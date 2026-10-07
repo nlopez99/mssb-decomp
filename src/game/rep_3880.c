@@ -1644,8 +1644,6 @@ void fn_3_151694(UnkModelRef3880* models, Vec* pos) {
 }
 
 // .text:0x00151204 size:0x490 mapped:0x80790298
-// 99.74%: saved FPRs differ inside the inlined fn_3_151068 and fn_3_150D84 (the latter
-// is itself a 82.56% candidate).
 void fn_3_151204(ModelEmitter3880* emitter, UnkModelRef3880* models, Vec* pos) {
     Particle3880* p;
     u32 i = 0;
@@ -1700,7 +1698,6 @@ void fn_3_151068(ModelEmitter3880* emitter, Particle3880* p) {
 // 82.56%: the target keeps lbl_3_data_26C3C's address in a saved register across each
 // rand() and forms it again for the next range; here it is formed after the call.
 void fn_3_150D84(ModelEmitter3880* emitter, Particle3880* p) {
-    f32 deg;
     f32 angle;
     f32 speed;
 
@@ -1710,8 +1707,8 @@ void fn_3_150D84(ModelEmitter3880* emitter, Particle3880* p) {
     p->pos.z = emitter->pos.z;
     p->_38 = p->_3C = (lbl_3_data_26C3C[10] + rand() % (lbl_3_data_26C3C[11] - lbl_3_data_26C3C[10])) / 100000.0f;
     p->vel.y = (lbl_3_data_26C3C[12] + rand() % (lbl_3_data_26C3C[13] - lbl_3_data_26C3C[12])) / 100000.0f;
-    deg = (rand() % 36000) / 100.0;
-    angle = 0.017453292f * deg;
+    angle = (rand() % 36000) / 100.0;
+    angle = 0.017453292f * angle;
     speed = (lbl_3_data_26C3C[16] + rand() % (lbl_3_data_26C3C[17] - lbl_3_data_26C3C[16])) / 100000.0f;
     p->vel.x = speed * cosf_kludge(angle);
     p->vel.z = speed * sinf_kludge(angle);
