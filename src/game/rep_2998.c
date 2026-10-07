@@ -284,11 +284,10 @@ void fn_3_E4CB0(s32* count, s32* objIdx) {
 
 // .text:0x000E4BE8 size:0xC8 mapped:0x80723C7C
 void* fn_3_E4BE8(s32 idx, MtxPtr mtx) {
-    Rep2998Obj* obj;
+    Rep2998Obj* obj = &lbl_3_common_bss_350E4._00[idx];
     Mtx bone;
 
-    obj = &lbl_3_common_bss_350E4._00[idx];
-    CTRLBuildMatrix(&obj->xform.control, mtx);
+    CTRLBuildMatrix(&lbl_3_common_bss_350E4._00[idx].xform.control, mtx);
     if (obj->_9D == 0) {
         if (obj->_C8 == 0 || obj->_C4 == 0 || obj->_C4 == 5 || obj->_C4 == 4) {
             return NULL;
