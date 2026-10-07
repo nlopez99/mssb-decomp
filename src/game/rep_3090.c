@@ -98,7 +98,12 @@ extern struct {
 } lbl_8036E548;
 
 extern struct {
-    /* 0x000 */ u8 _000[0x218];
+    /* 0x000 */ Vec _000;
+    /* 0x00C */ f32 _00C;
+    /* 0x010 */ u8 _010[0x178 - 0x10];
+    /* 0x178 */ s16 _178;
+    /* 0x17A */ s16 _17A;
+    /* 0x17C */ u8 _17C[0x218 - 0x17C];
     /* 0x218 */ u8 _218;
     /* 0x219 */ u8 _219[0x268 - 0x219];
 } g_Fielders[9];
@@ -118,6 +123,8 @@ typedef struct {
 } Unk3090Task;
 
 extern Unk3090Task* lbl_803CC1B8;
+
+extern s32 lbl_3_data_3B4C[];
 
 extern void** fn_800111D8(Unk3090Model* model);
 extern void fn_800B2C44(void* skeleton, u16 joint, Vec* pos);
@@ -455,7 +462,7 @@ s32* lbl_3_data_1DAE4[7] = {
     lbl_3_data_1DA90, lbl_3_data_1DA9C, lbl_3_data_1DAA8, lbl_3_data_1DAB4,
     lbl_3_data_1DAC0, lbl_3_data_1DACC, lbl_3_data_1DAD8,
 };
-s32 lbl_3_data_1DB00[6] = { 0 };
+Vec lbl_3_data_1DB00[2] = { { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f } };
 s32 lbl_3_data_1DB18[40] = {
     1, 9, 1, 12, 8000, 2000, 1, 13, 8000, 2000, 1, 7,
     0, 6, 13, 14, 8, 6, 17, -2, 6, 13, 38, 54,
@@ -960,8 +967,110 @@ int fn_3_10698C(void** list) {
 }
 
 // .text:0x00106270 size:0x71C mapped:0x80745304
-void fn_3_106270(void) {
-    return;
+void fn_3_106270(Vec* out) {
+    g_Stats_s* stats = &g_Stats;
+    s16 id = lbl_3_common_bss_DE94._0000->_0946;
+    Vec pos;
+    InMemRunnerType* runner;
+
+    if (id < 9 && id >= 0) {
+        memcpy(out, &g_Fielders[id]._000, sizeof(Vec));
+        if (g_Fielders[id]._178 != -1) {
+            if (lbl_8036E548._2C50[id] != NULL) {
+                if (stats->replayInd != 0 && stats->_3C == 7) {
+                    memset(out, 0, sizeof(Vec));
+                    getAnimRelatedCoordinates(id, 4, (VecXYZ*)out);
+                }
+                if (lbl_3_common_bss_DE94._0000->_0938 == -1) {
+                    lbl_3_common_bss_DE94._0000->_0938 = lbl_3_data_3B4C[g_Fielders[id]._17A];
+                    lbl_3_common_bss_DE94._0000->_0950 = 0;
+                }
+                memset(&pos, 0, sizeof(Vec));
+                if (!getAnimRelatedCoordinates(id, lbl_3_common_bss_DE94._0000->_0938, (VecXYZ*)&pos)) {
+                    memset(&pos, 0, sizeof(Vec));
+                    getAnimRelatedCoordinates(id, 4, (VecXYZ*)&pos);
+                }
+                if (lbl_3_common_bss_DE94._0000->_09B7 == 0) {
+                    if (lbl_3_common_bss_DE94._0000->_0938 != lbl_3_common_bss_DE94._0000->_093C ||
+                        lbl_3_common_bss_DE94._0000->_0948 != lbl_3_common_bss_DE94._0000->_0946 ||
+                        lbl_3_common_bss_DE94._0000->_0942 != lbl_3_common_bss_DE94._0000->_0940 ||
+                        lbl_3_common_bss_DE94._0000->_094E != g_Fielders[id]._17A) {
+                        lbl_3_common_bss_DE94._0000->_0950 = 0;
+                    }
+                    if (lbl_3_common_bss_DE94._0000->_0950 < 1) {
+                        memcpy(&lbl_3_common_bss_DE94._0000->_00E8, &pos, sizeof(Vec));
+                        lbl_3_common_bss_DE94._0000->_0950++;
+                    } else {
+                        memcpy(&pos, &lbl_3_common_bss_DE94._0000->_00E8, sizeof(Vec));
+                        if (lbl_3_common_bss_DE94._0000->_0950 < 3) {
+                            lbl_3_common_bss_DE94._0000->_0950++;
+                        }
+                    }
+                } else {
+                    memcpy(&lbl_3_common_bss_DE94._0000->_00E8, &pos, sizeof(Vec));
+                }
+                if (stats->replayInd != 0 && stats->_3C == 7) {
+                    out->y = -1.0f * out->y + g_Fielders[id]._00C + lbl_3_data_1DB00[lbl_3_common_bss_DE94._0000->_094C].y;
+                    out->x += lbl_3_data_1DB00[lbl_3_common_bss_DE94._0000->_094C].x;
+                    out->z += lbl_3_data_1DB00[lbl_3_common_bss_DE94._0000->_094C].z;
+                } else {
+                    out->y = -1.0f * pos.y + g_Fielders[id]._00C + lbl_3_data_1DB00[lbl_3_common_bss_DE94._0000->_094C].y;
+                    out->x = pos.x + lbl_3_data_1DB00[lbl_3_common_bss_DE94._0000->_094C].x;
+                    out->z = pos.z + lbl_3_data_1DB00[lbl_3_common_bss_DE94._0000->_094C].z;
+                }
+            }
+        } else {
+            memcpy(&lbl_3_common_bss_DE94._0000->_00DC, &out, sizeof(Vec));
+        }
+        lbl_3_common_bss_DE94._0000->_094E = g_Fielders[id]._17A;
+    } else if (id < 13 && id >= 0) {
+        runner = &g_Runners[id - 9];
+        memcpy(out, &runner->position, sizeof(Vec));
+        if (runner->rosterID != -1) {
+            if (lbl_8036E548._2C50[id] != NULL) {
+                if (lbl_3_common_bss_DE94._0000->_0938 == -1) {
+                    lbl_3_common_bss_DE94._0000->_0938 = lbl_3_data_3B4C[runner->charID];
+                    lbl_3_common_bss_DE94._0000->_0950 = 0;
+                }
+                memset(&pos, 0, sizeof(Vec));
+                if (!getAnimRelatedCoordinates(id, lbl_3_common_bss_DE94._0000->_0938, (VecXYZ*)&pos)) {
+                    memset(&pos, 0, sizeof(Vec));
+                    getAnimRelatedCoordinates(id, 4, (VecXYZ*)&pos);
+                }
+                pos.x -= runner->position.x;
+                pos.y -= runner->position.y;
+                pos.z -= runner->position.z;
+                if (lbl_3_common_bss_DE94._0000->_0938 != lbl_3_common_bss_DE94._0000->_093C ||
+                    lbl_3_common_bss_DE94._0000->_0948 != lbl_3_common_bss_DE94._0000->_0946 ||
+                    lbl_3_common_bss_DE94._0000->_0942 != lbl_3_common_bss_DE94._0000->_0940 ||
+                    lbl_3_common_bss_DE94._0000->_094E != runner->charID) {
+                    lbl_3_common_bss_DE94._0000->_0950 = 0;
+                }
+                if (lbl_3_common_bss_DE94._0000->_0950 < 1) {
+                    memcpy(&lbl_3_common_bss_DE94._0000->_00E8, &pos, sizeof(Vec));
+                    lbl_3_common_bss_DE94._0000->_0950++;
+                } else {
+                    memcpy(&pos, &lbl_3_common_bss_DE94._0000->_00E8, sizeof(Vec));
+                    if (lbl_3_common_bss_DE94._0000->_0950 < 3) {
+                        lbl_3_common_bss_DE94._0000->_0950++;
+                    }
+                }
+                out->y = -1.0f * pos.y + out->y + lbl_3_data_1DB00[lbl_3_common_bss_DE94._0000->_094C].y;
+                out->x = out->x + pos.x + lbl_3_data_1DB00[lbl_3_common_bss_DE94._0000->_094C].x;
+                out->z = out->z + pos.z + lbl_3_data_1DB00[lbl_3_common_bss_DE94._0000->_094C].z;
+            }
+            lbl_3_common_bss_DE94._0000->_094E = runner->charID;
+        }
+        memcpy(&lbl_3_common_bss_DE94._0000->_00DC, &out, sizeof(Vec));
+    } else if (id == 13) {
+        memcpy(out, &g_Ball, sizeof(Vec));
+        memcpy(&lbl_3_common_bss_DE94._0000->_00DC, &g_Ball, sizeof(Vec));
+    } else if (id == 14) {
+        memcpy(out, out, sizeof(Vec));
+        memcpy(&lbl_3_common_bss_DE94._0000->_00DC, out, sizeof(Vec));
+    } else if (id == 15) {
+        memcpy(out, &lbl_3_common_bss_DE94._0000->_00DC, sizeof(Vec));
+    }
 }
 
 // .text:0x0010617C size:0xF4 mapped:0x80745210
