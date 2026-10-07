@@ -825,9 +825,95 @@ void fn_3_1559E4(Particle27_3880* p, Vec* pos, Vec* rot) {
     p->color[3] = lbl_3_data_26BC0[4];
 }
 
+// Places a Bob-omb Derby particle at the ball, turned with the ball's spin
+static inline void fn_3_SpawnAtBall(Particle3880* p) {
+    Control control;
+    Mtx mtx;
+    Vec v;
+    Vec base;
+    f64 height;
+    f32 rz;
+    f32 ry;
+    f32 rx;
+
+    rx = 57.29578f * shortAngleToRad(g_Ball.matchFramesAndBallAngle.ballSpinAngle.yaw);
+    ry = 57.29578f * shortAngleToRad(g_Ball.matchFramesAndBallAngle.ballSpinAngle.pitch);
+    rz = 57.29578f * shortAngleToRad(g_Ball.matchFramesAndBallAngle.ballSpinAngle.roll);
+    p->_4A = lbl_3_data_26BC0[6];
+    control.type = 0;
+    CTRLSetRotation(&control, rx, ry, rz);
+    CTRLBuildMatrix(&control, mtx);
+    if (g_Minigame.GameMode_MiniGame == MINI_GAME_ID_BOBOMB_DERBY) {
+        base = lbl_3_data_26BB4;
+    } else {
+        PSVECScale(&lbl_3_data_26BB4, 1.5f, &base);
+    }
+    v.x = base.x + 1.5 * ((rand() % 40 - 20) / 100.0);
+    v.y = base.y;
+    v.z = base.z + 1.5 * ((rand() % 40 - 20) / 100.0);
+    PSMTXMultVec(mtx, &v, &v);
+    v.x += g_Ball.AtBat_Contact_BallPos.x;
+    height = fabs(g_Ball.AtBat_Contact_BallPos.y);
+    v.y -= height;
+    v.z += g_Ball.AtBat_Contact_BallPos.z;
+    p->pos.x = v.x;
+    p->pos.y = v.y;
+    p->pos.z = v.z;
+    p->_3C = p->_38 = lbl_3_data_26BC0[2];
+    p->color[3] = lbl_3_data_26BC0[4];
+}
+
 // .text:0x001552AC size:0x738 mapped:0x80794340
 BOOL fn_3_1552AC(Emitter3880* emitter) {
-    return 0;
+    Particle3880* p;
+    s32 alpha;
+    s32 grey;
+
+    if (lbl_80366158._28 != 0) {
+        return FALSE;
+    }
+    fn_80033620(emitter);
+    p = emitter->particles;
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_ONE, GX_BL_ONE, GX_LO_CLEAR);
+    do {
+        if (p->_48 != 0) {
+            p->_48--;
+            if (p->_48 == 0) {
+                fn_3_SpawnAtBall(p);
+            }
+        } else if (p->_4A != 0) {
+            fn_8003403C(p->_38, p->_3C);
+            fn_80033CC8(p, emitter->_10);
+            if (lbl_3_data_26BC0[6] / p->_4A < 2) {
+                alpha = p->color[3];
+                alpha += lbl_3_data_26BC0[5] / (lbl_3_data_26BC0[6] / 2);
+                if (alpha > lbl_3_data_26BC0[5]) {
+                    alpha = lbl_3_data_26BC0[5];
+                }
+                p->color[3] = alpha;
+                p->_38 += lbl_3_data_26BC0[3] / 100000.0f / (lbl_3_data_26BC0[6] / 2);
+                p->_3C = p->_38;
+            } else {
+                alpha = p->color[3];
+                alpha -= lbl_3_data_26BC0[5] / (lbl_3_data_26BC0[6] / 2);
+                if (alpha < lbl_3_data_26BC0[4]) {
+                    alpha = lbl_3_data_26BC0[4];
+                }
+                p->color[3] = alpha;
+                p->_38 -= lbl_3_data_26BC0[3] / 100000.0f / (lbl_3_data_26BC0[6] / 2);
+                p->_3C = p->_38;
+            }
+            grey = 255.0f * (p->color[3] / 255.0f);
+            p->color[0] = p->color[1] = p->color[2] = grey;
+            p->_4A--;
+        }
+        if (p->_4A == 0 && p->_48 <= 0) {
+            fn_3_SpawnAtBall(p);
+        }
+        p = p->next;
+    } while (p != NULL);
+    return FALSE;
 }
 
 // .text:0x00155288 size:0x24 mapped:0x8079431C
@@ -902,7 +988,64 @@ void fn_3_1549F0(Emitter3880* emitter, s16 id, Vec* pos, Vec* rot) {
 
 // .text:0x001542F4 size:0x6FC mapped:0x80793388
 BOOL fn_3_1542F4(Emitter3880* emitter) {
-    return 0;
+    Particle27_3880* p;
+    s32 alpha;
+    s32 grey;
+    Vec deg;
+
+    if (lbl_80366158._28 != 0) {
+        return FALSE;
+    }
+    if (emitter->particles == NULL) {
+        return FALSE;
+    }
+    p = (Particle27_3880*)(emitter->particles = fn_80031F34(emitter->particles, emitter->count));
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_ONE, GX_BL_ONE, GX_LO_CLEAR);
+    do {
+        if (p->_48 != 0) {
+            p->_48--;
+            if (p->_48 == 0) {
+                deg.x = 57.29578f * p->rotation->x;
+                deg.y = 57.29578f * p->rotation->y;
+                deg.z = 57.29578f * p->rotation->z;
+                fn_3_1559E4(p, p->origin, &deg);
+            }
+        } else if (p->_4A != 0) {
+            fn_8003403C(p->_38, p->_3C);
+            fn_80033CC8((Particle3880*)p, emitter->_10);
+            if (lbl_3_data_26BC0[6] / p->_4A < 2) {
+                alpha = p->color[3];
+                alpha += lbl_3_data_26BC0[5] / (lbl_3_data_26BC0[6] / 2);
+                if (alpha > lbl_3_data_26BC0[5]) {
+                    alpha = lbl_3_data_26BC0[5];
+                }
+                p->color[3] = alpha;
+                p->_38 += 3.0f * (lbl_3_data_26BC0[3] / 100000.0f / (lbl_3_data_26BC0[6] / 2));
+                p->_3C = p->_38;
+            } else {
+                alpha = p->color[3];
+                alpha -= lbl_3_data_26BC0[5] / (lbl_3_data_26BC0[6] / 2);
+                if (alpha < lbl_3_data_26BC0[4]) {
+                    alpha = lbl_3_data_26BC0[4];
+                }
+                p->color[3] = alpha;
+                p->_38 -= 3.0f * (lbl_3_data_26BC0[3] / 100000.0f / (lbl_3_data_26BC0[6] / 2));
+                p->_3C = p->_38;
+            }
+            grey = 255.0f * (p->color[3] / 255.0f);
+            p->color[0] = p->color[1] = p->color[2] = grey;
+            p->_4A--;
+        }
+        if (p->_4A == 0 && p->_48 <= 0) {
+            deg.x = 57.29578f * p->rotation->x;
+            deg.y = 57.29578f * p->rotation->y;
+            deg.z = 57.29578f * p->rotation->z;
+            fn_3_1559E4(p, p->origin, &deg);
+        }
+        p = p->next;
+    } while (p != NULL);
+    return FALSE;
 }
 
 // .text:0x00154238 size:0xBC mapped:0x807932CC
