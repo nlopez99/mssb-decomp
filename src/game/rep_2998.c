@@ -313,8 +313,8 @@ void fn_3_E4FC4(void** files) {
             draw->_90_7 = 1;
             draw->_90_6 = draw->_90_7 && draw->_78 != NULL;
             draw->_9A = 1;
-            fn_3_E4658(entry);
-            fn_3_E4554(entry);
+            fn_3_E4658(draw);
+            fn_3_E4554(draw);
             draw->_90_5 = 0;
             draw->_92 = 0xFF;
             draw->_84 = fn_3_E22A4;
