@@ -2,13 +2,24 @@
 // Must precede header_rep_data.h, which keeps the .rodata constants unpooled as in the target
 #include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
+#include "game/rep_140.h"
 
 extern struct {
     /* 0x00 */ u8 _00[0x9C];
     /* 0x9C */ s16 _9C;
 } g_Scores;
 
+extern struct {
+    /* 0x00 */ s16 _00;
+    /* 0x02 */ s16 _02;
+    /* 0x04 */ s16 _04;
+    /* 0x06 */ s16 _06[4];
+} g_RunningLogic;
+
 extern VecXZ lbl_3_data_4A34[4];
+extern VecXZ lbl_3_data_4A54[2][13];
+extern VecXYZ lbl_3_data_4B58[4];
+extern s16 lbl_3_data_21904[12];
 
 // .text:0x0008A958 size:0x73C mapped:0x806C99EC
 void fn_3_8A958(void) {
@@ -41,7 +52,22 @@ void fn_3_8A5A4(void) {
 
 // .text:0x0008A4E4 size:0xC0 mapped:0x806C9578
 void fn_3_8A4E4(void) {
-    return;
+    int i;
+
+    for (i = 0; i < 4; i++) {
+        InMemRunnerType* r = &g_Runners[i];
+        r->position.x = lbl_3_data_4A34[i].x;
+        r->position.z = lbl_3_data_4A34[i].z;
+        r->velocity.x = 0.0f;
+        r->velocity.y = 0.0f;
+        r->velocity.z = 0.0f;
+        r->startingBase_baseAchieved = i;
+        r->currentBase = i;
+        r->nextBase = (i + 1) & 3;
+        r->baseStandingOn = i;
+        r->baseRunningTowards = 0xFF;
+        r->leadOffStatus = 0;
+    }
 }
 
 // .text:0x0008A4C8 size:0x1C mapped:0x806C955C
@@ -66,8 +92,25 @@ void fn_3_899BC(void) {
 }
 
 // .text:0x00089914 size:0xA8 mapped:0x806C89A8
-void fn_3_89914(void) {
-    return;
+void fn_3_89914(int from, int to) {
+    InMemRunnerType* src = &g_Runners[from];
+    InMemRunnerType* dst = &g_Runners[to];
+
+    if (from >= 0 && from <= 3) {
+        if (g_GameLogic.secondaryGameMode == 15 && from == 0) {
+            dst->rosterID = g_Practice.rosterID;
+        } else {
+            dst->rosterID = src->rosterID;
+            dst->battingHand = src->battingHand;
+            dst->runnerDidntReachOnError = src->runnerDidntReachOnError;
+            dst->pitcherWhoLetRunnerOnBase = src->pitcherWhoLetRunnerOnBase;
+        }
+        g_RunningLogic._06[from] = to;
+    } else {
+        dst->rosterID = -1;
+        dst->runnerDidntReachOnError = 0;
+        dst->pitcherWhoLetRunnerOnBase = -1;
+    }
 }
 
 // .text:0x000898BC size:0x58 mapped:0x806C8950
@@ -108,7 +151,28 @@ void fn_3_8911C(void) {
 
 // .text:0x00089028 size:0xF4 mapped:0x806C80BC
 void fn_3_89028(void) {
-    return;
+    int i;
+
+    g_Runners[0].leadOffStatus = 0;
+    g_Runners[1].leadOffStatus = 0;
+    g_Runners[2].leadOffStatus = 0;
+    g_Runners[3].leadOffStatus = 0;
+    for (i = 1; i < 4; i++) {
+        InMemRunnerType* r = &g_Runners[i];
+        r->unused_AIRelated = 0;
+        r->tagUpInd = 0;
+        if (r->runnerOnFieldOrOutOrScored == 1) {
+            fn_3_85EF4(i, 1);
+        }
+    }
+    if (g_Strikes.balls >= 4) {
+        g_Runners[0].runnerOnFieldOrOutOrScored = 5;
+    } else if (g_FieldingLogic._107 == 4) {
+        g_Runners[0].runnerOnFieldOrOutOrScored = 1;
+        fn_3_85EF4(0, 1);
+    } else {
+        g_Runners[0].runnerOnFieldOrOutOrScored = 4;
+    }
 }
 
 // .text:0x00088F98 size:0x90 mapped:0x806C802C
@@ -210,7 +274,17 @@ void fn_3_86EF8(void) {
 
 // .text:0x00086DFC size:0xFC mapped:0x806C5E90
 void fn_3_86DFC(void) {
-    return;
+    int i;
+
+    for (i = 0; i < 4; i++) {
+        InMemRunnerType* r = &g_Runners[i];
+        if (r->runnerOnFieldOrOutOrScored != 0) {
+            if (g_FieldingLogic._107 == 1 && r->stealingStatus != 0) {
+                fn_3_7FEA8(i, 1);
+            }
+            r->stealingStatus = 0;
+        }
+    }
 }
 
 // .text:0x0008679C size:0x660 mapped:0x806C5830
@@ -314,8 +388,26 @@ void fn_3_85840(void) {
 }
 
 // .text:0x00085744 size:0xFC mapped:0x806C47D8
-void fn_3_85744(void) {
-    return;
+void fn_3_85744(int runner) {
+    InMemRunnerType* r = &g_Runners[runner];
+
+    if (r->fractionalBasesRan > 0.2) {
+        return;
+    }
+    if (r->distanceFromBall < 20.0f && g_Ball.ballState == 3) {
+        r->relatedToRunnerPos = 0;
+    }
+    if (g_FieldingLogic._0C4 == 5 || g_FieldingLogic._0C4 == 6 || g_FieldingLogic._0C4 == r->currentBase) {
+        if (r->percentTowardsNextBase >= 0.125f && r->runningDirectionCode == 1 && g_Ball.ballZoneAwayFromHome <= 3) {
+            r->relatedToRunnerPos = 0;
+        }
+    }
+    if (r->baseStandingOn >= 0 && r->baseRoundingState == 2) {
+        r->relatedToRunnerPos = 1;
+        if (0.0f == r->groundVelocity[0]) {
+            r->relatedToRunnerPos = 0;
+        }
+    }
 }
 
 // .text:0x00085074 size:0x6D0 mapped:0x806C4108
@@ -364,8 +456,49 @@ void fn_3_8307C(void) {
 }
 
 // .text:0x00082F80 size:0xFC mapped:0x806C2014
-void fn_3_82F80(void) {
-    return;
+void fn_3_82F80(int runner, s16* framesBack, s16* framesForward) {
+    InMemRunnerType* r = &g_Runners[runner];
+    int frames;
+    f32 dist;
+    f32 v;
+
+    frames = 0;
+    dist = r->percentTowardsNextBase_slideAdj;
+    if (dist > 0.0f) {
+        if (r->percentRanPerFrame_slideAdj < r->velocityPercent_stamAdj) {
+            v = r->percentRanPerFrame_slideAdj;
+            do {
+                v += r->accelerationPercent_stamAdj;
+                frames++;
+                if (v > r->velocityPercent_stamAdj) {
+                    dist -= r->velocityPercent_stamAdj;
+                    break;
+                }
+                dist -= v;
+            } while (!(dist < 0.0f));
+        }
+        frames += (int)(dist / r->velocityPercent_stamAdj) + 1;
+    }
+    *framesForward = frames;
+
+    frames = 0;
+    dist = r->percentFromCurrentBase_slideAdj;
+    if (dist > 0.0f) {
+        if (r->percentRanPerFrame_slideAdj > -r->velocityPercent_stamAdj) {
+            v = r->percentRanPerFrame_slideAdj;
+            do {
+                v -= r->accelerationPercent_stamAdj;
+                frames++;
+                if (v < -r->velocityPercent_stamAdj) {
+                    dist -= r->velocityPercent_stamAdj;
+                    break;
+                }
+                dist -= v;
+            } while (!(dist < 0.0f));
+        }
+        frames += (int)(dist / r->velocityPercent_stamAdj) + 1;
+    }
+    *framesBack = frames;
 }
 
 // .text:0x00082670 size:0x910 mapped:0x806C1704
@@ -389,8 +522,27 @@ void fn_3_81BC8(void) {
 }
 
 // .text:0x00081AEC size:0xDC mapped:0x806C0B80
-void fn_3_81AEC(void) {
-    return;
+void fn_3_81AEC(int runner) {
+    InMemRunnerType* r = &g_Runners[runner];
+    f32 step;
+
+    if (r->leadoffDurationFrames < 0x7FFE) {
+        r->leadoffDurationFrames++;
+    } else {
+        r->leadoffDurationFrames = 0x7FFF;
+    }
+    if (r->leadOffTotalFrameCountDown <= 0) {
+        r->leadOffStatus = 2;
+        r->percentRanPerFrame_slideAdj = 0.0f;
+        return;
+    }
+    step = r->leadoffDistancePercent + r->slidingAdjustment_backwards;
+    step -= r->percentTowardsNextBase;
+    step /= r->leadOffTotalFrameCountDown;
+    r->percentRanPerFrame_slideAdj = step;
+    r->percentTowardsNextBase += step;
+    r->fractionalBasesRan = r->startingBase_baseAchieved + r->percentTowardsNextBase;
+    r->leadOffTotalFrameCountDown--;
 }
 
 // .text:0x00081AB8 size:0x34 mapped:0x806C0B4C
@@ -410,8 +562,22 @@ void fn_3_81190(void) {
 }
 
 // .text:0x000810C4 size:0xCC mapped:0x806C0158
-void fn_3_810C4(void) {
-    return;
+void fn_3_810C4(int runner, int base) {
+    InMemRunnerType* r = &g_Runners[runner];
+    int next = (base + 1) & 3;
+
+    if (g_GameLogic.secondaryGameMode == 6) {
+        r->runningAngle = lbl_3_data_4B58[base].z;
+        r->percentTowardsNextBase = 0.0f;
+    } else {
+        r->percentTowardsNextBase = r->slidingAdjustment_backwards;
+    }
+    r->fractionalBasesRan = r->percentTowardsNextBase + base;
+    r->baseStandingOn = base;
+    r->currentBaseCoordinates.x = lbl_3_data_4A34[base].x;
+    r->currentBaseCoordinates.z = lbl_3_data_4A34[base].z;
+    r->nextBaseCoordinates.x = lbl_3_data_4A34[next].x;
+    r->nextBaseCoordinates.z = lbl_3_data_4A34[next].z;
 }
 
 // .text:0x00080028 size:0x109C mapped:0x806BF0BC
@@ -432,8 +598,31 @@ void fn_3_7FFD0(VecXYZ* out, int from, int to, f32 t) {
 }
 
 // .text:0x0007FED4 size:0xFC mapped:0x806BEF68
-void fn_3_7FED4(void) {
-    return;
+void fn_3_7FED4(VecXYZ* out, f32 pos, f32 t) {
+    VecXZ p;
+    int start;
+    int count;
+
+    if (pos < 1.0f) {
+        start = 0;
+        count = 4;
+    } else if (pos < 2.0f) {
+        start = 3;
+        count = 4;
+    } else if (pos < 3.0f) {
+        start = 6;
+        count = 4;
+    } else if (g_GameLogic.secondaryGameMode == 6) {
+        start = 9;
+        count = 4;
+    } else {
+        start = 9;
+        count = 3;
+    }
+    running_roundBasePosition(t, &p, &lbl_3_data_4A54[g_GameLogic.secondaryGameMode == 6][start], count);
+    out->x = p.x;
+    out->z = p.z;
+    out->y = 0.0f;
 }
 
 // .text:0x0007FEA8 size:0x2C mapped:0x806BEF3C
@@ -513,8 +702,27 @@ void fn_3_7D9DC(void) {
 }
 
 // .text:0x0007D920 size:0xBC mapped:0x806BC9B4
-void fn_3_7D920(void) {
-    return;
+void fn_3_7D920(int player) {
+    InMemRunnerType* r = &g_Runners[player];
+
+    if (g_Minigame._1B15[g_Minigame._18FC[player]] == 2) {
+        if (g_Minigame._1B19 == 0) {
+            g_Minigame._1B15[g_Minigame._18FC[player]] = 3;
+            r->runningToDugoutFrameCounter = 0;
+        }
+        return;
+    }
+    if (r->runningToDugoutFrameCounter < lbl_3_data_21904[1]) {
+        r->position.x += r->velocity.x;
+        r->position.z += r->velocity.z;
+    } else {
+        g_Minigame._1B15[g_Minigame._18FC[player]] = 2;
+    }
+    if (r->runningToDugoutFrameCounter < 0x7FFE) {
+        r->runningToDugoutFrameCounter++;
+    } else {
+        r->runningToDugoutFrameCounter = 0x7FFF;
+    }
 }
 
 // .text:0x0007D79C size:0x184 mapped:0x806BC830
