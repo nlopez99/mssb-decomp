@@ -2435,7 +2435,10 @@ typedef struct {
     /* 0x0EA */ s16 _0EA;
     /* 0x0EC */ u8 _0EC[0xEE - 0xEC];
     /* 0x0EE */ s16 _0EE;
-    /* 0x0F0 */ u8 _0F0[0x105 - 0xF0];
+    /* 0x0F0 */ u8 _0F0[0xF6 - 0xF0];
+    /* 0x0F6 */ s16 _0F6;
+    /* 0x0F8 */ u8 _0F8[0x101 - 0xF8];
+    /* 0x101 */ u8 _101[4];
     /* 0x105 */ u8 playerAtMoundCutoffLocation;
     /* 0x106 */ u8 throwSpeedType;
     /* 0x107 */ u8 _107;
@@ -2468,7 +2471,7 @@ typedef struct {
     /* 0x122 */ u8 _122;
     /* 0x123 */ u8 _123;
     /* 0x124 */ u8 _124;
-    /* 0x125 */ u8 _125;
+    /* 0x125 */ s8 _125;
     /* 0x126 */ s8 _126;
     /* 0x127 */ s8 _127;
     /* 0x128 */ u8 _128;
