@@ -30,8 +30,8 @@ Start with one unmatched function in objdiff, preferably a small game-code funct
 
 1. Create a branch for the function or a small related group.
 2. Inspect its target assembly and existing types. Use related matched functions as references.
-3. Write or refine C, rebuild the affected object, and inspect objdiff.
-4. Require an exact match including relocations before marking it matching.
+3. Write or refine C, then run `python3 tools/match.py <unit> <function>` to rebuild the object and diff it against the target, or inspect it in objdiff. For remaining register-allocation differences, `python3 tools/permute.py <function>` sets up decomp-permuter.
+4. Require an exact match including relocations before marking it matching. `tools/match.py` reports this as `match`. The 100% in objdiff's progress report is not enough on its own, because the report ignores relocation targets.
 5. Run the full matching build and regenerate the progress report.
 6. Review names, comments, types and undefined-behavior risks. A matching function does not prove that every guessed name or explanation is correct.
 
