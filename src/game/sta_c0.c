@@ -9,6 +9,8 @@
 #include "Dolphin/rand.h"
 #include "C3/control.h"
 #include "game/rep_D0.h"
+#include "game/m_sound.h"
+#include "game/rep_1D58.h"
 #include "math.h"
 #include "string.h"
 
@@ -156,16 +158,6 @@ extern s32 fn_8005268C(void);
 extern camera_803c639c_s* fn_80052734(s32 idx);
 extern s32 fn_800247E4(s32 x, s32 y, s32 width, s32 bytes);
 
-// rep_1D58.h and m_sound.h declare these void(void) to match their stubs
-extern void fn_3_B939C(void);
-extern void fn_3_B97DC(void* model, void* anim);
-extern void fn_3_B9D68(u8* types, s32 count, void** files, s32* indices);
-extern s32 fn_3_B7FC8(u32 id, Vec* pos);
-extern void fn_3_B9510(s32 idx);
-extern u8* fn_3_B9534(u16 width, u16 height, GXTexObj* obj);
-extern void fn_3_8B890(s32 handle);
-extern void fn_3_8BA60(s32 handle, Vec* pos, Vec* dir);
-extern s32 fn_3_8BBC4(u32 id, Vec* pos, Vec* dir, u8 arg3);
 
 extern u16 lbl_3_data_81DC[16];
 
@@ -621,7 +613,7 @@ void fn_3_C9744(void) {
     } else if (lbl_3_bss_9F6C != 0) {
         lbl_3_bss_9F40 = fn_3_8BBC4(lbl_3_data_81DC[g_d_GameSettings.StadiumID] + 1, NULL, NULL, 1);
         if (g_d_GameSettings.GameModeSelected != GAME_TYPE_MINIGAMES) {
-            lbl_3_bss_9F44 = fn_3_B7FC8(lbl_3_data_81DC[g_d_GameSettings.StadiumID], NULL);
+            lbl_3_bss_9F44 = fn_3_B7FC8(lbl_3_data_81DC[g_d_GameSettings.StadiumID], 0);
         }
         lbl_3_bss_9F6C = 0;
     } else {

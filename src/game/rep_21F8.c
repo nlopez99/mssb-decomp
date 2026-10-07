@@ -5,8 +5,9 @@
 #include "header_rep_data.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/mtx.h"
+#include "game/rep_1E08.h"
 
-typedef struct {
+typedef struct UnkKey21F8 {
     /* 0x0 */ f32 _0;
     /* 0x4 */ f32 _4;
     /* 0x8 */ u16 _8;
@@ -23,7 +24,7 @@ typedef struct UnkAnim21F8 {
     /* 0x3C */ u8 current[8];
 } UnkAnim21F8; // size: 0x44
 
-typedef struct {
+typedef struct UnkEffect21F8 {
     /* 0x00 */ UnkAnim21F8* anims;
     /* 0x04 */ void** _04;
     /* 0x08 */ s32 _08;
@@ -118,9 +119,6 @@ extern struct {
     /* 0x004 */ void* _004[1];
 } lbl_3_common_bss_35154;
 
-// rep_1E08.h declares these as void(void), matching their stub definitions
-extern void fn_3_BF8F8(UnkEffect21F8* effect, Mtx m, Vec* pos, f32 (*callback)(UnkAnim21F8*, int, Mtx, f32));
-extern f32 fn_3_BFDA4(UnkKey21F8* keys, int count, int frame, u8 current, u8* currentOut, f32 t);
 extern void fn_80034120(Mtx m);
 
 static u8 lbl_3_bss_9F34;
