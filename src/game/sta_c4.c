@@ -885,8 +885,6 @@ void fn_3_FA58C(void** files) {
 }
 
 // .text:0x000FA3C0 size:0x1CC mapped:0x80739454
-// 97.64%: count's three induction offsets start as copies of a fresh li 0, where the
-// target copies them from i's li 0 (the same instructions otherwise)
 void fn_3_FA3C0(void) {
     Mtx m;
     StaC4Draw* draw;
@@ -894,17 +892,17 @@ void fn_3_FA3C0(void) {
     s32 j;
     s32 count;
     s32 next;
-    s32 size;
 
-    size = (lbl_3_common_bss_350E4._30 * sizeof(u16)) + (lbl_3_common_bss_350E4._30 * sizeof(u32)) +
-           (lbl_3_common_bss_350E4._30 * sizeof(s32)) + (lbl_3_common_bss_350E4._30 * (2 * sizeof(Vec)));
+    // The allocation size; MWCC allocates it differently written as 2 * sizeof(Vec)
+    i = (lbl_3_common_bss_350E4._30 * sizeof(u16)) + (lbl_3_common_bss_350E4._30 * sizeof(u32)) +
+        (lbl_3_common_bss_350E4._30 * sizeof(s32)) + (lbl_3_common_bss_350E4._30 * sizeof(Vec) * 2);
     if (lbl_3_common_bss_350E4._48 == NULL) {
-        lbl_3_common_bss_350E4._48 = _OSAllocFromHeap(4, size);
+        lbl_3_common_bss_350E4._48 = _OSAllocFromHeap(4, i);
         lbl_3_common_bss_350E4._3C = (u32*)(lbl_3_common_bss_350E4._48 + lbl_3_common_bss_350E4._30 * 2);
         lbl_3_common_bss_350E4._44 = (s32*)(lbl_3_common_bss_350E4._3C + lbl_3_common_bss_350E4._30);
         lbl_3_common_bss_350E4._40 = (u16*)(lbl_3_common_bss_350E4._44 + lbl_3_common_bss_350E4._30);
     }
-    memset(lbl_3_common_bss_350E4._48, 0, size);
+    memset(lbl_3_common_bss_350E4._48, 0, i);
     count = 0;
     for (i = 0; i < 10; i++) {
         next = lbl_3_common_bss_350E4._40[count] = lbl_3_common_bss_350E4._40[count - 1] + lbl_3_common_bss_350E4._3C[count - 1];
