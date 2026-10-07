@@ -18,7 +18,7 @@ void fn_3_35F0(void);
 void fn_3_3638(StadiumDrawTask* task);
 void fn_3_3818(struct DrawTask1C0* task);
 void fn_3_38E8(void (*draw)(MtxPtr view, s32, s32));
-void fn_3_3904(void);
+void fn_3_3904(s16 x, s16 y, s32 id, GXColor c1, GXColor c2, u8 flag);
 void fn_3_3BE8(struct StadiumTex* tex, s16 x0, s16 y0, s16 x1, s16 y1, s16 u, s16 v, s16 w, s16 h);
 void fn_3_3EE8(struct StadiumTex* tex, s16 x0, s16 y0, s16 x1, s16 y1, s16 u, s16 v, s16 w, s16 h);
 void fn_3_42CC(GXTexObj* obj, s16 x0, s16 y0, s16 x1, s16 y1, s16 u, s16 v, s16 w, s16 h, GXColor c1,

@@ -83,7 +83,12 @@ typedef struct _StadiumEnv {
 typedef struct _UNK_StadiumCollision {
     /*0x000*/ void* _00;
     /*0x004*/ void* _04;
-    /*0x008*/ StadiumDrawTask tasks[8][2];
+    /*0x008*/ StadiumDrawTask _008[2];
+    /*0x0E8*/ StadiumDrawTask _0E8[2];
+    /*0x1C8*/ StadiumDrawTask _1C8[2];
+    /*0x2A8*/ StadiumDrawTask _2A8[2];
+    /*0x388*/ StadiumDrawTask _388[2][2];
+    /*0x548*/ StadiumDrawTask _548[2][2];
     /*0x708*/ u8 _708[2];
     /*0x70A*/ s16 numCollisionBoxes;
     /*0x70C*/ CollisionBox* pCollisionBoxes;

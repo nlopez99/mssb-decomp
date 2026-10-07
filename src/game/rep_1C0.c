@@ -119,8 +119,8 @@ extern struct {
 
 extern struct {
     /* 0x00 */ u8 _00[0x8];
-    /* 0x08 */ void* _08;
-    /* 0x0C */ void* _0C;
+    /* 0x08 */ StadiumTiles* _08;
+    /* 0x0C */ StadiumTiles* _0C;
 } lbl_3_common_bss_350E4;
 
 extern struct {
@@ -304,16 +304,16 @@ void fn_3_5EC0(StadiumFile* file) {
     haveActLayoutPointToGeoHeader(layout, geo);
     fn_800B2AC8(layout);
     g_UNK_StadiumDetails._04 = tex;
-    PSMTXIdentity(g_UNK_StadiumDetails.tasks[1][0]._08);
-    g_UNK_StadiumDetails.tasks[1][0].type = 2;
-    g_UNK_StadiumDetails.tasks[1][0].draw = fn_3_3638;
-    g_UNK_StadiumDetails.tasks[1][0].layout = layout;
-    g_UNK_StadiumDetails.tasks[1][1] = g_UNK_StadiumDetails.tasks[1][0];
-    g_UNK_StadiumDetails.tasks[3][0] = g_UNK_StadiumDetails.tasks[1][0];
-    g_UNK_StadiumDetails.tasks[3][1] = g_UNK_StadiumDetails.tasks[1][0];
+    PSMTXIdentity(g_UNK_StadiumDetails._0E8[0]._08);
+    g_UNK_StadiumDetails._0E8[0].type = 2;
+    g_UNK_StadiumDetails._0E8[0].draw = fn_3_3638;
+    g_UNK_StadiumDetails._0E8[0].layout = layout;
+    g_UNK_StadiumDetails._0E8[1] = g_UNK_StadiumDetails._0E8[0];
+    g_UNK_StadiumDetails._2A8[0] = g_UNK_StadiumDetails._0E8[0];
+    g_UNK_StadiumDetails._2A8[1] = g_UNK_StadiumDetails._0E8[0];
     for (i = 0; i < 0; i++) {
-        g_UNK_StadiumDetails.tasks[i + 6][0] = g_UNK_StadiumDetails.tasks[1][0];
-        g_UNK_StadiumDetails.tasks[i + 6][1] = g_UNK_StadiumDetails.tasks[1][0];
+        g_UNK_StadiumDetails._548[i][0] = g_UNK_StadiumDetails._0E8[0];
+        g_UNK_StadiumDetails._548[i][1] = g_UNK_StadiumDetails._0E8[0];
     }
 
     layout = (u8*)file + file->layout1;
@@ -322,15 +322,15 @@ void fn_3_5EC0(StadiumFile* file) {
     fn_800BCE38(geo);
     fn_800BD190(geo, tex);
     haveActLayoutPointToGeoHeader(layout, geo);
-    g_UNK_StadiumDetails.tasks[0][0].type = 2;
-    g_UNK_StadiumDetails.tasks[0][0].draw = fn_3_3638;
-    g_UNK_StadiumDetails.tasks[0][0].layout = layout;
-    g_UNK_StadiumDetails.tasks[0][1] = g_UNK_StadiumDetails.tasks[0][0];
-    g_UNK_StadiumDetails.tasks[2][0] = g_UNK_StadiumDetails.tasks[0][0];
-    g_UNK_StadiumDetails.tasks[2][1] = g_UNK_StadiumDetails.tasks[0][0];
+    g_UNK_StadiumDetails._008[0].type = 2;
+    g_UNK_StadiumDetails._008[0].draw = fn_3_3638;
+    g_UNK_StadiumDetails._008[0].layout = layout;
+    g_UNK_StadiumDetails._008[1] = g_UNK_StadiumDetails._008[0];
+    g_UNK_StadiumDetails._1C8[0] = g_UNK_StadiumDetails._008[0];
+    g_UNK_StadiumDetails._1C8[1] = g_UNK_StadiumDetails._008[0];
     for (i = 0; i < 0; i++) {
-        g_UNK_StadiumDetails.tasks[i + 4][0] = g_UNK_StadiumDetails.tasks[0][0];
-        g_UNK_StadiumDetails.tasks[i + 4][1] = g_UNK_StadiumDetails.tasks[0][0];
+        g_UNK_StadiumDetails._388[i][0] = g_UNK_StadiumDetails._008[0];
+        g_UNK_StadiumDetails._388[i][1] = g_UNK_StadiumDetails._008[0];
     }
 
     g_UNK_StadiumDetails.env =
@@ -440,7 +440,110 @@ void fn_3_5BAC(void) {
 }
 
 // .text:0x0000567C size:0x530 mapped:0x80644710
+// The target addresses this file's .data from lbl_3_data_228, which splits.txt leaves outside
+// the unit, so every pool offset here is 0x14 short; with that object defined first in this
+// file, only the pool symbol's name differs.
 void fn_3_567C(void) {
+    s32 i;
+    StadiumLight* light;
+    StadiumDrawTask* task;
+
+    switch (g_GameLogic.sceneID) {
+    case 1:
+    case 2:
+        light = &g_UNK_StadiumDetails.env.lights[g_GameLogic.sceneID - 1];
+        break;
+    default:
+        light = &g_UNK_StadiumDetails.env.lights[2];
+        break;
+    }
+    if (lbl_8036E548._307E == 0) {
+        return;
+    }
+    if (lbl_3_common_bss_35154._3E0 = g_GameLogic.sceneID != 1) {
+        fn_3_BD1D8(fn_80052768_getCamera(0)->view);
+    }
+    fn_3_B8C08(fn_80052768_getCamera(0)->view);
+    g_UNK_StadiumDetails.rotation += g_UNK_StadiumDetails.env.rotSpeed;
+    if (g_UNK_StadiumDetails.rotation >= 6.2831855f) {
+        g_UNK_StadiumDetails.rotation -= 6.2831855f;
+    }
+
+    if (fn_800527BC() >= 2) {
+        task = &g_UNK_StadiumDetails._2A8[lbl_803CBBC0];
+        task->_6C = 1;
+        PSMTXCopy(fn_80052734(1)->view, task->_38);
+        fn_800A7D4C(0, task);
+        fn_800A7D4C(0, &lbl_3_data_960[1][lbl_803CBBC0]);
+        task = &g_UNK_StadiumDetails._1C8[lbl_803CBBC0];
+        task->_6C = 1;
+        PSMTXRotRad(task->_08, 'Y', g_UNK_StadiumDetails.rotation);
+        PSMTXCopy(fn_80052734(1)->view, task->_38);
+        if (g_GameLogic.secondaryGameMode != 3) {
+            fn_800A7D4C(0, task);
+        }
+        fn_800A7D4C(0, &lbl_3_data_9B0[1][lbl_803CBBC0]);
+    }
+    if (fn_800527BC() > 2) {
+        for (i = 0; i < 0; i++) {
+            task = &g_UNK_StadiumDetails._548[i][lbl_803CBBC0];
+            task->_6C = i + 2;
+            PSMTXCopy(fn_80052734(i + 2)->view, task->_38);
+            fn_800A7D4C(0, task);
+            fn_800A7D4C(0, &lbl_3_data_960[i + 2][lbl_803CBBC0]);
+            task = &g_UNK_StadiumDetails._388[i][lbl_803CBBC0];
+            task->_6C = i + 2;
+            PSMTXRotRad(task->_08, 'Y', g_UNK_StadiumDetails.rotation);
+            PSMTXCopy(fn_80052734(i + 2)->view, task->_38);
+            if (g_GameLogic.secondaryGameMode != 3) {
+                fn_800A7D4C(0, task);
+            }
+            fn_800A7D4C(0, &lbl_3_data_9B0[i + 2][lbl_803CBBC0]);
+        }
+    }
+    task = &g_UNK_StadiumDetails._0E8[lbl_803CBBC0];
+    task->_6C = 0;
+    PSMTXCopy(fn_80052734(0)->view, task->_38);
+    fn_800A7D4C(0, task);
+    fn_800A7D4C(0, &lbl_3_data_960[0][lbl_803CBBC0]);
+    fn_800A7D4C(0, &lbl_3_data_7DC[lbl_803CBBC0]);
+    task = &g_UNK_StadiumDetails._008[lbl_803CBBC0];
+    task->_6C = 0;
+    PSMTXRotRad(task->_08, 'Y', g_UNK_StadiumDetails.rotation);
+    PSMTXCopy(fn_80052734(0)->view, task->_38);
+    fn_800A7D4C(0, task);
+    fn_800A7D4C(0, &lbl_3_data_9B0[0][lbl_803CBBC0]);
+
+    switch (g_d_GameSettings.StadiumID) {
+    case 0:
+    case 4:
+        if (g_d_GameSettings.GameModeSelected != 2) {
+            lbl_3_data_93C[lbl_803CBBC0].tiles[0] = lbl_3_common_bss_350E4._08;
+            lbl_3_data_93C[lbl_803CBBC0].tiles[1] = lbl_3_common_bss_350E4._0C;
+            break;
+        }
+    default:
+        lbl_3_data_93C[lbl_803CBBC0].tiles[0] = NULL;
+        lbl_3_data_93C[lbl_803CBBC0].tiles[1] = NULL;
+        break;
+    }
+    fn_800A7D4C(0, &lbl_3_data_93C[lbl_803CBBC0]);
+    if (lbl_3_common_bss_35154._3E0) {
+        fn_3_BCA20();
+    }
+
+    lbl_803C5090._1D = light->_0C;
+    lbl_803C5090._00 = light->_00;
+    lbl_803C5090._04 = 1.0f / fn_80052768_getCamera(0)->zoom;
+    lbl_803C5090._17 = light->_0D;
+    lbl_803C5090._08 = light->_04;
+    lbl_803C5090._0C = light->_08;
+    lbl_803C5090._14 = light->_0E;
+    lbl_803C5090._18 = 0;
+    lbl_803C5090._1A = 0xFF;
+    lbl_803C5090._1B = 0xFF;
+    lbl_803C5090._1C = 0xFF;
+    fn_8003A2C0();
 }
 
 // .text:0x00005518 size:0x164 mapped:0x806445AC
@@ -497,6 +600,8 @@ void fn_3_53E0(u16* text, s16* u, s16* v, s16* w, s16* h, s16* page) {
 }
 
 // .text:0x00004F90 size:0x450 mapped:0x80644024
+// 99.75%: the target keeps `count` unextended (`mr r14,r3`, `addi r14,r3,1`) where this
+// extends it on assignment.
 void fn_3_4F90(GXTexObj* obj, s16 x, s16 y, s16 value, u8 digits, GXColor c1, GXColor c2, u8 flag) {
     u16** glyphs = lbl_80366B18._798 + 1;
     s16 count;
@@ -560,7 +665,9 @@ void fn_3_4F90(GXTexObj* obj, s16 x, s16 y, s16 value, u8 digits, GXColor c1, GX
 }
 
 // .text:0x00004A38 size:0x558 mapped:0x80643ACC
+// 99.65%: the target forms the g_Scores base before `li r27,0` for the second loop.
 void fn_3_4A38(u8 stadium) {
+    GXTexObj obj;
     GXColor colors[7][2] = {
         { { 0x66, 0x66, 0x66, 0xFF }, { 0x00, 0x00, 0x00, 0xFF } },
         { { 0x66, 0x66, 0x66, 0xFF }, { 0x00, 0x00, 0x00, 0xFF } },
@@ -598,7 +705,6 @@ void fn_3_4A38(u8 stadium) {
     s16 unk49C[7][2] = { 0 };
     s16 unk4B8[7][2] = { { 0x10, 0x12 }, { 0x10, 0x10 } };
     s16 unk4D4[7][2] = { { 0x1A, 0x12 }, { 0x15, 0x12 } };
-    GXTexObj obj;
     s32 start;
     s32 i;
     s32 last;
@@ -837,7 +943,63 @@ void fn_3_3BE8(StadiumTex* tex, s16 x0, s16 y0, s16 x1, s16 y1, s16 u, s16 v, s1
 }
 
 // .text:0x00003904 size:0x2E4 mapped:0x80642998
-void fn_3_3904(void) {
+void fn_3_3904(s16 x, s16 y, s32 id, GXColor c1, GXColor c2, u8 flag) {
+    GXTexObj obj;
+    s16 u;
+    s16 v;
+    s16 w;
+    s16 h;
+    f32 dx;
+    f32 dy;
+    s32 code;
+    u16 idx;
+    u16* text;
+    s16 left;
+
+    text = lbl_80366B18._798[id + 1];
+    left = x;
+    while (TRUE) {
+        code = *text++;
+        if (code & 0x4000) {
+            switch (code & 0x3FFF) {
+            case 0:
+                return;
+            case 2:
+                x += 11;
+                break;
+            case 3:
+                x += 22;
+                break;
+            case 1:
+                x = left;
+                y += 22;
+                break;
+            }
+            continue;
+        }
+        if (code & 0x8000) {
+            code &= 0x7FFF;
+            idx = code % 2116;
+            u = idx % 46;
+            v = (idx / 46) * 22;
+            u *= 22;
+            w = 22;
+            h = 22;
+            dx = 16.0f;
+            dy = 18.0f;
+        } else {
+            u = code % 92;
+            v = (code / 92) * 22;
+            u = (u % 2 + u / 2 * 2) * 11;
+            w = 11;
+            h = 22;
+            dx = 8.0f;
+            dy = 18.0f;
+        }
+        GXInitTexObjLOD(&obj, GX_LINEAR, GX_LINEAR, 0.0f, 0.0f, 0.0f, GX_FALSE, GX_FALSE, GX_ANISO_1);
+        fn_3_42CC(&obj, x, y, x + dx, y + dy, u, v, w, h, c1, c2, flag & 1);
+        x += dx;
+    }
 }
 
 // .text:0x000038E8 size:0x1C mapped:0x8064297C
