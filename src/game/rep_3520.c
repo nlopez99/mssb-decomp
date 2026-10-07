@@ -7,6 +7,7 @@
 #include "game/rep_540.h"
 #include "game/m_sound.h"
 #include "game/rep_D0.h"
+#include "game/rep_140.h"
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/gx.h"
 #include "math.h"
@@ -153,6 +154,13 @@ extern void fn_3_16C394(s8 arg0);
 extern void fn_3_106EB0(void);
 // rep_AC8.h declares fn_3_25844 as void(void)
 extern void fn_3_25844(int, int);
+extern struct {
+    /* 0x00 */ u8 _00[0x40];
+    /* 0x40 */ s16 _40;
+} lbl_3_common_bss_37400;
+
+extern void fn_80011604(s8, void*);
+extern void fn_3_1608F0(int, int, int);
 extern void fn_800528B4(void);
 extern void fn_800246D4(int (*compare)(const void*, const void*), void* src, void* dst, int size, int count);
 extern void fn_800115C8(s8);
@@ -395,7 +403,6 @@ void fn_3_13ACB4(Unk3520Line* line) {
 }
 
 // .text:0x0013AA78 size:0x23C mapped:0x80779B0C
-// 98.5%: needs fn_3_13A0AC, still a stub that is inlined away here.
 void fn_3_13AA78(void) {
     if (g_Minigame._72A != 0) {
         fn_3_13A0AC();
@@ -455,8 +462,90 @@ void fn_3_13A724(void) {
 }
 
 // .text:0x0013A0AC size:0x678 mapped:0x80779140
+// 94.0%: the inlined fn_3_13ACB4 and fn_3_13A724 schedule their loads and stores
+// differently, and the setup computes the ratio in another order.
 void fn_3_13A0AC(void) {
-    return;
+    VecSrcDst seg;
+    CollisionStruct col;
+    f32 t;
+    f32 best;
+    f32 dx;
+    f32 dz;
+    f32 xx;
+    f32 zz;
+    f32 dist;
+    u32 type;
+    int i;
+    int who;
+    Unk3520Fielder* fielder;
+
+    g_Minigame._724++;
+    g_Minigame._726++;
+    if (g_Minigame.turnOverStatus != 0) {
+        g_Minigame._72A = 0;
+        return;
+    }
+    if (g_Minigame._724 > lbl_3_data_21A30[0]) {
+        g_Minigame._72A = 0;
+        fn_3_14E988(4);
+        return;
+    }
+    t = (f32)g_Minigame._726 / (f32)g_Minigame._728;
+    seg.src.x = g_Minigame._6E8;
+    seg.src.y = -(lbl_3_data_21A14[2] / 2);
+    seg.src.z = g_Minigame._6F0;
+    fn_3_28E4((Vec*)&g_Minigame._6E8, (Vec*)&g_Minigame._6F4, 3, t);
+    seg.dst.x = g_Minigame._6E8;
+    seg.dst.y = -(lbl_3_data_21A14[2] / 2);
+    seg.dst.z = g_Minigame._6F0;
+    type = checkCollision(&seg, &col, 0, FALSE);
+    if (type == 5) {
+        g_Minigame._6E8 = col.position.x;
+        fn_3_13ACB4((Unk3520Line*)&col);
+        g_Minigame._6F0 = seg.src.z;
+    }
+    if (g_Minigame._6EC <= lbl_3_data_21A14[4]) {
+        g_Minigame._6EC = lbl_3_data_21A14[4];
+        g_Minigame._72B++;
+        fn_3_13A724();
+    }
+    best = 999.9f;
+    for (i = 0, who = -1; i < 4; i++) {
+        if (g_Minigame.minigameFielderIndex[i] < 0) {
+            continue;
+        }
+        fielder = &g_Fielders[g_Minigame.minigameFielderIndex[i]];
+        if (fielder->_16C + fielder->_00C < g_Minigame._6EC - lbl_3_data_21A14[5]) {
+            continue;
+        }
+        dx = g_Minigame._6E8 - fielder->pos.x;
+        dz = g_Minigame._6F0 - fielder->pos.z;
+        xx = dx * dx;
+        zz = dz * dz;
+        dist = dolsqrtf2(xx + zz);
+        if (dist < lbl_3_data_21A14[5] + lbl_3_data_47BC[fielder->_1C9] && dist < best) {
+            best = dist;
+            who = i;
+        }
+    }
+    if (who >= 0) {
+        g_Minigame.miniGameCurrentPoints[who] += lbl_3_data_21A30[5];
+        g_Minigame._72A = 0;
+        g_Minigame._1D6D = who;
+        g_Minigame._1D56 = lbl_3_data_21A30[1];
+        fn_3_14E988(4);
+        if (g_Minigame.playerIDWithPowerup[0] == who) {
+            fn_800115C8(who);
+            if (g_Minigame.starDashRelated_0_5Or1_5 == &lbl_3_data_21AF8[5]) {
+                g_Minigame.playerIDWithPowerup[0] = -1;
+            }
+        }
+        fn_3_150010(who);
+        fn_80011604(who, fn_3_132EDC);
+        if (!g_d_GameSettings.exhibitionMatchInd && who == lbl_3_common_bss_37400._40) {
+            fn_3_1608F0(3, 0, 0);
+        }
+    }
 }
 
 // .text:0x0013A048 size:0x64 mapped:0x807790DC
