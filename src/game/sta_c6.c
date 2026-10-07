@@ -342,6 +342,8 @@ BOOL fn_3_E8AC8(void) {
 }
 
 // .text:0x000E7B20 size:0xFA8 mapped:0x80726BB4
+// The target reaches .data 0x19018-0x19770 from one pool base, which externs cannot
+// reproduce; with statics this scores 99.5% (pool bases in swapped registers, third loop counters)
 u8 fn_3_E7B20(void** files, s32* indices) {
     StaC6Draw* draw;
     StaC6Draw* entry;
@@ -646,6 +648,8 @@ void fn_3_E7A2C(void* arg) {
 }
 
 // .text:0x000E763C size:0x3F0 mapped:0x807266D0
+// 98.4%: the target copies i's zero into the first loop's induction registers
+// (mr r21,r24), and its frame is 0x10 bytes larger
 void fn_3_E763C(void) {
     Control control;
     Mtx mtx;
@@ -807,6 +811,8 @@ void fn_3_E7350(void) {
 }
 
 // .text:0x000E6D90 size:0x5C0 mapped:0x80725E24
+// The target reaches .data 0x19018-0x19770 from one pool base, which externs cannot
+// reproduce; with that data defined here as statics this scores 99.96% (frame 0x10 smaller)
 void fn_3_E6D90(void* arg) {
     StaC6Draw* draw = arg;
 
@@ -859,6 +865,8 @@ void fn_3_E6D90(void* arg) {
 }
 
 // .text:0x000E6A48 size:0x348 mapped:0x80725ADC
+// The target reaches .data 0x19018-0x19770 from one pool base, which externs cannot
+// reproduce; with that data defined here as statics this scores 99.8% (frame 0x10 smaller)
 void fn_3_E6A48(StaC6Draw* draw) {
     fn_3_E5A84(draw);
     fn_3_E6578(draw);
