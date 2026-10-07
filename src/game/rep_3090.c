@@ -4,6 +4,8 @@
 #include "Dolphin/mtxext.h"
 #include "string.h"
 #include "Dolphin/gx.h"
+#include "game/rep_1838.h"
+#include "stl/math.h"
 
 // Same layout as rep_A00.c's cue table entries, which read lbl_3_data_1E434 and lbl_3_data_1F090
 typedef struct {
@@ -958,12 +960,11 @@ BOOL fn_3_10617C(int player, int bone, Vec* out) {
 // .text:0x001060D8 size:0xA4 mapped:0x8074516C
 void fn_3_1060D8(void) {
     Vec* points = lbl_3_common_bss_DE94._0000->_0098;
-    int i;
+    s32 i;
 
     lbl_3_bss_B67A = 0;
     for (i = 0; i < 1000; i++) {
-        points->x = points->y = points->z = -1000.0f;
-        points++;
+        points[i].x = points[i].y = points[i].z = -1000.0f;
     }
 }
 
@@ -1187,12 +1188,59 @@ void fn_3_1048E0(void) {
 
 // .text:0x00104740 size:0x1A0 mapped:0x807437D4
 void fn_3_104740(void) {
-    return;
+    if (lbl_3_common_bss_DE94._0000->_09A7 == 2) {
+        lbl_3_common_bss_DE94._0000->_00C4.x = 0.00001f + g_pCamera->_284C.x;
+        lbl_3_common_bss_DE94._0000->_00C4.y = 0.00001f + g_pCamera->_284C.y;
+        lbl_3_common_bss_DE94._0000->_00C4.z = 0.00001f + g_pCamera->_284C.z;
+        lbl_3_common_bss_DE94._0000->_00D0.x = 0.00002f + g_pCamera->_284C.x;
+        lbl_3_common_bss_DE94._0000->_00D0.y = 0.00002f + g_pCamera->_284C.y;
+        lbl_3_common_bss_DE94._0000->_00D0.z = 0.00002f + g_pCamera->_284C.z;
+    } else {
+        lbl_3_common_bss_DE94._0000->_00C4.x = 0.00001f + g_pCamera->_2870;
+        lbl_3_common_bss_DE94._0000->_00C4.y = 0.00001f + g_pCamera->_2874;
+        lbl_3_common_bss_DE94._0000->_00C4.z = 0.0f;
+        lbl_3_common_bss_DE94._0000->_00D0.x = 0.00001f + g_pCamera->_2870;
+        lbl_3_common_bss_DE94._0000->_00D0.y = 0.00001f + g_pCamera->_2874;
+        lbl_3_common_bss_DE94._0000->_00D0.z = 0.0f;
+    }
+    lbl_3_common_bss_DE94._0000->_00AC.x = g_pCamera->_2840.x;
+    lbl_3_common_bss_DE94._0000->_00AC.y = g_pCamera->_2840.y;
+    lbl_3_common_bss_DE94._0000->_00AC.z = g_pCamera->_2840.z;
+    lbl_3_common_bss_DE94._0000->_00B8.x = 0.00001f + g_pCamera->_2840.x;
+    lbl_3_common_bss_DE94._0000->_00B8.y = 0.00001f + g_pCamera->_2840.y;
+    lbl_3_common_bss_DE94._0000->_00B8.z = 0.00001f + g_pCamera->_2840.z;
 }
 
 // .text:0x001045A8 size:0x198 mapped:0x8074363C
 void fn_3_1045A8(void) {
-    return;
+    f32 angle;
+    f32 radius;
+    f32 height;
+    f32 cosYaw;
+    f32 sinYaw;
+    f32 dx, dy, dz;
+
+    angle = fn_3_9FEA8(g_pCamera->_2874);
+    radius = 20.0f * cosf_kludge(angle);
+    height = sinf_kludge(angle);
+    angle = fn_3_9FEA8(g_pCamera->_2870);
+    cosYaw = cosf_kludge(angle);
+    sinYaw = sinf_kludge(angle);
+    dx = cosYaw * radius;
+    dy = 20.0f * height;
+    dz = sinYaw * radius;
+    g_pCamera->_2858.x += cosYaw * g_pCamera->_287C;
+    g_pCamera->_2858.z += sinYaw * g_pCamera->_287C;
+    g_pCamera->_2858.x += sinYaw * g_pCamera->_2880;
+    g_pCamera->_2858.z -= cosYaw * g_pCamera->_2880;
+    g_pCamera->_284C.x = dx + g_pCamera->_2858.x;
+    g_pCamera->_284C.y = dy + g_pCamera->_2858.y;
+    g_pCamera->_284C.z = dz + g_pCamera->_2858.z;
+    g_pCamera->_2840.x = g_pCamera->_2858.x;
+    g_pCamera->_2840.y = g_pCamera->_2858.y;
+    g_pCamera->_2840.z = g_pCamera->_2858.z;
+    g_pCamera->_287C = 0.0f;
+    g_pCamera->_2880 = 0.0f;
 }
 
 // .text:0x00104338 size:0x270 mapped:0x807433CC
@@ -1202,17 +1250,70 @@ void fn_3_104338(void) {
 
 // .text:0x001040D8 size:0x260 mapped:0x8074316C
 void fn_3_1040D8(void) {
-    return;
+    Vec result;
+    Vec from;
+    Vec anchor;
+    Vec target;
+    Vec prev;
+
+    if (lbl_3_common_bss_DE94._0000->_09B4 != 0) {
+        VEC_COPY(&from, &lbl_3_common_bss_DE94._0000->_00B8);
+        VEC_COPY(&prev, &g_pCamera->_2840);
+        VEC_COPY(&anchor, &prev);
+        VEC_COPY(&target, &lbl_3_common_bss_DE94._0000->_00AC);
+        result = fn_3_FC2FC(from, anchor, target, 0.01f, lbl_3_common_bss_DE94._0000->_0100,
+                            lbl_3_common_bss_DE94._0000->_0104, lbl_3_common_bss_DE94._0000->_0108);
+        VEC_COPY(&g_pCamera->_2840, &result);
+        VEC_COPY(&lbl_3_common_bss_DE94._0000->_00B8, &result);
+        VEC_COPY(&lbl_3_common_bss_DE94._0000->_00AC, &prev);
+    }
 }
 
 // .text:0x00103E7C size:0x25C mapped:0x80742F10
-void fn_3_103E7C(void) {
-    return;
+void fn_3_103E7C(f32* angles) {
+    Vec result;
+    Vec from;
+    Vec anchor;
+    Vec target;
+
+    if (lbl_3_common_bss_DE94._0000->_09B4 != 0) {
+        angles[0] = fn_3_9FEA8(angles[0]);
+        angles[1] = fn_3_9FEA8(angles[1]);
+        VEC_COPY(&from, &lbl_3_common_bss_DE94._0000->_00D0);
+        anchor.x = angles[0];
+        anchor.y = angles[1];
+        anchor.z = 0.0f;
+        VEC_COPY(&target, &lbl_3_common_bss_DE94._0000->_00C4);
+        result = fn_3_FC2FC(from, anchor, target, 0.01f, lbl_3_common_bss_DE94._0000->_010C,
+                            lbl_3_common_bss_DE94._0000->_0110, lbl_3_common_bss_DE94._0000->_0114);
+        lbl_3_common_bss_DE94._0000->_00C4.x = angles[0];
+        lbl_3_common_bss_DE94._0000->_00C4.y = angles[1];
+        lbl_3_common_bss_DE94._0000->_00C4.z = 0.0f;
+        VEC_COPY(&lbl_3_common_bss_DE94._0000->_00D0, &result);
+        angles[0] = result.x;
+        angles[1] = result.y;
+    }
 }
 
 // .text:0x00103C30 size:0x24C mapped:0x80742CC4
-void fn_3_103C30(void) {
-    return;
+void fn_3_103C30(Vec* pos) {
+    Vec result;
+    Vec from;
+    Vec anchor;
+    Vec target;
+    Vec cur;
+
+    if (lbl_3_common_bss_DE94._0000->_09B4 != 0) {
+        memcpy(&cur, pos, sizeof(Vec));
+        VEC_COPY(&from, &lbl_3_common_bss_DE94._0000->_00D0);
+        memcpy(&anchor, pos, sizeof(Vec));
+        VEC_COPY(&target, &lbl_3_common_bss_DE94._0000->_00C4);
+        result = fn_3_FC2FC(from, anchor, target, 0.01f, lbl_3_common_bss_DE94._0000->_010C,
+                            lbl_3_common_bss_DE94._0000->_0110, lbl_3_common_bss_DE94._0000->_0114);
+        VEC_COPY(&lbl_3_common_bss_DE94._0000->_00C4, pos);
+        VEC_COPY(&lbl_3_common_bss_DE94._0000->_00D0, &result);
+        VEC_COPY(pos, &result);
+    }
 }
 
 // .text:0x00101CC4 size:0x1F6C mapped:0x80740D58
@@ -1390,22 +1491,22 @@ void fn_3_FC448(void) {
 }
 
 // .text:0x000FC2FC size:0x14C mapped:0x8073B390
-Vec fn_3_FC2FC(Vec* pos, Vec* anchor, Vec* target, f32 scale, f32 stiffness, f32 damping, f32 length) {
+Vec fn_3_FC2FC(Vec pos, Vec anchor, Vec target, f32 scale, f32 stiffness, f32 damping, f32 length) {
     Vec dir;
     Vec vel;
     Vec diff;
     f32 dist;
     f32 force;
 
-    PSVECSubtract(pos, anchor, &dir);
-    dist = PSVECDistance(pos, anchor);
-    PSVECSubtract(target, anchor, &diff);
+    PSVECSubtract(&pos, &anchor, &dir);
+    dist = PSVECDistance(&pos, &anchor);
+    PSVECSubtract(&target, &anchor, &diff);
     PSVECScale(&diff, scale, &vel);
     force = stiffness * (length - dist) + damping * (PSVECDotProduct(&vel, &dir) / dist);
     PSVECNormalize(&dir, &dir);
     PSVECScale(&dir, force * scale, &dir);
-    PSVECAdd(pos, &dir, pos);
-    return *pos;
+    PSVECAdd(&pos, &dir, &pos);
+    return pos;
 }
 
 // .text:0x000FBE24 size:0x4D8 mapped:0x8073AEB8
