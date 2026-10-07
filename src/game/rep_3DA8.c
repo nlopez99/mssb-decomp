@@ -1,6 +1,7 @@
 #include "game/rep_3DA8.h"
 #include "header_rep_data.h"
 #include "game/UnknownHomes_Game.h"
+#include "Dolphin/rand.h"
 
 typedef struct ScoutFlagTable {
     /* 0x0 */ u8 _0[4];
@@ -153,6 +154,47 @@ void fn_3_16440C(void) {
                 bonus = 0;
                 bss->_12[i]._3 = 1;
                 bss->_12[i]._4 = ids[i];
+            }
+        }
+    }
+}
+
+// .text:0x00163E94 size:0x578 mapped:0x807A2F28
+void fn_3_163E94(void) {
+    StarMissionCompletionTracker* tracker = &starMissionCompletionTracker;
+    UnkBss37400* bss = &lbl_3_common_bss_37400;
+    u8 mission = tracker->_441C;
+    u8 level = tracker->_4415;
+    s32 bonus = lbl_80109420[bss->_46]._9;
+    s16 ids[9];
+    s32 i;
+    s32 n;
+    BOOL found;
+    ChallengeTrackingStruct* c;
+
+    for (i = 0; i < 9; i++) {
+        ids[i] = inMemRoster[1][i].stats.CharID;
+    }
+    fn_3_163D34();
+    n = rand() % 9;
+    found = fn_3_163BD4();
+    if (bonus > 0 && found) {
+        while (bonus > 0) {
+            if (ids[n] != -1) {
+                c = &tracker->characters[ids[n]];
+                if (bss->_00[n]._1 != 0 && bss->_00[n]._0 < bss->_00[n]._1) {
+                    bonus--;
+                    bss->_12[n]._1 = c->scoutFlagPointer->_4[level][mission];
+                    bss->_12[n]._0 = c->scoutFlagsAchieved;
+                    bss->_12[n]._2++;
+                    bss->_12[n]._3 = 1;
+                    bss->_12[n]._4 = ids[n];
+                    bss->_00[n]._0++;
+                }
+            }
+            n = (n + 1) % 9;
+            if (!fn_3_163948()) {
+                break;
             }
         }
     }

@@ -10,6 +10,7 @@ BOOL fn_3_163948(void);
 BOOL fn_3_163A7C(void);
 BOOL fn_3_163BD4(void);
 void fn_3_163D34(void);
+void fn_3_163E94(void);
 void fn_3_16440C(void);
 void fn_3_164554(void);
 void fn_3_164664(void);
