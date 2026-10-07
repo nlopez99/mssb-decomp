@@ -115,7 +115,7 @@ The base shows `lis rX,...rodata.0@ha; addi` and then `lfs f0,100(rX)`, while th
 
 - **Literal constants in the reverse of the target's order:** the source lists functions in address order. With `-inline deferred` MWCC generates functions last to first (objdiff's `reverse_fn_order` hides this for `.text`) and creates each function's constants as it goes, so REL source lists functions from the highest address down; `tools/reverse_functions.py` converts a file. Example: rep_940 `.rodata` 83% to 93%.
 - **The weak `dolsqrtf2` constants** (0x10 bytes, from `game/UnknownHomes_Game.h`) stay as a difference; the linker keeps one copy for the whole module. The explanation above is incomplete: in `rep_10E8`'s target, `_half` and `_three` are local objects in the middle of `.rodata` (0x1140, 0x1148), yet its constants are unpooled and the include order still matched.
-- **Avoid them when the unit needs nothing from `game/UnknownHomes_Game.h`:** if a function only passes a type such as `InMemBallType*` through, declare it as `struct _InMemBallType*` and include `Dolphin/vec.h` or `static/UnknownHomes_Static.h` instead; `.rodata` then scores 100%. Example: `rep_3C80.c`, 92.31% to 100%.
+- **Avoid them when the unit needs nothing from `game/UnknownHomes_Game.h`:** include only what it uses (`Dolphin/vec.h`, `static/UnknownHomes_Static.h`); `.rodata` then scores 100%. Example: `rep_3C80.c`, 92.31% to 100%.
 
 ## `.data` or `.bss` below 100% with every object defined
 

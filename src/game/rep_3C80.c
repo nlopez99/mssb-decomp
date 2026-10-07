@@ -40,38 +40,38 @@ extern Unk3C80Effects lbl_3_data_27D58;
 
 extern u8 lbl_800FC0FC[][3];
 
-extern void fn_8002955C(struct _InMemBallType* ball, s32 arg1, Unk3C80Burst* burst);
-extern void fn_80030D88(struct _InMemBallType* ball, Vec* vel, Unk3C80Trail* trail, s32 arg3);
-extern void fn_80031CA4(struct _InMemBallType* ball, Unk3C80Glow* glow);
+extern void fn_8002955C(Vec* pos, s32 arg1, Unk3C80Burst* burst);
+extern void fn_80030D88(Vec* pos, Vec* vel, Unk3C80Trail* trail, s32 arg3);
+extern void fn_80031CA4(Vec* pos, Unk3C80Glow* glow);
 extern s32 fn_8004AD54(u8 stadium, s32 type);
-extern void fn_80064344(struct _InMemBallType* ball, Vec* vel);
+extern void fn_80064344(Vec* pos, Vec* vel);
 
 // .text:0x0015F648 size:0x22C mapped:0x8079E6DC
 // The target reaches lbl_3_data_27D58 from a pool base: it is five statics of this file
 // (0x50, 0x54, 0x50, 0x54 and an s32 array at 0x148), outside this unit's split. Defined
 // as statics, this code differs only in that base symbol.
-void fn_3_15F648(s32 type, s32 mode, struct _InMemBallType* ball, Vec* vel) {
+void fn_3_15F648(s32 type, s32 mode, Vec* pos, Vec* vel) {
     Unk3C80Effects* fx = &lbl_3_data_27D58;
     s32 kind;
 
     switch (type) {
     case 10:
-        fn_80064344(ball, vel);
+        fn_80064344(pos, vel);
         break;
     default:
         if (mode == 1) {
             if (PSVECMag(vel) >= fx->_148[1] / 100000.0f) {
                 fx->_050._00 = lbl_3_common_bss_35154._004;
                 fx->_0A4._00 = lbl_3_common_bss_35154._004;
-                fn_8002955C(ball, 0, &fx->_050);
-                fn_80030D88(ball, vel, &fx->_0A4, 5);
+                fn_8002955C(pos, 0, &fx->_050);
+                fn_80030D88(pos, vel, &fx->_0A4, 5);
             }
         } else {
             kind = fn_8004AD54(g_d_GameSettings.StadiumID, type);
             if (PSVECMag(vel) >= fx->_148[0] / 100000.0f) {
                 fx->_000._00 = lbl_3_common_bss_35154._004;
                 fx->_000._40 = PACK_RGB(lbl_800FC0FC[kind][0], lbl_800FC0FC[kind][1], lbl_800FC0FC[kind][2]);
-                fn_80031CA4(ball, &fx->_000);
+                fn_80031CA4(pos, &fx->_000);
             }
             if (PSVECMag(vel) >= fx->_148[2] / 100000.0f) {
                 switch (kind) {
@@ -79,7 +79,7 @@ void fn_3_15F648(s32 type, s32 mode, struct _InMemBallType* ball, Vec* vel) {
                 case 3:
                 case 7:
                     fx->_0F4._00 = lbl_3_common_bss_35154._004;
-                    fn_8002955C(ball, 0, &fx->_0F4);
+                    fn_8002955C(pos, 0, &fx->_0F4);
                     break;
                 }
             }
