@@ -1695,9 +1695,8 @@ void fn_3_151068(ModelEmitter3880* emitter, Particle3880* p) {
 }
 
 // .text:0x00150D84 size:0x2E4 mapped:0x8078FE18
-// 82.56%: the target keeps lbl_3_data_26C3C's address in a saved register across each
-// rand() and forms it again for the next range; here it is formed after the call.
 void fn_3_150D84(ModelEmitter3880* emitter, Particle3880* p) {
+    s32* range;
     f32 angle;
     f32 speed;
 
@@ -1705,14 +1704,18 @@ void fn_3_150D84(ModelEmitter3880* emitter, Particle3880* p) {
     p->pos.x = emitter->pos.x;
     p->pos.y = -emitter->pos.y;
     p->pos.z = emitter->pos.z;
-    p->_38 = p->_3C = (lbl_3_data_26C3C[10] + rand() % (lbl_3_data_26C3C[11] - lbl_3_data_26C3C[10])) / 100000.0f;
-    p->vel.y = (lbl_3_data_26C3C[12] + rand() % (lbl_3_data_26C3C[13] - lbl_3_data_26C3C[12])) / 100000.0f;
+    range = &lbl_3_data_26C3C[10];
+    p->_38 = p->_3C = (range[0] + rand() % (range[1] - range[0])) / 100000.0f;
+    range = &lbl_3_data_26C3C[12];
+    p->vel.y = (range[0] + rand() % (range[1] - range[0])) / 100000.0f;
     angle = (rand() % 36000) / 100.0;
     angle = 0.017453292f * angle;
-    speed = (lbl_3_data_26C3C[16] + rand() % (lbl_3_data_26C3C[17] - lbl_3_data_26C3C[16])) / 100000.0f;
+    range = &lbl_3_data_26C3C[16];
+    speed = (range[0] + rand() % (range[1] - range[0])) / 100000.0f;
     p->vel.x = speed * cosf_kludge(angle);
     p->vel.z = speed * sinf_kludge(angle);
-    p->_1C.x = 57.29578f * ((lbl_3_data_26C3C[18] + rand() % (lbl_3_data_26C3C[19] - lbl_3_data_26C3C[18])) / 100000.0f);
+    range = &lbl_3_data_26C3C[18];
+    p->_1C.x = 57.29578f * ((range[0] + rand() % (range[1] - range[0])) / 100000.0f);
     p->_1C.x *= (rand() % 2) * -2 + 1;
     p->color[0] = p->color[1] = p->color[2] = p->color[3] = 0xFF;
 }
@@ -1784,8 +1787,6 @@ void fn_3_1504EC(ModelEmitter3880* emitter, Particle3880* p) {
 }
 
 // .text:0x00150120 size:0x3CC mapped:0x8078F1B4
-// 85.98%: differs only inside the inlined fn_3_150D84 (see there); inlined in turn into
-// fn_3_150940, the same code matches
 void fn_3_150120(ModelEmitter3880* emitter, Particle3880* p) {
     if (p->_48 != 0) {
         p->_48--;
