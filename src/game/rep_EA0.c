@@ -1027,15 +1027,15 @@ void fn_3_678B8(void) {
 }
 
 // .text:0x00067620 size:0x298 mapped:0x806A66B4
-// 97.72%, registers only: the target shares the header's 1 with i (r5) and holds p, 2i and 2i+1
-// in r6, r7 and r8; this build loads 1 twice and uses r8, r6 and r7. The copy loop's counter and
-// destination take r28 and r30 in the target, the reverse here.
+// 98.78%, registers only: the target holds i (and the header's 1), p, 2i and 2i+1 in r5 to r8;
+// this build puts 2i, 2i+1, p and i there. `p[6] = i = 1` is what shares the 1 with i.
 void fn_3_67620(s32 type, u16 frames) {
     u8* p;
     u8* start;
-    u8* src;
     u8* dst;
+    u8* src;
     int i;
+    int j;
 
     lbl_3_bss_16A0 = type;
     if (type == 10) {
@@ -1062,7 +1062,6 @@ void fn_3_67620(s32 type, u16 frames) {
     fn_80023EEC(&lbl_3_bss_1630, lbl_3_bss_1360, lbl_3_data_6880[type]._0C);
 
     p = lbl_3_bss_11E0;
-    i = 1;
     p[0] = GX_TRIANGLESTRIP | GX_VTXFMT0;
     start = p;
     p[1] = 0;
@@ -1070,7 +1069,7 @@ void fn_3_67620(s32 type, u16 frames) {
     p[3] = 0;
     p[4] = 0;
     p[5] = 2;
-    p[6] = 1;
+    p[6] = i = 1;
     p[7] = 0;
     p[8] = 3;
     p += 9;
@@ -1090,8 +1089,8 @@ void fn_3_67620(s32 type, u16 frames) {
     dst = lbl_3_bss_1060;
     src += 3;
     dst += 3 + 120 * 3;
-    i = 120;
-    while (i--) {
+    j = 120;
+    while (j--) {
         dst -= 3;
         memcpy(dst, src, 3);
         src += 3;
