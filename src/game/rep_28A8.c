@@ -472,7 +472,7 @@ void fn_3_DD3FC(void) {
         }
     }
     if (!g_Minigame.TF_ballDespawnedInd && g_Ball.fielderWBallIndex < 0 && !g_Ball.deadBallReason && g_Ball.AtBat_ContactResult >= 0 &&
-        g_GameLogic.CountdownUntilFade <= lbl_3_data_1899C[1] + lbl_3_data_49DC[11] - 10) {
+        g_GameLogic.CountdownUntilFade <= lbl_3_data_1899C[1] - 10 + lbl_3_data_49DC[11]) {
         g_GameLogic.CountdownUntilFade++;
     }
     if (g_GameLogic.CountdownUntilFade == lbl_3_data_1899C[1] - 10) {
@@ -520,13 +520,24 @@ void fn_3_DD37C(void) {
     }
 }
 
+static inline BOOL isSceneSkipped(void) {
+    BOOL done = FALSE;
+
+    if (g_GameLogic.FrameCountOfCurrentPitch >= lbl_3_data_18C48[2]) {
+        done = TRUE;
+    } else if (g_GameLogic.FrameCountOfCurrentAtBat_Copy >= lbl_3_data_18C48[1] && fn_3_6C938(1, 0x1100)) {
+        done = TRUE;
+    }
+    return done;
+}
+
 // .text:0x000DD1A8 size:0x1D4 mapped:0x8071C23C
 void fn_3_DD1A8(void) {
+    s32 i;
+
     switch (g_GameLogic._125) {
     case 0:
         if (g_Minigame.toyField_turnNumber == 0) {
-            s32 i;
-
             if (random_fn_3_9EE24(100) < lbl_3_data_18C48[7] || g_Minigame._1907 == 4) {
                 i = 0;
                 do {
@@ -543,19 +554,12 @@ void fn_3_DD1A8(void) {
         g_GameLogic.FrameCountOfCurrentAtBat_Copy = 0;
         g_GameLogic._125 = 1;
         break;
-    case 1: {
-        BOOL done = FALSE;
-        if (g_GameLogic.FrameCountOfCurrentPitch >= lbl_3_data_18C48[2]) {
-            done = TRUE;
-        } else if (g_GameLogic.FrameCountOfCurrentAtBat_Copy >= lbl_3_data_18C48[1] && fn_3_6C938(1, 0x1100)) {
-            done = TRUE;
-        }
-        if (done) {
+    case 1:
+        if (isSceneSkipped()) {
             g_GameLogic._125 = 2;
             changeScene(3, 6);
         }
         break;
-    }
     case 2:
         if (lbl_8037169C._13) {
             fn_3_FBD70();
@@ -1164,8 +1168,10 @@ void fn_3_DA640(s32 count, s32 idx) {
     f32 z;
     s32 i;
     f32 radius;
+    int range;
     f32 dist;
     int ang;
+    int r;
     f32 speed;
 
     g_Minigame._1939 = count;
@@ -1175,10 +1181,12 @@ void fn_3_DA640(s32 count, s32 idx) {
     if (count >= 20) {
         radius = lbl_3_data_18AC8[idx].radius[1];
     }
+    range = 1000.0f * radius;
     for (i = 0; i < count; i++) {
         g_Minigame.wallBall_coinsVisibleInd[i] = 1;
         g_Minigame.wallBall_coinCoordinates[i].y = 0.8f;
-        dist = 0.001f * (rand() % (int)(1000.0f * radius));
+        r = rand();
+        dist = 0.001f * (r % range);
         ang = fn_3_9FE6C_normalizeAngle(rand() % 4096);
         getComponentsFromSAng(ang, &x, &z);
         g_Minigame.wallBall_coinCoordinates[i].x = x * dist + lbl_3_data_18AC8[idx].x;
@@ -1193,17 +1201,15 @@ void fn_3_DA640(s32 count, s32 idx) {
 // .text:0x000D9EA0 size:0x7A0 mapped:0x80718F34
 void fn_3_D9EA0(void) {
     s32 i;
-    f32 gravity;
-    f32 drag;
-    f32 ground;
-    f32 bounce;
     Unk28A8Fielder* fielder;
     f32 dx;
     f32 dz;
     f32 dist0;
     f32 dist1;
     f32 dist2;
-    s8 closest;
+    s32 closest;
+    f32 dx2;
+    f32 dz2;
 
     if (g_Minigame._1939) {
         if (g_Minigame.wallBall_coinsVisibleFrameCounter[0] < 0x7FFE) {
@@ -1211,28 +1217,24 @@ void fn_3_D9EA0(void) {
         } else {
             g_Minigame.wallBall_coinsVisibleFrameCounter[0] = 0x7FFF;
         }
-        gravity = lbl_3_data_18B9C[0];
-        drag = lbl_3_data_18B9C[1];
-        ground = lbl_3_data_18B9C[3];
-        bounce = lbl_3_data_18B9C[2];
         for (i = 0; i < 100; i++) {
             if (g_Minigame.wallBall_coinsVisibleInd[i]) {
                 if (g_Minigame.wallBall_coinsVisibleFrameCounter[0] > lbl_3_data_18BB0[g_Minigame._199E][0]) {
                     g_Minigame.wallBall_coinsVisibleInd[i] = 0;
                 } else {
-                    g_Minigame.wallBall_coinVelocity[i].y -= gravity;
-                    g_Minigame.wallBall_coinVelocity[i].x *= drag;
-                    g_Minigame.wallBall_coinVelocity[i].y *= drag;
-                    g_Minigame.wallBall_coinVelocity[i].z *= drag;
+                    g_Minigame.wallBall_coinVelocity[i].y -= lbl_3_data_18B9C[0];
+                    g_Minigame.wallBall_coinVelocity[i].x *= lbl_3_data_18B9C[1];
+                    g_Minigame.wallBall_coinVelocity[i].y *= lbl_3_data_18B9C[1];
+                    g_Minigame.wallBall_coinVelocity[i].z *= lbl_3_data_18B9C[1];
                     g_Minigame.wallBall_coinCoordinates[i].x += g_Minigame.wallBall_coinVelocity[i].x;
                     g_Minigame.wallBall_coinCoordinates[i].y += g_Minigame.wallBall_coinVelocity[i].y;
                     g_Minigame.wallBall_coinCoordinates[i].z += g_Minigame.wallBall_coinVelocity[i].z;
-                    if (g_Minigame.wallBall_coinCoordinates[i].y <= ground) {
-                        g_Minigame.wallBall_coinCoordinates[i].y = ground;
+                    if (g_Minigame.wallBall_coinCoordinates[i].y <= lbl_3_data_18B9C[3]) {
+                        g_Minigame.wallBall_coinCoordinates[i].y = lbl_3_data_18B9C[3];
                         g_Minigame.wallBall_coinVelocity[i].y = -g_Minigame.wallBall_coinVelocity[i].y;
-                        g_Minigame.wallBall_coinVelocity[i].x *= bounce;
-                        g_Minigame.wallBall_coinVelocity[i].y *= bounce;
-                        g_Minigame.wallBall_coinVelocity[i].z *= bounce;
+                        g_Minigame.wallBall_coinVelocity[i].x *= lbl_3_data_18B9C[2];
+                        g_Minigame.wallBall_coinVelocity[i].y *= lbl_3_data_18B9C[2];
+                        g_Minigame.wallBall_coinVelocity[i].z *= lbl_3_data_18B9C[2];
                     }
                 }
             }
@@ -1243,18 +1245,24 @@ void fn_3_D9EA0(void) {
                 fielder = &g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[0]]];
                 dx = g_Minigame.wallBall_coinCoordinates[i].x - fielder->x;
                 dz = g_Minigame.wallBall_coinCoordinates[i].z - fielder->z;
-                dist0 = dolsqrtf2(dx * dx + dz * dz);
+                dx2 = dx * dx;
+                dz2 = dz * dz;
+                dist0 = dolsqrtf2(dx2 + dz2);
                 if (g_Minigame.minigameControlStruct._28[1] >= 0) {
                     fielder = &g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[1]]];
                     dx = g_Minigame.wallBall_coinCoordinates[i].x - fielder->x;
                     dz = g_Minigame.wallBall_coinCoordinates[i].z - fielder->z;
-                    dist1 = dolsqrtf2(dx * dx + dz * dz);
+                    dx2 = dx * dx;
+                    dz2 = dz * dz;
+                    dist1 = dolsqrtf2(dx2 + dz2);
                 }
                 if (g_Minigame.minigameControlStruct._28[2] >= 0) {
                     fielder = &g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[2]]];
                     dx = g_Minigame.wallBall_coinCoordinates[i].x - fielder->x;
                     dz = g_Minigame.wallBall_coinCoordinates[i].z - fielder->z;
-                    dist2 = dolsqrtf2(dx * dx + dz * dz);
+                    dx2 = dx * dx;
+                    dz2 = dz * dz;
+                    dist2 = dolsqrtf2(dx2 + dz2);
                 }
                 if (dist0 < dist2) {
                     if (dist0 < dist1) {
