@@ -3,6 +3,7 @@
 #include "header_rep_data.h"
 #include "Dolphin/mtxext.h"
 #include "string.h"
+#include "Dolphin/gx.h"
 
 // Same layout as rep_A00.c's cue table entries, which read lbl_3_data_1E434 and lbl_3_data_1F090
 typedef struct {
@@ -25,7 +26,10 @@ typedef struct {
 } Unk3090Point; // size: 0x14
 
 typedef struct Unk3090Key {
-    /* 0x00 */ u8 _00[0x3C];
+    /* 0x00 */ Vec _00;
+    /* 0x0C */ f32 _0C;
+    /* 0x10 */ f32 _10;
+    /* 0x14 */ u8 _14[0x3C - 0x14];
     /* 0x3C */ f32 _3C;
 } Unk3090Key; // size: 0x40
 
@@ -46,6 +50,45 @@ extern struct {
     u8 _00[0x28];
     u8 _28;
 } lbl_80366158;
+
+typedef struct {
+    /* 0x000 */ u8 _000[0x34];
+    /* 0x034 */ Vec _034;
+    /* 0x040 */ u8 _040[0x162 - 0x40];
+    /* 0x162 */ u16 _162[1];
+} Unk3090Model;
+
+extern struct {
+    /* 0x0000 */ u8 _0000[0x2C50];
+    /* 0x2C50 */ Unk3090Model* _2C50[9];
+} lbl_8036E548;
+
+extern struct {
+    /* 0x000 */ u8 _000[0x218];
+    /* 0x218 */ u8 _218;
+    /* 0x219 */ u8 _219[0x268 - 0x219];
+} g_Fielders[9];
+
+typedef struct {
+    /* 0x00 */ u8 _00[0x10];
+    /* 0x10 */ s16 _10;
+} Unk3090Queue;
+
+typedef struct {
+    /* 0x00 */ u8 _00[0xC];
+    /* 0x0C */ Unk3090Queue* _0C;
+    /* 0x10 */ u8 _10[0x1E - 0x10];
+    /* 0x1E */ u16 _1E;
+    /* 0x20 */ u8 _20[0x22 - 0x20];
+    /* 0x22 */ s16 _22;
+} Unk3090Task;
+
+extern Unk3090Task* lbl_803CC1B8;
+
+extern void** fn_800111D8(Unk3090Model* model);
+extern void fn_800B2C44(void* skeleton, u16 joint, Vec* pos);
+extern u8 LoadModel(Unk3090Model* model);
+extern void fn_800B0A14_removeQueue(Unk3090Queue* queue);
 
 s32 lbl_3_data_1C0A8[2] = { 1, 2 };
 s32 lbl_3_data_1C0B0[19] = {
@@ -855,6 +898,8 @@ static Vec lbl_3_data_20FEC = { 0.0f, 1.0f, 0.0f };
 static Vec lbl_3_data_20FF8 = { 0.0f, 0.0f, 1.0f };
 static Vec lbl_3_data_21004 = { 0.0f, 0.0f, -1.0f };
 
+static s16 lbl_3_bss_B67A;
+
 // .text:0x00106BA0 size:0x25C mapped:0x80745C34
 void fn_3_106BA0(void) {
     return;
@@ -886,28 +931,117 @@ void fn_3_106270(void) {
 }
 
 // .text:0x0010617C size:0xF4 mapped:0x80745210
-void fn_3_10617C(void) {
-    return;
+BOOL fn_3_10617C(int player, int bone, Vec* out) {
+    Unk3090Model* model = lbl_8036E548._2C50[player];
+    Vec pos;
+
+    if (model == NULL) {
+        return FALSE;
+    }
+    bone = model->_162[bone];
+    if (bone == 0xFFFF) {
+        out->x = 0.0f;
+        out->y = 0.0f;
+        out->z = 0.0f;
+        return FALSE;
+    }
+    fn_800B2C44(*fn_800111D8(model), bone, &pos);
+    out->x = pos.x;
+    out->y = pos.y;
+    out->z = pos.z;
+    out->x += model->_034.x;
+    out->y += model->_034.y;
+    out->z += model->_034.z;
+    return TRUE;
 }
 
 // .text:0x001060D8 size:0xA4 mapped:0x8074516C
 void fn_3_1060D8(void) {
-    return;
+    Vec* points = lbl_3_common_bss_DE94._0000->_0098;
+    int i;
+
+    lbl_3_bss_B67A = 0;
+    for (i = 0; i < 1000; i++) {
+        points->x = points->y = points->z = -1000.0f;
+        points++;
+    }
 }
 
 // .text:0x00106014 size:0xC4 mapped:0x807450A8
-void fn_3_106014(void) {
-    return;
+void fn_3_106014(f32 x, f32 y, f32 z) {
+    Vec* points = lbl_3_common_bss_DE94._0000->_0098;
+
+    if (lbl_3_bss_B67A == 0) {
+        points[lbl_3_bss_B67A].x = x;
+        points[lbl_3_bss_B67A].y = y;
+        points[lbl_3_bss_B67A].z = z;
+        lbl_3_bss_B67A++;
+    } else if (x != points[lbl_3_bss_B67A - 1].x && y != points[lbl_3_bss_B67A - 1].y && z != points[lbl_3_bss_B67A - 1].z) {
+        points[lbl_3_bss_B67A].x = x;
+        points[lbl_3_bss_B67A].y = y;
+        points[lbl_3_bss_B67A].z = z;
+        if (lbl_3_bss_B67A < 1000) {
+            lbl_3_bss_B67A++;
+        }
+    }
 }
 
 // .text:0x00105E00 size:0x214 mapped:0x80744E94
-void fn_3_105E00(void) {
-    return;
+void fn_3_105E00(int x, int y, int w, int h) {
+    Mtx44 proj;
+    Mtx mtx;
+
+    C_MTXOrtho(proj, 0.0f, 448.0f, 0.0f, 640.0f, 0.0f, -100.0f);
+    GXSetProjection(proj, GX_ORTHOGRAPHIC);
+    PSMTXIdentity(mtx);
+    GXLoadPosMtxImm(mtx, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    GXSetCullMode(GX_CULL_NONE);
+    GXSetColorUpdate(GX_TRUE);
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XY, GX_S16, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGB, GX_RGBA8, 0);
+    GXSetNumChans(1);
+    GXSetNumTexGens(0);
+    GXSetNumTevStages(1);
+    GXSetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+    GXSetChanCtrl(GX_COLOR0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetChanCtrl(GX_ALPHA0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_COPY);
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    GXPosition2s16(x, y);
+    GXColor4u8(0, 255, 0, 200);
+    GXPosition2s16(x + w, y);
+    GXColor4u8(0, 255, 0, 200);
+    GXPosition2s16(x + w, y + h);
+    GXColor4u8(0, 255, 0, 200);
+    GXPosition2s16(x, y + h);
+    GXColor4u8(0, 255, 0, 200);
+    GXEnd();
 }
 
 // .text:0x00105CDC size:0x124 mapped:0x80744D70
 void fn_3_105CDC(void) {
-    return;
+    Vec* points = lbl_3_common_bss_DE94._0000->_0098;
+    int i;
+
+    for (i = 0; i < 1000; i++) {
+        if (points[i].x != -1000.0 && points[i].y != -1000.0 && points[i].z != -1000.0) {
+            int x = (int)points[i].x * 320 + 320;
+            int z = (int)points[i].z * 224 + 224;
+
+            if (i == 135) {
+                i = 135;
+            }
+            if (i == 5) {
+                i = 5;
+            }
+            fn_3_105E00((s16)(x / 50 + 150), (s16)(-z / 50 + 400), 2, 2);
+        }
+    }
 }
 
 // .text:0x00105C84 size:0x58 mapped:0x80744D18
@@ -958,13 +1092,47 @@ void fn_3_105BD8(struct Unk3090View* view) {
 }
 
 // .text:0x00105ACC size:0x10C mapped:0x80744B60
-void fn_3_105ACC(void) {
-    return;
+void fn_3_105ACC(Quaternion* q, Mtx out) {
+    Mtx44 m;
+    f32 x = q->x;
+    f32 y = q->y;
+    f32 z = q->z;
+    f32 w = q->w;
+    f32 x2 = x + x;
+    f32 y2 = y + y;
+    f32 z2 = z + z;
+
+    m[0][0] = 1.0f - (y * y2 + z * z2);
+    m[1][0] = x * y2 - w * z2;
+    m[2][0] = x * z2 + w * y2;
+    m[3][0] = 0.0f;
+    m[0][1] = x * y2 + w * z2;
+    m[1][1] = 1.0f - (x * x2 + z * z2);
+    m[2][1] = y * z2 - w * x2;
+    m[3][1] = 0.0f;
+    m[0][2] = x * z2 - w * y2;
+    m[1][2] = y * z2 + w * x2;
+    m[2][2] = 1.0f - (x * x2 + y * y2);
+    m[3][2] = 0.0f;
+    m[0][3] = 0.0f;
+    m[1][3] = 0.0f;
+    m[2][3] = 0.0f;
+    m[3][3] = 1.0f;
+    memcpy(out, m, sizeof(Mtx));
 }
 
 // .text:0x00105A10 size:0xBC mapped:0x80744AA4
-void fn_3_105A10(void) {
-    return;
+void fn_3_105A10(Vec* out, Vec* from, Vec* to, f32 t) {
+    f32 result[4];
+    f32 a[4];
+    f32 b[4];
+
+    memcpy(a, from, sizeof(Vec));
+    memcpy(b, to, sizeof(Vec));
+    result[0] = a[0] * t + b[0] * (1.0f - t);
+    result[1] = a[1] * t + b[1] * (1.0f - t);
+    result[2] = a[2] * t + b[2] * (1.0f - t);
+    memcpy(out, result, sizeof(Vec));
 }
 
 // .text:0x001054D0 size:0x540 mapped:0x80744564
@@ -1095,7 +1263,37 @@ void fn_3_FDB30(void) {
 
 // .text:0x000FDA1C size:0x114 mapped:0x8073CAB0
 void fn_3_FDA1C(void) {
-    return;
+    Unk3090Task* task = lbl_803CC1B8;
+    Unk3090Model* model;
+
+    switch (task->_22) {
+    case 0:
+        task->_22 = 1;
+        break;
+    case 1:
+        model = lbl_8036E548._2C50[task->_1E];
+        if (g_Fielders[task->_1E]._218 == 0) {
+            if (task->_1E < 9) {
+                task->_1E++;
+                task->_22 = 0;
+            } else {
+                task->_22 = 2;
+            }
+        } else if (model == NULL || LoadModel(model)) {
+            if (task->_1E < 9) {
+                task->_1E++;
+                task->_22 = 0;
+            } else {
+                task->_22 = 2;
+            }
+        }
+        break;
+    case 2:
+        task->_0C->_10 = 1;
+        fn_800B0A14_removeQueue(task->_0C);
+        task->_22 = 0;
+        break;
+    }
 }
 
 // .text:0x000FD9FC size:0x20 mapped:0x8073CA90
@@ -1124,8 +1322,18 @@ void fn_3_FD4DC(void) {
 }
 
 // .text:0x000FD408 size:0xD4 mapped:0x8073C49C
-void fn_3_FD408(void) {
-    return;
+void fn_3_FD408(u32 idx, Vec* pos, f32* angles) {
+    lbl_3_common_bss_DE94_s2* cam = lbl_3_common_bss_DE94._0000;
+
+    if (cam->_003C > idx) {
+        memcpy(pos, &cam->_0034[idx]._00, sizeof(Vec));
+        angles[0] = cam->_0034[idx]._0C;
+        angles[1] = cam->_0034[idx]._10;
+    } else {
+        memcpy(pos, &cam->_0034[cam->_003C - 1]._00, sizeof(Vec));
+        angles[0] = cam->_0034[cam->_003C - 1]._0C;
+        angles[1] = cam->_0034[cam->_003C - 1]._10;
+    }
 }
 
 // .text:0x000FCF24 size:0x4E4 mapped:0x8073BFB8
@@ -1182,8 +1390,22 @@ void fn_3_FC448(void) {
 }
 
 // .text:0x000FC2FC size:0x14C mapped:0x8073B390
-void fn_3_FC2FC(void) {
-    return;
+Vec fn_3_FC2FC(Vec* pos, Vec* anchor, Vec* target, f32 scale, f32 stiffness, f32 damping, f32 length) {
+    Vec dir;
+    Vec vel;
+    Vec diff;
+    f32 dist;
+    f32 force;
+
+    PSVECSubtract(pos, anchor, &dir);
+    dist = PSVECDistance(pos, anchor);
+    PSVECSubtract(target, anchor, &diff);
+    PSVECScale(&diff, scale, &vel);
+    force = stiffness * (length - dist) + damping * (PSVECDotProduct(&vel, &dir) / dist);
+    PSVECNormalize(&dir, &dir);
+    PSVECScale(&dir, force * scale, &dir);
+    PSVECAdd(pos, &dir, pos);
+    return *pos;
 }
 
 // .text:0x000FBE24 size:0x4D8 mapped:0x8073AEB8
@@ -1192,8 +1414,21 @@ void fn_3_FBE24(void) {
 }
 
 // .text:0x000FBDAC size:0x78 mapped:0x8073AE40
-void fn_3_FBDAC(int arg0) {
-    return;
+void fn_3_FBDAC(int id) {
+    lbl_3_common_bss_DE94_s2* cam = lbl_3_common_bss_DE94._0000;
+
+    lbl_3_common_bss_DE94._0000->_09AB = 1;
+    lbl_3_common_bss_DE94._0000->_09AC = 1;
+    lbl_3_common_bss_DE94._0000->_09AF = 1;
+    lbl_3_common_bss_DE94._0000->_09B0 = 1;
+    cam->_0018 = 0;
+    cam->_0008 = 0;
+    cam->_0014 = 0;
+    lbl_3_common_bss_DE94._0000->_092C = id;
+    lbl_3_common_bss_DE94._0000->_0000 = lbl_3_data_20E0C[id];
+    lbl_3_common_bss_DE94._0000->_09AE = 1;
+    lbl_3_common_bss_DE94._0000->_0118 = 0;
+    lbl_3_common_bss_DE94._0000->_0944 = 0;
 }
 
 // .text:0x000FBD70 size:0x3C mapped:0x8073AE04
