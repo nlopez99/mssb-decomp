@@ -2103,8 +2103,14 @@ typedef struct _MiniGameStruct {
         /*0x1DD0*/ u8 _1DD0_u8;
     };
     /*0x1DD1*/ u8 _1DD1[0x1DF4 - 0x1DD1];
-    /*0x1DF4*/ u8 _1DF4;
-    /*0x1DF5*/ u8 _1DF5;
+    // Bob-omb Derby (rep_31F0) reads _1DF4 and _1DF5, Barrel Batter (rep_34B0) stores _1DF4_s16
+    union {
+        struct {
+            /*0x1DF4*/ u8 _1DF4;
+            /*0x1DF5*/ u8 _1DF5;
+        };
+        /*0x1DF4*/ s16 _1DF4_s16;
+    };
     /*0x1DF6*/ u8 _1DF6;
     /*0x1DF7*/ u8 _1DF7;
     /*0x1DF8*/ u8 _1DF8;

@@ -33,6 +33,11 @@ extern struct {
 extern u8 lbl_3_common_bss_32234[0x8];
 
 extern struct {
+    /* 0x00 */ u8 _00[0x40];
+    /* 0x40 */ s16 _40;
+} lbl_3_common_bss_37400;
+
+extern struct {
     /* 0x00 */ u8 _00[0xB6];
     /* 0xB6 */ u8 _B6;
     /* 0xB7 */ u8 _B7;
@@ -61,6 +66,7 @@ extern void fn_3_FBD58(void);
 extern void fn_3_FBD70(void);
 extern void fn_3_10AD48(void);
 extern void fn_8004C108(VecXYZ* pos, int arg1);
+extern void fn_3_1608F0(int, int, int);
 
 // .text:0x001324E8 size:0x9F4 mapped:0x8077157C
 void fn_3_1324E8(void) {
@@ -329,7 +335,27 @@ void fn_3_12FD6C(void) {
 
 // .text:0x0012FAC4 size:0x2A8 mapped:0x8076EB58
 void fn_3_12FAC4(void) {
-    return;
+    BB_barrelStruct* barrel;
+    int i;
+
+    fn_3_12F624();
+    for (i = 0; i < 15; i++) {
+        barrel = &g_Minigame.barrels[i];
+        if (barrel->animationCounter < 0x7FFE) {
+            barrel->animationCounter++;
+        } else {
+            barrel->animationCounter = 0x7FFF;
+        }
+        if (barrel->barrelState == 1) {
+            fn_3_12F9D4(i);
+        }
+        if (barrel->barrelState == 3) {
+            fn_3_12F28C(i);
+        }
+        if (barrel->replacingBarrelInd) {
+            fn_3_12EFA4(i);
+        }
+    }
 }
 
 // .text:0x0012F9D4 size:0xF0 mapped:0x8076EA68
@@ -360,11 +386,83 @@ void fn_3_12F9D4(int idx) {
 
 // .text:0x0012F624 size:0x3B0 mapped:0x8076E6B8
 void fn_3_12F624(void) {
-    return;
+    int flags[15];
+    s32 i;
+    int row;
+    int col;
+    int delay;
+    BOOL changed;
+    int points;
+    int hit;
+
+    if (g_Ball.framesSinceHit <= 0 || g_Minigame.barrelBatter_scoreCalculatedInd ||
+        g_Ball.AtBat_Contact_BallPos.z < lbl_3_data_216BC[0].z - lbl_3_data_21770[2] ||
+        g_Batter.contactType < 1 || g_Batter.contactType > 3) {
+        return;
+    }
+    for (row = 0; row < 3; row++) {
+        if (g_Ball.AtBat_Contact_BallPos.y < lbl_3_data_21770[3] + lbl_3_data_216BC[row].y) {
+            break;
+        }
+    }
+    if (row < 3 && !(g_Ball.AtBat_Contact_BallPos.x < lbl_3_data_216BC[0].x - lbl_3_data_21770[2])) {
+        for (col = 0; col < 15; col += 3) {
+            if (g_Ball.AtBat_Contact_BallPos.x < lbl_3_data_21770[2] + lbl_3_data_216BC[col].x) {
+                break;
+            }
+        }
+        if (col < 15) {
+            g_Minigame.barrelBatter_hitBarrelID = col + row;
+            for (i = 0; i < 15; i++) {
+                flags[i] = 0;
+            }
+            hit = g_Minigame.barrelBatter_hitBarrelID;
+            g_Minigame.barrels[hit].barrelState = 3;
+            g_Minigame.barrels[hit].animationCounter = 0;
+            g_Minigame.barrels[hit].delayUntilBlownUp = lbl_3_data_21788[0];
+            delay = lbl_3_data_21788[0] + lbl_3_data_21788[1];
+            if (g_Minigame.bB_bombBarrelID == hit && g_Minigame.barrels[hit].barrelColour == 3) {
+                g_Minigame.bB_bombBarrelHitInd = 1;
+            }
+            for (;;) {
+                changed = FALSE;
+                for (i = 0; i < 15; i++) {
+                    if (g_Minigame.barrels[i].barrelState == 3 && g_Minigame.barrels[i].delayUntilBlownUp != delay && !flags[i]) {
+                        if (g_Minigame.bB_bombBarrelHitInd) {
+                            fn_3_12F424(i, delay, TRUE);
+                        } else {
+                            fn_3_12F424(i, delay, FALSE);
+                        }
+                        flags[i] = 1;
+                        changed = TRUE;
+                        g_Minigame.barrelBatter_barrelsHit++;
+                    }
+                }
+                if (!changed) {
+                    break;
+                }
+                delay += lbl_3_data_21788[1];
+            }
+            if (!g_Minigame.bB_bombBarrelHitInd && g_Minigame.barrelBatter_barrelsHit >= 2) {
+                g_Minigame.barrelBatterChargeMeter += g_Minigame.barrelBatter_barrelsHit - 1;
+            }
+            if (g_Minigame.barrelBatter_barrelsHit <= 1) {
+                points = lbl_3_data_217A4[5] * g_Minigame.barrelBatter_barrelsHit;
+            } else {
+                points = g_Minigame.barrelBatter_barrelsHit * ((g_Minigame.barrelBatter_barrelsHit - 1) * lbl_3_data_217A4[5]);
+            }
+            g_Minigame.miniGameCurrentPoints[g_Minigame.rosterID] += points;
+            g_Minigame._1DF4_s16 = points;
+            if (!g_d_GameSettings.exhibitionMatchInd && g_Minigame.rosterID == lbl_3_common_bss_37400._40) {
+                fn_3_1608F0(2, points, g_Minigame.barrelBatter_barrelsHit);
+            }
+        }
+    }
+    g_Minigame.barrelBatter_scoreCalculatedInd = 1;
 }
 
 // .text:0x0012F424 size:0x200 mapped:0x8076E4B8
-void fn_3_12F424(int idx, s16 delay, BOOL all) {
+void fn_3_12F424(int idx, int delay, BOOL all) {
     int colour = g_Minigame.barrels[idx].barrelColour;
     int n;
 
@@ -419,8 +517,48 @@ void fn_3_12F28C(int idx) {
 }
 
 // .text:0x0012EFA4 size:0x2E8 mapped:0x8076E038
-void fn_3_12EFA4(void) {
-    return;
+void fn_3_12EFA4(int idx) {
+    BB_barrelStruct* barrel = &g_Minigame.barrels[idx];
+    BB_barrelStruct* above;
+    BB_barrelStruct* below;
+    VecXYZ pos;
+
+    barrel->currentPos.y += barrel->velo_bounceUpOnBlowUp;
+    if (barrel->velo_bounceUpOnBlowUp > 0.0f && idx % 3 == 1) {
+        above = &g_Minigame.barrels[idx + 1];
+        if (above->barrelState != 4 && !above->replacingBarrelInd) {
+            fn_3_12EE68(idx);
+        }
+        if (above->currentPos.y - barrel->currentPos.y < lbl_3_data_21770[3]) {
+            barrel->velo_bounceUpOnBlowUp -= lbl_3_data_21770[5];
+        }
+    }
+    barrel->velo_bounceUpOnBlowUp -= lbl_3_data_21770[5];
+    if (barrel->velo_bounceUpOnBlowUp > 0.0f && idx % 3 == 2) {
+        below = &g_Minigame.barrels[idx - 1];
+        if (barrel->currentPos.y - below->currentPos.y < lbl_3_data_21770[3]) {
+            barrel->velo_bounceUpOnBlowUp += lbl_3_data_21770[5];
+        }
+    }
+    if (barrel->currentPos.y < barrel->_28) {
+        barrel->currentPos.y = barrel->_28;
+        barrel->velo_bounceUpOnBlowUp = 0.0f;
+        barrel->replacingBarrelInd = 0;
+        if (barrel->barrelState != 4) {
+            pos.x = barrel->currentPos.x;
+            pos.y = barrel->currentPos.y;
+            pos.z = barrel->currentPos.z;
+            pos.z = pos.z - 1.0f;
+            pos.y = -barrel->_28;
+            if (barrel->_28 == 0.0f) {
+                fn_8004C108(&pos, 1);
+                fn_3_90064(0x2E4);
+            } else {
+                fn_8004C108(&pos, 0);
+                fn_3_90064(0x2E5);
+            }
+        }
+    }
 }
 
 // .text:0x0012EE68 size:0x13C mapped:0x8076DEFC
@@ -468,7 +606,35 @@ BOOL fn_3_12ED80(void) {
 
 // .text:0x0012EB10 size:0x270 mapped:0x8076DBA4
 void fn_3_12EB10(void) {
-    return;
+    int col;
+    int row;
+    int k;
+    int idx;
+
+    for (col = 0; col < 5; col++) {
+        for (row = 0; row < 2; row++) {
+            for (;;) {
+                idx = col * 3 + row;
+                if (g_Minigame.barrels[idx].barrelState != 4) {
+                    break;
+                }
+                for (k = row + 1; k < 3; k++) {
+                    g_Minigame.barrels[col * 3 + k - 1].barrelState = g_Minigame.barrels[col * 3 + k].barrelState;
+                    g_Minigame.barrels[col * 3 + k - 1].barrelColour = g_Minigame.barrels[col * 3 + k].barrelColour;
+                    g_Minigame.barrels[col * 3 + k - 1].currentPos.x = g_Minigame.barrels[col * 3 + k].currentPos.x;
+                    g_Minigame.barrels[col * 3 + k - 1].currentPos.y = g_Minigame.barrels[col * 3 + k].currentPos.y;
+                    g_Minigame.barrels[col * 3 + k - 1].currentPos.z = g_Minigame.barrels[col * 3 + k].currentPos.z;
+                    g_Minigame.barrels[col * 3 + k].barrelState = 0;
+                }
+            }
+        }
+    }
+    for (col = 0; col < 5; col++) {
+        idx = col * 3 + 2;
+        if (g_Minigame.barrels[idx].barrelState == 4) {
+            g_Minigame.barrels[idx].barrelState = 0;
+        }
+    }
 }
 
 // .text:0x0012E8FC size:0x214 mapped:0x8076D990
