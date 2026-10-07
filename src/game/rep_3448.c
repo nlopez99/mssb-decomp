@@ -851,13 +851,15 @@ void fn_3_129370(void) {
 }
 
 // .text:0x00128C18 size:0x758 mapped:0x80767CAC
+// 98.70%: before the minigame loop the target zeroes i once and copies it to j and the
+// table offset (li r27,0; mr r26,r27; mr r28,r27), the base loads 0 into each.
 void fn_3_128C18(void) {
-    UnkTask3448* task = lbl_803CC1B8;
     VecXYZ pos;
     int x;
     int y;
     s32 i;
     s32 j;
+    UnkTask3448* task = lbl_803CC1B8;
     s32 k;
     BOOL found;
     u8 c;
