@@ -115,22 +115,34 @@ extern struct {
     /* 0x6C */ void* _6C;
 } lbl_3_common_bss_32724;
 
+extern struct {
+    /* 0x00 */ u8 _00[0x28];
+    /* 0x28 */ u8 _28;
+} lbl_80366158;
+
 extern s32 lbl_3_data_26C94[9];
 extern s32 lbl_3_data_26E7C[8];
+extern s32 lbl_3_data_26E40[15];
 extern s32 lbl_3_data_26D00[20];
 extern s32 lbl_3_data_26C3C[22];
+extern f32 lbl_3_data_26C1C[4][2];
 extern Vec lbl_3_data_26E00[3];
+extern s32 lbl_3_data_26E24[7];
 extern f32 lbl_3_data_21770[6];
 extern u8 lbl_3_data_26CB8[24];
 extern Vec lbl_3_data_26D50;
 extern s32 lbl_3_data_26BDC[4];
 extern s32 lbl_3_data_26BEC[4];
+extern s32 lbl_3_data_26BFC[4];
 extern s32 lbl_3_data_26D5C[11];
 
 extern BOOL fn_8001B728(s32, s32, Vec*);
 extern void fn_80033794(void* particles);
+extern void fn_80033B58(void* texture, s32 index, s32, s32);
 extern void pitchingMachinePitching(u8 id);
+extern void fn_80033620(Emitter3880* emitter);
 extern void fn_80033CC8(Particle3880* p, void* texture);
+extern void fn_80033F64(f32 width, f32 height, f32 angle);
 extern void fn_8003403C(f32 width, f32 height);
 extern Emitter3880* fn_800339F0(Emitter3880* start, u8 id);
 extern Emitter3880* fn_800337CC(Emitter3880* emitter, s32 count, s32 exact);
@@ -140,6 +152,9 @@ extern Emitter3880* fn_80033A24(BOOL (*update)(Emitter3880*), s32, s32, s32, s32
 // rep_3310.h declares these as void(void) placeholders
 extern f32 fn_3_119854(u8 index);
 extern f32 fn_3_119D28(void);
+
+// rep_3448.h declares this as a void(void) placeholder
+extern void fn_3_11F4B4(s32 player, BOOL flag);
 
 static u8 lbl_3_bss_B894[0x124];
 static u8 lbl_3_bss_B890[4]; // unreferenced
@@ -402,23 +417,136 @@ void fn_3_151F2C(void) {
 }
 
 // .text:0x00151D6C size:0x1C0 mapped:0x80790E00
-void fn_3_151D6C(void) {
-    return;
+void fn_3_151D6C(Emitter3880* emitter, Particle3880* p) {
+    f32 height;
+    s32 alpha;
+    s32 step;
+    f32 grow;
+
+    fn_8003403C(p->_38, p->_3C);
+    fn_80033CC8(p, emitter->_10);
+    height = p->_4D ? fn_3_119854(2) : fn_3_119854(0);
+    alpha = p->color[3];
+    if (lbl_3_data_26BEC[3] / p->_4A < 2) {
+        step = lbl_3_data_26BDC[2] / (lbl_3_data_26BEC[3] / 2);
+        grow = lbl_3_data_26BEC[1] * height / 100000.0f / (lbl_3_data_26BEC[3] / 2);
+    } else {
+        step = -lbl_3_data_26BDC[2] / (lbl_3_data_26BEC[3] / 2);
+        grow = -(lbl_3_data_26BEC[1] * height / 100000.0f) / (lbl_3_data_26BEC[3] / 2);
+    }
+    alpha += step;
+    if (alpha < 0) {
+        alpha = 0;
+    } else if (alpha > 255) {
+        alpha = 255;
+    }
+    p->color[3] = alpha;
+    p->_38 += grow;
+    p->_3C = p->_38;
+    PSVECAdd(&p->pos, &p->vel, &p->pos);
+    p->_4A--;
 }
 
 // .text:0x00151BAC size:0x1C0 mapped:0x80790C40
-void fn_3_151BAC(void) {
-    return;
+void fn_3_151BAC(Emitter3880* emitter, Particle3880* p) {
+    f32 height;
+    s32 alpha;
+    s32 step;
+    f32 grow;
+
+    fn_8003403C(p->_38, p->_3C);
+    fn_80033CC8(p, emitter->_10);
+    height = p->_4D ? fn_3_119854(2) : fn_3_119854(0);
+    alpha = p->color[3];
+    if (lbl_3_data_26BFC[3] / p->_4A < 2) {
+        step = lbl_3_data_26BDC[2] / (lbl_3_data_26BFC[3] / 2);
+        grow = lbl_3_data_26BFC[1] * height / 100000.0f / (lbl_3_data_26BFC[3] / 2);
+    } else {
+        step = -lbl_3_data_26BDC[2] / (lbl_3_data_26BFC[3] / 2);
+        grow = -(lbl_3_data_26BFC[1] * height / 100000.0f) / (lbl_3_data_26BFC[3] / 2);
+    }
+    alpha += step;
+    if (alpha < 0) {
+        alpha = 0;
+    } else if (alpha > 255) {
+        alpha = 255;
+    }
+    p->color[3] = alpha;
+    p->_38 += grow;
+    p->_3C = p->_38;
+    PSVECAdd(&p->pos, &p->vel, &p->pos);
+    p->_4A--;
 }
 
 // .text:0x001519F8 size:0x1B4 mapped:0x80790A8C
-void fn_3_1519F8(void) {
-    return;
+void fn_3_1519F8(Emitter3880* emitter, Particle3880* p) {
+    Vec pull;
+    Vec dir;
+    Vec target;
+    f32 dist;
+
+    fn_3_1517D0(p, emitter);
+    if (lbl_80366158._28 == 0) {
+        PSVECAdd(&p->pos, &p->vel, &p->pos);
+        memcpy(&pull, &p->pos, sizeof(Vec));
+        pull.x = lbl_3_data_26C1C[p->_44][0] - pull.x;
+        pull.y = lbl_3_data_26C1C[p->_44][1] - pull.y;
+        pull.z = 0.0f;
+        PSVECNormalize(&pull, &dir);
+        dist = PSVECMag(&pull);
+        PSVECScale(&dir, 0.0015f * (1.0f / (dist * dist)), &pull);
+        PSVECAdd(&p->vel, &pull, &p->vel);
+        target.x = lbl_3_data_26C1C[p->_44][0];
+        target.y = lbl_3_data_26C1C[p->_44][1];
+        target.z = 0.0f;
+        PSVECNormalize(&target, &target);
+        if (PSVECDotProduct(&dir, &target) < 0.0f || !dist) {
+            p->_4A = 0;
+        }
+        if (p->_4A == 0 && p->_45 != 0) {
+            fn_3_11F4B4(p->_44, p->_4D == 1);
+            p->_45 = 0;
+        }
+    }
 }
 
 // .text:0x001517D0 size:0x228 mapped:0x80790864
-void fn_3_1517D0(void) {
-    return;
+void fn_3_1517D0(Particle3880* p, Emitter3880* emitter) {
+    f32 halfW = p->_38 / 2;
+    f32 halfH = p->_3C / 2;
+    Mtx mv;
+    Mtx44 proj;
+    Vec quad[4];
+    f32 uv[4][2] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
+    s32 i;
+
+    quad[0].x = -halfW;
+    quad[0].y = -halfH;
+    quad[1].x = halfW;
+    quad[1].y = -halfH;
+    quad[2].x = halfW;
+    quad[2].y = halfH;
+    quad[3].x = -halfW;
+    quad[3].y = halfH;
+    quad[3].z = 0.0f;
+    quad[2].z = 0.0f;
+    quad[1].z = 0.0f;
+    quad[0].z = 0.0f;
+    PSMTXIdentity(mv);
+    PSMTX44Identity(proj);
+    GXLoadPosMtxImm(mv, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    GXSetProjection(proj, GX_PERSPECTIVE);
+    fn_80033B58(emitter->_10, p->_4D, 0, 0);
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    for (i = 0; i < 4; i++) {
+        GXPosition3f32(p->pos.x + quad[i].x, p->pos.y + quad[i].y, -1.0f);
+        GXColor1u32(*(u32*)p->color);
+        GXTexCoord2f32(uv[p->_4E + i][0], uv[p->_4E + i][1]);
+    }
+    GXLoadPosMtxImm(fn_80052768_getCamera(0)->view, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    GXSetProjection(fn_80052768_getCamera(0)->proj, GX_PERSPECTIVE);
 }
 
 // .text:0x00151798 size:0x38 mapped:0x8079082C
@@ -972,8 +1100,22 @@ void fn_3_14B3F4(PathEmitter3880* emitter) {
 }
 
 // .text:0x0014B248 size:0x1AC mapped:0x8078A2DC
-void fn_3_14B248(void) {
-    return;
+void fn_3_14B248(PathEmitter3880* emitter, Particle3880* p) {
+    f32 angle;
+    f32 dist;
+    Vec offset;
+
+    p->_38 = p->_3C = lbl_3_data_26E24[3] / 100000.0f;
+    p->color[3] = lbl_3_data_26E24[5];
+    angle = 0.017453292f * (rand() % 360);
+    dist = (rand() % 200u) / 1000.0;
+    offset.x = dist * cosf_kludge(angle);
+    offset.y = dist * sinf_kludge(angle);
+    offset.z = 0.0f;
+    p->pos.x = emitter->_24.x + offset.x;
+    p->pos.y = emitter->_24.y + offset.y;
+    p->pos.z = emitter->_24.z + offset.z;
+    p->_4A = lbl_3_data_26E24[1];
 }
 
 // .text:0x0014AC40 size:0x608 mapped:0x80789CD4
@@ -1002,8 +1144,50 @@ void fn_3_14A37C(void) {
 }
 
 // .text:0x0014A188 size:0x1F4 mapped:0x8078921C
-void fn_3_14A188(void) {
-    return;
+BOOL fn_3_14A188(Emitter3880* emitter) {
+    Particle3880* p;
+    s32 alpha;
+    s32 alive = 0;
+    s32 step;
+    f32 grow;
+
+    if (lbl_80366158._28 != 0) {
+        return FALSE;
+    }
+    fn_80033620(emitter);
+    p = emitter->particles;
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+    do {
+        if (p->_4A != 0) {
+            alpha = p->color[3];
+            fn_80033F64(p->_38, p->_3C, p->vel.x);
+            fn_80033CC8(p, emitter->_10);
+            if (lbl_3_data_26E40[2] - p->_4A < lbl_3_data_26E40[4]) {
+                grow = (p->vel.z - lbl_3_data_26E40[5] / 100000.0f) / lbl_3_data_26E40[4];
+                step = (lbl_3_data_26E40[10] - lbl_3_data_26E40[9]) / lbl_3_data_26E40[4];
+            } else {
+                grow = (lbl_3_data_26E40[8] / 100000.0f + p->vel.z) / (lbl_3_data_26E40[2] - lbl_3_data_26E40[4]);
+                step = (lbl_3_data_26E40[11] - lbl_3_data_26E40[10]) / (lbl_3_data_26E40[2] - lbl_3_data_26E40[4]);
+            }
+            alpha += step;
+            if (alpha < 0) {
+                alpha = 0;
+            }
+            if (alpha > 255) {
+                alpha = 255;
+            }
+            p->color[3] = alpha;
+            p->_38 += grow;
+            p->_3C = p->_38;
+            p->vel.x += p->vel.y;
+            if (--p->_4A != 0) {
+                alive++;
+            }
+        }
+        p = p->next;
+    } while (p != NULL);
+    return alive == 0;
 }
 
 // .text:0x0014A164 size:0x24 mapped:0x807891F8
