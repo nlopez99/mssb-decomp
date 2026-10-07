@@ -32,6 +32,8 @@ jobs:
           PY
       - name: Check configure entry point
         run: python configure.py --help
+      - name: Check placeholder symbol names against symbols.txt
+        run: python tools/check_symbols.py
       - name: Check our changes for whitespace errors
         # Existing upstream whitespace is outside this fork's setup changes.
         run: git diff --check 72de19a39880398a69339010350652ad97e2a79c HEAD
