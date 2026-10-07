@@ -29,7 +29,7 @@ void fn_3_124738(void);
 void fn_3_124CE0(void);
 u32 fn_3_12536C(void);
 u32 fn_3_125424(struct UnkTask3448* task, s32 i, u32 frame);
-s32 fn_3_125480(struct UnkTask3448* task);
+u32 fn_3_125480(struct UnkTask3448* task);
 void fn_3_1254F8(void);
 void fn_3_125604(void);
 void fn_3_125850(void);
