@@ -29,7 +29,7 @@ void fn_3_E6798(void* arg);
 void fn_3_E67F4(void);
 void fn_3_E68A8(void* arg);
 void fn_3_E698C(void* arg);
-void fn_3_E6A48(struct StaC6Draw* draw);
+void fn_3_E6A48(void* arg);
 void fn_3_E6D90(void* arg);
 void fn_3_E7350(void);
 void fn_3_E7364(s32 idx);

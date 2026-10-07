@@ -421,13 +421,16 @@ BOOL fn_3_E8AC8(void) {
 }
 
 // .text:0x000E7B20 size:0xFA8 mapped:0x80726BB4
-// 99.50%: two base addresses in swapped registers, and other counters in the third loop
+// 99.98%: the third loop's counter i and draw index k are in swapped registers (r17/r18).
+// The target keeps four counters there, so j and k are their own variables.
 u8 fn_3_E7B20(void** files, s32* indices) {
+    u32 k;
+    u32 j;
+    u32 i;
     StaC6Draw* draw;
     StaC6Draw* entry;
     StaC6Model* model;
     u32 n;
-    u32 i;
     u8 end;
 
     n = 0;
@@ -541,9 +544,9 @@ u8 fn_3_E7B20(void** files, s32* indices) {
         n++;
     }
 
-    for (i = 0; i < 7; i++) {
-        entry->_C0 = n;
-        entry->type = i + 16;
+    for (k = n, j = 16, i = 0; j < 23; j++, i++, k++) {
+        entry->_C0 = k;
+        entry->type = j;
         entry->_9C = &lbl_8036E548._6C->models[25];
         draw->_74 = &lbl_8036E548._6C->models[i + 16];
         draw->_78 = NULL;
@@ -938,8 +941,9 @@ void fn_3_E6D90(void* arg) {
 }
 
 // .text:0x000E6A48 size:0x348 mapped:0x80725ADC
-// 99.88%: the pool base is formed before the PSMTXIdentity argument instead of after it
-void fn_3_E6A48(StaC6Draw* draw) {
+void fn_3_E6A48(void* arg) {
+    StaC6Draw* draw = arg;
+
     fn_3_E5A84(draw);
     fn_3_E6578(draw);
     if (draw->_9C != NULL) {
