@@ -744,6 +744,8 @@ void fn_3_685F0(void) {
 }
 
 // .text:0x00067EF0 size:0x700 mapped:0x806A6F84
+// 99.91%, registers only: in the last colors[0] |= the target moves (u8)(first - fade) to r6 and
+// loads colors2[2] into r0; this build keeps the value in r0 and loads colors2[2] into r6.
 s32 fn_3_67EF0(UnkRingEA0* ring, s32 count, Vec* pos, u32* colors, u32 color, Vec* pos2, u32* colors2, Vec* dir,
                f32 width) {
     Mtx m;
@@ -980,6 +982,9 @@ void fn_3_67A48(void) {
 }
 
 // .text:0x000678B8 size:0x190 mapped:0x806A694C
+// The target reaches lbl_3_data_6860, 6880, 6980 and 69A0 from one pool base at 0x6820, which no
+// extern reproduces; with this unit's .data as statics it scores 87.77% (the target loads
+// lbl_803CC1B8 with addi and lwz 0 and orders the argument setup differently).
 void fn_3_678B8(void) {
     UnkTaskEA0* task = lbl_803CC1B8;
     s32 side;
@@ -1011,6 +1016,9 @@ void fn_3_678B8(void) {
 }
 
 // .text:0x00067620 size:0x298 mapped:0x806A66B4
+// 97.72%, registers only: the target shares the header's 1 with i (r5) and holds p, 2i and 2i+1
+// in r6, r7 and r8; this build loads 1 twice and uses r8, r6 and r7. The copy loop's counter and
+// destination take r28 and r30 in the target, the reverse here.
 void fn_3_67620(s32 type, u16 frames) {
     u8* p;
     u8* start;
