@@ -64,15 +64,46 @@ typedef struct {
     /* 0x14 */ s32 _14[3];
 } UnkSpriteDesc3448; // size: 0x20
 
+typedef struct {
+    /* 0x00 */ void* _00;
+    /* 0x04 */ u8 _04[0x1A - 0x4];
+    /* 0x1A */ s16 _1A;
+    /* 0x1C */ u8 _1C[0x5C - 0x1C];
+} UnkAnimState3448; // size: 0x5C
+
 extern struct {
-    /* 0x00 */ u8 _00[0x96];
+    /* 0x00 */ void* _00[1];
+    /* 0x04 */ UnkAnimState3448 _04[1];
+    /* 0x60 */ void* _60;
+    /* 0x64 */ void* _64[3];
+    /* 0x70 */ void* _70[3];
+    /* 0x7C */ u8 _7C[0x96 - 0x7C];
     /* 0x96 */ u8 _96;
     /* 0x97 */ u8 _97[0xB7 - 0x97];
     /* 0xB7 */ u8 _B7;
     /* 0xB8 */ u8 _B8;
     /* 0xB9 */ u8 _B9[0xC4 - 0xB9];
     /* 0xC4 */ u8 _C4;
+    /* 0xC5 */ u8 _C5[0xD8 - 0xC5];
+    /* 0xD8 */ u8 _D8;
 } lbl_3_common_bss_32724;
+
+typedef struct {
+    /* 0x00 */ u32 _00[4];
+} UnkAramEntry3448; // size: 0x10
+
+extern UnkAramEntry3448 lbl_3_data_225F0[3];
+extern struct {
+    /* 0x0000 */ u8 _0000[0x2D9C];
+    /* 0x2D9C */ u32* _2D9C;
+    /* 0x2DA0 */ void* _2DA0[81]; // layout, geometry and texture of each model
+    /* 0x2EE4 */ u8 _2EE4[0x3078 - 0x2EE4];
+    /* 0x3078 */ u16 _3078;
+} lbl_8036E548;
+extern struct {
+    /* 0x000 */ u8 _000[0x715];
+    /* 0x715 */ s8 _715;
+} lbl_803C6CF8;
 
 extern struct {
     /* 0x000 */ u8 _000[0x1D2];
@@ -759,7 +790,18 @@ extern BOOL fn_3_1650C(int* outX, int* outY, BOOL r5, f32 pX, f32 pY, f32 pZ);
 extern void fn_800B0A14_removeQueue(void);
 // game/m_sound.h declares this void while m_sound.c is a stub; fn_3_121908 keeps the voice it returns.
 extern SND_VOICEID fn_3_90064(int id);
-extern void fn_800B0A5C_insertQueue(void (*)(void), s32);
+extern UnkTask3448* fn_800B0A5C_insertQueue(void (*)(void), s32);
+extern void* ARAMTransfer(UnkAramEntry3448* entry, int arg1, int arg2, u32 aram);
+extern void fn_3_E911C(void);
+extern void LoadActorLayout(void* layout);
+extern void convertGeometryAndSknHeader(void* geo, void*);
+extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);
+extern void convertTextureHeader(void* tex);
+extern void fn_800BD190(void* geo, void* tex);
+extern void ANIMGet(void* anim);
+extern void fn_80025DDC(void* anim);
+extern void fn_80025FFC(void* anim, UnkAnimState3448* state);
+extern void fn_80025EEC(UnkAnimState3448* state, s32, s32);
 extern u32 fn_3_107C88(void);
 extern struct UnkRecord3448* fn_3_109D88(void);
 extern s32 fn_8006C100(s16);
@@ -1153,9 +1195,9 @@ void fn_3_127B68(void) {
 void fn_3_1274B4(void) {
     UnkTask3448* task = lbl_803CC1B8;
     UnkRecord3448* rec;
+    s16 n;
     u32 i;
     s16 score;
-    s16 n;
     s32 stadium;
     SND_VOICEID voice;
 
@@ -1225,6 +1267,7 @@ void fn_3_1274B4(void) {
             }
         }
         task->_1C = 1;
+        break;
     case 1:
         for (i = 0; i < 5; i++) {
             if (i != g_Minigame._1E03) {
@@ -3525,7 +3568,9 @@ void fn_3_11E364(void) {
 
 // .text:0x0011E308 size:0x5C mapped:0x8075D39C
 void fn_3_11E308(void) {
-    return;
+    if (g_GameLogic._125 == 1 && g_GameLogic.FrameCountOfCurrentAtBat_Copy == 0) {
+        fn_800B0A5C_insertQueue(fn_3_E911C, 2)->_18 = 1;
+    }
 }
 
 // .text:0x0011DECC size:0x43C mapped:0x8075CF60
@@ -3535,12 +3580,31 @@ void fn_3_11DECC(void) {
 
 // .text:0x0011DE80 size:0x4C mapped:0x8075CF14
 void fn_3_11DE80(void) {
-    return;
+    if (g_GameLogic._125 == 0) {
+        g_Minigame._1E04 = (u32)fn_800B0A5C_insertQueue(fn_3_11DECC, 2);
+    }
 }
 
 // .text:0x0011DDC4 size:0xBC mapped:0x8075CE58
-void fn_3_11DDC4(void) {
-    return;
+u16 fn_3_11DDC4(u8* data, u32 len) {
+    u32 crc = 0;
+    u32 c;
+    u32 i;
+    s32 j;
+
+    for (i = 0; i < len; i++, data++) {
+        c = *data;
+        for (j = 0; j < 8; j++) {
+            if ((crc ^ c) & 1) {
+                crc >>= 1;
+                crc ^= 0x8408;
+            } else {
+                crc /= 2;
+            }
+            c >>= 1;
+        }
+    }
+    return crc;
 }
 
 // .text:0x0011DACC size:0x2F8 mapped:0x8075CB60
@@ -3554,11 +3618,88 @@ void fn_3_11D780(void) {
 }
 
 // .text:0x0011D6A0 size:0xE0 mapped:0x8075C734
-void fn_3_11D6A0(void) {
-    return;
+BOOL fn_3_11D6A0(void) {
+    switch (lbl_3_common_bss_32724._D8) {
+    case 0:
+        lbl_8036E548._2D9C = ARAMTransfer(&lbl_3_data_225F0[1], 0, 0, 0);
+        lbl_3_common_bss_32724._D8++;
+        break;
+    case 1:
+        if (lbl_803C6CF8._715 == 1) {
+            lbl_3_common_bss_32724._D8++;
+        }
+        break;
+    case 2:
+        if (g_d_GameSettings.GameModeSelected != GAME_TYPE_TOY_FIELD) {
+            fn_3_11D3AC();
+        }
+        lbl_3_common_bss_32724._D8++;
+        break;
+    default:
+        return TRUE;
+    }
+    return FALSE;
 }
 
 // .text:0x0011D3AC size:0x2F4 mapped:0x8075C440
+// The target indexes the six entries after _60 as (i + 1) << 2 to (i + 5) << 2 without
+// stepping i, as an unrolled loop would; loops holding ANIMGet do not unroll here, and
+// file[i + k] reuses i << 2. Registers then differ through the model loop.
 void fn_3_11D3AC(void) {
-    return;
+    u32* entry;
+    u32* file;
+    void* layout;
+    void* geo;
+    void* tex;
+    int i;
+    int j;
+
+    lbl_8036E548._3078 = 0;
+    file = lbl_8036E548._2D9C;
+    for (i = 0; i < 81; i++) {
+        lbl_8036E548._2DA0[i] = (u8*)file + file[i];
+    }
+    for (j = 0; j < 1; j++) {
+        entry = &file[i];
+        lbl_3_common_bss_32724._00[j] = (u8*)file + entry[0];
+        lbl_3_common_bss_32724._04[j]._00 = (u8*)file + entry[1];
+        i += 2;
+    }
+    lbl_3_common_bss_32724._60 = (u8*)file + file[i++];
+    lbl_3_common_bss_32724._70[0] = (u8*)file + file[i++];
+    ANIMGet(lbl_3_common_bss_32724._70[0]);
+    lbl_3_common_bss_32724._70[1] = (u8*)file + file[i++];
+    ANIMGet(lbl_3_common_bss_32724._70[1]);
+    lbl_3_common_bss_32724._70[2] = (u8*)file + file[i++];
+    ANIMGet(lbl_3_common_bss_32724._70[2]);
+    lbl_3_common_bss_32724._64[0] = (u8*)file + file[i++];
+    lbl_3_common_bss_32724._64[1] = (u8*)file + file[i++];
+    lbl_3_common_bss_32724._64[2] = (u8*)file + file[i++];
+
+    for (i = 0; i < 27; i++) {
+        layout = lbl_8036E548._2DA0[i * 3];
+        geo = lbl_8036E548._2DA0[i * 3 + 1];
+        tex = lbl_8036E548._2DA0[i * 3 + 2];
+        LoadActorLayout(layout);
+        if (i == 17) {
+            convertGeometryAndSknHeader(geo, lbl_3_common_bss_32724._60);
+        } else {
+            convertGeometryAndSknHeader(geo, NULL);
+        }
+        haveActLayoutPointToGeoHeader(layout, geo);
+        convertTextureHeader(tex);
+        fn_800BD190(geo, tex);
+    }
+
+    for (i = 0; i < 1; i++) {
+        fn_80025DDC(lbl_3_common_bss_32724._00[i]);
+        fn_80025FFC(lbl_3_common_bss_32724._00[i], &lbl_3_common_bss_32724._04[i]);
+        fn_80025EEC(&lbl_3_common_bss_32724._04[i], 0, 0);
+        if (i == 0) {
+            lbl_3_common_bss_32724._04[i]._1A = 1;
+        }
+    }
+    convertTextureHeader(lbl_3_common_bss_32724._64[0]);
+    convertTextureHeader(lbl_3_common_bss_32724._64[1]);
+    convertTextureHeader(lbl_3_common_bss_32724._64[2]);
 }
