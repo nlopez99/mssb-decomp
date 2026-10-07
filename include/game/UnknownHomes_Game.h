@@ -2778,18 +2778,6 @@ typedef struct {
 extern inMemStrikes g_Strikes;
 
 typedef struct {
-    u8 pad[0x24];
-    /* 0x0024 */ u32 playFrameCounter;
-    artificial_padding(0x24, 0x36, u32);
-    /* 0x0036 */ u8 replayInd;
-    /* 0x0037 */ u8 _37;
-    /* 0x0038 */ u8 _38;
-} g_Stats_s; // size: 0x4634
-
-// 0x8088a7e4
-extern g_Stats_s g_Stats;
-
-typedef struct {
     u8 pad[0x105];
     /* 0x105 */ u8 playerAtMoundCutoffLocation;
     /* 0x106 */ u8 throwSpeedType;
@@ -2869,6 +2857,49 @@ typedef struct {
 } g_FieldingLogic_s; // size 0x150
 
 extern g_FieldingLogic_s g_FieldingLogic;
+
+// Copies of the game state that a replay restores
+typedef struct {
+    /* 0x0000 */ GameControlsStruct gameLogic;
+    /* 0x0158 */ inMemStrikes strikes;
+    /* 0x017C */ u8 scores[0xC8];
+    /* 0x0244 */ InMemBallType ball;
+    /* 0x1E3C */ InMemPitcherType pitcher;
+    /* 0x1FB4 */ InMemBatterType batter;
+    /* 0x2064 */ AIStruct aiLogic;
+    /* 0x2120 */ g_FieldingLogic_s fieldingLogic;
+    /* 0x2270 */ u8 runningLogic[0x20];
+    /* 0x2290 */ u8 fielders[0x15A8];
+    /* 0x3838 */ InMemRunnerType runners[4];
+    /* 0x3D88 */ u8 _3D88[0x6];
+    /* 0x3D8E */ u8 _3D8E[0x4];
+    /* 0x3D92 */ u8 _3D92[0xE];
+    /* 0x3DA0 */ u8 _3DA0[0x14];
+    /* 0x3DB4 */ u8 _3DB4[0x2F4];
+    /* 0x40A8 */ u8 _40A8[0x80];
+    /* 0x4128 */ u8 _4128[0x2AC];
+    /* 0x43D4 */ u8 _43D4[0x21C];
+} ReplayState; // size: 0x45F0
+
+typedef struct {
+    u8 pad[0x24];
+    /* 0x0024 */ s32 playFrameCounter;
+    /* 0x0028 */ s16 _28;
+    artificial_padding(0x28, 0x36, s16);
+    /* 0x0036 */ u8 replayInd;
+    /* 0x0037 */ u8 _37;
+    /* 0x0038 */ u8 _38;
+    /* 0x0039 */ u8 _39;
+    artificial_padding(0x39, 0x3C, u8);
+    /* 0x003C */ u8 _3C;
+    artificial_padding(0x3C, 0x3F, u8);
+    /* 0x003F */ u8 _3F[2];
+    artificial_padding(0x40, 0x44, u8);
+    /* 0x0044 */ ReplayState _44;
+} g_Stats_s; // size: 0x4634
+
+// 0x8088a7e4
+extern g_Stats_s g_Stats;
 
 typedef struct {
     /* 0x0 */ s16 _0;
