@@ -1086,7 +1086,7 @@ void fn_3_DA834(void) {
                     break;
                 }
             }
-            for (i = n; i > 0; i--) {
+            for (i = n; i >= 1; i--) {
                 g_Minigame._1914_arr[i] = g_Minigame._1914_arr[i - 1];
                 g_Minigame._1914_arr[i - 1] = 0;
             }
@@ -1168,26 +1168,25 @@ void fn_3_DA640(s32 count, s32 idx) {
     f32 z;
     s32 i;
     f32 radius;
-    int range;
     f32 dist;
     int ang;
     int r;
     f32 speed;
 
     g_Minigame._1939 = count;
-    radius = lbl_3_data_18AC8[idx].radius[0];
     g_Minigame.panelHitInd = 1;
+    radius = lbl_3_data_18AC8[idx].radius[0];
     g_Minigame.wallBall_coinsVisibleFrameCounter[0] = 0;
     if (count >= 20) {
         radius = lbl_3_data_18AC8[idx].radius[1];
     }
-    range = 1000.0f * radius;
     for (i = 0; i < count; i++) {
         g_Minigame.wallBall_coinsVisibleInd[i] = 1;
         g_Minigame.wallBall_coinCoordinates[i].y = 0.8f;
         r = rand();
-        dist = 0.001f * (r % range);
-        ang = fn_3_9FE6C_normalizeAngle(rand() % 4096);
+        dist = 0.001f * (r % (int)(1000.0f * radius));
+        ang = rand() % 4096;
+        ang = fn_3_9FE6C_normalizeAngle(ang);
         getComponentsFromSAng(ang, &x, &z);
         g_Minigame.wallBall_coinCoordinates[i].x = x * dist + lbl_3_data_18AC8[idx].x;
         g_Minigame.wallBall_coinCoordinates[i].z = z * dist + lbl_3_data_18AC8[idx].z;
