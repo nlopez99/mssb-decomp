@@ -41,7 +41,9 @@ typedef struct Unk3520Spoke {
 // The pieces along the spokes, at g_Minigame._A8
 typedef struct Unk3520Piece {
     /* 0x00 */ Vec pos;
-    /* 0x0C */ u8 _0C[0x26 - 0xC];
+    /* 0x0C */ u8 _0C[0x22 - 0xC];
+    /* 0x22 */ s16 _22;
+    /* 0x24 */ u8 _24[2];
     /* 0x26 */ u8 _26;
     /* 0x27 */ u8 _27;
 } Unk3520Piece; // size: 0x28
@@ -116,7 +118,9 @@ typedef struct Unk3520Fielder {
     /* 0x034 */ f32 _034;
     /* 0x038 */ f32 _038;
     /* 0x03C */ f32 _03C;
-    /* 0x040 */ u8 _040[0x50 - 0x40];
+    /* 0x040 */ u8 _040[0x48 - 0x40];
+    /* 0x048 */ f32 _048;
+    /* 0x04C */ u8 _04C[0x50 - 0x4C];
     /* 0x050 */ f32 _050;
     /* 0x054 */ u8 _054[0x15C - 0x54];
     /* 0x15C */ f32 _15C;
@@ -126,10 +130,14 @@ typedef struct Unk3520Fielder {
     /* 0x17A */ s16 _17A;
     /* 0x17C */ u8 _17C[0x1C9 - 0x17C];
     /* 0x1C9 */ u8 _1C9;
-    /* 0x1CA */ u8 _1CA[0x203 - 0x1CA];
+    /* 0x1CA */ u8 _1CA[0x1D2 - 0x1CA];
+    /* 0x1D2 */ u8 _1D2;
+    /* 0x1D3 */ u8 _1D3[0x203 - 0x1D3];
     /* 0x203 */ u8 _203;
     /* 0x204 */ u8 _204;
-    /* 0x205 */ u8 _205[0x20F - 0x205];
+    /* 0x205 */ u8 _205[0x20D - 0x205];
+    /* 0x20D */ u8 _20D;
+    /* 0x20E */ u8 _20E;
     /* 0x20F */ u8 _20F;
     /* 0x210 */ u8 _210[0x268 - 0x210];
 } Unk3520Fielder; // size: 0x268
@@ -161,6 +169,14 @@ extern struct {
 
 extern void fn_80011604(s8, void*);
 extern void fn_3_1608F0(int, int, int);
+extern void fn_3_59A90(void);
+extern void fn_3_58870(void);
+extern void fn_3_6E24C(int rosterID, int fielderIdx);
+extern void fn_3_C39C8(void);
+extern void fn_3_169600(void);
+extern void minigamesSetSomePointers(void);
+extern void minigamesGXStuff(void);
+extern void minigamesSetSomePointers2(void);
 extern void fn_800528B4(void);
 extern void fn_800246D4(int (*compare)(const void*, const void*), void* src, void* dst, int size, int count);
 extern void fn_800115C8(s8);
@@ -171,6 +187,8 @@ extern void changeScene(u8, s16);
 
 extern u8 lbl_800EFBA4[0x10];
 extern u8 lbl_3_data_21278[2];
+extern u8 lbl_3_data_2127C[8][5];
+extern u8 lbl_3_data_21984[8];
 extern f32 lbl_3_data_4444[10];
 extern u8 lbl_3_data_88DC[2];
 extern f32 lbl_3_data_47BC[5];
@@ -255,8 +273,128 @@ void fn_3_13C464(void) {
 }
 
 // .text:0x0013BCB8 size:0x7AC mapped:0x8077AD4C
+// 93.8%: the fielder setup reads its table and stores in another order, and several
+// loops start from fresh g_Minigame bases instead of copies.
 void fn_3_13BCB8(void) {
-    return;
+    s32 i;
+    int n;
+    int j;
+    u8 strength;
+    int r;
+
+    if (g_GameLogic._125 == 0) {
+        fn_3_59A90();
+        g_GameLogic.secondaryGameMode = 8;
+        g_Minigame._17C0 = 0;
+        g_Minigame.turnOverStatus = 0;
+        g_Minigame._1A37 = 0;
+        for (i = 0; i < 4; i++) {
+            g_Minigame.miniGameCurrentPoints[i] = 0;
+            g_Minigame.miniGameLatestPoints[i] = 0;
+            g_Minigame.minigamePoints_current_Latest[i][0] = 0;
+            g_Minigame.minigamePoints_current_Latest[i][1] = 0;
+            g_Minigame.minigameControlStruct._28[i] = -1;
+            g_Minigame.minigameFielderIndex[i] = -1;
+            g_Minigame._18FC[i] = -1;
+            g_Minigame._1900[i] = -1;
+            g_Minigame.minigameControlStruct._24[i] = 0;
+        }
+        g_Minigame.pointsReqToWin_challenge = 0;
+        g_Minigame.minigamePlayerSelectedOrder = -1;
+        g_Minigame.rosterID = -1;
+        lbl_3_common_bss_34C58._30 = 0;
+        if (!g_Minigame.multiPlayerInd) {
+            g_Minigame._17C4 = lbl_3_data_21984[g_Minigame.soloMinigameDifficulty] * 60;
+            strength = lbl_3_data_2127C[g_Minigame.GameMode_MiniGame][g_Minigame.soloMinigameDifficulty];
+            for (i = 0; i < 4; i++) {
+                g_Minigame.minigameControlStruct.aIStrength[i] = strength;
+            }
+        } else {
+            if (g_Minigame._1A3C) {
+                for (i = 0; i < 4; i++) {
+                    g_Minigame.minigameControlStruct.aIStrength[i] = lbl_3_data_2127C[7][0];
+                }
+            }
+            g_Minigame._17C4 = lbl_3_data_21984[4] * 60;
+        }
+        fn_3_58870();
+        n = 0;
+        for (i = 0; i < 4; i++) {
+            if (g_Minigame.minigameControlStruct.characterIndex[i] >= 0) {
+                g_Minigame.minigameControlStruct._28[n] = i;
+                g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]] = n + 2;
+                fn_3_6E24C(i, g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]]);
+                g_Minigame.starDashStunType[i] = 0;
+                g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]]]._20D = i;
+                g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]]].pos.x = lbl_3_data_2198C[n][0];
+                g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]]].pos.z = lbl_3_data_2198C[n][1];
+                g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]]].pos.y = 0.0f;
+                g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]]]._00C = 0.0f;
+                g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]]]._1D2 = 0;
+                g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]]]._048 = -1.5707964f;
+                n++;
+            }
+        }
+        for (i = 0; i < 100; i++) {
+            g_Minigame.wallBall_coinsVisibleInd[i] = 0;
+        }
+        g_Minigame._1D50 = 30;
+        g_Minigame._1D6C = 0;
+        g_Minigame._1D54 = 0;
+        MG.bag.active = 0;
+        g_Minigame._72A = 0;
+        g_Minigame._1D52 = 600;
+        g_Minigame._1D6D = -1;
+        g_Minigame._1D72 = 0;
+        g_Minigame._1D73 = 0;
+        for (i = 0; i < 4; i++) {
+            MG.spokes[i].start.y = lbl_3_data_21A48.y;
+            MG.spokes[i].end.y = lbl_3_data_21A48.y;
+            g_Minigame._1D64[i] = i * 0x400;
+        }
+        for (i = 0; i < 40; i++) {
+            MG.pieces[i]._26 = 0;
+            MG.pieces[i].pos.y = lbl_3_data_21A48.y;
+            MG.pieces[i]._22 = 0;
+        }
+        if (!g_Minigame.multiPlayerInd && !g_Minigame._1A3C) {
+            lbl_3_bss_B781[0] = g_Minigame.soloMinigameDifficulty;
+            lbl_3_bss_B780 = lbl_3_data_21A88[g_Minigame.soloMinigameDifficulty];
+        } else {
+            lbl_3_bss_B781[0] = 3;
+            lbl_3_bss_B780 = 4;
+        }
+        for (i = 0; i < 4; i++) {
+            memset(&MG.objs[i]._0, 0, sizeof(Vec));
+            memset(&MG.objs[i]._C, 0, sizeof(Vec));
+            memset(&MG.objs[i]._18, 0, sizeof(Vec));
+            memset(&MG.objs[i]._24, 0, sizeof(Vec));
+            MG.objs[i]._3D = 0;
+        }
+        for (j = 0; j < lbl_3_bss_B780; j++) {
+            r = random_fn_3_9EE24((lbl_3_data_21A90[g_Minigame.soloMinigameDifficulty][0][1] - lbl_3_data_21A90[g_Minigame.soloMinigameDifficulty][0][0]) * 60);
+            MG.objs[j]._38 = lbl_3_data_21A90[g_Minigame.soloMinigameDifficulty][0][0] * 60 + r;
+            MG.objs[j]._30 = 360 / lbl_3_bss_B780 * j;
+            MG.objs[j]._34 = MG.objs[j]._30 + 360 / lbl_3_data_21A88[lbl_3_bss_B781[0]];
+        }
+        g_Minigame._1D78[0] = 0;
+        g_Minigame._1D78[1] = 0;
+        g_Minigame._1D78[2] = 0;
+        g_Minigame._1D78[3] = 0;
+        g_Minigame._1D76 = 0;
+        MG.box._1C = lbl_3_data_21B10[0];
+        MG.box._1E = 0;
+        g_Minigame.playerIDWithPowerup[0] = -1;
+        fn_3_133200();
+        fn_3_169600();
+        minigamesSetSomePointers();
+        minigamesGXStuff();
+        minigamesSetSomePointers2();
+        fn_3_C39C8();
+        g_GameLogic._125++;
+    } else {
+        fn_3_5A6D4(GAME_STATUS_GAME_START_MOVIE);
+    }
 }
 
 // .text:0x0013BBF4 size:0xC4 mapped:0x8077AC88
