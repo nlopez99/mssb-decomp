@@ -76,7 +76,41 @@ extern void fn_3_12DB80(void);
 
 // .text:0x001324E8 size:0x9F4 mapped:0x8077157C
 void fn_3_1324E8(void) {
-    return;
+    switch (g_GameLogic.gameStatus) {
+    case GAME_STATUS_LOAD_GAME:
+        fn_3_1320BC();
+        break;
+    case GAME_STATUS_TRANSITION_MINIGAME_TO_BATTING:
+        fn_3_13207C();
+        break;
+    case GAME_STATUS_TRANSITION_TO_MINIGAME_START:
+        fn_3_131FFC();
+        break;
+    case GAME_STATUS_TRANSITION_PREPARE_NEXT_PLAY:
+        fn_3_131EC4();
+        break;
+    case GAME_STATUS_DEFAULT:
+        fn_3_131C88();
+        break;
+    case GAME_STATUS_AT_BAT:
+        fn_3_130C6C();
+        break;
+    case GAME_STATUS_LIVE_BALL:
+        fn_3_1307D0();
+        break;
+    case GAME_STATUS_TRANSITION:
+        fn_3_131540();
+        break;
+    case GAME_STATUS_MINIGAME_NEW_ROUND:
+        fn_3_13128C();
+        break;
+    case GAME_STATUS_INNING_TRANSITION:
+        fn_3_13119C();
+        break;
+    case GAME_STATUS_TRANSITION_MINIGAME_POSTGAME:
+        fn_3_1312D4();
+        break;
+    }
 }
 
 // .text:0x001323CC size:0x11C mapped:0x80771460
