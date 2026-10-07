@@ -722,109 +722,6 @@ void fn_3_156548(u32 index, f32 x, f32 y, f32 z) {
     }
 }
 
-// .text:0x00156218 size:0x330 mapped:0x807952AC
-// Differs only through fn_3_155F08's call to fn_3_155C28, which the target inlines.
-void fn_3_156218(void) {
-    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES &&
-        g_Minigame.GameMode_MiniGame == MINI_GAME_ID_BOBOMB_DERBY) {
-        fn_3_155F08();
-    }
-}
-
-// .text:0x00155F08 size:0x310 mapped:0x80794F9C
-// The target inlines fn_3_155C28 here (99.8% with it marked inline, which drops its
-// standalone copy); MWCC keeps this version's call out of line.
-void fn_3_155F08(void) {
-    Emitter3880* emitter = fn_80033A24(fn_3_1552AC, 0x80, 0, lbl_3_data_26BC0[1], 1, 0x1B);
-
-    if (emitter != NULL) {
-        fn_3_155C28(emitter);
-    }
-}
-
-// .text:0x00155C28 size:0x2E0 mapped:0x80794CBC
-void fn_3_155C28(Emitter3880* emitter) {
-    Particle3880* p;
-    u32 i;
-    Control control;
-    Mtx mtx;
-    Vec base;
-    Vec v;
-    f64 height;
-    f32 rx;
-    f32 ry;
-    f32 rz;
-
-    p = emitter->particles;
-    emitter->_10 = lbl_3_common_bss_32724._6C;
-    i = 0;
-    do {
-        p->_48 = (u8)i++;
-        p->_4D = lbl_3_data_26BC0[0];
-        p->_4E = 0;
-        if (p->_48 == 0) {
-            rx = 57.29578f * shortAngleToRad(g_Ball.matchFramesAndBallAngle.ballSpinAngle.yaw);
-            ry = 57.29578f * shortAngleToRad(g_Ball.matchFramesAndBallAngle.ballSpinAngle.pitch);
-            rz = 57.29578f * shortAngleToRad(g_Ball.matchFramesAndBallAngle.ballSpinAngle.roll);
-            p->_4A = lbl_3_data_26BC0[6];
-            control.type = 0;
-            CTRLSetRotation(&control, rx, ry, rz);
-            CTRLBuildMatrix(&control, mtx);
-            if (g_Minigame.GameMode_MiniGame == MINI_GAME_ID_BOBOMB_DERBY) {
-                base = lbl_3_data_26BB4;
-            } else {
-                PSVECScale(&lbl_3_data_26BB4, 1.5f, &base);
-            }
-            v.x = base.x + 1.5 * ((rand() % 40 - 20) / 100.0);
-            v.y = base.y;
-            v.z = base.z + 1.5 * ((rand() % 40 - 20) / 100.0);
-            PSMTXMultVec(mtx, &v, &v);
-            v.x += g_Ball.AtBat_Contact_BallPos.x;
-            height = fabs(g_Ball.AtBat_Contact_BallPos.y);
-            v.y -= height;
-            v.z += g_Ball.AtBat_Contact_BallPos.z;
-            p->pos.x = v.x;
-            p->pos.y = v.y;
-            p->pos.z = v.z;
-            p->_3C = p->_38 = lbl_3_data_26BC0[2];
-            p->color[3] = lbl_3_data_26BC0[4];
-        }
-        p = p->next;
-    } while (p != NULL);
-}
-
-// .text:0x001559E4 size:0x244 mapped:0x80794A78
-void fn_3_1559E4(Particle27_3880* p, Vec* pos, Vec* rot) {
-    Control control;
-    Mtx mtx;
-    Vec v;
-    Vec base;
-    f64 height;
-
-    p->_4A = lbl_3_data_26BC0[6];
-    control.type = 0;
-    CTRLSetRotation(&control, rot->x, rot->y, rot->z);
-    CTRLBuildMatrix(&control, mtx);
-    if (g_Minigame.GameMode_MiniGame == MINI_GAME_ID_BOBOMB_DERBY) {
-        base = lbl_3_data_26BB4;
-    } else {
-        PSVECScale(&lbl_3_data_26BB4, 1.5f, &base);
-    }
-    v.x = base.x + 1.5 * ((rand() % 40 - 20) / 100.0);
-    v.y = base.y;
-    v.z = base.z + 1.5 * ((rand() % 40 - 20) / 100.0);
-    PSMTXMultVec(mtx, &v, &v);
-    v.x += pos->x;
-    height = fabs(pos->y);
-    v.y -= height;
-    v.z += pos->z;
-    p->pos.x = v.x;
-    p->pos.y = v.y;
-    p->pos.z = v.z;
-    p->_3C = p->_38 = lbl_3_data_26BC0[2];
-    p->color[3] = lbl_3_data_26BC0[4];
-}
-
 // Places a Bob-omb Derby particle at the ball, turned with the ball's spin
 static inline void fn_3_SpawnAtBall(Particle3880* p) {
     Control control;
@@ -856,6 +753,74 @@ static inline void fn_3_SpawnAtBall(Particle3880* p) {
     height = fabs(g_Ball.AtBat_Contact_BallPos.y);
     v.y -= height;
     v.z += g_Ball.AtBat_Contact_BallPos.z;
+    p->pos.x = v.x;
+    p->pos.y = v.y;
+    p->pos.z = v.z;
+    p->_3C = p->_38 = lbl_3_data_26BC0[2];
+    p->color[3] = lbl_3_data_26BC0[4];
+}
+
+// .text:0x00156218 size:0x330 mapped:0x807952AC
+void fn_3_156218(void) {
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES &&
+        g_Minigame.GameMode_MiniGame == MINI_GAME_ID_BOBOMB_DERBY) {
+        fn_3_155F08();
+    }
+}
+
+// .text:0x00155F08 size:0x310 mapped:0x80794F9C
+void fn_3_155F08(void) {
+    Emitter3880* emitter = fn_80033A24(fn_3_1552AC, 0x80, 0, lbl_3_data_26BC0[1], 1, 0x1B);
+
+    if (emitter != NULL) {
+        fn_3_155C28(emitter);
+    }
+}
+
+// .text:0x00155C28 size:0x2E0 mapped:0x80794CBC
+void fn_3_155C28(Emitter3880* emitter) {
+    Particle3880* p;
+    u32 i;
+
+    p = emitter->particles;
+    emitter->_10 = lbl_3_common_bss_32724._6C;
+    i = 0;
+    do {
+        p->_48 = (u8)i++;
+        p->_4D = lbl_3_data_26BC0[0];
+        p->_4E = 0;
+        if (p->_48 == 0) {
+            fn_3_SpawnAtBall(p);
+        }
+        p = p->next;
+    } while (p != NULL);
+}
+
+// .text:0x001559E4 size:0x244 mapped:0x80794A78
+void fn_3_1559E4(Particle27_3880* p, Vec* pos, Vec* rot) {
+    Control control;
+    Mtx mtx;
+    Vec v;
+    Vec base;
+    f64 height;
+
+    p->_4A = lbl_3_data_26BC0[6];
+    control.type = 0;
+    CTRLSetRotation(&control, rot->x, rot->y, rot->z);
+    CTRLBuildMatrix(&control, mtx);
+    if (g_Minigame.GameMode_MiniGame == MINI_GAME_ID_BOBOMB_DERBY) {
+        base = lbl_3_data_26BB4;
+    } else {
+        PSVECScale(&lbl_3_data_26BB4, 1.5f, &base);
+    }
+    v.x = base.x + 1.5 * ((rand() % 40 - 20) / 100.0);
+    v.y = base.y;
+    v.z = base.z + 1.5 * ((rand() % 40 - 20) / 100.0);
+    PSMTXMultVec(mtx, &v, &v);
+    v.x += pos->x;
+    height = fabs(pos->y);
+    v.y -= height;
+    v.z += pos->z;
     p->pos.x = v.x;
     p->pos.y = v.y;
     p->pos.z = v.z;
