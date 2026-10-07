@@ -108,6 +108,8 @@ The base shows `lis rX,...rodata.0@ha; addi` and then `lfs f0,100(rX)`, while th
 ## `.data` or `.bss` below 100% with every object defined
 
 - **A trailing `gap_..._data` symbol, or a last object larger than its type:** the linker padded the section up to the next unit's alignment (8 for `.data`, 32 for kinoko's `.bss`). Leave it; no source object belongs there. To confirm, `objdump -s -j .data` of both objects differs only in trailing zeros the base lacks. Examples: `rep_3F60.c` scores `.data` 99.78% (4 bytes at 0x28924); `rep_3E58.c` scores `.data` 98.73% (4-byte `gap_04_000285A4_data` after the jump table) and `.bss` 50% (`lbl_3_bss_B9E0` is an `s8` with size 0x20 in `symbols.txt`). A `switch` jump table needs no definition: MWCC emits it as `@NNN` and objdiff pairs it with `jumptable_...`.
+- **A `gap_*` symbol between two objects** (3 bytes after a `u8`, before a 4-aligned object): alignment padding inside the file; objdiff counts it as unmatched, so the section stays below 100%. Leave it. Example: `rep_4138.c` `.bss` 88.46% from `gap_05_0000D6E1_bss` and `gap_05_0000D6ED_bss`.
+- **An object larger than everything the code touches, ending at the unit's end on no alignment boundary:** the tail is a separate unreferenced object, not padding. Check a `memset` or loop bound for the real size, split the `symbols.txt` entry, and declare the tail too (MWCC keeps unreferenced statics). Example: `lbl_3_bss_D6F0` was 0x24, but `memset` clears 0x18; the last 0xC became `lbl_3_bss_D708` (`rep_4138.c`, `.bss` 66.67% to 88.46%). Likewise the 8 bytes `3, 0` after `rep_2308`'s four 0x28-byte draw entries became `lbl_3_data_17DB8`.
 
 ## Before committing
 
