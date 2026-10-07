@@ -23,7 +23,7 @@ void fn_3_148254(struct PlayerEmitter3880* emitter, struct Particle3880* p);
 u8 fn_3_1483D4(void);
 void fn_3_14841C(void);
 void fn_3_148EF0(struct Particle3880* p, f32 angle);
-void fn_3_148FD0(void);
+void fn_3_148FD0(struct PlayerEmitter3880* emitter, struct Particle3880* p);
 void fn_3_149340(void);
 void fn_3_14975C(void);
 void fn_3_149BA8(void);

@@ -24,7 +24,9 @@ typedef struct Particle3880 {
     /* 0x04 */ Vec pos;
     /* 0x10 */ Vec vel;
     /* 0x1C */ Vec _1C;
-    /* 0x28 */ u8 _28[0x34 - 0x28];
+    /* 0x28 */ f32 _28;
+    /* 0x2C */ f32 _2C;
+    /* 0x30 */ f32 _30;
     /* 0x34 */ f32 _34;
     /* 0x38 */ f32 _38;
     /* 0x3C */ f32 _3C;
@@ -1933,8 +1935,39 @@ void fn_3_149340(void) {
 }
 
 // .text:0x00148FD0 size:0x370 mapped:0x80788064
-void fn_3_148FD0(void) {
-    return;
+// 90.13%: the target loads lbl_3_data_26E7C[6] and the player pointer before the float
+// setup and schedules the angle math differently.
+void fn_3_148FD0(PlayerEmitter3880* emitter, Particle3880* p) {
+    UnkPlayer3880* player = lbl_8036E548._2C50[emitter->player];
+    u8 base = lbl_3_data_26E7C[6];
+    u8 span;
+    f32 angle;
+    f32 s;
+    f32 c;
+    s32 range;
+
+    p->pos.x = 0.0f;
+    p->pos.y = -(lbl_3_data_26E7C[5] / 100000.0f + player->_34.y);
+    p->pos.z = 0.0f;
+    angle = 0.017453292f * (15.0f * ((lbl_3_data_26E7C[0] / 2 - p->_4A) / (lbl_3_data_26E7C[0] / 2.0f)));
+    s = sinf_kludge(angle);
+    c = cosf_kludge(angle);
+    p->vel.x = s * lbl_3_data_26E7C[1] / 100000.0f;
+    p->vel.y = c * lbl_3_data_26E7C[1] / 100000.0f;
+    p->vel.z = 0.0f;
+    p->_1C.x = p->_1C.y = p->_1C.z = 0.0f;
+    range = 1000.0f * (lbl_3_data_26E7C[2] / 100000.0f);
+    p->_28 = (rand() % range) / 1000.0f;
+    p->_2C = (rand() % range) / 1000.0f;
+    p->_30 = (rand() % range) / 1000.0f;
+    p->color[3] = p->_47 = 0xFF;
+    span = 0xFF - lbl_3_data_26E7C[6];
+    p->color[1] = base + rand() % span;
+    p->color[2] = base + rand() % span;
+    p->_44 = base + rand() % span;
+    p->_45 = base + rand() % span;
+    p->_46 = base + rand() % span;
+    p->_4C = 0;
 }
 
 // .text:0x00148EF0 size:0xE0 mapped:0x80787F84
