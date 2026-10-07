@@ -33,7 +33,6 @@ extern struct {
     /* 0x08 */ f32 chemMult[3];
     /* 0x14 */ f32 chemBattingMult[3];
 } lbl_3_data_4618;
-extern s32 lbl_3_data_5B34[][5];
 extern f32 lbl_3_data_5E80[4][2];
 extern f32 lbl_3_data_5AF0[2];
 extern struct {
@@ -1512,7 +1511,7 @@ void calculateHorizontalPower(void) {
     }
 
     if (g_Batter.hitType >= 0) {
-        power = power * lbl_3_data_5B34[g_Batter.hitType][1 - g_Batter.easyBatting] / 100.0f;
+        power = power * hitTrajOptions[g_Batter.hitType]._0[1 - g_Batter.easyBatting] / 100.0f;
     }
 
     power = calcedDistance * (power / 100.0f * (lbl_3_data_5AF0[1] - lbl_3_data_5AF0[0]) + lbl_3_data_5AF0[0]);

@@ -2637,9 +2637,13 @@ extern trajZones bODTrajProbabilities[5];
 extern trajZones ToyFieldBattingVerticalAngleRanges[3][2][2][5];
 extern trajZones BattingVerticalAngleRangeProbabilities[3][2][2][5];
 
+// Per hit type. _0[0..1] are power percentages and _0[2..3] are trajectory
+// flags; each pair is indexed [0] with easy batting and [1] without. The code
+// indexes _0 as one array (e.g. _0[3 - easyBatting]), and converts the power
+// values to float as signed ints.
 typedef struct {
-    u32 _0[4];
-    u32 _10;
+    /* 0x00 */ s32 _0[4];
+    /* 0x10 */ u32 _10;
 } trajOptions_s;
 
 typedef struct {
