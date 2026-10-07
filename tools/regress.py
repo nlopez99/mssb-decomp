@@ -8,9 +8,12 @@
 #     also checks relocation targets).
 # It also lists what improved; paste the summary into the pull request.
 #
-# The base defaults to the merge-base with origin/main. It is built once per
-# commit in a git worktree under build/regress/, reusing this checkout's game
-# files and tools. The comparison includes uncommitted changes.
+# The base defaults to the merge-base with the local branch this branch tracks
+# (tools/worktree.py sets one, so a worker keeps the matches of the branch it
+# started from, including any not yet on origin/main), else with origin/main.
+# It is built once per commit in a git worktree under build/regress/, reusing
+# this checkout's game files and tools. The comparison includes uncommitted
+# changes.
 #
 # Usage:
 #   python3 tools/regress.py [--base REF]
@@ -42,8 +45,21 @@ def git(*args: str, cwd: str = root_dir) -> str:
     return subprocess.run(["git", *args], cwd=cwd, capture_output=True, text=True, check=True).stdout.strip()
 
 
+def local_upstream() -> Optional[str]:
+    # Only a local branch: a pushed branch tracks its own remote copy
+    try:
+        branch = git("symbolic-ref", "--short", "HEAD")
+        if git("config", f"branch.{branch}.remote") == ".":
+            merge = git("config", f"branch.{branch}.merge")
+            return merge[len("refs/heads/"):] if merge.startswith("refs/heads/") else merge
+    except subprocess.CalledProcessError:
+        pass
+    return None
+
+
 def resolve_base(ref: Optional[str]) -> Tuple[str, str]:
-    candidates = [ref] if ref else ["origin/main", "main"]
+    upstream = local_upstream()
+    candidates = [ref] if ref else ([upstream] if upstream else []) + ["origin/main", "main"]
     for candidate in candidates:
         try:
             return git("merge-base", "HEAD", candidate), candidate
@@ -153,7 +169,7 @@ def load_units(project_dir: str) -> Dict[str, Dict[str, Any]]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Fail if this checkout regresses any function against a base commit.")
-    parser.add_argument("--base", help="ref to compare against (default: merge-base with origin/main)")
+    parser.add_argument("--base", help="ref to compare against (default: merge-base with the tracked local branch, else origin/main)")
     args = parser.parse_args()
 
     base_sha, base_ref = resolve_base(args.base)
