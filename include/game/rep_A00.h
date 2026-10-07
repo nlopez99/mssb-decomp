@@ -5,14 +5,14 @@
 
 void fn_3_21C90(void);
 void fn_3_21DE4(void);
-void fn_3_21F14(void);
-void fn_3_2273C(void);
-void fn_3_2281C(void);
+BOOL fn_3_21F14(void);
+BOOL fn_3_2273C(void);
+BOOL fn_3_2281C(int i);
 void fn_3_22850(void);
 void fn_3_22944(void);
 void fn_3_22948(void);
-void fn_3_22A20(void);
-void fn_3_22ABC(void);
+BOOL fn_3_22A20(void);
+int fn_3_22ABC(void);
 void fn_3_22C10(void);
 void fn_3_22C20(void);
 void fn_3_230D4(void);
