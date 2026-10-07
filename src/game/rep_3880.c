@@ -78,6 +78,12 @@ typedef struct Emitter3880 {
     /* 0x17 */ u8 _17;
 } Emitter3880; // size: 0x18, followed by each effect's own fields
 
+// A whole emitter slot, for a list built on the stack
+typedef struct {
+    /* 0x00 */ Emitter3880 base;
+    /* 0x18 */ u8 _18[0x60 - 0x18];
+} EmitterSlot3880;
+
 typedef struct TrailEmitter3880 {
     /* 0x00 */ Emitter3880 base;
     /* 0x18 */ u8 _18;
@@ -896,18 +902,61 @@ void fn_3_14E810(void) {
 }
 
 // .text:0x0014E7C0 size:0x50 mapped:0x8078D854
-void fn_3_14E7C0(void) {
-    return;
+void fn_3_14E7C0(Vec* pos) {
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES &&
+        g_Minigame.GameMode_MiniGame == MINI_GAME_ID_STAR_DASH && pos != NULL) {
+        fn_3_14E234(pos);
+    }
 }
 
 // .text:0x0014E234 size:0x58C mapped:0x8078D2C8
-void fn_3_14E234(void) {
-    return;
+void fn_3_14E234(Vec* pos) {
+    EmitterSlot3880 tmp;
+    Emitter3880* emitter;
+    Emitter3880* added;
+    Particle3880* last;
+
+    emitter = fn_800339F0(NULL, 0x1F);
+    if (emitter != NULL) {
+        added = fn_800337CC(&tmp.base, lbl_3_data_26CD0[1], 1);
+        if (added == NULL) {
+            return;
+        }
+        fn_3_14DF6C(added, pos);
+        for (last = emitter->particles; last->next != NULL; last = last->next) {}
+        last->next = added->particles;
+        emitter->count += added->count;
+    } else {
+        emitter = fn_80033A24(fn_3_14DD04, 0x80, 0, lbl_3_data_26CD0[1], 1, 0x1F);
+        if (emitter != NULL) {
+            fn_3_14DF6C(emitter, pos);
+        }
+    }
 }
 
 // .text:0x0014DF6C size:0x2C8 mapped:0x8078D000
-void fn_3_14DF6C(void) {
-    return;
+void fn_3_14DF6C(Emitter3880* emitter, Vec* pos) {
+    Particle3880* p;
+
+    p = emitter->particles;
+    emitter->_10 = lbl_3_common_bss_32724._6C;
+    do {
+        p->_4D = lbl_3_data_26CD0[0];
+        p->_4E = 0;
+        p->pos.x = pos->x + (rand() % 1000 - 500) / 1000.0f;
+        p->pos.y = -(0.75f + pos->y);
+        p->pos.z = pos->z + (rand() % 1000 - 500) / 1000.0f;
+        p->vel.x = p->vel.z = 0.0f;
+        p->vel.y = lbl_3_data_26CD0[9] / 100000.0f;
+        p->vel.y += (rand() % (s32)(1000.0f * (p->vel.y / 2)) - 1000.0f * (p->vel.y / 4)) / 1000.0f;
+        p->color[0] = p->color[1] = p->color[2] = 0xFF;
+        p->color[3] = lbl_3_data_26CD0[6];
+        p->_1C.x = (rand() % 1000 + 500) / 1000.0f;
+        p->_38 = p->_3C = lbl_3_data_26CD0[3] / 100000.0f * p->_1C.x;
+        p->_4A = lbl_3_data_26CD0[2];
+        p->_48 = 0;
+        p = p->next;
+    } while (p != NULL);
 }
 
 // .text:0x0014DD04 size:0x268 mapped:0x8078CD98
