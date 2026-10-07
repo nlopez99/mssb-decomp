@@ -1,4 +1,6 @@
 #include "game/rep_2308.h"
+#include "game/rep_1F58.h"
+#include "game/rep_3AE8.h"
 // Must precede header_rep_data.h: its extern inline dolsqrtf2 puts weak constants first
 // in .rodata, so MWCC does not pool .rodata and addresses constants one by one
 #include "game/UnknownHomes_Game.h"
@@ -110,10 +112,6 @@ extern void fn_800B4CA0(Unk2308Actor*, f32);
 extern void fn_800BDA24(Unk2308Model*);
 extern void fn_800BDA94(Unk2308Model*, Mtx);
 
-// rep_1F58.h and rep_3AE8.h declare these as void(void), matching their stub definitions
-extern void fn_3_C11CC(s32 idx, s32 arg1);
-extern void fn_3_C1344(s32 idx, f32 chargeUp, f32 chargeDown, BOOL full);
-extern void fn_3_15C024(Vec* pos, Vec* vel, Vec* accel, s32 arg3);
 
 // .text:0x000CB284 size:0xC0 mapped:0x8070A318
 void fn_3_CB284(s32 idx, s32 windup, f32 proportion) {

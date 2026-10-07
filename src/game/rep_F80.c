@@ -3,6 +3,8 @@
 #include "game/UnknownHomes_Game.h"
 #include "static/UnknownHomes_Static.h"
 #include "game/rep_1838.h"
+#include "game/rep_1F58.h"
+#include "game/rep_2308.h"
 
 typedef struct {
     /* 0x00 */ u8 _00[0x54];
@@ -77,8 +79,8 @@ extern struct {
     /* 0x3AC */ u32 _3AC;
 } lbl_3_common_bss_35154;
 
-// rep_1E08.h, rep_1F58.h and rep_2308.h declare the functions taking arguments here as
-// void(void), matching their stub definitions, so this file declares them itself
+// rep_1E08.h declares the functions taking arguments here as void(void), matching
+// their stub definitions, so this file declares them itself
 extern void fn_3_BD4F0(void);
 extern void fn_3_BD504(f32 x, f32 y, f32 z, BOOL arg3);
 extern void fn_3_BD6AC(s32 arg0, f32 x, f32 y, f32 z);
@@ -87,13 +89,7 @@ extern void fn_3_BF1AC(void);
 extern void fn_3_C0770(void);
 extern void fn_3_C07A0(void);
 extern void fn_3_C07B0(void);
-extern void fn_3_C11CC(s32 idx, s32 arg1);
-extern void fn_3_C1344(s32 idx, f32 chargeUp, f32 chargeDown, BOOL full);
-extern void fn_3_C1770(s32 idx);
 extern void fn_3_CABB4(void);
-extern void fn_3_CB1B0(s32 idx, u8 starPitchType, s32 windup);
-extern void fn_3_CB234(s32 idx, s32 arg1);
-extern void fn_3_CB284(s32 idx, s32 windup, f32 proportion);
 extern void fn_3_CB344(s32 idx, u8 starPitchType);
 extern void fn_80011578(void);
 
