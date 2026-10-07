@@ -348,7 +348,8 @@ extern u8* fn_3_B9534(u16 width, u16 height, GXTexObj* obj);
 
 static const Vec lbl_3_rodata_2FB8 = { 0.0f, 0.5f, 60.0f };
 
-// MWCC lays out .bss statics in reverse order of declaration
+// MWCC lays out .bss statics in reverse order of declaration; nothing reads lbl_3_bss_B668
+static s32 lbl_3_bss_B668[4];
 static u8 lbl_3_bss_B664;
 static void* lbl_3_bss_B660;
 static GXTexObj lbl_3_bss_B640;
