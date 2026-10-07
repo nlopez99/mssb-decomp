@@ -94,11 +94,6 @@ extern struct {
 extern Unk2308Task* lbl_803CC1B8;
 extern u8 lbl_803CBBC0;
 
-// .data outside this unit's split
-extern s32 lbl_3_data_17D08[2];
-extern Unk2308Task* lbl_3_data_17D10[2];
-extern Unk2308Draw lbl_3_data_17D18[2][2];
-
 extern void ACTSetAnimation(Unk2308Actor* actor, void* animBank, char* sequenceName, u16 seqNum, f32 time, f32 speed);
 extern void fn_80024DB0(Unk2308Anim*);
 extern void fn_80024FA4(Unk2308Model*, u32, Unk2308Anim*, s32);
@@ -112,6 +107,13 @@ extern void fn_800B4CA0(Unk2308Actor*, f32);
 extern void fn_800BDA24(Unk2308Model*);
 extern void fn_800BDA94(Unk2308Model*, Mtx);
 
+s32 lbl_3_data_17D08[2] = { 23000, 8 };
+Unk2308Task* lbl_3_data_17D10[2] = { NULL, NULL };
+Unk2308Draw lbl_3_data_17D18[2][2] = {
+    { { 0, fn_3_CABF0 }, { 0, fn_3_CABF0 } },
+    { { 0, fn_3_CABF0 }, { 0, fn_3_CABF0 } },
+};
+s32 lbl_3_data_17DB8[2] = { 3, 0 };
 
 // .text:0x000CB284 size:0xC0 mapped:0x8070A318
 void fn_3_CB284(s32 idx, s32 windup, f32 proportion) {
@@ -268,4 +270,14 @@ void fn_3_CABF0(Unk2308Draw* draw) {
     fn_800BDA24(model);
     model->_00->_98 = 0xFF;
     fn_800BDA94(model, mtx);
+}
+
+// .text:0x000CABB4 size:0x3C mapped:0x80709C48
+void fn_3_CABB4(void) {
+    if (lbl_3_data_17D10[0] != NULL) {
+        lbl_3_data_17D10[0]->_34 = 1;
+    }
+    if (lbl_3_data_17D10[1] != NULL) {
+        lbl_3_data_17D10[1]->_34 = 1;
+    }
 }
