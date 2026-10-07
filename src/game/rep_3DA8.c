@@ -849,3 +849,233 @@ void fn_3_162080(void) {
         }
     }
 }
+
+// .text:0x00161588 size:0xAF8 mapped:0x807A061C
+void fn_3_161588(s32 event, s32 player) {
+    s32 i;
+    s32 id;
+    s32 set;
+
+    id = lbl_800E8558[inMemRoster[lbl_3_common_bss_37400._40][player].stats.CharID]._1;
+    set = lbl_800E8558[inMemRoster[lbl_3_common_bss_37400._40][player].stats.CharID]._2;
+    switch (event) {
+        case 0:
+            for (i = 0; i < 10; i++) {
+                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0) {
+                    switch (lbl_80109AE8[set][i].type) {
+                        case 31:
+                            starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
+                            if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
+                                lbl_80109AE8[set][i].target) {
+                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                            }
+                            break;
+                    }
+                }
+            }
+            break;
+        case 1:
+            for (i = 0; i < 10; i++) {
+                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0) {
+                    switch (lbl_80109AE8[set][i].type) {
+                        case 32:
+                            starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
+                            if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
+                                lbl_80109AE8[set][i].target) {
+                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                            }
+                            break;
+                    }
+                }
+            }
+            break;
+        case 3:
+            for (i = 0; i < 10; i++) {
+                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0) {
+                    switch (lbl_80109AE8[set][i].type) {
+                        case 37:
+                            starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
+                            if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
+                                lbl_80109AE8[set][i].target) {
+                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                            }
+                            break;
+                    }
+                }
+            }
+            break;
+        case 2:
+            for (i = 0; i < 10; i++) {
+                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0) {
+                    switch (lbl_80109AE8[set][i].type) {
+                        case 33:
+                            starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
+                            if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
+                                lbl_80109AE8[set][i].target) {
+                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                            }
+                            break;
+                        case 34:
+                            if (g_Ball.AtBat_ContactResult == 3) {
+                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
+                                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
+                                    lbl_80109AE8[set][i].target) {
+                                    starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                                }
+                            }
+                            break;
+                        case 35:
+                            break;
+                        case 36:
+                            if (g_Ball.currentStarSwing == 5 || g_Ball.currentStarSwing == 6) {
+                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
+                                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
+                                    lbl_80109AE8[set][i].target) {
+                                    starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                                }
+                            }
+                            break;
+                    }
+                }
+            }
+            break;
+        case 4:
+            for (i = 0; i < 10; i++) {
+                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0) {
+                    switch (lbl_80109AE8[set][i].type) {
+                        case 35:
+                            starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
+                            if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
+                                lbl_80109AE8[set][i].target) {
+                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                            }
+                            break;
+                    }
+                }
+            }
+            break;
+        case 5:
+            for (i = 0; i < 10; i++) {
+                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0) {
+                    switch (lbl_80109AE8[set][i].type) {
+                        case 38:
+                            if (g_Ball.AtBat_ContactResult == 3) {
+                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
+                                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
+                                    lbl_80109AE8[set][i].target) {
+                                    starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                                }
+                            }
+                            break;
+                    }
+                }
+            }
+            break;
+        case 6:
+            for (i = 0; i < 10; i++) {
+                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0) {
+                    switch (lbl_80109AE8[set][i].type) {
+                        case 39:
+                            starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
+                            if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
+                                lbl_80109AE8[set][i].target) {
+                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                            }
+                            break;
+                    }
+                }
+            }
+            break;
+        case 7:
+            for (i = 0; i < 10; i++) {
+                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0) {
+                    switch (lbl_80109AE8[set][i].type) {
+                        case 40:
+                            if (lbl_80109AE8[set][i].target ==
+                                lbl_800E8558[g_Fielders[g_Ball.fielderBeingThrownTo]._17A]._2) {
+                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                            }
+                            break;
+                    }
+                }
+            }
+            break;
+        case 8:
+            for (i = 0; i < 10; i++) {
+                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0) {
+                    switch (lbl_80109AE8[set][i].type) {
+                        case 41:
+                            starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
+                            if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
+                                lbl_80109AE8[set][i].target) {
+                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                            }
+                            break;
+                    }
+                }
+            }
+            break;
+        case 9:
+            for (i = 0; i < 10; i++) {
+                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0) {
+                    switch (lbl_80109AE8[set][i].type) {
+                        case 42:
+                            if (g_Ball.AtBat_ContactResult == 3) {
+                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
+                                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
+                                    lbl_80109AE8[set][i].target) {
+                                    starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                                }
+                            }
+                            break;
+                    }
+                }
+            }
+            break;
+        case 10:
+            for (i = 0; i < 10; i++) {
+                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0) {
+                    switch (lbl_80109AE8[set][i].type) {
+                        case 44:
+                            starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
+                            if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
+                                lbl_80109AE8[set][i].target) {
+                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                            }
+                            break;
+                    }
+                }
+            }
+            break;
+        case 11:
+            for (i = 0; i < 10; i++) {
+                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0) {
+                    switch (lbl_80109AE8[set][i].type) {
+                        case 45:
+                            starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
+                            if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
+                                lbl_80109AE8[set][i].target) {
+                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                            }
+                            break;
+                    }
+                }
+            }
+            break;
+        case 12:
+            for (i = 0; i < 10; i++) {
+                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0) {
+                    switch (lbl_80109AE8[set][i].type) {
+                        case 46:
+                            starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
+                            if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
+                                lbl_80109AE8[set][i].target) {
+                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                            }
+                            break;
+                    }
+                }
+            }
+            break;
+    }
+}

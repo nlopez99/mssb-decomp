@@ -3,6 +3,7 @@
 
 #include "mssbTypes.h"
 
+void fn_3_161588(s32 event, s32 player);
 void fn_3_162080(void);
 void fn_3_16230C(s32 result, s32 streak);
 void fn_3_162D54(void);
