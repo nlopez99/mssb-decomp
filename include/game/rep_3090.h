@@ -45,7 +45,7 @@ void fn_3_104AD4(Vec* out, Mtx44 mtx);
 void fn_3_104B20(Vec* out, Mtx44 mtx);
 void fn_3_104B3C(void);
 void fn_3_1054CC(void);
-void fn_3_1054D0(void);
+void fn_3_1054D0(struct Unk3090Track* track, u32 time, s16 channel);
 void fn_3_105A10(Vec* out, Vec* from, Vec* to, f32 t);
 void fn_3_105ACC(Quaternion* q, Mtx out);
 void fn_3_105BD8(struct Unk3090View* view);
