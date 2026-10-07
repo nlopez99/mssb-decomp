@@ -816,7 +816,7 @@ typedef struct _InputStruct {
     /*0x02*/ s16 controlStickMagnitude;
     /*0x04*/ E(u16, INPUT_BUTTON) buttonInput;
     /*0x06*/ E(u16, INPUT_BUTTON) newButtonInput; // pressed this frame
-    /*0x08*/ s16 _08;
+    /*0x08*/ E(u16, INPUT_BUTTON) _08; // repeat
     /*0x0A*/ s8 right_left;
     /*0x0B*/ s8 up_down;
     /*0x0C*/ u8 rightTriggerDistance;
@@ -1749,18 +1749,18 @@ typedef struct _MiniGameStruct {
     /*0x1911*/ u8 _1911;
     /*0x1912*/ u8 pointsTargetReachedInd;
     /*0x1913*/ u8 _1913;
-    /*0x1914*/ u8 _1914;
-    /*0x1915*/ u8 _1915;
-    /*0x1916*/ u8 _1916;
-    /*0x1917*/ u8 _1917;
-    /*0x1918*/ u8 _1918;
-    /*0x1919*/ u8 _1919;
-    /*0x191A*/ u8 _191A;
-    /*0x191B*/ u8 _191B;
-    /*0x191C*/ u8 _191C;
-    /*0x191D*/ u8 _191D;
-    /*0x191E*/ u8 _191E;
-    /*0x191F*/ u8 _191F;
+    // sta_c6 reads these one by one, Toy Field (rep_28A8) loops over _1914_arr
+    union {
+        struct {
+            /*0x1914*/ u8 _1914;
+            /*0x1915*/ u8 _1915;
+            /*0x1916*/ u8 _1916;
+            /*0x1917*/ u8 _1917;
+        };
+        /*0x1914*/ u8 _1914_arr[4];
+    };
+    /*0x1918*/ u8 _1918[4];
+    /*0x191C*/ s8 _191C[4];
     /*0x1920*/ E(u8, TOY_FIELD_RESULT) toyFieldBallStateResult2;
     /*0x1921*/ u8 _1921;
     /*0x1922*/ u8 _1922;
@@ -1778,10 +1778,7 @@ typedef struct _MiniGameStruct {
     /*0x1931*/ u8 _1931;
     /*0x1932*/ s16 _1932;
     /*0x1934*/ u8 _1934;
-    /*0x1935*/ u8 _1935;
-    /*0x1936*/ u8 _1936;
-    /*0x1937*/ u8 _1937;
-    /*0x1938*/ u8 _1938;
+    /*0x1935*/ s8 _1935[4];
     /*0x1939*/ u8 _1939;
     /*0x193A*/ u8 wallBall_coinsVisibleInd[100];
     /*0x199E*/ u8 _199E;
@@ -1820,7 +1817,8 @@ typedef struct _MiniGameStruct {
     /*0x19CD*/ u8 _19CD;
     /*0x19CE*/ u8 _19CE;
     /*0x19CF*/ u8 _19CF;
-    /*0x19D0*/ s16 _19D0;
+    /*0x19D0*/ u8 _19D0;
+    /*0x19D1*/ u8 _19D1;
     /*0x19D2*/ s16 _19D2;
     /*0x19D4*/ s16 _19D4;
     /*0x19D6*/ s16 _19D6;
@@ -2448,10 +2446,14 @@ typedef struct {
     /* 0x0C4 */ s16 _0C4;
     /* 0x0C6 */ u8 _0C6[0xCC - 0xC6];
     /* 0x0CC */ s16 _0CC;
-    /* 0x0CE */ u8 _0CE[0xE8 - 0xCE];
+    /* 0x0CE */ u8 _0CE[0xE4 - 0xCE];
+    /* 0x0E4 */ s16 _0E4;
+    /* 0x0E6 */ u8 _0E6[0xE8 - 0xE6];
     /* 0x0E8 */ s16 _0E8;
     /* 0x0EA */ s16 _0EA;
-    /* 0x0EC */ u8 _0EC[0x105 - 0xEC];
+    /* 0x0EC */ u8 _0EC[0xEE - 0xEC];
+    /* 0x0EE */ s16 _0EE;
+    /* 0x0F0 */ u8 _0F0[0x105 - 0xF0];
     /* 0x105 */ u8 playerAtMoundCutoffLocation;
     /* 0x106 */ u8 throwSpeedType;
     /* 0x107 */ u8 _107;
