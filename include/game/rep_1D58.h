@@ -41,7 +41,7 @@ u8* fn_3_B9534(s32 width, s32 height, GXTexObj* obj);
 void fn_3_B95EC(void);
 void fn_3_B97C8(void (*callback)(void));
 void fn_3_B97DC(void* model, void* anim);
-void fn_3_B98E8(void);
+void fn_3_B98E8(struct StadiumModel1D58* model);
 void fn_3_B99E4(void);
 s32 fn_3_B9BB4(s32 stadium);
 void fn_3_B9D68(u8* types, s32 count, void** files, s32* indices);
