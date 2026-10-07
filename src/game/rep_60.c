@@ -2,6 +2,7 @@
 #include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/os.h"
+#include "game/rep_1D58.h"
 
 typedef struct {
     /* 0x00 */ u8 _00[0x10];
@@ -60,8 +61,7 @@ extern void fn_800B0A14_removeQueue(void);
 extern void fn_3_5EC0(void* data);
 extern void fn_3_106DFC(void);
 extern BOOL fn_3_106E50(void);
-// rep_1D58.h and rep_1E08.h declare these as void(void), matching their stub definitions
-extern s32 fn_3_B9BB4(u8 stadium);
+// rep_1E08.h declares these as void(void), matching their stub definitions
 extern void fn_3_BD7D8(void);
 extern BOOL fn_3_BF878(void);
 
