@@ -3,23 +3,7 @@
 #include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
 #include "game/rep_1838.h"
-
-// Per-controller pad state in the main DOL; UnknownHomes_Static.h declares only the first
-// element and one field of the second.
-typedef struct {
-    /* 0x00 */ u16 _00;
-    /* 0x02 */ u16 _02;
-    /* 0x04 */ u16 _04;
-    /* 0x06 */ u8 _06[0x10 - 0x06];
-    /* 0x10 */ s8 _10;
-    /* 0x11 */ s8 _11;
-    /* 0x12 */ u8 _12[0x14 - 0x12];
-    /* 0x14 */ u8 _14;
-    /* 0x15 */ u8 _15;
-    /* 0x16 */ u8 _16[0x20 - 0x16];
-} PadState_803C77B8;
-
-extern PadState_803C77B8 lbl_803C77B8[4];
+#include "static/UnknownHomes_Static.h"
 
 // .text:0x0006D304 size:0x19C mapped:0x806AC398
 // Differs only at the loop top: the target holds the 0 for _0E in r3 and loads _00 into r0

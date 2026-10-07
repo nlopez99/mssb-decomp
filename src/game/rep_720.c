@@ -1035,7 +1035,7 @@ void fn_3_18FF8(void) {
             }
         }
     } else {
-        if (cam->_11A >= 0x1e && (lbl_803C77B8._02 & 0x100 || lbl_803C77B8._22 & 0x100)) {
+        if (cam->_11A >= 0x1e && (lbl_803C77B8[0]._02 & 0x100 || lbl_803C77B8[1]._02 & 0x100)) {
             f31 = g_Ball.AtBat_Contact_BallPos.x;
             f30 = g_Ball.AtBat_Contact_BallPos.z;
             f29 = g_Ball.ballDistanceFromHome;

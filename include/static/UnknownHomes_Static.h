@@ -63,13 +63,19 @@ extern camera_803c639c_s* fn_80052768_getCamera(int);
 extern int fn_8001C67C_animation(int, int);
 extern f32 LinearInterpolateToNewRange(f32 value, f32 prevMin, f32 prevMax, f32 nextMin, f32 nextMax);
 
+// Pad state, one element per controller port
 typedef struct {
-    /* 0x00 */ u16 _00;
-    /* 0x02 */ u16 _02;
-    /* 0x04 */ u16 _04;
-    artificial_padding(4, 0x22, u16);
-    /* 0x22 */ u16 _22;
-} lbl_803C77B8_s;
-extern lbl_803C77B8_s lbl_803C77B8;
+    /* 0x00 */ u16 _00; // buttons held
+    /* 0x02 */ u16 _02; // buttons newly pressed
+    /* 0x04 */ u16 _04; // newly pressed, or held with key repeat
+    /* 0x06 */ u8 _06[0x10 - 0x06];
+    /* 0x10 */ s8 _10;
+    /* 0x11 */ s8 _11;
+    /* 0x12 */ u8 _12[0x14 - 0x12];
+    /* 0x14 */ u8 _14;
+    /* 0x15 */ u8 _15;
+    /* 0x16 */ u8 _16[0x20 - 0x16];
+} lbl_803C77B8_s; // size: 0x20
+extern lbl_803C77B8_s lbl_803C77B8[4];
 
 #endif // !__UNKNOWN_HOMES_STATIC_H_
