@@ -1695,18 +1695,55 @@ void fn_3_14B9F0(void) {
 }
 
 // .text:0x0014B9A0 size:0x50 mapped:0x8078AA34
-void fn_3_14B9A0(void) {
-    return;
+void fn_3_14B9A0(u32 duration, Vec* pos) {
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES &&
+        g_Minigame.GameMode_MiniGame == MINI_GAME_ID_BARREL_BATTER && pos != NULL) {
+        fn_3_14B92C(duration, pos);
+    }
 }
 
 // .text:0x0014B92C size:0x74 mapped:0x8078A9C0
-void fn_3_14B92C(void) {
-    return;
+void fn_3_14B92C(u32 duration, Vec* pos) {
+    Emitter3880* emitter = fn_80033A24(fn_3_14AC40, 0x80, 0, lbl_3_data_26E24[2], 1, 0x23);
+
+    if (emitter != NULL) {
+        fn_3_14B53C((PathEmitter3880*)emitter, duration, pos);
+    }
 }
 
 // .text:0x0014B53C size:0x3F0 mapped:0x8078A5D0
-void fn_3_14B53C(void) {
-    return;
+// 99.90%: the inlined fn_3_14B248 keeps the angle in f28 and its cosine in f29 in the
+// target, the reverse here; fn_3_14B248 itself matches.
+void fn_3_14B53C(PathEmitter3880* emitter, u32 duration, Vec* pos) {
+    Vec diff;
+    f32 dist;
+    f32 dist2;
+    Particle3880* p;
+    s32 i = 0;
+
+    emitter->_18 = *pos;
+    emitter->base._10 = lbl_3_common_bss_32724._6C;
+    emitter->_34 = duration;
+    emitter->_36 = duration;
+    PSVECSubtract(&lbl_3_data_26E00[0], &lbl_3_data_26E00[1], &diff);
+    dist = PSVECMag(&diff);
+    PSVECSubtract(&lbl_3_data_26E00[1], &lbl_3_data_26E00[2], &diff);
+    dist2 = PSVECMag(&diff);
+    emitter->_30 = dist / ((dist2 + dist) / duration);
+    fn_3_14B3F4(emitter);
+    p = emitter->base.particles;
+    do {
+        p->_4D = lbl_3_data_26E24[0];
+        p->_4E = 0;
+        p->_48 = i * (emitter->_34 / (f32)lbl_3_data_26E24[2]);
+        p->color[0] = p->color[1] = p->color[2] = 0xFF;
+        p->_4A = lbl_3_data_26E24[1];
+        if (p->_48 == 0) {
+            fn_3_14B248(emitter, p);
+        }
+        p = p->next;
+        i++;
+    } while (p != NULL);
 }
 
 // .text:0x0014B3F4 size:0x148 mapped:0x8078A488
@@ -1751,8 +1788,8 @@ void fn_3_14B248(PathEmitter3880* emitter, Particle3880* p) {
 }
 
 // .text:0x0014AC40 size:0x608 mapped:0x80789CD4
-void fn_3_14AC40(void) {
-    return;
+BOOL fn_3_14AC40(Emitter3880* emitter) {
+    return 0;
 }
 
 // .text:0x0014AC1C size:0x24 mapped:0x80789CB0
