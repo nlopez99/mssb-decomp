@@ -29,12 +29,19 @@ typedef struct Unk36D8Chomp {
 typedef struct {
     /* 0x0 */ s16 _0;
     /* 0x2 */ u8 _2;
-    /* 0x3 */ u8 _3;
+    /* 0x3 */ s8 _3;
     /* 0x4 */ s8 _4;
     /* 0x5 */ u8 _5;
     /* 0x6 */ s8 _6;
     /* 0x7 */ s8 _7;
 } Unk36D8Cpu;
+
+// A place a CPU runner could run to, sorted by distance
+typedef struct {
+    /* 0x0 */ f32 dist;
+    /* 0x4 */ u8 dir;
+    /* 0x5 */ s8 target;
+} Unk36D8Target;
 
 extern struct {
     /* 0x00 */ u8 _00[0x40];
@@ -57,8 +64,13 @@ extern u8 lbl_3_data_218AC[5][3];
 extern f32 lbl_3_data_218BC[18];
 extern s16 lbl_3_data_21904[12];
 extern s16 lbl_3_data_21924[4];
+extern s8 lbl_3_data_2192C[4][2];
+extern f32 lbl_3_data_21934[4];
 extern s8 lbl_3_data_21944[4][2];
 extern s16 lbl_3_data_2194C[4][2];
+extern s16 lbl_3_data_2195C[4][2];
+extern s8 lbl_3_data_2196C[4][2];
+extern s8 lbl_3_data_21974[4][2];
 extern s8 lbl_3_data_2197C[4];
 extern s8 lbl_3_data_21980[4];
 
@@ -1259,7 +1271,7 @@ int fn_3_13D5E8(const void* a, const void* b) {
 }
 
 // .text:0x0013D578 size:0x70 mapped:0x8077C60C
-BOOL fn_3_13D578(s8 player) {
+bool fn_3_13D578(s8 player) {
     s8 i = 0;
 
     do {
@@ -1273,5 +1285,247 @@ BOOL fn_3_13D578(s8 player) {
 
 // .text:0x0013C7BC size:0xDBC mapped:0x8077B850
 void fn_3_13C7BC(void) {
-    return;
+    s8 chomp = -1;
+    s8 star = -1;
+    s8 n = 0;
+    Unk36D8Cpu* cpus = (Unk36D8Cpu*)&g_Minigame._1DCC;
+    Unk36D8Cpu* cpu;
+    Unk36D8Target entries[15];
+    s8 targets[16];
+    u8 dir;
+    f32 forward;
+    f32 backward;
+    f32 pos;
+    s8 i;
+    s8 j;
+    s8 k;
+    s8 idx;
+    s8 port;
+    u8 strength;
+    int lo;
+    int hi;
+
+    i = 0;
+    do {
+        g_Minigame._1DBC[i + 4] = 0;
+    } while (++i < 4);
+    i = 0;
+    do {
+        j = 0;
+        do {
+            idx = g_Minigame._1B26[i][j];
+            if (idx >= 0) {
+                switch (g_Minigame._1B1A[idx]) {
+                case 4:
+                    chomp = g_Minigame._1B20[idx];
+                    break;
+                case 3:
+                    star = g_Minigame._1B20[idx] + 1;
+                    k = 0;
+                    do {
+                        if (g_Minigame.wallBall_coinsVisibleInd[k] - 1 == idx) {
+                            if ((int)(100.0f * (g_Minigame._1630[k] + 0.001f)) == star * 10) {
+                                break;
+                            }
+                            targets[n++] = 10.0f * (g_Minigame._1630[k] + 0.001f);
+                        }
+                    } while (++k < 15);
+                    if (k >= 15) {
+                        star = -1;
+                    }
+                    break;
+                case 2:
+                    targets[n++] = g_Minigame._1B20[idx];
+                    break;
+                }
+            }
+        } while (++j < 2);
+    } while (++i < 4);
+
+    i = 0;
+    do {
+        port = g_Minigame.minigameControlStruct.characterIndex[i];
+        cpu = &cpus[i];
+        if (port >= 0 && port < 4 && g_Minigame.minigameControlStruct.battingHandedness[i]) {
+            g_Minigame._1DBC[port + 4] = 1;
+            memset(&g_Minigame._1D7C[port], 0, sizeof(InputStruct));
+            strength = g_Minigame.minigameControlStruct.aIStrength[i];
+            if (cpu->_2 < 10 || cpu->_2 > 13) {
+                if (g_Minigame._1B19 == 1 || g_Minigame._1B06 - g_Minigame._1AFA <= cpu->_0) {
+                    cpu->_2 = 10;
+                }
+            }
+            switch (cpu->_2) {
+            case 0:
+                if (g_Minigame._1AFA / 120 == cpu->_6 - 1 && g_Minigame._1AFA % 120 >= 48) {
+                    cpu->_2 = 7;
+                    break;
+                }
+                if (cpu->_4-- <= 0) {
+                    g_Minigame._1D7C[port].buttonInput = g_Minigame._1D7C[port].newButtonInput |= INPUT_BUTTON_B;
+                    cpu->_4 = RandomInt_Game_Range(lbl_3_data_2192C[strength][0], lbl_3_data_2192C[strength][1]);
+                }
+                if (cpu->_7-- > 0) {
+                    break;
+                }
+                cpu->_7 = RandomInt_Game_Range(lbl_3_data_21944[strength][0], lbl_3_data_21944[strength][1]);
+                cpu->_5 = 0;
+                if (chomp >= 0) {
+                    fn_3_13DC48(i, chomp / 10.0f, &forward, &backward);
+                    if (forward < backward) {
+                        cpu->_2 = 1;
+                    } else if (forward > backward) {
+                        cpu->_2 = 4;
+                    } else if (g_Runners[i].runningDirectionCode == 2 || g_Runners[i].nextDirectionBeingProcessed == 2) {
+                        cpu->_2 = RandomInt_Game(2) ? 1 : 4;
+                    }
+                    cpu->_5 = 4;
+                } else if (star >= 0) {
+                    if (fn_3_13D618(i, star / 10.0f, &dir) <= lbl_3_data_21934[strength]) {
+                        if (dir == 1) {
+                            cpu->_2 = 1;
+                        } else {
+                            cpu->_2 = 4;
+                        }
+                        cpu->_5 = 3;
+                    }
+                }
+                if (cpu->_5 == 0 && n != 0) {
+                    k = 0;
+                    do {
+                        entries[k].target = targets[k];
+                        entries[k].dist = fn_3_13DA50(i, entries[k].target / 10.0f, &entries[k].dir);
+                    } while (++k < n);
+                    fn_800246D4(fn_3_13D5E8, entries, entries, sizeof(Unk36D8Target), n);
+                    k = 0;
+                    do {
+                        if (fn_3_13D618(i, entries[k].target / 10.0f, &dir) <= lbl_3_data_21934[strength]) {
+                            if (dir == 1) {
+                                cpu->_2 = 1;
+                            } else {
+                                cpu->_2 = 4;
+                            }
+                            cpu->_5 = 2;
+                            break;
+                        }
+                    } while (++k < n);
+                }
+                if (cpu->_5 == 0 && (g_Runners[i].runningDirectionCode == 2 || g_Runners[i].nextDirectionBeingProcessed == 2)) {
+                    cpu->_2 = RandomInt_Game(2) ? 1 : 4;
+                }
+                break;
+            case 1:
+                if (g_Runners[i].runningDirectionCode == 1 || g_Runners[i].nextDirectionBeingProcessed == 1) {
+                    cpu->_2 = 0;
+                } else {
+                    g_Minigame._1D7C[port].buttonInput = g_Minigame._1D7C[port].newButtonInput |= INPUT_BUTTON_Y;
+                    cpu->_2 = 2;
+                }
+                break;
+            case 2:
+                cpu->_2 = 3;
+                break;
+            case 3:
+                g_Minigame._1D7C[port].buttonInput = g_Minigame._1D7C[port].newButtonInput |= INPUT_BUTTON_Y;
+                cpu->_2 = 0;
+                break;
+            case 4:
+                if (g_Runners[i].runningDirectionCode == 3 || g_Runners[i].nextDirectionBeingProcessed == 3) {
+                    cpu->_2 = 0;
+                } else {
+                    g_Minigame._1D7C[port].buttonInput = g_Minigame._1D7C[port].newButtonInput |= INPUT_BUTTON_X;
+                    cpu->_2 = 5;
+                }
+                break;
+            case 5:
+                cpu->_2 = 6;
+                break;
+            case 6:
+                g_Minigame._1D7C[port].buttonInput = g_Minigame._1D7C[port].newButtonInput |= INPUT_BUTTON_X;
+                cpu->_2 = 0;
+                break;
+            case 7:
+                if (g_Runners[i].runningDirectionCode == 1) {
+                    g_Minigame._1D7C[port].buttonInput = g_Minigame._1D7C[port].newButtonInput |= INPUT_BUTTON_X;
+                } else if (g_Runners[i].runningDirectionCode == 3) {
+                    g_Minigame._1D7C[port].buttonInput = g_Minigame._1D7C[port].newButtonInput |= INPUT_BUTTON_Y;
+                }
+                cpu->_2 = 8;
+                break;
+            case 8:
+                if (g_Runners[i].runningDirectionCode == 2 || g_Runners[i].nextDirectionBeingProcessed == 2) {
+                    cpu->_2 = 9;
+                } else {
+                    cpu->_2 = 7;
+                }
+                break;
+            case 9:
+                if (g_Minigame._1AFA % 120 >= 96) {
+                    if (RandomInt_Game(100) < lbl_3_data_2197C[strength]) {
+                        lo = g_Minigame._1AFA / 120 + 2;
+                        hi = g_Minigame._1B06 / 120 + 1;
+                        if (lo < hi) {
+                            cpu->_6 = RandomInt_Game_Range(lo, hi);
+                        } else {
+                            cpu->_6 = hi;
+                        }
+                    } else {
+                        cpu->_6 = 0x7F;
+                    }
+                    cpu->_2 = 0;
+                }
+                break;
+            case 10:
+                if (g_Runners[i].runningDirectionCode == 2 || g_Runners[i].nextDirectionBeingProcessed == 2) {
+                    cpu->_2 = 13;
+                    break;
+                }
+                if (cpu->_5 == 4) {
+                    cpu->_3 = RandomInt_Game_Range(lbl_3_data_21974[strength][0], lbl_3_data_21974[strength][1]);
+                } else {
+                    cpu->_3 = RandomInt_Game_Range(lbl_3_data_2196C[strength][0], lbl_3_data_2196C[strength][1]);
+                }
+                cpu->_2 = 11;
+            case 11:
+                if (cpu->_3-- <= 0) {
+                    if (g_Runners[i].runningDirectionCode == 1) {
+                        g_Minigame._1D7C[port].buttonInput = g_Minigame._1D7C[port].newButtonInput |= INPUT_BUTTON_X;
+                    } else if (g_Runners[i].runningDirectionCode == 3) {
+                        g_Minigame._1D7C[port].buttonInput = g_Minigame._1D7C[port].newButtonInput |= INPUT_BUTTON_Y;
+                    }
+                    cpu->_2 = 12;
+                }
+                break;
+            case 12:
+                if (g_Runners[i].runningDirectionCode == 2 || g_Runners[i].nextDirectionBeingProcessed == 2) {
+                    cpu->_2 = 13;
+                } else {
+                    cpu->_3 = 1;
+                    cpu->_2 = 11;
+                }
+                break;
+            case 13:
+                if (g_Minigame._1B19 == 0 || g_Minigame._1B19 == 4) {
+                    if (fn_3_13D578(i) || g_Minigame._17C4 <= 1200) {
+                        cpu->_0 = RandomInt_Game_Range(lbl_3_data_2195C[strength][0], lbl_3_data_2195C[strength][1]);
+                    } else {
+                        cpu->_0 = RandomInt_Game_Range(lbl_3_data_2194C[strength][0], lbl_3_data_2194C[strength][1]);
+                    }
+                    if (RandomInt_Game(100) < lbl_3_data_2197C[strength]) {
+                        lo = lbl_3_data_21980[strength];
+                        hi = g_Minigame._1B06 / 120 + 1;
+                        if (lo < hi) {
+                            cpu->_6 = RandomInt_Game_Range(lo, hi);
+                        } else {
+                            cpu->_6 = hi;
+                        }
+                    } else {
+                        cpu->_6 = 0x7F;
+                    }
+                    cpu->_2 = 0;
+                }
+                break;
+            }
+        }
+    } while (++i < 4);
 }

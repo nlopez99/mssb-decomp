@@ -7,7 +7,7 @@
 struct Unk36D8Chomp;
 
 void fn_3_13C7BC(void);
-BOOL fn_3_13D578(s8 player);
+bool fn_3_13D578(s8 player);
 int fn_3_13D5E8(const void* a, const void* b);
 f32 fn_3_13D618(s8 runner, f32 target, u8* dir);
 int fn_3_13DA20(const void* a, const void* b);
