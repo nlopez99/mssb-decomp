@@ -7,11 +7,29 @@
 #include "Dolphin/gx.h"
 #include "Dolphin/GX/GXFifo.h"
 #include "Dolphin/os.h"
+#include "C3/actor.h"
 #include "C3/control.h"
 #include "C3/geoPalette.h"
 #include "game/rep_D0.h"
 
 typedef struct {
+    /* 0x00 */ DODisplayLayout base;
+    /* 0x18 */ Mtx mtx;
+    /* 0x48 */ u8 _48[0x54 - 0x48];
+    /* 0x54 */ f32 _54;
+    /* 0x58 */ f32 _58;
+    /* 0x5C */ f32 _5C;
+    /* 0x60 */ f32 _60;
+    /* 0x64 */ f32 _64;
+    /* 0x68 */ f32 _68;
+} StadiumDisplayLayout;
+
+typedef struct {
+    /* 0x00 */ ActorLayout layout;
+    /* 0x20 */ ActorBone bones[1];
+} StadiumActorLayout;
+
+typedef struct StadiumTex {
     /* 0x00 */ void* image;
     /* 0x04 */ u8 _04[0x8 - 0x4];
     /* 0x08 */ u16 height;
@@ -36,6 +54,23 @@ typedef struct {
     /* 0x00 */ u32 _00[4];
 } StadiumAramEntry; // size: 0x10
 
+typedef struct {
+    /* 0x00 */ u8 id;
+    /* 0x01 */ u8 frame;
+    /* 0x02 */ u8 timer;
+} StadiumTileAnim; // size: 0x3
+
+typedef struct {
+    /* 0x00 */ void* src;
+    /* 0x04 */ StadiumTex* dst;
+    /* 0x08 */ u8* pos;
+    /* 0x0C */ u8* frames;
+    /* 0x10 */ StadiumTileAnim* entries;
+    /* 0x14 */ u16 count;
+    /* 0x16 */ u16 delay;
+    /* 0x18 */ u16 numFrames;
+} StadiumTiles;
+
 typedef struct DrawTask1C0 {
     /* 0x00 */ s32 type;
     /* 0x04 */ void (*draw)(struct DrawTask1C0* task);
@@ -50,7 +85,7 @@ typedef struct DrawTaskArg1C0 {
 typedef struct DrawTaskTiles1C0 {
     /* 0x00 */ s32 type;
     /* 0x04 */ void (*draw)(struct DrawTaskTiles1C0* task);
-    /* 0x08 */ void* tiles[2];
+    /* 0x08 */ StadiumTiles* tiles[2];
 } DrawTaskTiles1C0; // size: 0x10
 
 extern struct {
@@ -107,7 +142,7 @@ extern struct {
 extern u8 lbl_803CBBC0;
 
 extern u32 fn_80009028(void);
-extern void fn_80023F0C(void* dst, void* src, s32 x, s32 y, s32 w, s32 h);
+extern void fn_80023F0C(void* src, StadiumTex* dst, s32 srcX, s32 srcY, s32 w, s32 h, s32 dstX, s32 dstY);
 extern void fn_80035CA4(s32 id);
 extern void fn_8003A2C0(void);
 extern void fn_8003AD84(void* tex);
@@ -120,7 +155,7 @@ extern void fn_800A7D4C(s32, void*);
 extern void fn_800ACFB0(void* data);
 extern void fn_800B2AC8(void* layout);
 extern void fn_800B49E4(void* layout);
-extern BOOL fn_800B7D3C(s32 arg);
+extern BOOL fn_800B7D3C(s32 arg, Vec* corners, Mtx mtx);
 extern void SetFog(GXFogType type, f32 startZ, f32 endZ, f32 nearZ, f32 farZ, GXColor color);
 extern void fn_800BCDBC(void* geo);
 extern void fn_800BCE38(void* geo);
@@ -335,6 +370,53 @@ void fn_3_5E60(void) {
 
 // .text:0x00005C68 size:0x1F8 mapped:0x80644CFC
 void fn_3_5C68(DrawTaskTiles1C0* task) {
+    static const GXColor black = { 0, 0, 0, 0 };
+    StadiumTiles* tiles;
+    s32 j;
+    s32 i;
+    s32 changed;
+    s32 frame;
+    s32 dstX;
+    s32 dstY;
+    s32 srcX;
+    s32 srcY;
+
+    GXSetCullMode(GX_CULL_BACK);
+    SetFog(GX_FOG_NONE, 0.0f, 0.0f, 0.0f, 0.0f, black);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+    i = 2;
+    while (i--) {
+        tiles = task->tiles[i];
+        if (tiles == NULL) {
+            continue;
+        }
+        changed = 0;
+        for (j = 0; j < tiles->count; j++) {
+            if (tiles->entries[j].timer-- == 0) {
+                tiles->entries[j].frame = (tiles->entries[j].frame + 1) % tiles->numFrames;
+                dstY = (j / 8) * 64;
+                dstX = (j % 8) * 32;
+                frame = tiles->frames[tiles->entries[j].frame];
+                if (i != 0) {
+                    srcX = ((u8(*)[2][2])tiles->pos)[tiles->entries[j].id][frame][0] * 32;
+                    srcY = ((u8(*)[2][2])tiles->pos)[tiles->entries[j].id][frame][1] * 64;
+                } else {
+                    srcX = ((u8(*)[4][2])tiles->pos)[tiles->entries[j].id][frame][0] * 32;
+                    srcY = ((u8(*)[4][2])tiles->pos)[tiles->entries[j].id][frame][1] * 64;
+                }
+                fn_80023F0C(tiles->src, tiles->dst, srcX, srcY, 32, 64, dstX, dstY);
+                tiles->entries[j].timer = tiles->delay;
+                changed++;
+            }
+        }
+        if (changed) {
+            DCStoreRange(tiles->dst->image, tiles->dst->width * tiles->dst->height);
+        }
+    }
+    if (lbl_3_bss_18 != NULL) {
+        lbl_3_bss_18();
+    }
+    GXSetZCompLoc(GX_FALSE);
 }
 
 // .text:0x00005BF0 size:0x78 mapped:0x80644C84
@@ -363,19 +445,211 @@ void fn_3_567C(void) {
 
 // .text:0x00005518 size:0x164 mapped:0x806445AC
 void fn_3_5518(void) {
+    Mtx44 proj;
+    Mtx mtx;
+    s16 texIds[7] = { 0x49, 0x95, 0x1DB, 0x121, 0x1B2, 0xFB, 0 };
+    StadiumTex* textures = g_UNK_StadiumDetails._00;
+    StadiumTex* tex = &textures[texIds[g_d_GameSettings.StadiumID]];
+    void* image;
+
+    GXSetZMode(GX_TRUE, GX_ALWAYS, GX_TRUE);
+    GXSetScissor(0, 0, 640, 448);
+    C_MTXOrtho(proj, 0.0f, 480.0f, 0.0f, 640.0f, 0.5f, 1.5f);
+    GXSetProjection(proj, GX_ORTHOGRAPHIC);
+    GXSetCullMode(GX_CULL_NONE);
+    PSMTXIdentity(mtx);
+    GXLoadPosMtxImm(mtx, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    GXSetTexCopySrc(0, 0, 512, 480);
+    GXSetTexCopyDst(512, 480, GX_CTF_R4, GX_FALSE);
+    fn_3_4A38(g_d_GameSettings.StadiumID);
+    image = tex->image;
+    GXDrawDone();
+    GXCopyTex(image, GX_TRUE);
+    GXPixModeSync();
 }
 
 // .text:0x000053E0 size:0x138 mapped:0x80644474
-void fn_3_53E0(void) {
+void fn_3_53E0(u16* text, s16* u, s16* v, s16* w, s16* h, s16* page) {
+    s32 code = *text;
+    u16 idx;
+
+    if (code & 0x4000) {
+        return;
+    }
+    if (code & 0x8000) {
+        code &= 0x7FFF;
+        *page = code / 2116;
+        idx = code % 2116;
+        *u = idx % 46;
+        *v = (idx / 46) * 22;
+        *u *= 22;
+        *w = 22;
+        *h = 22;
+    } else {
+        *u = code % 92;
+        *v = (code / 92) * 22;
+        *u = (*u % 2 + *u / 2 * 2) * 11;
+        *w = 11;
+        *h = 22;
+        *page = 0;
+    }
 }
 
 // .text:0x00004F90 size:0x450 mapped:0x80644024
-void fn_3_4F90(void) {
+void fn_3_4F90(GXTexObj* obj, s16 x, s16 y, s16 value, u8 digits, GXColor c1, GXColor c2, u8 flag) {
+    u16** glyphs = lbl_80366B18._798 + 1;
+    s16 count;
+    s16 digit;
+    s16 num;
+    s16 width;
+    s16 u;
+    s16 v;
+    s16 w;
+    s16 h;
+    s16 page;
+    s32 i;
+
+    if (value > 99) {
+        value = 99;
+    }
+    count = (value >= 10) + 1;
+    if (flag) {
+        if (value != 0) {
+            count++;
+        } else {
+            count = 1;
+        }
+    }
+    if (count > digits) {
+        width = digits * 16 / count;
+    } else {
+        width = 16;
+    }
+    x = x + digits * 16 - width;
+    num = value;
+    if (flag) {
+        GXClearVtxDesc();
+        GXSetTevColor(GX_TEVREG0, c1);
+        GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+        GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+        GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_C0, GX_CC_C0);
+        GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_A0);
+        GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+        GXSetNumTexGens(0);
+        GXSetNumChans(1);
+        GXSetNumTevStages(1);
+        GXSetLineWidth(18, GX_TO_ZERO);
+        GXBegin(GX_LINES, GX_VTXFMT0, 4);
+        GXPosition3f32(x, y, -0.5f);
+        GXPosition3f32(x + width, y + 18, -0.5f);
+        GXPosition3f32(x + width, y, -0.5f);
+        GXPosition3f32(x, y + 18, -0.5f);
+        GXEnd();
+        GXSetLineWidth(6, GX_TO_ZERO);
+        x -= width;
+        count--;
+    }
+    for (i = 0; i < count; i++) {
+        digit = num % 10;
+        fn_3_53E0(glyphs[digit], &u, &v, &w, &h, &page);
+        fn_3_42CC(obj, x, y, x + width, y + 18, u, v, w, h, c1, c2, 0);
+        x -= width;
+        num /= 10;
+    }
 }
 
 // .text:0x00004A38 size:0x558 mapped:0x80643ACC
-void fn_3_4A38(void) {
+void fn_3_4A38(u8 stadium) {
+    GXColor colors[7][2] = {
+        { { 0x66, 0x66, 0x66, 0xFF }, { 0x00, 0x00, 0x00, 0xFF } },
+        { { 0x66, 0x66, 0x66, 0xFF }, { 0x00, 0x00, 0x00, 0xFF } },
+        { { 0x66, 0x66, 0x66, 0xFF }, { 0x00, 0x00, 0x00, 0xFF } },
+        { { 0x66, 0x66, 0x66, 0xFF }, { 0x00, 0x00, 0x00, 0xFF } },
+        { { 0x66, 0x66, 0x66, 0xFF }, { 0x00, 0x00, 0x00, 0xFF } },
+        { { 0x66, 0x66, 0x66, 0xFF }, { 0x00, 0x00, 0x00, 0xFF } },
+        { { 0x66, 0x66, 0x66, 0xFF }, { 0x00, 0x00, 0x00, 0xFF } },
+    };
+    s16 texIds[7] = { 0x48, 0x94, 0x1FA, 0x120, 0x1B1, 0xFC, 0x48 };
+    s16 unk26C[7] = { 0 };
+    s16 unk27C[7][2] = { { 0x10, 0x12 }, { 0x10, 0x12 }, { 0x10, 0x12 }, { 0x10, 0x12 },
+                         { 0x10, 0x12 }, { 0x10, 0x12 }, { 0x10, 0x12 } };
+    s16 unk298[2][2] = { { 0x20, 0x10 } };
+    s16 unk2A0[7][2] = { { 0x6, 0xC0 }, { 0x0, 0x8A } };
+    s16 unk2BC[7][2] = { { 0x6, 0xD6 }, { 0x0, 0x9F } };
+    s16 unk2D8[7][2] = { 0 };
+    s16 innings[7] = { 10, 9 };
+    s16 awayPos[7][2] = { { 0x1C, 0xC0 }, { 0x12, 0x8A } };
+    s16 homePos[7][2] = { { 0x1C, 0xD6 }, { 0x12, 0x9F } };
+    s16 awayTotalPos[7][2] = { { 0xFA, 0xC0 }, { 0xB4, 0x8A } };
+    s16 homeTotalPos[7][2] = { { 0xFA, 0xD6 }, { 0xB4, 0x9F } };
+    u8 totalDigits[7] = { 1, 1 };
+    s16 spacing[7][2] = { { 0x16, 0x12 }, { 0x12, 0x12 } };
+    s16 unk398[7][2] = { 0 };
+    s16 unk3B4[7][2] = { 0 };
+    s16 unk3D0[7][2] = { { 0x16, 0x12 }, { 0x12, 0x12 } };
+    s16 unk3EC[7][2] = { { 0x0, 0x110 }, { 0xC6, 0x8A } };
+    s16 unk408[7][2] = { { 0x0, 0x12A }, { 0xC6, 0x9F } };
+    u8 unk424[7] = { 1, 1 };
+    s16 unk42C[7][2] = { { 0x18, 0x110 }, { 0xD8, 0x8A } };
+    s16 unk448[7][2] = { { 0x18, 0x12A }, { 0xD8, 0x9F } };
+    s16 unk464[7][2] = { { 0x0, 0x150 }, { 0x0, 0x16A }, { 0x0, 0x184 }, { 0x105, 0x75 }, { 0x105, 0x8B }, { 0x105, 0xA1 } };
+    s16 unk480[7][2] = { 0 };
+    s16 unk49C[7][2] = { 0 };
+    s16 unk4B8[7][2] = { { 0x10, 0x12 }, { 0x10, 0x10 } };
+    s16 unk4D4[7][2] = { { 0x1A, 0x12 }, { 0x15, 0x12 } };
+    GXTexObj obj;
+    s32 start;
+    s32 i;
+    s32 last;
+    s32 offset;
+    u8 skip;
+
+    GXInitTexObjLOD(&obj, GX_LINEAR, GX_LINEAR, 0.0f, 0.0f, 0.0f, GX_FALSE, GX_FALSE, GX_ANISO_1);
+    start = 1;
+    if (g_Scores._00 >= innings[stadium] + 1) {
+        start = innings[stadium] + 1;
+    }
+
+    last = g_Scores._00;
+    offset = 0;
+    for (i = start; i <= last; i++) {
+        if (i == g_Scores._00 && g_Scores._04[0][i] == 0 && g_Scores._AD == 0 &&
+            g_GameLogic.EventTriggers_EndOfGame == 0) {
+            break;
+        }
+        fn_3_4F90(&obj, awayPos[stadium][0] + offset, awayPos[stadium][1], g_Scores._04[0][i], 1,
+                  colors[stadium][0], colors[stadium][1], 0);
+        offset += spacing[stadium][0];
+    }
+    fn_3_4F90(&obj, awayTotalPos[stadium][0], awayTotalPos[stadium][1], g_Scores._04[0][0], totalDigits[stadium],
+              colors[stadium][0], colors[stadium][1], 0);
+
+    if (g_GameLogic.EventTriggers_EndOfGame == 0) {
+        last = g_Scores._00 + g_Scores._AD;
+    } else {
+        last = g_Scores._AA + 1;
+    }
+    offset = 0;
+    for (; start < last; start++) {
+        if (start >= g_Scores._AA && g_Scores._04[1][0] > g_Scores._04[0][0]) {
+            skip = TRUE;
+        } else {
+            skip = FALSE;
+        }
+        if (start == g_Scores._00 && g_Scores._04[1][start] == 0 && !skip &&
+            g_GameLogic.EventTriggers_EndOfGame == 0) {
+            break;
+        }
+        fn_3_4F90(&obj, homePos[stadium][0] + offset, homePos[stadium][1], g_Scores._04[1][start], 1,
+                  colors[stadium][0], colors[stadium][1], skip);
+        offset += spacing[stadium][0];
+    }
+    fn_3_4F90(&obj, homeTotalPos[stadium][0], homeTotalPos[stadium][1], g_Scores._04[1][0], totalDigits[stadium],
+              colors[stadium][0], colors[stadium][1], 0);
 }
+
+// .text:0x00004A38 size:0x558 mapped:0x80643ACC
 
 // .text:0x00004984 size:0xB4 mapped:0x80643A18
 void fn_3_4984(void) {
@@ -393,15 +667,173 @@ void fn_3_4984(void) {
 }
 
 // .text:0x000042CC size:0x6B8 mapped:0x80643360
-void fn_3_42CC(void) {
+void fn_3_42CC(GXTexObj* obj, s16 x0, s16 y0, s16 x1, s16 y1, s16 u, s16 v, s16 w, s16 h, GXColor c1,
+               GXColor c2, u8 flag) {
+    f32 left = x0;
+    f32 top = y0;
+    f32 right = x1;
+    f32 bottom = y1;
+    // GXTexture.h declares these u32; the SDK returns u16, which the casts restore
+    u32 width = GXGetTexObjWidth(obj);
+    u32 height = GXGetTexObjHeight(obj);
+    f32 s0 = (f32)u / (u16)width;
+    f32 t0 = (f32)v / (u16)height;
+    f32 s1 = (f32)(u + w) / (u16)width;
+    f32 t1 = (f32)(v + h) / (u16)height;
+
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetTevColor(GX_TEVREG0, c1);
+    GXSetTevColor(GX_TEVREG1, c2);
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetNumChans(1);
+    GXSetNumTexGens(0);
+    GXSetNumTevStages(1);
+    if (!(flag & 1)) {
+        GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_C0, GX_CC_C1);
+    } else {
+        GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ONE, GX_CC_C0, GX_CC_C1);
+    }
+    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_A0);
+    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_OR);
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    GXPosition3f32(left - 1.0f, top - 1.0f, -0.5f);
+    GXPosition3f32(right + 1.0f, top - 1.0f, -0.5f);
+    GXPosition3f32(right + 1.0f, bottom + 1.0f, -0.5f);
+    GXPosition3f32(left - 1.0f, bottom + 1.0f, -0.5f);
+    GXEnd();
+
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
+    GXSetNumChans(0);
+    GXSetNumTexGens(1);
+    GXSetNumTevStages(2);
+    if (!(flag & 1)) {
+        GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_TEXC, GX_CC_TEXA, GX_CC_ZERO);
+        GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_A0);
+        GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+        GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+        GXSetTevColorIn(GX_TEVSTAGE1, GX_CC_ZERO, GX_CC_CPREV, GX_CC_C0, GX_CC_C1);
+        GXSetTevAlphaIn(GX_TEVSTAGE1, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_A0);
+        GXSetTevColorOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+        GXSetTevAlphaOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    } else {
+        GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_TEXC, GX_CC_TEXA, GX_CC_ONE);
+        GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_A0);
+        GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_SUB, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+        GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+        GXSetTevColorIn(GX_TEVSTAGE1, GX_CC_ZERO, GX_CC_CPREV, GX_CC_C0, GX_CC_C1);
+        GXSetTevAlphaIn(GX_TEVSTAGE1, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_A0);
+        GXSetTevColorOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+        GXSetTevAlphaOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    }
+    GXLoadTexObj(obj, GX_TEXMAP0);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    GXSetTevOrder(GX_TEVSTAGE1, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_OR);
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    GXPosition3f32(left, top, -0.5f);
+    GXTexCoord2f32(s0, t0);
+    GXPosition3f32(right, top, -0.5f);
+    GXTexCoord2f32(s1, t0);
+    GXPosition3f32(right, bottom, -0.5f);
+    GXTexCoord2f32(s1, t1);
+    GXPosition3f32(left, bottom, -0.5f);
+    GXTexCoord2f32(s0, t1);
+    GXEnd();
 }
 
 // .text:0x00003EE8 size:0x3E4 mapped:0x80642F7C
-void fn_3_3EE8(void) {
+void fn_3_3EE8(StadiumTex* tex, s16 x0, s16 y0, s16 x1, s16 y1, s16 u, s16 v, s16 w, s16 h) {
+    GXTexObj obj;
+    u16 height = tex->height;
+    u16 width = tex->width;
+    f32 left = x0;
+    f32 top = y0;
+    f32 right = x1;
+    f32 bottom = y1;
+    f32 s0 = (f32)u / width;
+    f32 t0 = (f32)v / height;
+    f32 s1 = (f32)(u + w) / width;
+    f32 t1 = (f32)(v + h) / height;
+    GXColor color = { 0xFF, 0xFF, 0xFF, 0xFF };
+
+    GXInitTexObj(&obj, tex->image, width, height, GX_TF_I4, GX_CLAMP, GX_CLAMP, GX_FALSE);
+    GXInitTexObjLOD(&obj, GX_NEAR, GX_NEAR, 0.0f, 0.0f, 0.0f, GX_FALSE, GX_FALSE, GX_ANISO_1);
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_REG, GX_SRC_REG, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetNumChans(0);
+    GXSetNumTexGens(1);
+    GXSetNumTevStages(1);
+    GXSetTevColor(GX_TEVREG0, color);
+    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_TEXC);
+    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_A0);
+    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    GXSetBlendMode(GX_BM_NONE, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_OR);
+    GXLoadTexObj(&obj, GX_TEXMAP0);
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    GXPosition3f32(left, top, -0.5f);
+    GXTexCoord2f32(s0, t0);
+    GXPosition3f32(right, top, -0.5f);
+    GXTexCoord2f32(s1, t0);
+    GXPosition3f32(right, bottom, -0.5f);
+    GXTexCoord2f32(s1, t1);
+    GXPosition3f32(left, bottom, -0.5f);
+    GXTexCoord2f32(s0, t1);
+    GXEnd();
 }
 
 // .text:0x00003BE8 size:0x300 mapped:0x80642C7C
-void fn_3_3BE8(void) {
+void fn_3_3BE8(StadiumTex* tex, s16 x0, s16 y0, s16 x1, s16 y1, s16 u, s16 v, s16 w, s16 h) {
+    GXTexObj obj;
+    f32 left = x0;
+    f32 top = y0;
+    f32 right = x1;
+    f32 bottom = y1;
+    GXColor color = { 0xFF, 0xFF, 0xFF, 0xFF };
+
+    GXInitTexObj(&obj, tex->image, tex->width, tex->height, GX_TF_I4, GX_CLAMP, GX_CLAMP, GX_FALSE);
+    GXInitTexObjLOD(&obj, GX_LINEAR, GX_LINEAR, 0.0f, 0.0f, 0.0f, GX_FALSE, GX_FALSE, GX_ANISO_1);
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_S16, 9);
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetNumChans(0);
+    GXSetNumTexGens(1);
+    GXSetTevColor(GX_TEVREG0, color);
+    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_TEXC);
+    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_A0);
+    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_OR);
+    GXLoadTexObj(&obj, GX_TEXMAP0);
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    GXPosition3f32(left, top, -0.5f);
+    GXTexCoord2s16(u, v);
+    GXPosition3f32(right, top, -0.5f);
+    GXTexCoord2s16(u + w, v);
+    GXPosition3f32(right, bottom, -0.5f);
+    GXTexCoord2s16(u + w, v + h);
+    GXPosition3f32(left, bottom, -0.5f);
+    GXTexCoord2s16(u, v + h);
+    GXEnd();
 }
 
 // .text:0x00003904 size:0x2E4 mapped:0x80642998
@@ -429,6 +861,72 @@ void fn_3_3818(DrawTask1C0* task) {
 
 // .text:0x00003638 size:0x1E0 mapped:0x806426CC
 void fn_3_3638(StadiumDrawTask* task) {
+    Vec corners[8];
+    Mtx mtx;
+    MtxPtr world;
+    MtxPtr camera;
+    s32 i;
+    StadiumActorLayout* layout;
+    StadiumDisplayLayout* disp;
+    DODisplayDataPtr pal;
+
+    world = task->_08;
+    camera = task->_38;
+    layout = task->layout;
+    pal = (DODisplayDataPtr)layout->layout.geoPaletteName;
+    for (i = 0; i < layout->layout.totalBones; i++) {
+        if (layout->bones[i].geoFileID == 0xFFFF) {
+            continue;
+        }
+        disp = (StadiumDisplayLayout*)pal->descriptorArray[layout->bones[i].geoFileID].layout;
+        CTRLBuildMatrix(layout->bones[i].orientationCtrl, disp->mtx);
+        PSMTXConcat(world, disp->mtx, disp->mtx);
+        PSMTXConcat(camera, disp->mtx, mtx);
+        corners[0].x = disp->_58;
+        corners[0].y = disp->_60;
+        corners[0].z = disp->_64;
+        corners[1].x = disp->_54;
+        corners[1].y = disp->_60;
+        corners[1].z = disp->_64;
+        corners[2].x = disp->_54;
+        corners[2].y = disp->_60;
+        corners[2].z = disp->_68;
+        corners[3].x = disp->_58;
+        corners[3].y = disp->_60;
+        corners[3].z = disp->_68;
+        corners[4].x = disp->_58;
+        corners[4].y = disp->_5C;
+        corners[4].z = disp->_64;
+        corners[5].x = disp->_54;
+        corners[5].y = disp->_5C;
+        corners[5].z = disp->_64;
+        corners[6].x = disp->_54;
+        corners[6].y = disp->_5C;
+        corners[6].z = disp->_68;
+        corners[7].x = disp->_58;
+        corners[7].y = disp->_5C;
+        corners[7].z = disp->_68;
+        if (fn_800B7D3C(task->_6C, corners, mtx)) {
+            if (layout->bones[i].pad16 & 1) {
+                GXSetZMode(GX_TRUE, GX_ALWAYS, GX_TRUE);
+            } else {
+                GXSetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
+            }
+            switch (layout->bones[i].pad16 & 6) {
+            case 2:
+                GXSetBlendMode(GX_BM_BLEND, GX_BL_ONE, GX_BL_ONE, GX_LO_CLEAR);
+                break;
+            case 4:
+                GXSetBlendMode(GX_BM_BLEND, GX_BL_DSTCOL, GX_BL_ZERO, GX_LO_CLEAR);
+                break;
+            case 3:
+            default:
+                GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+                break;
+            }
+            DOVARender((struct DODisplayObj*)disp, camera, 0, NULL);
+        }
+    }
 }
 
 // .text:0x000035F0 size:0x48 mapped:0x80642684
