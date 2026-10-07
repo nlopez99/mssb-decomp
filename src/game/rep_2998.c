@@ -100,7 +100,7 @@ typedef struct {
     /* 0x18 */ f32 _18;
 } Rep2998Prop; // size: 0x1C
 
-extern struct {
+typedef struct {
     /* 0x00 */ Rep2998Obj* _00;
     /* 0x04 */ u8* _04;
     /* 0x08 */ u8 _08[0x18 - 0x08];
@@ -122,7 +122,9 @@ extern struct {
     /* 0x66 */ s16 _66;
     /* 0x68 */ u8 _68[0x6D - 0x68];
     /* 0x6D */ u8 _6D;
-} lbl_3_common_bss_350E4;
+} Rep2998Common;
+
+extern Rep2998Common lbl_3_common_bss_350E4;
 
 extern struct {
     /* 0x00 */ u8 _00[0x6C];
@@ -220,18 +222,19 @@ void fn_3_E4FC4(void) {
 
 // .text:0x000E4EF4 size:0xD0 mapped:0x80723F88
 void fn_3_E4EF4(void) {
+    Rep2998Common* common = &lbl_3_common_bss_350E4;
     s32 count;
     s32 idx;
-    u32 size = lbl_3_common_bss_350E4._30 * 2 * sizeof(Vec) + lbl_3_common_bss_350E4._30 * sizeof(u32) +
-               lbl_3_common_bss_350E4._30 * sizeof(u32) + lbl_3_common_bss_350E4._30 * sizeof(u16);
+    u32 size = common->_30 * sizeof(u16) + common->_30 * sizeof(u32) + common->_30 * sizeof(u32) +
+               common->_30 * (2 * sizeof(Vec));
 
-    if (lbl_3_common_bss_350E4._48 == NULL) {
-        lbl_3_common_bss_350E4._48 = _OSAllocFromHeap(4, size);
-        lbl_3_common_bss_350E4._3C = (u32*)(lbl_3_common_bss_350E4._48 + lbl_3_common_bss_350E4._30 * 2);
-        lbl_3_common_bss_350E4._44 = lbl_3_common_bss_350E4._3C + lbl_3_common_bss_350E4._30;
-        lbl_3_common_bss_350E4._40 = (u16*)(lbl_3_common_bss_350E4._44 + lbl_3_common_bss_350E4._30);
+    if (common->_48 == NULL) {
+        common->_48 = _OSAllocFromHeap(4, size);
+        lbl_3_common_bss_350E4._3C = (u32*)(common->_48 + common->_30 * 2);
+        lbl_3_common_bss_350E4._44 = lbl_3_common_bss_350E4._3C + common->_30;
+        lbl_3_common_bss_350E4._40 = (u16*)(lbl_3_common_bss_350E4._44 + common->_30);
     }
-    memset(lbl_3_common_bss_350E4._48, 0, size);
+    memset(common->_48, 0, size);
     count = 0;
     idx = 0;
     fn_3_E4CB0(&count, &idx);
@@ -243,7 +246,6 @@ void fn_3_E4CB0(s32* count, s32* objIdx) {
     Rep2998Transform xform;
     Mtx m;
     Vec pos;
-    Rep2998Prop* prop;
     Rep2998Obj* obj;
     s32 slot;
     s32 i;
@@ -253,10 +255,13 @@ void fn_3_E4CB0(s32* count, s32* objIdx) {
         slot = lbl_3_common_bss_350E4._40[*count] =
             lbl_3_common_bss_350E4._40[*count - 1] + lbl_3_common_bss_350E4._3C[*count - 1];
         fn_3_B8574();
-        prop = lbl_3_data_18ED0;
-        for (j = 0; j < 10; j++, prop++) {
-            if (i == prop->_12 && prop->_10 != 2 && lbl_3_common_bss_350E4._00[*objIdx]._90_6) {
-                lbl_3_common_bss_350E4._44[slot++] = *objIdx;
+        for (j = 0; j < 10; j++) {
+            if (i != lbl_3_data_18ED0[j]._12 || lbl_3_data_18ED0[j]._10 == 2) {
+                continue;
+            }
+            if (lbl_3_common_bss_350E4._00[*objIdx]._90_6) {
+                lbl_3_common_bss_350E4._44[slot] = *objIdx;
+                slot++;
                 lbl_3_common_bss_350E4._3C[*count]++;
                 obj = &lbl_3_common_bss_350E4._00[*objIdx];
                 xform = obj->xform;
