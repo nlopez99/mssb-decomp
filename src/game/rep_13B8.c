@@ -3,6 +3,9 @@
 #include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
 #include "game/rep_140.h"
+#include "game/rep_18E8.h"
+#include "game/rep_3DA8.h"
+#include "static/UnknownHomes_Static.h"
 
 extern struct {
     /* 0x00 */ u8 _00[0x9C];
@@ -16,9 +19,26 @@ extern struct {
     /* 0x06 */ s16 _06[4];
 } g_RunningLogic;
 
+extern struct {
+    /* 0x00 */ u8 _00[0x40];
+    /* 0x40 */ s16 _40;
+} lbl_3_common_bss_37400;
+
+typedef struct {
+    /* 0x000 */ u8 _000[0x178];
+    /* 0x178 */ s16 _178;
+    /* 0x17A */ u8 _17A[0x268 - 0x17A];
+} Unk13B8Fielder; // size: 0x268
+
+extern Unk13B8Fielder g_Fielders[9];
+
+extern s16 lbl_3_data_1C88[4];
+extern VecXZ lbl_3_data_4444[5];
 extern VecXZ lbl_3_data_4A34[4];
 extern VecXZ lbl_3_data_4A54[2][13];
 extern VecXYZ lbl_3_data_4B58[4];
+extern f32 lbl_3_data_4C44[4];
+extern s16 lbl_3_data_4C54[12];
 extern s16 lbl_3_data_21904[12];
 
 // .text:0x0008A958 size:0x73C mapped:0x806C99EC
@@ -209,12 +229,63 @@ void fn_3_88C24(void) {
 
 // .text:0x00088B18 size:0x10C mapped:0x806C7BAC
 void fn_3_88B18(void) {
-    return;
+    int i;
+    int state = 0;
+
+    if (g_FieldingLogic._107 != 0 && g_FieldingLogic._107 != 4) {
+        state = 1;
+    }
+    for (i = 0; i < 4; i++) {
+        InMemRunnerType* r = &g_Runners[i];
+        if (r->forceOutCd == 2) {
+            state = 2;
+            continue;
+        }
+        r->forceOutCd = 0;
+        if (g_Ball.AtBat_ContactResult < 0 || g_FieldingLogic._108 != 0) {
+            continue;
+        }
+        if (state != 0) {
+            if (r->runnerOnFieldOrOutOrScored == 0) {
+                state = 1;
+            }
+            if (state == 2 && r->startingBase_baseAchieved == r->currentBase) {
+                r->forceOutCd = -1;
+            }
+        } else if (r->runnerOnFieldOrOutOrScored == 1) {
+            if (r->baseStandingOn >= 0 && r->baseStandingOn == ((r->startingBase_baseAchieved + 1) & 3)) {
+                continue;
+            }
+            if (r->startingBase_baseAchieved == r->currentBase) {
+                r->forceOutCd = 1;
+            }
+        } else {
+            state = 1;
+        }
+    }
 }
 
 // .text:0x000889FC size:0x11C mapped:0x806C7A90
 void fn_3_889FC(void) {
-    return;
+    InMemRunnerType* r = g_Runners;
+    int result = g_Ball.AtBat_ContactResult;
+    u8 fielding = g_FieldingLogic._108;
+    u8 landingZone = g_Ball.landingSpotZoneAwayFromHome;
+    u8 ballZone = g_Ball.ballZoneAwayFromHome;
+    u8 ballState = g_Ball.ballState;
+    int i;
+
+    for (i = 0; i < 4; r++, i++) {
+        if (r->runnerOnFieldOrOutOrScored == 1) {
+            if ((result == 3 || fielding == 2) && landingZone <= 1) {
+                r->isEligibleToScore = 0;
+            } else if (ballZone <= 1 && ballState != 0 && (u16)result > 1) {
+                if (r->currentBase != 0 && r->currentBase < 3) {
+                    r->isEligibleToScore = 0;
+                }
+            }
+        }
+    }
 }
 
 // .text:0x00088408 size:0x5F4 mapped:0x806C749C
@@ -258,13 +329,62 @@ void fn_3_872CC(void) {
 }
 
 // .text:0x000871BC size:0x110 mapped:0x806C6250
+// 96.76%: the target keeps g_Runners in r7 from the start; this copies it from r5 (one extra mr)
 void fn_3_871BC(void) {
-    return;
+    InMemRunnerType* r = g_Runners;
+    int runDrain = lbl_3_data_4C54[10];
+    int turnDrain = lbl_3_data_4C54[11];
+    int maxStamina = lbl_3_data_4C54[9];
+    f32 speedEffect = lbl_3_data_4C44[1];
+    f32 accelEffect = lbl_3_data_4C44[2];
+    f32 turnEffect = lbl_3_data_4C44[3];
+    int i;
+
+    for (i = 0; i < 4; r++, i++) {
+        if (r->runnerOnFieldOrOutOrScored == 1) {
+            int drain = 0;
+            f32 tired;
+
+            if (r->groundVelocity[0] >= 0.1f) {
+                drain = runDrain;
+            }
+            if (r->turnaroundCode != 0) {
+                drain += turnDrain;
+            }
+            if (drain != 0) {
+                r->stamina -= drain;
+                if (r->stamina < 0) {
+                    r->stamina = 0;
+                }
+            }
+            tired = 1.0f - (f32)r->stamina / (f32)maxStamina;
+            r->staminaMult = 1.0f - speedEffect * tired;
+            r->accelerationStaminaEffect = 1.0f - accelEffect * tired;
+            r->accelerationStaminaEffectWhileChangingDirection = 1.0f - turnEffect * tired;
+        }
+    }
 }
 
 // .text:0x000870AC size:0x110 mapped:0x806C6140
 void fn_3_870AC(void) {
-    return;
+    InMemRunnerType* r;
+
+    g_Runners[0].tagType = 0;
+    g_Runners[1].tagType = 0;
+    g_Runners[2].tagType = 0;
+    g_Runners[3].tagType = 0;
+    if ((g_FieldingLogic._111 == 2 || g_FieldingLogic._111 == 4) && g_FieldingLogic._0E8 >= 0) {
+        r = &g_Runners[g_FieldingLogic._0E8];
+        if (r->runnerOnFieldOrOutOrScored == 1) {
+            r->tagType = 1;
+        }
+        if (g_FieldingLogic._0EC < 5 && r->actionCode != 0) {
+            r->tagType = 2;
+        }
+        if (g_d_GameSettings.exhibitionMatchInd == 0 && lbl_3_common_bss_37400._40 == g_GameLogic.teamFielding) {
+            fn_3_161588(6, g_Fielders[g_Ball.fielderWBallIndex]._178);
+        }
+    }
 }
 
 // .text:0x00086EF8 size:0x1B4 mapped:0x806C5F8C
@@ -431,8 +551,30 @@ void fn_3_842E4(void) {
 }
 
 // .text:0x000841C0 size:0x124 mapped:0x806C3254
-void fn_3_841C0(void) {
-    return;
+int fn_3_841C0(int runner, int frame) {
+    InMemRunnerType* r = &g_Runners[runner];
+    int frames;
+
+    if (r->forceOutCd == 1) {
+        return 1;
+    }
+    frames = frame + fn_3_A6810(g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.x,
+                        g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.z, lbl_3_data_4444[r->nextBase].x,
+                        lbl_3_data_4444[r->nextBase].z);
+    frames += 45;
+    if (g_GameLogic.AIDifficulty0Special3Weak[g_GameLogic.awayTeamBattingInd_battingTeam] >= 3) {
+        frames -= 30;
+    } else {
+        frames += lbl_3_data_1C88[g_GameLogic.runnerAIInd[g_GameLogic.homeTeamBattingInd_fieldingTeam]];
+    }
+    if (g_Ball.ballZoneAwayFromHome <= 1) {
+        if (frames - 20 > r->framesToNextBase) {
+            return 1;
+        }
+    } else if (frames > r->framesToNextBase) {
+        return 1;
+    }
+    return -1;
 }
 
 // .text:0x00083714 size:0xAAC mapped:0x806C27A8

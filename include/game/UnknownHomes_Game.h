@@ -1114,7 +1114,7 @@ typedef struct _GameControlsStruct {
     /*0x008*/ int teamFielding;
     /*0x00C*/ int homeTeamBattingInd_fieldingTeam;
     /*0x010*/ int awayTeamBattingInd_battingTeam;
-    /*0x014*/ u32 AIDifficulty0Special3Weak[2];
+    /*0x014*/ int AIDifficulty0Special3Weak[2];
     artificial_padding(0x14, 0x24, u32[2]);
     /*0x024*/ LogoInfoStruct logo[2];
     /*0x03C*/ int battingOrderAndPositionMapping[2][10][2]; // first Pair Is Pitcher
@@ -2423,7 +2423,7 @@ typedef struct {
     /* 0x0E6 */ u8 _0E6[0xE8 - 0xE6];
     /* 0x0E8 */ s16 _0E8;
     /* 0x0EA */ s16 _0EA;
-    /* 0x0EC */ u8 _0EC[0xEE - 0xEC];
+    /* 0x0EC */ s16 _0EC;
     /* 0x0EE */ s16 _0EE;
     /* 0x0F0 */ u8 _0F0[0x105 - 0xF0];
     /* 0x105 */ u8 playerAtMoundCutoffLocation;
