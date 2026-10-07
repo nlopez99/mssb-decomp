@@ -600,8 +600,6 @@ void fn_3_53E0(u16* text, s16* u, s16* v, s16* w, s16* h, s16* page) {
 }
 
 // .text:0x00004F90 size:0x450 mapped:0x80644024
-// 99.75%: the target keeps `count` unextended (`mr r14,r3`, `addi r14,r3,1`) where this
-// extends it on assignment.
 void fn_3_4F90(GXTexObj* obj, s16 x, s16 y, s16 value, u8 digits, GXColor c1, GXColor c2, u8 flag) {
     u16** glyphs = lbl_80366B18._798 + 1;
     s16 count;
@@ -618,7 +616,11 @@ void fn_3_4F90(GXTexObj* obj, s16 x, s16 y, s16 value, u8 digits, GXColor c1, GX
     if (value > 99) {
         value = 99;
     }
-    count = (value >= 10) + 1;
+    if (value >= 10) {
+        count = 2;
+    } else {
+        count = 1;
+    }
     if (flag) {
         if (value != 0) {
             count++;
