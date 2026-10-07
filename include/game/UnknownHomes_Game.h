@@ -1471,7 +1471,7 @@ typedef struct _MiniGameControlStruct {
 
 typedef struct _MiniGameUnk19E8 {
     /*0x0*/ s8 _0;
-    /*0x1*/ u8 _1;
+    /*0x1*/ s8 _1;
     /*0x2*/ s8 _2;
     /*0x3*/ s8 _3;
     /*0x4*/ s8 _4;
