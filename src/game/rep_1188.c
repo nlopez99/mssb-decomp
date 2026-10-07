@@ -78,22 +78,21 @@ extern int LERPToNewRange_Float(int value, int inMin, int inMax, int outMin, int
 
 // .text:0x0006EF1C size:0x5CC mapped:0x806ADFB0
 void fn_3_6EF1C(void) {
+    int i;
     int j;
     int team;
-    int (*entry)[2];
-    int i;
+    int slot;
 
     for (i = 0; i < 2; i++) {
         team = i ^ g_GameLogic.homeTeamInd;
         g_GameLogic.battingOrderAndPositionMapping[team][0][1] = 0;
         for (j = 0; j < 9; j++) {
-            if (lbl_80354720[i][j].slot == 9) {
+            slot = lbl_80354720[i][j].slot;
+            if (slot == 9) {
                 g_GameLogic.battingOrderAndPositionMapping[team][0][0] = lbl_80354720[i][j].index;
             } else {
-                entry = g_GameLogic.battingOrderAndPositionMapping[team];
-                entry += lbl_80354720[i][j].slot;
-                entry[1][0] = lbl_80354720[i][j].index;
-                entry[1][1] = lbl_80354720[i][j].value;
+                g_GameLogic.battingOrderAndPositionMapping[team][slot + 1][0] = lbl_80354720[i][j].index;
+                g_GameLogic.battingOrderAndPositionMapping[team][slot + 1][1] = lbl_80354720[i][j].value;
                 if (lbl_80354720[i][j].value == 0) {
                     g_GameLogic.battingOrderAndPositionMapping[team][0][0] = lbl_80354720[i][j].index;
                 }
