@@ -3,6 +3,15 @@
 #include "game/UnknownHomes_Game.h"
 #include "game/m_sound.h"
 #include "static/UnknownHomes_Static.h"
+#include "game/rep_1C0.h"
+#include "game/rep_1D58.h"
+#include "game/rep_D18.h"
+#include "game/rep_31F0.h"
+#include "game/rep_34B0.h"
+#include "game/rep_36D8.h"
+#include "game/rep_3520.h"
+#include "game/rep_60.h"
+#include "string.h"
 
 typedef struct {
     /* 0x00 */ u32 _00[4];
@@ -31,11 +40,47 @@ extern struct {
     /* 0x10 */ u8 _10;
 } lbl_3_data_228;
 
+extern struct {
+    /* 0x0000 */ u8 _0000[0x3078];
+    /* 0x3078 */ s16 _3078;
+    /* 0x307A */ u8 _307A;
+    /* 0x307B */ u8 _307B[0x307E - 0x307B];
+    /* 0x307E */ u8 _307E;
+} lbl_8036E548;
+
+// A task from fn_800B0A5C_insertQueue
+typedef struct {
+    /* 0x00 */ u8 _00[0x1A];
+    /* 0x1A */ u16 _1A;
+} UnkTask31A0;
+
+extern struct {
+    /* 0x00 */ u8 _00[0x13];
+    /* 0x13 */ u8 _13;
+} lbl_8037169C;
+
+extern struct {
+    /* 0x00 */ u8 _00[0xD8];
+    /* 0xD8 */ u8 _D8;
+} lbl_3_common_bss_32724;
+
 extern AramEntry31A0 lbl_3_data_20FDC;
 extern u8 lbl_3_data_18910[8];
 
 extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void* ARAMTransfer(AramEntry31A0* entry, int arg1, int arg2, u32 aram);
+extern void fn_8001CA40(int arg);
+extern void fn_80011BE4(int arg);
+extern void fn_80018B38(void);
+extern void fn_80035B50(int arg);
+extern void fn_3_909B0(void);
+extern void fn_3_9081C(void);
+extern void fn_3_9DC18(u8* list, int count, int arg2);
+extern void fn_3_1160B8(void);
+extern void fn_3_1471C0(void);
+extern void fn_3_9E078(int* order, int count, int arg2);
+extern void changeScene(u8, s16);
+extern void fn_800B0A5C_insertQueue(void (*callback)(void), s32 arg1);
 extern void fn_800246D4(int (*compare)(const void*, const void*), void* src, void* dst, int size, int count);
 
 u8 lbl_3_data_21268[8] = { 1, 2, 4, 5, 3, 6, 7, 0 };
@@ -589,7 +634,15 @@ void fn_3_10FBE4(void) {
 
 // .text:0x0010FB74 size:0x70 mapped:0x8074EC08
 void fn_3_10FB74(void) {
-    return;
+    switch (g_GameLogic._125) {
+    case 0:
+        lbl_3_common_bss_32724._D8 = 0;
+        lbl_3_common_bss_34C58._2C = 0;
+        g_GameLogic._125++;
+        break;
+    }
+    lbl_8036E548._307A = 0;
+    fn_3_5A6D4(0x1D);
 }
 
 // .text:0x0010F91C size:0x258 mapped:0x8074E9B0
@@ -604,7 +657,20 @@ void fn_3_10F684(void) {
 
 // .text:0x0010F5BC size:0xC8 mapped:0x8074E650
 void fn_3_10F5BC(void) {
-    return;
+    if (g_Minigame._1A2C >= 0) {
+        lbl_8036E548._307E = 0;
+        fn_3_B95EC();
+        fn_3_5E60();
+    }
+    g_Minigame._1A2C = -1;
+    lbl_3_data_228._10 = 0;
+    g_d_GameSettings.StadiumID = lbl_3_data_18910[g_Minigame.GameMode_MiniGame];
+    g_d_GameSettings.miniGameStadiumIndicator = 0;
+    if (g_d_GameSettings.StadiumID == STADIUM_ID_MARIO_STADIUM || g_d_GameSettings.StadiumID == STADIUM_ID_PEACH_GARDEN ||
+        g_d_GameSettings.StadiumID == STADIUM_ID_BOWSERS_CASTLE || g_d_GameSettings.StadiumID == STADIUM_ID_YOHSI_PARK) {
+        g_d_GameSettings.miniGameStadiumIndicator = 1;
+    }
+    fn_800B0A5C_insertQueue(manageStadiumLoading, 0);
 }
 
 // .text:0x0010F564 size:0x58 mapped:0x8074E5F8
@@ -657,7 +723,14 @@ void fn_3_10C81C(void) {
 
 // .text:0x0010C7A4 size:0x78 mapped:0x8074B838
 void fn_3_10C7A4(void) {
-    return;
+    int i;
+
+    fn_8001CA40(0);
+    for (i = 0; i < 4; i++) {
+        fn_80011BE4(i);
+        g_Minigame._19E8[i]._1 = 0;
+        g_Minigame._19E8[i]._2 = -1;
+    }
 }
 
 // .text:0x0010C58C size:0x218 mapped:0x8074B620
@@ -687,7 +760,18 @@ void fn_3_10B27C(void) {
 
 // .text:0x0010B200 size:0x7C mapped:0x8074A294
 void fn_3_10B200(void) {
-    return;
+    if (g_d_GameSettings.GameModeSelected != GAME_TYPE_TOY_FIELD) {
+        lbl_8036E548._3078 = 0;
+    }
+    fn_80035B50(0xD);
+    fn_3_B95EC();
+    fn_3_5E60();
+    fn_80018B38();
+    fn_3_909B0();
+    fn_3_9081C();
+    fn_80035B50(0x11);
+    g_Minigame._19DF = 30;
+    fn_3_5A6D4(0x1D);
 }
 
 // .text:0x0010AEF0 size:0x310 mapped:0x80749F84
@@ -697,12 +781,27 @@ void fn_3_10AEF0(void) {
 
 // .text:0x0010AE18 size:0xD8 mapped:0x80749EAC
 void fn_3_10AE18(void) {
-    return;
+    fn_3_10AD48();
+    fn_3_5A6D4(0x1A);
 }
 
 // .text:0x0010AD48 size:0xD0 mapped:0x80749DDC
 void fn_3_10AD48(void) {
-    return;
+    int order[4];
+    int i;
+
+    for (i = 0; i < 4; i++) {
+        order[i] = -1;
+    }
+    for (i = 0; i < 4; i++) {
+        if (g_Minigame.minigameControlStruct.characterIndex[i] >= 0) {
+            order[i] = i;
+        }
+    }
+    fn_3_9E078(order, g_Minigame.miniGameNumberOfParticipants, 0);
+    for (i = 0; i < 4; i++) {
+        g_Minigame.minigameControlStruct._14[i] = order[i];
+    }
 }
 
 // .text:0x0010A0A0 size:0xCA8 mapped:0x80749134
@@ -712,7 +811,19 @@ void fn_3_10A0A0(void) {
 
 // .text:0x0010A01C size:0x84 mapped:0x807490B0
 void fn_3_10A01C(void) {
-    return;
+    if (g_Minigame.GameMode_MiniGame == 1) {
+        fn_3_1128E8();
+    } else if (g_Minigame.GameMode_MiniGame == 2) {
+        fn_3_1160B8();
+    } else if (g_Minigame.GameMode_MiniGame == 3) {
+        fn_3_1323CC();
+    } else if (g_Minigame.GameMode_MiniGame == 4) {
+        fn_3_141A2C();
+    } else if (g_Minigame.GameMode_MiniGame == 5) {
+        fn_3_1471C0();
+    } else if (g_Minigame.GameMode_MiniGame == 6) {
+        fn_3_13C464();
+    }
 }
 
 // .text:0x00109DE0 size:0x23C mapped:0x80748E74
@@ -732,8 +843,24 @@ struct UnkRecord3448* fn_3_109D88(void) {
 }
 
 // .text:0x00109CE8 size:0xA0 mapped:0x80748D7C
-void fn_3_109CE8(void) {
-    return;
+u32 fn_3_109CE8(struct UnkRecord3448* rec) {
+    struct UnkRecord3448* table;
+    u32 i;
+
+    if (g_Minigame._1907 == 1) {
+        table = fn_3_109D88();
+        i = 0;
+        do {
+            if (rec->_00 > table[i]._00) {
+                break;
+            }
+            if (rec->_00 == table[i]._00 && rec->_04 > table[i]._04) {
+                break;
+            }
+            i++;
+        } while (i < 5);
+        return i;
+    }
 }
 
 // .text:0x0010952C size:0x7BC mapped:0x807485C0
@@ -909,7 +1036,18 @@ BOOL fn_3_107988(u32 id) {
 
 // .text:0x001078F8 size:0x90 mapped:0x8074698C
 void fn_3_1078F8(void) {
-    return;
+    u32 i;
+
+    memset(&g_Minigame._1E04, 0, 0x28);
+    g_Minigame._1A3D = 0;
+    g_Minigame._1A3F = 0;
+    lbl_8036E548._307E = 0;
+    i = 0;
+    do {
+        g_Minigame._1E1C[i] = i + 1;
+    } while (++i < 6);
+    fn_3_9DC18(g_Minigame._1E1C, 6, 0);
+    fn_3_5A6D4(0x28);
 }
 
 // .text:0x00107784 size:0x174 mapped:0x80746818
@@ -919,7 +1057,30 @@ void fn_3_107784(void) {
 
 // .text:0x0010768C size:0xF8 mapped:0x80746720
 void fn_3_10768C(void) {
-    return;
+    switch (g_GameLogic._125) {
+    case 0:
+        g_Minigame.GameMode_MiniGame = g_Minigame._1E1C[g_Minigame._1E2A++];
+        changeScene(1, 6);
+        g_GameLogic._125 = 1;
+        break;
+    case 1:
+        if (((UnkTask31A0*)g_Minigame._1E04)->_1A != 0) {
+            changeScene(3, 6);
+            g_GameLogic._125 = 2;
+        }
+        break;
+    case 2:
+        if (lbl_8037169C._13 != 0) {
+            g_GameLogic._125 = 3;
+        }
+        break;
+    case 3:
+        g_GameLogic._125 = 4;
+        break;
+    case 4:
+        fn_3_5A6D4(0x21);
+        break;
+    }
 }
 
 // .text:0x0010754C size:0x140 mapped:0x807465E0

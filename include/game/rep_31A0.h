@@ -37,7 +37,7 @@ void fn_3_1089E8(void);
 void fn_3_108C54(void);
 void fn_3_109254(void);
 void fn_3_10952C(void);
-void fn_3_109CE8(void);
+u32 fn_3_109CE8(struct UnkRecord3448* rec);
 struct UnkRecord3448* fn_3_109D88(void);
 void fn_3_109DE0(void);
 void fn_3_10A01C(void);

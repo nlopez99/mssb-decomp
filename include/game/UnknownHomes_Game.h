@@ -2086,7 +2086,7 @@ typedef struct _MiniGameStruct {
     /*0x1E01*/ u8 _1E01;
     /*0x1E02*/ u8 _1E02;
     /*0x1E03*/ u8 _1E03;
-    /*0x1E04*/ u32 _1E04;
+    /*0x1E04*/ void* _1E04; // a task from fn_800B0A5C_insertQueue
     /*0x1E08*/ u8 _1E08[4][2];
     /*0x1E10*/ s16 _1E10[6];
     /*0x1E1C*/ u8 _1E1C[6];
