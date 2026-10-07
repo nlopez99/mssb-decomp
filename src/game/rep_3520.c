@@ -209,8 +209,25 @@ static inline void Unk3520Obj_SetDelay(Unk3520Obj* obj, u32 t) {
 }
 
 // .text:0x0013C468 size:0x328 mapped:0x8077B4FC
+// Needs fn_3_13BCB8 and fn_3_13B284, still stubs that are inlined away here.
 void fn_3_13C468(void) {
-    return;
+    switch (g_GameLogic.gameStatus) {
+    case GAME_STATUS_LOAD_GAME:
+        fn_3_13BCB8();
+        break;
+    case GAME_STATUS_TRANSITION_MINIGAME_TO_BATTING:
+        fn_3_13BBF4();
+        break;
+    case GAME_STATUS_DEFAULT:
+        fn_3_13BB30();
+        break;
+    case GAME_STATUS_LIVE_BALL:
+        fn_3_13B284();
+        break;
+    case GAME_STATUS_TRANSITION_MINIGAME_POSTGAME:
+        fn_3_13B9C4();
+        break;
+    }
 }
 
 // .text:0x0013C464 size:0x4 mapped:0x8077B4F8
