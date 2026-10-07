@@ -33,7 +33,6 @@ extern struct {
     /* 0x08 */ f32 chemMult[3];
     /* 0x14 */ f32 chemBattingMult[3];
 } lbl_3_data_4618;
-extern s32 lbl_3_data_5B34[][5];
 extern f32 lbl_3_data_5E80[4][2];
 extern f32 lbl_3_data_5AF0[2];
 extern struct {
@@ -54,7 +53,6 @@ extern struct {
     u8 _00[0x28];
     u8 _28;
 } lbl_80366158;
-extern u8 lbl_800E8754[];
 
 #define FRAME_COUNT_HOLD_FOR_BUNT 8
 // acts more like a flag than an actual timer
@@ -392,7 +390,7 @@ void batterHumanControlled(void) {
                     g_Batter.isStarSwing = FALSE;
                     if (!g_d_GameSettings.minigamesEnabled) {
                         if (inputs->buttonInput & PAD_TRIGGER_R || (ACTIVE_TUTORIAL() && r25)) {
-                            if (lbl_800E8754[4] || g_d_GameSettings.GameModeSelected == GAME_TYPE_PRACTICE) {
+                            if (gameInitOptions.starSkillsSetting || g_d_GameSettings.GameModeSelected == GAME_TYPE_PRACTICE) {
                                 g_Batter.isStarSwing = TRUE;
                                 g_Batter.chargeUp = 0.0f;
                                 g_Batter.chargeDown = 0.0f;
@@ -960,7 +958,39 @@ void calculateHitVariables(void) {
         g_Batter.captainStarSwingActivated = CAPTAIN_STAR_TYPE_NONE;
     } else if (g_Batter.isBunting) {
         calculateBuntHorizontalAngle();
-        calculateBuntVerticalAngle_unused();
+        // Same code as calculateBuntVerticalAngle_unused; calling that (inlined) allocates registers differently
+        {
+            int rng, ang0Low, ang0High, ang1Low, ang1High, contactLow, contactHigh, contact;
+            rng = 0;
+            if (g_Ball.StaticRandomInt1 % 2) {
+                rng = 1;
+            }
+
+            contact = g_Batter.contactType;
+            ang0Low = buntVerticalAngles[contact][0][rng][0];
+            ang0High = buntVerticalAngles[contact][0][rng][1];
+            ang1Low = buntVerticalAngles[contact][1][rng][0];
+            ang1High = buntVerticalAngles[contact][1][rng][1];
+
+            contactLow = ang0Low + ((g_Batter.contactSize_raw[BAT_CONTACT_TYPE_SLAP] * (ang1Low - ang0Low)) / 100);
+            contactHigh = ang0High + ((g_Batter.contactSize_raw[BAT_CONTACT_TYPE_SLAP] * (ang1High - ang0High)) / 100);
+
+            g_Ball.Hit_VerticalAngle = contactLow + (g_Ball.StaticRandomInt1 % (contactHigh - contactLow));
+
+            if (ACTIVE_TUTORIAL()) {
+                g_Ball.Hit_VerticalAngle = g_Practice.practice_hitVerticalAngle;
+            }
+
+            if (g_Ball.Hit_VerticalAngle > SANG_ANG_90) {
+                g_Ball.Hit_VerticalAngle = SANG_ANG_180 - g_Ball.Hit_VerticalAngle;
+                g_Ball.Hit_HorizontalAngle = fn_3_9FE6C_normalizeAngle(SANG_ANG_180 + g_Ball.Hit_HorizontalAngle);
+            } else if (g_Ball.Hit_VerticalAngle < -SANG_ANG_90) {
+                g_Ball.Hit_VerticalAngle = SANG_ANG_360 + g_Ball.Hit_VerticalAngle;
+                g_Ball.Hit_HorizontalAngle = fn_3_9FE6C_normalizeAngle(SANG_ANG_180 + g_Ball.Hit_HorizontalAngle);
+            } else if (g_Ball.Hit_VerticalAngle < 0) {
+                g_Ball.Hit_VerticalAngle = SANG_ANG_360 + g_Ball.Hit_VerticalAngle;
+            }
+        }
         calculateBuntHorizontalPower();
         g_Ball.maybeBuntInd = 1;
         g_Batter.captainStarSwingActivated = CAPTAIN_STAR_TYPE_NONE;
@@ -981,31 +1011,28 @@ void calculateHitVariables(void) {
     }
     calculateBallVelocityAcceleration();
 
+    // Same code as starHitSetting_unused, but its first three stores come in a different order
     if (g_Batter.captainStarSwingActivated) {
-        u32 starPower = g_Batter.captainStarSwingActivated;
-        g_Ball.currentStarSwing = g_Batter.captainStarSwingActivated;
-        g_Ball.currentStarSwing2 = g_Batter.captainStarSwingActivated;
-        g_Ball.inAirOrBefore2ndBounceOrLowBallEnergy = g_Batter.captainStarSwingActivated;
-        if (starPower == CAPTAIN_STAR_TYPE_DK ||
-            starPower == CAPTAIN_STAR_TYPE_DIDDY) {
-            g_Ball.directionOfBananaHit = g_Batter.batterHand;
+        E(u8, CAPTAIN_STAR_TYPE) starType = (s8)g_Batter.captainStarSwingActivated;
+        g_Ball.currentStarSwing = starType;
+        g_Ball.currentStarSwing2 = starType;
+        g_Ball.inAirOrBefore2ndBounceOrLowBallEnergy = FALSE;
+        if (starType == CAPTAIN_STAR_TYPE_DK || starType == CAPTAIN_STAR_TYPE_DIDDY) {
             g_Ball.matchFramesAndBallAngle.bananaHitStartFrame =
                 g_Ball.hangtimeOfHit * g_hitFloats.DKStarHangtimePercentStart;
             g_Ball.matchFramesAndBallAngle.bananaHitEndFrame =
                 g_Ball.hangtimeOfHit * g_hitFloats.DKStarHangtimePercentEnd;
-        } else if (starPower == CAPTAIN_STAR_TYPE_WARIO ||
-                   starPower == CAPTAIN_STAR_TYPE_WALUIGI) {
+            g_Ball.directionOfBananaHit = g_Batter.batterHand;
+        } else if (starType == CAPTAIN_STAR_TYPE_WARIO || starType == CAPTAIN_STAR_TYPE_WALUIGI) {
             g_Ball.warioWaluStarHitDirection = RandomInt_Game(2);
             g_Ball.unused_garlicHitRelated.x = 0.0f;
             g_Ball.matchFramesAndBallAngle.garlicHitFramesUntilHitGroundForSplit =
                 g_hitShorts.framesBeforeGroundWhenGarlicSplits;
-        } else if (starPower == CAPTAIN_STAR_TYPE_BOWSER ||
-                   starPower == CAPTAIN_STAR_TYPE_BOWSERJR) {
+        } else if (starType == CAPTAIN_STAR_TYPE_BOWSER || starType == CAPTAIN_STAR_TYPE_BOWSERJR) {
             g_Ball.inAirOrBefore2ndBounceOrLowBallEnergy = TRUE;
             g_Ball.hardHitIndicator = TRUE;
             g_Ball.ballEnergy = g_Ball.Hit_HorizontalPower * g_hitFloats.bulletStarEnergyMultiplier;
-        } else if (starPower == CAPTAIN_STAR_TYPE_PEACH ||
-                   starPower == CAPTAIN_STAR_TYPE_DAISY) {
+        } else if (starType == CAPTAIN_STAR_TYPE_PEACH || starType == CAPTAIN_STAR_TYPE_DAISY) {
             g_Ball.autoFielderAvoidDropSpotForPeachesStarHit = TRUE;
         }
     }
@@ -1187,8 +1214,8 @@ extern s16 ToyFieldBattingAngleRanges[3][2][15][2];
 // .text:0x00011B9C size:0x334 mapped:0x80650c30
 void calculateBallHorizontalAngleHit(void) {
     int angleRangeLower, angleRangeUpper, angleRange, horizAngle;
-    BOOL isCharge = TRUE;
     InputStruct* inputs = &g_Controls[g_GameLogic.teams[g_GameLogic.teamBatting]];
+    BOOL isCharge = TRUE;
 
     if (ACTIVE_TUTORIAL()) {
         inputs = &g_Practice.inputs[g_GameLogic.teamBatting];
@@ -1512,7 +1539,7 @@ void calculateHorizontalPower(void) {
     }
 
     if (g_Batter.hitType >= 0) {
-        power = power * lbl_3_data_5B34[g_Batter.hitType][1 - g_Batter.easyBatting] / 100.0f;
+        power = power * hitTrajOptions[g_Batter.hitType]._0[1 - g_Batter.easyBatting] / 100.0f;
     }
 
     power = calcedDistance * (power / 100.0f * (lbl_3_data_5AF0[1] - lbl_3_data_5AF0[0]) + lbl_3_data_5AF0[0]);
@@ -1591,13 +1618,14 @@ void calculateHorizontalPower(void) {
 
 // UNUSED .text:0x00010A80 size:0x280 mapped:0x8064fb14
 void calculateBuntHorizontalAngle(void) {
+    InputStruct* inputs = &g_Controls[g_GameLogic.teams[g_GameLogic.teamBatting]];
     BOOL pullInd = FALSE;
     int horizAngle;
     int upperBunt;
     int lowerBunt;
     u8 contact;
-    
-    InputStruct* inputs = &g_Controls[g_GameLogic.teams[g_GameLogic.teamBatting]];
+    int slapContactSize;
+
     if (ACTIVE_TUTORIAL()) {
         inputs = &g_Practice.inputs[g_GameLogic.teamBatting];
     } else if (minigame_checkIfAIInputIs_Algorithmic_Or_ControllerBased(
@@ -1608,14 +1636,13 @@ void calculateBuntHorizontalAngle(void) {
     }
 
     contact = g_Batter.contactType;
+    slapContactSize = g_Batter.contactSize_raw[BAT_CONTACT_TYPE_SLAP];
 
-    upperBunt = lbl_3_data_5A64[contact][0][1] + (((lbl_3_data_5A64[contact][1][1] - lbl_3_data_5A64[contact][0][1]) *
-                                                   g_Batter.contactSize_raw[BAT_CONTACT_TYPE_SLAP]) /
-                                                  100);
+    upperBunt = lbl_3_data_5A64[contact][0][1] +
+                (((lbl_3_data_5A64[contact][1][1] - lbl_3_data_5A64[contact][0][1]) * slapContactSize) / 100);
 
-    lowerBunt = lbl_3_data_5A64[contact][0][0] + (((lbl_3_data_5A64[contact][1][0] - lbl_3_data_5A64[contact][0][0]) *
-                                                   g_Batter.contactSize_raw[BAT_CONTACT_TYPE_SLAP]) /
-                                                  100);
+    lowerBunt = lbl_3_data_5A64[contact][0][0] +
+                (((lbl_3_data_5A64[contact][1][0] - lbl_3_data_5A64[contact][0][0]) * slapContactSize) / 100);
 
     horizAngle = lowerBunt + (g_Ball.StaticRandomInt1 % (upperBunt - lowerBunt));
 
