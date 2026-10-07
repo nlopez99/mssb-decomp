@@ -384,6 +384,7 @@ void fn_3_FBBA0(StaC4Tex* tex) {
 }
 
 // .text:0x000FB3D8 size:0x7C8 mapped:0x8073A46C
+// 99.57%: only the bounds loop differs, minX/minY and maxX/maxY in swapped float registers
 void fn_3_FB3D8(StaC4View* view) {
     f32 center[21][2];
     Vec diff;
@@ -503,6 +504,8 @@ void fn_3_FB3D8(StaC4View* view) {
 }
 
 // .text:0x000FA58C size:0xE4C mapped:0x80739620
+// The target reaches lbl_3_data_1BA88, 1BA98 and 1BE80 from one pool base, so this cannot
+// match while they lie outside the unit; with them defined here as statics, only registers differ
 void fn_3_FA58C(void** files) {
     StaC4Swaps* swaps;
     StaC4Tiles* tiles;
@@ -802,6 +805,7 @@ void fn_3_FA58C(void** files) {
 }
 
 // .text:0x000FA3C0 size:0x1CC mapped:0x80739454
+// 96.64%: registers only; count's induction offsets and the inner loop's pointers rotated
 void fn_3_FA3C0(void) {
     Mtx m;
     StaC4Prop* prop;
@@ -866,6 +870,7 @@ static inline void startAnim(StaC4Model* model) {
 }
 
 // .text:0x000F9E78 size:0x548 mapped:0x80738F0C
+// 98.95%: registers only; the target keeps idx in r31 and every other saved value one lower
 void fn_3_F9E78(s32 idx, void* arg1, StaC4Hit* hit) {
     Vec pos;
     StaC4Draw* draw = &lbl_3_common_bss_350E4._00[idx];
