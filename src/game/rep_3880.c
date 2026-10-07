@@ -14,7 +14,7 @@ typedef struct {
     /* 0xEC */ Mtx* _EC;
 } UnkModel3880;
 
-typedef struct {
+typedef struct UnkModelSet3880 {
     /* 0x00 */ u8 _00[0x18];
     /* 0x18 */ UnkModel3880** _18;
 } UnkModelSet3880;
@@ -917,39 +917,72 @@ void fn_3_151760(void) {
 }
 
 // .text:0x00151710 size:0x50 mapped:0x807907A4
-void fn_3_151710(void) {
-    return;
+void fn_3_151710(UnkModelSet3880** models, Vec* pos) {
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES &&
+        g_Minigame.GameMode_MiniGame == MINI_GAME_ID_WALLBALL && models != NULL) {
+        fn_3_151694(models, pos);
+    }
 }
 
 // .text:0x00151694 size:0x7C mapped:0x80790728
-void fn_3_151694(void) {
-    return;
+void fn_3_151694(UnkModelSet3880** models, Vec* pos) {
+    Emitter3880* emitter =
+        fn_80033A24(fn_3_150940, 0x80, 0, lbl_3_data_26C3C[1] + lbl_3_data_26C3C[9], 1, 0x1D);
+
+    if (emitter != NULL) {
+        fn_3_151204((ModelEmitter3880*)emitter, models, pos);
+    }
 }
 
 // .text:0x00151204 size:0x490 mapped:0x80790298
-void fn_3_151204(void) {
-    return;
+// 99.74%: saved FPRs differ inside the inlined fn_3_151068 and fn_3_150D84 (the latter
+// is itself a 82.56% candidate).
+void fn_3_151204(ModelEmitter3880* emitter, UnkModelSet3880** models, Vec* pos) {
+    Particle3880* p;
+    u32 i = 0;
+    s16 k = 0;
+
+    emitter->base._10 = lbl_3_common_bss_32724._6C;
+    emitter->models = models;
+    memcpy(&emitter->pos, pos, sizeof(Vec));
+    p = emitter->base.particles;
+    do {
+        if (i < lbl_3_data_26C3C[1]) {
+            p->_48 = ++i;
+            p->_4D = lbl_3_data_26C3C[0];
+            p->_4C = 1;
+            p->_4A = lbl_3_data_26C3C[6];
+            if (p->_48 == 0) {
+                fn_3_151068(emitter, p);
+            }
+        } else {
+            p->_48 = k++;
+            p->_4D = lbl_3_data_26C3C[8];
+            p->_4C = 2;
+            fn_3_150D84(emitter, p);
+        }
+        p->_4E = 0;
+        p = p->next;
+    } while (p != NULL);
 }
 
 // .text:0x00151068 size:0x19C mapped:0x807900FC
 void fn_3_151068(ModelEmitter3880* emitter, Particle3880* p) {
     UnkModel3880* model;
     Mtx mtx;
-    f32 x;
-    f32 y;
-    f32 z;
+    Vec v;
 
     p->_4A = lbl_3_data_26C3C[6];
     model = (*emitter->models)->_18[lbl_3_data_26C3C[7]];
     PSMTXIdentity(mtx);
-    x = (*model->_EC)[0][3];
-    y = (*model->_EC)[1][3];
-    z = (*model->_EC)[2][3];
-    x += (rand() % 100 - 50) / 100.0;
-    y += (rand() % 150 - 75) / 100.0;
-    p->pos.x = x;
-    p->pos.y = y;
-    p->pos.z = z;
+    v.x = (*model->_EC)[0][3];
+    v.y = (*model->_EC)[1][3];
+    v.z = (*model->_EC)[2][3];
+    v.x += (rand() % 100 - 50) / 100.0;
+    v.y += (rand() % 150 - 75) / 100.0;
+    p->pos.x = v.x;
+    p->pos.y = v.y;
+    p->pos.z = v.z;
     p->_3C = p->_38 = lbl_3_data_26C3C[2];
     p->color[3] = lbl_3_data_26C3C[4];
 }
@@ -979,12 +1012,11 @@ void fn_3_150D84(ModelEmitter3880* emitter, Particle3880* p) {
 }
 
 // .text:0x00150940 size:0x444 mapped:0x8078F9D4
-void fn_3_150940(void) {
-    return;
+BOOL fn_3_150940(Emitter3880* emitter) {
+    return 0;
 }
 
 // .text:0x001504EC size:0x454 mapped:0x8078F580
-// 99.71%: the two inlined copies of fn_3_151068 hold x and z in each other's saved FPRs.
 void fn_3_1504EC(ModelEmitter3880* emitter, Particle3880* p) {
     s32 alpha;
     s32 step;
