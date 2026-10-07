@@ -972,13 +972,29 @@ void fn_3_14DCE0(void) {
 }
 
 // .text:0x0014DC80 size:0x60 mapped:0x8078CD14
-void fn_3_14DC80(void) {
-    return;
+void fn_3_14DC80(s8 barrel) {
+    if (g_d_GameSettings.GameModeSelected != GAME_TYPE_MINIGAMES ||
+        g_Minigame.GameMode_MiniGame != MINI_GAME_ID_BARREL_BATTER || barrel >= 15 || barrel < 0) {
+        return;
+    }
+    fn_3_14D710(barrel);
 }
 
 // .text:0x0014D710 size:0x570 mapped:0x8078C7A4
-void fn_3_14D710(void) {
-    return;
+// The second inlined fn_3_14D44C swaps its particle and count registers (98.81%);
+// the first copy matches.
+void fn_3_14D710(s8 barrel) {
+    Emitter3880* emitter = fn_800339F0(NULL, 0x20);
+
+    if (emitter != NULL) {
+        fn_3_14D44C(emitter, barrel);
+    } else {
+        emitter = fn_80033A24(fn_3_14CECC, 0xF0, 0, lbl_3_data_26D00[2], 1, 0x20);
+        if (emitter != NULL) {
+            fn_3_14D6D4(emitter);
+            fn_3_14D44C(emitter, barrel);
+        }
+    }
 }
 
 // .text:0x0014D6D4 size:0x3C mapped:0x8078C768
@@ -998,8 +1014,40 @@ void fn_3_14D6D4(Emitter3880* emitter) {
 }
 
 // .text:0x0014D44C size:0x288 mapped:0x8078C4E0
-void fn_3_14D44C(void) {
-    return;
+void fn_3_14D44C(Emitter3880* emitter, s32 barrel) {
+    u8 index = barrel;
+    Particle3880* p;
+    s32 n;
+
+    n = 0;
+    p = emitter->particles;
+    do {
+        if (p->_44 == 0 && p->_4A == 0) {
+            if (n < 3) {
+                p->_44 = 1;
+                p->_45 = index;
+                p->_46 = 0xFF;
+                p->_4D = lbl_3_data_26D00[0];
+                p->_38 = p->_3C = lbl_3_data_26D00[4];
+                p->color[3] = lbl_3_data_26D00[7];
+                fn_3_14D318(p);
+                p->_4A = lbl_3_data_26D00[17];
+                p->_48 = 0;
+            } else {
+                p->_44 = 2;
+                p->_45 = index;
+                p->_46 = (n - 3) / 5;
+                p->_4D = lbl_3_data_26D00[1];
+                p->_38 = p->_3C = lbl_3_data_26D00[11];
+                p->color[3] = lbl_3_data_26D00[14];
+                p->_48 = ((n - 3) % 5) * 4 + 1;
+                p->_4A = lbl_3_data_26D00[18];
+            }
+            p->color[0] = p->color[1] = p->color[2] = 0xFF;
+            n++;
+        }
+        p = p->next;
+    } while (p != NULL && n < 43);
 }
 
 // .text:0x0014D318 size:0x134 mapped:0x8078C3AC
@@ -1024,8 +1072,8 @@ void fn_3_14D2C0(Particle3880* p) {
 }
 
 // .text:0x0014CECC size:0x3F4 mapped:0x8078BF60
-void fn_3_14CECC(void) {
-    return;
+BOOL fn_3_14CECC(Emitter3880* emitter) {
+    return 0;
 }
 
 // .text:0x0014CD40 size:0x18C mapped:0x8078BDD4
