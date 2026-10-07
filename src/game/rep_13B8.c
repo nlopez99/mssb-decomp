@@ -2071,6 +2071,7 @@ int fn_3_81EAC(int runner) {
 }
 
 // .text:0x00081BC8 size:0x2E4 mapped:0x806C0C5C
+// 95.27%: in the first overrun stage the target schedules the int-to-float constant ahead of lbl_3_data_4B44
 int fn_3_81BC8(int runner) {
     InMemRunnerType* r = &g_Runners[runner];
 
