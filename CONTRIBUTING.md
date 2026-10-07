@@ -24,6 +24,8 @@ ninja all_source progress build/GYQE01/report.json
 
 Do not begin matching work until the untouched baseline builds and passes its configured hash checks. If it fails, record the exact command and error before changing code or tool versions.
 
+Then enable the pre-push checks once per clone: `git config core.hooksPath tools/hooks`. Each push runs `tools/check_symbols.py` and `tools/regress.py`.
+
 ## Pick a contribution
 
 Start with one unmatched function in objdiff, preferably a small game-code function with understood inputs and outputs. Avoid racing someone else's claimed work. Until GitHub issues are available, agree on a function and file in chat before starting.
@@ -32,14 +34,14 @@ Start with one unmatched function in objdiff, preferably a small game-code funct
 2. Inspect its target assembly and existing types. Use related matched functions as references.
 3. Write or refine C, then run `python3 tools/match.py <unit> <function>` to rebuild the object and diff it against the target, or inspect it in objdiff. For remaining register-allocation differences, `python3 tools/permute.py <function>` sets up decomp-permuter.
 4. Require an exact match including relocations before marking it matching. `tools/match.py` reports this as `match`. The 100% in objdiff's progress report is not enough on its own, because the report ignores relocation targets.
-5. Run the full matching build and regenerate the progress report.
+5. Run `python3 tools/regress.py`. It builds, checks the hashes, and compares every function with the base commit; it fails if any objdiff score drops or any strict match is lost.
 6. Review names, comments, types and undefined-behavior risks. A matching function does not prove that every guessed name or explanation is correct.
 
 Keep matching work separate from gameplay changes, ports and experiments. Those belong on explicitly non-matching branches. Do not alter compiler flags, target objects, matching thresholds or report denominators just to make a score increase.
 
 ## Pull requests
 
-Include the function/object names, what changed, commands you actually ran, object-match evidence, the whole-build result, and any uncertainty. Explain substantial AI assistance briefly. State clearly if validation is blocked. Unverified work can be discussed, but must not be described as a verified match.
+Include the function/object names, what changed, commands you actually ran, object-match evidence, the whole-build result, and any uncertainty. The summary from `tools/regress.py` covers the evidence and the whole-build result. Explain substantial AI assistance briefly. State clearly if validation is blocked. Unverified work can be discussed, but must not be described as a verified match.
 
 Never commit game images, extracted binaries, assets, proprietary compiler binaries, credentials or generated build output. Use human-readable source and honest attribution; assembly wrappers are not new C decompilation progress.
 
