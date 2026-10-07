@@ -1487,9 +1487,134 @@ void fn_3_85744(int runner) {
     }
 }
 
+// Frames until the ball lands plus the frames from the landing spot to the base
+static inline int landingFramesToBase(int base) {
+    return g_Ball.framesUntilBallHitsGround +
+           fn_3_A6810(g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x, g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z,
+                      lbl_3_data_4444[base].x, lbl_3_data_4444[base].z);
+}
+
 // .text:0x00085074 size:0x6D0 mapped:0x806C4108
-void fn_3_85074(void) {
-    return;
+int fn_3_85074(int runner, int risk) {
+    InMemRunnerType* r = &g_Runners[runner];
+    int next = r->nextBase;
+    int current = r->currentBase;
+    int frames;
+    int margin;
+
+    if (g_Ball.pauseBallMovementWhenInPlant == 0 && g_Ball.hitClassification1 == 0) {
+        if (r->forceOutCd == 1) {
+            return 1;
+        }
+        return -1;
+    }
+    if (g_Strikes.outs == 2) {
+        return 1;
+    }
+    if (g_Ball.landingSpotZoneAwayFromHome <= 1) {
+        if (g_Ball.maxYOfHit >= 5.0f) {
+            return -1;
+        }
+        if (g_Ball.maxYOfHit < 2.0f && r->forceOutCd == 1) {
+            return 1;
+        }
+        if (risk <= 2) {
+            return -1;
+        }
+        if (r->forceOutCd == 1) {
+            return 1;
+        }
+        return landingFramesToBase(next) + 30 > r->framesToNextBase ? 1 : -1;
+    }
+    if (risk >= 6) {
+        return 1;
+    }
+    if (risk >= 5 && g_Ball.someCollisionVariable >= 2 && g_Ball.landingSpotZoneAwayFromHome < 3) {
+        return 1;
+    }
+    if (runner == 3) {
+        if (g_Ball.physicsSubstruct.hitLandingSpotDistFromHome > 63.0f) {
+            return -1;
+        }
+        if (g_Ball.physicsSubstruct.hitLandingSpotDistFromHome > 55.0f && risk <= 5) {
+            return -1;
+        }
+    }
+    if (runner == 2 && risk <= 1) {
+        if (VEC_DISTANCE_XZ(&lbl_3_data_4444[3], &g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot) > 70.0f &&
+            g_Ball.ballAngleFromHome < 0x48C) {
+            return -1;
+        }
+    }
+    if (g_Ball.framesUntilBallHitsGround < 60 && runner != 0) {
+        if ((risk <= 2 || (risk == 3 && g_Ball.landingSpotZoneAwayFromHome <= 2)) &&
+            r->framesToPreviousBase > landingFramesToBase(current)) {
+            return -1;
+        }
+        if (risk >= 4) {
+            if (runner == 3 && risk == 4 && g_Ball.landingSpotZoneAwayFromHome >= 4) {
+                return -1;
+            }
+            if (risk >= 5) {
+                if (r->forceOutCd != 0) {
+                    return 1;
+                }
+                if (g_Ball.maxYOfHit < 2.5f && g_Ball.ballVelocity > 0.5f) {
+                    if (g_Fielders[3]._7C < g_Fielders[5]._7C) {
+                        if (g_Ball.ballDistanceFromHome - 2.0f > g_Fielders[3]._70 && g_Fielders[3]._7C > 3.0f) {
+                            return 1;
+                        }
+                        if (g_Fielders[3]._7C > 4.0f && g_Ball.ballDistanceFromHome + g_Fielders[3]._7C > g_Fielders[3]._70) {
+                            return 1;
+                        }
+                    } else {
+                        if (g_Ball.ballDistanceFromHome - 2.0f > g_Fielders[5]._70) {
+                            return 1;
+                        }
+                        if (g_Fielders[5]._7C > 4.0f && g_Ball.ballDistanceFromHome + g_Fielders[5]._7C > g_Fielders[5]._70) {
+                            return 1;
+                        }
+                    }
+                }
+                if (landingFramesToBase(next) + 30 > r->framesToNextBase) {
+                    return 1;
+                }
+            }
+        }
+    }
+    if (runner != 0) {
+        frames = fn_3_A6810(g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x, g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z,
+                            lbl_3_data_4444[current].x, lbl_3_data_4444[current].z);
+        if (g_Ball.framesUntilBallHitsGround < 45) {
+            margin = r->framesToPreviousBase + 30;
+        } else {
+            margin = r->framesToPreviousBase + 15;
+        }
+        if (margin > frames) {
+            return 0;
+        }
+        if (r->runningDirectionCode == 2 && margin + 5 > frames) {
+            return 0;
+        }
+        if (0.8f + r->startingBase_baseAchieved <= r->fractionalBasesRan) {
+            if (risk >= 5 && g_Ball.ballDistanceFromHome > 3.0f + g_Fielders[6]._70 &&
+                g_Ball.ballDistanceFromHome > 3.0f + g_Fielders[7]._70 &&
+                g_Ball.ballDistanceFromHome > 3.0f + g_Fielders[8]._70) {
+                return 1;
+            }
+            return 0;
+        }
+        return 1;
+    }
+    margin = landingFramesToBase(next) + 30;
+    frames = r->framesToNextBase;
+    if (r->overRun1BStage != 0) {
+        return -2;
+    }
+    if (margin > frames) {
+        return 1;
+    }
+    return -2;
 }
 
 // .text:0x00084AD0 size:0x5A4 mapped:0x806C3B64

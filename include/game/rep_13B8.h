@@ -40,7 +40,7 @@ int fn_3_841C0(int runner, int frame);
 int fn_3_842E4(int runner);
 int fn_3_846C8(int runner);
 int fn_3_84AD0(int runner, int frame);
-void fn_3_85074(void);
+int fn_3_85074(int runner, int risk);
 void fn_3_85744(int runner);
 int fn_3_85840(int runner, int count, int* decisions);
 int fn_3_85A70(int runner);
