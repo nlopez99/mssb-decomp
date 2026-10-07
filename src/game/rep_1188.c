@@ -217,7 +217,7 @@ void fn_3_6EBB4(int rosterID) {
     int index;
 
     CharacterStats* char_stats = &inMemRoster[g_GameLogic.teamFielding][rosterID];
-    ChallengeTrackingStruct* starMissions = starMissionCompletionTracker;
+    ChallengeTrackingStruct* starMissions = starMissionCompletionTracker.characters;
 
     if (rosterID < 0) {
         g_Pitcher.rosterID = 0;
@@ -298,7 +298,7 @@ void fn_3_6E24C(int rosterID, int fielderIdx) {
     GameControlsStruct* logic = &g_GameLogic;
     UnkFielder1188* fielder = &g_Fielders[fielderIdx];
     CharacterStats* char_stats = &inMemRoster[logic->teamFielding][rosterID];
-    ChallengeTrackingStruct* starMissions = starMissionCompletionTracker;
+    ChallengeTrackingStruct* starMissions = starMissionCompletionTracker.characters;
     int index;
     int charID;
     int lo;
@@ -439,7 +439,7 @@ void setInMemBatterConstants(int rosterID) {
     int batterID;
 
     CharacterStats* char_stats = &inMemRoster[g_GameLogic.teamBatting][rosterID];
-    ChallengeTrackingStruct* starMissions = starMissionCompletionTracker;
+    ChallengeTrackingStruct* starMissions = starMissionCompletionTracker.characters;
     g_Batter.easyBatting = 0;
 
     if (g_d_GameSettings.GameModeSelected == GAME_TYPE_PRACTICE) {
@@ -511,7 +511,7 @@ void fn_3_6D964(int rosterID, int runnerIdx) {
 
     CharacterStats* char_stats = &inMemRoster[g_GameLogic.teamBatting][rosterID];
     InMemRunnerType* runner = &g_Runners[runnerIdx];
-    ChallengeTrackingStruct* starMissions = starMissionCompletionTracker;
+    ChallengeTrackingStruct* starMissions = starMissionCompletionTracker.characters;
 
     if (g_d_GameSettings.GameModeSelected == GAME_TYPE_PRACTICE) {
         if (g_Practice.practiceType_2 == 0 || g_Practice.practiceType_2 == 1 || g_Practice.practiceType_2 == 2 ||

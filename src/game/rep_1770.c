@@ -321,7 +321,6 @@ void fn_3_9A8A4(void) {
     UnkTask1770* task = lbl_803CC1B8;
     s32 next;
     s32 i;
-    u8* flags;
 
     fn_80034E20(task, lbl_3_data_C56C[g_Batter.batterHand]);
     lbl_80371C30[task->_14 + 9]._00->_5C = inMemRoster[g_GameLogic.teamFielding][g_Pitcher.rosterID].stats.CharID << 16;
@@ -384,12 +383,10 @@ void fn_3_9A8A4(void) {
     lbl_80371C30[task->_14 + 46]._00->_5C = 30 << 16;
     lbl_80371C30[task->_14 + 47]._00->_5C = 30 << 16;
     if (!g_d_GameSettings.exhibitionMatchInd) {
-        // The header declares only the first 0xAF8 of this 0x4508-byte object.
-        flags = (u8*)starMissionCompletionTracker + 0x43D6;
-        if (flags[g_Pitcher.charID] != 0 && g_GameLogic._13E[g_GameLogic.teamFielding] == 0) {
+        if (starMissionCompletionTracker._43D6[g_Pitcher.charID] != 0 && g_GameLogic._13E[g_GameLogic.teamFielding] == 0) {
             lbl_80371C30[task->_14 + 48]._00->_54 |= 2;
         }
-        if (flags[g_Batter.charID] != 0 && g_GameLogic._13E[g_GameLogic.teamBatting] == 0) {
+        if (starMissionCompletionTracker._43D6[g_Batter.charID] != 0 && g_GameLogic._13E[g_GameLogic.teamBatting] == 0) {
             lbl_80371C30[task->_14 + 49]._00->_54 |= 2;
         }
     } else {

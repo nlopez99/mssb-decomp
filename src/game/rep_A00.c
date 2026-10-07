@@ -184,19 +184,6 @@ typedef struct {
 
 extern UnkA00Bss37400 lbl_3_common_bss_37400;
 
-// starMissionCompletionTracker is 0x4508 bytes; the header declares only its leading array
-typedef struct {
-    /* 0x0000 */ ChallengeTrackingStruct _0000[54];
-    /* 0x0AF8 */ u8 _0AF8[0x16C2 - 0xAF8];
-    /* 0x16C2 */ s16 _16C2;
-    /* 0x16C4 */ u8 _16C4[0x441C - 0x16C4];
-    /* 0x441C */ u8 _441C;
-    /* 0x441D */ u8 _441D;
-    /* 0x441E */ u8 _441E;
-    /* 0x441F */ u8 _441F[0x44F1 - 0x441F];
-    /* 0x44F1 */ u8 _44F1;
-} UnkA00Challenge;
-
 extern struct {
     /* 0x00 */ u8 _00[0x13];
     /* 0x13 */ u8 _13;
@@ -1059,7 +1046,7 @@ void fn_3_22C20(void) {
     GameInitVariables* settings = &g_d_GameSettings;
     lbl_3_common_bss_32A94_s* bss = &lbl_3_common_bss_32A94;
     GameControlsStruct* logic = &g_GameLogic;
-    UnkA00Challenge* challenge;
+    StarMissionCompletionTracker* challenge;
     s16 team;
     s16 charID;
 
@@ -1079,7 +1066,7 @@ void fn_3_22C20(void) {
     case 2:
         fn_3_8C104(-1);
         fn_3_24DBC(2);
-        challenge = (UnkA00Challenge*)starMissionCompletionTracker;
+        challenge = &starMissionCompletionTracker;
         if (bss->_8A) {
             fn_3_FBDAC(lbl_3_data_2368[challenge->_441C]);
         } else {
@@ -1263,7 +1250,7 @@ BOOL fn_3_2273C(void) {
 
 // .text:0x00021F14 size:0x828 mapped:0x80660FA8
 BOOL fn_3_21F14(void) {
-    UnkA00Challenge* challenge = (UnkA00Challenge*)starMissionCompletionTracker;
+    StarMissionCompletionTracker* challenge = &starMissionCompletionTracker;
     GameInitVariables* settings = &g_d_GameSettings;
     UnkA00Bss37400* bss = &lbl_3_common_bss_37400;
     BOOL ret;

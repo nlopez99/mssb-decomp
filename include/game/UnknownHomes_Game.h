@@ -1372,7 +1372,23 @@ extern UnkSimulationRelatedStruct unkSimulationRelatedStruct;
 
 extern f32 vecDotProduct(VecXYZ* a, VecXYZ* b);
 
-extern ChallengeTrackingStruct starMissionCompletionTracker[54];
+// One 0x4508-byte object: code in every module reaches all its fields from this symbol
+typedef struct _StarMissionCompletionTracker {
+    /*0x0000*/ ChallengeTrackingStruct characters[54]; // indexed by character ID
+    /*0x0AF8*/ u8 _0AF8[0x16C2 - 0xAF8];
+    /*0x16C2*/ s16 _16C2;
+    /*0x16C4*/ u8 _16C4[0x43D6 - 0x16C4];
+    /*0x43D6*/ u8 _43D6[54]; // indexed by character ID
+    /*0x440C*/ u8 _440C[0x441C - 0x440C];
+    /*0x441C*/ u8 _441C;
+    /*0x441D*/ u8 _441D;
+    /*0x441E*/ u8 _441E;
+    /*0x441F*/ u8 _441F[0x44F1 - 0x441F];
+    /*0x44F1*/ u8 _44F1;
+    /*0x44F2*/ u8 _44F2[0x4508 - 0x44F2];
+} StarMissionCompletionTracker; // size: 0x4508
+
+extern StarMissionCompletionTracker starMissionCompletionTracker;
 
 typedef struct _SomeStarDashStruct {
     /*0x000*/ s16 _0[2];
