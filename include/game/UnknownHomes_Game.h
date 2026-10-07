@@ -2040,10 +2040,7 @@ typedef struct _MiniGameStruct {
     /*0x1D73*/ u8 _1D73;
     /*0x1D74*/ s8 playerIDWithPowerup[2];
     /*0x1D76*/ s16 _1D76;
-    /*0x1D78*/ u8 _1D78;
-    /*0x1D79*/ u8 _1D79;
-    /*0x1D7A*/ u8 _1D7A;
-    /*0x1D7B*/ u8 _1D7B;
+    /*0x1D78*/ u8 _1D78[4];
     /*0x1D7C*/ InputStruct _1D7C[4];
     /*0x1DBC*/ u8 _1DBC[8];
     /*0x1DC4*/ u8 _1DC4[4];

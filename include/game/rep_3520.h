@@ -8,6 +8,7 @@
 
 struct Unk3520Obj;
 struct Unk3520Box;
+struct Unk3520Line;
 
 void fn_3_132EDC(void* arg0, GXTevStageID* stage, GXTexCoordID* coord, GXTexMapID* map, u8* arg4, u8* arg5);
 void fn_3_1330E4(void);
@@ -53,7 +54,7 @@ u8 fn_3_137B10(struct Unk3520Obj* obj);
 void fn_3_137CF8(struct Unk3520Obj* obj);
 void fn_3_137DE4(struct Unk3520Obj* obj);
 void fn_3_137F14(struct Unk3520Obj* obj);
-void fn_3_13802C(void);
+void fn_3_13802C(struct Unk3520Obj* obj);
 void fn_3_1382E0(struct Unk3520Obj* obj);
 void fn_3_138448(struct Unk3520Obj* obj);
 void fn_3_1384B4(struct Unk3520Obj* obj);
@@ -69,7 +70,7 @@ void fn_3_13A0AC(void);
 void fn_3_13A724(void);
 void fn_3_13A89C(void);
 void fn_3_13AA78(void);
-void fn_3_13ACB4(void);
+void fn_3_13ACB4(struct Unk3520Line* line);
 void fn_3_13ADC0(Vec* out, Vec* v, Vec* n);
 void fn_3_13AE1C(void);
 void fn_3_13AFE4(void);

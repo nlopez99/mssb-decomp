@@ -24,7 +24,7 @@ typedef struct Unk3520Obj {
     /* 0x34 */ f32 _34;
     /* 0x38 */ s16 _38;
     /* 0x3A */ s16 _3A;
-    /* 0x3C */ u8 _3C;
+    /* 0x3C */ s8 _3C;
     /* 0x3D */ u8 _3D;
     /* 0x3E */ u8 _3E;
     /* 0x3F */ u8 _3F;
@@ -52,6 +52,12 @@ typedef struct Unk3520Box {
     /* 0x1C */ s16 _1C;
     /* 0x1E */ u8 _1E;
 } Unk3520Box; // size: 0x20
+
+// A wall the bounce reflects off
+typedef struct Unk3520Line {
+    /* 0x00 */ Vec pos;
+    /* 0x0C */ Vec dir;
+} Unk3520Line;
 
 // The coin bag, at g_Minigame._B6C
 typedef struct Unk3520Bag {
@@ -323,8 +329,33 @@ void fn_3_13ADC0(Vec* out, Vec* v, Vec* n) {
 }
 
 // .text:0x0013ACB4 size:0x10C mapped:0x80779D48
-void fn_3_13ACB4(void) {
-    return;
+void fn_3_13ACB4(Unk3520Line* line) {
+    Vec n;
+    Vec d;
+    Vec r;
+
+    n.x = -line->dir.z;
+    n.y = 0.0f;
+    n.z = line->dir.x;
+    d.x = line->pos.x - g_Minigame._6F4;
+    d.y = 0.0f;
+    d.z = line->pos.z - g_Minigame._6FC;
+    if (d.x * n.x + d.z * n.z > 0.0f) {
+        n.x *= -1.0f;
+        n.z *= -1.0f;
+    }
+    fn_3_13ADC0(&r, &d, &n);
+    n.x *= -1.0f;
+    n.z *= -1.0f;
+    g_Minigame._6F4 = line->pos.x + r.x;
+    g_Minigame._6FC = line->pos.z + r.z;
+    d.x = line->pos.x - g_Minigame._70C;
+    d.z = line->pos.z - g_Minigame._714;
+    fn_3_13ADC0(&r, &d, &n);
+    g_Minigame._70C = line->pos.x + r.x;
+    g_Minigame._714 = line->pos.z + r.z;
+    g_Minigame._700 = 0.5f * (g_Minigame._70C + g_Minigame._6F4);
+    g_Minigame._708 = 0.5f * (g_Minigame._714 + g_Minigame._6FC);
 }
 
 // .text:0x0013AA78 size:0x23C mapped:0x80779B0C
@@ -571,8 +602,27 @@ void fn_3_1382E0(Unk3520Obj* obj) {
 }
 
 // .text:0x0013802C size:0x2B4 mapped:0x807770C0
-void fn_3_13802C(void) {
-    return;
+void fn_3_13802C(Unk3520Obj* obj) {
+    if (g_Minigame._72A != 0) {
+        obj->_C.y = lbl_3_data_21A64[5];
+        obj->_3D = 5;
+        obj->_3A = 0;
+        return;
+    }
+    PSVECAdd(&obj->_0, &obj->_C, &obj->_0);
+    if (fn_3_137B10(obj)) {
+        g_Minigame._1D78[obj->_3C] = 0;
+        fn_3_90064(0x30D);
+    } else if (obj->_0.y <= 0.0f) {
+        obj->_0.y = 0.0f;
+        memset(&obj->_C, 0, sizeof(Vec));
+        obj->_3A = 0;
+        obj->_3D = 3;
+        fn_3_1371E8();
+        fn_3_137224(&obj->_0);
+        g_Minigame._1D78[obj->_3C] = 0;
+        fn_3_90064(0x2F7);
+    }
 }
 
 // .text:0x00137F14 size:0x118 mapped:0x80776FA8
