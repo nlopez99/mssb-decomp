@@ -26,6 +26,8 @@ typedef struct {
     /* 0x10 */ DODisplayData* pal;
     /* 0x14 */ u8 _14[0x18 - 0x14];
     /* 0x18 */ Rep2998Bone** _18;
+    /* 0x1C */ u8 _1C[0x98 - 0x1C];
+    /* 0x98 */ u8 _98;
 } Rep2998Actor;
 
 typedef struct {
@@ -164,8 +166,6 @@ extern Rep2998Fielder g_Fielders[9];
 extern u16 lbl_3_data_81DC[16];
 extern u8 lbl_3_data_8404[6][15][2];
 extern u8 lbl_3_data_84B8[30][2];
-extern Rep2998Prop lbl_3_data_18ED0[11];
-extern u8 lbl_3_data_19004[14];
 
 extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern Rep2998ModelTable* ActorObjectInitTable(u16 count);
@@ -178,13 +178,18 @@ extern void fn_800B4BC8(Rep2998Actor* actor, s32 arg1);
 extern void fn_800B4C04(Rep2998Actor* actor, f32 speed);
 extern f32 fn_800B4C40(Rep2998Actor* actor);
 extern void fn_800B4CA0(Rep2998Actor* actor, f32 frame);
+extern void fn_800BDF70(Rep2998Model* model);
+extern void fn_800BF058(void (*cb)(void* a, void* b));
+extern void fn_8003A548(void (*cb)(void));
 
-// rep_AC8.h and rep_1D58.h are not included: they declare fn_3_253A4, fn_3_B8414, fn_3_B8464
-// and fn_3_B98E8 as void(void) placeholders. fn_3_B7F70 lies in unsplit code.
+// rep_AC8.h and rep_1D58.h are not included: they declare fn_3_253A4, fn_3_B8184, fn_3_B828C,
+// fn_3_B8414, fn_3_B8464 and fn_3_B98E8 as void(void) placeholders. fn_3_B7F70 lies in unsplit code.
 extern s32 fn_3_253A4(s32 fielder, s32 angle);
 extern void fn_3_27648(void);
 extern s16 fn_3_B7F70(s16 range);
 extern s32 fn_3_B7FC8(u32 id, s32 arg1);
+extern void fn_3_B8184(void* a, void* b);
+extern void fn_3_B828C(void* obj);
 extern void fn_3_B8414(void* a, void* b);
 extern void fn_3_B8464(MtxPtr m, void* arg1);
 extern void fn_3_B8574(void);
@@ -192,6 +197,17 @@ extern void fn_3_B939C(void);
 extern void fn_3_B97DC(void* model, void* anim);
 extern void fn_3_B98E8(Rep2998Model* model);
 extern void fn_3_B9D68(u8* types, s32 count, void** files, s32* indices);
+
+Rep2998Prop lbl_3_data_18ED0[11] = {
+    { { -18.0f, 0.0f, 52.0f }, 0.0f, 0, 1, 1, 0, 0.0f, 360.0f },
+    { { -35.0f, 0.0f, 35.0f }, 0.0f, 0, 1, 2, 0, 315.0f, 180.0f },
+    { { 35.0f, 0.0f, 35.0f }, 0.0f, 0, 1, 3, 0, 225.0f, 180.0f },
+    { { 18.0f, 0.0f, 52.0f }, 0.0f, 0, 1, 4, 0, 0.0f, 360.0f },
+    { { 34.0f, 0.0f, 78.0f }, 0.0f, 0, 1, 5, 0, 0.0f, 360.0f },
+    { { -34.0f, 0.0f, 78.0f }, 0.0f, 0, 1, 6, 0, 0.0f, 360.0f },
+    { { 0.0f, 0.0f, 0.0f }, 0.0f, 2, 0, 0xFF, 0, 0.0f, 0.0f },
+};
+u8 lbl_3_data_19004[14] = { 1, 3, 4, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7 };
 
 static inline void playSound(s32 sound) {
     u32 stadium = g_d_GameSettings.StadiumID;
@@ -1063,4 +1079,35 @@ void fn_3_E1DB8(void) {
     } else {
         lbl_3_bss_AE08--;
     }
+}
+
+// .text:0x000E1D00 size:0xB8 mapped:0x80720D94
+void fn_3_E1D00(void) {
+    Rep2998Obj* obj;
+    s32 i;
+
+    fn_800BF058(fn_3_B8184);
+    fn_8003A548(fn_3_E1C60);
+    for (i = 0; i < lbl_3_common_bss_350E4._30; i++) {
+        if (lbl_3_data_18ED0[i]._10 == 2) {
+            break;
+        }
+        obj = &lbl_3_common_bss_350E4._00[i];
+        fn_3_B828C(obj);
+        if (obj->_74 != NULL) {
+            obj->_74->_00->_98 = obj->_93 | 6;
+            fn_800BDF70(obj->_74);
+        }
+    }
+    fn_8003A548(NULL);
+}
+
+// .text:0x000E1C60 size:0xA0 mapped:0x80720CF4
+void fn_3_E1C60(void) {
+    GXSetNumTevStages(1);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_A2, GX_CC_RASC);
+    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_TEXA);
+    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
 }

@@ -7,6 +7,8 @@
 struct Rep2998Obj;
 struct Rep2998Mesh;
 
+void fn_3_E1C60(void);
+void fn_3_E1D00(void);
 void fn_3_E1DB8(void);
 void fn_3_E1FA8(struct Rep2998Obj* obj);
 void fn_3_E2034(struct Rep2998Obj* obj);
