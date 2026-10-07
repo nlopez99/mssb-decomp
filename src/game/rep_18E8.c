@@ -1,17 +1,28 @@
 #include "game/rep_18E8.h"
 #include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
+#include "static/UnknownHomes_Static.h"
 #include "game/rep_1838.h"
 
 typedef struct {
-    /* 0x000 */ u8 _000[0xB4];
+    /* 0x000 */ f32 _000;
+    /* 0x004 */ f32 _004;
+    /* 0x008 */ f32 _008;
+    /* 0x00C */ u8 _00C[0x48 - 0xC];
+    /* 0x048 */ f32 _048;
+    /* 0x04C */ u8 _04C[0x70 - 0x4C];
+    /* 0x070 */ f32 _070;
+    /* 0x074 */ u8 _074[0xA8 - 0x74];
+    /* 0x0A8 */ f32 _0A8[3];
     /* 0x0B4 */ f32 _0B4;
     /* 0x0B8 */ f32 _0B8;
     /* 0x0BC */ u8 _0BC[0x178 - 0xBC];
     /* 0x178 */ s16 _178;
     /* 0x17A */ u8 _17A[0x18C - 0x17A];
     /* 0x18C */ s16 _18C;
-    /* 0x18E */ u8 _18E[0x1ED - 0x18E];
+    /* 0x18E */ u8 _18E[0x1CE - 0x18E];
+    /* 0x1CE */ u8 _1CE;
+    /* 0x1CF */ u8 _1CF[0x1ED - 0x1CF];
     /* 0x1ED */ u8 _1ED;
     /* 0x1EE */ u8 _1EE[0x1F8 - 0x1EE];
     /* 0x1F8 */ u8 _1F8;
@@ -102,8 +113,31 @@ BOOL fn_3_AABF8(void) {
 }
 
 // .text:0x000AAA3C size:0x1BC mapped:0x806E9AD0
-void fn_3_AAA3C(void) {
-    return;
+void fn_3_AAA3C(s32 fielder) {
+    Unk18E8Fielder* f = &g_Fielders[fielder];
+
+    if (g_FieldingLogic._0CE < 0 || g_FieldingLogic._0C4 < 0 || g_FieldingLogic._0C4 > 3) {
+        return;
+    }
+    if (f->_0A8[g_FieldingLogic._0C4] > 10.0f && g_FieldingLogic._0DC < 0) {
+        return;
+    }
+    if (g_FieldingLogic._0C4 == g_FieldingLogic._0CE && g_FieldingLogic._0E0 >= 0 && g_FieldingLogic._0E0 <= 3 &&
+        (g_FieldingLogic._0DC == g_Runners[g_FieldingLogic._0E0].nextBase ||
+         g_FieldingLogic._0DC == g_Runners[g_FieldingLogic._0E0].currentBase)) {
+        g_FieldingLogic._119 = 1;
+    }
+    if (g_FieldingLogic._0CE == 9 && g_FieldingLogic._0E0 >= 0 && g_FieldingLogic._0E0 <= 3 &&
+        g_Runners[g_FieldingLogic._0E0].runnerOnFieldOrOutOrScored == 1 &&
+        g_FieldingLogic._0C4 == g_Runners[g_FieldingLogic._0E0].baseRunningTowards) {
+        g_FieldingLogic._119 = 1;
+    }
+    if (g_FieldingLogic._119 && g_FieldingLogic._0C4 >= 0 && g_FieldingLogic._0C4 <= 3 &&
+        fn_3_9FC1C(game_atan2(lbl_3_data_4444[g_FieldingLogic._0C4][0] - f->_000,
+                              lbl_3_data_4444[g_FieldingLogic._0C4][1] - f->_008),
+                   f->_048) > 0x40) {
+        g_FieldingLogic._119 = 0;
+    }
 }
 
 // .text:0x000A9D20 size:0xD1C mapped:0x806E8DB4
@@ -152,8 +186,52 @@ void fn_3_A85C8(void) {
 }
 
 // .text:0x000A8478 size:0x150 mapped:0x806E750C
-void fn_3_A8478(void) {
-    return;
+// 99.64%: idx gets r8 where the target uses r6 (and r7 for its scaled index);
+// declaration order and if/ternary forms change nothing.
+BOOL fn_3_A8478(s32* runnerOut, s32* framesOut) {
+    s32 idx;
+    InMemRunnerType* r;
+    s32 cur = g_FieldingLogic._0C4;
+
+    if (g_FieldingLogic._0C4 >= 4 || g_FieldingLogic._0C4 < 0) {
+        return FALSE;
+    }
+    if (g_Ball.AtBat_ContactResult == 3) {
+        r = &g_Runners[cur];
+        if (r->runnerOnFieldOrOutOrScored == 1 && r->tagUpInd == 2) {
+            *runnerOut = cur;
+            goto tagUp;
+        }
+    }
+    idx = 3;
+    if (cur != 0) {
+        idx = cur - 1;
+    }
+    r = &g_Runners[idx];
+    if (r->runnerOnFieldOrOutOrScored == 1 && r->forceOutCd == 1) {
+        *runnerOut = idx;
+        goto forced;
+    }
+    return FALSE;
+
+tagUp:
+    if (r->currentBase == cur) {
+        if (r->runningDirectionCode == 3 || r->runningDirectionCode == 2) {
+            *framesOut = r->framesToPreviousBase;
+        } else if ((r->runningDirectionCode == 1 && r->nextDirectionBeingProcessed == 3) ||
+                   (r->runningDirectionCode == 3 && r->nextDirectionBeingProcessed == 1)) {
+            *framesOut = r->framesToPreviousBase + 20;
+        } else {
+            *framesOut = r->framesToPreviousBase + 50;
+        }
+    } else {
+        *framesOut = r->framesToPreviousBase + r->framesToPreviousBase + r->framesToNextBase;
+    }
+    return TRUE;
+
+forced:
+    *framesOut = r->framesToNextBase;
+    return TRUE;
 }
 
 // .text:0x000A8338 size:0x140 mapped:0x806E73CC
@@ -168,7 +246,40 @@ void fn_3_A8074(void) {
 
 // .text:0x000A7EF8 size:0x17C mapped:0x806E6F8C
 void fn_3_A7EF8(void) {
-    return;
+    InputStruct* inputs;
+    u8 prev;
+
+    inputs = &g_Controls[g_GameLogic.teams[g_GameLogic.teamFielding]];
+    if (ACTIVE_TUTORIAL()) {
+        inputs = &g_Practice.inputs[g_GameLogic.teamFielding];
+    } else if (g_d_GameSettings.minigamesEnabled) {
+        inputs = &g_Controls[g_Minigame.minigameControlStruct.characterIndex[g_Minigame._1922]];
+    }
+    prev = g_FieldingLogic._12E;
+    if (inputs->controlStickAngle >= 0xE00) {
+        g_FieldingLogic._12E = 2;
+    } else if (inputs->controlStickAngle >= 0xA00) {
+        g_FieldingLogic._12E = 3;
+    } else if (inputs->controlStickAngle >= 0x600) {
+        g_FieldingLogic._12E = 4;
+    } else if (inputs->controlStickAngle >= 0x200) {
+        g_FieldingLogic._12E = 1;
+    } else if (inputs->controlStickAngle >= 0) {
+        g_FieldingLogic._12E = 2;
+    } else {
+        g_FieldingLogic._12E = 0;
+    }
+    if (g_FieldingLogic._12E == 0) {
+        g_FieldingLogic._12F = 0;
+    } else if (g_FieldingLogic._12E == prev) {
+        if (g_FieldingLogic._12F < 0xFE) {
+            g_FieldingLogic._12F++;
+        } else {
+            g_FieldingLogic._12F = 0xFF;
+        }
+    } else {
+        g_FieldingLogic._12F = 1;
+    }
 }
 
 // .text:0x000A7C88 size:0x270 mapped:0x806E6D1C
@@ -193,7 +304,22 @@ void fn_3_A6E98(void) {
 
 // .text:0x000A6D48 size:0x150 mapped:0x806E5DDC
 void fn_3_A6D48(void) {
-    return;
+    s32 i;
+
+    lbl_3_bss_1824 = 0;
+    lbl_3_bss_1808[0] = -1;
+    lbl_3_bss_1808[1] = -1;
+    lbl_3_bss_1808[2] = -1;
+    lbl_3_bss_1808[3] = -1;
+    for (i = 3; i >= 0; i--) {
+        if (g_Runners[i].runnerOnFieldOrOutOrScored == 1) {
+            InMemRunnerType* r = &g_Runners[i];
+            lbl_3_bss_1824 |= 1 << ((s32)r->fractionalBasesRan * 4);
+            if (lbl_3_bss_1808[r->currentBase] < 0 || g_Runners[lbl_3_bss_1808[r->currentBase]].baseStandingOn >= 0) {
+                lbl_3_bss_1808[r->currentBase] = i;
+            }
+        }
+    }
 }
 
 // .text:0x000A6ABC size:0x28C mapped:0x806E5B50
@@ -505,8 +631,51 @@ void fn_3_A25C4(void) {
 }
 
 // .text:0x000A2404 size:0x1C0 mapped:0x806E1498
-void fn_3_A2404(void) {
-    return;
+BOOL fn_3_A2404(void) {
+    s32 order[3];
+    s32 i;
+
+    if (g_Ball.AtBat_ContactResult != 3) {
+        return FALSE;
+    }
+    if (lbl_3_bss_1820 == 0) {
+        return FALSE;
+    }
+    if (g_Ball.ballDistanceFromBase[1] < g_Ball.ballDistanceFromBase[3]) {
+        if (g_Ball.ballDistanceFromBase[2] < g_Ball.ballDistanceFromBase[1]) {
+            order[0] = 2;
+            order[1] = 1;
+            order[2] = 3;
+        } else if (g_Ball.ballDistanceFromBase[2] < g_Ball.ballDistanceFromBase[3]) {
+            order[0] = 1;
+            order[1] = 2;
+            order[2] = 3;
+        } else {
+            order[0] = 1;
+            order[1] = 3;
+            order[2] = 2;
+        }
+    } else if (g_Ball.ballDistanceFromBase[2] < g_Ball.ballDistanceFromBase[3]) {
+        order[0] = 2;
+        order[1] = 3;
+        order[2] = 1;
+    } else if (g_Ball.ballDistanceFromBase[2] < g_Ball.ballDistanceFromBase[1]) {
+        order[0] = 3;
+        order[1] = 2;
+        order[2] = 1;
+    } else {
+        order[0] = 3;
+        order[1] = 1;
+        order[2] = 2;
+    }
+    for (i = 0; i < 3; i++) {
+        InMemRunnerType* r = &g_Runners[order[i]];
+        if (r->runnerOnFieldOrOutOrScored == 1 && r->tagUpInd == 2 && lbl_3_bss_1858[order[i]] <= 4 &&
+            fn_3_A46A0(order[i])) {
+            return TRUE;
+        }
+    }
+    return FALSE;
 }
 
 // .text:0x000A222C size:0x1D8 mapped:0x806E12C0
@@ -549,8 +718,31 @@ BOOL fn_3_A1F3C(void) {
 }
 
 // .text:0x000A1DA0 size:0x19C mapped:0x806E0E34
-void fn_3_A1DA0(void) {
-    return;
+BOOL fn_3_A1DA0(void) {
+    Unk18E8Fielder* f = &g_Fielders[g_Ball.fielderWBallIndex];
+
+    if (f->_070 > 80.0f - 0.1f * (100 - f->_1CE)) {
+        return FALSE;
+    }
+    if (!(g_Runners[3].runnerOnFieldOrOutOrScored == 1 && g_Runners[3].fractionalBasesRan < 3.15f &&
+          (g_Runners[3].runningDirectionCode == 2 || g_Runners[3].runningDirectionCode == 1)) &&
+        !(g_Runners[2].runnerOnFieldOrOutOrScored == 1 && g_Runners[2].fractionalBasesRan > 2.85f &&
+          g_Runners[2].fractionalBasesRan <= 3.15f && g_Runners[3].runningDirectionCode == 1 && g_Runners[2].tagUpInd == 0)) {
+        return FALSE;
+    }
+    if (g_Runners[1].runnerOnFieldOrOutOrScored == 1) {
+        if (g_Runners[1].tagUpInd) {
+            if (g_Runners[1].fractionalBasesRan > 1.5f) {
+                return FALSE;
+            }
+        } else if (g_Runners[1].forceOutCd == 1 && g_Runners[1].fractionalBasesRan <= 0.7f) {
+            return FALSE;
+        }
+    }
+    g_FieldingLogic._0C4 = 0;
+    g_FieldingLogic._0CC = -1;
+    g_FieldingLogic._0DE = -1;
+    return TRUE;
 }
 
 // .text:0x000A1D04 size:0x9C mapped:0x806E0D98
