@@ -6,6 +6,7 @@
 
 struct Rep2998Obj;
 struct Rep2998Mesh;
+struct StadiumObjectCollision;
 
 void fn_3_E1C60(void);
 void fn_3_E1D00(void);
@@ -35,7 +36,7 @@ void fn_3_E4658(struct Rep2998Obj* obj);
 void fn_3_E4760(struct Rep2998Obj* obj);
 void fn_3_E48D0(struct Rep2998Obj* obj);
 void fn_3_E4A38(MtxPtr mtx, struct Rep2998Mesh* mesh);
-void* fn_3_E4BE8(s32 idx, MtxPtr mtx);
+struct StadiumObjectCollision* fn_3_E4BE8(s32 idx, Mtx mtx);
 void fn_3_E4CB0(s32* count, s32* objIdx);
 void fn_3_E4EF4(void);
 void fn_3_E4FC4(void** files);

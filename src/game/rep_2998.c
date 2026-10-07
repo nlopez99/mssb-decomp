@@ -453,7 +453,7 @@ void fn_3_E4CB0(s32* count, s32* objIdx) {
 }
 
 // .text:0x000E4BE8 size:0xC8 mapped:0x80723C7C
-void* fn_3_E4BE8(s32 idx, MtxPtr mtx) {
+struct StadiumObjectCollision* fn_3_E4BE8(s32 idx, Mtx mtx) {
     Rep2998Obj* obj = &lbl_3_common_bss_350E4._00[idx];
     Mtx bone;
 
