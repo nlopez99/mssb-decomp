@@ -50,7 +50,9 @@ typedef struct Unk3520Cpu {
 typedef struct Unk3520Fielder {
     /* 0x000 */ Vec pos;
     /* 0x00C */ f32 _00C;
-    /* 0x010 */ u8 _010[0x38 - 0x10];
+    /* 0x010 */ u8 _010[0x30 - 0x10];
+    /* 0x030 */ f32 _030;
+    /* 0x034 */ f32 _034;
     /* 0x038 */ f32 _038;
     /* 0x03C */ f32 _03C;
     /* 0x040 */ u8 _040[0x15C - 0x40];
@@ -75,7 +77,10 @@ extern void fn_3_10F550(u8, s16);
 extern void changeScene(u8, s16);
 
 extern u8 lbl_3_data_21278[2];
+extern Vec lbl_3_data_219AC;
 extern f32 lbl_3_data_219B8[19];
+extern f32 lbl_3_data_21A14[7];
+extern s16 lbl_3_data_21A30[6];
 extern s16 lbl_3_data_21A04[8];
 extern s16 lbl_3_data_21A3C[2][2];
 extern s16 lbl_3_data_21A44;
@@ -217,7 +222,27 @@ void fn_3_13A89C(void) {
 
 // .text:0x0013A724 size:0x178 mapped:0x807797B8
 void fn_3_13A724(void) {
-    return;
+    f32 speed;
+    Vec d;
+    f32 dist;
+
+    g_Minigame._6F4 = g_Minigame._6E8;
+    g_Minigame._6F8 = g_Minigame._6EC;
+    g_Minigame._6FC = g_Minigame._6F0;
+    g_Minigame._728 = RandomInt_Game_Range(lbl_3_data_21A30[3], lbl_3_data_21A30[4]);
+    speed = RandomF32_Game_Range(lbl_3_data_21A14[0], lbl_3_data_21A14[1]);
+    d.x = lbl_3_data_219AC.x - g_Minigame._6E8;
+    d.y = lbl_3_data_219AC.y - g_Minigame._6EC;
+    d.z = lbl_3_data_219AC.z - g_Minigame._6F0;
+    dist = dolsqrtf2(d.x * d.x + d.z * d.z);
+    getComponentsFromSAng(random_fn_3_9EE24(0x1000), &d.x, &d.z);
+    g_Minigame._70C = d.x * speed + g_Minigame._6F4;
+    g_Minigame._714 = d.z * speed + g_Minigame._6FC;
+    g_Minigame._710 = lbl_3_data_21A14[4];
+    g_Minigame._700 = 0.5f * (g_Minigame._6F4 + g_Minigame._70C);
+    g_Minigame._708 = 0.5f * (g_Minigame._6FC + g_Minigame._714);
+    g_Minigame._704 = g_Minigame._6F8 + RandomF32_Game_Range(lbl_3_data_21A14[2], lbl_3_data_21A14[3]);
+    g_Minigame._726 = 0;
 }
 
 // .text:0x0013A0AC size:0x678 mapped:0x80779140
@@ -461,8 +486,41 @@ u8 fn_3_137B10(Unk3520Obj* obj) {
 }
 
 // .text:0x001379A0 size:0x170 mapped:0x80776A34
-void fn_3_1379A0(void) {
-    return;
+BOOL fn_3_1379A0(int fielderIdx) {
+    Unk3520Fielder* fielder = &g_Fielders[fielderIdx];
+    u32 player;
+    u32 i;
+    Unk3520Obj* obj;
+    f32 top;
+    f32 range;
+    f32 dx;
+    f32 dz;
+
+    for (player = 0; player < 4; player++) {
+        if (g_Minigame.minigameFielderIndex[player] == fielderIdx) {
+            break;
+        }
+    }
+    if (player == g_Minigame._1D6D) {
+        return FALSE;
+    }
+    for (i = 0; i < lbl_3_bss_B780; i++) {
+        obj = &OBJS[i];
+        if (obj->_3D != 3 && obj->_3D != 5) {
+            continue;
+        }
+        top = fielder->_15C + (fielder->_00C + fielder->pos.y);
+        range = top < obj->_0.y ? fielder->_16C : 12.0f;
+        if (range < fabs(top - obj->_0.y)) {
+            continue;
+        }
+        dx = fabs(obj->_0.x - (fielder->pos.x + fielder->_030));
+        dz = fabs(obj->_0.z - (fielder->pos.z + fielder->_034));
+        if (dx < 3.5f && dz < 3.125f) {
+            return TRUE;
+        }
+    }
+    return FALSE;
 }
 
 // .text:0x001373E0 size:0x5C0 mapped:0x80776474
