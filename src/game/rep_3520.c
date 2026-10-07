@@ -701,6 +701,8 @@ u8 fn_3_137B10(Unk3520Obj* obj) {
     f32 range;
     f32 dx;
     f32 dz;
+    f64 ax;
+    f64 az;
     Vec v;
 
     for (i = 0; i < 4; i++) {
@@ -719,8 +721,10 @@ u8 fn_3_137B10(Unk3520Obj* obj) {
         if (range < fabs(top - obj->_0.y)) {
             continue;
         }
-        dx = fabs(obj->_0.x - fielder->pos.x);
-        dz = fabs(obj->_0.z - fielder->pos.z);
+        ax = fabs(obj->_0.x - fielder->pos.x);
+        az = fabs(obj->_0.z - fielder->pos.z);
+        dx = ax;
+        dz = az;
         if (dx <= 3.5f && dz <= 3.125f) {
             if (i == g_Minigame._1D6D) {
                 if (!hit) {
@@ -757,6 +761,8 @@ BOOL fn_3_1379A0(int fielderIdx) {
     f32 range;
     f32 dx;
     f32 dz;
+    f64 ax;
+    f64 az;
 
     for (player = 0; player < 4; player++) {
         if (g_Minigame.minigameFielderIndex[player] == fielderIdx) {
@@ -776,8 +782,10 @@ BOOL fn_3_1379A0(int fielderIdx) {
         if (range < fabs(top - obj->_0.y)) {
             continue;
         }
-        dx = fabs(obj->_0.x - (fielder->pos.x + fielder->_030));
-        dz = fabs(obj->_0.z - (fielder->pos.z + fielder->_034));
+        ax = fabs(obj->_0.x - (fielder->pos.x + fielder->_030));
+        az = fabs(obj->_0.z - (fielder->pos.z + fielder->_034));
+        dx = ax;
+        dz = az;
         if (dx < 3.5f && dz < 3.125f) {
             return TRUE;
         }
@@ -1217,12 +1225,12 @@ int fn_3_135520(f32 x, f32 z, f32 r) {
 }
 
 // .text:0x001354BC size:0x64 mapped:0x80774550
-// 98.0%: dx and dz come out of fabs in swapped FPRs, and the index scaling in another
-// register; MG.objs[i] scores 82%.
 BOOL fn_3_1354BC(s32 i, f32 x, f32 z) {
     BOOL ret = FALSE;
-    f32 dx = fabs(((Unk3520Obj*)((u8*)&g_Minigame + 0xBB0))[i]._0.x - x);
-    f32 dz = fabs(((Unk3520Obj*)((u8*)&g_Minigame + 0xBB0))[i]._0.z - z);
+    f64 ax = fabs(((Unk3520Obj*)((u8*)&g_Minigame + 0xBB0))[i]._0.x - x);
+    f64 az = fabs(((Unk3520Obj*)((u8*)&g_Minigame + 0xBB0))[i]._0.z - z);
+    f32 dx = ax;
+    f32 dz = az;
 
     if (dx <= 4.7f && dz <= 4.325f) {
         ret = TRUE;
