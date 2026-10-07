@@ -575,7 +575,8 @@ void fn_3_DEB90(void) {
         k = 1;
         for (i = 0; i < 4; i++) {
             if (g_Minigame.rosterID != i && g_Minigame.minigamePlayerSelectedOrder != i) {
-                g_Minigame.minigameControlStruct._28[k++] = i;
+                g_Minigame.minigameControlStruct._28[k] = i;
+                k++;
             }
         }
     } else {
@@ -591,15 +592,17 @@ void fn_3_DEB90(void) {
             } else if (g_Minigame._19BE[g_Minigame.minigameControlStruct._28[1]][1] > g_Minigame._19BE[g_Minigame.minigameControlStruct._28[2]][1]) {
                 g_Minigame.minigamePlayerSelectedOrder = g_Minigame.minigameControlStruct._28[1];
             } else {
-                g_Minigame.minigamePlayerSelectedOrder = g_Minigame.minigameControlStruct._28[random_fn_3_9EE24(2) + 1];
+                r = random_fn_3_9EE24(2) + 1;
+                g_Minigame.minigamePlayerSelectedOrder = g_Minigame.minigameControlStruct._28[r];
             }
-            g_Minigame._19C7 = 1;
             g_Minigame.rosterID = g_Minigame._19C6;
+            g_Minigame._19C7 = 1;
         }
         k = 1;
         for (j = 0; j < 4; j++) {
             if (j != g_Minigame.minigamePlayerSelectedOrder && j != g_Minigame.rosterID) {
-                g_Minigame.minigameControlStruct._28[k++] = j;
+                g_Minigame.minigameControlStruct._28[k] = j;
+                k++;
             }
         }
     }
@@ -1164,6 +1167,7 @@ static inline BOOL isSceneSkipped(void) {
 // .text:0x000DD1A8 size:0x1D4 mapped:0x8071C23C
 void fn_3_DD1A8(void) {
     s32 i;
+    s8 id;
 
     switch (g_GameLogic._125) {
     case 0:
@@ -1171,13 +1175,17 @@ void fn_3_DD1A8(void) {
             if (random_fn_3_9EE24(100) < lbl_3_data_18C48[7] || g_Minigame._1907 == 4) {
                 i = 0;
                 do {
-                    g_Minigame.rosterID = random_fn_3_9EE24(4);
-                } while (++i < 100 && g_Minigame.minigameControlStruct.battingHandedness[g_Minigame.rosterID] != 0);
+                    id = random_fn_3_9EE24(4);
+                    g_Minigame.rosterID = id;
+                    i++;
+                } while (i < 100 && g_Minigame.minigameControlStruct.battingHandedness[g_Minigame.rosterID] != 0);
             } else {
                 i = 0;
                 do {
-                    g_Minigame.rosterID = random_fn_3_9EE24(4);
-                } while (++i < 100 && g_Minigame.minigameControlStruct.battingHandedness[g_Minigame.rosterID] == 0);
+                    id = random_fn_3_9EE24(4);
+                    g_Minigame.rosterID = id;
+                    i++;
+                } while (i < 100 && g_Minigame.minigameControlStruct.battingHandedness[g_Minigame.rosterID] == 0);
             }
         }
         changeScene(1, 6);
@@ -1937,11 +1945,11 @@ void fn_3_D9EA0(void) {
 void fn_3_D9A30(void) {
     int phase;
     int rank;
+    s32 i;
     int flags;
     int third;
     s16 points;
     BOOL same;
-    s32 i;
     s32 j;
 
     phase = 0;
@@ -1981,9 +1989,9 @@ void fn_3_D9A30(void) {
         } else if (rand() % 100 < lbl_3_data_189B8[5]) {
             g_Minigame._192D = 8;
         }
-    }
-    if (g_Minigame._192D == 8 && rand() % 99 < lbl_3_data_189B8[4]) {
-        same = TRUE;
+        if (g_Minigame._192D == 8 && rand() % 99 < lbl_3_data_189B8[4]) {
+            same = TRUE;
+        }
     }
     for (i = 0; i < 3; i++) {
         g_Minigame._192A[i] = random_fn_3_9EE24(7);
@@ -2029,10 +2037,9 @@ void fn_3_D9A30(void) {
 // .text:0x000D9868 size:0x1C8 mapped:0x807188FC
 void fn_3_D9868(void) {
     Unk28A8Rank ranks[4];
-    Unk28A8Rank* rank;
     u32 i;
-    int n;
     u32 count;
+    Unk28A8Rank* rank;
     s32 k;
 
     fn_3_1079C8(ranks, 0);
@@ -2065,14 +2072,15 @@ void fn_3_D9868(void) {
     case 5:
         g_Minigame._1935[0] = g_Minigame.rosterID;
         if (count == 1 && ranks[0].id == g_Minigame.rosterID) {
-            i = n = 0;
+            count = 0;
+            i = 0;
             do {
                 if (rank->rank == 1) {
-                    n++;
+                    count++;
                 }
                 rank++;
             } while (++i < g_Minigame.miniGameNumberOfParticipants);
-            g_Minigame._1935[1] = ranks[random_fn_3_9EE24(n) + 1].id;
+            g_Minigame._1935[1] = ranks[random_fn_3_9EE24(count) + 1].id;
         } else {
             do {
                 g_Minigame._1935[1] = ranks[random_fn_3_9EE24(count)].id;
@@ -2084,7 +2092,7 @@ void fn_3_D9868(void) {
 
 // .text:0x000D8CD0 size:0xB98 mapped:0x80717D64
 void fn_3_D8CD0(void) {
-    s16 points;
+    int points;
     s16 tmp;
     s32 i;
 
