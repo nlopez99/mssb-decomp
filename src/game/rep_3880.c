@@ -2955,7 +2955,83 @@ void fn_3_147778(Emitter3880* emitter, Vec* pos) {
     } while (p != NULL);
 }
 
+static inline s32 fn_3_ParamBase(u8 kind) {
+    s32 base = 10;
+    if (kind == 1) {
+        base = 0;
+    }
+    return base;
+}
+
 // .text:0x0014737C size:0x3FC mapped:0x80786410
+// 89.85%: each parameter read forms lbl_3_data_26E9C's address again and the size's two
+// indices are selected in the other order; the base shares one address per pair
 BOOL fn_3_14737C(Emitter3880* emitter) {
-    return 0;
+    Particle3880* p;
+    Particle3880** link;
+    Particle3880* last;
+    s32 alive = 0;
+    s32 grow;
+    s32 life;
+    s32 alpha;
+    s32 step;
+    f32 scale;
+    f32 size;
+
+    p = emitter->particles = fn_80031F34(emitter->particles, emitter->count);
+    link = &emitter->particles;
+    last = NULL;
+    GXSetZMode(GX_TRUE, GX_ALWAYS, GX_FALSE);
+    do {
+        if (p->_4A != 0) {
+            if (p->_48 <= 0) {
+                grow = p->_4C == 1 ? lbl_3_data_26E9C[3] : lbl_3_data_26E9C[13];
+                life = p->_4C == 1 ? lbl_3_data_26E9C[1] : lbl_3_data_26E9C[11];
+                if (p->_4C == 1) {
+                    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_DSTALPHA, GX_LO_CLEAR);
+                } else {
+                    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+                }
+                fn_8003403C(p->_38, p->_3C);
+                fn_80033CC8(p, emitter->_10);
+                alpha = p->color[3];
+                scale = p->_4C == 1 ? p->vel.x : 1.0f;
+                if (grow > life - p->_4A) {
+                    size = scale * ((lbl_3_data_26E9C[fn_3_ParamBase(p->_4C) + 5] / 100000.0f - lbl_3_data_26E9C[fn_3_ParamBase(p->_4C) + 4] / 100000.0f) / grow);
+                    step = (-lbl_3_data_26E9C[fn_3_ParamBase(p->_4C) + 7] + lbl_3_data_26E9C[fn_3_ParamBase(p->_4C) + 8]) / grow;
+                } else {
+                    size = scale * ((lbl_3_data_26E9C[fn_3_ParamBase(p->_4C) + 6] / 100000.0f - lbl_3_data_26E9C[fn_3_ParamBase(p->_4C) + 5] / 100000.0f) / (life - grow));
+                    step = (-lbl_3_data_26E9C[fn_3_ParamBase(p->_4C) + 8] + lbl_3_data_26E9C[fn_3_ParamBase(p->_4C) + 9]) / (life - grow);
+                }
+                alpha += step;
+                if (alpha < 0) {
+                    alpha = 0;
+                } else if (alpha > 255) {
+                    alpha = 255;
+                }
+                p->_38 += size;
+                p->_3C = p->_38;
+                p->color[3] = alpha;
+                p->pos.y -= p->_4C == 1 ? 0.0f : 0.05f;
+                p->_4A--;
+                if (p->_4A == 0) {
+                    *link = p->next;
+                    if (last != NULL) {
+                        last->next = p;
+                    }
+                    last = p;
+                    p->next = NULL;
+                    emitter->count--;
+                } else {
+                    link = &p->next;
+                    alive++;
+                }
+            } else {
+                p->_48--;
+                link = &p->next;
+                alive++;
+            }
+        }
+    } while ((p = *link) != NULL);
+    return alive == 0;
 }
