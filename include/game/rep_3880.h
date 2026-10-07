@@ -105,7 +105,7 @@ void fn_3_151D6C(struct Emitter3880* emitter, struct Particle3880* p);
 BOOL fn_3_151F2C(struct Emitter3880* emitter);
 void fn_3_1524E8(struct Particle3880* p, u8 jitter);
 void fn_3_152794(struct Particle3880* p);
-void fn_3_152AB4(void);
+void fn_3_152AB4(u8 index, u8 target);
 void fn_3_1531A4(struct Particle3880* p);
 void fn_3_1534C0(struct Particle3880* p);
 void fn_3_1536A8(struct Particle3880* p, u8 kind);

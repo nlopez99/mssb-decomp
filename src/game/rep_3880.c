@@ -4,6 +4,7 @@
 #include "game/rep_1838.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/mtx.h"
+#include "Dolphin/mtxext.h"
 #include "C3/control.h"
 #include "Dolphin/rand.h"
 #include "static/UnknownHomes_Static.h"
@@ -1290,8 +1291,79 @@ void fn_3_1531A4(Particle3880* p) {
 }
 
 // .text:0x00152AB4 size:0x6F0 mapped:0x80791B48
-void fn_3_152AB4(void) {
-    return;
+void fn_3_152AB4(u8 index, u8 target) {
+    Emitter3880* emitter;
+    Particle3880* p;
+    camera_803c639c_s* camera;
+    Vec w;
+    Vec dir;
+    Vec screen;
+    Vec v;
+    f32 angle;
+    f32 scale;
+    s32 count = 0;
+
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES &&
+        g_Minigame.GameMode_MiniGame == MINI_GAME_ID_CHAINCHOMP_SPRINT) {
+        emitter = fn_800339F0(NULL, 0x1C);
+        if (emitter != NULL) {
+            p = emitter->particles;
+            do {
+                if (p->_4F == index && p->_4A != 0) {
+                    p->_48 = 0;
+                    p->_4F = 0xFF;
+                    fn_3_1524E8(p, TRUE);
+                    camera = fn_80052734(fn_8005268C());
+                    v.x = p->pos.x;
+                    v.y = p->pos.y;
+                    v.z = p->pos.z;
+                    PSMTXMultVec(camera->view, &v, &screen);
+                    w.x = w.y = w.z = 0.0f;
+                    PSVECSubtract(&w, &camera->eye, &w);
+                    p->_34 = PSVECMag(&w);
+                    PSMTX44MultVec(camera->proj, &screen, &screen);
+                    screen.z = -1.0f;
+                    p->pos.x = screen.x;
+                    p->pos.y = screen.y;
+                    p->pos.z = screen.z;
+                    p->_38 = p->_3C = lbl_3_data_26C0C[0] / 100000.0f;
+                    v.x = v.y = p->_38;
+                    v.z = p->_34;
+                    PSMTX44MultVec(camera->proj, &v, &screen);
+                    p->_38 = screen.x * (p->_4D ? 1.5 : 1.0);
+                    p->_3C = screen.y * (p->_4D ? 1.5 : 1.0);
+                    p->_4C = 3;
+                    p->_4A = lbl_3_data_26C0C[3];
+                    angle = 0.017453292f * (f32)(90.0 * (2.0 * (rand() / 32767.0f - 0.5)));
+                    dir.x = lbl_3_data_26C1C[target][0] - p->pos.x;
+                    dir.y = lbl_3_data_26C1C[target][1] - p->pos.y;
+                    dir.z = 0.0f;
+                    if (PSVECMag(&dir) >= 1.0) {
+                        scale = 1.0f;
+                    } else {
+                        scale = 1.0f / (PSVECMag(&dir) / 2);
+                    }
+                    PSVECNormalize(&dir, &dir);
+                    dir.x *= -1.0f;
+                    dir.y *= -1.0f;
+                    w.x = dir.x * cosf_kludge(angle) + -dir.y * sinf_kludge(angle);
+                    w.y = dir.x * sinf_kludge(angle) + dir.y * cosf_kludge(angle);
+                    w.z = 0.0f;
+                    PSVECScale(&w, lbl_3_data_26C0C[2] / 100000.0f * scale, &w);
+                    w.z = p->_34;
+                    PSMTX44MultVec(camera->proj, &w, &w);
+                    w.z = 0.0f;
+                    p->vel.x = w.x;
+                    p->vel.y = w.y;
+                    p->vel.z = w.z;
+                    p->color[3] = 0xFF;
+                    p->_44 = target;
+                    p->_45 = count++ == 0;
+                }
+                p = p->next;
+            } while (p != NULL);
+        }
+    }
 }
 
 // .text:0x00152794 size:0x320 mapped:0x80791828
