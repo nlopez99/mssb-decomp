@@ -1396,7 +1396,45 @@ void fn_3_14C79C(Emitter3880* emitter) {
 
 // .text:0x0014C4C8 size:0x2D4 mapped:0x8078B55C
 BOOL fn_3_14C4C8(Emitter3880* emitter) {
-    return 0;
+    Particle3880* p;
+    s32 alpha;
+    s32 step;
+    f32 grow;
+
+    if (lbl_80366158._28 != 0) {
+        return FALSE;
+    }
+    p = emitter->particles;
+    if (p->_4A != 0) {
+        GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+        GXSetBlendMode(GX_BM_BLEND, GX_BL_ONE, GX_BL_ONE, GX_LO_CLEAR);
+        fn_3_14C3BC(p);
+        fn_8003403C(p->_38, p->_3C);
+        fn_80033CC8(p, emitter->_10);
+        alpha = p->color[3];
+        if (lbl_3_data_26D5C[2] - lbl_3_data_26D5C[3] < p->_4A) {
+            grow = (lbl_3_data_26D5C[5] - lbl_3_data_26D5C[4]) / 100000.0f / lbl_3_data_26D5C[3];
+            step = (lbl_3_data_26D5C[8] - lbl_3_data_26D5C[7]) / lbl_3_data_26D5C[3];
+        } else {
+            grow = (lbl_3_data_26D5C[6] - lbl_3_data_26D5C[5]) / 100000.0f / (lbl_3_data_26D5C[2] - lbl_3_data_26D5C[3]);
+            step = (lbl_3_data_26D5C[9] - lbl_3_data_26D5C[8]) / (lbl_3_data_26D5C[2] - lbl_3_data_26D5C[3]);
+        }
+        alpha += step;
+        if (alpha < 0) {
+            alpha = 0;
+        }
+        if (alpha > 255) {
+            alpha = 255;
+        }
+        p->_38 += grow;
+        p->_3C = p->_38;
+        p->color[3] = alpha;
+        p->color[0] = p->color[1] = p->color[2] = p->color[3];
+        p->_4A--;
+    } else {
+        return TRUE;
+    }
+    return FALSE;
 }
 
 // .text:0x0014C3BC size:0x10C mapped:0x8078B450
