@@ -1,4 +1,5 @@
 #include "game/kinoko.h"
+#include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/os.h"
@@ -210,9 +211,6 @@ void fn_3_16B488(Vec* pos, s8 id) {
 }
 
 // .text:0x0016B5B4 size:0x2D0 mapped:0x807AA648
-// Does not match yet: this build addresses the float constants from one pooled
-// base, where the original loads each one directly. -pool off fixes this
-// function but breaks the pooled .bss accesses above.
 void fn_3_16B5B4(RibbonEffect* ribbon, s8 id, int frame) {
     f32 t = frame / 5.0f;
 
