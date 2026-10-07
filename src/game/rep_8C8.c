@@ -32,13 +32,14 @@ extern struct {
     /* 0xAC */ u8 _AC;
 } g_Scores;
 
-// .data 0x193C-0x1D28: only this unit uses most of it, but splits.txt does not assign it here
-extern f32 lbl_3_data_19CC[4];
+// .data 0x193C-0x1C30 and 0x1C90-0x1D28: only this unit uses it (1C10 also from the
+// functions at 0x1E154), but splits.txt does not assign it here yet
 extern u8 lbl_3_data_193C[8];
 extern u8 lbl_3_data_1944[3][4][6];
 extern u8 lbl_3_data_198C[4][5][2];
 extern u8 lbl_3_data_19B4[4][4];
 extern u8 lbl_3_data_19C4[8];
+extern f32 lbl_3_data_19CC[4];
 extern f32 lbl_3_data_19DC[5][2];
 extern f32 lbl_3_data_1A04[2];
 extern f32 lbl_3_data_1A0C[2];
@@ -74,6 +75,8 @@ extern u8 lbl_3_data_1C10[2][4][4];
 extern u8 lbl_3_data_1C90[8];
 extern u8 lbl_3_data_1C98[2][5][3][4];
 extern f32 lbl_3_data_1D10[6];
+
+// .data shared with other units
 extern f32 lbl_3_data_4474[4];
 extern s16 lbl_3_data_4B90[4];
 extern f32 lbl_3_data_5EB8[3];
@@ -85,6 +88,7 @@ void fn_3_20224(void) {
     int count;
     int bunt;
     int offset;
+    int range;
 
     if (g_Batter.aiControlledInd) {
         if (g_d_GameSettings.GameModeSelected == GAME_TYPE_PRACTICE && g_Practice.practiceType_2 != PRACTICE_TYPE_FREEPLAY) {
@@ -167,8 +171,8 @@ void fn_3_20224(void) {
             if (g_AiLogic.batterAIBuntInd == 1) {
                 bunt = 1;
             }
-            offset = (lbl_3_data_1C08[bunt][1] - lbl_3_data_1C08[bunt][0]) *
-                     g_AiLogic.aIDifficultyMultiplierArray[g_GameLogic.homeTeamBattingInd_fieldingTeam];
+            range = lbl_3_data_1C08[bunt][1] - lbl_3_data_1C08[bunt][0];
+            offset = range * g_AiLogic.aIDifficultyMultiplierArray[g_GameLogic.homeTeamBattingInd_fieldingTeam];
             g_AiLogic.batterAIZPosition = offset + lbl_3_data_1C08[bunt][0];
             g_AiLogic.batterAIInd8_FrameBtwn10And16 =
                 lbl_3_data_1C0C[0] + (int)((lbl_3_data_1C0C[1] - lbl_3_data_1C0C[0]) *
@@ -184,9 +188,9 @@ void fn_3_20224(void) {
             fn_3_20188();
         }
     }
-    g_AiLogic.batterAISwingInd = 0;
     g_AiLogic.batterAIBoxPosXVelo = 0.0f;
     g_AiLogic.batterAIBoxPosZVelo = 0.0f;
+    g_AiLogic.batterAISwingInd = 0;
     g_AiLogic.someNotAISwingInd = 0;
     g_AiLogic.aISwingDecisionRelated_noSwingOverride = 0;
     g_AiLogic.aIBatterTrackingCode = 0;
@@ -245,7 +249,7 @@ void fn_3_1FF48(void) {
             break;
         }
     }
-    if (g_Batter.batterHand != 0) {
+    if (g_Batter.batterHand != BATTING_HAND_RIGHT) {
         zone = 4 - zone;
     }
     g_AiLogic.lastPitchBallLocZone = zone;
@@ -358,7 +362,7 @@ void fn_3_1F998(void) {
     g_Batter.batPosition2.z = g_AiLogic.boxVerticalPoint;
     g_Batter.batterPos.x = g_Batter.batPosition2.x + reach->batOffsetFromBatterX;
     g_Batter.batterPos.z = g_Batter.batPosition2.z + reach->batOffsetFromBatterZ;
-    if (g_Batter.batterHand != 0) {
+    if (g_Batter.batterHand != BATTING_HAND_RIGHT) {
         g_Batter.batterPos.x = -g_Batter.batterPos.x;
     }
 }
@@ -435,7 +439,7 @@ void fn_3_1F478(void) {
                 x = -x;
             }
         }
-        if (g_Batter.batterHand != 0) {
+        if (g_Batter.batterHand != BATTING_HAND_RIGHT) {
             x = -x;
             g_AiLogic.batterAIDesiredXPosInBox = x - g_AiLogic.batterAITrackBallPoorlyOffset;
         } else {
@@ -470,7 +474,7 @@ void fn_3_1F1CC(void) {
 
     if (g_AiLogic.batterAIInd10_relatedToBoxPosPrePitch == 3) {
         g_AiLogic.batterAIDesiredXPosInBox = g_AiLogic.boxHorizontalPoint;
-    } else if (g_Batter.characterClass == 2) {
+    } else if (g_Batter.characterClass == CHARACTER_CLASS_SPEED) {
         if (g_AiLogic.batterAIInd10_relatedToBoxPosPrePitch == 1) {
             return;
         }
@@ -601,17 +605,17 @@ void fn_3_1EAA8(void) {
                                                             lbl_3_data_1BAC[late][g_AiLogic.aIBatterDifficulty][1]);
     }
     g_AiLogic.batterAILeftRightInput = RandomIndexFromWeights(lbl_3_data_1BD8[g_Batter.characterClass], 3);
-    if (g_d_GameSettings.GameModeSelected == 6) {
-        first = g_Minigame.minigameFielderIndex[(s8)g_Minigame.minigameControlStruct._28[1]];
-        second = g_Minigame.minigameFielderIndex[(s8)g_Minigame.minigameControlStruct._28[2]];
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+        first = g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[1]];
+        second = g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[2]];
         if (g_Fielders[first]._000 < 0.0f && g_Fielders[second]._000 < 0.0f) {
-            if (g_Batter.batterHand != 0) {
+            if (g_Batter.batterHand != BATTING_HAND_RIGHT) {
                 g_AiLogic.batterAILeftRightInput = 0;
             } else {
                 g_AiLogic.batterAILeftRightInput = 2;
             }
         } else if (g_Fielders[first]._000 > 0.0f && g_Fielders[second]._000 > 0.0f) {
-            if (g_Batter.batterHand != 0) {
+            if (g_Batter.batterHand != BATTING_HAND_RIGHT) {
                 g_AiLogic.batterAILeftRightInput = 2;
             } else {
                 g_AiLogic.batterAILeftRightInput = 0;
@@ -619,13 +623,13 @@ void fn_3_1EAA8(void) {
         } else {
             n = fn_3_E587C();
             if (n >= 4) {
-                if (g_Batter.batterHand != 0) {
+                if (g_Batter.batterHand != BATTING_HAND_RIGHT) {
                     g_AiLogic.batterAILeftRightInput = 0;
                 } else {
                     g_AiLogic.batterAILeftRightInput = 2;
                 }
             } else if (n != 3 && n >= 0) {
-                if (g_Batter.batterHand != 0) {
+                if (g_Batter.batterHand != BATTING_HAND_RIGHT) {
                     g_AiLogic.batterAILeftRightInput = 2;
                 } else {
                     g_AiLogic.batterAILeftRightInput = 0;
@@ -661,7 +665,7 @@ BOOL fn_3_1E7F4(void) {
                 break;
             }
         }
-        if (g_Batter.batterHand != 0) {
+        if (g_Batter.batterHand != BATTING_HAND_RIGHT) {
             zone = 4 - zone;
         }
         if (zone == 1 || zone == 3) {
@@ -690,7 +694,7 @@ BOOL fn_3_1E7F4(void) {
             }
         }
     }
-    if (g_d_GameSettings.GameModeSelected == 6) {
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
         kind = lbl_3_data_1AEC[1][kind][g_Batter.characterClass][g_AiLogic.aIBatterDifficulty];
     } else {
         kind = lbl_3_data_1AEC[0][kind][g_Batter.characterClass][g_AiLogic.aIBatterDifficulty];
