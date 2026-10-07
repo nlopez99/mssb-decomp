@@ -275,7 +275,7 @@ extern void fn_8003403C(f32, f32);
 extern void fn_80033CC8(StaC4Particle* particle, void* arg1);
 extern StaC4Emitter* fn_80033A24(BOOL (*update)(StaC4Emitter*), s32, s32, s32, s32, s32);
 extern s32 fn_800247E4(s32 x, s32 y, s32 width, s32 bytes);
-extern void fn_800528C0(s16* x, s16* y, f32, f32, f32);
+extern void fn_800528C0(f32 x, f32 y, f32 z, s16* screenX, s16* screenY);
 extern void fn_800B0A14_removeQueue(void);
 extern void* fn_800B0A5C_insertQueue(void (*)(void), u16);
 extern void fn_80034CEC(StaC4Task* task);
@@ -534,6 +534,7 @@ void fn_3_F934C(void) {
     Vec offset;
     f32 mag;
     f32 speed;
+    s32 shadow;
 
     memcpy(&tmp, vel, sizeof(Vec));
     PSVECScale(&task->vel, PSVECDotProduct(&task->vel, &tmp), &tmp);
@@ -548,8 +549,8 @@ void fn_3_F934C(void) {
     memcpy(&task->offset, &offset, sizeof(Vec));
     memcpy(pos, &tmp, sizeof(Vec));
     if (task->bounced && (fabs(PSVECMag(&offset)) <= 0.000001f ||
-                          (task->vel.x * offset.x >= 0.0f && task->vel.y * offset.y >= 0.0f &&
-                           task->vel.z * offset.z >= 0.0f))) {
+                          !(task->vel.x * offset.x < 0.0f || task->vel.y * offset.y < 0.0f ||
+                            task->vel.z * offset.z < 0.0f))) {
         memset(&task->offset, 0, sizeof(Vec));
         lbl_3_common_bss_350E4._6B = 0;
         fn_800B0A14_removeQueue();
@@ -565,9 +566,9 @@ void fn_3_F934C(void) {
                        task->offset.x + lbl_3_data_1BA98[task->idx].pos.x,
                        task->offset.y + lbl_3_data_1BA98[task->idx].pos.y,
                        task->offset.z + lbl_3_data_1BA98[task->idx].pos.z);
-    CTRLGetTranslation(&lbl_3_common_bss_350E4._00[task->idx + (lbl_3_bss_B62C + 9)].obj.control, &tmp.x, &tmp.y,
-                       &tmp.z);
-    CTRLSetTranslation(&lbl_3_common_bss_350E4._00[task->idx + (lbl_3_bss_B62C + 9)].obj.control,
+    shadow = task->idx + lbl_3_bss_B62C + 9;
+    CTRLGetTranslation(&lbl_3_common_bss_350E4._00[shadow].obj.control, &tmp.x, &tmp.y, &tmp.z);
+    CTRLSetTranslation(&lbl_3_common_bss_350E4._00[shadow].obj.control,
                        task->offset.x + lbl_3_data_1BA98[task->idx].pos.x, tmp.y,
                        task->offset.z + lbl_3_data_1BA98[task->idx].pos.z);
 }
@@ -584,9 +585,9 @@ void fn_3_F92FC(void) {
 
 // .text:0x000F9164 size:0x198 mapped:0x807381F8
 void fn_3_F9164(StaC4Draw* draw) {
-    s32 sound;
     s32 slot;
     u32 stadium;
+    s32 sound;
     SND_VOICEID voice;
     u8 vol;
 
@@ -617,10 +618,10 @@ void fn_3_F9164(StaC4Draw* draw) {
         vol = lbl_3_data_8404[stadium][sound][1];
     }
     sndFXCtrl(voice, 91, vol);
+    lbl_3_bss_B620[slot] = 1;
     lbl_3_bss_B5D8[slot].x = g_Ball.AtBat_Contact_BallPos.x;
     lbl_3_bss_B5D8[slot].y = -g_Ball.AtBat_Contact_BallPos.y;
     lbl_3_bss_B5D8[slot].z = g_Ball.AtBat_Contact_BallPos.z;
-    lbl_3_bss_B620[slot] = 1;
 }
 
 // .text:0x000F9088 size:0xDC mapped:0x8073811C
@@ -628,36 +629,32 @@ void fn_3_F9088(Vec* pos, s32 i) {
     s16 x;
     s16 y;
 
-    fn_800528C0(&x, &y, pos->x, pos->y, pos->z);
+    fn_800528C0(pos->x, pos->y, pos->z, &x, &y);
     lbl_80371C30[lbl_3_bss_B628->_14 + i]._00->_48 = x;
     lbl_80371C30[lbl_3_bss_B628->_14 + i]._00->_4C = y;
     lbl_80371C30[lbl_3_bss_B628->_14 + i]._00->_50 = 0.0f;
 }
 
+static inline BOOL isSpriteDone(StaC4Task* task, s32 i) {
+    return lbl_80371C30[task->_14 + i]._00->_69 == 2 ? TRUE : FALSE;
+}
+
 // .text:0x000F8E20 size:0x268 mapped:0x80737EB4
 void fn_3_F8E20(void) {
     StaC4Task* task = lbl_803CC1B8;
-    s16 x;
-    s16 y;
     s32 i;
 
     for (i = 0; i < 6; i++) {
         switch (lbl_3_bss_B620[i]) {
         case 1:
-            fn_800528C0(&x, &y, lbl_3_bss_B5D8[i].x, lbl_3_bss_B5D8[i].y, lbl_3_bss_B5D8[i].z);
-            lbl_80371C30[lbl_3_bss_B628->_14 + i]._00->_48 = x;
-            lbl_80371C30[lbl_3_bss_B628->_14 + i]._00->_4C = y;
-            lbl_80371C30[lbl_3_bss_B628->_14 + i]._00->_50 = 0.0f;
+            fn_3_F9088(&lbl_3_bss_B5D8[i], i);
             lbl_80371C30[task->_14 + i]._00->_5C = 0;
             lbl_80371C30[task->_14 + i]._00->_54 |= 2;
             lbl_3_bss_B620[i] = 2;
             break;
         case 2:
-            fn_800528C0(&x, &y, lbl_3_bss_B5D8[i].x, lbl_3_bss_B5D8[i].y, lbl_3_bss_B5D8[i].z);
-            lbl_80371C30[lbl_3_bss_B628->_14 + i]._00->_48 = x;
-            lbl_80371C30[lbl_3_bss_B628->_14 + i]._00->_4C = y;
-            lbl_80371C30[lbl_3_bss_B628->_14 + i]._00->_50 = 0.0f;
-            if (lbl_80371C30[task->_14 + i]._00->_69 == 2) {
+            fn_3_F9088(&lbl_3_bss_B5D8[i], i);
+            if (isSpriteDone(task, i)) {
                 lbl_80371C30[task->_14 + i]._00->_54 &= ~2;
                 lbl_3_bss_B620[i] = 0;
             }
