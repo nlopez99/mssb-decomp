@@ -2036,10 +2036,7 @@ typedef struct _MiniGameStruct {
     /*0x1D5A*/ s16 _1D5A;
     /*0x1D5C*/ u8 _1D5C[6];
     /*0x1D62*/ s16 _1D62;
-    /*0x1D64*/ s16 _1D64;
-    /*0x1D66*/ s16 _1D66;
-    /*0x1D68*/ s16 _1D68;
-    /*0x1D6A*/ s16 _1D6A;
+    /*0x1D64*/ s16 _1D64[4];
     /*0x1D6C*/ u8 _1D6C;
     /*0x1D6D*/ u8 _1D6D;
     /*0x1D6E*/ u8 starDashStunType[4];
@@ -2069,7 +2066,9 @@ typedef struct _MiniGameStruct {
         /*0x1DD0*/ s8 _1DD0;
         /*0x1DD0*/ u8 _1DD0_u8;
     };
-    /*0x1DD1*/ u8 _1DD1[0x1DF4 - 0x1DD1];
+    /*0x1DD1*/ u8 _1DD1[0x1DEC - 0x1DD1];
+    /*0x1DEC*/ f32 _1DEC;
+    /*0x1DF0*/ f32 _1DF0;
     // Bob-omb Derby (rep_31F0) reads _1DF4 and _1DF5, Barrel Batter (rep_34B0) stores _1DF4_s16
     union {
         struct {

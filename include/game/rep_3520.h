@@ -2,24 +2,30 @@
 #define __GAME_rep_3520_H_
 
 #include "mssbTypes.h"
+#include "Dolphin/mtx.h"
+#include "static/UnknownHomes_Static.h"
 
+struct Unk3520Obj;
+
+void fn_3_132EDC(void);
+void fn_3_1330E4(void);
 void fn_3_133200(void);
 void fn_3_133320(void);
 void fn_3_13334C(void);
 void fn_3_1344BC(void);
 void fn_3_1345AC(void);
 void fn_3_134658(void);
-void fn_3_134908(void);
-void fn_3_134918(void);
+int fn_3_134908(const void* a, const void* b);
+int fn_3_134918(const void* a, const void* b);
 void fn_3_13493C(void);
 void fn_3_134C80(void);
 void fn_3_134D4C(void);
 void fn_3_1350BC(void);
-void fn_3_1354BC(void);
+BOOL fn_3_1354BC(s32 i, f32 x, f32 z);
 void fn_3_135520(void);
-void fn_3_135600(void);
-void fn_3_13564C(void);
-void fn_3_135698(void);
+void fn_3_135600(f32* outX, f32* outZ, f32 x, f32 z);
+int fn_3_13564C(f32 x, f32 z);
+int fn_3_135698(const void* a, const void* b);
 void fn_3_1356F8(void);
 void fn_3_1357A4(void);
 void fn_3_13583C(void);
@@ -36,7 +42,7 @@ void fn_3_136220(void);
 void fn_3_13688C(void);
 void fn_3_136CF4(void);
 void fn_3_136EA4(void);
-void fn_3_1370A0(void);
+void fn_3_1370A0(camera_803c639c_s* camera);
 void fn_3_1371E8(void);
 void fn_3_137224(void);
 void fn_3_1373E0(void);
@@ -47,8 +53,8 @@ void fn_3_137DE4(void);
 void fn_3_137F14(void);
 void fn_3_13802C(void);
 void fn_3_1382E0(void);
-void fn_3_138448(void);
-void fn_3_1384B4(void);
+void fn_3_138448(struct Unk3520Obj* obj);
+void fn_3_1384B4(struct Unk3520Obj* obj);
 void fn_3_138AA4(void);
 void fn_3_1391C0(void);
 void fn_3_139700(void);
@@ -56,13 +62,13 @@ void fn_3_13974C(void);
 void fn_3_139808(void);
 void fn_3_139CA0(void);
 void fn_3_139F84(void);
-void fn_3_13A048(void);
+void fn_3_13A048(s32 to, s32 from);
 void fn_3_13A0AC(void);
 void fn_3_13A724(void);
 void fn_3_13A89C(void);
 void fn_3_13AA78(void);
 void fn_3_13ACB4(void);
-void fn_3_13ADC0(void);
+void fn_3_13ADC0(Vec* out, Vec* v, Vec* n);
 void fn_3_13AE1C(void);
 void fn_3_13AFE4(void);
 void fn_3_13B284(void);
