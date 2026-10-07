@@ -69,6 +69,14 @@ def tool_flags() -> list:
     return [arg for flag, path in paths.items() for arg in (flag, os.path.realpath(path))]
 
 
+def link_game_files(checkout: str) -> None:
+    for name in ("sys", "files"):
+        source = os.path.realpath(os.path.join(root_dir, "orig", VERSION, name))
+        if not os.path.isdir(source):
+            raise match.UsageError(f"game files missing: {source}")
+        os.symlink(source, os.path.join(checkout, "orig", VERSION, name))
+
+
 def ensure_base_build(sha: str) -> str:
     regress_dir = os.path.join(root_dir, "build", "regress")
     base_dir = os.path.join(regress_dir, sha[:12])
@@ -87,11 +95,7 @@ def ensure_base_build(sha: str) -> str:
 
     print(f"regress: building base {sha[:12]} in {os.path.relpath(base_dir, root_dir)} (once per base commit)")
     git("worktree", "add", "--detach", base_dir, sha)
-    for name in ("sys", "files"):
-        source = os.path.realpath(os.path.join(root_dir, "orig", VERSION, name))
-        if not os.path.isdir(source):
-            raise match.UsageError(f"game files missing: {source}")
-        os.symlink(source, os.path.join(base_dir, "orig", VERSION, name))
+    link_game_files(base_dir)
     subprocess.run([sys.executable, "configure.py", "--version", VERSION, *tool_flags()],
                    cwd=base_dir, check=True, capture_output=True)
     proc = subprocess.run(["ninja"], cwd=base_dir, capture_output=True, text=True)
