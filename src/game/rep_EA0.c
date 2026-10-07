@@ -748,12 +748,11 @@ s32 fn_3_67EF0(UnkRingEA0* ring, s32 count, Vec* pos, u32* colors, u32 color, Ve
     s32 i;
     s32 side;
     f32 angle;
-    u8 alpha;
+    u8 alpha = color & 0xFF;
     u8 first;
     s32 fade;
 
     colors[0] = color;
-    alpha = color;
     PSMTXCopy(fn_80052734(0)->_40, m);
     idx = 1;
     k = 0;
@@ -1064,12 +1063,12 @@ void fn_3_67620(s32 type, u16 frames) {
     dst = lbl_3_bss_1060;
     src += 3;
     dst += 3 + 120 * 3;
-    i = 119;
-    do {
+    i = 120;
+    while (i--) {
         dst -= 3;
         memcpy(dst, src, 3);
         src += 3;
-    } while (i--);
+    }
     DCStoreRangeNoSync(lbl_3_bss_1060, 3 + 120 * 3);
     lbl_3_common_bss_32724._CC = 1;
 }
