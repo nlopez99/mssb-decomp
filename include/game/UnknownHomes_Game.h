@@ -1928,17 +1928,14 @@ typedef struct _MiniGameStruct {
     /*0x1AFE*/ s16 _1AFE[4];
     /*0x1B06*/ s16 _1B06;
     /*0x1B08*/ s16 _1B08[6];
-    /*0x1B14*/ u8 _1B14;
+    /*0x1B14*/ s8 _1B14;
     /*0x1B15*/ u8 _1B15[4];
     /*0x1B19*/ u8 _1B19;
     /*0x1B1A*/ u8 _1B1A[6];
     /*0x1B20*/ u8 _1B20[6];
     /*0x1B26*/ s8 _1B26[4][2];
     /*0x1B2E*/ u8 _1B2E;
-    /*0x1B2F*/ u8 _1B2F;
-    /*0x1B30*/ u8 _1B30;
-    /*0x1B31*/ u8 _1B31;
-    /*0x1B32*/ u8 _1B32;
+    /*0x1B2F*/ u8 _1B2F[4];
     /*0x1B33*/ u8 _1B33;
     /*0x1B34*/ s16 _1B34;
     /*0x1B36*/ u8 _1B36[6];
@@ -2092,7 +2089,10 @@ typedef struct _MiniGameStruct {
     /*0x1DF6*/ u8 _1DF6;
     /*0x1DF7*/ u8 _1DF7;
     /*0x1DF8*/ u8 _1DF8;
-    /*0x1DF9*/ u8 _1DF9[0x1E2C - 0x1DF9];
+    /*0x1DF9*/ u8 _1DF9[0x1DFC - 0x1DF9];
+    /*0x1DFC*/ u8 _1DFC[4];
+    /*0x1E00*/ u8 _1E00;
+    /*0x1E01*/ u8 _1E01[0x1E2C - 0x1E01];
 } MiniGameStruct; // size: 0x1E2C
 
 extern MiniGameStruct g_Minigame;
