@@ -42,6 +42,23 @@ typedef struct {
 
 extern UnkChallengeTeam lbl_80109420[];
 
+typedef struct {
+    /* 0x0 */ u8 _0;
+    /* 0x1 */ u8 _1; // index into starMissionCompletionTracker.characters
+    /* 0x2 */ u8 _2; // index into lbl_80109AE8
+    /* 0x3 */ u8 _3[3];
+} UnkCharEntry; // size: 0x6
+
+extern UnkCharEntry lbl_800E8558[54];
+
+typedef struct {
+    /* 0x0 */ s16 type;
+    /* 0x2 */ s16 target;
+    /* 0x4 */ u8 _4[6];
+} UnkMissionDef; // size: 0xA
+
+extern UnkMissionDef lbl_80109AE8[32][10];
+
 // .text:0x00164554 size:0x110 mapped:0x807A35E8
 void fn_3_164554(void) {
     StarMissionCompletionTracker* tracker = &starMissionCompletionTracker;
@@ -229,4 +246,80 @@ void fn_3_1637EC(void) {
 // .text:0x0016230C size:0xA48 mapped:0x807A13A0
 void fn_3_16230C(s32 result, s32 streak) {
     return;
+}
+
+// .text:0x00162080 size:0x28C mapped:0x807A1114
+void fn_3_162080(void) {
+    UnkBss37400* bss = &lbl_3_common_bss_37400;
+    s32 i;
+    s32 j;
+    s32 id;
+    UnkMissionDef* def;
+    UnkMissionDef* m;
+    BOOL done;
+
+    if (bss->_40 == g_GameLogic.teamFielding) {
+        id = lbl_800E8558[g_Pitcher.charID]._1;
+        m = lbl_80109AE8[lbl_800E8558[g_Pitcher.charID]._2];
+        for (i = 0; i < 10; i++) {
+            if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0) {
+                def = &m[i];
+                done = FALSE;
+                if (def->type == 3) {
+                    if (g_Pitcher.starPitchType) {
+                        starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus |= 1;
+                        if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus == 0x11) {
+                            starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                        }
+                    }
+                } else {
+                    for (j = 4; j < 13; j++) {
+                        if (def->type == j) {
+                            switch (j) {
+                            case 11:
+                                if (g_Pitcher.starPitchType) {
+                                    starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
+                                    if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= def->target) {
+                                        done = TRUE;
+                                    }
+                                }
+                                break;
+                            case 12:
+                                if (g_Pitcher.ChargePitchType == 3) {
+                                    starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
+                                    if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= def->target) {
+                                        done = TRUE;
+                                    }
+                                }
+                                break;
+                            }
+                            if (done) {
+                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if (bss->_40 == g_GameLogic.teamBatting) {
+        id = lbl_800E8558[g_Batter.charID]._1;
+        m = lbl_80109AE8[lbl_800E8558[g_Batter.charID]._2];
+        for (i = 0; i < 10; i++) {
+            if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0) {
+                if (m[i].type == 3 && g_Ball.currentStarSwing2) {
+                    starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus |= 0x10;
+                    if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus == 0x11) {
+                        starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                    }
+                }
+                if (m[i].type == 2 && (g_GameLogic.IsStarChance == 3 || g_GameLogic.stadiumStarObtained)) {
+                    starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
+                    if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= m[i].target) {
+                        starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                    }
+                }
+            }
+        }
+    }
 }

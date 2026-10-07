@@ -1239,7 +1239,7 @@ typedef enum _FIELDING_ABILITIES {
 } FIELDING_ABILITIES;
 
 typedef struct _starMissionTrackingPair {
-    /*0x000*/ E(u8, STAR_MISSION_TRACKING) starMissionStatus;
+    /*0x000*/ E(s8, STAR_MISSION_TRACKING) starMissionStatus;
     /*0x001*/ u8 shownOnPauseMenu;
 } starMissionTrackingPair;
 
