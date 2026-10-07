@@ -584,6 +584,7 @@ void fn_3_12F624(void) {
     BOOL changed;
     int points;
     int hit;
+    s16* delays;
 
     i = g_Ball.framesSinceHit;
     if (i <= 0 || g_Minigame.barrelBatter_scoreCalculatedInd ||
@@ -607,11 +608,12 @@ void fn_3_12F624(void) {
             for (i = 0; i < 15; i++) {
                 flags[i] = 0;
             }
+            delays = lbl_3_data_21788;
             hit = g_Minigame.barrelBatter_hitBarrelID;
             g_Minigame.barrels[hit].barrelState = 3;
             g_Minigame.barrels[hit].animationCounter = 0;
-            g_Minigame.barrels[hit].delayUntilBlownUp = lbl_3_data_21788[0];
-            delay = lbl_3_data_21788[0] + lbl_3_data_21788[1];
+            g_Minigame.barrels[hit].delayUntilBlownUp = delays[0];
+            delay = delays[0] + delays[1];
             if (g_Minigame.bB_bombBarrelID == hit && g_Minigame.barrels[hit].barrelColour == 3) {
                 g_Minigame.bB_bombBarrelHitInd = 1;
             }
@@ -632,7 +634,7 @@ void fn_3_12F624(void) {
                 if (!changed) {
                     break;
                 }
-                delay += lbl_3_data_21788[1];
+                delay += delays[1];
             }
             if (!g_Minigame.bB_bombBarrelHitInd && g_Minigame.barrelBatter_barrelsHit >= 2) {
                 g_Minigame.barrelBatterChargeMeter += g_Minigame.barrelBatter_barrelsHit - 1;
