@@ -1715,8 +1715,8 @@ typedef struct _MiniGameStruct {
     /*0x18BC*/ s16 minigamePoints_current_Latest[4][2];
     /*0x18CC*/ MiniGameControlStruct minigameControlStruct;
     /*0x18F8*/ s8 minigameFielderIndex[4];
-    /*0x18FC*/ u8 _18FC[4];
-    /*0x1900*/ u8 _1900[4];
+    /*0x18FC*/ s8 _18FC[4];
+    /*0x1900*/ s8 _1900[4];
     /*0x1904*/ s8 minigamePlayerSelectedOrder;
     /*0x1905*/ s8 rosterID;
     /*0x1906*/ u8 miniGameNumberOfParticipants;
@@ -2073,6 +2073,8 @@ typedef struct _MiniGameStruct {
     /*0x1DC4*/ u8 _1DC4[4];
     /*0x1DC8*/ u8 _1DC8[4];
     /*0x1DCC*/ s16 _1DCC;
+    // Minigames share these fields: Wall Ball (rep_3290) reads _1DCE, _1DCF and _1DD0,
+    // Bob-omb Derby (rep_31F0) _1DCE_s16 and _1DD0_u8
     union {
         struct {
             /*0x1DCE*/ u8 _1DCE;
@@ -2080,7 +2082,10 @@ typedef struct _MiniGameStruct {
         };
         /*0x1DCE*/ s16 _1DCE_s16;
     };
-    /*0x1DD0*/ s8 _1DD0;
+    union {
+        /*0x1DD0*/ s8 _1DD0;
+        /*0x1DD0*/ u8 _1DD0_u8;
+    };
     /*0x1DD1*/ u8 _1DD1[0x1DF4 - 0x1DD1];
     /*0x1DF4*/ u8 _1DF4;
     /*0x1DF5*/ u8 _1DF5;
