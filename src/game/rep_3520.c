@@ -1230,7 +1230,7 @@ void fn_3_1350BC(void) {
 }
 
 // .text:0x00134D4C size:0x370 mapped:0x80773DE0
-int fn_3_134D4C(f32 cx, f32 cz, f32 radius, f32 px, f32 pz, f32 qx, f32 qz) {
+u32 fn_3_134D4C(f32 cx, f32 cz, f32 radius, f32 px, f32 pz, f32 qx, f32 qz) {
     f32 dx = cx - px;
     f32 dz = cz - pz;
     f32 dist;
@@ -1282,8 +1282,56 @@ BOOL fn_3_134C80(u32 player, u32 quadrant, u32 target, f32 x, f32 z) {
 }
 
 // .text:0x0013493C size:0x344 mapped:0x807739D0
-void fn_3_13493C(void) {
-    return;
+int fn_3_13493C(u32 player, f32* x, f32* z, u32 depth) {
+    f32 angle;
+    f32 x1;
+    f32 z1;
+    f32 x2;
+    f32 z2;
+    f32 d1;
+    f32 d2;
+    f32 dx;
+    f32 dz;
+    f32 rx;
+    f32 rz;
+
+    dx = *x - g_Fielders[g_Minigame.minigameFielderIndex[player]].pos.x;
+    dz = *z - g_Fielders[g_Minigame.minigameFielderIndex[player]].pos.z;
+    angle = atan2(dz, dx);
+    if (g_Minigame._1D72 != 0 && player != g_Minigame._1D6D) {
+        angle += 1.5707964f;
+        angle = fn_3_9FEA8(angle);
+        *x = 8.0f * cosf_kludge(angle) + lbl_3_data_21A48.x;
+        *z = 8.0f * sinf_kludge(angle) + lbl_3_data_21A48.z;
+    } else {
+        angle -= 1.5707964f;
+        angle = fn_3_9FEA8(angle);
+        x1 = 8.0f * cosf_kludge(angle) + lbl_3_data_21A48.x;
+        z1 = 8.0f * sinf_kludge(angle) + lbl_3_data_21A48.z;
+        dx = x1 - g_Fielders[g_Minigame.minigameFielderIndex[player]].pos.x;
+        dz = z1 - g_Fielders[g_Minigame.minigameFielderIndex[player]].pos.z;
+        d1 = dz + (dx * dx + dz);
+        angle += 3.1415927f;
+        angle = fn_3_9FEA8(angle);
+        x2 = 8.0f * cosf_kludge(angle) + lbl_3_data_21A48.x;
+        z2 = 8.0f * sinf_kludge(angle) + lbl_3_data_21A48.z;
+        dx = x2 - g_Fielders[g_Minigame.minigameFielderIndex[player]].pos.x;
+        dz = z2 - g_Fielders[g_Minigame.minigameFielderIndex[player]].pos.z;
+        d2 = dz + (dx * dx + dz);
+        if (d1 < d2) {
+            *x = x1;
+            *z = z1;
+        } else {
+            *x = x2;
+            *z = z2;
+        }
+    }
+    if (depth != 0 && fn_3_134D4C(lbl_3_data_21A48.x, lbl_3_data_21A48.z, 4.5f, g_Fielders[g_Minigame.minigameFielderIndex[player]].pos.x,
+                                  g_Fielders[g_Minigame.minigameFielderIndex[player]].pos.z, *x, *z)) {
+        fn_3_13493C(player, x, z, depth - 1);
+    }
+    fn_3_135600(&rx, &rz, *x, *z);
+    return fn_3_13564C(rx, rz);
 }
 
 // .text:0x00134918 size:0x24 mapped:0x807739AC
