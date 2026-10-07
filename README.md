@@ -70,15 +70,11 @@ macOS:
   ```
   brew install ninja
   ```
-- Install [wine-crossover](https://github.com/Gcenx/homebrew-wine):
-  ```
-  brew install --cask --no-quarantine gcenx/wine/wine-crossover
-  ```
-
-After OS upgrades, if macOS complains about `Wine Crossover.app` being unverified, you can unquarantine it using:
-```sh
-sudo xattr -rd com.apple.quarantine '/Applications/Wine Crossover.app'
-```
+- Wine is not needed. The build downloads [WiBo](https://github.com/decompals/WiBo), a minimal 32-bit Windows binary wrapper, and uses it to run the compiler.
+  - WiBo's macOS build is x86_64, so Apple Silicon Macs need Rosetta 2:
+    ```
+    softwareupdate --install-rosetta --agree-to-license
+    ```
 
 Linux:
 ------
