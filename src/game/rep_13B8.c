@@ -78,6 +78,7 @@ extern int fn_3_52560(int fielder, f32 x, f32 z);
 extern s16 lbl_3_data_1C58[5][4];
 extern s16 lbl_3_data_1C88[4];
 extern VecXZ lbl_3_data_4444[5];
+extern s16 lbl_3_data_49DC[44];
 extern VecXZ lbl_3_data_4A34[4];
 extern VecXZ lbl_3_data_4A54[2][13];
 extern s16 lbl_3_data_4B40[2];
@@ -341,8 +342,18 @@ void fn_3_88D88(int runner) {
 }
 
 // .text:0x00088C24 size:0x164 mapped:0x806C7CB8
+// 98.65%: only the registers of the inlined fn_3_889FC differ
 void fn_3_88C24(void) {
-    return;
+    fn_3_87AE8();
+    if (g_GameLogic.secondaryGameMode == 6) {
+        fn_3_87CC8();
+    } else {
+        fn_3_88408();
+        fn_3_88B18();
+        fn_3_889FC();
+        fn_3_87E80();
+    }
+    fn_3_8781C();
 }
 
 // .text:0x00088B18 size:0x10C mapped:0x806C7BAC
@@ -406,9 +417,96 @@ void fn_3_889FC(void) {
     }
 }
 
+// Credits the throwing fielder with the out
+static inline void creditThrowOut(void) {
+    if (g_d_GameSettings.exhibitionMatchInd == 0 && lbl_3_common_bss_37400._40 == g_GameLogic.teamFielding &&
+        g_Ball.throwingFielder >= 0 && g_FieldingLogic._141 != 0) {
+        fn_3_161588(8, g_Fielders[g_Ball.throwingFielder]._178);
+    }
+}
+
 // .text:0x00088408 size:0x5F4 mapped:0x806C749C
 void fn_3_88408(void) {
-    return;
+    InMemRunnerType* r;
+    int i;
+
+    if (g_Strikes.outs < 3) {
+        if (g_Ball.AtBat_ContactResult == 1 || g_Ball.AtBat_ContactResult == -1 || g_Ball.AtBat_ContactResult == 2) {
+            g_Runners[0].tagUpInd = 0;
+            g_Runners[1].tagUpInd = 0;
+            g_Runners[2].tagUpInd = 0;
+            g_Runners[3].tagUpInd = 0;
+        }
+        if (g_Ball.AtBat_ContactResult != -1) {
+            if (g_FieldingLogic._0E8 >= 0 && g_FieldingLogic._0E8 <= 3) {
+                r = &g_Runners[g_FieldingLogic._0E8];
+            }
+            if (g_Ball.AtBat_ContactResult == 3 || g_FieldingLogic._108 == 2) {
+                fn_3_88D88(0);
+                g_Runners[0].outType = 1;
+                if (g_Ball.fielderWhoGotLastOut < 0) {
+                    g_Ball.fielderWhoGotLastOut = g_Ball.fielderWBallIndex;
+                }
+            }
+            if (g_FieldingLogic._116 != 0 && g_FieldingLogic._111 == 1 && r->tagUpInd != 2) {
+                if (r->baseOfFailedBodyCheck >= 0) {
+                    fn_3_88D88(g_FieldingLogic._0E8);
+                    r->outType = 3;
+                    g_FieldingLogic._0E8 = -1;
+                    g_FieldingLogic._111 = 0;
+                    if (g_Ball.fielderWhoGotLastOut < 0) {
+                        g_Ball.fielderWhoGotLastOut = g_Ball.fielderWithBallIndexStored2;
+                        if (g_Ball.fielderWithBallIndexStored2 >= 6 && r->baseOfFailedBodyCheck == 0 &&
+                            g_Ball.numberOfThrowsDuringPlay == 2 && g_Ball.timeSinceBallPickedUp < lbl_3_data_49DC[39]) {
+                            g_UnkSound_32718._08 = 4;
+                            g_FieldingLogic._134 = g_Ball.fielderWithBallIndexStored2;
+                            if (g_d_GameSettings.exhibitionMatchInd == 0 &&
+                                lbl_3_common_bss_37400._40 == g_GameLogic.teamFielding) {
+                                fn_3_161588(2, g_Fielders[g_Ball.fielderWithBallIndexStored2]._178);
+                            }
+                        }
+                    }
+                    creditThrowOut();
+                }
+            } else if (g_FieldingLogic._111 >= 2 && g_FieldingLogic._111 <= 5 && g_FieldingLogic._112 == 2) {
+                if (r->tagUpInd == 2) {
+                    fn_3_88D88(g_FieldingLogic._0E8);
+                    r->outType = 4;
+                    g_FieldingLogic._0E8 = -1;
+                    creditThrowOut();
+                } else if ((r->baseStandingOn < 0 || r->forceOutCd == 1) &&
+                           (r->actionStage == 0 || r->actionFrames_countDown >= 15)) {
+                    fn_3_88D88(g_FieldingLogic._0E8);
+                    if (r->forceOutCd == 1) {
+                        r->forceOutCd = 2;
+                    }
+                    r->outType = 3;
+                    g_FieldingLogic._0E8 = -1;
+                    if (g_Ball.fielderWhoGotLastOut < 0) {
+                        g_Ball.fielderWhoGotLastOut = g_Ball.fielderWithBallIndexStored2;
+                    }
+                    creditThrowOut();
+                }
+                g_FieldingLogic._111 = 0;
+                g_FieldingLogic._112 = 0;
+                g_FieldingLogic._0CC = -1;
+            }
+            if (g_Ball.baseBallAndFielderAreOn >= 1 && g_Runners[g_Ball.baseBallAndFielderAreOn].tagUpInd == 2) {
+                fn_3_88D88(g_Ball.baseBallAndFielderAreOn);
+                g_Runners[g_Ball.baseBallAndFielderAreOn].outType = 4;
+                creditThrowOut();
+            }
+        }
+    }
+    for (i = 0; i < 4; i++) {
+        if (g_Runners[i].runnerOnFieldOrOutOrScored == 2) {
+            if (g_Runners[i].framesSinceOut < 0x7FFE) {
+                g_Runners[i].framesSinceOut++;
+            } else {
+                g_Runners[i].framesSinceOut = 0x7FFF;
+            }
+        }
+    }
 }
 
 // .text:0x00088228 size:0x1E0 mapped:0x806C72BC
@@ -518,7 +616,11 @@ void fn_3_87CC8(void) {
 
     for (i = 0; i < 4; i++) {
         InMemRunnerType* r = &g_Runners[i];
-        if (r->runnerOnFieldOrOutOrScored != 0) {
+        // continue and the two-step fn_3_9FEA8 call keep this over -inline auto's limit, so fn_3_88C24 calls it
+        if (r->runnerOnFieldOrOutOrScored == 0) {
+            continue;
+        }
+        {
             angle = atan2(-r->velocity.x, -r->velocity.y);
             if (g_Minigame._1B15[g_Minigame._18FC[i]] == 1) {
                 angle = fn_3_9FEA8(PI + atan2(-r->velocity.x, -r->velocity.z));
@@ -526,7 +628,8 @@ void fn_3_87CC8(void) {
                 if (0.0f == r->velocity.x && 0.0f == r->velocity.z) {
                     angle = atan2(-r->velocityStored.x, -r->velocityStored.z);
                     if (r->turningAroundInd == 1 && r->runningDirectionCode == 1 && r->acceleration > 0.0f) {
-                        angle = fn_3_9FEA8(PI + angle);
+                        angle = PI + angle;
+                        angle = fn_3_9FEA8(angle);
                     }
                 } else {
                     angle = atan2(-r->velocity.x, -r->velocity.z);
