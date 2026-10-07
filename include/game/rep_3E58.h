@@ -2,12 +2,15 @@
 #define __GAME_rep_3E58_H_
 
 #include "mssbTypes.h"
+#include "Dolphin/mtx.h"
 
-void fn_3_1666B0(void);
+struct UnkPlayer3E58;
+
+void fn_3_1666B0(Vec* src);
 void fn_3_16689C(void);
 void fn_3_16696C(void);
 void fn_3_16699C(void);
-void fn_3_166C30(void);
+void fn_3_166C30(struct UnkPlayer3E58* player, s8 id);
 void fn_3_166D40(void);
 void fn_3_166E04(void);
 void fn_3_166FCC(void);
