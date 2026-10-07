@@ -452,6 +452,7 @@ static inline void setCpuInputFlags(u8 value) {
 
 // .text:0x00111C5C size:0x324 mapped:0x80750CF0
 void fn_3_111C5C(void) {
+    MiniGameStruct* mg;
     s8 i;
     s8 c;
 
@@ -460,25 +461,25 @@ void fn_3_111C5C(void) {
             return;
         }
         fn_3_75560();
+        mg = &g_Minigame;
         setCpuInputFlags(0);
         i = 0;
         do {
-            c = g_Minigame.minigameControlStruct.characterIndex[i];
-            if (c >= 0 && c < 4 && i == g_Minigame.rosterID && g_Minigame.minigameControlStruct.battingHandedness[i]) {
+            if ((c = g_Minigame.minigameControlStruct.characterIndex[i]) >= 0 && c < 4 && i == g_Minigame.rosterID && g_Minigame.minigameControlStruct.battingHandedness[i]) {
                 g_Minigame._1DBC[c] = 1;
                 memset(&g_Minigame._1D7C[c], 0, sizeof(InputStruct));
                 switch (g_Pitcher.pitcherActionState) {
                 case 2:
-                    if (g_Minigame._1DD0_u8 == 0) {
+                    if (mg->_1DD0_u8 == 0) {
                         fn_3_110634();
-                        g_Minigame._1DD0_u8 = 1;
+                        mg->_1DD0_u8 = 1;
                     }
-                    if (g_Pitcher.windupCountdownUntilBallReleased <= g_Minigame._1DCC) {
+                    if (g_Pitcher.windupCountdownUntilBallReleased <= mg->_1DCC) {
                         g_Minigame._1D7C[c].buttonInput |= INPUT_BUTTON_A;
                     }
                     break;
                 case 3:
-                    if (g_Ball.pitchHangtimeCounter < g_Pitcher.frameWhenUnhittable - g_Minigame._1DCE_s16) {
+                    if (g_Ball.pitchHangtimeCounter < g_Pitcher.frameWhenUnhittable - mg->_1DCE_s16) {
                         g_Minigame._1D7C[c].buttonInput |= INPUT_BUTTON_A;
                     }
                     break;
