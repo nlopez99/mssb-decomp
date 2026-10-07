@@ -158,8 +158,9 @@ static u8 lbl_3_bss_9D40[0x40] ATTRIBUTE_ALIGN(32);
 static GXTexObj lbl_3_bss_9D20;
 
 // .text:0x000C1930 size:0x34 mapped:0x807009C4
-// Outside this unit's .text range in splits.txt, but inlined into most functions here
-s32 fn_3_C1930(s32 id) {
+// Outside this unit's .text range in splits.txt, but inlined into most functions here;
+// static inline until the split moves, so this object has no extra function
+static inline s32 fn_3_C1930(s32 id) {
     s32 i = 1;
 
     do {

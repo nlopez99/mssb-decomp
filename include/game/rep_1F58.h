@@ -18,6 +18,5 @@ void fn_3_C11CC(s32 idx, BOOL remove);
 void fn_3_C1344(s32 idx, f32 chargeUp, f32 chargeDown, BOOL full);
 void fn_3_C1770(s32 idx);
 // Outside this unit's .text range in splits.txt
-s32 fn_3_C1930(s32 id);
 
 #endif // !__GAME_rep_1F58_H_
