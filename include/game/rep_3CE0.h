@@ -3,7 +3,7 @@
 
 #include "mssbTypes.h"
 
-void fn_3_15FB84(void);
-void fn_3_15FF28(void);
+void fn_3_15FB84(s32 count, ...);
+void fn_3_15FF28(void* arg);
 
 #endif // !__GAME_rep_3CE0_H_
