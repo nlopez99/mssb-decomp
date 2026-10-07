@@ -23,5 +23,12 @@ void fn_3_240F8(void);
 void fn_3_24598(void);
 void fn_3_24630(void);
 void fn_3_24708(void);
+void fn_3_249E8(int id);
+void fn_3_24ADC(int id, BOOL queue);
+void fn_3_24DBC(u8 mode);
+void fn_3_24EA0(void);
+void fn_3_24F20(void);
+void fn_3_24F24(int idx);
+void fn_3_250FC(void);
 
 #endif // !__GAME_rep_A00_H_

@@ -187,7 +187,7 @@ void fn_3_751B4(void) {
 }
 
 // .text:0x000753E8 size:0x4C mapped:0x806B447C
-void fn_3_753E8(void) {
+void fn_3_753E8(BOOL keepAction) {
     return;
 }
 

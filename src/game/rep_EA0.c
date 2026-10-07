@@ -123,18 +123,31 @@ extern struct {
     /* 0x17C */ u8 _17C[0x268 - 0x17C];
 } g_Fielders[9];
 
-// This unit's .data (0x6820 to 0x69C0) is missing from splits.txt; fn_3_678B8 reaches it from
-// one pool base, so that function matches only once these are statics here
-extern u8 lbl_3_data_6820[16];
-extern f32 lbl_3_data_6830[2];
-extern f32 lbl_3_data_6838[2];
-extern f32 lbl_3_data_6840[2];
-extern f32 lbl_3_data_6848[2];
-extern u16 lbl_3_data_6860[8][2];
-extern UnkTrailEA0 lbl_3_data_6880[12];
-extern u8 lbl_3_data_6940[0x36];
-extern u8 lbl_3_data_6980[0x20];
-extern UnkDrawEA0 lbl_3_data_69A0[2];
+u8 lbl_3_data_6820[16] = { 0, 0, 0, 12, 13, 7, 7, 10, 11, 8, 9 };
+f32 lbl_3_data_6830[2] = { 2.5f, 5.0f };
+f32 lbl_3_data_6838[2] = { 0.6f, 0.6f };
+f32 lbl_3_data_6840[2] = { 0.3f, 1.0f };
+f32 lbl_3_data_6848[2] = { -0.1f, 1.0f };
+static u16 lbl_3_data_6860[8][2] ATTRIBUTE_ALIGN(32) = {
+    { 0x0000, 0x4000 }, { 0x4000, 0x4000 }, { 0x0000, 0x2000 }, { 0x4000, 0x2000 },
+    { 0x0000, 0x1000 }, { 0x4000, 0x1000 }, { 0x0000, 0x0800 }, { 0x4000, 0x0800 },
+};
+static UnkTrailEA0 lbl_3_data_6880[12] = {
+    { 0, 0.1f, 0.1f, 60 },  { 10, 0.2f, 0.2f, 30 }, { 11, 0.4f, 0.4f, 60 }, { 10, 0.3f, 0.3f, 50 },
+    { 11, 0.5f, 0.5f, 100 }, { 11, 1.0f, 1.0f, 100 }, { 23, 0.4f, 0.4f, 100 }, { 23, 1.0f, 1.0f, 100 },
+    { 30, 0.3f, 0.3f, 50 }, { 31, 0.3f, 0.3f, 50 }, { 33, 0.4f, 0.4f, 60 }, { 33, 0.4f, 0.4f, 60 },
+};
+u8 lbl_3_data_6940[0x36] = {
+    0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 5, 0, 0, 3, 6, 3, 0, 1, 0, 2, 1, 0, 3,
+    3, 6, 1, 2, 3, 4, 1, 0, 3, 2, 5, 0, 6, 6, 6, 0, 3, 1, 2, 3, 6, 5, 3, 0, 1, 0, 1,
+};
+static u8 lbl_3_data_6980[0x20] ATTRIBUTE_ALIGN(32) = {
+    GX_QUADS | GX_VTXFMT0, 0, 8, 0, 0, 0, 1, 0, 1, 3, 0, 3, 2, 0, 2, 2, 1, 2, 3, 1, 3, 5, 2, 1, 4, 2, 0,
+};
+static UnkDrawEA0 lbl_3_data_69A0[2] = {
+    { 0, fn_3_67C34 },
+    { 0, fn_3_67C34 },
+};
 
 extern void SetDisplayStateTexture(void*, s32, s32);
 extern void fn_8001D0D0(s32, f32);
@@ -744,8 +757,6 @@ void fn_3_685F0(void) {
 }
 
 // .text:0x00067EF0 size:0x700 mapped:0x806A6F84
-// 99.91%, registers only: in the last colors[0] |= the target moves (u8)(first - fade) to r6 and
-// loads colors2[2] into r0; this build keeps the value in r0 and loads colors2[2] into r6.
 s32 fn_3_67EF0(UnkRingEA0* ring, s32 count, Vec* pos, u32* colors, u32 color, Vec* pos2, u32* colors2, Vec* dir,
                f32 width) {
     Mtx m;
@@ -866,7 +877,8 @@ s32 fn_3_67EF0(UnkRingEA0* ring, s32 count, Vec* pos, u32* colors, u32 color, Ve
     colors[0] &= 0xFFFFFF00;
     colors2[1] |= (u8)fade;
     colors2[2] |= (u8)fade;
-    colors[0] |= (u8)(first - fade);
+    first = first - fade;
+    colors[0] |= first;
     memset(&pos[n * 2], 0, (count - n) * (2 * sizeof(Vec)));
     memset(&colors[n], 0, (count - n) * sizeof(u32));
     DCStoreRangeNoSync(pos, count * 2 * sizeof(Vec));
@@ -982,9 +994,8 @@ void fn_3_67A48(void) {
 }
 
 // .text:0x000678B8 size:0x190 mapped:0x806A694C
-// The target reaches lbl_3_data_6860, 6880, 6980 and 69A0 from one pool base at 0x6820, which no
-// extern reproduces; with this unit's .data as statics it scores 87.77% (the target loads
-// lbl_803CC1B8 with addi and lwz 0 and orders the argument setup differently).
+// 87.77%: the target loads lbl_803CC1B8 with addi and lwz 0 and orders the argument setup
+// differently; typed, struct, array and inline forms of that load all compile the same here.
 void fn_3_678B8(void) {
     UnkTaskEA0* task = lbl_803CC1B8;
     s32 side;
@@ -1016,15 +1027,15 @@ void fn_3_678B8(void) {
 }
 
 // .text:0x00067620 size:0x298 mapped:0x806A66B4
-// 97.72%, registers only: the target shares the header's 1 with i (r5) and holds p, 2i and 2i+1
-// in r6, r7 and r8; this build loads 1 twice and uses r8, r6 and r7. The copy loop's counter and
-// destination take r28 and r30 in the target, the reverse here.
+// 98.78%, registers only: the target holds i (and the header's 1), p, 2i and 2i+1 in r5 to r8;
+// this build puts 2i, 2i+1, p and i there. `p[6] = i = 1` is what shares the 1 with i.
 void fn_3_67620(s32 type, u16 frames) {
     u8* p;
     u8* start;
-    u8* src;
     u8* dst;
+    u8* src;
     int i;
+    int j;
 
     lbl_3_bss_16A0 = type;
     if (type == 10) {
@@ -1051,7 +1062,6 @@ void fn_3_67620(s32 type, u16 frames) {
     fn_80023EEC(&lbl_3_bss_1630, lbl_3_bss_1360, lbl_3_data_6880[type]._0C);
 
     p = lbl_3_bss_11E0;
-    i = 1;
     p[0] = GX_TRIANGLESTRIP | GX_VTXFMT0;
     start = p;
     p[1] = 0;
@@ -1059,7 +1069,7 @@ void fn_3_67620(s32 type, u16 frames) {
     p[3] = 0;
     p[4] = 0;
     p[5] = 2;
-    p[6] = 1;
+    p[6] = i = 1;
     p[7] = 0;
     p[8] = 3;
     p += 9;
@@ -1079,8 +1089,8 @@ void fn_3_67620(s32 type, u16 frames) {
     dst = lbl_3_bss_1060;
     src += 3;
     dst += 3 + 120 * 3;
-    i = 120;
-    while (i--) {
+    j = 120;
+    while (j--) {
         dst -= 3;
         memcpy(dst, src, 3);
         src += 3;

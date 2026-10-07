@@ -2,6 +2,7 @@
 #include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/os.h"
+#include "game/rep_1C0.h"
 #include "game/rep_1D58.h"
 #include "game/rep_1E08.h"
 
@@ -59,7 +60,6 @@ extern void* ARAMTransfer(UnkAramEntry60* entry, int arg1, int arg2, u32 aram);
 extern void fn_8001CBD4(void);
 extern void fn_800229CC(void);
 extern void fn_800B0A14_removeQueue(void);
-extern void fn_3_5EC0(void* data);
 extern void fn_3_106DFC(void);
 extern BOOL fn_3_106E50(void);
 

@@ -816,7 +816,7 @@ typedef struct _InputStruct {
     /*0x02*/ s16 controlStickMagnitude;
     /*0x04*/ E(u16, INPUT_BUTTON) buttonInput;
     /*0x06*/ E(u16, INPUT_BUTTON) newButtonInput; // pressed this frame
-    /*0x08*/ s16 _08;
+    /*0x08*/ E(u16, INPUT_BUTTON) _08; // repeat
     /*0x0A*/ s8 right_left;
     /*0x0B*/ s8 up_down;
     /*0x0C*/ u8 rightTriggerDistance;
@@ -1239,16 +1239,16 @@ typedef enum _FIELDING_ABILITIES {
 } FIELDING_ABILITIES;
 
 typedef struct _starMissionTrackingPair {
-    /*0x000*/ E(u8, STAR_MISSION_TRACKING) starMissionStatus;
+    /*0x000*/ E(s8, STAR_MISSION_TRACKING) starMissionStatus;
     /*0x001*/ u8 shownOnPauseMenu;
 } starMissionTrackingPair;
 
 // This is pack disabled in ghidra.
 typedef struct _ChallengeTrackingStruct {
-    /*0x000*/ void* scoutFlagPointer;
+    /*0x000*/ struct ScoutFlagTable* scoutFlagPointer;
     /*0x004*/ E(u8, CHALLENGE_CAPTAIN) challengeCaptain; // Created by retype action
     /*0x005*/ E(s8, CHARACTER_VARIANT_CLASSIFICATION) variantClassification;
-    /*0x006*/ u8 scoutFlagsAchieved;
+    /*0x006*/ s8 scoutFlagsAchieved;
     /*0x007*/ u8 _7;
     /*0x008*/ u8 _8;
     /*0x009*/ starMissionTrackingPair inGameMissionTracker[10];
@@ -1372,7 +1372,27 @@ extern UnkSimulationRelatedStruct unkSimulationRelatedStruct;
 
 extern f32 vecDotProduct(VecXYZ* a, VecXYZ* b);
 
-extern ChallengeTrackingStruct starMissionCompletionTracker[54];
+// One 0x4508-byte object: code in every module reaches all its fields from this symbol
+typedef struct _StarMissionCompletionTracker {
+    /*0x0000*/ ChallengeTrackingStruct characters[54]; // indexed by character ID
+    /*0x0AF8*/ u8 _0AF8[0x16C2 - 0xAF8];
+    /*0x16C2*/ s16 _16C2;
+    /*0x16C4*/ u8 _16C4[0x43C0 - 0x16C4];
+    /*0x43C0*/ s16 _43C0;
+    /*0x43C2*/ u8 _43C2[0x43D6 - 0x43C2];
+    /*0x43D6*/ u8 _43D6[54]; // indexed by character ID
+    /*0x440C*/ u8 _440C[0x4415 - 0x440C];
+    /*0x4415*/ u8 _4415;
+    /*0x4416*/ u8 _4416[0x441C - 0x4416];
+    /*0x441C*/ u8 _441C;
+    /*0x441D*/ u8 _441D;
+    /*0x441E*/ u8 _441E;
+    /*0x441F*/ u8 _441F[0x44F1 - 0x441F];
+    /*0x44F1*/ u8 _44F1;
+    /*0x44F2*/ u8 _44F2[0x4508 - 0x44F2];
+} StarMissionCompletionTracker; // size: 0x4508
+
+extern StarMissionCompletionTracker starMissionCompletionTracker;
 
 typedef struct _SomeStarDashStruct {
     /*0x000*/ s16 _0[2];
@@ -1448,7 +1468,7 @@ typedef struct _MiniGameControlStruct {
     /*0x00C*/ u8 battingHandedness[4];
     /*0x010*/ u8 aIStrength[4];
     /*0x014*/ s8 _14[4];
-    /*0x018*/ u8 _18[4];
+    /*0x018*/ s8 _18[4];
     /*0x01C*/ u8 _1C[4];
     /*0x020*/ u8 _20[4];
     /*0x024*/ u8 _24[4];
@@ -1696,16 +1716,22 @@ typedef struct _MiniGameStruct {
     /*0xCCE*/ u8 _CCE[2];
     /*0xCD0*/ VecXYZ wallBall_coinCoordinates[100];
     /*0x1180*/ VecXYZ wallBall_coinVelocity[100];
-    /*0x1630*/ f32 _1630;
-    /*0x1634*/ u8 pad10[396];
-    /*0x17C0*/ s32 _17C0;
-    /*0x17C4*/ s32 _17C4;
+    /*0x1630*/ f32 _1630[15];
+    /*0x166C*/ u8 pad10[0x17C0 - 0x166C];
+    /*0x17C0*/ u32 _17C0;
+    /*0x17C4*/ u32 _17C4;
     /*0x17C8*/ s16 wallBall_coinsVisibleFrameCounter[100];
     /*0x1890*/ s16 miniGameCurrentPoints[4];
     /*0x1898*/ s16 miniGameLatestPoints[4];
     /*0x18A0*/ u16 _18A0;
-    /*0x18A2*/ s16 bB_bombBarrelHitInd;
-    /*0x18A4*/ s16 bB_bombBarrelID;
+    // Barrel Batter (rep_31F0) names these two; Chain Chomp Sprint (rep_36D8) indexes them
+    union {
+        struct {
+            /*0x18A2*/ s16 bB_bombBarrelHitInd;
+            /*0x18A4*/ s16 bB_bombBarrelID;
+        };
+        /*0x18A2*/ s16 _18A2[2];
+    };
     /*0x18A6*/ s16 _18A6;
     /*0x18A8*/ s16 bODControllerInputAllowedInd;
     /*0x18AA*/ s16 framesSincePanelHit;
@@ -1733,18 +1759,18 @@ typedef struct _MiniGameStruct {
     /*0x1911*/ u8 _1911;
     /*0x1912*/ u8 pointsTargetReachedInd;
     /*0x1913*/ u8 _1913;
-    /*0x1914*/ u8 _1914;
-    /*0x1915*/ u8 _1915;
-    /*0x1916*/ u8 _1916;
-    /*0x1917*/ u8 _1917;
-    /*0x1918*/ u8 _1918;
-    /*0x1919*/ u8 _1919;
-    /*0x191A*/ u8 _191A;
-    /*0x191B*/ u8 _191B;
-    /*0x191C*/ u8 _191C;
-    /*0x191D*/ u8 _191D;
-    /*0x191E*/ u8 _191E;
-    /*0x191F*/ u8 _191F;
+    // sta_c6 reads these one by one, Toy Field (rep_28A8) loops over _1914_arr
+    union {
+        struct {
+            /*0x1914*/ u8 _1914;
+            /*0x1915*/ u8 _1915;
+            /*0x1916*/ u8 _1916;
+            /*0x1917*/ u8 _1917;
+        };
+        /*0x1914*/ u8 _1914_arr[4];
+    };
+    /*0x1918*/ u8 _1918[4];
+    /*0x191C*/ s8 _191C[4];
     /*0x1920*/ E(u8, TOY_FIELD_RESULT) toyFieldBallStateResult2;
     /*0x1921*/ u8 _1921;
     /*0x1922*/ u8 _1922;
@@ -1752,20 +1778,13 @@ typedef struct _MiniGameStruct {
     /*0x1924*/ u8 runnerNum;
     /*0x1925*/ u8 _1925;
     /*0x1926*/ u8 toyFieldStateInd_collisionRelated;
-    /*0x1927*/ u8 _1927;
-    /*0x1928*/ s16 _1928;
-    /*0x192A*/ u8 _192A;
-    /*0x192B*/ s16 _192B;
-    /*0x192E*/ u8 _192E;
-    /*0x192F*/ u8 _192F;
-    /*0x1930*/ u8 _1930;
-    /*0x1931*/ u8 _1931;
-    /*0x1932*/ s16 _1932;
+    /*0x1927*/ u8 _1927[3];
+    /*0x192A*/ u8 _192A[3];
+    /*0x192D*/ u8 _192D;
+    /*0x192E*/ u8 _192E[3];
+    /*0x1931*/ u8 _1931[3];
     /*0x1934*/ u8 _1934;
-    /*0x1935*/ u8 _1935;
-    /*0x1936*/ u8 _1936;
-    /*0x1937*/ u8 _1937;
-    /*0x1938*/ u8 _1938;
+    /*0x1935*/ s8 _1935[4];
     /*0x1939*/ u8 _1939;
     /*0x193A*/ u8 wallBall_coinsVisibleInd[100];
     /*0x199E*/ u8 _199E;
@@ -1789,12 +1808,8 @@ typedef struct _MiniGameStruct {
     /*0x19B8*/ s16 TF_framesSinceHittingPanel;
     /*0x19BA*/ s16 _19BA;
     /*0x19BC*/ s16 _19BC;
-    /*0x19BE*/ u8 _19BE;
-    /*0x19BF*/ u8 _19BF;
-    /*0x19C0*/ s16 _19C0;
-    /*0x19C2*/ s16 _19C2;
-    /*0x19C4*/ s16 _19C4;
-    /*0x19C6*/ u8 _19C6;
+    /*0x19BE*/ u8 _19BE[4][2];
+    /*0x19C6*/ s8 _19C6;
     /*0x19C7*/ u8 _19C7;
     /*0x19C8*/ u8 maybeTFCollisionResultState;
     /*0x19C9*/ E(u8, TOY_FIELD_RESULT) toyFieldBallStateResult;
@@ -1804,11 +1819,9 @@ typedef struct _MiniGameStruct {
     /*0x19CD*/ u8 _19CD;
     /*0x19CE*/ u8 _19CE;
     /*0x19CF*/ u8 _19CF;
-    /*0x19D0*/ s16 _19D0;
-    /*0x19D2*/ s16 _19D2;
-    /*0x19D4*/ s16 _19D4;
-    /*0x19D6*/ s16 _19D6;
-    /*0x19D8*/ s16 _19D8;
+    /*0x19D0*/ u8 _19D0;
+    /*0x19D1*/ u8 _19D1;
+    /*0x19D2*/ s16 _19D2[4];
     /*0x19DA*/ s8 _19DA[4];
     /*0x19DE*/ u8 _19DE;
     /*0x19DF*/ u8 _19DF;
@@ -1820,13 +1833,10 @@ typedef struct _MiniGameStruct {
     /*0x19E6*/ u8 _19E6;
     /*0x19E7*/ u8 _19E7;
     /*0x19E8*/ MiniGameUnk19E8 _19E8[4];
-    /*0x1A0C*/ u8 _1A0C;
+    /*0x1A0C*/ s8 _1A0C;
     /*0x1A0D*/ u8 _1A0D;
     /*0x1A0E*/ u8 _1A0E;
-    /*0x1A0F*/ u8 _1A0F;
-    /*0x1A10*/ u8 _1A10;
-    /*0x1A11*/ u8 _1A11;
-    /*0x1A12*/ u8 _1A12;
+    /*0x1A0F*/ s8 _1A0F[4];
     /*0x1A13*/ u8 _1A13[4];
     /*0x1A17*/ u8 battingHandedness[9];
     /*0x1A20*/ u8 _1A20;
@@ -1838,7 +1848,7 @@ typedef struct _MiniGameStruct {
     /*0x1A28*/ s16 someGraphicFrameCountdown;
     /*0x1A2A*/ E(u8, MINI_GAME_ID) GameMode_MiniGame;
     /*0x1A2B*/ E(u8, MINIGAME_DIFFICULTY) soloMinigameDifficulty;
-    /*0x1A2C*/ u8 _1A2C;
+    /*0x1A2C*/ s8 _1A2C;
     /*0x1A2D*/ u8 miniGameTurnCounter;
     /*0x1A2E*/ u8 bB_pitchesRemainingInTurn;
     /*0x1A2F*/ u8 bODRoundStartingNumPitches;
@@ -1894,7 +1904,7 @@ typedef struct _MiniGameStruct {
     /*0x1AD9*/ u8 _1AD9;
     /*0x1ADA*/ u8 barrelBatterChargeMeter;
     /*0x1ADB*/ u8 barrelBatter_scoreCalculatedInd;
-    /*0x1ADC*/ u8 barrelBatter_hitBarrelID;
+    /*0x1ADC*/ s8 barrelBatter_hitBarrelID;
     /*0x1ADD*/ u8 barrelBatter_barrelsHit;
     /*0x1ADE*/ u8 _1ADE[2];
     /*0x1AE0*/ f32 _1AE0;
@@ -1906,45 +1916,18 @@ typedef struct _MiniGameStruct {
     /*0x1AF8*/ s16 _1AF8;
     /*0x1AFA*/ s16 _1AFA;
     /*0x1AFC*/ s16 _1AFC;
-    /*0x1AFE*/ u8 _1AFE[2];
-    /*0x1B00*/ s16 _1B00;
-    /*0x1B02*/ s16 _1B02;
-    /*0x1B04*/ s16 _1B04;
+    // Chain Chomp Sprint (rep_36D8) indexes _1AFE, _1B08, _1B1A, _1B20 and _1B26
+    /*0x1AFE*/ s16 _1AFE[4];
     /*0x1B06*/ s16 _1B06;
-    /*0x1B08*/ s16 _1B08;
-    /*0x1B0A*/ s16 _1B0A;
-    /*0x1B0C*/ s16 _1B0C;
-    /*0x1B0E*/ s16 _1B0E;
-    /*0x1B10*/ s16 _1B10;
-    /*0x1B12*/ s16 _1B12;
-    /*0x1B14*/ u8 _1B14;
+    /*0x1B08*/ s16 _1B08[6];
+    /*0x1B14*/ s8 _1B14;
     /*0x1B15*/ u8 _1B15[4];
     /*0x1B19*/ u8 _1B19;
-    /*0x1B1A*/ u8 _1B1A;
-    /*0x1B1B*/ u8 _1B1B;
-    /*0x1B1C*/ u8 _1B1C;
-    /*0x1B1D*/ u8 _1B1D;
-    /*0x1B1E*/ u8 _1B1E;
-    /*0x1B1F*/ u8 _1B1F;
-    /*0x1B20*/ u8 _1B20;
-    /*0x1B21*/ u8 _1B21;
-    /*0x1B22*/ u8 _1B22;
-    /*0x1B23*/ u8 _1B23;
-    /*0x1B24*/ u8 _1B24;
-    /*0x1B25*/ u8 _1B25;
-    /*0x1B26*/ u8 _1B26;
-    /*0x1B27*/ u8 _1B27;
-    /*0x1B28*/ u8 _1B28;
-    /*0x1B29*/ u8 _1B29;
-    /*0x1B2A*/ u8 _1B2A;
-    /*0x1B2B*/ u8 _1B2B;
-    /*0x1B2C*/ u8 _1B2C;
-    /*0x1B2D*/ u8 _1B2D;
+    /*0x1B1A*/ u8 _1B1A[6];
+    /*0x1B20*/ u8 _1B20[6];
+    /*0x1B26*/ s8 _1B26[4][2];
     /*0x1B2E*/ u8 _1B2E;
-    /*0x1B2F*/ u8 _1B2F;
-    /*0x1B30*/ u8 _1B30;
-    /*0x1B31*/ u8 _1B31;
-    /*0x1B32*/ u8 _1B32;
+    /*0x1B2F*/ u8 _1B2F[4];
     /*0x1B33*/ u8 _1B33;
     /*0x1B34*/ s16 _1B34;
     /*0x1B36*/ u8 _1B36[6];
@@ -2087,12 +2070,21 @@ typedef struct _MiniGameStruct {
         /*0x1DD0*/ u8 _1DD0_u8;
     };
     /*0x1DD1*/ u8 _1DD1[0x1DF4 - 0x1DD1];
-    /*0x1DF4*/ u8 _1DF4;
-    /*0x1DF5*/ u8 _1DF5;
+    // Bob-omb Derby (rep_31F0) reads _1DF4 and _1DF5, Barrel Batter (rep_34B0) stores _1DF4_s16
+    union {
+        struct {
+            /*0x1DF4*/ u8 _1DF4;
+            /*0x1DF5*/ u8 _1DF5;
+        };
+        /*0x1DF4*/ s16 _1DF4_s16;
+    };
     /*0x1DF6*/ u8 _1DF6;
     /*0x1DF7*/ u8 _1DF7;
     /*0x1DF8*/ u8 _1DF8;
-    /*0x1DF9*/ u8 _1DF9[0x1E2C - 0x1DF9];
+    /*0x1DF9*/ u8 _1DF9[0x1DFC - 0x1DF9];
+    /*0x1DFC*/ u8 _1DFC[4];
+    /*0x1E00*/ u8 _1E00;
+    /*0x1E01*/ u8 _1E01[0x1E2C - 0x1E01];
 } MiniGameStruct; // size: 0x1E2C
 
 extern MiniGameStruct g_Minigame;
@@ -2426,10 +2418,14 @@ typedef struct {
     /* 0x0C4 */ s16 _0C4;
     /* 0x0C6 */ u8 _0C6[0xCC - 0xC6];
     /* 0x0CC */ s16 _0CC;
-    /* 0x0CE */ u8 _0CE[0xE8 - 0xCE];
+    /* 0x0CE */ u8 _0CE[0xE4 - 0xCE];
+    /* 0x0E4 */ s16 _0E4;
+    /* 0x0E6 */ u8 _0E6[0xE8 - 0xE6];
     /* 0x0E8 */ s16 _0E8;
     /* 0x0EA */ s16 _0EA;
-    /* 0x0EC */ u8 _0EC[0x105 - 0xEC];
+    /* 0x0EC */ u8 _0EC[0xEE - 0xEC];
+    /* 0x0EE */ s16 _0EE;
+    /* 0x0F0 */ u8 _0F0[0x105 - 0xF0];
     /* 0x105 */ u8 playerAtMoundCutoffLocation;
     /* 0x106 */ u8 throwSpeedType;
     /* 0x107 */ u8 _107;
@@ -2558,7 +2554,9 @@ typedef struct {
     /* 0x0 */ s16 _0;
     /* 0x2 */ s16 _2;
     /* 0x4 */ s16 _4;
-    /* 0x06 */ u8 _06[0x20 - 0x06];
+    /* 0x06 */ u8 _06[0x10 - 0x06];
+    /* 0x10 */ s8 _10[5][3];
+    /* 0x1F */ u8 _1F;
     /* 0x20 */ s16 _20;
     /* 0x22 */ s8 _22;
     /* 0x23 */ s8 _23;
@@ -2579,9 +2577,14 @@ typedef struct {
     /* 0x40 */ u8 _40;
     /* 0x41 */ u8 _41;
     /* 0x42 */ u8 _42;
-    /* 0x43 */ u8 _43[0x52 - 0x43];
+    /* 0x43 */ u8 _43[0x4C - 0x43];
+    /* 0x4C */ s16 _4C[2];
+    /* 0x50 */ u8 _50[0x52 - 0x50];
     /* 0x52 */ s16 _52[2][2];
-    /* 0x5A */ u8 _5A[0x65 - 0x5A];
+    /* 0x5A */ u8 _5A[0x61 - 0x5A];
+    /* 0x61 */ u8 _61;
+    /* 0x62 */ u8 _62;
+    /* 0x63 */ u8 _63[2];
     /* 0x65 */ u8 _65[2];
     /* 0x67 */ u8 _67[2];
     /* 0x69 */ u8 _69[2][10];

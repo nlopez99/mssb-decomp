@@ -29,7 +29,7 @@ game/rep_140.c:
 game/rep_1C0.c:
 	.text       start:0x000035D4 end:0x00006530
 	.rodata     start:0x000001C0 end:0x00000540
-	.data       start:0x0000023C end:0x00000A18
+	.data       start:0x00000228 end:0x00000A18
 	.bss        start:0x00000018 end:0x00000030
 
 game/rep_540.c:
@@ -53,7 +53,7 @@ game/rep_868.c:
 	.rodata     start:0x00000868 end:0x000008C8
 
 game/rep_8C8.c:
-	.text       start:0x0001E4B8 end:0x00020A60
+	.text       start:0x0001E4B8 end:0x00020CEC
 	.rodata     start:0x000008C8 end:0x00000940
 
 game/rep_940.c:
@@ -64,9 +64,9 @@ game/rep_9B0.c:
 	.rodata     start:0x000009B0 end:0x00000A00
 
 game/rep_A00.c:
-	.text       start:0x00021C90 end:0x000249E8
+	.text       start:0x00021C90 end:0x000251E4
 	.rodata     start:0x00000A00 end:0x00000A78
-	.data       start:0x00003A40 end:0x00003C40
+	.data       start:0x00001D28 end:0x00003C40
 	.bss        start:0x00000098 end:0x000000C8
 
 game/rep_A78.c:
@@ -98,6 +98,7 @@ game/rep_E08.c:
 game/rep_EA0.c:
 	.text       start:0x0006750C end:0x0006A160
 	.rodata     start:0x00000EA0 end:0x00000F80
+	.data       start:0x00006820 end:0x000069C0
 	.bss        start:0x00000200 end:0x00001728
 
 game/rep_F80.c:
@@ -169,6 +170,7 @@ game/rep_1720.c:
 game/rep_1770.c:
 	.text       start:0x000993A8 end:0x0009C578
 	.rodata     start:0x00001770 end:0x000017E0
+	.data       start:0x0000F4A4 end:0x0000F4E0
 
 game/rep_17E0.c:
 	.text       start:0x0009CAF0 end:0x0009CD90
@@ -213,7 +215,7 @@ game/rep_1CB8.c:
 game/rep_1D58.c:
 	.text       start:0x000B7FC8 end:0x000BA150
 	.rodata     start:0x00001D58 end:0x00001E08
-	.data       start:0x00011178 end:0x000111A8
+	.data       start:0x00011168 end:0x000111A8
 	.bss        start:0x00001900 end:0x00009950
 
 game/rep_1E08.c:
@@ -265,22 +267,24 @@ game/sta_c2.c:
 	.bss        start:0x0000A018 end:0x0000AE00
 
 game/rep_28A8.c:
-	.text       start:0x000D9EA0 end:0x000DEB90
+	.text       start:0x000D8A10 end:0x000E0668
 	.rodata     start:0x000028A8 end:0x00002940
-	.data       start:0x00018C48 end:0x00018CD8
+	.data       start:0x000188E8 end:0x00018D98
 
 game/rep_2940.c:
 	.text       start:0x000E11E0 end:0x000E1964
 	.rodata     start:0x00002940 end:0x00002998
 
 game/rep_2998.c:
-	.text       start:0x000E1DB8 end:0x000E587C
+	.text       start:0x000E1C60 end:0x000E587C
 	.rodata     start:0x00002998 end:0x00002B40
+	.data       start:0x00018ED0 end:0x00019018
 	.bss        start:0x0000AE00 end:0x0000AE50
 
 game/sta_c6.c:
-	.text       start:0x000E59B4 end:0x000E911C
+	.text       start:0x000E587C end:0x000E911C
 	.rodata     start:0x00002B40 end:0x00002BF8
+	.data       start:0x00019018 end:0x00019770
 	.bss        start:0x0000AE50 end:0x0000AEE0
 
 game/rep_2BF8.c:
@@ -293,8 +297,9 @@ game/sta_c5.c:
 	.bss        start:0x0000AEE0 end:0x0000B570
 
 game/sta_c4.c:
-	.text       start:0x000F8444 end:0x000FBCD0
+	.text       start:0x000F8444 end:0x000FBD58
 	.rodata     start:0x00002F68 end:0x00003090
+	.data       start:0x0001BA88 end:0x0001C0A8
 	.bss        start:0x0000B570 end:0x0000B678
 
 game/rep_3090.c:
@@ -339,7 +344,7 @@ game/rep_3520.c:
 	.bss        start:0x0000B700 end:0x0000B790
 
 game/rep_36D8.c:
-	.text       start:0x0013C7BC end:0x00141A2C
+	.text       start:0x0013C7BC end:0x00141C44
 	.rodata     start:0x000036D8 end:0x000037A8
 	.data       start:0x000265F0 end:0x00026698
 	.bss        start:0x0000B790 end:0x0000B7C0

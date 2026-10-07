@@ -15,7 +15,7 @@ s32 fn_3_8BBC4(u32 id, Vec* pos, Vec* dir, s32 arg3);
 void fn_3_8BDF4(void);
 void fn_3_8BE8C(void);
 void fn_3_8C07C(void);
-void fn_3_8C104(void);
+void fn_3_8C104(s32 arg0);
 void fn_3_8C2DC(void);
 void fn_3_8C4F0(void);
 void fn_3_8C5C8(void);
@@ -30,5 +30,6 @@ void fn_3_8FF18(void);
 void fn_3_8FF5C(void);
 void fn_3_90064(int id);
 void fn_3_90150(void);
+u32 fn_3_90220(s32 charID, s32 sound);
 
 #endif // !__GAME_m_sound_H_

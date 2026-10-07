@@ -13,6 +13,10 @@
 #   python3 tools/worktree.py <branch> [--base REF] [--dir PATH]
 #   python3 tools/worktree.py --remove <branch> [--dir PATH]
 #
+# The new branch tracks --base when that is a local branch (for HEAD, the
+# branch checked out here), so tools/regress.py in the worktree compares with
+# it rather than origin/main.
+#
 # --remove deletes the worktree and the regress.py base worktree nested in it,
 # after checking that nothing is uncommitted; the branch itself is kept.
 #
@@ -35,12 +39,14 @@ def remove(path: str) -> int:
         raise match.UsageError(f"{path} does not exist")
     if regress.git("status", "--porcelain", "--untracked-files=no", cwd=path):
         raise match.UsageError(f"{path} has uncommitted changes")
+    # Run git from the main checkout: this script may live in the worktree it removes
+    main_dir = os.path.dirname(regress.git("rev-parse", "--path-format=absolute", "--git-common-dir"))
     nested = os.path.join(path, "build", "regress")
     for name in os.listdir(nested) if os.path.isdir(nested) else []:
         subprocess.run(["git", "worktree", "remove", "--force", os.path.join(nested, name)],
-                       cwd=regress.root_dir, capture_output=True)
-    regress.git("worktree", "remove", "--force", path)
-    regress.git("worktree", "prune")
+                       cwd=main_dir, capture_output=True)
+    regress.git("worktree", "remove", "--force", path, cwd=main_dir)
+    regress.git("worktree", "prune", cwd=main_dir)
     print(f"removed {path}")
     return 0
 
@@ -62,6 +68,14 @@ def main() -> int:
     flags = regress.tool_flags()
 
     regress.git("worktree", "add", "-b", args.branch, path, args.base)
+    if args.base == "HEAD":
+        upstream = subprocess.run(["git", "symbolic-ref", "--short", "-q", "HEAD"], cwd=regress.root_dir,
+                                  capture_output=True, text=True).stdout.strip()
+    else:
+        upstream = args.base if subprocess.run(["git", "show-ref", "--verify", "-q", f"refs/heads/{args.base}"],
+                                               cwd=regress.root_dir).returncode == 0 else ""
+    if upstream:
+        regress.git("branch", f"--set-upstream-to={upstream}", args.branch)
     regress.link_game_files(path)
     subprocess.run([sys.executable, "configure.py", "--version", regress.VERSION, *flags],
                    cwd=path, check=True, capture_output=True)

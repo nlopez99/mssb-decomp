@@ -112,7 +112,7 @@ extern void fn_800B4C04(UnkActor3F60*, f32);
 extern void fn_800B4CA0(UnkActor3F60*, f32);
 extern void fn_800BDA24(UnkModel3F60*);
 extern void fn_800BDA94(UnkModel3F60*, Mtx);
-// C3/actor.h gives the SDK's five-argument prototype; this game's version takes a second float
+// C3/actor.h's prototype takes Actor*, which this file's actor type does not convert to
 extern void ACTSetAnimation(UnkActor3F60*, void*, char*, u16, f32, f32);
 
 static s32 lbl_3_data_285A8[54] = {

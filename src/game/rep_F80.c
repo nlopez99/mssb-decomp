@@ -80,9 +80,6 @@ extern struct {
     /* 0x3AC */ u32 _3AC;
 } lbl_3_common_bss_35154;
 
-extern void fn_3_C0770(void);
-extern void fn_3_C07A0(void);
-extern void fn_3_C07B0(void);
 extern void fn_3_CB344(s32 idx, u8 starPitchType);
 extern void fn_80011578(void);
 

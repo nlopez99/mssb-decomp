@@ -11,6 +11,8 @@
 #include "C3/control.h"
 #include "C3/geoPalette.h"
 #include "game/rep_D0.h"
+#include "game/rep_1D58.h"
+#include "game/rep_1E08.h"
 
 typedef struct {
     /* 0x00 */ DODisplayLayout base;
@@ -163,10 +165,12 @@ extern void fn_800BD190(void* geo, void* tex);
 extern void fn_800BF038(void (*callback)(void));
 extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);
 extern void convertTextureHeader(void* tex);
-extern void fn_3_B8C08(Mtx view);
-extern void fn_3_BCA20(void);
-extern void fn_3_BD1D8(Mtx view);
-extern void fn_3_BD434(u8 stadium, u8 mode);
+
+struct {
+    /* 0x00 */ u8 _00[0x10];
+    /* 0x10 */ u8 _10;
+    /* 0x11 */ u8 _11[3];
+} lbl_3_data_228 = { 0 };
 
 StadiumEnv lbl_3_data_23C[15] = {
     { { { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f }, { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f }, { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f } },
@@ -262,6 +266,7 @@ static DrawTaskArg1C0 lbl_3_data_9B0[4][2] = {
 };
 void (*lbl_3_data_A10[2])(MtxPtr view, s32, s32) = { 0 };
 
+static u8 lbl_3_bss_1C[0x14];
 static void (*lbl_3_bss_18)(void);
 
 // .text:0x000064DC size:0x54 mapped:0x80645570
@@ -440,9 +445,6 @@ void fn_3_5BAC(void) {
 }
 
 // .text:0x0000567C size:0x530 mapped:0x80644710
-// The target addresses this file's .data from lbl_3_data_228, which splits.txt leaves outside
-// the unit, so every pool offset here is 0x14 short; with that object defined first in this
-// file, only the pool symbol's name differs.
 void fn_3_567C(void) {
     s32 i;
     StadiumLight* light;
@@ -756,8 +758,6 @@ void fn_3_4A38(u8 stadium) {
     fn_3_4F90(&obj, homeTotalPos[stadium][0], homeTotalPos[stadium][1], g_Scores._04[1][0], totalDigits[stadium],
               colors[stadium][0], colors[stadium][1], 0);
 }
-
-// .text:0x00004A38 size:0x558 mapped:0x80643ACC
 
 // .text:0x00004984 size:0xB4 mapped:0x80643A18
 void fn_3_4984(void) {

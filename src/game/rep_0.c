@@ -80,26 +80,26 @@ void _epilog(void) {
 // .text:0x00000258 size:0x20C mapped:0x8063F2EC
 void fn_3_258(void) {
     if (lbl_3_bss_10.menuState == 0) {
-        if ((lbl_803C77B8._04 & PAD_BUTTON_UP) && lbl_3_bss_10.option != 0) {
+        if ((lbl_803C77B8[0]._04 & PAD_BUTTON_UP) && lbl_3_bss_10.option != 0) {
             lbl_3_bss_10.option--;
         }
-        if ((lbl_803C77B8._04 & PAD_BUTTON_DOWN) && lbl_3_bss_10.option < 1) {
+        if ((lbl_803C77B8[0]._04 & PAD_BUTTON_DOWN) && lbl_3_bss_10.option < 1) {
             lbl_3_bss_10.option++;
         }
-        if (lbl_803C77B8._04 & PAD_BUTTON_A) {
+        if (lbl_803C77B8[0]._04 & PAD_BUTTON_A) {
             lbl_3_bss_10.menuState = 1;
         }
     } else if (lbl_3_bss_10.menuState == 1 && lbl_3_bss_10.option == 0) {
-        if ((lbl_803C77B8._04 & PAD_BUTTON_UP) && lbl_3_bss_10._2 != 0) {
+        if ((lbl_803C77B8[0]._04 & PAD_BUTTON_UP) && lbl_3_bss_10._2 != 0) {
             lbl_3_bss_10._2--;
         }
-        if ((lbl_803C77B8._04 & PAD_BUTTON_DOWN) && lbl_3_bss_10._2 < 3) {
+        if ((lbl_803C77B8[0]._04 & PAD_BUTTON_DOWN) && lbl_3_bss_10._2 < 3) {
             lbl_3_bss_10._2++;
         }
-        if (lbl_803C77B8._04 & PAD_BUTTON_A) {
+        if (lbl_803C77B8[0]._04 & PAD_BUTTON_A) {
             lbl_3_bss_10.menuState = 3;
         }
-        if (lbl_803C77B8._04 & PAD_BUTTON_B) {
+        if (lbl_803C77B8[0]._04 & PAD_BUTTON_B) {
             lbl_3_bss_10.menuState = 0;
         }
     } else if (lbl_3_bss_10.menuState == 1 && lbl_3_bss_10.option == 1) {
@@ -107,16 +107,16 @@ void fn_3_258(void) {
         lbl_803CC1B8->callback = maybeProcessTeamData;
     } else if (lbl_3_bss_10.menuState == 2) {
     } else if (lbl_3_bss_10.menuState == 3) {
-        if ((lbl_803C77B8._04 & PAD_BUTTON_LEFT) && g_d_GameSettings.StadiumID != 0) {
+        if ((lbl_803C77B8[0]._04 & PAD_BUTTON_LEFT) && g_d_GameSettings.StadiumID != 0) {
             g_d_GameSettings.StadiumID--;
         }
-        if ((lbl_803C77B8._04 & PAD_BUTTON_RIGHT) && g_d_GameSettings.StadiumID < 10) {
+        if ((lbl_803C77B8[0]._04 & PAD_BUTTON_RIGHT) && g_d_GameSettings.StadiumID < 10) {
             g_d_GameSettings.StadiumID++;
         }
-        if (lbl_803C77B8._04 & PAD_BUTTON_A) {
+        if (lbl_803C77B8[0]._04 & PAD_BUTTON_A) {
             lbl_3_bss_10.menuState = 4;
         }
-        if (lbl_803C77B8._04 & PAD_BUTTON_B) {
+        if (lbl_803C77B8[0]._04 & PAD_BUTTON_B) {
             lbl_3_bss_10.menuState = 1;
         }
     } else if (lbl_3_bss_10.menuState == 4) {

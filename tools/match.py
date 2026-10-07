@@ -13,6 +13,10 @@
 # headers for types; --m2c prints the draft for any function. The draft is a
 # starting point and will not match as written.
 #
+# --source FILE compiles FILE in place of the unit's source file for this run
+# (the source is restored afterwards), for scratch variants such as a copy
+# that defines out-of-range data as statics.
+#
 # <unit> may be an objdiff unit name (game/game/kinoko), a source path
 # (src/game/kinoko.c) or a unique basename (kinoko).
 #
@@ -477,6 +481,16 @@ def strip_asm(text: str) -> str:
     return "".join(pieces)
 
 
+def hide_placeholder(ctx: str, function: str) -> None:
+    # A stub's header declares it void(void), and m2c would trust that over the
+    # registers the assembly reads, so rename it out of the context
+    with open(ctx) as f:
+        text = f.read()
+    if re.search(rf"\b{re.escape(function)}\s*\(\s*void\s*\)", text):
+        with open(ctx, "w") as f:
+            f.write(re.sub(rf"\b{re.escape(function)}\b", function + "_placeholder", text))
+
+
 def m2c_draft(unit: Dict[str, Any], function: str, build_context: bool) -> str:
     m2c = os.environ.get("M2C") or shutil.which("m2c")
     if m2c is None:
@@ -491,6 +505,8 @@ def m2c_draft(unit: Dict[str, Any], function: str, build_context: bool) -> str:
         prepared = prepare_context(os.path.join(root_dir, ctx), tmp) if ctx else None
         if prepared is None:
             note = "/* m2c ran without type context: the unit's .ctx could not be prepared */\n"
+        else:
+            hide_placeholder(prepared, function)
         proc = subprocess.run(
             command + (["--context", prepared] if prepared else []) + [asm_path(unit)],
             capture_output=True,
@@ -700,6 +716,7 @@ def main() -> int:
     parser.add_argument("--max-lines", type=int, default=200, help="cap on printed diff lines (default 200)")
     parser.add_argument("--json", action="store_true", help="print a machine-readable result instead")
     parser.add_argument("--m2c", action="store_true", help="print an m2c draft even if the function is in the source")
+    parser.add_argument("--source", metavar="FILE", help="compile FILE in place of the unit's source for this run")
     args = parser.parse_args()
 
     units = load_units()
@@ -717,7 +734,34 @@ def main() -> int:
     if "base_path" not in unit:
         raise UsageError(f"{unit['name']} has no source file yet (it is not split out into src/)")
 
+    if args.source:
+        if args.no_build:
+            raise UsageError("--source needs a build; drop --no-build")
+        return with_source(unit, args.source, lambda: run(args, unit, function))
+    return run(args, unit, function)
+
+
+def with_source(unit: Dict[str, Any], scratch: str, body) -> int:
+    source = os.path.join(root_dir, unit.get("metadata", {}).get("source_path", ""))
+    if not os.path.isfile(scratch):
+        raise UsageError(f"{scratch} not found")
+    backup = source + ".match-backup"
+    if os.path.exists(backup):
+        raise UsageError(f"{backup} exists from an interrupted --source run; move it back over {source} first")
+    shutil.copy2(source, backup)
+    try:
+        shutil.copyfile(scratch, source)
+        return body()
+    finally:
+        # copyfile, not os.replace: keep the source's new mtime so ninja rebuilds it
+        shutil.copyfile(backup, source)
+        os.unlink(backup)
+
+
+def run(args: argparse.Namespace, unit: Dict[str, Any], function: Optional[str]) -> int:
     result: Dict[str, Any] = {"unit": unit["name"], "source": unit.get("metadata", {}).get("source_path")}
+    if args.source:
+        result["source"] = f"{args.source} (in place of {result['source']})"
     if not args.no_build:
         ok, elapsed, output = build(unit)
         result["build"] = {"ok": ok, "seconds": round(elapsed, 2)}
