@@ -3,6 +3,8 @@
 
 #include "mssbTypes.h"
 
+struct UnkTask3448;
+
 void fn_3_11EC28(void);
 void fn_3_11F02C(void);
 void fn_3_11F480(void);
