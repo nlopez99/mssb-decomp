@@ -36,9 +36,6 @@ extern struct {
 
 extern UnkSlot0 lbl_80354720[2][9];
 
-// .data outside this unit's split
-extern u32 lbl_3_data_118[2][23];
-
 extern void* ARAMTransfer(UnkAramEntry0* entry, int arg1, int arg2, u32 aram);
 extern void fn_80036C88(u32* arg0, u32* arg1);
 extern void fn_8004B270(void);
@@ -53,6 +50,10 @@ char lbl_3_data_10[12][22] = {
     "Yokohama Stadium    ", "Tokyo Dome          ", "Nagoya Dome         ", "Kousien Stadium     ",
     "Hirosima Stadium    ", "Jingu Stadium       ", "Green Stadium Kobe  ", "Osaka Dome          ",
     "Seibu Dome          ", "Fukuoka Dome        ", "Chiba Marine Stadium", "Sapporo Dome        ",
+};
+u32 lbl_3_data_118[2][23] = {
+    { 0x1040, 0, 0, 0x1880, 0x1C40, 0x65A0, 0x6B20, 0x2E40, 0, 0xFA0, 0, 0, 0, 0x940, 0x1000, 0x560, 0xBE0 },
+    { 0 },
 };
 
 static UnkMenu0 lbl_3_bss_10;
