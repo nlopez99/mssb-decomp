@@ -39,10 +39,23 @@ extern struct {
 
 extern UnkTask3D50* lbl_803CC1B8;
 
-// This unit's .data (0x281F0 to 0x28418) lies outside its ranges in splits.txt
-extern UnkEffect3D50 lbl_3_data_281F0[8];
-extern s32 lbl_3_data_283F0[2][4];
-extern s32 lbl_3_data_28410[2];
+UnkEffect3D50 lbl_3_data_281F0[8] = {
+    { 0, { 4, 3, 110000, 1000, 90000, 40, 1, 102000, 101000, 100, 10000000, 0xFFFF0000, 0, 50000, 20000 } },
+    { 0, { 4, 3, 110000, 1000, 90000, 40, 1, 102000, 101000, 100, 10000000, 0xFFFF0000, 0, 50000, 20000 } },
+    { 0, { 4, 12, 200000, 1000, 90000, 40, 1, 102000, 101000, 100, 10000000, 0xFFFF0000, 0, 50000, 20000 } },
+    { 0, { 4, 1, 90000, 111000, 90000, 40, 1, 102000, 101000, 100, 10000000, 0xFFFF0000, 0, 50000, 20000 } },
+    { 0, { 4, 3, 110000, 1000, 90000, 40, 1, 102000, 101000, 100, 10000000, 0xB559FF00, 0, 50000, 20000 } },
+    { 0, { 4, 3, 110000, 1000, 90000, 40, 1, 102000, 101000, 100, 10000000, 0xB559FF00, 0, 50000, 20000 } },
+    { 0, { 4, 12, 200000, 1000, 90000, 40, 1, 102000, 101000, 100, 10000000, 0xB559FF00, 0, 50000, 20000 } },
+    { 0, { 4, 1, 70000, 1000, 90000, 40, 1, 102000, 101000, 100, 10000000, 0xB559FF00, 0, 50000, 20000 } },
+};
+
+s32 lbl_3_data_283F0[2][4] = {
+    { 10, 10, 10, 10 },
+    { 10, 10, 10, 1 },
+};
+
+s32 lbl_3_data_28410[2] = { 40, 40 };
 
 static UnkTask3D50* lbl_3_bss_B9B8;
 
@@ -51,18 +64,16 @@ extern void fn_800B0A14_removeQueue(void);
 extern UnkTask3D50* fn_800B0A5C_insertQueue(void (*)(void), u16);
 
 // .text:0x00160814 size:0xDC mapped:0x8079F8A8
-// The target stores _15 between loading _14 and the table value, with the zero and the
-// table value in swapped registers (r6 and r0), and stores _16 before _17.
 void fn_3_160814(s32 type) {
-    s32 time;
+    s32* times;
 
     if (lbl_3_common_bss_35154._464 == 0) {
         lbl_3_bss_B9B8 = fn_800B0A5C_insertQueue(fn_3_160578, lbl_803CC1B8->_12 + 1);
         lbl_3_bss_B9B8->_14 = type == 4;
-        time = lbl_3_data_283F0[lbl_3_bss_B9B8->_14][0];
+        times = lbl_3_data_283F0[lbl_3_bss_B9B8->_14];
         lbl_3_bss_B9B8->_15 = 0;
+        lbl_3_bss_B9B8->_16 = times[0];
         lbl_3_bss_B9B8->_17 = 0;
-        lbl_3_bss_B9B8->_16 = time;
         lbl_3_common_bss_35154._47A[lbl_3_bss_B9B8->_14 != 0] = lbl_3_data_28410[lbl_3_bss_B9B8->_14];
     }
 }
