@@ -1439,18 +1439,55 @@ void fn_3_14AC1C(void) {
 }
 
 // .text:0x0014A90C size:0x310 mapped:0x807899A0
-void fn_3_14A90C(void) {
-    return;
+void fn_3_14A90C(Vec* pos) {
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES &&
+        g_Minigame.GameMode_MiniGame == MINI_GAME_ID_BARREL_BATTER && pos != NULL) {
+        fn_3_14A62C(pos);
+    }
 }
 
 // .text:0x0014A62C size:0x2E0 mapped:0x807896C0
-void fn_3_14A62C(void) {
-    return;
+void fn_3_14A62C(Vec* pos) {
+    Emitter3880* emitter = fn_80033A24(fn_3_14A188, 0x80, 0, lbl_3_data_26E40[1], 1, 0x24);
+
+    if (emitter != NULL) {
+        fn_3_14A37C(emitter, pos);
+    }
 }
 
 // .text:0x0014A37C size:0x2B0 mapped:0x80789410
-void fn_3_14A37C(void) {
-    return;
+void fn_3_14A37C(Emitter3880* emitter, Vec* pos) {
+    Particle3880* p;
+    u32 i;
+    f32 angle;
+
+    emitter->_10 = lbl_3_common_bss_32724._6C;
+    p = emitter->particles;
+    i = 0;
+    do {
+        p->_4D = lbl_3_data_26E40[0];
+        p->_4E = 0;
+        p->_4A = lbl_3_data_26E40[2];
+        p->_48 = 0;
+        p->pos.x = pos->x;
+        p->pos.y = -pos->y;
+        p->pos.z = pos->z;
+        angle = 360 / lbl_3_data_26E40[1] * i;
+        angle = 0.017453292f * angle;
+        p->pos.x += lbl_3_data_26E40[3] * cosf_kludge(angle) / 100000.0f;
+        p->pos.y += lbl_3_data_26E40[3] * sinf_kludge(angle) / 100000.0f;
+        p->_38 = p->_3C = lbl_3_data_26E40[5] / 100000.0f;
+        p->color[0] = p->color[1] = p->color[2] = 0xFF;
+        p->color[3] = lbl_3_data_26E40[9];
+        p->vel.x = 0.0f;
+        p->vel.y = lbl_3_data_26E40[12] - rand() % lbl_3_data_26E40[13];
+        p->vel.y /= 100000.0f;
+        p->vel.y *= (rand() % 2) * -2 + 1;
+        p->vel.z = lbl_3_data_26E40[6] - rand() % lbl_3_data_26E40[7];
+        p->vel.z /= 100000.0f;
+        i++;
+        p = p->next;
+    } while (p != NULL);
 }
 
 // .text:0x0014A188 size:0x1F4 mapped:0x8078921C
