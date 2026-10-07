@@ -1820,10 +1820,11 @@ typedef struct _MiniGameStruct {
     /*0x19DE*/ u8 _19DE;
     /*0x19DF*/ u8 _19DF;
     /*0x19E0*/ u8 _19E0;
-    /*0x19E1*/ u8 _19E1;
+    /*0x19E1*/ s8 _19E1;
     /*0x19E2*/ u8 _19E2;
     /*0x19E3*/ u8 _19E3;
-    /*0x19E4*/ s16 _19E4;
+    /*0x19E4*/ u8 _19E4;
+    /*0x19E5*/ u8 _19E5;
     /*0x19E6*/ u8 _19E6;
     /*0x19E7*/ u8 _19E7;
     /*0x19E8*/ MiniGameUnk19E8 _19E8[4];
@@ -2035,7 +2036,7 @@ typedef struct _MiniGameStruct {
     /*0x1D68*/ s16 _1D68;
     /*0x1D6A*/ s16 _1D6A;
     /*0x1D6C*/ u8 _1D6C;
-    /*0x1D6D*/ u8 _1D6D;
+    /*0x1D6D*/ s8 _1D6D;
     /*0x1D6E*/ u8 starDashStunType[4];
     /*0x1D72*/ u8 _1D72;
     /*0x1D73*/ u8 _1D73;

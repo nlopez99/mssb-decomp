@@ -12,6 +12,7 @@
 #include "game/rep_3520.h"
 #include "game/rep_60.h"
 #include "string.h"
+#include "musyx/musyx.h"
 
 typedef struct {
     /* 0x00 */ u32 _00[4];
@@ -77,7 +78,10 @@ extern struct {
 extern struct {
     /* 0x00 */ u8 _00[0xB8];
     /* 0xB8 */ u8 _B8;
-    /* 0xB9 */ u8 _B9[0xD8 - 0xB9];
+    /* 0xB9 */ u8 _B9;
+    /* 0xBA */ u8 _BA;
+    /* 0xBB */ u8 _BB;
+    /* 0xBC */ u8 _BC[0xD8 - 0xBC];
     /* 0xD8 */ u8 _D8;
 } lbl_3_common_bss_32724;
 
@@ -86,11 +90,35 @@ extern CharacterStats lbl_8034E9A0[];
 extern u8 lbl_800E86F0[12];
 
 extern struct {
-    /* 0x000 */ u8 _000[0x1D1];
+    /* 0x000 */ s32 _000;
+    /* 0x004 */ u8 _004[0xA - 0x4];
+    /* 0x00A */ s16 _00A;
+    /* 0x00C */ u8 _00C[0x1D0 - 0xC];
+    /* 0x1D0 */ u8 _1D0;
     /* 0x1D1 */ u8 _1D1;
     /* 0x1D2 */ u8 _1D2;
+    /* 0x1D3 */ u8 _1D3[0x1DA - 0x1D3];
+    /* 0x1DA */ u8 _1DA;
 } lbl_3_common_bss_34C90;
 
+extern struct {
+    /* 0x00 */ u8 _00[0xAA];
+    /* 0xAA */ u8 _AA;
+    /* 0xAB */ u8 _AB;
+} g_Scores;
+
+extern struct {
+    /* 0x00 */ u8 _00[0x40];
+    /* 0x40 */ s16 _40;
+} lbl_3_common_bss_37400;
+
+extern struct {
+    /* 0x00 */ u8 _00[0x27];
+    /* 0x27 */ u8 _27;
+} lbl_80366158;
+
+extern u8 lbl_800EFBA4[0x10];
+extern s16 lbl_3_data_607C[16];
 extern AramEntry31A0 lbl_3_data_20FDC;
 extern u8 lbl_3_data_18910[8];
 
@@ -116,6 +144,10 @@ extern int fn_3_90928(void);
 extern void fn_800189E4(void);
 extern int fn_80035838(AramEntry31A0* entry, int arg1);
 extern int fn_3_6C938(int, int);
+extern void fn_3_161078(void);
+extern void fn_3_1658F0(void);
+extern void possiblyTransitionBlackScreen(void);
+extern void fn_8004CC18(void);
 extern void fn_800246D4(int (*compare)(const void*, const void*), void* src, void* dst, int size, int count);
 
 u8 lbl_3_data_21268[8] = { 1, 2, 4, 5, 3, 6, 7, 0 };
@@ -694,7 +726,63 @@ void fn_3_10FDC8(void) {
 
 // .text:0x0010FBE4 size:0x1E4 mapped:0x8074EC78
 void fn_3_10FBE4(void) {
-    return;
+    int i;
+
+    g_GameLogic.secondaryGameMode = 2;
+    fn_800B0A5C_insertQueue(possiblyTransitionBlackScreen, 2);
+    fn_800B0A5C_insertQueue(fn_3_5BAC, 4);
+    g_Scores._AA = 5;
+    g_Scores._AB = 5;
+    g_Minigame._19DF = 28;
+    g_Minigame._19E1 = 0;
+    g_Minigame._19E2 = 0;
+    g_Minigame._19E3 = 0;
+    g_Minigame._19E6 = 1;
+    g_Minigame._19E7 = 1;
+    g_Minigame.GameMode_MiniGame = 1;
+    g_Minigame.soloMinigameDifficulty = 0;
+    g_Minigame._1A2C = -1;
+    g_Minigame._1A0C = -1;
+    g_Minigame._19A7 = 4;
+    g_Minigame.pauseInd = 0;
+    g_Minigame._1A3C = 0;
+    g_Minigame._1A3F = 0;
+    g_Minigame._190A = 0;
+    g_Minigame._1D6D = -1;
+    g_Minigame._1A40 = 1;
+    g_Minigame.challenge_minigame_haven_tWonYetIndicator = 1;
+    g_Minigame._19A9 = 0;
+    g_Minigame._1A3D = 0;
+    g_Minigame._19E0 = 0;
+    g_Minigame._1A38 = 0;
+    g_Minigame._1A39 = 0;
+    g_Minigame._1A46[0] = 0;
+    g_Minigame.battingHandedness[5] = 0;
+    for (i = 0; i < 4; i++) {
+        g_Minigame._19DA[i] = -1;
+        g_Minigame._19E8[i]._0 = -1;
+        g_Minigame._19E8[i]._2 = -1;
+        g_Minigame._19E8[i]._3 = -1;
+        g_Minigame._19E8[i]._7 = 0;
+        g_Minigame._19E8[i]._8 = 0;
+        g_Minigame._1A0F[i] = -1;
+        g_Minigame._19D2[i] = 20;
+        g_Minigame._1A13[i] = 0;
+        g_Minigame.minigameControlStruct.aIStrength[i] = 0;
+        g_Minigame.minigameControlStruct._8[i] = 0;
+    }
+    g_Minigame.battingHandedness[4] = 0;
+    lbl_3_common_bss_32724._B9 = 0;
+    if (g_d_GameSettings.exhibitionMatchInd == 0) {
+        g_Minigame._190A = 1;
+        g_Minigame._19DA[g_d_GameSettings._35] = lbl_3_common_bss_37400._40 = g_d_GameSettings._35;
+        g_Minigame.GameMode_MiniGame = g_d_GameSettings._33;
+        fn_3_1658F0();
+        g_Minigame._19DF = 30;
+        fn_3_5A6D4(0x1B);
+    } else {
+        fn_3_5A6D4(0x1B);
+    }
 }
 
 // .text:0x0010FB74 size:0x70 mapped:0x8074EC08
@@ -794,12 +882,105 @@ void fn_3_10F3D8(void) {
 
 // .text:0x0010F1D4 size:0x204 mapped:0x8074E268
 void fn_3_10F1D4(void) {
-    return;
+    switch (g_GameLogic._125) {
+    case 0:
+        changeScene(6, 6);
+        g_GameLogic._125++;
+        g_GameLogic.FrameCountOfCurrentAtBat_Copy = 0;
+        lbl_8036E548._307E = 0;
+        g_Minigame._19E4 = 0;
+        break;
+    case 1:
+        if (g_GameLogic.FrameCountOfCurrentAtBat_Copy > 20) {
+            g_GameLogic._125++;
+        }
+        break;
+    case 2:
+        fn_3_10EFAC();
+        g_GameLogic.FrameCountOfCurrentAtBat_Copy = 0;
+        break;
+    case 3:
+        if (lbl_3_common_bss_32724._BB == 0) {
+            g_GameLogic._125++;
+        }
+        break;
+    case 4:
+        if (g_Minigame.GameMode_MiniGame >= 1 && g_Minigame.GameMode_MiniGame <= 6) {
+            if (g_Minigame._190A != 0) {
+                g_Minigame._19E4 = 0;
+            } else {
+                g_Minigame._19E4 = g_d_GameSettings._13_arr[g_Minigame.GameMode_MiniGame];
+            }
+        }
+        fn_3_5A6D4(0x1E);
+        break;
+    case 5:
+        switch (fn_3_5B380(g_Controls[lbl_80366158._27].newButtonInput)) {
+        case 1:
+            g_GameLogic.FrameCountOfCurrentAtBat_Copy = 0;
+            g_GameLogic._125++;
+            break;
+        case 2:
+            g_GameLogic._125 = 2;
+            break;
+        }
+        break;
+    case 6:
+        if (g_GameLogic.FrameCountOfCurrentAtBat_Copy > 45) {
+            changeScene(4, 6);
+        }
+        if (lbl_8037169C._13 != 0) {
+            fn_80062A74();
+            g_Minigame.battingHandedness[5] = 0;
+            g_GameLogic._125++;
+        }
+        break;
+    case 7:
+        fn_8004CC18();
+        g_GameLogic.framesOfExitingToMenu = 1;
+        break;
+    }
 }
 
 // .text:0x0010EFAC size:0x228 mapped:0x8074E040
 void fn_3_10EFAC(void) {
-    return;
+    InputStruct* input = &g_Controls[lbl_80366158._27];
+    u8 mode;
+
+    if (lbl_3_common_bss_32724._BB == 0) {
+        if (input->newButtonInput & 0x100) {
+            mode = lbl_3_data_21268[g_Minigame._19E1];
+            if (mode == 6 && g_d_GameSettings._12 < 1) {
+                sndFXStartEx(0x1BA, lbl_800EFBA4[3], 0x3F, 0);
+            } else if (mode == 7 && g_d_GameSettings._12 < 2) {
+                sndFXStartEx(0x1BA, lbl_800EFBA4[3], 0x3F, 0);
+            } else {
+                g_GameLogic._125 = 3;
+                sndFXStartEx(0x1B8, lbl_800EFBA4[1], 0x3F, 0);
+            }
+        } else if (input->newButtonInput & 0x200) {
+            fn_3_5B408();
+            g_GameLogic._125 = 5;
+            sndFXStartEx(0x1B9, lbl_800EFBA4[2], 0x3F, 0);
+        } else if (input->_08 & 1) {
+            if (g_Minigame._19E1 != 0) {
+                g_Minigame._19E1--;
+                sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+            }
+        } else if (input->_08 & 2) {
+            if (g_Minigame._19E1 < 6) {
+                g_Minigame._19E1++;
+                sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+            }
+        }
+    }
+    g_Minigame.GameMode_MiniGame = lbl_3_data_21268[g_Minigame._19E1];
+    if (g_Minigame.GameMode_MiniGame == 7) {
+        g_Minigame._1A3C = 1;
+    } else {
+        g_Minigame._1A3C = 0;
+    }
+    lbl_3_common_bss_32724._B9 = g_Minigame._19E1;
 }
 
 // .text:0x0010E60C size:0x9A0 mapped:0x8074D6A0
@@ -997,7 +1178,32 @@ void fn_3_1089E8(void) {
 
 // .text:0x00108854 size:0x194 mapped:0x807478E8
 int fn_3_108854(void) {
+    int i;
+
+    if (g_Minigame.turnOverStatus != 0) {
+        return 0;
+    }
+    for (i = 0; i < 4; i++) {
+        if (g_Minigame.minigameControlStruct.characterIndex[i] >= 0 && g_Minigame.minigameControlStruct.battingHandedness[i] == 0 &&
+            (g_Controls[g_Minigame.minigameControlStruct.characterIndex[i]].newButtonInput & 0x1000)) {
+            goto found;
+        }
+    }
     return 0;
+found:
+    g_Minigame.pauseInd = 1;
+    lbl_3_common_bss_34C90._000 = g_Minigame.minigameControlStruct.characterIndex[i];
+    lbl_3_common_bss_34C90._00A = 0;
+    if (g_d_GameSettings.exhibitionMatchInd == 0) {
+        lbl_3_common_bss_34C90._1D0 = 16;
+    } else if (g_Minigame._1A3C != 0) {
+        lbl_3_common_bss_34C90._1D0 = 13;
+    } else {
+        lbl_3_common_bss_34C90._1D0 = 9;
+    }
+    lbl_3_common_bss_34C90._1D2 = 0;
+    lbl_3_common_bss_34C90._1DA = 0;
+    return 1;
 }
 
 // .text:0x001084B4 size:0x3A0 mapped:0x80747548
@@ -1369,7 +1575,33 @@ void fn_3_107078(void) {
 
 // .text:0x00106ED4 size:0x1A4 mapped:0x80745F68
 void fn_3_106ED4(void) {
-    return;
+    int i;
+
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+        if (g_Minigame.challenge_minigame_haven_tWonYetIndicator == 0) {
+            if (g_Minigame.minigameControlStruct._1C[g_d_GameSettings._35] == 1) {
+                g_d_GameSettings.challengeMinigame_baseCoinsEarned += g_Minigame.miniGameCurrentPoints[g_d_GameSettings._35];
+            } else {
+                g_d_GameSettings.challengeMinigame_baseCoinsEarned += lbl_3_data_607C[15];
+            }
+        }
+    } else if (g_Minigame.challenge_minigame_haven_tWonYetIndicator != 0) {
+        g_d_GameSettings.challengeMinigame_baseCoinsEarned += lbl_3_data_607C[7];
+    } else if (g_Minigame.minigameControlStruct._1C[g_d_GameSettings._35] == 1) {
+        for (i = 0; i < 4; i++) {
+            if (g_Minigame.minigameControlStruct._1C[i] > 1) {
+                break;
+            }
+        }
+        g_d_GameSettings.challengeMinigame_baseCoinsEarned += lbl_3_data_607C[6];
+    } else if (g_d_GameSettings.challengeDifficulty != 0) {
+        g_d_GameSettings.challengeMinigame_baseCoinsEarned += lbl_3_data_607C[8];
+    }
+    for (i = 0; i < 4; i++) {
+        g_d_GameSettings._20[i][0] = g_Minigame.miniGameCurrentPoints[i];
+        g_d_GameSettings._20[i][1] = g_Minigame.minigameControlStruct._1C[i];
+    }
+    fn_3_161078();
 }
 
 // .text:0x00106EB0 size:0x24 mapped:0x80745F44

@@ -20,8 +20,11 @@ typedef struct _GameInitVariables {
     /*0x10*/ u8 _10;
     /*0x11*/ bool minigamesEnabled;
     /*0x12*/ u8 _12;
-    /*0x13*/ u8 _13;
-    artificial_padding(0x13, 0x20, u8);
+    union {
+        /*0x13*/ u8 _13;
+        /*0x13*/ u8 _13_arr[7]; // indexed by MINI_GAME_ID in fn_3_10F1D4
+    };
+    artificial_padding(0x13, 0x20, u8[7]);
     /*0x20*/ s16 _20[4][2];
     /*0x30*/ s16 challengeMinigame_baseCoinsEarned;
     /*0x32*/ u8 bJMatchRelated;
