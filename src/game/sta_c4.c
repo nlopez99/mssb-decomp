@@ -461,11 +461,11 @@ void fn_3_FA3C0(void) {
     Mtx m;
     StaC4Prop* prop;
     StaC4Draw* draw;
-    s32 size;
-    s32 count;
     s32 i;
     s32 j;
+    s32 count;
     s32 next;
+    s32 size;
 
     size = lbl_3_common_bss_350E4._30 * sizeof(u16) + lbl_3_common_bss_350E4._30 * sizeof(u32) +
            lbl_3_common_bss_350E4._30 * sizeof(s32) + lbl_3_common_bss_350E4._30 * (2 * sizeof(Vec));
@@ -522,9 +522,7 @@ static inline void startAnim(StaC4Model* model) {
 
 // .text:0x000F9E78 size:0x548 mapped:0x80738F0C
 void fn_3_F9E78(s32 idx, void* arg1, StaC4Hit* hit) {
-    f32 x;
-    f32 y;
-    f32 z;
+    Vec pos;
     StaC4Draw* draw = &lbl_3_common_bss_350E4._00[idx];
     StaC4Draw* entry;
     StaC4ShakeTask* shake;
@@ -564,10 +562,10 @@ void fn_3_F9E78(s32 idx, void* arg1, StaC4Hit* hit) {
         draw->obj._90_7 = 0;
         draw->obj._90_6 = 0;
         if (gameInitOptions.starSkillsSetting) {
-            CTRLGetTranslation(&draw->obj.control, &x, &y, &z);
-            fn_3_CB7E8(x, y, z);
+            CTRLGetTranslation(&draw->obj.control, &pos.x, &pos.y, &pos.z);
+            fn_3_CB7E8(pos.x, pos.y, pos.z);
         }
-        lbl_3_common_bss_350E4._00[idx + lbl_3_bss_B62C + 9].obj._90_7 = 0;
+        lbl_3_common_bss_350E4._00[lbl_3_bss_B62C + 9 + idx].obj._90_7 = 0;
         return;
     }
     if (draw->_A2 == 2) {
