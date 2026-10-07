@@ -490,7 +490,7 @@ void fn_3_FB3D8(StaC4View* view) {
     s32 c;
 
     fn_8003A144();
-    uv = _OSAllocFromHeap(4, 420 * (2 * sizeof(f32) + sizeof(Vec)));
+    uv = _OSAllocFromHeap(4, 420 * ((2 * sizeof(f32)) + sizeof(Vec)));
     pos = (Vec*)(uv + 420 * 2);
     n = 0;
     for (i = 0; i < 21; i++) {
