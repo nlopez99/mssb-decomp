@@ -19,7 +19,8 @@
 # A function matches when `objdiff-cli report generate` scores it 100% and
 # every relocation also points at the same thing. The report alone is not
 # enough: it ignores relocation targets, so a call to the wrong function
-# still scores 100%. Those functions are reported as "reloc".
+# still scores 100%. Those functions are reported as "reloc". A function whose
+# source is still an upstream placeholder ("{ return; }") is reported as "stub".
 #
 # Exit codes: 0 = matches, 1 = does not match yet, 2 = build failed,
 #             3 = usage or lookup error.
@@ -601,11 +602,17 @@ def print_draft(draft: Optional[str], max_lines: int, full: bool) -> None:
         print(line)
 
 
-def function_status(func: Dict[str, Any]) -> str:
+def function_status(func: Dict[str, Any], base_syms: Optional[Dict[str, "Symbol"]] = None) -> str:
     percent = func.get("fuzzy_match_percent")
     if percent is None:
         return "missing"
-    return "match" if percent >= 100.0 else "partial"
+    if percent >= 100.0:
+        return "match"
+    # An upstream placeholder, "{ return; }", compiles to a lone blr
+    base = base_syms.get(func["name"]) if base_syms else None
+    if base is not None and base.size == 4 and int(func["size"]) > 4:
+        return "stub"
+    return "partial"
 
 
 def print_unit(
@@ -663,7 +670,7 @@ LINKED_NOTE = (
 
 
 def check_function(unit: Dict[str, Any], func: Dict[str, Any], target_syms, base_syms):
-    status = function_status(func)
+    status = function_status(func, base_syms)
     target = disassemble(os.path.join(root_dir, unit["target_path"]), func["name"], target_syms)
     base = disassemble(os.path.join(root_dir, unit["base_path"]), func["name"], base_syms) if status != "missing" else []
     rows = function_diff(target, base, target_syms, base_syms) if base else []
@@ -734,7 +741,7 @@ def main() -> int:
         funcs = sorted(report_unit.get("functions", []), key=lambda f: int(f.get("address", 0)))
         statuses = {}
         for f in funcs:
-            status = function_status(f)
+            status = function_status(f, base_syms)
             if status == "match":
                 status = check_function(unit, f, target_syms, base_syms)[0]
             statuses[f["name"]] = status
