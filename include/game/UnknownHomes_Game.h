@@ -1245,10 +1245,10 @@ typedef struct _starMissionTrackingPair {
 
 // This is pack disabled in ghidra.
 typedef struct _ChallengeTrackingStruct {
-    /*0x000*/ void* scoutFlagPointer;
+    /*0x000*/ struct ScoutFlagTable* scoutFlagPointer;
     /*0x004*/ E(u8, CHALLENGE_CAPTAIN) challengeCaptain; // Created by retype action
     /*0x005*/ E(s8, CHARACTER_VARIANT_CLASSIFICATION) variantClassification;
-    /*0x006*/ u8 scoutFlagsAchieved;
+    /*0x006*/ s8 scoutFlagsAchieved;
     /*0x007*/ u8 _7;
     /*0x008*/ u8 _8;
     /*0x009*/ starMissionTrackingPair inGameMissionTracker[10];
@@ -1379,7 +1379,9 @@ typedef struct _StarMissionCompletionTracker {
     /*0x16C2*/ s16 _16C2;
     /*0x16C4*/ u8 _16C4[0x43D6 - 0x16C4];
     /*0x43D6*/ u8 _43D6[54]; // indexed by character ID
-    /*0x440C*/ u8 _440C[0x441C - 0x440C];
+    /*0x440C*/ u8 _440C[0x4415 - 0x440C];
+    /*0x4415*/ u8 _4415;
+    /*0x4416*/ u8 _4416[0x441C - 0x4416];
     /*0x441C*/ u8 _441C;
     /*0x441D*/ u8 _441D;
     /*0x441E*/ u8 _441E;
