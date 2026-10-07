@@ -9,7 +9,7 @@ BOOL fn_3_12ED80(void);
 void fn_3_12EE68(int idx);
 void fn_3_12EFA4(void);
 void fn_3_12F28C(int idx);
-void fn_3_12F424(void);
+void fn_3_12F424(int idx, s16 delay, BOOL all);
 void fn_3_12F624(void);
 void fn_3_12F9D4(int idx);
 void fn_3_12FAC4(void);
