@@ -5,6 +5,16 @@
 
 struct UnkTask3448;
 
+void fn_3_11D3AC(void);
+void fn_3_11D6A0(void);
+void fn_3_11D780(void);
+void fn_3_11DACC(void);
+void fn_3_11DDC4(void);
+void fn_3_11DE80(void);
+void fn_3_11DECC(void);
+void fn_3_11E308(void);
+void fn_3_11E364(void);
+void fn_3_11E7C4(void);
 void fn_3_11EC28(void);
 void fn_3_11F02C(void);
 void fn_3_11F480(void);
