@@ -1654,13 +1654,34 @@ void fn_3_14C398(void) {
 }
 
 // .text:0x0014C348 size:0x50 mapped:0x8078B3DC
-void fn_3_14C348(void) {
-    return;
+void fn_3_14C348(Vec* pos, u8 big) {
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES &&
+        g_Minigame.GameMode_MiniGame == MINI_GAME_ID_WALLBALL && pos != NULL) {
+        fn_3_14BECC(pos, big);
+    }
 }
 
 // .text:0x0014BECC size:0x47C mapped:0x8078AF60
-void fn_3_14BECC(void) {
-    return;
+// 99.16%: differs only inside its two inlined copies of fn_3_14BCB0.
+void fn_3_14BECC(Vec* pos, u8 big) {
+    EmitterSlot3880 tmp;
+    Emitter3880* emitter;
+    Emitter3880* added;
+    Particle3880* last;
+
+    emitter = fn_800339F0(NULL, 0x22);
+    if (emitter != NULL) {
+        added = fn_800337CC(&tmp.base, lbl_3_data_26D88[1], 1);
+        fn_3_14BCB0(added, pos, big);
+        for (last = emitter->particles; last->next != NULL; last = last->next) {}
+        last->next = added->particles;
+        emitter->count += added->count;
+    } else {
+        emitter = fn_80033A24(fn_3_14BA40, 0x80, 0, lbl_3_data_26D88[1], 1, 0x22);
+        if (emitter != NULL) {
+            fn_3_14BCB0(emitter, pos, big);
+        }
+    }
 }
 
 // .text:0x0014BCB0 size:0x21C mapped:0x8078AD44
