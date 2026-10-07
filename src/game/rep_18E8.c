@@ -867,8 +867,184 @@ s32 fn_3_A63E4(s32 runner, s32 toNext, s32* out0, s32* out1) {
 }
 
 // .text:0x000A5B4C size:0x898 mapped:0x806E4BE0
-void fn_3_A5B4C(void) {
-    return;
+void fn_3_A5B4C(s32 runner) {
+    InMemRunnerType* r = &g_Runners[runner];
+    s32 cur = r->currentBase;
+    s32 next = r->nextBase;
+    f32 toNext;
+    f32 toCur;
+    f32 ballToNext = g_Ball.ballDistanceFromBase[next];
+    f32 ballToCur = g_Ball.ballDistanceFromBase[cur];
+    s32 dir = 0;
+    s32 ballDist;
+    s32 cover;
+    s32 frames;
+    s32 base;
+
+    toNext = r->distToNextBase;
+    toCur = r->distToCurrentBase;
+    ballDist = r->distanceFromBall;
+    if (ballToNext + ballToCur < 32.0f && r->actionCode == 0) {
+        lbl_3_bss_17FC[runner] = 1;
+        if (ballToNext < toNext) {
+            dir = 1;
+        } else if (ballToCur < toCur) {
+            dir = -1;
+        }
+        if (r->runningDirectionCode == 1) {
+            if (r->restrictedMovementCodes & 1) {
+                lbl_3_bss_1838[runner] = 9;
+                lbl_3_bss_1828[runner] = -1;
+                lbl_3_bss_1848[runner] = 0;
+            } else if (dir == 1) {
+                if (g_Ball.baseBallAndFielderAreOn == next &&
+                    ((toNext < 7.0f && r->runningDirectionCode == 1 && r->nextDirectionBeingProcessed == 0) ||
+                     r->actionCode != 0)) {
+                    lbl_3_bss_1848[runner] = -50;
+                    lbl_3_bss_1838[runner] = next;
+                    lbl_3_bss_1828[runner] = -1;
+                } else {
+                    lbl_3_bss_1838[runner] = 9;
+                    lbl_3_bss_1828[runner] = -1;
+                    lbl_3_bss_1848[runner] = -15;
+                }
+            } else {
+                frames = fn_3_A63E4(runner, 1, &cover, &base) - 10;
+                if (g_Ball.numberOfThrowsDuringPlay <= 3 && g_FieldingLogic._0CC == -1 && frames >= -45) {
+                    lbl_3_bss_1848[runner] = frames;
+                    lbl_3_bss_1828[runner] = cover;
+                    lbl_3_bss_1838[runner] = base;
+                } else if (r->percentTowardsNextBase > 0.6f || frames >= -15) {
+                    lbl_3_bss_1848[runner] = frames;
+                    lbl_3_bss_1828[runner] = cover;
+                    lbl_3_bss_1838[runner] = base;
+                } else {
+                    lbl_3_bss_1838[runner] = 9;
+                    lbl_3_bss_1828[runner] = -1;
+                    lbl_3_bss_1848[runner] = 0;
+                }
+            }
+        } else if (r->runningDirectionCode == 3) {
+            if (r->restrictedMovementCodes & 2) {
+                lbl_3_bss_1838[runner] = 9;
+                lbl_3_bss_1828[runner] = -1;
+                lbl_3_bss_1848[runner] = 0;
+            } else if (dir == -1) {
+                if (g_Ball.baseBallAndFielderAreOn == cur && toCur < 7.0f && r->runningDirectionCode == 3 &&
+                    r->nextDirectionBeingProcessed == 0) {
+                    lbl_3_bss_1848[runner] = -50;
+                    lbl_3_bss_1838[runner] = cur;
+                    lbl_3_bss_1828[runner] = -1;
+                } else {
+                    lbl_3_bss_1838[runner] = 9;
+                    lbl_3_bss_1828[runner] = -1;
+                    lbl_3_bss_1848[runner] = -15;
+                }
+            } else {
+                frames = fn_3_A63E4(runner, 0, &cover, &base) - 10;
+                if (r->percentTowardsNextBase < 0.2f || frames >= -8) {
+                    lbl_3_bss_1848[runner] = frames;
+                    lbl_3_bss_1828[runner] = cover;
+                    lbl_3_bss_1838[runner] = base;
+                } else if (r->percentTowardsNextBase < 0.3f && frames >= -8 &&
+                           (r->nextDirectionBeingProcessed == 0 || r->runningDirectionCode != 2)) {
+                    lbl_3_bss_1848[runner] = frames;
+                    lbl_3_bss_1828[runner] = cover;
+                    lbl_3_bss_1838[runner] = base;
+                } else {
+                    lbl_3_bss_1838[runner] = 9;
+                    lbl_3_bss_1828[runner] = -1;
+                    lbl_3_bss_1848[runner] = 0;
+                }
+            }
+        } else {
+            lbl_3_bss_1838[runner] = 9;
+            lbl_3_bss_1828[runner] = -1;
+            lbl_3_bss_1848[runner] = 0;
+        }
+    } else if (r->runningDirectionCode == 1) {
+        if (r->percentTowardsNextBase < 0.25f) {
+            if (ballToNext < 10.0f) {
+                lbl_3_bss_1838[runner] = 9;
+                lbl_3_bss_1828[runner] = -1;
+                lbl_3_bss_1848[runner] = -15;
+                return;
+            }
+            if (ballToCur < 10.0f) {
+                if (ballDist > 5.0f) {
+                    lbl_3_bss_1848[runner] = fn_3_A63E4(runner, 0, &cover, &base);
+                    lbl_3_bss_1828[runner] = cover;
+                    lbl_3_bss_1838[runner] = base;
+                }
+                return;
+            }
+        }
+        frames = fn_3_A63E4(runner, 1, &cover, &base);
+        frames += lbl_3_data_1C40;
+        if (frames < -45) {
+            if (ballDist < 15.0f) {
+                lbl_3_bss_1838[runner] = 9;
+                lbl_3_bss_1828[runner] = -1;
+                lbl_3_bss_1848[runner] = -15;
+            } else if (ballToNext > 10.0f) {
+                lbl_3_bss_1848[runner] = frames;
+                lbl_3_bss_1828[runner] = cover;
+                lbl_3_bss_1838[runner] = base;
+            } else if (ballToNext < toNext) {
+                lbl_3_bss_1838[runner] = 9;
+                lbl_3_bss_1828[runner] = -1;
+                lbl_3_bss_1848[runner] = -30;
+            } else {
+                lbl_3_bss_1848[runner] = frames;
+                lbl_3_bss_1828[runner] = cover;
+                lbl_3_bss_1838[runner] = base;
+            }
+        } else {
+            lbl_3_bss_1848[runner] = frames;
+            lbl_3_bss_1828[runner] = cover;
+            lbl_3_bss_1838[runner] = base;
+        }
+    } else if (r->runningDirectionCode == 3) {
+        frames = fn_3_A63E4(runner, 0, &cover, &base);
+        frames += lbl_3_data_1C40;
+        if (frames < -30) {
+            if (ballToCur > 10.0f) {
+                lbl_3_bss_1848[runner] = frames;
+                lbl_3_bss_1828[runner] = cover;
+                lbl_3_bss_1838[runner] = base;
+            } else if (ballToCur < toCur) {
+                lbl_3_bss_1838[runner] = 9;
+                lbl_3_bss_1828[runner] = -1;
+                lbl_3_bss_1848[runner] = -30;
+            } else {
+                lbl_3_bss_1848[runner] = frames;
+                lbl_3_bss_1828[runner] = cover;
+                lbl_3_bss_1838[runner] = base;
+            }
+        } else if (r->percentTowardsNextBase >= 0.45f) {
+            lbl_3_bss_1848[runner] = frames;
+            lbl_3_bss_1828[runner] = cover;
+            lbl_3_bss_1838[runner] = base;
+        } else {
+            lbl_3_bss_1848[runner] = frames;
+            lbl_3_bss_1828[runner] = cover;
+            lbl_3_bss_1838[runner] = base;
+        }
+    } else if (r->runningDirectionCode == 2) {
+        if (r->baseStandingOn < 0) {
+            if (ballToNext < 10.0f) {
+                lbl_3_bss_1838[runner] = 9;
+                lbl_3_bss_1828[runner] = -1;
+                lbl_3_bss_1848[runner] = -15;
+            } else {
+                frames = fn_3_A63E4(runner, 1, &cover, &base);
+                frames += lbl_3_data_1C40;
+                lbl_3_bss_1828[runner] = cover;
+                lbl_3_bss_1848[runner] = frames;
+                lbl_3_bss_1838[runner] = base;
+            }
+        }
+    }
 }
 
 // .text:0x000A5704 size:0x448 mapped:0x806E4798

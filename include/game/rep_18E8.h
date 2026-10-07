@@ -34,7 +34,7 @@ void fn_3_A4A10(void);
 void fn_3_A4F50(void);
 void fn_3_A53DC(s32 runner);
 void fn_3_A5704(s32 runner);
-void fn_3_A5B4C(void);
+void fn_3_A5B4C(s32 runner);
 s32 fn_3_A63E4(s32 runner, s32 toNext, s32* out0, s32* out1);
 void fn_3_A67E8(s32 idx);
 s32 fn_3_A6810(f32 x0, f32 z0, f32 x1, f32 z1);
