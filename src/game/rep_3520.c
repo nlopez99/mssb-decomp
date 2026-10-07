@@ -551,8 +551,8 @@ void fn_3_139CA0(void) {
 }
 
 // .text:0x00139808 size:0x498 mapped:0x8077889C
-// 92.5%: the gravity add, the position update and the inlined reflections schedule
-// their loads and stores in another order.
+// 94.6%: the inlined reflections load -1.0f through addi and schedule the y loads
+// differently.
 void fn_3_139808(void) {
     int i;
     int j;
@@ -578,10 +578,10 @@ void fn_3_139808(void) {
             g_Minigame._1D6C--;
             continue;
         }
-        g_Minigame.wallBall_coinVelocity[i].y += lbl_3_data_219B8[11];
         seg.src.x = g_Minigame.wallBall_coinCoordinates[i].x;
         seg.src.y = -g_Minigame.wallBall_coinCoordinates[i].y;
         seg.src.z = g_Minigame.wallBall_coinCoordinates[i].z;
+        g_Minigame.wallBall_coinVelocity[i].y += lbl_3_data_219B8[11];
         g_Minigame.wallBall_coinCoordinates[i].x += g_Minigame.wallBall_coinVelocity[i].x;
         g_Minigame.wallBall_coinCoordinates[i].y += g_Minigame.wallBall_coinVelocity[i].y;
         g_Minigame.wallBall_coinCoordinates[i].z += g_Minigame.wallBall_coinVelocity[i].z;
