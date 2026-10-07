@@ -6,13 +6,13 @@
 
 void fn_3_7D79C(void);
 void fn_3_7D920(int player);
-void fn_3_7D9DC(void);
+void fn_3_7D9DC(int player);
 void fn_3_7DB30(int player);
 void fn_3_7DD24(int player);
 void fn_3_7DD6C(void);
 void fn_3_7E2BC(void);
 void fn_3_7EA68(void);
-void fn_3_7EBD4(void);
+void fn_3_7EBD4(int runner);
 void fn_3_7ECFC(void);
 void fn_3_7F2D8(void);
 void fn_3_7F494(void);
@@ -47,7 +47,7 @@ void fn_3_85A70(void);
 void fn_3_85C44(int runner, int direction);
 void fn_3_85CB0(void);
 void fn_3_85EF4(int runner, int direction);
-void fn_3_8604C(void);
+int fn_3_8604C(int* fielderOut);
 void fn_3_86118(void);
 void fn_3_8679C(void);
 void fn_3_86DFC(void);
