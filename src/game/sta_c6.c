@@ -5,6 +5,7 @@
 #include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
 #include "C3/control.h"
+#include "game/rep_1D58.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/mtx.h"
 #include "Dolphin/os.h"
@@ -295,11 +296,6 @@ extern u8 fn_800B3C04(s32 arg0, StaC6Actor* actor, Mtx camera);
 extern void AnimateActorBones(StaC6Actor* actor);
 extern s32 fn_8005268C(void);
 extern camera_803c639c_s* fn_80052734(s32 idx);
-extern void fn_3_B8414(Vec* min, Vec* max);
-extern void fn_3_B8464(Mtx m, void* model);
-extern void fn_3_B8574(void);
-extern void fn_3_B97DC(void* model, void* anim);
-extern void fn_3_B9D68(u8* types, s32 count, void** files, s32* indices);
 
 // MWCC lays out .bss statics in reverse order of declaration
 static u8 lbl_3_bss_AEB8[0x28];
