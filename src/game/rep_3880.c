@@ -19,6 +19,13 @@ typedef struct UnkModelSet3880 {
     /* 0x18 */ UnkModel3880** _18;
 } UnkModelSet3880;
 
+// What fn_3_151710's caller passes: the model set field of an actor
+typedef struct UnkModelRef3880 {
+    /* 0x00 */ UnkModelSet3880* set;
+    /* 0x04 */ u8 _04[0x6C - 0x4];
+    /* 0x6C */ u8 _6C;
+} UnkModelRef3880;
+
 typedef struct Particle3880 {
     /* 0x00 */ struct Particle3880* next;
     /* 0x04 */ Vec pos;
@@ -126,7 +133,7 @@ typedef struct PlayerEmitter3880 {
 
 typedef struct ModelEmitter3880 {
     /* 0x00 */ Emitter3880 base;
-    /* 0x18 */ UnkModelSet3880** models;
+    /* 0x18 */ UnkModelRef3880* models;
     /* 0x1C */ Vec pos;
 } ModelEmitter3880;
 
@@ -1439,7 +1446,7 @@ void fn_3_151760(void) {
 }
 
 // .text:0x00151710 size:0x50 mapped:0x807907A4
-void fn_3_151710(UnkModelSet3880** models, Vec* pos) {
+void fn_3_151710(UnkModelRef3880* models, Vec* pos) {
     if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES &&
         g_Minigame.GameMode_MiniGame == MINI_GAME_ID_WALLBALL && models != NULL) {
         fn_3_151694(models, pos);
@@ -1447,7 +1454,7 @@ void fn_3_151710(UnkModelSet3880** models, Vec* pos) {
 }
 
 // .text:0x00151694 size:0x7C mapped:0x80790728
-void fn_3_151694(UnkModelSet3880** models, Vec* pos) {
+void fn_3_151694(UnkModelRef3880* models, Vec* pos) {
     Emitter3880* emitter =
         fn_80033A24(fn_3_150940, 0x80, 0, lbl_3_data_26C3C[1] + lbl_3_data_26C3C[9], 1, 0x1D);
 
@@ -1459,7 +1466,7 @@ void fn_3_151694(UnkModelSet3880** models, Vec* pos) {
 // .text:0x00151204 size:0x490 mapped:0x80790298
 // 99.74%: saved FPRs differ inside the inlined fn_3_151068 and fn_3_150D84 (the latter
 // is itself a 82.56% candidate).
-void fn_3_151204(ModelEmitter3880* emitter, UnkModelSet3880** models, Vec* pos) {
+void fn_3_151204(ModelEmitter3880* emitter, UnkModelRef3880* models, Vec* pos) {
     Particle3880* p;
     u32 i = 0;
     s16 k = 0;
@@ -1495,7 +1502,7 @@ void fn_3_151068(ModelEmitter3880* emitter, Particle3880* p) {
     Vec v;
 
     p->_4A = lbl_3_data_26C3C[6];
-    model = (*emitter->models)->_18[lbl_3_data_26C3C[7]];
+    model = emitter->models->set->_18[lbl_3_data_26C3C[7]];
     PSMTXIdentity(mtx);
     v.x = (*model->_EC)[0][3];
     v.y = (*model->_EC)[1][3];
@@ -1535,7 +1542,30 @@ void fn_3_150D84(ModelEmitter3880* emitter, Particle3880* p) {
 
 // .text:0x00150940 size:0x444 mapped:0x8078F9D4
 BOOL fn_3_150940(Emitter3880* emitter) {
-    return 0;
+    ModelEmitter3880* self = (ModelEmitter3880*)emitter;
+    Particle3880* p;
+
+    if (lbl_80366158._28 != 0) {
+        return FALSE;
+    }
+    if (self->models->_6C == 0) {
+        return FALSE;
+    }
+    fn_80033620(&self->base);
+    p = self->base.particles;
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_DSTALPHA, GX_LO_CLEAR);
+    do {
+        if (p->_4A != 0) {
+            if (p->_4C == 1) {
+                fn_3_1504EC(self, p);
+            } else if (p->_4C == 2) {
+                fn_3_150120(self, p);
+            }
+        }
+        p = p->next;
+    } while (p != NULL);
+    return FALSE;
 }
 
 // .text:0x001504EC size:0x454 mapped:0x8078F580
@@ -1577,8 +1607,25 @@ void fn_3_1504EC(ModelEmitter3880* emitter, Particle3880* p) {
 }
 
 // .text:0x00150120 size:0x3CC mapped:0x8078F1B4
-void fn_3_150120(void) {
-    return;
+// 85.98%: differs only inside the inlined fn_3_150D84 (see there); inlined in turn into
+// fn_3_150940, the same code matches
+void fn_3_150120(ModelEmitter3880* emitter, Particle3880* p) {
+    if (p->_48 != 0) {
+        p->_48--;
+        return;
+    }
+    fn_80033F64(p->_38, p->_3C, p->_1C.x);
+    fn_80033CC8(p, emitter->base._10);
+    p->pos.x += p->vel.x;
+    p->pos.y -= p->vel.y;
+    p->pos.z += p->vel.z;
+    if (p->pos.y > 0.0f) {
+        p->pos.y = 0.0f;
+        p->vel.y = -p->vel.y * (lbl_3_data_26C3C[15] / 100000.0f);
+    }
+    if (--p->_4A == 0) {
+        fn_3_150D84(emitter, p);
+    }
 }
 
 // .text:0x001500C8 size:0x58 mapped:0x8078F15C
