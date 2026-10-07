@@ -1230,13 +1230,55 @@ void fn_3_1350BC(void) {
 }
 
 // .text:0x00134D4C size:0x370 mapped:0x80773DE0
-void fn_3_134D4C(void) {
-    return;
+int fn_3_134D4C(f32 cx, f32 cz, f32 radius, f32 px, f32 pz, f32 qx, f32 qz) {
+    f32 dx = cx - px;
+    f32 dz = cz - pz;
+    f32 dist;
+    f32 ux;
+    f32 uz;
+    f32 len;
+    f32 t;
+    f32 h;
+    f32 dx2;
+    f32 dz2;
+    f32 ux2;
+    f32 uz2;
+
+    dx2 = dx * dx;
+    dz2 = dz * dz;
+    dist = dolsqrtf2(dx2 + dz2);
+    ux = qx - px;
+    uz = qz - pz;
+    ux2 = ux * ux;
+    uz2 = uz * uz;
+    len = dolsqrtf2(ux2 + uz2);
+    ux /= len;
+    uz /= len;
+    t = dx * ux + dz * uz;
+    if (dist < radius) {
+        return 1;
+    }
+    if (dist == radius && t > 0.0f) {
+        return 2;
+    }
+    if (t > 0.0f) {
+        h = t * t + (radius * radius - dist * dist);
+        if (h >= 0.0f && t - dolsqrtf2(h) <= len) {
+            return 3;
+        }
+    }
+    return 0;
 }
 
 // .text:0x00134C80 size:0xCC mapped:0x80773D14
-void fn_3_134C80(void) {
-    return;
+BOOL fn_3_134C80(u32 player, u32 quadrant, u32 target, f32 x, f32 z) {
+    if (g_Minigame._1D72 != 0 && player != g_Minigame._1D6D) {
+        if (target == ((quadrant + 1) & 3) || target == ((quadrant + 2) & 3)) {
+            return TRUE;
+        }
+    }
+    return !!fn_3_134D4C(lbl_3_data_21A48.x, lbl_3_data_21A48.z, 4.5f, g_Fielders[g_Minigame.minigameFielderIndex[player]].pos.x,
+                       g_Fielders[g_Minigame.minigameFielderIndex[player]].pos.z, x, z);
 }
 
 // .text:0x0013493C size:0x344 mapped:0x807739D0
