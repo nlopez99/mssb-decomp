@@ -52,9 +52,11 @@ extern u8 lbl_800EFBA4[0x10];
 extern u8 lbl_803CBC3C[];
 
 extern s16 lbl_3_data_18C48[10];
+extern u8 lbl_3_data_2127C[][5];
 extern VecXYZ lbl_3_data_216BC[15];
 extern f32 lbl_3_data_21770[6];
 extern s16 lbl_3_data_21788[4];
+extern s16 lbl_3_data_21790[4];
 extern u8 lbl_3_data_21798[12];
 extern s16 lbl_3_data_217A4[12];
 
@@ -68,6 +70,9 @@ extern void fn_3_10AD48(void);
 extern void fn_8004C108(VecXYZ* pos, int arg1);
 extern void fn_3_1608F0(int, int, int);
 extern void ballPhysica(void);
+extern void fn_3_59A90(void);
+extern int fn_3_108854(void);
+extern void fn_3_12DB80(void);
 
 // .text:0x001324E8 size:0x9F4 mapped:0x8077157C
 void fn_3_1324E8(void) {
@@ -87,7 +92,54 @@ void fn_3_1323CC(void) {
 
 // .text:0x001320BC size:0x310 mapped:0x80771150
 void fn_3_1320BC(void) {
-    return;
+    int i;
+
+    if (g_GameLogic._125 == 0) {
+        fn_3_59A90();
+        g_GameLogic.secondaryGameMode = SECONDARY_GAME_MODE_BARREL_BATTER;
+        for (i = 0; i < 4; i++) {
+            g_Minigame.miniGameCurrentPoints[i] = 0;
+            g_Minigame.miniGameLatestPoints[i] = 0;
+            g_Minigame.minigamePoints_current_Latest[i][0] = 0;
+            g_Minigame.minigamePoints_current_Latest[i][1] = 0;
+            g_Minigame.minigameControlStruct._28[i] = -1;
+            g_Minigame.minigameFielderIndex[i] = -1;
+            g_Minigame._18FC[i] = -1;
+            g_Minigame._1900[i] = -1;
+            g_Minigame.minigameControlStruct._24[i] = 1;
+        }
+        g_Scores._00 = 0;
+        g_Minigame.pointsReqToWin_challenge = 0;
+        g_Minigame._1A37 = 0;
+        g_Minigame.minigamePlayerSelectedOrder = -1;
+        g_Minigame.rosterID = -1;
+        g_Minigame._17C0 = 0;
+        g_Minigame.bB_bombBarrelHitInd = 0;
+        g_Minigame.bB_bombBarrelID = -1;
+        if (!g_Minigame.multiPlayerInd) {
+            g_Scores._AA = 1;
+            for (i = 0; i < 4; i++) {
+                g_Minigame.minigameControlStruct.aIStrength[i] = lbl_3_data_2127C[g_Minigame.GameMode_MiniGame][g_Minigame.soloMinigameDifficulty];
+            }
+            if (g_Minigame.soloMinigameDifficulty <= MINIGAME_DIFFICULTY_MULTIPLAYER_CHALLENGE_HARD) {
+                g_Minigame.pointsReqToWin_challenge = lbl_3_data_21790[g_Minigame.soloMinigameDifficulty];
+            }
+        } else {
+            if (g_Minigame._1A3C) {
+                for (i = 0; i < 4; i++) {
+                    g_Minigame.minigameControlStruct.aIStrength[i] = lbl_3_data_2127C[7][0];
+                }
+            }
+            g_Scores._AA = lbl_3_data_21798[5];
+        }
+        fn_3_12FE84();
+        g_Minigame.turnNumberWithinRound = 0;
+        g_Minigame.barrelBatter_scoreCalculatedInd = 0;
+        g_Minigame.barrelBatterChargeMeter = 0;
+        g_GameLogic._125++;
+    } else {
+        fn_3_5A6D4(GAME_STATUS_GAME_START_MOVIE);
+    }
 }
 
 // .text:0x0013207C size:0x40 mapped:0x80771110
@@ -236,9 +288,31 @@ void fn_3_131114(void) {
     g_UnkSimulation_31AC0._6 = 4;
 }
 
+// Not in the target as a function: the value parameter gives the target's `mr r3,r4`, as in
+// rep_31F0.c.
+static inline void setCpuInputFlags(u8 value) {
+    s8 i = 0;
+    do {
+        g_Minigame._1DBC[i] = value;
+    } while (++i < 4);
+}
+
 // .text:0x00130C6C size:0x4A8 mapped:0x8076FD00
 void fn_3_130C6C(void) {
-    return;
+    if (g_Minigame.turnOverStatus == 0) {
+        if (fn_3_108854()) {
+            return;
+        }
+        if (g_Minigame.miniGameTurnCounter != 0 || g_GameLogic.FrameCountOfCurrentPitch >= lbl_3_data_217A4[8]) {
+            fn_3_75560();
+        }
+        fn_3_12DB80();
+        atBat_batter();
+        setCpuInputFlags(0);
+        fn_3_8A958();
+        fn_3_12FAC4();
+    }
+    fn_3_130ACC();
 }
 
 // .text:0x00130ACC size:0x1A0 mapped:0x8076FB60
@@ -438,7 +512,8 @@ void fn_3_12F624(void) {
     int points;
     int hit;
 
-    if (g_Ball.framesSinceHit <= 0 || g_Minigame.barrelBatter_scoreCalculatedInd ||
+    i = g_Ball.framesSinceHit;
+    if (i <= 0 || g_Minigame.barrelBatter_scoreCalculatedInd ||
         g_Ball.AtBat_Contact_BallPos.z < lbl_3_data_216BC[0].z - lbl_3_data_21770[2] ||
         g_Batter.contactType < 1 || g_Batter.contactType > 3) {
         return;
