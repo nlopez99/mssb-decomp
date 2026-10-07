@@ -53,7 +53,7 @@ typedef struct {
     /* 0x14 */ StaC6Shape* _14;
     /* 0x18 */ StaC6Shape* _18;
     /* 0x1C */ Control control;
-    /* 0x58 */ u8 _58[0xEC - 0x58];
+    /* 0x60 */ u8 _60[0xEC - 0x60];
     /* 0xEC */ MtxPtr _EC;
 } StaC6Bone;
 
@@ -86,7 +86,7 @@ typedef struct {
 
 typedef struct StaC6Draw {
     /* 0x00 */ Control control;
-    /* 0x3C */ u8 _3C[0x74 - 0x3C];
+    /* 0x44 */ u8 _44[0x74 - 0x44];
     /* 0x74 */ StaC6Model* _74;
     /* 0x78 */ void* _78;
     /* 0x7C */ void (*_7C)(void* arg);
@@ -421,9 +421,7 @@ BOOL fn_3_E8AC8(void) {
 }
 
 // .text:0x000E7B20 size:0xFA8 mapped:0x80726BB4
-// Reads .data 0x19018-0x19770 through one pool base, which externs cannot reproduce;
-// with that data as statics here this scores 99.5% (the two pool bases in swapped
-// registers, and other counters in the third loop)
+// 99.50%: two base addresses in swapped registers, and other counters in the third loop
 u8 fn_3_E7B20(void** files, s32* indices) {
     StaC6Draw* draw;
     StaC6Draw* entry;
@@ -728,8 +726,6 @@ void fn_3_E7A2C(void* arg) {
 }
 
 // .text:0x000E763C size:0x3F0 mapped:0x807266D0
-// 99.97%: the target frame is 0x10 bytes larger; the code matches with an 0x44-byte
-// Control, 8 bytes more than C3/control.h declares
 void fn_3_E763C(void) {
     Control control;
     Mtx mtx;
@@ -890,9 +886,6 @@ void fn_3_E7350(void) {
 }
 
 // .text:0x000E6D90 size:0x5C0 mapped:0x80725E24
-// Reads .data 0x19018-0x19770 through one pool base, which externs cannot reproduce;
-// with that data as statics here this scores 99.96%: the inlined fn_3_E5A84 frame is
-// 0x10 bytes smaller, as C3/control.h's Control is 8 bytes shorter than this game's
 void fn_3_E6D90(void* arg) {
     StaC6Draw* draw = arg;
 
@@ -945,9 +938,7 @@ void fn_3_E6D90(void* arg) {
 }
 
 // .text:0x000E6A48 size:0x348 mapped:0x80725ADC
-// Reads .data 0x19018-0x19770 through one pool base, which externs cannot reproduce;
-// with that data as statics here this scores 99.8%: the inlined fn_3_E5A84 frame is
-// 0x10 bytes smaller, as C3/control.h's Control is 8 bytes shorter than this game's
+// 99.88%: the pool base is formed before the PSMTXIdentity argument instead of after it
 void fn_3_E6A48(StaC6Draw* draw) {
     fn_3_E5A84(draw);
     fn_3_E6578(draw);

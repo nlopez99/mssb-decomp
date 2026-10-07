@@ -27,12 +27,15 @@ typedef union ControlParams {
     };
 } ControlParams;
 
+// This game's Control is 0x44 bytes: ACTSetBoneTrack passes two of a bone's Controls,
+// at 0x1C and 0x60, to the CTRL functions, and the stadium code copies 0x44 bytes of one.
 typedef struct Control {
     /* 0x00 */ u8 type;
     /* 0x01 */ u8 pad8;
     /* 0x02 */ u16 pad16;
     /* 0x04 */ ControlParams controlParams;
-} Control;
+    /* 0x3C */ u8 _3C[0x44 - 0x3C];
+} Control; // size: 0x44
 
 // control.c
 void CTRLSetScale(Control *control, f32 x, f32 y, f32 z);

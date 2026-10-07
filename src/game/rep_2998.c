@@ -47,13 +47,8 @@ typedef struct {
     /* 0x34 */ Rep2998Model _34[1];
 } Rep2998ModelTable;
 
-typedef struct {
-    /* 0x00 */ Control control;
-    /* 0x3C */ u8 _3C[0x44 - 0x3C];
-} Rep2998Transform; // size: 0x44
-
 typedef struct Rep2998Obj {
-    /* 0x00 */ Rep2998Transform xform;
+    /* 0x00 */ Control control;
     /* 0x44 */ u8 _44[0x74 - 0x44];
     /* 0x74 */ Rep2998Model* _74;
     /* 0x78 */ void* _78;
@@ -358,7 +353,7 @@ void fn_3_E4FC4(void** files) {
     draw->_90_7 = 1;
     draw->_90_6 = 0;
     draw->_9A = 0;
-    draw->xform.control.type = 0;
+    draw->control.type = 0;
     draw->_90_5 = 0;
     draw->_92 = 0xFF;
     draw->_84 = NULL;
@@ -380,9 +375,9 @@ void fn_3_E4FC4(void** files) {
             draw->_90_7 = 0;
             draw->_90_6 = 0;
             draw->_90_5 = 0;
-            draw->xform.control.type = 0;
-            CTRLSetTranslation(&draw->xform.control, 0.0f, 0.0f, 0.0f);
-            CTRLSetRotation(&draw->xform.control, 0.0f, 0.0f, 0.0f);
+            draw->control.type = 0;
+            CTRLSetTranslation(&draw->control, 0.0f, 0.0f, 0.0f);
+            CTRLSetRotation(&draw->control, 0.0f, 0.0f, 0.0f);
             draw->_92 = 0;
             draw->_8C = NULL;
             draw->_94 = 0;
@@ -418,7 +413,7 @@ void fn_3_E4EF4(void) {
 
 // .text:0x000E4CB0 size:0x244 mapped:0x80723D44
 void fn_3_E4CB0(s32* count, s32* objIdx) {
-    Rep2998Transform xform;
+    Control control;
     Mtx m;
     Vec pos;
     Rep2998Obj* obj;
@@ -439,13 +434,13 @@ void fn_3_E4CB0(s32* count, s32* objIdx) {
                 slot++;
                 lbl_3_common_bss_350E4._3C[*count]++;
                 obj = &lbl_3_common_bss_350E4._00[*objIdx];
-                xform = obj->xform;
-                CTRLGetTranslation(&xform.control, &pos.x, &pos.y, &pos.z);
-                CTRLSetTranslation(&xform.control, pos.x - 4.0, pos.y, pos.z - 4.0);
-                CTRLBuildMatrix(&xform.control, m);
+                control = obj->control;
+                CTRLGetTranslation(&control, &pos.x, &pos.y, &pos.z);
+                CTRLSetTranslation(&control, pos.x - 4.0, pos.y, pos.z - 4.0);
+                CTRLBuildMatrix(&control, m);
                 fn_3_B8464(m, obj->_78);
-                CTRLSetTranslation(&xform.control, 4.0 + pos.x, pos.y - 10.0, 4.0 + pos.z);
-                CTRLBuildMatrix(&xform.control, m);
+                CTRLSetTranslation(&control, 4.0 + pos.x, pos.y - 10.0, 4.0 + pos.z);
+                CTRLBuildMatrix(&control, m);
                 fn_3_B8464(m, obj->_78);
                 (*objIdx)++;
             }
@@ -462,7 +457,7 @@ void* fn_3_E4BE8(s32 idx, MtxPtr mtx) {
     Rep2998Obj* obj = &lbl_3_common_bss_350E4._00[idx];
     Mtx bone;
 
-    CTRLBuildMatrix(&lbl_3_common_bss_350E4._00[idx].xform.control, mtx);
+    CTRLBuildMatrix(&lbl_3_common_bss_350E4._00[idx].control, mtx);
     if (obj->_9D == 0) {
         if (obj->_C8 == 0 || obj->_C4 == 0 || obj->_C4 == 5 || obj->_C4 == 4) {
             return NULL;
@@ -552,8 +547,8 @@ void fn_3_E4760(Rep2998Obj* obj) {
 
 // .text:0x000E4658 size:0x108 mapped:0x807236EC
 void fn_3_E4658(Rep2998Obj* obj) {
-    obj->xform.control.type = 0;
-    CTRLSetTranslation(&obj->xform.control, lbl_3_data_18ED0[obj->_9C]._00.x, 0.24f + lbl_3_data_18ED0[obj->_9C]._00.y,
+    obj->control.type = 0;
+    CTRLSetTranslation(&obj->control, lbl_3_data_18ED0[obj->_9C]._00.x, 0.24f + lbl_3_data_18ED0[obj->_9C]._00.y,
                        lbl_3_data_18ED0[obj->_9C]._00.z);
     PSVECScale(&lbl_3_data_18ED0[obj->_9C]._00, 1.0f, &obj->_A0);
     obj->_A0.y -= 0.24f;
@@ -563,13 +558,13 @@ void fn_3_E4658(Rep2998Obj* obj) {
 
 // .text:0x000E45F0 size:0x68 mapped:0x80723684
 void fn_3_E45F0(Rep2998Obj* obj) {
-    CTRLSetRotation(&obj->xform.control, 0.0f, lbl_3_data_18ED0[obj->_9C]._0C, 0.0f);
+    CTRLSetRotation(&obj->control, 0.0f, lbl_3_data_18ED0[obj->_9C]._0C, 0.0f);
     obj->_B0 = lbl_3_data_18ED0[obj->_9C]._0C;
 }
 
 // .text:0x000E45A8 size:0x48 mapped:0x8072363C
 void fn_3_E45A8(Rep2998Obj* obj) {
-    CTRLSetScale(&obj->xform.control, 0.2f, 0.2f, 0.2f);
+    CTRLSetScale(&obj->control, 0.2f, 0.2f, 0.2f);
     obj->_B4 = 0.2f;
 }
 
@@ -600,7 +595,7 @@ void fn_3_E3B88(Rep2998Obj* obj) {
             Vec pos = { 0.0f, 0.0f, 0.0f };
 
             PSMTXCopy(obj->_74->_00->_18[17]->_EC, bone);
-            CTRLBuildMatrix(&obj->xform.control, m);
+            CTRLBuildMatrix(&obj->control, m);
             PSMTXConcat(m, bone, m);
             PSMTXMultVec(m, &pos, &pos);
             pos.y *= -1.0f;
@@ -685,9 +680,9 @@ void fn_3_E3914(Rep2998Obj* obj) {
 void fn_3_E3764(Rep2998Obj* obj) {
     obj->_C5++;
     obj->_B4 += 1.0857142857142859 / obj->_C6;
-    CTRLSetScale(&obj->xform.control, obj->_B4, obj->_B4, obj->_B4);
+    CTRLSetScale(&obj->control, obj->_B4, obj->_B4, obj->_B4);
     obj->_A0.y = -(1.2 * obj->_B4);
-    CTRLSetTranslation(&obj->xform.control, obj->_A0.x, -obj->_A0.y, obj->_A0.z);
+    CTRLSetTranslation(&obj->control, obj->_A0.x, -obj->_A0.y, obj->_A0.z);
     if (fn_3_E2B70(obj)) {
         if (fn_3_E3284(obj)) {
             return;
@@ -724,7 +719,7 @@ u8 fn_3_E3284(Rep2998Obj* obj) {
     f32 rad;
 
     PSMTXCopy(obj->_74->_00->_18[16]->_EC, bone);
-    CTRLBuildMatrix(&obj->xform.control, m);
+    CTRLBuildMatrix(&obj->control, m);
     PSMTXConcat(m, bone, m);
     PSMTXMultVec(m, &pos, &pos);
     pos.y *= -1.0f;
@@ -770,7 +765,7 @@ void fn_3_E3044(Rep2998Obj* obj) {
 
     if (obj->_CB == 7) {
         obj->_B0 += obj->_C0;
-        CTRLSetRotation(&obj->xform.control, 0.0f, obj->_B0, 0.0f);
+        CTRLSetRotation(&obj->control, 0.0f, obj->_B0, 0.0f);
     } else if (obj->_B8 >= 20.0 && obj->_B8 - speed < 20.0) {
         angle = obj->_BC;
         angle = 0.017453292f * angle;
@@ -810,8 +805,8 @@ void fn_3_E2E78(Rep2998Obj* obj) {
     } else {
         obj->_B4 -= 1.0857142857142859 / obj->_C6;
         obj->_A0.y = -(1.2 * obj->_B4);
-        CTRLSetTranslation(&obj->xform.control, obj->_A0.x, -obj->_A0.y, obj->_A0.z);
-        CTRLSetScale(&obj->xform.control, obj->_B4, obj->_B4, obj->_B4);
+        CTRLSetTranslation(&obj->control, obj->_A0.x, -obj->_A0.y, obj->_A0.z);
+        CTRLSetScale(&obj->control, obj->_B4, obj->_B4, obj->_B4);
         obj->_C5--;
     }
 }
@@ -905,7 +900,7 @@ void fn_3_E266C(Rep2998Obj* obj) {
         case 7:
             obj->_B0 = -obj->_BC;
             fn_3_E25D0(obj, 8);
-            CTRLSetRotation(&obj->xform.control, 0.0f, obj->_B0, 0.0f);
+            CTRLSetRotation(&obj->control, 0.0f, obj->_B0, 0.0f);
             break;
         case 8:
             fn_3_E25D0(obj, 9);
@@ -951,7 +946,7 @@ void fn_3_E2324(Rep2998Obj* obj) {
         return;
     }
     PSMTXCopy(obj->_74->_00->_18[16]->_EC, bone);
-    CTRLBuildMatrix(&obj->xform.control, m);
+    CTRLBuildMatrix(&obj->control, m);
     PSMTXConcat(m, bone, m);
     PSMTXMultVec(m, &pos, &pos);
     pos.y *= -1.0f;
@@ -1032,7 +1027,7 @@ void fn_3_E2034(Rep2998Obj* obj) {
         angle = 360.0f - angle;
     }
     obj->_B0 = -angle;
-    CTRLSetRotation(&obj->xform.control, 0.0f, obj->_B0, 0.0f);
+    CTRLSetRotation(&obj->control, 0.0f, obj->_B0, 0.0f);
 }
 
 // .text:0x000E1FA8 size:0x8C mapped:0x8072103C
