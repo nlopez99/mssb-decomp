@@ -1316,8 +1316,63 @@ void fn_3_A4F50(s32 runner) {
 }
 
 // .text:0x000A4A10 size:0x540 mapped:0x806E3AA4
+// 99.24%: only the inlined fn_3_A53DC tail differs, with the same residue as fn_3_A53DC.
 void fn_3_A4A10(void) {
-    return;
+    s32 i;
+
+    for (i = 0; i < 4; i++) {
+        lbl_3_bss_1848[i] = 0;
+        lbl_3_bss_1838[i] = -1;
+        lbl_3_bss_1828[i] = -1;
+        lbl_3_bss_17FC[i] = 0;
+        if (g_Runners[i].runnerOnFieldOrOutOrScored == 1) {
+            if (g_Runners[i].tagUpInd == 2) {
+                fn_3_A4F50(i);
+            } else if (g_Runners[i].baseStandingOn != -1 && g_Runners[i].forceOutCd <= 0) {
+                fn_3_A53DC(i);
+            } else if (g_Runners[i].overrunBaseStage == 0) {
+                if (g_Runners[i].forceOutCd == 1) {
+                    fn_3_A5704(i);
+                } else {
+                    fn_3_A5B4C(i);
+                }
+            }
+        }
+    }
+    for (i = 0; i < 4; i++) {
+        lbl_3_bss_1858[i] = 9;
+        if (g_Runners[i].runnerOnFieldOrOutOrScored == 1 &&
+            (g_Runners[i].baseStandingOn == -1 || g_Runners[i].tagUpInd == 2 || g_Runners[i].forceOutCd > 0 ||
+             lbl_3_bss_1828[i] == 0)) {
+            if (lbl_3_bss_1848[i] >= 90) {
+                lbl_3_bss_1858[i] = 8;
+            } else if (lbl_3_bss_1848[i] >= 30) {
+                lbl_3_bss_1858[i] = 7;
+            } else if (lbl_3_bss_1848[i] >= 15) {
+                lbl_3_bss_1858[i] = 6;
+            } else if (lbl_3_bss_1848[i] >= 8) {
+                lbl_3_bss_1858[i] = 5;
+            } else if (lbl_3_bss_1848[i] >= -8) {
+                lbl_3_bss_1858[i] = 4;
+            } else if (lbl_3_bss_1848[i] >= -15) {
+                lbl_3_bss_1858[i] = 3;
+            } else if (lbl_3_bss_1848[i] >= -30) {
+                lbl_3_bss_1858[i] = 2;
+            } else if (lbl_3_bss_1848[i] >= -45) {
+                lbl_3_bss_1858[i] = 1;
+            } else {
+                lbl_3_bss_1858[i] = 0;
+            }
+            if (g_FieldingLogic._107 == 2) {
+                lbl_3_bss_1858[i] -= 2;
+                if (lbl_3_bss_1858[i] < 2) {
+                    lbl_3_bss_1858[i] = 0;
+                } else {
+                    lbl_3_bss_1858[i] -= 2;
+                }
+            }
+        }
+    }
 }
 
 // .text:0x000A46A0 size:0x370 mapped:0x806E3734
