@@ -1396,14 +1396,14 @@ void fn_3_10CC20(void) {
 }
 
 // .text:0x0010C81C size:0x404 mapped:0x8074B8B0
-// 91.73%: registers differ, and the copy into _1A0F unrolls with another loop shape
+// 92.00%: registers differ, and the copy into _1A0F unrolls with another loop shape
 void fn_3_10C81C(void) {
     UnkQueue31A0 queue[4];
     int player;
     int wait;
     int n;
-    int count;
     int i;
+    int count;
     int j;
     int k;
     int port;
