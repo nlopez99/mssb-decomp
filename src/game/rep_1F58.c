@@ -18,9 +18,21 @@ typedef struct {
 
 typedef struct {
     /* 0x00 */ s32 _00;
-    /* 0x04 */ u8 _04[0x1C - 0x04];
+    /* 0x04 */ s32 _04;
+    /* 0x08 */ s32 _08;
+    /* 0x0C */ s32 _0C;
+    /* 0x10 */ s32 _10;
+    /* 0x14 */ s32 _14;
+    /* 0x18 */ s32 _18;
     /* 0x1C */ s32 _1C;
-    /* 0x20 */ u8 _20[0x40 - 0x20];
+    /* 0x20 */ s32 _20;
+    /* 0x24 */ s32 _24;
+    /* 0x28 */ s32 _28;
+    /* 0x2C */ s32 _2C;
+    /* 0x30 */ s32 _30;
+    /* 0x34 */ s32 _34;
+    /* 0x38 */ s32 _38;
+    /* 0x3C */ s32 _3C;
 } UnkSlotParams; // size: 0x40
 
 typedef struct {
@@ -120,30 +132,44 @@ extern struct {
 extern u8 lbl_803CBBC0;
 extern void* lbl_803CC1B8;
 
-// This unit's .data (0x17248 to 0x17508) lies outside its ranges in splits.txt
-extern struct {
-    /* 0x0 */ u8 _0[2];
-    /* 0x4 */ f32 _4[3];
-} lbl_3_data_17248;
-extern u8 lbl_3_data_17258[2][3];
-extern struct {
-    /* 0x000 */ UnkSlot slots[2];
-    /* 0x040 */ s32 _040;
-    /* 0x044 */ s32 _044;
-    /* 0x048 */ s32 _048;
-    /* 0x04C */ UnkSlotParams _04C;
-    /* 0x08C */ s32 _08C[54][2];
-    /* 0x23C */ f32 _23C;
-} lbl_3_data_17260;
-extern UnkTrailTask* lbl_3_data_174A0[2];
-extern Rep1F58Effect lbl_3_data_174A8[2][2];
+// MWCC lays out initialized .data statics in order of declaration
+static u8 lbl_3_data_17248[2] = { 80, 80 };
+static f32 lbl_3_data_1724C[3] = { 18.849556f, 18.849556f, 37.699112f };
+static u8 lbl_3_data_17258[2][3] = { { 0xFF, 0xF7, 0x88 }, { 0xFF, 0xF7, 0x88 } };
+static UnkSlot lbl_3_data_17260[2] = { { -1 }, { -1 } };
+static s32 lbl_3_data_172A0 = 250000;
+static s32 lbl_3_data_172A4 = 150000;
+static s32 lbl_3_data_172A8 = 4;
+static UnkSlotParams lbl_3_data_172AC = { 0, 3, 30, 8000, 10, 20, 1, 15, 99000, 99800, -500, -899, 255, 20, 10, -1 };
+static s32 lbl_3_data_172EC[54][2] = {
+    { 129999, 250000 }, { 129999, 250000 }, { 150000, 270000 }, { 80000, 250000 },
+    { 150000, 250000 }, { 150000, 250000 }, { 129999, 250000 }, { 60000, 250000 },
+    { 60000, 250000 }, { 150000, 280000 }, { 150000, 259999 }, { 150000, 259999 },
+    { 100000, 250000 }, { 50000, 250000 }, { 150000, 250000 }, { 60000, 250000 },
+    { 60000, 250000 }, { 120000, 250000 }, { 70000, 250000 }, { 100000, 250000 },
+    { 129999, 250000 }, { 150000, 259999 }, { 150000, 259999 }, { 150000, 259999 },
+    { 100000, 250000 }, { 100000, 250000 }, { 100000, 250000 }, { 150000, 250000 },
+    { 60000, 250000 }, { 60000, 250000 }, { 60000, 250000 }, { 60000, 250000 },
+    { 60000, 250000 }, { 100000, 250000 }, { 100000, 250000 }, { 100000, 250000 },
+    { 100000, 250000 }, { 150000, 250000 }, { 129999, 290000 }, { 80000, 250000 },
+    { 60000, 250000 }, { 60000, 250000 }, { 100000, 250000 }, { 129999, 250000 },
+    { 60000, 250000 }, { 60000, 250000 }, { 60000, 250000 }, { 60000, 250000 },
+    { 100000, 250000 }, { 100000, 250000 }, { 100000, 250000 }, { 100000, 250000 },
+    { 150000, 250000 }, { 150000, 250000 },
+};
+static f32 lbl_3_data_1749C = 95.0f;
+static UnkTrailTask* lbl_3_data_174A0[2] = { NULL, NULL };
+static Rep1F58Effect lbl_3_data_174A8[2][2] = {
+    { { 0, fn_3_C095C }, { 0, fn_3_C095C } },
+    { { 0, fn_3_C095C }, { 0, fn_3_C095C } },
+};
 
 extern UnkActor1F58* fn_80011570(void);
 extern s32 fn_8005268C(void);
 extern UnkCamera1F58* fn_80052734(s32);
 extern void fn_80024DB0(UnkAnim1F58*);
 extern void fn_80024FA4(UnkModelRef1F58*, u32, UnkAnim1F58*, s32);
-extern void fn_80027674(VecXYZ*, VecXYZ*, UnkSlotParams*, f32, u8);
+extern void fn_80027674(VecXYZ*, const VecXYZ*, UnkSlotParams*, f32, u8);
 extern void fn_80027918(u8, f32);
 extern void fn_800A7D4C(s32, void*);
 extern void fn_800B0A14_removeQueue(void);
@@ -158,13 +184,11 @@ static u8 lbl_3_bss_9D40[0x40] ATTRIBUTE_ALIGN(32);
 static GXTexObj lbl_3_bss_9D20;
 
 // .text:0x000C1930 size:0x34 mapped:0x807009C4
-// Outside this unit's .text range in splits.txt, but inlined into most functions here;
-// static inline until the split moves, so this object has no extra function
-static inline s32 fn_3_C1930(s32 id) {
+s32 fn_3_C1930(s32 id) {
     s32 i = 1;
 
     do {
-        if (id == lbl_3_data_17260.slots[i].id) {
+        if (id == lbl_3_data_17260[i].id) {
             break;
         }
     } while (i-- != 0);
@@ -172,8 +196,6 @@ static inline s32 fn_3_C1930(s32 id) {
 }
 
 // .text:0x000C1770 size:0x1C0 mapped:0x80700804
-// The target reaches this unit's .data from one pooled base (lbl_3_data_17248 + offset); this
-// matches once that data is in this unit's splits.txt range and defined here as statics
 void fn_3_C1770(s32 idx) {
     UnkActor1F58* actor = lbl_8036E548._2C50[idx];
     s32 i;
@@ -182,13 +204,13 @@ void fn_3_C1770(s32 idx) {
     if (actor != NULL) {
         i = fn_3_C1930(-1);
         if (i >= 0) {
-            lbl_3_data_17260._04C._00 = lbl_3_common_bss_35154._004;
-            lbl_3_data_17260.slots[i].id = idx;
-            lbl_3_data_17260.slots[i]._10.x = actor->_034.x;
-            lbl_3_data_17260.slots[i]._10.z = actor->_034.z;
-            lbl_3_data_17260.slots[i]._10.y = -(lbl_3_data_17260._08C[actor->_252][0] / 100000.0f);
-            memcpy(&lbl_3_data_17260.slots[i]._04, &lbl_3_data_17260.slots[i]._10, sizeof(VecXYZ));
-            lbl_3_data_17260.slots[i].timer = 0;
+            lbl_3_data_172AC._00 = lbl_3_common_bss_35154._004;
+            lbl_3_data_17260[i].id = idx;
+            lbl_3_data_17260[i]._10.x = actor->_034.x;
+            lbl_3_data_17260[i]._10.z = actor->_034.z;
+            lbl_3_data_17260[i]._10.y = -(lbl_3_data_172EC[actor->_252][0] / 100000.0f);
+            memcpy(&lbl_3_data_17260[i]._04, &lbl_3_data_17260[i]._10, sizeof(VecXYZ));
+            lbl_3_data_17260[i].timer = 0;
             ch = 0x18;
             if (i != 0) {
                 ch = 0x17;
@@ -201,8 +223,9 @@ void fn_3_C1770(s32 idx) {
 }
 
 // .text:0x000C1344 size:0x42C mapped:0x807003D8
-// Pooled .data base as in fn_3_C1770; with the data as statics, registers (the i * 0x20 offset
-// takes r31, the target's slot register) and the scheduling around fn_80027674 still differ
+// Registers only: the target gives the slot pointer r31, full r30 and the .data pool base r29,
+// this the pool base r31 and the i * 0x20 offset r30; the first inlined fn_3_C0D10 also swaps
+// its row offset and bss + 1
 void fn_3_C1344(s32 idx, f32 chargeUp, f32 chargeDown, BOOL full) {
     UnkActor1F58* actor;
     UnkSlot* slot;
@@ -221,35 +244,36 @@ void fn_3_C1344(s32 idx, f32 chargeUp, f32 chargeDown, BOOL full) {
     if (i < 0) {
         return;
     }
-    slot = &lbl_3_data_17260.slots[i];
+    slot = &lbl_3_data_17260[i];
     pos = &slot->_04;
     getAnimRelatedCoordinates(idx, 4, pos);
-    if (chargeUp > 0.0f && chargeUp < lbl_3_data_17260._23C) {
-        if (lbl_3_data_17260.slots[i].timer-- == 0) {
-            lbl_3_data_17260.slots[i].timer = lbl_3_data_17260._04C._1C;
+    if (chargeUp > 0.0f && chargeUp < lbl_3_data_1749C) {
+        if (lbl_3_data_17260[i].timer-- == 0) {
+            lbl_3_data_17260[i].timer = lbl_3_data_172AC._1C;
             {
                 VecXYZ* to = &slot->_10;
-                UnkSlotParams* params = &lbl_3_data_17260._04C;
-                f32 scale = lbl_3_data_17260._040 / 100000.0f;
+                UnkSlotParams* params = &lbl_3_data_172AC;
+                const VecXYZ* from = pos;
+                f32 scale = lbl_3_data_172A0 / 100000.0f;
 
                 ch = 0x18;
                 if (i != 0) {
                     ch = 0x17;
                 }
-                fn_80027674(to, pos, params, scale, ch);
+                fn_80027674(to, from, params, scale, ch);
             }
             actor->_05C = fn_3_C0DD8;
         }
     }
-    sin(chargeUp * lbl_3_data_17248._4[i] / 100.0f);
+    sin(chargeUp * lbl_3_data_1724C[i] / 100.0f);
     if (chargeUp < 100.0f) {
         fn_3_C0D10(i, lbl_3_data_17258[i][0], lbl_3_data_17258[i][1], lbl_3_data_17258[i][2],
-                   lbl_3_data_17248._0[i] * (0.5 * sin(chargeUp * lbl_3_data_17248._4[i] / 100.0f) + 0.5));
-        lbl_3_data_17260.slots[i]._1C = chargeUp;
+                   lbl_3_data_17248[i] * (0.5 * sin(chargeUp * lbl_3_data_1724C[i] / 100.0f) + 0.5));
+        lbl_3_data_17260[i]._1C = chargeUp;
     } else {
         fn_3_C0D10(i, lbl_3_data_17258[i][0], lbl_3_data_17258[i][1], lbl_3_data_17258[i][2],
-                   lbl_3_data_17248._0[i] * (0.5 * sin(chargeDown * lbl_3_data_17248._4[i] / 100.0f) + 0.5));
-        lbl_3_data_17260.slots[i]._1C = chargeDown;
+                   lbl_3_data_17248[i] * (0.5 * sin(chargeDown * lbl_3_data_1724C[i] / 100.0f) + 0.5));
+        lbl_3_data_17260[i]._1C = chargeDown;
     }
     if (full && lbl_3_common_bss_35154._477[i] == 0) {
         lbl_3_common_bss_35154._477[i] = 1;
@@ -258,7 +282,6 @@ void fn_3_C1344(s32 idx, f32 chargeUp, f32 chargeDown, BOOL full) {
 }
 
 // .text:0x000C11CC size:0x178 mapped:0x80700260
-// Pooled .data base as in fn_3_C1770; with the data as statics, the code is identical
 void fn_3_C11CC(s32 idx, BOOL remove) {
     UnkActor1F58* actor;
     UnkFadeTask* task;
@@ -271,7 +294,7 @@ void fn_3_C11CC(s32 idx, BOOL remove) {
             if (actor != NULL) {
                 actor->_05C = NULL;
             }
-            lbl_3_data_17260.slots[i].id = -1;
+            lbl_3_data_17260[i].id = -1;
             ch = 0x18;
             if (i != 0) {
                 ch = 0x17;
@@ -280,8 +303,8 @@ void fn_3_C11CC(s32 idx, BOOL remove) {
         } else {
             task = fn_800B0A5C_insertQueue(fn_3_C1004, ((UnkFadeTask*)lbl_803CC1B8)->_12);
             task->_14 = idx;
-            task->_15 = lbl_3_data_17248._0[i] *
-                        (0.5 * sin(lbl_3_data_17248._4[i] * lbl_3_data_17260.slots[i]._1C / 100.0f) + 0.5);
+            task->_15 = lbl_3_data_17248[i] *
+                        (0.5 * sin(lbl_3_data_1724C[i] * lbl_3_data_17260[i]._1C / 100.0f) + 0.5);
             task->_16 = 10;
         }
     }
@@ -300,7 +323,7 @@ void fn_3_C1004(void) {
             if (actor != NULL) {
                 actor->_05C = NULL;
             }
-            lbl_3_data_17260.slots[i].id = -1;
+            lbl_3_data_17260[i].id = -1;
             fn_800B0A14_removeQueue();
         }
         fn_3_C0D10(i, lbl_3_data_17258[i][0], lbl_3_data_17258[i][1], lbl_3_data_17258[i][2],
@@ -345,20 +368,21 @@ void fn_3_C0DD8(void* arg0, s32* tevStage, s32* texCoord, s32* texMap, u8* arg4,
 
 // .text:0x000C0D10 size:0xC8 mapped:0x806FFDA4
 void fn_3_C0D10(s32 idx, u8 r, u8 g, u8 b, u8 a) {
-    s32 row = idx * 16;
     s32 row2;
 
-    lbl_3_bss_9D40[row] = a;
-    lbl_3_bss_9D40[row + 1] = r;
-    *(u16*)&lbl_3_bss_9D40[row + 2] = *(u16*)&lbl_3_bss_9D40[row];
-    *(u32*)&lbl_3_bss_9D40[row + 4] = *(u32*)&lbl_3_bss_9D40[row];
-    memcpy(&lbl_3_bss_9D40[row + 8], &lbl_3_bss_9D40[row], 8);
-    row2 = row + 0x20;
+    idx *= 16;
+
+    lbl_3_bss_9D40[idx] = a;
+    lbl_3_bss_9D40[idx + 1] = r;
+    *(u16*)&lbl_3_bss_9D40[idx + 2] = *(u16*)&lbl_3_bss_9D40[idx];
+    *(u32*)&lbl_3_bss_9D40[idx + 4] = *(u32*)&lbl_3_bss_9D40[idx];
+    memcpy(&lbl_3_bss_9D40[idx + 8], &lbl_3_bss_9D40[idx], 8);
+    row2 = idx + 0x20;
     lbl_3_bss_9D40[row2] = g;
     lbl_3_bss_9D40[row2 + 1] = b;
-    *(u16*)&lbl_3_bss_9D40[row + 0x22] = *(u16*)&lbl_3_bss_9D40[row2];
-    *(u32*)&lbl_3_bss_9D40[row + 0x24] = *(u32*)&lbl_3_bss_9D40[row2];
-    memcpy(&lbl_3_bss_9D40[row + 0x28], &lbl_3_bss_9D40[row2], 8);
+    *(u16*)&lbl_3_bss_9D40[idx + 0x22] = *(u16*)&lbl_3_bss_9D40[row2];
+    *(u32*)&lbl_3_bss_9D40[idx + 0x24] = *(u32*)&lbl_3_bss_9D40[row2];
+    memcpy(&lbl_3_bss_9D40[idx + 0x28], &lbl_3_bss_9D40[row2], 8);
     DCStoreRange(lbl_3_bss_9D40, sizeof(lbl_3_bss_9D40));
 }
 
@@ -376,7 +400,7 @@ void fn_3_C0C4C(s32 idx) {
     UnkTrailTask* task = fn_800B0A5C_insertQueue(fn_3_C0AD8, 1);
 
     task->_14 = 0;
-    task->_1C = lbl_3_data_17260.slots[idx].id;
+    task->_1C = lbl_3_data_17260[idx].id;
     task->_20 = 0;
     for (idx = 0; idx < 2; idx++) {
         if (lbl_3_data_174A0[idx] == NULL) {
@@ -443,7 +467,8 @@ void fn_3_C095C(Rep1F58Effect* effect) {
 
 // .text:0x000C0854 size:0x108 mapped:0x806FF8E8
 // Registers only, in the slot release: the target puts the offset in r4, -1 in r5 and the
-// channel in r0, this the offset in r0, -1 in r4 and the channel in r5
+// channel in r0, this the offset in r0, -1 in r4 and the channel in r5 (calling
+// fn_3_C11CC(lbl_3_data_17260[i].id, TRUE), which inlines, gives the same code)
 void fn_3_C0854(void) {
     UnkActor1F58* actor;
     s32 i;
@@ -454,14 +479,14 @@ void fn_3_C0854(void) {
         if (lbl_3_data_174A0[i] != NULL) {
             lbl_3_data_174A0[i]->_20 = 1;
         }
-        if (lbl_3_data_17260.slots[i].id >= 0) {
-            j = fn_3_C1930(lbl_3_data_17260.slots[i].id);
+        if (lbl_3_data_17260[i].id >= 0) {
+            j = fn_3_C1930(lbl_3_data_17260[i].id);
             if (j >= 0) {
-                actor = lbl_8036E548._2C50[lbl_3_data_17260.slots[i].id];
+                actor = lbl_8036E548._2C50[lbl_3_data_17260[i].id];
                 if (actor != NULL) {
                     actor->_05C = NULL;
                 }
-                lbl_3_data_17260.slots[j].id = -1;
+                lbl_3_data_17260[j].id = -1;
                 ch = 0x18;
                 if (j != 0) {
                     ch = 0x17;
