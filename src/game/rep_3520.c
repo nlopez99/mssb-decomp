@@ -583,8 +583,118 @@ void fn_3_138AA4(void) {
 }
 
 // .text:0x001384B4 size:0x5F0 mapped:0x80777548
+// 98.2%: FPRs differ (the sums, deviations and center.x), and the else branch of the
+// first deviation test shares its store with the then branch.
 void fn_3_1384B4(Unk3520Obj* obj) {
-    return;
+    s32 coins[100];
+    Vec center = { 0.0f, 0.0f, 20.0f };
+    Vec d;
+    Vec dn;
+    Vec v;
+    Vec forward = { 1.0f, 0.0f, 0.0f };
+    u32 n;
+    u32 i;
+    f32 varX;
+    f32 sdZ;
+    f32 varZ;
+    f32 sumZ;
+    f32 sumX;
+    f32 sdX;
+    f32 angle;
+    f32 len;
+    f32 c;
+    f32 s;
+    f32 dot;
+    f32 px;
+    f32 pz;
+    f32 ex;
+    f32 ez;
+    f32 fx;
+    f32 fz;
+
+    sumX = sumZ = 0.0f;
+    n = 0;
+    for (i = 0; i < 100; i++) {
+        if (g_Minigame.wallBall_coinsVisibleInd[i] == 1) {
+            d.x = g_Minigame.wallBall_coinCoordinates[i].x - center.x;
+            d.y = 0.0f;
+            d.z = g_Minigame.wallBall_coinCoordinates[i].z - center.z;
+            PSVECNormalize(&d, &dn);
+            angle = 57.29578f * (f32)acos(PSVECDotProduct(&forward, &dn));
+            if (dn.z < 0.0f) {
+                angle = 360.0f - angle;
+            }
+            if (angle >= obj->_30 && angle <= obj->_34) {
+                coins[n] = i;
+                n++;
+                sumX += d.x;
+                sumZ += d.z;
+            }
+        }
+    }
+    if (n != 0) {
+        sumX /= n;
+        sumZ /= n;
+        varX = varZ = 0.0f;
+        for (i = 0; i < n; i++) {
+            d.x = g_Minigame.wallBall_coinCoordinates[coins[i]].x - center.x;
+            d.z = g_Minigame.wallBall_coinCoordinates[coins[i]].z - center.z;
+            varX += pow(d.x - sumX, 2.0);
+            varZ += pow(d.z - sumZ, 2.0);
+        }
+        sdX = sqrt(varX / n);
+        sdZ = sqrt(varZ / n);
+        v.x = v.y = v.z = 0.0f;
+        if (sdX > 7.0f) {
+            v.x = sumX + sdX * (fabs(sumX) / sumX);
+        } else {
+            v.x = sumX;
+        }
+        if (sdZ > 6.25f) {
+            v.z = sumZ + sdZ * (fabs(sumZ) / sumZ);
+        } else {
+            v.z = sumZ;
+        }
+        len = sqrt(pow(v.x, 2.0) + pow(v.z, 2.0));
+        if (len < 5.0f) {
+            PSVECNormalize(&v, &v);
+            v.x *= 5.0f;
+            v.z *= 5.0f;
+        } else if (len > 15.0f) {
+            PSVECNormalize(&v, &v);
+            v.x *= 15.0f;
+            v.z *= 15.0f;
+        }
+    } else {
+        angle = 0.017453292f * (obj->_30 + (obj->_34 - obj->_30) * (rand() / 32767.0f));
+        v.x = cos(angle);
+        v.z = sin(angle);
+        v.y = 0.0f;
+        PSVECNormalize(&v, &v);
+        PSVECScale(&v, 10.0f * (rand() / 32767.0f) + 5.0f, &v);
+    }
+    c = cos(0.017453292f * obj->_34);
+    s = sin(0.017453292f * obj->_34);
+    dot = v.x * c + v.z * s;
+    px = c * dot;
+    pz = s * dot;
+    ex = v.x - px;
+    ez = v.z - pz;
+    fx = 3.5 * (fabs(ex) / ex);
+    fz = 3.125 * (fabs(ez) / ez);
+    if (fabs(ex) < fabs(fx)) {
+        v.x = px + fx;
+    }
+    if (fabs(ez) < fabs(fz)) {
+        v.z = pz + fz;
+    }
+    obj->_0.x = v.x + center.x;
+    obj->_0.y = lbl_3_data_21A64[0];
+    obj->_0.z = v.z + center.z;
+    memset(&obj->_18, 0, sizeof(Vec));
+    memset(&obj->_24, 0, sizeof(Vec));
+    obj->_3A = 0;
+    obj->_3D = 1;
 }
 
 // .text:0x00138448 size:0x6C mapped:0x807774DC
