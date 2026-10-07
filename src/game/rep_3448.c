@@ -1107,8 +1107,78 @@ void fn_3_1243A4(void) {
 }
 
 // .text:0x00123EBC size:0x4E8 mapped:0x80762F50
+// The target reaches these descriptors (0x23B64, 0x23BC4, 0x23C24) from the pool base
+// lbl_3_data_226E0, so they are statics of this file; .data 0x226E0- is outside splits.txt.
 void fn_3_123EBC(void) {
-    return;
+    UnkTask3448* task = lbl_803CC1B8;
+    u32 n;
+    u32 i;
+
+    if (fn_3_12536C()) {
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    switch (task->_1C) {
+    case 0:
+        switch (g_Minigame.GameMode_MiniGame) {
+        case MINI_GAME_ID_CHAINCHOMP_SPRINT:
+            fn_80034E20(task, lbl_3_data_23AE4 + 4);
+            break;
+        case MINI_GAME_ID_PIRANHA_PANIC:
+            fn_80034E20(task, lbl_3_data_23AE4 + 7);
+            break;
+        case MINI_GAME_ID_STAR_DASH:
+            fn_80034E20(task, lbl_3_data_23AE4 + 10);
+            break;
+        }
+        task->_1C = 1;
+        break;
+    case 1:
+        switch (g_Minigame.GameMode_MiniGame) {
+        case MINI_GAME_ID_CHAINCHOMP_SPRINT:
+            fn_3_125424(task, 0, 12);
+            if (g_Minigame._1B19 == 3) {
+                task->_1C = 2;
+            }
+            break;
+        case MINI_GAME_ID_PIRANHA_PANIC:
+            fn_3_125424(task, 0, 10);
+            break;
+        case MINI_GAME_ID_STAR_DASH:
+            fn_3_125424(task, 0, 10);
+            break;
+        }
+        break;
+    case 2:
+    case 4:
+        lbl_80371C30[task->_14]._00->_68 = 1;
+        if (g_Minigame._1B19 != 3 && isAnimDone(lbl_80371C30[task->_14]._00)) {
+            lbl_80371C30[task->_14]._00->_5C = 0;
+            task->_1C = 1;
+        }
+        break;
+    }
+    n = g_Minigame._17C4 * 100 / 60;
+    if (n > 9999) {
+        n = 9999;
+    }
+    for (i = 0; i < 2; i++) {
+        fn_800363D8(task, 1, i * 4 + 1, 0x138, (n % 10000) / 1000);
+        fn_800363D8(task, 1, i * 4 + 2, 0x138, (n % 1000) / 100);
+        fn_800363D8(task, 1, i * 4 + 3, 0x138, (n % 100) / 10);
+        fn_800363D8(task, 1, i * 4 + 4, 0x138, n % 10);
+    }
+    if (n < 1000) {
+        if (lbl_80366158._28 != 0) {
+            lbl_80371C30[task->_14 + 1]._00->_68 = 0;
+        } else {
+            lbl_80371C30[task->_14 + 1]._00->_68 = 1;
+        }
+    } else {
+        lbl_80371C30[task->_14 + 1]._00->_5C = 0;
+        lbl_80371C30[task->_14 + 1]._00->_68 = 0;
+    }
 }
 
 // .text:0x00123990 size:0x52C mapped:0x80762A24
