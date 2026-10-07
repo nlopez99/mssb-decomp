@@ -40,8 +40,8 @@ typedef struct Emitter4090 {
     /* 0x18 */ u8 _18[0x60 - 0x18];
 } Emitter4090;
 
-// Particle settings; this unit's .data, outside its splits.txt ranges
-extern struct {
+// Particle settings
+struct {
     /* 0x00 */ s32 _00;
     /* 0x04 */ s32 life;
     /* 0x08 */ s32 _08;
@@ -58,7 +58,7 @@ extern struct {
     /* 0x34 */ s32 colorRange;
     /* 0x38 */ s32 _38;
     /* 0x3C */ s32 _3C;
-} lbl_3_data_2A408;
+} lbl_3_data_2A408 = { 41, 120, 240, 40, 10, 80000, 10000, 15000, 10000, 300, 10, 60, 200, 55, 26, 0 };
 
 typedef struct {
     /* 0x000 */ u8 _000[0x276];
@@ -94,8 +94,6 @@ extern Emitter4090* fn_80033A24(BOOL (*)(Emitter4090*), s32, s32, s32, s32, s32)
 extern void fn_80033CC8(Particle4090*, void*);
 extern void fn_80033F64(f32, f32, f32);
 extern bool fn_800527C4(Vec*);
-
-static inline void fn_3_16C410(u8 fielder);
 
 // .text:0x0016D5E4 size:0x22C mapped:0x807AC678
 void fn_3_16D5E4(u8 fielder) {
@@ -294,9 +292,7 @@ BOOL fn_3_16C548(Emitter4090* emitter) {
 }
 
 // .text:0x0016C410 size:0x138 mapped:0x807AB4A4
-// A global function of this file, but outside its .text range in splits.txt. Until the split
-// starts at 0x16C410, static inline keeps it out of the object; fn_3_16CC2C inlines it either way.
-static inline void fn_3_16C410(u8 fielder) {
+void fn_3_16C410(u8 fielder) {
     u32 stadium;
     s32 sound;
     SND_VOICEID voice;

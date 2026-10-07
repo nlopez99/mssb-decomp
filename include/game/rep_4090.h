@@ -6,6 +6,7 @@
 
 struct Emitter4090;
 
+void fn_3_16C410(u8 fielder);
 BOOL fn_3_16C548(struct Emitter4090* emitter);
 void fn_3_16C878(Vec* pos, struct Emitter4090* emitter, s32 n);
 void fn_3_16CC2C(Vec* pos, u8 fielder);
