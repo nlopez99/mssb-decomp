@@ -418,7 +418,71 @@ void fn_3_88228(void) {
 
 // .text:0x00087E80 size:0x3A8 mapped:0x806C6F14
 void fn_3_87E80(void) {
-    return;
+    int i;
+    f32 angle;
+    f32 heading;
+
+    for (i = 0; i < 4; i++) {
+        InMemRunnerType* r = &g_Runners[i];
+        if (r->runnerOnFieldOrOutOrScored != 0) {
+            angle = r->runningAngle;
+            heading = atan2(-r->velocity.x, -r->velocity.y);
+            if (g_GameLogic.secondaryGameMode == 6) {
+                goto standard;
+            }
+            if (i == 0 && (r->batterStayInBattersBoxReason == 1 ||
+                           (g_Pitcher.strikeOutOrWalk == 1 && g_FieldingLogic._107 != 4))) {
+                angle = PI;
+            } else if (i == 0 && g_Batter.hitTrajectory != 0 && r->batterStayInBattersBoxReason != 0) {
+                if (r->groundVelocity[0] >= 0.01f) {
+                    angle = heading;
+                } else {
+                    angle = PI;
+                }
+            } else if (i == 0 && (g_FieldingLogic._107 == 1 || g_FieldingLogic._107 == 2) && g_Strikes.outs < 3) {
+                angle = PI;
+            } else if (r->actionCode != 0) {
+                if (r->actionStage == 2 && r->actionFrames_countDown <= 1) {
+                    angle = lbl_3_data_4B58[r->baseStandingOn].x;
+                }
+            } else if (r->overRun1BStage >= 2) {
+                angle = atan2(-r->velocity.x, -r->velocity.z);
+            } else if (r->baseRoundingState == 2 && r->baseStandingOn >= 0) {
+                angle = atan2(-r->velocity.x, -r->velocity.z);
+            } else if (r->leadOffStatus == 1) {
+                angle = atan2(-r->velocity.x, -r->velocity.z);
+            } else if (r->runningToDugoutInd != 0) {
+                if (r->runningToDugoutInd == 2 && r->slideHomeFrames_CountDown != 0) {
+                    angle = r->runningAngle;
+                } else if (0.0f == r->velocity.x) {
+                    angle = r->runningAngle;
+                } else {
+                    angle = atan2(-r->velocity.x, -r->velocity.z);
+                }
+            } else {
+            standard:
+                if (r->runningDirectionCode != 0 && r->runningDirectionCode != 2) {
+                    if (r->leadOffStatus == 2) {
+                        angle = lbl_3_data_4B58[r->currentBase].x;
+                    } else if (0.0f == r->velocity.x && 0.0f == r->velocity.z) {
+                        angle = atan2(-r->velocityStored.x, -r->velocityStored.z);
+                        if (r->turningAroundInd == 1 && r->runningDirectionCode == 1 && r->acceleration > 0.0f) {
+                            angle = fn_3_9FEA8(PI + angle);
+                        }
+                    } else {
+                        angle = atan2(-r->velocity.x, -r->velocity.z);
+                    }
+                } else {
+                    angle = lbl_3_data_4B58[r->currentBase].x;
+                }
+            }
+            r->runningAngle = angle;
+            if (g_Ball.ballZoneAwayFromHome != 0) {
+                angle = atan2(-(g_Ball.AtBat_Contact_BallPos.x - r->position.x), -(g_Ball.AtBat_Contact_BallPos.z - r->position.z));
+            }
+            r->angleToBall = angle;
+        }
+    }
 }
 
 // .text:0x00087CC8 size:0x1B8 mapped:0x806C6D5C
@@ -552,8 +616,14 @@ void fn_3_8781C(void) {
 }
 
 // .text:0x00087424 size:0x3F8 mapped:0x806C64B8
+// 99.53%: only the registers of the inlined fn_3_871BC differ, as they do in fn_3_871BC itself
 void fn_3_87424(void) {
-    return;
+    fn_3_872CC();
+    if (g_GameLogic.secondaryGameMode != 6 && g_GameLogic.secondaryGameMode != 14) {
+        fn_3_88228();
+        fn_3_871BC();
+        fn_3_870AC();
+    }
 }
 
 // .text:0x000872CC size:0x158 mapped:0x806C6360
