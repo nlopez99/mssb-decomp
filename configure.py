@@ -690,7 +690,7 @@ config.libs = [
     Rel(
         "game",
         [
-            Object(NonMatching, "game/rep_0.c"),
+            Object(Matching, "game/rep_0.c"),
             Object(NonMatching, "game/rep_60.c"),
             Object(NonMatching, "game/rep_D0.c"),
             Object(NonMatching, "game/rep_140.c"),
