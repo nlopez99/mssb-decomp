@@ -22,11 +22,15 @@ extern struct {
     /* 0x02 */ s16 _02;
     /* 0x04 */ s16 _04;
     /* 0x06 */ s16 _06[4];
-    /* 0x0E */ u8 _0E[0x10 - 0x0E];
+    /* 0x0E */ s16 _0E;
     /* 0x10 */ u8 _10;
-    /* 0x11 */ u8 _11[0x14 - 0x11];
+    /* 0x11 */ u8 _11;
+    /* 0x12 */ u8 _12;
+    /* 0x13 */ u8 _13;
     /* 0x14 */ u8 _14;
     /* 0x15 */ u8 _15;
+    /* 0x16 */ u8 _16[0x1F - 0x16];
+    /* 0x1F */ s8 _1F;
 } g_RunningLogic;
 
 extern struct {
@@ -68,6 +72,7 @@ extern u8 bodyCheckProbabiliities[][5];
 extern s32 fn_3_A6810(f32 x0, f32 z0, f32 x1, f32 z1);
 extern int fn_3_A6ABC(f32 x, f32 z);
 extern u32 fn_3_107DF8(s8 port);
+extern int fn_3_6D658(int team, int charID, int otherCharID);
 extern void fn_3_59918(int event, int arg);
 extern void fn_3_5C74C(int arg);
 extern void fn_3_5D094(int arg);
@@ -78,6 +83,7 @@ extern int fn_3_52560(int fielder, f32 x, f32 z);
 extern s16 lbl_3_data_1C58[5][4];
 extern s16 lbl_3_data_1C88[4];
 extern VecXZ lbl_3_data_4444[5];
+extern s16 lbl_3_data_4638[4];
 extern s16 lbl_3_data_49DC[44];
 extern VecXZ lbl_3_data_4A34[4];
 extern VecXZ lbl_3_data_4A54[2][13];
@@ -239,8 +245,164 @@ void fn_3_89864(int runner, int bases) {
 }
 
 // .text:0x0008913C size:0x728 mapped:0x806C81D0
+// 99.17%: registers differ after the first loop (the AI and running-logic stores, the position copies)
 void fn_3_8913C(void) {
-    return;
+    int i;
+    InMemRunnerType* r;
+
+    g_RunningLogic._02 = 0;
+    g_RunningLogic._00 = 0;
+    g_RunningLogic._10 = 0;
+    g_RunningLogic._14 = 20;
+    g_RunningLogic._1F = -1;
+    g_Runners[0].position.x = g_Batter.batterPos.x;
+    g_Runners[0].position.z = g_Batter.batterPos.z;
+    for (i = 0; i < 4; i++) {
+        r = &g_Runners[i];
+        if (r->rosterID >= 0) {
+            r->runnerOnFieldOrOutOrScored = 1;
+            g_RunningLogic._02 |= 1 << (i * 4);
+            g_RunningLogic._00 |= 1 << (i * 4);
+            g_RunningLogic._10++;
+        } else {
+            r->runnerOnFieldOrOutOrScored = 0;
+        }
+        r->baseStandingOn = -1;
+        r->currentBase = i;
+        r->nextBase = (i + 1) & 3;
+        r->tagUpInd = 0;
+        r->restrictedMovementCodes = 0;
+        r->relatedToRunnerPos = 0;
+        r->outType = 0;
+        r->forceOutCd = 0;
+        r->isEligibleToScore = 1;
+        r->furthestBaseForcedToGoToOnWalk = 0;
+        r->framesSinceStealStarted = 0;
+        r->batterStayInBattersBoxReason = 0;
+        r->baseOfFailedBodyCheck = -1;
+        r->timeStandingOnBase = 0;
+        r->framesSinceOut = 0;
+        r->baseNumberEarned_NotIncludingFieldersChoice = -1;
+        r->stealingStatus = 0;
+        r->framesSinceStealInput = 0;
+        r->unused_someBaseNum = -1;
+        r->unused_const_1 = 1;
+        r->stamina = lbl_3_data_4C54[9];
+        r->staminaMult = 1.0f;
+        r->accelerationStaminaEffect = 1.0f;
+        r->accelerationStaminaEffectWhileChangingDirection = 1.0f;
+        if (i == 0) {
+            r->runningAngle = PI;
+        }
+        if (i >= 1) {
+            r->runningAngle = lbl_3_data_4B58[i].x;
+        }
+        r->distanceFromBall = VEC_DISTANCE_XZ(&g_Ball.AtBat_Contact_BallPos, &r->position);
+        r->groundVelocity[0] = 0.0f;
+        r->groundVelocity[1] = 0.0f;
+        r->groundVelocity[2] = 0.0f;
+        r->groundVelocity[3] = 0.0f;
+        r->acceleration = 0.0f;
+        r->percentRanPerFrame_slideAdj = 0.0f;
+        r->slidingAdjustment_backwards = 0.03f;
+        r->slidingAdjustment_forwards = 0.03f;
+        r->roundingStrengthPercent = 0.0f;
+        r->mashVeloAdjustment = 0.0f;
+        r->mashPercent = 0.0f;
+        r->actionFrames_countUp = 0;
+        r->actionFrames_countDown = 0;
+        r->_110 = 0;
+        r->framesSinceLastDirectionChange = 0;
+        r->slideHomeFrames_CountDown = 0;
+        r->runningDirectionDesired = 0;
+        r->nextDirectionBeingProcessed = 0;
+        r->runningDirectionCode = 0;
+        r->offsetFromNormalRunningPathInd = 0;
+        r->actionCode = 0;
+        r->actionStage = 0;
+        r->forceOutType_unsed = 0;
+        r->baseRoundingState = 0;
+        r->overrun1st_doneChecking = 0;
+        r->overRun1BStage = 0;
+        r->overrunning1BIndicator = 0;
+        r->overrunBaseStage = 0;
+        r->offsetPositionForRoundingInd = 0;
+        r->roundingInitiaializedInd = 0;
+        r->runningToDugoutInd = 0;
+        r->runningToDugoutStage = 0;
+        r->turnaroundCode = 0;
+        r->turningAroundInd = 0;
+        r->framesSinceLastMash = 0;
+        r->someCountdown_unused = 0;
+        r->_151 = 0;
+        r->scoredOnGRD = 0;
+        if (r->rosterID >= 0) {
+            r->runningDirectionCode = 2;
+        }
+        r->runnerDirectionCode_stored = r->runningDirectionCode;
+        if (r->leadOffStatus == 0) {
+            if (g_GameLogic.secondaryGameMode == 14) {
+                r->leadOffStatus = 0;
+            } else {
+                r->leadOffStatus = 1;
+            }
+            r->leadoffDurationFrames = 0;
+            r->leadOffTotalFrameCountDown = 45;
+            fn_3_810C4(i, i);
+        }
+    }
+    g_AiLogic._77 = 0;
+    g_RunningLogic._12 = g_RunningLogic._10;
+    g_AiLogic._44 = lbl_3_data_1C58[g_GameLogic.AIDifficulty0Special3Weak[g_GameLogic.homeTeamBattingInd_fieldingTeam]][1];
+    g_RunningLogic._15 = 0;
+    if (g_RunningLogic._02 & 0x1000) {
+        g_RunningLogic._15 = 1;
+    }
+    if (g_RunningLogic._02 & 0x100) {
+        g_RunningLogic._15++;
+    }
+    for (i = 1; i < 4; i++) {
+        if (g_Runners[i].runnerOnFieldOrOutOrScored == 0) {
+            g_Runners[i].forcedToAdvanceInd = 0;
+        } else if (g_Runners[i - 1].forcedToAdvanceInd != 0) {
+            g_Runners[i].forcedToAdvanceInd = 1;
+        } else {
+            g_Runners[i].forcedToAdvanceInd = 0;
+        }
+    }
+    g_Runners[0].forcedToAdvanceInd = 1;
+    g_Runners[0].unused_AIRelated = 1;
+    g_Runners[0].battingHand = g_Batter.batterHand;
+    g_Runners[0].runnerDidntReachOnError = 1;
+    g_Runners[0].pitcherWhoLetRunnerOnBase =
+        g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.awayTeamBattingInd_battingTeam][0][0];
+    g_Runners[0].batterStayInBattersBoxReason = 1;
+    g_Runners[0].position.x = g_Batter.batterPos.x;
+    g_Runners[0].position.y = 0.0f;
+    g_Runners[0].position.z = g_Batter.batterPos.z;
+    g_Runners[0].positionStored.x = g_Batter.batterPos.x;
+    g_Runners[0].positionStored.y = 0.0f;
+    g_Runners[0].positionStored.z = g_Batter.batterPos.z;
+    for (i = 1; i < 4; i++) {
+        g_Runners[i].positionStored.x = g_Runners[i].position.x;
+        g_Runners[i].positionStored.y = g_Runners[i].position.y;
+        g_Runners[i].positionStored.z = g_Runners[i].position.z;
+    }
+    if (g_Batter.batterHand == 0) {
+        g_RunningLogic._0E = (int)(28.0f / g_Runners[0].maximumBaseVelocity) + 35;
+    } else {
+        g_RunningLogic._0E = (int)(26.5f / g_Runners[0].maximumBaseVelocity) + 35;
+    }
+    g_RunningLogic._0E += 20;
+    g_Batter.runnersOnBase = 0;
+    g_Batter.chemLinksOnBase = 0;
+    for (i = 1; i < 4; i++) {
+        r = &g_Runners[i];
+        if (r->rosterID >= 0 && fn_3_6D658(g_GameLogic.teamBatting, g_Batter.charID, r->charID) >= lbl_3_data_4638[3]) {
+            g_Batter.chemLinksOnBase++;
+            g_Batter.runnersOnBase |= 1 << (i - 1);
+        }
+    }
 }
 
 // .text:0x0008911C size:0x20 mapped:0x806C81B0
@@ -1137,8 +1299,66 @@ int fn_3_85A70(int runner) {
 }
 
 // .text:0x00085840 size:0x230 mapped:0x806C48D4
-void fn_3_85840(void) {
-    return;
+// 94.03%: the target holds runner + 1, its runner offset and g_Runners in r29-r31; this build needs only two
+int fn_3_85840(int runner, int count, int* decisions) {
+    InMemRunnerType* r = &g_Runners[runner];
+    int next = r->nextBase;
+    int i;
+    u8 ballState;
+    s16 contact;
+    u8 hitClass;
+
+    if (next == 0) {
+        return 0;
+    }
+    ballState = g_Ball.ballState;
+    contact = g_Ball.AtBat_ContactResult;
+    hitClass = g_Ball.hitClassification2;
+    for (i = runner + 1; i < 4; i++) {
+        InMemRunnerType* other = &g_Runners[i];
+        if (other->runnerOnFieldOrOutOrScored != 1) {
+            continue;
+        }
+        if (other->currentBase == r->currentBase) {
+            if (other->baseRoundingState == 2 && other->overrunBaseStage == 3) {
+                return 1;
+            }
+            if (other->runningDirectionCode == 3) {
+                return 1;
+            }
+            if (other->runningDirectionCode == 2 && other->fractionalBasesRan - r->fractionalBasesRan < 0.7f) {
+                return 2;
+            }
+            if (ballState != 0) {
+                return 1;
+            }
+            if (runner == 0 && contact == 0 && r->fractionalBasesRan > 1.0f && count <= 3 &&
+                other->fractionalBasesRan < r->fractionalBasesRan) {
+                return 2;
+            }
+        }
+        if (other->currentBase == next) {
+            if (contact == 0) {
+                if (hitClass <= 4 && other->percentTowardsNextBase < 0.5f) {
+                    if (r->forceOutCd == 1 && count > 3) {
+                        return 0;
+                    }
+                    if (other->runningDirectionCode == 3 || other->runningDirectionCode == 2) {
+                        return 1;
+                    }
+                }
+            } else if (other->percentTowardsNextBase < 0.5f && decisions[i] <= 0) {
+                if (other->runningDirectionCode == 2 || other->runningDirectionCode == 3 ||
+                    (other->runningDirectionCode == 1 && other->nextDirectionBeingProcessed == 3)) {
+                    return 1;
+                }
+                if (other->baseRoundingState == 2 && other->overrunBaseStage >= 2) {
+                    return 1;
+                }
+            }
+        }
+    }
+    return 0;
 }
 
 // .text:0x00085744 size:0xFC mapped:0x806C47D8

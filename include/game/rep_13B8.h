@@ -42,7 +42,7 @@ int fn_3_846C8(int runner);
 int fn_3_84AD0(int runner, int frame);
 void fn_3_85074(void);
 void fn_3_85744(int runner);
-void fn_3_85840(void);
+int fn_3_85840(int runner, int count, int* decisions);
 int fn_3_85A70(int runner);
 void fn_3_85C44(int runner, int direction);
 void fn_3_85CB0(void);
