@@ -25,7 +25,7 @@ u8 fn_3_E3284(struct Rep2998Obj* obj);
 void fn_3_E3668(struct Rep2998Obj* obj);
 void fn_3_E3764(struct Rep2998Obj* obj);
 void fn_3_E3914(struct Rep2998Obj* obj);
-void fn_3_E3B88(void);
+void fn_3_E3B88(struct Rep2998Obj* obj);
 void fn_3_E4554(struct Rep2998Obj* obj);
 void fn_3_E45A8(struct Rep2998Obj* obj);
 void fn_3_E45F0(struct Rep2998Obj* obj);

@@ -405,8 +405,68 @@ void fn_3_E4554(Rep2998Obj* obj) {
 }
 
 // .text:0x000E3B88 size:0x9CC mapped:0x80722C1C
-void fn_3_E3B88(void) {
-    return;
+void fn_3_E3B88(Rep2998Obj* obj) {
+    if (g_GameLogic.gameStatus != GAME_STATUS_LIVE_BALL) {
+        if (obj->_C4 != 0) {
+            fn_3_E48D0(obj);
+        } else if (obj->_C7 != 0) {
+            fn_3_E45F0(obj);
+            fn_3_E4554(obj);
+            if (obj->_CA) {
+                fn_3_65F4();
+                obj->_CA = 0;
+                obj->_C0 = 0.0f;
+            }
+            obj->_C7 = 0;
+        }
+    } else {
+        if (obj->_CA) {
+            Mtx bone;
+            Mtx m;
+            Vec pos = { 0.0f, 0.0f, 0.0f };
+
+            PSMTXCopy(obj->_74->_00->_18[17]->_EC, bone);
+            CTRLBuildMatrix(&obj->xform.control, m);
+            PSMTXConcat(m, bone, m);
+            PSMTXMultVec(m, &pos, &pos);
+            pos.y *= -1.0f;
+            g_Ball.AtBat_Contact_BallPos.x = pos.x;
+            g_Ball.AtBat_Contact_BallPos.y = pos.y;
+            g_Ball.AtBat_Contact_BallPos.z = pos.z;
+        }
+        if (g_Ball.AtBat_ContactResult >= 2 && obj->_C4 != 0 && obj->_C4 != 5) {
+            obj->_C4 = 5;
+            if (obj->_CB != 1) {
+                fn_3_E25D0(obj, 9);
+            } else {
+                fn_800B4BC8(obj->_74->_00, 0);
+            }
+        }
+        switch (obj->_C4) {
+        case 0:
+            fn_3_E3914(obj);
+            break;
+        case 1:
+            fn_3_E3764(obj);
+            break;
+        case 2:
+            fn_3_E3668(obj);
+            break;
+        case 3:
+            fn_3_E3044(obj);
+            break;
+        case 4:
+            fn_3_E2F4C(obj);
+            break;
+        case 5:
+            fn_3_E2E78(obj);
+            break;
+        }
+    }
+    fn_3_E266C(obj);
+    if (obj->_C4 != 0 && obj->_C4 < 5 && obj->_C8 == 0) {
+        fn_3_E2324(obj);
+    }
 }
 
 // .text:0x000E3914 size:0x274 mapped:0x807229A8
