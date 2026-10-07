@@ -2957,7 +2957,7 @@ void fn_3_14A070(s32* values, s32 count) {
 }
 
 // .text:0x00149BA8 size:0x4C8 mapped:0x80788C3C
-// 92.16%: register allocation inside the inlined fn_3_149340 and fn_3_148FD0 (see there)
+// 91.20%: register allocation inside the inlined fn_3_149340 and fn_3_148FD0 (see there)
 void fn_3_149BA8(void) {
     PlayerEmitter3880* emitter;
     u32 i;
@@ -2982,7 +2982,7 @@ void fn_3_149BA8(void) {
 }
 
 // .text:0x0014975C size:0x44C mapped:0x807887F0
-// 91.15%: register allocation inside the inlined fn_3_149340 and fn_3_148FD0
+// 91.72%: register allocation inside the inlined fn_3_149340 and fn_3_148FD0
 void fn_3_14975C(s8 player) {
     PlayerEmitter3880* emitter = (PlayerEmitter3880*)fn_80033A24(fn_3_14841C, 0x80, 0, lbl_3_data_26E7C[0], 1, 0x25);
 
@@ -2993,7 +2993,7 @@ void fn_3_14975C(s8 player) {
 }
 
 // .text:0x00149340 size:0x41C mapped:0x807883D4
-// 89.91%: register allocation inside the inlined fn_3_148FD0, which keeps
+// 89.80%: register allocation inside the inlined fn_3_148FD0, which keeps
 // lbl_3_data_26E7C[6] in a saved register in the target
 void fn_3_149340(PlayerEmitter3880* emitter) {
     Particle3880* p = emitter->base.particles;
@@ -3011,8 +3011,9 @@ void fn_3_149340(PlayerEmitter3880* emitter) {
 }
 
 // .text:0x00148FD0 size:0x370 mapped:0x80788064
-// 90.13%: the target loads lbl_3_data_26E7C[6] and the player pointer before the float
-// setup and schedules the angle math differently.
+// 98.84%: the target keeps lbl_3_data_26E7C[6] itself in a saved register for the span
+// (here it is reloaded and the array's address is kept instead), and the angle and its
+// sine swap FPRs
 void fn_3_148FD0(PlayerEmitter3880* emitter, Particle3880* p) {
     UnkPlayer3880* player = lbl_8036E548._2C50[emitter->player];
     u8 base = lbl_3_data_26E7C[6];
@@ -3025,7 +3026,8 @@ void fn_3_148FD0(PlayerEmitter3880* emitter, Particle3880* p) {
     p->pos.x = 0.0f;
     p->pos.y = -(lbl_3_data_26E7C[5] / 100000.0f + player->_34.y);
     p->pos.z = 0.0f;
-    angle = 0.017453292f * (15.0f * ((lbl_3_data_26E7C[0] / 2 - p->_4A) / (lbl_3_data_26E7C[0] / 2.0f)));
+    angle = 15.0f * ((lbl_3_data_26E7C[0] / 2 - p->_4A) / (lbl_3_data_26E7C[0] / 2.0f));
+    angle = 0.017453292f * angle;
     s = sinf_kludge(angle);
     c = cosf_kludge(angle);
     p->vel.x = s * lbl_3_data_26E7C[1] / 100000.0f;
@@ -3058,7 +3060,49 @@ void fn_3_148EF0(Particle3880* p, f32 angle) {
 }
 
 // .text:0x0014841C size:0xAD4 mapped:0x807874B0
+// 98.01%: register allocation inside the inlined fn_3_148FD0 (see there)
 BOOL fn_3_14841C(Emitter3880* emitter) {
+    PlayerEmitter3880* self = (PlayerEmitter3880*)emitter;
+    Particle3880* p = self->base.particles;
+    UnkPlayer3880* player = lbl_8036E548._2C50[self->player];
+    f32 angle;
+    f32 jitter;
+
+    fn_3_147F94();
+    do {
+        if (p->_48 <= 0) {
+            fn_3_148254(self, p);
+            fn_3_1480E0(p);
+            PSVECAdd(&p->vel, &p->pos, &p->pos);
+            PSVECAdd((Vec*)&p->_28, &p->_1C, &p->_1C);
+            if (fn_3_1483D4()) {
+                Vec up = { 0.0f, 1.0f, 0.0f };
+                Vec dir;
+
+                memcpy(&dir, &p->vel, sizeof(Vec));
+                PSVECNormalize(&dir, &dir);
+                angle = 57.29578f * acos(PSVECDotProduct(&up, &dir));
+                if (dir.x < 0.0f) {
+                    angle *= -1.0f;
+                }
+                jitter = 20.0 * (2.0 * (rand() / 32767.0f - 0.5));
+                if (fabs(angle + jitter) > 20.0) {
+                    angle = 20.0 * (fabs(angle) / angle);
+                } else {
+                    angle = angle + jitter;
+                }
+                fn_3_148EF0(p, angle);
+                p->_4C++;
+            }
+            if (-p->pos.y - p->_3C < player->_34.y) {
+                fn_3_148FD0(self, p);
+            }
+        } else {
+            p->_48--;
+        }
+        p = p->next;
+    } while (p != NULL);
+    fn_3_147E20();
     return FALSE;
 }
 
