@@ -4,9 +4,20 @@
 #include "game/rep_1838.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/mtx.h"
+#include "C3/control.h"
 #include "Dolphin/rand.h"
 #include "static/UnknownHomes_Static.h"
 #include "string.h"
+
+typedef struct {
+    /* 0x00 */ u8 _00[0xEC];
+    /* 0xEC */ Mtx* _EC;
+} UnkModel3880;
+
+typedef struct {
+    /* 0x00 */ u8 _00[0x18];
+    /* 0x18 */ UnkModel3880** _18;
+} UnkModelSet3880;
 
 typedef struct Particle3880 {
     /* 0x00 */ struct Particle3880* next;
@@ -61,6 +72,16 @@ typedef struct TrailEmitter3880 {
     /* 0x18 */ u8 _18;
 } TrailEmitter3880;
 
+typedef struct PlayerEmitter3880 {
+    /* 0x00 */ Emitter3880 base;
+    /* 0x18 */ s8 player;
+} PlayerEmitter3880;
+
+typedef struct ModelEmitter3880 {
+    /* 0x00 */ Emitter3880 base;
+    /* 0x18 */ UnkModelSet3880** models;
+} ModelEmitter3880;
+
 typedef struct PathEmitter3880 {
     /* 0x00 */ Emitter3880 base;
     /* 0x18 */ Vec _18;
@@ -70,15 +91,6 @@ typedef struct PathEmitter3880 {
     /* 0x36 */ s16 _36;
 } PathEmitter3880;
 
-typedef struct {
-    /* 0x00 */ u8 _00[0xEC];
-    /* 0xEC */ Mtx* _EC;
-} UnkModel3880;
-
-typedef struct {
-    /* 0x00 */ u8 _00[0x18];
-    /* 0x18 */ UnkModel3880** _18;
-} UnkModelSet3880;
 
 typedef struct {
     /* 0x00 */ u8 _00[0x34];
@@ -86,9 +98,16 @@ typedef struct {
     /* 0x38 */ u8 _38[0x90 - 0x38];
 } UnkActor3880; // size: 0x90
 
+typedef struct {
+    /* 0x00 */ u8 _00[0x34];
+    /* 0x34 */ Vec _34;
+} UnkPlayer3880;
+
 extern struct {
-    /* 0x00 */ u8 _00[0x68];
-    /* 0x68 */ UnkActor3880* _68;
+    /* 0x0000 */ u8 _0000[0x68];
+    /* 0x0068 */ UnkActor3880* _0068;
+    /* 0x006C */ u8 _006C[0x2C50 - 0x6C];
+    /* 0x2C50 */ UnkPlayer3880* _2C50[13];
 } lbl_8036E548;
 
 extern struct {
@@ -98,6 +117,8 @@ extern struct {
 
 extern s32 lbl_3_data_26C94[9];
 extern s32 lbl_3_data_26E7C[8];
+extern s32 lbl_3_data_26D00[20];
+extern s32 lbl_3_data_26C3C[22];
 extern Vec lbl_3_data_26E00[3];
 extern f32 lbl_3_data_21770[6];
 extern u8 lbl_3_data_26CB8[24];
@@ -109,6 +130,8 @@ extern s32 lbl_3_data_26D5C[11];
 extern BOOL fn_8001B728(s32, s32, Vec*);
 extern void fn_80033794(void* particles);
 extern void pitchingMachinePitching(u8 id);
+extern void fn_80033CC8(Particle3880* p, void* texture);
+extern void fn_8003403C(f32 width, f32 height);
 extern Emitter3880* fn_800339F0(Emitter3880* start, u8 id);
 extern Emitter3880* fn_800337CC(Emitter3880* emitter, s32 count, s32 exact);
 extern Emitter3880* fn_80033A24(BOOL (*update)(Emitter3880*), s32, s32, s32, s32, s32);
@@ -132,8 +155,25 @@ void fn_3_157AC4(void) {
 }
 
 // .text:0x0015791C size:0x1A8 mapped:0x807969B0
-void fn_3_15791C(void) {
-    return;
+f32 fn_3_15791C(s32 frame) {
+    s32 cycles = (frame + 48) / 120;
+    s32 phase = (frame + 48) % 120;
+    f32 c;
+    f32 scale;
+
+    if (phase >= 48) {
+        c = cos(3.1415927f * (1.0f + (phase - 48.0f) / 72.0f));
+    } else {
+        c = cos(3.1415927f * (phase / 48.0f));
+    }
+    scale = c / 2;
+    scale += 0.5f;
+    if (cycles != 0 && g_GameLogic.gameStatus != GAME_STATUS_MVP_END_GAME &&
+        g_GameLogic.gameStatus != GAME_STATUS_MINIGAME_POST_MENU && g_GameLogic.gameStatus != GAME_STATUS_0x24 &&
+        g_GameLogic.gameStatus != GAME_STATUS_0x26) {
+        scale += 0.5f * (frame - 72.0f) / 120.0f;
+    }
+    return 4.0f * scale;
 }
 
 // .text:0x001578F8 size:0x24 mapped:0x8079698C
@@ -409,8 +449,26 @@ void fn_3_151204(void) {
 }
 
 // .text:0x00151068 size:0x19C mapped:0x807900FC
-void fn_3_151068(void) {
-    return;
+void fn_3_151068(ModelEmitter3880* emitter, Particle3880* p) {
+    UnkModel3880* model;
+    Mtx mtx;
+    f32 x;
+    f32 y;
+    f32 z;
+
+    p->_4A = lbl_3_data_26C3C[6];
+    model = (*emitter->models)->_18[lbl_3_data_26C3C[7]];
+    PSMTXIdentity(mtx);
+    x = (*model->_EC)[0][3];
+    y = (*model->_EC)[1][3];
+    z = (*model->_EC)[2][3];
+    x += (rand() % 100 - 50) / 100.0;
+    y += (rand() % 150 - 75) / 100.0;
+    p->pos.x = x;
+    p->pos.y = y;
+    p->pos.z = z;
+    p->_3C = p->_38 = lbl_3_data_26C3C[2];
+    p->color[3] = lbl_3_data_26C3C[4];
 }
 
 // .text:0x00150D84 size:0x2E4 mapped:0x8078FE18
@@ -507,8 +565,17 @@ void fn_3_14F544(Particle3880* p) {
 }
 
 // .text:0x0014F3CC size:0x178 mapped:0x8078E460
-void fn_3_14F3CC(void) {
-    return;
+void fn_3_14F3CC(Particle3880* p) {
+    Vec offset = { 0.0f, 0.0f, 0.0f };
+    f32 drop = p->_4C < 5 ? 1.25f : 0.5f;
+    s16 spreadX = p->_4C < 5 ? 20000 : 10000;
+    s16 spreadY = p->_4C < 5 ? 20000 : 10000;
+
+    offset.x += (rand() % spreadX - spreadX / 2) / 10000.0f;
+    offset.y += (rand() % spreadY - spreadY / 2) / 10000.0f;
+    p->pos.x = offset.x;
+    p->pos.y = offset.y - drop;
+    p->pos.z = offset.z;
 }
 
 // .text:0x0014ED24 size:0x6A8 mapped:0x8078DDB8
@@ -665,7 +732,7 @@ void fn_3_14D318(Particle3880* p) {
 
 // .text:0x0014D2C0 size:0x58 mapped:0x8078C354
 void fn_3_14D2C0(Particle3880* p) {
-    UnkActor3880* actor = &lbl_8036E548._68[p->_45 + 16];
+    UnkActor3880* actor = &lbl_8036E548._0068[p->_45 + 16];
     UnkModel3880* model = actor->_34->_18[p->_46];
 
     p->pos.x = (*model->_EC)[0][3];
@@ -679,13 +746,61 @@ void fn_3_14CECC(void) {
 }
 
 // .text:0x0014CD40 size:0x18C mapped:0x8078BDD4
-void fn_3_14CD40(void) {
-    return;
+void fn_3_14CD40(Emitter3880* emitter, Particle3880* p) {
+    s32 alpha;
+    s32 step;
+    f32 grow;
+
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_ONE, GX_BL_ONE, GX_LO_CLEAR);
+    fn_8003403C(p->_38, p->_3C);
+    fn_80033CC8(p, emitter->_10);
+    alpha = p->color[3];
+    if (-p->_48 < lbl_3_data_26D00[3]) {
+        grow = lbl_3_data_26D00[5] / 100000.0f / lbl_3_data_26D00[3];
+        step = lbl_3_data_26D00[8] / lbl_3_data_26D00[3];
+    } else {
+        grow = (lbl_3_data_26D00[6] - lbl_3_data_26D00[5]) / 100000.0f / (lbl_3_data_26D00[17] - lbl_3_data_26D00[3]);
+        step = (lbl_3_data_26D00[9] - lbl_3_data_26D00[8]) / (lbl_3_data_26D00[17] - lbl_3_data_26D00[3]);
+    }
+    alpha += step;
+    if (alpha > 255) {
+        alpha = 255;
+    } else if (alpha < 0) {
+        alpha = 0;
+    }
+    p->color[3] = alpha;
+    p->color[0] = p->color[1] = p->color[2] = p->color[3];
+    p->_38 += grow;
+    p->_3C = p->_38;
 }
 
 // .text:0x0014CBB4 size:0x18C mapped:0x8078BC48
-void fn_3_14CBB4(void) {
-    return;
+void fn_3_14CBB4(Emitter3880* emitter, Particle3880* p) {
+    s32 alpha;
+    s32 step;
+    f32 grow;
+
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+    fn_8003403C(p->_38, p->_3C);
+    fn_80033CC8(p, emitter->_10);
+    alpha = p->color[3];
+    if (-p->_48 < lbl_3_data_26D00[10]) {
+        grow = lbl_3_data_26D00[12] / 100000.0f / lbl_3_data_26D00[10];
+        step = lbl_3_data_26D00[15] / lbl_3_data_26D00[10];
+    } else {
+        grow = (lbl_3_data_26D00[13] - lbl_3_data_26D00[12]) / 100000.0f / (lbl_3_data_26D00[18] - lbl_3_data_26D00[10]);
+        step = (lbl_3_data_26D00[16] - lbl_3_data_26D00[15]) / (lbl_3_data_26D00[18] - lbl_3_data_26D00[10]);
+    }
+    alpha += step;
+    if (alpha > 255) {
+        alpha = 255;
+    } else if (alpha < 0) {
+        alpha = 0;
+    }
+    p->color[3] = alpha;
+    p->color[0] = p->color[1] = p->color[2] = p->color[3];
+    p->_38 += grow;
+    p->_3C = p->_38;
 }
 
 // .text:0x0014CB28 size:0x8C mapped:0x8078BBBC
@@ -954,23 +1069,99 @@ u8 fn_3_1483D4(void) {
 }
 
 // .text:0x00148254 size:0x180 mapped:0x807872E8
-void fn_3_148254(void) {
-    return;
+void fn_3_148254(PlayerEmitter3880* emitter, Particle3880* p) {
+    Vec pos;
+    Mtx mtx;
+    Control control;
+    f32 halfW = p->_38 / 2;
+    f32 halfH = p->_3C / 2;
+    UnkPlayer3880* player = lbl_8036E548._2C50[emitter->player];
+
+    lbl_3_bss_B860[0].x = -halfW;
+    lbl_3_bss_B860[0].y = -halfH;
+    lbl_3_bss_B860[1].x = halfW;
+    lbl_3_bss_B860[1].y = -halfH;
+    lbl_3_bss_B860[2].x = halfW;
+    lbl_3_bss_B860[2].y = halfH;
+    lbl_3_bss_B860[3].x = -halfW;
+    lbl_3_bss_B860[3].y = halfH;
+    PSMTXInverse(fn_80052768_getCamera(0)->view, mtx);
+    mtx[0][1] = mtx[1][0] = mtx[1][2] = mtx[2][1] = 0.0f;
+    mtx[1][1] = 1.0f;
+    pos.x = p->pos.x;
+    pos.y = p->pos.y;
+    pos.z = p->pos.z;
+    PSMTXMultVecSR(mtx, &pos, &pos);
+    control.type = 0;
+    CTRLSetRotation(&control, p->_1C, p->_20, p->_24);
+    CTRLSetTranslation(&control, player->_34.x + pos.x, -player->_34.y + pos.y, player->_34.z + pos.z);
+    CTRLBuildMatrix(&control, mtx);
+    PSMTXConcat(fn_80052768_getCamera(0)->view, mtx, mtx);
+    GXLoadPosMtxImm(mtx, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
 }
 
 // .text:0x001480E0 size:0x174 mapped:0x80787174
-void fn_3_1480E0(void) {
-    return;
+void fn_3_1480E0(Particle3880* p) {
+    s32 i;
+
+    GXSetCullMode(GX_CULL_BACK);
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    for (i = 0; i < 4; i++) {
+        GXPosition3f32(lbl_3_bss_B860[i].x, lbl_3_bss_B860[i].y, lbl_3_bss_B860[i].z);
+        GXColor1u32(*(u32*)p->color);
+    }
+    GXSetCullMode(GX_CULL_FRONT);
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    for (i = 0; i < 4; i++) {
+        GXPosition3f32(lbl_3_bss_B860[i].x, lbl_3_bss_B860[i].y, lbl_3_bss_B860[i].z);
+        GXColor1u32(*(u32*)&p->_44);
+    }
 }
 
 // .text:0x00147F94 size:0x14C mapped:0x80787028
 void fn_3_147F94(void) {
-    return;
+    GXSetZMode(GX_TRUE, GX_ALWAYS, GX_TRUE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetNumChans(1);
+    GXSetNumTexGens(0);
+    GXSetNumTevStages(1);
+    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_RASC);
+    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_RASA);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+    GXSetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
+    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
 }
 
 // .text:0x00147E20 size:0x174 mapped:0x80786EB4
 void fn_3_147E20(void) {
-    return;
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetNumChans(1);
+    GXSetNumTexGens(1);
+    GXSetNumTevStages(1);
+    GXSetCullMode(GX_CULL_NONE);
+    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_RASC, GX_CC_TEXC, GX_CC_ZERO);
+    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_RASA, GX_CA_TEXA, GX_CA_ZERO);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    GXLoadPosMtxImm(fn_80052768_getCamera(0)->view, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
 }
 
 // .text:0x00147DFC size:0x24 mapped:0x80786E90
