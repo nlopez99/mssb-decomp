@@ -172,7 +172,7 @@ void fn_3_75090(void) {
 }
 
 // .text:0x000750C4 size:0x18 mapped:0x806B4158
-void fn_3_750C4(void) {
+void fn_3_750C4(u8 state) {
     return;
 }
 

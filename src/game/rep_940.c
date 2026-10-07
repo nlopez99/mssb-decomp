@@ -4,6 +4,7 @@
 #include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
+#include "game/rep_1200.h"
 #include "game/rep_1838.h"
 
 extern struct {
@@ -40,10 +41,6 @@ extern u8 lbl_3_data_190C[4][6];
 extern u8 lbl_3_data_1924[4][4];
 extern s16 lbl_3_data_1934[4];
 extern f32 lbl_3_data_4474[4];
-
-// rep_1200.h declares this as taking no arguments; it stores its argument as
-// g_Pitcher.pitcherActionState
-extern void fn_3_750C4(u8 state);
 
 // .text:0x000219A0 size:0x2C mapped:0x80660A34
 void fn_3_219A0(void) {
