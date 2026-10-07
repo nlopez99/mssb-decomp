@@ -51,6 +51,10 @@ extern struct {
     /* 0x97 */ u8 _97[0xA6 - 0x97];
     /* 0xA6 */ u8 _A6;
     /* 0xA7 */ u8 _A7;
+    /* 0xA8 */ u8 _A8;
+    /* 0xA9 */ u8 _A9[0xAE - 0xA9];
+    /* 0xAE */ u8 _AE;
+    /* 0xAF */ u8 _AF;
 } lbl_3_common_bss_32724;
 
 extern struct {
@@ -65,6 +69,11 @@ extern struct {
     /* 0x1D2 */ u8 _1D2;
 } lbl_3_common_bss_34C90;
 
+extern struct {
+    /* 0x0000 */ u8 _0000[0x489B];
+    /* 0x489B */ u8 _489B[2][9];
+} lbl_8034E9A0;
+
 extern s16 lbl_3_data_5F3C[4];
 extern u8 lbl_3_data_F430[12][2];
 extern u8 lbl_3_data_F4D0[16];
@@ -74,6 +83,9 @@ extern void* lbl_803CC1B8;
 // Only this unit reads these; they lie outside its splits.txt ranges.
 extern UnkSpriteDesc1770 lbl_3_data_C22C[9];
 extern UnkSpriteDesc1770 lbl_3_data_C34C[17];
+extern UnkSpriteDesc1770 lbl_3_data_C56C[2][51];
+extern u16 lbl_3_data_D22C[4];
+extern u16 lbl_3_data_D234[14];
 extern UnkSpriteDesc1770 lbl_3_data_D258[9];
 extern UnkSpriteDesc1770 lbl_3_data_D378[12];
 extern UnkSpriteDesc1770 lbl_3_data_D4F8[6];
@@ -81,6 +93,7 @@ extern UnkSpriteDesc1770 lbl_3_data_D4F8[6];
 extern void fn_80034CEC(UnkTask1770* task);
 extern void fn_80034E20(UnkTask1770* task, UnkSpriteDesc1770* desc);
 extern void fn_8003649C(UnkTask1770* task, s32, s32, s32, s32);
+extern void fn_800363D8(UnkTask1770* task, s32, s32, s32, u16);
 extern void fn_800B0A14_removeQueue(void);
 extern void fn_3_972A0(UnkTask1770* task, s32, s32, s32);
 
@@ -295,7 +308,100 @@ void fn_3_9B108(UnkTask1770* task) {
 
 // .text:0x0009A8A4 size:0x864 mapped:0x806D9938
 void fn_3_9A8A4(void) {
-    return;
+    UnkTask1770* task = lbl_803CC1B8;
+    s32 next;
+    s32 i;
+    u8* flags;
+
+    fn_80034E20(task, lbl_3_data_C56C[g_Batter.batterHand]);
+    lbl_80371C30[task->_14 + 9]._00->_5C = inMemRoster[g_GameLogic.teamFielding][g_Pitcher.rosterID].stats.CharID << 16;
+    lbl_80371C30[task->_14 + 10]._00->_5C = inMemRoster[g_GameLogic.teamBatting][g_Batter.rosterID].stats.CharID << 16;
+    next = g_GameLogic.currentBatterPerTeam[g_GameLogic.homeTeamBattingInd_fieldingTeam] + 1;
+    if (next > 9) {
+        next = 1;
+    }
+    next = g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.homeTeamBattingInd_fieldingTeam][next][0];
+    lbl_80371C30[task->_14 + 6]._00->_5C = inMemRoster[g_GameLogic.teamBatting][next].stats.CharID << 16;
+    fn_800363D8(task, 13, 1, 0x2A, lbl_3_data_D22C[inMemRoster[g_GameLogic.teamFielding][g_Pitcher.rosterID].stats.CharacterClass]);
+    fn_800363D8(task, 14, 1, 0x2A, lbl_3_data_D22C[inMemRoster[g_GameLogic.teamBatting][g_Batter.rosterID].stats.CharacterClass]);
+
+    if (g_GameLogic._13E[g_GameLogic.teamFielding] != 0) {
+        lbl_80371C30[task->_14 + 15]._00->_5C = (g_GameLogic.teams[g_GameLogic.teamFielding] + 4) << 16;
+    } else {
+        lbl_80371C30[task->_14 + 15]._00->_5C = g_GameLogic.teams[g_GameLogic.teamFielding] << 16;
+    }
+    if (g_GameLogic._13E[g_GameLogic.teamBatting] != 0) {
+        lbl_80371C30[task->_14 + 16]._00->_5C = (g_GameLogic.teams[g_GameLogic.teamBatting] + 4) << 16;
+    } else {
+        lbl_80371C30[task->_14 + 16]._00->_5C = g_GameLogic.teams[g_GameLogic.teamBatting] << 16;
+    }
+
+    for (i = 0; i < 5; i++) {
+        if (g_GameLogic.TeamStars[g_GameLogic.teamFielding] > i) {
+            lbl_80371C30[task->_14 + 0x22 + i]._00->_5C = 3 << 16;
+        }
+        if (g_GameLogic.TeamStars[g_GameLogic.teamBatting] > i) {
+            lbl_80371C30[task->_14 + 0x27 + i]._00->_5C = 3 << 16;
+        }
+    }
+
+    if (gameInitOptions.starSkillsSetting == 0 && g_d_GameSettings.GameModeSelected != GAME_TYPE_PRACTICE) {
+        fn_800363D8(task, 3, 1, 0x22, lbl_3_data_D234[0]);
+        fn_800363D8(task, 4, 1, 0x22, lbl_3_data_D234[0]);
+        lbl_80371C30[task->_14 + 3]._00->_58 = (lbl_80371C30[task->_14 + 3]._00->_58 & 0xFF) | 0xBEBEBE00;
+        lbl_80371C30[task->_14 + 4]._00->_58 = (lbl_80371C30[task->_14 + 4]._00->_58 & 0xFF) | 0xBEBEBE00;
+        for (i = 24; i <= 43; i++) {
+            lbl_80371C30[task->_14 + i]._00->_54 &= ~2;
+        }
+    } else {
+        fn_800363D8(task, 3, 1, 0x22, lbl_3_data_D234[inMemRoster[g_GameLogic.teamFielding][g_Pitcher.rosterID].stats.CaptainStarHitPitch]);
+        fn_800363D8(task, 4, 1, 0x22, lbl_3_data_D234[inMemRoster[g_GameLogic.teamBatting][g_Batter.rosterID].stats.CaptainStarHitPitch]);
+    }
+
+    if (g_GameLogic.IsStarChance != 0) {
+        lbl_80371C30[task->_14 + 21]._00->_54 &= ~2;
+        lbl_80371C30[task->_14 + 17]._00->_54 &= ~2;
+    } else {
+        lbl_80371C30[task->_14 + 22]._00->_54 &= ~2;
+        if (g_Batter.chemLinksOnBase == 0) {
+            lbl_80371C30[task->_14 + 17]._00->_54 &= ~2;
+        }
+        if (lbl_3_common_bss_32724._AE == 0 || lbl_3_common_bss_32724._AF != g_Pitcher.rosterID) {
+            lbl_80371C30[task->_14 + 21]._00->_54 &= ~2;
+        }
+    }
+
+    lbl_80371C30[task->_14 + 46]._00->_5C = 30 << 16;
+    lbl_80371C30[task->_14 + 47]._00->_5C = 30 << 16;
+    if (!g_d_GameSettings.exhibitionMatchInd) {
+        // The header declares only the first 0xAF8 of this 0x4508-byte object.
+        flags = (u8*)starMissionCompletionTracker + 0x43D6;
+        if (flags[g_Pitcher.charID] != 0 && g_GameLogic._13E[g_GameLogic.teamFielding] == 0) {
+            lbl_80371C30[task->_14 + 48]._00->_54 |= 2;
+        }
+        if (flags[g_Batter.charID] != 0 && g_GameLogic._13E[g_GameLogic.teamBatting] == 0) {
+            lbl_80371C30[task->_14 + 49]._00->_54 |= 2;
+        }
+    } else {
+        if (lbl_8034E9A0._489B[g_GameLogic.teamFielding][g_Pitcher.rosterID] != 0) {
+            lbl_80371C30[task->_14 + 48]._00->_54 |= 2;
+        }
+        if (lbl_8034E9A0._489B[g_GameLogic.teamBatting][g_Batter.rosterID] != 0) {
+            lbl_80371C30[task->_14 + 49]._00->_54 |= 2;
+        }
+    }
+
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_PRACTICE && g_Practice.practiceLevel != 7) {
+        lbl_80371C30[task->_14 + 20]._00->_54 &= ~2;
+        lbl_80371C30[task->_14 + 5]._00->_54 &= ~2;
+    }
+
+    task->_18 = 0;
+    task->_1C = g_GameLogic.TeamStars[0];
+    task->_1E = g_GameLogic.TeamStars[1];
+    task->_20 = 0;
+    lbl_3_common_bss_32724._A8 = 1;
+    ((UnkTask1770*)lbl_803CC1B8)->_00 = fn_3_99E10;
 }
 
 // .text:0x00099E10 size:0xA94 mapped:0x806D8EA4
