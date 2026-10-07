@@ -2,12 +2,13 @@
 #define __GAME_rep_13B8_H_
 
 #include "mssbTypes.h"
+#include "game/UnknownHomes_Game.h"
 
 void fn_3_7D79C(void);
 void fn_3_7D920(void);
 void fn_3_7D9DC(void);
-void fn_3_7DB30(void);
-void fn_3_7DD24(void);
+void fn_3_7DB30(int player);
+void fn_3_7DD24(int player);
 void fn_3_7DD6C(void);
 void fn_3_7E2BC(void);
 void fn_3_7EA68(void);
@@ -18,13 +19,13 @@ void fn_3_7F494(void);
 void fn_3_7F9C4(void);
 void fn_3_7FA78(void);
 void fn_3_7FD90(void);
-void fn_3_7FEA8(void);
+void fn_3_7FEA8(int runner, int direction);
 void fn_3_7FED4(void);
-void fn_3_7FFD0(void);
+void fn_3_7FFD0(VecXYZ* out, int from, int to, f32 t);
 void fn_3_80028(void);
 void fn_3_810C4(void);
 void fn_3_81190(void);
-void fn_3_81AB8(void);
+void fn_3_81AB8(int runner);
 void fn_3_81AEC(void);
 void fn_3_81BC8(void);
 void fn_3_81EAC(void);
@@ -43,9 +44,9 @@ void fn_3_85074(void);
 void fn_3_85744(void);
 void fn_3_85840(void);
 void fn_3_85A70(void);
-void fn_3_85C44(void);
+void fn_3_85C44(int runner, int direction);
 void fn_3_85CB0(void);
-void fn_3_85EF4(void);
+void fn_3_85EF4(int runner, int direction);
 void fn_3_8604C(void);
 void fn_3_86118(void);
 void fn_3_8679C(void);
@@ -69,8 +70,8 @@ void fn_3_88F98(void);
 void fn_3_89028(void);
 void fn_3_8911C(void);
 void fn_3_8913C(void);
-void fn_3_89864(void);
-void fn_3_898BC(void);
+void fn_3_89864(int runner, int bases);
+void fn_3_898BC(int runner, int rosterID);
 void fn_3_89914(void);
 void fn_3_899BC(void);
 void fn_3_8A1D8(void);
