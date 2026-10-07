@@ -32,7 +32,9 @@ extern struct {
 typedef struct {
     /* 0x000 */ u8 _000[0x178];
     /* 0x178 */ s16 _178;
-    /* 0x17A */ u8 _17A[0x268 - 0x17A];
+    /* 0x17A */ u8 _17A[0x1E7 - 0x17A];
+    /* 0x1E7 */ u8 _1E7;
+    /* 0x1E8 */ u8 _1E8[0x268 - 0x1E8];
 } Unk13B8Fielder; // size: 0x268
 
 extern Unk13B8Fielder g_Fielders[9];
@@ -64,7 +66,12 @@ void fn_3_8A958(void) {
 
 // .text:0x0008A7B4 size:0x1A4 mapped:0x806C9848
 void fn_3_8A7B4(void) {
-    return;
+    if (g_GameLogic.battingAIInd[g_GameLogic.homeTeamBattingInd_fieldingTeam] != 0) {
+        fn_3_85CB0();
+    } else {
+        fn_3_7EA68();
+    }
+    fn_3_86EF8();
 }
 
 // .text:0x0008A618 size:0x19C mapped:0x806C96AC
@@ -260,8 +267,45 @@ void fn_3_88F98(void) {
 }
 
 // .text:0x00088D88 size:0x210 mapped:0x806C7E1C
-void fn_3_88D88(void) {
-    return;
+void fn_3_88D88(int runner) {
+    InMemRunnerType* r = &g_Runners[runner];
+    int i;
+
+    if (g_Strikes.outs < 3 && g_GameLogic.EventTriggers_EndOfGame == 0 && r->runnerOnFieldOrOutOrScored == 1) {
+        if (g_GameLogic.freeFieldingPracticeInd == 0) {
+            g_Strikes.outs++;
+        } else if ((g_Practice.practiceType_2 == 2 && g_Practice.practiceLevel == 1) || g_Practice.practiceLevel == 7 ||
+                   g_Practice.practiceLevel == 6) {
+            g_Strikes.outs++;
+        }
+        if (g_Ball.maybeBuntInd != 0 && g_Strikes.strikes >= 3) {
+            fn_3_59918(22, 0);
+        } else if (r->fractionalBasesRan >= 3.8f && g_Ball.baseBallAndFielderAreOn == 0) {
+            fn_3_59918(1, 1);
+        } else {
+            fn_3_59918(1, 0);
+        }
+        for (i = 0; i < 3; i++) {
+            if (g_Strikes.runnerIndexForEachOutThisPitch[i] == -1) {
+                g_Strikes.runnerIndexForEachOutThisPitch[i] = runner;
+                break;
+            }
+        }
+        if (g_Strikes.outs == 3) {
+            if (r->forceOutCd == 1) {
+                g_Strikes.forcedOutToEndInningInd = 1;
+            } else {
+                fn_3_5C74C(1);
+            }
+            fn_3_5D094(0);
+            if (g_GameLogic.EventTriggers_EndOfGame != 0) {
+                fn_3_59918(13, 0);
+            } else {
+                fn_3_59918(5, 0);
+            }
+        }
+        r->runnerOnFieldOrOutOrScored = 2;
+    }
 }
 
 // .text:0x00088C24 size:0x164 mapped:0x806C7CB8
@@ -337,7 +381,33 @@ void fn_3_88408(void) {
 
 // .text:0x00088228 size:0x1E0 mapped:0x806C72BC
 void fn_3_88228(void) {
-    return;
+    if (g_Ball.baseBallAndFielderAreOn >= 0 && g_Ball.AtBat_ContactResult >= 0 && g_Ball.AtBat_ContactResult != 3 &&
+        g_Fielders[g_Ball.fielderWBallIndex]._1E7 == 0) {
+        int runner = (g_Ball.baseBallAndFielderAreOn + 3) & 3;
+        if (g_Runners[runner].forceOutCd == 1) {
+            fn_3_88D88(runner);
+            g_Runners[runner].forceOutCd = 2;
+            g_Runners[runner].outType = 2;
+            if (g_Ball.fielderWhoGotLastOut < 0) {
+                if (g_Ball.throwingFielder < 0) {
+                    g_Ball.fielderWhoGotLastOut = g_Ball.fielderWBallIndex;
+                } else {
+                    g_Ball.fielderWhoGotLastOut = g_Ball.throwingFielder;
+                    if (g_FieldingLogic._141 != 0 && g_d_GameSettings.exhibitionMatchInd == 0 &&
+                        lbl_3_common_bss_37400._40 == g_GameLogic.teamFielding) {
+                        fn_3_161588(8, g_Fielders[g_Ball.throwingFielder]._178);
+                    }
+                    if (g_FieldingLogic._115 > 0 && g_FieldingLogic._133 != 0) {
+                        g_UnkSound_32718._08 = 4;
+                        g_FieldingLogic._134 = g_Ball.fielderWithBallIndexStored2;
+                        if (g_d_GameSettings.exhibitionMatchInd == 0 && lbl_3_common_bss_37400._40 == g_GameLogic.teamFielding) {
+                            fn_3_161588(2, g_Fielders[g_Ball.fielderWithBallIndexStored2]._178);
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 // .text:0x00087E80 size:0x3A8 mapped:0x806C6F14
@@ -689,8 +759,39 @@ void fn_3_85EF4(int runner, int direction) {
 }
 
 // .text:0x00085CB0 size:0x244 mapped:0x806C4D44
+// 60.54%: the target keeps fn_3_85C44's direction tests after inlining it with direction 1;
+// this build folds them away, which also shrinks the frame.
 void fn_3_85CB0(void) {
-    return;
+    int i;
+
+    if (g_Ball.pitchHangtimeCounter <= 30 && g_Pitcher.pitcherActionState == 2) {
+        if (g_Strikes.outs == 2 && g_Strikes.GameControls_StrikeBallBitVector == 0x23) {
+            for (i = 1; i <= 3; i++) {
+                if (g_Runners[i].runnerOnFieldOrOutOrScored == 0) {
+                    break;
+                }
+                if (g_Pitcher.pitchTotalTimeCounter >= g_AiLogic.batterAIStealingStartFrame) {
+                    fn_3_85C44(i, 1);
+                }
+            }
+        } else if (g_AiLogic.batterAIStealIndicator != 0) {
+            for (i = 1; i <= 2; i++) {
+                if (g_Pitcher.pitchTotalTimeCounter >= g_AiLogic.batterAIStealingStartFrame) {
+                    if (g_Runners[i].stealingStatus == 0) {
+                        if (g_AiLogic.batterAIStealingStartFrame < lbl_3_data_4B90[2]) {
+                            g_Runners[i].stealingStatus = 3;
+                        } else {
+                            g_Runners[i].stealingStatus = 2;
+                        }
+                        g_Runners[i].leadOffStatus = 0;
+                    }
+                    fn_3_85C44(i, 1);
+                }
+            }
+        } else if (g_AiLogic._74 == 2 && g_Pitcher.pitchTotalTimeCounter >= g_AiLogic.batterAIStealingStartFrame) {
+            fn_3_85C44(3, 1);
+        }
+    }
 }
 
 // .text:0x00085C44 size:0x6C mapped:0x806C4CD8
