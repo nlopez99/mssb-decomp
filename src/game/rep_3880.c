@@ -578,8 +578,41 @@ void fn_3_1534C0(Particle3880* p) {
 }
 
 // .text:0x001531A4 size:0x31C mapped:0x80792238
-void fn_3_1531A4(void) {
-    return;
+void fn_3_1531A4(Particle3880* p) {
+    Mtx rot;
+    camera_803c639c_s* camera = fn_80052734(fn_8005268C());
+    f32 height = p->_4D ? fn_3_119854(2) : fn_3_119854(0);
+    Vec forward = { 0.0f, 0.0f, -1.0f };
+    Vec axis;
+    Vec dir;
+    Vec offset;
+    f32 angle;
+
+    offset.x = 0.0f;
+    offset.y = 0.0f;
+    offset.z = -0.354f * height;
+    offset.x += height * ((rand() % 50 - 25) / 100.0);
+    offset.y += height * ((rand() % 50 - 25) / 100.0);
+    offset.z += height * ((rand() % 50 - 25) / 100.0);
+    PSVECSubtract(&camera->eye, &p->_1C, &dir);
+    PSVECNormalize(&dir, &dir);
+    angle = acos(PSVECDotProduct(&forward, &dir));
+    PSVECCrossProduct(&forward, &dir, &axis);
+    if (PSVECMag(&axis) == 0.0f) {
+        axis.x = 0.0f;
+        axis.y = -1.0f;
+        axis.z = 0.0f;
+    }
+    PSMTXRotAxisRad(rot, &axis, angle);
+    PSMTXMultVec(rot, &offset, &offset);
+    p->pos.x = p->_1C.x + offset.x;
+    p->pos.y = p->_1C.y + offset.y;
+    p->pos.z = p->_1C.z + offset.z;
+    p->_38 = p->_3C = lbl_3_data_26BFC[0];
+    p->_4C = 2;
+    p->_4A = lbl_3_data_26BFC[3];
+    p->vel.x = p->vel.z = 0.0f;
+    p->vel.y = lbl_3_data_26BFC[2] / 100000.0f;
 }
 
 // .text:0x00152AB4 size:0x6F0 mapped:0x80791B48

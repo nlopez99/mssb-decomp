@@ -102,7 +102,7 @@ void fn_3_151F2C(void);
 void fn_3_1524E8(struct Particle3880* p, u8 jitter);
 void fn_3_152794(struct Particle3880* p);
 void fn_3_152AB4(void);
-void fn_3_1531A4(void);
+void fn_3_1531A4(struct Particle3880* p);
 void fn_3_1534C0(struct Particle3880* p);
 void fn_3_1536A8(void);
 void fn_3_153E8C(struct Particle3880* p, Vec* pos, u8 arg2, u8 arg3, u8 arg4);
