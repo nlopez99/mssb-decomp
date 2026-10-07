@@ -263,12 +263,14 @@ void fn_3_E4FC4(void** files) {
         fn_800BDC88(lbl_8036E548._6C, j, j, files[indices[1]], NULL, files[indices[1] + 2]);
         fn_3_B98E8(&lbl_8036E548._6C->_34[i]);
     }
-    fn_800BDC88(lbl_8036E548._6C, j, j, files[indices[2]], NULL, NULL);
-    fn_3_B97DC(&lbl_8036E548._6C->_34[j], files[indices[2] + 2]);
-    model = &lbl_8036E548._6C->_34[j];
-    model->_5C = 180.0f;
-    model->_59 = 1;
-    fn_800B4CA0(lbl_8036E548._6C->_34[j]._00, lbl_8036E548._6C->_34[j]._5C);
+    for (i = 0; i < 1; j++, i++) {
+        fn_800BDC88(lbl_8036E548._6C, j, j, files[indices[2]], NULL, NULL);
+        fn_3_B97DC(&lbl_8036E548._6C->_34[j], files[indices[2] + 2]);
+        model = &lbl_8036E548._6C->_34[j];
+        model->_5C = 180.0f;
+        model->_59 = 1;
+        fn_800B4CA0(lbl_8036E548._6C->_34[j]._00, lbl_8036E548._6C->_34[j]._5C);
+    }
     for (i = 0; i < 10; i++) {
         lbl_3_bss_AE18[i] = files[indices[i + 4]];
     }
