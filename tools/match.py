@@ -477,6 +477,16 @@ def strip_asm(text: str) -> str:
     return "".join(pieces)
 
 
+def hide_placeholder(ctx: str, function: str) -> None:
+    # A stub's header declares it void(void), and m2c would trust that over the
+    # registers the assembly reads, so rename it out of the context
+    with open(ctx) as f:
+        text = f.read()
+    if re.search(rf"\b{re.escape(function)}\s*\(\s*void\s*\)", text):
+        with open(ctx, "w") as f:
+            f.write(re.sub(rf"\b{re.escape(function)}\b", function + "_placeholder", text))
+
+
 def m2c_draft(unit: Dict[str, Any], function: str, build_context: bool) -> str:
     m2c = os.environ.get("M2C") or shutil.which("m2c")
     if m2c is None:
@@ -491,6 +501,8 @@ def m2c_draft(unit: Dict[str, Any], function: str, build_context: bool) -> str:
         prepared = prepare_context(os.path.join(root_dir, ctx), tmp) if ctx else None
         if prepared is None:
             note = "/* m2c ran without type context: the unit's .ctx could not be prepared */\n"
+        else:
+            hide_placeholder(prepared, function)
         proc = subprocess.run(
             command + (["--context", prepared] if prepared else []) + [asm_path(unit)],
             capture_output=True,
