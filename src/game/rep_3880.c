@@ -1359,7 +1359,35 @@ void fn_3_14D2C0(Particle3880* p) {
 
 // .text:0x0014CECC size:0x3F4 mapped:0x8078BF60
 BOOL fn_3_14CECC(Emitter3880* emitter) {
-    return 0;
+    Particle3880* p;
+
+    if (lbl_80366158._28 != 0) {
+        return FALSE;
+    }
+    fn_80033620(emitter);
+    p = emitter->particles;
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+    do {
+        if (p->_44 != 0 && p->_4A != 0) {
+            if (p->_48 <= 0) {
+                if (p->_44 == 1) {
+                    fn_3_14CD40(emitter, p);
+                } else {
+                    if (p->_48 == 0) {
+                        fn_3_14D2C0(p);
+                    }
+                    fn_3_14CBB4(emitter, p);
+                }
+                p->_4A--;
+                if (p->_4A == 0) {
+                    fn_3_14CA98(p);
+                }
+            }
+            p->_48--;
+        }
+        p = p->next;
+    } while (p != NULL);
+    return FALSE;
 }
 
 // .text:0x0014CD40 size:0x18C mapped:0x8078BDD4
