@@ -685,11 +685,10 @@ void fn_3_13974C(void) {
 }
 
 // .text:0x00139700 size:0x4C mapped:0x80778794
-// 51.6%: needs fn_3_1391C0, still a stub that is inlined away here.
 void fn_3_139700(void) {
-    if (g_Minigame._B6C._40[0] != 0) {
+    if (MG.bag.active != 0) {
         if (g_Minigame.turnOverStatus != 0) {
-            g_Minigame._B6C._40[0] = 0;
+            MG.bag.active = 0;
         } else {
             fn_3_1391C0();
         }
@@ -697,8 +696,130 @@ void fn_3_139700(void) {
 }
 
 // .text:0x001391C0 size:0x540 mapped:0x80778254
+// 98.5%: registers only; bag sits in r28 where the target has r31, and the rest shift.
 void fn_3_1391C0(void) {
-    return;
+    Unk3520Bag* bag = &MG.bag;
+    VecSrcDst seg;
+    CollisionStruct col;
+    u32 type;
+    int i;
+    int who;
+    int angle;
+    s32 coin;
+    f32 best;
+    f32 radius;
+    f32 reach;
+    f32 dx;
+    f32 dz;
+    f32 dist;
+    f32 speed;
+    f32 scale;
+    Unk3520Fielder* fielder;
+
+    seg.src.x = bag->pos.x;
+    seg.src.y = -bag->pos.y;
+    seg.src.z = bag->pos.z;
+    bag->vel.y += lbl_3_data_219B8[11];
+    bag->pos.x = bag->vel.x + bag->pos.x;
+    bag->pos.y = bag->vel.y + bag->pos.y;
+    bag->pos.z = bag->vel.z + bag->pos.z;
+    seg.dst.x = bag->pos.x;
+    seg.dst.y = -bag->pos.y;
+    seg.dst.z = bag->pos.z;
+    type = checkCollision(&seg, &col, 0, FALSE);
+    if (type == 5) {
+        col.normal.y *= -1.0f;
+        fn_3_13ADC0(&bag->vel, &bag->vel, &col.normal);
+        bag->pos.x = col.position.x;
+        bag->pos.y = -col.position.y;
+        bag->pos.z = col.position.z;
+    }
+    seg.dst.x = bag->pos.x;
+    seg.dst.y = -bag->pos.y;
+    seg.dst.z = bag->pos.z;
+    if (fn_3_1373E0(&seg, &bag->vel, (VecSrcDst*)&col, lbl_3_data_219B8[15])) {
+        bag->pos.x = col.position.x;
+        bag->pos.y = col.position.y;
+        bag->pos.z = col.position.z;
+        memcpy(&bag->vel, &col.normal, sizeof(Vec));
+        seg.dst.x = bag->pos.x;
+        seg.dst.y = -bag->pos.y;
+        seg.dst.z = bag->pos.z;
+        type = checkCollision(&seg, &col, 0, FALSE);
+        if (type == 5) {
+            col.normal.y *= -1.0f;
+            fn_3_13ADC0(&bag->vel, &bag->vel, &col.normal);
+            bag->pos.x = col.position.x;
+            bag->pos.y = -col.position.y;
+            bag->pos.z = col.position.z;
+        }
+    }
+    if (bag->pos.y < lbl_3_data_219B8[14]) {
+        for (i = 0; i < 10; i++) {
+            coin = bag->coins[i];
+            g_Minigame.wallBall_coinCoordinates[coin].x = bag->pos.x;
+            g_Minigame.wallBall_coinCoordinates[coin].y = bag->pos.y;
+            g_Minigame.wallBall_coinCoordinates[coin].z = bag->pos.z;
+            angle = random_fn_3_9EE24(0x1000);
+            getComponentsFromSAng(angle + (random_fn_3_9EE24(lbl_3_data_21A04[4] * 2) - lbl_3_data_21A04[4]),
+                                  &g_Minigame.wallBall_coinVelocity[coin].x, &g_Minigame.wallBall_coinVelocity[coin].z);
+            scale = RandomF32_Game_Range(-lbl_3_data_219B8[9], lbl_3_data_219B8[10]);
+            g_Minigame.wallBall_coinVelocity[coin].x *= scale;
+            g_Minigame.wallBall_coinVelocity[coin].z *= scale;
+            g_Minigame.wallBall_coinVelocity[coin].y = RandomF32_Game_Range(lbl_3_data_219B8[7], lbl_3_data_219B8[8]);
+            g_Minigame.wallBall_coinsVisibleInd[coin] = 1;
+            g_Minigame.wallBall_coinsVisibleFrameCounter[coin] = 0;
+        }
+        bag->active = FALSE;
+        return;
+    }
+    best = 99999.9f;
+    radius = lbl_3_data_219B8[15];
+    for (i = 0, who = -1; i < 4; i++) {
+        if (g_Minigame.minigameFielderIndex[i] < 0) {
+            continue;
+        }
+        if (g_Minigame.starDashStunType[i] != 0 && g_Minigame.starDashStunType[i] != 3) {
+            continue;
+        }
+        fielder = &g_Fielders[g_Minigame.minigameFielderIndex[i]];
+        if (fielder->_203 != 0 && fielder->_204 > 3) {
+            continue;
+        }
+        if (fielder->_16C + fielder->_00C < bag->pos.y) {
+            continue;
+        }
+        reach = radius + lbl_3_data_47BC[fielder->_1C9];
+        dz = fielder->pos.z - bag->pos.z;
+        dx = fielder->pos.x - bag->pos.x;
+        reach *= reach;
+        dist = dx * dx + dz * dz;
+        if (dist < reach && dist < best) {
+            best = dist;
+            who = i;
+        }
+    }
+    if (who >= 0) {
+        g_Minigame.miniGameCurrentPoints[who] += lbl_3_data_21A04[5] * 10;
+        for (i = 0; i < 10; i++) {
+            coin = bag->coins[i];
+            g_Minigame.wallBall_coinCoordinates[coin].x = bag->pos.x;
+            g_Minigame.wallBall_coinCoordinates[coin].y = bag->pos.y;
+            g_Minigame.wallBall_coinCoordinates[coin].z = bag->pos.z;
+            angle = random_fn_3_9EE24(0x1000);
+            speed = RandomF32_Game_Range(lbl_3_data_219B8[2], lbl_3_data_219B8[3]);
+            g_Minigame.wallBall_coinsVisibleInd[coin] = 3;
+            getComponentsFromSAng(angle, &g_Minigame.wallBall_coinVelocity[coin].x, &g_Minigame.wallBall_coinVelocity[coin].z);
+            scale = speed + RandomF32_Game_Range(-lbl_3_data_219B8[4], lbl_3_data_219B8[4]);
+            g_Minigame.wallBall_coinVelocity[coin].x *= scale;
+            g_Minigame.wallBall_coinVelocity[coin].z *= scale;
+            g_Minigame.wallBall_coinVelocity[coin].y = RandomF32_Game_Range(lbl_3_data_219B8[0], lbl_3_data_219B8[1]);
+            g_Minigame.wallBall_coinsVisibleFrameCounter[coin] = 0;
+        }
+        fn_3_90064(0x30A);
+        bag->active = FALSE;
+        lbl_3_common_bss_34C58._30 = lbl_3_data_88DC[1];
+    }
 }
 
 // .text:0x00138AA4 size:0x71C mapped:0x80777B38
@@ -853,7 +974,6 @@ void fn_3_1384B4(Unk3520Obj* obj) {
 }
 
 // .text:0x00138448 size:0x6C mapped:0x807774DC
-// 69.6%: needs fn_3_1384B4, still a stub that is inlined away here.
 void fn_3_138448(Unk3520Obj* obj) {
     if (g_Minigame._72A == 0) {
         if (obj->_3A < 0x7FFE) {
@@ -1264,7 +1384,6 @@ void fn_3_1370A0(camera_803c639c_s* camera) {
 }
 
 // .text:0x00136EA4 size:0x1FC mapped:0x80775F38
-// 97.6%: needs fn_3_13688C, still a stub that is inlined away here.
 void fn_3_136EA4(void) {
     if (g_Minigame.turnOverStatus != 0) {
         g_Minigame.playerIDWithPowerup[0] = -1;
