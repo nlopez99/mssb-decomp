@@ -1016,8 +1016,8 @@ void fn_3_A76B4(void) {
 }
 
 // .text:0x000A7040 size:0x674 mapped:0x806E60D4
-// 98.93%: the target compares f->_050 + f->_05C with f->_058 and discards the result,
-// after computing the distance difference; the ternary below only approximates that order.
+// 98.49%: before testing distanceFromBall - f->_050 < 1.8f, the target also compares
+// f->_050 + f->_05C with f->_058 and discards the result; no plausible source found for that.
 void fn_3_A7040(s32 fielder) {
     Unk18E8Fielder* f;
     s32 base;
@@ -1095,7 +1095,7 @@ void fn_3_A7040(s32 fielder) {
                     if (fn_3_9FC1C(game_atan2(f->_000 - r->position.x, f->_008 - r->position.z), runAngle) < 0x100 &&
                         r->baseStandingOn < 0) {
                         if ((r->baseStandingOn < 0 || r->tagUpInd == 2) &&
-                            r->distanceFromBall - (f->_050 + f->_05C > f->_058 ? f->_050 : f->_050) < 1.8f) {
+                            r->distanceFromBall - f->_050 < 1.8f) {
                             g_FieldingLogic._111 = 2;
                             g_FieldingLogic._0E8 = i;
                             g_FieldingLogic._112 = 1;
