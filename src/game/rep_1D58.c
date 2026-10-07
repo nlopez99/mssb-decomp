@@ -190,8 +190,6 @@ extern StadiumLights1D58 lbl_800F7478[14];
 extern Light1D58 lbl_80367318[4];
 extern AramEntry1D58 lbl_3_data_10ACC[21];
 extern void (*lbl_3_data_10AB0[7])(void* file);
-// Only this unit uses it, but it lies just below the unit's .data range
-extern u8 lbl_3_data_11168[0x10];
 
 extern struct {
     /* 0x0000 */ u8 _0000[0x8];
@@ -277,6 +275,7 @@ extern StadiumObjectCollision* fn_3_E751C(s32 object, Mtx mtx);
 extern void fn_3_F6084(Mtx view, StadiumSort1D58* sort);
 extern StadiumObjectCollision* fn_3_F6504(s32 object, Mtx mtx);
 
+u8 lbl_3_data_11168[0x10] = { 0 };
 f32 lbl_3_data_11178[5] = { 18.0f, 90.0f, 162.0f, 234.0f, 306.0f };
 
 static void (*lbl_3_bss_9940)(void);
