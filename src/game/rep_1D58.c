@@ -149,6 +149,16 @@ typedef struct StadiumSort1D58 {
     /* 0x04 */ s32 index;
 } StadiumSort1D58; // size: 0x8
 
+typedef struct {
+    /* 0x00 */ u8 _00[0x40];
+    /* 0x40 */ Mtx _40;
+} UnkCamera1D58;
+
+typedef struct {
+    /* 0x00 */ u8 _00[0x14];
+    /* 0x14 */ UnkCamera1D58* _14;
+} UnkView1D58;
+
 extern struct {
     /* 0x00 */ StadiumObject1D58* _00;
     /* 0x04 */ StadiumObject1D58* _04;
@@ -181,6 +191,7 @@ extern StadiumLights1D58 lbl_800F7478[14];
 extern Light1D58 lbl_80367318[4];
 extern AramEntry1D58 lbl_3_data_10ACC[21];
 extern void (*lbl_3_data_10AB0[7])(void* file);
+// Only this unit uses it, but it lies just below the unit's .data range
 extern u8 lbl_3_data_11168[0x10];
 
 extern struct {
@@ -203,73 +214,69 @@ extern struct {
 } lbl_803C6CF8;
 
 extern void* _OSAllocFromHeap(u32 align, u32 size);
-extern void fn_800ACFB0(void* data);
-// rep_1C0.h types the draw callback's last parameter s32; fn_3_B8828 compares it unsigned
-extern void fn_3_38E8(void (*draw)(MtxPtr view, s32, u32));
-extern void fn_3_35E4(void (*callback)(void));
-extern void fn_8001E460(void (*draw)(MtxPtr view, s32, u32));
-extern void fn_800B2BFC(ModelActor1D58* actor, u16 arg1, u16 arg2);
-extern void fn_800B3F20(ModelActor1D58* actor);
-extern void fn_800B313C(ModelActor1D58* actor);
-extern void fn_800117CC(Mtx src, Mtx view, Mtx dst);
-extern void fn_800116DC(StadiumModel1D58* model, Mtx mtx, u16 arg2);
-extern u8 fn_800B3C04(s32 arg0, ModelActor1D58* actor, Mtx mtx);
-extern void fn_800BEA04(Vec pos);
-extern void fn_80024DB0(void* anim);
-extern void fn_80024FA4(StadiumModel1D58* model, u32 arg1, void* anim, s32 arg3);
-extern void fn_3_D55EC(Mtx view, StadiumSort1D58* sort);
-extern void fn_3_F6084(Mtx view, StadiumSort1D58* sort);
-extern void fn_3_E7388(Mtx view, StadiumSort1D58* sort);
-extern s32 fn_8005268C(void);
-extern void fn_800BD2CC(s32 arg0, GXColor color);
-extern void fn_800B9AA8(LITObj* light);
-extern void fn_800BDA94(StadiumModel1D58* model, Mtx mtx);
+extern void* ARAMTransfer(AramEntry1D58* entry, int arg1, int arg2, u32 aram);
+extern void ANIMGet(void* anim);
 extern void LoadActorLayout(void* layout);
 extern void convertGeometryAndSknHeader(void* geo, void* skn);
 extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);
 extern void convertTextureHeader(void* tex);
-extern void fn_800BD190(void* geo, void* tex);
-extern void ANIMGet(void* anim);
-extern void* fn_800ACF34(u32 align, u32 size);
-extern void fn_800ACF14(void* data);
-extern void fn_800C07BC(void* base, void* tmp, s32 count, s32 size, s32 (*compare)(const void* a, const void* b));
-extern void minigamesSetSomePointers(void);
-extern void minigamesGXStuff(void);
-extern void minigamesSetSomePointers2(void);
-extern void fn_8001B200(void);
-extern void fn_800B4278(ModelActor1D58* actor);
-extern void fn_3_C1964(void);
-extern void fn_800528B4(void);
-extern void fn_800638CC(void);
-extern StadiumObjectCollision* fn_3_C823C(s32 object, Mtx mtx);
-extern StadiumObjectCollision* fn_3_E4BE8(s32 object, Mtx mtx);
-extern StadiumObjectCollision* fn_3_F6504(s32 object, Mtx mtx);
-extern StadiumObjectCollision* fn_3_E751C(s32 object, Mtx mtx);
-extern void fn_800B4BC8(ModelActor1D58* actor, s32 arg1);
-extern void fn_800B4CA0(ModelActor1D58* actor, f32 time);
-extern void fn_800B4C04(ModelActor1D58* actor, f32 speed);
-extern void fn_800B4AFC(ModelActor1D58* actor, s32 arg1);
 extern void LITAlloc(LITObj** light);
 extern void LITInitAttn(LITObj* light, f32 a0, f32 a1, f32 a2, f32 k0, f32 k1, f32 k2);
 extern void LITInitPos(LITObj* light, f32 x, f32 y, f32 z);
 extern void LITInitColor(LITObj* light, GXColor color);
 extern void LITInitDir(LITObj* light, f32 nx, f32 ny, f32 nz);
 extern void LITXForm(LITObj* light, Mtx view);
-extern void fn_80023B90(LightData1D58* data, Light1D58* light);
-extern void fn_8001B214(void (*callback)(void));
-extern void fn_8001E474(void);
-extern void* ARAMTransfer(AramEntry1D58* entry, int arg1, int arg2, u32 aram);
+extern void minigamesSetSomePointers(void);
+extern void minigamesGXStuff(void);
+extern void minigamesSetSomePointers2(void);
 extern void fn_800B0A5C_insertQueue(void (*callback)(void), s32 arg1);
 extern void fn_800B0A14_removeQueue(void);
+extern void fn_800116DC(StadiumModel1D58* model, Mtx mtx, u16 arg2);
+extern void fn_800117CC(Mtx src, Mtx view, Mtx dst);
+extern void fn_8001B200(void);
+extern void fn_8001B214(void (*callback)(void));
+extern void fn_8001E460(void (*draw)(MtxPtr view, s32, u32));
+extern void fn_8001E474(void);
+extern void fn_80023B90(LightData1D58* data, Light1D58* light);
+extern void fn_80024DB0(void* anim);
+extern void fn_80024FA4(StadiumModel1D58* model, u32 arg1, void* anim, s32 arg3);
 extern void fn_8003A548(void (*callback)(void));
-extern struct {
-    /* 0x00 */ u8 _00[0x14];
-    /* 0x14 */ struct {
-        /* 0x00 */ u8 _00[0x40];
-        /* 0x40 */ Mtx _40;
-    }* _14;
-}* fn_800BF068(void);
 extern void fn_8003A8A0(struct DODisplayObj* obj, MtxPtr view, s32 arg2);
+extern s32 fn_8005268C(void);
+extern void fn_800528B4(void);
+extern void fn_800638CC(void);
+extern void fn_800ACF14(void* data);
+extern void* fn_800ACF34(u32 align, u32 size);
+extern void fn_800ACFB0(void* data);
+extern void fn_800B2BFC(ModelActor1D58* actor, u16 arg1, u16 arg2);
+extern void fn_800B313C(ModelActor1D58* actor);
+extern u8 fn_800B3C04(s32 arg0, ModelActor1D58* actor, Mtx mtx);
+extern void fn_800B3F20(ModelActor1D58* actor);
+extern void fn_800B4278(ModelActor1D58* actor);
+extern void fn_800B4AFC(ModelActor1D58* actor, s32 arg1);
+extern void fn_800B4BC8(ModelActor1D58* actor, s32 arg1);
+extern void fn_800B4C04(ModelActor1D58* actor, f32 speed);
+extern void fn_800B4CA0(ModelActor1D58* actor, f32 time);
+extern void fn_800B9AA8(LITObj* light);
+extern void fn_800BD190(void* geo, void* tex);
+extern void fn_800BD2CC(s32 arg0, GXColor color);
+extern void fn_800BDA94(StadiumModel1D58* model, Mtx mtx);
+extern void fn_800BEA04(Vec pos);
+extern UnkView1D58* fn_800BF068(void);
+extern void fn_800C07BC(void* base, void* tmp, s32 count, s32 size, s32 (*compare)(const void* a, const void* b));
+
+// rep_1C0.h types the draw callback's last parameter s32; fn_3_B8828 compares it unsigned
+extern void fn_3_38E8(void (*draw)(MtxPtr view, s32, u32));
+extern void fn_3_35E4(void (*callback)(void));
+extern void fn_3_C1964(void);
+// Their units' headers still declare these void(void)
+extern StadiumObjectCollision* fn_3_C823C(s32 object, Mtx mtx);
+extern void fn_3_D55EC(Mtx view, StadiumSort1D58* sort);
+extern StadiumObjectCollision* fn_3_E4BE8(s32 object, Mtx mtx);
+extern void fn_3_E7388(Mtx view, StadiumSort1D58* sort);
+extern StadiumObjectCollision* fn_3_E751C(s32 object, Mtx mtx);
+extern void fn_3_F6084(Mtx view, StadiumSort1D58* sort);
+extern StadiumObjectCollision* fn_3_F6504(s32 object, Mtx mtx);
 
 f32 lbl_3_data_11178[5] = { 18.0f, 90.0f, 162.0f, 234.0f, 306.0f };
 
@@ -383,25 +390,25 @@ void fn_3_B9D68(u8* types, s32 count, void** files, s32* indices) {
 s32 fn_3_B9BB4(s32 stadium) {
     if (lbl_803C6CF8._715 == 1) {
         switch (stadium) {
-        case 0:
+        case STADIUM_ID_MARIO_STADIUM:
             lbl_8036E548._0008 = ARAMTransfer(&lbl_3_data_10ACC[0], 0, 0, 0);
             break;
-        case 1:
+        case STADIUM_ID_BOWSERS_CASTLE:
             lbl_8036E548._0008 = ARAMTransfer(&lbl_3_data_10ACC[1], 0, 0, 0);
             break;
-        case 2:
+        case STADIUM_ID_WARIO_PALACE:
             lbl_8036E548._0008 = ARAMTransfer(&lbl_3_data_10ACC[2], 0, 0, 0);
             break;
-        case 3:
+        case STADIUM_ID_YOHSI_PARK:
             lbl_8036E548._0008 = ARAMTransfer(&lbl_3_data_10ACC[3], 0, 0, 0);
             break;
-        case 4:
+        case STADIUM_ID_PEACH_GARDEN:
             lbl_8036E548._0008 = ARAMTransfer(&lbl_3_data_10ACC[4], 0, 0, 0);
             break;
-        case 5:
+        case STADIUM_ID_DK_JUNGLE:
             lbl_8036E548._0008 = ARAMTransfer(&lbl_3_data_10ACC[5], 0, 0, 0);
             break;
-        case 6:
+        case STADIUM_ID_TOY_FIELD:
             lbl_8036E548._0008 = ARAMTransfer(&lbl_3_data_10ACC[6], 0, 0, 0);
             break;
         default:
@@ -577,7 +584,7 @@ void fn_3_B93CC(void) {
         lbl_3_common_bss_350E4._66 = rand();
     }
     if (lbl_80366158._28 != 0) {
-        if (g_d_GameSettings.GameModeSelected == 2 && lbl_3_common_bss_350E4._1C != NULL) {
+        if (g_d_GameSettings.GameModeSelected == GAME_TYPE_PRACTICE && lbl_3_common_bss_350E4._1C != NULL) {
             lbl_3_common_bss_350E4._1C();
         }
         return;
@@ -615,31 +622,31 @@ void fn_3_B939C(void) {
 
 // .text:0x000B91C8 size:0x1D4 mapped:0x806F825C
 StadiumObjectCollision* fn_3_B91C8(int stadium, s32 object, Mtx mtx) {
-    if (stadium == 1) {
+    if (stadium == STADIUM_ID_BOWSERS_CASTLE) {
         return fn_3_C823C(object, mtx);
-    } else if (stadium == 2) {
+    } else if (stadium == STADIUM_ID_WARIO_PALACE) {
         if (g_Ball.AtBat_ContactResult >= 2) {
             return NULL;
         }
         CTRLBuildMatrix(&lbl_3_common_bss_350E4._00[object].control, mtx);
         return lbl_3_common_bss_350E4._00[object]._78;
-    } else if (stadium == 3) {
+    } else if (stadium == STADIUM_ID_YOHSI_PARK) {
         if (g_Ball.currentStarSwing2 == 11 | g_Ball.currentStarSwing2 == 12) {
             return NULL;
         }
         return fn_3_E4BE8(object, mtx);
-    } else if (stadium == 4) {
+    } else if (stadium == STADIUM_ID_PEACH_GARDEN) {
         if (g_Ball.AtBat_ContactResult >= 2 | g_Ball.currentStarSwing2 == 11 | g_Ball.currentStarSwing2 == 12) {
             return NULL;
         }
         CTRLBuildMatrix(&lbl_3_common_bss_350E4._00[object].control, mtx);
         return lbl_3_common_bss_350E4._00[object]._78;
-    } else if (stadium == 5) {
+    } else if (stadium == STADIUM_ID_DK_JUNGLE) {
         if (g_Ball.AtBat_ContactResult >= 2) {
             return NULL;
         }
         return fn_3_F6504(object, mtx);
-    } else if (stadium == 6) {
+    } else if (stadium == STADIUM_ID_TOY_FIELD) {
         return fn_3_E751C(object, mtx);
     } else {
         CTRLBuildMatrix(&lbl_3_common_bss_350E4._00[object].control, mtx);
@@ -728,11 +735,11 @@ void fn_3_B8C08(Mtx view) {
             fn_80024FA4(obj->_74, obj->_8C->_2C, obj->_8C->_0C, -1);
         }
     }
-    if (g_d_GameSettings.StadiumID == 2 && g_d_GameSettings.GameModeSelected != 7) {
+    if (g_d_GameSettings.StadiumID == STADIUM_ID_WARIO_PALACE && g_d_GameSettings.GameModeSelected != GAME_TYPE_MINIGAMES) {
         fn_3_D55EC(view, lbl_3_common_bss_350E4._14);
-    } else if (g_d_GameSettings.StadiumID == 5 && g_d_GameSettings.GameModeSelected != 7) {
+    } else if (g_d_GameSettings.StadiumID == STADIUM_ID_DK_JUNGLE && g_d_GameSettings.GameModeSelected != GAME_TYPE_MINIGAMES) {
         fn_3_F6084(view, lbl_3_common_bss_350E4._14);
-    } else if (g_d_GameSettings.StadiumID == 6) {
+    } else if (g_d_GameSettings.StadiumID == STADIUM_ID_TOY_FIELD) {
         fn_3_E7388(view, lbl_3_common_bss_350E4._14);
     } else {
         fn_3_B867C(view, lbl_3_common_bss_350E4._14);
@@ -985,7 +992,7 @@ void fn_3_B8298(void) {
     u32 i;
 
     switch (g_d_GameSettings.StadiumID) {
-    case 3:
+    case STADIUM_ID_YOHSI_PARK:
         fn_8003A548(fn_3_B80D0);
         break;
     }
@@ -1017,7 +1024,7 @@ void fn_3_B8184(StadiumModel1D58* model, Mtx view) {
     ModelBone1D58* bone;
 
     CTRLBuildMatrix(&lbl_3_bss_190C->control, m);
-    if (m[1][3] > 0.0f && g_d_GameSettings.StadiumID == 1) {
+    if (m[1][3] > 0.0f && g_d_GameSettings.StadiumID == STADIUM_ID_BOWSERS_CASTLE) {
         return;
     }
     PSMTXConcat(view, m, mv);
