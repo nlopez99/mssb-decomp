@@ -26,6 +26,8 @@ objdiff's report scores these 100% because it ignores relocation targets; the un
 - **Array shape from index arithmetic.** `subfic r0,e,3; slwi; lwzx` from a struct's start is one 4-element array indexed `[3 - e]`, not two 2-element fields. Example: `trajOptions_s._0` must stay `s32[4]`.
 - **`extsb` before a call only in the target:** the callee takes `int`, and the caller sign-extends its `s8` argument; with an `s8` parameter the callee extends instead. Example: `fn_8001B728(s32, s32, Vec*)`.
 - **A flag parameter tested with `clrlwi. r0,r4,24`** is a `u8`; a `BOOL` (`int`) compiles to `cmpwi`.
+- **`extsb` before `cmpwi rX,-1` but none before `cmpwi rX,1` on the same field:** the field is `s8`; MWCC drops the sign extension when testing equality with a non-negative constant. Example: `AIStruct.aiPitchDirectionInput` in `fn_3_20CEC`.
+- **`cmplw` between two computed element addresses:** the source compares two arrays, which decay to pointers. Keep the original's bug. Example: `g_Scores._04[batting] > g_Scores._04[fielding]` in `fn_3_212A0`.
 - **A `u8` copy of a value.** `clrlwi rX,rY,24` before comparisons can mean the code compares a `u8` variable assigned from a cast (e.g. `u8 starType = (s8)field`), not the field directly.
 - **`neg` before `cntlzw` only in the base:** a pointer tested with `p == NULL` inside a `|` chain. Write `!p`, which compiles to plain `cntlzw; srwi`. Example: `fn_3_16E1EC`.
 - **A word loaded from `.rodata`, stored to the stack, reloaded after a call and written to the FIFO** (`lwz r0,lbl@l; stw r0,8(r1)` ... `lwz r0,8(r1); stw r0,-0x8000(r3)`): a local `GXColor color = { 0xFF, 0xFF, 0xFF, 0xFF };` sent with `GXColor1u32(*(u32*)&color)`. Example: `fn_3_16D810`.
@@ -38,6 +40,9 @@ objdiff's report scores these 100% because it ignores relocation targets; the un
 - **A `bl` only in the target, to an empty stub in the same file:** the stub gets inlined away, and `#pragma dont_inline` does not stop it. The caller matches once the stub has a real body; to check the rest now, delete the stub's definition temporarily and keep its prototype. Example: `fn_3_16C394` calls `fn_3_16B884`.
 - **Stores in a different order with the same values,** such as `[2]` before `[0]`: chained assignments store right to left, so `a[0] = a[2] = 255;`. Example: `fn_3_169600`.
 - **A float argument of an inlined call computed late** (the base adds the constant after the callee's first `bl` into a scratch FPR; the target adds it into the saved FPR before): update the variable before the call, `x += 1.8f; draw(d, x, y);`, instead of passing `x + 1.8f`. Example: `fn_3_16DB6C` inlining `fn_3_16D810`.
+- **A table load before a call in the target, after it in the base** (`lbzx r31,...; bl RandomInt_Game; cmpw r3,r31`): MWCC evaluates a call in an expression before the other operands, whichever side it is on, so the original read the value in its own statement first: `chance = table[i][j]; if (RandomInt_Game(100) < chance)`. Example: `fn_3_212A0`.
+- **A retry counter that only increments when the loop repeats** (`cmpwi r30,2; bge exit; addi r30,r30,1; b top`, where `while (... && tries++ < 2)` gives `cmpwi; addi; blt top`): `for (;;) { ...; if (done || tries >= 2) break; tries++; }`. Example: `fn_3_20FB0`.
+- **Float loads in another order, and a different constant addressed through `addi rX,rY,sym@l; lfs f,0(rX)`:** how the arithmetic is split into statements decides the scheduling. Try splitting a compound expression and moving neighbouring stores. Example: `fn_3_20EEC` matched only as `index` stored first, then `width = max - min; width /= 5.0f; x = min + width * index;`.
 - **Assertion panics:** `OSErrorLine(line, "message")` produces `OSPanic(__FILE__, line, ...)`, and `__FILE__` is the bare file name (`"kinoko.c"`).
 
 ## `...rodata.0` in the base, constants one by one in the target
@@ -47,6 +52,10 @@ The base shows `lis rX,...rodata.0@ha; addi` and then `lfs f0,100(rX)`, while th
 - **Cause: the original's `.rodata` began with weak objects, which turns pooling off for that section** (observed: with weak objects first nothing in `.rodata` is pooled, while `.bss` statics still are). `game/UnknownHomes_Game.h` defines `SQRT2_LINKAGE extern` before including `math.h`, so `dolsqrtf2` becomes an `extern inline` whose static locals are emitted as weak `_half$localstatic` and `_three$localstatic` even when unused; plain `#include "math.h"` emits nothing. The target's `.rodata` does not show them, presumably because the linker kept one weak copy for the whole module.
 - **Fix:** include `game/UnknownHomes_Game.h` above `header_rep_data.h`, as `game_batter.c` does. The `.rodata` section score loses those 0x10 bytes; the code matches. Example: `rep_4138.c`, where this matched `fn_3_16D810` and `fn_3_16DB6C`. `-pool off` also matches such functions but breaks pooled `.bss`, and GC/1.3.2 to 2.7 behave identically, so the include order is the explanation, not the flags.
 - The same include matched `fn_3_16B5B4` in `kinoko.c`, which pooled once an inlined callee added string literals.
+
+## `.rodata` below 100% with every function matched
+
+- **Literal constants in the reverse of the target's order.** With `-inline deferred` MWCC generates functions in reverse source order (objdiff's `reverse_fn_order` hides this for `.text`) and creates each function's constants as it goes, while the target's constants follow address order. Reversing the source's function order lines them up (rep_940: `.rodata` 83% to 93%, the rest being the weak `dolsqrtf2` constants), but the source convention is address order, so keep it and report the difference.
 
 ## Before committing
 

@@ -3,7 +3,7 @@
 
 #include "mssbTypes.h"
 
-void fn_3_20CEC(void);
+int fn_3_20CEC(f32 step);
 void fn_3_20E50(void);
 void fn_3_20EEC(void);
 void fn_3_20FB0(void);
