@@ -45,6 +45,9 @@ typedef struct {
 extern Rep540Friction lbl_3_data_4388[7];
 extern Rep540Friction lbl_3_data_4414;
 extern f32 lbl_3_data_4428[7];
+extern f32 lbl_3_data_45F4[2];
+extern f32 lbl_3_data_45FC;
+extern u8 lbl_3_data_4600;
 extern f32 lbl_3_data_4604;
 extern u8 lbl_3_data_4608;
 
@@ -53,8 +56,66 @@ extern void fn_3_8C5C8(void);
 extern void fn_3_8FF5C(s32 sound, f32 x, f32 y, f32 z);
 
 // .text:0x0000FBA8 size:0x3A4 mapped:0x8064EC3C
+// 99.9%: each seed sum adds the random product from r29 and the shifted rand() from r6
+// in the other order.
 void fn_3_FBA8(void) {
-    return;
+    s32 i;
+    s32 r;
+
+    g_Ball.AtBat_Contact_BallPos.x = lbl_3_data_450C[0];
+    g_Ball.AtBat_Contact_BallPos.y = 0.0f;
+    g_Ball.AtBat_Contact_BallPos.z = lbl_3_data_450C[1];
+    if (g_Minigame.GameMode_MiniGame == 6) {
+        g_Ball.AtBat_Contact_BallPos.x = 0.0f;
+        g_Ball.AtBat_Contact_BallPos.z = 0.0f;
+        g_Ball.AtBat_Contact_BallPos.y = 1.0f;
+    }
+    for (i = 0; i < 60; i++) {
+        g_Ball.pastCoordinates[i].x = g_Ball.AtBat_Contact_BallPos.x;
+        g_Ball.pastCoordinates[i].y = g_Ball.AtBat_Contact_BallPos.y;
+        g_Ball.pastCoordinates[i].z = g_Ball.AtBat_Contact_BallPos.z;
+    }
+    g_Ball.physicsSubstruct.acceleration.x = 0.0f;
+    g_Ball.physicsSubstruct.acceleration.y = 0.0f;
+    g_Ball.physicsSubstruct.acceleration.z = 0.0f;
+    g_Ball.physicsSubstruct.velocity.x = 0.0f;
+    g_Ball.physicsSubstruct.velocity.y = 0.0f;
+    g_Ball.physicsSubstruct.velocity.z = 0.0f;
+    g_Ball.physicsSubstruct.acceleration.x = 0.0f;
+    g_Ball.physicsSubstruct.acceleration.y = 0.0f;
+    g_Ball.physicsSubstruct.acceleration.z = 0.0f;
+    g_Ball.offsetWhilePickedUpHistory[0].x = 0.0f;
+    g_Ball.offsetWhilePickedUpHistory[0].y = 0.0f;
+    g_Ball.offsetWhilePickedUpHistory[0].z = 0.0f;
+    g_Ball.physicsSubstruct.gravity = lbl_3_data_45FC;
+    g_Ball.airResistance = lbl_3_data_4600;
+    g_Ball.fielderWBallIndex = -1;
+    g_Ball.ballState = 0;
+    g_Ball.AtBat_ContactResult = 0;
+    g_Ball.ballInitialHitDoneInd = 0;
+    g_Ball.fairBallInd = -1;
+    g_Ball.ballStoppingCode1ReallySlow2Stopped = 0;
+    g_Ball.framesSinceHit = -1;
+    g_Ball.timeSinceBallPickedUp = -1;
+    g_Ball.matchFramesAndBallAngle.framesSinceLastThrow = -1;
+    g_Ball.framesSinceBallHitGroundOrWasCaught = -1;
+    g_Ball.Hit_HorizontalPower = 110;
+    g_Ball.Hit_VerticalAngle = 397;
+    g_Ball.Hit_HorizontalAngle = 626;
+    g_FieldingLogic._0C4 = -1;
+    g_FieldingLogic._0C6 = -1;
+    g_Strikes.outs = 0;
+    g_Strikes.strikes = 0;
+    g_Strikes.balls = 0;
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+        g_Ball.groundYForBounces = lbl_3_data_45F4[1];
+    } else {
+        g_Ball.groundYForBounces = lbl_3_data_45F4[0];
+    }
+    r = (lbl_3_data_228._00 % 10 + 1) * (g_Ball.StaticRandomInt1 * rand());
+    g_Ball.StaticRandomInt1 = (rand() * 16 + r + lbl_3_data_228._00 / 2 + g_d_GameSettings.FrameCountWhileNotAtMainMenu) & 0x7FFF;
+    r = (lbl_3_data_228._00 % 10 + 1) * ((g_Ball.StaticRandomInt2 + 1) * rand());
+    g_Ball.StaticRandomInt2 = (rand() * 8 + r + lbl_3_data_228._00 / 2 + (g_d_GameSettings.FrameCountWhileNotAtMainMenu >> 1)) & 0x7FFF;
 }
 
 // .text:0x0000F9F8 size:0x1B0 mapped:0x8064EA8C
@@ -111,8 +172,94 @@ void fn_3_F578(void) {
 }
 
 // .text:0x0000F1DC size:0x39C mapped:0x8064E270
+// ballZoneWhenCaught = -1 loads 255 into its own register; the target stores the s16 -1
+// register, as if the field were s8 (rep_18E8 reads it with extsb, rep_13B8 without).
 void fn_3_F1DC(void) {
-    return;
+    u32 seed;
+
+    fn_3_F9F8();
+    seed = lbl_3_data_228._00;
+    g_Ball.StaticRandomInt1 = (g_Ball.StaticRandomInt2 * 16 + (seed % 10 + 1) * (g_Ball.StaticRandomInt2 * g_Ball.StaticRandomInt1) + seed / 2 + g_d_GameSettings.FrameCountWhileNotAtMainMenu) & 0x7FFF;
+    g_Ball.StaticRandomInt2 = (g_Ball.StaticRandomInt1 * 8 + (seed % 10 + 1) * (g_Ball.StaticRandomInt2 * (g_Ball.StaticRandomInt2 + 1)) + seed / 2 + (g_d_GameSettings.FrameCountWhileNotAtMainMenu >> 1)) & 0x7FFF;
+    g_Ball.StaticRandomInt1_prePitch = g_Ball.StaticRandomInt1;
+    g_Ball.framesSinceHit = -1;
+    g_Ball.physicsSubstruct.gravity = lbl_3_data_45FC;
+    g_Ball.framesSinceThrowStarted = -1;
+    g_Ball.pitchHangtimeCounter = -1;
+    g_Ball.postPitchResultCounter = -1;
+    g_Ball.framesSinceBallHitGroundOrWasCaught = -1;
+    g_Ball.framesSinceLastBounce = -1;
+    g_Ball.framesSincePickOff = -1;
+    g_Ball.ballHitGrroundDistanceFromHome = 0.0f;
+    g_Ball.AtBat_ContactResult = 0;
+    g_Ball.ballInitialHitDoneInd = 0;
+    g_Ball.fairBallInd = -1;
+    g_Ball.howFoulTheBallWillBe = 0;
+    g_Ball.always0_fairFoulRelated = 0;
+    g_Ball.ballState = 0;
+    g_Ball.fielderAboutToGetBall_hasBall = -1;
+    g_Ball.fielderWBallIndex = -1;
+    g_Ball.maxYOfHit = 0.0f;
+    g_Ball.deadBallReason = 0;
+    g_Ball.someCollisionVariable = 0;
+    g_Ball.deadBallRBIsAddedInd = 0;
+    g_Ball.baseBallAndFielderAreOn = -1;
+    g_Ball.fielderBeingThrownTo = -1;
+    g_Ball.ballIsLooseInd_unused = 0;
+    g_Ball.homeRunClassification = 0;
+    g_Ball.lineDriveThroughPitcherInd = 0;
+    g_Ball.hitWallInd = 0;
+    g_Ball.fielderWithBallIndexStored = -1;
+    g_Ball.fielderWithBallIndexStored2 = -1;
+    g_Ball.fielderWhoGotLastOut = -1;
+    g_Ball.throwingFielder = -1;
+    g_Ball.maybeBuntInd = 0;
+    g_Ball.maybebuntOn2Strikes = 0;
+    g_Ball.timeSinceBallPickedUp = -1;
+    g_Ball.matchFramesAndBallAngle.framesSinceLastThrow = -1;
+    g_Ball.groundRuleDoubleInd = 0;
+    g_Ball.matchFramesAndBallAngle.framesAfterReceivingThrow = 0;
+    g_Ball.numberOfThrowsDuringPlay = 0;
+    g_Ball.framesOnGroundUntilPickedUp = 0;
+    g_Ball.numFieldersWhoHandledBallDuringPlay = 0;
+    g_Ball.numThrowsDuringPlay = 0;
+    g_Ball.bobbleLocation_1fair_2foul = 0;
+    g_Ball.matchFramesAndBallAngle.ballAndFielderOnBaseFrames = 0;
+    g_Ball.homeRunInd = 0;
+    g_Ball.matchFramesAndBallAngle.ballOverWallFrames = 0;
+    g_Ball.ballZoneWhenCaught = -1;
+    g_Ball._1BDF = 0;
+    g_Ball.matchFramesAndBallAngle.framesSinceFoulCalled = 0;
+    g_Ball.collisionRelated = 0;
+    g_Ball.landingSpotZoneAwayFromHome = 0;
+    g_Ball.ballZoneAwayFromHome = 0;
+    g_Ball.looseBall_codeForHowLongUntilSomeoneWillGetIt = 0;
+    g_Ball.someYCoord = -1.0f;
+    g_Ball.looseBall_5FrameCountdown = 0;
+    g_Ball.ballIsRollingIndicator = 0;
+    g_Ball.ballPickedUpCaught.x = 0.0f;
+    g_Ball.ballPickedUpCaught.z = 0.0f;
+    g_Ball.matchFramesAndBallAngle.framesOnGround = 0;
+    g_Ball.inAirOrBefore2ndBounceOrLowBallEnergy = 0;
+    g_Ball.hardHitIndicator = 0;
+    g_Ball.ballEnergy = 0.0f;
+    g_Ball.framesSinceBallHitWall = 0;
+    g_Ball.hittingAddedGravityFactor = 0.0f;
+    g_Ball.currentStarSwing = 0;
+    g_Ball.currentStarSwing2 = 0;
+    g_Ball.knockoutProcessedFlag = 0;
+    g_Ball.bODQualifyingHitInd = 0;
+    g_Ball.IsAntichemistryThrow = 0;
+    g_Ball.warioWaluGarlicIsActive = 0;
+    g_Ball.matchFramesAndBallAngle.garlicHitFramesSinceSplit = 0;
+    g_Ball.autoFielderAvoidDropSpotForPeachesStarHit = 0;
+    g_Ball.fielderActionOccuring = 0;
+    g_Ball.catchAnimationTotalFrames = 0;
+    g_Ball._1BC0 = 1;
+    g_Ball.someCollisionInd = 0;
+    g_Ball.hitNoteBlockInd = 0;
+    g_Ball.pauseBallMovementWhenInPlant = 0;
+    g_Ball.ballCughtByPlantInd = 0;
 }
 
 // .text:0x0000EE4C size:0x390 mapped:0x8064DEE0
@@ -264,6 +411,8 @@ s32 fn_3_BBBC(VecXYZ* out, s32 count, s32 step, f32 x, f32 z) {
 }
 
 // .text:0x0000B940 size:0x27C mapped:0x8064A9D4
+// 97.4%: the history shift copies [0] to [1] load-store by component where the target
+// loads all three components first.
 void fn_3_B940(void) {
     VecXYZ pos;
     Rep540Fielder* fielder;
@@ -654,6 +803,7 @@ void fn_3_904C(void) {
 }
 
 // .text:0x00008CF0 size:0x35C mapped:0x80647D84
+// 99.9%: offset and ballTravelAngle are added from swapped volatile registers (r0/r3).
 void fn_3_8CF0(f32* speed, int frames, u8* stopped, BOOL noKnockout) {
     f32 x;
     f32 z;
@@ -757,6 +907,7 @@ static inline void fn_3_6530_inline(void) {
 }
 
 // .text:0x00006530 size:0x78 mapped:0x806455C4
+// 91.5%: the constants 1 and 0 of the second half are in r5/r0 where the target has r0/r4.
 void fn_3_6530(void) {
     g_Ball.someCollisionInd = 1;
     fn_3_65A8();
