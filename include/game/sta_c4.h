@@ -34,7 +34,7 @@ void fn_3_F9B9C(s32 idx, void* arg1, struct StaC4Hit* hit);
 void fn_3_F9D94(struct StaC4Draw* draw);
 void fn_3_F9E78(s32 idx, void* arg1, struct StaC4Hit* hit);
 void fn_3_FA3C0(void);
-void fn_3_FA58C(void);
+void fn_3_FA58C(void** files);
 void fn_3_FB3D8(struct StaC4View* view);
 void fn_3_FBBA0(struct StaC4Tex* tex);
 

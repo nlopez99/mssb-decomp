@@ -10,6 +10,9 @@
 #include "C3/control.h"
 #include "musyx/musyx.h"
 #include "game/rep_23E8.h"
+#include "game/rep_D0.h"
+#include "game/rep_1C0.h"
+#include "game/sta_c0.h"
 #include "game/m_sound.h"
 #include "math.h"
 #include "string.h"
@@ -216,6 +219,29 @@ typedef struct StaC4Tex {
     /* 0x1A */ u8 tlutFormat;
 } StaC4Tex;
 
+typedef struct {
+    /* 0x00 */ void* _00;
+    /* 0x04 */ void* _04;
+    /* 0x08 */ void* _08;
+    /* 0x0C */ void* _0C;
+    /* 0x10 */ u8* _10;
+    /* 0x14 */ u16 _14;
+    /* 0x16 */ u16 _16;
+    /* 0x18 */ u16 _18;
+} StaC4Tiles; // size: 0x1C
+
+typedef struct {
+    /* 0x00 */ u8 id;
+    /* 0x01 */ u8 value[2];
+} StaC4MaterialSwap; // size: 0x3
+
+typedef struct {
+    /* 0x00 */ StaC4MaterialSwap _00[2][2][2];
+    /* 0x18 */ void* _18;
+    /* 0x1C */ f32 _1C;
+    /* 0x20 */ u8 _20;
+} StaC4Swaps;
+
 typedef struct StaC4View {
     /* 0x00 */ u8 _00[0x38];
     /* 0x38 */ Mtx _38;
@@ -224,9 +250,9 @@ typedef struct StaC4View {
 extern struct {
     /* 0x00 */ StaC4Draw* _00;
     /* 0x04 */ u8* _04;
-    /* 0x08 */ void* _08;
-    /* 0x0C */ void* _0C;
-    /* 0x10 */ void* _10;
+    /* 0x08 */ StaC4Tiles* _08;
+    /* 0x0C */ StaC4Tiles* _0C;
+    /* 0x10 */ StaC4Swaps* _10;
     /* 0x14 */ u8 _14[0x18 - 0x14];
     /* 0x18 */ void (*_18)(void);
     /* 0x1C */ void (*_1C)(void);
@@ -250,29 +276,53 @@ extern struct {
     /* 0x6D */ u8 _6D;
 } lbl_3_common_bss_350E4;
 
+typedef struct {
+    /* 0x00 */ u8 _00[0x34];
+    /* 0x34 */ StaC4Model _34[1];
+} StaC4ActorTable;
+
 extern struct {
     /* 0x00 */ u8 _00[0x6C];
-    /* 0x6C */ struct {
-        /* 0x00 */ u8 _00[0x34];
-        /* 0x34 */ StaC4Model _34[1];
-    }* _6C;
+    /* 0x6C */ StaC4ActorTable* _6C;
 } lbl_8036E548;
 
 extern StaC4SpriteRef lbl_80371C30[];
 extern void* lbl_803CC1B8;
 
 extern u16 lbl_3_data_81DC[16];
+extern u8 lbl_3_data_10E9C[0xE0];
+extern u8 lbl_3_data_10F7C[8];
+extern u8 lbl_3_data_10F84[4];
+extern u8 lbl_3_data_10F88[0x80];
+extern u8 lbl_3_data_11008[0x40];
+extern u8 lbl_3_data_110A8[0x20][3];
+extern u8 lbl_3_data_11138[0x10][3];
 extern u8 lbl_3_data_8404[6][15][2];
 extern u8 lbl_3_data_84B8[30][2];
 
 // Only this unit reads these; they lie outside its splits.txt ranges.
 extern void (*lbl_3_data_1BA88[4])(s32 idx, void* arg1, StaC4Hit* hit);
 extern StaC4Prop lbl_3_data_1BA98[50];
+extern u8 lbl_3_data_1BE80[17];
 extern Vec lbl_3_data_1BF6C[21];
 extern u8 lbl_3_data_1C068[20][3];
 
 extern void* _OSAllocFromHeap(u32 align, u32 size);
+// Outside this unit's .text range, but only this unit references it.
+extern void fn_3_FBCD0(void);
 extern void fn_8003A144(void);
+extern void fn_80035750(void* arg0, void* arg1, s32 arg2);
+extern void fn_80034E20(StaC4Task* task, void* desc);
+extern StaC4ActorTable* ActorObjectInitTable(u16 count);
+extern void fn_800BDC88(StaC4ActorTable* actors, u16 first, u16 last, void* model, void* anim, s32 arg5);
+extern void fn_800BD548(StaC4Model* model, s32 count, ...);
+extern void fn_80025C58(void* anim, StaC4Model* model);
+extern void fn_80025DDC(void* anim);
+extern void fn_80025FFC(void* anim, StaC4Anim* state);
+extern void fn_80025EEC(StaC4Anim* state, s32, s32);
+extern void fn_3_B97C8(void (*callback)(void));
+extern void fn_3_B97DC(StaC4Model* model, void* anim);
+extern void fn_3_B9D68(u8* types, s32 count, void** files, s32* indices);
 extern StaC4Tex* fn_80039AB4(void);
 extern void fn_800245EC(camera_803c639c_s* camera, Mtx view, Vec* points, f32* out, s32 count, s32 arg5);
 extern void fn_800ACFB0(void* data);
@@ -452,8 +502,302 @@ void fn_3_FB3D8(StaC4View* view) {
 }
 
 // .text:0x000FA58C size:0xE4C mapped:0x80739620
-void fn_3_FA58C(void) {
-    return;
+void fn_3_FA58C(void** files) {
+    StaC4Swaps* swaps;
+    StaC4Tiles* tiles;
+    StaC4Prop* prop;
+    s32* indices;
+    StaC4Draw* entry;
+    StaC4Draw* draw;
+    u8* slot;
+    void (*draw3D)(void);
+    u32 size;
+    s32 i;
+    s32 k;
+    BOOL end;
+    s32 count;
+
+    draw3D = fn_3_FBCD0;
+    count = 0;
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES) {
+        draw3D = NULL;
+    }
+    lbl_3_common_bss_350E4._18 = draw3D;
+    lbl_3_common_bss_350E4._1C = fn_3_F8454;
+    lbl_3_bss_B664 = 1;
+    indices = lbl_3_common_bss_350E4._34 = _OSAllocFromHeap(4, 17 * sizeof(s32));
+    fn_3_B9D68(lbl_3_data_1BE80, 17, files, indices);
+    lbl_3_bss_B660 = files[0];
+    fn_80035750(files[indices[16]], files[indices[15]], 5);
+    lbl_3_bss_B628 = fn_800B0A5C_insertQueue(fn_3_F8E20, 2);
+    fn_80034E20(lbl_3_bss_B628, lbl_3_data_10E9C);
+    lbl_8036E548._6C = ActorObjectInitTable(16);
+    fn_800BDC88(lbl_8036E548._6C, 0, 0, files[indices[1]], NULL, 0);
+    fn_800BDC88(lbl_8036E548._6C, 1, 1, files[indices[3]], NULL, 0);
+    fn_800BDC88(lbl_8036E548._6C, 2, 2, files[indices[4]], NULL, 0);
+    fn_800BDC88(lbl_8036E548._6C, 3, 3, files[indices[5]], NULL, 0);
+    fn_800BDC88(lbl_8036E548._6C, 4, 4, files[indices[6]], NULL, 0);
+    for (i = 0; i < 9; i++) {
+        fn_800BDC88(lbl_8036E548._6C, i + 5, i + 5, files[indices[2]], files[indices[2] + 2], 0);
+        fn_3_B97DC(&lbl_8036E548._6C->_34[i + 5], files[indices[2] + 2]);
+        lbl_8036E548._6C->_34[i + 5]._58 = 0;
+    }
+    fn_800BDC88(lbl_8036E548._6C, 14, 14, files[indices[7]], NULL, 0);
+    fn_800BDC88(lbl_8036E548._6C, 15, 15, files[indices[8]], NULL, 0);
+    lbl_3_common_bss_350E4._6D = 16;
+    for (i = 0; i < 16; i++) {
+        fn_800BD548(&lbl_8036E548._6C->_34[i], 4, lbl_3_common_bss_350E4._20, lbl_3_common_bss_350E4._24,
+                    lbl_3_common_bss_350E4._28, lbl_3_common_bss_350E4._2C);
+    }
+    if (files[indices[13]] != NULL) {
+        fn_80025DDC(files[indices[13]]);
+        fn_80025C58(files[indices[13]], &lbl_8036E548._6C->_34[15]);
+        lbl_3_bss_B578._00 = files[indices[14]];
+        fn_80025FFC(files[indices[13]], &lbl_3_bss_B578);
+        fn_80025EEC(&lbl_3_bss_B578, 0, 0);
+    }
+
+    lbl_3_common_bss_350E4._30 = 52;
+    size = (52 * sizeof(StaC4Draw)) + (g_d_GameSettings.miniGameStadiumIndicator == 0 ? 0xEC : 0);
+    lbl_3_common_bss_350E4._00 = _OSAllocFromHeap(0x20, size);
+    memset(lbl_3_common_bss_350E4._00, 0, size);
+    lbl_3_common_bss_350E4._04 = _OSAllocFromHeap(0x20, size);
+    memset(lbl_3_common_bss_350E4._04, 0, size);
+    if (g_d_GameSettings.miniGameStadiumIndicator == 0) {
+        lbl_3_common_bss_350E4._08 = (StaC4Tiles*)(lbl_3_common_bss_350E4._04 + 52 * sizeof(StaC4Draw));
+        lbl_3_common_bss_350E4._0C = lbl_3_common_bss_350E4._08 + 1;
+        lbl_3_common_bss_350E4._08->_10 = (u8*)(lbl_3_common_bss_350E4._0C + 1);
+        lbl_3_common_bss_350E4._0C->_10 = lbl_3_common_bss_350E4._08->_10 + 0x60;
+        lbl_3_common_bss_350E4._10 = (StaC4Swaps*)(lbl_3_common_bss_350E4._0C->_10 + 0x30);
+    } else {
+        lbl_3_common_bss_350E4._08 = NULL;
+        lbl_3_common_bss_350E4._0C = NULL;
+        lbl_3_common_bss_350E4._10 = NULL;
+    }
+
+    draw = lbl_3_common_bss_350E4._00;
+    entry = draw;
+    if (g_d_GameSettings.GameModeSelected != GAME_TYPE_MINIGAMES) {
+        slot = lbl_3_bss_B630;
+        end = FALSE;
+        lbl_3_bss_B62C = 0xFFFF;
+        for (i = 0; i < 52; i++) {
+            entry->_A0 = i;
+            prop = &lbl_3_data_1BA98[i];
+            if (prop->type == 5) {
+                entry->_A1 = prop->type;
+                if (lbl_3_bss_B62C == 0xFFFF) {
+                    lbl_3_bss_B62C = i;
+                }
+                *slot++ = 0xFF;
+                draw->obj._74 = &lbl_8036E548._6C->_34[i + 5];
+                draw->obj._78 = NULL;
+                draw->obj._7C = NULL;
+                draw->obj._80 = NULL;
+                draw->obj._90_7 = 0;
+                draw->obj._90_6 = 0;
+                draw->obj._90_5 = 0;
+                draw->obj.control.type = 0;
+            } else if (end) {
+                entry->_A1 = 0;
+                entry->_A2 = 0;
+                draw->obj._74 = &lbl_8036E548._6C->_34[0];
+                draw->obj._78 = files[indices[9]];
+                draw->obj._7C = NULL;
+                draw->obj._80 = NULL;
+                draw->obj._90_7 = 0;
+                draw->obj._90_6 = 0;
+                draw->obj._90_5 = 1;
+                draw->obj.control.type = 0;
+                CTRLSetTranslation(&draw->obj.control, 0.0f, 0.0f, 0.0f);
+                CTRLSetRotation(&draw->obj.control, 0.0f, 0.0f, 0.0f);
+            } else {
+                end = prop->type == 4;
+                if (end) {
+                    prop = lbl_3_data_1BA98;
+                    for (k = 0; k < lbl_3_bss_B62C; prop++, k++) {
+                        entry->_A1 = 0;
+                        entry->_A2 = 0;
+                        draw->obj._74 = &lbl_8036E548._6C->_34[4];
+                        draw->obj._78 = NULL;
+                        draw->obj._7C = NULL;
+                        draw->obj._80 = NULL;
+                        draw->obj._90_7 = prop->visible;
+                        draw->obj._90_6 = 0;
+                        draw->obj.control.type = 0;
+                        CTRLSetTranslation(&draw->obj.control, prop->pos.x, -0.02f, prop->pos.z);
+                        CTRLSetRotation(&draw->obj.control, 0.0f, prop->rotY, 0.0f);
+                        draw->obj._92 = 0xFF;
+                        draw->obj._90_5 = 0;
+                        draw->obj._84 = NULL;
+                        draw->obj._8C = NULL;
+                        draw->obj._94 = 0;
+                        draw->obj._96 = -1;
+                        draw->obj._98 = 1;
+                        i++;
+                        entry = ++draw;
+                    }
+                    count = i;
+                    i--;
+                    draw--;
+                } else {
+                    entry->_A1 = prop->type;
+                    entry->_A2 = prop->_13;
+                    if (entry->_A1 == 3) {
+                        if (entry->_A2 == 8) {
+                            entry->_A2 = rand() % 3;
+                        }
+                    } else if (entry->_A1 == 0 && entry->_A2 == 8) {
+                        entry->_A2 = rand() % 3;
+                    } else {
+                        entry->_A2 = entry->_A1;
+                    }
+                    draw->obj._74 = &lbl_8036E548._6C->_34[entry->_A1];
+                    draw->obj._78 = files[indices[entry->_A2 + 9]];
+                    draw->obj._7C = NULL;
+                    draw->obj._80 = lbl_3_data_1BA88[entry->_A1];
+                    draw->obj._90_7 = prop->visible;
+                    draw->obj._90_6 = draw->obj._90_7 && draw->obj._78 != NULL;
+                    draw->obj.control.type = 0;
+                    CTRLSetTranslation(&draw->obj.control, prop->pos.x, prop->pos.y, prop->pos.z);
+                    CTRLSetRotation(&draw->obj.control, 0.0f, prop->rotY, 0.0f);
+                    draw->obj._90_5 = 1;
+                }
+            }
+            draw->obj._92 = 0xFF;
+            draw->obj._84 = NULL;
+            draw->obj._8C = NULL;
+            draw->obj._94 = 0;
+            draw->obj._96 = -1;
+            draw->obj._98 = 1;
+            entry = ++draw;
+        }
+    }
+
+    draw = &lbl_3_common_bss_350E4._00[count];
+    draw->_A0 = 0x33;
+    draw->_A1 = 6;
+    draw->_A2 = 10;
+    fn_3_F8ABC();
+    draw->obj._74 = &lbl_8036E548._6C->_34[14];
+    draw->obj._78 = NULL;
+    draw->obj._7C = fn_3_F8BA8;
+    draw->obj._80 = NULL;
+    draw->obj._90_7 = 1;
+    draw->obj._90_6 = draw->obj._90_7 && draw->obj._78 != NULL;
+    draw->obj.control.type = 0;
+    CTRLSetTranslation(&draw->obj.control, 0.0f, 0.0f, 0.0f);
+    CTRLSetRotation(&draw->obj.control, 0.0f, 0.0f, 0.0f);
+    draw->obj._90_5 = 1;
+    draw->obj._92 = 0xFF;
+    draw->obj._84 = fn_3_F8B34;
+    draw->obj._8C = NULL;
+    draw->obj._94 = 0;
+    draw->obj._96 = -1;
+    draw->obj._98 = 1;
+    fn_3_F8D00();
+    draw++;
+
+    draw->_A0 = 0x33;
+    draw->_A1 = 7;
+    draw->obj._74 = &lbl_8036E548._6C->_34[15];
+    draw->obj._78 = NULL;
+    draw->obj._7C = NULL;
+    draw->obj._80 = NULL;
+    draw->obj._90_7 = 1;
+    draw->obj._90_6 = draw->obj._90_7 && draw->obj._78 != NULL;
+    draw->obj.control.type = 0;
+    CTRLSetTranslation(&draw->obj.control, 0.0f, -0.01f, 0.0f);
+    CTRLSetRotation(&draw->obj.control, 0.0f, 0.0f, 0.0f);
+    draw->obj._90_5 = 1;
+    draw->obj._92 = 0xFF;
+    draw->obj._84 = NULL;
+    draw->obj._8C = &lbl_3_bss_B578;
+    draw->obj._94 = 0;
+    draw->obj._96 = -1;
+    draw->obj._98 = 1;
+
+    if (g_d_GameSettings.miniGameStadiumIndicator == 0) {
+        lbl_3_common_bss_350E4._08->_0C = lbl_3_data_10F7C;
+        lbl_3_common_bss_350E4._08->_08 = lbl_3_data_10F88;
+        lbl_3_common_bss_350E4._08->_00 = (u8*)g_UNK_StadiumDetails._00 + 0x60;
+        lbl_3_common_bss_350E4._08->_04 = (u8*)g_UNK_StadiumDetails._00 + 0x40;
+        lbl_3_common_bss_350E4._08->_14 = 0x20;
+        lbl_3_common_bss_350E4._08->_18 = 6;
+        lbl_3_common_bss_350E4._08->_16 = 5;
+        for (i = 0; i < 0x20; i++) {
+            lbl_3_common_bss_350E4._08->_10[i * 3] = lbl_3_data_110A8[i][0];
+            if (lbl_3_data_110A8[i][1] < 6) {
+                lbl_3_common_bss_350E4._08->_10[i * 3 + 1] = lbl_3_data_110A8[i][1];
+            } else {
+                lbl_3_common_bss_350E4._08->_10[i * 3 + 1] = rand() % 6;
+            }
+            if (lbl_3_data_110A8[i][2] < 5) {
+                lbl_3_common_bss_350E4._08->_10[i * 3 + 2] = lbl_3_data_110A8[i][2];
+            } else {
+                tiles = lbl_3_common_bss_350E4._08;
+                tiles->_10[i * 3 + 2] = rand() % tiles->_16;
+            }
+        }
+
+        lbl_3_common_bss_350E4._0C->_0C = lbl_3_data_10F84;
+        lbl_3_common_bss_350E4._0C->_08 = lbl_3_data_11008;
+        lbl_3_common_bss_350E4._0C->_00 = (u8*)g_UNK_StadiumDetails._00 + 0xA0;
+        lbl_3_common_bss_350E4._0C->_04 = (u8*)g_UNK_StadiumDetails._00 + 0x80;
+        lbl_3_common_bss_350E4._0C->_14 = 0x10;
+        lbl_3_common_bss_350E4._0C->_18 = 2;
+        lbl_3_common_bss_350E4._0C->_16 = 8;
+        for (i = 0; i < 0x10; i++) {
+            lbl_3_common_bss_350E4._0C->_10[i * 3] = lbl_3_data_11138[i][0];
+            if (lbl_3_data_11138[i][1] < 2) {
+                lbl_3_common_bss_350E4._0C->_10[i * 3 + 1] = lbl_3_data_11138[i][1];
+            } else {
+                lbl_3_common_bss_350E4._0C->_10[i * 3 + 1] = rand() % 6;
+            }
+            if (lbl_3_data_11138[i][2] < 8) {
+                lbl_3_common_bss_350E4._0C->_10[i * 3 + 2] = lbl_3_data_11138[i][2];
+            } else {
+                tiles = lbl_3_common_bss_350E4._0C;
+                tiles->_10[i * 3 + 2] = rand() % tiles->_16;
+            }
+        }
+
+        fn_3_35E4(fn_3_C9878);
+        swaps = lbl_3_common_bss_350E4._10;
+        swaps->_18 = g_UNK_StadiumDetails._00;
+        swaps->_20 = 2;
+        swaps->_1C = cos(1.3962634801864624);
+        swaps->_00[0][0][0].id = 8;
+        swaps->_00[0][0][0].value[0] = 2;
+        swaps->_00[0][0][0].value[1] = 7;
+        swaps->_00[0][0][1].id = 4;
+        swaps->_00[0][0][1].value[0] = 7;
+        swaps->_00[0][0][1].value[1] = 4;
+        swaps->_00[0][1][0].id = 9;
+        swaps->_00[0][1][0].value[0] = 2;
+        swaps->_00[0][1][0].value[1] = 7;
+        swaps->_00[0][1][1].id = 10;
+        swaps->_00[0][1][1].value[0] = 7;
+        swaps->_00[0][1][1].value[1] = 4;
+        swaps->_00[1][0][0].id = 8;
+        swaps->_00[1][0][0].value[0] = 2;
+        swaps->_00[1][0][0].value[1] = 7;
+        swaps->_00[1][0][1].id = 4;
+        swaps->_00[1][0][1].value[0] = 7;
+        swaps->_00[1][0][1].value[1] = 4;
+        swaps->_00[1][1][0].id = 9;
+        swaps->_00[1][1][0].value[0] = 2;
+        swaps->_00[1][1][0].value[1] = 7;
+        swaps->_00[1][1][1].id = 10;
+        swaps->_00[1][1][1].value[0] = 7;
+        swaps->_00[1][1][1].value[1] = 4;
+    }
+
+    lbl_3_common_bss_350E4._48 = NULL;
+    if (g_d_GameSettings.GameModeSelected != GAME_TYPE_MINIGAMES) {
+        fn_3_FA3C0();
+    }
+    fn_3_B97C8(fn_3_F8444);
 }
 
 // .text:0x000FA3C0 size:0x1CC mapped:0x80739454
@@ -467,8 +811,8 @@ void fn_3_FA3C0(void) {
     s32 next;
     s32 size;
 
-    size = lbl_3_common_bss_350E4._30 * sizeof(u16) + lbl_3_common_bss_350E4._30 * sizeof(u32) +
-           lbl_3_common_bss_350E4._30 * sizeof(s32) + lbl_3_common_bss_350E4._30 * (2 * sizeof(Vec));
+    size = (lbl_3_common_bss_350E4._30 * sizeof(u16)) + (lbl_3_common_bss_350E4._30 * sizeof(u32)) +
+           (lbl_3_common_bss_350E4._30 * sizeof(s32)) + (lbl_3_common_bss_350E4._30 * (2 * sizeof(Vec)));
     if (lbl_3_common_bss_350E4._48 == NULL) {
         lbl_3_common_bss_350E4._48 = _OSAllocFromHeap(4, size);
         lbl_3_common_bss_350E4._3C = (u32*)(lbl_3_common_bss_350E4._48 + lbl_3_common_bss_350E4._30 * 2);
