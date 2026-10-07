@@ -13,8 +13,8 @@ void fn_3_113EC0(void);
 void fn_3_113F14(void);
 void fn_3_114204(void);
 void fn_3_114384(void);
-void fn_3_1149B8(void);
+int fn_3_1149B8(const void* a, const void* b);
 void fn_3_114A2C(void);
-void fn_3_114A88(void);
+void fn_3_114A88(BOOL instant);
 
 #endif // !__GAME_rep_3290_H_

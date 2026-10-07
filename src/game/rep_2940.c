@@ -3,6 +3,7 @@
 #include "game/UnknownHomes_Game.h"
 #include "static/UnknownHomes_Static.h"
 #include "game/rep_F80.h"
+#include "game/rep_FE0.h"
 
 typedef struct {
     /* 0x000 */ u8 _000[0x34];
@@ -61,8 +62,6 @@ extern VecXZ lbl_3_data_217D8[4];
 
 extern Unk2940Actor* fn_800111FC(Unk2940Actor* actor, int arg1);
 extern int fn_8004ACC4(int arg0);
-// rep_FE0.h declares this as void(void).
-extern f32 fn_3_6AF9C(int fielder);
 
 extern void fn_3_6A250(void);
 extern void fn_3_6A25C(void);
