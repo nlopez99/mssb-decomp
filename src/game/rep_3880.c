@@ -2676,8 +2676,28 @@ void fn_3_14A070(s32* values, s32 count) {
 }
 
 // .text:0x00149BA8 size:0x4C8 mapped:0x80788C3C
+// 92.16%: register allocation inside the inlined fn_3_149340 and fn_3_148FD0 (see there)
 void fn_3_149BA8(void) {
-    return;
+    PlayerEmitter3880* emitter;
+    u32 i;
+    s8 player;
+
+    if (g_d_GameSettings.GameModeSelected != GAME_TYPE_MINIGAMES &&
+        g_d_GameSettings.GameModeSelected != GAME_TYPE_TOY_FIELD) {
+        lbl_3_data_26E7C[5] = 930000;
+    } else {
+        lbl_3_data_26E7C[5] = 750000;
+    }
+    for (i = 0; i < 4; i++) {
+        player = lbl_3_bss_B85C[i];
+        if (player > -1) {
+            emitter = (PlayerEmitter3880*)fn_80033A24(fn_3_14841C, 0x80, 0, lbl_3_data_26E7C[0], 1, 0x25);
+            if (emitter != NULL) {
+                emitter->player = player;
+                fn_3_149340(emitter);
+            }
+        }
+    }
 }
 
 // .text:0x0014975C size:0x44C mapped:0x807887F0
@@ -2686,8 +2706,21 @@ void fn_3_14975C(void) {
 }
 
 // .text:0x00149340 size:0x41C mapped:0x807883D4
-void fn_3_149340(void) {
-    return;
+// 89.91%: register allocation inside the inlined fn_3_148FD0, which keeps
+// lbl_3_data_26E7C[6] in a saved register in the target
+void fn_3_149340(PlayerEmitter3880* emitter) {
+    Particle3880* p = emitter->base.particles;
+    s16 i = 0;
+
+    do {
+        p->_4A = i;
+        p->_38 = lbl_3_data_26E7C[3] / 100000.0f;
+        p->_3C = lbl_3_data_26E7C[4] / 100000.0f;
+        fn_3_148FD0(emitter, p);
+        p->_48 = (i % 5 * (lbl_3_data_26E7C[0] / 5) + rand() % (lbl_3_data_26E7C[0] / 5)) * 2;
+        i++;
+        p = p->next;
+    } while (p != NULL);
 }
 
 // .text:0x00148FD0 size:0x370 mapped:0x80788064
@@ -2738,8 +2771,8 @@ void fn_3_148EF0(Particle3880* p, f32 angle) {
 }
 
 // .text:0x0014841C size:0xAD4 mapped:0x807874B0
-void fn_3_14841C(void) {
-    return;
+BOOL fn_3_14841C(Emitter3880* emitter) {
+    return FALSE;
 }
 
 // .text:0x001483D4 size:0x48 mapped:0x80787468
