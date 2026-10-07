@@ -2,6 +2,11 @@
 #define __GAME_rep_1E08_H_
 
 #include "mssbTypes.h"
+#include "Dolphin/mtx.h"
+
+struct UnkKey21F8;
+struct UnkAnim21F8;
+struct UnkEffect21F8;
 
 void fn_3_BA538(void);
 void fn_3_BA7F4(void);
@@ -23,8 +28,8 @@ void fn_3_BD1D4(void);
 void fn_3_BD1D8(void);
 void fn_3_BD434(void);
 void fn_3_BD4F0(void);
-void fn_3_BD504(void);
-void fn_3_BD6AC(void);
+void fn_3_BD504(f32 x, f32 y, f32 z, BOOL arg3);
+void fn_3_BD6AC(s32 arg0, f32 x, f32 y, f32 z);
 void fn_3_BD758(void);
 void fn_3_BD7D0(void);
 void fn_3_BD7D8(void);
@@ -36,7 +41,7 @@ void fn_3_BDCA4(void);
 void fn_3_BDE14(void);
 void fn_3_BDF74(void);
 void fn_3_BE140(void);
-void fn_3_BE174(void);
+void fn_3_BE174(s32 type, f32 x, f32 y, f32 z);
 void fn_3_BE1D4(void);
 void fn_3_BEFF8(void);
 void fn_3_BF070(void);
@@ -45,10 +50,11 @@ void fn_3_BF1AC(void);
 void fn_3_BF20C(void);
 void fn_3_BF238(void);
 void fn_3_BF6C0(void);
-void fn_3_BF878(void);
-void fn_3_BF8F8(void);
+BOOL fn_3_BF878(void);
+void fn_3_BF8F8(struct UnkEffect21F8* effect, Mtx m, Vec* pos,
+                 f32 (*callback)(struct UnkAnim21F8*, int, Mtx, f32));
 void fn_3_BFB3C(void);
-void fn_3_BFDA4(void);
+f32 fn_3_BFDA4(struct UnkKey21F8* keys, int count, int frame, u8 current, u8* currentOut, f32 t);
 void fn_3_C0134(void);
 
 #endif // !__GAME_rep_1E08_H_

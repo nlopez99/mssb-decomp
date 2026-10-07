@@ -3,6 +3,7 @@
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/os.h"
 #include "game/rep_1D58.h"
+#include "game/rep_1E08.h"
 
 typedef struct {
     /* 0x00 */ u8 _00[0x10];
@@ -61,9 +62,6 @@ extern void fn_800B0A14_removeQueue(void);
 extern void fn_3_5EC0(void* data);
 extern void fn_3_106DFC(void);
 extern BOOL fn_3_106E50(void);
-// rep_1E08.h declares these as void(void), matching their stub definitions
-extern void fn_3_BD7D8(void);
-extern BOOL fn_3_BF878(void);
 
 // .text:0x0000065C size:0x278 mapped:0x8063F6F0
 void manageLoadingState(void) {
