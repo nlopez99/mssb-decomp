@@ -145,7 +145,8 @@ typedef struct UnkStats3448 {
     /* 0x0C */ u8 _0C[6];
     /* 0x12 */ u8 _12;
     /* 0x13 */ u8 _13;
-} UnkStats3448;
+    /* 0x14 */ u8 _14;
+} UnkStats3448; // size: 0x16
 
 // Filled from UnkStats3448 by fn_8006C2B4
 typedef struct UnkTotals3448 {
@@ -812,7 +813,7 @@ extern void fn_80025EEC(UnkAnimState3448* state, s32, s32);
 extern u32 fn_3_107C88(void);
 extern struct UnkRecord3448* fn_3_109D88(void);
 extern s32 fn_8006C100(s16);
-extern s32 fn_8006C268(struct UnkTotals3448* totals);
+extern s16 fn_8006C268(struct UnkTotals3448* totals);
 extern void fn_8006C2B4(struct UnkTotals3448* totals, struct UnkStats3448* stats);
 extern void fn_3_10754C(struct UnkStats3448* stats);
 extern s32 fn_3_107CD0(void);
@@ -1021,13 +1022,15 @@ remove:
 }
 
 // .text:0x00127B68 size:0xED0 mapped:0x80766BFC
+// 99.91%: before the last loop the target forms lbl_80371C30's address after the three
+// division constants, the base before them (same registers).
 void fn_3_127B68(void) {
     UnkTask3448* task = lbl_803CC1B8;
     UnkTask3448* self = lbl_803CC1B8;
     UnkTotals3448 totals;
     UnkStats3448 stats;
     u32 i;
-    s32 n;
+    s16 n;
     s16 diff;
     s16 step;
 
@@ -1050,9 +1053,10 @@ void fn_3_127B68(void) {
         fn_80034E20(task, lbl_3_data_22700);
         lbl_80371C30[task->_14 + 2]._00->_5C =
             inMemRoster[0][g_Minigame.minigameControlStruct.characterIndex[g_Minigame._1908]].stats.CharID << 16;
-        for (i = 0; i < 6; i++) {
-            lbl_80371C30[task->_14 + stats._0C[i] + 3]._00->_72 = lbl_3_data_22B00[i];
-        }
+        i = 0;
+        do {
+            lbl_80371C30[task->_14 + (stats._0C[i] + 3)]._00->_72 = lbl_3_data_22B00[i];
+        } while (++i < 6);
         n = stats._00[0];
         if (n > 9999) {
             n = 9999;
@@ -1139,34 +1143,42 @@ void fn_3_127B68(void) {
         }
         lbl_80371C30[task->_14 + 30]._00->_64 = lbl_3_data_22B08[(u8)fn_8006C100(n)];
         task->_1C = 1;
+        break;
     case 1:
-        if (lbl_80371C30[task->_14]._00->_69 == 2 && lbl_80371C30[task->_14 + 1]._00->_69 == 2 &&
+        if (isSpriteDone(task, 0) && lbl_80371C30[task->_14 + 1]._00->_69 == 2 &&
             lbl_80371C30[task->_14 + 3]._00->_69 == 2) {
             lbl_80371C30[task->_14 + 28]._00->_68 = 1;
             lbl_80371C30[task->_14 + 29]._00->_68 = 1;
             fn_3_90064(lbl_3_data_81FC[0x30]);
             task->_1C = 2;
         }
+        break;
     case 2:
-        if (lbl_80371C30[task->_14 + 29]._00->_69 == 2) {
+        if (isAnimDone(lbl_80371C30[task->_14 + 29]._00)) {
             lbl_80371C30[task->_14 + 30]._00->_68 = 1;
             fn_3_90064(lbl_3_data_81FC[0x31]);
             task->_1C = 3;
         }
+        break;
     case 3:
         if (lbl_80371C30[task->_14 + 30]._00->_69 == 2) {
             task->_1C = 4;
         }
+        break;
     case 4:
         task->_18 = 1;
         if (task->_1A != 0) {
             task->_1C = 5;
         }
+        break;
     case 5:
         task->_1C = 6;
+        break;
+    case 6:
+        break;
     }
     for (i = 0; i < 8; i++) {
-        if (lbl_80371C30[task->_14 + 3]._00->_5C >> 16 >= lbl_3_data_22B18[i]) {
+        if (getFrame(task, 3) >= lbl_3_data_22B18[i]) {
             if (lbl_80371C30[task->_14 + 3]._00->_5C >> 16 == lbl_3_data_22B18[i]) {
                 fn_3_90064(lbl_3_data_81FC[0x2F]);
             }
