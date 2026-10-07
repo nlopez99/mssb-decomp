@@ -25,9 +25,14 @@ extern f32 lbl_3_data_19CC[4];
 extern u8 lbl_3_data_19C4[8];
 extern f32 lbl_3_data_19DC[5][2];
 extern f32 lbl_3_data_1A04[2];
+extern f32 lbl_3_data_1A0C[2];
 extern u8 lbl_3_data_1A24[4];
 extern u8 lbl_3_data_1A28[4][5];
 extern u8 lbl_3_data_1A3C[4];
+extern u8 lbl_3_data_1A40[6][4];
+extern u8 lbl_3_data_1A58[3][4][4];
+extern f32 lbl_3_data_1A88[4][2];
+extern f32 lbl_3_data_1AA8;
 extern u8 lbl_3_data_1AAC[4];
 extern u8 lbl_3_data_1AB0[4][3];
 extern u8 lbl_3_data_1ABC[2][4][4];
@@ -46,6 +51,7 @@ extern u8 lbl_3_data_1BD8[4][3];
 extern u8 lbl_3_data_1BE4[4][3];
 extern u8 lbl_3_data_1BF0[2][4][3];
 extern f32 lbl_3_data_4474[4];
+extern f32 lbl_3_data_5EB8[3];
 
 // .text:0x00020224 size:0x83C mapped:0x8065F2B8
 void fn_3_20224(void) {
@@ -144,12 +150,163 @@ void batterAIControlled(void) {
 
 // .text:0x0001F998 size:0x3F4 mapped:0x8065EA2C
 void fn_3_1F998(void) {
-    return;
+    BatterReachStruct* reach = &BatterHitbox[g_Batter.charID];
+    f32* speed = lbl_3_data_1A0C;
+
+    if (g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_PRACTICE_FIELDING) {
+        return;
+    }
+    if (g_Pitcher.windupCountdownUntilBallReleased <= lbl_3_data_1A3C[g_AiLogic.aIBatterDifficulty]) {
+        fn_3_1F478();
+    } else {
+        fn_3_1F1CC();
+    }
+
+    if (g_AiLogic.batterAIDesiredXPosInBox < g_AiLogic.boxHorizontalPoint) {
+        g_AiLogic.batterAIBoxPosXVelo -= speed[1];
+        if (g_AiLogic.batterAIBoxPosXVelo < -speed[0]) {
+            g_AiLogic.batterAIBoxPosXVelo = -speed[0];
+        }
+        g_AiLogic.boxHorizontalPoint += g_AiLogic.batterAIBoxPosXVelo;
+        if (g_AiLogic.batterAIDesiredXPosInBox > g_AiLogic.boxHorizontalPoint) {
+            g_AiLogic.boxHorizontalPoint = g_AiLogic.batterAIDesiredXPosInBox;
+        }
+    } else if (g_AiLogic.batterAIDesiredXPosInBox > g_AiLogic.boxHorizontalPoint) {
+        g_AiLogic.batterAIBoxPosXVelo += speed[1];
+        if (g_AiLogic.batterAIBoxPosXVelo > speed[0]) {
+            g_AiLogic.batterAIBoxPosXVelo = speed[0];
+        }
+        g_AiLogic.boxHorizontalPoint += g_AiLogic.batterAIBoxPosXVelo;
+        if (g_AiLogic.batterAIDesiredXPosInBox < g_AiLogic.boxHorizontalPoint) {
+            g_AiLogic.boxHorizontalPoint = g_AiLogic.batterAIDesiredXPosInBox;
+        }
+    } else {
+        g_AiLogic.batterAIInd10_relatedToBoxPosPrePitch = 2;
+        g_AiLogic.batterAIBoxPosXVelo = 0.0f;
+    }
+    if (g_AiLogic.boxHorizontalPoint < reach->HorizontalRangeNear) {
+        g_AiLogic.boxHorizontalPoint = reach->HorizontalRangeNear;
+    }
+    if (g_AiLogic.boxHorizontalPoint > reach->HorizontalRangeFar) {
+        g_AiLogic.boxHorizontalPoint = reach->HorizontalRangeFar;
+    }
+
+    if (g_AiLogic.batterAIDesiredZPosInBox < g_AiLogic.boxVerticalPoint) {
+        g_AiLogic.batterAIBoxPosZVelo -= speed[1];
+        if (g_AiLogic.batterAIBoxPosZVelo < -speed[0]) {
+            g_AiLogic.batterAIBoxPosZVelo = -speed[0];
+        }
+        g_AiLogic.boxVerticalPoint += g_AiLogic.batterAIBoxPosZVelo;
+        if (g_AiLogic.batterAIDesiredZPosInBox > g_AiLogic.boxVerticalPoint) {
+            g_AiLogic.boxVerticalPoint = g_AiLogic.batterAIDesiredZPosInBox;
+        }
+    } else if (g_AiLogic.batterAIDesiredZPosInBox > g_AiLogic.boxVerticalPoint) {
+        g_AiLogic.batterAIBoxPosZVelo += speed[1];
+        if (g_AiLogic.batterAIBoxPosZVelo > speed[0]) {
+            g_AiLogic.batterAIBoxPosZVelo = speed[0];
+        }
+        g_AiLogic.boxVerticalPoint += g_AiLogic.batterAIBoxPosZVelo;
+        if (g_AiLogic.batterAIDesiredZPosInBox < g_AiLogic.boxVerticalPoint) {
+            g_AiLogic.boxVerticalPoint = g_AiLogic.batterAIDesiredZPosInBox;
+        }
+    } else {
+        g_AiLogic.batterAIBoxPosZVelo = 0.0f;
+    }
+    if (g_AiLogic.boxVerticalPoint < reach->VerticalRangeFront) {
+        g_AiLogic.boxVerticalPoint = reach->VerticalRangeFront;
+    }
+    if (g_AiLogic.boxVerticalPoint > reach->VerticalRangeBack) {
+        g_AiLogic.boxVerticalPoint = reach->VerticalRangeBack;
+    }
+
+    g_Batter.batPosition2.x = g_AiLogic.boxHorizontalPoint;
+    g_Batter.batPosition2.z = g_AiLogic.boxVerticalPoint;
+    g_Batter.batterPos.x = g_Batter.batPosition2.x + reach->batOffsetFromBatterX;
+    g_Batter.batterPos.z = g_Batter.batPosition2.z + reach->batOffsetFromBatterZ;
+    if (g_Batter.batterHand != 0) {
+        g_Batter.batterPos.x = -g_Batter.batterPos.x;
+    }
 }
 
 // .text:0x0001F478 size:0x520 mapped:0x8065E50C
 void fn_3_1F478(void) {
-    return;
+    BOOL centered = FALSE;
+    int chance;
+    int zone;
+    f32 step;
+    f32 edge;
+    f32 x;
+
+    if (g_Ball.pitchHangtimeCounter < g_AiLogic.batterAIInd8_FrameBtwn10And16) {
+        fn_3_1F350();
+    } else if (g_Ball.pitchHangtimeCounter == g_AiLogic.batterAIInd8_FrameBtwn10And16) {
+        if (g_Pitcher.starPitchType == 3 || g_Pitcher.starPitchType == 4) {
+            g_AiLogic._73 = RandomInt_Game(2);
+            chance = lbl_3_data_1A40[5][g_AiLogic.aIBatterDifficulty];
+        } else if (g_Pitcher.starPitchType == 11 || g_Pitcher.starPitchType == 12) {
+            g_AiLogic.batterAITrackBallPoorlyOffset = RandomF32_Game_Range(-lbl_3_data_1AA8, lbl_3_data_1AA8);
+            g_AiLogic.aIBatterTrackingCode = 2;
+            return;
+        } else if (g_Pitcher.pitchXPosition2 >= lbl_3_data_19CC[1] && g_Pitcher.pitchXPosition2 < lbl_3_data_19CC[2]) {
+            centered = TRUE;
+            chance = lbl_3_data_1A40[4][g_AiLogic.aIBatterDifficulty];
+        } else {
+            chance = lbl_3_data_1A40[g_Batter.characterClass][g_AiLogic.aIBatterDifficulty];
+        }
+        if (RandomInt_Game(100) >= chance) {
+            return;
+        }
+        step = (lbl_3_data_4474[1] - lbl_3_data_4474[0]) / 5.0f;
+        edge = lbl_3_data_4474[0];
+        for (zone = 0; zone < 4; zone++) {
+            edge += step;
+            if (g_Pitcher.pitcher.x < edge) {
+                break;
+            }
+        }
+        if (g_Pitcher.starPitchType == 3 || g_Pitcher.starPitchType == 4) {
+            chance = lbl_3_data_1A58[0][g_Batter.characterClass][g_AiLogic.aIBatterDifficulty];
+        } else if (centered) {
+            chance = lbl_3_data_1A58[2][g_Batter.characterClass][g_AiLogic.aIBatterDifficulty];
+        } else if (g_AiLogic.lastPitchMoundZone == zone) {
+            chance = lbl_3_data_1A58[1][g_Batter.characterClass][g_AiLogic.aIBatterDifficulty];
+        } else {
+            chance = lbl_3_data_1A58[0][g_Batter.characterClass][g_AiLogic.aIBatterDifficulty];
+        }
+        if (RandomInt_Game(100) < chance) {
+            g_AiLogic.batterAITrackBallPoorlyOffset = RandomF32_Game_Range(lbl_3_data_1A88[g_AiLogic.aIBatterDifficulty][0],
+                                                                           lbl_3_data_1A88[g_AiLogic.aIBatterDifficulty][1]);
+            if (RandomInt_Game(2) != 0) {
+                g_AiLogic.batterAITrackBallPoorlyOffset = -g_AiLogic.batterAITrackBallPoorlyOffset;
+            }
+            g_AiLogic.aIBatterTrackingCode = 1;
+        } else {
+            g_AiLogic.aIBatterTrackingCode = 2;
+            g_AiLogic.batterAITrackBallPoorlyOffset = 0.0f;
+        }
+    } else if (g_AiLogic.aIBatterTrackingCode != 0) {
+        if (g_Pitcher.starPitchType == 11 || g_Pitcher.starPitchType == 12) {
+            g_AiLogic.batterAIDesiredXPosInBox = g_AiLogic.batterAITrackBallPoorlyOffset;
+            return;
+        }
+        x = g_Pitcher.pitchXPosition;
+        if (g_Pitcher.starPitchType == 3 || g_Pitcher.starPitchType == 4) {
+            if (g_Pitcher.warioWaluStarPitchRightLeft == 0) {
+                x += lbl_3_data_5EB8[0];
+            } else {
+                x -= lbl_3_data_5EB8[0];
+            }
+            if (g_AiLogic._73 == 0) {
+                x = -x;
+            }
+        }
+        if (g_Batter.batterHand != 0) {
+            x = -x;
+            g_AiLogic.batterAIDesiredXPosInBox = x - g_AiLogic.batterAITrackBallPoorlyOffset;
+        } else {
+            g_AiLogic.batterAIDesiredXPosInBox = x + g_AiLogic.batterAITrackBallPoorlyOffset;
+        }
+    }
 }
 
 // .text:0x0001F350 size:0x128 mapped:0x8065E3E4
