@@ -1,9 +1,15 @@
 #include "game/rep_3310.h"
-#include "header_rep_data.h"
+// Must precede header_rep_data.h, which keeps the .rodata constants unpooled as in the target
 #include "game/UnknownHomes_Game.h"
+#include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
 #include "game/rep_1C0.h"
+#include "game/rep_1838.h"
 #include "game/rep_1D58.h"
+#include "game/m_sound.h"
+#include "Dolphin/mtx.h"
+#include "C3/control.h"
+#include "string.h"
 
 typedef struct {
     /* 0x00 */ u8 _00[0x20];
@@ -27,6 +33,8 @@ typedef struct {
 typedef struct {
     /* 0x00 */ u8 _00[0x14];
     /* 0x14 */ UnkAnimSet3310* _14;
+    /* 0x18 */ u8 _18[0xEC - 0x18];
+    /* 0xEC */ Mtx* _EC;
 } UnkModel3310;
 
 typedef struct {
@@ -44,7 +52,7 @@ typedef struct {
     /* 0x04 */ void* _04;
     /* 0x08 */ u8 _08[0xE - 0x8];
     /* 0x0E */ u16 _0E;
-    /* 0x10 */ u8 _10[0x54 - 0x10];
+    /* 0x10 */ Control _10;
     /* 0x54 */ f32 _54;
     /* 0x58 */ u8 _58;
     /* 0x59 */ u8 _59;
@@ -60,8 +68,11 @@ typedef struct {
     /* 0x34 */ UnkActor3310 _34[1];
 } UnkActorTable3310;
 
-typedef struct {
-    /* 0x00 */ u8 _00[0x26];
+typedef struct UnkObj3310 {
+    /* 0x00 */ void (*_00)(s32);
+    /* 0x04 */ Vec _04;
+    /* 0x10 */ Vec _10;
+    /* 0x1C */ u8 _1C[0x26 - 0x1C];
     /* 0x26 */ u8 _26;
     /* 0x27 */ u8 _27;
 } UnkObj3310; // size: 0x28
@@ -69,15 +80,35 @@ typedef struct {
 extern struct {
     /* 0x0000 */ u8 _0000[0x68];
     /* 0x0068 */ UnkActorTable3310* _0068;
-    /* 0x006C */ u8 _006C[0x2D94 - 0x6C];
+    /* 0x006C */ u8 _006C[0xAC - 0x6C];
+    /* 0x00AC */ void* _00AC[4];
+    /* 0x00BC */ u8 _00BC[0x2D94 - 0xBC];
     /* 0x2D94 */ UnkObj3310* _2D94;
-    /* 0x2D98 */ u8 _2D98[0x3078 - 0x2D98];
+    /* 0x2D98 */ u8 _2D98[0x2DA0 - 0x2D98];
+    /* 0x2DA0 */ void* _2DA0[27][3]; // layout, geometry and texture of each model
+    /* 0x2EE4 */ u8 _2EE4[0x3078 - 0x2EE4];
     /* 0x3078 */ u16 _3078;
     /* 0x307A */ u8 _307A[0x307E - 0x307A];
     /* 0x307E */ u8 _307E;
 } lbl_8036E548;
 
-// g_Minigame's layout in this minigame
+typedef struct {
+    /* 0x00 */ Vec pos;
+    /* 0x0C */ u8 _0C[0x26 - 0xC];
+    /* 0x26 */ u8 active;
+    /* 0x27 */ u8 _27;
+} UnkPiranha3310; // size: 0x28
+
+typedef struct {
+    /* 0x00 */ Vec pos;
+    /* 0x0C */ u8 _0C[0x18 - 0xC];
+    /* 0x18 */ Vec rot; // degrees
+    /* 0x24 */ u8 _24[0x3D - 0x24];
+    /* 0x3D */ u8 active;
+    /* 0x3E */ u8 _3E[0x40 - 0x3E];
+} UnkMgMarker3310; // size: 0x40
+
+// g_Minigame's layout in the minigames this unit serves
 typedef struct {
     /* 0x00 */ Vec pos;
     /* 0x0C */ u8 _0C[0x2C - 0xC];
@@ -87,7 +118,10 @@ typedef struct {
 
 typedef struct {
     /* 0x0000 */ UnkMgEntry3310 _0000[3];
-    /* 0x00A8 */ u8 _00A8[0xCCE - 0xA8];
+    /* 0x00A8 */ UnkPiranha3310 _00A8[40];
+    /* 0x06E8 */ u8 _06E8[0xBB0 - 0x6E8];
+    /* 0x0BB0 */ UnkMgMarker3310 _0BB0[4];
+    /* 0x0CB0 */ u8 _0CB0[0xCCE - 0xCB0];
     /* 0x0CCE */ u8 _0CCE;
     /* 0x0CCF */ u8 _0CCF[0x1A2A - 0xCCF];
     /* 0x1A2A */ u8 _1A2A;
@@ -105,6 +139,24 @@ extern struct {
 } lbl_3_common_bss_32724;
 
 extern f32 fn_800B4A94(UnkModelSet3310* model);
+extern void fn_8001D0D0(s32 id, f32 scale);
+extern void fn_8001D110(s32 id, f32 x, f32 y, f32 z);
+extern void fn_800BDC88(UnkActorTable3310* actors, u16 first, u16 last, void* model, void* anim, s32 arg5);
+extern void fn_800BD548(UnkActor3310* actor, s32 count, ...);
+
+// .data outside this unit's split
+extern s16 lbl_3_data_217A4[12];
+extern Vec lbl_3_data_21A48;
+extern Vec lbl_3_data_21B94[4];
+extern struct {
+    /* 0x00 */ Vec pos;
+    /* 0x0C */ u8 _0C[0x30 - 0xC];
+} lbl_3_data_21BC4[7];
+
+extern struct {
+    /* 0x00 */ u8 _00[0x28];
+    /* 0x28 */ u8 _28;
+} lbl_80366158;
 extern void minigamesSetSomePointers(void);
 extern void minigamesGXStuff(void);
 extern void minigamesSetSomePointers2(void);
@@ -165,7 +217,15 @@ f32 lbl_3_data_226DC = 4.0f;
 
 // .text:0x0011D2C8 size:0xE4 mapped:0x8075C35C
 void fn_3_11D2C8(s32 model, s32 first, s32 count, void* anim, s32 arg4) {
-    return;
+    s32 i;
+
+    for (i = first; i < first + count; i++) {
+        fn_800BDC88(lbl_8036E548._0068, i, i, lbl_8036E548._2DA0[model][0], anim, arg4);
+        fn_800BD548(&lbl_8036E548._0068->_34[i], 4, lbl_8036E548._00AC[0], lbl_8036E548._00AC[1],
+                    lbl_8036E548._00AC[2], lbl_8036E548._00AC[3]);
+        CTRLSetTranslation(&lbl_8036E548._0068->_34[i]._10, 0.0f, 0.0f, 0.0f);
+        CTRLSetRotation(&lbl_8036E548._0068->_34[i]._10, 0.0f, 0.0f, 0.0f);
+    }
 }
 
 // .text:0x0011D1B0 size:0x118 mapped:0x8075C244
@@ -237,7 +297,7 @@ void fn_3_11AB2C(void) {
 }
 
 // .text:0x0011A92C size:0x200 mapped:0x807599C0
-void fn_3_11A92C(void) {
+void fn_3_11A92C(UnkObj3310* obj, s32 id) {
     return;
 }
 
@@ -297,7 +357,15 @@ void fn_3_119E30(s32 i) {
 
 // .text:0x00119D34 size:0xFC mapped:0x80758DC8
 void fn_3_119D34(void) {
-    return;
+    UnkObj3310* obj = &lbl_8036E548._2D94[0x1F];
+
+    obj->_26 = 1;
+    fn_3_11A92C(obj, 0x1F);
+    if (lbl_80366158._28 == 0 && g_GameLogic.gameStatus == GAME_STATUS_AT_BAT &&
+        g_Pitcher.pitchTotalTimeCounter == lbl_3_data_217A4[7]) {
+        fn_3_119C34();
+        fn_3_90064(0x2E6);
+    }
 }
 
 // .text:0x00119D28 size:0xC mapped:0x80758DBC
@@ -328,7 +396,19 @@ void fn_3_119934(void) {
 
 // .text:0x00119878 size:0xBC mapped:0x8075890C
 void fn_3_119878(void) {
-    return;
+    MiniGameStruct* mg = &g_Minigame;
+    UnkObj3310* obj = &lbl_8036E548._2D94[0xA6];
+    obj->_26 = 0;
+    obj->_00 = NULL;
+    if (mg->_CCE[0] != 0 &&
+        (mg->_CCC > 60 || mg->_CCC % 2 != 0 || mg->_1B19 == 2 || mg->_1B19 == 3)) {
+        obj->_26 = 1;
+        obj->_00 = fn_3_11741C;
+        obj->_04.x = mg->_CB0;
+        obj->_04.y = -mg->_CB4;
+        obj->_04.z = mg->_CB8;
+        fn_8001D0D0(0xA6, 3.5f);
+    }
 }
 
 // .text:0x00119854 size:0x24 mapped:0x807588E8
@@ -379,7 +459,29 @@ void fn_3_11897C(s32 i) {
 
 // .text:0x0011887C size:0x100 mapped:0x80757910
 void fn_3_11887C(void) {
-    return;
+    UnkObj3310* obj;
+    s32 i;
+    s32 id;
+
+    for (i = 0; i < 7; i++) {
+        id = i + 0xE9;
+        obj = &lbl_8036E548._2D94[id];
+        obj->_26 = 1;
+        if (i < 4) {
+            obj->_04.x = lbl_3_data_21B94[i].x;
+            obj->_04.y = -lbl_3_data_21B94[i].y;
+            obj->_04.z = lbl_3_data_21B94[i].z;
+            obj->_04.y = 0.0f;
+            fn_8001D110(id, lbl_3_data_226C4[2], lbl_3_data_226C4[3], lbl_3_data_226C4[2]);
+            obj->_00 = fn_3_11881C;
+        } else {
+            obj->_04.x = lbl_3_data_21BC4[i - 4].pos.x;
+            obj->_04.y = -lbl_3_data_21BC4[i - 4].pos.y;
+            obj->_04.z = lbl_3_data_21BC4[i - 4].pos.z;
+            fn_8001D110(id, lbl_3_data_226C4[0], lbl_3_data_226C4[1], lbl_3_data_226C4[0]);
+            obj->_00 = fn_3_11881C;
+        }
+    }
 }
 
 // .text:0x0011881C size:0x60 mapped:0x807578B0
@@ -395,7 +497,25 @@ void fn_3_11881C(s32 i) {
 
 // .text:0x0011874C size:0xD0 mapped:0x807577E0
 void fn_3_11874C(void) {
-    return;
+    s32 i;
+    UnkObj3310* obj;
+    Vec* pos;
+
+    if (g_GameLogic.secondaryGameMode != SECONDARY_GAME_MODE_STAR_DASH) {
+        for (i = 0; i < 40; i++) {
+            obj = &lbl_8036E548._2D94[i];
+            pos = &MG._00A8[i].pos;
+            obj->_26 = 0;
+            obj->_00 = NULL;
+            if (MG._00A8[i].active) {
+                obj->_26 = 1;
+                obj->_04.x = pos->x;
+                obj->_04.z = pos->z;
+                obj->_04.y = -0.01f;
+                fn_8001D110(i, lbl_3_data_226D4[1], 1.0f, lbl_3_data_226D4[1]);
+            }
+        }
+    }
 }
 
 // .text:0x00118614 size:0x138 mapped:0x807576A8
@@ -410,12 +530,32 @@ void fn_3_118508(void) {
 
 // .text:0x001183FC size:0x10C mapped:0x80757490
 void fn_3_1183FC(void) {
-    return;
+    s32 i;
+    UnkObj3310* obj;
+
+    for (i = 0; i < 4; i++) {
+        obj = &lbl_8036E548._2D94[i + 0xF0];
+        obj->_04.x = lbl_3_data_21B94[i].x;
+        obj->_04.y = -lbl_3_data_21B94[i].y;
+        obj->_04.z = lbl_3_data_21B94[i].z;
+        obj->_04.y = 0.0f;
+        obj->_04.z -= lbl_3_data_226DC;
+        obj->_26 = 1;
+    }
 }
 
 // .text:0x00118358 size:0xA4 mapped:0x807573EC
-void fn_3_118358(void) {
-    return;
+void fn_3_118358(s32 i, Vec* out) {
+    UnkActor3310* actor = &lbl_8036E548._0068->_34[i + 0x82];
+    UnkModel3310* model = actor->_00->_18[17];
+    if (i < 0 || i > 2) {
+        return;
+    }
+    if (out != NULL) {
+        memset(out, 0, sizeof(Vec));
+        PSMTXMultVec(*model->_EC, out, out);
+        out->y *= -1.0f;
+    }
 }
 
 // .text:0x00118164 size:0x1F4 mapped:0x807571F8
@@ -425,37 +565,120 @@ void fn_3_118164(void) {
 
 // .text:0x001180A4 size:0xC0 mapped:0x80757138
 void fn_3_1180A4(void) {
-    return;
+    UnkObj3310* objs = lbl_8036E548._2D94;
+
+    objs[0x64]._26 = 0;
+    objs[0xE6]._26 = 0;
+    if (g_Minigame._B6C._40[0] == 1) {
+        objs[0xE6]._26 = 1;
+        objs[0xE6]._04.x = g_Minigame._B6C._0.x;
+        objs[0xE6]._04.y = -g_Minigame._B6C._0.y;
+        objs[0xE6]._04.z = g_Minigame._B6C._0.z;
+        objs[0xE6]._10.x = 0.0f;
+        objs[0xE6]._10.y = 0.0f;
+        objs[0xE6]._10.z = 0.0f;
+        objs[0x64]._26 = 1;
+        objs[0x64]._00 = NULL;
+        objs[0x64]._04.x = g_Minigame._B6C._0.x;
+        objs[0x64]._04.y = -0.05f;
+        objs[0x64]._04.z = g_Minigame._B6C._0.z;
+        fn_8001D0D0(0x64, 10.0f);
+    }
 }
 
 // .text:0x00117FC8 size:0xDC mapped:0x8075705C
 void fn_3_117FC8(void) {
-    return;
+    UnkObj3310* obj = &lbl_8036E548._2D94[0xE8];
+
+    obj->_26 = 0;
+    lbl_8036E548._2D94[0x65]._26 = 0;
+    if (g_Minigame._72A) {
+        obj->_26 = 1;
+        obj->_04.x = g_Minigame._6E8;
+        obj->_04.y = -g_Minigame._6EC;
+        obj->_04.z = g_Minigame._6F0;
+        fn_8001D0D0(0xE8, 3.0f);
+        if (g_Minigame._724 == 0) {
+            obj->_10.y = RandomF32_Game_Range(-3.1415927f, 3.1415927f);
+        } else {
+            obj->_10.y = fn_3_9FEA8(0.1f + obj->_10.y);
+        }
+        obj->_00 = fn_3_117B78;
+    }
 }
 
 // .text:0x00117B78 size:0x450 mapped:0x80756C0C
-void fn_3_117B78(void) {
+void fn_3_117B78(s32 i) {
     return;
 }
 
 // .text:0x00117AE4 size:0x94 mapped:0x80756B78
 void fn_3_117AE4(void) {
-    return;
+    UnkObj3310* obj = &lbl_8036E548._2D94[0xE7];
+
+    obj->_26 = 1;
+    obj->_04.x = lbl_3_data_21A48.x;
+    obj->_04.z = lbl_3_data_21A48.z;
+    obj->_04.y = 0.0f;
+    obj->_10.x = 0.0f;
+    obj->_10.z = 0.0f;
+    obj->_10.y = shortAngleToRad(0x1000 - g_Minigame._1D64[0]);
+    fn_8001D0D0(0xE7, 3.0f);
 }
 
 // .text:0x001179EC size:0xF8 mapped:0x80756A80
 void fn_3_1179EC(void) {
-    return;
+    u32 i;
+    UnkObj3310* obj;
+    UnkMgMarker3310* marker;
+    s32 id;
+
+    for (i = 0; i < 4; i++) {
+        id = i + 0xE9;
+        obj = &lbl_8036E548._2D94[id];
+        marker = &MG._0BB0[i];
+        obj->_26 = 0;
+        obj->_00 = NULL;
+        if (MG._0BB0[i].active) {
+            obj->_26 = 1;
+            obj->_04.x = marker->pos.x;
+            obj->_04.y = -marker->pos.y;
+            obj->_04.z = marker->pos.z;
+            obj->_10.x = 0.017453292f * marker->rot.x;
+            obj->_10.y = 0.017453292f * marker->rot.y;
+            obj->_10.z = 0.017453292f * marker->rot.z;
+            fn_8001D0D0(id, 2.5f);
+            obj->_00 = fn_3_117588;
+        }
+    }
 }
 
 // .text:0x00117588 size:0x464 mapped:0x8075661C
-void fn_3_117588(void) {
+void fn_3_117588(s32 i) {
     return;
 }
 
 // .text:0x00117494 size:0xF4 mapped:0x80756528
 void fn_3_117494(void) {
-    return;
+    MiniGameStruct* mg = &g_Minigame;
+    UnkObj3310* objs = lbl_8036E548._2D94;
+
+    objs[0xED]._26 = 0;
+    objs[0x65]._26 = 0;
+    objs[0xED]._00 = NULL;
+    if (mg->_CCE[0] != 0 && (mg->_CCC > 60 || mg->_CCC % 2 != 0)) {
+        objs[0xED]._26 = 1;
+        objs[0xED]._00 = fn_3_11741C;
+        objs[0xED]._04.x = mg->_CB0;
+        objs[0xED]._04.y = -mg->_CB4;
+        objs[0xED]._04.z = mg->_CB8;
+        fn_8001D0D0(0xED, 2.5f);
+        objs[0x65]._26 = 1;
+        objs[0x65]._04.x = mg->_CB0;
+        objs[0x65]._04.y = -0.05f;
+        objs[0x65]._04.z = mg->_CB8;
+        fn_8001D0D0(0x65, 12.5f);
+    }
 }
 
 // .text:0x0011741C size:0x78 mapped:0x807564B0

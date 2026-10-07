@@ -2,6 +2,9 @@
 #define __GAME_rep_3310_H_
 
 #include "mssbTypes.h"
+#include "Dolphin/mtx.h"
+
+struct UnkObj3310;
 
 void fn_3_116840(void);
 void fn_3_1169D0(void);
@@ -9,14 +12,14 @@ void fn_3_116B38(void);
 void fn_3_116B74(void);
 void fn_3_11741C(s32 i);
 void fn_3_117494(void);
-void fn_3_117588(void);
+void fn_3_117588(s32 i);
 void fn_3_1179EC(void);
 void fn_3_117AE4(void);
-void fn_3_117B78(void);
+void fn_3_117B78(s32 i);
 void fn_3_117FC8(void);
 void fn_3_1180A4(void);
 void fn_3_118164(void);
-void fn_3_118358(void);
+void fn_3_118358(s32 i, Vec* out);
 void fn_3_1183FC(void);
 void fn_3_118508(void);
 void fn_3_118614(void);
@@ -45,7 +48,7 @@ void fn_3_11A210(void);
 u32 fn_3_11A350(s32 i);
 void fn_3_11A38C(s32 i, u16 frame);
 void fn_3_11A408(void);
-void fn_3_11A92C(void);
+void fn_3_11A92C(struct UnkObj3310* obj, s32 id);
 void fn_3_11AB2C(void);
 void fn_3_11AC6C(void);
 void fn_3_11B75C(void);
