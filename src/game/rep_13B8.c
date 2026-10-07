@@ -1070,8 +1070,8 @@ void fn_3_85074(void) {
 // Written out in fn_3_84AD0, the base's &lbl_3_data_4444[i].z is kept for its later call; inline, it is not
 static inline int ballFramesToBase(int frame, int base) {
     return fn_3_A6810(g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.x,
-                              g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.z, lbl_3_data_4444[base].x,
-                              lbl_3_data_4444[base].z);
+                      g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.z, lbl_3_data_4444[base].x,
+                      lbl_3_data_4444[base].z);
 }
 
 int fn_3_84AD0(int runner, int frame) {
@@ -1922,8 +1922,24 @@ int fn_3_7FA78(int runner) {
 }
 
 // .text:0x0007F9C4 size:0xB4 mapped:0x806BEA58
-void fn_3_7F9C4(void) {
-    return;
+void fn_3_7F9C4(int runner) {
+    InMemRunnerType* r = &g_Runners[runner];
+
+    if (r->runningToDugoutInd != 0) {
+        r->baseRoundingState = 0;
+        r->actionCode = 0;
+        return;
+    }
+    fn_3_7ECFC(runner);
+    fn_3_7F494(runner);
+    if (g_GameLogic.secondaryGameMode != 6) {
+        if (runner == 0 && r->nextBase == 1) {
+            fn_3_7F2D8();
+        } else if (r->baseRoundingState == 1) {
+            r->baseRoundingState = 0;
+        }
+        fn_3_7EBD4(runner);
+    }
 }
 
 // .text:0x0007F494 size:0x530 mapped:0x806BE528
@@ -2076,8 +2092,83 @@ round:
 }
 
 // .text:0x0007ECFC size:0x5DC mapped:0x806BDD90
-void fn_3_7ECFC(void) {
-    return;
+int fn_3_7ECFC(int runner) {
+    InMemRunnerType* r = &g_Runners[runner];
+    f32 throwDist = 100.0f;
+    int cutBack = 0;
+
+    if (g_GameLogic.secondaryGameMode == 6) {
+        r->baseRoundingState = 2;
+        r->offsetFromNormalRunningPathInd = 1;
+        return 1;
+    }
+    if (r->baseRoundingState == 2) {
+        r->baseRoundingState = 0;
+    }
+    r->offsetFromNormalRunningPathInd = 0;
+    if (g_Ball.framesSinceHit <= 0 && g_Practice.practiceType_2 != 3) {
+        return 0;
+    }
+    if (r->actionCode != 0) {
+        return 0;
+    }
+    if (r->baseRoundingState == 1) {
+        return 0;
+    }
+    if (r->runningDirectionCode == 3) {
+        cutBack = 1;
+    } else {
+        if (g_FieldingLogic._0C4 >= 0) {
+            throwDist = VEC_DISTANCE_XZ(&lbl_3_data_4444[r->baseRunningTowards], &g_Ball.throwTarget) +
+                        VEC_DISTANCE_XZ(&g_Ball.AtBat_Contact_BallPos, &g_Ball.throwTarget);
+        }
+        if (r->distanceFromBall < 15.0f) {
+            cutBack = 1;
+        } else if (throwDist < 20.0f) {
+            cutBack = 1;
+        } else if (g_Pitcher.strikeOutOrWalk >= 2) {
+            cutBack = 1;
+        } else if (g_Ball.ballZoneAwayFromHome <= 1 &&
+                   (g_Ball.AtBat_ContactResult == 1 || g_Ball.AtBat_ContactResult == 2) &&
+                   r->percentTowardsNextBase < 0.7f) {
+            cutBack = 1;
+        } else if (g_FieldingLogic._107 == 2) {
+            cutBack = 1;
+        }
+        if (g_Practice.practiceType_2 == 3) {
+            cutBack = 0;
+        }
+        if (cutBack != 0 && g_Ball.ballState == 0 && g_Ball.ballZoneAwayFromHome >= 1 && g_Ball.ballVelocity > 0.35f &&
+            r->percentTowardsNextBase >= 0.65f && r->percentTowardsNextBase <= 0.8f &&
+            g_Ball.ballDistanceFromHome > 2.0f + g_Fielders[2]._70 &&
+            g_Ball.ballDistanceFromHome > 2.0f + g_Fielders[4]._70) {
+            if (g_Ball.ballDistanceFromHome > 2.0f + g_Fielders[3]._70 &&
+                g_Ball.ballDistanceFromHome > 2.0f + g_Fielders[5]._70) {
+                cutBack = 0;
+            } else if (g_Fielders[3]._7C > g_Fielders[3]._70 - g_Ball.ballDistanceFromHome &&
+                       g_Fielders[5]._7C > g_Fielders[5]._70 - g_Ball.ballDistanceFromHome) {
+                cutBack = 0;
+            }
+        }
+    }
+    if (g_Ball.ballState == 1 && g_Ball.ballDistanceFromBase[r->baseRunningTowards] < 25.0f &&
+        r->percentTowardsNextBase > 0.5f) {
+        cutBack = 1;
+    }
+    if ((r->runningDirectionCode == 1 || r->runningDirectionCode == 2) && 0.0f == r->roundingStrengthPercent &&
+        (r->percentTowardsNextBase < 0.5f || r->fractionalBasesRan >= 3.0f)) {
+        cutBack = 1;
+    }
+    if (r->overrunBaseStage != 3 && cutBack != 0) {
+        r->offsetFromNormalRunningPathInd = 0;
+        return 0;
+    }
+    r->baseRoundingState = 2;
+    r->offsetFromNormalRunningPathInd = 1;
+    if (r->baseStandingOn >= 0) {
+        r->roundingStrengthPercent = 1.0f;
+    }
+    return 1;
 }
 
 // .text:0x0007EBD4 size:0x128 mapped:0x806BDC68
