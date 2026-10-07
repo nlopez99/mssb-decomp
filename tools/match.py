@@ -8,6 +8,11 @@
 #   python3 tools/match.py <unit> <function>      # instruction diff for one function
 #   python3 tools/match.py <function>             # same, looking the unit up by function
 #
+# For a function that is not in the source yet, it prints the target assembly
+# and an m2c draft (https://github.com/matt-kempster/m2c) using the unit's
+# headers for types; --m2c prints the draft for any function. The draft is a
+# starting point and will not match as written.
+#
 # <unit> may be an objdiff unit name (game/game/kinoko), a source path
 # (src/game/kinoko.c) or a unique basename (kinoko).
 #
@@ -29,6 +34,7 @@ import json
 import math
 import os
 import re
+import shutil
 import struct
 import subprocess
 import sys
@@ -397,6 +403,104 @@ def classify(left: Tuple[str, ...], right: Tuple[str, ...]) -> str:
 
 
 ###
+# m2c drafts
+###
+
+
+M2C_MISSING = (
+    "m2c not found on PATH (or $M2C); install it from https://github.com/matt-kempster/m2c\n"
+    "(the PyPI package named m2c is a different project)"
+)
+
+# m2c parses context with pycparser, which needs plain preprocessed C
+CONTEXT_DEFINES = ["-D__MWERKS__=0x4302", "-D__PPCGEKKO__", "-D__PPC__", "-D__declspec(x)="]
+
+
+def asm_path(unit: Dict[str, Any]) -> str:
+    # dtk writes each unit's assembly next to its split object: .../obj/x.o -> .../asm/x.s
+    return os.path.join(root_dir, os.path.splitext(unit["target_path"].replace("/obj/", "/asm/", 1))[0] + ".s")
+
+
+def context_path(unit: Dict[str, Any]) -> Optional[str]:
+    return unit.get("scratch", {}).get("ctx_path")
+
+
+def prepare_context(ctx: str, out_dir: str) -> Optional[str]:
+    compiler = shutil.which("cc") or shutil.which("gcc") or shutil.which("clang")
+    if compiler is None or not os.path.exists(ctx):
+        return None
+    out = os.path.join(out_dir, "ctx.c")
+    proc = subprocess.run(
+        [compiler, "-E", "-P", "-undef", "-nostdinc", "-x", "c", *CONTEXT_DEFINES, ctx, "-o", out],
+        capture_output=True,
+        text=True,
+    )
+    if proc.returncode != 0:
+        return None
+    with open(out) as f:
+        text = f.read()
+    with open(out, "w") as f:
+        f.write(strip_asm(text))
+    return out
+
+
+def strip_asm(text: str) -> str:
+    # m2c only needs declarations, so drop inline asm blocks (asm { ... }) and
+    # empty the bodies of functions written in asm (asm void f() { ... }).
+    pieces = []
+    pos = 0
+    for m in re.finditer(r"\basm\b", text):
+        if m.start() < pos:
+            continue
+        brace = text.find("{", m.end())
+        semi = text.find(";", m.end())
+        pieces.append(text[pos : m.start()])
+        if brace == -1 or (semi != -1 and semi < brace and text[m.end() : brace].strip()):
+            pos = m.end()  # a prototype such as `asm void f(void);`
+            continue
+        depth = 0
+        end = brace
+        while end < len(text):
+            depth += {"{": 1, "}": -1}.get(text[end], 0)
+            end += 1
+            if depth == 0:
+                break
+        header = text[m.end() : brace]
+        pieces.append(header + "{}" if header.strip() else "")
+        pos = end
+    pieces.append(text[pos:])
+    return "".join(pieces)
+
+
+def m2c_draft(unit: Dict[str, Any], function: str, build_context: bool) -> str:
+    m2c = os.environ.get("M2C") or shutil.which("m2c")
+    if m2c is None:
+        return M2C_MISSING
+    command = [m2c, "-t", "ppc-mwcc-c", "-f", function]
+    note = ""
+    ctx = context_path(unit)
+    if ctx and build_context:
+        # Best effort: without it m2c still runs, just without types
+        subprocess.run(["ninja", ctx], cwd=root_dir, capture_output=True)
+    with tempfile.TemporaryDirectory(prefix="match-m2c-") as tmp:
+        prepared = prepare_context(os.path.join(root_dir, ctx), tmp) if ctx else None
+        if prepared is None:
+            note = "/* m2c ran without type context: the unit's .ctx could not be prepared */\n"
+        proc = subprocess.run(
+            command + (["--context", prepared] if prepared else []) + [asm_path(unit)],
+            capture_output=True,
+            text=True,
+        )
+        output = (proc.stdout + proc.stderr).strip()
+        if prepared and "parsing C context" in output:
+            reason = next((line.strip() for line in output.splitlines() if line.strip().startswith("before:")), "")
+            note = f"/* m2c ran without type context: it could not parse the unit's headers ({reason}) */\n"
+            proc = subprocess.run(command + [asm_path(unit)], capture_output=True, text=True)
+            output = (proc.stdout + proc.stderr).strip()
+    return note + output
+
+
+###
 # Output
 ###
 
@@ -481,6 +585,18 @@ def print_listing(insns: List[Insn], symbols: Dict[str, Symbol], max_lines: int,
             print(f"... truncated at {max_lines} of {len(insns)} lines; use --max-lines or --full")
             break
         print(f"{insn.offset:04x}  {insn.text}{annotate(insn, symbols)}")
+
+
+def print_draft(draft: Optional[str], max_lines: int, full: bool) -> None:
+    if draft is None:
+        return
+    lines = draft.splitlines()
+    print("\nm2c draft (a starting point; it will not match as written):")
+    for n, line in enumerate(lines):
+        if not full and n >= max_lines:
+            print(f"... truncated at {max_lines} of {len(lines)} lines; use --max-lines or --full")
+            break
+        print(line)
 
 
 def function_status(func: Dict[str, Any]) -> str:
@@ -569,6 +685,7 @@ def main() -> int:
     parser.add_argument("-C", "--context", type=int, default=3, help="context lines around changes (default 3)")
     parser.add_argument("--max-lines", type=int, default=200, help="cap on printed diff lines (default 200)")
     parser.add_argument("--json", action="store_true", help="print a machine-readable result instead")
+    parser.add_argument("--m2c", action="store_true", help="print an m2c draft even if the function is in the source")
     args = parser.parse_args()
 
     units = load_units()
@@ -646,6 +763,7 @@ def main() -> int:
         raise UsageError(f"{unit['name']} has no function named '{function}' in the target")
     status, target, rows = check_function(unit, func, target_syms, base_syms)
     percent = func.get("fuzzy_match_percent")
+    draft = m2c_draft(unit, function, not args.no_build) if status == "missing" or args.m2c else None
 
     if args.json:
         result.update(
@@ -660,6 +778,8 @@ def main() -> int:
                 if m != " "
             ],
         )
+        if draft is not None:
+            result["m2c"] = draft
         print(json.dumps(result, indent=1))
         return EXIT_MATCH if status == "match" else EXIT_MISMATCH
 
@@ -670,6 +790,7 @@ def main() -> int:
     if status == "missing":
         print("not in the source yet; target assembly:")
         print_listing(target, target_syms, args.max_lines, args.full)
+        print_draft(draft, args.max_lines, args.full)
         return EXIT_MISMATCH
     if status == "reloc":
         print(RELOC_NOTE)
@@ -677,6 +798,7 @@ def main() -> int:
             print(LINKED_NOTE)
     if status != "match" or args.full:
         print_diff(rows, target_syms, base_syms, args.context, args.max_lines, args.full)
+    print_draft(draft, args.max_lines, args.full)
     return EXIT_MATCH if status == "match" else EXIT_MISMATCH
 
 
