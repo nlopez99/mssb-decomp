@@ -6,7 +6,7 @@
 
 typedef struct ScoutFlagTable {
     /* 0x0 */ u8 _0[4];
-    /* 0x4 */ s8 _4[1][6];
+    /* 0x4 */ s8 _4[1][6]; // [_4415][_441C]; the row count is unknown
 } ScoutFlagTable;
 
 typedef struct {
@@ -52,6 +52,9 @@ typedef struct {
 } UnkCharEntry; // size: 0x6
 
 extern UnkCharEntry lbl_800E8558[54];
+
+// The status of the character's mission i in the current game: counts up, -1 once completed
+#define MISSION_STATUS(id, i) starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus
 
 typedef struct {
     /* 0x0 */ s16 type;
@@ -213,8 +216,7 @@ void fn_3_164A74(void) {
             break;
         case 4:
             if (g_Scores._04[g_GameLogic.homeTeamBattingInd_fieldingTeam][0] >
-                    g_Scores._04[g_GameLogic.awayTeamBattingInd_battingTeam][0] ||
-                (g_Ball.deadBallReason == 1 &&
+                    g_Scores._04[g_GameLogic.awayTeamBattingInd_battingTeam][0] || (g_Ball.deadBallReason == 1 &&
                  g_Scores._A0 + g_RunningLogic._12 > g_Scores._04[g_GameLogic.awayTeamBattingInd_battingTeam][0]) ||
                 ((g_Pitcher.strikeOutOrWalk == 2 || g_Pitcher.strikeOutOrWalk == 3) && g_RunningLogic._12 >= 4 &&
                  g_Scores._A0 == g_Scores._04[g_GameLogic.awayTeamBattingInd_battingTeam][0])) {
@@ -229,8 +231,7 @@ void fn_3_164A74(void) {
             break;
         case 5:
             reason = g_Ball.deadBallReason;
-            if (g_Scores._04[g_GameLogic.homeTeamBattingInd_fieldingTeam][0] > g_Scores._A0 ||
-                reason == 1 ||
+            if (g_Scores._04[g_GameLogic.homeTeamBattingInd_fieldingTeam][0] > g_Scores._A0 || reason == 1 ||
                 (g_RunningLogic._02 == 0x1111 && (g_Pitcher.strikeOutOrWalk == 2 || g_Pitcher.strikeOutOrWalk == 3))) {
                 bss->_48 = 0;
             } else if ((g_Strikes.outs >= 2 && g_Pitcher.strikeOutOrWalk == 1 && !g_FieldingLogic._107) ||
@@ -267,8 +268,7 @@ void fn_3_164A74(void) {
             }
             break;
         case 8:
-            if (plays->_61 == 3 &&
-                ((g_Strikes.outs >= 2 && g_Pitcher.strikeOutOrWalk == 1 && !g_FieldingLogic._107) ||
+            if (plays->_61 == 3 && ((g_Strikes.outs >= 2 && g_Pitcher.strikeOutOrWalk == 1 && !g_FieldingLogic._107) ||
                  g_Strikes.outs >= 3)) {
                 bss->_47 = 2;
                 bss->_48 = 0;
@@ -282,10 +282,12 @@ void fn_3_164A74(void) {
                     if (g_RunningLogic._02 & 0x1100) {
                         hit = 1;
                     } else {
-                        if (g_Runners[1].runnerOnFieldOrOutOrScored == 1 && g_Runners[1].baseReachedAtTimeOfThrow >= 2) {
+                        if (g_Runners[1].runnerOnFieldOrOutOrScored == 1 &&
+                            g_Runners[1].baseReachedAtTimeOfThrow >= 2) {
                             hit = 1;
                         }
-                        if (g_Runners[0].runnerOnFieldOrOutOrScored == 1 && g_Runners[0].baseReachedAtTimeOfThrow >= 2) {
+                        if (g_Runners[0].runnerOnFieldOrOutOrScored == 1 &&
+                            g_Runners[0].baseReachedAtTimeOfThrow >= 2) {
                             hit = 1;
                         }
                     }
@@ -373,7 +375,8 @@ void fn_3_164A74(void) {
             break;
         case 12:
             if (g_GameLogic.EventTriggers_EndOfGame) {
-                if ((g_GameLogic.homeTeamInd ^ (g_Scores._A4 == g_d_GameSettings.humanTeamNumber)) && g_Scores._A4 != 2) {
+                if ((g_GameLogic.homeTeamInd ^ (g_Scores._A4 == g_d_GameSettings.humanTeamNumber)) &&
+                    g_Scores._A4 != 2) {
                     bss->_47 = 2;
                 } else {
                     bss->_47 = 1;
@@ -387,12 +390,15 @@ void fn_3_164A74(void) {
                     }
                     bss->_48 = 0;
                 } else if (g_Strikes.outs >= 2 && g_Pitcher.strikeOutOrWalk == 1) {
-                    if ((g_Scores._04[1][0] > g_Scores._04[0][0] && lbl_3_common_bss_37400._40 == g_GameLogic.teamBatting) ||
-                        (g_Scores._04[1][0] < g_Scores._04[0][0] && lbl_3_common_bss_37400._40 == g_GameLogic.teamFielding)) {
+                    if ((g_Scores._04[1][0] > g_Scores._04[0][0] &&
+                         lbl_3_common_bss_37400._40 == g_GameLogic.teamBatting) ||
+                        (g_Scores._04[1][0] < g_Scores._04[0][0] &&
+                         lbl_3_common_bss_37400._40 == g_GameLogic.teamFielding)) {
                         bss->_47 = 2;
                     }
                     bss->_48 = 0;
-                } else if (g_RunningLogic._10 == 4 && (g_Pitcher.strikeOutOrWalk == 2 || g_Pitcher.strikeOutOrWalk == 3)) {
+                } else if (g_RunningLogic._10 == 4 &&
+                           (g_Pitcher.strikeOutOrWalk == 2 || g_Pitcher.strikeOutOrWalk == 3)) {
                     if (g_Scores._04[1][0] == g_Scores._04[0][0]) {
                         if (g_GameLogic.teamBatting == g_d_GameSettings.humanTeamNumber) {
                             bss->_47 = 2;
@@ -670,6 +676,8 @@ BOOL fn_3_163948(void) {
 }
 
 // .text:0x00162D54 size:0xA98 mapped:0x807A1DE8
+// 99.79%: in the win-mission loop the target forms starMissionCompletionTracker's address before
+// lbl_80109AE8's and keeps m in r6 and the status pointer in r4; the base swaps both pairs.
 void fn_3_162D54(void) {
     s32 i;
     s32 k;
@@ -687,24 +695,24 @@ void fn_3_162D54(void) {
             id = lbl_800E8558[inMemRoster[lbl_3_common_bss_37400._40][idx].stats.CharID]._1;
             m = lbl_80109AE8[lbl_800E8558[id]._2];
             for (k = 0; k < 10; k++) {
-                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[k].starMissionStatus >= 0) {
+                if (MISSION_STATUS(id, k) >= 0) {
                     type = m[k].type;
                     if (type == 7) {
                         if (lbl_3_common_bss_32A94._63[side] == 1) {
-                            starMissionCompletionTracker.characters[id].inGameMissionTracker[k].starMissionStatus = -1;
+                            MISSION_STATUS(id, k) = -1;
                         }
                     } else if (type == 9 || type == 6) {
                         if (lbl_803535C8[lbl_3_common_bss_37400._40][idx]._18) {
                             if (type == 6) {
                                 if (m[k].target == lbl_800E8558[lbl_8034E9A0._46E4]._2) {
-                                    starMissionCompletionTracker.characters[id].inGameMissionTracker[k].starMissionStatus = -1;
+                                    MISSION_STATUS(id, k) = -1;
                                 }
                             } else {
-                                starMissionCompletionTracker.characters[id].inGameMissionTracker[k].starMissionStatus = -1;
+                                MISSION_STATUS(id, k) = -1;
                             }
                         }
                     } else if (type == 8) {
-                        starMissionCompletionTracker.characters[id].inGameMissionTracker[k].starMissionStatus = -1;
+                        MISSION_STATUS(id, k) = -1;
                     }
                 }
             }
@@ -713,12 +721,15 @@ void fn_3_162D54(void) {
             id = lbl_800E8558[inMemRoster[lbl_3_common_bss_37400._40][k].stats.CharID]._1;
             m = lbl_80109AE8[lbl_800E8558[id]._2];
             for (i = 0; i < 10; i++) {
-                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0) {
-                    if (m[i].type == 25 && lbl_803537E4[lbl_3_common_bss_37400._40][k]._04 != 0 && lbl_803537E4[lbl_3_common_bss_37400._40][k]._05 * 10 / lbl_803537E4[lbl_3_common_bss_37400._40][k]._04 >= m[i].target) {
-                        starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                if (MISSION_STATUS(id, i) >= 0) {
+                    if (m[i].type == 25 && lbl_803537E4[lbl_3_common_bss_37400._40][k]._04 != 0 &&
+                        lbl_803537E4[lbl_3_common_bss_37400._40][k]._05 * 10 /
+                                lbl_803537E4[lbl_3_common_bss_37400._40][k]._04 >=
+                            m[i].target) {
+                        MISSION_STATUS(id, i) = -1;
                     }
                     if (m[i].type == 26 && lbl_803537E4[lbl_3_common_bss_37400._40][k]._0D == 0) {
-                        starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                        MISSION_STATUS(id, i) = -1;
                     }
                 }
             }
@@ -727,19 +738,17 @@ void fn_3_162D54(void) {
             entry = &lbl_800E8558[lbl_80353A90._103];
             id = entry->_1;
             m = lbl_80109AE8[entry->_2];
-            for (i = 0; i < 10; i++) {
-                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0 &&
-                    m[i].type == 1) {
-                    starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+            for (i = 0; i < 10; m++, i++) {
+                if (MISSION_STATUS(id, i) >= 0 && m->type == 1) {
+                    MISSION_STATUS(id, i) = -1;
                 }
             }
             for (k = 0; k < 9; k++) {
                 id = lbl_800E8558[inMemRoster[lbl_3_common_bss_37400._40][k].stats.CharID]._1;
                 m = lbl_80109AE8[lbl_800E8558[id]._2];
                 for (i = 0; i < 10; i++) {
-                    if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0 &&
-                        m[i].type == 0 && g_d_GameSettings.StadiumID == m[i].target) {
-                        starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                    if (MISSION_STATUS(id, i) >= 0 && m[i].type == 0 && g_d_GameSettings.StadiumID == m[i].target) {
+                        MISSION_STATUS(id, i) = -1;
                     }
                 }
             }
@@ -748,9 +757,8 @@ void fn_3_162D54(void) {
                 id = lbl_800E8558[inMemRoster[lbl_3_common_bss_37400._40][k].stats.CharID]._1;
                 m = lbl_80109AE8[lbl_800E8558[id]._2];
                 for (i = 0; i < 10; i++) {
-                    if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus == -1 &&
-                        (m[i].flags & 1)) {
-                        starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = 0;
+                    if (MISSION_STATUS(id, i) == -1 && (m[i].flags & 1)) {
+                        MISSION_STATUS(id, i) = 0;
                     }
                 }
             }
@@ -760,19 +768,19 @@ void fn_3_162D54(void) {
         id = lbl_800E8558[inMemRoster[lbl_3_common_bss_37400._40][k].stats.CharID]._1;
         m = lbl_80109AE8[lbl_800E8558[id]._2];
         for (i = 0; i < 10; i++) {
-            if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus == -1) {
+            if (MISSION_STATUS(id, i) == -1) {
                 flags = m[i].flags;
                 if (flags & 2) {
                     if (g_d_GameSettings.challengeDifficulty < 1) {
-                        starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = 0;
+                        MISSION_STATUS(id, i) = 0;
                     }
                 } else if (flags & 4) {
                     if (g_d_GameSettings.challengeDifficulty < 2) {
-                        starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = 0;
+                        MISSION_STATUS(id, i) = 0;
                     }
                 } else if (flags & 8) {
                     if (g_d_GameSettings.challengeDifficulty < 3) {
-                        starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = 0;
+                        MISSION_STATUS(id, i) = 0;
                     }
                 }
             }
@@ -782,18 +790,18 @@ void fn_3_162D54(void) {
         id = lbl_800E8558[inMemRoster[lbl_3_common_bss_37400._40][k].stats.CharID]._1;
         m = lbl_80109AE8[lbl_800E8558[id]._2];
         for (i = 0; i < 10; i++) {
-            if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus == -1 &&
+            if (MISSION_STATUS(id, i) == -1 &&
                 (m[i].flags & 0x800) && lbl_8034E9A0._46E4 != 9 && starMissionCompletionTracker._16C2 != 42) {
-                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = 0;
+                MISSION_STATUS(id, i) = 0;
             }
         }
     }
     for (k = 0; k < 54; k++) {
         for (i = 0; i < 10; i++) {
-            if (starMissionCompletionTracker.characters[k].inGameMissionTracker[i].starMissionStatus <= -1) {
-                starMissionCompletionTracker.characters[k].inGameMissionTracker[i].starMissionStatus = -2;
+            if (MISSION_STATUS(k, i) <= -1) {
+                MISSION_STATUS(k, i) = -2;
             } else {
-                starMissionCompletionTracker.characters[k].inGameMissionTracker[i].starMissionStatus = 0;
+                MISSION_STATUS(k, i) = 0;
             }
         }
     }
@@ -841,15 +849,14 @@ void fn_3_16230C(s32 result, s32 streak) {
         id = lbl_800E8558[g_Pitcher.charID]._1;
         m = lbl_80109AE8[lbl_800E8558[g_Pitcher.charID]._2];
         for (i = 0; i < 10; i++) {
-            if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0) {
+            if (MISSION_STATUS(id, i) >= 0) {
                 def = &m[i];
                 done = FALSE;
                 if (def->type == 2) {
                     if (g_GameLogic.IsStarChance == 2) {
-                        starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
-                        if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
-                            def->target) {
-                            starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                        MISSION_STATUS(id, i)++;
+                        if (MISSION_STATUS(id, i) >= def->target) {
+                            MISSION_STATUS(id, i) = -1;
                         }
                     }
                 } else {
@@ -868,16 +875,15 @@ void fn_3_16230C(s32 result, s32 streak) {
                                     break;
                                 case 10:
                                     if (result == 1) {
-                                        starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
-                                        if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
-                                            def->target) {
+                                        MISSION_STATUS(id, i)++;
+                                        if (MISSION_STATUS(id, i) >= def->target) {
                                             done = TRUE;
                                         }
                                     }
                                     break;
                             }
                             if (done) {
-                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                                MISSION_STATUS(id, i) = -1;
                             }
                         }
                     }
@@ -888,14 +894,14 @@ void fn_3_16230C(s32 result, s32 streak) {
             id = lbl_800E8558[g_Fielders[fielder]._17A]._1;
             m = lbl_80109AE8[lbl_800E8558[g_Fielders[fielder]._17A]._2];
             for (j = 0; j < 10; j++) {
-                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[j].starMissionStatus >= 0 &&
-                    m[j].type == 43 && g_Strikes.storedOuts + 2 <= g_Strikes.outs) {
+                if (MISSION_STATUS(id, j) >= 0 && m[j].type == 43 && g_Strikes.storedOuts + 2 <= g_Strikes.outs) {
                     def = &m[j];
                     for (k = 0, flags = 0; k < 5; k++) {
                         if (lbl_3_common_bss_32A94._10[k][0] >= 0) {
                             if (lbl_3_common_bss_32A94._10[k][0] == fielder) {
                                 flags |= 1;
-                            } else if (def->target == lbl_800E8558[g_Fielders[lbl_3_common_bss_32A94._10[k][0]]._17A]._2) {
+                            } else if (def->target ==
+                                       lbl_800E8558[g_Fielders[lbl_3_common_bss_32A94._10[k][0]]._17A]._2) {
                                 flags |= 0x10;
                             }
                             if (k == 1 && lbl_3_common_bss_32A94._10[k][1] == 2) {
@@ -904,7 +910,7 @@ void fn_3_16230C(s32 result, s32 streak) {
                         }
                     }
                     if (flags == 0x11) {
-                        starMissionCompletionTracker.characters[id].inGameMissionTracker[j].starMissionStatus = -1;
+                        MISSION_STATUS(id, j) = -1;
                     }
                 }
             }
@@ -914,15 +920,14 @@ void fn_3_16230C(s32 result, s32 streak) {
         id = lbl_800E8558[g_Batter.charID]._1;
         m = lbl_80109AE8[lbl_800E8558[g_Batter.charID]._2];
         for (i = 0; i < 10; i++) {
-            if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0) {
+            if (MISSION_STATUS(id, i) >= 0) {
                 def = &m[i];
                 done = FALSE;
                 if (def->type == 2) {
                     if (g_GameLogic.IsStarChance == 3 || g_GameLogic.stadiumStarObtained) {
-                        starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
-                        if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
-                            def->target) {
-                            starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                        MISSION_STATUS(id, i)++;
+                        if (MISSION_STATUS(id, i) >= def->target) {
+                            MISSION_STATUS(id, i) = -1;
                         }
                     }
                 } else {
@@ -962,9 +967,8 @@ void fn_3_16230C(s32 result, s32 streak) {
                                     break;
                                 case 19:
                                     if (result >= 7 && result <= 10) {
-                                        starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
-                                        if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
-                                            def->target) {
+                                        MISSION_STATUS(id, i)++;
+                                        if (MISSION_STATUS(id, i) >= def->target) {
                                             done = TRUE;
                                         }
                                     }
@@ -973,19 +977,18 @@ void fn_3_16230C(s32 result, s32 streak) {
                                 case 21:
                                     if (result == 13) {
                                         if (j == 21) {
-                                            if (g_Scores._04[g_GameLogic.homeTeamBattingInd_fieldingTeam][0] > g_Scores._A0 &&
+                                            if (g_Scores._04[g_GameLogic.homeTeamBattingInd_fieldingTeam][0] >
+                                                    g_Scores._A0 &&
                                                 g_Runners[3].runnerOnFieldOrOutOrScored &&
                                                 g_Runners[3].furthestBaseForcedToGoToOnWalk) {
-                                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
-                                                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
-                                                    def->target) {
+                                                MISSION_STATUS(id, i)++;
+                                                if (MISSION_STATUS(id, i) >= def->target) {
                                                     done = TRUE;
                                                 }
                                             }
                                         } else {
-                                            starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
-                                            if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
-                                                def->target) {
+                                            MISSION_STATUS(id, i)++;
+                                            if (MISSION_STATUS(id, i) >= def->target) {
                                                 done = TRUE;
                                             }
                                         }
@@ -993,18 +996,16 @@ void fn_3_16230C(s32 result, s32 streak) {
                                     break;
                                 case 22:
                                     if (streak != 0) {
-                                        starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus += streak;
-                                        if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
-                                            def->target) {
+                                        MISSION_STATUS(id, i) += streak;
+                                        if (MISSION_STATUS(id, i) >= def->target) {
                                             done = TRUE;
                                         }
                                     }
                                     break;
                                 case 23:
                                     if (result == 10) {
-                                        starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
-                                        if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
-                                            def->target) {
+                                        MISSION_STATUS(id, i)++;
+                                        if (MISSION_STATUS(id, i) >= def->target) {
                                             done = TRUE;
                                         }
                                     }
@@ -1014,7 +1015,7 @@ void fn_3_16230C(s32 result, s32 streak) {
                                         for (k = 0; k < 9; k++) {
                                             if (def->target == lbl_800E8558[inMemRoster[team][k].stats.CharID]._2 &&
                                                 lbl_803537E4[team][k]._09) {
-                                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                                                MISSION_STATUS(id, i) = -1;
                                                 break;
                                             }
                                         }
@@ -1022,9 +1023,8 @@ void fn_3_16230C(s32 result, s32 streak) {
                                     break;
                                 case 24:
                                     if (g_Ball.currentStarSwing2 && streak != 0) {
-                                        starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus += streak;
-                                        if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
-                                            def->target) {
+                                        MISSION_STATUS(id, i) += streak;
+                                        if (MISSION_STATUS(id, i) >= def->target) {
                                             done = TRUE;
                                         }
                                     }
@@ -1032,9 +1032,8 @@ void fn_3_16230C(s32 result, s32 streak) {
                                 case 27:
                                     if (result >= 7 && result <= 10 && g_Batter.hitGeneralType == 1 &&
                                         g_Batter.chargeUp >= 1.0f && !g_Batter.nonCaptainStarSwingActivated) {
-                                        starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
-                                        if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
-                                            def->target) {
+                                        MISSION_STATUS(id, i)++;
+                                        if (MISSION_STATUS(id, i) >= def->target) {
                                             done = TRUE;
                                         }
                                     }
@@ -1055,16 +1054,15 @@ void fn_3_16230C(s32 result, s32 streak) {
                                     break;
                                 case 29:
                                     if (result >= 7 && result <= 10 && g_Batter.hitGeneralType == 3) {
-                                        starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
-                                        if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
-                                            def->target) {
+                                        MISSION_STATUS(id, i)++;
+                                        if (MISSION_STATUS(id, i) >= def->target) {
                                             done = TRUE;
                                         }
                                     }
                                     break;
                             }
                             if (done) {
-                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                                MISSION_STATUS(id, i) = -1;
                             }
                         }
                     }
@@ -1076,10 +1074,10 @@ void fn_3_16230C(s32 result, s32 streak) {
                 id = lbl_800E8558[inMemRoster[lbl_3_common_bss_37400._40][k].stats.CharID]._1;
                 m = lbl_80109AE8[lbl_800E8558[inMemRoster[lbl_3_common_bss_37400._40][k].stats.CharID]._2];
                 for (i = 0; i < 10; i++) {
-                    if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0 &&
+                    if (MISSION_STATUS(id, i) >= 0 &&
                         m[i].type == 30 && m[i].target == lbl_800E8558[g_Batter.charID]._2 &&
                         lbl_803537E4[lbl_3_common_bss_37400._40][k]._09) {
-                        starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                        MISSION_STATUS(id, i) = -1;
                     }
                 }
             }
@@ -1101,14 +1099,14 @@ void fn_3_162080(void) {
         id = lbl_800E8558[g_Pitcher.charID]._1;
         m = lbl_80109AE8[lbl_800E8558[g_Pitcher.charID]._2];
         for (i = 0; i < 10; i++) {
-            if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0) {
+            if (MISSION_STATUS(id, i) >= 0) {
                 def = &m[i];
                 done = FALSE;
                 if (def->type == 3) {
                     if (g_Pitcher.starPitchType) {
-                        starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus |= 1;
-                        if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus == 0x11) {
-                            starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                        MISSION_STATUS(id, i) |= 1;
+                        if (MISSION_STATUS(id, i) == 0x11) {
+                            MISSION_STATUS(id, i) = -1;
                         }
                     }
                 } else {
@@ -1117,23 +1115,23 @@ void fn_3_162080(void) {
                             switch (j) {
                             case 11:
                                 if (g_Pitcher.starPitchType) {
-                                    starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
-                                    if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= def->target) {
+                                    MISSION_STATUS(id, i)++;
+                                    if (MISSION_STATUS(id, i) >= def->target) {
                                         done = TRUE;
                                     }
                                 }
                                 break;
                             case 12:
                                 if (g_Pitcher.ChargePitchType == 3) {
-                                    starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
-                                    if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= def->target) {
+                                    MISSION_STATUS(id, i)++;
+                                    if (MISSION_STATUS(id, i) >= def->target) {
                                         done = TRUE;
                                     }
                                 }
                                 break;
                             }
                             if (done) {
-                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                                MISSION_STATUS(id, i) = -1;
                             }
                         }
                     }
@@ -1145,17 +1143,17 @@ void fn_3_162080(void) {
         id = lbl_800E8558[g_Batter.charID]._1;
         m = lbl_80109AE8[lbl_800E8558[g_Batter.charID]._2];
         for (i = 0; i < 10; i++) {
-            if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0) {
+            if (MISSION_STATUS(id, i) >= 0) {
                 if (m[i].type == 3 && g_Ball.currentStarSwing2) {
-                    starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus |= 0x10;
-                    if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus == 0x11) {
-                        starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                    MISSION_STATUS(id, i) |= 0x10;
+                    if (MISSION_STATUS(id, i) == 0x11) {
+                        MISSION_STATUS(id, i) = -1;
                     }
                 }
                 if (m[i].type == 2 && (g_GameLogic.IsStarChance == 3 || g_GameLogic.stadiumStarObtained)) {
-                    starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
-                    if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= m[i].target) {
-                        starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                    MISSION_STATUS(id, i)++;
+                    if (MISSION_STATUS(id, i) >= m[i].target) {
+                        MISSION_STATUS(id, i) = -1;
                     }
                 }
             }
@@ -1174,13 +1172,12 @@ void fn_3_161588(s32 event, s32 player) {
     switch (event) {
         case 0:
             for (i = 0; i < 10; i++) {
-                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0) {
+                if (MISSION_STATUS(id, i) >= 0) {
                     switch (lbl_80109AE8[set][i].type) {
                         case 31:
-                            starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
-                            if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
-                                lbl_80109AE8[set][i].target) {
-                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                            MISSION_STATUS(id, i)++;
+                            if (MISSION_STATUS(id, i) >= lbl_80109AE8[set][i].target) {
+                                MISSION_STATUS(id, i) = -1;
                             }
                             break;
                     }
@@ -1189,13 +1186,12 @@ void fn_3_161588(s32 event, s32 player) {
             break;
         case 1:
             for (i = 0; i < 10; i++) {
-                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0) {
+                if (MISSION_STATUS(id, i) >= 0) {
                     switch (lbl_80109AE8[set][i].type) {
                         case 32:
-                            starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
-                            if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
-                                lbl_80109AE8[set][i].target) {
-                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                            MISSION_STATUS(id, i)++;
+                            if (MISSION_STATUS(id, i) >= lbl_80109AE8[set][i].target) {
+                                MISSION_STATUS(id, i) = -1;
                             }
                             break;
                     }
@@ -1204,13 +1200,12 @@ void fn_3_161588(s32 event, s32 player) {
             break;
         case 3:
             for (i = 0; i < 10; i++) {
-                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0) {
+                if (MISSION_STATUS(id, i) >= 0) {
                     switch (lbl_80109AE8[set][i].type) {
                         case 37:
-                            starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
-                            if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
-                                lbl_80109AE8[set][i].target) {
-                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                            MISSION_STATUS(id, i)++;
+                            if (MISSION_STATUS(id, i) >= lbl_80109AE8[set][i].target) {
+                                MISSION_STATUS(id, i) = -1;
                             }
                             break;
                     }
@@ -1219,21 +1214,19 @@ void fn_3_161588(s32 event, s32 player) {
             break;
         case 2:
             for (i = 0; i < 10; i++) {
-                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0) {
+                if (MISSION_STATUS(id, i) >= 0) {
                     switch (lbl_80109AE8[set][i].type) {
                         case 33:
-                            starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
-                            if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
-                                lbl_80109AE8[set][i].target) {
-                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                            MISSION_STATUS(id, i)++;
+                            if (MISSION_STATUS(id, i) >= lbl_80109AE8[set][i].target) {
+                                MISSION_STATUS(id, i) = -1;
                             }
                             break;
                         case 34:
                             if (g_Ball.AtBat_ContactResult == 3) {
-                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
-                                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
-                                    lbl_80109AE8[set][i].target) {
-                                    starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                                MISSION_STATUS(id, i)++;
+                                if (MISSION_STATUS(id, i) >= lbl_80109AE8[set][i].target) {
+                                    MISSION_STATUS(id, i) = -1;
                                 }
                             }
                             break;
@@ -1241,10 +1234,9 @@ void fn_3_161588(s32 event, s32 player) {
                             break;
                         case 36:
                             if (g_Ball.currentStarSwing == 5 || g_Ball.currentStarSwing == 6) {
-                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
-                                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
-                                    lbl_80109AE8[set][i].target) {
-                                    starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                                MISSION_STATUS(id, i)++;
+                                if (MISSION_STATUS(id, i) >= lbl_80109AE8[set][i].target) {
+                                    MISSION_STATUS(id, i) = -1;
                                 }
                             }
                             break;
@@ -1254,13 +1246,12 @@ void fn_3_161588(s32 event, s32 player) {
             break;
         case 4:
             for (i = 0; i < 10; i++) {
-                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0) {
+                if (MISSION_STATUS(id, i) >= 0) {
                     switch (lbl_80109AE8[set][i].type) {
                         case 35:
-                            starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
-                            if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
-                                lbl_80109AE8[set][i].target) {
-                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                            MISSION_STATUS(id, i)++;
+                            if (MISSION_STATUS(id, i) >= lbl_80109AE8[set][i].target) {
+                                MISSION_STATUS(id, i) = -1;
                             }
                             break;
                     }
@@ -1269,14 +1260,13 @@ void fn_3_161588(s32 event, s32 player) {
             break;
         case 5:
             for (i = 0; i < 10; i++) {
-                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0) {
+                if (MISSION_STATUS(id, i) >= 0) {
                     switch (lbl_80109AE8[set][i].type) {
                         case 38:
                             if (g_Ball.AtBat_ContactResult == 3) {
-                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
-                                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
-                                    lbl_80109AE8[set][i].target) {
-                                    starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                                MISSION_STATUS(id, i)++;
+                                if (MISSION_STATUS(id, i) >= lbl_80109AE8[set][i].target) {
+                                    MISSION_STATUS(id, i) = -1;
                                 }
                             }
                             break;
@@ -1286,13 +1276,12 @@ void fn_3_161588(s32 event, s32 player) {
             break;
         case 6:
             for (i = 0; i < 10; i++) {
-                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0) {
+                if (MISSION_STATUS(id, i) >= 0) {
                     switch (lbl_80109AE8[set][i].type) {
                         case 39:
-                            starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
-                            if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
-                                lbl_80109AE8[set][i].target) {
-                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                            MISSION_STATUS(id, i)++;
+                            if (MISSION_STATUS(id, i) >= lbl_80109AE8[set][i].target) {
+                                MISSION_STATUS(id, i) = -1;
                             }
                             break;
                     }
@@ -1301,12 +1290,12 @@ void fn_3_161588(s32 event, s32 player) {
             break;
         case 7:
             for (i = 0; i < 10; i++) {
-                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0) {
+                if (MISSION_STATUS(id, i) >= 0) {
                     switch (lbl_80109AE8[set][i].type) {
                         case 40:
                             if (lbl_80109AE8[set][i].target ==
                                 lbl_800E8558[g_Fielders[g_Ball.fielderBeingThrownTo]._17A]._2) {
-                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                                MISSION_STATUS(id, i) = -1;
                             }
                             break;
                     }
@@ -1315,13 +1304,12 @@ void fn_3_161588(s32 event, s32 player) {
             break;
         case 8:
             for (i = 0; i < 10; i++) {
-                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0) {
+                if (MISSION_STATUS(id, i) >= 0) {
                     switch (lbl_80109AE8[set][i].type) {
                         case 41:
-                            starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
-                            if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
-                                lbl_80109AE8[set][i].target) {
-                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                            MISSION_STATUS(id, i)++;
+                            if (MISSION_STATUS(id, i) >= lbl_80109AE8[set][i].target) {
+                                MISSION_STATUS(id, i) = -1;
                             }
                             break;
                     }
@@ -1330,14 +1318,13 @@ void fn_3_161588(s32 event, s32 player) {
             break;
         case 9:
             for (i = 0; i < 10; i++) {
-                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0) {
+                if (MISSION_STATUS(id, i) >= 0) {
                     switch (lbl_80109AE8[set][i].type) {
                         case 42:
                             if (g_Ball.AtBat_ContactResult == 3) {
-                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
-                                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
-                                    lbl_80109AE8[set][i].target) {
-                                    starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                                MISSION_STATUS(id, i)++;
+                                if (MISSION_STATUS(id, i) >= lbl_80109AE8[set][i].target) {
+                                    MISSION_STATUS(id, i) = -1;
                                 }
                             }
                             break;
@@ -1347,13 +1334,12 @@ void fn_3_161588(s32 event, s32 player) {
             break;
         case 10:
             for (i = 0; i < 10; i++) {
-                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0) {
+                if (MISSION_STATUS(id, i) >= 0) {
                     switch (lbl_80109AE8[set][i].type) {
                         case 44:
-                            starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
-                            if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
-                                lbl_80109AE8[set][i].target) {
-                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                            MISSION_STATUS(id, i)++;
+                            if (MISSION_STATUS(id, i) >= lbl_80109AE8[set][i].target) {
+                                MISSION_STATUS(id, i) = -1;
                             }
                             break;
                     }
@@ -1362,13 +1348,12 @@ void fn_3_161588(s32 event, s32 player) {
             break;
         case 11:
             for (i = 0; i < 10; i++) {
-                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0) {
+                if (MISSION_STATUS(id, i) >= 0) {
                     switch (lbl_80109AE8[set][i].type) {
                         case 45:
-                            starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
-                            if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
-                                lbl_80109AE8[set][i].target) {
-                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                            MISSION_STATUS(id, i)++;
+                            if (MISSION_STATUS(id, i) >= lbl_80109AE8[set][i].target) {
+                                MISSION_STATUS(id, i) = -1;
                             }
                             break;
                     }
@@ -1377,13 +1362,12 @@ void fn_3_161588(s32 event, s32 player) {
             break;
         case 12:
             for (i = 0; i < 10; i++) {
-                if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >= 0) {
+                if (MISSION_STATUS(id, i) >= 0) {
                     switch (lbl_80109AE8[set][i].type) {
                         case 46:
-                            starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus++;
-                            if (starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus >=
-                                lbl_80109AE8[set][i].target) {
-                                starMissionCompletionTracker.characters[id].inGameMissionTracker[i].starMissionStatus = -1;
+                            MISSION_STATUS(id, i)++;
+                            if (MISSION_STATUS(id, i) >= lbl_80109AE8[set][i].target) {
+                                MISSION_STATUS(id, i) = -1;
                             }
                             break;
                     }
