@@ -278,6 +278,8 @@ extern StadiumObjectCollision* fn_3_F6504(s32 object, Mtx mtx);
 u8 lbl_3_data_11168[0x10] = { 0 };
 f32 lbl_3_data_11178[5] = { 18.0f, 90.0f, 162.0f, 234.0f, 306.0f };
 
+// Unreferenced, like lbl_3_bss_1900: the target's .bss runs to 0x9950, past MWCC's 8-byte section alignment.
+static u8 lbl_3_bss_9944[0xC];
 static void (*lbl_3_bss_9940)(void);
 static u8 lbl_3_bss_1940[0x8000] ATTRIBUTE_ALIGN(32);
 static Vec lbl_3_bss_1910[2];
@@ -286,6 +288,7 @@ static f32 lbl_3_bss_1908;
 static void* lbl_3_bss_1904;
 static u8 lbl_3_bss_1902;
 static u8 lbl_3_bss_1901;
+static u8 lbl_3_bss_1900;
 
 // .text:0x000B9FB8 size:0x198 mapped:0x806F904C
 void fn_3_B9FB8(s32 stadium, void* file) {
