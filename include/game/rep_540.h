@@ -10,7 +10,7 @@ void fn_3_65F4(void);
 void fn_3_6620(void);
 void fn_3_6694(void);
 void fn_3_6C38(void);
-void fn_3_8CF0(void);
+void fn_3_8CF0(f32* speed, int frames, u8* stopped, BOOL noKnockout);
 void fn_3_904C(void);
 void fn_3_9260(int collision);
 void fn_3_9508(void);
