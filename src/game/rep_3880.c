@@ -761,18 +761,37 @@ void fn_3_154214(void) {
 }
 
 // .text:0x001541C4 size:0x50 mapped:0x80793258
-void fn_3_1541C4(void) {
-    return;
+void fn_3_1541C4(u8 index, u8 kind, Vec* pos) {
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES &&
+        g_Minigame.GameMode_MiniGame == MINI_GAME_ID_CHAINCHOMP_SPRINT && pos != NULL) {
+        fn_3_1540E4(index, kind, pos);
+    }
 }
 
 // .text:0x001540E4 size:0xE0 mapped:0x80793178
-void fn_3_1540E4(void) {
+// Written out (fn_800339F0, else fn_80033A24 with fn_3_151F2C, a call to fn_3_153F8C each),
+// it inlines both calls to fn_3_153F8C, which the target makes with bl: the original
+// fn_3_153F8C counted about 20 more statements than the matching one below
+void fn_3_1540E4(u8 index, u8 kind, Vec* pos) {
     return;
 }
 
 // .text:0x00153F8C size:0x158 mapped:0x80793020
-void fn_3_153F8C(void) {
-    return;
+void fn_3_153F8C(Emitter3880* emitter, u8 index, u8 kind, Vec* pos) {
+    Particle3880* p = emitter->particles;
+    u8 i = 0;
+    u8 flag;
+
+    emitter->_10 = lbl_3_common_bss_32724._6C;
+    do {
+        if (p->_4A == 0) {
+            flag = i != 0;
+            fn_3_153E8C(p, pos, index, kind, i);
+            fn_3_1536A8(p, flag + 1);
+            i++;
+        }
+        p = p->next;
+    } while (p != NULL && i < lbl_3_data_26BDC[0]);
 }
 
 // .text:0x00153E8C size:0x100 mapped:0x80792F20
@@ -790,8 +809,119 @@ void fn_3_153E8C(Particle3880* p, Vec* pos, u8 arg2, u8 arg3, u8 arg4) {
 }
 
 // .text:0x001536A8 size:0x7E4 mapped:0x8079273C
-void fn_3_1536A8(void) {
-    return;
+// The cases repeat fn_3_1534C0, fn_3_1531A4 and fn_3_152794: calling them inlines the same code
+// with each one's stack locals in the opposite order
+void fn_3_1536A8(Particle3880* p, u8 kind) {
+    switch (kind) {
+    case 1: {
+        Mtx rot;
+        camera_803c639c_s* camera = fn_80052734(fn_8005268C());
+        f32 height = p->_4D ? fn_3_119854(2) : fn_3_119854(0);
+        Vec forward = { 0.0f, 0.0f, -1.0f };
+        Vec axis;
+        Vec dir;
+        Vec offset;
+        f32 angle;
+
+        offset.x = 0.0f;
+        offset.y = 0.0f;
+        offset.z = -0.354f * height;
+        PSVECSubtract(&camera->eye, &p->_1C, &dir);
+        PSVECNormalize(&dir, &dir);
+        angle = acos(PSVECDotProduct(&forward, &dir));
+        PSVECCrossProduct(&forward, &dir, &axis);
+        if (PSVECMag(&axis) == 0.0f) {
+            axis.x = 0.0f;
+            axis.y = -1.0f;
+            axis.z = 0.0f;
+        }
+        PSMTXRotAxisRad(rot, &axis, angle);
+        PSMTXMultVec(rot, &offset, &offset);
+        p->pos.x = p->_1C.x + offset.x;
+        p->pos.y = p->_1C.y + offset.y;
+        p->pos.z = p->_1C.z + offset.z;
+        p->_38 = p->_3C = lbl_3_data_26BEC[0];
+        p->_4C = 1;
+        p->_4A = lbl_3_data_26BEC[3];
+        p->vel.x = p->vel.z = 0.0f;
+        p->vel.y = lbl_3_data_26BEC[2] / 100000.0f;
+        break;
+    }
+    case 2: {
+        Mtx rot;
+        camera_803c639c_s* camera = fn_80052734(fn_8005268C());
+        f32 height = p->_4D ? fn_3_119854(2) : fn_3_119854(0);
+        Vec forward = { 0.0f, 0.0f, -1.0f };
+        Vec axis;
+        Vec dir;
+        Vec offset;
+        f32 angle;
+
+        offset.x = 0.0f;
+        offset.y = 0.0f;
+        offset.z = -0.354f * height;
+        offset.x += height * ((rand() % 50 - 25) / 100.0);
+        offset.y += height * ((rand() % 50 - 25) / 100.0);
+        offset.z += height * ((rand() % 50 - 25) / 100.0);
+        PSVECSubtract(&camera->eye, &p->_1C, &dir);
+        PSVECNormalize(&dir, &dir);
+        angle = acos(PSVECDotProduct(&forward, &dir));
+        PSVECCrossProduct(&forward, &dir, &axis);
+        if (PSVECMag(&axis) == 0.0f) {
+            axis.x = 0.0f;
+            axis.y = -1.0f;
+            axis.z = 0.0f;
+        }
+        PSMTXRotAxisRad(rot, &axis, angle);
+        PSMTXMultVec(rot, &offset, &offset);
+        p->pos.x = p->_1C.x + offset.x;
+        p->pos.y = p->_1C.y + offset.y;
+        p->pos.z = p->_1C.z + offset.z;
+        p->_38 = p->_3C = lbl_3_data_26BFC[0];
+        p->_4C = 2;
+        p->_4A = lbl_3_data_26BFC[3];
+        p->vel.x = p->vel.z = 0.0f;
+        p->vel.y = lbl_3_data_26BFC[2] / 100000.0f;
+        break;
+    }
+    case 3: {
+        Mtx rot;
+        camera_803c639c_s* camera = fn_80052734(fn_8005268C());
+        f32 height = p->_4D ? fn_3_119854(2) : fn_3_119854(0);
+        Vec forward = { 0.0f, 0.0f, -1.0f };
+        Vec axis;
+        Vec dir;
+        Vec offset;
+        f32 angle;
+
+        offset.x = 0.0f;
+        offset.y = 0.0f;
+        offset.z = -0.354f * height;
+        offset.x += height * ((rand() % 50 - 25) / 100.0);
+        offset.y += height * ((rand() % 50 - 25) / 100.0);
+        offset.z += height * ((rand() % 50 - 25) / 100.0);
+        PSVECSubtract(&camera->eye, &p->_1C, &dir);
+        PSVECNormalize(&dir, &dir);
+        angle = acos(PSVECDotProduct(&forward, &dir));
+        PSVECCrossProduct(&forward, &dir, &axis);
+        if (PSVECMag(&axis) == 0.0f) {
+            axis.x = 0.0f;
+            axis.y = -1.0f;
+            axis.z = 0.0f;
+        }
+        PSMTXRotAxisRad(rot, &axis, angle);
+        PSMTXMultVec(rot, &offset, &offset);
+        p->pos.x = p->_1C.x + offset.x;
+        p->pos.y = p->_1C.y + offset.y;
+        p->pos.z = p->_1C.z + offset.z;
+        p->_38 = p->_3C = lbl_3_data_26C0C[0];
+        p->_4C = 3;
+        p->_4A = lbl_3_data_26C0C[3];
+        p->vel.x = p->vel.z = 0.0f;
+        p->vel.y = -(lbl_3_data_26C0C[2] / 100000.0f);
+        break;
+    }
+    }
 }
 
 // .text:0x001534C0 size:0x1E8 mapped:0x80792554
@@ -946,8 +1076,8 @@ void fn_3_1524E8(Particle3880* p, u8 jitter) {
 }
 
 // .text:0x00151F2C size:0x5BC mapped:0x80790FC0
-void fn_3_151F2C(void) {
-    return;
+BOOL fn_3_151F2C(Emitter3880* emitter) {
+    return FALSE;
 }
 
 // .text:0x00151D6C size:0x1C0 mapped:0x80790E00
