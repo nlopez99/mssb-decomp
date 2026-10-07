@@ -2,6 +2,8 @@
 #include "header_rep_data.h"
 #include "game/UnknownHomes_Game.h"
 #include "static/UnknownHomes_Static.h"
+#include "game/rep_18E8.h"
+#include "game/rep_3DA8.h"
 
 extern struct {
     /* 0x00 */ u8 _00[0x12];
@@ -20,10 +22,6 @@ typedef struct {
 
 extern Unk12D0Fielder g_Fielders[9];
 
-// rep_18E8.h declares these as void(void) placeholders
-extern s32 fn_3_A63E4(s32 runner, s32 arg1, s32* out0, s32* out1);
-extern s32 fn_3_A6810(f32 x0, f32 z0, f32 x1, f32 z1);
-
 extern f32 lbl_3_data_4444[10];
 
 extern struct {
@@ -34,10 +32,8 @@ extern struct {
     /* 0xA8 */ u8 _A8[2];
 } g_Scores;
 
-// rep_3DA8.h declares this as a void(void) placeholder
-extern void fn_3_16230C(s32 result, u8 streak);
 extern void fn_3_76A9C(void);
-extern void fn_3_76D08(s16 rosterID, s32 result, s16 fielder, u8 streak);
+extern void fn_3_76D08(s16 rosterID, s32 result, s16 fielder, s32 streak);
 
 typedef struct {
     /* 0x00 */ u8 _00[0x1A];
@@ -527,7 +523,7 @@ void fn_3_77914(void) {
     s32 pitcher = g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.awayTeamBattingInd_battingTeam][0][0];
     s16 result = 0;
     s16 fielder = -1;
-    u8 streak = 0;
+    s32 streak = 0;
     Unk12D0PitcherStats* pitcherStats = &lbl_803535C8[g_GameLogic.teamFielding][pitcher];
     int i;
     int j;
