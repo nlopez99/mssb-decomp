@@ -148,12 +148,14 @@ extern void fn_3_157570(void);
 extern void fn_3_150010(s8 index);
 extern void fn_3_14E988(s8 index);
 extern void fn_3_14E894(void);
+extern void fn_3_1695A4(s8 arg0, u8 arg1);
+extern void fn_3_16C394(s8 arg0);
 extern void fn_3_106EB0(void);
 // rep_AC8.h declares fn_3_25844 as void(void)
 extern void fn_3_25844(int, int);
 extern void fn_800528B4(void);
 extern void fn_800246D4(int (*compare)(const void*, const void*), void* src, void* dst, int size, int count);
-extern void fn_800115C8(u8);
+extern void fn_800115C8(s8);
 extern void fn_80011578(void);
 extern void fn_3_5A6D4(u8 status);
 extern void fn_3_10F550(u8, s16);
@@ -970,7 +972,7 @@ BOOL fn_3_1379A0(int fielderIdx) {
 // .text:0x001373E0 size:0x5C0 mapped:0x80776474
 // 92.9%: the half-size constants are loaded through addi where the target loads them
 // directly, and the plane intersection schedules its stores differently.
-BOOL fn_3_1373E0(VecSrcDst* seg, Vec* vel, VecSrcDst* out, f32 radius) {
+u8 fn_3_1373E0(VecSrcDst* seg, Vec* vel, VecSrcDst* out, f32 radius) {
     f32 planes[4][3] = { { -1.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, { 0.0f, -1.0f, 0.0f } };
     Vec hit;
     Vec d1;
@@ -1195,7 +1197,113 @@ void fn_3_136CF4(Unk3520Box* box) {
 
 // .text:0x0013688C size:0x468 mapped:0x80775920
 void fn_3_13688C(Unk3520Box* box) {
-    return;
+    VecSrcDst seg;
+    CollisionStruct col;
+    u32 type;
+    f32 radius;
+    f32 best;
+    f32 dx;
+    f32 dz;
+    f32 dist;
+    f32 reach;
+    int i;
+    int who;
+    Unk3520Fielder* fielder;
+
+    seg.src.x = box->pos.x;
+    seg.src.y = -box->pos.y;
+    seg.src.z = box->pos.z;
+    box->vel.y += lbl_3_data_21AF8[2];
+    box->pos.x = box->vel.x + box->pos.x;
+    box->pos.y = box->vel.y + box->pos.y;
+    box->pos.z = box->vel.z + box->pos.z;
+    if (box->pos.y < 0.0f) {
+        box->pos.y = 0.0f;
+        box->vel.y = 0.0f;
+    }
+    seg.dst.x = box->pos.x;
+    seg.dst.y = -box->pos.y;
+    seg.dst.z = box->pos.z;
+    type = checkCollision(&seg, &col, 0, FALSE);
+    if (type == 5) {
+        col.normal.y *= -1.0f;
+        fn_3_13ADC0(&box->vel, &box->vel, &col.normal);
+        box->pos.x = col.position.x;
+        box->pos.y = -col.position.y;
+        box->pos.z = col.position.z;
+    }
+    seg.dst.x = box->pos.x;
+    seg.dst.y = -box->pos.y;
+    seg.dst.z = box->pos.z;
+    if (fn_3_1373E0(&seg, &box->vel, (VecSrcDst*)&col, lbl_3_data_21AF8[3])) {
+        box->pos.x = col.position.x;
+        box->pos.y = col.position.y;
+        box->pos.z = col.position.z;
+        memcpy(&box->vel, &col.normal, sizeof(Vec));
+        seg.dst.x = box->pos.x;
+        seg.dst.y = -box->pos.y;
+        seg.dst.z = box->pos.z;
+        type = checkCollision(&seg, &col, 0, FALSE);
+        if (type == 5) {
+            col.normal.y *= -1.0f;
+            fn_3_13ADC0(&box->vel, &box->vel, &col.normal);
+            box->pos.x = col.position.x;
+            box->pos.y = -col.position.y;
+            box->pos.z = col.position.z;
+        }
+    }
+    best = 99999.9f;
+    radius = lbl_3_data_21AF8[3];
+    for (i = 0, who = -1; i < 4; i++) {
+        if (g_Minigame.minigameFielderIndex[i] < 0) {
+            continue;
+        }
+        if (g_Minigame.starDashStunType[i] != 0 && g_Minigame.starDashStunType[i] != 3) {
+            continue;
+        }
+        fielder = &g_Fielders[g_Minigame.minigameFielderIndex[i]];
+        if (fielder->_203 != 0 && fielder->_204 > 3) {
+            continue;
+        }
+        if (fielder->_16C + fielder->_00C < box->pos.y) {
+            continue;
+        }
+        reach = radius + lbl_3_data_47BC[fielder->_1C9];
+        dz = fielder->pos.z - box->pos.z;
+        dx = fielder->pos.x - box->pos.x;
+        reach *= reach;
+        dist = dx * dx + dz * dz;
+        if (dist < reach && dist < best) {
+            best = dist;
+            who = i;
+        }
+    }
+    if (who >= 0) {
+        g_Minigame.playerIDWithPowerup[0] = who;
+        g_Minigame._1D58 = lbl_3_data_21B10[2];
+        if (MG.box._1E == 2) {
+            if (g_Minigame._1D6D == who) {
+                fn_3_14E988(g_Minigame._1D6D);
+                fn_800115C8(who);
+                g_Minigame._1D6D = -1;
+            }
+            g_Minigame.starDashRelated_0_5Or1_5 = &lbl_3_data_21AF8[5];
+            fn_3_90064(0x2F5);
+            fn_3_1695A4(who, 0);
+        } else {
+            g_Minigame.starDashRelated_0_5Or1_5 = &lbl_3_data_21AF8[4];
+            fn_3_90064(0x2F6);
+            fn_3_16C394(who);
+        }
+        box->_1E = 0;
+        box->_1C = lbl_3_data_21B10[0];
+    } else {
+        box->_1C--;
+        if (box->_1C <= 0) {
+            box->_1E = 0;
+            box->_1C = lbl_3_data_21B10[0];
+        }
+    }
 }
 
 // .text:0x00136220 size:0x66C mapped:0x807752B4

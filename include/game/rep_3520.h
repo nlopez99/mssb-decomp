@@ -49,7 +49,7 @@ void fn_3_136EA4(void);
 void fn_3_1370A0(camera_803c639c_s* camera);
 void fn_3_1371E8(void);
 void fn_3_137224(Vec* center);
-BOOL fn_3_1373E0(struct _VecSrcDst* seg, Vec* vel, struct _VecSrcDst* out, f32 radius);
+u8 fn_3_1373E0(struct _VecSrcDst* seg, Vec* vel, struct _VecSrcDst* out, f32 radius);
 BOOL fn_3_1379A0(int fielderIdx);
 u8 fn_3_137B10(struct Unk3520Obj* obj);
 void fn_3_137CF8(struct Unk3520Obj* obj);
