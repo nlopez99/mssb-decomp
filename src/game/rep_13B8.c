@@ -195,8 +195,104 @@ void fn_3_8A1D8(void) {
 }
 
 // .text:0x000899BC size:0x81C mapped:0x806C8A50
+// 21.37%, a draft: the logic follows the target, but this build is 0xD48 bytes against 0x81C;
+// how the target shares its inlined fn_3_89914 copies between branches is still open
 void fn_3_899BC(void) {
-    return;
+    int dest[5];
+    int i;
+
+    if (g_d_GameSettings.GameModeSelected == 2 && g_Strikes.outs >= 3) {
+        for (i = 0; i < 4; i++) {
+            g_Runners[i].runnerOnFieldOrOutOrScored = 0;
+            g_Runners[i].rosterID = -1;
+        }
+    }
+    for (i = 0; i < 4; i++) {
+        dest[i] = -1;
+        g_RunningLogic._06[i] = -1;
+    }
+    if (g_Pitcher.strikeOutOrWalk == 2 && g_FieldingLogic._107 != 0) {
+        for (i = 3; i >= 1; i--) {
+            if (g_Runners[i].runnerOnFieldOrOutOrScored == 1 || g_Runners[i].runnerOnFieldOrOutOrScored == 5) {
+                if (g_Runners[i].currentBase == i && g_Runners[i].forcedToAdvanceInd != 0) {
+                    dest[i + 1] = i;
+                } else {
+                    dest[g_Runners[i].currentBase] = i;
+                }
+            }
+        }
+        dest[1] = 0;
+        for (i = 3; i >= 0; i--) {
+            fn_3_89914(dest[i], i);
+        }
+        return;
+    }
+    if (g_Ball.maybebuntOn2Strikes != 0) {
+        dest[3] = 3;
+        fn_3_89914(dest[3], 3);
+        dest[2] = 2;
+        fn_3_89914(dest[2], 2);
+        dest[1] = 1;
+        fn_3_89914(dest[1], 1);
+        return;
+    }
+    if (g_Pitcher.strikeOutOrWalk == 3) {
+        if (g_Runners[1].runnerOnFieldOrOutOrScored == 0) {
+            dest[3] = 3;
+            fn_3_89914(dest[3], 3);
+            dest[2] = 2;
+            fn_3_89914(dest[2], 2);
+        } else if (g_Runners[2].runnerOnFieldOrOutOrScored == 0) {
+            dest[2] = 1;
+            fn_3_89914(dest[2], 2);
+            dest[3] = 3;
+            fn_3_89914(dest[3], 3);
+        } else {
+            dest[3] = 2;
+            fn_3_89914(dest[3], 3);
+            dest[2] = 1;
+            fn_3_89914(dest[2], 2);
+        }
+        dest[1] = 0;
+        fn_3_89914(dest[1], 1);
+        return;
+    }
+    if (g_Ball.deadBallReason == 3) {
+        dest[3] = 1;
+        fn_3_89914(dest[3], 3);
+        dest[2] = 0;
+        fn_3_89914(dest[2], 2);
+        dest[1] = -1;
+        fn_3_89914(dest[1], 1);
+        return;
+    }
+    if (g_Ball.deadBallReason == 4) {
+        if (g_Runners[1].baseReachedAtTimeOfThrow >= 0 && g_Runners[1].runnerOnFieldOrOutOrScored == 1 &&
+            g_Runners[1].baseReachedAtTimeOfThrow == 1) {
+            dest[3] = 1;
+        }
+        if (g_Runners[0].baseReachedAtTimeOfThrow >= 0 && g_Runners[0].runnerOnFieldOrOutOrScored == 1) {
+            int base = g_Runners[0].baseReachedAtTimeOfThrow + 2;
+            if (base < 4) {
+                if (dest[3] >= 0 && base == 3) {
+                    base--;
+                }
+                dest[base] = 0;
+            }
+        }
+        for (i = 3; i >= 1; i--) {
+            fn_3_89914(dest[i], i);
+        }
+        return;
+    }
+    for (i = 0; i < 4; i++) {
+        if (g_Runners[i].runnerOnFieldOrOutOrScored == 1 || g_Runners[i].runnerOnFieldOrOutOrScored == 5) {
+            dest[g_Runners[i].currentBase] = i;
+        }
+    }
+    for (i = 3; i >= 1; i--) {
+        fn_3_89914(dest[i], i);
+    }
 }
 
 // .text:0x00089914 size:0xA8 mapped:0x806C89A8
