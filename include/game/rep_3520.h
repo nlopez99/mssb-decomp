@@ -16,7 +16,7 @@ void fn_3_133320(void);
 void fn_3_13334C(void);
 BOOL fn_3_1344BC(int a, int b);
 s16 fn_3_1345AC(s16 angle, s16 target, int speed);
-void fn_3_134658(void);
+void fn_3_134658(u32 self, f32* x, f32* z, int* quadrant);
 int fn_3_134908(const void* a, const void* b);
 int fn_3_134918(const void* a, const void* b);
 void fn_3_13493C(void);

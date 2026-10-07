@@ -66,11 +66,17 @@ typedef struct Unk3520Minigame {
 
 #define MG (*(Unk3520Minigame*)&g_Minigame)
 
-// Elements of the arrays the qsort comparators below order
+// Another player as a target, sorted by fn_3_134918 (distance) or fn_3_134908 (points)
+typedef struct Unk3520Target {
+    /* 0x0 */ f32 dist;
+    /* 0x4 */ s16 points;
+    /* 0x6 */ u8 player;
+} Unk3520Target; // size: 0x8
+
+// Elements of the array fn_3_135698 orders
 typedef struct Unk3520Sort {
     /* 0x00 */ f32 _0;
-    /* 0x04 */ s16 _4;
-    /* 0x06 */ u8 _6[0x11 - 0x6];
+    /* 0x04 */ u8 _4[0x11 - 0x4];
     /* 0x11 */ u8 _11;
 } Unk3520Sort;
 
@@ -98,7 +104,9 @@ typedef struct Unk3520Fielder {
     /* 0x1CA */ u8 _1CA[0x203 - 0x1CA];
     /* 0x203 */ u8 _203;
     /* 0x204 */ u8 _204;
-    /* 0x205 */ u8 _205[0x268 - 0x205];
+    /* 0x205 */ u8 _205[0x20F - 0x205];
+    /* 0x20F */ u8 _20F;
+    /* 0x210 */ u8 _210[0x268 - 0x210];
 } Unk3520Fielder; // size: 0x268
 
 extern Unk3520Fielder g_Fielders[9];
@@ -120,6 +128,7 @@ extern void fn_3_106EB0(void);
 // rep_AC8.h declares fn_3_25844 as void(void)
 extern void fn_3_25844(int, int);
 extern void fn_800528B4(void);
+extern void fn_800246D4(int (*compare)(const void*, const void*), void* src, void* dst, int size, int count);
 extern void fn_800115C8(u8);
 extern void fn_80011578(void);
 extern void fn_3_5A6D4(u8 status);
@@ -1112,20 +1121,59 @@ void fn_3_13493C(void) {
 
 // .text:0x00134918 size:0x24 mapped:0x807739AC
 int fn_3_134918(const void* a, const void* b) {
-    if (((Unk3520Sort*)a)->_0 < ((Unk3520Sort*)b)->_0) {
+    if (((Unk3520Target*)a)->dist < ((Unk3520Target*)b)->dist) {
         return -1;
     }
-    return ((Unk3520Sort*)a)->_0 > ((Unk3520Sort*)b)->_0;
+    return ((Unk3520Target*)a)->dist > ((Unk3520Target*)b)->dist;
 }
 
 // .text:0x00134908 size:0x10 mapped:0x8077399C
 int fn_3_134908(const void* a, const void* b) {
-    return ((Unk3520Sort*)b)->_4 - ((Unk3520Sort*)a)->_4;
+    return ((Unk3520Target*)b)->points - ((Unk3520Target*)a)->points;
 }
 
 // .text:0x00134658 size:0x2B0 mapped:0x807736EC
-void fn_3_134658(void) {
-    return;
+void fn_3_134658(u32 self, f32* x, f32* z, int* quadrant) {
+    Unk3520Target targets[4];
+    Unk3520Target* target = targets;
+    Unk3520Target* best = targets;
+    u32 i;
+    u32 n = 0;
+    f32 dx;
+    f32 dz;
+
+    i = 0;
+    do {
+        if (i != self && g_Minigame.starDashStunType[i] == 0 && g_Fielders[g_Minigame.minigameFielderIndex[i]]._20F == 0) {
+            n++;
+            dx = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.x - g_Fielders[g_Minigame.minigameFielderIndex[self]].pos.x;
+            dz = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.z - g_Fielders[g_Minigame.minigameFielderIndex[self]].pos.z;
+            target->dist = dx * dx + dz * dz;
+            target->points = g_Minigame.miniGameCurrentPoints[i];
+            target->player = i;
+            target++;
+        }
+    } while (++i < 4);
+    if (n == 0) {
+        return;
+    }
+    fn_800246D4(fn_3_134918, targets, targets, sizeof(Unk3520Target), n);
+    i = 0;
+    do {
+        if (best->dist <= 4.0f && best->points > 0) {
+            *x = g_Fielders[g_Minigame.minigameFielderIndex[targets[i].player]].pos.x;
+            *z = g_Fielders[g_Minigame.minigameFielderIndex[targets[i].player]].pos.z;
+            *quadrant = fn_3_13564C(*x, *z);
+            return;
+        }
+        best++;
+    } while (++i < n);
+    fn_800246D4(fn_3_134908, targets, targets, sizeof(Unk3520Target), n);
+    if (targets[0].points > 0) {
+        *x = g_Fielders[g_Minigame.minigameFielderIndex[targets[0].player]].pos.x;
+        *z = g_Fielders[g_Minigame.minigameFielderIndex[targets[0].player]].pos.z;
+        *quadrant = fn_3_13564C(*x, *z);
+    }
 }
 
 // .text:0x001345AC size:0xAC mapped:0x80773640
