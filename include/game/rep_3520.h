@@ -7,6 +7,7 @@
 #include "static/UnknownHomes_Static.h"
 
 struct Unk3520Obj;
+struct Unk3520Box;
 
 void fn_3_132EDC(void* arg0, GXTevStageID* stage, GXTexCoordID* coord, GXTexMapID* map, u8* arg4, u8* arg5);
 void fn_3_1330E4(void);
@@ -40,8 +41,8 @@ void fn_3_135FF4(void);
 void fn_3_136048(void);
 void fn_3_1360BC(int player);
 void fn_3_136220(void);
-void fn_3_13688C(void);
-void fn_3_136CF4(void);
+void fn_3_13688C(struct Unk3520Box* box);
+void fn_3_136CF4(struct Unk3520Box* box);
 void fn_3_136EA4(void);
 void fn_3_1370A0(camera_803c639c_s* camera);
 void fn_3_1371E8(void);
