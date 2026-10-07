@@ -4,7 +4,6 @@
 #include "header_rep_data.h"
 #include "game/rep_1838.h"
 #include "game/rep_28A8.h"
-#include "game/rep_3880.h"
 #include "game/rep_540.h"
 #include "game/m_sound.h"
 #include "static/UnknownHomes_Static.h"
@@ -30,7 +29,31 @@ typedef struct Unk3520Obj {
     /* 0x3F */ u8 _3F;
 } Unk3520Obj; // size: 0x40
 
-#define OBJS ((Unk3520Obj*)((u8*)&g_Minigame + 0xBB0))
+// A spoke's end points, one per player at g_Minigame._1CE8
+typedef struct Unk3520Spoke {
+    /* 0x00 */ Vec start;
+    /* 0x0C */ Vec end;
+} Unk3520Spoke; // size: 0x18
+
+// The pieces along the spokes, at g_Minigame._A8
+typedef struct Unk3520Piece {
+    /* 0x00 */ Vec pos;
+    /* 0x0C */ u8 _0C[0x26 - 0xC];
+    /* 0x26 */ u8 _26;
+    /* 0x27 */ u8 _27;
+} Unk3520Piece; // size: 0x28
+
+// This minigame's view of g_Minigame
+typedef struct Unk3520Minigame {
+    /* 0x0000 */ u8 _0000[0xA8];
+    /* 0x00A8 */ Unk3520Piece pieces[40];
+    /* 0x06E8 */ u8 _06E8[0xBB0 - 0x6E8];
+    /* 0x0BB0 */ Unk3520Obj objs[4];
+    /* 0x0CB0 */ u8 _0CB0[0x1CE8 - 0xCB0];
+    /* 0x1CE8 */ Unk3520Spoke spokes[4];
+} Unk3520Minigame;
+
+#define MG (*(Unk3520Minigame*)&g_Minigame)
 
 // Elements of the arrays the qsort comparators below order
 typedef struct Unk3520Sort {
@@ -70,6 +93,10 @@ extern struct {
 } lbl_80366158;
 
 extern s32 fn_800247E4(s32, s32, s32, s32);
+// rep_3880.h declares fn_3_156548 as void(void); it takes the same arguments as fn_3_15730C
+extern void fn_3_156548(u32 index, f32 x, f32 y, f32 z);
+extern void fn_3_15730C(u32 index, f32 x, f32 y, f32 z);
+extern void fn_3_157570(void);
 extern void fn_800528B4(void);
 extern void fn_80011578(void);
 extern void fn_3_5A6D4(u8 status);
@@ -85,7 +112,11 @@ extern s16 lbl_3_data_21A04[8];
 extern s16 lbl_3_data_21A3C[2][2];
 extern s16 lbl_3_data_21A44;
 extern Vec lbl_3_data_21A48;
-extern s16 lbl_3_data_21A60;
+extern f32 lbl_3_data_21A54[3];
+extern struct {
+    /* 0x0 */ s16 _0;
+    /* 0x2 */ s16 _2;
+} lbl_3_data_21A60;
 extern f32 lbl_3_data_21A64[9];
 extern s16 lbl_3_data_21A90[4][4][2];
 extern s16 lbl_3_data_21AD0[4][4];
@@ -175,7 +206,7 @@ void fn_3_13B9C4(void) {
     g_Minigame._1D50 = 30;
     g_Minigame._1D6C = 0;
     for (i = 0; i < 4; i++) {
-        OBJS[i]._3D = 0;
+        MG.objs[i]._3D = 0;
     }
     g_Minigame._CCE[0] = 0;
 }
@@ -505,7 +536,7 @@ BOOL fn_3_1379A0(int fielderIdx) {
         return FALSE;
     }
     for (i = 0; i < lbl_3_bss_B780; i++) {
-        obj = &OBJS[i];
+        obj = &MG.objs[i];
         if (obj->_3D != 3 && obj->_3D != 5) {
             continue;
         }
@@ -631,7 +662,9 @@ void fn_3_136048(void) {
 
 // .text:0x00135FF4 size:0x54 mapped:0x80775088
 void fn_3_135FF4(void) {
-    if (lbl_3_data_21A3C[g_Minigame._1D73][0] * 60 == g_Minigame._17C0) {
+    u32 frame = lbl_3_data_21A3C[g_Minigame._1D73][0] * 60;
+
+    if (frame == g_Minigame._17C0) {
         g_Minigame._1D72 = 1;
         g_Minigame._1D62 = 0;
         g_Minigame._1D48 = 0.0f;
@@ -642,9 +675,9 @@ void fn_3_135FF4(void) {
 // .text:0x00135F4C size:0xA8 mapped:0x80774FE0
 void fn_3_135F4C(void) {
     g_Minigame._1D62++;
-    g_Minigame._1D48 = (f32)g_Minigame._1D62 / (f32)lbl_3_data_21A60;
+    g_Minigame._1D48 = (f32)g_Minigame._1D62 / (f32)lbl_3_data_21A60._0;
     fn_3_135C18();
-    if (g_Minigame._1D62 >= lbl_3_data_21A60) {
+    if (g_Minigame._1D62 >= lbl_3_data_21A60._0) {
         g_Minigame._1D72 = 2;
     }
 }
@@ -652,17 +685,20 @@ void fn_3_135F4C(void) {
 // .text:0x00135E98 size:0xB4 mapped:0x80774F2C
 void fn_3_135E98(void) {
     g_Minigame._1D62++;
-    g_Minigame._1D48 = 1.0f - (f32)g_Minigame._1D62 / (f32)lbl_3_data_21A60;
+    g_Minigame._1D48 = 1.0f - (f32)g_Minigame._1D62 / (f32)lbl_3_data_21A60._0;
     fn_3_135C18();
-    if (g_Minigame._1D62 >= lbl_3_data_21A60) {
+    if (g_Minigame._1D62 >= lbl_3_data_21A60._0) {
         g_Minigame._1D72 = 0;
     }
 }
 
 // .text:0x00135E38 size:0x60 mapped:0x80774ECC
 void fn_3_135E38(void) {
+    u32 frame;
+
     fn_3_135C18();
-    if (lbl_3_data_21A3C[g_Minigame._1D73 - 1][1] * 60 == g_Minigame._17C0) {
+    frame = lbl_3_data_21A3C[g_Minigame._1D73 - 1][1] * 60;
+    if (frame == g_Minigame._17C0) {
         g_Minigame._1D72 = 3;
         g_Minigame._1D62 = 0;
     }
@@ -670,7 +706,44 @@ void fn_3_135E38(void) {
 
 // .text:0x00135C18 size:0x220 mapped:0x80774CAC
 void fn_3_135C18(void) {
-    return;
+    f32 inner;
+    f32 outer;
+    f32 step;
+    f32 t;
+    f32 x;
+    f32 z;
+    int i;
+    int j;
+    int k;
+
+    inner = g_Minigame._1D48 * lbl_3_data_21A54[1] - lbl_3_data_21A54[0];
+    step = (lbl_3_data_21A54[1] - lbl_3_data_21A54[0]) / lbl_3_data_21A60._2;
+    outer = inner + lbl_3_data_21A54[0];
+    for (i = 0, k = 0; i < 4; i++) {
+        getComponentsFromSAng(g_Minigame._1D64[i], &x, &z);
+        t = inner;
+        MG.spokes[i].start.x = x * lbl_3_data_21A54[0] + lbl_3_data_21A48.x;
+        MG.spokes[i].start.z = z * lbl_3_data_21A54[0] + lbl_3_data_21A48.z;
+        MG.spokes[i].end.x = x * outer + lbl_3_data_21A48.x;
+        MG.spokes[i].end.z = z * outer + lbl_3_data_21A48.z;
+        x = (MG.spokes[i].end.x - MG.spokes[i].start.x) / inner;
+        z = (MG.spokes[i].end.z - MG.spokes[i].start.z) / inner;
+        for (j = 0; j < lbl_3_data_21A60._2; j++, k++) {
+            MG.pieces[k].pos.x = x * t + MG.spokes[i].start.x;
+            MG.pieces[k].pos.z = z * t + MG.spokes[i].start.z;
+            if (t < 0.0f) {
+                MG.pieces[k]._26 = 0;
+            } else {
+                t -= step;
+                if (MG.pieces[k]._26 != 0) {
+                    fn_3_156548(k, MG.pieces[k].pos.x, -MG.pieces[k].pos.y, MG.pieces[k].pos.z);
+                } else {
+                    fn_3_15730C(k, MG.pieces[k].pos.x, -MG.pieces[k].pos.y, MG.pieces[k].pos.z);
+                    MG.pieces[k]._26 = 1;
+                }
+            }
+        }
+    }
 }
 
 // .text:0x00135A64 size:0x1B4 mapped:0x80774AF8
@@ -811,8 +884,8 @@ BOOL fn_3_1354BC(s32 i, f32 x, f32 z) {
     f32 dz;
     f32 dx;
 
-    dx = fabs(OBJS[i]._0.x - x);
-    dz = fabs(OBJS[i]._0.z - z);
+    dx = fabs(MG.objs[i]._0.x - x);
+    dz = fabs(MG.objs[i]._0.z - z);
     if (dx <= 4.7f && dz <= 4.325f) {
         ret = TRUE;
     }
