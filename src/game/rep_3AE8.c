@@ -80,7 +80,8 @@ void fn_3_15C024(Vec* pos, Vec* vel, Vec* accel, BOOL curve) {
     pos->y += vel->y;
     pos->z += vel->z;
     if (curve) {
-        speed = 0.00005f * LinearInterpolateToNewRange(g_Pitcher.calced_curve, 1.0f, 100.0f, entry[1], entry[2]);
+        speed = LinearInterpolateToNewRange(g_Pitcher.calced_curve, 1.0f, 100.0f, entry[1], entry[2]);
+        speed = 0.00005f * speed;
         buttons = g_Controls[g_GameLogic.teams[g_GameLogic.teamFielding]].buttonInput;
         if (buttons & INPUT_BUTTON_LEFT) {
             dir = -1.0f;
