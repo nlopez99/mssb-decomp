@@ -1,153 +1,791 @@
 #include "game/sta_c6.h"
+// Must precede header_rep_data.h: its extern inline dolsqrtf2 puts weak constants first
+// in .rodata, so MWCC does not pool .rodata and addresses constants one by one
+#include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
+#include "static/UnknownHomes_Static.h"
+#include "C3/control.h"
+#include "Dolphin/gx.h"
+#include "Dolphin/mtx.h"
+#include "Dolphin/os.h"
+#include "Dolphin/rand.h"
+#include "musyx/musyx.h"
+#include "string.h"
 
-// .text:0x000E59B4 size:0x68 mapped:0x80724A48
-void fn_3_E59B4(void) {
-    return;
+typedef struct {
+    /* 0x00 */ void* _00;
+    /* 0x04 */ u8 _04[0x06 - 0x04];
+    /* 0x06 */ u8 format;
+} StaC6Tex;
+
+typedef struct {
+    /* 0x00 */ u8 _00[0xA0];
+    /* 0xA0 */ u16 _A0;
+} StaC6Tev;
+
+typedef struct {
+    /* 0x00 */ u8 _00[0x0C];
+    /* 0x0C */ StaC6Tev* _0C;
+} StaC6DispState;
+
+typedef struct {
+    /* 0x00 */ u8 _00[0x20];
+    /* 0x20 */ u8 _20;
+} StaC6DispInfo;
+
+typedef struct {
+    /* 0x00 */ u8 _00[0x04];
+    /* 0x04 */ StaC6DispInfo* _04;
+} StaC6DispHeader;
+
+typedef struct StaC6Shape {
+    /* 0x00 */ u8 _00[0x04];
+    /* 0x04 */ StaC6Tex* _04;
+    /* 0x08 */ StaC6DispState* _08;
+    /* 0x0C */ u8 _0C[0x10 - 0x0C];
+    /* 0x10 */ StaC6DispHeader* _10;
+    /* 0x14 */ u8 _14[0x18 - 0x14];
+    /* 0x18 */ Mtx _18;
+} StaC6Shape;
+
+typedef struct {
+    /* 0x00 */ u8 _00[0x14];
+    /* 0x14 */ StaC6Shape* _14;
+    /* 0x18 */ StaC6Shape* _18;
+    /* 0x1C */ Control control;
+    /* 0x58 */ u8 _58[0xEC - 0x58];
+    /* 0xEC */ MtxPtr _EC;
+} StaC6Bone;
+
+typedef struct {
+    /* 0x00 */ u8 _00[0x06];
+    /* 0x06 */ u16 _06;
+    /* 0x08 */ u8 _08[0x18 - 0x08];
+    /* 0x18 */ StaC6Bone** _18;
+    /* 0x1C */ u8 _1C[0x98 - 0x1C];
+    /* 0x98 */ u8 _98;
+} StaC6Actor;
+
+typedef struct {
+    /* 0x00 */ StaC6Actor* _00;
+    /* 0x04 */ u8 _04[0x10 - 0x04];
+    /* 0x10 */ u8 _10[0x44];
+    /* 0x54 */ f32 _54;
+    /* 0x58 */ u8 _58;
+    /* 0x59 */ u8 _59;
+    /* 0x5A */ u8 _5A[0x5C - 0x5A];
+    /* 0x5C */ f32 _5C;
+    /* 0x60 */ u8 _60[0x90 - 0x60];
+} StaC6Model; // size: 0x90
+
+typedef struct {
+    /* 0x00 */ u16 count;
+    /* 0x04 */ Mtx _04;
+    /* 0x34 */ StaC6Model models[1];
+} StaC6ModelTable;
+
+typedef struct StaC6Draw {
+    /* 0x00 */ Control control;
+    /* 0x3C */ u8 _3C[0x74 - 0x3C];
+    /* 0x74 */ StaC6Model* _74;
+    /* 0x78 */ void* _78;
+    /* 0x7C */ void (*_7C)(void* arg);
+    /* 0x80 */ void (*_80)(s32 idx);
+    /* 0x84 */ void (*_84)(void* arg);
+    /* 0x88 */ void (*_88)(void* arg);
+    /* 0x8C */ void* _8C;
+    /* 0x90 */ u8 _90_7 : 1;
+    /* 0x90 */ u8 _90_6 : 1;
+    /* 0x90 */ u8 _90_5 : 1;
+    /* 0x90 */ u8 _90_0 : 5;
+    /* 0x91 */ u8 _91;
+    /* 0x92 */ u8 _92;
+    /* 0x93 */ u8 _93;
+    /* 0x94 */ s16 _94;
+    /* 0x96 */ s16 _96;
+    /* 0x98 */ u8 _98;
+    /* 0x99 */ u8 _99[0x9C - 0x99];
+    /* 0x9C */ StaC6Model* _9C;
+    /* 0xA0 */ u32 _A0;
+    /* 0xA4 */ GXColor color;
+    /* 0xA8 */ GXColor* from;
+    /* 0xAC */ GXColor* to;
+    /* 0xB0 */ GXColor* _B0;
+    /* 0xB4 */ GXColor* _B4;
+    /* 0xB8 */ GXColor* _B8;
+    /* 0xBC */ GXColor* _BC;
+    /* 0xC0 */ u8 _C0;
+    /* 0xC1 */ u8 type;
+    /* 0xC2 */ u8 _C2;
+    /* 0xC3 */ u8 _C3;
+    /* 0xC4 */ u8 _C4;
+    /* 0xC5 */ u8 _C5[0xE8 - 0xC5];
+} StaC6Draw; // size: 0xE8
+
+typedef struct {
+    /* 0x00 */ Vec pos;
+    /* 0x0C */ f32 rotY;
+    /* 0x10 */ u8 type;
+    /* 0x11 */ u8 _11;
+    /* 0x12 */ u8 _12;
+    /* 0x13 */ u8 _13;
+} StaC6Prop; // size: 0x14
+
+typedef struct {
+    /* 0x00 */ u8 type;
+    /* 0x01 */ u8 _01;
+    /* 0x02 */ u8 _02;
+    /* 0x03 */ u8 _03;
+} StaC6Slot; // size: 0x4
+
+typedef struct StaC6Sort {
+    /* 0x00 */ f32 depth;
+    /* 0x04 */ s32 idx;
+} StaC6Sort; // size: 0x8
+
+typedef struct {
+    /* 0x00 */ Vec min;
+    /* 0x0C */ Vec max;
+} StaC6Bounds; // size: 0x18
+
+extern struct {
+    /* 0x00 */ StaC6Draw* _00;
+    /* 0x04 */ u8 _04[0x18 - 0x04];
+    /* 0x18 */ void (*_18)(void);
+    /* 0x1C */ u8 _1C[0x20 - 0x1C];
+    /* 0x20 */ s32 _20;
+    /* 0x24 */ s32 _24;
+    /* 0x28 */ s32 _28;
+    /* 0x2C */ s32 _2C;
+    /* 0x30 */ u32 _30;
+    /* 0x34 */ s32* _34;
+    /* 0x38 */ void** _38;
+    /* 0x3C */ u32* _3C;
+    /* 0x40 */ u16* _40;
+    /* 0x44 */ u32* _44;
+    /* 0x48 */ StaC6Bounds* _48;
+    /* 0x4C */ u8 _4C[0x64 - 0x4C];
+    /* 0x64 */ u16 _64;
+    /* 0x66 */ u8 _66[0x6C - 0x66];
+    /* 0x6C */ u8 _6C;
+    /* 0x6D */ u8 _6D;
+} lbl_3_common_bss_350E4;
+
+extern struct {
+    /* 0x00 */ u8 _00[0x6C];
+    /* 0x6C */ StaC6ModelTable* _6C;
+} lbl_8036E548;
+
+extern struct {
+    /* 0x00 */ u8 _00[0x28];
+    /* 0x28 */ u8 _28;
+} lbl_80366158;
+
+extern u16 lbl_3_data_81DC[16];
+extern u8 lbl_3_data_8404[6][15][2];
+extern u8 lbl_3_data_84B8[30][2];
+
+// .data 0x19018 to 0x19770 belongs to this file, but lies outside its splits.txt ranges
+extern GXColor lbl_3_data_19018[3];
+extern GXColor lbl_3_data_19024[27];
+extern StaC6Prop lbl_3_data_19090[4][16];
+extern StaC6Slot lbl_3_data_19590[4][8];
+extern u8 lbl_3_data_19610[0x2F];
+extern s8 lbl_3_data_1963F;
+extern s8 lbl_3_data_19640;
+extern Vec lbl_3_data_19644[7];
+extern f32 lbl_3_data_19698[7];
+extern u8 lbl_3_data_196B4[7];
+extern Vec lbl_3_data_196BC[7];
+extern f32 lbl_3_data_19710[7];
+extern u32 lbl_3_data_1972C[16];
+extern u8 lbl_3_data_1976C;
+
+extern void* _OSAllocFromHeap(u32 align, u32 size);
+extern StaC6ModelTable* ActorObjectInitTable(u16 count);
+extern void fn_800BDC88(StaC6ModelTable* table, u16 first, u16 last, void* model, void* anim, s32 arg5);
+extern void fn_800BD478(StaC6Model* model, void* file);
+extern void fn_800BD548(StaC6Model* model, s32 count, ...);
+extern void fn_800BDA24(StaC6Model* model);
+extern void fn_800BDA94(StaC6Model* model, Mtx camera);
+extern f32 fn_800B4C40(StaC6Actor* actor);
+extern void fn_800B4CA0(StaC6Actor* actor, f32 frame);
+extern u8 fn_800B3C04(s32 arg0, StaC6Actor* actor, Mtx camera);
+extern void AnimateActorBones(StaC6Actor* actor);
+extern s32 fn_8005268C(void);
+extern camera_803c639c_s* fn_80052734(s32 idx);
+extern void fn_3_B8414(Vec* min, Vec* max);
+extern void fn_3_B8464(Mtx m, void* model);
+extern void fn_3_B8574(void);
+extern void fn_3_B97DC(void* model, void* anim);
+extern void fn_3_B9D68(u8* types, s32 count, void** files, s32* indices);
+
+// MWCC lays out .bss statics in reverse order of declaration
+static u8 lbl_3_bss_AEB8[0x28];
+static StaC6Prop* lbl_3_bss_AEB4;
+static StaC6Slot* lbl_3_bss_AEB0;
+static u8 lbl_3_bss_AEAE;
+static u8 lbl_3_bss_AEAD;
+static u8 lbl_3_bss_AEAC;
+static u8 lbl_3_bss_AE8C[0x20];
+static s32 lbl_3_bss_AE88;
+static s32 lbl_3_bss_AE84;
+static u8 lbl_3_bss_AE80[4];
+static u8 lbl_3_bss_AE7C;
+static u8 lbl_3_bss_AE7B;
+static u8 lbl_3_bss_AE54[0x27];
+static u8 lbl_3_bss_AE53;
+static u8 lbl_3_bss_AE52;
+static u8 lbl_3_bss_AE51;
+static u8 lbl_3_bss_AE50;
+
+// .text:0x000E8B24 size:0x5F8 mapped:0x80727BB8
+void fn_3_E8B24(void** files) {
 }
 
-// .text:0x000E5A1C size:0x68 mapped:0x80724AB0
-void fn_3_E5A1C(void) {
-    return;
+// .text:0x000E8AC8 size:0x5C mapped:0x80727B5C
+BOOL fn_3_E8AC8(void) {
+    if (g_d_GameSettings.StadiumID != STADIUM_ID_TOY_FIELD) {
+        return FALSE;
+    }
+    return fn_3_E7B20(lbl_3_common_bss_350E4._38, lbl_3_common_bss_350E4._34) != 0;
 }
 
-// .text:0x000E5A84 size:0x238 mapped:0x80724B18
-void fn_3_E5A84(void) {
-    return;
+// .text:0x000E7B20 size:0xFA8 mapped:0x80726BB4
+u8 fn_3_E7B20(void** files, s32* indices) {
+    return 1;
 }
 
-// .text:0x000E5CBC size:0x158 mapped:0x80724D50
-void fn_3_E5CBC(void) {
-    return;
-}
-
-// .text:0x000E5E14 size:0x5C mapped:0x80724EA8
-void fn_3_E5E14(void) {
-    return;
-}
-
-// .text:0x000E5E70 size:0x17C mapped:0x80724F04
-void fn_3_E5E70(void) {
-    return;
-}
-
-// .text:0x000E5FEC size:0x424 mapped:0x80725080
-void fn_3_E5FEC(void) {
-    return;
-}
-
-// .text:0x000E6410 size:0x98 mapped:0x807254A4
-void fn_3_E6410(void) {
-    return;
-}
-
-// .text:0x000E64A8 size:0x80 mapped:0x8072553C
-void fn_3_E64A8(void) {
-    return;
-}
-
-// .text:0x000E6528 size:0x50 mapped:0x807255BC
-void fn_3_E6528(void) {
-    return;
-}
-
-// .text:0x000E6578 size:0xC0 mapped:0x8072560C
-void fn_3_E6578(void) {
-    return;
-}
-
-// .text:0x000E6638 size:0x4C mapped:0x807256CC
-void fn_3_E6638(void) {
-    return;
-}
-
-// .text:0x000E6684 size:0x98 mapped:0x80725718
-void fn_3_E6684(void) {
-    return;
-}
-
-// .text:0x000E671C size:0x7C mapped:0x807257B0
-void fn_3_E671C(void) {
-    return;
-}
-
-// .text:0x000E6798 size:0x5C mapped:0x8072582C
-void fn_3_E6798(void) {
-    return;
-}
-
-// .text:0x000E67F4 size:0xB4 mapped:0x80725888
-void fn_3_E67F4(void) {
-    return;
-}
-
-// .text:0x000E68A8 size:0xE4 mapped:0x8072593C
-void fn_3_E68A8(void) {
-    return;
-}
-
-// .text:0x000E698C size:0xBC mapped:0x80725A20
-void fn_3_E698C(void) {
-    return;
-}
-
-// .text:0x000E6A48 size:0x348 mapped:0x80725ADC
-void fn_3_E6A48(void) {
-    return;
-}
-
-// .text:0x000E6D90 size:0x5C0 mapped:0x80725E24
-void fn_3_E6D90(void) {
-    return;
-}
-
-// .text:0x000E7350 size:0x14 mapped:0x807263E4
-void fn_3_E7350(void) {
-    return;
-}
-
-// .text:0x000E7364 size:0x24 mapped:0x807263F8
-void fn_3_E7364(void) {
-    return;
-}
-
-// .text:0x000E7388 size:0x9C mapped:0x8072641C
-void fn_3_E7388(void) {
-    return;
-}
-
-// .text:0x000E7424 size:0xF8 mapped:0x807264B8
-void fn_3_E7424(void) {
-    return;
-}
-
-// .text:0x000E751C size:0x120 mapped:0x807265B0
-void fn_3_E751C(void) {
-    return;
+// .text:0x000E7A2C size:0xF4 mapped:0x80726AC0
+void fn_3_E7A2C(StaC6Draw* draw) {
+    draw->_7C = NULL;
+    draw->_80 = NULL;
+    draw->_84 = NULL;
+    draw->_88 = NULL;
+    switch (draw->type) {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+    case 9:
+    case 10:
+    case 11:
+    case 12:
+    case 13:
+    case 14:
+    case 15:
+        draw->_80 = fn_3_E7364;
+        draw->_84 = fn_3_E6D90;
+        lbl_3_bss_AEAC++;
+        break;
+    case 16:
+    case 17:
+    case 18:
+    case 19:
+    case 20:
+    case 21:
+    case 22:
+        draw->_7C = fn_3_E698C;
+        draw->_84 = fn_3_E68A8;
+        break;
+    case 23:
+        draw->_84 = fn_3_E6798;
+        draw->_88 = fn_3_E671C;
+        break;
+    case 24:
+        draw->_84 = fn_3_E6684;
+        draw->_88 = fn_3_E6638;
+        break;
+    case 26:
+        draw->_7C = fn_3_E59B4;
+        break;
+    case 25:
+        draw->_7C = fn_3_E5A1C;
+        break;
+    }
 }
 
 // .text:0x000E763C size:0x3F0 mapped:0x807266D0
 void fn_3_E763C(void) {
-    return;
 }
 
-// .text:0x000E7A2C size:0xF4 mapped:0x80726AC0
-void fn_3_E7A2C(void) {
-    return;
+// .text:0x000E751C size:0x120 mapped:0x807265B0
+void* fn_3_E751C(s32 idx, Mtx m) {
+    Control control;
+    StaC6Draw* draw;
+
+    control.type = 0;
+    draw = &lbl_3_common_bss_350E4._00[idx];
+    if (draw->type <= 7) {
+        CTRLSetTranslation(&control, lbl_3_bss_AEB4[idx].pos.x, -0.04f, lbl_3_bss_AEB4[idx].pos.z);
+        CTRLSetRotation(&control, 0.0f, lbl_3_bss_AEB4[idx].rotY, 0.0f);
+    } else {
+        CTRLSetTranslation(&control, lbl_3_data_19644[draw->_C3].x, -0.04f, lbl_3_data_19644[draw->_C3].z);
+        CTRLSetRotation(&control, 0.0f, lbl_3_data_19698[draw->_C3], 0.0f);
+    }
+    CTRLBuildMatrix(&control, m);
+    return draw->_78;
 }
 
-// .text:0x000E7B20 size:0xFA8 mapped:0x80726BB4
-void fn_3_E7B20(void) {
-    return;
+// .text:0x000E7424 size:0xF8 mapped:0x807264B8
+void fn_3_E7424(void) {
+    if (g_GameLogic.gameStatus == GAME_STATUS_AT_BAT || g_GameLogic.gameStatus == GAME_STATUS_DEFAULT) {
+        lbl_3_bss_AE88++;
+        lbl_3_bss_AE80[0] = g_Minigame._1914 != 0;
+        lbl_3_bss_AE80[1] = g_Minigame._1915 != 0;
+        lbl_3_bss_AE80[2] = g_Minigame._1916 != 0;
+        lbl_3_bss_AE80[3] = g_Minigame._1917 != 0;
+        lbl_3_data_1963F = -1;
+        lbl_3_data_19640 = -1;
+    }
+    lbl_3_bss_AE7C = lbl_3_bss_AE7B;
+    lbl_3_bss_AE7B = g_Minigame.toyFieldBallStateResult;
+    lbl_3_bss_AE84 += lbl_80366158._28 == 0;
+    if (lbl_3_bss_AE7C != lbl_3_bss_AE7B) {
+        lbl_3_bss_AE84 = 0;
+    }
+    lbl_3_bss_AE51 = 0;
 }
 
-// .text:0x000E8AC8 size:0x5C mapped:0x80727B5C
-void fn_3_E8AC8(void) {
-    return;
+// .text:0x000E7388 size:0x9C mapped:0x8072641C
+void fn_3_E7388(void* arg0, StaC6Sort* out) {
+    StaC6Draw* draw;
+    s32 i;
+    StaC6Sort* p;
+    StaC6Draw* draw2;
+
+    draw = &lbl_3_common_bss_350E4._00[lbl_3_common_bss_350E4._30 - 1];
+    p = out;
+    i = lbl_3_common_bss_350E4._30 - 1;
+    do {
+        if (!draw->_90_7) {
+            p->idx = i;
+            p++;
+        }
+        draw--;
+    } while (i-- != 0);
+    draw2 = &lbl_3_common_bss_350E4._00[lbl_3_common_bss_350E4._30 - 1];
+    p = out + lbl_3_common_bss_350E4._30;
+    i = lbl_3_common_bss_350E4._30 - 1;
+    do {
+        if (draw2->_90_7) {
+            p--;
+            p->idx = i;
+            p->depth = 1.0f;
+        }
+        draw2--;
+    } while (i-- != 0);
 }
 
-// .text:0x000E8B24 size:0x5F8 mapped:0x80727BB8
-void fn_3_E8B24(void) {
-    return;
+// .text:0x000E7364 size:0x24 mapped:0x807263F8
+void fn_3_E7364(s32 idx) {
+    StaC6Draw* draw = &lbl_3_common_bss_350E4._00[idx];
+    lbl_3_data_19640 = draw->_C0;
+}
+
+// .text:0x000E7350 size:0x14 mapped:0x807263E4
+void fn_3_E7350(void) {
+    lbl_3_data_1963F = lbl_3_data_19640;
+}
+
+// .text:0x000E6D90 size:0x5C0 mapped:0x80725E24
+void fn_3_E6D90(void* arg) {
+    StaC6Draw* draw = arg;
+}
+
+// .text:0x000E6A48 size:0x348 mapped:0x80725ADC
+void fn_3_E6A48(StaC6Draw* draw) {
+}
+
+// .text:0x000E698C size:0xBC mapped:0x80725A20
+void fn_3_E698C(void* arg) {
+    StaC6Draw* draw = arg;
+    StaC6Actor* actor = draw->_74->_00;
+    f32 frame = fn_800B4C40(draw->_74->_00);
+    u8 idx = draw->type - 16;
+
+    if (lbl_3_data_196B4[idx] == 0) {
+        fn_800B4CA0(actor, 0.0f);
+        AnimateActorBones(actor);
+    }
+    if (lbl_3_data_196B4[idx] != 0 && frame <= 60.0f) {
+        AnimateActorBones(actor);
+    }
+}
+
+// .text:0x000E68A8 size:0xE4 mapped:0x8072593C
+void fn_3_E68A8(void* arg) {
+    StaC6Draw* draw = arg;
+    StaC6Actor* actor = draw->_9C->_00;
+    f32 frame;
+
+    frame = fn_800B4C40(draw->_74->_00) - draw->_74->_54;
+    if (frame < 0.0f) {
+        frame = 0.0f;
+    }
+    if (draw->_9C != NULL) {
+        memcpy(draw->_9C->_10, draw, 0x44);
+        fn_800B4CA0(actor, frame);
+        fn_800BDA24(draw->_9C);
+        draw->_9C->_00->_98 = fn_800B3C04(0, draw->_9C->_00, fn_80052734(fn_8005268C())->view);
+        fn_800BDA94(draw->_9C, fn_80052768_getCamera(fn_8005268C())->view);
+    }
+}
+
+// .text:0x000E67F4 size:0xB4 mapped:0x80725888
+void fn_3_E67F4(void) {
+    StaC6Model* model;
+    u32 i;
+    StaC6Actor* actor;
+
+    for (i = 0; i < 7; i++) {
+        lbl_3_data_196B4[i] = 0;
+        actor = lbl_8036E548._6C->models[i + 16]._00;
+        model = &lbl_8036E548._6C->models[i + 16];
+        model->_5C = 20.0f;
+        model->_59 = 1;
+        fn_800B4CA0(actor, lbl_8036E548._6C->models[i + 16]._5C);
+        AnimateActorBones(actor);
+    }
+}
+
+// .text:0x000E6798 size:0x5C mapped:0x8072582C
+void fn_3_E6798(void* arg) {
+    StaC6Draw* draw = arg;
+    StaC6Actor* actor = draw->_74->_00;
+    s32 i;
+
+    for (i = 0; i < 7; i++) {
+        if (lbl_3_data_196B4[i]) {
+            actor->_18[i]->_14 = actor->_18[i]->_18;
+        } else {
+            actor->_18[i]->_14 = NULL;
+        }
+    }
+}
+
+// .text:0x000E671C size:0x7C mapped:0x807257B0
+void fn_3_E671C(void* arg) {
+    StaC6Draw* draw = arg;
+    StaC6Actor* actor = draw->_74->_00;
+    s32 i;
+
+    for (i = 0; i < 7; i++) {
+        actor->_18[i]->_14 = actor->_18[i]->_18;
+    }
+}
+
+// .text:0x000E6684 size:0x98 mapped:0x80725718
+void fn_3_E6684(void* arg) {
+    StaC6Draw* draw = arg;
+    StaC6Bone* bone;
+    s32 i;
+
+    for (i = 0; i < 3; i++) {
+        bone = draw->_74->_00->_18[i];
+        if (lbl_3_bss_AE80[i + 1]) {
+            bone->_14 = bone->_18;
+        } else {
+            bone->_14 = NULL;
+        }
+    }
+}
+
+// .text:0x000E6638 size:0x4C mapped:0x807256CC
+void fn_3_E6638(void* arg) {
+    StaC6Draw* draw = arg;
+    draw->_74->_00->_18[0]->_14 = draw->_74->_00->_18[0]->_18;
+    draw->_74->_00->_18[1]->_14 = draw->_74->_00->_18[1]->_18;
+    draw->_74->_00->_18[2]->_14 = draw->_74->_00->_18[2]->_18;
+}
+
+// .text:0x000E6578 size:0xC0 mapped:0x8072560C
+void fn_3_E6578(StaC6Draw* draw) {
+    StaC6Shape* shape;
+    StaC6DispState* state;
+
+    if (draw->_9C == NULL) {
+        return;
+    }
+    shape = draw->_9C->_00->_18[1]->_14;
+    state = shape->_08;
+    if (shape->_10->_04->_20 != 3) {
+        OSErrorLine(1811, "参照するディスプレイステートがTEV設定部分じゃないです\n");
+    }
+    if (draw->type == 2) {
+        state->_0C->_A0 = 1;
+    } else if (draw->type == 10) {
+        state->_0C->_A0 = 0;
+    } else {
+        state->_0C->_A0 = 4;
+    }
+}
+
+// .text:0x000E6528 size:0x50 mapped:0x807255BC
+void fn_3_E6528(StaC6Draw* draw) {
+    memcpy(&draw->color, draw->_B4, 4);
+    draw->_BC = &lbl_3_data_19024[25];
+    draw->_C2 = 0;
+}
+
+// .text:0x000E64A8 size:0x80 mapped:0x8072553C
+GXColor* fn_3_E64A8(void) {
+    switch ((u8)(rand() % 3)) {
+    case 0:
+        return &lbl_3_data_19018[0];
+    case 1:
+        return &lbl_3_data_19018[1];
+    default:
+        return &lbl_3_data_19018[2];
+    }
+}
+
+// .text:0x000E6410 size:0x98 mapped:0x807254A4
+void fn_3_E6410(StaC6Draw* draw) {
+    GXColor* colors[3];
+    s32 n;
+    s32 i;
+
+    n = 0;
+    for (i = 0; i < 3; i++) {
+        if (draw->to != &lbl_3_data_19018[i]) {
+            colors[n] = &lbl_3_data_19018[i];
+            n++;
+        }
+    }
+    draw->from = colors[rand() % 2];
+}
+
+// .text:0x000E5FEC size:0x424 mapped:0x80725080
+void fn_3_E5FEC(StaC6Draw* draw) {
+    StaC6Tex* tex;
+    void* data;
+
+    tex = draw->_9C->_00->_18[1]->_14->_04;
+    data = tex->_00;
+    switch ((u8)(tex->format >> 4)) {
+    case GX_RGB565:
+        *(u16*)data = ((u16)(draw->color.r >> 3) << 11) & 0xF800;
+        *(u16*)data |= ((u16)(draw->color.g >> 2) << 5) & 0x7E0;
+        *(u16*)data |= (u16)(draw->color.b >> 3) & 0x1F;
+        DCStoreRange(data, 2);
+        break;
+    case GX_RGBA4:
+        *(u16*)data = ((u16)(draw->color.r >> 4) << 12) & 0xF000;
+        *(u16*)data |= ((u16)(draw->color.g >> 4) << 8) & 0xF00;
+        *(u16*)data |= ((u16)(draw->color.b >> 4) << 4) & 0xF0;
+        *(u16*)data |= (u16)(draw->color.a >> 4) & 0xF;
+        DCStoreRange(data, 2);
+        break;
+    case GX_RGBA8:
+        memcpy(data, &draw->color, 4);
+        DCStoreRange(data, 4);
+        break;
+    case GX_RGB8:
+    case GX_RGBX8:
+        *(u32*)data = draw->color.r << 16;
+        *(u32*)data |= draw->color.g << 8;
+        *(u32*)data |= draw->color.b;
+        DCStoreRange(data, 3);
+        break;
+    case GX_RGBA6:
+        *(u32*)data = ((draw->color.r >> 2) & 0x3F) << 26;
+        *(u32*)data = ((draw->color.g >> 2) & 0x3F) << 20;
+        *(u32*)data = ((draw->color.b >> 2) & 0x3F) << 14;
+        *(u32*)data = ((draw->color.a >> 2) & 0x3F) << 8;
+        DCStoreRange(data, 3);
+        break;
+    }
+
+    if (lbl_3_data_1976C) {
+        if (draw->_C2) {
+            draw->_9C->_00->_18[2]->_14 = draw->_9C->_00->_18[2]->_18;
+        } else {
+            draw->_9C->_00->_18[2]->_14 = NULL;
+        }
+    } else {
+        draw->_9C->_00->_18[2]->_14 = NULL;
+    }
+
+    tex = draw->_74->_00->_18[0]->_14->_04;
+    data = tex->_00;
+    switch ((u8)(tex->format >> 4)) {
+    case GX_RGB565:
+        *(u16*)data = ((u16)(draw->_BC->r >> 3) << 11) & 0xF800;
+        *(u16*)data |= ((u16)(draw->_BC->g >> 2) << 5) & 0x7E0;
+        *(u16*)data |= (u16)(draw->_BC->b >> 3) & 0x1F;
+        DCStoreRange(data, 2);
+        break;
+    case GX_RGBA4:
+        *(u16*)data = ((u16)(draw->_BC->r >> 4) << 12) & 0xF000;
+        *(u16*)data |= ((u16)(draw->_BC->g >> 4) << 8) & 0xF00;
+        *(u16*)data |= ((u16)(draw->_BC->b >> 4) << 4) & 0xF0;
+        *(u16*)data |= (u16)(draw->_BC->a >> 4) & 0xF;
+        DCStoreRange(data, 2);
+        break;
+    case GX_RGBA8:
+        memcpy(data, draw->_BC, 4);
+        DCStoreRange(data, 4);
+        break;
+    case GX_RGB8:
+    case GX_RGBX8:
+        *(u32*)data = draw->_BC->r << 16;
+        *(u32*)data |= draw->_BC->g << 8;
+        *(u32*)data |= draw->_BC->b;
+        DCStoreRange(data, 3);
+        break;
+    case GX_RGBA6:
+        *(u32*)data = ((draw->_BC->r >> 2) & 0x3F) << 26;
+        *(u32*)data = ((draw->_BC->g >> 2) & 0x3F) << 20;
+        *(u32*)data = ((draw->_BC->b >> 2) & 0x3F) << 14;
+        *(u32*)data = ((draw->_BC->a >> 2) & 0x3F) << 8;
+        DCStoreRange(data, 3);
+        break;
+    }
+}
+
+// .text:0x000E5E70 size:0x17C mapped:0x80724F04
+void fn_3_E5E70(GXColor* dst, u8 format, void* src) {
+    u8 type = format >> 4;
+
+    if (dst == NULL || src == NULL) {
+        return;
+    }
+    switch (type) {
+    case GX_RGB565:
+        dst->r = (*(u16*)src & 0xF800) >> 8;
+        dst->g = (*(u16*)src & 0x7E0) >> 3;
+        dst->b = (*(u16*)src & 0x1F) << 3;
+        dst->a = 0xFF;
+        break;
+    case GX_RGBA4:
+        dst->r = (*(u16*)src & 0xF000) >> 12;
+        dst->g = (*(u16*)src & 0xF00) >> 8;
+        dst->b = (*(u16*)src & 0xF0) >> 4;
+        dst->a = *(u16*)src & 0xF;
+        dst->r |= dst->r << 4;
+        dst->g |= dst->g << 4;
+        dst->b |= dst->b << 4;
+        dst->a |= dst->a << 4;
+        break;
+    case GX_RGBA8:
+        dst->r = (*(u32*)src & 0xFF000000) >> 24;
+        dst->g = (*(u32*)src & 0xFF0000) >> 16;
+        dst->b = (*(u32*)src & 0xFF00) >> 8;
+        dst->a = *(u32*)src & 0xFF;
+        break;
+    case GX_RGB8:
+    case GX_RGBX8:
+        dst->r = (*(u32*)src & 0xFF000000) >> 24;
+        dst->g = (*(u32*)src & 0xFF0000) >> 16;
+        dst->b = (*(u32*)src & 0xFF00) >> 8;
+        dst->a = 0xFF;
+        break;
+    case GX_RGBA6:
+        dst->r = (*(u16*)src & 0xFC0000) >> 16;
+        dst->g = (*(u16*)src & 0x3F000) >> 10;
+        dst->b = (*(u16*)src & 0xFC0) >> 4;
+        dst->a = (*(u16*)src & 0x3F) << 2;
+        break;
+    }
+}
+
+// .text:0x000E5E14 size:0x5C mapped:0x80724EA8
+s32 fn_3_E5E14(StaC6Shape* shape) {
+    switch ((u8)(shape->_04->format >> 4)) {
+    case GX_RGB565:
+    case GX_RGBA4:
+        return 2;
+    case GX_RGBA8:
+        return 4;
+    case GX_RGB8:
+    case GX_RGBX8:
+    case GX_RGBA6:
+        return 3;
+    default:
+        return 0;
+    }
+}
+
+// .text:0x000E5CBC size:0x158 mapped:0x80724D50
+void fn_3_E5CBC(StaC6Draw* draw, f32 t) {
+    GXColor* to = draw->to;
+    GXColor* from = draw->from;
+
+    if (t > 1.0f) {
+        t = 1.0f;
+    } else if (t < 0.0f) {
+        t = 0.0f;
+    }
+    draw->color.r = (1.0f - t) * to->r + t * from->r;
+    draw->color.g = (1.0f - t) * to->g + t * from->g;
+    draw->color.b = (1.0f - t) * to->b + t * from->b;
+    draw->color.a = (1.0f - t) * to->a + t * from->a;
+}
+
+// .text:0x000E5A84 size:0x238 mapped:0x80724B18
+void fn_3_E5A84(StaC6Draw* draw) {
+    Control control;
+    Mtx mtx;
+    StaC6Bone* bone;
+    s32 i;
+
+    PSMTXIdentity(mtx);
+    control.type = 0;
+    if (draw->type < 8) {
+        CTRLSetTranslation(&control, lbl_3_bss_AEB4[draw->_C0].pos.x, lbl_3_bss_AEB4[draw->_C0].pos.y,
+                           lbl_3_bss_AEB4[draw->_C0].pos.z);
+        CTRLSetRotation(&control, 0.0f, lbl_3_bss_AEB4[draw->_C0].rotY, 0.0f);
+    } else {
+        CTRLSetTranslation(&control, lbl_3_data_19644[draw->_C3].x, lbl_3_data_19644[draw->_C3].y,
+                           lbl_3_data_19644[draw->_C3].z);
+        CTRLSetRotation(&control, 0.0f, lbl_3_data_19698[draw->_C3], 0.0f);
+    }
+    CTRLBuildMatrix(&control, mtx);
+    for (i = 0; i < draw->_74->_00->_06; i++) {
+        bone = draw->_74->_00->_18[i];
+        CTRLBuildMatrix(&bone->control, bone->_EC);
+        PSMTXConcat(mtx, bone->_EC, bone->_EC);
+        PSMTXCopy(bone->_EC, bone->_14->_18);
+    }
+    if (draw->_9C != NULL) {
+        for (i = 0; i < draw->_9C->_00->_06; i++) {
+            bone = draw->_9C->_00->_18[i];
+            CTRLBuildMatrix(&bone->control, bone->_EC);
+            PSMTXConcat(mtx, bone->_EC, bone->_EC);
+            if (bone->_14 != NULL) {
+                PSMTXCopy(bone->_EC, bone->_14->_18);
+            }
+        }
+        draw->_9C->_00->_98 = fn_800B3C04(0, draw->_9C->_00, fn_80052734(fn_8005268C())->view);
+    }
+    draw->_74->_00->_98 = fn_800B3C04(0, draw->_74->_00, fn_80052734(fn_8005268C())->view);
+}
+
+// .text:0x000E5A1C size:0x68 mapped:0x80724AB0
+void fn_3_E5A1C(void* arg) {
+    StaC6Draw* draw = arg;
+    StaC6Actor* actor = draw->_74->_00;
+
+    if (fn_800B4C40(actor) + 1.0f > 420.0f) {
+        fn_800B4CA0(actor, 60.0f);
+    }
+    AnimateActorBones(actor);
+}
+
+// .text:0x000E59B4 size:0x68 mapped:0x80724A48
+void fn_3_E59B4(void* arg) {
+    StaC6Draw* draw = arg;
+    StaC6Actor* actor = draw->_74->_00;
+
+    if (fn_800B4C40(actor) + 1.0f > 340.0f) {
+        fn_800B4CA0(actor, 20.0f);
+    }
+    AnimateActorBones(actor);
 }
 
