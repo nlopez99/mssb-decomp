@@ -226,5 +226,7 @@ void fn_3_591AC(void);
 void fn_3_59338(void);
 void fn_3_595C4(void);
 void fn_3_596F8(void);
+void fn_3_5985C(void);
+void fn_3_598D0(void);
 
 #endif // !__GAME_rep_AC8_H_
