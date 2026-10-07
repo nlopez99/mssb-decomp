@@ -1,8 +1,13 @@
 #include "game/rep_A00.h"
-#include "header_rep_data.h"
+// Must precede header_rep_data.h: its extern inline dolsqrtf2 puts weak constants first
+// in .rodata, so MWCC does not pool .rodata and addresses constants one by one
 #include "game/UnknownHomes_Game.h"
+#include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
 #include "string.h"
+#include "stl/math.h"
+#include "Dolphin/mtx.h"
+#include "game/rep_1838.h"
 #include "game/game_batter.h"
 #include "game/rep_540.h"
 #include "game/rep_868.h"
@@ -11,9 +16,7 @@
 #include "game/rep_AC8.h"
 
 typedef struct {
-    /* 0x00 */ f32 _00;
-    /* 0x04 */ f32 _04;
-    /* 0x08 */ f32 _08;
+    /* 0x00 */ Vec _00;
     /* 0x0C */ f32 _0C;
     /* 0x10 */ f32 _10;
     /* 0x14 */ f32 _14;
@@ -42,7 +45,7 @@ typedef struct {
     /* 0x27C */ s8 _27C;
     /* 0x27D */ u8 _27D;
     /* 0x27E */ u8 _27E;
-    /* 0x27F */ u8 _27F;
+    /* 0x27F */ s8 _27F;
     /* 0x280 */ s8 _280;
 } UnkA00Replay;
 
@@ -245,7 +248,58 @@ void fn_3_147DFC(void);
 
 // .text:0x00024708 size:0x2E0 mapped:0x8066379C
 void fn_3_24708(void) {
-    return;
+    UnkA00Actor* actor;
+    InMemRunnerType* runner;
+    int i;
+    f32 dist;
+    f32 diff;
+    Mtx mtx;
+    Vec offset;
+
+    for (i = 0; i < 13; i++) {
+        actor = lbl_8036E548._2C50[i];
+        if (actor == NULL) {
+            continue;
+        }
+        if (lbl_3_common_bss_1323C._0->_000[i]._29 != 1) {
+            continue;
+        }
+        if (lbl_3_common_bss_1323C._0->_27F == 3 && lbl_3_common_bss_1323C._0->_000[i]._1C > actor->_68) {
+        } else if (i <= 8) {
+            dist = PSVECDistance(&g_Fielders[i]._000, &lbl_3_common_bss_1323C._0->_000[i]._00);
+        } else if (i <= 12) {
+            runner = &g_Runners[i - 9];
+            lbl_3_common_bss_1323C._0->_000[i]._10 =
+                atan2(-(lbl_3_common_bss_1323C._0->_000[i]._00.x - runner->position.x),
+                      -(lbl_3_common_bss_1323C._0->_000[i]._00.z - runner->position.z));
+            PSMTXRotRad(mtx, 'Y', lbl_3_common_bss_1323C._0->_000[i]._0C);
+            offset.x = 0.0f;
+            offset.y = 0.0f;
+            offset.z = lbl_3_common_bss_1323C._0->_000[i]._14;
+            PSMTXMultVec(mtx, &offset, &offset);
+            runner->position.x -= offset.x;
+            runner->position.z -= offset.z;
+            diff = fn_3_9FEA8(lbl_3_common_bss_1323C._0->_000[i]._0C - lbl_3_common_bss_1323C._0->_000[i]._10);
+            if (!((diff < 0.02 && diff > 0.0f) || (diff > -0.02 && diff < 0.0f))) {
+                if (diff < 0.0f) {
+                    lbl_3_common_bss_1323C._0->_000[i]._0C += 0.017453292f;
+                } else {
+                    lbl_3_common_bss_1323C._0->_000[i]._0C -= 0.017453292f;
+                }
+            }
+            runner->runningAngle = lbl_3_common_bss_1323C._0->_000[i]._0C;
+            dist = PSVECDistance((Vec*)&runner->position, &lbl_3_common_bss_1323C._0->_000[i]._00);
+        }
+        if (lbl_3_common_bss_1323C._0->_27F == 3) {
+            if (actor->_68 == 0) {
+                lbl_3_common_bss_1323C._0->_000[i]._28 = 1;
+                lbl_3_common_bss_1323C._0->_000[i]._29 = 0;
+            }
+        } else if (dist < 3.0f) {
+            lbl_3_common_bss_1323C._0->_000[i]._28 = 1;
+            lbl_3_common_bss_1323C._0->_000[i]._29 = 0;
+        }
+    }
 }
 
 // .text:0x00024630 size:0xD8 mapped:0x806636C4
