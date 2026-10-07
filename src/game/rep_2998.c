@@ -242,9 +242,9 @@ static u8 lbl_3_bss_AE01;
 static u8 lbl_3_bss_AE00;
 
 // .text:0x000E4FC4 size:0x8B8 mapped:0x80724058
-// 96.99%: the target copies entry into a register of its own (r16) at the loop top for the
-// inlined fn_3_E4658 and fn_3_E4554; here they share draw's, so registers from r16 up, the
-// count loop's register and one stack spill (frame 0x80 against 0x90) differ.
+// 96.99%: the target copies entry to r16 at the loop top for the inlined fn_3_E4658 and fn_3_E4554
+// and spills a constant's address (frame 0x90, here 0x80). Passing them entry gives that frame and
+// spill but keeps entry itself in a saved register (95.42%); every copy of it is propagated away.
 void fn_3_E4FC4(void** files) {
     Vec unused = { 0.0f, 3.6f, -2.0f };
     GameInitVariables* settings;
