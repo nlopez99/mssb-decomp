@@ -13,10 +13,10 @@
 // One of four objects at g_Minigame + 0xBB0
 typedef struct Unk3520Obj {
     /* 0x00 */ Vec _0;
-    /* 0x0C */ f32 _C;
-    /* 0x10 */ f32 _10;
-    /* 0x14 */ f32 _14;
-    /* 0x18 */ u8 _18[0x30 - 0x18];
+    /* 0x0C */ Vec _C;
+    /* 0x18 */ u8 _18[0x24 - 0x18];
+    /* 0x24 */ f32 _24;
+    /* 0x28 */ u8 _28[0x30 - 0x28];
     /* 0x30 */ f32 _30;
     /* 0x34 */ f32 _34;
     /* 0x38 */ s16 _38;
@@ -44,6 +44,21 @@ typedef struct Unk3520Cpu {
     /* 0x6 */ u8 _6[2];
 } Unk3520Cpu; // size: 0x8
 
+typedef struct Unk3520Fielder {
+    /* 0x000 */ Vec pos;
+    /* 0x00C */ f32 _00C;
+    /* 0x010 */ u8 _010[0x38 - 0x10];
+    /* 0x038 */ f32 _038;
+    /* 0x03C */ f32 _03C;
+    /* 0x040 */ u8 _040[0x15C - 0x40];
+    /* 0x15C */ f32 _15C;
+    /* 0x160 */ u8 _160[0x16C - 0x160];
+    /* 0x16C */ f32 _16C;
+    /* 0x170 */ u8 _170[0x268 - 0x170];
+} Unk3520Fielder; // size: 0x268
+
+extern Unk3520Fielder g_Fielders[9];
+
 extern void fn_3_5A6D4(u8 status);
 extern void fn_3_10F550(u8, s16);
 extern void changeScene(u8, s16);
@@ -55,6 +70,8 @@ extern s16 lbl_3_data_21A3C[2][2];
 extern s16 lbl_3_data_21A44;
 extern Vec lbl_3_data_21A48;
 extern s16 lbl_3_data_21A60;
+extern f32 lbl_3_data_21A64[9];
+extern s16 lbl_3_data_21A90[4][4][2];
 extern s16 lbl_3_data_21AF0[1];
 extern s8 lbl_3_data_21B88[4];
 extern s16 lbl_3_data_21B8C[4];
@@ -276,13 +293,78 @@ void fn_3_137DE4(void) {
 }
 
 // .text:0x00137CF8 size:0xEC mapped:0x80776D8C
-void fn_3_137CF8(void) {
-    return;
+void fn_3_137CF8(Unk3520Obj* obj) {
+    u32 t;
+    s16 lo;
+    int r;
+
+    PSVECAdd(&obj->_0, &obj->_C, &obj->_0);
+    if (!fn_3_137B10(obj) && obj->_0.y >= lbl_3_data_21A64[0]) {
+        t = g_Minigame._17C0 / 60 / 20;
+        if (t > 3) {
+            t = 3;
+        }
+        obj->_3D = 0;
+        obj->_3A = 0;
+        lo = lbl_3_data_21A90[g_Minigame.soloMinigameDifficulty][t][0];
+        r = random_fn_3_9EE24((lbl_3_data_21A90[g_Minigame.soloMinigameDifficulty][t][1] - lo) * 60);
+        obj->_38 = r + lo * 60;
+    }
 }
 
 // .text:0x00137B10 size:0x1E8 mapped:0x80776BA4
-void fn_3_137B10(void) {
-    return;
+u8 fn_3_137B10(Unk3520Obj* obj) {
+    int i;
+    u8 hit = FALSE;
+    Unk3520Fielder* fielder;
+    f32 top;
+    f32 range;
+    f32 dx;
+    f32 dz;
+    Vec v;
+
+    for (i = 0; i < 4; i++) {
+        if (g_Minigame.minigameFielderIndex[i] < 0) {
+            continue;
+        }
+        if (g_Minigame.starDashStunType[i] != 0 && g_Minigame.starDashStunType[i] != 3) {
+            continue;
+        }
+        if (obj->_3D != 2 && i != g_Minigame._1D6D) {
+            continue;
+        }
+        fielder = &g_Fielders[g_Minigame.minigameFielderIndex[i]];
+        top = fielder->_15C + (fielder->_00C + fielder->pos.y);
+        range = top < obj->_0.y ? fielder->_16C : 12.0f;
+        if (range < fabs(top - obj->_0.y)) {
+            continue;
+        }
+        dx = fabs(obj->_0.x - fielder->pos.x);
+        dz = fabs(obj->_0.z - fielder->pos.z);
+        if (dx <= 3.5f && dz <= 3.125f) {
+            if (i == g_Minigame._1D6D) {
+                if (!hit) {
+                    v.x = fielder->_038;
+                    v.z = fielder->_03C;
+                    v.y = 0.0f;
+                    hit = TRUE;
+                    PSVECScale(&v, lbl_3_data_21A64[2], &v);
+                    v.y = lbl_3_data_21A64[3];
+                    memcpy(&obj->_C, &v, sizeof(Vec));
+                    obj->_24 = lbl_3_data_21A64[4];
+                    obj->_3A = 0;
+                    obj->_3D = 4;
+                }
+            } else {
+                g_Minigame.starDashStunType[i] = 1;
+                g_Minigame._1CB8[i].x = fielder->pos.x - obj->_0.x;
+                g_Minigame._1CB8[i].z = fielder->pos.z - obj->_0.z;
+                obj->_3E = 1;
+                obj->_3F = 0;
+            }
+        }
+    }
+    return hit;
 }
 
 // .text:0x001379A0 size:0x170 mapped:0x80776A34
@@ -401,8 +483,17 @@ void fn_3_135924(void) {
 }
 
 // .text:0x0013583C size:0xE8 mapped:0x807748D0
-void fn_3_13583C(void) {
-    return;
+void fn_3_13583C(Vec* pos) {
+    Vec center = { 0.0f, 0.0f, 20.0f };
+    Vec d;
+
+    if (pos != NULL) {
+        PSVECSubtract(pos, &center, &d);
+        d.y = 0.0f;
+        if (PSVECMag(&d) <= 3.5f) {
+            fn_3_1357A4(pos, &d);
+        }
+    }
 }
 
 // .text:0x001357A4 size:0x98 mapped:0x80774838
@@ -410,7 +501,7 @@ void fn_3_1357A4(Vec* pos, Vec* dir) {
     Vec base = { 0.0f, 0.0f, 20.0f };
     Vec n;
 
-    if (pos == NULL || dir == NULL) {
+    if (!pos || !dir) {
         return;
     }
     PSVECNormalize(dir, &n);
@@ -470,8 +561,41 @@ void fn_3_135600(f32* outX, f32* outZ, f32 x, f32 z) {
 }
 
 // .text:0x00135520 size:0xE0 mapped:0x807745B4
-void fn_3_135520(void) {
-    return;
+int fn_3_135520(f32 x, f32 z, f32 r) {
+    if (x >= 0.0f) {
+        if (z >= 0.0f) {
+            if (z <= r) {
+                return 1;
+            }
+            if (x <= r) {
+                return 2;
+            }
+        } else {
+            if (x <= r) {
+                return 1;
+            }
+            if (z >= -r) {
+                return 2;
+            }
+        }
+    } else {
+        if (z >= 0.0f) {
+            if (x >= -r) {
+                return 1;
+            }
+            if (z <= r) {
+                return 2;
+            }
+        } else {
+            if (z >= -r) {
+                return 1;
+            }
+            if (x >= -r) {
+                return 2;
+            }
+        }
+    }
+    return 0;
 }
 
 // .text:0x001354BC size:0x64 mapped:0x80774550
@@ -541,8 +665,15 @@ s16 fn_3_1345AC(s16 angle, s16 target, int speed) {
 }
 
 // .text:0x001344BC size:0xF0 mapped:0x80773550
-void fn_3_1344BC(void) {
-    return;
+BOOL fn_3_1344BC(int a, int b) {
+    f32 ax = g_Fielders[g_Minigame.minigameFielderIndex[a]].pos.x - lbl_3_data_21A48.x;
+    f32 az = g_Fielders[g_Minigame.minigameFielderIndex[a]].pos.z - lbl_3_data_21A48.z;
+    f32 bx = g_Fielders[g_Minigame.minigameFielderIndex[b]].pos.x - lbl_3_data_21A48.x;
+    f32 bz = g_Fielders[g_Minigame.minigameFielderIndex[b]].pos.z - lbl_3_data_21A48.z;
+    f32 angA = atan2(az, ax);
+    f32 angB = atan2(bz, bx);
+
+    return fn_3_9FCA4(radToShortAngle(angA), radToShortAngle(angB)) >= 0;
 }
 
 // .text:0x0013334C size:0x1170 mapped:0x807723E0
