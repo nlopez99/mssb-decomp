@@ -16,7 +16,8 @@ typedef struct _GameInitVariables {
     /*0x0C*/ u8 maybeHomeAway;
     /*0x0D*/ u8 maybeHomeAway2;
     /*0x0E*/ u8 home_AwaySetting;
-    artificial_padding(0x0e, 0x11, u8);
+    artificial_padding(0x0e, 0x10, u8);
+    /*0x10*/ u8 _10;
     /*0x11*/ bool minigamesEnabled;
     artificial_padding(0x11, 0x20, bool);
     /*0x20*/ s16 _20[4][2];
@@ -65,7 +66,8 @@ extern f32 LinearInterpolateToNewRange(f32 value, f32 prevMin, f32 prevMax, f32 
 typedef struct {
     /* 0x00 */ u16 _00;
     /* 0x02 */ u16 _02;
-    artificial_padding(2, 0x22, u16);
+    /* 0x04 */ u16 _04;
+    artificial_padding(4, 0x22, u16);
     /* 0x22 */ u16 _22;
 } lbl_803C77B8_s;
 extern lbl_803C77B8_s lbl_803C77B8;
