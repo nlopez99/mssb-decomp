@@ -793,6 +793,8 @@ extern SND_VOICEID fn_3_90064(int id);
 extern UnkTask3448* fn_800B0A5C_insertQueue(void (*)(void), s32);
 extern void* ARAMTransfer(UnkAramEntry3448* entry, int arg1, int arg2, u32 aram);
 extern void fn_3_E911C(void);
+// game/rep_31A0.h declares this void(void) while rep_31A0.c is a stub
+extern void fn_3_109DE0(struct UnkRecord3448* rec);
 extern void LoadActorLayout(void* layout);
 extern void convertGeometryAndSknHeader(void* geo, void*);
 extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);
@@ -3592,8 +3594,8 @@ u16 fn_3_11DDC4(u8* data, u32 len) {
     u32 i;
     s32 j;
 
-    for (i = 0; i < len; i++, data++) {
-        c = *data;
+    for (i = 0; i < len; i++) {
+        c = data[i];
         for (j = 0; j < 8; j++) {
             if ((crc ^ c) & 1) {
                 crc >>= 1;
@@ -3608,8 +3610,78 @@ u16 fn_3_11DDC4(u8* data, u32 len) {
 }
 
 // .text:0x0011DACC size:0x2F8 mapped:0x8075CB60
-void fn_3_11DACC(void) {
-    return;
+void fn_3_11DACC(u8* out, u8* buf, u8 seed, u8 key) {
+    UnkRecord3448 rec;
+    u32 n;
+    BOOL flag;
+    u32 score;
+    s16 bonus;
+    u32 bits;
+    u32 extra;
+    u32 crc;
+    u32 i;
+
+    fn_3_109DE0(&rec);
+    if (g_Minigame._1A3C != 0) {
+        score = rec._00;
+        flag = TRUE;
+        n = random_fn_3_9EE24(1000);
+    } else {
+        score = rec._00;
+        flag = FALSE;
+        n = rec._04;
+    }
+    if (score > 9999) {
+        score = 9999;
+    }
+    if (n > 999) {
+        n = 999;
+    }
+    bonus = rec._06;
+    bits = seed;
+    extra = 0;
+    buf[0] = flag;
+    buf[1] = score;
+    buf[2] = score >> 8;
+    buf[3] = n;
+    buf[4] = n >> 8;
+    buf[5] = bonus;
+    buf[6] = extra;
+    buf[7] = seed;
+    crc = fn_3_11DDC4(buf, 8);
+
+    out[0] = key;
+    out[1] = crc & 3;
+    i = 2;
+    do {
+        out[i] = (crc >> i) & 1;
+    } while (++i < 16);
+    out[1] |= (bits & 1) << 2;
+    i = 1;
+    do {
+        out[i * 2 + 1] |= ((bits >> i) & 1) << 1;
+    } while (++i < 8);
+    i = 0;
+    do {
+        out[i * 2 + 2] |= ((score >> (i * 2)) & 3) << 1;
+    } while (++i < 7);
+    out[1] |= flag << 3;
+    i = 0;
+    do {
+        out[i * 2 + 2] |= ((extra >> i) & 1) << 3;
+    } while (++i < 5);
+    i = 0;
+    do {
+        out[i * 2 + 3] |= ((n >> (i * 2)) & 3) << 2;
+    } while (++i < 5);
+    out[12] |= (bonus & 1) << 3;
+    out[13] |= ((bonus >> 1) & 3) << 2;
+    out[14] |= ((bonus >> 3) & 1) << 3;
+    out[15] |= ((bonus >> 4) & 3) << 2;
+    i = 1;
+    do {
+        out[i] = lbl_3_data_261C4[out[0] % 9][out[i]];
+    } while (++i < 16);
 }
 
 // .text:0x0011D780 size:0x34C mapped:0x8075C814

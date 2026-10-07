@@ -8,7 +8,7 @@ struct UnkTask3448;
 void fn_3_11D3AC(void);
 BOOL fn_3_11D6A0(void);
 void fn_3_11D780(void);
-void fn_3_11DACC(void);
+void fn_3_11DACC(u8* out, u8* buf, u8 seed, u8 key);
 u16 fn_3_11DDC4(u8* data, u32 len);
 void fn_3_11DE80(void);
 void fn_3_11DECC(void);
