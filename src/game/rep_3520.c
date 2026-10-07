@@ -53,11 +53,21 @@ typedef struct Unk3520Box {
     /* 0x1E */ u8 _1E;
 } Unk3520Box; // size: 0x20
 
+// The coin bag, at g_Minigame._B6C
+typedef struct Unk3520Bag {
+    /* 0x00 */ Vec pos;
+    /* 0x0C */ Vec vel;
+    /* 0x18 */ s32 coins[10];
+    /* 0x40 */ u8 active;
+    /* 0x41 */ u8 _41[3];
+} Unk3520Bag; // size: 0x44
+
 // This minigame's view of g_Minigame
 typedef struct Unk3520Minigame {
     /* 0x0000 */ u8 _0000[0xA8];
     /* 0x00A8 */ Unk3520Piece pieces[40];
-    /* 0x06E8 */ u8 _06E8[0xBB0 - 0x6E8];
+    /* 0x06E8 */ u8 _06E8[0xB6C - 0x6E8];
+    /* 0x0B6C */ Unk3520Bag bag;
     /* 0x0BB0 */ Unk3520Obj objs[4];
     /* 0x0CB0 */ Unk3520Box box;
     /* 0x0CD0 */ u8 _0CD0[0x1CE8 - 0xCD0];
@@ -401,7 +411,72 @@ void fn_3_139F84(void) {
 
 // .text:0x00139CA0 size:0x2E4 mapped:0x80778D34
 void fn_3_139CA0(void) {
-    return;
+    Unk3520Bag* bag = NULL;
+    u8 filling = FALSE;
+    int count;
+    int angle;
+    f32 speed;
+    f32 scale;
+    int i;
+
+    if (g_Minigame.turnOverStatus != 0) {
+        return;
+    }
+    if (--g_Minigame._1D50 > 0) {
+        return;
+    }
+    count = lbl_3_data_21A04[2];
+    if (g_Minigame._1D54 % lbl_3_data_21A04[6] == 0 && 100 - g_Minigame._1D6C >= 10 && MG.bag.active == 0) {
+        bag = &MG.bag;
+        MG.bag.active = TRUE;
+        count = 10;
+        filling = TRUE;
+    }
+    angle = random_fn_3_9EE24(0x1000);
+    speed = RandomF32_Game_Range(lbl_3_data_219B8[2], lbl_3_data_219B8[3]);
+    for (i = 0; i < 100; i++) {
+        if (filling) {
+            if (count != 0) {
+                if (g_Minigame.wallBall_coinsVisibleInd[i] == 0) {
+                    g_Minigame.wallBall_coinsVisibleInd[i] = 2;
+                    g_Minigame.wallBall_coinsVisibleFrameCounter[i] = 0;
+                    g_Minigame._1D6C++;
+                    bag->coins[count - 1] = i;
+                    count--;
+                }
+            } else {
+                bag->pos.x = lbl_3_data_219AC.x;
+                bag->pos.y = lbl_3_data_219AC.y;
+                bag->pos.z = lbl_3_data_219AC.z;
+                getComponentsFromSAng(angle + (random_fn_3_9EE24(lbl_3_data_21A04[4] * 2) - lbl_3_data_21A04[4]), &bag->vel.x,
+                                      &bag->vel.z);
+                scale = speed + RandomF32_Game_Range(-lbl_3_data_219B8[4], lbl_3_data_219B8[4]);
+                bag->vel.x *= scale;
+                bag->vel.z *= scale;
+                bag->vel.y = RandomF32_Game_Range(lbl_3_data_219B8[5], lbl_3_data_219B8[6]);
+                break;
+            }
+        } else if (g_Minigame.wallBall_coinsVisibleInd[i] == 0) {
+            g_Minigame.wallBall_coinCoordinates[i].x = lbl_3_data_219AC.x;
+            g_Minigame.wallBall_coinCoordinates[i].y = lbl_3_data_219AC.y;
+            g_Minigame.wallBall_coinCoordinates[i].z = lbl_3_data_219AC.z;
+            getComponentsFromSAng(angle + (random_fn_3_9EE24(lbl_3_data_21A04[4] * 2) - lbl_3_data_21A04[4]),
+                                  &g_Minigame.wallBall_coinVelocity[i].x, &g_Minigame.wallBall_coinVelocity[i].z);
+            scale = speed + RandomF32_Game_Range(-lbl_3_data_219B8[4], lbl_3_data_219B8[4]);
+            g_Minigame.wallBall_coinVelocity[i].x *= scale;
+            g_Minigame.wallBall_coinVelocity[i].z *= scale;
+            g_Minigame.wallBall_coinVelocity[i].y = RandomF32_Game_Range(lbl_3_data_219B8[0], lbl_3_data_219B8[1]);
+            g_Minigame.wallBall_coinsVisibleInd[i] = 1;
+            g_Minigame.wallBall_coinsVisibleFrameCounter[i] = 0;
+            g_Minigame._1D6C++;
+            g_Minigame._1D54++;
+            if (--count <= 0) {
+                fn_3_90064(0x2E8);
+                break;
+            }
+        }
+    }
+    g_Minigame._1D50 = RandomInt_Game_Range(lbl_3_data_21A04[0], lbl_3_data_21A04[1]);
 }
 
 // .text:0x00139808 size:0x498 mapped:0x8077889C

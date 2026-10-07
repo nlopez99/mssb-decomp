@@ -2027,7 +2027,7 @@ typedef struct _MiniGameStruct {
     /*0x1D4C*/ f32 starDashRelated_0_5Or1_5;
     /*0x1D50*/ s16 _1D50;
     /*0x1D52*/ s16 _1D52;
-    /*0x1D54*/ s16 _1D54;
+    /*0x1D54*/ u16 _1D54;
     /*0x1D56*/ s16 _1D56;
     /*0x1D58*/ s16 _1D58;
     /*0x1D5A*/ s16 _1D5A[4];
