@@ -1446,9 +1446,25 @@ typedef struct _MiniGameControlStruct {
     /*0x00B*/ u8 _B;
     /*0x00C*/ u8 battingHandedness[4];
     /*0x010*/ u8 aIStrength[4];
-    /*0x014*/ u8 _14;
-    /*0x015*/ u8 _15;
-} MiniGameControlStruct; // size: 0x16
+    /*0x014*/ u8 _14[4];
+    /*0x018*/ u8 _18[4];
+    /*0x01C*/ u8 _1C[4];
+    /*0x020*/ u8 _20[4];
+    /*0x024*/ u8 _24[4];
+    /*0x028*/ u8 _28[4];
+} MiniGameControlStruct; // size: 0x2C
+
+typedef struct _MiniGameUnk19E8 {
+    /*0x0*/ s8 _0;
+    /*0x1*/ u8 _1;
+    /*0x2*/ s8 _2;
+    /*0x3*/ s8 _3;
+    /*0x4*/ s8 _4;
+    /*0x5*/ u8 _5;
+    /*0x6*/ u8 _6;
+    /*0x7*/ s8 _7;
+    /*0x8*/ u8 _8;
+} MiniGameUnk19E8; // size: 0x9
 
 /*foul	1
 caught	2
@@ -1960,8 +1976,8 @@ typedef struct _MiniGameStruct {
     /*0x18B8*/ s16 _18B8;
     /*0x18BA*/ s16 _18BA;
     /*0x18BC*/ s32 minigamePoints_current_Latest[4];
-    /*0x18CC*/ MiniGameControlStruct minigameControlStruct[2];
-    /*0x18F8*/ u8 minigameFielderIndex[4];
+    /*0x18CC*/ MiniGameControlStruct minigameControlStruct[1];
+    /*0x18F8*/ s8 minigameFielderIndex[4];
     /*0x18FC*/ u8 _18FC[4];
     /*0x1900*/ u8 _1900;
     /*0x1901*/ u8 _1901;
@@ -2155,10 +2171,7 @@ typedef struct _MiniGameStruct {
     /*0x19D4*/ s16 _19D4;
     /*0x19D6*/ s16 _19D6;
     /*0x19D8*/ s16 _19D8;
-    /*0x19DA*/ u8 _19DA;
-    /*0x19DB*/ u8 _19DB;
-    /*0x19DC*/ u8 _19DC;
-    /*0x19DD*/ u8 _19DD;
+    /*0x19DA*/ s8 _19DA[4];
     /*0x19DE*/ u8 _19DE;
     /*0x19DF*/ u8 _19DF;
     /*0x19E0*/ u8 _19E0;
@@ -2168,39 +2181,7 @@ typedef struct _MiniGameStruct {
     /*0x19E4*/ s16 _19E4;
     /*0x19E6*/ u8 _19E6;
     /*0x19E7*/ u8 _19E7;
-    /*0x19E8*/ u8 _19E8;
-    /*0x19E9*/ u8 _19E9;
-    /*0x19EA*/ u8 _19EA;
-    /*0x19EB*/ u8 _19EB;
-    /*0x19EC*/ u8 _19EC;
-    /*0x19ED*/ u8 _19ED;
-    /*0x19EE*/ u8 _19EE;
-    /*0x19EF*/ u8 _19EF;
-    /*0x19F0*/ u8 _19F0;
-    /*0x19F1*/ u8 _19F1;
-    /*0x19F2*/ u8 _19F2;
-    /*0x19F3*/ u8 _19F3;
-    /*0x19F4*/ u8 _19F4;
-    /*0x19F5*/ u8 _19F5;
-    /*0x19F6*/ u8 pad14[2];
-    /*0x19F8*/ u8 _19F8;
-    /*0x19F9*/ u8 _19F9;
-    /*0x19FA*/ u8 _19FA;
-    /*0x19FB*/ u8 _19FB;
-    /*0x19FC*/ u8 _19FC;
-    /*0x19FD*/ u8 _19FD;
-    /*0x19FE*/ u8 _19FE;
-    /*0x19FF*/ u8 pad15[2];
-    /*0x1A01*/ u8 _1A01;
-    /*0x1A02*/ u8 _1A02;
-    /*0x1A03*/ u8 _1A03;
-    /*0x1A04*/ u8 _1A04;
-    /*0x1A05*/ u8 _1A05;
-    /*0x1A06*/ u8 _1A06;
-    /*0x1A07*/ u8 _1A07;
-    /*0x1A08*/ u8 pad16[2];
-    /*0x1A0A*/ u8 _1A0A;
-    /*0x1A0B*/ u8 _1A0B;
+    /*0x19E8*/ MiniGameUnk19E8 _19E8[4];
     /*0x1A0C*/ u8 _1A0C;
     /*0x1A0D*/ u8 _1A0D;
     /*0x1A0E*/ u8 _1A0E;
@@ -2208,10 +2189,7 @@ typedef struct _MiniGameStruct {
     /*0x1A10*/ u8 _1A10;
     /*0x1A11*/ u8 _1A11;
     /*0x1A12*/ u8 _1A12;
-    /*0x1A13*/ u8 _1A13;
-    /*0x1A14*/ u8 _1A14;
-    /*0x1A15*/ u8 _1A15;
-    /*0x1A16*/ u8 _1A16;
+    /*0x1A13*/ u8 _1A13[4];
     /*0x1A17*/ u8 battingHandedness[9];
     /*0x1A20*/ u8 _1A20;
     /*0x1A21*/ u8 _1A21;
