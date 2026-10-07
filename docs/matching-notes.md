@@ -17,6 +17,7 @@ objdiff's report scores these 100% because it ignores relocation targets; the un
 - **Declaration order.** The order locals are declared in affects which callee-saved register each gets; try moving the variable that lands in the wrong register above its neighbour. Example: `inputs` declared before the `BOOL` flag.
 - **A value loaded once.** Holding a repeated load in its own local (with the type of the expression, usually `int`, not the field's `u8`) changes allocation. Example: `slapContactSize` in `calculateBuntHorizontalAngle`.
 - **Operands swapped in an add** (`add r31,r31,r0` versus `add r31,r0,r3`): split the expression, e.g. `value = tex[i]; value += step * 2;`. Example: `fn_3_16943C`.
+- **Operands swapped in a branchless `or`/`or.` chain** (`cntlzw; srwi; or; or.` tests): reorder the operands of `|` in the condition; each order gives a different pairing. Example: `fn_3_16E1EC` matches only as `lbl_3_bss_D6EC | !lbl_8036E548._3088 | !lbl_3_bss_D6E4`.
 - **Stalled after a few tries:** run `python3 tools/permute.py <function>` and the command it prints. Take the permuter's idea, not its literal code (it reuses unrelated variables and adds casts like `(long long)`), then rewrite it plausibly and recheck.
 
 ## Instruction differences that reveal types
@@ -26,6 +27,8 @@ objdiff's report scores these 100% because it ignores relocation targets; the un
 - **`extsb` before a call only in the target:** the callee takes `int`, and the caller sign-extends its `s8` argument; with an `s8` parameter the callee extends instead. Example: `fn_8001B728(s32, s32, Vec*)`.
 - **A flag parameter tested with `clrlwi. r0,r4,24`** is a `u8`; a `BOOL` (`int`) compiles to `cmpwi`.
 - **A `u8` copy of a value.** `clrlwi rX,rY,24` before comparisons can mean the code compares a `u8` variable assigned from a cast (e.g. `u8 starType = (s8)field`), not the field directly.
+- **`neg` before `cntlzw` only in the base:** a pointer tested with `p == NULL` inside a `|` chain. Write `!p`, which compiles to plain `cntlzw; srwi`. Example: `fn_3_16E1EC`.
+- **A word loaded from `.rodata`, stored to the stack, reloaded after a call and written to the FIFO** (`lwz r0,lbl@l; stw r0,8(r1)` ... `lwz r0,8(r1); stw r0,-0x8000(r3)`): a local `GXColor color = { 0xFF, 0xFF, 0xFF, 0xFF };` sent with `GXColor1u32(*(u32*)&color)`. Example: `fn_3_16D810`.
 
 ## Structure differences
 
@@ -34,11 +37,16 @@ objdiff's report scores these 100% because it ignores relocation targets; the un
 - **Inlined same-file functions.** A call in the source with no `bl` in the object was inlined; small non-static functions from the same file inline too (`calculateBuntHorizontalPower`).
 - **A `bl` only in the target, to an empty stub in the same file:** the stub gets inlined away, and `#pragma dont_inline` does not stop it. The caller matches once the stub has a real body; to check the rest now, delete the stub's definition temporarily and keep its prototype. Example: `fn_3_16C394` calls `fn_3_16B884`.
 - **Stores in a different order with the same values,** such as `[2]` before `[0]`: chained assignments store right to left, so `a[0] = a[2] = 255;`. Example: `fn_3_169600`.
+- **A float argument of an inlined call computed late** (the base adds the constant after the callee's first `bl` into a scratch FPR; the target adds it into the saved FPR before): update the variable before the call, `x += 1.8f; draw(d, x, y);`, instead of passing `x + 1.8f`. Example: `fn_3_16DB6C` inlining `fn_3_16D810`.
 - **Assertion panics:** `OSErrorLine(line, "message")` produces `OSPanic(__FILE__, line, ...)`, and `__FILE__` is the bare file name (`"kinoko.c"`).
 
-## Unsolved
+## `...rodata.0` in the base, constants one by one in the target
 
-- **Constants addressed through `...rodata.0` in the base but one by one in the target.** Seen in `fn_3_16B5B4` once an inlined callee adds string literals. Compiling with `-pool off` matches it but breaks the pooled `.bss` statics, and GC/2.0 to 2.7 compile it identically. Leave such functions as best candidates rather than changing flags.
+The base shows `lis rX,...rodata.0@ha; addi` and then `lfs f0,100(rX)`, while the target names each constant (`lfs f0,lbl_3_rodata_418C@l(r4)`). MWCC pools a function's `.rodata` references once it touches enough of them (three float constants alone stayed separate in `fn_3_16D810`; adding a `GXColor` initializer pooled all four).
+
+- **Cause: the original's `.rodata` began with weak objects, which turns pooling off for that section** (observed: with weak objects first nothing in `.rodata` is pooled, while `.bss` statics still are). `game/UnknownHomes_Game.h` defines `SQRT2_LINKAGE extern` before including `math.h`, so `dolsqrtf2` becomes an `extern inline` whose static locals are emitted as weak `_half$localstatic` and `_three$localstatic` even when unused; plain `#include "math.h"` emits nothing. The target's `.rodata` does not show them, presumably because the linker kept one weak copy for the whole module.
+- **Fix:** include `game/UnknownHomes_Game.h` above `header_rep_data.h`, as `game_batter.c` does. The `.rodata` section score loses those 0x10 bytes; the code matches. Example: `rep_4138.c`, where this matched `fn_3_16D810` and `fn_3_16DB6C`. `-pool off` also matches such functions but breaks pooled `.bss`, and GC/1.3.2 to 2.7 behave identically, so the include order is the explanation, not the flags.
+- **Not yet tried on** `fn_3_16B5B4` in `kinoko.c`, the case first recorded here (pooled once an inlined callee adds string literals). `kinoko.c` does not include `game/UnknownHomes_Game.h` today.
 
 ## Before committing
 
