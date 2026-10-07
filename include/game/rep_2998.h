@@ -36,6 +36,6 @@ void fn_3_E4A38(MtxPtr mtx, struct Rep2998Mesh* mesh);
 void* fn_3_E4BE8(s32 idx, MtxPtr mtx);
 void fn_3_E4CB0(s32* count, s32* objIdx);
 void fn_3_E4EF4(void);
-void fn_3_E4FC4(void);
+void fn_3_E4FC4(void** files);
 
 #endif // !__GAME_rep_2998_H_

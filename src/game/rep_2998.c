@@ -37,7 +37,13 @@ typedef struct {
     /* 0x5A */ u8 _5A;
     /* 0x5B */ u8 _5B;
     /* 0x5C */ f32 _5C;
-} Rep2998Model;
+    /* 0x60 */ u8 _60[0x90 - 0x60];
+} Rep2998Model; // size: 0x90
+
+typedef struct {
+    /* 0x00 */ u8 _00[0x34];
+    /* 0x34 */ Rep2998Model _34[1];
+} Rep2998ModelTable;
 
 typedef struct {
     /* 0x00 */ Control control;
@@ -128,7 +134,7 @@ extern Rep2998Common lbl_3_common_bss_350E4;
 
 extern struct {
     /* 0x00 */ u8 _00[0x6C];
-    /* 0x6C */ u8* _6C;
+    /* 0x6C */ Rep2998ModelTable* _6C;
 } lbl_8036E548;
 
 typedef struct {
@@ -159,9 +165,12 @@ extern u16 lbl_3_data_81DC[16];
 extern u8 lbl_3_data_8404[6][15][2];
 extern u8 lbl_3_data_84B8[30][2];
 extern Rep2998Prop lbl_3_data_18ED0[11];
-extern u8 lbl_3_data_19004[0x14];
+extern u8 lbl_3_data_19004[14];
 
 extern void* _OSAllocFromHeap(u32 align, u32 size);
+extern Rep2998ModelTable* ActorObjectInitTable(u16 count);
+extern void fn_800BDC88(Rep2998ModelTable* table, u16 first, u16 last, void* model, void* anim, void* arg5);
+extern void fn_800BD548(Rep2998Model* model, s32 count, ...);
 extern void AnimateActorBones(Rep2998Actor* actor);
 extern f32 fn_800B4A94(Rep2998Actor* actor);
 extern void fn_800B4AFC(Rep2998Actor* actor, u8 flag);
@@ -180,7 +189,7 @@ extern void fn_3_B8464(MtxPtr m, void* arg1);
 extern void fn_3_B8574(void);
 extern void fn_3_B939C(void);
 extern void fn_3_B97DC(void* model, void* anim);
-extern void fn_3_B98E8(void* model);
+extern void fn_3_B98E8(Rep2998Model* model);
 extern void fn_3_B9D68(u8* types, s32 count, void** files, s32* indices);
 
 static inline void playSound(s32 sound) {
@@ -216,8 +225,151 @@ static u8 lbl_3_bss_AE01;
 static u8 lbl_3_bss_AE00;
 
 // .text:0x000E4FC4 size:0x8B8 mapped:0x80724058
-void fn_3_E4FC4(void) {
-    return;
+void fn_3_E4FC4(void** files) {
+    Vec unused = { 0.0f, 3.6f, -2.0f };
+    GameInitVariables* settings;
+    Rep2998Obj* draw;
+    Rep2998Obj* entry;
+    Rep2998Prop* prop;
+    Rep2998Model* model;
+    s32* indices;
+    s32 count;
+    s32 i;
+    u8 end;
+    u8 n;
+    u8 j;
+    u8 total;
+
+    count = 0;
+    end = FALSE;
+    lbl_3_common_bss_350E4._18 = fn_3_B939C;
+    lbl_3_common_bss_350E4._1C = fn_3_E1DB8;
+    lbl_3_bss_AE10 = 0;
+    indices = lbl_3_common_bss_350E4._34 = _OSAllocFromHeap(4, 14 * sizeof(s32));
+    fn_3_B9D68(lbl_3_data_19004, 14, files, indices);
+
+    prop = lbl_3_data_18ED0;
+    for (i = 0; i < 10; i++) {
+        if (prop[i]._10 == 2) {
+            break;
+        }
+    }
+    n = i;
+    total = n + 1;
+    lbl_8036E548._6C = ActorObjectInitTable(total);
+    lbl_3_common_bss_350E4._6D = total;
+    j = 0;
+    for (i = 0; i < n; j++, i++) {
+        fn_800BDC88(lbl_8036E548._6C, j, j, files[indices[1]], NULL, files[indices[1] + 2]);
+        fn_3_B98E8(&lbl_8036E548._6C->_34[i]);
+    }
+    fn_800BDC88(lbl_8036E548._6C, j, j, files[indices[2]], NULL, NULL);
+    fn_3_B97DC(&lbl_8036E548._6C->_34[j], files[indices[2] + 2]);
+    model = &lbl_8036E548._6C->_34[j];
+    model->_5C = 180.0f;
+    model->_59 = 1;
+    fn_800B4CA0(lbl_8036E548._6C->_34[j]._00, lbl_8036E548._6C->_34[j]._5C);
+    for (i = 0; i < 10; i++) {
+        lbl_3_bss_AE18[i] = files[indices[i + 4]];
+    }
+    for (i = 0; i < total; i++) {
+        fn_800BD548(&lbl_8036E548._6C->_34[i], 4, lbl_3_common_bss_350E4._20, lbl_3_common_bss_350E4._24,
+                    lbl_3_common_bss_350E4._28, lbl_3_common_bss_350E4._2C);
+    }
+
+    lbl_3_common_bss_350E4._30 = 20;
+    lbl_3_common_bss_350E4._00 = _OSAllocFromHeap(0x20, 20 * sizeof(Rep2998Obj));
+    memset(lbl_3_common_bss_350E4._00, 0, 20 * sizeof(Rep2998Obj));
+    lbl_3_common_bss_350E4._04 = _OSAllocFromHeap(0x20, 20 * sizeof(Rep2998Obj));
+    memset(lbl_3_common_bss_350E4._04, 0, 20 * sizeof(Rep2998Obj));
+    settings = &g_d_GameSettings;
+    draw = lbl_3_common_bss_350E4._00;
+    entry = draw;
+    if (settings->GameModeSelected == GAME_TYPE_MINIGAMES) {
+        lbl_3_common_bss_350E4._18 = NULL;
+    } else {
+        lbl_3_bss_AE13 = 0;
+        for (i = 0; i < 10; i++, prop++) {
+            if (prop->_10 == 2) {
+                end = TRUE;
+            }
+            if (end) {
+                for (; i < 11; i++) {
+                    lbl_3_data_18ED0[i]._10 = 2;
+                }
+                break;
+            }
+            entry->_9C = i;
+            entry->_9D = 0;
+            entry->_9E = prop->_12;
+            draw->_74 = &lbl_8036E548._6C->_34[i];
+            draw->_78 = files[indices[3]];
+            draw->_7C = fn_3_E3B88;
+            draw->_80 = fn_3_E2118;
+            draw->_90_7 = 1;
+            draw->_90_6 = draw->_90_7 && draw->_78 != NULL;
+            draw->_9A = 1;
+            fn_3_E4658(entry);
+            fn_3_E4554(entry);
+            draw->_90_5 = 0;
+            draw->_92 = 0xFF;
+            draw->_84 = fn_3_E22A4;
+            draw->_8C = NULL;
+            draw->_94 = 0;
+            draw->_96 = -1;
+            draw->_98 = 1;
+            entry = ++draw;
+            lbl_3_bss_AE14++;
+            count++;
+        }
+    }
+    lbl_3_bss_AE11 = count;
+    entry->_9C = 0;
+    entry->_9D = 1;
+    entry->_9E = 0;
+    draw->_74 = &lbl_8036E548._6C->_34[n];
+    draw->_78 = NULL;
+    draw->_7C = fn_3_E1FA8;
+    draw->_80 = NULL;
+    draw->_90_7 = 1;
+    draw->_90_6 = 0;
+    draw->_9A = 0;
+    draw->xform.control.type = 0;
+    draw->_90_5 = 0;
+    draw->_92 = 0xFF;
+    draw->_84 = NULL;
+    draw->_8C = NULL;
+    draw->_94 = 0;
+    draw->_96 = -1;
+    draw->_98 = 1;
+    entry = ++draw;
+    lbl_3_bss_AE12++;
+    count++;
+    lbl_3_common_bss_350E4._30 = count;
+    if (lbl_3_common_bss_350E4._30 > count) {
+        for (i = count; i < lbl_3_common_bss_350E4._30; i++) {
+            entry->_9D = 0;
+            draw->_74 = NULL;
+            draw->_78 = NULL;
+            draw->_7C = NULL;
+            draw->_80 = NULL;
+            draw->_90_7 = 0;
+            draw->_90_6 = 0;
+            draw->_90_5 = 0;
+            draw->xform.control.type = 0;
+            CTRLSetTranslation(&draw->xform.control, 0.0f, 0.0f, 0.0f);
+            CTRLSetRotation(&draw->xform.control, 0.0f, 0.0f, 0.0f);
+            draw->_92 = 0;
+            draw->_8C = NULL;
+            draw->_94 = 0;
+            draw->_96 = -1;
+            entry = ++draw;
+        }
+    }
+    lbl_3_common_bss_350E4._48 = NULL;
+    if (settings->GameModeSelected != GAME_TYPE_MINIGAMES) {
+        fn_3_E4EF4();
+    }
 }
 
 // .text:0x000E4EF4 size:0xD0 mapped:0x80723F88
@@ -225,8 +377,8 @@ void fn_3_E4EF4(void) {
     Rep2998Common* common = &lbl_3_common_bss_350E4;
     s32 count;
     s32 idx;
-    u32 size = common->_30 * sizeof(u16) + common->_30 * sizeof(u32) + common->_30 * sizeof(u32) +
-               common->_30 * (2 * sizeof(Vec));
+    u32 size = (common->_30 * sizeof(u16)) + (common->_30 * sizeof(u32)) + (common->_30 * sizeof(u32)) +
+               (common->_30 * (2 * sizeof(Vec)));
 
     if (common->_48 == NULL) {
         common->_48 = _OSAllocFromHeap(4, size);
