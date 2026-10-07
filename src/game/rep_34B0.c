@@ -1,4 +1,5 @@
 #include "game/rep_34B0.h"
+// Must precede header_rep_data.h, which keeps the .rodata constants unpooled as in the target
 #include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
 #include "game/rep_1838.h"
@@ -14,8 +15,6 @@
 #include "game/rep_1E08.h"
 #include "static/UnknownHomes_Static.h"
 #include "musyx/musyx.h"
-#include "Dolphin/mtx.h"
-#include "Dolphin/rand.h"
 #include "string.h"
 
 extern struct {
@@ -371,6 +370,8 @@ static inline void setCpuInputFlags(u8 value) {
 }
 
 // .text:0x00130C6C size:0x4A8 mapped:0x8076FD00
+// 98.14%: the target keeps setCpuInputFlags' &g_Minigame in r25 and walks the barrels from it,
+// with a separate r31 for the rosterID base; here the walk starts from that base.
 void fn_3_130C6C(void) {
     if (g_Minigame.turnOverStatus == 0) {
         if (fn_3_108854()) {
@@ -655,6 +656,8 @@ void fn_3_12F624(void) {
 }
 
 // .text:0x0012F424 size:0x200 mapped:0x8076E4B8
+// 94.65%: the target computes idx % 3 again for the second test, where this reuses the first
+// result (one register more through the first block). A cast, (int)idx % 3, matches.
 void fn_3_12F424(int idx, int delay, BOOL all) {
     int colour = g_Minigame.barrels[idx].barrelColour;
     int n;
