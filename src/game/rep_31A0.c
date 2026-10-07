@@ -17,6 +17,7 @@
 #include "game/rep_F80.h"
 #include "game/rep_2940.h"
 #include "game/rep_28A8.h"
+#include "game/rep_1E08.h"
 #include "string.h"
 #include "musyx/musyx.h"
 
@@ -94,6 +95,8 @@ extern struct {
     /* 0x00 */ u8 _00[0x12];
     /* 0x12 */ u8 _12;
     /* 0x13 */ u8 _13;
+    /* 0x14 */ u8 _14;
+    /* 0x15 */ u8 _15;
 } lbl_8037169C;
 
 extern struct {
@@ -195,6 +198,12 @@ extern void fn_3_161078(void);
 extern void fn_3_1658F0(void);
 extern void possiblyTransitionBlackScreen(void);
 extern void fn_8004CC18(void);
+extern void fn_800189B8(void);
+extern void fn_80018B74(void);
+extern BOOL fn_80020388(void);
+extern void fn_3_908E8(void);
+extern BOOL fn_3_90860(void);
+extern BOOL fn_3_90A18(void);
 extern BOOL fn_3_90DD8(void);
 extern BOOL fn_80016F7C(void);
 extern void fn_8003A540(int arg);
@@ -1386,7 +1395,139 @@ void fn_3_10BE7C(void) {
 
 // .text:0x0010B8D0 size:0x5AC mapped:0x8074A964
 void fn_3_10B8D0(void) {
-    return;
+    int i;
+
+    switch (g_GameLogic._125) {
+    case 0:
+        lbl_8036E548._307E = 0;
+        if ((g_Minigame._1A3C == 0 || g_Minigame._1E2A <= 1) && g_Minigame._1A38 == 0) {
+            fn_80062A74();
+            fn_800189B8();
+            if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES) {
+                fn_80035B50(0x11);
+            }
+            fn_80035B50(9);
+            fn_3_908E8();
+        }
+        g_Minigame.battingHandedness[5] = 0;
+        g_Minigame._1A41 = 0;
+        g_Minigame.multiPlayerInd = 0;
+        g_Minigame._19AA = 0;
+        g_Minigame._1908 = -1;
+        g_Minigame.battingHandedness[6] = 0;
+        g_Minigame._1A23 = 0;
+        g_Minigame._1A24[0] = 2;
+        g_Minigame._1A46[0] = 0;
+        if (g_d_GameSettings.exhibitionMatchInd == 0) {
+            g_Minigame._1A24[0] = 0;
+        }
+        g_d_GameSettings._3A = g_Minigame.soloMinigameDifficulty;
+        lbl_8037169C._15 = 0;
+        lbl_3_common_bss_34C58._2C = 0;
+        if (g_Minigame._1907 != 1 || g_Minigame._1A3C != 0) {
+            g_Minigame.multiPlayerInd = 1;
+            g_Minigame.soloMinigameDifficulty = 0;
+        }
+        if (g_Minigame._1907 == 1) {
+            for (i = 0; i < 4; i++) {
+                if (g_Minigame.minigameControlStruct.battingHandedness[i] == 0) {
+                    g_Minigame._1908 = i;
+                    break;
+                }
+            }
+        }
+        if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+            g_d_GameSettings._33 = 0;
+        } else {
+            g_d_GameSettings._33 = g_Minigame.GameMode_MiniGame;
+        }
+        g_GameLogic.FrameCountOfCurrentAtBat_Copy = 0;
+        g_GameLogic._125++;
+        if (g_Minigame._1A38 != 0 && g_Minigame._1A3C == 0) {
+            changeScene(1, 6);
+            g_GameLogic._125 = 2;
+        }
+        break;
+    case 1:
+        if (fn_80035838(&lbl_3_data_21EC8[g_Minigame.GameMode_MiniGame + 6], 0x11) != 0) {
+            changeScene(1, 6);
+            g_GameLogic.FrameCountOfCurrentAtBat_Copy = 0;
+            g_GameLogic._125++;
+        }
+        break;
+    case 2:
+        if (g_Minigame._1A38 != 0 && g_Minigame._1A3C == 0) {
+            g_GameLogic._125 = 8;
+        } else if (fn_3_90860()) {
+            lbl_3_common_bss_34C58._2C = 0;
+            g_GameLogic._125++;
+        }
+        break;
+    case 3:
+        g_d_GameSettings.StadiumID = lbl_3_data_18910[g_Minigame.GameMode_MiniGame];
+        if (fn_3_90A18()) {
+            g_GameLogic._125++;
+        }
+        break;
+    case 4:
+        fn_80018B74();
+        g_GameLogic._125++;
+    case 5:
+        g_Minigame._1A2C = -1;
+        lbl_3_data_228._10 = 0;
+        g_d_GameSettings.StadiumID = lbl_3_data_18910[g_Minigame.GameMode_MiniGame];
+        g_d_GameSettings.miniGameStadiumIndicator = 0;
+        if (g_d_GameSettings.StadiumID == STADIUM_ID_MARIO_STADIUM || g_d_GameSettings.StadiumID == STADIUM_ID_PEACH_GARDEN ||
+            g_d_GameSettings.StadiumID == STADIUM_ID_BOWSERS_CASTLE || g_d_GameSettings.StadiumID == STADIUM_ID_YOHSI_PARK) {
+            g_d_GameSettings.miniGameStadiumIndicator = 1;
+        }
+        fn_800B0A5C_insertQueue(manageStadiumLoading, 0);
+        g_GameLogic._125++;
+        break;
+    case 6:
+        if (fn_3_10F564() == 0) {
+            g_GameLogic._125++;
+        }
+        break;
+    case 7:
+        if (fn_80020388()) {
+            g_GameLogic._125++;
+        }
+        break;
+    case 8:
+        if (g_Minigame.battingHandedness[6] != 0) {
+            changeScene(3, 6);
+            if (g_Minigame.battingHandedness[6] == 2) {
+                g_GameLogic._125 = 10;
+            } else {
+                g_GameLogic._125 = 9;
+            }
+        }
+        break;
+    case 9:
+        if (lbl_8037169C._13 != 0) {
+            if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+                g_Scores._AB = g_Scores._AA = g_Minigame._1A24[0] * 2 + 1;
+                fn_3_5A6D4(5);
+            } else {
+                fn_3_5A6D4(4);
+            }
+            fn_3_BF070();
+        }
+        break;
+    case 10:
+        if (lbl_8037169C._13 != 0) {
+            g_GameLogic._125 = 11;
+        }
+        break;
+    case 11:
+        g_Minigame._1A38 = 0;
+        fn_3_10B200();
+        break;
+    }
+    if (g_GameLogic._125 >= 2 && g_Minigame.battingHandedness[6] == 0) {
+        fn_3_10B27C();
+    }
 }
 
 // .text:0x0010B27C size:0x654 mapped:0x8074A310
