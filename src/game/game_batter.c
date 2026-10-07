@@ -1185,8 +1185,8 @@ extern s16 ToyFieldBattingAngleRanges[3][2][15][2];
 // .text:0x00011B9C size:0x334 mapped:0x80650c30
 void calculateBallHorizontalAngleHit(void) {
     int angleRangeLower, angleRangeUpper, angleRange, horizAngle;
-    BOOL isCharge = TRUE;
     InputStruct* inputs = &g_Controls[g_GameLogic.teams[g_GameLogic.teamBatting]];
+    BOOL isCharge = TRUE;
 
     if (ACTIVE_TUTORIAL()) {
         inputs = &g_Practice.inputs[g_GameLogic.teamBatting];
@@ -1589,13 +1589,14 @@ void calculateHorizontalPower(void) {
 
 // UNUSED .text:0x00010A80 size:0x280 mapped:0x8064fb14
 void calculateBuntHorizontalAngle(void) {
+    InputStruct* inputs = &g_Controls[g_GameLogic.teams[g_GameLogic.teamBatting]];
     BOOL pullInd = FALSE;
     int horizAngle;
     int upperBunt;
     int lowerBunt;
     u8 contact;
-    
-    InputStruct* inputs = &g_Controls[g_GameLogic.teams[g_GameLogic.teamBatting]];
+    int slapContactSize;
+
     if (ACTIVE_TUTORIAL()) {
         inputs = &g_Practice.inputs[g_GameLogic.teamBatting];
     } else if (minigame_checkIfAIInputIs_Algorithmic_Or_ControllerBased(
@@ -1606,14 +1607,13 @@ void calculateBuntHorizontalAngle(void) {
     }
 
     contact = g_Batter.contactType;
+    slapContactSize = g_Batter.contactSize_raw[BAT_CONTACT_TYPE_SLAP];
 
-    upperBunt = lbl_3_data_5A64[contact][0][1] + (((lbl_3_data_5A64[contact][1][1] - lbl_3_data_5A64[contact][0][1]) *
-                                                   g_Batter.contactSize_raw[BAT_CONTACT_TYPE_SLAP]) /
-                                                  100);
+    upperBunt = lbl_3_data_5A64[contact][0][1] +
+                (((lbl_3_data_5A64[contact][1][1] - lbl_3_data_5A64[contact][0][1]) * slapContactSize) / 100);
 
-    lowerBunt = lbl_3_data_5A64[contact][0][0] + (((lbl_3_data_5A64[contact][1][0] - lbl_3_data_5A64[contact][0][0]) *
-                                                   g_Batter.contactSize_raw[BAT_CONTACT_TYPE_SLAP]) /
-                                                  100);
+    lowerBunt = lbl_3_data_5A64[contact][0][0] +
+                (((lbl_3_data_5A64[contact][1][0] - lbl_3_data_5A64[contact][0][0]) * slapContactSize) / 100);
 
     horizAngle = lowerBunt + (g_Ball.StaticRandomInt1 % (upperBunt - lowerBunt));
 
