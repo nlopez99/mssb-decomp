@@ -264,7 +264,7 @@ static DrawTaskArg1C0 lbl_3_data_9B0[4][2] = {
     { { 2, fn_3_5BCC, 2 }, { 2, fn_3_5BCC, 2 } },
     { { 2, fn_3_5BCC, 3 }, { 2, fn_3_5BCC, 3 } },
 };
-void (*lbl_3_data_A10[2])(MtxPtr view, s32, s32) = { 0 };
+void (*lbl_3_data_A10[2])(MtxPtr view, s32, u32) = { 0 };
 
 static u8 lbl_3_bss_1C[0x14];
 static void (*lbl_3_bss_18)(void);
@@ -1004,7 +1004,7 @@ void fn_3_3904(s16 x, s16 y, s32 id, GXColor c1, GXColor c2, u8 flag) {
 }
 
 // .text:0x000038E8 size:0x1C mapped:0x8064297C
-void fn_3_38E8(void (*draw)(MtxPtr view, s32, s32)) {
+void fn_3_38E8(void (*draw)(MtxPtr view, s32, u32)) {
     lbl_3_data_A10[lbl_803CBBC0] = draw;
 }
 

@@ -11,6 +11,7 @@
 #include "C3/control.h"
 #include "C3/geoPalette.h"
 #include "game/rep_D0.h"
+#include "game/rep_1C0.h"
 #include "game/m_sound.h"
 #include "game/rep_4138.h"
 #include "string.h"
@@ -262,9 +263,6 @@ extern void fn_800BEA04(Vec pos);
 extern UnkView1D58* fn_800BF068(void);
 extern void fn_800C07BC(void* base, void* tmp, s32 count, s32 size, s32 (*compare)(const void* a, const void* b));
 
-// rep_1C0.h types the draw callback's last parameter s32; fn_3_B8828 compares it unsigned
-extern void fn_3_38E8(void (*draw)(MtxPtr view, s32, u32));
-extern void fn_3_35E4(void (*callback)(void));
 extern void fn_3_C1964(void);
 // Their units' headers still declare these void(void)
 extern StadiumObjectCollision* fn_3_C823C(s32 object, Mtx mtx);
