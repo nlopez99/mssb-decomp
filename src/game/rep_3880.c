@@ -81,6 +81,27 @@ typedef struct Emitter3880 {
     /* 0x17 */ u8 _17;
 } Emitter3880; // size: 0x18, followed by each effect's own fields
 
+typedef struct TexInfo3880 {
+    /* 0x00 */ void* image;
+    /* 0x04 */ void* tlut;
+    /* 0x08 */ u16 height;
+    /* 0x0A */ u16 width;
+    /* 0x0C */ u8 _0C[0x10 - 0xC];
+    /* 0x10 */ f32 lodBias;
+    /* 0x14 */ u8 _14;
+    /* 0x15 */ u8 minLod;
+    /* 0x16 */ u8 maxLod;
+    /* 0x17 */ u8 format;
+    /* 0x18 */ u16 tlutCount;
+    /* 0x1A */ u8 tlutFormat;
+} TexInfo3880;
+
+typedef struct {
+    /* 0x00 */ Vec pos;
+    /* 0x0C */ u32 color;
+    /* 0x10 */ u16 uv[2];
+} TexVertex3880; // size: 0x14
+
 // A whole emitter slot, for a list built on the stack
 typedef struct {
     /* 0x00 */ Emitter3880 base;
@@ -155,6 +176,7 @@ extern f32 lbl_3_data_21770[6];
 extern u8 lbl_3_data_26CB8[24];
 extern Vec lbl_3_data_26D50;
 extern s32 lbl_3_data_26BDC[4];
+extern u16 lbl_3_data_26B9C[4][2];
 extern Vec lbl_3_data_26BB4;
 extern s32 lbl_3_data_26BC0[7];
 extern s32 lbl_3_data_26BEC[4];
@@ -192,7 +214,7 @@ static u8 lbl_3_bss_B890[4]; // unreferenced
 static Vec lbl_3_bss_B860[4];
 static s8 lbl_3_bss_B85C[4];
 static u8 lbl_3_bss_B858;
-static s32 lbl_3_bss_B854;
+static TexInfo3880* lbl_3_bss_B854;
 static TrailEmitter3880* lbl_3_bss_B850;
 
 // .text:0x00157AC4 size:0x2F4 mapped:0x80796B58
@@ -280,8 +302,56 @@ void fn_3_156D04(void) {
 }
 
 // .text:0x00156970 size:0x394 mapped:0x80795A04
-void fn_3_156970(void) {
-    return;
+void fn_3_156970(Vec* corners, u32 color, TexInfo3880* tex) {
+    TexVertex3880 verts[4];
+    Mtx mv;
+    GXTexObj obj;
+    GXTlutObj tlut;
+    s32 i;
+
+    PSMTXIdentity(mv);
+    for (i = 0; i < 4; i++) {
+        memcpy(&verts[i].pos, &corners[i], sizeof(Vec));
+        verts[i].color = color;
+        memcpy(verts[i].uv, lbl_3_data_26B9C[i], sizeof(verts[i].uv));
+    }
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetNumChans(1);
+    GXSetNumTexGens(1);
+    GXSetNumTevStages(1);
+    GXSetCullMode(GX_CULL_NONE);
+    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_RASC, GX_CC_TEXC, GX_CC_ZERO);
+    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_RASA, GX_CA_TEXA, GX_CA_ZERO);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    GXLoadPosMtxImm(mv, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    if (lbl_3_bss_B854 != tex) {
+        if (tex->tlut != NULL) {
+            GXInitTexObjCI(&obj, tex->image, tex->width, tex->height, tex->format, GX_CLAMP, GX_CLAMP, GX_FALSE, 0);
+            GXInitTlutObj(&tlut, tex->tlut, tex->tlutFormat, tex->tlutCount);
+            GXLoadTlut(&tlut, 0);
+        } else {
+            GXInitTexObj(&obj, tex->image, tex->width, tex->height, tex->format, GX_CLAMP, GX_CLAMP, GX_FALSE);
+        }
+        GXInitTexObjLOD(&obj, GX_LINEAR, GX_LINEAR, tex->minLod, tex->maxLod, tex->lodBias, GX_FALSE, GX_FALSE, GX_ANISO_1);
+        GXLoadTexObj(&obj, GX_TEXMAP0);
+        lbl_3_bss_B854 = tex;
+    }
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    for (i = 0; i < 4; i++) {
+        GXPosition3f32(verts[i].pos.x, verts[i].pos.y, verts[i].pos.z);
+        GXColor1u32(verts[i].color);
+        GXTexCoord2f32(verts[i].uv[0], verts[i].uv[1]);
+    }
 }
 
 // .text:0x00156548 size:0x428 mapped:0x807955DC
