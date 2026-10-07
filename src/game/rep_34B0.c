@@ -67,6 +67,7 @@ extern void fn_3_FBD70(void);
 extern void fn_3_10AD48(void);
 extern void fn_8004C108(VecXYZ* pos, int arg1);
 extern void fn_3_1608F0(int, int, int);
+extern void ballPhysica(void);
 
 // .text:0x001324E8 size:0x9F4 mapped:0x8077157C
 void fn_3_1324E8(void) {
@@ -285,17 +286,59 @@ void fn_3_130A80(void) {
 
 // .text:0x001307D0 size:0x2B0 mapped:0x8076F864
 void fn_3_1307D0(void) {
-    return;
+    ballPhysica();
+    fn_3_12FAC4();
+    fn_3_130288();
 }
 
 // .text:0x00130288 size:0x548 mapped:0x8076F31C
 void fn_3_130288(void) {
-    return;
+    if (g_Minigame.turnOverStatus == 0 && g_Ball.framesSinceHit >= lbl_3_data_217A4[4]) {
+        g_Minigame.turnOverStatus = 1;
+        if (!g_Minigame.multiPlayerInd && g_Minigame.soloMinigameDifficulty <= MINIGAME_DIFFICULTY_MULTIPLAYER_CHALLENGE_HARD &&
+            g_Minigame.miniGameCurrentPoints[g_Minigame.rosterID] >= g_Minigame.pointsReqToWin_challenge) {
+            g_Minigame.pointsTargetReachedInd = 2;
+            g_Minigame._1A37 = 1;
+            g_Minigame.challenge_minigame_haven_tWonYetIndicator = 0;
+            fn_3_10F550(1, lbl_3_data_217A4[10]);
+        }
+        if (g_Minigame.bB_bombBarrelHitInd) {
+            g_Minigame.bB_pitchesRemainingInTurn += lbl_3_data_21798[6 + g_Minigame.multiPlayerInd];
+        }
+        if (g_Minigame.bB_pitchesRemainingInTurn == 0) {
+            g_Minigame.pointsTargetReachedInd = 2;
+        }
+    }
+    if (g_Minigame.turnOverStatus == 0) {
+        return;
+    }
+    if (g_Minigame.turnOverStatus == 1) {
+        g_Minigame.turnOverStatus = 2;
+        g_GameLogic.CountdownUntilFade = lbl_3_data_217A4[1];
+    }
+    g_GameLogic.CountdownUntilFade--;
+    if (g_GameLogic.CountdownUntilFade <= 0 && fn_3_12ED80()) {
+        fn_3_12FFD4();
+    }
+    if (g_Minigame.pointsTargetReachedInd &&
+        (!g_Minigame.multiPlayerInd ||
+         (g_Minigame.multiPlayerInd && g_Minigame.turnNumberWithinRound + 1 >= g_Minigame.miniGameNumberOfParticipants &&
+          g_Scores._00 >= g_Scores._AA)) &&
+        !g_Minigame._1A37 && g_GameLogic.CountdownUntilFade == 1) {
+        sndFXStart(0x1BE, lbl_800EFBA4[7], 0x3F);
+    }
 }
 
 // .text:0x0012FFD4 size:0x2B4 mapped:0x8076F068
 void fn_3_12FFD4(void) {
-    return;
+    g_Minigame.bB_bombBarrelID = -1;
+    fn_3_12EB10();
+    fn_3_12E8FC();
+    if (g_Minigame.pointsTargetReachedInd) {
+        fn_3_5A6D4(GAME_STATUS_TRANSITION);
+    } else {
+        fn_3_5A6D4(GAME_STATUS_DEFAULT);
+    }
 }
 
 // .text:0x0012FE84 size:0x150 mapped:0x8076EF18
@@ -590,7 +633,7 @@ void fn_3_12EE68(int idx) {
 }
 
 // .text:0x0012ED80 size:0xE8 mapped:0x8076DE14
-BOOL fn_3_12ED80(void) {
+u8 fn_3_12ED80(void) {
     int i;
 
     for (i = 1; i < 15; i += 3) {

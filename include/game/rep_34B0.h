@@ -5,7 +5,7 @@
 
 void fn_3_12E8FC(void);
 void fn_3_12EB10(void);
-BOOL fn_3_12ED80(void);
+u8 fn_3_12ED80(void);
 void fn_3_12EE68(int idx);
 void fn_3_12EFA4(int idx);
 void fn_3_12F28C(int idx);
