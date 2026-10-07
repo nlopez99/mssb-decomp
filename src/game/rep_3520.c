@@ -12,6 +12,7 @@
 #include "stdlib.h"
 #include "string.h"
 #include "Dolphin/rand.h"
+#include "musyx/musyx.h"
 
 // One of four objects at g_Minigame + 0xBB0
 typedef struct Unk3520Obj {
@@ -112,6 +113,10 @@ extern s32 fn_800247E4(s32, s32, s32, s32);
 extern void fn_3_156548(u32 index, f32 x, f32 y, f32 z);
 extern void fn_3_15730C(u32 index, f32 x, f32 y, f32 z);
 extern void fn_3_157570(void);
+extern void fn_3_150010(s8 index);
+extern void fn_3_14E988(s8 index);
+extern void fn_3_14E894(void);
+extern void fn_3_106EB0(void);
 // rep_AC8.h declares fn_3_25844 as void(void)
 extern void fn_3_25844(int, int);
 extern void fn_800528B4(void);
@@ -121,6 +126,7 @@ extern void fn_3_5A6D4(u8 status);
 extern void fn_3_10F550(u8, s16);
 extern void changeScene(u8, s16);
 
+extern u8 lbl_800EFBA4[0x10];
 extern u8 lbl_3_data_21278[2];
 extern f32 lbl_3_data_47BC[5];
 extern Vec lbl_3_data_219AC;
@@ -240,7 +246,25 @@ void fn_3_13B284(void) {
 
 // .text:0x0013AFE4 size:0x2A0 mapped:0x8077A078
 void fn_3_13AFE4(void) {
-    return;
+    if (g_Minigame.turnOverStatus == 0) {
+        if (g_Minigame._17C4 == 0) {
+            g_Minigame.turnOverStatus = 1;
+            fn_3_10F550(3, 0);
+            sndFXStart(0x1BE, lbl_800EFBA4[7], 0x3F);
+        }
+    } else {
+        if (g_Minigame.turnOverStatus == 1) {
+            g_Minigame.turnOverStatus = 2;
+            g_GameLogic.CountdownUntilFade = lbl_3_data_21B20[0];
+            fn_3_14E894();
+        }
+        if (--g_GameLogic.CountdownUntilFade == 7) {
+            changeScene(3, 6);
+        }
+        if (g_GameLogic.CountdownUntilFade <= 0) {
+            fn_3_13AE1C();
+        }
+    }
 }
 
 // .text:0x0013AE1C size:0x1C8 mapped:0x80779EB0
@@ -286,12 +310,36 @@ void fn_3_13ACB4(void) {
 
 // .text:0x0013AA78 size:0x23C mapped:0x80779B0C
 void fn_3_13AA78(void) {
-    return;
+    if (g_Minigame._72A != 0) {
+        fn_3_13A0AC();
+    } else {
+        fn_3_13A89C();
+    }
+    if (g_Minigame._1D6D >= 0) {
+        if (--g_Minigame._1D56 < 0 || g_Minigame.turnOverStatus != 0) {
+            fn_3_14E988(g_Minigame._1D6D);
+            fn_800115C8(g_Minigame._1D6D);
+            g_Minigame._1D6D = -1;
+        }
+    }
 }
 
 // .text:0x0013A89C size:0x1DC mapped:0x80779930
 void fn_3_13A89C(void) {
-    return;
+    if (g_Minigame.turnOverStatus == 0) {
+        if (--g_Minigame._1D52 <= 0) {
+            g_Minigame._6E8 = lbl_3_data_219AC.x;
+            g_Minigame._6EC = lbl_3_data_219AC.y;
+            g_Minigame._6F0 = lbl_3_data_219AC.z;
+            g_Minigame._72B = 0;
+            fn_3_13A724();
+            g_Minigame._72A = 1;
+            g_Minigame._724 = 0;
+            g_Minigame._1D52 = lbl_3_data_21A30[2];
+            fn_3_150010(4);
+            fn_3_106EB0();
+        }
+    }
 }
 
 // .text:0x0013A724 size:0x178 mapped:0x807797B8
@@ -603,8 +651,39 @@ void fn_3_1373E0(void) {
 }
 
 // .text:0x00137224 size:0x1BC mapped:0x807762B8
-void fn_3_137224(void) {
-    return;
+void fn_3_137224(Vec* center) {
+    u32 i;
+    Vec pos;
+    Vec d;
+    Vec v;
+    f32 scale;
+
+    for (i = 0; i < 100; i++) {
+        if (g_Minigame.wallBall_coinsVisibleInd[i] != 1) {
+            continue;
+        }
+        if (g_Minigame.wallBall_coinCoordinates[i].y > lbl_3_data_219B8[14]) {
+            continue;
+        }
+        if (g_Minigame.wallBall_coinVelocity[i].y > 0.05) {
+            continue;
+        }
+        pos.x = g_Minigame.wallBall_coinCoordinates[i].x;
+        pos.y = g_Minigame.wallBall_coinCoordinates[i].y;
+        pos.z = g_Minigame.wallBall_coinCoordinates[i].z;
+        PSVECSubtract(&pos, center, &d);
+        scale = (36.0f - PSVECMag(&d)) / 36.0f;
+        d.y = 0.0f;
+        if (!PSVECMag(&d)) {
+            d.z = -1.0f;
+        }
+        PSVECNormalize(&d, &d);
+        v.x = 0.0f;
+        v.z = 0.0f;
+        v.y = 0.05f * (2.0 * (rand() / 32767.0f - 0.5)) + 0.3f;
+        PSVECScale(&v, scale, &v);
+        PSVECAdd(&v, (Vec*)&g_Minigame.wallBall_coinVelocity[i], (Vec*)&g_Minigame.wallBall_coinVelocity[i]);
+    }
 }
 
 // .text:0x001371E8 size:0x3C mapped:0x8077627C

@@ -46,7 +46,7 @@ void fn_3_136CF4(struct Unk3520Box* box);
 void fn_3_136EA4(void);
 void fn_3_1370A0(camera_803c639c_s* camera);
 void fn_3_1371E8(void);
-void fn_3_137224(void);
+void fn_3_137224(Vec* center);
 void fn_3_1373E0(void);
 BOOL fn_3_1379A0(int fielderIdx);
 u8 fn_3_137B10(struct Unk3520Obj* obj);
