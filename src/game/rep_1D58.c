@@ -4,6 +4,7 @@
 #include "game/UnknownHomes_Game.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/os.h"
+#include "Dolphin/rand.h"
 #include "C3/actor.h"
 #include "C3/control.h"
 #include "C3/geoPalette.h"
@@ -12,6 +13,71 @@
 #include "game/m_sound.h"
 #include "string.h"
 #include "math.h"
+
+typedef struct LITObj LITObj;
+
+typedef struct {
+    /* 0x00 */ u8 _00[0xA];
+} LightData1D58; // size: 0xA
+
+typedef struct {
+    /* 0x00 */ LightData1D58 lights[4];
+    /* 0x28 */ GXColor ambient;
+} StadiumLights1D58; // size: 0x2C
+
+typedef struct {
+    /* 0x00 */ Vec pos;
+    /* 0x0C */ GXColor color;
+} Light1D58; // size: 0x10
+
+typedef struct {
+    /* 0x00 */ u32 _00[4];
+} AramEntry1D58; // size: 0x10
+
+typedef struct ModelBone1D58 {
+    /* 0x000 */ u8 _000[0x14];
+    /* 0x014 */ struct DODisplayObj* _014;
+    /* 0x018 */ u8 _018[0xE8 - 0x18];
+    /* 0x0E8 */ struct BoneData1D58* _0E8;
+    /* 0x0EC */ MtxPtr _0EC;
+    /* 0x0F0 */ u8 _0F0[0x100 - 0xF0];
+    /* 0x100 */ struct ModelBone1D58* _100;
+} ModelBone1D58;
+
+typedef struct {
+    /* 0x00 */ u8 _00[0x6];
+    /* 0x06 */ u16 totalBones;
+    /* 0x08 */ u8 _08[0x14 - 0x8];
+    /* 0x14 */ struct DODisplayObj* skinObject;
+    /* 0x18 */ ModelBone1D58** boneArray;
+    /* 0x1C */ u8 _1C[0x64 - 0x1C];
+    /* 0x64 */ MtxPtr skinMtxArray;
+    /* 0x68 */ MtxPtr skinInvTransposeMtxArray;
+    /* 0x6C */ u8 _6C[0x74 - 0x6C];
+    /* 0x74 */ ModelBone1D58* drawHead;
+    /* 0x78 */ u8 _78[0x7C - 0x78];
+    /* 0x7C */ void* _7C;
+    /* 0x80 */ u8 _80[0x98 - 0x80];
+    /* 0x98 */ u8 _98;
+} ModelActor1D58;
+
+typedef struct StadiumModel1D58 {
+    /* 0x00 */ ModelActor1D58* actor;
+    /* 0x04 */ void* anim;
+    /* 0x08 */ u8 _08[0xE - 0x8];
+    /* 0x0E */ u16 _0E;
+    /* 0x10 */ u8 _10[0x54 - 0x10];
+    /* 0x54 */ f32 _54;
+    /* 0x58 */ u8 _58;
+    /* 0x59 */ u8 _59;
+    /* 0x5A */ u8 _5A;
+    /* 0x5B */ u8 _5B;
+    /* 0x5C */ f32 _5C;
+    /* 0x60 */ f32 _60;
+    /* 0x64 */ u16 _64;
+    /* 0x66 */ u16 _66;
+    /* 0x68 */ s32 _68;
+} StadiumModel1D58;
 
 typedef struct StadiumObject1D58 {
     /* 0x00 */ Control control;
@@ -62,7 +128,7 @@ extern struct {
     /* 0x14 */ StadiumSort1D58* _14;
     /* 0x18 */ void (*_18)(void);
     /* 0x1C */ void (*_1C)(void);
-    /* 0x20 */ void* _20[4];
+    /* 0x20 */ LITObj* _20[4];
     /* 0x30 */ s32 _30;
     /* 0x34 */ s32* _34;
     /* 0x38 */ void* _38;
@@ -81,10 +147,46 @@ extern struct {
     /* 0x6D */ u8 _6D;
 } lbl_3_common_bss_350E4; // size: 0x70
 
+extern StadiumLights1D58 lbl_800F7478[14];
+extern AramEntry1D58 lbl_3_data_10ACC[21];
+extern void (*lbl_3_data_10AB0[7])(void* file);
 extern u8 lbl_3_data_11168[0x10];
+
+extern struct {
+    /* 0x0000 */ u8 _0000[0x8];
+    /* 0x0008 */ void* _0008;
+    /* 0x000C */ u8 _000C[0x3088 - 0xC];
+    /* 0x3088 */ u8 _3088;
+} lbl_8036E548;
+
+extern struct {
+    /* 0x000 */ u8 _000[0x715];
+    /* 0x715 */ s8 _715;
+} lbl_803C6CF8;
 
 extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_800ACFB0(void* data);
+extern void LITAlloc(LITObj** light);
+extern void LITInitAttn(LITObj* light, f32 a0, f32 a1, f32 a2, f32 k0, f32 k1, f32 k2);
+extern void LITInitPos(LITObj* light, f32 x, f32 y, f32 z);
+extern void LITInitColor(LITObj* light, GXColor color);
+extern void LITInitDir(LITObj* light, f32 nx, f32 ny, f32 nz);
+extern void LITXForm(LITObj* light, Mtx view);
+extern void fn_80023B90(LightData1D58* data, Light1D58* light);
+extern void fn_8001B214(void (*callback)(void));
+extern void fn_8001E474(void);
+extern void* ARAMTransfer(AramEntry1D58* entry, int arg1, int arg2, u32 aram);
+extern void fn_800B0A5C_insertQueue(void (*callback)(void), s32 arg1);
+extern void fn_800B0A14_removeQueue(void);
+extern void fn_8003A548(void (*callback)(void));
+extern struct {
+    /* 0x00 */ u8 _00[0x14];
+    /* 0x14 */ struct {
+        /* 0x00 */ u8 _00[0x40];
+        /* 0x40 */ Mtx _40;
+    }* _14;
+}* fn_800BF068(void);
+extern void fn_8003A8A0(struct DODisplayObj* obj, MtxPtr view, s32 arg2);
 
 f32 lbl_3_data_11178[5] = { 18.0f, 90.0f, 162.0f, 234.0f, 306.0f };
 
@@ -98,8 +200,33 @@ static u8 lbl_3_bss_1902;
 static u8 lbl_3_bss_1901;
 
 // .text:0x000B9FB8 size:0x198 mapped:0x806F904C
-void fn_3_B9FB8(void) {
-    return;
+void fn_3_B9FB8(s32 stadium, void* file) {
+    Light1D58 data;
+    LITObj* light;
+    s32 i;
+
+    fn_8001E474();
+    memset(&lbl_3_common_bss_350E4, 0, sizeof(lbl_3_common_bss_350E4));
+    fn_3_35E4(NULL);
+    if (file != NULL) {
+        for (i = 0; i < 4; i++) {
+            fn_80023B90(&lbl_800F7478[g_d_GameSettings._54].lights[i], &data);
+            LITAlloc(&light);
+            LITInitAttn(light, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+            LITInitPos(light, data.pos.x, data.pos.y, data.pos.z);
+            LITInitColor(light, data.color);
+            lbl_3_common_bss_350E4._20[i] = light;
+        }
+        lbl_3_common_bss_350E4._38 = file;
+        lbl_3_common_bss_350E4._08 = NULL;
+        lbl_3_common_bss_350E4._0C = NULL;
+        lbl_3_data_10AB0[stadium](file);
+        lbl_3_common_bss_350E4._14 = _OSAllocFromHeap(4, lbl_3_common_bss_350E4._30 * sizeof(StadiumSort1D58));
+        fn_8001B214(fn_3_B8298);
+        lbl_3_common_bss_350E4._66 = rand();
+        lbl_8036E548._3088 = 1;
+        lbl_3_bss_1901 = 0;
+    }
 }
 
 // .text:0x000B9D68 size:0x250 mapped:0x806F8DFC
@@ -109,12 +236,46 @@ void fn_3_B9D68(u8* types, s32 count, void** files, s32* indices) {
 
 // .text:0x000B9BB4 size:0x1B4 mapped:0x806F8C48
 s32 fn_3_B9BB4(s32 stadium) {
+    if (lbl_803C6CF8._715 == 1) {
+        switch (stadium) {
+        case 0:
+            lbl_8036E548._0008 = ARAMTransfer(&lbl_3_data_10ACC[0], 0, 0, 0);
+            break;
+        case 1:
+            lbl_8036E548._0008 = ARAMTransfer(&lbl_3_data_10ACC[1], 0, 0, 0);
+            break;
+        case 2:
+            lbl_8036E548._0008 = ARAMTransfer(&lbl_3_data_10ACC[2], 0, 0, 0);
+            break;
+        case 3:
+            lbl_8036E548._0008 = ARAMTransfer(&lbl_3_data_10ACC[3], 0, 0, 0);
+            break;
+        case 4:
+            lbl_8036E548._0008 = ARAMTransfer(&lbl_3_data_10ACC[4], 0, 0, 0);
+            break;
+        case 5:
+            lbl_8036E548._0008 = ARAMTransfer(&lbl_3_data_10ACC[5], 0, 0, 0);
+            break;
+        case 6:
+            lbl_8036E548._0008 = ARAMTransfer(&lbl_3_data_10ACC[6], 0, 0, 0);
+            break;
+        default:
+            return -1;
+        }
+        fn_800B0A5C_insertQueue(fn_3_B99E4, 0);
+        lbl_3_common_bss_350E4._6A = 1;
+        return 1;
+    }
     return 0;
 }
 
 // .text:0x000B99E4 size:0x1D0 mapped:0x806F8A78
 void fn_3_B99E4(void) {
-    return;
+    if (lbl_803C6CF8._715 == 1) {
+        lbl_3_common_bss_350E4._6A = 0;
+        fn_3_B9FB8(g_d_GameSettings.StadiumID, lbl_8036E548._0008);
+        fn_800B0A14_removeQueue();
+    }
 }
 
 // .text:0x000B98E8 size:0xFC mapped:0x806F897C
@@ -321,7 +482,22 @@ void fn_3_B8414(Vec* min, Vec* max) {
 
 // .text:0x000B8298 size:0x17C mapped:0x806F732C
 void fn_3_B8298(void) {
-    return;
+    StadiumObject1D58* obj;
+    u32 i;
+
+    switch (g_d_GameSettings.StadiumID) {
+    case 3:
+        fn_8003A548(fn_3_B80D0);
+        break;
+    }
+    for (i = 0; i < lbl_3_common_bss_350E4._30; i++) {
+        obj = &lbl_3_common_bss_350E4._00[i];
+        if (obj->_90_7 && obj->_74 != NULL && obj->_9A != 0) {
+            fn_3_B828C(obj);
+            fn_3_B8184(obj->_74, fn_800BF068()->_14->_40);
+        }
+    }
+    fn_8003A548(NULL);
 }
 
 // .text:0x000B828C size:0xC mapped:0x806F7320
@@ -335,8 +511,33 @@ StadiumObject1D58* fn_3_B827C(void) {
 }
 
 // .text:0x000B8184 size:0xF8 mapped:0x806F7218
-void fn_3_B8184(void) {
-    return;
+void fn_3_B8184(StadiumModel1D58* model, Mtx view) {
+    Mtx mv;
+    Mtx m;
+    ModelActor1D58* actor;
+    ModelBone1D58* bone;
+
+    CTRLBuildMatrix(&lbl_3_bss_190C->control, m);
+    if (m[1][3] > 0.0f && g_d_GameSettings.StadiumID == 1) {
+        return;
+    }
+    PSMTXConcat(view, m, mv);
+    actor = model->actor;
+    bone = actor->drawHead;
+    if (actor->skinObject != NULL) {
+        if (actor->_7C != NULL) {
+            fn_8003A8A0(actor->skinObject, mv, 1);
+        } else {
+            DOVARenderSkin(actor->skinObject, mv, actor->skinMtxArray, actor->skinInvTransposeMtxArray, 0, NULL);
+        }
+    }
+    while (bone != NULL) {
+        if (bone->_014 != NULL) {
+            DOSetWorldMatrix(bone->_014, bone->_0EC);
+            fn_8003A8A0(bone->_014, mv, 0);
+        }
+        bone = bone->_100;
+    }
 }
 
 // .text:0x000B80D0 size:0xB4 mapped:0x806F7164

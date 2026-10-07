@@ -8,10 +8,11 @@
 struct _CollisionStruct;
 struct StadiumObjectCollision;
 struct StadiumObject1D58;
+struct StadiumModel1D58;
 
 s32 fn_3_B7FC8(u32 id, s32 arg1);
 void fn_3_B80D0(void);
-void fn_3_B8184(void);
+void fn_3_B8184(struct StadiumModel1D58* model, Mtx view);
 struct StadiumObject1D58* fn_3_B827C(void);
 void fn_3_B828C(struct StadiumObject1D58* obj);
 void fn_3_B8298(void);
@@ -44,6 +45,6 @@ void fn_3_B98E8(void);
 void fn_3_B99E4(void);
 s32 fn_3_B9BB4(s32 stadium);
 void fn_3_B9D68(u8* types, s32 count, void** files, s32* indices);
-void fn_3_B9FB8(void);
+void fn_3_B9FB8(s32 stadium, void* file);
 
 #endif // !__GAME_rep_1D58_H_
