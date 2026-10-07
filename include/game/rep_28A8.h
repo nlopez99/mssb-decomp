@@ -3,8 +3,10 @@
 
 #include "mssbTypes.h"
 
+extern s16 lbl_3_data_18C48[10];
+
 void fn_3_D9EA0(void);
-void fn_3_DA640(void);
+void fn_3_DA640(s32 count, s32 idx);
 void fn_3_DA834(void);
 void fn_3_DC240(void);
 void fn_3_DC380(void);
@@ -22,7 +24,7 @@ void fn_3_DD9A4(void);
 void fn_3_DDD60(void);
 void fn_3_DDF1C(void);
 void fn_3_DDFA0(void);
-void fn_3_DE308(void);
+void fn_3_DE308(int type);
 void fn_3_DE4FC(void);
 void fn_3_DE610(void);
 void fn_3_DE744(void);

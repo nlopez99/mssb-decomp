@@ -1810,7 +1810,7 @@ typedef struct _MiniGameStruct {
     /*0x19C0*/ s16 _19C0;
     /*0x19C2*/ s16 _19C2;
     /*0x19C4*/ s16 _19C4;
-    /*0x19C6*/ u8 _19C6;
+    /*0x19C6*/ s8 _19C6;
     /*0x19C7*/ u8 _19C7;
     /*0x19C8*/ u8 maybeTFCollisionResultState;
     /*0x19C9*/ E(u8, TOY_FIELD_RESULT) toyFieldBallStateResult;
