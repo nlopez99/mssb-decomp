@@ -11,6 +11,8 @@
 #include "game/rep_D0.h"
 #include "game/m_sound.h"
 #include "game/rep_1D58.h"
+#include "game/rep_1C0.h"
+#include "game/rep_4138.h"
 #include "math.h"
 #include "string.h"
 
@@ -150,8 +152,6 @@ extern void fn_80025C58(void* anim, void* model);
 extern void fn_80025DDC(void* anim);
 extern void fn_80025FFC(void* anim, StaC0Anim* state);
 extern void fn_80025EEC(StaC0Anim* state, s32, s32);
-extern void fn_3_35E4(void (*callback)(void));
-extern void fn_3_16E338(u16* arg0, s32 arg1);
 
 extern void AnimateActorBones(void* bones);
 extern s32 fn_8005268C(void);
