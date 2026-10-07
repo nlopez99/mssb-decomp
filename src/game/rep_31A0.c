@@ -1382,7 +1382,110 @@ void fn_3_10B8D0(void) {
 
 // .text:0x0010B27C size:0x654 mapped:0x8074A310
 void fn_3_10B27C(void) {
-    return;
+    int mode;
+    int k;
+
+    if (g_GameLogic.FrameCountOfCurrentAtBat_Copy == 1) {
+        g_Minigame.battingHandedness[7] = 0;
+        g_Minigame.battingHandedness[8] = 0;
+        g_Minigame._1A20 = 0;
+        g_Minigame._1A22 = 0;
+        if (g_Minigame.multiPlayerInd != 0) {
+            g_Minigame._1A20 = 2;
+        } else if (g_Minigame.soloMinigameDifficulty == 3) {
+            g_Minigame._1A20 = 1;
+        }
+        mode = g_Minigame.GameMode_MiniGame;
+        if (g_GameLogic.gameStatus == 0x28) {
+            mode = 7;
+        }
+        g_Minigame._1A21 = 0;
+        for (k = 0; k < 5; k++) {
+            if (lbl_3_data_B060[mode][g_Minigame._1A20][k] >= 0) {
+                g_Minigame._1A21++;
+            }
+        }
+    }
+    if (lbl_8037169C._12 == 0) {
+        return;
+    }
+    if (g_Minigame.battingHandedness[8] != 0) {
+        g_Minigame.battingHandedness[8]--;
+    } else if (g_Minigame.battingHandedness[7] == 0) {
+        if (fn_3_6C938(1, 0x200)) {
+            if (g_Minigame._1A3C == 0 || g_GameLogic.gameStatus == 0x28) {
+                g_Minigame.battingHandedness[6] = 2;
+                sndFXStartEx(0x1B9, lbl_800EFBA4[2], 0x3F, 0);
+            }
+        } else if ((g_GameLogic._125 >= 8 || g_GameLogic.gameStatus == 0x28) && fn_3_6C938(1, 0x100)) {
+            if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+                if (g_Minigame._1A23 == 0) {
+                    g_Minigame.battingHandedness[6] = 1;
+                    sndFXStartEx(0x1B8, lbl_800EFBA4[1], 0x3F, 0);
+                }
+            } else {
+                g_Minigame.battingHandedness[6] = 1;
+                sndFXStartEx(0x1B8, lbl_800EFBA4[1], 0x3F, 0);
+            }
+        } else if (fn_3_6C938(2, 0x20)) {
+            g_Minigame.battingHandedness[7] = 1;
+            g_Minigame._1A22 = 0;
+            g_Minigame.battingHandedness[8] = 30;
+            sndFXStartEx(0x1B8, lbl_800EFBA4[1], 0x3F, 0);
+        } else if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD && g_d_GameSettings.exhibitionMatchInd != 0) {
+            if (fn_3_6C938(2, 8) && g_Minigame._1A23 == 1) {
+                g_Minigame._1A23 = 0;
+                sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+            } else if (fn_3_6C938(2, 4) && g_Minigame._1A23 == 0) {
+                g_Minigame._1A23 = 1;
+                sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+            } else if (g_Minigame._1A23 == 1) {
+                if (fn_3_6C938(2, 1)) {
+                    if (g_Minigame._1A24[0] == 0) {
+                        g_Minigame._1A24[0] = 4;
+                    } else {
+                        g_Minigame._1A24[0]--;
+                    }
+                    sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+                } else if (fn_3_6C938(2, 2)) {
+                    if (g_Minigame._1A24[0] == 4) {
+                        g_Minigame._1A24[0] = 0;
+                    } else {
+                        g_Minigame._1A24[0]++;
+                    }
+                    sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+                }
+            }
+        }
+    } else if ((g_GameLogic._125 >= 8 || g_GameLogic.gameStatus == 0x28) && fn_3_6C938(0, 0x100)) {
+        g_Minigame.battingHandedness[6] = 1;
+        sndFXStartEx(0x1B8, lbl_800EFBA4[1], 0x3F, 0);
+    } else if (fn_3_6C938(2, 0x220)) {
+        g_Minigame.battingHandedness[7] = 0;
+        g_Minigame._1A22 = 0;
+        g_Minigame.battingHandedness[8] = 30;
+        sndFXStartEx(0x1B9, lbl_800EFBA4[2], 0x3F, 0);
+    } else if (g_Minigame._1A21 > 1) {
+        if (fn_3_6C938(2, 2)) {
+            if (g_Minigame.battingHandedness[7] == g_Minigame._1A21) {
+                g_Minigame.battingHandedness[7] = 1;
+            } else {
+                g_Minigame.battingHandedness[7]++;
+            }
+            g_Minigame._1A22 = 0;
+            g_Minigame.battingHandedness[8] = 20;
+            sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+        } else if (fn_3_6C938(2, 1)) {
+            if (g_Minigame.battingHandedness[7] == 1) {
+                g_Minigame.battingHandedness[7] = g_Minigame._1A21;
+            } else {
+                g_Minigame.battingHandedness[7]--;
+            }
+            g_Minigame._1A22 = 1;
+            g_Minigame.battingHandedness[8] = 20;
+            sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+        }
+    }
 }
 
 // .text:0x0010B200 size:0x7C mapped:0x8074A294
