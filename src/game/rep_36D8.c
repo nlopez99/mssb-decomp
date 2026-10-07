@@ -754,18 +754,18 @@ void fn_3_13F484(void) {
 }
 
 // .text:0x0013EC44 size:0x840 mapped:0x8077DCD8
-// 97.64%: base and pick are in r22/r23 the other way round, n is reset with li r3,0 instead of
-// mr r3,r6 before the first free-base loop, and the zero stores of the state-4 path use r3.
+// 99.56%: at the top of the retry loop the target loads 0 twice (li r3 for i, li r9 for the
+// stores and the free[] offset); here r9 copies i's 0, so the state-4 zero stores use r3.
 void fn_3_13EC44(int slot) {
     int occupied[4];
     int free[4];
     int chomped[4];
     int i;
     int j;
-    int n;
     int count;
     int pick;
     int base;
+    int coin;
     s8 chomp;
 
     for (i = 0; i < 6; i++) {
@@ -778,8 +778,8 @@ void fn_3_13EC44(int slot) {
         count = lbl_3_data_21884[2][0];
         g_Minigame._1B2E++;
     } else if (i < 6) {
-        g_Minigame._1B1A[slot] = 2;
         count = lbl_3_data_21884[0][0];
+        g_Minigame._1B1A[slot] = 2;
     } else {
         if (g_Minigame._17C0 < 1800) {
             j = 0;
@@ -789,12 +789,12 @@ void fn_3_13EC44(int slot) {
             j = 2;
         }
         j = RandomIndexFromWeights(lbl_3_data_2187C[j], 2);
-        g_Minigame._1B1A[slot] = j + 2;
         count = lbl_3_data_21884[j][0];
+        g_Minigame._1B1A[slot] = j + 2;
     }
 
     for (;;) {
-        n = 0;
+        i = 0;
         if (g_Minigame._1B1A[slot] == 4) {
             for (j = 0; j < 4; j++) {
                 occupied[j] = 0;
@@ -818,23 +818,23 @@ void fn_3_13EC44(int slot) {
                 occupied[chomp]++;
                 chomped[chomp]++;
             }
-            for (j = 0, n = 0; j < 4; j++) {
+            for (j = 0, i = 0; j < 4; j++) {
                 if (occupied[j] == 0) {
-                    free[n] = j;
-                    n++;
+                    free[i] = j;
+                    i++;
                 }
             }
-            if (n != 0) {
-                base = free[random_fn_3_9EE24(n)] * 10;
+            if (i != 0) {
+                base = free[random_fn_3_9EE24(i)] * 10;
                 break;
             }
-            for (j = 0, n = 0; j < 4; j++) {
+            for (j = 0, i = 0; j < 4; j++) {
                 if (chomped[j] == 0) {
-                    free[n] = j;
-                    n++;
+                    free[i] = j;
+                    i++;
                 }
             }
-            base = free[random_fn_3_9EE24(n)] * 10;
+            base = free[random_fn_3_9EE24(i)] * 10;
             break;
         }
         for (j = 0; j < 4; j++) {
@@ -848,42 +848,44 @@ void fn_3_13EC44(int slot) {
                 } else {
                     occupied[j] = 1;
                     if (g_Minigame._1B1A[slot] != 3) {
-                        free[n] = j;
-                        n++;
+                        free[i] = j;
+                        i++;
                     }
                 }
             } else {
-                free[n] = j;
-                n++;
+                free[i] = j;
+                i++;
             }
         }
         if (g_Minigame._1B1A[slot] == 3) {
-            if (n == 0) {
+            if (i == 0) {
                 count = lbl_3_data_21884[0][0];
                 g_Minigame._1B1A[slot] = 2;
                 continue;
             }
-            pick = free[random_fn_3_9EE24(n)];
-            base = random_fn_3_9EE24(6) + pick * 10;
+            pick = free[random_fn_3_9EE24(i)];
+            base = random_fn_3_9EE24(6);
+            base += pick * 10;
             base += 2;
             break;
         }
-        pick = free[random_fn_3_9EE24(n)];
+        pick = free[random_fn_3_9EE24(i)];
         if (occupied[pick] == 0) {
-            base = random_fn_3_9EE24(8) + pick * 10;
+            base = random_fn_3_9EE24(8);
+            base += pick * 10;
             base += 1;
             break;
         }
         base = pick * 10;
         pick = g_Minigame._1B20[g_Minigame._1B26[pick][0]] % 10;
-        n = random_fn_3_9EE24(8) + 1;
+        i = random_fn_3_9EE24(8) + 1;
         for (j = 0; j < 10; j++) {
             if (pick != j) {
-                if (n == 0) {
+                if (i == 0) {
                     base += j;
                     break;
                 }
-                n--;
+                i--;
             }
         }
         break;
@@ -896,15 +898,14 @@ void fn_3_13EC44(int slot) {
     }
     g_Minigame._1B20[slot] = base;
     base *= 10;
-    pick = 0;
-    for (i = 0; i < count; i++) {
-        for (; pick < 15; pick++) {
-            if (g_Minigame.wallBall_coinsVisibleInd[pick] == 0) {
-                g_Minigame.wallBall_coinsVisibleInd[pick] = slot + 1;
-                g_Minigame._1630[pick] = base / 100.0f;
-                g_Minigame.wallBall_coinsVisibleFrameCounter[pick] = 0;
-                fn_3_7FED4(&g_Minigame.wallBall_coinCoordinates[pick], g_Minigame._1630[pick], base % 100 / 100.0f);
-                fn_3_1541C4(pick, g_Minigame._1B1A[slot], &g_Minigame.wallBall_coinCoordinates[pick]);
+    for (i = 0, coin = 0; i < count; i++) {
+        for (; coin < 15; coin++) {
+            if (g_Minigame.wallBall_coinsVisibleInd[coin] == 0) {
+                g_Minigame.wallBall_coinsVisibleInd[coin] = slot + 1;
+                g_Minigame._1630[coin] = base / 100.0f;
+                g_Minigame.wallBall_coinsVisibleFrameCounter[coin] = 0;
+                fn_3_7FED4(&g_Minigame.wallBall_coinCoordinates[coin], g_Minigame._1630[coin], base % 100 / 100.0f);
+                fn_3_1541C4(coin, g_Minigame._1B1A[slot], &g_Minigame.wallBall_coinCoordinates[coin]);
                 break;
             }
         }
