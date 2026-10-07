@@ -428,6 +428,9 @@ void fn_3_DD9A4(void) {
 }
 
 // .text:0x000DD3FC size:0x5A8 mapped:0x8071C490
+// The target reaches lbl_3_data_188E8 to lbl_3_data_18C48 from one pool base, so that data
+// belongs in this file (outside the unit's .data split). Defined here, the code is identical
+// and only the pool base's relocation name differs.
 void fn_3_DD3FC(void) {
     s32 i;
 
@@ -977,6 +980,9 @@ void fn_3_DC240(void) {
 }
 
 // .text:0x000DA834 size:0x1A0C mapped:0x807198C8
+// The target reaches lbl_3_data_188E8 to lbl_3_data_18C48 from one pool base, so that data
+// belongs in this file (outside the unit's .data split). Defined here, the code is identical
+// and only the pool base's relocation name differs.
 void fn_3_DA834(void) {
     s32 i;
     s32 j;
@@ -1198,6 +1204,9 @@ void fn_3_DA640(s32 count, s32 idx) {
 }
 
 // .text:0x000D9EA0 size:0x7A0 mapped:0x80718F34
+// The target reaches lbl_3_data_188E8 to lbl_3_data_18C48 from one pool base, so that data
+// belongs in this file (outside the unit's .data split). Defined here, the code is identical
+// and only the pool base's relocation name differs.
 void fn_3_D9EA0(void) {
     s32 i;
     Unk28A8Fielder* fielder;
