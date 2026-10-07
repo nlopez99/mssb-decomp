@@ -757,8 +757,6 @@ void fn_3_685F0(void) {
 }
 
 // .text:0x00067EF0 size:0x700 mapped:0x806A6F84
-// 99.91%, registers only: in the last colors[0] |= the target moves (u8)(first - fade) to r6 and
-// loads colors2[2] into r0; this build keeps the value in r0 and loads colors2[2] into r6.
 s32 fn_3_67EF0(UnkRingEA0* ring, s32 count, Vec* pos, u32* colors, u32 color, Vec* pos2, u32* colors2, Vec* dir,
                f32 width) {
     Mtx m;
@@ -879,7 +877,8 @@ s32 fn_3_67EF0(UnkRingEA0* ring, s32 count, Vec* pos, u32* colors, u32 color, Ve
     colors[0] &= 0xFFFFFF00;
     colors2[1] |= (u8)fade;
     colors2[2] |= (u8)fade;
-    colors[0] |= (u8)(first - fade);
+    first = first - fade;
+    colors[0] |= first;
     memset(&pos[n * 2], 0, (count - n) * (2 * sizeof(Vec)));
     memset(&colors[n], 0, (count - n) * sizeof(u32));
     DCStoreRangeNoSync(pos, count * 2 * sizeof(Vec));
