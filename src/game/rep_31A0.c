@@ -31,7 +31,8 @@ struct UnkStats3448 {
     /* 0x12 */ u8 _12;
     /* 0x13 */ u8 _13;
     /* 0x14 */ u8 _14;
-};
+    /* 0x15 */ u8 _15;
+}; // size: 0x16
 
 // Written by fn_3_1079C8
 typedef struct UnkRank31A0 {
@@ -56,6 +57,8 @@ extern struct {
     /* 0x000 */ struct UnkRecord3448 _000[5];
     /* 0x028 */ struct UnkRecord3448 _028[6][5];
     /* 0x118 */ struct UnkRecord3448 _118[5];
+    /* 0x140 */ struct UnkStats3448 _140[32];
+    /* 0x400 */ s8 _400[1];
 } lbl_803616CC;
 
 extern struct {
@@ -145,6 +148,12 @@ extern struct {
 } lbl_80366158;
 
 extern u8 lbl_800EFBA4[0x10];
+
+extern struct {
+    /* 0x0 */ u8 _0[2];
+    /* 0x2 */ u8 _2;
+    /* 0x3 */ u8 _3[3];
+} lbl_800E8558[];
 extern s16 lbl_80109410[8];
 extern s16 lbl_3_data_607C[16];
 extern AramEntry31A0 lbl_3_data_20FDC;
@@ -1704,7 +1713,47 @@ u32 fn_3_109CE8(struct UnkRecord3448* rec) {
 
 // .text:0x0010952C size:0x7BC mapped:0x807485C0
 void fn_3_10952C(void) {
-    return;
+    struct UnkRecord3448 rec;
+    struct UnkRecord3448* table;
+    struct UnkStats3448 stats;
+    struct UnkStats3448* best;
+    u32 rank;
+    u32 i;
+    int slot;
+
+    g_Minigame._1E03 = 5;
+    if (g_Minigame._1907 == 1 &&
+        (g_Minigame._1A3C != 0 ||
+         (g_Minigame.GameMode_MiniGame != 4 && g_Minigame.GameMode_MiniGame != 5 && g_Minigame.GameMode_MiniGame != 6) ||
+         g_Minigame.minigameControlStruct._1C[g_Minigame._1908] == 1)) {
+        fn_3_109DE0(&rec);
+        rank = fn_3_109CE8(&rec);
+        g_Minigame._1E03 = rank;
+        if (rank < 5) {
+            table = fn_3_109D88();
+            for (i = 4; i > rank; i--) {
+                memcpy(&table[i], &table[i - 1], sizeof(struct UnkRecord3448));
+            }
+            memcpy(&table[rank], &rec, sizeof(struct UnkRecord3448));
+            g_Minigame._1A43 = rank + 1;
+        }
+        if (g_Minigame._1A3C != 0) {
+            fn_3_10754C(&stats);
+            slot = lbl_800E8558[stats._14]._2;
+            best = &lbl_803616CC._140[slot];
+            if (fn_8006C13C(&stats) > fn_8006C13C(best)) {
+                fn_3_10754C(best);
+                g_Minigame._1A46[0] = 1;
+            } else if (fn_8006C13C(&stats) == fn_8006C13C(best) && stats._12 < best->_12) {
+                fn_3_10754C(best);
+                g_Minigame._1A46[0] = 1;
+            }
+            if (3 - lbl_803616CC._400[slot] > stats._12) {
+                lbl_803616CC._400[slot] = 3 - stats._12;
+                g_Minigame._1A46[0] = 1;
+            }
+        }
+    }
 }
 
 // .text:0x00109254 size:0x2D8 mapped:0x807482E8
