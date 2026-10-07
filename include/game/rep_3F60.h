@@ -13,5 +13,7 @@ void fn_3_168A6C(struct UnkDraw3F60* draw);
 void fn_3_168CD8(struct UnkPlayer3F60* player, u16 arg1, s32 arg2, f32 frame);
 void fn_3_168DFC(void);
 void fn_3_168FA0(s32 idx, BOOL arg1);
+void fn_3_1690C0(void);
+void fn_3_169150(void);
 
 #endif // !__GAME_rep_3F60_H_

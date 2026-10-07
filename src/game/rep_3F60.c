@@ -4,6 +4,7 @@
 #include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
+#include "string.h"
 
 typedef struct {
     /* 0x00 */ u8 _00[0xEC];
@@ -100,23 +101,6 @@ extern struct {
 extern u8 lbl_803CBBC0;
 extern UnkTask3F60* lbl_803CC1B8;
 
-// This unit's .data (0x285A8-0x28928) lies outside its splits.txt ranges
-extern s32 lbl_3_data_285A8[54];
-extern struct {
-    /* 0x00 */ s32 _00;
-    /* 0x04 */ s32 _04[4][3];
-    /* 0x34 */ s32 _34;
-    /* 0x38 */ s32 _38;
-    /* 0x3C */ s32 _3C;
-    /* 0x40 */ s32 _40;
-    /* 0x44 */ s32 _44;
-    /* 0x48 */ UnkDraw3F60 _48[9][2];
-} lbl_3_data_28680;
-extern u8 lbl_3_data_28908[9];
-extern u8 lbl_3_data_28914[9];
-extern u16 lbl_3_data_2891E;
-extern u16 lbl_3_data_28920[2];
-
 extern s32 fn_8005268C(void);
 extern camera_803c639c_s* fn_80052734(s32);
 extern void fn_80024DB0(UnkAnim3F60*);
@@ -130,6 +114,78 @@ extern void fn_800BDA24(UnkModel3F60*);
 extern void fn_800BDA94(UnkModel3F60*, Mtx);
 // C3/actor.h gives the SDK's five-argument prototype; this game's version takes a second float
 extern void ACTSetAnimation(UnkActor3F60*, void*, char*, u16, f32, f32);
+
+static s32 lbl_3_data_285A8[54] = {
+    -250000, -250000, -250000, -200000, -200000, -200000, -250000, -240000, -240000,
+    -250000, -200000, -150000, -200000, -200000, -250000, -350000, -200000, -250000,
+    -200000, -200000, -250000, -200000, -200000, -200000, -180000, -180000, -180000,
+    -250000, -200000, -200000, -200000, -200000, -200000, -250000, -250000, -250000,
+    -250000, -180000, -280000, -200000, -200000, -200000, -250000, -250000, -200000,
+    -200000, -200000, -200000, -250000, -250000, -250000, -250000, -250000, -250000,
+};
+
+static struct {
+    /* 0x00 */ s32 _00;
+    /* 0x04 */ s32 _04[4][3];
+    /* 0x34 */ s32 _34;
+    /* 0x38 */ s32 _38;
+    /* 0x3C */ s32 _3C;
+    /* 0x40 */ s32 _40;
+    /* 0x44 */ s32 _44;
+} lbl_3_data_28680 = {
+    0,
+    {
+        { 50000, 0, 0 },
+        { 50000, 0, 0 },
+        { 50000, 0, 0 },
+        { 0, 0, 0 },
+    },
+    300000,
+    100000,
+    300000,
+    100000,
+    300000,
+};
+
+static UnkDraw3F60 lbl_3_data_286C8[9][2] = {
+    { { 0, fn_3_168A6C }, { 0, fn_3_168A6C } },
+    { { 0, fn_3_168A6C }, { 0, fn_3_168A6C } },
+    { { 0, fn_3_168A6C }, { 0, fn_3_168A6C } },
+    { { 0, fn_3_168A6C }, { 0, fn_3_168A6C } },
+    { { 0, fn_3_168A6C }, { 0, fn_3_168A6C } },
+    { { 0, fn_3_168A6C }, { 0, fn_3_168A6C } },
+    { { 0, fn_3_168A6C }, { 0, fn_3_168A6C } },
+    { { 0, fn_3_168A6C }, { 0, fn_3_168A6C } },
+    { { 0, fn_3_168A6C }, { 0, fn_3_168A6C } },
+};
+
+// The explicit initializers keep these in .data; without them MWCC puts them in .bss
+static u8 lbl_3_data_28908[9] = { 0 };
+static u8 lbl_3_data_28914[9] = { 0 };
+static u16 lbl_3_data_2891E = 9;
+static u16 lbl_3_data_28920 = 9;
+static u16 lbl_3_data_28922 = 9;
+
+// .text:0x00169150 size:0x2C mapped:0x807A81E4
+void fn_3_169150(void) {
+    fn_800B0A5C_insertQueue(fn_3_1690C0, 0);
+}
+
+// .text:0x001690C0 size:0x90 mapped:0x807A8154
+void fn_3_1690C0(void) {
+    int i;
+
+    memset(lbl_3_data_28908, 0, sizeof(lbl_3_data_28908));
+    if (g_d_GameSettings._55 != 0 || lbl_3_common_bss_35154._479 != 0) {
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    i = 8;
+    do {
+        lbl_3_data_28914[i] &= 0xFD;
+    } while (i--);
+    fn_800B0A14_removeQueue();
+}
 
 // .text:0x00168FA0 size:0x120 mapped:0x807A8034
 void fn_3_168FA0(s32 idx, BOOL arg1) {
@@ -154,9 +210,6 @@ void fn_3_168FA0(s32 idx, BOOL arg1) {
 }
 
 // .text:0x00168DFC size:0x1A4 mapped:0x807A7E90
-// Differs only in data addressing: the original reads 285A8, 28680 and 28908-28922 from one
-// .data pool base, as MWCC does for a file's statics. Matches once that data is defined here
-// as statics in address order (needs this unit's .data split).
 void fn_3_168DFC(void) {
     UnkTask3F60* task = lbl_803CC1B8;
     UnkDraw3F60* draw;
@@ -172,7 +225,7 @@ void fn_3_168DFC(void) {
     }
     lbl_3_data_28908[task->_29] = 1;
     player = lbl_8036E548._2C50[task->_29];
-    draw = &lbl_3_data_28680._48[task->_29][lbl_803CBBC0];
+    draw = &lbl_3_data_286C8[task->_29][lbl_803CBBC0];
     draw->_04 = fn_3_168A6C;
     draw->_18 = task->_24;
     draw->_08.x = task->_14.x;
@@ -201,7 +254,7 @@ void fn_3_168CD8(UnkPlayer3F60* player, u16 arg1, s32 arg2, f32 frame) {
         task->_29 = idx;
         task->_24 = 0;
         task->_20 = (f32)lbl_3_data_28680._3C / 100000.0f;
-        getAnimRelatedCoordinates(idx, lbl_3_data_28920[0], &task->_14);
+        getAnimRelatedCoordinates(idx, lbl_3_data_28920, &task->_14);
         task->_2A = 2;
         task->_28 = 4;
         task->_2B = 7;
@@ -269,9 +322,6 @@ void fn_3_16892C(UnkPlayer3F60* player, u16 arg1, s32 arg2, f32 frame) {
 }
 
 // .text:0x00168704 size:0x228 mapped:0x807A7798
-// Differs only in data addressing: the original reads 285A8, 28680 and 28908-28922 from one
-// .data pool base, as MWCC does for a file's statics. Matches once that data is defined here
-// as statics in address order (needs this unit's .data split).
 void fn_3_168704(void) {
     UnkTask3F60* task = lbl_803CC1B8;
     UnkDraw3F60* draw;
@@ -295,10 +345,10 @@ void fn_3_168704(void) {
     }
     lbl_3_data_28908[task->_29] = 1;
     player = lbl_8036E548._2C50[task->_29];
-    draw = &lbl_3_data_28680._48[task->_29][lbl_803CBBC0];
+    draw = &lbl_3_data_286C8[task->_29][lbl_803CBBC0];
     draw->_04 = fn_3_168414;
     draw->_18 = task->_24;
-    getAnimRelatedCoordinates(task->_29, lbl_3_data_28920[1], &draw->_08);
+    getAnimRelatedCoordinates(task->_29, lbl_3_data_28922, &draw->_08);
     draw->_08.y += (f32)lbl_3_data_285A8[player->_252] / 100000.0f;
     draw->_14 = (f32)lbl_3_data_28680._34 / 100000.0f;
     draw->_1C = task->_28;

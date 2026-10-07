@@ -37,6 +37,12 @@ typedef struct {
 } UnkOffset3CE0; // size: 0x10
 
 typedef struct {
+    /* 0x00 */ u8 _00[0x10];
+    /* 0x10 */ s16 _10;
+    /* 0x12 */ u16 _12;
+} UnkTask3CE0;
+
+typedef struct {
     /* 0x000 */ u8 _000[0x34];
     /* 0x034 */ Vec pos;
     /* 0x040 */ u8 _040[0x252 - 0x40];
@@ -51,9 +57,13 @@ extern struct {
     }* _004;
     /* 0x008 */ u8 _008[0x468 - 0x8];
     /* 0x468 */ u32 _468;
-    /* 0x46C */ u8 _46C[0x471 - 0x46C];
+    /* 0x46C */ u8 _46C[0x470 - 0x46C];
+    /* 0x470 */ u8 _470;
     /* 0x471 */ u8 _471;
     /* 0x472 */ u8 _472;
+    /* 0x473 */ u8 _473[4];
+    /* 0x477 */ u8 _477[0x479 - 0x477];
+    /* 0x479 */ u8 _479;
 } lbl_3_common_bss_35154;
 
 extern struct {
@@ -62,6 +72,7 @@ extern struct {
 } lbl_8036E548;
 
 extern u8 lbl_803CBBC0;
+extern UnkTask3CE0* lbl_803CC1B8;
 
 extern void gOz_GXSetTexture(s32, s32, s32);
 extern void SetDisplayStateTexture(void*, s32, s32);
@@ -69,56 +80,64 @@ extern s32 fn_8005268C(void);
 extern void fn_80052694(s32);
 extern camera_803c639c_s* fn_80052734(s32);
 extern void fn_800A7D4C(s32, void*);
+extern void fn_800B0A14_removeQueue(void);
+extern UnkTask3CE0* fn_800B0A5C_insertQueue(void (*)(void), s32);
 
-// This unit's .data (0x27EC0-0x281F0) lies outside its splits.txt ranges, and the
-// original reaches it as statics from one pool base, so these externs cannot match
-extern s32 lbl_3_data_27EC0[3][2];
-extern u8 lbl_3_data_27ED8[NUM_CHOOSABLE_CHARACTERS];
-extern struct {
+static s32 lbl_3_data_27EC0[3][2] = {
+    { 15000, 90000 },
+    { 20000, 129999 },
+    { 30000, 180000 },
+};
+static u8 lbl_3_data_27ED8[NUM_CHOOSABLE_CHARACTERS] = {
+    1, 1, 2, 1, 1, 1, 1, 0, 0, 2, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 2, 2, 2, 0, 0, 0,
+    1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1,
+};
+static struct {
     /* 0x00 */ s32 _00;
     /* 0x04 */ s32 _04;
     /* 0x08 */ UnkOffset3CE0 _08[1];
     /* 0x18 */ UnkOffset3CE0 _18[2];
     /* 0x38 */ UnkOffset3CE0 _38[3];
     /* 0x68 */ s32 _68;
-} lbl_3_data_27F10;
-extern UnkDraw3CE0 lbl_3_data_27F7C[2];
-extern Mtx44 lbl_3_data_28104;
-extern u8 lbl_3_data_28160[0x20];
-extern f32 lbl_3_data_28180[4][3];
-extern f32 lbl_3_data_281C0[4][3];
-
-// fn_3_15F874 lies just below this unit's .text range in splits.txt, but the target
-// inlines it twice into fn_3_15FF28, so it is defined here and kept out of the object
-static inline void fn_3_15F874(BOOL arg0) {
-    Mtx mtx;
-
-    GXSetProjection(lbl_3_data_28104, GX_ORTHOGRAPHIC);
-    PSMTXIdentity(mtx);
-    GXLoadPosMtxImm(mtx, GX_PNMTX0);
-    GXSetCurrentMtx(GX_PNMTX0);
-    GXSetColorUpdate(GX_FALSE);
-    GXSetAlphaUpdate(GX_FALSE);
-    GXSetZMode(GX_TRUE, GX_ALWAYS, GX_TRUE);
-    gOz_GXSetTexture(4, 0, 0);
-    GXClearVtxDesc();
-    GXSetVtxDesc(GX_VA_POS, GX_INDEX8);
-    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
-    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
-    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA4, 0);
-    if (arg0) {
-        GXSetArray(GX_VA_POS, lbl_3_data_281C0, sizeof(lbl_3_data_281C0[0]));
-    } else {
-        GXSetArray(GX_VA_POS, lbl_3_data_28180, sizeof(lbl_3_data_28180[0]));
-    }
-    GXCallDisplayList(lbl_3_data_28160, sizeof(lbl_3_data_28160));
-    GXSetColorUpdate(GX_TRUE);
-    GXSetAlphaUpdate(GX_TRUE);
-}
+} lbl_3_data_27F10 = {
+    64,
+    16,
+    { { 0, 0, 0xFFFF0080, 0xFFFFC818 } },
+    { { -200000, 0, 0xFFFF0080, 0xFFFFC818 }, { 200000, 0, 0xFFFF0080, 0xFFFFC818 } },
+    {
+        { 0, 0, 0xFFFF0080, 0xFFFFC818 },
+        { -300000, 0, 0xFFFF0080, 0xFFFFC818 },
+        { 300000, 0, 0xFFFF0080, 0xFFFFC818 },
+    },
+    900000,
+};
+static UnkDraw3CE0 lbl_3_data_27F7C[2] = {
+    { 0, fn_3_15FF28 },
+    { 0, fn_3_15FF28 },
+};
+static Mtx44 lbl_3_data_28104 = {
+    { 2.0f / 640.0f, 0.0f, 0.0f, -1.0f },
+    { 0.0f, -2.0f / 448.0f, 0.0f, 1.0f },
+    { 0.0f, 0.0f, -1.0f / 16777216.0f, -1.0f },
+    { 0.0f, 0.0f, 0.0f, 1.0f },
+};
+static u8 lbl_3_data_28160[0x20] ATTRIBUTE_ALIGN(32) = {
+    GX_QUADS, 0x00, 0x04, 0x00, 0xFF, 0xFF, 0x01, 0xFF, 0xFF, 0x02, 0xFF, 0xFF, 0x03, 0xFF, 0xFF,
+};
+static f32 lbl_3_data_28180[4][3] ATTRIBUTE_ALIGN(32) = {
+    { 0.0f, 0.0f, -16777215.0f },
+    { 0.0f, 448.0f, -16777215.0f },
+    { 640.0f, 448.0f, -16777215.0f },
+    { 640.0f, 0.0f, -16777215.0f },
+};
+static f32 lbl_3_data_281C0[4][3] ATTRIBUTE_ALIGN(32) = {
+    { 0.0f, 0.0f, -1.0f },
+    { 0.0f, 448.0f, -1.0f },
+    { 640.0f, 448.0f, -1.0f },
+    { 640.0f, 0.0f, -1.0f },
+};
 
 // .text:0x0015FF28 size:0x650 mapped:0x8079EFBC
-// Differs only in data addressing: the original reads 0x27EC0-0x281F0 from one .data pool
-// base. With that data defined here as statics in address order, every instruction matches.
 void fn_3_15FF28(void* arg) {
     UnkDraw3CE0* draw = arg;
     Mtx identity;
@@ -215,17 +234,15 @@ void fn_3_15FF28(void* arg) {
 }
 
 // .text:0x0015FB84 size:0x3A4 mapped:0x8079EC18
-// Differs in data addressing as fn_3_15FF28 does. With the data as statics, only n and
-// player swap volatile registers (r9 and r11) in the second loop.
 void fn_3_15FB84(s32 count, ...) {
     va_list args;
     s32 counts[4];
-    UnkPlayer3CE0* player;
-    UnkOffset3CE0* offset;
-    UnkMarker3CE0* marker;
-    s32 n;
-    s32 i;
     f32 height;
+    s32 i;
+    s32 n;
+    UnkMarker3CE0* marker;
+    UnkOffset3CE0* offset;
+    UnkPlayer3CE0* player;
 
     lbl_3_data_27F7C[lbl_803CBBC0]._C0 = count;
     height = -((f32)lbl_3_data_27F10._68 / 100000.0f);
@@ -279,4 +296,70 @@ void fn_3_15FB84(s32 count, ...) {
         marker++;
     }
     fn_800A7D4C(11, &lbl_3_data_27F7C[lbl_803CBBC0]);
+}
+
+// .text:0x0015FA58 size:0x12C mapped:0x8079EAEC
+void fn_3_15FA58(s32 count, s32* ids) {
+    UnkTask3CE0* task;
+
+    task = fn_800B0A5C_insertQueue(fn_3_15F9C0, lbl_803CC1B8->_12);
+    lbl_3_common_bss_35154._470 = 1;
+    lbl_3_common_bss_35154._471 = 0;
+    lbl_3_common_bss_35154._468 = 0;
+    lbl_3_common_bss_35154._472 = 0;
+    while (count--) {
+        lbl_3_common_bss_35154._473[lbl_3_common_bss_35154._472++] = *ids++;
+    }
+    task->_10 = lbl_3_data_27F10._04;
+}
+
+// .text:0x0015F9C0 size:0x98 mapped:0x8079EA54
+void fn_3_15F9C0(void) {
+    if (g_d_GameSettings._55 != 0 || lbl_3_common_bss_35154._479 != 0) {
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    lbl_803CC1B8->_10--;
+    lbl_3_common_bss_35154._468 =
+        lbl_3_data_27F10._00 * (lbl_3_data_27F10._04 - lbl_803CC1B8->_10) / lbl_3_data_27F10._04;
+    if (lbl_803CC1B8->_10 == 0) {
+        fn_800B0A14_removeQueue();
+    }
+}
+
+// .text:0x0015F9AC size:0x14 mapped:0x8079EA40
+void fn_3_15F9AC(void) {
+    lbl_3_common_bss_35154._471 = 1;
+}
+
+// .text:0x0015F998 size:0x14 mapped:0x8079EA2C
+void fn_3_15F998(void) {
+    lbl_3_common_bss_35154._470 = 0;
+}
+
+// .text:0x0015F874 size:0x124 mapped:0x8079E908
+void fn_3_15F874(BOOL arg0) {
+    Mtx mtx;
+
+    GXSetProjection(lbl_3_data_28104, GX_ORTHOGRAPHIC);
+    PSMTXIdentity(mtx);
+    GXLoadPosMtxImm(mtx, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    GXSetColorUpdate(GX_FALSE);
+    GXSetAlphaUpdate(GX_FALSE);
+    GXSetZMode(GX_TRUE, GX_ALWAYS, GX_TRUE);
+    gOz_GXSetTexture(4, 0, 0);
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_INDEX8);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA4, 0);
+    if (arg0) {
+        GXSetArray(GX_VA_POS, lbl_3_data_281C0, sizeof(lbl_3_data_281C0[0]));
+    } else {
+        GXSetArray(GX_VA_POS, lbl_3_data_28180, sizeof(lbl_3_data_28180[0]));
+    }
+    GXCallDisplayList(lbl_3_data_28160, sizeof(lbl_3_data_28160));
+    GXSetColorUpdate(GX_TRUE);
+    GXSetAlphaUpdate(GX_TRUE);
 }

@@ -22,12 +22,25 @@ extern struct {
 
 extern u8 lbl_803CBBC0;
 
-extern f32 lbl_3_data_2A448[4][3];
-extern f32 lbl_3_data_2A478[4][2];
-extern struct {
+f32 lbl_3_data_2A448[4][3] = {
+    { 0.0f, 0.0f, 101.785f },
+    { 1.8f, 0.0f, 101.785f },
+    { 1.8f, 2.28f, 101.785f },
+    { 0.0f, 2.28f, 101.785f },
+};
+f32 lbl_3_data_2A478[4][2] = {
+    { 0.0f, 0.0f },
+    { 0.09765625f, 0.0f },
+    { 0.09765625f, 1.0f },
+    { 0.0f, 1.0f },
+};
+struct {
     u32 _00;
     void (*_04)(void);
-} lbl_3_data_2A498[2];
+} lbl_3_data_2A498[2] = {
+    { 0, fn_3_16DFC4 },
+    { 0, fn_3_16DFC4 },
+};
 
 extern void fn_80033B58(void*, s32, s32, s32);
 extern s32 fn_8005268C(void);
@@ -36,6 +49,7 @@ extern void fn_800B0A14_removeQueue(void);
 extern void fn_800B0A5C_insertQueue(void (*)(void), s32);
 
 // MWCC lays out these statics in reverse order of declaration
+static u8 lbl_3_bss_D708[0xC]; // unreferenced; the memset of D6F0 clears only its 0x18 bytes
 static s32 lbl_3_bss_D6F0[6];
 static u8 lbl_3_bss_D6EC;
 static s32 lbl_3_bss_D6E8;

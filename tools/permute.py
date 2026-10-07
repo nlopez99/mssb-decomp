@@ -175,6 +175,13 @@ def main() -> int:
 
     out_dir = args.out or os.path.join(permuter_dir, "nonmatchings", function)
     os.makedirs(out_dir, exist_ok=True)
+    # An earlier run on this function, perhaps from another worktree, left its
+    # results here; they would mix with this run's
+    stale = [d for d in os.listdir(out_dir) if d.startswith("output-")]
+    for d in stale:
+        shutil.rmtree(os.path.join(out_dir, d))
+    if stale:
+        print(f"removed {len(stale)} output folders from an earlier run in {out_dir}")
     flags = compile_command(unit)
 
     project_o = os.path.join(root_dir, unit["base_path"])

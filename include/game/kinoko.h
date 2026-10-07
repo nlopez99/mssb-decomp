@@ -7,7 +7,8 @@
 // Named after the panic message in fn_3_16B488
 typedef struct {
     /* 0x00 */ Vec pos;
-    /* 0x0C */ u8 _0C[0x18];
+    /* 0x0C */ Vec _0C;
+    /* 0x18 */ Vec _18;
     /* 0x24 */ u8 color[4];
     /* 0x28 */ u8 colorFrom;
     /* 0x29 */ u8 colorTo;
@@ -21,8 +22,8 @@ void fn_3_1695A4(s8 arg0, u8 arg1);
 void fn_3_169600(void);
 void fn_3_169804(void);
 void fn_3_169984(void);
-void fn_3_169D00(void);
-void fn_3_169E70(void);
+void fn_3_169D00(RibbonEffect* ribbon, u32* count);
+void fn_3_169E70(RibbonEffect* ribbon);
 void fn_3_16A07C(void);
 void fn_3_16B488(Vec* pos, s8 id);
 void fn_3_16B5B4(RibbonEffect* ribbon, s8 id, int frame);

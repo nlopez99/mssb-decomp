@@ -5,6 +5,7 @@
 
 struct Unk2308Draw;
 
+void fn_3_CABB4(void);
 void fn_3_CABF0(struct Unk2308Draw* draw);
 void fn_3_CAE00(void);
 void fn_3_CAF9C(void);
