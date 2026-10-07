@@ -2759,7 +2759,16 @@ typedef struct {
 extern inMemStrikes g_Strikes;
 
 typedef struct {
-    u8 pad[0x105];
+    /* 0x0 */ u8 _0[3];
+    /* 0x3 */ u8 _3;
+    /* 0x4 */ u8 _4;
+    /* 0x5 */ u8 _5;
+} FieldingLogicFielder; // size 0x6
+
+typedef struct {
+    /* 0x000 */ u8 _000[0x74];
+    /* 0x074 */ FieldingLogicFielder _074[4];
+    /* 0x08C */ u8 _08C[0x105 - 0x8C];
     /* 0x105 */ u8 playerAtMoundCutoffLocation;
     /* 0x106 */ u8 throwSpeedType;
     /* 0x107 */ u8 _107;
