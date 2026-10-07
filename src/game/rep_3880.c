@@ -2982,8 +2982,14 @@ void fn_3_149BA8(void) {
 }
 
 // .text:0x0014975C size:0x44C mapped:0x807887F0
-void fn_3_14975C(void) {
-    return;
+// 91.15%: register allocation inside the inlined fn_3_149340 and fn_3_148FD0
+void fn_3_14975C(s8 player) {
+    PlayerEmitter3880* emitter = (PlayerEmitter3880*)fn_80033A24(fn_3_14841C, 0x80, 0, lbl_3_data_26E7C[0], 1, 0x25);
+
+    if (emitter != NULL) {
+        emitter->player = player;
+        fn_3_149340(emitter);
+    }
 }
 
 // .text:0x00149340 size:0x41C mapped:0x807883D4

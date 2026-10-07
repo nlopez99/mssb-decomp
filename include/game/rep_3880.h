@@ -29,7 +29,7 @@ BOOL fn_3_14841C(struct Emitter3880* emitter);
 void fn_3_148EF0(struct Particle3880* p, f32 angle);
 void fn_3_148FD0(struct PlayerEmitter3880* emitter, struct Particle3880* p);
 void fn_3_149340(struct PlayerEmitter3880* emitter);
-void fn_3_14975C(void);
+void fn_3_14975C(s8 player);
 void fn_3_149BA8(void);
 void fn_3_14A070(s32* values, s32 count);
 void fn_3_14A164(void);
