@@ -347,13 +347,41 @@ void fn_3_155264(void) {
 }
 
 // .text:0x0015521C size:0x48 mapped:0x807942B0
-void fn_3_15521C(void) {
-    return;
+void fn_3_15521C(s16 id, Vec* pos, Vec* rot) {
+    if (g_d_GameSettings.GameModeSelected != GAME_TYPE_MINIGAMES || pos == NULL || rot == NULL) {
+        return;
+    }
+    fn_3_154C7C(id, pos, rot);
 }
 
 // .text:0x00154C7C size:0x5A0 mapped:0x80793D10
-void fn_3_154C7C(void) {
-    return;
+void fn_3_154C7C(s16 id, Vec* pos, Vec* rot) {
+    EmitterSlot3880 tmp;
+    Emitter3880* emitter;
+    Emitter3880* added;
+    Particle3880* last;
+
+    emitter = fn_800339F0(NULL, 0x27);
+    if (emitter != NULL) {
+        added = fn_800337CC(&tmp.base, lbl_3_data_26BC0[1], 1);
+        if (added == NULL) {
+            return;
+        }
+        fn_3_1549F0(added, id, pos, rot);
+        last = emitter->particles;
+        if (last != NULL) {
+            for (; last->next != NULL; last = last->next) {}
+            last->next = added->particles;
+        } else {
+            emitter->particles = added->particles;
+        }
+        emitter->count += added->count;
+    } else {
+        emitter = fn_80033A24(fn_3_1542F4, 0x80, 0, lbl_3_data_26BC0[1], 1, 0x27);
+        if (emitter != NULL) {
+            fn_3_1549F0(emitter, id, pos, rot);
+        }
+    }
 }
 
 // .text:0x001549F0 size:0x28C mapped:0x80793A84
@@ -379,8 +407,8 @@ void fn_3_1549F0(Emitter3880* emitter, s16 id, Vec* pos, Vec* rot) {
 }
 
 // .text:0x001542F4 size:0x6FC mapped:0x80793388
-void fn_3_1542F4(void) {
-    return;
+BOOL fn_3_1542F4(Emitter3880* emitter) {
+    return 0;
 }
 
 // .text:0x00154238 size:0xBC mapped:0x807932CC
