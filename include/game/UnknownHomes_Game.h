@@ -2580,7 +2580,9 @@ typedef struct {
     /* 0x65 */ u8 _65[2];
     /* 0x67 */ u8 _67[2];
     /* 0x69 */ u8 _69[2][10];
-    /* 0x7D */ u8 _7D[0x8C - 0x7D];
+    /* 0x7D */ u8 _7D[0x8A - 0x7D];
+    /* 0x8A */ u8 _8A;
+    /* 0x8B */ u8 _8B;
 } lbl_3_common_bss_32A94_s; // size: 0x8C
 
 extern lbl_3_common_bss_32A94_s lbl_3_common_bss_32A94;

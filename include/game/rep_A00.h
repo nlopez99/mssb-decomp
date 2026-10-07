@@ -5,7 +5,7 @@
 
 void fn_3_21C90(void);
 void fn_3_21DE4(void);
-void fn_3_21F14(void);
+BOOL fn_3_21F14(void);
 BOOL fn_3_2273C(void);
 BOOL fn_3_2281C(int i);
 void fn_3_22850(void);
