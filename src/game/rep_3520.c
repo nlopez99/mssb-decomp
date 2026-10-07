@@ -6,6 +6,7 @@
 #include "game/rep_28A8.h"
 #include "game/rep_540.h"
 #include "game/m_sound.h"
+#include "game/rep_D0.h"
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/gx.h"
 #include "math.h"
@@ -114,11 +115,15 @@ typedef struct Unk3520Fielder {
     /* 0x034 */ f32 _034;
     /* 0x038 */ f32 _038;
     /* 0x03C */ f32 _03C;
-    /* 0x040 */ u8 _040[0x15C - 0x40];
+    /* 0x040 */ u8 _040[0x50 - 0x40];
+    /* 0x050 */ f32 _050;
+    /* 0x054 */ u8 _054[0x15C - 0x54];
     /* 0x15C */ f32 _15C;
     /* 0x160 */ u8 _160[0x16C - 0x160];
     /* 0x16C */ f32 _16C;
-    /* 0x170 */ u8 _170[0x1C9 - 0x170];
+    /* 0x170 */ u8 _170[0x17A - 0x170];
+    /* 0x17A */ s16 _17A;
+    /* 0x17C */ u8 _17C[0x1C9 - 0x17C];
     /* 0x1C9 */ u8 _1C9;
     /* 0x1CA */ u8 _1CA[0x203 - 0x1CA];
     /* 0x203 */ u8 _203;
@@ -156,7 +161,9 @@ extern void changeScene(u8, s16);
 
 extern u8 lbl_800EFBA4[0x10];
 extern u8 lbl_3_data_21278[2];
+extern f32 lbl_3_data_4444[10];
 extern f32 lbl_3_data_47BC[5];
+extern f32 lbl_3_data_2198C[4][2];
 extern Vec lbl_3_data_219AC;
 extern f32 lbl_3_data_219B8[19];
 extern f32 lbl_3_data_21A14[7];
@@ -178,6 +185,7 @@ extern s16 lbl_3_data_21AF0[1];
 extern f32 lbl_3_data_21AF4;
 extern f32 lbl_3_data_21AF8[6];
 extern s16 lbl_3_data_21B10[3];
+extern f32 lbl_3_data_21B18[2];
 extern f32 lbl_3_data_21B38[4];
 extern f32 lbl_3_data_21B58[4];
 extern u8 lbl_3_data_21B16;
@@ -1079,8 +1087,110 @@ void fn_3_13688C(Unk3520Box* box) {
 }
 
 // .text:0x00136220 size:0x66C mapped:0x807752B4
+// 99.4%: the collision-type test merges 2 and 3 into one range where the target tests
+// each; some FPRs differ in the stun branches.
 void fn_3_136220(void) {
-    return;
+    Unk3520Fielder* fielder;
+    int i;
+    VecSrcDst seg;
+    CollisionStruct col;
+    f32 xx;
+    f32 zz;
+    f32 len;
+    f32 scale;
+    f32 dx;
+    f32 dz;
+    f32 dist;
+    u32 type;
+
+    for (i = 0; i < 4; i++) {
+        if (g_Minigame.minigameFielderIndex[i] < 0) {
+            continue;
+        }
+        fielder = &g_Fielders[g_Minigame.minigameFielderIndex[i]];
+        if (fielder->_20F == 0) {
+            if (g_Minigame.starDashStunType[i] == 1) {
+                xx = g_Minigame._1CB8[i].x * g_Minigame._1CB8[i].x;
+                zz = g_Minigame._1CB8[i].z * g_Minigame._1CB8[i].z;
+                len = dolsqrtf2(xx + zz);
+                scale = lbl_3_data_21B18[0] / len;
+                g_Minigame._1CB8[i].x *= scale;
+                g_Minigame._1CB8[i].z *= scale;
+                g_Minigame._1CB8[i].y = 0.0f;
+                g_Minigame._1D5A[i] = 0;
+                g_Minigame.starDashStunType[i] = 2;
+                if (g_Minigame.playerIDWithPowerup[0] == i) {
+                    fn_800115C8(g_Minigame.playerIDWithPowerup[0]);
+                    g_Minigame.playerIDWithPowerup[0] = -1;
+                }
+                fn_3_1360BC(i);
+                fn_3_90064(0x2E7);
+                fn_3_90220(fielder->_17A, 10);
+                fn_3_6C854(g_Minigame.minigameControlStruct.characterIndex[i], 2);
+            } else if (g_Minigame.starDashStunType[i] == 2) {
+                g_Minigame._1D5A[i]++;
+                zz = g_Minigame._1CB8[i].z * g_Minigame._1CB8[i].z;
+                xx = g_Minigame._1CB8[i].x * g_Minigame._1CB8[i].x;
+                len = dolsqrtf2(xx + zz);
+                if (len > 0.0f) {
+                    seg.src.x = fielder->pos.x;
+                    seg.src.y = -1.0f;
+                    seg.src.z = fielder->pos.z;
+                    seg.dst.x = 2.0f * g_Minigame._1CB8[i].x + fielder->pos.x;
+                    seg.dst.y = -1.0f;
+                    seg.dst.z = 2.0f * g_Minigame._1CB8[i].z + fielder->pos.z;
+                    type = checkCollision(&seg, &col, 0, FALSE);
+                    if (type != 0) {
+                        g_Minigame._1CB8[i].x = 0.0f;
+                        g_Minigame._1CB8[i].z = 0.0f;
+                    }
+                    fielder->pos.x += g_Minigame._1CB8[i].x;
+                    fielder->pos.y += g_Minigame._1CB8[i].y;
+                    fielder->pos.z += g_Minigame._1CB8[i].z;
+                    g_Minigame._1CB8[i].x *= lbl_3_data_21B18[1];
+                    g_Minigame._1CB8[i].z *= lbl_3_data_21B18[1];
+                }
+                if (g_Minigame._1D5A[i] > lbl_3_data_21B20[1]) {
+                    g_Minigame.starDashStunType[i] = 3;
+                    fielder->_030 = 0.0f;
+                    fielder->_034 = 0.0f;
+                    g_Minigame._1D5A[i] = 0;
+                    fielder->_050 = 0.0f;
+                }
+            } else if (g_Minigame.starDashStunType[i] == 3) {
+                g_Minigame._1D5A[i]++;
+                if (g_Minigame._1D5A[i] > lbl_3_data_21B20[2]) {
+                    g_Minigame.starDashStunType[i] = 0;
+                }
+            }
+        }
+        seg.src.x = fielder->pos.x;
+        seg.src.y = -1.0f;
+        seg.src.z = fielder->pos.z;
+        seg.dst.x = fielder->pos.x;
+        seg.dst.y = 1.0f;
+        seg.dst.z = fielder->pos.z;
+        type = checkCollision(&seg, &col, 0, FALSE) & 0x7F;
+        if (type == 2 || type == 3 || type == 7 || type == 8 || type == 5) {
+            dx = lbl_3_data_4444[8] - fielder->pos.x;
+            dz = lbl_3_data_4444[8] - fielder->pos.z;
+            dist = dolsqrtf2(dx * dx + dz * dz);
+            if (0.0f == dist) {
+                fielder->pos.x = lbl_3_data_2198C[i][0];
+                fielder->pos.z = lbl_3_data_2198C[i][1];
+            } else {
+                dx /= dist;
+                dz /= dist;
+                if (dist < 7.0f) {
+                    fielder->pos.x -= 0.2f * dx;
+                    fielder->pos.z -= 0.2f * dz;
+                } else {
+                    fielder->pos.x += 0.2f * dx;
+                    fielder->pos.z += 0.2f * dz;
+                }
+            }
+        }
+    }
 }
 
 // .text:0x001360BC size:0x164 mapped:0x80775150
