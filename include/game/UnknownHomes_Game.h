@@ -2412,7 +2412,9 @@ typedef struct {
 typedef struct {
     /* 0x000 */ u8 _000[0x74];
     /* 0x074 */ FieldingLogicFielder _074[4];
-    /* 0x08C */ u8 _08C[0xAE - 0x8C];
+    /* 0x08C */ u8 _08C[0x90 - 0x8C];
+    /* 0x090 */ Vec _090;
+    /* 0x09C */ u8 _09C[0xAE - 0x9C];
     /* 0x0AE */ s16 _0AE;
     /* 0x0B0 */ u8 _0B0[0xC2 - 0xB0];
     /* 0x0C2 */ s16 _0C2;

@@ -20,7 +20,10 @@ typedef struct {
     /* 0x048 */ f32 _048;
     /* 0x04C */ u8 _04C[0x50 - 0x4C];
     /* 0x050 */ f32 _050;
-    /* 0x054 */ u8 _054[0x68 - 0x54];
+    /* 0x054 */ u8 _054[0x58 - 0x54];
+    /* 0x058 */ f32 _058;
+    /* 0x05C */ f32 _05C;
+    /* 0x060 */ u8 _060[0x68 - 0x60];
     /* 0x068 */ f32 _068;
     /* 0x06C */ u8 _06C[0x70 - 0x6C];
     /* 0x070 */ f32 _070;
@@ -693,8 +696,164 @@ void fn_3_A76B4(void) {
 }
 
 // .text:0x000A7040 size:0x674 mapped:0x806E60D4
-void fn_3_A7040(void) {
+// 98.93%: the target compares f->_050 + f->_05C with f->_058 and discards the result,
+// after computing the distance difference; the ternary below only approximates that order.
+void fn_3_A7040(s32 fielder) {
+    Unk18E8Fielder* f;
+    s32 base;
+    s32 i;
+    InMemRunnerType* r;
+
+    f = &g_Fielders[fielder];
+    g_FieldingLogic._111 = 0;
+    base = -1;
+    g_FieldingLogic._0E8 = -1;
+    if (g_Strikes.outs < 3 && g_Ball.ballState == 1 && g_Ball.fielderWBallIndex >= 0 && g_FieldingLogic._124 == 0) {
+        if (f->_1F5 >= 0) {
+            base = f->_1F5;
+        }
+        for (i = 0; i < 4; i++) {
+            if (f->_0A8[i] <= 0.8f) {
+                base = i;
+                break;
+            }
+        }
+        if (base >= 0) {
+            for (i = 3; i >= 0; i--) {
+                r = &g_Runners[i];
+                if ((g_Pitcher.strikeOutOrWalk != 2 || r->furthestBaseForcedToGoToOnWalk <= r->currentBase) &&
+                    r->runnerOnFieldOrOutOrScored == 1) {
+                    if (base == r->baseStandingOn_Stored && r->baseStandingOn < 0 && g_Ball.timeSinceBallPickedUp > 15 &&
+                        r->position.x < 20.0f) {
+                        g_FieldingLogic._111 = 5;
+                        g_FieldingLogic._0E8 = i;
+                        g_FieldingLogic._112 = 1;
+                        g_FieldingLogic._0EC = 1;
+                        g_FieldingLogic._124 = 15;
+                        g_FieldingLogic._135 = 1;
+                        goto found;
+                    }
+                    if (base == r->baseRunningTowards) {
+                        if ((r->forceOutCd == 1 && r->nextBase == base) || r->forceOutType_unsed != 0) {
+                            break;
+                        }
+                        if (r->actionCode != 0) {
+                            if (r->actionFrames_countDown < 6) {
+                                g_FieldingLogic._111 = 1;
+                                g_FieldingLogic._0E8 = i;
+                                g_FieldingLogic._112 = 1;
+                                g_FieldingLogic._124 = 15;
+                                g_FieldingLogic._125 = base;
+                                g_FieldingLogic._135 = 1;
+                                if (g_FieldingLogic._0DE >= 0) {
+                                    g_FieldingLogic._0DE = i;
+                                }
+                                goto found;
+                            }
+                        } else if (r->tagUpInd == 2 && r->distanceFromBall < 1.8f && g_Ball.timeSinceBallPickedUp > 15) {
+                            if (r->baseStandingOn == base && i != r->baseStandingOn) {
+                                g_FieldingLogic._111 = 5;
+                            } else {
+                                g_FieldingLogic._111 = 2;
+                            }
+                            g_FieldingLogic._0E8 = i;
+                            g_FieldingLogic._112 = 1;
+                            g_FieldingLogic._0EC = 1;
+                            g_FieldingLogic._124 = 15;
+                            g_FieldingLogic._135 = 1;
+                            goto found;
+                        }
+                    }
+                }
+            }
+        }
+        if (g_Ball.timeSinceBallPickedUp > 15) {
+            for (i = 3; i >= 0; i--) {
+                r = &g_Runners[i];
+                if (r->runnerOnFieldOrOutOrScored == 1 && (f->_18C < 0 || r->forceOutCd != 1 || r->nextBase != base)) {
+                    f32 runAngle = game_atan2(r->velocity.x, r->velocity.z);
+                    if (fn_3_9FC1C(game_atan2(f->_000 - r->position.x, f->_008 - r->position.z), runAngle) < 0x100 &&
+                        r->baseStandingOn < 0) {
+                        if ((r->baseStandingOn < 0 || r->tagUpInd == 2) &&
+                            r->distanceFromBall - (f->_050 + f->_05C > f->_058 ? f->_050 : f->_050) < 1.8f) {
+                            g_FieldingLogic._111 = 2;
+                            g_FieldingLogic._0E8 = i;
+                            g_FieldingLogic._112 = 1;
+                            g_FieldingLogic._0EC = 1;
+                            g_FieldingLogic._124 = 15;
+                            g_FieldingLogic._135 = 1;
+                            if (g_FieldingLogic._0DE >= 0) {
+                                g_FieldingLogic._0DE = i;
+                            }
+                            goto found;
+                        }
+                    } else {
+                        f32 dist = r->distanceFromBall;
+                        BOOL close = FALSE;
+                        s32 action;
+
+                        if (dist < 5.0f) {
+                            if (r->baseStandingOn < 0) {
+                                close = TRUE;
+                            } else {
+                                if (r->runningDirectionCode == 1 && r->distToCurrentBase > 2.5f) {
+                                    close = TRUE;
+                                }
+                                if (r->forceOutCd == 1 && r->baseStandingOn == r->startingBase_baseAchieved) {
+                                    close = TRUE;
+                                }
+                            }
+                        }
+                        if (close) {
+                            action = 0;
+                            if (r->forceOutCd == 1 && r->baseStandingOn == r->startingBase_baseAchieved && dist < 1.8f) {
+                                action = 2;
+                            } else if ((g_FieldingLogic._0CC < 0 || g_FieldingLogic._0CC > 3 ||
+                                        (!(f->_0A8[g_FieldingLogic._0CC] < 1.5f) &&
+                                         (!(f->_0A8[g_FieldingLogic._0CC] < 5.0f) ||
+                                          (r->forceOutCd == 0 && r->tagUpInd != 2)))) &&
+                                       dist < 1.8f) {
+                                action = 1;
+                            }
+                            if (action) {
+                                g_FieldingLogic._111 = 2;
+                                g_FieldingLogic._0E8 = i;
+                                g_FieldingLogic._112 = 1;
+                                g_FieldingLogic._0EC = 1;
+                                g_FieldingLogic._124 = 15;
+                                g_FieldingLogic._135 = 1;
+                                if (g_FieldingLogic._0DE >= 0) {
+                                    g_FieldingLogic._0DE = i;
+                                }
+                                goto found;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (g_FieldingLogic._111 == 2 && f->_050 == 0.0f) {
+            g_FieldingLogic._111 = 5;
+        }
+    }
     return;
+
+found:
+    if (g_Runners[g_FieldingLogic._0E8].actionCode != 0) {
+        if (g_Runners[g_FieldingLogic._0E8].runningDirectionCode == 1) {
+            g_FieldingLogic._090.x = lbl_3_data_4444[g_Runners[g_FieldingLogic._0E8].currentBase][0];
+            g_FieldingLogic._090.y = 0.0f;
+            g_FieldingLogic._090.z = lbl_3_data_4444[g_Runners[g_FieldingLogic._0E8].currentBase][1];
+        } else {
+            g_FieldingLogic._090.x = lbl_3_data_4444[g_Runners[g_FieldingLogic._0E8].nextBase][0];
+            g_FieldingLogic._090.y = 0.0f;
+            g_FieldingLogic._090.z = lbl_3_data_4444[g_Runners[g_FieldingLogic._0E8].nextBase][1];
+        }
+    } else {
+        g_FieldingLogic._090.x = g_Runners[g_FieldingLogic._0E8].position.x;
+        g_FieldingLogic._090.y = g_Runners[g_FieldingLogic._0E8].position.y;
+        g_FieldingLogic._090.z = g_Runners[g_FieldingLogic._0E8].position.z;
+    }
 }
 
 // .text:0x000A6E98 size:0x1A8 mapped:0x806E5F2C

@@ -41,7 +41,7 @@ s32 fn_3_A6810(f32 x0, f32 z0, f32 x1, f32 z1);
 int fn_3_A6ABC(f32 x, f32 z);
 void fn_3_A6D48(void);
 void fn_3_A6E98(s32 fielder);
-void fn_3_A7040(void);
+void fn_3_A7040(s32 fielder);
 void fn_3_A76B4(void);
 void fn_3_A7C88(void);
 void fn_3_A7EF8(void);
