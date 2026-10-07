@@ -11,13 +11,16 @@
 #include "C3/control.h"
 #include "C3/geoPalette.h"
 #include "game/rep_D0.h"
-#include "game/rep_1C0.h"
 #include "game/m_sound.h"
 #include "game/rep_4138.h"
 #include "string.h"
 #include "math.h"
 
-typedef struct LITObj LITObj;
+typedef struct LITObj {
+    /* 0x00 */ u8 _00[0x58];
+    /* 0x58 */ Vec _58;
+    /* 0x64 */ u8 _64[0xC0 - 0x64];
+} LITObj; // size: 0xC0
 
 typedef struct {
     /* 0x00 */ u8 _00[0xA];
@@ -94,6 +97,12 @@ typedef struct StadiumModel1D58 {
     /* 0x68 */ s32 _68;
 } StadiumModel1D58;
 
+typedef struct ObjAnim1D58 {
+    /* 0x00 */ u8 _00[0xC];
+    /* 0x0C */ u8 _0C[0x2C - 0xC];
+    /* 0x2C */ u32 _2C;
+} ObjAnim1D58;
+
 typedef struct StadiumObject1D58 {
     /* 0x00 */ Control control;
     /* 0x3C */ u8 _3C[0x44 - 0x3C];
@@ -104,7 +113,7 @@ typedef struct StadiumObject1D58 {
     /* 0x80 */ void (*_80)(s32 object, int type, struct _CollisionStruct* collision);
     /* 0x84 */ void (*_84)(struct StadiumObject1D58* obj);
     /* 0x88 */ void (*_88)(struct StadiumObject1D58* obj);
-    /* 0x8C */ void* _8C;
+    /* 0x8C */ struct ObjAnim1D58* _8C;
     /* 0x90 */ u8 _90_7 : 1;
     /* 0x90 */ u8 _90_6 : 1;
     /* 0x90 */ u8 _90_5 : 1;
@@ -169,6 +178,7 @@ extern struct {
 } lbl_3_common_bss_350E4; // size: 0x70
 
 extern StadiumLights1D58 lbl_800F7478[14];
+extern Light1D58 lbl_80367318[4];
 extern AramEntry1D58 lbl_3_data_10ACC[21];
 extern void (*lbl_3_data_10AB0[7])(void* file);
 extern u8 lbl_3_data_11168[0x10];
@@ -194,6 +204,32 @@ extern struct {
 
 extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_800ACFB0(void* data);
+// rep_1C0.h types the draw callback's last parameter s32; fn_3_B8828 compares it unsigned
+extern void fn_3_38E8(void (*draw)(MtxPtr view, s32, u32));
+extern void fn_3_35E4(void (*callback)(void));
+extern void fn_8001E460(void (*draw)(MtxPtr view, s32, u32));
+extern void fn_800B2BFC(ModelActor1D58* actor, u16 arg1, u16 arg2);
+extern void fn_800B3F20(ModelActor1D58* actor);
+extern void fn_800B313C(ModelActor1D58* actor);
+extern void fn_800117CC(Mtx src, Mtx view, Mtx dst);
+extern void fn_800116DC(StadiumModel1D58* model, Mtx mtx, u16 arg2);
+extern u8 fn_800B3C04(s32 arg0, ModelActor1D58* actor, Mtx mtx);
+extern void fn_800BEA04(Vec pos);
+extern void fn_80024DB0(void* anim);
+extern void fn_80024FA4(StadiumModel1D58* model, u32 arg1, void* anim, s32 arg3);
+extern void fn_3_D55EC(Mtx view, StadiumSort1D58* sort);
+extern void fn_3_F6084(Mtx view, StadiumSort1D58* sort);
+extern void fn_3_E7388(Mtx view, StadiumSort1D58* sort);
+extern s32 fn_8005268C(void);
+extern void fn_800BD2CC(s32 arg0, GXColor color);
+extern void fn_800B9AA8(LITObj* light);
+extern void fn_800BDA94(StadiumModel1D58* model, Mtx mtx);
+extern void LoadActorLayout(void* layout);
+extern void convertGeometryAndSknHeader(void* geo, void* skn);
+extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);
+extern void convertTextureHeader(void* tex);
+extern void fn_800BD190(void* geo, void* tex);
+extern void ANIMGet(void* anim);
 extern void* fn_800ACF34(u32 align, u32 size);
 extern void fn_800ACF14(void* data);
 extern void fn_800C07BC(void* base, void* tmp, s32 count, s32 size, s32 (*compare)(const void* a, const void* b));
@@ -278,7 +314,70 @@ void fn_3_B9FB8(s32 stadium, void* file) {
 
 // .text:0x000B9D68 size:0x250 mapped:0x806F8DFC
 void fn_3_B9D68(u8* types, s32 count, void** files, s32* indices) {
-    return;
+    u32* table;
+    u32* p;
+    void* layout;
+    void* geo;
+    void* skn;
+    void* tex;
+    s32* index;
+    s32 j;
+
+    s32 n;
+    s32 k;
+    index = indices;
+    tex = NULL;
+    skn = NULL;
+    k = 0;
+    do {
+        if (indices != NULL) {
+            *index = k;
+        }
+        switch (*types) {
+        case 1:
+            tex = (u8*)files + (u32)files[k++];
+            convertTextureHeader(tex);
+            break;
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+            layout = (u8*)files + (u32)files[k++];
+            geo = (u8*)files + (u32)files[k++];
+            if (!(*types == 2 || *types == 3)) {
+                ANIMGet((u8*)files + (u32)files[k++]);
+            }
+            if (*types == 3 || *types == 5) {
+                skn = (u8*)files + (u32)files[k++];
+            }
+            LoadActorLayout(layout);
+            convertGeometryAndSknHeader(geo, skn);
+            skn = NULL;
+            fn_800BD190(geo, tex);
+            haveActLayoutPointToGeoHeader(layout, geo);
+            break;
+        case 6:
+            table = (u32*)((u8*)files + (u32)files[k++]);
+            n = *(u16*)table;
+            for (j = 0, p = table + 1; j <= n; j++, p++) {
+                *p += (u32)table;
+            }
+            break;
+        case 7:
+            ANIMGet((u8*)files + (u32)files[k++]);
+            break;
+        case 8:
+        case 9:
+        default:
+            k++;
+            break;
+        }
+        index++;
+        types++;
+    } while (--count);
+    while (k--) {
+        ((u32*)files)[k] += (u32)files;
+    }
 }
 
 // .text:0x000B9BB4 size:0x1B4 mapped:0x806F8C48
@@ -587,12 +686,170 @@ void fn_3_B902C(void) {
 
 // .text:0x000B8C08 size:0x424 mapped:0x806F7C9C
 void fn_3_B8C08(Mtx view) {
-    return;
+    Mtx m;
+    Mtx mv;
+    StadiumObject1D58* obj;
+    ModelActor1D58* actor;
+    StadiumSort1D58* sort;
+    s32 i;
+
+    if (lbl_3_common_bss_350E4._38 == NULL) {
+        return;
+    }
+    fn_3_38E8(fn_3_B8828);
+    fn_8001E460(fn_3_B8828);
+    for (i = 0; i < lbl_3_common_bss_350E4._30; i++) {
+        obj = &lbl_3_common_bss_350E4._00[i];
+        if (!obj->_90_7 || obj->_74 == NULL) {
+            continue;
+        }
+        actor = obj->_74->actor;
+        fn_800B2BFC(actor, obj->_74->_64, obj->_74->_66);
+        fn_800B3F20(actor);
+        fn_800B313C(actor);
+        CTRLBuildMatrix(&obj->control, m);
+        PSMTXCopy(m, obj->_44);
+        PSMTXConcat(view, obj->_44, mv);
+        if (obj->_94 != 0) {
+            if (obj->_96 == -1) {
+                fn_800117CC(obj->_44, view, obj->_44);
+            } else {
+                fn_800116DC(obj->_74, mv, obj->_96);
+            }
+        }
+        obj->_93 = (obj->_93 & 0xFC) | fn_800B3C04(0, obj->_74->actor, mv);
+        if (obj->_9A != 0) {
+            Vec offset = { 0.0f, 0.0f, 0.0f };
+
+            PSMTXMultVec(m, &offset, &offset);
+            fn_800BEA04(offset);
+        }
+        if (obj->_8C != NULL && lbl_80366158._28 == 0 && obj->_93 != 0) {
+            fn_80024DB0(obj->_8C->_0C);
+            fn_80024FA4(obj->_74, obj->_8C->_2C, obj->_8C->_0C, -1);
+        }
+    }
+    if (g_d_GameSettings.StadiumID == 2 && g_d_GameSettings.GameModeSelected != 7) {
+        fn_3_D55EC(view, lbl_3_common_bss_350E4._14);
+    } else if (g_d_GameSettings.StadiumID == 5 && g_d_GameSettings.GameModeSelected != 7) {
+        fn_3_F6084(view, lbl_3_common_bss_350E4._14);
+    } else if (g_d_GameSettings.StadiumID == 6) {
+        fn_3_E7388(view, lbl_3_common_bss_350E4._14);
+    } else {
+        fn_3_B867C(view, lbl_3_common_bss_350E4._14);
+        if (lbl_3_common_bss_350E4._6C) {
+            Vec ball;
+
+            if (g_GameLogic.gameStatus == 2) {
+                lbl_3_bss_1908 = 0.25f;
+            } else {
+                lbl_3_bss_1908 = 0.0f;
+            }
+            memcpy(&ball, &g_Ball.AtBat_Contact_BallPos, sizeof(Vec));
+            PSMTXMultVec(view, &ball, &ball);
+            for (i = 0; i < lbl_3_common_bss_350E4._30; i++) {
+                sort = &lbl_3_common_bss_350E4._14[i];
+                if (!lbl_3_common_bss_350E4._00[sort->index]._90_7) {
+                    continue;
+                }
+                if (sort->depth < 2.0f + ball.z) {
+                    sort->depth = 1.0f;
+                } else if (sort->depth > 22.0f + ball.z) {
+                    sort->depth = 1.0 - (1.0f - lbl_3_bss_1908);
+                } else {
+                    sort->depth = 1.0 - (1.0f - lbl_3_bss_1908) * ((sort->depth - (2.0f + ball.z)) / 20.0f);
+                }
+            }
+        } else {
+            for (i = 0; i < lbl_3_common_bss_350E4._30; i++) {
+                lbl_3_common_bss_350E4._14[i].depth = 1.0f;
+            }
+        }
+    }
 }
 
 // .text:0x000B8828 size:0x3E0 mapped:0x806F78BC
-void fn_3_B8828(void) {
-    return;
+void fn_3_B8828(MtxPtr view, s32 arg1, u32 arg2) {
+    LITObj lit;
+    Mtx m;
+    Mtx mv;
+    Vec dir;
+    GXColor ambient;
+    GXColor ambient2;
+    StadiumObject1D58* obj;
+    Light1D58* lights;
+    s32 i;
+    s32 j;
+
+    ambient2 = ambient = lbl_800F7478[g_d_GameSettings._54].ambient;
+    lights = lbl_80367318;
+    if (lbl_8036E548._3088 == 0) {
+        return;
+    }
+    GXSetCullMode(GX_CULL_BACK);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+    for (i = 0; i < 4; i++) {
+        if (lbl_3_common_bss_350E4._20[i] != NULL) {
+            LITInitAttn(lbl_3_common_bss_350E4._20[i], 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+            LITInitPos(lbl_3_common_bss_350E4._20[i], lights[i].pos.x, lights[i].pos.y, lights[i].pos.z);
+            LITInitColor(lbl_3_common_bss_350E4._20[i], lights[i].color);
+            dir.x = lights[i].pos.x;
+            dir.y = lights[i].pos.y;
+            dir.z = lights[i].pos.z;
+            if (PSVECMag(&dir)) {
+                PSVECNormalize(&dir, &dir);
+                LITInitDir(lbl_3_common_bss_350E4._20[i], dir.x, dir.y, dir.z);
+            }
+        }
+    }
+    GXSetProjection(fn_80052768_getCamera(fn_8005268C())->proj, GX_PERSPECTIVE);
+    for (i = 0; i < lbl_3_common_bss_350E4._30; i++) {
+        obj = &lbl_3_common_bss_350E4._00[lbl_3_common_bss_350E4._14[i].index];
+        if (!obj->_90_7 || obj->_74 == NULL || arg2 != obj->_98) {
+            continue;
+        }
+        if (arg2 == 1 && arg1 != obj->_90_5) {
+            continue;
+        }
+        PSMTXConcat(view, obj->_44, mv);
+        if (obj->_90_5) {
+            ambient.a = obj->_92 * lbl_3_common_bss_350E4._14[i].depth;
+        } else {
+            ambient.a = obj->_92;
+        }
+        fn_800BD2CC(1, ambient);
+        for (j = 0; j < 4; j++) {
+            LITXForm(lbl_3_common_bss_350E4._20[j], view);
+        }
+        CTRLBuildMatrix(&obj->control, m);
+        PSMTXInverse(m, m);
+        lit = *lbl_3_common_bss_350E4._20[0];
+        PSMTXMultVecSR(m, &lit._58, &lit._58);
+        fn_800B9AA8(&lit);
+        obj->_74->actor->_98 = obj->_93;
+        if (obj->_90_4) {
+            GXSetZMode(obj->_90_3, obj->_90_2 ? GX_ALWAYS : GX_LEQUAL, obj->_90_1);
+        } else if (arg1 != 0) {
+            GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+        } else {
+            GXSetZMode(GX_TRUE, GX_ALWAYS, GX_FALSE);
+        }
+        if (obj->_84 != NULL) {
+            obj->_84(obj);
+        }
+        fn_800BDA94(obj->_74, mv);
+        for (j = 0; j < 16; j++) {
+            if (lbl_3_data_11168[j] != 0) {
+                GXSetTevDirect(j);
+                lbl_3_data_11168[j] = 0;
+            }
+        }
+        fn_800BD2CC(1, ambient2);
+        if (obj->_88 != NULL) {
+            obj->_88(obj);
+        }
+    }
+    fn_800B9AA8(lbl_3_common_bss_350E4._20[0]);
 }
 
 // .text:0x000B867C size:0x1AC mapped:0x806F7710

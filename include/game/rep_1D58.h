@@ -24,7 +24,7 @@ u32 fn_3_B85A8(s32 area, s32** objects);
 void fn_3_B85DC(s32 area, Vec* min, Vec* max);
 s32 fn_3_B8658(const void* a, const void* b);
 void fn_3_B867C(Mtx view, struct StadiumSort1D58* sort);
-void fn_3_B8828(void);
+void fn_3_B8828(MtxPtr view, s32 arg1, u32 arg2);
 void fn_3_B8C08(Mtx view);
 void fn_3_B902C(void);
 void fn_3_B908C(void);
