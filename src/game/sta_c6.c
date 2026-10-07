@@ -181,27 +181,106 @@ extern u16 lbl_3_data_81DC[16];
 extern u8 lbl_3_data_8404[6][15][2];
 extern u8 lbl_3_data_84B8[30][2];
 
-// .data 0x19018 to 0x19770 belongs to this file, but lies outside its splits.txt ranges
-extern GXColor lbl_3_data_19018[3];
-extern GXColor lbl_3_data_19024[9][3];
-extern StaC6Prop lbl_3_data_19090[16];
-extern StaC6Prop lbl_3_data_191D0[16];
-extern StaC6Prop lbl_3_data_19310[16];
-extern StaC6Prop lbl_3_data_19450[16];
-extern StaC6Slot lbl_3_data_19590[8];
-extern StaC6Slot lbl_3_data_195B0[8];
-extern StaC6Slot lbl_3_data_195D0[8];
-extern StaC6Slot lbl_3_data_195F0[8];
-extern u8 lbl_3_data_19610[0x2F];
-extern s8 lbl_3_data_1963F;
-extern s8 lbl_3_data_19640;
-extern Vec lbl_3_data_19644[7];
-extern f32 lbl_3_data_19698[7];
-extern u8 lbl_3_data_196B4[7];
-extern Vec lbl_3_data_196BC[7];
-extern f32 lbl_3_data_19710[7];
-extern u32 lbl_3_data_1972C[16];
-extern u8 lbl_3_data_1976C;
+// fn_3_E6A48, fn_3_E6D90 and fn_3_E7B20 read these from one pool base, so they are static
+static GXColor lbl_3_data_19018[3] = { { 0xBE, 0x00, 0x00, 0xFF }, { 0xC8, 0x76, 0x00, 0xFF }, { 0x00, 0xA0, 0x00, 0xFF } };
+static GXColor lbl_3_data_19024[9][3] = {
+    { { 0x05, 0x48, 0x00, 0xFF }, { 0x0D, 0xB4, 0x00, 0xFF }, { 0x12, 0xFA, 0x00, 0xFF } },
+    { { 0x05, 0x48, 0x00, 0xFF }, { 0x0D, 0xB4, 0x00, 0xFF }, { 0x12, 0xFA, 0x00, 0xFF } },
+    { { 0x58, 0x58, 0x58, 0xFF }, { 0xC8, 0xC8, 0xC8, 0xC8 }, { 0xFF, 0xFF, 0xFF, 0xFF } },
+    { { 0x08, 0x20, 0x6C, 0xFF }, { 0x0C, 0x38, 0xC8, 0xFF }, { 0x0F, 0x47, 0xFF, 0xFF } },
+    { { 0x5E, 0x00, 0x00, 0xFF }, { 0xDC, 0x00, 0x00, 0xFF }, { 0xFF, 0x19, 0x19, 0xFF } },
+    { { 0x5E, 0x1B, 0x00, 0xFF }, { 0xDC, 0x3E, 0x00, 0xFF }, { 0xFF, 0x4C, 0x05, 0xFF } },
+    { { 0x5A, 0x3B, 0x00, 0xFF }, { 0xDC, 0x91, 0x00, 0xFF }, { 0xFF, 0xB1, 0x19, 0xFF } },
+    { { 0x46, 0x45, 0x00, 0xFF }, { 0xD2, 0xD0, 0x00, 0xFF }, { 0xFF, 0xFC, 0x19, 0xFF } },
+    { { 0x58, 0x58, 0x58, 0xFF }, { 0xC8, 0xC8, 0xC8, 0xFF }, { 0xFF, 0xFF, 0xFF, 0xFF } },
+};
+static StaC6Prop lbl_3_data_19090[16] = {
+    { { 17.6f, 0.11f, 36.0f }, 40.0f, 4, 1, 1, 4 },
+    { { 0.0f, 0.11f, 52.4f }, 0.0f, 4, 1, 1, 4 },
+    { { -17.6f, 0.11f, 36.0f }, -40.0f, 4, 1, 1, 4 },
+    { { 34.6f, 0.11f, 53.0f }, 40.0f, 2, 1, 1, 2 },
+    { { 19.4f, 0.11f, 70.0f }, 25.0f, 0, 1, 1, 0 },
+    { { 0.0f, 0.11f, 76.2f }, 0.0f, 5, 1, 1, 5 },
+    { { -19.4f, 0.11f, 70.0f }, -25.0f, 0, 1, 1, 0 },
+    { { -34.6f, 0.11f, 53.0f }, -40.0f, 2, 1, 1, 2 },
+    { { 0.0f, 0.0f, 0.0f }, 0.0f, 27, 0, 255, 27 },
+};
+static StaC6Prop lbl_3_data_191D0[16] = {
+    { { 17.6f, 0.11f, 36.0f }, 40.0f, 2, 1, 1, 2 },
+    { { 0.0f, 0.11f, 52.4f }, 0.0f, 2, 1, 1, 2 },
+    { { -17.6f, 0.11f, 36.0f }, -40.0f, 2, 1, 1, 2 },
+    { { 34.6f, 0.11f, 53.0f }, 40.0f, 5, 1, 1, 5 },
+    { { 19.4f, 0.11f, 70.0f }, 25.0f, 0, 1, 1, 0 },
+    { { 0.0f, 0.11f, 76.2f }, 0.0f, 5, 1, 1, 5 },
+    { { -19.4f, 0.11f, 70.0f }, -25.0f, 0, 1, 1, 0 },
+    { { -34.6f, 0.11f, 53.0f }, -40.0f, 5, 1, 1, 5 },
+    { { 0.0f, 0.0f, 0.0f }, 0.0f, 27, 0, 255, 27 },
+};
+static StaC6Prop lbl_3_data_19310[16] = {
+    { { 17.6f, 0.11f, 36.0f }, 40.0f, 4, 1, 1, 4 },
+    { { 0.0f, 0.11f, 52.4f }, 0.0f, 4, 1, 1, 4 },
+    { { -17.6f, 0.11f, 36.0f }, -40.0f, 4, 1, 1, 4 },
+    { { 34.6f, 0.11f, 53.0f }, 40.0f, 2, 1, 1, 2 },
+    { { 19.4f, 0.11f, 70.0f }, 25.0f, 0, 1, 1, 0 },
+    { { 0.0f, 0.11f, 76.2f }, 0.0f, 5, 1, 1, 5 },
+    { { -19.4f, 0.11f, 70.0f }, -25.0f, 0, 1, 1, 0 },
+    { { -34.6f, 0.11f, 53.0f }, -40.0f, 2, 1, 1, 2 },
+    { { 0.0f, 0.0f, 0.0f }, 0.0f, 27, 0, 255, 27 },
+};
+static StaC6Prop lbl_3_data_19450[16] = {
+    { { 34.6f, 0.11f, 53.0f }, 40.0f, 7, 1, 1, 7 },
+    { { 17.6f, 0.11f, 36.0f }, 40.0f, 7, 1, 1, 7 },
+    { { 19.4f, 0.11f, 70.0f }, 25.0f, 7, 1, 1, 7 },
+    { { 0.0f, 0.11f, 52.4f }, 0.0f, 7, 1, 1, 7 },
+    { { 0.0f, 0.11f, 76.2f }, 0.0f, 7, 1, 1, 7 },
+    { { -19.4f, 0.11f, 70.0f }, -25.0f, 7, 1, 1, 7 },
+    { { -17.6f, 0.11f, 36.0f }, -40.0f, 7, 1, 1, 7 },
+    { { -34.6f, 0.11f, 53.0f }, -40.0f, 7, 1, 1, 7 },
+    { { 0.0f, 0.0f, 0.0f }, 0.0f, 27, 0, 255, 27 },
+};
+static StaC6Slot lbl_3_data_19590[8] = {
+    { 14, 1, 1, 14 }, { 13, 1, 1, 13 }, { 10, 1, 1, 10 }, { 15, 1, 1, 15 }, { 10, 1, 1, 10 }, { 13, 1, 1, 13 }, { 14, 1, 1, 14 }, { 27, 0, 255, 27 },
+};
+static StaC6Slot lbl_3_data_195B0[8] = {
+    { 10, 1, 1, 10 }, { 14, 1, 1, 14 }, { 10, 1, 1, 10 }, { 15, 1, 1, 15 }, { 10, 1, 1, 10 }, { 14, 1, 1, 14 }, { 10, 1, 1, 10 }, { 27, 0, 255, 27 },
+};
+static StaC6Slot lbl_3_data_195D0[8] = {
+    { 14, 1, 1, 14 }, { 13, 1, 1, 13 }, { 10, 1, 1, 10 }, { 15, 1, 1, 15 }, { 10, 1, 1, 10 }, { 13, 1, 1, 13 }, { 14, 1, 1, 14 }, { 27, 0, 255, 27 },
+};
+static StaC6Slot lbl_3_data_195F0[8] = {
+    { 15, 1, 1, 15 }, { 15, 1, 1, 15 }, { 15, 1, 1, 15 }, { 15, 1, 1, 15 }, { 15, 1, 1, 15 }, { 15, 1, 1, 15 }, { 15, 1, 1, 15 }, { 27, 0, 255, 27 },
+};
+u8 lbl_3_data_19610[0x2F] = {
+    1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+    2, 4, 4, 4, 4, 4, 4, 4, 2, 2, 4, 2, 2, 4, 4, 6,
+    6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+};
+static s8 lbl_3_data_1963F = -1;
+s8 lbl_3_data_19640 = -1;
+s8 lbl_3_data_19641 = -1;
+static Vec lbl_3_data_19644[7] = {
+    { 48.443f, 0.1f, 66.104f },
+    { 35.956f, 0.1f, 80.987f },
+    { 19.132f, 0.1f, 90.701f },
+    { 0.0f, 0.1f, 94.074f },
+    { -19.132f, 0.1f, 90.701f },
+    { -35.956f, 0.1f, 80.987f },
+    { -48.443f, 0.1f, 66.104f },
+};
+static f32 lbl_3_data_19698[7] = { 60.0f, 40.0f, 20.0f, 0.0f, -20.0f, -40.0f, -60.0f };
+static u8 lbl_3_data_196B4[7] = { 0 };
+static Vec lbl_3_data_196BC[7] = {
+    { -54.758f, 0.0f, 69.75f },
+    { -40.643f, 0.0f, 86.573f },
+    { -21.625f, 0.0f, 97.552f },
+    { 0.0f, 0.0f, 101.366f },
+    { 21.625f, 0.0f, 97.552f },
+    { 40.643f, 0.0f, 86.573f },
+    { 54.758f, 0.0f, 69.75f },
+};
+static f32 lbl_3_data_19710[7] = { -60.0f, -40.0f, -20.0f, 0.0f, 20.0f, 40.0f, 60.0f };
+static u32 lbl_3_data_1972C[16] = { 10, 9, 11, 2, 3, 4, 5, 6, 10, 9, 11, 2, 3, 4, 5, 6 };
+u8 lbl_3_data_1976C = 1;
 
 extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern StaC6ModelTable* ActorObjectInitTable(u16 count);
@@ -1271,3 +1350,37 @@ void fn_3_E59B4(void* arg) {
     AnimateActorBones(actor);
 }
 
+
+// .text:0x000E5924 size:0x90 mapped:0x807249B8
+BOOL fn_3_E5924(void) {
+    s32 i;
+
+    for (i = 0; i < 7; i++) {
+        if (!lbl_3_data_196B4[i]) {
+            break;
+        }
+    }
+    if (i >= 7) {
+        return TRUE;
+    }
+    return FALSE;
+}
+
+// .text:0x000E587C size:0xA8 mapped:0x80724910
+int fn_3_E587C(void) {
+    s32 i;
+    s32 n;
+    s32 idx;
+
+    n = 0;
+    for (i = 0; i < 7; i++) {
+        if (lbl_3_data_196B4[i]) {
+            idx = i;
+            n++;
+        }
+    }
+    if (n != 1) {
+        return -1;
+    }
+    return idx;
+}

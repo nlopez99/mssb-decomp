@@ -9,6 +9,8 @@ struct StaC6Draw;
 struct StaC6Shape;
 struct StaC6Sort;
 
+int fn_3_E587C(void);
+BOOL fn_3_E5924(void);
 void fn_3_E59B4(void* arg);
 void fn_3_E5A1C(void* arg);
 void fn_3_E5A84(struct StaC6Draw* draw);
