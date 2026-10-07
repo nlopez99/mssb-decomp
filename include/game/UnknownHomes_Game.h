@@ -2428,12 +2428,12 @@ typedef struct {
     /* 0x0DC */ s16 _0DC;
     /* 0x0DE */ s16 _0DE;
     /* 0x0E0 */ s16 _0E0;
-    /* 0x0E2 */ u8 _0E2[0xE4 - 0xE2];
+    /* 0x0E2 */ s16 _0E2;
     /* 0x0E4 */ s16 _0E4;
     /* 0x0E6 */ u8 _0E6[0xE8 - 0xE6];
     /* 0x0E8 */ s16 _0E8;
     /* 0x0EA */ s16 _0EA;
-    /* 0x0EC */ u8 _0EC[0xEE - 0xEC];
+    /* 0x0EC */ s16 _0EC;
     /* 0x0EE */ s16 _0EE;
     /* 0x0F0 */ u8 _0F0[0xF6 - 0xF0];
     /* 0x0F6 */ s16 _0F6;
