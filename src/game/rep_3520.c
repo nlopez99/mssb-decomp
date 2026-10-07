@@ -89,12 +89,15 @@ typedef struct Unk3520Target {
     /* 0x6 */ u8 player;
 } Unk3520Target; // size: 0x8
 
-// Elements of the array fn_3_135698 orders
-typedef struct Unk3520Sort {
-    /* 0x00 */ f32 _0;
-    /* 0x04 */ u8 _4[0x11 - 0x4];
-    /* 0x11 */ u8 _11;
-} Unk3520Sort;
+// A coin a CPU player could go for, scored by fn_3_1350BC and sorted by fn_3_135698
+typedef struct Unk3520Coin {
+    /* 0x00 */ f32 score;
+    /* 0x04 */ s32 coin;
+    /* 0x08 */ f32 x;
+    /* 0x0C */ f32 z;
+    /* 0x10 */ u8 quadrant;
+    /* 0x11 */ u8 valid;
+} Unk3520Coin; // size: 0x14
 
 // One per player, at g_Minigame._1DCC
 typedef struct Unk3520Cpu {
@@ -169,11 +172,14 @@ extern struct {
 } lbl_3_data_21A60;
 extern f32 lbl_3_data_21A64[9];
 extern s16 lbl_3_data_21A90[4][4][2];
+extern s16 lbl_3_data_21A88[4];
 extern s16 lbl_3_data_21AD0[4][4];
 extern s16 lbl_3_data_21AF0[1];
 extern f32 lbl_3_data_21AF4;
 extern f32 lbl_3_data_21AF8[6];
 extern s16 lbl_3_data_21B10[3];
+extern f32 lbl_3_data_21B38[4];
+extern f32 lbl_3_data_21B58[4];
 extern u8 lbl_3_data_21B16;
 extern s16 lbl_3_data_21B20[4];
 extern s8 lbl_3_data_21B88[4];
@@ -1138,16 +1144,16 @@ void fn_3_1356F8(void) {
 
 // .text:0x00135698 size:0x60 mapped:0x8077472C
 int fn_3_135698(const void* a, const void* b) {
-    if (((Unk3520Sort*)a)->_11 != 0 && ((Unk3520Sort*)b)->_11 == 0) {
+    if (((Unk3520Coin*)a)->valid != 0 && ((Unk3520Coin*)b)->valid == 0) {
         return -1;
     }
-    if (((Unk3520Sort*)a)->_11 == 0 && ((Unk3520Sort*)b)->_11 != 0) {
+    if (((Unk3520Coin*)a)->valid == 0 && ((Unk3520Coin*)b)->valid != 0) {
         return 1;
     }
-    if (((Unk3520Sort*)a)->_0 < ((Unk3520Sort*)b)->_0) {
+    if (((Unk3520Coin*)a)->score < ((Unk3520Coin*)b)->score) {
         return -1;
     }
-    return ((Unk3520Sort*)a)->_0 > ((Unk3520Sort*)b)->_0;
+    return ((Unk3520Coin*)a)->score > ((Unk3520Coin*)b)->score;
 }
 
 // .text:0x0013564C size:0x4C mapped:0x807746E0
@@ -1225,8 +1231,86 @@ BOOL fn_3_1354BC(s32 i, f32 x, f32 z) {
 }
 
 // .text:0x001350BC size:0x400 mapped:0x80774150
-void fn_3_1350BC(void) {
-    return;
+// 53%: fn_3_135520 is inlined here and the outer loop counts with ctr; the target calls
+// fn_3_135520, so the original callee was over the auto-inline limit.
+Unk3520Coin* fn_3_1350BC(u32 player, u32 quadrant, u32 count, Unk3520Coin* coins) {
+    u8 strength = g_Minigame.minigameControlStruct.aIStrength[player];
+    Unk3520Coin* c;
+    u32 i;
+    u32 j;
+    u32 k;
+    f32 x;
+    f32 z;
+    f32 dx;
+    f32 dz;
+    f32 dist;
+    Unk3520Fielder* fielder;
+
+    if (count == 0) {
+        return NULL;
+    }
+    for (i = 0, c = coins; i < count; i++, c++) {
+        c->valid = TRUE;
+        z = g_Minigame.wallBall_coinCoordinates[c->coin].z;
+        x = g_Minigame.wallBall_coinCoordinates[c->coin].x;
+        dz = z - lbl_3_data_21A48.z;
+        dx = x - lbl_3_data_21A48.x;
+        if (dx * dx + dz * dz < 20.25f) {
+            c->valid = FALSE;
+        } else if (player != g_Minigame._1D6D) {
+            if (g_Minigame._1D6D >= 0) {
+                fielder = &g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame._1D6D]];
+                dz = z - fielder->pos.z;
+                dx = x - fielder->pos.x;
+                if (dx * dx + dz * dz <= lbl_3_data_21B38[strength] * lbl_3_data_21B38[strength]) {
+                    c->valid = FALSE;
+                }
+            }
+            if (c->valid) {
+                for (j = 0; j < lbl_3_data_21A88[g_Minigame.soloMinigameDifficulty]; j++) {
+                    if (MG.objs[j]._3D >= 1 && MG.objs[j]._3D <= 3 && fn_3_1354BC(j, x, z)) {
+                        c->valid = FALSE;
+                        break;
+                    }
+                }
+            }
+            if (c->valid && MG.box._1E == 2) {
+                dz = z - MG.box.pos.z;
+                dx = x - MG.box.pos.x;
+                if (dx * dx + dz * dz <= lbl_3_data_21B58[strength] * lbl_3_data_21B58[strength]) {
+                    c->valid = FALSE;
+                }
+            }
+        }
+        fielder = &g_Fielders[g_Minigame.minigameFielderIndex[player]];
+        dz = g_Minigame.wallBall_coinCoordinates[c->coin].z - fielder->pos.z;
+        dx = g_Minigame.wallBall_coinCoordinates[c->coin].x - fielder->pos.x;
+        c->score = dx * dx + dz * dz;
+        for (k = 0; k < g_Minigame.miniGameNumberOfParticipants; k++) {
+            if (k == player) {
+                continue;
+            }
+            fielder = &g_Fielders[g_Minigame.minigameFielderIndex[k]];
+            dz = g_Minigame.wallBall_coinCoordinates[c->coin].z - fielder->pos.z;
+            dx = g_Minigame.wallBall_coinCoordinates[c->coin].x - fielder->pos.x;
+            dist = dx * dx + dz * dz;
+            if (dist < 36.0f && dist < c->score) {
+                c->score += 100.0f;
+            }
+        }
+        if (g_Minigame._1D72 != 0 && player != g_Minigame._1D6D) {
+            if (c->quadrant == ((quadrant + 1) & 3)) {
+                c->score += 10000.0f;
+            } else if (c->quadrant == ((quadrant + 2) & 3)) {
+                c->score += 400.0f;
+            }
+            if (fn_3_135520(c->x, c->z, 2.0f * lbl_3_data_21A54[2])) {
+                c->valid = FALSE;
+            }
+        }
+    }
+    fn_800246D4(fn_3_135698, coins, coins, sizeof(Unk3520Coin), count);
+    return coins;
 }
 
 // .text:0x00134D4C size:0x370 mapped:0x80773DE0

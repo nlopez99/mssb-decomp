@@ -9,6 +9,7 @@
 struct Unk3520Obj;
 struct Unk3520Box;
 struct Unk3520Line;
+struct Unk3520Coin;
 
 void fn_3_132EDC(void* arg0, GXTevStageID* stage, GXTexCoordID* coord, GXTexMapID* map, u8* arg4, u8* arg5);
 void fn_3_1330E4(void);
@@ -23,7 +24,7 @@ int fn_3_134918(const void* a, const void* b);
 int fn_3_13493C(u32 player, f32* x, f32* z, u32 depth);
 BOOL fn_3_134C80(u32 player, u32 quadrant, u32 target, f32 x, f32 z);
 u32 fn_3_134D4C(f32 cx, f32 cz, f32 radius, f32 px, f32 pz, f32 qx, f32 qz);
-void fn_3_1350BC(void);
+struct Unk3520Coin* fn_3_1350BC(u32 player, u32 quadrant, u32 count, struct Unk3520Coin* coins);
 BOOL fn_3_1354BC(s32 i, f32 x, f32 z);
 int fn_3_135520(f32 x, f32 z, f32 r);
 void fn_3_135600(f32* outX, f32* outZ, f32 x, f32 z);
