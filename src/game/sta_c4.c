@@ -12,6 +12,7 @@
 #include "game/rep_23E8.h"
 #include "game/rep_D0.h"
 #include "game/rep_1C0.h"
+#include "game/rep_1D58.h"
 #include "game/sta_c0.h"
 #include "game/m_sound.h"
 #include "math.h"
@@ -109,11 +110,6 @@ typedef struct {
     /* 0x04 */ u8 _04[0x5C - 0x4];
 } StaC4Anim; // size: 0x5C
 
-typedef struct {
-    /* 0x00 */ u8 _00[0x8];
-    /* 0x08 */ void* _08;
-} StaC4Geom;
-
 typedef struct StaC4Hit {
     /* 0x00 */ Vec x;
     /* 0x0C */ Vec n;
@@ -123,7 +119,7 @@ typedef struct StaC4Obj {
     /* 0x00 */ Control control;
     /* 0x44 */ u8 _44[0x74 - 0x44];
     /* 0x74 */ StaC4Model* _74;
-    /* 0x78 */ StaC4Geom* _78;
+    /* 0x78 */ struct StadiumObjectCollision* _78;
     /* 0x7C */ void (*_7C)(struct StaC4Draw* draw);
     /* 0x80 */ void (*_80)(s32 idx, void* arg1, StaC4Hit* hit);
     /* 0x84 */ void (*_84)(void);
@@ -243,9 +239,12 @@ typedef struct {
 } StaC4Swaps;
 
 typedef struct StaC4View {
-    /* 0x00 */ u8 _00[0x38];
+    /* 0x00 */ u32 _00;
+    /* 0x04 */ void (*_04)(struct StaC4View* view);
+    /* 0x08 */ s32 _08[12];
     /* 0x38 */ Mtx _38;
-} StaC4View;
+    /* 0x68 */ s32 _68;
+} StaC4View; // size: 0x6C
 
 extern struct {
     /* 0x00 */ StaC4Draw* _00;
@@ -288,6 +287,7 @@ extern struct {
 
 extern StaC4SpriteRef lbl_80371C30[];
 extern void* lbl_803CC1B8;
+extern u8 lbl_803CBBC0;
 
 extern u16 lbl_3_data_81DC[16];
 extern u8 lbl_3_data_10E9C[0xE0];
@@ -300,16 +300,7 @@ extern u8 lbl_3_data_11138[0x10][3];
 extern u8 lbl_3_data_8404[6][15][2];
 extern u8 lbl_3_data_84B8[30][2];
 
-// Only this unit reads these; they lie outside its splits.txt ranges.
-extern void (*lbl_3_data_1BA88[4])(s32 idx, void* arg1, StaC4Hit* hit);
-extern StaC4Prop lbl_3_data_1BA98[50];
-extern u8 lbl_3_data_1BE80[17];
-extern Vec lbl_3_data_1BF6C[21];
-extern u8 lbl_3_data_1C068[20][3];
-
 extern void* _OSAllocFromHeap(u32 align, u32 size);
-// Outside this unit's .text range, but only this unit references it.
-extern void fn_3_FBCD0(void);
 extern void fn_8003A144(void);
 extern void fn_80035750(void* arg0, void* arg1, s32 arg2);
 extern void fn_80034E20(StaC4Task* task, void* desc);
@@ -320,12 +311,10 @@ extern void fn_80025C58(void* anim, StaC4Model* model);
 extern void fn_80025DDC(void* anim);
 extern void fn_80025FFC(void* anim, StaC4Anim* state);
 extern void fn_80025EEC(StaC4Anim* state, s32, s32);
-extern void fn_3_B97C8(void (*callback)(void));
-extern void fn_3_B97DC(StaC4Model* model, void* anim);
-extern void fn_3_B9D68(u8* types, s32 count, void** files, s32* indices);
 extern StaC4Tex* fn_80039AB4(void);
 extern void fn_800245EC(camera_803c639c_s* camera, Mtx view, Vec* points, f32* out, s32 count, s32 arg5);
 extern void fn_800ACFB0(void* data);
+extern void fn_800A7D4C(s32, void*);
 extern void fn_80033620(StaC4Emitter* emitter);
 extern void fn_8003403C(f32, f32);
 extern void fn_80033CC8(StaC4Particle* particle, void* arg1);
@@ -340,11 +329,92 @@ extern void ACTSetAnimation(StaC4Actor* actor, StaC4AnimBank* animBank, char* se
 extern void fn_800B4CA0(StaC4Actor*, f32);
 extern void fn_800B4C04(StaC4Actor*, f32);
 extern void fn_800B4AFC(StaC4Actor*, s32);
-extern void fn_3_B8414(Vec* min, Vec* max);
-extern void fn_3_B8464(Mtx m, StaC4Geom* geom);
-extern void fn_3_B8574(void);
-extern void fn_3_B9510(s32 idx);
-extern u8* fn_3_B9534(u16 width, u16 height, GXTexObj* obj);
+
+// fn_3_FA58C reaches the first three from one pool base, so they are static
+static void (*lbl_3_data_1BA88[4])(s32 idx, void* arg1, StaC4Hit* hit) = {
+    fn_3_F9E78,
+    fn_3_F99F0,
+    fn_3_F976C,
+    fn_3_F9B9C,
+};
+static StaC4Prop lbl_3_data_1BA98[50] = {
+    { { -12.0f, -12.0f, 55.0f }, 350.0f, 3, 1, 1, 8 },
+    { { 12.0f, -12.0f, 55.0f }, 10.0f, 3, 1, 1, 8 },
+    { { -20.0f, -9.0f, 73.0f }, 350.0f, 3, 1, 1, 8 },
+    { { 20.0f, -9.0f, 73.0f }, 10.0f, 3, 1, 1, 8 },
+    { { -25.0f, -9.0f, 45.0f }, 320.0f, 3, 1, 2, 8 },
+    { { -51.0f, -9.0f, 65.0f }, 315.0f, 2, 1, 2, 8 },
+    { { -39.0f, -10.0f, 52.0f }, 315.0f, 2, 1, 3, 8 },
+    { { -30.0f, -12.0f, 62.0f }, 325.0f, 1, 1, 3, 8 },
+    { { 25.0f, -9.0f, 45.0f }, 40.0f, 3, 1, 4, 8 },
+    { { 51.0f, -9.0f, 65.0f }, 45.0f, 2, 1, 4, 8 },
+    { { 39.0f, -10.0f, 52.0f }, 45.0f, 2, 1, 5, 8 },
+    { { 30.0f, -12.0f, 62.0f }, 35.0f, 1, 1, 5, 8 },
+    { { -29.0f, -9.0f, 26.0f }, 265.0f, 1, 1, 6, 8 },
+    { { -39.0f, -10.0f, 36.0f }, 265.0f, 0, 1, 6, 8 },
+    { { 29.0f, -9.0f, 26.0f }, 85.0f, 1, 1, 7, 8 },
+    { { 39.0f, -10.0f, 36.0f }, 85.0f, 0, 1, 7, 8 },
+    { { 0.0f, 0.0f, 0.0f }, 0.0f, 5, 1, 9, 8 },
+    { { 0.0f, 0.0f, 0.0f }, 0.0f, 5, 1, 9, 8 },
+    { { 0.0f, 0.0f, 0.0f }, 0.0f, 5, 1, 9, 8 },
+    { { 0.0f, 0.0f, 0.0f }, 0.0f, 5, 1, 9, 8 },
+    { { 0.0f, 0.0f, 0.0f }, 0.0f, 5, 1, 9, 8 },
+    { { 0.0f, 0.0f, 0.0f }, 0.0f, 5, 1, 9, 8 },
+    { { 0.0f, 0.0f, 0.0f }, 0.0f, 5, 1, 9, 8 },
+    { { 0.0f, 0.0f, 0.0f }, 0.0f, 5, 1, 9, 8 },
+    { { 0.0f, 0.0f, 0.0f }, 0.0f, 5, 1, 9, 8 },
+    { { 0.0f, 0.0f, 0.0f }, 0.0f, 4, 1, 9, 8 },
+};
+static u8 lbl_3_data_1BE80[17] = { 1, 2, 4, 2, 2, 2, 2, 2, 2, 6, 6, 6, 6, 8, 9, 0, 0 };
+StaC4View lbl_3_data_1BE94[2] = {
+    { 2, fn_3_FB3D8 },
+    { 2, fn_3_FB3D8 },
+};
+Vec lbl_3_data_1BF6C[21] = {
+    { 1.2209f, -0.1f, 67.7082f },
+    { -1.2209f, -0.1f, 67.7082f },
+    { -3.5431f, -0.1f, 66.9536f },
+    { -5.5184f, -0.1f, 65.5184f },
+    { -6.9536f, -0.1f, 63.5431f },
+    { -7.7082f, -0.1f, 61.2209f },
+    { -7.7082f, -0.1f, 58.7791f },
+    { -6.9536f, -0.1f, 56.4569f },
+    { -5.5184f, -0.1f, 54.4816f },
+    { -3.5431f, -0.1f, 53.0464f },
+    { -1.2209f, -0.1f, 52.2918f },
+    { 1.2209f, -0.1f, 52.2918f },
+    { 3.5431f, -0.1f, 53.0464f },
+    { 5.5184f, -0.1f, 54.4816f },
+    { 6.9536f, -0.1f, 56.4569f },
+    { 7.7082f, -0.1f, 58.7791f },
+    { 7.7082f, -0.1f, 61.2209f },
+    { 6.9536f, -0.1f, 63.5431f },
+    { 5.5184f, -0.1f, 65.5184f },
+    { 3.5431f, -0.1f, 66.9536f },
+    { 0.0f, -0.1f, 60.0f },
+};
+u8 lbl_3_data_1C068[20][3] = {
+    { 20, 19, 0 },
+    { 20, 1, 2 },
+    { 20, 16, 17 },
+    { 20, 12, 13 },
+    { 20, 5, 6 },
+    { 20, 18, 19 },
+    { 20, 3, 4 },
+    { 20, 14, 15 },
+    { 20, 10, 11 },
+    { 20, 7, 8 },
+    { 20, 17, 18 },
+    { 20, 8, 9 },
+    { 20, 2, 3 },
+    { 20, 11, 12 },
+    { 20, 0, 1 },
+    { 20, 9, 10 },
+    { 20, 15, 16 },
+    { 20, 6, 7 },
+    { 20, 4, 5 },
+    { 20, 13, 14 },
+};
 
 static const Vec lbl_3_rodata_2FB8 = { 0.0f, 0.5f, 60.0f };
 
@@ -363,6 +433,15 @@ static u8 lbl_3_bss_B5D4;
 static StaC4Anim lbl_3_bss_B578;
 static s32 lbl_3_bss_B574;
 static u8 lbl_3_bss_B570;
+
+// .text:0x000FBCD0 size:0x88 mapped:0x8073AD64
+void fn_3_FBCD0(void) {
+    fn_3_B939C();
+    if (g_GameLogic.bOD_framesInLiveBallScene >= 0) {
+        PSMTXCopy(fn_80052768_getCamera(0)->view, lbl_3_data_1BE94[lbl_803CBBC0]._38);
+        fn_800A7D4C(1, &lbl_3_data_1BE94[lbl_803CBBC0]);
+    }
+}
 
 // .text:0x000FBBA0 size:0x130 mapped:0x8073AC34
 void fn_3_FBBA0(StaC4Tex* tex) {
@@ -504,27 +583,28 @@ void fn_3_FB3D8(StaC4View* view) {
 }
 
 // .text:0x000FA58C size:0xE4C mapped:0x80739620
-// The target reaches lbl_3_data_1BA88, 1BA98 and 1BE80 from one pool base, so this cannot
-// match while they lie outside the unit; with them defined here as statics, only registers differ
+// 99.49%: registers only; indices, slot and the main loop's i in rotated saved registers,
+// and the tile loops' counter, row pointer and offset rotated
 void fn_3_FA58C(void** files) {
     StaC4Swaps* swaps;
     StaC4Tiles* tiles;
-    StaC4Prop* prop;
+    StaC4Prop* prop = lbl_3_data_1BA98;
     s32* indices;
-    StaC4Draw* entry;
     StaC4Draw* draw;
+    StaC4Draw* entry;
     u8* slot;
     void (*draw3D)(void);
     u32 size;
     s32 i;
     s32 k;
-    BOOL end;
     s32 count;
+    BOOL end;
 
-    draw3D = fn_3_FBCD0;
     count = 0;
     if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES) {
         draw3D = NULL;
+    } else {
+        draw3D = fn_3_FBCD0;
     }
     lbl_3_common_bss_350E4._18 = draw3D;
     lbl_3_common_bss_350E4._1C = fn_3_F8454;
@@ -753,12 +833,12 @@ void fn_3_FA58C(void** files) {
         lbl_3_common_bss_350E4._0C->_16 = 8;
         for (i = 0; i < 0x10; i++) {
             lbl_3_common_bss_350E4._0C->_10[i * 3] = lbl_3_data_11138[i][0];
-            if (lbl_3_data_11138[i][1] < 2) {
+            if (lbl_3_data_11138[i][1] >= 2) {
                 lbl_3_common_bss_350E4._0C->_10[i * 3 + 1] = lbl_3_data_11138[i][1];
             } else {
                 lbl_3_common_bss_350E4._0C->_10[i * 3 + 1] = rand() % 6;
             }
-            if (lbl_3_data_11138[i][2] < 8) {
+            if (lbl_3_data_11138[i][2] >= 8) {
                 lbl_3_common_bss_350E4._0C->_10[i * 3 + 2] = lbl_3_data_11138[i][2];
             } else {
                 tiles = lbl_3_common_bss_350E4._0C;
@@ -805,10 +885,10 @@ void fn_3_FA58C(void** files) {
 }
 
 // .text:0x000FA3C0 size:0x1CC mapped:0x80739454
-// 96.64%: registers only; count's induction offsets and the inner loop's pointers rotated
+// 97.64%: count's three induction offsets start as copies of a fresh li 0, where the
+// target copies them from i's li 0 (the same instructions otherwise)
 void fn_3_FA3C0(void) {
     Mtx m;
-    StaC4Prop* prop;
     StaC4Draw* draw;
     s32 i;
     s32 j;
@@ -829,9 +909,8 @@ void fn_3_FA3C0(void) {
     for (i = 0; i < 10; i++) {
         next = lbl_3_common_bss_350E4._40[count] = lbl_3_common_bss_350E4._40[count - 1] + lbl_3_common_bss_350E4._3C[count - 1];
         fn_3_B8574();
-        prop = lbl_3_data_1BA98;
-        for (j = 0; j < lbl_3_common_bss_350E4._30; prop++, j++) {
-            if (i == prop->group && lbl_3_common_bss_350E4._00[j].obj._90_6) {
+        for (j = 0; j < lbl_3_common_bss_350E4._30; j++) {
+            if (i == lbl_3_data_1BA98[j].group && lbl_3_common_bss_350E4._00[j].obj._90_6) {
                 lbl_3_common_bss_350E4._44[next] = j;
                 next++;
                 lbl_3_common_bss_350E4._3C[count]++;

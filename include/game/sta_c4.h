@@ -37,5 +37,6 @@ void fn_3_FA3C0(void);
 void fn_3_FA58C(void** files);
 void fn_3_FB3D8(struct StaC4View* view);
 void fn_3_FBBA0(struct StaC4Tex* tex);
+void fn_3_FBCD0(void);
 
 #endif // !__GAME_sta_c4_H_
