@@ -22,7 +22,7 @@ typedef struct UnkTask3448 {
     /* 0x22 */ u16 _22;
     union {
         /* 0x24 */ u8 _24_arr[4];
-        /* 0x24 */ s16 _24_s16[4];
+        /* 0x24 */ s16 _24_s16[8];
         /* 0x24 */ SND_VOICEID voice;
         struct {
             /* 0x24 */ s8 _24;
@@ -105,6 +105,19 @@ extern struct {
     /* 0x28 */ u8 _28;
 } lbl_80366158;
 
+// Filled by fn_3_10754C
+typedef struct UnkStats3448 {
+    /* 0x00 */ s16 _00[6];
+    /* 0x0C */ u8 _0C[6];
+    /* 0x12 */ u8 _12;
+    /* 0x13 */ u8 _13;
+} UnkStats3448;
+
+// Filled from UnkStats3448 by fn_8006C2B4
+typedef struct UnkTotals3448 {
+    /* 0x00 */ s16 _00[8];
+} UnkTotals3448;
+
 // One entry per player, returned by fn_3_109D88
 typedef struct UnkRecord3448 {
     /* 0x0 */ s32 _00;
@@ -172,7 +185,11 @@ extern UnkSpriteDesc3448 lbl_3_data_23AE4[];
 // symbols.txt lumps this unit's pooled .data statics into one entry; the fields sit at their offsets.
 extern struct {
     /* 0x0000 */ s16 _0000[4][4];
-    /* 0x0020 */ u8 _0020[0x448 - 0x20];
+    /* 0x0020 */ UnkSpriteDesc3448 _0020[1];
+    /* 0x0040 */ u8 _0040[0x420 - 0x40];
+    /* 0x0420 */ u8 _0420[8];
+    /* 0x0428 */ u16 _0428[8];
+    /* 0x0438 */ u16 _0438[8];
     /* 0x0448 */ UnkSpriteDesc3448 _448[1];
     /* 0x0468 */ u8 _0468[0x1188 - 0x468];
     /* 0x1188 */ u16 _1188[8];
@@ -210,6 +227,9 @@ extern void fn_800B0A5C_insertQueue(void (*)(void), s32);
 extern u32 fn_3_107C88(void);
 extern struct UnkRecord3448* fn_3_109D88(void);
 extern s32 fn_8006C100(s16);
+extern s32 fn_8006C268(struct UnkTotals3448* totals);
+extern void fn_8006C2B4(struct UnkTotals3448* totals, struct UnkStats3448* stats);
+extern void fn_3_10754C(struct UnkStats3448* stats);
 extern s32 fn_3_107CD0(void);
 
 static inline u32 getFrame(UnkTask3448* task, u32 i) {
@@ -418,8 +438,183 @@ remove:
 }
 
 // .text:0x00127B68 size:0xED0 mapped:0x80766BFC
+// The target reads lbl_3_data_226E0's fields from a pool base hoisted to the entry, as for
+// statics of this file; .data 0x226E0- is outside splits.txt.
 void fn_3_127B68(void) {
-    return;
+    UnkTask3448* task = lbl_803CC1B8;
+    UnkTask3448* self = lbl_803CC1B8;
+    UnkTotals3448 totals;
+    UnkStats3448 stats;
+    u32 i;
+    s32 n;
+    s16 diff;
+    s16 step;
+
+    if (task->_1C >= 6) {
+        g_Minigame._1E04 = 0;
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    if (g_GameLogic.gameStatus != 0x24) {
+        g_Minigame._1E04 = 0;
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    fn_3_10754C(&stats);
+    fn_8006C2B4(&totals, &stats);
+    switch (task->_1C) {
+    case 0:
+        fn_80034E20(task, lbl_3_data_226E0._0020);
+        lbl_80371C30[task->_14 + 2]._00->_5C =
+            inMemRoster[0][g_Minigame.minigameControlStruct.characterIndex[g_Minigame._1908]].stats.CharID << 16;
+        for (i = 0; i < 6; i++) {
+            lbl_80371C30[task->_14 + stats._0C[i] + 3]._00->_72 = lbl_3_data_226E0._0420[i];
+        }
+        n = stats._00[0];
+        if (n > 9999) {
+            n = 9999;
+        }
+        fn_800363D8(task, 4, 4, 6, n >= 1000 ? (n % 10000) / 1000 : 10);
+        fn_800363D8(task, 4, 3, 6, n >= 100 ? (n % 1000) / 100 : 10);
+        fn_800363D8(task, 4, 2, 6, n >= 10 ? (n % 100) / 10 : 10);
+        fn_800363D8(task, 4, 1, 6, n % 10);
+        n = stats._00[1];
+        if (n > 9999) {
+            n = 9999;
+        }
+        if (n >= 1000) {
+            lbl_80371C30[task->_14 + 5]._00->_64 = 0x76;
+        } else if (n >= 100) {
+            lbl_80371C30[task->_14 + 5]._00->_64 = 0x77;
+        } else if (n >= 10) {
+            lbl_80371C30[task->_14 + 5]._00->_64 = 0x78;
+        } else {
+            lbl_80371C30[task->_14 + 5]._00->_64 = 0x79;
+        }
+        fn_800363D8(task, 5, 4, 6, (n % 10000) / 1000);
+        fn_800363D8(task, 5, 3, 6, (n % 1000) / 100);
+        fn_800363D8(task, 5, 2, 6, (n % 100) / 10);
+        fn_800363D8(task, 5, 1, 6, n % 10);
+        n = stats._00[2];
+        if (n > 9999) {
+            n = 9999;
+        }
+        fn_800363D8(task, 6, 4, 6, n >= 1000 ? (n % 10000) / 1000 : 10);
+        fn_800363D8(task, 6, 3, 6, n >= 100 ? (n % 1000) / 100 : 10);
+        fn_800363D8(task, 6, 2, 6, n >= 10 ? (n % 100) / 10 : 10);
+        fn_800363D8(task, 6, 1, 6, n % 10);
+        n = stats._00[3];
+        if (n > 99) {
+            n = 99;
+        }
+        if (n >= 10) {
+            lbl_80371C30[task->_14 + 7]._00->_64 = 0x7C;
+        } else {
+            lbl_80371C30[task->_14 + 7]._00->_64 = 0x7D;
+        }
+        fn_800363D8(task, 7, 2, 6, (n % 100) / 10);
+        fn_800363D8(task, 7, 1, 6, n % 10);
+        n = stats._00[4];
+        if (n > 999) {
+            n = 999;
+        }
+        fn_800363D8(task, 8, 3, 6, n >= 100 ? (n % 1000) / 100 : 10);
+        fn_800363D8(task, 8, 2, 6, n >= 10 ? (n % 100) / 10 : 10);
+        fn_800363D8(task, 8, 1, 6, n % 10);
+        n = stats._00[5];
+        if (n > 999) {
+            n = 999;
+        }
+        if (n >= 100) {
+            lbl_80371C30[task->_14 + 9]._00->_64 = 0x7E;
+        } else if (n >= 10) {
+            lbl_80371C30[task->_14 + 9]._00->_64 = 0x7F;
+        } else {
+            lbl_80371C30[task->_14 + 9]._00->_64 = 0x80;
+        }
+        fn_800363D8(task, 9, 3, 6, (n % 1000) / 100);
+        fn_800363D8(task, 9, 2, 6, (n % 100) / 10);
+        fn_800363D8(task, 9, 1, 6, n % 10);
+        fn_800363D8(task, 10, 1, 0x71, stats._12);
+        n = stats._13;
+        if (n > 99) {
+            n = 99;
+        }
+        fn_800363D8(task, 11, 2, 6, n >= 10 ? (n % 100) / 10 : 10);
+        fn_800363D8(task, 11, 1, 6, n % 10);
+        n = fn_8006C268(&totals);
+        if (n > 9999) {
+            n = 9999;
+        }
+        fn_800363D8(task, 0x1D, 4, 0x74, (n % 10000) / 1000);
+        fn_800363D8(task, 0x1D, 3, 0x74, (n % 1000) / 100);
+        fn_800363D8(task, 0x1D, 2, 0x74, (n % 100) / 10);
+        fn_800363D8(task, 0x1D, 1, 0x74, n % 10);
+        n = fn_8006C268(&totals);
+        if (n > 9999) {
+            n = 9999;
+        }
+        lbl_80371C30[task->_14 + 30]._00->_64 = lbl_3_data_226E0._0428[(u8)fn_8006C100(n)];
+        task->_1C = 1;
+    case 1:
+        if (lbl_80371C30[task->_14]._00->_69 == 2 && lbl_80371C30[task->_14 + 1]._00->_69 == 2 &&
+            lbl_80371C30[task->_14 + 3]._00->_69 == 2) {
+            lbl_80371C30[task->_14 + 28]._00->_68 = 1;
+            lbl_80371C30[task->_14 + 29]._00->_68 = 1;
+            fn_3_90064(lbl_3_data_81FC[0x30]);
+            task->_1C = 2;
+        }
+    case 2:
+        if (lbl_80371C30[task->_14 + 29]._00->_69 == 2) {
+            lbl_80371C30[task->_14 + 30]._00->_68 = 1;
+            fn_3_90064(lbl_3_data_81FC[0x31]);
+            task->_1C = 3;
+        }
+    case 3:
+        if (lbl_80371C30[task->_14 + 30]._00->_69 == 2) {
+            task->_1C = 4;
+        }
+    case 4:
+        task->_18 = 1;
+        if (task->_1A != 0) {
+            task->_1C = 5;
+        }
+    case 5:
+        task->_1C = 6;
+    }
+    for (i = 0; i < 8; i++) {
+        if (lbl_80371C30[task->_14 + 3]._00->_5C >> 16 >= lbl_3_data_226E0._0438[i]) {
+            if (lbl_80371C30[task->_14 + 3]._00->_5C >> 16 == lbl_3_data_226E0._0438[i]) {
+                fn_3_90064(lbl_3_data_81FC[0x2F]);
+            }
+            if (i < 6) {
+                diff = totals._00[stats._0C[i] - 1] - self->_24_s16[i];
+            } else if (i == 6) {
+                diff = totals._00[6] - self->_24_s16[i];
+            } else {
+                diff = totals._00[7] - self->_24_s16[i];
+            }
+            if (diff != 0) {
+                step = diff / 3;
+                if (step != 0) {
+                    self->_24_s16[i] += step;
+                } else {
+                    self->_24_s16[i] += 1;
+                }
+            }
+            n = self->_24_s16[i];
+            if (n > 999) {
+                n = 999;
+            }
+        } else {
+            n = 0;
+        }
+        fn_800363D8(task, i + 0x14, 3, 0x74, (n % 1000) / 100);
+        fn_800363D8(task, i + 0x14, 2, 0x74, (n % 100) / 10);
+        fn_800363D8(task, i + 0x14, 1, 0x74, n % 10);
+    }
 }
 
 // .text:0x001274B4 size:0x6B4 mapped:0x80766548
@@ -502,7 +697,7 @@ void fn_3_1274B4(void) {
         task->_1C = 1;
     case 1:
         for (i = 0; i < 5; i++) {
-            if (i != g_Minigame._1E03[0]) {
+            if (i != g_Minigame._1E03) {
                 fn_3_125424(task, i + 10, 10);
             }
             if (lbl_80371C30[task->_14 + 4]._00->_5C >> 16 == lbl_3_data_226E0._11A8[i]) {
