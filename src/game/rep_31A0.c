@@ -158,6 +158,11 @@ extern struct {
     /* 0x3 */ u8 _3[3];
 } lbl_800E8558[];
 extern s16 lbl_80109410[8];
+
+extern struct {
+    /* 0x0 */ u8 _0[3];
+    /* 0x3 */ u8 _3;
+} lbl_803C5F74;
 extern s16 lbl_3_data_607C[16];
 extern AramEntry31A0 lbl_3_data_20FDC;
 extern u8 lbl_3_data_188E8[3][6];
@@ -201,6 +206,9 @@ extern void fn_3_161078(void);
 extern void fn_3_1658F0(void);
 extern void possiblyTransitionBlackScreen(void);
 extern void fn_8004CC18(void);
+extern void fn_8004CC2C(void);
+extern void fn_8004CC4C(int arg0, int arg1, int arg2, int arg3, int arg4);
+extern void fn_8004D0F0(void);
 extern void fn_800189B8(void);
 extern void fn_80018B74(void);
 extern BOOL fn_80020388(void);
@@ -1846,8 +1854,211 @@ void fn_3_10AD48(void) {
 }
 
 // .text:0x0010A0A0 size:0xCA8 mapped:0x80749134
+// 99.41%: registers differ, and the minigame level is incremented from the compared value instead of reloaded
 void fn_3_10A0A0(void) {
-    return;
+    struct UnkRecord3448 rec;
+    int rank;
+    int ok;
+    int count;
+    u8* level;
+
+    switch (g_GameLogic._125) {
+    case 0:
+        lbl_3_common_bss_32724._B8 = 0;
+        g_Minigame._19A9 = 1;
+        g_Minigame._19AA = 0;
+        g_Minigame._1A44 = 0;
+        g_Minigame._1A45 = 0;
+        g_Minigame._1A43 = 0;
+        g_Minigame._1A3D = 0;
+        if (g_d_GameSettings.exhibitionMatchInd == 0) {
+            fn_3_106ED4();
+        } else if (g_Minigame.soloMinigameDifficulty == 3 || g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+            ok = TRUE;
+            if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+                if (g_Minigame._1908 < 0) {
+                    ok = FALSE;
+                }
+            } else if ((g_Minigame.GameMode_MiniGame == 2 || g_Minigame.GameMode_MiniGame == 4 || g_Minigame.GameMode_MiniGame == 5 ||
+                        g_Minigame.GameMode_MiniGame == 6) &&
+                       g_Minigame.minigameControlStruct._1C[g_Minigame._1908] > 1) {
+                ok = FALSE;
+            }
+            if (ok) {
+                fn_3_109DE0(&rec);
+                rank = fn_3_109CE8(&rec);
+                if (rank >= 5) {
+                    g_Minigame._1A43 = 0;
+                } else {
+                    g_Minigame._1A43 = rank + 1;
+                    g_Minigame._19AA = 1;
+                }
+            }
+        } else if (g_Minigame._1A37 == 1 && g_d_GameSettings.exhibitionMatchInd != 0 && g_Minigame.GameMode_MiniGame >= 1 &&
+                   g_Minigame.GameMode_MiniGame <= 6) {
+            level = &g_d_GameSettings._13_arr[g_Minigame.GameMode_MiniGame];
+            if (*level == g_Minigame.soloMinigameDifficulty) {
+                g_Minigame._1A44 = 1;
+                (*level)++;
+                for (count = 0; count < 6; count++) {
+                    if (g_d_GameSettings._13_arr[count + 1] < 3) {
+                        break;
+                    }
+                }
+                if (count >= 6) {
+                    g_Minigame._1A45 = 2;
+                    g_d_GameSettings._12 = 2;
+                }
+            }
+        }
+        fn_3_8C07C();
+        fn_3_5B368();
+        changeScene(1, 6);
+        g_GameLogic.FrameCountOfCurrentAtBat_Copy = 0;
+        g_GameLogic._125 = 1;
+        break;
+    case 1:
+        g_Minigame._19A9 = 2;
+        g_GameLogic.FrameCountOfCurrentAtBat_Copy = 0;
+        if (g_Minigame._1A37 == 0) {
+            fn_3_8FC0C();
+        }
+        g_GameLogic._125 = 2;
+        break;
+    case 2:
+        if (g_GameLogic.FrameCountOfCurrentAtBat_Copy == lbl_3_data_2137C[1]) {
+            lbl_3_common_bss_32724._B8 = 1;
+        }
+        if (g_Minigame._1A44 == 1) {
+            if (g_GameLogic.FrameCountOfCurrentPitch > 300) {
+                g_GameLogic._125 = 5;
+                g_GameLogic.FrameCountOfCurrentAtBat_Copy = 0;
+            }
+        } else if (g_Minigame._1A45 != 0) {
+            if (g_GameLogic.FrameCountOfCurrentPitch > 300) {
+                g_GameLogic._125 = 6;
+                g_GameLogic.FrameCountOfCurrentAtBat_Copy = 0;
+            }
+        } else if (g_GameLogic.FrameCountOfCurrentPitch > 300) {
+            if (g_d_GameSettings.exhibitionMatchInd == 0) {
+                if (g_GameLogic.FrameCountOfCurrentPitch > 420) {
+                    g_GameLogic._125 = 3;
+                }
+            } else if (g_Minigame.GameMode_MiniGame == 1 && g_Minigame.soloMinigameDifficulty == 3 && fn_3_6C938(0, 0x10) &&
+                       fn_3_6C938(0, 0x800) && fn_3_6C938(0, 0x200)) {
+                sndFXStartEx(0x1BF, lbl_800EFBA4[8], 0x3F, 0);
+                g_GameLogic.FrameCountOfCurrentAtBat_Copy = 0;
+                g_GameLogic._125 = 7;
+            } else if (fn_3_6C938(1, 0x1100)) {
+                g_GameLogic._125 = 3;
+            }
+        }
+        break;
+    case 7:
+        if (g_GameLogic.FrameCountOfCurrentAtBat_Copy > 30 && fn_3_6C938(1, 0x200)) {
+            sndFXStartEx(0x1B9, lbl_800EFBA4[2], 0x3F, 0);
+            g_GameLogic.FrameCountOfCurrentPitch = 270;
+            g_GameLogic._125 = 2;
+        }
+        break;
+    case 5:
+        if (g_GameLogic.FrameCountOfCurrentAtBat_Copy == 1) {
+            count = g_d_GameSettings._13_arr[g_Minigame.GameMode_MiniGame];
+            fn_8004CC4C(9, 0, count - 1, 0, count + 140);
+            fn_800B0A5C_insertQueue(fn_8004D0F0, 2);
+            g_GameLogic.scoreBook_logoFadeDirectionLeft_Right = 0;
+            fn_3_90064(0x301);
+        } else if (g_GameLogic.FrameCountOfCurrentAtBat_Copy > 150) {
+            if (fn_3_6C938(1, 0x1100)) {
+                fn_8004CC2C();
+                g_GameLogic.scoreBook_logoFadeDirectionLeft_Right = 1;
+            } else if (g_GameLogic.scoreBook_logoFadeDirectionLeft_Right != 0 && lbl_803C5F74._3 == 4) {
+                if (g_Minigame._1A45 != 0) {
+                    g_GameLogic.FrameCountOfCurrentAtBat_Copy = 0;
+                    g_GameLogic._125 = 6;
+                } else {
+                    g_GameLogic._125 = 3;
+                }
+            }
+        }
+        break;
+    case 6:
+        if (g_GameLogic.FrameCountOfCurrentAtBat_Copy == 1) {
+            fn_8004CC4C(9, 0, 4, 0, 0x91);
+            fn_800B0A5C_insertQueue(fn_8004D0F0, 2);
+            g_GameLogic.scoreBook_logoFadeDirectionLeft_Right = 0;
+        } else if (g_GameLogic.FrameCountOfCurrentAtBat_Copy > 150) {
+            if (fn_3_6C938(1, 0x1100)) {
+                fn_8004CC2C();
+                g_GameLogic.scoreBook_logoFadeDirectionLeft_Right = 1;
+            } else if (g_GameLogic.scoreBook_logoFadeDirectionLeft_Right != 0 && lbl_803C5F74._3 == 4) {
+                g_GameLogic.FrameCountOfCurrentAtBat_Copy = 0;
+                g_GameLogic._125 = 3;
+            }
+        }
+        break;
+    case 3:
+        if (g_Minigame._1A44 != 0 || g_Minigame._1A45 != 0) {
+            if (fn_3_5B220(1)) {
+                g_GameLogic._125 = 4;
+            }
+        } else {
+            g_GameLogic._125 = 4;
+        }
+        break;
+    case 4:
+        if (g_Minigame._190A != 0) {
+            g_GameLogic._125 = 9;
+        } else {
+            g_GameLogic._125 = 8;
+        }
+        fn_3_8FC0C();
+        break;
+    case 8:
+        if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+            lbl_3_common_bss_34C90._1D2 = 0;
+            if (g_Minigame._1908 >= 0) {
+                fn_3_5A6D4(0x24);
+            } else {
+                fn_3_5A6D4(0x22);
+            }
+        } else if (g_Minigame.multiPlayerInd == 0 && g_Minigame._1A3C == 0 && g_Minigame.soloMinigameDifficulty == 3) {
+            fn_3_5A6D4(0x24);
+        } else {
+            lbl_3_common_bss_34C90._1D1 = 0;
+            lbl_3_common_bss_34C90._1D2 = 0;
+            if (g_Minigame._1A3C != 0) {
+                fn_3_5A6D4(0x26);
+            } else {
+                fn_3_5A6D4(0x22);
+            }
+        }
+        break;
+    case 9:
+        fn_800203E0(12, lbl_3_data_6104[starMissionCompletionTracker._441C]);
+        if (lbl_8037169C._13 != 0) {
+            g_GameLogic._125 = 10;
+        }
+        break;
+    case 10:
+        if (g_Minigame.GameMode_MiniGame == 1 || g_Minigame.GameMode_MiniGame == 3) {
+            if (g_Minigame._1A37 != 0) {
+                g_d_GameSettings._38 = 1;
+            } else {
+                g_d_GameSettings._38 = 0;
+            }
+        } else if (g_Minigame.challenge_minigame_haven_tWonYetIndicator != 0) {
+            g_d_GameSettings._38 = 0;
+        } else {
+            g_d_GameSettings._38 = g_Minigame.minigameControlStruct._1C[g_d_GameSettings._35];
+        }
+        fn_3_15F998();
+        fn_3_147DFC();
+        fn_3_11CF84();
+        g_GameLogic.framesOfExitingToMenu = 1;
+        break;
+    }
+    fn_3_10A01C();
 }
 
 // .text:0x0010A01C size:0x84 mapped:0x807490B0
