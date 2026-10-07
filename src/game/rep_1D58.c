@@ -318,22 +318,22 @@ void fn_3_B9D68(u8* types, s32 count, void** files, s32* indices) {
     u32* p;
     void* layout;
     void* geo;
-    void* skn;
     void* tex;
-    s32* index;
+    void* skn;
+    s32 i;
     s32 j;
-
     s32 n;
     s32 k;
-    index = indices;
+
+    i = 0;
     tex = NULL;
     skn = NULL;
     k = 0;
     do {
         if (indices != NULL) {
-            *index = k;
+            indices[i] = k;
         }
-        switch (*types) {
+        switch (types[i]) {
         case 1:
             tex = (u8*)files + (u32)files[k++];
             convertTextureHeader(tex);
@@ -344,10 +344,10 @@ void fn_3_B9D68(u8* types, s32 count, void** files, s32* indices) {
         case 5:
             layout = (u8*)files + (u32)files[k++];
             geo = (u8*)files + (u32)files[k++];
-            if (!(*types == 2 || *types == 3)) {
+            if (!(types[i] == 2 || types[i] == 3)) {
                 ANIMGet((u8*)files + (u32)files[k++]);
             }
-            if (*types == 3 || *types == 5) {
+            if (types[i] == 3 || types[i] == 5) {
                 skn = (u8*)files + (u32)files[k++];
             }
             LoadActorLayout(layout);
@@ -372,8 +372,7 @@ void fn_3_B9D68(u8* types, s32 count, void** files, s32* indices) {
             k++;
             break;
         }
-        index++;
-        types++;
+        i++;
     } while (--count);
     while (k--) {
         ((u32*)files)[k] += (u32)files;
@@ -704,7 +703,7 @@ void fn_3_B8C08(Mtx view) {
             continue;
         }
         actor = obj->_74->actor;
-        fn_800B2BFC(actor, obj->_74->_64, obj->_74->_66);
+        fn_800B2BFC(obj->_74->actor, obj->_74->_64, obj->_74->_66);
         fn_800B3F20(actor);
         fn_800B313C(actor);
         CTRLBuildMatrix(&obj->control, m);
