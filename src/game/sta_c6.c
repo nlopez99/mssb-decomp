@@ -674,10 +674,10 @@ void fn_3_E763C(void) {
     for (i = 0; i < 10; i++) {
         start = lbl_3_common_bss_350E4._40[n] = lbl_3_common_bss_350E4._40[n - 1] + lbl_3_common_bss_350E4._3C[n - 1];
         fn_3_B8574();
-        if ((lbl_803C77B8._00 & 0x800) && i != 0) {
+        if ((lbl_803C77B8[0]._00 & 0x800) && i != 0) {
             continue;
         }
-        if ((lbl_803C77B8._00 & 0x400) && j != 0) {
+        if ((lbl_803C77B8[0]._00 & 0x400) && j != 0) {
             continue;
         }
         for (j = 0; j < 15; j++) {
