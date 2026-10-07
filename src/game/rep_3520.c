@@ -3,9 +3,12 @@
 #include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
 #include "game/rep_1838.h"
+#include "game/rep_540.h"
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/gx.h"
 #include "math.h"
+#include "stdlib.h"
+#include "string.h"
 
 // One of four objects at g_Minigame + 0xBB0
 typedef struct Unk3520Obj {
@@ -34,11 +37,27 @@ typedef struct Unk3520Sort {
     /* 0x11 */ u8 _11;
 } Unk3520Sort;
 
+// One per player, at g_Minigame._1DCC
+typedef struct Unk3520Cpu {
+    /* 0x0 */ f32 _0;
+    /* 0x4 */ s16 _4;
+    /* 0x6 */ u8 _6[2];
+} Unk3520Cpu; // size: 0x8
+
+extern void fn_3_5A6D4(u8 status);
+extern void fn_3_10F550(u8, s16);
+extern void changeScene(u8, s16);
+
+extern u8 lbl_3_data_21278[2];
+extern f32 lbl_3_data_219B8[19];
 extern s16 lbl_3_data_21A04[8];
 extern s16 lbl_3_data_21A3C[2][2];
 extern s16 lbl_3_data_21A44;
 extern Vec lbl_3_data_21A48;
+extern s16 lbl_3_data_21A60;
 extern s16 lbl_3_data_21AF0[1];
+extern s8 lbl_3_data_21B88[4];
+extern s16 lbl_3_data_21B8C[4];
 
 u8 lbl_3_data_26580 = 0xFF;
 
@@ -68,12 +87,30 @@ void fn_3_13BCB8(void) {
 
 // .text:0x0013BBF4 size:0xC4 mapped:0x8077AC88
 void fn_3_13BBF4(void) {
-    return;
+    switch (g_GameLogic._125) {
+    case 0:
+        fn_3_10F550(2, lbl_3_data_21278[0]);
+        changeScene(1, 6);
+        g_GameLogic.FrameCountOfCurrentAtBat_Copy = 0;
+        g_GameLogic._125 = 1;
+        break;
+    case 1:
+        if (g_GameLogic.FrameCountOfCurrentAtBat_Copy > lbl_3_data_21278[0] + lbl_3_data_21278[1]) {
+            g_GameLogic._125 = 2;
+        }
+        break;
+    case 2:
+        fn_3_5A6D4(GAME_STATUS_DEFAULT);
+        break;
+    }
 }
 
 // .text:0x0013BB30 size:0xC4 mapped:0x8077ABC4
 void fn_3_13BB30(void) {
-    return;
+    fn_3_F1DC();
+    fn_3_1356F8();
+    changeScene(1, 6);
+    fn_3_5A6D4(GAME_STATUS_LIVE_BALL);
 }
 
 // .text:0x0013B9C4 size:0x16C mapped:0x8077AA58
@@ -161,7 +198,20 @@ void fn_3_139808(void) {
 
 // .text:0x0013974C size:0xBC mapped:0x807787E0
 void fn_3_13974C(void) {
-    return;
+    u32 i;
+
+    for (i = 0; i < 100; i++) {
+        if (g_Minigame.wallBall_coinsVisibleInd[i] == 3) {
+            g_Minigame.wallBall_coinsVisibleFrameCounter[i]++;
+            PSVECAdd((Vec*)&g_Minigame.wallBall_coinCoordinates[i], (Vec*)&g_Minigame.wallBall_coinVelocity[i],
+                     (Vec*)&g_Minigame.wallBall_coinCoordinates[i]);
+            g_Minigame.wallBall_coinVelocity[i].y += lbl_3_data_219B8[11];
+            if (g_Minigame.wallBall_coinVelocity[i].y < 0.0f) {
+                g_Minigame.wallBall_coinsVisibleInd[i] = 0;
+                g_Minigame._1D6C--;
+            }
+        }
+    }
 }
 
 // .text:0x00139700 size:0x4C mapped:0x80778794
@@ -308,12 +358,22 @@ void fn_3_135FF4(void) {
 
 // .text:0x00135F4C size:0xA8 mapped:0x80774FE0
 void fn_3_135F4C(void) {
-    return;
+    g_Minigame._1D62++;
+    g_Minigame._1D48 = (f32)g_Minigame._1D62 / (f32)lbl_3_data_21A60;
+    fn_3_135C18();
+    if (g_Minigame._1D62 >= lbl_3_data_21A60) {
+        g_Minigame._1D72 = 2;
+    }
 }
 
 // .text:0x00135E98 size:0xB4 mapped:0x80774F2C
 void fn_3_135E98(void) {
-    return;
+    g_Minigame._1D62++;
+    g_Minigame._1D48 = 1.0f - (f32)g_Minigame._1D62 / (f32)lbl_3_data_21A60;
+    fn_3_135C18();
+    if (g_Minigame._1D62 >= lbl_3_data_21A60) {
+        g_Minigame._1D72 = 0;
+    }
 }
 
 // .text:0x00135E38 size:0x60 mapped:0x80774ECC
@@ -346,13 +406,31 @@ void fn_3_13583C(void) {
 }
 
 // .text:0x001357A4 size:0x98 mapped:0x80774838
-void fn_3_1357A4(void) {
-    return;
+void fn_3_1357A4(Vec* pos, Vec* dir) {
+    Vec base = { 0.0f, 0.0f, 20.0f };
+    Vec n;
+
+    if (pos == NULL || dir == NULL) {
+        return;
+    }
+    PSVECNormalize(dir, &n);
+    PSVECScale(&n, 3.5f, &n);
+    pos->x = base.x + n.x;
+    pos->z = base.z + n.z;
 }
 
 // .text:0x001356F8 size:0xAC mapped:0x8077478C
 void fn_3_1356F8(void) {
-    return;
+    Unk3520Cpu* cpu = (Unk3520Cpu*)&g_Minigame._1DCC;
+    u8 strength;
+    u32 i;
+
+    memset(g_Minigame._1D7C, 0, 0x78);
+    for (i = 0; i < 4; cpu++, i++) {
+        strength = g_Minigame.minigameControlStruct.aIStrength[i];
+        cpu->_4 = -1;
+        cpu->_0 = RandomInt_Game(100) < lbl_3_data_21B88[strength] ? 3.0f : 1.5f;
+    }
 }
 
 // .text:0x00135698 size:0x60 mapped:0x8077472C
@@ -449,8 +527,17 @@ void fn_3_134658(void) {
 }
 
 // .text:0x001345AC size:0xAC mapped:0x80773640
-void fn_3_1345AC(void) {
-    return;
+s16 fn_3_1345AC(s16 angle, s16 target, int speed) {
+    s16 step;
+
+    if (angle < 0 || target < 0) {
+        return target;
+    }
+    step = fn_3_9FCA4(target, angle) / lbl_3_data_21B8C[speed];
+    if (step == 0 || __abs(step) > 1500) {
+        return target;
+    }
+    return fn_3_9FE6C_normalizeAngle(angle + step);
 }
 
 // .text:0x001344BC size:0xF0 mapped:0x80773550
