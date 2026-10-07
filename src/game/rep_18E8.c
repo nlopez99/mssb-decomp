@@ -8,14 +8,26 @@ typedef struct {
     /* 0x000 */ f32 _000;
     /* 0x004 */ f32 _004;
     /* 0x008 */ f32 _008;
-    /* 0x00C */ u8 _00C[0x48 - 0xC];
+    /* 0x00C */ u8 _00C[0x14 - 0xC];
+    /* 0x014 */ f32 _014;
+    /* 0x018 */ f32 _018;
+    /* 0x01C */ f32 _01C;
+    /* 0x020 */ u8 _020[0x30 - 0x20];
+    /* 0x030 */ f32 _030;
+    /* 0x034 */ f32 _034;
+    /* 0x038 */ u8 _038[0x48 - 0x38];
     /* 0x048 */ f32 _048;
-    /* 0x04C */ u8 _04C[0x70 - 0x4C];
+    /* 0x04C */ u8 _04C[0x50 - 0x4C];
+    /* 0x050 */ f32 _050;
+    /* 0x054 */ u8 _054[0x70 - 0x54];
     /* 0x070 */ f32 _070;
     /* 0x074 */ u8 _074[0xA8 - 0x74];
     /* 0x0A8 */ f32 _0A8[4];
     /* 0x0B8 */ f32 _0B8;
-    /* 0x0BC */ u8 _0BC[0x178 - 0xBC];
+    /* 0x0BC */ u8 _0BC[0x120 - 0xBC];
+    /* 0x120 */ f32 _120;
+    /* 0x124 */ f32 _124;
+    /* 0x128 */ u8 _128[0x178 - 0x128];
     /* 0x178 */ s16 _178;
     /* 0x17A */ u8 _17A[0x17E - 0x17A];
     /* 0x17E */ s16 _17E;
@@ -23,14 +35,21 @@ typedef struct {
     /* 0x18C */ s16 _18C;
     /* 0x18E */ u8 _18E[0x192 - 0x18E];
     /* 0x192 */ s16 _192;
-    /* 0x194 */ u8 _194[0x1CD - 0x194];
+    /* 0x194 */ u8 _194[0x1AC - 0x194];
+    /* 0x1AC */ s16 _1AC;
+    /* 0x1AE */ u8 _1AE[0x1CD - 0x1AE];
     /* 0x1CD */ u8 _1CD;
     /* 0x1CE */ u8 _1CE;
     /* 0x1CF */ u8 _1CF[0x1ED - 0x1CF];
     /* 0x1ED */ u8 _1ED;
-    /* 0x1EE */ u8 _1EE[0x1F8 - 0x1EE];
+    /* 0x1EE */ u8 _1EE;
+    /* 0x1EF */ u8 _1EF[0x1F8 - 0x1EF];
     /* 0x1F8 */ u8 _1F8;
-    /* 0x1F9 */ u8 _1F9[0x215 - 0x1F9];
+    /* 0x1F9 */ u8 _1F9[0x200 - 0x1F9];
+    /* 0x200 */ u8 _200;
+    /* 0x201 */ u8 _201[0x20D - 0x201];
+    /* 0x20D */ u8 _20D;
+    /* 0x20E */ u8 _20E[0x215 - 0x20E];
     /* 0x215 */ u8 _215;
     /* 0x216 */ u8 _216[0x268 - 0x216];
 } Unk18E8Fielder; // size: 0x268
@@ -60,6 +79,10 @@ extern struct {
 // rep_AC8.h declares these as void(void) placeholders
 extern void fn_3_52F4C(s32 fielder, f32 x, f32 z);
 extern s32 fn_3_52560(s32 fielder);
+extern BOOL fn_3_51798(s32 fielder, VecXYZ* delta);
+
+extern void fn_8004AE18(s32 fielder);
+extern void fn_8004AFA8(s32 fielder);
 
 // .bss statics, in reverse address order: MWCC lays them out last declared first
 static u8 lbl_3_bss_1868[0x98];
@@ -107,8 +130,27 @@ void fn_3_AAFF0(void) {
 }
 
 // .text:0x000AAC84 size:0x36C mapped:0x806E9D18
-void fn_3_AAC84(void) {
-    return;
+void fn_3_AAC84(f32* x, f32* z) {
+    s32 target = g_FieldingLogic._0D8;
+    s32 frames;
+
+    if (target < 0) {
+        *x = lbl_3_data_4444[4][0];
+        *z = lbl_3_data_4444[4][1];
+        g_Ball.ballIsLooseInd_unused = 1;
+        g_Ball.fielderBeingThrownTo = -1;
+        return;
+    }
+    frames = fn_3_A6ABC(g_Fielders[target]._000, g_Fielders[target]._008);
+    frames -= 10;
+    if (g_Fielders[target]._17E < frames) {
+        *x = g_Fielders[target]._014;
+        *z = g_Fielders[target]._01C;
+    } else {
+        *x = frames * g_Fielders[target]._030 + g_Fielders[target]._000;
+        *z = frames * g_Fielders[target]._034 + g_Fielders[target]._008;
+    }
+    g_Ball.fielderBeingThrownTo = target;
 }
 
 // .text:0x000AABF8 size:0x8C mapped:0x806E9C8C
@@ -122,7 +164,10 @@ BOOL fn_3_AABF8(void) {
     if (g_Fielders[g_FieldingLogic._0D8]._18C != 5) {
         return FALSE;
     }
-    return !(g_Fielders[g_Ball.fielderWBallIndex]._0B8 < 10.0f);
+    if (g_Fielders[g_Ball.fielderWBallIndex]._0B8 < 10.0f) {
+        return FALSE;
+    }
+    return TRUE;
 }
 
 // .text:0x000AAA3C size:0x1BC mapped:0x806E9AD0
@@ -174,8 +219,54 @@ void fn_3_A9C74(s32 fielder) {
 }
 
 // .text:0x000A9984 size:0x2F0 mapped:0x806E8A18
-void fn_3_A9984(void) {
-    return;
+void fn_3_A9984(s32 fielder) {
+    Unk18E8Fielder* f = &g_Fielders[fielder];
+    VecXYZ delta;
+
+    if (f->_1AC == 0) {
+        if (f->_1EE <= 1) {
+            f->_200 = 0;
+            return;
+        }
+        delta.x = g_Ball.pastCoordinates[2].x - g_Ball.pastCoordinates[3].x;
+        delta.y = g_Ball.pastCoordinates[2].y - g_Ball.pastCoordinates[3].y;
+        delta.z = g_Ball.pastCoordinates[2].z - g_Ball.pastCoordinates[3].z;
+        f->_120 = 0.7f * delta.x;
+        f->_124 = 0.7f * delta.z;
+        f->_200 = 1;
+        if (g_d_GameSettings.minigamesEnabled) {
+            fn_8004AFA8(f->_20D);
+        } else {
+            fn_8004AFA8(fielder);
+        }
+    } else {
+        f32 scale = (f32)(f->_1EE - 1) / (f32)f->_1EE;
+        f->_120 *= scale;
+        f->_124 *= scale;
+        if (f->_1EE <= 1) {
+            f->_200 = 0;
+        }
+        if (f->_1AC > 0) {
+            if (g_d_GameSettings.minigamesEnabled) {
+                fn_8004AE18(f->_20D);
+            } else {
+                fn_8004AE18(fielder);
+            }
+        }
+    }
+    f->_030 = f->_120;
+    f->_034 = f->_124;
+    f->_050 = dolsqrtf2(SQ(f->_030) + SQ(f->_034));
+    if (fn_3_51798(fielder, &delta)) {
+        f->_120 = 0.0f;
+        f->_124 = 0.0f;
+        f->_030 = 0.0f;
+        f->_034 = 0.0f;
+        f->_050 = 0.0f;
+    } else {
+        f->_000 += f->_030;
+        f->_008 += f->_034;
+    }
 }
 
 // .text:0x000A96FC size:0x288 mapped:0x806E8790
@@ -959,8 +1050,57 @@ BOOL fn_3_A295C(void) {
 }
 
 // .text:0x000A25C4 size:0x398 mapped:0x806E1658
-void fn_3_A25C4(void) {
-    return;
+BOOL fn_3_A25C4(void) {
+    s32 base;
+
+    if (lbl_3_bss_1808[3] >= 0 && lbl_3_bss_1858[lbl_3_bss_1808[3]] <= 5) {
+        if ((g_Runners[lbl_3_bss_1808[3]].percentTowardsNextBase > 0.2f ||
+             (g_Runners[lbl_3_bss_1808[3]].baseStandingOn == -1 && g_Ball.baseBallAndFielderAreOn == 3)) &&
+            fn_3_A46A0(lbl_3_bss_1808[3])) {
+            base = 3;
+            goto found;
+        }
+        if ((lbl_3_bss_1800 & 0x1000) && g_Runners[lbl_3_bss_1808[3]].percentTowardsNextBase > 0.15f &&
+            fn_3_A46A0(lbl_3_bss_1808[3])) {
+            base = 3;
+            goto found;
+        }
+    }
+    if (lbl_3_bss_1808[2] >= 0 && lbl_3_bss_1858[lbl_3_bss_1808[2]] <= 5) {
+        if ((g_Runners[lbl_3_bss_1808[2]].percentTowardsNextBase > 0.2f ||
+             (g_Runners[lbl_3_bss_1808[2]].baseStandingOn == -1 && g_Ball.baseBallAndFielderAreOn == 2)) &&
+            fn_3_A46A0(lbl_3_bss_1808[2])) {
+            base = 2;
+            goto found;
+        }
+        if ((lbl_3_bss_1800 & 0x100) && g_Runners[lbl_3_bss_1808[2]].percentTowardsNextBase >= 0.15f &&
+            fn_3_A46A0(lbl_3_bss_1808[2])) {
+            base = 2;
+            goto found;
+        }
+    }
+    if (lbl_3_bss_1808[1] >= 0 && lbl_3_bss_1858[lbl_3_bss_1808[1]] <= 5) {
+        if ((g_Runners[lbl_3_bss_1808[1]].percentTowardsNextBase > 0.2f ||
+             (g_Runners[lbl_3_bss_1808[1]].baseStandingOn == -1 && g_Ball.baseBallAndFielderAreOn == 1)) &&
+            fn_3_A46A0(lbl_3_bss_1808[1])) {
+            base = 1;
+            goto found;
+        }
+        if ((lbl_3_bss_1800 & 0x10) && g_Runners[lbl_3_bss_1808[1]].percentTowardsNextBase > 0.15f &&
+            fn_3_A46A0(lbl_3_bss_1808[1])) {
+            base = 1;
+            goto found;
+        }
+    }
+    return FALSE;
+
+found:
+    if (g_Ball.ballDistanceFromBase[0] < 3.0f && g_FieldingLogic._0C4 == 2 && lbl_3_bss_1808[3] >= 0 && base == 1 &&
+        g_Runners[lbl_3_bss_1808[base]].fractionalBasesRan <= 1.2f && fn_3_AABF8()) {
+        g_FieldingLogic._0CC = -1;
+        g_FieldingLogic._0C4 = 5;
+    }
+    return TRUE;
 }
 
 // .text:0x000A2404 size:0x1C0 mapped:0x806E1498
