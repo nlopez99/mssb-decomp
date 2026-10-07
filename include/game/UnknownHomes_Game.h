@@ -1712,16 +1712,22 @@ typedef struct _MiniGameStruct {
     /*0xCCE*/ u8 _CCE[2];
     /*0xCD0*/ VecXYZ wallBall_coinCoordinates[100];
     /*0x1180*/ VecXYZ wallBall_coinVelocity[100];
-    /*0x1630*/ f32 _1630;
-    /*0x1634*/ u8 pad10[396];
+    /*0x1630*/ f32 _1630[15];
+    /*0x166C*/ u8 pad10[0x17C0 - 0x166C];
     /*0x17C0*/ u32 _17C0;
     /*0x17C4*/ u32 _17C4;
     /*0x17C8*/ s16 wallBall_coinsVisibleFrameCounter[100];
     /*0x1890*/ s16 miniGameCurrentPoints[4];
     /*0x1898*/ s16 miniGameLatestPoints[4];
     /*0x18A0*/ u16 _18A0;
-    /*0x18A2*/ s16 bB_bombBarrelHitInd;
-    /*0x18A4*/ s16 bB_bombBarrelID;
+    // Barrel Batter (rep_31F0) names these two; Chain Chomp Sprint (rep_36D8) indexes them
+    union {
+        struct {
+            /*0x18A2*/ s16 bB_bombBarrelHitInd;
+            /*0x18A4*/ s16 bB_bombBarrelID;
+        };
+        /*0x18A2*/ s16 _18A2[2];
+    };
     /*0x18A6*/ s16 _18A6;
     /*0x18A8*/ s16 bODControllerInputAllowedInd;
     /*0x18AA*/ s16 framesSincePanelHit;
