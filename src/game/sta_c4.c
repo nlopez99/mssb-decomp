@@ -403,9 +403,9 @@ void fn_3_FB3D8(StaC4View* view) {
     f32 x;
     f32 width;
     f32 height;
+    s32 b;
     s32 i;
     s32 j;
-    s32 b;
     s32 c;
 
     fn_8003A144();
