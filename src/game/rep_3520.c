@@ -968,8 +968,120 @@ BOOL fn_3_1379A0(int fielderIdx) {
 }
 
 // .text:0x001373E0 size:0x5C0 mapped:0x80776474
-void fn_3_1373E0(void) {
-    return;
+// 92.9%: the half-size constants are loaded through addi where the target loads them
+// directly, and the plane intersection schedules its stores differently.
+BOOL fn_3_1373E0(VecSrcDst* seg, Vec* vel, VecSrcDst* out, f32 radius) {
+    f32 planes[4][3] = { { -1.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, { 0.0f, -1.0f, 0.0f } };
+    Vec hit;
+    Vec d1;
+    Vec d3;
+    Vec n1;
+    Vec d2;
+    f32 height = 2.0f * radius;
+    f32 halfX = 3.5f + radius;
+    f32 halfZ = 3.125f + radius;
+    f32* plane;
+    f32 limit;
+    f32 t;
+    f32 nx;
+    f32 nz;
+    u32 i;
+    u8 outside;
+    Unk3520Obj* obj;
+
+    for (i = 0; i < lbl_3_bss_B780; i++) {
+        obj = &MG.objs[i];
+        outside = TRUE;
+        if (!(obj->_3D > 1 || obj->_3D == 4)) {
+            continue;
+        }
+        limit = obj->_0.y > -seg->dst.y ? height : 12.0f;
+        if (limit < fabs(obj->_0.y + seg->dst.y)) {
+            continue;
+        }
+        PSVECSubtract(&seg->dst, &obj->_0, &d1);
+        if (fabs(d1.x) > halfX) {
+            continue;
+        }
+        if (fabs(d1.z) > halfZ) {
+            continue;
+        }
+        if (PSVECMag(&d1) != 0.0f) {
+            PSVECNormalize(&d1, &n1);
+        } else {
+            memset(&n1, 0, sizeof(Vec));
+        }
+        PSVECSubtract(&seg->dst, &seg->src, &d2);
+        if (PSVECMag(&d2) != 0.0f) {
+            PSVECNormalize(&d2, &d2);
+        } else {
+            memset(&d2, 0, sizeof(Vec));
+        }
+        d2.y = 0.0f;
+        n1.y = 0.0f;
+        if (PSVECDotProduct(&n1, &d2) > 0.0f) {
+            continue;
+        }
+        PSVECSubtract(&seg->src, &obj->_0, &d3);
+        if (fabs(d3.x) <= halfX && fabs(d3.z) <= halfZ) {
+            PSVECSubtract(&seg->dst, &seg->src, &d2);
+            d2.y = 0.0f;
+            if (PSVECMag(&d2) != 0.0f) {
+                PSVECNormalize(&d2, &d2);
+                outside = FALSE;
+                seg->dst.x = seg->src.x;
+                seg->dst.z = seg->src.z;
+                seg->src.x = 7.0f * d2.x + seg->src.x;
+                seg->src.z = 6.25f * d2.z + seg->src.z;
+            } else {
+                nz = n1.z;
+                nx = n1.x;
+                if (0.8928571343421936 < fabs(nz / nx)) {
+                    nz = fabs(nz) / nz;
+                } else if (0.8928571343421936 > fabs(nz / nx)) {
+                    nx = fabs(nx) / nx;
+                } else {
+                    nz = fabs(nz) / nz;
+                    nx = fabs(nx) / nx;
+                }
+                out->src.x = nx * halfX + obj->_0.x;
+                out->src.y = -seg->src.y;
+                out->src.z = nz * halfZ + obj->_0.z;
+                out->dst.x = -1.0f * vel->x;
+                out->dst.y = vel->y;
+                out->dst.z = -1.0f * vel->z;
+                return TRUE;
+            }
+        }
+        PSVECSubtract(&seg->dst, &seg->src, &d2);
+        plane = d2.x > 0.0f ? planes[0] : planes[1];
+        plane[2] = plane[0] * (halfX * (fabs(plane[0]) / plane[0]) + obj->_0.x);
+        t = -((plane[0] * seg->src.x + plane[1] * seg->src.z) - plane[2]) / (plane[0] * d2.x + plane[1] * d2.z);
+        hit.x = d2.x * t + seg->src.x;
+        hit.z = d2.z * t + seg->src.z;
+        hit.y = -seg->src.y;
+        if (fabs(hit.z - obj->_0.z) <= halfZ && t >= 0.0f) {
+            memcpy(&out->dst, vel, sizeof(Vec));
+            out->dst.x *= -1.0f;
+        } else {
+            plane = d2.z > 0.0f ? planes[3] : planes[2];
+            plane[2] = plane[1] * (obj->_0.z + halfZ * fabs(plane[1]) / plane[1]);
+            t = -((plane[0] * seg->src.x + plane[1] * seg->src.z) - plane[2]) / (plane[0] * d2.x + plane[1] * d2.z);
+            hit.x = d2.x * t + seg->src.x;
+            hit.z = d2.z * t + seg->src.z;
+            hit.y = -seg->src.y;
+            memcpy(&out->dst, vel, sizeof(Vec));
+            out->dst.z *= -1.0f;
+        }
+        if (outside) {
+            memcpy(&out->src, &hit, sizeof(Vec));
+        } else {
+            seg->dst.y *= -1.0f;
+            memcpy(&out->src, &seg->dst, sizeof(Vec));
+        }
+        return TRUE;
+    }
+    return FALSE;
 }
 
 // .text:0x00137224 size:0x1BC mapped:0x807762B8
