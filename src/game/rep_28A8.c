@@ -776,12 +776,14 @@ void fn_3_DF25C(void) {
 // .text:0x000DF608 size:0xCC mapped:0x8071E69C
 void fn_3_DF608(void) {
     int i;
-    int j = 0;
+    int j;
 
     g_Minigame._19DA[g_d_GameSettings._35] = 0;
+    j = 0;
     for (i = 0; i < 4; i++) {
         if (g_d_GameSettings._35 != i) {
-            g_Minigame.minigameControlStruct.aIStrength[i] = lbl_3_data_18980[j++];
+            g_Minigame.minigameControlStruct.aIStrength[i] = lbl_3_data_18980[j];
+            j++;
         }
     }
     g_Minigame.miniGameNumberOfParticipants = lbl_3_data_18944[g_Minigame.GameMode_MiniGame] + 1;
