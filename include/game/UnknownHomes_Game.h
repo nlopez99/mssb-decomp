@@ -1468,7 +1468,7 @@ typedef struct _MiniGameControlStruct {
     /*0x00C*/ u8 battingHandedness[4];
     /*0x010*/ u8 aIStrength[4];
     /*0x014*/ s8 _14[4];
-    /*0x018*/ u8 _18[4];
+    /*0x018*/ s8 _18[4];
     /*0x01C*/ u8 _1C[4];
     /*0x020*/ u8 _20[4];
     /*0x024*/ u8 _24[4];
@@ -1781,10 +1781,8 @@ typedef struct _MiniGameStruct {
     /*0x1927*/ u8 _1927[3];
     /*0x192A*/ u8 _192A[3];
     /*0x192D*/ u8 _192D;
-    /*0x192E*/ u8 _192E;
-    /*0x192F*/ u8 _192F;
-    /*0x1930*/ u8 _1930[3];
-    /*0x1933*/ u8 _1933;
+    /*0x192E*/ u8 _192E[3];
+    /*0x1931*/ u8 _1931[3];
     /*0x1934*/ u8 _1934;
     /*0x1935*/ s8 _1935[4];
     /*0x1939*/ u8 _1939;
@@ -1823,10 +1821,7 @@ typedef struct _MiniGameStruct {
     /*0x19CF*/ u8 _19CF;
     /*0x19D0*/ u8 _19D0;
     /*0x19D1*/ u8 _19D1;
-    /*0x19D2*/ s16 _19D2;
-    /*0x19D4*/ s16 _19D4;
-    /*0x19D6*/ s16 _19D6;
-    /*0x19D8*/ s16 _19D8;
+    /*0x19D2*/ s16 _19D2[4];
     /*0x19DA*/ s8 _19DA[4];
     /*0x19DE*/ u8 _19DE;
     /*0x19DF*/ u8 _19DF;
@@ -1838,13 +1833,10 @@ typedef struct _MiniGameStruct {
     /*0x19E6*/ u8 _19E6;
     /*0x19E7*/ u8 _19E7;
     /*0x19E8*/ MiniGameUnk19E8 _19E8[4];
-    /*0x1A0C*/ u8 _1A0C;
+    /*0x1A0C*/ s8 _1A0C;
     /*0x1A0D*/ u8 _1A0D;
     /*0x1A0E*/ u8 _1A0E;
-    /*0x1A0F*/ u8 _1A0F;
-    /*0x1A10*/ u8 _1A10;
-    /*0x1A11*/ u8 _1A11;
-    /*0x1A12*/ u8 _1A12;
+    /*0x1A0F*/ s8 _1A0F[4];
     /*0x1A13*/ u8 _1A13[4];
     /*0x1A17*/ u8 battingHandedness[9];
     /*0x1A20*/ u8 _1A20;
@@ -1856,7 +1848,7 @@ typedef struct _MiniGameStruct {
     /*0x1A28*/ s16 someGraphicFrameCountdown;
     /*0x1A2A*/ E(u8, MINI_GAME_ID) GameMode_MiniGame;
     /*0x1A2B*/ E(u8, MINIGAME_DIFFICULTY) soloMinigameDifficulty;
-    /*0x1A2C*/ u8 _1A2C;
+    /*0x1A2C*/ s8 _1A2C;
     /*0x1A2D*/ u8 miniGameTurnCounter;
     /*0x1A2E*/ u8 bB_pitchesRemainingInTurn;
     /*0x1A2F*/ u8 bODRoundStartingNumPitches;
