@@ -144,6 +144,7 @@ extern struct {
 extern s32 lbl_3_data_26C94[9];
 extern s32 lbl_3_data_26E7C[8];
 extern s32 lbl_3_data_26E40[15];
+extern s32 lbl_3_data_26E9C[25];
 extern s32 lbl_3_data_26D00[20];
 extern s32 lbl_3_data_26CD0[12];
 extern s32 lbl_3_data_26C3C[22];
@@ -2121,21 +2122,113 @@ void fn_3_147DFC(void) {
 }
 
 // .text:0x00147CFC size:0x100 mapped:0x80786D90
-void fn_3_147CFC(void) {
-    return;
+void fn_3_147CFC(Vec* pos) {
+    EmitterSlot3880 tmp;
+    Emitter3880* emitter;
+    Emitter3880* added;
+    Particle3880* last;
+
+    if (pos == NULL) {
+        return;
+    }
+    emitter = fn_800339F0(NULL, 0x26);
+    if (emitter != NULL) {
+        added = fn_800337CC(&tmp.base, lbl_3_data_26E9C[2] + lbl_3_data_26E9C[12], 1);
+        if (added == NULL) {
+            return;
+        }
+        fn_3_147778(added, pos);
+        for (last = emitter->particles; last->next != NULL; last = last->next) {}
+        last->next = added->particles;
+        emitter->count += added->count;
+    } else {
+        emitter = fn_80033A24(fn_3_14737C, 0x80, 0, lbl_3_data_26E9C[2] + lbl_3_data_26E9C[12], 1, 0x26);
+        if (emitter != NULL) {
+            fn_3_147778(emitter, pos);
+        }
+    }
 }
 
 // .text:0x00147C00 size:0xFC mapped:0x80786C94
-void fn_3_147C00(void) {
-    return;
+void fn_3_147C00(Vec* pos) {
+    EmitterSlot3880 tmp;
+    Emitter3880* emitter;
+    Emitter3880* added;
+    Particle3880* last;
+
+    emitter = fn_800339F0(NULL, 0x26);
+    if (emitter != NULL) {
+        added = fn_800337CC(&tmp.base, lbl_3_data_26E9C[2] + lbl_3_data_26E9C[12], 1);
+        if (added == NULL) {
+            return;
+        }
+        fn_3_147778(added, pos);
+        for (last = emitter->particles; last->next != NULL; last = last->next) {}
+        last->next = added->particles;
+        emitter->count += added->count;
+    } else {
+        emitter = fn_80033A24(fn_3_14737C, 0x80, 0, lbl_3_data_26E9C[2] + lbl_3_data_26E9C[12], 1, 0x26);
+        if (emitter != NULL) {
+            fn_3_147778(emitter, pos);
+        }
+    }
 }
 
 // .text:0x00147778 size:0x488 mapped:0x8078680C
-void fn_3_147778(void) {
-    return;
+void fn_3_147778(Emitter3880* emitter, Vec* pos) {
+    s16 frame;
+    Particle3880* p;
+    u32 i = 0;
+    u8 count = lbl_3_data_26E9C[2];
+    u8 count2 = lbl_3_data_26E9C[12];
+    f64 angle;
+
+    if (pos->y > 0.0f) {
+        pos->y *= -1.0f;
+    }
+    frame = 0;
+    emitter->_10 = lbl_3_common_bss_32724._6C;
+    p = emitter->particles;
+    do {
+        if (i < count) {
+            p->_4C = 1;
+            p->vel.x = i == 0 ? 3.0f : 1.5f;
+            p->_4A = lbl_3_data_26E9C[1];
+            p->_38 = p->_3C = lbl_3_data_26E9C[4] / 100000.0f * p->vel.x;
+            p->color[3] = lbl_3_data_26E9C[7];
+            memcpy(&p->pos, pos, sizeof(Vec));
+            if (i != 0) {
+                angle = 0.01745329238474369 * (360.0 / count) * (i - 1);
+                p->pos.x += 1.5f * cosf_kludge(angle);
+                p->pos.y += 1.5f * sinf_kludge(angle);
+                p->pos.x += 0.5 * (rand() / 32767.0f - 1.0);
+                p->pos.y += 0.5 * (rand() / 32767.0f - 1.0);
+            }
+            p->_4D = lbl_3_data_26E9C[0];
+            p->_48 = frame;
+        } else {
+            p->_4C = 2;
+            p->_4A = lbl_3_data_26E9C[11];
+            p->_38 = p->_3C = lbl_3_data_26E9C[14] / 100000.0f;
+            p->color[3] = lbl_3_data_26E9C[17];
+            memcpy(&p->pos, pos, sizeof(Vec));
+            angle = 0.01745329238474369 * (360.0 / count2) * (u8)(i - count);
+            p->pos.x += 2.5f * cosf_kludge(angle);
+            p->pos.y += 2.5f * sinf_kludge(angle);
+            p->pos.x += 0.20000000298023224 * (2.0 * (rand() / 32767.0f - 0.5));
+            p->pos.y += 0.2f * (-1.0f * (rand() / 32767.0f));
+            p->_4D = lbl_3_data_26E9C[10];
+            p->_48 = 5;
+        }
+        p->color[0] = p->color[1] = p->color[2] = 0xFF;
+        frame += 2;
+        i++;
+        p->_4E = 0;
+        p = p->next;
+    } while (p != NULL);
 }
 
 // .text:0x0014737C size:0x3FC mapped:0x80786410
-void fn_3_14737C(void) {
-    return;
+BOOL fn_3_14737C(Emitter3880* emitter) {
+    return 0;
 }

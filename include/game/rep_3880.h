@@ -11,10 +11,10 @@ struct PathEmitter3880;
 struct ModelEmitter3880;
 struct PlayerEmitter3880;
 
-void fn_3_14737C(void);
-void fn_3_147778(void);
-void fn_3_147C00(void);
-void fn_3_147CFC(void);
+BOOL fn_3_14737C(struct Emitter3880* emitter);
+void fn_3_147778(struct Emitter3880* emitter, Vec* pos);
+void fn_3_147C00(Vec* pos);
+void fn_3_147CFC(Vec* pos);
 void fn_3_147DFC(void);
 void fn_3_147E20(void);
 void fn_3_147F94(void);
