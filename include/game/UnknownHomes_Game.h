@@ -2423,7 +2423,7 @@ typedef struct {
     /* 0x0C4 */ s16 _0C4;
     /* 0x0C6 */ s16 _0C6;
     /* 0x0C8 */ s16 _0C8;
-    /* 0x0CA */ u8 _0CA[0xCC - 0xCA];
+    /* 0x0CA */ s16 _0CA;
     /* 0x0CC */ s16 _0CC;
     /* 0x0CE */ s16 _0CE;
     /* 0x0D0 */ s16 _0D0[4];

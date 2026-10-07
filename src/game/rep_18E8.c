@@ -5,6 +5,9 @@
 #include "game/rep_1838.h"
 #include "game/rep_D0.h"
 #include "game/rep_3E58.h"
+#include "game/rep_1188.h"
+#include "game/rep_3DA8.h"
+#include "game/rep_12D0.h"
 
 typedef struct {
     /* 0x000 */ f32 _000;
@@ -48,7 +51,9 @@ typedef struct {
     /* 0x18C */ s16 _18C;
     /* 0x18E */ u8 _18E[0x192 - 0x18E];
     /* 0x192 */ s16 _192;
-    /* 0x194 */ u8 _194[0x1AC - 0x194];
+    /* 0x194 */ u8 _194[0x196 - 0x194];
+    /* 0x196 */ s16 _196;
+    /* 0x198 */ u8 _198[0x1AC - 0x198];
     /* 0x1AC */ s16 _1AC;
     /* 0x1AE */ u8 _1AE[0x1C2 - 0x1AE];
     /* 0x1C2 */ s16 _1C2;
@@ -65,7 +70,9 @@ typedef struct {
     /* 0x1E0 */ u8 _1E0;
     /* 0x1E1 */ u8 _1E1[0x1E2 - 0x1E1];
     /* 0x1E2 */ u8 _1E2;
-    /* 0x1E3 */ u8 _1E3[0x1ED - 0x1E3];
+    /* 0x1E3 */ u8 _1E3;
+    /* 0x1E4 */ u8 _1E4;
+    /* 0x1E5 */ u8 _1E5[0x1ED - 0x1E5];
     /* 0x1ED */ u8 _1ED;
     /* 0x1EE */ u8 _1EE;
     /* 0x1EF */ u8 _1EF[0x1F5 - 0x1EF];
@@ -91,12 +98,14 @@ extern u8 lbl_3_data_4900[][3];
 extern f32 lbl_3_data_4444[5][2];
 extern u8 lbl_3_data_1C38[2];
 extern s16 lbl_3_data_1C40;
+extern s16 lbl_3_data_4638[2];
 extern u8 lbl_3_data_4744[24];
 extern s16 lbl_3_data_4860[4][3];
 extern f32 lbl_3_data_4760[3];
 extern f32 lbl_3_data_4780[5];
 extern f32 lbl_3_data_4878[2];
 extern s16 lbl_3_data_4880;
+extern u8 lbl_3_data_4908[2];
 extern u8 lbl_3_data_7E34[54][4];
 extern u8 lbl_3_data_475C;
 extern s16 lbl_3_data_49DC[44];
@@ -106,6 +115,11 @@ extern struct {
     /* 0x02 */ u8 _02[0x4 - 0x2];
     /* 0x04 */ s16 _04;
 } g_RunningLogic;
+
+extern struct {
+    /* 0x00 */ u8 _00[0x40];
+    /* 0x40 */ s16 _40;
+} lbl_3_common_bss_37400;
 
 extern struct {
     /* 0x0000 */ u8 _0000[0x2C50];
@@ -128,6 +142,13 @@ extern BOOL fn_3_51798(s32 fielder, VecXYZ* delta);
 extern void fn_3_5985C(s32 fielder, s32 action);
 extern void fn_3_526DC(s32 fielder);
 
+// rep_540.h and m_sound.h declare these as void(void) placeholders
+extern void fn_3_A970(s32 arg);
+extern void fn_3_8FF5C(s32 sound, f32 x, f32 y, f32 z);
+extern u32 fn_3_90220(s32 charID, s32 sound);
+extern s32 fn_3_6D658(s32 team, s32 thrower, s32 receiver);
+extern int LERPToNewRange_Float(int value, int inMin, int inMax, int outMin, int outMax);
+
 extern void fn_8004AE18(s32 fielder);
 extern void fn_8004AFA8(s32 fielder);
 
@@ -148,8 +169,159 @@ static u8 lbl_3_bss_17FC[4];
 static s32 lbl_3_bss_17F8;
 
 // .text:0x000ABDD0 size:0xC28 mapped:0x806EAE64
-void fn_3_ABDD0(void) {
-    return;
+// 99.05%: registers in the prologue are one off, and the 0.0f for the final distance
+// is addressed through addi in the base; statement orders tried.
+void fn_3_ABDD0(s32 fielder) {
+    Unk18E8Fielder* f = &g_Fielders[fielder];
+    f32 x;
+    f32 z;
+    f32 dx;
+    f32 dz;
+    f32 angle;
+    f32 speed;
+    f32 horiz;
+    f32 power;
+
+    g_FieldingLogic._13E = 0;
+    g_Ball.IsAntichemistryThrow = 0;
+    g_Ball.AtBat_Contact_BallPos.x = f->_000 + g_Ball.offsetWhilePickedUpHistory[0].x;
+    g_Ball.AtBat_Contact_BallPos.y = f->_004 + g_Ball.offsetWhilePickedUpHistory[0].y;
+    g_Ball.AtBat_Contact_BallPos.z = f->_008 + g_Ball.offsetWhilePickedUpHistory[0].z;
+    g_Ball.offsetWhilePickedUpHistory[0].x = 0.0f;
+    g_Ball.offsetWhilePickedUpHistory[0].y = 0.0f;
+    g_Ball.offsetWhilePickedUpHistory[0].z = 0.0f;
+    if (g_FieldingLogic._0C4 >= 0 && g_FieldingLogic._0C4 <= 3) {
+        s32 skill;
+
+        x = lbl_3_data_4444[g_FieldingLogic._0C4][0];
+        z = lbl_3_data_4444[g_FieldingLogic._0C4][1];
+        g_Ball.fielderBeingThrownTo = g_FieldingLogic._0D0[g_FieldingLogic._0C4];
+        skill = fn_3_6D658(g_GameLogic.teamFielding, g_Fielders[fielder]._17A,
+                           g_Fielders[g_FieldingLogic._0D0[g_FieldingLogic._0C4]]._17A);
+        if (skill >= lbl_3_data_4638[0] && g_FieldingLogic._0C4 == g_Fielders[g_Ball.fielderBeingThrownTo]._1F5) {
+            g_FieldingLogic._13E = 1;
+        }
+        if (skill < lbl_3_data_4638[1]) {
+            s32 chance = LERPToNewRange_Float(skill, 0, 100, lbl_3_data_4908[0], lbl_3_data_4908[1]);
+            s32 roll = RandomInt_Game(100);
+            if (!ACTIVE_TUTORIAL() && roll < chance) {
+                f32 dist;
+                s32 dir;
+                s32 spread;
+
+                dx = x - g_Ball.AtBat_Contact_BallPos.x;
+                dz = z - g_Ball.AtBat_Contact_BallPos.z;
+                g_Ball.IsAntichemistryThrow = 1;
+                dist = dolsqrtf2(dx * dx + dz * dz);
+                dir = fn_3_9FB8C(dx, dz);
+                spread = RandomInt_Game_Range(lbl_3_data_49DC[35], lbl_3_data_49DC[36]);
+                getComponentsFromSAng(RandomInt_Game(2) ? dir + spread : dir - spread, &dx, &dz);
+                dx *= dist;
+                dz *= dist;
+                x = g_Ball.AtBat_Contact_BallPos.x + dx;
+                z = g_Ball.AtBat_Contact_BallPos.z + dz;
+            }
+        }
+    } else if (g_FieldingLogic._0C4 == 6 && g_FieldingLogic._0BE >= 0 && g_FieldingLogic._0BE != fielder) {
+        fn_3_AAFF0(&x, &z);
+    } else {
+        fn_3_AAC84(&x, &z);
+    }
+    g_Ball.throwTarget.x = x;
+    g_Ball.throwTarget.z = z;
+    power = fn_3_6E1D4(f->_1CE);
+    if (g_FieldingLogic._10B) {
+        if (g_FieldingLogic._0E6 > 60) {
+            g_FieldingLogic.throwSpeedType -= 2;
+        } else if (g_FieldingLogic._0E6 > 40) {
+            g_FieldingLogic.throwSpeedType -= 1;
+        }
+        g_FieldingLogic._10B = 0;
+    }
+    if (g_FieldingLogic._13E) {
+        if (g_FieldingLogic.throwSpeedType != 0 && g_FieldingLogic.throwSpeedType <= 3) {
+            g_FieldingLogic.throwSpeedType -= 1;
+            playSoundEffect(0x1AB);
+        } else {
+            g_FieldingLogic._13E = 2;
+        }
+        if (!g_d_GameSettings.exhibitionMatchInd && lbl_3_common_bss_37400._40 == g_GameLogic.teamFielding) {
+            fn_3_161588(7, f->_178);
+        }
+    }
+    speed = power / 200.0f;
+    if (g_FieldingLogic._0C4 == 6 || g_FieldingLogic._0C4 == 5) {
+        fn_3_AB5B0(0, &angle, &speed);
+    } else {
+        fn_3_AB5B0(g_Fielders[g_FieldingLogic._0D0[g_FieldingLogic._0C4]]._17E, &angle, &speed);
+    }
+    g_Ball.physicsSubstruct.velocity.y = speed * (f32)sin(angle);
+    horiz = speed * (f32)cos(angle);
+    dx = g_Ball.throwTarget.x - g_Ball.AtBat_Contact_BallPos.x;
+    dz = g_Ball.throwTarget.z - g_Ball.AtBat_Contact_BallPos.z;
+    angle = atan2(dz, dx);
+    g_Ball.physicsSubstruct.velocity.x = horiz * (f32)cos(angle);
+    g_Ball.physicsSubstruct.velocity.z = horiz * (f32)sin(angle);
+    if (g_Ball.numThrowsDuringPlay < 0xFE) {
+        g_Ball.numThrowsDuringPlay++;
+    } else {
+        g_Ball.numThrowsDuringPlay = 0xFF;
+    }
+    f->_050 = 0.0f;
+    f->_196 = 60;
+    f->_1E3 = 1;
+    g_Ball.framesSinceThrowStarted = 0;
+    g_Ball.ballState = 2;
+    g_Ball.fielderWBallIndex = -1;
+    g_Ball.baseBallAndFielderAreOn = -1;
+    g_Ball.ballIsLooseInd_unused = 0;
+    g_Ball.fielderAboutToGetBall_hasBall = -1;
+    g_Ball.thrownBallHasHitGround = 0;
+    g_Ball.throwingFielder = fielder;
+    g_Ball.matchFramesAndBallAngle.framesSinceLastThrow = g_Ball.timeSinceBallPickedUp;
+    g_Ball.timeSinceBallPickedUp = -1;
+    g_Ball.ballZoneFromHomeAtStartOfThrow = g_Ball.ballZoneAwayFromHome;
+    g_Ball.throwStartingLocation.x = g_Ball.AtBat_Contact_BallPos.x;
+    g_Ball.throwStartingLocation.z = g_Ball.AtBat_Contact_BallPos.z;
+    g_Ball.ballIsRollingIndicator = 0;
+    g_FieldingLogic._11A = 0;
+    g_FieldingLogic._11D = 0;
+    f->_1E4 = 0;
+    g_Pitcher.pickOffLoc = -1;
+    g_FieldingLogic._0CA = g_FieldingLogic._0C4;
+    g_FieldingLogic._124 = 0;
+    g_FieldingLogic._125 = -1;
+    g_FieldingLogic._12A = 0;
+    g_FieldingLogic._0C6 = -1;
+    g_Ball.throwDistance = dolsqrtf2(SQ(g_Ball.throwTarget.x - g_Ball.AtBat_Contact_BallPos.x) +
+                                     SQ(g_Ball.throwTarget.z - g_Ball.AtBat_Contact_BallPos.z));
+    if (g_FieldingLogic._0BE == fielder) {
+        g_FieldingLogic._0BE = -1;
+    }
+    {
+        s32 i;
+        for (i = 0; i < 4; i++) {
+            if (g_Runners[i].runnerOnFieldOrOutOrScored == 1) {
+                g_Runners[i].baseReachedAtTimeOfThrow = g_Runners[i].currentBase;
+            } else {
+                g_Runners[i].baseReachedAtTimeOfThrow = -1;
+            }
+        }
+    }
+    fn_3_A970(1);
+    if (g_FieldingLogic.throwSpeedType <= 2 && g_FieldingLogic._12D == 0) {
+        fn_3_8FF5C(0x16E, g_Ball.AtBat_Contact_BallPos.x, g_Ball.AtBat_Contact_BallPos.y, g_Ball.AtBat_Contact_BallPos.z);
+    } else {
+        fn_3_8FF5C(0x16D, g_Ball.AtBat_Contact_BallPos.x, g_Ball.AtBat_Contact_BallPos.y, g_Ball.AtBat_Contact_BallPos.z);
+    }
+    fn_3_78574(fielder);
+    if (g_FieldingLogic._13E) {
+        fn_3_90220(f->_17A, 0);
+    } else if (g_Ball.IsAntichemistryThrow) {
+        fn_3_90220(f->_17A, 10);
+    } else {
+        fn_3_90220(f->_17A, 5);
+    }
 }
 
 // .text:0x000AB5B0 size:0x820 mapped:0x806EA644
