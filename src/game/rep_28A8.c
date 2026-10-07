@@ -51,9 +51,16 @@ extern struct {
 } g_UnkSimulation_31AC0;
 
 extern struct {
-    /* 0x00 */ u8 _00[0xC5];
+    /* 0x00 */ u8 _00[0xAA];
+    /* 0xAA */ u8 _AA;
+    /* 0xAB */ u8 _AB[0xC5 - 0xAB];
     /* 0xC5 */ u8 _C5;
 } g_Scores;
+
+extern struct {
+    /* 0x00 */ u8 _00[0x40];
+    /* 0x40 */ s16 _40;
+} lbl_3_common_bss_37400;
 
 extern struct {
     /* 0x00 */ u8 _00[0x13];
@@ -97,9 +104,7 @@ extern s16 lbl_3_data_49DC[44];
 extern u16 lbl_3_data_81DC[16];
 extern u8 lbl_3_data_8404[6][15][2];
 extern u8 lbl_3_data_84B8[30][2];
-extern s16 lbl_3_data_1899C[4];
-extern u8 lbl_3_data_189AC[9];
-extern s16 lbl_3_data_189B8[6];
+extern u8 lbl_3_data_88DC;
 
 typedef struct {
     /* 0x0 */ f32 x;
@@ -107,12 +112,76 @@ typedef struct {
     /* 0x8 */ f32 radius[2];
 } Unk28A8Spawn; // size: 0x10
 
-extern Unk28A8Spawn lbl_3_data_18AC8[10];
-extern f32 lbl_3_data_18B88[5];
-extern f32 lbl_3_data_18B9C[5];
-extern s16 lbl_3_data_18BB0[2][2];
-extern u8 lbl_3_data_88DC;
-extern s16 lbl_3_data_18BB8[][3];
+u8 lbl_3_data_188E8[0x14] = { 0, 1, 2, 3, 4, 5, 0, 2, 3, 4, 5, 0, 0, 2, 3, 5, 0, 0, 0, 0 };
+u8 lbl_3_data_188FC[0x10] = { 0, 2, 1, 3, 4, 5, 0, 1, 3, 4, 0, 1, 3, 4, 0, 0 };
+u8 aILevel[4] = { 3, 2, 1, 0 };
+u8 lbl_3_data_18910[8] = { 6, 0, 4, 5, 2, 3, 1, 0 };
+u8 lbl_3_data_18918[8] = { 0, 2, 2, 2, 2, 2, 2, 0 };
+u8 lbl_3_data_18920[0x24] = {
+    4, 4, 4, 4, 4, 1, 1, 1, 1, 2, 4, 4, 4, 1, 4, 1, 1, 1,
+    1, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0,
+};
+u8 lbl_3_data_18944[8] = { 3, 0, 0, 0, 3, 3, 0, 0 };
+u8 lbl_3_data_1894C[0x2C] = {
+    0x03, 0x13, 0x30, 0x32, 0xFF, 0xFF, 0xFF, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00,
+    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x04, 0x0C,
+    0x2A, 0x14, 0x2B, 0xFF, 0xFF, 0x05, 0x10, 0x2C, 0x2D, 0x2E, 0x2F, 0xFF, 0x00, 0x00,
+};
+u8 lbl_3_data_18978[8] = { 0, 1, 2, 3, 3, 0, 0, 0 };
+static u8 lbl_3_data_18980[3] = { 2, 0, 0 };
+f32 lbl_3_data_18984[6] = { 0.0f, 70.0f, 12.0f, 40.0f, -12.0f, 40.0f };
+static s16 lbl_3_data_1899C[4] = { 120, 90, 20, 0 };
+static u8 lbl_3_data_189A4[8] = { 10, 20, 30, 40, 50, 10, 0, 0 };
+static u8 lbl_3_data_189AC[9] = { 0, 2, 3, 4, 5, 6, 9, 10, 11 };
+static s16 lbl_3_data_189B8[6] = { 10, 20, 30, 10, 100, 0 };
+s16 lbl_3_data_189C4[3][7] = {
+    { 0, 2, 3, 4, 5, 6, 7 },
+    { 5, 0, 3, 2, 7, 4, 6 },
+    { 4, 0, 6, 3, 5, 7, 2 },
+};
+static u8 lbl_3_data_189F0[3][3][3][8] = {
+    {
+        { { 20, 0, 13, 20, 0, 2, 5, 40 }, { 20, 0, 15, 15, 12, 3, 10, 25 }, { 30, 0, 25, 0, 20, 5, 10, 10 } },
+        { { 10, 0, 5, 10, 0, 0, 5, 70 }, { 20, 0, 15, 15, 12, 3, 10, 25 }, { 30, 0, 25, 0, 20, 5, 10, 10 } },
+        { { 5, 0, 5, 5, 0, 0, 5, 80 }, { 20, 0, 15, 15, 12, 3, 10, 25 }, { 30, 0, 25, 0, 20, 5, 10, 10 } },
+    },
+    {
+        { { 20, 0, 13, 20, 0, 2, 5, 40 }, { 20, 0, 15, 15, 12, 3, 10, 25 }, { 30, 0, 25, 0, 20, 5, 10, 10 } },
+        { { 10, 0, 5, 10, 0, 0, 5, 70 }, { 20, 0, 15, 15, 12, 3, 10, 25 }, { 30, 0, 25, 0, 20, 5, 10, 10 } },
+        { { 5, 0, 5, 5, 0, 0, 5, 80 }, { 20, 0, 15, 15, 12, 3, 10, 25 }, { 30, 0, 25, 0, 20, 5, 10, 10 } },
+    },
+    {
+        { { 20, 0, 11, 30, 0, 0, 0, 39 }, { 15, 0, 15, 30, 30, 0, 0, 10 }, { 20, 0, 20, 30, 30, 0, 0, 0 } },
+        { { 10, 0, 10, 20, 0, 0, 10, 50 }, { 15, 0, 5, 20, 40, 0, 10, 10 }, { 10, 0, 10, 10, 50, 10, 10, 0 } },
+        { { 10, 0, 10, 15, 0, 0, 5, 60 }, { 15, 0, 5, 20, 30, 5, 10, 10 }, { 10, 0, 10, 10, 50, 10, 10, 0 } },
+    },
+};
+static Unk28A8Spawn lbl_3_data_18AC8[10] = {
+    { 17.7f, 37.1f, { 9.0f, 14.0f } },
+    { 0.0f, 52.0f, { 9.0f, 14.0f } },
+    { -17.7f, 37.1f, { 9.0f, 14.0f } },
+    { 34.2f, 53.6f, { 9.0f, 14.0f } },
+    { 20.0f, 71.0f, { 9.0f, 14.0f } },
+    { 0.0f, 76.8f, { 9.0f, 14.0f } },
+    { -20.0f, 71.0f, { 9.0f, 14.0f } },
+    { -34.2f, 53.6f, { 9.0f, 14.0f } },
+    { 21.0f, 96.5f, { 9.0f, 15.0f } },
+    { -21.0f, 96.5f, { 9.0f, 15.0f } },
+};
+static u8 lbl_3_data_18B68[0x20] = {
+    0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+    1, 0, 1, 1, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0, 0,
+};
+static f32 lbl_3_data_18B88[5] = { 0.84f, 0.88f, 0.92f, 0.96f, 1.0f };
+static f32 lbl_3_data_18B9C[5] = { 0.004f, 0.985f, 0.65f, 0.5f, 1.5f };
+s16 lbl_3_data_18BB0[2][2] = { { 240, 180 }, { 180, 150 } };
+static s16 lbl_3_data_18BB8[24][3] = {
+    { 10, 0, 0 },     { 20, 0, 0 },    { 30, 0, 0 },     { 40, 0, -20 },  { 40, -40, 0 },  { 30, -10, -10 },
+    { 60, -20, -20 }, { 90, -30, -30 }, { 120, -40, -40 }, { 0, 0, 0 },   { 0, 0, 0 },     { 0, 0, 0 },
+    { 200, 0, 0 },    { 50, 0, 0 },    { 100, 0, 0 },    { 30, 0, 0 },    { 0, 0, 0 },     { 0, 0, 0 },
+    { -90, 30, 30 },  { 0, 0, 0 },     { -50, 0, 50 },   { 0, 0, 0 },     { -30, 30, 0 },  { 20, -20, 0 },
+};
+s16 lbl_3_data_18C48[10] = { 100, 180, 600, 279, 3, 1, 60, 70, 2, 0 };
 extern u8 lbl_803CBC3C[];
 
 extern void fn_3_5A6D4(u8 status);
@@ -128,11 +197,9 @@ extern void fn_3_5B408(void);
 extern int fn_3_5B380(u16 buttons);
 extern void fn_3_107E80(void);
 extern void fn_8004CC18(void);
-extern void fn_3_DF8D4(void);
 extern void ballPhysica(void);
-extern void fn_3_D8CD0(void);
-extern void fn_3_D9868(void);
-extern void fn_3_D9A30(void);
+extern void fn_3_10C81C(void);
+extern void fn_3_1E328(void);
 // sta_c6.c
 extern BOOL fn_3_E5924(void);
 
@@ -155,7 +222,93 @@ static inline void playStadiumSound(s32 sound) {
     sndFXCtrl(voice, 91, vol);
 }
 
-s16 lbl_3_data_18C48[10] = { 100, 180, 600, 279, 3, 1, 60, 70, 2, 0 };
+// .text:0x000DF8D4 size:0x14C mapped:0x8071E968
+void fn_3_DF8D4(void) {
+    int i;
+
+    for (i = 0; i < 4; i++) {
+        g_Minigame.miniGameCurrentPoints[i] = lbl_3_data_18C48[0];
+        g_Minigame.minigameControlStruct._1C[i] = 0;
+        g_Minigame.minigameControlStruct._28[i] = -1;
+        g_Minigame.minigameFielderIndex[i] = -1;
+        g_Minigame._18FC[i] = -1;
+        g_Minigame.minigameControlStruct._14[i] = -1;
+        g_Minigame.minigameControlStruct._18[i] = i;
+        g_Minigame._19BE[i][0] = 0xFF;
+    }
+    for (i = 0; i < 4; i++) {
+        g_Minigame._1914_arr[i] = 0;
+    }
+    g_Minigame.turnNumberWithinRound = 0;
+    g_Minigame._1939 = 0;
+    g_Minigame._190D = 3;
+    g_Minigame._19A6 = 0;
+    g_Minigame.challenge_minigame_haven_tWonYetIndicator = 1;
+    g_Minigame._19A9 = 0;
+    g_Minigame._1911 = 0;
+    g_Minigame.toyField_pointMultiplier = 1;
+    g_Minigame.toyfield_waitFor_CoinsX2_AnimationToEnd = 0;
+    g_Minigame._19CD = 0;
+    g_Minigame._19CE = 0;
+    g_Minigame._19CF = 0;
+    g_Minigame.toyField_selectedTurns = lbl_3_data_189A4[g_Minigame._1A24[0]];
+    g_Minigame.toyField_turnNumber = 0;
+    if (!g_d_GameSettings.exhibitionMatchInd) {
+        g_Minigame.toyField_selectedTurns = lbl_3_data_189A4[5];
+    }
+    fn_3_754B8();
+    initializeInMemBatter();
+    fn_3_FBA8();
+    fn_3_595C4();
+    fn_3_1E328();
+}
+
+// .text:0x000DF820 size:0xB4 mapped:0x8071E8B4
+void fn_3_DF820(void) {
+    int i;
+
+    fn_3_10C81C();
+    for (i = 0; i < 4; i++) {
+        if (g_Minigame._19E8[i]._0 != g_Minigame._19E8[i]._2) {
+            break;
+        }
+    }
+    if (i >= 4) {
+        fn_3_5A6D4(GAME_STATUS_TOY_STADIUM_LOAD);
+    }
+}
+
+// .text:0x000DF6D4 size:0x14C mapped:0x8071E768
+void fn_3_DF6D4(void) {
+    switch (g_GameLogic._125) {
+    case 0:
+        fn_3_DF608();
+        g_GameLogic._125++;
+    }
+    g_Minigame._190A = 1;
+    g_Minigame._19DA[g_d_GameSettings._35] = g_d_GameSettings._35;
+    lbl_3_common_bss_37400._40 = g_d_GameSettings._35;
+    g_Minigame.GameMode_MiniGame = g_d_GameSettings._33;
+    g_Minigame._19DF = 30;
+    fn_3_5A6D4(GAME_STATUS_0x1B);
+}
+
+// .text:0x000DF608 size:0xCC mapped:0x8071E69C
+void fn_3_DF608(void) {
+    int i;
+    int j = 0;
+
+    g_Minigame._19DA[g_d_GameSettings._35] = 0;
+    for (i = 0; i < 4; i++) {
+        if (g_d_GameSettings._35 != i) {
+            g_Minigame.minigameControlStruct.aIStrength[i] = lbl_3_data_18980[j++];
+        }
+    }
+    g_Minigame.miniGameNumberOfParticipants = lbl_3_data_18944[g_Minigame.GameMode_MiniGame] + 1;
+    g_Minigame._1907 = 1;
+    g_Minigame.multiPlayerInd = 1;
+    g_Scores._AA = 1;
+}
 
 // .text:0x000DE744 size:0x44C mapped:0x8071D7D8
 void fn_3_DE744(void) {
@@ -428,9 +581,6 @@ void fn_3_DD9A4(void) {
 }
 
 // .text:0x000DD3FC size:0x5A8 mapped:0x8071C490
-// The target reaches lbl_3_data_188E8 to lbl_3_data_18C48 from one pool base, so that data
-// belongs in this file (outside the unit's .data split). Defined here, the code is identical
-// and only the pool base's relocation name differs.
 void fn_3_DD3FC(void) {
     s32 i;
 
@@ -980,9 +1130,6 @@ void fn_3_DC240(void) {
 }
 
 // .text:0x000DA834 size:0x1A0C mapped:0x807198C8
-// The target reaches lbl_3_data_188E8 to lbl_3_data_18C48 from one pool base, so that data
-// belongs in this file (outside the unit's .data split). Defined here, the code is identical
-// and only the pool base's relocation name differs.
 void fn_3_DA834(void) {
     s32 i;
     s32 j;
@@ -1204,9 +1351,6 @@ void fn_3_DA640(s32 count, s32 idx) {
 }
 
 // .text:0x000D9EA0 size:0x7A0 mapped:0x80718F34
-// The target reaches lbl_3_data_188E8 to lbl_3_data_18C48 from one pool base, so that data
-// belongs in this file (outside the unit's .data split). Defined here, the code is identical
-// and only the pool base's relocation name differs.
 void fn_3_D9EA0(void) {
     s32 i;
     Unk28A8Fielder* fielder;

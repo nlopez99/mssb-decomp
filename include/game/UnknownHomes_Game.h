@@ -1810,11 +1810,7 @@ typedef struct _MiniGameStruct {
     /*0x19B8*/ s16 TF_framesSinceHittingPanel;
     /*0x19BA*/ s16 _19BA;
     /*0x19BC*/ s16 _19BC;
-    /*0x19BE*/ u8 _19BE;
-    /*0x19BF*/ u8 _19BF;
-    /*0x19C0*/ s16 _19C0;
-    /*0x19C2*/ s16 _19C2;
-    /*0x19C4*/ s16 _19C4;
+    /*0x19BE*/ u8 _19BE[4][2];
     /*0x19C6*/ s8 _19C6;
     /*0x19C7*/ u8 _19C7;
     /*0x19C8*/ u8 maybeTFCollisionResultState;
