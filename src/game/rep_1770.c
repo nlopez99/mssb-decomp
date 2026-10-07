@@ -1,6 +1,7 @@
 #include "game/rep_1770.h"
-#include "header_rep_data.h"
+// Must precede header_rep_data.h, which keeps the .rodata constants unpooled as in the target
 #include "game/UnknownHomes_Game.h"
+#include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
 
 typedef struct UnkTask1770 {
@@ -59,6 +60,12 @@ extern struct {
     /* 0x2A */ s16 _2A;
 } g_Scores;
 
+extern struct {
+    /* 0x000 */ u8 _000[0x1D2];
+    /* 0x1D2 */ u8 _1D2;
+} lbl_3_common_bss_34C90;
+
+extern s16 lbl_3_data_5F3C[4];
 extern UnkSpriteRef1770 lbl_80371C30[];
 extern void* lbl_803CC1B8;
 
@@ -184,7 +191,27 @@ void fn_3_9B7F4(void) {
 
 // .text:0x0009B320 size:0x4D4 mapped:0x806DA3B4
 void fn_3_9B320(void) {
-    return;
+    UnkTask1770* task = lbl_803CC1B8;
+    s32 i;
+
+    task->_18++;
+    if (lbl_3_common_bss_32724._96 != 0 || lbl_3_common_bss_32724._A7 == 0) {
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    if (task->_1C != g_Scores._04 || task->_1E != g_Scores._2A) {
+        fn_3_9B108(task);
+    }
+    if (lbl_3_common_bss_32724._A7 < 0xFF) {
+        for (i = 0; i < 16; i++) {
+            lbl_80371C30[task->_14 + i]._00->_58 = (lbl_80371C30[task->_14 + i]._00->_58 & 0xFFFFFF00) | lbl_3_common_bss_32724._A7;
+        }
+    } else {
+        for (i = 4; i <= 15; i++) {
+            lbl_80371C30[task->_14 + i]._00->_58 = (lbl_80371C30[task->_14 + i]._00->_58 & 0xFFFFFF00) | lbl_3_common_bss_32724._A6;
+        }
+    }
 }
 
 // .text:0x0009B108 size:0x218 mapped:0x806DA19C
@@ -267,7 +294,86 @@ void fn_3_99BDC(void) {
 
 // .text:0x00099818 size:0x3C4 mapped:0x806D88AC
 void fn_3_99818(void) {
+    UnkTask1770* task = lbl_803CC1B8;
+    s32 frame = 0;
+    f32 ratio;
+
+    if (lbl_3_common_bss_32724._96 != 0) {
+        goto remove;
+    }
+    if (g_Minigame.GameMode_MiniGame == 2) {
+        if (g_GameLogic.gameStatus == GAME_STATUS_TRANSITION_MINIGAME_POSTGAME) {
+            goto remove;
+        }
+        if (g_Minigame.pauseInd != 0) {
+            if (lbl_3_common_bss_34C90._1D2 == 7 || lbl_3_common_bss_34C90._1D2 == 13) {
+                goto remove;
+            }
+        }
+    } else if (lbl_3_common_bss_32724._A7 == 0) {
+        goto remove;
+    }
+
+    if (g_Pitcher.ChargePitchType != 0) {
+        ratio = (f32)g_Pitcher.unknownFrameCounter / (f32)(g_Pitcher.pitchWindUpCountDown - lbl_3_data_5F3C[2]);
+        if (ratio >= 1.0f) {
+            ratio = 1.0f;
+        }
+        lbl_80371C30[task->_14 + 3]._00->_68 = 0;
+        frame = 106.0f * ratio;
+        if (g_Pitcher.ChargePitchType == 3) {
+            lbl_80371C30[task->_14 + 3]._00->_5C = 106 << 16;
+            if ((s32)(lbl_80371C30[task->_14 + 2]._00->_5C >> 16) < 106) {
+                lbl_80371C30[task->_14 + 2]._00->_5C = 106 << 16;
+            } else {
+                lbl_80371C30[task->_14 + 2]._00->_68 = 1;
+            }
+            frame = 106;
+        } else if (g_Pitcher.overChargeInd != 0) {
+            frame = 106.0f * g_Pitcher.pitchChargeUp;
+            lbl_80371C30[task->_14 + 3]._00->_5C = frame << 16;
+        } else {
+            lbl_80371C30[task->_14 + 3]._00->_5C = frame << 16;
+        }
+    } else {
+        lbl_80371C30[task->_14 + 3]._00->_5C = 0;
+        lbl_80371C30[task->_14 + 3]._00->_68 = 0;
+        lbl_80371C30[task->_14 + 2]._00->_5C = 0;
+    }
+
+    if (g_Pitcher.ChargePitchType != 0) {
+        lbl_80371C30[task->_14 + 5]._00->_68 = 0;
+        if (g_Pitcher.ChargePitchType == 3) {
+            lbl_80371C30[task->_14 + 5]._00->_68 = 1;
+        } else {
+            lbl_80371C30[task->_14 + 5]._00->_5C = (frame + 10) << 16;
+        }
+    } else {
+        if ((lbl_80371C30[task->_14 + 5]._00->_5C >> 16) < 10) {
+            lbl_80371C30[task->_14 + 5]._00->_68 = 1;
+        } else {
+            lbl_80371C30[task->_14 + 5]._00->_5C = 10 << 16;
+            lbl_80371C30[task->_14 + 5]._00->_68 = 0;
+        }
+    }
+
+    if (g_Pitcher.ChargePitchType >= 2) {
+        if (task->_1C == 0) {
+            lbl_80371C30[task->_14 + 6]._00->_54 |= 2;
+            lbl_80371C30[task->_14 + 6]._00->_5C = frame << 16;
+            lbl_80371C30[task->_14 + 7]._00->_5C = 0;
+            lbl_80371C30[task->_14 + 7]._00->_68 = 1;
+            task->_1C = 1;
+        }
+    } else {
+        lbl_80371C30[task->_14 + 6]._00->_54 &= ~2;
+        task->_1C = 0;
+    }
     return;
+
+remove:
+    fn_80034CEC(task);
+    fn_800B0A14_removeQueue();
 }
 
 // .text:0x0009976C size:0xAC mapped:0x806D8800
@@ -286,5 +392,71 @@ void fn_3_9976C(void) {
 
 // .text:0x000993A8 size:0x3C4 mapped:0x806D843C
 void fn_3_993A8(void) {
-    return;
+    UnkTask1770* task = lbl_803CC1B8;
+    s32 frame = 0;
+
+    if (lbl_3_common_bss_32724._96 == 0 && lbl_3_common_bss_32724._A7 != 0) {
+        if (g_Batter.chargeStatus != 0) {
+            if (g_Batter.chargeUp < 1.0f) {
+                lbl_80371C30[task->_14 + 2]._00->_64 = 0x49;
+                frame = 75.0f * g_Batter.chargeUp;
+            } else {
+                lbl_80371C30[task->_14 + 2]._00->_64 = 0x48;
+                frame = (s32)(31.0f * g_Batter.chargeDown) + 75;
+            }
+            if (g_Batter.chargeDown >= 1.0f) {
+                lbl_80371C30[task->_14 + 3]._00->_5C = 106 << 16;
+                if ((lbl_80371C30[task->_14 + 2]._00->_5C >> 16) < 106) {
+                    lbl_80371C30[task->_14 + 2]._00->_5C = 106 << 16;
+                } else {
+                    lbl_80371C30[task->_14 + 2]._00->_68 = 1;
+                }
+                frame = 106;
+            } else {
+                lbl_80371C30[task->_14 + 3]._00->_5C = frame << 16;
+                lbl_80371C30[task->_14 + 2]._00->_5C = 0;
+                lbl_80371C30[task->_14 + 2]._00->_68 = 0;
+            }
+        } else {
+            lbl_80371C30[task->_14 + 3]._00->_5C = 0;
+            lbl_80371C30[task->_14 + 3]._00->_68 = 0;
+            lbl_80371C30[task->_14 + 2]._00->_5C = 0;
+        }
+
+        if (g_Batter.chargeStatus != 0) {
+            lbl_80371C30[task->_14 + 5]._00->_68 = 0;
+            if (g_Batter.swingInd != 0 && g_Batter.chargeDown >= 1.0f) {
+                if ((lbl_80371C30[task->_14 + 5]._00->_5C >> 16) < 106) {
+                    lbl_80371C30[task->_14 + 5]._00->_5C = 106 << 16;
+                } else {
+                    lbl_80371C30[task->_14 + 5]._00->_68 = 1;
+                }
+            } else {
+                lbl_80371C30[task->_14 + 5]._00->_5C = (frame + 10) << 16;
+            }
+        } else {
+            if ((lbl_80371C30[task->_14 + 5]._00->_5C >> 16) < 10) {
+                lbl_80371C30[task->_14 + 5]._00->_68 = 1;
+            } else {
+                lbl_80371C30[task->_14 + 5]._00->_5C = 10 << 16;
+                lbl_80371C30[task->_14 + 5]._00->_68 = 0;
+            }
+        }
+
+        if (g_Batter.chargeStatus != 0 && g_Batter.swingInd != 0) {
+            if (task->_1C == 0) {
+                lbl_80371C30[task->_14 + 6]._00->_54 |= 2;
+                lbl_80371C30[task->_14 + 6]._00->_5C = frame << 16;
+                lbl_80371C30[task->_14 + 7]._00->_5C = 0;
+                lbl_80371C30[task->_14 + 7]._00->_68 = 1;
+                task->_1C = 1;
+            }
+        } else {
+            lbl_80371C30[task->_14 + 6]._00->_54 &= ~2;
+            task->_1C = 0;
+        }
+    } else {
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+    }
 }
