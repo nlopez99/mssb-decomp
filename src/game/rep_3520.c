@@ -335,6 +335,8 @@ void fn_3_13ADC0(Vec* out, Vec* v, Vec* n) {
 }
 
 // .text:0x0013ACB4 size:0x10C mapped:0x80779D48
+// 91.2%: the second reflection loads _70C and _714 before the first one stores, and
+// the FPRs differ throughout.
 void fn_3_13ACB4(Unk3520Line* line) {
     Vec n;
     Vec d;
@@ -365,6 +367,7 @@ void fn_3_13ACB4(Unk3520Line* line) {
 }
 
 // .text:0x0013AA78 size:0x23C mapped:0x80779B0C
+// 98.5%: needs fn_3_13A0AC, still a stub that is inlined away here.
 void fn_3_13AA78(void) {
     if (g_Minigame._72A != 0) {
         fn_3_13A0AC();
@@ -447,6 +450,7 @@ void fn_3_139F84(void) {
 }
 
 // .text:0x00139CA0 size:0x2E4 mapped:0x80778D34
+// 96.2%: the target keeps count * 4 in its own register (r18) for bag->coins.
 void fn_3_139CA0(void) {
     Unk3520Bag* bag = NULL;
     u8 filling = FALSE;
@@ -540,6 +544,7 @@ void fn_3_13974C(void) {
 }
 
 // .text:0x00139700 size:0x4C mapped:0x80778794
+// 51.6%: needs fn_3_1391C0, still a stub that is inlined away here.
 void fn_3_139700(void) {
     if (g_Minigame._B6C._40[0] != 0) {
         if (g_Minigame.turnOverStatus != 0) {
@@ -566,6 +571,7 @@ void fn_3_1384B4(Unk3520Obj* obj) {
 }
 
 // .text:0x00138448 size:0x6C mapped:0x807774DC
+// 69.6%: needs fn_3_1384B4, still a stub that is inlined away here.
 void fn_3_138448(Unk3520Obj* obj) {
     if (g_Minigame._72A == 0) {
         if (obj->_3A < 0x7FFE) {
@@ -752,6 +758,8 @@ u8 fn_3_137B10(Unk3520Obj* obj) {
 }
 
 // .text:0x001379A0 size:0x170 mapped:0x80776A34
+// 90.7%: the unrolled fielder search walks other registers and offsets, and the
+// object loop strength-reduces differently.
 BOOL fn_3_1379A0(int fielderIdx) {
     Unk3520Fielder* fielder = &g_Fielders[fielderIdx];
     u32 player;
@@ -862,6 +870,7 @@ void fn_3_1370A0(camera_803c639c_s* camera) {
 }
 
 // .text:0x00136EA4 size:0x1FC mapped:0x80775F38
+// 97.6%: needs fn_3_13688C, still a stub that is inlined away here.
 void fn_3_136EA4(void) {
     if (g_Minigame.turnOverStatus != 0) {
         g_Minigame.playerIDWithPowerup[0] = -1;
@@ -1056,6 +1065,8 @@ void fn_3_135C18(void) {
 }
 
 // .text:0x00135A64 size:0x1B4 mapped:0x80774AF8
+// 96.5%: the spoke loop builds its g_Minigame base anew instead of copying r27, and
+// the saved registers follow from that.
 void fn_3_135A64(void) {
     int i;
     int j;
@@ -1137,6 +1148,8 @@ void fn_3_1357A4(Vec* pos, Vec* dir) {
 }
 
 // .text:0x001356F8 size:0xAC mapped:0x8077478C
+// 99.0%: cpu and the aIStrength walker swap r26 and r27; fn_3_13BB30, which inlines
+// this, matches.
 void fn_3_1356F8(void) {
     Unk3520Cpu* cpu = (Unk3520Cpu*)&g_Minigame._1DCC;
     u8 strength;
@@ -1179,6 +1192,8 @@ int fn_3_13564C(f32 x, f32 z) {
 }
 
 // .text:0x00135600 size:0x4C mapped:0x80774694
+// 96.8%: the bases of lbl_3_data_21A48 and g_Minigame swap r5 and r6 (the same
+// swap shows where fn_3_13493C inlines this).
 void fn_3_135600(f32* outX, f32* outZ, f32 x, f32 z) {
     x -= lbl_3_data_21A48.x;
     z -= lbl_3_data_21A48.z;
@@ -1225,6 +1240,7 @@ int fn_3_135520(f32 x, f32 z, f32 r) {
 }
 
 // .text:0x001354BC size:0x64 mapped:0x80774550
+// 99.2%: the index is scaled into another register; MG.objs[i] scores 83%.
 BOOL fn_3_1354BC(s32 i, f32 x, f32 z) {
     BOOL ret = FALSE;
     f64 ax = fabs(((Unk3520Obj*)((u8*)&g_Minigame + 0xBB0))[i]._0.x - x);
@@ -1322,6 +1338,7 @@ Unk3520Coin* fn_3_1350BC(u32 player, u32 quadrant, u32 count, Unk3520Coin* coins
 }
 
 // .text:0x00134D4C size:0x370 mapped:0x80773DE0
+// 96.5%: FPRs only; dx and dz land in f8 and f2 where the target reuses f1 and f0.
 u32 fn_3_134D4C(f32 cx, f32 cz, f32 radius, f32 px, f32 pz, f32 qx, f32 qz) {
     f32 dx = cx - px;
     f32 dz = cz - pz;
@@ -1374,6 +1391,7 @@ BOOL fn_3_134C80(u32 player, u32 quadrant, u32 target, f32 x, f32 z) {
 }
 
 // .text:0x0013493C size:0x344 mapped:0x807739D0
+// 99.8%: only the inlined fn_3_135600 swaps its two base registers.
 int fn_3_13493C(u32 player, f32* x, f32* z, u32 depth) {
     f32 angle;
     f32 x1;
@@ -1440,6 +1458,7 @@ int fn_3_134908(const void* a, const void* b) {
 }
 
 // .text:0x00134658 size:0x2B0 mapped:0x807736EC
+// 98.0%: the first loop walks targets and g_Minigame in registers off by one.
 void fn_3_134658(u32 self, f32* x, f32* z, int* quadrant) {
     Unk3520Target targets[4];
     Unk3520Target* target = targets;
