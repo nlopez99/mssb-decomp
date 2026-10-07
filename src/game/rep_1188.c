@@ -296,17 +296,16 @@ static inline u32 getFieldingStats(int rosterID) {
 
 // .text:0x0006E24C size:0x968 mapped:0x806AD2E0
 void fn_3_6E24C(int rosterID, int fielderIdx) {
+    GameControlsStruct* logic = &g_GameLogic;
+    UnkFielder1188* fielder = &g_Fielders[fielderIdx];
+    CharacterStats* char_stats = &inMemRoster[logic->teamFielding][rosterID];
+    ChallengeTrackingStruct* starMissions = starMissionCompletionTracker;
     int index;
     int charID;
     int lo;
     int hi;
     f32 width;
     f32 third;
-    f32 min;
-
-    UnkFielder1188* fielder = &g_Fielders[fielderIdx];
-    CharacterStats* char_stats = &inMemRoster[g_GameLogic.teamFielding][rosterID];
-    ChallengeTrackingStruct* starMissions = starMissionCompletionTracker;
 
     if (g_d_GameSettings.GameModeSelected == GAME_TYPE_PRACTICE) {
         if (g_Practice.practiceType_2 == 0 || g_Practice.practiceType_2 == 1 || g_Practice.practiceType_2 == 2 ||
@@ -348,10 +347,10 @@ void fn_3_6E24C(int rosterID, int fielderIdx) {
         }
     }
 
-    if (g_GameLogic.Team_CaptainRosterLoc[g_GameLogic.teamFielding] == fielder->rosterID) {
+    if (logic->Team_CaptainRosterLoc[logic->teamFielding] == fielder->rosterID) {
         fielder->_218 = 0;
     } else {
-        fielder->_218 = ++g_GameLogic.rosterLoc_skippingCap;
+        fielder->_218 = ++logic->rosterLoc_skippingCap;
     }
 
     if (g_d_GameSettings.minigamesEnabled) {
@@ -408,25 +407,20 @@ void fn_3_6E24C(int rosterID, int fielderIdx) {
     fielder->_0F8 = width + third;
     fielder->_0FC = width - third;
 
-    min = 0.01f * lbl_3_data_79B4.mins[0];
-    if (fielder->_0E8 < min) {
-        fielder->_0E8 = min;
+    if (fielder->_0E8 < 0.01f * lbl_3_data_79B4.mins[0]) {
+        fielder->_0E8 = 0.01f * lbl_3_data_79B4.mins[0];
     }
-    min = 0.01f * lbl_3_data_79B4.mins[1];
-    if (fielder->_0F4 < min) {
-        fielder->_0F4 = min;
+    if (fielder->_0F4 < 0.01f * lbl_3_data_79B4.mins[1]) {
+        fielder->_0F4 = 0.01f * lbl_3_data_79B4.mins[1];
     }
-    min = 0.01f * lbl_3_data_79B4.mins[3];
-    if (fielder->_100 < min) {
-        fielder->_100 = min;
+    if (fielder->_100 < 0.01f * lbl_3_data_79B4.mins[3]) {
+        fielder->_100 = 0.01f * lbl_3_data_79B4.mins[3];
     }
-    min = 0.01f * lbl_3_data_79B4.mins[4];
-    if (fielder->_104 < min) {
-        fielder->_104 = min;
+    if (fielder->_104 < 0.01f * lbl_3_data_79B4.mins[4]) {
+        fielder->_104 = 0.01f * lbl_3_data_79B4.mins[4];
     }
-    min = 0.01f * lbl_3_data_79B4.mins[5];
-    if (fielder->_108 < min) {
-        fielder->_108 = min;
+    if (fielder->_108 < 0.01f * lbl_3_data_79B4.mins[5]) {
+        fielder->_108 = 0.01f * lbl_3_data_79B4.mins[5];
     }
 
     fielder->_16C = 0.01f * lbl_3_data_7F10[charID] * charSizeMultipliers[charID][0];
