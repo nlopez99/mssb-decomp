@@ -1750,7 +1750,52 @@ void fn_3_14F3CC(Particle3880* p) {
 
 // .text:0x0014ED24 size:0x6A8 mapped:0x8078DDB8
 BOOL fn_3_14ED24(Emitter3880* emitter) {
-    return 0;
+    Particle3880* p;
+    s32 alpha;
+
+    fn_80033620(emitter);
+    p = emitter->particles;
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+    do {
+        if (p->_4A != 0) {
+            if (p->_48 <= 0) {
+                GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_DSTALPHA, GX_LO_CLEAR);
+                fn_8003403C(p->_38, p->_3C);
+                fn_80033CC8(p, emitter->_10);
+                if (lbl_3_data_26C94[7] / p->_4A < 2) {
+                    alpha = p->color[3];
+                    alpha += lbl_3_data_26C94[6] / (lbl_3_data_26C94[7] / 2);
+                    if (alpha > lbl_3_data_26C94[6]) {
+                        alpha = lbl_3_data_26C94[6];
+                    }
+                    p->color[3] = alpha;
+                    p->_38 += (lbl_3_data_26C94[3] - lbl_3_data_26C94[2]) / 100000.0f / (lbl_3_data_26C94[7] / 2);
+                    p->_3C = p->_38;
+                } else {
+                    alpha = p->color[3];
+                    alpha -= lbl_3_data_26C94[6] / (lbl_3_data_26C94[7] / 2);
+                    if (alpha < lbl_3_data_26C94[5]) {
+                        alpha = lbl_3_data_26C94[5];
+                    }
+                    p->color[3] = alpha;
+                    p->_38 += (lbl_3_data_26C94[4] - lbl_3_data_26C94[3]) / 100000.0f / (lbl_3_data_26C94[7] / 2);
+                    p->_3C = p->_38;
+                }
+                p->_4A--;
+                if (p->_4A == 0) {
+                    fn_3_14F544(p);
+                    fn_3_14EAF4(p);
+                }
+            } else {
+                p->_48--;
+                if (p->_48 == 0) {
+                    fn_3_14EAF4(p);
+                }
+            }
+        }
+        p = p->next;
+    } while (p != NULL);
+    return FALSE;
 }
 
 // .text:0x0014EAF4 size:0x230 mapped:0x8078DB88
@@ -2546,8 +2591,64 @@ void fn_3_14B248(PathEmitter3880* emitter, Particle3880* p) {
 }
 
 // .text:0x0014AC40 size:0x608 mapped:0x80789CD4
+// 99.72%: FPRs differ in the fabs() steps and inside the inlined fn_3_14B248
 BOOL fn_3_14AC40(Emitter3880* emitter) {
-    return 0;
+    PathEmitter3880* self = (PathEmitter3880*)emitter;
+    Particle3880* p;
+    s32 step;
+    s32 alpha;
+    f32 grow;
+
+    if (lbl_80366158._28 != 0) {
+        return FALSE;
+    }
+    fn_80033620(&self->base);
+    p = self->base.particles;
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_DSTALPHA, GX_LO_CLEAR);
+    if (lbl_80366158._28 == 0) {
+        fn_3_14B3F4(self);
+        self->_36--;
+    }
+    step = (lbl_3_data_26E24[6] - lbl_3_data_26E24[5]) / lbl_3_data_26E24[1] * 2;
+    grow = 2.0f * ((lbl_3_data_26E24[4] - lbl_3_data_26E24[3]) / 100000.0f / lbl_3_data_26E24[1]);
+    do {
+        if (p->_4A != 0) {
+            if (p->_48 > 0) {
+                p->_48--;
+                if (p->_48 == 0) {
+                    fn_3_14B248(self, p);
+                }
+            } else {
+                fn_8003403C(p->_38, p->_3C);
+                fn_80033CC8(p, self->base._10);
+                alpha = p->color[3];
+                if (lbl_3_data_26E24[1] / p->_4A < 2) {
+                    grow = fabs(grow);
+                    step = fabs(step);
+                } else {
+                    grow = -1.0 * fabs(grow);
+                    step = -1.0 * fabs(step);
+                }
+                alpha += step;
+                if (alpha > 255) {
+                    alpha = 255;
+                }
+                if (alpha < 0) {
+                    alpha = 0;
+                }
+                p->_38 += grow;
+                p->_3C = p->_38;
+                p->color[3] = alpha;
+                p->_4A--;
+                if (p->_4A == 0) {
+                    fn_3_14B248(self, p);
+                }
+            }
+        }
+        p = p->next;
+    } while (p != NULL);
+    return self->_36 == 0;
 }
 
 // .text:0x0014AC1C size:0x24 mapped:0x80789CB0
