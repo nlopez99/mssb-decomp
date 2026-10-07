@@ -108,5 +108,6 @@ The base shows `lis rX,...rodata.0@ha; addi` and then `lfs f0,100(rX)`, while th
 
 - Install m2c from https://github.com/matt-kempster/m2c. The PyPI package named `m2c` is an unrelated project.
 - `match.py --m2c` prepares the unit's context for m2c (preprocesses it and strips inline asm); the draft is typed only for globals the source's includes declare, so a placeholder file including only `header_rep_data.h` gives `?` types until you add `game/UnknownHomes_Game.h` and the like.
+- `match.py` reports a function you have written as `missing` when objdiff cannot pair it, for example after a callee's empty stub was inlined into it; give the callee a body first.
 - decomp-permuter's own `import.py` breaks on this project; `tools/permute.py` explains why in its header and replaces it.
 - `tools/permute.py` fails with a syntax error on `va_arg(args, s32)`, because pycparser cannot parse MWCC's `_var_arg_typeof`. For the permuter run only, write `*(s32*)__va_arg(args, 1)` (the same code), and restore `va_arg` afterwards.
