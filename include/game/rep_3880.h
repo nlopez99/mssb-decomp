@@ -12,6 +12,7 @@ struct Particle27_3880;
 struct PathEmitter3880;
 struct ModelEmitter3880;
 struct PlayerEmitter3880;
+struct UnkPlayer3880;
 
 BOOL fn_3_14737C(struct Emitter3880* emitter);
 void fn_3_147778(struct Emitter3880* emitter, Vec* pos);
@@ -128,14 +129,14 @@ void fn_3_156548(void);
 void fn_3_156970(Vec* corners, u32 color, struct TexInfo3880* tex);
 void fn_3_156D04(void);
 void fn_3_15730C(u32 index, f32 x, f32 y, f32 z);
-void fn_3_1573AC(void);
+void fn_3_1573AC(struct UnkPlayer3880* player);
 void fn_3_157570(void);
 void fn_3_157588(s32 count);
 Vec* fn_3_1575F0(u32 index);
 BOOL fn_3_15767C(struct Emitter3880* emitter);
 void fn_3_1578F8(void);
 f32 fn_3_15791C(s32 frame);
-void fn_3_157AC4(void);
-void fn_3_157DB8(void);
+BOOL fn_3_157AC4(struct Emitter3880* emitter);
+void fn_3_157DB8(s32 end);
 
 #endif // !__GAME_rep_3880_H_

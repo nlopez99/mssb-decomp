@@ -133,6 +133,11 @@ typedef struct PathEmitter3880 {
     /* 0x36 */ s16 _36;
 } PathEmitter3880;
 
+typedef struct FrameEmitter3880 {
+    /* 0x00 */ Emitter3880 base;
+    /* 0x18 */ s32 frame;
+    /* 0x1C */ s32 end;
+} FrameEmitter3880;
 
 typedef struct {
     /* 0x00 */ u8 _00[0x34];
@@ -140,9 +145,15 @@ typedef struct {
     /* 0x38 */ u8 _38[0x90 - 0x38];
 } UnkActor3880; // size: 0x90
 
-typedef struct {
-    /* 0x00 */ u8 _00[0x34];
-    /* 0x34 */ Vec _34;
+typedef struct UnkPlayer3880 {
+    /* 0x000 */ u8 _000[0x34];
+    /* 0x034 */ Vec _34;
+    /* 0x040 */ Vec rot;
+    /* 0x04C */ u8 _04C[0x252 - 0x4C];
+    /* 0x252 */ s8 _252;
+    /* 0x253 */ u8 _253;
+    /* 0x254 */ s8 _254;
+    /* 0x255 */ s8 _255;
 } UnkPlayer3880;
 
 extern struct {
@@ -153,7 +164,9 @@ extern struct {
 } lbl_8036E548;
 
 extern struct {
-    /* 0x00 */ u8 _00[0x6C];
+    /* 0x00 */ u8 _00[0x64];
+    /* 0x64 */ void* _64;
+    /* 0x68 */ void* _68;
     /* 0x6C */ void* _6C;
 } lbl_3_common_bss_32724;
 
@@ -161,6 +174,27 @@ extern struct {
     /* 0x00 */ u8 _00[0x28];
     /* 0x28 */ u8 _28;
 } lbl_80366158;
+
+extern struct {
+    /* 0x00 */ u8 _00[0x4];
+    /* 0x04 */ s32 _004;
+} lbl_3_common_bss_35154;
+
+// g_Minigame holds 40 of these from 0xA8 in Piranha Panic
+typedef struct {
+    /* 0x00 */ Vec pos;
+    /* 0x0C */ u8 _0C[0x1C - 0xC];
+    /* 0x1C */ s32 kind;
+    /* 0x20 */ u8 _20[0x26 - 0x20];
+    /* 0x26 */ u8 active;
+    /* 0x27 */ u8 _27;
+} UnkPiranha3880; // size: 0x28
+
+// The layout g_Minigame has in Piranha Panic
+typedef struct {
+    /* 0x00 */ u8 _00[0xA8];
+    /* 0xA8 */ UnkPiranha3880 piranhas[40];
+} UnkMinigame3880;
 
 typedef struct {
     /* 0x00 */ void* _00;
@@ -233,6 +267,9 @@ s32 lbl_3_data_26E9C[25] = {
 };
 
 extern BOOL fn_8001B728(s32, s32, Vec*);
+extern void fn_80030D88(Vec* pos, Vec* dir, UnkBurst3880* burst, s32 n);
+extern void fn_8002F5F4(Vec* pos, Vec* dir, UnkSpark3880* spark, s16 id);
+extern void fn_80030470(Vec* pos, Vec* dir, Vec* back, UnkBurst3880* burst, s32 n);
 extern s32 fn_8005268C(void);
 extern camera_803c639c_s* fn_80052734(s32 index);
 extern Particle3880* fn_80031F34(Particle3880* particles, s32 count);
@@ -264,13 +301,39 @@ static TexInfo3880* lbl_3_bss_B854;
 static TrailEmitter3880* lbl_3_bss_B850;
 
 // .text:0x00157DB8 size:0x70 mapped:0x80796E4C
-void fn_3_157DB8(void) {
-    return;
+void fn_3_157DB8(s32 end) {
+    FrameEmitter3880* emitter = (FrameEmitter3880*)fn_80033A24(fn_3_157AC4, 0x80, 0, 1, 1, 0x16);
+
+    if (emitter != NULL) {
+        emitter->frame = 0;
+        emitter->end = end;
+        emitter->base.particles->_4D = 0;
+        *(u32*)emitter->base.particles->color = 0xFFFFFFFF;
+    }
 }
 
 // .text:0x00157AC4 size:0x2F4 mapped:0x80796B58
-void fn_3_157AC4(void) {
-    return;
+BOOL fn_3_157AC4(Emitter3880* emitter) {
+    FrameEmitter3880* self = (FrameEmitter3880*)emitter;
+    Particle3880* p = emitter->particles;
+    Vec offset = { 2.775f, -6.975f, 0.0f };
+    Mtx m;
+
+    PSMTXRotRad(m, 'Y', shortAngleToRad(g_Minigame._1AF8));
+    PSMTXMultVec(m, &offset, &offset);
+    p->_38 = p->_3C = fn_3_15791C(self->frame);
+    p->pos.x = g_Minigame._1AE0 + offset.x + p->_38 * lbl_3_data_266A8[0];
+    p->pos.y = g_Minigame._1AE4 + offset.y + p->_3C * lbl_3_data_266A8[1];
+    p->pos.z = g_Minigame._1AE8 + offset.z;
+    fn_8003403C(p->_38, p->_3C);
+    fn_80033CC8(emitter->particles, lbl_3_common_bss_32724._64);
+    if (lbl_80366158._28 == 0) {
+        self->frame++;
+    }
+    if (g_Minigame._1A40 != 0) {
+        return TRUE;
+    }
+    return self->frame == self->end && g_GameLogic.gameStatus != GAME_STATUS_MVP_END_GAME;
 }
 
 // .text:0x0015791C size:0x1A8 mapped:0x807969B0
@@ -302,7 +365,52 @@ void fn_3_1578F8(void) {
 
 // .text:0x0015767C size:0x27C mapped:0x80796710
 BOOL fn_3_15767C(Emitter3880* emitter) {
-    return 0;
+    Vec pos;
+    Vec dir;
+    Vec back;
+    UnkPiranha3880* piranha;
+    Vec* point;
+    s16* ids;
+    u32 i;
+    u8 done;
+
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES &&
+        g_Minigame.GameMode_MiniGame == MINI_GAME_ID_PIRANHA_PANIC && lbl_3_bss_B850->_18 == 0) {
+        for (i = 0; i < 40; i++) {
+            piranha = &((UnkMinigame3880*)&g_Minigame)->piranhas[i];
+            if (piranha->active != 0) {
+                pos.x = piranha->pos.x;
+                pos.y = -piranha->pos.y;
+                pos.z = piranha->pos.z;
+                point = fn_3_1575F0(i);
+                PSVECSubtract(point, &pos, &dir);
+                if (PSVECMag(&dir)) {
+                    lbl_3_data_266B0[0]._00 = lbl_3_data_266B0[1]._00 = lbl_3_data_266B0[2]._00 =
+                        lbl_3_common_bss_32724._6C;
+                    lbl_3_data_267A0._00 = lbl_3_common_bss_35154._004;
+                    if (piranha->kind <= 3 && piranha->kind >= 0) {
+                        ids = lbl_3_data_267E4[piranha->kind];
+                        lbl_3_data_266B0[0]._04 = ids[0];
+                        lbl_3_data_266B0[1]._04 = ids[1];
+                        fn_8002F5F4(&pos, &dir, &lbl_3_data_267A0, ids[0]);
+                        if (lbl_80366158._28 == 0) {
+                            fn_80030D88(&pos, &dir, &lbl_3_data_266B0[1], 41);
+                            fn_80030D88(&pos, &dir, &lbl_3_data_266B0[2], 41);
+                            PSVECNormalize(&dir, &dir);
+                            PSVECSubtract(&pos, point, &back);
+                            fn_80030470(&pos, &dir, &back, &lbl_3_data_266B0[0], 41);
+                        }
+                    }
+                }
+            }
+        }
+        lbl_3_bss_B854 = NULL;
+    }
+    done = lbl_3_bss_B850->_18;
+    if (done) {
+        lbl_3_bss_B850 = NULL;
+    }
+    return done;
 }
 
 // .text:0x001575F0 size:0x8C mapped:0x80796684
@@ -332,8 +440,28 @@ void fn_3_157570(void) {
 }
 
 // .text:0x001573AC size:0x1C4 mapped:0x80796440
-void fn_3_1573AC(void) {
-    return;
+void fn_3_1573AC(UnkPlayer3880* player) {
+    Vec pos;
+    Vec dir;
+    Mtx mtx;
+    Control control;
+
+    pos.x = lbl_3_data_268FC[player->_252][0] / 100000.0f;
+    pos.y = lbl_3_data_268FC[player->_252][1] / 100000.0f;
+    pos.z = lbl_3_data_268FC[player->_252][2] / 100000.0f;
+    fn_8001B728(player->_255, 4, &pos);
+    control.type = 0;
+    CTRLSetRotation(&control, player->rot.x, player->rot.y, player->rot.z);
+    CTRLBuildMatrix(&control, mtx);
+    dir.x = 0.0f;
+    dir.y = 0.0f;
+    dir.z = 1.0f;
+    PSMTXMultVec(mtx, &dir, &dir);
+    lbl_3_data_268E4[0]->_00 = lbl_3_data_268E4[1]->_00 = lbl_3_data_268E4[2]->_00 = lbl_3_common_bss_32724._6C;
+    lbl_3_data_268E4[0]->_04 = lbl_3_data_268E4[1]->_04 = lbl_3_data_267E4[player->_254][1];
+    fn_80030D88(&pos, &dir, lbl_3_data_268E4[0], 41);
+    fn_80030D88(&pos, &dir, lbl_3_data_268E4[1], 41);
+    fn_80030D88(&pos, &dir, lbl_3_data_268E4[2], 41);
 }
 
 // .text:0x0015730C size:0xA0 mapped:0x807963A0
