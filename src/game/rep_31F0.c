@@ -110,6 +110,8 @@ static u8 lbl_3_bss_B699;
 static u8 lbl_3_bss_B698;
 
 // .text:0x00112BD8 size:0x7C0 mapped:0x80751C6C
+// 99.74%: in the inlined fn_3_111C5C the saved registers of i, the input address, mg and the
+// loop pointer are r27, r24, r25, r26 where the target has r24 to r27 (standalone it matches).
 void fn_3_112BD8(void) {
     switch (g_GameLogic.gameStatus) {
     case GAME_STATUS_LOAD_GAME:
