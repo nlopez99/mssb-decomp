@@ -9,7 +9,8 @@ typedef struct UnkTask3448 {
     /* 0x00 */ void (*_00)(void);
     /* 0x04 */ u8 _04[0xC - 0x4];
     /* 0x0C */ struct UnkTask3448* _0C;
-    /* 0x10 */ u8 _10[0x14 - 0x10];
+    /* 0x10 */ u8 _10[0x12 - 0x10];
+    /* 0x12 */ u16 _12;
     /* 0x14 */ u16 _14;
     /* 0x16 */ u16 _16;
     /* 0x18 */ u16 _18;
@@ -92,6 +93,12 @@ typedef struct {
 
 extern UnkFielder3448 g_Fielders[9];
 
+extern s16 lbl_80109410[8];
+extern struct {
+    /* 0x00 */ u32 _00;
+    /* 0x04 */ u8 _04[0x28 - 0x4];
+} lbl_803616CC[];
+
 extern UnkSpriteRef3448 lbl_80371C30[];
 extern void* lbl_803CC1B8;
 
@@ -107,6 +114,7 @@ extern UnkSpriteDesc3448 lbl_3_data_A9F8[];
 extern UnkSpriteDesc3448 lbl_3_data_B0E0[];
 extern u16 lbl_3_data_B140[][2];
 extern s16 lbl_3_data_213EC[10];
+extern u16 lbl_3_data_2145C[2];
 extern s16 lbl_3_data_21654[12];
 extern s16 lbl_3_data_21672;
 extern s16 lbl_3_data_21788[4];
@@ -114,15 +122,18 @@ extern u8 lbl_3_data_21798[12];
 extern u8 lbl_3_data_21884[4][2];
 extern UnkSpriteDesc3448 lbl_3_data_23894[];
 extern u16 lbl_3_data_238F4[8];
+extern UnkSpriteDesc3448 lbl_3_data_23904[];
 extern UnkSpriteDesc3448 lbl_3_data_23A44[];
 extern UnkSpriteDesc3448 lbl_3_data_23AE4[];
 extern UnkSpriteDesc3448 lbl_3_data_23C84[];
 extern UnkSpriteDesc3448 lbl_3_data_23D24[];
 extern UnkSpriteDesc3448 lbl_3_data_23DA4[];
 extern UnkSpriteDesc3448 lbl_3_data_23E04[];
+extern UnkSpriteDesc3448 lbl_3_data_23E64[];
 extern UnkSpriteDesc3448 lbl_3_data_23F24[];
 extern UnkSpriteDesc3448 lbl_3_data_240A4[];
 extern UnkSpriteDesc3448 lbl_3_data_246E4[];
+extern UnkSpriteDesc3448 lbl_3_data_24784[];
 extern UnkSpriteDesc3448 lbl_3_data_24844[];
 extern UnkSpriteDesc3448 lbl_3_data_24B04[];
 extern UnkSpriteDesc3448 lbl_3_data_24CE4[];
@@ -137,11 +148,20 @@ extern void fn_800362F0(UnkTask3448* task, s32);
 extern void fn_800363D8(UnkTask3448* task, s32, s32, s32, s32);
 extern void fn_800528C0(f32 x, f32 y, f32 z, s16* screenX, s16* screenY);
 extern void fn_800B0A14_removeQueue(void);
+extern void fn_800B0A5C_insertQueue(void (*)(void), s32);
 extern u32 fn_3_107C88(void);
 extern s32 fn_3_107CD0(void);
 
 static inline u32 getFrame(UnkTask3448* task, u32 i) {
     return lbl_80371C30[task->_14 + i]._00->_5C >> 16;
+}
+
+static inline UnkSprite3448* getSprite(UnkTask3448* task, u32 i) {
+    return lbl_80371C30[task->_14 + i]._00;
+}
+
+static inline BOOL isSpriteDone(UnkTask3448* task, u32 i) {
+    return lbl_80371C30[task->_14 + i]._00->_69 == 2 ? TRUE : FALSE;
 }
 
 static inline BOOL isAnimDone(UnkSprite3448* sprite) {
@@ -374,7 +394,108 @@ u32 fn_3_12536C(void) {
 
 // .text:0x00124CE0 size:0x68C mapped:0x80763D74
 void fn_3_124CE0(void) {
-    return;
+    UnkTask3448* task = lbl_803CC1B8;
+    u32 n;
+
+    if (fn_3_12536C()) {
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    switch (task->_1C) {
+    case 0:
+        if (g_Minigame.multiPlayerInd != 0) {
+            fn_800B0A14_removeQueue();
+            break;
+        }
+        if (g_Minigame.multiPlayerInd == 0 && g_Minigame._1A3C == 0 &&
+            g_Minigame.soloMinigameDifficulty == MINIGAME_DIFFICULTY_SOLO_NON_CHALLENGE) {
+            task->_1E = 1;
+        } else if (g_Minigame.GameMode_MiniGame == MINI_GAME_ID_BOBOMB_DERBY ||
+                   g_Minigame.GameMode_MiniGame == MINI_GAME_ID_BARREL_BATTER) {
+            task->_1E = 0;
+        } else {
+            fn_800B0A14_removeQueue();
+            break;
+        }
+        fn_80034E20(task, lbl_3_data_23904);
+        switch (g_Minigame.GameMode_MiniGame) {
+        case MINI_GAME_ID_BOBOMB_DERBY:
+            lbl_80371C30[task->_14]._00->_5C = 0 << 16;
+            lbl_80371C30[task->_14 + 2]._00->_5C = 0 << 16;
+            break;
+        case MINI_GAME_ID_WALLBALL:
+            lbl_80371C30[task->_14]._00->_5C = 1 << 16;
+            lbl_80371C30[task->_14 + 2]._00->_5C = 1 << 16;
+            break;
+        case MINI_GAME_ID_BARREL_BATTER:
+            lbl_80371C30[task->_14]._00->_5C = 2 << 16;
+            lbl_80371C30[task->_14 + 2]._00->_5C = 2 << 16;
+            break;
+        case MINI_GAME_ID_CHAINCHOMP_SPRINT:
+            lbl_80371C30[task->_14]._00->_5C = 4 << 16;
+            lbl_80371C30[task->_14 + 2]._00->_5C = 4 << 16;
+            break;
+        case MINI_GAME_ID_PIRANHA_PANIC:
+            lbl_80371C30[task->_14]._00->_5C = 3 << 16;
+            lbl_80371C30[task->_14 + 2]._00->_5C = 3 << 16;
+            break;
+        case MINI_GAME_ID_STAR_DASH:
+            lbl_80371C30[task->_14]._00->_5C = 5 << 16;
+            lbl_80371C30[task->_14 + 2]._00->_5C = 5 << 16;
+            break;
+        }
+        lbl_80371C30[task->_14 + 3]._00->_5C = task->_1E << 16;
+        lbl_80371C30[task->_14 + 4]._00->_64 = task->_1E != 0 ? 0x141 : 0x142;
+        lbl_80371C30[task->_14 + 5]._00->_5C = 61 << 16;
+        lbl_80371C30[task->_14 + 6]._00->_5C = 61 << 16;
+        lbl_80371C30[task->_14 + 7]._00->_5C = 61 << 16;
+        lbl_80371C30[task->_14 + 8]._00->_5C = 61 << 16;
+        task->_1C = 1;
+        break;
+    case 1:
+        if (task->_1E != 0) {
+            n = lbl_803616CC[g_Minigame.GameMode_MiniGame]._00;
+        } else {
+            n = g_Minigame.pointsReqToWin_challenge;
+        }
+        if (n > lbl_80109410[g_Minigame.GameMode_MiniGame]) {
+            n = lbl_80109410[g_Minigame.GameMode_MiniGame];
+        }
+        fn_800363D8(task, 5, 1, 0x145, (n % 10000) / 1000);
+        fn_800363D8(task, 6, 1, 0x145, (n % 1000) / 100);
+        fn_800363D8(task, 7, 1, 0x145, (n % 100) / 10);
+        fn_800363D8(task, 8, 1, 0x145, n % 10);
+        switch (g_Minigame.GameMode_MiniGame) {
+        case MINI_GAME_ID_BOBOMB_DERBY:
+            if (g_GameLogic.gameStatus == GAME_STATUS_DEFAULT || g_GameLogic.gameStatus == GAME_STATUS_AT_BAT) {
+                lbl_80371C30[task->_14 + 1]._00->_68 = 1;
+            } else {
+                lbl_80371C30[task->_14 + 1]._00->_68 = 4;
+            }
+            break;
+        case MINI_GAME_ID_WALLBALL:
+            lbl_80371C30[task->_14 + 1]._00->_68 = 1;
+            break;
+        case MINI_GAME_ID_BARREL_BATTER:
+            lbl_80371C30[task->_14 + 1]._00->_68 = 1;
+            break;
+        case MINI_GAME_ID_CHAINCHOMP_SPRINT:
+            if (g_Minigame._1B19 != 3) {
+                lbl_80371C30[task->_14 + 1]._00->_68 = 1;
+            } else {
+                lbl_80371C30[task->_14 + 1]._00->_68 = 4;
+            }
+            break;
+        case MINI_GAME_ID_PIRANHA_PANIC:
+            lbl_80371C30[task->_14 + 1]._00->_68 = 1;
+            break;
+        case MINI_GAME_ID_STAR_DASH:
+            lbl_80371C30[task->_14 + 1]._00->_68 = 1;
+            break;
+        }
+        break;
+    }
 }
 
 // .text:0x00124738 size:0x5A8 mapped:0x807637CC
@@ -814,8 +935,117 @@ void fn_3_122D24(void) {
 }
 
 // .text:0x001226D4 size:0x650 mapped:0x80761768
+// 99.67%: the first digit loop computes its digit into r0 and copies it to r29 in the target.
 void fn_3_1226D4(void) {
-    return;
+    UnkTask3448* task = lbl_803CC1B8;
+    MiniGameStruct* minigame = &g_Minigame;
+    s32 diff;
+    s32 step;
+    u32 n;
+    u32 j;
+
+    if (fn_3_12536C()) {
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    switch (task->_1C) {
+    case 0:
+        fn_800B0A5C_insertQueue(fn_3_122D24, task->_12);
+        fn_800B0A5C_insertQueue(fn_3_1231D4, task->_12);
+        fn_80034E20(task, lbl_3_data_23E64);
+        task->_1C = 1;
+        break;
+    case 1:
+        lbl_80371C30[task->_14]._00->_68 = 0;
+        lbl_80371C30[task->_14]._00->_5C = 0;
+        lbl_80371C30[task->_14 + 1]._00->_68 = 0;
+        lbl_80371C30[task->_14 + 1]._00->_5C = 0;
+        lbl_80371C30[task->_14 + 2]._00->_68 = 0;
+        lbl_80371C30[task->_14 + 2]._00->_5C = 0;
+        lbl_80371C30[task->_14 + 3]._00->_68 = 0;
+        lbl_80371C30[task->_14 + 3]._00->_5C = 0;
+        lbl_80371C30[task->_14 + 4]._00->_68 = 0;
+        lbl_80371C30[task->_14 + 4]._00->_5C = 0;
+        if (minigame->_1DF7 != 0) {
+            minigame->_1DF7 = 0;
+            task->_18 = 0;
+            task->_1A = 0;
+            task->_1C = 2;
+        }
+        break;
+    case 2:
+        lbl_80371C30[task->_14 + 1]._00->_68 = 1;
+        lbl_80371C30[task->_14 + 1]._00->_5C = 0;
+        lbl_80371C30[task->_14 + 2]._00->_68 = 1;
+        lbl_80371C30[task->_14 + 2]._00->_5C = 0;
+        lbl_80371C30[task->_14 + 3]._00->_68 = 1;
+        lbl_80371C30[task->_14 + 3]._00->_5C = 0;
+        lbl_80371C30[task->_14 + 4]._00->_68 = 1;
+        lbl_80371C30[task->_14 + 4]._00->_5C = 0;
+        task->_1C = 3;
+        break;
+    case 3:
+        if (fn_3_125424(task, 0, 16)) {
+            if (task->_18 < 0xFFFE) {
+                task->_18++;
+            } else {
+                task->_18 = 0xFFFF;
+            }
+            if (task->_18 >= lbl_3_data_2145C[task->_1A]) {
+                task->_18 = 0;
+                task->_1A++;
+            }
+            if (task->_1A == 2) {
+                task->_1C = 4;
+            }
+        }
+        break;
+    case 4:
+        if (isSpriteDone(task, 4) && isSpriteDone(task, 3) && isSpriteDone(task, 2) && isSpriteDone(task, 1)) {
+            getSprite(task, 0)->_68 = 1;
+            task->_1C = 5;
+        }
+        break;
+    case 5:
+        if (lbl_80371C30[task->_14]._00->_69 == 2) {
+            task->_1C = 1;
+        }
+        break;
+    }
+    if (task->_1A != 0) {
+        diff = g_Minigame.miniGameLatestPoints[g_Minigame.rosterID] - task->_1E;
+        if (diff != 0) {
+            step = diff / 4;
+            if (step != 0) {
+                task->_1E += step;
+            } else {
+                task->_1E += diff / __abs(diff);
+            }
+        }
+    } else {
+        task->_1E = g_Ball.Hit_HorizontalPower;
+    }
+    n = task->_1E;
+    if (n > 999) {
+        n = 999;
+    }
+    if (n >= 100) {
+        lbl_80371C30[task->_14]._00->_64 = 0x107;
+    } else if (n >= 10) {
+        lbl_80371C30[task->_14]._00->_64 = 0x109;
+    } else {
+        lbl_80371C30[task->_14]._00->_64 = 0x10A;
+    }
+    for (j = 1; j <= 3; j++) {
+        fn_800363D8(task, 4, j, 0x11B, (n % 1000) / 100);
+    }
+    for (j = 1; j <= 3; j++) {
+        fn_800363D8(task, 3, j, 0x11B, (n % 100) / 10);
+    }
+    for (j = 1; j <= 3; j++) {
+        fn_800363D8(task, 2, j, 0x11B, n % 10);
+    }
 }
 
 // .text:0x00122334 size:0x3A0 mapped:0x807613C8
@@ -1055,7 +1285,96 @@ s32 fn_3_120F5C(void) {
 
 // .text:0x0012089C size:0x6C0 mapped:0x8075F930
 void fn_3_12089C(void) {
-    return;
+    UnkTask3448* task = lbl_803CC1B8;
+    u32 n;
+
+    if (fn_3_12536C()) {
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    if (g_GameLogic.gameStatus == GAME_STATUS_DEFAULT) {
+        task->_1E = 1;
+    }
+    switch (task->_1C) {
+    case 0:
+        fn_80034E20(task, lbl_3_data_24784);
+        task->_1C = 1;
+        break;
+    case 1:
+        lbl_80371C30[task->_14 + 3]._00->_68 = 0;
+        lbl_80371C30[task->_14 + 3]._00->_5C = 0;
+        lbl_80371C30[task->_14]._00->_68 = 0;
+        lbl_80371C30[task->_14]._00->_5C = 0;
+        lbl_80371C30[task->_14 + 1]._00->_68 = 0;
+        lbl_80371C30[task->_14 + 1]._00->_5C = 0;
+        lbl_80371C30[task->_14 + 2]._00->_68 = 0;
+        lbl_80371C30[task->_14 + 2]._00->_5C = 0;
+        lbl_80371C30[task->_14 + 4]._00->_68 = 0;
+        lbl_80371C30[task->_14 + 4]._00->_5C = 0;
+        if (g_GameLogic.gameStatus == GAME_STATUS_AT_BAT &&
+            (g_Pitcher.pitcherActionState == PITCHER_ACTION_STATE_NO_CONTACT || g_Minigame.ballStoppedBreakingWallsInd != 0)) {
+            if (g_Minigame.wallBall_hitBowserWall != 0) {
+                fn_3_90064(0x300);
+                lbl_80371C30[task->_14 + 2]._00->_68 = 1;
+                if (g_Minigame.multiPlayerInd != 0 || g_Minigame._1A3C != 0 ||
+                    g_Minigame.soloMinigameDifficulty != MINIGAME_DIFFICULTY_SOLO_NON_CHALLENGE) {
+                    n = g_Minigame.miniGameCurrentPoints[g_Minigame.minigamePlayerSelectedOrder] / 2;
+                    if (n != 0) {
+                        if (n > 999) {
+                            n = 999;
+                        }
+                        if (n >= 100) {
+                            fn_800363D8(task, 4, 4, 0x11C, 11);
+                            fn_800363D8(task, 4, 3, 0x11C, (n % 1000) / 100);
+                        } else if (n >= 10) {
+                            fn_800363D8(task, 4, 4, 0x11C, 10);
+                            fn_800363D8(task, 4, 3, 0x11C, 11);
+                        } else {
+                            fn_800363D8(task, 4, 4, 0x11C, 10);
+                            fn_800363D8(task, 4, 3, 0x11C, 10);
+                        }
+                        if (n >= 10) {
+                            fn_800363D8(task, 4, 2, 0x11C, (n % 100) / 10);
+                        } else {
+                            fn_800363D8(task, 4, 2, 0x11C, 11);
+                        }
+                        fn_800363D8(task, 4, 1, 0x11C, n % 10);
+                        lbl_80371C30[task->_14 + 4]._00->_68 = 1;
+                    }
+                }
+            } else {
+                n = fn_3_120F5C();
+                if (n > 999) {
+                    n = 999;
+                }
+                if (n >= 100) {
+                    fn_800363D8(task, 3, 3, 0x11B, (n % 1000) / 100);
+                } else {
+                    fn_800363D8(task, 3, 3, 0x11B, 10);
+                }
+                if (n >= 10) {
+                    fn_800363D8(task, 3, 2, 0x11B, (n % 100) / 10);
+                } else {
+                    fn_800363D8(task, 3, 2, 0x11B, 10);
+                }
+                fn_800363D8(task, 3, 1, 0x11B, n % 10);
+                lbl_80371C30[task->_14 + 3]._00->_68 = 1;
+                if (g_Minigame.wallBall_hitNoteBlock == 1) {
+                    lbl_80371C30[task->_14]._00->_68 = 1;
+                    lbl_80371C30[task->_14 + 1]._00->_68 = 1;
+                }
+            }
+            task->_1E = 0;
+            task->_1C = 2;
+        }
+        break;
+    case 2:
+        if (!fn_3_125480(task) && task->_1E != 0) {
+            task->_1C = 1;
+        }
+        break;
+    }
 }
 
 // .text:0x0012026C size:0x630 mapped:0x8075F300
