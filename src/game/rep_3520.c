@@ -578,8 +578,39 @@ void fn_3_1391C0(void) {
 }
 
 // .text:0x00138AA4 size:0x71C mapped:0x80777B38
+// 97.8%: g_Minigame, the .bss base and the object walker sit in other saved registers,
+// and the inlined fn_3_137224 loop builds its bases anew.
 void fn_3_138AA4(void) {
-    return;
+    u32 i;
+
+    if (g_Minigame.turnOverStatus != 0) {
+        return;
+    }
+    for (i = 0; i < lbl_3_bss_B780; i++) {
+        if (i >= 4) {
+            break;
+        }
+        switch (MG.objs[i]._3D) {
+        case 0:
+            fn_3_138448(&MG.objs[i]);
+            break;
+        case 1:
+            fn_3_1382E0(&MG.objs[i]);
+            break;
+        case 2:
+            fn_3_13802C(&MG.objs[i]);
+            break;
+        case 3:
+            fn_3_137F14(&MG.objs[i]);
+            break;
+        case 4:
+            fn_3_137DE4(&MG.objs[i]);
+            break;
+        case 5:
+            fn_3_137CF8(&MG.objs[i]);
+            break;
+        }
+    }
 }
 
 // .text:0x001384B4 size:0x5F0 mapped:0x80777548
