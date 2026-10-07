@@ -105,7 +105,6 @@ typedef struct ObjAnim1D58 {
 
 typedef struct StadiumObject1D58 {
     /* 0x00 */ Control control;
-    /* 0x3C */ u8 _3C[0x44 - 0x3C];
     /* 0x44 */ Mtx _44;
     /* 0x74 */ struct StadiumModel1D58* _74;
     /* 0x78 */ struct StadiumObjectCollision* _78;

@@ -121,7 +121,7 @@ typedef struct StaC4Hit {
 
 typedef struct StaC4Obj {
     /* 0x00 */ Control control;
-    /* 0x3C */ u8 _3C[0x74 - 0x3C];
+    /* 0x44 */ u8 _44[0x74 - 0x44];
     /* 0x74 */ StaC4Model* _74;
     /* 0x78 */ StaC4Geom* _78;
     /* 0x7C */ void (*_7C)(struct StaC4Draw* draw);
