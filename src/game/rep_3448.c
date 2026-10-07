@@ -3686,7 +3686,88 @@ void fn_3_11DACC(u8* out, u8* buf, u8 seed, u8 key) {
 
 // .text:0x0011D780 size:0x34C mapped:0x8075C814
 void fn_3_11D780(void) {
-    return;
+    UnkTask3448* task = lbl_803CC1B8;
+    u8 code[16];
+    u8 buf[8];
+    u32 i;
+
+    if (lbl_3_common_bss_32724._96 != 0) {
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    if (g_Minigame._1A3C != 0) {
+        if (g_GameLogic._125 == 4) {
+            fn_80034CEC(task);
+            fn_800B0A14_removeQueue();
+            return;
+        }
+        if (g_GameLogic.gameStatus != 0x24) {
+            fn_80034CEC(task);
+            fn_800B0A14_removeQueue();
+            return;
+        }
+    } else {
+        if (g_GameLogic._125 == 3) {
+            fn_80034CEC(task);
+            fn_800B0A14_removeQueue();
+            return;
+        }
+        if (g_GameLogic.gameStatus != 0xE) {
+            fn_80034CEC(task);
+            fn_800B0A14_removeQueue();
+            return;
+        }
+    }
+    if (g_Minigame._1907 != 1) {
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    switch (task->_1C) {
+    case 0:
+        fn_80034E20(task, lbl_3_data_26254);
+        if (g_Minigame._1A3C != 0) {
+            lbl_80371C30[task->_14]._00->_64 = 0xBF;
+            task->_1E = 3;
+        } else {
+            lbl_80371C30[task->_14]._00->_64 = 0xBE;
+            task->_1E = 7;
+        }
+        task->_20 = random_fn_3_9EE24(0x100);
+        task->_22 = random_fn_3_9EE24(26);
+        task->_1C = 1;
+    case 1:
+        fn_3_11DACC(code, buf, task->_20, task->_22);
+        i = 0;
+        do {
+            fn_800363D8(task, i + 2, 1, 0xBD, code[i]);
+            fn_800363D8(task, i + 2, 2, 0xBD, code[i]);
+        } while (++i < 16);
+        task->_1C = 2;
+        break;
+    case 2:
+        if (g_GameLogic._125 == task->_1E) {
+            lbl_80371C30[task->_14]._00->_68 = 1;
+            lbl_80371C30[task->_14]._00->_5C = 0;
+            lbl_80371C30[task->_14 + 1]._00->_68 = 1;
+            lbl_80371C30[task->_14 + 1]._00->_5C = 0;
+            i = 0;
+            do {
+                lbl_80371C30[task->_14 + 2 + i]._00->_5C = 0;
+            } while (++i < 16);
+            task->_1C = 3;
+        }
+        break;
+    case 3:
+        if (g_GameLogic._125 != task->_1E) {
+            lbl_80371C30[task->_14]._00->_68 = 4;
+            lbl_80371C30[task->_14]._00->_5C = 0x140000;
+            lbl_80371C30[task->_14 + 1]._00->_68 = 4;
+            task->_1C = 2;
+        }
+        break;
+    }
 }
 
 // .text:0x0011D6A0 size:0xE0 mapped:0x8075C734
