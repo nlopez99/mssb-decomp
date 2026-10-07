@@ -4,6 +4,7 @@
 #include "header_rep_data.h"
 #include "game/rep_1838.h"
 #include "game/rep_3880.h"
+#include "game/m_sound.h"
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/rand.h"
 #include "string.h"
@@ -42,8 +43,6 @@ extern s8 lbl_3_data_216B0[4][2];
 extern s8 lbl_3_data_216B8[4];
 extern f32 lbl_3_data_219B8[19];
 
-// m_sound.h declares this as void(void).
-extern void fn_3_90064(int id);
 extern void fn_8004C108(VecXYZ* pos, int arg1);
 extern void fn_800246D4(int (*compare)(const void*, const void*), void* src, void* dst, int size, int count);
 

@@ -2,15 +2,16 @@
 #define __GAME_m_sound_H_
 
 #include "mssbTypes.h"
+#include "Dolphin/vec.h"
 
 void fn_3_8B718(void);
 void fn_3_8B7DC(void);
 void fn_3_8B804(void);
-void fn_3_8B890(void);
+void fn_3_8B890(s32 handle);
 void fn_3_8B964(void);
 void fn_3_8B9BC(void);
-void fn_3_8BA60(void);
-void fn_3_8BBC4(void);
+void fn_3_8BA60(s32 handle, Vec* pos, Vec* dir);
+s32 fn_3_8BBC4(u32 id, Vec* pos, Vec* dir, s32 arg3);
 void fn_3_8BDF4(void);
 void fn_3_8BE8C(void);
 void fn_3_8C07C(void);
@@ -27,7 +28,7 @@ void fn_3_8FC0C(void);
 void fn_3_8FC80(void);
 void fn_3_8FF18(void);
 void fn_3_8FF5C(void);
-void fn_3_90064(void);
+void fn_3_90064(int id);
 void fn_3_90150(void);
 
 #endif // !__GAME_m_sound_H_
