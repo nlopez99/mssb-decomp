@@ -179,7 +179,8 @@ extern void fn_800B4C04(Rep2998Actor* actor, f32 speed);
 extern f32 fn_800B4C40(Rep2998Actor* actor);
 extern void fn_800B4CA0(Rep2998Actor* actor, f32 frame);
 
-// rep_AC8.h and rep_1D58.h declare these as void(void) placeholders
+// rep_AC8.h and rep_1D58.h are not included: they declare fn_3_253A4, fn_3_B8414, fn_3_B8464
+// and fn_3_B98E8 as void(void) placeholders. fn_3_B7F70 lies in unsplit code.
 extern s32 fn_3_253A4(s32 fielder, s32 angle);
 extern void fn_3_27648(void);
 extern s16 fn_3_B7F70(s16 range);
@@ -225,6 +226,9 @@ static u8 lbl_3_bss_AE01;
 static u8 lbl_3_bss_AE00;
 
 // .text:0x000E4FC4 size:0x8B8 mapped:0x80724058
+// 96.99%: the target copies entry into a register of its own (r16) at the loop top for the
+// inlined fn_3_E4658 and fn_3_E4554; here they share draw's, so registers from r16 up, the
+// count loop's register and one stack spill (frame 0x80 against 0x90) differ.
 void fn_3_E4FC4(void** files) {
     Vec unused = { 0.0f, 3.6f, -2.0f };
     GameInitVariables* settings;
