@@ -94,7 +94,13 @@ typedef struct TexInfo3880 {
     /* 0x17 */ u8 format;
     /* 0x18 */ u16 tlutCount;
     /* 0x1A */ u8 tlutFormat;
-} TexInfo3880;
+    /* 0x1C */ u16 _1C;
+} TexInfo3880; // size: 0x20
+
+typedef struct {
+    /* 0x00 */ u32 _00;
+    /* 0x04 */ TexInfo3880 tex[1];
+} TexSet3880;
 
 typedef struct {
     /* 0x00 */ Vec pos;
@@ -166,8 +172,8 @@ extern struct {
 extern struct {
     /* 0x00 */ u8 _00[0x64];
     /* 0x64 */ void* _64;
-    /* 0x68 */ void* _68;
-    /* 0x6C */ void* _6C;
+    /* 0x68 */ TexSet3880* _68;
+    /* 0x6C */ TexSet3880* _6C;
 } lbl_3_common_bss_32724;
 
 extern struct {
@@ -267,6 +273,7 @@ s32 lbl_3_data_26E9C[25] = {
 };
 
 extern BOOL fn_8001B728(s32, s32, Vec*);
+extern void fn_800B24D4(s32 id);
 extern void fn_80030D88(Vec* pos, Vec* dir, UnkBurst3880* burst, s32 n);
 extern void fn_8002F5F4(Vec* pos, Vec* dir, UnkSpark3880* spark, s16 id);
 extern void fn_80030470(Vec* pos, Vec* dir, Vec* back, UnkBurst3880* burst, s32 n);
@@ -476,8 +483,99 @@ void fn_3_15730C(u32 index, f32 x, f32 y, f32 z) {
 }
 
 // .text:0x00156D04 size:0x608 mapped:0x80795D98
-void fn_3_156D04(void) {
-    return;
+// 96.55%: the base strength-reduces the texture index (i + 10) into its own saved register,
+// and a few FPRs differ in the size computation
+void fn_3_156D04(u32 index, f32 x, f32 y, f32 z) {
+    Vec quad[4];
+    Mtx44 proj;
+    Vec a;
+    Vec d;
+    Vec b;
+    Vec c;
+    Vec* point;
+    f32 zoom;
+    f32 scale;
+    f32 angle;
+    f32 size;
+    f32 w;
+    f32 half;
+    u32* color;
+    s32 i;
+
+    color = &lbl_3_data_26B84[((UnkMinigame3880*)&g_Minigame)->piranhas[index].kind];
+    zoom = fn_80052768_getCamera(0)->zoom;
+    scale = 1.0f / zoom;
+    fn_800B24D4(13);
+    point = fn_3_1575F0(index);
+    if (point != NULL) {
+        C_MTXFrustum(proj, -0.175f * scale, 0.175f * scale, 0.25f * scale, -0.25f * scale, 1.0f, 512.0f);
+        GXSetProjection(proj, GX_PERSPECTIVE);
+        PSMTXMultVec(fn_80052734(0)->view, point, &a);
+        point->x = x;
+        point->y = y;
+        point->z = z;
+        PSMTXMultVec(fn_80052734(0)->view, point, &b);
+        PSVECSubtract(&a, &b, &a);
+        c = a;
+        angle = 0.017453292f * (f32)((rand() % 15000) / 1000.0);
+        angle *= -(rand() % 2 * 2) + 1;
+        a.x = c.x * cosf_kludge(angle) + c.y * -sinf_kludge(angle);
+        a.y = c.x * sinf_kludge(angle) + c.y * cosf_kludge(angle);
+        GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_DSTALPHA, GX_LO_CLEAR);
+        GXSetZMode(GX_TRUE, GX_ALWAYS, GX_TRUE);
+        size = (rand() % 500 + 1000) / 1000.0;
+        i = 7;
+        do {
+            switch (i) {
+            case 0:
+            case 4:
+            case 7:
+                PSVECScale(&a, size * (lbl_3_data_26B94 + i * (lbl_3_data_26B98 - lbl_3_data_26B94) / 7.0f), &d);
+                PSVECAdd(&b, &d, &d);
+                if (i >= 4) {
+                    w = (7 - i) * 0.25f + 1.0f;
+                } else {
+                    w = 2.0f;
+                }
+                half = size * (w / 2);
+                quad[0].x = d.x - half;
+                quad[0].y = d.y - half;
+                quad[0].z = d.z;
+                quad[1].x = d.x - half;
+                quad[1].y = d.y + half;
+                quad[1].z = d.z;
+                quad[2].x = d.x + half;
+                quad[2].y = d.y + half;
+                quad[2].z = d.z;
+                quad[3].x = d.x + half;
+                quad[3].y = d.y - half;
+                quad[3].z = d.z;
+                GXSetBlendMode(GX_BM_SUBTRACT, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+                if (lbl_3_bss_B858 != 0) {
+                    fn_3_156970(quad, 0xFFFFFFFF,
+                                &lbl_3_common_bss_32724._68->tex[lbl_3_common_bss_32724._68->tex[0]._1C]);
+                }
+                if (i >= 4) {
+                    w = (7 - i) * 0.25f + 1.0f;
+                } else {
+                    w = 2.0f;
+                }
+                half = size * (w / 2);
+                quad[0].x = d.x - half;
+                quad[0].y = d.y - half;
+                quad[1].x = d.x - half;
+                quad[1].y = d.y + half;
+                quad[2].x = d.x + half;
+                quad[2].y = d.y + half;
+                quad[3].x = d.x + half;
+                quad[3].y = d.y - half;
+                GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_DSTALPHA, GX_LO_CLEAR);
+                fn_3_156970(quad, *color,
+                            &lbl_3_common_bss_32724._6C->tex[lbl_3_common_bss_32724._6C->tex[i + 10]._1C]);
+                break;
+            }
+        } while (i-- != 0);
+    }
 }
 
 // .text:0x00156970 size:0x394 mapped:0x80795A04
@@ -1077,6 +1175,42 @@ void fn_3_1524E8(Particle3880* p, u8 jitter) {
 
 // .text:0x00151F2C size:0x5BC mapped:0x80790FC0
 BOOL fn_3_151F2C(Emitter3880* emitter) {
+    Particle3880* p;
+    f32 height;
+
+    if (lbl_80366158._28 != 0) {
+        return FALSE;
+    }
+    fn_80033620(emitter);
+    p = emitter->particles;
+    if (p->_4C != 3) {
+        GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+    } else {
+        GXSetZMode(GX_FALSE, GX_ALWAYS, GX_FALSE);
+    }
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_DSTALPHA, GX_LO_CLEAR);
+    do {
+        if (p->_48 <= 0 && p->_4A != 0) {
+            height = p->_4D ? fn_3_119854(2) : fn_3_119854(0);
+            switch (p->_4C) {
+            case 1:
+                fn_3_151D6C(emitter, p);
+                break;
+            case 2:
+                fn_3_151BAC(emitter, p);
+                break;
+            case 3:
+                fn_3_1519F8(emitter, p);
+                break;
+            }
+        } else if (p->_48 != 0) {
+            p->_48--;
+        }
+        if (p->_4A == 0 && (p->_4C == 1 || p->_4C == 2)) {
+            fn_3_1536A8(p, 2);
+        }
+        p = p->next;
+    } while (p != NULL);
     return FALSE;
 }
 

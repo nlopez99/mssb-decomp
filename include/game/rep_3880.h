@@ -127,7 +127,7 @@ void fn_3_155F08(void);
 void fn_3_156218(void);
 void fn_3_156548(void);
 void fn_3_156970(Vec* corners, u32 color, struct TexInfo3880* tex);
-void fn_3_156D04(void);
+void fn_3_156D04(u32 index, f32 x, f32 y, f32 z);
 void fn_3_15730C(u32 index, f32 x, f32 y, f32 z);
 void fn_3_1573AC(struct UnkPlayer3880* player);
 void fn_3_157570(void);
