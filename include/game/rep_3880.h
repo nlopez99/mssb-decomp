@@ -125,7 +125,7 @@ void fn_3_1559E4(struct Particle27_3880* p, Vec* pos, Vec* rot);
 void fn_3_155C28(struct Emitter3880* emitter);
 void fn_3_155F08(void);
 void fn_3_156218(void);
-void fn_3_156548(void);
+void fn_3_156548(u32 index, f32 x, f32 y, f32 z);
 void fn_3_156970(Vec* corners, u32 color, struct TexInfo3880* tex);
 void fn_3_156D04(u32 index, f32 x, f32 y, f32 z);
 void fn_3_15730C(u32 index, f32 x, f32 y, f32 z);

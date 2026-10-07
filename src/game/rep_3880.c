@@ -274,6 +274,9 @@ s32 lbl_3_data_26E9C[25] = {
 
 extern BOOL fn_8001B728(s32, s32, Vec*);
 extern void fn_800B24D4(s32 id);
+extern void fn_800B27DC(Mtx44 proj, GXProjectionType type);
+extern void fn_800B2160(s32 mode);
+extern void fn_800B1468(Vec* corners, u32 color, TexInfo3880* tex);
 extern void fn_80030D88(Vec* pos, Vec* dir, UnkBurst3880* burst, s32 n);
 extern void fn_8002F5F4(Vec* pos, Vec* dir, UnkSpark3880* spark, s16 id);
 extern void fn_80030470(Vec* pos, Vec* dir, Vec* back, UnkBurst3880* burst, s32 n);
@@ -632,8 +635,84 @@ void fn_3_156970(Vec* corners, u32 color, TexInfo3880* tex) {
 }
 
 // .text:0x00156548 size:0x428 mapped:0x807955DC
-void fn_3_156548(void) {
-    return;
+// 96.26%: as in fn_3_156D04, the base strength-reduces the texture index (i + 1) into its
+// own saved register, and FPRs differ in the second size computation
+void fn_3_156548(u32 index, f32 x, f32 y, f32 z) {
+    Vec quad[4];
+    Mtx44 proj;
+    Vec a;
+    Vec d;
+    Vec b;
+    Vec* point;
+    f32 scale;
+    f32 w;
+    f32 half;
+    f32 size = 0.5f;
+    s32 i;
+
+    scale = 1.0f / fn_80052768_getCamera(0)->zoom;
+    fn_800B24D4(13);
+    point = fn_3_1575F0(index);
+    if (point != NULL) {
+        C_MTXFrustum(proj, -0.175f * scale, 0.175f * scale, 0.25f * scale, -0.25f * scale, 1.0f, 512.0f);
+        fn_800B27DC(proj, GX_PERSPECTIVE);
+        PSMTXMultVec(fn_80052734(0)->view, point, &a);
+        point->x = x;
+        point->y = y;
+        point->z = z;
+        PSMTXMultVec(fn_80052734(0)->view, point, &b);
+        PSVECSubtract(&a, &b, &a);
+        fn_800B2160(2);
+        i = 7;
+        do {
+            switch (i) {
+            case 0:
+            case 4:
+            case 7:
+                PSVECScale(&a, lbl_3_data_26BAC + i * (lbl_3_data_26BB0 - lbl_3_data_26BAC) / 7.0f, &d);
+                PSVECAdd(&b, &d, &d);
+                if (i >= 4) {
+                    w = (7 - i) * size * 0.25f + size;
+                } else {
+                    w = size * 2.0f;
+                }
+                half = w / 2;
+                quad[0].x = d.x - half;
+                quad[0].y = d.y - half;
+                quad[0].z = d.z;
+                quad[1].x = d.x - half;
+                quad[1].y = d.y + half;
+                quad[1].z = d.z;
+                quad[2].x = d.x + half;
+                quad[2].y = d.y + half;
+                quad[2].z = d.z;
+                quad[3].x = d.x + half;
+                quad[3].y = d.y - half;
+                quad[3].z = d.z;
+                fn_800B2160(3);
+                fn_800B1468(quad, 0xFFFFFFFF,
+                            &lbl_3_common_bss_32724._68->tex[lbl_3_common_bss_32724._68->tex[0]._1C]);
+                if (i >= 4) {
+                    w = (7 - i) * size * 0.25f + size;
+                } else {
+                    w = size * 2.0f;
+                }
+                half = w / 2;
+                quad[0].x = d.x - half;
+                quad[0].y = d.y - half;
+                quad[1].x = d.x - half;
+                quad[1].y = d.y + half;
+                quad[2].x = d.x + half;
+                quad[2].y = d.y + half;
+                quad[3].x = d.x + half;
+                quad[3].y = d.y - half;
+                fn_800B2160(2);
+                fn_800B1468(quad, 0xFFFFFFFF,
+                            &lbl_3_common_bss_32724._68->tex[lbl_3_common_bss_32724._68->tex[i + 1]._1C]);
+                break;
+            }
+        } while (i-- != 0);
+    }
 }
 
 // .text:0x00156218 size:0x330 mapped:0x807952AC
