@@ -62,7 +62,7 @@ void fn_3_BC2DC(void) {
 }
 
 // .text:0x000BC6D8 size:0x178 mapped:0x806FB76C
-void fn_3_BC6D8(void) {
+void fn_3_BC6D8(Vec* pos, Vec* eye, int type, BOOL flag) {
     return;
 }
 
@@ -87,12 +87,12 @@ void fn_3_BD1D4(void) {
 }
 
 // .text:0x000BD1D8 size:0x25C mapped:0x806FC26C
-void fn_3_BD1D8(void) {
+void fn_3_BD1D8(Mtx view) {
     return;
 }
 
 // .text:0x000BD434 size:0xBC mapped:0x806FC4C8
-void fn_3_BD434(void) {
+void fn_3_BD434(s32 stadium, s32 mode) {
     return;
 }
 
@@ -237,3 +237,17 @@ void fn_3_C0134(void) {
     return;
 }
 
+// .text:0x000C0770 size:0x30 mapped:0x806FF804
+void fn_3_C0770(void) {
+    return;
+}
+
+// .text:0x000C07A0 size:0x10 mapped:0x806FF834
+void fn_3_C07A0(void) {
+    return;
+}
+
+// .text:0x000C07B0 size:0x60 mapped:0x806FF844
+void fn_3_C07B0(void) {
+    return;
+}

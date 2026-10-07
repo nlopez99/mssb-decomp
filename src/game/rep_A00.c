@@ -16,6 +16,8 @@
 #include "game/rep_1330.h"
 #include "game/rep_3880.h"
 #include "game/rep_AC8.h"
+#include "game/rep_E08.h"
+#include "game/m_sound.h"
 
 typedef struct {
     /* 0x00 */ Vec _00;
@@ -226,14 +228,9 @@ void fn_3_21AA8(void);
 void fn_3_5A6D4(u8);
 BOOL fn_3_6B4C8(void);
 BOOL fn_3_6C938(s32, s32);
-void fn_3_8C07C(void);
-void fn_3_90220(s32, s32);
 void fn_3_FBD58(void);
 void fn_3_FBD70(void);
 BOOL fn_3_165D24(void);
-// rep_E08.h and m_sound.h declare these as void(void), matching their units' stubs
-void fn_3_6714C(BOOL);
-void fn_3_8C104(s32);
 void QueueCharacterAnimation(int actor, int anim, u8, u8, s16, u8, int);
 void AnimateCharacter(int actor, int anim, u8, u8, u8, s16, u8, int);
 

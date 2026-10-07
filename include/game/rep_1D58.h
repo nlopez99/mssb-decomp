@@ -3,6 +3,10 @@
 
 #include "mssbTypes.h"
 #include "Dolphin/GX/GXTypes.h"
+#include "Dolphin/mtx.h"
+#include "game/rep_D0.h"
+
+struct StadiumObjectCollision;
 
 s32 fn_3_B7FC8(u32 id, s32 arg1);
 void fn_3_B80D0(void);
@@ -13,17 +17,17 @@ void fn_3_B8298(void);
 void fn_3_B8414(void);
 void fn_3_B8464(void);
 void fn_3_B8574(void);
-void fn_3_B85A8(void);
-void fn_3_B85DC(void);
+u32 fn_3_B85A8(s32 area, s32** objects);
+void fn_3_B85DC(s32 area, Vec* min, Vec* max);
 void fn_3_B8658(void);
 void fn_3_B867C(void);
 void fn_3_B8828(void);
-void fn_3_B8C08(void);
+void fn_3_B8C08(Mtx view);
 void fn_3_B902C(void);
 void fn_3_B908C(void);
 void fn_3_B9124(void);
-int processStadiumObjectFunction(int, void*, int, void*);
-void fn_3_B91C8(void);
+int processStadiumObjectFunction(int stadium, s32 object, int type, CollisionStruct* collision);
+struct StadiumObjectCollision* fn_3_B91C8(int stadium, s32 object, Mtx mtx);
 void fn_3_B939C(void);
 void fn_3_B93C4(void);
 void fn_3_B93C8(int arg0);

@@ -11,6 +11,8 @@
 #include "C3/control.h"
 #include "C3/geoPalette.h"
 #include "game/rep_D0.h"
+#include "game/rep_1D58.h"
+#include "game/rep_1E08.h"
 
 typedef struct {
     /* 0x00 */ DODisplayLayout base;
@@ -163,10 +165,6 @@ extern void fn_800BD190(void* geo, void* tex);
 extern void fn_800BF038(void (*callback)(void));
 extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);
 extern void convertTextureHeader(void* tex);
-extern void fn_3_B8C08(Mtx view);
-extern void fn_3_BCA20(void);
-extern void fn_3_BD1D8(Mtx view);
-extern void fn_3_BD434(u8 stadium, u8 mode);
 
 struct {
     /* 0x00 */ u8 _00[0x10];

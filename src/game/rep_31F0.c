@@ -11,6 +11,8 @@
 #include "game/rep_28A8.h"
 #include "game/game_batter.h"
 #include "game/m_sound.h"
+#include "game/rep_1200.h"
+#include "game/rep_1E08.h"
 #include "static/UnknownHomes_Static.h"
 #include "musyx/musyx.h"
 #include "Dolphin/mtx.h"
@@ -76,14 +78,6 @@ extern s8 lbl_3_data_214DC[4][3];
 extern s8 lbl_3_data_214E8[4][3];
 extern s8 lbl_3_data_214F4[4][3];
 extern s16 lbl_3_data_217A4[12];
-
-// rep_1200.h and rep_1E08.h declare these as void(void) placeholders for their stubs
-void fn_3_750C4(u8 state);
-void fn_3_751B4(void);
-void fn_3_753E8(BOOL keepAction);
-void fn_3_75560(void);
-void fn_3_BC6D8(Vec* pos, Vec* eye, int type, BOOL flag);
-void fn_3_BF1AC(void);
 
 extern int fn_3_9E368(int* weights, int count);
 extern void fn_8003A540(int);

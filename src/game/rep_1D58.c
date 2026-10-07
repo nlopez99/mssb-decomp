@@ -47,12 +47,12 @@ void fn_3_B8574(void) {
 }
 
 // .text:0x000B85A8 size:0x34 mapped:0x806F763C
-void fn_3_B85A8(void) {
-    return;
+u32 fn_3_B85A8(s32 area, s32** objects) {
+    return 0;
 }
 
 // .text:0x000B85DC size:0x7C mapped:0x806F7670
-void fn_3_B85DC(void) {
+void fn_3_B85DC(s32 area, Vec* min, Vec* max) {
     return;
 }
 
@@ -72,7 +72,7 @@ void fn_3_B8828(void) {
 }
 
 // .text:0x000B8C08 size:0x424 mapped:0x806F7C9C
-void fn_3_B8C08(void) {
+void fn_3_B8C08(Mtx view) {
     return;
 }
 
@@ -92,13 +92,13 @@ void fn_3_B9124(void) {
 }
 
 // .text:0x000B916C size:0x5C mapped:0x806F8200
-int processStadiumObjectFunction(int, void*, int, void*) {
-    return;
+int processStadiumObjectFunction(int stadium, s32 object, int type, CollisionStruct* collision) {
+    return 0;
 }
 
 // .text:0x000B91C8 size:0x1D4 mapped:0x806F825C
-void fn_3_B91C8(void) {
-    return;
+struct StadiumObjectCollision* fn_3_B91C8(int stadium, s32 object, Mtx mtx) {
+    return NULL;
 }
 
 // .text:0x000B939C size:0x28 mapped:0x806F8430

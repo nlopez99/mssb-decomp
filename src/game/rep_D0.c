@@ -3,12 +3,7 @@
 #include "header_rep_data.h"
 #include "Dolphin/stl.h"
 #include "static/UnknownHomes_Static.h"
-
-// rep_1D58.h declares these as void(void) placeholders.
-extern u32 fn_3_B85A8(s32 area, s32** objects);
-extern void fn_3_B85DC(s32 area, Vec* min, Vec* max);
-extern struct StadiumObjectCollision* fn_3_B91C8(int stadium, s32 object, Mtx mtx);
-extern int processStadiumObjectFunction(int stadium, s32 object, int type, CollisionStruct* collision);
+#include "game/rep_1D58.h"
 
 extern void makeLookAtMatrix(Mtx m, const Vec* camPos, const Vec* camUp, const Vec* target);
 

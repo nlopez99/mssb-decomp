@@ -57,7 +57,7 @@ void fn_3_8C07C(void) {
 }
 
 // .text:0x0008C104 size:0x1D8 mapped:0x806CB198
-void fn_3_8C104(void) {
+void fn_3_8C104(s32 arg0) {
     return;
 }
 
@@ -131,3 +131,7 @@ void fn_3_90150(void) {
     return;
 }
 
+// .text:0x00090220 size:0x74 mapped:0x806CF2B4
+u32 fn_3_90220(s32 charID, s32 sound) {
+    return 0;
+}

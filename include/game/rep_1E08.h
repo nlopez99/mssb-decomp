@@ -20,13 +20,13 @@ void fn_3_BC224(void);
 void fn_3_BC25C(void);
 void fn_3_BC274(void);
 void fn_3_BC2DC(void);
-void fn_3_BC6D8(void);
+void fn_3_BC6D8(Vec* pos, Vec* eye, int type, BOOL flag);
 void fn_3_BC850(void);
 void fn_3_BC888(void);
 void fn_3_BCA20(void);
 void fn_3_BD1D4(void);
-void fn_3_BD1D8(void);
-void fn_3_BD434(void);
+void fn_3_BD1D8(Mtx view);
+void fn_3_BD434(s32 stadium, s32 mode);
 void fn_3_BD4F0(void);
 void fn_3_BD504(f32 x, f32 y, f32 z, BOOL arg3);
 void fn_3_BD6AC(s32 arg0, f32 x, f32 y, f32 z);
@@ -56,5 +56,8 @@ void fn_3_BF8F8(struct UnkEffect21F8* effect, Mtx m, Vec* pos,
 void fn_3_BFB3C(void);
 f32 fn_3_BFDA4(struct UnkKey21F8* keys, int count, int frame, u8 current, u8* currentOut, f32 t);
 void fn_3_C0134(void);
+void fn_3_C0770(void);
+void fn_3_C07A0(void);
+void fn_3_C07B0(void);
 
 #endif // !__GAME_rep_1E08_H_
