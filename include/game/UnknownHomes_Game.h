@@ -2068,7 +2068,7 @@ typedef struct _MiniGameStruct {
     };
     /*0x1DD1*/ u8 _1DD1[0x1DF4 - 0x1DD1];
     // Bob-omb Derby (rep_31F0) reads _1DF4 and _1DF5, Barrel Batter (rep_34B0) stores _1DF4_s16,
-    // Chain Chomp Sprint (rep_3448) keeps one score per player in _1DF4_arr
+    // Chain Chomp Sprint (rep_3448) keeps one score per player in _1DF4_arr, and fn_3_11E364 a flag in _1DF4_u8
     union {
         struct {
             /*0x1DF4*/ u8 _1DF4;
@@ -2080,6 +2080,7 @@ typedef struct _MiniGameStruct {
         };
         /*0x1DF4*/ s16 _1DF4_s16;
         /*0x1DF4*/ s16 _1DF4_arr[4];
+        /*0x1DF4*/ u8 _1DF4_u8[8];
     };
     /*0x1DFC*/ u8 _1DFC[4];
     /*0x1E00*/ u8 _1E00;
@@ -2088,7 +2089,8 @@ typedef struct _MiniGameStruct {
     /*0x1E03*/ u8 _1E03;
     /*0x1E04*/ u32 _1E04;
     /*0x1E08*/ u8 _1E08[4][2];
-    /*0x1E10*/ u8 _1E10[0x1E2A - 0x1E10];
+    /*0x1E10*/ u8 _1E10[0x1E1B - 0x1E10];
+    /*0x1E1B*/ u8 _1E1B[0x1E2A - 0x1E1B];
     /*0x1E2A*/ u8 _1E2A;
     /*0x1E2B*/ u8 _1E2B;
 } MiniGameStruct; // size: 0x1E2C
