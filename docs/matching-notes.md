@@ -59,6 +59,12 @@ Compare the built module with the original (`build/GYQE01/game/game.rel` against
 - **A unit's `.data` starting 4 bytes off an 8-byte boundary:** MWCC aligns every `.data` and `.bss` section to at least 8, so the linker places the object 4 bytes later and everything after it moves. If those 4 bytes are zero and follow the previous unit's last object, they are padding: start the unit's first object 4 bytes later in `symbols.txt` and drop the zeros from its definition. Example: `rep_1770.c`'s `lbl_3_data_F4A4` became `lbl_3_data_F4A8` (0x28 bytes). The section score stays below 100% until `splits.txt` starts the range there.
 - **`.bss` shorter than the unit's range:** padding to the next 8-byte boundary is at most 4 bytes, so more than that between the last object and the next unit is an unreferenced static of this unit; so is a byte before a `u8` that the target puts at offset 1. Declare them (in reverse address order, like the other `.bss` statics) and split `symbols.txt`. Examples: `lbl_3_bss_B9BC` (0x24) in `rep_3D50.c`; `lbl_3_bss_1900` and `lbl_3_bss_9944` (0xC) in `rep_1D58.c`.
 
+## Unit boundaries: evidence for a `splits.txt` proposal
+
+- **One object per `repHeaderData`.** Every game object starts its `.rodata` with its own copy of `header_rep_data.h`'s 0x50-byte `repHeaderData`, and units are named after where that copy sits. The module has 92 copies and 92 units, so code outside every unit's range is the tail or head of a neighbouring unit, not an object of its own. A unit with no code yet (`rep_A78`, `rep_D68`) is still one object.
+- **Jump tables close an object's `.data`, and each object's `.data` starts on an 8-byte boundary.** Zero padding before an 8-aligned run of tables marks a boundary (`0x10A30` after `fn_3_B482C`'s table). Proven with test files compiled with the game's flags.
+- **One base register reaching several objects proves they share a file; one group of readers does not.** The block 0x8110–0xD5B8 holds tables read only by single units' functions, yet lies outside those units' `.data` (rep_1770, rep_16B8, rep_3A48, rep_3448).
+
 ## Before committing
 
 - Run `tools/match.py` on every function that uses a type, prototype or symbol you changed, not only the one you were fixing.
