@@ -24,7 +24,8 @@ typedef struct Particle3880 {
     /* 0x04 */ Vec pos;
     /* 0x10 */ Vec vel;
     /* 0x1C */ Vec _1C;
-    /* 0x28 */ u8 _28[0x38 - 0x28];
+    /* 0x28 */ u8 _28[0x34 - 0x28];
+    /* 0x34 */ f32 _34;
     /* 0x38 */ f32 _38;
     /* 0x3C */ f32 _3C;
     /* 0x40 */ u8 color[4];
@@ -753,13 +754,27 @@ void fn_3_150070(void) {
 }
 
 // .text:0x00150010 size:0x60 mapped:0x8078F0A4
-void fn_3_150010(void) {
-    return;
+void fn_3_150010(s8 index) {
+    if (g_d_GameSettings.GameModeSelected != GAME_TYPE_MINIGAMES ||
+        g_Minigame.GameMode_MiniGame != MINI_GAME_ID_STAR_DASH || index > 4 || index < 0) {
+        return;
+    }
+    fn_3_14F930(index);
 }
 
 // .text:0x0014F930 size:0x6E0 mapped:0x8078E9C4
-void fn_3_14F930(void) {
-    return;
+void fn_3_14F930(s8 index) {
+    Emitter3880* emitter = fn_800339F0(NULL, 0x1E);
+
+    if (emitter != NULL) {
+        fn_3_14F5A4(emitter, index);
+    } else {
+        emitter = fn_80033A24(fn_3_14ED24, 0x80, 0, lbl_3_data_26C94[1], 1, 0x1E);
+        if (emitter != NULL) {
+            fn_3_14F8D0(emitter);
+            fn_3_14F5A4(emitter, index);
+        }
+    }
 }
 
 // .text:0x0014F8D0 size:0x60 mapped:0x8078E964
@@ -780,8 +795,27 @@ void fn_3_14F8D0(Emitter3880* emitter) {
 }
 
 // .text:0x0014F5A4 size:0x32C mapped:0x8078E638
-void fn_3_14F5A4(void) {
-    return;
+void fn_3_14F5A4(Emitter3880* emitter, s8 index) {
+    Particle3880* p;
+    u32 i;
+
+    i = 0;
+    p = emitter->particles;
+    do {
+        if (p->_4C == index + 1) {
+            p->_4A = lbl_3_data_26C94[7];
+            p->color[3] = lbl_3_data_26C94[5];
+            p->_38 = p->_3C = lbl_3_data_26C94[2] / 100000.0f;
+            p->_48 = p->_4A / 18.0f * i;
+            if (p->_48 == 0) {
+                fn_3_14EAF4(p);
+            }
+            p->color[0] = p->color[1] = p->color[2] = 0xFF;
+            i++;
+            p->_34 = 0.0f;
+        }
+        p = p->next;
+    } while (p != NULL);
 }
 
 // .text:0x0014F544 size:0x60 mapped:0x8078E5D8
@@ -806,8 +840,8 @@ void fn_3_14F3CC(Particle3880* p) {
 }
 
 // .text:0x0014ED24 size:0x6A8 mapped:0x8078DDB8
-void fn_3_14ED24(void) {
-    return;
+BOOL fn_3_14ED24(Emitter3880* emitter) {
+    return 0;
 }
 
 // .text:0x0014EAF4 size:0x230 mapped:0x8078DB88
