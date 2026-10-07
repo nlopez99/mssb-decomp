@@ -2039,17 +2039,15 @@ void fn_3_D9A30(void) {
 // .text:0x000D9868 size:0x1C8 mapped:0x807188FC
 void fn_3_D9868(void) {
     Unk28A8Rank ranks[4];
-    u32 i;
     u32 count;
-    Unk28A8Rank* rank;
+    u32 i;
     s32 k;
 
     fn_3_1079C8(ranks, 0);
-    rank = ranks;
     count = 0;
     i = 0;
     do {
-        if (rank[i].rank == 0) {
+        if (ranks[i].rank == 0) {
             count++;
         }
     } while (++i < g_Minigame.miniGameNumberOfParticipants);
@@ -2077,10 +2075,9 @@ void fn_3_D9868(void) {
             count = 0;
             i = 0;
             do {
-                if (rank->rank == 1) {
+                if (ranks[i].rank == 1) {
                     count++;
                 }
-                rank++;
             } while (++i < g_Minigame.miniGameNumberOfParticipants);
             g_Minigame._1935[1] = ranks[random_fn_3_9EE24(count) + 1].id;
         } else {
