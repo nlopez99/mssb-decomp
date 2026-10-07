@@ -159,11 +159,6 @@ typedef struct {
 } StaC4Prop; // size: 0x14
 
 typedef struct {
-    /* 0x00 */ Vec min;
-    /* 0x0C */ Vec max;
-} StaC4Bounds; // size: 0x18
-
-typedef struct {
     /* 0x00 */ u8 _00[0x10];
     /* 0x10 */ s16 timer;
     /* 0x12 */ u16 _12;
@@ -237,10 +232,10 @@ extern struct {
     /* 0x30 */ s32 _30;
     /* 0x34 */ s32* _34;
     /* 0x38 */ u8 _38[0x3C - 0x38];
-    /* 0x3C */ s32* _3C;
+    /* 0x3C */ u32* _3C;
     /* 0x40 */ u16* _40;
     /* 0x44 */ s32* _44;
-    /* 0x48 */ StaC4Bounds* _48;
+    /* 0x48 */ Vec* _48;
     /* 0x4C */ Vec _4C;
     /* 0x58 */ Vec _58;
     /* 0x64 */ s16 _64;
@@ -345,26 +340,26 @@ void fn_3_FA3C0(void) {
     s32 count;
     s32 i;
     s32 j;
-    u16 next;
+    s32 next;
 
-    size = lbl_3_common_bss_350E4._30 * sizeof(StaC4Bounds) + lbl_3_common_bss_350E4._30 * sizeof(s32) +
-           lbl_3_common_bss_350E4._30 * sizeof(s32) + lbl_3_common_bss_350E4._30 * sizeof(u16);
+    size = lbl_3_common_bss_350E4._30 * sizeof(u16) + lbl_3_common_bss_350E4._30 * sizeof(u32) +
+           lbl_3_common_bss_350E4._30 * sizeof(s32) + lbl_3_common_bss_350E4._30 * (2 * sizeof(Vec));
     if (lbl_3_common_bss_350E4._48 == NULL) {
         lbl_3_common_bss_350E4._48 = _OSAllocFromHeap(4, size);
-        lbl_3_common_bss_350E4._3C = (s32*)(lbl_3_common_bss_350E4._48 + lbl_3_common_bss_350E4._30);
-        lbl_3_common_bss_350E4._44 = lbl_3_common_bss_350E4._3C + lbl_3_common_bss_350E4._30;
+        lbl_3_common_bss_350E4._3C = (u32*)(lbl_3_common_bss_350E4._48 + lbl_3_common_bss_350E4._30 * 2);
+        lbl_3_common_bss_350E4._44 = (s32*)(lbl_3_common_bss_350E4._3C + lbl_3_common_bss_350E4._30);
         lbl_3_common_bss_350E4._40 = (u16*)(lbl_3_common_bss_350E4._44 + lbl_3_common_bss_350E4._30);
     }
     memset(lbl_3_common_bss_350E4._48, 0, size);
     count = 0;
     for (i = 0; i < 10; i++) {
-        lbl_3_common_bss_350E4._40[count] = lbl_3_common_bss_350E4._40[count - 1] + lbl_3_common_bss_350E4._3C[count - 1];
-        next = lbl_3_common_bss_350E4._40[count];
+        next = lbl_3_common_bss_350E4._40[count] = lbl_3_common_bss_350E4._40[count - 1] + lbl_3_common_bss_350E4._3C[count - 1];
         fn_3_B8574();
         prop = lbl_3_data_1BA98;
-        for (j = 0; j < lbl_3_common_bss_350E4._30; j++, prop++) {
+        for (j = 0; j < lbl_3_common_bss_350E4._30; prop++, j++) {
             if (i == prop->group && lbl_3_common_bss_350E4._00[j].obj._90_6) {
-                lbl_3_common_bss_350E4._44[next++] = j;
+                lbl_3_common_bss_350E4._44[next] = j;
+                next++;
                 lbl_3_common_bss_350E4._3C[count]++;
                 draw = &lbl_3_common_bss_350E4._00[j];
                 CTRLBuildMatrix(&draw->obj.control, m);
@@ -372,7 +367,7 @@ void fn_3_FA3C0(void) {
             }
         }
         if (lbl_3_common_bss_350E4._3C[count] != 0) {
-            fn_3_B8414(&lbl_3_common_bss_350E4._48[count].min, &lbl_3_common_bss_350E4._48[count].max);
+            fn_3_B8414(&lbl_3_common_bss_350E4._48[count * 2], &lbl_3_common_bss_350E4._48[count * 2 + 1]);
             count++;
         }
     }
@@ -391,7 +386,7 @@ void fn_3_F9E78(s32 idx, void* arg1, StaC4Hit* hit) {
     StaC4FlashTask* flash;
     s32 i;
 
-    fn_3_F9164(draw);
+    fn_3_F99F0(idx, arg1, hit);
     if (draw->_A2 == 0) {
         for (i = 0; i < 9; i++) {
             if (lbl_3_bss_B630[i] == 0xFF) {
@@ -502,7 +497,7 @@ void fn_3_F99F0(s32 idx, void* arg1, StaC4Hit* hit) {
 
 // .text:0x000F976C size:0x284 mapped:0x80738800
 void fn_3_F976C(s32 idx, void* arg1, StaC4Hit* hit) {
-    fn_3_F9164(&lbl_3_common_bss_350E4._00[idx]);
+    fn_3_F99F0(idx, arg1, hit);
     fn_3_F963C(idx, hit);
 }
 
@@ -585,8 +580,8 @@ void fn_3_F92FC(void) {
 
 // .text:0x000F9164 size:0x198 mapped:0x807381F8
 void fn_3_F9164(StaC4Draw* draw) {
-    s32 slot;
     u32 stadium;
+    s32 slot;
     s32 sound;
     SND_VOICEID voice;
     u8 vol;
