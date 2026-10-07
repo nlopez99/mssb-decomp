@@ -417,12 +417,12 @@ void fn_3_E3914(Rep2998Obj* obj) {
         return;
     }
     pos = obj->_A0;
-    pos.y += 1.4;
+    pos.y += 1.4000000000000001;
     PSVECSubtract((Vec*)&g_Ball.AtBat_Contact_BallPos, &pos, &d);
     d.y = 0.0f;
     if (PSVECMag(&d) <= 12.5) {
         swing = g_Ball.currentStarSwing2;
-        if (!((swing == 12) | (swing == 11) | (swing == 3) | (swing == 4))) {
+        if (!((swing == 3) | (swing == 4) | (swing == 11) | (swing == 12))) {
             obj->_C4 = 1;
             fn_3_E25D0(obj, 1);
             if (obj->_C9 == 0) {
@@ -468,13 +468,13 @@ void fn_3_E3668(Rep2998Obj* obj) {
 
 // .text:0x000E3284 size:0x3E4 mapped:0x80722318
 u8 fn_3_E3284(Rep2998Obj* obj) {
-    Vec a;
-    Vec b;
-    Vec cross;
+    Mtx m;
+    Mtx bone;
     Vec pos = { 0.0f, 0.0f, 0.0f };
     Vec down = { 0.0f, -1.0f, 0.0f };
-    Mtx bone;
-    Mtx m;
+    Vec cross;
+    Vec a;
+    Vec b;
     f32 limit;
     f32 angle;
     f32 base;
@@ -485,7 +485,7 @@ u8 fn_3_E3284(Rep2998Obj* obj) {
     PSMTXMultVec(m, &pos, &pos);
     pos.y *= -1.0f;
     limit = 2.2f * obj->_B4;
-    if (fabs(fn_3_9EFD0(&g_Ball.pastCoordinates[0], &g_Ball.AtBat_Contact_BallPos, (VecXYZ*)&pos, NULL)) <= limit) {
+    if (FABS(fn_3_9EFD0(&g_Ball.pastCoordinates[0], &g_Ball.AtBat_Contact_BallPos, (VecXYZ*)&pos, NULL)) <= limit) {
         obj->_C4 = 3;
         fn_3_E25D0(obj, 7);
         obj->_CA = 1;
@@ -520,18 +520,23 @@ u8 fn_3_E3284(Rep2998Obj* obj) {
 void fn_3_E3044(Rep2998Obj* obj) {
     f32 speed = obj->_74->_54;
     f32 angle;
+    f32 x;
+    f32 z;
 
     if (obj->_CB == 7) {
         obj->_B0 += obj->_C0;
         CTRLSetRotation(&obj->control, 0.0f, obj->_B0, 0.0f);
     } else if (obj->_B8 >= 20.0 && obj->_B8 - speed < 20.0) {
-        angle = 0.017453292f * obj->_BC;
-        g_Ball.AtBat_Contact_BallPos.x = obj->_B4 * (5.0 * (f32)sin(angle)) + obj->_A0.x;
+        angle = obj->_BC;
+        angle = 0.017453292f * angle;
+        x = obj->_B4 * (5.0 * sinf_kludge(angle)) + obj->_A0.x;
+        z = obj->_B4 * (-5.0 * cosf_kludge(angle)) + obj->_A0.z;
+        g_Ball.AtBat_Contact_BallPos.x = x;
         g_Ball.AtBat_Contact_BallPos.y = 2.0 * obj->_B4;
-        g_Ball.AtBat_Contact_BallPos.z = obj->_B4 * (-5.0 * (f32)cos(angle)) + obj->_A0.z;
+        g_Ball.AtBat_Contact_BallPos.z = z;
+        g_Ball.physicsSubstruct.velocity.x = 0.1 * sinf_kludge(angle);
         g_Ball.physicsSubstruct.velocity.y = 0.0f;
-        g_Ball.physicsSubstruct.velocity.x = 0.1 * (f32)sin(angle);
-        g_Ball.physicsSubstruct.velocity.z = 0.1 * -(f32)cos(angle);
+        g_Ball.physicsSubstruct.velocity.z = 0.1 * -cosf_kludge(angle);
         fn_3_65F4();
         obj->_CA = 0;
         playSound(1);
@@ -540,13 +545,15 @@ void fn_3_E3044(Rep2998Obj* obj) {
 
 // .text:0x000E2F4C size:0xF8 mapped:0x80721FE0
 void fn_3_E2F4C(Rep2998Obj* obj) {
+    f32 speed = obj->_74->_54;
     f32 angle;
     f32 x;
 
-    if (obj->_B8 >= 20.0 && obj->_B8 - obj->_74->_54 < 20.0 && gameInitOptions.starSkillsSetting) {
-        angle = 0.017453292f * -obj->_B0;
-        x = obj->_B4 * (5.0 * (f32)sin(angle)) + obj->_A0.x;
-        fn_3_CB7E8(x, -2.0 * obj->_B4, obj->_B4 * (-5.0 * (f32)cos(angle)) + obj->_A0.z);
+    if (obj->_B8 >= 20.0 && obj->_B8 - speed < 20.0 && gameInitOptions.starSkillsSetting) {
+        angle = -obj->_B0;
+        angle = 0.017453292f * angle;
+        x = obj->_B4 * (5.0 * sinf_kludge(angle)) + obj->_A0.x;
+        fn_3_CB7E8(x, -2.0 * obj->_B4, obj->_B4 * (-5.0 * cosf_kludge(angle)) + obj->_A0.z);
     }
 }
 
@@ -588,10 +595,12 @@ u8 fn_3_E2B70(Rep2998Obj* obj) {
 }
 
 // .text:0x000E29B4 size:0x1BC mapped:0x80721A48
-BOOL fn_3_E29B4(Rep2998Obj* obj) {
+u8 fn_3_E29B4(Rep2998Obj* obj) {
     static const f32 speeds[3] = { 0.8f, 1.0f, 1.2f };
     Vec pos = obj->_A0;
     Vec d;
+    Rep2998Model* model;
+    f32 speed;
 
     PSVECSubtract((Vec*)&g_Ball.AtBat_Contact_BallPos, &pos, &d);
     d.y = 0.0f;
@@ -602,8 +611,10 @@ BOOL fn_3_E29B4(Rep2998Obj* obj) {
         } else {
             fn_3_E25D0(obj, 5);
         }
-        obj->_74->_54 = speeds[fn_3_B7F70(3)];
-        obj->_74->_5A = 1;
+        speed = speeds[fn_3_B7F70(3)];
+        model = obj->_74;
+        model->_54 = speed;
+        model->_5A = 1;
         fn_800B4C04(obj->_74->_00, obj->_74->_54);
         return TRUE;
     }
@@ -611,7 +622,7 @@ BOOL fn_3_E29B4(Rep2998Obj* obj) {
 }
 
 // .text:0x000E28DC size:0xD8 mapped:0x80721970
-BOOL fn_3_E28DC(Rep2998Obj* obj) {
+u8 fn_3_E28DC(Rep2998Obj* obj) {
     Vec pos = obj->_A0;
     Vec d;
 
