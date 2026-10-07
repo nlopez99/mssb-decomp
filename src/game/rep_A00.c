@@ -441,13 +441,15 @@ s32 lbl_3_data_3B4C[54] = {
 
 static int lbl_3_bss_A0[10];
 static int lbl_3_bss_9C;
+// Nothing reads it, but the target has these 4 bytes ahead of lbl_3_bss_9C
+static int lbl_3_bss_98;
 
 // .text:0x000250FC size:0xE8 mapped:0x80664190
 void fn_3_250FC(void) {
     s32 i;
 
-    lbl_3_common_bss_1323C._0->_25C = 0;
-    for (i = 0; i < 33; i++) {
+    lbl_3_common_bss_1323C._0->_25C = i = 0;
+    for (; i < 33; i++) {
         lbl_3_data_2398[i]._34 = 0;
         lbl_3_data_2398[i]._38 = 0;
         lbl_3_data_2398[i]._3C = 0;
@@ -483,8 +485,12 @@ void fn_3_24F24(int idx) {
     if (range) {
         lbl_3_common_bss_1323C._0->_25E += random_fn_3_9EE24(range);
     }
-    while (*script != 0xFE) {
-        cue = *script++;
+    for (;;) {
+        cue = *script;
+        if (cue == 0xFE) {
+            break;
+        }
+        script++;
         lbl_3_common_bss_1323C._0->_240[lbl_3_data_1D28[cue]._14] = cue;
     }
 }
@@ -608,9 +614,10 @@ void fn_3_24ADC(int id, BOOL queue) {
 void fn_3_249E8(int id) {
     UnkA00Cue* cue = &lbl_3_data_1F090[id];
     int i;
+    u8 slot = cue->_14;
 
     for (i = 0; i < 9; i++) {
-        if (cue->_14 == g_Fielders[i]._218) {
+        if (slot == g_Fielders[i]._218) {
             lbl_3_common_bss_1323C._0->_240[i] = id;
             if (cue->_19 == 0) {
                 memcpy(&g_Fielders[i]._000, &cue->_00, sizeof(Vec));
