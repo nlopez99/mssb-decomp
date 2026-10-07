@@ -15,6 +15,8 @@
 #include "game/rep_3CE0.h"
 #include "game/rep_3310.h"
 #include "game/rep_F80.h"
+#include "game/rep_2940.h"
+#include "game/rep_28A8.h"
 #include "string.h"
 #include "musyx/musyx.h"
 
@@ -36,6 +38,12 @@ typedef struct UnkRank31A0 {
     /* 0x0 */ u8 id;
     /* 0x1 */ u8 rank;
 } UnkRank31A0; // size: 0x2
+
+// One player waiting in fn_3_10C81C's queue
+typedef struct {
+    /* 0x0 */ int player;
+    /* 0x4 */ int wait;
+} UnkQueue31A0; // size: 0x8
 
 // Eight bytes; fn_3_109D88 returns groups of five, one group per minigame
 struct UnkRecord3448 {
@@ -61,7 +69,11 @@ extern struct {
 } lbl_3_data_228;
 
 extern struct {
-    /* 0x0000 */ u8 _0000[0x3078];
+    /* 0x0000 */ u8 _0000[0x2D77];
+    /* 0x2D77 */ u8 _2D77;
+    /* 0x2D78 */ u8 _2D78[0x2D8E - 0x2D78];
+    /* 0x2D8E */ u8 _2D8E;
+    /* 0x2D8F */ u8 _2D8F[0x3078 - 0x2D8F];
     /* 0x3078 */ s16 _3078;
     /* 0x307A */ u8 _307A;
     /* 0x307B */ u8 _307B[0x307E - 0x307B];
@@ -76,7 +88,8 @@ typedef struct {
 } UnkTask31A0;
 
 extern struct {
-    /* 0x00 */ u8 _00[0x13];
+    /* 0x00 */ u8 _00[0x12];
+    /* 0x12 */ u8 _12;
     /* 0x13 */ u8 _13;
 } lbl_8037169C;
 
@@ -140,6 +153,7 @@ extern u8 lbl_800E854C[12];
 extern u8 lbl_3_data_609C[12][6];
 extern s8 lbl_3_data_B060[8][3][5];
 extern s8 lbl_3_data_6104[8];
+extern u8 lbl_3_data_18918[8];
 extern u8 lbl_3_data_188FC[3][5];
 extern u8 lbl_3_data_18910[8];
 extern u8 lbl_3_data_18944[8];
@@ -172,6 +186,15 @@ extern void fn_3_161078(void);
 extern void fn_3_1658F0(void);
 extern void possiblyTransitionBlackScreen(void);
 extern void fn_8004CC18(void);
+extern BOOL fn_3_90DD8(void);
+extern BOOL fn_80016F7C(void);
+extern void fn_8003A540(int arg);
+extern void fn_3_FBD58(void);
+extern void fn_3_FBD70(void);
+extern void minigamesSetSomePointers(void);
+extern void minigamesGXStuff(void);
+extern void fn_80011B64(int port);
+extern int fn_80016710(int charID, int port);
 extern void fn_800203E0(int, int);
 extern s16 fn_8006C13C(struct UnkStats3448* stats);
 // rep_D18.h declares fn_3_5B220 as a void(void) placeholder
@@ -1089,8 +1112,105 @@ void fn_3_10CC20(void) {
 }
 
 // .text:0x0010C81C size:0x404 mapped:0x8074B8B0
+// 91.73%: registers differ, and the copy into _1A0F unrolls with another loop shape
 void fn_3_10C81C(void) {
-    return;
+    UnkQueue31A0 queue[4];
+    int player;
+    int wait;
+    int n;
+    int count;
+    int i;
+    int j;
+    int k;
+    int port;
+    int found;
+    int cur;
+    s8* dst;
+    UnkQueue31A0* src;
+
+    n = 4;
+restart:
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_PRACTICE) {
+        n = 1;
+    }
+    count = 0;
+    for (i = 0; i < n; i++) {
+        queue[i].player = -1;
+        if (g_Minigame._1A0C != i && g_Minigame._19E8[i]._0 != -1 &&
+            (g_Minigame._19E8[i]._0 != g_Minigame._19E8[i]._2 || g_Minigame._19E8[i]._4 != g_Minigame.battingHandedness[i])) {
+            g_Minigame._19E8[i]._7 = 0;
+            if (g_Minigame._19D2[i] >= 20 || g_Minigame._19DE == 4) {
+                queue[count].player = i;
+                queue[count].wait = g_Minigame._19D2[i];
+                count++;
+                g_Minigame._19E8[i]._5 = g_Minigame.battingHandedness[i];
+            }
+        }
+    }
+    for (i = 0; i < count - 1; i++) {
+        for (j = i + 1; j < count; j++) {
+            if (queue[i].wait < queue[j].wait) {
+                player = queue[i].player;
+                wait = queue[i].wait;
+                queue[i].player = queue[j].player;
+                queue[i].wait = queue[j].wait;
+                queue[j].player = player;
+                queue[j].wait = wait;
+            }
+        }
+    }
+    g_Minigame._1A0F[0] = -1;
+    g_Minigame._1A0F[1] = -1;
+    g_Minigame._1A0F[2] = -1;
+    g_Minigame._1A0F[3] = -1;
+    k = 0;
+    if (g_Minigame._1A0C >= 0) {
+        g_Minigame._1A0F[0] = g_Minigame._1A0C;
+        k = 1;
+    }
+    src = queue;
+    dst = &g_Minigame._1A0F[k];
+    for (i = 0; i < count; i++) {
+        *dst++ = (src++)->player;
+    }
+    if (g_Minigame._1A0F[0] >= 0) {
+        cur = g_Minigame._1A0F[0];
+        port = cur;
+        if (g_d_GameSettings.GameModeSelected == GAME_TYPE_PRACTICE) {
+            port = 9;
+        }
+        if (g_Minigame.battingHandedness[4] == 0) {
+            g_Minigame.battingHandedness[4] = 1;
+            fn_80011B64(port);
+        }
+        if (g_Minigame._19E8[cur]._3 >= 0) {
+            found = fn_80016710(g_Minigame._19E8[cur]._3, port);
+        } else {
+            found = fn_80016710(g_Minigame._19E8[cur]._0, port);
+        }
+        if (found) {
+            g_Minigame._19E8[cur]._2 = g_Minigame._19E8[cur]._3;
+            g_Minigame._19E8[cur]._3 = -1;
+            lbl_8036E548._2D77 = 0;
+            g_Minigame._19E8[cur]._4 = g_Minigame._19E8[cur]._5;
+            g_Minigame._1A0C = -1;
+            g_Minigame._1A0F[0] = -1;
+            g_Minigame._1A13[cur] = 0;
+            g_Minigame.battingHandedness[4] = 0;
+            fn_3_E1370(3);
+            goto restart;
+        }
+        if (g_Minigame._19E8[cur]._3 < 0) {
+            g_Minigame._19E8[cur]._3 = g_Minigame._19E8[cur]._0;
+        }
+        g_Minigame._19E8[cur]._2 = -1;
+        g_Minigame._1A0C = cur;
+    }
+    for (i = 0; i < 4; i++) {
+        if (g_Minigame._1A13[i] != 0 && g_Minigame._19E8[i]._0 == g_Minigame._19E8[i]._2) {
+            g_Minigame._1A13[i] = 0;
+        }
+    }
 }
 
 // .text:0x0010C7A4 size:0x78 mapped:0x8074B838
@@ -1283,7 +1403,90 @@ void fn_3_10B200(void) {
 
 // .text:0x0010AEF0 size:0x310 mapped:0x80749F84
 void fn_3_10AEF0(void) {
-    return;
+    int i;
+
+    switch (g_GameLogic._125) {
+    case 0:
+        fn_800203E0(7, 0);
+        g_Minigame._1A40 = 0;
+        g_Minigame._19A7 = lbl_3_data_21270[g_Minigame.GameMode_MiniGame];
+        g_Minigame._1A3E = 0;
+        lbl_8036E548._307E = 1;
+        lbl_8036E548._2D8E = 0;
+        g_GameLogic._125 = 1;
+        if (g_d_GameSettings.exhibitionMatchInd == 0) {
+            g_d_GameSettings._36 = g_Minigame.minigameControlStruct._4[g_Minigame._1908];
+        }
+        break;
+    case 1:
+        fn_3_10C81C();
+        if (g_Minigame._1A0F[0] < 0) {
+            fn_3_E1370(lbl_3_data_18918[g_Minigame.GameMode_MiniGame]);
+            g_GameLogic._125 = 2;
+        }
+        break;
+    case 2:
+        if (fn_80016F7C()) {
+            g_GameLogic._125 = 3;
+            lbl_3_common_bss_34C58._2C = 0;
+        }
+        break;
+    case 3:
+        if (fn_3_90DD8()) {
+            g_GameLogic._125 = 5;
+        }
+        break;
+    case 5:
+        g_GameLogic._125 = 6;
+        break;
+    case 6:
+        if (lbl_8037169C._12 == 0) {
+            return;
+        }
+        if (g_GameLogic.FrameCountOfCurrentPitch >= lbl_3_data_18C48[2] ||
+            (g_GameLogic.FrameCountOfCurrentPitch >= lbl_3_data_18C48[1] && fn_3_6C938(2, 0x1100))) {
+            g_GameLogic._125 = 7;
+            changeScene(3, 6);
+            fn_8003A540(0);
+        }
+        break;
+    case 7:
+        if (lbl_8037169C._13 != 0) {
+            fn_3_FBD70();
+            fn_3_FBD58();
+            g_GameLogic._125 = 8;
+        }
+        break;
+    case 8:
+        lbl_8036E548._307A = 1;
+        g_Minigame._1A38 = 0;
+        g_Minigame._1A39 = 0;
+        for (i = 0; i < 4; i++) {
+            if (g_Minigame.minigameControlStruct.characterIndex[i] >= 0) {
+                g_Minigame.minigameControlStruct._14[i] = i;
+            }
+        }
+        if (g_GameLogic.secondaryGameMode == 3) {
+            minigamesSetSomePointers();
+            minigamesGXStuff();
+            g_Minigame._18A6 = 0;
+        }
+        if (g_Minigame.GameMode_MiniGame == 2) {
+            fn_3_5A6D4(0x23);
+        } else if (g_Minigame.miniGameNumberOfParticipants >= 2) {
+            if (g_GameLogic.secondaryGameMode == 8) {
+                fn_3_5A6D4(0x1A);
+            } else {
+                fn_3_5A6D4(0x23);
+            }
+        } else {
+            fn_3_5A6D4(0x1A);
+        }
+        break;
+    }
+    if (g_GameLogic.secondaryGameMode == 3 && g_GameLogic._125 >= 3) {
+        fn_3_1128EC();
+    }
 }
 
 // .text:0x0010AE18 size:0xD8 mapped:0x80749EAC
