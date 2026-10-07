@@ -164,6 +164,7 @@ extern void changeScene(u8, s16);
 extern u8 lbl_800EFBA4[0x10];
 extern u8 lbl_3_data_21278[2];
 extern f32 lbl_3_data_4444[10];
+extern u8 lbl_3_data_88DC[2];
 extern f32 lbl_3_data_47BC[5];
 extern f32 lbl_3_data_2198C[4][2];
 extern Vec lbl_3_data_219AC;
@@ -473,7 +474,9 @@ void fn_3_13A048(s32 to, s32 from) {
 
 // .text:0x00139F84 size:0xC4 mapped:0x80779018
 void fn_3_139F84(void) {
-    return;
+    fn_3_139CA0();
+    fn_3_139808();
+    fn_3_13974C();
 }
 
 // .text:0x00139CA0 size:0x2E4 mapped:0x80778D34
@@ -548,8 +551,119 @@ void fn_3_139CA0(void) {
 }
 
 // .text:0x00139808 size:0x498 mapped:0x8077889C
+// 92.5%: the gravity add, the position update and the inlined reflections schedule
+// their loads and stores in another order.
 void fn_3_139808(void) {
-    return;
+    int i;
+    int j;
+    int who;
+    VecSrcDst seg;
+    CollisionStruct col;
+    u32 type;
+    f32 best;
+    f32 radius;
+    f32 reach;
+    f32 dx;
+    f32 dz;
+    f32 dist;
+    Unk3520Fielder* fielder;
+
+    for (i = 0; i < 100; i++) {
+        if (g_Minigame.wallBall_coinsVisibleInd[i] != 1) {
+            continue;
+        }
+        g_Minigame.wallBall_coinsVisibleFrameCounter[i]++;
+        if (g_Minigame.wallBall_coinsVisibleFrameCounter[i] > lbl_3_data_21A04[3]) {
+            g_Minigame.wallBall_coinsVisibleInd[i] = 0;
+            g_Minigame._1D6C--;
+            continue;
+        }
+        g_Minigame.wallBall_coinVelocity[i].y += lbl_3_data_219B8[11];
+        seg.src.x = g_Minigame.wallBall_coinCoordinates[i].x;
+        seg.src.y = -g_Minigame.wallBall_coinCoordinates[i].y;
+        seg.src.z = g_Minigame.wallBall_coinCoordinates[i].z;
+        g_Minigame.wallBall_coinCoordinates[i].x += g_Minigame.wallBall_coinVelocity[i].x;
+        g_Minigame.wallBall_coinCoordinates[i].y += g_Minigame.wallBall_coinVelocity[i].y;
+        g_Minigame.wallBall_coinCoordinates[i].z += g_Minigame.wallBall_coinVelocity[i].z;
+        if (g_Minigame.wallBall_coinCoordinates[i].y < lbl_3_data_219B8[14]) {
+            g_Minigame.wallBall_coinCoordinates[i].y = lbl_3_data_219B8[14];
+            g_Minigame.wallBall_coinVelocity[i].y *= -lbl_3_data_219B8[12];
+            g_Minigame.wallBall_coinVelocity[i].x *= lbl_3_data_219B8[13];
+            g_Minigame.wallBall_coinVelocity[i].z *= lbl_3_data_219B8[13];
+        }
+        seg.dst.x = g_Minigame.wallBall_coinCoordinates[i].x;
+        seg.dst.y = -g_Minigame.wallBall_coinCoordinates[i].y;
+        seg.dst.z = g_Minigame.wallBall_coinCoordinates[i].z;
+        type = checkCollision(&seg, &col, 0, FALSE);
+        if (type == 5) {
+            col.normal.y *= -1.0f;
+            fn_3_13ADC0((Vec*)&g_Minigame.wallBall_coinVelocity[i], (Vec*)&g_Minigame.wallBall_coinVelocity[i], &col.normal);
+            g_Minigame.wallBall_coinCoordinates[i].x = col.position.x;
+            g_Minigame.wallBall_coinCoordinates[i].y = -col.position.y;
+            g_Minigame.wallBall_coinCoordinates[i].z = col.position.z;
+        }
+        seg.dst.x = g_Minigame.wallBall_coinCoordinates[i].x;
+        seg.dst.y = -g_Minigame.wallBall_coinCoordinates[i].y;
+        seg.dst.z = g_Minigame.wallBall_coinCoordinates[i].z;
+        if (fn_3_1373E0(&seg, (Vec*)&g_Minigame.wallBall_coinVelocity[i], (VecSrcDst*)&col, lbl_3_data_219B8[15])) {
+            g_Minigame.wallBall_coinCoordinates[i].x = col.position.x;
+            g_Minigame.wallBall_coinCoordinates[i].y = col.position.y;
+            g_Minigame.wallBall_coinCoordinates[i].z = col.position.z;
+            memcpy(&g_Minigame.wallBall_coinVelocity[i], &col.normal, sizeof(Vec));
+            seg.dst.x = g_Minigame.wallBall_coinCoordinates[i].x;
+            seg.dst.y = -g_Minigame.wallBall_coinCoordinates[i].y;
+            seg.dst.z = g_Minigame.wallBall_coinCoordinates[i].z;
+            type = checkCollision(&seg, &col, 0, FALSE);
+            if (type == 5) {
+                col.normal.y *= -1.0f;
+                fn_3_13ADC0((Vec*)&g_Minigame.wallBall_coinVelocity[i], (Vec*)&g_Minigame.wallBall_coinVelocity[i], &col.normal);
+                g_Minigame.wallBall_coinCoordinates[i].x = col.position.x;
+                g_Minigame.wallBall_coinCoordinates[i].y = -col.position.y;
+                g_Minigame.wallBall_coinCoordinates[i].z = col.position.z;
+            }
+        }
+        if (g_Minigame.turnOverStatus != 0) {
+            continue;
+        }
+        best = 99999.9f;
+        radius = lbl_3_data_219B8[15];
+        for (j = 0, who = -1; j < 4; j++) {
+            if (g_Minigame.minigameFielderIndex[j] < 0) {
+                continue;
+            }
+            if (g_Minigame.starDashStunType[j] != 0 && g_Minigame.starDashStunType[j] != 3) {
+                continue;
+            }
+            fielder = &g_Fielders[g_Minigame.minigameFielderIndex[j]];
+            if (fielder->_203 != 0 && fielder->_204 > 3) {
+                continue;
+            }
+            if (fielder->_16C + fielder->_00C < g_Minigame.wallBall_coinCoordinates[i].y) {
+                continue;
+            }
+            reach = radius + lbl_3_data_47BC[fielder->_1C9];
+            dz = fielder->pos.z - g_Minigame.wallBall_coinCoordinates[i].z;
+            dx = fielder->pos.x - g_Minigame.wallBall_coinCoordinates[i].x;
+            reach *= reach;
+            dist = dx * dx + dz * dz;
+            if (dist < reach && dist < best) {
+                best = dist;
+                who = j;
+            }
+        }
+        if (who >= 0) {
+            g_Minigame.miniGameCurrentPoints[who] += lbl_3_data_21A04[5];
+            g_Minigame.wallBall_coinsVisibleInd[i] = 3;
+            g_Minigame.wallBall_coinVelocity[i].z = 0.0f;
+            g_Minigame.wallBall_coinVelocity[i].x = 0.0f;
+            g_Minigame.wallBall_coinVelocity[i].y = RandomF32_Game_Range(lbl_3_data_219B8[0], lbl_3_data_219B8[1]);
+            g_Minigame.wallBall_coinsVisibleFrameCounter[i] = 0;
+            if (lbl_3_common_bss_34C58._30 == 0) {
+                fn_3_90064(0x2E9);
+                lbl_3_common_bss_34C58._30 = lbl_3_data_88DC[1];
+            }
+        }
+    }
 }
 
 // .text:0x0013974C size:0xBC mapped:0x807787E0
