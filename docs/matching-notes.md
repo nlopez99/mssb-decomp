@@ -18,7 +18,7 @@ objdiff's report scores these 100% because it ignores relocation targets; the un
 - **A value loaded once.** Holding a repeated load in its own local (with the type of the expression, usually `int`, not the field's `u8`) changes allocation. Example: `slapContactSize` in `calculateBuntHorizontalAngle`.
 - **Operands swapped in an add** (`add r31,r31,r0` versus `add r31,r0,r3`): split the expression, e.g. `value = tex[i]; value += step * 2;`. Example: `fn_3_16943C`.
 - **Operands swapped in a branchless `or`/`or.` chain** (`cntlzw; srwi; or; or.` tests): reorder the operands of `|` in the condition; each order gives a different pairing. Example: `fn_3_16E1EC` matches only as `lbl_3_bss_D6EC | !lbl_8036E548._3088 | !lbl_3_bss_D6E4`.
-- **Stalled after a few tries:** run `python3 tools/permute.py <function>` and the command it prints. Take the permuter's idea, not its literal code (it reuses unrelated variables and adds casts like `(long long)`), then rewrite it plausibly and recheck.
+- **Stalled after a few tries:** run `python3 tools/permute.py <unit> <function>` and the command it prints. Take the permuter's idea, not its literal code (it reuses unrelated variables and adds casts like `(long long)`), then rewrite it plausibly and recheck.
 
 ## Instruction differences that reveal types
 
@@ -52,13 +52,14 @@ objdiff's report scores these 100% because it ignores relocation targets; the un
 The base shows `lis rX,...rodata.0@ha; addi` and then `lfs f0,100(rX)`, while the target names each constant (`lfs f0,lbl_3_rodata_418C@l(r4)`). MWCC pools a function's `.rodata` references once it touches enough of them (three float constants alone stayed separate in `fn_3_16D810`; adding a `GXColor` initializer pooled all four).
 
 - **Cause: the original's `.rodata` began with weak objects, which turns pooling off for that section** (observed: with weak objects first nothing in `.rodata` is pooled, while `.bss` statics still are). `game/UnknownHomes_Game.h` defines `SQRT2_LINKAGE extern` before including `math.h`, so `dolsqrtf2` becomes an `extern inline` whose static locals are emitted as weak `_half$localstatic` and `_three$localstatic` even when unused; plain `#include "math.h"` emits nothing. The target's `.rodata` does not show them, presumably because the linker kept one weak copy for the whole module.
-- **Fix:** include `game/UnknownHomes_Game.h` above `header_rep_data.h`, as `game_batter.c` does. The `.rodata` section score loses those 0x10 bytes; the code matches. Example: `rep_4138.c`, where this matched `fn_3_16D810` and `fn_3_16DB6C`. `-pool off` also matches such functions but breaks pooled `.bss`, and GC/1.3.2 to 2.7 behave identically, so the include order is the explanation, not the flags.
+- **Fix, only when the base shows `...rodata.0`:** include `game/UnknownHomes_Game.h` above `header_rep_data.h`, as `game_batter.c` does. The `.rodata` section score loses those 0x10 bytes; the code matches. Example: `rep_4138.c`, where this matched `fn_3_16D810` and `fn_3_16DB6C`. `-pool off` also matches such functions but breaks pooled `.bss`, and GC/1.3.2 to 2.7 behave identically, so the include order is the explanation, not the flags.
 - The same include matched `fn_3_16B5B4` in `kinoko.c`, which pooled once an inlined callee added string literals.
-- **When nothing needs unpooled constants, include `header_rep_data.h` first.** That puts `repHeaderData` at offset 0 as in the target and scores `.rodata` higher (92% against 86% in `rep_F80.c`); every function matched with either order. The float constants still come out in a different order from the target, because `-inline deferred` generates functions last to first, so `.rodata` stays below 100% while the source keeps address order.
+- **When nothing needs unpooled constants, include `header_rep_data.h` first.** That puts `repHeaderData` at offset 0 as in the target and scores `.rodata` higher (92% against 86% in `rep_F80.c`); every function matched with either order.
 
 ## `.rodata` below 100% with every function matched
 
-- **Literal constants in the reverse of the target's order.** With `-inline deferred` MWCC generates functions in reverse source order (objdiff's `reverse_fn_order` hides this for `.text`) and creates each function's constants as it goes, while the target's constants follow address order. Reversing the source's function order lines them up (rep_940: `.rodata` 83% to 93%, the rest being the weak `dolsqrtf2` constants), but the source convention is address order, so keep it and report the difference.
+- **Literal constants in the reverse of the target's order:** the source lists functions in address order. With `-inline deferred` MWCC generates functions last to first (objdiff's `reverse_fn_order` hides this for `.text`) and creates each function's constants as it goes, so REL source lists functions from the highest address down; `tools/reverse_functions.py` converts a file. Example: rep_940 `.rodata` 83% to 93%.
+- **The weak `dolsqrtf2` constants** (0x10 bytes, from `game/UnknownHomes_Game.h`) stay as a difference; the linker keeps one copy for the whole module.
 
 ## Before committing
 
@@ -68,5 +69,5 @@ The base shows `lis rX,...rodata.0@ha; addi` and then `lfs f0,100(rX)`, while th
 ## Tool pitfalls
 
 - Install m2c from https://github.com/matt-kempster/m2c. The PyPI package named `m2c` is an unrelated project.
-- `match.py --m2c` prepares the unit's context for m2c (preprocesses it and strips inline asm); typed drafts work for every game and menus unit.
+- `match.py --m2c` prepares the unit's context for m2c (preprocesses it and strips inline asm); the draft is typed only for globals the source's includes declare, so a placeholder file including only `header_rep_data.h` gives `?` types until you add `game/UnknownHomes_Game.h` and the like.
 - decomp-permuter's own `import.py` breaks on this project; `tools/permute.py` explains why in its header and replaces it.

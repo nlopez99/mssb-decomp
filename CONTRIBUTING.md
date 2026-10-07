@@ -32,7 +32,7 @@ Start with one unmatched function in objdiff, preferably a small game-code funct
 
 1. Create a branch for the function or a small related group.
 2. Inspect its target assembly and existing types. Use related matched functions as references.
-3. Write or refine C, then run `python3 tools/match.py <unit> <function>` to rebuild the object and diff it against the target, or inspect it in objdiff. For remaining register-allocation differences, `python3 tools/permute.py <function>` sets up decomp-permuter.
+3. Write or refine C, then run `python3 tools/match.py <unit> <function>` to rebuild the object and diff it against the target, or inspect it in objdiff. For remaining register-allocation differences, `python3 tools/permute.py <unit> <function>` sets up decomp-permuter. In REL units (`game`, `menus`, `challenge`), list functions from the highest address down, because they build with `-inline deferred` and MWCC generates functions last to first; `python3 tools/reverse_functions.py <file>` converts a file.
 4. Require an exact match including relocations before marking it matching. `tools/match.py` reports this as `match`. The 100% in objdiff's progress report is not enough on its own, because the report ignores relocation targets.
 5. Run `python3 tools/regress.py`. It builds, checks the hashes, and compares every function with the base commit; it fails if any objdiff score drops or any strict match is lost.
 6. Review names, comments, types and undefined-behavior risks. A matching function does not prove that every guessed name or explanation is correct.
