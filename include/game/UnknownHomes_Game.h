@@ -2066,16 +2066,18 @@ typedef struct _MiniGameStruct {
     /*0x1DD1*/ u8 _1DD1[0x1DEC - 0x1DD1];
     /*0x1DEC*/ f32 _1DEC;
     /*0x1DF0*/ f32 _1DF0;
-    // Bob-omb Derby (rep_31F0) reads _1DF4 and _1DF5, Barrel Batter (rep_34B0) stores _1DF4_s16
+    // Bob-omb Derby (rep_31F0) reads _1DF4 to _1DF7, Barrel Batter (rep_34B0) stores _1DF4_s16,
+    // Star Dash (rep_3520) indexes _1DF4_arr by player
     union {
         struct {
             /*0x1DF4*/ u8 _1DF4;
             /*0x1DF5*/ u8 _1DF5;
+            /*0x1DF6*/ u8 _1DF6;
+            /*0x1DF7*/ u8 _1DF7;
         };
         /*0x1DF4*/ s16 _1DF4_s16;
+        /*0x1DF4*/ u8 _1DF4_arr[4];
     };
-    /*0x1DF6*/ u8 _1DF6;
-    /*0x1DF7*/ u8 _1DF7;
     /*0x1DF8*/ u8 _1DF8;
     /*0x1DF9*/ u8 _1DF9[0x1DFC - 0x1DF9];
     /*0x1DFC*/ u8 _1DFC[4];

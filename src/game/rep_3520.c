@@ -3,6 +3,8 @@
 #include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
 #include "game/rep_1838.h"
+#include "game/rep_28A8.h"
+#include "game/rep_3880.h"
 #include "game/rep_540.h"
 #include "game/m_sound.h"
 #include "static/UnknownHomes_Static.h"
@@ -10,6 +12,7 @@
 #include "math.h"
 #include "stdlib.h"
 #include "string.h"
+#include "Dolphin/rand.h"
 
 // One of four objects at g_Minigame + 0xBB0
 typedef struct Unk3520Obj {
@@ -65,6 +68,8 @@ extern struct {
 } lbl_80366158;
 
 extern s32 fn_800247E4(s32, s32, s32, s32);
+extern void fn_800528B4(void);
+extern void fn_80011578(void);
 extern void fn_3_5A6D4(u8 status);
 extern void fn_3_10F550(u8, s16);
 extern void changeScene(u8, s16);
@@ -78,7 +83,10 @@ extern Vec lbl_3_data_21A48;
 extern s16 lbl_3_data_21A60;
 extern f32 lbl_3_data_21A64[9];
 extern s16 lbl_3_data_21A90[4][4][2];
+extern s16 lbl_3_data_21AD0[4][4];
 extern s16 lbl_3_data_21AF0[1];
+extern f32 lbl_3_data_21AF4;
+extern s16 lbl_3_data_21B20[4];
 extern s8 lbl_3_data_21B88[4];
 extern s16 lbl_3_data_21B8C[4];
 
@@ -92,6 +100,18 @@ static GXTexObj lbl_3_bss_B708;
 static s32 lbl_3_bss_B704;
 static s16 lbl_3_bss_B702;
 static u8 lbl_3_bss_B700;
+
+// Waits a random time from the difficulty's range for the elapsed minutes
+static inline void Unk3520Obj_SetDelay(Unk3520Obj* obj, u32 t) {
+    s16 lo;
+    int r;
+
+    obj->_3D = 0;
+    obj->_3A = 0;
+    lo = lbl_3_data_21A90[g_Minigame.soloMinigameDifficulty][t][0];
+    r = random_fn_3_9EE24((lbl_3_data_21A90[g_Minigame.soloMinigameDifficulty][t][1] - lo) * 60);
+    obj->_38 = r + lo * 60;
+}
 
 // .text:0x0013C468 size:0x328 mapped:0x8077B4FC
 void fn_3_13C468(void) {
@@ -138,7 +158,21 @@ void fn_3_13BB30(void) {
 
 // .text:0x0013B9C4 size:0x16C mapped:0x8077AA58
 void fn_3_13B9C4(void) {
-    return;
+    u32 i;
+
+    fn_3_157570();
+    fn_3_DE4FC();
+    fn_3_5A6D4(GAME_STATUS_MVP_END_GAME);
+    fn_80011578();
+    for (i = 0; i < 100; i++) {
+        g_Minigame.wallBall_coinsVisibleInd[i] = 0;
+    }
+    g_Minigame._1D50 = 30;
+    g_Minigame._1D6C = 0;
+    for (i = 0; i < 4; i++) {
+        OBJS[i]._3D = 0;
+    }
+    g_Minigame._CCE[0] = 0;
 }
 
 // .text:0x0013B284 size:0x740 mapped:0x8077A318
@@ -279,8 +313,30 @@ void fn_3_138448(Unk3520Obj* obj) {
 }
 
 // .text:0x001382E0 size:0x168 mapped:0x80777374
-void fn_3_1382E0(void) {
-    return;
+void fn_3_1382E0(Unk3520Obj* obj) {
+    u32 t;
+    u32 minutes;
+
+    t = minutes = g_Minigame._17C0 / 60 / 20;
+
+    if (g_Minigame._72A != 0) {
+        Unk3520Obj_SetDelay(obj, minutes);
+    } else {
+        if (obj->_3A < 0x7FFE) {
+            obj->_3A++;
+        } else {
+            obj->_3A = 0x7FFF;
+        }
+        if (t > 3) {
+            t = 3;
+        }
+        if (obj->_3A / 60 >= lbl_3_data_21AD0[lbl_3_bss_B781[0]][t]) {
+            obj->_C.x = obj->_C.z = 0.0f;
+            obj->_C.y = -lbl_3_data_21A64[1];
+            obj->_3D = 2;
+            obj->_3A = 0;
+        }
+    }
 }
 
 // .text:0x0013802C size:0x2B4 mapped:0x807770C0
@@ -318,8 +374,6 @@ void fn_3_137F14(Unk3520Obj* obj) {
 // .text:0x00137DE4 size:0x130 mapped:0x80776E78
 void fn_3_137DE4(Unk3520Obj* obj) {
     u32 t;
-    s16 lo;
-    int r;
 
     PSVECAdd(&obj->_0, &obj->_C, &obj->_0);
     PSVECAdd(&obj->_18, &obj->_24, &obj->_18);
@@ -333,19 +387,13 @@ void fn_3_137DE4(Unk3520Obj* obj) {
         if (t > 3) {
             t = 3;
         }
-        obj->_3D = 0;
-        obj->_3A = 0;
-        lo = lbl_3_data_21A90[g_Minigame.soloMinigameDifficulty][t][0];
-        r = random_fn_3_9EE24((lbl_3_data_21A90[g_Minigame.soloMinigameDifficulty][t][1] - lo) * 60);
-        obj->_38 = r + lo * 60;
+        Unk3520Obj_SetDelay(obj, t);
     }
 }
 
 // .text:0x00137CF8 size:0xEC mapped:0x80776D8C
 void fn_3_137CF8(Unk3520Obj* obj) {
     u32 t;
-    s16 lo;
-    int r;
 
     PSVECAdd(&obj->_0, &obj->_C, &obj->_0);
     if (!fn_3_137B10(obj) && obj->_0.y >= lbl_3_data_21A64[0]) {
@@ -353,11 +401,7 @@ void fn_3_137CF8(Unk3520Obj* obj) {
         if (t > 3) {
             t = 3;
         }
-        obj->_3D = 0;
-        obj->_3A = 0;
-        lo = lbl_3_data_21A90[g_Minigame.soloMinigameDifficulty][t][0];
-        r = random_fn_3_9EE24((lbl_3_data_21A90[g_Minigame.soloMinigameDifficulty][t][1] - lo) * 60);
-        obj->_38 = r + lo * 60;
+        Unk3520Obj_SetDelay(obj, t);
     }
 }
 
@@ -439,7 +483,23 @@ void fn_3_1371E8(void) {
 
 // .text:0x001370A0 size:0x148 mapped:0x80776134
 void fn_3_1370A0(camera_803c639c_s* camera) {
-    return;
+    Vec shake;
+    Mtx inv;
+
+    memset(&shake, 0, sizeof(Vec));
+    shake.y = lbl_3_data_21AF4 * (2.0 * (rand() / 32767.0f - 0.5));
+    PSMTXInverse(camera->view, inv);
+    PSMTXMultVecSR(inv, &shake, &shake);
+    camera->eye.x += shake.x;
+    camera->eye.y += shake.y;
+    camera->eye.z += shake.z;
+    camera->target.x += shake.x;
+    camera->target.y += shake.y;
+    camera->target.z += shake.z;
+    if (--lbl_3_bss_B702 <= 0) {
+        lbl_3_bss_B702 = 0;
+        fn_800528B4();
+    }
 }
 
 // .text:0x00136EA4 size:0x1FC mapped:0x80775F38
@@ -463,8 +523,42 @@ void fn_3_136220(void) {
 }
 
 // .text:0x001360BC size:0x164 mapped:0x80775150
-void fn_3_1360BC(void) {
-    return;
+void fn_3_1360BC(int player) {
+    Unk3520Fielder* fielder = &g_Fielders[g_Minigame.minigameFielderIndex[player]];
+    int count;
+    int i;
+    int n;
+    f32 speed;
+
+    g_Minigame._1DF4_arr[player] = 1;
+    count = lbl_3_data_21B20[3];
+    if (g_Minigame.miniGameCurrentPoints[player] < count) {
+        count = g_Minigame.miniGameCurrentPoints[player];
+    }
+    if (count != 0) {
+        for (i = 0, n = 0; i < 50; i++) {
+            if (g_Minigame.wallBall_coinsVisibleInd[i] == 0) {
+                g_Minigame.wallBall_coinCoordinates[i].x = fielder->pos.x;
+                g_Minigame.wallBall_coinCoordinates[i].y = fielder->pos.y;
+                g_Minigame.wallBall_coinCoordinates[i].z = fielder->pos.z;
+                g_Minigame.wallBall_coinCoordinates[i].y = fielder->_16C;
+                g_Minigame.wallBall_coinVelocity[i].y = lbl_3_data_219B8[18];
+                getComponentsFromSAng(random_fn_3_9EE24(0x1000), &g_Minigame.wallBall_coinVelocity[i].x,
+                                      &g_Minigame.wallBall_coinVelocity[i].z);
+                speed = RandomF32_Game_Range(lbl_3_data_219B8[16], lbl_3_data_219B8[17]);
+                g_Minigame.wallBall_coinVelocity[i].x *= speed;
+                g_Minigame.wallBall_coinVelocity[i].z *= speed;
+                g_Minigame.wallBall_coinsVisibleInd[i] = 1;
+                g_Minigame.wallBall_coinsVisibleFrameCounter[i] = 0;
+                g_Minigame._1D6C++;
+                if (++n >= count) {
+                    break;
+                }
+            }
+        }
+        fn_3_90064(0x2E8);
+        g_Minigame.miniGameCurrentPoints[player] -= count;
+    }
 }
 
 // .text:0x00136048 size:0x74 mapped:0x807750DC
