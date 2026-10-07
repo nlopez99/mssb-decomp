@@ -1,268 +1,170 @@
 #include "game/rep_3310.h"
 #include "header_rep_data.h"
+#include "game/UnknownHomes_Game.h"
+#include "static/UnknownHomes_Static.h"
+#include "game/rep_1C0.h"
+#include "game/rep_1D58.h"
 
-// .text:0x00116840 size:0x190 mapped:0x807558D4
-void fn_3_116840(void) {
-    return;
+typedef struct {
+    /* 0x00 */ u8 _00[0x20];
+    /* 0x20 */ u16 _20;
+    /* 0x22 */ u8 _22[0x40 - 0x22];
+    /* 0x40 */ u16 _40;
+    /* 0x42 */ u8 _42[0x60 - 0x42];
+    /* 0x60 */ u16 _60;
+} UnkAnimFrame3310;
+
+typedef struct {
+    /* 0x00 */ u8 _00[0xC];
+    /* 0x0C */ UnkAnimFrame3310* _0C;
+} UnkAnimCtrl3310;
+
+typedef struct {
+    /* 0x00 */ u8 _00[0x8];
+    /* 0x08 */ UnkAnimCtrl3310* _08;
+} UnkAnimSet3310;
+
+typedef struct {
+    /* 0x00 */ u8 _00[0x14];
+    /* 0x14 */ UnkAnimSet3310* _14;
+} UnkModel3310;
+
+typedef struct {
+    /* 0x00 */ u8 _00[0x6];
+    /* 0x06 */ u16 _06;
+    /* 0x08 */ u8 _08[0x14 - 0x8];
+    /* 0x14 */ UnkAnimSet3310* _14;
+    /* 0x18 */ UnkModel3310** _18;
+    /* 0x1C */ u8 _1C[0x98 - 0x1C];
+    /* 0x98 */ u8 _98;
+} UnkModelSet3310;
+
+typedef struct {
+    /* 0x00 */ UnkModelSet3310* _00;
+    /* 0x04 */ void* _04;
+    /* 0x08 */ u8 _08[0xE - 0x8];
+    /* 0x0E */ u16 _0E;
+    /* 0x10 */ u8 _10[0x54 - 0x10];
+    /* 0x54 */ f32 _54;
+    /* 0x58 */ u8 _58;
+    /* 0x59 */ u8 _59;
+    /* 0x5A */ u8 _5A;
+    /* 0x5B */ u8 _5B;
+    /* 0x5C */ f32 _5C;
+    /* 0x60 */ f32 _60;
+    /* 0x64 */ u8 _64[0x90 - 0x64];
+} UnkActor3310; // size: 0x90
+
+typedef struct {
+    /* 0x00 */ u8 _00[0x34];
+    /* 0x34 */ UnkActor3310 _34[1];
+} UnkActorTable3310;
+
+typedef struct {
+    /* 0x00 */ u8 _00[0x26];
+    /* 0x26 */ u8 _26;
+    /* 0x27 */ u8 _27;
+} UnkObj3310; // size: 0x28
+
+extern struct {
+    /* 0x0000 */ u8 _0000[0x68];
+    /* 0x0068 */ UnkActorTable3310* _0068;
+    /* 0x006C */ u8 _006C[0x2D94 - 0x6C];
+    /* 0x2D94 */ UnkObj3310* _2D94;
+    /* 0x2D98 */ u8 _2D98[0x3078 - 0x2D98];
+    /* 0x3078 */ u16 _3078;
+    /* 0x307A */ u8 _307A[0x307E - 0x307A];
+    /* 0x307E */ u8 _307E;
+} lbl_8036E548;
+
+// g_Minigame's layout in this minigame
+typedef struct {
+    /* 0x00 */ Vec pos;
+    /* 0x0C */ u8 _0C[0x2C - 0xC];
+    /* 0x2C */ u8 _2C;
+    /* 0x2D */ u8 _2D[0x38 - 0x2D];
+} UnkMgEntry3310; // size: 0x38
+
+typedef struct {
+    /* 0x0000 */ UnkMgEntry3310 _0000[3];
+    /* 0x00A8 */ u8 _00A8[0xCCE - 0xA8];
+    /* 0x0CCE */ u8 _0CCE;
+    /* 0x0CCF */ u8 _0CCF[0x1A2A - 0xCCF];
+    /* 0x1A2A */ u8 _1A2A;
+    /* 0x1A2B */ u8 _1A2B[0x1AFF - 0x1A2B];
+    /* 0x1AFF */ u8 _1AFF[4];
+} UnkMinigame3310;
+
+#define MG (*(UnkMinigame3310*)&g_Minigame)
+
+extern struct {
+    /* 0x00 */ u8 _00[0x70];
+    /* 0x70 */ void* _70;
+    /* 0x74 */ void* _74;
+    /* 0x78 */ void* _78;
+} lbl_3_common_bss_32724;
+
+extern f32 fn_800B4A94(UnkModelSet3310* model);
+extern void minigamesSetSomePointers(void);
+extern void minigamesGXStuff(void);
+extern void minigamesSetSomePointers2(void);
+extern void fn_80035B50(s32);
+extern void fn_80018B38(void);
+extern void fn_3_909B0(void);
+extern void fn_3_9081C(void);
+// rep_3D70.h declares this as a void(void) placeholder
+extern void fn_3_14225C(UnkModelSet3310* model);
+
+typedef struct {
+    /* 0x00 */ u32 _00[4];
+} UnkAramEntry3310; // size: 0x10
+
+static inline void setAnim(UnkActor3310* actor, void* anim, u16 frame) {
+    actor->_04 = anim;
+    actor->_0E = frame;
+    actor->_5C = 0.0f;
+    actor->_58 = 1;
+    actor->_59 = anim != NULL;
+    actor->_5A = anim != NULL;
+    actor->_60 = 0.0f;
+    actor->_54 = 1.0f;
+    actor->_5A = 1;
+    actor->_5C = 0.0f;
+    actor->_59 = 1;
+    actor->_5B = 2;
 }
 
-// .text:0x001169D0 size:0x168 mapped:0x80755A64
-void fn_3_1169D0(void) {
-    return;
-}
+// .data, in address order
+UnkAramEntry3310 lbl_3_data_225F0[3] = {
+    { 0x0000040B, 0x40001640, 0x08EB4800, 0x00000C38 },
+    { 0x0000040B, 0x400B2D00, 0x08EB5800, 0x0006A948 },
+    { 0x00000000, 0x00000686, 0x08F20800, 0x00000688 },
+};
+Vec lbl_3_data_22620 = { 0.0f, -0.15f, 18.5f };
+f32 lbl_3_data_2262C = 0.45f;
+u8 lbl_3_data_22630[4] = { 0, 1, 3, 2 };
+u8 lbl_3_data_22634[4] = { 15, 15, 15, 15 };
+u8 lbl_3_data_22638[4] = { 2, 0, 3, 1 };
+u8 lbl_3_data_2263C[2] = { 0, 1 };
+u8 lbl_3_data_2263E = 2;
+u8 lbl_3_data_2263F = 6;
+f32 lbl_3_data_22640[4] = { 0.75f, 0.05f, 3.0f, 0.02f };
+f32 lbl_3_data_22650[3] = { 5.0f, 5.0f, 10.0f };
+u8 lbl_3_data_2265C[4] = { 1, 0, 2, 3 };
+f32 lbl_3_data_22660[3] = { 2.0f, 8.0f, 1.0f };
+s32 lbl_3_data_2266C = 60;
+u8 lbl_3_data_22670[8] = { 2, 0, 3, 4, 1, 0, 0, 0 };
+f32 lbl_3_data_22678[4] = { 2.0f, 2.5f, 1.0f, 1.0f };
+f32 lbl_3_data_22688[3] = { 0.5f, 0.0f, -0.5f };
+f32 lbl_3_data_22694[6] = { 0.5f, 1.0f, 1.0f, 0.5f, 0.5f, 0.5f };
+s16 lbl_3_data_226AC[8] = { 0, 0, 20, 10, 0, 0, 0xF50, 0 };
+u8 lbl_3_data_226BC[8] = { 3, 1, 4, 2, 0, 0, 0, 0 };
+f32 lbl_3_data_226C4[4] = { 1.5f, 0.7f, 1.0f, 0.5f };
+f32 lbl_3_data_226D4[2] = { 1.0f, 30.0f };
+f32 lbl_3_data_226DC = 4.0f;
 
-// .text:0x00116B38 size:0x3C mapped:0x80755BCC
-void fn_3_116B38(void) {
-    return;
-}
-
-// .text:0x00116B74 size:0x8A8 mapped:0x80755C08
-void fn_3_116B74(void) {
-    return;
-}
-
-// .text:0x0011741C size:0x78 mapped:0x807564B0
-void fn_3_11741C(void) {
-    return;
-}
-
-// .text:0x00117494 size:0xF4 mapped:0x80756528
-void fn_3_117494(void) {
-    return;
-}
-
-// .text:0x00117588 size:0x464 mapped:0x8075661C
-void fn_3_117588(void) {
-    return;
-}
-
-// .text:0x001179EC size:0xF8 mapped:0x80756A80
-void fn_3_1179EC(void) {
-    return;
-}
-
-// .text:0x00117AE4 size:0x94 mapped:0x80756B78
-void fn_3_117AE4(void) {
-    return;
-}
-
-// .text:0x00117B78 size:0x450 mapped:0x80756C0C
-void fn_3_117B78(void) {
-    return;
-}
-
-// .text:0x00117FC8 size:0xDC mapped:0x8075705C
-void fn_3_117FC8(void) {
-    return;
-}
-
-// .text:0x001180A4 size:0xC0 mapped:0x80757138
-void fn_3_1180A4(void) {
-    return;
-}
-
-// .text:0x00118164 size:0x1F4 mapped:0x807571F8
-void fn_3_118164(void) {
-    return;
-}
-
-// .text:0x00118358 size:0xA4 mapped:0x807573EC
-void fn_3_118358(void) {
-    return;
-}
-
-// .text:0x001183FC size:0x10C mapped:0x80757490
-void fn_3_1183FC(void) {
-    return;
-}
-
-// .text:0x00118508 size:0x10C mapped:0x8075759C
-void fn_3_118508(void) {
-    return;
-}
-
-// .text:0x00118614 size:0x138 mapped:0x807576A8
-void fn_3_118614(void) {
-    return;
-}
-
-// .text:0x0011874C size:0xD0 mapped:0x807577E0
-void fn_3_11874C(void) {
-    return;
-}
-
-// .text:0x0011881C size:0x60 mapped:0x807578B0
-void fn_3_11881C(void) {
-    return;
-}
-
-// .text:0x0011887C size:0x100 mapped:0x80757910
-void fn_3_11887C(void) {
-    return;
-}
-
-// .text:0x0011897C size:0x4C mapped:0x80757A10
-void fn_3_11897C(void) {
-    return;
-}
-
-// .text:0x001189C8 size:0x150 mapped:0x80757A5C
-void fn_3_1189C8(void) {
-    return;
-}
-
-// .text:0x00118B18 size:0x7A0 mapped:0x80757BAC
-void fn_3_118B18(void) {
-    return;
-}
-
-// .text:0x001192B8 size:0x1B0 mapped:0x8075834C
-void fn_3_1192B8(void) {
-    return;
-}
-
-// .text:0x00119468 size:0x44 mapped:0x807584FC
-void fn_3_119468(void) {
-    return;
-}
-
-// .text:0x001194AC size:0x50 mapped:0x80758540
-void fn_3_1194AC(void) {
-    return;
-}
-
-// .text:0x001194FC size:0x358 mapped:0x80758590
-void fn_3_1194FC(void) {
-    return;
-}
-
-// .text:0x00119854 size:0x24 mapped:0x807588E8
-void fn_3_119854(void) {
-    return;
-}
-
-// .text:0x00119878 size:0xBC mapped:0x8075890C
-void fn_3_119878(void) {
-    return;
-}
-
-// .text:0x00119934 size:0x300 mapped:0x807589C8
-void fn_3_119934(void) {
-    return;
-}
-
-// .text:0x00119C34 size:0x74 mapped:0x80758CC8
-void fn_3_119C34(void) {
-    return;
-}
-
-// .text:0x00119CA8 size:0x80 mapped:0x80758D3C
-void fn_3_119CA8(void) {
-    return;
-}
-
-// .text:0x00119D28 size:0xC mapped:0x80758DBC
-void fn_3_119D28(void) {
-    return;
-}
-
-// .text:0x00119D34 size:0xFC mapped:0x80758DC8
-void fn_3_119D34(void) {
-    return;
-}
-
-// .text:0x00119E30 size:0xB0 mapped:0x80758EC4
-void fn_3_119E30(void) {
-    return;
-}
-
-// .text:0x00119EE0 size:0x8C mapped:0x80758F74
-void fn_3_119EE0(void) {
-    return;
-}
-
-// .text:0x00119F6C size:0x2A0 mapped:0x80759000
-void fn_3_119F6C(void) {
-    return;
-}
-
-// .text:0x0011A20C size:0x4 mapped:0x807592A0
-void fn_3_11A20C(void) {
-    return;
-}
-
-// .text:0x0011A210 size:0x140 mapped:0x807592A4
-void fn_3_11A210(void) {
-    return;
-}
-
-// .text:0x0011A350 size:0x3C mapped:0x807593E4
-void fn_3_11A350(void) {
-    return;
-}
-
-// .text:0x0011A38C size:0x7C mapped:0x80759420
-void fn_3_11A38C(void) {
-    return;
-}
-
-// .text:0x0011A408 size:0x524 mapped:0x8075949C
-void fn_3_11A408(void) {
-    return;
-}
-
-// .text:0x0011A92C size:0x200 mapped:0x807599C0
-void fn_3_11A92C(void) {
-    return;
-}
-
-// .text:0x0011AB2C size:0x140 mapped:0x80759BC0
-void fn_3_11AB2C(void) {
-    return;
-}
-
-// .text:0x0011AC6C size:0xAF0 mapped:0x80759D00
-void fn_3_11AC6C(void) {
-    return;
-}
-
-// .text:0x0011B75C size:0x448 mapped:0x8075A7F0
-void fn_3_11B75C(void) {
-    return;
-}
-
-// .text:0x0011BBA4 size:0x488 mapped:0x8075AC38
-void fn_3_11BBA4(void) {
-    return;
-}
-
-// .text:0x0011C02C size:0x2A0 mapped:0x8075B0C0
-void fn_3_11C02C(void) {
-    return;
-}
-
-// .text:0x0011C2CC size:0x32C mapped:0x8075B360
-void fn_3_11C2CC(void) {
-    return;
-}
-
-// .text:0x0011C5F8 size:0x708 mapped:0x8075B68C
-void fn_3_11C5F8(void) {
-    return;
-}
-
-// .text:0x0011CD00 size:0x204 mapped:0x8075BD94
-void fn_3_11CD00(void) {
-    return;
-}
-
-// .text:0x0011CF04 size:0x80 mapped:0x8075BF98
-void fn_3_11CF04(void) {
-    return;
-}
-
-// .text:0x0011CF84 size:0x22C mapped:0x8075C018
-void fn_3_11CF84(void) {
+// .text:0x0011D2C8 size:0xE4 mapped:0x8075C35C
+void fn_3_11D2C8(s32 model, s32 first, s32 count, void* anim, s32 arg4) {
     return;
 }
 
@@ -271,8 +173,324 @@ void fn_3_11D1B0(void) {
     return;
 }
 
-// .text:0x0011D2C8 size:0xE4 mapped:0x8075C35C
-void fn_3_11D2C8(s32 model, s32 first, s32 count, void* anim, s32 arg4) {
+// .text:0x0011CF84 size:0x22C mapped:0x8075C018
+void fn_3_11CF84(void) {
     return;
 }
 
+// .text:0x0011CF04 size:0x80 mapped:0x8075BF98
+void fn_3_11CF04(void) {
+    if (g_d_GameSettings.GameModeSelected != GAME_TYPE_TOY_FIELD) {
+        lbl_8036E548._3078 = 0;
+    }
+    lbl_8036E548._307E = 0;
+    minigamesSetSomePointers();
+    minigamesGXStuff();
+    minigamesSetSomePointers2();
+    fn_80035B50(0xD);
+    fn_3_B95EC();
+    fn_3_5E60();
+    fn_80018B38();
+    fn_3_909B0();
+    fn_3_9081C();
+    fn_80035B50(0x11);
+}
+
+// .text:0x0011CD00 size:0x204 mapped:0x8075BD94
+void fn_3_11CD00(void) {
+    return;
+}
+
+// .text:0x0011C5F8 size:0x708 mapped:0x8075B68C
+void fn_3_11C5F8(void) {
+    return;
+}
+
+// .text:0x0011C2CC size:0x32C mapped:0x8075B360
+void fn_3_11C2CC(void) {
+    return;
+}
+
+// .text:0x0011C02C size:0x2A0 mapped:0x8075B0C0
+void fn_3_11C02C(void) {
+    return;
+}
+
+// .text:0x0011BBA4 size:0x488 mapped:0x8075AC38
+void fn_3_11BBA4(void) {
+    return;
+}
+
+// .text:0x0011B75C size:0x448 mapped:0x8075A7F0
+void fn_3_11B75C(void) {
+    return;
+}
+
+// .text:0x0011AC6C size:0xAF0 mapped:0x80759D00
+void fn_3_11AC6C(void) {
+    return;
+}
+
+// .text:0x0011AB2C size:0x140 mapped:0x80759BC0
+void fn_3_11AB2C(void) {
+    return;
+}
+
+// .text:0x0011A92C size:0x200 mapped:0x807599C0
+void fn_3_11A92C(void) {
+    return;
+}
+
+// .text:0x0011A408 size:0x524 mapped:0x8075949C
+void fn_3_11A408(void) {
+    return;
+}
+
+// .text:0x0011A38C size:0x7C mapped:0x80759420
+void fn_3_11A38C(s32 i, u16 frame) {
+    UnkActor3310* actor = &lbl_8036E548._0068->_34[i];
+    void* anim = lbl_3_common_bss_32724._70;
+
+    setAnim(actor, anim, frame);
+}
+
+// .text:0x0011A350 size:0x3C mapped:0x807593E4
+u32 fn_3_11A350(s32 i) {
+    return fn_800B4A94(lbl_8036E548._0068->_34[i]._00);
+}
+
+// .text:0x0011A210 size:0x140 mapped:0x807592A4
+void fn_3_11A210(void) {
+    return;
+}
+
+// .text:0x0011A20C size:0x4 mapped:0x807592A0
+void fn_3_11A20C(void) {
+    return;
+}
+
+// .text:0x00119F6C size:0x2A0 mapped:0x80759000
+void fn_3_119F6C(void) {
+    return;
+}
+
+// .text:0x00119EE0 size:0x8C mapped:0x80758F74
+void fn_3_119EE0(s32 i) {
+    UnkAnimCtrl3310* ctrl = lbl_8036E548._0068->_34[i]._00->_18[0]->_14->_08;
+
+    ctrl->_0C->_20 = lbl_3_data_22638[g_Minigame.barrels[i].barrelColour] * 3;
+    ctrl->_0C->_40 = lbl_3_data_22638[g_Minigame.barrels[i].barrelColour] * 3 + 1;
+    ctrl->_0C->_60 = lbl_3_data_22638[g_Minigame.barrels[i].barrelColour] * 3 + 2;
+}
+
+// .text:0x00119E30 size:0xB0 mapped:0x80758EC4
+void fn_3_119E30(s32 i) {
+    UnkAnimCtrl3310* ctrl;
+
+    if (g_Minigame.barrels[g_Minigame.bB_bombBarrelID].animationCounter % lbl_3_data_2263E == 0) {
+        ctrl = lbl_8036E548._0068->_34[i]._00->_18[0]->_14->_08;
+        ctrl->_0C->_20 = !lbl_3_data_2263C[ctrl->_0C->_20];
+        ctrl->_0C->_40 = !lbl_3_data_2263C[ctrl->_0C->_40];
+        ctrl->_0C->_60 = !lbl_3_data_2263C[ctrl->_0C->_60];
+    }
+}
+
+// .text:0x00119D34 size:0xFC mapped:0x80758DC8
+void fn_3_119D34(void) {
+    return;
+}
+
+// .text:0x00119D28 size:0xC mapped:0x80758DBC
+f32 fn_3_119D28(void) {
+    return lbl_3_data_2262C;
+}
+
+// .text:0x00119CA8 size:0x80 mapped:0x80758D3C
+void fn_3_119CA8(s32 i) {
+    UnkActor3310* actor = &lbl_8036E548._0068->_34[i];
+    void* anim = lbl_3_common_bss_32724._74;
+
+    setAnim(actor, anim, 0);
+}
+
+// .text:0x00119C34 size:0x74 mapped:0x80758CC8
+void fn_3_119C34(void) {
+    UnkActor3310* actor = &lbl_8036E548._0068->_34[31];
+    void* anim = lbl_3_common_bss_32724._74;
+
+    setAnim(actor, anim, 1);
+}
+
+// .text:0x00119934 size:0x300 mapped:0x807589C8
+void fn_3_119934(void) {
+    return;
+}
+
+// .text:0x00119878 size:0xBC mapped:0x8075890C
+void fn_3_119878(void) {
+    return;
+}
+
+// .text:0x00119854 size:0x24 mapped:0x807588E8
+f32 fn_3_119854(u8 index) {
+    if (index > 2) {
+        index = 2;
+    }
+    return lbl_3_data_22650[index];
+}
+
+// .text:0x001194FC size:0x358 mapped:0x80758590
+void fn_3_1194FC(void) {
+    return;
+}
+
+// .text:0x001194AC size:0x50 mapped:0x80758540
+void fn_3_1194AC(s32 i) {
+    lbl_8036E548._0068->_34[i]._00->_18[0]->_14->_08->_0C->_20 = lbl_3_data_2265C[MG._1AFF[i]];
+}
+
+// .text:0x00119468 size:0x44 mapped:0x807584FC
+void fn_3_119468(s32 i) {
+    UnkModelSet3310* model = lbl_8036E548._0068->_34[i]._00;
+    if (model->_98 & 9) {
+        fn_3_14225C(model);
+    }
+}
+
+// .text:0x001192B8 size:0x1B0 mapped:0x8075834C
+void fn_3_1192B8(void) {
+    return;
+}
+
+// .text:0x00118B18 size:0x7A0 mapped:0x80757BAC
+void fn_3_118B18(void) {
+    return;
+}
+
+// .text:0x001189C8 size:0x150 mapped:0x80757A5C
+void fn_3_1189C8(void) {
+    return;
+}
+
+// .text:0x0011897C size:0x4C mapped:0x80757A10
+void fn_3_11897C(s32 i) {
+    lbl_8036E548._0068->_34[i]._00->_14->_08->_0C->_20 = lbl_3_data_22670[MG._0000[i - 0x82]._2C];
+}
+
+// .text:0x0011887C size:0x100 mapped:0x80757910
+void fn_3_11887C(void) {
+    return;
+}
+
+// .text:0x0011881C size:0x60 mapped:0x807578B0
+void fn_3_11881C(s32 i) {
+    u8 v;
+    if (i - 0xE9 < 4) {
+        v = lbl_3_data_226BC[i - 0xE9];
+    } else {
+        v = lbl_3_data_226BC[4];
+    }
+    lbl_8036E548._0068->_34[i]._00->_18[0]->_14->_08->_0C->_20 = v;
+}
+
+// .text:0x0011874C size:0xD0 mapped:0x807577E0
+void fn_3_11874C(void) {
+    return;
+}
+
+// .text:0x00118614 size:0x138 mapped:0x807576A8
+void fn_3_118614(void) {
+    return;
+}
+
+// .text:0x00118508 size:0x10C mapped:0x8075759C
+void fn_3_118508(void) {
+    return;
+}
+
+// .text:0x001183FC size:0x10C mapped:0x80757490
+void fn_3_1183FC(void) {
+    return;
+}
+
+// .text:0x00118358 size:0xA4 mapped:0x807573EC
+void fn_3_118358(void) {
+    return;
+}
+
+// .text:0x00118164 size:0x1F4 mapped:0x807571F8
+void fn_3_118164(void) {
+    return;
+}
+
+// .text:0x001180A4 size:0xC0 mapped:0x80757138
+void fn_3_1180A4(void) {
+    return;
+}
+
+// .text:0x00117FC8 size:0xDC mapped:0x8075705C
+void fn_3_117FC8(void) {
+    return;
+}
+
+// .text:0x00117B78 size:0x450 mapped:0x80756C0C
+void fn_3_117B78(void) {
+    return;
+}
+
+// .text:0x00117AE4 size:0x94 mapped:0x80756B78
+void fn_3_117AE4(void) {
+    return;
+}
+
+// .text:0x001179EC size:0xF8 mapped:0x80756A80
+void fn_3_1179EC(void) {
+    return;
+}
+
+// .text:0x00117588 size:0x464 mapped:0x8075661C
+void fn_3_117588(void) {
+    return;
+}
+
+// .text:0x00117494 size:0xF4 mapped:0x80756528
+void fn_3_117494(void) {
+    return;
+}
+
+// .text:0x0011741C size:0x78 mapped:0x807564B0
+void fn_3_11741C(s32 i) {
+    UnkModelSet3310* model = lbl_8036E548._0068->_34[i]._00;
+    s32 frame = MG._0CCE == 1 ? 0 : 2;
+    s32 j;
+
+    for (j = 0; j < model->_06; j++) {
+        model->_18[j]->_14->_08->_0C->_20 = frame;
+    }
+}
+
+// .text:0x00116B74 size:0x8A8 mapped:0x80755C08
+void fn_3_116B74(void) {
+    return;
+}
+
+// .text:0x00116B38 size:0x3C mapped:0x80755BCC
+void fn_3_116B38(void) {
+    UnkObj3310* obj;
+    s32 i = 2;
+    if (MG._1A2A == 3) {
+        i = 31;
+    }
+    obj = &lbl_8036E548._2D94[i];
+    obj->_26 = 0;
+}
+
+// .text:0x001169D0 size:0x168 mapped:0x80755A64
+void fn_3_1169D0(void) {
+    return;
+}
+
+// .text:0x00116840 size:0x190 mapped:0x807558D4
+void fn_3_116840(void) {
+    return;
+}
