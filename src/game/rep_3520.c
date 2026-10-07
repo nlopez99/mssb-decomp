@@ -4,6 +4,7 @@
 #include "header_rep_data.h"
 #include "game/rep_1838.h"
 #include "game/rep_540.h"
+#include "game/m_sound.h"
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/gx.h"
 #include "math.h"
@@ -14,9 +15,8 @@
 typedef struct Unk3520Obj {
     /* 0x00 */ Vec _0;
     /* 0x0C */ Vec _C;
-    /* 0x18 */ u8 _18[0x24 - 0x18];
-    /* 0x24 */ f32 _24;
-    /* 0x28 */ u8 _28[0x30 - 0x28];
+    /* 0x18 */ Vec _18;
+    /* 0x24 */ Vec _24;
     /* 0x30 */ f32 _30;
     /* 0x34 */ f32 _34;
     /* 0x38 */ s16 _38;
@@ -59,6 +59,12 @@ typedef struct Unk3520Fielder {
 
 extern Unk3520Fielder g_Fielders[9];
 
+extern struct {
+    /* 0x00 */ u8 _00[0x28];
+    /* 0x28 */ u8 _28;
+} lbl_80366158;
+
+extern s32 fn_800247E4(s32, s32, s32, s32);
 extern void fn_3_5A6D4(u8 status);
 extern void fn_3_10F550(u8, s16);
 extern void changeScene(u8, s16);
@@ -76,14 +82,14 @@ extern s16 lbl_3_data_21AF0[1];
 extern s8 lbl_3_data_21B88[4];
 extern s16 lbl_3_data_21B8C[4];
 
-u8 lbl_3_data_26580 = 0xFF;
+s8 lbl_3_data_26580 = -1;
 
 // .bss statics, declared in reverse address order (MWCC lays them out last to first)
 static u8 lbl_3_bss_B781[1];
 static u8 lbl_3_bss_B780;
 static u8 lbl_3_bss_B740[0x40] ATTRIBUTE_ALIGN(32);
 static GXTexObj lbl_3_bss_B708;
-static u32 lbl_3_bss_B704;
+static s32 lbl_3_bss_B704;
 static s16 lbl_3_bss_B702;
 static u8 lbl_3_bss_B700;
 
@@ -283,13 +289,56 @@ void fn_3_13802C(void) {
 }
 
 // .text:0x00137F14 size:0x118 mapped:0x80776FA8
-void fn_3_137F14(void) {
-    return;
+void fn_3_137F14(Unk3520Obj* obj) {
+    if (g_Minigame._72A != 0) {
+        obj->_C.y = lbl_3_data_21A64[5];
+        obj->_3D = 5;
+        obj->_3A = 0;
+    } else {
+        if (obj->_3E != 0) {
+            obj->_3F++;
+            if (obj->_3F >= 10) {
+                fn_3_90064(0x303);
+                obj->_3E = 0;
+            }
+        }
+        if (obj->_3A < 0x7FFE) {
+            obj->_3A++;
+        } else {
+            obj->_3A = 0x7FFF;
+        }
+        if (!fn_3_137B10(obj) && obj->_3A >= lbl_3_data_21A64[6]) {
+            obj->_C.y = lbl_3_data_21A64[5];
+            obj->_3D = 5;
+            obj->_3A = 0;
+        }
+    }
 }
 
 // .text:0x00137DE4 size:0x130 mapped:0x80776E78
-void fn_3_137DE4(void) {
-    return;
+void fn_3_137DE4(Unk3520Obj* obj) {
+    u32 t;
+    s16 lo;
+    int r;
+
+    PSVECAdd(&obj->_0, &obj->_C, &obj->_0);
+    PSVECAdd(&obj->_18, &obj->_24, &obj->_18);
+    if (obj->_3A < 0x7FFE) {
+        obj->_3A++;
+    } else {
+        obj->_3A = 0x7FFF;
+    }
+    if (obj->_3A >= lbl_3_data_21A64[7]) {
+        t = g_Minigame._17C0 / 60 / 20;
+        if (t > 3) {
+            t = 3;
+        }
+        obj->_3D = 0;
+        obj->_3A = 0;
+        lo = lbl_3_data_21A90[g_Minigame.soloMinigameDifficulty][t][0];
+        r = random_fn_3_9EE24((lbl_3_data_21A90[g_Minigame.soloMinigameDifficulty][t][1] - lo) * 60);
+        obj->_38 = r + lo * 60;
+    }
 }
 
 // .text:0x00137CF8 size:0xEC mapped:0x80776D8C
@@ -351,7 +400,7 @@ u8 fn_3_137B10(Unk3520Obj* obj) {
                     PSVECScale(&v, lbl_3_data_21A64[2], &v);
                     v.y = lbl_3_data_21A64[3];
                     memcpy(&obj->_C, &v, sizeof(Vec));
-                    obj->_24 = lbl_3_data_21A64[4];
+                    obj->_24.x = lbl_3_data_21A64[4];
                     obj->_3A = 0;
                     obj->_3D = 4;
                 }
@@ -479,7 +528,13 @@ void fn_3_135A64(void) {
 
 // .text:0x00135924 size:0x140 mapped:0x807749B8
 void fn_3_135924(void) {
-    return;
+    u32 i;
+
+    for (i = 0; i < 100; i++) {
+        if (g_Minigame.wallBall_coinsVisibleInd[i] == 1 && g_Minigame.wallBall_coinCoordinates[i].y < 3.0f) {
+            fn_3_13583C((Vec*)&g_Minigame.wallBall_coinCoordinates[i]);
+        }
+    }
 }
 
 // .text:0x0013583C size:0xE8 mapped:0x807748D0
@@ -693,15 +748,84 @@ void fn_3_133320(void) {
 
 // .text:0x00133200 size:0x120 mapped:0x80772294
 void fn_3_133200(void) {
-    return;
+    u32 y;
+    u32 x;
+    u32 offset;
+
+    for (y = 0; y < 4; y++) {
+        for (x = 0; x < 4; x++) {
+            offset = fn_800247E4(x, y, 4, 4);
+            if (offset < 32) {
+                lbl_3_bss_B740[offset + 0] = lbl_3_bss_B740[offset + 2] = 255;
+                lbl_3_bss_B740[offset + 1] = lbl_3_bss_B740[offset + 3] = 150;
+            } else {
+                lbl_3_bss_B740[offset + 0] = lbl_3_bss_B740[offset + 2] = 150;
+                lbl_3_bss_B740[offset + 1] = lbl_3_bss_B740[offset + 3] = 150;
+            }
+        }
+    }
+    GXInitTexObj(&lbl_3_bss_B708, lbl_3_bss_B740, 4, 4, GX_TF_RGBA8, GX_REPEAT, GX_REPEAT, GX_FALSE);
+    GXInitTexObjLOD(&lbl_3_bss_B708, GX_LINEAR, GX_LINEAR, 0.0f, 0.0f, 0.0f, GX_FALSE, GX_FALSE, GX_ANISO_1);
+    lbl_3_data_26580 = -1;
+    lbl_3_bss_B704 = 0;
 }
 
 // .text:0x001330E4 size:0x11C mapped:0x80772178
 void fn_3_1330E4(void) {
-    return;
+    int value;
+    int i;
+
+    lbl_3_bss_B704 += (lbl_80366158._28 == 0);
+    if ((lbl_3_bss_B704 & 1) == 0) {
+        value = lbl_3_bss_B740[fn_800247E4(0, 0, 4, 4)];
+        value += lbl_3_data_26580 * 2;
+        if (value > 255) {
+            value = 255;
+        } else if (value < 0) {
+            value = 0;
+        }
+        for (i = 0; i < 32; i += 2) {
+            lbl_3_bss_B740[i] = value;
+        }
+        DCFlushRange(lbl_3_bss_B740, 0x40);
+        if (value + lbl_3_data_26580 * 2 > 255 || value + lbl_3_data_26580 * 2 < 0) {
+            lbl_3_data_26580 *= -1;
+        }
+    }
 }
 
 // .text:0x00132EDC size:0x208 mapped:0x80771F70
-void fn_3_132EDC(void) {
-    return;
+void fn_3_132EDC(void* arg0, GXTevStageID* stage, GXTexCoordID* coord, GXTexMapID* map, u8* arg4, u8* arg5) {
+    int value;
+    int i;
+
+    lbl_3_bss_B704 += (lbl_80366158._28 == 0);
+    if ((lbl_3_bss_B704 & 1) == 0) {
+        value = lbl_3_bss_B740[fn_800247E4(0, 0, 4, 4)];
+        value += lbl_3_data_26580 * 2;
+        if (value > 255) {
+            value = 255;
+        } else if (value < 0) {
+            value = 0;
+        }
+        for (i = 0; i < 32; i += 2) {
+            lbl_3_bss_B740[i] = value;
+        }
+        DCFlushRange(lbl_3_bss_B740, 0x40);
+        if (value + lbl_3_data_26580 * 2 > 255 || value + lbl_3_data_26580 * 2 < 0) {
+            lbl_3_data_26580 *= -1;
+        }
+    }
+    GXLoadTexObj(&lbl_3_bss_B708, *map);
+    GXSetTexCoordGen2(*coord, GX_TG_MTX2X4, GX_TG_TEX0, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
+    GXSetTevOrder(*stage, *coord, *map, GX_COLOR_NULL);
+    GXSetTevColorIn(*stage, GX_CC_ZERO, GX_CC_TEXC, GX_CC_TEXA, GX_CC_CPREV);
+    GXSetTevColorOp(*stage, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    GXSetTevAlphaIn(*stage, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_APREV);
+    GXSetTevAlphaOp(*stage, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    (*stage)++;
+    (*coord)++;
+    (*map)++;
+    (*arg4)++;
+    (*arg5)++;
 }

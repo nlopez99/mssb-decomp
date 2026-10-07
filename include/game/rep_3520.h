@@ -3,11 +3,12 @@
 
 #include "mssbTypes.h"
 #include "Dolphin/mtx.h"
+#include "Dolphin/gx.h"
 #include "static/UnknownHomes_Static.h"
 
 struct Unk3520Obj;
 
-void fn_3_132EDC(void);
+void fn_3_132EDC(void* arg0, GXTevStageID* stage, GXTexCoordID* coord, GXTexMapID* map, u8* arg4, u8* arg5);
 void fn_3_1330E4(void);
 void fn_3_133200(void);
 void fn_3_133320(void);
@@ -49,8 +50,8 @@ void fn_3_1373E0(void);
 void fn_3_1379A0(void);
 u8 fn_3_137B10(struct Unk3520Obj* obj);
 void fn_3_137CF8(struct Unk3520Obj* obj);
-void fn_3_137DE4(void);
-void fn_3_137F14(void);
+void fn_3_137DE4(struct Unk3520Obj* obj);
+void fn_3_137F14(struct Unk3520Obj* obj);
 void fn_3_13802C(void);
 void fn_3_1382E0(void);
 void fn_3_138448(struct Unk3520Obj* obj);
