@@ -1213,6 +1213,7 @@ void fn_3_127B68(void) {
 }
 
 // .text:0x001274B4 size:0x6B4 mapped:0x80766548
+// 99.95%: the target keeps the stadium in r22, the base in r18.
 void fn_3_1274B4(void) {
     UnkTask3448* task = lbl_803CC1B8;
     UnkRecord3448* rec;
@@ -1244,15 +1245,15 @@ void fn_3_1274B4(void) {
             lbl_80371C30[task->_14 + 2]._00->_68 = 1;
         }
         rec = fn_3_109D88();
-        for (i = 0; i < 5; i++, rec++) {
+        for (i = 0; i < 5; i++) {
             if (g_Minigame._1A3C != 0) {
                 lbl_80371C30[task->_14 + 5 + i]._00->_5C = 7 << 16;
             } else {
                 lbl_80371C30[task->_14 + 5 + i]._00->_5C = lbl_3_data_23878[g_Minigame.GameMode_MiniGame] << 16;
             }
-            lbl_80371C30[task->_14 + 20 + i]._00->_5C = rec->_06 << 16;
+            lbl_80371C30[task->_14 + 20 + i]._00->_5C = rec[i]._06 << 16;
             fn_800363D8(task, i + 0x32, 1, 0x12, i);
-            score = rec->_00;
+            score = rec[i]._00;
             if (g_Minigame._1A3C != 0) {
                 if (score > 9999) {
                     score = 9999;
@@ -1265,11 +1266,11 @@ void fn_3_1274B4(void) {
             fn_800363D8(task, 0x43 + i * 4, 1, 0x16, (score % 100) / 10);
             fn_800363D8(task, 0x44 + i * 4, 1, 0x16, score % 10);
             if (g_Minigame._1A3C != 0) {
-                lbl_80371C30[task->_14 + 0x5F + i]._00->_5C = (u8)fn_8006C100(rec->_00) << 16;
+                lbl_80371C30[task->_14 + 0x5F + i]._00->_5C = (u8)fn_8006C100(rec[i]._00) << 16;
                 lbl_80371C30[task->_14 + 0x5A + i]._00->_68 = 1;
                 lbl_80371C30[task->_14 + 0x64 + i]._00->_68 = 1;
             } else if (g_Minigame.GameMode_MiniGame == MINI_GAME_ID_BOBOMB_DERBY) {
-                n = rec->_04;
+                n = rec[i]._04;
                 if (n > 999) {
                     n = 999;
                 }
@@ -3578,12 +3579,10 @@ void fn_3_11EC28(void) {
 }
 
 // .text:0x0011E7C4 size:0x464 mapped:0x8075D858
-// 99.73%: as in fn_3_11F02C, the target keeps i in r18 and leaderPoints in r19, the base the reverse.
 void fn_3_11E7C4(void) {
     u32 tied;
     u32 i;
     s32 leader;
-    s16* leaderPoints;
     UnkTask3448* task = lbl_803CC1B8;
     s32 diff;
     u32 n;
@@ -3610,7 +3609,6 @@ void fn_3_11E7C4(void) {
     case 1:
         leader = fn_3_107CD0();
         tied = fn_3_107C88();
-        leaderPoints = g_Minigame.minigamePoints_current_Latest[leader];
         i = 0;
         do {
             if (g_Minigame._1DF4_u8[i] != 0) {
@@ -3639,7 +3637,7 @@ void fn_3_11E7C4(void) {
             fn_800363D8(task, 0x1D + i * 3, 1, 0x66, (n % 1000) / 100);
             fn_800363D8(task, 0x1E + i * 3, 1, 0x66, (n % 100) / 10);
             fn_800363D8(task, 0x1F + i * 3, 1, 0x66, n % 10);
-            if (tied == 0 && g_Minigame.minigamePoints_current_Latest[i][0] == leaderPoints[0]) {
+            if (tied == 0 && g_Minigame.minigamePoints_current_Latest[i][0] == g_Minigame.minigamePoints_current_Latest[leader][0]) {
                 lbl_80371C30[task->_14 + 0x29 + i]._00->_54 |= 2;
             } else {
                 lbl_80371C30[task->_14 + 0x29 + i]._00->_54 &= ~2;
@@ -3650,12 +3648,10 @@ void fn_3_11E7C4(void) {
 }
 
 // .text:0x0011E364 size:0x460 mapped:0x8075D3F8
-// 99.77%: as in fn_3_11F02C, the target keeps i in r17 and leaderPoints in r18, the base the reverse.
 void fn_3_11E364(void) {
     u32 tied;
     u32 i;
     s32 leader;
-    s16* leaderPoints;
     UnkTask3448* task = lbl_803CC1B8;
     u32 playSound = 0;
     s32 diff;
@@ -3683,7 +3679,6 @@ void fn_3_11E364(void) {
     case 1:
         leader = fn_3_107CD0();
         tied = fn_3_107C88();
-        leaderPoints = g_Minigame.minigamePoints_current_Latest[leader];
         i = 0;
         do {
             if (g_Minigame._1DF4_u8[i] != 0) {
@@ -3712,7 +3707,7 @@ void fn_3_11E364(void) {
             fn_800363D8(task, 0x15 + i * 3, 1, 0x66, (n % 1000) / 100);
             fn_800363D8(task, 0x16 + i * 3, 1, 0x66, (n % 100) / 10);
             fn_800363D8(task, 0x17 + i * 3, 1, 0x66, n % 10);
-            if (tied == 0 && g_Minigame.minigamePoints_current_Latest[i][0] == leaderPoints[0]) {
+            if (tied == 0 && g_Minigame.minigamePoints_current_Latest[i][0] == g_Minigame.minigamePoints_current_Latest[leader][0]) {
                 lbl_80371C30[task->_14 + 0x21 + i]._00->_54 |= 2;
             } else {
                 lbl_80371C30[task->_14 + 0x21 + i]._00->_54 &= ~2;
