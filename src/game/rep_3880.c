@@ -592,8 +592,38 @@ void fn_3_152794(void) {
 }
 
 // .text:0x001524E8 size:0x2AC mapped:0x8079157C
-void fn_3_1524E8(void) {
-    return;
+void fn_3_1524E8(Particle3880* p, u8 jitter) {
+    Mtx rot;
+    Vec offset;
+    Vec dir;
+    Vec axis;
+    camera_803c639c_s* camera = fn_80052734(fn_8005268C());
+    f32 height = p->_4D ? fn_3_119854(2) : fn_3_119854(0);
+    Vec forward = { 0.0f, 0.0f, -1.0f };
+    f32 angle;
+
+    offset.x = 0.0f;
+    offset.y = 0.0f;
+    offset.z = -0.354f * height;
+    if (jitter) {
+        offset.x += height * ((rand() % 50 - 25) / 100.0);
+        offset.y += height * ((rand() % 50 - 25) / 100.0);
+        offset.z += height * ((rand() % 50 - 25) / 100.0);
+    }
+    PSVECSubtract(&camera->eye, &p->_1C, &dir);
+    PSVECNormalize(&dir, &dir);
+    angle = acos(PSVECDotProduct(&forward, &dir));
+    PSVECCrossProduct(&forward, &dir, &axis);
+    if (PSVECMag(&axis) == 0.0f) {
+        axis.x = 0.0f;
+        axis.y = -1.0f;
+        axis.z = 0.0f;
+    }
+    PSMTXRotAxisRad(rot, &axis, angle);
+    PSMTXMultVec(rot, &offset, &offset);
+    p->pos.x = p->_1C.x + offset.x;
+    p->pos.y = p->_1C.y + offset.y;
+    p->pos.z = p->_1C.z + offset.z;
 }
 
 // .text:0x00151F2C size:0x5BC mapped:0x80790FC0
