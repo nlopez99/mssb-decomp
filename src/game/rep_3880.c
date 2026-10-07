@@ -98,6 +98,7 @@ typedef struct PlayerEmitter3880 {
 typedef struct ModelEmitter3880 {
     /* 0x00 */ Emitter3880 base;
     /* 0x18 */ UnkModelSet3880** models;
+    /* 0x1C */ Vec pos;
 } ModelEmitter3880;
 
 typedef struct PathEmitter3880 {
@@ -784,8 +785,27 @@ void fn_3_151068(ModelEmitter3880* emitter, Particle3880* p) {
 }
 
 // .text:0x00150D84 size:0x2E4 mapped:0x8078FE18
-void fn_3_150D84(void) {
-    return;
+// 82.56%: the target keeps lbl_3_data_26C3C's address in a saved register across each
+// rand() and forms it again for the next range; here it is formed after the call.
+void fn_3_150D84(ModelEmitter3880* emitter, Particle3880* p) {
+    f32 deg;
+    f32 angle;
+    f32 speed;
+
+    p->_4A = lbl_3_data_26C3C[20];
+    p->pos.x = emitter->pos.x;
+    p->pos.y = -emitter->pos.y;
+    p->pos.z = emitter->pos.z;
+    p->_38 = p->_3C = (lbl_3_data_26C3C[10] + rand() % (lbl_3_data_26C3C[11] - lbl_3_data_26C3C[10])) / 100000.0f;
+    p->vel.y = (lbl_3_data_26C3C[12] + rand() % (lbl_3_data_26C3C[13] - lbl_3_data_26C3C[12])) / 100000.0f;
+    deg = (rand() % 36000) / 100.0;
+    angle = 0.017453292f * deg;
+    speed = (lbl_3_data_26C3C[16] + rand() % (lbl_3_data_26C3C[17] - lbl_3_data_26C3C[16])) / 100000.0f;
+    p->vel.x = speed * cosf_kludge(angle);
+    p->vel.z = speed * sinf_kludge(angle);
+    p->_1C.x = 57.29578f * ((lbl_3_data_26C3C[18] + rand() % (lbl_3_data_26C3C[19] - lbl_3_data_26C3C[18])) / 100000.0f);
+    p->_1C.x *= (rand() % 2) * -2 + 1;
+    p->color[0] = p->color[1] = p->color[2] = p->color[3] = 0xFF;
 }
 
 // .text:0x00150940 size:0x444 mapped:0x8078F9D4

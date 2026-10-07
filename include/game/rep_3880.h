@@ -87,7 +87,7 @@ void fn_3_1500C8(void);
 void fn_3_150120(void);
 void fn_3_1504EC(void);
 void fn_3_150940(void);
-void fn_3_150D84(void);
+void fn_3_150D84(struct ModelEmitter3880* emitter, struct Particle3880* p);
 void fn_3_151068(struct ModelEmitter3880* emitter, struct Particle3880* p);
 void fn_3_151204(void);
 void fn_3_151694(void);
