@@ -54,10 +54,10 @@ extern struct {
 } lbl_3_common_bss_32724;
 
 extern struct {
-    /* 0x00 */ u8 _00[0x4];
-    /* 0x04 */ s16 _04;
-    /* 0x06 */ u8 _06[0x2A - 0x6];
-    /* 0x2A */ s16 _2A;
+    /* 0x00 */ s32 _00;
+    /* 0x04 */ s16 _04[2][19];
+    /* 0x50 */ u8 _50[0xAD - 0x50];
+    /* 0xAD */ u8 _AD;
 } g_Scores;
 
 extern struct {
@@ -66,11 +66,14 @@ extern struct {
 } lbl_3_common_bss_34C90;
 
 extern s16 lbl_3_data_5F3C[4];
+extern u8 lbl_3_data_F430[12][2];
+extern u8 lbl_3_data_F4D0[16];
 extern UnkSpriteRef1770 lbl_80371C30[];
 extern void* lbl_803CC1B8;
 
 // Only this unit reads these; they lie outside its splits.txt ranges.
 extern UnkSpriteDesc1770 lbl_3_data_C22C[9];
+extern UnkSpriteDesc1770 lbl_3_data_C34C[17];
 extern UnkSpriteDesc1770 lbl_3_data_D258[9];
 extern UnkSpriteDesc1770 lbl_3_data_D378[12];
 extern UnkSpriteDesc1770 lbl_3_data_D4F8[6];
@@ -186,7 +189,61 @@ void fn_3_9BEE0(UnkTask1770* task) {
 
 // .text:0x0009B7F4 size:0x6EC mapped:0x806DA888
 void fn_3_9B7F4(void) {
-    return;
+    UnkTask1770* task = lbl_803CC1B8;
+
+    fn_80034E20(task, lbl_3_data_C34C);
+    lbl_80371C30[task->_14 + 5]._00->_64 = lbl_3_data_F430[g_GameLogic.logo[0].captain][1];
+    lbl_80371C30[task->_14 + 6]._00->_64 = lbl_3_data_F430[g_GameLogic.logo[1].captain][1];
+    lbl_80371C30[task->_14 + 5]._00->_5C = g_GameLogic.logo[0].variationID << 16;
+    lbl_80371C30[task->_14 + 6]._00->_5C = g_GameLogic.logo[1].variationID << 16;
+    if (g_Scores._AD != 0) {
+        lbl_80371C30[task->_14 + 1]._00->_64 = 0x11B;
+        lbl_80371C30[task->_14 + 2]._00->_64 = 0x119;
+        lbl_80371C30[task->_14 + 3]._00->_64 = 0x116;
+    }
+
+    fn_8003649C(task, 3, 1, 0x110, lbl_3_data_F4D0[g_Scores._00 - 1]);
+    fn_8003649C(task, 3, 3, 0x110, lbl_3_data_F4D0[g_Scores._00 - 1]);
+    if (g_Scores._00 >= 10) {
+        lbl_80371C30[task->_14 + 7]._00->_54 &= ~2;
+        lbl_80371C30[task->_14 + 8]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + 9]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + 9]._00->_5C = 0;
+        lbl_80371C30[task->_14 + 8]._00->_5C = 1 << 16;
+        fn_8003649C(task, 9, 1, 0x112, g_Scores._00 / 10);
+        fn_8003649C(task, 8, 2, 0x112, g_Scores._00 % 10);
+        fn_8003649C(task, 9, 4, 0x112, g_Scores._00 / 10);
+        fn_8003649C(task, 8, 5, 0x112, g_Scores._00 % 10);
+    } else {
+        lbl_80371C30[task->_14 + 7]._00->_5C = 2 << 16;
+        fn_8003649C(task, 7, 3, 0x112, g_Scores._00);
+        fn_8003649C(task, 7, 6, 0x112, g_Scores._00);
+    }
+
+    if (g_Scores._04[0][0] >= 10) {
+        lbl_80371C30[task->_14 + 10]._00->_54 &= ~2;
+        lbl_80371C30[task->_14 + 11]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + 12]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + 12]._00->_5C = 2 << 16;
+        lbl_80371C30[task->_14 + 11]._00->_5C = 3 << 16;
+    } else {
+        lbl_80371C30[task->_14 + 10]._00->_5C = 0;
+    }
+    if (g_Scores._04[1][0] >= 10) {
+        lbl_80371C30[task->_14 + 13]._00->_54 &= ~2;
+        lbl_80371C30[task->_14 + 14]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + 15]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + 15]._00->_5C = 4 << 16;
+        lbl_80371C30[task->_14 + 14]._00->_5C = 5 << 16;
+    } else {
+        lbl_80371C30[task->_14 + 13]._00->_5C = 1 << 16;
+    }
+
+    fn_3_9B108(task);
+    task->_1C = g_Scores._04[0][0];
+    task->_1E = g_Scores._04[1][0];
+    task->_18 = 0;
+    ((UnkTask1770*)lbl_803CC1B8)->_00 = fn_3_9B320;
 }
 
 // .text:0x0009B320 size:0x4D4 mapped:0x806DA3B4
@@ -200,7 +257,7 @@ void fn_3_9B320(void) {
         fn_800B0A14_removeQueue();
         return;
     }
-    if (task->_1C != g_Scores._04 || task->_1E != g_Scores._2A) {
+    if (task->_1C != g_Scores._04[0][0] || task->_1E != g_Scores._04[1][0]) {
         fn_3_9B108(task);
     }
     if (lbl_3_common_bss_32724._A7 < 0xFF) {
@@ -216,23 +273,23 @@ void fn_3_9B320(void) {
 
 // .text:0x0009B108 size:0x218 mapped:0x806DA19C
 void fn_3_9B108(UnkTask1770* task) {
-    if (g_Scores._04 >= 10) {
-        fn_3_972A0(task, 11, 4, g_Scores._04 % 10);
-        fn_3_972A0(task, 12, 3, g_Scores._04 / 10);
-        fn_3_972A0(task, 11, 10, g_Scores._04 % 10);
-        fn_3_972A0(task, 12, 9, g_Scores._04 / 10);
+    if (g_Scores._04[0][0] >= 10) {
+        fn_3_972A0(task, 11, 4, g_Scores._04[0][0] % 10);
+        fn_3_972A0(task, 12, 3, g_Scores._04[0][0] / 10);
+        fn_3_972A0(task, 11, 10, g_Scores._04[0][0] % 10);
+        fn_3_972A0(task, 12, 9, g_Scores._04[0][0] / 10);
     } else {
-        fn_3_972A0(task, 10, 1, g_Scores._04);
-        fn_3_972A0(task, 10, 7, g_Scores._04);
+        fn_3_972A0(task, 10, 1, g_Scores._04[0][0]);
+        fn_3_972A0(task, 10, 7, g_Scores._04[0][0]);
     }
-    if (g_Scores._2A >= 10) {
-        fn_3_972A0(task, 14, 6, g_Scores._2A % 10);
-        fn_3_972A0(task, 15, 5, g_Scores._2A / 10);
-        fn_3_972A0(task, 14, 12, g_Scores._2A % 10);
-        fn_3_972A0(task, 15, 11, g_Scores._2A / 10);
+    if (g_Scores._04[1][0] >= 10) {
+        fn_3_972A0(task, 14, 6, g_Scores._04[1][0] % 10);
+        fn_3_972A0(task, 15, 5, g_Scores._04[1][0] / 10);
+        fn_3_972A0(task, 14, 12, g_Scores._04[1][0] % 10);
+        fn_3_972A0(task, 15, 11, g_Scores._04[1][0] / 10);
     } else {
-        fn_3_972A0(task, 13, 2, g_Scores._2A);
-        fn_3_972A0(task, 13, 8, g_Scores._2A);
+        fn_3_972A0(task, 13, 2, g_Scores._04[1][0]);
+        fn_3_972A0(task, 13, 8, g_Scores._04[1][0]);
     }
 }
 
