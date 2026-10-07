@@ -3,7 +3,7 @@
 #include "game/UnknownHomes_Game.h"
 #include "static/UnknownHomes_Static.h"
 
-typedef struct {
+typedef struct UnkTask1610 {
     /* 0x00 */ void (*_00)(void);
     /* 0x04 */ u8 _04[0x14 - 0x4];
     /* 0x14 */ u16 _14;
@@ -25,40 +25,36 @@ typedef struct {
     /* 0x04 */ u8 _04[0x8 - 0x4];
 } UnkSpriteRef1610; // size: 0x8
 
+// Read by fn_80034E20; a _00 of 3 ends the list.
+typedef struct {
+    /* 0x00 */ u16 _00;
+    /* 0x02 */ u16 _02;
+    /* 0x04 */ s32 _04[3];
+    /* 0x10 */ u8 _10[2];
+    /* 0x12 */ s16 _12;
+    /* 0x14 */ s32 _14[3];
+} UnkSpriteDesc1610; // size: 0x20
+
+extern struct {
+    /* 0x00 */ u8 _00[0x96];
+    /* 0x96 */ u8 _96;
+    /* 0x97 */ u8 _97;
+} lbl_3_common_bss_32724;
+
 extern UnkSpriteRef1610 lbl_80371C30[];
 extern void* lbl_803CC1B8;
 
-// .data outside this unit's split
-extern u8 lbl_3_data_D5B8[];
+UnkSpriteDesc1610 lbl_3_data_D5B8[4] = {
+    { 0, 0xD5, { 0, 0, -1 }, { 1, 7 }, 0xFF, { 0x02000000, 0, 0 } },
+    { 0, 0xD4, { 0, 0, -1 }, { 0, 6 }, 0xFF, { 0x02000000, 0, 0 } },
+    { 0, 0xD4, { 0, 0, -1 }, { 0, 6 }, 0xFF, { 0x02000000, 0, 0 } },
+    { 3 },
+};
 
-// .text outside this unit's split
-extern void fn_3_911A8(void);
-
-extern void fn_80034E20(UnkTask1610* task, void* data);
+extern void fn_80034CEC(UnkTask1610* task);
+extern void fn_80034E20(UnkTask1610* task, UnkSpriteDesc1610* desc);
 extern void fn_8003649C(UnkTask1610* task, s32, s32, s32, s32);
-
-// .text:0x000910F4 size:0xB4 mapped:0x806D0188
-// Outside this unit's split; inlined into fn_3_912B4
-static inline void fn_3_910F4(UnkTask1610* task) {
-    s32 i;
-    s32 outs;
-    s32 type;
-
-    outs = g_Strikes.outs;
-    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
-        outs = g_Minigame._190D - g_Minigame._1910;
-    }
-    for (i = 0; i < 2; i++) {
-        type = 3;
-        if (task->_1C != outs) {
-            if (outs >= i + 1) {
-                type = 2;
-            }
-            fn_8003649C(task, i + 1, i + 1, 0x107, type);
-        }
-    }
-    task->_1C = outs;
-}
+extern void fn_800B0A14_removeQueue(void);
 
 // .text:0x000912B4 size:0x188 mapped:0x806D0348
 void fn_3_912B4(void) {
@@ -80,4 +76,40 @@ void fn_3_912B4(void) {
     }
     task->_18 = 0;
     ((UnkTask1610*)lbl_803CC1B8)->_00 = fn_3_911A8;
+}
+
+// .text:0x000911A8 size:0x10C mapped:0x806D023C
+void fn_3_911A8(void) {
+    UnkTask1610* task = lbl_803CC1B8;
+
+    if (lbl_3_common_bss_32724._96 != 0 || g_GameLogic.gameStatus != GAME_STATUS_LIVE_BALL) {
+        lbl_3_common_bss_32724._97 = 0;
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    task->_18++;
+    fn_3_910F4(task);
+}
+
+// .text:0x000910F4 size:0xB4 mapped:0x806D0188
+void fn_3_910F4(UnkTask1610* task) {
+    s32 i;
+    s32 outs;
+    s32 type;
+
+    outs = g_Strikes.outs;
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+        outs = g_Minigame._190D - g_Minigame._1910;
+    }
+    for (i = 0; i < 2; i++) {
+        type = 3;
+        if (task->_1C != outs) {
+            if (outs >= i + 1) {
+                type = 2;
+            }
+            fn_8003649C(task, i + 1, i + 1, 0x107, type);
+        }
+    }
+    task->_1C = outs;
 }
