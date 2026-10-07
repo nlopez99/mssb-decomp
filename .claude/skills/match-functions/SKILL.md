@@ -20,7 +20,7 @@ Your **claim** is one unit that already has a source file. Turn as many of its f
 
 3. **Keep or restore.** At a time box, keep the **best candidate** only if its score beats what the file had, and put a comment of at most three lines above it saying what still differs. Otherwise restore the previous code. When a function teaches something the notes lack, add it to `docs/matching-notes.md` under its symptom (symptom, cause, fix, example).
 
-4. **Verify and commit.** Run `python3 tools/match.py <unit> --all`, `python3 tools/check_symbols.py` and `python3 tools/regress.py`. The last must end in `regress: OK`; its gained list also covers earlier branches, so report only your unit's lines. Commit with a message that names the matched functions.
+4. **Verify and commit.** Run `python3 tools/match.py <unit> --all`, `python3 tools/check_symbols.py` and `python3 tools/regress.py`. Both checks must pass before you commit, and the last must end in `regress: OK`; its gained list also covers earlier branches, so report only your unit's lines. Commit with a message that names the matched functions.
 
 5. **Report.** Your final message gives:
    - the unit, elapsed seconds since step 1, and code bytes matched before and after (the `code X/Y bytes` line of `match.py <unit>`);
@@ -31,10 +31,10 @@ Your **claim** is one unit that already has a source file. Turn as many of its f
 
 ## Claim
 
-Change only the unit's source file, its header under `include/`, the lines of `config/GYQE01/<module>/symbols.txt` that fall inside the unit's ranges in that module's `splits.txt`, and `docs/matching-notes.md`. You may change a shared declaration, such as a prototype, a field type or a new field in a shared header, when the evidence requires it. If you do, run `match.py` on every unit that uses it and list the change in the report.
+Change only the unit's source file, its header under `include/`, the lines of `config/GYQE01/<module>/symbols.txt` that fall inside the unit's ranges in that module's `splits.txt`, and `docs/matching-notes.md`. You may change a shared declaration, such as a prototype, a field type or a new field in a shared header, when the evidence requires it. If you do, run `match.py` on every unit that uses it and list the change in the report. Likewise, a `symbols.txt` entry outside your ranges that the evidence shows is wrong (separate objects lumped into one symbol, a wrong size) may be fixed in its own commit, once `regress.py` passes with it. List that change in the report too.
 
 Report these as an escalation with the evidence, and leave them unchanged: `splits.txt`, compiler flags or versions in `configure.py`, other units' source files, and any difference you trace to something outside the claim. Two cases keep you moving while you escalate:
-- Data that only your unit uses but that lies outside its ranges in `splits.txt` gets an `extern` declaration, plus an escalation proposing the split range and any wrong `symbols.txt` entries in it.
+- Data that only your unit uses but that lies outside its ranges in `splits.txt` gets an `extern` declaration, plus an escalation proposing the split range and any wrong `symbols.txt` entries in it. If the target reads that data from one pool base (offsets past a single symbol's size), no `extern` can match. Prove it with a temporary copy that declares the data as statics, then restore the file and put the result in the escalation. Functions just outside the unit's `.text` range that use its data may belong to it too: escalate them with the evidence.
 - A function another unit's header declares wrongly, typically a `void(void)` placeholder matching that unit's stub, gets a correct `extern` declaration in your source file. Do not include that header. Escalate with the signature and its evidence.
 
 A pragma or a section score is also an escalation: if a pragma gives a large gain, report the gain, and keep the pragma out of the source. Section scores (`.rodata`, `.data`, `.bss`) do not need to reach 100% for functions to `match`. Report them, and leave a unit's `Matching`/`NonMatching` flag in `configure.py` alone.
@@ -43,7 +43,7 @@ A pragma or a section score is also an escalation: if a pragma gives a large gai
 
 - Each function sits under its `// .text:0x... size:0x... mapped:0x...` line. For a function new to the file, compute `mapped` from a neighbour: the offset between `.text` and `mapped` is constant within a file.
 - Units built with `-inline deferred` (every `game`, `menus` and `challenge` unit, and main-DOL units whose `configure.py` entry adds it) list functions in **reverse address order**, highest first: MWCC generates them last to first. `python3 tools/reverse_functions.py <source file>` converts a file still in address order; if it refuses, reorder by hand. Other units list functions in address order.
-- Prototypes go in the unit's header in address order. Functions and data from other units that no header declares get `extern` declarations at the top of the source file. A global without a header gets a local `extern struct { ... } name;` with only the fields the unit uses, at their offsets.
+- Prototypes go in the unit's header in address order. Functions and data from other units that no header declares get `extern` declarations at the top of the source file. A global without a header gets a local `extern struct { ... } name;` with only the fields the unit uses, at their offsets. A type only this unit uses is defined in its source file; a prototype in the header that needs it uses a forward `struct` declaration.
 - Use the `symbols.txt` name for every symbol. Rename one only with evidence, such as an SDK function or a string that names it, and then rename it in `symbols.txt` and in every user (`tools/check_symbols.py` finds them). Unknown struct fields are `_XX` with `/* 0xXX */` offset comments.
 - Prefer SDK enum names (`GX_TF_RGBA8`) over bare numbers, and match the surrounding style. Comments explain what the code cannot: a compiler constraint or a remaining mismatch.
 
