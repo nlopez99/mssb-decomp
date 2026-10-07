@@ -1457,10 +1457,7 @@ typedef struct _UnkStructMinigame {
 
 typedef struct _MiniGameControlStruct {
     /*0x000*/ s8 characterIndex[4];
-    /*0x004*/ u8 _4;
-    /*0x005*/ u8 _5;
-    /*0x006*/ u8 _6;
-    /*0x007*/ u8 _7;
+    /*0x004*/ u8 _4[4]; // one per player, read by fn_3_126604 (rep_3448)
     /*0x008*/ u8 _8;
     /*0x009*/ u8 _9;
     /*0x00A*/ u8 _A;
@@ -2063,22 +2060,30 @@ typedef struct _MiniGameStruct {
     /*0x1DEC*/ f32 _1DEC;
     /*0x1DF0*/ f32 _1DF0;
     // Bob-omb Derby (rep_31F0) reads _1DF4 to _1DF7, Barrel Batter (rep_34B0) stores _1DF4_s16,
-    // Star Dash (rep_3520) indexes _1DF4_arr by player
+    // rep_3448 keeps one score per player in _1DF4_arr, Star Dash (rep_3520) flags players in _1DF4_bytes
     union {
         struct {
             /*0x1DF4*/ u8 _1DF4;
             /*0x1DF5*/ u8 _1DF5;
             /*0x1DF6*/ u8 _1DF6;
             /*0x1DF7*/ u8 _1DF7;
+            /*0x1DF8*/ u8 _1DF8;
+            /*0x1DF9*/ u8 _1DF9[0x1DFC - 0x1DF9];
         };
         /*0x1DF4*/ s16 _1DF4_s16;
-        /*0x1DF4*/ u8 _1DF4_arr[4];
+        /*0x1DF4*/ s16 _1DF4_arr[4];
+        /*0x1DF4*/ u8 _1DF4_bytes[4];
     };
-    /*0x1DF8*/ u8 _1DF8;
-    /*0x1DF9*/ u8 _1DF9[0x1DFC - 0x1DF9];
     /*0x1DFC*/ u8 _1DFC[4];
     /*0x1E00*/ u8 _1E00;
-    /*0x1E01*/ u8 _1E01[0x1E2C - 0x1E01];
+    /*0x1E01*/ u8 _1E01;
+    /*0x1E02*/ u8 _1E02;
+    /*0x1E03*/ u8 _1E03;
+    /*0x1E04*/ u32 _1E04;
+    /*0x1E08*/ u8 _1E08[4][2];
+    /*0x1E10*/ u8 _1E10[0x1E2A - 0x1E10];
+    /*0x1E2A*/ u8 _1E2A;
+    /*0x1E2B*/ u8 _1E2B;
 } MiniGameStruct; // size: 0x1E2C
 
 extern MiniGameStruct g_Minigame;
@@ -2406,28 +2411,36 @@ typedef struct {
 typedef struct {
     /* 0x000 */ u8 _000[0x74];
     /* 0x074 */ FieldingLogicFielder _074[4];
-    /* 0x08C */ u8 _08C[0xAE - 0x8C];
+    /* 0x08C */ u8 _08C[0x90 - 0x8C];
+    /* 0x090 */ Vec _090;
+    /* 0x09C */ u8 _09C[0xAE - 0x9C];
     /* 0x0AE */ s16 _0AE;
     /* 0x0B0 */ u8 _0B0[0xBE - 0xB0];
     /* 0x0BE */ s16 _0BE;
-    /* 0x0C0 */ u8 _0C0[0xC4 - 0xC0];
+    /* 0x0C0 */ u8 _0C0[0xC2 - 0xC0];
+    /* 0x0C2 */ s16 _0C2;
     /* 0x0C4 */ s16 _0C4;
-    /* 0x0C6 */ u8 _0C6[0xCC - 0xC6];
+    /* 0x0C6 */ s16 _0C6;
+    /* 0x0C8 */ s16 _0C8;
+    /* 0x0CA */ s16 _0CA;
     /* 0x0CC */ s16 _0CC;
-    /* 0x0CE */ u8 _0CE[0xD0 - 0xCE];
+    /* 0x0CE */ s16 _0CE;
     /* 0x0D0 */ s16 _0D0[4];
-    /* 0x0D8 */ u8 _0D8[0xDC - 0xD8];
+    /* 0x0D8 */ s16 _0D8;
+    /* 0x0DA */ u8 _0DA[0xDC - 0xDA];
     /* 0x0DC */ s16 _0DC;
     /* 0x0DE */ s16 _0DE;
-    /* 0x0E0 */ u8 _0E0[0xE4 - 0xE0];
+    /* 0x0E0 */ s16 _0E0;
+    /* 0x0E2 */ s16 _0E2;
     /* 0x0E4 */ s16 _0E4;
-    /* 0x0E6 */ u8 _0E6[0xE8 - 0xE6];
+    /* 0x0E6 */ s16 _0E6;
     /* 0x0E8 */ s16 _0E8;
     /* 0x0EA */ s16 _0EA;
     /* 0x0EC */ s16 _0EC;
     /* 0x0EE */ s16 _0EE;
     /* 0x0F0 */ s16 _0F0;
-    /* 0x0F2 */ u8 _0F2[0xF8 - 0xF2];
+    /* 0x0F2 */ u8 _0F2[0xF6 - 0xF2];
+    /* 0x0F6 */ s16 _0F6;
     /* 0x0F8 */ u8 _0F8[9];
     /* 0x101 */ u8 _101[4];
     /* 0x105 */ u8 playerAtMoundCutoffLocation;

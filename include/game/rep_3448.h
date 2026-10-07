@@ -3,17 +3,29 @@
 
 #include "mssbTypes.h"
 
+struct UnkTask3448;
+
+void fn_3_11D3AC(void);
+void fn_3_11D6A0(void);
+void fn_3_11D780(void);
+void fn_3_11DACC(void);
+void fn_3_11DDC4(void);
+void fn_3_11DE80(void);
+void fn_3_11DECC(void);
+void fn_3_11E308(void);
+void fn_3_11E364(void);
+void fn_3_11E7C4(void);
 void fn_3_11EC28(void);
 void fn_3_11F02C(void);
 void fn_3_11F480(void);
-void fn_3_11F4B4(void);
+void fn_3_11F4B4(s32 player, BOOL bonus);
 void fn_3_11F508(void);
 void fn_3_11F778(void);
 void fn_3_11FA58(void);
 void fn_3_11FDB0(void);
 void fn_3_12026C(void);
 void fn_3_12089C(void);
-void fn_3_120F5C(void);
+s32 fn_3_120F5C(void);
 void fn_3_120FF8(void);
 void fn_3_121304(void);
 void fn_3_121908(void);
@@ -27,9 +39,9 @@ void fn_3_123EBC(void);
 void fn_3_1243A4(void);
 void fn_3_124738(void);
 void fn_3_124CE0(void);
-void fn_3_12536C(void);
-void fn_3_125424(void);
-void fn_3_125480(void);
+u32 fn_3_12536C(void);
+u32 fn_3_125424(struct UnkTask3448* task, s32 i, u32 frame);
+u32 fn_3_125480(struct UnkTask3448* task);
 void fn_3_1254F8(void);
 void fn_3_125604(void);
 void fn_3_125850(void);

@@ -1883,7 +1883,7 @@ void fn_3_1360BC(int player) {
     s16 angle;
 
     fielder = &g_Fielders[g_Minigame.minigameFielderIndex[player]];
-    g_Minigame._1DF4_arr[player] = 1;
+    g_Minigame._1DF4_bytes[player] = 1;
     count = lbl_3_data_21B20[3];
     if (g_Minigame.miniGameCurrentPoints[player] < count) {
         count = g_Minigame.miniGameCurrentPoints[player];
