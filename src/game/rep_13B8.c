@@ -5,7 +5,6 @@
 #include "game/rep_140.h"
 #include "game/rep_1188.h"
 #include "game/rep_1838.h"
-#include "game/rep_18E8.h"
 #include "game/rep_3DA8.h"
 #include "game/rep_D0.h"
 #include "static/UnknownHomes_Static.h"
@@ -33,7 +32,9 @@ extern struct {
 } lbl_3_common_bss_37400;
 
 typedef struct {
-    /* 0x000 */ u8 _000[0x178];
+    /* 0x000 */ u8 _000[0x14];
+    /* 0x014 */ VecXYZ _14;
+    /* 0x020 */ u8 _020[0x178 - 0x20];
     /* 0x178 */ s16 _178;
     /* 0x17A */ u8 _17A[0x1E7 - 0x17A];
     /* 0x1E7 */ u8 _1E7;
@@ -42,6 +43,9 @@ typedef struct {
 
 extern Unk13B8Fielder g_Fielders[9];
 
+// rep_18E8.h declares fn_3_A6ABC as a void(void) placeholder
+extern s32 fn_3_A6810(f32 x0, f32 z0, f32 x1, f32 z1);
+extern int fn_3_A6ABC(f32 x, f32 z);
 extern u32 fn_3_107DF8(s8 port);
 extern void fn_3_59918(int event, int arg);
 extern void fn_3_5C74C(int arg);
@@ -813,7 +817,7 @@ int fn_3_8604C(int* fielderOut) {
     int best = 9999;
 
     for (i = 0; i < 9; i++) {
-        u8 state = g_FieldingLogic._0F0[i + 8];
+        u8 state = g_FieldingLogic._0F8[i];
         if (state == 1 || state == 10 || state == 11) {
             int frame;
             int t;
@@ -1046,13 +1050,189 @@ void fn_3_84AD0(void) {
 }
 
 // .text:0x000846C8 size:0x408 mapped:0x806C375C
-void fn_3_846C8(void) {
-    return;
+int fn_3_846C8(int runner) {
+    InMemRunnerType* r = &g_Runners[runner];
+    int next = r->nextBase;
+    int current = r->currentBase;
+    int toNext;
+    int toCurrent;
+    int result;
+
+    if (g_Ball.ballZoneAwayFromHome <= 2 && r->baseStandingOn >= 0) {
+        return 0;
+    }
+    if (g_Ball.ballZoneAwayFromHome >= 3 && r->percentTowardsNextBase >= 3.2f && r->runningDirectionCode == 1 &&
+        r->baseRoundingState == 2) {
+        r->unused_someBaseNum = 0;
+        return 1;
+    }
+    if (r->runningDirectionCode == 1 && r->percentTowardsNextBase > 0.8f && r->baseStandingOn < 0) {
+        return -2;
+    }
+    if (r->runningDirectionCode == 3 && r->percentTowardsNextBase < 0.2f && g_Ball.ballZoneAwayFromHome <= 2) {
+        return -2;
+    }
+    if (g_FieldingLogic._0D0[next] == g_Ball.fielderWBallIndex) {
+        return -1;
+    }
+    if (g_FieldingLogic._0D0[current] == g_Ball.fielderWBallIndex) {
+        return 1;
+    }
+    if (g_FieldingLogic._0CC != -1 && g_Ball.ballZoneAwayFromHome <= 2) {
+        result = fn_3_85A70(runner);
+        if (result != -2) {
+            return result;
+        }
+    }
+    toNext = fn_3_A6ABC(lbl_3_data_4444[next].x, lbl_3_data_4444[next].z);
+    toCurrent = fn_3_A6ABC(lbl_3_data_4444[current].x, lbl_3_data_4444[current].z);
+    if (g_GameLogic.AIDifficulty0Special3Weak[g_GameLogic.awayTeamBattingInd_battingTeam] >= 3) {
+        toNext -= 30;
+    } else {
+        toNext += lbl_3_data_1C88[g_GameLogic.runnerAIInd[g_GameLogic.homeTeamBattingInd_fieldingTeam]];
+    }
+    if (g_FieldingLogic._0C4 >= 0) {
+        int delay = 30 - g_FieldingLogic._0F0;
+        if (delay > 0) {
+            toNext += delay;
+            toCurrent += delay;
+        }
+    } else {
+        toNext += 30;
+        toCurrent += 30;
+    }
+    if (r->runningDirectionCode == 1 && r->percentTowardsNextBase > 0.5f) {
+        toNext += 40;
+        if (r->currentBase == 3) {
+            toNext += 20;
+        }
+    } else if (r->runningDirectionCode == 1 && (r->baseRoundingState != 1 || r->overrunBaseStage != 2)) {
+        if (r->percentTowardsNextBase >= 0.15f) {
+            toNext += 20;
+        }
+    }
+    if (toNext > r->framesToNextBase) {
+        if (runner == 3 && g_Ball.AtBat_ContactResult == 3 && g_Ball.timeSinceBallPickedUp <= 1 &&
+            g_Ball.numberOfThrowsDuringPlay == 1) {
+            r->unused_someBaseNum = 0;
+        }
+        return 1;
+    }
+    if (g_Ball.ballZoneAwayFromHome >= 3 && runner >= 1 && r->currentBase == r->startingBase_baseAchieved &&
+        g_Ball.AtBat_ContactResult != 3 && toNext > r->framesToNextBase - 20) {
+        return 1;
+    }
+    if (r->currentBase == 3 && g_Ball.ballZoneAwayFromHome >= 3 && g_Ball.AtBat_ContactResult != 3) {
+        if (toNext > r->framesToNextBase - 20) {
+            return 1;
+        }
+        if (toNext > r->framesToNextBase - 30 && g_Strikes.outs >= 2) {
+            return 1;
+        }
+    }
+    if (toCurrent > r->framesToPreviousBase) {
+        if (r->baseRoundingState == 2 && r->overrunBaseStage == 2 && toCurrent - 20 > r->framesToPreviousBase) {
+            return -2;
+        }
+        return -1;
+    }
+    if (toNext - r->framesToNextBase > toCurrent - r->framesToPreviousBase) {
+        return 1;
+    }
+    return -1;
 }
 
 // .text:0x000842E4 size:0x3E4 mapped:0x806C3378
-void fn_3_842E4(void) {
-    return;
+// 99.14%: register allocation only; the target gives the call arguments' saved pointers r26-r28
+// and r, next and current r25, r30 and r29
+int fn_3_842E4(int runner) {
+    InMemRunnerType* r = &g_Runners[runner];
+    int next;
+    int current;
+    int throwFrames;
+    int frames;
+
+    if (g_Ball.throwTimeEstimatesCompleteInd == 0) {
+        return -2;
+    }
+    next = r->nextBase;
+    current = r->currentBase;
+    throwFrames = g_Ball.framesUntilThrowReachesDest;
+    if (g_GameLogic.AIDifficulty0Special3Weak[g_GameLogic.awayTeamBattingInd_battingTeam] >= 3) {
+        throwFrames -= 30;
+    } else {
+        throwFrames += lbl_3_data_1C88[g_GameLogic.runnerAIInd[g_GameLogic.homeTeamBattingInd_fieldingTeam]];
+    }
+    if (r->runningDirectionCode == 1 && r->percentTowardsNextBase > 0.8f) {
+        r->baseRunningTowards = next;
+        return -2;
+    }
+    if (r->runningDirectionCode == 3 && r->percentTowardsNextBase < 0.2f && g_Ball.ballZoneAwayFromHome <= 3) {
+        r->baseRunningTowards = current;
+        return -2;
+    }
+    if (r->baseStandingOn == g_FieldingLogic._0C4) {
+        return -(g_FieldingLogic._0C4 == current);
+    }
+    if (r->runningDirectionCode == 1 && g_FieldingLogic._0C4 == next) {
+        if (r->percentTowardsNextBase >= 0.4f) {
+            throwFrames += 30;
+            if (r->currentBase == 3) {
+                throwFrames += 20;
+            }
+        }
+        if (r->framesToNextBase < throwFrames) {
+            return 1;
+        }
+        if (g_FieldingLogic._119 != 0 &&
+            g_Ball.StaticRandomInt1 % (g_GameLogic.AIDifficulty0Special3Weak[g_GameLogic.teamBatting] + 5) != 0) {
+            return 1;
+        }
+        return -1;
+    }
+    if (r->runningDirectionCode == 3 && g_FieldingLogic._0C4 == current) {
+        if (r->percentTowardsNextBase <= 0.4f) {
+            throwFrames += 15;
+        }
+        if (r->framesToPreviousBase < throwFrames) {
+            return -1;
+        }
+        if (g_FieldingLogic._119 != 0 &&
+            g_Ball.StaticRandomInt1 % (g_GameLogic.AIDifficulty0Special3Weak[g_GameLogic.teamBatting] + 5) != 0) {
+            return -1;
+        }
+        return 1;
+    }
+    if (g_FieldingLogic._0C4 == 6) {
+        frames = throwFrames + fn_3_A6810(g_Fielders[g_FieldingLogic._0BE]._14.x, g_Fielders[g_FieldingLogic._0BE]._14.z,
+                                          lbl_3_data_4444[next].x, lbl_3_data_4444[next].z);
+        frames += 30;
+        if (next == 0) {
+            frames += 15;
+            if (g_Strikes.outs >= 2) {
+                frames += 10;
+            }
+        }
+        if (r->percentTowardsNextBase >= 0.5f) {
+            frames += 15;
+        } else if (r->percentTowardsNextBase >= 0.15f) {
+            frames += 5;
+        }
+        if (r->framesToNextBase < frames) {
+            if (r->fractionalBasesRan >= 3.15f && g_Ball.ballZoneAwayFromHome >= 3) {
+                r->unused_someBaseNum = 0;
+            }
+            return 1;
+        }
+        if (r->baseRoundingState == 2 && r->overrunBaseStage == 2) {
+            frames = throwFrames + fn_3_A6810(g_Fielders[g_FieldingLogic._0BE]._14.x, g_Fielders[g_FieldingLogic._0BE]._14.z,
+                                              lbl_3_data_4444[current].x, lbl_3_data_4444[current].z);
+            frames += 20;
+            return (frames < r->framesToPreviousBase) - 2;
+        }
+        return -1;
+    }
+    return -2;
 }
 
 // .text:0x000841C0 size:0x124 mapped:0x806C3254
