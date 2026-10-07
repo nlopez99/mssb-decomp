@@ -82,6 +82,11 @@ extern int fn_3_52560(int fielder, f32 x, f32 z);
 
 extern s16 lbl_3_data_1C58[5][4];
 extern s16 lbl_3_data_1C88[4];
+extern struct {
+    /* 0x000 */ u8 _000[0x1D5];
+    /* 0x1D5 */ u8 _1D5;
+} lbl_3_common_bss_34C90;
+
 extern VecXZ lbl_3_data_4444[5];
 extern s16 lbl_3_data_4638[4];
 extern s16 lbl_3_data_49DC[44];
@@ -91,12 +96,14 @@ extern s16 lbl_3_data_4B40[2];
 extern f32 lbl_3_data_4B44;
 extern s16 lbl_3_data_4B48[4];
 extern VecXYZ lbl_3_data_4B58[4];
+extern f32 lbl_3_data_4B88[2];
 extern s16 lbl_3_data_4B90[4];
 extern f32 lbl_3_data_4C44[4];
 extern u8 lbl_3_data_7760[54][5];
 extern s16 lbl_3_data_4C54[12];
 extern f32 lbl_3_data_218BC[18];
 extern s16 lbl_3_data_21904[12];
+extern f32 lbl_3_data_2191C[2];
 
 // .text:0x0008A958 size:0x73C mapped:0x806C99EC
 void fn_3_8A958(void) {
@@ -1954,8 +1961,207 @@ void fn_3_82F80(int runner, s16* framesBack, s16* framesForward) {
 }
 
 // .text:0x00082670 size:0x910 mapped:0x806C1704
-void fn_3_82670(void) {
-    return;
+// 99.92%: only float registers differ in the final 10000.0f rounding (the target keeps 10000.0f in f2)
+void fn_3_82670(int runner) {
+    InMemRunnerType* r = &g_Runners[runner];
+    int turnaround = r->turnaroundCode;
+    f32 topSpeed;
+    f32 boost;
+    f32 inv;
+    int capped;
+
+    if (lbl_3_common_bss_34C90._1D5 != 0) {
+        return;
+    }
+    r->groundVelocity[3] = r->groundVelocity[2];
+    r->groundVelocity[2] = r->groundVelocity[1];
+    r->groundVelocity[1] = r->groundVelocity[0];
+    if (g_GameLogic.secondaryGameMode != 6) {
+        if (runner == 0 && r->delayBeforeStartingToRun > g_Ball.framesSinceHit) {
+            return;
+        }
+        if (r->batterStayInBattersBoxReason == 3) {
+            r->acceleration = 0.0f;
+            return;
+        }
+    }
+    if (r->actionCode != 0) {
+        fn_3_823B4(runner);
+        goto advance;
+    }
+    if (r->overRun1BStage != 0 && fn_3_81EAC(runner) != 0) {
+        return;
+    }
+    if (r->overrunBaseStage != 0 && fn_3_81BC8(runner) != 0) {
+        return;
+    }
+    if (r->leadOffStatus == 1) {
+        fn_3_81AEC(runner);
+        goto slide;
+    }
+    if (r->slideHomeFrames_CountDown != 0) {
+        return;
+    }
+    if (r->fractionalBasesRan >= 4.0f) {
+        return;
+    }
+    r->acceleration = 0.0f;
+    r->turnaroundCode = 0;
+    if (r->framesSinceLastDirectionChange < 0x7FFE) {
+        r->framesSinceLastDirectionChange++;
+    } else {
+        r->framesSinceLastDirectionChange = 0x7FFF;
+    }
+    if (r->nextDirectionBeingProcessed == 1) {
+        if (r->runningDirectionCode == 3) {
+            r->acceleration = r->baseAccelerationWhileChaingingDirection * r->accelerationStaminaEffectWhileChangingDirection;
+        } else {
+            r->acceleration = r->baseAcceleration * r->accelerationStaminaEffect;
+        }
+    } else if (r->nextDirectionBeingProcessed == 2) {
+        if (r->runningDirectionCode == 1) {
+            r->acceleration = -(r->baseAccelerationWhileChaingingDirection * r->accelerationStaminaEffectWhileChangingDirection);
+        } else if (r->runningDirectionCode == 3) {
+            r->acceleration = r->baseAccelerationWhileChaingingDirection * r->accelerationStaminaEffectWhileChangingDirection;
+        } else if (r->runningDirectionCode == 2) {
+            r->groundVelocity[0] = 0.0f;
+        }
+    } else if (r->nextDirectionBeingProcessed == 3) {
+        if (r->runningDirectionCode == 1) {
+            r->acceleration = -(r->baseAccelerationWhileChaingingDirection * r->accelerationStaminaEffectWhileChangingDirection);
+        } else {
+            r->acceleration = -(r->baseAcceleration * r->accelerationStaminaEffect);
+        }
+    } else if (r->runningDirectionCode == 1) {
+        r->acceleration = r->baseAcceleration * r->accelerationStaminaEffect;
+    } else if (r->runningDirectionCode == 3) {
+        r->acceleration = -(r->baseAcceleration * r->accelerationStaminaEffect);
+    } else if (r->runningDirectionCode == 2) {
+        r->groundVelocity[0] = 0.0f;
+    }
+    if (g_GameLogic.secondaryGameMode == 6) {
+        boost = lbl_3_data_218BC[16] * g_Minigame.miniGameCurrentPoints[r->miniGamePlayerNum] + 1.0f;
+        if (boost > lbl_3_data_218BC[17]) {
+            boost = lbl_3_data_218BC[17];
+        }
+        if (g_Minigame.playerIDWithPowerup[0] == runner) {
+            boost *= lbl_3_data_2191C[1];
+        }
+        topSpeed = boost * (r->maximumBaseVelocity * r->staminaMult);
+    } else if (r->stealingStatus != 0) {
+        topSpeed = lbl_3_data_4B88[1] * (r->maximumBaseVelocity * r->staminaMult);
+    } else {
+        topSpeed = lbl_3_data_4B88[0] * (r->maximumBaseVelocity * r->staminaMult);
+    }
+    capped = 0;
+    r->groundVelocity[0] += r->acceleration;
+    if (r->groundVelocity[0] > topSpeed) {
+        r->groundVelocity[0] = topSpeed;
+        capped = 1;
+    }
+    if (r->groundVelocity[0] < -topSpeed) {
+        r->groundVelocity[0] = -topSpeed;
+        capped = -1;
+    }
+    if (capped != 0) {
+        if (r->newButtonThisFrame_forMashPurposes != 0) {
+            r->framesSinceLastMash = r->FramesUntilNotSprinting;
+            r->mashPercent += r->percentAddedPerMash;
+            if (r->mashPercent > 1.0f) {
+                r->mashPercent = 1.0f;
+            }
+        } else if (r->framesSinceLastMash != 0) {
+            r->framesSinceLastMash--;
+        } else {
+            r->mashPercent -= r->stamina_MashPercentTakenAwayPerFrame;
+            if (r->mashPercent < 0.0f) {
+                r->mashPercent = 0.0f;
+            }
+        }
+        r->mashVeloAdjustment = r->mashPercent * r->maxMashVeloAdjustment;
+        if (capped == 1 && r->acceleration > 0.0f) {
+            r->groundVelocity[0] += r->mashVeloAdjustment;
+        } else if (r->acceleration < 0.0f) {
+            r->groundVelocity[0] -= r->mashVeloAdjustment;
+        }
+    } else {
+        r->mashPercent = 0.0f;
+        r->framesSinceLastMash = 0;
+    }
+    if (r->nextDirectionBeingProcessed == 1) {
+        if (r->groundVelocity[0] >= 0.0f) {
+            if (r->runningDirectionCode != 1) {
+                r->runnerDirectionCode_stored = r->runningDirectionCode;
+            }
+            r->runningDirectionCode = 1;
+            r->nextDirectionBeingProcessed = 0;
+            r->framesSinceLastDirectionChange = 0;
+            if (turnaround == 2 || r->groundVelocity[1] < 0.0f || r->groundVelocity[2] < 0.0f || r->groundVelocity[3] < 0.0f) {
+                r->turningAroundInd = 1;
+                playSoundEffect(0x174);
+            } else {
+                r->turningAroundInd = 0;
+            }
+            r->leadOffStatus = 0;
+        } else {
+            r->turnaroundCode = 2;
+        }
+    } else if (r->nextDirectionBeingProcessed == 2) {
+        if ((r->runningDirectionCode == 1 && r->groundVelocity[0] < 0.0f) ||
+            (r->runningDirectionCode == 3 && r->groundVelocity[0] > 0.0f) || r->groundVelocity[0] == 0.0f) {
+            if (r->runningDirectionCode != 2) {
+                r->runningDirectionCode = 2;
+                r->framesSinceLastDirectionChange = 0;
+            }
+            r->nextDirectionBeingProcessed = 0;
+            r->groundVelocity[0] = 0.0f;
+            r->turningAroundInd = 0;
+        } else {
+            r->turnaroundCode = 1;
+        }
+    } else if (r->nextDirectionBeingProcessed == 3) {
+        if (r->groundVelocity[0] <= 0.0f) {
+            if (r->runningDirectionCode != 3) {
+                r->runnerDirectionCode_stored = r->runningDirectionCode;
+            }
+            r->runningDirectionCode = 3;
+            r->nextDirectionBeingProcessed = 0;
+            r->framesSinceLastDirectionChange = 0;
+            if (turnaround == 2 || r->groundVelocity[1] > 0.0f || r->groundVelocity[2] > 0.0f || r->groundVelocity[3] > 0.0f) {
+                r->turningAroundInd = 1;
+                playSoundEffect(0x174);
+            } else {
+                r->turningAroundInd = 0;
+            }
+        } else {
+            r->turnaroundCode = 2;
+        }
+    }
+    if (r->runningDirectionCode == 1) {
+        r->baseRunningTowards = r->nextBase;
+    } else if (r->runningDirectionCode == 3) {
+        if (r->baseStandingOn >= 0 && r->startingBase_baseAchieved == r->baseStandingOn && r->tagUpInd == 2) {
+            r->baseRunningTowards = (r->currentBase + 3) & 3;
+        } else {
+            r->baseRunningTowards = r->currentBase;
+        }
+    }
+    inv = 1.0f / r->calculatedLengthOfCurrentBaseline;
+    r->percentRanPerFrame_slideAdj = r->groundVelocity[0] * inv;
+    r->velocityPercent_stamAdj = inv * (r->maximumBaseVelocity * r->staminaMult);
+    r->accelerationPercent_stamAdj = inv * (r->baseAcceleration * r->accelerationStaminaEffect);
+advance:
+    if (r->percentRanPerFrame_slideAdj != 0.0f) {
+        int scaled = 10000.0f * (r->fractionalBasesRan + r->percentRanPerFrame_slideAdj);
+        r->fractionalBasesRan = scaled / 10000.0f;
+        r->percentTowardsNextBase = (scaled % 10000) / 10000.0f;
+    }
+slide:
+    r->percentFromCurrentBase_slideAdj = r->percentTowardsNextBase - r->slidingAdjustment_backwards;
+    r->percentTowardsNextBase_slideAdj = (1.0f - r->percentTowardsNextBase) - r->slidingAdjustment_forwards;
+    if (r->overRun1BStage != 0) {
+        fn_3_81EAC(runner);
+    }
 }
 
 // .text:0x000823B4 size:0x2BC mapped:0x806C1448
