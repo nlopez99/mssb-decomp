@@ -984,8 +984,42 @@ void fn_3_150940(void) {
 }
 
 // .text:0x001504EC size:0x454 mapped:0x8078F580
-void fn_3_1504EC(void) {
-    return;
+// 99.71%: the two inlined copies of fn_3_151068 hold x and z in each other's saved FPRs.
+void fn_3_1504EC(ModelEmitter3880* emitter, Particle3880* p) {
+    s32 alpha;
+    s32 step;
+    f32 grow;
+
+    if (p->_48 != 0) {
+        p->_48--;
+        if (p->_48 == 0) {
+            fn_3_151068(emitter, p);
+        }
+    } else {
+        fn_8003403C(p->_38, p->_3C);
+        fn_80033CC8(p, emitter->base._10);
+        alpha = p->color[3];
+        if (lbl_3_data_26C3C[6] / p->_4A < 2) {
+            grow = lbl_3_data_26C3C[3] / 100000.0f / (lbl_3_data_26C3C[6] / 2);
+            step = lbl_3_data_26C3C[5] / (lbl_3_data_26C3C[6] / 2);
+        } else {
+            grow = -(lbl_3_data_26C3C[3] / 100000.0f) / (lbl_3_data_26C3C[6] / 2);
+            step = -lbl_3_data_26C3C[5] / (lbl_3_data_26C3C[6] / 2);
+        }
+        alpha += step;
+        if (alpha > 255) {
+            alpha = 255;
+        } else if (alpha < 0) {
+            alpha = 0;
+        }
+        p->color[3] = alpha;
+        p->_38 += grow;
+        p->_3C = p->_38;
+        p->_4A--;
+        if (p->_4A == 0) {
+            fn_3_151068(emitter, p);
+        }
+    }
 }
 
 // .text:0x00150120 size:0x3CC mapped:0x8078F1B4
