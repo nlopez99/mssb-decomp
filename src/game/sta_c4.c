@@ -216,6 +216,11 @@ typedef struct StaC4Tex {
     /* 0x1A */ u8 tlutFormat;
 } StaC4Tex;
 
+typedef struct StaC4View {
+    /* 0x00 */ u8 _00[0x38];
+    /* 0x38 */ Mtx _38;
+} StaC4View;
+
 extern struct {
     /* 0x00 */ StaC4Draw* _00;
     /* 0x04 */ u8* _04;
@@ -263,8 +268,14 @@ extern u8 lbl_3_data_84B8[30][2];
 // Only this unit reads these; they lie outside its splits.txt ranges.
 extern void (*lbl_3_data_1BA88[4])(s32 idx, void* arg1, StaC4Hit* hit);
 extern StaC4Prop lbl_3_data_1BA98[50];
+extern Vec lbl_3_data_1BF6C[21];
+extern u8 lbl_3_data_1C068[20][3];
 
 extern void* _OSAllocFromHeap(u32 align, u32 size);
+extern void fn_8003A144(void);
+extern StaC4Tex* fn_80039AB4(void);
+extern void fn_800245EC(camera_803c639c_s* camera, Mtx view, Vec* points, f32* out, s32 count, s32 arg5);
+extern void fn_800ACFB0(void* data);
 extern void fn_80033620(StaC4Emitter* emitter);
 extern void fn_8003403C(f32, f32);
 extern void fn_80033CC8(StaC4Particle* particle, void* arg1);
@@ -322,8 +333,122 @@ void fn_3_FBBA0(StaC4Tex* tex) {
 }
 
 // .text:0x000FB3D8 size:0x7C8 mapped:0x8073A46C
-void fn_3_FB3D8(void) {
-    return;
+void fn_3_FB3D8(StaC4View* view) {
+    f32 center[21][2];
+    Vec diff;
+    Vec step;
+    GXTexObj obj;
+    GXTlutObj tlut;
+    StaC4Tex* tex;
+    f32* uv;
+    Vec* pos;
+    s32 n;
+    MtxPtr mtx;
+    camera_803c639c_s* camera;
+    f32 minY;
+    f32 minX;
+    f32 maxY;
+    f32 maxX;
+    f32 y;
+    f32 x;
+    f32 width;
+    f32 height;
+    s32 i;
+    s32 j;
+    s32 b;
+    s32 c;
+
+    fn_8003A144();
+    uv = _OSAllocFromHeap(4, 420 * (2 * sizeof(f32) + sizeof(Vec)));
+    pos = (Vec*)(uv + 420 * 2);
+    n = 0;
+    for (i = 0; i < 21; i++) {
+        if (i == 20) {
+            continue;
+        }
+        PSVECSubtract(&lbl_3_data_1BF6C[i], &lbl_3_data_1BF6C[20], &diff);
+        for (j = 1; j <= 20; j++) {
+            PSVECScale(&diff, j / 22.0f, &step);
+            PSVECAdd(&lbl_3_data_1BF6C[20], &step, &pos[n]);
+            n++;
+        }
+    }
+    camera = fn_80052768_getCamera(0);
+    mtx = view->_38;
+    fn_800245EC(camera, mtx, lbl_3_data_1BF6C, center[0], 21, 1);
+    fn_800245EC(fn_80052768_getCamera(0), mtx, pos, uv, 400, 1);
+    minX = minY = 16777215.0f;
+    maxX = maxY = -minX;
+    for (i = 0; i < 800; i += 2) {
+        x = uv[i];
+        if (minX > x) {
+            minX = x;
+        }
+        if (maxX < x) {
+            maxX = x;
+        }
+        y = uv[i + 1];
+        if (minY > y) {
+            minY = y;
+        }
+        if (maxY < y) {
+            maxY = y;
+        }
+    }
+    width = 0.005f * (maxX - minX);
+    height = 0.005f * (maxY - minY);
+    for (i = 0; i < 800; i += 2) {
+        uv[i] += width * (rand() % 256) / 256.0f - 0.0025f;
+        uv[i + 1] += height * (rand() % 256) / 256.0f - 0.0025f;
+    }
+    tex = fn_80039AB4();
+    fn_3_FBBA0(tex);
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+    GXSetCullMode(GX_CULL_NONE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_OR);
+    GXSetAlphaCompare(GX_GREATER, 0, GX_AOP_AND, GX_ALWAYS, 0);
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
+    GXSetNumTevStages(1);
+    GXSetNumChans(1);
+    GXSetNumTexGens(1);
+    GXSetTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2X4, GX_TG_TEX0, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
+    GXSetTevOp(GX_TEVSTAGE0, GX_REPLACE);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    GXSetChanCtrl(GX_COLOR0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetChanCtrl(GX_ALPHA0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_COPY);
+    GXLoadPosMtxImm(mtx, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    for (i = 0; i < 20; i++) {
+        GXBegin(GX_TRIANGLESTRIP, GX_VTXFMT0, 43);
+        GXPosition3f32(lbl_3_data_1BF6C[lbl_3_data_1C068[i][0]].x, 0.01f + lbl_3_data_1BF6C[lbl_3_data_1C068[i][0]].y,
+                       lbl_3_data_1BF6C[lbl_3_data_1C068[i][0]].z);
+        GXColor1u32(0xFFFFFFFF);
+        GXTexCoord2f32(center[lbl_3_data_1C068[i][0]][0], center[lbl_3_data_1C068[i][0]][1]);
+        b = lbl_3_data_1C068[i][1];
+        c = lbl_3_data_1C068[i][2];
+        for (j = 0; j < 20; j++) {
+            GXPosition3f32(pos[b * 20 + j].x, 0.01f + pos[b * 20 + j].y, pos[b * 20 + j].z);
+            GXColor1u32(0xFFFFFFFF);
+            GXTexCoord2f32(uv[(b * 20 + j) * 2], uv[(b * 20 + j) * 2 + 1]);
+            GXPosition3f32(pos[c * 20 + j].x, 0.01f + pos[c * 20 + j].y, pos[c * 20 + j].z);
+            GXColor1u32(0xFFFFFFFF);
+            GXTexCoord2f32(uv[(c * 20 + j) * 2], uv[(c * 20 + j) * 2 + 1]);
+        }
+        GXPosition3f32(lbl_3_data_1BF6C[b].x, 0.01f + lbl_3_data_1BF6C[b].y, lbl_3_data_1BF6C[b].z);
+        GXColor1u32(0xFFFFFFFF);
+        GXTexCoord2f32(center[b][0], center[b][1]);
+        GXPosition3f32(lbl_3_data_1BF6C[c].x, 0.01f + lbl_3_data_1BF6C[c].y, lbl_3_data_1BF6C[c].z);
+        GXColor1u32(0xFFFFFFFF);
+        GXTexCoord2f32(center[c][0], center[c][1]);
+    }
+    fn_800ACFB0(uv);
 }
 
 // .text:0x000FA58C size:0xE4C mapped:0x80739620
@@ -374,6 +499,27 @@ void fn_3_FA3C0(void) {
     lbl_3_common_bss_350E4._64 = count;
 }
 
+static inline void setAnimMode(StaC4Model* model, u8 mode) {
+    model->_5B = mode;
+}
+
+static inline void setAnimFrame(StaC4Model* model, f32 frame) {
+    model->_5C = frame;
+    model->_59 = 1;
+}
+
+static inline void setAnimSpeed(StaC4Model* model, f32 speed) {
+    model->_54 = speed;
+    model->_5A = 1;
+}
+
+static inline void startAnim(StaC4Model* model) {
+    ACTSetAnimation(model->_00, model->_04, NULL, model->_0E, 0.0f, model->_60);
+    fn_800B4CA0(model->_00, model->_5C);
+    fn_800B4C04(model->_00, model->_54);
+    fn_800B4AFC(model->_00, model->_5B & 1);
+}
+
 // .text:0x000F9E78 size:0x548 mapped:0x80738F0C
 void fn_3_F9E78(s32 idx, void* arg1, StaC4Hit* hit) {
     f32 x;
@@ -381,7 +527,6 @@ void fn_3_F9E78(s32 idx, void* arg1, StaC4Hit* hit) {
     f32 z;
     StaC4Draw* draw = &lbl_3_common_bss_350E4._00[idx];
     StaC4Draw* entry;
-    StaC4Model* model;
     StaC4ShakeTask* shake;
     StaC4FlashTask* flash;
     s32 i;
@@ -397,17 +542,11 @@ void fn_3_F9E78(s32 idx, void* arg1, StaC4Hit* hit) {
                 entry->obj._80 = NULL;
                 entry->obj._90_6 = 0;
                 entry->obj._90_7 = 1;
-                entry->obj._74->_5B = 2;
-                entry->obj._74->_5C = 0.0f;
-                entry->obj._74->_59 = 1;
-                entry->obj._74->_54 = 1.0f;
-                entry->obj._74->_5A = 1;
+                setAnimMode(entry->obj._74, 2);
+                setAnimFrame(entry->obj._74, 0.0f);
+                setAnimSpeed(entry->obj._74, 1.0f);
                 entry->obj._74->_68 = 0;
-                model = entry->obj._74;
-                ACTSetAnimation(model->_00, model->_04, NULL, model->_0E, 0.0f, model->_60);
-                fn_800B4CA0(model->_00, model->_5C);
-                fn_800B4C04(model->_00, model->_54);
-                fn_800B4AFC(model->_00, model->_5B & 1);
+                startAnim(entry->obj._74);
                 entry->obj.frame = 0.0f;
                 entry->obj.control.type = 0;
                 CTRLSetTranslation(&entry->obj.control, lbl_3_data_1BA98[idx].pos.x, lbl_3_data_1BA98[idx].pos.y,
@@ -428,7 +567,7 @@ void fn_3_F9E78(s32 idx, void* arg1, StaC4Hit* hit) {
             CTRLGetTranslation(&draw->obj.control, &x, &y, &z);
             fn_3_CB7E8(x, y, z);
         }
-        lbl_3_common_bss_350E4._00[lbl_3_bss_B62C + idx + 9].obj._90_7 = 0;
+        lbl_3_common_bss_350E4._00[idx + lbl_3_bss_B62C + 9].obj._90_7 = 0;
         return;
     }
     if (draw->_A2 == 2) {

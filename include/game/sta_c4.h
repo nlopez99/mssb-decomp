@@ -9,6 +9,7 @@ struct StaC4Emitter;
 struct StaC4Draw;
 struct StaC4Hit;
 struct StaC4Tex;
+struct StaC4View;
 
 void fn_3_F8444(void);
 void fn_3_F8454(void);
@@ -34,7 +35,7 @@ void fn_3_F9D94(struct StaC4Draw* draw);
 void fn_3_F9E78(s32 idx, void* arg1, struct StaC4Hit* hit);
 void fn_3_FA3C0(void);
 void fn_3_FA58C(void);
-void fn_3_FB3D8(void);
+void fn_3_FB3D8(struct StaC4View* view);
 void fn_3_FBBA0(struct StaC4Tex* tex);
 
 #endif // !__GAME_sta_c4_H_
