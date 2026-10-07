@@ -183,6 +183,8 @@ extern void fn_3_909B0(void);
 extern void fn_3_9081C(void);
 extern void fn_3_9DC18(u8* list, int count, int arg2);
 extern void fn_3_1160B8(void);
+extern void fn_3_1160BC(void);
+extern void fn_3_1471C4(void);
 extern void fn_3_1471C0(void);
 extern void fn_3_9E078(int* order, int count, int arg2);
 extern void changeScene(u8, s16);
@@ -798,7 +800,82 @@ void fn_3_1104A8(void) {
 
 // .text:0x0010FDC8 size:0x6E0 mapped:0x8074EE5C
 void fn_3_10FDC8(void) {
-    return;
+    if (g_Minigame.pauseInd != 0) {
+        fn_3_1084B4();
+        return;
+    }
+    g_GameLogic.hudElementLoadingInd = 0;
+    g_GameLogic.hudLoadingRelated = 0;
+    if (g_Ball.totalFramesAtPlay < 0x7FFE) {
+        g_Ball.totalFramesAtPlay++;
+    } else {
+        g_Ball.totalFramesAtPlay = 0x7FFF;
+    }
+    switch (g_GameLogic.gameStatus) {
+    case 27:
+        fn_3_10FB74();
+        break;
+    case 28:
+        fn_3_10F1D4();
+        break;
+    case 29:
+        fn_3_10F3D8();
+        break;
+    case 30:
+        fn_3_10E60C();
+        break;
+    case 33:
+        fn_3_10B8D0();
+        break;
+    case 5:
+        fn_3_10AEF0();
+        break;
+    case 35:
+        fn_3_10AE18();
+        break;
+    case 14:
+        fn_3_10A0A0();
+        break;
+    case 36:
+        fn_3_109254();
+        break;
+    case 34:
+        fn_3_108C54();
+        break;
+    case 38:
+        fn_3_10722C();
+        break;
+    case 40:
+        fn_3_107784();
+        break;
+    case 41:
+        fn_3_10768C();
+        break;
+    case 39:
+        fn_3_1070A4();
+        break;
+    case 37:
+        fn_3_10F91C();
+        break;
+    default:
+        if (g_Minigame.GameMode_MiniGame == 1) {
+            fn_3_112BD8();
+        } else if (g_Minigame.GameMode_MiniGame == 2) {
+            fn_3_1160BC();
+        } else if (g_Minigame.GameMode_MiniGame == 3) {
+            fn_3_1324E8();
+        } else if (g_Minigame.GameMode_MiniGame == 4) {
+            fn_3_141A30();
+        } else if (g_Minigame.GameMode_MiniGame == 5) {
+            fn_3_1471C4();
+        } else if (g_Minigame.GameMode_MiniGame == 6) {
+            fn_3_13C468();
+        }
+        if (g_Minigame._17C4 == 600) {
+            fn_3_90064(0x2FD);
+        }
+        break;
+    }
 }
 
 // .text:0x0010FBE4 size:0x1E4 mapped:0x8074EC78
