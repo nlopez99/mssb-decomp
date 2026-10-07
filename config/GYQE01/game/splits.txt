@@ -61,6 +61,7 @@ game/rep_940.c:
 	.rodata     start:0x00000940 end:0x000009B0
 
 game/rep_9B0.c:
+	.text       start:0x000219CC end:0x00021C90
 	.rodata     start:0x000009B0 end:0x00000A00
 
 game/rep_A00.c:
