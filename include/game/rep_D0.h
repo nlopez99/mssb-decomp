@@ -4,6 +4,7 @@
 #include "mssbTypes.h"
 #include "Dolphin/vec.h"
 #include "Dolphin/mtx.h"
+#include "Dolphin/GX/GXTypes.h"
 
 typedef struct _VecSrcDst {
     Vec src, dst;
@@ -45,12 +46,50 @@ typedef struct _CollisionBox {
     /*0x04*/ TriangleGroup* triangleGroups[]; // one per bounding box
 } CollisionBox;
 
+typedef struct _StadiumDrawTask {
+    /*0x00*/ s32 type;
+    /*0x04*/ void (*draw)(struct _StadiumDrawTask* task);
+    /*0x08*/ Mtx _08;
+    /*0x38*/ Mtx _38;
+    /*0x68*/ void* layout;
+    /*0x6C*/ s32 _6C;
+} StadiumDrawTask; // size: 0x70
+
+typedef struct _StadiumFog {
+    /*0x00*/ GXColor color;
+    /*0x04*/ f32 start;
+    /*0x08*/ f32 end;
+} StadiumFog; // size: 0xC
+
+typedef struct _StadiumLight {
+    /*0x00*/ f32 _00;
+    /*0x04*/ f32 _04;
+    /*0x08*/ f32 _08;
+    /*0x0C*/ u8 _0C;
+    /*0x0D*/ u8 _0D;
+    /*0x0E*/ u16 _0E;
+} StadiumLight; // size: 0x10
+
+typedef struct _StadiumEnv {
+    /*0x00*/ StadiumFog fog[3];
+    /*0x24*/ StadiumLight lights[3];
+    /*0x54*/ f32 rotSpeed;
+    /*0x58*/ GXColor clearColor;
+    /*0x5C*/ u8 _5C;
+    /*0x5D*/ u8 _5D;
+    /*0x5E*/ u8 _5E[2];
+} StadiumEnv; // size: 0x60
+
 typedef struct _UNK_StadiumCollision {
     /*0x000*/ void* _00;
-    artificial_padding(0, 0x70a, void*);
+    /*0x004*/ void* _04;
+    /*0x008*/ StadiumDrawTask tasks[8][2];
+    /*0x708*/ u8 _708[2];
     /*0x70A*/ s16 numCollisionBoxes;
     /*0x70C*/ CollisionBox* pCollisionBoxes;
-    artificial_padding(0x70c, 0x778, CollisionBox*);
+    /*0x710*/ f32 rotation;
+    /*0x714*/ StadiumEnv env;
+    /*0x774*/ u8 _774;
     /*0x778*/ CollisionBox* _778;
     /*0x77C*/ s16 _77C;
 } UNK_StadiumCollision; // size: 0x780
