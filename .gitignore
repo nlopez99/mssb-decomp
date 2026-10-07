@@ -1,3 +1,12 @@
+# Local configuration backups and private files
+*.bak-*
+.env
+.env.*
+compilers/
+*.iso
+*.gcm
+*.rvz
+
 # IDE folders
 .idea/
 .vs/

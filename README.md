@@ -1,3 +1,11 @@
+# mssb-decomp
+
+An independent continuation of [roeming/mssb-dtk](https://github.com/roeming/mssb-dtk), preserving its history, existing contributions, and CC0 license. AI-assisted contributions are welcome when disclosed, reviewed, and validated against the original game.
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) for setup, contribution requirements, and the current CI limitations. Our initial source checks are not a verified game build. Inherited matching progress is upstream work, not progress made by this fork.
+
+---
+
 Mario Superstar Baseball
 [![Build Status]][actions] [![Code Progress]][progress] [![Game Code Progress]][progress] [![Data Progress]][progress]
 <!--

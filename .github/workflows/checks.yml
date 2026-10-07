@@ -1,0 +1,37 @@
+name: Source checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check Python syntax without generating build output
+        run: |
+          python - <<'PY'
+          import ast
+          from pathlib import Path
+          files = sorted(Path('.').glob('*.py')) + sorted(Path('tools').rglob('*.py'))
+          for path in files:
+              ast.parse(path.read_text(encoding='utf-8'), filename=str(path))
+          print(f'Python syntax OK: {len(files)} files')
+          PY
+      - name: Check configure entry point
+        run: python configure.py --help
+      - name: Check our changes for whitespace errors
+        # Existing upstream whitespace is outside this fork's setup changes.
+        run: git diff --check 72de19a39880398a69339010350652ad97e2a79c HEAD
