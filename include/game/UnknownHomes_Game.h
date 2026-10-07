@@ -1703,7 +1703,7 @@ typedef struct _MiniGameStruct {
     /*0x17C8*/ s16 wallBall_coinsVisibleFrameCounter[100];
     /*0x1890*/ s16 miniGameCurrentPoints[4];
     /*0x1898*/ s16 miniGameLatestPoints[4];
-    /*0x18A0*/ s16 _18A0;
+    /*0x18A0*/ u16 _18A0;
     /*0x18A2*/ s16 bB_bombBarrelHitInd;
     /*0x18A4*/ s16 bB_bombBarrelID;
     /*0x18A6*/ s16 _18A6;
@@ -1712,14 +1712,11 @@ typedef struct _MiniGameStruct {
     /*0x18AC*/ u8 pad12[12];
     /*0x18B8*/ s16 _18B8;
     /*0x18BA*/ s16 _18BA;
-    /*0x18BC*/ s32 minigamePoints_current_Latest[4];
+    /*0x18BC*/ s16 minigamePoints_current_Latest[4][2];
     /*0x18CC*/ MiniGameControlStruct minigameControlStruct;
     /*0x18F8*/ s8 minigameFielderIndex[4];
     /*0x18FC*/ u8 _18FC[4];
-    /*0x1900*/ u8 _1900;
-    /*0x1901*/ u8 _1901;
-    /*0x1902*/ u8 _1902;
-    /*0x1903*/ u8 _1903;
+    /*0x1900*/ u8 _1900[4];
     /*0x1904*/ s8 minigamePlayerSelectedOrder;
     /*0x1905*/ s8 rosterID;
     /*0x1906*/ u8 miniGameNumberOfParticipants;
@@ -1882,23 +1879,13 @@ typedef struct _MiniGameStruct {
     /*0x1A8B*/ u8 _1A8B;
     /*0x1A8C*/ u8 _1A8C[2];
     /*0x1A8E*/ s16 bOD_HitPowerOfEachChar[4];
-    /*0x1A96*/ u8 bODRelated5;
-    /*0x1A97*/ u8 bODRelated6;
-    /*0x1A98*/ u8 bODUnusedBytes[8];
-    /*0x1AA0*/ u8 _1AA0[3];
-    /*0x1AA3*/ u8 _1AA3;
-    /*0x1AA4*/ u8 _1AA4;
-    /*0x1AA5*/ u8 _1AA5;
-    /*0x1AA6*/ u8 _1AA6;
-    /*0x1AA7*/ u8 _1AA7;
-    /*0x1AA8*/ u8 _1AA8;
-    /*0x1AA9*/ u8 _1AA9;
-    /*0x1AAA*/ u8 pad18[30];
+    /*0x1A96*/ u8 _1A96[10];
+    /*0x1AA0*/ u8 _1AA0[4][10];
     /*0x1AC8*/ u8 bODRelated2;
     /*0x1AC9*/ u8 barrelBatter_BODPitchSelectionType;
     /*0x1ACA*/ u8 minigamePitchSpeedAdjustment;
     /*0x1ACB*/ u8 bOD_HRStreak;
-    /*0x1ACC*/ u8 bODCharacterHRStreakTracker[8];
+    /*0x1ACC*/ u8 bODCharacterHRStreakTracker[4][2];
     /*0x1AD4*/ u8 bODRelated3;
     /*0x1AD5*/ u8 bOD_KingBombInd;
     /*0x1AD6*/ u8 bODAngleIndexBasedOnHitPower;
@@ -2086,10 +2073,21 @@ typedef struct _MiniGameStruct {
     /*0x1DC4*/ u8 _1DC4[4];
     /*0x1DC8*/ u8 _1DC8[4];
     /*0x1DCC*/ s16 _1DCC;
-    /*0x1DCE*/ u8 _1DCE;
-    /*0x1DCF*/ s8 _1DCF;
+    union {
+        struct {
+            /*0x1DCE*/ u8 _1DCE;
+            /*0x1DCF*/ s8 _1DCF;
+        };
+        /*0x1DCE*/ s16 _1DCE_s16;
+    };
     /*0x1DD0*/ s8 _1DD0;
-    /*0x1DD1*/ u8 _1DD1[0x1E2C - 0x1DD1];
+    /*0x1DD1*/ u8 _1DD1[0x1DF4 - 0x1DD1];
+    /*0x1DF4*/ u8 _1DF4;
+    /*0x1DF5*/ u8 _1DF5;
+    /*0x1DF6*/ u8 _1DF6;
+    /*0x1DF7*/ u8 _1DF7;
+    /*0x1DF8*/ u8 _1DF8;
+    /*0x1DF9*/ u8 _1DF9[0x1E2C - 0x1DF9];
 } MiniGameStruct; // size: 0x1E2C
 
 extern MiniGameStruct g_Minigame;
@@ -2417,7 +2415,9 @@ typedef struct {
 typedef struct {
     /* 0x000 */ u8 _000[0x74];
     /* 0x074 */ FieldingLogicFielder _074[4];
-    /* 0x08C */ u8 _08C[0xC4 - 0x8C];
+    /* 0x08C */ u8 _08C[0xAE - 0x8C];
+    /* 0x0AE */ s16 _0AE;
+    /* 0x0B0 */ u8 _0B0[0xC4 - 0xB0];
     /* 0x0C4 */ s16 _0C4;
     /* 0x0C6 */ u8 _0C6[0xCC - 0xC6];
     /* 0x0CC */ s16 _0CC;
