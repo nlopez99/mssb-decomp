@@ -123,18 +123,31 @@ extern struct {
     /* 0x17C */ u8 _17C[0x268 - 0x17C];
 } g_Fielders[9];
 
-// This unit's .data (0x6820 to 0x69C0) is missing from splits.txt; fn_3_678B8 reaches it from
-// one pool base, so that function matches only once these are statics here
-extern u8 lbl_3_data_6820[16];
-extern f32 lbl_3_data_6830[2];
-extern f32 lbl_3_data_6838[2];
-extern f32 lbl_3_data_6840[2];
-extern f32 lbl_3_data_6848[2];
-extern u16 lbl_3_data_6860[8][2];
-extern UnkTrailEA0 lbl_3_data_6880[12];
-extern u8 lbl_3_data_6940[0x36];
-extern u8 lbl_3_data_6980[0x20];
-extern UnkDrawEA0 lbl_3_data_69A0[2];
+u8 lbl_3_data_6820[16] = { 0, 0, 0, 12, 13, 7, 7, 10, 11, 8, 9 };
+f32 lbl_3_data_6830[2] = { 2.5f, 5.0f };
+f32 lbl_3_data_6838[2] = { 0.6f, 0.6f };
+f32 lbl_3_data_6840[2] = { 0.3f, 1.0f };
+f32 lbl_3_data_6848[2] = { -0.1f, 1.0f };
+static u16 lbl_3_data_6860[8][2] ATTRIBUTE_ALIGN(32) = {
+    { 0x0000, 0x4000 }, { 0x4000, 0x4000 }, { 0x0000, 0x2000 }, { 0x4000, 0x2000 },
+    { 0x0000, 0x1000 }, { 0x4000, 0x1000 }, { 0x0000, 0x0800 }, { 0x4000, 0x0800 },
+};
+static UnkTrailEA0 lbl_3_data_6880[12] = {
+    { 0, 0.1f, 0.1f, 60 },  { 10, 0.2f, 0.2f, 30 }, { 11, 0.4f, 0.4f, 60 }, { 10, 0.3f, 0.3f, 50 },
+    { 11, 0.5f, 0.5f, 100 }, { 11, 1.0f, 1.0f, 100 }, { 23, 0.4f, 0.4f, 100 }, { 23, 1.0f, 1.0f, 100 },
+    { 30, 0.3f, 0.3f, 50 }, { 31, 0.3f, 0.3f, 50 }, { 33, 0.4f, 0.4f, 60 }, { 33, 0.4f, 0.4f, 60 },
+};
+u8 lbl_3_data_6940[0x36] = {
+    0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 5, 0, 0, 3, 6, 3, 0, 1, 0, 2, 1, 0, 3,
+    3, 6, 1, 2, 3, 4, 1, 0, 3, 2, 5, 0, 6, 6, 6, 0, 3, 1, 2, 3, 6, 5, 3, 0, 1, 0, 1,
+};
+static u8 lbl_3_data_6980[0x20] ATTRIBUTE_ALIGN(32) = {
+    GX_QUADS | GX_VTXFMT0, 0, 8, 0, 0, 0, 1, 0, 1, 3, 0, 3, 2, 0, 2, 2, 1, 2, 3, 1, 3, 5, 2, 1, 4, 2, 0,
+};
+static UnkDrawEA0 lbl_3_data_69A0[2] = {
+    { 0, fn_3_67C34 },
+    { 0, fn_3_67C34 },
+};
 
 extern void SetDisplayStateTexture(void*, s32, s32);
 extern void fn_8001D0D0(s32, f32);
@@ -982,9 +995,8 @@ void fn_3_67A48(void) {
 }
 
 // .text:0x000678B8 size:0x190 mapped:0x806A694C
-// The target reaches lbl_3_data_6860, 6880, 6980 and 69A0 from one pool base at 0x6820, which no
-// extern reproduces; with this unit's .data as statics it scores 87.77% (the target loads
-// lbl_803CC1B8 with addi and lwz 0 and orders the argument setup differently).
+// 87.77%: the target loads lbl_803CC1B8 with addi and lwz 0 and orders the argument setup
+// differently; typed, struct, array and inline forms of that load all compile the same here.
 void fn_3_678B8(void) {
     UnkTaskEA0* task = lbl_803CC1B8;
     s32 side;
