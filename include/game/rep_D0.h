@@ -17,16 +17,6 @@ typedef struct _AABB_Box {
     Vec a, b;
 } AABB_Box;
 
-typedef struct _CollisionBox {
-    AABB_Box* boundingBox;
-} CollisionBox;
-
-typedef struct _UNK_StadiumCollision {
-    void* _00;
-    artificial_padding(0, 0x70a, void*);
-    s16 numCollisionBoxes;
-    CollisionBox* pCollisionBoxes;
-} UNK_StadiumCollision; // size: 0x780
 
 typedef struct _TriangleCollisionStruct {
     /*0x00*/ Mtx mtx1;
@@ -34,8 +24,8 @@ typedef struct _TriangleCollisionStruct {
     /*0x60*/ Vec normal;
     /*0x6C*/ f32 distance; // unsure
     /*0x70*/ f32 collisionDistance; // unsure
-    /*0x72*/ E(u16, BALL_COLLISION_TYPE) collisionType;
-} TriangleCollisionStruct; // size: 0x74
+    /*0x74*/ E(u16, BALL_COLLISION_TYPE) collisionType;
+} TriangleCollisionStruct; // size: 0x78
 
 typedef struct _CollisionTriangle{
     /*0x00*/ Vec trianglePoint;
@@ -49,6 +39,21 @@ typedef struct _TriangleGroup {
     /*0x02*/ u16 count;
     /*0x04*/ CollisionTriangle tris[];
 } TriangleGroup; // size: at least 4, expandable
+
+typedef struct _CollisionBox {
+    /*0x00*/ AABB_Box* boundingBox;
+    /*0x04*/ TriangleGroup* triangleGroups[]; // one per bounding box
+} CollisionBox;
+
+typedef struct _UNK_StadiumCollision {
+    /*0x000*/ void* _00;
+    artificial_padding(0, 0x70a, void*);
+    /*0x70A*/ s16 numCollisionBoxes;
+    /*0x70C*/ CollisionBox* pCollisionBoxes;
+    artificial_padding(0x70c, 0x778, CollisionBox*);
+    /*0x778*/ CollisionBox* _778;
+    /*0x77C*/ s16 _77C;
+} UNK_StadiumCollision; // size: 0x780
 
 extern UNK_StadiumCollision g_UNK_StadiumDetails; 
 
@@ -68,10 +73,11 @@ typedef enum _BALL_COLLISION_TYPE {
     BALL_COLLISION_TYPE_FOUL = 0x80,
 } BALL_COLLISION_TYPE;
 
+BALL_COLLISION_TYPE fn_3_8D4(VecSrcDst* inVec, CollisionStruct* outCollision);
 BALL_COLLISION_TYPE checkCollision(VecSrcDst* inVec, CollisionStruct* outCollision, int collisionCheckType, BOOL useBallCoords);
-BALL_COLLISION_TYPE checkStatiumHazardCollisions(VecSrcDst* inVec, CollisionStruct* outCollision, Vec* v);
+BALL_COLLISION_TYPE checkStatiumHazardCollisions(VecSrcDst* inVec, CollisionStruct* outCollision, s32* hitObject);
 BALL_COLLISION_TYPE didCollideWithBoundingBoxes(VecSrcDst* inVec, CollisionStruct* outCollision, CollisionBox* boxes,
-                                                int boxCount);
-bool checkTriangleCollisions(TriangleCollisionStruct* collisionData, TriangleGroup* TriangleGroup);
+                                                s16 boxCount);
+BOOL checkTriangleCollisions(TriangleCollisionStruct* collisionData, TriangleGroup* TriangleGroup);
 
 #endif // !__GAME_rep_D0_H_
