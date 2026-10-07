@@ -1,6 +1,42 @@
 #include "game/rep_31A0.h"
 #include "header_rep_data.h"
 #include "game/UnknownHomes_Game.h"
+#include "game/m_sound.h"
+#include "static/UnknownHomes_Static.h"
+
+typedef struct {
+    /* 0x00 */ u32 _00[4];
+} AramEntry31A0; // size: 0x10
+
+// Eight bytes; fn_3_109D88 returns groups of five, one group per minigame
+struct UnkRecord3448 {
+    /* 0x0 */ s32 _00;
+    /* 0x4 */ s16 _04;
+    /* 0x6 */ s16 _06;
+};
+
+extern struct {
+    /* 0x000 */ struct UnkRecord3448 _000[5];
+    /* 0x028 */ struct UnkRecord3448 _028[6][5];
+    /* 0x118 */ struct UnkRecord3448 _118[5];
+} lbl_803616CC;
+
+extern struct {
+    /* 0x000 */ u8 _000[0x715];
+    /* 0x715 */ s8 _715;
+} lbl_803C6CF8;
+
+extern struct {
+    /* 0x00 */ u8 _00[0x10];
+    /* 0x10 */ u8 _10;
+} lbl_3_data_228;
+
+extern AramEntry31A0 lbl_3_data_20FDC;
+extern u8 lbl_3_data_18910[8];
+
+extern void* _OSAllocFromHeap(u32 align, u32 size);
+extern void* ARAMTransfer(AramEntry31A0* entry, int arg1, int arg2, u32 aram);
+extern void fn_800246D4(int (*compare)(const void*, const void*), void* src, void* dst, int size, int count);
 
 u8 lbl_3_data_21268[8] = { 1, 2, 4, 5, 3, 6, 7, 0 };
 u8 lbl_3_data_21270[8] = { 1, 4, 1, 4, 0, 3, 1, 0 };
@@ -462,7 +498,7 @@ s16 lbl_3_data_21EAC[8] = { 30, 60, 20, 35, 8, 15, 8, 15 };
 f32 lbl_3_data_21EBC = 10757.015f;
 u8 lbl_3_data_21EC0[4] = { 30, 50, 70, 85 };
 u8 lbl_3_data_21EC4[4] = { 10, 6, 3, 0 };
-u32 lbl_3_data_21EC8[62][4] = {
+AramEntry31A0 lbl_3_data_21EC8[62] = {
     { 1035, 0x4013764C, 0x1A635000, 0x0007DB48 },
     { 1035, 0x4003E3DC, 0x1A6B3000, 0x00021420 },
     { 1035, 0x4002EC10, 0x1A6D4800, 0x00013108 },
@@ -534,7 +570,11 @@ void fn_3_1104D4(void) {
 
 // .text:0x001104A8 size:0x2C mapped:0x8074F53C
 void fn_3_1104A8(void) {
-    return;
+    s8 i = 0;
+
+    do {
+        g_Minigame._1DBC[i] = 0;
+    } while (++i < 4);
 }
 
 // .text:0x0010FDC8 size:0x6E0 mapped:0x8074EE5C
@@ -568,13 +608,21 @@ void fn_3_10F5BC(void) {
 }
 
 // .text:0x0010F564 size:0x58 mapped:0x8074E5F8
-void fn_3_10F564(void) {
-    return;
+s32 fn_3_10F564(void) {
+    if (g_Minigame._1A2C == -1) {
+        if (lbl_3_data_228._10 != 0) {
+            g_Minigame._1A2C = lbl_3_data_18910[g_Minigame.GameMode_MiniGame];
+            return 0;
+        }
+        return 1;
+    }
+    return 0;
 }
 
 // .text:0x0010F550 size:0x14 mapped:0x8074E5E4
 void fn_3_10F550(u8 arg0, s16 arg1) {
-    return;
+    g_Minigame._1A41 = arg0;
+    g_Minigame.someGraphicFrameCountdown = arg1;
 }
 
 // .text:0x0010F3D8 size:0x178 mapped:0x8074E46C
@@ -673,8 +721,14 @@ void fn_3_109DE0(void) {
 }
 
 // .text:0x00109D88 size:0x58 mapped:0x80748E1C
-void fn_3_109D88(void) {
-    return;
+struct UnkRecord3448* fn_3_109D88(void) {
+    if (g_Minigame._1A3C != 0) {
+        return lbl_803616CC._118;
+    }
+    if (g_Minigame.GameMode_MiniGame != 0) {
+        return lbl_803616CC._028[g_Minigame.GameMode_MiniGame - 1];
+    }
+    return lbl_803616CC._000;
 }
 
 // .text:0x00109CE8 size:0xA0 mapped:0x80748D7C
@@ -723,58 +777,117 @@ void fn_3_107E80(void) {
 }
 
 // .text:0x00107E3C size:0x44 mapped:0x80746ED0
-u32 minigame_checkIfAIInputIs_Algorithmic_Or_ControllerBased(s8 arg0) {
+u32 minigame_checkIfAIInputIs_Algorithmic_Or_ControllerBased(s8 port) {
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES && port >= 0 && port < 4) {
+        return g_Minigame._1DBC[port];
+    }
     return 0;
 }
 
 // .text:0x00107DF8 size:0x44 mapped:0x80746E8C
-void fn_3_107DF8(void) {
-    return;
+u32 fn_3_107DF8(s8 port) {
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES && port >= 0 && port < 4) {
+        return g_Minigame._1DBC[port + 4];
+    }
+    return 0;
 }
 
 // .text:0x00107DB4 size:0x44 mapped:0x80746E48
-void fn_3_107DB4(void) {
-    return;
+u32 fn_3_107DB4(s8 port) {
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES && port >= 0 && port < 4) {
+        return g_Minigame._1DC4[port];
+    }
+    return 0;
 }
 
 // .text:0x00107D70 size:0x44 mapped:0x80746E04
-void fn_3_107D70(void) {
-    return;
+u32 fn_3_107D70(s8 port) {
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES && port >= 0 && port < 4) {
+        return g_Minigame._1DC8[port];
+    }
+    return 0;
 }
 
 // .text:0x00107D34 size:0x3C mapped:0x80746DC8
-void fn_3_107D34(void) {
-    return;
+int fn_3_107D34(const void* a, const void* b) {
+    u8 j = *(u8*)b;
+    u8 i = *(u8*)a;
+
+    if (g_Minigame.minigamePoints_current_Latest[j][0] != g_Minigame.minigamePoints_current_Latest[i][0]) {
+        return g_Minigame.minigamePoints_current_Latest[j][0] - g_Minigame.minigamePoints_current_Latest[i][0];
+    }
+    return i - j;
 }
 
 // .text:0x00107CD0 size:0x64 mapped:0x80746D64
-void fn_3_107CD0(void) {
-    return;
+s32 fn_3_107CD0(void) {
+    u8 order[4];
+    u32 i;
+
+    i = 0;
+    do {
+        order[i] = i;
+        i++;
+    } while (i < g_Minigame.miniGameNumberOfParticipants);
+    fn_800246D4(fn_3_107D34, order, order, 1, g_Minigame.miniGameNumberOfParticipants);
+    return order[0];
 }
 
 // .text:0x00107C88 size:0x48 mapped:0x80746D1C
-void fn_3_107C88(void) {
-    return;
+u32 fn_3_107C88(void) {
+    u32 i;
+
+    for (i = 1; i < g_Minigame.miniGameNumberOfParticipants; i++) {
+        if (g_Minigame.minigamePoints_current_Latest[i][0] != g_Minigame.minigamePoints_current_Latest[0][0]) {
+            return FALSE;
+        }
+    }
+    return TRUE;
 }
 
 // .text:0x00107C40 size:0x48 mapped:0x80746CD4
-void fn_3_107C40(void) {
-    return;
+u32 fn_3_107C40(void) {
+    u32 i;
+
+    for (i = 1; i < g_Minigame.miniGameNumberOfParticipants; i++) {
+        if (g_Minigame.miniGameCurrentPoints[i] != g_Minigame.miniGameCurrentPoints[0]) {
+            return FALSE;
+        }
+    }
+    return TRUE;
 }
 
 // .text:0x00107C04 size:0x3C mapped:0x80746C98
-void fn_3_107C04(void) {
-    return;
+int fn_3_107C04(const void* a, const void* b) {
+    u8 j = *(u8*)b;
+    u8 i = *(u8*)a;
+
+    if (g_Minigame.miniGameCurrentPoints[j] != g_Minigame.miniGameCurrentPoints[i]) {
+        return g_Minigame.miniGameCurrentPoints[j] - g_Minigame.miniGameCurrentPoints[i];
+    }
+    return i - j;
 }
 
 // .text:0x00107BD0 size:0x34 mapped:0x80746C64
-void fn_3_107BD0(void) {
-    return;
+int fn_3_107BD0(const void* a, const void* b) {
+    u8 j = *(u8*)b;
+    u8 i = *(u8*)a;
+
+    if (g_Minigame._1E22[j] != g_Minigame._1E22[i]) {
+        return g_Minigame._1E22[j] - g_Minigame._1E22[i];
+    }
+    return i - j;
 }
 
 // .text:0x00107B9C size:0x34 mapped:0x80746C30
-void fn_3_107B9C(void) {
-    return;
+int fn_3_107B9C(const void* a, const void* b) {
+    u8 j = *(u8*)b;
+    u8 i = *(u8*)a;
+
+    if (g_Minigame._1E26[j] != g_Minigame._1E26[i]) {
+        return g_Minigame._1E26[j] - g_Minigame._1E26[i];
+    }
+    return i - j;
 }
 
 // .text:0x001079C8 size:0x1D4 mapped:0x80746A5C
@@ -783,8 +896,15 @@ void fn_3_1079C8(void) {
 }
 
 // .text:0x00107988 size:0x40 mapped:0x80746A1C
-void fn_3_107988(void) {
-    return;
+BOOL fn_3_107988(u32 id) {
+    u32 i;
+
+    for (i = 0; i < g_Minigame._1E2A - 1; i++) {
+        if (g_Minigame._1E1C[i] == id) {
+            return TRUE;
+        }
+    }
+    return FALSE;
 }
 
 // .text:0x001078F8 size:0x90 mapped:0x8074698C
@@ -819,7 +939,9 @@ void fn_3_1070A4(void) {
 
 // .text:0x00107078 size:0x2C mapped:0x8074610C
 void fn_3_107078(void) {
-    return;
+    if (g_Minigame.minigameControlStruct._1C[g_Minigame._1908] == 1) {
+        g_Minigame._1A3F = 1;
+    }
 }
 
 // .text:0x00106ED4 size:0x1A4 mapped:0x80745F68
@@ -829,15 +951,20 @@ void fn_3_106ED4(void) {
 
 // .text:0x00106EB0 size:0x24 mapped:0x80745F44
 void fn_3_106EB0(void) {
-    return;
+    fn_3_90064(0x30B);
 }
 
 // .text:0x00106E50 size:0x60 mapped:0x80745EE4
 BOOL fn_3_106E50(void) {
-    return 0;
+    if (lbl_803C6CF8._715 == 1) {
+        g_Camera._1B4 = ARAMTransfer(&lbl_3_data_20FDC, 0, 0, 0);
+        return TRUE;
+    }
+    return FALSE;
 }
 
 // .text:0x00106DFC size:0x54 mapped:0x80745E90
 void fn_3_106DFC(void) {
-    return;
+    g_Camera._AB0 = _OSAllocFromHeap(4, 0x8000);
+    g_Camera._146C = _OSAllocFromHeap(4, 0x8000);
 }

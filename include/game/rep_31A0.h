@@ -3,6 +3,8 @@
 
 #include "mssbTypes.h"
 
+struct UnkRecord3448;
+
 void fn_3_106DFC(void);
 BOOL fn_3_106E50(void);
 void fn_3_106EB0(void);
@@ -14,19 +16,19 @@ void fn_3_10754C(void);
 void fn_3_10768C(void);
 void fn_3_107784(void);
 void fn_3_1078F8(void);
-void fn_3_107988(void);
+BOOL fn_3_107988(u32 id);
 void fn_3_1079C8(void);
-void fn_3_107B9C(void);
-void fn_3_107BD0(void);
-void fn_3_107C04(void);
-void fn_3_107C40(void);
-void fn_3_107C88(void);
-void fn_3_107CD0(void);
-void fn_3_107D34(void);
-void fn_3_107D70(void);
-void fn_3_107DB4(void);
-void fn_3_107DF8(void);
-u32 minigame_checkIfAIInputIs_Algorithmic_Or_ControllerBased(s8);
+int fn_3_107B9C(const void* a, const void* b);
+int fn_3_107BD0(const void* a, const void* b);
+int fn_3_107C04(const void* a, const void* b);
+u32 fn_3_107C40(void);
+u32 fn_3_107C88(void);
+s32 fn_3_107CD0(void);
+int fn_3_107D34(const void* a, const void* b);
+u32 fn_3_107D70(s8 port);
+u32 fn_3_107DB4(s8 port);
+u32 fn_3_107DF8(s8 port);
+u32 minigame_checkIfAIInputIs_Algorithmic_Or_ControllerBased(s8 port);
 void fn_3_107E80(void);
 void fn_3_108230(void);
 void fn_3_1084B4(void);
@@ -36,7 +38,7 @@ void fn_3_108C54(void);
 void fn_3_109254(void);
 void fn_3_10952C(void);
 void fn_3_109CE8(void);
-void fn_3_109D88(void);
+struct UnkRecord3448* fn_3_109D88(void);
 void fn_3_109DE0(void);
 void fn_3_10A01C(void);
 void fn_3_10A0A0(void);
@@ -57,7 +59,7 @@ void fn_3_10EFAC(void);
 void fn_3_10F1D4(void);
 void fn_3_10F3D8(void);
 void fn_3_10F550(u8, s16);
-void fn_3_10F564(void);
+s32 fn_3_10F564(void);
 void fn_3_10F5BC(void);
 void fn_3_10F684(void);
 void fn_3_10F91C(void);

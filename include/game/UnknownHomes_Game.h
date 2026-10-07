@@ -2088,7 +2088,10 @@ typedef struct _MiniGameStruct {
     /*0x1E03*/ u8 _1E03;
     /*0x1E04*/ u32 _1E04;
     /*0x1E08*/ u8 _1E08[4][2];
-    /*0x1E10*/ u8 _1E10[0x1E2A - 0x1E10];
+    /*0x1E10*/ s16 _1E10[6];
+    /*0x1E1C*/ u8 _1E1C[6];
+    /*0x1E22*/ u8 _1E22[4];
+    /*0x1E26*/ u8 _1E26[4];
     /*0x1E2A*/ u8 _1E2A;
     /*0x1E2B*/ u8 _1E2B;
 } MiniGameStruct; // size: 0x1E2C
@@ -2307,7 +2310,9 @@ typedef struct {
     /* 0x118 */ s16 _118;
     /* 0x11A */ s16 _11A;
     /* 0x11C */ u8 _11C;
-    artificial_padding(0x11C, 0xa50, u8);
+    artificial_padding(0x11C, 0x1b4, u8);
+    /* 0x1B4 */ void* _1B4;
+    artificial_padding(0x1b4, 0xa50, void*);
     /* 0xA50 */ int _A50;
     artificial_padding(0xa50, 0xa74, int);
     /* 0xA74 */ s16 _A74;
@@ -2334,7 +2339,7 @@ typedef struct {
     /* 0xAAA */ u16 _AAA;
     /* 0xAAC */ u16 _AAC;
     /* 0xAAE */ u16 _AAE;
-    artificial_padding(0xaae, 0xab4, u16);
+    /* 0xAB0 */ void* _AB0;
     /* 0xAB5 */ u8 _AB4;
     /* 0xAB5 */ u8 _AB5;
     /* 0xAB6 */ u8 _AB6;
@@ -2354,7 +2359,9 @@ typedef struct {
     /* 0xAC8 */ u8 _ACA;
     artificial_padding(0xaca, 0xad8, u8);
     /* 0xAD8 */ u8 _AD8;
-    artificial_padding(0xad8, 0x2810, u8);
+    artificial_padding(0xad8, 0x146c, u8);
+    /* 0x146C */ void* _146C;
+    artificial_padding(0x146c, 0x2810, void*);
     /* 0x2810 */ s16 _2810;
     /* 0x2812 */ s16 _2812;
     /* 0x2814 */ s16 _2814;
