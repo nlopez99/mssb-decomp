@@ -6,6 +6,9 @@
 #include "game/rep_1188.h"
 #include "game/rep_1838.h"
 #include "game/rep_3DA8.h"
+#include "game/rep_3E58.h"
+#include "game/rep_720.h"
+#include "game/m_sound.h"
 #include "game/rep_D0.h"
 #include "static/UnknownHomes_Static.h"
 
@@ -36,12 +39,25 @@ typedef struct {
     /* 0x014 */ VecXYZ _14;
     /* 0x020 */ u8 _020[0x178 - 0x20];
     /* 0x178 */ s16 _178;
-    /* 0x17A */ u8 _17A[0x1E7 - 0x17A];
+    /* 0x17A */ u8 _17A[0x1C9 - 0x17A];
+    /* 0x1C9 */ u8 _1C9;
+    /* 0x1CA */ u8 _1CA[0x1E7 - 0x1CA];
     /* 0x1E7 */ u8 _1E7;
-    /* 0x1E8 */ u8 _1E8[0x268 - 0x1E8];
+    /* 0x1E8 */ u8 _1E8[0x211 - 0x1E8];
+    /* 0x211 */ u8 _211;
+    /* 0x212 */ u8 _212[2];
+    /* 0x214 */ u8 _214;
+    /* 0x215 */ u8 _215[0x268 - 0x215];
 } Unk13B8Fielder; // size: 0x268
 
 extern Unk13B8Fielder g_Fielders[9];
+
+extern struct {
+    /* 0x0000 */ u8 _0000[0x2C74];
+    /* 0x2C74 */ struct UnkPlayer3E58* _2C74[4];
+} lbl_8036E548;
+
+extern u8 bodyCheckProbabiliities[][5];
 
 // rep_18E8.h declares fn_3_A6ABC as a void(void) placeholder
 extern s32 fn_3_A6810(f32 x0, f32 z0, f32 x1, f32 z1);
@@ -59,6 +75,7 @@ extern s16 lbl_3_data_1C88[4];
 extern VecXZ lbl_3_data_4444[5];
 extern VecXZ lbl_3_data_4A34[4];
 extern VecXZ lbl_3_data_4A54[2][13];
+extern s16 lbl_3_data_4B40[2];
 extern f32 lbl_3_data_4B44;
 extern s16 lbl_3_data_4B48[4];
 extern VecXYZ lbl_3_data_4B58[4];
@@ -1450,8 +1467,64 @@ void fn_3_823B4(int runner) {
 }
 
 // .text:0x00081EAC size:0x508 mapped:0x806C0F40
-void fn_3_81EAC(void) {
-    return;
+int fn_3_81EAC(int runner) {
+    InMemRunnerType* r = &g_Runners[runner];
+    f32 distFirst;
+    f32 distSecond;
+    f32 pct;
+
+    if (r->fractionalBasesRan < 1.0f) {
+        return 0;
+    }
+    if (r->nextDirectionBeingProcessed == 1) {
+        r->overRun1BStage = 0;
+        r->runningDirectionCode = 2;
+        r->overrunning1BIndicator = 1;
+        distFirst = VEC_DISTANCE_XZ(&lbl_3_data_4A34[1], &r->position);
+        distSecond = VEC_DISTANCE_XZ(&lbl_3_data_4A34[2], &r->position);
+        pct = (int)(10000.0f * (distFirst / (distFirst + distSecond))) / 10000.0f;
+        r->percentTowardsNextBase = pct;
+        r->fractionalBasesRan = 1.0f + pct;
+        r->fractionalBasesRan_stored = r->fractionalBasesRan;
+        r->percentTowardsNextBase_stored = r->percentTowardsNextBase;
+        r->groundVelocity[0] = 0.0f;
+        r->percentRanPerFrame_slideAdj = 0.0f;
+        r->percentFromCurrentBase_slideAdj = r->percentTowardsNextBase - r->slidingAdjustment_backwards;
+        r->percentTowardsNextBase_slideAdj = (1.0f - r->percentTowardsNextBase) - r->slidingAdjustment_forwards;
+        return 1;
+    }
+    if (r->overRun1BStage == 1) {
+        r->overRun1BStage = 2;
+        r->overrunBaseFrames_countUp = 0;
+        r->overrunBaseFrames_countDown = lbl_3_data_4B40[0];
+        r->runningDirectionCode = 4;
+        r->overrun1B_someDistConst_proportionPerFrame =
+            1.0f / ((r->overrunBaseFrames_countDown + 1) * (r->overrunBaseFrames_countDown / 2));
+        r->overrun1B_somePositionControl = 0.0f;
+    }
+    if (r->overRun1BStage == 2) {
+        r->overrunBaseFrames_countUp++;
+        r->overrunBaseFrames_countDown--;
+        if (r->overrunBaseFrames_countDown == 0) {
+            r->overRun1BStage = 3;
+            r->overrunBaseFrames_countUp = 0;
+            r->overrunBaseFrames_countDown = lbl_3_data_4B40[1];
+        } else {
+            r->overrun1B_somePositionControl +=
+                r->overrun1B_someDistConst_proportionPerFrame * r->overrunBaseFrames_countDown;
+        }
+    }
+    if (r->overRun1BStage == 3) {
+        r->overrunBaseFrames_countUp++;
+        r->overrunBaseFrames_countDown--;
+        if (r->overrunBaseFrames_countDown == 0) {
+            r->runningDirectionCode = 2;
+            r->overRun1BStage = 0;
+            fn_3_810C4(runner, 1);
+            return 1;
+        }
+    }
+    return 1;
 }
 
 // .text:0x00081BC8 size:0x2E4 mapped:0x806C0C5C
@@ -1730,8 +1803,115 @@ void fn_3_7F9C4(void) {
 }
 
 // .text:0x0007F494 size:0x530 mapped:0x806BE528
-void fn_3_7F494(void) {
-    return;
+// 99.64%: registers differ only where the body-check fielder and its probability row are addressed
+int fn_3_7F494(int runner) {
+    InMemRunnerType* r = &g_Runners[runner];
+    int bodyCheck = 0;
+    int frames;
+    f32 t;
+
+    if (g_GameLogic.secondaryGameMode == 6) {
+        return 0;
+    }
+    if (r->runnerOnFieldOrOutOrScored != 1 && r->runnerOnFieldOrOutOrScored != 2) {
+        return 0;
+    }
+    if (r->baseStandingOn >= 0) {
+        return 0;
+    }
+    if (!(r->runningDirectionCode == 1 && r->percentRanPerFrame_slideAdj > 0.0f) &&
+        !(r->runningDirectionCode == 3 && r->percentRanPerFrame_slideAdj < 0.0f)) {
+        return 0;
+    }
+    if (r->actionCode != 0) {
+        return 1;
+    }
+    if (r->baseRoundingState == 2) {
+        return 0;
+    }
+    if (r->nextBase == 1) {
+        return 0;
+    }
+    if (r->runningDirectionCode == 3) {
+        if (r->tagUpInd == 2 && r->currentBase != r->startingBase_baseAchieved) {
+            return 0;
+        }
+        if (r->forceOutCd == 1 && g_Ball.AtBat_ContactResult != 0) {
+            return 0;
+        }
+    }
+    if (r->runningDirectionCode == 1) {
+        t = r->percentTowardsNextBase_slideAdj / r->percentRanPerFrame_slideAdj;
+    } else {
+        t = r->percentFromCurrentBase_slideAdj / -r->percentRanPerFrame_slideAdj;
+    }
+    frames = (int)t + 1;
+    if (g_Ball.ballState == 2) {
+        if (g_FieldingLogic._0C4 == r->baseRunningTowards) {
+            int margin = g_Ball.framesUntilThrowReachesDest + 6 - frames;
+            if (margin >= lbl_3_data_4C54[1] && margin <= lbl_3_data_4C54[2]) {
+                bodyCheck = 1;
+            }
+        }
+    } else if (g_Ball.ballState == 1) {
+        int margin = 6 - g_Ball.timeSinceBallPickedUp - frames;
+        if (margin >= lbl_3_data_4C54[1] && margin <= lbl_3_data_4C54[2]) {
+            bodyCheck = 1;
+        }
+    }
+    if (frames < lbl_3_data_7760[r->charID][0] || frames > lbl_3_data_7760[r->charID][1]) {
+        return 0;
+    }
+    r->actionCode = 1;
+    r->actionFrames_countUp = 0;
+    r->actionFrames_countDown = frames;
+    r->actionStage = 1;
+    if (r->runningDirectionCode == 1) {
+        r->actionInForwardDirectionInd = 1;
+        if (bodyCheck != 0 && r->forceOutCd == 0 && r->mashPercent >= lbl_3_data_4C44[0] &&
+            checkFieldingStat(g_GameLogic.teamBatting, r->rosterID, 12)) {
+            u8 base = r->baseRunningTowards;
+            if (g_FieldingLogic._101[base] != 0 &&
+                ((g_Ball.fielderWBallIndex >= 0 && g_Ball.fielderWBallIndex == g_FieldingLogic._0D0[base] &&
+                  g_Ball.timeSinceBallPickedUp <= 9) ||
+                 (g_FieldingLogic._0C4 == base && g_Ball.framesUntilThrowReachesDest < 15))) {
+                Unk13B8Fielder* fielder = &g_Fielders[g_FieldingLogic._0D0[base]];
+                u8 chance = bodyCheckProbabiliities[r->weight][fielder->_1C9];
+
+                fielder->_211 = 1;
+                fielder->_214 = r->baseRunningTowards;
+                if (RandomInt_Game(100) < chance) {
+                    r->actionCode = 2;
+                    if (g_d_GameSettings.exhibitionMatchInd == 0 && lbl_3_common_bss_37400._40 == g_GameLogic.teamBatting) {
+                        fn_3_161588(12, r->rosterID);
+                    }
+                } else {
+                    r->actionCode = 3;
+                    if (g_GameLogic._13E[g_GameLogic.teamBatting] == 0) {
+                        fn_3_6C854(g_GameLogic.teamBatting, 2);
+                    }
+                }
+                fn_3_1682AC(lbl_8036E548._2C74[runner], 12);
+                fn_3_90220(r->charID, 10);
+                playSoundEffect(0x19C);
+                fn_3_1AE44(4, 0, lbl_3_data_4444[r->baseRunningTowards].x, 0.0f, lbl_3_data_4444[r->baseRunningTowards].z);
+            }
+        }
+    } else {
+        r->actionInForwardDirectionInd = 0;
+    }
+    if (r->forceOutCd == 1 && r->baseRunningTowards != r->startingBase_baseAchieved) {
+        r->forceOutType_unsed = 1;
+    }
+    if (r->tagUpInd == 2 && r->baseRunningTowards == r->startingBase_baseAchieved) {
+        r->forceOutType_unsed = 2;
+    }
+    if (g_Pitcher.strikeOutOrWalk == 2 &&
+        (r->furthestBaseForcedToGoToOnWalk > r->currentBase ||
+         (r->forcedToAdvanceInd != 0 && r->currentBase == r->startingBase_baseAchieved))) {
+        r->forceOutType_unsed = 3;
+    }
+    return 1;
 }
 
 // .text:0x0007F2D8 size:0x1BC mapped:0x806BE36C
