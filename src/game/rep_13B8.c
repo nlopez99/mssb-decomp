@@ -37,6 +37,11 @@ typedef struct {
 
 extern Unk13B8Fielder g_Fielders[9];
 
+extern u32 fn_3_107DF8(s8 port);
+extern void fn_3_59918(int event, int arg);
+extern void fn_3_5C74C(int arg);
+extern void fn_3_5D094(int arg);
+
 // rep_AC8.h declares this as a void(void) placeholder
 extern int fn_3_52560(int fielder, f32 x, f32 z);
 
@@ -342,12 +347,65 @@ void fn_3_87E80(void) {
 
 // .text:0x00087CC8 size:0x1B8 mapped:0x806C6D5C
 void fn_3_87CC8(void) {
-    return;
+    int i;
+    f32 angle;
+
+    for (i = 0; i < 4; i++) {
+        InMemRunnerType* r = &g_Runners[i];
+        if (r->runnerOnFieldOrOutOrScored != 0) {
+            angle = atan2(-r->velocity.x, -r->velocity.y);
+            if (g_Minigame._1B15[g_Minigame._18FC[i]] == 1) {
+                angle = fn_3_9FEA8(PI + atan2(-r->velocity.x, -r->velocity.z));
+            } else if (r->runningDirectionCode != 0 && r->runningDirectionCode != 2) {
+                if (0.0f == r->velocity.x && 0.0f == r->velocity.z) {
+                    angle = atan2(-r->velocityStored.x, -r->velocityStored.z);
+                    if (r->turningAroundInd == 1 && r->runningDirectionCode == 1 && r->acceleration > 0.0f) {
+                        angle = fn_3_9FEA8(PI + angle);
+                    }
+                } else {
+                    angle = atan2(-r->velocity.x, -r->velocity.z);
+                }
+            } else if (0.0f == r->percentTowardsNextBase) {
+                angle = lbl_3_data_4B58[r->currentBase].z;
+            } else {
+                angle = lbl_3_data_4B58[r->currentBase].x;
+            }
+            r->runningAngle = angle;
+            r->angleToBall = angle;
+        }
+    }
 }
 
 // .text:0x00087AE8 size:0x1E0 mapped:0x806C6B7C
 void fn_3_87AE8(void) {
-    return;
+    InMemRunnerType* batter = &g_Runners[0];
+    int i;
+
+    batter->batterStayInBattersBoxReason = 0;
+    if (g_GameLogic.secondaryGameMode != 6) {
+        if (g_Minigame.GameMode_MiniGame == 3) {
+            batter->batterStayInBattersBoxReason = 1;
+        } else if (g_Ball.framesSinceHit < 0) {
+            batter->batterStayInBattersBoxReason = 1;
+        } else if (g_FieldingLogic._107 == 1 || g_FieldingLogic._107 == 2 || g_FieldingLogic._107 == 3) {
+            if (g_Strikes.outs < 3) {
+                batter->batterStayInBattersBoxReason = 1;
+            }
+        } else if (batter->outType == 0 || batter->runnerOnFieldOrOutOrScored != 2) {
+            if (g_Ball.framesSinceHit < batter->delayBeforeStartingToRun) {
+                batter->batterStayInBattersBoxReason = 2;
+            } else if (g_Batter.hitTrajectory == 4 && g_Ball.framesSinceHit < 90) {
+                batter->batterStayInBattersBoxReason = 2;
+            } else if (g_Batter.hitTrajectory == 3 || g_Batter.hitTrajectory == 6) {
+                batter->batterStayInBattersBoxReason = 3;
+            }
+        }
+    }
+    for (i = 0; i < 4; i++) {
+        g_Runners[i].velocity.x = g_Runners[i].position.x - g_Runners[i].positionStored.x;
+        g_Runners[i].velocity.y = g_Runners[i].position.y - g_Runners[i].positionStored.y;
+        g_Runners[i].velocity.z = g_Runners[i].position.z - g_Runners[i].positionStored.z;
+    }
 }
 
 // .text:0x0008781C size:0x2CC mapped:0x806C68B0
@@ -648,8 +706,66 @@ void fn_3_85C44(int runner, int direction) {
 }
 
 // .text:0x00085A70 size:0x1D4 mapped:0x806C4B04
-void fn_3_85A70(void) {
-    return;
+int fn_3_85A70(int runner) {
+    InMemRunnerType* r = &g_Runners[runner];
+    int next;
+    int current;
+    int toNext;
+    int toCurrent;
+    int framesNext;
+    int framesPrev;
+    int base;
+
+    if (g_FieldingLogic._0CC == 9 && g_FieldingLogic._0DE != runner) {
+        return -2;
+    }
+    if (r->baseStandingOn >= 0) {
+        return -2;
+    }
+    next = r->nextBase;
+    current = r->currentBase;
+    if (next == g_FieldingLogic._0DC && (g_FieldingLogic._0CC == current || g_FieldingLogic._0CC == 9)) {
+        return -1;
+    }
+    if (current == g_FieldingLogic._0DC && (g_FieldingLogic._0CC == next || g_FieldingLogic._0CC == 9)) {
+        return 1;
+    }
+    toNext = fn_3_52560(g_Ball.fielderWBallIndex, lbl_3_data_4444[next].x, lbl_3_data_4444[next].z);
+    toCurrent = fn_3_52560(g_Ball.fielderWBallIndex, lbl_3_data_4444[current].x, lbl_3_data_4444[current].z);
+    framesNext = r->framesToNextBase;
+    framesPrev = r->framesToPreviousBase;
+    if (g_FieldingLogic._0CC == 9) {
+        if (r->runningDirectionCode == 1 || r->runningDirectionCode == 2) {
+            if (framesNext < toNext) {
+                return 1;
+            }
+            return -1;
+        }
+        if (framesPrev < toCurrent) {
+            return -1;
+        }
+        return 1;
+    }
+    if (r->distanceFromBall > 20.0f) {
+        return -2;
+    }
+    base = r->currentBase;
+    if (r->runningDirectionCode == 1 || r->runningDirectionCode == 2) {
+        base = r->nextBase;
+    }
+    if (base != g_FieldingLogic._0CC) {
+        return -2;
+    }
+    if (r->runningDirectionCode == 1) {
+        if (framesNext <= toNext) {
+            return 1;
+        }
+        return -1;
+    }
+    if (framesPrev <= toCurrent) {
+        return -1;
+    }
+    return 1;
 }
 
 // .text:0x00085840 size:0x230 mapped:0x806C48D4
@@ -1114,7 +1230,42 @@ void fn_3_7DD24(int player) {
 
 // .text:0x0007DB30 size:0x1F4 mapped:0x806BCBC4
 void fn_3_7DB30(int player) {
-    return;
+    InputStruct* input = &g_Controls[g_Minigame._18FC[player]];
+    InMemRunnerType* r = &g_Runners[player];
+
+    if (fn_3_107DF8(g_Minigame._18FC[player])) {
+        input = &g_Minigame._1D7C[g_Minigame._18FC[player]];
+    }
+    if (r->runningDirectionCode == 3) {
+        if (r->nextDirectionBeingProcessed == 2 || r->nextDirectionBeingProcessed == 1) {
+            if (input->newButtonInput & 0x400) {
+                fn_3_7FEA8(player, 3);
+            } else if (input->newButtonInput & 0x800) {
+                fn_3_7FEA8(player, 1);
+            }
+        } else if (input->newButtonInput & 0x800) {
+            fn_3_7FEA8(player, 2);
+        }
+    } else if (r->runningDirectionCode == 1) {
+        if (r->nextDirectionBeingProcessed == 2 || r->nextDirectionBeingProcessed == 3) {
+            if (input->newButtonInput & 0x400) {
+                fn_3_7FEA8(player, 3);
+            } else if (input->newButtonInput & 0x800) {
+                fn_3_7FEA8(player, 1);
+            }
+        } else if (input->newButtonInput & 0x400) {
+            fn_3_7FEA8(player, 2);
+        }
+    } else {
+        if (input->buttonInput & 0x800) {
+            fn_3_7FEA8(player, 1);
+        } else if (input->buttonInput & 0x400) {
+            fn_3_7FEA8(player, 3);
+        }
+    }
+    if (input->newButtonInput & 0xF00) {
+        r->newButtonThisFrame_forMashPurposes = 1;
+    }
 }
 
 // .text:0x0007D9DC size:0x154 mapped:0x806BCA70

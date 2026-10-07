@@ -43,7 +43,7 @@ void fn_3_84AD0(void);
 void fn_3_85074(void);
 void fn_3_85744(int runner);
 void fn_3_85840(void);
-void fn_3_85A70(void);
+int fn_3_85A70(int runner);
 void fn_3_85C44(int runner, int direction);
 void fn_3_85CB0(void);
 void fn_3_85EF4(int runner, int direction);
