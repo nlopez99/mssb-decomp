@@ -301,20 +301,21 @@ void fn_3_E4A38(MtxPtr mtx, Rep2998Mesh* mesh) {
     f32 maxX;
     f32 maxY;
     f32 maxZ;
-    u8* p;
     u32 n;
+    u8* p;
 
-    maxX = maxY = maxZ = -10000.0f;
-    minX = minY = minZ = 10000.0f;
+    minX = 10000.0f;
+    minY = 10000.0f;
+    minZ = 10000.0f;
+    maxX = -10000.0f;
+    maxY = -10000.0f;
+    maxZ = -10000.0f;
     p = mesh->_08;
     for (;;) {
         if (((Rep2998MeshHeader*)p)->_02 == 0) {
             break;
         }
-        n = ((Rep2998MeshHeader*)p)->_02 * 3;
-        if (((Rep2998MeshHeader*)p)->_01) {
-            n = ((Rep2998MeshHeader*)p)->_02 + 2;
-        }
+        n = ((Rep2998MeshHeader*)p)->_01 ? ((Rep2998MeshHeader*)p)->_02 + 2 : ((Rep2998MeshHeader*)p)->_02 * 3;
         p += sizeof(Rep2998MeshHeader);
         do {
             if (!lbl_3_bss_AE01) {
@@ -690,16 +691,17 @@ void fn_3_E25D0(Rep2998Obj* obj, u32 anim) {
 
 // .text:0x000E2324 size:0x2AC mapped:0x807213B8
 void fn_3_E2324(Rep2998Obj* obj) {
-    Vec pos = { 0.0f, 0.0f, 0.0f };
-    Vec down = { 0.0f, -1.0f, 0.0f };
-    u8 fielders[7] = { 2, 3, 4, 5, 6, 7, 8 };
     Mtx bone;
     Mtx m;
     Vec fielderPos;
     Vec d;
     Vec dir;
+    u8 fielders[7] = { 2, 3, 4, 5, 6, 7, 8 };
+    Vec pos = { 0.0f, 0.0f, 0.0f };
+    Vec down = { 0.0f, -1.0f, 0.0f };
     f32 limit;
     u32 i;
+    Rep2998Fielder* fielder;
 
     if (obj->_CA) {
         return;
@@ -711,24 +713,24 @@ void fn_3_E2324(Rep2998Obj* obj) {
     pos.y *= -1.0f;
     limit = 2.2f * obj->_B4;
     for (i = 0; i < 7; i++) {
-        if (g_Fielders[fielders[i]]._210 != 0) {
-            continue;
-        }
-        fielderPos.x = g_Fielders[fielders[i]]._000.x;
-        fielderPos.y = 1.5f;
-        fielderPos.z = g_Fielders[fielders[i]]._000.z;
-        PSVECSubtract(&pos, &fielderPos, &d);
-        dir.x = d.x;
-        dir.y = 0.0f;
-        dir.z = d.z;
-        PSVECNormalize(&dir, &dir);
-        if (PSVECMag(&d) <= limit) {
-            fn_3_253A4(fielders[i], fn_3_9FB8C(dir.x, dir.z));
-            if (obj->_CB != 8 && obj->_CA == 0) {
-                fn_3_E25D0(obj, 9);
-                obj->_C4 = 5;
+        fielder = &g_Fielders[fielders[i]];
+        if (fielder->_210 == 0) {
+            fielderPos.x = fielder->_000.x;
+            fielderPos.y = 1.5f;
+            fielderPos.z = fielder->_000.z;
+            PSVECSubtract(&pos, &fielderPos, &d);
+            dir.x = d.x;
+            dir.y = 0.0f;
+            dir.z = d.z;
+            PSVECNormalize(&dir, &dir);
+            if (PSVECMag(&d) <= limit) {
+                fn_3_253A4(fielders[i], fn_3_9FB8C(dir.x, dir.z));
+                if (obj->_CB != 8 && obj->_CA == 0) {
+                    fn_3_E25D0(obj, 9);
+                    obj->_C4 = 5;
+                }
+                playSound(4);
             }
-            playSound(4);
         }
     }
 }
