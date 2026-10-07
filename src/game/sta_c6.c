@@ -342,8 +342,9 @@ BOOL fn_3_E8AC8(void) {
 }
 
 // .text:0x000E7B20 size:0xFA8 mapped:0x80726BB4
-// The target reaches .data 0x19018-0x19770 from one pool base, which externs cannot
-// reproduce; with statics this scores 99.5% (pool bases in swapped registers, third loop counters)
+// Reads .data 0x19018-0x19770 through one pool base, which externs cannot reproduce;
+// with that data as statics here this scores 99.5% (the two pool bases in swapped
+// registers, and other counters in the third loop)
 u8 fn_3_E7B20(void** files, s32* indices) {
     StaC6Draw* draw;
     StaC6Draw* entry;
@@ -648,27 +649,26 @@ void fn_3_E7A2C(void* arg) {
 }
 
 // .text:0x000E763C size:0x3F0 mapped:0x807266D0
-// 98.4%: the target copies i's zero into the first loop's induction registers
-// (mr r21,r24), and its frame is 0x10 bytes larger
+// 99.97%: the target frame is 0x10 bytes larger; the code matches with an 0x44-byte
+// Control, 8 bytes more than C3/control.h declares
 void fn_3_E763C(void) {
     Control control;
     Mtx mtx;
     StaC6Draw* draw;
-    u32 size;
     s32 start;
     s32 j;
     s32 i;
     s32 n;
 
-    size = lbl_3_common_bss_350E4._30 * sizeof(u32) + lbl_3_common_bss_350E4._30 * sizeof(u16) +
+    i = lbl_3_common_bss_350E4._30 * sizeof(u32) + lbl_3_common_bss_350E4._30 * sizeof(u16) +
            lbl_3_common_bss_350E4._30 * sizeof(u32) + lbl_3_common_bss_350E4._30 * 2 * sizeof(Vec);
     if (lbl_3_common_bss_350E4._48 == NULL) {
-        lbl_3_common_bss_350E4._48 = _OSAllocFromHeap(4, size);
+        lbl_3_common_bss_350E4._48 = _OSAllocFromHeap(4, i);
         lbl_3_common_bss_350E4._3C = (u32*)(lbl_3_common_bss_350E4._48 + lbl_3_common_bss_350E4._30 * 2);
         lbl_3_common_bss_350E4._44 = lbl_3_common_bss_350E4._3C + lbl_3_common_bss_350E4._30;
         lbl_3_common_bss_350E4._40 = (u16*)(lbl_3_common_bss_350E4._44 + lbl_3_common_bss_350E4._30);
     }
-    memset(lbl_3_common_bss_350E4._48, 0, size);
+    memset(lbl_3_common_bss_350E4._48, 0, i);
 
     n = 0;
     for (i = 0; i < 10; i++) {
@@ -713,8 +713,8 @@ void fn_3_E763C(void) {
                     lbl_3_common_bss_350E4._44[start] = j + lbl_3_bss_AEAD;
                     start++;
                     lbl_3_common_bss_350E4._3C[n]++;
-                    control.type = 0;
                     draw = &lbl_3_common_bss_350E4._00[j + lbl_3_bss_AEAD];
+                    control.type = 0;
                     CTRLSetTranslation(&control, lbl_3_data_19644[j].x, lbl_3_data_19644[j].y,
                                        lbl_3_data_19644[j].z);
                     CTRLSetRotation(&control, 0.0f, lbl_3_data_19698[j], 0.0f);
@@ -811,8 +811,9 @@ void fn_3_E7350(void) {
 }
 
 // .text:0x000E6D90 size:0x5C0 mapped:0x80725E24
-// The target reaches .data 0x19018-0x19770 from one pool base, which externs cannot
-// reproduce; with that data defined here as statics this scores 99.96% (frame 0x10 smaller)
+// Reads .data 0x19018-0x19770 through one pool base, which externs cannot reproduce;
+// with that data as statics here this scores 99.96%: the inlined fn_3_E5A84 frame is
+// 0x10 bytes smaller, as C3/control.h's Control is 8 bytes shorter than this game's
 void fn_3_E6D90(void* arg) {
     StaC6Draw* draw = arg;
 
@@ -865,8 +866,9 @@ void fn_3_E6D90(void* arg) {
 }
 
 // .text:0x000E6A48 size:0x348 mapped:0x80725ADC
-// The target reaches .data 0x19018-0x19770 from one pool base, which externs cannot
-// reproduce; with that data defined here as statics this scores 99.8% (frame 0x10 smaller)
+// Reads .data 0x19018-0x19770 through one pool base, which externs cannot reproduce;
+// with that data as statics here this scores 99.8%: the inlined fn_3_E5A84 frame is
+// 0x10 bytes smaller, as C3/control.h's Control is 8 bytes shorter than this game's
 void fn_3_E6A48(StaC6Draw* draw) {
     fn_3_E5A84(draw);
     fn_3_E6578(draw);
