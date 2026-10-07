@@ -2695,8 +2695,6 @@ void fn_3_14B92C(u32 duration, Vec* pos) {
 }
 
 // .text:0x0014B53C size:0x3F0 mapped:0x8078A5D0
-// 99.90%: the inlined fn_3_14B248 keeps the angle in f28 and its cosine in f29 in the
-// target, the reverse here; fn_3_14B248 itself matches.
 void fn_3_14B53C(PathEmitter3880* emitter, u32 duration, Vec* pos) {
     Vec diff;
     f32 dist;
@@ -2759,7 +2757,8 @@ void fn_3_14B248(PathEmitter3880* emitter, Particle3880* p) {
 
     p->_38 = p->_3C = lbl_3_data_26E24[3] / 100000.0f;
     p->color[3] = lbl_3_data_26E24[5];
-    angle = 0.017453292f * (rand() % 360);
+    angle = rand() % 360;
+    angle = 0.017453292f * angle;
     dist = (rand() % 200u) / 1000.0;
     offset.x = dist * cosf_kludge(angle);
     offset.y = dist * sinf_kludge(angle);
@@ -2771,7 +2770,7 @@ void fn_3_14B248(PathEmitter3880* emitter, Particle3880* p) {
 }
 
 // .text:0x0014AC40 size:0x608 mapped:0x80789CD4
-// 99.72%: FPRs differ in the fabs() steps and inside the inlined fn_3_14B248
+// 99.91%: FPRs differ in the fabs() steps
 BOOL fn_3_14AC40(Emitter3880* emitter) {
     PathEmitter3880* self = (PathEmitter3880*)emitter;
     Particle3880* p;
