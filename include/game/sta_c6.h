@@ -35,7 +35,7 @@ void fn_3_E7388(void* arg0, struct StaC6Sort* out);
 void fn_3_E7424(void);
 void* fn_3_E751C(s32 idx, Mtx m);
 void fn_3_E763C(void);
-void fn_3_E7A2C(struct StaC6Draw* draw);
+void fn_3_E7A2C(void* arg);
 u8 fn_3_E7B20(void** files, s32* indices);
 BOOL fn_3_E8AC8(void);
 void fn_3_E8B24(void** files);

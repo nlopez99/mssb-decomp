@@ -143,11 +143,6 @@ typedef struct StaC6Sort {
     /* 0x04 */ s32 idx;
 } StaC6Sort; // size: 0x8
 
-typedef struct {
-    /* 0x00 */ Vec min;
-    /* 0x0C */ Vec max;
-} StaC6Bounds; // size: 0x18
-
 extern struct {
     /* 0x00 */ StaC6Draw* _00;
     /* 0x04 */ StaC6Draw* _04;
@@ -164,7 +159,7 @@ extern struct {
     /* 0x3C */ u32* _3C;
     /* 0x40 */ u16* _40;
     /* 0x44 */ u32* _44;
-    /* 0x48 */ StaC6Bounds* _48;
+    /* 0x48 */ Vec* _48;
     /* 0x4C */ u8 _4C[0x64 - 0x4C];
     /* 0x64 */ u16 _64;
     /* 0x66 */ u8 _66[0x6C - 0x66];
@@ -188,9 +183,15 @@ extern u8 lbl_3_data_84B8[30][2];
 
 // .data 0x19018 to 0x19770 belongs to this file, but lies outside its splits.txt ranges
 extern GXColor lbl_3_data_19018[3];
-extern GXColor lbl_3_data_19024[27];
-extern StaC6Prop lbl_3_data_19090[4][16];
-extern StaC6Slot lbl_3_data_19590[4][8];
+extern GXColor lbl_3_data_19024[9][3];
+extern StaC6Prop lbl_3_data_19090[16];
+extern StaC6Prop lbl_3_data_191D0[16];
+extern StaC6Prop lbl_3_data_19310[16];
+extern StaC6Prop lbl_3_data_19450[16];
+extern StaC6Slot lbl_3_data_19590[8];
+extern StaC6Slot lbl_3_data_195B0[8];
+extern StaC6Slot lbl_3_data_195D0[8];
+extern StaC6Slot lbl_3_data_195F0[8];
 extern u8 lbl_3_data_19610[0x2F];
 extern s8 lbl_3_data_1963F;
 extern s8 lbl_3_data_19640;
@@ -239,6 +240,25 @@ static u8 lbl_3_bss_AE53;
 static u8 lbl_3_bss_AE52;
 static u8 lbl_3_bss_AE51;
 static u8 lbl_3_bss_AE50;
+
+static inline void playStadiumSound(s32 sound) {
+    SND_VOICEID voice;
+    u8 vol;
+    s32 stadium = g_d_GameSettings.StadiumID;
+
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+        vol = lbl_3_data_84B8[sound][0];
+    } else {
+        vol = lbl_3_data_8404[stadium][sound][0];
+    }
+    voice = sndFXStartEx(lbl_3_data_81DC[stadium] + sound, vol, 63, 0);
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+        vol = lbl_3_data_84B8[sound][1];
+    } else {
+        vol = lbl_3_data_8404[stadium][sound][1];
+    }
+    sndFXCtrl(voice, 91, vol);
+}
 
 // .text:0x000E8B24 size:0x5F8 mapped:0x80727BB8
 void fn_3_E8B24(void** files) {
@@ -334,26 +354,28 @@ u8 fn_3_E7B20(void** files, s32* indices) {
     lbl_3_bss_AEAC = 0;
     memset(lbl_3_bss_AE8C, 0xFF, sizeof(lbl_3_bss_AE8C));
     memset(lbl_3_common_bss_350E4._00, 0, lbl_3_common_bss_350E4._30 * sizeof(StaC6Draw));
-    entry = draw = lbl_3_common_bss_350E4._00;
+    draw = lbl_3_common_bss_350E4._00;
+    entry = draw;
     switch (g_Minigame.miniGameNumberOfParticipants) {
     case 2:
-        lbl_3_bss_AEB4 = lbl_3_data_19090[0];
-        lbl_3_bss_AEB0 = lbl_3_data_19590[0];
+        lbl_3_bss_AEB4 = lbl_3_data_19090;
+        lbl_3_bss_AEB0 = lbl_3_data_19590;
         break;
     case 3:
-        lbl_3_bss_AEB4 = lbl_3_data_19090[1];
-        lbl_3_bss_AEB0 = lbl_3_data_19590[1];
+        lbl_3_bss_AEB4 = lbl_3_data_191D0;
+        lbl_3_bss_AEB0 = lbl_3_data_195B0;
         break;
+    case 4:
     default:
-        lbl_3_bss_AEB4 = lbl_3_data_19090[2];
-        lbl_3_bss_AEB0 = lbl_3_data_19590[2];
+        lbl_3_bss_AEB4 = lbl_3_data_19310;
+        lbl_3_bss_AEB0 = lbl_3_data_195D0;
         break;
     }
     lbl_3_bss_AEAE = g_Minigame.miniGameNumberOfParticipants - 2;
     if (g_Minigame._19A6 > 1) {
         lbl_3_bss_AE52 = 1;
-        lbl_3_bss_AEB4 = lbl_3_data_19090[3];
-        lbl_3_bss_AEB0 = lbl_3_data_19590[3];
+        lbl_3_bss_AEB4 = lbl_3_data_19450;
+        lbl_3_bss_AEB0 = lbl_3_data_195F0;
         lbl_3_bss_AEAE = 3;
     }
 
@@ -378,10 +400,10 @@ u8 fn_3_E7B20(void** files, s32* indices) {
         draw->_90_6 = 1;
         draw->control.type = 0;
         CTRLSetTranslation(&draw->control, 0.0f, 0.0f, 0.0f);
-        entry->_B8 = &lbl_3_data_19024[entry->type * 3];
-        entry->_B4 = &lbl_3_data_19024[entry->type * 3 + 1];
-        entry->_B0 = &lbl_3_data_19024[entry->type * 3 + 2];
-        entry->_BC = &lbl_3_data_19024[25];
+        entry->_B8 = &lbl_3_data_19024[entry->type][0];
+        entry->_B4 = &lbl_3_data_19024[entry->type][1];
+        entry->_B0 = &lbl_3_data_19024[entry->type][2];
+        entry->_BC = &lbl_3_data_19024[8][1];
         fn_3_E6528(entry);
         draw->_90_5 = 0;
         draw->_92 = 0xFF;
@@ -419,10 +441,10 @@ u8 fn_3_E7B20(void** files, s32* indices) {
         draw->_90_6 = 1;
         draw->control.type = 0;
         CTRLSetTranslation(&draw->control, 0.0f, 0.0f, 0.0f);
-        entry->_B8 = &lbl_3_data_19024[(entry->type - 8) * 3];
-        entry->_B4 = &lbl_3_data_19024[(entry->type - 8) * 3 + 1];
-        entry->_B0 = &lbl_3_data_19024[(entry->type - 8) * 3 + 2];
-        entry->_BC = &lbl_3_data_19024[25];
+        entry->_B8 = &lbl_3_data_19024[entry->type - 8][0];
+        entry->_B4 = &lbl_3_data_19024[entry->type - 8][1];
+        entry->_B0 = &lbl_3_data_19024[entry->type - 8][2];
+        entry->_BC = &lbl_3_data_19024[8][1];
         fn_3_E6528(entry);
         draw->_90_5 = 0;
         draw->_92 = 0xFF;
@@ -481,14 +503,15 @@ u8 fn_3_E7B20(void** files, s32* indices) {
     draw[1]._90_7 = 1;
     draw[1]._90_6 = 0;
     draw[1].control.type = 0;
-    CTRLSetTranslation(&draw[1].control, 0.0f, 0.0f, 0.0f);
+    entry = &draw[1];
+    CTRLSetTranslation(&entry->control, 0.0f, 0.0f, 0.0f);
     draw[1]._90_5 = 0;
     draw[1]._92 = 0xFF;
     draw[1]._8C = NULL;
     draw[1]._94 = 0;
     draw[1]._96 = -1;
     draw[1]._98 = 1;
-    fn_3_E7A2C(&draw[1]);
+    fn_3_E7A2C(entry);
 
     draw[2]._C0 = n + 2;
     draw[2].type = 26;
@@ -497,14 +520,15 @@ u8 fn_3_E7B20(void** files, s32* indices) {
     draw[2]._90_7 = 1;
     draw[2]._90_6 = 0;
     draw[2].control.type = 0;
-    CTRLSetTranslation(&draw[2].control, 0.0f, 0.0f, 0.0f);
+    entry = &draw[2];
+    CTRLSetTranslation(&entry->control, 0.0f, 0.0f, 0.0f);
     draw[2]._90_5 = 0;
     draw[2]._92 = 0xFF;
     draw[2]._8C = NULL;
     draw[2]._94 = 0;
     draw[2]._96 = -1;
     draw[2]._98 = 0;
-    fn_3_E7A2C(&draw[2]);
+    fn_3_E7A2C(entry);
 
     draw[3]._C0 = n + 3;
     draw[3].type = 25;
@@ -513,14 +537,15 @@ u8 fn_3_E7B20(void** files, s32* indices) {
     draw[3]._90_7 = 1;
     draw[3]._90_6 = 0;
     draw[3].control.type = 0;
-    CTRLSetTranslation(&draw[3].control, 0.0f, 0.0f, 0.0f);
+    entry = &draw[3];
+    CTRLSetTranslation(&entry->control, 0.0f, 0.0f, 0.0f);
     draw[3]._90_5 = 0;
     draw[3]._92 = 0xFF;
     draw[3]._8C = NULL;
     draw[3]._94 = 0;
     draw[3]._96 = -1;
     draw[3]._98 = 1;
-    fn_3_E7A2C(&draw[3]);
+    fn_3_E7A2C(entry);
 
     i = n + 4;
     draw += 4;
@@ -561,7 +586,9 @@ u8 fn_3_E7B20(void** files, s32* indices) {
 }
 
 // .text:0x000E7A2C size:0xF4 mapped:0x80726AC0
-void fn_3_E7A2C(StaC6Draw* draw) {
+void fn_3_E7A2C(void* arg) {
+    StaC6Draw* draw = arg;
+
     draw->_7C = NULL;
     draw->_80 = NULL;
     draw->_84 = NULL;
@@ -616,6 +643,84 @@ void fn_3_E7A2C(StaC6Draw* draw) {
 
 // .text:0x000E763C size:0x3F0 mapped:0x807266D0
 void fn_3_E763C(void) {
+    Control control;
+    Mtx mtx;
+    StaC6Draw* draw;
+    u32 size;
+    s32 start;
+    s32 j;
+    s32 i;
+    s32 n;
+
+    size = lbl_3_common_bss_350E4._30 * sizeof(u32) + lbl_3_common_bss_350E4._30 * sizeof(u16) +
+           lbl_3_common_bss_350E4._30 * sizeof(u32) + lbl_3_common_bss_350E4._30 * 2 * sizeof(Vec);
+    if (lbl_3_common_bss_350E4._48 == NULL) {
+        lbl_3_common_bss_350E4._48 = _OSAllocFromHeap(4, size);
+        lbl_3_common_bss_350E4._3C = (u32*)(lbl_3_common_bss_350E4._48 + lbl_3_common_bss_350E4._30 * 2);
+        lbl_3_common_bss_350E4._44 = lbl_3_common_bss_350E4._3C + lbl_3_common_bss_350E4._30;
+        lbl_3_common_bss_350E4._40 = (u16*)(lbl_3_common_bss_350E4._44 + lbl_3_common_bss_350E4._30);
+    }
+    memset(lbl_3_common_bss_350E4._48, 0, size);
+
+    n = 0;
+    for (i = 0; i < 10; i++) {
+        start = lbl_3_common_bss_350E4._40[n] = lbl_3_common_bss_350E4._40[n - 1] + lbl_3_common_bss_350E4._3C[n - 1];
+        fn_3_B8574();
+        if ((lbl_803C77B8._00 & 0x800) && i != 0) {
+            continue;
+        }
+        if ((lbl_803C77B8._00 & 0x400) && j != 0) {
+            continue;
+        }
+        for (j = 0; j < 15; j++) {
+            if (lbl_3_bss_AEB4[j]._12 == i) {
+                draw = &lbl_3_common_bss_350E4._00[j];
+                if (draw->_90_6 && draw->_78 != NULL) {
+                    lbl_3_common_bss_350E4._44[start] = j;
+                    start++;
+                    lbl_3_common_bss_350E4._3C[n]++;
+                    control.type = 0;
+                    draw = &lbl_3_common_bss_350E4._00[j];
+                    CTRLSetTranslation(&control, lbl_3_bss_AEB4[j].pos.x, lbl_3_bss_AEB4[j].pos.y,
+                                       lbl_3_bss_AEB4[j].pos.z);
+                    CTRLSetRotation(&control, 0.0f, lbl_3_bss_AEB4[j].rotY, 0.0f);
+                    CTRLBuildMatrix(&control, mtx);
+                    fn_3_B8464(mtx, draw->_78);
+                }
+            }
+        }
+        if (lbl_3_common_bss_350E4._3C[n] != 0) {
+            fn_3_B8414(&lbl_3_common_bss_350E4._48[n * 2], &lbl_3_common_bss_350E4._48[n * 2 + 1]);
+            n++;
+        }
+    }
+
+    for (i = 0; i < 10; i++) {
+        start = lbl_3_common_bss_350E4._40[n] = lbl_3_common_bss_350E4._40[n - 1] + lbl_3_common_bss_350E4._3C[n - 1];
+        fn_3_B8574();
+        for (j = 0; j < 7; j++) {
+            if (lbl_3_bss_AEB4[j]._12 == i) {
+                draw = &lbl_3_common_bss_350E4._00[j];
+                if (draw->_90_6 && draw->_78 != NULL) {
+                    lbl_3_common_bss_350E4._44[start] = j + lbl_3_bss_AEAD;
+                    start++;
+                    lbl_3_common_bss_350E4._3C[n]++;
+                    control.type = 0;
+                    draw = &lbl_3_common_bss_350E4._00[j + lbl_3_bss_AEAD];
+                    CTRLSetTranslation(&control, lbl_3_data_19644[j].x, lbl_3_data_19644[j].y,
+                                       lbl_3_data_19644[j].z);
+                    CTRLSetRotation(&control, 0.0f, lbl_3_data_19698[j], 0.0f);
+                    CTRLBuildMatrix(&control, mtx);
+                    fn_3_B8464(mtx, draw->_78);
+                }
+            }
+        }
+        if (lbl_3_common_bss_350E4._3C[n] != 0) {
+            fn_3_B8414(&lbl_3_common_bss_350E4._48[n * 2], &lbl_3_common_bss_350E4._48[n * 2 + 1]);
+            n++;
+        }
+        lbl_3_common_bss_350E4._64 = n;
+    }
 }
 
 // .text:0x000E751C size:0x120 mapped:0x807265B0
@@ -700,10 +805,69 @@ void fn_3_E7350(void) {
 // .text:0x000E6D90 size:0x5C0 mapped:0x80725E24
 void fn_3_E6D90(void* arg) {
     StaC6Draw* draw = arg;
+
+    fn_3_E5A84(draw);
+    if (g_GameLogic.gameStatus == GAME_STATUS_DEFAULT || g_GameLogic.gameStatus == GAME_STATUS_AT_BAT) {
+        fn_3_E6528(draw);
+        if (lbl_3_bss_AE52) {
+            lbl_3_bss_AE52 = 0;
+        }
+    }
+    if (g_GameLogic.gameStatus == GAME_STATUS_LIVE_BALL) {
+        if (g_Ball.AtBat_ContactResult != 0) {
+            if (lbl_3_data_1963F == draw->_C0 &&
+                g_Minigame.maybeTFCollisionResultState == lbl_3_data_1972C[draw->type])
+            {
+                memcpy(&draw->color, draw->_B0, 4);
+                draw->_BC = &lbl_3_data_19024[8][2];
+                if (!draw->_C2) {
+                    playStadiumSound(20);
+                }
+                draw->_C2 = 1;
+                if (g_Minigame.toyFieldBallStateResult != 0 &&
+                    g_Minigame.toyFieldBallStateResult == lbl_3_data_1972C[draw->type] && draw->type >= 8)
+                {
+                    if (!lbl_3_data_196B4[draw->_C4]) {
+                        playStadiumSound(23);
+                    }
+                    lbl_3_data_196B4[draw->_C4] = 1;
+                }
+            } else {
+                memcpy(&draw->color, draw->_B8, 4);
+                draw->_BC = &lbl_3_data_19024[8][0];
+                draw->_C2 = 0;
+            }
+        }
+    } else {
+        draw->_A0 = 0;
+    }
+    if (lbl_3_bss_AE52) {
+        memcpy(&draw->color, draw->_B0, 4);
+        draw->_BC = &lbl_3_data_19024[8][2];
+        draw->_C2 = 1;
+    }
+    fn_3_E5FEC(draw);
+    fn_3_E6578(draw);
+    if (draw->_9C != NULL) {
+        fn_800BDA94(draw->_9C, fn_80052768_getCamera(fn_8005268C())->view);
+        draw->_9C->_00->_18[2]->_14 = draw->_9C->_00->_18[2]->_18;
+    }
 }
 
 // .text:0x000E6A48 size:0x348 mapped:0x80725ADC
 void fn_3_E6A48(StaC6Draw* draw) {
+    fn_3_E5A84(draw);
+    fn_3_E6578(draw);
+    if (draw->_9C != NULL) {
+        fn_3_E5FEC(draw);
+        fn_800BDA94(draw->_9C, fn_80052768_getCamera(fn_8005268C())->view);
+    }
+    if (g_GameLogic.gameStatus == GAME_STATUS_LIVE_BALL && g_Minigame.toyFieldBallStateResult != 0 &&
+        g_Minigame.toyFieldBallStateResult == lbl_3_data_1972C[draw->type] && lbl_3_data_1963F == draw->_C0 &&
+        draw->type >= 8)
+    {
+        lbl_3_data_196B4[draw->_C4] = 1;
+    }
 }
 
 // .text:0x000E698C size:0xBC mapped:0x80725A20
@@ -833,7 +997,7 @@ void fn_3_E6578(StaC6Draw* draw) {
 // .text:0x000E6528 size:0x50 mapped:0x807255BC
 void fn_3_E6528(StaC6Draw* draw) {
     memcpy(&draw->color, draw->_B4, 4);
-    draw->_BC = &lbl_3_data_19024[25];
+    draw->_BC = &lbl_3_data_19024[8][1];
     draw->_C2 = 0;
 }
 
