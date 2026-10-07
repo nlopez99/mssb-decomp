@@ -272,7 +272,7 @@ void fn_3_11D1B0(void) {
 }
 
 // .text:0x0011D2C8 size:0xE4 mapped:0x8075C35C
-void fn_3_11D2C8(void) {
+void fn_3_11D2C8(s32 model, s32 first, s32 count, void* anim, s32 arg4) {
     return;
 }
 

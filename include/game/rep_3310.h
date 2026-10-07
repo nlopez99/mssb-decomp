@@ -57,6 +57,6 @@ void fn_3_11CD00(void);
 void fn_3_11CF04(void);
 void fn_3_11CF84(void);
 void fn_3_11D1B0(void);
-void fn_3_11D2C8(void);
+void fn_3_11D2C8(s32 model, s32 first, s32 count, void* anim, s32 arg4);
 
 #endif // !__GAME_rep_3310_H_
