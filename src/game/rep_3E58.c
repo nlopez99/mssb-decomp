@@ -66,9 +66,19 @@ extern struct {
 extern u32 lbl_803CBD0C;
 extern void* lbl_803CC1B8;
 
-// This unit's .data (0x28508 to 0x285A8) lies outside its ranges in splits.txt
-extern UnkParticle3E58 lbl_3_data_28508;
-extern u8 lbl_3_data_28558[0x18];
+UnkParticle3E58 lbl_3_data_28508 = {
+    0, 0x20, 1, 0x24,
+    { 0.0f, 0.0f, 0.0f },
+    0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.25f,
+    0xFF, 0,
+    { 0.0f, 0.0f, 0.0f },
+    0xFF, 0xFF, 0xFF, 0,
+};
+
+u8 lbl_3_data_28558[0x18] = {
+    0x04, 0x05, 0x06, 0x07, 0x08, 0x10, 0x11, 0x12, 0x13, 0x14, 0x16, 0x17,
+    0x18, 0x19, 0x1A, 0x1C, 0x1D, 0x1E, 0x1F, 0x20, 0x21, 0x22, 0x23, 0x00,
+};
 
 static s8 lbl_3_bss_B9E0;
 
@@ -76,6 +86,126 @@ extern BOOL fn_8001B728(s32, s32, Vec*);
 extern void fn_80026998(UnkParticle3E58*);
 extern void fn_800B0A14_removeQueue(void);
 extern void* fn_800B0A5C_insertQueue(void (*)(void), s32);
+
+// .text:0x001682AC size:0x168 mapped:0x807A7340
+void fn_3_1682AC(UnkPlayer3E58* player, s8 type) {
+    UnkTask3E58* task = NULL;
+
+    if (player != NULL) {
+        switch (type) {
+        case 1:
+            task = fn_800B0A5C_insertQueue(fn_3_1680D4, 0xFFFA);
+            break;
+        case 2:
+            task = fn_800B0A5C_insertQueue(fn_3_167F14, 0xFFFA);
+            break;
+        case 4:
+            task = fn_800B0A5C_insertQueue(fn_3_167CC4, 0xFFFA);
+            break;
+        case 3:
+            task = fn_800B0A5C_insertQueue(fn_3_167D4C, 0xFFFA);
+            break;
+        case 10:
+            task = fn_800B0A5C_insertQueue(fn_3_1678A8, 0xFFFA);
+            break;
+        case 8:
+            task = fn_800B0A5C_insertQueue(fn_3_1674D0, 0xFFFA);
+            break;
+        case 6:
+            task = fn_800B0A5C_insertQueue(fn_3_166FCC, 0xFFFA);
+            break;
+        case 12:
+            task = fn_800B0A5C_insertQueue(fn_3_167178, 0xFFFA);
+            break;
+        case 11:
+            task = fn_800B0A5C_insertQueue(fn_3_166E04, 0xFFFA);
+            break;
+        case 7:
+            task = fn_800B0A5C_insertQueue(fn_3_166D40, 0xFFFA);
+            break;
+        }
+        if (task != NULL) {
+            task->_14 = player;
+            task->_18 = 0;
+            task->_1A = type;
+            task->_1B = 0;
+        }
+    }
+}
+
+// .text:0x001680D4 size:0x1D8 mapped:0x807A7168
+void fn_3_1680D4(void) {
+    UnkTask3E58* task = lbl_803CC1B8;
+    UnkPlayer3E58* player;
+    s8 id;
+
+    if (g_d_GameSettings._55 != 0 || lbl_3_common_bss_35154._479 != 0) {
+        fn_800B0A14_removeQueue();
+    } else if (g_GameLogic.gameStatus != 2) {
+        fn_800B0A14_removeQueue();
+    } else if (task->_14->_062 == 0x26 || task->_14->_062 == 0x28 || task->_14->_062 == 0x29 || task->_14->_062 == 0x2A ||
+               task->_14->_062 == 0x2B || task->_14->_062 == 0x2C) {
+        id = lbl_3_data_28558[rand() % (sizeof(lbl_3_data_28558) - 1)];
+        player = task->_14;
+        fn_3_166C30(player, id);
+        task->_1B = 1;
+    } else if (task->_1B != 0) {
+        fn_800B0A14_removeQueue();
+    }
+}
+
+// .text:0x00167F14 size:0x1C0 mapped:0x807A6FA8
+void fn_3_167F14(void) {
+    UnkTask3E58* task = lbl_803CC1B8;
+    UnkPlayer3E58* player;
+    s8 id;
+
+    if (g_d_GameSettings._55 != 0 || lbl_3_common_bss_35154._479 != 0) {
+        fn_800B0A14_removeQueue();
+    } else if (g_GameLogic.gameStatus != 2) {
+        fn_800B0A14_removeQueue();
+    } else if (task->_14->_062 == 0x26) {
+        id = lbl_3_data_28558[rand() % (sizeof(lbl_3_data_28558) - 1)];
+        player = task->_14;
+        fn_3_166C30(player, id);
+        task->_1B = 1;
+    } else if (task->_1B != 0) {
+        fn_800B0A14_removeQueue();
+    }
+}
+
+// .text:0x00167D4C size:0x1C8 mapped:0x807A6DE0
+void fn_3_167D4C(void) {
+    UnkTask3E58* task = lbl_803CC1B8;
+    UnkPlayer3E58* player;
+    s8 id;
+
+    if (g_d_GameSettings._55 != 0 || lbl_3_common_bss_35154._479 != 0) {
+        fn_800B0A14_removeQueue();
+    } else if (g_GameLogic.gameStatus != 2) {
+        fn_800B0A14_removeQueue();
+    } else if (task->_14->_062 == 0x1B || task->_14->_062 == 0x1A) {
+        id = lbl_3_data_28558[rand() % (sizeof(lbl_3_data_28558) - 1)];
+        player = task->_14;
+        fn_3_166C30(player, id);
+        task->_1B = 1;
+    } else if (task->_1B != 0) {
+        fn_800B0A14_removeQueue();
+    }
+}
+
+// .text:0x00167CC4 size:0x88 mapped:0x807A6D58
+void fn_3_167CC4(void) {
+    if (g_d_GameSettings._55 != 0 || lbl_3_common_bss_35154._479 != 0) {
+        fn_800B0A14_removeQueue();
+    } else if (g_GameLogic.gameStatus != 2) {
+        fn_800B0A14_removeQueue();
+    } else if (g_Ball.ballState == 2) {
+        fn_3_16699C();
+    } else {
+        fn_800B0A14_removeQueue();
+    }
+}
 
 // .text:0x001678A8 size:0x41C mapped:0x807A693C
 void fn_3_1678A8(void) {

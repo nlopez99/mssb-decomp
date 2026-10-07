@@ -104,6 +104,10 @@ The base shows `lis rX,...rodata.0@ha; addi` and then `lfs f0,100(rX)`, while th
 - **Literal constants in the reverse of the target's order:** the source lists functions in address order. With `-inline deferred` MWCC generates functions last to first (objdiff's `reverse_fn_order` hides this for `.text`) and creates each function's constants as it goes, so REL source lists functions from the highest address down; `tools/reverse_functions.py` converts a file. Example: rep_940 `.rodata` 83% to 93%.
 - **The weak `dolsqrtf2` constants** (0x10 bytes, from `game/UnknownHomes_Game.h`) stay as a difference; the linker keeps one copy for the whole module. The explanation above is incomplete: in `rep_10E8`'s target, `_half` and `_three` are local objects in the middle of `.rodata` (0x1140, 0x1148), yet its constants are unpooled and the include order still matched.
 
+## `.data` or `.bss` below 100% with every object defined
+
+- **A trailing `gap_..._data` symbol, or a last object larger than its type:** the linker padded the section up to the next unit's alignment (8 for `.data`, 32 for kinoko's `.bss`). Leave it; no source object belongs there. Example: `rep_3E58.c` scores `.data` 98.73% (4-byte `gap_04_000285A4_data` after the jump table) and `.bss` 50% (`lbl_3_bss_B9E0` is an `s8` with size 0x20 in `symbols.txt`). A `switch` jump table needs no definition: MWCC emits it as `@NNN` and objdiff pairs it with `jumptable_...`.
+
 ## Before committing
 
 - Run `tools/match.py` on every function that uses a type, prototype or symbol you changed, not only the one you were fixing.

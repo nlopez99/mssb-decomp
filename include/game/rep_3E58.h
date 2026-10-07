@@ -17,5 +17,10 @@ void fn_3_166FCC(void);
 void fn_3_167178(void);
 void fn_3_1674D0(void);
 void fn_3_1678A8(void);
+void fn_3_167CC4(void);
+void fn_3_167D4C(void);
+void fn_3_167F14(void);
+void fn_3_1680D4(void);
+void fn_3_1682AC(struct UnkPlayer3E58* player, s8 type);
 
 #endif // !__GAME_rep_3E58_H_
