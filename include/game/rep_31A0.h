@@ -4,6 +4,8 @@
 #include "mssbTypes.h"
 
 struct UnkRecord3448;
+struct UnkStats3448;
+struct UnkRank31A0;
 
 void fn_3_106DFC(void);
 BOOL fn_3_106E50(void);
@@ -12,12 +14,12 @@ void fn_3_106ED4(void);
 void fn_3_107078(void);
 void fn_3_1070A4(void);
 void fn_3_10722C(void);
-void fn_3_10754C(void);
+void fn_3_10754C(struct UnkStats3448* stats);
 void fn_3_10768C(void);
 void fn_3_107784(void);
 void fn_3_1078F8(void);
 BOOL fn_3_107988(u32 id);
-void fn_3_1079C8(void);
+void fn_3_1079C8(struct UnkRank31A0* out, int mode);
 int fn_3_107B9C(const void* a, const void* b);
 int fn_3_107BD0(const void* a, const void* b);
 int fn_3_107C04(const void* a, const void* b);
@@ -49,7 +51,7 @@ void fn_3_10B200(void);
 void fn_3_10B27C(void);
 void fn_3_10B8D0(void);
 void fn_3_10BE7C(void);
-void fn_3_10C450(void);
+void fn_3_10C450(int player, int charID);
 void fn_3_10C58C(void);
 void fn_3_10C7A4(void);
 void fn_3_10C81C(void);

@@ -1458,10 +1458,7 @@ typedef struct _UnkStructMinigame {
 typedef struct _MiniGameControlStruct {
     /*0x000*/ s8 characterIndex[4];
     /*0x004*/ u8 _4[4]; // one per player, read by fn_3_126604 (rep_3448)
-    /*0x008*/ u8 _8;
-    /*0x009*/ u8 _9;
-    /*0x00A*/ u8 _A;
-    /*0x00B*/ u8 _B;
+    /*0x008*/ u8 _8[4];
     /*0x00C*/ u8 battingHandedness[4];
     /*0x010*/ u8 aIStrength[4];
     /*0x014*/ s8 _14[4];
