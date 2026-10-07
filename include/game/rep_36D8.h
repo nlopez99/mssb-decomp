@@ -40,5 +40,7 @@ void fn_3_1410F0(void);
 void fn_3_1412BC(void);
 void fn_3_1413E4(void);
 void fn_3_1414AC(void);
+void fn_3_141A2C(void);
+void fn_3_141A30(void);
 
 #endif // !__GAME_rep_36D8_H_

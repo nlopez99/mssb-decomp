@@ -118,6 +118,31 @@ static f32 lbl_3_bss_B794;
 static u8 lbl_3_bss_B791;
 static u8 lbl_3_bss_B790; // read by no code here, but B791 sits at an odd offset
 
+// .text:0x00141A30 size:0x214 mapped:0x80780AC4
+void fn_3_141A30(void) {
+    switch (g_GameLogic.gameStatus) {
+    case GAME_STATUS_LOAD_GAME:
+        fn_3_1414AC();
+        break;
+    case GAME_STATUS_TRANSITION_MINIGAME_TO_BATTING:
+        fn_3_1413E4();
+        break;
+    case GAME_STATUS_DEFAULT:
+        fn_3_1412BC();
+        break;
+    case GAME_STATUS_LIVE_BALL:
+        fn_3_140CE0();
+        break;
+    case GAME_STATUS_TRANSITION_MINIGAME_POSTGAME:
+        fn_3_1410F0();
+        break;
+    }
+}
+
+// .text:0x00141A2C size:0x4 mapped:0x80780AC0
+void fn_3_141A2C(void) {
+}
+
 // .text:0x001414AC size:0x580 mapped:0x80780540
 void fn_3_1414AC(void) {
     int order[4];
