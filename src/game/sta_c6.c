@@ -241,6 +241,10 @@ static u8 lbl_3_bss_AE52;
 static u8 lbl_3_bss_AE51;
 static u8 lbl_3_bss_AE50;
 
+static inline StaC6Model* getModel(u32 idx) {
+    return &lbl_8036E548._6C->models[idx];
+}
+
 static inline void playStadiumSound(s32 sound) {
     SND_VOICEID voice;
     u8 vol;
@@ -764,9 +768,9 @@ void fn_3_E7424(void) {
 // .text:0x000E7388 size:0x9C mapped:0x8072641C
 void fn_3_E7388(void* arg0, StaC6Sort* out) {
     StaC6Draw* draw;
-    s32 i;
     StaC6Sort* p;
     StaC6Draw* draw2;
+    s32 i;
 
     draw = &lbl_3_common_bss_350E4._00[lbl_3_common_bss_350E4._30 - 1];
     p = out;
@@ -914,7 +918,7 @@ void fn_3_E67F4(void) {
     for (i = 0; i < 7; i++) {
         lbl_3_data_196B4[i] = 0;
         actor = lbl_8036E548._6C->models[i + 16]._00;
-        model = &lbl_8036E548._6C->models[i + 16];
+        model = getModel(i + 16);
         model->_5C = 20.0f;
         model->_59 = 1;
         fn_800B4CA0(actor, lbl_8036E548._6C->models[i + 16]._5C);
