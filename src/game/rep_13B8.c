@@ -1053,8 +1053,42 @@ void fn_3_833EC(void) {
 }
 
 // .text:0x0008307C size:0x370 mapped:0x806C2110
-void fn_3_8307C(void) {
-    return;
+void fn_3_8307C(int runner) {
+    InMemRunnerType* r = &g_Runners[runner];
+    int base;
+    int ahead;
+    int next;
+    f32 distCurrent;
+    f32 distNext;
+
+    if ((r->runningToDugoutInd != 1 || r->runningToDugoutStage == 0) && g_Pitcher.pitcherActionState != 6) {
+        base = r->fractionalBasesRan;
+        r->currentBaseCoordinates.y = 0.0f;
+        ahead = base + 1;
+        r->nextBaseCoordinates.y = 0.0f;
+        next = ahead % 4;
+        if (g_GameLogic.secondaryGameMode == 6) {
+            r->currentBaseCoordinates.x = lbl_3_data_4A34[base].x;
+            r->currentBaseCoordinates.z = lbl_3_data_4A34[base].z;
+        } else if (ahead == 1) {
+            r->currentBaseCoordinates.x = g_Batter.batterPos.x;
+            r->currentBaseCoordinates.z = g_Batter.batterPos.z;
+        } else {
+            r->currentBaseCoordinates.x = lbl_3_data_4A34[base].x;
+            r->currentBaseCoordinates.z = lbl_3_data_4A34[base].z;
+        }
+        r->nextBaseCoordinates.x = lbl_3_data_4A34[next].x;
+        r->nextBaseCoordinates.z = lbl_3_data_4A34[next].z;
+        distCurrent = VEC_DISTANCE_XZ(&r->currentBaseCoordinates, &r->position);
+        distNext = VEC_DISTANCE_XZ(&r->nextBaseCoordinates, &r->position);
+        r->calculatedLengthOfCurrentBaseline = distCurrent + distNext;
+        r->fractionOfCalculatedBaselineRan = distCurrent / (distCurrent + distNext);
+        r->distToCurrentBase = distCurrent;
+        r->distToNextBase = distNext;
+        r->currentBase = base;
+        r->nextBase = next;
+        fn_3_82F80(runner, &r->framesToPreviousBase, &r->framesToNextBase);
+    }
 }
 
 // .text:0x00082F80 size:0xFC mapped:0x806C2014
@@ -1069,7 +1103,7 @@ void fn_3_82F80(int runner, s16* framesBack, s16* framesForward) {
     if (dist > 0.0f) {
         if (r->percentRanPerFrame_slideAdj < r->velocityPercent_stamAdj) {
             v = r->percentRanPerFrame_slideAdj;
-            do {
+            for (;;) {
                 v += r->accelerationPercent_stamAdj;
                 frames++;
                 if (v > r->velocityPercent_stamAdj) {
@@ -1077,7 +1111,10 @@ void fn_3_82F80(int runner, s16* framesBack, s16* framesForward) {
                     break;
                 }
                 dist -= v;
-            } while (!(dist < 0.0f));
+                if (dist < 0.0f) {
+                    break;
+                }
+            }
         }
         frames += (int)(dist / r->velocityPercent_stamAdj) + 1;
     }
@@ -1088,7 +1125,7 @@ void fn_3_82F80(int runner, s16* framesBack, s16* framesForward) {
     if (dist > 0.0f) {
         if (r->percentRanPerFrame_slideAdj > -r->velocityPercent_stamAdj) {
             v = r->percentRanPerFrame_slideAdj;
-            do {
+            for (;;) {
                 v -= r->accelerationPercent_stamAdj;
                 frames++;
                 if (v < -r->velocityPercent_stamAdj) {
@@ -1096,7 +1133,10 @@ void fn_3_82F80(int runner, s16* framesBack, s16* framesForward) {
                     break;
                 }
                 dist -= v;
-            } while (!(dist < 0.0f));
+                if (dist < 0.0f) {
+                    break;
+                }
+            }
         }
         frames += (int)(dist / r->velocityPercent_stamAdj) + 1;
     }
