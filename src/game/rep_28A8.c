@@ -88,11 +88,18 @@ extern struct {
 } lbl_8036E548;
 
 extern u8 lbl_800EFBA4[0x10];
+extern struct {
+    /* 0x000 */ u8 _000[0x398];
+    /* 0x398 */ u8 _398;
+} lbl_800EF808;
+
+extern s16 lbl_3_data_49DC[44];
 extern u16 lbl_3_data_81DC[16];
 extern u8 lbl_3_data_8404[6][15][2];
 extern u8 lbl_3_data_84B8[30][2];
 extern s16 lbl_3_data_1899C[4];
-extern u8 lbl_3_data_189AC[0x18];
+extern u8 lbl_3_data_189AC[9];
+extern s16 lbl_3_data_189B8[6];
 
 typedef struct {
     /* 0x0 */ f32 x;
@@ -100,7 +107,11 @@ typedef struct {
     /* 0x8 */ f32 radius[2];
 } Unk28A8Spawn; // size: 0x10
 
-extern Unk28A8Spawn lbl_3_data_18AC8[];
+extern Unk28A8Spawn lbl_3_data_18AC8[10];
+extern f32 lbl_3_data_18B88[5];
+extern f32 lbl_3_data_18B9C[5];
+extern s16 lbl_3_data_18BB0[2][2];
+extern u8 lbl_3_data_88DC;
 extern s16 lbl_3_data_18BB8[][3];
 extern u8 lbl_803CBC3C[];
 
@@ -119,6 +130,9 @@ extern void fn_3_107E80(void);
 extern void fn_8004CC18(void);
 extern void fn_3_DF8D4(void);
 extern void ballPhysica(void);
+extern void fn_3_D8CD0(void);
+extern void fn_3_D9868(void);
+extern void fn_3_D9A30(void);
 // sta_c6.c
 extern BOOL fn_3_E5924(void);
 
@@ -149,7 +163,6 @@ void fn_3_DE744(void) {
 
     fn_3_DDF1C();
     fn_3_6C0E0();
-    g_Strikes.storedOuts = g_Strikes.outs;
     g_Runners[0].positionStored.x = g_Runners[0].position.x;
     g_Runners[0].positionStored.y = g_Runners[0].position.y;
     g_Runners[0].positionStored.z = g_Runners[0].position.z;
@@ -161,6 +174,7 @@ void fn_3_DE744(void) {
     g_Runners[0].position.z = g_Batter.batterPos.z;
     g_Runners[0].runningAngle = 3.1415927f;
     g_GameLogic.CountdownUntilFade = 10000;
+    g_Strikes.storedOuts = g_Strikes.outs;
     g_Strikes.outs = 0;
     g_Strikes.storedOuts = 0;
     g_Ball.totalFramesAtPlay = 0;
@@ -415,7 +429,77 @@ void fn_3_DD9A4(void) {
 
 // .text:0x000DD3FC size:0x5A8 mapped:0x8071C490
 void fn_3_DD3FC(void) {
-    return;
+    s32 i;
+
+    if (g_Minigame.turnOverStatus == 1) {
+        g_Minigame.turnOverStatus = 2;
+        g_GameLogic.CountdownUntilFade = lbl_3_data_1899C[0];
+        if (g_Minigame.toyFieldBallStateResult2 == 1 && !g_Ball.maybebuntOn2Strikes) {
+            g_GameLogic.CountdownUntilFade = lbl_3_data_1899C[2];
+        }
+    }
+    g_GameLogic.CountdownUntilFade--;
+    if (g_Minigame._19A0 && !g_Minigame._19CE && g_GameLogic.CountdownUntilFade < lbl_3_data_1899C[1]) {
+        g_GameLogic.CountdownUntilFade = lbl_3_data_1899C[1];
+    }
+    if (g_Minigame._1939 && g_GameLogic.CountdownUntilFade < lbl_3_data_1899C[1]) {
+        g_GameLogic.CountdownUntilFade = lbl_3_data_1899C[1];
+    }
+    if (g_Minigame._19CE && g_Minigame._19CE < 3) {
+        if (g_GameLogic.CountdownUntilFade <= lbl_3_data_1899C[1] - 10) {
+            g_GameLogic.CountdownUntilFade++;
+        }
+        if (g_Minigame._19CE == 1) {
+            fn_3_DE308(12);
+            g_Minigame._19BA = 0;
+            g_Minigame._19CE = 2;
+            for (i = 0; i < 4; i++) {
+                if (g_Minigame._1918[i]) {
+                    g_Minigame._1914_arr[i] = 0;
+                }
+            }
+            if (lbl_800EF808._398 == 1) {
+                playStadiumSound(0x1A);
+            }
+        }
+        if (g_Minigame._19BA < 0x7FFE) {
+            g_Minigame._19BA++;
+        } else {
+            g_Minigame._19BA = 0x7FFF;
+        }
+        if (g_Minigame._19BA > lbl_3_data_18C48[3]) {
+            g_Minigame._19CE = 3;
+        }
+    }
+    if (!g_Minigame.TF_ballDespawnedInd && g_Ball.fielderWBallIndex < 0 && !g_Ball.deadBallReason && g_Ball.AtBat_ContactResult >= 0 &&
+        g_GameLogic.CountdownUntilFade <= lbl_3_data_1899C[1] + lbl_3_data_49DC[11] - 10) {
+        g_GameLogic.CountdownUntilFade++;
+    }
+    if (g_GameLogic.CountdownUntilFade == lbl_3_data_1899C[1] - 10) {
+        if (g_Minigame._19CD == 1 || g_Minigame._19CD == 2 || (g_Minigame._19CD != 3 && g_Minigame._1921)) {
+            g_GameLogic.CountdownUntilFade++;
+        } else if (g_Minigame.toyField_turnNumber >= g_Minigame.toyField_selectedTurns &&
+                   g_Minigame.minigameControlStruct._1C[g_Minigame.rosterID] == 1) {
+            fn_3_59918(13, 0);
+        } else if ((u8)g_Minigame.rosterID != g_Minigame._19C6) {
+            if (g_Minigame.toyField_turnNumber >= g_Minigame.toyField_selectedTurns) {
+                fn_3_59918(13, 0);
+            } else {
+                fn_3_59918(5, 0);
+            }
+        }
+        if (g_Minigame._19BC < 0x7FFE) {
+            g_Minigame._19BC++;
+        } else {
+            g_Minigame._19BC = 0x7FFF;
+        }
+    }
+    if (g_GameLogic.CountdownUntilFade == 7) {
+        changeScene(3, 6);
+    }
+    if (g_GameLogic.CountdownUntilFade <= 0) {
+        fn_3_DD37C();
+    }
 }
 
 // .text:0x000DD37C size:0x80 mapped:0x8071C410
@@ -890,7 +974,188 @@ void fn_3_DC240(void) {
 
 // .text:0x000DA834 size:0x1A0C mapped:0x807198C8
 void fn_3_DA834(void) {
-    return;
+    s32 i;
+    s32 j;
+    s32 n;
+
+    if (g_Minigame.framesSincePanelHit < 0x7FFE) {
+        g_Minigame.framesSincePanelHit++;
+    } else {
+        g_Minigame.framesSincePanelHit = 0x7FFF;
+    }
+    if (g_Minigame.framesSincePanelHit <= 1) {
+        if (g_Minigame.toyFieldBallStateResult2 == 1 && !g_Ball.maybebuntOn2Strikes) {
+            g_Minigame.turnOverStatus = 1;
+            fn_3_DE308(11);
+            return;
+        }
+        g_Minigame.panelHitInd = 1;
+        if (g_Minigame.toyFieldBallStateResult2 >= 1 && g_Minigame.toyFieldBallStateResult2 <= 8) {
+            g_Minigame.turnOverStatus = 1;
+            switch (g_Minigame.toyFieldBallStateResult2) {
+            case 1:
+                fn_3_DE308(22);
+                break;
+            case 2:
+                if (g_Pitcher.strikeOutOrWalk == 1 || g_Ball.maybebuntOn2Strikes) {
+                    fn_3_DE308(22);
+                } else if (g_Minigame.toyFieldStateInd_collisionRelated == 0x71) {
+                    fn_3_DE308(9);
+                } else {
+                    fn_3_DE308(10);
+                }
+                break;
+            case 3:
+                fn_3_DE308(0);
+                break;
+            case 4:
+                fn_3_DE308(1);
+                break;
+            case 5:
+                fn_3_DE308(2);
+                break;
+            case 6:
+                if (g_Ball.deadBallReason == 1) {
+                    fn_3_DE308(4);
+                } else {
+                    fn_3_DE308(3);
+                }
+                break;
+            case 7:
+                fn_3_DE308(23);
+                break;
+            case 8:
+                fn_3_DE308(23);
+                break;
+            }
+            if (g_Minigame.toyFieldBallStateResult2 >= 3 && g_Minigame.toyFieldBallStateResult2 <= 6) {
+                playStadiumSound(0);
+            }
+            if (g_Minigame.toyFieldBallStateResult2 == 2 || g_Ball.maybebuntOn2Strikes) {
+                if (g_Ball.fielderWBallIndex >= 0) {
+                    g_Minigame._19C6 = g_Fielders[g_Ball.fielderWBallIndex]._20D;
+                } else {
+                    g_Minigame._19C6 = g_Minigame.minigamePlayerSelectedOrder;
+                }
+            }
+        } else if (g_Minigame.toyFieldBallStateResult2 == 11) {
+            fn_3_D9A30();
+            fn_3_D9868();
+            g_Minigame.TF_framesSinceHittingPanel = 1;
+        } else if (g_Minigame.toyFieldBallStateResult2 == 9 || g_Minigame.toyFieldBallStateResult2 == 10) {
+            if (g_Minigame.lastKnownBallPosX < 0.0f) {
+                fn_3_DA640(30, 6);
+            } else {
+                fn_3_DA640(30, 4);
+            }
+            g_Minigame.TF_framesSinceHittingPanel = 1;
+            g_Minigame._199E = 0;
+        } else {
+            g_Minigame.turnOverStatus = 1;
+        }
+        if (g_Minigame.toyFieldBallStateResult2 >= 3 && g_Minigame.toyFieldBallStateResult2 <= 6) {
+            n = g_Minigame.toyFieldBallStateResult2 - 2;
+            for (j = 0; j < n; j++) {
+                if (g_Minigame._1914_arr[3]) {
+                    g_Minigame._1921++;
+                }
+                for (i = 3; i > 0; i--) {
+                    g_Minigame._1914_arr[i] = g_Minigame._1914_arr[i - 1];
+                    g_Minigame._1914_arr[i - 1] = 0;
+                }
+            }
+            for (i = 0; i < 4; i++) {
+                if (g_Minigame._191C[i] >= 0) {
+                    g_Minigame._191C[i] += n;
+                    if (g_Minigame._191C[i] >= 4) {
+                        g_Minigame._191C[i] = 4;
+                    }
+                }
+            }
+        }
+        if (g_Minigame.toyFieldBallStateResult2 == 7 || g_Minigame.toyFieldBallStateResult2 == 8) {
+            if (g_Minigame._1914_arr[3]) {
+                g_Minigame._1921++;
+            }
+            for (n = 1; n < 4; n++) {
+                if (!g_Minigame._1914_arr[n]) {
+                    break;
+                }
+            }
+            for (i = n; i > 0; i--) {
+                g_Minigame._1914_arr[i] = g_Minigame._1914_arr[i - 1];
+                g_Minigame._1914_arr[i - 1] = 0;
+            }
+            for (i = 0; i < 4; i++) {
+                if (g_Minigame._191C[i] < 0) {
+                    break;
+                }
+                g_Minigame._191C[i]++;
+                if (g_Minigame._191C[i] >= 4) {
+                    g_Minigame._191C[i] = 4;
+                }
+            }
+        }
+        for (i = 0; i < 4; i++) {
+            if (g_Ball.fielderWBallIndex >= 0 && g_Minigame.minigameFielderIndex[i] == g_Ball.fielderWBallIndex) {
+                if (g_Ball.AtBat_ContactResult == 3) {
+                    fn_3_DE308(20);
+                } else {
+                    fn_3_DE308(21);
+                }
+                break;
+            }
+        }
+        g_Minigame.pointsTargetReachedInd = 1;
+    } else {
+        if (g_Minigame.toyFieldBallStateResult2 == 11) {
+            if (g_Minigame._1934 == 0) {
+                if (g_Minigame._18B8 < 0x7FFE) {
+                    g_Minigame._18B8++;
+                } else {
+                    g_Minigame._18B8 = 0x7FFF;
+                }
+                for (i = 0; i < 3; i++) {
+                    if (g_Minigame._1927[i] == 0) {
+                        if (g_Minigame._18B8 > lbl_3_data_189B8[i]) {
+                            g_Minigame._1927[i] = 1;
+                        }
+                    } else if (g_Minigame._1927[i] == 1) {
+                        if (i == 0) {
+                            if (g_Minigame._18B8 > lbl_3_data_189B8[3]) {
+                                g_Minigame._1927[i] = 2;
+                            }
+                        } else if (i == 2) {
+                            if (g_Minigame._1930[i] == 3) {
+                                g_Minigame._1927[i] = 2;
+                            }
+                        } else if (g_Minigame._1930[i] >= 2) {
+                            g_Minigame._1927[i] = 2;
+                        }
+                    }
+                }
+            } else if (g_Minigame._1934 == 1) {
+            } else if (g_Minigame._1934 == 2) {
+                fn_3_D8CD0();
+                g_Minigame._1934 = 3;
+            } else {
+                if (g_Minigame._192D == 6) {
+                    g_Minigame._19A6 = 3;
+                    if (g_Minigame._18BA == 1) {
+                        fn_3_E8AC8();
+                    }
+                }
+                if (g_Minigame._18BA < 0x7FFE) {
+                    g_Minigame._18BA++;
+                } else {
+                    g_Minigame._18BA = 0x7FFF;
+                }
+            }
+        }
+        if (g_Minigame.toyFieldBallStateResult2 == 9 || g_Minigame.toyFieldBallStateResult2 == 10) {
+            fn_3_D9EA0();
+        }
+    }
 }
 
 // .text:0x000DA640 size:0x1F4 mapped:0x807196D4
@@ -927,5 +1192,106 @@ void fn_3_DA640(s32 count, s32 idx) {
 
 // .text:0x000D9EA0 size:0x7A0 mapped:0x80718F34
 void fn_3_D9EA0(void) {
-    return;
+    s32 i;
+    f32 gravity;
+    f32 drag;
+    f32 ground;
+    f32 bounce;
+    Unk28A8Fielder* fielder;
+    f32 dx;
+    f32 dz;
+    f32 dist0;
+    f32 dist1;
+    f32 dist2;
+    s8 closest;
+
+    if (g_Minigame._1939) {
+        if (g_Minigame.wallBall_coinsVisibleFrameCounter[0] < 0x7FFE) {
+            g_Minigame.wallBall_coinsVisibleFrameCounter[0]++;
+        } else {
+            g_Minigame.wallBall_coinsVisibleFrameCounter[0] = 0x7FFF;
+        }
+        gravity = lbl_3_data_18B9C[0];
+        drag = lbl_3_data_18B9C[1];
+        ground = lbl_3_data_18B9C[3];
+        bounce = lbl_3_data_18B9C[2];
+        for (i = 0; i < 100; i++) {
+            if (g_Minigame.wallBall_coinsVisibleInd[i]) {
+                if (g_Minigame.wallBall_coinsVisibleFrameCounter[0] > lbl_3_data_18BB0[g_Minigame._199E][0]) {
+                    g_Minigame.wallBall_coinsVisibleInd[i] = 0;
+                } else {
+                    g_Minigame.wallBall_coinVelocity[i].y -= gravity;
+                    g_Minigame.wallBall_coinVelocity[i].x *= drag;
+                    g_Minigame.wallBall_coinVelocity[i].y *= drag;
+                    g_Minigame.wallBall_coinVelocity[i].z *= drag;
+                    g_Minigame.wallBall_coinCoordinates[i].x += g_Minigame.wallBall_coinVelocity[i].x;
+                    g_Minigame.wallBall_coinCoordinates[i].y += g_Minigame.wallBall_coinVelocity[i].y;
+                    g_Minigame.wallBall_coinCoordinates[i].z += g_Minigame.wallBall_coinVelocity[i].z;
+                    if (g_Minigame.wallBall_coinCoordinates[i].y <= ground) {
+                        g_Minigame.wallBall_coinCoordinates[i].y = ground;
+                        g_Minigame.wallBall_coinVelocity[i].y = -g_Minigame.wallBall_coinVelocity[i].y;
+                        g_Minigame.wallBall_coinVelocity[i].x *= bounce;
+                        g_Minigame.wallBall_coinVelocity[i].y *= bounce;
+                        g_Minigame.wallBall_coinVelocity[i].z *= bounce;
+                    }
+                }
+            }
+        }
+        for (i = 0; i < 100; i++) {
+            if (g_Minigame.wallBall_coinsVisibleInd[i]) {
+                dist1 = dist2 = 999.9f;
+                fielder = &g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[0]]];
+                dx = g_Minigame.wallBall_coinCoordinates[i].x - fielder->x;
+                dz = g_Minigame.wallBall_coinCoordinates[i].z - fielder->z;
+                dist0 = dolsqrtf2(dx * dx + dz * dz);
+                if (g_Minigame.minigameControlStruct._28[1] >= 0) {
+                    fielder = &g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[1]]];
+                    dx = g_Minigame.wallBall_coinCoordinates[i].x - fielder->x;
+                    dz = g_Minigame.wallBall_coinCoordinates[i].z - fielder->z;
+                    dist1 = dolsqrtf2(dx * dx + dz * dz);
+                }
+                if (g_Minigame.minigameControlStruct._28[2] >= 0) {
+                    fielder = &g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[2]]];
+                    dx = g_Minigame.wallBall_coinCoordinates[i].x - fielder->x;
+                    dz = g_Minigame.wallBall_coinCoordinates[i].z - fielder->z;
+                    dist2 = dolsqrtf2(dx * dx + dz * dz);
+                }
+                if (dist0 < dist2) {
+                    if (dist0 < dist1) {
+                        dist1 = dist0;
+                        closest = g_Minigame.minigameControlStruct._28[0];
+                    } else {
+                        closest = g_Minigame.minigameControlStruct._28[1];
+                    }
+                } else if (dist1 < dist2) {
+                    closest = g_Minigame.minigameControlStruct._28[1];
+                } else {
+                    dist1 = dist2;
+                    closest = g_Minigame.minigameControlStruct._28[2];
+                }
+                if (dist1 < lbl_3_data_18B88[g_Fielders[g_Minigame.minigameFielderIndex[closest]]._1C9]) {
+                    g_Minigame.wallBall_coinsVisibleInd[i] = 0;
+                    g_Minigame.miniGameCurrentPoints[closest] += lbl_3_data_18C48[8] * g_Minigame.toyField_pointMultiplier;
+                    if (--g_Minigame._1939 == 0 && !g_Minigame.turnOverStatus) {
+                        g_Minigame.turnOverStatus = 1;
+                    }
+                    if (!lbl_3_common_bss_34C58._30) {
+                        playStadiumSound(0xC);
+                        lbl_3_common_bss_34C58._30 = lbl_3_data_88DC;
+                    }
+                }
+            }
+        }
+        if (g_Minigame.wallBall_coinsVisibleFrameCounter[0] > lbl_3_data_18BB0[g_Minigame._199E][0]) {
+            if (!g_Minigame.turnOverStatus) {
+                g_Minigame.turnOverStatus = 1;
+            }
+            if (g_Minigame._1939) {
+                g_Minigame.miniGameLatestPoints[g_Minigame.rosterID] = g_Minigame._1939 * g_Minigame.toyField_pointMultiplier;
+                g_Minigame.minigamePoints_current_Latest[g_Minigame.rosterID][0] = g_Minigame.miniGameCurrentPoints[g_Minigame.rosterID];
+                g_Minigame.minigamePoints_current_Latest[g_Minigame.rosterID][1] = g_Minigame.miniGameLatestPoints[g_Minigame.rosterID];
+                g_Minigame._1939 = 0;
+            }
+        }
+    }
 }
