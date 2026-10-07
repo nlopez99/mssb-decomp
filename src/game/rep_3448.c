@@ -103,6 +103,13 @@ extern struct {
     /* 0x28 */ u8 _28;
 } lbl_80366158;
 
+// One entry per player, returned by fn_3_109D88
+typedef struct UnkRecord3448 {
+    /* 0x0 */ s32 _00;
+    /* 0x4 */ s16 _04;
+    /* 0x6 */ s16 _06;
+} UnkRecord3448;
+
 typedef struct {
     /* 0x000 */ VecXYZ position;
     /* 0x00C */ u8 _00C[0x268 - 0xC];
@@ -138,7 +145,10 @@ extern s8 lbl_3_data_B060[][3][5];
 extern u16 lbl_3_data_B140[][2];
 extern s16 lbl_3_data_213EC[10];
 extern s16 lbl_3_data_21400[][2];
+extern u16 lbl_3_data_81DC[0x10];
 extern u16 lbl_3_data_81FC[0x88];
+extern u8 lbl_3_data_8404[][0x1E];
+extern u8 lbl_3_data_84B8[0x3C];
 extern u8 lbl_3_data_84F4[0x3C];
 extern u16 lbl_3_data_2145C[2];
 extern u8 lbl_3_data_21460[8];
@@ -155,6 +165,15 @@ extern u16 lbl_3_data_238F4[8];
 extern UnkSpriteDesc3448 lbl_3_data_23904[];
 extern UnkSpriteDesc3448 lbl_3_data_23A44[];
 extern UnkSpriteDesc3448 lbl_3_data_23AE4[];
+// symbols.txt lumps this unit's pooled .data statics into one entry; the fields sit at their offsets.
+extern struct {
+    /* 0x0000 */ u8 _0000[0x448];
+    /* 0x0448 */ UnkSpriteDesc3448 _448[1];
+    /* 0x0468 */ u8 _0468[0x1188 - 0x468];
+    /* 0x1188 */ u16 _1188[8];
+    /* 0x1198 */ u16 _1198[8];
+    /* 0x11A8 */ u16 _11A8[5];
+} lbl_3_data_226E0;
 extern UnkSpriteDesc3448 lbl_3_data_23C84[];
 extern UnkSpriteDesc3448 lbl_3_data_23D24[];
 extern UnkSpriteDesc3448 lbl_3_data_23DA4[];
@@ -183,6 +202,8 @@ extern void fn_800B0A14_removeQueue(void);
 extern SND_VOICEID fn_3_90064(int id);
 extern void fn_800B0A5C_insertQueue(void (*)(void), s32);
 extern u32 fn_3_107C88(void);
+extern struct UnkRecord3448* fn_3_109D88(void);
+extern s32 fn_8006C100(s16);
 extern s32 fn_3_107CD0(void);
 
 static inline u32 getFrame(UnkTask3448* task, u32 i) {
@@ -273,8 +294,105 @@ void fn_3_127B68(void) {
 }
 
 // .text:0x001274B4 size:0x6B4 mapped:0x80766548
+// The target reads lbl_3_data_226E0's fields from a pool base hoisted to the entry, as for
+// statics of this file; .data 0x226E0- is outside splits.txt.
 void fn_3_1274B4(void) {
-    return;
+    UnkTask3448* task = lbl_803CC1B8;
+    UnkRecord3448* rec;
+    u32 i;
+    s16 score;
+    s16 n;
+    s32 stadium;
+    SND_VOICEID voice;
+
+    if (lbl_3_common_bss_32724._96 != 0) {
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    if (g_GameLogic.gameStatus == 0x22) {
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    switch (task->_1C) {
+    case 0:
+        fn_80034E20(task, lbl_3_data_226E0._448);
+        if (g_Minigame._1A3C != 0) {
+            lbl_80371C30[task->_14 + 1]._00->_64 = 0xB1;
+        } else {
+            lbl_80371C30[task->_14 + 1]._00->_64 = lbl_3_data_226E0._1188[g_Minigame.GameMode_MiniGame];
+        }
+        if (g_Minigame._1A3C == 0 && g_Minigame.GameMode_MiniGame != MINI_GAME_ID_NONE) {
+            lbl_80371C30[task->_14 + 2]._00->_68 = 1;
+        }
+        rec = fn_3_109D88();
+        for (i = 0; i < 5; i++, rec++) {
+            if (g_Minigame._1A3C != 0) {
+                lbl_80371C30[task->_14 + 5 + i]._00->_5C = 7 << 16;
+            } else {
+                lbl_80371C30[task->_14 + 5 + i]._00->_5C = lbl_3_data_226E0._1198[g_Minigame.GameMode_MiniGame] << 16;
+            }
+            lbl_80371C30[task->_14 + 20 + i]._00->_5C = rec->_06 << 16;
+            fn_800363D8(task, i + 0x32, 1, 0x12, i);
+            score = rec->_00;
+            if (g_Minigame._1A3C != 0) {
+                if (score > 9999) {
+                    score = 9999;
+                }
+            } else if (score > lbl_80109410[g_Minigame.GameMode_MiniGame]) {
+                score = lbl_80109410[g_Minigame.GameMode_MiniGame];
+            }
+            fn_800363D8(task, 0x41 + i * 4, 1, 0x16, (score % 10000) / 1000);
+            fn_800363D8(task, 0x42 + i * 4, 1, 0x16, (score % 1000) / 100);
+            fn_800363D8(task, 0x43 + i * 4, 1, 0x16, (score % 100) / 10);
+            fn_800363D8(task, 0x44 + i * 4, 1, 0x16, score % 10);
+            if (g_Minigame._1A3C != 0) {
+                lbl_80371C30[task->_14 + 0x5F + i]._00->_5C = (u8)fn_8006C100(rec->_00) << 16;
+                lbl_80371C30[task->_14 + 0x5A + i]._00->_68 = 1;
+                lbl_80371C30[task->_14 + 0x64 + i]._00->_68 = 1;
+            } else if (g_Minigame.GameMode_MiniGame == MINI_GAME_ID_BOBOMB_DERBY) {
+                n = rec->_04;
+                if (n > 999) {
+                    n = 999;
+                }
+                if (n >= 100) {
+                    fn_800363D8(task, i + 0x55, 5, 6, (n % 1000) / 100);
+                } else {
+                    fn_800363D8(task, i + 0x55, 5, 6, 10);
+                }
+                if (n >= 10) {
+                    fn_800363D8(task, i + 0x55, 4, 6, (n % 100) / 10);
+                } else {
+                    fn_800363D8(task, i + 0x55, 4, 6, 10);
+                }
+                fn_800363D8(task, i + 0x55, 3, 6, n % 10);
+                lbl_80371C30[task->_14 + 0x55 + i]._00->_68 = 1;
+            }
+        }
+        task->_1C = 1;
+    case 1:
+        for (i = 0; i < 5; i++) {
+            if (i != g_Minigame._1E03[0]) {
+                fn_3_125424(task, i + 10, 10);
+            }
+            if (lbl_80371C30[task->_14 + 4]._00->_5C >> 16 == lbl_3_data_226E0._11A8[i]) {
+                if (g_Minigame.GameMode_MiniGame != MINI_GAME_ID_NONE) {
+                    fn_3_90064(lbl_3_data_81FC[0x2F]);
+                } else {
+                    stadium = g_d_GameSettings.StadiumID;
+                    voice = sndFXStartEx(lbl_3_data_81DC[stadium] + 0x1D,
+                                         g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD ? lbl_3_data_84B8[0x3A]
+                                                                                                 : lbl_3_data_8404[stadium][0x3A],
+                                         0x3F, 0);
+                    sndFXCtrl(voice, 0x5B,
+                              g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD ? lbl_3_data_84B8[0x3B]
+                                                                                      : lbl_3_data_8404[stadium][0x3B]);
+                }
+            }
+        }
+        break;
+    }
 }
 
 // .text:0x00126604 size:0xEB0 mapped:0x80765698
