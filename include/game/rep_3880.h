@@ -100,7 +100,7 @@ void fn_3_151BAC(struct Emitter3880* emitter, struct Particle3880* p);
 void fn_3_151D6C(struct Emitter3880* emitter, struct Particle3880* p);
 void fn_3_151F2C(void);
 void fn_3_1524E8(struct Particle3880* p, u8 jitter);
-void fn_3_152794(void);
+void fn_3_152794(struct Particle3880* p);
 void fn_3_152AB4(void);
 void fn_3_1531A4(void);
 void fn_3_1534C0(struct Particle3880* p);
