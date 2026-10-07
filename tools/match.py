@@ -547,9 +547,10 @@ def print_diff(rows, target_syms, base_syms, context: int, max_lines: int, full:
         counts[rows[k][0]] = counts.get(rows[k][0], 0) + 1
     summary = ", ".join(f"{MARK_NAMES[m]} {n}" for m, n in sorted(counts.items(), key=lambda x: -x[1]))
     print(f"{len(changed)} differing lines" + (f" ({summary})" if summary else ""))
-    if not changed:
+    if not changed and not full:
         return
-    print("markers: r register  i immediate  s symbol/branch  | opcode  < only in target  > only in base")
+    if changed:
+        print("markers: r register  i immediate  s symbol/branch  | opcode  < only in target  > only in base")
 
     shown = set(range(len(rows))) if full else set()
     if not full:
@@ -562,7 +563,7 @@ def print_diff(rows, target_syms, base_syms, context: int, max_lines: int, full:
     last = -1
     print(f"{'off':>5}  {'target':<{width}}    base")
     for k in sorted(shown):
-        if printed >= max_lines:
+        if not full and printed >= max_lines:
             print(f"... truncated at {max_lines} lines; use --max-lines or --full")
             break
         if last != -1 and k != last + 1:
