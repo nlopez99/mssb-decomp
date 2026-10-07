@@ -18,6 +18,7 @@
 #include "game/rep_3CE0.h"
 #include "game/rep_1038.h"
 #include "game/game_batter.h"
+#include "game/sta_c6.h"
 #include "musyx/musyx.h"
 #include "Dolphin/rand.h"
 
@@ -241,10 +242,6 @@ extern void fn_3_ACAF8(void);
 extern BOOL fn_3_FD9FC(void);
 extern void possiblyTransitionBlackScreen(void);
 extern void* fn_800B0A5C_insertQueue(void (*callback)(void), s32 arg1);
-// sta_c6.c; sta_c6.h declares fn_3_E8AC8 as returning BOOL, but its callers here test a u8
-extern BOOL fn_3_E5924(void);
-extern void fn_3_E67F4(void);
-extern u8 fn_3_E8AC8(void);
 
 static inline void playStadiumSound(s32 sound) {
     SND_VOICEID voice;
