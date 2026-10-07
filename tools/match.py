@@ -13,6 +13,10 @@
 # headers for types; --m2c prints the draft for any function. The draft is a
 # starting point and will not match as written.
 #
+# --source FILE compiles FILE in place of the unit's source file for this run
+# (the source is restored afterwards), for scratch variants such as a copy
+# that defines out-of-range data as statics.
+#
 # <unit> may be an objdiff unit name (game/game/kinoko), a source path
 # (src/game/kinoko.c) or a unique basename (kinoko).
 #
@@ -712,6 +716,7 @@ def main() -> int:
     parser.add_argument("--max-lines", type=int, default=200, help="cap on printed diff lines (default 200)")
     parser.add_argument("--json", action="store_true", help="print a machine-readable result instead")
     parser.add_argument("--m2c", action="store_true", help="print an m2c draft even if the function is in the source")
+    parser.add_argument("--source", metavar="FILE", help="compile FILE in place of the unit's source for this run")
     args = parser.parse_args()
 
     units = load_units()
@@ -729,7 +734,34 @@ def main() -> int:
     if "base_path" not in unit:
         raise UsageError(f"{unit['name']} has no source file yet (it is not split out into src/)")
 
+    if args.source:
+        if args.no_build:
+            raise UsageError("--source needs a build; drop --no-build")
+        return with_source(unit, args.source, lambda: run(args, unit, function))
+    return run(args, unit, function)
+
+
+def with_source(unit: Dict[str, Any], scratch: str, body) -> int:
+    source = os.path.join(root_dir, unit.get("metadata", {}).get("source_path", ""))
+    if not os.path.isfile(scratch):
+        raise UsageError(f"{scratch} not found")
+    backup = source + ".match-backup"
+    if os.path.exists(backup):
+        raise UsageError(f"{backup} exists from an interrupted --source run; move it back over {source} first")
+    shutil.copy2(source, backup)
+    try:
+        shutil.copyfile(scratch, source)
+        return body()
+    finally:
+        # copyfile, not os.replace: keep the source's new mtime so ninja rebuilds it
+        shutil.copyfile(backup, source)
+        os.unlink(backup)
+
+
+def run(args: argparse.Namespace, unit: Dict[str, Any], function: Optional[str]) -> int:
     result: Dict[str, Any] = {"unit": unit["name"], "source": unit.get("metadata", {}).get("source_path")}
+    if args.source:
+        result["source"] = f"{args.source} (in place of {result['source']})"
     if not args.no_build:
         ok, elapsed, output = build(unit)
         result["build"] = {"ok": ok, "seconds": round(elapsed, 2)}
