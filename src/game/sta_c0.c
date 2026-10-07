@@ -88,6 +88,7 @@ typedef struct {
     /* 0x0C */ Vec scale;
     /* 0x18 */ f32 rotY;
     /* 0x1C */ u8 type;
+    /* 0x1D */ u8 _1D[3];
 } StaC0Prop; // size: 0x20
 
 typedef struct {
@@ -122,14 +123,22 @@ extern struct {
     /* 0x6C */ StaC0Actor* _6C;
 } lbl_8036E548;
 
-extern StaC0Prop lbl_3_data_17B98[11];
-extern u8 lbl_3_data_17CF8[16];
 extern u8 lbl_3_data_10F7C[8];
 extern u8 lbl_3_data_10F84[4];
 extern u8 lbl_3_data_10F88[0x80];
 extern u8 lbl_3_data_11008[0x40];
 extern u8 lbl_3_data_11048[0x20][3];
 extern u8 lbl_3_data_11108[0x10][3];
+
+StaC0Prop lbl_3_data_17B98[11] = {
+    { { 24.4f, 0.0f, 117.2f }, { 1.0f, 1.0f, 1.0f }, -16.0f, 2, { 1 } },
+    { { 5.549f, 0.0f, 111.0f }, { 1.0f, 1.0f, 1.0f }, 0.0f, 2, { 1 } },
+    { { -22.0f, 0.0f, 109.8f }, { 0.9f, 0.9f, 0.9f }, 32.0f, 2, { 1 } },
+    { { 98.0f, 0.0f, 73.0f }, { 1.0f, 1.0f, 1.0f }, 75.0f, 2, { 1 } },
+    { { -112.0f, 0.0f, 66.0f }, { 1.0f, 1.0f, 1.0f }, -25.0f, 2, { 1 } },
+    { { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, 0.0f, 4 },
+};
+u8 lbl_3_data_17CF8[9] = { 1, 2, 4, 4, 4, 4, 2, 8, 9 };
 
 extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern StaC0Actor* ActorObjectInitTable(u16 count);
