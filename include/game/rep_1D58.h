@@ -9,6 +9,7 @@ struct _CollisionStruct;
 struct StadiumObjectCollision;
 struct StadiumObject1D58;
 struct StadiumModel1D58;
+struct StadiumSort1D58;
 
 s32 fn_3_B7FC8(u32 id, s32 arg1);
 void fn_3_B80D0(void);
@@ -22,7 +23,7 @@ void fn_3_B8574(void);
 u32 fn_3_B85A8(s32 area, s32** objects);
 void fn_3_B85DC(s32 area, Vec* min, Vec* max);
 s32 fn_3_B8658(const void* a, const void* b);
-void fn_3_B867C(void);
+void fn_3_B867C(Mtx view, struct StadiumSort1D58* sort);
 void fn_3_B8828(void);
 void fn_3_B8C08(Mtx view);
 void fn_3_B902C(void);

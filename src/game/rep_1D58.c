@@ -1,7 +1,9 @@
 #include "game/rep_1D58.h"
+// Must precede header_rep_data.h: its extern inline dolsqrtf2 puts weak constants first
+// in .rodata, so MWCC does not pool .rodata and addresses constants one by one
+#include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
-#include "game/UnknownHomes_Game.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/os.h"
 #include "Dolphin/rand.h"
@@ -133,7 +135,7 @@ typedef struct StadiumObjectCollision {
     /* 0x08 */ TriangleGroup* triangles;
 } StadiumObjectCollision;
 
-typedef struct {
+typedef struct StadiumSort1D58 {
     /* 0x00 */ f32 depth;
     /* 0x04 */ s32 index;
 } StadiumSort1D58; // size: 0x8
@@ -192,6 +194,9 @@ extern struct {
 
 extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_800ACFB0(void* data);
+extern void* fn_800ACF34(u32 align, u32 size);
+extern void fn_800ACF14(void* data);
+extern void fn_800C07BC(void* base, void* tmp, s32 count, s32 size, s32 (*compare)(const void* a, const void* b));
 extern void minigamesSetSomePointers(void);
 extern void minigamesGXStuff(void);
 extern void minigamesSetSomePointers2(void);
@@ -591,8 +596,53 @@ void fn_3_B8828(void) {
 }
 
 // .text:0x000B867C size:0x1AC mapped:0x806F7710
-void fn_3_B867C(void) {
-    return;
+void fn_3_B867C(Mtx view, StadiumSort1D58* sort) {
+    Vec pos;
+    StadiumObject1D58* obj;
+    void* tmp;
+    s32 n;
+    s32 m;
+    s32 i;
+
+    if (lbl_3_common_bss_350E4._6C) {
+        n = 0;
+        obj = &lbl_3_common_bss_350E4._00[lbl_3_common_bss_350E4._30 - 1];
+        i = lbl_3_common_bss_350E4._30 - 1;
+        do {
+            if (!obj->_90_7) {
+                sort[n].depth = -512.0f;
+                sort[n].index = i;
+                n++;
+            }
+            obj--;
+        } while (i-- != 0);
+        obj = &lbl_3_common_bss_350E4._00[lbl_3_common_bss_350E4._30 - 1];
+        i = lbl_3_common_bss_350E4._30 - 1;
+        m = lbl_3_common_bss_350E4._30;
+        do {
+            if (obj->_90_7) {
+                if (obj->_90_5) {
+                    CTRLGetTranslation(&obj->control, &pos.x, &pos.y, &pos.z);
+                    PSMTXMultVec(view, &pos, &pos);
+                    m--;
+                    sort[m].depth = pos.z;
+                    sort[m].index = i;
+                } else {
+                    sort[n].depth = -512.0f;
+                    sort[n].index = i;
+                    n++;
+                }
+            }
+            obj--;
+        } while (i-- != 0);
+        tmp = fn_800ACF34(0x20, (lbl_3_common_bss_350E4._30 - m) * sizeof(StadiumSort1D58));
+        fn_800C07BC(&sort[m], tmp, lbl_3_common_bss_350E4._30 - m, sizeof(StadiumSort1D58), fn_3_B8658);
+        fn_800ACF14(tmp);
+    } else {
+        for (i = 0; i < lbl_3_common_bss_350E4._30; i++) {
+            sort[i].index = i;
+        }
+    }
 }
 
 // .text:0x000B8658 size:0x24 mapped:0x806F76EC
@@ -746,5 +796,11 @@ void fn_3_B80D0(void) {
 
 // .text:0x000B7FC8 size:0x108 mapped:0x806F705C
 s32 fn_3_B7FC8(u32 id, s32 arg1) {
-    return 0;
+    Vec pos = { 0.0f, 0.0f, 37.0f };
+    f32 angle = 0.017453292f * lbl_3_data_11178[rand() % 5];
+
+    pos.x += 100.0f * (f32)cos(angle);
+    pos.y += -30.0f;
+    pos.z += 100.0f * (f32)sin(angle);
+    return fn_3_8BBC4(id, &pos, NULL, arg1);
 }
