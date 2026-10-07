@@ -629,10 +629,12 @@ def print_unit(
     )
     complete = "Matching" if unit.get("metadata", {}).get("complete") else "NonMatching"
     strict = sum(1 for s in statuses.values() if s == "match")
+    strict_code = sum(int(f["size"]) for f in funcs if statuses[f["name"]] == "match")
     print(
         f"functions {strict}/{measures.get('total_functions', 0)} matched "
         f"({measures.get('matched_functions', 0)} in objdiff's report), "
-        f"code {measures.get('matched_code', 0)}/{measures.get('total_code', 0)} bytes, configure.py: {complete}"
+        f"code {strict_code}/{measures.get('total_code', 0)} bytes "
+        f"({measures.get('matched_code', 0)} in objdiff's report), configure.py: {complete}"
     )
     if sections:
         print(f"sections: {sections}")
@@ -752,6 +754,7 @@ def main() -> int:
         if args.json:
             result.update(
                 matched=matched,
+                matched_code=sum(int(f["size"]) for f in funcs if statuses[f["name"]] == "match"),
                 measures=report_unit.get("measures", {}),
                 sections=report_unit.get("sections", []),
                 functions=[

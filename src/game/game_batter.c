@@ -80,7 +80,7 @@ static void calculateBuntVerticalAngle_unused(void);
 // .text:0x00014858 size:0x35C mapped:0x806538ec
 void atBat_batter(void) {
     if (minigame_checkIfAIInputIs_Algorithmic_Or_ControllerBased(
-            g_Minigame.minigameControlStruct[0].characterIndex[g_Minigame.rosterID])) {
+            g_Minigame.minigameControlStruct.characterIndex[g_Minigame.rosterID])) {
         g_Batter.aiControlledInd = false;
     }
 
@@ -228,7 +228,7 @@ void setDefaultInMemBatter(void) {
     if (g_d_GameSettings.GameModeSelected == GAME_TYPE_PRACTICE) {
         g_Batter.aiControlledInd = g_Practice.practiceBatterHandedness;
     } else if (g_d_GameSettings.minigamesEnabled) {
-        g_Batter.aiControlledInd = g_Minigame.minigameControlStruct[0].battingHandedness[g_Minigame.rosterID];
+        g_Batter.aiControlledInd = g_Minigame.minigameControlStruct.battingHandedness[g_Minigame.rosterID];
     } else {
         g_Batter.aiControlledInd = g_GameLogic.batterHandedness[g_GameLogic.homeTeamBattingInd_fieldingTeam];
     }
@@ -273,7 +273,7 @@ int someAnimationIndFunction(void) {
     int r2;
     int p2 = 9;
     if (g_d_GameSettings.minigamesEnabled) {
-        p2 = g_Minigame.minigameControlStruct[0].characterIndex[g_Minigame.rosterID];
+        p2 = g_Minigame.minigameControlStruct.characterIndex[g_Minigame.rosterID];
         r2 = inMemRoster[0][p2].stats.CharID;
     } else {
         r2 = inMemRoster[g_GameLogic.teamBatting][r].stats.CharID;
@@ -321,10 +321,10 @@ void batterHumanControlled(void) {
             r26 = TRUE;
         }
     } else if (minigame_checkIfAIInputIs_Algorithmic_Or_ControllerBased(
-                   g_Minigame.minigameControlStruct[0].characterIndex[g_Minigame.rosterID])) {
-        inputs = &g_Minigame._1D7C[g_Minigame.minigameControlStruct[0].characterIndex[g_Minigame.rosterID]];
+                   g_Minigame.minigameControlStruct.characterIndex[g_Minigame.rosterID])) {
+        inputs = &g_Minigame._1D7C[g_Minigame.minigameControlStruct.characterIndex[g_Minigame.rosterID]];
     } else if (g_d_GameSettings.minigamesEnabled) {
-        inputs = &g_Controls[g_Minigame.minigameControlStruct[0].characterIndex[g_Minigame.rosterID]];
+        inputs = &g_Controls[g_Minigame.minigameControlStruct.characterIndex[g_Minigame.rosterID]];
     }
 
     if (g_GameLogic.frameCountdownAtBeginningOfAtBatLockout == 0 &&
@@ -458,10 +458,10 @@ void batterInBoxMovement(void) {
     if (ACTIVE_TUTORIAL()) {
         inputs = &g_Practice.inputs[g_GameLogic.teamBatting];
     } else if (minigame_checkIfAIInputIs_Algorithmic_Or_ControllerBased(
-                   g_Minigame.minigameControlStruct[0].characterIndex[g_Minigame.rosterID])) {
-        inputs = &g_Minigame._1D7C[g_Minigame.minigameControlStruct[0].characterIndex[g_Minigame.rosterID]];
+                   g_Minigame.minigameControlStruct.characterIndex[g_Minigame.rosterID])) {
+        inputs = &g_Minigame._1D7C[g_Minigame.minigameControlStruct.characterIndex[g_Minigame.rosterID]];
     } else if (g_d_GameSettings.minigamesEnabled) {
-        inputs = &g_Controls[g_Minigame.minigameControlStruct[0].characterIndex[g_Minigame.rosterID]];
+        inputs = &g_Controls[g_Minigame.minigameControlStruct.characterIndex[g_Minigame.rosterID]];
     }
 
     if (g_Batter.framesSinceStartOfSwing > 0) {
@@ -689,14 +689,14 @@ void ifSwing(void) {
                 starSwingSpendStars();
                 if (g_Minigame.GameMode_MiniGame == SECONDARY_GAME_MODE_TOY_FIELD) {
                     if (g_Ball.bODQualifyingHitInd) {
-                        fn_3_6C854(g_Minigame.minigameControlStruct[0].characterIndex[g_Minigame.rosterID], 2);
+                        fn_3_6C854(g_Minigame.minigameControlStruct.characterIndex[g_Minigame.rosterID], 2);
                     }
                 } else if (g_Minigame.GameMode_MiniGame != SECONDARY_GAME_MODE_BOBOMB_DERBY &&
                            !g_Batter.aiControlledInd && !g_Batter.captainStarSwingActivated && !g_Batter.moonShotInd &&
                            (((g_Batter.isFullyCharged && g_Batter.contactType == HIT_CONTACT_TYPE_PERFECT)) ||
                             (g_Pitcher.starPitchType && !g_Batter.chargeStatus))) {
                     if (g_d_GameSettings.minigamesEnabled) {
-                        fn_3_6C854(g_Minigame.minigameControlStruct[0].characterIndex[g_Minigame.rosterID], 2);
+                        fn_3_6C854(g_Minigame.minigameControlStruct.characterIndex[g_Minigame.rosterID], 2);
                     } else {
                         fn_3_6C854(g_GameLogic.teamBatting, 2);
                     }
@@ -764,7 +764,7 @@ void starSwingSpendStars(void) {
 
             c = 9;
             if (g_d_GameSettings.minigamesEnabled) {
-                c = g_Minigame.minigameControlStruct[0].characterIndex[g_Minigame.rosterID];
+                c = g_Minigame.minigameControlStruct.characterIndex[g_Minigame.rosterID];
             }
             getAnimRelatedCoordinates(c, 26, &a);
             fn_3_C0CE8(g_Batter.captainStarHitPitch, a.x, a.y, a.z);
@@ -1220,10 +1220,10 @@ void calculateBallHorizontalAngleHit(void) {
     if (ACTIVE_TUTORIAL()) {
         inputs = &g_Practice.inputs[g_GameLogic.teamBatting];
     } else if (minigame_checkIfAIInputIs_Algorithmic_Or_ControllerBased(
-                   g_Minigame.minigameControlStruct[0].characterIndex[g_Minigame.rosterID])) {
-        inputs = &g_Minigame._1D7C[g_Minigame.minigameControlStruct[0].characterIndex[g_Minigame.rosterID]];
+                   g_Minigame.minigameControlStruct.characterIndex[g_Minigame.rosterID])) {
+        inputs = &g_Minigame._1D7C[g_Minigame.minigameControlStruct.characterIndex[g_Minigame.rosterID]];
     } else if (g_d_GameSettings.minigamesEnabled) {
-        inputs = &g_Controls[g_Minigame.minigameControlStruct[0].characterIndex[g_Minigame.rosterID]];
+        inputs = &g_Controls[g_Minigame.minigameControlStruct.characterIndex[g_Minigame.rosterID]];
     }
 
     if (g_Batter.hitGeneralType == BAT_CONTACT_TYPE_SLAP) {
@@ -1302,10 +1302,10 @@ void calculateVerticalAngle(void) {
     if (ACTIVE_TUTORIAL()) {
         inputs = &g_Practice.inputs[g_GameLogic.teamBatting];
     } else if (minigame_checkIfAIInputIs_Algorithmic_Or_ControllerBased(
-                   g_Minigame.minigameControlStruct[0].characterIndex[g_Minigame.rosterID])) {
-        inputs = &g_Minigame._1D7C[g_Minigame.minigameControlStruct[0].characterIndex[g_Minigame.rosterID]];
+                   g_Minigame.minigameControlStruct.characterIndex[g_Minigame.rosterID])) {
+        inputs = &g_Minigame._1D7C[g_Minigame.minigameControlStruct.characterIndex[g_Minigame.rosterID]];
     } else if (g_d_GameSettings.minigamesEnabled) {
-        inputs = &g_Controls[g_Minigame.minigameControlStruct[0].characterIndex[g_Minigame.rosterID]];
+        inputs = &g_Controls[g_Minigame.minigameControlStruct.characterIndex[g_Minigame.rosterID]];
     }
 
     if (g_Batter.captainStarSwingActivated) {
@@ -1629,10 +1629,10 @@ void calculateBuntHorizontalAngle(void) {
     if (ACTIVE_TUTORIAL()) {
         inputs = &g_Practice.inputs[g_GameLogic.teamBatting];
     } else if (minigame_checkIfAIInputIs_Algorithmic_Or_ControllerBased(
-                   g_Minigame.minigameControlStruct[0].characterIndex[g_Minigame.rosterID])) {
-        inputs = &g_Minigame._1D7C[g_Minigame.minigameControlStruct[0].characterIndex[g_Minigame.rosterID]];
+                   g_Minigame.minigameControlStruct.characterIndex[g_Minigame.rosterID])) {
+        inputs = &g_Minigame._1D7C[g_Minigame.minigameControlStruct.characterIndex[g_Minigame.rosterID]];
     } else if (g_d_GameSettings.minigamesEnabled) {
-        inputs = &g_Controls[g_Minigame.minigameControlStruct[0].characterIndex[g_Minigame.rosterID]];
+        inputs = &g_Controls[g_Minigame.minigameControlStruct.characterIndex[g_Minigame.rosterID]];
     }
 
     contact = g_Batter.contactType;

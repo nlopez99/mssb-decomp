@@ -362,7 +362,7 @@ typedef struct _InMemBallType {
     /*0x1B2C*/ VecXYZ diveCatchLocationOffset;
     /*0x1B38*/ VecXYZ fielderActionCatchCoords;
     /*0x1B44*/ s32 collisionCode;
-    /*0x1B48*/ f32 maybeCollisionRelated;
+    /*0x1B48*/ s32 maybeCollisionRelated; // collisionCode of the previous frame
     /*0x1B4C*/ s32 StaticRandomInt1;
     /*0x1B50*/ s32 StaticRandomInt2;
     /*0x1B54*/ u32 StaticRandomInt1_prePitch;
@@ -819,9 +819,10 @@ typedef struct _InputStruct {
     /*0x08*/ s16 _08;
     /*0x0A*/ s8 right_left;
     /*0x0B*/ s8 up_down;
-    /*0x0C*/ s8 rightTriggerDistance;
-    /*0x0D*/ s8 leftTriggerDistance;
-    /*0x0E*/ s16 _0E; // padding
+    /*0x0C*/ u8 rightTriggerDistance;
+    /*0x0D*/ u8 leftTriggerDistance;
+    /*0x0E*/ u8 _0E;
+    /*0x0F*/ u8 _0F; // padding
 } InputStruct;        // size: 0x10
 
 typedef enum _PRACTICE_TYPE {
@@ -1446,9 +1447,25 @@ typedef struct _MiniGameControlStruct {
     /*0x00B*/ u8 _B;
     /*0x00C*/ u8 battingHandedness[4];
     /*0x010*/ u8 aIStrength[4];
-    /*0x014*/ u8 _14;
-    /*0x015*/ u8 _15;
-} MiniGameControlStruct; // size: 0x16
+    /*0x014*/ u8 _14[4];
+    /*0x018*/ u8 _18[4];
+    /*0x01C*/ u8 _1C[4];
+    /*0x020*/ u8 _20[4];
+    /*0x024*/ u8 _24[4];
+    /*0x028*/ u8 _28[4];
+} MiniGameControlStruct; // size: 0x2C
+
+typedef struct _MiniGameUnk19E8 {
+    /*0x0*/ s8 _0;
+    /*0x1*/ u8 _1;
+    /*0x2*/ s8 _2;
+    /*0x3*/ s8 _3;
+    /*0x4*/ s8 _4;
+    /*0x5*/ u8 _5;
+    /*0x6*/ u8 _6;
+    /*0x7*/ s8 _7;
+    /*0x8*/ u8 _8;
+} MiniGameUnk19E8; // size: 0x9
 
 /*foul	1
 caught	2
@@ -1960,8 +1977,8 @@ typedef struct _MiniGameStruct {
     /*0x18B8*/ s16 _18B8;
     /*0x18BA*/ s16 _18BA;
     /*0x18BC*/ s32 minigamePoints_current_Latest[4];
-    /*0x18CC*/ MiniGameControlStruct minigameControlStruct[2];
-    /*0x18F8*/ u8 minigameFielderIndex[4];
+    /*0x18CC*/ MiniGameControlStruct minigameControlStruct;
+    /*0x18F8*/ s8 minigameFielderIndex[4];
     /*0x18FC*/ u8 _18FC[4];
     /*0x1900*/ u8 _1900;
     /*0x1901*/ u8 _1901;
@@ -2155,10 +2172,7 @@ typedef struct _MiniGameStruct {
     /*0x19D4*/ s16 _19D4;
     /*0x19D6*/ s16 _19D6;
     /*0x19D8*/ s16 _19D8;
-    /*0x19DA*/ u8 _19DA;
-    /*0x19DB*/ u8 _19DB;
-    /*0x19DC*/ u8 _19DC;
-    /*0x19DD*/ u8 _19DD;
+    /*0x19DA*/ s8 _19DA[4];
     /*0x19DE*/ u8 _19DE;
     /*0x19DF*/ u8 _19DF;
     /*0x19E0*/ u8 _19E0;
@@ -2168,39 +2182,7 @@ typedef struct _MiniGameStruct {
     /*0x19E4*/ s16 _19E4;
     /*0x19E6*/ u8 _19E6;
     /*0x19E7*/ u8 _19E7;
-    /*0x19E8*/ u8 _19E8;
-    /*0x19E9*/ u8 _19E9;
-    /*0x19EA*/ u8 _19EA;
-    /*0x19EB*/ u8 _19EB;
-    /*0x19EC*/ u8 _19EC;
-    /*0x19ED*/ u8 _19ED;
-    /*0x19EE*/ u8 _19EE;
-    /*0x19EF*/ u8 _19EF;
-    /*0x19F0*/ u8 _19F0;
-    /*0x19F1*/ u8 _19F1;
-    /*0x19F2*/ u8 _19F2;
-    /*0x19F3*/ u8 _19F3;
-    /*0x19F4*/ u8 _19F4;
-    /*0x19F5*/ u8 _19F5;
-    /*0x19F6*/ u8 pad14[2];
-    /*0x19F8*/ u8 _19F8;
-    /*0x19F9*/ u8 _19F9;
-    /*0x19FA*/ u8 _19FA;
-    /*0x19FB*/ u8 _19FB;
-    /*0x19FC*/ u8 _19FC;
-    /*0x19FD*/ u8 _19FD;
-    /*0x19FE*/ u8 _19FE;
-    /*0x19FF*/ u8 pad15[2];
-    /*0x1A01*/ u8 _1A01;
-    /*0x1A02*/ u8 _1A02;
-    /*0x1A03*/ u8 _1A03;
-    /*0x1A04*/ u8 _1A04;
-    /*0x1A05*/ u8 _1A05;
-    /*0x1A06*/ u8 _1A06;
-    /*0x1A07*/ u8 _1A07;
-    /*0x1A08*/ u8 pad16[2];
-    /*0x1A0A*/ u8 _1A0A;
-    /*0x1A0B*/ u8 _1A0B;
+    /*0x19E8*/ MiniGameUnk19E8 _19E8[4];
     /*0x1A0C*/ u8 _1A0C;
     /*0x1A0D*/ u8 _1A0D;
     /*0x1A0E*/ u8 _1A0E;
@@ -2208,10 +2190,7 @@ typedef struct _MiniGameStruct {
     /*0x1A10*/ u8 _1A10;
     /*0x1A11*/ u8 _1A11;
     /*0x1A12*/ u8 _1A12;
-    /*0x1A13*/ u8 _1A13;
-    /*0x1A14*/ u8 _1A14;
-    /*0x1A15*/ u8 _1A15;
-    /*0x1A16*/ u8 _1A16;
+    /*0x1A13*/ u8 _1A13[4];
     /*0x1A17*/ u8 battingHandedness[9];
     /*0x1A20*/ u8 _1A20;
     /*0x1A21*/ u8 _1A21;
@@ -2778,18 +2757,6 @@ typedef struct {
 extern inMemStrikes g_Strikes;
 
 typedef struct {
-    u8 pad[0x24];
-    /* 0x0024 */ u32 playFrameCounter;
-    artificial_padding(0x24, 0x36, u32);
-    /* 0x0036 */ u8 replayInd;
-    /* 0x0037 */ u8 _37;
-    /* 0x0038 */ u8 _38;
-} g_Stats_s; // size: 0x4634
-
-// 0x8088a7e4
-extern g_Stats_s g_Stats;
-
-typedef struct {
     u8 pad[0x105];
     /* 0x105 */ u8 playerAtMoundCutoffLocation;
     /* 0x106 */ u8 throwSpeedType;
@@ -2869,6 +2836,49 @@ typedef struct {
 } g_FieldingLogic_s; // size 0x150
 
 extern g_FieldingLogic_s g_FieldingLogic;
+
+// Copies of the game state that a replay restores
+typedef struct {
+    /* 0x0000 */ GameControlsStruct gameLogic;
+    /* 0x0158 */ inMemStrikes strikes;
+    /* 0x017C */ u8 scores[0xC8];
+    /* 0x0244 */ InMemBallType ball;
+    /* 0x1E3C */ InMemPitcherType pitcher;
+    /* 0x1FB4 */ InMemBatterType batter;
+    /* 0x2064 */ AIStruct aiLogic;
+    /* 0x2120 */ g_FieldingLogic_s fieldingLogic;
+    /* 0x2270 */ u8 runningLogic[0x20];
+    /* 0x2290 */ u8 fielders[0x15A8];
+    /* 0x3838 */ InMemRunnerType runners[4];
+    /* 0x3D88 */ u8 _3D88[0x6];
+    /* 0x3D8E */ u8 _3D8E[0x4];
+    /* 0x3D92 */ u8 _3D92[0xE];
+    /* 0x3DA0 */ u8 _3DA0[0x14];
+    /* 0x3DB4 */ u8 _3DB4[0x2F4];
+    /* 0x40A8 */ u8 _40A8[0x80];
+    /* 0x4128 */ u8 _4128[0x2AC];
+    /* 0x43D4 */ u8 _43D4[0x21C];
+} ReplayState; // size: 0x45F0
+
+typedef struct {
+    u8 pad[0x24];
+    /* 0x0024 */ s32 playFrameCounter;
+    /* 0x0028 */ s16 _28;
+    artificial_padding(0x28, 0x36, s16);
+    /* 0x0036 */ u8 replayInd;
+    /* 0x0037 */ u8 _37;
+    /* 0x0038 */ u8 _38;
+    /* 0x0039 */ u8 _39;
+    artificial_padding(0x39, 0x3C, u8);
+    /* 0x003C */ u8 _3C;
+    artificial_padding(0x3C, 0x3F, u8);
+    /* 0x003F */ u8 _3F[2];
+    artificial_padding(0x40, 0x44, u8);
+    /* 0x0044 */ ReplayState _44;
+} g_Stats_s; // size: 0x4634
+
+// 0x8088a7e4
+extern g_Stats_s g_Stats;
 
 typedef struct {
     /* 0x0 */ s16 _0;
