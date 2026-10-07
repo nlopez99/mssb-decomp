@@ -2329,7 +2329,11 @@ typedef struct {
     /* 0xAA2 */ s16 _AA2;
     /* 0xAA4 */ s16 _AA4;
     /* 0xAA6 */ s16 _AA6;
-    artificial_padding(0xaa6, 0xab4, u16);
+    /* 0xAA8 */ u16 _AA8;
+    /* 0xAAA */ u16 _AAA;
+    /* 0xAAC */ u16 _AAC;
+    /* 0xAAE */ u16 _AAE;
+    artificial_padding(0xaae, 0xab4, u16);
     /* 0xAB5 */ u8 _AB4;
     /* 0xAB5 */ u8 _AB5;
     /* 0xAB6 */ u8 _AB6;
