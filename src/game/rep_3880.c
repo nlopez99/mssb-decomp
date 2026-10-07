@@ -135,6 +135,7 @@ extern s32 lbl_3_data_26C94[9];
 extern s32 lbl_3_data_26E7C[8];
 extern s32 lbl_3_data_26E40[15];
 extern s32 lbl_3_data_26D00[20];
+extern s32 lbl_3_data_26CD0[12];
 extern s32 lbl_3_data_26C3C[22];
 extern f32 lbl_3_data_26C1C[4][2];
 extern Vec lbl_3_data_26E00[3];
@@ -154,6 +155,7 @@ extern s32 lbl_3_data_26DC4[15];
 extern BOOL fn_8001B728(s32, s32, Vec*);
 extern s32 fn_8005268C(void);
 extern camera_803c639c_s* fn_80052734(s32 index);
+extern Particle3880* fn_80031F34(Particle3880* particles, s32 count);
 extern void fn_80033794(void* particles);
 extern void fn_80033B58(void* texture, s32 index, s32, s32);
 extern void pitchingMachinePitching(u8 id);
@@ -909,8 +911,59 @@ void fn_3_14DF6C(void) {
 }
 
 // .text:0x0014DD04 size:0x268 mapped:0x8078CD98
-void fn_3_14DD04(void) {
-    return;
+BOOL fn_3_14DD04(Emitter3880* emitter) {
+    Particle3880* p;
+    Particle3880** link;
+    Particle3880* last;
+    s32 alive = 0;
+    s32 alpha;
+    s32 step;
+    f32 grow;
+
+    p = emitter->particles = fn_80031F34(emitter->particles, emitter->count);
+    link = &emitter->particles;
+    last = NULL;
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_DSTALPHA, GX_LO_CLEAR);
+    do {
+        if (p->_4A != 0) {
+            fn_8003403C(p->_38, p->_3C);
+            fn_80033CC8(p, emitter->_10);
+            p->pos.y -= p->vel.y;
+            p->vel.y -= lbl_3_data_26CD0[10] / 100000.0f;
+            alpha = p->color[3];
+            if (lbl_3_data_26CD0[2] / p->_4A < 2) {
+                grow = p->_1C.x * ((lbl_3_data_26CD0[4] - lbl_3_data_26CD0[3]) / 100000.0f / (lbl_3_data_26CD0[2] / 2));
+                step = (lbl_3_data_26CD0[7] - lbl_3_data_26CD0[6]) / (lbl_3_data_26CD0[2] / 2);
+            } else {
+                grow = p->_1C.x * ((lbl_3_data_26CD0[5] - lbl_3_data_26CD0[4]) / 100000.0f / (lbl_3_data_26CD0[2] / 2));
+                step = (lbl_3_data_26CD0[8] - lbl_3_data_26CD0[7]) / (lbl_3_data_26CD0[2] / 2);
+            }
+            p->_38 += grow;
+            p->_3C = p->_38;
+            alpha += step;
+            if (alpha < 0) {
+                alpha = 0;
+            } else if (alpha > 255) {
+                alpha = 255;
+            }
+            p->color[3] = alpha;
+            p->_4A--;
+            if (p->_4A == 0) {
+                *link = p->next;
+                if (last != NULL) {
+                    last->next = p;
+                }
+                last = p;
+                p->next = NULL;
+                emitter->count--;
+            } else {
+                link = &p->next;
+                alive++;
+            }
+        }
+    } while ((p = *link) != NULL);
+    return alive == 0;
 }
 
 // .text:0x0014DCE0 size:0x24 mapped:0x8078CD74
@@ -1181,8 +1234,79 @@ void fn_3_14BCB0(Emitter3880* emitter, Vec* pos, u8 big) {
 }
 
 // .text:0x0014BA40 size:0x270 mapped:0x8078AAD4
-void fn_3_14BA40(void) {
-    return;
+BOOL fn_3_14BA40(Emitter3880* emitter) {
+    Particle3880* p;
+    Particle3880** link;
+    Particle3880* removed;
+    Particle3880* last;
+    s32* cfg;
+    s32 total;
+    s32 fade;
+    s32 alive = 0;
+    s32 alpha;
+    s32 step;
+    f32 grow;
+
+    if (lbl_80366158._28 != 0) {
+        return FALSE;
+    }
+    p = emitter->particles = fn_80031F34(emitter->particles, emitter->count);
+    link = &emitter->particles;
+    last = NULL;
+    removed = NULL;
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+    do {
+        if (p->_4A != 0) {
+            cfg = !p->_4F ? lbl_3_data_26D88 : lbl_3_data_26DC4;
+            total = cfg[2];
+            fade = cfg[3];
+            fn_8003403C(p->_38, p->_3C);
+            fn_80033CC8(p, emitter->_10);
+            alpha = p->color[3];
+            if (total - p->_4A < fade) {
+                grow = (cfg[5] - cfg[4]) / fade / 100000.0f;
+                step = (cfg[11] - cfg[10]) / fade;
+            } else {
+                grow = (cfg[6] - cfg[5]) / (total - fade) / 100000.0f;
+                step = (cfg[12] - cfg[11]) / (total - fade);
+            }
+            alpha += step;
+            if (alpha > 255) {
+                alpha = 255;
+            }
+            if (alpha < 0) {
+                alpha = 0;
+            }
+            p->color[3] = alpha;
+            p->_38 += grow;
+            p->_3C = p->_38;
+            p->_4A--;
+            if (p->_4A == 0) {
+                *link = p->next;
+                if (last != NULL) {
+                    last->next = p;
+                } else {
+                    removed = p;
+                }
+                last = p;
+                p->next = NULL;
+                emitter->count--;
+            } else {
+                link = &p->next;
+                alive++;
+            }
+        }
+    } while ((p = *link) != NULL);
+    if (removed != NULL) {
+        p = removed;
+        do {
+            p->_4C = 0;
+            p->_48 = 0;
+        } while ((p = p->next) != NULL);
+        fn_80033794(removed);
+    }
+    return alive == 0;
 }
 
 // .text:0x0014B9F0 size:0x50 mapped:0x8078AA84
