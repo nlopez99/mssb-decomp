@@ -256,8 +256,10 @@ void fn_3_E4FC4(void** files) {
         }
         n++;
     }
-    lbl_8036E548._6C = ActorObjectInitTable(n + 1);
-    lbl_3_common_bss_350E4._6D = n + 1;
+    total = n;
+    total++;
+    lbl_8036E548._6C = ActorObjectInitTable(total);
+    lbl_3_common_bss_350E4._6D = total;
     j = 0;
     for (i = 0; i < n; j++, i++) {
         fn_800BDC88(lbl_8036E548._6C, j, j, files[indices[1]], NULL, files[indices[1] + 2]);
@@ -274,7 +276,7 @@ void fn_3_E4FC4(void** files) {
     for (i = 0; i < 10; i++) {
         lbl_3_bss_AE18[i] = files[indices[i + 4]];
     }
-    for (i = 0; i < lbl_3_common_bss_350E4._6D; i++) {
+    for (i = 0; i < total; i++) {
         fn_800BD548(&lbl_8036E548._6C->_34[i], 4, lbl_3_common_bss_350E4._20, lbl_3_common_bss_350E4._24,
                     lbl_3_common_bss_350E4._28, lbl_3_common_bss_350E4._2C);
     }
