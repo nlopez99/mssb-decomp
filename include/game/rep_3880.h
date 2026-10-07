@@ -136,5 +136,6 @@ BOOL fn_3_15767C(struct Emitter3880* emitter);
 void fn_3_1578F8(void);
 f32 fn_3_15791C(s32 frame);
 void fn_3_157AC4(void);
+void fn_3_157DB8(void);
 
 #endif // !__GAME_rep_3880_H_

@@ -217,6 +217,11 @@ static u8 lbl_3_bss_B858;
 static TexInfo3880* lbl_3_bss_B854;
 static TrailEmitter3880* lbl_3_bss_B850;
 
+// .text:0x00157DB8 size:0x70 mapped:0x80796E4C
+void fn_3_157DB8(void) {
+    return;
+}
+
 // .text:0x00157AC4 size:0x2F4 mapped:0x80796B58
 void fn_3_157AC4(void) {
     return;
