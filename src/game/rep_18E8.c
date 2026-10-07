@@ -4,6 +4,7 @@
 #include "static/UnknownHomes_Static.h"
 #include "game/rep_1838.h"
 #include "game/rep_D0.h"
+#include "game/rep_3E58.h"
 
 typedef struct {
     /* 0x000 */ f32 _000;
@@ -32,7 +33,9 @@ typedef struct {
     /* 0x074 */ u8 _074[0xA8 - 0x74];
     /* 0x0A8 */ f32 _0A8[4];
     /* 0x0B8 */ f32 _0B8;
-    /* 0x0BC */ u8 _0BC[0x120 - 0xBC];
+    /* 0x0BC */ u8 _0BC[0xF4 - 0xBC];
+    /* 0x0F4 */ f32 _0F4;
+    /* 0x0F8 */ u8 _0F8[0x120 - 0xF8];
     /* 0x120 */ f32 _120;
     /* 0x124 */ f32 _124;
     /* 0x128 */ u8 _128[0x174 - 0x128];
@@ -90,6 +93,7 @@ extern u8 lbl_3_data_1C38[2];
 extern s16 lbl_3_data_1C40;
 extern u8 lbl_3_data_4744[24];
 extern s16 lbl_3_data_4860[4][3];
+extern f32 lbl_3_data_4760[3];
 extern f32 lbl_3_data_4780[5];
 extern f32 lbl_3_data_4878[2];
 extern s16 lbl_3_data_4880;
@@ -99,7 +103,14 @@ extern s16 lbl_3_data_49DC[44];
 
 extern struct {
     /* 0x00 */ s16 _00;
+    /* 0x02 */ u8 _02[0x4 - 0x2];
+    /* 0x04 */ s16 _04;
 } g_RunningLogic;
+
+extern struct {
+    /* 0x0000 */ u8 _0000[0x2C50];
+    /* 0x2C50 */ struct UnkPlayer3E58* _2C50[9];
+} lbl_8036E548;
 
 extern struct {
     /* 0x00 */ s32 _00;
@@ -142,8 +153,211 @@ void fn_3_ABDD0(void) {
 }
 
 // .text:0x000AB5B0 size:0x820 mapped:0x806EA644
-void fn_3_AB5B0(void) {
-    return;
+// 99.90%: registers only, in the index arithmetic of the covering fielder's _0F4 load.
+void fn_3_AB5B0(s32 maxFrames, f32* angleOut, f32* speedOut) {
+    f32 speed = *speedOut;
+    f32 best = -9999.9f;
+    f32 lift = 0.0f;
+    f32 drag = 1.0f - g_Ball.airResistance / 10000.0f;
+    f32 lowLimit = 0.2f;
+    f32 highLimit;
+    f32 dist;
+    f32 angle;
+    f32 step;
+    f32 bestAngle;
+    f32 prevAngle;
+    s32 result = 0;
+    s32 prevResult = 0;
+    s32 iter;
+    s32 retries;
+    s32 frames;
+    f32 vx;
+    f32 vy;
+    f32 y;
+    f32 x;
+
+    g_FieldingLogic._141 = 0;
+    if (checkFieldingStat(g_GameLogic.teamFielding, g_Fielders[g_Ball.fielderWBallIndex]._178, 4)) {
+        if (g_FieldingLogic._0C4 == 0) {
+            if (g_RunningLogic._04 & 0x1000) {
+                g_FieldingLogic._140 = 1;
+                g_FieldingLogic._141 = 1;
+                playSoundEffect(0x1A8);
+            }
+        } else if (g_FieldingLogic._0C4 == 0 && (g_RunningLogic._04 & 0x1100)) {
+            g_FieldingLogic._140 = 1;
+            g_FieldingLogic._141 = 1;
+            playSoundEffect(0x1A8);
+        }
+    }
+    highLimit = g_Fielders[g_FieldingLogic._0D0[g_FieldingLogic._0C4]]._0F4 - 0.2f;
+    if (lowLimit < 0.5f * highLimit) {
+        lowLimit = 0.5f * highLimit;
+    }
+    dist = dolsqrtf2(SQ(g_Ball.throwTarget.x - g_Ball.AtBat_Contact_BallPos.x) +
+                     SQ(g_Ball.throwTarget.z - g_Ball.AtBat_Contact_BallPos.z));
+    angle = 0.0f;
+    bestAngle = angle;
+    step = 0.025f;
+    if (g_FieldingLogic.throwSpeedType <= 6) {
+        if (g_FieldingLogic._12D == 0) {
+            if (g_FieldingLogic.throwSpeedType != 0) {
+                g_FieldingLogic.throwSpeedType--;
+            }
+        } else if (g_FieldingLogic._12D == 2 && g_FieldingLogic.throwSpeedType < 6) {
+            g_FieldingLogic.throwSpeedType++;
+        }
+    }
+    switch (g_FieldingLogic.throwSpeedType) {
+    case 0:
+        speed *= 1.3f;
+        break;
+    case 1:
+        speed *= 1.2f;
+        break;
+    case 2:
+        speed *= 1.1f;
+        break;
+    case 4:
+        speed *= 0.9f;
+        break;
+    case 5:
+        speed *= 0.8f;
+        break;
+    case 6:
+        speed *= 0.7f;
+        break;
+    case 7:
+        speed = 0.35f;
+        if (dist < 10.0f) {
+            speed = 0.3f;
+        } else if (dist < 15.0f) {
+            speed = 0.325f;
+        }
+        break;
+    case 8:
+        speed = 0.25f;
+        angle = 0.6f;
+        bestAngle = angle;
+        break;
+    case 9:
+        speed = 0.55f;
+        break;
+    case 3:
+    case 10:
+        break;
+    }
+    if (g_FieldingLogic._13D) {
+        lift = lbl_3_data_4760[0];
+        if (g_FieldingLogic._107 == 2 && g_Ball.fielderWBallIndex == 1 && g_Ball.framesSinceHit <= 130) {
+            speed *= lbl_3_data_4760[1];
+        }
+    }
+    if (g_FieldingLogic._140) {
+        speed *= lbl_3_data_4760[2];
+    }
+    for (iter = 0, retries = 0; iter < 12; iter++) {
+        vx = speed * (f32)cos(angle);
+        vy = speed * (f32)sin(angle);
+        y = g_Ball.AtBat_Contact_BallPos.y;
+        x = 0.0f;
+        frames = 0;
+        while (frames < 900) {
+            frames++;
+            vx *= drag;
+            x += vx;
+            vy -= g_Ball.physicsSubstruct.gravity;
+            vy += lift;
+            vy *= drag;
+            y += vy;
+            if (x > dist) {
+                if (y < lowLimit) {
+                    result = 2;
+                } else if (y < highLimit) {
+                    result = 3;
+                } else {
+                    result = 4;
+                }
+                break;
+            }
+            if (y < 0.0f) {
+                result = 1;
+                break;
+            }
+        }
+        if (frames < maxFrames && retries < 5 && result != 1) {
+            angle += step;
+            g_FieldingLogic._140 = 0;
+            retries++;
+            speed *= 0.9f;
+            g_FieldingLogic._141 = 0;
+            continue;
+        }
+        if (result == 1) {
+            if (prevResult >= 2) {
+                break;
+            }
+            if (x - dist > best) {
+                bestAngle = angle;
+                best = x - dist;
+                angle += step;
+            } else {
+                angle = 0.5f * (bestAngle + angle);
+            }
+        } else if (result == 2) {
+            if (prevResult <= 1) {
+                bestAngle = angle;
+                angle += step;
+                step *= 0.95f;
+            } else if (prevResult == 4) {
+                bestAngle = angle;
+                angle = 0.5f * (prevAngle + angle);
+                step *= 0.95f;
+            } else if (y > best) {
+                bestAngle = angle;
+                angle += step;
+            } else {
+                break;
+            }
+            best = y;
+        } else if (result == 3) {
+            bestAngle = angle;
+            break;
+        } else if (result == 4) {
+            if (prevResult <= 2) {
+                bestAngle = angle;
+                if (iter == 0) {
+                    angle -= step;
+                } else {
+                    angle = 0.5f * (prevAngle + angle);
+                }
+            } else if (y < best) {
+                bestAngle = angle;
+                angle -= step;
+                step *= 0.95f;
+            } else {
+                break;
+            }
+            best = y;
+        }
+        prevAngle = bestAngle;
+        prevResult = result;
+    }
+    if (result == 1) {
+        f32 shortfall = dist - x;
+        if (shortfall > 14.0f && shortfall < 20.0f && g_FieldingLogic._0C4 == 0 && g_Ball.ballAngleFromHome > 0x3B8 &&
+            g_Ball.ballAngleFromHome < 0x448) {
+            bestAngle += 0.015f;
+        }
+        frames = 600;
+    }
+    *angleOut = bestAngle;
+    *speedOut = speed;
+    g_Ball.framesUntilThrowReachesDest = frames;
+    g_Ball.throwTimeEstimatesCompleteInd = 0;
+    if (g_FieldingLogic._140) {
+        fn_3_1682AC(lbl_8036E548._2C50[g_Ball.fielderWBallIndex], 4);
+    }
 }
 
 // .text:0x000AB554 size:0x5C mapped:0x806EA5E8

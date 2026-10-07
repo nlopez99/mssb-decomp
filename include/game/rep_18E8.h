@@ -60,7 +60,7 @@ BOOL fn_3_AABF8(void);
 void fn_3_AAC84(f32* x, f32* z);
 void fn_3_AAFF0(f32* x, f32* z);
 void fn_3_AB554(void);
-void fn_3_AB5B0(void);
+void fn_3_AB5B0(s32 maxFrames, f32* angleOut, f32* speedOut);
 void fn_3_ABDD0(void);
 
 #endif // !__GAME_rep_18E8_H_
