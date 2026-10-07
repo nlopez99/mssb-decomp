@@ -377,8 +377,7 @@ void fn_3_E4EF4(void) {
     Rep2998Common* common = &lbl_3_common_bss_350E4;
     s32 count;
     s32 idx;
-    u32 size = (common->_30 * sizeof(u16)) + (common->_30 * sizeof(u32)) + (common->_30 * sizeof(u32)) +
-               (common->_30 * (2 * sizeof(Vec)));
+    u32 size = common->_30 * 2 + common->_30 * 4 + common->_30 * 4 + common->_30 * 2 * 12;
 
     if (common->_48 == NULL) {
         common->_48 = _OSAllocFromHeap(4, size);
