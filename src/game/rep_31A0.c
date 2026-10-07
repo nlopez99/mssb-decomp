@@ -18,6 +18,8 @@
 #include "game/rep_2940.h"
 #include "game/rep_28A8.h"
 #include "game/rep_1E08.h"
+#include "game/rep_16B8.h"
+#include "game/rep_E08.h"
 #include "string.h"
 #include "musyx/musyx.h"
 
@@ -160,6 +162,11 @@ extern struct {
 extern s16 lbl_80109410[8];
 
 extern struct {
+    /* 0x0 */ u8 _0[6];
+    /* 0x6 */ u8 _6;
+} lbl_803C6714;
+
+extern struct {
     /* 0x0 */ u8 _0[3];
     /* 0x3 */ u8 _3;
 } lbl_803C5F74;
@@ -206,6 +213,11 @@ extern void fn_3_161078(void);
 extern void fn_3_1658F0(void);
 extern void possiblyTransitionBlackScreen(void);
 extern void fn_8004CC18(void);
+extern void fn_8004FDA0(int charID);
+extern void fn_80050138(int arg0, int c0, int c1, int c2, int c3, int arg5);
+extern void fn_800506E8(int port, int charID, int arg2);
+extern s8 fn_80050760(int player, int arg1, int arg2, int arg3, int arg4);
+extern void fn_80050FE8(int arg0, int arg1, int arg2, int arg3, int arg4, int arg5);
 extern void fn_8004CC2C(void);
 extern void fn_8004CC4C(int arg0, int arg1, int arg2, int arg3, int arg4);
 extern void fn_8004D0F0(void);
@@ -1206,8 +1218,176 @@ void fn_3_10EFAC(void) {
 }
 
 // .text:0x0010E60C size:0x9A0 mapped:0x8074D6A0
+// 99.42%: the target compares characters[i]._31 signed (cmpwi), and calls fn_3_10CC20, whose empty stub is inlined
 void fn_3_10E60C(void) {
-    return;
+    CharacterStats* stats;
+    int i;
+    int j;
+
+    if (g_GameLogic._125 <= 2) {
+        for (i = 0; i < 4; i++) {
+            g_Minigame._19E8[i]._8 = g_Minigame._19E8[i]._7;
+            g_Minigame._19E8[i]._7 = 1;
+        }
+    }
+    switch (g_GameLogic._125) {
+    case 0:
+        for (i = 0; i < 4; i++) {
+            if (g_Minigame._19DA[i] == 1) {
+                g_Minigame._19DA[i] = -1;
+            }
+            g_Minigame.minigameControlStruct.aIStrength[i] = 0;
+            g_Minigame._1A13[i] = 1;
+        }
+        if (g_Minigame._190A != 0) {
+            fn_80050FE8(1, 1, 1, 1, 1, 0);
+            for (i = 0; i < 54; i++) {
+                if (starMissionCompletionTracker.characters[i]._31 != 1) {
+                    fn_8004FDA0(i);
+                }
+            }
+            g_Minigame._19E8[lbl_3_common_bss_37400._40]._0 = g_d_GameSettings._36;
+        } else {
+            fn_80050FE8(1, 1, 1, 1, 1, 1);
+            for (i = 0; i < 4; i++) {
+                if (g_Minigame._19DA[i] < 0) {
+                    g_Minigame._19E8[i]._0 = -1;
+                }
+            }
+        }
+        for (i = 0; i < 3; i++) {
+            if (g_Minigame._19E8[i]._0 >= 0) {
+                for (j = i + 1; j < 4; j++) {
+                    if (g_Minigame._19E8[i]._0 == g_Minigame._19E8[j]._0) {
+                        g_Minigame._19E8[j]._0 = -3;
+                    }
+                }
+            }
+        }
+        fn_80050138(1, g_Minigame._19E8[0]._0, g_Minigame._19E8[1]._0, g_Minigame._19E8[2]._0, g_Minigame._19E8[3]._0, 1);
+        for (i = 0; i < 4; i++) {
+            g_Minigame._19E8[i]._1 = 0;
+            g_Minigame._19D2[i] = 20;
+        }
+        lbl_8036E548._307E = 0;
+        lbl_8036E548._2D77 = 0;
+        lbl_8036E548._307A = 5;
+        g_Minigame._18A2[0] = -1;
+        g_GameLogic.FrameCountOfCurrentAtBat_Copy = 0;
+        g_Minigame._19DE = 0;
+        g_Minigame._19E2 = 0;
+        g_Minigame._19E3 = 0;
+        if (g_Minigame.battingHandedness[5] == 0) {
+            fn_800B0A5C_insertQueue(fn_80062A94, 1);
+        }
+        changeScene(1, 6);
+        g_GameLogic._125++;
+        break;
+    case 1:
+        if (g_GameLogic.FrameCountOfCurrentAtBat_Copy == 1) {
+            for (i = 0; i < 4; i++) {
+                if (g_Minigame._19DA[i] == 0) {
+                    g_Minigame._19E8[i]._0 = fn_80050760(i, 0, 0, 0, 0);
+                    g_Minigame._19E8[i]._6 = 0;
+                    stats = &lbl_8034E9A0[g_Minigame._19E8[i]._0];
+                    g_Minigame.battingHandedness[i] = stats->stats.BattingStance + stats->stats.FieldingArm * 2;
+                    g_Minigame.minigameControlStruct._8[i] = 0;
+                }
+            }
+            changeScene(1, 6);
+        }
+        if (g_GameLogic.FrameCountOfCurrentAtBat_Copy > 30) {
+            g_Minigame._19DE = 0;
+            if (g_Minigame._19E0 != 0) {
+                g_Minigame._19DE = 5;
+                g_Minigame._19E0 = 0;
+                g_Minigame._19E8[lbl_80366158._27]._1 = 1;
+                fn_800506E8(lbl_80366158._27, g_Minigame._19E8[lbl_80366158._27]._0, 1);
+            }
+            g_GameLogic.FrameCountOfCurrentAtBat_Copy = 0;
+            g_GameLogic._125++;
+        }
+        break;
+    case 2:
+        fn_3_10CC20();
+        break;
+    case 3:
+        if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+            if (g_GameLogic.FrameCountOfCurrentAtBat_Copy > 20) {
+                switch (fn_3_5B380(g_Controls[lbl_80366158._27].newButtonInput)) {
+                case 1:
+                    g_GameLogic._125 = 4;
+                    g_GameLogic.FrameCountOfCurrentAtBat_Copy = 0;
+                    return;
+                case 2:
+                    g_GameLogic._125 = 2;
+                    return;
+                }
+            }
+            return;
+        }
+        g_GameLogic._125 = 4;
+        g_GameLogic.FrameCountOfCurrentAtBat_Copy = 0;
+        break;
+    case 4:
+        if (g_Minigame._1A0C == -1) {
+            if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+                if (g_GameLogic.FrameCountOfCurrentAtBat_Copy > 45) {
+                    changeScene(4, 6);
+                }
+                if (lbl_8037169C._13 != 0) {
+                    g_GameLogic._125 = 5;
+                }
+            } else if (g_GameLogic.FrameCountOfCurrentAtBat_Copy >= 15) {
+                fn_3_5A6D4(0x1C);
+            }
+        }
+        lbl_8036E548._307A = 0;
+        break;
+    case 5:
+        fn_3_972C8();
+        fn_8004CC18();
+        g_GameLogic.framesOfExitingToMenu = 1;
+        break;
+    case 6:
+        if (g_Minigame._1A0F[0] < 0) {
+            for (i = 0; i < 4; i++) {
+                if (g_Minigame._19E8[i]._7 == 0 && g_Minigame._19E8[i]._1 != 0) {
+                    break;
+                }
+            }
+            if (i >= 4) {
+                changeScene(3, 6);
+                if (g_Minigame._1A3C == 0) {
+                    lbl_803C6714._6 = 6;
+                    g_Minigame.battingHandedness[5] = 0;
+                }
+            }
+        }
+        if (lbl_8037169C._13 != 0) {
+            g_GameLogic._125 = 7;
+        }
+        break;
+    case 7:
+        fn_3_60768();
+        fn_3_10C58C();
+        lbl_8036E548._307A = 0;
+        g_Minigame.battingHandedness[6] = 0;
+        if (g_Minigame._1A3C != 0) {
+            fn_3_1078F8();
+        } else {
+            fn_3_5A6D4(0x21);
+        }
+        break;
+    }
+    if (g_GameLogic._125 == 3 || g_GameLogic._125 == 4) {
+        for (i = 0; i < 4; i++) {
+            g_Minigame._19E8[i]._7 = 0;
+        }
+    }
+    if (g_GameLogic._125 >= 2) {
+        fn_3_10C81C();
+    }
 }
 
 // .text:0x0010CC20 size:0x19EC mapped:0x8074BCB4
