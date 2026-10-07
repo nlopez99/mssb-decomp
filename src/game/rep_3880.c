@@ -4,6 +4,7 @@
 #include "game/rep_1838.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/mtx.h"
+#include "Dolphin/mtxext.h"
 #include "C3/control.h"
 #include "Dolphin/rand.h"
 #include "static/UnknownHomes_Static.h"
@@ -18,6 +19,13 @@ typedef struct UnkModelSet3880 {
     /* 0x00 */ u8 _00[0x18];
     /* 0x18 */ UnkModel3880** _18;
 } UnkModelSet3880;
+
+// What fn_3_151710's caller passes: the model set field of an actor
+typedef struct UnkModelRef3880 {
+    /* 0x00 */ UnkModelSet3880* set;
+    /* 0x04 */ u8 _04[0x6C - 0x4];
+    /* 0x6C */ u8 _6C;
+} UnkModelRef3880;
 
 typedef struct Particle3880 {
     /* 0x00 */ struct Particle3880* next;
@@ -94,7 +102,13 @@ typedef struct TexInfo3880 {
     /* 0x17 */ u8 format;
     /* 0x18 */ u16 tlutCount;
     /* 0x1A */ u8 tlutFormat;
-} TexInfo3880;
+    /* 0x1C */ u16 _1C;
+} TexInfo3880; // size: 0x20
+
+typedef struct {
+    /* 0x00 */ u32 _00;
+    /* 0x04 */ TexInfo3880 tex[1];
+} TexSet3880;
 
 typedef struct {
     /* 0x00 */ Vec pos;
@@ -120,7 +134,7 @@ typedef struct PlayerEmitter3880 {
 
 typedef struct ModelEmitter3880 {
     /* 0x00 */ Emitter3880 base;
-    /* 0x18 */ UnkModelSet3880** models;
+    /* 0x18 */ UnkModelRef3880* models;
     /* 0x1C */ Vec pos;
 } ModelEmitter3880;
 
@@ -133,6 +147,11 @@ typedef struct PathEmitter3880 {
     /* 0x36 */ s16 _36;
 } PathEmitter3880;
 
+typedef struct FrameEmitter3880 {
+    /* 0x00 */ Emitter3880 base;
+    /* 0x18 */ s32 frame;
+    /* 0x1C */ s32 end;
+} FrameEmitter3880;
 
 typedef struct {
     /* 0x00 */ u8 _00[0x34];
@@ -140,9 +159,15 @@ typedef struct {
     /* 0x38 */ u8 _38[0x90 - 0x38];
 } UnkActor3880; // size: 0x90
 
-typedef struct {
-    /* 0x00 */ u8 _00[0x34];
-    /* 0x34 */ Vec _34;
+typedef struct UnkPlayer3880 {
+    /* 0x000 */ u8 _000[0x34];
+    /* 0x034 */ Vec _34;
+    /* 0x040 */ Vec rot;
+    /* 0x04C */ u8 _04C[0x252 - 0x4C];
+    /* 0x252 */ s8 _252;
+    /* 0x253 */ u8 _253;
+    /* 0x254 */ s8 _254;
+    /* 0x255 */ s8 _255;
 } UnkPlayer3880;
 
 extern struct {
@@ -153,8 +178,10 @@ extern struct {
 } lbl_8036E548;
 
 extern struct {
-    /* 0x00 */ u8 _00[0x6C];
-    /* 0x6C */ void* _6C;
+    /* 0x00 */ u8 _00[0x64];
+    /* 0x64 */ void* _64;
+    /* 0x68 */ TexSet3880* _68;
+    /* 0x6C */ TexSet3880* _6C;
 } lbl_3_common_bss_32724;
 
 extern struct {
@@ -162,31 +189,105 @@ extern struct {
     /* 0x28 */ u8 _28;
 } lbl_80366158;
 
-extern s32 lbl_3_data_26C94[9];
-extern s32 lbl_3_data_26E7C[8];
-extern s32 lbl_3_data_26E40[15];
-extern s32 lbl_3_data_26E9C[25];
-extern s32 lbl_3_data_26D00[20];
-extern s32 lbl_3_data_26CD0[12];
-extern s32 lbl_3_data_26C3C[22];
-extern f32 lbl_3_data_26C1C[4][2];
-extern Vec lbl_3_data_26E00[3];
-extern s32 lbl_3_data_26E24[7];
+extern struct {
+    /* 0x00 */ u8 _00[0x4];
+    /* 0x04 */ s32 _004;
+} lbl_3_common_bss_35154;
+
+// g_Minigame holds 40 of these from 0xA8 in Piranha Panic
+typedef struct {
+    /* 0x00 */ Vec pos;
+    /* 0x0C */ u8 _0C[0x1C - 0xC];
+    /* 0x1C */ s32 kind;
+    /* 0x20 */ u8 _20[0x26 - 0x20];
+    /* 0x26 */ u8 active;
+    /* 0x27 */ u8 _27;
+} UnkPiranha3880; // size: 0x28
+
+// The layout g_Minigame has in Piranha Panic
+typedef struct {
+    /* 0x00 */ u8 _00[0xA8];
+    /* 0xA8 */ UnkPiranha3880 piranhas[40];
+} UnkMinigame3880;
+
+typedef struct {
+    /* 0x00 */ void* _00;
+    /* 0x04 */ s32 _04;
+    /* 0x08 */ s32 _08[18];
+} UnkBurst3880; // size: 0x50
+
+typedef struct {
+    /* 0x00 */ s32 _00;
+    /* 0x04 */ s32 _04[16];
+} UnkSpark3880; // size: 0x44
+
+// .data outside this unit's split
 extern f32 lbl_3_data_21770[6];
-extern u8 lbl_3_data_26CB8[24];
-extern Vec lbl_3_data_26D50;
-extern s32 lbl_3_data_26BDC[4];
-extern u16 lbl_3_data_26B9C[4][2];
-extern Vec lbl_3_data_26BB4;
-extern s32 lbl_3_data_26BC0[7];
-extern s32 lbl_3_data_26BEC[4];
-extern s32 lbl_3_data_26BFC[4];
-extern s32 lbl_3_data_26C0C[4];
-extern s32 lbl_3_data_26D5C[11];
-extern s32 lbl_3_data_26D88[15];
-extern s32 lbl_3_data_26DC4[15];
+
+// .data, in address order. The statics are reached from one pool base.
+static f32 lbl_3_data_266A8[2] = { 0.45f, -0.4f };
+static UnkBurst3880 lbl_3_data_266B0[3] = {
+    { 0, 21, { 2, 240000, 0, 0, 4, 2, 120000, 90000, 0, 155, 500000, 1000000, -500000, 500000, 0xFFFFFF00, 0, -28000, 1 } },
+    { 0, 7, { 4, 78000, 60000, 50000, 12, 6, 109000, 101000, 0, 60, 4500000, 9500000, -1000000, 4500000, 0xFFFFFF00, 0, 0, 0 } },
+    { 0, 18, { 0, 90000, 120000, 10000, 20, 10, 103000, 105999, 0, 60, 10000000, 18000000, 1000000, -1000000, 0x3C3C3C00, 0, 0, 0 } },
+};
+static UnkSpark3880 lbl_3_data_267A0 = { 0, { 20, 8, 0, 250000, 50000, 550000, 0, 0, 12, 13, 14, 15, 16, 17, 18, 19 } };
+static s16 lbl_3_data_267E4[4][2] = { { 11, 10 }, { 15, 14 }, { 17, 16 }, { 13, 12 } };
+UnkBurst3880 lbl_3_data_267F4 = {
+    0, 10, { 3, 100000, 30000, 10000, 12, 8, 110000, 50000, 0, 60, 4500000, 20000000, 0, 2000000, 0xFFFFFF00, 0, 75000, 0 }
+};
+UnkBurst3880 lbl_3_data_26844 = {
+    0, 10, { 5, 18000, 20000, 60000, 12, 6, 109000, 101000, 0, 60, 4500000, 9400000, -1000000, 4500000, 0xFFFFFF00, 0, 75000, 0 }
+};
+UnkBurst3880 lbl_3_data_26894 = {
+    0, 18, { 1, 60000, 10000, 50000, 30, 8, 104000, 106000, 0, 90, 12800000, 10000000, 1000000, 6000000, 0x3C3C3C00, 0, 75000, 0 }
+};
+static UnkBurst3880* lbl_3_data_268E4[3] = { &lbl_3_data_267F4, &lbl_3_data_26844, &lbl_3_data_26894 };
+s32 lbl_3_data_268F0[3] = { 0 }; // unreferenced
+static s32 lbl_3_data_268FC[54][3] = { 0 };
+static u32 lbl_3_data_26B84[4] = { 0xFF0000FF, 0x0000FFFF, 0xFFFF00FF, 0x00FF00FF };
+static f32 lbl_3_data_26B94 = -0.4f;
+static f32 lbl_3_data_26B98 = 6.0f;
+u16 lbl_3_data_26B9C[4][2] = { { 0, 0 }, { 1, 0 }, { 1, 1 }, { 0, 1 } };
+f32 lbl_3_data_26BAC = -0.2f;
+f32 lbl_3_data_26BB0 = 3.0f;
+Vec lbl_3_data_26BB4 = { 0.087f, -0.757f, 0.001f };
+s32 lbl_3_data_26BC0[7] = { 3, 32, 0, 35000, 0, 255, 32 };
+static s32 lbl_3_data_26BDC[4] = { 16, 0, 255, 28 };
+static s32 lbl_3_data_26BEC[4] = { 0, 150000, 0, 16 };
+static s32 lbl_3_data_26BFC[4] = { 0, 15000, 0, 32 };
+static s32 lbl_3_data_26C0C[4] = { 100000, 100000, 10000, 64 };
+static f32 lbl_3_data_26C1C[4][2] = { { -0.75f, 0.7f }, { 0.75f, 0.7f }, { -0.75f, -0.7f }, { 0.75f, -0.7f } };
+s32 lbl_3_data_26C3C[22] = {
+    2, 32, 0, 50000, 0, 255, 32, 15, 9, 150, 40000, 70000, 30000, 80000, 4400, 50000, 12000, 15000, 0, 104719, 60, 29,
+};
+s32 lbl_3_data_26C94[9] = { 2, 90, 200000, 100000, 0, 0, 255, 36, 30 };
+u8 lbl_3_data_26CB8[24] = {
+    0x04, 0x05, 0x06, 0x07, 0x08, 0x10, 0x11, 0x12, 0x13, 0x14, 0x16, 0x17,
+    0x18, 0x19, 0x1A, 0x1C, 0x1D, 0x1E, 0x1F, 0x20, 0x21, 0x22, 0x23, 0x00,
+};
+s32 lbl_3_data_26CD0[12] = { 2, 6, 40, 100000, 50000, 0, 255, 127, 0, 40000, 440, 31 };
+s32 lbl_3_data_26D00[20] = { 6, 5, 645, 5, 0, 600000, 800000, 0, 255, 0, 2, 0, 200000, 300000, 0, 255, 0, 20, 20, 32 };
+Vec lbl_3_data_26D50 = { 3.7f, -9.3f, 0.0f };
+s32 lbl_3_data_26D5C[11] = { 7, 1, 8, 5, 0, 1000000, 1200000, 0, 255, 0, 33 };
+s32 lbl_3_data_26D88[15] = { 8, 5, 30, 5, 0, 250000, 400000, 255, 255, 255, 0, 80, 0, 100000, 34 };
+s32 lbl_3_data_26DC4[15] = { 8, 16, 30, 15, 250000, 375000, 500000, 0, 0, 0, 255, 127, 0, 100000, 34 };
+Vec lbl_3_data_26E00[3] = { { 2.035f, -5.718f, 1.014f }, { 1.793f, -4.523f, 0.914f }, { 1.29f, -4.119f, 0.815f } };
+s32 lbl_3_data_26E24[7] = { 3, 16, 100, 0, 30000, 0, 255 };
+s32 lbl_3_data_26E40[15] = { 8, 6, 60, 30000, 5, 0, 100000, 40000, 50000, 0, 220, 0, 30000, 15000, 36 };
+s32 lbl_3_data_26E7C[8] = { 100, 5000, 1200000, 15000, 15000, 0, 60, 37 };
+s32 lbl_3_data_26E9C[25] = {
+    6, 30, 4, 5, 0, 250000, 350000, 0, 255, 0, 5, 20, 7, 2, 0, 250000, 350000, 0, 120, 0, 0, 0x00410045, 0x004D0049, 0x003F0000, 0,
+};
 
 extern BOOL fn_8001B728(s32, s32, Vec*);
+extern void fn_800B24D4(s32 id);
+extern void fn_800B27DC(Mtx44 proj, GXProjectionType type);
+extern void fn_800B2160(s32 mode);
+extern void fn_800B1468(Vec* corners, u32 color, TexInfo3880* tex);
+extern void fn_80030D88(Vec* pos, Vec* dir, UnkBurst3880* burst, s32 n);
+extern void fn_8002F5F4(Vec* pos, Vec* dir, UnkSpark3880* spark, s16 id);
+extern void fn_80030470(Vec* pos, Vec* dir, Vec* back, UnkBurst3880* burst, s32 n);
 extern s32 fn_8005268C(void);
 extern camera_803c639c_s* fn_80052734(s32 index);
 extern Particle3880* fn_80031F34(Particle3880* particles, s32 count);
@@ -218,13 +319,39 @@ static TexInfo3880* lbl_3_bss_B854;
 static TrailEmitter3880* lbl_3_bss_B850;
 
 // .text:0x00157DB8 size:0x70 mapped:0x80796E4C
-void fn_3_157DB8(void) {
-    return;
+void fn_3_157DB8(s32 end) {
+    FrameEmitter3880* emitter = (FrameEmitter3880*)fn_80033A24(fn_3_157AC4, 0x80, 0, 1, 1, 0x16);
+
+    if (emitter != NULL) {
+        emitter->frame = 0;
+        emitter->end = end;
+        emitter->base.particles->_4D = 0;
+        *(u32*)emitter->base.particles->color = 0xFFFFFFFF;
+    }
 }
 
 // .text:0x00157AC4 size:0x2F4 mapped:0x80796B58
-void fn_3_157AC4(void) {
-    return;
+BOOL fn_3_157AC4(Emitter3880* emitter) {
+    FrameEmitter3880* self = (FrameEmitter3880*)emitter;
+    Particle3880* p = emitter->particles;
+    Vec offset = { 2.775f, -6.975f, 0.0f };
+    Mtx m;
+
+    PSMTXRotRad(m, 'Y', shortAngleToRad(g_Minigame._1AF8));
+    PSMTXMultVec(m, &offset, &offset);
+    p->_38 = p->_3C = fn_3_15791C(self->frame);
+    p->pos.x = g_Minigame._1AE0 + offset.x + p->_38 * lbl_3_data_266A8[0];
+    p->pos.y = g_Minigame._1AE4 + offset.y + p->_3C * lbl_3_data_266A8[1];
+    p->pos.z = g_Minigame._1AE8 + offset.z;
+    fn_8003403C(p->_38, p->_3C);
+    fn_80033CC8(emitter->particles, lbl_3_common_bss_32724._64);
+    if (lbl_80366158._28 == 0) {
+        self->frame++;
+    }
+    if (g_Minigame._1A40 != 0) {
+        return TRUE;
+    }
+    return self->frame == self->end && g_GameLogic.gameStatus != GAME_STATUS_MVP_END_GAME;
 }
 
 // .text:0x0015791C size:0x1A8 mapped:0x807969B0
@@ -256,7 +383,52 @@ void fn_3_1578F8(void) {
 
 // .text:0x0015767C size:0x27C mapped:0x80796710
 BOOL fn_3_15767C(Emitter3880* emitter) {
-    return 0;
+    Vec pos;
+    Vec dir;
+    Vec back;
+    UnkPiranha3880* piranha;
+    Vec* point;
+    s16* ids;
+    u32 i;
+    u8 done;
+
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES &&
+        g_Minigame.GameMode_MiniGame == MINI_GAME_ID_PIRANHA_PANIC && lbl_3_bss_B850->_18 == 0) {
+        for (i = 0; i < 40; i++) {
+            piranha = &((UnkMinigame3880*)&g_Minigame)->piranhas[i];
+            if (piranha->active != 0) {
+                pos.x = piranha->pos.x;
+                pos.y = -piranha->pos.y;
+                pos.z = piranha->pos.z;
+                point = fn_3_1575F0(i);
+                PSVECSubtract(point, &pos, &dir);
+                if (PSVECMag(&dir)) {
+                    lbl_3_data_266B0[0]._00 = lbl_3_data_266B0[1]._00 = lbl_3_data_266B0[2]._00 =
+                        lbl_3_common_bss_32724._6C;
+                    lbl_3_data_267A0._00 = lbl_3_common_bss_35154._004;
+                    if (piranha->kind <= 3 && piranha->kind >= 0) {
+                        ids = lbl_3_data_267E4[piranha->kind];
+                        lbl_3_data_266B0[0]._04 = ids[0];
+                        lbl_3_data_266B0[1]._04 = ids[1];
+                        fn_8002F5F4(&pos, &dir, &lbl_3_data_267A0, ids[0]);
+                        if (lbl_80366158._28 == 0) {
+                            fn_80030D88(&pos, &dir, &lbl_3_data_266B0[1], 41);
+                            fn_80030D88(&pos, &dir, &lbl_3_data_266B0[2], 41);
+                            PSVECNormalize(&dir, &dir);
+                            PSVECSubtract(&pos, point, &back);
+                            fn_80030470(&pos, &dir, &back, &lbl_3_data_266B0[0], 41);
+                        }
+                    }
+                }
+            }
+        }
+        lbl_3_bss_B854 = NULL;
+    }
+    done = lbl_3_bss_B850->_18;
+    if (done) {
+        lbl_3_bss_B850 = NULL;
+    }
+    return done;
 }
 
 // .text:0x001575F0 size:0x8C mapped:0x80796684
@@ -286,8 +458,28 @@ void fn_3_157570(void) {
 }
 
 // .text:0x001573AC size:0x1C4 mapped:0x80796440
-void fn_3_1573AC(void) {
-    return;
+void fn_3_1573AC(UnkPlayer3880* player) {
+    Vec pos;
+    Vec dir;
+    Mtx mtx;
+    Control control;
+
+    pos.x = lbl_3_data_268FC[player->_252][0] / 100000.0f;
+    pos.y = lbl_3_data_268FC[player->_252][1] / 100000.0f;
+    pos.z = lbl_3_data_268FC[player->_252][2] / 100000.0f;
+    fn_8001B728(player->_255, 4, &pos);
+    control.type = 0;
+    CTRLSetRotation(&control, player->rot.x, player->rot.y, player->rot.z);
+    CTRLBuildMatrix(&control, mtx);
+    dir.x = 0.0f;
+    dir.y = 0.0f;
+    dir.z = 1.0f;
+    PSMTXMultVec(mtx, &dir, &dir);
+    lbl_3_data_268E4[0]->_00 = lbl_3_data_268E4[1]->_00 = lbl_3_data_268E4[2]->_00 = lbl_3_common_bss_32724._6C;
+    lbl_3_data_268E4[0]->_04 = lbl_3_data_268E4[1]->_04 = lbl_3_data_267E4[player->_254][1];
+    fn_80030D88(&pos, &dir, lbl_3_data_268E4[0], 41);
+    fn_80030D88(&pos, &dir, lbl_3_data_268E4[1], 41);
+    fn_80030D88(&pos, &dir, lbl_3_data_268E4[2], 41);
 }
 
 // .text:0x0015730C size:0xA0 mapped:0x807963A0
@@ -302,8 +494,99 @@ void fn_3_15730C(u32 index, f32 x, f32 y, f32 z) {
 }
 
 // .text:0x00156D04 size:0x608 mapped:0x80795D98
-void fn_3_156D04(void) {
-    return;
+// 96.55%: the base strength-reduces the texture index (i + 10) into its own saved register,
+// and a few FPRs differ in the size computation
+void fn_3_156D04(u32 index, f32 x, f32 y, f32 z) {
+    Vec quad[4];
+    Mtx44 proj;
+    Vec a;
+    Vec d;
+    Vec b;
+    Vec c;
+    Vec* point;
+    f32 zoom;
+    f32 scale;
+    f32 angle;
+    f32 size;
+    f32 w;
+    f32 half;
+    u32* color;
+    s32 i;
+
+    color = &lbl_3_data_26B84[((UnkMinigame3880*)&g_Minigame)->piranhas[index].kind];
+    zoom = fn_80052768_getCamera(0)->zoom;
+    scale = 1.0f / zoom;
+    fn_800B24D4(13);
+    point = fn_3_1575F0(index);
+    if (point != NULL) {
+        C_MTXFrustum(proj, -0.175f * scale, 0.175f * scale, 0.25f * scale, -0.25f * scale, 1.0f, 512.0f);
+        GXSetProjection(proj, GX_PERSPECTIVE);
+        PSMTXMultVec(fn_80052734(0)->view, point, &a);
+        point->x = x;
+        point->y = y;
+        point->z = z;
+        PSMTXMultVec(fn_80052734(0)->view, point, &b);
+        PSVECSubtract(&a, &b, &a);
+        c = a;
+        angle = 0.017453292f * (f32)((rand() % 15000) / 1000.0);
+        angle *= -(rand() % 2 * 2) + 1;
+        a.x = c.x * cosf_kludge(angle) + c.y * -sinf_kludge(angle);
+        a.y = c.x * sinf_kludge(angle) + c.y * cosf_kludge(angle);
+        GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_DSTALPHA, GX_LO_CLEAR);
+        GXSetZMode(GX_TRUE, GX_ALWAYS, GX_TRUE);
+        size = (rand() % 500 + 1000) / 1000.0;
+        i = 7;
+        do {
+            switch (i) {
+            case 0:
+            case 4:
+            case 7:
+                PSVECScale(&a, size * (lbl_3_data_26B94 + i * (lbl_3_data_26B98 - lbl_3_data_26B94) / 7.0f), &d);
+                PSVECAdd(&b, &d, &d);
+                if (i >= 4) {
+                    w = (7 - i) * 0.25f + 1.0f;
+                } else {
+                    w = 2.0f;
+                }
+                half = size * (w / 2);
+                quad[0].x = d.x - half;
+                quad[0].y = d.y - half;
+                quad[0].z = d.z;
+                quad[1].x = d.x - half;
+                quad[1].y = d.y + half;
+                quad[1].z = d.z;
+                quad[2].x = d.x + half;
+                quad[2].y = d.y + half;
+                quad[2].z = d.z;
+                quad[3].x = d.x + half;
+                quad[3].y = d.y - half;
+                quad[3].z = d.z;
+                GXSetBlendMode(GX_BM_SUBTRACT, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+                if (lbl_3_bss_B858 != 0) {
+                    fn_3_156970(quad, 0xFFFFFFFF,
+                                &lbl_3_common_bss_32724._68->tex[lbl_3_common_bss_32724._68->tex[0]._1C]);
+                }
+                if (i >= 4) {
+                    w = (7 - i) * 0.25f + 1.0f;
+                } else {
+                    w = 2.0f;
+                }
+                half = size * (w / 2);
+                quad[0].x = d.x - half;
+                quad[0].y = d.y - half;
+                quad[1].x = d.x - half;
+                quad[1].y = d.y + half;
+                quad[2].x = d.x + half;
+                quad[2].y = d.y + half;
+                quad[3].x = d.x + half;
+                quad[3].y = d.y - half;
+                GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_DSTALPHA, GX_LO_CLEAR);
+                fn_3_156970(quad, *color,
+                            &lbl_3_common_bss_32724._6C->tex[lbl_3_common_bss_32724._6C->tex[i + 10]._1C]);
+                break;
+            }
+        } while (i-- != 0);
+    }
 }
 
 // .text:0x00156970 size:0x394 mapped:0x80795A04
@@ -360,12 +643,125 @@ void fn_3_156970(Vec* corners, u32 color, TexInfo3880* tex) {
 }
 
 // .text:0x00156548 size:0x428 mapped:0x807955DC
-void fn_3_156548(void) {
-    return;
+// 96.26%: as in fn_3_156D04, the base strength-reduces the texture index (i + 1) into its
+// own saved register, and FPRs differ in the second size computation
+void fn_3_156548(u32 index, f32 x, f32 y, f32 z) {
+    Vec quad[4];
+    Mtx44 proj;
+    Vec a;
+    Vec d;
+    Vec b;
+    Vec* point;
+    f32 scale;
+    f32 w;
+    f32 half;
+    f32 size = 0.5f;
+    s32 i;
+
+    scale = 1.0f / fn_80052768_getCamera(0)->zoom;
+    fn_800B24D4(13);
+    point = fn_3_1575F0(index);
+    if (point != NULL) {
+        C_MTXFrustum(proj, -0.175f * scale, 0.175f * scale, 0.25f * scale, -0.25f * scale, 1.0f, 512.0f);
+        fn_800B27DC(proj, GX_PERSPECTIVE);
+        PSMTXMultVec(fn_80052734(0)->view, point, &a);
+        point->x = x;
+        point->y = y;
+        point->z = z;
+        PSMTXMultVec(fn_80052734(0)->view, point, &b);
+        PSVECSubtract(&a, &b, &a);
+        fn_800B2160(2);
+        i = 7;
+        do {
+            switch (i) {
+            case 0:
+            case 4:
+            case 7:
+                PSVECScale(&a, lbl_3_data_26BAC + i * (lbl_3_data_26BB0 - lbl_3_data_26BAC) / 7.0f, &d);
+                PSVECAdd(&b, &d, &d);
+                if (i >= 4) {
+                    w = (7 - i) * size * 0.25f + size;
+                } else {
+                    w = size * 2.0f;
+                }
+                half = w / 2;
+                quad[0].x = d.x - half;
+                quad[0].y = d.y - half;
+                quad[0].z = d.z;
+                quad[1].x = d.x - half;
+                quad[1].y = d.y + half;
+                quad[1].z = d.z;
+                quad[2].x = d.x + half;
+                quad[2].y = d.y + half;
+                quad[2].z = d.z;
+                quad[3].x = d.x + half;
+                quad[3].y = d.y - half;
+                quad[3].z = d.z;
+                fn_800B2160(3);
+                fn_800B1468(quad, 0xFFFFFFFF,
+                            &lbl_3_common_bss_32724._68->tex[lbl_3_common_bss_32724._68->tex[0]._1C]);
+                if (i >= 4) {
+                    w = (7 - i) * size * 0.25f + size;
+                } else {
+                    w = size * 2.0f;
+                }
+                half = w / 2;
+                quad[0].x = d.x - half;
+                quad[0].y = d.y - half;
+                quad[1].x = d.x - half;
+                quad[1].y = d.y + half;
+                quad[2].x = d.x + half;
+                quad[2].y = d.y + half;
+                quad[3].x = d.x + half;
+                quad[3].y = d.y - half;
+                fn_800B2160(2);
+                fn_800B1468(quad, 0xFFFFFFFF,
+                            &lbl_3_common_bss_32724._68->tex[lbl_3_common_bss_32724._68->tex[i + 1]._1C]);
+                break;
+            }
+        } while (i-- != 0);
+    }
+}
+
+// Places a Bob-omb Derby particle at the ball, turned with the ball's spin
+static inline void fn_3_SpawnAtBall(Particle3880* p) {
+    Control control;
+    Mtx mtx;
+    Vec v;
+    Vec base;
+    f64 height;
+    f32 rz;
+    f32 ry;
+    f32 rx;
+
+    rx = 57.29578f * shortAngleToRad(g_Ball.matchFramesAndBallAngle.ballSpinAngle.yaw);
+    ry = 57.29578f * shortAngleToRad(g_Ball.matchFramesAndBallAngle.ballSpinAngle.pitch);
+    rz = 57.29578f * shortAngleToRad(g_Ball.matchFramesAndBallAngle.ballSpinAngle.roll);
+    p->_4A = lbl_3_data_26BC0[6];
+    control.type = 0;
+    CTRLSetRotation(&control, rx, ry, rz);
+    CTRLBuildMatrix(&control, mtx);
+    if (g_Minigame.GameMode_MiniGame == MINI_GAME_ID_BOBOMB_DERBY) {
+        base = lbl_3_data_26BB4;
+    } else {
+        PSVECScale(&lbl_3_data_26BB4, 1.5f, &base);
+    }
+    v.x = base.x + 1.5 * ((rand() % 40 - 20) / 100.0);
+    v.y = base.y;
+    v.z = base.z + 1.5 * ((rand() % 40 - 20) / 100.0);
+    PSMTXMultVec(mtx, &v, &v);
+    v.x += g_Ball.AtBat_Contact_BallPos.x;
+    height = fabs(g_Ball.AtBat_Contact_BallPos.y);
+    v.y -= height;
+    v.z += g_Ball.AtBat_Contact_BallPos.z;
+    p->pos.x = v.x;
+    p->pos.y = v.y;
+    p->pos.z = v.z;
+    p->_3C = p->_38 = lbl_3_data_26BC0[2];
+    p->color[3] = lbl_3_data_26BC0[4];
 }
 
 // .text:0x00156218 size:0x330 mapped:0x807952AC
-// Differs only through fn_3_155F08's call to fn_3_155C28, which the target inlines.
 void fn_3_156218(void) {
     if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES &&
         g_Minigame.GameMode_MiniGame == MINI_GAME_ID_BOBOMB_DERBY) {
@@ -374,8 +770,6 @@ void fn_3_156218(void) {
 }
 
 // .text:0x00155F08 size:0x310 mapped:0x80794F9C
-// The target inlines fn_3_155C28 here (99.8% with it marked inline, which drops its
-// standalone copy); MWCC keeps this version's call out of line.
 void fn_3_155F08(void) {
     Emitter3880* emitter = fn_80033A24(fn_3_1552AC, 0x80, 0, lbl_3_data_26BC0[1], 1, 0x1B);
 
@@ -388,14 +782,6 @@ void fn_3_155F08(void) {
 void fn_3_155C28(Emitter3880* emitter) {
     Particle3880* p;
     u32 i;
-    Control control;
-    Mtx mtx;
-    Vec base;
-    Vec v;
-    f64 height;
-    f32 rx;
-    f32 ry;
-    f32 rz;
 
     p = emitter->particles;
     emitter->_10 = lbl_3_common_bss_32724._6C;
@@ -405,31 +791,7 @@ void fn_3_155C28(Emitter3880* emitter) {
         p->_4D = lbl_3_data_26BC0[0];
         p->_4E = 0;
         if (p->_48 == 0) {
-            rx = 57.29578f * shortAngleToRad(g_Ball.matchFramesAndBallAngle.ballSpinAngle.yaw);
-            ry = 57.29578f * shortAngleToRad(g_Ball.matchFramesAndBallAngle.ballSpinAngle.pitch);
-            rz = 57.29578f * shortAngleToRad(g_Ball.matchFramesAndBallAngle.ballSpinAngle.roll);
-            p->_4A = lbl_3_data_26BC0[6];
-            control.type = 0;
-            CTRLSetRotation(&control, rx, ry, rz);
-            CTRLBuildMatrix(&control, mtx);
-            if (g_Minigame.GameMode_MiniGame == MINI_GAME_ID_BOBOMB_DERBY) {
-                base = lbl_3_data_26BB4;
-            } else {
-                PSVECScale(&lbl_3_data_26BB4, 1.5f, &base);
-            }
-            v.x = base.x + 1.5 * ((rand() % 40 - 20) / 100.0);
-            v.y = base.y;
-            v.z = base.z + 1.5 * ((rand() % 40 - 20) / 100.0);
-            PSMTXMultVec(mtx, &v, &v);
-            v.x += g_Ball.AtBat_Contact_BallPos.x;
-            height = fabs(g_Ball.AtBat_Contact_BallPos.y);
-            v.y -= height;
-            v.z += g_Ball.AtBat_Contact_BallPos.z;
-            p->pos.x = v.x;
-            p->pos.y = v.y;
-            p->pos.z = v.z;
-            p->_3C = p->_38 = lbl_3_data_26BC0[2];
-            p->color[3] = lbl_3_data_26BC0[4];
+            fn_3_SpawnAtBall(p);
         }
         p = p->next;
     } while (p != NULL);
@@ -469,7 +831,55 @@ void fn_3_1559E4(Particle27_3880* p, Vec* pos, Vec* rot) {
 
 // .text:0x001552AC size:0x738 mapped:0x80794340
 BOOL fn_3_1552AC(Emitter3880* emitter) {
-    return 0;
+    Particle3880* p;
+    s32 alpha;
+    s32 grey;
+
+    if (lbl_80366158._28 != 0) {
+        return FALSE;
+    }
+    fn_80033620(emitter);
+    p = emitter->particles;
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_ONE, GX_BL_ONE, GX_LO_CLEAR);
+    do {
+        if (p->_48 != 0) {
+            p->_48--;
+            if (p->_48 == 0) {
+                fn_3_SpawnAtBall(p);
+            }
+        } else if (p->_4A != 0) {
+            fn_8003403C(p->_38, p->_3C);
+            fn_80033CC8(p, emitter->_10);
+            if (lbl_3_data_26BC0[6] / p->_4A < 2) {
+                alpha = p->color[3];
+                alpha += lbl_3_data_26BC0[5] / (lbl_3_data_26BC0[6] / 2);
+                if (alpha > lbl_3_data_26BC0[5]) {
+                    alpha = lbl_3_data_26BC0[5];
+                }
+                p->color[3] = alpha;
+                p->_38 += lbl_3_data_26BC0[3] / 100000.0f / (lbl_3_data_26BC0[6] / 2);
+                p->_3C = p->_38;
+            } else {
+                alpha = p->color[3];
+                alpha -= lbl_3_data_26BC0[5] / (lbl_3_data_26BC0[6] / 2);
+                if (alpha < lbl_3_data_26BC0[4]) {
+                    alpha = lbl_3_data_26BC0[4];
+                }
+                p->color[3] = alpha;
+                p->_38 -= lbl_3_data_26BC0[3] / 100000.0f / (lbl_3_data_26BC0[6] / 2);
+                p->_3C = p->_38;
+            }
+            grey = 255.0f * (p->color[3] / 255.0f);
+            p->color[0] = p->color[1] = p->color[2] = grey;
+            p->_4A--;
+        }
+        if (p->_4A == 0 && p->_48 <= 0) {
+            fn_3_SpawnAtBall(p);
+        }
+        p = p->next;
+    } while (p != NULL);
+    return FALSE;
 }
 
 // .text:0x00155288 size:0x24 mapped:0x8079431C
@@ -544,7 +954,64 @@ void fn_3_1549F0(Emitter3880* emitter, s16 id, Vec* pos, Vec* rot) {
 
 // .text:0x001542F4 size:0x6FC mapped:0x80793388
 BOOL fn_3_1542F4(Emitter3880* emitter) {
-    return 0;
+    Particle27_3880* p;
+    s32 alpha;
+    s32 grey;
+    Vec deg;
+
+    if (lbl_80366158._28 != 0) {
+        return FALSE;
+    }
+    if (emitter->particles == NULL) {
+        return FALSE;
+    }
+    p = (Particle27_3880*)(emitter->particles = fn_80031F34(emitter->particles, emitter->count));
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_ONE, GX_BL_ONE, GX_LO_CLEAR);
+    do {
+        if (p->_48 != 0) {
+            p->_48--;
+            if (p->_48 == 0) {
+                deg.x = 57.29578f * p->rotation->x;
+                deg.y = 57.29578f * p->rotation->y;
+                deg.z = 57.29578f * p->rotation->z;
+                fn_3_1559E4(p, p->origin, &deg);
+            }
+        } else if (p->_4A != 0) {
+            fn_8003403C(p->_38, p->_3C);
+            fn_80033CC8((Particle3880*)p, emitter->_10);
+            if (lbl_3_data_26BC0[6] / p->_4A < 2) {
+                alpha = p->color[3];
+                alpha += lbl_3_data_26BC0[5] / (lbl_3_data_26BC0[6] / 2);
+                if (alpha > lbl_3_data_26BC0[5]) {
+                    alpha = lbl_3_data_26BC0[5];
+                }
+                p->color[3] = alpha;
+                p->_38 += 3.0f * (lbl_3_data_26BC0[3] / 100000.0f / (lbl_3_data_26BC0[6] / 2));
+                p->_3C = p->_38;
+            } else {
+                alpha = p->color[3];
+                alpha -= lbl_3_data_26BC0[5] / (lbl_3_data_26BC0[6] / 2);
+                if (alpha < lbl_3_data_26BC0[4]) {
+                    alpha = lbl_3_data_26BC0[4];
+                }
+                p->color[3] = alpha;
+                p->_38 -= 3.0f * (lbl_3_data_26BC0[3] / 100000.0f / (lbl_3_data_26BC0[6] / 2));
+                p->_3C = p->_38;
+            }
+            grey = 255.0f * (p->color[3] / 255.0f);
+            p->color[0] = p->color[1] = p->color[2] = grey;
+            p->_4A--;
+        }
+        if (p->_4A == 0 && p->_48 <= 0) {
+            deg.x = 57.29578f * p->rotation->x;
+            deg.y = 57.29578f * p->rotation->y;
+            deg.z = 57.29578f * p->rotation->z;
+            fn_3_1559E4(p, p->origin, &deg);
+        }
+        p = p->next;
+    } while (p != NULL);
+    return FALSE;
 }
 
 // .text:0x00154238 size:0xBC mapped:0x807932CC
@@ -587,18 +1054,37 @@ void fn_3_154214(void) {
 }
 
 // .text:0x001541C4 size:0x50 mapped:0x80793258
-void fn_3_1541C4(void) {
-    return;
+void fn_3_1541C4(u8 index, u8 kind, Vec* pos) {
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES &&
+        g_Minigame.GameMode_MiniGame == MINI_GAME_ID_CHAINCHOMP_SPRINT && pos != NULL) {
+        fn_3_1540E4(index, kind, pos);
+    }
 }
 
 // .text:0x001540E4 size:0xE0 mapped:0x80793178
-void fn_3_1540E4(void) {
+// Written out (fn_800339F0, else fn_80033A24 with fn_3_151F2C, a call to fn_3_153F8C each),
+// it inlines both calls to fn_3_153F8C, which the target makes with bl: the original
+// fn_3_153F8C counted about 20 more statements than the matching one below
+void fn_3_1540E4(u8 index, u8 kind, Vec* pos) {
     return;
 }
 
 // .text:0x00153F8C size:0x158 mapped:0x80793020
-void fn_3_153F8C(void) {
-    return;
+void fn_3_153F8C(Emitter3880* emitter, u8 index, u8 kind, Vec* pos) {
+    Particle3880* p = emitter->particles;
+    u8 i = 0;
+    u8 flag;
+
+    emitter->_10 = lbl_3_common_bss_32724._6C;
+    do {
+        if (p->_4A == 0) {
+            flag = i != 0;
+            fn_3_153E8C(p, pos, index, kind, i);
+            fn_3_1536A8(p, flag + 1);
+            i++;
+        }
+        p = p->next;
+    } while (p != NULL && i < lbl_3_data_26BDC[0]);
 }
 
 // .text:0x00153E8C size:0x100 mapped:0x80792F20
@@ -616,8 +1102,119 @@ void fn_3_153E8C(Particle3880* p, Vec* pos, u8 arg2, u8 arg3, u8 arg4) {
 }
 
 // .text:0x001536A8 size:0x7E4 mapped:0x8079273C
-void fn_3_1536A8(void) {
-    return;
+// The cases repeat fn_3_1534C0, fn_3_1531A4 and fn_3_152794: calling them inlines the same code
+// with each one's stack locals in the opposite order
+void fn_3_1536A8(Particle3880* p, u8 kind) {
+    switch (kind) {
+    case 1: {
+        Mtx rot;
+        camera_803c639c_s* camera = fn_80052734(fn_8005268C());
+        f32 height = p->_4D ? fn_3_119854(2) : fn_3_119854(0);
+        Vec forward = { 0.0f, 0.0f, -1.0f };
+        Vec axis;
+        Vec dir;
+        Vec offset;
+        f32 angle;
+
+        offset.x = 0.0f;
+        offset.y = 0.0f;
+        offset.z = -0.354f * height;
+        PSVECSubtract(&camera->eye, &p->_1C, &dir);
+        PSVECNormalize(&dir, &dir);
+        angle = acos(PSVECDotProduct(&forward, &dir));
+        PSVECCrossProduct(&forward, &dir, &axis);
+        if (PSVECMag(&axis) == 0.0f) {
+            axis.x = 0.0f;
+            axis.y = -1.0f;
+            axis.z = 0.0f;
+        }
+        PSMTXRotAxisRad(rot, &axis, angle);
+        PSMTXMultVec(rot, &offset, &offset);
+        p->pos.x = p->_1C.x + offset.x;
+        p->pos.y = p->_1C.y + offset.y;
+        p->pos.z = p->_1C.z + offset.z;
+        p->_38 = p->_3C = lbl_3_data_26BEC[0];
+        p->_4C = 1;
+        p->_4A = lbl_3_data_26BEC[3];
+        p->vel.x = p->vel.z = 0.0f;
+        p->vel.y = lbl_3_data_26BEC[2] / 100000.0f;
+        break;
+    }
+    case 2: {
+        Mtx rot;
+        camera_803c639c_s* camera = fn_80052734(fn_8005268C());
+        f32 height = p->_4D ? fn_3_119854(2) : fn_3_119854(0);
+        Vec forward = { 0.0f, 0.0f, -1.0f };
+        Vec axis;
+        Vec dir;
+        Vec offset;
+        f32 angle;
+
+        offset.x = 0.0f;
+        offset.y = 0.0f;
+        offset.z = -0.354f * height;
+        offset.x += height * ((rand() % 50 - 25) / 100.0);
+        offset.y += height * ((rand() % 50 - 25) / 100.0);
+        offset.z += height * ((rand() % 50 - 25) / 100.0);
+        PSVECSubtract(&camera->eye, &p->_1C, &dir);
+        PSVECNormalize(&dir, &dir);
+        angle = acos(PSVECDotProduct(&forward, &dir));
+        PSVECCrossProduct(&forward, &dir, &axis);
+        if (PSVECMag(&axis) == 0.0f) {
+            axis.x = 0.0f;
+            axis.y = -1.0f;
+            axis.z = 0.0f;
+        }
+        PSMTXRotAxisRad(rot, &axis, angle);
+        PSMTXMultVec(rot, &offset, &offset);
+        p->pos.x = p->_1C.x + offset.x;
+        p->pos.y = p->_1C.y + offset.y;
+        p->pos.z = p->_1C.z + offset.z;
+        p->_38 = p->_3C = lbl_3_data_26BFC[0];
+        p->_4C = 2;
+        p->_4A = lbl_3_data_26BFC[3];
+        p->vel.x = p->vel.z = 0.0f;
+        p->vel.y = lbl_3_data_26BFC[2] / 100000.0f;
+        break;
+    }
+    case 3: {
+        Mtx rot;
+        camera_803c639c_s* camera = fn_80052734(fn_8005268C());
+        f32 height = p->_4D ? fn_3_119854(2) : fn_3_119854(0);
+        Vec forward = { 0.0f, 0.0f, -1.0f };
+        Vec axis;
+        Vec dir;
+        Vec offset;
+        f32 angle;
+
+        offset.x = 0.0f;
+        offset.y = 0.0f;
+        offset.z = -0.354f * height;
+        offset.x += height * ((rand() % 50 - 25) / 100.0);
+        offset.y += height * ((rand() % 50 - 25) / 100.0);
+        offset.z += height * ((rand() % 50 - 25) / 100.0);
+        PSVECSubtract(&camera->eye, &p->_1C, &dir);
+        PSVECNormalize(&dir, &dir);
+        angle = acos(PSVECDotProduct(&forward, &dir));
+        PSVECCrossProduct(&forward, &dir, &axis);
+        if (PSVECMag(&axis) == 0.0f) {
+            axis.x = 0.0f;
+            axis.y = -1.0f;
+            axis.z = 0.0f;
+        }
+        PSMTXRotAxisRad(rot, &axis, angle);
+        PSMTXMultVec(rot, &offset, &offset);
+        p->pos.x = p->_1C.x + offset.x;
+        p->pos.y = p->_1C.y + offset.y;
+        p->pos.z = p->_1C.z + offset.z;
+        p->_38 = p->_3C = lbl_3_data_26C0C[0];
+        p->_4C = 3;
+        p->_4A = lbl_3_data_26C0C[3];
+        p->vel.x = p->vel.z = 0.0f;
+        p->vel.y = -(lbl_3_data_26C0C[2] / 100000.0f);
+        break;
+    }
+    }
 }
 
 // .text:0x001534C0 size:0x1E8 mapped:0x80792554
@@ -694,8 +1291,79 @@ void fn_3_1531A4(Particle3880* p) {
 }
 
 // .text:0x00152AB4 size:0x6F0 mapped:0x80791B48
-void fn_3_152AB4(void) {
-    return;
+void fn_3_152AB4(u8 index, u8 target) {
+    Emitter3880* emitter;
+    Particle3880* p;
+    camera_803c639c_s* camera;
+    Vec w;
+    Vec dir;
+    Vec screen;
+    Vec v;
+    f32 angle;
+    f32 scale;
+    s32 count = 0;
+
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES &&
+        g_Minigame.GameMode_MiniGame == MINI_GAME_ID_CHAINCHOMP_SPRINT) {
+        emitter = fn_800339F0(NULL, 0x1C);
+        if (emitter != NULL) {
+            p = emitter->particles;
+            do {
+                if (p->_4F == index && p->_4A != 0) {
+                    p->_48 = 0;
+                    p->_4F = 0xFF;
+                    fn_3_1524E8(p, TRUE);
+                    camera = fn_80052734(fn_8005268C());
+                    v.x = p->pos.x;
+                    v.y = p->pos.y;
+                    v.z = p->pos.z;
+                    PSMTXMultVec(camera->view, &v, &screen);
+                    w.x = w.y = w.z = 0.0f;
+                    PSVECSubtract(&w, &camera->eye, &w);
+                    p->_34 = PSVECMag(&w);
+                    PSMTX44MultVec(camera->proj, &screen, &screen);
+                    screen.z = -1.0f;
+                    p->pos.x = screen.x;
+                    p->pos.y = screen.y;
+                    p->pos.z = screen.z;
+                    p->_38 = p->_3C = lbl_3_data_26C0C[0] / 100000.0f;
+                    v.x = v.y = p->_38;
+                    v.z = p->_34;
+                    PSMTX44MultVec(camera->proj, &v, &screen);
+                    p->_38 = screen.x * (p->_4D ? 1.5 : 1.0);
+                    p->_3C = screen.y * (p->_4D ? 1.5 : 1.0);
+                    p->_4C = 3;
+                    p->_4A = lbl_3_data_26C0C[3];
+                    angle = 0.017453292f * (f32)(90.0 * (2.0 * (rand() / 32767.0f - 0.5)));
+                    dir.x = lbl_3_data_26C1C[target][0] - p->pos.x;
+                    dir.y = lbl_3_data_26C1C[target][1] - p->pos.y;
+                    dir.z = 0.0f;
+                    if (PSVECMag(&dir) >= 1.0) {
+                        scale = 1.0f;
+                    } else {
+                        scale = 1.0f / (PSVECMag(&dir) / 2);
+                    }
+                    PSVECNormalize(&dir, &dir);
+                    dir.x *= -1.0f;
+                    dir.y *= -1.0f;
+                    w.x = dir.x * cosf_kludge(angle) + -dir.y * sinf_kludge(angle);
+                    w.y = dir.x * sinf_kludge(angle) + dir.y * cosf_kludge(angle);
+                    w.z = 0.0f;
+                    PSVECScale(&w, lbl_3_data_26C0C[2] / 100000.0f * scale, &w);
+                    w.z = p->_34;
+                    PSMTX44MultVec(camera->proj, &w, &w);
+                    w.z = 0.0f;
+                    p->vel.x = w.x;
+                    p->vel.y = w.y;
+                    p->vel.z = w.z;
+                    p->color[3] = 0xFF;
+                    p->_44 = target;
+                    p->_45 = count++ == 0;
+                }
+                p = p->next;
+            } while (p != NULL);
+        }
+    }
 }
 
 // .text:0x00152794 size:0x320 mapped:0x80791828
@@ -772,8 +1440,44 @@ void fn_3_1524E8(Particle3880* p, u8 jitter) {
 }
 
 // .text:0x00151F2C size:0x5BC mapped:0x80790FC0
-void fn_3_151F2C(void) {
-    return;
+BOOL fn_3_151F2C(Emitter3880* emitter) {
+    Particle3880* p;
+    f32 height;
+
+    if (lbl_80366158._28 != 0) {
+        return FALSE;
+    }
+    fn_80033620(emitter);
+    p = emitter->particles;
+    if (p->_4C != 3) {
+        GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+    } else {
+        GXSetZMode(GX_FALSE, GX_ALWAYS, GX_FALSE);
+    }
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_DSTALPHA, GX_LO_CLEAR);
+    do {
+        if (p->_48 <= 0 && p->_4A != 0) {
+            height = p->_4D ? fn_3_119854(2) : fn_3_119854(0);
+            switch (p->_4C) {
+            case 1:
+                fn_3_151D6C(emitter, p);
+                break;
+            case 2:
+                fn_3_151BAC(emitter, p);
+                break;
+            case 3:
+                fn_3_1519F8(emitter, p);
+                break;
+            }
+        } else if (p->_48 != 0) {
+            p->_48--;
+        }
+        if (p->_4A == 0 && (p->_4C == 1 || p->_4C == 2)) {
+            fn_3_1536A8(p, 2);
+        }
+        p = p->next;
+    } while (p != NULL);
+    return FALSE;
 }
 
 // .text:0x00151D6C size:0x1C0 mapped:0x80790E00
@@ -922,7 +1626,7 @@ void fn_3_151760(void) {
 }
 
 // .text:0x00151710 size:0x50 mapped:0x807907A4
-void fn_3_151710(UnkModelSet3880** models, Vec* pos) {
+void fn_3_151710(UnkModelRef3880* models, Vec* pos) {
     if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES &&
         g_Minigame.GameMode_MiniGame == MINI_GAME_ID_WALLBALL && models != NULL) {
         fn_3_151694(models, pos);
@@ -930,7 +1634,7 @@ void fn_3_151710(UnkModelSet3880** models, Vec* pos) {
 }
 
 // .text:0x00151694 size:0x7C mapped:0x80790728
-void fn_3_151694(UnkModelSet3880** models, Vec* pos) {
+void fn_3_151694(UnkModelRef3880* models, Vec* pos) {
     Emitter3880* emitter =
         fn_80033A24(fn_3_150940, 0x80, 0, lbl_3_data_26C3C[1] + lbl_3_data_26C3C[9], 1, 0x1D);
 
@@ -940,9 +1644,7 @@ void fn_3_151694(UnkModelSet3880** models, Vec* pos) {
 }
 
 // .text:0x00151204 size:0x490 mapped:0x80790298
-// 99.74%: saved FPRs differ inside the inlined fn_3_151068 and fn_3_150D84 (the latter
-// is itself a 82.56% candidate).
-void fn_3_151204(ModelEmitter3880* emitter, UnkModelSet3880** models, Vec* pos) {
+void fn_3_151204(ModelEmitter3880* emitter, UnkModelRef3880* models, Vec* pos) {
     Particle3880* p;
     u32 i = 0;
     s16 k = 0;
@@ -978,7 +1680,7 @@ void fn_3_151068(ModelEmitter3880* emitter, Particle3880* p) {
     Vec v;
 
     p->_4A = lbl_3_data_26C3C[6];
-    model = (*emitter->models)->_18[lbl_3_data_26C3C[7]];
+    model = emitter->models->set->_18[lbl_3_data_26C3C[7]];
     PSMTXIdentity(mtx);
     v.x = (*model->_EC)[0][3];
     v.y = (*model->_EC)[1][3];
@@ -993,10 +1695,8 @@ void fn_3_151068(ModelEmitter3880* emitter, Particle3880* p) {
 }
 
 // .text:0x00150D84 size:0x2E4 mapped:0x8078FE18
-// 82.56%: the target keeps lbl_3_data_26C3C's address in a saved register across each
-// rand() and forms it again for the next range; here it is formed after the call.
 void fn_3_150D84(ModelEmitter3880* emitter, Particle3880* p) {
-    f32 deg;
+    s32* range;
     f32 angle;
     f32 speed;
 
@@ -1004,21 +1704,48 @@ void fn_3_150D84(ModelEmitter3880* emitter, Particle3880* p) {
     p->pos.x = emitter->pos.x;
     p->pos.y = -emitter->pos.y;
     p->pos.z = emitter->pos.z;
-    p->_38 = p->_3C = (lbl_3_data_26C3C[10] + rand() % (lbl_3_data_26C3C[11] - lbl_3_data_26C3C[10])) / 100000.0f;
-    p->vel.y = (lbl_3_data_26C3C[12] + rand() % (lbl_3_data_26C3C[13] - lbl_3_data_26C3C[12])) / 100000.0f;
-    deg = (rand() % 36000) / 100.0;
-    angle = 0.017453292f * deg;
-    speed = (lbl_3_data_26C3C[16] + rand() % (lbl_3_data_26C3C[17] - lbl_3_data_26C3C[16])) / 100000.0f;
+    range = &lbl_3_data_26C3C[10];
+    p->_38 = p->_3C = (range[0] + rand() % (range[1] - range[0])) / 100000.0f;
+    range = &lbl_3_data_26C3C[12];
+    p->vel.y = (range[0] + rand() % (range[1] - range[0])) / 100000.0f;
+    angle = (rand() % 36000) / 100.0;
+    angle = 0.017453292f * angle;
+    range = &lbl_3_data_26C3C[16];
+    speed = (range[0] + rand() % (range[1] - range[0])) / 100000.0f;
     p->vel.x = speed * cosf_kludge(angle);
     p->vel.z = speed * sinf_kludge(angle);
-    p->_1C.x = 57.29578f * ((lbl_3_data_26C3C[18] + rand() % (lbl_3_data_26C3C[19] - lbl_3_data_26C3C[18])) / 100000.0f);
+    range = &lbl_3_data_26C3C[18];
+    p->_1C.x = 57.29578f * ((range[0] + rand() % (range[1] - range[0])) / 100000.0f);
     p->_1C.x *= (rand() % 2) * -2 + 1;
     p->color[0] = p->color[1] = p->color[2] = p->color[3] = 0xFF;
 }
 
 // .text:0x00150940 size:0x444 mapped:0x8078F9D4
 BOOL fn_3_150940(Emitter3880* emitter) {
-    return 0;
+    ModelEmitter3880* self = (ModelEmitter3880*)emitter;
+    Particle3880* p;
+
+    if (lbl_80366158._28 != 0) {
+        return FALSE;
+    }
+    if (self->models->_6C == 0) {
+        return FALSE;
+    }
+    fn_80033620(&self->base);
+    p = self->base.particles;
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_DSTALPHA, GX_LO_CLEAR);
+    do {
+        if (p->_4A != 0) {
+            if (p->_4C == 1) {
+                fn_3_1504EC(self, p);
+            } else if (p->_4C == 2) {
+                fn_3_150120(self, p);
+            }
+        }
+        p = p->next;
+    } while (p != NULL);
+    return FALSE;
 }
 
 // .text:0x001504EC size:0x454 mapped:0x8078F580
@@ -1060,8 +1787,23 @@ void fn_3_1504EC(ModelEmitter3880* emitter, Particle3880* p) {
 }
 
 // .text:0x00150120 size:0x3CC mapped:0x8078F1B4
-void fn_3_150120(void) {
-    return;
+void fn_3_150120(ModelEmitter3880* emitter, Particle3880* p) {
+    if (p->_48 != 0) {
+        p->_48--;
+        return;
+    }
+    fn_80033F64(p->_38, p->_3C, p->_1C.x);
+    fn_80033CC8(p, emitter->base._10);
+    p->pos.x += p->vel.x;
+    p->pos.y -= p->vel.y;
+    p->pos.z += p->vel.z;
+    if (p->pos.y > 0.0f) {
+        p->pos.y = 0.0f;
+        p->vel.y = -p->vel.y * (lbl_3_data_26C3C[15] / 100000.0f);
+    }
+    if (--p->_4A == 0) {
+        fn_3_150D84(emitter, p);
+    }
 }
 
 // .text:0x001500C8 size:0x58 mapped:0x8078F15C
@@ -1186,7 +1928,52 @@ void fn_3_14F3CC(Particle3880* p) {
 
 // .text:0x0014ED24 size:0x6A8 mapped:0x8078DDB8
 BOOL fn_3_14ED24(Emitter3880* emitter) {
-    return 0;
+    Particle3880* p;
+    s32 alpha;
+
+    fn_80033620(emitter);
+    p = emitter->particles;
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+    do {
+        if (p->_4A != 0) {
+            if (p->_48 <= 0) {
+                GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_DSTALPHA, GX_LO_CLEAR);
+                fn_8003403C(p->_38, p->_3C);
+                fn_80033CC8(p, emitter->_10);
+                if (lbl_3_data_26C94[7] / p->_4A < 2) {
+                    alpha = p->color[3];
+                    alpha += lbl_3_data_26C94[6] / (lbl_3_data_26C94[7] / 2);
+                    if (alpha > lbl_3_data_26C94[6]) {
+                        alpha = lbl_3_data_26C94[6];
+                    }
+                    p->color[3] = alpha;
+                    p->_38 += (lbl_3_data_26C94[3] - lbl_3_data_26C94[2]) / 100000.0f / (lbl_3_data_26C94[7] / 2);
+                    p->_3C = p->_38;
+                } else {
+                    alpha = p->color[3];
+                    alpha -= lbl_3_data_26C94[6] / (lbl_3_data_26C94[7] / 2);
+                    if (alpha < lbl_3_data_26C94[5]) {
+                        alpha = lbl_3_data_26C94[5];
+                    }
+                    p->color[3] = alpha;
+                    p->_38 += (lbl_3_data_26C94[4] - lbl_3_data_26C94[3]) / 100000.0f / (lbl_3_data_26C94[7] / 2);
+                    p->_3C = p->_38;
+                }
+                p->_4A--;
+                if (p->_4A == 0) {
+                    fn_3_14F544(p);
+                    fn_3_14EAF4(p);
+                }
+            } else {
+                p->_48--;
+                if (p->_48 == 0) {
+                    fn_3_14EAF4(p);
+                }
+            }
+        }
+        p = p->next;
+    } while (p != NULL);
+    return FALSE;
 }
 
 // .text:0x0014EAF4 size:0x230 mapped:0x8078DB88
@@ -1906,8 +2693,6 @@ void fn_3_14B92C(u32 duration, Vec* pos) {
 }
 
 // .text:0x0014B53C size:0x3F0 mapped:0x8078A5D0
-// 99.90%: the inlined fn_3_14B248 keeps the angle in f28 and its cosine in f29 in the
-// target, the reverse here; fn_3_14B248 itself matches.
 void fn_3_14B53C(PathEmitter3880* emitter, u32 duration, Vec* pos) {
     Vec diff;
     f32 dist;
@@ -1970,7 +2755,8 @@ void fn_3_14B248(PathEmitter3880* emitter, Particle3880* p) {
 
     p->_38 = p->_3C = lbl_3_data_26E24[3] / 100000.0f;
     p->color[3] = lbl_3_data_26E24[5];
-    angle = 0.017453292f * (rand() % 360);
+    angle = rand() % 360;
+    angle = 0.017453292f * angle;
     dist = (rand() % 200u) / 1000.0;
     offset.x = dist * cosf_kludge(angle);
     offset.y = dist * sinf_kludge(angle);
@@ -1982,8 +2768,64 @@ void fn_3_14B248(PathEmitter3880* emitter, Particle3880* p) {
 }
 
 // .text:0x0014AC40 size:0x608 mapped:0x80789CD4
+// 99.91%: FPRs differ in the fabs() steps
 BOOL fn_3_14AC40(Emitter3880* emitter) {
-    return 0;
+    PathEmitter3880* self = (PathEmitter3880*)emitter;
+    Particle3880* p;
+    s32 step;
+    s32 alpha;
+    f32 grow;
+
+    if (lbl_80366158._28 != 0) {
+        return FALSE;
+    }
+    fn_80033620(&self->base);
+    p = self->base.particles;
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_DSTALPHA, GX_LO_CLEAR);
+    if (lbl_80366158._28 == 0) {
+        fn_3_14B3F4(self);
+        self->_36--;
+    }
+    step = (lbl_3_data_26E24[6] - lbl_3_data_26E24[5]) / lbl_3_data_26E24[1] * 2;
+    grow = 2.0f * ((lbl_3_data_26E24[4] - lbl_3_data_26E24[3]) / 100000.0f / lbl_3_data_26E24[1]);
+    do {
+        if (p->_4A != 0) {
+            if (p->_48 > 0) {
+                p->_48--;
+                if (p->_48 == 0) {
+                    fn_3_14B248(self, p);
+                }
+            } else {
+                fn_8003403C(p->_38, p->_3C);
+                fn_80033CC8(p, self->base._10);
+                alpha = p->color[3];
+                if (lbl_3_data_26E24[1] / p->_4A < 2) {
+                    grow = fabs(grow);
+                    step = fabs(step);
+                } else {
+                    grow = -1.0 * fabs(grow);
+                    step = -1.0 * fabs(step);
+                }
+                alpha += step;
+                if (alpha > 255) {
+                    alpha = 255;
+                }
+                if (alpha < 0) {
+                    alpha = 0;
+                }
+                p->_38 += grow;
+                p->_3C = p->_38;
+                p->color[3] = alpha;
+                p->_4A--;
+                if (p->_4A == 0) {
+                    fn_3_14B248(self, p);
+                }
+            }
+        }
+        p = p->next;
+    } while (p != NULL);
+    return self->_36 == 0;
 }
 
 // .text:0x0014AC1C size:0x24 mapped:0x80789CB0
@@ -2112,27 +2954,63 @@ void fn_3_14A070(s32* values, s32 count) {
 }
 
 // .text:0x00149BA8 size:0x4C8 mapped:0x80788C3C
+// 91.90%: register allocation inside the inlined fn_3_149340 and fn_3_148FD0
 void fn_3_149BA8(void) {
-    return;
+    PlayerEmitter3880* emitter;
+    u32 i;
+    s8 player;
+
+    if (g_d_GameSettings.GameModeSelected != GAME_TYPE_MINIGAMES &&
+        g_d_GameSettings.GameModeSelected != GAME_TYPE_TOY_FIELD) {
+        lbl_3_data_26E7C[5] = 930000;
+    } else {
+        lbl_3_data_26E7C[5] = 750000;
+    }
+    for (i = 0; i < 4; i++) {
+        player = lbl_3_bss_B85C[i];
+        if (player > -1) {
+            emitter = (PlayerEmitter3880*)fn_80033A24(fn_3_14841C, 0x80, 0, lbl_3_data_26E7C[0], 1, 0x25);
+            if (emitter != NULL) {
+                emitter->player = player;
+                fn_3_149340(emitter);
+            }
+        }
+    }
 }
 
 // .text:0x0014975C size:0x44C mapped:0x807887F0
-void fn_3_14975C(void) {
-    return;
+// 93.97%: register allocation inside the inlined fn_3_149340 and fn_3_148FD0
+void fn_3_14975C(s8 player) {
+    PlayerEmitter3880* emitter = (PlayerEmitter3880*)fn_80033A24(fn_3_14841C, 0x80, 0, lbl_3_data_26E7C[0], 1, 0x25);
+
+    if (emitter != NULL) {
+        emitter->player = player;
+        fn_3_149340(emitter);
+    }
 }
 
 // .text:0x00149340 size:0x41C mapped:0x807883D4
-void fn_3_149340(void) {
-    return;
+// 92.08%: register allocation and scheduling around the inlined fn_3_148FD0
+void fn_3_149340(PlayerEmitter3880* emitter) {
+    Particle3880* p = emitter->base.particles;
+    s16 i = 0;
+
+    do {
+        p->_4A = i;
+        p->_38 = lbl_3_data_26E7C[3] / 100000.0f;
+        p->_3C = lbl_3_data_26E7C[4] / 100000.0f;
+        fn_3_148FD0(emitter, p);
+        p->_48 = (i % 5 * (lbl_3_data_26E7C[0] / 5) + rand() % (lbl_3_data_26E7C[0] / 5)) * 2;
+        i++;
+        p = p->next;
+    } while (p != NULL);
 }
 
 // .text:0x00148FD0 size:0x370 mapped:0x80788064
-// 90.13%: the target loads lbl_3_data_26E7C[6] and the player pointer before the float
-// setup and schedules the angle math differently.
 void fn_3_148FD0(PlayerEmitter3880* emitter, Particle3880* p) {
-    UnkPlayer3880* player = lbl_8036E548._2C50[emitter->player];
     u8 base = lbl_3_data_26E7C[6];
-    u8 span;
+    u8 span = 0xFF - lbl_3_data_26E7C[6];
+    UnkPlayer3880* player = lbl_8036E548._2C50[emitter->player];
     f32 angle;
     f32 s;
     f32 c;
@@ -2141,7 +3019,7 @@ void fn_3_148FD0(PlayerEmitter3880* emitter, Particle3880* p) {
     p->pos.x = 0.0f;
     p->pos.y = -(lbl_3_data_26E7C[5] / 100000.0f + player->_34.y);
     p->pos.z = 0.0f;
-    angle = 0.017453292f * (15.0f * ((lbl_3_data_26E7C[0] / 2 - p->_4A) / (lbl_3_data_26E7C[0] / 2.0f)));
+    angle = scaleValue(0.017453292f, scaleValue(15.0f, (lbl_3_data_26E7C[0] / 2 - p->_4A) / (lbl_3_data_26E7C[0] / 2.0f)));
     s = sinf_kludge(angle);
     c = cosf_kludge(angle);
     p->vel.x = s * lbl_3_data_26E7C[1] / 100000.0f;
@@ -2153,7 +3031,6 @@ void fn_3_148FD0(PlayerEmitter3880* emitter, Particle3880* p) {
     p->_2C = (rand() % range) / 1000.0f;
     p->_30 = (rand() % range) / 1000.0f;
     p->color[3] = p->_47 = 0xFF;
-    span = 0xFF - lbl_3_data_26E7C[6];
     p->color[1] = base + rand() % span;
     p->color[2] = base + rand() % span;
     p->_44 = base + rand() % span;
@@ -2174,8 +3051,50 @@ void fn_3_148EF0(Particle3880* p, f32 angle) {
 }
 
 // .text:0x0014841C size:0xAD4 mapped:0x807874B0
-void fn_3_14841C(void) {
-    return;
+// 99.94%: the int-to-float temporaries of the inlined fn_3_148FD0 take other stack slots
+BOOL fn_3_14841C(Emitter3880* emitter) {
+    PlayerEmitter3880* self = (PlayerEmitter3880*)emitter;
+    Particle3880* p = self->base.particles;
+    UnkPlayer3880* player = lbl_8036E548._2C50[self->player];
+
+    fn_3_147F94();
+    do {
+        if (p->_48 <= 0) {
+            fn_3_148254(self, p);
+            fn_3_1480E0(p);
+            PSVECAdd(&p->vel, &p->pos, &p->pos);
+            PSVECAdd((Vec*)&p->_28, &p->_1C, &p->_1C);
+            if (fn_3_1483D4() != 0) {
+                Vec up = { 0.0f, 1.0f, 0.0f };
+                Vec dir;
+                f32 angle;
+                f32 jitter;
+
+                memcpy(&dir, &p->vel, sizeof(Vec));
+                PSVECNormalize(&dir, &dir);
+                angle = 57.29578f * (f32)acos(PSVECDotProduct(&up, &dir));
+                if (dir.x < 0.0f) {
+                    angle *= -1.0f;
+                }
+                jitter = 20.0 * (2.0 * (rand() / 32767.0f - 0.5));
+                if (fabs(angle + jitter) > 20.0) {
+                    angle = 20.0 * (fabs(angle) / angle);
+                } else {
+                    angle = angle + jitter;
+                }
+                fn_3_148EF0(p, angle);
+                p->_4C++;
+            }
+            if (-p->pos.y - p->_3C < player->_34.y) {
+                fn_3_148FD0(self, p);
+            }
+        } else {
+            p->_48--;
+        }
+        p = p->next;
+    } while (p != NULL);
+    fn_3_147E20();
+    return FALSE;
 }
 
 // .text:0x001483D4 size:0x48 mapped:0x80787468
@@ -2391,7 +3310,83 @@ void fn_3_147778(Emitter3880* emitter, Vec* pos) {
     } while (p != NULL);
 }
 
+static inline s32 fn_3_ParamBase(u8 kind) {
+    s32 base = 10;
+    if (kind == 1) {
+        base = 0;
+    }
+    return base;
+}
+
 // .text:0x0014737C size:0x3FC mapped:0x80786410
+// 89.85%: each parameter read forms lbl_3_data_26E9C's address again and the size's two
+// indices are selected in the other order; the base shares one address per pair
 BOOL fn_3_14737C(Emitter3880* emitter) {
-    return 0;
+    Particle3880* p;
+    Particle3880** link;
+    Particle3880* last;
+    s32 alive = 0;
+    s32 grow;
+    s32 life;
+    s32 alpha;
+    s32 step;
+    f32 scale;
+    f32 size;
+
+    p = emitter->particles = fn_80031F34(emitter->particles, emitter->count);
+    link = &emitter->particles;
+    last = NULL;
+    GXSetZMode(GX_TRUE, GX_ALWAYS, GX_FALSE);
+    do {
+        if (p->_4A != 0) {
+            if (p->_48 <= 0) {
+                grow = p->_4C == 1 ? lbl_3_data_26E9C[3] : lbl_3_data_26E9C[13];
+                life = p->_4C == 1 ? lbl_3_data_26E9C[1] : lbl_3_data_26E9C[11];
+                if (p->_4C == 1) {
+                    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_DSTALPHA, GX_LO_CLEAR);
+                } else {
+                    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+                }
+                fn_8003403C(p->_38, p->_3C);
+                fn_80033CC8(p, emitter->_10);
+                alpha = p->color[3];
+                scale = p->_4C == 1 ? p->vel.x : 1.0f;
+                if (grow > life - p->_4A) {
+                    size = scale * ((lbl_3_data_26E9C[fn_3_ParamBase(p->_4C) + 5] / 100000.0f - lbl_3_data_26E9C[fn_3_ParamBase(p->_4C) + 4] / 100000.0f) / grow);
+                    step = (-lbl_3_data_26E9C[fn_3_ParamBase(p->_4C) + 7] + lbl_3_data_26E9C[fn_3_ParamBase(p->_4C) + 8]) / grow;
+                } else {
+                    size = scale * ((lbl_3_data_26E9C[fn_3_ParamBase(p->_4C) + 6] / 100000.0f - lbl_3_data_26E9C[fn_3_ParamBase(p->_4C) + 5] / 100000.0f) / (life - grow));
+                    step = (-lbl_3_data_26E9C[fn_3_ParamBase(p->_4C) + 8] + lbl_3_data_26E9C[fn_3_ParamBase(p->_4C) + 9]) / (life - grow);
+                }
+                alpha += step;
+                if (alpha < 0) {
+                    alpha = 0;
+                } else if (alpha > 255) {
+                    alpha = 255;
+                }
+                p->_38 += size;
+                p->_3C = p->_38;
+                p->color[3] = alpha;
+                p->pos.y -= p->_4C == 1 ? 0.0f : 0.05f;
+                p->_4A--;
+                if (p->_4A == 0) {
+                    *link = p->next;
+                    if (last != NULL) {
+                        last->next = p;
+                    }
+                    last = p;
+                    p->next = NULL;
+                    emitter->count--;
+                } else {
+                    link = &p->next;
+                    alive++;
+                }
+            } else {
+                p->_48--;
+                link = &p->next;
+                alive++;
+            }
+        }
+    } while ((p = *link) != NULL);
+    return alive == 0;
 }

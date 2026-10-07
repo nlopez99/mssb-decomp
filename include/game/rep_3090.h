@@ -3,6 +3,11 @@
 
 #include "mssbTypes.h"
 
+void fn_3_FBD58(void);
+void fn_3_FBD70(void);
+void fn_3_FBDAC(int);
+void fn_3_FBE24(void);
+void fn_3_FC2FC(void);
 void fn_3_FC448(void);
 void fn_3_FC938(void);
 void fn_3_FCE38(void);

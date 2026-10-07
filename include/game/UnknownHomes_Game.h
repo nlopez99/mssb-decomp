@@ -2007,10 +2007,7 @@ typedef struct _MiniGameStruct {
     /*0x1CAC*/ u8 _1CAC;
     /*0x1CAD*/ u8 _1CAD[4];
     /*0x1CB1*/ u8 _1CB1[7];
-    /*0x1CB8*/ f32 _1CB8;
-    /*0x1CBC*/ f32 _1CBC;
-    /*0x1CC0*/ f32 _1CC0;
-    /*0x1CC4*/ u8 _1CC4[36];
+    /*0x1CB8*/ VecXYZ _1CB8[4];
     /*0x1CE8*/ VecXYZ _1CE8;
     /*0x1CF4*/ VecXYZ _1CF4;
     /*0x1D00*/ u8 _1D00[4];
@@ -2022,19 +2019,15 @@ typedef struct _MiniGameStruct {
     /*0x1D40*/ f32 _1D40;
     /*0x1D44*/ f32 _1D44;
     /*0x1D48*/ f32 _1D48;
-    /*0x1D4C*/ f32 starDashRelated_0_5Or1_5;
+    /*0x1D4C*/ f32* starDashRelated_0_5Or1_5;
     /*0x1D50*/ s16 _1D50;
     /*0x1D52*/ s16 _1D52;
-    /*0x1D54*/ s16 _1D54;
+    /*0x1D54*/ u16 _1D54;
     /*0x1D56*/ s16 _1D56;
     /*0x1D58*/ s16 _1D58;
-    /*0x1D5A*/ s16 _1D5A;
-    /*0x1D5C*/ u8 _1D5C[6];
+    /*0x1D5A*/ s16 _1D5A[4];
     /*0x1D62*/ s16 _1D62;
-    /*0x1D64*/ s16 _1D64;
-    /*0x1D66*/ s16 _1D66;
-    /*0x1D68*/ s16 _1D68;
-    /*0x1D6A*/ s16 _1D6A;
+    /*0x1D64*/ s16 _1D64[4];
     /*0x1D6C*/ u8 _1D6C;
     /*0x1D6D*/ s8 _1D6D;
     /*0x1D6E*/ u8 starDashStunType[4];
@@ -2042,10 +2035,7 @@ typedef struct _MiniGameStruct {
     /*0x1D73*/ u8 _1D73;
     /*0x1D74*/ s8 playerIDWithPowerup[2];
     /*0x1D76*/ s16 _1D76;
-    /*0x1D78*/ u8 _1D78;
-    /*0x1D79*/ u8 _1D79;
-    /*0x1D7A*/ u8 _1D7A;
-    /*0x1D7B*/ u8 _1D7B;
+    /*0x1D78*/ u8 _1D78[4];
     /*0x1D7C*/ InputStruct _1D7C[4];
     /*0x1DBC*/ u8 _1DBC[8];
     /*0x1DC4*/ u8 _1DC4[4];
@@ -2064,9 +2054,12 @@ typedef struct _MiniGameStruct {
         /*0x1DD0*/ s8 _1DD0;
         /*0x1DD0*/ u8 _1DD0_u8;
     };
-    /*0x1DD1*/ u8 _1DD1[0x1DF4 - 0x1DD1];
-    // Bob-omb Derby (rep_31F0) reads _1DF4 and _1DF5, Barrel Batter (rep_34B0) stores _1DF4_s16,
-    // Chain Chomp Sprint (rep_3448) keeps one score per player in _1DF4_arr
+    /*0x1DD1*/ u8 _1DD1[0x1DEC - 0x1DD1];
+    /*0x1DEC*/ f32 _1DEC;
+    /*0x1DF0*/ f32 _1DF0;
+    // Bob-omb Derby (rep_31F0) reads _1DF4 to _1DF7, Barrel Batter (rep_34B0) stores _1DF4_s16,
+    // rep_3448 keeps one score per player in _1DF4_arr; rep_3448's fn_3_11E364 and Star Dash (rep_3520)
+    // keep per-player flags in _1DF4_u8
     union {
         struct {
             /*0x1DF4*/ u8 _1DF4;
@@ -2078,6 +2071,7 @@ typedef struct _MiniGameStruct {
         };
         /*0x1DF4*/ s16 _1DF4_s16;
         /*0x1DF4*/ s16 _1DF4_arr[4];
+        /*0x1DF4*/ u8 _1DF4_u8[8];
     };
     /*0x1DFC*/ u8 _1DFC[4];
     /*0x1E00*/ u8 _1E00;
