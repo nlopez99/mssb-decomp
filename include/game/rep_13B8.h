@@ -39,7 +39,7 @@ void fn_3_83714(void);
 int fn_3_841C0(int runner, int frame);
 int fn_3_842E4(int runner);
 int fn_3_846C8(int runner);
-void fn_3_84AD0(void);
+int fn_3_84AD0(int runner, int frame);
 void fn_3_85074(void);
 void fn_3_85744(int runner);
 void fn_3_85840(void);
