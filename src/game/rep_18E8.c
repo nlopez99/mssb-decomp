@@ -162,8 +162,8 @@ void fn_3_A5B4C(void) {
 }
 
 // .text:0x000A63E4 size:0x404 mapped:0x806E5478
-void fn_3_A63E4(void) {
-    return;
+s32 fn_3_A63E4(s32 runner, s32 arg1, s32* out0, s32* out1) {
+    return 0;
 }
 
 // .text:0x000A67E8 size:0x28 mapped:0x806E587C
@@ -172,8 +172,8 @@ void fn_3_A67E8(void) {
 }
 
 // .text:0x000A6810 size:0x2AC mapped:0x806E58A4
-void fn_3_A6810(void) {
-    return;
+s32 fn_3_A6810(f32 x0, f32 z0, f32 x1, f32 z1) {
+    return 0;
 }
 
 // .text:0x000A6ABC size:0x28C mapped:0x806E5B50

@@ -9,6 +9,8 @@
 #include "Dolphin/rand.h"
 #include "C3/control.h"
 #include "game/rep_D0.h"
+#include "game/m_sound.h"
+#include "game/rep_1D58.h"
 #include "math.h"
 #include "string.h"
 
@@ -88,6 +90,7 @@ typedef struct {
     /* 0x0C */ Vec scale;
     /* 0x18 */ f32 rotY;
     /* 0x1C */ u8 type;
+    /* 0x1D */ u8 _1D[3];
 } StaC0Prop; // size: 0x20
 
 typedef struct {
@@ -122,14 +125,22 @@ extern struct {
     /* 0x6C */ StaC0Actor* _6C;
 } lbl_8036E548;
 
-extern StaC0Prop lbl_3_data_17B98[11];
-extern u8 lbl_3_data_17CF8[16];
 extern u8 lbl_3_data_10F7C[8];
 extern u8 lbl_3_data_10F84[4];
 extern u8 lbl_3_data_10F88[0x80];
 extern u8 lbl_3_data_11008[0x40];
 extern u8 lbl_3_data_11048[0x20][3];
 extern u8 lbl_3_data_11108[0x10][3];
+
+StaC0Prop lbl_3_data_17B98[11] = {
+    { { 24.4f, 0.0f, 117.2f }, { 1.0f, 1.0f, 1.0f }, -16.0f, 2, { 1 } },
+    { { 5.549f, 0.0f, 111.0f }, { 1.0f, 1.0f, 1.0f }, 0.0f, 2, { 1 } },
+    { { -22.0f, 0.0f, 109.8f }, { 0.9f, 0.9f, 0.9f }, 32.0f, 2, { 1 } },
+    { { 98.0f, 0.0f, 73.0f }, { 1.0f, 1.0f, 1.0f }, 75.0f, 2, { 1 } },
+    { { -112.0f, 0.0f, 66.0f }, { 1.0f, 1.0f, 1.0f }, -25.0f, 2, { 1 } },
+    { { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, 0.0f, 4 },
+};
+u8 lbl_3_data_17CF8[9] = { 1, 2, 4, 4, 4, 4, 2, 8, 9 };
 
 extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern StaC0Actor* ActorObjectInitTable(u16 count);
@@ -147,16 +158,6 @@ extern s32 fn_8005268C(void);
 extern camera_803c639c_s* fn_80052734(s32 idx);
 extern s32 fn_800247E4(s32 x, s32 y, s32 width, s32 bytes);
 
-// rep_1D58.h and m_sound.h declare these void(void) to match their stubs
-extern void fn_3_B939C(void);
-extern void fn_3_B97DC(void* model, void* anim);
-extern void fn_3_B9D68(u8* types, s32 count, void** files, s32* indices);
-extern s32 fn_3_B7FC8(u32 id, Vec* pos);
-extern void fn_3_B9510(s32 idx);
-extern u8* fn_3_B9534(u16 width, u16 height, GXTexObj* obj);
-extern void fn_3_8B890(s32 handle);
-extern void fn_3_8BA60(s32 handle, Vec* pos, Vec* dir);
-extern s32 fn_3_8BBC4(u32 id, Vec* pos, Vec* dir, u8 arg3);
 
 extern u16 lbl_3_data_81DC[16];
 
@@ -612,7 +613,7 @@ void fn_3_C9744(void) {
     } else if (lbl_3_bss_9F6C != 0) {
         lbl_3_bss_9F40 = fn_3_8BBC4(lbl_3_data_81DC[g_d_GameSettings.StadiumID] + 1, NULL, NULL, 1);
         if (g_d_GameSettings.GameModeSelected != GAME_TYPE_MINIGAMES) {
-            lbl_3_bss_9F44 = fn_3_B7FC8(lbl_3_data_81DC[g_d_GameSettings.StadiumID], NULL);
+            lbl_3_bss_9F44 = fn_3_B7FC8(lbl_3_data_81DC[g_d_GameSettings.StadiumID], 0);
         }
         lbl_3_bss_9F6C = 0;
     } else {

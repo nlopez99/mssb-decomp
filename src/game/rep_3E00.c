@@ -1,6 +1,7 @@
 #include "game/rep_3E00.h"
 #include "header_rep_data.h"
 #include "game/UnknownHomes_Game.h"
+#include "game/rep_3310.h"
 #include "string.h"
 
 typedef struct {
@@ -33,9 +34,6 @@ extern struct {
     /* 0x00 */ void* _00[1];
     /* 0x04 */ UnkAnimState3E00 _04[1];
 } lbl_3_common_bss_32724;
-
-// rep_3310.h declares it void(void) to match its stub
-extern void fn_3_11D2C8(s32 model, s32 first, s32 count, s32, s32);
 
 extern void LoadActorLayout(void* layout);
 extern void convertGeometryAndSknHeader(void* geo, void*);

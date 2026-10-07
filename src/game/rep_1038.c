@@ -6,6 +6,7 @@
 #include "game/rep_F80.h"
 #include "game/rep_FE0.h"
 #include "game/rep_1090.h"
+#include "game/rep_1D58.h"
 
 typedef struct {
     /* 0x000 */ u8 _000[0x34];
@@ -81,13 +82,8 @@ extern VecXYZ lbl_3_data_18DD4[4];
 extern void fn_3_674E0(void);
 extern void fn_3_6AEE0(void);
 extern void fn_3_6B674(void);
-extern void fn_3_6C410(void);
-extern void fn_3_6C428(void);
-extern void fn_3_6C454(void);
 extern void fn_3_973EC(void);
 extern void fn_3_97800(void);
-// rep_1D58.h declares this as void(void).
-extern void fn_3_B93C8(int arg0);
 extern void fn_3_15A9F4(void);
 
 // .text:0x0006C1D8 size:0x238 mapped:0x806AB26C

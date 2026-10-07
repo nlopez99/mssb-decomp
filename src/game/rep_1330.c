@@ -4,6 +4,7 @@
 #include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
 #include "game/rep_720.h"
+#include "game/rep_EA0.h"
 #include "game/rep_1D58.h"
 #include "game/rep_1E08.h"
 #include "game/m_sound.h"
@@ -45,8 +46,6 @@ void fn_3_21C7C(s32, u8);
 void changeScene(u8, s16);
 void fn_80052798(s32);
 void fn_8001B224(void);
-// rep_EA0.h declares this as void(void)
-void fn_3_675B8(u16);
 
 static SND_VOICEID lbl_3_bss_1748[6];
 

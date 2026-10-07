@@ -26,13 +26,23 @@ extern struct {
     /* 0x2C50 */ Unk1090Actor* _2C50[13];
     /* 0x2C84 */ u8 _2C84[0x2D77 - 0x2C84];
     /* 0x2D77 */ u8 _2D77;
+    /* 0x2D78 */ u8 _2D78[0x2D90 - 0x2D78];
+    /* 0x2D90 */ struct {
+        /* 0x00 */ u8 _00[0xC6];
+        /* 0xC6 */ u8 _C6;
+    }* _2D90;
 } lbl_8036E548;
 
 extern struct {
     /* 0x000 */ u8* _000;
 } lbl_3_common_bss_1323C;
 
-extern u8 lbl_3_data_6EF0[8];
+extern struct {
+    /* 0x00 */ u8 _00[0x90];
+    /* 0x90 */ s16 _90;
+} lbl_3_common_bss_32724;
+
+u8 lbl_3_data_6EF0[4] = { 0, 1, 0, 1 };
 
 extern int fn_8004ACC4(int arg0);
 extern int fn_8004ACDC(int arg0);
@@ -40,8 +50,6 @@ extern void fn_3_6A250(void);
 extern void fn_3_6A254(void);
 extern void fn_3_6A25C(void);
 extern void fn_3_E07DC(void);
-
-static inline void fn_3_6C454(void);
 
 // .text:0x0006C4D0 size:0x384 mapped:0x806AB564
 void fn_3_6C4D0(void) {
@@ -118,8 +126,11 @@ void fn_3_6C4D0(void) {
     }
 }
 
+// .text:0x0006C4CC size:0x4 mapped:0x806AB560
+void fn_3_6C4CC(void) {}
+
 // .text:0x0006C454 size:0x78 mapped:0x806AB4E8
-static inline void fn_3_6C454(void) {
+void fn_3_6C454(void) {
     int i;
 
     for (i = 0; i < 4; i++) {
@@ -129,4 +140,18 @@ static inline void fn_3_6C454(void) {
     }
     fn_3_6A25C();
     fn_3_6A250();
+}
+
+// .text:0x0006C42C size:0x28 mapped:0x806AB4C0
+void fn_3_6C42C(void) {
+    lbl_8036E548._2D90->_C6 = 0;
+    lbl_3_common_bss_32724._90 = -1;
+}
+
+// .text:0x0006C428 size:0x4 mapped:0x806AB4BC
+void fn_3_6C428(void) {}
+
+// .text:0x0006C410 size:0x18 mapped:0x806AB4A4
+void fn_3_6C410(void) {
+    lbl_8036E548._2D90->_C6 = 0;
 }

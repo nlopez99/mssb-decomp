@@ -7,7 +7,7 @@ void fn_3_6750C(void) {
 }
 
 // .text:0x000675B8 size:0x68 mapped:0x806A664C
-void fn_3_675B8(void) {
+void fn_3_675B8(u16 arg0) {
     return;
 }
 

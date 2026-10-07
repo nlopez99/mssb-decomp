@@ -3,6 +3,9 @@
 
 #include "mssbTypes.h"
 
+struct UnkQuad3B70;
+
+void fn_3_15C230(struct UnkQuad3B70* quad);
 void fn_3_15C3F8(void);
 
 #endif // !__GAME_rep_3B70_H_

@@ -102,12 +102,12 @@ void fn_3_BD4F0(void) {
 }
 
 // .text:0x000BD504 size:0x1A8 mapped:0x806FC598
-void fn_3_BD504(void) {
+void fn_3_BD504(f32 x, f32 y, f32 z, BOOL arg3) {
     return;
 }
 
 // .text:0x000BD6AC size:0xAC mapped:0x806FC740
-void fn_3_BD6AC(void) {
+void fn_3_BD6AC(s32 arg0, f32 x, f32 y, f32 z) {
     return;
 }
 
@@ -167,7 +167,7 @@ void fn_3_BE140(void) {
 }
 
 // .text:0x000BE174 size:0x60 mapped:0x806FD208
-void fn_3_BE174(void) {
+void fn_3_BE174(s32 type, f32 x, f32 y, f32 z) {
     return;
 }
 
@@ -212,12 +212,13 @@ void fn_3_BF6C0(void) {
 }
 
 // .text:0x000BF878 size:0x80 mapped:0x806FE90C
-void fn_3_BF878(void) {
-    return;
+BOOL fn_3_BF878(void) {
+    return FALSE;
 }
 
 // .text:0x000BF8F8 size:0x244 mapped:0x806FE98C
-void fn_3_BF8F8(void) {
+void fn_3_BF8F8(struct UnkEffect21F8* effect, Mtx m, Vec* pos,
+                 f32 (*callback)(struct UnkAnim21F8*, int, Mtx, f32)) {
     return;
 }
 
@@ -227,8 +228,8 @@ void fn_3_BFB3C(void) {
 }
 
 // .text:0x000BFDA4 size:0x390 mapped:0x806FEE38
-void fn_3_BFDA4(void) {
-    return;
+f32 fn_3_BFDA4(struct UnkKey21F8* keys, int count, int frame, u8 current, u8* currentOut, f32 t) {
+    return 0.0f;
 }
 
 // .text:0x000C0134 size:0x63C mapped:0x806FF1C8

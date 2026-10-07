@@ -128,7 +128,10 @@ def build(unit: Dict[str, Any]) -> Tuple[bool, float, str]:
     # Only ask for missing ones: with configure.py --objdiff/--binutils they are
     # not ninja targets. binutils is a directory output in build.ninja.
     tools = [t for t in (objdiff_cli, os.path.dirname(objdump)) if not os.path.exists(t)]
-    targets = [unit["target_path"], unit["base_path"]] + [os.path.relpath(t, root_dir) for t in tools]
+    # dtk writes a linked (Matching) unit's target object while splitting, but
+    # build.ninja does not list it as an output
+    targets = [] if unit.get("metadata", {}).get("complete") else [unit["target_path"]]
+    targets += [unit["base_path"]] + [os.path.relpath(t, root_dir) for t in tools]
     start = time.monotonic()
     proc = subprocess.run(["ninja", *targets], cwd=root_dir, capture_output=True, text=True)
     elapsed = time.monotonic() - start

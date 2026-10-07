@@ -2,8 +2,9 @@
 #define __GAME_rep_1D58_H_
 
 #include "mssbTypes.h"
+#include "Dolphin/GX/GXTypes.h"
 
-void fn_3_B7FC8(void);
+s32 fn_3_B7FC8(u32 id, s32 arg1);
 void fn_3_B80D0(void);
 void fn_3_B8184(void);
 void fn_3_B827C(void);
@@ -25,19 +26,19 @@ int processStadiumObjectFunction(int, void*, int, void*);
 void fn_3_B91C8(void);
 void fn_3_B939C(void);
 void fn_3_B93C4(void);
-void fn_3_B93C8(void);
+void fn_3_B93C8(int arg0);
 void fn_3_B93CC(void);
 void fn_3_B950C(void);
-void fn_3_B9510(void);
+void fn_3_B9510(s32 idx);
 void fn_3_B9524(void);
-void fn_3_B9534(void);
+u8* fn_3_B9534(u16 width, u16 height, GXTexObj* obj);
 void fn_3_B95EC(void);
 void fn_3_B97C8(void);
-void fn_3_B97DC(void);
+void fn_3_B97DC(void* model, void* anim);
 void fn_3_B98E8(void);
 void fn_3_B99E4(void);
-void fn_3_B9BB4(void);
-void fn_3_B9D68(void);
+s32 fn_3_B9BB4(s32 stadium);
+void fn_3_B9D68(u8* types, s32 count, void** files, s32* indices);
 void fn_3_B9FB8(void);
 
 #endif // !__GAME_rep_1D58_H_

@@ -21,10 +21,13 @@ extern struct {
     /* 0x28 */ u8 _28;
 } lbl_80366158;
 
-// .data outside this unit's split
-extern Unk3C28Trail lbl_3_data_27C98[3];
-
 extern void fn_8002C2D0(Vec* pos, Vec* dir, Unk3C28Trail* trail);
+
+Unk3C28Trail lbl_3_data_27C98[3] = {
+    { 0, { 4, 6, 110000, 1000, 90000, 40, 1, 102000, 101000, 100, 10000000, 0xFFFFFF00, 0, 50000, 20000 } },
+    { 0, { 4, 6, 110000, 1000, 90000, 40, 1, 102000, 101000, 100, 10000000, 0xFFFFFF00, 0, 50000, 20000 } },
+    { 0, { 4, 6, 150000, 1000, 90000, 40, 1, 102000, 101000, 100, 2000000, 0xFFFFFF00, 0, 50000, 20000 } },
+};
 
 // .text:0x0015F574 size:0xD4 mapped:0x8079E608
 void fn_3_15F574(void) {

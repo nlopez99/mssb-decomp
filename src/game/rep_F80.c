@@ -4,6 +4,7 @@
 #include "static/UnknownHomes_Static.h"
 #include "game/rep_1838.h"
 #include "game/rep_1F58.h"
+#include "game/rep_1E08.h"
 #include "game/rep_2308.h"
 
 typedef struct {
@@ -79,17 +80,9 @@ extern struct {
     /* 0x3AC */ u32 _3AC;
 } lbl_3_common_bss_35154;
 
-// rep_1E08.h declares the functions taking arguments here as void(void), matching
-// their stub definitions, so this file declares them itself
-extern void fn_3_BD4F0(void);
-extern void fn_3_BD504(f32 x, f32 y, f32 z, BOOL arg3);
-extern void fn_3_BD6AC(s32 arg0, f32 x, f32 y, f32 z);
-extern void fn_3_BE174(s32 type, f32 x, f32 y, f32 z);
-extern void fn_3_BF1AC(void);
 extern void fn_3_C0770(void);
 extern void fn_3_C07A0(void);
 extern void fn_3_C07B0(void);
-extern void fn_3_CABB4(void);
 extern void fn_3_CB344(s32 idx, u8 starPitchType);
 extern void fn_80011578(void);
 

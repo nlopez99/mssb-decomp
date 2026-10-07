@@ -2,8 +2,8 @@
 #include "header_rep_data.h"
 
 // .text:0x000B7FC8 size:0x108 mapped:0x806F705C
-void fn_3_B7FC8(void) {
-    return;
+s32 fn_3_B7FC8(u32 id, s32 arg1) {
+    return 0;
 }
 
 // .text:0x000B80D0 size:0xB4 mapped:0x806F7164
@@ -112,7 +112,7 @@ void fn_3_B93C4(void) {
 }
 
 // .text:0x000B93C8 size:0x4 mapped:0x806F845C
-void fn_3_B93C8(void) {
+void fn_3_B93C8(int arg0) {
     return;
 }
 
@@ -127,7 +127,7 @@ void fn_3_B950C(void) {
 }
 
 // .text:0x000B9510 size:0x14 mapped:0x806F85A4
-void fn_3_B9510(void) {
+void fn_3_B9510(s32 idx) {
     return;
 }
 
@@ -137,8 +137,8 @@ void fn_3_B9524(void) {
 }
 
 // .text:0x000B9534 size:0xB8 mapped:0x806F85C8
-void fn_3_B9534(void) {
-    return;
+u8* fn_3_B9534(u16 width, u16 height, GXTexObj* obj) {
+    return NULL;
 }
 
 // .text:0x000B95EC size:0x1DC mapped:0x806F8680
@@ -152,7 +152,7 @@ void fn_3_B97C8(void) {
 }
 
 // .text:0x000B97DC size:0x10C mapped:0x806F8870
-void fn_3_B97DC(void) {
+void fn_3_B97DC(void* model, void* anim) {
     return;
 }
 
@@ -167,12 +167,12 @@ void fn_3_B99E4(void) {
 }
 
 // .text:0x000B9BB4 size:0x1B4 mapped:0x806F8C48
-void fn_3_B9BB4(void) {
-    return;
+s32 fn_3_B9BB4(s32 stadium) {
+    return 0;
 }
 
 // .text:0x000B9D68 size:0x250 mapped:0x806F8DFC
-void fn_3_B9D68(void) {
+void fn_3_B9D68(u8* types, s32 count, void** files, s32* indices) {
     return;
 }
 
