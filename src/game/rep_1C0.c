@@ -781,13 +781,12 @@ void fn_3_42CC(GXTexObj* obj, s16 x0, s16 y0, s16 x1, s16 y1, s16 u, s16 v, s16 
     f32 top = y0;
     f32 right = x1;
     f32 bottom = y1;
-    // GXTexture.h declares these u32; the SDK returns u16, which the casts restore
-    u32 width = GXGetTexObjWidth(obj);
-    u32 height = GXGetTexObjHeight(obj);
-    f32 s0 = (f32)u / (u16)width;
-    f32 t0 = (f32)v / (u16)height;
-    f32 s1 = (f32)(u + w) / (u16)width;
-    f32 t1 = (f32)(v + h) / (u16)height;
+    u16 width = GXGetTexObjWidth(obj);
+    u16 height = GXGetTexObjHeight(obj);
+    f32 s0 = (f32)u / width;
+    f32 t0 = (f32)v / height;
+    f32 s1 = (f32)(u + w) / width;
+    f32 t1 = (f32)(v + h) / height;
 
     GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
     GXSetTevColor(GX_TEVREG0, c1);
