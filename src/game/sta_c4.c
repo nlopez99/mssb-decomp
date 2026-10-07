@@ -583,16 +583,16 @@ void fn_3_FB3D8(StaC4View* view) {
 }
 
 // .text:0x000FA58C size:0xE4C mapped:0x80739620
-// 99.49%: registers only; indices, slot and the main loop's i in rotated saved registers,
-// and the tile loops' counter, row pointer and offset rotated
+// 99.69%: registers only; slot and the main loop's i swap saved registers, and the
+// tile loops' counter, row pointer and offset are rotated
 void fn_3_FA58C(void** files) {
     StaC4Swaps* swaps;
     StaC4Tiles* tiles;
     StaC4Prop* prop = lbl_3_data_1BA98;
-    s32* indices;
+    u8* slot;
     StaC4Draw* draw;
     StaC4Draw* entry;
-    u8* slot;
+    s32* indices;
     void (*draw3D)(void);
     u32 size;
     s32 i;
@@ -641,8 +641,8 @@ void fn_3_FA58C(void** files) {
         fn_80025EEC(&lbl_3_bss_B578, 0, 0);
     }
 
-    lbl_3_common_bss_350E4._30 = 52;
     size = (52 * sizeof(StaC4Draw)) + (g_d_GameSettings.miniGameStadiumIndicator == 0 ? 0xEC : 0);
+    lbl_3_common_bss_350E4._30 = 52;
     lbl_3_common_bss_350E4._00 = _OSAllocFromHeap(0x20, size);
     memset(lbl_3_common_bss_350E4._00, 0, size);
     lbl_3_common_bss_350E4._04 = _OSAllocFromHeap(0x20, size);
