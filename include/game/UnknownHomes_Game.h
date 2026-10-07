@@ -1377,7 +1377,9 @@ typedef struct _StarMissionCompletionTracker {
     /*0x0000*/ ChallengeTrackingStruct characters[54]; // indexed by character ID
     /*0x0AF8*/ u8 _0AF8[0x16C2 - 0xAF8];
     /*0x16C2*/ s16 _16C2;
-    /*0x16C4*/ u8 _16C4[0x43D6 - 0x16C4];
+    /*0x16C4*/ u8 _16C4[0x43C0 - 0x16C4];
+    /*0x43C0*/ s16 _43C0;
+    /*0x43C2*/ u8 _43C2[0x43D6 - 0x43C2];
     /*0x43D6*/ u8 _43D6[54]; // indexed by character ID
     /*0x440C*/ u8 _440C[0x4415 - 0x440C];
     /*0x4415*/ u8 _4415;
@@ -2591,7 +2593,9 @@ typedef struct {
     /* 0x4C */ s16 _4C[2];
     /* 0x50 */ u8 _50[0x52 - 0x50];
     /* 0x52 */ s16 _52[2][2];
-    /* 0x5A */ u8 _5A[0x63 - 0x5A];
+    /* 0x5A */ u8 _5A[0x61 - 0x5A];
+    /* 0x61 */ u8 _61;
+    /* 0x62 */ u8 _62;
     /* 0x63 */ u8 _63[2];
     /* 0x65 */ u8 _65[2];
     /* 0x67 */ u8 _67[2];

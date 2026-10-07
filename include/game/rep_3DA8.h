@@ -16,5 +16,6 @@ void fn_3_163E94(void);
 void fn_3_16440C(void);
 void fn_3_164554(void);
 void fn_3_164664(void);
+void fn_3_164A74(void);
 
 #endif // !__GAME_rep_3DA8_H_

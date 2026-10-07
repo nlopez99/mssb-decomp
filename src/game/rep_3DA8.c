@@ -38,8 +38,8 @@ extern UnkBss37400 lbl_3_common_bss_37400;
 
 typedef struct {
     /* 0x0 */ u8 _0[9];
-    /* 0x9 */ s8 _9;
-    /* 0xA */ u8 _A[0xF - 0xA];
+    /* 0x9 */ s8 _9[3];
+    /* 0xC */ u8 _C[0xF - 0xC];
 } UnkChallengeTeam; // size: 0xF
 
 extern UnkChallengeTeam lbl_80109420[];
@@ -78,6 +78,10 @@ extern struct {
     /* 0xA0 */ s16 _A0;
     /* 0xA2 */ u8 _A2[0xA4 - 0xA2];
     /* 0xA4 */ s16 _A4;
+    /* 0xA6 */ u8 _A6[0xAA - 0xA6];
+    /* 0xAA */ u8 _AA;
+    /* 0xAB */ u8 _AB[0xAD - 0xAB];
+    /* 0xAD */ u8 _AD;
 } g_Scores;
 
 typedef struct {
@@ -114,16 +118,325 @@ extern struct {
 } lbl_80353A90;
 
 extern struct {
+    /* 0x00 */ u8 _00[2];
+    /* 0x02 */ s16 _02;
+    /* 0x04 */ u8 _04[0x10 - 0x4];
+    /* 0x10 */ u8 _10;
+    /* 0x11 */ u8 _11;
+    /* 0x12 */ u8 _12;
+} g_RunningLogic;
+
+extern struct {
     /* 0x0000 */ u8 _0000[0x46E4];
     /* 0x46E4 */ s32 _46E4;
 } lbl_8034E9A0;
+
+// .text:0x00164A74 size:0xE7C mapped:0x807A3B08
+void fn_3_164A74(void) {
+    StarMissionCompletionTracker* tracker = &starMissionCompletionTracker;
+    UnkBss37400* bss = &lbl_3_common_bss_37400;
+    u8 mission = tracker->_441C;
+    u8 level = tracker->_4415;
+    lbl_3_common_bss_32A94_s* plays = &lbl_3_common_bss_32A94;
+    InMemRunnerType* runners = g_Runners;
+    s32 bonusIdx = 0;
+    s32 result = 0;
+    s32 hit;
+    u8 reason;
+    s32 bonus;
+    s32 i;
+    ChallengeTrackingStruct* c;
+
+    bss->_47 = 1;
+    bonus = lbl_80109420[bss->_46]._9[0];
+    bss->_49 = bonus;
+    switch (bss->_46) {
+        case 1:
+            if (g_FieldingLogic._107) {
+                if (g_Strikes.outs >= 3) {
+                    bss->_47 = 2;
+                } else if (g_Pitcher.strikeOutOrWalk == 1) {
+                    bss->_48 = 0;
+                } else {
+                    bss->_47 = 0;
+                }
+            } else if ((g_Strikes.outs > g_Strikes.storedOuts && plays->_22 == 0) || g_Pitcher.strikeOutOrWalk == 1) {
+                if (g_Pitcher.strikeOutOrWalk == 1 || lbl_3_common_bss_32A94._24 == 14) {
+                    bonusIdx = 1;
+                    bss->_47 = 2;
+                } else {
+                    bonusIdx = 0;
+                    bss->_47 = 2;
+                }
+            }
+            break;
+        case 2:
+            if (g_FieldingLogic._107) {
+                if (g_Strikes.outs >= 3) {
+                    bss->_48 = 0;
+                } else if (g_Pitcher.strikeOutOrWalk == 1) {
+                    bss->_48 = 0;
+                } else {
+                    bss->_47 = 0;
+                }
+            } else if ((g_Strikes.allForcedRunnersReachedTheirBaseInd == 1 || plays->_22 >= 1) &&
+                       lbl_3_common_bss_32A94._24 == 0 && lbl_3_common_bss_32A94._20 <= 0) {
+                if (plays->_23 == 1) {
+                    if (plays->_26 == 1) {
+                        bonusIdx = 1;
+                    } else if (plays->_26 >= 2) {
+                        bonusIdx = 2;
+                    } else {
+                        bonusIdx = 0;
+                    }
+                } else if (plays->_23 == 2) {
+                    bonusIdx = 1;
+                } else if (plays->_23 >= 3) {
+                    bonusIdx = 2;
+                }
+                bss->_47 = 2;
+            }
+            break;
+        case 3:
+            if (g_Scores._04[g_GameLogic.homeTeamBattingInd_fieldingTeam][0] > g_Scores._A0 ||
+                g_Ball.deadBallReason == 1 ||
+                ((g_Pitcher.strikeOutOrWalk == 2 || g_Pitcher.strikeOutOrWalk == 3) && g_RunningLogic._12 >= 4)) {
+                bss->_47 = 2;
+                bss->_48 = 0;
+            } else if (g_Strikes.outs >= 3 ||
+                       (g_Strikes.outs == 2 && g_Pitcher.strikeOutOrWalk == 1 && !g_FieldingLogic._107)) {
+                bss->_48 = 0;
+            } else {
+                bss->_48 = 1;
+                bss->_47 = 0;
+            }
+            break;
+        case 4:
+            if (g_Scores._04[g_GameLogic.homeTeamBattingInd_fieldingTeam][0] >
+                    g_Scores._04[g_GameLogic.awayTeamBattingInd_battingTeam][0] ||
+                (g_Ball.deadBallReason == 1 &&
+                 g_Scores._A0 + g_RunningLogic._12 > g_Scores._04[g_GameLogic.awayTeamBattingInd_battingTeam][0]) ||
+                ((g_Pitcher.strikeOutOrWalk == 2 || g_Pitcher.strikeOutOrWalk == 3) && g_RunningLogic._12 >= 4 &&
+                 g_Scores._A0 == g_Scores._04[g_GameLogic.awayTeamBattingInd_battingTeam][0])) {
+                bss->_47 = 2;
+                bss->_48 = 0;
+            } else if (g_Strikes.outs >= 3 || (g_Strikes.outs == 2 && g_Pitcher.strikeOutOrWalk == 1)) {
+                bss->_48 = 0;
+            } else {
+                bss->_48 = 1;
+                bss->_47 = 0;
+            }
+            break;
+        case 5:
+            reason = g_Ball.deadBallReason;
+            if (g_Scores._04[g_GameLogic.homeTeamBattingInd_fieldingTeam][0] > g_Scores._A0 ||
+                reason == 1 ||
+                (g_RunningLogic._02 == 0x1111 && (g_Pitcher.strikeOutOrWalk == 2 || g_Pitcher.strikeOutOrWalk == 3))) {
+                bss->_48 = 0;
+            } else if ((g_Strikes.outs >= 2 && g_Pitcher.strikeOutOrWalk == 1 && !g_FieldingLogic._107) ||
+                       g_Strikes.outs >= 3) {
+                bss->_47 = 2;
+                bss->_48 = 0;
+            } else {
+                bss->_48 = 1;
+                bss->_47 = 0;
+            }
+            break;
+        case 6:
+            if (g_Strikes.outs >= g_Strikes.storedOuts + 2) {
+                bss->_47 = 2;
+                bss->_48 = 0;
+            } else if (g_FieldingLogic._107) {
+                bss->_48 = 1;
+                bss->_47 = 0;
+            } else {
+                bss->_48 = 0;
+            }
+            break;
+        case 7:
+            if (g_Pitcher.strikeOutOrWalk == 1) {
+                bss->_47 = 2;
+                bss->_48 = 0;
+            } else if (g_FieldingLogic._107) {
+                if (g_Strikes.outs >= 3) {
+                    bss->_48 = 0;
+                } else {
+                    bss->_48 = 1;
+                    bss->_47 = 0;
+                }
+            }
+            break;
+        case 8:
+            if (plays->_61 == 3 &&
+                ((g_Strikes.outs >= 2 && g_Pitcher.strikeOutOrWalk == 1 && !g_FieldingLogic._107) ||
+                 g_Strikes.outs >= 3)) {
+                bss->_47 = 2;
+                bss->_48 = 0;
+            } else {
+                hit = 0;
+                if (g_Ball.deadBallReason == 3) {
+                    if (g_RunningLogic._02 & 0x1100) {
+                        hit = 1;
+                    }
+                } else if (g_Ball.deadBallReason == 4) {
+                    if (g_RunningLogic._02 & 0x1100) {
+                        hit = 1;
+                    } else {
+                        if (g_Runners[1].runnerOnFieldOrOutOrScored == 1 && g_Runners[1].baseReachedAtTimeOfThrow >= 2) {
+                            hit = 1;
+                        }
+                        if (g_Runners[0].runnerOnFieldOrOutOrScored == 1 && g_Runners[0].baseReachedAtTimeOfThrow >= 2) {
+                            hit = 1;
+                        }
+                    }
+                }
+                if (plays->_61 == 3 && !g_FieldingLogic._107) {
+                    bss->_48 = 0;
+                } else if (g_Scores._A0 < g_Scores._04[g_GameLogic.homeTeamBattingInd_fieldingTeam][0]) {
+                    bss->_48 = 0;
+                } else if (g_Ball.deadBallReason == 1 || hit) {
+                    bss->_48 = 0;
+                } else {
+                    bss->_48 = 1;
+                    bss->_47 = 0;
+                }
+            }
+            break;
+        case 9:
+            if (plays->_24 == 1) {
+                bss->_47 = 2;
+                bss->_48 = 0;
+            } else if (g_FieldingLogic._107) {
+                if (g_Strikes.outs >= 3) {
+                    bss->_48 = 0;
+                } else if (g_Pitcher.strikeOutOrWalk == 1) {
+                    bss->_48 = 0;
+                } else {
+                    bss->_48 = 1;
+                    bss->_47 = 0;
+                }
+            } else {
+                bss->_48 = 0;
+            }
+            break;
+        case 10:
+            if (g_Scores._04[g_GameLogic.homeTeamBattingInd_fieldingTeam][0] > g_Scores._A0 &&
+                runners[3].furthestBaseForcedToGoToOnWalk && g_Ball.maybeBuntInd) {
+                result = 1;
+            }
+            if (result) {
+                bss->_47 = 2;
+                bss->_48 = 0;
+            } else if (g_FieldingLogic._107) {
+                if (g_Strikes.outs >= 3) {
+                    bss->_48 = 0;
+                } else if (g_Pitcher.strikeOutOrWalk == 1) {
+                    bss->_48 = 0;
+                } else if (runners[3].runnerOnFieldOrOutOrScored != 1) {
+                    bss->_48 = 0;
+                } else {
+                    bss->_48 = 1;
+                    bss->_47 = 0;
+                }
+            } else {
+                bss->_48 = 0;
+            }
+            break;
+        case 11:
+            if (g_FieldingLogic._107 == 1 || g_FieldingLogic._107 == 2) {
+                if ((runners[1].runnerOnFieldOrOutOrScored == 1 || runners[1].runnerOnFieldOrOutOrScored == 3) &&
+                    runners[1].currentBase > 1) {
+                    result = 1;
+                }
+                if (runners[1].runnerOnFieldOrOutOrScored == 2) {
+                    result = 2;
+                }
+            }
+            if (result == 2) {
+                bss->_47 = 1;
+                bss->_48 = 0;
+            } else if (result) {
+                bss->_47 = 2;
+                bss->_48 = 0;
+            } else if (g_FieldingLogic._107) {
+                if (g_Strikes.outs >= 3) {
+                    bss->_48 = 0;
+                } else if (g_Pitcher.strikeOutOrWalk == 1) {
+                    bss->_48 = 0;
+                } else {
+                    bss->_48 = 1;
+                    bss->_47 = 0;
+                }
+            } else {
+                bss->_48 = 0;
+            }
+            break;
+        case 12:
+            if (g_GameLogic.EventTriggers_EndOfGame) {
+                if ((g_GameLogic.homeTeamInd ^ (g_Scores._A4 == g_d_GameSettings.humanTeamNumber)) && g_Scores._A4 != 2) {
+                    bss->_47 = 2;
+                } else {
+                    bss->_47 = 1;
+                }
+                bss->_48 = 0;
+            } else if (g_Scores._00 >= g_Scores._AA && g_Scores._AD) {
+                if (g_Ball.deadBallReason == 1 &&
+                    g_Scores._A0 + g_RunningLogic._12 > g_Scores._04[g_GameLogic.awayTeamBattingInd_battingTeam][0]) {
+                    if (g_GameLogic.teamBatting == g_d_GameSettings.humanTeamNumber) {
+                        bss->_47 = 2;
+                    }
+                    bss->_48 = 0;
+                } else if (g_Strikes.outs >= 2 && g_Pitcher.strikeOutOrWalk == 1) {
+                    if ((g_Scores._04[1][0] > g_Scores._04[0][0] && lbl_3_common_bss_37400._40 == g_GameLogic.teamBatting) ||
+                        (g_Scores._04[1][0] < g_Scores._04[0][0] && lbl_3_common_bss_37400._40 == g_GameLogic.teamFielding)) {
+                        bss->_47 = 2;
+                    }
+                    bss->_48 = 0;
+                } else if (g_RunningLogic._10 == 4 && (g_Pitcher.strikeOutOrWalk == 2 || g_Pitcher.strikeOutOrWalk == 3)) {
+                    if (g_Scores._04[1][0] == g_Scores._04[0][0]) {
+                        if (g_GameLogic.teamBatting == g_d_GameSettings.humanTeamNumber) {
+                            bss->_47 = 2;
+                        }
+                        bss->_48 = 0;
+                    } else {
+                        bss->_48 = 1;
+                        bss->_47 = 0;
+                    }
+                } else {
+                    bss->_48 = 1;
+                    bss->_47 = 0;
+                }
+            } else {
+                bss->_48 = 1;
+                bss->_47 = 0;
+            }
+            break;
+    }
+    if (bss->_47 == 2) {
+        if (bss->_46 == 2 || bss->_46 == 1) {
+            c = &tracker->characters[tracker->_43C0];
+            bonus = lbl_80109420[bss->_46]._9[bonusIdx];
+            for (i = 0; i < 9; i++) {
+                if (bss->_12[i]._3 == 1) {
+                    bss->_12[i]._2 = bonus;
+                }
+            }
+            c->scoutFlagsAchieved += bonus;
+            if (c->scoutFlagsAchieved > c->scoutFlagPointer->_4[level][mission]) {
+                c->scoutFlagsAchieved = c->scoutFlagPointer->_4[level][mission];
+            }
+        } else {
+            fn_3_164554();
+        }
+    }
+}
 
 // .text:0x00164664 size:0x410 mapped:0x807A36F8
 void fn_3_164664(void) {
     s32 n;
     StarMissionCompletionTracker* tracker = &starMissionCompletionTracker;
     UnkBss37400* bss = &lbl_3_common_bss_37400;
-    s32 bonus = lbl_80109420[bss->_46]._9;
+    s32 bonus = lbl_80109420[bss->_46]._9[0];
     u8 mission = tracker->_441C;
     u8 level = tracker->_4415;
     s16 ids[9];
@@ -188,7 +501,7 @@ void fn_3_16440C(void) {
     u8 level = tracker->_4415;
     InMemBatterType* batter = &g_Batter;
     InMemPitcherType* pitcher = &g_Pitcher;
-    s32 bonus = lbl_80109420[bss->_46]._9;
+    s32 bonus = lbl_80109420[bss->_46]._9[0];
     s16 ids[9];
     s32 i;
     s32 charID;
@@ -223,7 +536,7 @@ void fn_3_163E94(void) {
     UnkBss37400* bss = &lbl_3_common_bss_37400;
     u8 mission = tracker->_441C;
     u8 level = tracker->_4415;
-    s32 bonus = lbl_80109420[bss->_46]._9;
+    s32 bonus = lbl_80109420[bss->_46]._9[0];
     s16 ids[9];
     s32 i;
     s32 n;
