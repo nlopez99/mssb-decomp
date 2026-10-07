@@ -23,9 +23,7 @@ typedef struct Particle3880 {
     /* 0x00 */ struct Particle3880* next;
     /* 0x04 */ Vec pos;
     /* 0x10 */ Vec vel;
-    /* 0x1C */ f32 _1C;
-    /* 0x20 */ f32 _20;
-    /* 0x24 */ f32 _24;
+    /* 0x1C */ Vec _1C;
     /* 0x28 */ u8 _28[0x38 - 0x28];
     /* 0x38 */ f32 _38;
     /* 0x3C */ f32 _3C;
@@ -45,8 +43,21 @@ typedef struct Particle3880 {
 // Particles of emitter 0x27
 typedef struct Particle27_3880 {
     /* 0x00 */ struct Particle27_3880* next;
-    /* 0x04 */ u8 _04[0x18 - 0x4];
-    /* 0x18 */ s16 _18;
+    /* 0x04 */ Vec pos;
+    /* 0x10 */ Vec* origin;
+    /* 0x14 */ Vec* rotation;
+    /* 0x18 */ s16 id;
+    /* 0x1A */ u8 _1A[0x38 - 0x1A];
+    /* 0x38 */ f32 _38;
+    /* 0x3C */ f32 _3C;
+    /* 0x40 */ u8 color[4];
+    /* 0x44 */ u8 _44[0x48 - 0x44];
+    /* 0x48 */ s16 _48;
+    /* 0x4A */ s16 _4A;
+    /* 0x4C */ u8 _4C;
+    /* 0x4D */ u8 _4D;
+    /* 0x4E */ u8 _4E;
+    /* 0x4F */ u8 _4F;
 } Particle27_3880;
 
 // Particles of the trail emitter in lbl_3_bss_B850
@@ -132,11 +143,17 @@ extern f32 lbl_3_data_21770[6];
 extern u8 lbl_3_data_26CB8[24];
 extern Vec lbl_3_data_26D50;
 extern s32 lbl_3_data_26BDC[4];
+extern Vec lbl_3_data_26BB4;
+extern s32 lbl_3_data_26BC0[7];
 extern s32 lbl_3_data_26BEC[4];
 extern s32 lbl_3_data_26BFC[4];
 extern s32 lbl_3_data_26D5C[11];
+extern s32 lbl_3_data_26D88[15];
+extern s32 lbl_3_data_26DC4[15];
 
 extern BOOL fn_8001B728(s32, s32, Vec*);
+extern s32 fn_8005268C(void);
+extern camera_803c639c_s* fn_80052734(s32 index);
 extern void fn_80033794(void* particles);
 extern void fn_80033B58(void* texture, s32 index, s32, s32);
 extern void pitchingMachinePitching(u8 id);
@@ -274,8 +291,35 @@ void fn_3_155C28(void) {
 }
 
 // .text:0x001559E4 size:0x244 mapped:0x80794A78
-void fn_3_1559E4(void) {
-    return;
+void fn_3_1559E4(Particle27_3880* p, Vec* pos, Vec* rot) {
+    Control control;
+    Mtx mtx;
+    Vec v;
+    Vec base;
+    f64 height;
+
+    p->_4A = lbl_3_data_26BC0[6];
+    control.type = 0;
+    CTRLSetRotation(&control, rot->x, rot->y, rot->z);
+    CTRLBuildMatrix(&control, mtx);
+    if (g_Minigame.GameMode_MiniGame == MINI_GAME_ID_BOBOMB_DERBY) {
+        base = lbl_3_data_26BB4;
+    } else {
+        PSVECScale(&lbl_3_data_26BB4, 1.5f, &base);
+    }
+    v.x = base.x + 1.5 * ((rand() % 40 - 20) / 100.0);
+    v.y = base.y;
+    v.z = base.z + 1.5 * ((rand() % 40 - 20) / 100.0);
+    PSMTXMultVec(mtx, &v, &v);
+    v.x += pos->x;
+    height = fabs(pos->y);
+    v.y -= height;
+    v.z += pos->z;
+    p->pos.x = v.x;
+    p->pos.y = v.y;
+    p->pos.z = v.z;
+    p->_3C = p->_38 = lbl_3_data_26BC0[2];
+    p->color[3] = lbl_3_data_26BC0[4];
 }
 
 // .text:0x001552AC size:0x738 mapped:0x80794340
@@ -304,8 +348,25 @@ void fn_3_154C7C(void) {
 }
 
 // .text:0x001549F0 size:0x28C mapped:0x80793A84
-void fn_3_1549F0(void) {
-    return;
+void fn_3_1549F0(Emitter3880* emitter, s16 id, Vec* pos, Vec* rot) {
+    Particle27_3880* p;
+    u32 i;
+
+    i = 0;
+    p = (Particle27_3880*)emitter->particles;
+    emitter->_10 = lbl_3_common_bss_32724._6C;
+    do {
+        p->id = id;
+        p->origin = pos;
+        p->rotation = rot;
+        p->_48 = (u8)i++;
+        p->_4D = lbl_3_data_26BC0[0];
+        p->_4E = 0;
+        if (p->_48 == 0) {
+            fn_3_1559E4(p, pos, rot);
+        }
+        p = p->next;
+    } while (p != NULL);
 }
 
 // .text:0x001542F4 size:0x6FC mapped:0x80793388
@@ -327,7 +388,7 @@ void fn_3_154238(s16 id) {
         last = NULL;
         removed = NULL;
         do {
-            if (p->_18 == id) {
+            if (p->id == id) {
                 *link = p->next;
                 if (last != NULL) {
                     last->next = p;
@@ -375,9 +436,9 @@ void fn_3_153E8C(Particle3880* p, Vec* pos, u8 arg2, u8 arg3, u8 arg4) {
     p->_4F = arg2;
     p->color[0] = p->color[1] = p->color[2] = 0xFF;
     p->color[3] = lbl_3_data_26BDC[1];
-    p->_1C = pos->x;
-    p->_20 = -pos->y - 0.1435f * (p->_4D ? fn_3_119854(2) : fn_3_119854(0));
-    p->_24 = pos->z;
+    p->_1C.x = pos->x;
+    p->_1C.y = -pos->y - 0.1435f * (p->_4D ? fn_3_119854(2) : fn_3_119854(0));
+    p->_1C.z = pos->z;
     p->_44 = p->_45 = 0;
 }
 
@@ -387,8 +448,38 @@ void fn_3_1536A8(void) {
 }
 
 // .text:0x001534C0 size:0x1E8 mapped:0x80792554
-void fn_3_1534C0(void) {
-    return;
+void fn_3_1534C0(Particle3880* p) {
+    Mtx rot;
+    camera_803c639c_s* camera = fn_80052734(fn_8005268C());
+    f32 height = p->_4D ? fn_3_119854(2) : fn_3_119854(0);
+    Vec forward = { 0.0f, 0.0f, -1.0f };
+    Vec axis;
+    Vec dir;
+    Vec offset;
+    f32 angle;
+
+    offset.x = 0.0f;
+    offset.y = 0.0f;
+    offset.z = -0.354f * height;
+    PSVECSubtract(&camera->eye, &p->_1C, &dir);
+    PSVECNormalize(&dir, &dir);
+    angle = acos(PSVECDotProduct(&forward, &dir));
+    PSVECCrossProduct(&forward, &dir, &axis);
+    if (PSVECMag(&axis) == 0.0f) {
+        axis.x = 0.0f;
+        axis.y = -1.0f;
+        axis.z = 0.0f;
+    }
+    PSMTXRotAxisRad(rot, &axis, angle);
+    PSMTXMultVec(rot, &offset, &offset);
+    p->pos.x = p->_1C.x + offset.x;
+    p->pos.y = p->_1C.y + offset.y;
+    p->pos.z = p->_1C.z + offset.z;
+    p->_38 = p->_3C = lbl_3_data_26BEC[0];
+    p->_4C = 1;
+    p->_4A = lbl_3_data_26BEC[3];
+    p->vel.x = p->vel.z = 0.0f;
+    p->vel.y = lbl_3_data_26BEC[2] / 100000.0f;
 }
 
 // .text:0x001531A4 size:0x31C mapped:0x80792238
@@ -712,8 +803,19 @@ void fn_3_14ED24(void) {
 }
 
 // .text:0x0014EAF4 size:0x230 mapped:0x8078DB88
-void fn_3_14EAF4(void) {
-    return;
+void fn_3_14EAF4(Particle3880* p) {
+    Vec offset = { 0.0f, 0.0f, 0.0f };
+
+    if (p->_4C == 5) {
+        offset.x += (rand() % 10000 - 5000) / 10000.0f;
+        offset.y += (rand() % 10000 - 5000) / 10000.0f;
+        p->pos.x = offset.x;
+        p->pos.y = offset.y - 0.5f;
+        p->pos.z = offset.z;
+    } else {
+        p->pos.x = p->pos.y = p->pos.z = 0.0f;
+    }
+    fn_3_14E9F0(p);
 }
 
 // .text:0x0014E9F0 size:0x104 mapped:0x8078DA84
@@ -1038,8 +1140,44 @@ void fn_3_14BECC(void) {
 }
 
 // .text:0x0014BCB0 size:0x21C mapped:0x8078AD44
-void fn_3_14BCB0(void) {
-    return;
+// Volatile int and float registers of the spread math differ (99.26%): the target loads the
+// 2.0f factor late, as here, but multiplies it first.
+void fn_3_14BCB0(Emitter3880* emitter, Vec* pos, u8 big) {
+    Particle3880* p;
+    s32* cfg;
+    u32 count;
+    f32 angle;
+    f32 spread;
+    f32 deg;
+    s32 r;
+    f32 radius = 2.0f;
+
+    emitter->_10 = lbl_3_common_bss_32724._6C;
+    count = 0;
+    p = emitter->particles;
+    cfg = big ? lbl_3_data_26DC4 : lbl_3_data_26D88;
+    do {
+        if (p->_4A == 0) {
+            p->_4D = cfg[0];
+            p->_4E = 0;
+            p->_4A = cfg[2];
+            p->_38 = p->_3C = cfg[4] / 100000.0f;
+            p->color[3] = cfg[10];
+            p->color[0] = cfg[7];
+            p->color[1] = cfg[8];
+            p->color[2] = cfg[9];
+            r = rand();
+            deg = 180.0 / cfg[1] * count;
+            spread = (2.0 * (r / 32767.0f - 0.5)) * radius;
+            angle = 0.017453292f * deg;
+            p->pos.x = pos->x + spread * cosf_kludge(angle);
+            p->pos.y = pos->y - spread * sinf_kludge(angle) - 1.0;
+            p->pos.z = pos->z;
+            p->_4F = big;
+            count++;
+        }
+        p = p->next;
+    } while (p != NULL && count < lbl_3_data_26D88[1]);
 }
 
 // .text:0x0014BA40 size:0x270 mapped:0x8078AAD4
@@ -1277,7 +1415,7 @@ void fn_3_148254(PlayerEmitter3880* emitter, Particle3880* p) {
     pos.z = p->pos.z;
     PSMTXMultVecSR(mtx, &pos, &pos);
     control.type = 0;
-    CTRLSetRotation(&control, p->_1C, p->_20, p->_24);
+    CTRLSetRotation(&control, p->_1C.x, p->_1C.y, p->_1C.z);
     CTRLSetTranslation(&control, player->_34.x + pos.x, -player->_34.y + pos.y, player->_34.z + pos.z);
     CTRLBuildMatrix(&control, mtx);
     PSMTXConcat(fn_80052768_getCamera(0)->view, mtx, mtx);
