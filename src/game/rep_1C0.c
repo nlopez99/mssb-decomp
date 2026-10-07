@@ -953,8 +953,7 @@ void fn_3_3904(s16 x, s16 y, s32 id, GXColor c1, GXColor c2, u8 flag) {
     s16 h;
     f32 dx;
     f32 dy;
-    s32 code;
-    u16 idx;
+    u16 code;
     u16* text;
     s16 left;
 
@@ -981,10 +980,10 @@ void fn_3_3904(s16 x, s16 y, s32 id, GXColor c1, GXColor c2, u8 flag) {
         }
         if (code & 0x8000) {
             code &= 0x7FFF;
-            idx = code % 2116;
-            u = idx % 46;
-            v = (idx / 46) * 22;
-            u *= 22;
+            code %= 2116;
+            u = code % 46;
+            v = (code / 46) * 22;
+            u = u * 22;
             w = 22;
             h = 22;
             dx = 16.0f;
