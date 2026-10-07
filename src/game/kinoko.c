@@ -219,7 +219,7 @@ void fn_3_16917C(void* arg0, GXTevStageID* stage, GXTexCoordID* coord, GXTexMapI
         }
     }
     GXLoadTexObj(lbl_3_bss_BA04, *map);
-    GXSetTexCoordGen2(*coord, GX_TG_MTX3X4, GX_TG_TEX0, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
+    GXSetTexCoordGen2(*coord, GX_TG_MTX2X4, GX_TG_TEX0, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
     GXSetTevOrder(*stage, *coord, *map, GX_COLOR_NULL);
     if (lbl_3_bss_BA00 == lbl_3_bss_BAA0) {
         GXSetTevColorIn(*stage, GX_CC_CPREV, GX_CC_TEXC, GX_CC_TEXA, GX_CC_ZERO);
