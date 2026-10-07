@@ -7,6 +7,7 @@
 #include "game/rep_1838.h"
 #include "game/rep_18E8.h"
 #include "game/rep_3DA8.h"
+#include "game/rep_D0.h"
 #include "static/UnknownHomes_Static.h"
 
 extern struct {
@@ -19,7 +20,9 @@ extern struct {
     /* 0x02 */ s16 _02;
     /* 0x04 */ s16 _04;
     /* 0x06 */ s16 _06[4];
-    /* 0x0E */ u8 _0E[0x14 - 0x0E];
+    /* 0x0E */ u8 _0E[0x10 - 0x0E];
+    /* 0x10 */ u8 _10;
+    /* 0x11 */ u8 _11[0x14 - 0x11];
     /* 0x14 */ u8 _14;
     /* 0x15 */ u8 _15;
 } g_RunningLogic;
@@ -52,9 +55,12 @@ extern s16 lbl_3_data_1C88[4];
 extern VecXZ lbl_3_data_4444[5];
 extern VecXZ lbl_3_data_4A34[4];
 extern VecXZ lbl_3_data_4A54[2][13];
+extern f32 lbl_3_data_4B44;
+extern s16 lbl_3_data_4B48[4];
 extern VecXYZ lbl_3_data_4B58[4];
 extern s16 lbl_3_data_4B90[4];
 extern f32 lbl_3_data_4C44[4];
+extern u8 lbl_3_data_7760[54][5];
 extern s16 lbl_3_data_4C54[12];
 extern f32 lbl_3_data_218BC[18];
 extern s16 lbl_3_data_21904[12];
@@ -480,7 +486,69 @@ void fn_3_87AE8(void) {
 
 // .text:0x0008781C size:0x2CC mapped:0x806C68B0
 void fn_3_8781C(void) {
-    return;
+    int i;
+    InMemRunnerType* r;
+    VecSrcDst ray;
+    CollisionStruct hit;
+
+    g_RunningLogic._00 = 0;
+    g_RunningLogic._04 = 0;
+    g_RunningLogic._10 = 0;
+    for (i = 0; i < 4; i++) {
+        r = &g_Runners[i];
+        if (r->percentTowardsNextBase > 0.2f) {
+            r->relatedToRunnerPos = 0;
+        }
+        if (r->runnerOnFieldOrOutOrScored == 1) {
+            g_RunningLogic._00 |= 1 << (i * 4);
+            g_RunningLogic._10++;
+            if (r->currentBase <= 3) {
+                g_RunningLogic._04 |= 1 << (r->currentBase * 4);
+            }
+        }
+        if (g_Ball.AtBat_ContactResult == -1 && r->runnerOnFieldOrOutOrScored == 1) {
+            r->runnerOnFieldOrOutOrScored = 4;
+        }
+        if (r->baseStandingOn >= 0) {
+            if (r->timeStandingOnBase < 0x7FFE) {
+                r->timeStandingOnBase++;
+            } else {
+                r->timeStandingOnBase = 0x7FFF;
+            }
+        } else {
+            r->timeStandingOnBase = 0;
+        }
+        r->nextBase = (r->currentBase + 1) & 3;
+        if (r->runnerOnFieldOrOutOrScored != 0) {
+            ray.src.x = r->position.x;
+            ray.src.y = -1.0f;
+            ray.src.z = r->position.z;
+            ray.dst.x = r->position.x;
+            ray.dst.y = 1.0f;
+            ray.dst.z = r->position.z;
+            r->someCollisionCheck = checkCollision(&ray, &hit, 0, 0);
+        }
+    }
+    if (g_Runners[0].baseNumberEarned_NotIncludingFieldersChoice == -1) {
+        u32 ballState = g_Ball.ballState;
+        u32 ballZone = g_Ball.ballZoneAwayFromHome;
+        u32 caughtZone = g_Ball.ballZoneWhenCaught;
+        u32 fielding = g_FieldingLogic._10E;
+        int j;
+
+        for (j = 0; j < 4; j++) {
+            r = &g_Runners[j];
+            if ((ballState == 1 && ballZone <= 2) || caughtZone <= 1 || fielding != 0) {
+                if (r->runnerOnFieldOrOutOrScored == 2) {
+                    r->baseNumberEarned_NotIncludingFieldersChoice = r->currentBase;
+                } else if (r->runnerOnFieldOrOutOrScored != 0 && r->baseStandingOn >= 0) {
+                    r->baseNumberEarned_NotIncludingFieldersChoice = r->baseStandingOn;
+                }
+            } else if (r->runnerOnFieldOrOutOrScored == 3) {
+                r->baseNumberEarned_NotIncludingFieldersChoice = 0;
+            }
+        }
+    }
 }
 
 // .text:0x00087424 size:0x3F8 mapped:0x806C64B8
@@ -1041,8 +1109,54 @@ void fn_3_82670(void) {
 }
 
 // .text:0x000823B4 size:0x2BC mapped:0x806C1448
-void fn_3_823B4(void) {
-    return;
+void fn_3_823B4(int runner) {
+    InMemRunnerType* r = &g_Runners[runner];
+
+    r->actionFrames_countUp++;
+    r->actionFrames_countDown--;
+    if (r->actionStage == 1) {
+        if (r->actionInForwardDirectionInd != 0) {
+            f32 dist = (1.0f - r->slidingAdjustment_forwards) - r->percentTowardsNextBase;
+            if (r->actionFrames_countDown <= 0) {
+                r->percentRanPerFrame_slideAdj = 0.03f + dist;
+            } else {
+                r->percentRanPerFrame_slideAdj = dist / (r->actionFrames_countDown + 1);
+            }
+        } else {
+            f32 dist = r->percentTowardsNextBase - r->slidingAdjustment_backwards;
+            if (r->actionFrames_countDown <= 0) {
+                r->percentRanPerFrame_slideAdj = -dist - 0.03f;
+            } else {
+                r->percentRanPerFrame_slideAdj = -dist / (r->actionFrames_countDown + 1);
+            }
+        }
+        if (r->actionFrames_countDown <= 0) {
+            r->actionFrames_countUp = 0;
+            r->actionFrames_countDown = lbl_3_data_7760[r->charID][3];
+            r->actionStage = 2;
+            r->percentRanPerFrame_slideAdj = 0.0f;
+            r->fractionalBasesRan = r->baseRunningTowards;
+            r->percentTowardsNextBase = 0.0f;
+            if (r->baseRunningTowards == 0) {
+                r->fractionalBasesRan = 4.0f;
+            }
+            if (r->runnerOnFieldOrOutOrScored == 2) {
+                r->actionStage = 3;
+            }
+        }
+    } else if (r->actionStage == 2) {
+        r->groundVelocity[0] = 0.0f;
+        r->percentRanPerFrame_slideAdj = 0.0f;
+        if (r->actionFrames_countDown <= 0) {
+            r->actionCode = 0;
+            r->actionStage = 0;
+            if (r->baseStandingOn >= 0) {
+                fn_3_81AB8(runner);
+                fn_3_810C4(runner, r->baseStandingOn);
+                r->framesSinceLastDirectionChange = 1;
+            }
+        }
+    }
 }
 
 // .text:0x00081EAC size:0x508 mapped:0x806C0F40
@@ -1051,8 +1165,52 @@ void fn_3_81EAC(void) {
 }
 
 // .text:0x00081BC8 size:0x2E4 mapped:0x806C0C5C
-void fn_3_81BC8(void) {
-    return;
+int fn_3_81BC8(int runner) {
+    InMemRunnerType* r = &g_Runners[runner];
+
+    if (r->runningDirectionDesired == 1) {
+        r->nextDirectionBeingProcessed = 1;
+        r->overrunBaseStage = 0;
+        return 0;
+    }
+    if (r->overrunBaseStage == 1) {
+        r->overrunBaseStage = 2;
+        r->overrunBaseFrames_countUp = 0;
+        r->overrunBaseFrames_countDown = lbl_3_data_4B48[0];
+        r->runningDirectionCode = 5;
+        r->overrun1B_someDistConst_proportionPerFrame =
+            lbl_3_data_4B44 / ((r->overrunBaseFrames_countDown + 1) * (r->overrunBaseFrames_countDown / 2));
+    }
+    if (r->overrunBaseStage == 2) {
+        r->overrunBaseFrames_countUp++;
+        r->overrunBaseFrames_countDown--;
+        if (r->overrunBaseFrames_countDown < 0) {
+            r->overrunBaseStage = 3;
+            r->overrunBaseFrames_countUp = 0;
+            r->overrunBaseFrames_countDown = lbl_3_data_4B48[1];
+            r->overrun1B_someDistConst_proportionPerFrame =
+                (r->slidingAdjustment_backwards - r->percentTowardsNextBase) / r->overrunBaseFrames_countDown;
+        } else {
+            r->percentRanPerFrame_slideAdj = r->overrun1B_someDistConst_proportionPerFrame * r->overrunBaseFrames_countDown;
+        }
+    }
+    if (r->overrunBaseStage == 3) {
+        r->overrunBaseFrames_countUp++;
+        r->overrunBaseFrames_countDown--;
+        if (r->overrunBaseFrames_countDown < 0) {
+            r->overrunBaseStage = 0;
+            fn_3_81AB8(runner);
+            fn_3_810C4(runner, r->currentBase);
+        } else {
+            r->percentRanPerFrame_slideAdj = r->overrun1B_someDistConst_proportionPerFrame;
+            r->offsetFromNormalRunningPathInd = 0;
+        }
+    }
+    r->fractionalBasesRan += r->percentRanPerFrame_slideAdj;
+    r->percentTowardsNextBase += r->percentRanPerFrame_slideAdj;
+    r->percentFromCurrentBase_slideAdj = r->percentTowardsNextBase - r->slidingAdjustment_backwards;
+    r->percentTowardsNextBase_slideAdj = (1.0f - r->percentTowardsNextBase) - r->slidingAdjustment_forwards;
+    return 1;
 }
 
 // .text:0x00081AEC size:0xDC mapped:0x806C0B80
@@ -1169,13 +1327,111 @@ void fn_3_7FEA8(int runner, int direction) {
 }
 
 // .text:0x0007FD90 size:0x118 mapped:0x806BEE24
-void fn_3_7FD90(void) {
-    return;
+void fn_3_7FD90(int runner) {
+    InMemRunnerType* r = &g_Runners[runner];
+    int forced;
+
+    if ((r->runningToDugoutInd == 0 || r->runningToDugoutStage == 0) && r->actionCode == 0) {
+        if (r->framesSinceLastDirectionChange >= lbl_3_data_4C54[3] ||
+            (r->runningDirectionCode != 1 && r->runningDirectionCode != 3)) {
+            if (r->runningDirectionDesired != 0) {
+                if (g_GameLogic.secondaryGameMode == 6) {
+                    if (r->runnerOnFieldOrOutOrScored == 1) {
+                        r->nextDirectionBeingProcessed = r->runningDirectionDesired;
+                    }
+                } else {
+                    if ((runner != 0 || r->nextBase != 1) && r->runnerOnFieldOrOutOrScored == 1) {
+                        r->nextDirectionBeingProcessed = r->runningDirectionDesired;
+                    }
+                    if (r->nextDirectionBeingProcessed == 3 && r->tagUpInd != 3 && r->baseStandingOn >= 0) {
+                        r->nextDirectionBeingProcessed = 0;
+                    }
+                }
+            }
+        }
+        forced = fn_3_7FA78(runner);
+        if (forced != 0) {
+            r->nextDirectionBeingProcessed = forced;
+        }
+    }
 }
 
 // .text:0x0007FA78 size:0x318 mapped:0x806BEB0C
-void fn_3_7FA78(void) {
-    return;
+int fn_3_7FA78(int runner) {
+    InMemRunnerType* r = &g_Runners[runner];
+
+    if (g_GameLogic.secondaryGameMode == 6) {
+        if (g_Minigame.turnOverStatus != 0) {
+            return 2;
+        }
+        if (g_Minigame._1B19 == 2 || g_Minigame._1B19 == 3) {
+            return 2;
+        }
+        return 0;
+    }
+    if (g_GameLogic.secondaryGameMode != 14) {
+        if (g_Ball.framesSinceHit <= 0) {
+            return 0;
+        }
+        if (g_FieldingLogic._107 == 1) {
+            if (runner != 0 && r->runningDirectionCode == 2 && r->runningDirectionDesired == 0 &&
+                g_Ball.framesSincePickOff == lbl_3_data_4C54[4]) {
+                return 3;
+            }
+        } else if (g_FieldingLogic._107 == 2) {
+            if (runner != 0 && r->runningDirectionCode == 2 && r->runningDirectionDesired == 0 &&
+                g_Ball.framesSincePickOff == lbl_3_data_4C54[4]) {
+                return 3;
+            }
+        }
+        if (runner == 0) {
+            if (r->fractionalBasesRan < 1.0f && r->forceOutCd == 1 && g_FieldingLogic._108 == 0 && g_FieldingLogic._107 == 0) {
+                return 1;
+            }
+        } else if (r->leadOffStatus == 1) {
+            return 1;
+        }
+        if (g_Ball.deadBallReason == 1) {
+            return 1;
+        }
+        if (g_Ball.framesSinceHit == 5) {
+            return 1;
+        }
+    }
+    if (r->restrictedMovementCodes & 4) {
+        if (r->runningDirectionCode == 1) {
+            return 2;
+        }
+        if (r->nextDirectionBeingProcessed == 1 && r->runningDirectionCode == 2) {
+            return 2;
+        }
+    } else if (r->restrictedMovementCodes & 1) {
+        if ((r->baseRoundingState != 1 || r->overRun1BStage == 0) && r->runningDirectionCode == 1) {
+            return 2;
+        }
+        if (r->nextDirectionBeingProcessed == 1) {
+            return 2;
+        }
+    } else if (r->restrictedMovementCodes & 2) {
+        if (r->runningDirectionCode == 3) {
+            return 2;
+        }
+        if (r->nextDirectionBeingProcessed == 3) {
+            return 2;
+        }
+    } else if (r->restrictedMovementCodes_stored & 4) {
+        if (!(r->restrictedMovementCodes & 1) && g_Ball.framesSinceHit > 0 &&
+            (r->runningDirectionCode == 2 || r->nextDirectionBeingProcessed == 2) && r->tagUpInd == 0) {
+            return 1;
+        }
+    } else if ((r->restrictedMovementCodes_stored & 8) && !(r->restrictedMovementCodes & 2) &&
+               (r->runningDirectionCode == 2 || r->nextDirectionBeingProcessed == 2)) {
+        return 3;
+    }
+    if (g_Ball.AtBat_ContactResult == 3 && r->tagUpInd == 2) {
+        return 3;
+    }
+    return 0;
 }
 
 // .text:0x0007F9C4 size:0xB4 mapped:0x806BEA58
