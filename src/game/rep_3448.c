@@ -2,7 +2,7 @@
 #include "header_rep_data.h"
 #include "game/UnknownHomes_Game.h"
 #include "static/UnknownHomes_Static.h"
-#include "game/m_sound.h"
+#include "game/rep_1838.h"
 #include "musyx/musyx.h"
 
 typedef struct UnkTask3448 {
@@ -18,10 +18,11 @@ typedef struct UnkTask3448 {
     /* 0x1C */ u16 _1C;
     /* 0x1E */ u16 _1E;
     /* 0x20 */ u16 _20;
-    /* 0x22 */ u8 _22[0x24 - 0x22];
+    /* 0x22 */ u16 _22;
     union {
         /* 0x24 */ u8 _24_arr[4];
         /* 0x24 */ s16 _24_s16[4];
+        /* 0x24 */ SND_VOICEID voice;
         struct {
             /* 0x24 */ s8 _24;
             /* 0x25 */ u8 _25;
@@ -114,7 +115,12 @@ extern UnkSpriteDesc3448 lbl_3_data_A9F8[];
 extern UnkSpriteDesc3448 lbl_3_data_B0E0[];
 extern u16 lbl_3_data_B140[][2];
 extern s16 lbl_3_data_213EC[10];
+extern u16 lbl_3_data_81FC[0x88];
+extern u8 lbl_3_data_84F4[0x3C];
 extern u16 lbl_3_data_2145C[2];
+extern u8 lbl_3_data_21460[8];
+extern u8 lbl_3_data_21468[4][6];
+extern u8 lbl_3_data_21480[8];
 extern s16 lbl_3_data_21654[12];
 extern s16 lbl_3_data_21672;
 extern s16 lbl_3_data_21788[4];
@@ -132,6 +138,7 @@ extern UnkSpriteDesc3448 lbl_3_data_23E04[];
 extern UnkSpriteDesc3448 lbl_3_data_23E64[];
 extern UnkSpriteDesc3448 lbl_3_data_23F24[];
 extern UnkSpriteDesc3448 lbl_3_data_240A4[];
+extern UnkSpriteDesc3448 lbl_3_data_23F64[];
 extern UnkSpriteDesc3448 lbl_3_data_246E4[];
 extern UnkSpriteDesc3448 lbl_3_data_24784[];
 extern UnkSpriteDesc3448 lbl_3_data_24844[];
@@ -148,6 +155,8 @@ extern void fn_800362F0(UnkTask3448* task, s32);
 extern void fn_800363D8(UnkTask3448* task, s32, s32, s32, s32);
 extern void fn_800528C0(f32 x, f32 y, f32 z, s16* screenX, s16* screenY);
 extern void fn_800B0A14_removeQueue(void);
+// game/m_sound.h declares this void while m_sound.c is a stub; fn_3_121908 keeps the voice it returns.
+extern SND_VOICEID fn_3_90064(int id);
 extern void fn_800B0A5C_insertQueue(void (*)(void), s32);
 extern u32 fn_3_107C88(void);
 extern s32 fn_3_107CD0(void);
@@ -1115,8 +1124,177 @@ void fn_3_122334(void) {
 }
 
 // .text:0x00121908 size:0xA2C mapped:0x8076099C
+// 98.96%: the target tests task->_1A == 0 as a cntlzw boolean, and allocates the g_Minigame
+// base of the _1907 test in other registers.
 void fn_3_121908(void) {
-    return;
+    UnkTask3448* task = lbl_803CC1B8;
+    MiniGameStruct* minigame = &g_Minigame;
+    u32 level;
+    u32 i;
+    s8 ch;
+    u8 mode;
+    u8 sym;
+
+    if (fn_3_12536C()) {
+        if (task->_1C != 0 && task->voice != SND_ID_ERROR) {
+            sndFXKeyOff(task->voice);
+            sndFXCtrl(task->voice, 7, 0);
+            task->voice = SND_ID_ERROR;
+        }
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    if (task->voice != SND_ID_ERROR) {
+        sndFXCtrl(task->voice, 7, g_Minigame.pauseInd != 0 ? 0 : lbl_3_data_84F4[0x1C]);
+    }
+    switch (task->_1C) {
+    case 0:
+        fn_80034E20(task, lbl_3_data_23F64);
+        lbl_80371C30[task->_14 + 8]._00->_54 &= ~2;
+        task->_1E = random_fn_3_9EE24(6);
+        task->voice = SND_ID_ERROR;
+        task->_1C = 1;
+    case 1:
+        minigame->_1DF4 = 0;
+        if (g_GameLogic.gameStatus == GAME_STATUS_AT_BAT && g_Pitcher.pitcherActionState == PITCHER_ACTION_STATE_PRE_PITCH) {
+            task->_1C = 2;
+        }
+        break;
+    case 2:
+        if (g_Batter.batterHand != 0) {
+            lbl_80371C30[task->_14]._00->_64 = 0x156;
+            lbl_80371C30[task->_14 + 1]._00->_64 = 0x153;
+            lbl_80371C30[task->_14 + 6]._00->_64 = 0x151;
+            lbl_80371C30[task->_14 + 7]._00->_5C = 0 << 16;
+        } else {
+            lbl_80371C30[task->_14]._00->_64 = 0x157;
+            lbl_80371C30[task->_14 + 1]._00->_64 = 0x154;
+            lbl_80371C30[task->_14 + 6]._00->_64 = 0x152;
+            lbl_80371C30[task->_14 + 7]._00->_5C = 1 << 16;
+        }
+        if (g_Minigame.multiPlayerInd == 0 && g_Minigame._1A3C == 0) {
+            if (g_Minigame.multiPlayerInd == 0 && g_Minigame._1A3C == 0 &&
+                g_Minigame.soloMinigameDifficulty == MINIGAME_DIFFICULTY_SOLO_NON_CHALLENGE) {
+                level = g_Minigame.miniGameTurnCounter / 5;
+                if (level >= 4) {
+                    level = 3;
+                }
+            } else {
+                level = g_Minigame.soloMinigameDifficulty;
+            }
+            if (g_Minigame.miniGameTurnCounter % 10 == g_Minigame._1AD8) {
+                task->_20 = 3;
+            } else {
+                task->_20 = RandomIndexFromWeights(lbl_3_data_21468[level], 6);
+            }
+            task->_22 = 1;
+        } else if (g_Minigame._1A3C != 0 && g_Minigame._1907 == 1 &&
+                   g_Minigame.minigameControlStruct.battingHandedness[g_Minigame.rosterID] == 0) {
+            if (g_Minigame.miniGameTurnCounter % 10 == g_Minigame._1AD8 && g_Scores._00 == g_Minigame._1AD9) {
+                task->_20 = 3;
+            } else {
+                task->_20 = RandomIndexFromWeights(lbl_3_data_21480, 6);
+            }
+            task->_22 = 1;
+        } else {
+            task->_20 = random_fn_3_9EE24(6);
+            task->_22 = 1;
+        }
+        task->_18 = 0;
+        task->_1A = 0;
+        task->_1C = 3;
+    case 3:
+        mode = g_Minigame.pauseInd == 0;
+        lbl_80371C30[task->_14 + 1]._00->_68 = mode;
+        lbl_80371C30[task->_14 + 6]._00->_68 = mode;
+        if (isAnimDone(lbl_80371C30[task->_14 + 6]._00) && lbl_80371C30[task->_14 + 1]._00->_69 == 2) {
+            task->voice = fn_3_90064(lbl_3_data_81FC[0x1C]);
+            task->_1C = 4;
+        }
+        break;
+    case 4:
+        if (task->_18 < 0xFFFE) {
+            task->_18++;
+        } else {
+            task->_18 = 0xFFFF;
+        }
+        if (g_Minigame._1907 - (g_Minigame.minigameControlStruct.battingHandedness[g_Minigame.rosterID] == 0) != 0) {
+            if (task->_18 >= 110 && lbl_3_data_21460[(task->_1E + 1U) % 7] == task->_20) {
+                task->_1A = 1;
+            }
+            i = 0;
+            do {
+                ch = g_Minigame.minigameControlStruct.characterIndex[i];
+                if (ch >= 0 && ch < 4 && i != g_Minigame.rosterID &&
+                    g_Minigame.minigameControlStruct.battingHandedness[i] == 0 && g_Minigame.pauseInd == 0 &&
+                    (g_Controls[ch].newButtonInput & 0x100)) {
+                    task->_1A = 1;
+                    break;
+                }
+            } while (++i < 4);
+            if (task->_1A == 0) {
+                lbl_80371C30[task->_14 + 8]._00->_54 |= 2;
+            } else {
+                lbl_80371C30[task->_14 + 8]._00->_54 &= ~2;
+            }
+        } else if (task->_18 >= 50 && lbl_3_data_21460[(task->_1E + 1U) % 7] == task->_20) {
+            task->_1A = 1;
+        }
+        lbl_80371C30[task->_14 + 2]._00->_68 = g_Minigame.pauseInd == 0;
+        if (isAnimDone(lbl_80371C30[task->_14 + 2]._00)) {
+            lbl_80371C30[task->_14 + 2]._00->_5C = 0;
+            task->_1E = (task->_1E + 1U) % 7;
+            if (task->_1A != 0) {
+                lbl_80371C30[task->_14 + 2]._00->_68 = 0;
+                sndFXKeyOff(task->voice);
+                sndFXCtrl(task->voice, 7, 0);
+                task->voice = SND_ID_ERROR;
+                fn_3_90064(lbl_3_data_81FC[0x1D]);
+                task->_1C = 5;
+            }
+        }
+        break;
+    case 5:
+        lbl_80371C30[task->_14 + 3]._00->_68 = g_Minigame.pauseInd == 0;
+        if (isAnimDone(lbl_80371C30[task->_14 + 3]._00)) {
+            lbl_80371C30[task->_14 + 3]._00->_5C = 0;
+            lbl_80371C30[task->_14 + 3]._00->_68 = 0;
+            task->_1C = 6;
+        }
+        break;
+    case 6:
+        mode = 4;
+        if (g_Minigame.pauseInd != 0) {
+            mode = 0;
+        }
+        lbl_80371C30[task->_14 + 1]._00->_68 = mode;
+        lbl_80371C30[task->_14 + 6]._00->_68 = mode;
+        if (lbl_80371C30[task->_14 + 6]._00->_5C >> 16 == 0 && lbl_80371C30[task->_14 + 1]._00->_5C >> 16 == 0) {
+            minigame->_1DF4 = 1;
+            if ((minigame->_1DF5 = lbl_3_data_21460[task->_1E]) == 5) {
+                do {
+                    minigame->_1DF5 = random_fn_3_9EE24(5);
+                } while (task->_22 != 0 && minigame->_1DF5 == 3);
+                minigame->_1DF6 = 1;
+            } else {
+                minigame->_1DF6 = 0;
+            }
+            task->_1C = 7;
+        }
+        break;
+    case 7:
+        if (g_Pitcher.pitcherActionState != PITCHER_ACTION_STATE_PRE_PITCH) {
+            task->_1C = 1;
+        }
+        break;
+    }
+    sym = lbl_3_data_21460[task->_1E];
+    fn_800363D8(task, 3, 1, 0x15B, sym);
+    fn_800363D8(task, 3, 2, 0x15C, sym);
+    sym = lbl_3_data_21460[(task->_1E + 1U) % 7];
+    fn_800363D8(task, 4, 1, 0x15B, sym);
+    fn_800363D8(task, 4, 2, 0x15C, sym);
 }
 
 // .text:0x00121304 size:0x604 mapped:0x80760398
