@@ -56,11 +56,17 @@ extern struct {
 } lbl_3_common_bss_1323C;
 
 typedef struct {
-    /* 0x00 */ u8 _00[0x62];
-    /* 0x62 */ s16 _62;
-    /* 0x64 */ u8 _64[0x68 - 0x64];
-    /* 0x68 */ s16 _68;
-    /* 0x6A */ s16 _6A;
+    /* 0x000 */ u8 _000[0x34];
+    /* 0x034 */ Vec _034;
+    /* 0x040 */ u8 _040[0x44 - 0x40];
+    /* 0x044 */ f32 _044;
+    /* 0x048 */ u8 _048[0x62 - 0x48];
+    /* 0x062 */ s16 _062;
+    /* 0x064 */ u8 _064[0x68 - 0x64];
+    /* 0x068 */ s16 _068;
+    /* 0x06A */ s16 _06A;
+    /* 0x06C */ u8 _06C[0x25D - 0x6C];
+    /* 0x25D */ u8 _25D;
 } UnkA00Actor;
 
 extern struct {
@@ -70,7 +76,11 @@ extern struct {
 
 typedef struct {
     /* 0x000 */ Vec _000;
-    /* 0x00C */ u8 _00C[0x218 - 0xC];
+    /* 0x00C */ u8 _00C[0x48 - 0xC];
+    /* 0x048 */ f32 _048;
+    /* 0x04C */ u8 _04C[0x1C7 - 0x4C];
+    /* 0x1C7 */ u8 _1C7;
+    /* 0x1C8 */ u8 _1C8[0x218 - 0x1C8];
     /* 0x218 */ u8 _218;
     /* 0x219 */ u8 _219[0x268 - 0x219];
 } UnkA00Fielder; // size: 0x268
@@ -119,6 +129,9 @@ typedef struct {
     /* 0x18 */ u8 _18;
     /* 0x19 */ u8 _19;
 } UnkA00Cue; // size: 0x1C
+
+extern UnkA00Cue lbl_3_data_1E434[];
+extern UnkA00Cue lbl_3_data_1F090[];
 
 typedef struct {
     /* 0x00 */ u8 _00[0x10];
@@ -221,6 +234,8 @@ BOOL fn_3_165D24(void);
 // rep_E08.h and m_sound.h declare these as void(void), matching their units' stubs
 void fn_3_6714C(BOOL);
 void fn_3_8C104(s32);
+void QueueCharacterAnimation(int actor, int anim, u8, u8, s16, u8, int);
+void AnimateCharacter(int actor, int anim, u8, u8, u8, s16, u8, int);
 
 UnkA00Cue lbl_3_data_1D28[18] = {
     { { 0.0f, 0.0f, 15.0f }, 0.0f, 0x2, 0x0, 0, 0, 1, 0, 0, 0 },
@@ -427,7 +442,70 @@ s32 lbl_3_data_3B4C[54] = {
 static int lbl_3_bss_A0[10];
 static int lbl_3_bss_9C;
 
-static inline void resetReplay(u8 mode) {
+// .text:0x000250FC size:0xE8 mapped:0x80664190
+void fn_3_250FC(void) {
+    s32 i;
+
+    lbl_3_common_bss_1323C._0->_25C = 0;
+    for (i = 0; i < 33; i++) {
+        lbl_3_data_2398[i]._34 = 0;
+        lbl_3_data_2398[i]._38 = 0;
+        lbl_3_data_2398[i]._3C = 0;
+    }
+    lbl_3_common_bss_1323C._0->_27B = 0;
+}
+
+// .text:0x00024F24 size:0x1D8 mapped:0x80663FB8
+void fn_3_24F24(int idx) {
+    u8* script = lbl_3_data_1F40[idx];
+    s32 i;
+    int range = 0;
+    u8 cue;
+
+    for (i = 0; i < 13; i++) {
+        lbl_3_common_bss_1323C._0->_240[i] = -1;
+    }
+    lbl_3_common_bss_1323C._0->_25C = 1;
+    lbl_3_common_bss_1323C._0->_23C = 0;
+    lbl_3_common_bss_1323C._0->_27C = 0;
+    lbl_3_common_bss_1323C._0->_25D = idx;
+    lbl_3_common_bss_1323C._0->_25F = 1;
+    lbl_3_common_bss_1323C._0->_27D = 0;
+    lbl_3_common_bss_1323C._0->_27E = 0;
+    lbl_3_common_bss_1323C._0->_25A = 0;
+    lbl_3_common_bss_1323C._0->_280 = 1;
+    lbl_3_common_bss_1323C._0->_23E = *script * 10;
+    if (*++script == 0xFD) {
+        range = 2;
+        script++;
+    }
+    lbl_3_common_bss_1323C._0->_25E = *script++;
+    if (range) {
+        lbl_3_common_bss_1323C._0->_25E += random_fn_3_9EE24(range);
+    }
+    while (*script != 0xFE) {
+        cue = *script++;
+        lbl_3_common_bss_1323C._0->_240[lbl_3_data_1D28[cue]._14] = cue;
+    }
+}
+
+// .text:0x00024F20 size:0x4 mapped:0x80663FB4
+void fn_3_24F20(void) {
+}
+
+// .text:0x00024EA0 size:0x80 mapped:0x80663F34
+void fn_3_24EA0(void) {
+    int i;
+
+    for (i = 0; i < 13; i++) {
+        lbl_3_common_bss_1323C._0->_240[i] = -1;
+        memset(&lbl_3_common_bss_1323C._0->_000[i], 0, sizeof(UnkA00ReplayEntry));
+        lbl_3_common_bss_1323C._0->_261[i] = 0;
+    }
+}
+
+// .text:0x00024DBC size:0xE4 mapped:0x80663E50
+void fn_3_24DBC(u8 mode) {
     int i;
 
     for (i = 0; i < 13; i++) {
@@ -445,6 +523,103 @@ static inline void resetReplay(u8 mode) {
     lbl_3_common_bss_1323C._0->_27E = 0;
     lbl_3_common_bss_1323C._0->_25A = 0;
     lbl_3_common_bss_1323C._0->_280 = 1;
+}
+
+// .text:0x00024ADC size:0x2E0 mapped:0x80663B70
+void fn_3_24ADC(int id, BOOL queue) {
+    UnkA00Cue* cue = &lbl_3_data_1E434[id];
+    int idx = cue->_14;
+    UnkA00Actor* actor;
+    InMemRunnerType* runner;
+    int flag;
+
+    lbl_3_common_bss_1323C._0->_240[idx] = id;
+    if (idx <= 8) {
+        actor = lbl_8036E548._2C50[idx];
+        if (cue->_19 == 0) {
+            memcpy(&g_Fielders[idx]._000, &cue->_00, sizeof(Vec));
+            if (actor != NULL) {
+                memcpy(&actor->_034, &cue->_00, sizeof(Vec));
+            }
+        }
+        g_Fielders[idx]._048 = lbl_3_common_bss_1323C._0->_000[idx]._0C = cue->_0C;
+        if (actor != NULL) {
+            actor->_044 = cue->_0C;
+            actor->_25D = 1;
+        }
+        if (cue->_10 >= 0x69 && cue->_10 < 0x75) {
+            flag = 0;
+        } else {
+            flag = g_Fielders[idx]._1C7;
+        }
+        lbl_3_common_bss_1323C._0->_261[idx] = 1;
+        lbl_3_common_bss_1323C._0->_26E[idx] = 1;
+    } else if (idx <= 12) {
+        actor = lbl_8036E548._2C50[idx];
+        if (idx == 10) {
+            if (actor == NULL) {
+                return;
+            }
+        } else if (idx == 11) {
+            if (actor == NULL) {
+                return;
+            }
+        } else if (idx == 12) {
+            if (actor == NULL) {
+                return;
+            }
+        }
+        runner = &g_Runners[idx - 9];
+        if (cue->_19 == 0) {
+            memcpy(&runner->position, &cue->_00, sizeof(Vec));
+            if (actor != NULL) {
+                memcpy(&actor->_034, &cue->_00, sizeof(Vec));
+            }
+        }
+        runner->runningAngle = lbl_3_common_bss_1323C._0->_000[idx]._0C = cue->_0C;
+        if (actor != NULL) {
+            actor->_044 = cue->_0C;
+            actor->_25D = 1;
+        }
+        lbl_3_common_bss_1323C._0->_261[idx] = 1;
+        lbl_3_common_bss_1323C._0->_26E[idx] = 1;
+        if (idx == 9) {
+            if (lbl_3_common_bss_1323C._0->_25D == 0 || lbl_3_common_bss_1323C._0->_25D == 1) {
+                if (g_Batter.batterHand == BATTING_HAND_LEFT) {
+                    flag = 0;
+                } else {
+                    flag = 1;
+                }
+            } else {
+                flag = 0;
+            }
+        } else {
+            flag = 0;
+        }
+    }
+    if (!queue) {
+        AnimateCharacter(idx, cue->_10, cue->_16, cue->_17, cue->_18, cue->_12, flag, 0);
+    } else {
+        QueueCharacterAnimation(idx, cue->_10, cue->_16, cue->_18, cue->_12, flag, 0);
+    }
+}
+
+// .text:0x000249E8 size:0xF4 mapped:0x80663A7C
+void fn_3_249E8(int id) {
+    UnkA00Cue* cue = &lbl_3_data_1F090[id];
+    int i;
+
+    for (i = 0; i < 9; i++) {
+        if (cue->_14 == g_Fielders[i]._218) {
+            lbl_3_common_bss_1323C._0->_240[i] = id;
+            if (cue->_19 == 0) {
+                memcpy(&g_Fielders[i]._000, &cue->_00, sizeof(Vec));
+            }
+            g_Fielders[i]._048 = lbl_3_common_bss_1323C._0->_000[i]._0C = cue->_0C;
+            lbl_3_common_bss_1323C._0->_261[i] = 1;
+            AnimateCharacter(i, cue->_10, cue->_16, cue->_17, cue->_18, cue->_12, 0, 0);
+        }
+    }
 }
 
 // .text:0x00024708 size:0x2E0 mapped:0x8066379C
@@ -465,7 +640,7 @@ void fn_3_24708(void) {
         if (lbl_3_common_bss_1323C._0->_000[i]._29 != 1) {
             continue;
         }
-        if (lbl_3_common_bss_1323C._0->_27F == 3 && lbl_3_common_bss_1323C._0->_000[i]._1C > actor->_68) {
+        if (lbl_3_common_bss_1323C._0->_27F == 3 && lbl_3_common_bss_1323C._0->_000[i]._1C > actor->_068) {
         } else if (i <= 8) {
             dist = PSVECDistance(&g_Fielders[i]._000, &lbl_3_common_bss_1323C._0->_000[i]._00);
         } else if (i <= 12) {
@@ -492,7 +667,7 @@ void fn_3_24708(void) {
             dist = PSVECDistance((Vec*)&runner->position, &lbl_3_common_bss_1323C._0->_000[i]._00);
         }
         if (lbl_3_common_bss_1323C._0->_27F == 3) {
-            if (actor->_68 == 0) {
+            if (actor->_068 == 0) {
                 lbl_3_common_bss_1323C._0->_000[i]._28 = 1;
                 lbl_3_common_bss_1323C._0->_000[i]._29 = 0;
             }
@@ -547,7 +722,7 @@ void fn_3_240F8(void) {
         break;
     case 1:
         changeScene(1, 6);
-        resetReplay(5);
+        fn_3_24DBC(5);
         if (g_Runners[0].baseStandingOn == 1) {
             fn_3_FBDAC(lbl_3_data_20D4[g_Runners[0].charID]);
         } else if (g_Runners[0].baseStandingOn == 2) {
@@ -601,8 +776,8 @@ void fn_3_240F8(void) {
         break;
     }
     actor = lbl_8036E548._2C50[9];
-    if (actor->_62 == 0x3A &&
-        actor->_6A == lbl_3_data_7F7C[lbl_800E8558[g_Batter.charID]._2][2]) {
+    if (actor->_062 == 0x3A &&
+        actor->_06A == lbl_3_data_7F7C[lbl_800E8558[g_Batter.charID]._2][2]) {
         fn_3_90220(g_Batter.charID, 0);
     }
 }
@@ -623,7 +798,7 @@ void fn_3_23CEC(void) {
         }
         break;
     case 1:
-        resetReplay(3);
+        fn_3_24DBC(3);
         fn_3_FBDAC(lbl_3_data_1FF8[g_Runners[0].charID]);
         g_GameLogic.FrameCountOfCurrentAtBat_Copy = 0;
         logic->_125 = 2;
@@ -667,8 +842,8 @@ void fn_3_23CEC(void) {
         break;
     }
     actor = lbl_8036E548._2C50[9];
-    if (actor->_62 == 0x3C &&
-        actor->_6A == lbl_3_data_7F7C[lbl_800E8558[g_Batter.charID]._2][0]) {
+    if (actor->_062 == 0x3C &&
+        actor->_06A == lbl_3_data_7F7C[lbl_800E8558[g_Batter.charID]._2][0]) {
         fn_3_90220(g_Batter.charID, 0);
     }
 }
@@ -691,7 +866,7 @@ void fn_3_23890(void) {
         }
         break;
     case 1:
-        resetReplay(4);
+        fn_3_24DBC(4);
         fn_3_FBDAC(0x4C);
         logic->_125 = 2;
         break;
@@ -784,7 +959,7 @@ void fn_3_234BC(void) {
         }
         break;
     case 1:
-        resetReplay(0);
+        fn_3_24DBC(0);
         if (g_GameLogic.playOverInd == 1) {
             fn_3_FBDAC(0x6A);
         } else {
@@ -842,7 +1017,7 @@ void fn_3_230D4(void) {
         break;
     case 1:
         changeScene(1, 6);
-        resetReplay(1);
+        fn_3_24DBC(1);
         fn_3_FBDAC(0x6B);
         g_GameLogic.FrameCountOfCurrentAtBat_Copy = 0;
         logic->_125 = 2;
@@ -899,7 +1074,7 @@ void fn_3_22C20(void) {
         break;
     case 2:
         fn_3_8C104(-1);
-        resetReplay(2);
+        fn_3_24DBC(2);
         challenge = (UnkA00Challenge*)starMissionCompletionTracker;
         if (bss->_8A) {
             fn_3_FBDAC(lbl_3_data_2368[challenge->_441C]);
@@ -1059,7 +1234,7 @@ BOOL fn_3_2281C(int i) {
     if (actor == NULL) {
         return TRUE;
     }
-    if (actor->_68 == 0) {
+    if (actor->_068 == 0) {
         return TRUE;
     }
     return FALSE;
@@ -1074,7 +1249,7 @@ BOOL fn_3_2273C(void) {
             if (lbl_8036E548._2C50[i] == NULL) {
                 return TRUE;
             }
-            if (lbl_8036E548._2C50[i]->_68 == 0) {
+            if (lbl_8036E548._2C50[i]->_068 == 0) {
                 return TRUE;
             }
         }
