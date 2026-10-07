@@ -24,7 +24,7 @@ void fn_3_7FED4(VecXYZ* out, f32 pos, f32 t);
 void fn_3_7FFD0(VecXYZ* out, int from, int to, f32 t);
 void fn_3_80028(void);
 void fn_3_810C4(int runner, int base);
-void fn_3_81190(void);
+void fn_3_81190(int runner);
 void fn_3_81AB8(int runner);
 void fn_3_81AEC(int runner);
 int fn_3_81BC8(int runner);

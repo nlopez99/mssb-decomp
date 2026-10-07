@@ -2362,8 +2362,157 @@ void fn_3_81AB8(int runner) {
 }
 
 // .text:0x00081190 size:0x928 mapped:0x806C0224
-void fn_3_81190(void) {
-    return;
+void fn_3_81190(int runner) {
+    int reverse = 0;
+    int arrived = -1;
+    InMemRunnerType* r = &g_Runners[runner];
+    s16 prevBase = r->baseStandingOn;
+
+    if (r->runnerOnFieldOrOutOrScored != 1 && r->runnerOnFieldOrOutOrScored != 2 && r->runnerOnFieldOrOutOrScored != 4) {
+        return;
+    }
+    if (r->groundVelocity[0] > 0.0f) {
+        int base = r->fractionalBasesRan;
+        if (base > (int)r->fractionalBasesRan_stored) {
+            if (r->baseRoundingState == 2) {
+                r->fractionalBasesRan = base;
+                r->percentTowardsNextBase = 0.0f;
+                if (g_GameLogic.secondaryGameMode == 6) {
+                    if (r->fractionalBasesRan >= 4.0f) {
+                        r->fractionalBasesRan -= 4.0f;
+                    }
+                } else if (r->runningDirectionDesired != 1) {
+                    r->runningDirectionCode = 2;
+                    r->nextDirectionBeingProcessed = 2;
+                    r->overrunBaseStage = 1;
+                }
+            } else if (r->baseRoundingState == 1) {
+                r->fractionalBasesRan = base;
+                r->percentTowardsNextBase = 0.0f;
+            } else if (r->actionCode != 0) {
+                r->fractionalBasesRan = base;
+                r->percentTowardsNextBase = 0.0f;
+                if (r->runnerOnFieldOrOutOrScored != 1) {
+                    fn_3_8307C(runner);
+                }
+            } else {
+                arrived = base & 3;
+            }
+        }
+    } else if (r->groundVelocity[0] < 0.0f) {
+        if (g_GameLogic.secondaryGameMode == 6) {
+            reverse = 1;
+        }
+        if (g_Ball.AtBat_ContactResult == 3 && r->tagUpInd == 2 && r->currentBase > r->startingBase_baseAchieved) {
+            reverse = 1;
+        }
+        if (reverse != 0) {
+            if (r->fractionalBasesRan < 0.0f) {
+                r->fractionalBasesRan += 4.0f;
+                r->percentTowardsNextBase += 1.0f;
+            }
+        } else if (r->percentTowardsNextBase <= r->slidingAdjustment_backwards) {
+            if (r->actionCode != 0) {
+                r->fractionalBasesRan = (int)r->fractionalBasesRan + r->slidingAdjustment_backwards;
+                r->percentTowardsNextBase = r->slidingAdjustment_backwards;
+            } else {
+                arrived = r->currentBase;
+            }
+        }
+    }
+    if (arrived >= 0) {
+        fn_3_81AB8(runner);
+        fn_3_810C4(runner, arrived);
+    }
+    if (r->runnerOnFieldOrOutOrScored == 1 || (r->runnerOnFieldOrOutOrScored == 4 && g_Ball.AtBat_ContactResult == -1)) {
+        r->baseStandingOn = -1;
+        if (r->fractionalBasesRan > 0.5f || g_GameLogic.secondaryGameMode == 6) {
+            if (r->fractionalBasesRan >= 4.0f) {
+                r->baseStandingOn = 0;
+            } else if (r->percentTowardsNextBase <= r->slidingAdjustment_backwards) {
+                r->baseStandingOn = r->fractionalBasesRan;
+            } else if (r->percentTowardsNextBase >= 1.0f - r->slidingAdjustment_forwards) {
+                r->baseStandingOn = ((int)r->fractionalBasesRan + 1) & 3;
+            }
+        }
+        if (r->baseStandingOn >= 0) {
+            if (r->groundVelocity[0] == 0.0f && r->percentTowardsNextBase > 0.5f) {
+                fn_3_810C4(runner, r->baseStandingOn);
+            }
+            if (r->baseStandingOn == g_Ball.baseBallAndFielderAreOn && prevBase == -1) {
+                g_FieldingLogic._125 = -1;
+                if (g_FieldingLogic._116 == 1) {
+                    if (g_Pitcher.strikeOutOrWalk != 2 ||
+                        (!(r->furthestBaseForcedToGoToOnWalk > r->currentBase) &&
+                         (r->forcedToAdvanceInd == 0 || r->currentBase != r->startingBase_baseAchieved))) {
+                        r->baseOfFailedBodyCheck = r->baseStandingOn;
+                        r->baseStandingOn = -1;
+                        g_FieldingLogic._111 = 1;
+                        g_FieldingLogic._0E8 = runner;
+                    }
+                } else if (g_Strikes.outs < 3 &&
+                           (r->tagUpInd != 2 || g_Ball.baseBallAndFielderAreOn == r->startingBase_baseAchieved)) {
+                    fn_3_59918(2, 0);
+                }
+            } else if (prevBase == -1 && g_Ball.framesSinceHit > 100 && g_Ball.fielderWBallIndex >= 0 &&
+                       g_Ball.ballDistanceFromBase[r->baseStandingOn] < 2.5f) {
+                if (r->forceOutCd == 1) {
+                    fn_3_59918(2, 0);
+                } else if (r->tagUpInd == 2) {
+                    fn_3_59918(2, 0);
+                } else if (r->baseOfFailedBodyCheck < 0 && r->tagType != 2 && r->runnerOnFieldOrOutOrScored != 2 &&
+                           (g_FieldingLogic._111 == 2 || g_FieldingLogic._111 == 4)) {
+                    fn_3_59918(2, 0);
+                }
+            }
+            fn_3_8307C(runner);
+            if (r->baseStandingOn == r->startingBase_baseAchieved && r->tagUpInd == 2) {
+                r->tagUpInd = 0;
+            }
+            if (r->runningDirectionCode == 1) {
+                if (r->percentTowardsNextBase < 0.5f) {
+                    r->roundingInitiaializedInd = 0;
+                    r->offsetPositionForRoundingInd = 0;
+                }
+            } else if (r->runningDirectionCode == 3) {
+                if (r->percentTowardsNextBase > 0.5f) {
+                    r->roundingInitiaializedInd = 0;
+                    r->offsetPositionForRoundingInd = 0;
+                }
+            } else {
+                r->roundingInitiaializedInd = 0;
+                r->offsetPositionForRoundingInd = 0;
+            }
+            r->overrunning1BIndicator = 0;
+        }
+        if (r->baseStandingOn == 0) {
+            if (g_Strikes.outs < 3 && g_d_GameSettings.GameModeSelected != 7 &&
+                (g_Ball.AtBat_ContactResult == 1 || g_Ball.AtBat_ContactResult == 2 ||
+                 (g_Ball.AtBat_ContactResult == 3 && r->tagUpInd == 0) ||
+                 (g_Ball.AtBat_ContactResult == 0 && g_Strikes.storedOuts == 2) || g_Practice.practiceType_2 == 3)) {
+                r->runningDirectionCode = 0;
+                r->runnerOnFieldOrOutOrScored = 3;
+                if (g_GameLogic.EventTriggers_EndOfGame != 0) {
+                    r->runnerOnFieldOrOutOrScored = 4;
+                } else if (g_Ball.deadBallReason != 0) {
+                    r->runnerOnFieldOrOutOrScored = 4;
+                } else {
+                    g_Scores._9C++;
+                }
+                if (r->actionCode != 0) {
+                    r->runningToDugoutInd = 2;
+                } else {
+                    r->runningToDugoutInd = 3;
+                }
+                r->runningToDugoutStage = 0;
+            }
+            if (r->actionCode != 0 && r->slideHomeFrames_CountDown == 0 && g_GameLogic.secondaryGameMode != 6) {
+                r->slideHomeFrames_CountDown = lbl_3_data_4C54[0];
+            }
+        } else if (r->fractionalBasesRan >= 4.0f && g_GameLogic.EventTriggers_EndOfGame != 0 && r->actionCode != 0) {
+            r->runningToDugoutInd = 2;
+        }
+    }
 }
 
 // .text:0x000810C4 size:0xCC mapped:0x806C0158
