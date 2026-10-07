@@ -150,7 +150,8 @@ typedef struct {
 
 extern struct {
     /* 0x00 */ StaC6Draw* _00;
-    /* 0x04 */ u8 _04[0x18 - 0x04];
+    /* 0x04 */ StaC6Draw* _04;
+    /* 0x08 */ u8 _08[0x18 - 0x08];
     /* 0x18 */ void (*_18)(void);
     /* 0x1C */ u8 _1C[0x20 - 0x1C];
     /* 0x20 */ s32 _20;
@@ -241,6 +242,71 @@ static u8 lbl_3_bss_AE50;
 
 // .text:0x000E8B24 size:0x5F8 mapped:0x80727BB8
 void fn_3_E8B24(void** files) {
+    s32* indices;
+    StaC6Model* model;
+    u32 i;
+
+    lbl_3_common_bss_350E4._18 = fn_3_E7424;
+    lbl_3_common_bss_350E4._6C = 0;
+    indices = lbl_3_common_bss_350E4._34 = _OSAllocFromHeap(4, 0x2F * sizeof(s32));
+    fn_3_B9D68(lbl_3_data_19610, 0x2F, files, indices);
+    lbl_8036E548._6C = ActorObjectInitTable(30);
+    fn_800BDC88(lbl_8036E548._6C, 0, 0, files[indices[1]], NULL, 0);
+    fn_800BDC88(lbl_8036E548._6C, 1, 1, files[indices[2]], NULL, 0);
+    fn_800BDC88(lbl_8036E548._6C, 2, 2, files[indices[3]], NULL, 0);
+    fn_800BDC88(lbl_8036E548._6C, 3, 3, files[indices[4]], NULL, 0);
+    fn_800BDC88(lbl_8036E548._6C, 4, 4, files[indices[5]], NULL, 0);
+    fn_800BDC88(lbl_8036E548._6C, 5, 5, files[indices[6]], NULL, 0);
+    fn_800BDC88(lbl_8036E548._6C, 6, 6, files[indices[7]], NULL, 0);
+    fn_800BDC88(lbl_8036E548._6C, 7, 7, files[indices[8]], NULL, 0);
+    fn_800BDC88(lbl_8036E548._6C, 8, 8, files[indices[9]], NULL, 0);
+    fn_800BDC88(lbl_8036E548._6C, 9, 9, files[indices[10]], NULL, 0);
+    fn_800BDC88(lbl_8036E548._6C, 10, 10, files[indices[11]], NULL, 0);
+    fn_800BDC88(lbl_8036E548._6C, 11, 11, files[indices[12]], NULL, 0);
+    fn_800BDC88(lbl_8036E548._6C, 12, 12, files[indices[13]], NULL, 0);
+    fn_800BDC88(lbl_8036E548._6C, 13, 13, files[indices[14]], NULL, 0);
+    fn_800BDC88(lbl_8036E548._6C, 14, 14, files[indices[15]], NULL, 0);
+    fn_800BDC88(lbl_8036E548._6C, 15, 15, files[indices[16]], NULL, 0);
+    for (i = 0; i < 7; i++) {
+        fn_800BDC88(lbl_8036E548._6C, i + 16, i + 16, files[indices[i + 17]], NULL, 0);
+        fn_3_B97DC(&lbl_8036E548._6C->models[i + 16], files[indices[i + 17] + 2]);
+    }
+    fn_800BDC88(lbl_8036E548._6C, 23, 23, files[indices[24]], NULL, 0);
+    fn_800BDC88(lbl_8036E548._6C, 24, 24, files[indices[25]], NULL, 0);
+    fn_800BDC88(lbl_8036E548._6C, 25, 25, files[indices[26]], NULL, 0);
+    fn_3_B97DC(&lbl_8036E548._6C->models[25], files[indices[26] + 2]);
+    fn_800BDC88(lbl_8036E548._6C, 26, 26, files[indices[27]], NULL, 0);
+    fn_800BDC88(lbl_8036E548._6C, 27, 27, files[indices[28]], NULL, 0);
+    fn_800BDC88(lbl_8036E548._6C, 28, 28, files[indices[29]], NULL, 0);
+    fn_3_B97DC(&lbl_8036E548._6C->models[28], files[indices[29] + 2]);
+    model = &lbl_8036E548._6C->models[28];
+    model->_5C = 20.0f;
+    model->_59 = 1;
+    fn_800B4CA0(lbl_8036E548._6C->models[28]._00, lbl_8036E548._6C->models[28]._5C);
+    fn_800BDC88(lbl_8036E548._6C, 29, 29, files[indices[30]], NULL, 0);
+    fn_3_B97DC(&lbl_8036E548._6C->models[29], files[indices[30] + 2]);
+    model = &lbl_8036E548._6C->models[29];
+    model->_5C = 60.0f;
+    model->_59 = 1;
+    fn_800B4CA0(lbl_8036E548._6C->models[29]._00, lbl_8036E548._6C->models[29]._5C);
+
+    lbl_3_common_bss_350E4._6D = 30;
+    for (i = 0; i < lbl_3_common_bss_350E4._6D; i++) {
+        fn_800BD478(&lbl_8036E548._6C->models[i], files[indices[i + 1]]);
+    }
+    for (i = 0; i < 30; i++) {
+        fn_800BD548(&lbl_8036E548._6C->models[i], 4, lbl_3_common_bss_350E4._20, lbl_3_common_bss_350E4._24,
+                    lbl_3_common_bss_350E4._28, lbl_3_common_bss_350E4._2C);
+    }
+
+    lbl_3_common_bss_350E4._30 = 32;
+    lbl_3_common_bss_350E4._00 = _OSAllocFromHeap(32, lbl_3_common_bss_350E4._30 * sizeof(StaC6Draw));
+    memset(lbl_3_common_bss_350E4._00, 0, lbl_3_common_bss_350E4._30 * sizeof(StaC6Draw));
+    lbl_3_common_bss_350E4._04 = _OSAllocFromHeap(32, lbl_3_common_bss_350E4._30 * sizeof(StaC6Draw));
+    memset(lbl_3_common_bss_350E4._04, 0, lbl_3_common_bss_350E4._30 * sizeof(StaC6Draw));
+    lbl_3_common_bss_350E4._48 = NULL;
+    fn_3_E7B20(files, indices);
+    lbl_3_bss_AE88 = 0;
 }
 
 // .text:0x000E8AC8 size:0x5C mapped:0x80727B5C
@@ -253,7 +319,245 @@ BOOL fn_3_E8AC8(void) {
 
 // .text:0x000E7B20 size:0xFA8 mapped:0x80726BB4
 u8 fn_3_E7B20(void** files, s32* indices) {
-    return 1;
+    StaC6Draw* draw;
+    StaC6Draw* entry;
+    StaC6Model* model;
+    u32 n;
+    u32 i;
+    u8 end;
+
+    n = 0;
+    end = FALSE;
+    if (files == NULL || indices == NULL) {
+        return FALSE;
+    }
+    lbl_3_bss_AEAC = 0;
+    memset(lbl_3_bss_AE8C, 0xFF, sizeof(lbl_3_bss_AE8C));
+    memset(lbl_3_common_bss_350E4._00, 0, lbl_3_common_bss_350E4._30 * sizeof(StaC6Draw));
+    entry = draw = lbl_3_common_bss_350E4._00;
+    switch (g_Minigame.miniGameNumberOfParticipants) {
+    case 2:
+        lbl_3_bss_AEB4 = lbl_3_data_19090[0];
+        lbl_3_bss_AEB0 = lbl_3_data_19590[0];
+        break;
+    case 3:
+        lbl_3_bss_AEB4 = lbl_3_data_19090[1];
+        lbl_3_bss_AEB0 = lbl_3_data_19590[1];
+        break;
+    default:
+        lbl_3_bss_AEB4 = lbl_3_data_19090[2];
+        lbl_3_bss_AEB0 = lbl_3_data_19590[2];
+        break;
+    }
+    lbl_3_bss_AEAE = g_Minigame.miniGameNumberOfParticipants - 2;
+    if (g_Minigame._19A6 > 1) {
+        lbl_3_bss_AE52 = 1;
+        lbl_3_bss_AEB4 = lbl_3_data_19090[3];
+        lbl_3_bss_AEB0 = lbl_3_data_19590[3];
+        lbl_3_bss_AEAE = 3;
+    }
+
+    for (i = 0; i < 15; i++) {
+        if (lbl_3_bss_AEB4[i].type == 0x1B) {
+            end = TRUE;
+        }
+        if (end) {
+            for (; i < 16; i++) {
+                memset(&lbl_3_bss_AEB4[i], 0, sizeof(StaC6Prop));
+                lbl_3_bss_AEB4[i].type = 0x1B;
+                lbl_3_bss_AEB4[i]._12 = 10;
+            }
+            break;
+        }
+        entry->_C0 = i;
+        entry->type = lbl_3_bss_AEB4[i].type;
+        entry->_9C = &lbl_8036E548._6C->models[23];
+        draw->_74 = &lbl_8036E548._6C->models[entry->type];
+        draw->_78 = files[indices[entry->type + 31]];
+        draw->_90_7 = 1;
+        draw->_90_6 = 1;
+        draw->control.type = 0;
+        CTRLSetTranslation(&draw->control, 0.0f, 0.0f, 0.0f);
+        entry->_B8 = &lbl_3_data_19024[entry->type * 3];
+        entry->_B4 = &lbl_3_data_19024[entry->type * 3 + 1];
+        entry->_B0 = &lbl_3_data_19024[entry->type * 3 + 2];
+        entry->_BC = &lbl_3_data_19024[25];
+        fn_3_E6528(entry);
+        draw->_90_5 = 0;
+        draw->_92 = 0xFF;
+        draw->_8C = NULL;
+        draw->_94 = 0;
+        draw->_96 = -1;
+        draw->_98 = 1;
+        fn_3_E7A2C(entry);
+        entry = ++draw;
+        n++;
+    }
+
+    end = FALSE;
+    lbl_3_bss_AEAD = n;
+    for (i = 0; i < 7; i++) {
+        if (lbl_3_bss_AEB0[i].type == 0x1B) {
+            end = TRUE;
+        }
+        if (end) {
+            for (; i < 8; i++) {
+                memset(&lbl_3_bss_AEB0[i], 0, sizeof(StaC6Slot));
+                lbl_3_bss_AEB0[i].type = 0x1B;
+                lbl_3_bss_AEB0[i]._02 = 10;
+            }
+            break;
+        }
+        entry->_C0 = n;
+        entry->type = lbl_3_bss_AEB0[i].type;
+        entry->_C3 = i;
+        entry->_C4 = 6 - i;
+        entry->_9C = &lbl_8036E548._6C->models[24];
+        draw->_74 = &lbl_8036E548._6C->models[entry->type];
+        draw->_78 = files[indices[entry->type + 31]];
+        draw->_90_7 = 1;
+        draw->_90_6 = 1;
+        draw->control.type = 0;
+        CTRLSetTranslation(&draw->control, 0.0f, 0.0f, 0.0f);
+        entry->_B8 = &lbl_3_data_19024[(entry->type - 8) * 3];
+        entry->_B4 = &lbl_3_data_19024[(entry->type - 8) * 3 + 1];
+        entry->_B0 = &lbl_3_data_19024[(entry->type - 8) * 3 + 2];
+        entry->_BC = &lbl_3_data_19024[25];
+        fn_3_E6528(entry);
+        draw->_90_5 = 0;
+        draw->_92 = 0xFF;
+        draw->_8C = NULL;
+        draw->_94 = 0;
+        draw->_96 = -1;
+        draw->_98 = 1;
+        fn_3_E7A2C(entry);
+        entry = ++draw;
+        n++;
+    }
+
+    for (i = 0; i < 7; i++) {
+        entry->_C0 = n;
+        entry->type = i + 16;
+        entry->_9C = &lbl_8036E548._6C->models[25];
+        draw->_74 = &lbl_8036E548._6C->models[i + 16];
+        draw->_78 = NULL;
+        draw->_90_7 = 1;
+        draw->_90_6 = 1;
+        draw->control.type = 0;
+        CTRLSetTranslation(&draw->control, lbl_3_data_196BC[entry->type - 16].x, lbl_3_data_196BC[entry->type - 16].y,
+                           lbl_3_data_196BC[entry->type - 16].z);
+        CTRLSetRotation(&draw->control, 0.0f, lbl_3_data_19710[entry->type - 16], 0.0f);
+        draw->_90_5 = 1;
+        draw->_92 = 0xFF;
+        draw->_8C = NULL;
+        draw->_94 = 0;
+        draw->_96 = -1;
+        draw->_98 = 1;
+        fn_3_E7A2C(entry);
+        entry = ++draw;
+        n++;
+    }
+
+    draw[0]._C0 = n;
+    draw[0].type = 23;
+    draw[0]._74 = &lbl_8036E548._6C->models[26];
+    draw[0]._78 = NULL;
+    draw[0]._90_7 = 1;
+    draw[0]._90_6 = 0;
+    draw[0].control.type = 0;
+    CTRLSetTranslation(&draw[0].control, 0.0f, 0.0f, 0.0f);
+    draw[0]._90_5 = 0;
+    draw[0]._92 = 0xFF;
+    draw[0]._8C = NULL;
+    draw[0]._94 = 0;
+    draw[0]._96 = -1;
+    draw[0]._98 = 1;
+    fn_3_E7A2C(&draw[0]);
+
+    draw[1]._C0 = n + 1;
+    draw[1].type = 24;
+    draw[1]._74 = &lbl_8036E548._6C->models[27];
+    draw[1]._78 = NULL;
+    draw[1]._90_7 = 1;
+    draw[1]._90_6 = 0;
+    draw[1].control.type = 0;
+    CTRLSetTranslation(&draw[1].control, 0.0f, 0.0f, 0.0f);
+    draw[1]._90_5 = 0;
+    draw[1]._92 = 0xFF;
+    draw[1]._8C = NULL;
+    draw[1]._94 = 0;
+    draw[1]._96 = -1;
+    draw[1]._98 = 1;
+    fn_3_E7A2C(&draw[1]);
+
+    draw[2]._C0 = n + 2;
+    draw[2].type = 26;
+    draw[2]._74 = &lbl_8036E548._6C->models[28];
+    draw[2]._78 = NULL;
+    draw[2]._90_7 = 1;
+    draw[2]._90_6 = 0;
+    draw[2].control.type = 0;
+    CTRLSetTranslation(&draw[2].control, 0.0f, 0.0f, 0.0f);
+    draw[2]._90_5 = 0;
+    draw[2]._92 = 0xFF;
+    draw[2]._8C = NULL;
+    draw[2]._94 = 0;
+    draw[2]._96 = -1;
+    draw[2]._98 = 0;
+    fn_3_E7A2C(&draw[2]);
+
+    draw[3]._C0 = n + 3;
+    draw[3].type = 25;
+    draw[3]._74 = &lbl_8036E548._6C->models[29];
+    draw[3]._78 = NULL;
+    draw[3]._90_7 = 1;
+    draw[3]._90_6 = 0;
+    draw[3].control.type = 0;
+    CTRLSetTranslation(&draw[3].control, 0.0f, 0.0f, 0.0f);
+    draw[3]._90_5 = 0;
+    draw[3]._92 = 0xFF;
+    draw[3]._8C = NULL;
+    draw[3]._94 = 0;
+    draw[3]._96 = -1;
+    draw[3]._98 = 1;
+    fn_3_E7A2C(&draw[3]);
+
+    i = n + 4;
+    draw += 4;
+    entry = draw;
+    if (lbl_3_common_bss_350E4._30 > i) {
+        for (; i < lbl_3_common_bss_350E4._30; i++) {
+            entry->type = 0x1B;
+            draw->_74 = NULL;
+            draw->_78 = NULL;
+            draw->_7C = NULL;
+            draw->_80 = NULL;
+            draw->_90_7 = 0;
+            draw->_90_6 = 0;
+            draw->_90_5 = 0;
+            draw->control.type = 0;
+            CTRLSetTranslation(&draw->control, 0.0f, 0.0f, 0.0f);
+            CTRLSetRotation(&draw->control, 0.0f, 0.0f, 0.0f);
+            draw->_92 = 0;
+            draw->_8C = NULL;
+            draw->_94 = 0;
+            draw->_96 = -1;
+            entry = ++draw;
+        }
+    }
+
+    fn_3_E763C();
+    if (g_GameLogic.gameStatus == GAME_STATUS_GAME_START_MOVIE) {
+        for (i = 0; i < 7; i++) {
+            lbl_3_data_196B4[i] = 0;
+            model = &lbl_8036E548._6C->models[i + 16];
+            model->_5C = 20.0f;
+            model->_59 = 1;
+            fn_800B4CA0(lbl_8036E548._6C->models[i + 16]._00, lbl_8036E548._6C->models[i + 16]._5C);
+            AnimateActorBones(lbl_8036E548._6C->models[i + 16]._00);
+        }
+    }
+    return TRUE;
 }
 
 // .text:0x000E7A2C size:0xF4 mapped:0x80726AC0
