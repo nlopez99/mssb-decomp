@@ -4,7 +4,7 @@
 #include "mssbTypes.h"
 #include "game/UnknownHomes_Game.h"
 
-void fn_3_7D79C(void);
+void fn_3_7D79C(int player);
 void fn_3_7D920(int player);
 void fn_3_7D9DC(int player);
 void fn_3_7DB30(int player);
@@ -14,7 +14,7 @@ void fn_3_7E2BC(void);
 void fn_3_7EA68(void);
 void fn_3_7EBD4(int runner);
 void fn_3_7ECFC(void);
-void fn_3_7F2D8(void);
+int fn_3_7F2D8(void);
 void fn_3_7F494(void);
 void fn_3_7F9C4(void);
 void fn_3_7FA78(void);

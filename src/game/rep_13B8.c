@@ -3,6 +3,7 @@
 #include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
 #include "game/rep_140.h"
+#include "game/rep_1188.h"
 #include "game/rep_1838.h"
 #include "game/rep_18E8.h"
 #include "game/rep_3DA8.h"
@@ -20,6 +21,7 @@ extern struct {
     /* 0x06 */ s16 _06[4];
     /* 0x0E */ u8 _0E[0x14 - 0x0E];
     /* 0x14 */ u8 _14;
+    /* 0x15 */ u8 _15;
 } g_RunningLogic;
 
 extern struct {
@@ -44,6 +46,7 @@ extern VecXZ lbl_3_data_4444[5];
 extern VecXZ lbl_3_data_4A34[4];
 extern VecXZ lbl_3_data_4A54[2][13];
 extern VecXYZ lbl_3_data_4B58[4];
+extern s16 lbl_3_data_4B90[4];
 extern f32 lbl_3_data_4C44[4];
 extern s16 lbl_3_data_4C54[12];
 extern f32 lbl_3_data_218BC[18];
@@ -106,12 +109,38 @@ void fn_3_8A4C8(void) {
 
 // .text:0x0008A350 size:0x178 mapped:0x806C93E4
 void fn_3_8A350(void) {
-    return;
+    int i;
+
+    for (i = 1; i < 4; i++) {
+        if (g_d_GameSettings.GameModeSelected != 5 || g_d_GameSettings.bJMatchInd != 1 || g_Runners[i].rosterID < 0) {
+            g_Runners[i].rosterID = -1;
+            g_Runners[i].battingHand = 0;
+            g_Runners[i].runnerDidntReachOnError = 0;
+            g_Runners[i].pitcherWhoLetRunnerOnBase = -1;
+        }
+    }
+    g_RunningLogic._15 = 0;
+    fn_3_8A4E4();
 }
 
 // .text:0x0008A1D8 size:0x178 mapped:0x806C926C
 void fn_3_8A1D8(void) {
-    return;
+    int i;
+
+    fn_3_8A4E4();
+    if (g_GameLogic.secondaryGameMode != 12) {
+        for (i = 1; i < 4; i++) {
+            InMemRunnerType* r = &g_Runners[i];
+            if (r->rosterID >= 0) {
+                fn_3_6D964(r->rosterID, i);
+            } else {
+                r->runnerOnFieldOrOutOrScored = 0;
+            }
+        }
+    }
+    fn_3_6D964(g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.homeTeamBattingInd_fieldingTeam]
+                                                         [g_GameLogic.currentBatterPerTeam[g_GameLogic.homeTeamBattingInd_fieldingTeam]][0],
+               0);
 }
 
 // .text:0x000899BC size:0x81C mapped:0x806C8A50
@@ -432,7 +461,59 @@ void fn_3_870AC(void) {
 
 // .text:0x00086EF8 size:0x1B4 mapped:0x806C5F8C
 void fn_3_86EF8(void) {
-    return;
+    int i;
+
+    for (i = 1; i < 4; i++) {
+        InMemRunnerType* r = &g_Runners[i];
+        if (r->runnerOnFieldOrOutOrScored != 0 && r->stealingStatus != 0) {
+            if (r->framesSinceStealInput < 0xFE) {
+                r->framesSinceStealInput++;
+            } else {
+                r->framesSinceStealInput = 0xFF;
+            }
+            if (g_Pitcher.pitchTotalTimeCounter > 0 && r->stealingStatus == 1) {
+                if (g_Pitcher.pitchTotalTimeCounter == lbl_3_data_4B90[2]) {
+                    int lo = lbl_3_data_4B90[2];
+                    int hi = lbl_3_data_4B90[2];
+                    lo -= lbl_3_data_4B90[1];
+                    hi -= lbl_3_data_4B90[0];
+                    if (r->framesSinceStealInput >= lo && r->framesSinceStealInput <= hi) {
+                        r->stealingStatus = 3;
+                        r->leadOffStatus = 0;
+                        fn_3_7FEA8(i, 1);
+                    }
+                } else if (g_Pitcher.pitchTotalTimeCounter >= lbl_3_data_4B90[3]) {
+                    r->stealingStatus = 2;
+                    r->leadOffStatus = 0;
+                    fn_3_7FEA8(i, 1);
+                }
+            }
+            if (r->runnerOnFieldOrOutOrScored == 1) {
+                if (r->runningDirectionCode == 1 && r->furthestBaseForcedToGoToOnWalk == 0) {
+                    int j;
+                    int forced = 1;
+
+                    for (j = 1; j < i; j++) {
+                        if (g_Runners[j].runnerOnFieldOrOutOrScored == 0) {
+                            forced = 0;
+                        }
+                    }
+                    if (forced) {
+                        r->furthestBaseForcedToGoToOnWalk = i + 1;
+                    } else {
+                        r->furthestBaseForcedToGoToOnWalk = 1;
+                    }
+                }
+                if (r->furthestBaseForcedToGoToOnWalk != 0) {
+                    if (r->framesSinceStealStarted < 0x7FFE) {
+                        r->framesSinceStealStarted++;
+                    } else {
+                        r->framesSinceStealStarted = 0x7FFF;
+                    }
+                }
+            }
+        }
+    }
 }
 
 // .text:0x00086DFC size:0xFC mapped:0x806C5E90
@@ -891,8 +972,40 @@ void fn_3_7F494(void) {
 }
 
 // .text:0x0007F2D8 size:0x1BC mapped:0x806BE36C
-void fn_3_7F2D8(void) {
-    return;
+int fn_3_7F2D8(void) {
+    InMemRunnerType* r = &g_Runners[0];
+
+    if (r->actionCode == 0 && r->overrun1st_doneChecking == 0) {
+        if (r->overRun1BStage != 0) {
+            return 1;
+        }
+        if (g_Ball.AtBat_ContactResult != 3) {
+            if (r->fractionalBasesRan < 0.5f ||
+                (g_Ball.AtBat_ContactResult == 0 && g_Runners[1].runnerOnFieldOrOutOrScored == 1 &&
+                 (g_Runners[1].baseStandingOn == 1 ||
+                  (g_Ball.landingSpotZoneAwayFromHome <= 2 && g_Runners[1].fractionalBasesRan < 1.5f))) ||
+                (!(g_Ball.AtBat_ContactResult == 0 && g_Ball.maxYOfHit > 15.0f) &&
+                 (g_Ball.ballZoneAwayFromHome <= 1 || (g_Ball.ballZoneAwayFromHome <= 2 && g_Ball.ballVelocity < 0.2f) ||
+                  (g_Ball.fielderWBallIndex >= 0 && g_Ball.ballDistanceFromBase[1] < 25.0f) ||
+                  (g_Ball.fielderWBallIndex == 8 && r->fractionalBasesRan <= 0.75f) ||
+                  (g_FieldingLogic._0C4 == 1 && g_Ball.ballState == 2 &&
+                   r->framesToNextBase + 30 > g_Ball.framesUntilThrowReachesDest)))) {
+                goto round;
+            }
+            r->overrun1st_doneChecking = 1;
+        }
+    }
+    if (r->baseRoundingState == 1) {
+        r->baseRoundingState = 0;
+    }
+    return 0;
+
+round:
+    r->baseRoundingState = 1;
+    if (r->fractionalBasesRan > 0.8f) {
+        r->overRun1BStage = 1;
+    }
+    return 1;
 }
 
 // .text:0x0007ECFC size:0x5DC mapped:0x806BDD90
@@ -1039,6 +1152,20 @@ void fn_3_7D920(int player) {
 }
 
 // .text:0x0007D79C size:0x184 mapped:0x806BC830
-void fn_3_7D79C(void) {
-    return;
+void fn_3_7D79C(int player) {
+    InMemRunnerType* r = &g_Runners[player];
+
+    if (r->runningToDugoutFrameCounter <= 0) {
+        fn_3_7FED4(&r->position, r->fractionalBasesRan, r->percentTowardsNextBase);
+        r->velocity.x = 0.0f;
+        r->velocity.z = 0.0f;
+    }
+    if (r->runningToDugoutFrameCounter < 0x7FFE) {
+        r->runningToDugoutFrameCounter++;
+    } else {
+        r->runningToDugoutFrameCounter = 0x7FFF;
+    }
+    if (r->runningToDugoutFrameCounter >= lbl_3_data_21904[2]) {
+        g_Minigame._1B15[g_Minigame._18FC[player]] = 0;
+    }
 }
