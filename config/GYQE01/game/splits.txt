@@ -215,7 +215,7 @@ game/rep_1CB8.c:
 game/rep_1D58.c:
 	.text       start:0x000B7FC8 end:0x000BA150
 	.rodata     start:0x00001D58 end:0x00001E08
-	.data       start:0x00011178 end:0x000111A8
+	.data       start:0x00011168 end:0x000111A8
 	.bss        start:0x00001900 end:0x00009950
 
 game/rep_1E08.c:
@@ -297,8 +297,9 @@ game/sta_c5.c:
 	.bss        start:0x0000AEE0 end:0x0000B570
 
 game/sta_c4.c:
-	.text       start:0x000F8444 end:0x000FBCD0
+	.text       start:0x000F8444 end:0x000FBD58
 	.rodata     start:0x00002F68 end:0x00003090
+	.data       start:0x0001BA88 end:0x0001C0A8
 	.bss        start:0x0000B570 end:0x0000B678
 
 game/rep_3090.c:
