@@ -52,7 +52,9 @@ typedef struct {
     /* 0x1CA */ u8 _1CA[0x1CD - 0x1CA];
     /* 0x1CD */ u8 _1CD;
     /* 0x1CE */ u8 _1CE;
-    /* 0x1CF */ u8 _1CF[0x1D7 - 0x1CF];
+    /* 0x1CF */ u8 _1CF[0x1D2 - 0x1CF];
+    /* 0x1D2 */ u8 _1D2;
+    /* 0x1D3 */ u8 _1D3[0x1D7 - 0x1D3];
     /* 0x1D7 */ u8 _1D7;
     /* 0x1D8 */ u8 _1D8[0x1E2 - 0x1D8];
     /* 0x1E2 */ u8 _1E2;
@@ -1269,8 +1271,48 @@ void fn_3_A53DC(s32 runner) {
 }
 
 // .text:0x000A4F50 size:0x48C mapped:0x806E3FE4
-void fn_3_A4F50(void) {
-    return;
+// 89.83%: the inlined fn_3_A6ABC allocates its FPRs differently, as in fn_3_A63E4.
+void fn_3_A4F50(s32 runner) {
+    Unk18E8Fielder* f = &g_Fielders[g_Ball.fielderWBallIndex];
+    InMemRunnerType* r = &g_Runners[runner];
+    s32 base = r->startingBase_baseAchieved;
+    s16 coverer = g_FieldingLogic._0D0[base];
+    s32 arrival;
+    f32 ballDist;
+    s32 frames;
+    s32 runnerFrames;
+
+    arrival = f->_192 + (fn_3_A6ABC(lbl_3_data_4444[base][0], lbl_3_data_4444[base][1]) + 20) + lbl_3_data_1C40;
+    ballDist = g_Ball.ballDistanceFromBase[base];
+    frames = fn_3_52560(g_Ball.fielderWBallIndex);
+    if (r->currentBase == r->startingBase_baseAchieved) {
+        runnerFrames = r->framesToPreviousBase;
+    } else {
+        runnerFrames = r->framesToPreviousBase + 180;
+    }
+    if (coverer == g_Ball.fielderWBallIndex || coverer == -1 || ballDist < 4.0f ||
+        (g_Fielders[coverer]._17E < 0 && g_FieldingLogic._101[base] == 0) || g_Ball.framesSinceHit < 70) {
+        lbl_3_bss_1838[runner] = base;
+        lbl_3_bss_1828[runner] = -1;
+        lbl_3_bss_1848[runner] = frames - runnerFrames;
+        return;
+    }
+    if (frames < g_Fielders[coverer]._17E + 5) {
+        lbl_3_bss_1838[runner] = base;
+        lbl_3_bss_1828[runner] = -1;
+        lbl_3_bss_1848[runner] = frames - runnerFrames;
+        return;
+    }
+    if (arrival < g_Fielders[coverer]._17E ||
+        (g_Fielders[coverer]._17E < 0 && g_Fielders[coverer]._1D2 <= g_Ball.framesSinceHit)) {
+        lbl_3_bss_1828[runner] = base + 10;
+        lbl_3_bss_1838[runner] = -1;
+        lbl_3_bss_1848[runner] = g_Fielders[coverer]._17E - runnerFrames;
+        return;
+    }
+    lbl_3_bss_1828[runner] = base;
+    lbl_3_bss_1838[runner] = -1;
+    lbl_3_bss_1848[runner] = arrival - runnerFrames;
 }
 
 // .text:0x000A4A10 size:0x540 mapped:0x806E3AA4
@@ -1342,8 +1384,44 @@ BOOL fn_3_A46A0(s32 runner) {
 }
 
 // .text:0x000A41E8 size:0x4B8 mapped:0x806E327C
-void fn_3_A41E8(void) {
-    return;
+// 95.38%: the inlined fn_3_A6ABC allocates its FPRs differently, as in fn_3_A63E4.
+void fn_3_A41E8(s32 base) {
+    Unk18E8Fielder* f = &g_Fielders[g_Ball.fielderWBallIndex];
+    s16 coverer = g_FieldingLogic._0D0[base];
+    s32 arrival;
+    f32 ballDist;
+    s32 frames;
+
+    if (base == 5) {
+        if (fn_3_AABF8()) {
+            g_FieldingLogic._0CC = -1;
+            g_FieldingLogic._0C4 = 5;
+        } else if (g_Ball.ballZoneAwayFromHome >= 3 && g_FieldingLogic._0BE >= 0 &&
+                   g_FieldingLogic._0BE != g_Ball.fielderWBallIndex) {
+            g_FieldingLogic._0CC = -1;
+            g_FieldingLogic._0C4 = 6;
+        } else {
+            g_FieldingLogic._0CC = -1;
+            g_FieldingLogic._0C4 = -1;
+        }
+        return;
+    }
+    arrival = f->_192 + fn_3_A6ABC(lbl_3_data_4444[base][0], lbl_3_data_4444[base][1]);
+    ballDist = g_Ball.ballDistanceFromBase[base];
+    frames = fn_3_52560(g_Ball.fielderWBallIndex);
+    if (coverer == g_Ball.fielderWBallIndex || coverer == -1 || ballDist < 3.0f) {
+        g_FieldingLogic._0CC = base;
+        g_FieldingLogic._0C4 = -1;
+    } else if (frames < g_Fielders[coverer]._17E + 5) {
+        g_FieldingLogic._0CC = base;
+        g_FieldingLogic._0C4 = -1;
+    } else if (arrival < g_Fielders[coverer]._17E) {
+        g_FieldingLogic._0CC = base;
+        g_FieldingLogic._0C4 = -1;
+    } else {
+        g_FieldingLogic._0CC = -1;
+        g_FieldingLogic._0C4 = base;
+    }
 }
 
 // .text:0x000A4158 size:0x90 mapped:0x806E31EC
@@ -1892,8 +1970,57 @@ BOOL fn_3_A222C(void) {
 }
 
 // .text:0x000A2048 size:0x1E4 mapped:0x806E10DC
-void fn_3_A2048(void) {
-    return;
+BOOL fn_3_A2048(void) {
+    s32 i;
+    s32 flags = 0;
+
+    for (i = 0; i < 4; i++) {
+        if (g_Runners[i].runnerOnFieldOrOutOrScored == 1) {
+            if (g_Runners[i].fractionalBasesRan < 1.7f) {
+                flags |= 0x10;
+            } else if (g_Runners[i].fractionalBasesRan < 2.2f) {
+                flags |= 0x100;
+            } else if (g_Runners[i].fractionalBasesRan <= 3.0f) {
+                flags |= 0x1000;
+            }
+        }
+    }
+    if (g_Ball.ballAngleFromHome > 0x500) {
+        if (flags & 0x1000) {
+            fn_3_A41E8(3);
+            return TRUE;
+        }
+        if (flags & 0x100) {
+            fn_3_A41E8(3);
+            return TRUE;
+        }
+        if (flags & 0x10) {
+            fn_3_A41E8(2);
+            return TRUE;
+        }
+        return FALSE;
+    }
+    if (g_Ball.ballAngleFromHome > 0x400) {
+        if (flags & 0x1000) {
+            fn_3_A41E8(3);
+            return TRUE;
+        }
+        if ((flags & 0x100) && !(flags & 0x1000)) {
+            fn_3_A41E8(2);
+            return TRUE;
+        }
+        return FALSE;
+    }
+    if (flags & 0x1000) {
+        if (!(flags & 0x10) || (flags & 0x100)) {
+            fn_3_A41E8(0);
+            return TRUE;
+        }
+    } else if (flags & 0x100) {
+        fn_3_A41E8(3);
+        return TRUE;
+    }
+    return FALSE;
 }
 
 // .text:0x000A1F3C size:0x10C mapped:0x806E0FD0
