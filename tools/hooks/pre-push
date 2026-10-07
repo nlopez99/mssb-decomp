@@ -1,0 +1,11 @@
+#!/bin/sh
+# Runs tools/check_symbols.py and tools/regress.py before a push.
+# Enable once per clone: git config core.hooksPath tools/hooks
+# Skip one push with: git push --no-verify
+cd "$(git rev-parse --show-toplevel)" || exit 1
+python3 tools/check_symbols.py || exit 1
+if [ ! -f objdiff.json ]; then
+    echo "pre-push: no build in this checkout, skipping tools/regress.py" >&2
+    exit 0
+fi
+exec python3 tools/regress.py
