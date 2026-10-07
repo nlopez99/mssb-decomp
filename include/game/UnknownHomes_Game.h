@@ -246,8 +246,8 @@ typedef struct _InMemRunnerType {
     /*0x12B*/ u8 relatedToRunnerPos;
     /*0x12C*/ u8 outType;
     /*0x12D*/ u8 forcedToAdvanceInd; // maybe
-    /*0x12E*/ u8 unused_someBaseNum;
-    /*0x12F*/ u8 baseOfFailedBodyCheck; // maybe
+    /*0x12E*/ s8 unused_someBaseNum;
+    /*0x12F*/ s8 baseOfFailedBodyCheck; // maybe
     /*0x130*/ u8 tagType;               // 1=Running 2=Sliding
     /*0x131*/ u8 runnerDidntReachOnError;
     /*0x132*/ u8 isEligibleToScore; // maybe
@@ -281,7 +281,7 @@ typedef struct _InMemRunnerType {
     /*0x14E*/ u8 stealingStatus;
     /*0x14F*/ u8 framesSinceStealInput;
     /*0x150*/ u8 someCountdown_unused;
-    /*0x151*/ u8 _151;
+    /*0x151*/ s8 _151;
     /*0x152*/ u8 miniGamePlayerNum;
     /*0x153*/ u8 scoredOnGRD; // maybe
 } InMemRunnerType;            // size: 0x154
@@ -1114,7 +1114,7 @@ typedef struct _GameControlsStruct {
     /*0x008*/ int teamFielding;
     /*0x00C*/ int homeTeamBattingInd_fieldingTeam;
     /*0x010*/ int awayTeamBattingInd_battingTeam;
-    /*0x014*/ u32 AIDifficulty0Special3Weak[2];
+    /*0x014*/ int AIDifficulty0Special3Weak[2];
     artificial_padding(0x14, 0x24, u32[2]);
     /*0x024*/ LogoInfoStruct logo[2];
     /*0x03C*/ int battingOrderAndPositionMapping[2][10][2]; // first Pair Is Pitcher
@@ -1457,10 +1457,7 @@ typedef struct _UnkStructMinigame {
 
 typedef struct _MiniGameControlStruct {
     /*0x000*/ s8 characterIndex[4];
-    /*0x004*/ u8 _4;
-    /*0x005*/ u8 _5;
-    /*0x006*/ u8 _6;
-    /*0x007*/ u8 _7;
+    /*0x004*/ u8 _4[4]; // one per player, read by fn_3_126604 (rep_3448)
     /*0x008*/ u8 _8;
     /*0x009*/ u8 _9;
     /*0x00A*/ u8 _A;
@@ -2070,21 +2067,30 @@ typedef struct _MiniGameStruct {
         /*0x1DD0*/ u8 _1DD0_u8;
     };
     /*0x1DD1*/ u8 _1DD1[0x1DF4 - 0x1DD1];
-    // Bob-omb Derby (rep_31F0) reads _1DF4 and _1DF5, Barrel Batter (rep_34B0) stores _1DF4_s16
+    // Bob-omb Derby (rep_31F0) reads _1DF4 and _1DF5, Barrel Batter (rep_34B0) stores _1DF4_s16,
+    // Chain Chomp Sprint (rep_3448) keeps one score per player in _1DF4_arr
     union {
         struct {
             /*0x1DF4*/ u8 _1DF4;
             /*0x1DF5*/ u8 _1DF5;
+            /*0x1DF6*/ u8 _1DF6;
+            /*0x1DF7*/ u8 _1DF7;
+            /*0x1DF8*/ u8 _1DF8;
+            /*0x1DF9*/ u8 _1DF9[0x1DFC - 0x1DF9];
         };
         /*0x1DF4*/ s16 _1DF4_s16;
+        /*0x1DF4*/ s16 _1DF4_arr[4];
     };
-    /*0x1DF6*/ u8 _1DF6;
-    /*0x1DF7*/ u8 _1DF7;
-    /*0x1DF8*/ u8 _1DF8;
-    /*0x1DF9*/ u8 _1DF9[0x1DFC - 0x1DF9];
     /*0x1DFC*/ u8 _1DFC[4];
     /*0x1E00*/ u8 _1E00;
-    /*0x1E01*/ u8 _1E01[0x1E2C - 0x1E01];
+    /*0x1E01*/ u8 _1E01;
+    /*0x1E02*/ u8 _1E02;
+    /*0x1E03*/ u8 _1E03;
+    /*0x1E04*/ u32 _1E04;
+    /*0x1E08*/ u8 _1E08[4][2];
+    /*0x1E10*/ u8 _1E10[0x1E2A - 0x1E10];
+    /*0x1E2A*/ u8 _1E2A;
+    /*0x1E2B*/ u8 _1E2B;
 } MiniGameStruct; // size: 0x1E2C
 
 extern MiniGameStruct g_Minigame;
@@ -2176,7 +2182,7 @@ typedef struct {
     /* 0x3C */ f32 _3C;
     /* 0x40 */ s16 AIFrameToBeginPitch;
     /* 0x42 */ u16 _42;
-    /* 0x44 */ u16 _44;
+    /* 0x44 */ s16 _44;
     /* 0x46 */ u8 _46;
     /* 0x47 */ u8 _47;
     /* 0x48 */ u8 _48;
@@ -2439,9 +2445,10 @@ typedef struct {
     /* 0x0EA */ s16 _0EA;
     /* 0x0EC */ s16 _0EC;
     /* 0x0EE */ s16 _0EE;
-    /* 0x0F0 */ u8 _0F0[0xF6 - 0xF0];
+    /* 0x0F0 */ s16 _0F0;
+    /* 0x0F2 */ u8 _0F2[0xF6 - 0xF2];
     /* 0x0F6 */ s16 _0F6;
-    /* 0x0F8 */ u8 _0F8[0x101 - 0xF8];
+    /* 0x0F8 */ u8 _0F8[9];
     /* 0x101 */ u8 _101[4];
     /* 0x105 */ u8 playerAtMoundCutoffLocation;
     /* 0x106 */ u8 throwSpeedType;
@@ -2459,7 +2466,7 @@ typedef struct {
     /* 0x112 */ u8 _112;
     /* 0x113 */ u8 _113;
     /* 0x114 */ u8 _114;
-    /* 0x115 */ u8 _115;
+    /* 0x115 */ s8 _115;
     /* 0x116 */ u8 _116;
     /* 0x117 */ u8 _117;
     /* 0x118 */ u8 _118;
