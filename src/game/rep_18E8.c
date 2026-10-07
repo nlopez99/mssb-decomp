@@ -157,8 +157,31 @@ void fn_3_AB554(void) {
 }
 
 // .text:0x000AAFF0 size:0x564 mapped:0x806EA084
-void fn_3_AAFF0(void) {
-    return;
+void fn_3_AAFF0(f32* x, f32* z) {
+    Unk18E8Fielder* t = &g_Fielders[g_FieldingLogic._0BE];
+    s32 frames = fn_3_A6ABC(t->_000, t->_008);
+
+    if (t->_17E < frames - 5) {
+        *x = t->_014;
+        *z = t->_01C;
+    } else {
+        f32 dx = t->_014 - t->_000;
+        f32 dz = t->_01C - t->_008;
+        f32 len = dolsqrtf2(dx * dx + dz * dz) == 0.0f ? 1.0f : dolsqrtf2(dx * dx + dz * dz);
+        f32 speed;
+
+        if (len <= 0.1f) {
+            len = 0.1f;
+        }
+        dx /= len;
+        dz /= len;
+        speed = 0.9f * t->_058;
+        dx *= speed;
+        dz *= speed;
+        *x = dx * (frames - 10) + t->_000;
+        *z = dz * (frames - 10) + t->_008;
+    }
+    g_Ball.fielderBeingThrownTo = g_FieldingLogic._0BE;
 }
 
 // .text:0x000AAC84 size:0x36C mapped:0x806E9D18

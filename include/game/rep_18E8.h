@@ -58,7 +58,7 @@ void fn_3_A9D20(void);
 void fn_3_AAA3C(s32 fielder);
 BOOL fn_3_AABF8(void);
 void fn_3_AAC84(f32* x, f32* z);
-void fn_3_AAFF0(void);
+void fn_3_AAFF0(f32* x, f32* z);
 void fn_3_AB554(void);
 void fn_3_AB5B0(void);
 void fn_3_ABDD0(void);
