@@ -37,6 +37,8 @@ Start with one unmatched function in objdiff, preferably a small game-code funct
 5. Run `python3 tools/regress.py`. It builds, checks the hashes, and compares every function with the base commit; it fails if any objdiff score drops or any strict match is lost.
 6. Review names, comments, types and undefined-behavior risks. A matching function does not prove that every guessed name or explanation is correct.
 
+To work on several units at once, give each its own worktree: `python3 tools/worktree.py <branch>` creates and builds one. Claude Code agents follow `.claude/skills/match-functions/SKILL.md`, the same procedure with a time box per function.
+
 Keep matching work separate from gameplay changes, ports and experiments. Those belong on explicitly non-matching branches. Do not alter compiler flags, target objects, matching thresholds or report denominators just to make a score increase.
 
 ## Pull requests
