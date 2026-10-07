@@ -13,7 +13,6 @@
 #include "game/rep_540.h"
 #include "game/rep_1838.h"
 #include "game/rep_23E8.h"
-#include "game/rep_AC8.h"
 #include "math.h"
 #include "string.h"
 
@@ -112,7 +111,7 @@ extern struct {
     /* 0x3C */ u32* _3C;
     /* 0x40 */ u16* _40;
     /* 0x44 */ u32* _44;
-    /* 0x48 */ u8* _48;
+    /* 0x48 */ Vec* _48;
     /* 0x4C */ u8 _4C[0x64 - 0x4C];
     /* 0x64 */ s16 _64;
     /* 0x66 */ s16 _66;
@@ -125,6 +124,30 @@ extern struct {
     /* 0x6C */ u8* _6C;
 } lbl_8036E548;
 
+typedef struct {
+    /* 0x000 */ Vec _000;
+    /* 0x00C */ u8 _00C[0x210 - 0x00C];
+    /* 0x210 */ u8 _210;
+    /* 0x211 */ u8 _211[0x268 - 0x211];
+} Rep2998Fielder; // size: 0x268
+
+typedef struct {
+    /* 0x00 */ u8 _00;
+    /* 0x01 */ u8 _01;
+    /* 0x02 */ u16 _02;
+} Rep2998MeshHeader;
+
+typedef struct {
+    /* 0x00 */ Vec _00;
+    /* 0x0C */ u32 _0C;
+} Rep2998MeshVertex;
+
+typedef struct Rep2998Mesh {
+    /* 0x00 */ u8 _00[0x08];
+    /* 0x08 */ u8* _08;
+} Rep2998Mesh;
+
+extern Rep2998Fielder g_Fielders[9];
 extern u16 lbl_3_data_81DC[16];
 extern u8 lbl_3_data_8404[6][15][2];
 extern u8 lbl_3_data_84B8[30][2];
@@ -133,14 +156,16 @@ extern u8 lbl_3_data_19004[0x14];
 
 extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void AnimateActorBones(Rep2998Actor* actor);
-extern void fn_800B4A94(Rep2998Actor* actor);
+extern f32 fn_800B4A94(Rep2998Actor* actor);
 extern void fn_800B4AFC(Rep2998Actor* actor, u8 flag);
 extern void fn_800B4BC8(Rep2998Actor* actor, s32 arg1);
 extern void fn_800B4C04(Rep2998Actor* actor, f32 speed);
 extern f32 fn_800B4C40(Rep2998Actor* actor);
 extern void fn_800B4CA0(Rep2998Actor* actor, f32 frame);
 
-// rep_1D58.h declares these as void(void) placeholders
+// rep_AC8.h and rep_1D58.h declare these as void(void) placeholders
+extern s32 fn_3_253A4(s32 fielder, s32 angle);
+extern void fn_3_27648(void);
 extern s16 fn_3_B7F70(s16 range);
 extern s32 fn_3_B7FC8(u32 id, s32 arg1);
 extern void fn_3_B8414(void* a, void* b);
@@ -150,6 +175,25 @@ extern void fn_3_B939C(void);
 extern void fn_3_B97DC(void* model, void* anim);
 extern void fn_3_B98E8(void* model);
 extern void fn_3_B9D68(u8* types, s32 count, void** files, s32* indices);
+
+static inline void playSound(s32 sound) {
+    u32 stadium = g_d_GameSettings.StadiumID;
+    SND_VOICEID voice;
+    u8 vol;
+
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+        vol = lbl_3_data_84B8[sound][0];
+    } else {
+        vol = lbl_3_data_8404[stadium][sound][0];
+    }
+    voice = sndFXStartEx(lbl_3_data_81DC[stadium] + sound, vol, 63, 0);
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+        vol = lbl_3_data_84B8[sound][1];
+    } else {
+        vol = lbl_3_data_8404[stadium][sound][1];
+    }
+    sndFXCtrl(voice, 91, vol);
+}
 
 // MWCC lays out .bss statics in reverse order of declaration
 static void* lbl_3_bss_AE18[14];
@@ -171,12 +215,63 @@ void fn_3_E4FC4(void) {
 
 // .text:0x000E4EF4 size:0xD0 mapped:0x80723F88
 void fn_3_E4EF4(void) {
-    return;
+    s32 count;
+    s32 idx;
+    u32 size = lbl_3_common_bss_350E4._30 * 2 * sizeof(Vec) + lbl_3_common_bss_350E4._30 * sizeof(u32) +
+               lbl_3_common_bss_350E4._30 * sizeof(u32) + lbl_3_common_bss_350E4._30 * sizeof(u16);
+
+    if (lbl_3_common_bss_350E4._48 == NULL) {
+        lbl_3_common_bss_350E4._48 = _OSAllocFromHeap(4, size);
+        lbl_3_common_bss_350E4._3C = (u32*)(lbl_3_common_bss_350E4._48 + lbl_3_common_bss_350E4._30 * 2);
+        lbl_3_common_bss_350E4._44 = lbl_3_common_bss_350E4._3C + lbl_3_common_bss_350E4._30;
+        lbl_3_common_bss_350E4._40 = (u16*)(lbl_3_common_bss_350E4._44 + lbl_3_common_bss_350E4._30);
+    }
+    memset(lbl_3_common_bss_350E4._48, 0, size);
+    count = 0;
+    idx = 0;
+    fn_3_E4CB0(&count, &idx);
+    lbl_3_common_bss_350E4._64 = count;
 }
 
 // .text:0x000E4CB0 size:0x244 mapped:0x80723D44
-void fn_3_E4CB0(void) {
-    return;
+void fn_3_E4CB0(s32* count, s32* objIdx) {
+    Control ctrl;
+    Mtx m;
+    f32 z;
+    f32 y;
+    f32 x;
+    Rep2998Prop* prop;
+    Rep2998Obj* obj;
+    u16 slot;
+    s32 i;
+    s32 j;
+
+    for (i = 0; i < 10; i++) {
+        slot = lbl_3_common_bss_350E4._40[*count] =
+            lbl_3_common_bss_350E4._40[*count - 1] + lbl_3_common_bss_350E4._3C[*count - 1];
+        fn_3_B8574();
+        prop = lbl_3_data_18ED0;
+        for (j = 0; j < 10; j++, prop++) {
+            if (i == prop->_12 && prop->_10 != 2 && lbl_3_common_bss_350E4._00[*objIdx]._90_6) {
+                lbl_3_common_bss_350E4._44[slot++] = *objIdx;
+                lbl_3_common_bss_350E4._3C[*count]++;
+                obj = &lbl_3_common_bss_350E4._00[*objIdx];
+                ctrl = obj->control;
+                CTRLGetTranslation(&ctrl, &x, &y, &z);
+                CTRLSetTranslation(&ctrl, x - 4.0, y, z - 4.0);
+                CTRLBuildMatrix(&ctrl, m);
+                fn_3_B8464(m, obj->_78);
+                CTRLSetTranslation(&ctrl, 4.0 + x, y - 10.0, 4.0 + z);
+                CTRLBuildMatrix(&ctrl, m);
+                fn_3_B8464(m, obj->_78);
+                (*objIdx)++;
+            }
+        }
+        if (lbl_3_common_bss_350E4._3C[*count] != 0) {
+            fn_3_B8414(&lbl_3_common_bss_350E4._48[*count * 2], &lbl_3_common_bss_350E4._48[*count * 2 + 1]);
+            (*count)++;
+        }
+    }
 }
 
 // .text:0x000E4BE8 size:0xC8 mapped:0x80723C7C
@@ -197,8 +292,58 @@ void* fn_3_E4BE8(s32 idx, MtxPtr mtx) {
 }
 
 // .text:0x000E4A38 size:0x1B0 mapped:0x80723ACC
-void fn_3_E4A38(void) {
-    return;
+void fn_3_E4A38(MtxPtr mtx, Rep2998Mesh* mesh) {
+    Vec v;
+    Vec out;
+    f32 minX;
+    f32 minY;
+    f32 minZ;
+    f32 maxX;
+    f32 maxY;
+    f32 maxZ;
+    u8* p;
+    u32 n;
+
+    maxX = maxY = maxZ = -10000.0f;
+    minX = minY = minZ = 10000.0f;
+    p = mesh->_08;
+    for (;;) {
+        if (((Rep2998MeshHeader*)p)->_02 == 0) {
+            break;
+        }
+        n = ((Rep2998MeshHeader*)p)->_02 * 3;
+        if (((Rep2998MeshHeader*)p)->_01) {
+            n = ((Rep2998MeshHeader*)p)->_02 + 2;
+        }
+        p += sizeof(Rep2998MeshHeader);
+        do {
+            if (!lbl_3_bss_AE01) {
+                PSMTXMultVec(mtx, &((Rep2998MeshVertex*)p)->_00, &v);
+            } else {
+                PSVECScale(&((Rep2998MeshVertex*)p)->_00, 1.0f, &v);
+            }
+            p += sizeof(Rep2998MeshVertex);
+            if (minX > v.x) {
+                minX = v.x;
+            }
+            if (minY > v.y) {
+                minY = v.y;
+            }
+            if (minZ > v.z) {
+                minZ = v.z;
+            }
+            if (maxX < v.x) {
+                maxX = v.x;
+            }
+            if (maxY < v.y) {
+                maxY = v.y;
+            }
+            if (maxZ < v.z) {
+                maxZ = v.z;
+            }
+        } while (--n != 0);
+    }
+    PSVECScale((Vec*)&g_Ball.AtBat_Contact_BallPos, 1.0f, &out);
 }
 
 // .text:0x000E48D0 size:0x168 mapped:0x80723964
@@ -256,33 +401,153 @@ void fn_3_E3B88(void) {
 }
 
 // .text:0x000E3914 size:0x274 mapped:0x807229A8
-void fn_3_E3914(void) {
-    return;
+void fn_3_E3914(Rep2998Obj* obj) {
+    static const u8 counts[3] = { 20, 20, 20 };
+    Vec pos;
+    Vec d;
+    u8 swing;
+
+    if (obj->_C7 != 0) {
+        return;
+    }
+    if (g_Ball.AtBat_ContactResult >= 2) {
+        return;
+    }
+    if (g_Ball.AtBat_Contact_BallPos.y > 11.0) {
+        return;
+    }
+    pos = obj->_A0;
+    pos.y += 1.4;
+    PSVECSubtract((Vec*)&g_Ball.AtBat_Contact_BallPos, &pos, &d);
+    d.y = 0.0f;
+    if (PSVECMag(&d) <= 12.5) {
+        swing = g_Ball.currentStarSwing2;
+        if (!((swing == 12) | (swing == 11) | (swing == 3) | (swing == 4))) {
+            obj->_C4 = 1;
+            fn_3_E25D0(obj, 1);
+            if (obj->_C9 == 0) {
+                obj->_C8 = fn_3_B7F70(100) / 70;
+            } else {
+                obj->_C8 = 0;
+            }
+            obj->_C5 = 0;
+            obj->_C6 = counts[fn_3_B7F70(3)];
+            obj->_C7 = 1;
+            playSound(3);
+        }
+    }
 }
 
 // .text:0x000E3764 size:0x1B0 mapped:0x807227F8
-void fn_3_E3764(void) {
-    return;
+void fn_3_E3764(Rep2998Obj* obj) {
+    obj->_C5++;
+    obj->_B4 += 1.0857142857142859 / obj->_C6;
+    CTRLSetScale(&obj->control, obj->_B4, obj->_B4, obj->_B4);
+    obj->_A0.y = -(1.2 * obj->_B4);
+    CTRLSetTranslation(&obj->control, obj->_A0.x, -obj->_A0.y, obj->_A0.z);
+    if (fn_3_E2B70(obj)) {
+        if (fn_3_E3284(obj)) {
+            return;
+        }
+    } else {
+        fn_3_E2034(obj);
+    }
+    if (obj->_C5 >= obj->_C6) {
+        obj->_C4 = 2;
+    }
 }
 
 // .text:0x000E3668 size:0xFC mapped:0x807226FC
-void fn_3_E3668(void) {
-    return;
+void fn_3_E3668(Rep2998Obj* obj) {
+    if (fn_3_E2B70(obj)) {
+        fn_3_E3284(obj);
+    } else {
+        fn_3_E2034(obj);
+    }
 }
 
 // .text:0x000E3284 size:0x3E4 mapped:0x80722318
-void fn_3_E3284(void) {
-    return;
+u8 fn_3_E3284(Rep2998Obj* obj) {
+    Vec a;
+    Vec b;
+    Vec cross;
+    Vec pos = { 0.0f, 0.0f, 0.0f };
+    Vec down = { 0.0f, -1.0f, 0.0f };
+    Mtx bone;
+    Mtx m;
+    f32 limit;
+    f32 angle;
+    f32 base;
+
+    PSMTXCopy(obj->_74->_00->_18[16]->_EC, bone);
+    CTRLBuildMatrix(&obj->control, m);
+    PSMTXConcat(m, bone, m);
+    PSMTXMultVec(m, &pos, &pos);
+    pos.y *= -1.0f;
+    limit = 2.2f * obj->_B4;
+    if (fabs(fn_3_9EFD0(&g_Ball.pastCoordinates[0], &g_Ball.AtBat_Contact_BallPos, (VecXYZ*)&pos, NULL)) <= limit) {
+        obj->_C4 = 3;
+        fn_3_E25D0(obj, 7);
+        obj->_CA = 1;
+        fn_3_6620();
+        base = lbl_3_data_18ED0[obj->_9C]._14;
+        obj->_BC = base + fn_3_B7F70((u32)(10.0f * lbl_3_data_18ED0[obj->_9C]._18)) / 10.0;
+        g_Ball.physicsSubstruct.velocity.x = g_Ball.physicsSubstruct.velocity.y = g_Ball.physicsSubstruct.velocity.z =
+            0.0f;
+        a.x = sin(-(0.017453292f * obj->_B0));
+        a.y = 0.0f;
+        a.z = -(f32)cos(-(0.017453292f * obj->_B0));
+        b.x = sin(0.017453292f * obj->_BC);
+        b.y = 0.0f;
+        b.z = -(f32)cos(0.017453292f * obj->_BC);
+        PSVECNormalize(&a, &a);
+        PSVECNormalize(&b, &b);
+        angle = acos(PSVECDotProduct(&a, &b));
+        if (angle) {
+            PSVECCrossProduct(&a, &b, &cross);
+            if (!(PSVECDotProduct(&cross, &down) > 0.0f)) {
+                angle *= -1.0f;
+            }
+        }
+        obj->_C0 = -(57.29578f * (angle / 60.0f));
+        playSound(0);
+        return TRUE;
+    }
+    return FALSE;
 }
 
 // .text:0x000E3044 size:0x240 mapped:0x807220D8
-void fn_3_E3044(void) {
-    return;
+void fn_3_E3044(Rep2998Obj* obj) {
+    f32 speed = obj->_74->_54;
+    f32 angle;
+
+    if (obj->_CB == 7) {
+        obj->_B0 += obj->_C0;
+        CTRLSetRotation(&obj->control, 0.0f, obj->_B0, 0.0f);
+    } else if (obj->_B8 >= 20.0 && obj->_B8 - speed < 20.0) {
+        angle = 0.017453292f * obj->_BC;
+        g_Ball.AtBat_Contact_BallPos.x = obj->_B4 * (5.0 * (f32)sin(angle)) + obj->_A0.x;
+        g_Ball.AtBat_Contact_BallPos.y = 2.0 * obj->_B4;
+        g_Ball.AtBat_Contact_BallPos.z = obj->_B4 * (-5.0 * (f32)cos(angle)) + obj->_A0.z;
+        g_Ball.physicsSubstruct.velocity.y = 0.0f;
+        g_Ball.physicsSubstruct.velocity.x = 0.1 * (f32)sin(angle);
+        g_Ball.physicsSubstruct.velocity.z = 0.1 * -(f32)cos(angle);
+        fn_3_65F4();
+        obj->_CA = 0;
+        playSound(1);
+    }
 }
 
 // .text:0x000E2F4C size:0xF8 mapped:0x80721FE0
-void fn_3_E2F4C(void) {
-    return;
+void fn_3_E2F4C(Rep2998Obj* obj) {
+    f32 angle;
+    f32 x;
+
+    if (obj->_B8 >= 20.0 && obj->_B8 - obj->_74->_54 < 20.0 && gameInitOptions.starSkillsSetting) {
+        angle = 0.017453292f * -obj->_B0;
+        x = obj->_B4 * (5.0 * (f32)sin(angle)) + obj->_A0.x;
+        fn_3_CB7E8(x, -2.0 * obj->_B4, obj->_B4 * (-5.0 * (f32)cos(angle)) + obj->_A0.z);
+    }
 }
 
 // .text:0x000E2E78 size:0xD4 mapped:0x80721F0C
@@ -300,13 +565,49 @@ void fn_3_E2E78(Rep2998Obj* obj) {
 }
 
 // .text:0x000E2B70 size:0x308 mapped:0x80721C04
-void fn_3_E2B70(void) {
-    return;
+u8 fn_3_E2B70(Rep2998Obj* obj) {
+    Vec d;
+
+    if (g_Ball.AtBat_ContactResult >= 2) {
+        return FALSE;
+    }
+    if (obj->_C8) {
+        return FALSE;
+    }
+    if (g_Ball.deadBallReason == 1 || g_Ball.deadBallReason == 3) {
+        return FALSE;
+    }
+    if (obj->_CB >= 4 && obj->_CB <= 6) {
+        return TRUE;
+    }
+    PSVECSubtract((Vec*)&g_Ball.AtBat_Contact_BallPos, (Vec*)&g_Ball.pastCoordinates[0], &d);
+    if (PSVECMag(&d) != 0.0f) {
+        return fn_3_E29B4(obj);
+    }
+    return fn_3_E28DC(obj);
 }
 
 // .text:0x000E29B4 size:0x1BC mapped:0x80721A48
-void fn_3_E29B4(void) {
-    return;
+BOOL fn_3_E29B4(Rep2998Obj* obj) {
+    static const f32 speeds[3] = { 0.8f, 1.0f, 1.2f };
+    Vec pos = obj->_A0;
+    Vec d;
+
+    PSVECSubtract((Vec*)&g_Ball.AtBat_Contact_BallPos, &pos, &d);
+    d.y = 0.0f;
+    if (5.5 * obj->_B4 > PSVECMag(&d) && g_Ball.AtBat_Contact_BallPos.y >= 1.5 * obj->_B4 &&
+        g_Ball.AtBat_Contact_BallPos.y <= 8.5 * obj->_B4) {
+        if (g_Ball.AtBat_Contact_BallPos.y < 5.0 * obj->_B4) {
+            fn_3_E25D0(obj, 4);
+        } else {
+            fn_3_E25D0(obj, 5);
+        }
+        obj->_74->_54 = speeds[fn_3_B7F70(3)];
+        obj->_74->_5A = 1;
+        fn_800B4C04(obj->_74->_00, obj->_74->_54);
+        return TRUE;
+    }
+    return FALSE;
 }
 
 // .text:0x000E28DC size:0xD8 mapped:0x80721970
@@ -324,8 +625,44 @@ BOOL fn_3_E28DC(Rep2998Obj* obj) {
 }
 
 // .text:0x000E266C size:0x270 mapped:0x80721700
-void fn_3_E266C(void) {
-    return;
+void fn_3_E266C(Rep2998Obj* obj) {
+    Rep2998Model* model = obj->_74;
+
+    if (obj->_AC == NULL) {
+        return;
+    }
+    if (!(model->_5B & 1) && !fn_800B4A94(model->_00)) {
+        switch (obj->_CB) {
+        case 1:
+            if (obj->_C4 == 5 || obj->_C4 == 0) {
+                fn_3_E25D0(obj, 0);
+                break;
+            }
+        case 4:
+        case 5:
+            if (obj->_C8 == 0) {
+                fn_3_E25D0(obj, 2);
+            } else {
+                fn_3_E25D0(obj, 3);
+            }
+            break;
+        case 7:
+            obj->_B0 = -obj->_BC;
+            fn_3_E25D0(obj, 8);
+            CTRLSetRotation(&obj->control, 0.0f, obj->_B0, 0.0f);
+            break;
+        case 8:
+            fn_3_E25D0(obj, 9);
+            obj->_C4 = 5;
+            break;
+        case 6:
+        default:
+            fn_3_E25D0(obj, 0);
+            break;
+        }
+    }
+    AnimateActorBones(model->_00);
+    obj->_B8 = fn_800B4C40(model->_00);
 }
 
 // .text:0x000E25D0 size:0x9C mapped:0x80721664
@@ -341,8 +678,48 @@ void fn_3_E25D0(Rep2998Obj* obj, u32 anim) {
 }
 
 // .text:0x000E2324 size:0x2AC mapped:0x807213B8
-void fn_3_E2324(void) {
-    return;
+void fn_3_E2324(Rep2998Obj* obj) {
+    Vec pos = { 0.0f, 0.0f, 0.0f };
+    Vec down = { 0.0f, -1.0f, 0.0f };
+    u8 fielders[7] = { 2, 3, 4, 5, 6, 7, 8 };
+    Mtx bone;
+    Mtx m;
+    Vec fielderPos;
+    Vec d;
+    Vec dir;
+    f32 limit;
+    u32 i;
+
+    if (obj->_CA) {
+        return;
+    }
+    PSMTXCopy(obj->_74->_00->_18[16]->_EC, bone);
+    CTRLBuildMatrix(&obj->control, m);
+    PSMTXConcat(m, bone, m);
+    PSMTXMultVec(m, &pos, &pos);
+    pos.y *= -1.0f;
+    limit = 2.2f * obj->_B4;
+    for (i = 0; i < 7; i++) {
+        if (g_Fielders[fielders[i]]._210 != 0) {
+            continue;
+        }
+        fielderPos.x = g_Fielders[fielders[i]]._000.x;
+        fielderPos.y = 1.5f;
+        fielderPos.z = g_Fielders[fielders[i]]._000.z;
+        PSVECSubtract(&pos, &fielderPos, &d);
+        dir.x = d.x;
+        dir.y = 0.0f;
+        dir.z = d.z;
+        PSVECNormalize(&dir, &dir);
+        if (PSVECMag(&d) <= limit) {
+            fn_3_253A4(fielders[i], fn_3_9FB8C(dir.x, dir.z));
+            if (obj->_CB != 8 && obj->_CA == 0) {
+                fn_3_E25D0(obj, 9);
+                obj->_C4 = 5;
+            }
+            playSound(4);
+        }
+    }
 }
 
 // .text:0x000E22A4 size:0x80 mapped:0x80721338
@@ -363,8 +740,24 @@ void fn_3_E22A4(Rep2998Obj* obj) {
 }
 
 // .text:0x000E2118 size:0x18C mapped:0x807211AC
-void fn_3_E2118(void) {
-    return;
+void fn_3_E2118(u32 idx) {
+    Rep2998Obj* obj = &lbl_3_common_bss_350E4._00[idx];
+
+    if (obj->_C4 == 0 || obj->_C4 == 5) {
+        return;
+    }
+    if (obj->_C8 != 0 && obj->_C4 != 4) {
+        if (g_Ball.AtBat_ContactResult > 1) {
+            return;
+        }
+        obj->_C9 = 1;
+        obj->_C4 = 4;
+        fn_3_E25D0(obj, 8);
+        playSound(2);
+    }
+    fn_3_65A8();
+    fn_3_27648();
+    g_FieldingLogic._13B = 1;
 }
 
 // .text:0x000E2034 size:0xE4 mapped:0x807210C8
@@ -401,5 +794,32 @@ void fn_3_E1FA8(Rep2998Obj* obj) {
 
 // .text:0x000E1DB8 size:0x1F0 mapped:0x80720E4C
 void fn_3_E1DB8(void) {
-    return;
+    if (g_GameLogic.gameStatus == GAME_STATUS_MINIGAME_READY) {
+        return;
+    }
+    if (g_GameLogic.gameStatus == GAME_STATUS_PAUSED) {
+        if (lbl_3_bss_AE10) {
+            fn_3_8B890(lbl_3_bss_AE04);
+            lbl_3_bss_AE10 = 0;
+        }
+        return;
+    }
+    if (!lbl_3_bss_AE10) {
+        lbl_3_bss_AE04 = fn_3_8BBC4(lbl_3_data_81DC[g_d_GameSettings.StadiumID] + 5, NULL, NULL, 6);
+        lbl_3_bss_AE10 = 1;
+        lbl_3_bss_AE0C = rand() % 900 + 100;
+        lbl_3_bss_AE08 = rand() % 900 + 100;
+    }
+    if (lbl_3_bss_AE0C <= 0) {
+        fn_3_B7FC8(lbl_3_data_81DC[g_d_GameSettings.StadiumID] + 6, 7);
+        lbl_3_bss_AE0C = rand() % 900 + 100;
+    } else {
+        lbl_3_bss_AE0C--;
+    }
+    if (lbl_3_bss_AE08 <= 0) {
+        fn_3_B7FC8(lbl_3_data_81DC[g_d_GameSettings.StadiumID] + 7, 7);
+        lbl_3_bss_AE08 = rand() % 900 + 100;
+    } else {
+        lbl_3_bss_AE08--;
+    }
 }
