@@ -3154,8 +3154,194 @@ void fn_3_7EA68(void) {
 }
 
 // .text:0x0007E2BC size:0x7AC mapped:0x806BD350
+// 99.46%: registers differ in the stick-held branch (base and i swapped) and the third loop's
+// handled counter starts as li 0 here where the target copies it from i with mr
 void fn_3_7E2BC(void) {
-    return;
+    InputStruct* input = &g_Controls[g_GameLogic.teams[g_GameLogic.teamBatting]];
+    int i;
+    int reverse;
+    u16 buttons;
+
+    if (g_d_GameSettings.GameModeSelected == 2 && g_Practice.loadingGuidedPractice != 0) {
+        return;
+    }
+    if (ACTIVE_TUTORIAL()) {
+        input = &g_Practice.inputs[g_GameLogic.teamBatting];
+    }
+    buttons = input->buttonInput;
+    if (g_Ball.framesSinceHit < 30) {
+        buttons = input->newButtonInput;
+    }
+    if (input->controlStickAngle < 0) {
+        reverse = 0;
+        for (i = 0; i < 4; i++) {
+            InMemRunnerType* r = &g_Runners[i];
+            if (r->runnerOnFieldOrOutOrScored == 1) {
+                if (r->runningDirectionCode == 3) {
+                    if (r->nextDirectionBeingProcessed != 2 && r->nextDirectionBeingProcessed != 1 &&
+                        (input->newButtonInput & 0x800)) {
+                        reverse = 1;
+                        break;
+                    }
+                } else if (r->runningDirectionCode == 1 && r->currentBase != 0 && r->nextDirectionBeingProcessed != 2 &&
+                           r->nextDirectionBeingProcessed != 3 && (input->newButtonInput & 0x400)) {
+                    reverse = 1;
+                    break;
+                }
+            }
+        }
+        if (reverse != 0) {
+            for (i = 0; i < 4; i++) {
+                if (g_Runners[i].runnerOnFieldOrOutOrScored == 1) {
+                    fn_3_7FEA8(i, 2);
+                }
+            }
+        } else {
+            for (i = 0; i < 4; i++) {
+                InMemRunnerType* r = &g_Runners[i];
+                if (r->runnerOnFieldOrOutOrScored != 1) {
+                    continue;
+                }
+                if (r->runningDirectionCode == 3) {
+                    if (r->nextDirectionBeingProcessed == 2 || r->nextDirectionBeingProcessed == 1) {
+                        if (buttons & 0x400) {
+                            fn_3_7FEA8(i, 3);
+                        } else if (input->newButtonInput & 0x800) {
+                            fn_3_7FEA8(i, 1);
+                        }
+                    }
+                } else if (r->runningDirectionCode == 1) {
+                    if (r->nextDirectionBeingProcessed == 2 || r->nextDirectionBeingProcessed == 3) {
+                        if (input->newButtonInput & 0x400) {
+                            fn_3_7FEA8(i, 3);
+                        } else if (buttons & 0x800) {
+                            fn_3_7FEA8(i, 1);
+                        }
+                    }
+                } else if (r->runningDirectionCode == 5 && (buttons & 0x800)) {
+                    fn_3_7FEA8(i, 1);
+                } else if (input->newButtonInput & 0x800) {
+                    fn_3_7FEA8(i, 1);
+                } else if (input->newButtonInput & 0x400) {
+                    fn_3_7FEA8(i, 3);
+                }
+            }
+        }
+        if (input->newButtonInput & 0xF00) {
+            g_Runners[0].newButtonThisFrame_forMashPurposes = 1;
+            g_Runners[1].newButtonThisFrame_forMashPurposes = 1;
+            g_Runners[2].newButtonThisFrame_forMashPurposes = 1;
+            g_Runners[3].newButtonThisFrame_forMashPurposes = 1;
+        }
+        if (ACTIVE_TUTORIAL() && g_Practice.practice_runner_countInputForMashing != 0) {
+            g_Runners[0].newButtonThisFrame_forMashPurposes = 1;
+            g_Runners[1].newButtonThisFrame_forMashPurposes = 1;
+            g_Runners[2].newButtonThisFrame_forMashPurposes = 1;
+            g_Runners[3].newButtonThisFrame_forMashPurposes = 1;
+        }
+    } else if (buttons & 0x800) {
+        int base = -1;
+        int waited;
+
+        if (input->controlStickAngle >= 0xA00 && input->controlStickAngle < 0xE00) {
+            base = 0;
+        } else if (input->controlStickAngle >= 0x600) {
+            base = 3;
+        } else if (input->controlStickAngle >= 0x200) {
+            base = 2;
+        }
+        if (base < 0) {
+            return;
+        }
+        waited = 0;
+        for (i = 3; i >= 0; i--) {
+            InMemRunnerType* r = &g_Runners[i];
+            if (r->runnerOnFieldOrOutOrScored != 1 || r->nextBase != base) {
+                continue;
+            }
+            if (waited != 0) {
+                if (r->_151 <= 0) {
+                    r->_151 = 1;
+                } else {
+                    r->_151++;
+                }
+                r->someCountdown_unused = lbl_3_data_4C54[5];
+                if (r->_151 <= lbl_3_data_4C54[6]) {
+                    return;
+                }
+            }
+            if (r->runningDirectionCode == 1) {
+                if (r->nextDirectionBeingProcessed == 2 || r->nextDirectionBeingProcessed == 3) {
+                    fn_3_7FEA8(i, 1);
+                    return;
+                }
+                if (waited != 0) {
+                    return;
+                }
+                waited++;
+            } else if (r->runningDirectionCode == 3) {
+                if (r->nextDirectionBeingProcessed == 2 || r->nextDirectionBeingProcessed == 1) {
+                    fn_3_7FEA8(i, 1);
+                    return;
+                }
+                if (input->newButtonInput & 0x800) {
+                    fn_3_7FEA8(i, 2);
+                }
+                return;
+            } else if (r->runningDirectionCode == 5 && (buttons & 0x800)) {
+                fn_3_7FEA8(i, 1);
+                return;
+            } else {
+                if (input->newButtonInput & 0x800) {
+                    fn_3_7FEA8(i, 1);
+                }
+                return;
+            }
+        }
+    } else if (buttons & 0x400) {
+        int base = -1;
+        int handled;
+
+        if (input->controlStickAngle < 0xA00 || input->controlStickAngle >= 0xE00) {
+            if (input->controlStickAngle >= 0x600) {
+                base = 3;
+            } else if (input->controlStickAngle >= 0x200) {
+                base = 2;
+            } else {
+                base = 1;
+            }
+        }
+        if (base < 0) {
+            return;
+        }
+        for (handled = i = 0; i < 4; i++) {
+            InMemRunnerType* r = &g_Runners[i];
+            if (r->runnerOnFieldOrOutOrScored != 1 || r->currentBase != base) {
+                continue;
+            }
+            if (r->runningDirectionCode == 1) {
+                if (r->nextDirectionBeingProcessed == 2 || r->nextDirectionBeingProcessed == 3) {
+                    fn_3_7FEA8(i, 3);
+                    return;
+                }
+                if (input->newButtonInput & 0x400) {
+                    fn_3_7FEA8(i, 2);
+                }
+                return;
+            } else if (r->runningDirectionCode == 3) {
+                if (r->nextDirectionBeingProcessed == 2 || r->nextDirectionBeingProcessed == 1) {
+                    fn_3_7FEA8(i, 3);
+                    return;
+                }
+            } else if (input->newButtonInput & 0x400) {
+                fn_3_7FEA8(i, 3);
+                return;
+            }
+            if (handled >= 2) {
+                return;
+            }
+        }
+    }
 }
 
 // .text:0x0007DD6C size:0x550 mapped:0x806BCE00

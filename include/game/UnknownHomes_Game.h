@@ -281,7 +281,7 @@ typedef struct _InMemRunnerType {
     /*0x14E*/ u8 stealingStatus;
     /*0x14F*/ u8 framesSinceStealInput;
     /*0x150*/ u8 someCountdown_unused;
-    /*0x151*/ u8 _151;
+    /*0x151*/ s8 _151;
     /*0x152*/ u8 miniGamePlayerNum;
     /*0x153*/ u8 scoredOnGRD; // maybe
 } InMemRunnerType;            // size: 0x154
