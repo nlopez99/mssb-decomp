@@ -12,5 +12,6 @@ BOOL fn_3_163BD4(void);
 void fn_3_163D34(void);
 void fn_3_16440C(void);
 void fn_3_164554(void);
+void fn_3_164664(void);
 
 #endif // !__GAME_rep_3DA8_H_

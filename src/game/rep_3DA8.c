@@ -59,6 +59,42 @@ typedef struct {
 
 extern UnkMissionDef lbl_80109AE8[32][10];
 
+// .text:0x00164664 size:0x410 mapped:0x807A36F8
+void fn_3_164664(void) {
+    s32 n;
+    StarMissionCompletionTracker* tracker = &starMissionCompletionTracker;
+    UnkBss37400* bss = &lbl_3_common_bss_37400;
+    s32 bonus = lbl_80109420[bss->_46]._9;
+    u8 mission = tracker->_441C;
+    u8 level = tracker->_4415;
+    s16 ids[9];
+    s32 i;
+    BOOL found;
+    ChallengeTrackingStruct* c;
+
+    for (i = 0; i < 9; i++) {
+        ids[i] = inMemRoster[1][i].stats.CharID;
+    }
+    n = 0;
+    found = fn_3_163BD4();
+    if (bonus > 0 && found) {
+        while (bonus > 0) {
+            if (ids[n] != -1) {
+                c = &tracker->characters[ids[n]];
+                if (c->scoutFlagPointer->_4[level][mission] != 0 &&
+                    c->scoutFlagsAchieved < c->scoutFlagPointer->_4[level][mission]) {
+                    bonus--;
+                    c->scoutFlagsAchieved++;
+                }
+            }
+            n = (n + 1) % 9;
+            if (!fn_3_163BD4()) {
+                break;
+            }
+        }
+    }
+}
+
 // .text:0x00164554 size:0x110 mapped:0x807A35E8
 void fn_3_164554(void) {
     StarMissionCompletionTracker* tracker = &starMissionCompletionTracker;
