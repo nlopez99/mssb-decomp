@@ -1976,7 +1976,7 @@ typedef struct _MiniGameStruct {
     /*0x18B8*/ s16 _18B8;
     /*0x18BA*/ s16 _18BA;
     /*0x18BC*/ s32 minigamePoints_current_Latest[4];
-    /*0x18CC*/ MiniGameControlStruct minigameControlStruct[1];
+    /*0x18CC*/ MiniGameControlStruct minigameControlStruct;
     /*0x18F8*/ s8 minigameFielderIndex[4];
     /*0x18FC*/ u8 _18FC[4];
     /*0x1900*/ u8 _1900;

@@ -100,7 +100,7 @@ void fn_3_E1478(void) {
     }
 
     for (i = 0; i < 4; i++) {
-        character = g_Minigame.minigameControlStruct[0].characterIndex[i];
+        character = g_Minigame.minigameControlStruct.characterIndex[i];
         if (character < 0) {
             continue;
         }
@@ -111,7 +111,7 @@ void fn_3_E1478(void) {
             }
             continue;
         }
-        if (g_Minigame.minigameControlStruct[0]._24[i] == 0) {
+        if (g_Minigame.minigameControlStruct._24[i] == 0) {
             fielderIdx = g_Minigame.minigameFielderIndex[i];
             if (fielderIdx < 0) {
                 return;

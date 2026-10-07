@@ -160,7 +160,7 @@ void fn_3_6A9B0(void) {
     f32 chargeDown;
 
     if (g_d_GameSettings.minigamesEnabled) {
-        idx = g_Minigame.minigameControlStruct[0].characterIndex[g_Minigame.rosterID];
+        idx = g_Minigame.minigameControlStruct.characterIndex[g_Minigame.rosterID];
     } else {
         idx = 9;
     }
@@ -200,7 +200,7 @@ void fn_3_6A83C(void) {
 
     if (g_d_GameSettings.minigamesEnabled) {
         s8 order = g_Minigame.minigamePlayerSelectedOrder;
-        idx = g_Minigame.minigameControlStruct[0].characterIndex[order];
+        idx = g_Minigame.minigameControlStruct.characterIndex[order];
     }
 
     if (g_Pitcher.pitchTotalTimeCounter < 0) {

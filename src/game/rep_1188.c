@@ -31,7 +31,7 @@ void setInMemBatterConstants(int rosterID) {
             char_stats = inMemRoster[g_GameLogic.teamBatting];
         }
     } else if (g_d_GameSettings.minigamesEnabled) {
-        rosterID = g_Minigame.minigameControlStruct[0].characterIndex[g_Minigame.rosterID];
+        rosterID = g_Minigame.minigameControlStruct.characterIndex[g_Minigame.rosterID];
         char_stats = &inMemRoster[0][rosterID];
     } else {
         g_Batter.easyBatting =
@@ -80,10 +80,10 @@ void setInMemBatterConstants(int rosterID) {
             g_Batter.batterHand = 0;
         }
 
-        bVar1 = g_Minigame.minigameControlStruct[0].characterIndex[rosterID];
+        bVar1 = g_Minigame.minigameControlStruct.characterIndex[rosterID];
 
-        if (g_Minigame.minigameControlStruct[0].battingHandedness[bVar1] != 0) {
-            g_Pitcher.aiLevel = aILevel[g_Minigame.minigameControlStruct[0].aIStrength[bVar1]];
+        if (g_Minigame.minigameControlStruct.battingHandedness[bVar1] != 0) {
+            g_Pitcher.aiLevel = aILevel[g_Minigame.minigameControlStruct.aIStrength[bVar1]];
         }
     }
 }
