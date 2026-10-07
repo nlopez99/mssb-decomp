@@ -1685,13 +1685,13 @@ void fn_3_14BECC(Vec* pos, u8 big) {
 }
 
 // .text:0x0014BCB0 size:0x21C mapped:0x8078AD44
-// Volatile int and float registers of the spread math differ (99.26%): the target loads the
-// 2.0f factor late, as here, but multiplies it first.
+// 99.63%: the target multiplies the late-loaded 2.0f factor first and allocates the
+// spread math's volatile registers differently.
 void fn_3_14BCB0(Emitter3880* emitter, Vec* pos, u8 big) {
     Particle3880* p;
     s32* cfg;
     u32 count;
-    f32 angle;
+    f32 f;
     f32 spread;
     f32 deg;
     s32 r;
@@ -1713,10 +1713,11 @@ void fn_3_14BCB0(Emitter3880* emitter, Vec* pos, u8 big) {
             p->color[2] = cfg[9];
             r = rand();
             deg = 180.0 / cfg[1] * count;
-            spread = (2.0 * (r / 32767.0f - 0.5)) * radius;
-            angle = 0.017453292f * deg;
-            p->pos.x = pos->x + spread * cosf_kludge(angle);
-            p->pos.y = pos->y - spread * sinf_kludge(angle) - 1.0;
+            f = r / 32767.0f;
+            spread = (2.0 * (f - 0.5)) * radius;
+            f = 0.017453292f * deg;
+            p->pos.x = pos->x + spread * cosf_kludge(f);
+            p->pos.y = pos->y - spread * sinf_kludge(f) - 1.0;
             p->pos.z = pos->z;
             p->_4F = big;
             count++;
