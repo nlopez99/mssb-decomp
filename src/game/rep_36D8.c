@@ -112,9 +112,11 @@ static inline void setCpuFlags(u8 value) {
 
 s32 lbl_3_data_265F0 = -1;
 
-static u8 lbl_3_bss_B791;
-static f32 lbl_3_bss_B794;
+// .bss is laid out in reverse declaration order
 static s32 lbl_3_bss_B798;
+static f32 lbl_3_bss_B794;
+static u8 lbl_3_bss_B791;
+static u8 lbl_3_bss_B790; // read by no code here, but B791 sits at an odd offset
 
 // .text:0x001414AC size:0x580 mapped:0x80780540
 void fn_3_1414AC(void) {
@@ -300,6 +302,8 @@ void fn_3_1410F0(void) {
 }
 
 // .text:0x00140CE0 size:0x410 mapped:0x8077FD74
+// 97.52%: the inlined fn_3_13F7E4 loop starts its pointers from the address the setCpuFlags
+// loop used (kept in r7) in the target; here it loads g_Minigame's address again.
 void fn_3_140CE0(void) {
     if (fn_3_108854()) {
         return;
@@ -725,6 +729,8 @@ void fn_3_13F484(void) {
 }
 
 // .text:0x0013EC44 size:0x840 mapped:0x8077DCD8
+// 97.64%: base and pick are in r22/r23 the other way round, n is reset with li r3,0 instead of
+// mr r3,r6 before the first free-base loop, and the zero stores of the state-4 path use r3.
 void fn_3_13EC44(int slot) {
     int occupied[4];
     int free[4];
@@ -1238,6 +1244,7 @@ f32 fn_3_13DA50(s8 runner, f32 target, u8* dir) {
 }
 
 // .text:0x0013DA20 size:0x30 mapped:0x8077CAB4
+// 81.25%: same schedule difference as fn_3_13D5E8.
 int fn_3_13DA20(const void* a, const void* b) {
     return 100.0f * *(f32*)a - 100.0f * *(f32*)b;
 }
@@ -1266,6 +1273,8 @@ f32 fn_3_13D618(s8 runner, f32 target, u8* dir) {
 }
 
 // .text:0x0013D5E8 size:0x30 mapped:0x8077C67C
+// 81.25%: the target keeps stwu first and loads the constant before both operands;
+// MWCC schedules the stwu after the first fmuls here.
 int fn_3_13D5E8(const void* a, const void* b) {
     return 100.0f * *(f32*)a - 100.0f * *(f32*)b;
 }
@@ -1284,6 +1293,9 @@ bool fn_3_13D578(s8 player) {
 }
 
 // .text:0x0013C7BC size:0xDBC mapped:0x8077B850
+// 99.58%: the target keeps g_Minigame's address in r23 from the first loop on and starts the
+// first loop's pointer as a copy of it; here that loop uses the address itself and the later
+// loops load it again.
 void fn_3_13C7BC(void) {
     s8 chomp = -1;
     s8 star = -1;
