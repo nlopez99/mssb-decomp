@@ -11,3 +11,7 @@
 
 # decomp-toolkit writes files with LF
 config/**/*.txt  text eol=lf
+# Workers add lessons to the notes in parallel: keep both sides' lines on a
+# merge (tools/check_notes.py catches a lesson both sides edited)
+docs/matching-notes.md   merge=union
+docs/matching-notes/*.md merge=union
