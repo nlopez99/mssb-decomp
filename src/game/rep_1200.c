@@ -20,6 +20,8 @@
 #include "game/rep_3A98.h"
 #include "game/rep_3DA8.h"
 #include "game/m_sound.h"
+#include "game/rep_D0.h"
+#include "musyx/musyx.h"
 
 extern struct {
     /* 0x00 */ s32 _00;
@@ -90,14 +92,19 @@ extern f32 lbl_3_data_5E78[2];
 extern f32 lbl_3_data_4474[4];
 extern f32 lbl_3_data_5E98[6];
 extern f32 lbl_3_data_5EB0[2];
+extern f32 lbl_3_data_5EB8[3];
+extern f32 lbl_3_data_5EC4[3];
+extern f32 lbl_3_data_5ED0[3];
 extern s16 lbl_3_data_5EDC[22];
 extern f32 lbl_3_data_5F08[13];
+extern u8 lbl_3_data_5F44[12];
 extern u8 lbl_3_data_5F50[2][5];
 extern f32 lbl_3_data_5F5C[8];
 extern s16 lbl_3_data_5F7C[10];
 extern f32 lbl_3_data_5F90[12];
 extern f32 lbl_3_data_2138C[4];
 extern u8 lbl_3_data_76FC[][3];
+extern VecXYZ lbl_3_data_21380;
 
 // .data 0x8080-0x8088: only this unit uses it, but splits.txt does not assign it here yet
 extern s16 lbl_3_data_8080[4];
@@ -108,6 +115,7 @@ void fn_3_1DD48(void);
 void fn_3_7A154(int arg);
 void fn_3_7CE90(void);
 void fn_3_7BC20(void);
+void fn_3_7AB34(void);
 extern void changeScene(u8, s16);
 int fn_3_6D564(int team, int rosterID, int arg);
 
@@ -445,7 +453,18 @@ void fn_3_73FAC(void) {
 
 // .text:0x00073F2C size:0x80 mapped:0x806B2FC0
 void fn_3_73F2C(void) {
-    return;
+    if (g_Pitcher.pitchTotalTimeCounter < 0x7FFE) {
+        g_Pitcher.pitchTotalTimeCounter++;
+    } else {
+        g_Pitcher.pitchTotalTimeCounter = 0x7FFF;
+    }
+    if (g_Ball.pitchHangtimeCounter < 0x7FFE) {
+        g_Ball.pitchHangtimeCounter++;
+    } else {
+        g_Ball.pitchHangtimeCounter = 0x7FFF;
+    }
+    g_Pitcher.warioWaluStarAnimationStage = 0;
+    fn_3_71248();
 }
 
 // .text:0x00073DE8 size:0x144 mapped:0x806B2E7C
@@ -680,7 +699,117 @@ void fn_3_735A8(void) {
 
 // .text:0x0007310C size:0x49C mapped:0x806B21A0
 void fn_3_7310C(void) {
-    return;
+    VecXYZ release;
+    int port;
+
+    if (g_Pitcher.starPitchInd) {
+        if (g_d_GameSettings.GameModeSelected != GAME_TYPE_PRACTICE || g_Practice.practiceLevel == 7) {
+            if (g_Pitcher.nonCaptainStarPitchTriggeredType) {
+                if (g_GameLogic.TeamStars[g_GameLogic.teamFielding] >= starPowerCosts.regularStarCost) {
+                    g_GameLogic.TeamStars[g_GameLogic.teamFielding] -= starPowerCosts.regularStarCost;
+                } else {
+                    g_GameLogic.TeamStars[g_GameLogic.teamFielding] = 0;
+                }
+            } else if (g_GameLogic.Team_CaptainRosterLoc[g_GameLogic.teamFielding] != g_Pitcher.rosterID &&
+                       g_d_GameSettings.GameModeSelected != GAME_TYPE_PRACTICE) {
+                if (g_GameLogic.TeamStars[g_GameLogic.teamFielding] >= starPowerCosts.nonCaptain_CaptainStarCost) {
+                    g_GameLogic.TeamStars[g_GameLogic.teamFielding] -= starPowerCosts.nonCaptain_CaptainStarCost;
+                } else {
+                    g_GameLogic.TeamStars[g_GameLogic.teamFielding] = 0;
+                }
+            } else {
+                if (g_GameLogic.TeamStars[g_GameLogic.teamFielding] >= starPowerCosts.captainStarCost) {
+                    g_GameLogic.TeamStars[g_GameLogic.teamFielding] -= starPowerCosts.captainStarCost;
+                } else {
+                    g_GameLogic.TeamStars[g_GameLogic.teamFielding] = 0;
+                }
+            }
+        }
+        g_AiLogic.nStarPitchesThrownThisAB++;
+    }
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES) {
+        if (g_Minigame.miniGameTurnCounter < 0xFE) {
+            g_Minigame.miniGameTurnCounter++;
+        } else {
+            g_Minigame.miniGameTurnCounter = 0xFF;
+        }
+        if (g_Minigame.bB_pitchesRemainingInTurn) {
+            g_Minigame.bB_pitchesRemainingInTurn--;
+        }
+    }
+    port = 0;
+    if (g_Minigame.GameMode_MiniGame == MINI_GAME_ID_BOBOMB_DERBY ||
+        g_Minigame.GameMode_MiniGame == MINI_GAME_ID_BARREL_BATTER ||
+        (g_d_GameSettings.GameModeSelected == GAME_TYPE_PRACTICE && g_Practice.practiceLevel == 4)) {
+        release.x = lbl_3_data_21380.x;
+        release.y = lbl_3_data_21380.y;
+        release.z = lbl_3_data_21380.z;
+        release.y = -release.y;
+    } else {
+        if (g_d_GameSettings.minigamesEnabled) {
+            port = g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder];
+        }
+        if (g_Pitcher.charID == 0x26) {
+            getAnimRelatedCoordinates(port, 9, &release);
+        } else if (!g_Pitcher.handedness) {
+            getAnimRelatedCoordinates(port, 0x19, &release);
+        } else {
+            getAnimRelatedCoordinates(port, 0x13, &release);
+        }
+    }
+    g_Pitcher.pitchRelease.x = g_Pitcher.ballCurrentPosition.x = release.x;
+    g_Pitcher.pitchRelease.y = g_Pitcher.ballCurrentPosition.y = -release.y;
+    g_Pitcher.pitchRelease.z = g_Pitcher.ballCurrentPosition.z = release.z;
+    if (g_Pitcher.nonCaptainStarPitchTriggeredType) {
+        g_Pitcher.TypeOfPitch = 0;
+    } else if (g_Pitcher.starPitchType) {
+        g_Pitcher.specialPitchTypeCode = g_Pitcher.starPitchType + 3;
+        g_Pitcher.TypeOfPitch = lbl_3_data_5F44[g_Pitcher.specialPitchTypeCode - 4];
+    } else if (g_Pitcher.TypeOfPitch == 2) {
+        g_Pitcher.specialPitchTypeCode = 3;
+    } else {
+        g_Pitcher.specialPitchTypeCode = 1;
+        if (g_Pitcher.ChargePitchType >= 1) {
+            g_Pitcher.TypeOfPitch = 1;
+        } else {
+            g_Pitcher.TypeOfPitch = 0;
+        }
+    }
+    fn_3_72CA8();
+    fn_3_72768();
+    g_Ball.framesSinceHit = -1;
+    g_Ball.pitchHangtimeCounter = 0;
+    g_Ball.postPitchResultCounter = -1;
+    g_Ball.fielderWBallIndex = -1;
+    g_Ball.AtBat_ContactResult = 0;
+    g_Ball.ballState = 0;
+    g_Pitcher.pitchCurveVeloV1 = 0.0f;
+    g_Pitcher._60 = 0.0f;
+    g_Pitcher.pitchCurveVeloV2 = 0.0f;
+    g_Pitcher._68 = 0.0f;
+    g_Pitcher.cancelParabolicAdjustmentInd = 0;
+    g_Pitcher.strikeZoneProcessNumber = 0;
+    g_Pitcher.nPickoffAttempts = 0;
+    g_Pitcher._10C[1] = 0.0f;
+    g_Pitcher._10C[2] = 0.0f;
+    g_Minigame._1911 = 0;
+    sndFXKeyOff(lbl_3_bss_172C[0]);
+    fn_3_20064();
+    if (g_Pitcher.nPitchesThisAB < 0xFE) {
+        g_Pitcher.nPitchesThisAB++;
+    } else {
+        g_Pitcher.nPitchesThisAB = 0xFF;
+    }
+    fn_3_71248();
+    fn_3_7AB34();
+    if (!g_Pitcher.AIInd &&
+        (g_Pitcher.ChargePitchType == 3 || g_Pitcher.nonCaptainStarPitchTriggeredType || g_Pitcher.starPitchType)) {
+        if (g_d_GameSettings.minigamesEnabled) {
+            fn_3_6C854(g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder], 2);
+        } else {
+            fn_3_6C854(g_GameLogic.teamFielding, 2);
+        }
+    }
 }
 
 // .text:0x00072CA8 size:0x464 mapped:0x806B1D3C
@@ -823,7 +952,208 @@ void fn_3_72768(void) {
 
 // .text:0x00071248 size:0x1520 mapped:0x806B02DC
 void fn_3_71248(void) {
-    return;
+    VecSrcDst ray;
+    CollisionStruct hit;
+    f32 dist;
+    f32 t;
+    f32 amp;
+    f32 ground;
+    f32 speed;
+    BALL_COLLISION_TYPE collision;
+
+    if (g_Pitcher.eggBallBounceNumber) {
+        g_Pitcher.framesSinceFirstEggBounce++;
+    }
+    g_Pitcher.ballLastPosition.x = g_Pitcher.ballCurrentPosition.x;
+    g_Pitcher.ballLastPosition.y = g_Pitcher.ballCurrentPosition.y;
+    g_Pitcher.ballLastPosition.z = g_Pitcher.ballCurrentPosition.z;
+    if (g_Minigame.GameMode_MiniGame == MINI_GAME_ID_WALLBALL && g_Minigame.ballStoppedBreakingWallsInd) {
+        g_Pitcher.ballVelocity.y -= g_Ball.physicsSubstruct.gravity;
+        g_Pitcher.ballCurrentPosition.x += g_Pitcher.ballVelocity.x;
+        g_Pitcher.ballCurrentPosition.y += g_Pitcher.ballVelocity.y;
+        g_Pitcher.ballCurrentPosition.z += g_Pitcher.ballVelocity.z;
+        if (g_Ball.AtBat_Contact_BallPos.y < g_Ball.groundYForBounces) {
+            g_Pitcher.ballCurrentPosition.y = g_Ball.groundYForBounces;
+            g_Pitcher.ballVelocity.x *= lbl_3_data_4388[g_d_GameSettings.StadiumID]._10;
+            g_Pitcher.ballVelocity.z *= lbl_3_data_4388[g_d_GameSettings.StadiumID]._10;
+            g_Pitcher.ballVelocity.y *= -lbl_3_data_4388[g_d_GameSettings.StadiumID]._04;
+        }
+        g_Ball.AtBat_Contact_BallPos.x = g_Pitcher.ballCurrentPosition.x;
+        g_Ball.AtBat_Contact_BallPos.y = g_Pitcher.ballCurrentPosition.y;
+        g_Ball.AtBat_Contact_BallPos.z = g_Pitcher.ballCurrentPosition.z;
+    } else {
+        if (g_Pitcher.starPitchType == 7 || g_Pitcher.starPitchType == 8) {
+            if (g_Ball.pitchHangtimeCounter >= g_Pitcher.bulletPitchLoopStartingFrame && g_Pitcher.bulletPitchStageCode == 0) {
+                g_Pitcher.bulletPitchStageCode = 1;
+            }
+            if (g_Pitcher.bulletPitchStageCode == 1) {
+                fn_3_709B4();
+            } else {
+                goto straight;
+            }
+        } else {
+        straight:
+            if (g_Pitcher.ballCurrentPosition.z <= g_Pitcher.pitchZ_whenAirResistanceStarts) {
+                dist = g_Pitcher.ballVelocity.z - g_Pitcher.ballVelocity.z * g_Pitcher.airResistance_veloAdj;
+                if (dist < -0.05f) {
+                    g_Pitcher.ballVelocity.z = dist;
+                    g_Pitcher.ballVelocity.x =
+                        g_Pitcher.ballVelocity.x - g_Pitcher.ballVelocity.x * g_Pitcher.airResistance_veloAdj;
+                    g_Pitcher.ballVelocity.y =
+                        g_Pitcher.ballVelocity.y - g_Pitcher.ballVelocity.y * g_Pitcher.airResistance_veloAdj;
+                }
+            }
+            fn_3_70EF4();
+            g_Pitcher.ballVelocity.x *= g_Pitcher.decelerationFactor;
+            g_Pitcher.ballVelocity.y *= g_Pitcher.decelerationFactor;
+            g_Pitcher.ballVelocity.z *= g_Pitcher.decelerationFactor;
+            fn_3_70B94();
+            fn_3_70AEC();
+            g_Pitcher.ballVelocity.x += g_Pitcher.pitchCurveVeloV1;
+            g_Pitcher.ballCurrentPosition.x += g_Pitcher.ballVelocity.x;
+            g_Pitcher.ballCurrentPosition.y += g_Pitcher.ballVelocity.y;
+            g_Pitcher.ballCurrentPosition.z += g_Pitcher.ballVelocity.z;
+        }
+        g_Ball.AtBat_Contact_BallPos.x = g_Pitcher.ballCurrentPosition.x + g_Pitcher.pitchX_parabolicAdjustment;
+        g_Ball.AtBat_Contact_BallPos.y = g_Pitcher.ballCurrentPosition.y + g_Pitcher.pitchY_parabolicAdjustment;
+        g_Ball.AtBat_Contact_BallPos.z = g_Pitcher.ballCurrentPosition.z;
+        if ((g_Pitcher.starPitchType == 7 || g_Pitcher.starPitchType == 8) && g_Pitcher.bulletPitchStageCode == 1) {
+            g_Ball.AtBat_Contact_BallPos.x += g_Pitcher.starPitchPositionAdjustment.x;
+            g_Ball.AtBat_Contact_BallPos.y += g_Pitcher.starPitchPositionAdjustment.y;
+            g_Ball.AtBat_Contact_BallPos.z += g_Pitcher.starPitchPositionAdjustment.z;
+        }
+        if (g_Pitcher.starPitchType == 3) {
+            dist = lbl_3_data_5EB8[1] - g_Ball.AtBat_Contact_BallPos.z;
+            if (dist >= 0.0f) {
+                g_Pitcher.starPitchPositionAdjustment.x = lbl_3_data_5EB8[0] * (dist / lbl_3_data_5EB8[1]);
+                if (g_Pitcher.warioWaluStarPitchRightLeft) {
+                    g_Pitcher.starPitchPositionAdjustment.x = -g_Pitcher.starPitchPositionAdjustment.x;
+                }
+                g_Ball.AtBat_Contact_BallPos.x += g_Pitcher.starPitchPositionAdjustment.x;
+                if (g_Pitcher.warioWaluStarHasPlayedSound == 0) {
+                    playSoundEffect(0x1B2);
+                }
+                g_Pitcher.warioWaluStarAnimationStage = 1;
+                if (g_Ball.AtBat_Contact_BallPos.z < lbl_3_data_5EB8[2]) {
+                    g_Pitcher.warioWaluStarAnimationStage = 2;
+                }
+                g_Pitcher.warioWaluStarHasPlayedSound++;
+            }
+        } else if (g_Pitcher.starPitchType == 4) {
+            dist = lbl_3_data_5EC4[1] - g_Ball.AtBat_Contact_BallPos.z;
+            if (dist >= 0.0f) {
+                t = dist / lbl_3_data_5EC4[1];
+                amp = lbl_3_data_5EC4[0] * t;
+                if (t > 1.0f) {
+                    t = 1.0f;
+                }
+                g_Pitcher.starPitchPositionAdjustment.x = 2.0f * amp * -sinf_kludge(4.712389f * t) + -amp;
+                if (g_Pitcher.warioWaluStarPitchRightLeft) {
+                    g_Pitcher.starPitchPositionAdjustment.x = -g_Pitcher.starPitchPositionAdjustment.x;
+                }
+                g_Ball.AtBat_Contact_BallPos.x += g_Pitcher.starPitchPositionAdjustment.x;
+                if (g_Pitcher.warioWaluStarHasPlayedSound == 0) {
+                    playSoundEffect(0x1B2);
+                }
+                g_Pitcher.warioWaluStarAnimationStage = 1;
+                if (g_Ball.AtBat_Contact_BallPos.z < lbl_3_data_5EC4[2]) {
+                    g_Pitcher.warioWaluStarAnimationStage = 2;
+                }
+                g_Pitcher.warioWaluStarHasPlayedSound++;
+            }
+        }
+        if (g_Pitcher.starPitchType == 11 || g_Pitcher.starPitchType == 12) {
+            t = (f32)g_Ball.pitchHangtimeCounter / (f32)g_Pitcher.frameWhenUnhittable;
+            if (t >= lbl_3_data_5F90[g_Pitcher.starPitchType - 11 + 8] &&
+                t <= lbl_3_data_5F90[g_Pitcher.starPitchType - 11 + 10]) {
+                g_Pitcher.peachDaisyAnimationHappened = 1;
+                g_Pitcher.peachDaisyStarAnimationOn++;
+            } else {
+                g_Pitcher.peachDaisyStarAnimationOn = 0;
+            }
+        }
+        ground = g_Ball.groundYForBounces;
+        if (g_Pitcher.starPitchType == 9 || g_Pitcher.starPitchType == 10) {
+            ground = lbl_3_data_5F5C[0];
+        }
+        if (g_Ball.AtBat_Contact_BallPos.y < ground) {
+            if ((g_Pitcher.starPitchType == 9 || g_Pitcher.starPitchType == 10) &&
+                (g_Pitcher.eggBallBounceNumber == 0 || g_Pitcher.eggBallBounceNumber == 1)) {
+                fn_3_70838();
+            } else {
+                speed = SQ(g_Pitcher.ballVelocity.x) + SQ(g_Pitcher.ballVelocity.z);
+                g_Pitcher.ballVelocity.y = -(ground - g_Ball.pastCoordinates[0].y);
+                g_Pitcher.eggBallBounceNumber++;
+                g_Pitcher.cancelParabolicAdjustmentInd = 1;
+                g_Ball.AtBat_Contact_BallPos.y = ground;
+                g_Pitcher.ballCurrentPosition.y = ground;
+                g_Pitcher.ballVelocity.y *= lbl_3_data_5ED0[1];
+                speed = dolsqrtf2(speed);
+                if (speed < 0.01f) {
+                    speed = 0.01f;
+                }
+                g_Pitcher.pitchCurveVeloV1 = 0.0f;
+                g_Pitcher._60 = 0.0f;
+                g_Pitcher.ballVelocity.x = 0.15f * (g_Pitcher.ballVelocity.x / speed);
+                g_Pitcher.ballVelocity.z = 0.15f * (g_Pitcher.ballVelocity.z / speed);
+                playSoundEffect(0x17E);
+            }
+        }
+        g_Pitcher.framesUntilBallReachesBatterZ = fn_3_70768(&g_Pitcher.pitchXPosition, FALSE, g_Batter.batPosition.z);
+        fn_3_70768(&g_Pitcher.pitchXPosition2, TRUE, g_Batter.batPosition.z);
+        if (g_Pitcher.framesUntilPitchGetsToBatter < 0) {
+            g_Pitcher.framesUntilPitchGetsToBatter = g_Pitcher.framesUntilBallReachesBatterZ + g_Ball.pitchHangtimeCounter;
+        }
+        fn_3_70280();
+        if (g_Pitcher.strikeZoneProcessNumber == 0 && g_Ball.AtBat_Contact_BallPos.z < g_Pitcher.strikeCheckZ[0]) {
+            fn_3_706B8(0);
+            g_Pitcher.strikeZoneProcessNumber = 1;
+        }
+        if (g_Pitcher.strikeZoneProcessNumber <= 1 && g_Ball.AtBat_Contact_BallPos.z < g_Pitcher.strikeCheckZ[1]) {
+            if (!g_Pitcher.calledStrikeInd) {
+                fn_3_706B8(1);
+            }
+            g_Pitcher.strikeZoneProcessNumber = 2;
+        }
+        if (g_Ball.AtBat_Contact_BallPos.z >= g_Pitcher.centerOfStrikeZone.z) {
+            g_Pitcher.framesUntilUnhittable = g_Pitcher.frameWhenUnhittable - g_Ball.pitchHangtimeCounter;
+        }
+        if (g_Ball.AtBat_Contact_BallPos.z < -3.0f) {
+            fn_3_750C4(PITCHER_ACTION_STATE_NO_CONTACT);
+            g_Pitcher.pitchDidntResultInLiveBallInd = 1;
+            if (g_Pitcher.pitchSpeed > 144) {
+                playSoundEffect(0x16B);
+            } else {
+                playSoundEffect(0x16A);
+            }
+        }
+        g_Pitcher.frontOfPlateZ2 = g_Pitcher.frontOfPlateZ;
+        g_Pitcher.pitchLinearInterpolateX =
+            g_Pitcher.pitchRelease.x + (g_Pitcher.ballCurrentPosition.x - g_Pitcher.pitchRelease.x) *
+                                           (g_Pitcher.frontOfPlateZ - g_Pitcher.pitchRelease.z) /
+                                           (g_Pitcher.ballCurrentPosition.z - g_Pitcher.pitchRelease.z);
+        g_Pitcher.pitchLinearInterpolateY =
+            g_Pitcher.pitchRelease.x + (g_Pitcher.ballCurrentPosition.y - g_Pitcher.pitchRelease.y) *
+                                           (g_Pitcher.frontOfPlateZ - g_Pitcher.pitchRelease.z) /
+                                           (g_Pitcher.ballCurrentPosition.z - g_Pitcher.pitchRelease.z);
+        if (g_Batter.hitByPitch) {
+            fn_3_6FFC4();
+            fn_3_750C4(PITCHER_ACTION_STATE_HIT_BY_PITCH);
+            g_Pitcher.pitchDidntResultInLiveBallInd = 1;
+        }
+    }
+    ray.src.x = g_Ball.AtBat_Contact_BallPos.x;
+    ray.src.y = -g_Ball.AtBat_Contact_BallPos.y;
+    ray.src.z = g_Ball.AtBat_Contact_BallPos.z;
+    ray.dst.x = g_Ball.AtBat_Contact_BallPos.x;
+    ray.dst.y = 10.0f;
+    ray.dst.z = g_Ball.AtBat_Contact_BallPos.z;
+    collision = checkCollision(&ray, &hit, 0, 0);
+    g_Ball.maybeCollisionRelated = g_Ball.collisionCode;
+    g_Ball.physicsSubstruct.twoFrameLookback[1] = -hit.position.y;
+    if (collision) {
+        g_Ball.collisionCode = collision;
+    }
 }
 
 // .text:0x00070EF4 size:0x354 mapped:0x806AFF88
