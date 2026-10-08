@@ -65,6 +65,7 @@ Compare the built module with the original (`build/GYQE01/game/game.rel` against
 - **One object per `repHeaderData`.** Every game object starts its `.rodata` with its own copy of `header_rep_data.h`'s 0x50-byte `repHeaderData`, and units are named after where that copy sits. The module has 92 copies and 92 units, so code outside every unit's range is the tail or head of a neighbouring unit, not an object of its own. A unit with no code yet (`rep_A78`, `rep_D68`) is still one object.
 - **Jump tables close an object's `.data`, and each object's `.data` starts on an 8-byte boundary.** Zero padding before an 8-aligned run of tables marks a boundary (`0x10A30` after `fn_3_B482C`'s table). Proven with test files compiled with the game's flags.
 - **One base register reaching several objects proves they share a file; one group of readers does not.** The block 0x8110–0xD5B8 holds tables read only by single units' functions, yet lies outside those units' `.data` (rep_1770, rep_16B8, rep_3A48, rep_3448).
+- **A pool base below the unit's `.data` range:** rep_16B8's `fn_3_96CA4` and `fn_3_91FC4` reach `lbl_3_data_BE50`, `BF18`, `BF2C`, `EE5C`, `F1FC`, `F20C` and `F430` from the base `lbl_3_data_8D88` (offsets 0x30C8 to 0x66A8), so one object's `.data` starts at 0x8D88 and runs past 0xF430, across rep_1610's 0xD5B8 range; a copy of `rep_16B8.c` defining 0x8D88–0xBF6C before its own data matched `fn_3_96CA4` apart from the base's name. Yet `fn_3_9894C` names `D648`, `D7E8` and `D860` one by one, unexplained.
 
 ## Before committing
 
