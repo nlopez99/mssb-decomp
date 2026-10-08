@@ -741,10 +741,10 @@ void fn_3_BF158(void) {
 
 // .text:0x000BF070 size:0xE8 mapped:0x806FE104
 // The target reaches 0x111A8, +8 and +0x20 (lbl_3_data_111C8) from one pool base:
-// this unit's statics, outside its .data range in splits.txt, so externs cannot match.
+// statics of this file outside its .data range; defined as statics it scores 100% (reloc).
 void fn_3_BF070(void) {
-    s32 i;
     u8* file;
+    s32 i;
 
     fn_8003A85C(lbl_3_data_111A8._00[g_d_GameSettings.StadiumID]);
     fn_8003A848(lbl_3_data_111A8._08[g_d_GameSettings.StadiumID][0], lbl_3_data_111A8._08[g_d_GameSettings.StadiumID][1],
