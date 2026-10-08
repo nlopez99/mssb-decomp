@@ -167,15 +167,23 @@ typedef struct StaC2Draw {
             /* 0xAC */ Quaternion _AC;
             /* 0xBC */ f32 _BC;
             /* 0xC0 */ f32 _C0;
-            /* 0xC4 */ StaC2Target* _C4;
-            /* 0xC8 */ u8 _C8[0xCA - 0xC8];
+            /* 0xC4 */ f32 _C4;
+            /* 0xC8 */ f32 _C8;
+            /* 0xCC */ u8 _CC_D0[0xD0 - 0xCC];
+            /* 0xD0 */ s8 _D0;
+            /* 0xD1 */ u8 _D1;
+        };
+        struct {
+            /* 0xA0 */ u8 _A0_B0[0xB0 - 0xA0];
+            /* 0xB0 */ f32 _B0;
+            /* 0xB4 */ u8 _B4_CA[0xCA - 0xB4];
             /* 0xCA */ u8 _CA;
             /* 0xCB */ u8 _CB;
             /* 0xCC */ u8 _CC;
-            /* 0xCD */ u8 _CD[0xD0 - 0xCD];
-            /* 0xD0 */ s8 _D0;
-            /* 0xD1 */ u8 _D1;
-            /* 0xD2 */ u8 _D2[0xE8 - 0xD2];
+        };
+        struct {
+            /* 0xA0 */ u8 _A0_C4[0xC4 - 0xA0];
+            /* 0xC4 */ StaC2Target* target;
         };
         struct {
             /* 0xA0 */ f32 frame;
@@ -186,10 +194,7 @@ typedef struct StaC2Draw {
         struct {
             /* 0xA0 */ StaC2Link* link;
         };
-        struct {
-            /* 0xA0 */ u8 _A0_B0[0xB0 - 0xA0];
-            /* 0xB0 */ f32 _B0;
-        };
+        /* 0xA0 */ u8 _A0_E8[0xE8 - 0xA0];
     };
 } StaC2Draw; // size: 0xE8
 
@@ -651,13 +656,34 @@ void fn_3_D24E8(StaC2Draw* draw, s8 fielder) {
 BOOL fn_3_D249C(StaC2Draw* draw) {
     Vec diff;
 
-    PSVECSubtract(&draw->_C4->_1CC, &draw->_C4->_0C, &diff);
+    PSVECSubtract(&draw->target->_1CC, &draw->target->_0C, &diff);
     return PSVECMag(&diff) > 14.250000447034836;
 }
 
 // .text:0x000D233C size:0x160 mapped:0x807113D0
-void fn_3_D233C(void) {
-    return;
+InMemBallType* fn_3_D233C(StaC2Draw* draw) {
+    Mtx m;
+    Vec diff;
+    Vec dir;
+    Vec fwd = { 1.0f, 0.0f, 0.0f };
+    Vec axis = { 0.0f, 1.0f, 0.0f };
+    Vec pos = draw->_A0;
+
+    if (g_Ball.AtBat_ContactResult >= 2) {
+        return NULL;
+    }
+    pos.y = 4.5f;
+    PSVECSubtract((Vec*)&g_Ball, &pos, &diff);
+    diff.y = 0.0f;
+    if (PSVECMag(&diff) < 23.0f) {
+        PSVECNormalize(&diff, &diff);
+        PSMTXRotAxisRad(m, &axis, 0.017453292f * draw->_C0);
+        PSMTXMultVec(m, &fwd, &dir);
+        if (57.29578f * acosf_kludge(PSVECDotProduct(&diff, &dir)) <= 60.0f) {
+            return &g_Ball;
+        }
+    }
+    return NULL;
 }
 
 // .text:0x000D2220 size:0x11C mapped:0x807112B4
@@ -784,8 +810,13 @@ void fn_3_D127C(void) {
 }
 
 // .text:0x000D1110 size:0x16C mapped:0x807101A4
-void fn_3_D1110(void) {
-    return;
+void fn_3_D1110(StaC2Draw* draw) {
+    fn_3_D1004(draw, lbl_3_data_18364[draw->_9C].pos.x, lbl_3_data_18364[draw->_9C].pos.y,
+               lbl_3_data_18364[draw->_9C].pos.z, lbl_3_data_18364[draw->_9C]._10, 0.0f);
+    draw->_C8 = lbl_3_data_18364[draw->_9C].pos.y;
+    draw->_BC = 0.0f;
+    draw->_C4 = 0.0f;
+    draw->_D1 = 0;
 }
 
 // .text:0x000D1004 size:0x10C mapped:0x80710098

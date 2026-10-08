@@ -5,6 +5,7 @@
 #include "Dolphin/mtx.h"
 
 struct StaC2Draw;
+struct _InMemBallType;
 struct StaC2Spring;
 struct StaC2Particle;
 struct StaC2Emitter;
@@ -57,7 +58,7 @@ void fn_3_D0534(void);
 f32 fn_3_D0854(struct StaC2Draw* draw);
 void fn_3_D0918(void);
 void fn_3_D1004(struct StaC2Draw* draw, f32 x, f32 y, f32 z, f32 rotY, f32 tilt);
-void fn_3_D1110(void);
+void fn_3_D1110(struct StaC2Draw* draw);
 void fn_3_D127C(void);
 void fn_3_D1280(void);
 void fn_3_D141C(void);
@@ -68,7 +69,7 @@ void fn_3_D1AC4(struct StaC2Draw* draw);
 void fn_3_D1B24(void);
 void fn_3_D1F2C(void);
 void fn_3_D2220(void);
-void fn_3_D233C(void);
+struct _InMemBallType* fn_3_D233C(struct StaC2Draw* draw);
 BOOL fn_3_D249C(struct StaC2Draw* draw);
 void fn_3_D24E8(struct StaC2Draw* draw, s8 fielder);
 s8 fn_3_D255C(struct StaC2Draw* draw);
