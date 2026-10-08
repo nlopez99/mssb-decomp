@@ -5,6 +5,7 @@
 #include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
 #include "C3/control.h"
+#include "Dolphin/gx.h"
 #include "Dolphin/rand.h"
 #include "string.h"
 #include "game/rep_3AE8.h"
@@ -66,6 +67,33 @@ typedef struct {
     /* 0x20 */ s32 _20;
     /* 0x24 */ UnkSpark1E08* _24;
 } UnkSparkTask1E08;
+
+typedef struct UnkKey21F8 {
+    /* 0x0 */ f32 value;
+    /* 0x4 */ f32 amplitude;
+    /* 0x8 */ u16 type : 4;
+    /* 0x8 */ u16 frame : 12;
+    /* 0xA */ u8 _A;
+    /* 0xB */ u8 _B;
+} UnkKey21F8; // size: 0xC
+
+typedef struct UnkAnim21F8 {
+    /* 0x00 */ f32 _00[4];
+    /* 0x10 */ u16 _10;
+    /* 0x12 */ u16 _12;
+    /* 0x14 */ UnkKey21F8* keys[8];
+    /* 0x34 */ u8 counts[8];
+    /* 0x3C */ u8 current[8];
+} UnkAnim21F8; // size: 0x44
+
+typedef struct UnkEffect21F8 {
+    /* 0x00 */ UnkAnim21F8* anims;
+    /* 0x04 */ void** _04;
+    /* 0x08 */ s32 _08;
+    /* 0x0C */ s32 _0C;
+    /* 0x10 */ f32 _10;
+    /* 0x14 */ f32 time;
+} UnkEffect21F8; // size: 0x18
 
 typedef struct {
     /* 0x000 */ Vec _000;
@@ -216,6 +244,8 @@ extern void fn_8006C3F0(s32 arg0);
 extern void pitchingMachinePitching(u8 id);
 extern void minigamesSetSomePointers(void);
 extern void fn_800A7D4C(s32, void*);
+extern void fn_80033B58(void* texture, s32 index, s32, s32);
+extern u16 lbl_800F7860[4][2];
 extern void fn_8003A550(s32 idx, VecXYZ* pos, Vec* dir, BOOL flag);
 
 // .text:0x000C07B0 size:0x60 mapped:0x806FF844
@@ -243,18 +273,108 @@ void fn_3_C0134(void) {
 
 // .text:0x000BFDA4 size:0x390 mapped:0x806FEE38
 f32 fn_3_BFDA4(struct UnkKey21F8* keys, int count, int frame, u8 current, u8* currentOut, f32 t) {
-    return 0.0f;
+    UnkKey21F8* key;
+    UnkKey21F8* next;
+    s32 dir;
+    f32 span;
+    f32 start;
+    f32 delta;
+    f32 amp;
+    f32 offset;
+    f32 local;
+
+    if (current < count - 1 && keys[current + 1].frame <= t) {
+        dir = 1;
+    } else if (current != 0 && keys[current].frame > t) {
+        dir = -1;
+    }
+    while ((current < count - 1 && keys[current + 1].frame <= t) || (current != 0 && keys[current].frame > t)) {
+        current += dir;
+    }
+    if (current == count - 1) {
+        next = &keys[current];
+        span = frame - keys[current].frame;
+    } else {
+        next = &keys[current + 1];
+        span = keys[current + 1].frame - keys[current].frame;
+    }
+    key = &keys[current];
+    start = key->value;
+    delta = next->value - start;
+    local = t - key->frame;
+    switch (key->type) {
+    case 0:
+        t = start + delta * local / span;
+        break;
+    case 1:
+        amp = key->amplitude * 0.5f;
+        if (key->_A) {
+            offset = amp;
+        } else {
+            offset = -amp;
+        }
+        if (key->_B & 1) {
+            if (key->_A) {
+                delta -= key->amplitude;
+            } else {
+                delta += key->amplitude;
+            }
+        }
+        t = amp * cos(3.1415927f * (key->_A + local * key->_B / span)) + (start + offset + delta * local / span);
+        break;
+    case 2:
+        break;
+    }
+    if (currentOut != NULL) {
+        *currentOut = current;
+    }
+    return t;
 }
 
 // .text:0x000BFB3C size:0x268 mapped:0x806FEBD0
-void fn_3_BFB3C(void) {
-    return;
+f32 fn_3_BFB3C(UnkAnim21F8* anim, int frame, Mtx m, f32 t) {
+    return 0.0f;
 }
 
 // .text:0x000BF8F8 size:0x244 mapped:0x806FE98C
 void fn_3_BF8F8(struct UnkEffect21F8* effect, Mtx m, Vec* pos,
                  f32 (*callback)(struct UnkAnim21F8*, int, Mtx, f32)) {
-    return;
+    Mtx mtx;
+    Mtx inv;
+    Vec quad[4];
+    Vec out;
+    u8 alpha;
+    s32 i;
+    s32 j;
+
+    if (callback == NULL) {
+        callback = fn_3_BFB3C;
+    }
+    PSMTXInverse(m, inv);
+    inv[2][3] = inv[1][3] = inv[0][3] = 0.0f;
+    memset(quad, 0, sizeof(quad));
+    for (i = 0; i < effect->_08; i++) {
+        alpha = 255.0f * callback(&effect->anims[i], effect->_10, mtx, effect->time);
+        if (alpha) {
+            quad[0].x = effect->anims[i]._00[0];
+            quad[0].y = effect->anims[i]._00[1];
+            quad[1].x = effect->anims[i]._00[0] + effect->anims[i]._00[2];
+            quad[1].y = effect->anims[i]._00[1];
+            quad[2].x = effect->anims[i]._00[0] + effect->anims[i]._00[2];
+            quad[2].y = effect->anims[i]._00[1] + effect->anims[i]._00[3];
+            quad[3].x = effect->anims[i]._00[0];
+            quad[3].y = effect->anims[i]._00[1] + effect->anims[i]._00[3];
+            PSMTXConcat(inv, mtx, mtx);
+            fn_80033B58(effect->_04[effect->anims[i]._10], effect->anims[i]._12, 0, 0);
+            GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+            for (j = 0; j < 4; j++) {
+                PSMTXMultVec(mtx, &quad[j], &out);
+                GXPosition3f32(pos->x + out.x, pos->y + out.y, pos->z + out.z);
+                GXColor1u32(0xFFFFFF00 | alpha);
+                GXTexCoord2f32(lbl_800F7860[j][0], lbl_800F7860[j][1]);
+            }
+        }
+    }
 }
 
 // .text:0x000BF878 size:0x80 mapped:0x806FE90C

@@ -55,7 +55,7 @@ void fn_3_BF6C0(void);
 BOOL fn_3_BF878(void);
 void fn_3_BF8F8(struct UnkEffect21F8* effect, Mtx m, Vec* pos,
                  f32 (*callback)(struct UnkAnim21F8*, int, Mtx, f32));
-void fn_3_BFB3C(void);
+f32 fn_3_BFB3C(struct UnkAnim21F8* anim, int frame, Mtx m, f32 t);
 f32 fn_3_BFDA4(struct UnkKey21F8* keys, int count, int frame, u8 current, u8* currentOut, f32 t);
 void fn_3_C0134(void);
 void fn_3_C0770(void);
