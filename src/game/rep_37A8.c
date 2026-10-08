@@ -2,7 +2,30 @@
 // Must precede header_rep_data.h, which keeps the .rodata constants unpooled as in the target
 #include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
+#include "game/rep_1838.h"
+#include "game/rep_31A0.h"
+#include "game/rep_D18.h"
 #include "Dolphin/gx.h"
+#include "string.h"
+
+// A CPU player's state, one per player at g_Minigame._1DCC
+typedef struct Unk37A8Cpu {
+    /* 0x0 */ s16 _0;
+    /* 0x2 */ u8 _2;
+    /* 0x3 */ u8 _3;
+} Unk37A8Cpu; // size: 0x4
+
+// This minigame's view of g_Minigame
+typedef struct Unk37A8Minigame {
+    /* 0x0000 */ u8 _0000[0x1BB6];
+    /* 0x1BB6 */ s8 _1BB6[4];
+    /* 0x1BBA */ u8 _1BBA[0x1C7E - 0x1BBA];
+    /* 0x1C7E */ s8 _1C7E[4][3];
+    /* 0x1C8A */ u8 _1C8A[0x1DCC - 0x1C8A];
+    /* 0x1DCC */ Unk37A8Cpu _1DCC[4];
+} Unk37A8Minigame;
+
+#define MG (*(Unk37A8Minigame*)&g_Minigame)
 
 extern struct {
     /* 0x00 */ u8 _00[0x28];
@@ -12,6 +35,11 @@ extern struct {
 extern void fn_800B993C(void);
 extern void fn_800B9948(void* callback);
 extern void pitchingMachinePitching(u8 id);
+extern void changeScene(u8, s16);
+
+extern u8 lbl_3_data_21278[2];
+extern f32 lbl_3_data_21D34[4][3][3];
+extern s16 lbl_3_data_21EAC[4][2];
 
 f32 lbl_3_data_26698[3] = { 0.5f, 0.0f, -0.5f };
 s8 lbl_3_data_266A4 = -1;
@@ -50,12 +78,29 @@ void fn_3_146A90(void) {
 
 // .text:0x001469CC size:0xC4 mapped:0x80785A60
 void fn_3_1469CC(void) {
-    return;
+    switch (g_GameLogic._125) {
+    case 0:
+        fn_3_10F550(2, lbl_3_data_21278[0]);
+        changeScene(1, 6);
+        g_GameLogic.FrameCountOfCurrentAtBat_Copy = 0;
+        g_GameLogic._125 = 1;
+        break;
+    case 1:
+        if (g_GameLogic.FrameCountOfCurrentAtBat_Copy > lbl_3_data_21278[0] + lbl_3_data_21278[1]) {
+            g_GameLogic._125 = 2;
+        }
+        break;
+    case 2:
+        fn_3_5A6D4(GAME_STATUS_DEFAULT);
+        break;
+    }
 }
 
 // .text:0x00146928 size:0xA4 mapped:0x807859BC
 void fn_3_146928(void) {
-    return;
+    fn_3_142C18();
+    changeScene(1, 6);
+    fn_3_5A6D4(GAME_STATUS_LIVE_BALL);
 }
 
 // .text:0x00146408 size:0x520 mapped:0x8078549C
@@ -84,8 +129,19 @@ void fn_3_145B98(void) {
 }
 
 // .text:0x00145AD0 size:0xC8 mapped:0x80784B64
-void fn_3_145AD0(void) {
-    return;
+void fn_3_145AD0(int player) {
+    int team;
+    int slot;
+
+    team = MG._1BB6[player];
+    for (slot = 0; slot < 3; slot++) {
+        if (MG._1C7E[team][slot] == player) {
+            break;
+        }
+    }
+    g_Minigame.wallBall_coinCoordinates[player].x = lbl_3_data_21D34[g_Minigame._1CAD[team]][slot][0];
+    g_Minigame.wallBall_coinCoordinates[player].y = lbl_3_data_21D34[g_Minigame._1CAD[team]][slot][1];
+    g_Minigame.wallBall_coinCoordinates[player].z = lbl_3_data_21D34[g_Minigame._1CAD[team]][slot][2];
 }
 
 // .text:0x001453BC size:0x714 mapped:0x80784450
@@ -165,7 +221,19 @@ void fn_3_142CA8(void) {
 
 // .text:0x00142C18 size:0x90 mapped:0x80781CAC
 void fn_3_142C18(void) {
-    return;
+    Unk37A8Cpu* cpus = MG._1DCC;
+    Unk37A8Cpu* cpu;
+    s8 i;
+    u8 strength;
+
+    memset(g_Minigame._1D7C, 0, 0x78);
+    i = 0;
+    do {
+        cpu = &cpus[i];
+        strength = g_Minigame.minigameControlStruct.aIStrength[i];
+        cpu->_3 = 1;
+        cpu->_0 = RandomInt_Game_Range(lbl_3_data_21EAC[strength][0], lbl_3_data_21EAC[strength][1]);
+    } while (++i < 4);
 }
 
 // .text:0x001428F0 size:0x328 mapped:0x80781984
