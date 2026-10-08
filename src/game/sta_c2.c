@@ -300,7 +300,7 @@ typedef struct StaC2Spring {
     /* 0x0C */ Vec _0C[2];
     /* 0x24 */ Vec _24;
     /* 0x30 */ Vec _30;
-    /* 0x3C */ s32 _3C;
+    /* 0x3C */ u32 _3C;
 } StaC2Spring; // size: 0x40
 
 typedef struct {
@@ -308,7 +308,7 @@ typedef struct {
     /* 0x34 */ Vec _34;
 } StaC2Player;
 
-typedef struct {
+typedef struct StaC2SpringParams {
     /* 0x00 */ f32 _00;
     /* 0x04 */ f32 _04;
     /* 0x08 */ f32 _08;
@@ -940,8 +940,100 @@ void fn_3_D1F2C(void) {
 }
 
 // .text:0x000D1B24 size:0x408 mapped:0x80710BB8
-void fn_3_D1B24(void) {
-    return;
+// 98.90%: callee-saved registers differ (springs, the loop pointer and force).
+void fn_3_D1B24(StaC2SpringParams* params, StaC2Spring* springs, s32 count, Vec* force) {
+    Vec v;
+    Vec d;
+    Vec acc;
+    StaC2Spring* s;
+    StaC2Spring* a;
+    StaC2Spring* b;
+    s32 i;
+    f32 len;
+    f32 k;
+    f32 f;
+    f32 damp;
+    f32 speed;
+    f32 friction;
+    f32 fmag;
+    f32 vmag;
+
+    s = springs;
+    for (i = 0; i < count; s++, i++) {
+        memset(&s->_30, 0, sizeof(Vec));
+        if (!s->_3C && i != count - 1) {
+            s->_30.y = -9.80665f * s->_00;
+        }
+        if (i == count - 1) {
+            PSVECAdd(&s->_30, force, &s->_30);
+        }
+    }
+    i = count;
+    while (--i != 0) {
+        a = &springs[i];
+        b = &springs[i - 1];
+        PSVECSubtract(&a->_0C[0], &b->_0C[0], &d);
+        PSVECSubtract(&a->_24, &b->_24, &v);
+        len = PSVECMag(&d);
+        k = params->_08 * (len - params->_00);
+        damp = params->_0C * (PSVECDotProduct(&v, &d) / len);
+        f = -(k + damp);
+        if (!PSVECMag(&d)) {
+            d.x = d.z = 0.0f;
+            d.y = -1.0f;
+        }
+        PSVECNormalize(&d, &d);
+        PSVECScale(&d, f, &d);
+        if (!a->_3C) {
+            PSVECAdd(&a->_30, &d, &a->_30);
+        }
+        PSVECScale(&d, -1.0f, &d);
+        if (!b->_3C) {
+            PSVECAdd(&b->_30, &d, &b->_30);
+        }
+    }
+    s = springs;
+    for (i = 0; i < count; s++, i++) {
+        if (!s->_3C) {
+            memcpy(&v, &s->_24, sizeof(Vec));
+            memcpy(&d, &s->_30, sizeof(Vec));
+            PSVECScale(&d, s->_04, &d);
+            PSVECScale(&d, params->dt, &d);
+            PSVECAdd(&v, &d, &v);
+            memset(&acc, 0, sizeof(Vec));
+            speed = PSVECMag(&v);
+            if (speed) {
+                PSVECScale(&v, -1.0f, &d);
+                PSVECNormalize(&d, &d);
+                PSVECScale(&d, params->_14 * (speed * speed), &d);
+                PSVECAdd(&acc, &d, &acc);
+            }
+            if (s->_0C[0].y <= s->_08 && s->_30.y < 0.0f) {
+                friction = s->_30.y * params->_10;
+                if (friction < 0.0f) {
+                    friction = -friction;
+                }
+                memcpy(&d, &s->_30, sizeof(Vec));
+                d.y = 0.0f;
+                fmag = PSVECMag(&d);
+                v.y = 0.0f;
+                vmag = PSVECMag(&v);
+                if (vmag || fmag > friction) {
+                    if (vmag) {
+                        PSVECNormalize(&v, &d);
+                    } else {
+                        PSVECNormalize(&d, &d);
+                    }
+                    PSVECScale(&d, -friction, &d);
+                    PSVECAdd(&acc, &d, &acc);
+                } else {
+                    PSVECScale(&s->_30, -1.0f, &d);
+                    PSVECAdd(&acc, &d, &acc);
+                }
+            }
+            PSVECAdd(&s->_30, &acc, &s->_30);
+        }
+    }
 }
 
 // .text:0x000D1AC4 size:0x60 mapped:0x80710B58

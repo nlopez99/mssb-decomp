@@ -8,6 +8,7 @@ struct StaC2Draw;
 struct StaC2Spawner;
 struct _InMemBallType;
 struct StaC2Spring;
+struct StaC2SpringParams;
 struct StaC2Particle;
 struct StaC2Emitter;
 
@@ -67,7 +68,7 @@ void fn_3_D173C(struct StaC2Draw* draw);
 void fn_3_D1848(struct StaC2Draw* draw);
 void fn_3_D196C(s32 idx);
 void fn_3_D1AC4(struct StaC2Draw* draw);
-void fn_3_D1B24(void);
+void fn_3_D1B24(struct StaC2SpringParams* params, struct StaC2Spring* springs, s32 count, Vec* force);
 void fn_3_D1F2C(void);
 void fn_3_D2220(void);
 struct _InMemBallType* fn_3_D233C(struct StaC2Draw* draw);
