@@ -24,32 +24,6 @@ extern struct {
     /* 0x2034 */ u8 emitterActive[100];
 } lbl_3_common_bss_32B20;
 
-extern BOOL fn_800214D0(void);
-extern BOOL fn_80021518(s32 group, void* data);
-extern void fn_800ACFB0(void* ptr);
-extern void* fn_800B0A5C_insertQueue(void (*callback)(void), s32 arg1);
-
-extern unsigned long sndRemoveListener(SND_LISTENER* li);
-extern unsigned long sndUpdateListener(SND_LISTENER* li, SND_FVECTOR* pos, SND_FVECTOR* dir, SND_FVECTOR* heading,
-                                       SND_FVECTOR* up, u8 vol, SND_ROOM* room);
-extern unsigned long sndAddListener(SND_LISTENER* li, SND_FVECTOR* pos, SND_FVECTOR* dir, SND_FVECTOR* heading,
-                                    SND_FVECTOR* up, f32 front_sur, f32 back_sur, f32 soundSpeed, unsigned long flags,
-                                    unsigned char vol, SND_ROOM* room);
-extern s32 fn_800698F8(s32 charID);
-extern bool32 sndSeqGetValid(s32 seqID);
-
-// rep_1BC8.c declares this as void(u8), which the signed test of its argument rules out,
-// so the prototype stays out of the header until that extern is fixed
-void fn_3_90AB0(s32 charID);
-
-// .data outside the unit's ranges
-extern u16 lbl_3_data_8168[0x36];
-extern u8 lbl_3_data_81D4[8];
-extern u8 lbl_3_data_8338[0x66][2];
-extern u8 lbl_3_data_8530[2][0x180];
-extern f32 lbl_3_data_88AC[3];
-extern SND_FVECTOR lbl_3_data_8D70;
-
 typedef struct Unk90754 {
     /* 0x00000 */ u8 _00000[0x11820];
     /* 0x11820 */ u8 _11820;
@@ -69,6 +43,49 @@ typedef struct SoundLoadTask {
         /* 0x2 */ s8 _2;
     } entries[14];
 } SoundLoadTask;
+
+typedef struct SeqEntry {
+    /* 0x0 */ u16 group;
+    /* 0x2 */ u16 song;
+    /* 0x4 */ u16 _4;
+} SeqEntry;
+
+extern BOOL fn_800214D0(void);
+extern BOOL fn_80021518(s32 group, void* data);
+extern void fn_800ACFB0(void* ptr);
+extern void* fn_800B0A5C_insertQueue(void (*callback)(void), s32 arg1);
+
+extern unsigned long sndRemoveListener(SND_LISTENER* li);
+extern unsigned long sndUpdateListener(SND_LISTENER* li, SND_FVECTOR* pos, SND_FVECTOR* dir, SND_FVECTOR* heading,
+                                       SND_FVECTOR* up, u8 vol, SND_ROOM* room);
+extern unsigned long sndAddListener(SND_LISTENER* li, SND_FVECTOR* pos, SND_FVECTOR* dir, SND_FVECTOR* heading,
+                                    SND_FVECTOR* up, f32 front_sur, f32 back_sur, f32 soundSpeed, unsigned long flags,
+                                    unsigned char vol, SND_ROOM* room);
+extern s32 fn_800698F8(s32 charID);
+extern bool32 sndSeqGetValid(s32 seqID);
+extern void fn_800216F8(u8 group, int (*callback)(void));
+extern int fn_8006285C(void);
+extern void fn_800A86B4(s32 arg0);
+extern void fn_800A88C0(void);
+extern void fn_800A8B78(void);
+extern unsigned long sndCheckEmitter(SND_EMITTER* em);
+extern unsigned long sndRemoveEmitter(SND_EMITTER* em);
+extern SoundLoadTask* lbl_803CC1B8;
+
+// rep_1BC8.c declares these as void(u8) and BOOL(s16, s16), which the signed tests of their
+// arguments without extension rule out, so the prototypes stay out of the header until it is fixed
+void fn_3_90AB0(s32 charID);
+BOOL fn_3_90B14(int first, int second);
+
+// .data outside the unit's ranges
+extern u16 lbl_3_data_8168[0x36];
+extern u8 lbl_3_data_81D4[8];
+extern u8 lbl_3_data_830C[0x16][2];
+extern u8 lbl_3_data_8338[0x66][2];
+extern u8 lbl_3_data_8530[2][0x180];
+extern f32 lbl_3_data_88AC[3];
+extern SeqEntry lbl_3_data_88E0[];
+extern SND_FVECTOR lbl_3_data_8D70;
 
 // .bss, in reverse address order
 static s32 lbl_3_bss_1780[30];
@@ -97,6 +114,53 @@ int fn_3_91064(void) {
     return 0;
 }
 
+// .text:0x00090C14 size:0x9C mapped:0x806CFCA8
+BOOL fn_3_90C14(int charID) {
+    SoundLoadTask* task = lbl_803CC1B8;
+    int group;
+
+    if (lbl_3_common_bss_34C58._2C == 0) {
+        lbl_3_common_bss_34C58._2D = charID;
+        group = fn_800698F8(charID);
+        task->_10 = 0;
+        fn_800216F8(group + 5, fn_3_90F48);
+        lbl_3_common_bss_34C58._2C++;
+    } else if (task->_10 != 0) {
+        lbl_3_common_bss_34C58._2C++;
+        return TRUE;
+    }
+    return FALSE;
+}
+
+// .text:0x00090B14 size:0x100 mapped:0x806CFBA8
+BOOL fn_3_90B14(int first, int second) {
+    SoundLoadTask* task = lbl_803CC1B8;
+    int group;
+
+    if (lbl_3_common_bss_34C58._2C == 0) {
+        lbl_3_common_bss_34C58._2C = 1;
+    }
+    if (lbl_3_common_bss_34C58._2C == 1 || lbl_3_common_bss_34C58._2C == 3) {
+        if (lbl_3_common_bss_34C58._2C == 1) {
+            lbl_3_common_bss_34C58._2D = first;
+        } else {
+            if (second < 0) {
+                return TRUE;
+            }
+            lbl_3_common_bss_34C58._2D = second;
+        }
+        group = fn_800698F8(lbl_3_common_bss_34C58._2D);
+        task->_10 = 0;
+        fn_800216F8(group + 5, fn_3_90F48);
+        lbl_3_common_bss_34C58._2C++;
+    } else if (task->_10 != 0) {
+        if (++lbl_3_common_bss_34C58._2C == 5) {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
 // .text:0x00090AB0 size:0x64 mapped:0x806CFB44
 void fn_3_90AB0(s32 charID) {
     int idx;
@@ -111,6 +175,20 @@ void fn_3_90AB0(s32 charID) {
     }
 }
 
+// .text:0x00090A18 size:0x98 mapped:0x806CFAAC
+BOOL fn_3_90A18(void) {
+    SoundLoadTask* task = lbl_803CC1B8;
+
+    if (lbl_3_common_bss_34C58._2C == 0) {
+        fn_800216F8(g_d_GameSettings.StadiumID + 0x27, fn_3_90798);
+        task->_10 = 0;
+        lbl_3_common_bss_34C58._2C++;
+    } else if (task->_10 != 0) {
+        return TRUE;
+    }
+    return FALSE;
+}
+
 // .text:0x000909B0 size:0x68 mapped:0x806CFA44
 void fn_3_909B0(void) {
     int idx;
@@ -121,11 +199,39 @@ void fn_3_909B0(void) {
     lbl_800EF808.groups[idx] = NULL;
 }
 
+// .text:0x00090928 size:0x88 mapped:0x806CF9BC
+int fn_3_90928(void) {
+    SoundLoadTask* task = lbl_803CC1B8;
+
+    if (lbl_3_common_bss_34C58._2C == 0) {
+        fn_800216F8(0x25, fn_8006285C);
+        task->_10 = 0;
+        lbl_3_common_bss_34C58._2C++;
+    } else if (task->_10 != 0) {
+        return TRUE;
+    }
+    return FALSE;
+}
+
 // .text:0x000908E8 size:0x40 mapped:0x806CF97C
 void fn_3_908E8(void) {
     fn_800214D0();
     fn_800ACFB0(lbl_800EF808.groups[0x25]);
     lbl_800EF808.groups[0x25] = NULL;
+}
+
+// .text:0x00090860 size:0x88 mapped:0x806CF8F4
+BOOL fn_3_90860(void) {
+    SoundLoadTask* task = lbl_803CC1B8;
+
+    if (lbl_3_common_bss_34C58._2C == 0) {
+        fn_800216F8(1, fn_3_910AC);
+        task->_10 = 0;
+        lbl_3_common_bss_34C58._2C++;
+    } else if (task->_10 != 0) {
+        return TRUE;
+    }
+    return FALSE;
 }
 
 // .text:0x0009081C size:0x44 mapped:0x806CF8B0
@@ -168,6 +274,36 @@ void fn_3_906FC(void) {
     lbl_3_bss_1774 = table;
 }
 
+// .text:0x00090674 size:0x88 mapped:0x806CF708
+void fn_3_90674(s32 song) {
+    SeqEntry* entry = &lbl_3_data_88E0[song];
+
+    lbl_3_common_bss_34C58._04 = sndSeqPlayEx(entry->group, entry->song, (void*)lbl_3_bss_1774[song], NULL, 0);
+    sndSeqVolume(lbl_3_data_830C[song][0], 0, lbl_3_common_bss_34C58._04, 0);
+}
+
+// .text:0x00090434 size:0x138 mapped:0x806CF4C8
+void fn_3_90434(void) {
+    int i;
+
+    fn_800A86B4(3);
+    fn_800A88C0();
+    fn_800A8B78();
+    if (sndSeqGetValid(lbl_3_common_bss_34C58._04)) {
+        sndSeqVolume(0, 0, lbl_3_common_bss_34C58._04, 1);
+    }
+    if (sndSeqGetValid(lbl_3_common_bss_34C58._08)) {
+        sndSeqVolume(0, 0, lbl_3_common_bss_34C58._08, 1);
+    }
+    for (i = 0; i < 3; i++) {
+        if (lbl_3_common_bss_34C58.voices[i] != SND_ID_ERROR) {
+            sndFXKeyOff(lbl_3_common_bss_34C58.voices[i]);
+            lbl_3_common_bss_34C58.voices[i] = SND_ID_ERROR;
+        }
+    }
+    fn_3_8BDF4();
+}
+
 // .text:0x000903B8 size:0x7C mapped:0x806CF44C
 void fn_3_903B8(void) {
     if (sndSeqGetValid(lbl_3_common_bss_34C58._04)) {
@@ -175,6 +311,19 @@ void fn_3_903B8(void) {
     }
     if (sndSeqGetValid(lbl_3_common_bss_34C58._08)) {
         sndSeqVolume(0, 0xA0, lbl_3_common_bss_34C58._08, 1);
+    }
+}
+
+// .text:0x00090328 size:0x90 mapped:0x806CF3BC
+void fn_3_90328(s32 time) {
+    if (time < 0) {
+        time = 3000;
+    }
+    if (sndSeqGetValid(lbl_3_common_bss_34C58._04)) {
+        sndSeqVolume(0, time, lbl_3_common_bss_34C58._04, 1);
+    }
+    if (sndSeqGetValid(lbl_3_common_bss_34C58._08)) {
+        sndSeqVolume(0, time, lbl_3_common_bss_34C58._08, 1);
     }
 }
 
@@ -298,8 +447,10 @@ void fn_3_8C104(s32 arg0) {
 }
 
 // .text:0x0008C07C size:0x88 mapped:0x806CB110
+// 98.82%: the inlined fn_3_8B258 gets the queue pointer in r8 and its head in r7, where the
+// target (and every other inlined copy) has the pointer in the lower register
 void fn_3_8C07C(void) {
-    return;
+    fn_3_8B258(4, 0, 0);
 }
 
 // .text:0x0008BE8C size:0x1F0 mapped:0x806CAF20
@@ -309,7 +460,8 @@ void fn_3_8BE8C(void) {
 
 // .text:0x0008BDF4 size:0x98 mapped:0x806CAE88
 void fn_3_8BDF4(void) {
-    return;
+    fn_3_8B804();
+    fn_3_8B7DC();
 }
 
 // .text:0x0008BBC4 size:0x230 mapped:0x806CAC58
@@ -352,7 +504,16 @@ void fn_3_8B890(s32 handle) {
 
 // .text:0x0008B804 size:0x8C mapped:0x806CA898
 void fn_3_8B804(void) {
-    return;
+    int i;
+
+    for (i = 0; i < 100; i++) {
+        if (lbl_3_common_bss_32B20.emitterActive[i]) {
+            if (sndCheckEmitter(&lbl_3_common_bss_32B20.emitters[i])) {
+                sndRemoveEmitter(&lbl_3_common_bss_32B20.emitters[i]);
+            }
+            lbl_3_common_bss_32B20.emitterActive[i] = 0;
+        }
+    }
 }
 
 // .text:0x0008B7DC size:0x28 mapped:0x806CA870
@@ -368,4 +529,19 @@ void fn_3_8B718(void) {
 // .text:0x0008B2E4 size:0x34 mapped:0x806CA378
 void fn_3_8B2E4(void) {
     lbl_3_bss_1768 = fn_800B0A5C_insertQueue(fn_3_8B094, 0);
+}
+
+// .text:0x0008B258 size:0x8C mapped:0x806CA2EC
+BOOL fn_3_8B258(s32 state, s32 id, s32 arg) {
+    u8 head;
+    u8 next;
+
+    if (lbl_3_bss_1768 == NULL || lbl_3_bss_1768->tail == (next = ((head = lbl_3_bss_1768->head) + 1) % 14)) {
+        return FALSE;
+    }
+    lbl_3_bss_1768->head = next;
+    lbl_3_bss_1768->entries[head]._0 = id;
+    lbl_3_bss_1768->entries[head].state = state;
+    lbl_3_bss_1768->entries[head]._2 = arg;
+    return TRUE;
 }

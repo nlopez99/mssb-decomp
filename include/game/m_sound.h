@@ -6,6 +6,7 @@
 #include "musyx/musyx.h"
 
 void fn_3_8B094(void);
+BOOL fn_3_8B258(s32 state, s32 id, s32 arg);
 void fn_3_8B2E4(void);
 void fn_3_8B718(void);
 void fn_3_8B7DC(void);
@@ -36,15 +37,23 @@ void fn_3_90150(void);
 u32 fn_3_90220(s32 charID, s32 sound);
 SND_VOICEID playSoundEffect(int sound);
 void fn_3_902FC(void);
+void fn_3_90328(s32 time);
 void fn_3_903B8(void);
+void fn_3_90434(void);
+void fn_3_90674(s32 song);
 void fn_3_906FC(void);
 struct Unk90754;
 void fn_3_90754(struct Unk90754* p, u8 a, u8 b);
 int fn_3_90764(void);
 int fn_3_90798(void);
 void fn_3_9081C(void);
+BOOL fn_3_90860(void);
 void fn_3_908E8(void);
+int fn_3_90928(void);
 void fn_3_909B0(void);
+BOOL fn_3_90A18(void);
+BOOL fn_3_90C14(int charID);
+int fn_3_90F48(void);
 int fn_3_91064(void);
 int fn_3_910AC(void);
 
