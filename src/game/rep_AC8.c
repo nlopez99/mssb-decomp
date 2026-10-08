@@ -3665,8 +3665,66 @@ void fn_3_402A8(void) {
 }
 
 // .text:0x0003FCF0 size:0x5B8 mapped:0x8067ED84
-void fn_3_3FCF0(void) {
-    return;
+// 91.99%: the target compares angle without re-extending it and keeps the four fielder
+// angles one register lower; an s32 angle set from (s16)fn_3_9FB8C(...) scores 92.16%.
+void fn_3_3FCF0(BOOL useLanding) {
+    s16 angle = g_Ball.Hit_HorizontalAngle;
+    s32 third;
+    s16 a2;
+    s16 a3;
+    s16 a4;
+    s16 a5;
+
+    if (useLanding) {
+        angle = fn_3_9FB8C(g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x,
+                           g_Ball.physicsSubstruct.hitLandingSpotDistFromHome);
+    }
+    a2 = g_Fielders[2]._182;
+    a3 = g_Fielders[3]._182;
+    a4 = g_Fielders[4]._182;
+    a5 = g_Fielders[5]._182;
+    if (g_Fielders[0]._1DA == 0 && g_Ball.physicsSubstruct.hitLandingSpotDistFromHome < 25.0f && g_Ball.maxYOfHit < 8.0f) {
+        fn_3_3F760();
+        return;
+    }
+    if (angle < a2 + (a3 - a2) / 5) {
+        fn_3_5985C(2, 3);
+        fn_3_5985C(3, 3);
+        return;
+    }
+    if (angle < (a2 + a3) / 2) {
+        fn_3_5985C(2, 3);
+        fn_3_5985C(3, 3);
+        return;
+    }
+    third = (a5 - a3) / 3;
+    if (angle < a3 + third) {
+        fn_3_5985C(3, 3);
+        if (angle > g_Fielders[0]._182 - 0x40) {
+            fn_3_5985C(0, 4);
+        }
+    } else if (angle < a3 + third * 2) {
+        fn_3_5985C(0, 4);
+        if (__abs(angle - a3) < __abs(angle - a5)) {
+            fn_3_5985C(3, 3);
+        } else {
+            fn_3_5985C(5, 3);
+        }
+    } else {
+        third = (a4 - a5) / 3;
+        if (angle < a5 + third) {
+            fn_3_5985C(5, 3);
+            if (angle < g_Fielders[0]._182 + 0x40) {
+                fn_3_5985C(0, 4);
+            }
+        } else if (angle < a5 + third * 2) {
+            fn_3_5985C(4, 3);
+            fn_3_5985C(5, 3);
+        } else {
+            fn_3_5985C(4, 3);
+            fn_3_5985C(5, 3);
+        }
+    }
 }
 
 // .text:0x0003F760 size:0x590 mapped:0x8067E7F4
@@ -3721,7 +3779,44 @@ void fn_3_3F760(void) {
 
 // .text:0x0003F24C size:0x514 mapped:0x8067E2E0
 void fn_3_3F24C(void) {
-    return;
+    s16 angle = g_Ball.Hit_HorizontalAngle;
+
+    if (g_Ball.Hit_VerticalAngle >= 0x400 && g_Ball.Hit_VerticalAngle <= 0xC00) {
+        angle += 0x800;
+        if (angle > 0x1000) {
+            angle -= 0x1000;
+        }
+    }
+    if (angle > 0xA00 && angle < 0xE00) {
+        fn_3_5985C(1, 3);
+    } else if (angle >= 0xE00 || angle < 0x200) {
+        if (g_Ball.Hit_VerticalAngle > 0x800) {
+            fn_3_5985C(2, 3);
+        } else if (g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z < 10.0f) {
+            fn_3_5985C(1, 3);
+            fn_3_5985C(2, 3);
+        } else if (g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z < 20.0f) {
+            fn_3_5985C(2, 3);
+            fn_3_5985C(3, 3);
+        } else {
+            fn_3_5985C(3, 3);
+            fn_3_5985C(8, 3);
+        }
+    } else if (g_Ball.Hit_VerticalAngle > 0x800) {
+        fn_3_5985C(4, 3);
+    } else if (g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z < 10.0f) {
+        fn_3_5985C(1, 3);
+        fn_3_5985C(4, 3);
+    } else if (g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z < 20.0f) {
+        fn_3_5985C(4, 3);
+        fn_3_5985C(5, 3);
+    } else {
+        fn_3_5985C(5, 3);
+        fn_3_5985C(6, 3);
+    }
+    fn_3_4C9C8();
+    fn_3_47778();
+    fn_3_4A124();
 }
 
 // .text:0x0003F124 size:0x128 mapped:0x8067E1B8
