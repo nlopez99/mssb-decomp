@@ -14,6 +14,7 @@
 #include "game/rep_1838.h"
 #include "game/rep_AC8.h"
 #include "game/rep_1D58.h"
+#include "game/rep_23E8.h"
 #include "game/rep_540.h"
 #include "game/m_sound.h"
 #include "string.h"
@@ -133,9 +134,14 @@ typedef struct {
     /* 0x00 */ u8 _00[0xC];
     /* 0x0C */ f32 frame;
     /* 0x10 */ f32 speed;
-    /* 0x14 */ u8 _14[0x24 - 0x14];
+    /* 0x14 */ u8 _14[0x1A - 0x14];
+    /* 0x1A */ s16 _1A;
+    /* 0x1C */ u8 _1C[0x24 - 0x1C];
     /* 0x24 */ u16 length;
-} StaC2Anim;
+    /* 0x26 */ u8 _26[0x58 - 0x26];
+    /* 0x58 */ s8 _58;
+    /* 0x59 */ u8 _59[0x5C - 0x59];
+} StaC2Anim; // size: 0x5C
 
 typedef struct {
     /* 0x00 */ u8 _00[0x8];
@@ -199,6 +205,7 @@ typedef struct StaC2Draw {
         };
         struct {
             /* 0xA0 */ struct StaC2Emitter* smoke;
+            /* 0xA4 */ u8 hit;
         };
         struct {
             /* 0xA0 */ struct StaC2Draw* host;
@@ -481,9 +488,9 @@ static StaC2Task* lbl_3_bss_A8A4;
 static u8 lbl_3_bss_A898[0xC];
 static Vec lbl_3_bss_A820[10];
 static u8 lbl_3_bss_A81C;
-static StaC2Rec5C lbl_3_bss_A764[2];
-static StaC2Rec5C lbl_3_bss_A3CC[10];
-static StaC2Rec5C lbl_3_bss_A034[10];
+static StaC2Anim lbl_3_bss_A764[2];
+static StaC2Anim lbl_3_bss_A3CC[10];
+static StaC2Anim lbl_3_bss_A034[10];
 static f32 lbl_3_bss_A030;
 static u8 lbl_3_bss_A02D;
 static u8 lbl_3_bss_A02C;
@@ -2110,13 +2117,39 @@ void fn_3_CF92C(void) {
 }
 
 // .text:0x000CF72C size:0x200 mapped:0x8070E7C0
-void fn_3_CF72C(void) {
-    return;
+void fn_3_CF72C(s32 idx) {
+    StaC2Draw* draw = &lbl_3_common_bss_350E4._00[idx];
+    Vec cpos;
+    Vec ball;
+
+    if (g_Ball.AtBat_ContactResult < 2 && draw->hit != 1) {
+        if (gameInitOptions.starSkillsSetting != 0) {
+            CTRLGetTranslation(&draw->control, &cpos.x, &cpos.y, &cpos.z);
+            fn_3_CB7E8(cpos.x, cpos.y - 5.0f, cpos.z);
+            draw->hit = 1;
+        }
+        if (draw->smoke != NULL) {
+            fn_80033964(draw->smoke);
+            draw->smoke = NULL;
+        }
+        draw->smoke = fn_80033A24(fn_3_CEFA8, 128, 0, 30, 1, 0);
+        if (draw->smoke != NULL) {
+            ball.x = g_Ball.AtBat_Contact_BallPos.x;
+            ball.y = g_Ball.AtBat_Contact_BallPos.y;
+            ball.z = g_Ball.AtBat_Contact_BallPos.z;
+            fn_3_CF278(draw, ball);
+        }
+        draw->_8C = &lbl_3_bss_A034[draw->_9C];
+        fn_80025EEC(draw->_8C, 0, 0);
+        draw->_8C->_1A = 1;
+        draw->_8C->_58 = -1;
+        playStadiumSound(0);
+    }
 }
 
 // .text:0x000CF278 size:0x4B4 mapped:0x8070E30C
-// 97.71%: i and j swap registers, and the target loads pos->y before storing p->pos.x.
-void fn_3_CF278(StaC2Draw* draw, Vec* pos) {
+// 99.97%: the counters i and j are swapped between r29 and r30.
+void fn_3_CF278(StaC2Draw* draw, Vec pos) {
     StaC2Emitter* emitter = draw->smoke;
     StaC2Particle* p = emitter->particles;
     u32 j = 0;
@@ -2134,9 +2167,9 @@ void fn_3_CF278(StaC2Draw* draw, Vec* pos) {
             p->vel.x = 0.01 * cosf_kludge(angle);
             p->vel.z = 0.01 * sinf_kludge(angle);
             p->vel.y = -0.01f;
-            p->pos.x = pos->x + (rand() % 200 - 100) / 100.0f;
-            p->pos.y = -pos->y;
-            p->pos.z = pos->z + (rand() % 200 - 100) / 100.0f;
+            p->pos.x = pos.x + (rand() % 200 - 100) / 100.0f;
+            p->pos.y = -pos.y;
+            p->pos.z = pos.z + (rand() % 200 - 100) / 100.0f;
             p->delay = 0;
             p->color[0] = p->color[1] = p->color[2] = 255;
             p->color[3] = 0;
