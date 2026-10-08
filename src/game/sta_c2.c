@@ -198,6 +198,11 @@ typedef struct StaC2Draw {
             /* 0xA0 */ StaC2Link* link;
         };
         struct {
+            /* 0xA0 */ u8 _A0_AC_2[0xAC - 0xA0];
+            /* 0xAC */ StaC2Target* from;
+            /* 0xB0 */ StaC2Target* to;
+        };
+        struct {
             /* 0xA0 */ u8 _A0_C4_2[0xC4 - 0xA0];
             /* 0xC4 */ struct StaC2Spring* springs;
         };
@@ -1032,8 +1037,59 @@ void fn_3_D173C(StaC2Draw* draw) {
 }
 
 // .text:0x000D141C size:0x320 mapped:0x807104B0
-void fn_3_D141C(void) {
-    return;
+// 99.82%: the copies of dir into horiz and vert are scheduled in another order.
+void fn_3_D141C(StaC2Draw* draw) {
+    Vec dir;
+    Vec vert;
+    Vec horiz;
+    Quaternion q;
+    Quaternion qx;
+    Quaternion qy;
+    Quaternion qz;
+    Vec xAxis = { 1.0f, 0.0f, 0.0f };
+    Vec yAxis = { 0.0f, 1.0f, 0.0f };
+    Vec zAxis = { 0.0f, 0.0f, 1.0f };
+    f32 angleX;
+    f32 angleY;
+    f32 angleZ;
+
+    angleX = angleY = angleZ = 0.0f;
+    PSVECSubtract(&draw->to->_0C, &draw->from->_0C, &dir);
+    horiz = vert = dir;
+    horiz.x = sqrt(pow(horiz.z, 2.0) + pow(horiz.x, 2.0));
+    horiz.z = 0.0f;
+    vert.y = 0.0f;
+    PSVECNormalize(&dir, &dir);
+    if (PSVECMag(&vert)) {
+        PSVECNormalize(&vert, &vert);
+        angleY = acosf_kludge(PSVECDotProduct(&xAxis, &vert));
+        if (vert.z > 0.0f) {
+            angleY *= -1.0f;
+        }
+    }
+    if (PSVECMag(&horiz)) {
+        PSVECNormalize(&horiz, &horiz);
+        angleZ = acosf_kludge(PSVECDotProduct(&xAxis, &horiz));
+        if (horiz.y > 0.0f) {
+            angleZ *= -1.0f;
+        }
+    }
+    if (angleX || angleY || angleZ) {
+        C_QUATRotAxisRad(&qy, &yAxis, angleY);
+        C_QUATRotAxisRad(&qz, &zAxis, angleZ);
+        if (draw->_9C % 2 == 0) {
+            angleX = 1.5707964f;
+        }
+        C_QUATRotAxisRad(&qx, &xAxis, angleX);
+        q = qy;
+        PSQUATMultiply(&q, &qz, &q);
+        PSQUATMultiply(&q, &qx, &q);
+        PSQUATNormalize(&q, &q);
+        if (!PSQUATDotProduct(&q, &q)) {
+            C_QUATRotAxisRad(&q, &xAxis, 0.0f);
+        }
+        CTRLSetQuat(&draw->control, q.x, q.y, q.z, q.w);
+    }
 }
 
 // .text:0x000D1280 size:0x19C mapped:0x80710314
