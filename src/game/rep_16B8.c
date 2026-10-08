@@ -128,7 +128,15 @@ extern struct {
 } lbl_3_common_bss_34C90;
 
 extern struct {
-    /* 0x00 */ u8 _00[0x42];
+    /* 0x00 */ u8 _00[0x12];
+    /* 0x12 */ struct {
+        /* 0x0 */ s8 _0;
+        /* 0x1 */ s8 _1;
+        /* 0x2 */ s8 _2;
+        /* 0x3 */ s8 _3;
+        /* 0x4 */ s8 _4;
+    } _12[9];
+    /* 0x3F */ u8 _3F[0x42 - 0x3F];
     /* 0x42 */ s16 _42;
     /* 0x44 */ u8 _44[0x46 - 0x44];
     /* 0x46 */ u8 _46;
@@ -932,8 +940,61 @@ void fn_3_94E68(void) {
 }
 
 // .text:0x00094BC4 size:0x2A4 mapped:0x806D3C58
+// 98.22%: the target computes idx as base + (j + 1) (addi, then add) and
+// allocates the counters differently; the instructions are otherwise the same.
 void fn_3_94BC4(void) {
-    return;
+    UnkTask1770* task = lbl_803CC1B8;
+    UnkSprite1770* sprite;
+    s32 count;
+    s32 i;
+    s32 j;
+    s32 idx;
+    s32 base;
+
+    if (lbl_3_common_bss_32724._B4 != 0) {
+        task->_1C[0] = 2;
+    } else if (g_GameLogic.gameStatus == 22) {
+        task->_1C[0] = 1;
+    } else {
+        task->_1C[0] = 0;
+    }
+    fn_80034E20(task, lbl_3_data_E378);
+    count = 0;
+    for (i = 0; i < 9; i++) {
+        if (lbl_3_common_bss_37400._12[i]._3 != 0) {
+            base = lbl_3_data_E758[count];
+            lbl_80371C30[task->_14 + base]._00->_5C = lbl_3_common_bss_37400._12[i]._4 << 16;
+            for (j = 0; j < 5; j++) {
+                idx = base + (j + 1);
+                if (j >= lbl_3_common_bss_37400._12[i]._1) {
+                    lbl_80371C30[task->_14 + idx]._00->_54 &= ~2;
+                } else {
+                    sprite = lbl_80371C30[task->_14 + idx]._00;
+                    sprite->_54 |= 2;
+                    lbl_80371C30[task->_14 + idx]._00->_68 = 0;
+                    lbl_80371C30[task->_14 + idx]._00->_5C = 0;
+                    if (j < lbl_3_common_bss_37400._12[i]._0) {
+                        lbl_80371C30[task->_14 + idx]._00->_5C = 1 << 16;
+                    } else if (j < lbl_3_common_bss_37400._12[i]._2 + lbl_3_common_bss_37400._12[i]._0) {
+                        if (task->_1C[0] == 2) {
+                            lbl_80371C30[task->_14 + idx]._00->_5C = 40 << 16;
+                        } else {
+                            lbl_80371C30[task->_14 + idx]._00->_5C = 60 << 16;
+                        }
+                        lbl_80371C30[task->_14 + idx]._00->_68 = 1;
+                    }
+                }
+            }
+            count++;
+        }
+    }
+    if (count < 0) {
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    lbl_80371C30[task->_14 + 1]._00->_5C = (count - 1) << 16;
+    task->_1A = count;
+    ((UnkTask1770*)lbl_803CC1B8)->_00 = fn_3_9497C;
 }
 
 // .text:0x0009497C size:0x248 mapped:0x806D3A10
