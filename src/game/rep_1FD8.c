@@ -12,6 +12,7 @@
 #include "C3/geoPalette.h"
 #include "game/rep_1D58.h"
 #include "game/rep_AC8.h"
+#include "game/rep_23E8.h"
 #include "string.h"
 
 typedef struct Rep1FD8Sprite {
@@ -112,7 +113,8 @@ typedef struct Rep1FD8Model {
 } Rep1FD8Model;
 
 typedef struct Rep1FD8Draw {
-    /* 0x00 */ u8 _00[0x74];
+    /* 0x00 */ Control control;
+    /* 0x44 */ Mtx _44;
     /* 0x74 */ Rep1FD8Model* _74;
     /* 0x78 */ u8 _78[0x9C - 0x78];
     /* 0x9C */ Vec _9C;
@@ -120,10 +122,14 @@ typedef struct Rep1FD8Draw {
     /* 0xA9 */ u8 _A9;
     /* 0xAA */ u8 _AA[0xB0 - 0xAA];
     /* 0xB0 */ u8 _B0;
-} Rep1FD8Draw;
+    /* 0xB1 */ u8 _B1[0xE8 - 0xB1];
+} Rep1FD8Draw; // size: 0xE8
 
 extern struct {
-    /* 0x00 */ StadiumObject1D58* _00;
+    union {
+        /* 0x00 */ StadiumObject1D58* _00;
+        /* 0x00 */ Rep1FD8Draw* draws;
+    };
     /* 0x04 */ u8 _04[0x30 - 0x04];
     /* 0x30 */ s32 _30;
 } lbl_3_common_bss_350E4;
@@ -231,6 +237,15 @@ void fn_3_C75B8(void) {
     return;
 }
 
+static inline void startBallEffect(s32 base) {
+    s32 idx = (g_Ball.inAirOrBefore2ndBounceOrLowBallEnergy != 0) + base;
+
+    lbl_3_bss_9E48[idx] = 1;
+    lbl_3_bss_9DE8[idx].x = g_Ball.AtBat_Contact_BallPos.x;
+    lbl_3_bss_9DE8[idx].y = -g_Ball.AtBat_Contact_BallPos.y;
+    lbl_3_bss_9DE8[idx].z = g_Ball.AtBat_Contact_BallPos.z;
+}
+
 static inline void playStadiumSound(s32 sound) {
     s32 stadium;
     u8 vol;
@@ -252,14 +267,8 @@ static inline void playStadiumSound(s32 sound) {
 }
 
 // .text:0x000C749C size:0x11C mapped:0x80706530
-// 99.58%: the target keeps idx in r6 and idx * 12 in r8; here the two are swapped.
 void fn_3_C749C(void) {
-    s32 idx = (g_Ball.inAirOrBefore2ndBounceOrLowBallEnergy != 0) + 2;
-
-    lbl_3_bss_9E48[idx] = 1;
-    lbl_3_bss_9DE8[idx].x = g_Ball.AtBat_Contact_BallPos.x;
-    lbl_3_bss_9DE8[idx].y = -g_Ball.AtBat_Contact_BallPos.y;
-    lbl_3_bss_9DE8[idx].z = g_Ball.AtBat_Contact_BallPos.z;
+    startBallEffect(2);
     playStadiumSound(4);
 }
 
@@ -375,8 +384,26 @@ void fn_3_C42A4(void) {
 }
 
 // .text:0x000C414C size:0x158 mapped:0x807031E0
-void fn_3_C414C(void) {
-    return;
+void fn_3_C414C(s32 idx) {
+    Rep1FD8Draw* draw = &lbl_3_common_bss_350E4.draws[idx];
+    Vec pos;
+    u8 hit = FALSE;
+
+    CTRLGetTranslation(&draw->control, &pos.x, &pos.y, &pos.z);
+    if (g_Ball.AtBat_ContactResult != 2) {
+        if (draw->_A9 == 5 && gameInitOptions.starSkillsSetting != 0) {
+            fn_3_CB7E8(pos.x, pos.y - 5.0f, pos.z);
+            hit = TRUE;
+            draw->_A9 = 6;
+        } else if (draw->_A9 == 4 && gameInitOptions.starSkillsSetting != 0) {
+            fn_3_CB7E8(pos.x, pos.y, pos.z - 5.0f);
+            hit = TRUE;
+            draw->_A9 = 6;
+        }
+    }
+    if (hit) {
+        startBallEffect(6);
+    }
 }
 
 // .text:0x000C40EC size:0x60 mapped:0x80703180
