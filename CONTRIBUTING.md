@@ -28,7 +28,7 @@ Then enable the pre-push checks once per clone: `git config core.hooksPath tools
 
 ## Pick a contribution
 
-Start with one unmatched function in objdiff, preferably a small game-code function with understood inputs and outputs. Avoid racing someone else's claimed work. Until GitHub issues are available, agree on a function and file in chat before starting.
+Start with one unmatched function in objdiff, preferably a small game-code function with understood inputs and outputs. `docs/backlog.md` lists follow-ups, untouched units and open questions. Avoid racing someone else's claimed work. Until GitHub issues are available, agree on a function and file in chat before starting.
 
 1. Create a branch for the function or a small related group.
 2. Inspect its target assembly and existing types. Use related matched functions as references.
@@ -37,7 +37,7 @@ Start with one unmatched function in objdiff, preferably a small game-code funct
 5. Run `python3 tools/regress.py`. It builds, checks the hashes, and compares every function with the base commit; it fails if any objdiff score drops or any strict match is lost.
 6. Review names, comments, types and undefined-behavior risks. A matching function does not prove that every guessed name or explanation is correct.
 
-To work on several units at once, give each its own worktree: `python3 tools/worktree.py <branch>` creates and builds one. Claude Code agents follow `.claude/skills/match-functions/SKILL.md`, the same procedure with a time box per function.
+To work on several units at once, give each its own worktree: `python3 tools/worktree.py <branch>` creates and builds one. Claude Code agents follow `.claude/skills/match-functions/SKILL.md`, the same procedure with a time box per function. `/run-batch` (`.claude/skills/run-batch/SKILL.md`) runs several such agents in parallel; `tools/integrate.py` merges each one's branch, and `tools/link_trial.py` links the units that match.
 
 Keep matching work separate from gameplay changes, ports and experiments. Those belong on explicitly non-matching branches. Do not alter compiler flags, target objects, matching thresholds or report denominators just to make a score increase.
 
