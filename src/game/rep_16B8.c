@@ -21,7 +21,7 @@ typedef struct {
     /* 0x58 */ u32 _58;
     /* 0x5C */ u32 _5C;
     /* 0x60 */ u8 _60[0x64 - 0x60];
-    /* 0x64 */ s16 _64;
+    /* 0x64 */ u16 _64;
     /* 0x66 */ u8 _66;
     /* 0x67 */ u8 _67;
     /* 0x68 */ u8 _68;
@@ -122,7 +122,9 @@ extern struct {
 } lbl_3_common_bss_34C90;
 
 extern struct {
-    /* 0x00 */ u8 _00[0x46];
+    /* 0x00 */ u8 _00[0x42];
+    /* 0x42 */ s16 _42;
+    /* 0x44 */ u8 _44[0x46 - 0x44];
     /* 0x46 */ u8 _46;
     /* 0x47 */ u8 _47;
 } lbl_3_common_bss_37400;
@@ -139,6 +141,9 @@ extern void fn_80034E20(UnkTask1770* task, UnkSpriteDesc1770* desc);
 extern void fn_8003649C(UnkTask1770* task, s32, s32, s32, s32);
 extern void fn_800B0A14_removeQueue(void);
 extern void fn_3_ED574(void);
+extern void fn_80035CA4(s32 id);
+extern void fn_80069A98(void);
+extern void fn_800363D8(UnkTask1770* task, s32, s32, s32, u32);
 extern void* fn_800B0A5C_insertQueue(void (*)(void), u16);
 
 u16 lbl_3_data_D638[8] = {
@@ -459,9 +464,7 @@ UnkSpriteDesc1770 lbl_3_data_F224[9] = {
     { 3, 0, { 0, 0, 0 }, { 0, 0 }, 0, { 0, 0, 0 } },
 };
 
-u32 lbl_3_data_F344[3] = {
-    0x00410042, 0x00410042, 0x00410042
-};
+u16 lbl_3_data_F344[6] = { 0x41, 0x42, 0x41, 0x42, 0x41, 0x42 };
 
 UnkSpriteDesc1770 lbl_3_data_F350[2] = {
     { 0, 0xb1, { 0, 0, -1 }, { 1, 5 }, 0xff, { 0x2000000, 0, 0 } },
@@ -479,8 +482,9 @@ UnkSpriteDesc1770 lbl_3_data_F3F0[2] = {
     { 3, 0, { 0, 0, 0 }, { 0, 0 }, 0, { 0, 0, 0 } },
 };
 
-u32 lbl_3_data_F430[6] = {
-    0x00010001, 0x00010001, 0x00010001, 0x00010001, 0x00010001, 0x00010001
+u8 lbl_3_data_F430[12][2] = {
+    { 0, 1 }, { 0, 1 }, { 0, 1 }, { 0, 1 }, { 0, 1 }, { 0, 1 },
+    { 0, 1 }, { 0, 1 }, { 0, 1 }, { 0, 1 }, { 0, 1 }, { 0, 1 },
 };
 
 
@@ -588,7 +592,36 @@ void fn_3_973EC(void) {
 
 // .text:0x000972C8 size:0x124 mapped:0x806D635C
 void fn_3_972C8(void) {
-    return;
+    lbl_3_common_bss_32724._96 = 1;
+    if (g_d_GameSettings.GameModeSelected == 4) {
+        fn_80069A98();
+        fn_80035CA4(0x16);
+    }
+    if (g_d_GameSettings.GameModeSelected == 0 || g_d_GameSettings.GameModeSelected == 5 ||
+        g_d_GameSettings.GameModeSelected == 4)
+    {
+        fn_80035CA4(0x10);
+        fn_80035CA4(0xF);
+    }
+    fn_80035CA4(2);
+    fn_80035CA4(5);
+    fn_80035CA4(4);
+    if (g_d_GameSettings.minigamesEnabled) {
+        fn_80035CA4(0x14);
+        if (g_d_GameSettings.GameModeSelected == 6) {
+            fn_80035CA4(0xE);
+        }
+        fn_80035CA4(3);
+        fn_80035CA4(9);
+        fn_80035CA4(0xD);
+        fn_80035CA4(0x11);
+    } else if (g_d_GameSettings.GameModeSelected == 2) {
+        fn_80035CA4(0xB);
+        fn_80035CA4(9);
+    }
+    if (lbl_3_common_bss_32724._D1 != 0) {
+        fn_80035CA4(0xC);
+    }
 }
 
 // .text:0x000972A0 size:0x28 mapped:0x806D6334
@@ -716,7 +749,34 @@ void fn_3_952DC(void) {
 
 // .text:0x000951B4 size:0x128 mapped:0x806D4248
 void fn_3_951B4(void) {
-    return;
+    UnkTask1770* task = lbl_803CC1B8;
+
+    if (g_Ball.deadBallReason == 1) {
+        if (g_GameLogic.gameStatus == 20) {
+            lbl_80371C30[task->_14]._00->_68 = 1;
+        }
+        if (g_GameLogic.gameStatus == 2) {
+        } else if (g_GameLogic.gameStatus == 20) {
+        } else {
+            goto kill;
+        }
+        return;
+    }
+    if (g_UnkSound_32718._07 == 0 || g_GameLogic.gameStatus == 1) {
+        lbl_80371C30[task->_14]._00->_68 = 1;
+    }
+    if (lbl_3_common_bss_32724._96 == 0 && lbl_3_common_bss_37400._42 != 0) {
+        if (g_GameLogic.gameStatus == 1) {
+        } else if (g_GameLogic.gameStatus == 2) {
+        } else {
+            goto kill;
+        }
+        return;
+    }
+kill:
+    lbl_3_common_bss_32724._B4 = 0;
+    fn_80034CEC(task);
+    fn_800B0A14_removeQueue();
 }
 
 // .text:0x00095124 size:0x90 mapped:0x806D41B8
@@ -784,8 +844,21 @@ void fn_3_948B8(void) {
 }
 
 // .text:0x00094760 size:0x158 mapped:0x806D37F4
+// 91.77%: the target loads 37 for the first call and the second sprite
+// row offset earlier; the instructions are otherwise the same.
 void fn_3_94760(void) {
-    return;
+    UnkTask1770* task = lbl_803CC1B8;
+
+    fn_80034E20(task, lbl_3_data_E75C);
+    lbl_80371C30[task->_14 + 3]._00->_64 = lbl_3_data_F430[g_GameLogic.logo[0].captain][0];
+    lbl_80371C30[task->_14 + 4]._00->_64 = lbl_3_data_F430[g_GameLogic.logo[1].captain][0];
+    lbl_80371C30[task->_14 + 3]._00->_5C = g_GameLogic.logo[0].variationID << 16;
+    lbl_80371C30[task->_14 + 4]._00->_5C = g_GameLogic.logo[1].variationID << 16;
+    fn_800363D8(task, 5, 1, 37,
+                g_GameLogic.teams[g_GameLogic.homeTeamInd] + g_GameLogic._13E[g_GameLogic.homeTeamInd] * 4);
+    fn_800363D8(task, 6, 1, 37,
+                g_GameLogic.teams[g_GameLogic.homeTeamInd ^ 1] + g_GameLogic._13E[g_GameLogic.homeTeamInd ^ 1] * 4);
+    ((UnkTask1770*)lbl_803CC1B8)->_00 = fn_3_94708;
 }
 
 // .text:0x00094708 size:0x58 mapped:0x806D379C
@@ -854,8 +927,28 @@ void fn_3_91E4C(void) {
 }
 
 // .text:0x00091D1C size:0x130 mapped:0x806D0DB0
+// 99.87%: the loop index add has its operands swapped (add r5,r11,r0
+// against add r5,r0,r11).
 void fn_3_91D1C(void) {
-    return;
+    UnkTask1770* task = lbl_803CC1B8;
+    s32 i;
+    s32 batter;
+
+    fn_80034E20(task, lbl_3_data_F224);
+    lbl_80371C30[task->_14 + 3]._00->_64 = lbl_3_data_F344[g_d_GameSettings.StadiumID];
+    for (i = 0; i < 3; i++) {
+        batter = g_GameLogic.currentBatterPerTeam[g_GameLogic.awayTeamBattingInd_battingTeam] + i;
+        if (batter > 9) {
+            batter -= 9;
+        }
+        lbl_80371C30[task->_14 + (i + 5)]._00->_5C =
+            inMemRoster[g_GameLogic.teamFielding]
+                       [g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.awayTeamBattingInd_battingTeam][batter][0]]
+                           .stats.CharID
+            << 16;
+    }
+    fn_800363D8(task, 1, 4, 7, g_d_GameSettings.StadiumID);
+    ((UnkTask1770*)lbl_803CC1B8)->_00 = fn_3_91CCC;
 }
 
 // .text:0x00091CCC size:0x50 mapped:0x806D0D60
