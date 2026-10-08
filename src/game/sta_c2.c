@@ -1454,8 +1454,21 @@ void fn_3_CC81C(void) {
 }
 
 // .text:0x000CC5C4 size:0x258 mapped:0x8070B658
-void fn_3_CC5C4(void) {
-    return;
+void fn_3_CC5C4(StaC2Draw* draw) {
+    draw->_CA = g_Minigame._1B19;
+    fn_80025EEC(draw->_8C, 0, 2);
+    draw->_CB = draw->_CA;
+    draw->_90_7 = 1;
+    draw->control.type = 0;
+    CTRLSetScale(&draw->control, 0.75f, 0.75f, 0.75f);
+    draw->_A0.x = g_Minigame._1AE0;
+    draw->_A0.y = g_Minigame._1AE4;
+    draw->_A0.z = g_Minigame._1AE8;
+    draw->_C0 = shortAngleToRad(g_Minigame._1AF8);
+    CTRLSetRotation(&draw->control, 0.0f, draw->_C0, 0.0f);
+    CTRLSetTranslation(&draw->control, draw->_A0.x, -draw->_A0.y, draw->_A0.z);
+    fn_3_CC438();
+    fn_3_CBF80(draw);
 }
 
 // .text:0x000CC438 size:0x18C mapped:0x8070B4CC
