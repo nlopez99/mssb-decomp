@@ -985,7 +985,8 @@ void fn_3_8781C(void) {
     if (g_Runners[0].baseNumberEarned_NotIncludingFieldersChoice == -1) {
         u32 ballState = g_Ball.ballState;
         u32 ballZone = g_Ball.ballZoneAwayFromHome;
-        u32 caughtZone = g_Ball.ballZoneWhenCaught;
+        // Read as unsigned, so that -1 (no zone) fails the test below; the target has no extsb
+        u32 caughtZone = (u8)g_Ball.ballZoneWhenCaught;
         u32 fielding = g_FieldingLogic._10E;
         int j;
 

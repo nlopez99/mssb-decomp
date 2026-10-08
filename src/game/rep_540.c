@@ -196,8 +196,6 @@ void fn_3_F578(void) {
 }
 
 // .text:0x0000F1DC size:0x39C mapped:0x8064E270
-// 97.9%: ballZoneWhenCaught = -1 loads 255 into its own register; the target stores the
-// s16 -1 register, as if the field were s8 (rep_18E8 reads it with extsb, rep_13B8 without).
 void fn_3_F1DC(void) {
     u32 seed;
 
@@ -287,8 +285,6 @@ void fn_3_F1DC(void) {
 }
 
 // .text:0x0000EE4C size:0x390 mapped:0x8064DEE0
-// 96.7%: as in fn_3_F1DC, ballZoneWhenCaught = -1 needs its own li 255; the target stores
-// the -1 register, as if the field were s8. With an s8 field this order matches.
 void fn_3_EE4C(void) {
     f32 x;
     f32 z;
