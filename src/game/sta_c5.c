@@ -479,8 +479,8 @@ static inline void spawnDrawEffect(StaC5Draw* draw) {
 }
 
 // .text:0x000F6FDC size:0x1468 mapped:0x80736070
-// 92.23%: register allocation differs throughout; the target also counts the props with
-// n1 + 2 hoisted between the two counting loops and keeps the ball model index on the stack.
+// 94.25%: register allocation differs throughout; the target also computes n1 + 2
+// between the two counting loops and spills ballModel where this keeps it in a register.
 void fn_3_F6FDC(void** files) {
     StaC5Draw* draw;
     StaC5Draw* entry;
@@ -496,8 +496,8 @@ void fn_3_F6FDC(void** files) {
     s32 n2;
     u8 j;
     u8 pitcherModel;
-    u8 ballModel;
     u8 fieldModel;
+    u8 ballModel;
     u8 numModels;
     u8 numActors;
     u8 count;
@@ -517,13 +517,16 @@ void fn_3_F6FDC(void** files) {
     fn_3_B9D68(lbl_3_data_1BA34, 18, files, indices);
     lbl_3_bss_B560[0] = files[0];
 
-    for (n1 = 0, prop = lbl_3_data_1B8FC; n1 < 5; n1++, prop++) {
-        if (prop->type == 6) {
+    prop = lbl_3_data_1B8FC;
+    n2 = 0;
+    for (n1 = 0; n1 < 5; n1++) {
+        if (prop[n1].type == 6) {
             break;
         }
     }
-    for (n2 = 0, prop2 = lbl_3_data_1B9A4; n2 < 5; n2++, prop2++) {
-        if (prop2->type == 6) {
+    prop2 = lbl_3_data_1B9A4;
+    for (; n2 < 5; n2++) {
+        if (prop2[n2].type == 6) {
             break;
         }
     }
@@ -586,7 +589,7 @@ void fn_3_F6FDC(void** files) {
         lbl_3_bss_B21D = 0;
         idx = 0;
         for (i = 0; i < 5; i++) {
-            if (lbl_3_data_1B884[i].type == 6 || lbl_3_data_1B8FC[i].type != 0) {
+            if (lbl_3_data_1B884[i].type == 6 || prop->type != 0) {
                 break;
             }
             entry->_9D = 0;
@@ -611,6 +614,7 @@ void fn_3_F6FDC(void** files) {
             draw->_98 = 1;
             draw->_9A = 1;
             entry = ++draw;
+            prop++;
             lbl_3_bss_B21E++;
         }
         end = FALSE;
@@ -664,7 +668,7 @@ void fn_3_F6FDC(void** files) {
     if (g_d_GameSettings.GameModeSelected != 7) {
         lbl_3_bss_B21B = count;
         for (i = 0; i < 5; i++) {
-            if (lbl_3_data_1B9A4[i].type == 6) {
+            if (prop2->type == 6) {
                 end = TRUE;
             }
             if (end) {
@@ -692,6 +696,7 @@ void fn_3_F6FDC(void** files) {
             draw->_96 = -1;
             draw->_98 = 1;
             entry = ++draw;
+            prop2++;
             lbl_3_bss_B21C++;
         }
         fn_800B0A5C_insertQueue(fn_3_F0184, 0x6001);
