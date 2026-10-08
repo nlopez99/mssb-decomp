@@ -69,12 +69,34 @@ extern void fn_3_27648(void);
 extern void fn_3_253A4(s32 fielder, s32 angle);
 extern u8 fn_3_51DF0(f32 x, f32 z);
 
+// .text:0x00010030 size:0x11C mapped:0x8064F0C4
+// Outside this unit's .text range in splits.txt, but inlined into fn_3_FBA8.
+static inline void fn_3_10030(void) {
+    s32 r;
+
+    r = (lbl_3_data_228._00 % 10 + 1) * (g_Ball.StaticRandomInt1 * rand());
+    g_Ball.StaticRandomInt1 = (r + rand() * 16 + lbl_3_data_228._00 / 2 + g_d_GameSettings.FrameCountWhileNotAtMainMenu) & 0x7FFF;
+    r = (lbl_3_data_228._00 % 10 + 1) * ((g_Ball.StaticRandomInt2 + 1) * rand());
+    g_Ball.StaticRandomInt2 = (r + rand() * 8 + lbl_3_data_228._00 / 2 + (g_d_GameSettings.FrameCountWhileNotAtMainMenu >> 1)) & 0x7FFF;
+}
+
+// .text:0x0000FF98 size:0x98 mapped:0x8064F02C
+// Outside this unit's .text range in splits.txt, but inlined into fn_3_F578, fn_3_F7B8 and fn_3_F1DC.
+static inline void fn_3_FF98(void) {
+    u32 seed = lbl_3_data_228._00;
+
+    g_Ball.StaticRandomInt1 =
+        (g_Ball.StaticRandomInt2 * 16 + (seed % 10 + 1) * (g_Ball.StaticRandomInt2 * g_Ball.StaticRandomInt1) + seed / 2 + g_d_GameSettings.FrameCountWhileNotAtMainMenu) & 0x7FFF;
+    g_Ball.StaticRandomInt1_prePitch = g_Ball.StaticRandomInt1;
+    g_Ball.StaticRandomInt2 =
+        (g_Ball.StaticRandomInt1 * 8 + (seed % 10 + 1) * (g_Ball.StaticRandomInt2 * (g_Ball.StaticRandomInt2 + 1)) + seed / 2 + (g_d_GameSettings.FrameCountWhileNotAtMainMenu >> 1)) & 0x7FFF;
+}
+
 // .text:0x0000FBA8 size:0x3A4 mapped:0x8064EC3C
 // 99.9%: each seed sum adds the random product from r29 and the shifted rand() from r6
 // in the other order.
 void fn_3_FBA8(void) {
     s32 i;
-    s32 r;
 
     g_Ball.AtBat_Contact_BallPos.x = lbl_3_data_450C[0];
     g_Ball.AtBat_Contact_BallPos.y = 0.0f;
@@ -126,10 +148,7 @@ void fn_3_FBA8(void) {
     } else {
         g_Ball.groundYForBounces = lbl_3_data_45F4[0];
     }
-    r = (lbl_3_data_228._00 % 10 + 1) * (g_Ball.StaticRandomInt1 * rand());
-    g_Ball.StaticRandomInt1 = (rand() * 16 + r + lbl_3_data_228._00 / 2 + g_d_GameSettings.FrameCountWhileNotAtMainMenu) & 0x7FFF;
-    r = (lbl_3_data_228._00 % 10 + 1) * ((g_Ball.StaticRandomInt2 + 1) * rand());
-    g_Ball.StaticRandomInt2 = (rand() * 8 + r + lbl_3_data_228._00 / 2 + (g_d_GameSettings.FrameCountWhileNotAtMainMenu >> 1)) & 0x7FFF;
+    fn_3_10030();
 }
 
 // .text:0x0000F9F8 size:0x1B0 mapped:0x8064EA8C
@@ -159,29 +178,15 @@ void fn_3_F9F8(void) {
 
 // .text:0x0000F7B8 size:0x240 mapped:0x8064E84C
 void fn_3_F7B8(void) {
-    u32 seed;
-
     fn_3_F9F8();
-    seed = lbl_3_data_228._00;
-    g_Ball.StaticRandomInt1 =
-        (g_Ball.StaticRandomInt2 * 16 + (seed % 10 + 1) * (g_Ball.StaticRandomInt2 * g_Ball.StaticRandomInt1) + seed / 2 + g_d_GameSettings.FrameCountWhileNotAtMainMenu) & 0x7FFF;
-    g_Ball.StaticRandomInt1_prePitch = g_Ball.StaticRandomInt1;
-    g_Ball.StaticRandomInt2 =
-        (g_Ball.StaticRandomInt1 * 8 + (seed % 10 + 1) * (g_Ball.StaticRandomInt2 * (g_Ball.StaticRandomInt2 + 1)) + seed / 2 + (g_d_GameSettings.FrameCountWhileNotAtMainMenu >> 1)) & 0x7FFF;
+    fn_3_FF98();
     g_Ball.fielderWBallIndex = -1;
 }
 
 // .text:0x0000F578 size:0x240 mapped:0x8064E60C
 void fn_3_F578(void) {
-    u32 seed;
-
     fn_3_F9F8();
-    seed = lbl_3_data_228._00;
-    g_Ball.StaticRandomInt1 =
-        (g_Ball.StaticRandomInt2 * 16 + (seed % 10 + 1) * (g_Ball.StaticRandomInt2 * g_Ball.StaticRandomInt1) + seed / 2 + g_d_GameSettings.FrameCountWhileNotAtMainMenu) & 0x7FFF;
-    g_Ball.StaticRandomInt1_prePitch = g_Ball.StaticRandomInt1;
-    g_Ball.StaticRandomInt2 =
-        (g_Ball.StaticRandomInt1 * 8 + (seed % 10 + 1) * (g_Ball.StaticRandomInt2 * (g_Ball.StaticRandomInt2 + 1)) + seed / 2 + (g_d_GameSettings.FrameCountWhileNotAtMainMenu >> 1)) & 0x7FFF;
+    fn_3_FF98();
     g_Ball.deadBallReason = 0;
 }
 
