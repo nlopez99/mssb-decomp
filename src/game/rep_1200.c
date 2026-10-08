@@ -177,8 +177,8 @@ void fn_3_750C4(u8 state) {
 }
 
 // .text:0x000750DC size:0xD8 mapped:0x806B4170
-void fn_3_750DC(void) {
-    return;
+BOOL fn_3_750DC(void) {
+    return FALSE;
 }
 
 // .text:0x000751B4 size:0x234 mapped:0x806B4248
