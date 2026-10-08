@@ -128,6 +128,7 @@ typedef struct StaC5Ball {
     /* 0xB4 */ Vec vel;
     /* 0xC0 */ f32 _C0;
     /* 0xC4 */ s8 _C4;
+    /* 0xC5 */ u8 _C5;
 } StaC5Ball;
 
 typedef struct {
@@ -211,7 +212,8 @@ extern struct {
     /* 0x48 */ Vec* _48;
     /* 0x4C */ u8 _4C[0x64 - 0x4C];
     /* 0x64 */ u16 _64;
-    /* 0x66 */ u8 _66[0x6D - 0x66];
+    /* 0x66 */ u8 _66[0x6C - 0x66];
+    /* 0x6C */ u8 _6C;
     /* 0x6D */ u8 _6D;
 } lbl_3_common_bss_350E4;
 
@@ -256,6 +258,9 @@ extern bool fn_800527C4(Vec* pos);
 extern void fn_80064430(Vec* pos, s32 type, f32 arg2, f32 arg3);
 extern BOOL fn_8001B728(s32, s32, Vec*);
 extern s32 fn_8005268C(void);
+extern void fn_800ACF14(void* data);
+extern void* fn_800ACF34(u32 align, u32 size);
+extern void fn_800C07BC(void* base, void* tmp, s32 count, s32 size, s32 (*compare)(const void* a, const void* b));
 extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_8003A144(void);
 extern void* fn_80039AB4(void);
@@ -581,8 +586,75 @@ struct StadiumObjectCollision* fn_3_F6504(s32 idx, MtxPtr mtx) {
 }
 
 // .text:0x000F6084 size:0x480 mapped:0x80735118
-void fn_3_F6084(void) {
-    return;
+void fn_3_F6084(MtxPtr view, StadiumSort1D58* sort) {
+    Vec pos;
+    StaC5Draw* obj;
+    StaC5Draw* draw;
+    s32 m;
+    s32 i;
+    s32 n;
+    StaC5Ball* ball;
+    StadiumSort1D58 tmp;
+    void* buf;
+    u32 a;
+    u32 b;
+
+    if (lbl_3_common_bss_350E4._6C) {
+        n = 0;
+        obj = &lbl_3_common_bss_350E4._00[lbl_3_common_bss_350E4._30 - 1];
+        i = lbl_3_common_bss_350E4._30 - 1;
+        do {
+            if (!obj->_90_7) {
+                sort[n].depth = -512.0f;
+                sort[n].index = i;
+                n++;
+            }
+            obj--;
+        } while (i-- != 0);
+        obj = &lbl_3_common_bss_350E4._00[lbl_3_common_bss_350E4._30 - 1];
+        i = lbl_3_common_bss_350E4._30 - 1;
+        m = lbl_3_common_bss_350E4._30 - 1;
+        do {
+            if (obj->_90_7) {
+                if (draw->_9D == 4) {
+                    sort[lbl_3_common_bss_350E4._30 - 1].depth = -1.0f;
+                    sort[lbl_3_common_bss_350E4._30 - 1].index = i;
+                } else if (obj->_90_5) {
+                    CTRLGetTranslation(&obj->control, &pos.x, &pos.y, &pos.z);
+                    PSMTXMultVec(view, &pos, &pos);
+                    m--;
+                    sort[m].depth = pos.z;
+                    sort[m].index = i;
+                } else {
+                    sort[n].depth = -512.0f;
+                    sort[n].index = i;
+                    n++;
+                }
+            }
+            draw = --obj;
+        } while (i-- != 0);
+        buf = fn_800ACF34(0x20, (lbl_3_common_bss_350E4._30 - m) * sizeof(StadiumSort1D58));
+        fn_800C07BC(&sort[m], buf, lbl_3_common_bss_350E4._30 - m, sizeof(StadiumSort1D58), fn_3_F5F28);
+        fn_800ACF14(buf);
+        for (i = 0; i < lbl_3_bss_B220.count; i++) {
+            ball = (StaC5Ball*)&lbl_3_common_bss_350E4._00[lbl_3_bss_B21F + i];
+            a = fn_3_F5E78(ball->_C5);
+            b = fn_3_F5E78(ball->_A0->_C5);
+            if (a > b) {
+                tmp = sort[a];
+                sort[a] = sort[b];
+                sort[b] = tmp;
+            }
+        }
+        fn_3_F5F4C(view);
+    } else {
+        obj = lbl_3_common_bss_350E4._00;
+        for (i = 0; i < lbl_3_common_bss_350E4._30; i++) {
+            CTRLGetTranslation(&obj->control, &pos.x, &pos.y, &pos.z);
+            sort[i].depth = 1.0f;
+            sort[i].index = i;
+        }
+    }
 }
 
 // .text:0x000F5F4C size:0x138 mapped:0x80734FE0

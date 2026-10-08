@@ -5,6 +5,7 @@
 #include "Dolphin/mtx.h"
 
 struct StaC5Draw;
+struct StadiumSort1D58;
 struct StaC5Shape;
 struct StaC5Emitter;
 struct StadiumObjectCollision;
@@ -74,7 +75,7 @@ s32 fn_3_F5E78(u8 id);
 s32 fn_3_F5EFC(const void* a, const void* b);
 s32 fn_3_F5F28(const void* a, const void* b);
 void fn_3_F5F4C(MtxPtr mtx);
-void fn_3_F6084(void);
+void fn_3_F6084(MtxPtr view, struct StadiumSort1D58* sort);
 struct StadiumObjectCollision* fn_3_F6504(s32 idx, MtxPtr mtx);
 void fn_3_F65C8(s32* n);
 void fn_3_F66C8(s32* n);
