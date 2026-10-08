@@ -2,6 +2,8 @@
 #include "header_rep_data.h"
 #include "game/UnknownHomes_Game.h"
 #include "static/UnknownHomes_Static.h"
+#include "musyx/musyx.h"
+#include "string.h"
 #include "game/m_sound.h"
 #include "game/rep_10E8.h"
 #include "game/rep_1038.h"
@@ -32,14 +34,43 @@ extern struct {
 } lbl_80366158;
 
 extern struct {
-    /* 0x0000 */ u8 _0000[0x3088];
+    /* 0x0000 */ u8 _0000[0x6C];
+    /* 0x006C */ s32 _006C;
+    /* 0x0070 */ u8 _0070[0x2D44 - 0x70];
+    /* 0x2D44 */ s16 _2D44;
+    /* 0x2D46 */ u8 _2D46[0x2D50 - 0x2D46];
+    /* 0x2D50 */ s16 _2D50;
+    /* 0x2D52 */ u8 _2D52[0x2D5C - 0x2D52];
+    /* 0x2D5C */ s16 _2D5C;
+    /* 0x2D5E */ u8 _2D5E[0x2D7D - 0x2D5E];
+    /* 0x2D7D */ u8 _2D7D;
+    /* 0x2D7E */ u8 _2D7E[0x307A - 0x2D7E];
+    /* 0x307A */ u8 _307A;
+    /* 0x307B */ u8 _307B;
+    /* 0x307C */ u8 _307C;
+    /* 0x307D */ u8 _307D;
+    /* 0x307E */ u8 _307E;
+    /* 0x307F */ u8 _307F[0x3088 - 0x307F];
     /* 0x3088 */ u8 _3088;
 } lbl_8036E548;
 
 extern struct {
-    /* 0x0 */ u8 _0[0x5];
+    /* 0x0000 */ u8 _0000[0x470D];
+    /* 0x470D */ u8 _470D[2];
+} lbl_8034E9A0;
+
+extern struct {
+    /* 0x00 */ u8 _00[0xC7];
+    /* 0xC7 */ u8 _C7;
+} g_Scores;
+
+extern struct {
+    /* 0x0 */ u8 _0[0x4];
+    /* 0x4 */ u8 _4;
     /* 0x5 */ u8 _5;
     /* 0x6 */ u8 _6;
+    /* 0x7 */ u8 _7[2];
+    /* 0x9 */ u8 _9;
 } g_UnkSimulation_31AC0;
 
 extern struct {
@@ -52,15 +83,21 @@ extern struct {
 extern struct {
     /* 0x00 */ u8 _00[0x96];
     /* 0x96 */ u8 _96;
+    /* 0x97 */ u8 _97[0xA4 - 0x97];
+    /* 0xA4 */ u8 _A4;
+    /* 0xA5 */ u8 _A5[0xD7 - 0xA5];
+    /* 0xD7 */ u8 _D7;
 } lbl_3_common_bss_32724;
 
 extern u8 lbl_803CBC3C;
 
 extern struct {
-    /* 0x00 */ u8 _00[0x10];
+    /* 0x00 */ void (*callback)(void);
+    /* 0x04 */ u8 _04[0x10 - 0x4];
     /* 0x10 */ s16 _10;
 }* lbl_803CC1B8;
 
+extern void changeScene(u8, s16);
 extern void fn_8001E474(void);
 extern void fn_8001F228(void);
 extern void fn_3_7D458(void);
@@ -241,9 +278,60 @@ void fn_3_5B0C4(void) {
     lbl_3_data_228._04++;
 }
 
+// Registers differ from the setup through the stores (97.07%); the instructions
+// and their order match.
 // .text:0x0005AE9C size:0x228 mapped:0x80699F30
 void fn_3_5AE9C(void) {
-    return;
+    int logo0;
+    int logo1;
+    u8 side;
+
+    changeScene(4, 0);
+    side = g_d_GameSettings.home_AwaySetting;
+    logo0 = lbl_8034E9A0._470D[side];
+    logo1 = lbl_8034E9A0._470D[side ^ 1];
+    g_GameLogic.framesOfExitingToMenu = 0;
+    g_UnkSimulation_31AC0._4 = 0;
+    g_UnkSimulation_31AC0._9 = 0;
+    lbl_8036E548._307E = 0;
+    g_d_GameSettings.minigamesEnabled = 0;
+    g_d_GameSettings._13 = 0;
+    g_d_GameSettings.someChallengeModeFlag = 0;
+    lbl_8036E548._307A = 0;
+    lbl_8036E548._006C = 0;
+    lbl_8036E548._307C = 0;
+    lbl_8036E548._307D = 0;
+    lbl_3_common_bss_32724._A4 = 0;
+    g_d_GameSettings._55 = 0;
+    g_d_GameSettings.challengeMinigame_baseCoinsEarned = 0;
+    g_d_GameSettings.bJMatchRelated = 0;
+    lbl_8036E548._2D44 = -1;
+    lbl_8036E548._2D50 = -1;
+    lbl_8036E548._2D5C = -1;
+    g_GameLogic.teams[0] = g_d_GameSettings.PlayerPorts[0];
+    g_GameLogic.teams[1] = g_d_GameSettings.PlayerPorts[1] % 4;
+    g_GameLogic.logo[0].ID = logo0;
+    g_GameLogic.logo[1].ID = logo1;
+    g_GameLogic.logo[0].variationID = logo0 % 4;
+    g_GameLogic.logo[1].variationID = logo1 % 4;
+    g_GameLogic.logo[0].captain = logo0 / 4;
+    g_GameLogic.logo[1].captain = logo1 / 4;
+    g_Scores._C7 = gameInitOptions.runsNeededForMercy;
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD || g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES) {
+        g_d_GameSettings.minigamesEnabled = 1;
+    }
+    memset(&g_Minigame, 0, sizeof(g_Minigame));
+    g_Minigame.GameMode_MiniGame = 0;
+    sndVolume(127, 10, 255);
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD || g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES) {
+        lbl_8036E548._2D7D = 0;
+        lbl_3_common_bss_32724._D7 = 0;
+        lbl_803CC1B8->callback = fn_3_59F40;
+    } else if (g_d_GameSettings.GameModeSelected == GAME_TYPE_PRACTICE) {
+        lbl_803CC1B8->callback = fn_3_59C2C;
+    } else {
+        lbl_803CC1B8->callback = fn_3_5A28C;
+    }
 }
 
 // .text:0x0005AE0C size:0x90 mapped:0x80699EA0
