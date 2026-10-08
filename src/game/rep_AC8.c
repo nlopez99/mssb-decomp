@@ -93,7 +93,7 @@ typedef struct UnkAC8Fielder {
     /* 0x18C */ s16 _18C;
     /* 0x18E */ u8 _18E[0x190 - 0x18E];
     /* 0x190 */ s16 _190;
-    /* 0x192 */ u8 _192[0x194 - 0x192];
+    /* 0x192 */ s16 _192;
     /* 0x194 */ s16 _194;
     /* 0x196 */ u8 _196[0x198 - 0x196];
     /* 0x198 */ s16 _198;
@@ -165,7 +165,7 @@ typedef struct UnkAC8Fielder {
     /* 0x1FC */ u8 _1FC;
     /* 0x1FD */ u8 _1FD[0x1FF - 0x1FD];
     /* 0x1FF */ u8 _1FF;
-    /* 0x200 */ u8 _200[0x201 - 0x200];
+    /* 0x200 */ u8 _200;
     /* 0x201 */ u8 _201;
     /* 0x202 */ u8 _202[0x203 - 0x202];
     /* 0x203 */ u8 _203;
@@ -787,7 +787,65 @@ void fn_3_55CC4(s32 fielder) {
 
 // .text:0x00055918 size:0x3AC mapped:0x806949AC
 void fn_3_55918(void) {
-    return;
+    s32 i;
+
+    if (g_GameLogic.teamAIInd[g_GameLogic.awayTeamBattingInd_battingTeam]) {
+        fn_3_41D78();
+    }
+    if (g_Strikes.outs >= 3 && g_d_GameSettings.GameModeSelected != GAME_TYPE_PRACTICE) {
+        for (i = 0; i < 9; i++) {
+            if (g_Fielders[i]._1D3 != 17 && (g_Ball.fielderWBallIndex != i || g_FieldingLogic._116 == 0) &&
+                g_Fielders[i]._200 == 0) {
+                fn_3_5985C(i, 17);
+            }
+        }
+    }
+    if (g_Ball._1BDF >= 1 && g_Ball._1BDF <= 4) {
+        for (i = 0; i < 9; i++) {
+            fn_3_5985C(i, 0);
+        }
+    } else if (g_Ball.deadBallReason != 0) {
+        for (i = 0; i < 9; i++) {
+            if (!(!(g_Ball._1BDF >= 1 && g_Ball._1BDF <= 4) && g_Fielders[i]._1D3 == 15 && g_Ball.deadBallReason != 0) &&
+                g_Fielders[i]._1D3 != 12 && g_Fielders[i]._252 == 0) {
+                fn_3_5985C(i, 12);
+            }
+        }
+    }
+    if (g_FieldingLogic._0C6 >= 0) {
+        if (g_FieldingLogic._0C8 < 0x7FFE) {
+            g_FieldingLogic._0C8++;
+        } else {
+            g_FieldingLogic._0C8 = 0x7FFF;
+        }
+        if (g_FieldingLogic._0C8 > 30) {
+            g_FieldingLogic._0C6 = -1;
+            g_FieldingLogic._0C8 = 0;
+        }
+    }
+    if (g_FieldingLogic._0C4 >= 0) {
+        if (g_Ball.ballState == 2) {
+            g_FieldingLogic._0F0 = 0;
+        } else if (g_FieldingLogic._0F0 < 0x7FFE) {
+            g_FieldingLogic._0F0++;
+        } else {
+            g_FieldingLogic._0F0 = 0x7FFF;
+        }
+    } else {
+        g_FieldingLogic._0F0 = 0;
+    }
+    if (g_FieldingLogic._12B) {
+        if (g_Ball.fielderWBallIndex < 0) {
+            g_FieldingLogic._12B = 0;
+        } else if (g_Fielders[g_Ball.fielderWBallIndex]._1F5 >= 0) {
+            g_FieldingLogic._12B = 0;
+        } else {
+            g_FieldingLogic._12B--;
+        }
+    }
+    for (i = 0; i < 9; i++) {
+        g_Fielders[i]._192 = 15;
+    }
 }
 
 // .text:0x00055710 size:0x208 mapped:0x806947A4
