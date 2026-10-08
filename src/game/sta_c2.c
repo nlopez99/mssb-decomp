@@ -935,8 +935,67 @@ void fn_3_D2220(void) {
 }
 
 // .text:0x000D1F2C size:0x2F4 mapped:0x80710FC0
-void fn_3_D1F2C(void) {
-    return;
+// 97.91%: callee-saved registers differ (the parameters against the step counter).
+void fn_3_D1F2C(StaC2SpringParams* params, StaC2Spring* springs, s32 count, Vec* force, StaC2Draw* draw) {
+    Vec accel;
+    Vec scaled;
+    Vec center;
+    Vec diff;
+    Vec dir;
+    Vec push;
+    Vec tmp;
+    Vec next;
+    s32 step;
+    s32 i;
+    StaC2Spring* s;
+    f32 damp;
+    f32 dt2;
+    f32 pen;
+    f32 dist;
+
+    center = draw->_A0;
+    center.y += 4.5;
+    PSVECScale(force, params->dt, &scaled);
+    for (step = 0; step < params->steps; step++) {
+        fn_3_D1B24(params, springs, count, &scaled);
+        s = springs;
+        for (i = 0; i < count; s++, i++) {
+            PSVECScale(&s->_30, s->_04, &accel);
+            damp = params->_24;
+            dt2 = params->dt2;
+            PSVECScale(&s->_0C[0], 2.0f, &next);
+            PSVECSubtract(&next, &s->_0C[1], &next);
+            PSVECScale(&accel, dt2, &tmp);
+            PSVECAdd(&next, &tmp, &next);
+            PSVECSubtract(&next, &s->_0C[1], &s->_24);
+            PSVECScale(&s->_24, damp, &s->_24);
+            memcpy(&s->_0C[1], &s->_0C[0], sizeof(Vec));
+            memcpy(&s->_0C[0], &next, sizeof(Vec));
+            if (!s->_3C) {
+                pen = s->_0C[0].y - s->_08;
+                if (pen < 0.0f) {
+                    s->_0C[0].y -= pen * params->_04;
+                    s->_0C[1].y -= (s->_0C[1].y - s->_08) * params->_04;
+                }
+                PSVECSubtract(&s->_0C[0], &center, &diff);
+                dist = PSVECMag(&diff);
+                if (4.5 + s->_08 > dist) {
+                    PSVECNormalize(&diff, &dir);
+                    PSVECScale(&dir, (4.5 + s->_08) - dist, &push);
+                    s->_0C[0].x += push.x * params->_04;
+                    s->_0C[0].y += push.y * params->_04;
+                    s->_0C[0].z += push.z * params->_04;
+                    PSVECSubtract(&s->_0C[1], &center, &diff);
+                    dist = PSVECMag(&diff);
+                    PSVECNormalize(&diff, &dir);
+                    PSVECScale(&dir, (4.5 + s->_08) - dist, &push);
+                    s->_0C[1].x += push.x * params->_04;
+                    s->_0C[1].y += push.y * params->_04;
+                    s->_0C[1].z += push.z * params->_04;
+                }
+            }
+        }
+    }
 }
 
 // .text:0x000D1B24 size:0x408 mapped:0x80710BB8
