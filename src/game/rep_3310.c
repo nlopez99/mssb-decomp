@@ -502,17 +502,18 @@ void fn_3_11B75C(void) {
 }
 
 // .text:0x0011AC6C size:0xAF0 mapped:0x80759D00
-// 84.14%: the base inlines fn_3_1192B8, which the target calls; the rest follows its
-// inlined callees. fn_3_11D1B0 shows the same with fn_3_11CD00 and fn_3_11C02C.
+// 99.85%: only registers differ, in the inlined fn_3_117494 (as in fn_3_116B74).
 void fn_3_11AC6C(void) {
-    s32 i;
     UnkObj3310* obj;
+    s32 i;
 
     if (g_GameLogic.gameStatus >= 0x1B && g_GameLogic.gameStatus <= 0x29) {
-        for (i = 0; i < lbl_8036E548._3078; i++) {
-            obj = &lbl_8036E548._2D94[i];
-            if (obj != NULL) {
-                obj->_26 = 0;
+        if (lbl_8036E548._3078 != 0) {
+            for (i = 0; i < lbl_8036E548._3078; i++) {
+                obj = &lbl_8036E548._2D94[i];
+                if (obj != NULL) {
+                    obj->_26 = 0;
+                }
             }
         }
         return;
@@ -1118,10 +1119,13 @@ void fn_3_119468(s32 i) {
 void fn_3_1192B8(void) {
     UnkObj3310* obj;
     s32 i;
+    s32 id;
     f32 t;
+    f32 scale;
 
     for (i = 0; i < 3; i++) {
-        obj = &lbl_8036E548._2D94[i + 0x82];
+        id = i + 0x82;
+        obj = &lbl_8036E548._2D94[id];
         obj->_26 = 0;
         if (MG._0000[i]._2A != 0) {
             obj->_26 = 1;
@@ -1129,11 +1133,11 @@ void fn_3_1192B8(void) {
             obj->_04.y = -MG._0000[i].pos.y;
             obj->_04.z = MG._0000[i].pos.z;
             if (MG._0000[i]._2A != 3) {
-                fn_8001D0D0(i + 0x82, lbl_3_data_22678[0][MG._0000[i]._2B]);
+                fn_8001D0D0(id, lbl_3_data_22678[0][MG._0000[i]._2B]);
             } else {
                 t = (f32)MG._0000[i]._1A / (f32)lbl_3_data_21E68[6];
-                fn_8001D0D0(i + 0x82, (1.0f - t) * lbl_3_data_22678[0][MG._0000[i]._2B] +
-                                          lbl_3_data_22678[1][MG._0000[i]._2B] * t);
+                scale = (1.0f - t) * lbl_3_data_22678[0][MG._0000[i]._2B] + lbl_3_data_22678[1][MG._0000[i]._2B] * t;
+                fn_8001D0D0(id, scale);
             }
             if (MG._0000[i]._2B == 0) {
                 obj->_10.y = MG._0000[i].rot.y;
