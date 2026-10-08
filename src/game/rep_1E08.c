@@ -319,9 +319,8 @@ BOOL fn_3_C0134(void* arg) {
 
 // .text:0x000BFDA4 size:0x390 mapped:0x806FEE38
 f32 fn_3_BFDA4(struct UnkKey21F8* keys, int count, int frame, u8 current, u8* currentOut, f32 t) {
-    UnkKey21F8* key;
-    UnkKey21F8* next;
     s32 dir;
+    UnkKey21F8* next;
     f32 span;
     f32 start;
     f32 delta;
@@ -338,35 +337,34 @@ f32 fn_3_BFDA4(struct UnkKey21F8* keys, int count, int frame, u8 current, u8* cu
         current += dir;
     }
     if (current == count - 1) {
-        next = &keys[current];
         span = frame - keys[current].frame;
+        next = &keys[current];
     } else {
-        next = &keys[current + 1];
         span = keys[current + 1].frame - keys[current].frame;
+        next = &keys[current + 1];
     }
-    key = &keys[current];
-    start = key->value;
+    start = keys[current].value;
+    local = t - keys[current].frame;
     delta = next->value - start;
-    local = t - key->frame;
-    switch (key->type) {
+    switch (keys[current].type) {
     case 0:
         t = start + delta * local / span;
         break;
     case 1:
-        amp = key->amplitude * 0.5f;
-        if (key->_A) {
+        amp = keys[current].amplitude / 2;
+        if (keys[current]._A) {
             offset = amp;
         } else {
             offset = -amp;
         }
-        if (key->_B & 1) {
-            if (key->_A) {
-                delta -= key->amplitude;
+        if (keys[current]._B & 1) {
+            if (keys[current]._A) {
+                delta -= keys[current].amplitude;
             } else {
-                delta += key->amplitude;
+                delta += keys[current].amplitude;
             }
         }
-        t = amp * cos(3.1415927f * (key->_A + local * key->_B / span)) + (start + offset + delta * local / span);
+        t = amp * cos(3.1415927f * (keys[current]._A + local * keys[current]._B / span)) + (start + offset + delta * local / span);
         break;
     case 2:
         break;
