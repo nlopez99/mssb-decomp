@@ -5,13 +5,23 @@
 #include "game/rep_CC8.h"
 #include "game/rep_D18.h"
 #include "musyx/musyx.h"
+#include "game/rep_1C18.h"
+#include "game/m_sound.h"
 
 typedef struct AramEntry1B20 {
     /* 0x0 */ u32 _0[4];
 } AramEntry1B20; // size: 0x10
 
 extern struct {
-    /* 0x000 */ u8 _000[0x1D2];
+    /* 0x000 */ s32 _000;
+    /* 0x004 */ u8 _004[0xA - 0x4];
+    /* 0x00A */ s16 _00A;
+    /* 0x00C */ s16 _00C;
+    /* 0x00E */ u8 _00E[0x12 - 0xE];
+    /* 0x012 */ s16 _012;
+    /* 0x014 */ u8 _014[0x1D0 - 0x14];
+    /* 0x1D0 */ u8 _1D0;
+    /* 0x1D1 */ u8 _1D1;
     /* 0x1D2 */ u8 _1D2;
     /* 0x1D3 */ u8 _1D3;
     /* 0x1D4 */ u8 _1D4[0x1D9 - 0x1D4];
@@ -44,6 +54,9 @@ extern struct {
     /* 0x2D46 */ u8 _2D46;
     /* 0x2D47 */ u8 _2D47[0x2D52 - 0x2D47];
     /* 0x2D52 */ u8 _2D52;
+    /* 0x2D53 */ u8 _2D53[0x307D - 0x2D53];
+    /* 0x307D */ u8 _307D;
+    /* 0x307E */ u8 _307E;
 } lbl_8036E548;
 
 extern void changeScene(u8, s16);
@@ -51,6 +64,8 @@ extern void minigamesSetSomePointers(void);
 extern u8 lbl_800EFBA4[0x10];
 extern int fn_80035838(AramEntry1B20* entry, int count);
 extern void fn_80035B50(int arg);
+extern void fn_8004CC18(void);
+extern void fn_80011A60(void);
 
 extern u8 lbl_3_data_FC30[];
 extern u8 lbl_3_data_FCE8[];
@@ -77,9 +92,12 @@ u8 lbl_3_data_FAA8[3][9] = {
 u8 lbl_3_data_FAC4[8] = {
     0x00, 0x01, 0x02, 0x03, 0x04, 0x00, 0x00, 0x00,
 };
-u8 lbl_3_data_FACC[28] = {
-    0x04, 0x00, 0x01, 0x02, 0x03, 0x04, 0x00, 0x01, 0x02, 0x03, 0x04, 0x00, 0x01, 0x02, 0x03, 0x04,
-    0x00, 0x01, 0x02, 0x03, 0x04, 0x04, 0x05, 0x06, 0x07, 0x00, 0x00, 0x00,
+u8 lbl_3_data_FACC[5][5] = {
+    { 4, 0, 1, 2, 3 },
+    { 4, 0, 1, 2, 3 },
+    { 4, 0, 1, 2, 3 },
+    { 4, 0, 1, 2, 3 },
+    { 4, 4, 5, 6, 7 },
 };
 u8 lbl_3_data_FAE8[2][5] = {
     { 4, 0, 1, 2, 3 },
@@ -377,12 +395,138 @@ void fn_3_B3A28(void) {
 
 // .text:0x000B3620 size:0x408 mapped:0x806F26B4
 void fn_3_B3620(void) {
-    return;
+    lbl_80366158._28 = 1;
+    if (g_Practice.frames_onPauseScreen < 0x7FFE) {
+        g_Practice.frames_onPauseScreen++;
+    } else {
+        g_Practice.frames_onPauseScreen = 0x7FFF;
+    }
+    if (g_Practice.frames_onPauseScreen2 < 0x7FFE) {
+        g_Practice.frames_onPauseScreen2++;
+    } else {
+        g_Practice.frames_onPauseScreen2 = 0x7FFF;
+    }
+    if (lbl_3_common_bss_34C90._00A < 0x7FFE) {
+        lbl_3_common_bss_34C90._00A++;
+    } else {
+        lbl_3_common_bss_34C90._00A = 0x7FFF;
+    }
+    if (lbl_3_common_bss_34C90._00C < 0x7FFE) {
+        lbl_3_common_bss_34C90._00C++;
+    } else {
+        lbl_3_common_bss_34C90._00C = 0x7FFF;
+    }
+    if (lbl_3_common_bss_34C90._012 < 0x7FFE) {
+        lbl_3_common_bss_34C90._012++;
+    } else {
+        lbl_3_common_bss_34C90._012 = 0x7FFF;
+    }
+    if (g_Practice._188 < 0x7FFE) {
+        g_Practice._188++;
+    } else {
+        g_Practice._188 = 0x7FFF;
+    }
+    switch (lbl_3_common_bss_34C90._1D2) {
+    case 0:
+        if (g_Practice.practiceLevel == lbl_3_data_FACC[g_Practice.practiceType_2][0] - 1) {
+            lbl_3_common_bss_34C90._1D0 = 8;
+        } else {
+            lbl_3_common_bss_34C90._1D0 = 7;
+        }
+        lbl_3_common_bss_34C90._000 = g_Practice.homeAway;
+        g_Practice.frames_onPauseScreen2 = 0;
+        lbl_3_common_bss_34C90._1D2 = 1;
+        break;
+    case 1:
+        if (g_Practice.frames_onPauseScreen2 > 30) {
+            lbl_3_common_bss_34C90._1D2 = 2;
+        }
+        break;
+    case 2:
+        fn_3_B3448();
+        lbl_3_common_bss_34C90._012 = 0;
+        break;
+    case 4:
+    case 10:
+        changeScene(3, 6);
+        lbl_3_common_bss_34C90._1D2++;
+        break;
+    case 5:
+    case 11:
+        if (lbl_8037169C._13 != 0) {
+            g_Practice.loadingGuidedPractice = 0;
+            lbl_3_common_bss_34C90._1D9 = 2;
+            g_Practice._19F = 0;
+            lbl_8036E548._307D = 0;
+            if (lbl_3_common_bss_34C90._1D2 == 11) {
+                g_Practice.practiceState = 0;
+                g_Practice.practiceLevel++;
+                g_Practice.tutorialState = 0;
+                g_Practice.framesSincePracticeMenuDefaultTransition = 0;
+            } else {
+                g_Practice.practiceState = 0;
+                g_Practice.transitioningIndicator = 1;
+                g_Practice.tutorialState = 2;
+                g_Practice.framesSincePracticeMenuDefaultTransition = 0;
+            }
+        }
+        break;
+    case 6:
+        changeScene(3, 6);
+        lbl_3_common_bss_34C90._1D2 = 7;
+        break;
+    case 7:
+        if (lbl_8037169C._13 != 0) {
+            g_Practice.loadingGuidedPractice = 0;
+            lbl_3_common_bss_34C90._1D9 = 2;
+            g_Practice._19F = 0;
+            lbl_8036E548._307D = 0;
+            lbl_8036E548._307E = 0;
+            fn_3_B5D4C(0);
+            g_Practice.returnToPracticeMenuState = 1;
+            g_GameLogic.secondaryGameMode = 10;
+            g_Practice.totalFrames = 0;
+            g_Practice.framesInCurrTransitionState = 0;
+            g_Practice.practiceState = 0;
+            fn_80011A60();
+            fn_3_8C07C();
+        }
+        break;
+    case 12:
+        switch (fn_3_5B380(g_Controls[lbl_3_common_bss_34C90._000].newButtonInput)) {
+        case 1:
+            if (g_Practice._1B1 != 0) {
+                fn_8004CC18();
+                fn_3_5B368();
+            } else {
+                changeScene(3, 6);
+            }
+            lbl_3_common_bss_34C90._1D2 = 13;
+            break;
+        case 2:
+            lbl_3_common_bss_34C90._1D2 = 2;
+            break;
+        }
+        break;
+    case 13:
+        if (g_Practice._1B1 != 0) {
+            if (fn_3_5B220(3) != 0) {
+                changeScene(3, 6);
+                g_Practice._1B1 = 0;
+            }
+        } else if (lbl_8037169C._13 != 0) {
+            g_GameLogic.framesOfExitingToMenu = 1;
+            lbl_3_common_bss_34C90._1D9 = 2;
+            fn_8004CC18();
+        }
+        break;
+    }
 }
 
 // .text:0x000B3448 size:0x1D8 mapped:0x806F24DC
-// The target keeps `menu` in r0 and its temporaries in r3; this gives r6 and r0.
-void fn_3_B3448(void) {
+// The target tests the inputs in r3 where this uses r4; it returns the sound's
+// voice on some paths only, like the target's use of r3.
+int fn_3_B3448(void) {
     int menu = 0;
     InputStruct* input = &g_Controls[g_Practice.homeAway];
 
@@ -405,19 +549,23 @@ void fn_3_B3448(void) {
                 fn_3_5B408();
                 lbl_3_common_bss_34C90._1D2 = 12;
                 break;
+            default:
+                break;
             }
-            sndFXStartEx(0x1B8, lbl_800EFBA4[1], 0x3F, 0);
+            return sndFXStartEx(0x1B8, lbl_800EFBA4[1], 0x3F, 0);
         }
     } else if (input->_08 & 4) {
-        if (++lbl_3_common_bss_34C90._1DA >= lbl_3_data_FAE8[menu][0]) {
+        lbl_3_common_bss_34C90._1DA++;
+        if (lbl_3_common_bss_34C90._1DA >= lbl_3_data_FAE8[menu][0]) {
             lbl_3_common_bss_34C90._1DA = 0;
         }
-        sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+        return sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
     } else if (input->_08 & 8) {
-        if (--lbl_3_common_bss_34C90._1DA < 0) {
+        lbl_3_common_bss_34C90._1DA--;
+        if (lbl_3_common_bss_34C90._1DA < 0) {
             lbl_3_common_bss_34C90._1DA = lbl_3_data_FAE8[menu][0] - 1;
         }
-        sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+        return sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
     }
 }
 
@@ -473,7 +621,100 @@ void fn_3_B2E20(void) {
 
 // .text:0x000B2AA0 size:0x380 mapped:0x806F1B34
 void fn_3_B2AA0(void) {
-    return;
+    int count = 5;
+    InputStruct* input = &g_Controls[g_Practice.homeAway];
+
+    if (lbl_3_common_bss_34C90._1D0 == 6) {
+        count = 5;
+    } else if (lbl_3_common_bss_34C90._1D0 == 5) {
+        count = 4;
+    }
+    if (input->newButtonInput & 0x1000) {
+        sndFXStartEx(0x1B8, lbl_800EFBA4[1], 0x3F, 0);
+        lbl_3_common_bss_34C90._1D2 = 4;
+    } else if (input->newButtonInput & 0x100) {
+        sndFXStartEx(0x1B8, lbl_800EFBA4[1], 0x3F, 0);
+        if (lbl_3_common_bss_34C90._1D0 == 6) {
+            switch (lbl_3_common_bss_34C90._1DA) {
+            case 0:
+                lbl_3_common_bss_34C90._1D2 = 4;
+                break;
+            case 1:
+                lbl_3_common_bss_34C90._1D3 = 0;
+                lbl_3_common_bss_34C90._1D2 = 3;
+                break;
+            case 2:
+                lbl_3_common_bss_34C90._1D2 = 8;
+                break;
+            case 3:
+                lbl_3_common_bss_34C90._1D2 = 6;
+                break;
+            case 4:
+                fn_3_5B408();
+                lbl_3_common_bss_34C90._012 = 0;
+                lbl_3_common_bss_34C90._1D2 = 12;
+                break;
+            }
+        } else if (lbl_3_common_bss_34C90._1D0 == 5) {
+            switch (lbl_3_common_bss_34C90._1DA) {
+            case 0:
+                lbl_3_common_bss_34C90._1D2 = 4;
+                break;
+            case 1:
+                lbl_3_common_bss_34C90._1D3 = 0;
+                lbl_3_common_bss_34C90._1D2 = 3;
+                break;
+            case 2:
+                lbl_3_common_bss_34C90._1D2 = 6;
+                break;
+            case 3:
+                fn_3_5B408();
+                lbl_3_common_bss_34C90._012 = 0;
+                lbl_3_common_bss_34C90._1D2 = 12;
+                break;
+            }
+        } else {
+            switch (lbl_3_common_bss_34C90._1DA) {
+            case 0:
+                lbl_3_common_bss_34C90._1D2 = 4;
+                break;
+            case 1:
+                lbl_3_common_bss_34C90._1D3 = 0;
+                lbl_3_common_bss_34C90._1D2 = 3;
+                break;
+            case 2:
+                lbl_3_common_bss_34C90._1D2 = 10;
+                break;
+            case 3:
+                lbl_3_common_bss_34C90._1D2 = 6;
+                break;
+            case 4:
+                fn_3_5B408();
+                lbl_3_common_bss_34C90._012 = 0;
+                lbl_3_common_bss_34C90._1D2 = 12;
+                break;
+            }
+        }
+    } else if (input->newButtonInput & 0x200) {
+        if (lbl_3_common_bss_34C90._1DA != 0) {
+            lbl_3_common_bss_34C90._1DA = 0;
+        } else {
+            lbl_3_common_bss_34C90._1D2 = 4;
+        }
+        sndFXStartEx(0x1B9, lbl_800EFBA4[2], 0x3F, 0);
+    } else if (input->_08 & 4) {
+        lbl_3_common_bss_34C90._1DA++;
+        if (lbl_3_common_bss_34C90._1DA >= count) {
+            lbl_3_common_bss_34C90._1DA = 0;
+        }
+        sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+    } else if (input->_08 & 8) {
+        lbl_3_common_bss_34C90._1DA--;
+        if (lbl_3_common_bss_34C90._1DA < 0) {
+            lbl_3_common_bss_34C90._1DA = count - 1;
+        }
+        sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+    }
 }
 
 // .text:0x000B28A8 size:0x1F8 mapped:0x806F193C
