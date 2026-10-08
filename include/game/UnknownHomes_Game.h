@@ -2863,7 +2863,7 @@ extern s16 HitVertTrajRanges[2][5][5][2];
 
 extern BOOL getAnimRelatedCoordinates(int, int, VecXYZ*);
 extern void fn_3_6C854(int, int);
-extern void playSoundEffect(int);
+extern u32 playSoundEffect(int);
 extern void fn_3_5ED98(void);
 extern int RandomIndexFromWeights(u8* weights, int count);
 extern void fn_3_FBDAC(int);
