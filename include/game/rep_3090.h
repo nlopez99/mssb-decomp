@@ -22,7 +22,7 @@ void fn_3_FCF20(void);
 void fn_3_FCF24(void);
 void fn_3_FD408(u32 idx, Vec* pos, f32* angles);
 void fn_3_FD4DC(void);
-void fn_3_FD51C(void);
+void fn_3_FD51C(int idx);
 void fn_3_FD5A8(void);
 void fn_3_FD670(void);
 BOOL fn_3_FD9FC(void);

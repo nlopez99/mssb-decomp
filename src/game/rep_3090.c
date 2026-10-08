@@ -978,12 +978,60 @@ static s16 lbl_3_bss_B67A;
 
 // .text:0x00106BA0 size:0x25C mapped:0x80745C34
 void fn_3_106BA0(void) {
-    return;
+    int i;
+
+    for (i = 0; i < 2; i++) {
+        g_Camera._120[i]._0124 = 1;
+        g_Camera._120[i]._0118 = 0;
+        g_Camera._120[i]._011C = 0;
+        g_Camera._120[i]._0946 = 14;
+        g_Camera._120[i]._09AE = 0;
+        g_Camera._120[i]._09B1 = 0;
+        g_Camera._120[i]._09AF = 0;
+        g_Camera._120[i]._09B0 = 0;
+        g_Camera._120[i]._092C = 0;
+        g_Camera._120[i]._0928 = 0;
+        g_Camera._120[i]._09B2 = 0;
+        g_Camera._120[i]._09B4 = 0;
+        g_Camera._120[i]._09B3 = 0;
+        g_Camera._120[i]._09B5 = 0;
+        g_Camera._120[i]._09B6 = 0;
+        g_Camera._120[i]._09B7 = 0;
+        g_Camera._120[i]._00D0.x = 0.0f;
+        g_Camera._120[i]._00D0.y = 0.0f;
+        g_Camera._120[i]._00D0.z = 0.0f;
+        g_Camera._120[i]._00C4.x = 0.0f;
+        g_Camera._120[i]._00C4.y = 0.0f;
+        g_Camera._120[i]._00C4.z = 1.0f;
+        g_Camera._120[i]._00DC.x = 1.0f;
+        g_Camera._120[i]._00DC.y = 1.0f;
+        g_Camera._120[i]._00DC.z = 1.0f;
+        g_Camera._120[i]._0100 = 7.0f;
+        g_Camera._120[i]._0104 = 2.0f;
+        g_Camera._120[i]._0108 = 0.001f;
+        g_Camera._120[i]._010C = 1.0f;
+        g_Camera._120[i]._0110 = 2.0f;
+        g_Camera._120[i]._0114 = 0.001f;
+        g_Camera._120[i]._094A = 0;
+        memset(g_Camera._120[i]._0128, 0, sizeof(g_Camera._120[i]._0128));
+        memcpy(&g_Camera._120[i]._00B8, &g_pCamera->_284C, sizeof(Vec));
+    }
+    g_pCamera->_28A9 = 0;
+    fn_3_FD5A8();
 }
 
 // .text:0x001069C0 size:0x1E0 mapped:0x80745A54
 void fn_3_1069C0(void) {
-    return;
+    s32 i;
+
+    lbl_3_common_bss_DE94._0000->_0124 = 1;
+    lbl_3_common_bss_DE94._0000->_0118 = 0;
+    lbl_3_common_bss_DE94._0000->_011C = 0;
+    lbl_3_common_bss_DE94._0000->_0928 = 0;
+    for (i = 0; i < 512; i++) {
+        lbl_3_common_bss_DE94._0000->_0128[i] = 0;
+    }
+    fn_3_FD5A8();
 }
 
 // .text:0x001069B0 size:0x10 mapped:0x80745A44
@@ -2465,12 +2513,48 @@ void fn_3_FD670(void) {
 
 // .text:0x000FD5A8 size:0xC8 mapped:0x8073C63C
 void fn_3_FD5A8(void) {
-    return;
+    Unk3090Spline* spline;
+    Vec up = { 0.0f, 1.0f, 0.0f };
+    int i;
+
+    for (i = 0; i < 2; i++) {
+        spline = &g_Camera._120[i]._001C_s;
+        spline->_04 = 0;
+        spline->_08 = 0;
+        spline->_0C = up;
+        spline->_1C = 0;
+        spline->_20 = 0;
+        spline->_24 = 0;
+        spline->_28 = 0;
+        spline->_2C = 0.0f;
+        spline->_30 = 0;
+        spline->_34 = 0;
+        spline->_38 = 0;
+        spline->_3C = 0;
+        spline->_40 = 0;
+        spline->_44 = 0.0f;
+    }
 }
 
 // .text:0x000FD51C size:0x8C mapped:0x8073C5B0
-void fn_3_FD51C(void) {
-    return;
+void fn_3_FD51C(int idx) {
+    Unk3090Spline* spline = &g_Camera._120[idx]._001C_s;
+    Vec up = { 0.0f, 1.0f, 0.0f };
+
+    spline->_04 = 0;
+    spline->_08 = 0;
+    spline->_0C = up;
+    spline->_1C = 0;
+    spline->_20 = 0;
+    spline->_24 = 0;
+    spline->_28 = 0;
+    spline->_2C = 0.0f;
+    spline->_30 = 0;
+    spline->_34 = 0;
+    spline->_38 = 0;
+    spline->_3C = 0;
+    spline->_40 = 0;
+    spline->_44 = 0.0f;
 }
 
 // .text:0x000FD4DC size:0x40 mapped:0x8073C570
@@ -2616,12 +2700,24 @@ int fn_3_FCE38(int i, f32 time) {
 
 // .text:0x000FC938 size:0x500 mapped:0x8073B9CC
 void fn_3_FC938(void) {
-    return;
+    lbl_3_common_bss_DE94._0000->_0120 = fn_3_10698C(g_pCamera->_1B4);
+    memcpy(lbl_3_common_bss_DE94._0000->_0990, fn_3_1069B0(g_pCamera->_1B4, lbl_3_common_bss_DE94._0000->_0940), 0x8000);
+    fn_3_1069C0();
+    fn_3_105C84(lbl_3_common_bss_DE94._0000->_0990);
+    fn_3_104338();
+    fn_3_101CC4();
 }
 
+// 6.71%: the target inlines fn_3_FC938 here; this build calls it. Without its fn_3_104338
+// call fn_3_FC938 is small enough for -inline auto, so the original was smaller by MWCC's measure.
 // .text:0x000FC448 size:0x4F0 mapped:0x8073B4DC
 void fn_3_FC448(void) {
-    return;
+    int i;
+
+    for (i = 0; i < 2; i++) {
+        lbl_3_common_bss_DE94._0000 = &g_Camera._120[i];
+        fn_3_FC938();
+    }
 }
 
 // .text:0x000FC2FC size:0x14C mapped:0x8073B390
