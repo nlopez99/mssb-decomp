@@ -2028,9 +2028,15 @@ typedef struct _MiniGameStruct {
     /*0x1C8A*/ u8 _1C8A[4];
     /*0x1C8E*/ u8 _1C8E[4];
     /*0x1C92*/ u8 _1C92[8];
-    /*0x1C9A*/ u8 _1C9A;
-    /*0x1C9B*/ u8 _1C9B;
-    /*0x1C9C*/ s16 _1C9C;
+    // Piranha Panic (rep_37A8) loops over four bytes here; fn_3_53130 indexes them per player
+    union {
+        struct {
+            /*0x1C9A*/ u8 _1C9A;
+            /*0x1C9B*/ u8 _1C9B;
+            /*0x1C9C*/ s16 _1C9C;
+        };
+        /*0x1C9A*/ u8 _1C9A_arr[4];
+    };
     /*0x1C9E*/ u8 _1C9E;
     /*0x1C9F*/ u8 _1C9F;
     /*0x1CA0*/ u8 _1CA0[2];
