@@ -5,10 +5,21 @@
 #include "game/rep_1BC8.h"
 #include "game/rep_DB8.h"
 #include "game/rep_1038.h"
+#include "game/rep_13B8.h"
+#include "game/rep_E08.h"
 
 extern void fn_3_1DD48(void);
 extern void changeScene(u8, s16);
 extern u8 lbl_3_data_FAF4[4][4];
+
+extern struct {
+    /* 0x0000 */ u8 _0000[0xCF4E];
+    /* 0xCF4E */ u8 _CF4E[4][4];
+} lbl_80354768;
+
+// rep_1B20.h declares these as void(void) placeholders.
+extern void fn_3_B1DA4(int level, int arg1);
+extern void fn_3_B3A28(void);
 
 extern struct {
     /* 0x00 */ u8 _00[0x13];
@@ -47,13 +58,41 @@ void fn_3_B7184(void) {
 }
 
 // .text:0x000B707C size:0x108 mapped:0x806F6110
-void fn_3_B707C(void) {
-    return;
+int fn_3_B707C(void) {
+    if (g_Practice.pauseMenuLoading != 0) {
+        return 0;
+    }
+    if (g_Practice.guidedPracticeCompletionRelated == 0) {
+        return 0;
+    }
+    if (g_UnkSound_32718._07 != 0) {
+        return 0;
+    }
+    if (++g_Practice._186 > 150) {
+        if (g_Practice._1B2[g_Practice.practiceType_2][g_Practice.practiceLevel] == 0) {
+            g_Practice._1B1 = 1;
+            g_Practice._1B2[g_Practice.practiceType_2][g_Practice.practiceLevel] = 1;
+            lbl_80354768._CF4E[g_Practice.practiceType_2][g_Practice.practiceLevel] = 1;
+        }
+        g_Practice._1C7 = 1;
+        fn_3_B3A28();
+        fn_3_B1DA4(g_Practice.practiceLevel + 12, 1);
+        return 1;
+    }
+    return 0;
 }
 
 // .text:0x000B6F6C size:0x110 mapped:0x806F6000
 void fn_3_B6F6C(void) {
-    return;
+    fn_3_8A4E4();
+    fn_3_6C108();
+    g_Strikes.strikes = 0;
+    g_Strikes.balls = 0;
+    g_GameLogic._125 = 1;
+    g_GameLogic.pre_PostMiniGameInd = 1;
+    g_GameLogic.minigameLastTurnSuccessInd = 1;
+    fn_3_B6E98();
+    fn_3_6714C(0);
 }
 
 // .text:0x000B6E98 size:0xD4 mapped:0x806F5F2C

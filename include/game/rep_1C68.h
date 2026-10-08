@@ -17,7 +17,7 @@ void fn_3_B6C9C(void);
 void fn_3_B6D80(void);
 void fn_3_B6E98(void);
 void fn_3_B6F6C(void);
-void fn_3_B707C(void);
+int fn_3_B707C(void);
 void fn_3_B7184(void);
 void fn_3_B7620(void);
 void fn_3_B777C(u8 arg0);
