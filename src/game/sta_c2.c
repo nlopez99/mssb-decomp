@@ -1,12 +1,15 @@
 #include "game/sta_c2.h"
-#include "header_rep_data.h"
+// Must precede header_rep_data.h: its extern inline dolsqrtf2 puts weak constants first
+// in .rodata, so MWCC does not pool .rodata and addresses constants one by one
 #include "game/UnknownHomes_Game.h"
+#include "header_rep_data.h"
 #include "Dolphin/mtx.h"
 #include "musyx/musyx.h"
 #include "C3/control.h"
 #include "Dolphin/os.h"
 #include "game/rep_1838.h"
 #include "game/rep_AC8.h"
+#include "string.h"
 
 typedef struct StaC2Place {
     /* 0x00 */ Vec pos;
@@ -114,13 +117,18 @@ typedef struct StaC2Draw {
     /* 0x00 */ Control control;
     /* 0x44 */ u8 _44[0x74 - 0x44];
     /* 0x74 */ StaC2Model* _74;
-    /* 0x78 */ u8 _78[0xA0 - 0x78];
+    /* 0x78 */ u8 _78[0x9C - 0x78];
+    /* 0x9C */ u8 _9C;
+    /* 0x9D */ u8 _9D[0xA0 - 0x9D];
     /* 0xA0 */ Vec _A0;
     /* 0xAC */ u8 _AC[0xC4 - 0xAC];
     /* 0xC4 */ StaC2Target* _C4;
     /* 0xC8 */ u8 _C8[0xCA - 0xC8];
     /* 0xCA */ u8 _CA;
-    /* 0xCB */ u8 _CB[0xE8 - 0xCB];
+    /* 0xCB */ u8 _CB[0xD0 - 0xCB];
+    /* 0xD0 */ s8 _D0;
+    /* 0xD1 */ u8 _D1;
+    /* 0xD2 */ u8 _D2[0xE8 - 0xD2];
 } StaC2Draw; // size: 0xE8
 
 typedef struct StaC2Particle {
@@ -156,6 +164,36 @@ typedef struct {
     /* 0x00 */ u8 _00[0x4];
     /* 0x04 */ s32 _04;
 } StaC2ObjEntry; // size: 0x8
+
+typedef struct {
+    /* 0x00 */ u8 _00[0x48];
+    /* 0x48 */ Vec _48;
+} StaC2Sprite;
+
+typedef struct {
+    /* 0x00 */ StaC2Sprite* _00;
+    /* 0x04 */ u8 _04[0x8 - 0x4];
+} StaC2SpriteRef; // size: 0x8
+
+typedef struct {
+    /* 0x00 */ u8 _00[0x14];
+    /* 0x14 */ u16 _14;
+} StaC2Task;
+
+typedef struct StaC2Spring {
+    /* 0x00 */ f32 _00;
+    /* 0x04 */ f32 _04;
+    /* 0x08 */ f32 _08;
+    /* 0x0C */ Vec _0C[2];
+    /* 0x24 */ Vec _24;
+    /* 0x30 */ Vec _30;
+    /* 0x3C */ s32 _3C;
+} StaC2Spring; // size: 0x40
+
+typedef struct {
+    /* 0x00 */ u8 _00[0x34];
+    /* 0x34 */ Vec _34;
+} StaC2Player;
 
 typedef struct StaC2Rec5C {
     /* 0x00 */ u8 _00[0x5C];
@@ -219,6 +257,16 @@ extern struct {
     /* 0x30 */ u32 _30;
 } lbl_3_common_bss_350E4;
 
+extern void fn_800528C0(f32 x, f32 y, f32 z, s16* screenX, s16* screenY);
+extern struct {
+    /* 0x0000 */ u8 _0000[0x2C50];
+    /* 0x2C50 */ StaC2Player* _2C50[13];
+} lbl_8036E548;
+
+extern StaC2SpriteRef lbl_80371C30[];
+
+// fn_3_B7F70 lies in unsplit code
+extern s16 fn_3_B7F70(s16 range);
 extern void AnimateActorBones(StaC2Actor* actor);
 
 // MWCC lays out .bss statics in reverse order of declaration
@@ -227,7 +275,7 @@ static u8 lbl_3_bss_ABD0[0x200];
 static u8 lbl_3_bss_A9D0[0x200];
 static u8 lbl_3_bss_A8D0[0x100];
 static f32 lbl_3_bss_A8A8[10];
-static s32 lbl_3_bss_A8A4;
+static StaC2Task* lbl_3_bss_A8A4;
 static u8 lbl_3_bss_A898[0xC];
 static f32 lbl_3_bss_A820[30];
 static u8 lbl_3_bss_A81C;
@@ -339,8 +387,29 @@ void fn_3_D511C(void) {
 }
 
 // .text:0x000D501C size:0x100 mapped:0x807140B0
-void fn_3_D501C(void) {
-    return;
+void fn_3_D501C(StaC2Spring* springs) {
+    u32 i;
+
+    if (springs != NULL) {
+        memset(springs, 0, sizeof(StaC2Spring));
+        for (i = 0; i < 8; i++) {
+            if (i == 7) {
+                springs[i]._00 = lbl_3_data_188E0;
+                springs[i]._08 = 0.504375f;
+                springs[i]._3C = 1;
+            } else {
+                if (i == 0) {
+                    springs[i]._3C = 1;
+                }
+                springs[i]._00 = lbl_3_data_188E0;
+                springs[i]._08 = 0.504375f;
+            }
+            springs[i]._04 = 1.0f / springs[i]._00;
+            memset(springs[i]._0C, 0, sizeof(springs[i]._0C));
+            memset(&springs[i]._24, 0, sizeof(springs[i]._24));
+            memset(&springs[i]._30, 0, sizeof(springs[i]._30));
+        }
+    }
 }
 
 // .text:0x000D4E00 size:0x21C mapped:0x80713E94
@@ -394,8 +463,29 @@ void fn_3_D278C(void) {
 }
 
 // .text:0x000D2684 size:0x108 mapped:0x80711718
-void fn_3_D2684(void) {
-    return;
+Vec* fn_3_D2684(StaC2Draw* draw) {
+    Vec diff;
+    u8 right[9] = { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
+    u8 left[9] = { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
+    u8* order;
+    u32 i;
+    StaC2Player* player;
+
+    if (draw->_A0.x > 0.0f) {
+        order = right;
+    } else {
+        order = left;
+    }
+    for (i = 0; i < 4; i++) {
+        player = lbl_8036E548._2C50[order[i]];
+        if (player != NULL) {
+            PSVECSubtract(&draw->_A0, &player->_34, &diff);
+            if (PSVECMag(&diff) <= 12.5f) {
+                return &player->_34;
+            }
+        }
+    }
+    return NULL;
 }
 
 // .text:0x000D255C size:0x128 mapped:0x807115F0
@@ -500,8 +590,18 @@ void fn_3_D0918(void) {
 }
 
 // .text:0x000D0854 size:0xC4 mapped:0x8070F8E8
-void fn_3_D0854(void) {
-    return;
+f32 fn_3_D0854(StaC2Draw* draw) {
+    f32 base;
+    f32 range;
+
+    if (draw->_D0 > 0) {
+        base = lbl_3_data_18364[draw->_9C]._20;
+        range = lbl_3_data_18364[draw->_9C]._24;
+    } else {
+        base = lbl_3_data_18364[draw->_9C]._28;
+        range = lbl_3_data_18364[draw->_9C]._2C;
+    }
+    return base + range * (fn_3_B7F70(1000) / 1000.0);
 }
 
 // .text:0x000D0534 size:0x320 mapped:0x8070F5C8
@@ -521,7 +621,12 @@ void fn_3_D0528(void) {
 
 // .text:0x000D0490 size:0x98 mapped:0x8070F524
 void fn_3_D0490(void) {
-    return;
+    s32 idx = (g_Ball.inAirOrBefore2ndBounceOrLowBallEnergy != 0) + 2;
+
+    lbl_3_bss_A898[idx] = 1;
+    lbl_80371C30[lbl_3_bss_A8A4->_14 + idx]._00->_48.x = g_Ball.AtBat_Contact_BallPos.x;
+    lbl_80371C30[lbl_3_bss_A8A4->_14 + idx]._00->_48.y = -g_Ball.AtBat_Contact_BallPos.y;
+    lbl_80371C30[lbl_3_bss_A8A4->_14 + idx]._00->_48.z = g_Ball.AtBat_Contact_BallPos.z;
 }
 
 // .text:0x000D0284 size:0x20C mapped:0x8070F318
@@ -635,12 +740,23 @@ void fn_3_CED30(void) {
 
 // .text:0x000CEC98 size:0x98 mapped:0x8070DD2C
 void fn_3_CEC98(void) {
-    return;
+    s32 idx = (g_Ball.inAirOrBefore2ndBounceOrLowBallEnergy != 0) + 8;
+
+    lbl_3_bss_A898[idx] = 1;
+    lbl_80371C30[lbl_3_bss_A8A4->_14 + idx]._00->_48.x = g_Ball.AtBat_Contact_BallPos.x;
+    lbl_80371C30[lbl_3_bss_A8A4->_14 + idx]._00->_48.y = -g_Ball.AtBat_Contact_BallPos.y;
+    lbl_80371C30[lbl_3_bss_A8A4->_14 + idx]._00->_48.z = g_Ball.AtBat_Contact_BallPos.z;
 }
 
 // .text:0x000CEBBC size:0xDC mapped:0x8070DC50
-void fn_3_CEBBC(void) {
-    return;
+void fn_3_CEBBC(Vec* pos, s32 i) {
+    s16 x;
+    s16 y;
+
+    fn_800528C0(pos->x, pos->y, pos->z, &x, &y);
+    lbl_80371C30[lbl_3_bss_A8A4->_14 + i]._00->_48.x = x;
+    lbl_80371C30[lbl_3_bss_A8A4->_14 + i]._00->_48.y = y;
+    lbl_80371C30[lbl_3_bss_A8A4->_14 + i]._00->_48.z = 0.0f;
 }
 
 // .text:0x000CE954 size:0x268 mapped:0x8070D9E8
@@ -704,8 +820,25 @@ void fn_3_CC438(void) {
 }
 
 // .text:0x000CC354 size:0xE4 mapped:0x8070B3E8
-void fn_3_CC354(void) {
-    return;
+void fn_3_CC354(StaC2Spring* springs) {
+    u32 i;
+
+    if (springs != NULL) {
+        for (i = 0; i < 4; i++) {
+            if (i == 3) {
+                springs[i]._00 = lbl_3_data_188E0;
+                springs[i]._08 = 0.504375f;
+                springs[i]._3C = 1;
+            } else {
+                springs[i]._00 = lbl_3_data_188E0;
+                springs[i]._08 = 0.504375f;
+            }
+            springs[i]._04 = 1.0f / springs[i]._00;
+            memset(springs[i]._0C, 0, sizeof(springs[i]._0C));
+            memset(&springs[i]._24, 0, sizeof(springs[i]._24));
+            memset(&springs[i]._30, 0, sizeof(springs[i]._30));
+        }
+    }
 }
 
 // .text:0x000CC1D4 size:0x180 mapped:0x8070B268

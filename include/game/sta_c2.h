@@ -2,8 +2,10 @@
 #define __GAME_sta_c2_H_
 
 #include "mssbTypes.h"
+#include "Dolphin/mtx.h"
 
 struct StaC2Draw;
+struct StaC2Spring;
 struct StaC2Particle;
 struct StaC2Emitter;
 
@@ -13,7 +15,7 @@ void fn_3_CBAFC(void);
 void fn_3_CBC18(void);
 void fn_3_CBF80(void);
 void fn_3_CC1D4(void);
-void fn_3_CC354(void);
+void fn_3_CC354(struct StaC2Spring* spring);
 void fn_3_CC438(void);
 void fn_3_CC5C4(void);
 void fn_3_CC81C(void);
@@ -26,7 +28,7 @@ void fn_3_CDFA4(void);
 void fn_3_CE56C(void);
 void fn_3_CE8E4(void);
 void fn_3_CE954(void);
-void fn_3_CEBBC(void);
+void fn_3_CEBBC(Vec* pos, s32 i);
 void fn_3_CEC98(void);
 void fn_3_CED30(void);
 void fn_3_CED34(void);
@@ -52,7 +54,7 @@ void fn_3_D0490(void);
 void fn_3_D0528(void);
 s32 fn_3_D052C(void);
 void fn_3_D0534(void);
-void fn_3_D0854(void);
+f32 fn_3_D0854(struct StaC2Draw* draw);
 void fn_3_D0918(void);
 void fn_3_D1004(void);
 void fn_3_D1110(void);
@@ -70,7 +72,7 @@ void fn_3_D233C(void);
 BOOL fn_3_D249C(struct StaC2Draw* draw);
 void fn_3_D24E8(struct StaC2Draw* draw, s8 fielder);
 void fn_3_D255C(void);
-void fn_3_D2684(void);
+Vec* fn_3_D2684(struct StaC2Draw* draw);
 void fn_3_D278C(void);
 void fn_3_D2A0C(void);
 void fn_3_D30D0(void);
@@ -81,7 +83,7 @@ void fn_3_D3F54(void);
 void fn_3_D4780(void);
 void fn_3_D4CA4(void);
 void fn_3_D4E00(void);
-void fn_3_D501C(void);
+void fn_3_D501C(struct StaC2Spring* springs);
 void fn_3_D511C(void);
 s32 fn_3_D53C0(u8 id);
 s32 fn_3_D5444(const void* a, const void* b);
