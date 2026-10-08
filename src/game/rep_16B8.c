@@ -10,7 +10,7 @@ typedef struct UnkTask1770 {
     /* 0x14 */ u16 _14;
     /* 0x16 */ u8 _16[0x18 - 0x16];
     /* 0x18 */ u16 _18;
-    /* 0x1A */ u8 _1A[0x1C - 0x1A];
+    /* 0x1A */ u16 _1A;
     /* 0x1C */ u16 _1C[2];
     /* 0x20 */ u16 _20;
     /* 0x22 */ u16 _22;
@@ -129,6 +129,11 @@ extern struct {
     /* 0x46 */ u8 _46;
     /* 0x47 */ u8 _47;
 } lbl_3_common_bss_37400;
+
+extern struct {
+    /* 0x00 */ u8 _00[0x26];
+    /* 0x26 */ u8 _26;
+} lbl_8034E978;
 
 extern UnkSpriteRef1770 lbl_80371C30[];
 extern void* lbl_803CC1B8;
@@ -981,13 +986,43 @@ void fn_3_91FC4(void) {
 }
 
 // .text:0x00091E4C size:0x178 mapped:0x806D0EE0
+// 98.72%: the target branches to the shared exit with bge, then b to the
+// end, where this compiles to one blt.
 void fn_3_91E4C(void) {
-    return;
+    UnkTask1770* task = lbl_803CC1B8;
+    s32 i;
+    s32 value;
+
+    if (lbl_3_common_bss_32724._CD == 0) {
+        if (lbl_3_common_bss_32724._CE == 0) {
+            return;
+        }
+        lbl_80371C30[task->_14]._00->_68 = 4;
+        lbl_80371C30[task->_14 + 1]._00->_68 = 4;
+        value = lbl_80371C30[task->_14 + 1]._00->_5C >> 16;
+        for (i = 0; i < 11; i++) {
+            if (value <= lbl_3_data_F200[i]) {
+                if (i == 0) {
+                    lbl_80371C30[task->_14 + 2]._00->_68 = 4;
+                    lbl_80371C30[task->_14 + 3]._00->_68 = 4;
+                }
+                lbl_80371C30[task->_14 + 6 + i]._00->_68 = 4;
+                lbl_80371C30[task->_14 + 17 + i]._00->_68 = 4;
+            }
+        }
+        task->_1A++;
+        if (task->_1A < 45) {
+            return;
+        }
+    }
+    fn_80034CEC(task);
+    fn_800B0A14_removeQueue();
+    if (g_GameLogic.gameStatus == 3) {
+        lbl_8034E978._26 = 1;
+    }
 }
 
 // .text:0x00091D1C size:0x130 mapped:0x806D0DB0
-// 99.87%: the loop index add has its operands swapped (add r5,r11,r0
-// against add r5,r0,r11).
 void fn_3_91D1C(void) {
     UnkTask1770* task = lbl_803CC1B8;
     s32 i;
@@ -1000,7 +1035,7 @@ void fn_3_91D1C(void) {
         if (batter > 9) {
             batter -= 9;
         }
-        lbl_80371C30[task->_14 + (i + 5)]._00->_5C =
+        lbl_80371C30[task->_14 + 5 + i]._00->_5C =
             inMemRoster[g_GameLogic.teamFielding]
                        [g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.awayTeamBattingInd_battingTeam][batter][0]]
                            .stats.CharID
