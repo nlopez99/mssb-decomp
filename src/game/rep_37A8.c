@@ -66,7 +66,8 @@ typedef struct Unk37A8Minigame {
     /* 0x17C8 */ s16 _17C8[50];
     /* 0x182C */ u8 _182C[0x193A - 0x182C];
     /* 0x193A */ u8 _193A[100];
-    /* 0x199E */ u8 _199E[0x1B3C - 0x199E];
+    /* 0x199E */ u8 _199E[0x1B34 - 0x199E];
+    /* 0x1B34 */ s16 _1B34[4];
     /* 0x1B3C */ s16 _1B3C[4];
     /* 0x1B44 */ s16 _1B44[4];
     /* 0x1B4C */ u8 _1B4C[0x1B50 - 0x1B4C];
@@ -97,7 +98,9 @@ typedef struct Unk37A8Fielder {
     /* 0x010 */ u8 _010[0x38 - 0x10];
     /* 0x038 */ f32 _038;
     /* 0x03C */ f32 _03C;
-    /* 0x040 */ u8 _040[0x50 - 0x40];
+    /* 0x040 */ u8 _040[0x48 - 0x40];
+    /* 0x048 */ f32 _048;
+    /* 0x04C */ u8 _04C[0x50 - 0x4C];
     /* 0x050 */ f32 _050;
     /* 0x054 */ u8 _054[0x10C - 0x54];
     /* 0x10C */ f32 _10C;
@@ -111,7 +114,11 @@ typedef struct Unk37A8Fielder {
     /* 0x1C9 */ u8 _1C9;
     /* 0x1CA */ u8 _1CA[0x1CE - 0x1CA];
     /* 0x1CE */ u8 _1CE;
-    /* 0x1CF */ u8 _1CF[0x268 - 0x1CF];
+    /* 0x1CF */ u8 _1CF[0x1D2 - 0x1CF];
+    /* 0x1D2 */ u8 _1D2;
+    /* 0x1D3 */ u8 _1D3[0x20D - 0x1D3];
+    /* 0x20D */ u8 _20D;
+    /* 0x20E */ u8 _20E[0x268 - 0x20E];
 } Unk37A8Fielder; // size: 0x268
 
 extern Unk37A8Fielder g_Fielders[9];
@@ -144,6 +151,18 @@ extern s8 lbl_3_data_21EBC[4];
 extern f32 lbl_3_data_21E24[17];
 extern u8 lbl_3_data_21E9C[4][4];
 extern u8 lbl_3_data_21E1C[2];
+extern u8 lbl_3_data_2127C[8][5];
+extern u8 lbl_3_data_21E08[8];
+extern struct {
+    /* 0x0 */ s32 _0;
+} g_Scores;
+extern void minigamesSetSomePointers(void);
+extern void minigamesGXStuff(void);
+extern void minigamesSetSomePointers2(void);
+extern void fn_3_59A90(void);
+extern void fn_3_591AC(void);
+extern void fn_3_58870(void);
+extern void fn_3_6E24C(int rosterID, int fielderIdx);
 extern int LERPToNewRange_Float(int value, int inMin, int inMax, int outMin, int outMax);
 extern f32 lbl_3_data_47BC[5];
 extern s8 lbl_3_data_21EC0[4];
@@ -180,7 +199,133 @@ void fn_3_1471C0(void) {
 
 // .text:0x00146A90 size:0x730 mapped:0x80785B24
 void fn_3_146A90(void) {
-    return;
+    Unk37A8Fielder* fielder;
+    s32 i;
+    s32 j;
+    s32 n;
+    u8 strength;
+
+    if (g_GameLogic._125 == 0) {
+        fn_3_59A90();
+        g_Minigame._17C0 = 0;
+        g_Minigame.turnOverStatus = 0;
+        g_GameLogic.secondaryGameMode = 7;
+        g_Minigame._1A37 = 0;
+        for (i = 0; i < 4; i++) {
+            g_Minigame.miniGameCurrentPoints[i] = 0;
+            g_Minigame.miniGameLatestPoints[i] = 0;
+            g_Minigame.minigamePoints_current_Latest[i][0] = 0;
+            g_Minigame.minigamePoints_current_Latest[i][1] = 0;
+            g_Minigame.minigameControlStruct._28[i] = -1;
+            g_Minigame.minigameFielderIndex[i] = -1;
+            g_Minigame._18FC[i] = -1;
+            g_Minigame._1900[i] = -1;
+            g_Minigame.minigameControlStruct._24[i] = 0;
+        }
+        g_Scores._0 = 0;
+        g_Minigame.pointsReqToWin_challenge = 0;
+        g_Minigame.turnNumberWithinRound = 0;
+        g_Minigame.minigamePlayerSelectedOrder = -1;
+        g_Minigame.rosterID = -1;
+        g_Minigame._17C0 = 0;
+        if (!g_Minigame.multiPlayerInd) {
+            g_Minigame._17C4 = lbl_3_data_21E08[g_Minigame.soloMinigameDifficulty] * 60;
+            strength = lbl_3_data_2127C[g_Minigame.GameMode_MiniGame][g_Minigame.soloMinigameDifficulty];
+            for (i = 0; i < 4; i++) {
+                g_Minigame.minigameControlStruct.aIStrength[i] = strength;
+            }
+        } else {
+            if (g_Minigame._1A3C) {
+                for (i = 0; i < 4; i++) {
+                    g_Minigame.minigameControlStruct.aIStrength[i] = lbl_3_data_2127C[7][0];
+                }
+            }
+            g_Minigame._17C4 = lbl_3_data_21E08[4] * 60;
+        }
+        fn_3_591AC();
+        fn_3_58870();
+        n = 0;
+        for (i = 0; i < 4; i++) {
+            if (g_Minigame.minigameControlStruct.characterIndex[i] >= 0) {
+                g_Minigame.minigameControlStruct._28[n] = i;
+                g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]] = n + 2;
+                fn_3_6E24C(i, g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]]);
+                MG._1C7E[i][0] = -1;
+                MG._1C7E[i][1] = -1;
+                MG._1C7E[i][2] = -1;
+                fielder = &g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]]];
+                g_Minigame._1C8A[i] = 0;
+                fielder->_20D = i;
+                fielder->pos.x = lbl_3_data_21B94[n].x;
+                MG._1B34[i] = -1;
+                g_Minigame._1C92[i] = -1;
+                fielder->pos.y = lbl_3_data_21B94[n].y;
+                MG._1C9A[i] = 0;
+                fielder->pos.z = lbl_3_data_21B94[n].z;
+                MG._1B50[i] = 0;
+                fielder->_00C = lbl_3_data_21D2C[1];
+                MG._1B80[i] = 0;
+                fielder->_1D2 = 0;
+                g_Minigame._1CA5[i] = 0;
+                fielder->_050 = 0.0f;
+                g_Minigame._1CAD[i] = i;
+                fielder->_048 = 1.5707964f;
+                g_Minigame._1CB1[i] = 0;
+                for (j = 0; j < 10; j++) {
+                    MG._1B58[i][j] = 0;
+                }
+                MG._1C9E[i] = 0;
+                n++;
+            }
+        }
+        for (i = 0; i < 100; i++) {
+            MG._193A[i] = 0;
+            MG._1BB6[i] = -1;
+        }
+        g_Minigame._1B4C = 60;
+        fn_3_145B98();
+        for (i = 0; i < 3; i++) {
+            MG._0000[i]._2A = 0;
+            MG._0000[i]._2B = 0;
+            MG._0000[i]._2E = 0;
+            MG._0000[i]._1A = 0;
+            MG._0000[i]._1C = -1;
+            MG._0000[i]._1E = 0;
+            MG._0000[i]._20 = 0;
+            MG._0000[i]._22 = 0;
+            MG._0000[i]._33 = 0xFF;
+            MG._0000[i].pos.x = lbl_3_data_21BC4[i][0].x;
+            MG._0000[i].pos.y = lbl_3_data_21BC4[i][0].y;
+            MG._0000[i].pos.z = lbl_3_data_21BC4[i][0].z;
+            MG._0000[i]._2F[0] = -1;
+            MG._0000[i]._2F[1] = -1;
+            MG._0000[i]._2F[2] = -1;
+            MG._0000[i]._2F[3] = -1;
+        }
+        for (i = 0; i < 4; i++) {
+            MG._1CA9[i] = 0;
+        }
+        g_Minigame._1CA2 = 0;
+        g_Minigame._1CA3 = 0;
+        g_Minigame._1CA4 = 0;
+        if (!g_Minigame.multiPlayerInd) {
+            g_Minigame._1B4E = RandomInt_Game_Range(lbl_3_data_21DC8[g_Minigame.soloMinigameDifficulty][0][0],
+                                                    lbl_3_data_21DC8[g_Minigame.soloMinigameDifficulty][0][1]) * 60;
+        } else {
+            g_Minigame._1B4E = RandomInt_Game_Range(lbl_3_data_21DC8[4][0][0], lbl_3_data_21DC8[4][0][1]) * 60;
+        }
+        minigamesSetSomePointers();
+        minigamesGXStuff();
+        minigamesSetSomePointers2();
+        for (i = 0; i < 40; i++) {
+            MG._00A8[i].active = 0;
+        }
+        fn_3_157588(40);
+        g_GameLogic._125++;
+    } else {
+        fn_3_5A6D4(GAME_STATUS_GAME_START_MOVIE);
+    }
+    fn_3_142088();
 }
 
 // .text:0x001469CC size:0xC4 mapped:0x80785A60
