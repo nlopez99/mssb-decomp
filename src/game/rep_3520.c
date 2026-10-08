@@ -1401,7 +1401,7 @@ u8 fn_3_137B10(Unk3520Obj* obj) {
 // .text:0x001379A0 size:0x170 mapped:0x80776A34
 // 90.7%: the unrolled fielder search walks other registers and offsets, and the
 // object loop strength-reduces differently.
-BOOL fn_3_1379A0(int fielderIdx) {
+u8 fn_3_1379A0(int fielderIdx) {
     Unk3520Fielder* fielder = &g_Fielders[fielderIdx];
     u32 player;
     u32 i;
