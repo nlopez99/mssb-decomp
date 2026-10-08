@@ -296,8 +296,7 @@ u8 lbl_3_data_2263F = 6;
 f32 lbl_3_data_22640[4] = { 0.75f, 0.05f, 3.0f, 0.02f };
 f32 lbl_3_data_22650[3] = { 5.0f, 5.0f, 10.0f };
 u8 lbl_3_data_2265C[4] = { 1, 0, 2, 3 };
-f32 lbl_3_data_22660 = 2.0f;
-f32 lbl_3_data_22664 = 8.0f;
+f32 lbl_3_data_22660[2] = { 2.0f, 8.0f };
 f32 lbl_3_data_22668 = 1.0f;
 s32 lbl_3_data_2266C = 60;
 u8 lbl_3_data_22670[8] = { 2, 0, 3, 4, 1, 0, 0, 0 };
@@ -1013,15 +1012,13 @@ f32 fn_3_119854(u8 index) {
 }
 
 // .text:0x001194FC size:0x358 mapped:0x80758590
-// 96.95%: as in fn_3_119934, the acos compare takes its operands the other way round; the
-// target also keeps &lbl_3_data_22660 in its own register (r25) and i in r22.
 void fn_3_1194FC(void) {
     Vec dir;
     Vec fwd = { 0.0f, 0.0f, 1.0f };
-    s32 i;
     UnkObj3310* obj;
     UnkObj3310* alt;
     UnkObj3310* shadow;
+    s32 i;
     u8 state;
     s32 base;
     f32 angle;
@@ -1052,9 +1049,9 @@ void fn_3_1194FC(void) {
             obj->_04.y = -g_Minigame.wallBall_coinCoordinates[i].y;
             obj->_04.z = g_Minigame.wallBall_coinCoordinates[i].z;
             if (g_Minigame.wallBall_coinsVisibleInd[i] == 2) {
-                scale = lbl_3_data_22660 - (g_Minigame._1C4C[i] * (lbl_3_data_22660 - lbl_3_data_22668)) / lbl_3_data_2266C;
+                scale = lbl_3_data_22660[0] - (g_Minigame._1C4C[i] * (lbl_3_data_22660[0] - lbl_3_data_22668)) / lbl_3_data_2266C;
                 if (lbl_80366158._28 == 0) {
-                    fn_8001D110(base + i, lbl_3_data_22660, scale, lbl_3_data_22660);
+                    fn_8001D110(base + i, lbl_3_data_22660[0], scale, lbl_3_data_22660[0]);
                     if ((g_Minigame._1C4C[i] += -2 * g_Minigame._1C1A[i] + 1) >= 60) {
                         g_Minigame._1C1A[i] = g_Minigame._1C1A[i] == 0;
                     }
@@ -1067,7 +1064,7 @@ void fn_3_1194FC(void) {
                     obj->_04.y -= 0.5f;
                 }
             } else {
-                fn_8001D0D0(base + i, lbl_3_data_22660);
+                fn_8001D0D0(base + i, lbl_3_data_22660[0]);
                 if (g_Minigame.wallBall_coinsVisibleInd[i] != 6) {
                     dir.x = g_Minigame.wallBall_coinVelocity[i].x;
                     dir.y = 0.0f;
@@ -1092,7 +1089,7 @@ void fn_3_1194FC(void) {
                 shadow->_04.x = g_Minigame.wallBall_coinCoordinates[i].x;
                 shadow->_04.y = -0.05f;
                 shadow->_04.z = g_Minigame.wallBall_coinCoordinates[i].z;
-                fn_8001D0D0(i + 0x28, lbl_3_data_22664);
+                fn_8001D0D0(i + 0x28, lbl_3_data_22660[1]);
             }
         }
     }
