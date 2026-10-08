@@ -199,10 +199,12 @@ typedef struct {
 
 extern Unk3090Scene* lbl_3_common_bss_1323C;
 
-extern struct {
+typedef struct {
     u8 _00[0xAD];
     u8 _AD;
-} lbl_3_common_bss_32724;
+} Unk3090Sound;
+
+extern Unk3090Sound lbl_3_common_bss_32724;
 
 extern struct {
     u8 _00[0x13];
@@ -2492,14 +2494,17 @@ BOOL fn_3_100018(void) {
     return lbl_3_common_bss_DE94._0000->_09B6 == 1;
 }
 
-// 96.32%: the target keeps g_d_GameSettings, g_GameLogic and lbl_3_common_bss_32724 in
-// registers from entry and not g_Runners; opcode 0x4D passes the script word to fn_3_2273C,
-// which rep_A00.h declares BOOL(void).
+// 99.22%: registers in the captain searches (0x48, 0x49, 0x55, 0x58, 0x59), 0x2F's modulo and
+// 0x66's distance sum; opcode 0x4D passes the script word to fn_3_2273C, which rep_A00.h
+// declares BOOL(void), so this build omits two loads there.
 // .text:0x000FDB30 size:0x24E8 mapped:0x8073CBC4
 BOOL fn_3_FDB30(void) {
     Unk3090Task* task = lbl_803CC1B8;
+    GameInitVariables* settings = &g_d_GameSettings;
+    GameControlsStruct* logic = &g_GameLogic;
+    Unk3090Sound* sound = &lbl_3_common_bss_32724;
     lbl_3_common_bss_DE94_s2* cam = lbl_3_common_bss_DE94._0000;
-    u8 stage = starMissionCompletionTracker._441C;
+    s32 stage = starMissionCompletionTracker._441C;
     u8 level = starMissionCompletionTracker._4415;
     Unk3090Task* newTask;
     Unk3090Point* point;
@@ -2510,7 +2515,8 @@ BOOL fn_3_FDB30(void) {
     s32 arg;
     s32 arg2;
     s32* list;
-    s8 kind;
+    s32 kind;
+    InMemRunnerType* runner;
     s32 limit;
     f32 frames;
 
@@ -2528,7 +2534,7 @@ BOOL fn_3_FDB30(void) {
         fn_3_100038();
         return FALSE;
     }
-    while (TRUE) {
+    for (;;) {
         switch (cam->_0000[0]) {
         case 1:
             idx = g_pCamera->_28A8;
@@ -2574,7 +2580,7 @@ BOOL fn_3_FDB30(void) {
             }
             g_pCamera->_120[g_pCamera->_28A8]._09B9 = 0;
             fn_80052798(1);
-            lbl_3_common_bss_32724._AD = 0;
+            sound->_AD = 0;
             cam->_0018 = 1;
             return TRUE;
         case 3:
@@ -2881,19 +2887,21 @@ BOOL fn_3_FDB30(void) {
         case 0x46:
             lbl_3_common_bss_1323C->_27F = 1;
             point = &lbl_3_data_1F18C[cam->_0000[1]];
-            lbl_3_common_bss_1323C->_000[point->_10]._28 = 0;
-            lbl_3_common_bss_1323C->_000[point->_10]._29 = 1;
-            lbl_3_common_bss_1323C->_000[point->_10]._14 = point->_0C;
-            memcpy(&lbl_3_common_bss_1323C->_000[point->_10]._00, &point->_00, sizeof(Vec));
+            idx = point->_10;
+            lbl_3_common_bss_1323C->_000[idx]._28 = 0;
+            lbl_3_common_bss_1323C->_000[idx]._29 = 1;
+            lbl_3_common_bss_1323C->_000[idx]._14 = point->_0C;
+            memcpy(&lbl_3_common_bss_1323C->_000[idx]._00, &point->_00, sizeof(Vec));
             cam->_0000 += 2;
             continue;
         case 0x63:
             lbl_3_common_bss_1323C->_27F = 2;
             point = &lbl_3_data_1F18C[cam->_0000[1]];
             idx = point->_10;
+            model = lbl_8036E548._2C50[idx];
             lbl_3_common_bss_1323C->_000[idx]._28 = 0;
             lbl_3_common_bss_1323C->_000[idx]._29 = 1;
-            lbl_3_common_bss_1323C->_000[idx]._14 = lbl_3_data_1F1F0[lbl_8036E548._2C50[idx]->_252];
+            lbl_3_common_bss_1323C->_000[idx]._14 = lbl_3_data_1F1F0[model->_252];
             memcpy(&lbl_3_common_bss_1323C->_000[idx]._00, &point->_00, sizeof(Vec));
             cam->_0000 += 2;
             continue;
@@ -3053,10 +3061,10 @@ BOOL fn_3_FDB30(void) {
             lbl_3_common_bss_DE94._0000->_09B9 = cam->_0000[1];
             if (lbl_3_common_bss_DE94._0000->_09B9 == 1) {
                 fn_80052798(2);
-                lbl_3_common_bss_32724._AD = 1;
+                sound->_AD = 1;
             } else {
                 fn_80052798(1);
-                lbl_3_common_bss_32724._AD = 0;
+                sound->_AD = 0;
             }
             cam->_0000 += 2;
             continue;
@@ -3065,10 +3073,10 @@ BOOL fn_3_FDB30(void) {
             lbl_3_common_bss_DE94._0000->_09B9 = 1;
             if (cam->_0000[2] >= 0) {
                 fn_80052798(2);
-                lbl_3_common_bss_32724._AD = 1;
+                sound->_AD = 1;
             } else {
                 fn_80052798(1);
-                lbl_3_common_bss_32724._AD = 0;
+                sound->_AD = 0;
             }
             if (cam->_0000[0] == 0x41) {
                 arg = cam->_0000[1];
@@ -3132,7 +3140,7 @@ BOOL fn_3_FDB30(void) {
             }
             continue;
         case 0x48:
-            if (g_GameLogic.Team_CaptainRosterLoc[g_d_GameSettings.humanTeamNumber] ==
+            if (logic->Team_CaptainRosterLoc[settings->humanTeamNumber] ==
                 lbl_8036E548._2C50[lbl_3_data_1E434[cam->_0000[1]]._14]->_257) {
                 fn_3_24ADC(cam->_0000[1], FALSE);
                 cam->_0000 += 3;
@@ -3144,7 +3152,7 @@ BOOL fn_3_FDB30(void) {
         case 0x49:
             found = 0;
             for (i = 0; i < 9; i++) {
-                if (g_GameLogic.Team_CaptainRosterLoc[g_d_GameSettings.humanTeamNumber] == lbl_8036E548._2C50[i]->_257) {
+                if (logic->Team_CaptainRosterLoc[settings->humanTeamNumber] == lbl_8036E548._2C50[i]->_257) {
                     found = i;
                 }
             }
@@ -3176,18 +3184,19 @@ BOOL fn_3_FDB30(void) {
         case 0x52:
         case 0x53:
         case 0x54:
+            runner = &g_Runners[0];
             switch (cam->_0000[0]) {
             case 0x51:
-                lbl_3_common_bss_DE94._0000->_0940 = lbl_3_data_37AC[g_Runners[0].charID];
+                lbl_3_common_bss_DE94._0000->_0940 = lbl_3_data_37AC[runner->charID];
                 break;
             case 0x52:
-                lbl_3_common_bss_DE94._0000->_0940 = lbl_3_data_3888[g_Runners[0].charID];
+                lbl_3_common_bss_DE94._0000->_0940 = lbl_3_data_3888[runner->charID];
                 break;
             case 0x53:
-                lbl_3_common_bss_DE94._0000->_0940 = lbl_3_data_3964[g_Runners[0].charID];
+                lbl_3_common_bss_DE94._0000->_0940 = lbl_3_data_3964[runner->charID];
                 break;
             case 0x54:
-                lbl_3_common_bss_DE94._0000->_0940 = lbl_3_data_3A40[g_Runners[0].charID];
+                lbl_3_common_bss_DE94._0000->_0940 = lbl_3_data_3A40[runner->charID];
                 break;
             default:
                 lbl_3_common_bss_DE94._0000->_0940 = 0;
@@ -3201,7 +3210,7 @@ BOOL fn_3_FDB30(void) {
         case 0x56:
             kind = 0;
             for (i = 0; i < 9; i++) {
-                if (g_GameLogic.Team_CaptainRosterLoc[g_d_GameSettings.humanTeamNumber] == lbl_8036E548._2C50[i]->_257) {
+                if (logic->Team_CaptainRosterLoc[settings->humanTeamNumber] == lbl_8036E548._2C50[i]->_257) {
                     kind = lbl_8036E548._2C50[i]->_252;
                 }
             }
@@ -3240,7 +3249,7 @@ BOOL fn_3_FDB30(void) {
         case 0x58:
             found = 0;
             for (i = 0; i < 9; i++) {
-                if (g_GameLogic.Team_CaptainRosterLoc[g_d_GameSettings.humanTeamNumber] == lbl_8036E548._2C50[i]->_257) {
+                if (logic->Team_CaptainRosterLoc[settings->humanTeamNumber] == lbl_8036E548._2C50[i]->_257) {
                     found = i;
                 }
             }
@@ -3250,7 +3259,7 @@ BOOL fn_3_FDB30(void) {
         case 0x59:
             found = 0;
             for (i = 0; i < 9; i++) {
-                if (g_GameLogic.Team_CaptainRosterLoc[g_d_GameSettings.humanTeamNumber] == lbl_8036E548._2C50[i]->_257) {
+                if (logic->Team_CaptainRosterLoc[settings->humanTeamNumber] == lbl_8036E548._2C50[i]->_257) {
                     found = i;
                 }
             }
