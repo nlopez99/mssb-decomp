@@ -805,7 +805,29 @@ void fn_3_52084(void) {
 
 // .text:0x00051DF0 size:0x294 mapped:0x80690E84
 u8 fn_3_51DF0(f32 x, f32 z) {
-    return 0;
+    f32 xx;
+    f32 dz;
+    f32 dist;
+
+    if (x - z + 40.0f > 0.0f && -x - z + 40.0f > 0.0f) {
+        return 0;
+    }
+    xx = x * x;
+    if (dolsqrtf2(z * z + xx) < 38.8f) {
+        return 1;
+    }
+    dz = z - 18.4f;
+    dist = dolsqrtf2(dz * dz + xx);
+    if (dist < 28.0f) {
+        return 1;
+    }
+    if (dist < 37.0f) {
+        return 2;
+    }
+    if (dist < 43.0f) {
+        return 3;
+    }
+    return 4;
 }
 
 // .text:0x00051798 size:0x658 mapped:0x8069082C
