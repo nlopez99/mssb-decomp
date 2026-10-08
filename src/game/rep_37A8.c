@@ -7,6 +7,7 @@
 #include "game/rep_31A0.h"
 #include "game/rep_3310.h"
 #include "game/rep_3880.h"
+#include "game/m_sound.h"
 #include "game/rep_D18.h"
 #include "Dolphin/gx.h"
 #include "string.h"
@@ -64,7 +65,8 @@ typedef struct Unk37A8Minigame {
     /* 0x17C8 */ s16 _17C8[50];
     /* 0x182C */ u8 _182C[0x193A - 0x182C];
     /* 0x193A */ u8 _193A[100];
-    /* 0x199E */ u8 _199E[0x1B44 - 0x199E];
+    /* 0x199E */ u8 _199E[0x1B3C - 0x199E];
+    /* 0x1B3C */ s16 _1B3C[4];
     /* 0x1B44 */ s16 _1B44[4];
     /* 0x1B4C */ u8 _1B4C[0x1B50 - 0x1B4C];
     /* 0x1B50 */ s16 _1B50[4];
@@ -91,11 +93,24 @@ typedef struct Unk37A8Minigame {
 typedef struct Unk37A8Fielder {
     /* 0x000 */ Vec pos;
     /* 0x00C */ f32 _00C;
-    /* 0x010 */ u8 _010[0x17A - 0x10];
+    /* 0x010 */ u8 _010[0x38 - 0x10];
+    /* 0x038 */ f32 _038;
+    /* 0x03C */ f32 _03C;
+    /* 0x040 */ u8 _040[0x50 - 0x40];
+    /* 0x050 */ f32 _050;
+    /* 0x054 */ u8 _054[0x10C - 0x54];
+    /* 0x10C */ f32 _10C;
+    /* 0x110 */ f32 _110;
+    /* 0x114 */ f32 _114;
+    /* 0x118 */ u8 _118[0x17A - 0x118];
     /* 0x17A */ s16 _17A;
-    /* 0x17C */ u8 _17C[0x1C9 - 0x17C];
+    /* 0x17C */ u8 _17C[0x1C7 - 0x17C];
+    /* 0x1C7 */ u8 _1C7;
+    /* 0x1C8 */ u8 _1C8;
     /* 0x1C9 */ u8 _1C9;
-    /* 0x1CA */ u8 _1CA[0x268 - 0x1CA];
+    /* 0x1CA */ u8 _1CA[0x1CE - 0x1CA];
+    /* 0x1CE */ u8 _1CE;
+    /* 0x1CF */ u8 _1CF[0x268 - 0x1CF];
 } Unk37A8Fielder; // size: 0x268
 
 extern Unk37A8Fielder g_Fielders[9];
@@ -127,6 +142,7 @@ extern s16 lbl_3_data_21EAC[4][2];
 extern s8 lbl_3_data_21EBC[4];
 extern f32 lbl_3_data_21E24[17];
 extern u8 lbl_3_data_21E9C[4][4];
+extern u8 lbl_3_data_21E1C[2];
 extern int LERPToNewRange_Float(int value, int inMin, int inMax, int outMin, int outMax);
 extern f32 lbl_3_data_47BC[5];
 extern s8 lbl_3_data_21EC0[4];
@@ -391,8 +407,64 @@ void fn_3_144ADC(int player) {
 }
 
 // .text:0x0014471C size:0x3C0 mapped:0x807837B0
-void fn_3_14471C(void) {
-    return;
+void fn_3_14471C(int player) {
+    Unk37A8Fielder* fielder;
+    VecXYZ d;
+    f32 xx;
+    f32 zz;
+    f32 dist;
+    f32 scale;
+    s32 frames;
+    int port;
+    u8 coin;
+
+    fielder = &g_Fielders[g_Minigame.minigameFielderIndex[player]];
+    port = g_Minigame.minigameControlStruct.characterIndex[player];
+    coin = g_Minigame._1C8E[player];
+    if (fielder->_17A == 0x26) {
+        getAnimRelatedCoordinates(port, 9, &d);
+    } else if (fielder->_1C7 == 0) {
+        getAnimRelatedCoordinates(port, 0x19, &d);
+    } else {
+        getAnimRelatedCoordinates(port, 0x13, &d);
+    }
+    g_Minigame.wallBall_coinCoordinates[coin].x = d.x;
+    g_Minigame.wallBall_coinCoordinates[coin].y = -d.y;
+    g_Minigame.wallBall_coinCoordinates[coin].z = d.z;
+    d.x = fielder->_10C - g_Minigame.wallBall_coinCoordinates[coin].x;
+    d.y = fielder->_110 - g_Minigame.wallBall_coinCoordinates[coin].y;
+    d.z = fielder->_114 - g_Minigame.wallBall_coinCoordinates[coin].z;
+    if (MG._193A[coin] == 4) {
+        if (MG._1B84[coin] != 5) {
+            xx = d.x * d.x;
+            zz = d.z * d.z;
+            dist = dolsqrtf2(xx + zz);
+            if (player == 0 || player == 3) {
+                scale = lbl_3_data_21E24[8] / dist;
+            } else {
+                scale = lbl_3_data_21E24[9] / dist;
+            }
+            g_Minigame.wallBall_coinVelocity[coin].x = d.x * scale;
+            g_Minigame.wallBall_coinVelocity[coin].z = d.z * scale;
+            g_Minigame.wallBall_coinVelocity[coin].y = lbl_3_data_21E24[10];
+        } else {
+            frames = lbl_3_data_21E68[23] + 10;
+            g_Minigame.wallBall_coinVelocity[coin].x = (fielder->_10C - g_Minigame.wallBall_coinCoordinates[coin].x) / frames;
+            g_Minigame.wallBall_coinVelocity[coin].z = (fielder->_114 - g_Minigame.wallBall_coinCoordinates[coin].z) / frames;
+            g_Minigame.wallBall_coinVelocity[coin].y = -lbl_3_data_21E24[11] * frames * 0.5f;
+        }
+        MG._193A[coin] = 6;
+    } else {
+        frames = LERPToNewRange_Float(fielder->_1CE, 0, 100, lbl_3_data_21E1C[0], lbl_3_data_21E1C[1]);
+        g_Minigame.wallBall_coinVelocity[coin].x = d.x / frames;
+        g_Minigame.wallBall_coinVelocity[coin].y = d.y / frames;
+        g_Minigame.wallBall_coinVelocity[coin].z = d.z / frames;
+        MG._193A[coin] = 5;
+    }
+    MG._17C8[coin] = 0;
+    if (MG._1B84[coin] == 5) {
+        fn_3_90064(0x308);
+    }
 }
 
 // .text:0x0014443C size:0x2E0 mapped:0x807834D0
@@ -577,12 +649,89 @@ s32 fn_3_143770(UnkMgEntry3310* entry) {
 
 // .text:0x00143714 size:0x5C mapped:0x807827A8
 void fn_3_143714(void) {
-    return;
+    int i;
+
+    for (i = 0; i < 40; i++) {
+        if (MG._00A8[i].active != 0) {
+            fn_3_143358(i);
+        }
+    }
 }
 
 // .text:0x00143358 size:0x3BC mapped:0x807823EC
-void fn_3_143358(void) {
-    return;
+void fn_3_143358(int idx) {
+    Unk37A8Piranha* piranha;
+    Unk37A8Fielder* fielder;
+    Vec dir;
+    f32 dx;
+    f32 dz;
+    f32 xx;
+    f32 zz;
+    f32 dist;
+    int i;
+
+    piranha = &MG._00A8[idx];
+    piranha->_20++;
+    if (piranha->_20 > lbl_3_data_21E68[10]) {
+        piranha->active = 0;
+        return;
+    }
+    piranha->pos.x += piranha->vel.x;
+    piranha->pos.y += piranha->vel.y;
+    piranha->pos.z += piranha->vel.z;
+    if (piranha->active == 2) {
+        piranha->vel.y += piranha->_18;
+    }
+    if (piranha->pos.y < lbl_3_data_21E24[13]) {
+        if (piranha->pos.z < 0.0f) {
+            if (piranha->active == 2) {
+                MG._1C9E[piranha->_1C] = 0;
+            }
+            piranha->active = 0;
+            return;
+        }
+        piranha->vel.y = -piranha->vel.y;
+    }
+    for (i = 0; i < 4; i++) {
+        if (g_Minigame.minigameFielderIndex[i] < 0) {
+            continue;
+        }
+        fielder = &g_Fielders[g_Minigame.minigameFielderIndex[i]];
+        if (g_Minigame._1CA5[i] != 0) {
+            continue;
+        }
+        dx = piranha->pos.x - fielder->pos.x;
+        dz = piranha->pos.z - fielder->pos.z;
+        xx = dx * dx;
+        zz = dz * dz;
+        dist = dolsqrtf2(xx + zz);
+        if (lbl_3_data_21E24[2] + lbl_3_data_47BC[fielder->_1C9] > dist) {
+            if (piranha->active == 2) {
+                MG._1C9E[piranha->_1C] = 0;
+            }
+            piranha->active = 0;
+            if (MG._1C9A[i] == 0) {
+                MG._1C9A[i] = 1;
+                MG._1B3C[i] = lbl_3_data_21E68[14];
+                MG._1B50[i] = 0;
+                dir.x = piranha->vel.x;
+                dir.y = 0.0f;
+                dir.z = piranha->vel.z;
+                PSVECNormalize(&dir, &dir);
+                fielder->_038 = dir.x;
+                g_Minigame._1DF4_u8[i] = 1;
+                fielder->_03C = dir.z;
+                fielder->_050 = lbl_3_data_21E24[15];
+                fn_3_6C854(g_Minigame.minigameControlStruct.characterIndex[i], 2);
+                if (g_Minigame._1CB1[i] < 0xFFFE) {
+                    g_Minigame._1CB1[i]++;
+                } else {
+                    g_Minigame._1CB1[i] = 0xFF;
+                }
+            }
+            return;
+        }
+    }
 }
 
 // .text:0x001430D0 size:0x288 mapped:0x80782164
