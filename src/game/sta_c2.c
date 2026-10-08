@@ -8,6 +8,7 @@
 #include "musyx/musyx.h"
 #include "C3/control.h"
 #include "Dolphin/os.h"
+#include "Dolphin/mtxext.h"
 #include "game/rep_1838.h"
 #include "game/rep_AC8.h"
 #include "game/rep_1D58.h"
@@ -1106,8 +1107,50 @@ void fn_3_CDB48(void) {
 }
 
 // .text:0x000CD968 size:0x1E0 mapped:0x8070C9FC
-void fn_3_CD968(void) {
-    return;
+BOOL fn_3_CD968(Vec* pos, f32 width, f32 height) {
+    Vec out;
+    Vec corners[4];
+    camera_803c639c_s* camera;
+    u32 i;
+    u8 code;
+    u8 all = 0;
+    f32 left;
+    f32 right;
+    f32 bottom;
+    f32 top;
+
+    camera = fn_80052734(fn_8005268C());
+    PSMTXMultVec(camera->view, pos, pos);
+    if (pos->z > -1.0f || pos->z < -512.0f) {
+        return FALSE;
+    }
+    bottom = pos->y - height * 0.5f;
+    right = pos->x + width * 0.5f;
+    left = pos->x - width * 0.5f;
+    top = pos->y + height * 0.5f;
+    corners[0].z = corners[1].z = corners[2].z = corners[3].z = pos->z;
+    corners[0].x = corners[3].x = left;
+    corners[1].x = corners[2].x = right;
+    corners[0].y = corners[1].y = bottom;
+    corners[3].y = corners[2].y = top;
+    for (i = 0; i < 4; i++) {
+        PSMTX44MultVec(camera->proj, &corners[i], &out);
+        code = out.x < -1.0f;
+        code |= (out.x > 1.0f) << 1;
+        code |= (out.y < -1.0f) << 2;
+        code |= (out.y > 1.0f) << 3;
+        if (code == 0) {
+            return TRUE;
+        }
+        all &= code;
+    }
+    if ((all & 3U) == 1 || (all & 3U) == 2) {
+        return FALSE;
+    }
+    if ((all & 0xCU) == 4 || (all & 0xCU) == 8) {
+        return FALSE;
+    }
+    return TRUE;
 }
 
 // .text:0x000CD958 size:0x10 mapped:0x8070C9EC
@@ -1230,6 +1273,21 @@ void fn_3_CBA9C(StaC2Draw* draw) {
 }
 
 // .text:0x000CB8A8 size:0x1F4 mapped:0x8070A93C
-void fn_3_CB8A8(void) {
-    return;
+void fn_3_CB8A8(StaC2Draw* draw) {
+    switch (draw->_CA) {
+    case 0:
+        fn_80025EEC(draw->_8C, 0, 2);
+        fn_3_CC1D4();
+        break;
+    case 3:
+        fn_80025EEC(draw->_8C, 0, 4);
+        break;
+    case 1:
+        fn_80025EEC(draw->_8C, 0, 3);
+        break;
+    case 2:
+    default:
+        fn_80025EEC(draw->_8C, 0, 1);
+        break;
+    }
 }

@@ -10,7 +10,7 @@ struct StaC2Spring;
 struct StaC2Particle;
 struct StaC2Emitter;
 
-void fn_3_CB8A8(void);
+void fn_3_CB8A8(struct StaC2Draw* draw);
 void fn_3_CBA9C(struct StaC2Draw* draw);
 void fn_3_CBAFC(void);
 void fn_3_CBC18(void);
@@ -22,7 +22,7 @@ void fn_3_CC5C4(void);
 void fn_3_CC81C(void);
 void fn_3_CCC24(void);
 void fn_3_CD958(void);
-void fn_3_CD968(void);
+BOOL fn_3_CD968(Vec* pos, f32 width, f32 height);
 void fn_3_CDB48(void);
 void fn_3_CDD90(void);
 void fn_3_CDFA4(void);
