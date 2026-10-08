@@ -47,9 +47,10 @@ void fn_3_15B610(void) {
     }
 }
 
-// 95.37%: registers and the scheduling of case 3's roster index math differ.
+// 95.47%: registers and the scheduling of case 3's roster index math differ.
 // .text:0x0015B494 size:0x17C mapped:0x8079A528
 void fn_3_15B494(void) {
+    CharacterStats* roster;
     int team;
 
     switch (g_Practice.practiceState) {
@@ -77,9 +78,9 @@ void fn_3_15B494(void) {
         }
         break;
     case 3:
+        roster = inMemRoster[g_GameLogic.teamBatting];
         team = g_GameLogic.homeTeamBattingInd_fieldingTeam;
-        if (fn_80014D4C(inMemRoster[g_GameLogic.teamBatting]
-                                   [g_GameLogic.battingOrderAndPositionMapping[team][g_GameLogic.currentBatterPerTeam[team]][0]]
+        if (fn_80014D4C(roster[g_GameLogic.battingOrderAndPositionMapping[team][g_GameLogic.currentBatterPerTeam[team]][0]]
                             .stats.CharID)) {
             fn_3_B3C94(4);
         }

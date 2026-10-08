@@ -60,6 +60,10 @@ extern void* ARAMTransfer(void* entry, int arg1, int arg2, u32 aram);
 extern void fn_800111B4(void* arg);
 extern void fn_8000F4B8(int arg0, int arg1, int arg2, int arg3);
 extern BOOL fn_3_90C14(int arg);
+extern void fn_3_90AB0(u8 id);
+extern BOOL fn_3_90B14(s16 a, s16 b);
+
+extern u8 lbl_800E8558[];
 extern BOOL fn_8001594C(int team);
 
 extern void possiblyTransitionBlackScreen(void);
@@ -282,7 +286,84 @@ void fn_3_B3FE8(void) {
 
 // .text:0x000B3CD4 size:0x314 mapped:0x806F2D68
 BOOL fn_3_B3CD4(void) {
-    return FALSE;
+    int second = -1;
+    int first = 0;
+
+    if (g_Practice._1D9 == 0) {
+        g_Practice._1D9 = 1;
+        g_Practice.someCharID3 = -1;
+        g_Practice.someCharID4 = -1;
+        switch (g_Practice.practiceType_2) {
+        case 0:
+            break;
+        case 1:
+            second = 1;
+            break;
+        case 2:
+            second = 1;
+            break;
+        case 3:
+            return TRUE;
+        case 4:
+            first = g_Minigame._19E8[g_Practice.homeAway]._0;
+            break;
+        }
+        if (first == 0) {
+            first = -1;
+        }
+        if (second == 0) {
+            second = -1;
+        }
+        if (first < 0) {
+            first = second;
+            second = -1;
+        }
+        if (first < 0) {
+            return TRUE;
+        }
+        if (second >= 0 && lbl_800E8558[first * 6 + 2] == lbl_800E8558[second * 6 + 2]) {
+            second = -1;
+        }
+        if (second < 0) {
+            if ((g_Practice.someCharID1 >= 0 && lbl_800E8558[g_Practice.someCharID1 * 6 + 2] == lbl_800E8558[first * 6 + 2]) ||
+                (g_Practice.someCharID2 >= 0 && lbl_800E8558[g_Practice.someCharID2 * 6 + 2] == lbl_800E8558[first * 6 + 2])) {
+                return TRUE;
+            }
+            if (g_Practice.someCharID2 >= 0) {
+                fn_3_90AB0(lbl_800E8558[g_Practice.someCharID2 * 6 + 1]);
+                g_Practice.someCharID2 = lbl_800E8558[first * 6 + 1];
+            } else if (g_Practice.someCharID1 < 0) {
+                g_Practice.someCharID1 = lbl_800E8558[first * 6 + 1];
+            } else {
+                g_Practice.someCharID2 = lbl_800E8558[first * 6 + 1];
+            }
+            g_Practice.someCharID3 = lbl_800E8558[first * 6 + 1];
+        } else if (g_Practice.someCharID1 >= 0) {
+            if (lbl_800E8558[g_Practice.someCharID1 * 6 + 1] != lbl_800E8558[second * 6 + 1]) {
+                if (lbl_800E8558[g_Practice.someCharID1 * 6 + 1] == lbl_800E8558[first * 6 + 1]) {
+                    first = second;
+                    goto replace_second;
+                }
+                fn_3_90AB0(lbl_800E8558[g_Practice.someCharID1 * 6 + 1]);
+                fn_3_90AB0(lbl_800E8558[g_Practice.someCharID2 * 6 + 1]);
+                g_Practice.someCharID3 = lbl_800E8558[first * 6 + 1];
+                g_Practice.someCharID4 = lbl_800E8558[second * 6 + 1];
+                g_Practice.someCharID1 = lbl_800E8558[first * 6 + 1];
+                g_Practice.someCharID2 = lbl_800E8558[second * 6 + 1];
+            } else {
+            replace_second:
+                if (lbl_800E8558[g_Practice.someCharID2 * 6 + 1] != lbl_800E8558[first * 6 + 1]) {
+                    fn_3_90AB0(lbl_800E8558[g_Practice.someCharID2 * 6 + 1]);
+                    g_Practice.someCharID3 = lbl_800E8558[first * 6 + 1];
+                    g_Practice.someCharID2 = lbl_800E8558[first * 6 + 1];
+                }
+            }
+        }
+    }
+    if (g_Practice.someCharID3 >= 0 && !fn_3_90B14(g_Practice.someCharID3, g_Practice.someCharID4)) {
+        return FALSE;
+    }
+    return TRUE;
 }
 
 // .text:0x000B3CAC size:0x28 mapped:0x806F2D40
