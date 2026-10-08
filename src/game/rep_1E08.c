@@ -8,6 +8,10 @@
 #include "Dolphin/rand.h"
 #include "string.h"
 #include "game/rep_3AE8.h"
+#include "game/rep_2390.h"
+#include "game/rep_3C28.h"
+#include "game/rep_3D50.h"
+#include "game/rep_D0.h"
 
 #include "game/rep_1F58.h"
 #include "game/rep_1FD8.h"
@@ -54,15 +58,34 @@ typedef struct {
 } UnkSpark1E08; // size: 0x34C
 
 typedef struct {
-    /* 0x00 */ u8 _00[0x14];
+    /* 0x00 */ void (*_00)(void);
+    /* 0x04 */ u8 _04[0x10 - 0x4];
+    /* 0x10 */ s16 _10;
+    /* 0x12 */ u8 _12[0x14 - 0x12];
     /* 0x14 */ VecXYZ _14;
     /* 0x20 */ s32 _20;
     /* 0x24 */ UnkSpark1E08* _24;
 } UnkSparkTask1E08;
 
+typedef struct {
+    /* 0x000 */ Vec _000;
+    /* 0x00C */ u8 _00C[0x3A8 - 0xC];
+} UnkScreen1E08; // size: 0x3A8
+
 typedef struct UnkPlayer1E08 {
-    /* 0x000 */ u8 _000[0x252];
+    /* 0x000 */ u8 _000[0x44];
+    /* 0x044 */ f32 _044;
+    /* 0x048 */ u8 _048[0x252 - 0x48];
     /* 0x252 */ s8 _252;
+    /* 0x253 */ u8 _253[0x25A - 0x253];
+    /* 0x25A */ u8 _25A;
+    /* 0x25B */ u8 _25B[0x25D - 0x25B];
+    /* 0x25D */ u8 _25D;
+    /* 0x25E */ u8 _25E[0x275 - 0x25E];
+    /* 0x275 */ u8 _275;
+    /* 0x276 */ u8 _276;
+    /* 0x277 */ u8 _277[0x279 - 0x277];
+    /* 0x279 */ u8 _279;
 } UnkPlayer1E08;
 
 typedef struct UnkObj1E08 {
@@ -86,14 +109,16 @@ typedef struct {
     /* 0x3B1 */ u8 _3B1[0x3B8 - 0x3B1];
     /* 0x3B8 */ UnkKey1E08* _3B8;
     /* 0x3BC */ Vec _3BC;
-    /* 0x3C8 */ s32 _3C8;
-    /* 0x3CC */ s32 _3CC;
+    /* 0x3C8 */ u32 _3C8;
+    /* 0x3CC */ u32 _3CC;
     /* 0x3D0 */ f32 _3D0;
     /* 0x3D4 */ f32 _3D4;
     /* 0x3D8 */ f32 _3D8;
     /* 0x3DC */ f32 _3DC;
     /* 0x3E0 */ u8 _3E0;
-    /* 0x3E1 */ u8 _3E1[0x3E4 - 0x3E1];
+    /* 0x3E1 */ u8 _3E1;
+    /* 0x3E2 */ u8 _3E2;
+    /* 0x3E3 */ u8 _3E3;
     /* 0x3E4 */ UnkMarker1E08 _3E4;
     /* 0x40C */ s32 _40C[3];
     /* 0x418 */ u8 _418;
@@ -102,7 +127,8 @@ typedef struct {
     /* 0x41C */ Vec _41C;
     /* 0x428 */ u8 _428[0x440 - 0x428];
     /* 0x440 */ Vec _440;
-    /* 0x44C */ u8 _44C[0x464 - 0x44C];
+    /* 0x44C */ Vec _44C;
+    /* 0x458 */ u8 _458[0x464 - 0x458];
     /* 0x464 */ s16 _464;
     /* 0x466 */ u8 _466;
     /* 0x467 */ u8 _467[0x479 - 0x467];
@@ -125,12 +151,14 @@ typedef struct {
     /* 0x00B0 */ s32 _00B0;
     /* 0x00B4 */ s32 _00B4;
     /* 0x00B8 */ s32 _00B8;
-    /* 0x00BC */ u8 _00BC[0xC60 - 0xBC];
-    /* 0x0C60 */ struct {
-        /* 0x000 */ s32 _000;
-        /* 0x004 */ u8 _004[0x27C - 0x4];
-    } _0C60[13];
-    /* 0x2CAC */ u8 _2CAC[0x3070 - 0x2CAC];
+    /* 0x00BC */ u8 _00BC[0xC04 - 0xBC];
+    /* 0x0C04 */ struct {
+        /* 0x000 */ u8 _000[0x5C];
+        /* 0x05C */ s32 _05C;
+        /* 0x060 */ u8 _060[0x27C - 0x60];
+    } _0C04[13];
+    /* 0x2C50 */ UnkPlayer1E08* _2C50[13];
+    /* 0x2C84 */ u8 _2C84[0x3070 - 0x2C84];
     /* 0x3070 */ void (*_3070)(s32);
     /* 0x3074 */ void (*_3074)(s32);
 } Unk8036E548;
@@ -157,12 +185,13 @@ extern UnkPair1E08 lbl_3_data_111C8[];
 extern u8 lbl_3_data_11380[0x10];
 extern void (*lbl_3_data_11390[])(s32);
 extern UnkSpark1E08 lbl_3_data_11620[4];
+extern f32 lbl_3_data_12CB4[0x13];
 extern u8 lbl_3_data_1146C[0x190];
 extern s32 lbl_3_data_17000[0x36];
 extern s32 lbl_3_data_170D8[6];
 extern UnkKey1E08 lbl_3_data_12354[15][10];
 
-static f32 lbl_3_bss_9978[0xEA];
+static UnkScreen1E08 lbl_3_bss_9978;
 static Vec lbl_3_bss_996C;
 static s32 lbl_3_bss_9968;
 static f32 lbl_3_bss_9964;
@@ -187,6 +216,7 @@ extern void fn_8006C3F0(s32 arg0);
 extern void pitchingMachinePitching(u8 id);
 extern void minigamesSetSomePointers(void);
 extern void fn_800A7D4C(s32, void*);
+extern void fn_8003A550(s32 idx, VecXYZ* pos, Vec* dir, BOOL flag);
 
 // .text:0x000C07B0 size:0x60 mapped:0x806FF844
 void fn_3_C07B0(void) {
@@ -263,7 +293,7 @@ void fn_3_BF1AC(void) {
     fn_3_CABB4();
     i = 12;
     do {
-        lbl_8036E548._0C60[i]._000 = 0;
+        lbl_8036E548._0C04[i]._05C = 0;
     } while (i-- != 0);
     lbl_3_common_bss_35154._479 = 1;
 }
@@ -322,7 +352,30 @@ void fn_3_BE140(void) {
 
 // .text:0x000BDF74 size:0x1CC mapped:0x806FD008
 void fn_3_BDF74(void) {
-    return;
+    UnkSparkTask1E08* task = (UnkSparkTask1E08*)lbl_803CC1B8;
+    s32 i;
+    f32 angle;
+
+    if (g_d_GameSettings._55 || lbl_3_common_bss_35154._479) {
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    if (task->_10 != 0) {
+        task->_10--;
+        return;
+    }
+    task->_14.x = g_Ball.physicsSubstruct.futureCoordsAndDist[0].pos.x;
+    task->_14.y = -g_Ball.physicsSubstruct.futureCoordsAndDist[0].pos.y;
+    task->_14.z = g_Ball.physicsSubstruct.futureCoordsAndDist[0].pos.z;
+    task->_20 = lbl_3_data_A3C[1] - 2;
+    task->_24 = &lbl_3_data_11620[2];
+    for (i = 0; i < 0x60; i++) {
+        angle = 6.2831855f * rand() / 32767.0f;
+        lbl_3_data_11620[2]._04C[i][0] = 400.0 * cos(angle);
+        lbl_3_data_11620[2]._04C[i][1] = 400.0 * sin(angle);
+    }
+    memcpy(lbl_3_data_11620[3]._04C, lbl_3_data_11620[2]._04C, sizeof(lbl_3_data_11620[2]._04C));
+    lbl_803CC1B8->_00 = fn_3_BDCA4;
 }
 
 // .text:0x000BDE14 size:0x160 mapped:0x806FCEA8
@@ -441,7 +494,51 @@ void fn_3_BD6AC(s32 arg0, f32 x, f32 y, f32 z) {
 
 // .text:0x000BD504 size:0x1A8 mapped:0x806FC598
 void fn_3_BD504(f32 x, f32 y, f32 z, BOOL arg3) {
-    return;
+    if (!lbl_80366158._28) {
+        memcpy(&lbl_3_common_bss_35154._44C, &lbl_3_common_bss_35154._440, sizeof(Vec));
+        lbl_3_common_bss_35154._440.x = x;
+        lbl_3_common_bss_35154._440.y = y;
+        lbl_3_common_bss_35154._440.z = z;
+    }
+    if (lbl_3_common_bss_35154._466) {
+        if (arg3) {
+            switch (g_Ball.currentStarSwing) {
+            case 9:
+            case 10:
+                break;
+            case 1:
+            case 2:
+                fn_3_CB538(g_Ball.currentStarSwing);
+                break;
+            case 7:
+            case 8:
+                fn_3_15F574();
+                break;
+            case 3:
+            case 4:
+                fn_3_160814(g_Ball.currentStarSwing);
+                break;
+            }
+        } else {
+            switch (g_Pitcher.starPitchType) {
+            case 1:
+            case 2:
+                fn_3_CB538(g_Pitcher.starPitchType);
+                break;
+            case 7:
+            case 8:
+                fn_3_15F574();
+                break;
+            case 11:
+            case 12:
+                fn_3_15B79C(g_Pitcher.starPitchType == 12);
+                break;
+            }
+        }
+        if (!lbl_80366158._28) {
+            lbl_3_common_bss_35154._464++;
+        }
+    }
 }
 
 // .text:0x000BD4F0 size:0x14 mapped:0x806FC584
@@ -471,7 +568,56 @@ void fn_3_BD434(s32 stadium, s32 mode) {
 
 // .text:0x000BD1D8 size:0x25C mapped:0x806FC26C
 void fn_3_BD1D8(Mtx view) {
-    return;
+    VecSrcDst seg;
+    CollisionStruct col;
+    Vec v;
+    f32 inv;
+    f32 hw;
+    f32 hh;
+    f32 top;
+    f32 bottom;
+    f32 right;
+    f32 left;
+    f32 nw;
+    f32 nh;
+    u8 visible;
+
+    inv = 1.0f / fn_80052768_getCamera(0)->zoom;
+    lbl_3_common_bss_35154._3C8 = (lbl_3_common_bss_35154._3C8 + 1) % lbl_3_common_bss_35154._3CC;
+    PSVECScale(&lbl_3_common_bss_35154._3BC, 1.0f, &v);
+    PSMTXMultVec(view, &v, &lbl_3_bss_9978._000);
+    if (lbl_3_bss_9978._000.z <= -1.0f) {
+        visible = FALSE;
+        hw = 640.0f * lbl_3_bss_9978._000.z * 0.5f / -1280.0f * inv;
+        hh = -448.0f * lbl_3_bss_9978._000.z * 0.5f / -1280.0f * inv;
+        nw = -hw;
+        nh = -hh;
+        top = 384.0f + lbl_3_bss_9978._000.y;
+        bottom = lbl_3_bss_9978._000.y - 384.0f;
+        right = 384.0f + lbl_3_bss_9978._000.x;
+        left = lbl_3_bss_9978._000.x - 384.0f;
+        if (hh < top && bottom < nh && hw > left && right > nw) {
+            visible = TRUE;
+        }
+        lbl_3_common_bss_35154._3E1 = visible;
+        if (visible) {
+            lbl_3_bss_996C.x = 2.0f * -lbl_3_bss_9978._000.x;
+            lbl_3_bss_996C.y = 2.0f * -lbl_3_bss_9978._000.y;
+            lbl_3_bss_996C.z = 0.0f;
+            if (g_UNK_StadiumDetails._77C != 0) {
+                memcpy(&seg.src, &fn_80052768_getCamera(0)->eye, sizeof(Vec));
+                memcpy(&seg.dst, &lbl_3_common_bss_35154._3BC, sizeof(Vec));
+                lbl_3_common_bss_35154._3E2 = fn_3_8D4(&seg, &col);
+                if (!lbl_3_common_bss_35154._3E2) {
+                    memcpy(&seg.dst, &fn_80052768_getCamera(0)->eye, sizeof(Vec));
+                    memcpy(&seg.src, &lbl_3_common_bss_35154._3BC, sizeof(Vec));
+                    lbl_3_common_bss_35154._3E2 = fn_3_8D4(&seg, &col);
+                }
+            }
+        }
+    } else {
+        lbl_3_common_bss_35154._3E1 = 0;
+    }
 }
 
 // .text:0x000BD1D4 size:0x4 mapped:0x806FC268
@@ -486,7 +632,41 @@ void fn_3_BCA20(void) {
 
 // .text:0x000BC888 size:0x198 mapped:0x806FB91C
 void fn_3_BC888(void) {
-    return;
+    UnkPlayer1E08* player;
+    s32 i;
+    s32 bits;
+    Mtx m;
+    VecXYZ pos;
+    Vec dir;
+
+    for (i = 0; i < 13; i++) {
+        player = lbl_8036E548._2C50[i];
+        if (player != NULL) {
+            if (!player->_25D) {
+                player->_279 = 0;
+            } else {
+                PSMTXRotRad(m, 'Y', player->_044);
+                dir.x = lbl_3_bss_9964;
+                dir.y = 0.0f;
+                dir.z = lbl_3_data_12CB4[0];
+                PSMTXMultVec(m, &dir, &dir);
+                bits = player->_276 & 0x14;
+                if (bits == 0x10 && (player->_275 & 0x7F) == 6) {
+                    getAnimRelatedCoordinates(i, 0x22, &pos);
+                    pos.y = 0.0f;
+                    fn_8003A550(i, &pos, &dir, !player->_25A);
+                }
+                player->_279 = bits == 4;
+                bits = player->_276 & 0xA;
+                if (bits == 8 && (player->_275 & 0x7F) == 6) {
+                    getAnimRelatedCoordinates(i, 0x1E, &pos);
+                    pos.y = 0.0f;
+                    fn_8003A550(i, &pos, &dir, player->_25A);
+                }
+                player->_279 |= (bits == 2) << 1;
+            }
+        }
+    }
 }
 
 // .text:0x000BC850 size:0x38 mapped:0x806FB8E4
