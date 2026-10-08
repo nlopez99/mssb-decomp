@@ -2179,7 +2179,7 @@ void fn_3_135600(f32* outX, f32* outZ, f32 x, f32 z) {
 }
 
 // .text:0x00135520 size:0xE0 mapped:0x807745B4
-int fn_3_135520(f32 x, f32 z, f32 r) {
+u32 fn_3_135520(f32 x, f32 z, f32 r) {
     if (x >= 0.0f) {
         if (z >= 0.0f) {
             if (z <= r) {
@@ -2357,7 +2357,7 @@ u32 fn_3_134D4C(f32 cx, f32 cz, f32 radius, f32 px, f32 pz, f32 qx, f32 qz) {
 }
 
 // .text:0x00134C80 size:0xCC mapped:0x80773D14
-BOOL fn_3_134C80(u32 player, u32 quadrant, u32 target, f32 x, f32 z) {
+u32 fn_3_134C80(u32 player, u32 quadrant, u32 target, f32 x, f32 z) {
     if (g_Minigame._1D72 != 0 && player != g_Minigame._1D6D) {
         if (target == ((quadrant + 1) & 3) || target == ((quadrant + 2) & 3)) {
             return TRUE;
@@ -2436,7 +2436,7 @@ int fn_3_134908(const void* a, const void* b) {
 
 // .text:0x00134658 size:0x2B0 mapped:0x807736EC
 // 98.0%: the first loop walks targets and g_Minigame in registers off by one.
-void fn_3_134658(u32 self, f32* x, f32* z, int* quadrant) {
+void fn_3_134658(u32 self, f32* x, f32* z, u32* quadrant) {
     Unk3520Target targets[4];
     Unk3520Target* target = targets;
     Unk3520Target* best = targets;
@@ -2505,9 +2505,16 @@ BOOL fn_3_1344BC(int a, int b) {
     return fn_3_9FCA4(radToShortAngle(angA), radToShortAngle(angB)) >= 0;
 }
 
+// The angle around the center from player i's fielder, turned by offset
+static inline s16 Unk3520_CircleAngle(int i, int offset) {
+    return fn_3_9FE6C_normalizeAngle(
+        radToShortAngle(atan2(-(g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.x - lbl_3_data_21A48.x),
+                              g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.z - lbl_3_data_21A48.z)) + offset);
+}
+
 // .text:0x0013334C size:0x1170 mapped:0x807723E0
-// 80.8%: fn_3_135520 is inlined here (the target calls it), and the loops over
-// MG.objs and the coins walk other registers.
+// 84.1%: fn_3_135520 is inlined here (the target calls it), and the loops over
+// MG.objs and the players walk other registers.
 void fn_3_13334C(void) {
     Unk3520Ai* ai = (Unk3520Ai*)&g_Minigame._1DCC;
     Unk3520Coin* coins;
@@ -2518,7 +2525,7 @@ void fn_3_13334C(void) {
     int starQuadrant;
     int bagQuadrant;
     int boxQuadrant;
-    int target;
+    u32 target;
     u32 quadrant;
     f32 tx;
     f32 tz;
@@ -2558,7 +2565,8 @@ void fn_3_13334C(void) {
     }
     count = 0;
     coin = coins;
-    for (i = 0; i < 100; i++) {
+    i = 0;
+    do {
         if (g_Minigame.wallBall_coinsVisibleInd[i] == 1) {
             coin->coin = i;
             fn_3_135600(&coin->x, &coin->z, g_Minigame.wallBall_coinCoordinates[i].x, g_Minigame.wallBall_coinCoordinates[i].z);
@@ -2566,8 +2574,9 @@ void fn_3_13334C(void) {
             coin++;
             count++;
         }
-    }
-    for (i = 0; i < 4; i++) {
+    } while (++i < 100);
+    i = 0;
+    do {
         character = g_Minigame.minigameControlStruct.characterIndex[i];
         if (character < 0 || character >= 4 || g_Minigame.minigameControlStruct.battingHandedness[i] == 0) {
             continue;
@@ -2599,11 +2608,12 @@ void fn_3_13334C(void) {
                 dz = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.z - MG.bag.pos.z;
                 dx = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.x - MG.bag.pos.x;
                 if (dx * dx + dz * dz <= lbl_3_data_21B78[strength] * lbl_3_data_21B78[strength]) {
-                    for (j = 0; j < lbl_3_data_21A88[g_Minigame.soloMinigameDifficulty]; j++) {
+                    j = 0;
+                    do {
                         if (MG.objs[j]._3D >= 1 && MG.objs[j]._3D <= 3 && fn_3_1354BC(j, MG.bag.pos.x, MG.bag.pos.z)) {
                             break;
                         }
-                    }
+                    } while (++j < lbl_3_data_21A88[g_Minigame.soloMinigameDifficulty]);
                     if (j >= lbl_3_data_21A88[g_Minigame.soloMinigameDifficulty]) {
                         tx = MG.bag.pos.x;
                         tz = MG.bag.pos.z;
@@ -2615,11 +2625,12 @@ void fn_3_13334C(void) {
                 dz = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.z - MG.box.pos.z;
                 dx = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.x - MG.box.pos.x;
                 if (dx * dx + dz * dz <= lbl_3_data_21B68[strength] * lbl_3_data_21B68[strength]) {
-                    for (j = 0; j < lbl_3_data_21A88[g_Minigame.soloMinigameDifficulty]; j++) {
+                    j = 0;
+                    do {
                         if (MG.objs[j]._3D >= 1 && MG.objs[j]._3D <= 3 && fn_3_1354BC(j, MG.box.pos.x, MG.box.pos.z)) {
                             break;
                         }
-                    }
+                    } while (++j < lbl_3_data_21A88[g_Minigame.soloMinigameDifficulty]);
                     if (j >= lbl_3_data_21A88[g_Minigame.soloMinigameDifficulty]) {
                         tx = MG.box.pos.x;
                         tz = MG.box.pos.z;
@@ -2650,14 +2661,13 @@ void fn_3_13334C(void) {
                 if (dx * dx + dz * dz <= lbl_3_data_21B38[strength] * lbl_3_data_21B38[strength]) {
                     offset = fn_3_1344BC(g_Minigame._1D6D, i) ? 0 : 0x800;
                     away = radToShortAngle(atan2(dz, dx));
-                    tangent = fn_3_9FE6C_normalizeAngle(
-                        radToShortAngle(atan2(-(g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.x - lbl_3_data_21A48.x),
-                                              g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.z - lbl_3_data_21A48.z)) + offset);
+                    tangent = Unk3520_CircleAngle(i, offset);
                     input->controlStickAngle = fn_3_9FE6C_normalizeAngle(radToShortAngle(atan2(dz, dx)) + fn_3_9FCA4(tangent, away) / 2);
                 }
             }
             if (i != g_Minigame._1D6D) {
-                for (j = 0; j < lbl_3_data_21A88[g_Minigame.soloMinigameDifficulty]; j++) {
+                j = 0;
+                do {
                     if (MG.objs[j]._3D >= 1 && MG.objs[j]._3D <= 3) {
                         dz = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.z - MG.objs[j]._0.z;
                         dx = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.x - MG.objs[j]._0.x;
@@ -2668,7 +2678,7 @@ void fn_3_13334C(void) {
                                 strength);
                         }
                     }
-                }
+                } while (++j < lbl_3_data_21A88[g_Minigame.soloMinigameDifficulty]);
             }
             if (MG.box._1E == 2) {
                 dz = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.z - MG.box.pos.z;
@@ -2683,9 +2693,7 @@ void fn_3_13334C(void) {
             if (g_Minigame._1D72 != 0 && i != g_Minigame._1D6D) {
                 if (fn_3_135520(x, z, 0.20943952f * dolsqrtf2(x * x + z * z) + ai->cpu[i]._0) == 1) {
                     ai->cpu[i]._0 = RandomInt_Game(100) < lbl_3_data_21B88[strength] ? 3.0f : 1.5f;
-                    input->controlStickAngle = fn_3_9FE6C_normalizeAngle(
-                        radToShortAngle(atan2(-(g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.x - lbl_3_data_21A48.x),
-                                              g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.z - lbl_3_data_21A48.z)));
+                    input->controlStickAngle = Unk3520_CircleAngle(i, 0);
                     ai->cpu[i]._6 = 1;
                 }
             }
@@ -2694,9 +2702,7 @@ void fn_3_13334C(void) {
             ai->cpu[i]._7 = 1;
             ai->cpu[i]._6 = 2;
         case 2:
-            input->controlStickAngle = fn_3_9FE6C_normalizeAngle(
-                radToShortAngle(atan2(-(g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.x - lbl_3_data_21A48.x),
-                                      g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.z - lbl_3_data_21A48.z)));
+            input->controlStickAngle = Unk3520_CircleAngle(i, 0);
             if (ai->cpu[i]._7-- <= 0) {
                 g_Minigame._1D7C[character].buttonInput |= 0x100;
                 g_Minigame._1D7C[character].newButtonInput |= 0x100;
@@ -2710,7 +2716,7 @@ void fn_3_13334C(void) {
             break;
         }
         ai->cpu[i]._4 = input->controlStickAngle;
-    }
+    } while (++i < 4);
     fn_800ACFB0(coins);
 }
 
