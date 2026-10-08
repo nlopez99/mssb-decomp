@@ -1,5 +1,9 @@
 #include "game/rep_1FD8.h"
+// Must precede header_rep_data.h: its extern inline dolsqrtf2 puts weak constants first
+// in .rodata, so MWCC does not pool .rodata and addresses constants one by one
+#include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
+#include "Dolphin/rand.h"
 #include "C3/control.h"
 #include "C3/geoPalette.h"
 #include "game/rep_1D58.h"
@@ -26,6 +30,37 @@ typedef struct Rep1FD8Task {
     /* 0x14 */ u16 _14;
 } Rep1FD8Task;
 
+typedef struct Rep1FD8Particle {
+    /* 0x00 */ struct Rep1FD8Particle* next;
+    /* 0x04 */ Vec pos;
+    /* 0x10 */ Vec vel;
+    /* 0x1C */ f32 grow;
+    /* 0x20 */ f32 growScale;
+    /* 0x24 */ f32 alpha;
+    /* 0x28 */ u8 _28[0x38 - 0x28];
+    /* 0x38 */ f32 _38;
+    /* 0x3C */ f32 _3C;
+    /* 0x40 */ u8 color[4];
+    /* 0x44 */ u8 _44[0x48 - 0x44];
+    /* 0x48 */ s16 delay;
+    /* 0x4A */ s16 life;
+    /* 0x4C */ u8 _4C;
+    /* 0x4D */ u8 _4D;
+    /* 0x4E */ u8 _4E;
+    /* 0x4F */ u8 duration;
+} Rep1FD8Particle;
+
+typedef struct Rep1FD8Spawner {
+    /* 0x00 */ u8 _00[0x0C];
+    /* 0x0C */ Rep1FD8Particle* particles;
+    /* 0x10 */ void* _10;
+    /* 0x14 */ u8 _14[0x18 - 0x14];
+    /* 0x18 */ Vec pos;
+    /* 0x24 */ u8 idx;
+    /* 0x25 */ u8 _25;
+} Rep1FD8Spawner;
+
+extern Rep1FD8Spawner* fn_80033A24(BOOL (*update)(Rep1FD8Spawner*), s32, s32, s32, s32, s32);
 extern Rep1FD8Task* fn_800B0A5C_insertQueue(void (*callback)(void), s32 priority);
 extern void fn_800528C0(f32 x, f32 y, f32 z, s16* screenX, s16* screenY);
 extern Rep1FD8SpriteRef lbl_80371C30[];
@@ -34,8 +69,18 @@ extern void fn_800B0A14_removeQueue(void);
 extern void fn_80034CEC(Rep1FD8Task* task);
 extern void fn_8003A8A0(struct DODisplayObj* obj, MtxPtr view, s32 arg2);
 
+static const u8 lbl_3_rodata_2028[3] = { 0xA0, 0x46, 0x00 };
+static const Vec lbl_3_rodata_202C[6] = {
+    { -19.3f, -14.5f, 86.0f },
+    { 19.3f, -14.5f, 86.0f },
+    { -15.92f, -18.8f, 112.16f },
+    { 15.92f, -18.8f, 112.16f },
+    { -36.5f, -17.9f, -22.8f },
+    { 36.5f, -17.9f, -22.8f },
+};
+
 // .bss, declared in reverse address order (MWCC lays .bss statics out last to first)
-static s32 lbl_3_bss_9F0C[5];
+static void* lbl_3_bss_9F0C[5];
 static u8 lbl_3_bss_9E54[0xB8];
 static Rep1FD8Task* lbl_3_bss_9E50;
 static u8 lbl_3_bss_9E48[8];
@@ -256,27 +301,99 @@ void fn_3_C3A38(void) {
 
 // .text:0x000C39C8 size:0x70 mapped:0x80702A5C
 void fn_3_C39C8(void) {
-    return;
+    Rep1FD8Spawner* spawner;
+    u32 i;
+
+    for (i = 0; i < 6; i++) {
+        spawner = fn_80033A24(fn_3_C30F0, 128, 0, 21, 1, 0);
+        if (spawner != NULL) {
+            fn_3_C366C(spawner, i);
+        }
+    }
 }
 
 // .text:0x000C366C size:0x35C mapped:0x80702700
-void fn_3_C366C(void) {
-    return;
+void fn_3_C366C(Rep1FD8Spawner* spawner, u8 idx) {
+    Rep1FD8Particle* p = spawner->particles;
+    s32 i;
+    f32 angle;
+    s32 life;
+
+    spawner->_10 = lbl_3_bss_9F0C[0];
+    spawner->pos = lbl_3_rodata_202C[idx];
+    spawner->idx = idx;
+    for (i = 0; p != NULL; i++, p = p->next) {
+        angle = rand() % 360;
+        angle = 0.017453292f * angle;
+        p->vel.x = 0.01 * cosf_kludge(angle);
+        p->vel.z = 0.01 * sinf_kludge(angle);
+        p->vel.y = 0.08f;
+        p->delay = i * 4;
+        p->grow = 0.5f;
+        p->grow += (u32)rand() % 2500 / 1000.0;
+        p->_38 = p->grow;
+        p->_3C = 2.0 * p->grow;
+        p->growScale = rand() % 101 / 100.0;
+        p->pos.x = spawner->pos.x;
+        p->pos.y = spawner->pos.y;
+        p->pos.z = spawner->pos.z;
+        p->color[0] = lbl_3_rodata_2028[0];
+        p->color[1] = lbl_3_rodata_2028[1];
+        p->color[2] = lbl_3_rodata_2028[2];
+        p->color[3] = p->alpha = 255.0f;
+        life = rand() % 24 + 72;
+        p->life = life;
+        p->duration = life;
+        p->_4D = 29;
+        p->_4E = 0;
+    }
 }
 
 // .text:0x000C30F0 size:0x57C mapped:0x80702184
-void fn_3_C30F0(void) {
-    return;
+BOOL fn_3_C30F0(Rep1FD8Spawner* spawner) {
+    return FALSE;
 }
 
 // .text:0x000C2EDC size:0x214 mapped:0x80701F70
-void fn_3_C2EDC(void) {
-    return;
+void fn_3_C2EDC(Rep1FD8Particle* p) {
+    p->_38 += p->growScale * (3.0 * p->grow / p->duration);
+    p->_3C += p->growScale * (2.0 * p->grow / p->duration);
+    p->alpha += -255.0f / p->duration;
+    if (p->alpha < 0.0f) {
+        p->alpha = 0.0f;
+    }
+    p->color[3] = p->alpha;
+    p->color[0] = lbl_3_rodata_2028[0] * (p->color[3] / 255.0);
+    p->color[1] = lbl_3_rodata_2028[1] * (p->color[3] / 255.0);
+    p->color[2] = lbl_3_rodata_2028[2] * (p->color[3] / 255.0);
+    p->pos.x += p->vel.x;
+    p->pos.y -= p->vel.y;
+    p->pos.z += p->vel.z;
+    p->life--;
 }
 
 // .text:0x000C2C80 size:0x25C mapped:0x80701D14
-void fn_3_C2C80(void) {
-    return;
+void fn_3_C2C80(Rep1FD8Particle* p, Rep1FD8Spawner* spawner) {
+    f32 angle = 0.017453292f * (rand() % 360);
+
+    p->vel.x = 0.01 * cosf_kludge(angle);
+    p->vel.z = 0.01 * sinf_kludge(angle);
+    p->vel.y = 0.08f;
+    p->grow = 0.5f;
+    p->grow += (u32)rand() % 2500 / 1000.0;
+    p->_38 = p->grow;
+    p->_3C = 2.0 * p->grow;
+    p->growScale = rand() % 101 / 100.0;
+    p->duration = p->life = rand() % 24 + 72;
+    p->pos.x = spawner->pos.x;
+    p->pos.y = spawner->pos.y;
+    p->pos.z = spawner->pos.z;
+    p->color[0] = lbl_3_rodata_2028[0];
+    p->color[1] = lbl_3_rodata_2028[1];
+    p->color[2] = lbl_3_rodata_2028[2];
+    p->color[3] = p->alpha = 255.0f;
+    p->life = p->duration;
+    p->delay = 0;
 }
 
 // .text:0x000C2AA0 size:0x1E0 mapped:0x80701B34

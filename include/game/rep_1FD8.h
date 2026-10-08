@@ -6,6 +6,8 @@
 
 struct StadiumObjectCollision;
 struct StadiumModel1D58;
+struct Rep1FD8Particle;
+struct Rep1FD8Spawner;
 
 void fn_3_C1964(void);
 void fn_3_C1974(u8* stadium);
@@ -19,10 +21,10 @@ void fn_3_C2644(void);
 void fn_3_C2974(void);
 void fn_3_C298C(void);
 void fn_3_C2AA0(void);
-void fn_3_C2C80(void);
-void fn_3_C2EDC(void);
-void fn_3_C30F0(void);
-void fn_3_C366C(void);
+void fn_3_C2C80(struct Rep1FD8Particle* p, struct Rep1FD8Spawner* spawner);
+void fn_3_C2EDC(struct Rep1FD8Particle* p);
+BOOL fn_3_C30F0(struct Rep1FD8Spawner* spawner);
+void fn_3_C366C(struct Rep1FD8Spawner* spawner, u8 idx);
 void fn_3_C39C8(void);
 void fn_3_C3A38(void);
 void fn_3_C3C2C(void);
