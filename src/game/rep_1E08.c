@@ -109,9 +109,7 @@ typedef union {
 
 typedef struct UnkPanel1E08 {
     /* 0x00 */ struct UnkPanel1E08* next;
-    /* 0x04 */ f32 _04;
-    /* 0x08 */ f32 _08;
-    /* 0x0C */ f32 _0C;
+    /* 0x04 */ Vec pos;
     /* 0x10 */ Vec _10;
     /* 0x1C */ Vec rot;
     /* 0x28 */ Vec spin;
@@ -125,9 +123,19 @@ typedef struct UnkPanel1E08 {
 } UnkPanel1E08;
 
 typedef struct UnkPanelList1E08 {
-    /* 0x00 */ u8 _00[0xC];
+    /* 0x00 */ struct UnkPanelList1E08* prev;
+    /* 0x04 */ struct UnkPanelList1E08* next;
+    /* 0x08 */ BOOL (*update)(void*);
     /* 0x0C */ UnkPanel1E08* head;
+    /* 0x10 */ void* _10;
+    /* 0x14 */ u16 _14 : 4;
+    /* 0x14 */ u16 count : 12;
 } UnkPanelList1E08;
+
+typedef struct {
+    /* 0x0 */ UnkPanel1E08* panel;
+    /* 0x4 */ f32 depth;
+} UnkPanelSort1E08; // size: 0x8
 
 typedef struct UnkPlayer1E08 {
     /* 0x000 */ u8 _000[0x34];
@@ -277,6 +285,10 @@ extern s32 fn_8004ABE0(void);
 extern void pitchingMachinePitching(u8 id);
 extern void minigamesSetSomePointers(void);
 extern void fn_800A7D4C(s32, void*);
+extern void* _OSAllocFromHeap(u32 align, u32 size);
+extern void fn_800ACFB0(void* data);
+extern void fn_800246D4(int (*compare)(const void*, const void*), void* src, void* dst, int size, int count);
+extern int fn_3_BA174(const void* a, const void* b);
 extern void fn_800245EC(camera_803c639c_s* camera, Mtx view, Vec* points, f32* out, s32 count, s32 arg5);
 extern void fn_80033B58(void* texture, s32 index, s32, s32);
 extern u16 lbl_800F7860[4][2];
@@ -1123,9 +1135,9 @@ void fn_3_BB15C(UnkPanel1E08* panel) {
     f32 spin;
 
     lo = min = lbl_3_data_170D8[5];
-    panel->_04 = panel->_4A * 2 / (f32)lbl_3_data_170D8[0] - 1.0f;
-    panel->_08 = -1.0f;
-    panel->_0C = 50.0f * (rand() / 32767.0f) + 50.0f;
+    panel->pos.x = panel->_4A * 2 / (f32)lbl_3_data_170D8[0] - 1.0f;
+    panel->pos.y = -1.0f;
+    panel->pos.z = 50.0f * (rand() / 32767.0f) + 50.0f;
     fn_3_BB07C(panel, 0.0f);
     panel->rot.x = panel->rot.y = panel->rot.z = 0.0f;
     spin = lbl_3_data_170D8[2] / 100000.0f;
@@ -1156,7 +1168,110 @@ void fn_3_BB07C(UnkPanel1E08* obj, f32 angle) {
 }
 
 // .text:0x000BA7F4 size:0x888 mapped:0x806F9888
+// fabs(pos.x) and pos.x swap f1/f2, and the inlined fn_3_BB07C's int-to-float
+// temporaries sit 8 bytes higher on the stack than in the target.
 BOOL fn_3_BA7F4(void* arg) {
+    UnkPanelList1E08* list = arg;
+    Vec up = { 0.0f, 1.0f, 0.0f };
+    Vec dir;
+    UnkPanelSort1E08* sort;
+    UnkPanel1E08* panel;
+    UnkPanel1E08* head;
+    s32 count;
+    UnkPanelSort1E08* entry;
+    f32 angle;
+    f32 delta;
+
+    GXSetZMode(GX_TRUE, GX_ALWAYS, GX_TRUE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetNumChans(1);
+    GXSetNumTexGens(0);
+    GXSetNumTevStages(1);
+    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_RASC);
+    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_RASA);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+    GXSetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
+    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    count = list->count;
+    panel = list->head;
+    sort = _OSAllocFromHeap(0x20, count * sizeof(UnkPanelSort1E08));
+    entry = sort;
+    while (panel != NULL) {
+        entry->panel = panel;
+        entry->depth = panel->pos.z;
+        entry++;
+        panel = panel->next;
+    }
+    fn_800246D4(fn_3_BA174, sort, sort, sizeof(UnkPanelSort1E08), count);
+    head = sort[0].panel;
+    entry = sort;
+    while (--count != 0) {
+        entry->panel->next = entry[1].panel;
+        entry++;
+    }
+    entry->panel->next = NULL;
+    fn_800ACFB0(sort);
+    list->head = head;
+    panel = head;
+    do {
+        if (panel->_48 <= 0) {
+            fn_3_BA538(panel);
+            PSVECAdd(&panel->_10, &panel->pos, &panel->pos);
+            PSVECAdd(&panel->spin, &panel->rot, &panel->rot);
+            if (fabs(panel->pos.x) > 1.0) {
+                panel->pos.x = fabs(panel->pos.x) / panel->pos.x;
+                panel->_10.x *= -1.0f;
+            } else if (rand() % 5 == 0) {
+                memcpy(&dir, &panel->_10, sizeof(Vec));
+                PSVECNormalize(&dir, &dir);
+                angle = 57.29578f * (f32)acos(PSVECDotProduct(&up, &dir));
+                if (dir.x < 0.0f) {
+                    angle *= -1.0f;
+                }
+                delta = 20.0 * (2.0 * (rand() / 32767.0f - 0.5));
+                if (fabs(angle + delta) > 20.0) {
+                    angle = 20.0 * (fabs(angle) / angle);
+                } else {
+                    angle += delta;
+                }
+                fn_3_BB07C(panel, angle);
+            }
+            if (panel->pos.y > 1.0f) {
+                fn_3_BB15C(panel);
+            }
+        } else {
+            panel->_48--;
+        }
+        panel = panel->next;
+    } while (panel != NULL);
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetNumChans(1);
+    GXSetNumTexGens(1);
+    GXSetNumTevStages(1);
+    GXSetCullMode(GX_CULL_NONE);
+    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_RASC, GX_CC_TEXC, GX_CC_ZERO);
+    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_RASA, GX_CA_TEXA, GX_CA_ZERO);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    GXLoadPosMtxImm(fn_80052768_getCamera(0)->view, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    GXSetProjection(fn_80052768_getCamera(0)->proj, GX_PERSPECTIVE);
     return FALSE;
 }
 
@@ -1183,11 +1298,11 @@ void fn_3_BA538(UnkPanel1E08* panel) {
     quad[3].y = hh;
     quad[0].z = quad[1].z = quad[2].z = quad[3].z = 0.0f;
     CTRLSetRotation(&ctrl, panel->rot.x, panel->rot.y, panel->rot.z);
-    CTRLSetTranslation(&ctrl, 0.5f * panel->_04 / 2.0f * panel->_0C, 0.35f * panel->_08 / 2.0f * panel->_0C, -1.5f);
+    CTRLSetTranslation(&ctrl, 0.5f * panel->pos.x / 2.0f * panel->pos.z, 0.35f * panel->pos.y / 2.0f * panel->pos.z, -1.5f);
     CTRLBuildMatrix(&ctrl, m);
     GXLoadPosMtxImm(m, GX_PNMTX0);
     GXSetCurrentMtx(GX_PNMTX0);
-    C_MTXOrtho(proj, -0.175f * panel->_0C, 0.175f * panel->_0C, 0.25f * panel->_0C, -0.25f * panel->_0C, 1.0f, 512.0f);
+    C_MTXOrtho(proj, -0.175f * panel->pos.z, 0.175f * panel->pos.z, 0.25f * panel->pos.z, -0.25f * panel->pos.z, 1.0f, 512.0f);
     GXSetProjection(proj, GX_ORTHOGRAPHIC);
     GXSetCullMode(GX_CULL_BACK);
     GXBegin(GX_QUADS, GX_VTXFMT0, 4);
