@@ -74,7 +74,7 @@ Compare the built module with the original (`build/GYQE01/game/game.rel` against
 
 - Install m2c from https://github.com/matt-kempster/m2c. The PyPI package named `m2c` is an unrelated project.
 - `match.py --m2c` prepares the unit's context for m2c (preprocesses it and strips inline asm); the draft is typed only for globals the source's includes declare, so a placeholder file including only `header_rep_data.h` gives `?` types until you add `game/UnknownHomes_Game.h` and the like.
-- `match.py` reports a function you have written as `missing` when objdiff cannot pair it, for example after a callee's empty stub was inlined into it; give the callee a body first.
+- `match.py` reports a function you have written as `missing` when objdiff cannot pair it, for example after a callee's empty stub was inlined into it; give the callee a body first. If the callee has a body and is still inlined where the target calls it, see "A callee inlined in the base but called with `bl` in the target" in [`structure.md`](matching-notes/structure.md).
 - decomp-permuter's own `import.py` breaks on this project; `tools/permute.py` explains why in its header and replaces it.
 - `tools/permute.py` fails to compile its view when the source has `sizeof(T) + (x)`: pycparser reads it as `sizeof((T) +(x))`, a cast. Parenthesize the product, `(20 * sizeof(T)) + (...)`, which compiles the same.
 - The same happens with `sizeof(T) * 2` (read as `sizeof((T)(*2))`). Put the constant first, `(count - k) * (2 * sizeof(Vec))`; check the score afterwards, since `(count - k) * 2 * sizeof(Vec)` does not fold to one `mulli` (`fn_3_67EF0` in `rep_EA0.c`).
