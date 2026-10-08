@@ -1151,7 +1151,7 @@ typedef struct _GameControlsStruct {
     /*0x108*/ s16 _108;
     /*0x10A*/ s16 bOD_framesInLiveBallScene;
     /*0x10C*/ s16 frameCountdownAtBeginningOfAtBatLockout;
-    /*0x10E*/ s16 scoreBook_teamDisplayed;
+    /*0x10E*/ u16 scoreBook_teamDisplayed;
     /*0x110*/ s16 scoreBook_batter_pitcherStatsDisplayed;
     /*0x112*/ s16 scoreBook_scrollIndex;
     /*0x114*/ s16 _114;
@@ -1183,13 +1183,13 @@ typedef struct _GameControlsStruct {
     /*0x133*/ u8 _133[0x135 - 0x133];
     /*0x135*/ u8 _135;
     /*0x136*/ u8 _136;
-    /*0x137*/ u8 playOverFadeOutStarted;
+    /*0x137*/ s8 playOverFadeOutStarted;
     /*0x138*/ u8 playOver;
     /*0x139*/ u8 playOverInd;
     /*0x13A*/ u8 walkOffWinInd; // unsure
     /*0x13B*/ u8 gameOverInd;
     /*0x13C*/ u8 scoutFlag_VsScreenInd;
-    artificial_padding(0x13C, 0x13E, u8);
+    /*0x13D*/ u8 _13D;
     /*0x13E*/ u8 _13E[2];
     /*0x140*/ u8 _140[2];
     /*0x142*/ u8 teamAIInd[2];
