@@ -220,7 +220,11 @@ typedef struct {
 
 typedef struct {
     /* 0x000 */ Vec pos;
-    /* 0x00C */ u8 _00C[0x217 - 0x00C];
+    /* 0x00C */ u8 _00C[0x16C - 0x00C];
+    /* 0x16C */ f32 _16C;
+    /* 0x170 */ u8 _170[0x210 - 0x170];
+    /* 0x210 */ u8 _210;
+    /* 0x211 */ u8 _211[0x217 - 0x211];
     /* 0x217 */ u8 _217;
     /* 0x218 */ u8 _218[0x268 - 0x218];
 } StaC5Fielder; // size: 0x268
@@ -228,6 +232,7 @@ typedef struct {
 extern StaC5Fielder g_Fielders[9];
 extern s32 fn_800247E4(s32 x, s32 y, s32 width, s32 bytes);
 extern BOOL fn_800527C4(Vec* pos);
+extern BOOL fn_8001B728(s32, s32, Vec*);
 extern s32 fn_8005268C(void);
 extern camera_803c639c_s* fn_80052734(s32 idx);
 extern s16 fn_3_B7F70(s16 range);
@@ -314,6 +319,26 @@ static s32 lbl_3_bss_AEE4;
 static u8 lbl_3_bss_AEE2;
 static u8 lbl_3_bss_AEE1;
 static u8 lbl_3_bss_AEE0;
+
+static inline void playStadiumSound(s32 sound) {
+    s32 stadium;
+    u8 vol;
+    SND_VOICEID voice;
+
+    stadium = g_d_GameSettings.StadiumID;
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+        vol = lbl_3_data_84B8[sound][0];
+    } else {
+        vol = lbl_3_data_8404[stadium][sound][0];
+    }
+    voice = sndFXStartEx(lbl_3_data_81DC[stadium] + sound, vol, 63, 0);
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+        vol = lbl_3_data_84B8[sound][1];
+    } else {
+        vol = lbl_3_data_8404[stadium][sound][1];
+    }
+    sndFXCtrl(voice, 91, vol);
+}
 
 // .text:0x000F6FDC size:0x1468 mapped:0x80736070
 void fn_3_F6FDC(void) {
@@ -820,9 +845,6 @@ void fn_3_F2724(StaC5Draw* draw, StaC5Draw* target) {
     f32 m11;
     f32 x;
     f32 z;
-    s32 stadium;
-    u8 vol;
-    SND_VOICEID voice;
 
     sn = sin(-(0.017453292f * draw->_B4));
     cs = cos(-(0.017453292f * draw->_B4));
@@ -838,25 +860,57 @@ void fn_3_F2724(StaC5Draw* draw, StaC5Draw* target) {
     z = fabs(z);
     if (x <= 3.0 && z <= 1.75) {
         target->_C6 = 5;
-        stadium = g_d_GameSettings.StadiumID;
-        if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
-            vol = lbl_3_data_84B8[11][0];
-        } else {
-            vol = lbl_3_data_8404[stadium][11][0];
-        }
-        voice = sndFXStartEx(lbl_3_data_81DC[stadium] + 11, vol, 63, 0);
-        if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
-            vol = lbl_3_data_84B8[11][1];
-        } else {
-            vol = lbl_3_data_8404[stadium][11][1];
-        }
-        sndFXCtrl(voice, 91, vol);
+        playStadiumSound(11);
     }
 }
 
 // .text:0x000F2448 size:0x2DC mapped:0x807314DC
-void fn_3_F2448(void) {
-    return;
+s32 fn_3_F2448(StaC5Draw* draw) {
+    Vec d;
+    Vec pos;
+    u8 fielders[7] = { 2, 3, 4, 5, 6, 7, 8 };
+    f32 sn;
+    f32 cs;
+    f32 m00;
+    f32 m01;
+    f32 m10;
+    f32 m11;
+    f32 x;
+    f32 z;
+    f32 range;
+    u32 i;
+    StaC5Fielder* fielder;
+
+    sn = sin(-(0.017453292f * draw->_B4));
+    cs = cos(-(0.017453292f * draw->_B4));
+    for (i = 0; i < 7; i++) {
+        fielder = &g_Fielders[fielders[i]];
+        memset(&pos, 0, sizeof(Vec));
+        fn_8001B728(fielders[i], 4, &pos);
+        pos.y *= -1.0f;
+        if (pos.y < draw->_A0.y) {
+            range = fielder->_16C;
+        } else {
+            range = 4.6666665f;
+        }
+        if (range < fabs(pos.y - draw->_A0.y) || fielder == NULL || fielder->_210 != 0) {
+            continue;
+        }
+        PSVECSubtract(&fielder->pos, &draw->_A0, &d);
+        m00 = cos(-(0.017453292f * draw->_B4));
+        m01 = sin(-(0.017453292f * draw->_B4));
+        m10 = sin(-(0.017453292f * draw->_B4));
+        m11 = cos(-(0.017453292f * draw->_B4));
+        x = d.x * m00 + d.z * m01;
+        z = d.x * -m10 + d.z * m11;
+        x = fabs(x);
+        z = fabs(z);
+        if (x <= 3.0 && z <= 1.75) {
+            playStadiumSound(4);
+            return (s8)fielders[i];
+        }
+    }
+    return -1;
 }
 
 // .text:0x000F22FC size:0x14C mapped:0x80731390
@@ -916,23 +970,7 @@ void fn_3_F1750(StaC5Draw* draw) {
 
 // .text:0x000F1674 size:0xDC mapped:0x80730708
 void fn_3_F1674(void) {
-    s32 stadium;
-    u8 vol;
-    SND_VOICEID voice;
-
-    stadium = g_d_GameSettings.StadiumID;
-    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
-        vol = lbl_3_data_84B8[5][0];
-    } else {
-        vol = lbl_3_data_8404[stadium][5][0];
-    }
-    voice = sndFXStartEx(lbl_3_data_81DC[stadium] + 5, vol, 63, 0);
-    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
-        vol = lbl_3_data_84B8[5][1];
-    } else {
-        vol = lbl_3_data_8404[stadium][5][1];
-    }
-    sndFXCtrl(voice, 91, vol);
+    playStadiumSound(5);
     fn_3_65A8();
     fn_3_F466C();
 }
@@ -1171,9 +1209,6 @@ void fn_3_EEFD4(s32 idx) {
     Vec ref = { 1.0f, 0.0f, 0.0f };
     Vec pos;
     f32 angle;
-    s32 stadium;
-    u8 vol;
-    SND_VOICEID voice;
 
     if (draw->_C6 < 3) {
         dir.x = g_Ball.physicsSubstruct.velocity.x;
@@ -1193,19 +1228,7 @@ void fn_3_EEFD4(s32 idx) {
             fn_3_CB7E8(pos.x, pos.y - 5.0f, pos.z);
             draw->_C8 = 1;
         }
-        stadium = g_d_GameSettings.StadiumID;
-        if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
-            vol = lbl_3_data_84B8[9][0];
-        } else {
-            vol = lbl_3_data_8404[stadium][9][0];
-        }
-        voice = sndFXStartEx(lbl_3_data_81DC[stadium] + 9, vol, 63, 0);
-        if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
-            vol = lbl_3_data_84B8[9][1];
-        } else {
-            vol = lbl_3_data_8404[stadium][9][1];
-        }
-        sndFXCtrl(voice, 91, vol);
+        playStadiumSound(9);
         fn_3_F466C();
     }
 }
