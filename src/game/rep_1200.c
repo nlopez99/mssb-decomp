@@ -18,6 +18,8 @@
 #include "game/rep_940.h"
 #include "game/rep_31F0.h"
 #include "game/rep_3A98.h"
+#include "game/rep_3DA8.h"
+#include "game/m_sound.h"
 
 extern struct {
     /* 0x00 */ s32 _00;
@@ -27,6 +29,8 @@ extern struct {
     /* 0xAB */ u8 _AB;
     /* 0xAC */ u8 _AC;
     /* 0xAD */ u8 _AD;
+    /* 0xAE */ u8 _AE[0xC7 - 0xAE];
+    /* 0xC7 */ u8 _C7;
 } g_Scores;
 
 extern struct {
@@ -37,9 +41,26 @@ extern struct {
 extern struct {
     /* 0x00 */ u8 _00[0x9C];
     /* 0x9C */ u8 _9C;
-    /* 0x9D */ u8 _9D[0xB3 - 0x9D];
+    /* 0x9D */ u8 _9D[0xB1 - 0x9D];
+    /* 0xB1 */ u8 _B1;
+    /* 0xB2 */ u8 _B2;
     /* 0xB3 */ u8 _B3;
+    /* 0xB4 */ u8 _B4;
 } lbl_3_common_bss_32724;
+
+extern struct {
+    /* 0x00 */ u8 _00[0x6];
+    /* 0x06 */ s16 _06;
+} lbl_3_common_bss_32220;
+
+extern struct {
+    /* 0x00 */ u8 _00[0x42];
+    /* 0x42 */ s16 _42;
+    /* 0x44 */ u8 _44[2];
+    /* 0x46 */ u8 _46;
+    /* 0x47 */ u8 _47;
+    /* 0x48 */ u8 _48;
+} lbl_3_common_bss_37400;
 
 extern struct {
     /* 0x0000 */ u8 _0000[0x2D46];
@@ -86,6 +107,8 @@ extern int LERPToNewRange_Float(int value, int inMin, int inMax, int outMin, int
 void fn_3_1DD48(void);
 void fn_3_7A154(int arg);
 void fn_3_7CE90(void);
+void fn_3_7BC20(void);
+extern void changeScene(u8, s16);
 int fn_3_6D564(int team, int rosterID, int arg);
 
 // .text 0x6F4E8-0x6F6CC: only this unit calls it, but splits.txt does not assign it here yet
@@ -463,7 +486,98 @@ void fn_3_73DE8(void) {
 
 // .text:0x000738A8 size:0x540 mapped:0x806B293C
 void fn_3_738A8(void) {
-    return;
+    int endFrame = 120;
+
+    if (g_Pitcher.pitchTotalTimeCounter < 0x7FFE) {
+        g_Pitcher.pitchTotalTimeCounter++;
+    } else {
+        g_Pitcher.pitchTotalTimeCounter = 0x7FFF;
+    }
+    if (g_Pitcher.framesSinceAtBatEnded < 0x7FFE) {
+        g_Pitcher.framesSinceAtBatEnded++;
+    } else {
+        g_Pitcher.framesSinceAtBatEnded = 0x7FFF;
+    }
+    if (g_d_GameSettings.minigamesEnabled) {
+        return;
+    }
+    if (g_GameLogic.gameOverInd) {
+        endFrame = 195;
+    } else if (g_Batter.hitByPitch) {
+        endFrame = 90;
+    } else {
+        if (g_Ball.postPitchResultCounter < 0x7FFE) {
+            g_Ball.postPitchResultCounter++;
+        } else {
+            g_Ball.postPitchResultCounter = 0x7FFF;
+        }
+        if (fn_3_6F4E8()) {
+            return;
+        }
+    }
+    if (g_Pitcher.framesSinceAtBatEnded == 1) {
+        if (!g_d_GameSettings.exhibitionMatchInd && lbl_3_common_bss_37400._46 && !g_Stats.replayInd) {
+            fn_3_164A74();
+            lbl_3_common_bss_37400._42 = 180;
+        }
+        if ((g_Pitcher.strikeOutOrWalk == 2 || g_Pitcher.strikeOutOrWalk == 3) && g_RunningLogic._10 == 4) {
+            if (g_Scores._AD) {
+                if (g_Scores._00 >= g_Scores._AA && g_Scores._04[0][0] == g_Scores._04[1][0]) {
+                    fn_3_59918(13, 0);
+                    g_GameLogic.gameOverInd = 1;
+                } else if (g_Scores._C7 &&
+                           g_Scores._04[g_GameLogic.homeTeamBattingInd_fieldingTeam][0] -
+                                   g_Scores._04[g_GameLogic.awayTeamBattingInd_battingTeam][0] + 1 >=
+                               g_Scores._C7) {
+                    fn_3_59918(17, 0);
+                    g_GameLogic.gameOverInd = 1;
+                }
+            }
+            g_Pitcher.walkedInRunInd = 1;
+        }
+    }
+    if (!g_d_GameSettings.exhibitionMatchInd && lbl_3_common_bss_37400._46 && !g_Stats.replayInd &&
+        !lbl_3_common_bss_37400._48) {
+        if (--lbl_3_common_bss_37400._42 == 120) {
+            lbl_3_common_bss_32724._B4 = 1;
+        }
+        endFrame = 120;
+    }
+    if (g_Pitcher.framesSinceAtBatEnded == 1) {
+        if (endFrame > 120) {
+            lbl_3_common_bss_34C58._2A = 1;
+            lbl_3_common_bss_34C58._24 = 119;
+        } else {
+            lbl_3_common_bss_34C58._2A = 1;
+            lbl_3_common_bss_34C58._24 = endFrame - 1;
+        }
+    }
+    if (g_Pitcher.framesSinceAtBatEnded == endFrame - 11) {
+        if (!lbl_3_common_bss_32724._B1) {
+            changeScene(3, 6);
+        }
+    } else if (g_Pitcher.framesSinceAtBatEnded == endFrame - 31) {
+        if (lbl_3_common_bss_32220._06 > 29) {
+            g_Pitcher.framesSinceAtBatEnded--;
+        } else {
+            fn_3_7BC20();
+            if (g_Stats._39) {
+                lbl_3_common_bss_32724._B1 = 1;
+            }
+        }
+    } else if (g_Pitcher.framesSinceAtBatEnded >= endFrame) {
+        g_GameLogic.hudLoadingRelated = 1;
+        fn_3_73718();
+        fn_3_750C4(PITCHER_ACTION_STATE_POST_HIT);
+        if (g_Pitcher.strikeOutOrWalk == 1) {
+            fn_3_73850();
+        } else if (g_Pitcher.strikeOutOrWalk == 2 || g_Pitcher.strikeOutOrWalk == 3) {
+            fn_3_735A8();
+        }
+        if (g_Stats._39) {
+            fn_3_8C07C();
+        }
+    }
 }
 
 // .text:0x00073850 size:0x58 mapped:0x806B28E4
@@ -627,7 +741,84 @@ void fn_3_72CA8(void) {
 
 // .text:0x00072768 size:0x540 mapped:0x806B17FC
 void fn_3_72768(void) {
-    return;
+    InputStruct* input = &g_Controls[g_GameLogic.teams[g_GameLogic.teamFielding]];
+    s16* pitchData;
+    int frame;
+    f32 z;
+    f32 vz;
+    f32 slowedVz;
+    f32 half;
+    int bullet;
+
+    if (ACTIVE_TUTORIAL()) {
+        input = &g_Practice.inputs[g_GameLogic.teamFielding];
+    } else if (fn_3_107DB4(g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder])) {
+        input = &g_Minigame._1D7C[g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder]];
+    } else if (g_d_GameSettings.minigamesEnabled && g_Minigame.minigamePlayerSelectedOrder >= 0) {
+        input = &g_Controls[g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder]];
+    }
+    pitchData = lbl_3_data_5D6C[g_Pitcher.specialPitchTypeCode];
+    z = g_Pitcher.ballCurrentPosition.z;
+    g_Pitcher.ballVelocity.z = -(g_Pitcher.pitchSpeed / g_Pitcher.pitchSpeedScaler);
+    g_Pitcher.moundZ = 18.44f;
+    g_Pitcher.ballVelocity.x = -((g_Pitcher.pitchStartingPosition_AIMaxCurve - g_Pitcher.ballCurrentPosition.x) *
+                                 g_Pitcher.ballVelocity.z /
+                                 (g_Pitcher.ballCurrentPosition.z - g_Pitcher.frontOfPlateZ));
+    g_Pitcher.pitchZ_whenAirResistanceStarts = g_Pitcher.moundZ * (100 - pitchData[4]) / 100.0f;
+    g_Pitcher.ballVelocity.y = -((g_Pitcher.eggBallBounceYHeight - g_Pitcher.ballCurrentPosition.y) *
+                                 g_Pitcher.ballVelocity.z /
+                                 (g_Pitcher.ballCurrentPosition.z - g_Pitcher.frontOfPlateZ));
+    g_Pitcher.airResistance_veloAdj = 0.001f * pitchData[3];
+    vz = g_Pitcher.ballVelocity.z;
+    for (frame = 1; frame < 0xFFFF; frame++) {
+        if (z <= g_Pitcher.moundZ && !g_Pitcher.pitchInAirInd) {
+            g_Pitcher.pitchInAirInd = frame;
+        }
+        if (z <= g_Pitcher.pitchZ_whenAirResistanceStarts) {
+            if (!g_Pitcher.frameBallCanStartBeingControlled) {
+                g_Pitcher.frameBallCanStartBeingControlled = frame;
+            }
+            slowedVz = vz - vz * g_Pitcher.airResistance_veloAdj;
+            if (slowedVz < -0.05f) {
+                vz = slowedVz;
+            }
+        }
+        vz *= g_Pitcher.decelerationFactor;
+        z += vz;
+        if (z <= g_Pitcher.frontOfPlateZ) {
+            g_Pitcher.frameWhenUnhittable = frame;
+            break;
+        }
+    }
+    g_Pitcher.verticalGlobalParabolicVelo = pitchData[5];
+    if (g_Pitcher.starPitchType == 9 || g_Pitcher.starPitchType == 10) {
+        g_Pitcher.verticalGlobalParabolicVelo = RandomInt_Game_Range(lbl_3_data_5F7C[2], lbl_3_data_5F7C[3]);
+    }
+    half = g_Pitcher.frameWhenUnhittable / 2.0f;
+    g_Pitcher.verticalOffsetParabolaMidpoint = g_Pitcher.verticalGlobalParabolicVelo * half * half / 10000.0f;
+    g_Pitcher.horizontalGlobalParabolicVelo = pitchData[6];
+    if (g_Pitcher.handedness) {
+        g_Pitcher.horizontalGlobalParabolicVelo = -g_Pitcher.horizontalGlobalParabolicVelo;
+    }
+    half = g_Pitcher.frameWhenUnhittable / 2.0f;
+    g_Pitcher.horizontalOffsetParabolaMidpoint = g_Pitcher.horizontalGlobalParabolicVelo * half * half / 10000.0f;
+    if (g_Pitcher.starPitchType == 3 || g_Pitcher.starPitchType == 4) {
+        if (g_Pitcher.AIInd) {
+            g_Pitcher.warioWaluStarPitchRightLeft = RandomInt_Game(2);
+        } else if (input->buttonInput & INPUT_BUTTON_RIGHT) {
+            g_Pitcher.warioWaluStarPitchRightLeft = 0;
+        } else if (input->buttonInput & INPUT_BUTTON_LEFT) {
+            g_Pitcher.warioWaluStarPitchRightLeft = 1;
+        } else {
+            g_Pitcher.warioWaluStarPitchRightLeft = RandomInt_Game(2);
+        }
+    }
+    if (g_Pitcher.starPitchType == 7 || g_Pitcher.starPitchType == 8) {
+        bullet = g_Pitcher.starPitchType - 7;
+        g_Pitcher.bulletPitchLoopFrames = RandomInt_Game_Range(lbl_3_data_5F50[bullet][0], lbl_3_data_5F50[bullet][1]);
+        g_Pitcher.bulletPitchLoopStartingFrame = RandomInt_Game_Range(lbl_3_data_5F50[bullet][2], lbl_3_data_5F50[bullet][3]);
+        g_Pitcher.frameWhenUnhittable += g_Pitcher.bulletPitchLoopFrames;
+    }
 }
 
 // .text:0x00071248 size:0x1520 mapped:0x806B02DC
