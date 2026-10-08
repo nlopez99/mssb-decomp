@@ -32,9 +32,6 @@ extern struct {
     /* 0xA8 */ u8 _A8[2];
 } g_Scores;
 
-extern void fn_3_76A9C(void);
-extern void fn_3_76D08(s16 rosterID, s32 result, s16 fielder, s32 streak);
-
 typedef struct {
     /* 0x00 */ u8 _00[0x1A];
     /* 0x1A */ u8 _1A;
@@ -807,4 +804,20 @@ positions:
     if (!g_d_GameSettings.exhibitionMatchInd) {
         fn_3_16230C(result, streak);
     }
+}
+
+void fn_3_76C78(void) {
+    return;
+}
+
+void fn_3_76558(void) {
+    return;
+}
+
+void fn_3_76174(void) {
+    return;
+}
+
+void fn_3_759BC(void) {
+    return;
 }
