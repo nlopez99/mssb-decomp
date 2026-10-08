@@ -2028,16 +2028,16 @@ void fn_3_EE96C(Vec* pos) {
 }
 
 // .text:0x000EE67C size:0x2F0 mapped:0x8072D710
-// 66.63%: the target unrolls the 13-step vertex attribute loop by 6 and keeps an
-// empty case 1 in the switch; no loop form or case list tried here reproduces either.
+// 97.37%: the target's switch also tests an empty case 1 (cmpwi 3, then cmpwi 1), which
+// MWCC drops here, and keeps the shift counter in r3 where this has r7.
 void fn_3_EE67C(StaC5Shape* shape, MtxPtr view) {
     Mtx mv;
     GXVtxDescList desc[27];
     StaC5DispEntry* entry;
     s32 i;
     s32 n;
-    s32 shift;
     s32 attr;
+    s32 shift;
     u32 type;
 
     PSMTXConcat(view, shape->_18, mv);
@@ -2049,8 +2049,6 @@ void fn_3_EE67C(StaC5Shape* shape, MtxPtr view) {
     entry = shape->_10->entries;
     for (i = 0; i < shape->_10->count; i++, entry++) {
         switch (entry->type) {
-        case 1:
-            break;
         case 2:
             GXClearVtxDesc();
             n = 0;
@@ -2059,13 +2057,19 @@ void fn_3_EE67C(StaC5Shape* shape, MtxPtr view) {
                 desc[0].mType = entry->flags & 3;
                 n = 1;
             }
-            for (shift = 2, attr = GX_VA_POS; attr < GX_NRM_MTX_ARRAY; attr++, shift += 2) {
+            for (shift = 2, attr = GX_VA_POS; attr <= GX_VA_TEX7; attr++, shift += 2) {
                 type = (entry->flags >> shift) & 3;
                 if (type != 0) {
                     desc[n].mAttr = attr;
                     desc[n].mType = type;
                     n++;
                 }
+            }
+            type = (entry->flags >> shift) & 3;
+            if (type != 0) {
+                desc[n].mAttr = attr;
+                desc[n].mType = type;
+                n++;
             }
             desc[n].mAttr = GX_VA_NULL;
             GXSetVtxDescv(desc);
