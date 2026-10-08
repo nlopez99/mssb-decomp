@@ -24,7 +24,7 @@ void fn_3_EEFA4(void);
 void fn_3_EEFD0(void);
 void fn_3_EEFD4(s32 idx);
 void fn_3_EF218(void);
-void fn_3_EF21C(void);
+void fn_3_EF21C(struct StaC5Draw* draw);
 void fn_3_EF3D4(struct StaC5Draw* draw, u8 idx);
 void fn_3_EF408(struct StaC5Draw* draw);
 u8 fn_3_EF55C(Vec pos, u8 block);

@@ -202,18 +202,6 @@ typedef struct {
 } StaC5Prop2; // size: 0x18
 
 typedef struct {
-    /* 0x00 */ s32 period[3];
-    /* 0x0C */ f32 _0C[3];
-    /* 0x18 */ f32 _18[3];
-} StaC5Flash; // size: 0x24
-
-typedef struct {
-    /* 0x00 */ s32 _00;
-    /* 0x04 */ f32 _04;
-    /* 0x08 */ f32 _08;
-} StaC5Wave; // size: 0xC
-
-typedef struct {
     /* 0x00 */ u32 _00;
     /* 0x04 */ void (*_04)(void);
 } StaC5View; // size: 0x8
@@ -231,7 +219,8 @@ typedef struct {
 
 extern StaC5Fielder g_Fielders[9];
 extern s32 fn_800247E4(s32 x, s32 y, s32 width, s32 bytes);
-extern BOOL fn_800527C4(Vec* pos);
+extern bool fn_800527C4(Vec* pos);
+extern void fn_80064430(Vec* pos, s32 type, f32 arg2, f32 arg3);
 extern BOOL fn_8001B728(s32, s32, Vec*);
 extern s32 fn_8005268C(void);
 extern camera_803c639c_s* fn_80052734(s32 idx);
@@ -258,8 +247,18 @@ static StaC5Prop lbl_3_data_1B8FC[6] = {
     { { -32.536f, 10.0f, 100.625f }, 45.0f, 0, 1, 1, 0 },
     { { 0.0f, 0.0f, 0.0f }, 0.0f, 6, 0, 0xFF, 0 },
 };
-static StaC5Flash lbl_3_data_1B974 = { { 15, 10, 2 }, { 1.0f, 1.0f, 1.0f }, { 0.7f, 0.7f, 0.7f } };
-static StaC5Wave lbl_3_data_1B998 = { 2, 3.0f, 3.0f };
+static s32 lbl_3_data_1B974 = 15;
+static s32 lbl_3_data_1B978 = 10;
+static s32 lbl_3_data_1B97C = 2;
+static f32 lbl_3_data_1B980 = 1.0f;
+static f32 lbl_3_data_1B984 = 1.0f;
+static f32 lbl_3_data_1B988 = 1.0f;
+static f32 lbl_3_data_1B98C = 0.7f;
+static f32 lbl_3_data_1B990 = 0.7f;
+static f32 lbl_3_data_1B994 = 0.7f;
+static s32 lbl_3_data_1B998 = 2;
+static f32 lbl_3_data_1B99C = 3.0f;
+static f32 lbl_3_data_1B9A0 = 3.0f;
 static StaC5Prop2 lbl_3_data_1B9A4[6] = {
     { { -22.621f, 0.0f, 66.963f }, 0.0f, 2, 1, 1, 0, 0 },
     { { 2.3625f, 0.0f, 56.7685f }, 0.0f, 2, 1, 1, 0, 1 },
@@ -1193,8 +1192,27 @@ void fn_3_EF3D4(StaC5Draw* draw, u8 idx) {
 }
 
 // .text:0x000EF21C size:0x1B8 mapped:0x8072E2B0
-void fn_3_EF21C(void) {
-    return;
+void fn_3_EF21C(StaC5Draw* draw) {
+    if (g_GameLogic.gameStatus == GAME_STATUS_LIVE_BALL && fn_800527C4(&draw->_A0)) {
+        switch (draw->_C6) {
+        case 0:
+            if (draw->_C7 % lbl_3_data_1B974 == 0) {
+                fn_80064430(&draw->_A0, 0, lbl_3_data_1B980, 0.0f);
+            }
+            break;
+        case 1:
+            if (draw->_C7 % lbl_3_data_1B978 == 0) {
+                fn_80064430(&draw->_A0, 0, lbl_3_data_1B984, 0.0f);
+            }
+            break;
+        case 2:
+            if (draw->_C7 % lbl_3_data_1B97C == 0) {
+                fn_80064430(&draw->_A0, 1, lbl_3_data_1B988, lbl_3_data_1B994);
+                playStadiumSound(8);
+            }
+            break;
+        }
+    }
 }
 
 // .text:0x000EF218 size:0x4 mapped:0x8072E2AC
