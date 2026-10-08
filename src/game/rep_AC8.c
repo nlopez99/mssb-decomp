@@ -8,6 +8,7 @@
 #include "game/rep_3E58.h"
 #include "game/rep_540.h"
 #include "game/rep_D0.h"
+#include "game/rep_720.h"
 #include "game/m_sound.h"
 
 typedef struct UnkAC8Fielder {
@@ -49,7 +50,9 @@ typedef struct UnkAC8Fielder {
     /* 0x0E8 */ f32 _0E8;
     /* 0x0EC */ u8 _0EC[0xF4 - 0xEC];
     /* 0x0F4 */ f32 _0F4;
-    /* 0x0F8 */ u8 _0F8[0x118 - 0xF8];
+    /* 0x0F8 */ u8 _0F8[0xFC - 0xF8];
+    /* 0x0FC */ f32 _0FC;
+    /* 0x100 */ u8 _100[0x118 - 0x100];
     /* 0x118 */ f32 _118;
     /* 0x11C */ f32 _11C;
     /* 0x120 */ u8 _120[0x128 - 0x120];
@@ -248,6 +251,7 @@ extern u8 lbl_3_data_470C[2];
 extern s16 lbl_3_data_484C[10];
 extern f32 lbl_3_data_4930[43];
 extern f32 lbl_3_data_18984[6];
+extern s16 lbl_3_data_1C3C[2];
 extern u8 lbl_3_data_48F8[8];
 extern s16 lbl_3_data_49DC[44];
 
@@ -2528,8 +2532,76 @@ void fn_3_2D308(s32 fielder) {
 }
 
 // .text:0x0002D080 size:0x288 mapped:0x8066C114
-void fn_3_2D080(void) {
-    return;
+// Registers differ: the fielder pointer is computed earlier than in the target
+// and the float temporaries take other registers.
+s32 fn_3_2D080(s32 fielder) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    f32 bestY = 99.0f;
+    s32 prevFrames = 9999;
+    s32 bestIdx = 0;
+    s32 found = 0;
+    s32 i = 0;
+    s32 margin = lbl_3_data_1C3C[1];
+    s32 frames;
+    f32 x;
+    f32 z;
+    f32 dx;
+    f32 dz;
+    f32 dist;
+    f32 speed;
+
+    while (i < 360) {
+        if (g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y > 4.5f) {
+            if (g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y > 20.0f) {
+                i += 10;
+            } else if (g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y > 10.0f) {
+                i += 5;
+            } else {
+                i += 2;
+            }
+            continue;
+        }
+        x = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x;
+        z = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z;
+        if (x == f->_000 && z == f->_008) {
+            frames = 1;
+        } else {
+            dx = x - f->_000;
+            dz = z - f->_008;
+            dist = dx * dx;
+            dz *= dz;
+            dist = dolsqrtf2(dist + dz);
+            speed = f->_058;
+            if (speed == 0.0f) {
+                speed = 1.0f;
+            }
+            frames = (s32)(dist / speed) + (f->_1D1 / 2u);
+        }
+        if (frames < i - margin) {
+            if (g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y < f->_0F4) {
+                break;
+            }
+            if (found && bestY < g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y) {
+                i = bestIdx;
+                break;
+            }
+            bestY = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y;
+            bestIdx = i;
+            found = 1;
+        } else if (found) {
+            i = bestIdx;
+            break;
+        }
+        if (frames > prevFrames && !found) {
+            break;
+        }
+        prevFrames = frames;
+        i += 3;
+    }
+    if (i >= 360) {
+        i = 359;
+    }
+    return i;
 }
 
 // .text:0x0002CEF4 size:0x18C mapped:0x8066BF88
@@ -2698,9 +2770,50 @@ BOOL fn_3_27FF4(s32 fielder) {
 }
 
 // .text:0x00027D68 size:0x28C mapped:0x80666DFC
-void fn_3_27D68(void) {
-    return;
+// Registers only: the distance temporaries and loop bounds take other
+// float registers than the target's.
+BOOL fn_3_27D68(s32 fielder) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    s32 i;
+    f32 dx;
+    f32 dz;
+    f32 dist;
+    f32 h = f->_148;
+    f32 top = 1.0f + (f->_0F4 + h);
+    f32 bottom = f->_0FC + h;
+
+    for (i = 1; i < 11; i++) {
+        if (g_Ball.physicsSubstruct.futureCoordsAndDist[i].dist < f->_070 &&
+            g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y > bottom &&
+            g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y < top) {
+            dx = f->_000 - g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x;
+            dz = f->_008 - g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z;
+            dist = dx * dx;
+            dz *= dz;
+            dist = dolsqrtf2(dist + dz);
+            if (dist < f->_0E8) {
+                goto found;
+            }
+        }
+    }
+    return FALSE;
+
+found:
+    if (g_Ball.physicsSubstruct.futureCoordsAndDist[i + 1].dist < f->_070) {
+        i -= 2;
+    } else if (g_Ball.physicsSubstruct.futureCoordsAndDist[i + 2].dist < f->_070) {
+        i -= 1;
+    }
+    if (i < 0) {
+        i = 0;
+    }
+    fn_3_2C238(fielder, 5, i, 0, 0);
+    fn_3_1AE44(3, 0, g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x,
+               g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y,
+               g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z);
+    return TRUE;
 }
+
 
 // .text:0x00027860 size:0x508 mapped:0x806668F4
 void fn_3_27860(void) {
