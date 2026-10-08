@@ -206,6 +206,8 @@ typedef struct StaC2Draw {
             /* 0xA0 */ u8 _A0_AC_3[0xAC - 0xA0];
             /* 0xAC */ Vec vel;
             /* 0xB8 */ Vec* goal;
+            /* 0xBC */ u8 _BC_C8[0xC8 - 0xBC];
+            /* 0xC8 */ s16 hops;
         };
         struct {
             /* 0xA0 */ u8 _A0_AC_2[0xAC - 0xA0];
@@ -882,8 +884,67 @@ void fn_3_D3CDC(StaC2Draw* draw) {
 }
 
 // .text:0x000D3880 size:0x45C mapped:0x80712914
-void fn_3_D3880(void) {
-    return;
+void fn_3_D3880(StaC2Draw* draw) {
+    Vec diff;
+    Vec dir;
+    Vec pos;
+    Vec fwd = { 1.0f, 0.0f, 0.0f };
+    Vec facing;
+    Vec sndPos;
+    Vec sndDir;
+    f32 dot;
+    f32 angle;
+    f32 dist;
+    BOOL zero;
+
+    memcpy(&pos, &draw->_A0, sizeof(Vec));
+    pos.y += 4.5;
+    if (g_GameLogic.gameStatus == 2 && !(g_Ball.AtBat_Contact_BallPos.y > 10.0)) {
+        PSVECSubtract((Vec*)&g_Ball, &pos, &diff);
+        memcpy(&dir, &diff, sizeof(Vec));
+        dir.y = 0.0f;
+        zero = !PSVECMag(&dir);
+        if (zero) {
+            dir.x = 1.0f;
+        }
+        PSVECNormalize(&dir, &dir);
+        memset(&facing, 0, sizeof(Vec));
+        facing.x = cosf_kludge(0.017453292f * -draw->_C0);
+        facing.z = sinf_kludge(0.017453292f * -draw->_C0);
+        PSVECNormalize(&facing, &facing);
+        if (57.29578f * acosf_kludge(PSVECDotProduct(&dir, &facing)) <= 60.0f) {
+            PSVECNormalize(&fwd, &fwd);
+            dot = PSVECDotProduct(&dir, &fwd);
+            if (dot > 1.0f) {
+                dot = 1.0f;
+            } else if (dot < -1.0f) {
+                dot = -1.0f;
+            }
+            angle = 57.29578f * acosf_kludge(dot);
+            if (dir.z < 0.0f) {
+                angle *= -1.0f;
+            }
+            draw->_C0 = -angle;
+            dist = PSVECMag(&diff);
+            if (dist <= 21.250000447034836 && draw->hops > 0) {
+                draw->_BC = angle;
+                if (dist <= 12.5f || g_Ball.ballState == 1) {
+                    draw->_CA = 4;
+                    draw->vel.x = 0.26f * cosf_kludge(0.017453292f * draw->_BC);
+                    draw->vel.y = 0.3f;
+                    draw->vel.z = 0.26f * sinf_kludge(0.017453292f * draw->_BC);
+                    draw->hops--;
+                } else {
+                    draw->_CA = 3;
+                    draw->vel.y = 0.4f;
+                }
+                fn_80025EEC(draw->_8C, 0, 4);
+                fn_3_8BBC4(lbl_3_data_81DC[g_d_GameSettings.StadiumID] + 4, &sndPos, &sndDir, 12);
+            }
+        }
+    }
+    CTRLSetRotation(&draw->control, 0.0f, draw->_C0, 0.0f);
+    fn_3_D2220(draw);
 }
 
 // .text:0x000D36B0 size:0x1D0 mapped:0x80712744
