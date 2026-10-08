@@ -16,6 +16,7 @@
 #include "game/rep_540.h"
 #include "game/m_sound.h"
 #include "game/rep_1838.h"
+#include "game/rep_23E8.h"
 #include "Dolphin/rand.h"
 
 typedef struct {
@@ -71,19 +72,25 @@ typedef struct StaC5Draw {
     /* 0xC5 */ u8 _C5;
     /* 0xC6 */ u8 _C6;
     /* 0xC7 */ u8 _C7;
-    /* 0xC8 */ u8 _C8[0xE8 - 0xC8];
+    /* 0xC8 */ u8 _C8;
+    /* 0xC9 */ u8 _C9[0xE8 - 0xC9];
 } StaC5Draw; // size: 0xE8
 
 typedef struct StaC5Ball {
     /* 0x00 */ Control control;
     /* 0x44 */ u8 _44[0x74 - 0x44];
     /* 0x74 */ StaC5Model* _74;
-    /* 0x78 */ u8 _78[0x9C - 0x78];
+    /* 0x78 */ u8 _78[0x99 - 0x78];
+    /* 0x99 */ u8 _99;
+    /* 0x9A */ u8 _9A[0x9C - 0x9A];
     /* 0x9C */ u8 _9C;
-    /* 0x9D */ u8 _9D[0xA8 - 0x9D];
+    /* 0x9D */ u8 _9D[0xA0 - 0x9D];
+    /* 0xA0 */ StaC5Draw* _A0;
+    /* 0xA4 */ struct StaC5Emitter* _A4;
     /* 0xA8 */ Vec pos;
     /* 0xB4 */ Vec vel;
     /* 0xC0 */ f32 _C0;
+    /* 0xC4 */ s8 _C4;
 } StaC5Ball;
 
 typedef struct {
@@ -126,12 +133,13 @@ typedef struct StaC5Particle {
 typedef struct StaC5Emitter {
     /* 0x00 */ struct StaC5Emitter* prev;
     /* 0x04 */ struct StaC5Emitter* next;
-    /* 0x08 */ BOOL (*update)(struct StaC5Emitter*);
+    /* 0x08 */ BOOL (*_08)(struct StaC5Emitter*);
     /* 0x0C */ StaC5Particle* particles;
     /* 0x10 */ void* _10;
 } StaC5Emitter;
 
 extern void fn_80033620(StaC5Emitter* emitter);
+extern void fn_80033964(StaC5Emitter* emitter);
 extern void fn_80033F64(f32, f32, f32);
 extern void fn_80033CC8(StaC5Particle* particle, void* arg1);
 
@@ -480,8 +488,32 @@ s32 fn_3_F5E78(u8 id) {
 }
 
 // .text:0x000F5C30 size:0x248 mapped:0x80734CC4
-void fn_3_F5C30(void) {
-    return;
+void fn_3_F5C30(StaC5Ball* obj) {
+    obj->pos.x = lbl_3_data_1B884[obj->_9C].pos.x;
+    obj->pos.y = lbl_3_data_1B884[obj->_9C].pos.y;
+    obj->pos.z = lbl_3_data_1B884[obj->_9C].pos.z;
+    obj->_C0 = -lbl_3_data_1B884[obj->_9C].rotY;
+    obj->control.type = 0;
+    CTRLSetTranslation(&obj->control, obj->pos.x, -obj->pos.y, obj->pos.z);
+    CTRLSetRotation(&obj->control, 0.0f, obj->_C0, 0.0f);
+    obj->vel.x = obj->vel.y = obj->vel.z = 0.0f;
+    if (obj->_A4 != NULL) {
+        if (obj->_A4->_08 != NULL) {
+            fn_80033964(obj->_A4);
+            obj->_A4 = NULL;
+        } else {
+            obj->_A4 = NULL;
+        }
+    }
+    if (obj->_A0 != NULL) {
+        fn_3_F3BB0(obj->_A0);
+    }
+    obj->_99 = 1;
+    obj->_C4 = 0;
+    if (lbl_3_data_1B820 != -1) {
+        fn_3_8B890(lbl_3_data_1B820);
+        lbl_3_data_1B820 = -1;
+    }
 }
 
 // .text:0x000F56CC size:0x564 mapped:0x80734760
@@ -1027,8 +1059,49 @@ void fn_3_EF218(void) {
 }
 
 // .text:0x000EEFD4 size:0x244 mapped:0x8072E068
-void fn_3_EEFD4(void) {
-    return;
+void fn_3_EEFD4(s32 idx) {
+    StaC5Draw* draw = &lbl_3_common_bss_350E4._00[idx];
+    Vec dir;
+    Vec ref = { 1.0f, 0.0f, 0.0f };
+    Vec pos;
+    f32 angle;
+    s32 stadium;
+    u8 vol;
+    SND_VOICEID voice;
+
+    if (draw->_C6 < 3) {
+        dir.x = g_Ball.physicsSubstruct.velocity.x;
+        dir.y = 0.0f;
+        dir.z = g_Ball.physicsSubstruct.velocity.z;
+        PSVECNormalize(&dir, &dir);
+        angle = acosf_kludge(PSVECDotProduct(&ref, &dir));
+        if (dir.z < 0.0f) {
+            angle = 360.0 * 0.017453292f - angle;
+        }
+        draw->_B8 = angle;
+        draw->_BC = 0.5f;
+        draw->_C6 = 4;
+        fn_3_F13F8(draw);
+        if (g_Ball.AtBat_ContactResult != 2 && gameInitOptions.starSkillsSetting) {
+            CTRLGetTranslation(&draw->control, &pos.x, &pos.y, &pos.z);
+            fn_3_CB7E8(pos.x, pos.y - 5.0f, pos.z);
+            draw->_C8 = 1;
+        }
+        stadium = g_d_GameSettings.StadiumID;
+        if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+            vol = lbl_3_data_84B8[9][0];
+        } else {
+            vol = lbl_3_data_8404[stadium][9][0];
+        }
+        voice = sndFXStartEx(lbl_3_data_81DC[stadium] + 9, vol, 63, 0);
+        if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+            vol = lbl_3_data_84B8[9][1];
+        } else {
+            vol = lbl_3_data_8404[stadium][9][1];
+        }
+        sndFXCtrl(voice, 91, vol);
+        fn_3_F466C();
+    }
 }
 
 // .text:0x000EEFD0 size:0x4 mapped:0x8072E064
