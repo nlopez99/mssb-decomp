@@ -1618,12 +1618,11 @@ static inline void fn_3_959BC_setAlpha(UnkTask1770* task, s32 alpha) {
 }
 
 // .text:0x000959BC size:0xCE0 mapped:0x806D4A50
-// 99.92%: in the sceneID loop the target keeps i in r10 and the sprite in r9,
-// one register above this build's; the instructions are the same.
 void fn_3_959BC(void) {
     UnkTask1770* task = lbl_803CC1B8;
     s32 k;
     s32 i;
+    s32 j;
     s32 t;
     s32 d;
     s32 any;
@@ -1754,12 +1753,12 @@ void fn_3_959BC(void) {
             for (i = 1; i < 4; i++) {
                 if (g_Runners[i].runnerOnFieldOrOutOrScored != 0 && g_Runners[i].furthestBaseForcedToGoToOnWalk != 0) {
                     lbl_80371C30[task->_14 + 12]._00->_54 |= 2;
-                    for (; i < 4; i++) {
-                        if (g_Runners[i].stealingStatus == 3) {
+                    for (j = i; j < 4; j++) {
+                        if (g_Runners[j].stealingStatus == 3) {
                             break;
                         }
                     }
-                    if (i < 4) {
+                    if (j < 4) {
                         lbl_80371C30[task->_14 + 12]._00->_64 = 162;
                     } else {
                         lbl_80371C30[task->_14 + 12]._00->_64 = 166;
