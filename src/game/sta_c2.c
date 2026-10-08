@@ -11,6 +11,8 @@
 #include "game/rep_1838.h"
 #include "game/rep_AC8.h"
 #include "game/rep_1D58.h"
+#include "game/rep_540.h"
+#include "game/m_sound.h"
 #include "string.h"
 
 typedef struct StaC2Place {
@@ -157,7 +159,8 @@ typedef struct StaC2Draw {
     /* 0x99 */ u8 _99;
     /* 0x9A */ u8 _9A[0x9C - 0x9A];
     /* 0x9C */ u8 _9C;
-    /* 0x9D */ u8 _9D[0xA0 - 0x9D];
+    /* 0x9D */ u8 type;
+    /* 0x9E */ u8 _9E[0xA0 - 0x9E];
     union {
         struct {
             /* 0xA0 */ Vec _A0;
@@ -167,7 +170,9 @@ typedef struct StaC2Draw {
             /* 0xC4 */ StaC2Target* _C4;
             /* 0xC8 */ u8 _C8[0xCA - 0xC8];
             /* 0xCA */ u8 _CA;
-            /* 0xCB */ u8 _CB[0xD0 - 0xCB];
+            /* 0xCB */ u8 _CB;
+            /* 0xCC */ u8 _CC;
+            /* 0xCD */ u8 _CD[0xD0 - 0xCD];
             /* 0xD0 */ s8 _D0;
             /* 0xD1 */ u8 _D1;
             /* 0xD2 */ u8 _D2[0xE8 - 0xD2];
@@ -180,6 +185,10 @@ typedef struct StaC2Draw {
         };
         struct {
             /* 0xA0 */ StaC2Link* link;
+        };
+        struct {
+            /* 0xA0 */ u8 _A0_B0[0xB0 - 0xA0];
+            /* 0xB0 */ f32 _B0;
         };
     };
 } StaC2Draw; // size: 0xE8
@@ -214,7 +223,7 @@ typedef struct StaC2Emitter {
 } StaC2Emitter;
 
 typedef struct {
-    /* 0x00 */ u8 _00[0x4];
+    /* 0x00 */ f32 _00;
     /* 0x04 */ s32 _04;
 } StaC2ObjEntry; // size: 0x8
 
@@ -335,6 +344,8 @@ extern s32 fn_8005268C(void);
 extern camera_803c639c_s* fn_80052734(s32 idx);
 extern void fn_80033CC8(StaC2Particle* p, void* texture);
 extern void fn_8003403C(f32 width, f32 height);
+extern void fn_80025EEC(StaC2Anim* anim, s32, s32);
+extern u16 lbl_3_data_81DC[16];
 extern StaC2SpriteRef lbl_80371C30[];
 
 // fn_3_B7F70 lies in unsplit code
@@ -350,7 +361,7 @@ static u8 lbl_3_bss_A8D0[0x100];
 static f32 lbl_3_bss_A8A8[10];
 static StaC2Task* lbl_3_bss_A8A4;
 static u8 lbl_3_bss_A898[0xC];
-static f32 lbl_3_bss_A820[30];
+static Vec lbl_3_bss_A820[10];
 static u8 lbl_3_bss_A81C;
 static StaC2Rec5C lbl_3_bss_A764[2];
 static StaC2Rec5C lbl_3_bss_A3CC[10];
@@ -427,8 +438,31 @@ void fn_3_D55EC(void) {
 }
 
 // .text:0x000D5494 size:0x158 mapped:0x80714528
-void fn_3_D5494(void) {
-    return;
+void fn_3_D5494(Mtx m) {
+    Vec pos;
+    StaC2Draw* draw;
+    StaC2ObjEntry* entry;
+    u32 i;
+    u8 type;
+
+    memcpy(&pos, &g_Ball, sizeof(Vec));
+    PSMTXMultVec(m, &pos, &pos);
+    for (i = 0; i < lbl_3_common_bss_350E4._30; i++) {
+        entry = &lbl_3_common_bss_350E4._14[i];
+        draw = &lbl_3_common_bss_350E4._00[entry->_04];
+        if (draw->_90_7) {
+            type = draw->type;
+            if (type == 0 || type == 4 || type == 5 || (type > 7 && type < 11)) {
+                entry->_00 = 1.0f;
+            } else if (entry->_00 < 2.0f + pos.z) {
+                entry->_00 = 1.0f;
+            } else if (entry->_00 > 10.0f + pos.z) {
+                entry->_00 = 0.25f;
+            } else {
+                entry->_00 = 1.0 - 0.75f * ((entry->_00 - (2.0f + pos.z)) / 8.0f);
+            }
+        }
+    }
 }
 
 // .text:0x000D5470 size:0x24 mapped:0x80714504
@@ -655,8 +689,32 @@ void fn_3_D1AC4(StaC2Draw* draw) {
 }
 
 // .text:0x000D196C size:0x158 mapped:0x80710A00
-void fn_3_D196C(void) {
-    return;
+void fn_3_D196C(s32 idx) {
+    StaC2Draw* draw = &lbl_3_common_bss_350E4._00[idx];
+    Vec pos;
+    s32 slot;
+
+    if (g_Ball.ballState != 1) {
+        if (draw->_CA == 0) {
+            draw->_99 &= 0xFB;
+            draw->_CC = 5;
+            draw->_CB = draw->_CA;
+            draw->_CA = 2;
+            draw->_B0 = 0.5f;
+            fn_80025EEC(draw->_8C, 0, 3);
+        }
+        memcpy(&pos, &g_Ball, sizeof(Vec));
+        pos.y *= -1.0f;
+        fn_3_8BBC4(lbl_3_data_81DC[g_d_GameSettings.StadiumID] + 5, &pos, NULL, 13);
+        slot = g_Ball.inAirOrBefore2ndBounceOrLowBallEnergy != 0;
+        lbl_3_bss_A898[slot] = 1;
+        lbl_3_bss_A820[slot].x = g_Ball.AtBat_Contact_BallPos.x;
+        lbl_3_bss_A820[slot].y = -g_Ball.AtBat_Contact_BallPos.y;
+        lbl_3_bss_A820[slot].z = g_Ball.AtBat_Contact_BallPos.z;
+        fn_3_65A8();
+        fn_3_27648();
+        g_FieldingLogic._13B = 1;
+    }
 }
 
 // .text:0x000D1848 size:0x124 mapped:0x807108DC
