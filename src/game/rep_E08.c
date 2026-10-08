@@ -145,7 +145,9 @@ typedef struct UnkE08Actor {
     /* 0x64 */ u8 _64[0x68 - 0x64];
     /* 0x68 */ s16 _68;
     /* 0x6A */ s16 _6A;
-    /* 0x6C */ u8 _6C[0x16A - 0x6C];
+    /* 0x6C */ u8 _6C[0x70 - 0x6C];
+    /* 0x70 */ s16 _70;
+    /* 0x72 */ u8 _72[0x16A - 0x72];
     /* 0x16A */ u16 _16A;
     /* 0x16C */ u8 _16C[0x252 - 0x16C];
     /* 0x252 */ s8 _252;
@@ -154,8 +156,7 @@ typedef struct UnkE08Actor {
     /* 0x25E */ u8 _25E;
     /* 0x25F */ u8 _25F[0x26F - 0x25F];
     /* 0x26F */ u8 _26F;
-    /* 0x270 */ s16 _270;
-    /* 0x272 */ u8 _272[0x274 - 0x272];
+    /* 0x270 */ u8 _270[0x274 - 0x270];
     /* 0x274 */ u8 _274;
     /* 0x275 */ u8 _275[0x27C - 0x275];
 } UnkE08Actor; // size: 0x27C
@@ -287,6 +288,21 @@ static inline int getActorAnim(UnkE08Actor* actor) {
     return 0xFFFF;
 }
 
+// Sets an actor's remaining frames from its animation's length
+static inline void updateAnimLength(UnkE08Actor* actor) {
+    f32 length;
+    int animIndex;
+
+    if (actor != NULL && actor->_25D != 0) {
+        length = 1.0f;
+        animIndex = getActorAnim(actor);
+        if (animIndex != 0xFFFF) {
+            length = fn_800B4A44(*fn_800111D8(actor), animIndex);
+        }
+        actor->_68 = length / actor->_4C;
+    }
+}
+
 // The minigame player slot whose fielder is `fielder`, or 4 when none is
 static inline s32 findMinigameSlot(s32 fielder) {
     s32 slot;
@@ -312,7 +328,7 @@ void fn_3_67130(void) {
 }
 
 // .text:0x000668BC size:0x874 mapped:0x806A5950
-// 99.53%: the target copies the actor pointer into a saved register right after its NULL
+// 99.62%: the target copies the actor pointer into a saved register right after its NULL
 // test (mr r26,r4) and reads it through both; registers differ in that first loop.
 void fn_3_668BC(void) {
     s32 i;
@@ -321,8 +337,6 @@ void fn_3_668BC(void) {
     UnkE08Actor* actor;
     UnkE08Fielder* fielder;
     UnkE08Anim* anim;
-    f32 length;
-    int animIndex;
     s16 state;
 
     if (g_GameLogic.gameStatus == 3 || g_GameLogic.gameStatus == 5) {
@@ -340,19 +354,12 @@ void fn_3_668BC(void) {
         }
     }
     for (i = 0; i < 13; i++) {
-        if (lbl_8036E548._2C50[i] != NULL && lbl_8036E548._2C50[i]->_25D != 0) {
-            actor = lbl_8036E548._2C50[i];
-            length = 1.0f;
-            animIndex = getActorAnim(actor);
-            if (animIndex != 0xFFFF) {
-                length = fn_800B4A44(*fn_800111D8(actor), animIndex);
-            }
-            actor->_68 = length / actor->_4C;
-        }
+        actor = lbl_8036E548._2C50[i];
+        updateAnimLength(actor);
     }
     if (g_Stats.replayInd != 0 && g_Stats.playFrameCounter == 1 && lbl_8036E548._2C50[9] != NULL && g_Stats._34 != 0) {
         lbl_8036E548._2C50[9]->_68 = g_Stats._34 - 1;
-        lbl_8036E548._2C50[9]->_270 = g_Stats._34 - 1;
+        lbl_8036E548._2C50[9]->_70 = g_Stats._34 - 1;
     }
     for (i = 0; i < 9; i++) {
         fielder = &g_Fielders[i];
