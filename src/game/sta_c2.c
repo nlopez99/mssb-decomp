@@ -1161,6 +1161,7 @@ void fn_3_D3880(StaC2Draw* draw) {
     Vec sndDir;
     f32 dot;
     f32 angle;
+    s32 life;
     f32 dist;
     BOOL zero;
 
@@ -1246,6 +1247,7 @@ void fn_3_D30D0(StaC2Draw* draw) {
     f32 dot;
     f32 rad;
     f32 angle;
+    s32 life;
     s8 fielder;
 
     prevVy = draw->vel.y;
@@ -1323,6 +1325,7 @@ void fn_3_D2A0C(StaC2Draw* draw) {
     f32 prevVy;
     f32 vy;
     f32 angle;
+    s32 life;
     s8 fielder;
 
     prevVy = draw->vel.y;
@@ -2125,6 +2128,7 @@ void fn_3_D0284(void* arg) {
     StaC2Draw* draw = arg;
     u8 state = draw->parent->_D1;
     f32 angle;
+    s32 life;
     s32 alpha;
 
     if (state == 0) {
@@ -2217,6 +2221,7 @@ void fn_3_CFD58(StaC2Draw* draw) {
     StaC2Particle* p = emitter->particles;
     s32 i;
     f32 angle;
+    s32 life;
     s32 alpha;
 
     emitter->_20 = (StaC2EmitterOwner*)draw;
@@ -2390,6 +2395,7 @@ void fn_3_CF278(StaC2Draw* draw, Vec pos) {
     u32 j = 0;
     u32 i = 0;
     f32 angle;
+    s32 life;
     f32 c;
 
     emitter->_10 = lbl_3_bss_ADD0[0];
@@ -2567,21 +2573,33 @@ void fn_3_CE954(void) {
 
 // .text:0x000CE8E4 size:0x70 mapped:0x8070D978
 void fn_3_CE8E4(void) {
-    return;
+    StaC2Spawner* spawner;
+    u32 i;
+
+    for (i = 0; i < 4; i++) {
+        spawner = (StaC2Spawner*)fn_80033A24((BOOL (*)(StaC2Emitter*))fn_3_CDFA4, 128, 0, 21, 1, 0);
+        if (spawner != NULL) {
+            fn_3_CE56C(spawner, i);
+        }
+    }
 }
 
 // .text:0x000CE56C size:0x378 mapped:0x8070D600
+// The angle and life written as separate statements make this count as larger to MWCC's
+// auto-inline measure, so fn_3_CE8E4 calls it as the target does.
 void fn_3_CE56C(StaC2Spawner* spawner, u8 idx) {
     StaC2Particle* p = spawner->particles;
     s32 i;
     f32 angle;
+    s32 life;
 
     spawner->_10 = lbl_3_bss_ADD0[0];
     spawner->pos = lbl_3_rodata_24A0[idx];
     spawner->idx = idx;
     spawner->_25 = 1;
     for (i = 0; p != NULL; i++, p = p->next) {
-        angle = 0.017453292f * (rand() % 360);
+        angle = rand() % 360;
+        angle = 0.017453292f * angle;
         p->vel.x = 0.01 * cosf_kludge(angle);
         p->vel.z = 0.01 * sinf_kludge(angle);
         p->vel.y = 0.12f;
@@ -2595,7 +2613,9 @@ void fn_3_CE56C(StaC2Spawner* spawner, u8 idx) {
         p->pos.y = spawner->pos.y;
         p->pos.z = spawner->pos.z;
         p->color[3] = p->alpha = 255.0f;
-        p->duration = p->life = rand() % 24 + 72;
+        life = rand() % 24 + 72;
+        p->life = life;
+        p->duration = life;
         p->_4D = 21;
         p->_4E = 0;
         p->_4C = i;
@@ -2931,7 +2951,17 @@ void fn_3_CCC24(void** files, s32* indices) {
 
 // .text:0x000CC81C size:0x408 mapped:0x8070B8B0
 void fn_3_CC81C(void) {
-    return;
+    StaC2Draw* draw = lbl_3_common_bss_350E4._00;
+    u32 i;
+
+    for (i = 0; i < lbl_3_common_bss_350E4._30; i++, draw++) {
+        if (draw->type == 0) {
+            fn_3_CC5C4(draw);
+            break;
+        }
+    }
+    fn_3_CC1D4();
+    fn_3_CE8E4();
 }
 
 // .text:0x000CC5C4 size:0x258 mapped:0x8070B658
@@ -2993,6 +3023,7 @@ void fn_3_CC354(StaC2Spring* springs) {
 void fn_3_CC1D4(void) {
     Mtx m;
     f32 angle;
+    s32 life;
     Vec offset;
     StaC2Draw* draw;
     u32 start;
