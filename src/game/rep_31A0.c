@@ -1918,29 +1918,25 @@ void fn_3_10CC20(void) {
 }
 
 // .text:0x0010C81C size:0x404 mapped:0x8074B8B0
-// 92.00%: registers differ, and the copy into _1A0F unrolls with another loop shape
 void fn_3_10C81C(void) {
+    int j;
+    int cur;
     UnkQueue31A0 queue[4];
     int player;
     int wait;
     int n;
     int i;
     int count;
-    int j;
     int k;
     int port;
     int found;
-    int cur;
-    s8* dst;
-    UnkQueue31A0* src;
 
     n = 4;
 restart:
     if (g_d_GameSettings.GameModeSelected == GAME_TYPE_PRACTICE) {
         n = 1;
     }
-    count = 0;
-    for (i = 0; i < n; i++) {
+    for (i = 0, count = 0; i < n; i++) {
         queue[i].player = -1;
         if (g_Minigame._1A0C != i && g_Minigame._19E8[i]._0 != -1 &&
             (g_Minigame._19E8[i]._0 != g_Minigame._19E8[i]._2 || g_Minigame._19E8[i]._4 != g_Minigame.battingHandedness[i])) {
@@ -1974,10 +1970,8 @@ restart:
         g_Minigame._1A0F[0] = g_Minigame._1A0C;
         k = 1;
     }
-    src = queue;
-    dst = &g_Minigame._1A0F[k];
-    for (i = 0; i < count; i++) {
-        *dst++ = (src++)->player;
+    for (i = 0; i < count; i++, k++) {
+        g_Minigame._1A0F[k] = queue[i].player;
     }
     if (g_Minigame._1A0F[0] >= 0) {
         cur = g_Minigame._1A0F[0];
@@ -1997,8 +1991,8 @@ restart:
         if (found) {
             g_Minigame._19E8[cur]._2 = g_Minigame._19E8[cur]._3;
             g_Minigame._19E8[cur]._3 = -1;
-            lbl_8036E548._2D77 = 0;
             g_Minigame._19E8[cur]._4 = g_Minigame._19E8[cur]._5;
+            lbl_8036E548._2D77 = 0;
             g_Minigame._1A0C = -1;
             g_Minigame._1A0F[0] = -1;
             g_Minigame._1A13[cur] = 0;
