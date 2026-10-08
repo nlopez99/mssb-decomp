@@ -2,6 +2,7 @@
 #include "header_rep_data.h"
 #include "game/UnknownHomes_Game.h"
 #include "static/UnknownHomes_Static.h"
+#include "musyx/musyx.h"
 
 typedef struct UnkTask1770 {
     /* 0x00 */ void (*_00)(void);
@@ -133,6 +134,10 @@ extern UnkSpriteRef1770 lbl_80371C30[];
 extern void* lbl_803CC1B8;
 
 // Only this unit reads these; they lie outside its splits.txt ranges.
+extern struct {
+    /* 0x0 */ s16 _0;
+    /* 0x2 */ u8 _2[0x8 - 0x2];
+} lbl_3_data_BE50[];
 extern UnkSpriteDesc1770 lbl_3_data_BF6C[];
 extern UnkSpriteDesc1770 lbl_3_data_C1EC[];
 
@@ -631,7 +636,41 @@ void fn_3_972A0(UnkTask1770* task, s32 arg1, s32 arg2, s32 arg3) {
 
 // .text:0x00097144 size:0x15C mapped:0x806D61D8
 void fn_3_97144(void) {
-    return;
+    s32 started = 0;
+
+    if (g_GameLogic.gameStatus == 3 || (u8)(g_GameLogic.gameStatus - 0x13) <= 4 ||
+        g_GameLogic.gameStatus == 0x18)
+    {
+        g_UnkSound_32718._02 = 0;
+        g_UnkSound_32718._03 = 0;
+        g_UnkSound_32718._04 = 0;
+        g_UnkSound_32718._05 = 0;
+        g_UnkSound_32718._06 = 0;
+        return;
+    }
+    if (g_UnkSound_32718._07 == 0) {
+        if (g_UnkSound_32718._02 != 0) {
+            if (g_Stats.replayInd == 0) {
+                started = 1;
+                g_UnkSound_32718._07 = g_UnkSound_32718._02;
+                g_UnkSound_32718._02 = g_UnkSound_32718._03;
+                g_UnkSound_32718._03 = g_UnkSound_32718._04;
+                g_UnkSound_32718._04 = g_UnkSound_32718._05;
+                g_UnkSound_32718._05 = g_UnkSound_32718._06;
+                g_UnkSound_32718._06 = 0;
+                g_UnkSound_32718._00 = 0;
+            }
+            sndFXKeyOff(lbl_3_common_bss_34C58._1C);
+        }
+    } else {
+        g_UnkSound_32718._00++;
+        if (g_UnkSound_32718._02 != 0 && g_UnkSound_32718._00 < 60) {
+            g_UnkSound_32718._00 = 60;
+        }
+    }
+    if (lbl_3_data_BE50[g_UnkSound_32718._07]._0 >= 0 && started) {
+        fn_800B0A5C_insertQueue(fn_3_96CA4, 2);
+    }
 }
 
 // .text:0x00096CA4 size:0x4A0 mapped:0x806D5D38
@@ -812,7 +851,27 @@ void fn_3_95000(void) {
 
 // .text:0x00094E68 size:0x198 mapped:0x806D3EFC
 void fn_3_94E68(void) {
-    return;
+    UnkTask1770* task = lbl_803CC1B8;
+
+    if (lbl_3_common_bss_32724._96 == 0 &&
+        (task->_1C[0] == lbl_3_common_bss_37400._46 || lbl_3_common_bss_37400._47 == 2) &&
+        g_GameLogic.gameStatus != 3 && (g_GameLogic.gameStatus != 8 || lbl_3_common_bss_37400._47 == 0) &&
+        (g_GameLogic.gameStatus != 0 || lbl_3_common_bss_37400._47 != 2))
+    {
+        if (g_Stats.replayInd != 0) {
+            lbl_80371C30[task->_14]._00->_54 &= ~2;
+            lbl_80371C30[task->_14 + 1]._00->_54 &= ~2;
+        } else if (g_GameLogic.gameStatus == 0 || g_GameLogic.gameStatus == 1 || g_GameLogic.gameStatus == 2) {
+            lbl_80371C30[task->_14]._00->_54 |= 2;
+            lbl_80371C30[task->_14 + 1]._00->_54 |= 2;
+        } else {
+            lbl_80371C30[task->_14]._00->_54 &= ~2;
+            lbl_80371C30[task->_14 + 1]._00->_54 &= ~2;
+        }
+    } else {
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+    }
 }
 
 // .text:0x00094BC4 size:0x2A4 mapped:0x806D3C58
