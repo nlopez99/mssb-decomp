@@ -6,9 +6,7 @@
 #include "static/UnknownHomes_Static.h"
 #include "game/rep_1838.h"
 #include "game/sta_c6.h"
-
-extern BOOL fn_3_B0CF4(void);
-extern void fn_3_B0D2C(void);
+#include "game/rep_1AD0.h"
 
 typedef struct {
     /* 0x000 */ f32 _000;

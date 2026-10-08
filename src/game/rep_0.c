@@ -3,6 +3,7 @@
 #include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
 #include "game/rep_1E08.h"
+#include "game/rep_D18.h"
 #include "Dolphin/pad.h"
 #include "string.h"
 
@@ -42,7 +43,6 @@ extern void fn_8004B270(void);
 extern void* fn_800B0A5C_insertQueue(void (*)(void), s32);
 extern void fn_800B0D28(u32* arg0);
 extern void fn_800BF038(int arg0);
-extern void fn_3_5AE9C(void);
 extern void fn_3_C0824(void);
 
 UnkAramEntry0 lbl_3_data_0 = { { 0x00000000, 0x000046E0, 0x06CF8800, 0x000046E0 } };

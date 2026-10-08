@@ -3,6 +3,7 @@
 #include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
+#include "game/rep_16B8.h"
 
 typedef struct UnkTask1770 {
     /* 0x00 */ void (*_00)(void);
@@ -105,7 +106,6 @@ extern void fn_80034E20(UnkTask1770* task, UnkSpriteDesc1770* desc);
 extern void fn_8003649C(UnkTask1770* task, s32, s32, s32, s32);
 extern void fn_800363D8(UnkTask1770* task, s32, s32, s32, u16);
 extern void fn_800B0A14_removeQueue(void);
-extern void fn_3_972A0(UnkTask1770* task, s32, s32, s32);
 
 // .text:0x0009C28C size:0x2EC mapped:0x806DB320
 void fn_3_9C28C(void) {
