@@ -71,8 +71,13 @@ extern void fn_3_27648(void);
 extern void fn_3_253A4(s32 fielder, s32 angle);
 extern u8 fn_3_51DF0(f32 x, f32 z);
 
+// .text:0x0001014C size:0x17C mapped:0x8064F1E0
+void ballPhysica(void) {
+    return;
+}
+
 // .text:0x00010030 size:0x11C mapped:0x8064F0C4
-// Outside this unit's .text range in splits.txt, but inlined into fn_3_FBA8.
+// Inlined into fn_3_FBA8; still static inline until its own copy is written.
 static inline void fn_3_10030(void) {
     s32 r;
 
@@ -83,7 +88,7 @@ static inline void fn_3_10030(void) {
 }
 
 // .text:0x0000FF98 size:0x98 mapped:0x8064F02C
-// Outside this unit's .text range in splits.txt, but inlined into fn_3_F578, fn_3_F7B8 and fn_3_F1DC.
+// Inlined into fn_3_F578, fn_3_F7B8 and fn_3_F1DC; still static inline until its own copy is written.
 static inline void fn_3_FF98(void) {
     u32 seed = lbl_3_data_228._00;
 
@@ -92,6 +97,11 @@ static inline void fn_3_FF98(void) {
     g_Ball.StaticRandomInt1_prePitch = g_Ball.StaticRandomInt1;
     g_Ball.StaticRandomInt2 =
         (g_Ball.StaticRandomInt1 * 8 + (seed % 10 + 1) * (g_Ball.StaticRandomInt2 * (g_Ball.StaticRandomInt2 + 1)) + seed / 2 + (g_d_GameSettings.FrameCountWhileNotAtMainMenu >> 1)) & 0x7FFF;
+}
+
+// .text:0x0000FF4C size:0x4C mapped:0x8064EFE0
+void fn_3_FF4C(void) {
+    return;
 }
 
 // .text:0x0000FBA8 size:0x3A4 mapped:0x8064EC3C
