@@ -14,6 +14,8 @@
 #include "game/rep_1C0.h"
 #include "game/rep_1FD8.h"
 #include "game/rep_2998.h"
+#include "game/sta_c2.h"
+#include "game/sta_c5.h"
 #include "game/sta_c6.h"
 #include "game/m_sound.h"
 #include "game/rep_4138.h"
@@ -194,9 +196,6 @@ extern void fn_800C07BC(void* base, void* tmp, s32 count, s32 size, s32 (*compar
 
 extern void fn_3_C1964(void);
 // Their units' headers still declare these void(void)
-extern void fn_3_D55EC(Mtx view, StadiumSort1D58* sort);
-extern void fn_3_F6084(Mtx view, StadiumSort1D58* sort);
-extern StadiumObjectCollision* fn_3_F6504(s32 object, Mtx mtx);
 
 u8 lbl_3_data_11168[0x10] = { 0 };
 f32 lbl_3_data_11178[5] = { 18.0f, 90.0f, 162.0f, 234.0f, 306.0f };
