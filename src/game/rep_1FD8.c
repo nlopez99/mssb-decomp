@@ -338,8 +338,8 @@ typedef struct Rep1FD8Prop2 {
     /* 0x11 */ u8 _11;
     /* 0x12 */ u8 _12;
     /* 0x13 */ u8 _13;
-    /* 0x14 */ s16 _14;
-    /* 0x16 */ s16 _16;
+    /* 0x14 */ u16 _14;
+    /* 0x16 */ u16 _16;
 } Rep1FD8Prop2; // size: 0x18
 
 // fn_3_C8650 reads 17508, 17514, 175FC, 17704 and 177E0 from one pool base, so they are static
@@ -422,8 +422,8 @@ static u8 lbl_3_bss_9D81;
 static u8 lbl_3_bss_9D80;
 
 // .text:0x000C8650 size:0xD2C mapped:0x807076E4
-// 87.37%, a first draft: structure follows the target, but registers differ throughout and the
-// target's frame is 0x10 larger (it keeps &g_d_GameSettings on the stack for the final test).
+// 94.19%: registers differ throughout, and the target spills &g_d_GameSettings to 8(r1) for
+// the final GameModeSelected test and sets the first loop's end flag before draws[1] is set up.
 void fn_3_C8650(void** files) {
     Rep1FD8Draw* draw;
     Rep1FD8Prop* prop;
@@ -433,6 +433,9 @@ void fn_3_C8650(void** files) {
     u32 total;
     u32 i;
     u32 j;
+    u32 k;
+    s32 l;
+    s32 m;
     s32 count;
     u8 end;
 
@@ -455,7 +458,8 @@ void fn_3_C8650(void** files) {
         fn_800BDC88(lbl_8036E548._6C, j, j, files[indices[4]], NULL, 0);
     }
     fn_800BDC88(lbl_8036E548._6C, j, j, files[indices[5]], NULL, 0);
-    fn_800BDC88(lbl_8036E548._6C, j + 1, j + 1, files[indices[6]], NULL, 0);
+    k = j + 1;
+    fn_800BDC88(lbl_8036E548._6C, k, k, files[indices[6]], NULL, 0);
     for (i = 0; i < total; i++) {
         fn_800BD548(&lbl_8036E548._6C->models[i], 4, lbl_3_common_bss_350E4._20, lbl_3_common_bss_350E4._24,
                     lbl_3_common_bss_350E4._28, lbl_3_common_bss_350E4._2C);
@@ -524,17 +528,17 @@ void fn_3_C8650(void** files) {
         end = FALSE;
         lbl_3_bss_9DE5 = 0;
         lbl_3_bss_9DE4 = count;
-        for (i = 0, prop = lbl_3_data_17514; i < 10; i++, prop++) {
+        for (l = 0, prop = lbl_3_data_17514; l < 10; l++, prop++) {
             if (prop->type == 7) {
                 end = TRUE;
             }
             if (end) {
-                for (j = i; j < 11; j++) {
-                    lbl_3_data_17514[j].type = 7;
+                for (m = l; m < 11; m++) {
+                    lbl_3_data_17514[m].type = 7;
                 }
                 break;
             }
-            draw->_A8 = i;
+            draw->_A8 = l;
             draw->_A9 = prop->type;
             draw->_74 = &lbl_8036E548._6C->models[2];
             draw->_78 = files[indices[7]];
@@ -567,19 +571,19 @@ void fn_3_C8650(void** files) {
         end = FALSE;
         lbl_3_bss_9DE3 = 0;
         lbl_3_bss_9DE2 = count;
-        for (i = 0, prop2 = lbl_3_data_175FC; i < 10; i++, prop2++) {
+        for (l = 0, prop2 = lbl_3_data_175FC; l < 10; l++, prop2++) {
             if (prop2->type == 7) {
                 end = TRUE;
             }
             if (end) {
-                for (j = i; j < 11; j++) {
-                    lbl_3_data_175FC[j].type = 7;
+                for (m = l; m < 11; m++) {
+                    lbl_3_data_175FC[m].type = 7;
                 }
                 break;
             }
-            draw->_A8 = i;
+            draw->_A8 = l;
             draw->_A9 = prop2->type;
-            draw->_74 = &lbl_8036E548._6C->models[i + 3];
+            draw->_74 = &lbl_8036E548._6C->models[l + 3];
             draw->_78 = NULL;
             draw->_7C = fn_3_C63D0;
             draw->_80 = NULL;
@@ -587,7 +591,7 @@ void fn_3_C8650(void** files) {
             draw->_90_6 = draw->_90_7 && draw->_78 != NULL;
             draw->_BC = fn_3_B7F70(240) + 1;
             draw->_BD = 0;
-            draw->vel.z = draw->vel.y = draw->vel.x = 0.0f;
+            draw->vel.x = draw->vel.y = draw->vel.z = 0.0f;
             draw->_B8 = prop2->_14;
             draw->_BA = prop2->_16;
             draw->control.type = 0;
@@ -614,23 +618,23 @@ void fn_3_C8650(void** files) {
         end = FALSE;
         lbl_3_bss_9DE1 = 0;
         lbl_3_bss_9DE0 = count;
-        for (i = 0, prop = lbl_3_data_17704; i < 10; i++, prop++) {
+        for (l = 0, prop = lbl_3_data_17704; l < 10; l++, prop++) {
             if (prop->type == 7) {
                 end = TRUE;
             }
             if (end) {
-                for (j = i; j < 11; j++) {
-                    lbl_3_data_17704[j].type = 7;
+                for (m = l; m < 11; m++) {
+                    lbl_3_data_17704[m].type = 7;
                 }
                 break;
             }
-            draw->_A8 = i;
+            draw->_A8 = l;
             draw->_A9 = prop->type;
             if (draw->_A9 == 4) {
-                draw->_74 = &lbl_8036E548._6C->models[n + 3];
+                draw->_74 = &lbl_8036E548._6C->models[j];
                 draw->_78 = files[indices[8]];
             } else {
-                draw->_74 = &lbl_8036E548._6C->models[n + 4];
+                draw->_74 = &lbl_8036E548._6C->models[k];
                 draw->_78 = files[indices[9]];
             }
             draw->_7C = NULL;
