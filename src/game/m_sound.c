@@ -373,6 +373,21 @@ static f32 lbl_3_bss_1764;
 static u8 lbl_3_bss_1761;
 static u8 lbl_3_bss_1760;
 
+// Queues a sound group load for fn_3_8B094, as fn_3_8B258 does; the callers expand it in place
+#define QUEUE_SOUND_LOAD(state, id, arg)                                                                   \
+    do {                                                                                                   \
+        u8 head_;                                                                                          \
+        u8 next_;                                                                                          \
+                                                                                                           \
+        if (lbl_3_bss_1768 != NULL &&                                                                      \
+            lbl_3_bss_1768->tail != (next_ = ((head_ = lbl_3_bss_1768->head) + 1) % 14)) {                 \
+            lbl_3_bss_1768->head = next_;                                                                  \
+            lbl_3_bss_1768->queue[head_ * 3] = (id);                                                       \
+            lbl_3_bss_1768->queue[head_ * 3 + 1] = (state);                                                \
+            lbl_3_bss_1768->queue[head_ * 3 + 2] = (arg);                                                  \
+        }                                                                                                  \
+    } while (0)
+
 // .text:0x000910AC size:0x48 mapped:0x806D0140
 int fn_3_910AC(void) {
     fn_80021518(0x1C, lbl_800EF808.groups[1]);
@@ -1026,9 +1041,9 @@ void fn_3_8F1C8(void) {
 }
 
 // .text:0x0008DA80 size:0x1748 mapped:0x806CCB14
-// 99.23%: the inlined fn_3_8C2DC re-extends sel in every branch where the target keeps one
-// (u8)sel in r23, and the inlined fn_3_8B258 copies swap its queue pointer and head registers;
-// the target also tests !(song == 4 || song == 0) as a value (cntlzw)
+// 99.37%: the inlined fn_3_8C2DC re-extends sel in every branch where the target keeps one
+// (u8)sel in r23, the inlined fn_3_8C4F0 holds its step count in r18 (r19 in the target),
+// and the target tests !(song == 4 || song == 0) as a value (cntlzw)
 void fn_3_8DA80(void) {
     s32 song = -1;
     BOOL flag = FALSE;
@@ -1402,7 +1417,7 @@ game:
     if (lbl_3_common_bss_34C58._2A == 1 && lbl_3_common_bss_34C58._24 != 0) {
         lbl_3_common_bss_34C58._24--;
         if (lbl_3_common_bss_34C58._24 == 0) {
-            fn_3_8B258(3, 0, 0);
+            QUEUE_SOUND_LOAD(3, 0, 0);
         } else {
             fn_3_8C4F0(lbl_3_common_bss_34C58._24, 0);
         }
@@ -1481,7 +1496,7 @@ change:
         if (lbl_3_common_bss_34C58._20 != 0x15 && song != 0x16 && song != 0x17) {
             fn_3_9056C(lbl_3_common_bss_34C58._20);
             if ((song == 4 || song == 0) == FALSE) {
-                fn_3_8B258(4, 0, 0);
+                QUEUE_SOUND_LOAD(4, 0, 0);
             }
         } else {
             if (lbl_3_common_bss_34C58._20 == 0x15 || lbl_3_common_bss_34C58._20 == 0x16 ||
@@ -1490,15 +1505,15 @@ change:
                     fn_3_8C104(-1);
                 }
             } else {
-                fn_3_8B258(4, 0, 0);
+                QUEUE_SOUND_LOAD(4, 0, 0);
                 fn_3_90674(lbl_3_common_bss_34C58._20);
             }
         }
     } else {
             if (flag) {
-                fn_3_8B258(3, 0, 0);
+                QUEUE_SOUND_LOAD(3, 0, 0);
             } else {
-                fn_3_8B258(4, 0, 0);
+                QUEUE_SOUND_LOAD(4, 0, 0);
             }
     }
     return;
@@ -1803,7 +1818,6 @@ bool fn_3_8C2DC(u32 steps, s32 sel) {
 }
 
 // .text:0x0008C104 size:0x1D8 mapped:0x806CB198
-// 99.66%: the inlined fn_3_8B258 swaps its queue pointer and head registers, as in fn_3_8C07C
 void fn_3_8C104(s32 vol) {
     int stadium;
     u8 level;
@@ -1840,17 +1854,15 @@ void fn_3_8C104(s32 vol) {
     if (vol >= 0) {
         level = vol;
     }
-    fn_3_8B258(0, stadium, level);
+    QUEUE_SOUND_LOAD(0, stadium, level);
     if (level == 0) {
         fn_800A8878(level, level);
     }
 }
 
 // .text:0x0008C07C size:0x88 mapped:0x806CB110
-// 98.82%: the inlined fn_3_8B258 gets the queue pointer in r8 and its head in r7, where the
-// target (and every other inlined copy) has the pointer in the lower register
 void fn_3_8C07C(void) {
-    fn_3_8B258(4, 0, 0);
+    QUEUE_SOUND_LOAD(4, 0, 0);
 }
 
 // .text:0x0008BE8C size:0x1F0 mapped:0x806CAF20
