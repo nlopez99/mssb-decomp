@@ -17,7 +17,10 @@ typedef struct Unk37A8Cpu {
 
 // This minigame's view of g_Minigame
 typedef struct Unk37A8Minigame {
-    /* 0x0000 */ u8 _0000[0x1BB6];
+    /* 0x0000 */ u8 _0000[0x1B58];
+    /* 0x1B58 */ u8 _1B58[4][10];
+    /* 0x1B80 */ u8 _1B80[4];
+    /* 0x1B84 */ u8 _1B84[0x1BB6 - 0x1B84];
     /* 0x1BB6 */ s8 _1BB6[4];
     /* 0x1BBA */ u8 _1BBA[0x1C7E - 0x1BBA];
     /* 0x1C7E */ s8 _1C7E[4][3];
@@ -216,7 +219,16 @@ void fn_3_142DB4(void) {
 
 // .text:0x00142CA8 size:0x10C mapped:0x80781D3C
 void fn_3_142CA8(void) {
-    return;
+    s32 i;
+    s32 j;
+
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 10; j++) {
+            g_Minigame.miniGameCurrentPoints[i] += MG._1B58[i][j];
+            MG._1B58[i][j] = 0;
+        }
+        MG._1B80[i] = 0;
+    }
 }
 
 // .text:0x00142C18 size:0x90 mapped:0x80781CAC
