@@ -797,19 +797,15 @@ void fn_3_1AE44(u8 arg4, u16 arg5, f32 arg1, f32 arg2, f32 arg3) {
 }
 
 // .text:0x00019FA4 size:0xEA0 mapped:0x80659038
-// 96.99%: registers differ throughout, and the zoom lerps load lbl_3_data_A40's
-// _0C and the int-to-float constant with other addressing than the target
+// 97.38%: the point copy and the inlined fn_3_19B3C differ in registers, and the
+// zoom lerp loads lbl_3_data_A40[]._0C and the int-to-float constant differently
 void fn_3_19FA4(void) {
     VecXYZ points[5];
     VecXZ keys[5];
-    s32 pitch[3];
-    s32 yaw[3];
     VecXZ out;
     s32 i;
     int dur;
     int sum;
-    int acc;
-    int d;
     f32 t;
     f32 zoom;
 
@@ -873,34 +869,14 @@ void fn_3_19FA4(void) {
             sum += g_pCamera->_000A[i - 1];
             keys[i].z = sum;
         }
-        for (i = 0; i < g_pCamera->_0012; i++) {
-            pitch[i] = lbl_3_data_A40[g_pCamera->_0004[i]]._10[0];
-        }
-        acc = pitch[0];
-        (&points[0].x)[0] = acc;
-        for (i = 1; i < g_pCamera->_0012; i++) {
-            d = pitch[i] - pitch[i - 1];
-            if (d > 0x800) {
-                acc -= 0x1000 - d;
-            } else if (d < -0x800) {
-                acc += d + 0x1000;
-            } else {
-                acc += d;
-            }
-            (&points[0].x)[i] = acc;
-        }
+        fn_3_19B3C(0, &points[0].x);
         for (i = 0; i < g_pCamera->_0012; i++) {
             keys[i].x = (&points[0].x)[i];
         }
         running_roundBasePosition(t, &out, keys, g_pCamera->_0012);
         g_pCamera->_2870 = fn_3_9FDD8(out.x);
 
-        for (i = 0; i < g_pCamera->_0012; i++) {
-            yaw[i] = lbl_3_data_A40[g_pCamera->_0004[i]]._10[1];
-        }
-        for (i = 0; i < g_pCamera->_0012; i++) {
-            (&points[0].x)[i] = yaw[i];
-        }
+        fn_3_19B3C(1, &points[0].x);
         for (i = 0; i < g_pCamera->_0012; i++) {
             keys[i].x = (&points[0].x)[i];
         }
@@ -1039,7 +1015,7 @@ void fn_3_19CB0(s16 arg) {
 
 // .text:0x00019B3C size:0x174 mapped:0x80658BD0
 void fn_3_19B3C(int arg, f32* arg2) {
-    int sp8[4];
+    int sp8[3];
     int i;
     
     for (i = 0; i < g_pCamera->_0012; i++) {
