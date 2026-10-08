@@ -111,8 +111,7 @@ extern s16 lbl_3_data_21904[12];
 extern f32 lbl_3_data_2191C[2];
 
 // .text:0x0008A958 size:0x73C mapped:0x806C99EC
-// 97.75%: as in fn_3_7DD6C, the fn_3_889FC inlined through fn_3_88C24 allocates differently;
-// the inlined fn_3_8A618 loop also has r5 and r6 swapped.
+// 99.61%: only the inlined fn_3_8A618 loop differs, with r5 and r6 swapped as in fn_3_8A618
 void fn_3_8A958(void) {
     int i;
 
@@ -654,7 +653,6 @@ void fn_3_88D88(int runner) {
 }
 
 // .text:0x00088C24 size:0x164 mapped:0x806C7CB8
-// 98.65%: only the registers of the inlined fn_3_889FC differ
 void fn_3_88C24(void) {
     fn_3_87AE8();
     if (g_GameLogic.secondaryGameMode == 6) {
@@ -708,21 +706,17 @@ void fn_3_88B18(void) {
 
 // .text:0x000889FC size:0x11C mapped:0x806C7A90
 void fn_3_889FC(void) {
-    InMemRunnerType* r = g_Runners;
-    int result = g_Ball.AtBat_ContactResult;
-    u8 fielding = g_FieldingLogic._108;
-    u8 landingZone = g_Ball.landingSpotZoneAwayFromHome;
-    u8 ballZone = g_Ball.ballZoneAwayFromHome;
-    u8 ballState = g_Ball.ballState;
     int i;
 
-    for (i = 0; i < 4; r++, i++) {
-        if (r->runnerOnFieldOrOutOrScored == 1) {
-            if ((result == 3 || fielding == 2) && landingZone <= 1) {
-                r->isEligibleToScore = 0;
-            } else if (ballZone <= 1 && ballState != 0 && (u16)result > 1) {
-                if (r->currentBase != 0 && r->currentBase < 3) {
-                    r->isEligibleToScore = 0;
+    for (i = 0; i < 4; i++) {
+        int result = g_Ball.AtBat_ContactResult;
+
+        if (g_Runners[i].runnerOnFieldOrOutOrScored == 1) {
+            if ((result == 3 || g_FieldingLogic._108 == 2) && g_Ball.landingSpotZoneAwayFromHome <= 1) {
+                g_Runners[i].isEligibleToScore = 0;
+            } else if (g_Ball.ballZoneAwayFromHome <= 1 && g_Ball.ballState != 0 && (u16)result > 1) {
+                if (g_Runners[i].currentBase != 0 && g_Runners[i].currentBase < 3) {
+                    g_Runners[i].isEligibleToScore = 0;
                 }
             }
         }
@@ -1058,8 +1052,6 @@ void fn_3_8781C(void) {
 }
 
 // .text:0x00087424 size:0x3F8 mapped:0x806C64B8
-// 99.53%: only the registers of the inlined fn_3_871BC differ. Declaring fn_3_871BC's locals in
-// reverse and assigning them after matches this function but drops fn_3_871BC to 95.07%.
 void fn_3_87424(void) {
     fn_3_872CC();
     if (g_GameLogic.secondaryGameMode != 6 && g_GameLogic.secondaryGameMode != 14) {
@@ -1110,38 +1102,30 @@ void fn_3_872CC(void) {
 }
 
 // .text:0x000871BC size:0x110 mapped:0x806C6250
-// 96.76%: the target keeps g_Runners in r7 from the start; this copies it from r5 (one extra mr)
 void fn_3_871BC(void) {
-    InMemRunnerType* r = g_Runners;
-    int runDrain = lbl_3_data_4C54[10];
-    int turnDrain = lbl_3_data_4C54[11];
-    int maxStamina = lbl_3_data_4C54[9];
-    f32 speedEffect = lbl_3_data_4C44[1];
-    f32 accelEffect = lbl_3_data_4C44[2];
-    f32 turnEffect = lbl_3_data_4C44[3];
     int i;
 
-    for (i = 0; i < 4; r++, i++) {
-        if (r->runnerOnFieldOrOutOrScored == 1) {
+    for (i = 0; i < 4; i++) {
+        if (g_Runners[i].runnerOnFieldOrOutOrScored == 1) {
             int drain = 0;
             f32 tired;
 
-            if (r->groundVelocity[0] >= 0.1f) {
-                drain = runDrain;
+            if (g_Runners[i].groundVelocity[0] >= 0.1f) {
+                drain = lbl_3_data_4C54[10];
             }
-            if (r->turnaroundCode != 0) {
-                drain += turnDrain;
+            if (g_Runners[i].turnaroundCode != 0) {
+                drain += lbl_3_data_4C54[11];
             }
             if (drain != 0) {
-                r->stamina -= drain;
-                if (r->stamina < 0) {
-                    r->stamina = 0;
+                g_Runners[i].stamina -= drain;
+                if (g_Runners[i].stamina < 0) {
+                    g_Runners[i].stamina = 0;
                 }
             }
-            tired = 1.0f - (f32)r->stamina / (f32)maxStamina;
-            r->staminaMult = 1.0f - speedEffect * tired;
-            r->accelerationStaminaEffect = 1.0f - accelEffect * tired;
-            r->accelerationStaminaEffectWhileChangingDirection = 1.0f - turnEffect * tired;
+            tired = 1.0f - (f32)g_Runners[i].stamina / (f32)lbl_3_data_4C54[9];
+            g_Runners[i].staminaMult = 1.0f - lbl_3_data_4C44[1] * tired;
+            g_Runners[i].accelerationStaminaEffect = 1.0f - lbl_3_data_4C44[2] * tired;
+            g_Runners[i].accelerationStaminaEffectWhileChangingDirection = 1.0f - lbl_3_data_4C44[3] * tired;
         }
     }
 }
@@ -4119,9 +4103,6 @@ void fn_3_7E2BC(void) {
 }
 
 // .text:0x0007DD6C size:0x550 mapped:0x806BCE00
-// 97.70%: the target keeps g_Runners in r25 for the fn_3_889FC inlined through fn_3_88C24. That
-// copy matches once fn_3_889FC reads only result into a local (fields read directly, g_Runners[i]),
-// but fn_3_889FC itself then drops to 97.6%; the form that matches all three is open.
 void fn_3_7DD6C(void) {
     int i;
 
