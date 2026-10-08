@@ -49,7 +49,10 @@ typedef struct {
     /* 0x2C */ f32 min;
 } lbl_3_data_1348_s;
 
-extern u32 lbl_3_bss_44;
+// .bss statics are laid out in reverse declaration order; nothing reads 0x40 or 0x48
+static u8 lbl_3_bss_48[0x50];
+static u32 lbl_3_bss_44;
+static u8 lbl_3_bss_40[4];
 extern s32 fn_800527BC(void);
 
 extern struct {
