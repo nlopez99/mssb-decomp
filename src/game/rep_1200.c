@@ -69,6 +69,8 @@ extern f32 lbl_3_data_5E78[2];
 extern f32 lbl_3_data_4474[4];
 extern f32 lbl_3_data_5E98[6];
 extern f32 lbl_3_data_5EB0[2];
+extern s16 lbl_3_data_5EDC[22];
+extern f32 lbl_3_data_5F08[13];
 extern u8 lbl_3_data_5F50[2][5];
 extern f32 lbl_3_data_5F5C[8];
 extern s16 lbl_3_data_5F7C[10];
@@ -84,6 +86,7 @@ extern int LERPToNewRange_Float(int value, int inMin, int inMax, int outMin, int
 void fn_3_1DD48(void);
 void fn_3_7A154(int arg);
 void fn_3_7CE90(void);
+int fn_3_6D564(int team, int rosterID, int arg);
 
 // .text 0x6F4E8-0x6F6CC: only this unit calls it, but splits.txt does not assign it here yet
 BOOL fn_3_6F4E8(void);
@@ -568,7 +571,58 @@ void fn_3_7310C(void) {
 
 // .text:0x00072CA8 size:0x464 mapped:0x806B1D3C
 void fn_3_72CA8(void) {
-    return;
+    f32 cursed = g_Pitcher.cursedBallStat;
+    f32 control = g_Pitcher.curveControlStat;
+    f32 curve = g_Pitcher.curveStat;
+    f32 t;
+
+    if (g_Pitcher.starPitchType) {
+        g_Pitcher.pitchSpeed = lbl_3_data_5D6C[g_Pitcher.specialPitchTypeCode][0];
+        g_Pitcher.calced_cursedBall = 100;
+        g_Pitcher.calced_curveControl = 100;
+        g_Pitcher.calced_curve = 100;
+        if (g_Pitcher.starPitchType == 9 || g_Pitcher.starPitchType == 10) {
+            g_Pitcher.pitchSpeed = RandomInt_Game_Range(lbl_3_data_5F7C[0], lbl_3_data_5F7C[1]);
+        }
+        return;
+    }
+    if (g_Pitcher.ChargePitchType == 3 || g_Pitcher.nonCaptainStarPitchTriggeredType == 2) {
+        g_Pitcher.pitchSpeed = g_Pitcher.fastBallSpeed * lbl_3_data_5F08[10];
+    } else if (g_Pitcher.ChargePitchType != 0) {
+        if (g_Pitcher.ChargePitchType == 1) {
+            g_Pitcher.ChargePitchType = 2;
+        }
+        t = lbl_3_data_5F08[9] * ((f32)g_Pitcher.fastBallSpeed - (f32)g_Pitcher.curveBallSpeed);
+        t *= 1.0f - g_Pitcher.pitchChargeUp;
+        g_Pitcher.pitchSpeed = g_Pitcher.fastBallSpeed - (int)t;
+    } else if (g_Pitcher.TypeOfPitch == 2) {
+        g_Pitcher.pitchSpeed = g_Pitcher.curveBallSpeed;
+    } else {
+        g_Pitcher.pitchSpeed = g_Pitcher.curveBallSpeed;
+    }
+    if (g_Pitcher.ChargePitchType >= 2 || g_Pitcher.TypeOfPitch == 2 || g_Pitcher.nonCaptainStarPitchTriggeredType == 2 ||
+        g_Pitcher.nonCaptainStarPitchTriggeredType == 3) {
+        cursed *= lbl_3_data_5F08[8];
+        control *= lbl_3_data_5F08[5];
+        curve *= lbl_3_data_5F08[2];
+    }
+    if (g_Pitcher.nonCaptainStarPitchTriggeredType == 0 &&
+        fn_3_6D564(g_GameLogic.teamFielding, g_Pitcher.rosterID, 0) < lbl_3_data_5EDC[3]) {
+        if (g_Pitcher.ChargePitchType) {
+            g_Pitcher.pitchSpeed = g_Pitcher.pitchSpeed * (1.0f - 0.01f * lbl_3_data_5EDC[6]);
+        } else if (g_Pitcher.TypeOfPitch != 2) {
+            curve *= 1.0f - 0.01f * lbl_3_data_5EDC[5];
+        }
+        control *= 1.0f - 0.01f * lbl_3_data_5EDC[7];
+        cursed *= 1.0f - 0.01f * lbl_3_data_5EDC[8];
+    }
+    if (g_Minigame.GameMode_MiniGame == MINI_GAME_ID_BOBOMB_DERBY ||
+        g_Minigame.GameMode_MiniGame == MINI_GAME_ID_BARREL_BATTER) {
+        g_Pitcher.pitchSpeed = g_Minigame.minigamePitchSpeedAdjustment;
+    }
+    g_Pitcher.calced_cursedBall = cursed;
+    g_Pitcher.calced_curveControl = control;
+    g_Pitcher.calced_curve = curve;
 }
 
 // .text:0x00072768 size:0x540 mapped:0x806B17FC
