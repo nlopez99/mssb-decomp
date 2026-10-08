@@ -147,16 +147,17 @@ void fn_3_10030(void) {
 }
 
 // .text:0x0000FF98 size:0x98 mapped:0x8064F02C
-// 76.5%: the copies inlined into fn_3_F578, fn_3_F7B8 and fn_3_F1DC match; this one loads the
-// seed through addi + lwz 0 and schedules the modulo differently.
 void fn_3_FF98(void) {
     u32 seed = lbl_3_data_228._00;
+    s32 r;
 
-    g_Ball.StaticRandomInt1 =
-        (g_Ball.StaticRandomInt2 * 16 + (seed % 10 + 1) * (g_Ball.StaticRandomInt2 * g_Ball.StaticRandomInt1) + seed / 2 + g_d_GameSettings.FrameCountWhileNotAtMainMenu) & 0x7FFF;
+    r = g_Ball.StaticRandomInt2 * 16 + (seed % 10 + 1) * (g_Ball.StaticRandomInt2 * g_Ball.StaticRandomInt1) + seed / 2 +
+        g_d_GameSettings.FrameCountWhileNotAtMainMenu;
+    g_Ball.StaticRandomInt1 = r & 0x7FFF;
     g_Ball.StaticRandomInt1_prePitch = g_Ball.StaticRandomInt1;
-    g_Ball.StaticRandomInt2 =
-        (g_Ball.StaticRandomInt1 * 8 + (seed % 10 + 1) * (g_Ball.StaticRandomInt2 * (g_Ball.StaticRandomInt2 + 1)) + seed / 2 + (g_d_GameSettings.FrameCountWhileNotAtMainMenu >> 1)) & 0x7FFF;
+    r = g_Ball.StaticRandomInt1 * 8 + (seed % 10 + 1) * (g_Ball.StaticRandomInt2 * (g_Ball.StaticRandomInt2 + 1)) + seed / 2 +
+        (g_d_GameSettings.FrameCountWhileNotAtMainMenu >> 1);
+    g_Ball.StaticRandomInt2 = r & 0x7FFF;
 }
 
 // .text:0x0000FF4C size:0x4C mapped:0x8064EFE0
