@@ -1156,7 +1156,7 @@ void fn_3_71248(void) {
     f32 ground;
     f32* window;
     f32 speed;
-    BALL_COLLISION_TYPE collision;
+    u32 collision;
 
     if (g_Pitcher.eggBallBounceNumber) {
         g_Pitcher.framesSinceFirstEggBounce++;
@@ -1318,7 +1318,7 @@ void fn_3_71248(void) {
         if (g_Ball.AtBat_Contact_BallPos.z < -3.0f) {
             fn_3_750C4(PITCHER_ACTION_STATE_NO_CONTACT);
             g_Pitcher.pitchDidntResultInLiveBallInd = 1;
-            if (g_Pitcher.pitchSpeed > 144) {
+            if (g_Pitcher.pitchSpeed >= 145) {
                 playSoundEffect(0x16B);
             } else {
                 playSoundEffect(0x16A);
