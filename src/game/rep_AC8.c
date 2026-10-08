@@ -2105,8 +2105,103 @@ void fn_3_4FB34(void) {
 }
 
 // .text:0x0004F504 size:0x630 mapped:0x8068E598
-void fn_3_4F504(void) {
-    return;
+// 99.89%: as in fn_3_4EFC8, the inlined fn_3_52560 takes dx and dz in each other's float
+// registers, and the last test's two sums compare in swapped registers.
+void fn_3_4F504(int fielder) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    s32 i;
+    s32 start;
+    s32 frames;
+    s32 catchFrame;
+    s32 prevCatch = 9999;
+    s32 arrive;
+    s32 bestIdx = 0;
+    s32 found = 0;
+    s32 close = 0;
+    s32 result = 0;
+    f32 y;
+    f32 bestY = 99.0f;
+
+    start = f->_1D2 - g_Ball.framesSinceHit;
+    if (start < 1) {
+        start = 1;
+    }
+    i = start;
+    while (i < 360) {
+        if (g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y > 4.5f) {
+            i += 3;
+            continue;
+        }
+        frames = fn_3_52560(fielder, g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x,
+                            g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z);
+        catchFrame = start + frames - 5;
+        if (catchFrame < i) {
+            y = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y;
+            if (y < 2.0f) {
+                result = 1;
+                break;
+            }
+            if (found && bestY < y) {
+                i = bestIdx;
+                result = 2;
+                break;
+            }
+            bestY = y;
+            bestIdx = i;
+            found = 1;
+        } else {
+            if (catchFrame < i + 30) {
+                close = 1;
+            }
+            if (found) {
+                i = bestIdx;
+                result = 2;
+                break;
+            }
+        }
+        if (catchFrame > prevCatch && !found &&
+            dolsqrtf2(SQ(g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x) +
+                      SQ(g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z)) > 10.0f) {
+            result = 3;
+            break;
+        }
+        prevCatch = catchFrame;
+        i++;
+    }
+    if (i >= 360) {
+        i = 359;
+    }
+    f->_186 = i;
+    if (result == 2 && g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y < 2.0f) {
+        result = 1;
+    }
+    if (result == 3 && !close) {
+        result = 4;
+    }
+    f->_1DD = result;
+    f->_1DA = 0;
+    if (result != 1 && result != 2) {
+        f->_1DA = 1;
+    }
+    if (dolsqrtf2(SQ(g_Ball.landingSpotLocation.x - g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x) +
+                  SQ(g_Ball.landingSpotLocation.z - g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z)) < 3.0f &&
+        result == 1) {
+        f->_1DB = 0;
+    } else {
+        f->_1DB = 1;
+    }
+    if (f->_1DB == 0) {
+        if (catchFrame + 30 < f->_186) {
+            g_FieldingLogic._0F2 |= 1 << fielder;
+        }
+    } else if (result == 1) {
+        arrive = f->_186 + fn_3_A6810(g_Ball.physicsSubstruct.futureCoordsAndDist[f->_186].pos.x,
+                                      g_Ball.physicsSubstruct.futureCoordsAndDist[f->_186].pos.z, lbl_3_data_4444[1].x,
+                                      lbl_3_data_4444[1].z);
+        if (arrive + 60 < g_RunningLogic._0E + 30) {
+            g_FieldingLogic._0F2 |= 1 << fielder;
+        }
+    }
 }
 
 // .text:0x0004EFC8 size:0x53C mapped:0x8068E05C
