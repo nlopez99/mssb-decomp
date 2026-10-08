@@ -10,6 +10,7 @@
 #include "game/rep_3880.h"
 #include "Dolphin/mtx.h"
 #include "C3/control.h"
+#include "Dolphin/gx.h"
 #include "string.h"
 
 typedef struct {
@@ -167,7 +168,8 @@ extern struct {
     /* 0x30 */ void* _30;
     /* 0x34 */ u8 _34[0x60 - 0x34];
     /* 0x60 */ s32 _60;
-    /* 0x64 */ u8 _64[0x70 - 0x64];
+    /* 0x64 */ u8 _64[0x6C - 0x64];
+    /* 0x6C */ void* _6C;
     /* 0x70 */ void* _70;
     /* 0x74 */ void* _74;
     /* 0x78 */ void* _78;
@@ -213,6 +215,8 @@ extern void fn_800B4278(UnkModelSet3310* model);
 extern void fn_800ACFB0(void* data);
 extern void fn_800B993C(void);
 extern void fn_3_90CB0(void);
+extern s32 fn_8005268C(void);
+extern void fn_80033B58(void* texture, s32 index, s32, s32);
 extern void fn_80024DB0(UnkAnimState3310* state);
 extern void fn_80024FA4(UnkActor3310* actor, void* anim, UnkAnimState3310* state, s32 arg3);
 
@@ -296,6 +300,39 @@ f32 lbl_3_data_226DC = 4.0f;
 // .bss, declared in reverse address order: MWCC lays statics out last to first
 static u8 lbl_3_bss_B6C0[0x40]; // unreferenced
 static f32 lbl_3_bss_B6BC;
+
+static inline void clearObjs(void) {
+    u32 i;
+    UnkObj3310* obj;
+
+    for (i = 0; i < 40; i++) {
+        obj = &lbl_8036E548._2D94[i];
+        obj->_26 = 0;
+        obj->_00 = NULL;
+    }
+}
+
+static inline void showPipes(void) {
+    s32 i;
+    UnkObj3310* obj;
+
+    for (i = 0; i < 7; i++) {
+        obj = &lbl_8036E548._2D94[i + 0xE9];
+        obj->_26 = 0;
+        if (i >= 4) {
+            obj->_26 = 1;
+            obj->_04.x = lbl_3_data_21BC4[i - 4].pos.x;
+            obj->_04.y = -lbl_3_data_21BC4[i - 4].pos.y;
+            obj->_04.z = lbl_3_data_21BC4[i - 4].pos.z;
+            fn_8001D110(i + 0xE9, lbl_3_data_226C4[0], lbl_3_data_226C4[1], lbl_3_data_226C4[0]);
+            obj->_00 = fn_3_11881C;
+        }
+    }
+    lbl_8036E548._2D94[0xF0]._26 = 0;
+    lbl_8036E548._2D94[0xF1]._26 = 0;
+    lbl_8036E548._2D94[0xF2]._26 = 0;
+    lbl_8036E548._2D94[0xF3]._26 = 0;
+}
 
 // .text:0x0011D2C8 size:0xE4 mapped:0x8075C35C
 void fn_3_11D2C8(s32 model, s32 first, s32 count, void* anim, s32 arg4) {
@@ -1169,8 +1206,75 @@ void fn_3_117FC8(void) {
 }
 
 // .text:0x00117B78 size:0x450 mapped:0x80756C0C
+// 89.37%: the uv table and object pointer get other registers, and the rotation loop
+// orders its sin/cos calls and products differently.
 void fn_3_117B78(s32 i) {
-    return;
+    UnkObj3310* obj = &lbl_8036E548._2D94[i];
+    u32 j;
+    f32 size = 1.5f;
+    GXColor color;
+    Vec tmp;
+    f32 uv[4][2] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
+    Vec quad[4];
+
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetNumChans(1);
+    GXSetNumTexGens(1);
+    GXSetNumTevStages(1);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD1, GX_TEXMAP1, GX_COLOR0A0);
+    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_TEXC, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO);
+    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_TEXA, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO);
+    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+
+    quad[0].x = -size;
+    quad[0].z = size;
+    quad[1].x = size;
+    quad[1].z = size;
+    quad[2].x = size;
+    quad[2].z = -size;
+    quad[3].x = -size;
+    quad[3].z = -size;
+    for (j = 0; j < 4; j++) {
+        memcpy(&tmp, &quad[j], sizeof(Vec));
+        quad[j].x = tmp.x * (f32)cos(-obj->_10.y) + tmp.z * -(f32)sin(-obj->_10.y);
+        quad[j].z = tmp.x * (f32)sin(-obj->_10.y) + tmp.z * (f32)cos(-obj->_10.y);
+    }
+    quad[0].x += obj->_04.x;
+    quad[1].x += obj->_04.x;
+    quad[2].x += obj->_04.x;
+    quad[3].x += obj->_04.x;
+    quad[0].z += obj->_04.z;
+    quad[1].z += obj->_04.z;
+    quad[2].z += obj->_04.z;
+    quad[3].z += obj->_04.z;
+    quad[3].y = -0.060000002f;
+    quad[2].y = -0.060000002f;
+    quad[1].y = -0.060000002f;
+    quad[0].y = -0.060000002f;
+    color.r = 0;
+    color.g = 0;
+    color.b = 0;
+    color.a = 155;
+    GXLoadPosMtxImm(fn_80052768_getCamera(fn_8005268C())->view, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    GXSetProjection(fn_80052768_getCamera(fn_8005268C())->proj, GX_PERSPECTIVE);
+    fn_80033B58(lbl_3_common_bss_32724._6C, 0x14, 0, 0);
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    for (j = 0; j < 4; j++) {
+        GXPosition3f32(quad[j].x, quad[j].y, quad[j].z);
+        GXColor1u32(*(u32*)&color);
+        GXTexCoord2f32(uv[j][0], uv[j][1]);
+    }
 }
 
 // .text:0x00117AE4 size:0x94 mapped:0x80756B78
@@ -1254,8 +1358,38 @@ void fn_3_11741C(s32 i) {
 }
 
 // .text:0x00116B74 size:0x8A8 mapped:0x80755C08
+// 99.62%: only registers differ: in the inlined fn_3_117494 the target keeps the object
+// table in r26 and &g_Minigame in r27, the base the reverse.
 void fn_3_116B74(void) {
-    return;
+    switch (g_Minigame.GameMode_MiniGame) {
+    case MINI_GAME_ID_BOBOMB_DERBY:
+        fn_3_116B38();
+        break;
+    case MINI_GAME_ID_WALLBALL:
+        fn_3_1169D0();
+        break;
+    case MINI_GAME_ID_BARREL_BATTER:
+        fn_3_116B38();
+        fn_3_119F6C();
+        break;
+    case MINI_GAME_ID_CHAINCHOMP_SPRINT:
+        fn_3_119934();
+        fn_3_117494();
+        break;
+    case MINI_GAME_ID_STAR_DASH:
+        fn_3_118164();
+        fn_3_117FC8();
+        clearObjs();
+        fn_3_1179EC();
+        fn_3_117494();
+        break;
+    case MINI_GAME_ID_PIRANHA_PANIC:
+        fn_3_1194FC();
+        fn_3_116840();
+        clearObjs();
+        showPipes();
+        break;
+    }
 }
 
 // .text:0x00116B38 size:0x3C mapped:0x80755BCC
