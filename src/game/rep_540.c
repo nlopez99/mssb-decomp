@@ -1003,8 +1003,8 @@ void fn_3_C9F4(void) {
 }
 
 // .text:0x0000C034 size:0x9C0 mapped:0x8064B0C8
-// 99.9%: Hit_HorizontalAngle, the |0x400 - angle| temporary and &g_RunningLogic take
-// r7/r6/r6 where the base has r6/r4/r7.
+// 99.88%: the |0x400 - angle| temporary, its sign and the constant bases take other
+// volatile registers than the target's.
 void fn_3_C034(void) {
     f32 dist;
     f32 adjust;
@@ -1086,8 +1086,9 @@ classified:
         g_Batter.hitTrajectory = 5;
     }
     g_RunningLogic._13 = 0;
-    adjust = 0.04f * __abs(0x400 - g_Ball.Hit_HorizontalAngle);
-    if (g_Ball.Hit_HorizontalAngle >= 608 && g_Ball.Hit_HorizontalAngle < 1440 &&
+    angle = g_Ball.Hit_HorizontalAngle;
+    adjust = 0.04f * __abs(0x400 - angle);
+    if (angle >= 608 && angle < 1440 &&
         g_d_GameSettings.GameModeSelected != GAME_TYPE_PRACTICE) {
         if (135.0f - adjust < g_Ball.physicsSubstruct.hitLandingSpotDistFromHome) {
             if (g_Ball.Hit_VerticalAngle >= 280) {
