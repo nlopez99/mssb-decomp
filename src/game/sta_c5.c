@@ -261,7 +261,7 @@ extern struct {
     /* 0x24 */ s32 _24;
     /* 0x28 */ s32 _28;
     /* 0x2C */ s32 _2C;
-    /* 0x30 */ u32 _30;
+    /* 0x30 */ s32 _30;
     /* 0x34 */ s32* _34;
     /* 0x38 */ u8 _38[0x3C - 0x38];
     /* 0x3C */ u32* _3C;
@@ -479,8 +479,8 @@ static inline void spawnDrawEffect(StaC5Draw* draw) {
 }
 
 // .text:0x000F6FDC size:0x1468 mapped:0x80736070
-// 94.25%: register allocation differs throughout; the target also computes n1 + 2
-// between the two counting loops and spills ballModel where this keeps it in a register.
+// 95.31%: register allocation differs throughout; the target also computes n1 + 2
+// between the two counting loops and stores pitcherModel to the s8 _C3 without extsb.
 void fn_3_F6FDC(void** files) {
     StaC5Draw* draw;
     StaC5Draw* entry;
@@ -495,12 +495,12 @@ void fn_3_F6FDC(void** files) {
     s32 n1;
     s32 n2;
     u8 j;
-    u8 pitcherModel;
+    s8 pitcherModel;
     u8 fieldModel;
     u8 ballModel;
     u8 numModels;
     u8 numActors;
-    u8 count;
+    s32 count;
     u8 idx;
     u8 end;
 
@@ -1002,7 +1002,7 @@ struct StadiumObjectCollision* fn_3_F6504(s32 idx, MtxPtr mtx) {
 }
 
 // .text:0x000F6084 size:0x480 mapped:0x80735118
-// 98.89%: the sort pointers for n and m and two loop counters use other saved
+// 99.10%: the sort pointers for n and m and two loop counters use other saved
 // registers than the target.
 void fn_3_F6084(MtxPtr view, StadiumSort1D58* sort) {
     Vec pos;
