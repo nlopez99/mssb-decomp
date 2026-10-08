@@ -15,7 +15,7 @@ void fn_3_CB8A8(struct StaC2Draw* draw);
 void fn_3_CBA9C(struct StaC2Draw* draw);
 void fn_3_CBAFC(void);
 void fn_3_CBC18(void);
-void fn_3_CBF80(void);
+void fn_3_CBF80(struct StaC2Draw* draw);
 void fn_3_CC1D4(void);
 void fn_3_CC354(struct StaC2Spring* spring);
 void fn_3_CC438(void);

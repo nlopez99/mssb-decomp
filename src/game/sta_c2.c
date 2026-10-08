@@ -198,6 +198,10 @@ typedef struct StaC2Draw {
             /* 0xA0 */ StaC2Link* link;
         };
         struct {
+            /* 0xA0 */ u8 _A0_C4_2[0xC4 - 0xA0];
+            /* 0xC4 */ struct StaC2Spring* springs;
+        };
+        struct {
             /* 0xA0 */ u8 _A0_AC[0xAC - 0xA0];
             /* 0xAC */ f32 halfWidth;
         };
@@ -1526,8 +1530,42 @@ void fn_3_CC1D4(void) {
 }
 
 // .text:0x000CBF80 size:0x254 mapped:0x8070B014
-void fn_3_CBF80(void) {
-    return;
+void fn_3_CBF80(StaC2Draw* draw) {
+    Control control;
+    Mtx m;
+    Vec offset = { -4.5f, 0.0f, 0.0f };
+    Vec pos;
+    u32 i;
+    f32 dy;
+    f32 dz;
+
+    offset.y = -4.5f;
+    control.type = 0;
+    CTRLSetRotation(&control, 0.0f, draw->_C0, 0.0f);
+    CTRLBuildMatrix(&control, m);
+    PSMTXMultVec(m, &offset, &offset);
+    offset.y *= -1.0f;
+    offset.x += draw->_A0.x;
+    offset.y += draw->_A0.y;
+    offset.z += draw->_A0.z;
+    pos = offset;
+    for (i = 4; i != 0; i--) {
+        draw->springs[i - 1]._0C[0].x = pos.x;
+        draw->springs[i - 1]._0C[0].y = pos.y;
+        draw->springs[i - 1]._0C[0].z = pos.z;
+        pos.y -= 2.4f;
+        if (pos.y - 0.15000000223517418 < 0.0) {
+            dy = 0.15000000223517418 - pos.y;
+            dz = 2.4f * cosf_kludge(acosf_kludge(dy / 2.4f));
+            pos.y = 0.15f;
+            pos.z += dz;
+        }
+    }
+    for (i = 0; i < 4; i++) {
+        draw->springs[i]._0C[1] = draw->springs[i]._0C[0];
+        memset(&draw->springs[i]._24, 0, sizeof(Vec));
+        memset(&draw->springs[i]._30, 0, sizeof(Vec));
+    }
 }
 
 // .text:0x000CBC18 size:0x368 mapped:0x8070ACAC
