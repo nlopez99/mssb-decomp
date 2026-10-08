@@ -48,6 +48,7 @@ int fn_3_90764(void);
 int fn_3_90798(void);
 void fn_3_9081C(void);
 void fn_3_90CB0(void);
+BOOL fn_3_90DD8(void);
 BOOL fn_3_90860(void);
 void fn_3_908E8(void);
 int fn_3_90928(void);

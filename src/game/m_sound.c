@@ -22,8 +22,9 @@ extern struct {
 extern struct {
     /* 0x0000 */ SND_LISTENER listener;
     /* 0x0090 */ SND_EMITTER emitters[100];
-    /* 0x1FD0 */ u8 _1FD0[100];
+    /* 0x1FD0 */ u8 emitterType[100];
     /* 0x2034 */ u8 emitterActive[100];
+    /* 0x2098 */ u8 _2098[100];
 } lbl_3_common_bss_32B20;
 
 typedef struct Unk90754 {
@@ -32,6 +33,12 @@ typedef struct Unk90754 {
     /* 0x11821 */ u8 _11821;
 } Unk90754;
 
+typedef struct SoundLoad {
+    /* 0x0 */ s8 id;
+    /* 0x1 */ s8 state;
+    /* 0x2 */ s8 arg;
+} SoundLoad;
+
 // A queue of sound group loads, run by fn_3_8B094
 typedef struct SoundLoadTask {
     /* 0x00 */ u8 _00[0x10];
@@ -39,12 +46,19 @@ typedef struct SoundLoadTask {
     /* 0x12 */ u8 _12[2];
     /* 0x14 */ u8 head;
     /* 0x15 */ u8 tail;
-    /* 0x16 */ struct {
-        /* 0x0 */ s8 _0;
-        /* 0x1 */ s8 state;
-        /* 0x2 */ s8 _2;
-    } entries[14];
+    /* 0x16 */ s8 queue[14 * 3];
 } SoundLoadTask;
+
+// Emitter parameters in hundred-thousandths, indexed by emitter type
+typedef struct EmitterParams {
+    /* 0x00 */ s32 pos[3];
+    /* 0x0C */ s32 maxDis;
+    /* 0x10 */ s32 comp;
+    /* 0x14 */ s32 maxVol;
+    /* 0x18 */ s32 minVol;
+    /* 0x1C */ u32 flags[7];
+    /* 0x38 */ s32 _38;
+} EmitterParams;
 
 typedef struct SeqEntry {
     /* 0x0 */ u16 group;
@@ -68,16 +82,27 @@ extern bool32 sndSeqGetValid(s32 seqID);
 extern void fn_800216F8(u8 group, int (*callback)(void));
 extern int fn_8006285C(void);
 extern void fn_800A86B4(s32 arg0);
-extern void fn_800A88C0(void);
 extern void fn_800A8B78(void);
 extern unsigned long sndCheckEmitter(SND_EMITTER* em);
 extern unsigned long sndRemoveEmitter(SND_EMITTER* em);
 extern SoundLoadTask* lbl_803CC1B8;
+extern unsigned long sndAddEmitter(SND_EMITTER* em_buffer, SND_FVECTOR* pos, SND_FVECTOR* dir, f32 maxDis, f32 comp,
+                                   unsigned long flags, unsigned short fxid, unsigned char maxVol, unsigned char minVol,
+                                   SND_ROOM* room);
 extern unsigned long sndUpdateEmitter(SND_EMITTER* em, SND_FVECTOR* pos, SND_FVECTOR* dir, u8 maxVol, SND_ROOM* room);
 extern camera_803c639c_s* fn_80052734(s32 idx);
 extern u32 fn_800A8864(void);
 extern void fn_800A8878(u8 a, u8 b);
 extern u8 lbl_800E8558[][6];
+extern void* fn_800A88C0(void);
+extern u32 fn_800A88C8(void);
+extern u32 fn_800A88D0(void);
+extern void fn_800A8AB0(s32 arg0);
+extern void fn_800A8AB8(s32 arg0);
+extern BOOL fn_800A8518(s32 arg0);
+extern void LoadFile(char* name, void* dest, s32 arg2, s32 arg3, s32 arg4);
+extern u8 lbl_8034E478[16][0x50];
+extern char lbl_800E87B4[15][16];
 
 // rep_1BC8.c declares these as void(u8) and BOOL(s16, s16), which the signed tests of their
 // arguments without extension rule out, so the prototypes stay out of the header until it is fixed
@@ -95,7 +120,9 @@ extern u8 lbl_3_data_84F4[0x3C];
 extern u8 lbl_3_data_8530[2][0x180];
 extern f32 lbl_3_data_88AC[3];
 extern SeqEntry lbl_3_data_88E0[];
+extern EmitterParams lbl_3_data_8974[17];
 extern SND_FVECTOR lbl_3_data_8D70;
+extern Vec lbl_3_data_8D7C;
 
 // .bss, in reverse address order
 static s32 lbl_3_bss_1780[30];
@@ -146,6 +173,44 @@ int fn_3_90F48(void) {
     group = idx + 5;
     fn_80021518(lbl_3_data_8148[idx], lbl_800EF808.groups[group]);
     return 0;
+}
+
+// .text:0x00090DD8 size:0x170 mapped:0x806CFE6C
+BOOL fn_3_90DD8(void) {
+    SoundLoadTask* task = lbl_803CC1B8;
+    u8 state = lbl_3_common_bss_34C58._2C;
+    int player = state / 2;
+    int charID;
+    int group;
+    int i;
+
+    if (state == 0 || state == 2 || state == 4 || state == 6) {
+        if (g_Minigame.minigameControlStruct.characterIndex[player] < 0) {
+            lbl_3_common_bss_34C58._2C += 2;
+            return FALSE;
+        }
+        charID = lbl_800E8558[g_Minigame.minigameControlStruct._4[player]][1];
+        if (player != 0) {
+            for (i = 0; i < player; i++) {
+                if (charID == lbl_800E8558[g_Minigame.minigameControlStruct._4[i]][1]) {
+                    if ((lbl_3_common_bss_34C58._2C += 2) >= 8) {
+                        g_Minigame._19AB = 1;
+                        return TRUE;
+                    }
+                    return FALSE;
+                }
+            }
+        }
+        group = fn_800698F8(charID);
+        fn_800216F8(group + 5, fn_3_90F48);
+        lbl_3_common_bss_34C58._2C++;
+    } else if (task->_10 != 0) {
+        if (++lbl_3_common_bss_34C58._2C >= 8) {
+            g_Minigame._19AB = 1;
+            return TRUE;
+        }
+    }
+    return FALSE;
 }
 
 // .text:0x00090CB0 size:0x128 mapped:0x806CFD44
@@ -583,13 +648,65 @@ void fn_3_8BDF4(void) {
 }
 
 // .text:0x0008BBC4 size:0x230 mapped:0x806CAC58
-s32 fn_3_8BBC4(u32 id, Vec* pos, Vec* dir, s32 arg3) {
-    return 0;
+s32 fn_3_8BBC4(u32 id, Vec* pos, Vec* dir, s32 type) {
+    int i;
+    Vec defPos;
+
+    for (i = 0; i < 100; i++) {
+        if (!lbl_3_common_bss_32B20.emitterActive[i] || !sndCheckEmitter(&lbl_3_common_bss_32B20.emitters[i])) {
+            lbl_3_common_bss_32B20.emitterType[i] = type;
+            lbl_3_common_bss_32B20.emitterActive[i] = 1;
+            lbl_3_common_bss_32B20._2098[i] = 0;
+            if (pos == NULL) {
+                defPos.x = lbl_3_data_8974[type].pos[0] / 100000.0f;
+                defPos.y = lbl_3_data_8974[type].pos[1] / 100000.0f;
+                defPos.z = lbl_3_data_8974[type].pos[2] / 100000.0f;
+                pos = &defPos;
+            }
+            if (dir == NULL) {
+                dir = &lbl_3_data_8D7C;
+            }
+            sndAddEmitter(&lbl_3_common_bss_32B20.emitters[i], (SND_FVECTOR*)pos, (SND_FVECTOR*)dir,
+                          lbl_3_data_8974[type].maxDis / 100000.0f, lbl_3_data_8974[type].comp / 100000.0f,
+                          lbl_3_data_8974[type].flags[0] | lbl_3_data_8974[type].flags[1] |
+                              lbl_3_data_8974[type].flags[2] | lbl_3_data_8974[type].flags[3] |
+                              lbl_3_data_8974[type].flags[4] | lbl_3_data_8974[type].flags[5] |
+                              lbl_3_data_8974[type].flags[6],
+                          id, lbl_3_data_8974[type].maxVol, lbl_3_data_8974[type].minVol, NULL);
+            return i;
+        }
+    }
+    if (i == 100) {
+        OSPanic("m_sound.c", 0xE4C, "No Empty Emitter");
+    }
+    return -1;
 }
 
 // .text:0x0008BA60 size:0x164 mapped:0x806CAAF4
 void fn_3_8BA60(s32 handle, Vec* pos, Vec* dir) {
-    return;
+    SND_EMITTER* em;
+    Vec defPos;
+    u8 type;
+
+    if (handle < 0 || handle >= 100 || !lbl_3_common_bss_32B20.emitterActive[handle]) {
+        return;
+    }
+    em = &lbl_3_common_bss_32B20.emitters[handle];
+    if (!sndCheckEmitter(em)) {
+        lbl_3_common_bss_32B20.emitterActive[handle] = 0;
+        return;
+    }
+    type = lbl_3_common_bss_32B20.emitterType[handle];
+    if (pos == NULL) {
+        defPos.x = lbl_3_data_8974[type].pos[0] / 100000.0f;
+        defPos.y = lbl_3_data_8974[type].pos[1] / 100000.0f;
+        defPos.z = lbl_3_data_8974[type].pos[2] / 100000.0f;
+        pos = &defPos;
+    }
+    if (dir == NULL) {
+        dir = &lbl_3_data_8D7C;
+    }
+    sndUpdateEmitter(em, (SND_FVECTOR*)pos, (SND_FVECTOR*)dir, lbl_3_data_8974[type].maxVol, NULL);
 }
 
 // .text:0x0008B9BC size:0xA4 mapped:0x806CAA50
@@ -687,8 +804,60 @@ BOOL fn_3_8B258(s32 state, s32 id, s32 arg) {
         return FALSE;
     }
     lbl_3_bss_1768->head = next;
-    lbl_3_bss_1768->entries[head]._0 = id;
-    lbl_3_bss_1768->entries[head].state = state;
-    lbl_3_bss_1768->entries[head]._2 = arg;
+    lbl_3_bss_1768->queue[head * 3] = id;
+    lbl_3_bss_1768->queue[head * 3 + 1] = state;
+    lbl_3_bss_1768->queue[head * 3 + 2] = arg;
     return TRUE;
+}
+
+// .text:0x0008B094 size:0x1C4 mapped:0x806CA128
+void fn_3_8B094(void) {
+    SoundLoadTask* task = lbl_803CC1B8;
+    u8 tail;
+    u8 next;
+    s8 state;
+    s8 arg;
+    u8 id;
+
+    if (task->head == task->tail) {
+        return;
+    }
+    if (fn_800A88C8() == 3) {
+        return;
+    }
+    tail = task->tail;
+    next = (tail + 1) % 14;
+    state = task->queue[tail * 3 + 1];
+    arg = task->queue[tail * 3 + 2];
+    id = task->queue[tail * 3];
+    switch (state) {
+    case 0:
+        fn_800A8878(arg, arg);
+        if (&lbl_8034E478[(s8)id] == fn_800A88C0()) {
+            task->queue[tail * 3 + 1] = 2;
+        } else {
+            fn_800A8AB8(0);
+            task->queue[tail * 3 + 1]++;
+        }
+        break;
+    case 1:
+        fn_800A8AB0(2);
+        LoadFile(lbl_800E87B4[(s8)id], &lbl_8034E478[(s8)id], 0, 0, 1);
+        task->queue[tail * 3 + 1]++;
+    case 2:
+        if (fn_800A8518(1)) {
+            task->tail = next;
+        }
+        break;
+    case 3:
+        if (!fn_800A88D0() || fn_800A8518(2)) {
+            task->tail = next;
+        }
+        break;
+    case 4:
+        if (fn_800A8518(3)) {
+            task->tail = next;
+        }
+        break;
+    }
 }
