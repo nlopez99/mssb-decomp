@@ -357,11 +357,7 @@ UnkSpriteDesc1770 lbl_3_data_E378[31] = {
     { 3, 0, { 0, 0, 0 }, { 0, 0 }, 0, { 0, 0, 0 } },
 };
 
-u8 lbl_3_data_E758 = 0x06;
-
-u8 lbl_3_data_E759[3] = {
-    0x0C, 0x12, 0x18
-};
+u8 lbl_3_data_E758[4] = { 6, 12, 18, 24 };
 
 UnkSpriteDesc1770 lbl_3_data_E75C[8] = {
     { 0, 0xb7, { 0, 0, -1 }, { 1, 5 }, 0xff, { 0x2000000, 0, 0x10000 } },
@@ -941,8 +937,65 @@ void fn_3_94BC4(void) {
 }
 
 // .text:0x0009497C size:0x248 mapped:0x806D3A10
+// 87.50%: the target adds each offset to task->_14 + k computed first and
+// keeps 60 << 16 in a register for the loop; the branches are otherwise the same.
 void fn_3_9497C(void) {
+    UnkTask1770* task = lbl_803CC1B8;
+    u16 state;
+    s32 i;
+    UnkSprite1770* sprite;
+
+    if (lbl_3_common_bss_32724._96 != 0) {
+        goto kill;
+    }
+    if (g_UnkSound_32718._07 == 0 || g_GameLogic.gameStatus == 1) {
+        lbl_80371C30[task->_14]._00->_68 = 1;
+        lbl_80371C30[task->_14 + 2]._00->_68 = 1;
+        lbl_80371C30[task->_14 + 3]._00->_68 = 1;
+        lbl_80371C30[task->_14 + 4]._00->_68 = 1;
+        lbl_80371C30[task->_14 + 5]._00->_68 = 1;
+    }
+    state = task->_1C[0];
+    if (state == 2) {
+        if (lbl_3_common_bss_32724._B4 == 0) {
+            goto kill;
+        }
+    } else if (state != 0) {
+        if (g_GameLogic.gameStatus != 22) {
+            goto kill;
+        }
+    } else if (lbl_3_common_bss_32724._B3 == 0) {
+        goto kill;
+    }
+    if (state != 2) {
+        for (i = 0; i < task->_1A; i++) {
+            sprite = lbl_80371C30[task->_14 + 1 + lbl_3_data_E758[i]]._00;
+            if ((sprite->_5C >> 16) > 40) {
+                sprite->_5C = 60 << 16;
+            }
+            sprite = lbl_80371C30[task->_14 + 2 + lbl_3_data_E758[i]]._00;
+            if ((sprite->_5C >> 16) > 40) {
+                sprite->_5C = 60 << 16;
+            }
+            sprite = lbl_80371C30[task->_14 + 3 + lbl_3_data_E758[i]]._00;
+            if ((sprite->_5C >> 16) > 40) {
+                sprite->_5C = 60 << 16;
+            }
+            sprite = lbl_80371C30[task->_14 + 4 + lbl_3_data_E758[i]]._00;
+            if ((sprite->_5C >> 16) > 40) {
+                sprite->_5C = 60 << 16;
+            }
+            sprite = lbl_80371C30[task->_14 + 5 + lbl_3_data_E758[i]]._00;
+            if ((sprite->_5C >> 16) > 40) {
+                sprite->_5C = 60 << 16;
+            }
+        }
+    }
     return;
+
+kill:
+    fn_80034CEC(task);
+    fn_800B0A14_removeQueue();
 }
 
 // .text:0x00094930 size:0x4C mapped:0x806D39C4
