@@ -1058,21 +1058,19 @@ void fn_3_BD434(s32 stadium, s32 mode) {
 }
 
 // .text:0x000BD1D8 size:0x25C mapped:0x806FC26C
-// The visibility test's operands sit in other FPRs, and the target forms
-// the -448.0f address before loading 640.0f.
 void fn_3_BD1D8(Mtx view) {
     VecSrcDst seg;
     CollisionStruct col;
     Vec v;
     f32 inv;
+    f32 nh;
+    f32 nw;
     f32 hw;
     f32 hh;
     f32 top;
     f32 bottom;
     f32 right;
     f32 left;
-    f32 nw;
-    f32 nh;
     u8 visible;
 
     inv = 1.0f / fn_80052768_getCamera(0)->zoom;
@@ -1081,8 +1079,8 @@ void fn_3_BD1D8(Mtx view) {
     PSMTXMultVec(view, &v, &lbl_3_bss_9978._000);
     if (lbl_3_bss_9978._000.z <= -1.0f) {
         visible = FALSE;
-        hw = 640.0f * lbl_3_bss_9978._000.z * 0.5f / -1280.0f * inv;
-        hh = -448.0f * lbl_3_bss_9978._000.z * 0.5f / -1280.0f * inv;
+        hh = scaleValue(scaleValue(scaleValue(-448.0f, lbl_3_bss_9978._000.z), 0.5f) / -1280.0f, inv);
+        hw = scaleValue(scaleValue(scaleValue(640.0f, lbl_3_bss_9978._000.z), 0.5f) / -1280.0f, inv);
         nw = -hw;
         nh = -hh;
         top = 384.0f + lbl_3_bss_9978._000.y;
@@ -1094,8 +1092,8 @@ void fn_3_BD1D8(Mtx view) {
         }
         lbl_3_common_bss_35154._3E1 = visible;
         if (visible) {
-            lbl_3_bss_996C.x = 2.0f * -lbl_3_bss_9978._000.x;
-            lbl_3_bss_996C.y = 2.0f * -lbl_3_bss_9978._000.y;
+            lbl_3_bss_996C.x = scaleValue(2.0f, -lbl_3_bss_9978._000.x);
+            lbl_3_bss_996C.y = scaleValue(2.0f, -lbl_3_bss_9978._000.y);
             lbl_3_bss_996C.z = 0.0f;
             if (g_UNK_StadiumDetails._77C != 0) {
                 memcpy(&seg.src, &fn_80052768_getCamera(0)->eye, sizeof(Vec));
