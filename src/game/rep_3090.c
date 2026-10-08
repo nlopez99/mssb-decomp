@@ -100,6 +100,19 @@ typedef struct Unk3090View {
     /* 0x84 */ u8 _84;
 } Unk3090View; // size: 0x88
 
+typedef struct Unk3090Pose {
+    /* 0x00 */ Vec _00;
+    /* 0x0C */ Vec _0C;
+    /* 0x18 */ Vec _18;
+    /* 0x24 */ Vec _24;
+    /* 0x30 */ Vec _30;
+    /* 0x3C */ f32 _3C;
+    /* 0x40 */ Vec _40;
+    /* 0x4C */ f32 _4C;
+    /* 0x50 */ f32 _50;
+    /* 0x54 */ u8 _54;
+} Unk3090Pose; // size: 0x58
+
 extern struct {
     u8 _00[0x28];
     u8 _28;
@@ -1629,20 +1642,33 @@ void fn_3_104AD4(Vec* out, Mtx44 mtx) {
 }
 
 // .text:0x00104A88 size:0x4C mapped:0x80743B1C
-void fn_3_104A88(Vec* out, Mtx44 mtx) {
-    PSMTX44MultVec(mtx, &lbl_3_data_20FF8, out);
-    PSVECNormalize(out, out);
+void fn_3_104A88(Vec out, Mtx44 mtx) {
+    PSMTX44MultVec(mtx, &lbl_3_data_20FF8, &out);
+    PSVECNormalize(&out, &out);
 }
 
 // .text:0x00104A3C size:0x4C mapped:0x80743AD0
-void fn_3_104A3C(Vec* out, Mtx44 mtx) {
-    PSMTX44MultVec(mtx, &lbl_3_data_21004, out);
-    PSVECNormalize(out, out);
+void fn_3_104A3C(Vec out, Mtx44 mtx) {
+    PSMTX44MultVec(mtx, &lbl_3_data_21004, &out);
+    PSVECNormalize(&out, &out);
 }
 
 // .text:0x001048E0 size:0x15C mapped:0x80743974
-void fn_3_1048E0(void) {
-    return;
+void fn_3_1048E0(struct Unk3090Track* track, u32 time, s16 channel, u8 depth, struct Unk3090Pose* pose) {
+    Unk3090View view;
+
+    fn_3_105BD8(&view);
+    fn_3_104B3C(track, time, channel, depth, &view);
+    memcpy(&pose->_00, &view._58, sizeof(Vec));
+    memcpy(&pose->_0C, &view._64, sizeof(Vec));
+    memcpy(&pose->_40, &view._70, sizeof(Vec));
+    pose->_3C = view._4C;
+    fn_3_104AD4(&pose->_18, view._00);
+    fn_3_104A88(pose->_24, view._00);
+    fn_3_104A3C(pose->_30, view._00);
+    pose->_4C = view._7C;
+    pose->_50 = view._80;
+    pose->_54 = view._84;
 }
 
 // .text:0x00104740 size:0x1A0 mapped:0x807437D4
@@ -1704,7 +1730,23 @@ void fn_3_1045A8(void) {
 
 // .text:0x00104338 size:0x270 mapped:0x807433CC
 void fn_3_104338(void) {
-    return;
+    Unk3090Pose pose;
+
+    fn_3_1048E0(lbl_3_common_bss_DE94._0000->_0990, lbl_3_common_bss_DE94._0000->_0118, 0, 0, &pose);
+    memcpy(&lbl_3_common_bss_DE94._0000->_0064, &pose._00, sizeof(Vec));
+    lbl_3_common_bss_DE94._0000->_00A0 = pose._3C;
+    lbl_3_common_bss_DE94._0000->_00A4 = pose._4C;
+    lbl_3_common_bss_DE94._0000->_00A8 = pose._50;
+    lbl_3_common_bss_DE94._0000->_09A7 = pose._54;
+    memcpy(&lbl_3_common_bss_DE94._0000->_0088, &pose._0C, sizeof(Vec));
+    g_pCamera->_2858.x = pose._00.x;
+    g_pCamera->_2858.y = pose._00.y;
+    g_pCamera->_2858.z = pose._00.z;
+    g_pCamera->_2870 = pose._4C;
+    g_pCamera->_2874 = pose._50;
+    g_pCamera->_289C = fn_3_9FF04(fn_3_9FEA8(g_pCamera->_2870));
+    g_pCamera->_289C = fn_3_9FF04(fn_3_9FEA8(g_pCamera->_2870));
+    g_pCamera->_2878 = 1.0f;
 }
 
 // .text:0x001040D8 size:0x260 mapped:0x8074316C

@@ -6,6 +6,7 @@
 
 struct Unk3090Track;
 struct Unk3090View;
+struct Unk3090Pose;
 
 void fn_3_FBD58(void);
 void fn_3_FBD70(void);
@@ -38,9 +39,9 @@ void fn_3_1040D8(void);
 void fn_3_104338(void);
 void fn_3_1045A8(void);
 void fn_3_104740(void);
-void fn_3_1048E0(void);
-void fn_3_104A3C(Vec* out, Mtx44 mtx);
-void fn_3_104A88(Vec* out, Mtx44 mtx);
+void fn_3_1048E0(struct Unk3090Track* track, u32 time, s16 channel, u8 depth, struct Unk3090Pose* pose);
+void fn_3_104A3C(Vec out, Mtx44 mtx);
+void fn_3_104A88(Vec out, Mtx44 mtx);
 void fn_3_104AD4(Vec* out, Mtx44 mtx);
 void fn_3_104B20(Vec* out, Mtx44 mtx);
 void fn_3_104B3C(struct Unk3090Track* track, u32 time, s16 channel, u8 depth, struct Unk3090View* view);
