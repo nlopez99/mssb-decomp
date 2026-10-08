@@ -198,6 +198,10 @@ typedef struct StaC2Draw {
             /* 0xA0 */ StaC2Link* link;
         };
         struct {
+            /* 0xA0 */ u8 _A0_AC[0xAC - 0xA0];
+            /* 0xAC */ f32 halfWidth;
+        };
+        struct {
             /* 0xA0 */ struct StaC2Draw* parent;
             /* 0xA4 */ Vec pos;
             /* 0xB0 */ Vec offset;
@@ -517,8 +521,45 @@ void fn_3_D60C0(u32* n) {
 }
 
 // .text:0x000D5E80 size:0x240 mapped:0x80714F14
-void fn_3_D5E80(void) {
-    return;
+void fn_3_D5E80(u32* n) {
+    StaC2Draw* draw;
+    s32 next;
+    s32 idx;
+    Mtx m;
+    s32 group;
+    Control control;
+    s32 i;
+
+    for (group = 0; group < 5; group++) {
+        next = lbl_3_common_bss_350E4._40[*n] = lbl_3_common_bss_350E4._40[*n - 1] + lbl_3_common_bss_350E4._3C[*n - 1];
+        fn_3_B8574();
+        for (i = 0; i < lbl_3_bss_A025; i++) {
+            if (group == lbl_3_data_1849C[i]._0E && lbl_3_data_1849C[i].type != 13) {
+                idx = i + lbl_3_bss_A024;
+                if (lbl_3_common_bss_350E4._00[idx]._90_6) {
+                    lbl_3_common_bss_350E4._44[next] = idx;
+                    next++;
+                    lbl_3_common_bss_350E4._3C[*n]++;
+                    draw = &lbl_3_common_bss_350E4._00[idx];
+                    control = draw->control;
+                    CTRLBuildMatrix(&control, m);
+                    fn_3_B8464(m, draw->_78);
+                    CTRLSetTranslation(&control, draw->halfWidth + lbl_3_data_1849C[draw->_9C].pos.x, 0.0f,
+                                       draw->halfWidth + lbl_3_data_1849C[draw->_9C].pos.z);
+                    CTRLBuildMatrix(&control, m);
+                    fn_3_B8464(m, draw->_78);
+                    CTRLSetTranslation(&control, lbl_3_data_1849C[draw->_9C].pos.x - draw->halfWidth, 0.0f,
+                                       lbl_3_data_1849C[draw->_9C].pos.z - draw->halfWidth);
+                    CTRLBuildMatrix(&control, m);
+                    fn_3_B8464(m, draw->_78);
+                }
+            }
+        }
+        if (lbl_3_common_bss_350E4._3C[*n] != 0) {
+            fn_3_B8414(&lbl_3_common_bss_350E4._48[*n * 2], &lbl_3_common_bss_350E4._48[*n * 2 + 1]);
+            (*n)++;
+        }
+    }
 }
 
 // .text:0x000D5C8C size:0x1F4 mapped:0x80714D20
