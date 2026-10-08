@@ -161,7 +161,6 @@ extern struct {
 } lbl_3_common_bss_37400;
 
 extern int fn_3_6C938(int, int);
-extern int random_fn_3_9EE24(int max);
 extern int fn_3_6D564(int team, int rosterID, int arg);
 extern void fn_3_9C794(void);
 

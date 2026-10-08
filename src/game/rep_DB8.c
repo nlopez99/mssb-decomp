@@ -193,7 +193,6 @@ extern struct {
     }* _0;
 } lbl_3_common_bss_1323C;
 extern void fn_3_1DD48(void);
-extern void fn_3_7A154(int);
 extern void fn_3_1DC30(void);
 extern void fn_3_79EF4(void);
 extern void fn_3_1637EC(void);

@@ -23,6 +23,7 @@
 #include "game/rep_D0.h"
 #include "musyx/musyx.h"
 #include "game/rep_2308.h"
+#include "game/rep_12D0.h"
 
 extern struct {
     /* 0x00 */ s32 _00;
@@ -120,7 +121,6 @@ s16 lbl_3_data_8080[4] = {1, 100, 60, 0};
 BOOL fn_8001C920(int charID);
 extern int LERPToNewRange_Float(int value, int inMin, int inMax, int outMin, int outMax);
 void fn_3_1DD48(void);
-void fn_3_7A154(int arg);
 void fn_3_7CE90(void);
 void fn_3_7BC20(void);
 void fn_3_7AB34(void);

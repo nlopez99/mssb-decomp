@@ -25,6 +25,7 @@
 #include "game/rep_D18.h"
 #include "game/rep_DB8.h"
 #include "game/rep_3090.h"
+#include "game/m_sound.h"
 #include "musyx/musyx.h"
 #include "Dolphin/rand.h"
 
@@ -216,7 +217,6 @@ extern void fn_8004CC18(void);
 extern void fn_3_1E328(void);
 extern void fn_800203E0(int, int);
 extern BOOL fn_80016F7C(void);
-extern BOOL fn_3_90DD8(void);
 extern void fn_3_E1964(void);
 extern void fn_3_1E154(void);
 extern void fn_3_1608F0(int, int, int);

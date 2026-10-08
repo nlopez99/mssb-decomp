@@ -10,6 +10,7 @@
 #include "game/m_sound.h"
 #include "static/UnknownHomes_Static.h"
 #include "game/rep_D18.h"
+#include "game/rep_1188.h"
 #include "Dolphin/gx.h"
 #include "string.h"
 #include "musyx/musyx.h"
@@ -163,7 +164,6 @@ extern void minigamesSetSomePointers2(void);
 extern void fn_3_59A90(void);
 extern void fn_3_591AC(void);
 extern void fn_3_58870(void);
-extern void fn_3_6E24C(int rosterID, int fielderIdx);
 extern void fn_3_1608F0(int, int, int);
 extern void fn_80062BE4(Vec* pos);
 extern u8 lbl_3_data_21E18[2][2];
