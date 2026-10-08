@@ -352,7 +352,6 @@ void fn_3_15EE2C(void) {
 // .text:0x0015DB44 size:0x12E8 mapped:0x8079CBD8
 void fn_3_15DB44(void) {
     UnkTask3BD8* task = lbl_803CC1B8;
-    s32 done;
     s32 flag;
     s32 i;
     s32 j;
@@ -365,7 +364,7 @@ void fn_3_15DB44(void) {
     } else {
         task->_18 = 0xFFFF;
     }
-    done = 0;
+    flag = 0;
     lbl_3_common_bss_32724._D2 = 0;
     if (g_GameLogic._125 == 10) {
         goto kill;
@@ -378,28 +377,28 @@ void fn_3_15DB44(void) {
         if (task->_1E == 0) {
             sprite = lbl_80371C30[task->_14 + 49]._00;
             if ((sprite->_5C >> 16) >= 10) {
-                sprite->_68 = done;
+                sprite->_68 = flag;
             }
             sprite = lbl_80371C30[task->_14 + 50]._00;
             if ((sprite->_5C >> 16) >= 5) {
-                sprite->_68 = done;
+                sprite->_68 = flag;
             }
         } else {
             sprite = lbl_80371C30[task->_14 + 49]._00;
             if ((sprite->_5C >> 16) >= 5) {
-                sprite->_68 = done;
+                sprite->_68 = flag;
             }
             sprite = lbl_80371C30[task->_14 + 50]._00;
             if ((sprite->_5C >> 16) >= 10) {
-                sprite->_68 = done;
+                sprite->_68 = flag;
             }
         }
         sprite = lbl_80371C30[task->_14 + 54]._00;
         if ((sprite->_5C >> 16) >= 10) {
-            sprite->_68 = done;
+            sprite->_68 = flag;
         }
         if (task->_18 >= 30) {
-            lbl_80371C30[task->_14]._00->_68 = done;
+            lbl_80371C30[task->_14]._00->_68 = flag;
             task->_1A++;
         }
     } else if (task->_1A == 2) {
@@ -478,7 +477,7 @@ void fn_3_15DB44(void) {
             sprite = lbl_80371C30[task->_14 + 54]._00;
             if ((sprite->_5C >> 16) <= 21) {
                 sprite->_5C = 0xA0000;
-                done = 1;
+                flag = 1;
                 lbl_80371C30[task->_14 + 54]._00->_68 = 0;
             }
         } else {
@@ -489,14 +488,14 @@ void fn_3_15DB44(void) {
             sprite = lbl_80371C30[task->_14 + 54]._00;
             if ((sprite->_5C >> 16) <= 10) {
                 sprite->_5C = 0xA0000;
-                done = 1;
+                flag = 1;
                 lbl_80371C30[task->_14 + 54]._00->_68 = 0;
             }
         }
         for (i = 2; i <= 42; i++) {
             lbl_80371C30[task->_14 + i]._00->_68 = 1;
         }
-        if (done) {
+        if (flag) {
             task->_1A = 2;
             task->_18 = 0;
         }
