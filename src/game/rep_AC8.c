@@ -7,6 +7,7 @@
 #include "game/rep_1CB8.h"
 #include "game/rep_3E58.h"
 #include "game/rep_540.h"
+#include "game/rep_D0.h"
 #include "game/m_sound.h"
 
 typedef struct UnkAC8Fielder {
@@ -51,7 +52,11 @@ typedef struct UnkAC8Fielder {
     /* 0x0F8 */ u8 _0F8[0x118 - 0xF8];
     /* 0x118 */ f32 _118;
     /* 0x11C */ f32 _11C;
-    /* 0x120 */ u8 _120[0x140 - 0x120];
+    /* 0x120 */ u8 _120[0x128 - 0x120];
+    /* 0x128 */ f32 _128;
+    /* 0x12C */ f32 _12C;
+    /* 0x130 */ f32 _130;
+    /* 0x134 */ u8 _134[0x140 - 0x134];
     /* 0x140 */ f32 _140;
     /* 0x144 */ f32 _144;
     /* 0x148 */ f32 _148;
@@ -71,7 +76,8 @@ typedef struct UnkAC8Fielder {
     /* 0x17E */ s16 _17E;
     /* 0x180 */ u8 _180[0x184 - 0x180];
     /* 0x184 */ s16 _184;
-    /* 0x186 */ u8 _186[0x18A - 0x186];
+    /* 0x186 */ s16 _186;
+    /* 0x188 */ u8 _188[0x18A - 0x188];
     /* 0x18A */ s16 _18A;
     /* 0x18C */ s16 _18C;
     /* 0x18E */ u8 _18E[0x190 - 0x18E];
@@ -91,7 +97,7 @@ typedef struct UnkAC8Fielder {
     /* 0x1AE */ s16 _1AE;
     /* 0x1B0 */ s16 _1B0;
     /* 0x1B2 */ s16 _1B2;
-    /* 0x1B4 */ u8 _1B4[0x1B6 - 0x1B4];
+    /* 0x1B4 */ s16 _1B4;
     /* 0x1B6 */ s16 _1B6;
     /* 0x1B8 */ s16 _1B8;
     /* 0x1BA */ s16 _1BA;
@@ -1240,8 +1246,55 @@ void fn_3_49C18(s32 fielder) {
 }
 
 // .text:0x000499C4 size:0x254 mapped:0x80688A58
-void fn_3_499C4(void) {
-    return;
+// Registers differ around g_Fielders[idx]._186 - g_Ball.framesSinceHit
+// (the g_Fielders and g_Ball bases swap r0/r3/r5/r6).
+void fn_3_499C4(s32 fielder, struct _VecXYZ* out) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    s32 idx = g_FieldingLogic._0B0;
+    s32 found;
+    s32 frame;
+    s32 i;
+    f32 len;
+    f32 nx;
+    f32 nz;
+
+    out->y = 0.0f;
+    if (g_FieldingLogic._0B2 >= 0) {
+        idx = g_FieldingLogic._0B2;
+    }
+    found = 0;
+    frame = g_Fielders[idx]._186 - g_Ball.framesSinceHit;
+    if (frame > 0) {
+        f32 limit = g_Ball.physicsSubstruct.futureCoordsAndDist[frame].dist + lbl_3_data_4930[0];
+        for (i = frame + 1; i < 360; i += 3) {
+            if (limit < g_Ball.physicsSubstruct.futureCoordsAndDist[frame].dist) {
+                break;
+            }
+        }
+        if (i < 360) {
+            found = i;
+        }
+    }
+    if (found == 0) {
+        frame = f->_186 - g_Ball.framesSinceHit;
+        if (frame <= 0) {
+            frame = 90;
+        } else if (frame >= 360) {
+            frame = 359;
+        }
+        len = dolsqrtf2(g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.x *
+                            g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.x +
+                        g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.z *
+                            g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.z);
+        nx = g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.x / len;
+        nz = g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.z / len;
+        len += lbl_3_data_4930[0];
+        out->x = nx * len;
+        out->z = nz * len;
+    } else {
+        out->x = g_Ball.physicsSubstruct.futureCoordsAndDist[found].pos.x;
+        out->z = g_Ball.physicsSubstruct.futureCoordsAndDist[found].pos.z;
+    }
 }
 
 // .text:0x000494F4 size:0x4D0 mapped:0x80688588
@@ -2533,8 +2586,35 @@ void fn_3_28224(void) {
 }
 
 // .text:0x00027FF4 size:0x230 mapped:0x80667088
-void fn_3_27FF4(void) {
-    return;
+BOOL fn_3_27FF4(s32 fielder) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    VecSrcDst line;
+    CollisionStruct hit;
+    f32 len;
+
+    if ((f->_038 == 0.0f && f->_03C == 0.0f) || f->_19A < 0) {
+        return FALSE;
+    }
+    line.src.x = f->_000;
+    line.dst.y = -lbl_3_data_4930[29];
+    line.src.y = -lbl_3_data_4930[29];
+    line.src.z = f->_008;
+    line.dst.x = f->_000 + f->_038 * lbl_3_data_4930[28];
+    line.dst.z = f->_008 + f->_03C * lbl_3_data_4930[28];
+    if ((checkCollision(&line, &hit, 0, FALSE) & 0x7F) != 2) {
+        return FALSE;
+    }
+    f->_207 = 1;
+    f->_1B4 = lbl_3_data_49DC[7];
+    f->_128 = hit.position.x;
+    f->_12C = lbl_3_data_4930[29];
+    f->_130 = hit.position.z;
+    f->_148 = 0.0f;
+    len = dolsqrtf2(hit.normal.x * hit.normal.x + hit.normal.z * hit.normal.z);
+    f->_140 = hit.normal.x / len;
+    f->_144 = hit.normal.z / len;
+    f->_050 = 0.0f;
+    return TRUE;
 }
 
 // .text:0x00027D68 size:0x28C mapped:0x80666DFC
