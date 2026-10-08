@@ -3095,7 +3095,67 @@ void fn_3_480B8(void) {
 
 // .text:0x00047778 size:0x940 mapped:0x8068680C
 void fn_3_47778(void) {
-    return;
+    if (g_Ball.hitClassification2 != 5 && g_Ball.hitClassification2 != 6 && g_Ball.hitClassification2 != 8) {
+        return;
+    }
+    if (g_FieldingLogic._0F8[3] == 1 || g_FieldingLogic._0F8[3] == 10 || g_FieldingLogic._0F8[3] == 11) {
+        if (g_Fielders[5]._18C != -1) {
+            g_Fielders[3]._18C = 6;
+            g_Fielders[3]._1D7 = 2;
+        } else {
+            g_Fielders[5]._18C = 6;
+            g_Fielders[5]._1D7 = 2;
+            if (g_FieldingLogic._0F8[5] == 0) {
+                fn_3_5985C(5, 11);
+            }
+        }
+    } else if (g_FieldingLogic._0F8[5] == 1 || g_FieldingLogic._0F8[5] == 10 || g_FieldingLogic._0F8[5] == 11) {
+        if (g_Fielders[3]._18C != -1) {
+            g_Fielders[5]._18C = 6;
+            g_Fielders[5]._1D7 = 2;
+        } else {
+            g_Fielders[3]._18C = 6;
+            g_Fielders[3]._1D7 = 2;
+            if (g_FieldingLogic._0F8[3] == 0) {
+                fn_3_5985C(3, 11);
+            }
+        }
+    } else if (g_Ball.Hit_HorizontalAngle < 0x400) {
+        if (g_Fielders[3]._18C == 1 &&
+            (g_FieldingLogic._0F8[2] == 1 || g_FieldingLogic._0F8[2] == 10 || g_FieldingLogic._0F8[2] == 11)) {
+            g_Fielders[2]._18C = 6;
+            g_Fielders[2]._1D7 = 2;
+        } else {
+            g_Fielders[3]._18C = 6;
+            g_Fielders[3]._1D7 = 2;
+            if (g_FieldingLogic._0F8[3] == 0) {
+                fn_3_5985C(3, 11);
+            }
+        }
+    } else if (g_Fielders[5]._18C == 3 &&
+               (g_FieldingLogic._0F8[4] == 1 || g_FieldingLogic._0F8[4] == 10 || g_FieldingLogic._0F8[4] == 11)) {
+        g_Fielders[4]._18C = 6;
+        g_Fielders[4]._1D7 = 2;
+    } else {
+        g_Fielders[5]._18C = 6;
+        g_Fielders[5]._1D7 = 2;
+        if (g_FieldingLogic._0F8[5] == 0) {
+            fn_3_5985C(5, 11);
+        }
+    }
+    if (g_FieldingLogic._0F8[0] == 0) {
+        g_Fielders[0]._18C = 15;
+        if (g_Ball.Hit_HorizontalAngle < 0x320) {
+            fn_3_52F4C(0, 6.0f, 16.0f);
+        } else if (g_Ball.Hit_HorizontalAngle < 0x400) {
+            fn_3_52F4C(0, 3.0f, 21.0f);
+        } else if (g_Ball.Hit_HorizontalAngle < 0x4E0) {
+            fn_3_52F4C(0, -3.0f, 21.0f);
+        } else {
+            fn_3_52F4C(0, -6.0f, 16.0f);
+        }
+        fn_3_5985C(0, 14);
+    }
 }
 
 // .text:0x00047628 size:0x150 mapped:0x806866BC
