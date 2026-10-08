@@ -1041,13 +1041,14 @@ void fn_3_8F1C8(void) {
 }
 
 // .text:0x0008DA80 size:0x1748 mapped:0x806CCB14
-// 99.37%: the inlined fn_3_8C2DC re-extends sel in every branch where the target keeps one
-// (u8)sel in r23, the inlined fn_3_8C4F0 holds its step count in r18 (r19 in the target),
-// and the target tests !(song == 4 || song == 0) as a value (cntlzw)
+// The fades and queue pushes are written out in place: fn_3_8B258, fn_3_8C4F0 and fn_3_8C2DC
+// have no callers in the target, and MWCC allocates inlined calls to them differently
 void fn_3_8DA80(void) {
     s32 song = -1;
     BOOL flag = FALSE;
     int sel;
+    BOOL jingle;
+    u32 steps;
 
     switch (g_d_GameSettings.GameModeSelected) {
     case GAME_TYPE_PRACTICE:
@@ -1415,11 +1416,32 @@ game:
         }
     }
     if (lbl_3_common_bss_34C58._2A == 1 && lbl_3_common_bss_34C58._24 != 0) {
-        lbl_3_common_bss_34C58._24--;
-        if (lbl_3_common_bss_34C58._24 == 0) {
+        steps = --lbl_3_common_bss_34C58._24;
+        if (steps == 0) {
             QUEUE_SOUND_LOAD(3, 0, 0);
         } else {
-            fn_3_8C4F0(lbl_3_common_bss_34C58._24, 0);
+            u32 vol;
+            int hi;
+            u8 lo;
+            int level;
+
+            vol = fn_800A8864();
+            hi = (vol >> 8) & 0xFF;
+            lo = vol & 0xFF;
+
+            lbl_3_common_bss_34C58._2F = 0;
+            if (lbl_3_bss_1761 == 0) {
+                lbl_3_bss_1761 = 1;
+                lbl_3_bss_1771 = hi / steps;
+                lbl_3_bss_1770 = lo / steps;
+            }
+            level = hi - lbl_3_bss_1771;
+            if ((s16)level <= 0 || steps == 1) {
+                lbl_3_bss_1761 = 0;
+                fn_800A8878(0, 0);
+            } else {
+                fn_800A8878(level, lo - lbl_3_bss_1770);
+            }
         }
     }
     if (lbl_3_common_bss_34C58._2A == 2) {
@@ -1434,8 +1456,47 @@ game:
         if (g_GameLogic.gameStatus == 0xB) {
             sel = 1;
         }
-        if (!fn_3_8C2DC(lbl_3_common_bss_34C58._24, sel)) {
-            lbl_3_common_bss_34C58._2A = 0;
+        {
+            u8 idx;
+            u32 vol;
+            u8 target;
+            f32 cur;
+            bool more;
+
+            steps = lbl_3_common_bss_34C58._24;
+            idx = sel;
+            vol = fn_800A8864();
+
+            if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+                target = lbl_800E88A4[9][idx];
+            } else if (lbl_3_common_bss_34C58._20 == 0x16) {
+                target = lbl_800E88A4[6][idx];
+            } else if (g_GameLogic.gameStatus == 0xE) {
+                target = lbl_800E88A4[7][idx];
+            } else if (g_GameLogic.gameStatus == 0x17) {
+                target = lbl_800E88A4[8][idx];
+            } else {
+                target = lbl_800E88A4[g_d_GameSettings.StadiumID][idx];
+            }
+            cur = (int)((vol >> 8) & 0xFF);
+            if (cur > lbl_3_bss_1764) {
+                lbl_3_bss_1764 = cur;
+            }
+            if (!lbl_3_common_bss_34C58._2F) {
+                lbl_3_bss_176C = (f32)target / (f32)steps;
+                lbl_3_common_bss_34C58._2F = 1;
+                lbl_3_bss_1764 = cur;
+            }
+            lbl_3_bss_1764 += lbl_3_bss_176C;
+            fn_800A8878(lbl_3_bss_1764, lbl_3_bss_1764);
+            if (lbl_3_bss_1764 >= target) {
+                lbl_3_common_bss_34C58._2F = more = FALSE;
+            } else {
+                more = TRUE;
+            }
+            if (!more) {
+                lbl_3_common_bss_34C58._2A = 0;
+            }
         }
         lbl_3_common_bss_34C58._24--;
     }
@@ -1495,7 +1556,12 @@ change:
     if (lbl_3_common_bss_34C58._20 != -1) {
         if (lbl_3_common_bss_34C58._20 != 0x15 && song != 0x16 && song != 0x17) {
             fn_3_9056C(lbl_3_common_bss_34C58._20);
-            if ((song == 4 || song == 0) == FALSE) {
+            jingle = FALSE;
+            if (song == 4 || song == 0) {
+                jingle = TRUE;
+            }
+            jingle = !jingle;
+            if (jingle) {
                 QUEUE_SOUND_LOAD(4, 0, 0);
             }
         } else {
