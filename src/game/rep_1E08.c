@@ -5,6 +5,7 @@
 #include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
 #include "C3/control.h"
+#include "C3/anim.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/rand.h"
 #include "string.h"
@@ -325,7 +326,6 @@ extern void fn_8003A6B0(s32 idx, void* arg1, f32 x, f32 y);
 extern UnkModelTable1E08* ActorObjectInitTable(u16 count);
 extern void fn_800BDC88(UnkModelTable1E08* table, u16 first, u16 last, void* model, void* anim, void* arg5);
 extern void ACTSetAnimation(void* actor, void* animBank, char* sequenceName, u16 seqNum, f32 time, f32 speed);
-extern void ANIMGet(void* anim);
 extern void LoadActorLayout(void* layout);
 extern void convertGeometryAndSknHeader(void* geo, void* skn);
 extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);

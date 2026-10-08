@@ -8,6 +8,7 @@
 #include "Dolphin/os.h"
 #include "Dolphin/rand.h"
 #include "C3/actor.h"
+#include "C3/anim.h"
 #include "C3/control.h"
 #include "C3/geoPalette.h"
 #include "game/rep_D0.h"
@@ -144,7 +145,6 @@ extern struct {
 
 extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void* ARAMTransfer(AramEntry1D58* entry, int arg1, int arg2, u32 aram);
-extern void ANIMGet(void* anim);
 extern void LoadActorLayout(void* layout);
 extern void convertGeometryAndSknHeader(void* geo, void* skn);
 extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);
@@ -275,7 +275,7 @@ void fn_3_B9D68(u8* types, s32 count, void** files, s32* indices) {
             layout = (u8*)files + (u32)files[k++];
             geo = (u8*)files + (u32)files[k++];
             if (!(types[i] == 2 || types[i] == 3)) {
-                ANIMGet((u8*)files + (u32)files[k++]);
+                ANIMGet((ANIMBank*)((u8*)files + (u32)files[k++]));
             }
             if (types[i] == 3 || types[i] == 5) {
                 skn = (u8*)files + (u32)files[k++];
@@ -294,7 +294,7 @@ void fn_3_B9D68(u8* types, s32 count, void** files, s32* indices) {
             }
             break;
         case 7:
-            ANIMGet((u8*)files + (u32)files[k++]);
+            ANIMGet((ANIMBank*)((u8*)files + (u32)files[k++]));
             break;
         case 8:
         case 9:
