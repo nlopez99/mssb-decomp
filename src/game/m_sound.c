@@ -3,6 +3,8 @@
 #include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
 #include "musyx/seq.h"
+#include "game/rep_720.h"
+#include "Dolphin/os.h"
 
 // The sound bank table: group data pointers, indexed by sound group
 extern struct {
@@ -71,6 +73,11 @@ extern void fn_800A8B78(void);
 extern unsigned long sndCheckEmitter(SND_EMITTER* em);
 extern unsigned long sndRemoveEmitter(SND_EMITTER* em);
 extern SoundLoadTask* lbl_803CC1B8;
+extern unsigned long sndUpdateEmitter(SND_EMITTER* em, SND_FVECTOR* pos, SND_FVECTOR* dir, u8 maxVol, SND_ROOM* room);
+extern camera_803c639c_s* fn_80052734(s32 idx);
+extern u32 fn_800A8864(void);
+extern void fn_800A8878(u8 a, u8 b);
+extern u8 lbl_800E8558[][6];
 
 // rep_1BC8.c declares these as void(u8) and BOOL(s16, s16), which the signed tests of their
 // arguments without extension rule out, so the prototypes stay out of the header until it is fixed
@@ -78,10 +85,13 @@ void fn_3_90AB0(s32 charID);
 BOOL fn_3_90B14(int first, int second);
 
 // .data outside the unit's ranges
+extern u8 lbl_3_data_8148[0x20];
 extern u16 lbl_3_data_8168[0x36];
 extern u8 lbl_3_data_81D4[8];
+extern u16 lbl_3_data_81FC[0x88];
 extern u8 lbl_3_data_830C[0x16][2];
 extern u8 lbl_3_data_8338[0x66][2];
+extern u8 lbl_3_data_84F4[0x3C];
 extern u8 lbl_3_data_8530[2][0x180];
 extern f32 lbl_3_data_88AC[3];
 extern SeqEntry lbl_3_data_88E0[];
@@ -112,6 +122,67 @@ int fn_3_91064(void) {
     fn_80021518(0x1C, lbl_800EF808.groups[3]);
     fn_80021518(0x36, lbl_800EF808.groups[3]);
     return 0;
+}
+
+// .text:0x00090F48 size:0x11C mapped:0x806CFFDC
+int fn_3_90F48(void) {
+    int charID;
+    int idx;
+    int group;
+    u8 slot;
+
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_PRACTICE) {
+        charID = lbl_3_common_bss_34C58._2D;
+    } else if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES ||
+               g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+        charID = g_Minigame.minigameControlStruct._4[lbl_3_common_bss_34C58._2C / 2];
+    } else if (g_GameLogic.gameStatus == 0xE) {
+        charID = lbl_3_common_bss_34C58._2D;
+    } else {
+        slot = lbl_800EF808._39A;
+        charID = inMemRoster[slot / 9][slot % 9].stats.CharID;
+    }
+    idx = fn_800698F8(charID);
+    group = idx + 5;
+    fn_80021518(lbl_3_data_8148[idx], lbl_800EF808.groups[group]);
+    return 0;
+}
+
+// .text:0x00090CB0 size:0x128 mapped:0x806CFD44
+void fn_3_90CB0(void) {
+    int team;
+    int i;
+    int j;
+    BOOL dup;
+    int idx;
+
+    if (g_Minigame._19AB != 0) {
+        for (team = 3; team >= 0; team--) {
+            for (i = 0; i < 4; i++) {
+                if (g_Minigame.minigameControlStruct.characterIndex[i] == team) {
+                    dup = FALSE;
+                    for (j = 0; j < i; j++) {
+                        if (lbl_800E8558[g_Minigame.minigameControlStruct._4[i]][1] ==
+                            lbl_800E8558[g_Minigame.minigameControlStruct._4[j]][1]) {
+                            dup = TRUE;
+                            break;
+                        }
+                    }
+                    if (!dup) {
+                        break;
+                    }
+                }
+            }
+            if (i < 4) {
+                idx = fn_800698F8(inMemRoster[0][team].stats.CharID) + 5;
+                if (lbl_800EF808.groups[idx] != NULL) {
+                    fn_800214D0();
+                    fn_800ACFB0(lbl_800EF808.groups[idx]);
+                    lbl_800EF808.groups[idx] = NULL;
+                }
+            }
+        }
+    }
 }
 
 // .text:0x00090C14 size:0x9C mapped:0x806CFCA8
@@ -356,12 +427,42 @@ void fn_3_90150(void) {
 
 // .text:0x00090064 size:0xEC mapped:0x806CF0F8
 SND_VOICEID fn_3_90064(int id) {
-    return 0;
+    int i;
+
+    if (g_d_GameSettings.GameModeSelected != GAME_TYPE_MINIGAMES) {
+        OSPanic("m_sound.c", 0x402, "no mini game");
+    }
+    for (i = 0; i < 0x39; i++) {
+        if (id == lbl_3_data_81FC[i]) {
+            break;
+        }
+    }
+    if (i == 0x39) {
+        OSPanic("m_sound.c", 0x40D, "no entry mini_se_no");
+    }
+    return sndFXStartEx(id, lbl_3_data_84F4[i], 0x3F, 0);
 }
 
 // .text:0x0008FF5C size:0x108 mapped:0x806CEFF0
 SND_VOICEID fn_3_8FF5C(s32 sound, f32 x, f32 y, f32 z) {
-    return 0;
+    int sx;
+    int sy;
+    int pan = 0x3F;
+    SND_VOICEID vid;
+
+    if (lbl_800EF808._396 == 1) {
+        fn_3_1650C(&sx, &sy, TRUE, x, -y, z);
+        if (sx < 0) {
+            pan = 0;
+        } else if (sx > 640) {
+            pan = 0x7F;
+        } else {
+            pan = 127.0f * (sx / 640.0f);
+        }
+    }
+    vid = sndFXStartEx(sound, lbl_3_data_8338[sound - 0x151][0], pan, 0);
+    sndFXCtrl(vid, 0x5B, lbl_3_data_8338[sound - 0x151][1]);
+    return vid;
 }
 
 // .text:0x0008FF18 size:0x44 mapped:0x806CEFAC
@@ -432,8 +533,25 @@ void fn_3_8C5C8(void) {
 }
 
 // .text:0x0008C4F0 size:0xD8 mapped:0x806CB584
-void fn_3_8C4F0(void) {
-    return;
+BOOL fn_3_8C4F0(u32 steps, u8 target) {
+    u32 vol = fn_800A8864();
+    int hi = (vol >> 8) & 0xFF;
+    u8 lo = vol & 0xFF;
+
+    lbl_3_common_bss_34C58._2F = 0;
+    if (lbl_3_bss_1761 == 0) {
+        lbl_3_bss_1761 = 1;
+        lbl_3_bss_1771 = hi / steps;
+        lbl_3_bss_1770 = lo / steps;
+    }
+    hi -= lbl_3_bss_1771;
+    if ((s16)hi <= target || steps == 1) {
+        lbl_3_bss_1761 = 0;
+        fn_800A8878(target, target);
+        return FALSE;
+    }
+    fn_800A8878(hi, lo - lbl_3_bss_1770);
+    return TRUE;
 }
 
 // .text:0x0008C2DC size:0x214 mapped:0x806CB370
@@ -499,7 +617,19 @@ void fn_3_8B964(SND_FVECTOR* pos, SND_FVECTOR* dir, SND_FVECTOR* heading) {
 
 // .text:0x0008B890 size:0xD4 mapped:0x806CA924
 void fn_3_8B890(s32 handle) {
-    return;
+    SND_EMITTER* em;
+
+    if (handle < 0 || handle >= 100 || !lbl_3_common_bss_32B20.emitterActive[handle]) {
+        return;
+    }
+    em = &lbl_3_common_bss_32B20.emitters[handle];
+    if (sndCheckEmitter(em)) {
+        SND_FVECTOR pos = { 0.0f, 0.0f, 0.0f };
+        SND_FVECTOR dir = { 0.0f, 0.0f, 1.0f };
+
+        sndUpdateEmitter(em, &pos, &dir, 0, NULL);
+        sndRemoveEmitter(em);
+    }
 }
 
 // .text:0x0008B804 size:0x8C mapped:0x806CA898
@@ -522,8 +652,25 @@ void fn_3_8B7DC(void) {
 }
 
 // .text:0x0008B718 size:0xC4 mapped:0x806CA7AC
-void fn_3_8B718(void) {
-    return;
+void fn_3_8B718(Vec* pos, Vec* vel, Vec* dir) {
+    camera_803c639c_s* cam = fn_80052734(0);
+
+    if (pos != NULL) {
+        pos->x = cam->eye.x;
+        pos->y = cam->eye.y;
+        pos->z = cam->eye.z;
+    }
+    if (vel != NULL) {
+        vel->x = 0.0f;
+        vel->y = 0.0f;
+        vel->z = 0.0f;
+    }
+    if (dir != NULL) {
+        PSVECSubtract(&cam->target, &cam->eye, dir);
+        if (PSVECMag(dir)) {
+            PSVECNormalize(dir, dir);
+        }
+    }
 }
 
 // .text:0x0008B2E4 size:0x34 mapped:0x806CA378
