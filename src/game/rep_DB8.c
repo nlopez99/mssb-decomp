@@ -3,7 +3,7 @@
 #include "static/UnknownHomes_Static.h"
 #include "game/rep_DB8.h"
 #include "musyx/musyx.h"
-#include "PowerPC_EABI_Support/MSL_C/MSL_Common/rand.h"
+#include "Dolphin/rand.h"
 #include "game/rep_D18.h"
 #include "game/rep_1200.h"
 #include "game/rep_1188.h"
@@ -195,7 +195,6 @@ extern void fn_3_1DD48(void);
 extern void fn_3_7A154(int);
 extern void fn_3_90AB0(s32);
 extern void fn_3_1DC30(void);
-extern u8 lbl_3_data_60F0;
 extern int fn_3_B32B8(void);
 extern void fn_3_79EF4(void);
 extern void fn_3_1637EC(void);
@@ -229,7 +228,6 @@ typedef struct {
     /* 0x0 */ u32 _0[4];
 } FileEntryDB8; // size 0x10
 
-extern FileEntryDB8 lbl_3_data_6130[62];
 
 extern struct {
     /* 0x000 */ u8 _000[0x101];
@@ -254,11 +252,93 @@ typedef struct {
     /* 0x6 */ s16 _6;
 } ChallengeStartDB8; // size 0x8
 
-extern ChallengeStartDB8 lbl_3_data_5FF4[2][4][2];
-extern s16 lbl_3_data_6074[4];
 extern s16 lbl_3_data_607C[16];
 extern u8 lbl_8010B600[][3];
 extern u8 lbl_3_data_6104[8];
+
+ChallengeStartDB8 lbl_3_data_5FF4[2][4][2] = {
+    {
+        { { -2, 0, 0x000, 2 }, { -2, 1, 0x001, 3 } },
+        { { -2, 0, 0x001, 2 }, { -2, 1, 0x010, 3 } },
+        { { -1, 0, 0x000, 2 }, { -1, 1, 0x010, 3 } },
+        { { -1, 1, 0x011, 3 }, { -1, 2, 0x111, 4 } },
+    },
+    {
+        { { 0, 0, 0x010, 2 }, { 0, 0, 0x011, 2 } },
+        { { 0, 1, 0x010, 3 }, { 0, 0, 0x000, 2 } },
+        { { -1, 1, 0x010, 3 }, { -1, 0, 0x000, 2 } },
+        { { -1, 2, 0x010, 4 }, { -1, 1, 0x000, 3 } },
+    },
+};
+
+s16 lbl_3_data_6074[4] = { 3, 2, 1, 0 };
+
+u8 lbl_3_data_60F0 = 30;
+
+FileEntryDB8 lbl_3_data_6130[62] = {
+    { { 0x0000040B, 0x4013764C, 0x1A635000, 0x0007DB48 } },
+    { { 0x0000040B, 0x4003E3DC, 0x1A6B3000, 0x00021420 } },
+    { { 0x0000040B, 0x4002EC10, 0x1A6D4800, 0x00013108 } },
+    { { 0x0000040B, 0x400E72C0, 0x1A6E8000, 0x00060768 } },
+    { { 0x0000040B, 0x40049404, 0x1A748800, 0x00020E34 } },
+    { { 0x0000040B, 0x40076AE0, 0x18ED7000, 0x00036BC8 } },
+    { { 0x0000040B, 0x4010FD70, 0x1A769800, 0x0005E284 } },
+    { { 0x0000040B, 0x400DB738, 0x1A7C8000, 0x00049AB4 } },
+    { { 0x0000040B, 0x400E9864, 0x1A812000, 0x00059DC0 } },
+    { { 0x0000040B, 0x400B7718, 0x1A86C000, 0x00050288 } },
+    { { 0x0000040B, 0x400D87FC, 0x1A8BC800, 0x00047BC4 } },
+    { { 0x0000040B, 0x400D643C, 0x1A904800, 0x0004E3AC } },
+    { { 0x0000040B, 0x400D5C7C, 0x1A953000, 0x00048D9C } },
+    { { 0x0000040B, 0x400B767C, 0x1A99C000, 0x00047518 } },
+    { { 0x0000040B, 0x400441F8, 0x1A9E3800, 0x0001AA84 } },
+    { { 0x0000040B, 0x40106568, 0x1A9FE800, 0x00068C10 } },
+    { { 0x0000040B, 0x4010E5A0, 0x0E97A800, 0x0009BCAC } },
+    { { 0x0000040B, 0x40016980, 0x0EA16800, 0x0000D6C4 } },
+    { { 0x0000040B, 0x40016980, 0x0EA24000, 0x0000C944 } },
+    { { 0x0000040B, 0x40016980, 0x0EA31000, 0x0000E700 } },
+    { { 0x0000040B, 0x40016980, 0x0EA3F800, 0x0000D64C } },
+    { { 0x0000040B, 0x40016980, 0x0EA4D000, 0x0000C900 } },
+    { { 0x0000040B, 0x40016980, 0x0EA5A000, 0x0000CFFC } },
+    { { 0x0000040B, 0x40016980, 0x0EA67000, 0x0000D720 } },
+    { { 0x0000040B, 0x40016980, 0x0EA74800, 0x0000D6CC } },
+    { { 0x0000040B, 0x40016980, 0x0EA82000, 0x0000D21C } },
+    { { 0x0000040B, 0x40016980, 0x0EA8F800, 0x0000D0BC } },
+    { { 0x0000040B, 0x40016980, 0x0EA9D000, 0x0000B544 } },
+    { { 0x0000040B, 0x40016980, 0x0EAA8800, 0x0000C4F8 } },
+    { { 0x0000040B, 0x400ADFFC, 0x18AEE800, 0x0004BAB0 } },
+    { { 0x0000040B, 0x4037CF5C, 0x18B3A800, 0x00208AF0 } },
+    { { 0x0000040B, 0x4000A820, 0x18ED3800, 0x00003758 } },
+    { { 0x0000040B, 0x4011EC24, 0x18F0E000, 0x000D8818 } },
+    { { 0x0000040B, 0x400193E8, 0x191B8800, 0x000089D8 } },
+    { { 0x0000040B, 0x4006C850, 0x06C96000, 0x0002C884 } },
+    { { 0x0000040B, 0x4005B178, 0x06CC3000, 0x0003555C } },
+    { { 0x0000040B, 0x401EB174, 0x18D43800, 0x000FB220 } },
+    { { 0x0000040B, 0x4001ED60, 0x1AA67800, 0x0000CFF0 } },
+    { { 0x0000040B, 0x4000BF30, 0x1AA74800, 0x000026E0 } },
+    { { 0x0000040B, 0x40003498, 0x1AA77000, 0x00000E28 } },
+    { { 0x0000040B, 0x4000BDE0, 0x1AA78000, 0x000024F4 } },
+    { { 0x0000040B, 0x40006088, 0x1AA7A800, 0x00001290 } },
+    { { 0x0000040B, 0x400049F0, 0x1AA7C000, 0x000018F4 } },
+    { { 0x0000040B, 0x40005ECC, 0x1AA7E000, 0x00001D38 } },
+    { { 0x0000040B, 0x40002670, 0x1AA80000, 0x00000BE8 } },
+    { { 0x00000000, 0x00028240, 0x1AA81000, 0x00028240 } },
+    { { 0x00000000, 0x00028240, 0x1AAA9800, 0x00028240 } },
+    { { 0x00000000, 0x00028240, 0x1AAD2000, 0x00028240 } },
+    { { 0x00000000, 0x00028240, 0x1AAFA800, 0x00028240 } },
+    { { 0x00000000, 0x00028240, 0x1AB23000, 0x00028240 } },
+    { { 0x00000000, 0x00028240, 0x1AB4B800, 0x00028240 } },
+    { { 0x00000000, 0x00028240, 0x1AB74000, 0x00028240 } },
+    { { 0x00000000, 0x00028240, 0x1AB9C800, 0x00028240 } },
+    { { 0x00000000, 0x00028240, 0x1ABC5000, 0x00028240 } },
+    { { 0x00000000, 0x00028240, 0x1ABED800, 0x00028240 } },
+    { { 0x00000000, 0x00028240, 0x1AC16000, 0x00028240 } },
+    { { 0x00000000, 0x00028240, 0x1AC3E800, 0x00028240 } },
+    { { 0x00000000, 0x00028240, 0x1AC67000, 0x00028240 } },
+    { { 0x00000000, 0x00028240, 0x1AC8F800, 0x00028240 } },
+    { { 0x00000000, 0x00028240, 0x1ACB8000, 0x00028240 } },
+    { { 0x00000000, 0x00028240, 0x1ACE0800, 0x00028240 } },
+    { { 0x00000000, 0x00028240, 0x1AD09000, 0x00028240 } },
+};
 
 // .text:0x0006011C size:0x64C mapped:0x8069F1B0
 void fn_3_6011C(void) {
@@ -661,16 +741,17 @@ void fn_3_5F3FC(void) {
 }
 
 // .text:0x0005F154 size:0x2A8 mapped:0x8069E1E8
+// 99.18%: registers only: the target gives g_Scores r7 and 999 r8, here r8 and r5.
 void fn_3_5F154(void) {
     int diff;
 
     fn_3_5F720();
     g_Scores._9C = 0;
     g_Scores._9E = g_Scores._04[g_Scores._AD][g_Scores._00];
-    g_Scores._A2 = g_Scores._A0;
     g_GameLogic._12F = 0;
     g_GameLogic._123 = 0;
     g_GameLogic.CountdownUntilFade = 999;
+    g_Scores._A2 = g_Scores._A0;
     g_GameLogic.PauseSimulationFrameCount = 0;
     g_GameLogic.playOver = 0;
     g_GameLogic.walkOffWinInd = 0;
@@ -1113,6 +1194,8 @@ void fn_3_5DF54(void) {
 }
 
 // .text:0x0005DD30 size:0x224 mapped:0x8069CDC4
+// 99.31%: registers only, in the deadBallReason 4 loop: the target allocates runs
+// (r8) ahead of _AA, _00 and _AD, where this gives it r11.
 void fn_3_5DD30(void) {
     int count = 0;
     int runs;
@@ -1494,6 +1577,8 @@ void fn_3_5CD24(void) {
 }
 
 // .text:0x0005C74C size:0x5D8 mapped:0x8069B7E0
+// 98.07%: the target reloads g_Strikes.outs for outs + forced through a kept &g_Strikes
+// and saves r28 too; every register from r4 up is one higher than here.
 void fn_3_5C74C(int arg) {
     int forced = 0;
     u64 total = 0;
@@ -1900,6 +1985,8 @@ void fn_3_5BA2C(void) {
 }
 
 // .text:0x0005B5A0 size:0x48C mapped:0x8069A634
+// 95.33%: the target forms g_Runners' and g_GameLogic's addresses again in each of the
+// three runner blocks, where this keeps them in registers; allocation differs from 0x1AC on.
 void fn_3_5B5A0(void) {
     int r;
     s16 bases;
