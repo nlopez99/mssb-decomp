@@ -161,15 +161,19 @@ void fn_3_FF98(void) {
 }
 
 // .text:0x0000FF4C size:0x4C mapped:0x8064EFE0
-// 92.9%: same instructions in the same order; the registers differ.
+// 94.5%: same instructions in the same order; the volatile registers differ.
 void fn_3_FF4C(void) {
-    s32 a = g_Ball.StaticRandomInt1 & 0x505;
-    s32 b = g_Ball.StaticRandomInt2 & 0x505;
+    s32 a;
+    s32 b;
+    s32 x = g_Ball.StaticRandomInt1;
+    s32 y = g_Ball.StaticRandomInt2;
 
-    a = (g_Ball.StaticRandomInt1 >> 1) + a;
-    b = (g_Ball.StaticRandomInt2 >> 2) + b;
-    g_Ball.StaticRandomInt1 = (g_Ball.StaticRandomInt1 * 8 + a) & 0x7FFF;
-    g_Ball.StaticRandomInt2 = (g_Ball.StaticRandomInt2 * 8 + b) & 0x7FFF;
+    a = x & 0x505;
+    b = y & 0x505;
+    a = (x >> 1) + a;
+    b = (y >> 2) + b;
+    g_Ball.StaticRandomInt1 = (x * 8 + a) & 0x7FFF;
+    g_Ball.StaticRandomInt2 = (y * 8 + b) & 0x7FFF;
 }
 
 // .text:0x0000FBA8 size:0x3A4 mapped:0x8064EC3C
@@ -1367,7 +1371,8 @@ void fn_3_B440(void) {
 }
 
 // .text:0x0000A970 size:0xAD0 mapped:0x80649A04
-// 99.70%: &velocity.x and &velocity.z swap r28/r27, and the star swing takes r6 for r5.
+// 99.77%: the target squares velocity.x before velocity.z for the banana-hit speed but still
+// gives &velocity.x r28 (x first here gives it r27), and the star swing takes r6 for r5.
 void fn_3_A970(int mode) {
     f32 speed;
     f32 angle;
@@ -1439,7 +1444,7 @@ void fn_3_A970(int mode) {
     if ((g_Ball.currentStarSwing == 5 || g_Ball.currentStarSwing == 6) &&
         g_Ball.framesSinceHit > g_Ball.matchFramesAndBallAngle.bananaHitStartFrame &&
         g_Ball.framesSinceHit < g_Ball.matchFramesAndBallAngle.bananaHitEndFrame) {
-        speed = VEC_LENGTH_XZ(&g_Ball.physicsSubstruct.velocity);
+        speed = dolsqrtf2(SQ(g_Ball.physicsSubstruct.velocity.z) + SQ(g_Ball.physicsSubstruct.velocity.x));
         angle = game_atan2(g_Ball.physicsSubstruct.velocity.x, g_Ball.physicsSubstruct.velocity.z);
         if (g_Ball.directionOfBananaHit) {
             angle += g_hitFloats.DKStarAngleDelta;
@@ -1447,8 +1452,8 @@ void fn_3_A970(int mode) {
             angle -= g_hitFloats.DKStarAngleDelta;
         }
         getComponentsFromRad(angle, &g_Ball.physicsSubstruct.velocity.x, &g_Ball.physicsSubstruct.velocity.z);
-        g_Ball.physicsSubstruct.velocity.z *= speed;
         g_Ball.physicsSubstruct.velocity.x *= speed;
+        g_Ball.physicsSubstruct.velocity.z *= speed;
     }
     g_Ball.AtBat_Contact_BallPos.x += g_Ball.physicsSubstruct.velocity.x;
     g_Ball.AtBat_Contact_BallPos.y += g_Ball.physicsSubstruct.velocity.y;
