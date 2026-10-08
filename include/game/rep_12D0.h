@@ -34,6 +34,7 @@ struct Unk12D0PlayerStats* fn_3_7BB74(void);
 struct Unk12D0PitcherStats* fn_3_7BBC0(void);
 void fn_3_7BBF8(void);
 void fn_3_7BC0C(void);
+void fn_3_7BC20(void);
 void fn_3_7C190(void);
 BOOL fn_3_7C194(void);
 

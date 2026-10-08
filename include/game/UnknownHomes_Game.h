@@ -1187,7 +1187,7 @@ typedef struct _GameControlsStruct {
     /*0x13A*/ u8 walkOffWinInd; // unsure
     /*0x13B*/ u8 gameOverInd;
     /*0x13C*/ u8 scoutFlag_VsScreenInd;
-    artificial_padding(0x13C, 0x13E, u8);
+    /*0x13D*/ u8 _13D;
     /*0x13E*/ u8 _13E[2];
     /*0x140*/ u8 _140[2];
     /*0x142*/ u8 teamAIInd[2];
@@ -2843,8 +2843,13 @@ typedef struct {
     /* 0x48 */ u8 _48[0x4C - 0x48];
     /* 0x4C */ s16 _4C[2];
     /* 0x50 */ u8 _50[0x52 - 0x50];
-    /* 0x52 */ s16 _52[2][2];
-    /* 0x5A */ u8 _5A[0x60 - 0x5A];
+    union {
+        /* 0x52 */ s16 _52[2][2];
+        struct {
+            /* 0x52 */ u8 _52_pad[0x58 - 0x52];
+            /* 0x58 */ s16 _58[2][2];
+        };
+    };
     /* 0x60 */ u8 _60;
     /* 0x61 */ u8 _61;
     /* 0x62 */ u8 _62;
