@@ -196,7 +196,7 @@ s32 fn_3_5164C(s32 fielder, struct _VecXYZ* out);
 BOOL fn_3_51798(s32 fielder, struct _VecXYZ* delta);
 u8 fn_3_51DF0(f32 x, f32 z);
 void fn_3_52084(void);
-void fn_3_522E0(void);
+void fn_3_522E0(s32 fielder, s32 frames, f32 dx, f32 dz, f32* x, f32* z, f32* dist);
 int fn_3_52560(int fielder, f32 x, f32 z);
 void fn_3_526DC(s32 fielder);
 void fn_3_52F4C(s32 fielder, f32 x, f32 z);

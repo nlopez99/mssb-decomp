@@ -30,7 +30,8 @@ typedef struct UnkAC8Fielder {
     /* 0x050 */ f32 _050;
     /* 0x054 */ f32 _054;
     /* 0x058 */ f32 _058;
-    /* 0x05C */ u8 _05C[0x64 - 0x5C];
+    /* 0x05C */ f32 _05C;
+    /* 0x060 */ u8 _060[0x64 - 0x60];
     /* 0x064 */ f32 _064;
     /* 0x068 */ f32 _068;
     /* 0x06C */ u8 _06C[0x70 - 0x6C];
@@ -206,11 +207,12 @@ extern struct {
     /* 0x2C50 */ struct UnkPlayer3E58* _2C50[9];
 } lbl_8036E548;
 
-// rep_1838.h declares fn_3_9FB8C as returning s16; callers here sign-extend its result, so they saw an s32 return.
+// rep_1838.h declares fn_3_9FB8C as returning s16 and fn_3_9FCF8 as taking s16s: callers here
+// sign-extend fn_3_9FB8C's result and pass fn_3_9FCF8 unextended ints, which it extends itself.
 extern s16 radToShortAngle(f32 v);
 extern s32 fn_3_9FB8C(f32 x, f32 y);
 extern s16 fn_3_9FCA4(s16 a, s16 b);
-extern s16 fn_3_9FCF8(s16 a, s16 b);
+extern s16 fn_3_9FCF8(s32 a, s32 b);
 extern void getComponentsFromSAng(s16 ang, f32* x, f32* y);
 extern bool calculateLineIntersection(VecXZ* out, VecXZ* a, VecXZ* b);
 extern u8 lbl_3_data_46F8[][9];
@@ -820,8 +822,42 @@ int fn_3_52560(int fielder, f32 x, f32 z) {
 }
 
 // .text:0x000522E0 size:0x280 mapped:0x80691374
-void fn_3_522E0(void) {
-    return;
+void fn_3_522E0(s32 fielder, s32 frames, f32 dx, f32 dz, f32* x, f32* z, f32* dist) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    f32 total = 0.0f;
+    f32 speed = f->_050;
+    f32 len;
+    f32 nx;
+    f32 nz;
+    s32 angle;
+    s32 i;
+
+    if (dx == 0.0f && dz == 0.0f) {
+        *x = f->_000;
+        *z = f->_008;
+        *dist = 0.0f;
+        return;
+    }
+    len = dolsqrtf2(dx * dx + dz * dz);
+    nx = dx / len;
+    nz = dz / len;
+    angle = fn_3_9FB8C(nx, nz);
+    if (!(f->_050 < 0.05f) && f->_19A >= 0 && fn_3_9FCF8(angle, f->_19A) > 0x2A8) {
+        speed = 0.0f;
+    }
+    for (i = 0; i <= f->_1D1; i++) {
+        speed += f->_05C;
+        if (speed > f->_058) {
+            total += f->_058;
+            break;
+        }
+        total += speed;
+    }
+    frames -= i + 1;
+    total = f->_058 * frames + total;
+    *dist = total;
+    *x = nx * total + f->_000;
+    *z = nz * total + f->_008;
 }
 
 // .text:0x00052084 size:0x25C mapped:0x80691118
