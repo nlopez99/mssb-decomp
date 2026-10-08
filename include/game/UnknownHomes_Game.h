@@ -944,7 +944,7 @@ typedef struct _PracticeStruct {
     /*0x1AA*/ u8 transitioningIndicator; // unsure
     /*0x1AB*/ u8 _1AB[4];
     /*0x1AF*/ u8 returnToPracticeMenuState;
-    artificial_padding(0x1af, 0x1b1, u8);
+    /*0x1B0*/ u8 _1B0;
     /*0x1B1*/ u8 _1B1;
     /*0x1B2*/ u8 _1B2[4][4];
     /*0x1C2*/ s8 instructionNumber;
@@ -1152,8 +1152,8 @@ typedef struct _GameControlsStruct {
     /*0x10A*/ s16 bOD_framesInLiveBallScene;
     /*0x10C*/ s16 frameCountdownAtBeginningOfAtBatLockout;
     /*0x10E*/ u16 scoreBook_teamDisplayed;
-    /*0x110*/ s16 scoreBook_batter_pitcherStatsDisplayed;
-    /*0x112*/ s16 scoreBook_scrollIndex;
+    /*0x110*/ u16 scoreBook_batter_pitcherStatsDisplayed;
+    /*0x112*/ u16 scoreBook_scrollIndex;
     /*0x114*/ s16 _114;
     /*0x116*/ s16 scoreBook_logoFadeDirectionLeft_Right;
     /*0x118*/ s16 _118;
