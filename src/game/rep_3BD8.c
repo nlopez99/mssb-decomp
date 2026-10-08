@@ -347,7 +347,320 @@ void fn_3_15EE2C(void) {
 
 // .text:0x0015DB44 size:0x12E8 mapped:0x8079CBD8
 void fn_3_15DB44(void) {
+    UnkTask3BD8* task = lbl_803CC1B8;
+    s32 done;
+    s32 flag;
+    s32 i;
+    s32 j;
+    s32 team;
+    u32 frame;
+    UnkSprite3BD8* sprite;
+
+    if (task->_18 < 0xFFFE) {
+        task->_18++;
+    } else {
+        task->_18 = 0xFFFF;
+    }
+    done = 0;
+    lbl_3_common_bss_32724._D2 = 0;
+    if (g_GameLogic._125 == 10) {
+        goto kill;
+    }
+    if (task->_1A == 0) {
+        lbl_3_common_bss_32724._D2 = 1;
+        task->_1A++;
+    } else if (task->_1A == 1) {
+        lbl_3_common_bss_32724._D2 = 1;
+        if (task->_1E == 0) {
+            sprite = lbl_80371C30[task->_14 + 49]._00;
+            if ((sprite->_5C >> 16) >= 10) {
+                sprite->_68 = done;
+            }
+            sprite = lbl_80371C30[task->_14 + 50]._00;
+            if ((sprite->_5C >> 16) >= 5) {
+                sprite->_68 = done;
+            }
+        } else {
+            sprite = lbl_80371C30[task->_14 + 49]._00;
+            if ((sprite->_5C >> 16) >= 5) {
+                sprite->_68 = done;
+            }
+            sprite = lbl_80371C30[task->_14 + 50]._00;
+            if ((sprite->_5C >> 16) >= 10) {
+                sprite->_68 = done;
+            }
+        }
+        sprite = lbl_80371C30[task->_14 + 54]._00;
+        if ((sprite->_5C >> 16) >= 10) {
+            sprite->_68 = done;
+        }
+        if (task->_18 >= 30) {
+            lbl_80371C30[task->_14]._00->_68 = done;
+            task->_1A++;
+        }
+    } else if (task->_1A == 2) {
+        if (task->_20 != g_GameLogic.scoreBook_scrollIndex) {
+            lbl_3_common_bss_32724._D2 = 1;
+            task->_18 = 0;
+            task->_1A = 7;
+        } else if (task->_1C != g_GameLogic.scoreBook_teamDisplayed) {
+            lbl_3_common_bss_32724._D2 = 1;
+            task->_18 = 0;
+            task->_1A = 3;
+        } else if (task->_1E != g_GameLogic.scoreBook_batter_pitcherStatsDisplayed) {
+            lbl_3_common_bss_32724._D2 = 1;
+            task->_18 = 0;
+            task->_1A = 5;
+        } else if (g_GameLogic._125 == 8) {
+            lbl_3_common_bss_32724._D2 = 1;
+            task->_18 = 0;
+            task->_1A = 9;
+        }
+    } else if (task->_1A == 3) {
+        lbl_3_common_bss_32724._D2 = 1;
+        flag = 0;
+        if (g_GameLogic.scoreBook_logoFadeDirectionLeft_Right == 0) {
+            if (task->_18 == 1) {
+                lbl_80371C30[task->_14 + 54]._00->_5C = 0x150000;
+                lbl_80371C30[task->_14 + 54]._00->_68 = 1;
+            }
+            sprite = lbl_80371C30[task->_14 + 54]._00;
+            if ((sprite->_5C >> 16) >= 31) {
+                flag = 1;
+                sprite->_68 = 0;
+            }
+        } else {
+            if (task->_18 == 1) {
+                lbl_80371C30[task->_14 + 54]._00->_5C = 0xA0000;
+                lbl_80371C30[task->_14 + 54]._00->_68 = 1;
+            }
+            sprite = lbl_80371C30[task->_14 + 54]._00;
+            if ((sprite->_5C >> 16) >= 20) {
+                flag = 1;
+                sprite->_68 = 0;
+            }
+        }
+        for (i = 2; i < 43; i++) {
+            lbl_80371C30[task->_14 + i]._00->_68 = 4;
+        }
+        if (flag) {
+            task->_1A = 4;
+            task->_18 = 0;
+        }
+    } else if (task->_1A == 4) {
+        lbl_3_common_bss_32724._D2 = 1;
+        if (task->_18 == 1) {
+            task->_1C = g_GameLogic.scoreBook_teamDisplayed;
+            if (task->_1C == 0) {
+                lbl_80371C30[task->_14 + 55]._00->_54 |= 2;
+                lbl_80371C30[task->_14 + 56]._00->_54 &= ~2;
+            } else {
+                lbl_80371C30[task->_14 + 55]._00->_54 &= ~2;
+                lbl_80371C30[task->_14 + 56]._00->_54 |= 2;
+            }
+            team = g_GameLogic.homeTeamInd ^ task->_1C;
+            if (g_GameLogic._13E[team] != 0) {
+                fn_800363D8(task, 57, 1, 3, g_GameLogic.teams[team] + 4);
+            } else {
+                fn_800363D8(task, 57, 1, 3, g_GameLogic.teams[team]);
+            }
+            fn_3_15D1D8(task);
+        }
+        if (g_GameLogic.scoreBook_logoFadeDirectionLeft_Right == 1) {
+            if (task->_18 == 1) {
+                lbl_80371C30[task->_14 + 54]._00->_5C = 0x1F0000;
+                lbl_80371C30[task->_14 + 54]._00->_68 = 4;
+            }
+            sprite = lbl_80371C30[task->_14 + 54]._00;
+            if ((sprite->_5C >> 16) <= 21) {
+                sprite->_5C = 0xA0000;
+                done = 1;
+                lbl_80371C30[task->_14 + 54]._00->_68 = 0;
+            }
+        } else {
+            if (task->_18 == 1) {
+                lbl_80371C30[task->_14 + 54]._00->_5C = 0x140000;
+                lbl_80371C30[task->_14 + 54]._00->_68 = 4;
+            }
+            sprite = lbl_80371C30[task->_14 + 54]._00;
+            if ((sprite->_5C >> 16) <= 10) {
+                sprite->_5C = 0xA0000;
+                done = 1;
+                lbl_80371C30[task->_14 + 54]._00->_68 = 0;
+            }
+        }
+        for (i = 2; i < 43; i++) {
+            lbl_80371C30[task->_14 + i]._00->_68 = 1;
+        }
+        if (done) {
+            task->_1A = 2;
+            task->_18 = 0;
+        }
+    } else if (task->_1A == 5) {
+        lbl_3_common_bss_32724._D2 = 1;
+        if (task->_18 == 1) {
+            for (i = 7; i < 49; i++) {
+                lbl_80371C30[task->_14 + i]._00->_68 = 4;
+            }
+        }
+        if (task->_1E == 0) {
+            sprite = lbl_80371C30[task->_14 + 49]._00;
+            if ((sprite->_5C >> 16) <= 5) {
+                sprite->_68 = 0;
+            } else {
+                sprite->_68 = 4;
+            }
+            sprite = lbl_80371C30[task->_14 + 50]._00;
+            if ((sprite->_5C >> 16) >= 10) {
+                sprite->_68 = 0;
+            } else {
+                sprite->_68 = 1;
+            }
+        } else {
+            sprite = lbl_80371C30[task->_14 + 50]._00;
+            if ((sprite->_5C >> 16) <= 5) {
+                sprite->_68 = 0;
+            } else {
+                sprite->_68 = 4;
+            }
+            sprite = lbl_80371C30[task->_14 + 49]._00;
+            if ((sprite->_5C >> 16) >= 10) {
+                sprite->_68 = 0;
+            } else {
+                sprite->_68 = 1;
+            }
+        }
+        if (task->_18 >= 8) {
+            task->_1A = 6;
+            task->_18 = 0;
+        }
+    } else if (task->_1A == 6) {
+        lbl_3_common_bss_32724._D2 = 1;
+        if (task->_18 == 1) {
+            task->_1E = g_GameLogic.scoreBook_batter_pitcherStatsDisplayed;
+            for (i = 7; i < 49; i++) {
+                lbl_80371C30[task->_14 + i]._00->_68 = 1;
+            }
+            for (i = 0; i < 6; i++) {
+                fn_800363D8(task, i + 43, 1, 15, lbl_3_data_27C40[task->_1E][i]);
+            }
+            if (task->_1E == 0) {
+                lbl_80371C30[task->_14 + 53]._00->_5C = 0x50000;
+            } else {
+                lbl_80371C30[task->_14 + 53]._00->_5C = 0x330000;
+            }
+            fn_3_15D1D8(task);
+        }
+        if (task->_18 >= 8) {
+            task->_1A = 2;
+            task->_18 = 0;
+        }
+    } else if (task->_1A == 7) {
+        lbl_3_common_bss_32724._D2 = 1;
+        if (task->_18 == 1) {
+            for (i = 2; i < 43; i++) {
+                if (i != 12 && i != 18 && i != 24 && i != 30 && i != 36 && i != 42) {
+                    lbl_80371C30[task->_14 + i]._00->_68 = 4;
+                }
+            }
+        }
+        if (task->_18 >= 8) {
+            task->_1A = 8;
+            task->_18 = 0;
+        }
+    } else if (task->_1A == 8) {
+        lbl_3_common_bss_32724._D2 = 1;
+        if (task->_18 == 1) {
+            task->_20 = g_GameLogic.scoreBook_scrollIndex;
+            for (i = 2; i < 43; i++) {
+                lbl_80371C30[task->_14 + i]._00->_68 = 1;
+            }
+            fn_3_15D1D8(task);
+        }
+        if (task->_18 >= 8) {
+            task->_1A = 2;
+            task->_18 = 0;
+        }
+    } else {
+        lbl_3_common_bss_32724._D2 = 1;
+        lbl_80371C30[task->_14]._00->_68 = 4;
+        frame = lbl_80371C30[task->_14]._00->_5C >> 16;
+        if (frame == 10) {
+            lbl_80371C30[task->_14 + 54]._00->_68 = 4;
+            lbl_80371C30[task->_14 + 51]._00->_68 = 4;
+            if (task->_1E == 0) {
+                lbl_80371C30[task->_14 + 53]._00->_5C = 0x50000;
+                lbl_80371C30[task->_14 + 53]._00->_68 = 4;
+            } else {
+                lbl_80371C30[task->_14 + 53]._00->_5C = 0x330000;
+                lbl_80371C30[task->_14 + 53]._00->_68 = 1;
+            }
+        }
+        if ((s32)frame <= lbl_3_data_27C4C[0] + 5) {
+            if (task->_1E == 0) {
+                lbl_80371C30[task->_14 + 49]._00->_68 = 1;
+                lbl_80371C30[task->_14 + 50]._00->_68 = 4;
+            } else {
+                lbl_80371C30[task->_14 + 49]._00->_68 = 4;
+                lbl_80371C30[task->_14 + 50]._00->_68 = 1;
+            }
+        }
+        for (i = 0; i < 5; i++) {
+            if ((s32)frame <= lbl_3_data_27C4C[i] + 5) {
+                lbl_80371C30[task->_14 + i + 2]._00->_68 = 4;
+            }
+        }
+        for (i = 0; i < 6; i++) {
+            if ((s32)frame <= lbl_3_data_27C4C[i] + 5) {
+                lbl_80371C30[task->_14 + i + 43]._00->_68 = 4;
+            }
+        }
+        for (i = 0; i < 6; i++) {
+            if ((s32)frame <= lbl_3_data_27C4C[i] + 5) {
+                for (j = 0; j < 6; j++) {
+                    lbl_80371C30[task->_14 + i * 6 + j + 7]._00->_68 = 4;
+                }
+            }
+        }
+        if ((lbl_80371C30[task->_14]._00->_5C >> 16) == 0) {
+            goto kill;
+        }
+    }
+    if (task->_1A >= 2) {
+        if (task->_1E == 0) {
+            sprite = lbl_80371C30[task->_14 + 53]._00;
+            if ((sprite->_5C >> 16) >= 45) {
+                sprite->_5C = 0x50000;
+            }
+        } else {
+            sprite = lbl_80371C30[task->_14 + 53]._00;
+            if ((sprite->_5C >> 16) >= 93) {
+                sprite->_5C = 0x330000;
+            }
+        }
+    }
+    if (task->_20 == 0) {
+        sprite = lbl_80371C30[task->_14 + 52]._00;
+        frame = sprite->_5C >> 16;
+        if (frame >= 302 || frame < 202) {
+            sprite->_5C = 0xCA0000;
+        }
+    } else if (task->_20 == 4) {
+        sprite = lbl_80371C30[task->_14 + 52]._00;
+        frame = sprite->_5C >> 16;
+        if (frame >= 201 || frame < 101) {
+            sprite->_5C = 0x650000;
+        }
+    } else {
+        sprite = lbl_80371C30[task->_14 + 52]._00;
+        if ((sprite->_5C >> 16) >= 100) {
+            sprite->_5C = 0;
+        }
+    }
     return;
+kill:
+    fn_80034CEC(task);
+    fn_800B0A14_removeQueue();
 }
 
 // .text:0x0015D1D8 size:0x96C mapped:0x8079C26C
