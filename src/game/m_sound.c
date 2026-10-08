@@ -95,6 +95,21 @@ extern struct {
     /* 0x00 */ s16 _0;
     /* 0x02 */ s16 _2;
 } g_RunningLogic;
+typedef struct UnkPlayer8CD74 {
+    /* 0x000 */ u8 _000[0x62];
+    /* 0x062 */ s16 _62;
+    /* 0x064 */ u8 _064[6];
+    /* 0x06A */ s16 _6A;
+    /* 0x06C */ u8 _06C[0x27C - 0x6C];
+} UnkPlayer8CD74;
+extern struct {
+    /* 0x0000 */ u8 _0000[0xC04];
+    /* 0x0C04 */ UnkPlayer8CD74 _C04[13];
+    /* 0x2C58 */ u8 _2C58[0x1C];
+    /* 0x2C74 */ UnkPlayer8CD74* _2C74;
+    /* 0x2C78 */ u8 _2C78[0x307D - 0x2C78];
+    /* 0x307D */ u8 _307D;
+} lbl_8036E548;
 extern struct {
     /* 0x00 */ u8 _00[0xC2];
     /* 0xC2 */ u8 _C2;
@@ -784,12 +799,183 @@ void fn_3_8DA80(void) {
 
 // .text:0x0008D9C0 size:0xC0 mapped:0x806CCA54
 void fn_3_8D9C0(void) {
-    return;
+    camera_803c639c_s* cam;
+    Vec pos;
+    Vec vel;
+    Vec dir;
+
+    fn_3_8CD74();
+    cam = fn_80052734(0);
+    pos.x = cam->eye.x;
+    pos.y = cam->eye.y;
+    pos.z = cam->eye.z;
+    vel.x = 0.0f;
+    vel.y = 0.0f;
+    vel.z = 0.0f;
+    PSVECSubtract(&cam->target, &cam->eye, &dir);
+    if (PSVECMag(&dir)) {
+        PSVECNormalize(&dir, &dir);
+    }
+    fn_3_8B964((SND_FVECTOR*)&pos, (SND_FVECTOR*)&vel, (SND_FVECTOR*)&dir);
 }
 
 // .text:0x0008CD74 size:0xC4C mapped:0x806CBE08
+// 62.95%: the target reaches the sound tables from one lbl_3_data_8148 pool base (they are
+// statics of this file); the externs here are addressed one by one
 void fn_3_8CD74(void) {
-    return;
+    UnkPlayer8CD74* player;
+
+    if (g_GameLogic.gameStatus == 0xB) {
+        return;
+    }
+    if (g_Minigame.pauseInd != 0) {
+        return;
+    }
+    if (g_GameLogic.gameStatus == 1) {
+        if (g_Pitcher.windupCountdownUntilBallReleased == 0 && g_Ball.pitchHangtimeCounter == 0) {
+            if (lbl_3_common_bss_34C58._34 == 0) {
+                if (g_d_GameSettings.GameModeSelected == GAME_TYPE_PRACTICE && g_Practice.practiceLevel == 4) {
+                    playSoundEffect(0x1AE);
+                } else if (g_Minigame.GameMode_MiniGame != 1 && g_Minigame.GameMode_MiniGame != 3) {
+                    if (g_GameLogic.PauseSimulationFrameCount == 5) {
+                        fn_3_90220(g_Pitcher.charID, 6);
+                    } else if (g_Pitcher.ChargePitchType == 3) {
+                        playSoundEffect(0x188);
+                        fn_3_90220(g_Pitcher.charID, 6);
+                    } else if (g_Pitcher.ChargePitchType != 0) {
+                        if (g_Pitcher.starPitchType == 0) {
+                            fn_3_90220(g_Pitcher.charID, 5);
+                        }
+                        playSoundEffect(0x187);
+                    } else if (g_Pitcher.TypeOfPitch == 2) {
+                        playSoundEffect(0x17D);
+                    } else {
+                        playSoundEffect(0x186);
+                    }
+                }
+            }
+            lbl_3_common_bss_34C58._34 = 1;
+        }
+        if (g_Minigame.GameMode_MiniGame == 1 && g_Ball.pitchHangtimeCounter == 1 && g_Pitcher.starPitchInd != 0) {
+            playSoundEffect(0x19E);
+            lbl_3_bss_177C = playSoundEffect(0x18F);
+        }
+        if (g_GameLogic.PauseSimulationFrameCount == 1 && g_Pitcher.starPitchType != 0) {
+            playSoundEffect(0x19E);
+            switch (g_Pitcher.starPitchType) {
+            case 1:
+            case 2:
+                lbl_3_bss_177C = playSoundEffect(0x18F);
+                break;
+            case 3:
+            case 4:
+                lbl_3_bss_177C = playSoundEffect(0x18C);
+                break;
+            case 5:
+            case 6:
+                lbl_3_bss_177C = playSoundEffect(0x18D);
+                break;
+            case 7:
+            case 8:
+                lbl_3_bss_177C = playSoundEffect(0x190);
+                break;
+            case 9:
+            case 10:
+                lbl_3_bss_177C = playSoundEffect(0x18E);
+                break;
+            case 11:
+            case 12:
+                lbl_3_bss_177C = playSoundEffect(0x19A);
+                break;
+            }
+        }
+        if (g_Ball.pitchHangtimeCounter > 0 && g_Pitcher.framesUntilUnhittable < 30 && lbl_8036E548._307D == 0) {
+            player = lbl_8036E548._2C74;
+            if (g_d_GameSettings.minigamesEnabled) {
+                player = &lbl_8036E548._C04[g_Minigame.minigameControlStruct.characterIndex[g_Minigame.rosterID]];
+            }
+            if (player != NULL && player->_62 == 0x60 && player->_6A == 5) {
+                fn_3_90220(g_Batter.charID, 3);
+            }
+        }
+    }
+    if (lbl_8036E548._307D == 0) {
+        if (lbl_3_common_bss_34C58._2B != 0 && g_Ball.framesSinceHit == 2) {
+            lbl_3_common_bss_34C58._2B = 0;
+            sndFXKeyOff(lbl_3_bss_177C);
+            if (g_Batter.isBunting) {
+                playSoundEffect(0x153);
+            } else if (g_Batter.captainStarSwingActivated != 0) {
+                switch (g_Batter.captainStarSwingActivated) {
+                case 1:
+                case 2:
+                    lbl_3_bss_1778 = playSoundEffect(0x194);
+                    break;
+                case 3:
+                case 4:
+                    lbl_3_bss_1778 = playSoundEffect(0x191);
+                    break;
+                case 5:
+                case 6:
+                    lbl_3_bss_1778 = playSoundEffect(0x192);
+                    break;
+                case 7:
+                case 8:
+                    lbl_3_bss_1778 = playSoundEffect(0x195);
+                    break;
+                case 9:
+                case 10:
+                    lbl_3_bss_1778 = playSoundEffect(0x193);
+                    break;
+                case 11:
+                case 12:
+                    lbl_3_bss_1778 = playSoundEffect(0x199);
+                    lbl_3_bss_1760 = 0;
+                    break;
+                }
+                playSoundEffect(0x184);
+                playSoundEffect(0x185);
+                fn_3_90220(g_Batter.charID, 0);
+            } else if (g_Batter.charID == 2) {
+                playSoundEffect(0x1AF);
+            } else if (g_Batter.charID == 0x26) {
+                playSoundEffect(0x1B0);
+            } else if (g_Batter.displayContactSprite) {
+                playSoundEffect(0x184);
+                playSoundEffect(0x185);
+            } else if (g_Batter.contactType == 2) {
+                playSoundEffect(0x184);
+                fn_3_90220(g_Batter.charID, 0);
+            } else if (g_Batter.contactType >= 1 && g_Batter.contactType <= 3) {
+                fn_3_90220(g_Batter.charID, 0);
+                playSoundEffect(0x184);
+            } else {
+                playSoundEffect(0x183);
+            }
+        }
+        if (g_Batter.chargeStatus == 1 && g_GameLogic.gameStatus == 1 && g_Batter.chargeFrames < g_Batter.frameChargeDownBegins &&
+            g_Batter.chargeFrames == 1) {
+            lbl_3_common_bss_34C58._1C = fn_3_90220(g_Batter.charID, 2);
+        }
+    }
+    if (g_Batter.captainStarSwingActivated == 11 && lbl_3_bss_1760 == 0 && g_Ball.physicsSubstruct.velocity.y <= -0.09 &&
+        g_Ball.physicsSubstruct.velocity.y >= -0.1) {
+        sndFXKeyOff(lbl_3_bss_177C);
+        lbl_3_bss_1778 = playSoundEffect(0x19B);
+        lbl_3_bss_1760 = 1;
+    }
+    if (g_GameLogic.gameStatus != 1 && g_GameLogic.gameStatus != 2 && lbl_3_bss_177C != 0) {
+        sndFXKeyOff(lbl_3_bss_177C);
+    }
+    if (g_Ball.AtBat_Contact_BallPos.z < -3.0f && lbl_3_bss_177C != 0) {
+        sndFXKeyOff(lbl_3_bss_177C);
+    }
+    if (g_Pitcher.strikeOutOrWalk == 3) {
+        sndFXKeyOff(lbl_3_bss_177C);
+    }
+    if (lbl_3_bss_1778 != 0 && (g_Ball.currentStarSwing == 0 || g_Ball.deadBallReason != 0)) {
+        sndFXKeyOff(lbl_3_bss_1778);
+    }
 }
 
 // .text:0x0008C5C8 size:0x7AC mapped:0x806CB65C
