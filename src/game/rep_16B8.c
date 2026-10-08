@@ -2518,35 +2518,34 @@ void fn_3_91FC4(void) {
 }
 
 // .text:0x00091E4C size:0x178 mapped:0x806D0EE0
-// 98.72%: the target branches to the shared exit with bge, then b to the
-// end, where this compiles to one blt.
 void fn_3_91E4C(void) {
     UnkTask1770* task = lbl_803CC1B8;
     s32 i;
     s32 value;
 
     if (lbl_3_common_bss_32724._CD == 0) {
-        if (lbl_3_common_bss_32724._CE == 0) {
-            return;
-        }
-        lbl_80371C30[task->_14]._00->_68 = 4;
-        lbl_80371C30[task->_14 + 1]._00->_68 = 4;
-        value = lbl_80371C30[task->_14 + 1]._00->_5C >> 16;
-        for (i = 0; i < 11; i++) {
-            if (value <= lbl_3_data_F200[i]) {
-                if (i == 0) {
-                    lbl_80371C30[task->_14 + 2]._00->_68 = 4;
-                    lbl_80371C30[task->_14 + 3]._00->_68 = 4;
+        if (lbl_3_common_bss_32724._CE != 0) {
+            lbl_80371C30[task->_14]._00->_68 = 4;
+            lbl_80371C30[task->_14 + 1]._00->_68 = 4;
+            value = lbl_80371C30[task->_14 + 1]._00->_5C >> 16;
+            for (i = 0; i < 11; i++) {
+                if (value <= lbl_3_data_F200[i]) {
+                    if (i == 0) {
+                        lbl_80371C30[task->_14 + 2]._00->_68 = 4;
+                        lbl_80371C30[task->_14 + 3]._00->_68 = 4;
+                    }
+                    lbl_80371C30[task->_14 + 6 + i]._00->_68 = 4;
+                    lbl_80371C30[task->_14 + 17 + i]._00->_68 = 4;
                 }
-                lbl_80371C30[task->_14 + 6 + i]._00->_68 = 4;
-                lbl_80371C30[task->_14 + 17 + i]._00->_68 = 4;
+            }
+            task->_1A++;
+            if (task->_1A >= 45) {
+                goto kill;
             }
         }
-        task->_1A++;
-        if (task->_1A < 45) {
-            return;
-        }
+        return;
     }
+kill:
     fn_80034CEC(task);
     fn_800B0A14_removeQueue();
     if (g_GameLogic.gameStatus == 3) {
