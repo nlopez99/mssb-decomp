@@ -304,6 +304,11 @@ typedef struct {
     /* 0x24 */ f32 _24;
 } StaC2SpringParams; // size: 0x28
 
+typedef struct StaC2Spawner {
+    /* 0x00 */ u8 _00[0x18];
+    /* 0x18 */ Vec pos;
+} StaC2Spawner;
+
 typedef struct StaC2Rec5C {
     /* 0x00 */ u8 _00[0x5C];
 } StaC2Rec5C; // size: 0x5C
@@ -1360,8 +1365,24 @@ void fn_3_CDD90(StaC2Particle* p) {
 }
 
 // .text:0x000CDB48 size:0x248 mapped:0x8070CBDC
-void fn_3_CDB48(void) {
-    return;
+void fn_3_CDB48(StaC2Particle* p, StaC2Spawner* spawner) {
+    f32 angle = 0.017453292f * (rand() % 360);
+
+    p->vel.x = 0.01 * cosf_kludge(angle);
+    p->vel.z = 0.01 * sinf_kludge(angle);
+    p->vel.y = 0.12f;
+    p->grow = 0.5f;
+    p->grow += (u32)rand() % 2500 / 1000.0;
+    p->_38 = 2.0 * p->grow;
+    p->_3C = 6.0 * p->grow;
+    p->growScale = rand() % 101 / 100.0;
+    p->duration = p->life = rand() % 24 + 72;
+    p->pos.x = spawner->pos.x;
+    p->pos.y = spawner->pos.y;
+    p->pos.z = spawner->pos.z;
+    p->color[3] = p->alpha = 255.0f;
+    p->life = p->duration;
+    p->delay = 0;
 }
 
 // .text:0x000CD968 size:0x1E0 mapped:0x8070C9FC

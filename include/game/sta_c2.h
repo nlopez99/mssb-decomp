@@ -5,6 +5,7 @@
 #include "Dolphin/mtx.h"
 
 struct StaC2Draw;
+struct StaC2Spawner;
 struct _InMemBallType;
 struct StaC2Spring;
 struct StaC2Particle;
@@ -23,7 +24,7 @@ void fn_3_CC81C(void);
 void fn_3_CCC24(void);
 void fn_3_CD958(void);
 BOOL fn_3_CD968(Vec* pos, f32 width, f32 height);
-void fn_3_CDB48(void);
+void fn_3_CDB48(struct StaC2Particle* p, struct StaC2Spawner* spawner);
 void fn_3_CDD90(struct StaC2Particle* p);
 void fn_3_CDFA4(void);
 void fn_3_CE56C(void);
