@@ -590,7 +590,7 @@ static inline BOOL isSpriteDone(StaC2Task* task, s32 i) {
 }
 
 // .text:0x000D67CC size:0x2244 mapped:0x80715860
-// 92.17%: a first draft; the frame is 32 bytes smaller than the target's, and the saved
+// 94.60%: a first draft; the frame is 32 bytes smaller than the target's, and the saved
 // registers and spilled locals (counts and model indices at 228-320(r1)) differ throughout.
 void fn_3_D67CC(void** files) {
     Mtx m;
@@ -788,7 +788,8 @@ void fn_3_D67CC(void** files) {
     lbl_3_common_bss_350E4._04 = _OSAllocFromHeap(32, 67 * sizeof(StaC2Draw));
     memset(lbl_3_common_bss_350E4._04, 0, 67 * sizeof(StaC2Draw));
 
-    entry = draw = lbl_3_common_bss_350E4._00;
+    draw = lbl_3_common_bss_350E4._00;
+    entry = draw;
     lbl_3_bss_A02C = 0;
     anim = lbl_3_bss_A764;
     for (i = 0; i < 2; i++, place34++) {
@@ -875,7 +876,10 @@ void fn_3_D67CC(void** files) {
     }
 
     for (i = 0; i < 14; i++) {
-        springs = i / 7 ? lbl_3_bss_A9D0 : lbl_3_bss_ABD0;
+        springs = lbl_3_bss_A9D0;
+        if (i / 7 == 0) {
+            springs = lbl_3_bss_ABD0;
+        }
         entry->from = &springs[i % 7];
         entry->to = &springs[i % 7 + 1];
         entry->type = 2;
@@ -1077,8 +1081,8 @@ void fn_3_D67CC(void** files) {
             end = TRUE;
         }
         if (end) {
-            for (; i < 11; i++) {
-                lbl_3_data_185D0[i].type = 13;
+            for (k = i; k < 11; k++) {
+                lbl_3_data_185D0[k].type = 13;
             }
             break;
         }
