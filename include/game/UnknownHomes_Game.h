@@ -931,7 +931,7 @@ typedef struct _PracticeStruct {
     /*0x1A4*/ u8 _1A4;
     artificial_padding(0x1a4, 0x1aa, u8);
     /*0x1AA*/ u8 transitioningIndicator; // unsure
-    artificial_padding(0x1aa, 0x1af, u8);
+    /*0x1AB*/ u8 _1AB[4];
     /*0x1AF*/ u8 returnToPracticeMenuState;
     artificial_padding(0x1af, 0x1c2, u8);
     /*0x1C2*/ s8 instructionNumber;

@@ -6,9 +6,9 @@
 void fn_3_B3B70(void);
 void fn_3_B3BD0(void);
 void fn_3_B3C64(void);
-void fn_3_B3C78(void);
-void fn_3_B3C94(void);
-void fn_3_B3CAC(void);
+void fn_3_B3C78(int state);
+void fn_3_B3C94(int state);
+void fn_3_B3CAC(int mode);
 void fn_3_B3CD4(void);
 void fn_3_B3FE8(void);
 void fn_3_B4124(void);
