@@ -189,6 +189,7 @@ typedef struct StaC2Draw {
             /* 0xCA */ u8 _CA;
             /* 0xCB */ u8 _CB;
             /* 0xCC */ u8 _CC;
+            /* 0xCD */ u8 _CD;
         };
         struct {
             /* 0xA0 */ u8 _A0_C4[0xC4 - 0xA0];
@@ -370,7 +371,7 @@ static const Vec lbl_3_rodata_2500 = { 1.0f, 0.0f, 0.0f };
 
 // fn_3_D67CC reads these from one pool base, so they are static
 static SND_VOICEID lbl_3_data_182C0 = -1;
-static SND_VOICEID lbl_3_data_182C4 = -1;
+static s32 lbl_3_data_182C4 = -1;
 static StaC2Place34 lbl_3_data_182C8[3] = {
     { { 55.0f, 0.0f, 40.0f }, 0, 1, 1, 0, 0.0f, 180.0f, 0.0f, 0.0f, 180.0f, 0.0f, 160.0f, 120.0f, 1 },
     { { -55.0f, 0.0f, 40.0f }, 0, 1, 2, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 290.0f, 100.0f, 0 },
@@ -851,8 +852,25 @@ void fn_3_D501C(StaC2Spring* springs) {
 }
 
 // .text:0x000D4E00 size:0x21C mapped:0x80713E94
-void fn_3_D4E00(void) {
-    return;
+void fn_3_D4E00(StaC2Draw* draw) {
+    draw->_CA = rand() % 10;
+    if (draw->_CA < 3) {
+        draw->_CA = 0;
+        fn_80025EEC(draw->_8C, 0, 2);
+    } else {
+        draw->_CA = 1;
+        fn_80025EEC(draw->_8C, 0, 1);
+    }
+    draw->_CB = draw->_CA;
+    draw->_90_7 = 1;
+    fn_3_D4CA4(draw);
+    draw->_99 = 0;
+    draw->hops = 1;
+    if (lbl_3_data_182C4 != -1) {
+        fn_3_8B890(lbl_3_data_182C4);
+        lbl_3_data_182C4 = -1;
+    }
+    draw->_CD = 1;
 }
 
 // .text:0x000D4CA4 size:0x15C mapped:0x80713D38
