@@ -20,7 +20,7 @@ void fn_3_BBBC4(void);
 void fn_3_BBF94(void);
 void fn_3_BC224(void);
 void fn_3_BC25C(void);
-BOOL fn_3_BC274(struct UnkPlayer1E08* player, Vec* a, Vec* b);
+BOOL fn_3_BC274(struct UnkPlayer1E08* player, struct _VecXYZ* a, struct _VecXYZ* b);
 void fn_3_BC2DC(void);
 void fn_3_BC6D8(Vec* pos, Vec* eye, int type, BOOL flag);
 void fn_3_BC850(void* arg0, s32 index);

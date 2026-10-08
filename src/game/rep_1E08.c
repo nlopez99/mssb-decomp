@@ -13,6 +13,8 @@
 #include "game/rep_3C28.h"
 #include "game/rep_3D50.h"
 #include "game/rep_D0.h"
+#include "game/rep_3CE0.h"
+#include "game/rep_3F60.h"
 
 #include "game/rep_1F58.h"
 #include "game/rep_1FD8.h"
@@ -101,7 +103,9 @@ typedef struct {
 } UnkScreen1E08; // size: 0x3A8
 
 typedef struct UnkPlayer1E08 {
-    /* 0x000 */ u8 _000[0x44];
+    /* 0x000 */ u8 _000[0x34];
+    /* 0x034 */ VecXYZ _034;
+    /* 0x040 */ u8 _040[0x44 - 0x40];
     /* 0x044 */ f32 _044;
     /* 0x048 */ u8 _048[0x252 - 0x48];
     /* 0x252 */ s8 _252;
@@ -159,7 +163,11 @@ typedef struct {
     /* 0x458 */ u8 _458[0x464 - 0x458];
     /* 0x464 */ s16 _464;
     /* 0x466 */ u8 _466;
-    /* 0x467 */ u8 _467[0x479 - 0x467];
+    /* 0x467 */ u8 _467[0x470 - 0x467];
+    /* 0x470 */ u8 _470;
+    /* 0x471 */ u8 _471;
+    /* 0x472 */ u8 _472[5];
+    /* 0x477 */ u8 _477[0x479 - 0x477];
     /* 0x479 */ u8 _479;
     /* 0x47A */ u8 _47A[0x480 - 0x47A];
 } Unk1E08State; // size: 0x480
@@ -239,8 +247,10 @@ extern void* fn_80033A24(void (*update)(void), s32, s32, s32, s32, s32);
 extern void fn_800BD670(UnkActor1E08* actor, s32 arg1);
 extern void fn_800BD8C4(UnkActor1E08* actor, s32 arg1);
 extern void fn_800BD548(void* model, s32 count, ...);
-extern void fn_8006C43C(s32 arg0);
-extern void fn_8006C3F0(s32 arg0);
+extern void fn_8006C43C(void (*callback)(struct UnkPlayer3F60*, u16, s32, f32));
+extern void fn_8006C3F0(void (*callback)(struct UnkPlayer3F60*, u16, s32, f32));
+extern s32 fn_8004ABE8(s32 arg0);
+extern s32 fn_8004ABE0(void);
 extern void pitchingMachinePitching(u8 id);
 extern void minigamesSetSomePointers(void);
 extern void fn_800A7D4C(s32, void*);
@@ -333,7 +343,65 @@ f32 fn_3_BFDA4(struct UnkKey21F8* keys, int count, int frame, u8 current, u8* cu
 
 // .text:0x000BFB3C size:0x268 mapped:0x806FEBD0
 f32 fn_3_BFB3C(UnkAnim21F8* anim, int frame, Mtx m, f32 t) {
-    return 0.0f;
+    Mtx tmp;
+    f32 value;
+
+    PSMTXIdentity(m);
+    PSMTXIdentity(tmp);
+    if (anim->keys[0] != NULL) {
+        value = fn_3_BFDA4(anim->keys[0], anim->counts[0], frame, anim->current[0], &anim->current[0], t);
+    } else {
+        value = 1.0f;
+    }
+    m[0][0] = value;
+    if (anim->keys[1] != NULL) {
+        value = fn_3_BFDA4(anim->keys[1], anim->counts[1], frame, anim->current[1], &anim->current[1], t);
+    } else {
+        value = 1.0f;
+    }
+    m[1][1] = value;
+    if (anim->keys[6] != NULL) {
+        value = fn_3_BFDA4(anim->keys[6], anim->counts[6], frame, anim->current[6], &anim->current[6], t);
+    } else {
+        value = 0.0f;
+    }
+    if (value) {
+        PSMTXRotRad(tmp, 'Z', value);
+        PSMTXConcat(tmp, m, m);
+    }
+    if (anim->keys[5] != NULL) {
+        value = fn_3_BFDA4(anim->keys[5], anim->counts[5], frame, anim->current[5], &anim->current[5], t);
+    } else {
+        value = 0.0f;
+    }
+    if (value) {
+        PSMTXRotRad(tmp, 'Y', value);
+        PSMTXConcat(tmp, m, m);
+    }
+    PSMTXIdentity(tmp);
+    if (anim->keys[2] != NULL) {
+        value = fn_3_BFDA4(anim->keys[2], anim->counts[2], frame, anim->current[2], &anim->current[2], t);
+    } else {
+        value = 0.0f;
+    }
+    tmp[0][3] = value;
+    if (anim->keys[3] != NULL) {
+        value = fn_3_BFDA4(anim->keys[3], anim->counts[3], frame, anim->current[3], &anim->current[3], t);
+    } else {
+        value = 0.0f;
+    }
+    tmp[1][3] = value;
+    if (anim->keys[4] != NULL) {
+        value = fn_3_BFDA4(anim->keys[4], anim->counts[4], frame, anim->current[4], &anim->current[4], t);
+    } else {
+        value = 0.0f;
+    }
+    tmp[2][3] = value;
+    PSMTXConcat(tmp, m, m);
+    if (anim->keys[7] != NULL) {
+        return fn_3_BFDA4(anim->keys[7], anim->counts[7], frame, anim->current[7], &anim->current[7], t);
+    }
+    return 1.0f;
 }
 
 // .text:0x000BF8F8 size:0x244 mapped:0x806FE98C
@@ -400,8 +468,8 @@ void fn_3_BF238(void) {
 
 // .text:0x000BF20C size:0x2C mapped:0x806FE2A0
 void fn_3_BF20C(void) {
-    fn_8006C43C(0);
-    fn_8006C3F0(0);
+    fn_8006C43C(NULL);
+    fn_8006C3F0(NULL);
 }
 
 // .text:0x000BF1AC size:0x60 mapped:0x806FE240
@@ -760,8 +828,8 @@ void fn_3_BC888(void) {
     Vec dir;
 
     for (i = 0; i < 13; i++) {
-        player = lbl_8036E548._2C50[i];
-        if (player != NULL) {
+        if (lbl_8036E548._2C50[i] != NULL) {
+            player = lbl_8036E548._2C50[i];
             if (!player->_25D) {
                 player->_279 = 0;
             } else {
@@ -801,11 +869,43 @@ void fn_3_BC6D8(Vec* pos, Vec* eye, int type, BOOL flag) {
 
 // .text:0x000BC2DC size:0x3FC mapped:0x806FB370
 void fn_3_BC2DC(void) {
-    return;
+    UnkPlayer1E08* player;
+    s32 i;
+    VecXYZ pos;
+
+    for (i = 0; i < 13; i++) {
+        player = lbl_8036E548._2C50[i];
+        if (player != NULL) {
+            player->_276 >>= 1;
+            player->_276 <<= 3;
+            getAnimRelatedCoordinates(i, 0x1E, &pos);
+            player->_276 |= fn_3_BC274(player, &player->_034, &pos) << 1;
+            getAnimRelatedCoordinates(i, 0x22, &pos);
+            player->_276 |= fn_3_BC274(player, &player->_034, &pos) << 2;
+        }
+    }
+    if (g_d_GameSettings.minigamesEnabled) {
+        for (i = 0; i < 4; i++) {
+            if (lbl_8036E548._2C50[i] != NULL && g_FieldingLogic._000[i]._1A && i == g_FieldingLogic._000[i]._14) {
+                lbl_8036E548._2C50[i]->_276 |= 1;
+            }
+        }
+    } else {
+        for (i = 0; i < 9; i++) {
+            if (lbl_8036E548._2C50[i] != NULL && g_FieldingLogic._000[0]._1A && i == g_FieldingLogic._000[0]._14) {
+                lbl_8036E548._2C50[i]->_276 |= 1;
+            }
+        }
+    }
+    for (i = 0; i < 4; i++) {
+        if (lbl_8036E548._2C50[i + 9] != NULL && g_Runners[i].mashPercent >= 0.75f) {
+            lbl_8036E548._2C50[i + 9]->_276 |= 1;
+        }
+    }
 }
 
 // .text:0x000BC274 size:0x68 mapped:0x806FB308
-BOOL fn_3_BC274(UnkPlayer1E08* player, Vec* a, Vec* b) {
+BOOL fn_3_BC274(UnkPlayer1E08* player, VecXYZ* a, VecXYZ* b) {
     return a->y - b->y < lbl_3_data_17000[player->_252] / 100000.0f;
 }
 
@@ -822,7 +922,63 @@ void fn_3_BC224(void) {
 
 // .text:0x000BBF94 size:0x290 mapped:0x806FB028
 void fn_3_BBF94(void) {
-    return;
+    switch (g_GameLogic.gameStatus) {
+    case 0:
+    case 3:
+    case 4:
+    case 6:
+    case 7:
+    case 8:
+    case 9:
+    case 10:
+    case 11:
+    case 12:
+    case 13:
+    case 15:
+    case 16:
+    case 17:
+    case 18:
+    case 24:
+    case 26:
+    case 27:
+    case 28:
+    case 29:
+    case 30:
+    case 31:
+    case 32:
+    case 33:
+    case 34:
+    case 35:
+    case 36:
+    case 37:
+    case 38:
+    case 39:
+    case 40:
+    case 41:
+        lbl_3_common_bss_35154._479 = 1;
+        break;
+    }
+    if (g_GameLogic.gameStatus < 27) {
+        fn_3_BC2DC();
+    }
+    if (g_GameLogic.gameStatus == 1 || g_GameLogic.gameStatus == 2 || g_GameLogic.gameStatus == 3 ||
+        g_GameLogic.gameStatus == 19 || g_GameLogic.gameStatus == 20 || g_GameLogic.gameStatus == 22 ||
+        g_GameLogic.gameStatus == 23) {
+        fn_3_BC888();
+    }
+    if (lbl_3_common_bss_35154._470) {
+        fn_3_15FB84(lbl_3_common_bss_35154._472[0], lbl_3_common_bss_35154._472[1], lbl_3_common_bss_35154._472[2],
+                    lbl_3_common_bss_35154._472[3], lbl_3_common_bss_35154._472[4]);
+    }
+    fn_3_169150();
+    fn_8006C43C(fn_3_168CD8);
+    fn_8006C3F0(fn_3_16892C);
+    if (fn_8004ABE8(1)) {
+        fn_3_CB3AC();
+        if (fn_8004ABE0()) {
+            playSoundEffect(0x1B6);
+        }
+    }
 }
 
 // .text:0x000BBBC4 size:0x3D0 mapped:0x806FAC58
