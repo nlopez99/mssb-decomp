@@ -1117,12 +1117,12 @@ int fn_3_10698C(void** list) {
     return count;
 }
 
-// 99.34%: in the runner branch the target keeps the runner in r30 and the id in r29; this
-// build copies the id to r30 and puts the runner in r31.
+// 99.57%: the target tests the id with `extsh.` once (cmpwi here) and swaps r4/r5/r6 in the
+// fielder branch's angle lookup; with an s16 id (99.34%) the runner branch's registers differ.
 // .text:0x00106270 size:0x71C mapped:0x80745304
 void fn_3_106270(Vec* out) {
     g_Stats_s* stats = &g_Stats;
-    s16 id = lbl_3_common_bss_DE94._0000->_0946;
+    int id = lbl_3_common_bss_DE94._0000->_0946;
     Vec pos;
     InMemRunnerType* runner;
 
