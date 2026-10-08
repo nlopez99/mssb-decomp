@@ -3,10 +3,13 @@
 #include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
 #include "game/rep_1838.h"
+#include "game/rep_28A8.h"
 #include "game/rep_31A0.h"
+#include "game/rep_3880.h"
 #include "game/rep_D18.h"
 #include "Dolphin/gx.h"
 #include "string.h"
+#include "musyx/musyx.h"
 
 // g_Minigame's three entries in this minigame
 typedef struct UnkMgEntry3310 {
@@ -41,14 +44,16 @@ typedef struct Unk37A8Cpu {
 // This minigame's view of g_Minigame
 typedef struct Unk37A8Minigame {
     /* 0x0000 */ UnkMgEntry3310 _0000[3];
-    /* 0x00A8 */ u8 _00A8[0x1B44 - 0xA8];
+    /* 0x00A8 */ u8 _00A8[0x193A - 0xA8];
+    /* 0x193A */ u8 _193A[100];
+    /* 0x199E */ u8 _199E[0x1B44 - 0x199E];
     /* 0x1B44 */ s16 _1B44[4];
     /* 0x1B4C */ u8 _1B4C[0x1B58 - 0x1B4C];
     /* 0x1B58 */ u8 _1B58[4][10];
     /* 0x1B80 */ u8 _1B80[4];
     /* 0x1B84 */ u8 _1B84[0x1BB6 - 0x1B84];
-    /* 0x1BB6 */ s8 _1BB6[4];
-    /* 0x1BBA */ u8 _1BBA[0x1C7E - 0x1BBA];
+    /* 0x1BB6 */ s8 _1BB6[50];
+    /* 0x1BE8 */ u8 _1BE8[0x1C7E - 0x1BE8];
     /* 0x1C7E */ s8 _1C7E[4][3];
     /* 0x1C8A */ u8 _1C8A[0x1CA9 - 0x1C8A];
     /* 0x1CA9 */ u8 _1CA9[4];
@@ -75,6 +80,7 @@ extern void fn_800B993C(void);
 extern void fn_800B9948(void* callback);
 extern void pitchingMachinePitching(u8 id);
 extern void changeScene(u8, s16);
+extern u8 lbl_800EFBA4[0x10];
 
 extern u8 lbl_3_data_21278[2];
 extern f32 lbl_3_data_21D34[4][3][3];
@@ -156,12 +162,52 @@ void fn_3_146408(void) {
 
 // .text:0x001461A4 size:0x264 mapped:0x80785238
 void fn_3_1461A4(void) {
-    return;
+    if (g_Minigame.turnOverStatus == 0) {
+        if (g_Minigame._17C4 == 0) {
+            g_Minigame.turnOverStatus = 1;
+            fn_3_10F550(3, 0);
+            sndFXStart(0x1BE, lbl_800EFBA4[7], 0x3F);
+        }
+    } else {
+        if (g_Minigame.turnOverStatus == 1) {
+            g_Minigame.turnOverStatus = 2;
+            g_GameLogic.CountdownUntilFade = lbl_3_data_21E68[17];
+        }
+        if (--g_GameLogic.CountdownUntilFade == 7) {
+            changeScene(3, 6);
+        }
+        if (g_GameLogic.CountdownUntilFade <= 0) {
+            fn_3_145FF4();
+        }
+    }
 }
 
 // .text:0x00145FF4 size:0x1B0 mapped:0x80785088
 void fn_3_145FF4(void) {
-    return;
+    u32 i;
+
+    fn_3_157570();
+    fn_3_DE4FC();
+    if (g_Minigame.soloMinigameDifficulty <= MINIGAME_DIFFICULTY_MULTIPLAYER_CHALLENGE_HARD && !g_Minigame.multiPlayerInd) {
+        if (g_Minigame.minigameControlStruct._1C[g_Minigame._1908] == 1 && !g_Minigame.challenge_minigame_haven_tWonYetIndicator) {
+            g_Minigame._1A37 = 1;
+        } else {
+            g_Minigame._1A37 = 2;
+        }
+    }
+    fn_3_5A6D4(GAME_STATUS_MVP_END_GAME);
+    for (i = 0; i < 50; i++) {
+        MG._193A[i] = 0;
+        MG._1BB6[i] = -1;
+    }
+    g_Minigame._1B4C = 60;
+    for (i = 0; i < 3; i++) {
+        fn_3_14402C(i);
+        MG._0000[i]._2A = 2;
+        MG._0000[i]._1C = 1;
+        MG._0000[i]._2B = 0;
+    }
+    fn_3_154214();
 }
 
 // .text:0x00145EB8 size:0x13C mapped:0x80784F4C
