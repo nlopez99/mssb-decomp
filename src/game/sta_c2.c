@@ -262,6 +262,19 @@ typedef struct {
     /* 0x34 */ Vec _34;
 } StaC2Player;
 
+typedef struct {
+    /* 0x00 */ f32 _00;
+    /* 0x04 */ f32 _04;
+    /* 0x08 */ f32 _08;
+    /* 0x0C */ f32 _0C;
+    /* 0x10 */ f32 _10;
+    /* 0x14 */ f32 _14;
+    /* 0x18 */ f32 dt;
+    /* 0x1C */ f32 dt2;
+    /* 0x20 */ s32 steps;
+    /* 0x24 */ f32 _24;
+} StaC2SpringParams; // size: 0x28
+
 typedef struct StaC2Rec5C {
     /* 0x00 */ u8 _00[0x5C];
 } StaC2Rec5C; // size: 0x5C
@@ -360,10 +373,10 @@ extern void fn_800B4CA0(StaC2Actor* actor, f32 frame);
 
 // MWCC lays out .bss statics in reverse order of declaration
 static u8 lbl_3_bss_ADD0[0x30];
-static u8 lbl_3_bss_ABD0[0x200];
-static u8 lbl_3_bss_A9D0[0x200];
-static u8 lbl_3_bss_A8D0[0x100];
-static f32 lbl_3_bss_A8A8[10];
+static StaC2Spring lbl_3_bss_ABD0[8];
+static StaC2Spring lbl_3_bss_A9D0[8];
+static StaC2Spring lbl_3_bss_A8D0[4];
+static StaC2SpringParams lbl_3_bss_A8A8;
 static StaC2Task* lbl_3_bss_A8A4;
 static u8 lbl_3_bss_A898[0xC];
 static Vec lbl_3_bss_A820[10];
@@ -1119,7 +1132,17 @@ void fn_3_CC5C4(void) {
 
 // .text:0x000CC438 size:0x18C mapped:0x8070B4CC
 void fn_3_CC438(void) {
-    return;
+    lbl_3_bss_A8A8._00 = 1.755f;
+    lbl_3_bss_A8A8._04 = 0.5f;
+    lbl_3_bss_A8A8._08 = 300.0f;
+    lbl_3_bss_A8A8._0C = 20.0f;
+    lbl_3_bss_A8A8._10 = 1.5f;
+    lbl_3_bss_A8A8._14 = 0.001f;
+    lbl_3_bss_A8A8.steps = 8;
+    lbl_3_bss_A8A8.dt = 1.0f / lbl_3_bss_A8A8.steps / 60.0f;
+    lbl_3_bss_A8A8.dt2 = lbl_3_bss_A8A8.dt * lbl_3_bss_A8A8.dt;
+    lbl_3_bss_A8A8._24 = 1.0f / (2.0f * lbl_3_bss_A8A8.dt);
+    fn_3_CC354(lbl_3_bss_A8D0);
 }
 
 // .text:0x000CC354 size:0xE4 mapped:0x8070B3E8
@@ -1146,7 +1169,36 @@ void fn_3_CC354(StaC2Spring* springs) {
 
 // .text:0x000CC1D4 size:0x180 mapped:0x8070B268
 void fn_3_CC1D4(void) {
-    return;
+    Mtx m;
+    f32 angle;
+    Vec offset;
+    StaC2Draw* draw;
+    u32 start;
+    u32 i;
+    StaC2Model* model;
+
+    angle = shortAngleToRad(g_Minigame._1AF8);
+    PSMTXRotRad(m, 'Y', 0.017453292f * -angle);
+    offset.x = 4.5f;
+    offset.y = 9.0f;
+    offset.z = 0.0f;
+    PSMTXMultVec(m, &offset, &offset);
+    for (start = 0; start < lbl_3_common_bss_350E4._30; start++) {
+        if (lbl_3_common_bss_350E4._00[start].type == 1) {
+            break;
+        }
+    }
+    for (i = start; i < start + 3; i++) {
+        draw = &lbl_3_common_bss_350E4._00[i];
+        CTRLSetTranslation(&draw->control, g_Minigame._1AE0 + offset.x, g_Minigame._1AE4 - offset.y,
+                           g_Minigame._1AE8 + offset.z);
+        model = draw->_74;
+        draw->wait = i % 3 * 30;
+        draw->frame = 0.0f;
+        model->_5C = draw->frame;
+        model->_59 = 1;
+        fn_800B4CA0(model->_00, model->_5C);
+    }
 }
 
 // .text:0x000CBF80 size:0x254 mapped:0x8070B014
