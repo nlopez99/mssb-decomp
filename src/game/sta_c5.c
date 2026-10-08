@@ -338,7 +338,7 @@ static struct {
     /* 0x54 */ u8 _54[0x2FC - 0x54];
 } lbl_3_bss_B260;
 static u32 lbl_3_bss_B244[7];
-static u8 lbl_3_bss_B228[0x1C];
+static f32 lbl_3_bss_B228[7];
 static f32 lbl_3_bss_B224;
 static u8 lbl_3_bss_B220;
 static u8 lbl_3_bss_B21F;
@@ -367,7 +367,7 @@ static void* lbl_3_bss_AEF4;
 static s32 lbl_3_bss_AEF0;
 static f32 lbl_3_bss_AEEC;
 static u8 lbl_3_bss_AEE8;
-static s32 lbl_3_bss_AEE4;
+static u32 lbl_3_bss_AEE4;
 static u8 lbl_3_bss_AEE2;
 static u8 lbl_3_bss_AEE1;
 static u8 lbl_3_bss_AEE0;
@@ -1130,8 +1130,66 @@ void fn_3_F2FFC(StaC5Draw* draw, f32 x, f32 z) {
 }
 
 // .text:0x000F2938 size:0x6C4 mapped:0x807319CC
-void fn_3_F2938(void) {
-    return;
+// 99.86%: in the inlined fn_3_F2724 the sine and cosine land in f29/f30 the other way
+// round; reordering fn_3_F2724's locals fixes one copy or the other, never both.
+void fn_3_F2938(StaC5Draw* draw) {
+    Vec pos;
+    Vec dir;
+    Vec fwd = { 0.0f, 0.0f, -1.0f };
+    StaC5Draw* other;
+    f32 s;
+    f32 t;
+    f32 angle;
+    u32 i;
+
+    t = 0.42f * lbl_3_bss_B224 * lbl_3_bss_AEE4;
+    s = 1.0f - t;
+    for (i = 0; i < 7; i++) {
+        lbl_3_bss_B228[i] = lbl_3_bss_B244[i] * pow(t, i) * pow(s, 6 - i);
+    }
+    pos = draw->_A0;
+    pos.z = 0.0f;
+    pos.x = 0.0f;
+    for (i = 0; i < 7; i++) {
+        pos.x += lbl_3_bss_B228[i] * lbl_3_bss_B260.pts[i].x;
+        pos.z += lbl_3_bss_B228[i] * lbl_3_bss_B260.pts[i].z;
+    }
+    pos.y += draw->_B8;
+    PSVECSubtract(&pos, &draw->_A0, &dir);
+    if (pos.y < 0.0f) {
+        pos.y = 0.0f;
+        draw->_B8 = 0.5f * -draw->_B8;
+        if (draw->_B8 > 0.022f) {
+            playStadiumSound(1);
+        } else if (lbl_3_data_1B820 == -1) {
+            lbl_3_data_1B820 = fn_3_8BBC4(lbl_3_data_81DC[g_d_GameSettings.StadiumID] + 2, &pos, &dir, 3);
+        } else {
+            fn_3_8BA60(lbl_3_data_1B820, &pos, &dir);
+        }
+    }
+    draw->_B8 -= 0.044f;
+    dir.y = 0.0f;
+    if (PSVECMag(&dir)) {
+        PSVECNormalize(&dir, &dir);
+        PSVECNormalize(&fwd, &fwd);
+        angle = 57.29578f * (f32)acos(PSVECDotProduct(&dir, &fwd));
+        if (dir.x < 0.0f) {
+            angle = 360.0f - angle;
+        }
+    } else {
+        angle = -draw->_B4;
+    }
+    fn_3_F3A5C(draw, pos.x, pos.y, pos.z, -angle);
+    if (draw->_A0.y < 0.5 && draw->_B8 <= 0.0f) {
+        for (i = 0; i < lbl_3_bss_B21C; i++) {
+            other = &lbl_3_common_bss_350E4._00[lbl_3_bss_B21B + i];
+            if (other->_C6 < 3) {
+                fn_3_F2724(draw, other);
+            }
+        }
+    }
+    fn_3_F1E2C(draw);
+    lbl_3_bss_AEE4++;
 }
 
 // .text:0x000F2724 size:0x214 mapped:0x807317B8
