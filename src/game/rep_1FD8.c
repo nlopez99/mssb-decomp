@@ -5,6 +5,7 @@
 #include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/rand.h"
+#include "musyx/musyx.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/mtxext.h"
 #include "C3/control.h"
@@ -143,6 +144,9 @@ extern u16 lbl_3_data_177F0;
 extern Rep1FD8CameraSlot lbl_3_data_17804[2];
 extern u8 lbl_803CBBC0;
 extern void fn_800A7D4C(s32, void*);
+extern u16 lbl_3_data_81DC[16];
+extern u8 lbl_3_data_8404[6][15][2];
+extern u8 lbl_3_data_84B8[30][2];
 extern BOOL fn_8001B728(s32, s32, Vec*);
 extern void fn_800BF058(void (*draw)(StadiumModel1D58* model, Mtx view));
 extern void fn_800BDF70(StadiumModel1D58* model);
@@ -227,9 +231,36 @@ void fn_3_C75B8(void) {
     return;
 }
 
+static inline void playStadiumSound(s32 sound) {
+    s32 stadium;
+    u8 vol;
+    SND_VOICEID voice;
+
+    stadium = g_d_GameSettings.StadiumID;
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+        vol = lbl_3_data_84B8[sound][0];
+    } else {
+        vol = lbl_3_data_8404[stadium][sound][0];
+    }
+    voice = sndFXStartEx(lbl_3_data_81DC[stadium] + sound, vol, 63, 0);
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+        vol = lbl_3_data_84B8[sound][1];
+    } else {
+        vol = lbl_3_data_8404[stadium][sound][1];
+    }
+    sndFXCtrl(voice, 91, vol);
+}
+
 // .text:0x000C749C size:0x11C mapped:0x80706530
+// 99.58%: the target keeps idx in r6 and idx * 12 in r8; here the two are swapped.
 void fn_3_C749C(void) {
-    return;
+    s32 idx = (g_Ball.inAirOrBefore2ndBounceOrLowBallEnergy != 0) + 2;
+
+    lbl_3_bss_9E48[idx] = 1;
+    lbl_3_bss_9DE8[idx].x = g_Ball.AtBat_Contact_BallPos.x;
+    lbl_3_bss_9DE8[idx].y = -g_Ball.AtBat_Contact_BallPos.y;
+    lbl_3_bss_9DE8[idx].z = g_Ball.AtBat_Contact_BallPos.z;
+    playStadiumSound(4);
 }
 
 // .text:0x000C7444 size:0x58 mapped:0x807064D8
