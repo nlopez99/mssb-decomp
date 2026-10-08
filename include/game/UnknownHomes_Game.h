@@ -968,7 +968,8 @@ typedef struct _PracticeStruct {
     /*0x1D4*/ u8 loadingGuidedPractice; // unsure
     /*0x1D5*/ u8 _1D5;
     /*0x1D6*/ u8 practiceLevel_2;
-    artificial_padding(0x1d6, 0x1d9, u8);
+    /*0x1D7*/ u8 _1D7;
+    /*0x1D8*/ u8 _1D8;
     /*0x1D9*/ u8 _1D9;
     /*0x1DA*/ u8 _1DA;
     /*0x1DB*/ u8 _1DB;
