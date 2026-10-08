@@ -234,6 +234,7 @@ extern u8 lbl_3_data_69D0[0x520];
 extern s16 lbl_3_data_217A4[12];
 extern s16 lbl_3_data_21A04[8];
 extern s16 lbl_3_data_21E68[26];
+extern f32 lbl_3_data_21A64[9];
 extern VecXYZ lbl_3_data_21520[2][7];
 extern s16 lbl_3_data_21654[12];
 extern Vec lbl_3_data_21380;
@@ -911,8 +912,6 @@ void fn_3_119C34(void) {
 }
 
 // .text:0x00119934 size:0x300 mapped:0x807589C8
-// 97.79%: the target rounds acos's result (frsp) right after the call, before loading dir.z;
-// the base schedules frsp after the load, so f1 and f2 swap.
 void fn_3_119934(void) {
     UnkObj3310* obj;
     s32 i;
@@ -968,7 +967,7 @@ void fn_3_119934(void) {
                 dir.y = 0.0f;
                 PSVECNormalize(&dir, &dir);
                 angle = acos(dir.x);
-                if (dir.z < 0.0f) {
+                if (0.0f > dir.z) {
                     angle = 6.2831855f - angle;
                 }
                 obj->_10.y = angle;
@@ -1068,7 +1067,7 @@ void fn_3_1194FC(void) {
                     dir.z = g_Minigame.wallBall_coinVelocity[i].z;
                     PSVECNormalize(&dir, &dir);
                     angle = acos(PSVECDotProduct(&fwd, &dir));
-                    if (dir.x < 0.0f) {
+                    if (0.0f > dir.x) {
                         angle = 6.2831855f - angle;
                     }
                     if (lbl_80366158._28 == 0) {
@@ -1448,8 +1447,6 @@ void fn_3_117FC8(void) {
 }
 
 // .text:0x00117B78 size:0x450 mapped:0x80756C0C
-// 89.37%: the uv table and object pointer get other registers, and the rotation loop
-// orders its sin/cos calls and products differently.
 void fn_3_117B78(s32 i) {
     UnkObj3310* obj = &lbl_8036E548._2D94[i];
     u32 j;
@@ -1478,14 +1475,10 @@ void fn_3_117B78(s32 i) {
     GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
     GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
 
-    quad[0].x = -size;
-    quad[0].z = size;
-    quad[1].x = size;
-    quad[1].z = size;
-    quad[2].x = size;
-    quad[2].z = -size;
-    quad[3].x = -size;
-    quad[3].z = -size;
+    quad[0].z = quad[1].z = size;
+    quad[3].x = quad[0].x = -size;
+    quad[2].x = quad[1].x = size;
+    quad[3].z = quad[2].z = -size;
     for (j = 0; j < 4; j++) {
         memcpy(&tmp, &quad[j], sizeof(Vec));
         quad[j].x = tmp.x * (f32)cos(-obj->_10.y) + tmp.z * -(f32)sin(-obj->_10.y);
@@ -1503,9 +1496,7 @@ void fn_3_117B78(s32 i) {
     quad[2].y = -0.060000002f;
     quad[1].y = -0.060000002f;
     quad[0].y = -0.060000002f;
-    color.r = 0;
-    color.g = 0;
-    color.b = 0;
+    color.r = color.g = color.b = 0;
     color.a = 155;
     GXLoadPosMtxImm(fn_80052768_getCamera(fn_8005268C())->view, GX_PNMTX0);
     GXSetCurrentMtx(GX_PNMTX0);
@@ -1562,7 +1553,67 @@ void fn_3_1179EC(void) {
 
 // .text:0x00117588 size:0x464 mapped:0x8075661C
 void fn_3_117588(s32 i) {
-    return;
+    GXColor color;
+    f32 uv[4][2] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
+    Vec quad[4];
+    UnkObj3310* obj = &lbl_8036E548._2D94[i];
+    UnkMgMarker3310* marker = &MG._0BB0[i - 0xE9];
+    f32 scale = 2.5f * (1.0f - (-obj->_04.y * 0.5f) / lbl_3_data_21A64[0]);
+    f32 hx;
+    f32 hz;
+    UnkModelSet3310* model;
+    s32 frame;
+    s32 j;
+    u8 state;
+
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetNumChans(1);
+    GXSetNumTexGens(1);
+    GXSetNumTevStages(1);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD1, GX_TEXMAP1, GX_COLOR0A0);
+    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_TEXC, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO);
+    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_TEXA, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO);
+    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+
+    hx = 2.8f * scale * 0.5f;
+    hz = 2.5f * scale * 0.5f;
+    quad[0].x = quad[3].x = -hx + obj->_04.x;
+    quad[1].x = quad[2].x = hx + obj->_04.x;
+    quad[2].z = quad[3].z = -hz + obj->_04.z;
+    quad[0].z = quad[1].z = hz + obj->_04.z;
+    quad[0].y = quad[1].y = quad[2].y = quad[3].y = -0.060000002f;
+    color.r = color.g = color.b = 0;
+    color.a = 155;
+    GXLoadPosMtxImm(fn_80052768_getCamera(fn_8005268C())->view, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    GXSetProjection(fn_80052768_getCamera(fn_8005268C())->proj, GX_PERSPECTIVE);
+    fn_80033B58(lbl_3_common_bss_32724._6C, 0x13, 0, 0);
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    for (j = 0; j < 4; j++) {
+        GXPosition3f32(quad[j].x, quad[j].y, quad[j].z);
+        GXColor1u32(*(u32*)&color);
+        GXTexCoord2f32(uv[j][0], uv[j][1]);
+    }
+    state = marker->active;
+    model = lbl_8036E548._0068->_34[i]._00;
+    if (state == 1 || state == 5) {
+        frame = 0;
+    } else {
+        frame = 1;
+    }
+    for (j = 0; j < model->_06; j++) {
+        model->_18[j]->_14->_08->_0C->_20 = frame;
+    }
 }
 
 // .text:0x00117494 size:0xF4 mapped:0x80756528
