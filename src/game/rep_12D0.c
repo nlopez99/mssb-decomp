@@ -230,15 +230,13 @@ void fn_3_7C190(void) {
 }
 
 // .text:0x0007BC20 size:0x570 mapped:0x806BACB4
-// 98.65%: the target does not fold the `type == 3` test right after `type = 3` (s32 types,
-// moving the test out of the block and a one-pass loop did not reproduce it); the rest
-// are register numbers.
 void fn_3_7BC20(void) {
     int endOfGame;
-    int type = 0;
+    s32 type = 0;
     int sub = 0;
     int runners;
     int diff;
+    InMemRunnerType* batter;
     inMemCamera* cam;
     InMemBallType* ball = &g_Ball;
     inMemStrikes* strikes = &g_Strikes;
@@ -257,9 +255,12 @@ void fn_3_7BC20(void) {
     } else if (g_Scores._C2 != 0) {
         if (lbl_3_common_bss_32A94._2 >= 6 && lbl_3_common_bss_32A94._2 <= 10) {
             type = 3;
-            if (type == 3 && strikes->outs != 3 && g_Runners[0].runnerOnFieldOrOutOrScored != 2 &&
-                g_Runners[0].runnerOnFieldOrOutOrScored != 3) {
-                type = 4;
+            if (type == 3) {
+                batter = &g_Runners[0];
+                if (strikes->outs != 3 && batter->runnerOnFieldOrOutOrScored != 2 &&
+                    batter->runnerOnFieldOrOutOrScored != 3) {
+                    type = 4;
+                }
             }
             if (ball->fielderWithBallIndexStored2 != 6 && ball->fielderWithBallIndexStored2 != 7 &&
                 ball->fielderWithBallIndexStored2 != 8) {
@@ -334,7 +335,7 @@ void fn_3_7BC20(void) {
             }
         }
         if (lbl_3_common_bss_32A94._2 >= 36 && lbl_3_common_bss_32A94._2 <= 38 && cam->_A50 == 2) {
-            if (endOfGame != 0) {
+            if (g_GameLogic.EventTriggers_EndOfGame != 0) {
                 type = 6;
             } else {
                 runners = 0;
