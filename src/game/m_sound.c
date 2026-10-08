@@ -2072,14 +2072,14 @@ BOOL fn_3_8B258(s32 state, s32 id, s32 arg) {
 }
 
 // .text:0x0008B094 size:0x1C4 mapped:0x806CA128
-// 91.46%: the target reads the state byte as task + (tail * 3 + 0x17) with lbzx/stbx, keeping
+// 93.01%: the target reads the state byte as task + (tail * 3 + 0x17) with lbzx/stbx, keeping
 // task in r31; this keeps task + tail * 3 instead and shifts the saved registers
 void fn_3_8B094(void) {
     SoundLoadTask* task = lbl_803CC1B8;
     u8 tail;
     u8 next;
     s8 state;
-    s8 arg;
+    int arg;
     u8 id;
 
     if (task->head == task->tail) {
