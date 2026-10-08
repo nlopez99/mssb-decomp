@@ -10,6 +10,7 @@
 #include "game/rep_D0.h"
 #include "game/rep_720.h"
 #include "game/m_sound.h"
+#include "string.h"
 
 typedef struct UnkAC8Fielder {
     /* 0x000 */ f32 _000;
@@ -111,7 +112,8 @@ typedef struct UnkAC8Fielder {
     /* 0x1C4 */ u8 _1C4;
     /* 0x1C5 */ u8 _1C5;
     /* 0x1C6 */ u8 _1C6;
-    /* 0x1C7 */ u8 _1C7[0x1CA - 0x1C7];
+    /* 0x1C7 */ u8 _1C7[0x1C9 - 0x1C7];
+    /* 0x1C9 */ u8 _1C9;
     /* 0x1CA */ u8 _1CA;
     /* 0x1CB */ u8 _1CB[0x1CC - 0x1CB];
     /* 0x1CC */ u8 _1CC;
@@ -145,7 +147,7 @@ typedef struct UnkAC8Fielder {
     /* 0x1F5 */ s8 _1F5;
     /* 0x1F6 */ u8 _1F6[0x1FA - 0x1F6];
     /* 0x1FA */ u8 _1FA;
-    /* 0x1FB */ u8 _1FB[0x1FC - 0x1FB];
+    /* 0x1FB */ u8 _1FB;
     /* 0x1FC */ u8 _1FC;
     /* 0x1FD */ u8 _1FD[0x1FF - 0x1FD];
     /* 0x1FF */ u8 _1FF;
@@ -176,7 +178,10 @@ typedef struct UnkAC8Fielder {
     /* 0x21C */ f32 _21C;
     /* 0x220 */ f32 _220;
     /* 0x224 */ f32 _224;
-    /* 0x228 */ u8 _228[0x24C - 0x228];
+    /* 0x228 */ f32 _228;
+    /* 0x22C */ f32 _22C;
+    /* 0x230 */ f32 _230;
+    /* 0x234 */ u8 _234[0x24C - 0x234];
     /* 0x24C */ s16 _24C;
     /* 0x24E */ s16 _24E;
     /* 0x250 */ u8 _250[0x252 - 0x250];
@@ -254,6 +259,12 @@ extern f32 lbl_3_data_18984[6];
 extern s16 lbl_3_data_1C3C[2];
 extern u8 lbl_3_data_48F8[8];
 extern s16 lbl_3_data_49DC[44];
+extern f32 lbl_3_data_476C[5];
+extern s16 lbl_3_data_7F10[54];
+extern f32 game_atan2(f32 x, f32 y);
+extern f32 fn_3_9FEA8(f32 v);
+extern s16 fn_3_9FE6C_normalizeAngle(s16);
+extern u8 fn_3_1379A0(int fielderIdx);
 
 // Per-action fielder handlers, indexed by the fielder's action (_1D3)
 typedef struct {
@@ -968,6 +979,97 @@ u8 fn_3_51DF0(f32 x, f32 z) {
 
 // .text:0x00051798 size:0x658 mapped:0x8069082C
 BOOL fn_3_51798(s32 fielder, struct _VecXYZ* delta) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    VecSrcDst ray;
+    CollisionStruct hit;
+    u32 type;
+    f32 ox;
+    f32 oz;
+    f32 dirX;
+    f32 dirZ;
+    f32 nx;
+    f32 nz;
+    f32 len;
+    f32 reach;
+    f32 dist;
+    f32 ang;
+    f32 dx;
+    f32 dz;
+    f32 dx2;
+    f32 dz2;
+
+    if (f->_050 == 0.0f) {
+        return 0;
+    }
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD && g_GameLogic.gameStatus == 1) {
+        u32 ret = fn_3_5164C(fielder, delta);
+        if (ret != 0) {
+            return ret;
+        }
+    }
+    if (!g_d_GameSettings.minigamesEnabled && f->_0A8[0] < 70.0f && !fn_3_B7E10(f->_000, f->_008)) {
+        return 0;
+    }
+    if (f->_1FB != 0) {
+        return 0;
+    }
+    if (fn_3_B7E10(f->_000, f->_008) || g_Minigame.GameMode_MiniGame == MINI_GAME_ID_STAR_DASH ||
+        g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+        ray.src.x = ray.dst.x = f->_000 + f->_030;
+        ray.src.z = ray.dst.z = f->_008 + f->_034;
+        ray.src.y = -5.0f;
+        ray.dst.y = 10.0f;
+        type = checkCollision(&ray, &hit, 0, 0) & 0x7F;
+        if (!(type != 2 && type != 3 && type != 7 && type != 8 && type != 5)) {
+            return 1;
+        }
+        if (g_Minigame.GameMode_MiniGame == MINI_GAME_ID_STAR_DASH && fn_3_1379A0(fielder)) {
+            memcpy(delta, f, sizeof(VecXYZ));
+            return 1;
+        }
+    }
+    dirX = f->_030 / f->_050;
+    dirZ = f->_034 / f->_050;
+    ray.src.x = f->_000;
+    ray.src.y = -0.5f;
+    ray.src.z = f->_008;
+    ray.dst.y = -0.5f;
+    ray.dst.x = f->_000 + dirX;
+    ray.dst.z = f->_008 + dirZ;
+    type = checkCollision(&ray, &hit, 0, 0) & 0x7F;
+    if (type != 2 && type != 5) {
+        return 0;
+    }
+    len = dolsqrtf2(hit.normal.x * hit.normal.x + hit.normal.z * hit.normal.z);
+    nx = hit.normal.x / len;
+    nz = hit.normal.z / len;
+    ox = nx * lbl_3_data_476C[f->_1C9];
+    oz = nz * lbl_3_data_476C[f->_1C9];
+    ang = game_atan2(-ox, -oz);
+    reach = lbl_3_data_476C[f->_1C9] / (f32)cos(fn_3_9FEA8(ang - game_atan2(dirX, dirZ)));
+    if (f->_25A == 2) {
+        reach = lbl_3_data_7F10[f->_17A];
+    }
+    dx = f->_000 - hit.position.x;
+    dz = f->_008 - hit.position.z;
+    dx2 = dx * dx;
+    dz2 = dz * dz;
+    dist = dolsqrtf2(dx2 + dz2);
+    if (dist < reach) {
+        ray.dst.x = f->_000 + f->_030;
+        ray.dst.z = f->_008 + f->_034;
+        ray.src.x = ray.dst.x + 3.0f * nx;
+        ray.src.z = ray.dst.z + 3.0f * nz;
+        ray.dst.x = ray.dst.x - 3.0f * nx;
+        ray.dst.z = ray.dst.z - 3.0f * nz;
+        type = checkCollision(&ray, &hit, 1, 0);
+        if (type != 0) {
+            delta->x = ox * lbl_3_data_476C[f->_1C9] + hit.position.x;
+            delta->z = oz * lbl_3_data_476C[f->_1C9] + hit.position.z;
+            return 2;
+        }
+        return 1;
+    }
     return 0;
 }
 
@@ -2494,7 +2596,40 @@ void fn_3_2F7D4(s32 fielder) {
 
 // .text:0x0002F574 size:0x260 mapped:0x8066E608
 void fn_3_2F574(s32 fielder) {
-    return;
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    struct _VecXYZ pos;
+    s32 type = f->_1CC;
+
+    f->_204++;
+    f->_164 -= lbl_3_data_4884[type]._4;
+    if (f->_1AE >= f->_1B0 && f->_164 < 0.0f) {
+        f->_164 = 0.0f;
+    }
+    f->_15C += f->_164;
+    f->_1AE--;
+    if (f->_160 != 0.0f || f->_168 != 0.0f) {
+        f->_030 = f->_160;
+        f->_034 = f->_168;
+        f->_050 = dolsqrtf2(f->_030 * f->_030 + f->_034 * f->_034);
+        if (fn_3_51798(fielder, &pos)) {
+            f->_160 = 0.0f;
+            f->_168 = 0.0f;
+            f->_030 = 0.0f;
+            f->_034 = 0.0f;
+            f->_050 = 0.0f;
+        } else {
+            f->_000 += f->_030;
+            f->_008 += f->_034;
+        }
+    }
+    f->_014 = f->_000;
+    f->_01C = f->_008;
+    f->_1F0 = 1;
+    if (f->_1AE <= 0) {
+        f->_203 = 0;
+        f->_15C = 0.0f;
+        f->_1A0 = 0;
+    }
 }
 
 // .text:0x0002F484 size:0xF0 mapped:0x8066E518
@@ -2979,7 +3114,27 @@ void fn_3_25C40(void) {
 
 // .text:0x00025A68 size:0x1D8 mapped:0x80664AFC
 void fn_3_25A68(s32 fielder) {
-    return;
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    struct _VecXYZ pos;
+
+    f->_228 *= 0.95f;
+    f->_230 *= 0.95f;
+    f->_030 = f->_228;
+    f->_034 = f->_230;
+    f->_050 = dolsqrtf2(f->_030 * f->_030 + f->_034 * f->_034);
+    if (fn_3_51798(fielder, &pos)) {
+        f->_000 = f->_0D4;
+        f->_008 = f->_0D8;
+        f->_050 = 0.0f;
+        f->_030 = 0.0f;
+        f->_034 = 0.0f;
+    } else {
+        f->_000 += f->_030;
+        f->_008 += f->_034;
+    }
+    f->_014 = f->_000;
+    f->_01C = f->_008;
+    f->_1F0 = 1;
 }
 
 // .text:0x000258D8 size:0x190 mapped:0x8066496C
@@ -3016,7 +3171,49 @@ void fn_3_25844(int fielder, int arg1) {
 
 // .text:0x00025648 size:0x1FC mapped:0x806646DC
 void fn_3_25648(s32 fielder) {
-    return;
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    struct _VecXYZ pos;
+    s32 result;
+
+    f->_1BA--;
+    if (f->_1BA <= 0) {
+        f->_20F = 0;
+        f->_050 = 0.0f;
+        f->_030 = 0.0f;
+        f->_034 = 0.0f;
+        return;
+    }
+    f->_1B8++;
+    f->_1BC = fn_3_9FE6C_normalizeAngle(f->_1BC + lbl_3_data_49DC[32]);
+    f->_050 = lbl_3_data_4930[33];
+    getComponentsFromSAng(f->_1BC, &f->_038, &f->_03C);
+    f->_030 = f->_038 * f->_050;
+    f->_034 = f->_03C * f->_050;
+    result = fn_3_51798(fielder, &pos);
+    if (result != 0) {
+        if (result == 2 && !(pos.x > 55.0f) && !(pos.x < -55.0f)) {
+            f->_030 = pos.x - f->_000;
+            f->_034 = pos.z - f->_008;
+            f->_000 = pos.x;
+            f->_008 = pos.z;
+        } else {
+            f->_050 = 0.0f;
+            f->_030 = 0.0f;
+            f->_034 = 0.0f;
+        }
+    } else {
+        f->_000 += f->_030;
+        f->_008 += f->_034;
+    }
+    f->_014 = f->_000;
+    f->_01C = f->_008;
+    if (g_d_GameSettings.minigamesEnabled) {
+        if (g_Minigame.minigameControlStruct.battingHandedness[f->_20D] == 0) {
+            fn_3_6C854(g_Minigame.minigameControlStruct.characterIndex[f->_20D], 0);
+        }
+    } else if (g_GameLogic._13E[g_GameLogic.teamFielding] == 0) {
+        fn_3_6C854(g_GameLogic.teamFielding, 0);
+    }
 }
 
 // .text:0x000253A4 size:0x2A4 mapped:0x80664438
@@ -3063,7 +3260,6 @@ BOOL fn_3_253A4(s32 fielder, s32 angle) {
 }
 
 // .text:0x000251E4 size:0x1C0 mapped:0x80664278
-// Waits on fn_3_51798: while that is a stub it is inlined here and folds the result.
 void fn_3_251E4(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     struct _VecXYZ pos;
