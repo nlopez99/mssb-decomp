@@ -820,10 +820,6 @@ void fn_3_15D1D8(UnkTask3BD8* task) {
 
 // .text:0x0015C6E4 size:0xAF4 mapped:0x8079B778
 void fn_3_15C6E4(UnkTask3BD8* task, s32 id, s32 value, s32 type) {
-    s32 a;
-    s32 b;
-    s32 c;
-    s32 d;
     s32 rem;
     s32 whole;
 
@@ -853,15 +849,12 @@ void fn_3_15C6E4(UnkTask3BD8* task, s32 id, s32 value, s32 type) {
             fn_800363D8(task, id, 10, 0x1A, 0);
         } else {
             lbl_80371C30[task->_14 + id]._00->_64 = 0x19;
-            a = value / 100;
-            fn_800363D8(task, id, 2, 0x1A, a);
-            b = (value / 10) % 10;
-            fn_800363D8(task, id, 3, 0x1A, b);
-            c = value % 10;
-            fn_800363D8(task, id, 4, 0x1A, c);
-            fn_800363D8(task, id, 6, 0x1A, a);
-            fn_800363D8(task, id, 7, 0x1A, b);
-            fn_800363D8(task, id, 8, 0x1A, c);
+            fn_800363D8(task, id, 2, 0x1A, value / 100);
+            fn_800363D8(task, id, 3, 0x1A, (value / 10) % 10);
+            fn_800363D8(task, id, 4, 0x1A, value % 10);
+            fn_800363D8(task, id, 6, 0x1A, value / 100);
+            fn_800363D8(task, id, 7, 0x1A, (value / 10) % 10);
+            fn_800363D8(task, id, 8, 0x1A, value % 10);
         }
     } else if (type == 11) {
         if (value >= 1000) {
@@ -869,29 +862,22 @@ void fn_3_15C6E4(UnkTask3BD8* task, s32 id, s32 value, s32 type) {
                 value = 9999;
             }
             lbl_80371C30[task->_14 + id]._00->_64 = 0x17;
-            a = value / 1000;
-            fn_800363D8(task, id, 1, 0x1A, a);
-            b = (value / 100) % 10;
-            fn_800363D8(task, id, 2, 0x1A, b);
-            c = (value / 10) % 10;
-            fn_800363D8(task, id, 4, 0x1A, c);
-            d = value % 10;
-            fn_800363D8(task, id, 5, 0x1A, d);
-            fn_800363D8(task, id, 6, 0x1A, a);
-            fn_800363D8(task, id, 7, 0x1A, b);
-            fn_800363D8(task, id, 9, 0x1A, c);
-            fn_800363D8(task, id, 10, 0x1A, d);
+            fn_800363D8(task, id, 1, 0x1A, value / 1000);
+            fn_800363D8(task, id, 2, 0x1A, (value / 100) % 10);
+            fn_800363D8(task, id, 4, 0x1A, (value / 10) % 10);
+            fn_800363D8(task, id, 5, 0x1A, value % 10);
+            fn_800363D8(task, id, 6, 0x1A, value / 1000);
+            fn_800363D8(task, id, 7, 0x1A, (value / 100) % 10);
+            fn_800363D8(task, id, 9, 0x1A, (value / 10) % 10);
+            fn_800363D8(task, id, 10, 0x1A, value % 10);
         } else {
             lbl_80371C30[task->_14 + id]._00->_64 = 0x16;
-            a = (value / 100) % 10;
-            fn_800363D8(task, id, 1, 0x1A, a);
-            b = (value / 10) % 10;
-            fn_800363D8(task, id, 3, 0x1A, b);
-            c = value % 10;
-            fn_800363D8(task, id, 4, 0x1A, c);
-            fn_800363D8(task, id, 5, 0x1A, a);
-            fn_800363D8(task, id, 7, 0x1A, b);
-            fn_800363D8(task, id, 8, 0x1A, c);
+            fn_800363D8(task, id, 1, 0x1A, (value / 100) % 10);
+            fn_800363D8(task, id, 3, 0x1A, (value / 10) % 10);
+            fn_800363D8(task, id, 4, 0x1A, value % 10);
+            fn_800363D8(task, id, 5, 0x1A, (value / 100) % 10);
+            fn_800363D8(task, id, 7, 0x1A, (value / 10) % 10);
+            fn_800363D8(task, id, 8, 0x1A, value % 10);
         }
     } else {
         if (type == 12) {
@@ -906,13 +892,11 @@ void fn_3_15C6E4(UnkTask3BD8* task, s32 id, s32 value, s32 type) {
             if (rem != 0) {
                 if (whole >= 10) {
                     lbl_80371C30[task->_14 + id]._00->_64 = 0x14;
-                    a = whole / 10;
-                    fn_800363D8(task, id, 1, 0x1A, a);
-                    b = whole % 10;
-                    fn_800363D8(task, id, 2, 0x1A, b);
+                    fn_800363D8(task, id, 1, 0x1A, whole / 10);
+                    fn_800363D8(task, id, 2, 0x1A, whole % 10);
                     fn_800363D8(task, id, 3, 0x1A, rem + 11);
-                    fn_800363D8(task, id, 4, 0x1A, a);
-                    fn_800363D8(task, id, 5, 0x1A, b);
+                    fn_800363D8(task, id, 4, 0x1A, whole / 10);
+                    fn_800363D8(task, id, 5, 0x1A, whole % 10);
                     fn_800363D8(task, id, 6, 0x1A, rem + 11);
                 } else if (whole != 0) {
                     lbl_80371C30[task->_14 + id]._00->_64 = 0x12;
@@ -938,26 +922,21 @@ void fn_3_15C6E4(UnkTask3BD8* task, s32 id, s32 value, s32 type) {
                 value = 99;
             }
             lbl_80371C30[task->_14 + id]._00->_64 = 0x13;
-            a = value % 10;
-            fn_800363D8(task, id, 2, 0x1A, a);
-            b = value / 10;
-            fn_800363D8(task, id, 1, 0x1A, b);
-            fn_800363D8(task, id, 4, 0x1A, a);
-            fn_800363D8(task, id, 3, 0x1A, b);
+            fn_800363D8(task, id, 2, 0x1A, value % 10);
+            fn_800363D8(task, id, 1, 0x1A, value / 10);
+            fn_800363D8(task, id, 4, 0x1A, value % 10);
+            fn_800363D8(task, id, 3, 0x1A, value / 10);
         } else {
             if (value >= 1000) {
                 value = 999;
             }
             lbl_80371C30[task->_14 + id]._00->_64 = 0x15;
-            a = value % 10;
-            fn_800363D8(task, id, 3, 0x1A, a);
-            b = (value / 10) % 10;
-            fn_800363D8(task, id, 2, 0x1A, b);
-            c = value / 100;
-            fn_800363D8(task, id, 1, 0x1A, c);
-            fn_800363D8(task, id, 6, 0x1A, a);
-            fn_800363D8(task, id, 5, 0x1A, b);
-            fn_800363D8(task, id, 4, 0x1A, c);
+            fn_800363D8(task, id, 3, 0x1A, value % 10);
+            fn_800363D8(task, id, 2, 0x1A, (value / 10) % 10);
+            fn_800363D8(task, id, 1, 0x1A, value / 100);
+            fn_800363D8(task, id, 6, 0x1A, value % 10);
+            fn_800363D8(task, id, 5, 0x1A, (value / 10) % 10);
+            fn_800363D8(task, id, 4, 0x1A, value / 100);
         }
     }
 }
