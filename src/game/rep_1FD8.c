@@ -617,8 +617,25 @@ void fn_3_C597C(void) {
 }
 
 // .text:0x000C56E8 size:0x294 mapped:0x8070477C
-void fn_3_C56E8(void) {
-    return;
+void fn_3_C56E8(Rep1FD8Draw* draw) {
+    Vec center;
+    Vec pos;
+    Rep1FD8Spawner* spawner;
+    Rep1FD8Particle* p;
+
+    PSMTXMultVec(fn_80052734(fn_8005268C())->view, &draw->_9C, &center);
+    spawner = fn_800339F0(NULL, draw->_A8 + 42);
+    if (spawner != NULL) {
+        for (p = spawner->particles; p != NULL; p = p->next) {
+            PSMTXMultVec(fn_80052734(fn_8005268C())->view, &p->pos, &pos);
+            if (center.z >= pos.z) {
+                p->_50 = 0;
+            } else {
+                p->_50 = 1;
+            }
+        }
+        fn_3_C4CF4(spawner, 0);
+    }
 }
 
 // .text:0x000C54D0 size:0x218 mapped:0x80704564
@@ -704,8 +721,31 @@ void fn_3_C4B80(void) {
 }
 
 // .text:0x000C48D0 size:0x2B0 mapped:0x80703964
-void fn_3_C48D0(void) {
-    return;
+void fn_3_C48D0(Rep1FD8Spawner* spawner, Vec pos) {
+    Rep1FD8Particle* p;
+    u32 i;
+    f32 theta;
+    f32 phi;
+    f32 speed;
+
+    for (i = 0, p = spawner->particles; p != NULL; p = p->next) {
+        p->pos.x = pos.x;
+        p->pos.y = pos.y;
+        p->pos.z = pos.z;
+        theta = 3.1415927f * (rand() % 181) / 180.0f;
+        phi = 3.1415927f * (rand() % 360) / 180.0f;
+        speed = 0.5f - (rand() % 3) / 10.0f;
+        p->vel.x = speed * cos(theta) * cos(phi);
+        p->vel.y = -speed * sin(theta);
+        p->vel.z = speed * sin(theta) * cos(phi);
+        p->_38 = p->_3C = 4.4f;
+        p->delay = i / 6;
+        p->_4D = 27;
+        p->_4E = 0;
+        p->color[0] = p->color[1] = p->color[2] = p->color[3] = 255;
+        p->life = 1;
+        i++;
+    }
 }
 
 // .text:0x000C4724 size:0x1AC mapped:0x807037B8
@@ -747,8 +787,34 @@ BOOL fn_3_C4724(Rep1FD8Spawner* spawner) {
 }
 
 // .text:0x000C444C size:0x2D8 mapped:0x807034E0
-void fn_3_C444C(void) {
-    return;
+void fn_3_C444C(Rep1FD8Spawner* spawner, Rep1FD8Draw* draw) {
+    Rep1FD8Particle* p = spawner->particles;
+    u32 i;
+    f32 x = draw->_9C.x;
+    f32 y = draw->_9C.y;
+    f32 z = draw->_9C.z;
+    f32 theta;
+    f32 phi;
+    f32 speed;
+
+    for (i = 0; p != NULL; p = p->next) {
+        p->pos.x = x;
+        p->pos.y = y;
+        p->pos.z = z;
+        theta = 3.1415927f * (rand() % 360) / 180.0f;
+        phi = 3.1415927f * (rand() % 360) / 180.0f;
+        speed = 0.5f - (rand() % 3) / 10.0f;
+        p->vel.x = speed * cos(theta) * cos(phi);
+        p->vel.y = -speed * sin(theta);
+        p->vel.z = speed * sin(theta) * cos(phi);
+        p->_38 = p->_3C = 4.4f;
+        p->delay = i / 6;
+        p->_4D = 27;
+        p->_4E = 0;
+        p->color[0] = p->color[1] = p->color[2] = p->color[3] = 255;
+        p->life = 1;
+        i++;
+    }
 }
 
 // .text:0x000C42A4 size:0x1A8 mapped:0x80703338
