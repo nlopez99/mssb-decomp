@@ -1965,6 +1965,18 @@ void fn_3_6694(void) {
     }
 }
 
+static inline void resetBallFlags(void) {
+    g_Ball.currentStarSwing = 0;
+    g_Ball.inAirOrBefore2ndBounceOrLowBallEnergy = 0;
+    g_Ball.someCollisionInd = 1;
+    g_Ball.warioWaluGarlicIsActive = 0;
+    g_Ball.autoFielderAvoidDropSpotForPeachesStarHit = 0;
+    g_Ball.physicsSubstruct.acceleration.x = 0.0f;
+    g_Ball.physicsSubstruct.acceleration.y = 0.0f;
+    g_Ball.physicsSubstruct.acceleration.z = 0.0f;
+    fn_3_27648();
+}
+
 // .text:0x00006620 size:0x74 mapped:0x806456B4
 void fn_3_6620(void) {
     if (g_Ball.pauseBallMovementWhenInPlant == 0) {
@@ -1972,15 +1984,7 @@ void fn_3_6620(void) {
         g_Ball.ballCughtByPlantInd = 1;
         g_Ball.matchFramesAndBallAngle.framesInsidePlant = 0;
         g_Ball.someCollisionVariable = 0;
-        g_Ball.currentStarSwing = 0;
-        g_Ball.inAirOrBefore2ndBounceOrLowBallEnergy = 0;
-        g_Ball.someCollisionInd = 1;
-        g_Ball.warioWaluGarlicIsActive = 0;
-        g_Ball.autoFielderAvoidDropSpotForPeachesStarHit = 0;
-        g_Ball.physicsSubstruct.acceleration.x = 0.0f;
-        g_Ball.physicsSubstruct.acceleration.y = 0.0f;
-        g_Ball.physicsSubstruct.acceleration.z = 0.0f;
-        fn_3_27648();
+        resetBallFlags();
     }
 }
 
@@ -2007,22 +2011,9 @@ void fn_3_65A8(void) {
     }
 }
 
-static inline void fn_3_6530_inline(void) {
-    g_Ball.currentStarSwing = 0;
-    g_Ball.inAirOrBefore2ndBounceOrLowBallEnergy = 0;
-    g_Ball.warioWaluGarlicIsActive = 0;
-    g_Ball.autoFielderAvoidDropSpotForPeachesStarHit = 0;
-    g_Ball.physicsSubstruct.acceleration.x = 0.0f;
-    g_Ball.physicsSubstruct.acceleration.y = 0.0f;
-    g_Ball.physicsSubstruct.acceleration.z = 0.0f;
-    fn_3_27648();
-}
-
 // .text:0x00006530 size:0x78 mapped:0x806455C4
-// 91.5%: the constants 1 and 0 of the second half are in r5/r0 where the target has r0/r4.
 void fn_3_6530(void) {
     g_Ball.someCollisionInd = 1;
     fn_3_65A8();
-    g_Ball.someCollisionInd = 1;
-    fn_3_6530_inline();
+    resetBallFlags();
 }
