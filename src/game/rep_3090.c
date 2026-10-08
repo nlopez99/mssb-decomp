@@ -3588,13 +3588,14 @@ void fn_3_FCEAC(void) {
     return;
 }
 
-// 94.14%: registers only; the target keeps the camera in r5, the key offset in r6 and
-// the key count in r7, where this build uses r7, r5 and r6.
+// 94.48%: registers only; the target keeps the camera in r5, the key offset in r6 and
+// the key count in r7, and this build ends with an unreachable blr the target lacks.
 // .text:0x000FCE38 size:0x74 mapped:0x8073BECC
 int fn_3_FCE38(int i, f32 time) {
     lbl_3_common_bss_DE94_s2* cam = lbl_3_common_bss_DE94._0000;
+    int count = cam->_003C;
 
-    while (i < cam->_003C && time > cam->_0034[i]._3C) {
+    while (i < count && time > cam->_0034[i]._3C) {
         i++;
     }
     while (i > 0 && time <= cam->_0034[i - 1]._3C) {
