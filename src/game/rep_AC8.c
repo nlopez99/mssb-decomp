@@ -36,7 +36,8 @@ typedef struct UnkAC8Fielder {
     /* 0x074 */ f32 _074;
     /* 0x078 */ u8 _078[0x84 - 0x78];
     /* 0x084 */ f32 _084[9];
-    /* 0x0A8 */ u8 _0A8[0xD4 - 0xA8];
+    /* 0x0A8 */ f32 _0A8[4];
+    /* 0x0B8 */ u8 _0B8[0xD4 - 0xB8];
     /* 0x0D4 */ f32 _0D4;
     /* 0x0D8 */ f32 _0D8;
     /* 0x0DC */ u8 _0DC[0xF4 - 0xDC];
@@ -92,7 +93,8 @@ typedef struct UnkAC8Fielder {
     /* 0x1C2 */ s16 _1C2;
     /* 0x1C4 */ u8 _1C4;
     /* 0x1C5 */ u8 _1C5;
-    /* 0x1C6 */ u8 _1C6[0x1CA - 0x1C6];
+    /* 0x1C6 */ u8 _1C6;
+    /* 0x1C7 */ u8 _1C7[0x1CA - 0x1C7];
     /* 0x1CA */ u8 _1CA;
     /* 0x1CB */ u8 _1CB[0x1CC - 0x1CB];
     /* 0x1CC */ u8 _1CC;
@@ -414,8 +416,52 @@ void fn_3_55EEC(void) {
 }
 
 // .text:0x00055CC4 size:0x228 mapped:0x80694D58
-void fn_3_55CC4(void) {
-    return;
+void fn_3_55CC4(s32 fielder) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+
+    if (f->_1E8 == 2 && g_Ball.fielderWBallIndex != fielder) {
+        f->_1E8 = 0;
+    }
+    if (f->_050 <= 0.0f) {
+        f->_19A = -1;
+        f->_1A0 = 0;
+    } else {
+        f->_19A = radToShortAngle(f->_064);
+        if (f->_1A0 < 0x7FFE) {
+            f->_1A0++;
+        } else {
+            f->_1A0 = 0x7FFF;
+        }
+    }
+    if (g_FieldingLogic._0DE >= 0 && f->_1C6 == 0 && g_Runners[g_FieldingLogic._0DE].runnerOnFieldOrOutOrScored != 1) {
+        g_FieldingLogic._0DE = -1;
+    }
+    if (g_Ball.ballState == 1 || g_Ball.ballState == 2) {
+        if (g_FieldingLogic._0DC >= 0 && g_FieldingLogic._0CC == 9 && g_FieldingLogic._0DE >= 0) {
+            f32 progress = g_Runners[g_FieldingLogic._0DE].percentTowardsNextBase;
+
+            if (progress >= 0.3f && progress <= 0.65f) {
+                g_FieldingLogic._0F4 = g_FieldingLogic._0DE;
+            }
+        }
+        if (g_FieldingLogic._0F4 >= 0) {
+            u8 from;
+            u8 to;
+
+            if (g_Runners[g_FieldingLogic._0F4].runnerOnFieldOrOutOrScored != 1 || g_Runners[g_FieldingLogic._0F4].baseStandingOn >= 0) {
+                g_FieldingLogic._0F4 = -1;
+                return;
+            }
+            from = g_Runners[g_FieldingLogic._0F4].currentBase;
+            to = g_Runners[g_FieldingLogic._0F4].nextBase;
+            if (g_FieldingLogic._0C4 != -1 && g_FieldingLogic._0C4 != from && g_FieldingLogic._0C4 != to) {
+                g_FieldingLogic._0F4 = -1;
+            }
+            if (g_FieldingLogic._0CC != -1 && g_FieldingLogic._0CC != 9 && g_FieldingLogic._0CC != from && g_FieldingLogic._0CC != to) {
+                g_FieldingLogic._0F4 = -1;
+            }
+        }
+    }
 }
 
 // .text:0x00055918 size:0x3AC mapped:0x806949AC
@@ -1251,7 +1297,34 @@ void fn_3_3E690(void) {
 
 // .text:0x0003E468 size:0x228 mapped:0x8067D4FC
 void fn_3_3E468(void) {
-    return;
+    s32 i;
+    s32 j;
+    s32 best;
+    f32 bestDist;
+
+    for (i = 0; i < 9; i++) {
+        g_Fielders[i]._18C = -1;
+        g_Fielders[i]._1D7 = 0;
+    }
+    for (i = 0; i < 4; i++) {
+        g_FieldingLogic._0D0[i] = -1;
+        g_FieldingLogic._101[i] = 0;
+    }
+    g_FieldingLogic._0D8 = -1;
+    g_FieldingLogic.playerAtMoundCutoffLocation = 0;
+    for (i = 0; i < 4; i++) {
+        bestDist = 9999.9f;
+        for (j = 0; j < 6; j++) {
+            if (g_FieldingLogic._0F8[j] == 0 && g_Fielders[j]._0A8[i] < bestDist) {
+                bestDist = g_Fielders[j]._0A8[i];
+                best = j;
+            }
+        }
+        g_Fielders[best]._18C = i;
+        g_Fielders[best]._1D7 = 1;
+        fn_3_5985C(best, 1);
+        g_FieldingLogic._0D0[i] = best;
+    }
 }
 
 // .text:0x0003E34C size:0x11C mapped:0x8067D3E0
@@ -1336,8 +1409,15 @@ void fn_3_3C484(void) {
 }
 
 // .text:0x0003C270 size:0x214 mapped:0x8067B304
-void fn_3_3C270(void) {
-    return;
+BOOL fn_3_3C270(s32 fielder) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+
+    f->_18C = 0xE;
+    f->_1D7 = 2;
+    fn_3_5985C(fielder, 0xE);
+    f->_1D6 = 0xB;
+    fn_3_52F4C(fielder, lbl_3_data_4444[4].x, lbl_3_data_4444[4].z);
+    return TRUE;
 }
 
 // .text:0x0003C220 size:0x50 mapped:0x8067B2B4
