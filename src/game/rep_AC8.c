@@ -120,18 +120,22 @@ typedef struct UnkAC8Fielder {
     /* 0x1DD */ u8 _1DD;
     /* 0x1DE */ u8 _1DE;
     /* 0x1DF */ u8 _1DF;
-    /* 0x1E0 */ u8 _1E0[0x1E8 - 0x1E0];
+    /* 0x1E0 */ u8 _1E0[0x1E3 - 0x1E0];
+    /* 0x1E3 */ u8 _1E3;
+    /* 0x1E4 */ u8 _1E4[0x1E8 - 0x1E4];
     /* 0x1E8 */ u8 _1E8;
     /* 0x1E9 */ u8 _1E9;
     /* 0x1EA */ u8 _1EA[0x1EE - 0x1EA];
     /* 0x1EE */ u8 _1EE;
     /* 0x1EF */ u8 _1EF[0x1F0 - 0x1EF];
     /* 0x1F0 */ u8 _1F0;
-    /* 0x1F1 */ u8 _1F1[0x1F2 - 0x1F1];
+    /* 0x1F1 */ u8 _1F1;
     /* 0x1F2 */ u8 _1F2;
     /* 0x1F3 */ u8 _1F3[0x1F5 - 0x1F3];
     /* 0x1F5 */ s8 _1F5;
-    /* 0x1F6 */ u8 _1F6[0x1FC - 0x1F6];
+    /* 0x1F6 */ u8 _1F6[0x1FA - 0x1F6];
+    /* 0x1FA */ u8 _1FA;
+    /* 0x1FB */ u8 _1FB[0x1FC - 0x1FB];
     /* 0x1FC */ u8 _1FC;
     /* 0x1FD */ u8 _1FD[0x1FF - 0x1FD];
     /* 0x1FF */ u8 _1FF;
@@ -157,7 +161,8 @@ typedef struct UnkAC8Fielder {
     /* 0x213 */ u8 _213;
     /* 0x214 */ u8 _214[0x216 - 0x214];
     /* 0x216 */ u8 _216;
-    /* 0x217 */ u8 _217[0x21C - 0x217];
+    /* 0x217 */ u8 _217;
+    /* 0x218 */ u8 _218[0x21C - 0x218];
     /* 0x21C */ f32 _21C;
     /* 0x220 */ f32 _220;
     /* 0x224 */ f32 _224;
@@ -322,8 +327,25 @@ void fn_3_595C4(void) {
 }
 
 // .text:0x00059338 size:0x28C mapped:0x806983CC
+// 94.05%: the first loop walks the mapping with lwzu in the target; the inlined
+// fn_3_596F8 carries that function's own differences.
 void fn_3_59338(void) {
-    return;
+    s32 i;
+
+    for (i = 1; i < 10; i++) {
+        if (g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.awayTeamBattingInd_battingTeam][i][1] >= 20) {
+            g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.awayTeamBattingInd_battingTeam][i][1] -= 20;
+        } else if (g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.awayTeamBattingInd_battingTeam][i][1] >= 10) {
+            g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.awayTeamBattingInd_battingTeam][i][1] -= 10;
+        }
+    }
+    fn_3_596F8();
+    for (i = 0; i < 9; i++) {
+        g_Fielders[i]._1F1 = 0;
+        g_Fielders[i]._1E3 = 0;
+        g_Fielders[i]._1FA = 0;
+        g_Fielders[i]._217 = 0;
+    }
 }
 
 // .text:0x000591AC size:0x18C mapped:0x80698240
