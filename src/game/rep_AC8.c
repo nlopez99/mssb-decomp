@@ -208,7 +208,10 @@ typedef struct UnkAC8Fielder {
     /* 0x228 */ f32 _228;
     /* 0x22C */ f32 _22C;
     /* 0x230 */ f32 _230;
-    /* 0x234 */ u8 _234[0x248 - 0x234];
+    /* 0x234 */ f32 _234;
+    /* 0x238 */ f32 _238;
+    /* 0x23C */ f32 _23C;
+    /* 0x240 */ u8 _240[0x248 - 0x240];
     /* 0x248 */ f32 _248;
     /* 0x24C */ s16 _24C;
     /* 0x24E */ s16 _24E;
@@ -275,7 +278,8 @@ extern u8 lbl_3_data_46F8[][9];
 typedef struct {
     /* 0x00 */ u8 _00[0x8];
     /* 0x08 */ f32 _08;
-    /* 0x0C */ u8 _0C[0x14 - 0xC];
+    /* 0x0C */ f32 _0C;
+    /* 0x10 */ u8 _10[0x14 - 0x10];
 } UnkAC8Data47D0; // size: 0x14
 
 extern UnkAC8Data47D0 lbl_3_data_47D0[6];
@@ -8081,8 +8085,94 @@ void fn_3_2ACD8(void) {
 }
 
 // .text:0x0002A69C size:0x63C mapped:0x80669730
-void fn_3_2A69C(void) {
-    return;
+// 97.73%: registers only: the target keeps base in r30 and f in r28 (here r27 and r29),
+// and lead and gap in f4 and f2.
+BOOL fn_3_2A69C(s32 fielder) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    s16 base = g_FieldingLogic._0C4;
+    f32 lead;
+    f32 gap;
+    f32 dx;
+    f32 dz;
+    f32 dist;
+    s16 angle;
+    s16 turn;
+
+    if (base < 0 || base > 3) {
+        return FALSE;
+    }
+    if (fielder != g_Ball.fielderBeingThrownTo) {
+        return FALSE;
+    }
+    if (g_Ball.framesSinceThrowStarted <= 3) {
+        return FALSE;
+    }
+    if (f->_1A8 != 0) {
+        return FALSE;
+    }
+    if (f->_252 == 2) {
+        return FALSE;
+    }
+    if (fn_3_9CE0(lbl_3_data_4444[base].x, lbl_3_data_4444[base].z) < f->_0E8) {
+        if (f->_1F5 == base) {
+            return FALSE;
+        }
+        if (g_Ball.framesUntilThrowReachesDest > lbl_3_data_49DC[19]) {
+            return FALSE;
+        }
+        if (g_Ball.framesUntilThrowReachesDest < lbl_3_data_49DC[20]) {
+            return FALSE;
+        }
+        gap = f->_0A8[base] - lbl_3_data_47D0[f->_1CA]._0C;
+        lead = 1.2f * f->_058 * g_Ball.framesUntilThrowReachesDest;
+        if (gap - lead > 3.0f) {
+            return FALSE;
+        }
+        if (gap < lead) {
+            f32 remain;
+
+            fn_3_2C238(fielder, 8, g_Ball.framesUntilThrowReachesDest, 0, 0);
+            f->_234 = g_Ball.physicsSubstruct.futureCoordsAndDist[g_Ball.framesUntilThrowReachesDest].pos.x;
+            f->_238 = g_Ball.physicsSubstruct.futureCoordsAndDist[g_Ball.framesUntilThrowReachesDest].pos.y;
+            f->_23C = g_Ball.physicsSubstruct.futureCoordsAndDist[g_Ball.framesUntilThrowReachesDest].pos.z;
+            dz = f->_23C - f->_008;
+            dx = f->_234 - f->_000;
+            dist = dolsqrtf2(dx * dx + dz * dz);
+            remain = dist - lbl_3_data_47D0[f->_1CA]._0C;
+            if (remain / g_Ball.framesUntilThrowReachesDest < 0.07f) {
+                f->_21C = f->_234;
+                f->_224 = f->_23C;
+            } else {
+                f32 scale = remain / dist;
+
+                f->_21C = dx * scale + f->_000;
+                f->_224 = dz * scale + f->_008;
+            }
+        } else {
+            fn_3_2C238(fielder, 8, g_Ball.framesUntilThrowReachesDest, 1, 0);
+            dz = lbl_3_data_4444[base].z - f->_008;
+            dx = lbl_3_data_4444[base].x - f->_000;
+            dist = dolsqrtf2(dx * dx + dz * dz);
+            dx /= dist;
+            dz /= dist;
+            dx = 1.1f * (f->_058 * dx);
+            dz = 1.1f * (f->_058 * dz);
+            f->_21C = dx * g_Ball.framesUntilThrowReachesDest + f->_000;
+            f->_224 = dz * g_Ball.framesUntilThrowReachesDest + f->_008;
+        }
+        f->_261 = 0;
+        angle = fn_3_9FB8C(g_Ball.AtBat_Contact_BallPos.x - f->_000, g_Ball.AtBat_Contact_BallPos.z - f->_008);
+        turn = fn_3_9FCA4(angle, fn_3_9FB8C(f->_21C - f->_000, f->_224 - f->_008));
+        if (turn < -0x500 || turn > 0x500) {
+            f->_261 = 3;
+        } else if (turn < -0x200) {
+            f->_261 = 1;
+        } else if (turn > 0x200) {
+            f->_261 = 2;
+        }
+        return TRUE;
+    }
+    return FALSE;
 }
 
 // .text:0x0002A288 size:0x414 mapped:0x8066931C
