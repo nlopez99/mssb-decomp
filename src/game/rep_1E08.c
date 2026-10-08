@@ -1365,8 +1365,6 @@ void fn_3_BB07C(UnkPanel1E08* obj, f32 angle) {
 }
 
 // .text:0x000BA7F4 size:0x888 mapped:0x806F9888
-// fabs(pos.x) and pos.x swap f1/f2, and the inlined fn_3_BB07C's int-to-float
-// temporaries sit 8 bytes higher on the stack than in the target.
 BOOL fn_3_BA7F4(void* arg) {
     UnkPanelList1E08* list = arg;
     Vec up = { 0.0f, 1.0f, 0.0f };
@@ -1378,6 +1376,7 @@ BOOL fn_3_BA7F4(void* arg) {
     UnkPanelSort1E08* entry;
     f32 angle;
     f32 delta;
+    f64 ax;
 
     GXSetZMode(GX_TRUE, GX_ALWAYS, GX_TRUE);
     GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
@@ -1422,8 +1421,9 @@ BOOL fn_3_BA7F4(void* arg) {
             fn_3_BA538(panel);
             PSVECAdd(&panel->_10, &panel->pos, &panel->pos);
             PSVECAdd(&panel->spin, &panel->rot, &panel->rot);
-            if (fabs(panel->pos.x) > 1.0) {
-                panel->pos.x = fabs(panel->pos.x) / panel->pos.x;
+            ax = fabs(panel->pos.x);
+            if (ax > 1.0) {
+                panel->pos.x = ax / panel->pos.x;
                 panel->_10.x *= -1.0f;
             } else if (rand() % 5 == 0) {
                 memcpy(&dir, &panel->_10, sizeof(Vec));
