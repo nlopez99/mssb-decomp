@@ -459,6 +459,8 @@ extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_8004C094(Vec* pos);
 extern StaC2Emitter* fn_80033A24(BOOL (*update)(StaC2Emitter*), s32, s32, s32, s32, s32);
 extern void fn_80033964(StaC2Emitter* emitter);
+extern u8 lbl_3_data_8404[6][15][2];
+extern u8 lbl_3_data_84B8[30][2];
 extern StaC2SpriteRef lbl_80371C30[];
 
 // fn_3_B7F70 lies in unsplit code
@@ -500,6 +502,26 @@ static u8 lbl_3_bss_A018;
 static inline void stopVoice(SND_VOICEID* voice) {
     sndFXKeyOff(*voice);
     sndFXCtrl(*voice, 7, 0);
+}
+
+static inline SND_VOICEID playStadiumSound(s32 sound) {
+    SND_VOICEID voice;
+    u8 vol;
+    s32 stadium = g_d_GameSettings.StadiumID;
+
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+        vol = lbl_3_data_84B8[sound][0];
+    } else {
+        vol = lbl_3_data_8404[stadium][sound][0];
+    }
+    voice = sndFXStartEx(lbl_3_data_81DC[stadium] + sound, vol, 63, 0);
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+        vol = lbl_3_data_84B8[sound][1];
+    } else {
+        vol = lbl_3_data_8404[stadium][sound][1];
+    }
+    sndFXCtrl(voice, 91, vol);
+    return voice;
 }
 
 static inline BOOL isSpriteDone(StaC2Task* task, s32 i) {
@@ -1655,8 +1677,100 @@ void fn_3_D1004(StaC2Draw* draw, f32 x, f32 y, f32 z, f32 rotY, f32 tilt) {
 }
 
 // .text:0x000D0918 size:0x6EC mapped:0x8070F9AC
-void fn_3_D0918(void) {
-    return;
+void fn_3_D0918(void* arg) {
+    StaC2Draw* draw = arg;
+    StaC2Bone* bone = draw->_74->_00->_18[3];
+    Vec ball;
+    Vec diff;
+    Vec axis = { 0.0f, 1.0f, 0.0f };
+    Quaternion q;
+    f32 dist;
+
+    draw->_C4 += 0.03;
+    if (draw->_C4 >= 6.2831855f) {
+        draw->_C4 = 0.0f;
+    }
+    draw->_A0.y = 0.5 * sinf_kludge(draw->_C4) + draw->_C8;
+    if (g_GameLogic.gameStatus != 2) {
+        if (draw->_D1 != 0) {
+            if (draw->_D1 == 2) {
+                fn_3_65F4();
+                lbl_3_common_bss_350E4._6B = 0;
+                lbl_3_bss_A030 = 0.0f;
+                stopVoice(&lbl_3_data_182C0);
+            }
+            draw->_D1 = 0;
+        }
+        if (lbl_3_data_182C0 != -1) {
+            stopVoice(&lbl_3_data_182C0);
+        }
+    }
+    switch (draw->_D1) {
+    case 0:
+        ball.x = g_Ball.AtBat_Contact_BallPos.x;
+        ball.y = g_Ball.AtBat_Contact_BallPos.y;
+        ball.z = g_Ball.AtBat_Contact_BallPos.z;
+        PSVECSubtract(&ball, &draw->_A0, &diff);
+        diff.y = 0.0f;
+        if (!(g_Ball.currentStarSwing2 == 3 | g_Ball.currentStarSwing2 == 4 | g_Ball.currentStarSwing2 == 11 |
+              g_Ball.currentStarSwing2 == 12) &&
+            PSVECMag(&diff) < 5.0f && ball.y > 5.5 &&
+            ball.y < 10.0f && g_Ball.AtBat_ContactResult < 2) {
+            draw->_D1 = 1;
+            // the target stores the direction twice
+            draw->_D0 = draw->_D0 = fn_3_B7F70(2) * -2 + 1;
+            draw->_BC = lbl_3_data_18364[draw->_9C]._30;
+        }
+        break;
+    case 1:
+        draw->_C0 += draw->_D0 * draw->_BC;
+        ball.x = g_Ball.AtBat_Contact_BallPos.x;
+        ball.y = 0.0f;
+        ball.z = g_Ball.AtBat_Contact_BallPos.z;
+        PSVECSubtract(&ball, &draw->_A0, &diff);
+        diff.y = 0.0f;
+        dist = PSVECMag(&diff);
+        if (dist < 5.0f) {
+            PSVECNormalize(&diff, &diff);
+            PSVECScale(&diff, 5.0f, &diff);
+            g_Ball.AtBat_Contact_BallPos.x = draw->_A0.x + diff.x;
+            g_Ball.AtBat_Contact_BallPos.z = draw->_A0.z + diff.z;
+            draw->_D1 = 2;
+            fn_3_6620();
+            lbl_3_common_bss_350E4._6B = 1;
+            draw->_CCf = fn_3_D0854(draw);
+            if (draw->_CCf < 0.0f) {
+                draw->_CCf = 360.0 + draw->_CCf;
+            }
+            lbl_3_data_182C0 = playStadiumSound(1);
+        } else {
+            ball.x = g_Ball.pastCoordinates[0].x;
+            ball.y = 0.0f;
+            ball.z = g_Ball.pastCoordinates[0].z;
+            PSVECSubtract(&ball, &draw->_A0, &diff);
+            diff.y = 0.0f;
+            if (dist > PSVECMag(&diff)) {
+                draw->_D1 = 3;
+            }
+        }
+        break;
+    case 2:
+        draw->_C0 += draw->_D0 * draw->_BC;
+        fn_3_D0534(draw);
+        break;
+    case 3:
+        draw->_BC -= lbl_3_data_18364[draw->_9C]._30 / 150.0f;
+        draw->_C0 += draw->_D0 * draw->_BC;
+        if (draw->_BC <= 0.0f) {
+            draw->_D1 = 0;
+        }
+        break;
+    }
+    C_QUATRotAxisRad(&q, &axis, 0.017453292f * draw->_C0);
+    PSQUATMultiply(&draw->_AC, &q, &q);
+    PSQUATNormalize(&q, &q);
+    CTRLSetTranslation(&draw->control, draw->_A0.x, -draw->_A0.y, draw->_A0.z);
+    CTRLSetQuat(&bone->control, q.x, q.y, q.z, q.w);
 }
 
 // .text:0x000D0854 size:0xC4 mapped:0x8070F8E8
