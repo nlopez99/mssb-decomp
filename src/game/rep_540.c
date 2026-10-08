@@ -608,8 +608,8 @@ void fn_3_D9EC(void) {
 }
 
 // .text:0x0000CE28 size:0xBC4 mapped:0x8064BEBC
-// 99.7%: the bounce interpolation computes x - prevX and z - prevZ in place (the target
-// uses fresh FPRs), and the bounce friction blocks swap r0/r3 for the mode and collision code.
+// 99.8%: the bounce interpolation computes x - prevX, z - prevZ and t in other FPRs, and the
+// bounce friction blocks swap r0/r3 for the game mode and the collision code.
 void estimateAndSetFutureCoords(int mode) {
     f32 x;
     f32 y;
@@ -711,9 +711,10 @@ restart:
         x += vx;
         z += vz;
         if (y < g_Ball.groundYForBounces) {
+            t = prevY - y;
             x -= prevX;
             z -= prevZ;
-            t = (prevY - g_Ball.groundYForBounces) / (prevY - y);
+            t = (prevY - g_Ball.groundYForBounces) / t;
             x = t * x + prevX;
             remain = 1.0f - t;
             z = t * z + prevZ;
