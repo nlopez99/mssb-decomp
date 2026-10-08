@@ -7025,8 +7025,95 @@ void fn_3_313B0(void) {
 }
 
 // .text:0x00030D74 size:0x63C mapped:0x8066FE08
+// 98.63%: registers only: the first loop's counter and fielder pointer take r29 and r30 in
+// the target (here r27 and r29).
 void fn_3_30D74(void) {
-    return;
+    s32 i;
+    f32 z;
+    f32 x;
+
+    if (lbl_3_common_bss_34C90._1D5 == 0) {
+        for (i = 2; i < 9; i++) {
+            UnkAC8Fielder* f = &g_Fielders[i];
+            f32 dx;
+            f32 dz;
+            f32 dx2;
+            f32 dz2;
+
+            fn_3_58F58(i, &x, &z);
+            dx = f->_000 - x;
+            dz = f->_008 - z;
+            dx2 = dx * dx;
+            dz2 = dz * dz;
+            if (dolsqrtf2(dx2 + dz2) < 0.1f) {
+                x = f->_000;
+                z = f->_008;
+            }
+            fn_3_52F4C(i, x, z);
+        }
+        for (i = 2; i < 9; i++) {
+            UnkAC8Fielder* f = &g_Fielders[i];
+            BOOL moving = FALSE;
+
+            if (f->_068 > 0.2f) {
+                moving = TRUE;
+            } else if (f->_050 >= 0.1f && f->_068 > 0.05f) {
+                moving = TRUE;
+            }
+            if (moving) {
+                if (g_Pitcher.pitchTotalTimeCounter <= 0) {
+                    f->_050 = 0.1f;
+                } else if (g_Batter.buntStatus >= 1 && g_Batter.buntStatus <= 3 && (i == 2 || i == 4)) {
+                    f->_050 += f->_05C;
+                    if (f->_050 > f->_058) {
+                        f->_050 = f->_058;
+                    }
+                } else if (((i == 3 && g_Batter.batterHand == 0) || (i == 5 && g_Batter.batterHand != 0)) &&
+                           g_Runners[1].runnerOnFieldOrOutOrScored != 0 && g_Runners[1].furthestBaseForcedToGoToOnWalk != 0) {
+                    f->_050 += f->_05C;
+                    if (f->_050 > f->_058) {
+                        f->_050 = f->_058;
+                    }
+                } else if (g_Pitcher.pitchTotalTimeCounter < 60) {
+                    f->_17E = 60 - g_Pitcher.pitchTotalTimeCounter;
+                    f->_050 = f->_068 / f->_17E;
+                } else {
+                    f->_17E = 0;
+                    f->_050 = 0.0f;
+                }
+                f->_068 -= f->_050;
+                if (f->_050 <= 0.0f) {
+                    f->_050 = 0.0f;
+                    f->_17E = -1;
+                } else if (f->_068 < 0.0f) {
+                    f->_030 = f->_014 - f->_000;
+                    f->_034 = f->_01C - f->_008;
+                    f->_000 = f->_014;
+                    f->_008 = f->_01C;
+                    f->_068 = 0.0f;
+                    f->_17E = 0;
+                } else {
+                    f->_030 = f->_050 * (f32)cos(f->_064);
+                    f->_034 = f->_050 * (f32)sin(f->_064);
+                    f->_000 += f->_030;
+                    f->_008 += f->_034;
+                    f->_17E = f->_068 / f->_050;
+                }
+                f->_1E3 = 0;
+            } else {
+                f->_030 = f->_014 - f->_000;
+                f->_034 = f->_01C - f->_008;
+                f->_000 = f->_014;
+                f->_008 = f->_01C;
+                f->_068 = 0.0f;
+                f->_050 = 0.0f;
+                f->_1E3 = 1;
+                f->_17E = -1;
+            }
+        }
+        g_Fielders[0]._000 = g_Pitcher.pitcher.x;
+        g_Fielders[0]._008 = g_Pitcher.pitcher.z;
+    }
 }
 
 // .text:0x00030A58 size:0x31C mapped:0x8066FAEC
