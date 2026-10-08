@@ -3,8 +3,17 @@
 #include "game/UnknownHomes_Game.h"
 #include "game/rep_D18.h"
 #include "game/rep_1BC8.h"
+#include "game/rep_DB8.h"
+#include "game/rep_1038.h"
 
 extern void fn_3_1DD48(void);
+extern void changeScene(u8, s16);
+extern u8 lbl_3_data_FAF4[4][4];
+
+extern struct {
+    /* 0x00 */ u8 _00[0x13];
+    /* 0x13 */ u8 _13;
+} g_RunningLogic;
 
 // .text:0x000B77DC size:0x1D0 mapped:0x806F6870
 void fn_3_B77DC(void) {
@@ -49,7 +58,28 @@ void fn_3_B6F6C(void) {
 
 // .text:0x000B6E98 size:0xD4 mapped:0x806F5F2C
 void fn_3_B6E98(void) {
-    return;
+    fn_3_5F720();
+    g_Strikes.storedOuts = g_Strikes.outs;
+    g_Strikes.runnerIndexForEachOutThisPitch[0] = -1;
+    g_Strikes.runnerIndexForEachOutThisPitch[1] = -1;
+    g_Strikes.runnerIndexForEachOutThisPitch[2] = -1;
+    g_Strikes.GameControls_StrikeBallBitVector = g_Strikes.balls + g_Strikes.strikes * 16;
+    g_Strikes.allForcedRunnersReachedTheirBaseInd = 0;
+    g_Ball.totalFramesAtPlay = 0;
+    g_FieldingLogic._10E = 0;
+    g_FieldingLogic._0EE = 0;
+    g_FieldingLogic._10F = 0;
+    g_FieldingLogic._110 = 0;
+    g_FieldingLogic._128 = 0;
+    g_FieldingLogic._129 = 0;
+    g_RunningLogic._13 = 0;
+    g_GameLogic.pre_PostMiniGameInd = 0;
+    g_GameLogic.minigameLastTurnSuccessInd = 0;
+    g_Practice._1EC = 0;
+    g_Practice._1ED = 0;
+    changeScene(1, 6);
+    fn_3_5A6D4(2);
+    fn_3_6C0E0();
 }
 
 // .text:0x000B6D80 size:0x118 mapped:0x806F5E14
@@ -59,7 +89,27 @@ void fn_3_B6D80(void) {
 
 // .text:0x000B6C9C size:0xE4 mapped:0x806F5D30
 void fn_3_B6C9C(void) {
-    return;
+    if (g_Practice.instructionNumber >= 0) {
+        if (g_Practice.allowPlayToEndIndicator == 0) {
+            g_FieldingLogic._0AE = 0;
+            return;
+        }
+    } else {
+        if (g_Runners[1].runnerOnFieldOrOutOrScored == 3) {
+            g_Practice.guidedPracticeCompletionRelated = 1;
+        }
+        return;
+    }
+    if (g_FieldingLogic._0AE < 0x7FFE) {
+        g_FieldingLogic._0AE++;
+    } else {
+        g_FieldingLogic._0AE = 0x7FFF;
+    }
+    if (g_FieldingLogic._0AE >= 60) {
+        fn_3_B6C50();
+    } else if (g_FieldingLogic._0AE == 54) {
+        changeScene(3, 6);
+    }
 }
 
 // .text:0x000B6C50 size:0x4C mapped:0x806F5CE4
@@ -104,7 +154,27 @@ void fn_3_B61C0(void) {
 
 // .text:0x000B60F0 size:0xD0 mapped:0x806F5184
 void fn_3_B60F0(void) {
-    return;
+    fn_3_5F720();
+    g_Strikes.storedOuts = g_Strikes.outs;
+    g_Strikes.runnerIndexForEachOutThisPitch[0] = -1;
+    g_Strikes.runnerIndexForEachOutThisPitch[1] = -1;
+    g_Strikes.runnerIndexForEachOutThisPitch[2] = -1;
+    g_Strikes.GameControls_StrikeBallBitVector = g_Strikes.balls + g_Strikes.strikes * 16;
+    g_Strikes.allForcedRunnersReachedTheirBaseInd = 0;
+    g_Ball.totalFramesAtPlay = 0;
+    g_FieldingLogic._10E = 0;
+    g_FieldingLogic._0EE = 0;
+    g_FieldingLogic._10F = 0;
+    g_FieldingLogic._110 = 0;
+    g_FieldingLogic._128 = 0;
+    g_FieldingLogic._129 = 0;
+    g_RunningLogic._13 = 0;
+    g_GameLogic.pre_PostMiniGameInd = 0;
+    g_GameLogic.minigameLastTurnSuccessInd = 0;
+    g_Practice.guidedPracticeCompletionRelated2 = 0;
+    changeScene(1, 6);
+    fn_3_5A6D4(1);
+    fn_3_6C0E0();
 }
 
 // .text:0x000B5F7C size:0x174 mapped:0x806F5010
@@ -114,5 +184,34 @@ void fn_3_B5F7C(void) {
 
 // .text:0x000B5E7C size:0x100 mapped:0x806F4F10
 void fn_3_B5E7C(void) {
-    return;
+    if (g_Practice.practiceType_2 == 4) {
+        return;
+    }
+    if (g_Pitcher.pitcherActionState != 4) {
+        return;
+    }
+    switch (g_Practice.practiceLevel) {
+    case 0:
+        g_Practice.guidedPracticeCounter++;
+        break;
+    case 1:
+        if (g_Pitcher.ChargePitchType >= 2) {
+            g_Practice.guidedPracticeCounter++;
+        }
+        break;
+    case 2:
+        if (g_Pitcher.TypeOfPitch == 2) {
+            g_Practice.guidedPracticeCounter++;
+        }
+        break;
+    case 3:
+        if (g_Pitcher.starPitchType != 0) {
+            g_Practice.guidedPracticeCounter++;
+        }
+        break;
+    }
+    if (g_Practice.guidedPracticeCounter >= lbl_3_data_FAF4[g_Practice.practiceType_2][g_Practice.practiceLevel]) {
+        g_Practice.guidedPracticeCompletionRelated = 1;
+    }
+    g_Practice.guidedPracticeCompletionRelated2 = 1;
 }

@@ -990,7 +990,7 @@ typedef struct _PracticeStruct {
     /*0x1EA*/ u8 _1EA;
     /*0x1EB*/ u8 _1EB;
     /*0x1EC*/ u8 _1EC;
-    artificial_padding(0x1ec, 0x1ee, u8);
+    /*0x1ED*/ u8 _1ED;
     /*0x1EE*/ u8 _1EE;
     /*0x1EF*/ u8 rosterID; // unsure
 } PracticeStruct;          // size: 0x1f0
