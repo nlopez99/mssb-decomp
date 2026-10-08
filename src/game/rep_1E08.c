@@ -51,7 +51,7 @@ typedef struct {
     /* 0x27 */ u8 _27;
 } UnkMarker1E08; // size: 0x28
 
-typedef struct {
+typedef struct UnkSpark1E08 {
     /* 0x000 */ u8 _000[0x8];
     /* 0x008 */ Mtx _008;
     /* 0x038 */ Vec _038;
@@ -243,6 +243,7 @@ extern UnkPair1E08 lbl_3_data_111C8[];
 extern u8 lbl_3_data_11380[0x10];
 extern void (*lbl_3_data_11390[])(s32);
 extern UnkSpark1E08 lbl_3_data_11620[4];
+extern s32 lbl_3_data_12350;
 extern f32 lbl_3_data_12CB4[0x13];
 extern u8 lbl_3_data_1146C[0x190];
 extern s32 lbl_3_data_17000[0x36];
@@ -276,6 +277,7 @@ extern s32 fn_8004ABE0(void);
 extern void pitchingMachinePitching(u8 id);
 extern void minigamesSetSomePointers(void);
 extern void fn_800A7D4C(s32, void*);
+extern void fn_800245EC(camera_803c639c_s* camera, Mtx view, Vec* points, f32* out, s32 count, s32 arg5);
 extern void fn_80033B58(void* texture, s32 index, s32, s32);
 extern u16 lbl_800F7860[4][2];
 extern void fn_8003A550(s32 idx, VecXYZ* pos, Vec* dir, BOOL flag);
@@ -628,8 +630,80 @@ void fn_3_BDCA4(void) {
 }
 
 // .text:0x000BD8FC size:0x3A8 mapped:0x806FC990
-void fn_3_BD8FC(void) {
-    return;
+// The first branch loads -1 twice; the target copies color0 into color1 (mr r30,r31),
+// and the last branch forms 0xFFFFFF00 twice where the target reuses color1's register.
+void fn_3_BD8FC(UnkSpark1E08* spark) {
+    Mtx m;
+    Vec dir;
+    Vec perp;
+    f32 screen[2];
+    u32 color0;
+    u32 color1;
+    s32 n;
+    f32 cx;
+    f32 cy;
+    f32 px;
+    f32 py;
+    f32 scale;
+    s32 i;
+
+    if (lbl_3_bss_9960) {
+        color0 = 0xFFFFFFFF;
+        color1 = color0;
+    } else {
+        n = lbl_3_data_A3C[1];
+        if (spark->_044 < n - 18) {
+            color1 = (spark->_044 * 255 / (n - 18)) | 0xFFFFFF00;
+            color0 = color1;
+        } else if (spark->_044 < n - 10) {
+            color0 = 0xFFFFFFFF;
+            color1 = ((spark->_044 - (n - 18)) * 0x7F8 / 8) | 0xFFFFFF00;
+        } else {
+            color1 = 0xFFFFFF00;
+            color0 = ((n - 2 - spark->_044) * 255 / 8) | color1;
+        }
+    }
+    scale = 0.00078125f * spark->_048;
+    fn_800245EC(fn_80052768_getCamera(0), spark->_008, &spark->_038, screen, 1, lbl_3_data_12350);
+    cx = -(640.0f * screen[0] + -320.0f) * scale;
+    cy = -(448.0f * screen[1] + -224.0f) * scale;
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetNumChans(1);
+    GXSetNumTexGens(0);
+    PSMTXIdentity(m);
+    GXLoadPosMtxImm(m, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    GXSetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+    GXSetProjection(fn_80052768_getCamera(0)->proj, GX_PERSPECTIVE);
+    GXSetZMode(GX_TRUE, GX_ALWAYS, GX_FALSE);
+    GXSetCullMode(GX_CULL_NONE);
+    GXBegin(GX_TRIANGLES, GX_VTXFMT0, 0x60 * 3);
+    for (i = 0; i < 0x60; i++) {
+        px = spark->_04C[i][0] * scale;
+        py = spark->_04C[i][1] * scale;
+        dir.x = cx - px;
+        dir.y = cy - py;
+        dir.z = 0.0f;
+        PSVECScale(&dir, 0.75f, &dir);
+        perp.x = dir.y;
+        perp.y = -dir.x;
+        perp.z = 0.0f;
+        PSVECNormalize(&perp, &perp);
+        PSVECScale(&perp, 0.003125f, &perp);
+        GXPosition3f32(px - perp.x, py - perp.y, -1.0f);
+        GXColor1u32(color0);
+        GXPosition3f32(px + perp.x, py + perp.y, -1.0f);
+        GXColor1u32(color0);
+        GXPosition3f32(px + dir.x, py + dir.y, -1.0f);
+        GXColor1u32(color1);
+    }
 }
 
 // .text:0x000BD8D8 size:0x24 mapped:0x806FC96C
@@ -1005,7 +1079,11 @@ void fn_3_BBF94(void) {
 
 // .text:0x000BBBC4 size:0x3D0 mapped:0x806FAC58
 void fn_3_BBBC4(void) {
-    return;
+    UnkPanelList1E08* list = fn_80033A24(fn_3_BA7F4, 0x80, 0, lbl_3_data_170D8[0], 1, 0x19);
+
+    if (list != NULL) {
+        fn_3_BB454(list);
+    }
 }
 
 // .text:0x000BB7F4 size:0x3D0 mapped:0x806FA888

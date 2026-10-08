@@ -7,6 +7,7 @@
 struct UnkKey21F8;
 struct UnkPlayer1E08;
 struct UnkPanel1E08;
+struct UnkSpark1E08;
 struct UnkPanelList1E08;
 struct UnkAnim21F8;
 struct UnkEffect21F8;
@@ -39,7 +40,7 @@ void fn_3_BD7D8(void);
 void fn_3_BD7DC(s32 arg0);
 void fn_3_BD80C(s32 arg0);
 void fn_3_BD8D8(void);
-void fn_3_BD8FC(void);
+void fn_3_BD8FC(struct UnkSpark1E08* spark);
 void fn_3_BDCA4(void);
 void fn_3_BDE14(void);
 void fn_3_BDF74(void);
