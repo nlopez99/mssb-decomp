@@ -108,7 +108,8 @@ typedef struct StaC5Draw {
     };
     /* 0xC0 */ u8 _C0;
     /* 0xC1 */ s8 _C1;
-    /* 0xC2 */ u8 _C2[0xC4 - 0xC2];
+    /* 0xC2 */ u8 _C2;
+    /* 0xC3 */ s8 _C3;
     /* 0xC4 */ s8 _C4;
     /* 0xC5 */ u8 _C5;
     /* 0xC6 */ u8 _C6;
@@ -143,10 +144,24 @@ typedef struct {
     /* 0x34 */ StaC5Model models[1];
 } StaC5ModelTable;
 
+typedef struct {
+    /* 0x000 */ u8 _000[0x44];
+    /* 0x044 */ f32 _44;
+    /* 0x048 */ u8 _048[0x254 - 0x048];
+    /* 0x254 */ s8 _254;
+    /* 0x255 */ s8 _255;
+    /* 0x256 */ u8 _256[0x25A - 0x256];
+    /* 0x25A */ u8 _25A;
+    /* 0x25B */ u8 _25B[0x25D - 0x25B];
+    /* 0x25D */ u8 _25D;
+} StaC5Player;
+
 extern struct {
     /* 0x0000 */ u8 _0000[0x6C];
     /* 0x006C */ StaC5ModelTable* _6C;
-    /* 0x0070 */ u8 _0070[0x307E - 0x0070];
+    /* 0x0070 */ u8 _0070[0x2C50 - 0x0070];
+    /* 0x2C50 */ StaC5Player* _2C50[9];
+    /* 0x2C74 */ u8 _2C74[0x307E - 0x2C74];
     /* 0x307E */ u8 _307E;
     /* 0x307F */ u8 _307F[0x3088 - 0x307F];
     /* 0x3088 */ u8 _3088;
@@ -1626,7 +1641,6 @@ void fn_3_F0224(StaC5Draw* draw) {
 }
 
 // .text:0x000F0184 size:0xA0 mapped:0x8072F218
-// Waits on fn_3_EFB54: its empty stub is inlined here, where the target calls it.
 void fn_3_F0184(void) {
     u32 i;
     StaC5Draw* draw;
@@ -1645,8 +1659,121 @@ void fn_3_F0184(void) {
 }
 
 // .text:0x000EFB54 size:0x630 mapped:0x8072EBE8
+// 95.88%: the frame is 0x10 larger and every local sits 12 bytes higher than in the
+// target (q2 at 0x8 up to pos at 0x74); the struct copies may need other forms.
 void fn_3_EFB54(StaC5Draw* draw) {
-    return;
+    Quaternion q2;
+    Quaternion q1;
+    Quaternion q;
+    Vec axis;
+    Vec w;
+    Vec u;
+    Vec right = { 1.0f, 0.0f, 0.0f };
+    Vec off;
+    Vec pos = { 0.0f, 0.0f, 0.0f };
+    StaC5Player* player;
+    s32 i;
+    s8 side;
+    f32 angle;
+    f32 depth;
+    f32 radius;
+
+    player = lbl_8036E548._2C50[draw->_C1];
+    if (player == NULL) {
+        return;
+    }
+    if (player->_255 != draw->_C3) {
+        for (i = 0; i < 9; i++) {
+            player = lbl_8036E548._2C50[i];
+            if (player != NULL && draw->_C3 == player->_255) {
+                draw->_C1 = player->_254;
+                break;
+            }
+        }
+        if (player == NULL) {
+            return;
+        }
+    }
+    memset(&pos, 0, sizeof(Vec));
+    if (!player->_25A) {
+        fn_8001B728(player->_254, 0x22, &pos);
+        side = -1;
+    } else {
+        fn_8001B728(player->_254, 0x1E, &pos);
+        side = 1;
+    }
+    switch (draw->_C0) {
+    case 0:
+        angle = -player->_44 - 0.017453292f * (side * 30 + 90);
+        break;
+    case 1:
+        angle = -player->_44 - 0.017453292f * (side * 30 + 60);
+        break;
+    case 2:
+        angle = -player->_44 - 0.017453292f * (side * 30 + 120);
+        break;
+    }
+    if (pos.y < 0.0f) {
+        depth = pos.y;
+        if (pos.y < -2.5f) {
+            depth = -2.5f;
+        }
+        radius = sqrt(6.25f - depth * depth);
+    } else {
+        depth = 0.0f;
+        radius = 2.5f;
+    }
+    off.x = -radius * (f32)cos(angle);
+    off.y = -depth;
+    off.z = -radius * (f32)sin(angle);
+    pos.x += off.x * 0.5f;
+    pos.y += off.y * 0.5f;
+    pos.z += off.z * 0.5f;
+    pos.y *= -1.0f;
+    off.x *= -1.0f;
+    off.y *= -1.0f;
+    off.z *= -1.0f;
+    draw->_A0 = pos;
+    w = off;
+    u = off;
+    w.z = 0.0f;
+    u.y = 0.0f;
+    w.x = sqrt(pow(off.z, 2.0) + pow(off.x, 2.0));
+    if (0.0f != radius) {
+        PSVECNormalize(&u, &u);
+    }
+    PSVECNormalize(&w, &w);
+    draw->_AC = 57.29578f * -(f32)acos(PSVECDotProduct(&u, &right));
+    if (u.z < 0.0f) {
+        draw->_AC = 360.0f - draw->_AC;
+    }
+    axis.x = 0.0f;
+    axis.y = 1.0f;
+    axis.z = 0.0f;
+    C_QUATRotAxisRad(&q1, &axis, 0.017453292f * draw->_AC);
+    draw->_B0 = 57.29578f * (f32)acos(PSVECDotProduct(&w, &right));
+    if (w.y < 0.0f) {
+        draw->_B0 = 360.0f - draw->_B0;
+    }
+    axis.x = 0.0f;
+    axis.y = 0.0f;
+    axis.z = 1.0f;
+    C_QUATRotAxisRad(&q2, &axis, 0.017453292f * draw->_B0);
+    PSQUATMultiply(&q1, &q2, &q);
+    PSQUATNormalize(&q, &q);
+    if (PSQUATDotProduct(&q, &q) == 0.0f) {
+        axis.x = 0.0f;
+        axis.y = 1.0f;
+        axis.z = 0.0f;
+        C_QUATRotAxisRad(&q, &axis, 0.0f);
+    }
+    if (player->_25D == 1) {
+        draw->_90_7 = 1;
+    } else {
+        draw->_90_7 = 0;
+    }
+    CTRLSetTranslation(&draw->control, draw->_A0.x, -draw->_A0.y, draw->_A0.z);
+    CTRLSetQuat(&draw->control, q.x, q.y, q.z, q.w);
 }
 
 // .text:0x000EF930 size:0x224 mapped:0x8072E9C4
