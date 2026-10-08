@@ -355,12 +355,12 @@ void fn_3_15D1D8(UnkTask3BD8* task) {
     s32 order[5];
     s32 i;
     s32 j;
-    s32 team;
     s32 total;
     s32 total2;
     s32 rate;
     UnkBatStats3BD8* bat;
     UnkPitchStats3BD8* pitch;
+    s32 team;
 
     team = task->_1C ^ g_GameLogic.homeTeamInd;
     for (i = 0; i < 5; i++) {
@@ -383,11 +383,11 @@ void fn_3_15D1D8(UnkTask3BD8* task) {
             if (bat->_04 == 0) {
                 fn_3_15C6E4(task, i + 37, 0, 22);
             } else {
-                rate = bat->_05 * 10000 / bat->_04;
-                if (rate % 10 >= 5) {
-                    rate += 10;
+                total = bat->_05 * 10000 / bat->_04;
+                if (total % 10 >= 5) {
+                    total += 10;
                 }
-                fn_3_15C6E4(task, i + 37, rate / 10, 10);
+                fn_3_15C6E4(task, i + 37, total / 10, 10);
             }
         }
         total = 0;
@@ -428,8 +428,9 @@ void fn_3_15D1D8(UnkTask3BD8* task) {
         fn_3_15C6E4(task, 42, rate / 10, 10);
     } else {
         for (i = 0; i < 5; i++) {
+            bat = &lbl_803537E4[team][order[i]];
             pitch = &lbl_803535C8[team][order[i]];
-            fn_3_15C6E4(task, i + 7, lbl_803537E4[team][order[i]]._23, 3);
+            fn_3_15C6E4(task, i + 7, bat->_23, 3);
             if (pitch->_00 == 0) {
                 fn_3_15C6E4(task, i + 13, 0, 21);
                 fn_3_15C6E4(task, i + 19, 0, 21);
@@ -508,8 +509,8 @@ void fn_3_15C6E4(UnkTask3BD8* task, s32 id, s32 value, s32 type) {
     s32 b;
     s32 c;
     s32 d;
-    s32 whole;
     s32 rem;
+    s32 whole;
 
     fn_800362F0(task, id);
     if (type == 21) {
