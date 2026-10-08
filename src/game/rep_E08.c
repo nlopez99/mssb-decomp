@@ -537,8 +537,6 @@ void fn_3_631AC(s32 i) {
 }
 
 // .text:0x00062E70 size:0x33C mapped:0x806A1F04
-// 99.77%: the target loads g_Fielders[i]._20D before minigamePlayerSelectedOrder, and the
-// inlined fn_3_62CA8 has r3 and r4 swapped; no declaration order of fn_3_62CA8 fixes both.
 void fn_3_62E70(void) {
     s32 i;
 
@@ -551,11 +549,13 @@ void fn_3_62E70(void) {
         fn_3_62904();
     }
     for (i = 0; i < 9; i++) {
+        UnkE08Fielder* fielder = &g_Fielders[i];
+
         g_UnkAnimation_31EAC[i]._40 = g_Fielders[i]._1C7;
         if (g_d_GameSettings.minigamesEnabled && findMinigameSlot(i) >= 4) {
             continue;
         }
-        if (g_Minigame.GameMode_MiniGame == 2 && (s8)g_Fielders[i]._20D == g_Minigame.minigamePlayerSelectedOrder &&
+        if (g_Minigame.GameMode_MiniGame == 2 && (s8)fielder->_20D == g_Minigame.minigamePlayerSelectedOrder &&
             g_Minigame.wallBallRotatePitchersInd == 0) {
             continue;
         }
@@ -567,9 +567,28 @@ void fn_3_62E70(void) {
         if (i == 1 && (g_GameLogic.gameStatus == 1 || g_GameLogic.gameStatus == 0 || g_GameLogic.gameStatus == 0xB)) {
             fn_3_62E28();
         } else {
-            g_UnkAnimation_31EAC[i]._00 = g_Fielders[i]._050;
-            g_UnkAnimation_31EAC[i]._45 = 0;
-            fn_3_62CA8(i);
+            // fn_3_62CA8 written out: inlined, its own declaration order swaps r3 and r4
+            u8 kind;
+            UnkE08Actor* actor = lbl_8036E548._2C50[i];
+            UnkE08Anim* anim = &g_UnkAnimation_31EAC[i];
+
+            anim->_00 = fielder->_050;
+            anim->_45 = 0;
+            if (anim->_4C == 0) {
+                kind = fielder->_252;
+                anim->_4C = kind;
+                anim->_4A = fielder->_24C;
+                if (kind == 1 || kind == 2) {
+                    anim->_4E = fielder->_253;
+                }
+                if (anim->_4C != 0) {
+                    anim->_4D = anim->_4C;
+                }
+            }
+            if (actor != NULL && actor->_62 == 0x24) {
+                anim->_4C = 0;
+                anim->_4F = 0;
+            }
             fn_3_62E04(i);
             fn_3_62D44(i);
             fn_3_61B64(i);
