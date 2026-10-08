@@ -112,6 +112,29 @@ typedef struct Rep1FD8Draw {
     /* 0xB0 */ u8 _B0;
 } Rep1FD8Draw;
 
+extern struct {
+    /* 0x00 */ StadiumObject1D58* _00;
+    /* 0x04 */ u8 _04[0x30 - 0x04];
+    /* 0x30 */ s32 _30;
+} lbl_3_common_bss_350E4;
+
+typedef struct Rep1FD8CameraSlot {
+    /* 0x00 */ u8 _00[0x8];
+    /* 0x08 */ Mtx view;
+    /* 0x38 */ void* task;
+} Rep1FD8CameraSlot; // size: 0x3C
+
+typedef struct Rep1FD8CameraTask {
+    /* 0x00 */ u8 _00[0x2A];
+    /* 0x2A */ u8 _2A;
+} Rep1FD8CameraTask;
+
+// Outside every unit's .data range in splits.txt (escalated).
+extern Rep1FD8CameraSlot lbl_3_data_17804[2];
+extern u8 lbl_803CBBC0;
+extern void fn_800A7D4C(s32, void*);
+extern void fn_800BF058(void (*draw)(StadiumModel1D58* model, Mtx view));
+extern void fn_800BDF70(StadiumModel1D58* model);
 extern Rep1FD8Spawner* fn_80033A24(BOOL (*update)(Rep1FD8Spawner*), s32, s32, s32, s32, s32);
 extern Rep1FD8Task* fn_800B0A5C_insertQueue(void (*callback)(void), s32 priority);
 extern void fn_800528C0(f32 x, f32 y, f32 z, s16* screenX, s16* screenY);
@@ -152,7 +175,7 @@ static StadiumObject1D58* lbl_3_bss_9D94;
 static s32 lbl_3_bss_9D90;
 static s32 lbl_3_bss_9D8C;
 static s32 lbl_3_bss_9D88;
-static s32 lbl_3_bss_9D84;
+static u32 lbl_3_bss_9D84;
 static u8 lbl_3_bss_9D82;
 static u8 lbl_3_bss_9D81;
 static u8 lbl_3_bss_9D80;
@@ -311,8 +334,19 @@ void fn_3_C40EC(Rep1FD8Draw* draw) {
 }
 
 // .text:0x000C4068 size:0x84 mapped:0x807030FC
-void fn_3_C4068(void) {
-    return;
+void fn_3_C4068(Rep1FD8Draw* draw) {
+    Rep1FD8TexRegs* regs = draw->_74->_00->_18[1]->_14->_10->_04;
+    u16 frame = regs->_04 & 0x1FFF;
+
+    if (lbl_3_bss_9D84++ > 4) {
+        frame++;
+        if (frame > 19) {
+            frame = 4;
+        }
+        lbl_3_bss_9D84 = 0;
+    }
+    regs->_04 &= ~0x1FFF;
+    regs->_04 |= frame;
 }
 
 // .text:0x000C3F70 size:0xF8 mapped:0x80703004
@@ -586,7 +620,18 @@ void fn_3_C24A0(void) {
 
 // .text:0x000C23E0 size:0xC0 mapped:0x80701474
 void fn_3_C23E0(void) {
-    return;
+    StadiumObject1D58* obj;
+    s32 i;
+
+    fn_800BF058(fn_3_B8184);
+    for (i = 0; i < lbl_3_common_bss_350E4._30; i++) {
+        obj = &lbl_3_common_bss_350E4._00[i];
+        fn_3_B828C(obj);
+        if (i >= 1 && i < 11 && obj->_90_7 && obj->_74 != NULL) {
+            obj->_74->actor->_98 = obj->_93 | 6;
+            fn_800BDF70(obj->_74);
+        }
+    }
 }
 
 // .text:0x000C2310 size:0xD0 mapped:0x807013A4
@@ -618,7 +663,16 @@ void fn_3_C2310(StadiumModel1D58* model, Mtx view) {
 
 // .text:0x000C2244 size:0xCC mapped:0x807012D8
 void fn_3_C2244(void) {
-    return;
+    Rep1FD8CameraTask* task = lbl_803CC1B8;
+
+    if (lbl_3_bss_9D9C != 0) {
+        lbl_3_bss_9D90 = 0;
+        fn_800B0A14_removeQueue();
+    } else if (task->_2A != 0) {
+        fn_800A7D4C(1, &lbl_3_data_17804[lbl_803CBBC0]);
+        PSMTXCopy(fn_80052768_getCamera(0)->view, lbl_3_data_17804[lbl_803CBBC0].view);
+        lbl_3_data_17804[lbl_803CBBC0].task = task;
+    }
 }
 
 // .text:0x000C1C18 size:0x62C mapped:0x80700CAC

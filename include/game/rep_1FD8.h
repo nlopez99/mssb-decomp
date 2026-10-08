@@ -31,7 +31,7 @@ void fn_3_C3A38(void);
 void fn_3_C3C2C(void);
 void fn_3_C3E94(Vec* pos, s32 i);
 void fn_3_C3F70(void);
-void fn_3_C4068(void);
+void fn_3_C4068(struct Rep1FD8Draw* draw);
 void fn_3_C40EC(struct Rep1FD8Draw* draw);
 void fn_3_C414C(void);
 void fn_3_C42A4(void);
