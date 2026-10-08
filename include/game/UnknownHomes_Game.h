@@ -2590,7 +2590,8 @@ typedef struct {
 typedef struct {
     /* 0x00 */ u8 _00[0x8];
     /* 0x08 */ f32 _08;
-    /* 0x0C */ u8 _0C[0x14 - 0xC];
+    /* 0x0C */ s16 _0C;
+    /* 0x0E */ u8 _0E[0x14 - 0xE];
     /* 0x14 */ s16 _14;
     /* 0x16 */ u8 _16[0x1A - 0x16];
     /* 0x1A */ u8 _1A;
@@ -2604,14 +2605,16 @@ typedef struct {
 
 typedef struct {
     /* 0x000 */ FieldingLogicEntry _000[4];
-    /* 0x070 */ u8 _070[0x74 - 0x70];
+    /* 0x070 */ FieldingLogicEntry* _070;
     /* 0x074 */ FieldingLogicFielder _074[4];
     /* 0x08C */ FieldingLogic08C* _08C;
     /* 0x090 */ Vec _090;
     /* 0x09C */ u8 _09C[0xAE - 0x9C];
     /* 0x0AE */ s16 _0AE;
     /* 0x0B0 */ s16 _0B0;
-    /* 0x0B2 */ u8 _0B2[0xBC - 0xB2];
+    /* 0x0B2 */ u8 _0B2[0xB8 - 0xB2];
+    /* 0x0B8 */ s16 _0B8;
+    /* 0x0BA */ u8 _0BA[0xBC - 0xBA];
     /* 0x0BC */ s16 _0BC;
     /* 0x0BE */ s16 _0BE;
     /* 0x0C0 */ u8 _0C0[0xC2 - 0xC0];
