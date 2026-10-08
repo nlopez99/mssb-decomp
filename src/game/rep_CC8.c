@@ -86,11 +86,11 @@ void fn_3_59AC0(s32 arg0, s32 arg1, s32 arg2) {
 
 // .text:0x00059A90 size:0x30 mapped:0x80698B24
 void fn_3_59A90(void) {
-    g_UnkSound_32718._02[0] = 0;
-    g_UnkSound_32718._02[1] = 0;
-    g_UnkSound_32718._02[2] = 0;
-    g_UnkSound_32718._02[3] = 0;
-    g_UnkSound_32718._02[4] = 0;
+    g_UnkSound_32718.queue[0] = 0;
+    g_UnkSound_32718.queue[1] = 0;
+    g_UnkSound_32718.queue[2] = 0;
+    g_UnkSound_32718.queue[3] = 0;
+    g_UnkSound_32718.queue[4] = 0;
     g_UnkSound_32718._00 = 0;
     g_UnkSound_32718._07 = 0;
     g_UnkSound_32718._08 = 0;
@@ -140,8 +140,8 @@ void fn_3_59918(int arg0, int arg1) {
         g_GameLogic.gameOverInd = 1;
     }
     for (i = 0; i < 5; i++) {
-        if (g_UnkSound_32718._02[i] == 0) {
-            g_UnkSound_32718._02[i] = arg0;
+        if (g_UnkSound_32718.queue[i] == 0) {
+            g_UnkSound_32718.queue[i] = arg0;
             return;
         }
     }

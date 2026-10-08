@@ -2184,7 +2184,17 @@ extern InputStruct g_Controls[];
 
 typedef struct {
     /* 0x0 */ s16 _00;
-    /* 0x2 */ u8 _02[5];
+    // A five-entry queue: rep_CC8 fills the first free slot, rep_16B8 shifts it
+    union {
+        /* 0x2 */ u8 queue[5];
+        struct {
+            /* 0x2 */ u8 _02;
+            /* 0x3 */ u8 _03;
+            /* 0x4 */ u8 _04;
+            /* 0x5 */ u8 _05;
+            /* 0x6 */ u8 _06;
+        };
+    };
     /* 0x7 */ u8 _07;
     /* 0x8 */ u8 _08;
 } lbl_3_common_bss_32718_struct;
