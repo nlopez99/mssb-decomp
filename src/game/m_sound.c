@@ -1185,7 +1185,60 @@ void fn_3_8CD74(void) {
 
 // .text:0x0008C5C8 size:0x7AC mapped:0x806CB65C
 void fn_3_8C5C8(void) {
-    return;
+    int code = g_Ball.collisionCode & 0x7F;
+    s32 stadium;
+    SND_VOICEID voice;
+
+    if (g_Ball.ballVelocity < 0.2f) {
+        return;
+    }
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES) {
+        return;
+    }
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+        stadium = g_d_GameSettings.StadiumID;
+        voice = sndFXStartEx(lbl_3_data_81DC[stadium] + 0x18,
+                             g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD ? lbl_3_data_84B8[0x18][0]
+                                                                                     : lbl_3_data_8404[stadium][0x18][0],
+                             0x3F, 0);
+        sndFXCtrl(voice, 0x5B,
+                  g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD ? lbl_3_data_84B8[0x18][1]
+                                                                          : lbl_3_data_8404[stadium][0x18][1]);
+        return;
+    }
+    if (g_d_GameSettings.StadiumID == 1) {
+        if (code == 8) {
+            fn_3_8FF5C(0x1A2, g_Ball.AtBat_Contact_BallPos.x, g_Ball.AtBat_Contact_BallPos.y, g_Ball.AtBat_Contact_BallPos.z);
+        } else {
+            fn_3_8FF5C(0x1A1, g_Ball.AtBat_Contact_BallPos.x, g_Ball.AtBat_Contact_BallPos.y, g_Ball.AtBat_Contact_BallPos.z);
+        }
+        return;
+    }
+    if (g_d_GameSettings.StadiumID == 3) {
+        if (code == 1) {
+            fn_3_8FF5C(0x1A4, g_Ball.AtBat_Contact_BallPos.x, g_Ball.AtBat_Contact_BallPos.y, g_Ball.AtBat_Contact_BallPos.z);
+            return;
+        }
+    } else if (g_d_GameSettings.StadiumID == 4) {
+        if (code == 6) {
+            fn_3_8FF5C(0x1A1, g_Ball.AtBat_Contact_BallPos.x, g_Ball.AtBat_Contact_BallPos.y, g_Ball.AtBat_Contact_BallPos.z);
+            return;
+        }
+        if (code == 10) {
+            fn_3_8FF5C(0x1A2, g_Ball.AtBat_Contact_BallPos.x, g_Ball.AtBat_Contact_BallPos.y, g_Ball.AtBat_Contact_BallPos.z);
+            return;
+        }
+        if (code == 9) {
+            fn_3_8FF5C(0x1A0, g_Ball.AtBat_Contact_BallPos.x, g_Ball.AtBat_Contact_BallPos.y, g_Ball.AtBat_Contact_BallPos.z);
+            return;
+        }
+    } else if (g_d_GameSettings.StadiumID == 5) {
+        if (code == 10) {
+            fn_3_8FF5C(0x1A2, g_Ball.AtBat_Contact_BallPos.x, g_Ball.AtBat_Contact_BallPos.y, g_Ball.AtBat_Contact_BallPos.z);
+            return;
+        }
+    }
+    fn_3_8FF5C(0x17E, g_Ball.AtBat_Contact_BallPos.x, g_Ball.AtBat_Contact_BallPos.y, g_Ball.AtBat_Contact_BallPos.z);
 }
 
 // .text:0x0008C4F0 size:0xD8 mapped:0x806CB584
