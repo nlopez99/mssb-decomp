@@ -6,7 +6,7 @@
 void fn_3_AC9F8(void);
 void fn_3_ACAF8(void);
 void fn_3_ACD38(void);
-void fn_3_AD164(void);
+void fn_3_AD164(int arg0);
 void fn_3_AD2A0(void);
 void fn_3_AD3BC(void);
 void fn_3_AD8CC(void);

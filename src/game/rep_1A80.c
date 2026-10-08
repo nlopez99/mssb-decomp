@@ -53,7 +53,9 @@ extern struct {
     /* 0x220 */ u8 _220;
     /* 0x221 */ u8 _221;
     /* 0x222 */ u8 _222;
-    /* 0x223 */ u8 _223[0x242 - 0x223];
+    /* 0x223 */ u8 _223[0x23F - 0x223];
+    /* 0x23F */ u8 _23F[2];
+    /* 0x241 */ u8 _241;
     /* 0x242 */ s16 _242[9];
     /* 0x254 */ s16 _254;
     /* 0x256 */ s16 _256;
@@ -675,13 +677,149 @@ void fn_3_AD2A0(void) {
 }
 
 // .text:0x000AD164 size:0x13C mapped:0x806EC1F8
-void fn_3_AD164(void) {
-    return;
+void fn_3_AD164(int arg0) {
+    switch (lbl_3_common_bss_34C90._1D2) {
+    case 0:
+        lbl_3_common_bss_34C90._23F[lbl_3_common_bss_34C90._000] = 0;
+        if (g_GameLogic._13E[lbl_3_common_bss_34C90._000 ^ 1] == 0) {
+            lbl_3_common_bss_34C90._23F[lbl_3_common_bss_34C90._000 ^ 1] = 1;
+        } else {
+            lbl_3_common_bss_34C90._23F[lbl_3_common_bss_34C90._000 ^ 1] = 0xFF;
+        }
+        lbl_3_common_bss_34C90._1D2 = 1;
+        break;
+    case 1:
+        lbl_3_common_bss_34C90._012 = 0;
+        lbl_3_common_bss_34C90._1D2 = 2;
+        break;
+    case 2:
+        if (lbl_3_common_bss_34C90._012 > 20) {
+            lbl_3_common_bss_34C90._1D2 = 3;
+        }
+        break;
+    case 3:
+        fn_3_ACD38();
+        break;
+    case 4:
+        lbl_3_common_bss_34C90._012 = 0;
+        lbl_3_common_bss_34C90._1D2 = 5;
+        break;
+    case 5:
+        if (lbl_3_common_bss_34C90._012 > 20) {
+            lbl_3_common_bss_34C90._1D2 = 6;
+        }
+        break;
+    case 6:
+        if (arg0 == 0) {
+            fn_3_AFD80(2);
+        } else {
+            fn_3_AFD80(9);
+        }
+        break;
+    }
 }
 
 // .text:0x000ACD38 size:0x42C mapped:0x806EBDCC
 void fn_3_ACD38(void) {
-    return;
+    int i;
+    InputStruct* input;
+
+    for (i = 0; i < 2; i++) {
+        input = &g_Controls[g_GameLogic.teams[i]];
+        if (g_GameLogic._13E[i] != 0) {
+            continue;
+        }
+        if (input->newButtonInput & PAD_BUTTON_A) {
+            if (lbl_3_common_bss_34C90._23F[i] == 0) {
+                sndFXStartEx(0x1B8, lbl_800EFBA4[1], 0x3F, 0);
+                lbl_3_common_bss_34C90._1D2 = 4;
+            }
+        } else if (input->_08 & PAD_BUTTON_UP) {
+            if (lbl_3_common_bss_34C90._23F[i] == 0) {
+                lbl_3_common_bss_34C90._23F[i] = 4;
+            } else if (lbl_3_common_bss_34C90._23F[i] == 1) {
+                if (i == lbl_3_common_bss_34C90._000) {
+                    lbl_3_common_bss_34C90._23F[i] = 0;
+                } else {
+                    lbl_3_common_bss_34C90._23F[i] = 4;
+                }
+            } else {
+                lbl_3_common_bss_34C90._23F[i]--;
+            }
+            sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+        } else if (input->_08 & PAD_BUTTON_DOWN) {
+            if (lbl_3_common_bss_34C90._23F[i] == 4) {
+                if (i == lbl_3_common_bss_34C90._000) {
+                    lbl_3_common_bss_34C90._23F[i] = 0;
+                } else {
+                    lbl_3_common_bss_34C90._23F[i] = 1;
+                }
+            } else {
+                lbl_3_common_bss_34C90._23F[i]++;
+            }
+            sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+        } else if (input->_08 & PAD_BUTTON_RIGHT) {
+            if (lbl_3_common_bss_34C90._23F[i] == 0) {
+                continue;
+            }
+            switch (lbl_3_common_bss_34C90._23F[i]) {
+            case 1:
+                if (!gameInitOptions.controlOptions[g_GameLogic.teams[i]].easyBatting) {
+                    gameInitOptions.controlOptions[g_GameLogic.teams[i]].easyBatting = TRUE;
+                    sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+                }
+                break;
+            case 2:
+                if (!gameInitOptions.controlOptions[g_GameLogic.teams[i]].autoFielding) {
+                    gameInitOptions.controlOptions[g_GameLogic.teams[i]].autoFielding = TRUE;
+                    sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+                }
+                break;
+            case 3:
+                if (!gameInitOptions.controlOptions[g_GameLogic.teams[i]].autoRunning) {
+                    gameInitOptions.controlOptions[g_GameLogic.teams[i]].autoRunning = TRUE;
+                    sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+                }
+                break;
+            case 4:
+                if (gameInitOptions.controlOptions[g_GameLogic.teams[i]].dropSpot == TRUE) {
+                    gameInitOptions.controlOptions[g_GameLogic.teams[i]].dropSpot = FALSE;
+                    sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+                }
+                break;
+            }
+        } else if (input->_08 & PAD_BUTTON_LEFT) {
+            if (lbl_3_common_bss_34C90._23F[i] == 0) {
+                continue;
+            }
+            switch (lbl_3_common_bss_34C90._23F[i]) {
+            case 1:
+                if (gameInitOptions.controlOptions[g_GameLogic.teams[i]].easyBatting) {
+                    gameInitOptions.controlOptions[g_GameLogic.teams[i]].easyBatting = FALSE;
+                    sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+                }
+                break;
+            case 2:
+                if (gameInitOptions.controlOptions[g_GameLogic.teams[i]].autoFielding) {
+                    gameInitOptions.controlOptions[g_GameLogic.teams[i]].autoFielding = FALSE;
+                    sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+                }
+                break;
+            case 3:
+                if (gameInitOptions.controlOptions[g_GameLogic.teams[i]].autoRunning) {
+                    gameInitOptions.controlOptions[g_GameLogic.teams[i]].autoRunning = FALSE;
+                    sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+                }
+                break;
+            case 4:
+                if (!gameInitOptions.controlOptions[g_GameLogic.teams[i]].dropSpot) {
+                    gameInitOptions.controlOptions[g_GameLogic.teams[i]].dropSpot = TRUE;
+                    sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+                }
+                break;
+            }
+        }
+    }
 }
 
 // .text:0x000ACAF8 size:0x240 mapped:0x806EBB8C
