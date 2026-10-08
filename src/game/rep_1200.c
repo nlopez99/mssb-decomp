@@ -11,9 +11,18 @@
 #include "game/rep_1838.h"
 #include "game/rep_540.h"
 #include "game/rep_CC8.h"
+#include "game/rep_31A0.h"
+#include "game/rep_3880.h"
+#include "game/rep_D18.h"
 
 extern struct {
     /* 0x00 */ s32 _00;
+    /* 0x04 */ s16 _04[2][19];
+    /* 0x50 */ u8 _50[0xAA - 0x50];
+    /* 0xAA */ u8 _AA;
+    /* 0xAB */ u8 _AB;
+    /* 0xAC */ u8 _AC;
+    /* 0xAD */ u8 _AD;
 } g_Scores;
 
 extern struct {
@@ -34,6 +43,7 @@ typedef struct {
 
 extern Rep540Friction lbl_3_data_4388[7];
 extern f32 lbl_3_data_446C[2];
+extern VecXZ lbl_3_data_450C[9];
 extern f32 lbl_3_data_4474[4];
 extern f32 lbl_3_data_5E98[6];
 extern f32 lbl_3_data_5EB0[2];
@@ -44,7 +54,16 @@ extern f32 lbl_3_data_5F90[12];
 extern f32 lbl_3_data_2138C[4];
 extern u8 lbl_3_data_76FC[][3];
 
+// .data 0x8080-0x8088: only this unit uses it, but splits.txt does not assign it here yet
+extern s16 lbl_3_data_8080[4];
+
 BOOL fn_8001C920(int charID);
+void fn_3_1DD48(void);
+void fn_3_7A154(int arg);
+void fn_3_7CE90(void);
+
+// .text 0x6F4E8-0x6F6CC: only this unit calls it, but splits.txt does not assign it here yet
+BOOL fn_3_6F4E8(void);
 
 static s32 lbl_3_bss_172C[7];
 static s32 lbl_3_bss_1728;
@@ -96,7 +115,77 @@ void fn_3_753E8(BOOL keepAction) {
 
 // .text:0x000751B4 size:0x234 mapped:0x806B4248
 void fn_3_751B4(void) {
-    return;
+    fn_3_750C4(PITCHER_ACTION_STATE_NONE);
+    g_Ball.fielderWBallIndex = 0;
+    g_Pitcher.pitchSpeedScaler = lbl_3_data_5F90[0];
+    g_Pitcher.decelerationFactor = lbl_3_data_5F90[1];
+    g_Pitcher.centerOfStrikeZone.x = 0.5f * (lbl_3_data_5E98[0] + lbl_3_data_5E98[1]);
+    g_Pitcher.centerOfStrikeZone.z = 0.5f * (lbl_3_data_5E98[2] + lbl_3_data_5E98[3]);
+    g_Pitcher.strikeZoneLeft = lbl_3_data_5E98[0];
+    g_Pitcher.strikeZoneRight = lbl_3_data_5E98[1];
+    g_Pitcher.beginningOfStrikeCheckZ = lbl_3_data_5E98[2];
+    g_Pitcher.endingOfStrikeCheckZ = lbl_3_data_5E98[3];
+    g_Pitcher.ballCurrentPosition.x = lbl_3_data_450C[0].x;
+    g_Pitcher.ballCurrentPosition.y = 1.0f;
+    g_Pitcher.ballCurrentPosition.z = lbl_3_data_450C[0].z;
+    g_Pitcher.ballVelocity.x = 0.0f;
+    g_Pitcher.ballVelocity.y = 0.0f;
+    g_Pitcher.ballVelocity.z = 0.0f;
+    g_Pitcher.pitchStartingPosition_AIMaxCurve = g_Pitcher.centerOfStrikeZone.x;
+    g_Pitcher.eggBallBounceYHeight = lbl_3_data_5E98[4];
+    g_Pitcher.frontOfPlateZ = g_Pitcher.centerOfStrikeZone.z;
+    g_Pitcher.pitchTotalTimeCounter = 0;
+    g_Pitcher.strikeZoneProcessNumber = 0;
+    g_Pitcher.frameBallCanStartBeingControlled = 0;
+    g_Pitcher.pitchInAirInd = 0;
+    g_Pitcher.calledStrikeInd = 0;
+    g_Pitcher.strikeInd = 0;
+    g_Pitcher.miniGameRelated = 0;
+    g_Pitcher.pickOffLoc = -1;
+    g_Pitcher.pitchDidntResultInLiveBallInd = 0;
+    g_Pitcher.strikeOutOrWalk = 0;
+    g_Pitcher.framesUntilPitchGetsToBatter = -1;
+    g_Pitcher.pitchChargeUp = 0.0f;
+    g_Pitcher.pitchChargeUpAnimationProportion = 0.0f;
+    g_Pitcher.unknownFrameCounter = 0;
+    g_Pitcher.ChargePitchType = 0;
+    g_Pitcher.framesAHeldForChargePitches = 0;
+    g_Pitcher.TypeOfPitch = 0;
+    g_Pitcher.ballHaloTrainInd_unused = 0;
+    g_Pitcher.overChargeInd = 0;
+    g_Pitcher.starPitchInd = 0;
+    g_Pitcher.starPitchType = 0;
+    g_Pitcher.warioWaluStarAnimationStage = 0;
+    g_Pitcher.windupCountdownUntilBallReleased = lbl_3_data_8080[0];
+    g_Pitcher.warioWaluStarHasPlayedSound = 0;
+    g_Pitcher.peachDaisyStarAnimationOn = 0;
+    g_Pitcher.peachDaisyAnimationHappened = 0;
+    g_Pitcher.anyCurveInput = 0;
+    g_Pitcher.bulletPitchFrameCounter = 0;
+    g_Pitcher.bulletPitchStageCode = 0;
+    g_Pitcher.eggBallBounceNumber = 0;
+    g_Pitcher.framesSinceFirstEggBounce = 0;
+    g_Pitcher.pitcherOffCenter = 0;
+    g_Pitcher.nonCaptainStarPitchTriggeredType = 0;
+    g_Pitcher.walkedInRunInd = 0;
+    g_Pitcher.unused_pitcherIsFielder = 0;
+    g_Pitcher.starPitchPositionAdjustment.x = 0.0f;
+    g_Pitcher.starPitchPositionAdjustment.y = 0.0f;
+    g_Pitcher.starPitchPositionAdjustment.z = 0.0f;
+    g_Pitcher.pitchWindUpCountDown = lbl_3_data_8080[1];
+    g_Pitcher.curvePitchWindupFrames = lbl_3_data_8080[2];
+    g_Pitcher.windupCountdownUntilBallReleased = g_Pitcher.pitchWindUpCountDown;
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_PRACTICE) {
+        g_Pitcher.AIInd = g_Practice.aIEnabled;
+    } else if (g_Minigame.GameMode_MiniGame == MINI_GAME_ID_BOBOMB_DERBY ||
+               g_Minigame.GameMode_MiniGame == MINI_GAME_ID_BARREL_BATTER) {
+        g_Pitcher.AIInd = 1;
+    } else if (g_d_GameSettings.minigamesEnabled) {
+        g_Pitcher.AIInd = g_Minigame.minigameControlStruct.battingHandedness[g_Minigame.minigamePlayerSelectedOrder];
+    } else {
+        g_Pitcher.AIInd = g_GameLogic._140[g_GameLogic.awayTeamBattingInd_battingTeam];
+    }
+    lbl_3_common_bss_34C58._34 = 0;
 }
 
 // .text:0x000750DC size:0xD8 mapped:0x806B4170
@@ -139,7 +228,42 @@ void fn_3_74D0C(void) {
 
 // .text:0x00074AC4 size:0x248 mapped:0x806B3B58
 void fn_3_74AC4(void) {
-    return;
+    InputStruct* input = &g_Controls[g_GameLogic.teams[g_GameLogic.teamFielding]];
+    f32 step = 0.0f;
+
+    if (ACTIVE_TUTORIAL()) {
+        input = &g_Practice.inputs[g_GameLogic.teamFielding];
+    } else if (fn_3_107DB4(g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder])) {
+        input = &g_Minigame._1D7C[g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder]];
+    } else if (g_d_GameSettings.minigamesEnabled) {
+        input = &g_Controls[g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder]];
+    }
+    if (input->buttonInput & INPUT_TRIGGER_L) {
+        g_Pitcher.pitcherOffCenter = 1;
+    }
+    if (g_Pitcher.pitcherOffCenter) {
+        if (g_Pitcher.pitcher.x >= -lbl_3_data_4474[3] && g_Pitcher.pitcher.x <= lbl_3_data_4474[3]) {
+            g_Pitcher.pitcherOffCenter = 0;
+            g_Pitcher.pitcher.x = 0.0f;
+        } else if (g_Pitcher.pitcher.x < 0.0f) {
+            g_Pitcher.pitcher.x += lbl_3_data_4474[3];
+        } else {
+            g_Pitcher.pitcher.x -= lbl_3_data_4474[3];
+        }
+    } else {
+        if (input->buttonInput & INPUT_BUTTON_LEFT) {
+            step = -lbl_3_data_4474[2];
+        } else if (input->buttonInput & INPUT_BUTTON_RIGHT) {
+            step = lbl_3_data_4474[2];
+        }
+        g_Pitcher.pitcher.x += step;
+        if (g_Pitcher.pitcher.x < lbl_3_data_4474[0]) {
+            g_Pitcher.pitcher.x = lbl_3_data_4474[0];
+        }
+        if (g_Pitcher.pitcher.x > lbl_3_data_4474[1]) {
+            g_Pitcher.pitcher.x = lbl_3_data_4474[1];
+        }
+    }
 }
 
 // .text:0x00074128 size:0x99C mapped:0x806B31BC
@@ -189,7 +313,38 @@ void fn_3_73F2C(void) {
 
 // .text:0x00073DE8 size:0x144 mapped:0x806B2E7C
 void fn_3_73DE8(void) {
-    return;
+    if (g_Pitcher.pitchTotalTimeCounter < 0x7FFE) {
+        g_Pitcher.pitchTotalTimeCounter++;
+    } else {
+        g_Pitcher.pitchTotalTimeCounter = 0x7FFF;
+    }
+    if (g_Ball.postPitchResultCounter < 0x7FFE) {
+        g_Ball.postPitchResultCounter++;
+    } else {
+        g_Ball.postPitchResultCounter = 0x7FFF;
+    }
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES &&
+        (g_Minigame.GameMode_MiniGame == MINI_GAME_ID_BOBOMB_DERBY ||
+         g_Minigame.GameMode_MiniGame == MINI_GAME_ID_WALLBALL ||
+         g_Minigame.GameMode_MiniGame == MINI_GAME_ID_BARREL_BATTER)) {
+        g_Pitcher.miniGameRelated = 1;
+        if (g_Minigame.GameMode_MiniGame == MINI_GAME_ID_BOBOMB_DERBY) {
+            fn_3_155288();
+        }
+    } else if (!g_Pitcher.miniGameRelated) {
+        fn_3_703EC();
+        return;
+    }
+    if (fn_3_6F4E8()) {
+        return;
+    }
+    if (!(g_d_GameSettings.GameModeSelected == GAME_TYPE_PRACTICE && g_Practice.guidedPracticeCompletionRelated)) {
+        if (g_Pitcher.currentStateFrameCounter > 75) {
+            g_GameLogic.playBatterWalkupAnimation = 0;
+            fn_3_5A6D4(0);
+        }
+    }
+    fn_3_7CE90();
 }
 
 // .text:0x000738A8 size:0x540 mapped:0x806B293C
@@ -468,7 +623,58 @@ BOOL fn_3_70680(f32 x) {
 
 // .text:0x000703EC size:0x294 mapped:0x806AF480
 void fn_3_703EC(void) {
-    return;
+    if (g_Batter.framesSinceStartOfSwing > 0 && g_Batter.framesSinceStartOfSwing < swingSoundFrame[0][1] &&
+        !g_Batter._95) {
+        return;
+    }
+    g_Pitcher.miniGameRelated = 1;
+    if (g_Pitcher.strikeInd) {
+        if (++g_Strikes.strikes >= 3) {
+            g_Pitcher.strikeOutOrWalk = 1;
+            g_Pitcher.framesSinceAtBatEnded = 0;
+            fn_3_750C4(PITCHER_ACTION_STATE_HIT);
+            fn_3_59918(16, 0);
+            if (g_GameLogic.IsStarChance == 1) {
+                if ((g_Scores._00 < g_Scores._AA || !g_Scores._AD || g_Strikes.outs < 2 ||
+                     g_Scores._04[g_GameLogic.awayTeamBattingInd_battingTeam][0] <=
+                         g_Scores._04[g_GameLogic.homeTeamBattingInd_fieldingTeam][0]) &&
+                    (g_Scores._00 < g_Scores._AB || !g_Scores._AD || g_Strikes.outs < 2)) {
+                    if (g_GameLogic.TeamStars[g_GameLogic.teamFielding] < 5) {
+                        g_GameLogic.TeamStars[g_GameLogic.teamFielding]++;
+                        if (g_Stats.replayInd == 0) {
+                            playSoundEffect(0x19D);
+                        }
+                    }
+                }
+                g_GameLogic.IsStarChance = 2;
+            }
+            if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+                g_Minigame._19C6 = g_Minigame.minigamePlayerSelectedOrder;
+            }
+        } else {
+            fn_3_59918(8, 0);
+        }
+    } else {
+        if (++g_Strikes.balls >= 4) {
+            g_Pitcher.strikeOutOrWalk = 2;
+            g_Pitcher.framesSinceAtBatEnded = 0;
+            fn_3_750C4(PITCHER_ACTION_STATE_HIT);
+            fn_3_59918(10, 0);
+            if (g_GameLogic.IsStarChance == 1) {
+                if (g_GameLogic.TeamStars[g_GameLogic.teamBatting] < 5) {
+                    g_GameLogic.TeamStars[g_GameLogic.teamBatting]++;
+                    if (g_Stats.replayInd == 0) {
+                        playSoundEffect(0x19D);
+                    }
+                }
+                g_GameLogic.IsStarChance = 3;
+            }
+        } else {
+            fn_3_59918(9, 0);
+        }
+    }
+    fn_3_7A154(0);
+    fn_3_1DD48();
 }
 
 // .text:0x00070280 size:0x16C mapped:0x806AF314
