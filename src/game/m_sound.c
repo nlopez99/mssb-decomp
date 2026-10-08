@@ -105,7 +105,7 @@ typedef struct UnkPlayer8CD74 {
 extern struct {
     /* 0x0000 */ u8 _0000[0xC04];
     /* 0x0C04 */ UnkPlayer8CD74 _C04[13];
-    /* 0x2C58 */ u8 _2C58[0x1C];
+    /* 0x2C50 */ u8 _2C50[0x24];
     /* 0x2C74 */ UnkPlayer8CD74* _2C74;
     /* 0x2C78 */ u8 _2C78[0x307D - 0x2C78];
     /* 0x307D */ u8 _307D;
@@ -631,6 +631,24 @@ void fn_3_90674(s32 song) {
     sndSeqVolume(lbl_3_data_830C[song][0], 0, lbl_3_common_bss_34C58._04, 0);
 }
 
+// .text:0x0009056C size:0x108 mapped:0x806CF600
+BOOL fn_3_9056C(s32 song) {
+    SeqEntry* entry;
+
+    if (g_d_GameSettings.GameModeSelected != GAME_TYPE_PRACTICE) {
+        entry = &lbl_3_data_88E0[song];
+    } else {
+        entry = &lbl_3_data_8954[song];
+    }
+    if (sndSeqGetValid(lbl_3_common_bss_34C58._08)) {
+        sndSeqVolume(0, 0, lbl_3_common_bss_34C58._08, 1);
+        return FALSE;
+    }
+    lbl_3_common_bss_34C58._08 = sndSeqPlayEx(entry->group, entry->song, (void*)lbl_3_bss_1774[song], NULL, 0);
+    sndSeqVolume(lbl_800EF808._391 = lbl_3_data_830C[song][0], 0, lbl_3_common_bss_34C58._08, 0);
+    return TRUE;
+}
+
 // .text:0x00090434 size:0x138 mapped:0x806CF4C8
 void fn_3_90434(void) {
     int i;
@@ -699,8 +717,17 @@ u32 fn_3_90220(s32 charID, s32 sound) {
 }
 
 // .text:0x00090150 size:0xD0 mapped:0x806CF1E4
-void fn_3_90150(void) {
-    return;
+SND_VOICEID fn_3_90150(s32 charID, s32 sound) {
+    int fxid = lbl_3_data_8168[charID] + sound;
+    int vol = lbl_3_data_8530[0][sound];
+    int ctrl;
+    SND_VOICEID vid;
+    vol = vol * lbl_3_data_8830;
+    ctrl = lbl_3_data_8530[1][sound];
+    ctrl = ctrl * lbl_3_data_8830;
+    vid = sndFXStartEx(fxid, vol, 0x3F, 0);
+    sndFXCtrl(vid, 0x5B, ctrl);
+    return vid;
 }
 
 // .text:0x00090064 size:0xEC mapped:0x806CF0F8
@@ -1003,15 +1030,10 @@ void fn_3_8D9C0(void) {
 }
 
 // .text:0x0008CD74 size:0xC4C mapped:0x806CBE08
-// 62.95%: the target reaches the sound tables from one lbl_3_data_8148 pool base (they are
-// statics of this file); the externs here are addressed one by one
 void fn_3_8CD74(void) {
     UnkPlayer8CD74* player;
 
-    if (g_GameLogic.gameStatus == 0xB) {
-        return;
-    }
-    if (g_Minigame.pauseInd != 0) {
+    if (g_GameLogic.gameStatus == 0xB || g_Minigame.pauseInd != 0) {
         return;
     }
     if (g_GameLogic.gameStatus == 1) {
@@ -1141,7 +1163,7 @@ void fn_3_8CD74(void) {
             lbl_3_common_bss_34C58._1C = fn_3_90220(g_Batter.charID, 2);
         }
     }
-    if (g_Batter.captainStarSwingActivated == 11 && lbl_3_bss_1760 == 0 && g_Ball.physicsSubstruct.velocity.y <= -0.09 &&
+    if ((g_Batter.captainStarSwingActivated == 11 || g_Batter.captainStarSwingActivated == 11) && lbl_3_bss_1760 == 0 && g_Ball.physicsSubstruct.velocity.y <= -0.09 &&
         g_Ball.physicsSubstruct.velocity.y >= -0.1) {
         sndFXKeyOff(lbl_3_bss_177C);
         lbl_3_bss_1778 = playSoundEffect(0x19B);
@@ -1438,6 +1460,38 @@ void fn_3_8B718(Vec* pos, Vec* vel, Vec* dir) {
         PSVECSubtract(&cam->target, &cam->eye, dir);
         if (PSVECMag(dir)) {
             PSVECNormalize(dir, dir);
+        }
+    }
+}
+
+// .text:0x0008B318 size:0x400 mapped:0x806CA3AC
+void fn_3_8B318(int arg) {
+    u32 i;
+    s32 j;
+
+    if (arg == -1) {
+        for (j = 0; j < 12; j++) {
+            lbl_3_data_8530[1][j] = lbl_3_data_8278[j];
+        }
+    } else if (arg == 6) {
+        for (i = 0; i < 7; i++) {
+            lbl_3_data_84B8[i][1] = lbl_3_data_8270[i];
+        }
+        for (j = 0; j < 12; j++) {
+            lbl_3_data_8530[1][j] = lbl_3_data_8278[j];
+        }
+        for (i = 0; i < 0x66; i++) {
+            lbl_3_data_8338[i][1] = lbl_3_data_8284[i];
+        }
+    } else {
+        for (i = 0; i < 7; i++) {
+            lbl_3_data_84B8[i][1] = 0;
+        }
+        for (j = 0; j < 12; j++) {
+            lbl_3_data_8530[1][j] = 0;
+        }
+        for (i = 0; i < 0x66; i++) {
+            lbl_3_data_8338[i][1] = 0;
         }
     }
 }
