@@ -264,9 +264,13 @@ typedef struct {
 
 typedef struct {
     /* 0x000 */ Vec pos;
-    /* 0x00C */ u8 _00C[0x16C - 0x00C];
+    /* 0x00C */ u8 _00C[0x15C - 0x00C];
+    /* 0x15C */ f32 _15C;
+    /* 0x160 */ u8 _160[0x16C - 0x160];
     /* 0x16C */ f32 _16C;
-    /* 0x170 */ u8 _170[0x210 - 0x170];
+    /* 0x170 */ u8 _170[0x17A - 0x170];
+    /* 0x17A */ s16 _17A;
+    /* 0x17C */ u8 _17C[0x210 - 0x17C];
     /* 0x210 */ u8 _210;
     /* 0x211 */ u8 _211[0x217 - 0x211];
     /* 0x217 */ u8 _217;
@@ -412,6 +416,29 @@ static inline void playStadiumSound(s32 sound) {
         vol = lbl_3_data_8404[stadium][sound][1];
     }
     sndFXCtrl(voice, 91, vol);
+}
+
+static inline void spawnDrawEffect(StaC5Draw* draw) {
+    if (g_GameLogic.gameStatus == GAME_STATUS_LIVE_BALL && fn_800527C4(&draw->_A0)) {
+        switch (draw->_C6) {
+        case 0:
+            if (draw->_C7 % lbl_3_data_1B974 == 0) {
+                fn_80064430(&draw->_A0, 0, lbl_3_data_1B980, 0.0f);
+            }
+            break;
+        case 1:
+            if (draw->_C7 % lbl_3_data_1B978 == 0) {
+                fn_80064430(&draw->_A0, 0, lbl_3_data_1B984, 0.0f);
+            }
+            break;
+        case 2:
+            if (draw->_C7 % lbl_3_data_1B97C == 0) {
+                fn_80064430(&draw->_A0, 1, lbl_3_data_1B988, lbl_3_data_1B994);
+                playStadiumSound(8);
+            }
+            break;
+        }
+    }
 }
 
 // .text:0x000F6FDC size:0x1468 mapped:0x80736070
@@ -1585,7 +1612,7 @@ void fn_3_F13F8(StaC5Draw* draw) {
 }
 
 // .text:0x000F0FA4 size:0x454 mapped:0x80730038
-// Waits on fn_3_F082C and fn_3_F0224: their empty stubs are inlined here.
+// 99.17%: model gets r4 and &g_GameLogic r3, the reverse of the target.
 void fn_3_F0FA4(StaC5Draw* draw) {
     StaC5Model* model = draw->_74;
 
@@ -1630,14 +1657,179 @@ void fn_3_F0FA4(StaC5Draw* draw) {
     }
 }
 
+static inline void offsetPos(Vec* out, Vec* pos, f32 x, f32 y, f32 z) {
+    out->x = pos->x + x;
+    out->y = pos->y + y;
+    out->z = pos->z + z;
+}
+
+static inline void turnTowardHome(StaC5Draw* draw) {
+    Vec to;
+    Vec fwd;
+    Vec cross;
+    f32 angle;
+    f32 dot;
+
+    to.x = lbl_3_data_1B9A4[draw->_9C].pos.x - draw->_A0.x;
+    to.y = 0.0f;
+    to.z = lbl_3_data_1B9A4[draw->_9C].pos.z - draw->_A0.z;
+    PSVECNormalize(&to, &to);
+    angle = -(0.017453292f * draw->_AC);
+    fwd.x = cos(angle);
+    fwd.y = 0.0f;
+    fwd.z = sin(angle);
+    PSVECNormalize(&fwd, &fwd);
+    dot = PSVECDotProduct(&to, &fwd);
+    if (dot < -1.0) {
+        dot = -1.0f;
+    }
+    draw->_B4 = 57.29578f * (f32)acos(dot);
+    PSVECCrossProduct(&to, &fwd, &cross);
+    if (cross.y < 0.0f) {
+        draw->_C4 = 1;
+    } else {
+        draw->_C4 = -1;
+    }
+}
+
 // .text:0x000F082C size:0x778 mapped:0x8072F8C0
+// 99.97%: the heading angle's negation goes to f30 before the multiply, where the
+// target negates into f1 and writes only the product to f30.
 void fn_3_F082C(StaC5Draw* draw) {
-    return;
+    Vec next;
+    StaC5Fielder* fielder;
+    u32 i;
+    f32 c;
+    f32 s;
+    f32 angle;
+
+    for (i = 0; i < 9; i++) {
+        fielder = &g_Fielders[i];
+        if (fielder == NULL) {
+            break;
+        }
+        if (!fn_3_EF55C(fielder->pos, draw->_C5) && fielder->_15C <= 0.0f) {
+            draw->_C1 = i;
+            draw->_C6 = 2;
+            fn_3_B97DC(draw->_74, lbl_3_bss_B154[1]);
+            return;
+        }
+    }
+    switch (draw->_C6) {
+    case 0:
+        spawnDrawEffect(draw);
+        if (draw->_B4 > 0.0f) {
+            if (draw->_B4 < 0.5) {
+                draw->_AC += draw->_C4 * draw->_B4;
+                draw->_B4 = 0.0f;
+            } else {
+                draw->_AC += 0.5 * draw->_C4;
+                draw->_B4 -= 0.5;
+            }
+            draw->_C7++;
+        } else {
+            draw->_C7 = 0;
+            draw->_C6 = 1;
+        }
+        break;
+    case 1:
+        if (draw->_C7 < 20) {
+            draw->_C7++;
+            angle = -draw->_AC;
+            angle *= 0.017453292f;
+            c = cos(angle);
+            s = sin(angle);
+            offsetPos(&next, &draw->_A0, 0.08 * c, 0.0f, 0.08 * s);
+            if (fn_3_EF7B4(next, draw->_C5) != FALSE) {
+                turnTowardHome(draw);
+                draw->_C6 = 0;
+            } else {
+                draw->_A0.x = next.x;
+                draw->_A0.y = next.y;
+                draw->_A0.z = next.z;
+            }
+        } else {
+            if (fn_3_B7F70(10) < 8) {
+                draw->_C6 = 0;
+                draw->_B4 = fn_3_B7F70(60) + 1;
+                draw->_C4 = fn_3_B7F70(2) * -1 + 1;
+            }
+            draw->_C7 = 0;
+        }
+        spawnDrawEffect(draw);
+        break;
+    }
+    CTRLSetTranslation(&draw->control, draw->_A0.x, -draw->_A0.y, draw->_A0.z);
+    CTRLSetRotation(&draw->control, 0.0f, draw->_AC, 0.0f);
 }
 
 // .text:0x000F0224 size:0x608 mapped:0x8072F2B8
 void fn_3_F0224(StaC5Draw* draw) {
-    return;
+    Vec next;
+    Vec diff;
+    Vec dir;
+    Vec right = { 1.0f, 0.0f, 0.0f };
+    StaC5Player* player;
+    StaC5Fielder* fielder;
+    StaC5Draw* other;
+    f32 angle;
+    u32 i;
+
+    player = lbl_8036E548._2C50[draw->_C1];
+    fielder = &g_Fielders[draw->_C1];
+    if (fn_3_EF55C(fielder->pos, draw->_C5)) {
+        draw->_C6 = 1;
+        draw->_C1 = -1;
+        fn_3_B97DC(draw->_74, lbl_3_bss_B154[0]);
+        draw->_C7 = 0;
+        return;
+    }
+    diff.x = fielder->pos.x - draw->_A0.x;
+    diff.y = 0.0f;
+    diff.z = fielder->pos.z - draw->_A0.z;
+    PSVECNormalize(&diff, &dir);
+    next.x = draw->_A0.x + 0.12 * dir.x;
+    next.y = draw->_A0.y;
+    next.z = draw->_A0.z + 0.12 * dir.z;
+    if (fn_3_EF7B4(next, draw->_C5) == FALSE) {
+        draw->_A0.x = next.x;
+        draw->_A0.y = next.y;
+        draw->_A0.z = next.z;
+    }
+    PSVECNormalize(&right, &right);
+    angle = 57.29578f * (f32)acos(PSVECDotProduct(&dir, &right));
+    if (diff.z < 0.0f) {
+        angle = 360.0f - angle;
+    }
+    draw->_AC = -angle;
+    memset(&diff, 0, sizeof(Vec));
+    fn_8001B728(draw->_C1, 0x23, &diff);
+    diff.y *= -1.0f;
+    if ((f32)sqrt(pow(fielder->pos.x - draw->_A0.x, 2.0) + pow(fielder->pos.z - draw->_A0.z, 2.0)) < 1.25f &&
+        fabs_inline(diff.y) <= 0.5)
+    {
+        fn_3_F13F8(draw);
+        for (i = 0; i < lbl_3_bss_B21C; i++) {
+            if (i != draw->_9C) {
+                other = &lbl_3_common_bss_350E4._00[i + lbl_3_bss_B21B];
+                if (other->_C6 == 3 && other->_C1 == draw->_C1) {
+                    draw->_C0++;
+                }
+            }
+        }
+        draw->_C7 = 0;
+        draw->_C6 = 3;
+        if (fn_800527C4(&fielder->pos)) {
+            playStadiumSound(10);
+        }
+        g_Fielders[draw->_C1]._217++;
+        draw->_C2 = fielder->_17A;
+        draw->_C3 = player->_255;
+    }
+    CTRLSetTranslation(&draw->control, draw->_A0.x, -draw->_A0.y, draw->_A0.z);
+    CTRLSetRotation(&draw->control, 0.0f, draw->_AC, 0.0f);
+    spawnDrawEffect(draw);
+    draw->_C7++;
 }
 
 // .text:0x000F0184 size:0xA0 mapped:0x8072F218
