@@ -1374,9 +1374,8 @@ void fn_3_10E60C(void) {
 }
 
 // .text:0x0010CC20 size:0x19EC mapped:0x8074BCB4
-// 99.90%: case 3's "_1 == 1" skip is a direct beq where the target branches
-// over a b (one instruction short), and the lbl_3_data_18920 row lookup in
-// case 0 swaps r4 and r5
+// 99.92%: case 3's "_1 == 1" skip is a direct beq where the target branches
+// over a b, so this is one instruction short (see structure.md)
 void fn_3_10CC20(void) {
     s8 sel[4];
     u8 taken[12];
@@ -1569,8 +1568,8 @@ void fn_3_10CC20(void) {
                 g_Minigame._1A0E = 4 - g_Minigame._19E7;
                 g_Minigame._19E3 = g_Minigame._1A0D;
             } else {
-                g_Minigame._19E6 = lbl_3_data_18920[g_Minigame.GameMode_MiniGame][4];
                 g_Minigame._19DE = 2;
+                g_Minigame._19E6 = lbl_3_data_18920[g_Minigame.GameMode_MiniGame][4];
             }
         }
     } else if (g_Minigame._19DE == 1) {
