@@ -861,8 +861,55 @@ void fn_3_D4CA4(void) {
 }
 
 // .text:0x000D4780 size:0x524 mapped:0x80713814
-void fn_3_D4780(void) {
-    return;
+void fn_3_D4780(StaC2Draw* draw) {
+    Control control;
+    Mtx m;
+    Vec top;
+    Vec offset = lbl_3_rodata_24E8;
+    Vec diff;
+    u32 i;
+    f32 len;
+
+    memcpy(&offset, &lbl_3_rodata_24E8, sizeof(Vec));
+    if (lbl_3_data_182C8[draw->_9C]._30 == 0) {
+        memcpy(&top, &lbl_3_rodata_24DC, sizeof(Vec));
+    } else {
+        memcpy(&top, &lbl_3_rodata_24D0, sizeof(Vec));
+    }
+    top.y = 0.5f;
+    offset.y = -0.5f;
+    control.type = 0;
+    if (draw->_CA == 0) {
+        CTRLSetRotation(&control, lbl_3_data_182C8[draw->_9C]._1C, -lbl_3_data_182C8[draw->_9C]._20,
+                        lbl_3_data_182C8[draw->_9C]._24);
+    } else {
+        CTRLSetRotation(&control, lbl_3_data_182C8[draw->_9C]._10, -lbl_3_data_182C8[draw->_9C]._14,
+                        lbl_3_data_182C8[draw->_9C]._18);
+    }
+    CTRLBuildMatrix(&control, m);
+    PSMTXMultVec(m, &offset, &offset);
+    offset.y *= -1.0f;
+    offset.x += draw->_A0.x;
+    offset.y += draw->_A0.y;
+    offset.z += draw->_A0.z;
+    PSVECSubtract(&offset, &top, &diff);
+    len = PSVECMag(&diff);
+    for (i = 0; i < 8; i++) {
+        draw->springs[i]._0C[0].x = (i / 7.0f) * diff.x + top.x;
+        draw->springs[i]._0C[0].y = (i / 7.0f) * diff.y + top.y;
+        draw->springs[i]._0C[0].z = (i / 7.0f) * diff.z + top.z;
+    }
+    for (i = 0; i < 8; i++) {
+        draw->springs[i]._0C[0].y -= (7.125f - len / 2) * sinf_kludge(3.1415927f * (i / 7.0f));
+        if (draw->springs[i]._0C[0].y < draw->springs[i]._08) {
+            draw->springs[i]._0C[0].y = draw->springs[i]._08;
+        }
+    }
+    for (i = 0; i < 8; i++) {
+        memcpy(&draw->springs[i]._0C[1], &draw->springs[i]._0C[0], sizeof(Vec));
+        memset(&draw->springs[i]._24, 0, sizeof(Vec));
+        memset(&draw->springs[i]._30, 0, sizeof(Vec));
+    }
 }
 
 // .text:0x000D3F54 size:0x82C mapped:0x80712FE8
