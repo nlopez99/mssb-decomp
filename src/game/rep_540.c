@@ -45,6 +45,7 @@ typedef struct {
 extern Rep540Friction lbl_3_data_4388[7];
 extern Rep540Friction lbl_3_data_4414;
 extern f32 lbl_3_data_4428[7];
+extern VecXZ lbl_3_data_4444[5];
 extern f32 lbl_3_data_45F4[2];
 extern f32 lbl_3_data_45FC;
 extern u8 lbl_3_data_4600;
@@ -273,8 +274,86 @@ void fn_3_E2D4(void) {
 }
 
 // .text:0x0000DC48 size:0x68C mapped:0x8064CCDC
-void fn_3_DC48(void) {
-    return;
+void fn_3_DC48(BOOL fromPitcher) {
+    VecSrcDst ray;
+    CollisionStruct hit;
+    f32 len;
+    s32 type;
+    int i;
+    int j;
+    int k;
+
+    if (fromPitcher) {
+        ray.src.x = g_Pitcher._30.x;
+        ray.src.y = -0.5f;
+        ray.src.z = g_Pitcher._30.z;
+        if (g_Ball.physicsSubstruct.futureCoordsAndDist[60].dist == 0.0f) {
+            ray.dst.x = 200.0f * g_Ball.physicsSubstruct.futureCoordsAndDist[60].pos.x;
+            ray.dst.y = -0.5f;
+            ray.dst.z = 200.0f * g_Ball.physicsSubstruct.futureCoordsAndDist[60].pos.z;
+        } else {
+            ray.dst.x = 200.0f * (g_Ball.physicsSubstruct.futureCoordsAndDist[60].pos.x /
+                                  g_Ball.physicsSubstruct.futureCoordsAndDist[60].dist);
+            ray.dst.y = -0.5f;
+            ray.dst.z = 200.0f * (g_Ball.physicsSubstruct.futureCoordsAndDist[60].pos.z /
+                                  g_Ball.physicsSubstruct.futureCoordsAndDist[60].dist);
+        }
+    } else {
+        ray.src.x = g_Ball.AtBat_Contact_BallPos.x;
+        ray.src.y = -0.5f;
+        ray.src.z = g_Ball.AtBat_Contact_BallPos.z;
+        ray.dst.x = 200.0f * g_Ball.ballVelocityPercent.x + g_Ball.AtBat_Contact_BallPos.x;
+        ray.dst.y = -0.5f;
+        ray.dst.z = 200.0f * g_Ball.ballVelocityPercent.z + g_Ball.AtBat_Contact_BallPos.z;
+    }
+    if (ray.src.x == ray.dst.x && ray.src.z == ray.dst.z) {
+        ray.dst.z = 10.0f + ray.src.z;
+    }
+    type = checkCollision(&ray, &hit, 0, 0) & 0x7F;
+    g_Ball.someCollisionVariable = 0;
+    if (type == BALL_COLLISION_TYPE_WALL || type == BALL_COLLISION_TYPE_UNCLIMBABLE_WALL) {
+        g_Ball.ballWillHitBallPos.x = hit.position.x;
+        g_Ball.ballWillHitBallPos.z = hit.position.z;
+        g_Ball.wallAndBallIntersectionDistFromHome = VEC_LENGTH_XZ(&g_Ball.ballWillHitBallPos);
+        len = VEC_LENGTH_XZ(&hit.normal) == 0.0f ? 1.0f : VEC_LENGTH_XZ(&hit.normal);
+        g_Ball._1BC0 = 1;
+        g_Ball._19E4 = hit.normal.x / len;
+        g_Ball.physicsSubstruct.throwYAtSelectedFuturePoint = 0.0f;
+        g_Ball.frameBallWillHitWall = -1;
+        g_Ball._19E8 = hit.normal.z / len;
+        for (i = 0; i < 360; i += 10) {
+            if (g_Ball.physicsSubstruct.futureCoordsAndDist[i].dist > g_Ball.wallAndBallIntersectionDistFromHome) {
+                for (j = i - 9, k = 0; k < 10; j++, k++) {
+                    if (g_Ball.physicsSubstruct.futureCoordsAndDist[j].dist > g_Ball.wallAndBallIntersectionDistFromHome) {
+                        i = 360;
+                        g_Ball.physicsSubstruct.throwYAtSelectedFuturePoint = g_Ball.physicsSubstruct.futureCoordsAndDist[j].pos.y;
+                        g_Ball.frameBallWillHitWall = j;
+                        break;
+                    }
+                }
+            }
+        }
+        if (g_Ball.Hit_HorizontalAngle >= 0x200 && g_Ball.Hit_HorizontalAngle <= 0x600 && g_Ball.someCollisionInd == 0) {
+            if (((20.0f + g_Ball.wallAndBallIntersectionDistFromHome < g_Ball.physicsSubstruct.hitLandingSpotDistFromHome &&
+                  g_Ball.Hit_VerticalAngle > 300) ||
+                 g_Ball.physicsSubstruct.hitLandingSpotDistFromHome >= 140.0f) &&
+                g_Ball.physicsSubstruct.throwYAtSelectedFuturePoint >= 8.0f &&
+                (g_Ball.ballWillHitBallPos.x < 0.0f ? -g_Ball.ballWillHitBallPos.x : g_Ball.ballWillHitBallPos.x) < g_Ball.ballWillHitBallPos.z) {
+                g_Ball.someCollisionVariable = 3;
+            } else if (20.0f + g_Ball.wallAndBallIntersectionDistFromHome < g_Ball.physicsSubstruct.hitLandingSpotDistFromHome) {
+                g_Ball.someCollisionVariable = 2;
+            } else if (10.0f + g_Ball.wallAndBallIntersectionDistFromHome < g_Ball.physicsSubstruct.hitLandingSpotDistFromHome &&
+                       g_Ball.Hit_VerticalAngle > 300) {
+                g_Ball.someCollisionVariable = 2;
+            } else if (1.0f + g_Ball.wallAndBallIntersectionDistFromHome < g_Ball.physicsSubstruct.hitLandingSpotDistFromHome) {
+                g_Ball.someCollisionVariable = 1;
+            }
+        }
+    } else {
+        g_Ball.wallAndBallIntersectionDistFromHome = 999.9f;
+        g_Ball.physicsSubstruct.throwYAtSelectedFuturePoint = 0.0f;
+        g_Ball.frameBallWillHitWall = -1;
+    }
 }
 
 // .text:0x0000DBD0 size:0x78 mapped:0x8064CC64
@@ -313,7 +392,46 @@ void estimateAndSetFutureCoords(int) {
 
 // .text:0x0000C9F4 size:0x434 mapped:0x8064BA88
 void fn_3_C9F4(void) {
-    return;
+    s32 i;
+
+    if (g_Ball.framesSinceHit < 0x7FFE) {
+        g_Ball.framesSinceHit++;
+    } else {
+        g_Ball.framesSinceHit = 0x7FFF;
+    }
+    if (g_Ball.timeSinceBallPickedUp < 0x7FFE) {
+        g_Ball.timeSinceBallPickedUp++;
+    } else {
+        g_Ball.timeSinceBallPickedUp = 0x7FFF;
+    }
+    if (g_Ball.framesSinceBallHitGroundOrWasCaught == -1) {
+        g_Ball.framesSinceBallHitGroundOrWasCaught = 1;
+    } else if (g_Ball.framesSinceBallHitGroundOrWasCaught < 0x7FFE) {
+        g_Ball.framesSinceBallHitGroundOrWasCaught++;
+    } else {
+        g_Ball.framesSinceBallHitGroundOrWasCaught = 0x7FFF;
+    }
+    fn_3_A83C();
+    if (g_Ball.fielderWBallIndex >= 0) {
+        g_Ball.AtBat_Contact_BallPos.x = g_Fielders[g_Ball.fielderWBallIndex].pos.x;
+        g_Ball.AtBat_Contact_BallPos.y = g_Fielders[g_Ball.fielderWBallIndex].pos.y;
+        g_Ball.AtBat_Contact_BallPos.z = g_Fielders[g_Ball.fielderWBallIndex].pos.z;
+        g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x = g_Ball.AtBat_Contact_BallPos.x;
+        g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z = g_Ball.AtBat_Contact_BallPos.z;
+    }
+    g_Ball.ballDistanceFromHome = VEC_LENGTH_XZ(&g_Ball.AtBat_Contact_BallPos);
+    for (i = 0; i < 360; i++) {
+        g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x = g_Ball.AtBat_Contact_BallPos.x;
+        g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y = g_Ball.AtBat_Contact_BallPos.y;
+        g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z = g_Ball.AtBat_Contact_BallPos.z;
+    }
+    g_Ball.ballOnMoundInd = 0;
+    g_Ball.framesSinceLastBounce = -1;
+    if (g_Ball.currentStarSwing != 0) {
+        g_Ball.currentStarSwing = 0;
+        g_Batter.invisibleBallForPeachStarHit = 0;
+        g_Ball.warioWaluGarlicIsActive = 0;
+    }
 }
 
 // .text:0x0000C034 size:0x9C0 mapped:0x8064B0C8
@@ -475,8 +593,77 @@ void fn_3_B940(void) {
 }
 
 // .text:0x0000B440 size:0x500 mapped:0x8064A4D4
+// 99.2%: the FPRs of the throw target, ball position and their distances are numbered
+// differently (target f4/f3/f1 for x, base f2/f1/f5).
 void fn_3_B440(void) {
-    return;
+    f32 dx;
+    f32 dz;
+    int i;
+
+    g_Ball.throwTimeEstimatesCompleteInd = 1;
+    if (g_Ball.framesUntilThrowReachesDest < 15) {
+        return;
+    }
+    dx = g_Ball.throwTarget.x - g_Ball.AtBat_Contact_BallPos.x;
+    if (dx < 0.0f) {
+        dx = -dx;
+    }
+    dz = g_Ball.throwTarget.z - g_Ball.AtBat_Contact_BallPos.z;
+    if (dz < 0.0f) {
+        dz = -dz;
+    }
+    if (dx > dz) {
+        if (g_Ball.throwTarget.x < g_Ball.AtBat_Contact_BallPos.x) {
+            for (i = 10; i < 360; i += 10) {
+                if (g_Ball.throwTarget.x >= g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x) {
+                    i -= 10;
+                    break;
+                }
+            }
+            for (; i < 360; i++) {
+                if (g_Ball.throwTarget.x >= g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x) {
+                    break;
+                }
+            }
+        } else {
+            for (i = 10; i < 360; i += 10) {
+                if (g_Ball.throwTarget.x <= g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x) {
+                    i -= 10;
+                    break;
+                }
+            }
+            for (; i < 360; i++) {
+                if (g_Ball.throwTarget.x <= g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x) {
+                    break;
+                }
+            }
+        }
+    } else if (g_Ball.throwTarget.z < g_Ball.AtBat_Contact_BallPos.z) {
+            for (i = 10; i < 360; i += 10) {
+                if (g_Ball.throwTarget.z >= g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z) {
+                    i -= 10;
+                    break;
+                }
+            }
+            for (; i < 360; i++) {
+                if (g_Ball.throwTarget.z >= g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z) {
+                    break;
+                }
+            }
+    } else {
+            for (i = 10; i < 360; i += 10) {
+                if (g_Ball.throwTarget.z <= g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z) {
+                    i -= 10;
+                    break;
+                }
+            }
+            for (; i < 360; i++) {
+                if (g_Ball.throwTarget.z <= g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z) {
+                    break;
+                }
+            }
+    }
+    g_Ball.framesUntilThrowReachesDest = i;
 }
 
 // .text:0x0000A970 size:0xAD0 mapped:0x80649A04
@@ -578,10 +765,10 @@ void fn_3_9E84(void) {
         } else if (g_Ball.numFieldersWhoHandledBallDuringPlay != 0 && g_Ball.numberOfThrowsDuringPlay != 0) {
             fn_3_9E18();
         } else {
-            g_Ball.deadBallReason = 3;
             g_Ball.deadballLastLoc.x = g_Ball.AtBat_Contact_BallPos.x;
             g_Ball.deadballLastLoc.y = g_Ball.AtBat_Contact_BallPos.y;
             g_Ball.deadballLastLoc.z = g_Ball.AtBat_Contact_BallPos.z;
+            g_Ball.deadBallReason = 3;
             fn_3_59918(7, 0);
         }
     }
@@ -850,7 +1037,53 @@ void fn_3_6C38(void) {
 
 // .text:0x00006694 size:0x5A4 mapped:0x80645728
 void fn_3_6694(void) {
-    return;
+    s32 type = g_Ball.collisionCode & 0x7F;
+    s32 foul = g_Ball.collisionCode & BALL_COLLISION_TYPE_FOUL;
+
+    if (fn_3_B7E10(g_Ball.AtBat_Contact_BallPos.x, g_Ball.AtBat_Contact_BallPos.z)) {
+        foul = TRUE;
+    }
+    if (type == BALL_COLLISION_TYPE_STRUCTURE && g_Ball.deadBallReason == 0) {
+        switch (g_Ball.AtBat_ContactResult) {
+        case -1:
+            fn_3_A020();
+            break;
+        case 0:
+            if (g_Ball.matchFramesAndBallAngle.ballOverWallFrames >= 5) {
+                if (foul) {
+                    fn_3_A020();
+                } else {
+                    fn_3_9FA4();
+                }
+            }
+            break;
+        case 1:
+            if (!g_Ball.ballInitialHitDoneInd && foul) {
+                fn_3_A020();
+            } else if ((g_Ball.maybeCollisionRelated & 0x7F) == BALL_COLLISION_TYPE_STRUCTURE) {
+                fn_3_9E84();
+            }
+            break;
+        default:
+            fn_3_9E18();
+            break;
+        }
+        if (g_Ball.matchFramesAndBallAngle.ballOverWallFrames == 0) {
+            g_Ball.matchFramesAndBallAngle.ballOverWallFrames = 1;
+        }
+    } else if (g_Ball.AtBat_ContactResult == 1 && !g_Ball.ballInitialHitDoneInd &&
+               g_Ball.AtBat_Contact_BallPos.z > lbl_3_data_4444[1].z) {
+        g_Ball.ballInitialHitDoneInd = 1;
+        if (foul) {
+            fn_3_A0F0();
+        } else {
+            g_Ball.AtBat_ContactResult = 1;
+            if (g_d_GameSettings.GameModeSelected != GAME_TYPE_TOY_FIELD &&
+                fn_3_B7D6C(g_Ball.AtBat_Contact_BallPos.x, g_Ball.AtBat_Contact_BallPos.z)) {
+                fn_3_59918(4, 1);
+            }
+        }
+    }
 }
 
 // .text:0x00006620 size:0x74 mapped:0x806456B4
