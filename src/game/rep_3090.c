@@ -7,6 +7,7 @@
 #include "game/rep_1838.h"
 #include "stl/math.h"
 #include "static/UnknownHomes_Static.h"
+#include "game/rep_9B0.h"
 #include "game/rep_A00.h"
 #include "game/rep_1E08.h"
 
@@ -218,9 +219,6 @@ extern s32 lbl_3_data_3A40[];
 extern s32 lbl_3_data_3B1C[];
 extern s32 lbl_3_data_3B34[];
 
-// rep_9B0.h declares the second parameter u8; the target passes the script word unconverted
-extern void fn_3_219CC(void);
-extern void fn_3_21C7C(s32, s32);
 extern void fn_3_7BBF8(void);
 extern void fn_3_7BC0C(void);
 extern void fn_80011358(int, u8);

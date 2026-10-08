@@ -2,7 +2,7 @@
 #include "header_rep_data.h"
 
 // .text:0x00021C7C size:0x14 mapped:0x80660D10
-void fn_3_21C7C(s32 arg0, u8 arg1) {
+void fn_3_21C7C(s32 arg0, s32 arg1) {
     return;
 }
 
