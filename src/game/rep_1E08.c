@@ -162,10 +162,34 @@ typedef struct {
 } UnkActor1E08;
 
 typedef struct {
+    /* 0x00 */ void* actor;
+    /* 0x04 */ void* anim;
+    /* 0x08 */ u8 _08[0xE - 0x8];
+    /* 0x0E */ u16 _0E;
+    /* 0x10 */ u8 _10[0x60 - 0x10];
+    /* 0x60 */ f32 _60;
+    /* 0x64 */ u8 _64[0x90 - 0x64];
+} UnkModel1E08; // size: 0x90
+
+typedef struct {
+    /* 0x00 */ u8 _00[0x34];
+    /* 0x34 */ UnkModel1E08 models[7];
+} UnkModelTable1E08;
+
+typedef struct {
+    /* 0x00 */ void* _00;
+    /* 0x04 */ u8 _04[0x2C - 0x4];
+    /* 0x2C */ void* _2C;
+    /* 0x30 */ u8 _30[0x5C - 0x30];
+} UnkAnimEntry1E08; // size: 0x5C
+
+typedef struct {
     /* 0x000 */ UnkTask1E08* _000;
-    /* 0x004 */ u8 _004[0x8 - 0x4];
+    /* 0x004 */ void* _004;
     /* 0x008 */ void* _008;
-    /* 0x00C */ u8 _00C[0x3AC - 0xC];
+    /* 0x00C */ u32* _00C;
+    /* 0x010 */ UnkModelTable1E08* _010;
+    /* 0x014 */ UnkAnimEntry1E08 _014[10];
     /* 0x3AC */ u32 _3AC;
     /* 0x3B0 */ u8 _3B0;
     /* 0x3B1 */ u8 _3B1[0x3B8 - 0x3B1];
@@ -285,6 +309,19 @@ extern s32 fn_8004ABE0(void);
 extern void pitchingMachinePitching(u8 id);
 extern void minigamesSetSomePointers(void);
 extern void fn_800A7D4C(s32, void*);
+extern UnkModelTable1E08* ActorObjectInitTable(u16 count);
+extern void fn_800BDC88(UnkModelTable1E08* table, u16 first, u16 last, void* model, void* anim, void* arg5);
+extern void ACTSetAnimation(void* actor, void* animBank, char* sequenceName, u16 seqNum, f32 time, f32 speed);
+extern void ANIMGet(void* anim);
+extern void LoadActorLayout(void* layout);
+extern void convertGeometryAndSknHeader(void* geo, void* skn);
+extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);
+extern void convertTextureHeader(void* tex);
+extern void fn_800BD190(void* geo, void* tex);
+extern void fn_80025DDC(void* anim);
+extern void fn_80025C58(void* anim, UnkModel1E08* model);
+extern void fn_80025FFC(void* anim, UnkAnimEntry1E08* entry);
+extern void fn_80025EEC(UnkAnimEntry1E08* entry, s32, s32);
 extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_800ACFB0(void* data);
 extern void fn_800246D4(int (*compare)(const void*, const void*), void* src, void* dst, int size, int count);
@@ -497,7 +534,157 @@ void fn_3_BF6C0(void) {
 
 // .text:0x000BF238 size:0x488 mapped:0x806FE2CC
 void fn_3_BF238(void) {
-    return;
+    s32 i;
+    s32 n;
+    void* tex;
+    void* layout;
+    void* geo;
+    void* anim;
+    UnkModel1E08* model;
+    UnkAnimEntry1E08* entry;
+
+    if (lbl_803C6CF8._715 == 1) {
+        n = 0;
+        lbl_3_common_bss_35154._010 = ActorObjectInitTable(7);
+        for (i = 0; i < 44; i++) {
+            if (lbl_3_common_bss_35154._00C[i] != 0) {
+                lbl_3_common_bss_35154._00C[i] += (u32)lbl_3_common_bss_35154._00C;
+                switch (i) {
+                case 0:
+                case 8:
+                case 18:
+                case 24:
+                case 30:
+                case 36:
+                    tex = (void*)lbl_3_common_bss_35154._00C[i];
+                    convertTextureHeader(tex);
+                    break;
+                case 1:
+                case 9:
+                case 19:
+                case 25:
+                case 31:
+                case 37:
+                    layout = (void*)lbl_3_common_bss_35154._00C[i];
+                    LoadActorLayout(layout);
+                    break;
+                case 2:
+                case 10:
+                case 20:
+                case 26:
+                case 32:
+                case 38:
+                    geo = (void*)lbl_3_common_bss_35154._00C[i];
+                    convertGeometryAndSknHeader(geo, NULL);
+                    break;
+                case 3:
+                case 11:
+                case 21:
+                case 27:
+                case 33:
+                case 39:
+                    anim = (void*)lbl_3_common_bss_35154._00C[i];
+                    ANIMGet(anim);
+                    fn_800BD190(geo, tex);
+                    haveActLayoutPointToGeoHeader(layout, geo);
+                    fn_800BDC88(lbl_3_common_bss_35154._010, n, n, layout, anim, NULL);
+                    model = &lbl_3_common_bss_35154._010->models[n];
+                    ACTSetAnimation(model->actor, model->anim, NULL, model->_0E, 0.0f, model->_60);
+                    n++;
+                    break;
+                case 4:
+                case 5:
+                    anim = (void*)lbl_3_common_bss_35154._00C[i];
+                    entry = &lbl_3_common_bss_35154._014[i - 4];
+                    entry->_2C = anim;
+                    fn_80025DDC(anim);
+                    fn_80025C58(anim, &lbl_3_common_bss_35154._010->models[0]);
+                    break;
+                case 12:
+                case 13:
+                case 14:
+                    anim = (void*)lbl_3_common_bss_35154._00C[i];
+                    entry = &lbl_3_common_bss_35154._014[i - 10];
+                    entry->_2C = anim;
+                    fn_80025DDC(anim);
+                    fn_80025C58(anim, &lbl_3_common_bss_35154._010->models[1]);
+                    break;
+                case 22:
+                    anim = (void*)lbl_3_common_bss_35154._00C[i];
+                    entry = &lbl_3_common_bss_35154._014[i - 17];
+                    entry->_2C = anim;
+                    fn_80025DDC(anim);
+                    fn_80025C58(anim, &lbl_3_common_bss_35154._010->models[2]);
+                    break;
+                case 28:
+                    anim = (void*)lbl_3_common_bss_35154._00C[i];
+                    entry = &lbl_3_common_bss_35154._014[i - 22];
+                    entry->_2C = anim;
+                    fn_80025DDC(anim);
+                    fn_80025C58(anim, &lbl_3_common_bss_35154._010->models[3]);
+                    break;
+                case 34:
+                    anim = (void*)lbl_3_common_bss_35154._00C[i];
+                    entry = &lbl_3_common_bss_35154._014[i - 27];
+                    entry->_2C = anim;
+                    fn_80025DDC(anim);
+                    fn_80025C58(anim, &lbl_3_common_bss_35154._010->models[4]);
+                    break;
+                case 40:
+                case 41:
+                    anim = (void*)lbl_3_common_bss_35154._00C[i];
+                    entry = &lbl_3_common_bss_35154._014[i - 32];
+                    entry->_2C = anim;
+                    fn_80025DDC(anim);
+                    fn_80025C58(anim, &lbl_3_common_bss_35154._010->models[5]);
+                    break;
+                case 6:
+                case 7:
+                    entry = &lbl_3_common_bss_35154._014[i - 6];
+                    entry->_00 = (void*)lbl_3_common_bss_35154._00C[i];
+                    fn_80025FFC(entry->_2C, entry);
+                    fn_80025EEC(entry, 0, 0);
+                    break;
+                case 15:
+                case 16:
+                case 17:
+                    entry = &lbl_3_common_bss_35154._014[i - 13];
+                    entry->_00 = (void*)lbl_3_common_bss_35154._00C[i];
+                    fn_80025FFC(entry->_2C, entry);
+                    fn_80025EEC(entry, 0, 0);
+                    break;
+                case 23:
+                    entry = &lbl_3_common_bss_35154._014[i - 18];
+                    entry->_00 = (void*)lbl_3_common_bss_35154._00C[i];
+                    fn_80025FFC(entry->_2C, entry);
+                    fn_80025EEC(entry, 0, 0);
+                    break;
+                case 29:
+                    entry = &lbl_3_common_bss_35154._014[i - 23];
+                    entry->_00 = (void*)lbl_3_common_bss_35154._00C[i];
+                    fn_80025FFC(entry->_2C, entry);
+                    fn_80025EEC(entry, 0, 0);
+                    break;
+                case 35:
+                    entry = &lbl_3_common_bss_35154._014[i - 28];
+                    entry->_00 = (void*)lbl_3_common_bss_35154._00C[i];
+                    fn_80025FFC(entry->_2C, entry);
+                    fn_80025EEC(entry, 0, 0);
+                    break;
+                case 42:
+                case 43:
+                    entry = &lbl_3_common_bss_35154._014[i - 34];
+                    entry->_00 = (void*)lbl_3_common_bss_35154._00C[i];
+                    fn_80025FFC(entry->_2C, entry);
+                    fn_80025EEC(entry, 0, 0);
+                    break;
+                }
+            }
+        }
+        lbl_3_common_bss_35154._3B0 = 0;
+        fn_800B0A5C_insertQueue(fn_3_BEFF8, 6);
+        fn_800B0A14_removeQueue();
+    }
 }
 
 // .text:0x000BF20C size:0x2C mapped:0x806FE2A0
