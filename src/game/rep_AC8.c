@@ -3689,7 +3689,15 @@ void fn_3_3F24C(void) {
 
 // .text:0x0003F124 size:0x128 mapped:0x8067E1B8
 void fn_3_3F124(void) {
-    return;
+    fn_3_5985C(0, 20);
+    if ((g_Fielders[3]._182 + g_Fielders[5]._182) / 2 > g_Ball.Hit_HorizontalAngle) {
+        fn_3_5985C(3, 3);
+    } else {
+        fn_3_5985C(5, 3);
+    }
+    fn_3_4C9C8();
+    fn_3_47778();
+    fn_3_4A124();
 }
 
 // .text:0x0003F034 size:0xF0 mapped:0x8067E0C8
@@ -4900,7 +4908,33 @@ void fn_3_34450(void) {
 
 // .text:0x000341E8 size:0x268 mapped:0x8067327C
 void fn_3_341E8(void) {
-    return;
+    s32 primary;
+    s32 secondary;
+    s16 angle;
+
+    fn_3_33DD0(&primary, &secondary);
+    g_FieldingLogic._0B0 = primary;
+    g_FieldingLogic._0B2 = secondary;
+    fn_3_5985C(g_FieldingLogic._0B0, 22);
+    fn_3_5985C(g_FieldingLogic._0B2, 22);
+    if (g_FieldingLogic._0B2 >= 0) {
+        g_FieldingLogic._139 = 1;
+    } else {
+        angle = fn_3_9FB8C(g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x,
+                           g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z);
+        if (g_FieldingLogic._0B0 == 7) {
+            if (angle < 0x400) {
+                fn_3_5985C(8, 24);
+            } else {
+                fn_3_5985C(6, 24);
+            }
+        } else {
+            fn_3_5985C(7, 24);
+        }
+    }
+    fn_3_4C9C8();
+    fn_3_47778();
+    fn_3_33D9C();
 }
 
 // .text:0x00033DD0 size:0x418 mapped:0x80672E64
@@ -5110,7 +5144,22 @@ void fn_3_329A4(void) {
 
 // .text:0x00032810 size:0x194 mapped:0x806718A4
 void fn_3_32810(void) {
-    return;
+    fn_3_5985C(0, 21);
+    g_FieldingLogic._0B0 = 0;
+    if (g_Ball.Hit_HorizontalAngle < 0x400) {
+        g_FieldingLogic._0B2 = 3;
+    } else {
+        g_FieldingLogic._0B2 = 5;
+    }
+    fn_3_5985C(3, 22);
+    fn_3_5985C(5, 22);
+    g_FieldingLogic._13A = 1;
+    fn_3_5985C(7, 23);
+    g_FieldingLogic._0B4 = 7;
+    g_FieldingLogic._139 = 1;
+    fn_3_4C9C8();
+    fn_3_47778();
+    fn_3_4A124();
 }
 
 // .text:0x000327F4 size:0x1C mapped:0x80671888

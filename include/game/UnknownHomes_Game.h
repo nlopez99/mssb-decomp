@@ -2655,7 +2655,8 @@ typedef struct {
     /* 0x0AE */ s16 _0AE;
     /* 0x0B0 */ s16 _0B0;
     /* 0x0B2 */ s16 _0B2;
-    /* 0x0B4 */ u8 _0B4[0xB8 - 0xB4];
+    /* 0x0B4 */ s16 _0B4;
+    /* 0x0B6 */ u8 _0B6[0xB8 - 0xB6];
     /* 0x0B8 */ s16 _0B8;
     /* 0x0BA */ u8 _0BA[0xBC - 0xBA];
     /* 0x0BC */ s16 _0BC;
