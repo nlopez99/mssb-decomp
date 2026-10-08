@@ -9,6 +9,7 @@
 #include "game/rep_3DA8.h"
 #include "game/rep_12D0.h"
 #include "game/rep_540.h"
+#include "game/rep_AC8.h"
 #include "game/m_sound.h"
 
 typedef struct {
@@ -172,21 +173,6 @@ extern int LERPToNewRange_Float(int value, int inMin, int inMax, int outMin, int
 
 extern void fn_8004AE18(s32 fielder);
 
-// rep_AC8.h declares these fielder callbacks as void(void) stubs; each takes the fielder in r3.
-extern void fn_3_251E4(s32 fielder);
-extern void fn_3_25648(s32 fielder);
-extern void fn_3_25A68(s32 fielder);
-extern void fn_3_2F574(s32 fielder);
-extern void fn_3_2FF2C(s32 fielder);
-extern void fn_3_30564(s32 fielder);
-extern void fn_3_5372C(s32 fielder);
-extern BOOL fn_3_51798(s32 fielder, struct _VecXYZ* delta);
-extern int fn_3_52560(int fielder, f32 x, f32 z);
-extern void fn_3_526DC(s32 fielder);
-extern void fn_3_52F4C(s32 fielder, f32 x, f32 z);
-extern void fn_3_5985C(s32 fielder, s32 action);
-extern void fn_3_3A584(s32 fielder);
-extern void fn_3_3AAF8(s32 fielder);
 extern void fn_8004AFA8(s32 fielder);
 
 // .bss statics, in reverse address order: MWCC lays them out last declared first
