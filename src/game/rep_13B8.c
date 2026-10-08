@@ -1058,7 +1058,8 @@ void fn_3_8781C(void) {
 }
 
 // .text:0x00087424 size:0x3F8 mapped:0x806C64B8
-// 99.53%: only the registers of the inlined fn_3_871BC differ, as they do in fn_3_871BC itself
+// 99.53%: only the registers of the inlined fn_3_871BC differ. Declaring fn_3_871BC's locals in
+// reverse and assigning them after matches this function but drops fn_3_871BC to 95.07%.
 void fn_3_87424(void) {
     fn_3_872CC();
     if (g_GameLogic.secondaryGameMode != 6 && g_GameLogic.secondaryGameMode != 14) {
@@ -3617,7 +3618,7 @@ void fn_3_7F9C4(int runner) {
 }
 
 // .text:0x0007F494 size:0x530 mapped:0x806BE528
-// 99.64%: registers differ only where the body-check fielder and its probability row are addressed
+// 99.85%: only g_FieldingLogic's and g_Fielders' addresses for the body-check fielder swap r3 and r4
 int fn_3_7F494(int runner) {
     InMemRunnerType* r = &g_Runners[runner];
     int bodyCheck = 0;
@@ -3689,11 +3690,10 @@ int fn_3_7F494(int runner) {
                 ((g_Ball.fielderWBallIndex >= 0 && g_Ball.fielderWBallIndex == g_FieldingLogic._0D0[base] &&
                   g_Ball.timeSinceBallPickedUp <= 9) ||
                  (g_FieldingLogic._0C4 == base && g_Ball.framesUntilThrowReachesDest < 15))) {
-                Unk13B8Fielder* fielder = &g_Fielders[g_FieldingLogic._0D0[base]];
-                u8 chance = bodyCheckProbabiliities[r->weight][fielder->_1C9];
+                u8 chance = bodyCheckProbabiliities[r->weight][g_Fielders[g_FieldingLogic._0D0[base]]._1C9];
 
-                fielder->_211 = 1;
-                fielder->_214 = r->baseRunningTowards;
+                g_Fielders[g_FieldingLogic._0D0[base]]._211 = 1;
+                g_Fielders[g_FieldingLogic._0D0[base]]._214 = r->baseRunningTowards;
                 if (RandomInt_Game(100) < chance) {
                     r->actionCode = 2;
                     if (g_d_GameSettings.exhibitionMatchInd == 0 && lbl_3_common_bss_37400._40 == g_GameLogic.teamBatting) {
