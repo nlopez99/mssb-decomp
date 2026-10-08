@@ -76,7 +76,8 @@ typedef struct {
     /* 0x04 */ u8 _04[0x58 - 0x04];
     /* 0x58 */ u8 _58;
     /* 0x59 */ u8 _59;
-    /* 0x5A */ u8 _5A[0x5C - 0x5A];
+    /* 0x5A */ u8 _5A;
+    /* 0x5B */ u8 _5B;
     /* 0x5C */ f32 _5C;
     /* 0x60 */ u8 _60[0x90 - 0x60];
 } StaC5Model; // size: 0x90
@@ -86,14 +87,28 @@ typedef struct StaC5Draw {
     /* 0x44 */ u8 _44[0x74 - 0x44];
     /* 0x74 */ StaC5Model* _74;
     /* 0x78 */ struct StadiumObjectCollision* _78;
-    /* 0x7C */ u8 _7C[0x90 - 0x7C];
+    /* 0x7C */ void (*_7C)();
+    /* 0x80 */ void (*_80)();
+    /* 0x84 */ void (*_84)(void);
+    /* 0x88 */ void* _88;
+    /* 0x8C */ void* _8C;
     /* 0x90 */ u8 _90_7 : 1;
     /* 0x90 */ u8 _90_6 : 1;
     /* 0x90 */ u8 _90_5 : 1;
-    /* 0x90 */ u8 _90_0 : 5;
-    /* 0x91 */ u8 _91[0x99 - 0x91];
+    /* 0x90 */ u8 _90_4 : 1;
+    /* 0x90 */ u8 _90_3 : 1;
+    /* 0x90 */ u8 _90_2 : 1;
+    /* 0x90 */ u8 _90_1 : 1;
+    /* 0x90 */ u8 _90_0 : 1;
+    /* 0x91 */ u8 _91;
+    /* 0x92 */ u8 _92;
+    /* 0x93 */ u8 _93;
+    /* 0x94 */ s16 _94;
+    /* 0x96 */ s16 _96;
+    /* 0x98 */ u8 _98;
     /* 0x99 */ u8 _99;
-    /* 0x9A */ u8 _9A[0x9C - 0x9A];
+    /* 0x9A */ u8 _9A;
+    /* 0x9B */ u8 _9B;
     /* 0x9C */ u8 _9C;
     /* 0x9D */ u8 _9D;
     /* 0x9E */ u8 _9E[0xA0 - 0x9E];
@@ -128,7 +143,8 @@ typedef struct StaC5Ball {
     /* 0x99 */ u8 _99;
     /* 0x9A */ u8 _9A[0x9C - 0x9A];
     /* 0x9C */ u8 _9C;
-    /* 0x9D */ u8 _9D[0xA0 - 0x9D];
+    /* 0x9D */ u8 _9D;
+    /* 0x9E */ u8 _9E[0xA0 - 0x9E];
     /* 0xA0 */ StaC5Draw* _A0;
     /* 0xA4 */ struct StaC5Emitter* _A4;
     /* 0xA8 */ Vec pos;
@@ -206,6 +222,23 @@ typedef struct StaC5Emitter {
     /* 0x10 */ void* _10;
 } StaC5Emitter;
 
+typedef struct {
+    /* 0x00 */ void* _00;
+    /* 0x04 */ u8 _04[0x10 - 0x04];
+    /* 0x10 */ f32 _10;
+    /* 0x14 */ u8 _14[0x5C - 0x14];
+} StaC5Anim; // size: 0x5C
+
+extern StaC5ModelTable* ActorObjectInitTable(u16 count);
+extern void fn_800BDC88(StaC5ModelTable* table, u16 first, u16 last, void* model, void* anim, s32 arg5);
+extern void fn_800BD548(void* model, s32 count, ...);
+extern void fn_80025C58(void* anim, void* model);
+extern void fn_80025DDC(void* anim);
+extern void fn_80025FFC(void* anim, StaC5Anim* state);
+extern void fn_80025EEC(StaC5Anim* state, s32, s32);
+extern void fn_800B4AFC(StaC5Actor* actor, s32 flag);
+extern void fn_800B0A5C_insertQueue(void (*func)(void), s32 arg);
+
 extern void fn_80033620(StaC5Emitter* emitter);
 extern void fn_80033964(StaC5Emitter* emitter);
 extern StaC5Emitter* fn_80033A24(BOOL (*update)(StaC5Emitter*), s32, s32, s32, s32, s32);
@@ -219,13 +252,17 @@ typedef struct StadiumSort1D58 {
 
 extern struct {
     /* 0x00 */ StaC5Draw* _00;
-    /* 0x04 */ u8 _04[0x14 - 0x04];
+    /* 0x04 */ StaC5Draw* _04;
+    /* 0x08 */ u8 _08[0x14 - 0x08];
     /* 0x14 */ StadiumSort1D58* _14;
     /* 0x18 */ void (*_18)(void);
     /* 0x1C */ void (*_1C)(void);
-    /* 0x20 */ u8 _20[0x30 - 0x20];
+    /* 0x20 */ s32 _20;
+    /* 0x24 */ s32 _24;
+    /* 0x28 */ s32 _28;
+    /* 0x2C */ s32 _2C;
     /* 0x30 */ u32 _30;
-    /* 0x34 */ void* _34;
+    /* 0x34 */ s32* _34;
     /* 0x38 */ u8 _38[0x3C - 0x38];
     /* 0x3C */ u32* _3C;
     /* 0x40 */ u16* _40;
@@ -370,8 +407,8 @@ static u8 lbl_3_bss_B21B;
 static u8 lbl_3_bss_B21A;
 static u8 lbl_3_bss_B219;
 static u8 lbl_3_bss_B218;
-static u8 lbl_3_bss_B1BC[0x5C];
-static u8 lbl_3_bss_B160[0x5C];
+static StaC5Anim lbl_3_bss_B1BC;
+static StaC5Anim lbl_3_bss_B160;
 static u8 lbl_3_bss_B15C;
 static void* lbl_3_bss_B154[2];
 static GXTexObj lbl_3_bss_B134;
@@ -442,8 +479,335 @@ static inline void spawnDrawEffect(StaC5Draw* draw) {
 }
 
 // .text:0x000F6FDC size:0x1468 mapped:0x80736070
-void fn_3_F6FDC(void) {
-    return;
+// 92.23%: register allocation differs throughout; the target also counts the props with
+// n1 + 2 hoisted between the two counting loops and keeps the ball model index on the stack.
+void fn_3_F6FDC(void** files) {
+    StaC5Draw* draw;
+    StaC5Draw* entry;
+    StaC5Ball* ball;
+    s32* indices;
+    StaC5Prop* prop;
+    StaC5Prop2* prop2;
+    s32 i;
+    u32 x;
+    u32 y;
+    s32 off;
+    s32 n1;
+    s32 n2;
+    u8 j;
+    u8 pitcherModel;
+    u8 ballModel;
+    u8 fieldModel;
+    u8 numModels;
+    u8 numActors;
+    u8 count;
+    u8 idx;
+    u8 end;
+
+    count = 0;
+    end = FALSE;
+    lbl_3_common_bss_350E4._18 = fn_3_B939C;
+    lbl_3_common_bss_350E4._1C = fn_3_EDFAC;
+    lbl_3_bss_B15C = 1;
+    if (g_d_GameSettings.GameModeSelected != 7) {
+        fn_3_B97C8(fn_3_F6FCC);
+    }
+    lbl_3_bss_AEE8 = 0;
+    indices = lbl_3_common_bss_350E4._34 = _OSAllocFromHeap(4, 18 * sizeof(s32));
+    fn_3_B9D68(lbl_3_data_1BA34, 18, files, indices);
+    lbl_3_bss_B560[0] = files[0];
+
+    for (n1 = 0, prop = lbl_3_data_1B8FC; n1 < 5; n1++, prop++) {
+        if (prop->type == 6) {
+            break;
+        }
+    }
+    for (n2 = 0, prop2 = lbl_3_data_1B9A4; n2 < 5; n2++, prop2++) {
+        if (prop2->type == 6) {
+            break;
+        }
+    }
+    numModels = n1 + 2 + n2;
+    numActors = numModels + 4;
+    lbl_8036E548._6C = ActorObjectInitTable(numActors);
+    lbl_3_common_bss_350E4._6D = numActors;
+    j = 0;
+    lbl_3_bss_B219 = 0;
+    for (i = 0; i < (u8)n1; i++, j++) {
+        fn_800BDC88(lbl_8036E548._6C, j, j, files[indices[1]], NULL, 0);
+        fn_3_B97DC(&lbl_8036E548._6C->models[j], files[indices[1] + 2]);
+    }
+    lbl_3_bss_B218 = j;
+    pitcherModel = j;
+    fn_800BDC88(lbl_8036E548._6C, j, j, files[indices[2]], NULL, 0);
+    fn_3_B97DC(&lbl_8036E548._6C->models[j], files[indices[2] + 2]);
+    lbl_8036E548._6C->models[j]._5B = 2;
+    fn_800B4AFC(lbl_8036E548._6C->models[j]._00, lbl_8036E548._6C->models[j]._5B & 1);
+    ballModel = j + 1;
+    fn_800BDC88(lbl_8036E548._6C, ballModel, ballModel, files[indices[3]], NULL, 0);
+    j += 2;
+    fieldModel = j;
+    for (i = 0; i < (u8)n2; i++, j++) {
+        fn_800BDC88(lbl_8036E548._6C, j, j, files[indices[4]], NULL, (s32)files[indices[4] + 2]);
+        fn_3_B98E8((struct StadiumModel1D58*)&lbl_8036E548._6C->models[j]);
+    }
+    fn_800BDC88(lbl_8036E548._6C, j, j, files[indices[5]], NULL, 0);
+    fn_800BDC88(lbl_8036E548._6C, (u8)(j + 1), (u8)(j + 1), files[indices[6]], NULL, 0);
+    fn_800BDC88(lbl_8036E548._6C, (u8)(j + 2), (u8)(j + 2), files[indices[7]], NULL, 0);
+    lbl_3_bss_B55C = &lbl_8036E548._6C->models[(u8)(j + 2)];
+    fn_800BDC88(lbl_8036E548._6C, (u8)(j + 3), (u8)(j + 3), files[indices[8]], NULL, 0);
+    lbl_3_bss_B154[0] = files[indices[16]];
+    lbl_3_bss_B154[1] = files[indices[17]];
+    for (i = 0; i < numActors; i++) {
+        fn_800BD548(&lbl_8036E548._6C->models[i], 4, lbl_3_common_bss_350E4._20, lbl_3_common_bss_350E4._24,
+                    lbl_3_common_bss_350E4._28, lbl_3_common_bss_350E4._2C);
+    }
+    fn_80025DDC(files[indices[14]]);
+    fn_80025C58(files[indices[14]], &lbl_8036E548._6C->models[(u8)(j + 1)]);
+    lbl_3_bss_B1BC._00 = files[indices[15]];
+    fn_80025FFC(files[indices[14]], &lbl_3_bss_B1BC);
+    fn_80025EEC(&lbl_3_bss_B1BC, 0, 0);
+    lbl_3_bss_B1BC._10 = 0.3f;
+    fn_80025DDC(files[indices[12]]);
+    fn_80025C58(files[indices[12]], &lbl_8036E548._6C->models[j]);
+    lbl_3_bss_B160._00 = files[indices[13]];
+    fn_80025FFC(files[indices[12]], &lbl_3_bss_B160);
+    fn_80025EEC(&lbl_3_bss_B160, 0, 0);
+
+    lbl_3_common_bss_350E4._30 = 25;
+    lbl_3_common_bss_350E4._00 = _OSAllocFromHeap(0x20, 25 * sizeof(StaC5Draw));
+    memset(lbl_3_common_bss_350E4._00, 0, 25 * sizeof(StaC5Draw));
+    lbl_3_common_bss_350E4._04 = _OSAllocFromHeap(0x20, 25 * sizeof(StaC5Draw));
+    memset(lbl_3_common_bss_350E4._04, 0, 25 * sizeof(StaC5Draw));
+    draw = lbl_3_common_bss_350E4._00;
+    entry = draw;
+
+    if (g_d_GameSettings.GameModeSelected != 7) {
+        lbl_3_bss_B21D = 0;
+        idx = 0;
+        for (i = 0; i < 5; i++) {
+            if (lbl_3_data_1B884[i].type == 6 || lbl_3_data_1B8FC[i].type != 0) {
+                break;
+            }
+            entry->_9D = 0;
+            draw->_74 = &lbl_8036E548._6C->models[i];
+            entry->_C2 = idx;
+            entry->_C3 = pitcherModel;
+            draw->_78 = files[indices[9]];
+            draw->_7C = NULL;
+            draw->_80 = fn_3_F1674;
+            draw->_90_6 = draw->_90_7 && draw->_78 != NULL;
+            entry->_9C = i;
+            entry->_C5 = count;
+            fn_3_F3BB0(entry);
+            count++;
+            idx++;
+            draw->_90_5 = 1;
+            draw->_92 = 0xFF;
+            draw->_8C = NULL;
+            draw->_84 = NULL;
+            draw->_94 = 0;
+            draw->_96 = -1;
+            draw->_98 = 1;
+            draw->_9A = 1;
+            entry = ++draw;
+            lbl_3_bss_B21E++;
+        }
+        end = FALSE;
+        for (x = 0; x < 7; x++) {
+            lbl_3_bss_B244[x] = fn_3_F37BC(6, x);
+        }
+    }
+
+    lbl_3_bss_B21F = count;
+    for (i = 0; i < 5; i++) {
+        if (lbl_3_data_1B884[i].type == 6) {
+            end = TRUE;
+        }
+        if (end) {
+            for (; i < 5; i++) {
+                lbl_3_data_1B884[i].type = 6;
+            }
+            break;
+        }
+        ball = (StaC5Ball*)entry;
+        ball->_9D = 1;
+        ball->_9C = i;
+        ball->_C5 = count;
+        if (g_d_GameSettings.GameModeSelected == 7) {
+            ball->_A0 = NULL;
+        } else {
+            ball->_A0 = &lbl_3_common_bss_350E4._00[lbl_3_bss_B21D + i];
+            ball->_A0->_BCp = &ball->_C0;
+        }
+        ball->_C4 = 0;
+        draw->_74 = &lbl_8036E548._6C->models[ballModel];
+        draw->_78 = files[indices[10]];
+        draw->_7C = fn_3_F56CC;
+        draw->_80 = fn_3_F466C;
+        draw->_90_7 = 1;
+        draw->_90_6 = draw->_90_7 && draw->_78 != NULL;
+        fn_3_F5C30(ball);
+        count++;
+        draw->_90_5 = 1;
+        draw->_92 = 0xFF;
+        draw->_8C = NULL;
+        draw->_84 = fn_3_F469C;
+        draw->_94 = 0;
+        draw->_96 = -1;
+        draw->_98 = 1;
+        entry = ++draw;
+        lbl_3_bss_B220++;
+    }
+
+    end = FALSE;
+    if (g_d_GameSettings.GameModeSelected != 7) {
+        lbl_3_bss_B21B = count;
+        for (i = 0; i < 5; i++) {
+            if (lbl_3_data_1B9A4[i].type == 6) {
+                end = TRUE;
+            }
+            if (end) {
+                for (; i < 6; i++) {
+                    lbl_3_data_1B9A4[i].type = 6;
+                    lbl_3_data_1B9A4[i]._12 = 0xFF;
+                }
+                break;
+            }
+            entry->_9D = 2;
+            draw->_74 = &lbl_8036E548._6C->models[fieldModel + i];
+            draw->_78 = files[indices[11]];
+            draw->_7C = fn_3_F0FA4;
+            draw->_80 = fn_3_EEFD4;
+            draw->_90_7 = 1;
+            draw->_90_6 = draw->_90_7 && draw->_78 != NULL;
+            entry->_9C = i;
+            fn_3_F1518(entry);
+            count++;
+            draw->_90_5 = 1;
+            draw->_92 = 0xFF;
+            draw->_8C = NULL;
+            draw->_84 = NULL;
+            draw->_94 = 0;
+            draw->_96 = -1;
+            draw->_98 = 1;
+            entry = ++draw;
+            lbl_3_bss_B21C++;
+        }
+        fn_800B0A5C_insertQueue(fn_3_F0184, 0x6001);
+    }
+
+    entry->_9D = 3;
+    draw->_74 = &lbl_8036E548._6C->models[j];
+    draw->_78 = NULL;
+    draw->_7C = NULL;
+    draw->_80 = NULL;
+    draw->_90_7 = 1;
+    draw->_90_6 = draw->_90_7 && draw->_78 != NULL;
+    draw->control.type = 0;
+    CTRLSetTranslation(&draw->control, 0.0f, -0.15f, 0.0f);
+    CTRLSetRotation(&draw->control, 0.0f, 0.0f, 0.0f);
+    draw->_90_5 = 1;
+    draw->_92 = 0xFF;
+    draw->_8C = &lbl_3_bss_B160;
+    draw->_84 = NULL;
+    draw->_94 = 0;
+    draw->_96 = -1;
+    draw->_98 = 1;
+    entry = ++draw;
+    count++;
+
+    lbl_3_bss_B21A = count;
+    entry->_9D = 4;
+    draw->_74 = &lbl_8036E548._6C->models[(u8)(j + 1)];
+    draw->_78 = NULL;
+    draw->_7C = NULL;
+    draw->_80 = NULL;
+    draw->_90_7 = 1;
+    draw->_90_6 = draw->_90_7 && draw->_78 != NULL;
+    draw->control.type = 0;
+    CTRLSetTranslation(&draw->control, 0.0f, -0.1f, 0.0f);
+    CTRLSetRotation(&draw->control, 0.0f, 0.0f, 0.0f);
+    draw->_90_5 = 1;
+    draw->_92 = 0xFF;
+    draw->_8C = &lbl_3_bss_B1BC;
+    draw->_84 = fn_3_EEFA4;
+    draw->_88 = NULL;
+    draw->_94 = 0;
+    draw->_96 = -1;
+    draw->_98 = 1;
+    fn_800B0A5C_insertQueue(fn_3_EEF24, 5);
+    entry = ++draw;
+    count++;
+
+    entry->_9D = 5;
+    draw->_74 = &lbl_8036E548._6C->models[(u8)(j + 3)];
+    draw->_78 = NULL;
+    draw->_7C = NULL;
+    draw->_80 = NULL;
+    draw->_90_7 = 1;
+    draw->_90_6 = draw->_90_7 && draw->_78 != NULL;
+    draw->control.type = 0;
+    CTRLSetTranslation(&draw->control, 0.0f, -0.2f, 0.0f);
+    CTRLSetRotation(&draw->control, 0.0f, 0.0f, 0.0f);
+    draw->_90_5 = 1;
+    draw->_92 = 0xFF;
+    draw->_8C = NULL;
+    draw->_84 = NULL;
+    draw->_94 = 0;
+    draw->_96 = -1;
+    draw->_98 = 1;
+    draw->_90_4 = 1;
+    draw->_90_3 = 1;
+    draw->_90_2 = 0;
+    draw->_90_1 = 0;
+    entry = ++draw;
+    count++;
+
+    if (lbl_3_common_bss_350E4._30 > count) {
+        for (i = count; i < lbl_3_common_bss_350E4._30; i++) {
+            entry->_9D = 0;
+            draw->_74 = NULL;
+            draw->_78 = NULL;
+            draw->_7C = NULL;
+            draw->_80 = NULL;
+            draw->_90_7 = 0;
+            draw->_90_6 = 0;
+            draw->_90_5 = 0;
+            draw->control.type = 0;
+            CTRLSetTranslation(&draw->control, 0.0f, 0.0f, 0.0f);
+            CTRLSetRotation(&draw->control, 0.0f, 0.0f, 0.0f);
+            draw->_92 = 0;
+            draw->_8C = NULL;
+            draw->_94 = 0;
+            draw->_96 = -1;
+            entry = ++draw;
+        }
+    }
+
+    lbl_3_common_bss_350E4._48 = NULL;
+    if (g_d_GameSettings.GameModeSelected != 7) {
+        fn_3_F6C60();
+    }
+    lbl_3_bss_B11C[0][0] = 0.01f;
+    lbl_3_bss_B11C[0][1] = 0.0f;
+    lbl_3_bss_B11C[0][2] = 0.0f;
+    lbl_3_bss_B11C[1][0] = 0.0f;
+    lbl_3_bss_B11C[1][1] = 0.01f;
+    lbl_3_bss_B11C[1][2] = 0.0f;
+    GXSetIndTexMtx(GX_ITM_0, lbl_3_bss_B11C, 2);
+    lbl_3_bss_B118 = fn_3_B9534(16, 16, &lbl_3_bss_B134);
+    if (lbl_3_bss_B118 == NULL) {
+        OSPanic("sta_c5.c", 4136, "error\n");
+    }
+    for (y = 0; y < 16; y++) {
+        for (x = 0; x < 16; x++) {
+            off = fn_800247E4(x, y, 16, 2);
+            lbl_3_bss_B118[off] = (u8)(rand() % 200) + 27;
+            lbl_3_bss_B118[off + 1] = (u8)(rand() % 200) + 27;
+        }
+    }
+    memset(lbl_3_bss_AF18, 1, sizeof(lbl_3_bss_AF18));
 }
 
 // .text:0x000F6FCC size:0x10 mapped:0x80736060
