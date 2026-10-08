@@ -1354,11 +1354,24 @@ void fn_3_F0224(StaC5Draw* draw) {
 
 // .text:0x000F0184 size:0xA0 mapped:0x8072F218
 void fn_3_F0184(void) {
-    return;
+    u32 i;
+    StaC5Draw* draw;
+
+    if (lbl_3_bss_AEE8) {
+        fn_800B0A14_removeQueue();
+        lbl_3_bss_AEE8 = 0;
+        return;
+    }
+    for (i = 0; i < lbl_3_bss_B21C; i++) {
+        draw = &lbl_3_common_bss_350E4._00[i + lbl_3_bss_B21B];
+        if (draw != NULL && draw->_C6 == 3) {
+            fn_3_EFB54(draw);
+        }
+    }
 }
 
 // .text:0x000EFB54 size:0x630 mapped:0x8072EBE8
-void fn_3_EFB54(void) {
+void fn_3_EFB54(StaC5Draw* draw) {
     return;
 }
 

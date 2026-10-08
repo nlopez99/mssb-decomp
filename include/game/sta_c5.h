@@ -33,7 +33,7 @@ BOOL fn_3_EF7B4(Vec pos, u8 block);
 void fn_3_EF800(struct StaC5Draw* draw);
 void fn_3_EF890(struct StaC5Draw* draw);
 void fn_3_EF930(struct StaC5Draw* draw);
-void fn_3_EFB54(void);
+void fn_3_EFB54(struct StaC5Draw* draw);
 void fn_3_F0184(void);
 void fn_3_F0224(struct StaC5Draw* draw);
 void fn_3_F082C(struct StaC5Draw* draw);
