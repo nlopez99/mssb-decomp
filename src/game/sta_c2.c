@@ -856,8 +856,24 @@ void fn_3_D4E00(void) {
 }
 
 // .text:0x000D4CA4 size:0x15C mapped:0x80713D38
-void fn_3_D4CA4(void) {
-    return;
+void fn_3_D4CA4(StaC2Draw* draw) {
+    draw->control.type = 0;
+    CTRLSetScale(&draw->control, 0.75f, 0.75f, 0.75f);
+    if (draw->_CA == 0) {
+        CTRLSetRotation(&draw->control, lbl_3_data_182C8[draw->_9C]._1C, -lbl_3_data_182C8[draw->_9C]._20,
+                        lbl_3_data_182C8[draw->_9C]._24);
+        draw->_C0 = -lbl_3_data_182C8[draw->_9C]._20;
+    } else {
+        CTRLSetRotation(&draw->control, lbl_3_data_182C8[draw->_9C]._10, -lbl_3_data_182C8[draw->_9C]._14,
+                        lbl_3_data_182C8[draw->_9C]._18);
+        draw->_C0 = -lbl_3_data_182C8[draw->_9C]._14;
+    }
+    CTRLSetTranslation(&draw->control, lbl_3_data_182C8[draw->_9C].pos.x, lbl_3_data_182C8[draw->_9C].pos.y,
+                       lbl_3_data_182C8[draw->_9C].pos.z);
+    draw->_A0.x = lbl_3_data_182C8[draw->_9C].pos.x;
+    draw->_A0.y = -lbl_3_data_182C8[draw->_9C].pos.y;
+    draw->_A0.z = lbl_3_data_182C8[draw->_9C].pos.z;
+    fn_3_D4780(draw);
 }
 
 // .text:0x000D4780 size:0x524 mapped:0x80713814
