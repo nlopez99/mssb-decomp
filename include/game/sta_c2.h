@@ -11,6 +11,7 @@ struct StaC2Spring;
 struct StaC2SpringParams;
 struct StaC2Particle;
 struct StaC2Emitter;
+struct StadiumSort1D58;
 
 void fn_3_CB8A8(struct StaC2Draw* draw);
 void fn_3_CBA9C(struct StaC2Draw* draw);
@@ -92,7 +93,7 @@ s32 fn_3_D53C0(u8 id);
 s32 fn_3_D5444(const void* a, const void* b);
 s32 fn_3_D5470(const void* a, const void* b);
 void fn_3_D5494(Mtx m);
-void fn_3_D55EC(Mtx view, struct StaC2ObjEntry* sort);
+void fn_3_D55EC(Mtx view, struct StadiumSort1D58* sort);
 void fn_3_D5B6C(u32* n);
 void fn_3_D5C8C(u32* n);
 void fn_3_D5E80(u32* n);

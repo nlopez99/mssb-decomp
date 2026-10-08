@@ -314,10 +314,10 @@ typedef struct StaC2Emitter {
     /* 0x20 */ StaC2EmitterOwner* _20;
 } StaC2Emitter;
 
-typedef struct StaC2ObjEntry {
-    /* 0x00 */ f32 _00;
-    /* 0x04 */ s32 _04;
-} StaC2ObjEntry; // size: 0x8
+typedef struct StadiumSort1D58 {
+    /* 0x00 */ f32 depth;
+    /* 0x04 */ s32 index;
+} StadiumSort1D58; // size: 0x8
 
 typedef struct {
     /* 0x00 */ u8 _00[0x48];
@@ -451,7 +451,7 @@ extern struct {
     /* 0x00 */ StaC2Draw* _00;
     /* 0x04 */ StaC2Draw* _04;
     /* 0x08 */ u8 _08[0x14 - 0x08];
-    /* 0x14 */ StaC2ObjEntry* _14;
+    /* 0x14 */ StadiumSort1D58* _14;
     /* 0x18 */ u8 _18[0x20 - 0x18];
     /* 0x20 */ s32 _20;
     /* 0x24 */ s32 _24;
@@ -784,10 +784,10 @@ void fn_3_D5B6C(u32* n) {
 }
 
 // .text:0x000D55EC size:0x580 mapped:0x80714680
-void fn_3_D55EC(Mtx view, StaC2ObjEntry* sort) {
+void fn_3_D55EC(Mtx view, StadiumSort1D58* sort) {
     s32 idx[3];
     Vec pos;
-    StaC2ObjEntry entries[3];
+    StadiumSort1D58 entries[3];
     StaC2Draw* tri;
     StaC2Draw* draw;
     void* tmp;
@@ -801,8 +801,8 @@ void fn_3_D55EC(Mtx view, StaC2ObjEntry* sort) {
         i = lbl_3_common_bss_350E4._30 - 1;
         do {
             if (!draw->_90_7) {
-                sort[n]._00 = -512.0f;
-                sort[n]._04 = i;
+                sort[n].depth = -512.0f;
+                sort[n].index = i;
                 n++;
             }
             draw--;
@@ -816,20 +816,20 @@ void fn_3_D55EC(Mtx view, StaC2ObjEntry* sort) {
                     CTRLGetTranslation(&draw->control, &pos.x, &pos.y, &pos.z);
                     PSMTXMultVec(view, &pos, &pos);
                     m--;
-                    sort[m]._00 = pos.z;
-                    sort[m]._04 = i;
+                    sort[m].depth = pos.z;
+                    sort[m].index = i;
                 } else {
-                    sort[n]._00 = -512.0f;
-                    sort[n]._04 = i;
+                    sort[n].depth = -512.0f;
+                    sort[n].index = i;
                     n++;
                 }
             }
             draw--;
         } while (i-- != 0);
-        tmp = fn_800ACF34(0x20, (lbl_3_common_bss_350E4._30 - m) * sizeof(StaC2ObjEntry));
-        fn_800C07BC(&sort[m], tmp, lbl_3_common_bss_350E4._30 - m, sizeof(StaC2ObjEntry), fn_3_D5470);
+        tmp = fn_800ACF34(0x20, (lbl_3_common_bss_350E4._30 - m) * sizeof(StadiumSort1D58));
+        fn_800C07BC(&sort[m], tmp, lbl_3_common_bss_350E4._30 - m, sizeof(StadiumSort1D58), fn_3_D5470);
         fn_800ACF14(tmp);
-        tmp = fn_800ACF34(0x20, (lbl_3_common_bss_350E4._30 - m) * sizeof(StaC2ObjEntry));
+        tmp = fn_800ACF34(0x20, (lbl_3_common_bss_350E4._30 - m) * sizeof(StadiumSort1D58));
         for (i = 0; i < lbl_3_bss_A027; i++) {
             tri = &lbl_3_common_bss_350E4._00[lbl_3_bss_A026 + i];
             if (tri->host->_D1 != 0) {
@@ -851,8 +851,8 @@ void fn_3_D55EC(Mtx view, StaC2ObjEntry* sort) {
         draw = lbl_3_common_bss_350E4._00;
         for (i = 0; i < lbl_3_common_bss_350E4._30; i++) {
             CTRLGetTranslation(&draw->control, &pos.x, &pos.y, &pos.z);
-            sort[i]._00 = 1.0f;
-            sort[i]._04 = i;
+            sort[i].depth = 1.0f;
+            sort[i].index = i;
         }
     }
 }
@@ -861,7 +861,7 @@ void fn_3_D55EC(Mtx view, StaC2ObjEntry* sort) {
 void fn_3_D5494(Mtx m) {
     Vec pos;
     StaC2Draw* draw;
-    StaC2ObjEntry* entry;
+    StadiumSort1D58* entry;
     u32 i;
     u8 type;
 
@@ -869,17 +869,17 @@ void fn_3_D5494(Mtx m) {
     PSMTXMultVec(m, &pos, &pos);
     for (i = 0; i < lbl_3_common_bss_350E4._30; i++) {
         entry = &lbl_3_common_bss_350E4._14[i];
-        draw = &lbl_3_common_bss_350E4._00[entry->_04];
+        draw = &lbl_3_common_bss_350E4._00[entry->index];
         if (draw->_90_7) {
             type = draw->type;
             if (type == 0 || type == 4 || type == 5 || (type > 7 && type < 11)) {
-                entry->_00 = 1.0f;
-            } else if (entry->_00 < 2.0f + pos.z) {
-                entry->_00 = 1.0f;
-            } else if (entry->_00 > 10.0f + pos.z) {
-                entry->_00 = 0.25f;
+                entry->depth = 1.0f;
+            } else if (entry->depth < 2.0f + pos.z) {
+                entry->depth = 1.0f;
+            } else if (entry->depth > 10.0f + pos.z) {
+                entry->depth = 0.25f;
             } else {
-                entry->_00 = 1.0 - 0.75f * ((entry->_00 - (2.0f + pos.z)) / 8.0f);
+                entry->depth = 1.0 - 0.75f * ((entry->depth - (2.0f + pos.z)) / 8.0f);
             }
         }
     }
@@ -912,7 +912,7 @@ s32 fn_3_D53C0(u8 id) {
     u32 i;
 
     for (i = lbl_3_common_bss_350E4._30; i != 0; i--) {
-        if (id == lbl_3_common_bss_350E4._14[i - 1]._04) {
+        if (id == lbl_3_common_bss_350E4._14[i - 1].index) {
             return i - 1;
         }
     }
