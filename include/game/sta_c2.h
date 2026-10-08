@@ -94,8 +94,8 @@ void fn_3_D55EC(void);
 void fn_3_D5B6C(u32* n);
 void fn_3_D5C8C(u32* n);
 void fn_3_D5E80(void);
-void fn_3_D60C0(void);
-void fn_3_D62F0(void);
+void fn_3_D60C0(u32* n);
+void fn_3_D62F0(u32* n);
 void fn_3_D6514(void);
 void fn_3_D67CC(void);
 

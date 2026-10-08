@@ -439,13 +439,81 @@ void fn_3_D6514(void) {
 }
 
 // .text:0x000D62F0 size:0x224 mapped:0x80715384
-void fn_3_D62F0(void) {
-    return;
+void fn_3_D62F0(u32* n) {
+    Mtx m;
+    Control control;
+    StaC2Draw* draw;
+    s32 idx;
+    s32 i;
+    u16 next;
+
+    for (i = 0; i < lbl_3_bss_A02D; i++) {
+        next = lbl_3_common_bss_350E4._40[*n] = lbl_3_common_bss_350E4._40[*n - 1] + lbl_3_common_bss_350E4._3C[*n - 1];
+        idx = lbl_3_bss_A02C + i;
+        lbl_3_common_bss_350E4._44[next] = idx;
+        lbl_3_common_bss_350E4._3C[*n]++;
+        draw = &lbl_3_common_bss_350E4._00[idx];
+        control = draw->control;
+        CTRLBuildMatrix(&control, m);
+        fn_3_B8464(m, draw->_78);
+        CTRLSetTranslation(&control, 14.250000447034836 + lbl_3_data_182C8[draw->_9C].pos.x,
+                           -(9.375f + lbl_3_data_182C8[draw->_9C].pos.y),
+                           14.250000447034836 + lbl_3_data_182C8[draw->_9C].pos.z);
+        CTRLBuildMatrix(&control, m);
+        fn_3_B8464(m, draw->_78);
+        CTRLSetTranslation(&control, lbl_3_data_182C8[draw->_9C].pos.x - 14.250000447034836,
+                           -(9.375f + lbl_3_data_182C8[draw->_9C].pos.y),
+                           lbl_3_data_182C8[draw->_9C].pos.z - 14.250000447034836);
+        CTRLBuildMatrix(&control, m);
+        fn_3_B8464(m, draw->_78);
+        if (lbl_3_common_bss_350E4._3C[*n] != 0) {
+            fn_3_B8414(&lbl_3_common_bss_350E4._48[*n * 2], &lbl_3_common_bss_350E4._48[*n * 2 + 1]);
+            (*n)++;
+        }
+    }
 }
 
 // .text:0x000D60C0 size:0x230 mapped:0x80715154
-void fn_3_D60C0(void) {
-    return;
+// 99.64%: r7 and r8 swap between the draw-table base and idx * 232 in the inner loop.
+void fn_3_D60C0(u32* n) {
+    StaC2Draw* draw;
+    s32 next;
+    s32 idx;
+    Mtx m;
+    s32 group;
+    Control control;
+    s32 i;
+
+    for (group = 0; group < 3; group++) {
+        next = lbl_3_common_bss_350E4._40[*n] = lbl_3_common_bss_350E4._40[*n - 1] + lbl_3_common_bss_350E4._3C[*n - 1];
+        fn_3_B8574();
+        for (i = 0; i < lbl_3_bss_A02B; i++) {
+            if (group == lbl_3_data_18364[i]._0E && lbl_3_data_18364[i].type != 13) {
+                idx = i + lbl_3_bss_A02A;
+                if (lbl_3_common_bss_350E4._00[idx]._90_6) {
+                    lbl_3_common_bss_350E4._44[next] = idx;
+                    next++;
+                    lbl_3_common_bss_350E4._3C[*n]++;
+                    draw = &lbl_3_common_bss_350E4._00[idx];
+                    control = draw->control;
+                    CTRLSetTranslation(&control, lbl_3_data_18364[draw->_9C].pos.x,
+                                       -(lbl_3_data_18364[draw->_9C].pos.y - 0.5),
+                                       lbl_3_data_18364[draw->_9C].pos.z);
+                    CTRLBuildMatrix(&control, m);
+                    fn_3_B8464(m, draw->_78);
+                    CTRLSetTranslation(&control, lbl_3_data_18364[draw->_9C].pos.x,
+                                       -(0.5 + lbl_3_data_18364[draw->_9C].pos.y),
+                                       lbl_3_data_18364[draw->_9C].pos.z);
+                    CTRLBuildMatrix(&control, m);
+                    fn_3_B8464(m, draw->_78);
+                }
+            }
+        }
+        if (lbl_3_common_bss_350E4._3C[*n] != 0) {
+            fn_3_B8414(&lbl_3_common_bss_350E4._48[*n * 2], &lbl_3_common_bss_350E4._48[*n * 2 + 1]);
+            (*n)++;
+        }
+    }
 }
 
 // .text:0x000D5E80 size:0x240 mapped:0x80714F14
