@@ -353,10 +353,6 @@ typedef struct StaC2Spawner {
     /* 0x25 */ u8 _25;
 } StaC2Spawner;
 
-typedef struct StaC2Rec5C {
-    /* 0x00 */ u8 _00[0x5C];
-} StaC2Rec5C; // size: 0x5C
-
 // Shared by several functions, so these are file-scope constants
 static const u8 lbl_3_rodata_2498[4] = { 0x80, 0x20, 0x00, 0x00 };
 static const u8 lbl_3_rodata_249C[4] = { 0x46, 0x46, 0x46, 0x00 };
