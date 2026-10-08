@@ -1969,8 +1969,7 @@ typedef struct _MiniGameStruct {
     /*0x1B2E*/ u8 _1B2E;
     /*0x1B2F*/ u8 _1B2F[4];
     /*0x1B33*/ u8 _1B33;
-    /*0x1B34*/ s16 _1B34;
-    /*0x1B36*/ u8 _1B36[6];
+    /*0x1B34*/ s16 _1B34[4]; // per player, read by fn_3_60D80 (rep_E08)
     /*0x1B3C*/ s16 _1B3C;
     /*0x1B3E*/ u8 _1B3E[6];
     /*0x1B44*/ s16 _1B44;
@@ -2035,7 +2034,7 @@ typedef struct _MiniGameStruct {
     /*0x1C81*/ u8 _1C81[9];
     /*0x1C8A*/ u8 _1C8A[4];
     /*0x1C8E*/ u8 _1C8E[4];
-    /*0x1C92*/ u8 _1C92[8];
+    /*0x1C92*/ s8 _1C92[8]; // s8: fn_3_60D80 (rep_E08) compares with cmpwi
     /*0x1C9A*/ u8 _1C9A;
     /*0x1C9B*/ u8 _1C9B;
     /*0x1C9C*/ s16 _1C9C;
