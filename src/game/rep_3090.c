@@ -1534,8 +1534,9 @@ void fn_3_1054CC(void) {
     return;
 }
 
-// 99.73%: registers only; the key count, time, stride and fraction take r5, r4, r6 and r3
-// in the target (r4, r5, r3, r6 here), and the forward vector rotates f3/f2/f0.
+// 99.78%: registers only; the key count and seconds take r5 and r4 in the target (swapped
+// here), the key search's pointers r9/r8 (r8/r7 here), and the forward vector rotates f3/f2/f0.
+// Best of every order of the six integer locals.
 // .text:0x00104B3C size:0x990 mapped:0x80743BD0
 void fn_3_104B3C(struct Unk3090Track* track, u32 time, s16 channel, u8 depth, struct Unk3090View* view) {
     Unk3090View child;
@@ -1556,9 +1557,9 @@ void fn_3_104B3C(struct Unk3090Track* track, u32 time, s16 channel, u8 depth, st
     u8* keys = ch->_0C;
     Unk3090TrackKey* key;
     Unk3090TrackKey* next;
-    s32 stride;
     u32 sec;
     u16 frac;
+    s32 stride;
     u32 i;
     f32 t;
     f32 angle;
