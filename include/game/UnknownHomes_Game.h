@@ -874,9 +874,9 @@ typedef struct _PracticeStruct {
     /*0x020*/ void* commandList; // unsure
     /*0x024*/ int homeAway;
     artificial_padding(0x24, 0x140, int);
-    /*0x140*/ frame_t totalFrames;
-    /*0x142*/ frame_t framesInCurrTransitionState;
-    /*0x144*/ frame_t framesSincePracticeMenuDefaultTransition;
+    /*0x140*/ u16 totalFrames;
+    /*0x142*/ u16 framesInCurrTransitionState;
+    /*0x144*/ u16 framesSincePracticeMenuDefaultTransition;
     /*0x146*/ frame_t practiceMenu_framesOnCurrMenuScreen;
     /*0x148*/ u16 frames_sinceMovedToFromMenu;
     /*0x14A*/ frame_t _14A;
@@ -921,18 +921,27 @@ typedef struct _PracticeStruct {
     /*0x198*/ E(u8, PRACTICE_TYPE) practiceType_1;
     /*0x199*/ E(u8, PRACTICE_TYPE) practiceType;
     /*0x19A*/ u8 subMenuCursor;
-    artificial_padding(0x19a, 0x19e, u8);
+    artificial_padding(0x19a, 0x19c, u8);
+    /*0x19C*/ u8 _19C;
+    artificial_padding(0x19c, 0x19e, u8);
     /*0x19E*/ u8 pauseMenuLoading; // unsure
     /*0x19F*/ u8 _19F;
     artificial_padding(0x19f, 0x1a1, u8);
     /*0x1A1*/ u8 aIEnabled;
     /*0x1A2*/ u8 practiceBatterHandedness; // unsure
     /*0x1A3*/ u8 freePracticeInd_writeOnly;
-    artificial_padding(0x1a3, 0x1aa, u8);
+    /*0x1A4*/ u8 _1A4;
+    /*0x1A5*/ u8 _1A5;
+    /*0x1A6*/ u8 _1A6;
+    /*0x1A7*/ u8 _1A7;
+    /*0x1A8*/ u8 _1A8;
+    /*0x1A9*/ u8 _1A9;
     /*0x1AA*/ u8 transitioningIndicator; // unsure
-    artificial_padding(0x1aa, 0x1af, u8);
+    /*0x1AB*/ u8 _1AB[4];
     /*0x1AF*/ u8 returnToPracticeMenuState;
-    artificial_padding(0x1af, 0x1c2, u8);
+    artificial_padding(0x1af, 0x1b1, u8);
+    /*0x1B1*/ u8 _1B1;
+    /*0x1B2*/ u8 _1B2[4][4];
     /*0x1C2*/ s8 instructionNumber;
     /*0x1C3*/ u8 readyToMoveToNextInstruction; // unsure
     /*0x1C4*/ u8 practice_runner_countInputForMashing;
@@ -954,7 +963,10 @@ typedef struct _PracticeStruct {
     /*0x1D4*/ u8 loadingGuidedPractice; // unsure
     /*0x1D5*/ u8 _1D5;
     /*0x1D6*/ u8 practiceLevel_2;
-    artificial_padding(0x1d6, 0x1e1, u8);
+    artificial_padding(0x1d6, 0x1d9, u8);
+    /*0x1D9*/ u8 _1D9;
+    /*0x1DA*/ u8 _1DA;
+    artificial_padding(0x1da, 0x1e1, u8);
     /*0x1E1*/ u8 hitVariablesSetIndicator;
     /*0x1E2*/ u8 _1E2;
     /*0x1E3*/ u8 aiBuntIndicator; // unsure
@@ -1442,6 +1454,22 @@ typedef struct _BB_barrelStruct {
     /*0x033*/ u8 pad;
 } BB_barrelStruct; // size: 0x34
 
+// One of Star Dash's (rep_3520) four objects, at g_Minigame + 0xBB0
+typedef struct Unk3520Obj {
+    /* 0x00 */ Vec _0;
+    /* 0x0C */ Vec _C;
+    /* 0x18 */ Vec _18;
+    /* 0x24 */ Vec _24;
+    /* 0x30 */ f32 _30;
+    /* 0x34 */ f32 _34;
+    /* 0x38 */ s16 _38;
+    /* 0x3A */ s16 _3A;
+    /* 0x3C */ s8 _3C;
+    /* 0x3D */ u8 _3D;
+    /* 0x3E */ u8 _3E;
+    /* 0x3F */ u8 _3F;
+} Unk3520Obj; // size: 0x40
+
 typedef struct _UnkStructMinigame {
     /*0x000*/ VecXYZ _0;
     /*0x00C*/ VecXYZ _C;
@@ -1475,10 +1503,10 @@ typedef struct _MiniGameUnk19E8 {
     /*0x2*/ s8 _2;
     /*0x3*/ s8 _3;
     /*0x4*/ s8 _4;
-    /*0x5*/ u8 _5;
-    /*0x6*/ u8 _6;
+    /*0x5*/ s8 _5;
+    /*0x6*/ s8 _6;
     /*0x7*/ s8 _7;
-    /*0x8*/ u8 _8;
+    /*0x8*/ s8 _8;
 } MiniGameUnk19E8; // size: 0x9
 
 /*foul	1
@@ -1681,6 +1709,8 @@ typedef struct _MiniGameStruct {
     /*0x72B*/ u8 _72B;
     /*0x72C*/ MaybeWallBallStruct wallBallWalls[7];
     /*0x860*/ BB_barrelStruct barrels[15];
+    union {
+        struct {
     /*0xB6C*/ UnkStructMinigame _B6C;
     /*0xBD4*/ VecXYZ _BD4;
     /*0xBE0*/ f32 _BE0;
@@ -1699,6 +1729,13 @@ typedef struct _MiniGameStruct {
     /*0xC6D*/ u8 _C6D[64];
     /*0xCAD*/ u8 _CAD;
     /*0xCAE*/ u8 pad4[2];
+        };
+        // Star Dash (rep_3520) keeps its four objects here, after its coin bag
+        struct {
+            /*0xB6C*/ u8 _B6C_starDash[0x44];
+            /*0xBB0*/ Unk3520Obj starDashObjs[4];
+        };
+    };
     /*0xCB0*/ f32 _CB0;
     /*0xCB4*/ f32 _CB4;
     /*0xCB8*/ f32 _CB8;
@@ -1822,8 +1859,8 @@ typedef struct _MiniGameStruct {
     /*0x19E0*/ u8 _19E0;
     /*0x19E1*/ s8 _19E1;
     /*0x19E2*/ u8 _19E2;
-    /*0x19E3*/ u8 _19E3;
-    /*0x19E4*/ u8 _19E4;
+    /*0x19E3*/ s8 _19E3;
+    /*0x19E4*/ s8 _19E4;
     /*0x19E5*/ u8 _19E5;
     /*0x19E6*/ u8 _19E6;
     /*0x19E7*/ u8 _19E7;
@@ -2008,16 +2045,22 @@ typedef struct _MiniGameStruct {
     /*0x1CAD*/ u8 _1CAD[4];
     /*0x1CB1*/ u8 _1CB1[7];
     /*0x1CB8*/ VecXYZ _1CB8[4];
-    /*0x1CE8*/ VecXYZ _1CE8;
-    /*0x1CF4*/ VecXYZ _1CF4;
-    /*0x1D00*/ u8 _1D00[4];
-    /*0x1D04*/ VecXYZ _1D04;
-    /*0x1D10*/ VecXYZ _1D10;
-    /*0x1D1C*/ VecXYZ _1D1C;
-    /*0x1D28*/ VecXYZ _1D28;
-    /*0x1D34*/ VecXYZ _1D34;
-    /*0x1D40*/ f32 _1D40;
-    /*0x1D44*/ f32 _1D44;
+    union {
+        struct {
+            /*0x1CE8*/ VecXYZ _1CE8;
+            /*0x1CF4*/ VecXYZ _1CF4;
+            /*0x1D00*/ u8 _1D00[4];
+            /*0x1D04*/ VecXYZ _1D04;
+            /*0x1D10*/ VecXYZ _1D10;
+            /*0x1D1C*/ VecXYZ _1D1C;
+            /*0x1D28*/ VecXYZ _1D28;
+            /*0x1D34*/ VecXYZ _1D34;
+            /*0x1D40*/ f32 _1D40;
+            /*0x1D44*/ f32 _1D44;
+        };
+        // Star Dash (rep_3520) keeps each spoke's start and end points here
+        /*0x1CE8*/ VecXYZ starDashSpokes[4][2];
+    };
     /*0x1D48*/ f32 _1D48;
     /*0x1D4C*/ f32* starDashRelated_0_5Or1_5;
     /*0x1D50*/ s16 _1D50;
@@ -2141,11 +2184,17 @@ extern InputStruct g_Controls[];
 
 typedef struct {
     /* 0x0 */ s16 _00;
-    /* 0x2 */ u8 _02;
-    /* 0x3 */ u8 _03;
-    /* 0x4 */ u8 _04;
-    /* 0x5 */ u8 _05;
-    /* 0x6 */ u8 _06;
+    // A five-entry queue: rep_CC8 fills the first free slot, rep_16B8 shifts it
+    union {
+        /* 0x2 */ u8 queue[5];
+        struct {
+            /* 0x2 */ u8 _02;
+            /* 0x3 */ u8 _03;
+            /* 0x4 */ u8 _04;
+            /* 0x5 */ u8 _05;
+            /* 0x6 */ u8 _06;
+        };
+    };
     /* 0x7 */ u8 _07;
     /* 0x8 */ u8 _08;
 } lbl_3_common_bss_32718_struct;
@@ -2268,6 +2317,137 @@ typedef struct {
     /* 0x10 */ u32 _10;
 } trajOptions_s;
 
+typedef struct Unk3090Spline {
+    /* 0x00 */ struct Unk3090CtrlPoint* _00;
+    /* 0x04 */ s32 _04;
+    /* 0x08 */ s32 _08;
+    /* 0x0C */ Vec _0C;
+    /* 0x18 */ struct Unk3090Key* _18;
+    /* 0x1C */ s32 _1C;
+    /* 0x20 */ s32 _20;
+    /* 0x24 */ s32 _24;
+    /* 0x28 */ s32 _28;
+    /* 0x2C */ f32 _2C;
+    /* 0x30 */ s32 _30;
+    /* 0x34 */ s32 _34;
+    /* 0x38 */ s32 _38;
+    /* 0x3C */ s32 _3C;
+    /* 0x40 */ s32 _40;
+    /* 0x44 */ f32 _44;
+} Unk3090Spline; // size: 0x48
+
+typedef struct lbl_3_common_bss_DE94_s2 {
+    /* 0x0000 */ s32* _0000;
+    /* 0x0004 */ s32* _0004;
+    /* 0x0008 */ s32 _0008;
+    /* 0x000C */ s32 _000C;
+    /* 0x0010 */ s32 _0010;
+    /* 0x0014 */ s32 _0014;
+    /* 0x0018 */ s32 _0018;
+    // fn_3_FD51C resets 0x1C to 0x64 as one block
+    union {
+        struct {
+            /* 0x001C */ struct Unk3090CtrlPoint* _001C;
+            /* 0x0020 */ s32 _0020;
+            /* 0x0024 */ u8 _0024[0x34 - 0x24];
+            /* 0x0034 */ struct Unk3090Key* _0034;
+            /* 0x0038 */ s32 _0038;
+            /* 0x003C */ s32 _003C;
+            /* 0x0040 */ u8 _0040[0x44 - 0x40];
+            /* 0x0044 */ s32 _0044;
+            /* 0x0048 */ u8 _0048[0x64 - 0x48];
+        };
+        /* 0x001C */ Unk3090Spline _001C_s;
+    };
+    /* 0x0064 */ Vec _0064;
+    /* 0x0070 */ u8 _0070[0x88 - 0x70];
+    /* 0x0088 */ Vec _0088;
+    /* 0x0094 */ u8 _0094[0x98 - 0x94];
+    /* 0x0098 */ Vec* _0098;
+    /* 0x009C */ struct Unk3090SrcKey* _009C;
+    /* 0x00A0 */ f32 _00A0;
+    /* 0x00A4 */ f32 _00A4;
+    /* 0x00A8 */ f32 _00A8;
+    /* 0x00AC */ Vec _00AC;
+    /* 0x00B8 */ Vec _00B8;
+    /* 0x00C4 */ Vec _00C4;
+    /* 0x00D0 */ Vec _00D0;
+    /* 0x00DC */ Vec _00DC;
+    /* 0x00E8 */ Vec _00E8;
+    /* 0x00F4 */ u8 _00F4[0x100 - 0xF4];
+    /* 0x0100 */ f32 _0100;
+    /* 0x0104 */ f32 _0104;
+    /* 0x0108 */ f32 _0108;
+    /* 0x010C */ f32 _010C;
+    /* 0x0110 */ f32 _0110;
+    /* 0x0114 */ f32 _0114;
+    /* 0x0118 */ u32 _0118;
+    /* 0x011C */ u32 _011C;
+    /* 0x0120 */ s32 _0120;
+    /* 0x0124 */ s32 _0124;
+    /* 0x0128 */ s32 _0128[512];
+    /* 0x0928 */ s32 _0928;
+    /* 0x092C */ s32 _092C;
+    /* 0x0930 */ u8 _0930[0x934 - 0x930];
+    /* 0x0934 */ s32 _0934;
+    /* 0x0938 */ s32 _0938;
+    /* 0x093C */ s32 _093C;
+    /* 0x0940 */ s16 _0940;
+    /* 0x0942 */ s16 _0942;
+    /* 0x0944 */ s16 _0944;
+    /* 0x0946 */ s16 _0946;
+    /* 0x0948 */ s16 _0948;
+    /* 0x094A */ s16 _094A;
+    /* 0x094C */ s16 _094C;
+    /* 0x094E */ s16 _094E;
+    /* 0x0950 */ s16 _0950;
+    /* 0x0952 */ u8 _0952[0x954 - 0x952];
+    /* 0x0954 */ s16 _0954;
+    /* 0x0956 */ s16 _0956;
+    /* 0x0958 */ s16 _0958;
+    /* 0x095A */ s16 _095A;
+    /* 0x095C */ u8 _095C[0x95E - 0x95C];
+    /* 0x095E */ s16 _095E;
+    /* 0x0960 */ s16 _0960;
+    /* 0x0962 */ s16 _0962;
+    /* 0x0964 */ u8 _0964[0x96C - 0x964];
+    /* 0x096C */ s16 _096C[4];
+    /* 0x0974 */ s16 _0974;
+    /* 0x0976 */ s16 _0976;
+    /* 0x0978 */ u8 _0978[0x97C - 0x978];
+    /* 0x097C */ s16 _097C;
+    /* 0x097E */ u8 _097E[0x984 - 0x97E];
+    /* 0x0984 */ s16 _0984;
+    /* 0x0986 */ s16 _0986;
+    /* 0x0988 */ s16 _0988;
+    /* 0x098A */ u8 _098A[0x990 - 0x98A];
+    /* 0x0990 */ struct Unk3090Track* _0990;
+    /* 0x0994 */ u8 _0994[0x99B - 0x994];
+    /* 0x099B */ u8 _099B[4];
+    /* 0x099F */ u8 _099F;
+    /* 0x09A0 */ u8 _09A0[0x9A7 - 0x9A0];
+    /* 0x09A7 */ u8 _09A7;
+    /* 0x09A8 */ u8 _09A8;
+    /* 0x09A9 */ u8 _09A9;
+    /* 0x09AA */ u8 _09AA;
+    /* 0x09AB */ u8 _09AB;
+    /* 0x09AC */ u8 _09AC;
+    /* 0x09AD */ u8 _09AD;
+    /* 0x09AE */ u8 _09AE;
+    /* 0x09AF */ u8 _09AF;
+    /* 0x09B0 */ u8 _09B0;
+    /* 0x09B1 */ u8 _09B1;
+    /* 0x09B2 */ u8 _09B2;
+    /* 0x09B3 */ u8 _09B3;
+    /* 0x09B4 */ u8 _09B4;
+    /* 0x09B5 */ u8 _09B5;
+    /* 0x09B6 */ u8 _09B6;
+    /* 0x09B7 */ u8 _09B7;
+    /* 0x09B8 */ u8 _09B8;
+    /* 0x09B9 */ u8 _09B9;
+    /* 0x09BA */ u8 _09BA[0x9BC - 0x9BA];
+} lbl_3_common_bss_DE94_s2; // size: 0x9BC
+
 typedef struct {
     /* 0x000 */ s16 _0000;
     /* 0x002 */ u16 _0002;
@@ -2302,58 +2482,68 @@ typedef struct {
     /* 0x118 */ s16 _118;
     /* 0x11A */ s16 _11A;
     /* 0x11C */ u8 _11C;
-    artificial_padding(0x11C, 0x1b4, u8);
-    /* 0x1B4 */ void* _1B4;
-    artificial_padding(0x1b4, 0xa50, void*);
-    /* 0xA50 */ int _A50;
-    artificial_padding(0xa50, 0xa74, int);
-    /* 0xA74 */ s16 _A74;
-    /* 0xA76 */ s16 _A76;
-    /* 0xA78 */ s16 _A78;
-    /* 0xA7A */ s16 _A7A;
-    /* 0xA7C */ s16 _A7C;
-    /* 0xA7E */ s16 _A7E;
-    /* 0xA80 */ s16 _A80;
-    /* 0xA82 */ s16 _A82;
-    /* 0xA84 */ s16 _A84[4];
-    /* 0xA8C */ s16 _A8C[4];
-    /* 0xA94 */ s16 _A94;
-    /* 0xA96 */ s16 _A96;
-    /* 0xA98 */ s16 _A98;
-    /* 0xA9A */ s16 _A9A;
-    /* 0xA9C */ s16 _A9C;
-    /* 0xA9E */ s16 _A9E;
-    /* 0xAA0 */ s16 _AA0;
-    /* 0xAA2 */ s16 _AA2;
-    /* 0xAA4 */ s16 _AA4;
-    /* 0xAA6 */ s16 _AA6;
-    /* 0xAA8 */ u16 _AA8;
-    /* 0xAAA */ u16 _AAA;
-    /* 0xAAC */ u16 _AAC;
-    /* 0xAAE */ u16 _AAE;
-    /* 0xAB0 */ void* _AB0;
-    /* 0xAB5 */ u8 _AB4;
-    /* 0xAB5 */ u8 _AB5;
-    /* 0xAB6 */ u8 _AB6;
-    /* 0xAB7 */ u8 _AB7;
-    /* 0xAB8 */ u8 _AB8;
-    /* 0xAB9 */ u8 _AB9;
-    /* 0xABA */ u8 _ABA;
-    /* 0xABB */ u8 _ABB[4];
-    /* 0xABF */ u8 _ABF;
-    /* 0xAC0 */ u8 _AC0[4];
-    /* 0xAC4 */ u8 _AC4;
-    /* 0xAC5 */ u8 _AC5;
-    /* 0xAC6 */ u8 _AC6;
-    artificial_padding(0xac6, 0xac8, u8);
-    /* 0xAC8 */ u8 _AC8;
-    /* 0xAC8 */ u8 _AC9;
-    /* 0xAC8 */ u8 _ACA;
-    artificial_padding(0xaca, 0xad8, u8);
-    /* 0xAD8 */ u8 _AD8;
-    artificial_padding(0xad8, 0x146c, u8);
-    /* 0x146C */ void* _146C;
-    artificial_padding(0x146c, 0x2810, void*);
+    artificial_padding(0x11C, 0x120, u8);
+    // rep_3090 keeps one camera-script block per player here and points lbl_3_common_bss_DE94
+    // at the current one; other units name single fields of the blocks
+    union {
+        struct {
+            u8 __0x1b4padding[0x1B4 - 0x120];
+            /* 0x1B4 */ void* _1B4;
+            artificial_padding(0x1b4, 0xa50, void*);
+            /* 0xA50 */ int _A50;
+            artificial_padding(0xa50, 0xa72, int);
+            /* 0xA72 */ s16 _A72;
+            /* 0xA74 */ s16 _A74;
+            /* 0xA76 */ s16 _A76;
+            /* 0xA78 */ s16 _A78;
+            /* 0xA7A */ s16 _A7A;
+            /* 0xA7C */ s16 _A7C;
+            /* 0xA7E */ s16 _A7E;
+            /* 0xA80 */ s16 _A80;
+            /* 0xA82 */ s16 _A82;
+            /* 0xA84 */ s16 _A84[4];
+            /* 0xA8C */ s16 _A8C[4];
+            /* 0xA94 */ s16 _A94;
+            /* 0xA96 */ s16 _A96;
+            /* 0xA98 */ s16 _A98;
+            /* 0xA9A */ s16 _A9A;
+            /* 0xA9C */ s16 _A9C;
+            /* 0xA9E */ s16 _A9E;
+            /* 0xAA0 */ s16 _AA0;
+            /* 0xAA2 */ s16 _AA2;
+            /* 0xAA4 */ s16 _AA4;
+            /* 0xAA6 */ s16 _AA6;
+            /* 0xAA8 */ u16 _AA8;
+            /* 0xAAA */ u16 _AAA;
+            /* 0xAAC */ u16 _AAC;
+            /* 0xAAE */ u16 _AAE;
+            /* 0xAB0 */ void* _AB0;
+            /* 0xAB5 */ u8 _AB4;
+            /* 0xAB5 */ u8 _AB5;
+            /* 0xAB6 */ u8 _AB6;
+            /* 0xAB7 */ u8 _AB7;
+            /* 0xAB8 */ u8 _AB8;
+            /* 0xAB9 */ u8 _AB9;
+            /* 0xABA */ u8 _ABA;
+            /* 0xABB */ u8 _ABB[4];
+            /* 0xABF */ u8 _ABF;
+            /* 0xAC0 */ u8 _AC0[4];
+            /* 0xAC4 */ u8 _AC4;
+            /* 0xAC5 */ u8 _AC5;
+            /* 0xAC6 */ u8 _AC6;
+            artificial_padding(0xac6, 0xac8, u8);
+            /* 0xAC8 */ u8 _AC8;
+            /* 0xAC8 */ u8 _AC9;
+            /* 0xAC8 */ u8 _ACA;
+            artificial_padding(0xaca, 0xad8, u8);
+            /* 0xAD8 */ u8 _AD8;
+            artificial_padding(0xad8, 0x146c, u8);
+            /* 0x146C */ void* _146C;
+            u8 __0x14a8padding[0x14A8 - 0x1470];
+        };
+        /* 0x120 */ lbl_3_common_bss_DE94_s2 _120[2];
+    };
+    u8 __0x2810padding[0x2810 - 0x14A8];
     /* 0x2810 */ s16 _2810;
     /* 0x2812 */ s16 _2812;
     /* 0x2814 */ s16 _2814;
@@ -2387,6 +2577,7 @@ typedef struct {
     /* 0x28A6 */ u8 _28A6;
     /* 0x28A7 */ u8 _28A7;
     /* 0x28A8 */ u8 _28A8;
+    /* 0x28A9 */ u8 _28A9;
 } inMemCamera;
 
 extern inMemCamera *g_pCamera;
@@ -2415,7 +2606,10 @@ typedef struct {
 } FieldingLogicFielder; // size 0x6
 
 typedef struct {
-    /* 0x00 */ u8 _00[0x14];
+    /* 0x00 */ u8 _00[0x8];
+    /* 0x08 */ f32 _08;
+    /* 0x0C */ s16 _0C;
+    /* 0x0E */ u8 _0E[0x14 - 0xE];
     /* 0x14 */ s16 _14;
     /* 0x16 */ u8 _16[0x1A - 0x16];
     /* 0x1A */ u8 _1A;
@@ -2423,14 +2617,24 @@ typedef struct {
 } FieldingLogicEntry; // size 0x1C
 
 typedef struct {
+    /* 0x0 */ s16 _0;
+    /* 0x2 */ u8 _2;
+} FieldingLogic08C;
+
+typedef struct {
     /* 0x000 */ FieldingLogicEntry _000[4];
-    /* 0x070 */ u8 _070[0x74 - 0x70];
+    /* 0x070 */ FieldingLogicEntry* _070;
     /* 0x074 */ FieldingLogicFielder _074[4];
-    /* 0x08C */ u8 _08C[0x90 - 0x8C];
+    /* 0x08C */ FieldingLogic08C* _08C;
     /* 0x090 */ Vec _090;
     /* 0x09C */ u8 _09C[0xAE - 0x9C];
     /* 0x0AE */ s16 _0AE;
-    /* 0x0B0 */ u8 _0B0[0xBE - 0xB0];
+    /* 0x0B0 */ s16 _0B0;
+    /* 0x0B2 */ s16 _0B2;
+    /* 0x0B4 */ u8 _0B4[0xB8 - 0xB4];
+    /* 0x0B8 */ s16 _0B8;
+    /* 0x0BA */ u8 _0BA[0xBC - 0xBA];
+    /* 0x0BC */ s16 _0BC;
     /* 0x0BE */ s16 _0BE;
     /* 0x0C0 */ u8 _0C0[0xC2 - 0xC0];
     /* 0x0C2 */ s16 _0C2;
@@ -2454,7 +2658,8 @@ typedef struct {
     /* 0x0EC */ s16 _0EC;
     /* 0x0EE */ s16 _0EE;
     /* 0x0F0 */ s16 _0F0;
-    /* 0x0F2 */ u8 _0F2[0xF6 - 0xF2];
+    /* 0x0F2 */ u8 _0F2[0xF4 - 0xF2];
+    /* 0x0F4 */ s16 _0F4;
     /* 0x0F6 */ s16 _0F6;
     /* 0x0F8 */ u8 _0F8[9];
     /* 0x101 */ u8 _101[4];
@@ -2525,10 +2730,8 @@ typedef struct {
     /* 0x145 */ u8 _145;
     /* 0x146 */ u8 _146;
     /* 0x147 */ u8 _147;
-    /* 0x148 */ u8 _148;
-    /* 0x149 */ u8 _149;
-    /* 0x14A */ u8 _14A;
-    /* 0x14B */ u8 _14B;
+    /* 0x148 */ u16 _148;
+    /* 0x14A */ u16 _14A;
     /* 0x14C */ u8 _14C;
     /* 0x14D */ u8 _14D;
     /* 0x14E */ u8 _14E;
@@ -2573,7 +2776,8 @@ typedef struct {
     /* 0x0039 */ u8 _39;
     artificial_padding(0x39, 0x3C, u8);
     /* 0x003C */ u8 _3C;
-    artificial_padding(0x3C, 0x3F, u8);
+    /* 0x003D */ u8 _3D;
+    /* 0x003E */ u8 _3E;
     /* 0x003F */ u8 _3F[2];
     artificial_padding(0x40, 0x44, u8);
     /* 0x0044 */ ReplayState _44;
@@ -2626,84 +2830,6 @@ typedef struct {
 } lbl_3_common_bss_32A94_s; // size: 0x8C
 
 extern lbl_3_common_bss_32A94_s lbl_3_common_bss_32A94;
-
-typedef struct {
-    /* 0x0000 */ s32* _0000;
-    /* 0x0004 */ u8 _0004[0x8 - 0x4];
-    /* 0x0008 */ s32 _0008;
-    /* 0x000C */ u8 _000C[0x14 - 0xC];
-    /* 0x0014 */ s32 _0014;
-    /* 0x0018 */ s32 _0018;
-    /* 0x001C */ struct Unk3090CtrlPoint* _001C;
-    /* 0x0020 */ s32 _0020;
-    /* 0x0024 */ u8 _0024[0x34 - 0x24];
-    /* 0x0034 */ struct Unk3090Key* _0034;
-    /* 0x0038 */ s32 _0038;
-    /* 0x003C */ s32 _003C;
-    /* 0x0040 */ u8 _0040[0x44 - 0x40];
-    /* 0x0044 */ s32 _0044;
-    /* 0x0048 */ u8 _0048[0x64 - 0x48];
-    /* 0x0064 */ Vec _0064;
-    /* 0x0070 */ u8 _0070[0x88 - 0x70];
-    /* 0x0088 */ Vec _0088;
-    /* 0x0094 */ u8 _0094[0x98 - 0x94];
-    /* 0x0098 */ Vec* _0098;
-    /* 0x009C */ struct Unk3090SrcKey* _009C;
-    /* 0x00A0 */ f32 _00A0;
-    /* 0x00A4 */ f32 _00A4;
-    /* 0x00A8 */ f32 _00A8;
-    /* 0x00AC */ Vec _00AC;
-    /* 0x00B8 */ Vec _00B8;
-    /* 0x00C4 */ Vec _00C4;
-    /* 0x00D0 */ Vec _00D0;
-    /* 0x00DC */ Vec _00DC;
-    /* 0x00E8 */ Vec _00E8;
-    /* 0x00F4 */ u8 _00F4[0x100 - 0xF4];
-    /* 0x0100 */ f32 _0100;
-    /* 0x0104 */ f32 _0104;
-    /* 0x0108 */ f32 _0108;
-    /* 0x010C */ f32 _010C;
-    /* 0x0110 */ f32 _0110;
-    /* 0x0114 */ f32 _0114;
-    /* 0x0118 */ u32 _0118;
-    /* 0x011C */ u32 _011C;
-    /* 0x0120 */ u8 _0120[0x124 - 0x120];
-    /* 0x0124 */ s32 _0124;
-    /* 0x0128 */ s32 _0128[512];
-    /* 0x0928 */ s32 _0928;
-    /* 0x092C */ s32 _092C;
-    /* 0x0930 */ u8 _0930[0x938 - 0x930];
-    /* 0x0938 */ s32 _0938;
-    /* 0x093C */ s32 _093C;
-    /* 0x0940 */ s16 _0940;
-    /* 0x0942 */ s16 _0942;
-    /* 0x0944 */ s16 _0944;
-    /* 0x0946 */ s16 _0946;
-    /* 0x0948 */ s16 _0948;
-    /* 0x094A */ u8 _094A[0x94C - 0x94A];
-    /* 0x094C */ s16 _094C;
-    /* 0x094E */ s16 _094E;
-    /* 0x0950 */ s16 _0950;
-    /* 0x0952 */ u8 _0952[0x990 - 0x952];
-    /* 0x0990 */ struct Unk3090Track* _0990;
-    /* 0x0994 */ u8 _0994[0x9A7 - 0x994];
-    /* 0x09A7 */ u8 _09A7;
-    /* 0x09A8 */ u8 _09A8;
-    /* 0x09A9 */ u8 _09A9;
-    /* 0x09AA */ u8 _09AA;
-    /* 0x09AB */ u8 _09AB;
-    /* 0x09AC */ u8 _09AC;
-    /* 0x09AD */ u8 _09AD;
-    /* 0x09AE */ u8 _09AE;
-    /* 0x09AF */ u8 _09AF;
-    /* 0x09B0 */ u8 _09B0;
-    /* 0x09B1 */ u8 _09B1;
-    /* 0x09B2 */ u8 _09B2[0x9B4 - 0x9B2];
-    /* 0x09B4 */ u8 _09B4;
-    /* 0x09B5 */ u8 _09B5;
-    /* 0x09B6 */ u8 _09B6;
-    /* 0x09B7 */ u8 _09B7;
-} lbl_3_common_bss_DE94_s2;
 
 typedef struct {
     lbl_3_common_bss_DE94_s2* _0000;

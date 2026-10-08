@@ -3,6 +3,8 @@
 
 #include "mssbTypes.h"
 
+struct UnkMgEntry3310;
+
 void fn_3_141C8C(void);
 void fn_3_141F30(void);
 void fn_3_142030(void);
@@ -17,7 +19,7 @@ void fn_3_142DB4(void);
 void fn_3_1430D0(void);
 void fn_3_143358(void);
 void fn_3_143714(void);
-void fn_3_143770(void);
+void fn_3_143770(struct UnkMgEntry3310* entry);
 void fn_3_1439EC(void);
 void fn_3_143FAC(void);
 void fn_3_14402C(void);

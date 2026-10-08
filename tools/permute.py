@@ -10,6 +10,10 @@
 #   python3 tools/permute.py <function>
 #   then run the command it prints, e.g.
 #   (cd ~/.local/share/decomp-permuter && .venv/bin/python permuter.py nonmatchings/<function> -j 8 --stop-on-zero)
+#   python3 tools/permute.py <function> --best   # its best result so far
+#
+# --best prints the output folder with the lowest score and the source change
+# the permuter made there (its diff.txt), while the run goes on or after it.
 #
 # The permuter is found in $PERMUTER_DIR (default ~/.local/share/decomp-permuter).
 # Its import.py is not used: on macOS it needs Homebrew GCC's cpp, and its
@@ -143,12 +147,36 @@ def write_compile_script(path: str, flags: List[str]) -> None:
     os.chmod(path, 0o755)
 
 
+def best(out_dir: str, max_lines: int = 80) -> int:
+    scores = []
+    for d in os.listdir(out_dir) if os.path.isdir(out_dir) else []:
+        m = re.match(r"output-(\d+)-(\d+)$", d)
+        if m:
+            scores.append((int(m.group(1)), int(m.group(2)), d))
+    if not scores:
+        print(f"no output folders in {out_dir} yet")
+        return 1
+    score, _, d = min(scores)
+    print(f"best: {os.path.join(out_dir, d)} (score {score}; {len(scores)} output folders)")
+    diff = os.path.join(out_dir, d, "diff.txt")
+    if os.path.exists(diff):
+        with open(diff) as f:
+            lines = f.read().splitlines()
+        print("\n".join(lines[:max_lines]))
+        if len(lines) > max_lines:
+            print(f"... {len(lines) - max_lines} more lines in {diff}")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Set up decomp-permuter for one function.")
     parser.add_argument("unit", help="unit name, source path or basename, or a function name")
     parser.add_argument("function", nargs="?", help="function to permute")
     parser.add_argument("-o", "--out", help="output directory (default: <permuter>/nonmatchings/<function>)")
+    parser.add_argument("--best", action="store_true", help="print the best result so far instead of setting up")
     args = parser.parse_args()
+    if args.best:
+        return best(args.out or os.path.join(permuter_dir, "nonmatchings", args.function or args.unit))
 
     if not os.path.exists(os.path.join(permuter_dir, "permuter.py")):
         raise match.UsageError(

@@ -2765,7 +2765,6 @@ void fn_3_14B248(PathEmitter3880* emitter, Particle3880* p) {
 }
 
 // .text:0x0014AC40 size:0x608 mapped:0x80789CD4
-// 99.91%: FPRs differ in the fabs() steps
 BOOL fn_3_14AC40(Emitter3880* emitter) {
     PathEmitter3880* self = (PathEmitter3880*)emitter;
     Particle3880* p;
@@ -3048,7 +3047,7 @@ void fn_3_148EF0(Particle3880* p, f32 angle) {
 }
 
 // .text:0x0014841C size:0xAD4 mapped:0x807874B0
-// 99.94%: the int-to-float temporaries of the inlined fn_3_148FD0 take other stack slots
+// 99.96%: the int-to-float temporaries of the inlined fn_3_148FD0 take other stack slots
 BOOL fn_3_14841C(Emitter3880* emitter) {
     PlayerEmitter3880* self = (PlayerEmitter3880*)emitter;
     Particle3880* p = self->base.particles;

@@ -5,7 +5,9 @@
 #   1. rebases the branch onto the integration branch if that has moved, and
 #      stops on a conflict;
 #   2. checks the worker's worktree: nothing uncommitted, check_symbols.py,
-#      check_prototypes.py and regress.py against the integration branch; it
+#      check_prototypes.py, check_notes.py (two workers can add the same
+#      lesson, and the notes' union merge keeps both) and regress.py against
+#      the integration branch; it
 #      also lists the commits, the changed files, each changed unit's
 #      summary and any added line a reviewer should look at (inline asm,
 #      pragmas, m2c leftovers);
@@ -38,8 +40,9 @@ import regress  # noqa: E402
 import worktree  # noqa: E402
 
 EXIT_OK, EXIT_FAILED, EXIT_CONFLICT, EXIT_USAGE = 0, 1, 2, 3
-# Added lines a reviewer should see: compiler steering and m2c leftovers
-REVIEW = re.compile(r"^\+.*(\basm\b|#pragma|\(long long\)|\bM2C_|__declspec|\bvolatile\b)")
+# Added lines a reviewer should see: compiler steering and m2c leftovers, in
+# code rather than in a // comment ("the volatile registers differ")
+REVIEW = re.compile(r"^\+(?:(?!//).)*(\basm\b|#pragma|\(long long\)|\bM2C_|__declspec|\bvolatile\b)")
 SUMMARY = re.compile(r"^(regress|build|objdiff|strict)|DROPPED|LOST|\bgone\b")
 
 
@@ -93,7 +96,7 @@ def check(branch: str, checkout: str, into: str) -> bool:
     files = regress.git("diff", "--name-only", f"{fork}..HEAD", cwd=checkout).split()
     print(f"files changed: {' '.join(files) or 'none'}")
 
-    for script, args in (("check_symbols.py", ()), ("check_prototypes.py", ())):
+    for script, args in (("check_symbols.py", ()), ("check_prototypes.py", ()), ("check_notes.py", ())):
         code, output = run_tool(checkout, script, *args)
         last = output.splitlines()[-1] if output else ""
         print(last if code == 0 else f"FAILED: {script}\n{output}")

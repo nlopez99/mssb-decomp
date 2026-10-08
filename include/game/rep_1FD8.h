@@ -2,29 +2,38 @@
 #define __GAME_rep_1FD8_H_
 
 #include "mssbTypes.h"
+#include "Dolphin/mtx.h"
 
+struct StadiumObjectCollision;
+struct StadiumModel1D58;
+struct Rep1FD8Particle;
+struct Rep1FD8Spawner;
+struct Rep1FD8Draw;
+
+void fn_3_C1964(void);
+void fn_3_C1974(u8* stadium);
 void fn_3_C19C8(void);
 void fn_3_C1C18(void);
 void fn_3_C2244(void);
-void fn_3_C2310(void);
+void fn_3_C2310(struct StadiumModel1D58* model, Mtx view);
 void fn_3_C23E0(void);
 void fn_3_C24A0(void);
 void fn_3_C2644(void);
 void fn_3_C2974(void);
 void fn_3_C298C(void);
-void fn_3_C2AA0(void);
-void fn_3_C2C80(void);
-void fn_3_C2EDC(void);
-void fn_3_C30F0(void);
-void fn_3_C366C(void);
+u8 fn_3_C2AA0(Vec* pos, f32 width, f32 height);
+void fn_3_C2C80(struct Rep1FD8Particle* p, struct Rep1FD8Spawner* spawner);
+void fn_3_C2EDC(struct Rep1FD8Particle* p);
+BOOL fn_3_C30F0(struct Rep1FD8Spawner* spawner);
+void fn_3_C366C(struct Rep1FD8Spawner* spawner, u8 idx);
 void fn_3_C39C8(void);
 void fn_3_C3A38(void);
 void fn_3_C3C2C(void);
-void fn_3_C3E94(void);
-void fn_3_C3F70(void);
-void fn_3_C4068(void);
-void fn_3_C40EC(void);
-void fn_3_C414C(void);
+void fn_3_C3E94(Vec* pos, s32 i);
+void fn_3_C3F70(struct Rep1FD8Draw* draw);
+void fn_3_C4068(struct Rep1FD8Draw* draw);
+void fn_3_C40EC(struct Rep1FD8Draw* draw);
+void fn_3_C414C(s32 idx);
 void fn_3_C42A4(void);
 void fn_3_C444C(void);
 void fn_3_C4724(void);
@@ -36,18 +45,18 @@ void fn_3_C5304(void);
 void fn_3_C54D0(void);
 void fn_3_C56E8(void);
 void fn_3_C597C(void);
-void fn_3_C5CE0(void);
+BOOL fn_3_C5CE0(struct Rep1FD8Draw* draw);
 void fn_3_C5DDC(void);
 void fn_3_C625C(void);
 void fn_3_C63D0(void);
 void fn_3_C71CC(void);
-void fn_3_C7444(void);
+void fn_3_C7444(struct Rep1FD8Draw* draw);
 void fn_3_C749C(void);
 void fn_3_C75B8(void);
 void fn_3_C77AC(void);
 void fn_3_C7A0C(void);
 void fn_3_C805C(void);
-void fn_3_C823C(void);
+struct StadiumObjectCollision* fn_3_C823C(s32 idx, MtxPtr mtx);
 void fn_3_C82B4(void);
 void fn_3_C8650(void);
 

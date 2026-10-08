@@ -4,6 +4,8 @@
 #include "static/UnknownHomes_Static.h"
 #include "game/rep_3090.h"
 #include "game/rep_1838.h"
+#include "game/rep_D0.h"
+#include "game/rep_140.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/rand.h"
 
@@ -48,7 +50,25 @@ typedef struct {
     /* 0x2C */ f32 min;
 } lbl_3_data_1348_s;
 
-extern u32 lbl_3_bss_44;
+// .bss statics are laid out in reverse declaration order; nothing reads 0x40 or 0x48
+static u8 lbl_3_bss_48[0x50];
+static u32 lbl_3_bss_44;
+static u8 lbl_3_bss_40[4];
+extern s32 fn_800527BC(void);
+
+extern struct {
+    /* 0x0 */ u8 _0[0x5];
+    /* 0x5 */ u8 _5;
+} g_UnkSimulation_31AC0;
+
+typedef struct {
+    /* 0x000 */ u8 _000[0x25C];
+    /* 0x25C */ u8 _25C;
+} Unk720Replay;
+
+extern struct {
+    /* 0x0 */ Unk720Replay* _0;
+} lbl_3_common_bss_1323C;
 
 s16 lbl_3_data_A38[2] = { 1, 2 };
 u8 lbl_3_data_A3C[2] = { 25, 45 };
@@ -213,8 +233,69 @@ inline void fn_3_17B2C_inline(lbl_3_data_A40_s* p) {
 }
 
 // .text:0x0001CE90 size:0x9DC mapped:0x8065BF24
+// 99.91%: the inlined fn_3_166F4 and fn_3_17110 swap f28/f29/f30, as in fn_3_1850C
 void fn_3_1CE90(void) {
-    return;
+    g_pCamera = &g_Camera;
+    if (g_GameLogic.gameStatus == GAME_STATUS_DEFAULT || g_GameLogic.gameStatus == GAME_STATUS_TRANSITION_PREPARE_NEXT_PLAY) {
+        fn_3_1CBCC();
+    }
+restart:
+    g_pCamera->_28A8 = fn_800527BC();
+    if (g_pCamera->_28A8 > 2) {
+        g_pCamera->_28A8 = 2;
+    }
+    while (g_pCamera->_28A8 != 0) {
+        g_pCamera->_28A8 -= g_pCamera->_28A8 != 0;
+        lbl_3_common_bss_DE94._0000 = &g_pCamera->_120[g_pCamera->_28A8];
+        if (lbl_3_common_bss_DE94._0000->_09AB != 0) {
+            fn_3_FD670();
+            if (g_pCamera->_28A9 == 1) {
+                g_pCamera->_28A9 = 0;
+                goto restart;
+            }
+        } else if (g_GameLogic.gameStatus >= 0x1B && g_GameLogic.gameStatus <= 0x21) {
+            fn_3_166F4();
+        } else if (g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_NONE ||
+                   g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_TOY_FIELD || g_GameLogic.secondaryGameMode == 15 ||
+                   g_GameLogic.secondaryGameMode == 16) {
+            fn_3_1850C();
+        } else if (g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_PRACTICE_MENU) {
+            fn_3_166F4();
+        } else if (g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_BOBOMB_DERBY ||
+                   g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_WALLBALL ||
+                   g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_BARREL_BATTER ||
+                   g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_CHAINCHOMP_SPRINT ||
+                   g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_STAR_DASH ||
+                   g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_0x9 ||
+                   g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_PIRANHA_PANIC) {
+            fn_3_1850C();
+        } else if (g_GameLogic.secondaryGameMode == 14) {
+            fn_3_17110();
+        } else if (g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_PRACTICE_PITCHING ||
+                   g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_PRACTICE_BATTING ||
+                   g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_PRACTICE_FIELDING) {
+            fn_3_1850C();
+            if (g_Practice.instructionNumber >= 0) {
+                fn_3_17760();
+            } else {
+                g_Camera._2818 = 0;
+            }
+        } else {
+            fn_3_17804();
+        }
+        fn_3_1CAC0();
+        if (g_GameLogic.sceneID == SCENE_ID_LIVE_BALL) {
+            g_UNK_StadiumDetails._774 = 1;
+        } else {
+            g_UNK_StadiumDetails._774 = 0;
+        }
+    }
+    if (g_Stats.replayInd != 0 && g_Stats._3C != 12) {
+        fn_3_15A98();
+    }
+    if (g_Stats._37 != 0) {
+        fn_3_15524();
+    }
 }
 
 // .text:0x0001CCC8 size:0x1C8 mapped:0x8065BD5C
@@ -716,8 +797,18 @@ void fn_3_1AE44(u8 arg4, u16 arg5, f32 arg1, f32 arg2, f32 arg3) {
 }
 
 // .text:0x00019FA4 size:0xEA0 mapped:0x80659038
+// 97.38%: the point copy and the inlined fn_3_19B3C differ in registers, and the
+// zoom lerp loads lbl_3_data_A40[]._0C and the int-to-float constant differently
 void fn_3_19FA4(void) {
-    int r31;
+    VecXYZ points[5];
+    VecXZ keys[5];
+    VecXZ out;
+    s32 i;
+    int dur;
+    int sum;
+    f32 t;
+    f32 zoom;
+
     if (g_pCamera->_000E < S16_MAX - 1) {
         g_pCamera->_000E++;
     } else {
@@ -728,18 +819,17 @@ void fn_3_19FA4(void) {
     }
 
     if (g_pCamera->_0014 == 0) {
-        r31 = g_pCamera->_000A[g_pCamera->_0013];
-        if (g_pCamera->_000E > r31) {
+        dur = g_pCamera->_000A[g_pCamera->_0013];
+        if (g_pCamera->_000E > dur) {
             g_pCamera->_000E = 1;
             g_pCamera->_0013++;
-            r31 = g_pCamera->_000A[(u8)g_pCamera->_0013];
+            dur = g_pCamera->_000A[(u8)g_pCamera->_0013];
             if (g_pCamera->_0013 >= g_pCamera->_0012 - 1) {
                 g_pCamera->_0014 = 1;
             }
         }
     }
-    if (g_pCamera->_0014 != 0)
-    {
+    if (g_pCamera->_0014 != 0) {
         f32 f28;
         lbl_3_data_A40_s* p = &lbl_3_data_A40[g_pCamera->_0004[g_pCamera->_0013]];
         VEC_COPY(&g_pCamera->_2858, &p->_00);
@@ -762,20 +852,108 @@ void fn_3_19FA4(void) {
             fn_3_1C8AC_inline(&v, _f31, _f6);
         }
     } else if (g_pCamera->_0015 != 0) {
-        int i;
-        int r9;
-        Vec sp50[5];
         for (i = 0; i < g_pCamera->_0012; i++) {
-            VEC_COPY(&sp50[i], &lbl_3_data_A40[i]._00);
+            lbl_3_data_A40_s* p = &lbl_3_data_A40[g_pCamera->_0004[i]];
+            VEC_COPY(&points[i], &p->_00);
         }
-        r9 = 0;
+        sum = 0;
+        for (i = 0; i < g_pCamera->_0012 - 1; i++) {
+            sum += g_pCamera->_000A[i];
+        }
+        t = (f32)g_pCamera->_0010 / (f32)sum;
+        fn_3_28E4((Vec*)&g_pCamera->_2858, (Vec*)points, g_pCamera->_0012, t);
+
+        keys[0].z = 0.0f;
+        sum = 0;
+        for (i = 1; i < g_pCamera->_0012; i++) {
+            sum += g_pCamera->_000A[i - 1];
+            keys[i].z = sum;
+        }
+        fn_3_19B3C(0, &points[0].x);
         for (i = 0; i < g_pCamera->_0012; i++) {
-            r9 += g_pCamera->_000A[i];
+            keys[i].x = (&points[0].x)[i];
         }
-        
-        // fn_3_28E4();
+        running_roundBasePosition(t, &out, keys, g_pCamera->_0012);
+        g_pCamera->_2870 = fn_3_9FDD8(out.x);
+
+        fn_3_19B3C(1, &points[0].x);
+        for (i = 0; i < g_pCamera->_0012; i++) {
+            keys[i].x = (&points[0].x)[i];
+        }
+        running_roundBasePosition(t, &out, keys, g_pCamera->_0012);
+        g_pCamera->_2874 = fn_3_9FDD8(out.x);
+
+        zoom = lbl_3_data_A40[g_pCamera->_0004[g_pCamera->_0013]]._0C;
+        g_pCamera->_2878 = (f32)g_pCamera->_000E * (lbl_3_data_A40[g_pCamera->_0004[g_pCamera->_0013 + 1]]._0C - zoom) / (f32)dur + zoom;
+        {
+            Vec v;
+            f32 _f30 = fn_3_9FEA8(g_pCamera->_2874);
+            f32 f30 = COSF(_f30) * 20.f;
+            f32 _f29 = SINF(_f30);
+
+            f32 _f28 = fn_3_9FEA8(g_pCamera->_2870);
+            f32 _f31 = COSF(_f28);
+            f32 _f6 = SINF(_f28);
+
+            v.x = _f31 * f30;
+            v.z = _f6 * f30;
+            v.y = _f29 * 20.f;
+            fn_3_1C8AC_inline(&v, _f31, _f6);
+        }
+        g_pCamera->_289C = radToShortAngle(g_pCamera->_2870);
+        g_pCamera->_289E = fn_3_9FF04(g_pCamera->_2874);
+        if (g_pCamera->_0010 < S16_MAX - 1) {
+            g_pCamera->_0010++;
+        } else {
+            g_pCamera->_0010 = S16_MAX;
+        }
+    } else {
+        lbl_3_data_A40_s* from = &lbl_3_data_A40[g_pCamera->_0004[g_pCamera->_0013]];
+        lbl_3_data_A40_s* to = &lbl_3_data_A40[g_pCamera->_0004[g_pCamera->_0013 + 1]];
+        f32 angle;
+        f32 diff;
+
+        g_pCamera->_2858.x = (f32)g_pCamera->_000E * (to->_00.x - from->_00.x) / (f32)dur + from->_00.x;
+        g_pCamera->_2858.y = (f32)g_pCamera->_000E * (to->_00.y - from->_00.y) / (f32)dur + from->_00.y;
+        g_pCamera->_2858.z = (f32)g_pCamera->_000E * (to->_00.z - from->_00.z) / (f32)dur + from->_00.z;
+        for (i = 0; i < 2; i++) {
+            angle = shortAngleToRad_Capped(from->_10[i]);
+            diff = shortAngleToRad_Capped(to->_10[i]) - angle;
+            if (diff > 3.1415927f) {
+                diff = -(6.2831855f - diff);
+            }
+            if (diff < -3.1415927f) {
+                diff += 6.2831855f;
+            }
+            diff = diff * (f32)g_pCamera->_000E / (f32)dur;
+            if (i == 0) {
+                g_pCamera->_2870 = diff + angle;
+                g_pCamera->_2870 = fn_3_9FEA8(g_pCamera->_2870);
+            } else {
+                g_pCamera->_2874 = diff + angle;
+                g_pCamera->_2874 = fn_3_9FEA8(g_pCamera->_2874);
+            }
+        }
+        zoom = from->_0C;
+        g_pCamera->_2878 = (f32)g_pCamera->_000E * (to->_0C - zoom) / (f32)dur + zoom;
+        {
+            Vec v;
+            f32 _f30 = fn_3_9FEA8(g_pCamera->_2874);
+            f32 f30 = COSF(_f30) * 20.f;
+            f32 _f29 = SINF(_f30);
+
+            f32 _f28 = fn_3_9FEA8(g_pCamera->_2870);
+            f32 _f31 = COSF(_f28);
+            f32 _f6 = SINF(_f28);
+
+            v.x = _f31 * f30;
+            v.z = _f6 * f30;
+            v.y = _f29 * 20.f;
+            fn_3_1C8AC_inline(&v, _f31, _f6);
+        }
+        g_pCamera->_289C = radToShortAngle(g_pCamera->_2870);
+        g_pCamera->_289E = fn_3_9FF04(g_pCamera->_2874);
     }
-    cos(r31);
 }
 
 // .text:0x00019CB0 size:0x2F4 mapped:0x80658D44
@@ -837,7 +1015,7 @@ void fn_3_19CB0(s16 arg) {
 
 // .text:0x00019B3C size:0x174 mapped:0x80658BD0
 void fn_3_19B3C(int arg, f32* arg2) {
-    int sp8[4];
+    int sp8[3];
     int i;
     
     for (i = 0; i < g_pCamera->_0012; i++) {
@@ -959,8 +1137,8 @@ void fn_3_193E8(void) {
         d = f->min;
     }
     
-    d3 = d - f->max;
-    d3 /= (f->min - f->max);
+    d -= f->max;
+    d3 = d / (f->min - f->max);
     if (g_Ball.fielderWBallIndex >= 0) {
         min = f->min2;
         max = f->max2;
@@ -1108,13 +1286,166 @@ void fn_3_18FF8(void) {
 }
 
 // .text:0x0001850C size:0xAEC mapped:0x806575A0
+// 99.94%: the inlined fn_3_16900 and fn_3_1785C swap f28/f29/f30; fn_3_17DA0
+// matched once its copy of that camera code was written out with its own locals
 void fn_3_1850C(void) {
-    return;
+    u8 status = g_GameLogic.gameStatus;
+
+    if (status == GAME_STATUS_MVP_END_GAME || status == GAME_STATUS_MINIGAME_POST_MENU || status == GAME_STATUS_0x26 ||
+        status == GAME_STATUS_0x24 || status == GAME_STATUS_0x27) {
+        fn_3_16900();
+    } else if (status == GAME_STATUS_LOAD_GAME) {
+        g_GameLogic.sceneID = SCENE_ID_0;
+        g_GameLogic._106 = -1;
+        g_GameLogic.bOD_framesInLiveBallScene = -1;
+        g_pCamera->_28A0 = 0;
+    } else if (status == GAME_STATUS_GAME_START_MOVIE) {
+        fn_3_16328();
+        g_GameLogic.sceneID = SCENE_ID_0;
+        g_GameLogic._106 = -1;
+        g_GameLogic.bOD_framesInLiveBallScene = -1;
+        g_pCamera->_28A0 = 0;
+    } else if (status == GAME_STATUS_INNING_TRANSITION) {
+        fn_3_161C0();
+        g_GameLogic.sceneID = SCENE_ID_0;
+        g_GameLogic._106 = -1;
+        g_GameLogic.bOD_framesInLiveBallScene = -1;
+        g_pCamera->_28A0 = 0;
+    } else if (status == GAME_STATUS_END_OF_GAME) {
+        fn_3_16058();
+        g_GameLogic.sceneID = SCENE_ID_0;
+        g_GameLogic._106 = -1;
+        g_GameLogic.bOD_framesInLiveBallScene = -1;
+        g_pCamera->_28A0 = 0;
+    } else if (status == GAME_STATUS_TRANSITION_PREPARE_NEXT_PLAY || status == GAME_STATUS_PAUSED || status == GAME_STATUS_0xC) {
+        g_GameLogic.sceneID = SCENE_ID_0;
+        g_GameLogic._106 = -1;
+        g_GameLogic.bOD_framesInLiveBallScene = -1;
+        g_pCamera->_28A0 = 0;
+    } else if (lbl_3_common_bss_1323C._0->_25C != 0) {
+        fn_3_16014();
+        g_GameLogic.sceneID = SCENE_ID_0;
+        g_GameLogic._106 = -1;
+        g_GameLogic.bOD_framesInLiveBallScene = -1;
+        g_pCamera->_28A0 = 0;
+    } else if (g_Stats.replayInd != 0 && g_Stats._3C != 12 && g_Stats._3C != 1) {
+        fn_3_15F38();
+        g_GameLogic.sceneID = SCENE_ID_0;
+        g_GameLogic._106 = -1;
+        g_GameLogic.bOD_framesInLiveBallScene = -1;
+        g_pCamera->_28A0 = 0;
+    } else if (g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_WALLBALL ||
+               g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_CHAINCHOMP_SPRINT ||
+               g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_PIRANHA_PANIC ||
+               g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_STAR_DASH ||
+               g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_0x9 ||
+               g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_BARREL_BATTER) {
+        fn_3_1785C();
+    } else {
+        fn_3_17DA0();
+    }
 }
 
 // .text:0x00017DA0 size:0x76C mapped:0x80656E34
 void fn_3_17DA0(void) {
-    return;
+    f32 _f31;
+    f32 f30;
+    f32 _f30;
+    f32 _f29;
+    f32 _f28;
+    f32 _f6;
+    Vec v;
+    int star;
+    u8 frames;
+
+    if (g_GameLogic.gameStatus == GAME_STATUS_AT_BAT || g_GameLogic.gameStatus == GAME_STATUS_DEFAULT ||
+        g_GameLogic.gameStatus == GAME_STATUS_TRANSITION_PREPARE_NEXT_PLAY) {
+        g_GameLogic.sceneID = SCENE_ID_AT_BAT;
+        if (g_Stats.replayInd != 0 && (g_Stats._3C == 12 || g_Stats._3C == 1) && g_Stats._3E != 0) {
+            g_GameLogic.sceneID = SCENE_ID_REPLAY_AT_BAT;
+        }
+    } else if (g_GameLogic.gameStatus == GAME_STATUS_LIVE_BALL) {
+        star = 0;
+        if (g_Ball.currentStarSwing != 0) {
+            star = 1;
+        }
+        if (g_FieldingLogic._107 != 0) {
+            g_GameLogic.sceneID = SCENE_ID_LIVE_BALL;
+        } else {
+            frames = lbl_3_data_A3C[star];
+            if (g_Ball.framesSinceHit < frames) {
+                g_GameLogic.sceneID = SCENE_ID_AT_BAT;
+                if (g_Stats.replayInd != 0 && (g_Stats._3C == 12 || g_Stats._3C == 1) && g_Stats._3E != 0) {
+                    g_GameLogic.sceneID = SCENE_ID_REPLAY_AT_BAT;
+                }
+                if (g_Ball.framesSinceHit == frames - 4) {
+                    g_UnkSimulation_31AC0._5 = 1;
+                }
+            } else {
+                g_GameLogic.sceneID = SCENE_ID_LIVE_BALL;
+                if (g_Stats.replayInd != 0 && (g_Stats._3C == 12 || g_Stats._3C == 1) && g_Stats._3E != 0) {
+                    g_GameLogic.sceneID = SCENE_ID_REPLAY_LIVE_BALL;
+                }
+            }
+        }
+    }
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD && g_Minigame._19CE != 0) {
+        if (g_Minigame._19BA == 1) {
+            fn_3_FBDAC(0x67);
+        }
+        return;
+    }
+    if (g_GameLogic.sceneID == SCENE_ID_AT_BAT || g_GameLogic.sceneID == SCENE_ID_REPLAY_AT_BAT) {
+        if (g_GameLogic.sceneID == SCENE_ID_REPLAY_AT_BAT) {
+            if (g_pCamera->_28A0 == 0) {
+                g_pCamera->_0000 = random_fn_3_9EE24(4) + 0x4d;
+            }
+        } else {
+            g_pCamera->_0000 = g_pCamera->_28A7;
+        }
+        fn_3_17B2C_inline(&lbl_3_data_A40[g_pCamera->_0000]);
+
+        _f30 = shortAngleToRad_Capped(g_pCamera->_289E);
+        f30 = COSF(_f30) * 20.f;
+        _f29 = SINF(_f30);
+
+        _f28 = shortAngleToRad_Capped(g_pCamera->_289C);
+        _f31 = COSF(_f28);
+        _f6 = SINF(_f28);
+
+        v.x = _f31 * f30;
+        v.z = _f6 * f30;
+        v.y = _f29 * 20.f;
+        fn_3_1C8AC_inline(&v, _f31, _f6);
+
+        if (g_GameLogic._106 < S16_MAX - 1) {
+            g_GameLogic._106++;
+        } else {
+            g_GameLogic._106 = S16_MAX;
+        }
+        g_GameLogic.bOD_framesInLiveBallScene = -1;
+        g_pCamera->_283E = 0;
+        if (g_pCamera->_28A0 < S16_MAX - 1) {
+            g_pCamera->_28A0++;
+        } else {
+            g_pCamera->_28A0 = S16_MAX;
+        }
+    } else if (g_GameLogic.sceneID == SCENE_ID_LIVE_BALL || g_GameLogic.sceneID == SCENE_ID_REPLAY_LIVE_BALL) {
+        if (g_Minigame.GameMode_MiniGame == 1) {
+            fn_3_16F04();
+        } else {
+            fn_3_17AF0();
+        }
+        if (g_GameLogic.bOD_framesInLiveBallScene < S16_MAX - 1) {
+            g_GameLogic.bOD_framesInLiveBallScene++;
+        } else {
+            g_GameLogic.bOD_framesInLiveBallScene = S16_MAX;
+        }
+        g_GameLogic._106 = -1;
+        g_pCamera->_28A0 = 0;
+    } else {
+        g_pCamera->_28A0 = 0;
+    }
 }
 
 // .text:0x00017B2C size:0x274 mapped:0x80656BC0

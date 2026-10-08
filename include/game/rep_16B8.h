@@ -18,7 +18,7 @@ void fn_3_91FC4(void);
 void fn_3_92CD8(void);
 void fn_3_933CC(void);
 void fn_3_93544(void);
-void fn_3_93688(void);
+void fn_3_93688(struct UnkTask1770* task);
 void fn_3_93960(void);
 void fn_3_93D5C(void);
 void fn_3_9413C(void);

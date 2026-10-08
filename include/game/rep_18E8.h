@@ -3,7 +3,7 @@
 
 #include "mssbTypes.h"
 
-void fn_3_A009C(void);
+void fn_3_A009C(s32 fielder);
 s32 fn_3_A1D04(void);
 BOOL fn_3_A1DA0(void);
 BOOL fn_3_A1F3C(void);
@@ -54,7 +54,7 @@ void fn_3_A9354(s32 fielder, s32 mode);
 void fn_3_A96FC(s32 fielder);
 void fn_3_A9984(s32 fielder);
 void fn_3_A9C74(s32 fielder);
-void fn_3_A9D20(void);
+void fn_3_A9D20(s32 fielder);
 void fn_3_AAA3C(s32 fielder);
 BOOL fn_3_AABF8(void);
 void fn_3_AAC84(f32* x, f32* z);

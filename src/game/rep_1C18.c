@@ -7,7 +7,7 @@ void fn_3_B5D78(void) {
 }
 
 // .text:0x000B5D4C size:0x2C mapped:0x806F4DE0
-void fn_3_B5D4C(void) {
+void fn_3_B5D4C(int type) {
     return;
 }
 
