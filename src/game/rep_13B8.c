@@ -111,7 +111,6 @@ extern s16 lbl_3_data_21904[12];
 extern f32 lbl_3_data_2191C[2];
 
 // .text:0x0008A958 size:0x73C mapped:0x806C99EC
-// 99.61%: only the inlined fn_3_8A618 loop differs, with r5 and r6 swapped as in fn_3_8A618
 void fn_3_8A958(void) {
     int i;
 
@@ -144,10 +143,10 @@ void fn_3_8A7B4(void) {
 }
 
 // .text:0x0008A618 size:0x19C mapped:0x806C96AC
-// 97.94%: the loop's constants 0 and 1 are in swapped registers (r6 and r0 in the target)
+// 96.50%: the loop's registers rotate (the target has g_Runners in r5, _107 in r4, 0 in r6, 1 in r0);
+// its copy inlined in fn_3_8A958 matches. Reading _107 into a local first scores 97.94% here but not there.
 void fn_3_8A618(void) {
     int i;
-    u8 steal;
 
     if (g_GameLogic.gameStatus == 2 && g_GameLogic.FrameCountOfCurrentPitch < g_RunningLogic._14 &&
         g_GameLogic.secondaryGameMode != 14 && g_FieldingLogic._107 == 0) {
@@ -161,11 +160,10 @@ void fn_3_8A618(void) {
     } else {
         fn_3_83714();
     }
-    steal = g_FieldingLogic._107;
     for (i = 0; i < 4; i++) {
         if (g_Runners[i].runnerOnFieldOrOutOrScored != 0) {
-            if (steal == 1 && g_Runners[i].stealingStatus != 0 && g_Runners[i].rosterID >= 0) {
-                g_Runners[i].runningDirectionDesired = 1;
+            if (g_FieldingLogic._107 == 1 && g_Runners[i].stealingStatus != 0) {
+                fn_3_7FEA8(i, 1);
             }
             g_Runners[i].stealingStatus = 0;
         }
