@@ -161,6 +161,11 @@ static inline UnkSprite3A48* getSprite(UnkTask3A48* task, s32 i) {
     s32 idx = task->_14 + i;
     return lbl_80371C30[idx]._00;
 }
+static inline u32 getFrame(UnkTask3A48* task, s32 i) {
+    i += task->_14;
+    return lbl_80371C30[i]._00->_5C >> 16;
+}
+
 static inline BOOL isAnimDone(UnkSprite3A48* sprite) {
     return sprite->_69 == 2 ? TRUE : FALSE;
 }
@@ -564,8 +569,6 @@ void fn_3_159590(void) {
 }
 
 // .text:0x00159114 size:0x47C mapped:0x807981A8
-// 99.83%: in the block after the state chain, the target loads g_Minigame._19E8[0]._0 into r6
-// and the sprite index into r0; this build swaps those registers.
 void fn_3_159114(void) {
     UnkTask3A48* task = lbl_803CC1B8;
     s32 done;
@@ -617,7 +620,7 @@ void fn_3_159114(void) {
         }
     }
     if (g_Minigame._19DA[0] >= 0) {
-        if (g_Minigame._19E8[0]._0 != (getSprite(task, 13)->_5C >> 16)) {
+        if (g_Minigame._19E8[0]._0 != getFrame(task, 13)) {
             getSprite(task, 8)->_5C = 0;
             getSprite(task, 9)->_5C = 0;
         }
