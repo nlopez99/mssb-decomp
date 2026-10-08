@@ -171,7 +171,7 @@ void fn_3_49EA8(s32 fielder);
 void fn_3_49F3C(void);
 void fn_3_49F40(s32 fielder, s32 kind);
 void fn_3_4A124(void);
-void fn_3_4A408(void);
+void fn_3_4A408(int fielder, f32* x, f32* z);
 void fn_3_4A9AC(s32 fielder);
 void fn_3_4B128(s32 fielder);
 void fn_3_4B514(s32 fielder);

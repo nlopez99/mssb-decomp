@@ -2565,8 +2565,51 @@ void fn_3_4A9AC(s32 fielder) {
 }
 
 // .text:0x0004A408 size:0x5A4 mapped:0x8068949C
-void fn_3_4A408(void) {
-    return;
+// 98.64%: the inlined fn_3_5985C recomputes the fielder pointer and fn_3_52560 swaps dx and
+// dz; with fielder, fn_3_52560 and fn_3_4EFC8 all s32 this reaches 99.83% (see fn_3_3EB6C).
+void fn_3_4A408(int fielder, f32* x, f32* z) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    s32 frame;
+    f32 ahead;
+    f32 vx;
+    f32 vz;
+
+    if (g_Ball.AtBat_ContactResult == 0) {
+        frame = g_Ball.framesUntilBallHitsGround + 30;
+        if (fn_3_52560(fielder, g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.x,
+                       g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.z) < g_Ball.framesUntilBallHitsGround + 30) {
+            *x = g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.x;
+            *z = g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.z;
+        } else {
+            *x = g_Ball.physicsSubstruct.futureCoordsAndDist[g_Ball.framesUntilBallHitsGround + 60].pos.x;
+            *z = g_Ball.physicsSubstruct.futureCoordsAndDist[g_Ball.framesUntilBallHitsGround + 60].pos.z;
+        }
+        return;
+    }
+    if (fn_3_9CE0(f->_000, f->_008) < 1.0f) {
+        fn_3_5985C(fielder, 12);
+        f->_1D5 = 3;
+        return;
+    }
+    if (fielder >= 6) {
+        ahead = 60.0f - dolsqrtf2(SQ(g_Ball.physicsSubstruct.futureCoordsAndDist[60].pos.x) +
+                                  SQ(g_Ball.physicsSubstruct.futureCoordsAndDist[60].pos.z));
+        if (ahead > 0.0f) {
+            vx = g_Ball.ballVelocityPercent.x * ahead;
+            vz = g_Ball.ballVelocityPercent.z * ahead;
+            *x = vx + g_Ball.physicsSubstruct.futureCoordsAndDist[60].pos.x;
+            *z = vz + g_Ball.physicsSubstruct.futureCoordsAndDist[60].pos.z;
+            return;
+        }
+    }
+    if (fn_3_52560(fielder, g_Ball.physicsSubstruct.futureCoordsAndDist[30].pos.x,
+                   g_Ball.physicsSubstruct.futureCoordsAndDist[30].pos.z) < 30) {
+        *x = g_Ball.physicsSubstruct.futureCoordsAndDist[30].pos.x;
+        *z = g_Ball.physicsSubstruct.futureCoordsAndDist[30].pos.z;
+    } else {
+        *x = g_Ball.physicsSubstruct.futureCoordsAndDist[60].pos.x;
+        *z = g_Ball.physicsSubstruct.futureCoordsAndDist[60].pos.z;
+    }
 }
 
 // .text:0x0004A124 size:0x2E4 mapped:0x806891B8
@@ -3309,8 +3352,53 @@ void fn_3_3FCF0(void) {
 }
 
 // .text:0x0003F760 size:0x590 mapped:0x8067E7F4
+// 98.96%: registers only; from the Hit_HorizontalAngle test on, the target's volatile
+// registers are one higher (g_Ball's base in r7 against r6); the permuter found nothing.
 void fn_3_3F760(void) {
-    return;
+    fn_3_5985C(0, 3);
+    if (g_Fielders[1]._1DA == 0) {
+        if (g_Runners[3].runnerOnFieldOrOutOrScored == 1 && g_Runners[3].runningDirectionCode == 1 &&
+            g_Runners[3].fractionalBasesRan >= 3.25f && g_Fielders[1]._186 > 0) {
+            if (dolsqrtf2(SQ(g_Ball.physicsSubstruct.futureCoordsAndDist[g_Fielders[1]._186].pos.x) +
+                          SQ(g_Ball.physicsSubstruct.futureCoordsAndDist[g_Fielders[1]._186].pos.z)) < 5.0f) {
+                fn_3_5985C(1, 3);
+            }
+        } else {
+            fn_3_5985C(1, 3);
+        }
+    }
+    if (g_Ball.Hit_HorizontalAngle < 0x400) {
+        if (g_Fielders[2]._1DA == 0) {
+            if (g_Fielders[3]._186 - 15 < g_Fielders[2]._186) {
+                if (g_Fielders[0]._186 - g_Fielders[3]._186 < 120) {
+                    fn_3_5985C(3, 3);
+                }
+            } else if (g_Ball.physicsSubstruct.futureCoordsAndDist[g_Fielders[2]._186].pos.z < lbl_3_data_4444[1].z) {
+                if (g_Fielders[0]._186 - g_Fielders[2]._186 < 80) {
+                    fn_3_5985C(2, 3);
+                }
+            } else if (g_Fielders[0]._186 - g_Fielders[3]._186 < 120) {
+                fn_3_5985C(3, 3);
+            }
+        } else if (g_Fielders[3]._1DA == 0 && g_Fielders[0]._186 - g_Fielders[3]._186 < 120) {
+            fn_3_5985C(3, 3);
+        }
+    } else if (g_Fielders[4]._1DA == 0) {
+        if (g_Fielders[5]._186 - 15 < g_Fielders[4]._186) {
+            if (g_Fielders[0]._186 - g_Fielders[5]._186 < 120) {
+                fn_3_5985C(5, 3);
+            }
+        } else if (g_Ball.physicsSubstruct.futureCoordsAndDist[g_Fielders[4]._186].pos.z < lbl_3_data_4444[1].z) {
+            if ((g_Runners[2].runnerOnFieldOrOutOrScored != 1 || g_Fielders[4]._186 <= 0) &&
+                g_Fielders[0]._186 - g_Fielders[4]._186 < 80) {
+                fn_3_5985C(4, 3);
+            }
+        } else if (g_Fielders[0]._186 - g_Fielders[5]._186 < 120) {
+            fn_3_5985C(5, 3);
+        }
+    } else if (g_Fielders[5]._1DA == 0 && g_Fielders[0]._186 - g_Fielders[5]._186 < 120) {
+        fn_3_5985C(5, 3);
+    }
 }
 
 // .text:0x0003F24C size:0x514 mapped:0x8067E2E0
