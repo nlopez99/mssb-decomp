@@ -1178,7 +1178,9 @@ typedef struct _GameControlsStruct {
     /*0x12E*/ u8 hudLoadingRelated; // unsure
     /*0x12F*/ u8 _12F;
     /*0x130*/ E(u8, WIN_TYPE) winType;
-    artificial_padding(0x130, 0x135, u8);
+    /*0x131*/ u8 _131;
+    /*0x132*/ u8 _132;
+    /*0x133*/ u8 _133[0x135 - 0x133];
     /*0x135*/ u8 _135;
     /*0x136*/ u8 _136;
     /*0x137*/ u8 playOverFadeOutStarted;

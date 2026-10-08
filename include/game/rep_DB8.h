@@ -21,7 +21,7 @@ void fn_3_5D51C(void);
 void fn_3_5D5E8(void);
 void fn_3_5D9F8(void);
 void fn_3_5DA9C(void);
-void fn_3_5DCE0(void);
+int fn_3_5DCE0(void);
 void fn_3_5DD30(void);
 void fn_3_5DF54(void);
 void fn_3_5E2C4(void);
