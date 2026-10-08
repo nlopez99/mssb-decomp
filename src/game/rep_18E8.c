@@ -1813,7 +1813,6 @@ void fn_3_A67E8(s32 idx) {
 }
 
 // .text:0x000A63E4 size:0x404 mapped:0x806E5478
-// 99.82%: registers only, in the lbl_3_data_4444 and g_FieldingLogic address registers.
 s32 fn_3_A63E4(s32 runner, s32 toNext, s32* out0, s32* out1) {
     InMemRunnerType* r = &g_Runners[runner];
     Unk18E8Fielder* f = &g_Fielders[g_Ball.fielderWBallIndex];
@@ -1831,10 +1830,10 @@ s32 fn_3_A63E4(s32 runner, s32 toNext, s32* out0, s32* out1) {
         runnerFrames = r->framesToNextBase;
         base = r->nextBase;
     }
-    coverer = g_FieldingLogic._0D0[base];
     {
         f32 x = lbl_3_data_4444[base].x;
         f32 z = lbl_3_data_4444[base].z;
+        coverer = g_FieldingLogic._0D0[base];
         fielderFrames = fn_3_A6ABC(x, z);
         ballDist = g_Ball.ballDistanceFromBase[base];
         arrival = f->_192 + fielderFrames;
@@ -2045,22 +2044,22 @@ void fn_3_A5B4C(s32 runner) {
 }
 
 // .text:0x000A5704 size:0x448 mapped:0x806E4798
-// 94.49%: the lbl_3_data_4444 and g_FieldingLogic address loads are scheduled differently,
-// and the build reaches lbl_3_bss_17F8 through ...bss.0.
 void fn_3_A5704(s32 runner) {
     Unk18E8Fielder* f = &g_Fielders[g_Ball.fielderWBallIndex];
     InMemRunnerType* r = &g_Runners[runner];
     s32 base = r->nextBase;
-    s32 runnerFrames = r->framesToNextBase;
-    s16 coverer = g_FieldingLogic._0D0[base];
-    s32 arrival;
     f32 ballDist;
+    s16 coverer;
+    s32 arrival;
+    s32 runnerFrames = r->framesToNextBase;
     s32 frames;
 
     {
         f32 x = lbl_3_data_4444[base].x;
         f32 z = lbl_3_data_4444[base].z;
-        arrival = f->_192 + fn_3_A6ABC(x, z) + lbl_3_data_1C40;
+        coverer = g_FieldingLogic._0D0[base];
+        arrival = f->_192 + fn_3_A6ABC(x, z);
+        arrival += lbl_3_data_1C40;
         ballDist = g_Ball.ballDistanceFromBase[base];
         frames = fn_3_52560(g_Ball.fielderWBallIndex, x, z);
     }
@@ -2089,31 +2088,29 @@ void fn_3_A5704(s32 runner) {
 }
 
 // .text:0x000A53DC size:0x328 mapped:0x806E4470
-// 97.46%: the tail schedules the framesToNextBase load and the 0 and -1 constants
-// differently (registers and order only); several statement orders tried.
 void fn_3_A53DC(s32 runner) {
     InMemRunnerType* r = &g_Runners[runner];
     Unk18E8Fielder* f = &g_Fielders[g_Ball.fielderWBallIndex];
 
     if (runner == 3 && r->baseStandingOn == 3 && g_RunningLogic._00 == 0x1000 && g_Ball.ballZoneAwayFromHome >= 4 &&
         g_Ball.AtBat_ContactResult == 3) {
-        s32 frames = f->_192 + fn_3_A6ABC(lbl_3_data_4444[0].x, lbl_3_data_4444[0].z);
-        frames += lbl_3_data_1C40;
-        frames -= r->framesToNextBase;
+        s32 arrival = f->_192 + fn_3_A6ABC(lbl_3_data_4444[0].x, lbl_3_data_4444[0].z);
+        s32 runnerFrames;
+
+        arrival += lbl_3_data_1C40;
+        runnerFrames = r->framesToNextBase;
         lbl_3_bss_1828[runner] = 0;
         lbl_3_bss_1838[runner] = -1;
-        lbl_3_bss_1848[runner] = frames;
+        lbl_3_bss_1848[runner] = arrival - runnerFrames;
     }
 }
 
 // .text:0x000A4F50 size:0x48C mapped:0x806E3FE4
-// 91.27%: as in fn_3_A5704, the lbl_3_data_4444 and g_FieldingLogic address loads are
-// scheduled differently.
 void fn_3_A4F50(s32 runner) {
     Unk18E8Fielder* f = &g_Fielders[g_Ball.fielderWBallIndex];
     InMemRunnerType* r = &g_Runners[runner];
     s32 base = r->startingBase_baseAchieved;
-    s16 coverer = g_FieldingLogic._0D0[base];
+    s16 coverer;
     s32 arrival;
     f32 ballDist;
     s32 frames;
@@ -2122,7 +2119,9 @@ void fn_3_A4F50(s32 runner) {
     {
         f32 x = lbl_3_data_4444[base].x;
         f32 z = lbl_3_data_4444[base].z;
-        arrival = f->_192 + (fn_3_A6ABC(x, z) + 20) + lbl_3_data_1C40;
+        coverer = g_FieldingLogic._0D0[base];
+        arrival = f->_192 + fn_3_A6ABC(x, z) + 20;
+        arrival += lbl_3_data_1C40;
         ballDist = g_Ball.ballDistanceFromBase[base];
         frames = fn_3_52560(g_Ball.fielderWBallIndex, x, z);
     }
@@ -2157,7 +2156,6 @@ void fn_3_A4F50(s32 runner) {
 }
 
 // .text:0x000A4A10 size:0x540 mapped:0x806E3AA4
-// 99.24%: only the inlined fn_3_A53DC tail differs, with the same residue as fn_3_A53DC.
 void fn_3_A4A10(void) {
     s32 i;
 
