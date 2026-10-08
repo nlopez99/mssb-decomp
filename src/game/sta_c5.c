@@ -101,6 +101,40 @@ extern void AnimateActorBones(StaC5Actor* actor);
 extern void fn_800B4CA0(StaC5Actor* actor, f32 frame);
 extern f32 fn_800B4A94(StaC5Actor* actor);
 
+typedef struct StaC5Particle {
+    /* 0x00 */ struct StaC5Particle* next;
+    /* 0x04 */ Vec pos;
+    /* 0x10 */ Vec vel;
+    /* 0x1C */ f32 _1C;
+    /* 0x20 */ f32 _20;
+    /* 0x24 */ f32 _24;
+    /* 0x28 */ f32 _28;
+    /* 0x2C */ f32 _2C;
+    /* 0x30 */ u8 _30[0x38 - 0x30];
+    /* 0x38 */ f32 _38;
+    /* 0x3C */ f32 _3C;
+    /* 0x40 */ u8 color[4];
+    /* 0x44 */ u8 _44[0x48 - 0x44];
+    /* 0x48 */ s16 delay;
+    /* 0x4A */ s16 life;
+    /* 0x4C */ u8 _4C;
+    /* 0x4D */ u8 _4D;
+    /* 0x4E */ u8 _4E;
+    /* 0x4F */ u8 index;
+} StaC5Particle;
+
+typedef struct StaC5Emitter {
+    /* 0x00 */ struct StaC5Emitter* prev;
+    /* 0x04 */ struct StaC5Emitter* next;
+    /* 0x08 */ BOOL (*update)(struct StaC5Emitter*);
+    /* 0x0C */ StaC5Particle* particles;
+    /* 0x10 */ void* _10;
+} StaC5Emitter;
+
+extern void fn_80033620(StaC5Emitter* emitter);
+extern void fn_80033F64(f32, f32, f32);
+extern void fn_80033CC8(StaC5Particle* particle, void* arg1);
+
 typedef struct StadiumSort1D58 {
     /* 0x00 */ f32 depth;
     /* 0x04 */ s32 index;
@@ -178,6 +212,8 @@ typedef struct {
 extern StaC5Fielder g_Fielders[9];
 extern s32 fn_800247E4(s32 x, s32 y, s32 width, s32 bytes);
 extern BOOL fn_800527C4(Vec* pos);
+extern s32 fn_8005268C(void);
+extern s16 fn_3_B7F70(s16 range);
 
 extern u16 lbl_3_data_81DC[16];
 extern u8 lbl_3_data_8404[6][15][2];
@@ -460,7 +496,44 @@ void fn_3_F4FBC(void) {
 
 // .text:0x000F4DAC size:0x210 mapped:0x80733E40
 void fn_3_F4DAC(void) {
-    return;
+    Vec vel;
+    Vec dir;
+    Vec forward = { 0.0f, 0.0f, 1.0f };
+    u8 step = 100 / lbl_3_bss_B220.count;
+    u8 n = 0;
+    f32 speed;
+    f32 angle;
+    f32 t;
+    u8 roll;
+    StaC5Draw* draw;
+
+    vel.x = g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x;
+    vel.y = 0.0f;
+    vel.z = g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z;
+    PSVECNormalize(&vel, &dir);
+    speed = PSVECMag(&vel);
+    angle = 57.29578f * (f32)acos(PSVECDotProduct(&dir, &forward));
+    if (angle < 18.0f) {
+        roll = fn_3_B7F70(100);
+        while (roll / step != 0) {
+            step += 100 / lbl_3_bss_B220.count;
+            n++;
+        }
+        draw = &lbl_3_common_bss_350E4._00[n + lbl_3_bss_B21F];
+    } else if (dir.x < 0.0f) {
+        draw = &lbl_3_common_bss_350E4._00[lbl_3_bss_B21F];
+    } else {
+        draw = &lbl_3_common_bss_350E4._00[lbl_3_bss_B21F + 1];
+    }
+    t = angle / 45.0f;
+    if (speed > 90.0 * (1.0 - t) + 73.0f * t) {
+        return;
+    }
+    if (speed > 52.0f) {
+        draw->_C4 = 1;
+    } else {
+        draw->_C4 = 2;
+    }
 }
 
 // .text:0x000F4D00 size:0xAC mapped:0x80733D94
@@ -532,8 +605,39 @@ void fn_3_F3EFC(void) {
 }
 
 // .text:0x000F3CD0 size:0x22C mapped:0x80732D64
-void fn_3_F3CD0(void) {
-    return;
+BOOL fn_3_F3CD0(StaC5Emitter* emitter) {
+    StaC5Particle* p = emitter->particles;
+    u32 alive = 0;
+
+    fn_80033620(emitter);
+    do {
+        if (p->delay <= 0 && p->life != 0) {
+            fn_80033F64(p->_38, p->_3C, p->_20);
+            fn_80033CC8(p, emitter->_10);
+            if (-p->delay < 5) {
+                p->_38 += (p->_28 - 10.0) / 5.0;
+                p->_3C = p->_38;
+                p->color[3] += 12.0;
+            } else {
+                p->_38 += (p->_2C - p->_28) / 495.0f;
+                p->_3C = p->_38;
+                p->color[3] += -60.0 / (495 - p->index);
+                if (p->color[3] >= 60) {
+                    p->color[3] = 0;
+                }
+            }
+            p->pos.x += p->vel.x;
+            p->pos.y += p->vel.y;
+            p->pos.z += p->vel.z;
+            p->_20 += p->_1C * p->_24;
+            p->life--;
+        }
+        p->delay--;
+        if (p->life != 0) {
+            alive++;
+        }
+    } while ((p = p->next) != NULL);
+    return alive == 0;
 }
 
 // .text:0x000F3BB0 size:0x120 mapped:0x80732C44
@@ -1010,8 +1114,54 @@ void fn_3_EEB94(void) {
 }
 
 // .text:0x000EE96C size:0x228 mapped:0x8072DA00
-void fn_3_EE96C(void) {
-    return;
+void fn_3_EE96C(Vec* pos) {
+    Mtx view;
+    Vec dir;
+    Vec down = { 0.0f, -1.0f, 0.0f };
+    camera_803c639c_s* camera;
+    f32 dist;
+    f32 scale;
+    f32 range;
+    s32 scaleS;
+    s32 scaleT;
+
+    camera = fn_80052768_getCamera(fn_8005268C());
+    PSVECSubtract(&camera->eye, &camera->target, &dir);
+    if (PSVECMag(&dir)) {
+        PSVECNormalize(&dir, &dir);
+    } else {
+        dir.y = 0.0f;
+        dir.x = 0.0f;
+        dir.z = 1.0f;
+    }
+    acos(PSVECDotProduct(&dir, &down));
+    PSVECSubtract(&camera->eye, pos, &dir);
+    range = dist = PSVECMag(&dir);
+    if (dist < 20.0f) {
+        dist = 20.0f;
+    }
+    PSMTXCopy(camera->view, view);
+    scale = 0.19999999f / dist;
+    lbl_3_bss_B11C[0][0] = scale;
+    lbl_3_bss_B11C[1][1] = scale * (f32)(1.0 - fabs(0.5f * (down.y * view[1][1])));
+    if (range < 35.0f) {
+        scaleS = GX_ITS_16;
+        scaleT = GX_ITS_16;
+    } else if (range < 55.0f) {
+        scaleS = GX_ITS_8;
+        scaleT = GX_ITS_8;
+    } else {
+        scaleS = GX_ITS_4;
+        scaleT = GX_ITS_4;
+    }
+    lbl_3_bss_AEF4 = NULL;
+    DCFlushRange(lbl_3_bss_B118, 0x200);
+    GXSetIndTexMtx(GX_ITM_0, lbl_3_bss_B11C, 2);
+    GXLoadTexObj(&lbl_3_bss_B134, GX_TEXMAP7);
+    GXSetIndTexOrder(GX_IND_TEX_STAGE_0, GX_TEXCOORD0, GX_TEXMAP7);
+    GXSetNumIndStages(1);
+    GXSetIndTexCoordScale(GX_IND_TEX_STAGE_0, scaleS, scaleT);
+    GXSetTevIndWarp(GX_TEVSTAGE0, GX_IND_TEX_STAGE_0, GX_TRUE, GX_FALSE, GX_ITM_0);
 }
 
 // .text:0x000EE67C size:0x2F0 mapped:0x8072D710
