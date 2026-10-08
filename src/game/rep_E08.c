@@ -668,15 +668,14 @@ void fn_3_61B64(void) {
 
 // .text:0x00061544 size:0x620 mapped:0x806A05D8
 BOOL fn_3_61544(s32 i) {
-    s32 player = i;
     s32 animId = -1;
-    UnkE08Fielder* fielder = &g_Fielders[i];
-    UnkE08Anim* anim = &g_UnkAnimation_31EAC[i];
-    s32 frames = 0;
-    UnkE08Actor* actor;
-    u8 kind;
+    s32 player = i;
     s32 turnAnim;
-
+    UnkE08Fielder* fielder = &g_Fielders[i];
+    UnkE08Actor* actor;
+    s32 frames = 0;
+    UnkE08Anim* anim = &g_UnkAnimation_31EAC[i];
+    u8 kind;
     if (g_d_GameSettings.minigamesEnabled) {
         if (i == 0) {
             player = g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder];
@@ -822,6 +821,7 @@ BOOL fn_3_61544(s32 i) {
 // .text:0x00061228 size:0x31C mapped:0x806A02BC
 BOOL fn_3_61228(s32 i) {
     s16 timer;
+    s32 step;
     BOOL turn = FALSE;
     UnkE08Anim* anim = &g_UnkAnimation_31EAC[i];
     UnkE08Throw* throwInfo = &g_UnkThrowing_31ACC;
@@ -857,7 +857,8 @@ BOOL fn_3_61228(s32 i) {
             fn_3_60804(i, FALSE);
             return FALSE;
         }
-        if (timer >= lbl_3_data_7D24[actor->_252][actor->_62 - 0x1D]) {
+        step = actor->_62 - 0x1D;
+        if (timer >= lbl_3_data_7D24[actor->_252][step]) {
             logic->_10A = 1;
         }
         return TRUE;
