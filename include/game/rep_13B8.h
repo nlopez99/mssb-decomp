@@ -48,7 +48,7 @@ void fn_3_85C44(int runner, int direction);
 void fn_3_85CB0(void);
 void fn_3_85EF4(int runner, int direction);
 int fn_3_8604C(int* fielderOut);
-void fn_3_86118(void);
+int fn_3_86118(void);
 void fn_3_8679C(void);
 void fn_3_86DFC(void);
 void fn_3_86EF8(void);

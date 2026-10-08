@@ -51,7 +51,11 @@ typedef struct {
     /* 0x070 */ f32 _70;
     /* 0x074 */ u8 _074[0x7C - 0x74];
     /* 0x07C */ f32 _7C;
-    /* 0x080 */ u8 _080[0x178 - 0x80];
+    /* 0x080 */ u8 _080[0xE8 - 0x80];
+    /* 0x0E8 */ f32 _E8;
+    /* 0x0EC */ u8 _0EC[0x100 - 0xEC];
+    /* 0x100 */ f32 _100;
+    /* 0x104 */ u8 _104[0x178 - 0x104];
     /* 0x178 */ s16 _178;
     /* 0x17A */ u8 _17A[0x1C9 - 0x17A];
     /* 0x1C9 */ u8 _1C9;
@@ -76,6 +80,7 @@ extern u8 bodyCheckProbabiliities[][5];
 extern int fn_3_6D658(int team, int charID, int otherCharID);
 
 extern s16 lbl_3_data_1C58[5][4];
+extern s16 lbl_3_data_1C80[4];
 extern s16 lbl_3_data_1C88[4];
 extern struct {
     /* 0x000 */ u8 _000[0x1D5];
@@ -1189,12 +1194,262 @@ void fn_3_86DFC(void) {
 
 // .text:0x0008679C size:0x660 mapped:0x806C5830
 void fn_3_8679C(void) {
-    return;
+    f32 prevFrac = -1.0f;
+    int prev = -1;
+    int i;
+    int j;
+
+    for (i = 0; i < 4; i++) {
+        g_Runners[i].restrictedMovementCodes_stored = g_Runners[i].restrictedMovementCodes;
+        g_Runners[i].restrictedMovementCodes = 0;
+    }
+    if (g_Strikes.outs >= 3) {
+        return;
+    }
+
+    for (i = 3; i >= 0; i--) {
+        InMemRunnerType* r = &g_Runners[i];
+
+        if (r->runnerOnFieldOrOutOrScored != 1) {
+            continue;
+        }
+        if (i == 1 && g_Ball.AtBat_ContactResult != 3 && g_FieldingLogic._108 == 0 && g_FieldingLogic._107 == 0 &&
+            r->fractionalBasesRan <= 1.2f && g_Ball.framesSinceHit >= 1) {
+            if (g_Ball.AtBat_ContactResult == 0 && g_Ball.framesUntilBallHitsGround < 120 &&
+                VEC_DISTANCE_XZ(&lbl_3_data_4444[1], &g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot) < 10.0f) {
+            } else if (g_Batter.hitTrajectory != 3 && g_Runners[0].runnerOnFieldOrOutOrScored != 2) {
+                r->restrictedMovementCodes |= 2;
+                if (r->runningDirectionCode == 3 && r->tagUpInd != 0) {
+                    r->restrictedMovementCodes |= 8;
+                }
+            }
+        } else if (i == 0 && g_Ball.AtBat_ContactResult == 0 && g_Runners[1].runnerOnFieldOrOutOrScored == 1 &&
+                   g_Runners[1].fractionalBasesRan < 2.0f && g_Runners[1].runningDirectionCode == 3) {
+            r->restrictedMovementCodes |= 1;
+        } else if (prevFrac < 0.0f) {
+            if (r->fractionalBasesRan >= 3.75f && g_GameLogic.secondaryGameMode != 14 && g_Strikes.storedOuts < 2) {
+                if (r->tagUpInd != 0) {
+                    r->restrictedMovementCodes |= 4;
+                } else if (g_Ball.AtBat_ContactResult == 0 || g_Ball.AtBat_ContactResult == -1) {
+                    r->restrictedMovementCodes |= 4;
+                }
+            }
+        } else {
+            f32 gap = prevFrac - r->fractionalBasesRan;
+            InMemRunnerType* ahead = &g_Runners[prev];
+
+            if (r->runningDirectionCode == 3) {
+                gap -= 0.15f;
+            } else if (r->runningDirectionCode == 2) {
+                gap -= 0.1f;
+            }
+            if (g_Runners[prev].runningDirectionCode == 3) {
+                gap -= 0.05f;
+            }
+            if (r->currentBase != g_Runners[prev].currentBase && g_Runners[prev].baseStandingOn < 0) {
+                gap -= 0.15f;
+            }
+            if (gap < 0.3f) {
+                r->restrictedMovementCodes |= 1;
+                g_Runners[prev].restrictedMovementCodes |= 2;
+                if (ahead->runningDirectionCode == 3 && ahead->tagUpInd != 0 &&
+                    (g_Ball.AtBat_ContactResult == 0 || g_Ball.AtBat_ContactResult == 3)) {
+                    ahead->restrictedMovementCodes |= 8;
+                }
+                if (ahead->percentTowardsNextBase < 0.5f && ahead->baseStandingOn == -1 &&
+                    r->percentTowardsNextBase > 0.5f && r->baseStandingOn == -1) {
+                    if (ahead->distToCurrentBase <= r->distToNextBase) {
+                        if (ahead->runningDirectionCode == 3 && r->baseStandingOn == -1) {
+                            ahead->restrictedMovementCodes &= 0xFD;
+                        } else if (r->runningDirectionCode == 1 && ahead->baseStandingOn == -1) {
+                            ahead->restrictedMovementCodes &= 0xFE;
+                        } else if (r->baseStandingOn == -1) {
+                            ahead->restrictedMovementCodes &= 0xFD;
+                        } else if (ahead->baseStandingOn == -1) {
+                            r->restrictedMovementCodes &= 0xFE;
+                        }
+                    } else if (ahead->tagUpInd != 0 && r->baseStandingOn == -1) {
+                        ahead->restrictedMovementCodes &= 0xFD;
+                    } else if (r->runningDirectionCode == 1 && ahead->baseStandingOn == -1) {
+                        r->restrictedMovementCodes &= 0xFE;
+                    } else if (ahead->runningDirectionCode == 3 && r->baseStandingOn == -1) {
+                        ahead->restrictedMovementCodes &= 0xFD;
+                    } else if (ahead->baseStandingOn == -1) {
+                        r->restrictedMovementCodes &= 0xFE;
+                    } else if (r->baseStandingOn == -1) {
+                        ahead->restrictedMovementCodes &= 0xFD;
+                    }
+                }
+            }
+        }
+        prevFrac = r->fractionalBasesRan;
+        prev = i;
+    }
+
+    for (i = 0; i <= 1; i++) {
+        InMemRunnerType* r = &g_Runners[i];
+        s16 next = r->currentBase + 1;
+        s16 count = 0;
+
+        if (next <= 3 && !(r->percentTowardsNextBase < 0.75f)) {
+            for (j = i + 1; j < 4; j++) {
+                if (g_Runners[j].runnerOnFieldOrOutOrScored == 1 && next == g_Runners[j].currentBase) {
+                    count++;
+                }
+            }
+            if (count >= 2) {
+                r->restrictedMovementCodes |= 1;
+            }
+        }
+    }
 }
 
 // .text:0x00086118 size:0x684 mapped:0x806C51AC
-void fn_3_86118(void) {
-    return;
+int fn_3_86118(void) {
+    int best = 9999;
+    int bestFrame = 0;
+    int closest = -1;
+    int frame;
+    int i;
+    int diff;
+    f32 dist;
+
+    if (g_Ball.landingSpotZoneAwayFromHome <= 1 && g_Ball.maxYOfHit < 3.5f && g_Ball.framesSinceHit <= 45 &&
+        g_Ball.Hit_HorizontalPower > 80) {
+        for (i = 2; i < 6; i++) {
+            if (g_Fielders[i]._7C < 2.0f && g_Ball.physicsSubstruct.hitLandingSpotDistFromHome > g_Fielders[i]._70) {
+                return 2;
+            }
+        }
+        return 7;
+    }
+
+    if ((g_Ball.physicsSubstruct.velocity.y < 0.0f && g_Ball.AtBat_Contact_BallPos.y < 2.0f) || g_Ball.maxYOfHit < 2.0f) {
+        dist = VEC_DISTANCE_XZ(&g_Ball.AtBat_Contact_BallPos, &g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot);
+        frame = 1;
+    } else {
+        for (frame = g_Ball.framesUntilBallHitsGround; frame > 0; frame -= 5) {
+            if (g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.y >= 2.0f) {
+                frame++;
+                for (i = 0; i < 5; i++) {
+                    if (g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.y < 2.0f) {
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+        if (frame < 1) {
+            frame = 1;
+        }
+        dist = VEC_DISTANCE_XZ(&g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos,
+                               &g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot);
+    }
+
+    i = 1;
+    if (g_Ball.physicsSubstruct.hitLandingSpotDistFromHome < 25.0f && g_Ball.hangtimeOfHit > 30 && g_Ball.maxYOfHit > 3.0f) {
+        i = 0;
+    }
+    if (g_Ball.physicsSubstruct.hitLandingSpotDistFromHome < 18.0f && g_Ball.hangtimeOfHit > 30 && g_Ball.maxYOfHit > 4.0f) {
+        i = 0;
+    }
+
+    if (g_Ball.maxYOfHit <= 3.0f) {
+        int found = -1;
+
+        for (; i < 6; i++) {
+            u8 state = g_FieldingLogic._0F8[i];
+            if (state == 1 || state == 10 || state == 11) {
+                if (g_Fielders[i]._7C < 3.0f && 3.0f + g_Ball.physicsSubstruct.hitLandingSpotDistFromHome > g_Fielders[i]._70) {
+                    if (g_Fielders[i]._7C < 1.5f * g_Fielders[i]._E8) {
+                        return 1;
+                    }
+                    if (g_Fielders[i]._70 > 1.5f * g_Fielders[i]._7C + g_Ball.ballDistanceFromHome) {
+                        return 1;
+                    }
+                }
+                if (g_Fielders[i]._7C < 5.0f && 2.0f + g_Ball.ballDistanceFromHome < g_Fielders[i]._70 &&
+                    5.0f + g_Ball.physicsSubstruct.hitLandingSpotDistFromHome > g_Fielders[i]._70) {
+                    found = i;
+                }
+            }
+        }
+        if (found >= 0) {
+            return 3;
+        }
+        return 5;
+    }
+
+    for (; i < 9; i++) {
+        u8 state = g_FieldingLogic._0F8[i];
+        if (state == 1 || state == 10 || state == 11) {
+            if (g_Fielders[i]._7C < 3.0f && g_Ball.physicsSubstruct.hitLandingSpotDistFromHome > g_Fielders[i]._70) {
+                int t = fn_3_52560(i, g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.x,
+                                   g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.z) - 10;
+                if (best > t) {
+                    best = t;
+                    bestFrame = frame;
+                    if (g_Ball.physicsSubstruct.futureCoordsAndDist[frame].dist > 1.0f + g_Fielders[i]._70) {
+                        best = t + 15;
+                    }
+                }
+                closest = i;
+            } else {
+                int toLanding = fn_3_52560(i, g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x,
+                                           g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z) - 10;
+                int toFrame = fn_3_52560(i, g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.x,
+                                         g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.z) - 10;
+                if (toLanding < toFrame) {
+                    if (best > toLanding) {
+                        bestFrame = g_Ball.framesUntilBallHitsGround;
+                        best = toLanding + 3;
+                    }
+                } else if (best > toFrame) {
+                    best = toFrame;
+                    bestFrame = frame;
+                }
+            }
+        }
+    }
+
+    diff = best - bestFrame;
+    if (g_GameLogic.battingAIInd[g_GameLogic.homeTeamBattingInd_fieldingTeam] != 0) {
+        diff += lbl_3_data_1C80[g_GameLogic.runnerAIInd[g_GameLogic.homeTeamBattingInd_fieldingTeam]];
+    }
+    if (best <= 0) {
+        return 0;
+    }
+    if (g_Ball.someCollisionVariable != 0 && diff < 5) {
+        return 3;
+    }
+    if (diff < -60) {
+        return 0;
+    }
+    if (diff < -30) {
+        return 1;
+    }
+    if (diff < -5) {
+        return 2;
+    }
+    if (diff < 8) {
+        if (g_Ball.physicsSubstruct.hitLandingSpotDistFromHome < 40.0f) {
+            if (diff <= 5) {
+                return 3;
+            }
+        } else {
+            return 3;
+        }
+    }
+    if (closest >= 0 && g_Ball.AtBat_Contact_BallPos.y < g_Fielders[closest]._100) {
+        return 3;
+    }
+    if (diff < 20) {
+        return 4;
+    }
+    if (diff < 40) {
+        return 5;
+    }
+    return (diff < 90) ? 6 : 7;
 }
 
 // .text:0x0008604C size:0xCC mapped:0x806C50E0
