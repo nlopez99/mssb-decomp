@@ -2475,7 +2475,6 @@ void fn_3_43038(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     s32 frames = 0;
     s32 i;
-    CoordAndDist* p;
 
     f->_1DC = 4;
     i = 5;
@@ -2484,8 +2483,8 @@ void fn_3_43038(s32 fielder) {
             i++;
             continue;
         }
-        p = &g_Ball.physicsSubstruct.futureCoordsAndDist[i];
-        frames = fn_3_52560(fielder, p->pos.x, p->pos.z);
+        frames = fn_3_52560(fielder, g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x,
+                            g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z);
         if (frames < i) {
             f->_184 = i;
             goto found;
