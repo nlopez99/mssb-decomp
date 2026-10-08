@@ -172,7 +172,7 @@ typedef struct StaC2Draw {
             /* 0xC0 */ f32 _C0;
             /* 0xC4 */ f32 _C4;
             /* 0xC8 */ f32 _C8;
-            /* 0xCC */ u8 _CC_D0[0xD0 - 0xCC];
+            /* 0xCC */ f32 _CCf;
             /* 0xD0 */ s8 _D0;
             /* 0xD1 */ u8 _D1;
         };
@@ -428,6 +428,8 @@ extern struct {
     /* 0x48 */ Vec* _48;
     /* 0x4C */ u8 _4C[0x64 - 0x4C];
     /* 0x64 */ s16 _64;
+    /* 0x66 */ u8 _66[0x6B - 0x66];
+    /* 0x6B */ u8 _6B;
 } lbl_3_common_bss_350E4;
 
 extern struct {
@@ -492,6 +494,11 @@ static u8 lbl_3_bss_A021;
 static u8 lbl_3_bss_A020;
 static u8* lbl_3_bss_A01C;
 static u8 lbl_3_bss_A018;
+
+static inline void stopVoice(SND_VOICEID* voice) {
+    sndFXKeyOff(*voice);
+    sndFXCtrl(*voice, 7, 0);
+}
 
 static inline BOOL isSpriteDone(StaC2Task* task, s32 i) {
     return lbl_80371C30[task->_14 + i]._00->_69 == 2 ? TRUE : FALSE;
@@ -1452,8 +1459,70 @@ f32 fn_3_D0854(StaC2Draw* draw) {
 }
 
 // .text:0x000D0534 size:0x320 mapped:0x8070F5C8
-void fn_3_D0534(void) {
-    return;
+void fn_3_D0534(StaC2Draw* draw) {
+    Mtx m;
+    Vec ball;
+    Vec diff;
+    Vec b;
+    Vec a;
+    Vec rel;
+    Vec dir;
+    f32 limit;
+    f32 mag;
+    f32 x;
+    f32 z;
+
+    lbl_3_bss_A030 += draw->_BC;
+    ball.x = g_Ball.AtBat_Contact_BallPos.x;
+    ball.y = g_Ball.AtBat_Contact_BallPos.y;
+    ball.z = g_Ball.AtBat_Contact_BallPos.z;
+    PSVECSubtract(&ball, &draw->_A0, &diff);
+    diff.y = 0.0f;
+    rel = diff;
+    PSMTXRotRad(m, 'Y', 0.017453292f * (draw->_D0 * draw->_BC));
+    PSMTXMultVec(m, &diff, &diff);
+    if (lbl_3_bss_A030 / 360.0f >= 1.0f) {
+        b.y = a.y = 0.0f;
+        if (draw->_D0 > 0) {
+            b.x = rel.z;
+            b.z = -rel.x;
+        } else {
+            b.x = -rel.z;
+            b.z = rel.x;
+        }
+        if (draw->_D0 > 0) {
+            a.x = diff.z;
+            a.z = -diff.x;
+        } else {
+            a.x = -diff.z;
+            a.z = diff.x;
+        }
+        PSVECNormalize(&b, &b);
+        PSVECNormalize(&a, &a);
+        limit = acosf_kludge(PSVECDotProduct(&b, &a));
+        dir.x = sinf_kludge(0.017453292f * draw->_CCf);
+        dir.y = 0.0f;
+        dir.z = cosf_kludge(0.017453292f * draw->_CCf);
+        if (acosf_kludge(PSVECDotProduct(&b, &dir)) <= limit) {
+            PSVECSubtract(&diff, &rel, &diff);
+            mag = PSVECMag(&diff);
+            g_Ball.physicsSubstruct.velocity.x = dir.x * mag;
+            g_Ball.physicsSubstruct.velocity.y = 0.0f;
+            g_Ball.physicsSubstruct.velocity.z = dir.z * mag;
+            draw->_D1 = 3;
+            fn_3_65F4();
+            lbl_3_common_bss_350E4._6B = 0;
+            lbl_3_bss_A030 = 0.0f;
+            stopVoice(&lbl_3_data_182C0);
+            lbl_3_data_182C0 = -1;
+            return;
+        }
+    }
+    z = diff.z + draw->_A0.z;
+    x = diff.x + draw->_A0.x;
+    g_Ball.AtBat_Contact_BallPos.y = ball.y;
+    g_Ball.AtBat_Contact_BallPos.x = x;
+    g_Ball.AtBat_Contact_BallPos.z = z;
 }
 
 // .text:0x000D052C size:0x8 mapped:0x8070F5C0
