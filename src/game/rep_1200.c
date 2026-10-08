@@ -1146,7 +1146,7 @@ void fn_3_72768(void) {
 
 // .text:0x00071248 size:0x1520 mapped:0x806B02DC
 // Mostly inlined copies of this file's functions; the remaining differences are those of
-// fn_3_709B4 and the scheduling of the bounce and collision blocks.
+// fn_3_709B4 plus registers in the bounce block (the target rounds `ground` with frsp).
 void fn_3_71248(void) {
     VecSrcDst ray;
     CollisionStruct hit;
@@ -1154,6 +1154,7 @@ void fn_3_71248(void) {
     f32 t;
     f32 amp;
     f32 ground;
+    f32* window;
     f32 speed;
     BALL_COLLISION_TYPE collision;
 
@@ -1260,8 +1261,8 @@ void fn_3_71248(void) {
         }
         if (g_Pitcher.starPitchType == 11 || g_Pitcher.starPitchType == 12) {
             t = (f32)g_Ball.pitchHangtimeCounter / (f32)g_Pitcher.frameWhenUnhittable;
-            if (t >= lbl_3_data_5F90[g_Pitcher.starPitchType - 11 + 8] &&
-                t <= lbl_3_data_5F90[g_Pitcher.starPitchType - 11 + 10]) {
+            window = &lbl_3_data_5F90[g_Pitcher.starPitchType - 11];
+            if (t >= window[8] && t <= window[10]) {
                 g_Pitcher.peachDaisyAnimationHappened = 1;
                 g_Pitcher.peachDaisyStarAnimationOn++;
             } else {
@@ -1277,8 +1278,8 @@ void fn_3_71248(void) {
                 (g_Pitcher.eggBallBounceNumber == 0 || g_Pitcher.eggBallBounceNumber == 1)) {
                 fn_3_70838();
             } else {
-                speed = SQ(g_Pitcher.ballVelocity.x) + SQ(g_Pitcher.ballVelocity.z);
                 g_Pitcher.ballVelocity.y = -(ground - g_Ball.pastCoordinates[0].y);
+                speed = SQ(g_Pitcher.ballVelocity.x) + SQ(g_Pitcher.ballVelocity.z);
                 g_Pitcher.eggBallBounceNumber++;
                 g_Pitcher.cancelParabolicAdjustmentInd = 1;
                 g_Ball.AtBat_Contact_BallPos.y = ground;
