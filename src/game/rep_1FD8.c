@@ -62,10 +62,16 @@ typedef struct Rep1FD8Spawner {
     /* 0x08 */ void* _08;
     /* 0x0C */ Rep1FD8Particle* particles;
     /* 0x10 */ void* _10;
-    /* 0x14 */ u8 _14[0x18 - 0x14];
+    /* 0x14 */ u16 _14_hi : 4;
+    /* 0x14 */ u16 count : 12;
     /* 0x18 */ Vec pos;
-    /* 0x24 */ u8 idx;
-    /* 0x25 */ u8 _25;
+    union {
+        struct {
+            /* 0x24 */ u8 idx;
+            /* 0x25 */ u8 _25;
+        };
+        /* 0x24 */ s32 timer;
+    };
 } Rep1FD8Spawner;
 
 typedef struct Rep1FD8SpawnerTask {
@@ -116,7 +122,8 @@ typedef struct Rep1FD8Draw {
     /* 0x00 */ Control control;
     /* 0x44 */ Mtx _44;
     /* 0x74 */ Rep1FD8Model* _74;
-    /* 0x78 */ u8 _78[0x9C - 0x78];
+    /* 0x78 */ struct StadiumObjectCollision* _78;
+    /* 0x7C */ u8 _7C[0x9C - 0x7C];
     /* 0x9C */ Vec _9C;
     /* 0xA8 */ u8 _A8;
     /* 0xA9 */ u8 _A9;
@@ -132,10 +139,16 @@ extern struct {
     };
     /* 0x04 */ u8 _04[0x30 - 0x04];
     /* 0x30 */ s32 _30;
+    /* 0x34 */ u8 _34[0x3C - 0x34];
+    /* 0x3C */ u32* _3C;
+    /* 0x40 */ u16* _40;
+    /* 0x44 */ s32* _44;
+    /* 0x48 */ Vec* _48;
 } lbl_3_common_bss_350E4;
 
 typedef struct Rep1FD8CameraSlot {
-    /* 0x00 */ u8 _00[0x8];
+    /* 0x00 */ u32 _00;
+    /* 0x04 */ void (*_04)(void);
     /* 0x08 */ Mtx view;
     /* 0x38 */ void* task;
 } Rep1FD8CameraSlot; // size: 0x3C
@@ -145,9 +158,6 @@ typedef struct Rep1FD8CameraTask {
     /* 0x2A */ u8 _2A;
 } Rep1FD8CameraTask;
 
-// Outside every unit's .data range in splits.txt (escalated).
-extern u16 lbl_3_data_177F0;
-extern Rep1FD8CameraSlot lbl_3_data_17804[2];
 extern u8 lbl_803CBBC0;
 extern void fn_800A7D4C(s32, void*);
 extern u16 lbl_3_data_81DC[16];
@@ -165,6 +175,50 @@ extern void fn_800B0A14_removeQueue(void);
 extern void fn_80034CEC(Rep1FD8Task* task);
 extern void fn_8003A8A0(struct DODisplayObj* obj, MtxPtr view, s32 arg2);
 
+typedef struct Rep1FD8LightData {
+    /* 0x00 */ s16 pos[3];
+    /* 0x06 */ GXColor color;
+} Rep1FD8LightData; // size: 0xA
+
+typedef struct Rep1FD8Light {
+    /* 0x00 */ Vec pos;
+    /* 0x0C */ GXColor color;
+} Rep1FD8Light; // size: 0x10
+
+typedef struct Rep1FD8StadiumLights {
+    /* 0x00 */ Rep1FD8LightData lights[4];
+    /* 0x28 */ GXColor ambient;
+} Rep1FD8StadiumLights; // size: 0x2C
+
+typedef struct Rep1FD8StadiumFile {
+    /* 0x00 */ u8 _00[0x14];
+    /* 0x14 */ u32 tex;
+} Rep1FD8StadiumFile;
+
+extern Rep1FD8StadiumLights lbl_800F7478[14];
+extern Rep1FD8Light lbl_80367318[4];
+extern struct {
+    /* 0x00 */ u8 _00[0x4];
+    /* 0x04 */ Rep1FD8StadiumFile* _04;
+} lbl_8036E548;
+extern struct {
+    /* 0x00 */ f32 _00;
+    /* 0x04 */ u8 _04[0x14 - 0x04];
+    /* 0x14 */ u16 _14;
+    /* 0x16 */ u8 _16;
+    /* 0x17 */ u8 _17;
+    /* 0x18 */ u8 _18;
+    /* 0x19 */ u8 _19;
+    /* 0x1A */ u8 _1A[0x1D - 0x1A];
+    /* 0x1D */ u8 _1D;
+} lbl_803C5090;
+extern struct {
+    /* 0x00 */ u8 _00[0x28];
+    /* 0x28 */ u8 _28;
+} lbl_80366158;
+extern void fn_80023B90(Rep1FD8LightData* data, Rep1FD8Light* light);
+extern void fn_800BEBCC(u8 idx, Vec dir);
+
 static const u8 lbl_3_rodata_2028[3] = { 0xA0, 0x46, 0x00 };
 static const Vec lbl_3_rodata_202C[6] = {
     { -19.3f, -14.5f, 86.0f },
@@ -175,6 +229,73 @@ static const Vec lbl_3_rodata_202C[6] = {
     { 36.5f, -17.9f, -22.8f },
 };
 static const Vec lbl_3_rodata_2080 = { 0.0f, 0.0f, 0.0f };
+
+typedef struct Rep1FD8Prop {
+    /* 0x00 */ Vec pos;
+    /* 0x0C */ f32 rotY;
+    /* 0x10 */ u8 type;
+    /* 0x11 */ u8 _11;
+    /* 0x12 */ u8 _12;
+    /* 0x13 */ u8 _13;
+} Rep1FD8Prop; // size: 0x14
+
+typedef struct Rep1FD8Prop2 {
+    /* 0x00 */ Vec pos;
+    /* 0x0C */ f32 rotY;
+    /* 0x10 */ u8 type;
+    /* 0x11 */ u8 _11;
+    /* 0x12 */ u8 _12;
+    /* 0x13 */ u8 _13;
+    /* 0x14 */ s16 _14;
+    /* 0x16 */ s16 _16;
+} Rep1FD8Prop2; // size: 0x18
+
+// fn_3_C8650 reads 17508, 17514, 175FC, 17704 and 177E0 from one pool base, so they are static
+static f32 lbl_3_data_17508[3] = { 1.0f, 3.0f, 5.0f };
+static Rep1FD8Prop lbl_3_data_17514[11] = {
+    { { -51.592f, -18.0f, 68.051f }, 306.0f, 2, 1, 1, 2 },
+    { { -43.569f, -18.0f, 76.869f }, 314.0f, 2, 1, 1, 2 },
+    { { -33.845f, -18.0f, 84.008f }, 330.0f, 2, 1, 1, 2 },
+    { { 51.592f, -18.0f, 68.051f }, 52.0f, 2, 1, 2, 2 },
+    { { 43.569f, -18.0f, 76.869f }, 44.0f, 2, 1, 2, 2 },
+    { { 33.845f, -18.0f, 84.008f }, 28.0f, 2, 1, 2, 2 },
+    { { 0.0f, 0.0f, 0.0f }, 0.0f, 7, 0, 255, 7 },
+};
+f32 lbl_3_data_175F0[3] = { 0.06f, 0.07f, 0.08f };
+static Rep1FD8Prop2 lbl_3_data_175FC[11] = {
+    { { -48.0f, 5.5f, 25.0f }, 0.0f, 3, 1, 1, 3, 295, 1 },
+    { { -43.0f, 5.5f, 56.0f }, 0.0f, 3, 1, 1, 3, 315, 90 },
+    { { -10.0f, 5.5f, 77.0f }, 0.0f, 3, 1, 2, 3, 180, 90 },
+    { { 10.0f, 5.5f, 77.0f }, 0.0f, 3, 1, 2, 3, 270, 90 },
+    { { 45.0f, 5.5f, 23.0f }, 0.0f, 3, 1, 3, 3, 245, 1 },
+    { { 43.0f, 5.5f, 56.0f }, 0.0f, 3, 1, 3, 3, 135, 90 },
+    { { 0.0f, 0.0f, 0.0f }, 0.0f, 7, 0, 255, 7 },
+};
+static Rep1FD8Prop lbl_3_data_17704[11] = {
+    { { -12.891f, -5.93f, 87.961f }, 348.0f, 4, 1, 1, 6 },
+    { { 12.891f, -5.93f, 87.961f }, 12.0f, 4, 1, 1, 6 },
+    { { -23.0f, -0.02f, 72.0f }, 0.0f, 5, 1, 2, 6 },
+    { { -22.0f, -0.02f, 45.0f }, 0.0f, 5, 1, 2, 6 },
+    { { -50.0f, -0.02f, 38.0f }, 0.0f, 5, 1, 2, 6 },
+    { { 23.0f, -0.02f, 72.0f }, 0.0f, 5, 1, 3, 6 },
+    { { 22.0f, -0.02f, 45.0f }, 0.0f, 5, 1, 3, 6 },
+    { { 50.0f, -0.02f, 38.0f }, 0.0f, 5, 1, 3, 6 },
+    { { 0.0f, 0.0f, 0.0f }, 0.0f, 7, 0, 255, 7 },
+};
+static u8 lbl_3_data_177E0[16] = { 1, 2, 2, 2, 2, 2, 2, 6, 6, 6, 8, 9, 8, 9, 0, 0 };
+u16 lbl_3_data_177F0 = 4;
+s32 lbl_3_data_177F4 = 2;
+Rep1FD8LightData lbl_3_data_177F8 = { { 200, 1426, 2152 }, { 0xFF, 0xFF, 0xFF, 0x00 } };
+Rep1FD8CameraSlot lbl_3_data_17804[2] = {
+    { 0, fn_3_C1C18 },
+    { 0, fn_3_C1C18 },
+};
+f32 lbl_3_data_1787C = 0.7f;
+s16 lbl_3_data_17880[3][3] = {
+    { 106, -98, 220 },
+    { 94, -87, 230 },
+    { 120, -80, 212 },
+};
 
 // .bss, declared in reverse address order (MWCC lays .bss statics out last to first)
 static void* lbl_3_bss_9F0C[5];
@@ -214,7 +335,13 @@ void fn_3_C82B4(void) {
 
 // .text:0x000C823C size:0x78 mapped:0x807072D0
 struct StadiumObjectCollision* fn_3_C823C(s32 idx, MtxPtr mtx) {
-    return NULL;
+    Rep1FD8Draw* draw = &lbl_3_common_bss_350E4.draws[idx];
+
+    CTRLBuildMatrix(&draw->control, mtx);
+    if (draw->_A9 == 5) {
+        mtx[1][3] = -0.002f;
+    }
+    return lbl_3_common_bss_350E4.draws[idx]._78;
 }
 
 // .text:0x000C805C size:0x1E0 mapped:0x807070F0
@@ -298,8 +425,23 @@ void fn_3_C63D0(void) {
 }
 
 // .text:0x000C625C size:0x174 mapped:0x807052F0
-void fn_3_C625C(void) {
-    return;
+BOOL fn_3_C625C(Rep1FD8Draw* draw) {
+    Vec pos = draw->_9C;
+    Vec diff;
+
+    if (g_Ball.ballState == 1) {
+        return FALSE;
+    }
+    if (g_Ball.currentStarSwing2 == 11 | g_Ball.currentStarSwing2 == 12) {
+        return FALSE;
+    }
+    pos.y *= -1.0f;
+    PSVECSubtract((Vec*)&g_Ball, &pos, &diff);
+    if (PSVECMag(&diff) <= 2.6f) {
+        playStadiumSound(2);
+        return TRUE;
+    }
+    return FALSE;
 }
 
 // .text:0x000C5DDC size:0x480 mapped:0x80704E70
@@ -360,7 +502,26 @@ void fn_3_C4CF4(void) {
 
 // .text:0x000C4B80 size:0x174 mapped:0x80703C14
 void fn_3_C4B80(void) {
-    return;
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetNumChans(1);
+    GXSetNumTexGens(1);
+    GXSetNumTevStages(1);
+    GXSetCullMode(GX_CULL_NONE);
+    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_RASC, GX_CC_TEXC, GX_CC_ZERO);
+    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_RASA, GX_CA_TEXA, GX_CA_ZERO);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    GXSetProjection(fn_80052734(fn_8005268C())->proj, GX_PERSPECTIVE);
+    GXLoadPosMtxImm(fn_80052734(fn_8005268C())->view, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
 }
 
 // .text:0x000C48D0 size:0x2B0 mapped:0x80703964
@@ -369,8 +530,41 @@ void fn_3_C48D0(void) {
 }
 
 // .text:0x000C4724 size:0x1AC mapped:0x807037B8
-void fn_3_C4724(void) {
-    return;
+BOOL fn_3_C4724(Rep1FD8Spawner* spawner) {
+    Rep1FD8Particle* p = spawner->particles;
+    u32 i = 0;
+
+    fn_80033620(spawner);
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+    do {
+        if (p->delay != 0) {
+            p->delay -= lbl_80366158._28 == 0;
+        } else {
+            if (p->life == 0) {
+                continue;
+            }
+            fn_8003403C(p->_38, p->_3C);
+            fn_80033CC8(p, spawner->_10);
+            if (lbl_80366158._28 == 0) {
+                p->pos.x += p->vel.x;
+                p->pos.y += p->vel.y;
+                p->pos.z += p->vel.z;
+                p->_38 -= 0.275f;
+                p->_3C -= 0.275f;
+                p->color[3] -= 15;
+                if (p->_38 <= 0.0f || p->_3C <= 0.0f) {
+                    p->life = 0;
+                }
+            }
+        }
+        i++;
+    } while ((p = p->next) != NULL && i < spawner->count);
+    spawner->timer -= lbl_80366158._28 == 0;
+    if (spawner->timer == 0) {
+        return TRUE;
+    }
+    return FALSE;
 }
 
 // .text:0x000C444C size:0x2D8 mapped:0x807034E0
@@ -379,8 +573,36 @@ void fn_3_C444C(void) {
 }
 
 // .text:0x000C42A4 size:0x1A8 mapped:0x80703338
-void fn_3_C42A4(void) {
-    return;
+void fn_3_C42A4(u32* n, s32* count) {
+    Mtx m;
+    StadiumObject1D58* obj;
+    s32 next;
+    s32 group;
+    s32 i;
+
+    for (group = 0; group < 5; group++) {
+        next = lbl_3_common_bss_350E4._40[*n] = lbl_3_common_bss_350E4._40[*n - 1] + lbl_3_common_bss_350E4._3C[*n - 1];
+        fn_3_B8574();
+        for (i = 0; i < 10; i++) {
+            if (group == lbl_3_data_17704[i]._12 && lbl_3_data_17704[i].type != 7) {
+                if (lbl_3_common_bss_350E4._00[i + lbl_3_bss_9DE0]._90_6) {
+                    lbl_3_common_bss_350E4._44[next] = i + lbl_3_bss_9DE0;
+                    next++;
+                    lbl_3_common_bss_350E4._3C[*n]++;
+                    obj = &lbl_3_common_bss_350E4._00[i + lbl_3_bss_9DE0];
+                    CTRLBuildMatrix(&obj->control, m);
+                    fn_3_B8464(m, obj->_78);
+                    m[1][3] *= -100.0f;
+                    fn_3_B8464(m, obj->_78);
+                    (*count)++;
+                }
+            }
+        }
+        if (lbl_3_common_bss_350E4._3C[*n] != 0) {
+            fn_3_B8414(&lbl_3_common_bss_350E4._48[*n * 2], &lbl_3_common_bss_350E4._48[*n * 2 + 1]);
+            (*n)++;
+        }
+    }
 }
 
 // .text:0x000C414C size:0x158 mapped:0x807031E0
@@ -726,7 +948,40 @@ void fn_3_C2644(void) {
 
 // .text:0x000C24A0 size:0x1A4 mapped:0x80701534
 void fn_3_C24A0(void) {
-    return;
+    Vec dir;
+    s16 timer;
+    u8 alpha;
+
+    ((Rep1FD8Task*)lbl_803CC1B8)->_10--;
+    timer = ((Rep1FD8Task*)lbl_803CC1B8)->_10;
+    if (timer == 0) {
+        fn_800B0A14_removeQueue();
+        fn_80023B90(lbl_800F7478[g_d_GameSettings._54].lights, lbl_80367318);
+        if (lbl_8036E548._04 != NULL) {
+            *(u16*)((u8*)lbl_8036E548._04 + lbl_8036E548._04->tex + 0x60) = 2;
+        }
+    } else {
+        if (timer < 12) {
+            alpha = (timer << 7) / 12;
+        } else {
+            alpha = 128;
+        }
+        fn_80023B90(&lbl_3_data_177F8, lbl_80367318);
+        if (lbl_8036E548._04 != NULL) {
+            *(u16*)((u8*)lbl_8036E548._04 + lbl_8036E548._04->tex + 0x60) = 3;
+        }
+        lbl_803C5090._1D = 11;
+        lbl_803C5090._00 = 1.0f;
+        lbl_803C5090._14 = 0x1C0;
+        lbl_803C5090._17 = alpha;
+        lbl_803C5090._19 = lbl_3_data_177F4;
+        lbl_803C5090._18 = 1;
+    }
+    dir.x = -lbl_80367318[0].pos.x;
+    dir.y = -lbl_80367318[0].pos.y;
+    dir.z = -lbl_80367318[0].pos.z;
+    PSVECNormalize(&dir, &dir);
+    fn_800BEBCC(0, dir);
 }
 
 // .text:0x000C23E0 size:0xC0 mapped:0x80701474
