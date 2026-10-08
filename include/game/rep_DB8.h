@@ -10,7 +10,7 @@ void fn_3_5BD40(void);
 void fn_3_5C418(void);
 u8 fn_3_5C530(int inning);
 void fn_3_5C5C8(void);
-void fn_3_5C69C(void);
+void fn_3_5C69C(int base);
 void fn_3_5C74C(int arg);
 void fn_3_5CD24(void);
 void fn_3_5CDB4(void);
