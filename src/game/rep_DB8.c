@@ -682,8 +682,8 @@ void fn_3_5F3FC(void) {
         g_GameLogic.pre_PostMiniGameInd = 1;
         g_GameLogic.minigameLastTurnSuccessInd = 1;
         g_GameLogic.frameCountdownAtBeginningOfAtBatLockout = 90;
-        g_GameLogic._133 = 0;
-        g_GameLogic._134 = 0;
+        g_GameLogic._133[0] = 0;
+        g_GameLogic._133[1] = 0;
         if (g_Scores._C6 < 254) {
             g_Scores._C6++;
         } else {
@@ -1370,8 +1370,8 @@ void fn_3_5D51C(void) {
     g_GameLogic.awayTeamBattingInd_battingTeam ^= 1;
     g_GameLogic.teamBatting ^= 1;
     g_GameLogic.teamFielding ^= 1;
-    g_GameLogic._131 = 0;
-    g_GameLogic._132 = 0;
+    g_GameLogic._131[0] = 0;
+    g_GameLogic._131[1] = 0;
     g_Scores._A0 = g_Scores._04[g_Scores._AD][0];
     fn_3_5A684();
     fn_3_8A350();

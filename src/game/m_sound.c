@@ -84,6 +84,7 @@ extern unsigned long sndAddListener(SND_LISTENER* li, SND_FVECTOR* pos, SND_FVEC
                                     unsigned char vol, SND_ROOM* room);
 extern s32 fn_800698F8(s32 charID);
 extern bool32 sndSeqGetValid(s32 seqID);
+extern bool32 sndSeqLoop(s32 seqID, bool32 on);
 extern void fn_800216F8(u8 group, int (*callback)(void));
 extern int fn_8006285C(void);
 extern void fn_800A86B4(s32 arg0);
@@ -105,15 +106,37 @@ typedef struct UnkPlayer8CD74 {
 extern struct {
     /* 0x0000 */ u8 _0000[0xC04];
     /* 0x0C04 */ UnkPlayer8CD74 _C04[13];
-    /* 0x2C58 */ u8 _2C58[0x1C];
+    /* 0x2C50 */ u8 _2C50[0x24];
     /* 0x2C74 */ UnkPlayer8CD74* _2C74;
-    /* 0x2C78 */ u8 _2C78[0x307D - 0x2C78];
+    /* 0x2C78 */ u8 _2C78[0x2D46 - 0x2C78];
+    /* 0x2D46 */ u8 _2D46;
+    /* 0x2D47 */ u8 _2D47[0x2D52 - 0x2D47];
+    /* 0x2D52 */ u8 _2D52;
+    /* 0x2D53 */ u8 _2D53[0x307D - 0x2D53];
     /* 0x307D */ u8 _307D;
 } lbl_8036E548;
 extern struct {
     /* 0x00 */ u8 _00[0xC2];
     /* 0xC2 */ u8 _C2;
 } g_Scores;
+extern struct {
+    /* 0x000 */ u8 _000[0x1D1];
+    /* 0x1D1 */ u8 _1D1;
+    /* 0x1D2 */ u8 _1D2;
+} lbl_3_common_bss_34C90;
+extern struct {
+    /* 0x00 */ u8 _00[0x46];
+    /* 0x46 */ u8 _46;
+    /* 0x47 */ u8 _47;
+} lbl_3_common_bss_37400;
+extern struct {
+    /* 0x00 */ u8 _00[0xB3];
+    /* 0xB3 */ u8 _B3;
+} lbl_3_common_bss_32724;
+extern struct {
+    /* 0x000 */ u8 _000[0x25C];
+    /* 0x25C */ u8 _25C;
+} lbl_3_common_bss_134C4;
 extern unsigned long sndAddEmitter(SND_EMITTER* em_buffer, SND_FVECTOR* pos, SND_FVECTOR* dir, f32 maxDis, f32 comp,
                                    unsigned long flags, unsigned short fxid, unsigned char maxVol, unsigned char minVol,
                                    SND_ROOM* room);
@@ -138,21 +161,204 @@ extern char lbl_800E87B4[15][16];
 void fn_3_90AB0(s32 charID);
 BOOL fn_3_90B14(int first, int second);
 
-// .data outside the unit's ranges
-extern u8 lbl_3_data_8148[0x20];
-extern u16 lbl_3_data_8168[0x36];
-extern u8 lbl_3_data_81D4[8];
-extern u16 lbl_3_data_81FC[0x88];
-extern u8 lbl_3_data_830C[0x16][2];
-extern u8 lbl_3_data_8338[0x66][2];
-extern u8 lbl_3_data_84F4[0x3C];
-extern u8 lbl_3_data_8530[2][0x180];
-extern f32 lbl_3_data_88AC[3];
-extern s16 lbl_3_data_88B8[0x12];
-extern SeqEntry lbl_3_data_88E0[];
-extern EmitterParams lbl_3_data_8974[17];
-extern SND_FVECTOR lbl_3_data_8D70;
-extern Vec lbl_3_data_8D7C;
+// .data
+static u8 lbl_3_data_8148[0x20] = {
+    0x1B, 0x1A, 0x19, 0x18, 0x17, 0x16, 0x15, 0x14, 0x13, 0x12, 0x11, 0x10, 0x0F, 0x0E, 0x0D, 0x0C,
+    0x0B, 0x0A, 0x23, 0x07, 0x09, 0x21, 0x22, 0x08, 0x30, 0x2E, 0x27, 0x2F, 0x32, 0x25, 0x24, 0x26,
+};
+static u16 lbl_3_data_8168[0x36] = {
+    0x144, 0x137, 0x12A, 0x11D, 0x110, 0x103, 0x0F6, 0x0E9, 0x0DC,
+    0x0CF, 0x0C2, 0x0B5, 0x0A8, 0x09B, 0x08E, 0x081, 0x074, 0x067,
+    0x201, 0x040, 0x05A, 0x1E7, 0x1E7, 0x1E7, 0x1F4, 0x1F4, 0x1F4,
+    0x04D, 0x277, 0x09B, 0x09B, 0x09B, 0x09B, 0x25D, 0x25D, 0x25D,
+    0x25D, 0x235, 0x26A, 0x2C9, 0x21B, 0x20E, 0x0A8, 0x05A, 0x074,
+    0x074, 0x074, 0x074, 0x228, 0x228, 0x228, 0x228, 0x04D, 0x04D,
+};
+u8 lbl_3_data_81D4[8] = {
+    0x2A, 0x2B, 0x2C, 0x34, 0x02, 0x01, 0x06, 0x00,
+};
+u16 lbl_3_data_81DC[0x10] = {
+    0x248, 0x24A, 0x252, 0x30F, 0x010, 0x001, 0x022, 0x000,
+    0x249, 0x251, 0x258, 0x00F, 0x017, 0x00F, 0x03F, 0x000,
+};
+u16 lbl_3_data_81FC[0x39] = {
+    0x2D6, 0x2D7, 0x2D8, 0x2D9, 0x2E1, 0x2E2, 0x2E3, 0x2E4,
+    0x2E5, 0x2E6, 0x2DD, 0x2DE, 0x2DF, 0x2E0, 0x2DA, 0x2DB,
+    0x2DC, 0x2E7, 0x2E8, 0x2E9, 0x2EA, 0x2EB, 0x2EC, 0x2ED,
+    0x2EE, 0x2EF, 0x2F0, 0x2F1, 0x2F2, 0x2F3, 0x2F4, 0x2F5,
+    0x2F6, 0x2F7, 0x2F8, 0x2F9, 0x2FA, 0x2FB, 0x2FC, 0x2FD,
+    0x2FE, 0x2FF, 0x300, 0x301, 0x302, 0x303, 0x304, 0x305,
+    0x306, 0x307, 0x308, 0x309, 0x30A, 0x30B, 0x30C, 0x30D,
+    0x30E,
+};
+static u8 lbl_3_data_8270[7] = {
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
+};
+static u8 lbl_3_data_8278[12] = {
+    0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78,
+};
+static u8 lbl_3_data_8284[0x66] = {
+    0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F,
+    0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F,
+    0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F,
+    0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F,
+    0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F,
+    0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F,
+};
+u8 lbl_3_data_82EC[0x20] = {
+    0x7F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7F, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+};
+static u8 lbl_3_data_830C[0x16][2] = {
+    { 0x4B, 0x28 }, { 0x4B, 0x28 }, { 0x55, 0x28 }, { 0x55, 0x28 }, { 0x55, 0x28 }, { 0x55, 0x28 }, { 0x55, 0x28 }, { 0x55, 0x28 },
+    { 0x55, 0x28 }, { 0x5A, 0x28 }, { 0x55, 0x28 }, { 0x55, 0x28 }, { 0x55, 0x28 }, { 0x55, 0x28 }, { 0x55, 0x28 }, { 0x55, 0x28 },
+    { 0x5A, 0x28 }, { 0x5F, 0x28 }, { 0x69, 0x28 }, { 0x00, 0x00 }, { 0x55, 0x28 }, { 0x00, 0x00 },
+};
+static u8 lbl_3_data_8338[0x66][2] = {
+    { 0x7F, 0x00 }, { 0x7F, 0x00 }, { 0x7F, 0x00 }, { 0x46, 0x00 }, { 0x4B, 0x00 }, { 0x55, 0x00 }, { 0x5A, 0x00 }, { 0x5A, 0x00 },
+    { 0x64, 0x00 }, { 0x7F, 0x00 }, { 0x64, 0x00 }, { 0x78, 0x00 }, { 0x64, 0x00 }, { 0x7F, 0x00 }, { 0x64, 0x00 }, { 0x64, 0x00 },
+    { 0x64, 0x00 }, { 0x64, 0x00 }, { 0x64, 0x00 }, { 0x64, 0x00 }, { 0x64, 0x00 }, { 0x64, 0x00 }, { 0x64, 0x00 }, { 0x64, 0x00 },
+    { 0x7F, 0x00 }, { 0x64, 0x00 }, { 0x6E, 0x00 }, { 0x7F, 0x00 }, { 0x75, 0x00 }, { 0x75, 0x00 }, { 0x64, 0x00 }, { 0x64, 0x00 },
+    { 0x57, 0x00 }, { 0x64, 0x00 }, { 0x64, 0x00 }, { 0x57, 0x00 }, { 0x64, 0x00 }, { 0x64, 0x00 }, { 0x64, 0x00 }, { 0x7F, 0x00 },
+    { 0x7F, 0x00 }, { 0x75, 0x00 }, { 0x54, 0x00 }, { 0x64, 0x00 }, { 0x64, 0x00 }, { 0x50, 0x00 }, { 0x5A, 0x00 }, { 0x7F, 0x00 },
+    { 0x7F, 0x00 }, { 0x7F, 0x00 }, { 0x7F, 0x00 }, { 0x7F, 0x00 }, { 0x7F, 0x00 }, { 0x64, 0x00 }, { 0x64, 0x00 }, { 0x64, 0x00 },
+    { 0x75, 0x00 }, { 0x6B, 0x00 }, { 0x64, 0x00 }, { 0x73, 0x00 }, { 0x7F, 0x00 }, { 0x7F, 0x00 }, { 0x7F, 0x00 }, { 0x7F, 0x00 },
+    { 0x7F, 0x00 }, { 0x7F, 0x00 }, { 0x7F, 0x00 }, { 0x7F, 0x00 }, { 0x7F, 0x00 }, { 0x6B, 0x00 }, { 0x55, 0x00 }, { 0x6B, 0x00 },
+    { 0x6B, 0x00 }, { 0x7F, 0x00 }, { 0x7F, 0x00 }, { 0x75, 0x00 }, { 0x66, 0x00 }, { 0x75, 0x00 }, { 0x7F, 0x00 }, { 0x55, 0x00 },
+    { 0x64, 0x00 }, { 0x64, 0x00 }, { 0x64, 0x00 }, { 0x64, 0x00 }, { 0x64, 0x00 }, { 0x6E, 0x00 }, { 0x64, 0x00 }, { 0x64, 0x00 },
+    { 0x73, 0x00 }, { 0x6E, 0x00 }, { 0x5A, 0x00 }, { 0x6E, 0x00 }, { 0x7F, 0x00 }, { 0x7F, 0x00 }, { 0x6B, 0x00 }, { 0x7F, 0x00 },
+    { 0x75, 0x00 }, { 0x7F, 0x00 }, { 0x7F, 0x00 }, { 0x73, 0x00 }, { 0x7F, 0x00 }, { 0x7F, 0x00 },
+};
+u8 lbl_3_data_8404[6][15][2] = {
+    { { 0x3C, 0x00 }, { 0x5A, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 } },
+    { { 0x7F, 0x00 }, { 0x7F, 0x00 }, { 0x7F, 0x00 }, { 0x69, 0x00 }, { 0x7F, 0x00 }, { 0x7F, 0x00 }, { 0x7F, 0x00 }, { 0x7F, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 } },
+    { { 0x7F, 0x00 }, { 0x7F, 0x00 }, { 0x7F, 0x00 }, { 0x7F, 0x00 }, { 0x7F, 0x00 }, { 0x7F, 0x00 }, { 0x7F, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 } },
+    { { 0x7F, 0x00 }, { 0x7F, 0x00 }, { 0x7F, 0x00 }, { 0x64, 0x00 }, { 0x7F, 0x00 }, { 0x41, 0x00 }, { 0x46, 0x00 }, { 0x46, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 } },
+    { { 0x7F, 0x00 }, { 0x7F, 0x00 }, { 0x7F, 0x00 }, { 0x32, 0x00 }, { 0x4D, 0x00 }, { 0x4D, 0x00 }, { 0x57, 0x00 }, { 0x57, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 }, { 0x00, 0x00 } },
+    { { 0x7F, 0x00 }, { 0x64, 0x00 }, { 0x64, 0x00 }, { 0x64, 0x00 }, { 0x7F, 0x00 }, { 0x7F, 0x00 }, { 0x3C, 0x00 }, { 0x3C, 0x00 }, { 0x69, 0x00 }, { 0x7F, 0x00 }, { 0x6E, 0x00 }, { 0x7F, 0x00 }, { 0x6E, 0x00 }, { 0x7F, 0x00 }, { 0x7F, 0x00 } },
+};
+u8 lbl_3_data_84B8[30][2] = {
+    { 0x7F, 0x00 }, { 0x6B, 0x00 }, { 0x64, 0x00 }, { 0x5F, 0x00 }, { 0x75, 0x00 }, { 0x70, 0x00 }, { 0x6B, 0x00 }, { 0x7F, 0x00 },
+    { 0x6B, 0x00 }, { 0x7F, 0x00 }, { 0x7F, 0x00 }, { 0x7F, 0x00 }, { 0x4B, 0x00 }, { 0x7F, 0x00 }, { 0x7F, 0x00 }, { 0x7F, 0x00 },
+    { 0x64, 0x00 }, { 0x64, 0x00 }, { 0x69, 0x00 }, { 0x75, 0x00 }, { 0x69, 0x00 }, { 0x5F, 0x00 }, { 0x5F, 0x00 }, { 0x69, 0x00 },
+    { 0x64, 0x00 }, { 0x6E, 0x00 }, { 0x78, 0x00 }, { 0x6E, 0x00 }, { 0x6E, 0x00 }, { 0x7F, 0x00 },
+};
+u8 lbl_3_data_84F4[0x3C] = {
+    0x6B, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x4D, 0x4D, 0x7F, 0x61, 0x6B, 0x61, 0x61, 0x7F, 0x6B,
+    0x5F, 0x69, 0x43, 0x37, 0x7F, 0x7F, 0x7F, 0x69, 0x7F, 0x61, 0x75, 0x75, 0x64, 0x5F, 0x7F, 0x64,
+    0x64, 0x7F, 0x69, 0x5A, 0x64, 0x6B, 0x7F, 0x7F, 0x5A, 0x7F, 0x7F, 0x75, 0x7F, 0x7F, 0x73, 0x64,
+    0x73, 0x6E, 0x6E, 0x7F, 0x73, 0x73, 0x7F, 0x7F, 0x78, 0x00, 0x00, 0x00,
+};
+static u8 lbl_3_data_8530[2][0x180] = {
+    {
+        0x64, 0x64, 0x64, 0x64, 0x64, 0x64, 0x64, 0x64, 0x64, 0x64, 0x64, 0x64, 0x7F, 0x7F, 0x7F, 0x7F,
+        0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F,
+        0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F,
+        0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F,
+        0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F,
+        0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F,
+        0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F,
+        0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F,
+        0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F,
+        0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F,
+        0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F,
+        0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F,
+        0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F,
+        0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F,
+        0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F,
+        0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F,
+        0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F,
+        0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F,
+        0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F,
+        0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F,
+        0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F,
+        0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F,
+        0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F,
+        0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F,
+    },
+    {
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    },
+};
+static f32 lbl_3_data_8830 = 0.6f;
+f32 lbl_3_data_8834[6][4] = {
+    { 50.0f, 0.0f, 127.0f, 10.0f },
+    { 50.0f, 0.0f, 127.0f, 10.0f },
+    { 50.0f, 0.0f, 127.0f, 10.0f },
+    { 50.0f, 0.0f, 127.0f, 10.0f },
+    { 100.0f, 0.0f, 127.0f, 10.0f },
+    { 100.0f, 0.0f, 127.0f, 10.0f },
+};
+u32 lbl_3_data_8894[6] = {
+    0x01, 0x01, 0x01, 0x01, 0x61, 0x61,
+};
+f32 lbl_3_data_88AC[3] = { 50.0f, 50.0f, 1.0f };
+s16 lbl_3_data_88B8[0x12] = {
+    0x2000, 0x3B00, 0x3, 0x2D, 0x46, 0x0,
+    0x2000, 0x3FFF, 0x1, 0x3C, 0x7F, 0x0,
+    0x2000, 0x3FFF, 0x14, 0xA5, 0x7F, 0x0,
+};
+u8 lbl_3_data_88DC[2] = {
+    0x03, 0x03,
+};
+static SeqEntry lbl_3_data_88E0[19] = {
+    { 0x1D, 0x00, 0x0 }, { 0x1D, 0x01, 0x1 }, { 0x1D, 0x02, 0x2 }, { 0x1D, 0x03, 0x3 },
+    { 0x1D, 0x04, 0x4 }, { 0x1D, 0x06, 0x5 }, { 0x1D, 0x05, 0x6 }, { 0x1D, 0x07, 0x7 },
+    { 0x1D, 0x08, 0x8 }, { 0x1D, 0x09, 0x9 }, { 0x1D, 0x0A, 0xA }, { 0x1D, 0x0B, 0xB },
+    { 0x1D, 0x0C, 0xC }, { 0x1D, 0x0D, 0xD }, { 0x1D, 0x0E, 0xE }, { 0x1D, 0x0F, 0xF },
+    { 0x1D, 0x10, 0x10 }, { 0x1D, 0x11, 0x11 }, { 0x1D, 0x12, 0x12 },
+};
+static SeqEntry lbl_3_data_8954[1] = {
+    { 0x36, 0x15, 0x0 },
+};
+u8 lbl_3_data_895C[0x16] = {
+    0x16, 0x17, 0x19, 0x1A, 0x1D, 0x1E, 0x1F, 0x20, 0x22, 0x23, 0x24, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E,
+    0x2F, 0x31, 0x32, 0x33, 0x34, 0x35,
+};
+EmitterParams lbl_3_data_8974[17] = {
+    { { -5000000, -4000000, 23000000 }, 30000000, 0, 110, 30, { 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 }, 1 },
+    { { -5000000, 0, 19000000 }, 40000000, 0, 127, 50, { 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 }, 1 },
+    { { 0, 0, 6000000 }, 8000000, 0, 90, 30, { 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 }, 16 },
+    { { 0, 0, 0 }, 20000000, 0, 90, 30, { 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x40 }, 32 },
+    { { -5000000, -1000000, 5000000 }, 30000000, 0, 70, 10, { 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x40 }, 32 },
+    { { 0, 0, 5000000 }, 20000000, 0, 50, 15, { 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x40 }, 32 },
+    { { -5000000, 0, 19000000 }, 40000000, 0, 90, 35, { 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 }, 1 },
+    { { 0, 0, 0 }, 20000000, 0, 60, 40, { 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x40 }, 8 },
+    { { 0, 0, 0 }, 20000000, 0, 110, 90, { 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x40 }, 2 },
+    { { 0, 0, 0 }, 20000000, 0, 127, 100, { 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x40 }, 2 },
+    { { 0, 0, 0 }, 20000000, 0, 127, 100, { 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x40 }, 4 },
+    { { 0, 0, 0 }, 20000000, 0, 127, 100, { 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x40 }, 4 },
+    { { 0, 0, 0 }, 20000000, 0, 127, 100, { 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x40 }, 4 },
+    { { 0, 0, 0 }, 20000000, 0, 127, 100, { 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x40 }, 4 },
+    { { 0, 0, 0 }, 20000000, 0, 127, 100, { 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x40 }, 4 },
+    { { 0, 0, 0 }, 20000000, 0, 127, 0, { 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 }, 1 },
+    { { 0, 0, 0 }, 20000000, 0, 127, 0, { 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 }, 1 },
+};
+static SND_FVECTOR lbl_3_data_8D70 = { 0.0f, -1.0f, 0.0f };
+Vec lbl_3_data_8D7C = { 0.0f, 0.0f, 0.0f };
 
 // .bss, in reverse address order
 static s32 lbl_3_bss_1780[30];
@@ -166,6 +372,21 @@ static SoundLoadTask* lbl_3_bss_1768;
 static f32 lbl_3_bss_1764;
 static u8 lbl_3_bss_1761;
 static u8 lbl_3_bss_1760;
+
+// Queues a sound group load for fn_3_8B094, as fn_3_8B258 does; the callers expand it in place
+#define QUEUE_SOUND_LOAD(state, id, arg)                                                                   \
+    do {                                                                                                   \
+        u8 head_;                                                                                          \
+        u8 next_;                                                                                          \
+                                                                                                           \
+        if (lbl_3_bss_1768 != NULL &&                                                                      \
+            lbl_3_bss_1768->tail != (next_ = ((head_ = lbl_3_bss_1768->head) + 1) % 14)) {                 \
+            lbl_3_bss_1768->head = next_;                                                                  \
+            lbl_3_bss_1768->queue[head_ * 3] = (id);                                                       \
+            lbl_3_bss_1768->queue[head_ * 3 + 1] = (state);                                                \
+            lbl_3_bss_1768->queue[head_ * 3 + 2] = (arg);                                                  \
+        }                                                                                                  \
+    } while (0)
 
 // .text:0x000910AC size:0x48 mapped:0x806D0140
 int fn_3_910AC(void) {
@@ -448,6 +669,24 @@ void fn_3_90674(s32 song) {
     sndSeqVolume(lbl_3_data_830C[song][0], 0, lbl_3_common_bss_34C58._04, 0);
 }
 
+// .text:0x0009056C size:0x108 mapped:0x806CF600
+BOOL fn_3_9056C(s32 song) {
+    SeqEntry* entry;
+
+    if (g_d_GameSettings.GameModeSelected != GAME_TYPE_PRACTICE) {
+        entry = &lbl_3_data_88E0[song];
+    } else {
+        entry = &lbl_3_data_8954[song];
+    }
+    if (sndSeqGetValid(lbl_3_common_bss_34C58._08)) {
+        sndSeqVolume(0, 0, lbl_3_common_bss_34C58._08, 1);
+        return FALSE;
+    }
+    lbl_3_common_bss_34C58._08 = sndSeqPlayEx(entry->group, entry->song, (void*)lbl_3_bss_1774[song], NULL, 0);
+    sndSeqVolume(lbl_800EF808._391 = lbl_3_data_830C[song][0], 0, lbl_3_common_bss_34C58._08, 0);
+    return TRUE;
+}
+
 // .text:0x00090434 size:0x138 mapped:0x806CF4C8
 void fn_3_90434(void) {
     int i;
@@ -516,8 +755,17 @@ u32 fn_3_90220(s32 charID, s32 sound) {
 }
 
 // .text:0x00090150 size:0xD0 mapped:0x806CF1E4
-void fn_3_90150(void) {
-    return;
+SND_VOICEID fn_3_90150(s32 charID, s32 sound) {
+    int fxid = lbl_3_data_8168[charID] + sound;
+    int vol = lbl_3_data_8530[0][sound];
+    int ctrl;
+    SND_VOICEID vid;
+    vol = vol * lbl_3_data_8830;
+    ctrl = lbl_3_data_8530[1][sound];
+    ctrl = ctrl * lbl_3_data_8830;
+    vid = sndFXStartEx(fxid, vol, 0x3F, 0);
+    sndFXCtrl(vid, 0x5B, ctrl);
+    return vid;
 }
 
 // .text:0x00090064 size:0xEC mapped:0x806CF0F8
@@ -622,8 +870,8 @@ void fn_3_8FC0C(void) {
 
 // .text:0x0008F21C size:0x9F0 mapped:0x806CE2B0
 // 99.37%: the target tests the stadium with four separate compares (this merges 2 and 3 into a
-// range check) and tests the flag through (-x | x) >> 31; "dome = dome != FALSE;" reproduces
-// that test (99.78%) but is no plausible source
+// range check; assigning the || chain to dome keeps them, 99.04%) and tests the flag through
+// (-x | x) >> 31; "dome = dome != FALSE;" reproduces that test (99.78%) but is no plausible source
 void fn_3_8F21C(void) {
     BOOL dome = FALSE;
     BOOL stop = FALSE;
@@ -793,8 +1041,555 @@ void fn_3_8F1C8(void) {
 }
 
 // .text:0x0008DA80 size:0x1748 mapped:0x806CCB14
+// The fades and queue pushes are written out in place: fn_3_8B258, fn_3_8C4F0 and fn_3_8C2DC
+// have no callers in the target, and MWCC allocates inlined calls to them differently
 void fn_3_8DA80(void) {
+    s32 song = -1;
+    BOOL flag = FALSE;
+    int sel;
+    BOOL jingle;
+    u32 steps;
+
+    switch (g_d_GameSettings.GameModeSelected) {
+    case GAME_TYPE_PRACTICE:
+        if (g_Practice.tutorialState == 0 && g_Practice.practiceState == 0) {
+            fn_3_8B318(g_d_GameSettings.StadiumID);
+        }
+        break;
+    default:
+        if (g_GameLogic.gameStatus == 5 && g_GameLogic.FrameCountOfCurrentPitch == 1) {
+            fn_3_8B318(g_d_GameSettings.StadiumID);
+        }
+        break;
+    }
+    if (g_GameLogic.framesOfExitingToMenu != 0) {
+        return;
+    }
+    if (g_GameLogic.gameStatus == 0x17) {
+        return;
+    }
+    if (g_GameLogic.gameStatus == 0xE && !g_d_GameSettings.minigamesEnabled) {
+        return;
+    }
+    if (lbl_3_common_bss_34C58._33 != 0 && g_GameLogic.gameStatus == 0) {
+        lbl_3_common_bss_34C58._33--;
+    }
+    fn_3_8D9C0();
+    if (!lbl_800EF808._398) {
+        if (lbl_3_common_bss_34C58._04 != SND_ID_ERROR) {
+            if (sndSeqGetValid(lbl_3_common_bss_34C58._04)) {
+                sndSeqVolume(0, 0, lbl_3_common_bss_34C58._04, 1);
+            }
+            lbl_3_common_bss_34C58._04 = SND_ID_ERROR;
+        }
+        return;
+    }
+    lbl_3_common_bss_34C58._22 = lbl_3_common_bss_34C58._20;
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_PRACTICE) {
+        if (g_GameLogic.secondaryGameMode == 0xA || g_GameLogic.secondaryGameMode == 0x11 ||
+            g_GameLogic.secondaryGameMode == 0x12) {
+            song = -1;
+            goto change;
+        }
+        if (g_Practice.tutorialState == 0) {
+            song = -1;
+            goto change;
+        }
+        if (g_Practice._19F != 0 && (lbl_3_common_bss_34C90._1D2 == 6 || lbl_3_common_bss_34C90._1D2 == 7 ||
+                                     lbl_3_common_bss_34C90._1D2 == 8 || lbl_3_common_bss_34C90._1D2 == 9)) {
+            song = -1;
+            goto change;
+        }
+        if (g_Practice._1C7 != 0 && (lbl_3_common_bss_34C90._1D2 == 6 || lbl_3_common_bss_34C90._1D2 == 7)) {
+            song = -1;
+            goto change;
+        }
+        if (g_Practice.practiceType_2 == 4) {
+            if (g_GameLogic.gameStatus == 5) {
+                return;
+            }
+            goto game;
+        }
+        song = 0x15;
+        if (g_Ball.deadBallReason != 1 || g_GameLogic.secondaryGameMode == 0xB) {
+            goto change;
+        }
+        song = 0;
+        goto game;
+    }
+    if (g_d_GameSettings.minigamesEnabled && g_GameLogic.gameStatus == 0x21) {
+        song = -1;
+        goto change;
+    }
+    if ((g_GameLogic.gameStatus == 0x27 || g_GameLogic.gameStatus == 0x24 || g_GameLogic.gameStatus == 0x22) &&
+        g_Minigame._1908 >= 0 && g_Minigame._1A3C != 0) {
+        if (g_GameLogic.gameStatus == 0x22) {
+            return;
+        }
+        if (g_GameLogic.gameStatus == 0x24) {
+            if (g_GameLogic.FrameCountOfCurrentPitch == 1) {
+                fn_3_8C104(-1);
+            }
+            return;
+        }
+        if (g_Minigame.minigameControlStruct._1C[g_Minigame._1908] == 1 &&
+            g_Minigame.challenge_minigame_haven_tWonYetIndicator == 0) {
+            song = 0xC;
+        } else {
+            song = 0xD;
+        }
+        goto change;
+    }
+    if (g_d_GameSettings.minigamesEnabled &&
+        (g_GameLogic.gameStatus == 0xE || g_GameLogic.gameStatus == 0x24 || g_GameLogic._125 == 8 ||
+         g_GameLogic.gameStatus == 0x22 || g_GameLogic.gameStatus == 0x27 || g_GameLogic.gameStatus == 0x26)) {
+        if (g_GameLogic.gameStatus == 0xE || g_GameLogic.gameStatus == 0x24 || g_GameLogic.gameStatus == 0x22 ||
+            g_GameLogic.gameStatus == 0x26 || g_GameLogic.gameStatus == 0x27) {
+            if (g_GameLogic.gameStatus == 0x22) {
+                if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+                    if (lbl_3_common_bss_34C90._1D2 == 0xA || lbl_3_common_bss_34C90._1D2 == 4 ||
+                        lbl_3_common_bss_34C90._1D2 == 5) {
+                        goto fade;
+                    }
+                } else if (lbl_3_common_bss_34C90._1D2 == 9 || lbl_3_common_bss_34C90._1D2 == 6 ||
+                           lbl_3_common_bss_34C90._1D2 == 7) {
+                    goto fade;
+                }
+            }
+            if (g_GameLogic.gameStatus == 0x26) {
+                return;
+            }
+            if (!g_d_GameSettings.exhibitionMatchInd) {
+                if (g_Minigame.GameMode_MiniGame == 1 || g_Minigame.GameMode_MiniGame == 3) {
+                    if (g_Minigame._1A37 == 1) {
+                        song = 0xC;
+                    } else {
+                        song = 0xD;
+                    }
+                } else if (g_Minigame.minigameControlStruct._1C[g_Minigame._1908] == 1 &&
+                           g_Minigame.challenge_minigame_haven_tWonYetIndicator == 0) {
+                    song = 0xC;
+                } else {
+                    song = 0xD;
+                }
+                goto change;
+            }
+            if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+                if (g_Minigame._1908 >= 0) {
+                    if (g_Minigame.minigameControlStruct._1C[g_Minigame._1908] == 1 &&
+                        g_Minigame.challenge_minigame_haven_tWonYetIndicator == 0) {
+                        song = 5;
+                    } else {
+                        song = 7;
+                    }
+                } else {
+                    song = 5;
+                }
+                goto change;
+            }
+            if (g_Minigame.multiPlayerInd != 0) {
+                if (g_Minigame._1A3C != 0 && g_Minigame._1907 == 1) {
+                    if (g_Minigame.minigameControlStruct._1C[g_Minigame._1908] == 1 &&
+                        g_Minigame.challenge_minigame_haven_tWonYetIndicator == 0) {
+                        song = 5;
+                    } else {
+                        song = 7;
+                    }
+                } else if (g_Minigame.challenge_minigame_haven_tWonYetIndicator != 0) {
+                    song = 7;
+                } else {
+                    song = 5;
+                }
+                goto change;
+            }
+            if (g_Minigame.soloMinigameDifficulty == 3 && g_Minigame._1A3C == 0) {
+                if (g_GameLogic.FrameCountOfCurrentPitch == 0) {
+                    return;
+                }
+                if (g_Minigame._1A43 == 1) {
+                    song = 0xE;
+                } else if (g_Minigame._1A43 != 0) {
+                    song = 0xF;
+                } else {
+                    song = 7;
+                }
+                goto change;
+            }
+            if (g_Minigame._1A37 == 1) {
+                song = 5;
+            } else {
+                song = 7;
+            }
+            goto change;
+        }
+        if (g_GameLogic._125 == 8) {
+            sndSeqLoop(lbl_3_common_bss_34C58._08, 0);
+        }
+    } else if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES) {
+        if (g_GameLogic.gameStatus >= 0x1B) {
+            song = -1;
+            goto change;
+        }
+        if (g_GameLogic.gameStatus == 5) {
+            song = 6;
+            goto change;
+        }
+        sndSeqVolume(lbl_3_data_830C[song][0], 15, lbl_3_common_bss_34C58._04, 0);
+        if (g_Minigame.GameMode_MiniGame == 6) {
+            if (g_Minigame._1D6D >= 0) {
+                flag = TRUE;
+                if (g_Minigame.pauseInd != 0) {
+                    sndFXKeyOff(lbl_3_common_bss_34C58._04);
+                } else if (lbl_3_common_bss_34C58._20 == 0x13 && sndFXCheck(lbl_3_common_bss_34C58._04) == SND_ID_ERROR) {
+                    lbl_3_common_bss_34C58._04 = fn_3_90064(0x2ED);
+                }
+                song = 0x13;
+            } else {
+                if (sndFXCheck(lbl_3_common_bss_34C58._04) != SND_ID_ERROR) {
+                    sndFXKeyOff(lbl_3_common_bss_34C58._04);
+                }
+                song = 0x15;
+            }
+        } else {
+            song = 0x15;
+        }
+        if (g_Minigame.pauseInd != 0) {
+            if (lbl_3_common_bss_34C90._1D2 == 7 || lbl_3_common_bss_34C90._1D2 == 9) {
+                song = -1;
+                goto change;
+            }
+            fn_800A8878(lbl_800E88A4[g_d_GameSettings.StadiumID][1], lbl_800E88A4[g_d_GameSettings.StadiumID][1]);
+        } else {
+            fn_800A8878(lbl_800E88A4[g_d_GameSettings.StadiumID][0], lbl_800E88A4[g_d_GameSettings.StadiumID][0]);
+        }
+        goto change;
+    } else if (g_d_GameSettings.minigamesEnabled) {
+        if (g_GameLogic.gameStatus == 0x22 || g_GameLogic.gameStatus == 0xB || g_GameLogic.gameStatus == 0xD ||
+            g_Minigame._19CE != 0) {
+            if (lbl_3_common_bss_34C58._22 != -1) {
+                fn_800A8878(lbl_800E88A4[9][1], lbl_800E88A4[9][1]);
+            }
+            lbl_3_common_bss_34C58._20 = -1;
+            return;
+        }
+        fn_800A8878(lbl_800E88A4[9][0], lbl_800E88A4[9][0]);
+        if (g_GameLogic.gameStatus >= 0x1B) {
+            return;
+        }
+        if (g_GameLogic.gameStatus == 5) {
+            song = 0;
+        } else {
+            song = 0x15;
+        }
+        goto change;
+    }
+    if (g_GameLogic.gameStatus == 5 && g_d_GameSettings.GameModeSelected != GAME_TYPE_PRACTICE) {
+        song = 0;
+        goto change;
+    }
+    if (g_GameLogic.gameStatus == 9) {
+        song = 1;
+        goto change;
+    }
+    if (g_GameLogic.gameStatus == 3) {
+        song = 2;
+        goto change;
+    }
+    if (g_GameLogic.gameStatus == 8) {
+        song = -1;
+        flag = TRUE;
+        if (g_Strikes.outs != 3 && g_Stats._39 == 0) {
+            if (g_Pitcher.walkedInRunInd) {
+                playSoundEffect(0x198);
+            } else if (!g_GameLogic.EventTriggers_EndOfGame) {
+                playSoundEffect(0x197);
+            }
+        }
+        goto change;
+    }
+game:
+    if (g_GameLogic.gameStatus == 0xB) {
+        if (lbl_3_common_bss_34C90._1D1 == 1) {
+            goto change;
+        }
+        if (lbl_3_common_bss_34C58._20 != 0x15) {
+            lbl_3_common_bss_34C58._20 = 0x15;
+            lbl_3_common_bss_34C58._22 = 0x15;
+            fn_3_8C104(0);
+        }
+    }
+    if (g_Stats.replayInd) {
+        song = 0x16;
+        if (g_Stats._39 == 4) {
+            song = -1;
+            flag = TRUE;
+        }
+        if (g_Stats.playFrameCounter > g_Stats._28 - 30) {
+            song = -1;
+            flag = TRUE;
+        }
+        goto change;
+    }
+    if (g_GameLogic.gameStatus == 0x13) {
+        song = 0x17;
+        goto change;
+    }
+    if (g_GameLogic.gameStatus == 7 || g_GameLogic.gameStatus == 0) {
+        return;
+    }
+    if (lbl_8036E548._2D46 != 0) {
+        return;
+    }
+    if (lbl_8036E548._2D52 != 0) {
+        return;
+    }
+    if (!g_d_GameSettings.exhibitionMatchInd && lbl_3_common_bss_37400._46 != 0) {
+        if (g_GameLogic.gameStatus == 0x16 && g_GameLogic._133[g_GameLogic.teamFielding] == 0) {
+            song = 9;
+            lbl_3_common_bss_34C58._32 = 1;
+            goto change;
+        }
+        if (lbl_3_common_bss_34C58._32 == 0) {
+            if (g_GameLogic.gameStatus == 1 && g_GameLogic._133[g_GameLogic.teamFielding] == 0) {
+                song = 0x12;
+                lbl_3_common_bss_34C58._32 = 2;
+                goto change;
+            }
+        } else if (lbl_3_common_bss_34C58._32 == 2 && lbl_3_common_bss_32724._B3 != 0) {
+            song = 0x12;
+            lbl_3_common_bss_34C58._32 = 2;
+            goto change;
+        }
+        if ((g_GameLogic.gameStatus == 1 || g_GameLogic.gameStatus == 2) && !g_Stats.replayInd) {
+            if (lbl_3_common_bss_37400._47 == 1) {
+                if (g_Ball.deadBallReason != 1) {
+                    song = 0xB;
+                    if (g_FieldingLogic._107) {
+                        lbl_3_common_bss_34C58._33 = 2;
+                    }
+                    goto change;
+                }
+            } else if (lbl_3_common_bss_37400._47 == 2 && g_Ball.deadBallReason != 1) {
+                song = 0xA;
+                if (g_FieldingLogic._107) {
+                    lbl_3_common_bss_34C58._33 = 2;
+                }
+                goto change;
+            }
+        }
+    }
+    if (g_GameLogic.gameStatus == 0x16 && g_GameLogic.playOverInd) {
+        song = 0x10;
+        goto change;
+    }
+    if (g_GameLogic.gameStatus == 0x15) {
+        song = 0x11;
+        goto change;
+    }
+    if (g_GameLogic.gameStatus == 0x16 && lbl_3_common_bss_DE94._0000->_092C == 0x60 &&
+        g_d_GameSettings.GameModeSelected != GAME_TYPE_CHALLENGE) {
+        lbl_3_common_bss_DE94._0000->_092C = 0;
+        song = 8;
+        lbl_3_common_bss_34C58._2E = 1;
+        goto change;
+    }
+    if (lbl_3_common_bss_34C58._2E) {
+        if (lbl_3_common_bss_34C58._27 == 0) {
+            lbl_3_common_bss_34C58._2E = 0;
+        }
+        song = 8;
+        goto change;
+    }
+    if (lbl_3_common_bss_134C4._25C != 0 && g_Ball.deadBallReason != 1 && lbl_3_common_bss_DE94._0000->_092C != 0) {
+        song = 4;
+        goto change;
+    }
+    if (g_GameLogic.gameStatus == 0x13) {
+        return;
+    }
+    if (g_Ball.deadBallReason == 1) {
+        if (g_d_GameSettings.GameModeSelected == GAME_TYPE_PRACTICE) {
+            song = 0;
+        } else {
+            song = 3;
+            goto change;
+        }
+    }
+    if (lbl_3_common_bss_34C58._2A == 1 && lbl_3_common_bss_34C58._24 != 0) {
+        steps = --lbl_3_common_bss_34C58._24;
+        if (steps == 0) {
+            QUEUE_SOUND_LOAD(3, 0, 0);
+        } else {
+            u32 vol;
+            int hi;
+            u8 lo;
+            int level;
+
+            vol = fn_800A8864();
+            hi = (vol >> 8) & 0xFF;
+            lo = vol & 0xFF;
+
+            lbl_3_common_bss_34C58._2F = 0;
+            if (lbl_3_bss_1761 == 0) {
+                lbl_3_bss_1761 = 1;
+                lbl_3_bss_1771 = hi / steps;
+                lbl_3_bss_1770 = lo / steps;
+            }
+            level = hi - lbl_3_bss_1771;
+            if ((s16)level <= 0 || steps == 1) {
+                lbl_3_bss_1761 = 0;
+                fn_800A8878(0, 0);
+            } else {
+                fn_800A8878(level, lo - lbl_3_bss_1770);
+            }
+        }
+    }
+    if (lbl_3_common_bss_34C58._2A == 2) {
+        if (lbl_3_common_bss_34C58._33 != 0) {
+            lbl_3_common_bss_34C58._33 = 0;
+            lbl_3_common_bss_34C58._20 = 0x15;
+        }
+        if (lbl_3_common_bss_34C58._24 == 120) {
+            fn_3_8C104(0);
+        }
+        sel = 0;
+        if (g_GameLogic.gameStatus == 0xB) {
+            sel = 1;
+        }
+        {
+            u8 idx;
+            u32 vol;
+            u8 target;
+            f32 cur;
+            bool more;
+
+            steps = lbl_3_common_bss_34C58._24;
+            idx = sel;
+            vol = fn_800A8864();
+
+            if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+                target = lbl_800E88A4[9][idx];
+            } else if (lbl_3_common_bss_34C58._20 == 0x16) {
+                target = lbl_800E88A4[6][idx];
+            } else if (g_GameLogic.gameStatus == 0xE) {
+                target = lbl_800E88A4[7][idx];
+            } else if (g_GameLogic.gameStatus == 0x17) {
+                target = lbl_800E88A4[8][idx];
+            } else {
+                target = lbl_800E88A4[g_d_GameSettings.StadiumID][idx];
+            }
+            cur = (int)((vol >> 8) & 0xFF);
+            if (cur > lbl_3_bss_1764) {
+                lbl_3_bss_1764 = cur;
+            }
+            if (!lbl_3_common_bss_34C58._2F) {
+                lbl_3_bss_176C = (f32)target / (f32)steps;
+                lbl_3_common_bss_34C58._2F = 1;
+                lbl_3_bss_1764 = cur;
+            }
+            lbl_3_bss_1764 += lbl_3_bss_176C;
+            fn_800A8878(lbl_3_bss_1764, lbl_3_bss_1764);
+            if (lbl_3_bss_1764 >= target) {
+                lbl_3_common_bss_34C58._2F = more = FALSE;
+            } else {
+                more = TRUE;
+            }
+            if (!more) {
+                lbl_3_common_bss_34C58._2A = 0;
+            }
+        }
+        lbl_3_common_bss_34C58._24--;
+    }
+    if (g_Ball.deadBallReason == 1 && g_d_GameSettings.GameModeSelected == GAME_TYPE_PRACTICE) {
+        goto change;
+    }
+    if (g_GameLogic.gameStatus == 2) {
+        if (lbl_3_common_bss_34C58._29 != 0) {
+            lbl_3_common_bss_34C58._29--;
+        }
+        return;
+    }
+    if (lbl_3_common_bss_34C58._2A != 0) {
+        return;
+    }
+    if (g_GameLogic.gameStatus == 0xB) {
+        return;
+    }
+    if (lbl_3_common_bss_34C58._33 != 0) {
+        song = 0x15;
+        goto change;
+    }
+    if (g_Strikes.storedOuts == 0) {
+        song = 0x15;
+        goto change;
+    }
+    if (lbl_3_common_bss_32A94._3E == 0) {
+        goto stop;
+    }
+    song = 0x15;
+change:
+    if (lbl_3_common_bss_34C58._22 == song) {
+        return;
+    }
+    if (lbl_3_common_bss_34C58._20 == 8 && sndSeqGetValid(lbl_3_common_bss_34C58._08)) {
+        return;
+    }
+    if (lbl_3_common_bss_34C58._28 == 0) {
+        lbl_3_common_bss_34C58._28 = 1;
+        lbl_3_common_bss_34C58._27 = 20;
+        fn_3_903B8();
+    } else if (lbl_3_common_bss_34C58._27 != 0) {
+        lbl_3_common_bss_34C58._27--;
+    }
+    if (lbl_3_common_bss_34C58._27 != 0 && !flag) {
+        return;
+    }
+    if (lbl_3_common_bss_34C58._04 != SND_ID_ERROR) {
+        if (sndSeqGetValid(lbl_3_common_bss_34C58._04)) {
+            sndSeqVolume(0, 0, lbl_3_common_bss_34C58._04, 1);
+        }
+        lbl_3_common_bss_34C58._04 = SND_ID_ERROR;
+        return;
+    }
+    lbl_3_common_bss_34C58._28 = 0;
+    lbl_3_common_bss_34C58._20 = song;
+    if (lbl_3_common_bss_34C58._20 != -1) {
+        if (lbl_3_common_bss_34C58._20 != 0x15 && song != 0x16 && song != 0x17) {
+            fn_3_9056C(lbl_3_common_bss_34C58._20);
+            jingle = FALSE;
+            if (song == 4 || song == 0) {
+                jingle = TRUE;
+            }
+            jingle = !jingle;
+            if (jingle) {
+                QUEUE_SOUND_LOAD(4, 0, 0);
+            }
+        } else {
+            if (lbl_3_common_bss_34C58._20 == 0x15 || lbl_3_common_bss_34C58._20 == 0x16 ||
+                lbl_3_common_bss_34C58._20 == 0x17) {
+                if (lbl_3_common_bss_34C58._20 != lbl_3_common_bss_34C58._22) {
+                    fn_3_8C104(-1);
+                }
+            } else {
+                QUEUE_SOUND_LOAD(4, 0, 0);
+                fn_3_90674(lbl_3_common_bss_34C58._20);
+            }
+        }
+    } else {
+            if (flag) {
+                QUEUE_SOUND_LOAD(3, 0, 0);
+            } else {
+                QUEUE_SOUND_LOAD(4, 0, 0);
+            }
+    }
     return;
+stop:
+    fn_3_90328(-1);
+    lbl_3_common_bss_34C58._20 = -1;
+    return;
+fade:
+    fn_3_90328(12);
+    lbl_3_common_bss_34C58._20 = -1;
 }
 
 // .text:0x0008D9C0 size:0xC0 mapped:0x806CCA54
@@ -820,15 +1615,10 @@ void fn_3_8D9C0(void) {
 }
 
 // .text:0x0008CD74 size:0xC4C mapped:0x806CBE08
-// 62.95%: the target reaches the sound tables from one lbl_3_data_8148 pool base (they are
-// statics of this file); the externs here are addressed one by one
 void fn_3_8CD74(void) {
     UnkPlayer8CD74* player;
 
-    if (g_GameLogic.gameStatus == 0xB) {
-        return;
-    }
-    if (g_Minigame.pauseInd != 0) {
+    if (g_GameLogic.gameStatus == 0xB || g_Minigame.pauseInd != 0) {
         return;
     }
     if (g_GameLogic.gameStatus == 1) {
@@ -958,7 +1748,7 @@ void fn_3_8CD74(void) {
             lbl_3_common_bss_34C58._1C = fn_3_90220(g_Batter.charID, 2);
         }
     }
-    if (g_Batter.captainStarSwingActivated == 11 && lbl_3_bss_1760 == 0 && g_Ball.physicsSubstruct.velocity.y <= -0.09 &&
+    if ((g_Batter.captainStarSwingActivated == 11 || g_Batter.captainStarSwingActivated == 11) && lbl_3_bss_1760 == 0 && g_Ball.physicsSubstruct.velocity.y <= -0.09 &&
         g_Ball.physicsSubstruct.velocity.y >= -0.1) {
         sndFXKeyOff(lbl_3_bss_177C);
         lbl_3_bss_1778 = playSoundEffect(0x19B);
@@ -980,7 +1770,60 @@ void fn_3_8CD74(void) {
 
 // .text:0x0008C5C8 size:0x7AC mapped:0x806CB65C
 void fn_3_8C5C8(void) {
-    return;
+    int code = g_Ball.collisionCode & 0x7F;
+    s32 stadium;
+    SND_VOICEID voice;
+
+    if (g_Ball.ballVelocity < 0.2f) {
+        return;
+    }
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES) {
+        return;
+    }
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+        stadium = g_d_GameSettings.StadiumID;
+        voice = sndFXStartEx(lbl_3_data_81DC[stadium] + 0x18,
+                             g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD ? lbl_3_data_84B8[0x18][0]
+                                                                                     : lbl_3_data_8404[stadium][0x18][0],
+                             0x3F, 0);
+        sndFXCtrl(voice, 0x5B,
+                  g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD ? lbl_3_data_84B8[0x18][1]
+                                                                          : lbl_3_data_8404[stadium][0x18][1]);
+        return;
+    }
+    if (g_d_GameSettings.StadiumID == 1) {
+        if (code == 8) {
+            fn_3_8FF5C(0x1A2, g_Ball.AtBat_Contact_BallPos.x, g_Ball.AtBat_Contact_BallPos.y, g_Ball.AtBat_Contact_BallPos.z);
+        } else {
+            fn_3_8FF5C(0x1A1, g_Ball.AtBat_Contact_BallPos.x, g_Ball.AtBat_Contact_BallPos.y, g_Ball.AtBat_Contact_BallPos.z);
+        }
+        return;
+    }
+    if (g_d_GameSettings.StadiumID == 3) {
+        if (code == 1) {
+            fn_3_8FF5C(0x1A4, g_Ball.AtBat_Contact_BallPos.x, g_Ball.AtBat_Contact_BallPos.y, g_Ball.AtBat_Contact_BallPos.z);
+            return;
+        }
+    } else if (g_d_GameSettings.StadiumID == 4) {
+        if (code == 6) {
+            fn_3_8FF5C(0x1A1, g_Ball.AtBat_Contact_BallPos.x, g_Ball.AtBat_Contact_BallPos.y, g_Ball.AtBat_Contact_BallPos.z);
+            return;
+        }
+        if (code == 10) {
+            fn_3_8FF5C(0x1A2, g_Ball.AtBat_Contact_BallPos.x, g_Ball.AtBat_Contact_BallPos.y, g_Ball.AtBat_Contact_BallPos.z);
+            return;
+        }
+        if (code == 9) {
+            fn_3_8FF5C(0x1A0, g_Ball.AtBat_Contact_BallPos.x, g_Ball.AtBat_Contact_BallPos.y, g_Ball.AtBat_Contact_BallPos.z);
+            return;
+        }
+    } else if (g_d_GameSettings.StadiumID == 5) {
+        if (code == 10) {
+            fn_3_8FF5C(0x1A2, g_Ball.AtBat_Contact_BallPos.x, g_Ball.AtBat_Contact_BallPos.y, g_Ball.AtBat_Contact_BallPos.z);
+            return;
+        }
+    }
+    fn_3_8FF5C(0x17E, g_Ball.AtBat_Contact_BallPos.x, g_Ball.AtBat_Contact_BallPos.y, g_Ball.AtBat_Contact_BallPos.z);
 }
 
 // .text:0x0008C4F0 size:0xD8 mapped:0x806CB584
@@ -1006,8 +1849,7 @@ BOOL fn_3_8C4F0(u32 steps, u8 target) {
 }
 
 // .text:0x0008C2DC size:0x214 mapped:0x806CB370
-// 98.80%: the setup block takes r0/r5 for the constant 1 and 0x4330 the other way round
-BOOL fn_3_8C2DC(u32 steps, s32 sel) {
+bool fn_3_8C2DC(u32 steps, s32 sel) {
     u32 vol = fn_800A8864();
     u8 target;
     f32 cur;
@@ -1028,8 +1870,8 @@ BOOL fn_3_8C2DC(u32 steps, s32 sel) {
         lbl_3_bss_1764 = cur;
     }
     if (!lbl_3_common_bss_34C58._2F) {
-        lbl_3_common_bss_34C58._2F = 1;
         lbl_3_bss_176C = (f32)target / (f32)steps;
+        lbl_3_common_bss_34C58._2F = 1;
         lbl_3_bss_1764 = cur;
     }
     lbl_3_bss_1764 += lbl_3_bss_176C;
@@ -1042,7 +1884,6 @@ BOOL fn_3_8C2DC(u32 steps, s32 sel) {
 }
 
 // .text:0x0008C104 size:0x1D8 mapped:0x806CB198
-// 99.66%: the inlined fn_3_8B258 swaps its queue pointer and head registers, as in fn_3_8C07C
 void fn_3_8C104(s32 vol) {
     int stadium;
     u8 level;
@@ -1079,25 +1920,21 @@ void fn_3_8C104(s32 vol) {
     if (vol >= 0) {
         level = vol;
     }
-    fn_3_8B258(0, stadium, level);
+    QUEUE_SOUND_LOAD(0, stadium, level);
     if (level == 0) {
         fn_800A8878(level, level);
     }
 }
 
 // .text:0x0008C07C size:0x88 mapped:0x806CB110
-// 98.82%: the inlined fn_3_8B258 gets the queue pointer in r8 and its head in r7, where the
-// target (and every other inlined copy) has the pointer in the lower register
 void fn_3_8C07C(void) {
-    fn_3_8B258(4, 0, 0);
+    QUEUE_SOUND_LOAD(4, 0, 0);
 }
 
 // .text:0x0008BE8C size:0x1F0 mapped:0x806CAF20
-// 92.66%: the target keeps the clearing loop's entry test (li r6,0 first, cmpwi r6,100; bge)
-// and walks the arrays from r3; every counter form tried folds the test away
 void fn_3_8BE8C(void) {
     SND_FVECTOR pos = { 0.0f, 0.0f, 0.0f };
-    int i;
+    s32 i;
 
     for (i = 0; i < 100; i++) {
         lbl_3_common_bss_32B20.emitterType[i] = 0xFF;
@@ -1259,6 +2096,38 @@ void fn_3_8B718(Vec* pos, Vec* vel, Vec* dir) {
     }
 }
 
+// .text:0x0008B318 size:0x400 mapped:0x806CA3AC
+void fn_3_8B318(int arg) {
+    u32 i;
+    s32 j;
+
+    if (arg == -1) {
+        for (j = 0; j < 12; j++) {
+            lbl_3_data_8530[1][j] = lbl_3_data_8278[j];
+        }
+    } else if (arg == 6) {
+        for (i = 0; i < 7; i++) {
+            lbl_3_data_84B8[i][1] = lbl_3_data_8270[i];
+        }
+        for (j = 0; j < 12; j++) {
+            lbl_3_data_8530[1][j] = lbl_3_data_8278[j];
+        }
+        for (i = 0; i < 0x66; i++) {
+            lbl_3_data_8338[i][1] = lbl_3_data_8284[i];
+        }
+    } else {
+        for (i = 0; i < 7; i++) {
+            lbl_3_data_84B8[i][1] = 0;
+        }
+        for (j = 0; j < 12; j++) {
+            lbl_3_data_8530[1][j] = 0;
+        }
+        for (i = 0; i < 0x66; i++) {
+            lbl_3_data_8338[i][1] = 0;
+        }
+    }
+}
+
 // .text:0x0008B2E4 size:0x34 mapped:0x806CA378
 void fn_3_8B2E4(void) {
     lbl_3_bss_1768 = fn_800B0A5C_insertQueue(fn_3_8B094, 0);
@@ -1280,14 +2149,14 @@ BOOL fn_3_8B258(s32 state, s32 id, s32 arg) {
 }
 
 // .text:0x0008B094 size:0x1C4 mapped:0x806CA128
-// 91.46%: the target reads the state byte as task + (tail * 3 + 0x17) with lbzx/stbx, keeping
+// 93.01%: the target reads the state byte as task + (tail * 3 + 0x17) with lbzx/stbx, keeping
 // task in r31; this keeps task + tail * 3 instead and shifts the saved registers
 void fn_3_8B094(void) {
     SoundLoadTask* task = lbl_803CC1B8;
     u8 tail;
     u8 next;
     s8 state;
-    s8 arg;
+    int arg;
     u8 id;
 
     if (task->head == task->tail) {
