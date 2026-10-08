@@ -392,7 +392,6 @@ void fn_3_89864(int runner, int bases) {
 }
 
 // .text:0x0008913C size:0x728 mapped:0x806C81D0
-// 99.17%: registers differ after the first loop (the AI and running-logic stores, the position copies)
 void fn_3_8913C(void) {
     int i;
     InMemRunnerType* r;
@@ -498,9 +497,9 @@ void fn_3_8913C(void) {
             fn_3_810C4(i, i);
         }
     }
+    g_AiLogic._44 = lbl_3_data_1C58[g_GameLogic.AIDifficulty0Special3Weak[g_GameLogic.homeTeamBattingInd_fieldingTeam]][1];
     g_AiLogic._77 = 0;
     g_RunningLogic._12 = g_RunningLogic._10;
-    g_AiLogic._44 = lbl_3_data_1C58[g_GameLogic.AIDifficulty0Special3Weak[g_GameLogic.homeTeamBattingInd_fieldingTeam]][1];
     g_RunningLogic._15 = 0;
     if (g_RunningLogic._02 & 0x1000) {
         g_RunningLogic._15 = 1;
@@ -527,9 +526,9 @@ void fn_3_8913C(void) {
     g_Runners[0].position.x = g_Batter.batterPos.x;
     g_Runners[0].position.y = 0.0f;
     g_Runners[0].position.z = g_Batter.batterPos.z;
-    g_Runners[0].positionStored.x = g_Batter.batterPos.x;
-    g_Runners[0].positionStored.y = 0.0f;
-    g_Runners[0].positionStored.z = g_Batter.batterPos.z;
+    g_Runners[0].positionStored.x = g_Runners[0].position.x;
+    g_Runners[0].positionStored.y = g_Runners[0].position.y;
+    g_Runners[0].positionStored.z = g_Runners[0].position.z;
     for (i = 1; i < 4; i++) {
         g_Runners[i].positionStored.x = g_Runners[i].position.x;
         g_Runners[i].positionStored.y = g_Runners[i].position.y;
