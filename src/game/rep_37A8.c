@@ -8,6 +8,7 @@
 #include "game/rep_3310.h"
 #include "game/rep_3880.h"
 #include "game/m_sound.h"
+#include "static/UnknownHomes_Static.h"
 #include "game/rep_D18.h"
 #include "Dolphin/gx.h"
 #include "string.h"
@@ -163,6 +164,13 @@ extern void fn_3_59A90(void);
 extern void fn_3_591AC(void);
 extern void fn_3_58870(void);
 extern void fn_3_6E24C(int rosterID, int fielderIdx);
+extern void fn_3_1608F0(int, int, int);
+extern void fn_80062BE4(Vec* pos);
+extern u8 lbl_3_data_21E18[2][2];
+extern struct {
+    /* 0x00 */ u8 _00[0x40];
+    /* 0x40 */ s16 _40;
+} lbl_3_common_bss_37400;
 extern int LERPToNewRange_Float(int value, int inMin, int inMax, int outMin, int outMax);
 extern f32 lbl_3_data_47BC[5];
 extern s8 lbl_3_data_21EC0[4];
@@ -412,7 +420,16 @@ void fn_3_145FF4(void) {
 
 // .text:0x00145EB8 size:0x13C mapped:0x80784F4C
 void fn_3_145EB8(void) {
-    return;
+    int i;
+
+    fn_3_145B98();
+    for (i = 0; i < 50; i++) {
+        if (MG._193A[i] == 5 || MG._193A[i] == 6) {
+            fn_3_1453BC(i);
+        } else if (MG._193A[i] == 2) {
+            fn_3_145AD0(i);
+        }
+    }
 }
 
 // .text:0x00145B98 size:0x320 mapped:0x80784C2C
@@ -500,8 +517,161 @@ void fn_3_145AD0(int player) {
 }
 
 // .text:0x001453BC size:0x714 mapped:0x80784450
-void fn_3_1453BC(void) {
-    return;
+void fn_3_1453BC(int coin) {
+    UnkMgEntry3310* entry;
+    Unk37A8Fielder* fielder;
+    s16* timer;
+    u8* state;
+    VecXYZ pos;
+    Vec dir;
+    f32 dx;
+    f32 dz;
+    f32 dist;
+    s16 points;
+    s16 left;
+    int team;
+    int player;
+    int target;
+    int i;
+
+    team = MG._1BB6[coin];
+    timer = &g_Minigame.wallBall_coinsVisibleFrameCounter[coin];
+    if (g_Minigame.wallBall_coinsVisibleFrameCounter[coin] < 0x7FFE) {
+        (*timer)++;
+    } else {
+        *timer = 0x7FFF;
+    }
+    state = &g_Minigame.wallBall_coinsVisibleInd[coin];
+    if (g_Minigame.wallBall_coinsVisibleInd[coin] == 6) {
+        g_Minigame.wallBall_coinVelocity[coin].y += lbl_3_data_21E24[11];
+        if (MG._1B84[coin] != 5) {
+            g_Minigame.wallBall_coinVelocity[coin].x *= lbl_3_data_21E24[12];
+            g_Minigame.wallBall_coinVelocity[coin].z *= lbl_3_data_21E24[12];
+        } else if (*timer >= lbl_3_data_21E68[23]) {
+            player = -1 - MG._1BE8[coin];
+            fn_3_147CFC((Vec*)&g_Minigame.wallBall_coinCoordinates[coin]);
+            fn_3_90064(0x309);
+            fn_3_154238(coin);
+            if (g_Minigame._1CA5[player] == 0 && MG._1C9A[player] == 0) {
+                MG._1C9A[player] = 1;
+                MG._1B3C[player] = lbl_3_data_21E68[14];
+                MG._1B50[player] = 0;
+                fielder = &g_Fielders[g_Minigame.minigameFielderIndex[player]];
+                dir.x = 0.0f;
+                dir.y = 0.0f;
+                dir.z = -1.0f;
+                PSVECNormalize(&dir, &dir);
+                fielder->_038 = dir.x;
+                g_Minigame._1DF4_u8[player] = 1;
+                fielder->_03C = dir.z;
+                fielder->_050 = lbl_3_data_21E24[15];
+                fn_3_6C854(g_Minigame.minigameControlStruct.characterIndex[player], 2);
+                if (g_Minigame._1CB1[player] < 0xFFFE) {
+                    g_Minigame._1CB1[player]++;
+                } else {
+                    g_Minigame._1CB1[player] = 0xFF;
+                }
+            }
+            *state = 0;
+            *timer = 0;
+            return;
+        }
+    }
+    g_Minigame.wallBall_coinCoordinates[coin].x += g_Minigame.wallBall_coinVelocity[coin].x;
+    g_Minigame.wallBall_coinCoordinates[coin].y += g_Minigame.wallBall_coinVelocity[coin].y;
+    g_Minigame.wallBall_coinCoordinates[coin].z += g_Minigame.wallBall_coinVelocity[coin].z;
+    if (g_Minigame.wallBall_coinCoordinates[coin].y < 0.0f) {
+        *state = 0;
+        *timer = 0;
+        if (MG._1B84[coin] == 5) {
+            fn_3_154238(coin);
+        }
+        return;
+    }
+    target = MG._1BE8[coin];
+    if (target >= 0) {
+        dx = g_Minigame.wallBall_coinCoordinates[coin].x - lbl_3_data_21BC4[target][1].x;
+        dz = g_Minigame.wallBall_coinCoordinates[coin].z - lbl_3_data_21BC4[target][1].z;
+        dist = dolsqrtf2(dx * dx + dz * dz);
+        entry = &MG._0000[target];
+        if (entry->_2A == 2 && dist < lbl_3_data_21E24[1]) {
+            if (MG._1B84[coin] == entry->_2C || entry->_2C == 4 || MG._1B84[coin] == 5) {
+                if (MG._1B84[coin] == 5) {
+                    points = lbl_3_data_21E68[24];
+                } else {
+                    points = 1;
+                }
+                pos = g_Minigame.wallBall_coinCoordinates[coin];
+                pos.y *= -1.0f;
+                if (MG._1B84[coin] == 5) {
+                    fn_3_147CFC((Vec*)&pos);
+                    fn_3_154238(coin);
+                } else {
+                    fn_80062BE4((Vec*)&pos);
+                }
+                if (MG._1B84[coin] == 5) {
+                    fn_3_90064(0x309);
+                } else {
+                    fn_3_90064(0x2DC);
+                }
+                left = entry->_2D - (s8)points;
+                if (left <= 0) {
+                    entry->_2D = 0;
+                } else {
+                    entry->_2D = left;
+                }
+                MG._1B50[team]++;
+                MG._1B58[team][g_Minigame._1B80[team]] = (s8)points * lbl_3_data_21E18[entry->_2B][1];
+                g_Minigame._1B80[team]++;
+                entry->_2F[0] = -1;
+                entry->_2F[1] = -1;
+                entry->_2F[2] = -1;
+                entry->_2F[3] = -1;
+                entry->_2E = 0;
+                if (entry->_2D == 0) {
+                    MG._1B58[team][g_Minigame._1B80[team]] = lbl_3_data_21E18[entry->_2B][0];
+                    g_Minigame._1B80[team]++;
+                    if (entry->_2C == 4) {
+                        g_Minigame._1CA3 = 0;
+                        entry->_2E = 0;
+                    } else if (g_Minigame._1CA2 != 0) {
+                        g_Minigame._1CA2 = 2;
+                    }
+                    entry->_1C = lbl_3_data_21E68[8] - lbl_3_data_21E68[9];
+                    entry->_1A = 0;
+                    entry->_2A = 4;
+                    MG._1CA9[entry->_2C] = 0;
+                    if (!g_d_GameSettings.exhibitionMatchInd && team == lbl_3_common_bss_37400._40) {
+                        fn_3_1608F0(5, entry->_2C, 0);
+                    }
+                }
+                entry->_1E = 1;
+            } else if ((entry->_33 == 3 && entry->_2E == 0) || entry->_33 == 0) {
+                if (entry->_2E == 0) {
+                    entry->_26 = 0;
+                }
+                for (i = 0; i < 4; i++) {
+                    if (entry->_2F[i] < 0) {
+                        entry->_2F[i] = MG._1BB6[coin];
+                        entry->_2E = 1;
+                        entry->_20 = 0;
+                        break;
+                    }
+                }
+                MG._1B50[team] = 0;
+            }
+            *state = 0;
+            *timer = 0;
+            return;
+        }
+    }
+    if (*timer > lbl_3_data_21E68[0]) {
+        *state = 0;
+        *timer = 0;
+        if (MG._1B84[coin] == 5) {
+            fn_3_154238(coin);
+        }
+    }
 }
 
 // .text:0x00144CB8 size:0x704 mapped:0x80783D4C
