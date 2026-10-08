@@ -2557,7 +2557,9 @@ typedef struct {
 } FieldingLogicFielder; // size 0x6
 
 typedef struct {
-    /* 0x00 */ u8 _00[0x14];
+    /* 0x00 */ u8 _00[0x8];
+    /* 0x08 */ f32 _08;
+    /* 0x0C */ u8 _0C[0x14 - 0xC];
     /* 0x14 */ s16 _14;
     /* 0x16 */ u8 _16[0x1A - 0x16];
     /* 0x1A */ u8 _1A;
