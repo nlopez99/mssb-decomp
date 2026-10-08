@@ -163,6 +163,11 @@ extern struct {
     /* 0x26 */ u8 _26;
 } lbl_8034E978;
 
+extern struct {
+    /* 0x00 */ s32 _00;
+    /* 0x04 */ s16 _04[2][19];
+} g_Scores;
+
 extern UnkSpriteRef1770 lbl_80371C30[];
 extern void* lbl_803CC1B8;
 
@@ -1199,8 +1204,41 @@ void fn_3_93960(void) {
 }
 
 // .text:0x00093688 size:0x2D8 mapped:0x806D271C
-void fn_3_93688(void) {
-    return;
+void fn_3_93688(UnkTask1770* task) {
+    s32 score;
+
+    if (g_Scores._04[0][0] >= 10) {
+        score = g_Scores._04[0][0];
+        if (g_Scores._04[0][0] >= 99) {
+            score = 99;
+        }
+        lbl_80371C30[task->_14 + 4]._00->_54 &= ~2;
+        lbl_80371C30[task->_14 + 5]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + 6]._00->_54 |= 2;
+        fn_8003649C(task, 5, 2, 0xF6, score / 10);
+        fn_8003649C(task, 6, 3, 0xF6, score % 10);
+    } else {
+        lbl_80371C30[task->_14 + 4]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + 5]._00->_54 &= ~2;
+        lbl_80371C30[task->_14 + 6]._00->_54 &= ~2;
+        fn_8003649C(task, 4, 1, 0xF6, g_Scores._04[0][0]);
+    }
+    score = g_Scores._04[1][0];
+    if (score >= 10) {
+        if (score >= 99) {
+            score = 99;
+        }
+        lbl_80371C30[task->_14 + 7]._00->_54 &= ~2;
+        lbl_80371C30[task->_14 + 8]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + 9]._00->_54 |= 2;
+        fn_8003649C(task, 8, 5, 0xF6, score / 10);
+        fn_8003649C(task, 9, 6, 0xF6, score % 10);
+    } else {
+        lbl_80371C30[task->_14 + 7]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + 8]._00->_54 &= ~2;
+        lbl_80371C30[task->_14 + 9]._00->_54 &= ~2;
+        fn_8003649C(task, 7, 4, 0xF6, g_Scores._04[1][0]);
+    }
 }
 
 // .text:0x00093544 size:0x144 mapped:0x806D25D8
