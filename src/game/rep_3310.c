@@ -264,6 +264,19 @@ typedef struct {
     /* 0x00 */ u32 _00[4];
 } UnkAramEntry3310; // size: 0x10
 
+// The float forms of MSL's math functions: each rounds its result before the caller uses it.
+static inline f32 acosf(f32 x) {
+    return acos(x);
+}
+
+static inline f32 sinf(f32 x) {
+    return sin(x);
+}
+
+static inline f32 cosf(f32 x) {
+    return cos(x);
+}
+
 static inline void setAnim(UnkActor3310* actor, void* anim, u16 frame) {
     actor->_04 = anim;
     actor->_0E = frame;
@@ -972,8 +985,8 @@ void fn_3_119934(void) {
                 memcpy(&dir, &g_Minigame.wallBall_coinVelocity[i], sizeof(Vec));
                 dir.y = 0.0f;
                 PSVECNormalize(&dir, &dir);
-                angle = acos(dir.x);
-                if (0.0f > dir.z) {
+                angle = acosf(dir.x);
+                if (dir.z < 0.0f) {
                     angle = 6.2831855f - angle;
                 }
                 obj->_10.y = angle;
@@ -1071,8 +1084,8 @@ void fn_3_1194FC(void) {
                     dir.y = 0.0f;
                     dir.z = g_Minigame.wallBall_coinVelocity[i].z;
                     PSVECNormalize(&dir, &dir);
-                    angle = acos(PSVECDotProduct(&fwd, &dir));
-                    if (0.0f > dir.x) {
+                    angle = acosf(PSVECDotProduct(&fwd, &dir));
+                    if (dir.x < 0.0f) {
                         angle = 6.2831855f - angle;
                     }
                     if (lbl_80366158._28 == 0) {
@@ -1461,8 +1474,8 @@ void fn_3_117FC8(void) {
 }
 
 // .text:0x00117B78 size:0x450 mapped:0x80756C0C
-// 89.42%: the uv table and object pointer get other registers, and the rotation loop
-// orders its sin/cos calls and products differently.
+// 94.91%: the quad's corner sums and stores are scheduled in another order, and the uv
+// table and object pointer get other registers.
 void fn_3_117B78(s32 i) {
     UnkObj3310* obj = &lbl_8036E548._2D94[i];
     u32 j;
@@ -1491,14 +1504,14 @@ void fn_3_117B78(s32 i) {
     GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
     GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
 
+    quad[0].x = quad[3].x = -size;
     quad[0].z = quad[1].z = size;
-    quad[3].x = quad[0].x = -size;
-    quad[2].x = quad[1].x = size;
-    quad[3].z = quad[2].z = -size;
+    quad[1].x = quad[2].x = size;
+    quad[2].z = quad[3].z = -size;
     for (j = 0; j < 4; j++) {
         memcpy(&tmp, &quad[j], sizeof(Vec));
-        quad[j].x = tmp.x * (f32)cos(-obj->_10.y) + tmp.z * -(f32)sin(-obj->_10.y);
-        quad[j].z = tmp.x * (f32)sin(-obj->_10.y) + tmp.z * (f32)cos(-obj->_10.y);
+        quad[j].x = tmp.x * cosf(-obj->_10.y) + tmp.z * -sinf(-obj->_10.y);
+        quad[j].z = tmp.x * sinf(-obj->_10.y) + tmp.z * cosf(-obj->_10.y);
     }
     quad[0].x += obj->_04.x;
     quad[1].x += obj->_04.x;
