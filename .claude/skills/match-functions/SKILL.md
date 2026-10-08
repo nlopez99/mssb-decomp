@@ -20,7 +20,7 @@ Your **claim** is one unit that already has a source file. Turn as many of its f
 
 3. **Keep or restore.** At a time box, keep the **best candidate** only if its score beats what the file had, and put a comment of at most three lines above it saying what still differs. Otherwise restore the previous code. When a function teaches something the notes lack, add it under its symptom, in `docs/matching-notes.md` or the notes file that symptom points to (symptom, cause, fix, example).
 
-4. **Verify and commit.** Run `python3 tools/match.py <unit> --all`, `python3 tools/check_symbols.py` and `python3 tools/regress.py`. Both checks must pass before you commit, and the last must end in `regress: OK`. In a worktree made by `tools/worktree.py` it compares with the branch the worktree started from; report only your unit's lines of its gained list. Commit with a message that names the matched functions, or says what else changed.
+4. **Verify and commit.** Run `python3 tools/match.py <unit> --all`, `python3 tools/check_symbols.py`, `python3 tools/check_prototypes.py` and `python3 tools/regress.py`. All three checks must pass before you commit, and the last must end in `regress: OK`. In a worktree made by `tools/worktree.py` it compares with the branch the worktree started from; report only your unit's lines of its gained list. Commit with a message that names the matched functions, or says what else changed.
 
 5. **Report.** Your final message gives:
    - the unit, elapsed seconds since step 1 (per unit when the claim has several), code bytes matched before and after (the `code X/Y bytes` line of `match.py <unit>`), and section scores before and after;
