@@ -479,30 +479,30 @@ static inline void spawnDrawEffect(StaC5Draw* draw) {
 }
 
 // .text:0x000F6FDC size:0x1468 mapped:0x80736070
-// 95.66%: register allocation differs throughout; the target also computes n1 + 2
-// between the two counting loops and stores pitcherModel to the s8 _C3 without extsb.
+// 96.70%: saved registers differ in places (the declaration order moves them); the target
+// computes n1 + 2 between the counting loops and stores pitcherModel to _C3 without extsb.
 void fn_3_F6FDC(void** files) {
-    StaC5Draw* draw;
-    StaC5Draw* entry;
-    StaC5Ball* ball;
-    s32* indices;
-    StaC5Prop* prop;
-    StaC5Prop2* prop2;
-    s32 i;
-    u32 x;
-    u32 y;
-    s32 off;
     s32 n1;
-    s32 n2;
-    u8 j;
-    s8 pitcherModel;
-    u8 fieldModel;
-    u8 ballModel;
-    u8 numModels;
-    u8 numActors;
-    s32 count;
-    u8 idx;
     u8 end;
+    s32 i;
+    StaC5Prop* prop;
+    StaC5Draw* draw;
+    s32* indices;
+    s8 pitcherModel;
+    u32 y;
+    s32 count;
+    u8 fieldModel;
+    u8 j;
+    u32 x;
+    s32 off;
+    StaC5Prop2* prop2;
+    u8 idx;
+    u8 numModels;
+    s32 n2;
+    StaC5Ball* ball;
+    StaC5Draw* entry;
+    u8 numActors;
+    u8 ballModel;
 
     count = 0;
     end = FALSE;
