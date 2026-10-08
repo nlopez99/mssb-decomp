@@ -126,19 +126,38 @@ typedef struct Rep1FD8Actor {
 
 typedef struct Rep1FD8Model {
     /* 0x00 */ Rep1FD8Actor* _00;
-} Rep1FD8Model;
+    /* 0x04 */ u8 _04[0x90 - 0x04];
+} Rep1FD8Model; // size: 0x90
+
+typedef struct Rep1FD8ModelTable {
+    /* 0x00 */ u16 count;
+    /* 0x04 */ Mtx _04;
+    /* 0x34 */ Rep1FD8Model models[1];
+} Rep1FD8ModelTable;
 
 typedef struct Rep1FD8Draw {
     /* 0x00 */ Control control;
     /* 0x44 */ Mtx _44;
     /* 0x74 */ Rep1FD8Model* _74;
     /* 0x78 */ struct StadiumObjectCollision* _78;
-    /* 0x7C */ u8 _7C[0x90 - 0x7C];
+    /* 0x7C */ void (*_7C)(struct Rep1FD8Draw* draw);
+    /* 0x80 */ void (*_80)(s32 idx);
+    /* 0x84 */ void (*_84)(struct Rep1FD8Draw* draw);
+    /* 0x88 */ void (*_88)(struct Rep1FD8Draw* draw);
+    /* 0x8C */ void* _8C;
     /* 0x90 */ u8 _90_7 : 1;
-    /* 0x90 */ u8 _90_0 : 7;
-    /* 0x91 */ u8 _91[0x99 - 0x91];
+    /* 0x90 */ u8 _90_6 : 1;
+    /* 0x90 */ u8 _90_5 : 1;
+    /* 0x90 */ u8 _90_0 : 5;
+    /* 0x91 */ u8 _91;
+    /* 0x92 */ u8 _92;
+    /* 0x93 */ u8 _93;
+    /* 0x94 */ u16 _94;
+    /* 0x96 */ s16 _96;
+    /* 0x98 */ u8 _98;
     /* 0x99 */ u8 _99;
-    /* 0x9A */ u8 _9A[0x9C - 0x9A];
+    /* 0x9A */ u8 _9A;
+    /* 0x9B */ u8 _9B;
     /* 0x9C */ Vec _9C;
     /* 0xA8 */ u8 _A8;
     /* 0xA9 */ u8 _A9;
@@ -164,15 +183,25 @@ extern struct {
         /* 0x00 */ StadiumObject1D58* _00;
         /* 0x00 */ Rep1FD8Draw* draws;
     };
-    /* 0x04 */ u8 _04[0x30 - 0x04];
+    /* 0x04 */ void* _04;
+    /* 0x08 */ u8 _08[0x18 - 0x08];
+    /* 0x18 */ void (*_18)(void);
+    /* 0x1C */ u8 _1C[0x20 - 0x1C];
+    /* 0x20 */ s32 _20;
+    /* 0x24 */ s32 _24;
+    /* 0x28 */ s32 _28;
+    /* 0x2C */ s32 _2C;
     /* 0x30 */ s32 _30;
-    /* 0x34 */ u8 _34[0x3C - 0x34];
+    /* 0x34 */ s32* _34;
+    /* 0x38 */ u8 _38[0x3C - 0x38];
     /* 0x3C */ u32* _3C;
     /* 0x40 */ u16* _40;
     /* 0x44 */ s32* _44;
     /* 0x48 */ Vec* _48;
     /* 0x4C */ u8 _4C[0x64 - 0x4C];
     /* 0x64 */ s16 _64;
+    /* 0x66 */ u8 _66[0x6D - 0x66];
+    /* 0x6D */ u8 _6D;
 } lbl_3_common_bss_350E4;
 
 typedef struct Rep1FD8CameraSlot {
@@ -243,7 +272,9 @@ typedef struct Rep1FD8Fielder {
 extern struct {
     /* 0x0000 */ u8 _0000[0x4];
     /* 0x0004 */ Rep1FD8StadiumFile* _04;
-    /* 0x0008 */ u8 _0008[0x2C50 - 0x8];
+    /* 0x0008 */ u8 _0008[0x6C - 0x8];
+    /* 0x006C */ Rep1FD8ModelTable* _6C;
+    /* 0x0070 */ u8 _0070[0x2C50 - 0x70];
     /* 0x2C50 */ Rep1FD8Fielder* _2C50[13];
 } lbl_8036E548;
 extern struct {
@@ -263,6 +294,16 @@ extern struct {
 } lbl_80366158;
 extern void fn_80023B90(Rep1FD8LightData* data, Rep1FD8Light* light);
 extern void fn_800528B4(void);
+extern Rep1FD8ModelTable* ActorObjectInitTable(u16 count);
+extern void fn_800BDC88(Rep1FD8ModelTable* table, u16 first, u16 last, void* model, void* anim, s32 arg5);
+extern void fn_800BD548(Rep1FD8Model* model, s32 count, ...);
+extern void fn_80025DDC(void* anim);
+extern void fn_80025C58(void* anim, Rep1FD8Model* model);
+extern void fn_80025FFC(void* anim, struct Rep1FD8Anim* state);
+extern void fn_80025EEC(struct Rep1FD8Anim* anim, s32, s32);
+extern void fn_80035750(void* arg0, void* arg1, s32 arg2);
+extern void fn_80034E20(Rep1FD8Task* task, void* desc);
+extern u8 lbl_3_data_10C1C[0x120];
 extern s16 fn_3_B7F70(s16 range);
 extern BOOL fn_80033928(u8 id);
 extern void SetDisplayStateTexture(void* tex, s32, s32);
@@ -348,9 +389,15 @@ s16 lbl_3_data_17880[3][3] = {
     { 120, -80, 212 },
 };
 
+typedef struct Rep1FD8Anim {
+    /* 0x00 */ void* file;
+    /* 0x04 */ u8 _04[0x5C - 0x04];
+} Rep1FD8Anim; // size: 0x5C
+
 // .bss, declared in reverse address order (MWCC lays .bss statics out last to first)
 static void* lbl_3_bss_9F0C[5];
-static u8 lbl_3_bss_9E54[0xB8];
+static Rep1FD8Anim lbl_3_bss_9EB0;
+static Rep1FD8Anim lbl_3_bss_9E54;
 static Rep1FD8Task* lbl_3_bss_9E50;
 static u8 lbl_3_bss_9E48[8];
 static Vec lbl_3_bss_9DE8[8];
@@ -375,8 +422,261 @@ static u8 lbl_3_bss_9D81;
 static u8 lbl_3_bss_9D80;
 
 // .text:0x000C8650 size:0xD2C mapped:0x807076E4
-void fn_3_C8650(void) {
-    return;
+// 87.37%, a first draft: structure follows the target, but registers differ throughout and the
+// target's frame is 0x10 larger (it keeps &g_d_GameSettings on the stack for the final test).
+void fn_3_C8650(void** files) {
+    Rep1FD8Draw* draw;
+    Rep1FD8Prop* prop;
+    Rep1FD8Prop2* prop2;
+    s32* indices;
+    u32 n;
+    u32 total;
+    u32 i;
+    u32 j;
+    s32 count;
+    u8 end;
+
+    lbl_3_common_bss_350E4._18 = fn_3_B939C;
+    indices = lbl_3_common_bss_350E4._34 = _OSAllocFromHeap(4, 16 * sizeof(s32));
+    fn_3_B9D68(lbl_3_data_177E0, 16, files, indices);
+    lbl_3_bss_9F0C[0] = files[0];
+    for (n = 0; n < 10; n++) {
+        if (lbl_3_data_175FC[n].type == 7) {
+            break;
+        }
+    }
+    total = n + 5;
+    lbl_3_common_bss_350E4._6D = total;
+    lbl_8036E548._6C = ActorObjectInitTable(total);
+    fn_800BDC88(lbl_8036E548._6C, 0, 0, files[indices[1]], NULL, 0);
+    fn_800BDC88(lbl_8036E548._6C, 1, 1, files[indices[2]], NULL, 0);
+    fn_800BDC88(lbl_8036E548._6C, 2, 2, files[indices[3]], NULL, 0);
+    for (i = 0, j = 3; i < n; i++, j++) {
+        fn_800BDC88(lbl_8036E548._6C, j, j, files[indices[4]], NULL, 0);
+    }
+    fn_800BDC88(lbl_8036E548._6C, j, j, files[indices[5]], NULL, 0);
+    fn_800BDC88(lbl_8036E548._6C, j + 1, j + 1, files[indices[6]], NULL, 0);
+    for (i = 0; i < total; i++) {
+        fn_800BD548(&lbl_8036E548._6C->models[i], 4, lbl_3_common_bss_350E4._20, lbl_3_common_bss_350E4._24,
+                    lbl_3_common_bss_350E4._28, lbl_3_common_bss_350E4._2C);
+    }
+    fn_80025DDC(files[indices[10]]);
+    for (i = 0; i < n; i++) {
+        fn_80025C58(files[indices[10]], &lbl_8036E548._6C->models[i + 3]);
+    }
+    lbl_3_bss_9EB0.file = files[indices[11]];
+    fn_80025FFC(files[indices[10]], &lbl_3_bss_9EB0);
+    fn_80025EEC(&lbl_3_bss_9EB0, 0, 0);
+    fn_80025DDC(files[indices[12]]);
+    fn_80025C58(files[indices[12]], &lbl_8036E548._6C->models[1]);
+    lbl_3_bss_9E54.file = files[indices[13]];
+    fn_80025FFC(files[indices[12]], &lbl_3_bss_9E54);
+    fn_80025EEC(&lbl_3_bss_9E54, 0, 0);
+    fn_80035750(files[indices[15]], files[indices[14]], 5);
+    fn_80034E20(lbl_3_bss_9E50 = fn_800B0A5C_insertQueue(fn_3_C3C2C, 2), lbl_3_data_10C1C);
+
+    lbl_3_common_bss_350E4._30 = 32;
+    lbl_3_common_bss_350E4.draws = _OSAllocFromHeap(32, 32 * sizeof(Rep1FD8Draw));
+    memset(lbl_3_common_bss_350E4.draws, 0, 32 * sizeof(Rep1FD8Draw));
+    lbl_3_common_bss_350E4._04 = _OSAllocFromHeap(32, 32 * sizeof(Rep1FD8Draw));
+    memset(lbl_3_common_bss_350E4._04, 0, 32 * sizeof(Rep1FD8Draw));
+
+    draw = lbl_3_common_bss_350E4.draws;
+    draw->_A9 = 0;
+    draw->_74 = &lbl_8036E548._6C->models[0];
+    draw->_78 = NULL;
+    draw->_7C = fn_3_C4068;
+    draw->_80 = NULL;
+    draw->_90_7 = 1;
+    draw->_90_6 = draw->_90_7 && draw->_78 != NULL;
+    draw->control.type = 0;
+    CTRLSetTranslation(&draw->control, 0.0f, 0.0f, 0.0f);
+    CTRLSetRotation(&draw->control, 0.0f, 0.0f, 0.0f);
+    draw->_90_5 = 0;
+    draw->_92 = 0xFF;
+    draw->_8C = NULL;
+    draw->_84 = NULL;
+    draw->_94 = 0;
+    draw->_96 = -1;
+    draw->_98 = 0;
+    draw++;
+    draw->_A9 = 1;
+    draw->_74 = &lbl_8036E548._6C->models[1];
+    draw->_78 = NULL;
+    draw->_7C = fn_3_C3F70;
+    draw->_80 = NULL;
+    draw->_90_7 = 1;
+    draw->_90_6 = draw->_90_7 && draw->_78 != NULL;
+    draw->control.type = 0;
+    CTRLSetTranslation(&draw->control, 0.0f, 0.0f, 0.0f);
+    CTRLSetRotation(&draw->control, 0.0f, 0.0f, 0.0f);
+    draw->_90_5 = 0;
+    draw->_92 = 0xFF;
+    draw->_8C = &lbl_3_bss_9E54;
+    draw->_84 = NULL;
+    draw->_94 = 0;
+    draw->_96 = -1;
+    draw->_98 = 1;
+    draw++;
+    count = 2;
+
+    if (g_d_GameSettings.GameModeSelected != 7) {
+        end = FALSE;
+        lbl_3_bss_9DE5 = 0;
+        lbl_3_bss_9DE4 = count;
+        for (i = 0, prop = lbl_3_data_17514; i < 10; i++, prop++) {
+            if (prop->type == 7) {
+                end = TRUE;
+            }
+            if (end) {
+                for (j = i; j < 11; j++) {
+                    lbl_3_data_17514[j].type = 7;
+                }
+                break;
+            }
+            draw->_A8 = i;
+            draw->_A9 = prop->type;
+            draw->_74 = &lbl_8036E548._6C->models[2];
+            draw->_78 = files[indices[7]];
+            draw->_7C = fn_3_C7A0C;
+            draw->_80 = (void (*)(s32))fn_3_C749C;
+            draw->_90_7 = prop->_11;
+            draw->_90_6 = draw->_90_7 && draw->_78 != NULL;
+            draw->control.type = 0;
+            CTRLSetTranslation(&draw->control, prop->pos.x, prop->pos.y, prop->pos.z);
+            CTRLSetRotation(&draw->control, 0.0f, prop->rotY, 0.0f);
+            draw->_9C.x = prop->pos.x;
+            count++;
+            draw->_9C.y = prop->pos.y;
+            draw->_9C.z = prop->pos.z;
+            draw->_AC = 0.0f;
+            draw->_B0 = 0;
+            draw->_B1 = 0;
+            draw->_B2 = 1;
+            draw->_90_5 = 0;
+            draw->_92 = 0xFF;
+            draw->_84 = fn_3_C7444;
+            draw->_8C = NULL;
+            draw->_94 = 0;
+            draw->_96 = -1;
+            draw->_98 = 1;
+            draw->_9A = 1;
+            draw++;
+            lbl_3_bss_9DE5++;
+        }
+        end = FALSE;
+        lbl_3_bss_9DE3 = 0;
+        lbl_3_bss_9DE2 = count;
+        for (i = 0, prop2 = lbl_3_data_175FC; i < 10; i++, prop2++) {
+            if (prop2->type == 7) {
+                end = TRUE;
+            }
+            if (end) {
+                for (j = i; j < 11; j++) {
+                    lbl_3_data_175FC[j].type = 7;
+                }
+                break;
+            }
+            draw->_A8 = i;
+            draw->_A9 = prop2->type;
+            draw->_74 = &lbl_8036E548._6C->models[i + 3];
+            draw->_78 = NULL;
+            draw->_7C = fn_3_C63D0;
+            draw->_80 = NULL;
+            draw->_90_7 = prop2->_11;
+            draw->_90_6 = draw->_90_7 && draw->_78 != NULL;
+            draw->_BC = fn_3_B7F70(240) + 1;
+            draw->_BD = 0;
+            draw->vel.z = draw->vel.y = draw->vel.x = 0.0f;
+            draw->_B8 = prop2->_14;
+            draw->_BA = prop2->_16;
+            draw->control.type = 0;
+            CTRLSetTranslation(&draw->control, prop2->pos.x, prop2->pos.y, prop2->pos.z);
+            CTRLSetRotation(&draw->control, 0.0f, prop2->rotY, 0.0f);
+            draw->_9C.x = prop2->pos.x;
+            count++;
+            draw->_9C.y = prop2->pos.y;
+            draw->_9C.z = prop2->pos.z;
+            draw->_90_5 = 1;
+            draw->_92 = 0xFF;
+            draw->_8C = &lbl_3_bss_9EB0;
+            draw->_84 = fn_3_C56E8;
+            draw->_88 = fn_3_C54D0;
+            draw->_94 = 1;
+            draw->_96 = 4;
+            draw->_98 = 1;
+            draw->_9A = 1;
+            draw++;
+            lbl_3_bss_9DE3++;
+        }
+        lbl_3_bss_9D82 = 0;
+        fn_800B0A5C_insertQueue(fn_3_C5DDC, 0x6001);
+        end = FALSE;
+        lbl_3_bss_9DE1 = 0;
+        lbl_3_bss_9DE0 = count;
+        for (i = 0, prop = lbl_3_data_17704; i < 10; i++, prop++) {
+            if (prop->type == 7) {
+                end = TRUE;
+            }
+            if (end) {
+                for (j = i; j < 11; j++) {
+                    lbl_3_data_17704[j].type = 7;
+                }
+                break;
+            }
+            draw->_A8 = i;
+            draw->_A9 = prop->type;
+            if (draw->_A9 == 4) {
+                draw->_74 = &lbl_8036E548._6C->models[n + 3];
+                draw->_78 = files[indices[8]];
+            } else {
+                draw->_74 = &lbl_8036E548._6C->models[n + 4];
+                draw->_78 = files[indices[9]];
+            }
+            draw->_7C = NULL;
+            draw->_80 = fn_3_C414C;
+            draw->_90_7 = prop->_11;
+            draw->_90_6 = draw->_90_7 && draw->_78 != NULL;
+            draw->control.type = 0;
+            CTRLSetTranslation(&draw->control, prop->pos.x, prop->pos.y, prop->pos.z);
+            CTRLSetRotation(&draw->control, 0.0f, prop->rotY, 0.0f);
+            draw->_90_5 = 1;
+            draw->_92 = 0xFF;
+            count++;
+            draw->_8C = NULL;
+            draw->_84 = fn_3_C40EC;
+            draw->_94 = 0;
+            draw->_96 = -1;
+            draw->_98 = 1;
+            draw++;
+            lbl_3_bss_9DE1++;
+        }
+    }
+    for (i = count; i < lbl_3_common_bss_350E4._30; i++, draw++) {
+        draw->_A9 = 0;
+        draw->_74 = NULL;
+        draw->_78 = NULL;
+        draw->_7C = NULL;
+        draw->_80 = NULL;
+        draw->_90_7 = 0;
+        draw->_90_6 = 0;
+        draw->_90_5 = 0;
+        draw->control.type = 0;
+        CTRLSetTranslation(&draw->control, 0.0f, 0.0f, 0.0f);
+        CTRLSetRotation(&draw->control, 0.0f, 0.0f, 0.0f);
+        draw->_92 = 0;
+        draw->_8C = NULL;
+        draw->_94 = 0;
+        draw->_96 = -1;
+    }
+    lbl_3_common_bss_350E4._48 = NULL;
+    if (g_d_GameSettings.GameModeSelected != 7) {
+        fn_3_C82B4();
+    }
+    fn_800528AC(fn_3_C3A38);
+    fn_3_C39C8();
+    fn_3_C1974(files[indices[0]]);
+    fn_3_B97C8(fn_3_C2974);
 }
 
 // .text:0x000C82B4 size:0x39C mapped:0x80707348

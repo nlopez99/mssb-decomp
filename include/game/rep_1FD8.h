@@ -60,6 +60,6 @@ void fn_3_C7A0C(struct Rep1FD8Draw* draw);
 void fn_3_C805C(u32* n, s32* count);
 struct StadiumObjectCollision* fn_3_C823C(s32 idx, MtxPtr mtx);
 void fn_3_C82B4(void);
-void fn_3_C8650(void);
+void fn_3_C8650(void** files);
 
 #endif // !__GAME_rep_1FD8_H_
