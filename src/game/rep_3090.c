@@ -2708,15 +2708,18 @@ void fn_3_FC938(void) {
     fn_3_101CC4();
 }
 
-// 6.71%: the target inlines fn_3_FC938 here; this build calls it. Without its fn_3_104338
-// call fn_3_FC938 is small enough for -inline auto, so the original was smaller by MWCC's measure.
 // .text:0x000FC448 size:0x4F0 mapped:0x8073B4DC
 void fn_3_FC448(void) {
     int i;
 
     for (i = 0; i < 2; i++) {
         lbl_3_common_bss_DE94._0000 = &g_Camera._120[i];
-        fn_3_FC938();
+        lbl_3_common_bss_DE94._0000->_0120 = fn_3_10698C(g_pCamera->_1B4);
+        memcpy(lbl_3_common_bss_DE94._0000->_0990, fn_3_1069B0(g_pCamera->_1B4, lbl_3_common_bss_DE94._0000->_0940), 0x8000);
+        fn_3_1069C0();
+        fn_3_105C84(lbl_3_common_bss_DE94._0000->_0990);
+        fn_3_104338();
+        fn_3_101CC4();
     }
 }
 
