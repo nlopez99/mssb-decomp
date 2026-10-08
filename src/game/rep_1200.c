@@ -14,6 +14,8 @@
 #include "game/rep_31A0.h"
 #include "game/rep_3880.h"
 #include "game/rep_D18.h"
+#include "game/rep_8C8.h"
+#include "game/rep_940.h"
 
 extern struct {
     /* 0x00 */ s32 _00;
@@ -24,6 +26,11 @@ extern struct {
     /* 0xAC */ u8 _AC;
     /* 0xAD */ u8 _AD;
 } g_Scores;
+
+extern struct {
+    /* 0x00 */ u8 _00[0x10];
+    /* 0x10 */ u8 _10;
+} g_RunningLogic;
 
 extern struct {
     /* 0x00 */ u8 _00[0x9C];
@@ -44,6 +51,8 @@ typedef struct {
 extern Rep540Friction lbl_3_data_4388[7];
 extern f32 lbl_3_data_446C[2];
 extern VecXZ lbl_3_data_450C[9];
+extern s16 lbl_3_data_5D6C[][7];
+extern f32 lbl_3_data_5E78[2];
 extern f32 lbl_3_data_4474[4];
 extern f32 lbl_3_data_5E98[6];
 extern f32 lbl_3_data_5EB0[2];
@@ -58,6 +67,7 @@ extern u8 lbl_3_data_76FC[][3];
 extern s16 lbl_3_data_8080[4];
 
 BOOL fn_8001C920(int charID);
+extern int LERPToNewRange_Float(int value, int inMin, int inMax, int outMin, int outMax);
 void fn_3_1DD48(void);
 void fn_3_7A154(int arg);
 void fn_3_7CE90(void);
@@ -472,12 +482,104 @@ void fn_3_71248(void) {
 
 // .text:0x00070EF4 size:0x354 mapped:0x806AFF88
 void fn_3_70EF4(void) {
-    return;
+    InputStruct* input = &g_Controls[g_GameLogic.teams[g_GameLogic.teamFielding]];
+    s16* curveRange = lbl_3_data_5D6C[g_Pitcher.specialPitchTypeCode];
+    int dir = 0;
+    f32 maxCurve;
+    f32 divisor;
+    f32 step;
+
+    g_Pitcher.pitchCurveVeloV1 = 0.0f;
+    g_Pitcher._60 = 0.0f;
+    if (!g_Pitcher.cancelParabolicAdjustmentInd && g_Pitcher.calced_curve) {
+        maxCurve = 0.00005f * LinearInterpolateToNewRange(g_Pitcher.calced_curve, 1.0f, 100.0f, curveRange[1], curveRange[2]);
+        if (g_Pitcher.AIInd) {
+            dir = fn_3_20CEC(maxCurve);
+        } else {
+            if (ACTIVE_TUTORIAL()) {
+                input = &g_Practice.inputs[g_GameLogic.teamFielding];
+            } else if (fn_3_107DB4(g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder])) {
+                input = &g_Minigame._1D7C[g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder]];
+            } else if (g_d_GameSettings.minigamesEnabled) {
+                input = &g_Controls[g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder]];
+            }
+            if (input->buttonInput & INPUT_BUTTON_LEFT) {
+                dir = -1;
+            } else if (input->buttonInput & INPUT_BUTTON_RIGHT) {
+                dir = 1;
+            }
+        }
+        divisor = LinearInterpolateToNewRange(g_Pitcher.calced_curveControl, 1.0f, 100.0f, lbl_3_data_5E78[0], lbl_3_data_5E78[1]);
+        if (divisor < 1.0f) {
+            divisor = 1.0f;
+        }
+        if (dir == 0) {
+            step = maxCurve / divisor;
+            if (g_Pitcher.pitchCurveVeloV2 < 0.0f) {
+                g_Pitcher.pitchCurveVeloV2 += step;
+                if (g_Pitcher.pitchCurveVeloV2 > 0.0f) {
+                    g_Pitcher.pitchCurveVeloV2 = 0.0f;
+                }
+            } else {
+                g_Pitcher.pitchCurveVeloV2 -= step;
+                if (g_Pitcher.pitchCurveVeloV2 < 0.0f) {
+                    g_Pitcher.pitchCurveVeloV2 = 0.0f;
+                }
+            }
+        } else {
+            g_Pitcher.pitchCurveVeloV2 += maxCurve * dir / divisor;
+            if (dir < 0) {
+                if (g_Pitcher.pitchCurveVeloV2 < -maxCurve) {
+                    g_Pitcher.pitchCurveVeloV2 = -maxCurve;
+                }
+            } else if (g_Pitcher.pitchCurveVeloV2 > maxCurve) {
+                g_Pitcher.pitchCurveVeloV2 = maxCurve;
+            }
+        }
+        g_Pitcher.pitchCurveVeloV1 = g_Pitcher.pitchCurveVeloV2;
+        if (dir) {
+            g_Pitcher.anyCurveInput = 1;
+        }
+    }
 }
 
 // .text:0x00070B94 size:0x360 mapped:0x806AFC28
 void fn_3_70B94(void) {
-    return;
+    f32 t;
+
+    if (g_Pitcher.starPitchType == 9 || g_Pitcher.starPitchType == 10) {
+        if (g_Pitcher.eggBallBounceNumber == 0) {
+            t = g_Ball.pitchHangtimeCounter - g_Pitcher.frameWhenUnhittable / 2.0f;
+            g_Pitcher.pitchY_parabolicAdjustment =
+                g_Pitcher.verticalOffsetParabolaMidpoint - g_Pitcher.verticalGlobalParabolicVelo * t * t / 10000.0f;
+        } else if (g_Pitcher.eggBallBounceNumber == 1 || g_Pitcher.eggBallBounceNumber == 2) {
+            if (g_Pitcher.framesSinceFirstEggBounce == 1) {
+                if (g_Pitcher.eggBallBounceNumber == 1) {
+                    g_Pitcher.ballBouncePeakZ = fn_3_70768(&t, FALSE, g_Pitcher.eggBallBounceZLoc) / 2.0f;
+                    g_Pitcher.verticalGlobalParabolicVelo = LERPToNewRange_Float(
+                        g_Pitcher.pitchSpeed, lbl_3_data_5F7C[4], lbl_3_data_5F7C[5], lbl_3_data_5F7C[6], lbl_3_data_5F7C[7]);
+                    t = g_Pitcher.ballBouncePeakZ;
+                    g_Pitcher.verticalOffsetParabolaMidpoint = g_Pitcher.verticalGlobalParabolicVelo * t * t / 10000.0f;
+                } else {
+                    g_Pitcher.ballBouncePeakZ = g_Pitcher.framesUntilBallReachesBatterZ;
+                    g_Pitcher.verticalOffsetParabolaMidpoint = 0.3f + lbl_3_data_5E98[4];
+                    t = g_Pitcher.framesUntilBallReachesBatterZ;
+                    g_Pitcher.verticalGlobalParabolicVelo = 10000.0f * g_Pitcher.verticalOffsetParabolaMidpoint / (t * t);
+                }
+            }
+            t = (f32)g_Pitcher.framesSinceFirstEggBounce - (f32)g_Pitcher.ballBouncePeakZ;
+            g_Pitcher.pitchY_parabolicAdjustment =
+                g_Pitcher.verticalOffsetParabolaMidpoint - g_Pitcher.verticalGlobalParabolicVelo * t * t / 10000.0f;
+        } else {
+            g_Pitcher.pitchY_parabolicAdjustment = 0.0f;
+        }
+    } else if (g_Pitcher.cancelParabolicAdjustmentInd) {
+        g_Pitcher.pitchY_parabolicAdjustment = 0.0f;
+    } else {
+        t = g_Ball.pitchHangtimeCounter - g_Pitcher.frameWhenUnhittable / 2.0f;
+        g_Pitcher.pitchY_parabolicAdjustment =
+            g_Pitcher.verticalOffsetParabolaMidpoint - g_Pitcher.verticalGlobalParabolicVelo * t * t / 10000.0f;
+    }
 }
 
 // .text:0x00070AEC size:0xA8 mapped:0x806AFB80
@@ -713,7 +815,32 @@ void fn_3_70280(void) {
 
 // .text:0x0006FFC4 size:0x2BC mapped:0x806AF058
 void fn_3_6FFC4(void) {
-    return;
+    int spread = g_Ball.StaticRandomInt1 % 257 - 128;
+    int ang;
+    f32 z;
+    f32 x;
+    f32 extra;
+    f32 speed;
+
+    ang = fn_3_9FB8C(g_Pitcher.ballVelocity.x, -g_Pitcher.ballVelocity.z);
+    getComponentsFromSAng(ang + spread, &x, &z);
+    extra = 0.01f * (g_Ball.StaticRandomInt2 % 10);
+    speed = dolsqrtf2(SQ(g_Pitcher.ballVelocity.x) + SQ(g_Pitcher.ballVelocity.z));
+    g_Ball.physicsSubstruct.velocity.x = (0.1f + extra) * (x * speed);
+    g_Ball.physicsSubstruct.velocity.z = (0.1f + extra) * (z * speed);
+    g_Ball.physicsSubstruct.velocity.y = 0.0f;
+    g_Pitcher.strikeOutOrWalk = 3;
+    g_Pitcher.miniGameRelated = 1;
+    g_Pitcher.framesSinceAtBatEnded = 0;
+    playSoundEffect(0x170);
+    if (!g_Batter.aiControlledInd) {
+        if (g_d_GameSettings.minigamesEnabled) {
+            fn_3_6C854(g_Minigame.minigameControlStruct.characterIndex[g_Minigame.rosterID], 2);
+        } else {
+            fn_3_6C854(g_GameLogic.teamBatting, 2);
+        }
+    }
+    fn_3_7A154(0);
 }
 
 // .text:0x0006FDA0 size:0x224 mapped:0x806AEE34
@@ -788,8 +915,61 @@ void fn_3_6FA28(void) {
 }
 
 // .text:0x0006F748 size:0x2E0 mapped:0x806AE7DC
-void fn_3_6F748(void) {
-    return;
+BOOL fn_3_6F748(void) {
+    InputStruct* input = &g_Controls[g_GameLogic.teams[g_GameLogic.teamFielding]];
+
+    if (g_Pitcher.AIInd) {
+        if (fn_3_20B30()) {
+            goto pickoff;
+        }
+        return FALSE;
+    }
+    if (ACTIVE_TUTORIAL()) {
+        input = &g_Practice.inputs[g_GameLogic.teamFielding];
+    } else if (fn_3_107DB4(g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder])) {
+        input = &g_Minigame._1D7C[g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder]];
+    } else if (g_d_GameSettings.minigamesEnabled && g_Minigame.minigamePlayerSelectedOrder >= 0) {
+        input = &g_Controls[g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder]];
+    }
+    if (g_GameLogic.FrameCountOfCurrentPitch < 90) {
+        return FALSE;
+    }
+    if (g_RunningLogic._10 <= 1) {
+        return FALSE;
+    }
+    if (fn_3_6F6CC()) {
+        if (g_Pitcher.nPickoffAttempts < 0xFE) {
+            g_Pitcher.nPickoffAttempts++;
+        } else {
+            g_Pitcher.nPickoffAttempts = 0xFF;
+        }
+        return TRUE;
+    }
+    if (input->newButtonInput & INPUT_BUTTON_B) {
+        g_Pitcher.pickOffLoc = 4;
+        if (input->buttonInput & INPUT_BUTTON_LEFT) {
+            if (g_Runners[3].runnerOnFieldOrOutOrScored) {
+                g_Pitcher.pickOffLoc = 3;
+            }
+        } else if (input->buttonInput & INPUT_BUTTON_UP) {
+            if (g_Runners[2].runnerOnFieldOrOutOrScored) {
+                g_Pitcher.pickOffLoc = 2;
+            }
+        } else if (input->buttonInput & INPUT_BUTTON_RIGHT) {
+            if (g_Runners[1].runnerOnFieldOrOutOrScored) {
+                g_Pitcher.pickOffLoc = 1;
+            }
+        }
+    pickoff:
+        fn_3_5C69C(0);
+        if (g_Pitcher.nPickoffAttempts < 0xFE) {
+            g_Pitcher.nPickoffAttempts++;
+        } else {
+            g_Pitcher.nPickoffAttempts = 0xFF;
+        }
+        return TRUE;
+    }
+    return FALSE;
 }
 
 // .text:0x0006F6CC size:0x7C mapped:0x806AE760
