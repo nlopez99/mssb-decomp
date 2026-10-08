@@ -947,8 +947,50 @@ void fn_3_D4780(StaC2Draw* draw) {
 }
 
 // .text:0x000D3F54 size:0x82C mapped:0x80712FE8
-void fn_3_D3F54(void) {
-    return;
+void fn_3_D3F54(void* arg) {
+    StaC2Draw* draw = arg;
+
+    if (g_GameLogic.gameStatus == 3) {
+        if (draw->_CD == 0) {
+            fn_3_D4E00(draw);
+        }
+    } else {
+        if (draw->_CD != 0) {
+            draw->_CD = 0;
+        }
+        if (g_GameLogic.gameStatus == 0) {
+            if (draw->_CA != 0) {
+                draw->_CA = 1;
+                fn_80025EEC(draw->_8C, 0, 1);
+            }
+            fn_3_D4CA4(draw);
+            draw->hops = 1;
+            return;
+        }
+        if (g_GameLogic.gameStatus == 2) {
+            draw->_90_7 = 1;
+        }
+        switch (draw->_CA) {
+        case 0:
+            fn_3_D3CDC(draw);
+            break;
+        case 1:
+            fn_3_D3880(draw);
+            break;
+        case 2:
+            fn_3_D36B0(draw);
+            break;
+        case 3:
+            fn_3_D30D0(draw);
+            break;
+        case 4:
+            fn_3_D2A0C(draw);
+            break;
+        case 5:
+            fn_3_D278C(draw);
+            break;
+        }
+    }
 }
 
 // .text:0x000D3CDC size:0x278 mapped:0x80712D70
@@ -959,6 +1001,7 @@ void fn_3_D3CDC(StaC2Draw* draw) {
     u32 i;
     u8* order;
     StaC2Player* player;
+    Vec* pos;
 
     if (g_GameLogic.gameStatus != 2) {
         if (draw->_99 & 2) {
@@ -973,7 +1016,8 @@ void fn_3_D3CDC(StaC2Draw* draw) {
         for (i = 0; i < 4; i++) {
             player = lbl_8036E548._2C50[order[i]];
             if (player != NULL) {
-                PSVECSubtract(&draw->_A0, &player->_34, &diff);
+                pos = &player->_34;
+                PSVECSubtract(&draw->_A0, pos, &diff);
                 if (PSVECMag(&diff) <= 12.5f) {
                     draw->_99 |= 2;
                     if (fn_3_B7F70(10) < 4) {
