@@ -4,12 +4,12 @@
 #include "mssbTypes.h"
 
 void fn_3_60768(void);
-void fn_3_60804(void);
-void fn_3_60A98(void);
+void fn_3_60804(s32 i, BOOL mode);
+void fn_3_60A98(s32 i, struct UnkE08Actor* actor);
 BOOL fn_3_60D80(s32 i);
-void fn_3_60E90(void);
-void fn_3_61148(void);
-void fn_3_61228(void);
+BOOL fn_3_60E90(s32 i);
+BOOL fn_3_61148(s32 i);
+BOOL fn_3_61228(s32 i);
 void fn_3_61544(void);
 void fn_3_61B64(void);
 void fn_3_62904(void);
@@ -19,7 +19,7 @@ void fn_3_62D44(s32 i);
 void fn_3_62E04(s32 i);
 void fn_3_62E28(void);
 void fn_3_62E70(void);
-void fn_3_631AC(void);
+void fn_3_631AC(s32 i);
 void fn_3_63874(s32 i);
 void fn_3_63A38(void);
 void fn_3_63AF8(void);

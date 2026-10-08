@@ -1,16 +1,48 @@
 #include "game/rep_E08.h"
-#include "header_rep_data.h"
+// Must precede header_rep_data.h, which keeps the .rodata constants unpooled as in the target
 #include "game/UnknownHomes_Game.h"
+#include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
+#include "game/rep_1838.h"
+#include "game/m_sound.h"
+#include "game/rep_1CB8.h"
 
 typedef struct UnkE08Fielder {
-    /* 0x000 */ u8 _000[0xE8];
+    /* 0x000 */ VecXYZ _000;
+    /* 0x00C */ u8 _00C[0x30 - 0xC];
+    /* 0x030 */ f32 _030;
+    /* 0x034 */ f32 _034;
+    /* 0x038 */ u8 _038[0x48 - 0x38];
+    /* 0x048 */ f32 _048;
+    /* 0x04C */ u8 _04C[0x50 - 0x4C];
+    /* 0x050 */ f32 _050;
+    /* 0x054 */ u8 _054[0xA8 - 0x54];
+    /* 0x0A8 */ f32 _0A8;
+    /* 0x0AC */ u8 _0AC[0xD4 - 0xAC];
+    /* 0x0D4 */ f32 _0D4;
+    /* 0x0D8 */ f32 _0D8;
+    /* 0x0DC */ u8 _0DC[0xE8 - 0xDC];
     /* 0x0E8 */ f32 _0E8;
-    /* 0x0EC */ u8 _0EC[0x1C7 - 0xEC];
+    /* 0x0EC */ u8 _0EC[0x17A - 0xEC];
+    /* 0x17A */ s16 _17A;
+    /* 0x17C */ u8 _17C[0x1AA - 0x17C];
+    /* 0x1AA */ s16 _1AA;
+    /* 0x1AC */ u8 _1AC[0x1C7 - 0x1AC];
     /* 0x1C7 */ u8 _1C7;
-    /* 0x1C8 */ u8 _1C8[0x1E5 - 0x1C8];
+    /* 0x1C8 */ u8 _1C8;
+    /* 0x1C9 */ u8 _1C9;
+    /* 0x1CA */ u8 _1CA[0x1D3 - 0x1CA];
+    /* 0x1D3 */ u8 _1D3;
+    /* 0x1D4 */ u8 _1D4[0x1E5 - 0x1D4];
     /* 0x1E5 */ u8 _1E5;
-    /* 0x1E6 */ u8 _1E6[0x248 - 0x1E6];
+    /* 0x1E6 */ u8 _1E6[0x1FB - 0x1E6];
+    /* 0x1FB */ u8 _1FB;
+    /* 0x1FC */ u8 _1FC[0x211 - 0x1FC];
+    /* 0x211 */ u8 _211;
+    /* 0x212 */ u8 _212;
+    /* 0x213 */ u8 _213[0x215 - 0x213];
+    /* 0x215 */ u8 _215;
+    /* 0x216 */ u8 _216[0x248 - 0x216];
     /* 0x248 */ f32 _248;
     /* 0x24C */ s16 _24C;
     /* 0x24E */ u8 _24E[0x252 - 0x24E];
@@ -22,26 +54,43 @@ typedef struct UnkE08Fielder {
 } UnkE08Fielder; // size: 0x268
 
 typedef struct UnkE08Anim {
-    /* 0x00 */ u8 _00[0x38];
+    /* 0x00 */ u8 _00[0x10];
+    /* 0x10 */ VecXYZ _10;
+    /* 0x1C */ u8 _1C[0x2C - 0x1C];
+    /* 0x2C */ VecXYZ _2C;
     /* 0x38 */ s16 _38;
     /* 0x3A */ s16 _3A;
     /* 0x3C */ u8 _3C[0x40 - 0x3C];
     /* 0x40 */ u8 _40;
     /* 0x41 */ u8 _41;
-    /* 0x42 */ u8 _42[0x45 - 0x42];
+    /* 0x42 */ u8 _42;
+    /* 0x43 */ u8 _43;
+    /* 0x44 */ u8 _44;
     /* 0x45 */ u8 _45;
-    /* 0x46 */ u8 _46[0x4A - 0x46];
+    /* 0x46 */ u8 _46;
+    /* 0x47 */ u8 _47;
+    /* 0x48 */ u8 _48;
+    /* 0x49 */ u8 _49;
     /* 0x4A */ s16 _4A;
     /* 0x4C */ u8 _4C;
     /* 0x4D */ u8 _4D;
     /* 0x4E */ u8 _4E;
     /* 0x4F */ u8 _4F;
-    /* 0x50 */ u8 _50[0x54 - 0x50];
+    /* 0x50 */ u8 _50;
+    /* 0x51 */ u8 _51;
+    /* 0x52 */ u8 _52[0x54 - 0x52];
 } UnkE08Anim; // size: 0x54
 
 typedef struct UnkE08Actor {
-    /* 0x00 */ u8 _00[0x62];
+    /* 0x00 */ u8 _00[0x34];
+    /* 0x34 */ VecXYZ _34;
+    /* 0x40 */ u8 _40[0x62 - 0x40];
     /* 0x62 */ s16 _62;
+    /* 0x64 */ u8 _64[0x68 - 0x64];
+    /* 0x68 */ s16 _68;
+    /* 0x6A */ s16 _6A;
+    /* 0x6C */ u8 _6C[0x252 - 0x6C];
+    /* 0x252 */ s8 _252;
 } UnkE08Actor;
 
 typedef struct UnkE08Track {
@@ -78,26 +127,48 @@ extern struct {
     /* 0xB */ u8 _B;
 } lbl_3_common_bss_32220;
 
-extern struct {
+typedef struct UnkE08Throw {
     /* 0x00 */ Vec _00;
-    /* 0x0C */ u8 _0C[0xE - 0xC];
+    /* 0x0C */ s16 _0C;
     /* 0x0E */ u8 _0E;
-} g_UnkThrowing_31ACC;
+    /* 0x0F */ u8 _0F;
+    /* 0x10 */ u8 _10;
+} UnkE08Throw;
+
+extern UnkE08Throw g_UnkThrowing_31ACC;
 
 typedef struct UnkE08RunnerAnim {
-    /* 0x00 */ u8 _00[0x1B];
+    /* 0x00 */ f32 _00;
+    /* 0x04 */ u8 _04[0x1B - 0x4];
     /* 0x1B */ u8 _1B;
-    /* 0x1C */ u8 _1C[0x20 - 0x1C];
+    /* 0x1C */ u8 _1C;
+    /* 0x1D */ u8 _1D;
+    /* 0x1E */ u8 _1E[0x20 - 0x1E];
 } UnkE08RunnerAnim; // size: 0x20
 
 extern UnkE08RunnerAnim lbl_3_common_bss_321A0[4];
 
 // .data outside this unit's range in splits.txt
+typedef struct UnkE08CharEntry {
+    /* 0x0 */ u8 _0[2];
+    /* 0x2 */ u8 _2;
+    /* 0x3 */ u8 _3[3];
+} UnkE08CharEntry; // size: 0x6
+
+extern UnkE08CharEntry lbl_800E8558[54];
+
+extern u8 lbl_3_data_7760[][5];
 extern s16 lbl_3_data_7870[][3];
+extern u8 lbl_3_data_7D24[][5];
+extern u8 lbl_3_data_7E34[54][4];
+extern s16 lbl_3_data_7F10[54];
+extern f32 lbl_3_data_476C[5];
 
 extern UnkE08Fielder g_Fielders[9];
 extern UnkE08Anim g_UnkAnimation_31EAC[9];
 
+void fn_8001B4D8(int actor);
+void fn_8001B5EC(int actor, int flag);
 void QueueCharacterAnimation(int actor, int anim, u8, u8, s16, u8, int);
 void AnimateCharacter(int actor, int anim, u8, u8, u8, s16, u8, int);
 
@@ -182,7 +253,27 @@ void fn_3_63AF8(void) {
 
 // .text:0x00063A38 size:0xC0 mapped:0x806A2ACC
 void fn_3_63A38(void) {
-    return;
+    s32 i;
+    InMemRunnerType* runner;
+    UnkE08RunnerAnim* state;
+
+    for (i = 0; i < 4; i++) {
+        runner = &g_Runners[i];
+        state = &lbl_3_common_bss_321A0[i];
+        state->_1C = state->_1B;
+        if (g_d_GameSettings.minigamesEnabled && g_Minigame._18FC[i] < 0) {
+            continue;
+        }
+        if (runner->runnerOnFieldOrOutOrScored == 0) {
+            state->_1B = 0;
+        } else {
+            state->_1B = 3;
+            state->_00 = runner->groundVelocity[0];
+            state->_1D = runner->runningDirectionCode;
+            fn_3_63874(i);
+            fn_3_631AC(i);
+        }
+    }
 }
 
 // .text:0x00063874 size:0x1C4 mapped:0x806A2908
@@ -233,8 +324,125 @@ void fn_3_63874(s32 i) {
 }
 
 // .text:0x000631AC size:0x6C8 mapped:0x806A2240
-void fn_3_631AC(void) {
-    return;
+void fn_3_631AC(s32 i) {
+    s32 player = i + 9;
+    UnkE08Actor* actor = lbl_8036E548._2C50[player];
+    InMemRunnerType* runner = &g_Runners[i];
+    UnkE08RunnerAnim* state = &lbl_3_common_bss_321A0[i];
+    s16 actorAnim;
+    BOOL slides;
+
+    if (g_d_GameSettings.minigamesEnabled) {
+        player = g_Minigame._18FC[i];
+        actor = lbl_8036E548._2C50[player];
+    }
+    if (actor != NULL) {
+        actorAnim = actor->_62;
+    }
+    switch (state->_1B) {
+    case 0:
+        return;
+    case 2:
+        slides = FALSE;
+        if (lbl_800E8558[runner->charID]._2 == 0xE || lbl_800E8558[runner->charID]._2 == 0x14 ||
+            lbl_800E8558[runner->charID]._2 == 0x1A || lbl_800E8558[runner->charID]._2 == 0x1E) {
+            slides = TRUE;
+        }
+        if (runner->runningDirectionCode == 1 && runner->framesToNextBase < 10 &&
+            g_GameLogic.secondaryGameMode != SECONDARY_GAME_MODE_CHAINCHOMP_SPRINT && slides) {
+            AnimateCharacter(player, 0x2E, 0, 1, 0, lbl_3_data_7870[runner->charID][2] - 10, 0, -1);
+        } else if (actorAnim == 0x31) {
+            AnimateCharacter(player, 0x2D, 1, 2, 0, 0, 0, -1);
+        } else {
+            AnimateCharacter(player, 0x2D, 1, 1, 0, 0, 0, -1);
+        }
+        break;
+    case 3:
+        if (g_Minigame.GameMode_MiniGame != 0) {
+            AnimateCharacter(player, 0x39, 1, 1, 1, 0, 0, -1);
+        } else if (lbl_800E8558[runner->charID]._2 == 0xC) {
+            AnimateCharacter(player, 0x39, 1, 1, 1, 0, 0, -1);
+        } else {
+            AnimateCharacter(player, 0x38, 1, 1, 1, 0, 0, -1);
+        }
+        break;
+    case 4:
+        AnimateCharacter(player, 0x39, 1, 1, 1, 0, 0, -1);
+        break;
+    case 5:
+        if (runner->runningDirectionCode == 3) {
+            AnimateCharacter(player, 0x30, 0, 1, 0, 0x14, 1, -1);
+        } else {
+            AnimateCharacter(player, 0x30, 0, 1, 0, 0x14, 0, -1);
+        }
+        break;
+    case 7:
+        if (runner->runnerDirectionCode_stored == 3) {
+            AnimateCharacter(player, 0x31, 0, 1, 0, 0, 1, 0);
+        } else {
+            AnimateCharacter(player, 0x31, 0, 1, 0, 0, 0, 0);
+        }
+        break;
+    case 8:
+        if (runner->actionStage == 1) {
+            if (runner->actionFrames_countUp == 1) {
+                if (runner->actionCode == 2) {
+                    AnimateCharacter(player, 0x33, 0, 1, 1,
+                                     lbl_3_data_7760[runner->charID][2] - runner->actionFrames_countDown, 1, -1);
+                } else if (runner->actionCode == 3) {
+                    AnimateCharacter(player, 0x33, 0, 1, 1,
+                                     lbl_3_data_7760[runner->charID][2] - runner->actionFrames_countDown, 1, -1);
+                } else if (runner->actionInForwardDirectionInd != 0 && runner->nextBase != 0) {
+                    AnimateCharacter(player, 0x32, 0, 1, 1,
+                                     lbl_3_data_7760[runner->charID][2] - runner->actionFrames_countDown, 1, -1);
+                } else {
+                    AnimateCharacter(player, 0x34, 0, 1, 1,
+                                     lbl_3_data_7760[runner->charID][4] - runner->actionFrames_countDown, 0, -1);
+                }
+                if (g_GameLogic.gameStatus == GAME_STATUS_LIVE_BALL) {
+                    playSoundEffect(0x171);
+                }
+            }
+        } else if (runner->actionStage == 2) {
+            if (runner->actionFrames_countDown == 1) {
+                AnimateCharacter(player, 0x38, 1, 1, 1, 0, 0, 0);
+            }
+        }
+        break;
+    case 9:
+        AnimateCharacter(player, 0x2D, 1, 1, 0, 0, 0, -1);
+        break;
+    case 10:
+        AnimateCharacter(player, 0x2F, 1, 1, 0, 0, 0, -1);
+        break;
+    case 11:
+        AnimateCharacter(player, 0x30, 1, 1, 0, 0, 0, -1);
+        break;
+    case 12:
+        AnimateCharacter(player, 0x2F, 1, 1, 0, 0, 0, -1);
+        break;
+    case 13:
+        AnimateCharacter(player, 0x2D, 1, 1, 0, 0, 0, -1);
+        break;
+    case 14:
+        if (runner->slideHomeFrames_CountDown == 0 && runner->velocity.x != 0.0f) {
+            AnimateCharacter(player, 0x2D, 1, 1, 0, 0, 0, -1);
+        }
+        break;
+    case 15:
+        AnimateCharacter(player, 0x35, 0, 1, 0,
+                         lbl_3_data_7870[runner->charID][1] - runner->leadOffTotalFrameCountDown, 0, -1);
+        break;
+    case 16:
+        AnimateCharacter(player, 0x39, 1, 1, 1, 0, 0, 0);
+        break;
+    case 17:
+        if (actorAnim != 0x24) {
+            fn_3_90220(runner->charID, 10);
+        }
+        AnimateCharacter(player, 0x24, 0, 1, 1, 0, 0, 0x14);
+        break;
+    }
 }
 
 // .text:0x00062E70 size:0x33C mapped:0x806A1F04
@@ -337,7 +545,65 @@ void fn_3_62B50(void) {
 
 // .text:0x00062904 size:0x24C mapped:0x806A1998
 void fn_3_62904(void) {
-    return;
+    s32 i;
+    s16 holder;
+    UnkE08Anim* anim;
+    UnkE08Fielder* fielder;
+    u8 state;
+    s16 runner;
+
+    if (g_d_GameSettings.minigamesEnabled) {
+        return;
+    }
+    for (i = 0; i < 9; i++) {
+        if (g_Fielders[i]._211 != 0) {
+            if (g_Fielders[i]._211 != 0 && g_UnkAnimation_31EAC[i]._51 != 8 && g_UnkAnimation_31EAC[i]._51 != 9) {
+                g_UnkAnimation_31EAC[i]._51 = 8;
+            }
+            break;
+        }
+    }
+    holder = g_Ball.fielderWBallIndex;
+    if (holder < 0 || g_FieldingLogic._111 == 0) {
+        return;
+    }
+    fielder = &g_Fielders[holder];
+    anim = &g_UnkAnimation_31EAC[holder];
+    if (g_FieldingLogic._135 != 0) {
+        fielder->_1AA = 0;
+    }
+    g_UnkThrowing_31ACC._10 = g_FieldingLogic._135;
+    if (g_FieldingLogic._111 == 1) {
+        state = 1;
+        if (g_FieldingLogic._0E8 >= 0) {
+            int angle = fn_3_9FB8C(g_FieldingLogic._090.x - fielder->_000.x, g_FieldingLogic._090.z - fielder->_000.z);
+            int facing = radToShortAngle(fielder->_048);
+            int diff = fn_3_9FCA4(angle, facing);
+            if (diff < -0x280) {
+                state = 2;
+            } else if (diff > 0x280) {
+                state = 3;
+            }
+        }
+        anim->_51 = state;
+    } else if (g_FieldingLogic._111 == 2) {
+        anim->_51 = 4;
+    } else if (g_FieldingLogic._111 == 5) {
+        state = 5;
+        runner = g_FieldingLogic._0E8;
+        if (runner >= 0) {
+            InMemRunnerType* target = &g_Runners[runner];
+            int angle = fn_3_9FB8C(target->position.x - fielder->_000.x, target->position.z - fielder->_000.z);
+            int facing = radToShortAngle(fielder->_048);
+            int diff = fn_3_9FCA4(angle, facing);
+            if (diff < -0x1C0) {
+                state = 7;
+            } else if (diff > 0x1C0) {
+                state = 6;
+            }
+        }
+        anim->_51 = state;
+    }
 }
 
 // .text:0x00061B64 size:0xDA0 mapped:0x806A0BF8
@@ -351,18 +617,199 @@ void fn_3_61544(void) {
 }
 
 // .text:0x00061228 size:0x31C mapped:0x806A02BC
-void fn_3_61228(void) {
-    return;
+BOOL fn_3_61228(s32 i) {
+    UnkE08Anim* anim = &g_UnkAnimation_31EAC[i];
+    UnkE08Throw* throwInfo = &g_UnkThrowing_31ACC;
+    g_FieldingLogic_s* logic = &g_FieldingLogic;
+    UnkE08Fielder* fielder = &g_Fielders[i];
+    s32 player = i;
+    s32 animId = 0x1D;
+    BOOL turn = FALSE;
+    UnkE08Actor* actor;
+    s16 timer;
+
+    if (g_d_GameSettings.minigamesEnabled) {
+        if (i == 0) {
+            player = g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder];
+        } else {
+            player = g_Minigame.minigameControlStruct._28[i - 2];
+        }
+    }
+    actor = lbl_8036E548._2C50[player];
+    if (actor == NULL) {
+        return FALSE;
+    }
+    if (throwInfo->_0C != i) {
+        return FALSE;
+    }
+    if (anim->_43 != 0) {
+        if (fielder->_1D3 == 0x11) {
+            anim->_43 = 0;
+            fn_3_60804(i, FALSE);
+            return FALSE;
+        }
+        timer = actor->_6A;
+        if (timer > 0 && actor->_68 <= 0) {
+            anim->_43 = 0;
+            fn_3_60804(i, FALSE);
+            return FALSE;
+        }
+        if (timer >= lbl_3_data_7D24[actor->_252][actor->_62 - 0x1D]) {
+            logic->_10A = 1;
+        }
+        return TRUE;
+    }
+    if (fielder->_215 != 0) {
+        return FALSE;
+    }
+    if (throwInfo->_0E == 0) {
+        return FALSE;
+    }
+    switch (throwInfo->_0E) {
+    case 2:
+        animId = 0x1E;
+        break;
+    case 3:
+        animId = 0x1F;
+        break;
+    case 4:
+        animId = 0x1D;
+        break;
+    case 5:
+        animId = 0x1D;
+        break;
+    case 6:
+        animId = 0x1D;
+        break;
+    case 7:
+        animId = 0x1D;
+        turn = TRUE;
+        break;
+    }
+    if (turn) {
+        int facing = radToShortAngle(fielder->_048);
+        int target = fn_3_9FB8C(throwInfo->_00.x - fielder->_000.x, throwInfo->_00.z - fielder->_000.z);
+        int diff = fn_3_9FCA4(facing, target);
+        int adjust = -diff;
+
+        if (diff < -0x600 || diff > 0x600) {
+            if (diff < -0x600) {
+                adjust = -0x800 - diff;
+            } else {
+                adjust = 0x800 - diff;
+            }
+        } else if (diff > 0x200) {
+            adjust = 0x400 - diff;
+        } else if (diff < -0x200) {
+            adjust = -0x400 - diff;
+        }
+        fielder->_048 = shortAngleToRad_Capped(facing + adjust);
+    }
+    AnimateCharacter(player, animId, 0, 1, 1, 0, anim->_40, -1);
+    throwInfo->_0F = animId;
+    anim->_43 = 1;
+    if (turn) {
+        anim->_43 = 2;
+    }
+    anim->_4C = 0;
+    anim->_4F = 0;
+    anim->_47 = 0;
+    anim->_46 = 0;
+    anim->_50 = 0;
+    fn_3_60804(i, TRUE);
+    return TRUE;
 }
 
 // .text:0x00061148 size:0xE0 mapped:0x806A01DC
-void fn_3_61148(void) {
-    return;
+BOOL fn_3_61148(s32 i) {
+    UnkE08Anim* anim = &g_UnkAnimation_31EAC[i];
+    s32 player = i;
+    UnkE08Actor* actor;
+
+    if (g_d_GameSettings.minigamesEnabled) {
+        if (i == 0) {
+            player = g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder];
+        } else {
+            player = g_Minigame.minigameControlStruct._28[i - 2];
+        }
+    }
+    actor = lbl_8036E548._2C50[player];
+    if (actor == NULL) {
+        return FALSE;
+    }
+    if (anim->_43 != 0) {
+        if (actor->_68 <= 0) {
+            anim->_43 = 0;
+            fn_3_60804(i, FALSE);
+            return FALSE;
+        }
+        return TRUE;
+    }
+    return FALSE;
 }
 
 // .text:0x00060E90 size:0x2B8 mapped:0x8069FF24
-void fn_3_60E90(void) {
-    return;
+BOOL fn_3_60E90(s32 i) {
+    s32 player = i;
+    u8 state;
+    UnkE08Actor* actor;
+    UnkE08Anim* anim = &g_UnkAnimation_31EAC[i];
+    UnkE08Fielder* fielder = &g_Fielders[i];
+    s16 actorAnim;
+
+    if (g_d_GameSettings.minigamesEnabled) {
+        if (i == 0) {
+            player = g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder];
+        } else {
+            player = g_Minigame.minigameControlStruct._28[i - 2];
+        }
+    }
+    state = anim->_51;
+    actor = lbl_8036E548._2C50[player];
+    actorAnim = actor->_62;
+    if (state != 9 && g_Ball.fielderWBallIndex != i) {
+        anim->_44 = 0;
+        return FALSE;
+    }
+    if (state == 9) {
+        return TRUE;
+    }
+    if (anim->_44 != 0 && g_UnkThrowing_31ACC._10 == 0) {
+        if (state == 8 && fielder->_212 == 3) {
+            if (actorAnim != 0x24) {
+                fn_3_90220(fielder->_17A, 10);
+            }
+            anim->_51 = 9;
+            AnimateCharacter(player, 0x24, 0, 1, 0, 0, anim->_40, 0);
+            QueueCharacterAnimation(player, 0x25, 0, 1, 0, anim->_40, 0);
+            fn_3_60804(i, FALSE);
+            return TRUE;
+        }
+        if (actor->_68 <= 0) {
+            anim->_44 = 0;
+            anim->_51 = 0;
+            fn_3_60804(i, FALSE);
+            return FALSE;
+        }
+        return TRUE;
+    }
+    if (state != 0 && state != 4) {
+        if (state == 8) {
+            if (lbl_3_data_7E34[actor->_252][1] - g_FieldingLogic._0F6 < 0) {
+                goto fail;
+            }
+            AnimateCharacter(player, 0x23, 0, 1, 1, lbl_3_data_7E34[actor->_252][0], anim->_40, -1);
+            anim->_44 = 1;
+        } else {
+            AnimateCharacter(player, 0x21, 0, 1, 0, lbl_3_data_7E34[actor->_252][0], anim->_40, -1);
+            anim->_44 = 1;
+        }
+        fn_3_60804(i, FALSE);
+        return TRUE;
+    }
+fail:
+    anim->_44 = 0;
+    return FALSE;
 }
 
 // .text:0x00060D80 size:0x110 mapped:0x8069FE14
@@ -394,13 +841,97 @@ BOOL fn_3_60D80(s32 i) {
 }
 
 // .text:0x00060A98 size:0x2E8 mapped:0x8069FB2C
-void fn_3_60A98(void) {
-    return;
+void fn_3_60A98(s32 i, UnkE08Actor* actor) {
+    UnkE08Anim* anim = &g_UnkAnimation_31EAC[i];
+    s16 actorAnim = actor->_62;
+    UnkE08Fielder* fielder = &g_Fielders[i];
+    f32 dx;
+    f32 dz;
+    f32 dist;
+    f32 scale;
+
+    if (actor == NULL) {
+        return;
+    }
+    if (fielder->_0A8 < 60.0f && !fn_3_B7E10(fielder->_000.x, fielder->_000.z)) {
+        return;
+    }
+    dx = fielder->_000.x - anim->_10.x;
+    dz = fielder->_000.z - anim->_10.z;
+    dist = dolsqrtf2(dx * dx + dz * dz);
+    if (dist <= 0.0f) {
+        return;
+    }
+    dx /= dist;
+    dz /= dist;
+    if (actorAnim == 0x1A || actorAnim == 0x1B) {
+        scale = 0.01f * (lbl_3_data_7F10[fielder->_17A] + 30) * charSizeMultipliers[fielder->_17A][0];
+        dx *= scale;
+        dz *= scale;
+    } else {
+        dx *= lbl_3_data_476C[fielder->_1C9];
+        dz *= lbl_3_data_476C[fielder->_1C9];
+    }
+    if (fn_3_B7CDC(dx + fielder->_000.x, dz + fielder->_000.z)) {
+        fn_3_60804(i, FALSE);
+        if (g_d_GameSettings.minigamesEnabled) {
+            if (i == 0) {
+                i = g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder];
+            } else {
+                i = g_Minigame.minigameControlStruct._28[i - 2];
+            }
+        }
+        fn_8001B5EC(i, 0);
+        fielder->_000.x = fielder->_0D4;
+        fielder->_000.z = fielder->_0D8;
+        fielder->_1FB = 0;
+    }
 }
 
 // .text:0x00060804 size:0x294 mapped:0x8069F898
-void fn_3_60804(void) {
-    return;
+void fn_3_60804(s32 i, BOOL mode) {
+    UnkE08Anim* anim = &g_UnkAnimation_31EAC[i];
+    UnkE08Fielder* fielder = &g_Fielders[i];
+    UnkE08Actor* actor;
+    VecXYZ pos;
+
+    if (g_d_GameSettings.minigamesEnabled) {
+        if (i == 0) {
+            i = g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder];
+        } else {
+            i = g_Minigame.minigameControlStruct._28[i - 2];
+        }
+    }
+    actor = lbl_8036E548._2C50[i];
+    if (actor == NULL) {
+        return;
+    }
+    if (!mode) {
+        if (anim->_42 == 1) {
+            anim->_42 = 0;
+            getAnimRelatedCoordinates(i, 4, &anim->_2C);
+            fielder->_030 = anim->_2C.x - fielder->_000.x;
+            fielder->_034 = anim->_2C.z - fielder->_000.z;
+            fielder->_050 = dolsqrtf2(fielder->_030 * fielder->_030 + fielder->_034 * fielder->_034);
+            fielder->_000.x = anim->_2C.x;
+            fielder->_000.z = anim->_2C.z;
+            anim->_48 = 1;
+        }
+    } else if (anim->_42 == 0) {
+        fn_8001B4D8(i);
+        if (anim->_48 == 1) {
+            anim->_10.x = anim->_2C.x;
+            anim->_10.z = anim->_2C.z;
+        } else {
+            anim->_10.x = actor->_34.x;
+            anim->_10.z = actor->_34.z;
+        }
+        anim->_42 = 1;
+    } else {
+        getAnimRelatedCoordinates(i, 4, &pos);
+        anim->_10.x = actor->_34.x = pos.x;
+        anim->_10.z = actor->_34.z = pos.z;
+    }
 }
 
 // .text:0x00060768 size:0x9C mapped:0x8069F7FC
