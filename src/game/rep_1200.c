@@ -16,6 +16,8 @@
 #include "game/rep_D18.h"
 #include "game/rep_8C8.h"
 #include "game/rep_940.h"
+#include "game/rep_31F0.h"
+#include "game/rep_3A98.h"
 
 extern struct {
     /* 0x00 */ s32 _00;
@@ -35,7 +37,18 @@ extern struct {
 extern struct {
     /* 0x00 */ u8 _00[0x9C];
     /* 0x9C */ u8 _9C;
+    /* 0x9D */ u8 _9D[0xB3 - 0x9D];
+    /* 0xB3 */ u8 _B3;
 } lbl_3_common_bss_32724;
+
+extern struct {
+    /* 0x0000 */ u8 _0000[0x2D46];
+    /* 0x2D46 */ u8 _2D46;
+    /* 0x2D47 */ u8 _2D47[0x2D52 - 0x2D47];
+    /* 0x2D52 */ u8 _2D52;
+    /* 0x2D53 */ u8 _2D53[0x2D5E - 0x2D53];
+    /* 0x2D5E */ u8 _2D5E;
+} lbl_8036E548;
 
 extern u8 lbl_803CBC3C[];
 extern u8 lbl_800E8558[][6];
@@ -233,7 +246,95 @@ void fn_3_75090(void) {
 
 // .text:0x00074D0C size:0x384 mapped:0x806B3DA0
 void fn_3_74D0C(void) {
-    return;
+    InputStruct* input = &g_Controls[g_GameLogic.teams[g_GameLogic.teamFielding]];
+
+    g_Ball.AtBat_Contact_BallPos.x = g_Pitcher.ballCurrentPosition.x;
+    g_Ball.AtBat_Contact_BallPos.y = g_Pitcher.ballCurrentPosition.y;
+    g_Ball.AtBat_Contact_BallPos.z = g_Pitcher.ballCurrentPosition.z;
+    if (g_GameLogic.frameCountdownAtBeginningOfAtBatLockout != 0) {
+        g_Pitcher.currentStateFrameCounter = 0;
+        return;
+    }
+    if (g_Batter.beginningOfABAnimationOccuring) {
+        g_Pitcher.currentStateFrameCounter = 0;
+        return;
+    }
+    if (g_UnkSound_32718._07 == 12) {
+        g_Pitcher.currentStateFrameCounter = 0;
+        return;
+    }
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD && g_Minigame.toyfield_waitFor_CoinsX2_AnimationToEnd) {
+        g_Pitcher.currentStateFrameCounter = 0;
+        return;
+    }
+    if (lbl_8036E548._2D46) {
+        return;
+    }
+    if (lbl_8036E548._2D52) {
+        return;
+    }
+    if (lbl_8036E548._2D5E) {
+        return;
+    }
+    if (!g_d_GameSettings.exhibitionMatchInd && lbl_3_common_bss_32724._B3) {
+        return;
+    }
+    if (g_Pitcher.pitchDeliveryAnimationPlaying) {
+        g_Pitcher.currentStateFrameCounter = 0;
+        return;
+    }
+    if (g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_PRACTICE_FIELDING && !g_Practice.hitVariablesSetIndicator) {
+        return;
+    }
+    if (g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_PRACTICE_BASERUNNING && !g_Practice._1EC) {
+        return;
+    }
+    if (g_d_GameSettings.minigamesEnabled) {
+        if (g_Minigame.GameMode_MiniGame == MINI_GAME_ID_BOBOMB_DERBY) {
+            fn_3_1118B4();
+            return;
+        }
+        if (g_Minigame.GameMode_MiniGame == MINI_GAME_ID_BARREL_BATTER) {
+            fn_3_1118B4();
+            return;
+        }
+        input = &g_Controls[g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder]];
+        if (fn_3_107DB4(g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder])) {
+            input = &g_Minigame._1D7C[g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder]];
+        }
+        if (g_Pitcher.AIInd) {
+            fn_3_215AC();
+            return;
+        }
+    } else {
+        if (g_d_GameSettings.GameModeSelected == GAME_TYPE_PRACTICE && g_Practice.practiceLevel == 4) {
+            fn_3_15AD94();
+            return;
+        }
+        if (ACTIVE_TUTORIAL()) {
+            input = &g_Practice.inputs[g_GameLogic.teamFielding];
+        }
+        if (fn_3_6F748()) {
+            return;
+        }
+        if (g_Pitcher.AIInd) {
+            fn_3_215AC();
+            return;
+        }
+    }
+    fn_3_74AC4();
+    if (input->newButtonInput & INPUT_BUTTON_A) {
+        if (!g_d_GameSettings.minigamesEnabled && (input->buttonInput & INPUT_TRIGGER_R)) {
+            g_Pitcher.starPitchInd = 1;
+        }
+        if (!g_Pitcher.starPitchInd && (input->buttonInput & INPUT_BUTTON_DOWN)) {
+            g_Pitcher.TypeOfPitch = 2;
+        } else {
+            g_Pitcher.framesAHeldForChargePitches = 1;
+        }
+        fn_3_750C4(PITCHER_ACTION_STATE_WINDUP);
+        g_Stats._38 = 1;
+    }
 }
 
 // .text:0x00074AC4 size:0x248 mapped:0x806B3B58
