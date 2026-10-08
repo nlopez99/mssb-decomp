@@ -311,7 +311,71 @@ void fn_3_AFA64(void) {
 
 // .text:0x000AF5A4 size:0x4C0 mapped:0x806EE638
 void fn_3_AF5A4(void) {
-    return;
+    if (lbl_3_common_bss_34C90._00C < 0x7FFE) {
+        lbl_3_common_bss_34C90._00C++;
+    } else {
+        lbl_3_common_bss_34C90._00C = 0x7FFF;
+    }
+    if (lbl_3_common_bss_34C90._012 < 0x7FFE) {
+        lbl_3_common_bss_34C90._012++;
+    } else {
+        lbl_3_common_bss_34C90._012 = 0x7FFF;
+    }
+    lbl_803CBC3C[0] = 1;
+    if (lbl_3_common_bss_34C90._201 != 0) {
+        lbl_3_common_bss_34C90._004 = 0;
+        lbl_3_common_bss_34C90._006 = 0;
+        lbl_3_common_bss_34C90._008 = 0;
+        lbl_3_common_bss_34C90._206--;
+        if (lbl_3_common_bss_34C90._206 < 0) {
+            lbl_3_common_bss_34C90._206 = 12;
+        }
+    } else {
+        lbl_3_common_bss_34C90._004 = g_Controls[g_GameLogic.teams[lbl_3_common_bss_34C90._000]].buttonInput;
+        lbl_3_common_bss_34C90._006 = g_Controls[g_GameLogic.teams[lbl_3_common_bss_34C90._000]].newButtonInput;
+        lbl_3_common_bss_34C90._008 = g_Controls[g_GameLogic.teams[lbl_3_common_bss_34C90._000]]._08;
+    }
+    switch (lbl_3_common_bss_34C90._1D1) {
+    case 0:
+        break;
+    case 1:
+        fn_3_AF10C();
+        break;
+    case 2:
+        fn_3_AE334();
+        break;
+    case 3:
+        fn_3_ADA3C();
+        break;
+    case 4:
+    case 7:
+    case 8:
+        fn_3_AD8CC();
+        break;
+    case 5:
+        fn_3_AD164(0);
+        break;
+    case 6:
+        fn_3_ACAF8();
+        break;
+    case 9:
+        fn_3_AEC50();
+        break;
+    case 10:
+        fn_3_AE770();
+        break;
+    case 11:
+    case 14:
+    case 15:
+        fn_3_AD8CC();
+        break;
+    case 12:
+        fn_3_AD164(1);
+        break;
+    case 13:
+        fn_3_ACAF8();
+        break;
+    }
 }
 
 // .text:0x000AF428 size:0x17C mapped:0x806EE4BC
