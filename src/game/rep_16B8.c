@@ -694,14 +694,14 @@ kill:
 }
 
 // .text:0x0009894C size:0x2D4 mapped:0x806D79E0
-// 87.43%: the base reaches lbl_3_data_D648, D7E8 and D860 from one pooled
-// ...data.0 base where the target names each (95.97% with the three as externs).
+// 88.34%: the base reaches lbl_3_data_D648, D7E8 and D860 from one pooled
+// ...data.0 base where the target names each; with D648 alone extern, 96.91%.
 void fn_3_9894C(void) {
     UnkTask1770* task = lbl_803CC1B8;
     UnkLayout16B8* layout;
     s32 i;
     u16 count;
-    u16 icon;
+    s32 icon;
 
     fn_80034E20(task, lbl_3_data_D648);
     if ((!g_d_GameSettings.minigamesEnabled && g_GameLogic.gameStatus == 11) ||
