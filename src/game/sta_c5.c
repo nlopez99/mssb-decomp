@@ -100,9 +100,18 @@ typedef struct {
 } StaC5ModelTable;
 
 extern struct {
-    /* 0x00 */ u8 _00[0x6C];
-    /* 0x6C */ StaC5ModelTable* _6C;
+    /* 0x0000 */ u8 _0000[0x6C];
+    /* 0x006C */ StaC5ModelTable* _6C;
+    /* 0x0070 */ u8 _0070[0x307E - 0x0070];
+    /* 0x307E */ u8 _307E;
+    /* 0x307F */ u8 _307F[0x3088 - 0x307F];
+    /* 0x3088 */ u8 _3088;
 } lbl_8036E548;
+
+extern u8 lbl_803CBBC0;
+extern void fn_800A7D4C(s32, void*);
+extern void fn_800B0A14_removeQueue(void);
+extern void fn_800BDA24(StaC5Model* model);
 
 extern void AnimateActorBones(StaC5Actor* actor);
 extern void fn_800B4CA0(StaC5Actor* actor, f32 frame);
@@ -200,15 +209,9 @@ typedef struct {
 } StaC5Wave; // size: 0xC
 
 typedef struct {
-    /* 0x00 */ void* _00;
+    /* 0x00 */ u32 _00;
     /* 0x04 */ void (*_04)(void);
-    /* 0x08 */ void* _08;
-    /* 0x0C */ void (*_0C)(void);
-    /* 0x10 */ u8 _10;
-    /* 0x11 */ u8 _11;
-    /* 0x12 */ u8 _12;
-    /* 0x13 */ u8 _13;
-} StaC5Callbacks; // size: 0x14
+} StaC5View; // size: 0x8
 
 typedef struct {
     /* 0x000 */ Vec pos;
@@ -255,13 +258,19 @@ static StaC5Prop2 lbl_3_data_1B9A4[6] = {
 static u8 lbl_3_data_1BA34[18] = { 1, 4, 4, 2, 3, 2, 2, 2, 2, 6, 6, 6, 8, 9, 8, 9, 7, 7 };
 static f32 lbl_3_data_1BA48 = 48.0f;
 static f32 lbl_3_data_1BA4C[2][2] = { { 3.0f, 0.0f }, { -3.0f, 0.0f } };
-static StaC5Callbacks lbl_3_data_1BA5C = { NULL, fn_3_EEE3C, NULL, fn_3_EEE3C, 1, 1, 1, 0 };
+static StaC5View lbl_3_data_1BA5C[2] = {
+    { 0, fn_3_EEE3C },
+    { 0, fn_3_EEE3C },
+};
+static u8 lbl_3_data_1BA6C = 1;
+static u8 lbl_3_data_1BA6D = 1;
+static u8 lbl_3_data_1BA6E = 1;
 static Vec lbl_3_data_1BA70 = { 0.0f, 0.0f, 0.0f };
 static Vec lbl_3_data_1BA7C = { 0.0f, 0.0f, 0.0f };
 
 // MWCC lays out .bss statics in reverse declaration order
 static s32 lbl_3_bss_B560[4];
-static s32 lbl_3_bss_B55C;
+static StaC5Model* lbl_3_bss_B55C;
 static f32 lbl_3_bss_B260[0xBF];
 static u32 lbl_3_bss_B244[7];
 static struct {
@@ -285,7 +294,9 @@ static GXTexObj lbl_3_bss_B134;
 static Mtx23 lbl_3_bss_B11C;
 static u8* lbl_3_bss_B118;
 static s8 lbl_3_bss_AF18[0x200];
-static f32 lbl_3_bss_AF04[5];
+static Vec lbl_3_bss_AF0C;
+static f32 lbl_3_bss_AF08;
+static f32 lbl_3_bss_AF04;
 static f32 lbl_3_bss_AF00;
 static s32 lbl_3_bss_AEFC;
 static s32 lbl_3_bss_AEF8;
@@ -372,8 +383,56 @@ void fn_3_F6938(s32* n) {
 }
 
 // .text:0x000F66C8 size:0x270 mapped:0x8073575C
-void fn_3_F66C8(void) {
-    return;
+void fn_3_F66C8(s32* n) {
+    Mtx m;
+    Control control;
+    s32 i;
+    s32 j;
+    s32 idx;
+    u16 start;
+    f32(*corners)[2];
+    f32 minX;
+    f32 maxX;
+    f32 minZ;
+    f32 maxZ;
+    struct StadiumObjectCollision* collision;
+    StaC5Draw* draw;
+
+    fn_3_B8574();
+    for (i = 0; i < lbl_3_bss_B21C; i++) {
+        start = lbl_3_common_bss_350E4._40[*n] = lbl_3_common_bss_350E4._40[*n - 1] + lbl_3_common_bss_350E4._3C[*n - 1];
+        idx = lbl_3_bss_B21B + i;
+        lbl_3_common_bss_350E4._44[start] = idx;
+        lbl_3_common_bss_350E4._3C[*n]++;
+        draw = &lbl_3_common_bss_350E4._00[idx];
+        corners = lbl_3_data_1B824[draw->_9C];
+        minX = maxX = corners[0][0];
+        minZ = maxZ = corners[0][1];
+        for (j = 1; j < 4; j++) {
+            f32* c = corners[j];
+
+            if (minX > c[0]) {
+                minX = c[0];
+            } else if (maxX < c[0]) {
+                maxX = c[0];
+            }
+            if (minZ > c[1]) {
+                minZ = c[1];
+            } else if (maxZ < c[1]) {
+                maxZ = c[1];
+            }
+        }
+        collision = lbl_3_common_bss_350E4._00[lbl_3_bss_B21B]._78;
+        CTRLSetTranslation(&control, minX, 0.0f, maxZ);
+        CTRLBuildMatrix(&control, m);
+        fn_3_B8464(m, collision);
+        CTRLSetTranslation(&control, maxX, -5.0f, minZ);
+        CTRLBuildMatrix(&control, m);
+        fn_3_B8464(m, collision);
+        fn_3_B8414(&lbl_3_common_bss_350E4._48[*n * 2], &lbl_3_common_bss_350E4._48[*n * 2 + 1]);
+        (*n)++;
+        fn_3_B8574();
+    }
 }
 
 // .text:0x000F65C8 size:0x100 mapped:0x8073565C
@@ -1003,13 +1062,54 @@ void fn_3_EF800(StaC5Draw* draw) {
 }
 
 // .text:0x000EF7B4 size:0x4C mapped:0x8072E848
-void fn_3_EF7B4(void) {
-    return;
+BOOL fn_3_EF7B4(Vec pos, u8 block) {
+    return fn_3_EF55C(pos, block) != 0;
 }
 
 // .text:0x000EF55C size:0x258 mapped:0x8072E5F0
-void fn_3_EF55C(void) {
-    return;
+u8 fn_3_EF55C(Vec pos, u8 block) {
+    Vec to;
+    Vec edge;
+    Vec cross;
+    u8 sidesA[2][2] = { { 1, 3 }, { 0, 2 } };
+    u8 sidesB[2][2] = { { 0, 1 }, { 2, 3 } };
+    f32(*corners)[2];
+    u32 i;
+    s8 sign;
+
+    if (pos.y > 0.0f) {
+        return 1;
+    }
+    corners = lbl_3_data_1B824[block];
+    for (i = 0, sign = -1; i < 2; i++, sign += 2) {
+        to.x = pos.x - corners[sidesA[i][0]][0];
+        to.y = 0.0f;
+        to.z = pos.z - corners[sidesA[i][0]][1];
+        edge.x = corners[sidesA[i][1]][0] - corners[sidesA[i][0]][0];
+        edge.y = 0.0f;
+        edge.z = corners[sidesA[i][1]][1] - corners[sidesA[i][0]][1];
+        PSVECNormalize(&to, &to);
+        PSVECNormalize(&edge, &edge);
+        PSVECCrossProduct(&edge, &to, &cross);
+        if (cross.y * sign < 0.0f) {
+            return 1;
+        }
+    }
+    for (i = 0, sign = -1; i < 2; i++, sign += 2) {
+        to.x = pos.x - corners[sidesB[i][0]][0];
+        to.y = 0.0f;
+        to.z = pos.z - corners[sidesB[i][0]][1];
+        edge.x = corners[sidesB[i][1]][0] - corners[sidesB[i][0]][0];
+        edge.y = 0.0f;
+        edge.z = corners[sidesB[i][1]][1] - corners[sidesB[i][0]][1];
+        PSVECNormalize(&to, &to);
+        PSVECNormalize(&edge, &edge);
+        PSVECCrossProduct(&edge, &to, &cross);
+        if (cross.y * sign < 0.0f) {
+            return 1;
+        }
+    }
+    return 0;
 }
 
 // .text:0x000EF408 size:0x154 mapped:0x8072E49C
@@ -1116,7 +1216,14 @@ void fn_3_EEFA4(void) {
 
 // .text:0x000EEF24 size:0x80 mapped:0x8072DFB8
 void fn_3_EEF24(void) {
-    return;
+    if (!lbl_8036E548._3088) {
+        fn_800B0A14_removeQueue();
+    } else if (lbl_8036E548._307E) {
+        fn_800BDA24(lbl_3_bss_B55C);
+        fn_3_EE388();
+        fn_3_EEB94();
+        fn_800A7D4C(1, &lbl_3_data_1BA5C[lbl_803CBBC0]);
+    }
 }
 
 // .text:0x000EEE3C size:0xE8 mapped:0x8072DED0
@@ -1158,14 +1265,17 @@ void fn_3_EEB94(void) {
     s32 offset;
     s32 s;
     s32 t;
+    s32 r;
 
     for (y = 0; y < 0x10; y++) {
         for (x = 0; x < 0x10; x++) {
             offset = fn_800247E4(x, y, 0x10, 2);
             s = lbl_3_bss_B118[offset];
             t = lbl_3_bss_B118[offset + 1];
-            s += lbl_3_bss_AF18[offset] * (rand() % 14 + 8);
-            t += lbl_3_bss_AF18[offset + 1] * (rand() % 14 + 8);
+            r = rand() % 14 + 8;
+            s += lbl_3_bss_AF18[offset] * r;
+            r = rand() % 14 + 8;
+            t += lbl_3_bss_AF18[offset + 1] * r;
             if (s >= 227) {
                 s--;
                 lbl_3_bss_AF18[offset] = -1;
@@ -1244,7 +1354,44 @@ void fn_3_EE67C(void) {
 
 // .text:0x000EE388 size:0x2F4 mapped:0x8072D41C
 void fn_3_EE388(void) {
-    return;
+    f32 angle;
+    f32 limit;
+
+    if (lbl_3_data_1BA6D) {
+        rand();
+        angle = 6.2831855f * (rand() / 32767.0f);
+        lbl_3_bss_AF0C.x = 0.01f * cosf_kludge(angle);
+        lbl_3_bss_AF0C.y = 0.01f * sinf_kludge(angle);
+        lbl_3_bss_AF0C.z = 0.0f;
+        PSVECSubtract(&lbl_3_bss_AF0C, &lbl_3_data_1BA70, &lbl_3_data_1BA7C);
+        if (PSVECMag(&lbl_3_data_1BA7C)) {
+            PSVECNormalize(&lbl_3_data_1BA7C, &lbl_3_data_1BA7C);
+        }
+        PSVECScale(&lbl_3_data_1BA7C, 0.0005f, &lbl_3_data_1BA7C);
+        lbl_3_data_1BA6D = 0;
+    }
+    PSVECAdd(&lbl_3_data_1BA70, &lbl_3_data_1BA7C, &lbl_3_data_1BA70);
+    limit = PSVECMag(&lbl_3_bss_AF0C);
+    if (PSVECMag(&lbl_3_data_1BA70) > limit) {
+        lbl_3_data_1BA7C.x *= -1.0f;
+        lbl_3_data_1BA7C.y *= -1.0f;
+        PSVECScale(&lbl_3_bss_AF0C, 2.0f, &lbl_3_bss_AF0C);
+    } else if (PSVECDotProduct(&lbl_3_data_1BA70, &lbl_3_bss_AF0C) <= 0.0f) {
+        lbl_3_data_1BA70.x = lbl_3_data_1BA70.y = 0.0f;
+        lbl_3_data_1BA6D = 1;
+    }
+    if (lbl_3_data_1BA6E) {
+        lbl_3_bss_AF08 = 0.0005f * (2.0 * (rand() / 32767.0f - 0.5));
+        lbl_3_data_1BA6E = 0;
+        lbl_3_bss_AF04 = 0.0f;
+        lbl_3_bss_AF00 = 0.000025f * (fabs(lbl_3_bss_AF08) / lbl_3_bss_AF08);
+    }
+    lbl_3_bss_AF04 += lbl_3_bss_AF00;
+    if (fabs(lbl_3_bss_AF04) >= fabs(lbl_3_bss_AF08)) {
+        lbl_3_bss_AF00 *= -1.0f;
+    } else if ((s32)(fabs(lbl_3_bss_AF04) / lbl_3_bss_AF04) != (s32)(fabs(lbl_3_bss_AF08) / lbl_3_bss_AF08)) {
+        lbl_3_data_1BA6E = 1;
+    }
 }
 
 // .text:0x000EE100 size:0x288 mapped:0x8072D194
