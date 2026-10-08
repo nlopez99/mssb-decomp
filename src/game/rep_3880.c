@@ -3,6 +3,7 @@
 #include "header_rep_data.h"
 #include "game/rep_1838.h"
 #include "game/rep_3448.h"
+#include "game/rep_3310.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/mtx.h"
 #include "Dolphin/mtxext.h"
@@ -304,8 +305,6 @@ extern Emitter3880* fn_800337CC(Emitter3880* emitter, s32 count, s32 exact);
 extern Emitter3880* fn_80033A24(BOOL (*update)(Emitter3880*), s32, s32, s32, s32, s32);
 
 // rep_3310.h declares these as void(void) placeholders
-extern f32 fn_3_119854(u8 index);
-extern f32 fn_3_119D28(void);
 
 // .bss, declared in reverse address order: MWCC lays statics out last to first
 static u8 lbl_3_bss_B894[0x124];

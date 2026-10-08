@@ -16,6 +16,7 @@
 #include "game/rep_31A0.h"
 #include "game/rep_CC8.h"
 #include "game/rep_D18.h"
+#include "game/rep_3090.h"
 #include "static/UnknownHomes_Static.h"
 #include "musyx/musyx.h"
 #include "Dolphin/mtx.h"
@@ -87,8 +88,6 @@ extern void fn_8003A540(int);
 extern void fn_3_1608F0(int, int, int);
 extern void changeScene(u8, s16);
 extern int fn_3_6C938(int, int);
-extern void fn_3_FBD58(void);
-extern void fn_3_FBD70(void);
 extern void minigamesSetSomePointers(void);
 extern void minigamesGXStuff(void);
 extern void minigamesSetSomePointers2(void);

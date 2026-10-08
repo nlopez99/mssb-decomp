@@ -21,6 +21,7 @@
 #include "game/rep_16B8.h"
 #include "game/rep_E08.h"
 #include "game/rep_D18.h"
+#include "game/rep_3090.h"
 #include "string.h"
 #include "musyx/musyx.h"
 
@@ -208,8 +209,6 @@ extern BOOL fn_3_90A18(void);
 extern BOOL fn_3_90DD8(void);
 extern BOOL fn_80016F7C(void);
 extern void fn_8003A540(int arg);
-extern void fn_3_FBD58(void);
-extern void fn_3_FBD70(void);
 extern void minigamesSetSomePointers(void);
 extern void minigamesGXStuff(void);
 extern void fn_80011B64(int port);

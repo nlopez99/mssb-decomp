@@ -24,6 +24,7 @@
 #include "game/rep_CC8.h"
 #include "game/rep_D18.h"
 #include "game/rep_DB8.h"
+#include "game/rep_3090.h"
 #include "musyx/musyx.h"
 #include "Dolphin/rand.h"
 
@@ -208,8 +209,6 @@ s16 lbl_3_data_18C48[10] = { 100, 180, 600, 279, 3, 1, 60, 70, 2, 0 };
 extern u8 lbl_803CBC3C[];
 
 extern void fn_3_1DD48(void);
-extern void fn_3_FBD58(void);
-extern void fn_3_FBD70(void);
 extern void Set_803cb848(int);
 extern int fn_3_6C938(int, int);
 extern void changeScene(u8, s16);
@@ -221,8 +220,6 @@ extern BOOL fn_3_90DD8(void);
 extern void fn_3_E1964(void);
 extern void fn_3_1E154(void);
 extern void fn_3_1608F0(int, int, int);
-// rep_3090.h declares the stub's void(void) placeholder
-extern BOOL fn_3_FD9FC(void);
 extern void possiblyTransitionBlackScreen(void);
 extern void* fn_800B0A5C_insertQueue(void (*callback)(void), s32 arg1);
 
