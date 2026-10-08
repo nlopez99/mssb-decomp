@@ -1139,17 +1139,16 @@ BOOL fn_3_61544(s32 i) {
 }
 
 // .text:0x00061228 size:0x31C mapped:0x806A02BC
-// 99.21%: registers only; player and turn are r30 and r26 in the target, r26 and r30 here.
 BOOL fn_3_61228(s32 i) {
     s16 timer;
     s32 step;
-    BOOL turn = FALSE;
+    s32 player = i;
     UnkE08Anim* anim = &g_UnkAnimation_31EAC[i];
     UnkE08Throw* throwInfo = &g_UnkThrowing_31ACC;
     UnkE08Fielder* fielder = &g_Fielders[i];
     UnkE08Actor* actor;
     s32 animId = 0x1D;
-    s32 player = i;
+    BOOL turn = FALSE;
     g_FieldingLogic_s* logic = &g_FieldingLogic;
 
     if (g_d_GameSettings.minigamesEnabled) {
@@ -1210,10 +1209,12 @@ BOOL fn_3_61228(s32 i) {
             break;
         }
         if (turn) {
+            int adjust;
             int facing = radToShortAngle(fielder->_048);
             int target = fn_3_9FB8C(throwInfo->_00.x - fielder->_000.x, throwInfo->_00.z - fielder->_000.z);
             int diff = fn_3_9FCA4(facing, target);
-            int adjust = -diff;
+
+            adjust = -diff;
 
             if (diff < -0x600 || diff > 0x600) {
                 if (diff < -0x600) {
