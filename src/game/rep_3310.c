@@ -782,8 +782,6 @@ void fn_3_11A20C(void) {
 }
 
 // .text:0x00119F6C size:0x2A0 mapped:0x80759000
-// 98.49%: the target recomputes the fn_3_11A350(i + 0x10) model address ((i + 16) * 0x90 + 0x34),
-// the base reuses the strength-reduced i * 0x90 induction register.
 void fn_3_119F6C(void) {
     UnkObj3310* obj;
     UnkObj3310* exploded;
@@ -795,13 +793,14 @@ void fn_3_119F6C(void) {
     u32 j;
     UnkTexScroll3310* scroll;
     u32 frame;
+    UnkActor3310* actor;
 
     bombObj = &lbl_8036E548._2D94[0xF];
     bombObj->_26 = 0;
     for (i = 0; i < 15; i++) {
         exploded = &lbl_8036E548._2D94[i + 0x10];
-        obj = &lbl_8036E548._2D94[i];
         barrel = &g_Minigame.barrels[i];
+        obj = &lbl_8036E548._2D94[i];
         exploded->_26 = 0;
         obj->_26 = 0;
         if (g_Minigame.barrels[i].barrelState == 0) {
@@ -814,7 +813,8 @@ void fn_3_119F6C(void) {
                 fn_3_14DC80(i);
                 fn_3_90064(0x2E3);
             }
-            frame = fn_3_11A350(i + 0x10);
+            actor = &lbl_8036E548._0068->_34[i + 0x10];
+            frame = fn_800B4A94(actor->_00);
             if (frame <= lbl_3_data_2263F) {
                 if (!(frame & 1)) {
                     model = lbl_8036E548._0068->_34[i + 0x10]._00;
