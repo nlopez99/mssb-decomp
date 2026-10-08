@@ -12,6 +12,7 @@
 #include "game/rep_540.h"
 #include "game/rep_CC8.h"
 #include "game/rep_E08.h"
+#include "game/rep_1838.h"
 
 typedef struct Fielder1AD0 {
     /* 0x000 */ u8 _000[0x1C7];
@@ -26,6 +27,11 @@ extern struct {
     /* 0x13 */ u8 _13;
 } g_RunningLogic;
 
+extern s16 lbl_3_data_FB08[10][3];
+extern s16 lbl_3_data_FB44[10][3];
+extern s16 lbl_3_data_FB80[10][3];
+extern s16 lbl_3_data_FBBC[10][3];
+extern s16 lbl_3_data_FBF8[8];
 extern s16 lbl_3_data_FC1C[2];
 
 extern struct {
@@ -93,17 +99,64 @@ BOOL fn_3_B1470(void) {
 
 // .text:0x000B12F8 size:0x178 mapped:0x806F038C
 void fn_3_B12F8(void) {
-    return;
+    fn_3_F578();
+    fn_3_753E8(FALSE);
+    setBatterContactConstants();
+    fn_3_8A1D8();
+    fn_3_58E50();
+    fn_3_1E154();
+    fn_3_59A90();
+    fn_3_6C108();
+    g_Strikes.strikes = 0;
+    g_Strikes.balls = 0;
+    g_GameLogic._125 = 1;
+    g_GameLogic.pre_PostMiniGameInd = 1;
+    g_GameLogic.minigameLastTurnSuccessInd = 1;
+    fn_3_B11D0();
+    fn_3_6714C(FALSE);
 }
 
 // .text:0x000B11D0 size:0x128 mapped:0x806F0264
 void fn_3_B11D0(void) {
-    return;
+    fn_3_5F720();
+    fn_3_B0D7C();
+    g_Strikes.storedOuts = g_Strikes.outs;
+    g_Strikes.runnerIndexForEachOutThisPitch[0] = -1;
+    g_Strikes.runnerIndexForEachOutThisPitch[1] = -1;
+    g_Strikes.runnerIndexForEachOutThisPitch[2] = -1;
+    g_Strikes.GameControls_StrikeBallBitVector = g_Strikes.balls + (g_Strikes.strikes * 16);
+    g_Strikes.allForcedRunnersReachedTheirBaseInd = 0;
+    g_Ball.totalFramesAtPlay = 0;
+    g_FieldingLogic._10E = 0;
+    g_FieldingLogic._0EE = 0;
+    g_FieldingLogic._10F = 0;
+    g_FieldingLogic._110 = 0;
+    g_FieldingLogic._128 = 0;
+    g_FieldingLogic._129 = 0;
+    g_RunningLogic._13 = 0;
+    g_GameLogic.pre_PostMiniGameInd = 0;
+    g_GameLogic.minigameLastTurnSuccessInd = 0;
+    g_Practice.hitVariablesSetIndicator = 0;
+    g_Practice._1E4 = 0;
+    g_Practice._1CB = 0;
+    g_Strikes.outs = 0;
+    g_Practice._152 = 0;
+    changeScene(1, 6);
+    fn_3_5A6D4(1);
+    fn_3_6C0E0();
 }
 
 // .text:0x000B116C size:0x64 mapped:0x806F0200
 void fn_3_B116C(void) {
-    return;
+    if (g_Practice.instructionNumber >= 0 || !fn_3_B32B8()) {
+        if (g_Practice.hitVariablesSetIndicator == 0) {
+            fn_3_B0B5C();
+        }
+        fn_3_75560();
+        atBat_batter();
+        fn_3_8A958();
+        fn_3_31594();
+    }
 }
 
 // .text:0x000B1120 size:0x4C mapped:0x806F01B4
@@ -156,7 +209,37 @@ BOOL fn_3_B0CF4(void) {
 
 // .text:0x000B0B5C size:0x198 mapped:0x806EFBF0
 void fn_3_B0B5C(void) {
-    return;
+    int i;
+
+    if (g_Practice.hitVariablesSetIndicator == 0 && ++g_Practice._152 >= lbl_3_data_FBF8[0]) {
+        if (g_Practice.practiceLevel == 0) {
+            i = random_fn_3_9EE24(10);
+            g_Ball.Hit_HorizontalPower = lbl_3_data_FB08[i][0];
+            g_Ball.Hit_VerticalAngle = lbl_3_data_FB08[i][1];
+            g_Ball.Hit_HorizontalAngle = lbl_3_data_FB08[i][2];
+        } else if (g_Practice.practiceLevel == 1) {
+            i = random_fn_3_9EE24(10);
+            g_Ball.Hit_HorizontalPower = lbl_3_data_FB44[i][0];
+            g_Ball.Hit_VerticalAngle = lbl_3_data_FB44[i][1];
+            g_Ball.Hit_HorizontalAngle = lbl_3_data_FB44[i][2];
+        } else if (g_Practice.practiceLevel == 2) {
+            i = random_fn_3_9EE24(10);
+            g_Ball.Hit_HorizontalPower = lbl_3_data_FB80[i][0];
+            g_Ball.Hit_VerticalAngle = lbl_3_data_FB80[i][1];
+            g_Ball.Hit_HorizontalAngle = lbl_3_data_FB80[i][2];
+        } else if (g_Practice.practiceLevel == 3) {
+            i = random_fn_3_9EE24(10);
+            g_Ball.Hit_HorizontalPower = lbl_3_data_FBBC[i][0];
+            g_Ball.Hit_VerticalAngle = lbl_3_data_FBBC[i][1];
+            g_Ball.Hit_HorizontalAngle = lbl_3_data_FBBC[i][2];
+        }
+        g_Practice.hitVariablesSetIndicator = 1;
+        if (g_Practice.maybeCommandData[0] < 0x7FFE) {
+            g_Practice.maybeCommandData[0]++;
+        } else {
+            g_Practice.maybeCommandData[0] = 0x7FFF;
+        }
+    }
 }
 
 // .text:0x000B0AAC size:0xB0 mapped:0x806EFB40
