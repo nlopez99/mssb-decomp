@@ -640,7 +640,6 @@ void fn_3_D62F0(u32* n) {
 }
 
 // .text:0x000D60C0 size:0x230 mapped:0x80715154
-// 99.64%: r7 and r8 swap between the draw-table base and idx * 232 in the inner loop.
 void fn_3_D60C0(u32* n) {
     StaC2Draw* draw;
     s32 next;
@@ -655,8 +654,8 @@ void fn_3_D60C0(u32* n) {
         fn_3_B8574();
         for (i = 0; i < lbl_3_bss_A02B; i++) {
             if (group == lbl_3_data_18364[i]._0E && lbl_3_data_18364[i].type != 13) {
-                idx = i + lbl_3_bss_A02A;
-                if (lbl_3_common_bss_350E4._00[idx]._90_6) {
+                if (lbl_3_common_bss_350E4._00[i + lbl_3_bss_A02A]._90_6) {
+                    idx = i + lbl_3_bss_A02A;
                     lbl_3_common_bss_350E4._44[next] = idx;
                     next++;
                     lbl_3_common_bss_350E4._3C[*n]++;
@@ -1161,7 +1160,6 @@ void fn_3_D3880(StaC2Draw* draw) {
     Vec sndDir;
     f32 dot;
     f32 angle;
-    s32 life;
     f32 dist;
     BOOL zero;
 
@@ -1247,7 +1245,6 @@ void fn_3_D30D0(StaC2Draw* draw) {
     f32 dot;
     f32 rad;
     f32 angle;
-    s32 life;
     s8 fielder;
 
     prevVy = draw->vel.y;
@@ -1325,7 +1322,6 @@ void fn_3_D2A0C(StaC2Draw* draw) {
     f32 prevVy;
     f32 vy;
     f32 angle;
-    s32 life;
     s8 fielder;
 
     prevVy = draw->vel.y;
@@ -1550,7 +1546,6 @@ void fn_3_D2220(StaC2Draw* draw) {
 }
 
 // .text:0x000D1F2C size:0x2F4 mapped:0x80710FC0
-// 99.10%: callee-saved registers differ (the parameters against the step counter).
 void fn_3_D1F2C(StaC2SpringParams* params, StaC2Spring* springs, s32 count, Vec* force, StaC2Draw* draw) {
     Vec accel;
     Vec scaled;
@@ -1560,13 +1555,13 @@ void fn_3_D1F2C(StaC2SpringParams* params, StaC2Spring* springs, s32 count, Vec*
     Vec push;
     Vec tmp;
     Vec next;
-    s32 step;
     StaC2Spring* s;
     f32 dt2;
     f32 damp;
     f32 pen;
     f32 dist;
     s32 i;
+    s32 step;
 
     center = draw->_A0;
     center.y += 4.5;
@@ -1590,7 +1585,8 @@ void fn_3_D1F2C(StaC2SpringParams* params, StaC2Spring* springs, s32 count, Vec*
                 pen = s->_0C[0].y - s->_08;
                 if (pen < 0.0f) {
                     s->_0C[0].y -= pen * params->_04;
-                    s->_0C[1].y -= (s->_0C[1].y - s->_08) * params->_04;
+                    pen = s->_0C[1].y - s->_08;
+                    s->_0C[1].y -= pen * params->_04;
                 }
                 PSVECSubtract(&s->_0C[0], &center, &diff);
                 dist = PSVECMag(&diff);
@@ -2127,7 +2123,6 @@ void fn_3_D0284(void* arg) {
     StaC2Draw* draw = arg;
     u8 state = draw->parent->_D1;
     f32 angle;
-    s32 life;
     s32 alpha;
 
     if (state == 0) {
@@ -2220,7 +2215,6 @@ void fn_3_CFD58(StaC2Draw* draw) {
     StaC2Particle* p = emitter->particles;
     s32 i;
     f32 angle;
-    s32 life;
     s32 alpha;
 
     emitter->_20 = (StaC2EmitterOwner*)draw;
@@ -2393,7 +2387,6 @@ void fn_3_CF278(StaC2Draw* draw, Vec pos) {
     u32 j;
     u32 i;
     f32 angle;
-    s32 life;
     f32 c;
 
     emitter->_10 = lbl_3_bss_ADD0[0];
@@ -3025,7 +3018,6 @@ void fn_3_CC354(StaC2Spring* springs) {
 void fn_3_CC1D4(void) {
     Mtx m;
     f32 angle;
-    s32 life;
     Vec offset;
     StaC2Draw* draw;
     u32 start;
