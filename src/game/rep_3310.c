@@ -61,7 +61,9 @@ typedef struct {
     /* 0x5B */ u8 _5B;
     /* 0x5C */ f32 _5C;
     /* 0x60 */ f32 _60;
-    /* 0x64 */ u8 _64[0x90 - 0x64];
+    /* 0x64 */ u8 _64[0x6C - 0x64];
+    /* 0x6C */ u8 _6C;
+    /* 0x6D */ u8 _6D[0x90 - 0x6D];
 } UnkActor3310; // size: 0x90
 
 typedef struct {
@@ -141,7 +143,8 @@ typedef struct {
 
 typedef struct {
     /* 0x00 */ f32 _00;
-    /* 0x04 */ u8 _04[0xC - 0x4];
+    /* 0x04 */ f32 _04;
+    /* 0x08 */ u8 _08[0xC - 0x8];
     /* 0x0C */ u16 _0C;
     /* 0x0E */ s16 _0E;
     /* 0x10 */ u8 _10;
@@ -150,11 +153,14 @@ typedef struct {
 } UnkAnimState3310;
 
 extern struct {
-    /* 0x00 */ u8 _00[0x10];
+    /* 0x00 */ void* _00;
+    /* 0x04 */ u8 _04[0x10 - 0x4];
     /* 0x10 */ UnkAnimState3310 _10;
     /* 0x24 */ u8 _24[0x30 - 0x24];
     /* 0x30 */ void* _30;
-    /* 0x34 */ u8 _34[0x70 - 0x34];
+    /* 0x34 */ u8 _34[0x60 - 0x34];
+    /* 0x60 */ s32 _60;
+    /* 0x64 */ u8 _64[0x70 - 0x64];
     /* 0x70 */ void* _70;
     /* 0x74 */ void* _74;
     /* 0x78 */ void* _78;
@@ -191,12 +197,22 @@ extern void fn_80034CEC(UnkTask3310* task);
 extern void fn_80034E20(UnkTask3310* task, void* desc);
 extern void fn_800B0A14_removeQueue(void);
 extern void fn_80062C24(Vec* pos);
+extern void* _OSAllocFromHeap(u32 align, u32 size);
+extern UnkActorTable3310* ActorObjectInitTable(u16 count);
+extern void fn_80025C58(void* anim, UnkActor3310* actor);
+extern void fn_80011B64(s32 i);
+extern void fn_800B4CDC(UnkModelSet3310* model);
+extern void fn_800B4278(UnkModelSet3310* model);
+extern void fn_800ACFB0(void* data);
+extern void fn_800B993C(void);
+extern void fn_3_90CB0(void);
 extern void fn_80024DB0(UnkAnimState3310* state);
 extern void fn_80024FA4(UnkActor3310* actor, void* anim, UnkAnimState3310* state, s32 arg3);
 
 // .data outside this unit's split
 extern u8 lbl_3_data_69D0[0x520];
 extern s16 lbl_3_data_217A4[12];
+extern s16 lbl_3_data_21A04[8];
 extern Vec lbl_3_data_21380;
 extern Vec lbl_3_data_21A48;
 extern Vec lbl_3_data_21B94[4];
@@ -291,7 +307,31 @@ void fn_3_11D1B0(void) {
 
 // .text:0x0011CF84 size:0x22C mapped:0x8075C018
 void fn_3_11CF84(void) {
-    return;
+    s32 i;
+
+    if ((g_Minigame._1A3C == 0 || g_Minigame._1E2A >= 6) && g_Minigame._1A38 == 0) {
+        for (i = 0; i < 4; i++) {
+            fn_80011B64(i);
+        }
+    }
+    for (i = lbl_8036E548._3078 - 1; i >= 0; i--) {
+        lbl_8036E548._0068->_34[i]._6C = 0;
+    }
+    for (i = lbl_8036E548._3078 - 1; i >= 0; i--) {
+        fn_800B4CDC(lbl_8036E548._0068->_34[i]._00);
+    }
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES) {
+        for (i = lbl_8036E548._3078 - 1; i >= 0; i--) {
+            fn_800B4278(lbl_8036E548._0068->_34[i]._00);
+        }
+        fn_800ACFB0(lbl_8036E548._0068);
+        fn_800ACFB0(lbl_8036E548._2D94);
+    }
+    fn_800B993C();
+    fn_3_90CB0();
+    if (g_Minigame._1A38 == 0 || g_Minigame._1A3C != 0) {
+        fn_3_11CF04();
+    }
 }
 
 // .text:0x0011CF04 size:0x80 mapped:0x8075BF98
@@ -314,32 +354,90 @@ void fn_3_11CF04(void) {
 
 // .text:0x0011CD00 size:0x204 mapped:0x8075BD94
 void fn_3_11CD00(void) {
-    return;
+    lbl_8036E548._3078 = 3;
+    lbl_8036E548._2D94 = _OSAllocFromHeap(0x20, lbl_8036E548._3078 * 0x28);
+    lbl_8036E548._0068 = ActorObjectInitTable(lbl_8036E548._3078);
+    fn_3_11D2C8(13, 0, 1, NULL, 0);
+    fn_3_11D2C8(14, 1, 1, NULL, 0);
+    fn_3_11D2C8(15, 2, 1, NULL, 0);
+    lbl_3_common_bss_32724._10._04 = 0.5f;
+    fn_80025C58(lbl_3_common_bss_32724._00, &lbl_8036E548._0068->_34[2]);
 }
 
 // .text:0x0011C5F8 size:0x708 mapped:0x8075B68C
 void fn_3_11C5F8(void) {
-    return;
+    u16 i;
+
+    lbl_8036E548._3078 = 0x111;
+    lbl_8036E548._2D94 = _OSAllocFromHeap(0x20, lbl_8036E548._3078 * 0x28);
+    lbl_8036E548._0068 = ActorObjectInitTable(lbl_8036E548._3078);
+    fn_3_11D2C8(0, 0, 0x82, NULL, 0);
+    fn_3_11D2C8(21, 0x82, 0x64, NULL, 0);
+    fn_3_11D2C8(1, 0xE6, 7, NULL, 0);
+    fn_3_11D2C8(2, 0xED, 7, NULL, 0);
+    fn_3_11D2C8(3, 0xF4, 7, NULL, 0);
+    fn_3_11D2C8(5, 0xFB, 1, NULL, 0);
+    fn_3_11D2C8(6, 0xFC, 7, NULL, 0);
+    fn_3_11D2C8(7, 0x103, 7, NULL, 0);
+    fn_3_11D2C8(4, 0x10A, 7, NULL, 0);
+    for (i = 0; i < 7; i++) {
+        setAnim(&lbl_8036E548._0068->_34[i + 0xFC], lbl_3_common_bss_32724._70, 0);
+        setAnim(&lbl_8036E548._0068->_34[i + 0x103], lbl_3_common_bss_32724._70, 2);
+    }
 }
 
 // .text:0x0011C2CC size:0x32C mapped:0x8075B360
 void fn_3_11C2CC(void) {
-    return;
+    s32 i;
+
+    lbl_8036E548._3078 = 0x20;
+    lbl_8036E548._2D94 = _OSAllocFromHeap(0x20, lbl_8036E548._3078 * 0x28);
+    lbl_8036E548._0068 = ActorObjectInitTable(lbl_8036E548._3078);
+    fn_3_11D2C8(8, 0, 0xF, NULL, 0);
+    fn_3_11D2C8(9, 0xF, 1, NULL, 0);
+    fn_3_11D2C8(10, 0x10, 0xF, NULL, 0);
+    fn_3_11D2C8(16, 0x1F, 1, NULL, 0);
+    for (i = 0; i < 15; i++) {
+        setAnim(&lbl_8036E548._0068->_34[i + 0x10], lbl_3_common_bss_32724._74, 0);
+    }
 }
 
 // .text:0x0011C02C size:0x2A0 mapped:0x8075B0C0
 void fn_3_11C02C(void) {
-    return;
+    lbl_8036E548._3078 = 0xA7;
+    lbl_8036E548._2D94 = _OSAllocFromHeap(0x20, lbl_8036E548._3078 * 0x28);
+    lbl_8036E548._0068 = ActorObjectInitTable(lbl_8036E548._3078);
+    fn_3_11D2C8(0, 0, 0x82, NULL, 0);
+    fn_3_11D2C8(11, 0x82, 0x23, NULL, 0);
+    fn_3_11D2C8(12, 0xA5, 1, NULL, 0);
+    fn_3_11D2C8(26, 0xA6, 1, NULL, 0);
 }
 
 // .text:0x0011BBA4 size:0x488 mapped:0x8075AC38
 void fn_3_11BBA4(void) {
-    return;
+    lbl_8036E548._3078 = 0xEE;
+    lbl_8036E548._2D94 = _OSAllocFromHeap(0x20, lbl_8036E548._3078 * 0x28);
+    lbl_8036E548._0068 = ActorObjectInitTable(lbl_8036E548._3078);
+    fn_3_11D2C8(0, 0, 0x82, NULL, 0);
+    fn_3_11D2C8(21, 0x82, 0x64, NULL, 0);
+    fn_3_11D2C8(22, 0xE6, 1, NULL, 0);
+    fn_3_11D2C8(23, 0xE7, 1, NULL, 0);
+    fn_3_11D2C8(24, 0xE8, 1, NULL, 0);
+    fn_3_11D2C8(25, 0xE9, 4, NULL, 0);
+    fn_3_11D2C8(26, 0xED, 1, NULL, 0);
 }
 
 // .text:0x0011B75C size:0x448 mapped:0x8075A7F0
 void fn_3_11B75C(void) {
-    return;
+    lbl_8036E548._3078 = 0xF4;
+    lbl_8036E548._2D94 = _OSAllocFromHeap(0x20, lbl_8036E548._3078 * 0x28);
+    lbl_8036E548._0068 = ActorObjectInitTable(lbl_8036E548._3078);
+    fn_3_11D2C8(0, 0, 0x82, NULL, 0);
+    fn_3_11D2C8(17, 0x82, 3, lbl_3_common_bss_32724._78, lbl_3_common_bss_32724._60);
+    fn_3_11D2C8(18, 0x85, 0x32, NULL, 0);
+    fn_3_11D2C8(13, 0xB7, 0x32, NULL, 0);
+    fn_3_11D2C8(19, 0xE9, 7, NULL, 0);
+    fn_3_11D2C8(20, 0xF0, 4, NULL, 0);
 }
 
 // .text:0x0011AC6C size:0xAF0 mapped:0x80759D00
@@ -753,7 +851,49 @@ void fn_3_118358(s32 i, Vec* out) {
 
 // .text:0x00118164 size:0x1F4 mapped:0x807571F8
 void fn_3_118164(void) {
-    return;
+    UnkObj3310* coin;
+    UnkObj3310* shadow;
+    s32 i;
+    s32 id;
+
+    for (i = 0; i < 100; i++) {
+        id = i + 0x82;
+        coin = &lbl_8036E548._2D94[id];
+        coin->_26 = 0;
+        shadow = &lbl_8036E548._2D94[i];
+        shadow->_26 = 0;
+        if (g_Minigame.wallBall_coinsVisibleInd[i] == 1 || g_Minigame.wallBall_coinsVisibleInd[i] == 3) {
+            coin->_26 = 1;
+            coin->_04.x = g_Minigame.wallBall_coinCoordinates[i].x;
+            coin->_04.y = -g_Minigame.wallBall_coinCoordinates[i].y;
+            coin->_04.z = g_Minigame.wallBall_coinCoordinates[i].z;
+            coin->_10.x = 0.0f;
+            coin->_10.z = 0.0f;
+            fn_8001D0D0(id, 2.0f);
+            if (g_Minigame.wallBall_coinsVisibleFrameCounter[i] <= 1) {
+                coin->_10.y = RandomF32_Game_Range(-3.1415927f, 3.1415927f);
+            } else if (g_Minigame.wallBall_coinsVisibleInd[i] == 1) {
+                coin->_10.y = fn_3_9FEA8(0.05f + coin->_10.y);
+            } else {
+                coin->_10.y = fn_3_9FEA8(10.0f + coin->_10.y);
+            }
+            shadow->_26 = 1;
+            shadow->_00 = NULL;
+            shadow->_04.x = g_Minigame.wallBall_coinCoordinates[i].x;
+            shadow->_04.y = -0.05f;
+            shadow->_04.z = g_Minigame.wallBall_coinCoordinates[i].z;
+            fn_8001D0D0(i, 5.0f);
+            if (g_Minigame.wallBall_coinsVisibleFrameCounter[i] > lbl_3_data_21A04[3] - 180 &&
+                g_Minigame.wallBall_coinsVisibleInd[i] == 1 && (g_d_GameSettings.FrameCountWhileNotAtMainMenu & 1)) {
+                coin->_26 = 0;
+                shadow->_26 = 0;
+            }
+            if (g_Minigame.wallBall_coinsVisibleInd[i] == 3 && (g_d_GameSettings.FrameCountWhileNotAtMainMenu & 1)) {
+                coin->_26 = 0;
+                shadow->_26 = 0;
+            }
+        }
+    }
 }
 
 // .text:0x001180A4 size:0xC0 mapped:0x80757138
@@ -918,5 +1058,25 @@ void fn_3_1169D0(void) {
 
 // .text:0x00116840 size:0x190 mapped:0x807558D4
 void fn_3_116840(void) {
-    return;
+    s32 i;
+    UnkObj3310* obj;
+
+    for (i = 0; i < 3; i++) {
+        obj = &lbl_8036E548._2D94[i + 0x82];
+        obj->_26 = 0;
+        if (MG._0000[i]._2A) {
+            obj->_26 = 1;
+            obj->_04.x = MG._0000[i].pos.x;
+            obj->_04.y = -MG._0000[i].pos.y;
+            obj->_04.z = MG._0000[i].pos.z;
+            fn_8001D0D0(i + 0x82, lbl_3_data_22678[MG._0000[i]._2B]);
+            obj->_10.y = lbl_3_data_22688[i];
+            obj->_00 = fn_3_11897C;
+            if (MG._0000[i]._1C == 1) {
+                fn_3_1189C8(i, 0, 0, 6, 1);
+                MG._0000[i]._1C++;
+            }
+        }
+    }
 }
+
