@@ -422,7 +422,7 @@ static u8 lbl_3_bss_9D81;
 static u8 lbl_3_bss_9D80;
 
 // .text:0x000C8650 size:0xD2C mapped:0x807076E4
-// 94.19%: registers differ throughout, and the target spills &g_d_GameSettings to 8(r1) for
+// 94.59%: registers differ throughout, and the target spills &g_d_GameSettings to 8(r1) for
 // the final GameModeSelected test and sets the first loop's end flag before draws[1] is set up.
 void fn_3_C8650(void** files) {
     Rep1FD8Draw* draw;
@@ -656,22 +656,24 @@ void fn_3_C8650(void** files) {
             lbl_3_bss_9DE1++;
         }
     }
-    for (i = count; i < lbl_3_common_bss_350E4._30; i++, draw++) {
-        draw->_A9 = 0;
-        draw->_74 = NULL;
-        draw->_78 = NULL;
-        draw->_7C = NULL;
-        draw->_80 = NULL;
-        draw->_90_7 = 0;
-        draw->_90_6 = 0;
-        draw->_90_5 = 0;
-        draw->control.type = 0;
-        CTRLSetTranslation(&draw->control, 0.0f, 0.0f, 0.0f);
-        CTRLSetRotation(&draw->control, 0.0f, 0.0f, 0.0f);
-        draw->_92 = 0;
-        draw->_8C = NULL;
-        draw->_94 = 0;
-        draw->_96 = -1;
+    if (count < lbl_3_common_bss_350E4._30) {
+        for (l = count; l < lbl_3_common_bss_350E4._30; l++, draw++) {
+            draw->_A9 = 0;
+            draw->_74 = NULL;
+            draw->_78 = NULL;
+            draw->_7C = NULL;
+            draw->_80 = NULL;
+            draw->_90_7 = 0;
+            draw->_90_6 = 0;
+            draw->_90_5 = 0;
+            draw->control.type = 0;
+            CTRLSetTranslation(&draw->control, 0.0f, 0.0f, 0.0f);
+            CTRLSetRotation(&draw->control, 0.0f, 0.0f, 0.0f);
+            draw->_92 = 0;
+            draw->_8C = NULL;
+            draw->_94 = 0;
+            draw->_96 = -1;
+        }
     }
     lbl_3_common_bss_350E4._48 = NULL;
     if (g_d_GameSettings.GameModeSelected != 7) {
