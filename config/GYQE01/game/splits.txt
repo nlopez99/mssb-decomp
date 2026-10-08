@@ -139,9 +139,9 @@ game/rep_1200.c:
 	.bss        start:0x00001728 end:0x00001748
 
 game/rep_12D0.c:
-	.text       start:0x000759BC end:0x0007976C
+	.text       start:0x000759BC end:0x0007C1FC
 	.rodata     start:0x000012D0 end:0x00001330
-	.data       start:0x000080A8 end:0x00008110
+	.data       start:0x000080A8 end:0x00008148
 
 game/rep_1330.c:
 	.text       start:0x0007C1FC end:0x0007CE90
@@ -153,8 +153,9 @@ game/rep_13B8.c:
 	.rodata     start:0x000013B8 end:0x00001508
 
 game/m_sound.c:
-	.text       start:0x0008B258 end:0x00090754
+	.text       start:0x0008B094 end:0x000910F4
 	.rodata     start:0x00001508 end:0x00001610
+	.data       start:0x00008148 end:0x00008D88
 	.bss        start:0x00001760 end:0x000017F8
 
 game/rep_1610.c:

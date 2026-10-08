@@ -1969,8 +1969,7 @@ typedef struct _MiniGameStruct {
     /*0x1B2E*/ u8 _1B2E;
     /*0x1B2F*/ u8 _1B2F[4];
     /*0x1B33*/ u8 _1B33;
-    /*0x1B34*/ s16 _1B34;
-    /*0x1B36*/ u8 _1B36[6];
+    /*0x1B34*/ s16 _1B34[4]; // per player, read by fn_3_60D80 (rep_E08)
     /*0x1B3C*/ s16 _1B3C;
     /*0x1B3E*/ u8 _1B3E[6];
     /*0x1B44*/ s16 _1B44;
@@ -2035,10 +2034,16 @@ typedef struct _MiniGameStruct {
     /*0x1C81*/ u8 _1C81[9];
     /*0x1C8A*/ u8 _1C8A[4];
     /*0x1C8E*/ u8 _1C8E[4];
-    /*0x1C92*/ s8 _1C92[8];
-    /*0x1C9A*/ u8 _1C9A;
-    /*0x1C9B*/ u8 _1C9B;
-    /*0x1C9C*/ s16 _1C9C;
+    /*0x1C92*/ s8 _1C92[8]; // s8: fn_3_60D80 (rep_E08) compares with cmpwi
+    // Piranha Panic (rep_37A8) loops over four bytes here; fn_3_53130 indexes them per player
+    union {
+        struct {
+            /*0x1C9A*/ u8 _1C9A;
+            /*0x1C9B*/ u8 _1C9B;
+            /*0x1C9C*/ s16 _1C9C;
+        };
+        /*0x1C9A*/ u8 _1C9A_arr[4];
+    };
     /*0x1C9E*/ u8 _1C9E;
     /*0x1C9F*/ u8 _1C9F;
     /*0x1CA0*/ u8 _1CA0[2];
@@ -2163,9 +2168,14 @@ extern struct {
     /* 0x00 */ u32 _00;
     /* 0x04 */ u32 _04;
     /* 0x08 */ u32 _08;
-    /* 0x08 */ u32 _0C;
-    /* 0x10 */ u32 _10;
-    /* 0x14 */ u32 _14;
+    union {
+        struct {
+            /* 0x0C */ u32 _0C;
+            /* 0x10 */ u32 _10;
+            /* 0x14 */ u32 _14;
+        };
+        /* 0x0C */ u32 voices[3]; // m_sound's fn_3_90434 keys them off in a loop
+    };
     /* 0x18 */ u32 _18;
     /* 0x1C */ u32 _1C; // written to after sndFXStartEx
     /* 0x20 */ s16 _20;
@@ -2614,12 +2624,16 @@ typedef struct {
 } FieldingLogicFielder; // size 0x6
 
 typedef struct {
-    /* 0x00 */ u8 _00[0x8];
+    /* 0x00 */ f32 _00;
+    /* 0x04 */ f32 _04;
     /* 0x08 */ f32 _08;
     /* 0x0C */ s16 _0C;
-    /* 0x0E */ u8 _0E[0x14 - 0xE];
+    /* 0x0E */ s16 _0E;
+    /* 0x10 */ s16 _10;
+    /* 0x12 */ s16 _12;
     /* 0x14 */ s16 _14;
-    /* 0x16 */ u8 _16[0x1A - 0x16];
+    /* 0x16 */ s16 _16;
+    /* 0x18 */ s16 _18;
     /* 0x1A */ u8 _1A;
     /* 0x1B */ u8 _1B;
 } FieldingLogicEntry; // size 0x1C
@@ -2627,6 +2641,8 @@ typedef struct {
 typedef struct {
     /* 0x0 */ s16 _0;
     /* 0x2 */ u8 _2;
+    /* 0x3 */ u8 _3;
+    /* 0x4 */ u8 _4;
 } FieldingLogic08C;
 
 typedef struct {
@@ -2777,7 +2793,7 @@ typedef struct {
     /* 0x0028 */ s16 _28;
     artificial_padding(0x28, 0x32, s16);
     /* 0x0032 */ s16 _32;
-    artificial_padding(0x32, 0x36, s16);
+    /* 0x0034 */ s16 _34;
     /* 0x0036 */ u8 replayInd;
     /* 0x0037 */ u8 _37;
     /* 0x0038 */ u8 _38;
@@ -2852,7 +2868,7 @@ extern s16 HitVertTrajRanges[2][5][5][2];
 
 extern BOOL getAnimRelatedCoordinates(int, int, VecXYZ*);
 extern void fn_3_6C854(int, int);
-extern void playSoundEffect(int);
+extern u32 playSoundEffect(int);
 extern void fn_3_5ED98(void);
 extern int RandomIndexFromWeights(u8* weights, int count);
 extern void fn_3_FBDAC(int);
