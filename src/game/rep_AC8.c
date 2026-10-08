@@ -289,6 +289,7 @@ extern s16 lbl_3_data_1C3C[2];
 extern u8 lbl_3_data_48F8[8];
 extern s16 lbl_3_data_49DC[44];
 extern f32 lbl_3_data_476C[5];
+extern f32 lbl_3_data_4794[10];
 extern s16 lbl_3_data_48A4[3][5];
 extern u8 lbl_3_data_4900[2][3];
 extern s16 lbl_3_data_4924[6];
@@ -4582,8 +4583,59 @@ void fn_3_2BB04(void) {
 }
 
 // .text:0x0002B694 size:0x470 mapped:0x8066A728
-void fn_3_2B694(void) {
-    return;
+BOOL fn_3_2B694(s32 fielder) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    f32 speed;
+    s32 frame;
+
+    if (f->_050 == 0.0f || f->_19A < 0) {
+        return FALSE;
+    }
+    if (g_Ball.hitWallInd) {
+        return FALSE;
+    }
+    if (g_Ball.numFieldersWhoHandledBallDuringPlay) {
+        return FALSE;
+    }
+    if (g_Ball.AtBat_ContactResult == 1) {
+        if (fn_3_9FCF8(f->_180, f->_19A) > 0x500) {
+            return FALSE;
+        }
+    } else if (g_Ball.AtBat_ContactResult == 0 && fn_3_9FCF8(f->_180, f->_19A) > 0x500 &&
+               1.0f + f->_070 < g_Ball.physicsSubstruct.hitLandingSpotDistFromHome) {
+        return FALSE;
+    }
+    speed = f->_058;
+    if (fielder == g_FieldingLogic._070->_14) {
+        speed *= g_FieldingLogic._070->_08;
+    }
+    for (frame = lbl_3_data_49DC[17]; frame <= lbl_3_data_49DC[16]; frame++) {
+        f32 dx;
+        f32 dz;
+        f32 dist;
+        f32 reach;
+
+        if (g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.y > f->_0F8) {
+            continue;
+        }
+        dx = g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.x - f->_000;
+        dz = g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.z - f->_008;
+        if (fn_3_9FCF8((s16)fn_3_9FB8C(dx, dz), f->_19A) > lbl_3_data_49DC[18]) {
+            continue;
+        }
+        dist = dolsqrtf2(dx * dx + dz * dz);
+        reach = dist - lbl_3_data_4794[f->_1C9];
+        if ((s32)(reach / (speed * lbl_3_data_4930[30])) + 1 <= frame && !(reach < f->_0E8) &&
+            !fn_3_B7CDC(g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.x,
+                        g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.z)) {
+            fn_3_2C238(fielder, 7, frame, 0, 0);
+            f->_21C = dx * (reach / dist) + f->_000;
+            f->_224 = dz * (reach / dist) + f->_008;
+            fn_3_2B5C0(fielder);
+            return TRUE;
+        }
+    }
+    return FALSE;
 }
 
 // .text:0x0002B5C0 size:0xD4 mapped:0x8066A654
@@ -4944,8 +4996,8 @@ void fn_3_261E8(s32 fielder) {
 }
 
 // .text:0x00025C40 size:0x5A8 mapped:0x80664CD4
-// 99.41%: registers only; the dive offset and the second branch's dx and dz take other
-// float registers, as do the lerp's differences.
+// 99.75%: registers only; the second branch's dx and dz take each other's float registers,
+// as do the catch lerp's differences.
 void fn_3_25C40(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     s32 ch = fielder;
@@ -4975,9 +5027,9 @@ void fn_3_25C40(s32 fielder) {
             scale = 0.01f * lbl_3_data_79B4.sizes[f->_17A][4] / dolsqrtf2(dx * dx + dz * dz);
             ox = dx * scale;
             oz = dz * scale;
-            g_Ball.diveCatchLocationOffset.y = 0.01f * lbl_3_data_79B4.sizes[f->_17A][7];
             g_Ball.diveCatchLocationOffset.x = f->_000 + ox;
             g_Ball.diveCatchLocationOffset.z = f->_008 + oz;
+            g_Ball.diveCatchLocationOffset.y = 0.01f * lbl_3_data_79B4.sizes[f->_17A][7];
         } else {
             if (f->_24C > lbl_3_data_49DC[24]) {
                 return;
