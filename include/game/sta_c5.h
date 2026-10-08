@@ -5,13 +5,14 @@
 #include "Dolphin/mtx.h"
 
 struct StaC5Draw;
+struct StaC5Shape;
 struct StaC5Emitter;
 struct StadiumObjectCollision;
 struct StaC5Ball;
 
 void fn_3_EDFAC(void);
 s32 fn_3_EE0BC(u32 flags);
-void fn_3_EE100(void);
+void fn_3_EE100(struct StaC5Shape* shape, MtxPtr view);
 void fn_3_EE388(void);
 void fn_3_EE67C(void);
 void fn_3_EE96C(Vec* pos);

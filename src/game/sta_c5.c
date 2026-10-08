@@ -19,6 +19,11 @@
 #include "game/rep_23E8.h"
 #include "Dolphin/rand.h"
 
+typedef struct StaC5Shape {
+    /* 0x00 */ u8 _00[0x18];
+    /* 0x18 */ Mtx _18;
+} StaC5Shape;
+
 typedef struct {
     /* 0x00 */ u8 _00[0x60];
     /* 0x60 */ u8 _60;
@@ -224,6 +229,7 @@ extern StaC5Fielder g_Fielders[9];
 extern s32 fn_800247E4(s32 x, s32 y, s32 width, s32 bytes);
 extern BOOL fn_800527C4(Vec* pos);
 extern s32 fn_8005268C(void);
+extern camera_803c639c_s* fn_80052734(s32 idx);
 extern s16 fn_3_B7F70(s16 range);
 
 extern u16 lbl_3_data_81DC[16];
@@ -1395,8 +1401,60 @@ void fn_3_EE388(void) {
 }
 
 // .text:0x000EE100 size:0x288 mapped:0x8072D194
-void fn_3_EE100(void) {
-    return;
+void fn_3_EE100(StaC5Shape* shape, MtxPtr view) {
+    Mtx world;
+    Mtx tex;
+    Mtx m;
+    Mtx44 proj;
+    GXColor white;
+    f32 wobble;
+    f32 scale;
+
+    white.r = 0xFF;
+    white.g = 0xFF;
+    white.b = 0xFF;
+    white.a = 0xFF;
+    GXSetChanMatColor(GX_COLOR0A0, white);
+    GXSetNumChans(1);
+    wobble = lbl_3_bss_AF04;
+    PSMTXCopy(shape->_18, tex);
+    PSMTXCopy(view, world);
+    world[0][3] += lbl_3_data_1BA70.x;
+    world[1][3] += lbl_3_data_1BA70.y;
+    scale = 1.0f + wobble;
+    world[0][0] *= scale;
+    world[0][1] *= scale;
+    world[0][2] *= scale;
+    world[1][0] *= scale;
+    world[1][1] *= scale;
+    world[1][2] *= scale;
+    PSMTXConcat(world, tex, tex);
+    PSMTXIdentity(m);
+    PSMTX44Copy(fn_80052734(fn_8005268C())->proj, proj);
+    m[0][0] = proj[0][0];
+    m[0][2] = proj[0][2];
+    m[1][1] = proj[1][1];
+    m[1][2] = proj[1][2];
+    m[2][2] = proj[3][2];
+    PSMTXConcat(m, tex, tex);
+    PSMTXIdentity(m);
+    m[0][0] = 0.5f;
+    m[0][2] = 0.5f;
+    m[1][1] = -0.5f;
+    m[1][2] = 0.5f;
+    m[2][2] = 1.0f;
+    m[2][3] = 0.0f;
+    m[1][3] = 0.0f;
+    m[0][3] = 0.0f;
+    PSMTXConcat(m, tex, tex);
+    GXLoadTexMtxImm(tex, GX_TEXMTX0, GX_MTX3x4);
+    GXSetTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX3X4, GX_TG_POS, GX_TEXMTX0, GX_FALSE, GX_PTIDENTITY);
+    GXSetNumTevStages(1);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_TEXC, GX_CC_RASC, GX_CC_ZERO);
+    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_RASA, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO);
+    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
 }
 
 // .text:0x000EE0BC size:0x44 mapped:0x8072D150
