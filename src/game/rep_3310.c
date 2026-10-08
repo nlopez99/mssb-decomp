@@ -622,8 +622,8 @@ void fn_3_11A92C(UnkObj3310* obj, s32 id) {
 }
 
 // .text:0x0011A408 size:0x524 mapped:0x8075949C
-// 97.15%: registers differ: the target keeps i * 0x28 in r25 and the wall cursor in r26,
-// and computes id after the category test.
+// 98.84%: the setAnim block of the note-block case and the frame threshold
+// (srwi against srawi) differ, and the branches after them shift by one instruction.
 void fn_3_11A408(void) {
     UnkObj3310* obj;
     UnkObj3310* shadow;
@@ -639,23 +639,23 @@ void fn_3_11A408(void) {
 
     lbl_8036E548._2D94[0xFB]._26 = 0;
     for (i = 0; i < 7; i++) {
+        wall = &g_Minigame.wallBallWalls[i];
         lbl_8036E548._2D94[i + 0xE6]._26 = 0;
         lbl_8036E548._2D94[i + 0xED]._26 = 0;
         lbl_8036E548._2D94[i + 0xF4]._26 = 0;
         lbl_8036E548._2D94[i + 0xFC]._26 = 0;
         lbl_8036E548._2D94[i + 0x103]._26 = 0;
         lbl_8036E548._2D94[i + 0x10A]._26 = 0;
-        wall = &g_Minigame.wallBallWalls[i];
         if (g_Minigame.wallBallWalls[i]._28 == 0) {
             continue;
         } else if (g_Minigame.wallBallWalls[i]._28 == 4) {
-            id = i + (wall->coinGenerationCategory == 2) * 7 + 0xFC;
+            id = i + 0xFC + (wall->coinGenerationCategory == 2) * 7;
             if (wall->coinGenerationCategory == 2) {
                 if (g_Minigame.wallBall_hitNoteBlock == 1) {
                     pos.x = wall->_0.x;
                     pos.y = g_Ball.AtBat_Contact_BallPos.y;
                     pos.z = wall->_0.z;
-                    setAnim(&lbl_8036E548._0068->_34[id], lbl_3_common_bss_32724._70, 3);
+                    fn_3_11A38C(id, 3);
                     fn_3_151710((struct UnkModelRef3880*)&lbl_8036E548._0068->_34[id], &pos);
                     fn_3_90064(0x2EB);
                 } else {
@@ -673,12 +673,12 @@ void fn_3_11A408(void) {
             }
             fn_3_14C348((Vec*)&wall->_0, big);
             if (big) {
-                g_Minigame.wallBallWalls[i]._28 = 0;
+                wall->_28 = 0;
                 continue;
             }
-            g_Minigame.wallBallWalls[i]._28 = 5;
+            wall->_28 = 5;
         } else if (g_Minigame.wallBallWalls[i]._28 == 5) {
-            id = i + (wall->coinGenerationCategory == 2) * 7 + 0xFC;
+            id = i + 0xFC + (wall->coinGenerationCategory == 2) * 7;
             frame = fn_3_11A350(id);
             if (frame < (lbl_3_data_22634[wall->coinGenerationCategory] >> 1) && frame % 2 == 0) {
                 model = lbl_8036E548._0068->_34[id]._00;
