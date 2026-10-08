@@ -2217,11 +2217,11 @@ u32 fn_3_135520(f32 x, f32 z, f32 r) {
 }
 
 // .text:0x001354BC size:0x64 mapped:0x80774550
-// 99.2%: the index is scaled into another register; MG.objs[i] scores 83%.
 BOOL fn_3_1354BC(s32 i, f32 x, f32 z) {
     BOOL ret = FALSE;
-    f64 ax = fabs(((Unk3520Obj*)((u8*)&g_Minigame + 0xBB0))[i]._0.x - x);
-    f64 az = fabs(((Unk3520Obj*)((u8*)&g_Minigame + 0xBB0))[i]._0.z - z);
+    Unk3520Minigame* mg = &MG;
+    f64 ax = fabs(mg->objs[i]._0.x - x);
+    f64 az = fabs(mg->objs[i]._0.z - z);
     f32 dx = ax;
     f32 dz = az;
 
@@ -2513,7 +2513,7 @@ static inline s16 Unk3520_CircleAngle(int i, int offset) {
 }
 
 // .text:0x0013334C size:0x1170 mapped:0x807723E0
-// 84.1%: fn_3_135520 is inlined here (the target calls it), and the loops over
+// 85.2%: fn_3_135520 is inlined here (the target calls it), and the loops over
 // MG.objs and the players walk other registers.
 void fn_3_13334C(void) {
     Unk3520Ai* ai = (Unk3520Ai*)&g_Minigame._1DCC;
