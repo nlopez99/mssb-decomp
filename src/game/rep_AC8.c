@@ -25,7 +25,7 @@ typedef struct UnkAC8Fielder {
     /* 0x03C */ f32 _03C;
     /* 0x040 */ u8 _040[0x48 - 0x40];
     /* 0x048 */ f32 _048;
-    /* 0x04C */ u8 _04C[0x50 - 0x4C];
+    /* 0x04C */ f32 _04C;
     /* 0x050 */ f32 _050;
     /* 0x054 */ f32 _054;
     /* 0x058 */ f32 _058;
@@ -124,7 +124,9 @@ typedef struct UnkAC8Fielder {
     /* 0x1EE */ u8 _1EE;
     /* 0x1EF */ u8 _1EF[0x1F0 - 0x1EF];
     /* 0x1F0 */ u8 _1F0;
-    /* 0x1F1 */ u8 _1F1[0x1F5 - 0x1F1];
+    /* 0x1F1 */ u8 _1F1[0x1F2 - 0x1F1];
+    /* 0x1F2 */ u8 _1F2;
+    /* 0x1F3 */ u8 _1F3[0x1F5 - 0x1F3];
     /* 0x1F5 */ s8 _1F5;
     /* 0x1F6 */ u8 _1F6[0x1FC - 0x1F6];
     /* 0x1FC */ u8 _1FC;
@@ -182,6 +184,13 @@ typedef struct UnkAC8Fielder {
 } UnkAC8Fielder; // size: 0x268
 
 extern UnkAC8Fielder g_Fielders[9];
+
+extern struct {
+    /* 0x00 */ u8 _00[0x4];
+    /* 0x04 */ s16 _04;
+    /* 0x06 */ u8 _06[0x10 - 0x6];
+    /* 0x10 */ u8 _10;
+} g_RunningLogic;
 
 extern struct {
     /* 0x0000 */ u8 _0000[0x2C50];
@@ -637,8 +646,60 @@ void fn_3_54B58(void) {
 }
 
 // .text:0x00054900 size:0x258 mapped:0x80693994
-void fn_3_54900(void) {
-    return;
+void fn_3_54900(s32 fielder) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    s32 runners = g_RunningLogic._04;
+    f32 x;
+    f32 z;
+
+    if (f->_1F5 >= 0) {
+        x = lbl_3_data_4444[4].x;
+        z = lbl_3_data_4444[4].z;
+    } else {
+        if (g_RunningLogic._10 == 0) {
+            f->_04C = f->_048;
+            f->_1F2 = 1;
+            return;
+        }
+        if (g_Ball.AtBat_ContactResult == 3) {
+            runners &= 0xFFF0;
+        }
+        switch (runners) {
+        case 0x1:
+            x = lbl_3_data_4444[1].x;
+            z = lbl_3_data_4444[1].z;
+            break;
+        case 0x10:
+            x = 0.7f * lbl_3_data_4444[2].x + 0.3f * lbl_3_data_4444[1].x;
+            z = 0.7f * lbl_3_data_4444[2].z + 0.3f * lbl_3_data_4444[1].z;
+            break;
+        case 0x100:
+            x = 0.7f * lbl_3_data_4444[3].x + 0.3f * lbl_3_data_4444[2].x;
+            z = 0.7f * lbl_3_data_4444[3].z + 0.3f * lbl_3_data_4444[2].z;
+            break;
+        case 0x11:
+            x = 0.5f * (lbl_3_data_4444[1].x + lbl_3_data_4444[2].x);
+            z = 0.5f * (lbl_3_data_4444[1].z + lbl_3_data_4444[2].z);
+            break;
+        case 0x110:
+            x = 0.5f * (lbl_3_data_4444[2].x + lbl_3_data_4444[3].x);
+            z = 0.5f * (lbl_3_data_4444[2].z + lbl_3_data_4444[3].z);
+            break;
+        case 0x111:
+            x = 0.3f * lbl_3_data_4444[3].x + 0.7f * lbl_3_data_4444[2].x;
+            z = 0.3f * lbl_3_data_4444[3].z + 0.7f * lbl_3_data_4444[2].z;
+            break;
+        case 0x101:
+            x = lbl_3_data_4444[4].x;
+            z = lbl_3_data_4444[4].z;
+            break;
+        default:
+            x = lbl_3_data_4444[0].x;
+            z = lbl_3_data_4444[0].z;
+            break;
+        }
+    }
+    f->_048 = atan2(z - f->_008, x - f->_000);
 }
 
 // .text:0x000544B8 size:0x448 mapped:0x8069354C
@@ -1166,8 +1227,46 @@ BOOL fn_3_468DC(f32* x, f32* z) {
 }
 
 // .text:0x00046688 size:0x254 mapped:0x8068571C
-void fn_3_46688(void) {
-    return;
+BOOL fn_3_46688(f32* x, f32* z) {
+    UnkAC8Fielder* f = &g_Fielders[g_FieldingLogic._0B0];
+    f32 dx;
+    f32 dz;
+    f32 dx2;
+    f32 dz2;
+    f32 dist;
+    f32 t;
+
+    if (g_Ball.fielderWBallIndex >= 0) {
+        *x = g_Ball.AtBat_Contact_BallPos.x;
+        *z = g_Ball.AtBat_Contact_BallPos.z;
+    } else if (g_Ball.ballState == 2) {
+        *x = g_Ball.throwStartingLocation.x;
+        *z = g_Ball.deadballLastLoc.x;
+    } else if (g_Ball.fielderAboutToGetBall_hasBall >= 0) {
+        *x = g_Fielders[g_Ball.fielderAboutToGetBall_hasBall]._000;
+        *z = g_Fielders[g_Ball.fielderAboutToGetBall_hasBall]._008;
+    } else if (g_Ball.AtBat_ContactResult == 0) {
+        *x = g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x;
+        *z = g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z;
+    } else {
+        dx = g_Ball.AtBat_Contact_BallPos.x - f->_000;
+        dz = g_Ball.AtBat_Contact_BallPos.z - f->_008;
+        dx2 = dx * dx;
+        dz2 = dz * dz;
+        dist = dolsqrtf2(dx2 + dz2);
+        if (dist == 0.0f) {
+            *x = g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x;
+            *z = g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z;
+        } else if (g_Ball.ballVelocity <= 0.01f) {
+            *x = g_Ball.AtBat_Contact_BallPos.x;
+            *z = g_Ball.AtBat_Contact_BallPos.z;
+        } else {
+            t = dist / g_Ball.ballVelocity;
+            *x = g_Ball.physicsSubstruct.velocity.x * t + g_Ball.AtBat_Contact_BallPos.x;
+            *z = g_Ball.physicsSubstruct.velocity.z * t + g_Ball.AtBat_Contact_BallPos.z;
+        }
+    }
+    return TRUE;
 }
 
 // .text:0x00045E98 size:0x7F0 mapped:0x80684F2C
