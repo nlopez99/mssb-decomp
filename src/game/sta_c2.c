@@ -712,7 +712,19 @@ s32 fn_3_D53C0(u8 id) {
 
 // .text:0x000D511C size:0x2A4 mapped:0x807141B0
 void fn_3_D511C(void) {
-    return;
+    memset(&lbl_3_bss_A8A8, 0, sizeof(lbl_3_bss_A8A8));
+    lbl_3_bss_A8A8._00 = 1.755f;
+    lbl_3_bss_A8A8._04 = 0.5f;
+    lbl_3_bss_A8A8._08 = 300.0f;
+    lbl_3_bss_A8A8._0C = 20.0f;
+    lbl_3_bss_A8A8._10 = 1.5f;
+    lbl_3_bss_A8A8._14 = 0.001f;
+    lbl_3_bss_A8A8.steps = 8;
+    lbl_3_bss_A8A8.dt = 1.0f / lbl_3_bss_A8A8.steps / 60.0f;
+    lbl_3_bss_A8A8.dt2 = lbl_3_bss_A8A8.dt * lbl_3_bss_A8A8.dt;
+    lbl_3_bss_A8A8._24 = 1.0f / (2.0f * lbl_3_bss_A8A8.dt);
+    fn_3_D501C(lbl_3_bss_ABD0);
+    fn_3_D501C(lbl_3_bss_A9D0);
 }
 
 // .text:0x000D501C size:0x100 mapped:0x807140B0
