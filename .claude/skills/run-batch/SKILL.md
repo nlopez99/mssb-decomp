@@ -18,6 +18,7 @@ Keep a batch log in the batch worktree's `build/batch-<N>.md` (`build/` is ignor
 
 3. **Integrate each report as it arrives.** Check that the worker left nothing running (`ps -Ao pid,command | grep <worktree>`, typically a permuter; kill it). Then run `python3 tools/integrate.py b<N>/<unit>` from the batch worktree, so tool changes made on the batch branch apply: it rebases the branch onto the batch branch, checks it, fast-forwards, runs `regress.py` against the old tip, and removes the worktree only if that passes.
    - Exit 2, a rebase conflict: in a shared header, keep both layouts as an anonymous `union` (the match-functions skill's **Claim**). When the conflict repeats over many commits, run `git merge match/batch-<N>` once in the worker's worktree instead. Then run `integrate.py` again.
+   - Exit 1 because the rebased branch no longer builds: another worker, merged meanwhile, changed the same shared declaration another way. Give it both views as an anonymous `union` in the worker's worktree, commit there, and run `integrate.py` again.
    - Regress fails after the merge: fix forward on the batch branch, or reset it to the old tip that `integrate.py` prints.
 
    Log the report and refill the slot from the queue. Done when the branch is merged and the slot is busy again.
