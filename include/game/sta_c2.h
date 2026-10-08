@@ -50,7 +50,7 @@ void fn_3_CFD58(void);
 void fn_3_D00CC(void);
 void fn_3_D00D0(void);
 void fn_3_D0280(void);
-void fn_3_D0284(void);
+void fn_3_D0284(void* arg);
 void fn_3_D0490(void);
 void fn_3_D0528(void);
 s32 fn_3_D052C(void);

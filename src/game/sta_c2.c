@@ -8,6 +8,7 @@
 #include "musyx/musyx.h"
 #include "C3/control.h"
 #include "Dolphin/os.h"
+#include "Dolphin/rand.h"
 #include "Dolphin/mtxext.h"
 #include "game/rep_1838.h"
 #include "game/rep_AC8.h"
@@ -194,6 +195,12 @@ typedef struct StaC2Draw {
         };
         struct {
             /* 0xA0 */ StaC2Link* link;
+        };
+        struct {
+            /* 0xA0 */ struct StaC2Draw* parent;
+            /* 0xA4 */ Vec pos;
+            /* 0xB0 */ Vec offset;
+            /* 0xBC */ f32 radius;
         };
         /* 0xA0 */ u8 _A0_E8[0xE8 - 0xA0];
     };
@@ -933,8 +940,44 @@ void fn_3_D0490(void) {
 }
 
 // .text:0x000D0284 size:0x20C mapped:0x8070F318
-void fn_3_D0284(void) {
-    return;
+void fn_3_D0284(void* arg) {
+    StaC2Draw* draw = arg;
+    u8 state = draw->parent->_D1;
+    f32 angle;
+    s32 alpha;
+
+    if (state == 0) {
+        if (draw->_90_7) {
+            draw->_90_7 = 0;
+        }
+        if (draw->_92 != 255) {
+            draw->_92 = 255;
+        }
+        if (draw->radius != 1.0) {
+            draw->radius = 1.0f;
+        }
+    } else {
+        if (!draw->_90_7) {
+            draw->_90_7 = 1;
+        }
+        CTRLSetRotation(&draw->control, 0.0f, draw->parent->_C0, 0.0f);
+        angle = 0.017453292f * (rand() % 360);
+        draw->offset.x = draw->radius * cosf_kludge(angle);
+        draw->offset.z = draw->radius * sinf_kludge(angle);
+        CTRLSetTranslation(&draw->control, draw->pos.x + draw->offset.x, 0.0f, draw->pos.z + draw->offset.z);
+        if (state == 3) {
+            alpha = draw->_92;
+            alpha -= 1.7f;
+            if (alpha < 0) {
+                alpha = 0;
+            }
+            draw->_92 = alpha;
+            draw->radius -= 1.0 / 150.0;
+            if (draw->radius < 0.0f) {
+                draw->radius = 0.0f;
+            }
+        }
+    }
 }
 
 // .text:0x000D0280 size:0x4 mapped:0x8070F314
