@@ -100,6 +100,6 @@ void fn_3_D5E80(u32* n);
 void fn_3_D60C0(u32* n);
 void fn_3_D62F0(u32* n);
 void fn_3_D6514(void);
-void fn_3_D67CC(void);
+void fn_3_D67CC(void** files);
 
 #endif // !__GAME_sta_c2_H_
