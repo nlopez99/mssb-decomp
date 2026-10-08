@@ -1371,8 +1371,8 @@ void fn_3_B440(void) {
 }
 
 // .text:0x0000A970 size:0xAD0 mapped:0x80649A04
-// 99.77%: the target squares velocity.x before velocity.z for the banana-hit speed but still
-// gives &velocity.x r28 (x first here gives it r27), and the star swing takes r6 for r5.
+// 99.83%: the target squares velocity.x before velocity.z for the banana-hit speed but still
+// gives &velocity.x r28 (x first here gives it r27), and currentStarSwing takes r6 for r5.
 void fn_3_A970(int mode) {
     f32 speed;
     f32 angle;
@@ -1496,13 +1496,13 @@ void fn_3_A970(int mode) {
             if (g_Ball.framesSinceHit >= fn_3_15C014()) {
                 g_Ball.currentStarSwing = 0;
                 g_Batter.invisibleBallForPeachStarHit = 0;
-            } else if (g_Ball.framesSinceHit >= ((s16*)&g_hitShorts)[g_Ball.currentStarSwing - 2]) {
+            } else if (g_Ball.framesSinceHit >= (&g_hitShorts.frameChargeDownEnds)[g_Ball.currentStarSwing - 2]) {
                 g_Batter.invisibleBallForPeachStarHit = 1;
             }
-        } else if (g_Ball.framesSinceHit >= ((s16*)&g_hitShorts)[g_Ball.currentStarSwing]) {
+        } else if (g_Ball.framesSinceHit >= (&g_hitShorts.frameChargeDownEnds)[g_Ball.currentStarSwing]) {
             g_Ball.currentStarSwing = 0;
             g_Batter.invisibleBallForPeachStarHit = 0;
-        } else if (g_Ball.framesSinceHit >= ((s16*)&g_hitShorts)[g_Ball.currentStarSwing - 2]) {
+        } else if (g_Ball.framesSinceHit >= (&g_hitShorts.frameChargeDownEnds)[g_Ball.currentStarSwing - 2]) {
             g_Batter.invisibleBallForPeachStarHit = 1;
         }
         if (!g_Batter.invisibleBallForPeachStarHit) {
