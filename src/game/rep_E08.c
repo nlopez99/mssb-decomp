@@ -1007,7 +1007,7 @@ void fn_3_61B64(s32 i) {
     }
     if (g_Minigame.GameMode_MiniGame != 2) {
         if (g_Minigame.GameMode_MiniGame == 5) {
-            if ((&g_Minigame._1C9A)[fielder->_20D] == 1) {
+            if (g_Minigame._1C9A_arr[fielder->_20D] == 1) {
                 if (actorAnim != 0x24) {
                     fn_3_90220(fielder->_17A, 10);
                 }
@@ -1015,7 +1015,7 @@ void fn_3_61B64(s32 i) {
                 anim->_43 = 0;
                 goto end;
             }
-            if ((&g_Minigame._1C9A)[fielder->_20D] == 2) {
+            if (g_Minigame._1C9A_arr[fielder->_20D] == 2) {
                 AnimateCharacter(player, 0, 1, 1, 0, 0, 0, -1);
                 goto end;
             }
