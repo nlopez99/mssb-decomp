@@ -2311,8 +2311,41 @@ BOOL fn_3_30564(s32 fielder) {
 }
 
 // .text:0x00030214 size:0x350 mapped:0x8066F2A8
-void fn_3_30214(void) {
-    return;
+BOOL fn_3_30214(s32 fielder) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    VecSrcDst line;
+    CollisionStruct hit;
+    f32 dx;
+    f32 dz;
+    f32 dist;
+    f32 len;
+
+    if ((f->_038 == 0.0f && f->_03C == 0.0f) || f->_19A < 0) {
+        return FALSE;
+    }
+    line.dst.y = -0.5f;
+    line.src.y = -0.5f;
+    line.src.x = f->_000;
+    line.src.z = f->_008;
+    line.dst.x = f->_000 + f->_038 * lbl_3_data_4930[15];
+    line.dst.z = f->_008 + f->_03C * lbl_3_data_4930[15];
+    if ((checkCollision(&line, &hit, 0, FALSE) & 0x7F) != 2) {
+        return FALSE;
+    }
+    f->_205 = 1;
+    dz = line.dst.z - f->_008;
+    dx = line.dst.x - f->_000;
+    dist = dolsqrtf2(dx * dx + dz * dz);
+    f->_1B2 = (s32)(dist / lbl_3_data_4930[16]) + 1;
+    f->_128 = hit.position.x + hit.normal.x * lbl_3_data_4930[27];
+    f->_130 = hit.position.z + hit.normal.z * lbl_3_data_4930[27];
+    f->_154 = lbl_3_data_4930[17];
+    f->_148 = 0.0f;
+    len = dolsqrtf2(hit.normal.x * hit.normal.x + hit.normal.z * hit.normal.z);
+    f->_140 = hit.normal.x / len;
+    f->_144 = hit.normal.z / len;
+    f->_050 = 0.0f;
+    return TRUE;
 }
 
 // .text:0x000300B8 size:0x15C mapped:0x8066F14C
