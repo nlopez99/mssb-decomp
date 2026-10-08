@@ -4,6 +4,10 @@
 #include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
+#include "C3/control.h"
+#include "Dolphin/rand.h"
+#include "string.h"
+#include "game/rep_3AE8.h"
 
 #include "game/rep_1F58.h"
 #include "game/rep_1FD8.h"
@@ -22,19 +26,84 @@ typedef struct {
 } UnkTask1E08;
 
 typedef struct {
+    /* 0x00 */ Vec pos;
+    /* 0x0C */ u8 _0C;
+    /* 0x0D */ u8 _0D;
+    /* 0x0E */ u8 _0E;
+    /* 0x0F */ u8 _0F;
+} UnkKey1E08; // size: 0x10
+
+typedef struct {
+    /* 0x00 */ u8 _00[0x4];
+    /* 0x04 */ Vec pos;
+    /* 0x10 */ Vec rot;
+    /* 0x1C */ u8 _1C[0x20 - 0x1C];
+    /* 0x20 */ s16 _20;
+    /* 0x22 */ u8 _22[0x26 - 0x22];
+    /* 0x26 */ u8 visible;
+    /* 0x27 */ u8 _27;
+} UnkMarker1E08; // size: 0x28
+
+typedef struct {
+    /* 0x000 */ u8 _000[0x8];
+    /* 0x008 */ Mtx _008;
+    /* 0x038 */ Vec _038;
+    /* 0x044 */ s32 _044;
+    /* 0x048 */ f32 _048;
+    /* 0x04C */ f32 _04C[0x60][2];
+} UnkSpark1E08; // size: 0x34C
+
+typedef struct {
+    /* 0x00 */ u8 _00[0x14];
+    /* 0x14 */ VecXYZ _14;
+    /* 0x20 */ s32 _20;
+    /* 0x24 */ UnkSpark1E08* _24;
+} UnkSparkTask1E08;
+
+typedef struct UnkPlayer1E08 {
+    /* 0x000 */ u8 _000[0x252];
+    /* 0x252 */ s8 _252;
+} UnkPlayer1E08;
+
+typedef struct UnkObj1E08 {
+    /* 0x00 */ u8 _00[0x10];
+    /* 0x10 */ Vec _10;
+} UnkObj1E08;
+
+typedef struct {
+    /* 0x00 */ u8 _00[0x34];
+    /* 0x34 */ u8 _34[0x44 - 0x34];
+    /* 0x44 */ Control control;
+} UnkActor1E08;
+
+typedef struct {
     /* 0x000 */ UnkTask1E08* _000;
     /* 0x004 */ u8 _004[0x8 - 0x4];
     /* 0x008 */ void* _008;
     /* 0x00C */ u8 _00C[0x3AC - 0xC];
     /* 0x3AC */ u32 _3AC;
     /* 0x3B0 */ u8 _3B0;
-    /* 0x3B1 */ u8 _3B1[0x40C - 0x3B1];
+    /* 0x3B1 */ u8 _3B1[0x3B8 - 0x3B1];
+    /* 0x3B8 */ UnkKey1E08* _3B8;
+    /* 0x3BC */ Vec _3BC;
+    /* 0x3C8 */ s32 _3C8;
+    /* 0x3CC */ s32 _3CC;
+    /* 0x3D0 */ f32 _3D0;
+    /* 0x3D4 */ f32 _3D4;
+    /* 0x3D8 */ f32 _3D8;
+    /* 0x3DC */ f32 _3DC;
+    /* 0x3E0 */ u8 _3E0;
+    /* 0x3E1 */ u8 _3E1[0x3E4 - 0x3E1];
+    /* 0x3E4 */ UnkMarker1E08 _3E4;
     /* 0x40C */ s32 _40C[3];
     /* 0x418 */ u8 _418;
     /* 0x419 */ s8 _419;
     /* 0x41A */ u8 _41A[0x41C - 0x41A];
     /* 0x41C */ Vec _41C;
-    /* 0x428 */ u8 _428[0x466 - 0x428];
+    /* 0x428 */ u8 _428[0x440 - 0x428];
+    /* 0x440 */ Vec _440;
+    /* 0x44C */ u8 _44C[0x464 - 0x44C];
+    /* 0x464 */ s16 _464;
     /* 0x466 */ u8 _466;
     /* 0x467 */ u8 _467[0x479 - 0x467];
     /* 0x479 */ u8 _479;
@@ -48,18 +117,25 @@ typedef struct {
 
 extern Unk1E08State lbl_3_common_bss_35154;
 
-extern struct {
+typedef struct {
     /* 0x0000 */ u8 _0000[0x70];
-    /* 0x0070 */ void* _0070;
-    /* 0x0074 */ u8 _0074[0xC60 - 0x74];
+    /* 0x0070 */ UnkActor1E08* _0070;
+    /* 0x0074 */ u8 _0074[0xAC - 0x74];
+    /* 0x00AC */ s32 _00AC;
+    /* 0x00B0 */ s32 _00B0;
+    /* 0x00B4 */ s32 _00B4;
+    /* 0x00B8 */ s32 _00B8;
+    /* 0x00BC */ u8 _00BC[0xC60 - 0xBC];
     /* 0x0C60 */ struct {
         /* 0x000 */ s32 _000;
         /* 0x004 */ u8 _004[0x27C - 0x4];
     } _0C60[13];
     /* 0x2CAC */ u8 _2CAC[0x3070 - 0x2CAC];
-    /* 0x3070 */ void (*_3070)(void);
+    /* 0x3070 */ void (*_3070)(s32);
     /* 0x3074 */ void (*_3074)(s32);
-} lbl_8036E548;
+} Unk8036E548;
+
+extern Unk8036E548 lbl_8036E548;
 
 extern struct {
     /* 0x000 */ u8 _000[0x715];
@@ -68,13 +144,23 @@ extern struct {
 
 extern UnkTask1E08* lbl_803CC1B8;
 
+extern struct {
+    /* 0x00 */ u8 _00[0x28];
+    /* 0x28 */ u8 _28;
+} lbl_80366158;
+
+extern u8 lbl_803CBBC0;
+extern u8 lbl_3_data_A3C[2];
+
 // .data outside this unit's range in splits.txt
 extern UnkPair1E08 lbl_3_data_111C8[];
 extern u8 lbl_3_data_11380[0x10];
 extern void (*lbl_3_data_11390[])(s32);
+extern UnkSpark1E08 lbl_3_data_11620[4];
 extern u8 lbl_3_data_1146C[0x190];
 extern s32 lbl_3_data_17000[0x36];
 extern s32 lbl_3_data_170D8[6];
+extern UnkKey1E08 lbl_3_data_12354[15][10];
 
 static f32 lbl_3_bss_9978[0xEA];
 static Vec lbl_3_bss_996C;
@@ -86,18 +172,21 @@ static s16 lbl_3_bss_9952[5];
 static u8 lbl_3_bss_9950;
 
 extern void* ARAMTransfer(void* entry, int arg1, int arg2, u32 aram);
-extern UnkTask1E08* fn_800B0A5C_insertQueue(void (*callback)(void), s32 arg1);
+extern void* fn_800B0A5C_insertQueue(void (*callback)(void), s32 arg1);
 extern void fn_800B0A14_removeQueue(void);
 extern void fn_80034CEC(UnkTask1E08* task);
 extern void fn_80034E20(UnkTask1E08* task, void* desc);
 extern void fn_8003A688(void* arg0, f32 x, f32 y);
 extern BOOL fn_80033928(s32 arg0);
 extern void* fn_80033A24(void (*update)(void), s32, s32, s32, s32, s32);
-extern void fn_800BD670(void* arg0, s32 arg1);
+extern void fn_800BD670(UnkActor1E08* actor, s32 arg1);
+extern void fn_800BD8C4(UnkActor1E08* actor, s32 arg1);
+extern void fn_800BD548(void* model, s32 count, ...);
 extern void fn_8006C43C(s32 arg0);
 extern void fn_8006C3F0(s32 arg0);
 extern void pitchingMachinePitching(u8 id);
 extern void minigamesSetSomePointers(void);
+extern void fn_800A7D4C(s32, void*);
 
 // .text:0x000C07B0 size:0x60 mapped:0x806FF844
 void fn_3_C07B0(void) {
@@ -238,12 +327,41 @@ void fn_3_BDF74(void) {
 
 // .text:0x000BDE14 size:0x160 mapped:0x806FCEA8
 void fn_3_BDE14(void) {
-    return;
+    UnkSparkTask1E08* task;
+    s32 i;
+    f32 angle;
+
+    task = fn_800B0A5C_insertQueue(fn_3_BDCA4, 3);
+    getAnimRelatedCoordinates(0, 7, &task->_14);
+    task->_20 = lbl_3_data_A3C[1] - 2;
+    task->_24 = lbl_3_data_11620;
+    for (i = 0; i < 0x60; i++) {
+        angle = 6.2831855f * rand() / 32767.0f;
+        lbl_3_data_11620[0]._04C[i][0] = 400.0 * cos(angle);
+        lbl_3_data_11620[0]._04C[i][1] = 400.0 * sin(angle);
+    }
+    memcpy(lbl_3_data_11620[1]._04C, lbl_3_data_11620[0]._04C, sizeof(lbl_3_data_11620[0]._04C));
 }
 
 // .text:0x000BDCA4 size:0x170 mapped:0x806FCD38
 void fn_3_BDCA4(void) {
-    return;
+    UnkSparkTask1E08* task = (UnkSparkTask1E08*)lbl_803CC1B8;
+
+    if (g_d_GameSettings._55 || lbl_3_common_bss_35154._479) {
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    task->_20 -= lbl_80366158._28 != 2;
+    task->_24[lbl_803CBBC0]._048 = 1.0f / fn_80052768_getCamera(0)->zoom;
+    task->_24[lbl_803CBBC0]._038.x = task->_14.x;
+    task->_24[lbl_803CBBC0]._038.y = task->_14.y;
+    task->_24[lbl_803CBBC0]._038.z = task->_14.z;
+    task->_24[lbl_803CBBC0]._044 = task->_20;
+    PSMTXCopy(fn_80052768_getCamera(0)->view, task->_24[lbl_803CBBC0]._008);
+    fn_800A7D4C(0, &task->_24[lbl_803CBBC0]);
+    if (task->_20 == 0) {
+        fn_800B0A14_removeQueue();
+    }
 }
 
 // .text:0x000BD8FC size:0x3A8 mapped:0x806FC990
@@ -258,8 +376,17 @@ void fn_3_BD8D8(void) {
 }
 
 // .text:0x000BD80C size:0xCC mapped:0x806FC8A0
-void fn_3_BD80C(void) {
-    return;
+void fn_3_BD80C(s32 arg0) {
+    UnkMarker1E08* marker = &lbl_3_common_bss_35154._3E4;
+    Unk8036E548* scene = &lbl_8036E548;
+
+    if (marker->visible) {
+        CTRLSetTranslation(&scene->_0070->control, marker->pos.x, marker->pos.y, marker->pos.z);
+        CTRLSetRotation(&scene->_0070->control, 57.295776f * marker->rot.x, 57.295776f * marker->rot.y,
+                        57.295776f * marker->rot.z);
+        fn_800BD548(scene->_0070->_34, 4, scene->_00AC, scene->_00B0, scene->_00B4, scene->_00B8);
+    }
+    fn_800BD8C4(scene->_0070, arg0);
 }
 
 // .text:0x000BD7DC size:0x30 mapped:0x806FC870
@@ -290,7 +417,26 @@ void fn_3_BD758(void) {
 
 // .text:0x000BD6AC size:0xAC mapped:0x806FC740
 void fn_3_BD6AC(s32 arg0, f32 x, f32 y, f32 z) {
-    return;
+    lbl_3_common_bss_35154._466 = 1;
+    lbl_3_common_bss_35154._440.x = x;
+    lbl_3_common_bss_35154._440.y = y;
+    lbl_3_common_bss_35154._440.z = z;
+    lbl_3_common_bss_35154._464 = 0;
+    if (arg0) {
+        switch (g_Ball.currentStarSwing) {
+        case 11:
+        case 12:
+            fn_3_15BAA0(g_Ball.currentStarSwing == 12);
+            break;
+        }
+    } else {
+        switch (g_Pitcher.starPitchType) {
+        case 11:
+        case 12:
+            fn_3_15BAA0(g_Pitcher.starPitchType == 12);
+            break;
+        }
+    }
 }
 
 // .text:0x000BD504 size:0x1A8 mapped:0x806FC598
@@ -305,7 +451,22 @@ void fn_3_BD4F0(void) {
 
 // .text:0x000BD434 size:0xBC mapped:0x806FC4C8
 void fn_3_BD434(s32 stadium, s32 mode) {
-    return;
+    s32 i;
+    UnkKey1E08* keys = lbl_3_data_12354[stadium + mode * 7];
+
+    lbl_3_common_bss_35154._3B8 = keys;
+    lbl_3_common_bss_35154._3CC = 5400;
+    lbl_3_common_bss_35154._3C8 = 0;
+    lbl_3_common_bss_35154._3D0 = 0.3125f;
+    lbl_3_common_bss_35154._3D4 = 0.0002f;
+    lbl_3_common_bss_35154._3D8 = 0.5f;
+    for (i = 0; keys[i]._0E < 4; i++) {
+    }
+    lbl_3_common_bss_35154._3E0 = 1;
+    lbl_3_common_bss_35154._3BC.x = lbl_3_common_bss_35154._3B8[i].pos.x;
+    lbl_3_common_bss_35154._3BC.y = lbl_3_common_bss_35154._3B8[i].pos.y;
+    lbl_3_common_bss_35154._3BC.z = lbl_3_common_bss_35154._3B8[i].pos.z;
+    lbl_3_common_bss_35154._3DC = 128.0f;
 }
 
 // .text:0x000BD1D8 size:0x25C mapped:0x806FC26C
@@ -344,8 +505,8 @@ void fn_3_BC2DC(void) {
 }
 
 // .text:0x000BC274 size:0x68 mapped:0x806FB308
-void fn_3_BC274(void) {
-    return;
+BOOL fn_3_BC274(UnkPlayer1E08* player, Vec* a, Vec* b) {
+    return a->y - b->y < lbl_3_data_17000[player->_252] / 100000.0f;
 }
 
 // .text:0x000BC25C size:0x18 mapped:0x806FB2F0
@@ -385,8 +546,17 @@ void fn_3_BB15C(void) {
 }
 
 // .text:0x000BB07C size:0xE0 mapped:0x806FA110
-void fn_3_BB07C(void) {
-    return;
+void fn_3_BB07C(UnkObj1E08* obj, f32 angle) {
+    f32 s;
+    f32 c;
+    f32 rad;
+
+    rad = 0.017453292f * angle;
+    s = sin(rad);
+    c = cos(rad);
+    obj->_10.x = s * lbl_3_data_170D8[1] / 100000.0f;
+    obj->_10.y = c * lbl_3_data_170D8[1] / 100000.0f;
+    obj->_10.z = 0.0f;
 }
 
 // .text:0x000BA7F4 size:0x888 mapped:0x806F9888

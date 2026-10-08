@@ -5,12 +5,14 @@
 #include "Dolphin/mtx.h"
 
 struct UnkKey21F8;
+struct UnkPlayer1E08;
+struct UnkObj1E08;
 struct UnkAnim21F8;
 struct UnkEffect21F8;
 
 void fn_3_BA538(void);
 void fn_3_BA7F4(void);
-void fn_3_BB07C(void);
+void fn_3_BB07C(struct UnkObj1E08* obj, f32 angle);
 void fn_3_BB15C(void);
 void fn_3_BB454(void);
 void fn_3_BB7F4(void);
@@ -18,7 +20,7 @@ void fn_3_BBBC4(void);
 void fn_3_BBF94(void);
 void fn_3_BC224(void);
 void fn_3_BC25C(void);
-void fn_3_BC274(void);
+BOOL fn_3_BC274(struct UnkPlayer1E08* player, Vec* a, Vec* b);
 void fn_3_BC2DC(void);
 void fn_3_BC6D8(Vec* pos, Vec* eye, int type, BOOL flag);
 void fn_3_BC850(void* arg0, s32 index);
@@ -34,7 +36,7 @@ void fn_3_BD758(void);
 BOOL fn_3_BD7D0(void);
 void fn_3_BD7D8(void);
 void fn_3_BD7DC(s32 arg0);
-void fn_3_BD80C(void);
+void fn_3_BD80C(s32 arg0);
 void fn_3_BD8D8(void);
 void fn_3_BD8FC(void);
 void fn_3_BDCA4(void);
