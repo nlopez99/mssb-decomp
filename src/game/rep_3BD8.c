@@ -290,7 +290,7 @@ void fn_3_15F088(void) {
             lbl_80371C30[task->_14 + 2]._00->_68 = 1;
         }
         if (lbl_3_common_bss_32724._CE != 0) {
-            lbl_80371C30[task->_14]._00->_68 = 4;
+            lbl_80371C30[task->_14 + 0]._00->_68 = 4;
             lbl_80371C30[task->_14 + 3]._00->_68 = 4;
             lbl_80371C30[task->_14 + 4]._00->_54 &= ~2;
             task->_1A++;
@@ -348,8 +348,8 @@ void fn_3_15EE2C(void) {
 // .text:0x0015DB44 size:0x12E8 mapped:0x8079CBD8
 void fn_3_15DB44(void) {
     UnkTask3BD8* task = lbl_803CC1B8;
-    s32 flag;
     s32 i;
+    s32 flag;
     s32 j;
     s32 team;
     s32 frame;
@@ -394,7 +394,7 @@ void fn_3_15DB44(void) {
             sprite->_68 = flag;
         }
         if (task->_18 >= 30) {
-            lbl_80371C30[task->_14]._00->_68 = flag;
+            lbl_80371C30[task->_14 + 0]._00->_68 = flag;
             task->_1A++;
         }
     } else if (task->_1A == 2) {
@@ -470,9 +470,8 @@ void fn_3_15DB44(void) {
                 lbl_80371C30[task->_14 + 54]._00->_5C = 0x1F0000;
                 lbl_80371C30[task->_14 + 54]._00->_68 = 4;
             }
-            sprite = lbl_80371C30[task->_14 + 54]._00;
-            if ((sprite->_5C >> 16) <= 21) {
-                sprite->_5C = 0xA0000;
+            if ((lbl_80371C30[task->_14 + 54]._00->_5C >> 16) <= 21) {
+                lbl_80371C30[task->_14 + 54]._00->_5C = 0xA0000;
                 flag = 1;
                 lbl_80371C30[task->_14 + 54]._00->_68 = 0;
             }
@@ -481,9 +480,8 @@ void fn_3_15DB44(void) {
                 lbl_80371C30[task->_14 + 54]._00->_5C = 0x140000;
                 lbl_80371C30[task->_14 + 54]._00->_68 = 4;
             }
-            sprite = lbl_80371C30[task->_14 + 54]._00;
-            if ((sprite->_5C >> 16) <= 10) {
-                sprite->_5C = 0xA0000;
+            if ((lbl_80371C30[task->_14 + 54]._00->_5C >> 16) <= 10) {
+                lbl_80371C30[task->_14 + 54]._00->_5C = 0xA0000;
                 flag = 1;
                 lbl_80371C30[task->_14 + 54]._00->_68 = 0;
             }
@@ -582,9 +580,10 @@ void fn_3_15DB44(void) {
         }
     } else {
         lbl_3_common_bss_32724._D2 = 1;
-        lbl_80371C30[task->_14]._00->_68 = 4;
-        sprite = lbl_80371C30[task->_14]._00;
-        frame = sprite->_5C >> 16;
+        lbl_80371C30[task->_14 + 0]._00->_68 = 4;
+        // The index is written as an offset like the others: `+ 0` makes it an int,
+        // which the target scales with slwi where task->_14 alone gives rlwinm.
+        frame = lbl_80371C30[task->_14 + 0]._00->_5C >> 16;
         if (frame == 10) {
             lbl_80371C30[task->_14 + 54]._00->_68 = 4;
             lbl_80371C30[task->_14 + 51]._00->_68 = 4;
@@ -622,7 +621,7 @@ void fn_3_15DB44(void) {
                 }
             }
         }
-        if ((lbl_80371C30[task->_14]._00->_5C >> 16) == 0) {
+        if ((lbl_80371C30[task->_14 + 0]._00->_5C >> 16) == 0) {
             goto kill;
         }
     }
@@ -943,9 +942,9 @@ void fn_3_15C638(void) {
 
     fn_80034E20(task, lbl_3_data_27C54);
     if (lbl_80353A90._104 == 2) {
-        lbl_80371C30[task->_14]._00->_64 = 0xD3;
+        lbl_80371C30[task->_14 + 0]._00->_64 = 0xD3;
     } else if (lbl_80353A90._104 == 3) {
-        lbl_80371C30[task->_14]._00->_64 = 0xC0;
+        lbl_80371C30[task->_14 + 0]._00->_64 = 0xC0;
     }
     ((UnkTask3BD8*)lbl_803CC1B8)->_00 = fn_3_15C5F4;
 }
