@@ -5,6 +5,7 @@
 #include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
 #include "C3/control.h"
+#include "game/rep_1D58.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/mtx.h"
 #include "Dolphin/os.h"
@@ -138,10 +139,10 @@ typedef struct {
     /* 0x03 */ u8 _03;
 } StaC6Slot; // size: 0x4
 
-typedef struct StaC6Sort {
+typedef struct StadiumSort1D58 {
     /* 0x00 */ f32 depth;
-    /* 0x04 */ s32 idx;
-} StaC6Sort; // size: 0x8
+    /* 0x04 */ s32 index;
+} StadiumSort1D58; // size: 0x8
 
 extern struct {
     /* 0x00 */ StaC6Draw* _00;
@@ -295,11 +296,6 @@ extern u8 fn_800B3C04(s32 arg0, StaC6Actor* actor, Mtx camera);
 extern void AnimateActorBones(StaC6Actor* actor);
 extern s32 fn_8005268C(void);
 extern camera_803c639c_s* fn_80052734(s32 idx);
-extern void fn_3_B8414(Vec* min, Vec* max);
-extern void fn_3_B8464(Mtx m, void* model);
-extern void fn_3_B8574(void);
-extern void fn_3_B97DC(void* model, void* anim);
-extern void fn_3_B9D68(u8* types, s32 count, void** files, s32* indices);
 
 // MWCC lays out .bss statics in reverse order of declaration
 static u8 lbl_3_bss_AEB8[0x28];
@@ -413,7 +409,7 @@ void fn_3_E8B24(void** files) {
 }
 
 // .text:0x000E8AC8 size:0x5C mapped:0x80727B5C
-BOOL fn_3_E8AC8(void) {
+u8 fn_3_E8AC8(void) {
     if (g_d_GameSettings.StadiumID != STADIUM_ID_TOY_FIELD) {
         return FALSE;
     }
@@ -810,7 +806,7 @@ void fn_3_E763C(void) {
 }
 
 // .text:0x000E751C size:0x120 mapped:0x807265B0
-void* fn_3_E751C(s32 idx, Mtx m) {
+struct StadiumObjectCollision* fn_3_E751C(s32 idx, Mtx m) {
     Control control;
     StaC6Draw* draw;
 
@@ -848,9 +844,9 @@ void fn_3_E7424(void) {
 }
 
 // .text:0x000E7388 size:0x9C mapped:0x8072641C
-void fn_3_E7388(void* arg0, StaC6Sort* out) {
+void fn_3_E7388(Mtx view, StadiumSort1D58* out) {
     StaC6Draw* draw;
-    StaC6Sort* p;
+    StadiumSort1D58* p;
     StaC6Draw* draw2;
     s32 i;
 
@@ -859,7 +855,7 @@ void fn_3_E7388(void* arg0, StaC6Sort* out) {
     i = lbl_3_common_bss_350E4._30 - 1;
     do {
         if (!draw->_90_7) {
-            p->idx = i;
+            p->index = i;
             p++;
         }
         draw--;
@@ -870,7 +866,7 @@ void fn_3_E7388(void* arg0, StaC6Sort* out) {
     do {
         if (draw2->_90_7) {
             p--;
-            p->idx = i;
+            p->index = i;
             p->depth = 1.0f;
         }
         draw2--;

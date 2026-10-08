@@ -3,10 +3,12 @@
 
 #include "mssbTypes.h"
 
+struct _VecXYZ;
+
 void fn_3_251E4(void);
-void fn_3_253A4(void);
+BOOL fn_3_253A4(s32 fielder, s32 angle);
 void fn_3_25648(void);
-void fn_3_25844(void);
+void fn_3_25844(int fielder, int arg1);
 void fn_3_258D8(void);
 void fn_3_25A68(void);
 void fn_3_25C40(void);
@@ -191,13 +193,13 @@ void fn_3_50C20(void);
 void fn_3_50DD8(void);
 void fn_3_51220(void);
 void fn_3_5164C(void);
-void fn_3_51798(void);
-void fn_3_51DF0(void);
+BOOL fn_3_51798(s32 fielder, struct _VecXYZ* delta);
+u8 fn_3_51DF0(f32 x, f32 z);
 void fn_3_52084(void);
 void fn_3_522E0(void);
-void fn_3_52560(void);
-void fn_3_526DC(void);
-void fn_3_52F4C(void);
+int fn_3_52560(int fielder, f32 x, f32 z);
+void fn_3_526DC(s32 fielder);
+void fn_3_52F4C(s32 fielder, f32 x, f32 z);
 void fn_3_530EC(void);
 void fn_3_53130(void);
 void fn_3_5372C(void);
@@ -226,5 +228,7 @@ void fn_3_591AC(void);
 void fn_3_59338(void);
 void fn_3_595C4(void);
 void fn_3_596F8(void);
+void fn_3_5985C(s32 fielder, s32 action);
+void fn_3_598D0(void);
 
 #endif // !__GAME_rep_AC8_H_

@@ -246,8 +246,8 @@ typedef struct _InMemRunnerType {
     /*0x12B*/ u8 relatedToRunnerPos;
     /*0x12C*/ u8 outType;
     /*0x12D*/ u8 forcedToAdvanceInd; // maybe
-    /*0x12E*/ u8 unused_someBaseNum;
-    /*0x12F*/ u8 baseOfFailedBodyCheck; // maybe
+    /*0x12E*/ s8 unused_someBaseNum;
+    /*0x12F*/ s8 baseOfFailedBodyCheck; // maybe
     /*0x130*/ u8 tagType;               // 1=Running 2=Sliding
     /*0x131*/ u8 runnerDidntReachOnError;
     /*0x132*/ u8 isEligibleToScore; // maybe
@@ -281,7 +281,7 @@ typedef struct _InMemRunnerType {
     /*0x14E*/ u8 stealingStatus;
     /*0x14F*/ u8 framesSinceStealInput;
     /*0x150*/ u8 someCountdown_unused;
-    /*0x151*/ u8 _151;
+    /*0x151*/ s8 _151;
     /*0x152*/ u8 miniGamePlayerNum;
     /*0x153*/ u8 scoredOnGRD; // maybe
 } InMemRunnerType;            // size: 0x154
@@ -434,7 +434,7 @@ typedef struct _InMemBallType {
     /*0x1BDA*/ u8 bobbleLocation_1fair_2foul;
     /*0x1BDB*/ u8 _1BDB;
     /*0x1BDC*/ u8 homeRunInd;
-    /*0x1BDD*/ u8 ballZoneWhenCaught;
+    /*0x1BDD*/ s8 ballZoneWhenCaught;
     /*0x1BDE*/ u8 ballStoppingCode1ReallySlow2Stopped;
     /*0x1BDF*/ u8 _1BDF;
     /*0x1BE0*/ u8 throwTimeEstimatesCompleteInd;
@@ -1114,7 +1114,7 @@ typedef struct _GameControlsStruct {
     /*0x008*/ int teamFielding;
     /*0x00C*/ int homeTeamBattingInd_fieldingTeam;
     /*0x010*/ int awayTeamBattingInd_battingTeam;
-    /*0x014*/ u32 AIDifficulty0Special3Weak[2];
+    /*0x014*/ int AIDifficulty0Special3Weak[2];
     artificial_padding(0x14, 0x24, u32[2]);
     /*0x024*/ LogoInfoStruct logo[2];
     /*0x03C*/ int battingOrderAndPositionMapping[2][10][2]; // first Pair Is Pitcher
@@ -1253,7 +1253,7 @@ typedef struct _ChallengeTrackingStruct {
     /*0x008*/ u8 _8;
     /*0x009*/ starMissionTrackingPair inGameMissionTracker[10];
     /*0x01D*/ starMissionTrackingPair saveFileMissionTracker[10];
-    /*0x031*/ E(u8, CHALLENGE_RECRUITMENT_CD) _31;
+    /*0x031*/ E(s8, CHALLENGE_RECRUITMENT_CD) _31;
     /*0x032*/ u8 _32;
     /*0x033*/ u8 _33;
 } ChallengeTrackingStruct; // size: 0x34
@@ -1457,14 +1457,8 @@ typedef struct _UnkStructMinigame {
 
 typedef struct _MiniGameControlStruct {
     /*0x000*/ s8 characterIndex[4];
-    /*0x004*/ u8 _4;
-    /*0x005*/ u8 _5;
-    /*0x006*/ u8 _6;
-    /*0x007*/ u8 _7;
-    /*0x008*/ u8 _8;
-    /*0x009*/ u8 _9;
-    /*0x00A*/ u8 _A;
-    /*0x00B*/ u8 _B;
+    /*0x004*/ u8 _4[4]; // one per player, read by fn_3_126604 (rep_3448)
+    /*0x008*/ u8 _8[4];
     /*0x00C*/ u8 battingHandedness[4];
     /*0x010*/ u8 aIStrength[4];
     /*0x014*/ s8 _14[4];
@@ -1477,7 +1471,7 @@ typedef struct _MiniGameControlStruct {
 
 typedef struct _MiniGameUnk19E8 {
     /*0x0*/ s8 _0;
-    /*0x1*/ u8 _1;
+    /*0x1*/ s8 _1;
     /*0x2*/ s8 _2;
     /*0x3*/ s8 _3;
     /*0x4*/ s8 _4;
@@ -1821,15 +1815,16 @@ typedef struct _MiniGameStruct {
     /*0x19CF*/ u8 _19CF;
     /*0x19D0*/ u8 _19D0;
     /*0x19D1*/ u8 _19D1;
-    /*0x19D2*/ s16 _19D2[4];
+    /*0x19D2*/ u16 _19D2[4];
     /*0x19DA*/ s8 _19DA[4];
     /*0x19DE*/ u8 _19DE;
     /*0x19DF*/ u8 _19DF;
     /*0x19E0*/ u8 _19E0;
-    /*0x19E1*/ u8 _19E1;
+    /*0x19E1*/ s8 _19E1;
     /*0x19E2*/ u8 _19E2;
     /*0x19E3*/ u8 _19E3;
-    /*0x19E4*/ s16 _19E4;
+    /*0x19E4*/ u8 _19E4;
+    /*0x19E5*/ u8 _19E5;
     /*0x19E6*/ u8 _19E6;
     /*0x19E7*/ u8 _19E7;
     /*0x19E8*/ MiniGameUnk19E8 _19E8[4];
@@ -2012,10 +2007,7 @@ typedef struct _MiniGameStruct {
     /*0x1CAC*/ u8 _1CAC;
     /*0x1CAD*/ u8 _1CAD[4];
     /*0x1CB1*/ u8 _1CB1[7];
-    /*0x1CB8*/ f32 _1CB8;
-    /*0x1CBC*/ f32 _1CBC;
-    /*0x1CC0*/ f32 _1CC0;
-    /*0x1CC4*/ u8 _1CC4[36];
+    /*0x1CB8*/ VecXYZ _1CB8[4];
     /*0x1CE8*/ VecXYZ _1CE8;
     /*0x1CF4*/ VecXYZ _1CF4;
     /*0x1D00*/ u8 _1D00[4];
@@ -2027,30 +2019,23 @@ typedef struct _MiniGameStruct {
     /*0x1D40*/ f32 _1D40;
     /*0x1D44*/ f32 _1D44;
     /*0x1D48*/ f32 _1D48;
-    /*0x1D4C*/ f32 starDashRelated_0_5Or1_5;
+    /*0x1D4C*/ f32* starDashRelated_0_5Or1_5;
     /*0x1D50*/ s16 _1D50;
     /*0x1D52*/ s16 _1D52;
-    /*0x1D54*/ s16 _1D54;
+    /*0x1D54*/ u16 _1D54;
     /*0x1D56*/ s16 _1D56;
     /*0x1D58*/ s16 _1D58;
-    /*0x1D5A*/ s16 _1D5A;
-    /*0x1D5C*/ u8 _1D5C[6];
+    /*0x1D5A*/ s16 _1D5A[4];
     /*0x1D62*/ s16 _1D62;
-    /*0x1D64*/ s16 _1D64;
-    /*0x1D66*/ s16 _1D66;
-    /*0x1D68*/ s16 _1D68;
-    /*0x1D6A*/ s16 _1D6A;
+    /*0x1D64*/ s16 _1D64[4];
     /*0x1D6C*/ u8 _1D6C;
-    /*0x1D6D*/ u8 _1D6D;
+    /*0x1D6D*/ s8 _1D6D;
     /*0x1D6E*/ u8 starDashStunType[4];
     /*0x1D72*/ u8 _1D72;
     /*0x1D73*/ u8 _1D73;
     /*0x1D74*/ s8 playerIDWithPowerup[2];
     /*0x1D76*/ s16 _1D76;
-    /*0x1D78*/ u8 _1D78;
-    /*0x1D79*/ u8 _1D79;
-    /*0x1D7A*/ u8 _1D7A;
-    /*0x1D7B*/ u8 _1D7B;
+    /*0x1D78*/ u8 _1D78[4];
     /*0x1D7C*/ InputStruct _1D7C[4];
     /*0x1DBC*/ u8 _1DBC[8];
     /*0x1DC4*/ u8 _1DC4[4];
@@ -2069,22 +2054,38 @@ typedef struct _MiniGameStruct {
         /*0x1DD0*/ s8 _1DD0;
         /*0x1DD0*/ u8 _1DD0_u8;
     };
-    /*0x1DD1*/ u8 _1DD1[0x1DF4 - 0x1DD1];
-    // Bob-omb Derby (rep_31F0) reads _1DF4 and _1DF5, Barrel Batter (rep_34B0) stores _1DF4_s16
+    /*0x1DD1*/ u8 _1DD1[0x1DEC - 0x1DD1];
+    /*0x1DEC*/ f32 _1DEC;
+    /*0x1DF0*/ f32 _1DF0;
+    // Bob-omb Derby (rep_31F0) reads _1DF4 to _1DF7, Barrel Batter (rep_34B0) stores _1DF4_s16,
+    // rep_3448 keeps one score per player in _1DF4_arr; rep_3448's fn_3_11E364 and Star Dash (rep_3520)
+    // keep per-player flags in _1DF4_u8
     union {
         struct {
             /*0x1DF4*/ u8 _1DF4;
             /*0x1DF5*/ u8 _1DF5;
+            /*0x1DF6*/ u8 _1DF6;
+            /*0x1DF7*/ u8 _1DF7;
+            /*0x1DF8*/ u8 _1DF8;
+            /*0x1DF9*/ u8 _1DF9[0x1DFC - 0x1DF9];
         };
         /*0x1DF4*/ s16 _1DF4_s16;
+        /*0x1DF4*/ s16 _1DF4_arr[4];
+        /*0x1DF4*/ u8 _1DF4_u8[8];
     };
-    /*0x1DF6*/ u8 _1DF6;
-    /*0x1DF7*/ u8 _1DF7;
-    /*0x1DF8*/ u8 _1DF8;
-    /*0x1DF9*/ u8 _1DF9[0x1DFC - 0x1DF9];
     /*0x1DFC*/ u8 _1DFC[4];
     /*0x1E00*/ u8 _1E00;
-    /*0x1E01*/ u8 _1E01[0x1E2C - 0x1E01];
+    /*0x1E01*/ u8 _1E01;
+    /*0x1E02*/ u8 _1E02;
+    /*0x1E03*/ u8 _1E03;
+    /*0x1E04*/ void* _1E04; // a task from fn_800B0A5C_insertQueue
+    /*0x1E08*/ u8 _1E08[4][2];
+    /*0x1E10*/ s16 _1E10[6];
+    /*0x1E1C*/ u8 _1E1C[6];
+    /*0x1E22*/ u8 _1E22[4];
+    /*0x1E26*/ u8 _1E26[4];
+    /*0x1E2A*/ u8 _1E2A;
+    /*0x1E2B*/ u8 _1E2B;
 } MiniGameStruct; // size: 0x1E2C
 
 extern MiniGameStruct g_Minigame;
@@ -2176,7 +2177,7 @@ typedef struct {
     /* 0x3C */ f32 _3C;
     /* 0x40 */ s16 AIFrameToBeginPitch;
     /* 0x42 */ u16 _42;
-    /* 0x44 */ u16 _44;
+    /* 0x44 */ s16 _44;
     /* 0x46 */ u8 _46;
     /* 0x47 */ u8 _47;
     /* 0x48 */ u8 _48;
@@ -2301,7 +2302,9 @@ typedef struct {
     /* 0x118 */ s16 _118;
     /* 0x11A */ s16 _11A;
     /* 0x11C */ u8 _11C;
-    artificial_padding(0x11C, 0xa50, u8);
+    artificial_padding(0x11C, 0x1b4, u8);
+    /* 0x1B4 */ void* _1B4;
+    artificial_padding(0x1b4, 0xa50, void*);
     /* 0xA50 */ int _A50;
     artificial_padding(0xa50, 0xa74, int);
     /* 0xA74 */ s16 _A74;
@@ -2328,7 +2331,7 @@ typedef struct {
     /* 0xAAA */ u16 _AAA;
     /* 0xAAC */ u16 _AAC;
     /* 0xAAE */ u16 _AAE;
-    artificial_padding(0xaae, 0xab4, u16);
+    /* 0xAB0 */ void* _AB0;
     /* 0xAB5 */ u8 _AB4;
     /* 0xAB5 */ u8 _AB5;
     /* 0xAB6 */ u8 _AB6;
@@ -2348,7 +2351,9 @@ typedef struct {
     /* 0xAC8 */ u8 _ACA;
     artificial_padding(0xaca, 0xad8, u8);
     /* 0xAD8 */ u8 _AD8;
-    artificial_padding(0xad8, 0x2810, u8);
+    artificial_padding(0xad8, 0x146c, u8);
+    /* 0x146C */ void* _146C;
+    artificial_padding(0x146c, 0x2810, void*);
     /* 0x2810 */ s16 _2810;
     /* 0x2812 */ s16 _2812;
     /* 0x2814 */ s16 _2814;
@@ -2410,22 +2415,49 @@ typedef struct {
 } FieldingLogicFielder; // size 0x6
 
 typedef struct {
-    /* 0x000 */ u8 _000[0x74];
+    /* 0x00 */ u8 _00[0x14];
+    /* 0x14 */ s16 _14;
+    /* 0x16 */ u8 _16[0x1A - 0x16];
+    /* 0x1A */ u8 _1A;
+    /* 0x1B */ u8 _1B;
+} FieldingLogicEntry; // size 0x1C
+
+typedef struct {
+    /* 0x000 */ FieldingLogicEntry _000[4];
+    /* 0x070 */ u8 _070[0x74 - 0x70];
     /* 0x074 */ FieldingLogicFielder _074[4];
-    /* 0x08C */ u8 _08C[0xAE - 0x8C];
+    /* 0x08C */ u8 _08C[0x90 - 0x8C];
+    /* 0x090 */ Vec _090;
+    /* 0x09C */ u8 _09C[0xAE - 0x9C];
     /* 0x0AE */ s16 _0AE;
-    /* 0x0B0 */ u8 _0B0[0xC4 - 0xB0];
+    /* 0x0B0 */ u8 _0B0[0xBE - 0xB0];
+    /* 0x0BE */ s16 _0BE;
+    /* 0x0C0 */ u8 _0C0[0xC2 - 0xC0];
+    /* 0x0C2 */ s16 _0C2;
     /* 0x0C4 */ s16 _0C4;
-    /* 0x0C6 */ u8 _0C6[0xCC - 0xC6];
+    /* 0x0C6 */ s16 _0C6;
+    /* 0x0C8 */ s16 _0C8;
+    /* 0x0CA */ s16 _0CA;
     /* 0x0CC */ s16 _0CC;
-    /* 0x0CE */ u8 _0CE[0xE4 - 0xCE];
+    /* 0x0CE */ s16 _0CE;
+    /* 0x0D0 */ s16 _0D0[4];
+    /* 0x0D8 */ s16 _0D8;
+    /* 0x0DA */ u8 _0DA[0xDC - 0xDA];
+    /* 0x0DC */ s16 _0DC;
+    /* 0x0DE */ s16 _0DE;
+    /* 0x0E0 */ s16 _0E0;
+    /* 0x0E2 */ s16 _0E2;
     /* 0x0E4 */ s16 _0E4;
-    /* 0x0E6 */ u8 _0E6[0xE8 - 0xE6];
+    /* 0x0E6 */ s16 _0E6;
     /* 0x0E8 */ s16 _0E8;
     /* 0x0EA */ s16 _0EA;
-    /* 0x0EC */ u8 _0EC[0xEE - 0xEC];
+    /* 0x0EC */ s16 _0EC;
     /* 0x0EE */ s16 _0EE;
-    /* 0x0F0 */ u8 _0F0[0x105 - 0xF0];
+    /* 0x0F0 */ s16 _0F0;
+    /* 0x0F2 */ u8 _0F2[0xF6 - 0xF2];
+    /* 0x0F6 */ s16 _0F6;
+    /* 0x0F8 */ u8 _0F8[9];
+    /* 0x101 */ u8 _101[4];
     /* 0x105 */ u8 playerAtMoundCutoffLocation;
     /* 0x106 */ u8 throwSpeedType;
     /* 0x107 */ u8 _107;
@@ -2442,7 +2474,7 @@ typedef struct {
     /* 0x112 */ u8 _112;
     /* 0x113 */ u8 _113;
     /* 0x114 */ u8 _114;
-    /* 0x115 */ u8 _115;
+    /* 0x115 */ s8 _115;
     /* 0x116 */ u8 _116;
     /* 0x117 */ u8 _117;
     /* 0x118 */ u8 _118;
@@ -2458,7 +2490,7 @@ typedef struct {
     /* 0x122 */ u8 _122;
     /* 0x123 */ u8 _123;
     /* 0x124 */ u8 _124;
-    /* 0x125 */ u8 _125;
+    /* 0x125 */ s8 _125;
     /* 0x126 */ s8 _126;
     /* 0x127 */ s8 _127;
     /* 0x128 */ u8 _128;
@@ -2596,10 +2628,81 @@ typedef struct {
 extern lbl_3_common_bss_32A94_s lbl_3_common_bss_32A94;
 
 typedef struct {
-    u8 pad[0xa0];
+    /* 0x0000 */ s32* _0000;
+    /* 0x0004 */ u8 _0004[0x8 - 0x4];
+    /* 0x0008 */ s32 _0008;
+    /* 0x000C */ u8 _000C[0x14 - 0xC];
+    /* 0x0014 */ s32 _0014;
+    /* 0x0018 */ s32 _0018;
+    /* 0x001C */ struct Unk3090CtrlPoint* _001C;
+    /* 0x0020 */ s32 _0020;
+    /* 0x0024 */ u8 _0024[0x34 - 0x24];
+    /* 0x0034 */ struct Unk3090Key* _0034;
+    /* 0x0038 */ s32 _0038;
+    /* 0x003C */ s32 _003C;
+    /* 0x0040 */ u8 _0040[0x44 - 0x40];
+    /* 0x0044 */ s32 _0044;
+    /* 0x0048 */ u8 _0048[0x64 - 0x48];
+    /* 0x0064 */ Vec _0064;
+    /* 0x0070 */ u8 _0070[0x88 - 0x70];
+    /* 0x0088 */ Vec _0088;
+    /* 0x0094 */ u8 _0094[0x98 - 0x94];
+    /* 0x0098 */ Vec* _0098;
+    /* 0x009C */ struct Unk3090SrcKey* _009C;
     /* 0x00A0 */ f32 _00A0;
-    artificial_padding(0xa0, 0x9ac, f32);
+    /* 0x00A4 */ f32 _00A4;
+    /* 0x00A8 */ f32 _00A8;
+    /* 0x00AC */ Vec _00AC;
+    /* 0x00B8 */ Vec _00B8;
+    /* 0x00C4 */ Vec _00C4;
+    /* 0x00D0 */ Vec _00D0;
+    /* 0x00DC */ Vec _00DC;
+    /* 0x00E8 */ Vec _00E8;
+    /* 0x00F4 */ u8 _00F4[0x100 - 0xF4];
+    /* 0x0100 */ f32 _0100;
+    /* 0x0104 */ f32 _0104;
+    /* 0x0108 */ f32 _0108;
+    /* 0x010C */ f32 _010C;
+    /* 0x0110 */ f32 _0110;
+    /* 0x0114 */ f32 _0114;
+    /* 0x0118 */ u32 _0118;
+    /* 0x011C */ u32 _011C;
+    /* 0x0120 */ u8 _0120[0x124 - 0x120];
+    /* 0x0124 */ s32 _0124;
+    /* 0x0128 */ s32 _0128[512];
+    /* 0x0928 */ s32 _0928;
+    /* 0x092C */ s32 _092C;
+    /* 0x0930 */ u8 _0930[0x938 - 0x930];
+    /* 0x0938 */ s32 _0938;
+    /* 0x093C */ s32 _093C;
+    /* 0x0940 */ s16 _0940;
+    /* 0x0942 */ s16 _0942;
+    /* 0x0944 */ s16 _0944;
+    /* 0x0946 */ s16 _0946;
+    /* 0x0948 */ s16 _0948;
+    /* 0x094A */ u8 _094A[0x94C - 0x94A];
+    /* 0x094C */ s16 _094C;
+    /* 0x094E */ s16 _094E;
+    /* 0x0950 */ s16 _0950;
+    /* 0x0952 */ u8 _0952[0x990 - 0x952];
+    /* 0x0990 */ struct Unk3090Track* _0990;
+    /* 0x0994 */ u8 _0994[0x9A7 - 0x994];
+    /* 0x09A7 */ u8 _09A7;
+    /* 0x09A8 */ u8 _09A8;
+    /* 0x09A9 */ u8 _09A9;
+    /* 0x09AA */ u8 _09AA;
+    /* 0x09AB */ u8 _09AB;
     /* 0x09AC */ u8 _09AC;
+    /* 0x09AD */ u8 _09AD;
+    /* 0x09AE */ u8 _09AE;
+    /* 0x09AF */ u8 _09AF;
+    /* 0x09B0 */ u8 _09B0;
+    /* 0x09B1 */ u8 _09B1;
+    /* 0x09B2 */ u8 _09B2[0x9B4 - 0x9B2];
+    /* 0x09B4 */ u8 _09B4;
+    /* 0x09B5 */ u8 _09B5;
+    /* 0x09B6 */ u8 _09B6;
+    /* 0x09B7 */ u8 _09B7;
 } lbl_3_common_bss_DE94_s2;
 
 typedef struct {

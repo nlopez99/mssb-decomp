@@ -403,7 +403,7 @@ void GXGetTexObjData(void)
  * @note Address: N/A
  * @note Size: 0x10
  */
-u32 GXGetTexObjWidth(GXTexObj* obj)
+u16 GXGetTexObjWidth(GXTexObj* obj)
 {
 	GXTexObjPriv* priv = (GXTexObjPriv*)obj;
 	return GX_BITGET(priv->image0, 22, 10) + 1;
@@ -413,7 +413,7 @@ u32 GXGetTexObjWidth(GXTexObj* obj)
  * @note Address: N/A
  * @note Size: 0x10
  */
-u32 GXGetTexObjHeight(GXTexObj* obj)
+u16 GXGetTexObjHeight(GXTexObj* obj)
 {
 	GXTexObjPriv* priv = (GXTexObjPriv*)obj;
 	return GX_BITGET(priv->image0, 12, 10) + 1;}

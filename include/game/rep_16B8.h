@@ -3,6 +3,8 @@
 
 #include "mssbTypes.h"
 
+struct UnkTask1770;
+
 void fn_3_91520(void);
 void fn_3_91A60(void);
 void fn_3_91AC8(void);
@@ -46,5 +48,18 @@ void fn_3_9669C(void);
 void fn_3_96914(void);
 void fn_3_9698C(void);
 void fn_3_96CA4(void);
+void fn_3_97144(void);
+void fn_3_972A0(struct UnkTask1770* task, s32, s32, s32);
+void fn_3_972C8(void);
+void fn_3_973EC(void);
+void fn_3_97800(void);
+void fn_3_978DC(void);
+void fn_3_97CEC(void);
+void fn_3_98028(void);
+void fn_3_983B8(void);
+void fn_3_98434(void);
+void fn_3_9894C(void);
+void fn_3_98C20(void);
+void fn_3_98DE0(void);
 
 #endif // !__GAME_rep_16B8_H_

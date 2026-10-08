@@ -7,7 +7,8 @@
 
 struct StaC6Draw;
 struct StaC6Shape;
-struct StaC6Sort;
+struct StadiumObjectCollision;
+struct StadiumSort1D58;
 
 int fn_3_E587C(void);
 BOOL fn_3_E5924(void);
@@ -33,13 +34,13 @@ void fn_3_E6A48(void* arg);
 void fn_3_E6D90(void* arg);
 void fn_3_E7350(void);
 void fn_3_E7364(s32 idx);
-void fn_3_E7388(void* arg0, struct StaC6Sort* out);
+void fn_3_E7388(Mtx view, struct StadiumSort1D58* sort);
 void fn_3_E7424(void);
-void* fn_3_E751C(s32 idx, Mtx m);
+struct StadiumObjectCollision* fn_3_E751C(s32 idx, Mtx m);
 void fn_3_E763C(void);
 void fn_3_E7A2C(void* arg);
 u8 fn_3_E7B20(void** files, s32* indices);
-BOOL fn_3_E8AC8(void);
+u8 fn_3_E8AC8(void);
 void fn_3_E8B24(void** files);
 
 #endif // !__GAME_sta_c6_H_

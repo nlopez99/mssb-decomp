@@ -3,6 +3,7 @@
 
 #include "mssbTypes.h"
 #include "Dolphin/vec.h"
+#include "musyx/musyx.h"
 
 void fn_3_8B718(void);
 void fn_3_8B7DC(void);
@@ -27,8 +28,8 @@ void fn_3_8F21C(void);
 void fn_3_8FC0C(void);
 void fn_3_8FC80(void);
 void fn_3_8FF18(void);
-void fn_3_8FF5C(void);
-void fn_3_90064(int id);
+SND_VOICEID fn_3_8FF5C(s32 sound, f32 x, f32 y, f32 z);
+SND_VOICEID fn_3_90064(int id);
 void fn_3_90150(void);
 u32 fn_3_90220(s32 charID, s32 sound);
 

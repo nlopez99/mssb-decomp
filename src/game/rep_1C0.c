@@ -264,7 +264,7 @@ static DrawTaskArg1C0 lbl_3_data_9B0[4][2] = {
     { { 2, fn_3_5BCC, 2 }, { 2, fn_3_5BCC, 2 } },
     { { 2, fn_3_5BCC, 3 }, { 2, fn_3_5BCC, 3 } },
 };
-void (*lbl_3_data_A10[2])(MtxPtr view, s32, s32) = { 0 };
+void (*lbl_3_data_A10[2])(MtxPtr view, s32, u32) = { 0 };
 
 static u8 lbl_3_bss_1C[0x14];
 static void (*lbl_3_bss_18)(void);
@@ -781,13 +781,12 @@ void fn_3_42CC(GXTexObj* obj, s16 x0, s16 y0, s16 x1, s16 y1, s16 u, s16 v, s16 
     f32 top = y0;
     f32 right = x1;
     f32 bottom = y1;
-    // GXTexture.h declares these u32; the SDK returns u16, which the casts restore
-    u32 width = GXGetTexObjWidth(obj);
-    u32 height = GXGetTexObjHeight(obj);
-    f32 s0 = (f32)u / (u16)width;
-    f32 t0 = (f32)v / (u16)height;
-    f32 s1 = (f32)(u + w) / (u16)width;
-    f32 t1 = (f32)(v + h) / (u16)height;
+    u16 width = GXGetTexObjWidth(obj);
+    u16 height = GXGetTexObjHeight(obj);
+    f32 s0 = (f32)u / width;
+    f32 t0 = (f32)v / height;
+    f32 s1 = (f32)(u + w) / width;
+    f32 t1 = (f32)(v + h) / height;
 
     GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
     GXSetTevColor(GX_TEVREG0, c1);
@@ -1004,7 +1003,7 @@ void fn_3_3904(s16 x, s16 y, s32 id, GXColor c1, GXColor c2, u8 flag) {
 }
 
 // .text:0x000038E8 size:0x1C mapped:0x8064297C
-void fn_3_38E8(void (*draw)(MtxPtr view, s32, s32)) {
+void fn_3_38E8(void (*draw)(MtxPtr view, s32, u32)) {
     lbl_3_data_A10[lbl_803CBBC0] = draw;
 }
 

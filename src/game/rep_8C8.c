@@ -5,10 +5,8 @@
 #include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
 #include "game/rep_1838.h"
-
-extern BOOL fn_3_B0CF4(void);
-extern void fn_3_B0D2C(void);
-extern int fn_3_E587C(void);
+#include "game/sta_c6.h"
+#include "game/rep_1AD0.h"
 
 typedef struct {
     /* 0x000 */ f32 _000;

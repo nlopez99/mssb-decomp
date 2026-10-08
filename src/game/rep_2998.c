@@ -13,6 +13,7 @@
 #include "game/rep_540.h"
 #include "game/rep_1838.h"
 #include "game/rep_23E8.h"
+#include "game/rep_AC8.h"
 #include "math.h"
 #include "string.h"
 
@@ -177,10 +178,9 @@ extern void fn_800BDF70(Rep2998Model* model);
 extern void fn_800BF058(void (*cb)(void* a, void* b));
 extern void fn_8003A548(void (*cb)(void));
 
-// rep_AC8.h and rep_1D58.h are not included: they declare fn_3_253A4, fn_3_B8184, fn_3_B828C,
-// fn_3_B8414, fn_3_B8464 and fn_3_B98E8 as void(void) placeholders. fn_3_B7F70 lies in unsplit code.
-extern s32 fn_3_253A4(s32 fielder, s32 angle);
-extern void fn_3_27648(void);
+// rep_1D58.h is not included: it declares fn_3_B8184, fn_3_B828C, fn_3_B8414, fn_3_B8464 and
+// fn_3_B98E8 with rep_1D58's stadium types, where this file passes its own. fn_3_B7F70 lies in
+// unsplit code.
 extern s16 fn_3_B7F70(s16 range);
 extern s32 fn_3_B7FC8(u32 id, s32 arg1);
 extern void fn_3_B8184(void* a, void* b);
@@ -453,7 +453,7 @@ void fn_3_E4CB0(s32* count, s32* objIdx) {
 }
 
 // .text:0x000E4BE8 size:0xC8 mapped:0x80723C7C
-void* fn_3_E4BE8(s32 idx, MtxPtr mtx) {
+struct StadiumObjectCollision* fn_3_E4BE8(s32 idx, Mtx mtx) {
     Rep2998Obj* obj = &lbl_3_common_bss_350E4._00[idx];
     Mtx bone;
 

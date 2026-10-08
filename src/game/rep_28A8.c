@@ -18,6 +18,13 @@
 #include "game/rep_3CE0.h"
 #include "game/rep_1038.h"
 #include "game/game_batter.h"
+#include "game/sta_c6.h"
+#include "game/rep_1A80.h"
+#include "game/rep_31A0.h"
+#include "game/rep_CC8.h"
+#include "game/rep_D18.h"
+#include "game/rep_DB8.h"
+#include "game/rep_3090.h"
 #include "musyx/musyx.h"
 #include "Dolphin/rand.h"
 
@@ -128,10 +135,6 @@ typedef struct {
     /* 0x8 */ f32 radius[2];
 } Unk28A8Spawn; // size: 0x10
 
-typedef struct {
-    /* 0x0 */ u8 id;
-    /* 0x1 */ u8 rank;
-} Unk28A8Rank; // size: 0x2
 
 u8 lbl_3_data_188E8[0x14] = { 0, 1, 2, 3, 4, 5, 0, 2, 3, 4, 5, 0, 0, 2, 3, 5, 0, 0, 0, 0 };
 u8 lbl_3_data_188FC[0x10] = { 0, 2, 1, 3, 4, 5, 0, 1, 3, 4, 0, 1, 3, 4, 0, 0 };
@@ -205,46 +208,20 @@ static s16 lbl_3_data_18BB8[24][3] = {
 s16 lbl_3_data_18C48[10] = { 100, 180, 600, 279, 3, 1, 60, 70, 2, 0 };
 extern u8 lbl_803CBC3C[];
 
-extern void fn_3_5A6D4(u8 status);
-extern void fn_3_AFD80(u8);
-extern void fn_3_59918(int, int);
 extern void fn_3_1DD48(void);
-extern void fn_3_FBD58(void);
-extern void fn_3_FBD70(void);
 extern void Set_803cb848(int);
 extern int fn_3_6C938(int, int);
 extern void changeScene(u8, s16);
-extern void fn_3_5B408(void);
-extern int fn_3_5B380(u16 buttons);
-extern void fn_3_107E80(void);
 extern void fn_8004CC18(void);
-extern void ballPhysica(void);
-extern void fn_3_10C81C(void);
 extern void fn_3_1E328(void);
-extern u8 fn_3_5C530(int inning);
-extern void fn_3_1079C8(Unk28A8Rank* out, int arg1);
 extern void fn_800203E0(int, int);
-extern void fn_3_59B20(void);
-extern BOOL fn_3_59AE4(void);
 extern BOOL fn_80016F7C(void);
 extern BOOL fn_3_90DD8(void);
 extern void fn_3_E1964(void);
 extern void fn_3_1E154(void);
 extern void fn_3_1608F0(int, int, int);
-extern void fn_3_10F3D8(void);
-extern void fn_3_10E60C(void);
-extern void fn_3_10B8D0(void);
-extern void fn_3_10A0A0(void);
-extern void fn_3_109254(void);
-extern void fn_3_ACAF8(void);
-// rep_3090.h declares the stub's void(void) placeholder
-extern BOOL fn_3_FD9FC(void);
 extern void possiblyTransitionBlackScreen(void);
 extern void* fn_800B0A5C_insertQueue(void (*callback)(void), s32 arg1);
-// sta_c6.c; sta_c6.h declares fn_3_E8AC8 as returning BOOL, but its callers here test a u8
-extern BOOL fn_3_E5924(void);
-extern void fn_3_E67F4(void);
-extern u8 fn_3_E8AC8(void);
 
 static inline void playStadiumSound(s32 sound) {
     SND_VOICEID voice;
@@ -2038,7 +2015,7 @@ void fn_3_D9A30(void) {
 
 // .text:0x000D9868 size:0x1C8 mapped:0x807188FC
 void fn_3_D9868(void) {
-    Unk28A8Rank ranks[4];
+    UnkRank31A0 ranks[4];
     u32 count;
     u32 i;
     s32 k;

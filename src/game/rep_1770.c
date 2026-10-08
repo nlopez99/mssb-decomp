@@ -3,6 +3,7 @@
 #include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
+#include "game/rep_16B8.h"
 
 typedef struct UnkTask1770 {
     /* 0x00 */ void (*_00)(void);
@@ -94,9 +95,9 @@ extern UnkSpriteDesc1770 lbl_3_data_D258[9];
 extern UnkSpriteDesc1770 lbl_3_data_D378[12];
 extern UnkSpriteDesc1770 lbl_3_data_D4F8[6];
 
-u8 lbl_3_data_F4A4[0x2C] = {
-    0, 0, 0, 0, 2, 5, 4, 3, 8, 3, 4, 5, 2, 6, 0, 1, 8, 6, 7, 1, 2, 0,
-    7, 4, 4, 3, 1, 2, 5, 1, 2, 4, 6, 8, 7, 6, 8, 5, 3, 3, 5, 7, 4, 6,
+u8 lbl_3_data_F4A8[0x28] = {
+    2, 5, 4, 3, 8, 3, 4, 5, 2, 6, 0, 1, 8, 6, 7, 1, 2, 0, 7, 4,
+    4, 3, 1, 2, 5, 1, 2, 4, 6, 8, 7, 6, 8, 5, 3, 3, 5, 7, 4, 6,
 };
 u8 lbl_3_data_F4D0[16] = { 0, 1, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3 };
 
@@ -105,7 +106,6 @@ extern void fn_80034E20(UnkTask1770* task, UnkSpriteDesc1770* desc);
 extern void fn_8003649C(UnkTask1770* task, s32, s32, s32, s32);
 extern void fn_800363D8(UnkTask1770* task, s32, s32, s32, u16);
 extern void fn_800B0A14_removeQueue(void);
-extern void fn_3_972A0(UnkTask1770* task, s32, s32, s32);
 
 // .text:0x0009C28C size:0x2EC mapped:0x806DB320
 void fn_3_9C28C(void) {

@@ -10,6 +10,11 @@
 #include "game/rep_540.h"
 #include "game/sta_c2.h"
 #include "game/m_sound.h"
+#include "game/rep_13B8.h"
+#include "game/rep_31A0.h"
+#include "game/rep_3880.h"
+#include "game/rep_CC8.h"
+#include "game/rep_D18.h"
 #include "static/UnknownHomes_Static.h"
 #include "musyx/musyx.h"
 #include "Dolphin/mtx.h"
@@ -18,7 +23,7 @@
 
 // The chain chomp, at g_Minigame._CB0
 typedef struct Unk36D8Chomp {
-    /* 0x00 */ u8 _00[0xC];
+    /* 0x00 */ VecXYZ _00;
     /* 0x0C */ Vec _0C;
     /* 0x18 */ f32 _18;
     /* 0x1C */ s16 _1C;
@@ -74,29 +79,13 @@ extern s8 lbl_3_data_21974[4][2];
 extern s8 lbl_3_data_2197C[4];
 extern s8 lbl_3_data_21980[4];
 
-extern void fn_3_5A6D4(u8 status);
-extern void fn_3_10F550(u8, s16);
 extern void changeScene(u8, s16);
-extern void fn_3_7D9DC(int);
-extern void fn_3_7DD6C(void);
-extern void fn_3_7FED4(void* obj, f32 pos, f32 arg2);
-extern void fn_3_157DB8(s16);
 extern void fn_800528B4(void);
 extern void fn_800115C8(u8);
 extern void fn_80011578(void);
 extern void fn_8004C094(Vec*);
-extern void fn_3_14C904(void);
-extern void fn_3_151798(void);
-extern void fn_3_152AB4(u8, u8);
-extern void fn_3_1541C4(u8, u8, VecXYZ*);
-extern void fn_3_1578F8(void);
 extern void fn_3_1608F0(int, int, int);
-extern void fn_3_106EB0(void);
-extern int fn_3_108854(void);
 extern void fn_800246D4(int (*compare)(const void*, const void*), void* src, void* dst, int size, int count);
-extern void fn_3_59A90(void);
-extern void fn_3_810C4(int, int);
-extern void fn_3_8913C(void);
 extern void fn_3_9E078(int* order, int count, int);
 extern void minigamesSetSomePointers(void);
 extern void minigamesGXStuff(void);
@@ -905,7 +894,7 @@ void fn_3_13EC44(int slot) {
                 g_Minigame._1630[coin] = base / 100.0f;
                 g_Minigame.wallBall_coinsVisibleFrameCounter[coin] = 0;
                 fn_3_7FED4(&g_Minigame.wallBall_coinCoordinates[coin], g_Minigame._1630[coin], base % 100 / 100.0f);
-                fn_3_1541C4(coin, g_Minigame._1B1A[slot], &g_Minigame.wallBall_coinCoordinates[coin]);
+                fn_3_1541C4(coin, g_Minigame._1B1A[slot], (Vec*)&g_Minigame.wallBall_coinCoordinates[coin]);
                 break;
             }
         }
@@ -1093,7 +1082,7 @@ void fn_3_13E3A4(Unk36D8Chomp* chomp) {
                 }
             }
             chomp->_18 = *target / 10.0f;
-            fn_3_7FED4(chomp, chomp->_18, 0.0f);
+            fn_3_7FED4(&chomp->_00, chomp->_18, 0.0f);
             memset(&chomp->_0C, 0, sizeof(Vec));
             chomp->_1C = lbl_3_data_21924[1];
         }

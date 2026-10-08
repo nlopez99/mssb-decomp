@@ -206,8 +206,8 @@ f32 fn_3_14A4(f32 distance, const f32* endLengths, const f32* values, const f32*
     {
         f32 localTime = distance - endLengths[segment];
         f32 intervalLength = endLengths[segment + 1] - endLengths[segment];
-        f32 linearCoeffecient = -(intervalLength * (2.0f * curvature[segment] + curvature[segment + 1]) - (values[segment + 1] - values[segment]) / intervalLength);
-
-        return values[segment] + localTime * (localTime * (3.0f * curvature[segment] + (localTime * (curvature[segment + 1] - curvature[segment])) / intervalLength) + linearCoeffecient);
+        // One expression: a separate variable for the linear term emits 2.0f before 3.0f in .rodata.
+        return values[segment] + localTime * (localTime * (3.0f * curvature[segment] + (localTime * (curvature[segment + 1] - curvature[segment])) / intervalLength)
+                                              + ((values[segment + 1] - values[segment]) / intervalLength - intervalLength * (2.0f * curvature[segment] + curvature[segment + 1])));
     }
 }

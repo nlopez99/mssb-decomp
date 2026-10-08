@@ -57,6 +57,8 @@ s32 lbl_3_data_283F0[2][4] = {
 
 s32 lbl_3_data_28410[2] = { 40, 40 };
 
+// Unreferenced: the target's .bss runs to 0xB9E0, past what MWCC's 8-byte section alignment pads.
+static u8 lbl_3_bss_B9BC[0x24];
 static UnkTask3D50* lbl_3_bss_B9B8;
 
 extern void fn_8002C2D0(Vec* pos, Vec* dir, UnkEffect3D50* effect);

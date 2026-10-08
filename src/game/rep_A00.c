@@ -18,6 +18,9 @@
 #include "game/rep_AC8.h"
 #include "game/rep_E08.h"
 #include "game/m_sound.h"
+#include "game/rep_9B0.h"
+#include "game/rep_D18.h"
+#include "game/rep_3090.h"
 
 typedef struct {
     /* 0x00 */ Vec _00;
@@ -211,12 +214,8 @@ void fn_8001D074(s32, BOOL);
 void fn_800B0A14_removeQueue(void);
 UnkA00Task* fn_800B0A5C_insertQueue(void (*)(void), s32);
 void fn_80052798(s32);
-void fn_3_21AA8(void);
-void fn_3_5A6D4(u8);
 BOOL fn_3_6B4C8(void);
 BOOL fn_3_6C938(s32, s32);
-void fn_3_FBD58(void);
-void fn_3_FBD70(void);
 BOOL fn_3_165D24(void);
 void QueueCharacterAnimation(int actor, int anim, u8, u8, s16, u8, int);
 void AnimateCharacter(int actor, int anim, u8, u8, u8, s16, u8, int);

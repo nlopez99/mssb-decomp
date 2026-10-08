@@ -13,9 +13,11 @@
 # headers for types; --m2c prints the draft for any function. The draft is a
 # starting point and will not match as written.
 #
-# --source FILE compiles FILE in place of the unit's source file for this run
-# (the source is restored afterwards), for scratch variants such as a copy
-# that defines out-of-range data as statics.
+# --source FILE compiles FILE in place of the unit's source file for this run,
+# for scratch variants such as a copy that defines out-of-range data as
+# statics. It compiles into a temporary directory and leaves the source and
+# the build directory alone, so such runs can go alongside other edits and
+# runs in the same checkout.
 #
 # <unit> may be an objdiff unit name (game/game/kinoko), a source path
 # (src/game/kinoko.c) or a unique basename (kinoko).
@@ -101,12 +103,12 @@ def resolve_unit(query: str, units: List[Dict[str, Any]]) -> Optional[Dict[str, 
     return None
 
 
-def generate_report() -> Dict[str, Any]:
+def generate_report(project: str = root_dir) -> Dict[str, Any]:
     fd, path = tempfile.mkstemp(prefix="match-report-", suffix=".json")
     os.close(fd)
     try:
         proc = subprocess.run(
-            [objdiff_cli, "report", "generate", "-p", root_dir, "-o", path],
+            [objdiff_cli, "report", "generate", "-p", project, "-o", path],
             cwd=root_dir,
             capture_output=True,
             text=True,
@@ -127,7 +129,7 @@ def find_function_unit(report: Dict[str, Any], function: str) -> List[str]:
     ]
 
 
-def build(unit: Dict[str, Any]) -> Tuple[bool, float, str]:
+def build(unit: Dict[str, Any], with_base: bool = True) -> Tuple[bool, float, str]:
     # Tools are ninja outputs too, so a fresh worktree fetches them on first use.
     # Only ask for missing ones: with configure.py --objdiff/--binutils they are
     # not ninja targets. binutils is a directory output in build.ninja.
@@ -135,12 +137,41 @@ def build(unit: Dict[str, Any]) -> Tuple[bool, float, str]:
     # dtk writes a linked (Matching) unit's target object while splitting, but
     # build.ninja does not list it as an output
     targets = [] if unit.get("metadata", {}).get("complete") else [unit["target_path"]]
-    targets += [unit["base_path"]] + [os.path.relpath(t, root_dir) for t in tools]
+    targets += ([unit["base_path"]] if with_base else []) + [os.path.relpath(t, root_dir) for t in tools]
     start = time.monotonic()
     proc = subprocess.run(["ninja", *targets], cwd=root_dir, capture_output=True, text=True)
     elapsed = time.monotonic() - start
     output = proc.stdout + proc.stderr
     return proc.returncode == 0, elapsed, output
+
+
+def build_scratch(unit: Dict[str, Any], scratch: str, out_dir: str) -> Tuple[bool, float, str, Dict[str, Any]]:
+    # Compile the scratch file with the unit's own command into out_dir, and
+    # describe it there as a one-unit objdiff project whose base is that object
+    ok, elapsed, output = build(unit, with_base=False)
+    if not ok:
+        return ok, elapsed, output, unit
+    source = unit["metadata"]["source_path"]
+    obj_dir = os.path.dirname(unit["base_path"])
+    proc = subprocess.run(["ninja", "-t", "commands", unit["base_path"]], cwd=root_dir, capture_output=True, text=True)
+    command = proc.stdout.strip().splitlines()[-1].split(" && ")[0]
+    io = f" -c {source} -o {obj_dir}"
+    if io not in command:
+        raise UsageError(f"cannot find '{io.strip()}' in the compile command for {unit['base_path']}")
+    copy = os.path.join(out_dir, os.path.basename(source))
+    shutil.copyfile(scratch, copy)
+    command = command.replace(io, f" -c {copy} -o {out_dir}")
+    start = time.monotonic()
+    proc = subprocess.run(command, shell=True, cwd=root_dir, capture_output=True, text=True)
+    elapsed += time.monotonic() - start
+    base = os.path.join(out_dir, os.path.splitext(os.path.basename(source))[0] + ".o")
+    scratch_unit = dict(unit, target_path=os.path.join(root_dir, unit["target_path"]), base_path=base)
+    with open(objdiff_json) as f:
+        project = json.load(f)
+    project["units"] = [scratch_unit]
+    with open(os.path.join(out_dir, "objdiff.json"), "w") as f:
+        json.dump(project, f)
+    return proc.returncode == 0, elapsed, proc.stdout + proc.stderr, scratch_unit
 
 
 def build_errors(output: str, limit: int = 80) -> str:
@@ -634,12 +665,35 @@ def function_status(func: Dict[str, Any], base_syms: Optional[Dict[str, "Symbol"
     return "partial"
 
 
+def stub_callees(unit: Dict[str, Any], statuses: Dict[str, str]) -> Dict[str, List[str]]:
+    # An empty stub is inlined into its callers, so a caller cannot match until
+    # each stub it calls in this unit has a body: list those per function
+    path = asm_path(unit)
+    if not os.path.exists(path):
+        return {}
+    waits: Dict[str, List[str]] = {}
+    current = None
+    with open(path) as f:
+        for line in f:
+            if line.startswith(".fn "):
+                current = line[4:].split(",")[0].strip()
+                continue
+            m = re.search(r"\tbl?\s+([A-Za-z_][\w.@]*)\s*$", line)
+            if current and m:
+                callee = m.group(1)
+                if callee != current and statuses.get(callee) in ("stub", "missing"):
+                    if callee not in waits.setdefault(current, []):
+                        waits[current].append(callee)
+    return waits
+
+
 def print_unit(
     unit: Dict[str, Any],
     report_unit: Dict[str, Any],
     statuses: Dict[str, str],
     base_only: List[str],
     show_all: bool,
+    waits: Dict[str, List[str]],
 ) -> None:
     measures = report_unit.get("measures", {})
     funcs = sorted(report_unit.get("functions", []), key=lambda f: int(f.get("address", 0)))
@@ -665,7 +719,8 @@ def print_unit(
             continue
         percent = func.get("fuzzy_match_percent")
         shown = f"{percent:6.2f}%" if percent is not None else "      -"
-        print(f"  {status:<8}{shown}  {int(func['size']):#7x}  {func['name']}")
+        waiting = f"  (waits on {', '.join(waits[func['name']])})" if waits.get(func["name"]) else ""
+        print(f"  {status:<8}{shown}  {int(func['size']):#7x}  {func['name']}{waiting}")
     if hidden:
         print(f"  ({hidden} matching functions hidden; --all shows them)")
     if "reloc" in statuses.values():
@@ -737,33 +792,23 @@ def main() -> int:
     if args.source:
         if args.no_build:
             raise UsageError("--source needs a build; drop --no-build")
-        return with_source(unit, args.source, lambda: run(args, unit, function))
+        if not os.path.isfile(args.source):
+            raise UsageError(f"{args.source} not found")
+        with tempfile.TemporaryDirectory(prefix="match-source-") as out_dir:
+            return run(args, unit, function, out_dir)
     return run(args, unit, function)
 
 
-def with_source(unit: Dict[str, Any], scratch: str, body) -> int:
-    source = os.path.join(root_dir, unit.get("metadata", {}).get("source_path", ""))
-    if not os.path.isfile(scratch):
-        raise UsageError(f"{scratch} not found")
-    backup = source + ".match-backup"
-    if os.path.exists(backup):
-        raise UsageError(f"{backup} exists from an interrupted --source run; move it back over {source} first")
-    shutil.copy2(source, backup)
-    try:
-        shutil.copyfile(scratch, source)
-        return body()
-    finally:
-        # copyfile, not os.replace: keep the source's new mtime so ninja rebuilds it
-        shutil.copyfile(backup, source)
-        os.unlink(backup)
-
-
-def run(args: argparse.Namespace, unit: Dict[str, Any], function: Optional[str]) -> int:
+def run(args: argparse.Namespace, unit: Dict[str, Any], function: Optional[str], scratch_dir: Optional[str] = None) -> int:
     result: Dict[str, Any] = {"unit": unit["name"], "source": unit.get("metadata", {}).get("source_path")}
-    if args.source:
+    project = root_dir
+    if scratch_dir:
         result["source"] = f"{args.source} (in place of {result['source']})"
-    if not args.no_build:
+        ok, elapsed, output, unit = build_scratch(unit, args.source, scratch_dir)
+        project = scratch_dir
+    elif not args.no_build:
         ok, elapsed, output = build(unit)
+    if scratch_dir or not args.no_build:
         result["build"] = {"ok": ok, "seconds": round(elapsed, 2)}
         if not ok:
             result["build"]["errors"] = build_errors(output)
@@ -774,7 +819,7 @@ def run(args: argparse.Namespace, unit: Dict[str, Any], function: Optional[str])
                 print(result["build"]["errors"])
             return EXIT_BUILD_FAILED
 
-    report = generate_report()
+    report = generate_report(project)
     report_unit = next((u for u in report["units"] if u["name"] == unit["name"]), None)
     if report_unit is None:
         raise UsageError(f"{unit['name']} is not in the objdiff report")
@@ -794,6 +839,7 @@ def run(args: argparse.Namespace, unit: Dict[str, Any], function: Optional[str])
             if status == "match":
                 status = check_function(unit, f, target_syms, base_syms)[0]
             statuses[f["name"]] = status
+        waits = stub_callees(unit, statuses)
         if funcs:
             matched = all(s == "match" for s in statuses.values())
         else:  # data-only unit
@@ -805,7 +851,13 @@ def run(args: argparse.Namespace, unit: Dict[str, Any], function: Optional[str])
                 measures=report_unit.get("measures", {}),
                 sections=report_unit.get("sections", []),
                 functions=[
-                    {"name": f["name"], "size": int(f["size"]), "percent": f.get("fuzzy_match_percent"), "status": statuses[f["name"]]}
+                    {
+                        "name": f["name"],
+                        "size": int(f["size"]),
+                        "percent": f.get("fuzzy_match_percent"),
+                        "status": statuses[f["name"]],
+                        "waits_on": waits.get(f["name"], []),
+                    }
                     for f in funcs
                 ],
                 base_only=base_only,
@@ -814,7 +866,7 @@ def run(args: argparse.Namespace, unit: Dict[str, Any], function: Optional[str])
         else:
             built = f" (built in {result['build']['seconds']:.2f}s)" if "build" in result else ""
             print(f"{unit['name']}  {result['source']}{built}")
-            print_unit(unit, report_unit, statuses, base_only, args.all)
+            print_unit(unit, report_unit, statuses, base_only, args.all, waits)
         return EXIT_MATCH if matched else EXIT_MISMATCH
 
     func = next((f for f in report_unit.get("functions", []) if f["name"] == function), None)

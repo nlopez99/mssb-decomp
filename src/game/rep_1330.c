@@ -8,6 +8,8 @@
 #include "game/rep_1D58.h"
 #include "game/rep_1E08.h"
 #include "game/m_sound.h"
+#include "game/rep_9B0.h"
+#include "game/rep_3090.h"
 #include "musyx/musyx.h"
 #include "string.h"
 
@@ -40,9 +42,6 @@ extern struct {
     /* 0xC8 */ u8 _C8;
 } lbl_3_common_bss_32724;
 
-void fn_3_FBD58(void);
-void fn_3_FBD70(void);
-void fn_3_21C7C(s32, u8);
 void changeScene(u8, s16);
 void fn_80052798(s32);
 void fn_8001B224(void);

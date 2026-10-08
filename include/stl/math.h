@@ -120,6 +120,7 @@ inline f32 fabsf(f32 x) { return __fabsf(x); }
 inline f32 tanf_kludge(f32 __x) { return tan((f64)__x); }
 inline f32 sinf_kludge(f32 __x) { return sin((f64)__x); }
 inline f32 cosf_kludge(f32 __x) { return cos((f64)__x); }
+inline f32 acosf_kludge(f32 __x) { return acos((f64)__x); }
 
 #ifdef __cplusplus
 };
