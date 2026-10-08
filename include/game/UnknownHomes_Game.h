@@ -1491,10 +1491,10 @@ typedef struct _MiniGameUnk19E8 {
     /*0x2*/ s8 _2;
     /*0x3*/ s8 _3;
     /*0x4*/ s8 _4;
-    /*0x5*/ u8 _5;
-    /*0x6*/ u8 _6;
+    /*0x5*/ s8 _5;
+    /*0x6*/ s8 _6;
     /*0x7*/ s8 _7;
-    /*0x8*/ u8 _8;
+    /*0x8*/ s8 _8;
 } MiniGameUnk19E8; // size: 0x9
 
 /*foul	1
@@ -1847,8 +1847,8 @@ typedef struct _MiniGameStruct {
     /*0x19E0*/ u8 _19E0;
     /*0x19E1*/ s8 _19E1;
     /*0x19E2*/ u8 _19E2;
-    /*0x19E3*/ u8 _19E3;
-    /*0x19E4*/ u8 _19E4;
+    /*0x19E3*/ s8 _19E3;
+    /*0x19E4*/ s8 _19E4;
     /*0x19E5*/ u8 _19E5;
     /*0x19E6*/ u8 _19E6;
     /*0x19E7*/ u8 _19E7;
