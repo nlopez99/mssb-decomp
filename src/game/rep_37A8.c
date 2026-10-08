@@ -24,7 +24,8 @@ typedef struct UnkMgEntry3310 {
     /* 0x20 */ s16 _20;
     /* 0x22 */ s16 _22;
     /* 0x24 */ s16 _24;
-    /* 0x26 */ u8 _26[0x2A - 0x26];
+    /* 0x26 */ s16 _26;
+    /* 0x28 */ s16 _28;
     /* 0x2A */ u8 _2A;
     /* 0x2B */ u8 _2B;
     /* 0x2C */ u8 _2C;
@@ -469,7 +470,70 @@ void fn_3_14471C(int player) {
 
 // .text:0x0014443C size:0x2E0 mapped:0x807834D0
 void fn_3_14443C(void) {
-    return;
+    int i;
+    int j;
+
+    fn_3_14423C();
+    for (i = 0; i < 3; i++) {
+        if (MG._0000[i]._18 < 0x7FFE) {
+            MG._0000[i]._18++;
+        } else {
+            MG._0000[i]._18 = 0x7FFF;
+        }
+        if (MG._0000[i]._1A < 0x7FFE) {
+            MG._0000[i]._1A++;
+        } else {
+            MG._0000[i]._1A = 0x7FFF;
+        }
+        if (MG._0000[i]._1E != 0) {
+            if (MG._0000[i]._1E < 0x7FFE) {
+                MG._0000[i]._1E++;
+            } else {
+                MG._0000[i]._1E = 0x7FFF;
+            }
+        }
+        if (MG._0000[i]._2A == 0) {
+            fn_3_14402C(i);
+        } else if (MG._0000[i]._2A == 1) {
+            MG._0000[i]._1C--;
+            MG._0000[i].pos.y = Lerp37A8(lbl_3_data_21D1C[MG._0000[i]._2B * 2], lbl_3_data_21D1C[MG._0000[i]._2B * 2 + 1],
+                                         (f32)MG._0000[i]._1A / (f32)lbl_3_data_21E68[5]);
+            if (MG._0000[i]._1C <= 0) {
+                MG._0000[i]._2A = 2;
+                MG._0000[i]._1A = 0;
+            }
+        } else if (MG._0000[i]._2A == 2) {
+            if (g_Minigame._1CA2 == 2) {
+                for (j = 0; j < 3; j++) {
+                    if (MG._0000[j]._2A == 2) {
+                        MG._0000[j]._2A = 3;
+                        MG._0000[j]._1A = 0;
+                    }
+                }
+            }
+            fn_3_1439EC(i);
+        } else if (MG._0000[i]._2A == 3) {
+            MG._0000[i].pos.y = (lbl_3_data_21D1C[MG._0000[i]._2B * 2] - lbl_3_data_21D1C[MG._0000[i]._2B * 2 + 1]) *
+                                    ((f32)MG._0000[i]._1A / (f32)lbl_3_data_21E68[6]) +
+                                lbl_3_data_21D1C[MG._0000[i]._2B * 2];
+            if (MG._0000[i]._1A >= lbl_3_data_21E68[6]) {
+                MG._0000[i]._2A = 0;
+                MG._0000[i]._1A = 0;
+                MG._1CA9[MG._0000[i]._2C] = 0;
+                if (g_Minigame._1CA3 != 0) {
+                    g_Minigame._1CA3 = 0;
+                }
+            }
+        } else if (MG._0000[i]._2A == 4) {
+            if (MG._0000[i]._1C != 0) {
+                MG._0000[i]._1C--;
+            }
+            if (MG._0000[i]._1A >= lbl_3_data_21E68[8]) {
+                MG._0000[i]._2A = 0;
+                MG._0000[i]._1A = 0;
+            }
+        }
+    }
 }
 
 // .text:0x0014423C size:0x200 mapped:0x807832D0
@@ -575,13 +639,55 @@ void fn_3_14402C(int idx) {
 }
 
 // .text:0x00143FAC size:0x80 mapped:0x80783040
-void fn_3_143FAC(void) {
-    return;
+void fn_3_143FAC(int idx) {
+    int i;
+
+    if (g_Minigame._1CA2 == 2) {
+        for (i = 0; i < 3; i++) {
+            if (MG._0000[i]._2A == 2) {
+                MG._0000[i]._2A = 3;
+                MG._0000[i]._1A = 0;
+            }
+        }
+    }
+    fn_3_1439EC(idx);
 }
 
 // .text:0x001439EC size:0x5C0 mapped:0x80782A80
-void fn_3_1439EC(void) {
-    return;
+void fn_3_1439EC(int idx) {
+    UnkMgEntry3310* entry;
+    s32 i;
+
+    entry = &MG._0000[idx];
+    if (entry->_2B != 0) {
+        entry->_20++;
+        if (entry->_20 == 1) {
+            entry->_2E = 0;
+        }
+        if (entry->_20 >= lbl_3_data_21E68[12]) {
+            entry->_20 = 0;
+            for (i = 0; i < 4; i++) {
+                fn_3_1430D0(idx, i);
+                fn_3_90064(0x2DA);
+            }
+            entry->_2E = 1;
+        }
+    } else if (entry->_2E != 0) {
+        entry->_26++;
+        if (entry->_26 == lbl_3_data_21E68[13]) {
+            fn_3_1430D0(idx, entry->_2F[0]);
+            entry->_34 = -1;
+            entry->_2F[0] = entry->_2F[1];
+            entry->_2F[1] = entry->_2F[2];
+            entry->_2F[2] = entry->_2F[3];
+            entry->_2F[3] = -1;
+            if (entry->_2F[0] < 0) {
+                entry->_2E = 0;
+            }
+            entry->_26 = 0;
+            fn_3_90064(0x2DA);
+        }
+    }
 }
 
 // .text:0x00143770 size:0x27C mapped:0x80782804
