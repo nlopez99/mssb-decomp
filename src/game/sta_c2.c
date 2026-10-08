@@ -1045,8 +1045,90 @@ void fn_3_D30D0(StaC2Draw* draw) {
 }
 
 // .text:0x000D2A0C size:0x6C4 mapped:0x80711AA0
-void fn_3_D2A0C(void) {
-    return;
+void fn_3_D2A0C(StaC2Draw* draw) {
+    Vec center;
+    Vec diff;
+    Vec dir;
+    Vec n;
+    Vec fwd = { 1.0f, 0.0f, 0.0f };
+    Vec pos;
+    Vec snd;
+    f32 prevVy;
+    f32 vy;
+    f32 angle;
+    s8 fielder;
+
+    prevVy = draw->vel.y;
+    draw->_A0.x += draw->vel.x;
+    draw->_A0.y += draw->vel.y;
+    draw->_A0.z += draw->vel.z;
+    draw->vel.y -= 0.04f;
+    vy = draw->vel.y;
+    if (prevVy > 0.0f && vy <= 0.0f) {
+        memcpy(&pos, &draw->_A0, sizeof(Vec));
+        pos.y *= -1.0f;
+        fn_3_8BBC4(lbl_3_data_81DC[g_d_GameSettings.StadiumID] + 3, &pos, NULL, 11);
+    }
+    if (draw->_A0.y < 0.0f) {
+        draw->_A0.y = 0.0f;
+        draw->vel.y = 0.3f;
+        memcpy(&pos, &draw->_A0, sizeof(Vec));
+        pos.y *= -1.0f;
+        fn_3_8BBC4(lbl_3_data_81DC[g_d_GameSettings.StadiumID] + 2, &pos, NULL, 10);
+        fn_8004C094(&draw->_A0);
+    }
+    CTRLSetTranslation(&draw->control, draw->_A0.x, -draw->_A0.y, draw->_A0.z);
+    CTRLSetRotation(&draw->control, 0.0f, draw->_C0, 0.0f);
+    fn_3_D2220(draw);
+    if (g_Ball.AtBat_ContactResult < 2) {
+        center = draw->_A0;
+        center.y += 4.5;
+        PSVECSubtract((Vec*)&g_Ball, &center, &diff);
+        if (g_Ball.AtBat_Contact_BallPos.y < center.y) {
+            diff.y = 0.0f;
+        }
+        if (PSVECMag(&diff) < 4.5) {
+            PSVECNormalize(&diff, &dir);
+            g_Ball.AtBat_Contact_BallPos.x = 4.5 * dir.x + center.x;
+            g_Ball.AtBat_Contact_BallPos.z = 4.5 * dir.z + center.z;
+            g_Ball.physicsSubstruct.velocity.x = 0.3 * dir.x;
+            g_Ball.physicsSubstruct.velocity.y = 0.3 * dir.y;
+            g_Ball.physicsSubstruct.velocity.z = 0.3 * dir.z;
+            draw->_CA = 5;
+            memcpy(&snd, &g_Ball, sizeof(Vec));
+            snd.y *= -1.0f;
+            fn_3_8BBC4(lbl_3_data_81DC[g_d_GameSettings.StadiumID] + 5, &snd, NULL, 13);
+            fn_3_27648();
+            g_FieldingLogic._13B = 1;
+            fn_3_6530();
+            lbl_3_bss_A898[1] = 1;
+            lbl_3_bss_A820[1].x = g_Ball.AtBat_Contact_BallPos.x;
+            lbl_3_bss_A820[1].y = -g_Ball.AtBat_Contact_BallPos.y;
+            lbl_3_bss_A820[1].z = g_Ball.AtBat_Contact_BallPos.z;
+        }
+    }
+    if (fn_3_D249C(draw)) {
+        draw->_CA = 5;
+    }
+    fielder = fn_3_D255C(draw);
+    if (fielder >= 0) {
+        fn_3_D24E8(draw, fielder);
+        draw->_CA = 5;
+    }
+    if (draw->_CA == 5) {
+        PSVECNormalize(&draw->vel, &n);
+        n.x *= -1.0f;
+        n.z *= -1.0f;
+        draw->vel.x = 0.15 * n.x;
+        draw->vel.y = 0.2f;
+        draw->vel.z = 0.15 * n.z;
+        angle = -(57.29578f * acosf_kludge(PSVECDotProduct(&fwd, &n)));
+        if (n.z < 0.0f) {
+            angle *= -1.0f;
+        }
+        draw->_C0 = angle;
+        fn_80025EEC(draw->_8C, 0, 1);
+    }
 }
 
 // .text:0x000D278C size:0x280 mapped:0x80711820

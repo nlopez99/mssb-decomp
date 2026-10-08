@@ -77,7 +77,7 @@ void fn_3_D24E8(struct StaC2Draw* draw, s8 fielder);
 s8 fn_3_D255C(struct StaC2Draw* draw);
 Vec* fn_3_D2684(struct StaC2Draw* draw);
 void fn_3_D278C(struct StaC2Draw* draw);
-void fn_3_D2A0C(void);
+void fn_3_D2A0C(struct StaC2Draw* draw);
 void fn_3_D30D0(struct StaC2Draw* draw);
 void fn_3_D36B0(struct StaC2Draw* draw);
 void fn_3_D3880(struct StaC2Draw* draw);
