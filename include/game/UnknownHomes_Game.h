@@ -2748,7 +2748,8 @@ typedef struct {
     /* 0x0039 */ u8 _39;
     artificial_padding(0x39, 0x3C, u8);
     /* 0x003C */ u8 _3C;
-    artificial_padding(0x3C, 0x3F, u8);
+    /* 0x003D */ u8 _3D;
+    /* 0x003E */ u8 _3E;
     /* 0x003F */ u8 _3F[2];
     artificial_padding(0x40, 0x44, u8);
     /* 0x0044 */ ReplayState _44;
