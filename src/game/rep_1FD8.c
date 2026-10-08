@@ -131,13 +131,18 @@ typedef struct Rep1FD8Draw {
     /* 0x44 */ Mtx _44;
     /* 0x74 */ Rep1FD8Model* _74;
     /* 0x78 */ struct StadiumObjectCollision* _78;
-    /* 0x7C */ u8 _7C[0x9C - 0x7C];
+    /* 0x7C */ u8 _7C[0x90 - 0x7C];
+    /* 0x90 */ u8 _90_7 : 1;
+    /* 0x90 */ u8 _90_0 : 7;
+    /* 0x91 */ u8 _91[0x9C - 0x91];
     /* 0x9C */ Vec _9C;
     /* 0xA8 */ u8 _A8;
     /* 0xA9 */ u8 _A9;
     /* 0xAA */ u8 _AA[0xB0 - 0xAA];
     /* 0xB0 */ u8 _B0;
-    /* 0xB1 */ u8 _B1[0xE8 - 0xB1];
+    /* 0xB1 */ u8 _B1[0xBD - 0xB1];
+    /* 0xBD */ u8 _BD;
+    /* 0xBE */ u8 _BE[0xE8 - 0xBE];
 } Rep1FD8Draw; // size: 0xE8
 
 extern struct {
@@ -152,6 +157,8 @@ extern struct {
     /* 0x40 */ u16* _40;
     /* 0x44 */ s32* _44;
     /* 0x48 */ Vec* _48;
+    /* 0x4C */ u8 _4C[0x64 - 0x4C];
+    /* 0x64 */ s16 _64;
 } lbl_3_common_bss_350E4;
 
 typedef struct Rep1FD8CameraSlot {
@@ -180,7 +187,8 @@ extern u8 lbl_3_data_84B8[30][2];
 extern BOOL fn_8001B728(s32, s32, Vec*);
 extern void fn_800BF058(void (*draw)(StadiumModel1D58* model, Mtx view));
 extern void fn_800BDF70(StadiumModel1D58* model);
-extern Rep1FD8Spawner* fn_80033A24(BOOL (*update)(Rep1FD8Spawner*), s32, s32, s32, s32, s32);
+extern Rep1FD8Spawner* fn_80033A24(BOOL (*update)(Rep1FD8Spawner*), s32, s32, s32, s32, u8);
+extern void pitchingMachinePitching(u8 id);
 extern Rep1FD8Task* fn_800B0A5C_insertQueue(void (*callback)(void), s32 priority);
 extern void fn_800528C0(f32 x, f32 y, f32 z, s16* screenX, s16* screenY);
 extern Rep1FD8SpriteRef lbl_80371C30[];
@@ -232,6 +240,7 @@ extern struct {
 } lbl_80366158;
 extern void fn_80023B90(Rep1FD8LightData* data, Rep1FD8Light* light);
 extern void fn_800528B4(void);
+extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern Rep1FD8Spawner* fn_800339F0(Rep1FD8Spawner* start, u8 id);
 extern void fn_800BEBCC(u8 idx, Vec dir);
 
@@ -346,7 +355,23 @@ void fn_3_C8650(void) {
 
 // .text:0x000C82B4 size:0x39C mapped:0x80707348
 void fn_3_C82B4(void) {
-    return;
+    u32 n;
+    s32 count;
+    s32 size;
+
+    size = (lbl_3_common_bss_350E4._30 * sizeof(u16)) + (lbl_3_common_bss_350E4._30 * sizeof(u32)) + (lbl_3_common_bss_350E4._30 * sizeof(s32)) + (lbl_3_common_bss_350E4._30 * sizeof(Vec) * 2);
+    if (lbl_3_common_bss_350E4._48 == NULL) {
+        lbl_3_common_bss_350E4._48 = _OSAllocFromHeap(4, size);
+        lbl_3_common_bss_350E4._3C = (u32*)(lbl_3_common_bss_350E4._48 + lbl_3_common_bss_350E4._30 * 2);
+        lbl_3_common_bss_350E4._44 = (s32*)(lbl_3_common_bss_350E4._3C + lbl_3_common_bss_350E4._30);
+        lbl_3_common_bss_350E4._40 = (u16*)(lbl_3_common_bss_350E4._44 + lbl_3_common_bss_350E4._30);
+    }
+    memset(lbl_3_common_bss_350E4._48, 0, size);
+    n = 0;
+    count = 0;
+    fn_3_C805C(&n, &count);
+    fn_3_C42A4(&n, &count);
+    lbl_3_common_bss_350E4._64 = n;
 }
 
 // .text:0x000C823C size:0x78 mapped:0x807072D0
@@ -612,8 +637,22 @@ BOOL fn_3_C5CE0(Rep1FD8Draw* draw) {
 }
 
 // .text:0x000C597C size:0x364 mapped:0x80704A10
-void fn_3_C597C(void) {
-    return;
+// 99.70%: the inlined fn_3_C444C allocates its position and angles in other FPRs
+// (target x..phi in f25..f21 and speed in f26, base the reverse order).
+void fn_3_C597C(s32 idx) {
+    Rep1FD8Draw* draw = &lbl_3_common_bss_350E4.draws[idx];
+    Rep1FD8Spawner* spawner;
+
+    pitchingMachinePitching(draw->_A8 + 42);
+    spawner = fn_80033A24(fn_3_C4724, 128, 0, 24, 1, draw->_A8 + 52);
+    if (spawner != NULL) {
+        fn_3_C444C(spawner, draw);
+        spawner->_10 = lbl_3_bss_9F0C[0];
+        spawner->timer = 30;
+    }
+    draw->_BD = 2;
+    draw->_90_7 = 0;
+    draw->_9C.y = 10.0f;
 }
 
 // .text:0x000C56E8 size:0x294 mapped:0x8070477C
@@ -676,8 +715,63 @@ void fn_3_C5304(Rep1FD8Spawner* spawner, Rep1FD8Draw* draw) {
 }
 
 // .text:0x000C4F00 size:0x404 mapped:0x80703F94
-void fn_3_C4F00(void) {
-    return;
+BOOL fn_3_C4F00(Rep1FD8Spawner* spawner) {
+    Rep1FD8Particle* p;
+    Mtx m;
+    Vec offset;
+    f32 angle;
+    f32 radius;
+
+    fn_80033620(spawner);
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+    p = spawner->particles;
+    do {
+        if (p->delay != 0) {
+            p->delay -= lbl_80366158._28 == 0;
+            if (p->delay == 0) {
+                radius = (f32)(15 - rand() % 31) / 10.0f;
+                angle = 3.1415927f * (rand() % 361) / 180.0f;
+                offset.x = radius * cos(angle);
+                offset.z = radius * sin(angle);
+                offset.y = 2.5f;
+                CTRLBuildMatrix(&spawner->owner->control, m);
+                PSMTXMultVec(m, &offset, &p->pos);
+            }
+        } else if (p->life != 0 && lbl_80366158._28 == 0) {
+            if (p->duration == 0) {
+                p->color[3] += 15;
+                p->_38 += 0.125f;
+                p->_3C += 0.125f;
+                if (p->_38 >= 2.0f || p->_3C >= 2.0f) {
+                    p->duration = 1;
+                }
+            } else {
+                p->color[3] -= 15;
+                p->_38 -= 0.125f;
+                p->_3C -= 0.125f;
+                if (p->_38 <= 0.0f || p->_3C <= 0.0f) {
+                    p->life = 0;
+                }
+            }
+        }
+        if (p->life == 0) {
+            p->_38 = p->_3C = 0.0f;
+            p->life = 1;
+            p->duration = 0;
+            p->delay = 0;
+                radius = (f32)(15 - rand() % 31) / 10.0f;
+            angle = 3.1415927f * (rand() % 361) / 180.0f;
+            offset.x = radius * cos(angle);
+            offset.z = radius * sin(angle);
+            offset.y = 2.5f;
+            CTRLBuildMatrix(&spawner->owner->control, m);
+            PSMTXMultVec(m, &offset, &p->pos);
+            p->color[3] = 0;
+        }
+        p = p->next;
+    } while (p != NULL);
+    return FALSE;
 }
 
 // .text:0x000C4CF4 size:0x20C mapped:0x80703D88
@@ -1214,7 +1308,28 @@ void fn_3_C2974(void) {
 
 // .text:0x000C2644 size:0x330 mapped:0x807016D8
 void fn_3_C2644(void) {
-    return;
+    Rep1FD8Task* task;
+
+    if (g_d_GameSettings.minigamesEnabled != 0 && g_GameLogic.gameStatus >= 27 && g_GameLogic.gameStatus <= 41) {
+        return;
+    }
+    if (g_GameLogic.gameStatus == 23) {
+        lbl_3_bss_9D9C = 1;
+    }
+    if (lbl_3_bss_9D9C != 0) {
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    task = lbl_803CC1B8;
+    switch (task->_10 = (task->_10 + 1) % 1800) {
+    case 300:
+    case 310:
+    case 1200:
+        task = fn_800B0A5C_insertQueue(fn_3_C24A0, 5);
+        task->_10 = 16;
+        fn_3_C19C8();
+        break;
+    }
 }
 
 // .text:0x000C24A0 size:0x1A4 mapped:0x80701534
