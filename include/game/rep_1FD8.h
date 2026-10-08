@@ -5,11 +5,14 @@
 #include "Dolphin/mtx.h"
 
 struct StadiumObjectCollision;
+struct StadiumModel1D58;
 
+void fn_3_C1964(void);
+void fn_3_C1974(u8* stadium);
 void fn_3_C19C8(void);
 void fn_3_C1C18(void);
 void fn_3_C2244(void);
-void fn_3_C2310(void);
+void fn_3_C2310(struct StadiumModel1D58* model, Mtx view);
 void fn_3_C23E0(void);
 void fn_3_C24A0(void);
 void fn_3_C2644(void);
@@ -23,7 +26,7 @@ void fn_3_C366C(void);
 void fn_3_C39C8(void);
 void fn_3_C3A38(void);
 void fn_3_C3C2C(void);
-void fn_3_C3E94(void);
+void fn_3_C3E94(Vec* pos, s32 i);
 void fn_3_C3F70(void);
 void fn_3_C4068(void);
 void fn_3_C40EC(void);
