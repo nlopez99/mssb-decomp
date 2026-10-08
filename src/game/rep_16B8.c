@@ -141,14 +141,18 @@ extern struct {
 
 extern struct {
     /* 0x000 */ s32 _000;
-    /* 0x004 */ u8 _004[0x12 - 0x4];
+    /* 0x004 */ u8 _004[0xC - 0x4];
+    /* 0x00C */ s16 _00C;
+    /* 0x00E */ u8 _00E[0x12 - 0xE];
     /* 0x012 */ s16 _012;
     /* 0x014 */ u8 _014[0x1D0 - 0x14];
     /* 0x1D0 */ u8 _1D0;
     /* 0x1D1 */ u8 _1D1;
     /* 0x1D2 */ u8 _1D2;
     /* 0x1D3 */ u8 _1D3;
-    /* 0x1D4 */ u8 _1D4[0x1D9 - 0x1D4];
+    /* 0x1D4 */ u8 _1D4;
+    /* 0x1D5 */ u8 _1D5;
+    /* 0x1D6 */ u8 _1D6[0x1D9 - 0x1D6];
     /* 0x1D9 */ u8 _1D9;
     /* 0x1DA */ s8 _1DA;
     /* 0x1DB */ u8 _1DB[0x221 - 0x1DB];
@@ -236,6 +240,7 @@ extern UnkSpriteDesc1770 lbl_3_data_BF2C[];
 extern UnkSpriteDesc1770 lbl_3_data_8D88[];
 extern UnkSpriteDesc1770 lbl_3_data_BF6C[];
 extern UnkSpriteDesc1770 lbl_3_data_BFEC[];
+extern f32 lbl_3_data_C1CC[8];
 extern UnkSpriteDesc1770 lbl_3_data_C1EC[];
 
 extern void fn_80034CEC(UnkTask1770* task);
@@ -1594,9 +1599,203 @@ void fn_3_9669C(void) {
     ((UnkTask1770*)lbl_803CC1B8)->_00 = fn_3_959BC;
 }
 
+static inline void fn_3_959BC_setAlpha(UnkTask1770* task, s32 alpha) {
+    s32 i;
+
+    if (g_d_GameSettings.GameModeSelected == 6) {
+        for (i = 1; i < 6; i++) {
+            lbl_80371C30[task->_14 + i]._00->_58 = (lbl_80371C30[task->_14 + i]._00->_58 & 0xFFFFFF00) | alpha;
+        }
+    } else {
+        for (i = 1; i < 14; i++) {
+            lbl_80371C30[task->_14 + i]._00->_58 = (lbl_80371C30[task->_14 + i]._00->_58 & 0xFFFFFF00) | alpha;
+        }
+    }
+}
+
 // .text:0x000959BC size:0xCE0 mapped:0x806D4A50
+// 99.92%: in the sceneID loop the target keeps i in r10 and the sprite in r9,
+// one register above this build's; the instructions are the same.
 void fn_3_959BC(void) {
+    UnkTask1770* task = lbl_803CC1B8;
+    s32 k;
+    s32 i;
+    s32 t;
+    s32 d;
+    s32 any;
+    u16 v;
+    s32 alpha;
+    s32 base;
+    f32 px;
+    f32 py;
+    s16 frames;
+
+    if (task->_18 < 0xFFFE) {
+        task->_18++;
+    } else {
+        task->_18 = 0xFFFF;
+    }
+    if (lbl_3_common_bss_32724._96 != 0) {
+        goto kill;
+    }
+    if (g_d_GameSettings.GameModeSelected == 2) {
+        if (g_Practice.tutorialState == 0) {
+            goto kill;
+        }
+        if (g_Practice._1C7 != 0) {
+            goto kill;
+        }
+    }
+    if (task->_1A != 0) {
+        if (task->_1A < 0xFFFE) {
+            task->_1A++;
+        } else {
+            task->_1A = 0xFFFF;
+        }
+    }
+    if (g_d_GameSettings.GameModeSelected == 6) {
+        if (g_Minigame.framesSincePanelHit == 1) {
+            any = 0;
+            for (i = 0; i < 4; i++) {
+                if (g_Minigame._191C[i] > i) {
+                    any = 1;
+                }
+            }
+            if (any) {
+                task->_1A = 1;
+            }
+        }
+        if (task->_1A != 0) {
+            for (i = 0; i < 4; i++) {
+                lbl_80371C30[task->_14 + 1 + i]._00->_54 &= ~2;
+            }
+            t = (task->_1A - 1) % 45;
+            if (t == 0) {
+                for (i = 0; i < 4; i++) {
+                    d = task->_1C[i] % 10;
+                    if (d == 4) {
+                        task->_1C[i] = 14;
+                    } else if (d < g_Minigame._191C[i]) {
+                        task->_1C[i]++;
+                        lbl_80371C30[task->_14 + (task->_1C[i] % 10 % 4 + 1)]._00->_54 |= 2;
+                    } else if (d > 0 && d < 4 && d == g_Minigame._191C[i]) {
+                        lbl_80371C30[task->_14 + (d % 4 + 1)]._00->_54 |= 2;
+                        if (task->_1C[i] < 10) {
+                            task->_1C[i] += 10;
+                        }
+                    }
+                }
+            }
+            for (i = 0; i < 4; i++) {
+                v = task->_1C[i];
+                k = v % 10 % 4 + 1;
+                if (v <= g_Minigame._191C[i]) {
+                    if (k == 1) {
+                        lbl_80371C30[task->_14 + k]._00->_54 |= 2;
+                    } else if (t <= 15 || t > 30) {
+                        lbl_80371C30[task->_14 + k]._00->_54 |= 2;
+                    }
+                    g_Minigame._1925 |= 1 << (k - 1);
+                } else if (v >= 10) {
+                    g_Minigame._1925 |= 1 << (k - 1);
+                    lbl_80371C30[task->_14 + k]._00->_54 |= 2;
+                }
+            }
+        }
+    } else {
+        for (i = 0; i < 3; i++) {
+            lbl_80371C30[task->_14 + 9 + i]._00->_54 &= ~2;
+        }
+        for (i = 0; i < 4; i++) {
+            k = i + 1;
+            if (g_Runners[i].runnerOnFieldOrOutOrScored != 1 || g_Strikes.outs >= 3) {
+                lbl_80371C30[task->_14 + k]._00->_54 &= ~2;
+                continue;
+            }
+            if (i == 0) {
+                frames = g_Ball.framesSinceHit;
+                if (frames >= 1) {
+                    if (g_Runners[i].runnerOnFieldOrOutOrScored == 1 ||
+                        g_Runners[i].runnerOnFieldOrOutOrScored == 5)
+                    {
+                        if (frames < 16) {
+                            lbl_80371C30[task->_14 + k]._00->_58 =
+                                (lbl_80371C30[task->_14 + k]._00->_58 & 0xFFFFFF00) | (frames << 4);
+                        } else {
+                            lbl_80371C30[task->_14 + k]._00->_58 =
+                                (lbl_80371C30[task->_14 + k]._00->_58 & 0xFFFFFF00) | 0xFF;
+                        }
+                    }
+                } else {
+                    lbl_80371C30[task->_14 + k]._00->_54 &= ~2;
+                    continue;
+                }
+            } else {
+                lbl_80371C30[task->_14 + k]._00->_58 = (lbl_80371C30[task->_14 + k]._00->_58 & 0xFFFFFF00) | 0xFF;
+            }
+            lbl_80371C30[task->_14 + k]._00->_54 |= 2;
+            px = lbl_3_data_C1CC[2] * g_Runners[i].position.x;
+            py = lbl_3_data_C1CC[3] * -g_Runners[i].position.z;
+            px += lbl_3_data_C1CC[0];
+            py += lbl_3_data_C1CC[1];
+            lbl_80371C30[task->_14 + k]._00->_48 = px;
+            lbl_80371C30[task->_14 + k]._00->_4C = py;
+            base = g_Runners[i].currentBase;
+            if (base >= 1 && base <= 3) {
+                lbl_80371C30[task->_14 + 9 + base - 1]._00->_54 |= 2;
+            }
+        }
+        lbl_80371C30[task->_14 + 12]._00->_54 &= ~2;
+        if (g_GameLogic.sceneID == 1) {
+            for (i = 1; i < 4; i++) {
+                if (g_Runners[i].runnerOnFieldOrOutOrScored != 0 && g_Runners[i].furthestBaseForcedToGoToOnWalk != 0) {
+                    lbl_80371C30[task->_14 + 12]._00->_54 |= 2;
+                    for (; i < 4; i++) {
+                        if (g_Runners[i].stealingStatus == 3) {
+                            break;
+                        }
+                    }
+                    if (i < 4) {
+                        lbl_80371C30[task->_14 + 12]._00->_64 = 162;
+                    } else {
+                        lbl_80371C30[task->_14 + 12]._00->_64 = 166;
+                    }
+                    break;
+                }
+            }
+        }
+        lbl_80371C30[task->_14 + 13]._00->_54 &= ~2;
+        if (g_d_GameSettings.GameModeSelected != 2 && g_GameLogic._13E[g_GameLogic.teamBatting] == 0 &&
+            g_GameLogic.battingAIInd[g_GameLogic.homeTeamBattingInd_fieldingTeam] != 0)
+        {
+            lbl_80371C30[task->_14 + 13]._00->_54 |= 2;
+        }
+    }
+    if (task->_18 <= 16) {
+        alpha = task->_18 << 4;
+        if (alpha > 255) {
+            alpha = 255;
+        }
+        fn_3_959BC_setAlpha(task, alpha);
+    }
+    if (lbl_3_common_bss_34C90._1D5 != 0 && g_d_GameSettings.GameModeSelected != 6) {
+        alpha = 240 - (lbl_3_common_bss_34C90._00C << 4);
+        if (alpha <= 0) {
+            goto kill;
+        }
+        fn_3_959BC_setAlpha(task, alpha);
+    }
+    if (g_GameLogic.hudLoadingRelated != 0 || g_GameLogic.gameStatus == 3 || g_GameLogic.gameStatus == 14 ||
+        g_GameLogic.secondaryGameMode == 10)
+    {
+        goto kill;
+    }
     return;
+
+kill:
+    lbl_3_common_bss_32724._C7 = 0;
+    fn_80034CEC(task);
+    fn_800B0A14_removeQueue();
 }
 
 // .text:0x00095970 size:0x4C mapped:0x806D4A04
@@ -1882,12 +2081,13 @@ void fn_3_94BC4(void) {
 }
 
 // .text:0x0009497C size:0x248 mapped:0x806D3A10
-// 87.50%: the target adds each offset to task->_14 + k computed first and
-// keeps 60 << 16 in a register for the loop; the branches are otherwise the same.
+// 93.71%: the inner loop unrolls as in the target, but the target forms
+// (task->_14 + k) + E758[i] and loads task->_14 first; registers differ with it.
 void fn_3_9497C(void) {
     UnkTask1770* task = lbl_803CC1B8;
     u16 state;
     s32 i;
+    s32 j;
     UnkSprite1770* sprite;
 
     if (lbl_3_common_bss_32724._96 != 0) {
@@ -1914,25 +2114,11 @@ void fn_3_9497C(void) {
     }
     if (state != 2) {
         for (i = 0; i < task->_1A; i++) {
-            sprite = lbl_80371C30[task->_14 + 1 + lbl_3_data_E758[i]]._00;
-            if ((sprite->_5C >> 16) > 40) {
-                sprite->_5C = 60 << 16;
-            }
-            sprite = lbl_80371C30[task->_14 + 2 + lbl_3_data_E758[i]]._00;
-            if ((sprite->_5C >> 16) > 40) {
-                sprite->_5C = 60 << 16;
-            }
-            sprite = lbl_80371C30[task->_14 + 3 + lbl_3_data_E758[i]]._00;
-            if ((sprite->_5C >> 16) > 40) {
-                sprite->_5C = 60 << 16;
-            }
-            sprite = lbl_80371C30[task->_14 + 4 + lbl_3_data_E758[i]]._00;
-            if ((sprite->_5C >> 16) > 40) {
-                sprite->_5C = 60 << 16;
-            }
-            sprite = lbl_80371C30[task->_14 + 5 + lbl_3_data_E758[i]]._00;
-            if ((sprite->_5C >> 16) > 40) {
-                sprite->_5C = 60 << 16;
+            for (j = 0; j < 5; j++) {
+                sprite = lbl_80371C30[task->_14 + 1 + j + lbl_3_data_E758[i]]._00;
+                if ((sprite->_5C >> 16) > 40) {
+                    sprite->_5C = 60 << 16;
+                }
             }
         }
     }
