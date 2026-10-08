@@ -2625,6 +2625,8 @@ typedef struct {
 typedef struct {
     /* 0x0 */ s16 _0;
     /* 0x2 */ u8 _2;
+    /* 0x3 */ u8 _3;
+    /* 0x4 */ u8 _4;
 } FieldingLogic08C;
 
 typedef struct {
