@@ -124,6 +124,7 @@ extern u8 lbl_3_data_8338[0x66][2];
 extern u8 lbl_3_data_84F4[0x3C];
 extern u8 lbl_3_data_8530[2][0x180];
 extern f32 lbl_3_data_88AC[3];
+extern s16 lbl_3_data_88B8[0x12];
 extern SeqEntry lbl_3_data_88E0[];
 extern EmitterParams lbl_3_data_8974[17];
 extern SND_FVECTOR lbl_3_data_8D70;
@@ -552,7 +553,34 @@ void fn_3_8FF18(void) {
 
 // .text:0x0008FC80 size:0x298 mapped:0x806CED14
 void fn_3_8FC80(void) {
-    return;
+    int height;
+    int h;
+    f32 t;
+
+    if ((g_GameLogic.secondaryGameMode == 0 || (u8)(g_GameLogic.secondaryGameMode - 11) <= 4 || g_GameLogic.secondaryGameMode == 16) &&
+        !(g_d_GameSettings.GameModeSelected == GAME_TYPE_PRACTICE &&
+          (g_Practice._19F != 0 || g_Practice.tutorialState == 0)) &&
+        g_GameLogic.gameStatus == 2 && g_Ball.AtBat_Contact_BallPos.y > 3.0f && g_Ball.maxYOfHit > 8.0f &&
+        !(g_Ball.AtBat_Contact_BallPos.y < 6.0f && g_Ball.physicsSubstruct.velocity.y < 0.0f) &&
+        g_Ball.collisionRelated == 0 && g_Ball.ballCughtByPlantInd == 0 && g_Ball.deadBallReason == 0 &&
+        g_Ball.AtBat_ContactResult != 1 && (u16)(g_Ball.AtBat_ContactResult - 2) > 1) {
+        if (lbl_3_common_bss_34C58._18 == SND_ID_ERROR) {
+            lbl_3_common_bss_34C58._18 = playSoundEffect(0x17F);
+            sndFXCtrl(lbl_3_common_bss_34C58._18, 7, lbl_3_data_88B8[4]);
+        }
+        h = g_Ball.AtBat_Contact_BallPos.y;
+        height = h;
+        if (h > lbl_3_data_88B8[3]) {
+            height = lbl_3_data_88B8[3];
+        }
+        height -= lbl_3_data_88B8[2];
+        t = (f32)height / (lbl_3_data_88B8[3] - lbl_3_data_88B8[2]);
+        sndFXCtrl14(lbl_3_common_bss_34C58._18, 0x80,
+                    lbl_3_data_88B8[0] + (int)(t * (lbl_3_data_88B8[1] - lbl_3_data_88B8[0])));
+    } else if (lbl_3_common_bss_34C58._18 != SND_ID_ERROR) {
+        sndFXKeyOff(lbl_3_common_bss_34C58._18);
+        lbl_3_common_bss_34C58._18 = SND_ID_ERROR;
+    }
 }
 
 // .text:0x0008FC0C size:0x74 mapped:0x806CECA0
