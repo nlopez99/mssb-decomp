@@ -2026,14 +2026,14 @@ void fn_3_94E68(void) {
 }
 
 // .text:0x00094BC4 size:0x2A4 mapped:0x806D3C58
-// 98.22%: the target computes idx as base + (j + 1) (addi, then add) and
-// allocates the counters differently; the instructions are otherwise the same.
+// 98.79%: the target computes idx as base + (j + 1) (addi, then add); every
+// form tried here reassociates it to (j + base) + 1.
 void fn_3_94BC4(void) {
     UnkTask1770* task = lbl_803CC1B8;
     UnkSprite1770* sprite;
-    s32 count;
     s32 i;
     s32 j;
+    s32 count;
     s32 idx;
     s32 base;
 
@@ -2045,8 +2045,7 @@ void fn_3_94BC4(void) {
         task->_1C[0] = 0;
     }
     fn_80034E20(task, lbl_3_data_E378);
-    count = 0;
-    for (i = 0; i < 9; i++) {
+    for (i = 0, count = 0; i < 9; i++) {
         if (lbl_3_common_bss_37400._12[i]._3 != 0) {
             base = lbl_3_data_E758[count];
             lbl_80371C30[task->_14 + base]._00->_5C = lbl_3_common_bss_37400._12[i]._4 << 16;
