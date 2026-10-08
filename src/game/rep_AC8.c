@@ -6,6 +6,7 @@
 #include "game/rep_1188.h"
 #include "game/rep_1CB8.h"
 #include "game/rep_3E58.h"
+#include "game/rep_540.h"
 
 typedef struct UnkAC8Fielder {
     /* 0x000 */ f32 _000;
@@ -34,13 +35,16 @@ typedef struct UnkAC8Fielder {
     /* 0x06C */ u8 _06C[0x70 - 0x6C];
     /* 0x070 */ f32 _070;
     /* 0x074 */ f32 _074;
-    /* 0x078 */ u8 _078[0x84 - 0x78];
+    /* 0x078 */ u8 _078[0x80 - 0x78];
+    /* 0x080 */ f32 _080;
     /* 0x084 */ f32 _084[9];
     /* 0x0A8 */ f32 _0A8[4];
     /* 0x0B8 */ u8 _0B8[0xD4 - 0xB8];
     /* 0x0D4 */ f32 _0D4;
     /* 0x0D8 */ f32 _0D8;
-    /* 0x0DC */ u8 _0DC[0xF4 - 0xDC];
+    /* 0x0DC */ u8 _0DC[0xE8 - 0xDC];
+    /* 0x0E8 */ f32 _0E8;
+    /* 0x0EC */ u8 _0EC[0xF4 - 0xEC];
     /* 0x0F4 */ f32 _0F4;
     /* 0x0F8 */ u8 _0F8[0x118 - 0xF8];
     /* 0x118 */ f32 _118;
@@ -201,6 +205,10 @@ typedef struct {
 
 extern UnkAC8Data47D0 lbl_3_data_47D0[6];
 extern VecXZ lbl_3_data_4444[5];
+extern VecXZ lbl_3_data_450C[9];
+extern VecXZ lbl_3_data_4554[4][3];
+extern VecXZ lbl_3_data_45B4[4];
+extern VecXZ lbl_3_data_45D4[4];
 
 typedef struct {
     /* 0x0 */ f32 _0;
@@ -311,8 +319,59 @@ void fn_3_591AC(void) {
 }
 
 // .text:0x00058F58 size:0x254 mapped:0x80697FEC
-void fn_3_58F58(void) {
-    return;
+// 99.87%: the lbl_3_data_4554 element address takes pos * 0x18 and row * 8 in swapped registers.
+void fn_3_58F58(s32 pos, f32* x, f32* z) {
+    BOOL bunt = FALSE;
+    s32 depth = g_Pitcher.pitchTotalTimeCounter <= 0 ? 1 : 2;
+    s32 row;
+
+    if (pos <= 1) {
+        *x = lbl_3_data_450C[pos].x;
+        *z = lbl_3_data_450C[pos].z;
+        return;
+    }
+    if (pos <= 5) {
+        if (g_Runners[1].runnerOnFieldOrOutOrScored != 0 && g_Runners[1].furthestBaseForcedToGoToOnWalk != 0 &&
+            g_Ball.pitchHangtimeCounter > 0 && g_Pitcher.framesUntilUnhittable < 15) {
+            if (g_Batter.batterHand == 0 && pos == 3) {
+                *x = lbl_3_data_4444[2].x;
+                *z = lbl_3_data_4444[2].z;
+                return;
+            }
+            if (g_Batter.batterHand != 0 && pos == 5) {
+                *x = lbl_3_data_4444[2].x;
+                *z = lbl_3_data_4444[2].z;
+                return;
+            }
+        }
+        row = 0;
+        if (g_Pitcher.pitchTotalTimeCounter > 30 && (pos == 2 || pos == 4) && g_Batter.buntStatus >= 1 && g_Batter.buntStatus <= 3) {
+            bunt = TRUE;
+        }
+        if ((pos == 2 && g_Runners[1].runnerOnFieldOrOutOrScored == 1) || (pos == 4 && g_Runners[3].runnerOnFieldOrOutOrScored == 1)) {
+            row = depth;
+        }
+        if (g_Runners[2].runnerOnFieldOrOutOrScored == 1) {
+            if (pos == 3 && g_Batter.batterHand == 0) {
+                row = depth;
+                g_FieldingLogic._11E = 0;
+            }
+            if (pos == 5 && g_Batter.batterHand == 1) {
+                row = depth;
+                g_FieldingLogic._11E = 1;
+            }
+        }
+        if (bunt) {
+            *x = lbl_3_data_45B4[pos - 2].x;
+            *z = lbl_3_data_45B4[pos - 2].z;
+            return;
+        }
+        *x = lbl_3_data_4554[pos - 2][row].x;
+        *z = lbl_3_data_4554[pos - 2][row].z;
+        return;
+    }
+    *x = lbl_3_data_45D4[pos - 6].x;
+    *z = lbl_3_data_45D4[pos - 6].z;
 }
 
 // .text:0x00058E50 size:0x108 mapped:0x80697EE4
@@ -1296,6 +1355,8 @@ void fn_3_3E690(void) {
 }
 
 // .text:0x0003E468 size:0x228 mapped:0x8067D4FC
+// 92.16%: the target keeps the last loop's counter in r31 (with a stack frame), apart from
+// the zero the earlier stores use; here both share one register.
 void fn_3_3E468(void) {
     s32 i;
     s32 j;
@@ -1454,7 +1515,40 @@ void fn_3_3B99C(void) {
 
 // .text:0x0003B764 size:0x238 mapped:0x8067A7F8
 void fn_3_3B764(void) {
-    return;
+    UnkAC8Fielder* f = &g_Fielders[g_FieldingLogic._0B0];
+    f32 dx;
+    f32 dz;
+    f32 dx2;
+    f32 dz2;
+
+    if (g_FieldingLogic._0C4 >= 0) {
+        g_Ball.fielderAboutToGetBall_hasBall = -1;
+    } else if (g_FieldingLogic._0B0 >= 0 && g_Ball.looseBall_5FrameCountdown == 0) {
+        if (g_Ball.AtBat_ContactResult == 0) {
+            if (f->_080 < 5.0f) {
+                g_Ball.fielderAboutToGetBall_hasBall = g_FieldingLogic._0B0;
+            } else {
+                g_Ball.fielderAboutToGetBall_hasBall = -1;
+            }
+        } else {
+            dx = f->_000 - g_Ball.physicsSubstruct.futureCoordsAndDist[1].pos.x;
+            dz = f->_008 - g_Ball.physicsSubstruct.futureCoordsAndDist[1].pos.z;
+            dx2 = dx * dx;
+            dz2 = dz * dz;
+            if (dolsqrtf2(dx2 + dz2) <= f->_074) {
+                if (fn_3_9CE0(f->_000, f->_008) < f->_0E8) {
+                    g_Ball.fielderAboutToGetBall_hasBall = g_FieldingLogic._0B0;
+                } else {
+                    g_Ball.fielderAboutToGetBall_hasBall = -1;
+                }
+            }
+        }
+        if (g_Ball.fielderAboutToGetBall_hasBall >= 0) {
+            g_Ball.ballIsLooseInd_unused = 0;
+            g_Ball.looseBall_codeForHowLongUntilSomeoneWillGetIt = 0;
+            g_Ball.fielderBeingThrownTo = -1;
+        }
+    }
 }
 
 // .text:0x0003B370 size:0x3F4 mapped:0x8067A404
