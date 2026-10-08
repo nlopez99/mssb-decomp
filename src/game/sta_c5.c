@@ -407,6 +407,7 @@ void fn_3_F6FCC(void) {
 }
 
 // .text:0x000F6C60 size:0x36C mapped:0x80735CF4
+// 99.41%: only the volatile registers of the inlined fn_3_F6A94 loop differ.
 void fn_3_F6C60(void) {
     s32 n;
     u32 size;
@@ -434,6 +435,8 @@ void fn_3_F6C60(void) {
 }
 
 // .text:0x000F6A94 size:0x1CC mapped:0x80735B28
+// 97.13%: volatile registers differ (B21D/B21E addresses and the start*4 pointer);
+// the target forms the B21E address before reading _3C[*n - 1].
 void fn_3_F6A94(s32* n) {
     Mtx m;
     Control control;
@@ -585,6 +588,8 @@ struct StadiumObjectCollision* fn_3_F6504(s32 idx, MtxPtr mtx) {
 }
 
 // .text:0x000F6084 size:0x480 mapped:0x80735118
+// 98.89%: the sort pointers for n and m and two loop counters use other saved
+// registers than the target.
 void fn_3_F6084(MtxPtr view, StadiumSort1D58* sort) {
     Vec pos;
     StaC5Draw* obj;
@@ -1298,6 +1303,7 @@ void fn_3_F13F8(StaC5Draw* draw) {
 }
 
 // .text:0x000F0FA4 size:0x454 mapped:0x80730038
+// Waits on fn_3_F082C and fn_3_F0224: their empty stubs are inlined here.
 void fn_3_F0FA4(StaC5Draw* draw) {
     StaC5Model* model = draw->_74;
 
@@ -1353,6 +1359,7 @@ void fn_3_F0224(StaC5Draw* draw) {
 }
 
 // .text:0x000F0184 size:0xA0 mapped:0x8072F218
+// Waits on fn_3_EFB54: its empty stub is inlined here, where the target calls it.
 void fn_3_F0184(void) {
     u32 i;
     StaC5Draw* draw;
@@ -1444,6 +1451,8 @@ BOOL fn_3_EF7B4(Vec pos, u8 block) {
 }
 
 // .text:0x000EF55C size:0x258 mapped:0x8072E5F0
+// 99.50%: the sidesA walking pointer and sign are in r27/r28 where the target has
+// r28/r27; statement and declaration orders tried change nothing else.
 u8 fn_3_EF55C(Vec pos, u8 block) {
     Vec to;
     Vec edge;
@@ -1460,11 +1469,11 @@ u8 fn_3_EF55C(Vec pos, u8 block) {
     corners = lbl_3_data_1B824[block];
     for (i = 0, sign = -1; i < 2; i++, sign += 2) {
         to.x = pos.x - corners[sidesA[i][0]][0];
-        to.y = 0.0f;
         to.z = pos.z - corners[sidesA[i][0]][1];
         edge.x = corners[sidesA[i][1]][0] - corners[sidesA[i][0]][0];
         edge.y = 0.0f;
         edge.z = corners[sidesA[i][1]][1] - corners[sidesA[i][0]][1];
+        to.y = 0.0f;
         PSVECNormalize(&to, &to);
         PSVECNormalize(&edge, &edge);
         PSVECCrossProduct(&edge, &to, &cross);
@@ -1474,11 +1483,11 @@ u8 fn_3_EF55C(Vec pos, u8 block) {
     }
     for (i = 0, sign = -1; i < 2; i++, sign += 2) {
         to.x = pos.x - corners[sidesB[i][0]][0];
-        to.y = 0.0f;
         to.z = pos.z - corners[sidesB[i][0]][1];
         edge.x = corners[sidesB[i][1]][0] - corners[sidesB[i][0]][0];
         edge.y = 0.0f;
         edge.z = corners[sidesB[i][1]][1] - corners[sidesB[i][0]][1];
+        to.y = 0.0f;
         PSVECNormalize(&to, &to);
         PSVECNormalize(&edge, &edge);
         PSVECCrossProduct(&edge, &to, &cross);
@@ -1752,6 +1761,8 @@ void fn_3_EE96C(Vec* pos) {
 }
 
 // .text:0x000EE67C size:0x2F0 mapped:0x8072D710
+// 66.63%: the target unrolls the 13-step vertex attribute loop by 6 and keeps an
+// empty case 1 in the switch; no loop form or case list tried here reproduces either.
 void fn_3_EE67C(StaC5Shape* shape, MtxPtr view) {
     Mtx mv;
     GXVtxDescList desc[27];
