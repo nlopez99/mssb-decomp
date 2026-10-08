@@ -1,5 +1,115 @@
 #include "game/rep_AC8.h"
 #include "header_rep_data.h"
+#include "game/UnknownHomes_Game.h"
+#include "game/rep_18E8.h"
+#include "game/rep_1838.h"
+
+typedef struct UnkAC8Fielder {
+    /* 0x000 */ f32 _000;
+    /* 0x004 */ f32 _004;
+    /* 0x008 */ f32 _008;
+    /* 0x00C */ u8 _00C[0x14 - 0xC];
+    /* 0x014 */ f32 _014;
+    /* 0x018 */ f32 _018;
+    /* 0x01C */ f32 _01C;
+    /* 0x020 */ u8 _020[0x30 - 0x20];
+    /* 0x030 */ f32 _030;
+    /* 0x034 */ f32 _034;
+    /* 0x038 */ u8 _038[0x48 - 0x38];
+    /* 0x048 */ f32 _048;
+    /* 0x04C */ u8 _04C[0x50 - 0x4C];
+    /* 0x050 */ f32 _050;
+    /* 0x054 */ f32 _054;
+    /* 0x058 */ u8 _058[0x68 - 0x58];
+    /* 0x068 */ f32 _068;
+    /* 0x06C */ u8 _06C[0x84 - 0x6C];
+    /* 0x084 */ f32 _084[9];
+    /* 0x0A8 */ u8 _0A8[0x150 - 0xA8];
+    /* 0x150 */ f32 _150;
+    /* 0x154 */ u8 _154[0x158 - 0x154];
+    /* 0x158 */ f32 _158;
+    /* 0x15C */ u8 _15C[0x18C - 0x15C];
+    /* 0x18C */ s16 _18C;
+    /* 0x18E */ u8 _18E[0x190 - 0x18E];
+    /* 0x190 */ s16 _190;
+    /* 0x192 */ u8 _192[0x1A4 - 0x192];
+    /* 0x1A4 */ s16 _1A4;
+    /* 0x1A6 */ u8 _1A6[0x1AC - 0x1A6];
+    /* 0x1AC */ s16 _1AC;
+    /* 0x1AE */ u8 _1AE[0x1B6 - 0x1AE];
+    /* 0x1B6 */ s16 _1B6;
+    /* 0x1B8 */ s16 _1B8;
+    /* 0x1BA */ s16 _1BA;
+    /* 0x1BC */ s16 _1BC;
+    /* 0x1BE */ s16 _1BE;
+    /* 0x1C0 */ s16 _1C0;
+    /* 0x1C2 */ u8 _1C2[0x1D3 - 0x1C2];
+    /* 0x1D3 */ u8 _1D3;
+    /* 0x1D4 */ u8 _1D4;
+    /* 0x1D5 */ u8 _1D5;
+    /* 0x1D6 */ u8 _1D6;
+    /* 0x1D7 */ u8 _1D7[0x1EE - 0x1D7];
+    /* 0x1EE */ u8 _1EE;
+    /* 0x1EF */ u8 _1EF[0x1F0 - 0x1EF];
+    /* 0x1F0 */ u8 _1F0;
+    /* 0x1F1 */ u8 _1F1[0x1FF - 0x1F1];
+    /* 0x1FF */ u8 _1FF;
+    /* 0x200 */ u8 _200[0x203 - 0x200];
+    /* 0x203 */ u8 _203;
+    /* 0x204 */ u8 _204[0x205 - 0x204];
+    /* 0x205 */ u8 _205;
+    /* 0x206 */ u8 _206[0x207 - 0x206];
+    /* 0x207 */ u8 _207;
+    /* 0x208 */ u8 _208[0x20F - 0x208];
+    /* 0x20F */ u8 _20F;
+    /* 0x210 */ u8 _210;
+    /* 0x211 */ u8 _211[0x24C - 0x211];
+    /* 0x24C */ s16 _24C;
+    /* 0x24E */ s16 _24E;
+    /* 0x250 */ u8 _250[0x252 - 0x250];
+    /* 0x252 */ u8 _252;
+    /* 0x253 */ u8 _253;
+    /* 0x254 */ u8 _254;
+    /* 0x255 */ u8 _255;
+    /* 0x256 */ u8 _256;
+    /* 0x257 */ u8 _257[0x259 - 0x257];
+    /* 0x259 */ u8 _259;
+    /* 0x25A */ u8 _25A[0x25B - 0x25A];
+    /* 0x25B */ u8 _25B;
+    /* 0x25C */ u8 _25C;
+    /* 0x25D */ u8 _25D;
+    /* 0x25E */ u8 _25E;
+    /* 0x25F */ u8 _25F;
+    /* 0x260 */ u8 _260;
+    /* 0x261 */ u8 _261[0x264 - 0x261];
+    /* 0x264 */ u8 _264;
+    /* 0x265 */ u8 _265[0x268 - 0x265];
+} UnkAC8Fielder; // size: 0x268
+
+extern UnkAC8Fielder g_Fielders[9];
+extern s16 lbl_3_data_484C[10];
+extern f32 lbl_3_data_4930[43];
+extern s16 lbl_3_data_49DC[44];
+
+// Per-action fielder handlers, indexed by the fielder's action (_1D3)
+typedef struct {
+    /* 0x0 */ s32 _0;
+    /* 0x4 */ void (*_4)(s32 fielder);
+} UnkAC8Action;
+
+UnkAC8Action lbl_3_data_3C40[29] = {
+    { 0, fn_3_3C220 },   { 2, fn_3_4D20C },   { -1, fn_3_45394 },  { 1, fn_3_45860 },  { 1, fn_3_455B4 },
+    { -1, fn_3_48480 },  { -1, fn_3_4B128 },  { 6, fn_3_4B514 },   { 5, fn_3_4B514 },  { 0, fn_3_3CCB0 },
+    { 7, fn_3_A9D20 },   { 3, fn_3_48A54 },   { 8, fn_3_3D6AC },   { 4, fn_3_4A9AC },  { 9, fn_3_3DB78 },
+    { 10, fn_3_3B370 },  { 11, fn_3_35D28 },  { 12, fn_3_3D304 },  { 1, fn_3_45394 },  { 13, fn_3_3C1A8 },
+    { 14, fn_3_3E34C },  { 10, fn_3_3AE34 },  { 10, fn_3_3AE34 },  { 10, fn_3_3AE34 }, { 4, fn_3_49C18 },
+    { 15, fn_3_45B88 },  { 1, fn_3_2DCF4 },   { -1, fn_3_2DAC4 },  { -1, fn_3_2D92C },
+};
+
+// .bss statics, in reverse address order: MWCC lays them out last declared first
+static s16 lbl_3_bss_170[0x48];
+static s16 lbl_3_bss_16C;
+static s16 lbl_3_bss_C8[0x52];
 
 // .text:0x000598D0 size:0x48 mapped:0x80698964
 void fn_3_598D0(void) {
@@ -8,7 +118,23 @@ void fn_3_598D0(void) {
 
 // .text:0x0005985C size:0x74 mapped:0x806988F0
 void fn_3_5985C(s32 fielder, s32 action) {
-    return;
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+
+    if (fielder == -1) {
+        return;
+    }
+    f->_1D3 = action;
+    if (lbl_3_data_3C40[action]._0 >= 0) {
+        g_FieldingLogic._0F8[fielder] = lbl_3_data_3C40[action]._0;
+    }
+    f->_1D5 = 0;
+    f->_1D6 = 0;
+    f->_1A4 = 0;
+    f->_1AC = 0;
+    f->_1FF = 0;
+    if (action == 0x18) {
+        g_FieldingLogic._0BC = fielder;
+    }
 }
 
 // .text:0x000596F8 size:0x164 mapped:0x8069878C
@@ -132,12 +258,12 @@ void fn_3_53F48(void) {
 }
 
 // .text:0x00053EE8 size:0x60 mapped:0x80692F7C
-void fn_3_53EE8(void) {
-    return;
+void fn_3_53EE8(s32 fielder) {
+    fn_3_5985C(fielder, 0x13);
 }
 
 // .text:0x0005372C size:0x7BC mapped:0x806927C0
-void fn_3_5372C(void) {
+void fn_3_5372C(s32 fielder) {
     return;
 }
 
@@ -147,8 +273,16 @@ void fn_3_53130(void) {
 }
 
 // .text:0x000530EC size:0x44 mapped:0x80692180
-void fn_3_530EC(void) {
-    return;
+void fn_3_530EC(s32 fielder) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+
+    g_Fielders[fielder]._014 = f->_000;
+    g_Fielders[fielder]._018 = f->_004;
+    g_Fielders[fielder]._01C = f->_008;
+    g_Fielders[fielder]._030 = 0.0f;
+    g_Fielders[fielder]._034 = 0.0f;
+    g_Fielders[fielder]._050 = 0.0f;
+    g_Fielders[fielder]._068 = 0.0f;
 }
 
 // .text:0x00052F4C size:0x1A0 mapped:0x80691FE0
@@ -247,12 +381,21 @@ void fn_3_4DC14(void) {
 }
 
 // .text:0x0004DB84 size:0x90 mapped:0x8068CC18
-void fn_3_4DB84(void) {
-    return;
+BOOL fn_3_4DB84(s32 fielder) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+
+    if (g_Ball.ballVelocityPercent.x == 0.0f && g_Ball.ballVelocityPercent.z == 0.0f) {
+        return FALSE;
+    }
+    if (-(g_Ball.ballVelocityPercent.x * g_Ball.AtBat_Contact_BallPos.x) - g_Ball.ballVelocityPercent.z * g_Ball.AtBat_Contact_BallPos.z +
+            (g_Ball.ballVelocityPercent.x * f->_000 + g_Ball.ballVelocityPercent.z * f->_008) > 0.0f) {
+        return TRUE;
+    }
+    return FALSE;
 }
 
 // .text:0x0004D20C size:0x978 mapped:0x8068C2A0
-void fn_3_4D20C(void) {
+void fn_3_4D20C(s32 fielder) {
     return;
 }
 
@@ -277,17 +420,17 @@ void fn_3_4B8D0(void) {
 }
 
 // .text:0x0004B514 size:0x3BC mapped:0x8068A5A8
-void fn_3_4B514(void) {
+void fn_3_4B514(s32 fielder) {
     return;
 }
 
 // .text:0x0004B128 size:0x3EC mapped:0x8068A1BC
-void fn_3_4B128(void) {
+void fn_3_4B128(s32 fielder) {
     return;
 }
 
 // .text:0x0004A9AC size:0x77C mapped:0x80689A40
-void fn_3_4A9AC(void) {
+void fn_3_4A9AC(s32 fielder) {
     return;
 }
 
@@ -312,12 +455,18 @@ void fn_3_49F3C(void) {
 }
 
 // .text:0x00049EA8 size:0x94 mapped:0x80688F3C
-void fn_3_49EA8(void) {
-    return;
+void fn_3_49EA8(s32 fielder) {
+    if (g_FieldingLogic._0F8[fielder] == 9) {
+        return;
+    }
+    g_Fielders[fielder]._18C = 7;
+    fn_3_5985C(fielder, 0xE);
+    g_Fielders[fielder]._1D6 = 0;
+    g_Fielders[fielder]._190 = -1;
 }
 
 // .text:0x00049C18 size:0x290 mapped:0x80688CAC
-void fn_3_49C18(void) {
+void fn_3_49C18(s32 fielder) {
     return;
 }
 
@@ -332,12 +481,12 @@ void fn_3_494F4(void) {
 }
 
 // .text:0x00048A54 size:0xAA0 mapped:0x80687AE8
-void fn_3_48A54(void) {
+void fn_3_48A54(s32 fielder) {
     return;
 }
 
 // .text:0x00048480 size:0x5D4 mapped:0x80687514
-void fn_3_48480(void) {
+void fn_3_48480(s32 fielder) {
     return;
 }
 
@@ -387,7 +536,7 @@ void fn_3_45E98(void) {
 }
 
 // .text:0x00045B88 size:0x310 mapped:0x80684C1C
-void fn_3_45B88(void) {
+void fn_3_45B88(s32 fielder) {
     return;
 }
 
@@ -397,17 +546,17 @@ void fn_3_4597C(void) {
 }
 
 // .text:0x00045860 size:0x11C mapped:0x806848F4
-void fn_3_45860(void) {
+void fn_3_45860(s32 fielder) {
     return;
 }
 
 // .text:0x000455B4 size:0x2AC mapped:0x80684648
-void fn_3_455B4(void) {
+void fn_3_455B4(s32 fielder) {
     return;
 }
 
 // .text:0x00045394 size:0x220 mapped:0x80684428
-void fn_3_45394(void) {
+void fn_3_45394(s32 fielder) {
     return;
 }
 
@@ -532,12 +681,12 @@ void fn_3_3E468(void) {
 }
 
 // .text:0x0003E34C size:0x11C mapped:0x8067D3E0
-void fn_3_3E34C(void) {
+void fn_3_3E34C(s32 fielder) {
     return;
 }
 
 // .text:0x0003DB78 size:0x7D4 mapped:0x8067CC0C
-void fn_3_3DB78(void) {
+void fn_3_3DB78(s32 fielder) {
     return;
 }
 
@@ -547,17 +696,17 @@ void fn_3_3D7D4(void) {
 }
 
 // .text:0x0003D6AC size:0x128 mapped:0x8067C740
-void fn_3_3D6AC(void) {
+void fn_3_3D6AC(s32 fielder) {
     return;
 }
 
 // .text:0x0003D304 size:0x3A8 mapped:0x8067C398
-void fn_3_3D304(void) {
+void fn_3_3D304(s32 fielder) {
     return;
 }
 
 // .text:0x0003CCB0 size:0x654 mapped:0x8067BD44
-void fn_3_3CCB0(void) {
+void fn_3_3CCB0(s32 fielder) {
     return;
 }
 
@@ -582,12 +731,12 @@ void fn_3_3C270(void) {
 }
 
 // .text:0x0003C220 size:0x50 mapped:0x8067B2B4
-void fn_3_3C220(void) {
+void fn_3_3C220(s32 fielder) {
     return;
 }
 
 // .text:0x0003C1A8 size:0x78 mapped:0x8067B23C
-void fn_3_3C1A8(void) {
+void fn_3_3C1A8(s32 fielder) {
     return;
 }
 
@@ -603,7 +752,14 @@ void fn_3_3B9E4(void) {
 
 // .text:0x0003B99C size:0x48 mapped:0x8067AA30
 void fn_3_3B99C(void) {
-    return;
+    if (g_Minigame.GameMode_MiniGame == 5) {
+        return;
+    }
+    if (!(g_FieldingLogic._14A & 0x100)) {
+        return;
+    }
+    g_FieldingLogic._08C->_2 = 2;
+    g_FieldingLogic._08C->_0 = lbl_3_bss_170[0];
 }
 
 // .text:0x0003B764 size:0x238 mapped:0x8067A7F8
@@ -612,12 +768,12 @@ void fn_3_3B764(void) {
 }
 
 // .text:0x0003B370 size:0x3F4 mapped:0x8067A404
-void fn_3_3B370(void) {
+void fn_3_3B370(s32 fielder) {
     return;
 }
 
 // .text:0x0003AE34 size:0x53C mapped:0x80679EC8
-void fn_3_3AE34(void) {
+void fn_3_3AE34(s32 fielder) {
     return;
 }
 
@@ -627,17 +783,32 @@ void fn_3_3ACC0(void) {
 }
 
 // .text:0x0003ABF0 size:0xD0 mapped:0x80679C84
-void fn_3_3ABF0(void) {
-    return;
+void fn_3_3ABF0(s32 fielder) {
+    s32 idx = g_FieldingLogic._0B0;
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    UnkAC8Fielder* fb = &g_Fielders[idx];
+
+    if (g_Ball.framesSinceHit < lbl_3_data_484C[0]) {
+        return;
+    }
+    if (g_FieldingLogic._139 != 0) {
+        return;
+    }
+    if (fb->_256 != 1 || !(f->_084[idx] < 15.0f)) {
+        if (fb->_252 == 0 || fb->_25B != 0) {
+            return;
+        }
+    }
+    fn_3_530EC(fielder);
 }
 
 // .text:0x0003AAF8 size:0xF8 mapped:0x80679B8C
-void fn_3_3AAF8(void) {
+void fn_3_3AAF8(s32 fielder) {
     return;
 }
 
 // .text:0x0003A584 size:0x574 mapped:0x80679618
-void fn_3_3A584(void) {
+void fn_3_3A584(s32 fielder) {
     return;
 }
 
@@ -647,8 +818,14 @@ void fn_3_3A234(void) {
 }
 
 // .text:0x0003A1FC size:0x38 mapped:0x80679290
-void fn_3_3A1FC(void) {
-    return;
+void fn_3_3A1FC(s32 fielder) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+
+    if (f->_1B6 != 0) {
+        f->_050 = f->_054;
+    } else {
+        f->_050 = 0.0f;
+    }
 }
 
 // .text:0x00039EB0 size:0x34C mapped:0x80678F44
@@ -747,7 +924,7 @@ void fn_3_35E1C(void) {
 }
 
 // .text:0x00035D28 size:0xF4 mapped:0x80674DBC
-void fn_3_35D28(void) {
+void fn_3_35D28(s32 fielder) {
     return;
 }
 
@@ -802,8 +979,8 @@ void fn_3_32810(void) {
 }
 
 // .text:0x000327F4 size:0x1C mapped:0x80671888
-void fn_3_327F4(void) {
-    return;
+BOOL fn_3_327F4(void) {
+    return g_Ball.hitClassification2 == 1;
 }
 
 // .text:0x000323A4 size:0x450 mapped:0x80671438
@@ -862,7 +1039,7 @@ void fn_3_3061C(void) {
 }
 
 // .text:0x00030564 size:0xB8 mapped:0x8066F5F8
-void fn_3_30564(void) {
+void fn_3_30564(s32 fielder) {
     return;
 }
 
@@ -877,7 +1054,7 @@ void fn_3_300B8(void) {
 }
 
 // .text:0x0002FF2C size:0x18C mapped:0x8066EFC0
-void fn_3_2FF2C(void) {
+void fn_3_2FF2C(s32 fielder) {
     return;
 }
 
@@ -897,7 +1074,7 @@ void fn_3_2F7D4(void) {
 }
 
 // .text:0x0002F574 size:0x260 mapped:0x8066E608
-void fn_3_2F574(void) {
+void fn_3_2F574(s32 fielder) {
     return;
 }
 
@@ -937,17 +1114,17 @@ void fn_3_2DDB4(void) {
 }
 
 // .text:0x0002DCF4 size:0xC0 mapped:0x8066CD88
-void fn_3_2DCF4(void) {
+void fn_3_2DCF4(s32 fielder) {
     return;
 }
 
 // .text:0x0002DAC4 size:0x230 mapped:0x8066CB58
-void fn_3_2DAC4(void) {
+void fn_3_2DAC4(s32 fielder) {
     return;
 }
 
 // .text:0x0002D92C size:0x198 mapped:0x8066C9C0
-void fn_3_2D92C(void) {
+void fn_3_2D92C(s32 fielder) {
     return;
 }
 
@@ -992,8 +1169,38 @@ void fn_3_2C2F0(void) {
 }
 
 // .text:0x0002C238 size:0xB8 mapped:0x8066B2CC
-void fn_3_2C238(void) {
-    return;
+void fn_3_2C238(s32 fielder, s32 arg1, s32 arg2, u8 arg3, u8 arg4) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+
+    f->_24C = arg2;
+    f->_24E = 0;
+    f->_252 = arg1;
+    f->_253 = 0;
+    f->_254 = 0;
+    f->_255 = arg4;
+    f->_25B = arg3;
+    f->_259 = 0;
+    f->_25C = 0;
+    f->_25D = 0;
+    f->_25E = 0;
+    f->_25F = 0;
+    f->_264 = 0;
+    f->_260 = 0;
+    if (arg1 == 7) {
+        f->_260 = 1;
+    }
+    if (arg2 < g_Ball.framesUntilBallHitsGround) {
+        f->_264 = 1;
+    }
+    switch (arg1) {
+    case 3:
+        f->_259 = 2;
+        break;
+    case 4:
+        f->_259 = 3;
+        break;
+    }
+    g_Ball.catchAnimationTotalFrames = 0;
 }
 
 // .text:0x0002BB04 size:0x734 mapped:0x8066AB98
@@ -1067,8 +1274,11 @@ void fn_3_27764(void) {
 }
 
 // .text:0x00027738 size:0x2C mapped:0x806667CC
-void fn_3_27738(void) {
-    return;
+void fn_3_27738(s32 fielder) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+
+    f->_25B = 1;
+    g_Ball.catchAnimationTotalFrames = 0;
 }
 
 // .text:0x00027648 size:0xF0 mapped:0x806666DC
@@ -1097,7 +1307,7 @@ void fn_3_25C40(void) {
 }
 
 // .text:0x00025A68 size:0x1D8 mapped:0x80664AFC
-void fn_3_25A68(void) {
+void fn_3_25A68(s32 fielder) {
     return;
 }
 
@@ -1108,11 +1318,23 @@ void fn_3_258D8(void) {
 
 // .text:0x00025844 size:0x94 mapped:0x806648D8
 void fn_3_25844(int fielder, int arg1) {
-    return;
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+
+    if (f->_20F == 0) {
+        f->_1BC = radToShortAngle(f->_048);
+        f->_20F = 1;
+        f->_1B8 = 0;
+        f->_1BA = lbl_3_data_49DC[arg1 + 29];
+        f->_252 = 0;
+        f->_203 = 0;
+        f->_205 = 0;
+        f->_207 = 0;
+        f->_1EE = 0;
+    }
 }
 
 // .text:0x00025648 size:0x1FC mapped:0x806646DC
-void fn_3_25648(void) {
+void fn_3_25648(s32 fielder) {
     return;
 }
 
@@ -1122,6 +1344,6 @@ BOOL fn_3_253A4(s32 fielder, s32 angle) {
 }
 
 // .text:0x000251E4 size:0x1C0 mapped:0x80664278
-void fn_3_251E4(void) {
+void fn_3_251E4(s32 fielder) {
     return;
 }

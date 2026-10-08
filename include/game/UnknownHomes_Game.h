@@ -2598,14 +2598,21 @@ typedef struct {
 } FieldingLogicEntry; // size 0x1C
 
 typedef struct {
+    /* 0x0 */ s16 _0;
+    /* 0x2 */ u8 _2;
+} FieldingLogic08C;
+
+typedef struct {
     /* 0x000 */ FieldingLogicEntry _000[4];
     /* 0x070 */ u8 _070[0x74 - 0x70];
     /* 0x074 */ FieldingLogicFielder _074[4];
-    /* 0x08C */ u8 _08C[0x90 - 0x8C];
+    /* 0x08C */ FieldingLogic08C* _08C;
     /* 0x090 */ Vec _090;
     /* 0x09C */ u8 _09C[0xAE - 0x9C];
     /* 0x0AE */ s16 _0AE;
-    /* 0x0B0 */ u8 _0B0[0xBE - 0xB0];
+    /* 0x0B0 */ s16 _0B0;
+    /* 0x0B2 */ u8 _0B2[0xBC - 0xB2];
+    /* 0x0BC */ s16 _0BC;
     /* 0x0BE */ s16 _0BE;
     /* 0x0C0 */ u8 _0C0[0xC2 - 0xC0];
     /* 0x0C2 */ s16 _0C2;
@@ -2702,8 +2709,7 @@ typedef struct {
     /* 0x147 */ u8 _147;
     /* 0x148 */ u8 _148;
     /* 0x149 */ u8 _149;
-    /* 0x14A */ u8 _14A;
-    /* 0x14B */ u8 _14B;
+    /* 0x14A */ u16 _14A;
     /* 0x14C */ u8 _14C;
     /* 0x14D */ u8 _14D;
     /* 0x14E */ u8 _14E;
