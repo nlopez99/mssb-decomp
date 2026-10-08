@@ -259,10 +259,9 @@ void fn_3_8A1D8(void) {
 }
 
 // .text:0x000899BC size:0x81C mapped:0x806C8A50
-// 21.37%, a draft: the logic follows the target, but this build is 0xD48 bytes against 0x81C;
-// how the target shares its inlined fn_3_89914 copies between branches is still open
+// dest[i + 1] for the runner on third writes past dest, as the target's 0x30-byte frame shows
 void fn_3_899BC(void) {
-    int dest[5];
+    int dest[4];
     int i;
 
     if (g_d_GameSettings.GameModeSelected == 2 && g_Strikes.outs >= 3) {
@@ -293,41 +292,41 @@ void fn_3_899BC(void) {
     }
     if (g_Ball.maybebuntOn2Strikes != 0) {
         dest[3] = 3;
-        fn_3_89914(dest[3], 3);
+        fn_3_89914(3, 3);
         dest[2] = 2;
-        fn_3_89914(dest[2], 2);
+        fn_3_89914(2, 2);
         dest[1] = 1;
-        fn_3_89914(dest[1], 1);
+        fn_3_89914(1, 1);
         return;
     }
     if (g_Pitcher.strikeOutOrWalk == 3) {
         if (g_Runners[1].runnerOnFieldOrOutOrScored == 0) {
             dest[3] = 3;
-            fn_3_89914(dest[3], 3);
+            fn_3_89914(3, 3);
             dest[2] = 2;
-            fn_3_89914(dest[2], 2);
+            fn_3_89914(2, 2);
         } else if (g_Runners[2].runnerOnFieldOrOutOrScored == 0) {
             dest[2] = 1;
-            fn_3_89914(dest[2], 2);
+            fn_3_89914(1, 2);
             dest[3] = 3;
-            fn_3_89914(dest[3], 3);
+            fn_3_89914(3, 3);
         } else {
             dest[3] = 2;
-            fn_3_89914(dest[3], 3);
+            fn_3_89914(2, 3);
             dest[2] = 1;
-            fn_3_89914(dest[2], 2);
+            fn_3_89914(1, 2);
         }
         dest[1] = 0;
-        fn_3_89914(dest[1], 1);
+        fn_3_89914(0, 1);
         return;
     }
     if (g_Ball.deadBallReason == 3) {
         dest[3] = 1;
-        fn_3_89914(dest[3], 3);
+        fn_3_89914(1, 3);
         dest[2] = 0;
-        fn_3_89914(dest[2], 2);
+        fn_3_89914(0, 2);
         dest[1] = -1;
-        fn_3_89914(dest[1], 1);
+        fn_3_89914(-1, 1);
         return;
     }
     if (g_Ball.deadBallReason == 4) {
@@ -3157,10 +3156,11 @@ void fn_3_810C4(int runner, int base) {
 }
 
 // .text:0x00080028 size:0x109C mapped:0x806BF0BC
-// 97.51%: the overrun and action steps schedule the target point's loads later, the dugout
+// 97.54%: the overrun and action steps schedule the target point's loads later, the dugout
 // velocity takes the speed as the second fmuls operand, and some FPR pairs are swapped.
 void fn_3_80028(int runner) {
     InMemRunnerType* r = &g_Runners[runner];
+    VecXYZ p;
     f32 bx;
     f32 bz;
     f32 by;
@@ -3192,10 +3192,10 @@ void fn_3_80028(int runner) {
                 r->position.x = ((VecXZ*)&out)->x;
                 r->position.z = ((VecXZ*)&out)->z;
             } else if (r->overRun1BStage == 3) {
-                fn_3_7FFD0(&d, 1, 2, r->slidingAdjustment_backwards);
-                out.x = (d.x - r->position.x) / r->overrunBaseFrames_countDown;
-                out.y = (d.y - r->position.y) / r->overrunBaseFrames_countDown;
-                out.z = (d.z - r->position.z) / r->overrunBaseFrames_countDown;
+                fn_3_7FFD0(&p, 1, 2, r->slidingAdjustment_backwards);
+                out.x = (p.x - r->position.x) / r->overrunBaseFrames_countDown;
+                out.y = (p.y - r->position.y) / r->overrunBaseFrames_countDown;
+                out.z = (p.z - r->position.z) / r->overrunBaseFrames_countDown;
                 r->position.x += out.x;
                 r->position.y += out.y;
                 r->position.z += out.z;
@@ -3205,14 +3205,14 @@ void fn_3_80028(int runner) {
         } else if (r->actionCode != 0 && r->actionStage == 2) {
             if (r->timeStandingOnBase >= 6) {
                 if (r->baseOfFailedBodyCheck >= 0) {
-                    fn_3_7FFD0(&d, r->baseOfFailedBodyCheck, (r->baseOfFailedBodyCheck + 1) & 3,
+                    fn_3_7FFD0(&p, r->baseOfFailedBodyCheck, (r->baseOfFailedBodyCheck + 1) & 3,
                                r->slidingAdjustment_backwards);
                 } else {
-                    fn_3_7FFD0(&d, r->baseStandingOn, (r->baseStandingOn + 1) & 3, r->slidingAdjustment_backwards);
+                    fn_3_7FFD0(&p, r->baseStandingOn, (r->baseStandingOn + 1) & 3, r->slidingAdjustment_backwards);
                 }
-                out.x = (d.x - r->position.x) / r->actionFrames_countDown;
-                out.y = (d.y - r->position.y) / r->actionFrames_countDown;
-                out.z = (d.z - r->position.z) / r->actionFrames_countDown;
+                out.x = (p.x - r->position.x) / r->actionFrames_countDown;
+                out.y = (p.y - r->position.y) / r->actionFrames_countDown;
+                out.z = (p.z - r->position.z) / r->actionFrames_countDown;
                 r->position.x += out.x;
                 r->position.y += out.y;
                 r->position.z += out.z;
