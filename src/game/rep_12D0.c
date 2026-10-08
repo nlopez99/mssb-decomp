@@ -230,6 +230,9 @@ void fn_3_7C190(void) {
 }
 
 // .text:0x0007BC20 size:0x570 mapped:0x806BACB4
+// 93.99%: the target keeps `type` in r4 and `sub` in r5 (r3 unused) and does not fold the
+// `type == 3` test right after `type = 3`; s32 types, a one-pass loop and declaration
+// orders did not reproduce either.
 void fn_3_7BC20(void) {
     int sub = 0;
     int type = 0;
@@ -422,6 +425,9 @@ Unk12D0PlayerStats* fn_3_7BB74(void) {
 }
 
 // .text:0x0007B308 size:0x86C mapped:0x806BA39C
+// 95.03%: in the target the second loop keeps `1` and its counter in one register, and the
+// `_A0` loop reuses the lbl_80353A90 base register from the loops before it (the base
+// recomputes it); the rest are register numbers.
 void fn_3_7B308(void) {
     int t;
     int i;
@@ -777,6 +783,8 @@ void fn_3_7AB34(void) {
 }
 
 // .text:0x0007A154 size:0x9E0 mapped:0x806B91E8
+// 99.53%: register numbers only, in the `arg0 == 0` block (g_Runners[3]'s pitcher index in r6
+// and teamFielding in r8 in the target) and `runs` incremented in place there.
 void fn_3_7A154(int arg0) {
     s32 i;
     int runs;
@@ -798,7 +806,7 @@ void fn_3_7A154(int arg0) {
             lbl_803537E4[g_GameLogic.teamBatting][g_Runners[i].rosterID]._02 = 1;
         }
     }
-    fn_3_7BBC0()->_12 = 1;
+    lbl_803535C8[g_GameLogic.teamFielding][g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.awayTeamBattingInd_battingTeam][0][0]]._12 = 1;
     fn_3_7AB78(0);
     if (pitcherStats->_1B < g_Pitcher.pitchSpeed) {
         pitcherStats->_1B = g_Pitcher.pitchSpeed;
@@ -1917,14 +1925,17 @@ positions:
 }
 
 // .text:0x00076D08 size:0xC0C mapped:0x806B5D9C
+// 98.64%: register numbers, plus two conversions: the target masks `fielder` with clrlwi 24
+// before the `_1` insert and stores currentBatterPerTeam into `_0b` without the base's
+// clrlwi 16; the bitfields' declared types do not change either.
 void fn_3_76D08(s32 rosterID, s32 result, s16 fielder, s32 streak) {
     int atBat = 0;
+    int runs;
     int pitcher = g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.awayTeamBattingInd_battingTeam][0][0];
     Unk12D0PlayerStats* playerStats = &lbl_803537E4[g_GameLogic.teamBatting][rosterID];
     Unk12D0PitcherStats* pitcherStats = &lbl_803535C8[g_GameLogic.teamFielding][pitcher];
     int idx;
     int i;
-    int runs;
     s16 angle;
 
     if (playerStats->_03 < 0xFE) {
@@ -1932,8 +1943,7 @@ void fn_3_76D08(s32 rosterID, s32 result, s16 fielder, s32 streak) {
     } else {
         playerStats->_03 = 0xFF;
     }
-    idx = fn_3_7AEA8();
-    if (idx >= 100) {
+    if ((idx = fn_3_7AEA8()) >= 100) {
         for (i = 0; i < 99; i++) {
             lbl_3_common_bss_32888[g_GameLogic.teamBatting][i] = lbl_3_common_bss_32888[g_GameLogic.teamBatting][i + 1];
             lbl_803532A8[g_GameLogic.teamBatting][i]._0 = lbl_803532A8[g_GameLogic.teamBatting][i + 1]._0;
@@ -2383,6 +2393,8 @@ void fn_3_76558(void) {
 }
 
 // .text:0x00076174 size:0x3E4 mapped:0x806B5208
+// 97.95%: register numbers only (w, team and the stats pointers are allocated differently);
+// declaration orders were searched.
 void fn_3_76174(void) {
     int i;
     int best;
@@ -2504,14 +2516,17 @@ void fn_3_76174(void) {
 }
 
 // .text:0x000759BC size:0x7B8 mapped:0x806B4A50
+// 87.88%: the scoring loop indexes the stats tables by base + offset in the target (pointer
+// increments in the base), so `winner` and lbl_3_data_60F8[0] spill to the stack there
+// and the base keeps them in registers.
 void fn_3_759BC(void) {
     int winner = -1;
     int team = -1;
     int mvpTeam;
     int t;
-    int i;
     int best;
     int bestScore;
+    int i;
     s32 score[9];
     Unk12D0PlayerStats* player;
 
