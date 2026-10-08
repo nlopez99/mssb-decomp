@@ -6,14 +6,14 @@
 
 struct UnkKey21F8;
 struct UnkPlayer1E08;
-struct UnkObj1E08;
+struct UnkPanel1E08;
 struct UnkAnim21F8;
 struct UnkEffect21F8;
 
-void fn_3_BA538(void);
+void fn_3_BA538(struct UnkPanel1E08* panel);
 void fn_3_BA7F4(void);
-void fn_3_BB07C(struct UnkObj1E08* obj, f32 angle);
-void fn_3_BB15C(void);
+void fn_3_BB07C(struct UnkPanel1E08* obj, f32 angle);
+void fn_3_BB15C(struct UnkPanel1E08* panel);
 void fn_3_BB454(void);
 void fn_3_BB7F4(void);
 void fn_3_BBBC4(void);

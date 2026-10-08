@@ -102,6 +102,28 @@ typedef struct {
     /* 0x00C */ u8 _00C[0x3A8 - 0xC];
 } UnkScreen1E08; // size: 0x3A8
 
+typedef union {
+    /* 0x0 */ u32 rgba;
+    /* 0x0 */ u8 c[4];
+} UnkColor1E08;
+
+typedef struct UnkPanel1E08 {
+    /* 0x00 */ u8 _00[0x4];
+    /* 0x04 */ f32 _04;
+    /* 0x08 */ f32 _08;
+    /* 0x0C */ f32 _0C;
+    /* 0x10 */ Vec _10;
+    /* 0x1C */ Vec rot;
+    /* 0x28 */ Vec spin;
+    /* 0x34 */ u8 _34[0x38 - 0x34];
+    /* 0x38 */ f32 width;
+    /* 0x3C */ f32 height;
+    /* 0x40 */ UnkColor1E08 color0;
+    /* 0x44 */ UnkColor1E08 color1;
+    /* 0x48 */ u8 _48[0x4A - 0x48];
+    /* 0x4A */ s16 _4A;
+} UnkPanel1E08;
+
 typedef struct UnkPlayer1E08 {
     /* 0x000 */ u8 _000[0x34];
     /* 0x034 */ VecXYZ _034;
@@ -119,11 +141,6 @@ typedef struct UnkPlayer1E08 {
     /* 0x277 */ u8 _277[0x279 - 0x277];
     /* 0x279 */ u8 _279;
 } UnkPlayer1E08;
-
-typedef struct UnkObj1E08 {
-    /* 0x00 */ u8 _00[0x10];
-    /* 0x10 */ Vec _10;
-} UnkObj1E08;
 
 typedef struct {
     /* 0x00 */ u8 _00[0x34];
@@ -997,12 +1014,33 @@ void fn_3_BB454(void) {
 }
 
 // .text:0x000BB15C size:0x2F8 mapped:0x806FA1F0
-void fn_3_BB15C(void) {
-    return;
+void fn_3_BB15C(UnkPanel1E08* panel) {
+    s32 min;
+    u8 lo;
+    u8 range;
+    f32 spin;
+
+    lo = min = lbl_3_data_170D8[5];
+    panel->_04 = panel->_4A * 2 / (f32)lbl_3_data_170D8[0] - 1.0f;
+    panel->_08 = -1.0f;
+    panel->_0C = 50.0f * (rand() / 32767.0f) + 50.0f;
+    fn_3_BB07C(panel, 0.0f);
+    panel->rot.x = panel->rot.y = panel->rot.z = 0.0f;
+    spin = lbl_3_data_170D8[2] / 100000.0f;
+    panel->spin.x = spin * (rand() / 32767.0f);
+    panel->spin.y = spin * (rand() / 32767.0f);
+    panel->spin.z = spin * (rand() / 32767.0f);
+    panel->color0.c[3] = panel->color1.c[3] = 0xFF;
+    range = 0xFF - min;
+    panel->color0.c[1] = lo + rand() % range;
+    panel->color0.c[2] = lo + rand() % range;
+    panel->color1.c[0] = lo + rand() % range;
+    panel->color1.c[1] = lo + rand() % range;
+    panel->color1.c[2] = lo + rand() % range;
 }
 
 // .text:0x000BB07C size:0xE0 mapped:0x806FA110
-void fn_3_BB07C(UnkObj1E08* obj, f32 angle) {
+void fn_3_BB07C(UnkPanel1E08* obj, f32 angle) {
     f32 s;
     f32 c;
     f32 rad;
@@ -1021,6 +1059,44 @@ void fn_3_BA7F4(void) {
 }
 
 // .text:0x000BA538 size:0x2BC mapped:0x806F95CC
-void fn_3_BA538(void) {
-    return;
+void fn_3_BA538(UnkPanel1E08* panel) {
+    Control ctrl;
+    Vec quad[4];
+    Mtx m;
+    Mtx44 proj;
+    f32 hw;
+    f32 hh;
+    s32 i;
+
+    hw = panel->width / 2.0f;
+    hh = panel->height / 2.0f;
+    ctrl.type = 0;
+    quad[0].x = -hw;
+    quad[0].y = -hh;
+    quad[1].x = hw;
+    quad[1].y = -hh;
+    quad[2].x = hw;
+    quad[2].y = hh;
+    quad[3].x = -hw;
+    quad[3].y = hh;
+    quad[0].z = quad[1].z = quad[2].z = quad[3].z = 0.0f;
+    CTRLSetRotation(&ctrl, panel->rot.x, panel->rot.y, panel->rot.z);
+    CTRLSetTranslation(&ctrl, 0.5f * panel->_04 / 2.0f * panel->_0C, 0.35f * panel->_08 / 2.0f * panel->_0C, -1.5f);
+    CTRLBuildMatrix(&ctrl, m);
+    GXLoadPosMtxImm(m, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    C_MTXOrtho(proj, -0.175f * panel->_0C, 0.175f * panel->_0C, 0.25f * panel->_0C, -0.25f * panel->_0C, 1.0f, 512.0f);
+    GXSetProjection(proj, GX_ORTHOGRAPHIC);
+    GXSetCullMode(GX_CULL_BACK);
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    for (i = 0; i < 4; i++) {
+        GXPosition3f32(quad[i].x, quad[i].y, quad[i].z);
+        GXColor1u32(panel->color0.rgba);
+    }
+    GXSetCullMode(GX_CULL_FRONT);
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    for (i = 0; i < 4; i++) {
+        GXPosition3f32(quad[i].x, quad[i].y, quad[i].z);
+        GXColor1u32(panel->color1.rgba);
+    }
 }
