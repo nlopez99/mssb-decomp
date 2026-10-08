@@ -41,7 +41,7 @@ typedef struct UnkAC8Fielder {
     /* 0x06C */ f32 _06C;
     /* 0x070 */ f32 _070;
     /* 0x074 */ f32 _074;
-    /* 0x078 */ u8 _078[0x7C - 0x78];
+    /* 0x078 */ f32 _078;
     /* 0x07C */ f32 _07C;
     /* 0x080 */ f32 _080;
     /* 0x084 */ f32 _084[9];
@@ -1820,7 +1820,47 @@ void fn_3_4EBC4(void) {
 
 // .text:0x0004E638 size:0x58C mapped:0x8068D6CC
 void fn_3_4E638(void) {
-    return;
+    UnkAC8Fielder* f = &g_Fielders[g_Ball.fielderBeingThrownTo];
+    f32 traveled;
+    f32 throwLen;
+    f32 ballLen;
+    s16 throwAngle;
+    s32 diff;
+
+    if (g_Ball.fielderBeingThrownTo < 0) {
+        return;
+    }
+    traveled = dolsqrtf2(SQ(g_Ball.throwStartingLocation.x - g_Ball.AtBat_Contact_BallPos.x) +
+                         SQ(g_Ball.throwStartingLocation.z - g_Ball.AtBat_Contact_BallPos.z));
+    if (((g_Ball.framesSinceThrowStarted > 5 && f->_074 > f->_078) ||
+         (g_Ball.framesUntilThrowReachesDest < 1 && f->_074 > 3.0f) ||
+         (g_Ball.ballVelocity < 0.18f && g_Ball.fielderWBallIndex < 0 && g_Ball.framesSinceThrowStarted > 60) ||
+         traveled > 2.0f + g_Ball.throwDistance || g_Ball.throwHasLastedEstimatedNOfFrames) &&
+        f->_074 > f->_0E8 && (f->_252 == 0 || f->_24C <= 0)) {
+        throwLen = dolsqrtf2(SQ(g_Ball.throwTarget.x - g_Ball.throwStartingLocation.x) +
+                             SQ(g_Ball.throwTarget.z - g_Ball.throwStartingLocation.z));
+        ballLen = dolsqrtf2(SQ(g_Ball.throwStartingLocation.x - g_Ball.AtBat_Contact_BallPos.x) +
+                            SQ(g_Ball.throwStartingLocation.z - g_Ball.AtBat_Contact_BallPos.z));
+        throwAngle = fn_3_9FB8C(g_Ball.throwTarget.x - g_Ball.throwStartingLocation.x,
+                                g_Ball.throwTarget.z - g_Ball.throwStartingLocation.z);
+        diff = fn_3_9FCF8(throwAngle, (s16)fn_3_9FB8C(g_Ball.AtBat_Contact_BallPos.x - g_Ball.throwStartingLocation.x,
+                                                 g_Ball.AtBat_Contact_BallPos.z - g_Ball.throwStartingLocation.z));
+        if (g_Ball.framesSinceThrowStarted > 5 && (3.0f + throwLen < ballLen || (throwLen < ballLen && diff < 0x20))) {
+            g_Ball.looseBall_codeForHowLongUntilSomeoneWillGetIt = 1;
+            if (!g_GameLogic.walkOffWinInd) {
+                g_FieldingLogic._128 = 1;
+            }
+        } else {
+            g_Ball.looseBall_codeForHowLongUntilSomeoneWillGetIt = 2;
+            g_FieldingLogic._12C = 1;
+        }
+        g_Ball.ballIsLooseInd_unused = 1;
+        g_Ball.ballState = 3;
+        fn_3_4E1BC();
+        g_FieldingLogic._0C4 = -1;
+        g_Ball.fielderBeingThrownTo = -1;
+        g_Ball.looseBall_5FrameCountdown = 5;
+    }
 }
 
 // .text:0x0004E1BC size:0x47C mapped:0x8068D250
