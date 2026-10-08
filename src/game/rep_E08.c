@@ -42,7 +42,9 @@ typedef struct UnkE08Fielder {
     /* 0x1FB */ u8 _1FB;
     /* 0x1FC */ u8 _1FC[0x200 - 0x1FC];
     /* 0x200 */ u8 _200;
-    /* 0x201 */ u8 _201[0x207 - 0x201];
+    /* 0x201 */ u8 _201[0x203 - 0x201];
+    /* 0x203 */ u8 _203;
+    /* 0x204 */ u8 _204[0x207 - 0x204];
     /* 0x207 */ u8 _207;
     /* 0x208 */ u8 _208[0x20D - 0x208];
     /* 0x20D */ u8 _20D;
@@ -75,7 +77,8 @@ typedef struct UnkE08Fielder {
 } UnkE08Fielder; // size: 0x268
 
 typedef struct UnkE08Anim {
-    /* 0x00 */ u8 _00[0x10];
+    /* 0x00 */ f32 _00;
+    /* 0x04 */ u8 _04[0x10 - 0x4];
     /* 0x10 */ VecXYZ _10;
     /* 0x1C */ u8 _1C[0x2C - 0x1C];
     /* 0x2C */ VecXYZ _2C;
@@ -226,6 +229,18 @@ u16 lbl_3_data_6660[87][2] = {
     { 0x100, 0x0 }, { 0x101, 0x101 }, { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x1, 0x0 }, { 0x0, 0x101 },
     { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x101, 0x0 },
 };
+
+// The minigame player slot whose fielder is `fielder`, or 4 when none is
+static inline s32 findMinigameSlot(s32 fielder) {
+    s32 slot;
+
+    for (slot = 0; slot < 4; slot++) {
+        if (g_Minigame.minigameFielderIndex[slot] == fielder) {
+            break;
+        }
+    }
+    return slot;
+}
 
 // .text:0x0006714C size:0x394 mapped:0x806A61E0
 void fn_3_6714C(BOOL arg0) {
@@ -501,8 +516,45 @@ void fn_3_631AC(s32 i) {
 }
 
 // .text:0x00062E70 size:0x33C mapped:0x806A1F04
+// Waits on fn_3_61B64, whose empty stub is inlined here. With the stub removed this
+// scores 99.77%: the target loads g_Fielders[i]._20D before minigamePlayerSelectedOrder, and
+// the inlined fn_3_62CA8 swaps r3 and r4.
 void fn_3_62E70(void) {
-    return;
+    s32 i;
+
+    g_UnkThrowing_31ACC._0C = g_Ball.fielderWBallIndex;
+    if (g_UnkThrowing_31ACC._0C >= 0 && g_Fielders[g_UnkThrowing_31ACC._0C]._203 != 0) {
+        g_UnkThrowing_31ACC._0C = -1;
+    }
+    if (g_Minigame.GameMode_MiniGame == 0) {
+        fn_3_62B50();
+        fn_3_62904();
+    }
+    for (i = 0; i < 9; i++) {
+        g_UnkAnimation_31EAC[i]._40 = g_Fielders[i]._1C7;
+        if (g_d_GameSettings.minigamesEnabled && findMinigameSlot(i) >= 4) {
+            continue;
+        }
+        if (g_Minigame.GameMode_MiniGame == 2 && (s8)g_Fielders[i]._20D == g_Minigame.minigamePlayerSelectedOrder &&
+            g_Minigame.wallBallRotatePitchersInd == 0) {
+            continue;
+        }
+        if (i == 0 && (g_GameLogic.gameStatus == 1 || g_GameLogic.gameStatus == 0 ||
+                       (g_GameLogic.gameStatus == 2 && g_FieldingLogic._117 != 0) || g_GameLogic.gameStatus == 0xB ||
+                       g_GameLogic.gameStatus == 0x16)) {
+            continue;
+        }
+        if (i == 1 && (g_GameLogic.gameStatus == 1 || g_GameLogic.gameStatus == 0 || g_GameLogic.gameStatus == 0xB)) {
+            fn_3_62E28();
+        } else {
+            g_UnkAnimation_31EAC[i]._00 = g_Fielders[i]._050;
+            g_UnkAnimation_31EAC[i]._45 = 0;
+            fn_3_62CA8(i);
+            fn_3_62E04(i);
+            fn_3_62D44(i);
+            fn_3_61B64(i);
+        }
+    }
 }
 
 // .text:0x00062E28 size:0x48 mapped:0x806A1EBC
@@ -662,7 +714,7 @@ void fn_3_62904(void) {
 }
 
 // .text:0x00061B64 size:0xDA0 mapped:0x806A0BF8
-void fn_3_61B64(void) {
+void fn_3_61B64(s32 i) {
     return;
 }
 
@@ -819,6 +871,7 @@ BOOL fn_3_61544(s32 i) {
 }
 
 // .text:0x00061228 size:0x31C mapped:0x806A02BC
+// 99.21%: registers only; player and turn are r30 and r26 in the target, r26 and r30 here.
 BOOL fn_3_61228(s32 i) {
     s16 timer;
     s32 step;
@@ -1044,6 +1097,8 @@ BOOL fn_3_60D80(s32 i) {
 }
 
 // .text:0x00060A98 size:0x2E8 mapped:0x8069FB2C
+// 96.72%: registers only. The target keeps i in r30 and actorAnim in r29 (swapped here),
+// and computes nx and nz straight into f1 and f2; no declaration order found reproduces it.
 void fn_3_60A98(s32 i, UnkE08Actor* actor) {
     UnkE08Anim* anim = &g_UnkAnimation_31EAC[i];
     UnkE08Fielder* fielder = &g_Fielders[i];
