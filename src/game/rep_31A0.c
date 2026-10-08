@@ -1190,7 +1190,7 @@ void fn_3_10EFAC(void) {
 }
 
 // .text:0x0010E60C size:0x9A0 mapped:0x8074D6A0
-// 99.42%: the target compares characters[i]._31 signed (cmpwi), and calls fn_3_10CC20, whose empty stub is inlined
+// 99.51%: the target calls fn_3_10CC20, whose empty stub is inlined here
 void fn_3_10E60C(void) {
     CharacterStats* stats;
     int i;
