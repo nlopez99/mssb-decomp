@@ -52,7 +52,7 @@ typedef struct Unk37A8Piranha {
 // A CPU player's state, one per player at g_Minigame._1DCC
 typedef struct Unk37A8Cpu {
     /* 0x0 */ s16 _0;
-    /* 0x2 */ u8 _2;
+    /* 0x2 */ s8 _2;
     /* 0x3 */ s8 _3;
 } Unk37A8Cpu; // size: 0x4
 
@@ -66,12 +66,13 @@ typedef struct Unk37A8Minigame {
     /* 0x193A */ u8 _193A[100];
     /* 0x199E */ u8 _199E[0x1B44 - 0x199E];
     /* 0x1B44 */ s16 _1B44[4];
-    /* 0x1B4C */ u8 _1B4C[0x1B58 - 0x1B4C];
+    /* 0x1B4C */ u8 _1B4C[0x1B50 - 0x1B4C];
+    /* 0x1B50 */ s16 _1B50[4];
     /* 0x1B58 */ u8 _1B58[4][10];
     /* 0x1B80 */ u8 _1B80[4];
     /* 0x1B84 */ u8 _1B84[50];
     /* 0x1BB6 */ s8 _1BB6[50];
-    /* 0x1BE8 */ u8 _1BE8[50];
+    /* 0x1BE8 */ s8 _1BE8[50];
     /* 0x1C1A */ u8 _1C1A[50];
     /* 0x1C4C */ u8 _1C4C[50];
     /* 0x1C7E */ s8 _1C7E[4][3];
@@ -92,7 +93,9 @@ typedef struct Unk37A8Fielder {
     /* 0x00C */ f32 _00C;
     /* 0x010 */ u8 _010[0x17A - 0x10];
     /* 0x17A */ s16 _17A;
-    /* 0x17C */ u8 _17C[0x268 - 0x17C];
+    /* 0x17C */ u8 _17C[0x1C9 - 0x17C];
+    /* 0x1C9 */ u8 _1C9;
+    /* 0x1CA */ u8 _1CA[0x268 - 0x1CA];
 } Unk37A8Fielder; // size: 0x268
 
 extern Unk37A8Fielder g_Fielders[9];
@@ -122,6 +125,10 @@ extern u8 lbl_3_data_21E10[8];
 extern s16 lbl_3_data_21E68[26];
 extern s16 lbl_3_data_21EAC[4][2];
 extern s8 lbl_3_data_21EBC[4];
+extern f32 lbl_3_data_21E24[17];
+extern u8 lbl_3_data_21E9C[4][4];
+extern int LERPToNewRange_Float(int value, int inMin, int inMax, int outMin, int outMax);
+extern f32 lbl_3_data_47BC[5];
 extern s8 lbl_3_data_21EC0[4];
 
 f32 lbl_3_data_26698[3] = { 0.5f, 0.0f, -0.5f };
@@ -686,7 +693,7 @@ void fn_3_142C18(void) {
 }
 
 // .text:0x001428F0 size:0x328 mapped:0x80781984
-BOOL fn_3_1428F0(s8 player, u8 force) {
+u8 fn_3_1428F0(s8 player, u8 force) {
     Unk37A8Cpu* cpu;
     s8 port;
     u8 strength;
@@ -774,13 +781,158 @@ BOOL fn_3_1428F0(s8 player, u8 force) {
 }
 
 // .text:0x00142570 size:0x380 mapped:0x80781604
-void fn_3_142570(void) {
-    return;
+s32 fn_3_142570(s8 player) {
+    Unk37A8Fielder* fielder;
+    Unk37A8Piranha* piranha;
+    f32 speed;
+    f32 vx2;
+    f32 vz2;
+    f32 dx;
+    f32 dz;
+    f32 reach;
+    f32 dist;
+    s32 best;
+    s32 t;
+    s16 limit;
+    u8 found;
+    s8 i;
+
+    fielder = &g_Fielders[g_Minigame.minigameFielderIndex[player]];
+    reach = lbl_3_data_21E24[2] + lbl_3_data_47BC[fielder->_1C9];
+    best = 10000;
+    found = FALSE;
+    i = 0;
+    do {
+        piranha = &MG._00A8[i];
+        if (piranha->active != 0) {
+            dz = fielder->pos.z - piranha->pos.z;
+            dx = fielder->pos.x - piranha->pos.x;
+            dist = dolsqrtf2(dx * dx + dz * dz);
+            if (dist < reach) {
+                return 0;
+            }
+            dx /= dist;
+            dz /= dist;
+            vx2 = piranha->vel.x * piranha->vel.x;
+            vz2 = piranha->vel.z * piranha->vel.z;
+            speed = dolsqrtf2(vx2 + vz2);
+            if (dx * (piranha->vel.x / speed) + dz * (piranha->vel.z / speed) >= 0.9994f) {
+                t = (dist - reach) / speed;
+                if (t < best) {
+                    best = t;
+                }
+                found = TRUE;
+            }
+        }
+    } while (++i < 40);
+    limit = lbl_3_data_21E68[23];
+    i = 0;
+    do {
+        if (MG._193A[i] == 6 && MG._1B84[i] == 5 && player == -1 - MG._1BE8[i]) {
+            t = limit - MG._17C8[i];
+            if (t >= 0) {
+                if (t < best) {
+                    best = t;
+                }
+                found = TRUE;
+            }
+        }
+    } while (++i < 50);
+    if (found) {
+        return best;
+    }
+    return -1;
 }
 
 // .text:0x00142284 size:0x2EC mapped:0x80781318
 void fn_3_142284(void) {
-    return;
+    Unk37A8Cpu* cpus = MG._1DCC;
+    Unk37A8Cpu* cpu;
+    s32 eta[4];
+    s8 port;
+    u8 strength;
+    s8 i;
+
+    i = 0;
+    do {
+        cpu = &cpus[i];
+        port = g_Minigame.minigameControlStruct.characterIndex[i];
+        if (port >= 0 && port < 4) {
+            eta[i] = fn_3_142570(i);
+            if (g_Minigame.minigameControlStruct.battingHandedness[i] == 0) {
+                continue;
+            }
+            memset(&g_Minigame._1D7C[port], 0, sizeof(InputStruct));
+            strength = g_Minigame.minigameControlStruct.aIStrength[i];
+            switch (cpu->_2) {
+            case 0:
+                if (eta[i] >= 0) {
+                    switch (RandomIndexFromWeights(lbl_3_data_21E9C[strength], 4)) {
+                    case 0:
+                        if (eta[i] > LERPToNewRange_Float(MG._1B50[i], 0, lbl_3_data_21E68[19], lbl_3_data_21E68[2], lbl_3_data_21E68[3]) + 3) {
+                            if (fn_3_1428F0(i, FALSE)) {
+                                cpu->_2 = 1;
+                            }
+                        } else {
+                            g_Minigame._1D7C[port].newButtonInput |= 4;
+                            g_Minigame._1D7C[port].buttonInput |= 4;
+                            cpu->_2 = 2;
+                        }
+                        break;
+                    case 1:
+                        if (eta[i] > lbl_3_data_21E68[2] + 3) {
+                            if (fn_3_1428F0(i, FALSE)) {
+                                cpu->_2 = 1;
+                            }
+                        } else {
+                            g_Minigame._1D7C[port].newButtonInput |= 4;
+                            g_Minigame._1D7C[port].buttonInput |= 4;
+                            cpu->_2 = 2;
+                        }
+                        break;
+                    case 2:
+                        g_Minigame._1D7C[port].newButtonInput |= 4;
+                        g_Minigame._1D7C[port].buttonInput |= 4;
+                        cpu->_2 = 2;
+                        break;
+                    case 3:
+                        if (fn_3_1428F0(i, TRUE)) {
+                            cpu->_2 = 1;
+                        }
+                        break;
+                    }
+                } else if (fn_3_1428F0(i, FALSE)) {
+                    cpu->_2 = 1;
+                }
+                break;
+            case 1:
+                if (g_Minigame._1C92[i] < 0) {
+                    cpu->_2 = 0;
+                }
+                break;
+            case 2:
+                g_Minigame._1D7C[port].buttonInput |= 4;
+                if (g_Minigame._1CA5[i] != 1) {
+                    cpu->_2 = 3;
+                }
+                break;
+            case 3:
+                if (eta[i] >= 0) {
+                    g_Minigame._1D7C[port].buttonInput |= 4;
+                } else {
+                    cpu->_2 = 4;
+                }
+                break;
+            case 4:
+                if (g_Minigame._1CA5[i] != 3) {
+                    cpu->_2 = 0;
+                }
+                break;
+            }
+        } else {
+            eta[i] = -1;
+        }
+    } while (++i < 4);
 }
 
 // .text:0x0014225C size:0x28 mapped:0x807812F0

@@ -2035,7 +2035,7 @@ typedef struct _MiniGameStruct {
     /*0x1C81*/ u8 _1C81[9];
     /*0x1C8A*/ u8 _1C8A[4];
     /*0x1C8E*/ u8 _1C8E[4];
-    /*0x1C92*/ u8 _1C92[8];
+    /*0x1C92*/ s8 _1C92[8];
     /*0x1C9A*/ u8 _1C9A;
     /*0x1C9B*/ u8 _1C9B;
     /*0x1C9C*/ s16 _1C9C;
