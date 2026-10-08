@@ -199,7 +199,7 @@ typedef struct StaC2Draw {
         };
         struct {
             /* 0xA0 */ struct StaC2Draw* host;
-            /* 0xA4 */ void* _A4p;
+            /* 0xA4 */ struct StaC2Draw* follow;
             /* 0xA8 */ struct StaC2Emitter* emitter;
         };
         struct {
@@ -453,6 +453,8 @@ extern void fn_80034CEC(StaC2Task* task);
 extern void fn_800B0A14_removeQueue(void);
 extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_8004C094(Vec* pos);
+extern StaC2Emitter* fn_80033A24(BOOL (*update)(StaC2Emitter*), s32, s32, s32, s32, s32);
+extern void fn_80033964(StaC2Emitter* emitter);
 extern StaC2SpriteRef lbl_80371C30[];
 
 // fn_3_B7F70 lies in unsplit code
@@ -1521,8 +1523,43 @@ void fn_3_D0280(void) {
 }
 
 // .text:0x000D00D0 size:0x1B0 mapped:0x8070F164
-void fn_3_D00D0(void) {
-    return;
+void fn_3_D00D0(void* arg) {
+    StaC2Draw* draw = arg;
+    Vec pos;
+    StaC2Draw* follow = draw->follow;
+    u8 state = draw->host->_D1;
+
+    if (state == 0) {
+        if (draw->_90_7) {
+            draw->_90_7 = 0;
+        }
+        if (draw->_92 != 255) {
+            draw->_92 = 255;
+        }
+        if (draw->emitter != NULL) {
+            fn_80033964(draw->emitter);
+            draw->emitter = NULL;
+        }
+    } else {
+        if (!draw->_90_7) {
+            draw->_90_7 = 1;
+        }
+        if (draw->emitter == NULL) {
+            draw->emitter = fn_80033A24(fn_3_CFB44, 128, 0, 30, 0, 1);
+            if (draw->emitter != NULL) {
+                fn_3_CFD58(draw);
+            }
+        }
+        CTRLSetRotation(&draw->control, 0.0f, draw->host->_C0, 0.0f);
+        if (state == 3) {
+            draw->_92 = draw->_92 - 1.7f;
+            if (draw->_92 > 253.3f) {
+                draw->_92 = 0;
+            }
+        }
+    }
+    CTRLGetTranslation(&follow->control, &pos.x, &pos.y, &pos.z);
+    CTRLSetTranslation(&draw->control, pos.x, pos.y, pos.z);
 }
 
 // .text:0x000D00CC size:0x4 mapped:0x8070F160
