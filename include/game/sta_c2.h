@@ -61,7 +61,7 @@ void fn_3_D0918(void);
 void fn_3_D1004(struct StaC2Draw* draw, f32 x, f32 y, f32 z, f32 rotY, f32 tilt);
 void fn_3_D1110(struct StaC2Draw* draw);
 void fn_3_D127C(void);
-void fn_3_D1280(void);
+void fn_3_D1280(struct StaC2Draw* draw);
 void fn_3_D141C(struct StaC2Draw* draw);
 void fn_3_D173C(struct StaC2Draw* draw);
 void fn_3_D1848(struct StaC2Draw* draw);

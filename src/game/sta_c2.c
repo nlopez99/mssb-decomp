@@ -201,6 +201,7 @@ typedef struct StaC2Draw {
             /* 0xA0 */ u8 _A0_AC_2[0xAC - 0xA0];
             /* 0xAC */ StaC2Target* from;
             /* 0xB0 */ StaC2Target* to;
+            /* 0xB4 */ u8 counter;
         };
         struct {
             /* 0xA0 */ u8 _A0_C4_2[0xC4 - 0xA0];
@@ -1093,8 +1094,34 @@ void fn_3_D141C(StaC2Draw* draw) {
 }
 
 // .text:0x000D1280 size:0x19C mapped:0x80710314
-void fn_3_D1280(void) {
-    return;
+void fn_3_D1280(StaC2Draw* draw) {
+    Vec mid;
+    Vec diff;
+    Vec pos;
+    f32 dist;
+
+    if (g_GameLogic.gameStatus == 1 || g_GameLogic.gameStatus == 0) {
+        draw->control.type = 0;
+    }
+    fn_3_D141C(draw);
+    PSVECAdd(&draw->to->_0C, &draw->from->_0C, &mid);
+    PSVECScale(&mid, 0.5f, &mid);
+    if (g_GameLogic.gameStatus == 2 && g_GameLogic.bOD_framesInLiveBallScene >= 0) {
+        PSVECSubtract(&mid, &draw->_A0, &diff);
+        dist = PSVECMag(&diff);
+        if (draw->counter + 1 < 256) {
+            draw->counter++;
+        }
+        if (dist >= 0.3f && draw->counter > 10) {
+            memcpy(&pos, &draw->_A0, sizeof(Vec));
+            pos.y *= -1.0f;
+            fn_3_8BBC4(lbl_3_data_81DC[g_d_GameSettings.StadiumID] + 6, &pos, NULL, 14);
+            draw->counter = 0;
+        }
+    }
+    PSVECScale(&mid, 1.0f, &draw->_A0);
+    CTRLSetTranslation(&draw->control, draw->_A0.x, -draw->_A0.y, draw->_A0.z);
+    CTRLSetScale(&draw->control, 0.75f, 0.75f, 0.75f);
 }
 
 // .text:0x000D127C size:0x4 mapped:0x80710310
