@@ -2670,7 +2670,7 @@ typedef struct {
     /* 0x0CE */ s16 _0CE;
     /* 0x0D0 */ s16 _0D0[4];
     /* 0x0D8 */ s16 _0D8;
-    /* 0x0DA */ u8 _0DA[0xDC - 0xDA];
+    /* 0x0DA */ s16 _0DA;
     /* 0x0DC */ s16 _0DC;
     /* 0x0DE */ s16 _0DE;
     /* 0x0E0 */ s16 _0E0;

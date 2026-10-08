@@ -93,7 +93,7 @@ void fn_3_378B4(void);
 void fn_3_38000(void);
 void fn_3_38234(void);
 void fn_3_38304(void);
-void fn_3_38790(void);
+void fn_3_38790(s32 fielder, BOOL relay);
 void fn_3_38D10(void);
 void fn_3_38FF8(void);
 void fn_3_393B0(void);

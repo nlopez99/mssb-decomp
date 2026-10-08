@@ -282,6 +282,10 @@ extern u8 lbl_3_data_84B8[30][2];
 extern u8 fn_800639BC(s8 fielder, VecXYZ* pos, VecXYZ* prev);
 extern void fn_80063958(s8 fielder);
 extern void fn_3_13A048(s32 to, s32 from);
+extern struct {
+    /* 0x000 */ u8 _000[0x1D5];
+    /* 0x1D5 */ u8 _1D5;
+} lbl_3_common_bss_34C90;
 extern VecXZ lbl_3_data_4300[9];
 extern f32 lbl_3_data_4348[7][2];
 extern void fn_3_9F79C(f32 a, f32 b, f32 c, f32* x, f32* y);
@@ -4187,8 +4191,62 @@ void fn_3_38D10(void) {
 }
 
 // .text:0x00038790 size:0x580 mapped:0x80677824
-void fn_3_38790(void) {
-    return;
+void fn_3_38790(s32 fielder, BOOL relay) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    s32 prev = g_FieldingLogic._0B0;
+
+    if (fielder < 0) {
+        return;
+    }
+    if (fielder == prev) {
+        return;
+    }
+    if (g_Ball.ballState == 0 && g_Ball.ballAngleFromHome >= 984 && g_Ball.ballAngleFromHome < 1064) {
+        if (prev == 3 && fielder == 5 && f->_18C == 2 && f->_084[3] < 8.0f) {
+            return;
+        }
+        if (prev == 5 && fielder == 3 && f->_18C == 2 && f->_084[5] < 8.0f) {
+            return;
+        }
+    }
+    if (g_Ball.ballState == 0 && g_Ball.hitClassification2 <= 6 && fielder == 1 &&
+        (lbl_3_bss_170[0] >= 0x800 || lbl_3_bss_170[0] == 0)) {
+        return;
+    }
+    g_FieldingLogic._0B0 = fielder;
+    if (!relay) {
+        fn_3_5985C(g_FieldingLogic._0B0, 15);
+    } else {
+        fn_3_5985C(g_FieldingLogic._0B0, 21);
+    }
+    if (f->_18C >= 0 && f->_18C <= 5) {
+        fn_3_4B8D0(fielder);
+    }
+    if (g_FieldingLogic._0B0 == g_FieldingLogic._0BE) {
+        g_FieldingLogic._0BE = -1;
+    }
+    if (prev >= 0) {
+        if (prev >= 6) {
+            fn_3_5985C(prev, 16);
+        } else if (g_Ball.ballState == 0) {
+            if (g_Fielders[prev]._070 > 3.0f + f->_070) {
+                fn_3_5985C(prev, 16);
+            } else if (g_Fielders[prev]._18C == 6) {
+                fn_3_5985C(prev, 11);
+            } else {
+                fn_3_5985C(prev, 12);
+                g_Fielders[prev]._1D5 = 4;
+            }
+        } else {
+            fn_3_5985C(prev, 12);
+            g_Fielders[prev]._1D5 = 4;
+        }
+    }
+    if (g_Ball.framesSinceHit < 30) {
+        g_FieldingLogic._0DA = 20;
+    } else {
+        g_FieldingLogic._0DA = 45;
+    }
 }
 
 // .text:0x00038304 size:0x48C mapped:0x80677398
@@ -4876,7 +4934,49 @@ void fn_3_31594(void) {
 
 // .text:0x000313B0 size:0x1E4 mapped:0x80670444
 void fn_3_313B0(void) {
-    return;
+    UnkAC8Fielder* f;
+    s32 i;
+    s32 k;
+
+    for (i = 0; i < 9; i++) {
+        f = &g_Fielders[i];
+        if (g_d_GameSettings.minigamesEnabled) {
+            for (k = 0; k < 4; k++) {
+                if (g_Minigame.minigameFielderIndex[k] == i) {
+                    break;
+                }
+            }
+            if (k >= 4) {
+                continue;
+            }
+        }
+        if (f->_050 > 0.0f) {
+            if (lbl_3_common_bss_34C90._1D5 == 0) {
+                f->_048 = atan2(f->_034, f->_030);
+            }
+        } else if (g_Pitcher.pitchTotalTimeCounter <= 0 && g_Runners[1].runnerOnFieldOrOutOrScored == 1 && i == 2 &&
+                   !g_d_GameSettings.minigamesEnabled) {
+            f->_048 = -3.1415927f;
+        } else {
+            f->_048 = atan2(-f->_008, -f->_000);
+        }
+        if (f->_030 != 0.0f || f->_034 != 0.0f) {
+            f->_064 = atan2(f->_034, f->_030);
+            f->_19A = radToShortAngle(f->_064);
+        } else {
+            f->_064 = 0.0f;
+            f->_19A = -1;
+        }
+        if (g_d_GameSettings.minigamesEnabled) {
+            g_Minigame.minigameRelatedIndex = i;
+            fn_3_544B8();
+        }
+    }
+    if (g_d_GameSettings.minigamesEnabled) {
+        fn_3_53F48();
+    } else {
+        fn_3_544B8();
+    }
 }
 
 // .text:0x00030D74 size:0x63C mapped:0x8066FE08
