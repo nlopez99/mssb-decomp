@@ -118,7 +118,12 @@ extern struct {
 } lbl_3_common_bss_32724;
 
 extern struct {
-    /* 0x000 */ u8 _000[0x221];
+    /* 0x000 */ u8 _000[0x1D1];
+    /* 0x1D1 */ u8 _1D1;
+    /* 0x1D2 */ u8 _1D2;
+    /* 0x1D3 */ u8 _1D3[0x1D9 - 0x1D3];
+    /* 0x1D9 */ u8 _1D9;
+    /* 0x1DA */ u8 _1DA[0x221 - 0x1DA];
     /* 0x221 */ u8 _221;
 } lbl_3_common_bss_34C90;
 
@@ -515,7 +520,58 @@ void fn_3_98DE0(void) {
 
 // .text:0x00098C20 size:0x1C0 mapped:0x806D7CB4
 void fn_3_98C20(void) {
+    UnkTask1770* task = lbl_803CC1B8;
+
+    if (lbl_3_common_bss_32724._96 != 0) {
+        goto kill;
+    }
+    if (task->_1C[0] == 0) {
+        task->_1C[0] = 1;
+    } else if (task->_1C[0] == 1) {
+        if (g_d_GameSettings.GameModeSelected == 2) {
+            if (!g_Practice._19F) {
+                goto kill;
+            }
+            if (lbl_3_common_bss_34C90._1D2 == 4) {
+                task->_1C[0] = 2;
+            }
+        } else if (g_d_GameSettings.minigamesEnabled) {
+            if (g_GameLogic.gameStatus == 11 && lbl_3_common_bss_34C90._1D2 == 4) {
+                task->_1C[0] = 2;
+            }
+            if (g_d_GameSettings.GameModeSelected == 7) {
+                if (lbl_3_common_bss_34C90._1D2 == 4) {
+                    task->_1C[0] = 2;
+                }
+                if (lbl_3_common_bss_34C90._1D2 == 7) {
+                    goto kill;
+                }
+                if (lbl_3_common_bss_34C90._1D2 == 13) {
+                    goto kill;
+                }
+            }
+        } else {
+            if ((lbl_3_common_bss_34C90._1D1 == 2 || lbl_3_common_bss_34C90._1D1 == 9) &&
+                lbl_3_common_bss_34C90._1D2 == 4)
+            {
+                goto kill;
+            }
+            if (lbl_3_common_bss_34C90._1D9 == 2) {
+                goto kill;
+            }
+        }
+    } else if (task->_1C[0] == 2) {
+        lbl_80371C30[task->_14]._00->_68 = 4;
+        if ((lbl_80371C30[task->_14]._00->_5C >> 16) == 0) {
+            goto kill;
+        }
+    }
     return;
+
+kill:
+    fn_80034CEC(task);
+    fn_800B0A14_removeQueue();
+    lbl_3_common_bss_32724._AA = 0;
 }
 
 // .text:0x0009894C size:0x2D4 mapped:0x806D79E0
