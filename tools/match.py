@@ -665,12 +665,35 @@ def function_status(func: Dict[str, Any], base_syms: Optional[Dict[str, "Symbol"
     return "partial"
 
 
+def stub_callees(unit: Dict[str, Any], statuses: Dict[str, str]) -> Dict[str, List[str]]:
+    # An empty stub is inlined into its callers, so a caller cannot match until
+    # each stub it calls in this unit has a body: list those per function
+    path = asm_path(unit)
+    if not os.path.exists(path):
+        return {}
+    waits: Dict[str, List[str]] = {}
+    current = None
+    with open(path) as f:
+        for line in f:
+            if line.startswith(".fn "):
+                current = line[4:].split(",")[0].strip()
+                continue
+            m = re.search(r"\tbl?\s+([A-Za-z_][\w.@]*)\s*$", line)
+            if current and m:
+                callee = m.group(1)
+                if callee != current and statuses.get(callee) in ("stub", "missing"):
+                    if callee not in waits.setdefault(current, []):
+                        waits[current].append(callee)
+    return waits
+
+
 def print_unit(
     unit: Dict[str, Any],
     report_unit: Dict[str, Any],
     statuses: Dict[str, str],
     base_only: List[str],
     show_all: bool,
+    waits: Dict[str, List[str]],
 ) -> None:
     measures = report_unit.get("measures", {})
     funcs = sorted(report_unit.get("functions", []), key=lambda f: int(f.get("address", 0)))
@@ -696,7 +719,8 @@ def print_unit(
             continue
         percent = func.get("fuzzy_match_percent")
         shown = f"{percent:6.2f}%" if percent is not None else "      -"
-        print(f"  {status:<8}{shown}  {int(func['size']):#7x}  {func['name']}")
+        waiting = f"  (waits on {', '.join(waits[func['name']])})" if waits.get(func["name"]) else ""
+        print(f"  {status:<8}{shown}  {int(func['size']):#7x}  {func['name']}{waiting}")
     if hidden:
         print(f"  ({hidden} matching functions hidden; --all shows them)")
     if "reloc" in statuses.values():
@@ -815,6 +839,7 @@ def run(args: argparse.Namespace, unit: Dict[str, Any], function: Optional[str],
             if status == "match":
                 status = check_function(unit, f, target_syms, base_syms)[0]
             statuses[f["name"]] = status
+        waits = stub_callees(unit, statuses)
         if funcs:
             matched = all(s == "match" for s in statuses.values())
         else:  # data-only unit
@@ -826,7 +851,13 @@ def run(args: argparse.Namespace, unit: Dict[str, Any], function: Optional[str],
                 measures=report_unit.get("measures", {}),
                 sections=report_unit.get("sections", []),
                 functions=[
-                    {"name": f["name"], "size": int(f["size"]), "percent": f.get("fuzzy_match_percent"), "status": statuses[f["name"]]}
+                    {
+                        "name": f["name"],
+                        "size": int(f["size"]),
+                        "percent": f.get("fuzzy_match_percent"),
+                        "status": statuses[f["name"]],
+                        "waits_on": waits.get(f["name"], []),
+                    }
                     for f in funcs
                 ],
                 base_only=base_only,
@@ -835,7 +866,7 @@ def run(args: argparse.Namespace, unit: Dict[str, Any], function: Optional[str],
         else:
             built = f" (built in {result['build']['seconds']:.2f}s)" if "build" in result else ""
             print(f"{unit['name']}  {result['source']}{built}")
-            print_unit(unit, report_unit, statuses, base_only, args.all)
+            print_unit(unit, report_unit, statuses, base_only, args.all, waits)
         return EXIT_MATCH if matched else EXIT_MISMATCH
 
     func = next((f for f in report_unit.get("functions", []) if f["name"] == function), None)
