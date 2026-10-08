@@ -97,6 +97,7 @@ typedef struct {
 } UnkTextWindow3A48; // size: 0x38
 
 extern UnkTextWindow3A48 lbl_80366B18[];
+extern u8 lbl_800E8558[][6];
 extern struct {
     /* 0x00 */ u8 _00[0x8];
     /* 0x08 */ u16 _08;
@@ -107,11 +108,15 @@ extern struct {
     /* 0x01 */ u8 _01[0x8 - 0x1];
     /* 0x08 */ u8 _08;
     /* 0x09 */ u8 _09;
+    /* 0x0A */ u8 _0A[0x26 - 0xA];
+    /* 0x26 */ u8 _26;
 } lbl_8034E978;
 extern UnkSpriteRef3A48 lbl_80371C30[];
 extern void* lbl_803CC1B8;
 
 // In the 0x8110-0xD5B8 block outside every unit's .data range
+extern u8 lbl_3_data_9D50[][5];
+extern u8 lbl_3_data_A594[4];
 extern UnkSpriteDesc3A48 lbl_3_data_B1BC[];
 extern u16 lbl_3_data_B3DC[6];
 extern u16 lbl_3_data_B3E8[6];
@@ -119,6 +124,7 @@ extern UnkSpriteDesc3A48 lbl_3_data_B3F4[];
 extern UnkSpriteDesc3A48 lbl_3_data_B5D4[];
 extern s16 lbl_3_data_B834[5][4];
 extern UnkSpriteDesc3A48 lbl_3_data_B85C[];
+extern u16 lbl_3_data_BA5C[10];
 extern UnkSpriteDesc3A48 lbl_3_data_BA70[];
 extern UnkSpriteDesc3A48 lbl_3_data_BD50[];
 extern UnkSpriteDesc3A48 lbl_3_data_BD90[];
@@ -134,9 +140,9 @@ extern s16 lbl_3_data_104B8[16][2][3];
 
 extern void fn_8000F8F4(UnkTask3A48* task);
 extern u16 fn_8000F988(UnkTask3A48* task, s32, u16, s32, s32, s32);
-extern void fn_8000FD9C(u16 id, s32, s32);
-extern void fn_8000FE08(u16 id, s32, s32);
-extern void fn_8000FEE8(u16 id);
+extern void fn_8000FD9C(s32 id, s32, s32);
+extern void fn_8000FE08(s32 id, s32, s32);
+extern void fn_8000FEE8(s32 id);
 extern void fn_8004CC4C(int arg0, int arg1, int arg2, int arg3, int arg4);
 extern void fn_8004D0F0(void);
 extern void fn_80050F78(int);
@@ -150,6 +156,14 @@ extern UnkTask3A48* fn_800B0A5C_insertQueue(void (*)(void), s32);
 // Between rep_3448's and rep_34B0's .text ranges
 extern void fn_3_12BFE8(void);
 extern void fn_3_12C3F0(void);
+
+static inline UnkSprite3A48* getSprite(UnkTask3A48* task, s32 i) {
+    s32 idx = task->_14 + i;
+    return lbl_80371C30[idx]._00;
+}
+static inline BOOL isAnimDone(UnkSprite3A48* sprite) {
+    return sprite->_69 == 2 ? TRUE : FALSE;
+}
 
 static inline void setScreen(u8 id) {
     lbl_8034E978._00 = id;
@@ -340,7 +354,96 @@ void fn_3_15A244(void) {
 
 // .text:0x00159D50 size:0x4F4 mapped:0x80798DE4
 void fn_3_159D50(void) {
-    return;
+    UnkTask3A48* task = lbl_803CC1B8;
+    s32 i;
+    s32 count;
+    u32 frame;
+
+    if (lbl_3_common_bss_32724._96 == 0 && g_Practice.practiceType_1 != 6 && g_GameLogic.secondaryGameMode == 10) {
+        if (task->_1C == 1) {
+            if ((lbl_80371C30[task->_14]._00->_5C >> 16) >= 25) {
+                lbl_80371C30[task->_14]._00->_68 = 0;
+                task->_1C = 2;
+            }
+        } else if (task->_1C == 2) {
+            for (i = 0; i < 5; i++) {
+                if (g_Practice.practiceType == i) {
+                    if ((lbl_80371C30[task->_14 + i + 1]._00->_5C >> 16) < 90) {
+                        lbl_80371C30[task->_14 + i + 1]._00->_68 = 1;
+                        lbl_80371C30[task->_14 + i + 11]._00->_68 = 1;
+                    } else {
+                        lbl_80371C30[task->_14 + i + 1]._00->_5C = 10 << 16;
+                        lbl_80371C30[task->_14 + i + 11]._00->_5C = 10 << 16;
+                    }
+                } else {
+                    frame = lbl_80371C30[task->_14 + i + 1]._00->_5C >> 16;
+                    if (frame > 10) {
+                        lbl_80371C30[task->_14 + i + 1]._00->_5C = 10 << 16;
+                        lbl_80371C30[task->_14 + i + 1]._00->_68 = 4;
+                        lbl_80371C30[task->_14 + i + 11]._00->_5C = 10 << 16;
+                        lbl_80371C30[task->_14 + i + 11]._00->_68 = 4;
+                    } else if (frame != 0) {
+                        lbl_80371C30[task->_14 + i + 1]._00->_68 = 4;
+                        lbl_80371C30[task->_14 + i + 11]._00->_68 = 4;
+                    } else {
+                        lbl_80371C30[task->_14 + i + 1]._00->_68 = 0;
+                        lbl_80371C30[task->_14 + i + 11]._00->_68 = 0;
+                    }
+                }
+            }
+            if (g_Practice.practiceState == 5) {
+                lbl_80371C30[task->_14]._00->_68 = 1;
+                lbl_80371C30[task->_14]._00->_64 = lbl_3_data_B3E8[g_Practice.practiceType];
+                lbl_80371C30[task->_14 + 1 + g_Practice.practiceType]._00->_68 = 1;
+                lbl_80371C30[task->_14 + 1 + g_Practice.practiceType]._00->_5C = 90 << 16;
+                lbl_80371C30[task->_14 + 11 + g_Practice.practiceType]._00->_68 = 1;
+                lbl_80371C30[task->_14 + 11 + g_Practice.practiceType]._00->_5C = 90 << 16;
+                task->_1C = 3;
+            }
+        } else if (task->_1C == 3) {
+            if ((lbl_80371C30[task->_14]._00->_5C >> 16) >= 40) {
+                lbl_80371C30[task->_14]._00->_68 = 0;
+            }
+            if (g_Practice.practiceType_1 == 1 || g_Practice.practiceType_1 == 2 || g_Practice.practiceType_1 == 3 || g_Practice.practiceType_1 == 4 ||
+                g_Practice.practiceType_1 == 5)
+            {
+                if (g_Practice.practiceState == 3) {
+                    if (g_Practice.practiceType_2 == 4) {
+                        lbl_80371C30[task->_14]._00->_68 = 1;
+                        task->_1C = 9;
+                    }
+                } else if (g_Practice.practiceState == 6) {
+                    lbl_80371C30[task->_14]._00->_68 = 4;
+                    lbl_80371C30[task->_14 + 1 + g_Practice.practiceType]._00->_68 = 4;
+                    lbl_80371C30[task->_14 + 11 + g_Practice.practiceType]._00->_68 = 4;
+                    task->_1C = 4;
+                }
+            }
+        } else if (task->_1C == 4) {
+            count = 0;
+            if ((lbl_80371C30[task->_14]._00->_5C >> 16) <= 25) {
+                count = 1;
+                lbl_80371C30[task->_14]._00->_68 = 0;
+            }
+            if ((lbl_80371C30[task->_14 + 1 + g_Practice.practiceType]._00->_5C >> 16) <= 90) {
+                count++;
+                lbl_80371C30[task->_14 + 1 + g_Practice.practiceType]._00->_68 = 0;
+                lbl_80371C30[task->_14 + 11 + g_Practice.practiceType]._00->_68 = 0;
+            }
+            if (count >= 2) {
+                task->_1C = 2;
+            }
+        } else if (task->_1C == 5) {
+            if ((lbl_80371C30[task->_14]._00->_5C >> 16) <= 40) {
+                lbl_80371C30[task->_14]._00->_68 = 0;
+                task->_1C = 3;
+            }
+        }
+    } else {
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+        lbl_3_common_bss_32724._C0 = 0;
+    }
 }
 
 // .text:0x001599B8 size:0x398 mapped:0x80798A4C
@@ -381,7 +484,72 @@ void fn_3_1599B8(void) {
 
 // .text:0x001595F4 size:0x3C4 mapped:0x80798688
 void fn_3_1595F4(void) {
-    return;
+    UnkTask3A48* task = lbl_803CC1B8;
+    s32 i;
+
+    if (g_GameLogic.secondaryGameMode == 10 &&
+        (g_Practice.practiceType_1 == 1 || g_Practice.practiceType_1 == 2 || g_Practice.practiceType_1 == 3 || g_Practice.practiceType_1 == 4 ||
+         g_Practice.practiceType_1 == 5 || g_Practice.practiceType_1 == 6))
+    {
+        if (task->_18 == 0) {
+            task->_18 = 1;
+        } else if (task->_18 == 1) {
+            if ((s32)(lbl_80371C30[task->_14]._00->_5C >> 16) >= 15) {
+                task->_18 = 2;
+            }
+        } else if (task->_18 == 2) {
+            task->_1A += 32;
+            if (task->_1A > 255) {
+                task->_1A = 255;
+            }
+            for (i = 0; i < 4; i++) {
+                if (g_Practice.subMenuCursor == i) {
+                    if (g_Practice.practiceState == 3 || g_Practice.practiceState == 4) {
+                        lbl_80371C30[task->_14 + 2 + i]._00->_68 = 1;
+                        lbl_80371C30[task->_14 + 6 + i]._00->_68 = 1;
+                    } else {
+                        if ((s32)(lbl_80371C30[task->_14 + 2 + i]._00->_5C >> 16) < 9) {
+                            lbl_80371C30[task->_14 + 2 + i]._00->_68 = 1;
+                        } else {
+                            lbl_80371C30[task->_14 + 2 + i]._00->_68 = 0;
+                        }
+                        lbl_80371C30[task->_14 + 6 + i]._00->_5C = 1 << 16;
+                        lbl_80371C30[task->_14 + 6 + i]._00->_68 = 0;
+                    }
+                } else {
+                    lbl_80371C30[task->_14 + 2 + i]._00->_5C = 0;
+                    lbl_80371C30[task->_14 + 2 + i]._00->_68 = 0;
+                    lbl_80371C30[task->_14 + 6 + i]._00->_5C = 0;
+                    lbl_80371C30[task->_14 + 6 + i]._00->_68 = 0;
+                }
+            }
+            if (g_Practice.practiceType_1 != 6 && g_Practice.practiceState == 6) {
+                task->_18 = 3;
+            }
+        } else if (task->_18 == 3) {
+            if (task->_1A >= 32) {
+                task->_1A -= 32;
+            } else {
+                task->_1A = 0;
+            }
+            lbl_80371C30[task->_14]._00->_68 = 4;
+            lbl_80371C30[task->_14 + 1]._00->_68 = 4;
+        }
+        for (i = 0; i < 4; i++) {
+            lbl_80371C30[task->_14 + 14 + i]._00->_58 = task->_1A | (lbl_80371C30[task->_14 + 14 + i]._00->_58 & ~0xFF);
+        }
+        return;
+    }
+    lbl_3_common_bss_32724._C1 = 0;
+    lbl_3_common_bss_32724._C2 = 0;
+    for (i = 0; i < 4; i++) {
+        if (task->_1C_arr[i] != 0xFFFF) {
+            fn_8000FEE8(task->_1C_arr[i]);
+        }
+    }
+    fn_8000F8F4(task);
+    fn_80034CEC(task);
+    fn_800B0A14_removeQueue();
 }
 
 // .text:0x00159590 size:0x64 mapped:0x80798624
@@ -396,8 +564,86 @@ void fn_3_159590(void) {
 }
 
 // .text:0x00159114 size:0x47C mapped:0x807981A8
+// 99.83%: in the block after the state chain, the target loads g_Minigame._19E8[0]._0 into r6
+// and the sprite index into r0; this build swaps those registers.
 void fn_3_159114(void) {
+    UnkTask3A48* task = lbl_803CC1B8;
+    s32 done;
+    s32 id;
+    u8* entry;
+
+    if (task->_1A < 0xFFFE) {
+        task->_1A++;
+    } else {
+        task->_1A = 0xFFFF;
+    }
+    if (lbl_3_common_bss_32724._96 != 0 || g_Practice.practiceType_1 != 6) {
+        goto remove;
+    }
+    if (task->_1E == 0) {
+        task->_1E = 1;
+        task->_1A = 0;
+    } else if (task->_1E == 1) {
+        done = 0;
+        if ((s32)(lbl_80371C30[task->_14]._00->_5C >> 16) >= 14) {
+            done |= 16;
+            lbl_80371C30[task->_14]._00->_68 = 0;
+            lbl_80371C30[task->_14 + 2]._00->_68 = 0;
+        }
+        if (done == 16) {
+            task->_1E = 2;
+        }
+    } else if (task->_1E == 2) {
+        id = g_Minigame._19E8[g_Practice.homeAway]._0;
+        lbl_80371C30[task->_14 + 5]._00->_5C = lbl_3_data_A594[g_Minigame.battingHandedness[g_Practice.homeAway]] << 16;
+        if (lbl_800E8558[id][0] != 0 && g_Minigame._19E8[g_Practice.homeAway]._1 == 0 &&
+            g_Minigame._19E8[g_Practice.homeAway]._6 == 0)
+        {
+            lbl_80371C30[task->_14 + 7]._00->_54 |= 2;
+        } else {
+            lbl_80371C30[task->_14 + 7]._00->_54 &= ~2;
+        }
+        if (g_Practice.practiceState == 4) {
+            goto remove;
+        }
+        if (g_Practice.practiceState == 5) {
+            task->_1E = 3;
+            task->_1A = 0;
+        }
+    } else if (task->_1E == 3) {
+        if (task->_1A == 1) {
+            lbl_80371C30[task->_14]._00->_68 = 1;
+            lbl_80371C30[task->_14 + 2]._00->_68 = 1;
+        }
+    }
+    if (g_Minigame._19DA[0] >= 0) {
+        if (g_Minigame._19E8[0]._0 != (getSprite(task, 13)->_5C >> 16)) {
+            getSprite(task, 8)->_5C = 0;
+            getSprite(task, 9)->_5C = 0;
+        }
+        getSprite(task, 8)->_54 |= 2;
+        getSprite(task, 8)->_68 = 1;
+        getSprite(task, 9)->_54 |= 2;
+        getSprite(task, 9)->_68 = 1;
+        getSprite(task, 13)->_5C = g_Minigame._19E8[0]._0 << 16;
+        getSprite(task, 11)->_54 |= 2;
+        getSprite(task, 11)->_68 = 1;
+        entry = lbl_800E8558[g_Minigame._19E8[0]._0];
+        getSprite(task, 12)->_5C = lbl_3_data_9D50[entry[0]][entry[5]] << 16;
+    } else {
+        getSprite(task, 8)->_5C = 0;
+        getSprite(task, 8)->_54 &= ~2;
+        getSprite(task, 9)->_5C = 0;
+        getSprite(task, 9)->_54 &= ~2;
+        getSprite(task, 13)->_5C = 54 << 16;
+        getSprite(task, 11)->_5C = 0;
+        getSprite(task, 11)->_54 &= ~2;
+    }
     return;
+
+remove:
+    fn_80034CEC(task);
+    fn_800B0A14_removeQueue();
 }
 
 // .text:0x001590C8 size:0x4C mapped:0x8079815C
@@ -427,7 +673,88 @@ void fn_3_158FE4(void) {
 
 // .text:0x00158B64 size:0x480 mapped:0x80797BF8
 void fn_3_158B64(void) {
-    return;
+    UnkTask3A48* task = lbl_803CC1B8;
+    BOOL done = FALSE;
+    s16 text;
+    UnkSprite3A48* sprite;
+    s32 frame;
+
+    if (lbl_3_common_bss_32724._96 == 0 && (g_Practice.tutorialState != 2 || g_Practice.practiceState != 3)) {
+        if (task->_1C == 0) {
+            task->_1C++;
+            g_Practice.laukituTextChannelIndex = fn_8000F988(task, 9, 0, 5, 0, 0);
+            lbl_80366B18[g_Practice.laukituTextChannelIndex]._2F = 0;
+            lbl_80366B18[g_Practice.laukituTextChannelIndex]._30 = 1;
+            fn_8000FD9C(g_Practice.laukituTextChannelIndex, 2, 0);
+            g_Practice.diagramTextChannelIndex = fn_8000F988(task, 10, 0, 5, 0, 0);
+            lbl_80366B18[g_Practice.diagramTextChannelIndex]._2F = 1;
+            lbl_80366B18[g_Practice.diagramTextChannelIndex]._30 = 1;
+        }
+        if (g_Practice.instructionComplete_readyToAdvance != 0 || g_Practice.allInstructionsComplete != 0) {
+            lbl_80371C30[task->_14 + 7]._00->_54 |= 2;
+        } else {
+            lbl_80371C30[task->_14 + 7]._00->_54 &= ~2;
+        }
+        sprite = lbl_80371C30[task->_14]._00;
+        frame = sprite->_5C >> 16;
+        if (g_Practice.textRelatedIndicator != 0) {
+            if (frame <= 15) {
+                sprite->_68 = 1;
+            } else if (sprite->_69 == 2) {
+                done = TRUE;
+            }
+        } else if (frame > 15) {
+            sprite->_68 = 4;
+        } else if (frame < 15) {
+            sprite->_68 = 1;
+        } else {
+            sprite->_68 = 0;
+        }
+        if (g_Practice.maybeControlFlag1 != 0 && done) {
+            lbl_80371C30[task->_14 + 8]._00->_64 = lbl_3_data_BA5C[g_Practice.maybeControlFlag1];
+            lbl_80371C30[task->_14 + 8]._00->_54 |= 2;
+            lbl_80371C30[task->_14 + 4]._00->_68 = 1;
+            lbl_80371C30[task->_14 + 5]._00->_68 = 1;
+            if (isAnimDone(lbl_80371C30[task->_14 + 4]._00)) {
+                lbl_80371C30[task->_14 + 10]._00->_58 = (lbl_80371C30[task->_14 + 10]._00->_58 & ~0xFF) | 0xFF;
+            } else {
+                lbl_80371C30[task->_14 + 10]._00->_58 &= ~0xFF;
+            }
+        } else {
+            lbl_80371C30[task->_14 + 8]._00->_54 &= ~2;
+            lbl_80371C30[task->_14 + 4]._00->_68 = 4;
+            lbl_80371C30[task->_14 + 5]._00->_68 = 4;
+            lbl_80371C30[task->_14 + 10]._00->_58 &= ~0xFF;
+        }
+        lbl_80371C30[task->_14 + 6]._00->_5C = g_Practice.maybeControlFlag2 << 16;
+        text = g_Practice.lakituTextIndex;
+        if (text >= 0) {
+            g_Practice.lakituTextIndex_stored = text;
+            g_Practice.lakituTextIndex = -1;
+            fn_8000FE08(g_Practice.laukituTextChannelIndex, 5, text);
+        }
+        text = g_Practice.diagramTitleTextIndex;
+        if (text >= 0) {
+            g_Practice.diagramTitleTextIndex_stored = text;
+            g_Practice.diagramTitleTextIndex = -1;
+            fn_8000FE08(g_Practice.diagramTextChannelIndex, 5, text);
+        }
+        g_Practice.currentMessageDoneTyping = lbl_80366B18[g_Practice.laukituTextChannelIndex]._34;
+    } else {
+        g_Practice.currentMessageDoneTyping = 1;
+        if (g_Practice.laukituTextChannelIndex >= 0) {
+            fn_8000FEE8(g_Practice.laukituTextChannelIndex);
+        }
+        if (g_Practice.diagramTextChannelIndex >= 0) {
+            fn_8000FEE8(g_Practice.diagramTextChannelIndex);
+        }
+        if (g_Practice.laukituTextChannelIndex >= 0 || g_Practice.diagramTextChannelIndex >= 0) {
+            fn_8000F8F4(task);
+        }
+        lbl_8034E978._26 = 1;
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+    }
 }
 
 // .text:0x001589C4 size:0x1A0 mapped:0x80797A58
