@@ -1296,7 +1296,7 @@ void fn_3_B440(void) {
 
 // .text:0x0000A970 size:0xAD0 mapped:0x80649A04
 // Needs fn_3_6C38, still a stub that is inlined away here. With a real fn_3_6C38 body it
-// scores 99.67%: &velocity.x and &velocity.z swap r28/r27, and the star swing r5/r6.
+// scores 99.70%: &velocity.x and &velocity.z swap r28/r27, and the star swing takes r6 for r5.
 void fn_3_A970(int mode) {
     f32 speed;
     f32 angle;
@@ -1376,8 +1376,8 @@ void fn_3_A970(int mode) {
             angle -= g_hitFloats.DKStarAngleDelta;
         }
         getComponentsFromRad(angle, &g_Ball.physicsSubstruct.velocity.x, &g_Ball.physicsSubstruct.velocity.z);
-        g_Ball.physicsSubstruct.velocity.x *= speed;
         g_Ball.physicsSubstruct.velocity.z *= speed;
+        g_Ball.physicsSubstruct.velocity.x *= speed;
     }
     g_Ball.AtBat_Contact_BallPos.x += g_Ball.physicsSubstruct.velocity.x;
     g_Ball.AtBat_Contact_BallPos.y += g_Ball.physicsSubstruct.velocity.y;
