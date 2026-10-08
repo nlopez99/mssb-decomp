@@ -17,7 +17,9 @@
 # for scratch variants such as a copy that defines out-of-range data as
 # statics. It compiles into a temporary directory and leaves the source and
 # the build directory alone, so such runs can go alongside other edits and
-# runs in the same checkout.
+# runs in the same checkout. Repeat it with a header copy to replace a header
+# for the run too: a .h file replaces the header of the same name under
+# include/, and COPY=include/<path> names the one it replaces.
 #
 # <unit> may be an objdiff unit name (game/game/kinoko), a source path
 # (src/game/kinoko.c) or a unique basename (kinoko).
@@ -145,9 +147,13 @@ def build(unit: Dict[str, Any], with_base: bool = True) -> Tuple[bool, float, st
     return proc.returncode == 0, elapsed, output
 
 
-def build_scratch(unit: Dict[str, Any], scratch: str, out_dir: str) -> Tuple[bool, float, str, Dict[str, Any]]:
-    # Compile the scratch file with the unit's own command into out_dir, and
-    # describe it there as a one-unit objdiff project whose base is that object
+def build_scratch(
+    unit: Dict[str, Any], scratch: Optional[str], headers: List[Tuple[str, str]], out_dir: str
+) -> Tuple[bool, float, str, Dict[str, Any]]:
+    # Compile the scratch file (or the unit's own source) with the unit's own
+    # command into out_dir, with the header copies in an include directory
+    # searched first, and describe it there as a one-unit objdiff project
+    # whose base is that object
     ok, elapsed, output = build(unit, with_base=False)
     if not ok:
         return ok, elapsed, output, unit
@@ -159,8 +165,17 @@ def build_scratch(unit: Dict[str, Any], scratch: str, out_dir: str) -> Tuple[boo
     if io not in command:
         raise UsageError(f"cannot find '{io.strip()}' in the compile command for {unit['base_path']}")
     copy = os.path.join(out_dir, os.path.basename(source))
-    shutil.copyfile(scratch, copy)
+    shutil.copyfile(scratch or os.path.join(root_dir, source), copy)
     command = command.replace(io, f" -c {copy} -o {out_dir}")
+    if headers:
+        if " -i include " not in command:
+            raise UsageError(f"cannot find '-i include' in the compile command for {unit['base_path']}")
+        overlay = os.path.join(out_dir, "include")
+        for header_copy, replaces in headers:
+            dest = os.path.join(overlay, os.path.relpath(replaces, "include"))
+            os.makedirs(os.path.dirname(dest), exist_ok=True)
+            shutil.copyfile(header_copy, dest)
+        command = command.replace(" -i include ", f" -i {overlay} -i include ", 1)
     start = time.monotonic()
     proc = subprocess.run(command, shell=True, cwd=root_dir, capture_output=True, text=True)
     elapsed += time.monotonic() - start
@@ -640,14 +655,19 @@ def print_listing(insns: List[Insn], symbols: Dict[str, Symbol], max_lines: int,
         print(f"{insn.offset:04x}  {insn.text}{annotate(insn, symbols)}")
 
 
-def print_draft(draft: Optional[str], max_lines: int, full: bool) -> None:
+def print_draft(draft: Optional[str], function: str, max_lines: int, full: bool) -> None:
     if draft is None:
         return
     lines = draft.splitlines()
     print("\nm2c draft (a starting point; it will not match as written):")
     for n, line in enumerate(lines):
         if not full and n >= max_lines:
-            print(f"... truncated at {max_lines} of {len(lines)} lines; use --max-lines or --full")
+            # Keep the whole draft, so reading the rest needs no second run
+            path = os.path.join(build_dir, "m2c", f"{function}.c")
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, "w") as f:
+                f.write(draft)
+            print(f"... truncated at {max_lines} of {len(lines)} lines; the whole draft is in {os.path.relpath(path, root_dir)}")
             break
         print(line)
 
@@ -771,7 +791,13 @@ def main() -> int:
     parser.add_argument("--max-lines", type=int, default=200, help="cap on printed diff lines (default 200)")
     parser.add_argument("--json", action="store_true", help="print a machine-readable result instead")
     parser.add_argument("--m2c", action="store_true", help="print an m2c draft even if the function is in the source")
-    parser.add_argument("--source", metavar="FILE", help="compile FILE in place of the unit's source for this run")
+    parser.add_argument(
+        "--source",
+        metavar="FILE",
+        action="append",
+        help="for this run, compile FILE in place of the unit's source (.c) or of the header of the same name "
+        "under include/ (.h, or FILE=include/<path>); repeatable",
+    )
     args = parser.parse_args()
 
     units = load_units()
@@ -792,19 +818,52 @@ def main() -> int:
     if args.source:
         if args.no_build:
             raise UsageError("--source needs a build; drop --no-build")
-        if not os.path.isfile(args.source):
-            raise UsageError(f"{args.source} not found")
+        args.scratch_source, args.scratch_headers = scratch_files(args.source)
         with tempfile.TemporaryDirectory(prefix="match-source-") as out_dir:
             return run(args, unit, function, out_dir)
     return run(args, unit, function)
+
+
+def scratch_files(specs: List[str]) -> Tuple[Optional[str], List[Tuple[str, str]]]:
+    # Sort --source arguments into the source copy and (header copy, the
+    # header under include/ it replaces) pairs
+    source = None
+    headers = []
+    for spec in specs:
+        copy, _, replaces = spec.partition("=")
+        if not os.path.isfile(copy):
+            raise UsageError(f"{copy} not found")
+        if not replaces and copy.endswith(".c"):
+            if source:
+                raise UsageError("--source takes one .c file")
+            source = copy
+            continue
+        if not replaces:
+            name = os.path.basename(copy)
+            found = [
+                os.path.relpath(os.path.join(d, name), root_dir)
+                for d, _, files in os.walk(os.path.join(root_dir, "include"))
+                if name in files
+            ]
+            if len(found) != 1:
+                where = ", ".join(found) or "nothing"
+                raise UsageError(f"{name} names {where} under include/; write {copy}=include/<path>")
+            replaces = found[0]
+        replaces = os.path.normpath(replaces)
+        if not replaces.startswith("include" + os.sep) or not os.path.isfile(os.path.join(root_dir, replaces)):
+            raise UsageError(f"{replaces} is not a file under include/")
+        headers.append((copy, replaces))
+    return source, headers
 
 
 def run(args: argparse.Namespace, unit: Dict[str, Any], function: Optional[str], scratch_dir: Optional[str] = None) -> int:
     result: Dict[str, Any] = {"unit": unit["name"], "source": unit.get("metadata", {}).get("source_path")}
     project = root_dir
     if scratch_dir:
-        result["source"] = f"{args.source} (in place of {result['source']})"
-        ok, elapsed, output, unit = build_scratch(unit, args.source, scratch_dir)
+        replaced = [f"{args.scratch_source} in place of {result['source']}"] if args.scratch_source else []
+        replaced += [f"{copy} in place of {replaces}" for copy, replaces in args.scratch_headers]
+        result["source"] = f"{result['source']} ({'; '.join(replaced)})"
+        ok, elapsed, output, unit = build_scratch(unit, args.scratch_source, args.scratch_headers, scratch_dir)
         project = scratch_dir
     elif not args.no_build:
         ok, elapsed, output = build(unit)
@@ -901,7 +960,7 @@ def run(args: argparse.Namespace, unit: Dict[str, Any], function: Optional[str],
     if status == "missing":
         print("not in the source yet; target assembly:")
         print_listing(target, target_syms, args.max_lines, args.full)
-        print_draft(draft, args.max_lines, args.full)
+        print_draft(draft, function, args.max_lines, args.full)
         return EXIT_MISMATCH
     if status == "reloc":
         print(RELOC_NOTE)
@@ -909,7 +968,7 @@ def run(args: argparse.Namespace, unit: Dict[str, Any], function: Optional[str],
             print(LINKED_NOTE)
     if status != "match" or args.full:
         print_diff(rows, target_syms, base_syms, args.context, args.max_lines, args.full)
-    print_draft(draft, args.max_lines, args.full)
+    print_draft(draft, function, args.max_lines, args.full)
     return EXIT_MATCH if status == "match" else EXIT_MISMATCH
 
 
