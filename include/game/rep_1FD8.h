@@ -20,7 +20,7 @@ void fn_3_C24A0(void);
 void fn_3_C2644(void);
 void fn_3_C2974(void);
 void fn_3_C298C(void);
-void fn_3_C2AA0(void);
+u8 fn_3_C2AA0(Vec* pos, f32 width, f32 height);
 void fn_3_C2C80(struct Rep1FD8Particle* p, struct Rep1FD8Spawner* spawner);
 void fn_3_C2EDC(struct Rep1FD8Particle* p);
 BOOL fn_3_C30F0(struct Rep1FD8Spawner* spawner);

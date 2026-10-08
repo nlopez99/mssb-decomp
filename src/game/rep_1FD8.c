@@ -3,7 +3,10 @@
 // in .rodata, so MWCC does not pool .rodata and addresses constants one by one
 #include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
+#include "static/UnknownHomes_Static.h"
 #include "Dolphin/rand.h"
+#include "Dolphin/gx.h"
+#include "Dolphin/mtxext.h"
 #include "C3/control.h"
 #include "C3/geoPalette.h"
 #include "game/rep_1D58.h"
@@ -60,6 +63,11 @@ typedef struct Rep1FD8Spawner {
     /* 0x25 */ u8 _25;
 } Rep1FD8Spawner;
 
+extern u32 fn_8005268C(void);
+extern camera_803c639c_s* fn_80052734(s32 idx);
+extern void fn_80033CC8(Rep1FD8Particle* p, void* texture);
+extern void fn_8003403C(f32 width, f32 height);
+extern void fn_80033620(Rep1FD8Spawner* emitter);
 extern Rep1FD8Spawner* fn_80033A24(BOOL (*update)(Rep1FD8Spawner*), s32, s32, s32, s32, s32);
 extern Rep1FD8Task* fn_800B0A5C_insertQueue(void (*callback)(void), s32 priority);
 extern void fn_800528C0(f32 x, f32 y, f32 z, s16* screenX, s16* screenY);
@@ -351,6 +359,35 @@ void fn_3_C366C(Rep1FD8Spawner* spawner, u8 idx) {
 
 // .text:0x000C30F0 size:0x57C mapped:0x80702184
 BOOL fn_3_C30F0(Rep1FD8Spawner* spawner) {
+    Rep1FD8Particle* p = spawner->particles;
+    Vec pos;
+
+    if (g_GameLogic.gameStatus >= 27 && g_GameLogic.gameStatus <= 33) {
+        return FALSE;
+    }
+    if (g_GameLogic.gameStatus == 2 || g_GameLogic.gameStatus == 1) {
+        pos = spawner->pos;
+        if (!fn_3_C2AA0(&pos, 4.0f, 4.0f)) {
+            return FALSE;
+        }
+    }
+    fn_80033620(spawner);
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_ONE, GX_BL_ONE, GX_LO_CLEAR);
+    do {
+        if (p->delay <= 0 && p->life != 0) {
+            fn_8003403C(p->_38, p->_3C);
+            fn_80033CC8(p, spawner->_10);
+            if (fn_8005268C() == 0) {
+                fn_3_C2EDC(p);
+            }
+        }
+        p->delay -= fn_8005268C() == 0;
+        if (p->life == 0) {
+            fn_3_C2C80(p, spawner);
+        }
+        p = p->next;
+    } while (p != NULL);
     return FALSE;
 }
 
@@ -397,8 +434,52 @@ void fn_3_C2C80(Rep1FD8Particle* p, Rep1FD8Spawner* spawner) {
 }
 
 // .text:0x000C2AA0 size:0x1E0 mapped:0x80701B34
-void fn_3_C2AA0(void) {
-    return;
+// 93.77%, as sta_c2's identical fn_3_CD968: the target loads pos->x before pos->y for the
+// corners and computes them in other FPRs.
+u8 fn_3_C2AA0(Vec* pos, f32 width, f32 height) {
+    Vec out;
+    Vec corners[4];
+    camera_803c639c_s* camera;
+    u32 i;
+    u8 code;
+    u8 all = 0;
+    f32 left;
+    f32 right;
+    f32 bottom;
+    f32 top;
+
+    camera = fn_80052734(fn_8005268C());
+    PSMTXMultVec(camera->view, pos, pos);
+    if (pos->z > -1.0f || pos->z < -512.0f) {
+        return FALSE;
+    }
+    bottom = pos->y - height * 0.5f;
+    right = pos->x + width * 0.5f;
+    left = pos->x - width * 0.5f;
+    top = pos->y + height * 0.5f;
+    corners[0].z = corners[1].z = corners[2].z = corners[3].z = pos->z;
+    corners[0].x = corners[3].x = left;
+    corners[1].x = corners[2].x = right;
+    corners[0].y = corners[1].y = bottom;
+    corners[3].y = corners[2].y = top;
+    for (i = 0; i < 4; i++) {
+        PSMTX44MultVec(camera->proj, &corners[i], &out);
+        code = out.x < -1.0f;
+        code |= (out.x > 1.0f) << 1;
+        code |= (out.y < -1.0f) << 2;
+        code |= (out.y > 1.0f) << 3;
+        if (code == 0) {
+            return TRUE;
+        }
+        all &= code;
+    }
+    if ((all & 3U) == 1 || (all & 3U) == 2) {
+        return FALSE;
+    }
+    if ((all & 0xCU) == 4 || (all & 0xCU) == 8) {
+        return FALSE;
+    }
+    return TRUE;
 }
 
 // .text:0x000C298C size:0x114 mapped:0x80701A20
