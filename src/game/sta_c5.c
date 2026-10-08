@@ -10,8 +10,10 @@
 #include "Dolphin/os.h"
 #include "musyx/musyx.h"
 #include "string.h"
+#include "math.h"
 #include "game/rep_1D58.h"
 #include "game/rep_AC8.h"
+#include "game/rep_540.h"
 
 typedef struct {
     /* 0x00 */ u8 _00[0x60];
@@ -31,25 +33,63 @@ typedef struct {
     /* 0x00 */ StaC5Actor* _00;
     /* 0x04 */ u8 _04[0x58 - 0x04];
     /* 0x58 */ u8 _58;
-} StaC5Model;
+    /* 0x59 */ u8 _59;
+    /* 0x5A */ u8 _5A[0x5C - 0x5A];
+    /* 0x5C */ f32 _5C;
+    /* 0x60 */ u8 _60[0x90 - 0x60];
+} StaC5Model; // size: 0x90
 
 typedef struct StaC5Draw {
     /* 0x00 */ Control control;
     /* 0x44 */ u8 _44[0x74 - 0x44];
     /* 0x74 */ StaC5Model* _74;
-    /* 0x78 */ u8 _78[0x90 - 0x78];
+    /* 0x78 */ struct StadiumObjectCollision* _78;
+    /* 0x7C */ u8 _7C[0x90 - 0x7C];
     /* 0x90 */ u8 _90_7 : 1;
     /* 0x90 */ u8 _90_6 : 1;
     /* 0x90 */ u8 _90_5 : 1;
     /* 0x90 */ u8 _90_0 : 5;
-    /* 0x91 */ u8 _91[0xA0 - 0x91];
+    /* 0x91 */ u8 _91[0x9C - 0x91];
+    /* 0x9C */ u8 _9C;
+    /* 0x9D */ u8 _9D;
+    /* 0x9E */ u8 _9E[0xA0 - 0x9E];
     /* 0xA0 */ Vec _A0;
-    /* 0xAC */ u8 _AC[0xB4 - 0xAC];
+    /* 0xAC */ f32 _AC;
+    /* 0xB0 */ f32 _B0;
     /* 0xB4 */ f32 _B4;
-    /* 0xB8 */ u8 _B8[0xC6 - 0xB8];
+    /* 0xB8 */ u8 _B8[0xC1 - 0xB8];
+    /* 0xC1 */ u8 _C1;
+    /* 0xC2 */ u8 _C2[0xC6 - 0xC2];
     /* 0xC6 */ u8 _C6;
     /* 0xC7 */ u8 _C7;
-} StaC5Draw;
+    /* 0xC8 */ u8 _C8[0xE8 - 0xC8];
+} StaC5Draw; // size: 0xE8
+
+typedef struct StaC5Ball {
+    /* 0x00 */ Control control;
+    /* 0x44 */ u8 _44[0x74 - 0x44];
+    /* 0x74 */ StaC5Model* _74;
+    /* 0x78 */ u8 _78[0x9C - 0x78];
+    /* 0x9C */ u8 _9C;
+    /* 0x9D */ u8 _9D[0xA8 - 0x9D];
+    /* 0xA8 */ Vec pos;
+    /* 0xB4 */ Vec vel;
+    /* 0xC0 */ f32 _C0;
+} StaC5Ball;
+
+typedef struct {
+    /* 0x00 */ u16 count;
+    /* 0x04 */ Mtx _04;
+    /* 0x34 */ StaC5Model models[1];
+} StaC5ModelTable;
+
+extern struct {
+    /* 0x00 */ u8 _00[0x6C];
+    /* 0x6C */ StaC5ModelTable* _6C;
+} lbl_8036E548;
+
+extern void AnimateActorBones(StaC5Actor* actor);
+extern void fn_800B4CA0(StaC5Actor* actor, f32 frame);
 
 typedef struct StadiumSort1D58 {
     /* 0x00 */ f32 depth;
@@ -57,7 +97,8 @@ typedef struct StadiumSort1D58 {
 } StadiumSort1D58; // size: 0x8
 
 extern struct {
-    /* 0x00 */ u8 _00[0x14];
+    /* 0x00 */ StaC5Draw* _00;
+    /* 0x04 */ u8 _04[0x14 - 0x04];
     /* 0x14 */ StadiumSort1D58* _14;
     /* 0x18 */ void (*_18)(void);
     /* 0x1C */ void (*_1C)(void);
@@ -216,8 +257,25 @@ void fn_3_F65C8(void) {
 }
 
 // .text:0x000F6504 size:0xC4 mapped:0x80735598
-void fn_3_F6504(void) {
-    return;
+struct StadiumObjectCollision* fn_3_F6504(s32 idx, MtxPtr mtx) {
+    if (lbl_3_common_bss_350E4._00[idx]._9D == 2) {
+        if (lbl_3_common_bss_350E4._00[idx]._C6 < 3 && g_Ball.ballState != BALL_STATE_HELD) {
+            CTRLBuildMatrix(&lbl_3_common_bss_350E4._00[idx].control, mtx);
+        } else {
+            return NULL;
+        }
+    } else if (lbl_3_common_bss_350E4._00[idx]._9D == 0) {
+        if (lbl_3_common_bss_350E4._00[idx]._C1 == 2) {
+            return NULL;
+        }
+        if (g_Ball.AtBat_ContactResult >= 2) {
+            return NULL;
+        }
+        CTRLBuildMatrix(&lbl_3_common_bss_350E4._00[idx].control, mtx);
+    } else {
+        CTRLBuildMatrix(&lbl_3_common_bss_350E4._00[idx].control, mtx);
+    }
+    return lbl_3_common_bss_350E4._00[idx]._78;
 }
 
 // .text:0x000F6084 size:0x480 mapped:0x80735118
@@ -288,18 +346,45 @@ void fn_3_F4DAC(void) {
 }
 
 // .text:0x000F4D00 size:0xAC mapped:0x80733D94
-void fn_3_F4D00(void) {
-    return;
+void fn_3_F4D00(StaC5Ball* obj) {
+    Vec d;
+    Vec target;
+
+    PSVECAdd(&obj->pos, &obj->vel, &obj->pos);
+    CTRLSetTranslation(&obj->control, obj->pos.x, -obj->pos.y, obj->pos.z);
+    target.x = lbl_3_data_1B884[obj->_9C].pos.x;
+    target.y = lbl_3_data_1B884[obj->_9C].pos.y;
+    target.z = lbl_3_data_1B884[obj->_9C].pos.z;
+    PSVECSubtract(&target, &obj->pos, &d);
+    obj->vel.x = 0.2f * d.x;
+    obj->vel.z = 0.2f * d.z;
 }
 
 // .text:0x000F4C4C size:0xB4 mapped:0x80733CE0
-void fn_3_F4C4C(void) {
-    return;
+void fn_3_F4C4C(StaC5Ball* obj) {
+    f32 angle = -obj->_C0;
+
+    angle = 0.017453292f * angle;
+
+    obj->vel.x = 3.0f * sinf_kludge(angle);
+    obj->vel.y = 0.0f;
+    obj->vel.z = 3.0f * -cosf_kludge(angle);
+    PSVECScale(&obj->vel, -1.0f, &obj->vel);
 }
 
 // .text:0x000F4BA0 size:0xAC mapped:0x80733C34
-void fn_3_F4BA0(void) {
-    return;
+void fn_3_F4BA0(StaC5Ball* obj) {
+    Vec target;
+    Vec d;
+
+    PSVECAdd(&obj->pos, &obj->vel, &obj->pos);
+    CTRLSetTranslation(&obj->control, obj->pos.x, -obj->pos.y, obj->pos.z);
+    target.x = lbl_3_data_1B884[obj->_9C].pos.x;
+    target.y = lbl_3_data_1B884[obj->_9C].pos.y;
+    target.z = lbl_3_data_1B884[obj->_9C].pos.z;
+    PSVECSubtract(&target, &obj->pos, &d);
+    obj->vel.x = 0.2f * d.x;
+    obj->vel.z = 0.2f * d.z;
 }
 
 // .text:0x000F46A0 size:0x500 mapped:0x80733734
@@ -339,8 +424,10 @@ void fn_3_F3BB0(void) {
 }
 
 // .text:0x000F3AE0 size:0xD0 mapped:0x80732B74
-void fn_3_F3AE0(void) {
-    return;
+void fn_3_F3AE0(StaC5Draw* draw) {
+    draw->_AC = lbl_3_data_1B884[draw->_9C].pos.x;
+    draw->_B0 = lbl_3_data_1B884[draw->_9C].pos.z;
+    fn_3_F3A5C(draw, draw->_AC, 10.0f, draw->_B0, -lbl_3_data_1B884[draw->_9C].rotY);
 }
 
 // .text:0x000F3A5C size:0x84 mapped:0x80732AF0
@@ -414,8 +501,15 @@ void fn_3_F193C(void) {
 }
 
 // .text:0x000F18A4 size:0x98 mapped:0x80730938
-void fn_3_F18A4(void) {
-    return;
+void fn_3_F18A4(StaC5Draw* draw) {
+    StaC5Model* model = &lbl_8036E548._6C->models[lbl_3_bss_B218];
+
+    draw->_74 = model;
+    model->_5C = 0.0f;
+    model->_59 = 1;
+    fn_800B4CA0(model->_00, model->_5C);
+    draw->_B4 += 180.0;
+    AnimateActorBones(model->_00);
 }
 
 // .text:0x000F1750 size:0x154 mapped:0x807307E4
@@ -425,7 +519,25 @@ void fn_3_F1750(void) {
 
 // .text:0x000F1674 size:0xDC mapped:0x80730708
 void fn_3_F1674(void) {
-    return;
+    s32 stadium;
+    u8 vol;
+    SND_VOICEID voice;
+
+    stadium = g_d_GameSettings.StadiumID;
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+        vol = lbl_3_data_84B8[5][0];
+    } else {
+        vol = lbl_3_data_8404[stadium][5][0];
+    }
+    voice = sndFXStartEx(lbl_3_data_81DC[stadium] + 5, vol, 63, 0);
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+        vol = lbl_3_data_84B8[5][1];
+    } else {
+        vol = lbl_3_data_8404[stadium][5][1];
+    }
+    sndFXCtrl(voice, 91, vol);
+    fn_3_65A8();
+    fn_3_F466C();
 }
 
 // .text:0x000F1518 size:0x15C mapped:0x807305AC
@@ -434,8 +546,15 @@ void fn_3_F1518(void) {
 }
 
 // .text:0x000F1448 size:0xD0 mapped:0x807304DC
-void fn_3_F1448(void) {
-    return;
+void fn_3_F1448(StaC5Draw* draw) {
+    draw->_A0.x = lbl_3_data_1B9A4[draw->_9C].pos.x;
+    draw->_A0.y = lbl_3_data_1B9A4[draw->_9C].pos.y;
+    draw->_A0.z = lbl_3_data_1B9A4[draw->_9C].pos.z;
+    draw->_AC = -lbl_3_data_1B9A4[draw->_9C].rotY;
+    draw->control.type = 0;
+    CTRLSetTranslation(&draw->control, draw->_A0.x, -draw->_A0.y, draw->_A0.z);
+    CTRLSetRotation(&draw->control, 0.0f, draw->_AC, 0.0f);
+    CTRLSetScale(&draw->control, 1.0f, 1.0f, 1.0f);
 }
 
 // .text:0x000F13F8 size:0x50 mapped:0x8073048C
@@ -482,8 +601,11 @@ void fn_3_EF930(void) {
 }
 
 // .text:0x000EF890 size:0xA0 mapped:0x8072E924
-void fn_3_EF890(void) {
-    return;
+void fn_3_EF890(StaC5Draw* draw) {
+    fn_3_F13F8(draw);
+    CTRLSetScale(&draw->control, 2.0f, 0.1f, 2.0f);
+    draw->_C6 = 6;
+    draw->_C7 = 75;
 }
 
 // .text:0x000EF800 size:0x90 mapped:0x8072E894
