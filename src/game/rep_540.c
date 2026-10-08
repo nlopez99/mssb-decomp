@@ -1165,8 +1165,6 @@ s32 fn_3_BBBC(VecXYZ* out, s32 count, s32 step, f32 x, f32 z) {
 }
 
 // .text:0x0000B940 size:0x27C mapped:0x8064A9D4
-// 97.4%: the history shift copies [0] to [1] load-store by component where the target
-// loads all three components first.
 void fn_3_B940(void) {
     VecXYZ pos;
     Rep540Fielder* fielder;
@@ -1211,11 +1209,12 @@ void fn_3_B940(void) {
                     g_Ball.offsetWhilePickedUpHistory[i].z = z;
                 }
             } else {
-                for (i = 3; i != 0; i--) {
+                for (i = 3; i > 1; i--) {
                     g_Ball.offsetWhilePickedUpHistory[i].x = g_Ball.offsetWhilePickedUpHistory[i - 1].x;
                     g_Ball.offsetWhilePickedUpHistory[i].y = g_Ball.offsetWhilePickedUpHistory[i - 1].y;
                     g_Ball.offsetWhilePickedUpHistory[i].z = g_Ball.offsetWhilePickedUpHistory[i - 1].z;
                 }
+                VEC_COPY(&g_Ball.offsetWhilePickedUpHistory[1], &g_Ball.offsetWhilePickedUpHistory[0]);
                 g_Ball.offsetWhilePickedUpHistory[0].x = pos.x - fielder->pos.x;
                 g_Ball.offsetWhilePickedUpHistory[0].y = -pos.y - fielder->pos.y;
                 g_Ball.offsetWhilePickedUpHistory[0].z = pos.z - fielder->pos.z;
