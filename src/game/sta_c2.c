@@ -1,7 +1,12 @@
 #include "game/sta_c2.h"
 #include "header_rep_data.h"
+#include "game/UnknownHomes_Game.h"
 #include "Dolphin/mtx.h"
 #include "musyx/musyx.h"
+#include "C3/control.h"
+#include "Dolphin/os.h"
+#include "game/rep_1838.h"
+#include "game/rep_AC8.h"
 
 typedef struct StaC2Place {
     /* 0x00 */ Vec pos;
@@ -64,6 +69,94 @@ typedef struct StaC2Swing {
     /* 0x30 */ f32 _30;
 } StaC2Swing; // size: 0x34
 
+typedef struct {
+    /* 0x00 */ u8 _00[0x74];
+    /* 0x74 */ u32 _74;
+} StaC2TexRegs;
+
+typedef struct {
+    /* 0x00 */ u8 _00[0x4];
+    /* 0x04 */ StaC2TexRegs* _04;
+} StaC2TexInfo;
+
+typedef struct {
+    /* 0x00 */ u8 _00[0x10];
+    /* 0x10 */ StaC2TexInfo* _10;
+} StaC2TexMap;
+
+typedef struct {
+    /* 0x00 */ u8 _00[0x14];
+    /* 0x14 */ StaC2TexMap* _14;
+} StaC2Material;
+
+typedef struct {
+    /* 0x00 */ StaC2Material* _00;
+} StaC2Materials;
+
+typedef struct StaC2Actor {
+    /* 0x00 */ u8 _00[0x18];
+    /* 0x18 */ StaC2Materials* _18;
+} StaC2Actor;
+
+typedef struct {
+    /* 0x000 */ u8 _000[0xC];
+    /* 0x00C */ Vec _0C;
+    /* 0x018 */ u8 _018[0x1CC - 0x18];
+    /* 0x1CC */ Vec _1CC;
+} StaC2Target;
+
+typedef struct StaC2Model {
+    /* 0x00 */ StaC2Actor* _00;
+    /* 0x04 */ u8 _04[0x90 - 0x04];
+} StaC2Model; // size: 0x90
+
+typedef struct StaC2Draw {
+    /* 0x00 */ Control control;
+    /* 0x44 */ u8 _44[0x74 - 0x44];
+    /* 0x74 */ StaC2Model* _74;
+    /* 0x78 */ u8 _78[0xA0 - 0x78];
+    /* 0xA0 */ Vec _A0;
+    /* 0xAC */ u8 _AC[0xC4 - 0xAC];
+    /* 0xC4 */ StaC2Target* _C4;
+    /* 0xC8 */ u8 _C8[0xCA - 0xC8];
+    /* 0xCA */ u8 _CA;
+    /* 0xCB */ u8 _CB[0xE8 - 0xCB];
+} StaC2Draw; // size: 0xE8
+
+typedef struct StaC2Particle {
+    /* 0x00 */ struct StaC2Particle* next;
+    /* 0x04 */ Vec pos;
+    /* 0x10 */ Vec vel;
+    /* 0x1C */ Vec _1C;
+    /* 0x28 */ u8 _28[0x38 - 0x28];
+    /* 0x38 */ f32 _38;
+    /* 0x3C */ f32 _3C;
+    /* 0x40 */ u8 color[4];
+    /* 0x44 */ u8 _44[0x48 - 0x44];
+    /* 0x48 */ s16 delay;
+    /* 0x4A */ s16 life;
+} StaC2Particle;
+
+typedef struct {
+    /* 0x00 */ u8 _00[0xBC];
+    /* 0xBC */ f32 _BC;
+} StaC2EmitterSrc;
+
+typedef struct {
+    /* 0x00 */ u8 _00[0xA4];
+    /* 0xA4 */ StaC2EmitterSrc* _A4;
+} StaC2EmitterOwner;
+
+typedef struct StaC2Emitter {
+    /* 0x00 */ u8 _00[0x20];
+    /* 0x20 */ StaC2EmitterOwner* _20;
+} StaC2Emitter;
+
+typedef struct {
+    /* 0x00 */ u8 _00[0x4];
+    /* 0x04 */ s32 _04;
+} StaC2ObjEntry; // size: 0x8
+
 typedef struct StaC2Rec5C {
     /* 0x00 */ u8 _00[0x5C];
 } StaC2Rec5C; // size: 0x5C
@@ -113,6 +206,20 @@ static u8 lbl_3_data_188C4[0x1A] = {
     1, 2, 2, 4, 2, 2, 2, 2, 4, 2, 2, 2, 2, 6, 6, 8, 8, 9, 8, 9, 8, 8, 8, 9, 0, 0,
 };
 f32 lbl_3_data_188E0 = 0.1f;
+
+extern struct {
+    /* 0x000 */ Vec pos;
+    /* 0x00C */ u8 _00C[0x268 - 0xC];
+} g_Fielders[9];
+
+extern struct {
+    /* 0x00 */ u8 _00[0x14];
+    /* 0x14 */ StaC2ObjEntry* _14;
+    /* 0x18 */ u8 _18[0x30 - 0x18];
+    /* 0x30 */ u32 _30;
+} lbl_3_common_bss_350E4;
+
+extern void AnimateActorBones(StaC2Actor* actor);
 
 // MWCC lays out .bss statics in reverse order of declaration
 static u8 lbl_3_bss_ADD0[0x30];
@@ -191,18 +298,39 @@ void fn_3_D5494(void) {
 }
 
 // .text:0x000D5470 size:0x24 mapped:0x80714504
-void fn_3_D5470(void) {
-    return;
+s32 fn_3_D5470(const void* a, const void* b) {
+    f32 fa = *(const f32*)a;
+    f32 fb = *(const f32*)b;
+
+    if (fa < fb) {
+        return -1;
+    }
+    return fa > fb;
 }
 
 // .text:0x000D5444 size:0x2C mapped:0x807144D8
-void fn_3_D5444(void) {
-    return;
+s32 fn_3_D5444(const void* a, const void* b) {
+    u32 ua = *(const u32*)a;
+    u32 ub = *(const u32*)b;
+
+    if (ua < ub) {
+        return -1;
+    }
+    return ua > ub;
 }
 
 // .text:0x000D53C0 size:0x84 mapped:0x80714454
-void fn_3_D53C0(void) {
-    return;
+s32 fn_3_D53C0(u8 id) {
+    u32 i;
+
+    for (i = lbl_3_common_bss_350E4._30; i != 0; i--) {
+        if (id == lbl_3_common_bss_350E4._14[i - 1]._04) {
+            return i - 1;
+        }
+    }
+    // "came to a part with no return value"
+    OSPanic("sta_c2.c", 2147, "//OZ \x96\xdf\x82\xe8\x92\x6c\x82\xcc\x96\xb3\x82\xa2\x95\x94\x95\xaa\x82\xc9\x97\x88\x82\xdc\x82\xb5\x82\xbd\x81\x42\n");
+    return 0;
 }
 
 // .text:0x000D511C size:0x2A4 mapped:0x807141B0
@@ -276,13 +404,21 @@ void fn_3_D255C(void) {
 }
 
 // .text:0x000D24E8 size:0x74 mapped:0x8071157C
-void fn_3_D24E8(void) {
-    return;
+void fn_3_D24E8(StaC2Draw* draw, s8 fielder) {
+    Vec dir;
+
+    PSVECSubtract(&g_Fielders[fielder].pos, &draw->_A0, &dir);
+    dir.y = 0.0f;
+    PSVECNormalize(&dir, &dir);
+    fn_3_253A4(fielder, fn_3_9FB8C(dir.x, dir.z));
 }
 
 // .text:0x000D249C size:0x4C mapped:0x80711530
-void fn_3_D249C(void) {
-    return;
+BOOL fn_3_D249C(StaC2Draw* draw) {
+    Vec diff;
+
+    PSVECSubtract(&draw->_C4->_1CC, &draw->_C4->_0C, &diff);
+    return PSVECMag(&diff) > 14.250000447034836;
 }
 
 // .text:0x000D233C size:0x160 mapped:0x807113D0
@@ -306,8 +442,16 @@ void fn_3_D1B24(void) {
 }
 
 // .text:0x000D1AC4 size:0x60 mapped:0x80710B58
-void fn_3_D1AC4(void) {
-    return;
+void fn_3_D1AC4(StaC2Draw* draw) {
+    StaC2TexRegs* regs = draw->_74->_00->_18->_00->_14->_10->_04;
+
+    if (draw->_CA == 0) {
+        regs->_74 &= ~0x1FFF;
+        regs->_74 |= 3;
+    } else {
+        regs->_74 &= ~0x1FFF;
+        regs->_74 |= 2;
+    }
 }
 
 // .text:0x000D196C size:0x158 mapped:0x80710A00
@@ -366,8 +510,8 @@ void fn_3_D0534(void) {
 }
 
 // .text:0x000D052C size:0x8 mapped:0x8070F5C0
-void fn_3_D052C(void) {
-    return;
+s32 fn_3_D052C(void) {
+    return 0;
 }
 
 // .text:0x000D0528 size:0x4 mapped:0x8070F5BC
@@ -411,13 +555,22 @@ void fn_3_CFB44(void) {
 }
 
 // .text:0x000CFAB4 size:0x90 mapped:0x8070EB48
-void fn_3_CFAB4(void) {
-    return;
+void fn_3_CFAB4(StaC2Particle* particle, StaC2Emitter* emitter) {
+    StaC2EmitterSrc* src = emitter->_20->_A4;
+
+    particle->pos.x = particle->_1C.x;
+    particle->pos.y = particle->_1C.y;
+    particle->pos.z = particle->_1C.z;
+    particle->_38 = particle->_3C = 3.0 * src->_BC;
+    particle->color[0] = particle->color[1] = particle->color[2] = 255;
+    particle->color[3] = 255.0 * src->_BC;
+    particle->life = 30;
+    particle->delay = 0;
 }
 
 // .text:0x000CFA8C size:0x28 mapped:0x8070EB20
-void fn_3_CFA8C(void) {
-    return;
+void fn_3_CFA8C(StaC2Draw* draw) {
+    AnimateActorBones(draw->_74->_00);
 }
 
 // .text:0x000CFA88 size:0x4 mapped:0x8070EB1C
@@ -527,7 +680,7 @@ void fn_3_CD968(void) {
 
 // .text:0x000CD958 size:0x10 mapped:0x8070C9EC
 void fn_3_CD958(void) {
-    return;
+    lbl_3_bss_A81C = 1;
 }
 
 // .text:0x000CCC24 size:0xD34 mapped:0x8070BCB8
@@ -576,8 +729,16 @@ void fn_3_CBAFC(void) {
 }
 
 // .text:0x000CBA9C size:0x60 mapped:0x8070AB30
-void fn_3_CBA9C(void) {
-    return;
+void fn_3_CBA9C(StaC2Draw* draw) {
+    StaC2TexRegs* regs = draw->_74->_00->_18->_00->_14->_10->_04;
+
+    if (draw->_CA == 0) {
+        regs->_74 &= ~0x1FFF;
+        regs->_74 |= 3;
+    } else {
+        regs->_74 &= ~0x1FFF;
+        regs->_74 |= 2;
+    }
 }
 
 // .text:0x000CB8A8 size:0x1F4 mapped:0x8070A93C
