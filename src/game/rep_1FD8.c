@@ -10,6 +10,8 @@
 #include "C3/control.h"
 #include "C3/geoPalette.h"
 #include "game/rep_1D58.h"
+#include "game/rep_AC8.h"
+#include "string.h"
 
 typedef struct Rep1FD8Sprite {
     /* 0x00 */ u8 _00[0x48];
@@ -75,13 +77,16 @@ extern void fn_80033CC8(Rep1FD8Particle* p, void* texture);
 extern void fn_8003403C(f32 width, f32 height);
 extern void fn_80033620(Rep1FD8Spawner* emitter);
 typedef struct Rep1FD8TexRegs {
-    /* 0x00 */ u8 _00[0x4];
+    /* 0x00 */ u8 _00;
+    /* 0x01 */ u8 _01[0x4 - 0x1];
     /* 0x04 */ u32 _04;
-} Rep1FD8TexRegs;
+    /* 0x08 */ u8 _08[0x10 - 0x8];
+} Rep1FD8TexRegs; // size: 0x10
 
 typedef struct Rep1FD8TexInfo {
     /* 0x00 */ u8 _00[0x4];
     /* 0x04 */ Rep1FD8TexRegs* _04;
+    /* 0x08 */ u16 _08;
 } Rep1FD8TexInfo;
 
 typedef struct Rep1FD8TexMap {
@@ -95,7 +100,9 @@ typedef struct Rep1FD8Bone {
 } Rep1FD8Bone;
 
 typedef struct Rep1FD8Actor {
-    /* 0x00 */ u8 _00[0x18];
+    /* 0x00 */ u8 _00[0x6];
+    /* 0x06 */ u16 _06;
+    /* 0x08 */ u8 _08[0x18 - 0x8];
     /* 0x18 */ Rep1FD8Bone** _18;
 } Rep1FD8Actor;
 
@@ -106,7 +113,9 @@ typedef struct Rep1FD8Model {
 typedef struct Rep1FD8Draw {
     /* 0x00 */ u8 _00[0x74];
     /* 0x74 */ Rep1FD8Model* _74;
-    /* 0x78 */ u8 _78[0xA9 - 0x78];
+    /* 0x78 */ u8 _78[0x9C - 0x78];
+    /* 0x9C */ Vec _9C;
+    /* 0xA8 */ u8 _A8;
     /* 0xA9 */ u8 _A9;
     /* 0xAA */ u8 _AA[0xB0 - 0xAA];
     /* 0xB0 */ u8 _B0;
@@ -130,9 +139,11 @@ typedef struct Rep1FD8CameraTask {
 } Rep1FD8CameraTask;
 
 // Outside every unit's .data range in splits.txt (escalated).
+extern u16 lbl_3_data_177F0;
 extern Rep1FD8CameraSlot lbl_3_data_17804[2];
 extern u8 lbl_803CBBC0;
 extern void fn_800A7D4C(s32, void*);
+extern BOOL fn_8001B728(s32, s32, Vec*);
 extern void fn_800BF058(void (*draw)(StadiumModel1D58* model, Mtx view));
 extern void fn_800BDF70(StadiumModel1D58* model);
 extern Rep1FD8Spawner* fn_80033A24(BOOL (*update)(Rep1FD8Spawner*), s32, s32, s32, s32, s32);
@@ -153,6 +164,7 @@ static const Vec lbl_3_rodata_202C[6] = {
     { -36.5f, -17.9f, -22.8f },
     { 36.5f, -17.9f, -22.8f },
 };
+static const Vec lbl_3_rodata_2080 = { 0.0f, 0.0f, 0.0f };
 
 // .bss, declared in reverse address order (MWCC lays .bss statics out last to first)
 static void* lbl_3_bss_9F0C[5];
@@ -174,7 +186,7 @@ static u8* lbl_3_bss_9D98;
 static StadiumObject1D58* lbl_3_bss_9D94;
 static s32 lbl_3_bss_9D90;
 static s32 lbl_3_bss_9D8C;
-static s32 lbl_3_bss_9D88;
+static u32 lbl_3_bss_9D88;
 static u32 lbl_3_bss_9D84;
 static u8 lbl_3_bss_9D82;
 static u8 lbl_3_bss_9D81;
@@ -256,8 +268,24 @@ void fn_3_C5DDC(void) {
 }
 
 // .text:0x000C5CE0 size:0xFC mapped:0x80704D74
-void fn_3_C5CE0(void) {
-    return;
+BOOL fn_3_C5CE0(Rep1FD8Draw* draw) {
+    Vec pos = lbl_3_rodata_2080;
+    Vec diff;
+    u32 i;
+
+    if (g_GameLogic.gameStatus == 2 && g_GameLogic.playOver != 0) {
+        return FALSE;
+    }
+    for (i = 0; i < 9; i++) {
+        memset(&pos, 0, sizeof(Vec));
+        fn_8001B728(i, 4, &pos);
+        PSVECSubtract(&pos, &draw->_9C, &diff);
+        if (PSVECMag(&diff) <= 2.6f) {
+            fn_3_25844(i, 1);
+            return TRUE;
+        }
+    }
+    return FALSE;
 }
 
 // .text:0x000C597C size:0x364 mapped:0x80704A10
@@ -350,8 +378,33 @@ void fn_3_C4068(Rep1FD8Draw* draw) {
 }
 
 // .text:0x000C3F70 size:0xF8 mapped:0x80703004
-void fn_3_C3F70(void) {
-    return;
+void fn_3_C3F70(Rep1FD8Draw* draw) {
+    Rep1FD8Actor* actor = draw->_74->_00;
+    Rep1FD8TexMap* map;
+    Rep1FD8TexRegs* regs;
+    u32 i;
+    u32 j;
+
+    if (lbl_3_bss_9D88++ > 4) {
+        if (++lbl_3_data_177F0 > 19) {
+            lbl_3_data_177F0 = 4;
+        }
+        lbl_3_bss_9D88 = 0;
+    }
+    if (lbl_3_bss_9D88 == 0) {
+        for (i = 0; i < actor->_06; i++) {
+            map = actor->_18[i]->_14;
+            if (map != NULL) {
+                regs = map->_10->_04;
+                for (j = 0; j < map->_10->_08; regs++, j++) {
+                    if (regs->_00 == 1) {
+                        regs->_04 &= ~0x1FFF;
+                        regs->_04 |= lbl_3_data_177F0;
+                    }
+                }
+            }
+        }
+    }
 }
 
 // .text:0x000C3E94 size:0xDC mapped:0x80702F28
