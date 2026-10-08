@@ -308,6 +308,8 @@ typedef struct {
 
 extern UnkAC8Data4884 lbl_3_data_4884[2];
 extern u8 lbl_3_data_470C[2];
+extern f32 lbl_3_data_1C44[4];
+extern s16 lbl_3_data_1C54[2];
 extern f32 lbl_3_data_4848;
 extern s16 lbl_3_data_484C[10];
 extern f32 lbl_3_data_4930[43];
@@ -358,7 +360,8 @@ UnkAC8Action lbl_3_data_3C40[29] = {
 // .bss statics, in reverse address order: MWCC lays them out last declared first
 static s16 lbl_3_bss_170[0x48];
 static s16 lbl_3_bss_16C;
-static s16 lbl_3_bss_C8[0x52];
+static s16 lbl_3_bss_CC[4][20];
+static s16 lbl_3_bss_C8[2];
 
 // .text:0x000598D0 size:0x48 mapped:0x80698964
 void fn_3_598D0(void) {
@@ -7214,12 +7217,147 @@ void fn_3_2E87C(void) {
 
 // .text:0x0002E41C size:0x460 mapped:0x8066D4B0
 void fn_3_2E41C(void) {
-    return;
+    s32 i;
+    s32 j;
+
+    if (lbl_3_common_bss_34C90._1D5 != 0) {
+        return;
+    }
+    if (g_Minigame.GameMode_MiniGame == 2) {
+        if (g_Minigame.wallBallRotatePitchersInd == 0) {
+            g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame.minigamePlayerSelectedOrder]]._000 = g_Pitcher.pitcher.x;
+            g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame.minigamePlayerSelectedOrder]]._008 = g_Pitcher.pitcher.z;
+        }
+        return;
+    }
+    for (i = 0; i < 4; i++) {
+        if (g_Minigame.minigameFielderIndex[i] > 0) {
+            s16* history;
+            InputStruct* input;
+
+            g_Minigame.minigameRelatedIndex = g_Minigame.minigameFielderIndex[i];
+            g_Minigame._1922 = i;
+            if (g_d_GameSettings.GameModeSelected == 6 && g_Minigame.minigameControlStruct.battingHandedness[i] != 0) {
+                fn_3_2DDB4();
+            }
+            input = &g_Controls[g_Minigame.minigameControlStruct.characterIndex[i]];
+            history = lbl_3_bss_CC[g_Minigame.minigameControlStruct.characterIndex[i]];
+            for (j = 19; j > 0; j--) {
+                lbl_3_bss_170[j] = history[j - 1];
+            }
+            lbl_3_bss_170[0] = input->controlStickAngle;
+            if (lbl_3_bss_170[0] == -1) {
+                for (j = 1; j < 20; j++) {
+                    lbl_3_bss_170[j] = -1;
+                }
+            }
+            if (lbl_3_bss_170[1] >= 0 && lbl_3_bss_170[2] != 0) {
+                lbl_3_bss_16C = lbl_3_bss_170[0];
+            } else {
+                lbl_3_bss_16C = -1;
+            }
+            for (j = 0; j < 20; j++) {
+                history[j] = lbl_3_bss_170[j];
+            }
+            g_FieldingLogic._148 = input->buttonInput;
+            g_FieldingLogic._14A = input->newButtonInput;
+            g_FieldingLogic._14C = input->_08;
+            g_FieldingLogic._070 = &g_FieldingLogic._000[i];
+            g_FieldingLogic._08C = (FieldingLogic08C*)&g_FieldingLogic._074[i];
+            g_FieldingLogic._08C->_2 = 0;
+            fn_3_3AAF8(g_Minigame.minigameFielderIndex[i]);
+            fn_3_3A584(g_Minigame.minigameFielderIndex[i]);
+        }
+    }
+    if (g_d_GameSettings.minigamesEnabled) {
+        if (g_Minigame.minigamePlayerSelectedOrder >= 0) {
+            g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame.minigamePlayerSelectedOrder]]._000 = g_Pitcher.pitcher.x;
+            g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame.minigamePlayerSelectedOrder]]._008 = g_Pitcher.pitcher.z;
+        }
+    } else {
+        g_Fielders[0]._000 = g_Pitcher.pitcher.x;
+        g_Fielders[0]._008 = g_Pitcher.pitcher.z;
+    }
 }
 
 // .text:0x0002DDB4 size:0x668 mapped:0x8066CE48
+// 99.45%: the target masks the player index when scaling it ((p << 1) & 0x1FE, (p << 4) &
+// 0xFF0), and loads the first target's x and z into f1 and f0 the other way round.
 void fn_3_2DDB4(void) {
-    return;
+    u8 player = g_Minigame._1922;
+    UnkAC8Fielder* f = &g_Fielders[g_Minigame.minigameRelatedIndex];
+    InputStruct* input = &g_Controls[player];
+    f32 x2;
+    f32 z2;
+    f32 dist;
+
+    if (g_AiLogic.mgTimer[player] < 0x7FFE) {
+        g_AiLogic.mgTimer[player]++;
+    } else {
+        g_AiLogic.mgTimer[player] = 0x7FFF;
+    }
+    if (g_AiLogic.mgMode[player] == 0) {
+        if (g_AiLogic.mgStep[player] == 0) {
+            f32 offset;
+
+            x2 = f->_000 * f->_000;
+            z2 = f->_008 * f->_008;
+            offset = lbl_3_data_1C44[g_Batter.characterClass];
+            dist = dolsqrtf2(x2 + z2);
+            g_AiLogic.mgTarget[player].x = f->_000 / dist * offset + f->_000;
+            g_AiLogic.mgTarget[player].z = f->_008 / dist * offset + f->_008;
+            g_AiLogic.mgTimer[player] = 0;
+            g_AiLogic.mgStep[player] = 1;
+        } else if (g_AiLogic.mgStep[player] == 2) {
+            if (f->_1C8 == 2 || f->_1C8 == 3) {
+                g_AiLogic.mgMode[player] = 1;
+                g_AiLogic.mgAngle[player] = f->_180;
+            } else {
+                g_AiLogic.mgMode[player] = 2;
+            }
+            g_AiLogic.mgStep[player] = 0;
+        }
+    } else if (g_AiLogic.mgMode[player] == 1) {
+        if (g_AiLogic.mgStep[player] == 0) {
+            x2 = f->_000 * f->_000;
+            z2 = f->_008 * f->_008;
+            dist = dolsqrtf2(x2 + z2);
+            if (f->_000 < -15.0f) {
+                g_AiLogic.mgAngle[player] = f->_180 - 0x600 + RandomInt_Game(0x400);
+            } else if (f->_000 > 15.0f) {
+                g_AiLogic.mgAngle[player] = f->_180 + 0x200 + RandomInt_Game(0x400);
+            } else if (dist > 75.0f) {
+                g_AiLogic.mgAngle[player] = RandomInt_Game(0x800) + 0x400 + f->_180;
+            } else if (dist < 50.0f) {
+                g_AiLogic.mgAngle[player] = RandomInt_Game(0x800) - 0x400 + f->_180;
+            } else if (RandomInt_Game(2)) {
+                g_AiLogic.mgAngle[player] += RandomInt_Game(0x400) - 0x200;
+            } else {
+                g_AiLogic.mgAngle[player] = RandomInt_Game(0x1000);
+            }
+            g_AiLogic.mgAngle[player] = fn_3_9FE6C_normalizeAngle(g_AiLogic.mgAngle[player]);
+            g_AiLogic.mgDuration[player] = RandomInt_Game_Range(lbl_3_data_1C54[0], lbl_3_data_1C54[1]);
+            g_AiLogic.mgTimer[player] = 0;
+            g_AiLogic.mgStep[player] = 1;
+        }
+    }
+    if (g_AiLogic.mgStep[player] == 1) {
+        if (g_AiLogic.mgMode[player] == 1) {
+            input->controlStickAngle = g_AiLogic.mgAngle[player];
+            if (g_AiLogic.mgTimer[player] >= g_AiLogic.mgDuration[player]) {
+                g_AiLogic.mgStep[player] = 0;
+            }
+        } else {
+            f32 dz = g_AiLogic.mgTarget[player].z - f->_008;
+            f32 dx = g_AiLogic.mgTarget[player].x - f->_000;
+
+            if (dolsqrtf2(dx * dx + dz * dz) < 0.5f) {
+                g_AiLogic.mgStep[player] = 2;
+            } else {
+                input->controlStickAngle = fn_3_9FB8C(dx, dz);
+            }
+        }
+    }
 }
 
 // .text:0x0002DCF4 size:0xC0 mapped:0x8066CD88

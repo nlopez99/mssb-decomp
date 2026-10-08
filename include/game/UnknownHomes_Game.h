@@ -2297,19 +2297,32 @@ typedef struct {
     /* 0x77 */ u8 _77;
     /* 0x78 */ u8 _78;
     /* 0x79 */ u8 _79[3];
-    /* 0x7C */ u8 _7C[4];
-    /* 0x80 */ u8 _80[28];
-    /* 0x9C */ u8 _9C[8];
-    /* 0xA4 */ u8 _A4[8];
-    /* 0xAC */ u8 _AC[8];
-    /* 0xB4 */ u8 _B4;
-    /* 0xB5 */ u8 _B5;
-    /* 0xB6 */ u8 _B6;
-    /* 0xB7 */ u8 _B7;
-    /* 0xB8 */ u8 _B8;
-    /* 0xB9 */ u8 _B9;
-    /* 0xBA */ u8 _BA;
-    /* 0xBB */ u8 _BB;
+    union {
+        struct {
+            /* 0x7C */ u8 _7C[4];
+            /* 0x80 */ u8 _80[28];
+            /* 0x9C */ u8 _9C[8];
+            /* 0xA4 */ u8 _A4[8];
+            /* 0xAC */ u8 _AC[8];
+            /* 0xB4 */ u8 _B4;
+            /* 0xB5 */ u8 _B5;
+            /* 0xB6 */ u8 _B6;
+            /* 0xB7 */ u8 _B7;
+            /* 0xB8 */ u8 _B8;
+            /* 0xB9 */ u8 _B9;
+            /* 0xBA */ u8 _BA;
+            /* 0xBB */ u8 _BB;
+        };
+        // Per-player state of the minigame fielder AI (rep_AC8's fn_3_2DDB4)
+        struct {
+            /* 0x7C */ VecXZ mgTarget[4];
+            /* 0x9C */ s16 mgTimer[4];
+            /* 0xA4 */ s16 mgDuration[4];
+            /* 0xAC */ s16 mgAngle[4];
+            /* 0xB4 */ u8 mgMode[4];
+            /* 0xB8 */ u8 mgStep[4];
+        };
+    };
 } AIStruct; // size 0xBC
 
 extern AIStruct g_AiLogic;
@@ -2758,8 +2771,7 @@ typedef struct {
     /* 0x147 */ u8 _147;
     /* 0x148 */ u16 _148;
     /* 0x14A */ u16 _14A;
-    /* 0x14C */ u8 _14C;
-    /* 0x14D */ u8 _14D;
+    /* 0x14C */ u16 _14C;
     /* 0x14E */ u8 _14E;
     /* 0x14F */ u8 _14F;
 } g_FieldingLogic_s; // size 0x150
