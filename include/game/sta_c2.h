@@ -92,7 +92,7 @@ s32 fn_3_D5470(const void* a, const void* b);
 void fn_3_D5494(Mtx m);
 void fn_3_D55EC(void);
 void fn_3_D5B6C(u32* n);
-void fn_3_D5C8C(void);
+void fn_3_D5C8C(u32* n);
 void fn_3_D5E80(void);
 void fn_3_D60C0(void);
 void fn_3_D62F0(void);

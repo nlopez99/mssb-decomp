@@ -429,8 +429,43 @@ void fn_3_D5E80(void) {
 }
 
 // .text:0x000D5C8C size:0x1F4 mapped:0x80714D20
-void fn_3_D5C8C(void) {
-    return;
+void fn_3_D5C8C(u32* n) {
+    Control control;
+    Mtx m;
+    Mtx scale;
+    s32 group;
+    s32 i;
+    s32 next;
+    s32 idx;
+    StaC2Draw* draw;
+
+    PSMTXIdentity(scale);
+    PSMTXScale(scale, 2.0f, 2.0f, 2.0f);
+    for (group = 0; group < 5; group++) {
+        next = lbl_3_common_bss_350E4._40[*n] = lbl_3_common_bss_350E4._40[*n - 1] + lbl_3_common_bss_350E4._3C[*n - 1];
+        fn_3_B8574();
+        for (i = 0; i < lbl_3_bss_A023; i++) {
+            if (group == lbl_3_data_18730[i]._0E && lbl_3_data_18730[i].type != 13) {
+                idx = i + lbl_3_bss_A022;
+                if (lbl_3_common_bss_350E4._00[idx]._90_6) {
+                    lbl_3_common_bss_350E4._44[next] = idx;
+                    next++;
+                    lbl_3_common_bss_350E4._3C[*n]++;
+                    draw = &lbl_3_common_bss_350E4._00[idx];
+                    control = draw->control;
+                    CTRLBuildMatrix(&control, m);
+                    PSMTXConcat(m, scale, m);
+                    fn_3_B8464(m, draw->_78);
+                    m[1][3] *= 100.0f;
+                    fn_3_B8464(m, draw->_78);
+                }
+            }
+        }
+        if (lbl_3_common_bss_350E4._3C[*n] != 0) {
+            fn_3_B8414(&lbl_3_common_bss_350E4._48[*n * 2], &lbl_3_common_bss_350E4._48[*n * 2 + 1]);
+            (*n)++;
+        }
+    }
 }
 
 // .text:0x000D5B6C size:0x120 mapped:0x80714C00
