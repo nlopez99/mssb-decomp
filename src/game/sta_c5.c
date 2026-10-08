@@ -759,7 +759,40 @@ void fn_3_F5C30(StaC5Ball* obj) {
 
 // .text:0x000F56CC size:0x564 mapped:0x80734760
 void fn_3_F56CC(StaC5Ball* obj) {
-    return;
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES) {
+        return;
+    }
+    if (g_GameLogic.gameStatus == GAME_STATUS_INNING_TRANSITION) {
+        fn_3_F5C30(obj);
+        obj->_7C = fn_3_F46A0;
+    } else if (g_GameLogic.gameStatus != GAME_STATUS_LIVE_BALL) {
+        if (g_GameLogic.gameStatus == GAME_STATUS_DEFAULT) {
+            fn_3_F5C30(obj);
+        }
+        if (lbl_3_bss_AEE1) {
+            lbl_3_bss_AEE1 = 0;
+        }
+        if (lbl_3_bss_AEE2) {
+            lbl_3_bss_AEE2 = 0;
+        }
+    } else {
+        if (obj->_99) {
+            obj->_99 = 0;
+        }
+        if (obj->_A0 != NULL) {
+            fn_3_F193C(obj->_A0);
+        }
+        switch (obj->_C4) {
+        case 0:
+        case 1:
+        case 2:
+            fn_3_F4FBC(obj);
+            break;
+        case 3:
+            fn_3_F4BA0(obj);
+            break;
+        }
+    }
 }
 
 // .text:0x000F4FBC size:0x710 mapped:0x80734050
