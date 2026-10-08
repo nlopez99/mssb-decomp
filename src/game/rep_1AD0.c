@@ -7,7 +7,11 @@
 #include "game/game_batter.h"
 #include "game/rep_13B8.h"
 #include "game/rep_AC8.h"
-#include "game/rep_1B20.h"
+#include "game/rep_DB8.h"
+#include "game/rep_1038.h"
+#include "game/rep_540.h"
+#include "game/rep_CC8.h"
+#include "game/rep_E08.h"
 
 typedef struct Fielder1AD0 {
     /* 0x000 */ u8 _000[0x1C7];
@@ -17,7 +21,24 @@ typedef struct Fielder1AD0 {
 
 extern Fielder1AD0 g_Fielders[9];
 
+extern struct {
+    /* 0x00 */ u8 _00[0x13];
+    /* 0x13 */ u8 _13;
+} g_RunningLogic;
+
+extern s16 lbl_3_data_FC1C[2];
+
+extern struct {
+    /* 0x0000 */ u8 _0000[0xCF4E];
+    /* 0xCF4E */ u8 _CF4E[4][4];
+} lbl_80354768;
+
 extern void fn_3_1DD48(void);
+extern void fn_3_B1DA4(int, int);
+extern int fn_3_B32B8(void);
+extern void fn_3_B3A28(void);
+extern void fn_3_1E154(void);
+extern void changeScene(u8, s16);
 
 // .text:0x000B1C14 size:0x9C mapped:0x806F0CA8
 void fn_3_B1C14(void) {
@@ -46,8 +67,28 @@ void fn_3_B1578(void) {
 }
 
 // .text:0x000B1470 size:0x108 mapped:0x806F0504
-void fn_3_B1470(void) {
-    return;
+BOOL fn_3_B1470(void) {
+    if (g_Practice.pauseMenuLoading != 0) {
+        return FALSE;
+    }
+    if (g_Practice.guidedPracticeCompletionRelated == 0) {
+        return FALSE;
+    }
+    if (g_UnkSound_32718._07 != 0) {
+        return FALSE;
+    }
+    if (++g_Practice._186 > 150) {
+        if (g_Practice._1B2[g_Practice.practiceType_2][g_Practice.practiceLevel] == 0) {
+            g_Practice._1B1 = 1;
+            g_Practice._1B2[g_Practice.practiceType_2][g_Practice.practiceLevel] = 1;
+            lbl_80354768._CF4E[g_Practice.practiceType_2][g_Practice.practiceLevel] = 1;
+        }
+        g_Practice._1C7 = 1;
+        fn_3_B3A28();
+        fn_3_B1DA4(g_Practice.practiceLevel + 8, 1);
+        return TRUE;
+    }
+    return FALSE;
 }
 
 // .text:0x000B12F8 size:0x178 mapped:0x806F038C
@@ -139,18 +180,86 @@ void fn_3_B056C(void) {
 }
 
 // .text:0x000B0464 size:0x108 mapped:0x806EF4F8
-void fn_3_B0464(void) {
-    return;
+BOOL fn_3_B0464(void) {
+    if (g_Practice.pauseMenuLoading != 0) {
+        return FALSE;
+    }
+    if (g_Practice.guidedPracticeCompletionRelated == 0) {
+        return FALSE;
+    }
+    if (g_UnkSound_32718._07 != 0) {
+        return FALSE;
+    }
+    if (++g_Practice._186 > 150) {
+        if (g_Practice._1B2[g_Practice.practiceType_2][g_Practice.practiceLevel] == 0) {
+            g_Practice._1B1 = 1;
+            g_Practice._1B2[g_Practice.practiceType_2][g_Practice.practiceLevel] = 1;
+            lbl_80354768._CF4E[g_Practice.practiceType_2][g_Practice.practiceLevel] = 1;
+        }
+        g_Practice._1C7 = 1;
+        fn_3_B3A28();
+        fn_3_B1DA4(g_Practice.practiceLevel + 4, 1);
+        return TRUE;
+    }
+    return FALSE;
 }
 
 // .text:0x000B03F0 size:0x74 mapped:0x806EF484
 void fn_3_B03F0(void) {
-    return;
+    fn_3_F578();
+    fn_3_753E8(FALSE);
+    setBatterContactConstants();
+    fn_3_8A1D8();
+    fn_3_58E50();
+    fn_3_1E154();
+    fn_3_59A90();
+    fn_3_6C108();
+    g_Strikes.strikes = 0;
+    g_Strikes.balls = 0;
+    g_GameLogic._125 = 1;
+    g_GameLogic.pre_PostMiniGameInd = 1;
+    g_GameLogic.minigameLastTurnSuccessInd = 1;
+    fn_3_B02A8();
+    fn_3_6714C(FALSE);
 }
 
 // .text:0x000B02A8 size:0x148 mapped:0x806EF33C
 void fn_3_B02A8(void) {
-    return;
+    fn_3_5F720();
+    if (g_Practice.practiceLevel == 4) {
+        g_Pitcher.windupCountdownUntilBallReleased = lbl_3_data_FC1C[1];
+    }
+    g_Strikes.storedOuts = g_Strikes.outs;
+    g_Strikes.runnerIndexForEachOutThisPitch[0] = -1;
+    g_Strikes.runnerIndexForEachOutThisPitch[1] = -1;
+    g_Strikes.runnerIndexForEachOutThisPitch[2] = -1;
+    g_Strikes.GameControls_StrikeBallBitVector = g_Strikes.balls + (g_Strikes.strikes * 16);
+    g_Strikes.allForcedRunnersReachedTheirBaseInd = 0;
+    g_Ball.totalFramesAtPlay = 0;
+    g_FieldingLogic._10E = 0;
+    g_FieldingLogic._0EE = 0;
+    g_FieldingLogic._10F = 0;
+    g_FieldingLogic._110 = 0;
+    g_FieldingLogic._128 = 0;
+    g_FieldingLogic._129 = 0;
+    g_RunningLogic._13 = 0;
+    if (g_GameLogic.pre_PostMiniGameInd != 0) {
+        g_GameLogic.minigameLastTurnSuccessInd = 1;
+        g_GameLogic.hudElementLoadingInd = 1;
+    } else {
+        g_GameLogic.minigameLastTurnSuccessInd = 0;
+    }
+    g_GameLogic.pre_PostMiniGameInd = 0;
+    g_GameLogic.minigameLastTurnSuccessInd = 0;
+    g_Practice.guidedPracticeCompletionRelated2 = 0;
+    g_Practice._1B0 = 0;
+    changeScene(1, 6);
+    fn_3_5A6D4(1);
+    fn_3_6C0E0();
+    if (lbl_3_common_bss_34C58._2A != 0) {
+        lbl_3_common_bss_34C58._2A = 2;
+        lbl_3_common_bss_34C58._24 = 120;
+    }
 }
 
 // .text:0x000B025C size:0x4C mapped:0x806EF2F0
