@@ -111,8 +111,8 @@ extern s16 lbl_3_data_21904[12];
 extern f32 lbl_3_data_2191C[2];
 
 // .text:0x0008A958 size:0x73C mapped:0x806C99EC
-// 97.75%: as in fn_3_7DD6C, the target keeps g_Runners in a saved register for the inlined
-// fn_3_889FC; the inlined fn_3_8A618 loop also has r5 and r6 swapped.
+// 97.75%: as in fn_3_7DD6C, the fn_3_889FC inlined through fn_3_88C24 allocates differently;
+// the inlined fn_3_8A618 loop also has r5 and r6 swapped.
 void fn_3_8A958(void) {
     int i;
 
@@ -131,16 +131,7 @@ void fn_3_8A958(void) {
             r->distanceFromBall = VEC_DISTANCE_XZ(&g_Ball.AtBat_Contact_BallPos, &r->position);
         }
     }
-    fn_3_87AE8();
-    if (g_GameLogic.secondaryGameMode == 6) {
-        fn_3_87CC8();
-    } else {
-        fn_3_88408();
-        fn_3_88B18();
-        fn_3_889FC();
-        fn_3_87E80();
-    }
-    fn_3_8781C();
+    fn_3_88C24();
 }
 
 // .text:0x0008A7B4 size:0x1A4 mapped:0x806C9848
@@ -4128,8 +4119,9 @@ void fn_3_7E2BC(void) {
 }
 
 // .text:0x0007DD6C size:0x550 mapped:0x806BCE00
-// 97.70%: the target keeps g_Runners in r25 through the loop, walks a copy and reuses it in the
-// inlined fn_3_889FC; this build recomputes it there, which shifts the saved registers.
+// 97.70%: the target keeps g_Runners in r25 for the fn_3_889FC inlined through fn_3_88C24. That
+// copy matches once fn_3_889FC reads only result into a local (fields read directly, g_Runners[i]),
+// but fn_3_889FC itself then drops to 97.6%; the form that matches all three is open.
 void fn_3_7DD6C(void) {
     int i;
 
@@ -4159,16 +4151,7 @@ void fn_3_7DD6C(void) {
             fn_3_833EC(i);
         }
     }
-    fn_3_87AE8();
-    if (g_GameLogic.secondaryGameMode == 6) {
-        fn_3_87CC8();
-    } else {
-        fn_3_88408();
-        fn_3_88B18();
-        fn_3_889FC();
-        fn_3_87E80();
-    }
-    fn_3_8781C();
+    fn_3_88C24();
 }
 
 // .text:0x0007DD24 size:0x48 mapped:0x806BCDB8
