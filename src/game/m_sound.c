@@ -1026,6 +1026,9 @@ void fn_3_8F1C8(void) {
 }
 
 // .text:0x0008DA80 size:0x1748 mapped:0x806CCB14
+// 99.20%: the inlined fn_3_8C2DC re-extends sel in every branch where the target keeps one
+// (u8)sel in r23, and the inlined fn_3_8B258 copies swap its queue pointer and head registers;
+// the target also tests !(song == 4 || song == 0) as a value (cntlzw)
 void fn_3_8DA80(void) {
     s32 song = -1;
     BOOL flag = FALSE;
@@ -1766,7 +1769,7 @@ BOOL fn_3_8C4F0(u32 steps, u8 target) {
 
 // .text:0x0008C2DC size:0x214 mapped:0x806CB370
 // 98.80%: the setup block takes r0/r5 for the constant 1 and 0x4330 the other way round
-BOOL fn_3_8C2DC(u32 steps, s32 sel) {
+bool fn_3_8C2DC(u32 steps, s32 sel) {
     u32 vol = fn_800A8864();
     u8 target;
     f32 cur;
@@ -1852,11 +1855,9 @@ void fn_3_8C07C(void) {
 }
 
 // .text:0x0008BE8C size:0x1F0 mapped:0x806CAF20
-// 92.66%: the target keeps the clearing loop's entry test (li r6,0 first, cmpwi r6,100; bge)
-// and walks the arrays from r3; every counter form tried folds the test away
 void fn_3_8BE8C(void) {
     SND_FVECTOR pos = { 0.0f, 0.0f, 0.0f };
-    int i;
+    s32 i;
 
     for (i = 0; i < 100; i++) {
         lbl_3_common_bss_32B20.emitterType[i] = 0xFF;

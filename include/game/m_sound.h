@@ -21,7 +21,7 @@ void fn_3_8BDF4(void);
 void fn_3_8BE8C(void);
 void fn_3_8C07C(void);
 void fn_3_8C104(s32 vol);
-BOOL fn_3_8C2DC(u32 steps, s32 sel);
+bool fn_3_8C2DC(u32 steps, s32 sel);
 BOOL fn_3_8C4F0(u32 steps, u8 target);
 void fn_3_8C5C8(void);
 void fn_3_8CD74(void);
