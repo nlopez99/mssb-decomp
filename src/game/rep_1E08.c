@@ -723,6 +723,8 @@ void fn_3_BD8D8(void) {
 }
 
 // .text:0x000BD80C size:0xCC mapped:0x806FC8A0
+// The target keeps marker = state + 0x3E4 in r30 and tests visible through the
+// state base; here MWCC folds marker into the base (pos at 1000(r30)).
 void fn_3_BD80C(s32 arg0) {
     UnkMarker1E08* marker = &lbl_3_common_bss_35154._3E4;
     Unk8036E548* scene = &lbl_8036E548;
@@ -787,6 +789,8 @@ void fn_3_BD6AC(s32 arg0, f32 x, f32 y, f32 z) {
 }
 
 // .text:0x000BD504 size:0x1A8 mapped:0x806FC598
+// The target has a dead `b` to the end right after the first switch's compare
+// tree (an empty case 9/10 body); MWCC drops it here, so the bodies sit 4 bytes early.
 void fn_3_BD504(f32 x, f32 y, f32 z, BOOL arg3) {
     if (!lbl_80366158._28) {
         memcpy(&lbl_3_common_bss_35154._44C, &lbl_3_common_bss_35154._440, sizeof(Vec));
@@ -861,6 +865,8 @@ void fn_3_BD434(s32 stadium, s32 mode) {
 }
 
 // .text:0x000BD1D8 size:0x25C mapped:0x806FC26C
+// The visibility test's operands sit in other FPRs, and the target forms
+// the -448.0f address before loading 640.0f.
 void fn_3_BD1D8(Mtx view) {
     VecSrcDst seg;
     CollisionStruct col;
