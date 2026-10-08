@@ -2,6 +2,7 @@
 #include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
 #include "game/rep_1838.h"
+#include "game/rep_3448.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/mtx.h"
 #include "Dolphin/mtxext.h"
@@ -302,14 +303,11 @@ extern Emitter3880* fn_800339F0(Emitter3880* start, u8 id);
 extern Emitter3880* fn_800337CC(Emitter3880* emitter, s32 count, s32 exact);
 extern Emitter3880* fn_80033A24(BOOL (*update)(Emitter3880*), s32, s32, s32, s32, s32);
 
-// .bss, declared in reverse address order: MWCC lays statics out last to first
 // rep_3310.h declares these as void(void) placeholders
 extern f32 fn_3_119854(u8 index);
 extern f32 fn_3_119D28(void);
 
-// rep_3448.h declares this as a void(void) placeholder
-extern void fn_3_11F4B4(s32 player, BOOL flag);
-
+// .bss, declared in reverse address order: MWCC lays statics out last to first
 static u8 lbl_3_bss_B894[0x124];
 static u8 lbl_3_bss_B890[4]; // unreferenced
 static Vec lbl_3_bss_B860[4];

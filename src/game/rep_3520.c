@@ -8,6 +8,14 @@
 #include "game/m_sound.h"
 #include "game/rep_D0.h"
 #include "game/rep_140.h"
+#include "game/kinoko.h"
+#include "game/rep_1188.h"
+#include "game/rep_1FD8.h"
+#include "game/rep_31A0.h"
+#include "game/rep_3880.h"
+#include "game/rep_AC8.h"
+#include "game/rep_CC8.h"
+#include "game/rep_D18.h"
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/gx.h"
 #include "math.h"
@@ -150,18 +158,6 @@ extern struct {
 } lbl_80366158;
 
 extern s32 fn_800247E4(s32, s32, s32, s32);
-// rep_3880.h declares fn_3_156548 as void(void); it takes the same arguments as fn_3_15730C
-extern void fn_3_156548(u32 index, f32 x, f32 y, f32 z);
-extern void fn_3_15730C(u32 index, f32 x, f32 y, f32 z);
-extern void fn_3_157570(void);
-extern void fn_3_150010(s8 index);
-extern void fn_3_14E988(s8 index);
-extern void fn_3_14E894(void);
-extern void fn_3_1695A4(s8 arg0, u8 arg1);
-extern void fn_3_16C394(s8 arg0);
-extern void fn_3_106EB0(void);
-// rep_AC8.h declares fn_3_25844 as void(void)
-extern void fn_3_25844(int, int);
 extern struct {
     /* 0x00 */ u8 _00[0x40];
     /* 0x40 */ s16 _40;
@@ -169,11 +165,6 @@ extern struct {
 
 extern void fn_80011604(s8, void*);
 extern void fn_3_1608F0(int, int, int);
-extern void fn_3_59A90(void);
-extern void fn_3_58870(void);
-extern void fn_3_6E24C(int rosterID, int fielderIdx);
-extern void fn_3_C39C8(void);
-extern void fn_3_169600(void);
 extern void minigamesSetSomePointers(void);
 extern void minigamesGXStuff(void);
 extern void minigamesSetSomePointers2(void);
@@ -181,8 +172,6 @@ extern void fn_800528B4(void);
 extern void fn_800246D4(int (*compare)(const void*, const void*), void* src, void* dst, int size, int count);
 extern void fn_800115C8(s8);
 extern void fn_80011578(void);
-extern void fn_3_5A6D4(u8 status);
-extern void fn_3_10F550(u8, s16);
 extern void changeScene(u8, s16);
 
 extern u8 lbl_800EFBA4[0x10];

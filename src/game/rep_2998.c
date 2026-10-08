@@ -13,6 +13,7 @@
 #include "game/rep_540.h"
 #include "game/rep_1838.h"
 #include "game/rep_23E8.h"
+#include "game/rep_AC8.h"
 #include "math.h"
 #include "string.h"
 
@@ -177,10 +178,9 @@ extern void fn_800BDF70(Rep2998Model* model);
 extern void fn_800BF058(void (*cb)(void* a, void* b));
 extern void fn_8003A548(void (*cb)(void));
 
-// rep_AC8.h and rep_1D58.h are not included: they declare fn_3_253A4, fn_3_B8184, fn_3_B828C,
-// fn_3_B8414, fn_3_B8464 and fn_3_B98E8 as void(void) placeholders. fn_3_B7F70 lies in unsplit code.
-extern s32 fn_3_253A4(s32 fielder, s32 angle);
-extern void fn_3_27648(void);
+// rep_1D58.h is not included: it declares fn_3_B8184, fn_3_B828C, fn_3_B8414, fn_3_B8464 and
+// fn_3_B98E8 with rep_1D58's stadium types, where this file passes its own. fn_3_B7F70 lies in
+// unsplit code.
 extern s16 fn_3_B7F70(s16 range);
 extern s32 fn_3_B7FC8(u32 id, s32 arg1);
 extern void fn_3_B8184(void* a, void* b);

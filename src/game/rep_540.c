@@ -9,6 +9,8 @@
 #include "game/rep_1838.h"
 #include "game/rep_1CB8.h"
 #include "game/rep_3AE8.h"
+#include "game/rep_AC8.h"
+#include "game/m_sound.h"
 
 extern struct {
     /* 0x00 */ s16 _00;
@@ -61,15 +63,6 @@ extern f32 lbl_3_data_4930[43];
 extern f32 lbl_3_data_5CDC[11];
 extern f32 lbl_3_data_21438;
 extern u8 lbl_3_data_4608;
-
-// From m_sound.h, which declares fn_3_8FF5C as a void(void) placeholder.
-extern void fn_3_8C5C8(void);
-extern void fn_3_8FF5C(s32 sound, f32 x, f32 y, f32 z);
-
-// From rep_AC8.h, which declares fn_3_253A4 and fn_3_51DF0 as void(void) placeholders.
-extern void fn_3_27648(void);
-extern void fn_3_253A4(s32 fielder, s32 angle);
-extern u8 fn_3_51DF0(f32 x, f32 z);
 
 // .text:0x0001014C size:0x17C mapped:0x8064F1E0
 void ballPhysica(void) {

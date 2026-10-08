@@ -8,6 +8,9 @@
 #include "game/rep_1188.h"
 #include "game/rep_3DA8.h"
 #include "game/rep_12D0.h"
+#include "game/rep_540.h"
+#include "game/rep_AC8.h"
+#include "game/m_sound.h"
 
 typedef struct {
     /* 0x000 */ f32 _000;
@@ -135,17 +138,6 @@ extern struct {
     /* 0xAD */ u8 _AD;
 } g_Scores;
 
-// rep_AC8.h declares these as void(void) placeholders
-extern void fn_3_52F4C(s32 fielder, f32 x, f32 z);
-extern s32 fn_3_52560(s32 fielder);
-extern BOOL fn_3_51798(s32 fielder, VecXYZ* delta);
-extern void fn_3_5985C(s32 fielder, s32 action);
-extern void fn_3_526DC(s32 fielder);
-
-// rep_540.h and m_sound.h declare these as void(void) placeholders
-extern void fn_3_A970(s32 arg);
-extern void fn_3_8FF5C(s32 sound, f32 x, f32 y, f32 z);
-extern u32 fn_3_90220(s32 charID, s32 sound);
 extern s32 fn_3_6D658(s32 team, s32 thrower, s32 receiver);
 extern int LERPToNewRange_Float(int value, int inMin, int inMax, int outMin, int outMax);
 
@@ -1470,8 +1462,7 @@ void fn_3_A67E8(s32 idx) {
 }
 
 // .text:0x000A63E4 size:0x404 mapped:0x806E5478
-// 95.47%: registers only. The inlined fn_3_A6ABC keeps its speed in f4 where the target
-// uses f7, which shifts its other FPRs; statement and declaration orders change nothing.
+// 99.82%: registers only, in the lbl_3_data_4444 and g_FieldingLogic address registers.
 s32 fn_3_A63E4(s32 runner, s32 toNext, s32* out0, s32* out1) {
     InMemRunnerType* r = &g_Runners[runner];
     Unk18E8Fielder* f = &g_Fielders[g_Ball.fielderWBallIndex];
@@ -1490,13 +1481,17 @@ s32 fn_3_A63E4(s32 runner, s32 toNext, s32* out0, s32* out1) {
         base = r->nextBase;
     }
     coverer = g_FieldingLogic._0D0[base];
-    fielderFrames = fn_3_A6ABC(lbl_3_data_4444[base].x, lbl_3_data_4444[base].z);
-    ballDist = g_Ball.ballDistanceFromBase[base];
-    arrival = f->_192 + fielderFrames;
-    if (ballDist > 60.0f && ballDist < 70.0f && (base == 0 || base == 3)) {
-        arrival -= 45;
+    {
+        f32 x = lbl_3_data_4444[base].x;
+        f32 z = lbl_3_data_4444[base].z;
+        fielderFrames = fn_3_A6ABC(x, z);
+        ballDist = g_Ball.ballDistanceFromBase[base];
+        arrival = f->_192 + fielderFrames;
+        if (ballDist > 60.0f && ballDist < 70.0f && (base == 0 || base == 3)) {
+            arrival -= 45;
+        }
+        fielderFrames = fn_3_52560(g_Ball.fielderWBallIndex, x, z);
     }
-    fielderFrames = fn_3_52560(g_Ball.fielderWBallIndex);
     if (coverer == g_Ball.fielderWBallIndex || coverer == -1 || ballDist < 3.0f) {
         *out0 = -1;
         *out1 = base;
@@ -1699,8 +1694,8 @@ void fn_3_A5B4C(s32 runner) {
 }
 
 // .text:0x000A5704 size:0x448 mapped:0x806E4798
-// 91.78%: like fn_3_A63E4, the inlined fn_3_A6ABC allocates its FPRs differently
-// (the target keeps the speed in f7 and loads the target point into f1/f2).
+// 94.49%: the lbl_3_data_4444 and g_FieldingLogic address loads are scheduled differently,
+// and the build reaches lbl_3_bss_17F8 through ...bss.0.
 void fn_3_A5704(s32 runner) {
     Unk18E8Fielder* f = &g_Fielders[g_Ball.fielderWBallIndex];
     InMemRunnerType* r = &g_Runners[runner];
@@ -1715,9 +1710,9 @@ void fn_3_A5704(s32 runner) {
         f32 x = lbl_3_data_4444[base].x;
         f32 z = lbl_3_data_4444[base].z;
         arrival = f->_192 + fn_3_A6ABC(x, z) + lbl_3_data_1C40;
+        ballDist = g_Ball.ballDistanceFromBase[base];
+        frames = fn_3_52560(g_Ball.fielderWBallIndex, x, z);
     }
-    ballDist = g_Ball.ballDistanceFromBase[base];
-    frames = fn_3_52560(g_Ball.fielderWBallIndex);
     if (coverer == g_Ball.fielderWBallIndex || coverer == -1 || ballDist < 3.0f || g_Fielders[coverer]._1E2 ||
         (g_Fielders[coverer]._17E < 0 && g_FieldingLogic._101[base] == 0)) {
         lbl_3_bss_1838[runner] = base;
@@ -1761,7 +1756,8 @@ void fn_3_A53DC(s32 runner) {
 }
 
 // .text:0x000A4F50 size:0x48C mapped:0x806E3FE4
-// 89.83%: the inlined fn_3_A6ABC allocates its FPRs differently, as in fn_3_A63E4.
+// 91.27%: as in fn_3_A5704, the lbl_3_data_4444 and g_FieldingLogic address loads are
+// scheduled differently.
 void fn_3_A4F50(s32 runner) {
     Unk18E8Fielder* f = &g_Fielders[g_Ball.fielderWBallIndex];
     InMemRunnerType* r = &g_Runners[runner];
@@ -1772,9 +1768,13 @@ void fn_3_A4F50(s32 runner) {
     s32 frames;
     s32 runnerFrames;
 
-    arrival = f->_192 + (fn_3_A6ABC(lbl_3_data_4444[base].x, lbl_3_data_4444[base].z) + 20) + lbl_3_data_1C40;
-    ballDist = g_Ball.ballDistanceFromBase[base];
-    frames = fn_3_52560(g_Ball.fielderWBallIndex);
+    {
+        f32 x = lbl_3_data_4444[base].x;
+        f32 z = lbl_3_data_4444[base].z;
+        arrival = f->_192 + (fn_3_A6ABC(x, z) + 20) + lbl_3_data_1C40;
+        ballDist = g_Ball.ballDistanceFromBase[base];
+        frames = fn_3_52560(g_Ball.fielderWBallIndex, x, z);
+    }
     if (r->currentBase == r->startingBase_baseAchieved) {
         runnerFrames = r->framesToPreviousBase;
     } else {
@@ -1929,7 +1929,6 @@ BOOL fn_3_A46A0(s32 runner) {
 }
 
 // .text:0x000A41E8 size:0x4B8 mapped:0x806E327C
-// 95.38%: the inlined fn_3_A6ABC allocates its FPRs differently, as in fn_3_A63E4.
 void fn_3_A41E8(s32 base) {
     Unk18E8Fielder* f = &g_Fielders[g_Ball.fielderWBallIndex];
     s16 coverer = g_FieldingLogic._0D0[base];
@@ -1953,7 +1952,7 @@ void fn_3_A41E8(s32 base) {
     }
     arrival = f->_192 + fn_3_A6ABC(lbl_3_data_4444[base].x, lbl_3_data_4444[base].z);
     ballDist = g_Ball.ballDistanceFromBase[base];
-    frames = fn_3_52560(g_Ball.fielderWBallIndex);
+    frames = fn_3_52560(g_Ball.fielderWBallIndex, lbl_3_data_4444[base].x, lbl_3_data_4444[base].z);
     if (coverer == g_Ball.fielderWBallIndex || coverer == -1 || ballDist < 3.0f) {
         g_FieldingLogic._0CC = base;
         g_FieldingLogic._0C4 = -1;

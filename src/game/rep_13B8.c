@@ -10,6 +10,11 @@
 #include "game/rep_720.h"
 #include "game/m_sound.h"
 #include "game/rep_D0.h"
+#include "game/rep_18E8.h"
+#include "game/rep_31A0.h"
+#include "game/rep_AC8.h"
+#include "game/rep_CC8.h"
+#include "game/rep_DB8.h"
 #include "static/UnknownHomes_Static.h"
 
 extern struct {
@@ -68,17 +73,7 @@ extern struct {
 
 extern u8 bodyCheckProbabiliities[][5];
 
-// rep_18E8.h declares fn_3_A6ABC as a void(void) placeholder
-extern s32 fn_3_A6810(f32 x0, f32 z0, f32 x1, f32 z1);
-extern int fn_3_A6ABC(f32 x, f32 z);
-extern u32 fn_3_107DF8(s8 port);
 extern int fn_3_6D658(int team, int charID, int otherCharID);
-extern void fn_3_59918(int event, int arg);
-extern void fn_3_5C74C(int arg);
-extern void fn_3_5D094(int arg);
-
-// rep_AC8.h declares this as a void(void) placeholder
-extern int fn_3_52560(int fielder, f32 x, f32 z);
 
 extern s16 lbl_3_data_1C58[5][4];
 extern s16 lbl_3_data_1C88[4];
