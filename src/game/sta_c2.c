@@ -1804,7 +1804,6 @@ void fn_3_D173C(StaC2Draw* draw) {
 }
 
 // .text:0x000D141C size:0x320 mapped:0x807104B0
-// 99.82%: the copies of dir into horiz and vert are scheduled in another order.
 void fn_3_D141C(StaC2Draw* draw) {
     Vec dir;
     Vec vert;
@@ -1822,8 +1821,8 @@ void fn_3_D141C(StaC2Draw* draw) {
 
     angleX = angleY = angleZ = 0.0f;
     PSVECSubtract(draw->to->_0C, draw->from->_0C, &dir);
-    horiz = vert = dir;
-    horiz.x = sqrt(pow(horiz.z, 2.0) + pow(horiz.x, 2.0));
+    vert = horiz = dir;
+    horiz.x = sqrt(pow(horiz.x, 2.0) + pow(horiz.z, 2.0));
     horiz.z = 0.0f;
     vert.y = 0.0f;
     PSVECNormalize(&dir, &dir);
@@ -2388,12 +2387,11 @@ void fn_3_CF72C(s32 idx) {
 }
 
 // .text:0x000CF278 size:0x4B4 mapped:0x8070E30C
-// 99.97%: the counters i and j are swapped between r29 and r30.
 void fn_3_CF278(StaC2Draw* draw, Vec pos) {
     StaC2Emitter* emitter = draw->smoke;
     StaC2Particle* p = emitter->particles;
-    u32 j = 0;
-    u32 i = 0;
+    u32 j;
+    u32 i;
     f32 angle;
     s32 life;
     f32 c;
@@ -2401,6 +2399,8 @@ void fn_3_CF278(StaC2Draw* draw, Vec pos) {
     emitter->_10 = lbl_3_bss_ADD0[0];
     emitter->_18 = 100;
     emitter->_20 = (StaC2EmitterOwner*)draw;
+    i = 0;
+    j = 0;
     for (; p != NULL; i++, p = p->next) {
         if (i < 10) {
             p->_38 = p->_3C = 0.1f;
@@ -2950,6 +2950,8 @@ void fn_3_CCC24(void** files, s32* indices) {
 }
 
 // .text:0x000CC81C size:0x408 mapped:0x8070B8B0
+// 99.19%: the target copies the draw pointer to r29 before the type test and passes the
+// copy to the inlined fn_3_CC5C4's fn_3_CBF80 call; here one register serves both.
 void fn_3_CC81C(void) {
     StaC2Draw* draw = lbl_3_common_bss_350E4._00;
     u32 i;
