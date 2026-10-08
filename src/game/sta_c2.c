@@ -198,6 +198,11 @@ typedef struct StaC2Draw {
             /* 0xA0 */ StaC2Link* link;
         };
         struct {
+            /* 0xA0 */ struct StaC2Draw* host;
+            /* 0xA4 */ void* _A4p;
+            /* 0xA8 */ struct StaC2Emitter* emitter;
+        };
+        struct {
             /* 0xA0 */ u8 _A0_AC_3[0xAC - 0xA0];
             /* 0xAC */ Vec vel;
             /* 0xB8 */ Vec* goal;
@@ -1526,8 +1531,41 @@ void fn_3_D00CC(void) {
 }
 
 // .text:0x000CFD58 size:0x374 mapped:0x8070EDEC
-void fn_3_CFD58(void) {
-    return;
+void fn_3_CFD58(StaC2Draw* draw) {
+    StaC2Emitter* emitter = draw->emitter;
+    StaC2Particle* p = emitter->particles;
+    s32 i;
+    f32 angle;
+    s32 alpha;
+
+    emitter->_20 = (StaC2EmitterOwner*)draw;
+    emitter->_10 = lbl_3_bss_ADD0[0];
+    for (i = 0; p != NULL; i++, p = p->next) {
+        angle = 360.0 * (i % 5) / 5.0;
+        angle += -draw->host->_D0 * (i / 5) * 10;
+        angle = 0.017453292f * angle;
+        p->_1C.x = p->pos.x = 6.0f * cosf_kludge(angle) + draw->host->_A0.x;
+        p->_1C.y = p->pos.y = 0.0f;
+        p->_1C.z = p->pos.z = 6.0f * sinf_kludge(angle) + draw->host->_A0.z;
+        rand();
+        p->vel.x = 0.0f;
+        p->vel.y = 0.03f;
+        p->vel.z = 0.0f;
+        p->life = (i / 5 + 1) * 5;
+        p->pos.x += p->vel.x * (30 - p->life);
+        p->pos.y += p->vel.y * (30 - p->life);
+        p->pos.z += p->vel.z * (30 - p->life);
+        p->_38 = p->_3C = 3.0 + 3.0 * ((30 - p->life) / 30.0f);
+        p->color[0] = p->color[1] = p->color[2] = 255;
+        alpha = 255.0f + -255.0f * ((30 - p->life) / 30.0f);
+        if (alpha < 0) {
+            alpha = 0;
+        }
+        p->color[3] = alpha;
+        p->delay = 0;
+        p->_4D = 9;
+        p->_4E = 0;
+    }
 }
 
 // .text:0x000CFB44 size:0x214 mapped:0x8070EBD8

@@ -48,7 +48,7 @@ void fn_3_CFA88(void);
 void fn_3_CFA8C(struct StaC2Draw* draw);
 void fn_3_CFAB4(struct StaC2Particle* particle, struct StaC2Emitter* emitter);
 BOOL fn_3_CFB44(struct StaC2Emitter* emitter);
-void fn_3_CFD58(void);
+void fn_3_CFD58(struct StaC2Draw* draw);
 void fn_3_D00CC(void);
 void fn_3_D00D0(void);
 void fn_3_D0280(void);
