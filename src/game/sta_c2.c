@@ -198,6 +198,11 @@ typedef struct StaC2Draw {
             /* 0xA0 */ StaC2Link* link;
         };
         struct {
+            /* 0xA0 */ u8 _A0_AC_3[0xAC - 0xA0];
+            /* 0xAC */ Vec vel;
+            /* 0xB8 */ Vec* goal;
+        };
+        struct {
             /* 0xA0 */ u8 _A0_AC_2[0xAC - 0xA0];
             /* 0xAC */ StaC2Target* from;
             /* 0xB0 */ StaC2Target* to;
@@ -856,8 +861,35 @@ void fn_3_D2A0C(void) {
 }
 
 // .text:0x000D278C size:0x280 mapped:0x80711820
-void fn_3_D278C(void) {
-    return;
+void fn_3_D278C(StaC2Draw* draw) {
+    Vec diff;
+    Vec pos;
+
+    draw->_A0.x += draw->vel.x;
+    draw->_A0.y += draw->vel.y;
+    draw->_A0.z += draw->vel.z;
+    draw->vel.y -= 0.04f;
+    if (draw->_A0.y < 0.0f) {
+        draw->_A0.y = 0.0f;
+        PSVECSubtract(draw->goal, &draw->_A0, &diff);
+        if (5.0f >= PSVECMag(&diff)) {
+            draw->_CA = 1;
+            if (draw->goal->x < 0.0f) {
+                draw->_C0 = 0.0f;
+            } else {
+                draw->_C0 = 180.0f;
+            }
+        } else {
+            draw->vel.y = 0.2f;
+        }
+        memcpy(&pos, &draw->_A0, sizeof(Vec));
+        pos.y *= -1.0f;
+        fn_3_8BBC4(lbl_3_data_81DC[g_d_GameSettings.StadiumID] + 2, &pos, NULL, 10);
+        fn_8004C094(&draw->_A0);
+    }
+    CTRLSetTranslation(&draw->control, draw->_A0.x, -draw->_A0.y, draw->_A0.z);
+    CTRLSetRotation(&draw->control, 0.0f, draw->_C0, 0.0f);
+    fn_3_D2220(draw);
 }
 
 // .text:0x000D2684 size:0x108 mapped:0x80711718
