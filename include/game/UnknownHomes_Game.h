@@ -874,9 +874,9 @@ typedef struct _PracticeStruct {
     /*0x020*/ void* commandList; // unsure
     /*0x024*/ int homeAway;
     artificial_padding(0x24, 0x140, int);
-    /*0x140*/ frame_t totalFrames;
-    /*0x142*/ frame_t framesInCurrTransitionState;
-    /*0x144*/ frame_t framesSincePracticeMenuDefaultTransition;
+    /*0x140*/ u16 totalFrames;
+    /*0x142*/ u16 framesInCurrTransitionState;
+    /*0x144*/ u16 framesSincePracticeMenuDefaultTransition;
     /*0x146*/ frame_t practiceMenu_framesOnCurrMenuScreen;
     /*0x148*/ u16 frames_sinceMovedToFromMenu;
     /*0x14A*/ frame_t _14A;
@@ -921,7 +921,9 @@ typedef struct _PracticeStruct {
     /*0x198*/ E(u8, PRACTICE_TYPE) practiceType_1;
     /*0x199*/ E(u8, PRACTICE_TYPE) practiceType;
     /*0x19A*/ u8 subMenuCursor;
-    artificial_padding(0x19a, 0x19e, u8);
+    artificial_padding(0x19a, 0x19c, u8);
+    /*0x19C*/ u8 _19C;
+    artificial_padding(0x19c, 0x19e, u8);
     /*0x19E*/ u8 pauseMenuLoading; // unsure
     /*0x19F*/ u8 _19F;
     artificial_padding(0x19f, 0x1a1, u8);
@@ -937,7 +939,8 @@ typedef struct _PracticeStruct {
     /*0x1AA*/ u8 transitioningIndicator; // unsure
     /*0x1AB*/ u8 _1AB[4];
     /*0x1AF*/ u8 returnToPracticeMenuState;
-    artificial_padding(0x1af, 0x1b2, u8);
+    artificial_padding(0x1af, 0x1b1, u8);
+    /*0x1B1*/ u8 _1B1;
     /*0x1B2*/ u8 _1B2[4][4];
     /*0x1C2*/ s8 instructionNumber;
     /*0x1C3*/ u8 readyToMoveToNextInstruction; // unsure
@@ -962,7 +965,8 @@ typedef struct _PracticeStruct {
     /*0x1D6*/ u8 practiceLevel_2;
     artificial_padding(0x1d6, 0x1d9, u8);
     /*0x1D9*/ u8 _1D9;
-    artificial_padding(0x1d9, 0x1e1, u8);
+    /*0x1DA*/ u8 _1DA;
+    artificial_padding(0x1da, 0x1e1, u8);
     /*0x1E1*/ u8 hitVariablesSetIndicator;
     /*0x1E2*/ u8 _1E2;
     /*0x1E3*/ u8 aiBuntIndicator; // unsure
