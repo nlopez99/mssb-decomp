@@ -3608,7 +3608,30 @@ void fn_3_411AC(void) {
 
 // .text:0x00040D88 size:0x424 mapped:0x8067FE1C
 void fn_3_40D88(void) {
-    return;
+    if (g_Fielders[8]._1DB == 0 && g_Fielders[6]._1DB == 0) {
+        fn_3_5985C(6, 3);
+        fn_3_5985C(7, 3);
+        fn_3_5985C(8, 3);
+    } else if (g_Fielders[8]._1DB == 0) {
+        fn_3_5985C(8, 3);
+        fn_3_5985C(7, 3);
+    } else if (g_Fielders[6]._1DB == 0) {
+        fn_3_5985C(6, 3);
+        fn_3_5985C(7, 3);
+    } else if (g_Fielders[7]._1DB == 0) {
+        fn_3_5985C(6, 3);
+        fn_3_5985C(7, 3);
+        fn_3_5985C(8, 3);
+    } else if (g_Fielders[7]._182 > g_Ball.Hit_HorizontalAngle) {
+        fn_3_5985C(8, 3);
+        fn_3_5985C(7, 3);
+    } else {
+        fn_3_5985C(6, 3);
+        fn_3_5985C(7, 3);
+    }
+    fn_3_4C9C8();
+    fn_3_47778();
+    fn_3_40D54();
 }
 
 // .text:0x00040D54 size:0x34 mapped:0x8067FDE8
@@ -3619,7 +3642,21 @@ void fn_3_40D54(void) {
 
 // .text:0x00040C04 size:0x150 mapped:0x8067FC98
 void fn_3_40C04(void) {
-    return;
+    s32 i;
+
+    for (i = 2; i < 6; i++) {
+        if (g_Fielders[i]._1DD == 2) {
+            fn_3_5985C(i, 3);
+            break;
+        }
+    }
+    if (i == 2) {
+        fn_3_5985C(3, 3);
+    }
+    if (i == 4) {
+        fn_3_5985C(5, 3);
+    }
+    fn_3_40D88();
 }
 
 // .text:0x000402A8 size:0x95C mapped:0x8067F33C
