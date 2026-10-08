@@ -202,10 +202,6 @@ u32 lbl_3_data_27C54[16] = {
     0x00030000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 };
 
-static inline void fn_3BD8_set68(UnkTask3BD8* task, s32 idx, u8 value) {
-    lbl_80371C30[task->_14 + idx]._00->_68 = value;
-}
-
 // .text:0x0015F410 size:0x164 mapped:0x8079E4A4
 void fn_3_15F410(void) {
     if (g_GameLogic._125 < 3) {
@@ -611,18 +607,18 @@ void fn_3_15DB44(void) {
         }
         for (i = 0; i < 5; i++) {
             if (frame <= lbl_3_data_27C4C[i] + 5) {
-                fn_3BD8_set68(task, i + 2, 4);
+                lbl_80371C30[task->_14 + 2 + i]._00->_68 = 4;
             }
         }
         for (i = 0; i < 6; i++) {
             if (frame <= lbl_3_data_27C4C[i] + 5) {
-                fn_3BD8_set68(task, i + 43, 4);
+                lbl_80371C30[task->_14 + 43 + i]._00->_68 = 4;
             }
         }
         for (i = 0; i < 6; i++) {
             if (frame <= lbl_3_data_27C4C[i] + 5) {
                 for (j = 0; j < 6; j++) {
-                    fn_3BD8_set68(task, i * 6 + j + 7, 4);
+                    lbl_80371C30[task->_14 + 7 + i * 6 + j]._00->_68 = 4;
                 }
             }
         }
