@@ -14,7 +14,9 @@ extern struct {
     /* 0x391 */ u8 _391;
     /* 0x392 */ u8 _392[4];
     /* 0x396 */ u8 _396;
-    /* 0x397 */ u8 _397[3];
+    /* 0x397 */ u8 _397;
+    /* 0x398 */ u8 _398;
+    /* 0x399 */ u8 _399;
     /* 0x39A */ u8 _39A;
     /* 0x39B */ u8 _39B;
 } lbl_800EF808;
@@ -25,6 +27,8 @@ extern struct {
     /* 0x1FD0 */ u8 emitterType[100];
     /* 0x2034 */ u8 emitterActive[100];
     /* 0x2098 */ u8 _2098[100];
+    /* 0x20FC */ u8 _20FC;
+    /* 0x20FD */ u8 _20FD;
 } lbl_3_common_bss_32B20;
 
 typedef struct Unk90754 {
@@ -94,6 +98,7 @@ extern camera_803c639c_s* fn_80052734(s32 idx);
 extern u32 fn_800A8864(void);
 extern void fn_800A8878(u8 a, u8 b);
 extern u8 lbl_800E8558[][6];
+extern u8 lbl_800E88A4[][2];
 extern void* fn_800A88C0(void);
 extern u32 fn_800A88C8(void);
 extern u32 fn_800A88D0(void);
@@ -620,13 +625,83 @@ BOOL fn_3_8C4F0(u32 steps, u8 target) {
 }
 
 // .text:0x0008C2DC size:0x214 mapped:0x806CB370
-void fn_3_8C2DC(void) {
-    return;
+// 98.80%: the setup block takes r0/r5 for the constant 1 and 0x4330 the other way round
+BOOL fn_3_8C2DC(u32 steps, s32 sel) {
+    u32 vol = fn_800A8864();
+    u8 target;
+    f32 cur;
+
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+        target = lbl_800E88A4[9][(u8)sel];
+    } else if (lbl_3_common_bss_34C58._20 == 0x16) {
+        target = lbl_800E88A4[6][(u8)sel];
+    } else if (g_GameLogic.gameStatus == 0xE) {
+        target = lbl_800E88A4[7][(u8)sel];
+    } else if (g_GameLogic.gameStatus == 0x17) {
+        target = lbl_800E88A4[8][(u8)sel];
+    } else {
+        target = lbl_800E88A4[g_d_GameSettings.StadiumID][(u8)sel];
+    }
+    cur = (int)((vol >> 8) & 0xFF);
+    if (cur > lbl_3_bss_1764) {
+        lbl_3_bss_1764 = cur;
+    }
+    if (!lbl_3_common_bss_34C58._2F) {
+        lbl_3_common_bss_34C58._2F = 1;
+        lbl_3_bss_176C = (f32)target / (f32)steps;
+        lbl_3_bss_1764 = cur;
+    }
+    lbl_3_bss_1764 += lbl_3_bss_176C;
+    fn_800A8878(lbl_3_bss_1764, lbl_3_bss_1764);
+    if (lbl_3_bss_1764 >= target) {
+        lbl_3_common_bss_34C58._2F = 0;
+        return FALSE;
+    }
+    return TRUE;
 }
 
 // .text:0x0008C104 size:0x1D8 mapped:0x806CB198
-void fn_3_8C104(s32 arg0) {
-    return;
+// 99.66%: the inlined fn_3_8B258 swaps its queue pointer and head registers, as in fn_3_8C07C
+void fn_3_8C104(s32 vol) {
+    int stadium;
+    u8 level;
+    int sel = 0;
+
+    if (!lbl_800EF808._398) {
+        return;
+    }
+    if (vol == -2) {
+        sel = 1;
+    }
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+        stadium = 9;
+        level = lbl_800E88A4[stadium][sel];
+    } else if (g_GameLogic.gameStatus == 0x24) {
+        stadium = 7;
+        level = lbl_800E88A4[stadium][sel];
+    } else if (lbl_3_common_bss_34C58._20 == 0x16) {
+        stadium = 6;
+        level = lbl_800E88A4[stadium][sel];
+    } else if (lbl_3_common_bss_34C58._20 == 0x17) {
+        stadium = 14;
+        level = lbl_800E88A4[stadium][sel];
+    } else if (g_GameLogic.gameStatus == 0xE) {
+        stadium = 7;
+        level = lbl_800E88A4[stadium][sel];
+    } else if (g_GameLogic.gameStatus == 0x17) {
+        stadium = 8;
+        level = lbl_800E88A4[stadium][sel];
+    } else {
+        stadium = g_d_GameSettings.StadiumID;
+        level = lbl_800E88A4[stadium][sel];
+    }
+    if (vol >= 0) {
+        level = vol;
+    }
+    fn_3_8B258(0, stadium, level);
+    if (level == 0) {
+        fn_800A8878(level, level);
+    }
 }
 
 // .text:0x0008C07C size:0x88 mapped:0x806CB110
@@ -637,8 +712,21 @@ void fn_3_8C07C(void) {
 }
 
 // .text:0x0008BE8C size:0x1F0 mapped:0x806CAF20
+// 92.66%: the target keeps the clearing loop's entry test (li r6,0 first, cmpwi r6,100; bge)
+// and walks the arrays from r3; every counter form tried folds the test away
 void fn_3_8BE8C(void) {
-    return;
+    SND_FVECTOR pos = { 0.0f, 0.0f, 0.0f };
+    int i;
+
+    for (i = 0; i < 100; i++) {
+        lbl_3_common_bss_32B20.emitterType[i] = 0xFF;
+        lbl_3_common_bss_32B20.emitterActive[i] = 0;
+        lbl_3_common_bss_32B20._2098[i] = 0;
+    }
+    lbl_3_common_bss_32B20._20FC = 0xFF;
+    lbl_3_common_bss_32B20._20FD = 0;
+    fn_3_8B9BC(&pos);
+    fn_3_8B804();
 }
 
 // .text:0x0008BDF4 size:0x98 mapped:0x806CAE88
@@ -811,6 +899,8 @@ BOOL fn_3_8B258(s32 state, s32 id, s32 arg) {
 }
 
 // .text:0x0008B094 size:0x1C4 mapped:0x806CA128
+// 91.46%: the target reads the state byte as task + (tail * 3 + 0x17) with lbzx/stbx, keeping
+// task in r31; this keeps task + tail * 3 instead and shifts the saved registers
 void fn_3_8B094(void) {
     SoundLoadTask* task = lbl_803CC1B8;
     u8 tail;
