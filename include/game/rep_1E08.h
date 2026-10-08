@@ -12,6 +12,11 @@ struct UnkPanelList1E08;
 struct UnkAnim21F8;
 struct UnkEffect21F8;
 
+void fn_3_BA150(void);
+int fn_3_BA174(const void* a, const void* b);
+void fn_3_BA1A0(void);
+void fn_3_BA268(void);
+void fn_3_BA3EC(void);
 void fn_3_BA538(struct UnkPanel1E08* panel);
 BOOL fn_3_BA7F4(void* arg);
 void fn_3_BB07C(struct UnkPanel1E08* obj, f32 angle);

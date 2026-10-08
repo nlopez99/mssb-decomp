@@ -338,7 +338,6 @@ extern void fn_80025EEC(UnkAnimEntry1E08* entry, s32, s32);
 extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_800ACFB0(void* data);
 extern void fn_800246D4(int (*compare)(const void*, const void*), void* src, void* dst, int size, int count);
-extern int fn_3_BA174(const void* a, const void* b);
 extern void fn_800245EC(camera_803c639c_s* camera, Mtx view, Vec* points, f32* out, s32 count, s32 arg5);
 extern void fn_80033B58(void* texture, s32 index, s32, s32);
 extern u16 lbl_800F7860[4][2];
@@ -1541,4 +1540,29 @@ void fn_3_BA538(UnkPanel1E08* panel) {
         GXPosition3f32(quad[i].x, quad[i].y, quad[i].z);
         GXColor1u32(panel->color1.rgba);
     }
+}
+
+// .text:0x000BA3EC size:0x14C mapped:0x806F9480
+void fn_3_BA3EC(void) {
+    return;
+}
+
+// .text:0x000BA268 size:0x184 mapped:0x806F92FC
+void fn_3_BA268(void) {
+    return;
+}
+
+// .text:0x000BA1A0 size:0xC8 mapped:0x806F9234
+void fn_3_BA1A0(void) {
+    return;
+}
+
+// .text:0x000BA174 size:0x2C mapped:0x806F9208
+int fn_3_BA174(const void* a, const void* b) {
+    return 0;
+}
+
+// .text:0x000BA150 size:0x24 mapped:0x806F91E4
+void fn_3_BA150(void) {
+    return;
 }
