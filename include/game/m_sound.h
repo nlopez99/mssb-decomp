@@ -56,6 +56,8 @@ void fn_3_908E8(void);
 int fn_3_90928(void);
 void fn_3_909B0(void);
 BOOL fn_3_90A18(void);
+void fn_3_90AB0(s32 charID);
+BOOL fn_3_90B14(int first, int second);
 BOOL fn_3_90C14(int charID);
 int fn_3_90F48(void);
 int fn_3_91064(void);

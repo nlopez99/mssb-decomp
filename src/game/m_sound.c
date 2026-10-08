@@ -156,11 +156,6 @@ extern void LoadFile(char* name, void* dest, s32 arg2, s32 arg3, s32 arg4);
 extern u8 lbl_8034E478[16][0x50];
 extern char lbl_800E87B4[15][16];
 
-// rep_1BC8.c declares these as void(u8) and BOOL(s16, s16), which the signed tests of their
-// arguments without extension rule out, so the prototypes stay out of the header until it is fixed
-void fn_3_90AB0(s32 charID);
-BOOL fn_3_90B14(int first, int second);
-
 // .data
 static u8 lbl_3_data_8148[0x20] = {
     0x1B, 0x1A, 0x19, 0x18, 0x17, 0x16, 0x15, 0x14, 0x13, 0x12, 0x11, 0x10, 0x0F, 0x0E, 0x0D, 0x0C,

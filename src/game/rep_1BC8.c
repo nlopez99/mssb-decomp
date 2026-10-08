@@ -59,9 +59,6 @@ extern struct {
 extern void* ARAMTransfer(void* entry, int arg1, int arg2, u32 aram);
 extern void fn_800111B4(void* arg);
 extern void fn_8000F4B8(int arg0, int arg1, int arg2, int arg3);
-extern BOOL fn_3_90C14(int arg);
-extern void fn_3_90AB0(u8 id);
-extern BOOL fn_3_90B14(s16 a, s16 b);
 
 extern u8 lbl_800E8558[];
 extern BOOL fn_8001594C(int team);
