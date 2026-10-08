@@ -3,6 +3,7 @@
 #include "game/UnknownHomes_Game.h"
 #include "game/rep_D18.h"
 #include "game/rep_1BC8.h"
+#include "game/rep_1B20.h"
 #include "game/rep_DB8.h"
 #include "game/rep_1038.h"
 #include "game/rep_13B8.h"
@@ -47,15 +48,6 @@ extern struct {
     /* 0xCF4E */ u8 _CF4E[4][4];
 } lbl_80354768;
 
-// rep_1B20.h declares these as void(void) placeholders.
-extern void fn_3_B1DA4(int level, int arg1);
-extern void fn_3_B3A28(void);
-extern int fn_3_B32B8(void);
-extern void fn_3_B27A4(void);
-extern int fn_3_B1CB0(void);
-extern int fn_3_B254C(void);
-extern void fn_3_B2630(void);
-extern void fn_3_B3620(void);
 
 extern struct {
     /* 0x00 */ u8 _00[0x13];

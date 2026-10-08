@@ -10,7 +10,7 @@
 #include "game/rep_1BC8.h"
 
 // .data of rep_1B20
-extern s16 lbl_3_data_FC1C;
+extern s16 lbl_3_data_FC1C[2];
 extern u8 lbl_3_data_FAA8[3][9];
 
 extern struct {
@@ -281,7 +281,7 @@ void fn_3_15ADD4(void) {
 
 // .text:0x0015AD94 size:0x40 mapped:0x80799E28
 void fn_3_15AD94(void) {
-    if (g_Pitcher.currentStateFrameCounter > lbl_3_data_FC1C) {
+    if (g_Pitcher.currentStateFrameCounter > lbl_3_data_FC1C[0]) {
         fn_3_750C4(2);
     }
 }

@@ -2,6 +2,7 @@
 #include "header_rep_data.h"
 #include "game/UnknownHomes_Game.h"
 #include "game/rep_1BC8.h"
+#include "game/rep_1B20.h"
 #include "game/rep_D18.h"
 #include "game/rep_1200.h"
 #include "game/game_batter.h"
@@ -61,14 +62,6 @@ extern struct {
 } lbl_80354768;
 
 extern void fn_3_1DD48(void);
-extern int fn_3_B1CB0(void);
-extern void fn_3_B1DA4(int, int);
-extern int fn_3_B254C(void);
-extern void fn_3_B2630(void);
-extern int fn_3_B32B8(void);
-extern void fn_3_B3620(void);
-extern void fn_3_B3A28(void);
-extern void fn_3_B27A4(void);
 extern int fn_3_6BA64(void);
 extern void fn_80011BE4(int arg);
 extern void fn_3_1E154(void);
