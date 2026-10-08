@@ -1,0 +1,35 @@
+name: Report
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      # GitHub's runners have no game files, so tools/publish_report.py builds
+      # the report locally and attaches it to the "reports" release, named
+      # after the source tree it was built from.
+      - name: Download the report for this tree
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          tree=$(git rev-parse 'HEAD^{tree}')
+          mkdir -p build/GYQE01
+          if ! gh release download reports --pattern "GYQE01_${tree}.json" --output build/GYQE01/report.json; then
+            echo "::error::No report for tree ${tree}. Run python3 tools/publish_report.py on this commit; it re-runs this job."
+            exit 1
+          fi
+          jq -e '.measures.total_code' build/GYQE01/report.json > /dev/null
+      - uses: actions/upload-artifact@v4
+        with:
+          name: GYQE01_report
+          path: build/GYQE01/report.json
+          if-no-files-found: error
