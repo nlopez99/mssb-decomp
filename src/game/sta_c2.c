@@ -2750,7 +2750,7 @@ void fn_3_CD958(void) {
 }
 
 // .text:0x000CCC24 size:0xD34 mapped:0x8070BCB8
-// 98.25%: the target keeps the place pointer in r28 from the first instruction (one more
+// 98.37%: the target keeps the place pointer in r28 from the first instruction (one more
 // saved register, 112-byte frame); here it is rebuilt before its loop, shifting registers.
 void fn_3_CCC24(void** files, s32* indices) {
     StaC2Draw* draw;
@@ -2767,8 +2767,9 @@ void fn_3_CCC24(void** files, s32* indices) {
     u8 end = FALSE;
     u32 k;
 
-    for (n = 0; n < 10; n++) {
-        if (lbl_3_data_185D0[n].type == 13) {
+    place = lbl_3_data_185D0;
+    for (n = 0; n < 10; n++, place++) {
+        if (place->type == 13) {
             break;
         }
     }
