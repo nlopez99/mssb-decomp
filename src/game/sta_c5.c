@@ -17,6 +17,7 @@
 #include "game/m_sound.h"
 #include "game/rep_1838.h"
 #include "game/rep_23E8.h"
+#include "game/rep_D0.h"
 #include "Dolphin/rand.h"
 
 
@@ -1142,8 +1143,85 @@ void fn_3_F22FC(StaC5Draw* draw, s8 idx) {
 }
 
 // .text:0x000F1E2C size:0x4D0 mapped:0x80730EC0
-void fn_3_F1E2C(void) {
-    return;
+void fn_3_F1E2C(StaC5Draw* draw) {
+    VecSrcDst line;
+    CollisionStruct hit;
+    Vec mid0;
+    Vec mid1;
+    Vec front;
+    Vec fwd = { 0.0f, 0.0f, -1.0f };
+    f32 angle;
+    u8 hitFront;
+    u8 hitLeft;
+    u8 hitRight;
+
+    if (draw->_A0.y > 0.0f) {
+        return;
+    }
+    angle = -(0.017453292f * draw->_B4);
+    front.x = 5.5 * (fwd.x * cosf_kludge(angle) + fwd.z * -sinf_kludge(angle));
+    front.z = 5.5 * (fwd.x * sinf_kludge(angle) + fwd.z * cosf_kludge(angle));
+    PSVECAdd(&front, &draw->_A0, &front);
+    front.y = 0.0f;
+    line.src.x = line.dst.x = front.x;
+    line.src.z = line.dst.z = front.z;
+    line.src.y = -1.0f;
+    line.dst.y = 1.0f;
+    hitFront = checkCollision(&line, &hit, 0, FALSE) & 0x7F;
+    if (hitFront == BALL_COLLISION_TYPE_WATER) {
+        if ((u8)draw->_C4 % lbl_3_data_1B998 != 0) {
+            draw->_C4++;
+            return;
+        }
+        fn_80064430(&line.src, 1, 0.0f, lbl_3_data_1B99C);
+    }
+    line.src.x = lbl_3_data_1BA4C[0][0] * cosf_kludge(angle) + lbl_3_data_1BA4C[0][1] * -sinf_kludge(angle);
+    line.src.z = lbl_3_data_1BA4C[0][0] * sinf_kludge(angle) + lbl_3_data_1BA4C[0][1] * cosf_kludge(angle);
+    PSVECAdd(&front, &line.src, &line.src);
+    line.dst.x = line.src.x;
+    line.dst.z = line.src.z;
+    line.src.y = -1.0f;
+    line.dst.y = 1.0f;
+    hitLeft = checkCollision(&line, &hit, 0, FALSE) & 0x7F;
+    if (hitLeft == BALL_COLLISION_TYPE_WATER) {
+        if ((u8)draw->_C4 % lbl_3_data_1B998 != 0) {
+            draw->_C4++;
+            return;
+        }
+        fn_80064430(&line.src, 1, 0.0f, lbl_3_data_1B99C);
+    }
+    line.src.x = lbl_3_data_1BA4C[1][0] * cosf_kludge(angle) + lbl_3_data_1BA4C[1][1] * -sinf_kludge(angle);
+    line.src.z = lbl_3_data_1BA4C[1][0] * sinf_kludge(angle) + lbl_3_data_1BA4C[1][1] * cosf_kludge(angle);
+    PSVECAdd(&front, &line.src, &line.src);
+    line.dst.x = line.src.x;
+    line.dst.z = line.src.z;
+    line.src.y = -1.0f;
+    line.dst.y = 1.0f;
+    hitRight = checkCollision(&line, &hit, 0, FALSE) & 0x7F;
+    if (hitRight == BALL_COLLISION_TYPE_WATER) {
+        if ((u8)draw->_C4 % lbl_3_data_1B998 != 0) {
+            draw->_C4++;
+            return;
+        }
+        fn_80064430(&line.src, 1, 0.0f, lbl_3_data_1B99C);
+    }
+    if (hitFront == BALL_COLLISION_TYPE_WATER) {
+        if (hitLeft == BALL_COLLISION_TYPE_WATER) {
+            PSVECSubtract(&line.src, &front, &mid0);
+            mid0.x *= 0.5f;
+            mid0.z *= 0.5f;
+            PSVECAdd(&mid0, &front, &mid0);
+            fn_80064430(&mid0, 1, 0.0f, lbl_3_data_1B99C);
+        }
+        if (hitRight == BALL_COLLISION_TYPE_WATER) {
+            PSVECSubtract(&line.src, &front, &mid1);
+            mid1.x *= 0.5f;
+            mid1.z *= 0.5f;
+            PSVECAdd(&mid1, &front, &mid1);
+            fn_80064430(&mid1, 1, 0.0f, lbl_3_data_1B99C);
+        }
+    }
+    draw->_C4 += ((hitFront | hitLeft | hitRight) & BALL_COLLISION_TYPE_WATER) != 0;
 }
 
 // .text:0x000F193C size:0x4F0 mapped:0x807309D0
