@@ -13,6 +13,9 @@
 #include "game/m_sound.h"
 #include "game/rep_1200.h"
 #include "game/rep_1E08.h"
+#include "game/rep_31A0.h"
+#include "game/rep_CC8.h"
+#include "game/rep_D18.h"
 #include "static/UnknownHomes_Static.h"
 #include "musyx/musyx.h"
 #include "Dolphin/mtx.h"
@@ -81,12 +84,8 @@ extern s16 lbl_3_data_217A4[12];
 
 extern int fn_3_9E368(int* weights, int count);
 extern void fn_8003A540(int);
-extern void fn_3_5A6D4(u8 status);
 extern void fn_3_1608F0(int, int, int);
-extern void ballPhysica(void);
-extern int fn_3_108854(void);
 extern void changeScene(u8, s16);
-extern void fn_3_10F550(u8, s16);
 extern int fn_3_6C938(int, int);
 extern void fn_3_FBD58(void);
 extern void fn_3_FBD70(void);
@@ -94,8 +93,6 @@ extern void minigamesSetSomePointers(void);
 extern void minigamesGXStuff(void);
 extern void minigamesSetSomePointers2(void);
 extern void Set_803cb848(int);
-extern void fn_3_10AD48(void);
-extern void fn_3_59A90(void);
 extern camera_803c639c_s* fn_80052734(int);
 extern void fn_8003414C(Mtx);
 

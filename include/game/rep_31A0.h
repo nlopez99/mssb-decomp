@@ -3,9 +3,28 @@
 
 #include "mssbTypes.h"
 
-struct UnkRecord3448;
-struct UnkStats3448;
-struct UnkRank31A0;
+// Filled by fn_3_10754C; records of these sit 0x16 apart at lbl_803616CC + 0x140
+typedef struct UnkStats3448 {
+    /* 0x00 */ s16 _00[6];
+    /* 0x0C */ u8 _0C[6];
+    /* 0x12 */ u8 _12;
+    /* 0x13 */ u8 _13;
+    /* 0x14 */ u8 _14;
+    /* 0x15 */ u8 _15;
+} UnkStats3448; // size: 0x16
+
+// Written by fn_3_1079C8
+typedef struct UnkRank31A0 {
+    /* 0x0 */ u8 id;
+    /* 0x1 */ u8 rank;
+} UnkRank31A0; // size: 0x2
+
+// One entry per player; fn_3_109D88 returns groups of five, one group per minigame
+typedef struct UnkRecord3448 {
+    /* 0x0 */ s32 _00;
+    /* 0x4 */ s16 _04;
+    /* 0x6 */ s16 _06;
+} UnkRecord3448; // size: 0x8
 
 void fn_3_106DFC(void);
 BOOL fn_3_106E50(void);

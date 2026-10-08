@@ -5,6 +5,7 @@
 #include "game/rep_1C0.h"
 #include "game/rep_1D58.h"
 #include "game/rep_1E08.h"
+#include "game/rep_31A0.h"
 
 typedef struct {
     /* 0x00 */ u8 _00[0x10];
@@ -60,8 +61,6 @@ extern void* ARAMTransfer(UnkAramEntry60* entry, int arg1, int arg2, u32 aram);
 extern void fn_8001CBD4(void);
 extern void fn_800229CC(void);
 extern void fn_800B0A14_removeQueue(void);
-extern void fn_3_106DFC(void);
-extern BOOL fn_3_106E50(void);
 
 // .text:0x0000065C size:0x278 mapped:0x8063F6F0
 void manageLoadingState(void) {

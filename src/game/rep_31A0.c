@@ -20,6 +20,7 @@
 #include "game/rep_1E08.h"
 #include "game/rep_16B8.h"
 #include "game/rep_E08.h"
+#include "game/rep_D18.h"
 #include "string.h"
 #include "musyx/musyx.h"
 
@@ -27,34 +28,11 @@ typedef struct {
     /* 0x00 */ u32 _00[4];
 } AramEntry31A0; // size: 0x10
 
-// Filled by fn_3_10754C
-struct UnkStats3448 {
-    /* 0x00 */ s16 _00[6];
-    /* 0x0C */ u8 _0C[6];
-    /* 0x12 */ u8 _12;
-    /* 0x13 */ u8 _13;
-    /* 0x14 */ u8 _14;
-    /* 0x15 */ u8 _15;
-}; // size: 0x16
-
-// Written by fn_3_1079C8
-typedef struct UnkRank31A0 {
-    /* 0x0 */ u8 id;
-    /* 0x1 */ u8 rank;
-} UnkRank31A0; // size: 0x2
-
 // One player waiting in fn_3_10C81C's queue
 typedef struct {
     /* 0x0 */ int player;
     /* 0x4 */ int wait;
 } UnkQueue31A0; // size: 0x8
-
-// Eight bytes; fn_3_109D88 returns groups of five, one group per minigame
-struct UnkRecord3448 {
-    /* 0x0 */ s32 _00;
-    /* 0x4 */ s16 _04;
-    /* 0x6 */ s16 _06;
-};
 
 extern struct {
     /* 0x000 */ struct UnkRecord3448 _000[5];
@@ -238,12 +216,6 @@ extern void fn_80011B64(int port);
 extern int fn_80016710(int charID, int port);
 extern void fn_800203E0(int, int);
 extern s16 fn_8006C13C(struct UnkStats3448* stats);
-// rep_D18.h declares fn_3_5B220 as a void(void) placeholder
-extern void fn_3_5A6D4(u8 status);
-extern int fn_3_5B220(int arg);
-extern void fn_3_5B368(void);
-extern int fn_3_5B380(u16 buttons);
-extern void fn_3_5B408(void);
 extern void fn_800246D4(int (*compare)(const void*, const void*), void* src, void* dst, int size, int count);
 
 u8 lbl_3_data_21268[8] = { 1, 2, 4, 5, 3, 6, 7, 0 };

@@ -4,6 +4,9 @@
 #include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
 #include "game/rep_1838.h"
+#include "game/m_sound.h"
+#include "game/rep_31A0.h"
+#include "game/rep_720.h"
 #include "musyx/musyx.h"
 
 typedef struct UnkTask3448 {
@@ -139,26 +142,10 @@ extern struct {
     /* 0x28 */ u8 _28;
 } lbl_80366158;
 
-// Filled by fn_3_10754C
-typedef struct UnkStats3448 {
-    /* 0x00 */ s16 _00[6];
-    /* 0x0C */ u8 _0C[6];
-    /* 0x12 */ u8 _12;
-    /* 0x13 */ u8 _13;
-    /* 0x14 */ u8 _14;
-} UnkStats3448; // size: 0x16
-
 // Filled from UnkStats3448 by fn_8006C2B4
 typedef struct UnkTotals3448 {
     /* 0x00 */ s16 _00[8];
 } UnkTotals3448;
-
-// One entry per player, returned by fn_3_109D88
-typedef struct UnkRecord3448 {
-    /* 0x0 */ s32 _00;
-    /* 0x4 */ s16 _04;
-    /* 0x6 */ s16 _06;
-} UnkRecord3448;
 
 typedef struct {
     /* 0x000 */ VecXYZ position;
@@ -790,17 +777,10 @@ extern void fn_80034E20(UnkTask3448* task, UnkSpriteDesc3448* desc);
 extern void fn_800362F0(UnkTask3448* task, s32);
 extern void fn_800363D8(UnkTask3448* task, s32, s32, s32, s32);
 extern void fn_800528C0(f32 x, f32 y, f32 z, s16* screenX, s16* screenY);
-extern BOOL fn_3_1650C(int* outX, int* outY, BOOL r5, f32 pX, f32 pY, f32 pZ);
 extern void fn_800B0A14_removeQueue(void);
-// game/m_sound.h declares this void while m_sound.c is a stub; fn_3_121908 keeps the voice it returns.
-extern SND_VOICEID fn_3_90064(int id);
 extern UnkTask3448* fn_800B0A5C_insertQueue(void (*)(void), s32);
 extern void* ARAMTransfer(UnkAramEntry3448* entry, int arg1, int arg2, u32 aram);
 extern void fn_3_E911C(void);
-// game/rep_31A0.h declares this void(void) while rep_31A0.c is a stub
-extern s32 fn_3_107988(void);
-// game/rep_31A0.h declares this void(void) while rep_31A0.c is a stub
-extern void fn_3_109DE0(struct UnkRecord3448* rec);
 extern void LoadActorLayout(void* layout);
 extern void convertGeometryAndSknHeader(void* geo, void*);
 extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);
@@ -810,13 +790,9 @@ extern void ANIMGet(void* anim);
 extern void fn_80025DDC(void* anim);
 extern void fn_80025FFC(void* anim, UnkAnimState3448* state);
 extern void fn_80025EEC(UnkAnimState3448* state, s32, s32);
-extern u32 fn_3_107C88(void);
-extern struct UnkRecord3448* fn_3_109D88(void);
 extern s32 fn_8006C100(s16);
 extern s16 fn_8006C268(struct UnkTotals3448* totals);
 extern void fn_8006C2B4(struct UnkTotals3448* totals, struct UnkStats3448* stats);
-extern void fn_3_10754C(struct UnkStats3448* stats);
-extern s32 fn_3_107CD0(void);
 
 static inline u32 getFrame(UnkTask3448* task, u32 i) {
     return lbl_80371C30[task->_14 + i]._00->_5C >> 16;
@@ -3728,8 +3704,6 @@ void fn_3_11E308(void) {
 }
 
 // .text:0x0011DECC size:0x43C mapped:0x8075CF60
-// 99.35%: in the last loop the target allocates one more volatile register (k in r3, the
-// _14 + 10 + i sprite in r4) than the base.
 void fn_3_11DECC(void) {
     UnkTask3448* task = lbl_803CC1B8;
     UnkTask3448* self = lbl_803CC1B8;
@@ -3818,7 +3792,7 @@ void fn_3_11DECC(void) {
         lbl_80371C30[self->_14 + 10 + i]._00->_08 = lbl_80371C30[k + 15 + self->_14]._00;
         lbl_80371C30[k + 15 + self->_14]._00->_00 = lbl_80371C30[self->_14 + 10 + i]._00;
         if (lbl_80371C30[self->_14 + 10 + i]._00->_68 == 0) {
-            lbl_80371C30[self->_14 + 10 + i]._00->_5C = (fn_3_107988() == 0) << 16;
+            lbl_80371C30[self->_14 + 10 + i]._00->_5C = (fn_3_107988(k) == 0) << 16;
         }
     } while (++i < 6);
 }
