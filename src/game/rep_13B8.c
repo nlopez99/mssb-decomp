@@ -1685,21 +1685,14 @@ int fn_3_85A70(int runner) {
 }
 
 // .text:0x00085840 size:0x230 mapped:0x806C48D4
-// 94.03%: the target holds runner + 1, its runner offset and g_Runners in r29-r31; this build needs only two
 int fn_3_85840(int runner, int count, int* decisions) {
     InMemRunnerType* r = &g_Runners[runner];
     int next = r->nextBase;
     int i;
-    u8 ballState;
-    s16 contact;
-    u8 hitClass;
 
     if (next == 0) {
         return 0;
     }
-    ballState = g_Ball.ballState;
-    contact = g_Ball.AtBat_ContactResult;
-    hitClass = g_Ball.hitClassification2;
     for (i = runner + 1; i < 4; i++) {
         InMemRunnerType* other = &g_Runners[i];
         if (other->runnerOnFieldOrOutOrScored != 1) {
@@ -1715,17 +1708,17 @@ int fn_3_85840(int runner, int count, int* decisions) {
             if (other->runningDirectionCode == 2 && other->fractionalBasesRan - r->fractionalBasesRan < 0.7f) {
                 return 2;
             }
-            if (ballState != 0) {
+            if (g_Ball.ballState != 0) {
                 return 1;
             }
-            if (runner == 0 && contact == 0 && r->fractionalBasesRan > 1.0f && count <= 3 &&
+            if (runner == 0 && g_Ball.AtBat_ContactResult == 0 && r->fractionalBasesRan > 1.0f && count <= 3 &&
                 other->fractionalBasesRan < r->fractionalBasesRan) {
                 return 2;
             }
         }
-        if (other->currentBase == next) {
-            if (contact == 0) {
-                if (hitClass <= 4 && other->percentTowardsNextBase < 0.5f) {
+        if (other->currentBase == r->nextBase) {
+            if (g_Ball.AtBat_ContactResult == 0) {
+                if (g_Ball.hitClassification2 <= 4 && other->percentTowardsNextBase < 0.5f) {
                     if (r->forceOutCd == 1 && count > 3) {
                         return 0;
                     }
