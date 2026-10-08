@@ -330,6 +330,21 @@ typedef struct StaC2Rec5C {
     /* 0x00 */ u8 _00[0x5C];
 } StaC2Rec5C; // size: 0x5C
 
+// Shared by several functions, so these are file-scope constants
+static const u8 lbl_3_rodata_2498[4] = { 0x80, 0x20, 0x00, 0x00 };
+static const u8 lbl_3_rodata_249C[4] = { 0x46, 0x46, 0x46, 0x00 };
+static const Vec lbl_3_rodata_24A0[4] = {
+    { -49.05f, -42.19f, 131.5f },
+    { 49.05f, -42.19f, 131.5f },
+    { 73.5f, -42.19f, 108.5f },
+    { -73.5f, -42.19f, 108.5f },
+};
+static const Vec lbl_3_rodata_24D0 = { 60.0f, 0.0f, 40.0f };
+static const Vec lbl_3_rodata_24DC = { -60.0f, 0.0f, 40.0f };
+static const Vec lbl_3_rodata_24E8 = { -4.5f, 0.0f, 0.0f };
+static const Vec lbl_3_rodata_24F4 = { 1.0f, 0.0f, 0.0f };
+static const Vec lbl_3_rodata_2500 = { 1.0f, 0.0f, 0.0f };
+
 // fn_3_D67CC reads these from one pool base, so they are static
 static SND_VOICEID lbl_3_data_182C0 = -1;
 static SND_VOICEID lbl_3_data_182C4 = -1;
@@ -930,8 +945,20 @@ InMemBallType* fn_3_D233C(StaC2Draw* draw) {
 }
 
 // .text:0x000D2220 size:0x11C mapped:0x807112B4
-void fn_3_D2220(void) {
-    return;
+void fn_3_D2220(StaC2Draw* draw) {
+    StaC2Spring* springs = draw->springs;
+    Mtx m;
+    Vec axis = { 0.0f, 1.0f, 0.0f };
+    Vec force = { 0.0f, 0.0f, 0.0f };
+    Vec pos;
+
+    PSMTXRotAxisRad(m, &axis, 0.017453292f * draw->_C0);
+    PSMTXMultVec(m, &lbl_3_rodata_24E8, &pos);
+    PSVECAdd(&pos, &draw->_A0, &pos);
+    pos.y += 4.5;
+    springs[7]._0C[0] = pos;
+    springs[7]._0C[1] = springs[7]._0C[0];
+    fn_3_D1F2C(&lbl_3_bss_A8A8, draw->springs, 8, &force, draw);
 }
 
 // .text:0x000D1F2C size:0x2F4 mapped:0x80710FC0
@@ -1868,7 +1895,7 @@ void fn_3_CC1D4(void) {
 void fn_3_CBF80(StaC2Draw* draw) {
     Control control;
     Mtx m;
-    Vec offset = { -4.5f, 0.0f, 0.0f };
+    Vec offset = lbl_3_rodata_24E8;
     Vec pos;
     u32 i;
     f32 dy;

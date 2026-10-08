@@ -70,7 +70,7 @@ void fn_3_D196C(s32 idx);
 void fn_3_D1AC4(struct StaC2Draw* draw);
 void fn_3_D1B24(struct StaC2SpringParams* params, struct StaC2Spring* springs, s32 count, Vec* force);
 void fn_3_D1F2C(struct StaC2SpringParams* params, struct StaC2Spring* springs, s32 count, Vec* force, struct StaC2Draw* draw);
-void fn_3_D2220(void);
+void fn_3_D2220(struct StaC2Draw* draw);
 struct _InMemBallType* fn_3_D233C(struct StaC2Draw* draw);
 BOOL fn_3_D249C(struct StaC2Draw* draw);
 void fn_3_D24E8(struct StaC2Draw* draw, s8 fielder);
