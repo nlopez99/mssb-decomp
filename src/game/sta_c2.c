@@ -967,8 +967,81 @@ void fn_3_D36B0(StaC2Draw* draw) {
 }
 
 // .text:0x000D30D0 size:0x5E0 mapped:0x80712164
-void fn_3_D30D0(void) {
-    return;
+void fn_3_D30D0(StaC2Draw* draw) {
+    Vec fwd = { 1.0f, 0.0f, 0.0f };
+    Vec to;
+    Vec from;
+    Vec diff;
+    Vec dir;
+    Vec pos;
+    f32 prevVy;
+    f32 vy;
+    f32 dot;
+    f32 rad;
+    f32 angle;
+    s8 fielder;
+
+    prevVy = draw->vel.y;
+    draw->_A0.y += prevVy;
+    draw->vel.y -= 0.04f;
+    vy = draw->vel.y;
+    if (prevVy > 0.0f && vy <= 0.0f) {
+        memcpy(&pos, &draw->_A0, sizeof(Vec));
+        pos.y *= -1.0f;
+        fn_3_8BBC4(lbl_3_data_81DC[g_d_GameSettings.StadiumID] + 3, &pos, NULL, 11);
+    }
+    if (draw->_A0.y < 0.0f) {
+        draw->_A0.y = 0.0f;
+        draw->vel.y = 0.4f;
+        from.x = draw->_A0.x;
+        from.y = 0.0f;
+        from.z = draw->_A0.z;
+        to.x = g_Ball.AtBat_Contact_BallPos.x;
+        to.y = 0.0f;
+        to.z = g_Ball.AtBat_Contact_BallPos.z;
+        PSVECSubtract(&to, &from, &diff);
+        if (!PSVECMag(&diff)) {
+            diff.y = diff.z = 0.0f;
+            diff.x = 1.0f;
+        }
+        PSVECNormalize(&diff, &dir);
+        dot = PSVECDotProduct(&fwd, &dir);
+        if (dot > 1.0f) {
+            dot = 1.0f;
+        } else if (dot < -1.0f) {
+            dot = -1.0f;
+        }
+        rad = acosf_kludge(dot);
+        if (dir.z < 0.0f) {
+            rad = 6.2831855f - rad;
+        }
+        angle = 57.29578f * rad;
+        if ((PSVECMag(&diff) <= 12.5f || g_Ball.ballState == 1) && draw->hops > 0 &&
+            g_Ball.AtBat_Contact_BallPos.y <= 10.0) {
+            draw->_CA = 4;
+            draw->_BC = angle;
+            draw->vel.x = 0.26f * cosf_kludge(0.017453292f * draw->_BC);
+            draw->vel.y = 0.0f;
+            draw->vel.z = 0.26f * sinf_kludge(0.017453292f * draw->_BC);
+            draw->hops--;
+        } else if (PSVECMag(&diff) > 21.250000447034836) {
+            draw->_CA = 1;
+            draw->vel.y = 0.0f;
+            fn_80025EEC(draw->_8C, 0, 1);
+        }
+        memcpy(&pos, &draw->_A0, sizeof(Vec));
+        pos.y *= -1.0f;
+        fn_3_8BBC4(lbl_3_data_81DC[g_d_GameSettings.StadiumID] + 2, &pos, NULL, 10);
+        draw->_C0 = -angle;
+        fn_8004C094(&draw->_A0);
+    }
+    CTRLSetTranslation(&draw->control, draw->_A0.x, -draw->_A0.y, draw->_A0.z);
+    CTRLSetRotation(&draw->control, 0.0f, draw->_C0, 0.0f);
+    fn_3_D2220(draw);
+    fielder = fn_3_D255C(draw);
+    if (fielder >= 0) {
+        fn_3_D24E8(draw, fielder);
+    }
 }
 
 // .text:0x000D2A0C size:0x6C4 mapped:0x80711AA0
