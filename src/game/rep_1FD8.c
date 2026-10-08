@@ -163,17 +163,17 @@ extern struct {
 
 typedef struct Rep1FD8CameraSlot {
     /* 0x00 */ u32 _00;
-    /* 0x04 */ void (*_04)(void);
+    /* 0x04 */ void (*_04)(struct Rep1FD8CameraSlot* slot);
     /* 0x08 */ Mtx view;
-    /* 0x38 */ void* task;
+    /* 0x38 */ struct Rep1FD8CameraTask* task;
 } Rep1FD8CameraSlot; // size: 0x3C
 
 typedef struct Rep1FD8CameraTask {
     /* 0x00 */ u8 _00[0x14];
     /* 0x14 */ Vec _14;
     /* 0x20 */ s16 _20[2];
-    /* 0x24 */ u8 _24;
-    /* 0x25 */ u8 _25[2];
+    /* 0x24 */ s8 _24;
+    /* 0x25 */ s8 _25[2];
     /* 0x27 */ u8 _27[2];
     /* 0x29 */ u8 _29;
     /* 0x2A */ u8 _2A;
@@ -240,6 +240,7 @@ extern struct {
 } lbl_80366158;
 extern void fn_80023B90(Rep1FD8LightData* data, Rep1FD8Light* light);
 extern void fn_800528B4(void);
+extern void SetDisplayStateTexture(void* tex, s32, s32);
 extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern Rep1FD8Spawner* fn_800339F0(Rep1FD8Spawner* start, u8 id);
 extern void fn_800BEBCC(u8 idx, Vec dir);
@@ -611,12 +612,36 @@ BOOL fn_3_C625C(Rep1FD8Draw* draw) {
 }
 
 // .text:0x000C5DDC size:0x480 mapped:0x80704E70
+// 99.77%: as in fn_3_C597C, the inlined fn_3_C48D0 allocates the position and angles in
+// other FPRs (target y, z, theta, phi in f24..f21, base f22, f21, f23, f24).
 void fn_3_C5DDC(void) {
-    return;
+    Rep1FD8Draw* draw;
+    Rep1FD8Spawner* spawner;
+    u32 i;
+
+    if (lbl_3_bss_9D82 != 0) {
+        lbl_3_bss_9D82 = 0;
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    for (i = 0; i < lbl_3_bss_9DE3; i++) {
+        draw = &lbl_3_common_bss_350E4.draws[lbl_3_bss_9DE2 + i];
+        if (draw->_BD == 1 && fn_3_C5CE0(draw)) {
+            spawner = fn_80033A24(fn_3_C4724, 128, 0, 24, 1, draw->_A8 + 52);
+            if (spawner != NULL) {
+                fn_3_C48D0(spawner, draw->_9C);
+                spawner->_10 = lbl_3_bss_9F0C[0];
+                spawner->timer = 30;
+            }
+            draw->_BD = 2;
+            draw->_90_7 = 0;
+            draw->_9C.y = 10.0f;
+        }
+    }
 }
 
 // .text:0x000C5CE0 size:0xFC mapped:0x80704D74
-BOOL fn_3_C5CE0(Rep1FD8Draw* draw) {
+u8 fn_3_C5CE0(Rep1FD8Draw* draw) {
     Vec pos = lbl_3_rodata_2080;
     Vec diff;
     u32 i;
@@ -1428,8 +1453,90 @@ void fn_3_C2244(void) {
 }
 
 // .text:0x000C1C18 size:0x62C mapped:0x80700CAC
-void fn_3_C1C18(void) {
-    return;
+// 95.95%: register allocation differs from the second quad loop on (target: size reuses
+// f26, dx/dy in f28/f27, color in r27 and i in r25; base one register off each).
+void fn_3_C1C18(Rep1FD8CameraSlot* slot) {
+    Vec pos;
+    Mtx m = {
+        { 1.0f, 0.0f, 0.0f, 0.0f },
+        { 0.0f, 1.0f, 0.0f, 0.0f },
+        { 0.0f, 0.0f, 1.0f, 0.0f },
+    };
+    Rep1FD8CameraTask* task = slot->task;
+    s32 i;
+    u32 color;
+    f32 halfWidth;
+    f32 height;
+    f32 size;
+    f32 dx;
+    f32 dy;
+
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U16, 0);
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetNumChans(1);
+    GXSetNumTexGens(1);
+    GXSetNumTevStages(1);
+    GXSetCullMode(GX_CULL_NONE);
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_ONE, GX_LO_CLEAR);
+    GXSetTevOp(GX_TEVSTAGE0, GX_MODULATE);
+    GXLoadPosMtxImm(m, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    for (i = 0; i <= 2; i++) {
+        SetDisplayStateTexture(lbl_3_bss_9D98 + i * 0x20, i, i);
+    }
+    color = (s32)(task->_2A * lbl_3_data_1787C) | 0xFFFFFF00;
+    PSMTXMultVec(slot->view, &task->_14, &pos);
+    halfWidth = 512.0f * ((100.0f + task->_24) / 100.0f) * -pos.z / 1280.0f / 2.0f;
+    height = 256.0f * ((100.0f + task->_24) / 100.0f) * -pos.z / 1280.0f;
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    GXPosition3f32(pos.x - halfWidth, pos.y - 0.25f * height, pos.z);
+    GXColor1u32(color);
+    GXTexCoord2u16(0, 0);
+    GXPosition3f32(pos.x - halfWidth, pos.y + 0.75f * height, pos.z);
+    GXColor1u32(color);
+    GXTexCoord2u16(0, 1);
+    GXPosition3f32(pos.x + halfWidth, pos.y + 0.75f * height, pos.z);
+    GXColor1u32(color);
+    GXTexCoord2u16(1, 1);
+    GXPosition3f32(pos.x + halfWidth, pos.y - 0.25f * height, pos.z);
+    GXColor1u32(color);
+    GXTexCoord2u16(1, 0);
+    GXEnd();
+    size = 256.0f * -pos.z / 1280.0f;
+    color = task->_2A | 0xFFFFFF00;
+    for (i = task->_29; i < 2; i++) {
+        GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, task->_27[i], GX_COLOR0A0);
+        SetDisplayStateTexture(lbl_3_bss_9D98 + (task->_27[i] << 5), 0, 0);
+        dx = (100.0f + task->_25[i]) / 100.0f * size * cos(0.0000958738f * task->_20[i]);
+        dy = (100.0f + task->_25[i]) / 100.0f * size * sin(0.0000958738f * task->_20[i]);
+        GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+        GXPosition3f32(pos.x, pos.y, pos.z);
+        GXColor1u32(color);
+        GXTexCoord2u16(0, 0);
+        GXPosition3f32(pos.x - dy, pos.y + dx, pos.z);
+        GXColor1u32(color);
+        GXTexCoord2u16(0, 1);
+        GXPosition3f32(pos.x + dx - dy, pos.y + dx + dy, pos.z);
+        GXColor1u32(color);
+        GXTexCoord2u16(1, 1);
+        GXPosition3f32(pos.x + dx, pos.y + dy, pos.z);
+        GXColor1u32(color);
+        GXTexCoord2u16(1, 0);
+        GXEnd();
+        pos.x += (dx - dy) * 0.5f;
+        pos.y += (dx + dy) * 0.5f;
+    }
+    task->_29 -= task->_29 != 0;
+    i = task->_2A - (task->_29 == 0) * 42;
+    task->_2A = i * (i > 0);
 }
 
 // .text:0x000C19C8 size:0x250 mapped:0x80700A5C
