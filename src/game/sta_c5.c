@@ -319,6 +319,11 @@ static u8 lbl_3_bss_AEE2;
 static u8 lbl_3_bss_AEE1;
 static u8 lbl_3_bss_AEE0;
 
+// MSL's math.h defines fabs as an inline function; include/stl/math.h makes it a macro
+static inline f64 fabs_inline(f64 x) {
+    return __fabs(x);
+}
+
 static inline void playStadiumSound(s32 sound) {
     s32 stadium;
     u8 vol;
@@ -855,8 +860,8 @@ void fn_3_F2724(StaC5Draw* draw, StaC5Draw* target) {
     m11 = cos(-(0.017453292f * draw->_B4));
     x = d.x * m00 + d.z * m01;
     z = d.x * -m10 + d.z * m11;
-    x = fabs(x);
-    z = fabs(z);
+    x = fabs_inline(x);
+    z = fabs_inline(z);
     if (x <= 3.0 && z <= 1.75) {
         target->_C6 = 5;
         playStadiumSound(11);
@@ -892,7 +897,7 @@ s32 fn_3_F2448(StaC5Draw* draw) {
         } else {
             range = 4.6666665f;
         }
-        if (range < fabs(pos.y - draw->_A0.y) || fielder == NULL || fielder->_210 != 0) {
+        if (range < fabs_inline(pos.y - draw->_A0.y) || fielder == NULL || fielder->_210 != 0) {
             continue;
         }
         PSVECSubtract(&fielder->pos, &draw->_A0, &d);
@@ -902,8 +907,8 @@ s32 fn_3_F2448(StaC5Draw* draw) {
         m11 = cos(-(0.017453292f * draw->_B4));
         x = d.x * m00 + d.z * m01;
         z = d.x * -m10 + d.z * m11;
-        x = fabs(x);
-        z = fabs(z);
+        x = fabs_inline(x);
+        z = fabs_inline(z);
         if (x <= 3.0 && z <= 1.75) {
             playStadiumSound(4);
             return (s8)fielders[i];
@@ -1373,7 +1378,7 @@ void fn_3_EE96C(Vec* pos) {
     PSMTXCopy(camera->view, view);
     scale = 0.19999999f / dist;
     lbl_3_bss_B11C[0][0] = scale;
-    lbl_3_bss_B11C[1][1] = scale * (f32)(1.0 - fabs(0.5f * (down.y * view[1][1])));
+    lbl_3_bss_B11C[1][1] = scale * (f32)(1.0 - fabs_inline(0.5f * (down.y * view[1][1])));
     if (range < 35.0f) {
         scaleS = GX_ITS_16;
         scaleT = GX_ITS_16;
@@ -1430,13 +1435,13 @@ void fn_3_EE388(void) {
     if (lbl_3_data_1BA6E) {
         lbl_3_bss_AF08 = 0.0005f * (2.0 * (rand() / 32767.0f - 0.5));
         lbl_3_data_1BA6E = 0;
+        lbl_3_bss_AF00 = 0.000025f * (fabs_inline(lbl_3_bss_AF08) / lbl_3_bss_AF08);
         lbl_3_bss_AF04 = 0.0f;
-        lbl_3_bss_AF00 = 0.000025f * (fabs(lbl_3_bss_AF08) / lbl_3_bss_AF08);
     }
     lbl_3_bss_AF04 += lbl_3_bss_AF00;
-    if (fabs(lbl_3_bss_AF04) >= fabs(lbl_3_bss_AF08)) {
+    if (fabs_inline(lbl_3_bss_AF04) >= fabs_inline(lbl_3_bss_AF08)) {
         lbl_3_bss_AF00 *= -1.0f;
-    } else if ((s32)(fabs(lbl_3_bss_AF04) / lbl_3_bss_AF04) != (s32)(fabs(lbl_3_bss_AF08) / lbl_3_bss_AF08)) {
+    } else if ((s32)(fabs_inline(lbl_3_bss_AF04) / lbl_3_bss_AF04) != (s32)(fabs_inline(lbl_3_bss_AF08) / lbl_3_bss_AF08)) {
         lbl_3_data_1BA6E = 1;
     }
 }
