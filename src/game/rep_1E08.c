@@ -184,15 +184,21 @@ typedef struct {
 } UnkAnimEntry1E08; // size: 0x5C
 
 typedef struct {
+    /* 0x00 */ u8 _00[0x18];
+    /* 0x18 */ u8* _18;
+} UnkAramFile1E08;
+
+typedef struct {
     /* 0x000 */ UnkTask1E08* _000;
     /* 0x004 */ void* _004;
-    /* 0x008 */ void* _008;
+    /* 0x008 */ UnkAramFile1E08* _008;
     /* 0x00C */ u32* _00C;
     /* 0x010 */ UnkModelTable1E08* _010;
     /* 0x014 */ UnkAnimEntry1E08 _014[10];
     /* 0x3AC */ u32 _3AC;
     /* 0x3B0 */ u8 _3B0;
-    /* 0x3B1 */ u8 _3B1[0x3B8 - 0x3B1];
+    /* 0x3B1 */ u8 _3B1;
+    /* 0x3B2 */ u8 _3B2[0x3B8 - 0x3B2];
     /* 0x3B8 */ UnkKey1E08* _3B8;
     /* 0x3BC */ Vec _3BC;
     /* 0x3C8 */ u32 _3C8;
@@ -271,6 +277,10 @@ extern u8 lbl_803CBBC0;
 extern u8 lbl_3_data_A3C[2];
 
 // .data outside this unit's range in splits.txt
+extern struct {
+    /* 0x00 */ u8 _00[8];
+    /* 0x08 */ u8 _08[8][3];
+} lbl_3_data_111A8;
 extern UnkPair1E08 lbl_3_data_111C8[];
 extern u8 lbl_3_data_11380[0x10];
 extern void (*lbl_3_data_11390[])(s32);
@@ -309,6 +319,9 @@ extern s32 fn_8004ABE0(void);
 extern void pitchingMachinePitching(u8 id);
 extern void minigamesSetSomePointers(void);
 extern void fn_800A7D4C(s32, void*);
+extern void fn_8003A85C(u8 arg0);
+extern void fn_8003A848(u8 r, u8 g, u8 b);
+extern void fn_8003A6B0(s32 idx, void* arg1, f32 x, f32 y);
 extern UnkModelTable1E08* ActorObjectInitTable(u16 count);
 extern void fn_800BDC88(UnkModelTable1E08* table, u16 first, u16 last, void* model, void* anim, void* arg5);
 extern void ACTSetAnimation(void* actor, void* animBank, char* sequenceName, u16 seqNum, f32 time, f32 speed);
@@ -727,8 +740,25 @@ void fn_3_BF158(void) {
 }
 
 // .text:0x000BF070 size:0xE8 mapped:0x806FE104
+// The target reaches 0x111A8, +8 and +0x20 (lbl_3_data_111C8) from one pool base:
+// this unit's statics, outside its .data range in splits.txt, so externs cannot match.
 void fn_3_BF070(void) {
-    return;
+    s32 i;
+    u8* file;
+
+    fn_8003A85C(lbl_3_data_111A8._00[g_d_GameSettings.StadiumID]);
+    fn_8003A848(lbl_3_data_111A8._08[g_d_GameSettings.StadiumID][0], lbl_3_data_111A8._08[g_d_GameSettings.StadiumID][1],
+                lbl_3_data_111A8._08[g_d_GameSettings.StadiumID][2]);
+    file = lbl_3_common_bss_35154._008->_18;
+    lbl_3_common_bss_35154._3B1 = 1;
+    for (i = 0; i < 13; i++) {
+        if (lbl_8036E548._2C50[i] != NULL) {
+            fn_8003A6B0(i, file + 4, lbl_3_data_111C8[lbl_8036E548._2C50[i]->_252]._00,
+                        lbl_3_data_111C8[lbl_8036E548._2C50[i]->_252]._04);
+        } else {
+            fn_8003A6B0(i, file + 4, lbl_3_data_111C8[0]._00, lbl_3_data_111C8[0]._04);
+        }
+    }
 }
 
 // .text:0x000BEFF8 size:0x78 mapped:0x806FE08C
