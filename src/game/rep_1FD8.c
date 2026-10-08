@@ -55,6 +55,7 @@ typedef struct Rep1FD8Particle {
     /* 0x4D */ u8 _4D;
     /* 0x4E */ u8 _4E;
     /* 0x4F */ u8 duration;
+    /* 0x50 */ u8 _50;
 } Rep1FD8Particle;
 
 typedef struct Rep1FD8Spawner {
@@ -64,7 +65,14 @@ typedef struct Rep1FD8Spawner {
     /* 0x10 */ void* _10;
     /* 0x14 */ u16 _14_hi : 4;
     /* 0x14 */ u16 count : 12;
-    /* 0x18 */ Vec pos;
+    union {
+        /* 0x18 */ Vec pos;
+        struct {
+            /* 0x18 */ Vec* target;
+            /* 0x1C */ u8 _1C[0x20 - 0x1C];
+            /* 0x20 */ struct Rep1FD8Draw* owner;
+        };
+    };
     union {
         struct {
             /* 0x24 */ u8 idx;
@@ -217,6 +225,8 @@ extern struct {
     /* 0x28 */ u8 _28;
 } lbl_80366158;
 extern void fn_80023B90(Rep1FD8LightData* data, Rep1FD8Light* light);
+extern void fn_800528B4(void);
+extern Rep1FD8Spawner* fn_800339F0(Rep1FD8Spawner* start, u8 id);
 extern void fn_800BEBCC(u8 idx, Vec dir);
 
 static const u8 lbl_3_rodata_2028[3] = { 0xA0, 0x46, 0x00 };
@@ -316,7 +326,7 @@ static s32 lbl_3_bss_9D9C;
 static u8* lbl_3_bss_9D98;
 static StadiumObject1D58* lbl_3_bss_9D94;
 static s32 lbl_3_bss_9D90;
-static s32 lbl_3_bss_9D8C;
+static u32 lbl_3_bss_9D8C;
 static u32 lbl_3_bss_9D88;
 static u32 lbl_3_bss_9D84;
 static u8 lbl_3_bss_9D82;
@@ -345,8 +355,39 @@ struct StadiumObjectCollision* fn_3_C823C(s32 idx, MtxPtr mtx) {
 }
 
 // .text:0x000C805C size:0x1E0 mapped:0x807070F0
-void fn_3_C805C(void) {
-    return;
+void fn_3_C805C(u32* n, s32* count) {
+    Mtx m;
+    Control control;
+    StadiumObject1D58* obj;
+    s32 next;
+    s32 group;
+    s32 i;
+
+    for (group = 0; group < 5; group++) {
+        next = lbl_3_common_bss_350E4._40[*n] = lbl_3_common_bss_350E4._40[*n - 1] + lbl_3_common_bss_350E4._3C[*n - 1];
+        fn_3_B8574();
+        for (i = 0; i < 10; i++) {
+            if (group == lbl_3_data_17514[i]._12 && lbl_3_data_17514[i].type != 7) {
+                if (lbl_3_common_bss_350E4._00[i + lbl_3_bss_9DE4]._90_6) {
+                    lbl_3_common_bss_350E4._44[next] = i + lbl_3_bss_9DE4;
+                    next++;
+                    lbl_3_common_bss_350E4._3C[*n]++;
+                    obj = &lbl_3_common_bss_350E4._00[i + lbl_3_bss_9DE4];
+                    control = obj->control;
+                    CTRLBuildMatrix(&obj->control, m);
+                    fn_3_B8464(m, obj->_78);
+                    CTRLSetTranslation(&control, lbl_3_data_17514[i].pos.x, -5.0f, lbl_3_data_17514[i].pos.z);
+                    CTRLBuildMatrix(&control, m);
+                    fn_3_B8464(m, obj->_78);
+                    (*count)++;
+                }
+            }
+        }
+        if (lbl_3_common_bss_350E4._3C[*n] != 0) {
+            fn_3_B8414(&lbl_3_common_bss_350E4._48[*n * 2], &lbl_3_common_bss_350E4._48[*n * 2 + 1]);
+            (*n)++;
+        }
+    }
 }
 
 // .text:0x000C7A0C size:0x650 mapped:0x80706AA0
@@ -360,8 +401,37 @@ void fn_3_C77AC(void) {
 }
 
 // .text:0x000C75B8 size:0x1F4 mapped:0x8070664C
-void fn_3_C75B8(void) {
-    return;
+BOOL fn_3_C75B8(Rep1FD8Spawner* spawner) {
+    Rep1FD8Particle* p;
+    s32 exp = -spawner->timer;
+
+    fn_80033620(spawner);
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+    p = spawner->particles;
+    do {
+        if (p->delay != 0) {
+            p->delay -= lbl_80366158._28 == 0;
+        } else if (p->life != 0) {
+            fn_8003403C(p->_38, p->_3C);
+            fn_80033CC8(p, spawner->_10);
+            if (lbl_80366158._28 == 0) {
+                if (p->_38 < p->grow) {
+                    p->_38 += p->grow / 12.0f;
+                    p->_3C += p->grow / 12.0f;
+                }
+                p->pos.x += p->vel.x;
+                p->pos.z += p->vel.z;
+                p->pos.y = p->vel.y + spawner->target->y - 5.0 * pow(2.0, exp);
+                if (30 - spawner->timer >= 16) {
+                    p->color[3] -= 10.928572f;
+                }
+            }
+        }
+        p = p->next;
+    } while (p != NULL);
+    spawner->timer -= lbl_80366158._28 == 0;
+    return !spawner->timer;
 }
 
 static inline void startBallEffect(s32 base) {
@@ -481,13 +551,40 @@ void fn_3_C56E8(void) {
 }
 
 // .text:0x000C54D0 size:0x218 mapped:0x80704564
-void fn_3_C54D0(void) {
-    return;
+void fn_3_C54D0(Rep1FD8Draw* draw) {
+    Rep1FD8Spawner* spawner = fn_800339F0(NULL, draw->_A8 + 42);
+
+    if (spawner != NULL) {
+        fn_3_C4CF4(spawner, 1);
+    }
 }
 
 // .text:0x000C5304 size:0x1CC mapped:0x80704398
-void fn_3_C5304(void) {
-    return;
+void fn_3_C5304(Rep1FD8Spawner* spawner, Rep1FD8Draw* draw) {
+    Rep1FD8Particle* p = spawner->particles;
+    s16 delay = 0;
+
+    spawner->target = &draw->_9C;
+    spawner->owner = draw;
+    while (p != NULL) {
+        p->_38 = p->_3C = 0.0f;
+        p->delay = delay;
+        delay += 4;
+        p->_4D = 21;
+        p->_4E = 0;
+        p->color[0] = p->color[1] = p->color[2] = 255;
+        p->color[3] = 0;
+        p->life = 1;
+        p->duration = 0;
+        if (p->delay == 0) {
+            p->pos.x = spawner->target->x + (f32)(15 - rand() % 31) / 10.0f;
+            p->pos.y = 2.5f + spawner->target->y;
+            p->pos.z = spawner->target->z + (f32)(15 - rand() % 31) / 10.0f;
+        } else {
+            p->pos.x = p->pos.y = p->pos.z = 0.0f;
+        }
+        p = p->next;
+    }
 }
 
 // .text:0x000C4F00 size:0x404 mapped:0x80703F94
@@ -496,8 +593,19 @@ void fn_3_C4F00(void) {
 }
 
 // .text:0x000C4CF4 size:0x20C mapped:0x80703D88
-void fn_3_C4CF4(void) {
-    return;
+void fn_3_C4CF4(Rep1FD8Spawner* spawner, u8 layer) {
+    Rep1FD8Particle* p = spawner->particles;
+
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+    fn_3_C4B80();
+    while (p != NULL) {
+        if (p->delay <= 0 && p->life > 0 && layer == p->_50) {
+            fn_8003403C(p->_38, p->_3C);
+            fn_80033CC8(p, spawner->_10);
+        }
+        p = p->next;
+    }
 }
 
 // .text:0x000C4B80 size:0x174 mapped:0x80703C14
@@ -732,8 +840,34 @@ void fn_3_C3C2C(void) {
 }
 
 // .text:0x000C3A38 size:0x1F4 mapped:0x80702ACC
-void fn_3_C3A38(void) {
-    return;
+void fn_3_C3A38(camera_803c639c_s* camera) {
+    Vec shake;
+    Mtx inv;
+
+    if (g_GameLogic.gameStatus != 2 || camera == NULL) {
+        lbl_3_bss_9D8C = 0;
+        lbl_3_bss_9D81 = 0;
+        fn_800528B4();
+        return;
+    }
+    if (lbl_3_bss_9D81 != 0) {
+        lbl_3_bss_9D8C = 60;
+        lbl_3_bss_9D81 = 0;
+    }
+    if (lbl_3_bss_9D8C != 0) {
+        shake.x = (f32)(rand() % 20 - 10) / 17.0f;
+        shake.y = (f32)(rand() % 20 - 10) / 17.0f;
+        shake.z = 0.0f;
+        PSMTXInverse(fn_80052768_getCamera(0)->view, inv);
+        PSMTXMultVecSR(inv, &shake, &shake);
+        camera->eye.x += shake.x;
+        camera->eye.y += shake.y;
+        camera->eye.z += shake.z;
+        camera->target.x += shake.x;
+        camera->target.y += shake.y;
+        camera->target.z += shake.z;
+        lbl_3_bss_9D8C--;
+    }
 }
 
 // .text:0x000C39C8 size:0x70 mapped:0x80702A5C
