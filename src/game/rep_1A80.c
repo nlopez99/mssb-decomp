@@ -28,7 +28,8 @@ extern struct {
     /* 0x00E */ s16 _00E;
     /* 0x010 */ s16 _010;
     /* 0x012 */ s16 _012;
-    /* 0x014 */ u8 _014[0x1D0 - 0x14];
+    /* 0x014 */ s16 _014[2][10][4];
+    /* 0x0B4 */ u8 _0B4[0x1D0 - 0xB4];
     /* 0x1D0 */ u8 _1D0;
     /* 0x1D1 */ u8 _1D1;
     /* 0x1D2 */ u8 _1D2;
@@ -67,7 +68,8 @@ extern struct {
 } lbl_3_common_bss_34C90;
 
 extern struct {
-    /* 0x00 */ u8 _00[0x9C];
+    /* 0x00 */ u8 _00[0x9B];
+    /* 0x9B */ u8 _9B;
     /* 0x9C */ u8 _9C;
     /* 0x9D */ u8 _9D[0xB3 - 0x9D];
     /* 0xB3 */ u8 _B3;
@@ -91,11 +93,24 @@ extern struct {
     /* 0x13 */ u8 _13;
 } lbl_8037169C;
 
+extern struct {
+    /* 0x0000 */ struct {
+        /* 0x0 */ u16 _0;
+        /* 0x2 */ u16 _2;
+        /* 0x4 */ u16 _4;
+    } _0000[4];
+    /* 0x0018 */ u8 _0018[0xCF42 - 0x18];
+    /* 0xCF42 */ u8 _CF42;
+    /* 0xCF43 */ u8 _CF43[0xCFA2 - 0xCF43];
+    /* 0xCFA2 */ u8 _CFA2[4];
+} lbl_803297E0;
+
 extern u8 lbl_3_data_6104[8];
 
 extern void changeScene(u8, s16);
 extern void fn_800203E0(int, s8);
 extern void fn_8004CC18(void);
+extern int fn_3_6BD6C(void);
 extern void fn_80035B50(int arg);
 extern u8 lbl_800EFBA4[0x10];
 extern u8 lbl_803CBC3C[];
@@ -826,17 +841,232 @@ void fn_3_ADEDC(void) {
 
 // .text:0x000ADA3C size:0x4A0 mapped:0x806ECAD0
 void fn_3_ADA3C(void) {
-    return;
+    int i;
+
+    if (lbl_3_common_bss_34C90._1D2 == 0) {
+        fn_80035B50(0x13);
+        fn_3_AD2A0();
+        lbl_3_common_bss_32724._9B = 0;
+        lbl_3_common_bss_34C90._1D2++;
+    } else if (lbl_3_common_bss_34C90._1D2 == 1) {
+        if (lbl_3_common_bss_34C90._260 == 0) {
+            lbl_3_common_bss_34C90._1D2++;
+        } else if (fn_3_6BD6C() != 0) {
+            lbl_3_common_bss_34C90._1D2++;
+        }
+    } else if (lbl_3_common_bss_34C90._1D2 == 2) {
+        fn_3_AF428();
+        if (lbl_3_common_bss_34C90._254 >= 0 || lbl_3_common_bss_34C90._258 >= 0 ||
+            lbl_3_common_bss_34C90._256 >= 0 || lbl_3_common_bss_34C90._25A >= 0)
+        {
+            return;
+        }
+        lbl_3_common_bss_34C90._1D2++;
+    } else {
+        fn_3_753E8(TRUE);
+        setBatterContactConstants();
+        fn_3_FBD70();
+        fn_3_FBD58();
+        lbl_8036E548._307E = 1;
+        g_GameLogic.pre_PostMiniGameInd = 1;
+        for (i = 0; i < 2; i++) {
+            if (g_GameLogic._13E[i] == 0) {
+                if (gameInitOptions.controlOptions[g_GameLogic.teams[i]].autoRunning) {
+                    g_GameLogic.battingAIInd[g_GameLogic.homeTeamInd ^ i] = 1;
+                } else {
+                    g_GameLogic.battingAIInd[g_GameLogic.homeTeamInd ^ i] = 0;
+                }
+                if (gameInitOptions.controlOptions[g_GameLogic.teams[i]].autoFielding) {
+                    g_GameLogic.teamAIInd[g_GameLogic.homeTeamInd ^ i] = 1;
+                    g_GameLogic.autoFielding[g_GameLogic.homeTeamInd ^ i] = 1;
+                } else {
+                    g_GameLogic.teamAIInd[g_GameLogic.homeTeamInd ^ i] = 0;
+                    g_GameLogic.autoFielding[g_GameLogic.homeTeamInd ^ i] = 0;
+                }
+            }
+        }
+        changeScene(1, 6);
+        if (g_GameLogic.playOverInd) {
+            fn_3_5A6D4(0x16);
+        } else {
+            fn_3_5A6D4(0);
+        }
+    }
 }
 
 // .text:0x000AD8CC size:0x170 mapped:0x806EC960
 void fn_3_AD8CC(void) {
-    return;
+    switch (lbl_3_common_bss_34C90._1D2) {
+    case 0:
+        lbl_3_common_bss_34C90._012 = 0;
+        lbl_803297E0._CFA2[lbl_3_common_bss_34C90._000] = lbl_3_common_bss_34C90._1D1 != 4;
+        if (lbl_3_common_bss_34C90._1D1 == 14 || lbl_3_common_bss_34C90._1D1 == 7) {
+            lbl_803297E0._CFA2[lbl_3_common_bss_34C90._000] = 2;
+        } else if (lbl_3_common_bss_34C90._1D1 == 15 || lbl_3_common_bss_34C90._1D1 == 8) {
+            lbl_803297E0._CFA2[lbl_3_common_bss_34C90._000] = 3;
+        }
+        lbl_3_common_bss_34C90._1D2 = 2;
+        break;
+    case 1:
+        break;
+    case 2:
+        lbl_3_common_bss_34C90._012 = 0;
+        lbl_3_common_bss_34C90._1D2 = 3;
+        break;
+    case 3:
+        if (lbl_3_common_bss_34C90._012 > 20) {
+            lbl_3_common_bss_34C90._1D2 = 4;
+        }
+        break;
+    case 4:
+        fn_3_AD3BC();
+        break;
+    case 5:
+        lbl_3_common_bss_34C90._012 = 0;
+        lbl_3_common_bss_34C90._1D2 = 6;
+        break;
+    case 6:
+        if (lbl_3_common_bss_34C90._012 > 20) {
+            if (lbl_3_common_bss_34C90._1D1 == 11 || lbl_3_common_bss_34C90._1D1 == 14 ||
+                lbl_3_common_bss_34C90._1D1 == 15)
+            {
+                fn_3_AFD80(9);
+            } else {
+                fn_3_AFD80(2);
+            }
+        }
+        break;
+    }
 }
 
 // .text:0x000AD3BC size:0x510 mapped:0x806EC450
 void fn_3_AD3BC(void) {
-    return;
+    u16 buttons;
+    int i;
+    int pos;
+
+    if (lbl_3_common_bss_34C90._201 != 0) {
+        buttons = 0;
+        if (lbl_3_common_bss_34C90._206 <= 0) {
+            switch (lbl_3_common_bss_34C90._207) {
+            case 0:
+                buttons = PAD_BUTTON_DOWN;
+                if (++lbl_3_common_bss_34C90._208 >= 3) {
+                    lbl_3_common_bss_34C90._208 = 0;
+                    lbl_3_common_bss_34C90._207++;
+                }
+                break;
+            case 1:
+                lbl_3_common_bss_34C90._208 = 0;
+                buttons = PAD_BUTTON_A;
+                lbl_3_common_bss_34C90._207++;
+                break;
+            case 2:
+                if (++lbl_3_common_bss_34C90._208 >= 2) {
+                    lbl_3_common_bss_34C90._208 = 0;
+                    lbl_3_common_bss_34C90._207++;
+                }
+                break;
+            case 3:
+                for (i = 1; i < 10; i++) {
+                    if (lbl_3_common_bss_34C90._014[g_GameLogic.teamFielding][i][3] == 0) {
+                        pos = lbl_3_common_bss_34C90._014[g_GameLogic.teamFielding][i][2];
+                        break;
+                    }
+                }
+                if (lbl_3_common_bss_34C90._208 == 0) {
+                    if (pos == 1) {
+                        lbl_3_common_bss_34C90._207++;
+                        buttons = PAD_BUTTON_DOWN;
+                    } else if (pos == 3 || pos == 5 || pos == 7) {
+                        buttons = PAD_BUTTON_UP;
+                        if (pos == 5) {
+                            lbl_3_common_bss_34C90._207++;
+                        }
+                    } else if (pos == 2 || pos == 8) {
+                        buttons = PAD_BUTTON_RIGHT;
+                        if (pos == 2) {
+                            lbl_3_common_bss_34C90._207++;
+                        }
+                    } else {
+                        buttons = PAD_BUTTON_LEFT;
+                        if (pos == 4) {
+                            lbl_3_common_bss_34C90._207++;
+                        }
+                    }
+                    lbl_3_common_bss_34C90._208++;
+                } else {
+                    if (pos == 3) {
+                        buttons = PAD_BUTTON_RIGHT;
+                    } else {
+                        buttons = PAD_BUTTON_UP;
+                    }
+                    lbl_3_common_bss_34C90._207++;
+                }
+                break;
+            case 4:
+                lbl_3_common_bss_34C90._208 = 0;
+                buttons = PAD_BUTTON_A;
+                lbl_3_common_bss_34C90._207++;
+                break;
+            case 5:
+                if (++lbl_3_common_bss_34C90._208 >= 2) {
+                    lbl_3_common_bss_34C90._208 = 0;
+                    buttons = PAD_BUTTON_B;
+                    lbl_3_common_bss_34C90._207++;
+                }
+                break;
+            case 6:
+                if (++lbl_3_common_bss_34C90._208 >= 2) {
+                    buttons = PAD_BUTTON_A;
+                    lbl_3_common_bss_34C90._204[g_GameLogic.teamFielding] = 1;
+                }
+                break;
+            }
+        }
+        for (i = 0; i < 4; i++) {
+            if (i == lbl_3_common_bss_34C90._000) {
+                lbl_803297E0._0000[i]._0 = buttons;
+                lbl_803297E0._0000[i]._2 = buttons;
+                lbl_803297E0._0000[i]._4 = buttons;
+            } else {
+                lbl_803297E0._0000[i]._0 = 0;
+                lbl_803297E0._0000[i]._2 = 0;
+                lbl_803297E0._0000[i]._4 = 0;
+            }
+        }
+    } else {
+        for (i = 0; i < 4; i++) {
+            if (i == lbl_3_common_bss_34C90._000) {
+                lbl_803297E0._0000[i]._0 = g_Controls[g_GameLogic.teams[lbl_3_common_bss_34C90._000]].buttonInput;
+                lbl_803297E0._0000[i]._2 = g_Controls[g_GameLogic.teams[lbl_3_common_bss_34C90._000]].newButtonInput;
+                lbl_803297E0._0000[i]._4 = g_Controls[g_GameLogic.teams[lbl_3_common_bss_34C90._000]]._08;
+            } else {
+                lbl_803297E0._0000[i]._0 = 0;
+                lbl_803297E0._0000[i]._2 = 0;
+                lbl_803297E0._0000[i]._4 = 0;
+            }
+        }
+    }
+    if (lbl_3_common_bss_34C90._1D1 == 4 || lbl_3_common_bss_34C90._1D1 == 11 || lbl_3_common_bss_34C90._1D1 == 14 ||
+        lbl_3_common_bss_34C90._1D1 == 7 || lbl_3_common_bss_34C90._1D1 == 8 || lbl_3_common_bss_34C90._1D1 == 15)
+    {
+        if (lbl_803297E0._CF42 != 0) {
+            lbl_3_common_bss_34C90._1D2 = 5;
+            if (lbl_3_common_bss_34C90._1D1 == 4) {
+                for (i = 0; i < 9; i++) {
+                    if (lbl_3_common_bss_34C90._242[i] != lbl_80354720[lbl_3_common_bss_34C90._000][i][2]) {
+                        if (lbl_80354720[lbl_3_common_bss_34C90._000][i][2] == 0) {
+                            lbl_3_common_bss_34C90._254 = i;
+                        } else if (lbl_80354720[lbl_3_common_bss_34C90._000][i][2] == 1) {
+                            lbl_3_common_bss_34C90._256 = i;
+                        }
+                        lbl_3_common_bss_34C90._242[i] = lbl_80354720[lbl_3_common_bss_34C90._000][i][2];
+                    }
+                }
+            }
+        }
+    }
 }
 
 // .text:0x000AD2A0 size:0x11C mapped:0x806EC334
