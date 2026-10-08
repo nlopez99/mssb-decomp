@@ -11,7 +11,7 @@ Work only in the git worktree at `{worktree}` (branch `{branch}`, already built)
 
 First read `{worktree}/.claude/skills/match-functions/SKILL.md` and follow it exactly. Do not push. Put temporary files under `{scratchpad}/b{N}-{unit}/`. `regress.py` in this worktree compares with `match/batch-{N}` by default, so its "0 lost" covers matches from earlier batches too.
 
-{The claim: its size and state (untouched, or a follow-up and what the last session left, in order), splits applied for it, and evidence you hold, such as callers' prototypes or a function the target inlines.}
+{The claim: its size and state (untouched, or a follow-up and what the last session left), splits applied for it, and evidence you hold, such as callers' prototypes or a function the target inlines. Give facts, not an order of work: the skill's order decides that, and a second order makes the worker choose.}
 
 Take functions in the skill's order, commit after every few that reach `match` (with `check_symbols.py` passing), and finish with the report once about {60, or 90 for an untouched unit over 30 KB} minutes have passed since step 1, at a clean commit, listing the functions not yet attempted; a follow-up worker continues from there.
 
