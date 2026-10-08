@@ -165,7 +165,7 @@ extern u8 lbl_3_data_188E8[3][6];
 extern u8 lbl_800E854C[12];
 extern u8 lbl_3_data_609C[12][6];
 extern s8 lbl_3_data_B060[8][3][5];
-extern s8 lbl_3_data_6104[8];
+extern u8 lbl_3_data_6104[8];
 extern u8 lbl_3_data_18918[8];
 extern u8 lbl_3_data_188FC[3][5];
 extern u8 lbl_3_data_18910[8];
@@ -218,7 +218,7 @@ extern void minigamesSetSomePointers(void);
 extern void minigamesGXStuff(void);
 extern void fn_80011B64(int port);
 extern int fn_80016710(int charID, int port);
-extern void fn_800203E0(int, int);
+extern void fn_800203E0(int, s8);
 extern s16 fn_8006C13C(struct UnkStats3448* stats);
 extern void fn_800246D4(int (*compare)(const void*, const void*), void* src, void* dst, int size, int count);
 
@@ -2539,7 +2539,7 @@ void fn_3_10AD48(void) {
 }
 
 // .text:0x0010A0A0 size:0xCA8 mapped:0x80749134
-// 99.41%: registers differ, and the minigame level is incremented from the compared value instead of reloaded
+// 99.43%: registers differ, and the minigame level is incremented from the compared value instead of reloaded
 void fn_3_10A0A0(void) {
     struct UnkRecord3448 rec;
     int rank;
@@ -3215,7 +3215,6 @@ found:
 }
 
 // .text:0x001084B4 size:0x3A0 mapped:0x80747548
-// 99.96%: the lbl_3_data_6104 entry is loaded into r4 instead of r0 before its extsb
 void fn_3_1084B4(void) {
     lbl_80366158._28 = 1;
     if (lbl_3_common_bss_34C90._00A < 0x7FFE) {
