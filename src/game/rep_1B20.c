@@ -1068,10 +1068,10 @@ int fn_3_B254C(void) {
 }
 
 // .text:0x000B1DD0 size:0x77C mapped:0x806F0E64
-// First draft (86.46%): the target keeps the stick-direction masks in r29-r31 and
-// lays out the command switch differently; registers and blocks differ throughout.
+// 90.14%: the target reloads cpuInputDuration[i] after the decrement (lha, cmpwi),
+// keeps the 0x1200 case's stick masks in r29-r31, and allocates the switch differently.
 void fn_3_B1DD0(void) {
-    int i;
+    s16 i;
     s16 cmd;
     s16 team;
     InputStruct* input;
@@ -1246,8 +1246,6 @@ void fn_3_B1DD0(void) {
         case 0x7F00:
             g_Practice.allInstructionsComplete = 1;
             lbl_80366158._28 = 1;
-            return;
-        default:
             return;
         }
         g_Practice.commandIndex++;

@@ -915,7 +915,7 @@ typedef struct _PracticeStruct {
             /*0x17E*/ frame_t _17E;
         };
         struct {
-            /*0x178*/ s16 cpuInput[2];         // per team
+            /*0x178*/ u16 cpuInput[2];        // per team
             /*0x17C*/ s16 cpuInputDuration[2]; // per team
         };
     };
