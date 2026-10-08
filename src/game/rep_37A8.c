@@ -8,6 +8,29 @@
 #include "Dolphin/gx.h"
 #include "string.h"
 
+// g_Minigame's three entries in this minigame
+typedef struct UnkMgEntry3310 {
+    /* 0x00 */ Vec pos;
+    /* 0x0C */ Vec rot;
+    /* 0x18 */ s16 _18;
+    /* 0x1A */ s16 _1A;
+    /* 0x1C */ s16 _1C;
+    /* 0x1E */ s16 _1E;
+    /* 0x20 */ s16 _20;
+    /* 0x22 */ s16 _22;
+    /* 0x24 */ s16 _24;
+    /* 0x26 */ u8 _26[0x2A - 0x26];
+    /* 0x2A */ u8 _2A;
+    /* 0x2B */ u8 _2B;
+    /* 0x2C */ u8 _2C;
+    /* 0x2D */ u8 _2D;
+    /* 0x2E */ u8 _2E;
+    /* 0x2F */ s8 _2F[4];
+    /* 0x33 */ u8 _33;
+    /* 0x34 */ s8 _34;
+    /* 0x35 */ u8 _35[0x38 - 0x35];
+} UnkMgEntry3310; // size: 0x38
+
 // A CPU player's state, one per player at g_Minigame._1DCC
 typedef struct Unk37A8Cpu {
     /* 0x0 */ s16 _0;
@@ -17,18 +40,31 @@ typedef struct Unk37A8Cpu {
 
 // This minigame's view of g_Minigame
 typedef struct Unk37A8Minigame {
-    /* 0x0000 */ u8 _0000[0x1B58];
+    /* 0x0000 */ UnkMgEntry3310 _0000[3];
+    /* 0x00A8 */ u8 _00A8[0x1B44 - 0xA8];
+    /* 0x1B44 */ s16 _1B44[4];
+    /* 0x1B4C */ u8 _1B4C[0x1B58 - 0x1B4C];
     /* 0x1B58 */ u8 _1B58[4][10];
     /* 0x1B80 */ u8 _1B80[4];
     /* 0x1B84 */ u8 _1B84[0x1BB6 - 0x1B84];
     /* 0x1BB6 */ s8 _1BB6[4];
     /* 0x1BBA */ u8 _1BBA[0x1C7E - 0x1BBA];
     /* 0x1C7E */ s8 _1C7E[4][3];
-    /* 0x1C8A */ u8 _1C8A[0x1DCC - 0x1C8A];
+    /* 0x1C8A */ u8 _1C8A[0x1CA9 - 0x1C8A];
+    /* 0x1CA9 */ u8 _1CA9[4];
+    /* 0x1CAD */ u8 _1CAD[0x1DCC - 0x1CAD];
     /* 0x1DCC */ Unk37A8Cpu _1DCC[4];
 } Unk37A8Minigame;
 
 #define MG (*(Unk37A8Minigame*)&g_Minigame)
+
+typedef struct Unk37A8Fielder {
+    /* 0x000 */ Vec pos;
+    /* 0x00C */ f32 _00C;
+    /* 0x010 */ u8 _010[0x268 - 0x10];
+} Unk37A8Fielder; // size: 0x268
+
+extern Unk37A8Fielder g_Fielders[9];
 
 extern struct {
     /* 0x00 */ u8 _00[0x28];
@@ -42,6 +78,13 @@ extern void changeScene(u8, s16);
 
 extern u8 lbl_3_data_21278[2];
 extern f32 lbl_3_data_21D34[4][3][3];
+extern s16 lbl_3_data_21DC4[2];
+extern f32 lbl_3_data_21D1C[4];
+extern f32 lbl_3_data_21D2C[2];
+extern s16 lbl_3_data_21DC8[5][2][3];
+extern s16 lbl_3_data_21E04[2];
+extern u8 lbl_3_data_21E10[8];
+extern s16 lbl_3_data_21E68[26];
 extern s16 lbl_3_data_21EAC[4][2];
 
 f32 lbl_3_data_26698[3] = { 0.5f, 0.0f, -0.5f };
@@ -158,8 +201,46 @@ void fn_3_144CB8(void) {
 }
 
 // .text:0x00144ADC size:0x1DC mapped:0x80783B70
-void fn_3_144ADC(void) {
-    return;
+static inline f32 Lerp37A8(f32 a, f32 b, f32 t) {
+    return (b - a) * t + a;
+}
+
+void fn_3_144ADC(int player) {
+    Unk37A8Fielder* fielder;
+    InputStruct* input;
+
+    input = &g_Controls[g_Minigame.minigameControlStruct.characterIndex[player]];
+    fielder = &g_Fielders[g_Minigame.minigameFielderIndex[player]];
+    if (g_Minigame.minigameControlStruct.battingHandedness[player] != 0) {
+        input = &g_Minigame._1D7C[g_Minigame.minigameControlStruct.characterIndex[player]];
+    }
+    if (MG._1B44[player] < 0x7FFE) {
+        MG._1B44[player]++;
+    } else {
+        MG._1B44[player] = 0x7FFF;
+    }
+    switch (g_Minigame._1CA5[player]) {
+    case 1:
+        fielder->_00C = Lerp37A8(lbl_3_data_21D2C[1], lbl_3_data_21D2C[0], (f32)MG._1B44[player] / (f32)lbl_3_data_21E68[16]);
+        if (MG._1B44[player] >= lbl_3_data_21E68[16]) {
+            g_Minigame._1CA5[player] = 2;
+            MG._1B44[player] = 0;
+        }
+        break;
+    case 2:
+        if (!(input->buttonInput & 4)) {
+            g_Minigame._1CA5[player] = 3;
+            MG._1B44[player] = 0;
+        }
+        break;
+    case 3:
+        fielder->_00C = Lerp37A8(lbl_3_data_21D2C[0], lbl_3_data_21D2C[1], (f32)MG._1B44[player] / (f32)lbl_3_data_21E68[16]);
+        if (MG._1B44[player] >= lbl_3_data_21E68[16]) {
+            g_Minigame._1CA5[player] = 0;
+            MG._1B44[player] = 0;
+        }
+        break;
+    }
 }
 
 // .text:0x0014471C size:0x3C0 mapped:0x807837B0
@@ -174,12 +255,104 @@ void fn_3_14443C(void) {
 
 // .text:0x0014423C size:0x200 mapped:0x807832D0
 void fn_3_14423C(void) {
-    return;
+    u32 start;
+    u32 end;
+    int i;
+    UnkMgEntry3310* entry;
+
+    if (g_Minigame.turnOverStatus != 0) {
+        return;
+    }
+    if (g_Minigame._1CA3 != 0) {
+        if (MG._0000[1]._2A == 2 && MG._0000[1]._18 >= lbl_3_data_21DC8[g_Minigame.soloMinigameDifficulty][g_Minigame._1CA4 - 1][2] * 60) {
+            MG._0000[1]._2A = 3;
+            MG._0000[1]._2E = 0;
+            MG._0000[1]._1A = 0;
+        }
+    } else if (g_Minigame._1CA4 < 2) {
+        if (!g_Minigame.multiPlayerInd) {
+            start = lbl_3_data_21DC8[g_Minigame.soloMinigameDifficulty][g_Minigame._1CA4][0] * 60;
+            end = lbl_3_data_21DC8[g_Minigame.soloMinigameDifficulty][g_Minigame._1CA4][1] * 60;
+        } else {
+            start = lbl_3_data_21DC8[4][g_Minigame._1CA4][0] * 60;
+            end = lbl_3_data_21DC8[4][g_Minigame._1CA4][1] * 60;
+        }
+        if (g_Minigame._17C0 < start || g_Minigame._17C0 > end) {
+            g_Minigame._1CA2 = 0;
+            return;
+        }
+        for (i = 0; i < 3; i++) {
+            if (MG._0000[i]._2A != 0) {
+                break;
+            }
+        }
+        if (i < 3) {
+            if (g_Minigame._1CA2 == 0) {
+                g_Minigame._1CA2 = 2;
+            }
+        } else {
+            entry = &MG._0000[1];
+            entry->_2A = 1;
+            entry->_2B = 1;
+            entry->_2C = 4;
+            entry->_2D = lbl_3_data_21E10[g_Minigame._1CA4 + 4];
+            entry->_18 = 0;
+            entry->_1A = 0;
+            entry->_1C = lbl_3_data_21E68[5];
+            entry->_20 = 0;
+            entry->_2E = 0;
+            entry->pos.y = lbl_3_data_21D1C[3];
+            entry->_2F[0] = -1;
+            entry->_2F[1] = -1;
+            entry->_2F[2] = -1;
+            entry->_2F[3] = -1;
+            g_Minigame._1CA3 = 1;
+            g_Minigame._1CA2 = 0;
+            g_Minigame._1CA4++;
+        }
+    }
 }
 
 // .text:0x0014402C size:0x210 mapped:0x807830C0
-void fn_3_14402C(void) {
-    return;
+void fn_3_14402C(int idx) {
+    s16* timer;
+    s32 candidates[4];
+    int n;
+    int i;
+
+    if (g_Minigame.turnOverStatus == 0) {
+        timer = &MG._0000[idx]._1C;
+        if (*timer < 0) {
+            *timer = RandomInt_Game_Range(lbl_3_data_21DC4[0], lbl_3_data_21DC4[1]);
+        } else if (g_Minigame._1CA3 == 0 && g_Minigame._1CA2 == 0) {
+            (*timer)--;
+            if (*timer == 0) {
+                n = 0;
+                for (i = 0; i < 4; i++) {
+                    if (MG._1CA9[i] == 0) {
+                        candidates[n] = i;
+                        n++;
+                    }
+                }
+                MG._0000[idx]._2C = candidates[random_fn_3_9EE24(n)];
+                MG._1CA9[MG._0000[idx]._2C] = 1;
+                MG._0000[idx]._2D = lbl_3_data_21E10[MG._0000[idx]._2C];
+                *timer = lbl_3_data_21E68[5];
+                MG._0000[idx]._18 = 0;
+                MG._0000[idx]._1A = 0;
+                MG._0000[idx]._1E = 0;
+                MG._0000[idx]._2A = 1;
+                MG._0000[idx]._2B = 0;
+                MG._0000[idx].pos.y = lbl_3_data_21D1C[1];
+                MG._0000[idx]._22 = lbl_3_data_21E04[0] + RandomInt_Game_Range(lbl_3_data_21E04[0], lbl_3_data_21E04[1]);
+                MG._0000[idx]._24 = MG._0000[idx]._22;
+                MG._0000[idx]._34 = -1;
+                MG._0000[idx].rot.z = 0.0f;
+                MG._0000[idx].rot.x = 0.0f;
+                MG._0000[idx].rot.y = lbl_3_data_26698[idx];
+            }
+        }
+    }
 }
 
 // .text:0x00143FAC size:0x80 mapped:0x80783040
