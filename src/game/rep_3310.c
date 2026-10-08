@@ -32,9 +32,16 @@ typedef struct {
 } UnkAnimSet3310;
 
 typedef struct {
+    /* 0x00 */ f32 _00;
+    /* 0x04 */ f32 _04;
+    /* 0x08 */ f32 _08;
+} UnkTexScroll3310;
+
+typedef struct {
     /* 0x00 */ u8 _00[0x14];
     /* 0x14 */ UnkAnimSet3310* _14;
-    /* 0x18 */ u8 _18[0xEC - 0x18];
+    /* 0x18 */ u8 _18[0xE8 - 0x18];
+    /* 0xE8 */ UnkTexScroll3310* _E8;
     /* 0xEC */ Mtx* _EC;
 } UnkModel3310;
 
@@ -214,6 +221,7 @@ extern u8 lbl_3_data_69D0[0x520];
 extern s16 lbl_3_data_217A4[12];
 extern s16 lbl_3_data_21A04[8];
 extern Vec lbl_3_data_21380;
+extern f32 lbl_3_data_2188C[7];
 extern Vec lbl_3_data_21A48;
 extern Vec lbl_3_data_21B94[4];
 extern struct {
@@ -271,7 +279,9 @@ u8 lbl_3_data_2263F = 6;
 f32 lbl_3_data_22640[4] = { 0.75f, 0.05f, 3.0f, 0.02f };
 f32 lbl_3_data_22650[3] = { 5.0f, 5.0f, 10.0f };
 u8 lbl_3_data_2265C[4] = { 1, 0, 2, 3 };
-f32 lbl_3_data_22660[3] = { 2.0f, 8.0f, 1.0f };
+f32 lbl_3_data_22660 = 2.0f;
+f32 lbl_3_data_22664 = 8.0f;
+f32 lbl_3_data_22668 = 1.0f;
 s32 lbl_3_data_2266C = 60;
 u8 lbl_3_data_22670[8] = { 2, 0, 3, 4, 1, 0, 0, 0 };
 f32 lbl_3_data_22678[4] = { 2.0f, 2.5f, 1.0f, 1.0f };
@@ -571,8 +581,79 @@ void fn_3_11A20C(void) {
 }
 
 // .text:0x00119F6C size:0x2A0 mapped:0x80759000
+// 98.49%: the target recomputes the fn_3_11A350(i + 0x10) model address ((i + 16) * 0x90 + 0x34),
+// the base reuses the strength-reduced i * 0x90 induction register.
 void fn_3_119F6C(void) {
-    return;
+    UnkObj3310* obj;
+    UnkObj3310* exploded;
+    UnkObj3310* bombObj;
+    BB_barrelStruct* barrel;
+    s32 i;
+    u8 bomb = FALSE;
+    UnkModelSet3310* model;
+    u32 j;
+    UnkTexScroll3310* scroll;
+    u32 frame;
+
+    bombObj = &lbl_8036E548._2D94[0xF];
+    bombObj->_26 = 0;
+    for (i = 0; i < 15; i++) {
+        exploded = &lbl_8036E548._2D94[i + 0x10];
+        obj = &lbl_8036E548._2D94[i];
+        barrel = &g_Minigame.barrels[i];
+        exploded->_26 = 0;
+        obj->_26 = 0;
+        if (g_Minigame.barrels[i].barrelState == 0) {
+            continue;
+        }
+        if (g_Minigame.barrels[i].barrelState == 4) {
+            obj = exploded;
+            if (barrel->animationCounter == 0) {
+                setAnim(&lbl_8036E548._0068->_34[i + 0x10], lbl_3_common_bss_32724._74, 0);
+                fn_3_14DC80(i);
+                fn_3_90064(0x2E3);
+            }
+            frame = fn_3_11A350(i + 0x10);
+            if (frame <= lbl_3_data_2263F) {
+                if (!(frame & 1)) {
+                    model = lbl_8036E548._0068->_34[i + 0x10]._00;
+                    for (j = 0; j < model->_06; j++) {
+                        scroll = model->_18[j]->_E8;
+                        if (scroll != NULL) {
+                            scroll->_00 += scroll->_08;
+                        }
+                    }
+                    exploded->_26 = 0;
+                    continue;
+                } else if (frame == 0) {
+                    fn_3_14CB28(i);
+                }
+            }
+        } else if (barrel->barrelColour == 3 && i == g_Minigame.bB_bombBarrelID) {
+            bomb = TRUE;
+            obj = bombObj;
+        }
+        obj->_26 = 1;
+        obj->_04.x = barrel->currentPos.x;
+        obj->_04.y = -barrel->currentPos.y;
+        obj->_04.z = barrel->currentPos.z;
+        obj->_10.x = 0.0f;
+        obj->_10.y = 0.0f;
+        obj->_10.z = 0.0f;
+        if (bomb) {
+            fn_8001D0D0(0xF, 0.75f);
+        } else {
+            fn_8001D0D0(i, 0.75f);
+        }
+        if (bomb) {
+            bomb = FALSE;
+            obj->_00 = fn_3_119E30;
+        } else if (barrel->barrelState != 4) {
+            obj->_00 = fn_3_119EE0;
+        } else {
+            obj->_00 = NULL;
+        }
+    }
 }
 
 // .text:0x00119EE0 size:0x8C mapped:0x80758F74
@@ -631,8 +712,74 @@ void fn_3_119C34(void) {
 }
 
 // .text:0x00119934 size:0x300 mapped:0x807589C8
+// 97.79%: the target rounds acos's result (frsp) right after the call, before loading dir.z;
+// the base schedules frsp after the load, so f1 and f2 swap.
 void fn_3_119934(void) {
-    return;
+    UnkObj3310* obj;
+    s32 i;
+    UnkObj3310* special;
+    s32 kind;
+    u8 state;
+    Vec dir;
+    f32 angle;
+
+    special = &lbl_8036E548._2D94[0xA5];
+    special->_26 = 0;
+    for (i = 0; i < 15; i++) {
+        obj = &lbl_8036E548._2D94[i + 0x82];
+        obj->_26 = 0;
+        state = g_Minigame.wallBall_coinsVisibleInd[i];
+        kind = g_Minigame._1B1A[state - 1] - 2;
+        if (kind == 2) {
+            if (state >= 1 && state <= 6) {
+                special->_26 = 1;
+                special->_04.x = g_Minigame.wallBall_coinCoordinates[i].x;
+                special->_04.y = g_Minigame.wallBall_coinCoordinates[i].y;
+                special->_04.z = g_Minigame.wallBall_coinCoordinates[i].z;
+                fn_8001D0D0(0xA5, lbl_3_data_22650[kind]);
+                special->_10.y += 0.005f;
+                if (special->_10.y > 3.1415927f) {
+                    special->_10.y -= 6.2831855f;
+                }
+            }
+        } else if (state >= 1 && state <= 6) {
+            obj->_26 = 1;
+            obj->_04.x = g_Minigame.wallBall_coinCoordinates[i].x;
+            obj->_04.y = g_Minigame.wallBall_coinCoordinates[i].y;
+            obj->_04.z = g_Minigame.wallBall_coinCoordinates[i].z;
+            fn_8001D0D0(i + 0x82, lbl_3_data_22650[kind]);
+            obj->_10.y += 0.005f;
+            if (obj->_10.y > 3.1415927f) {
+                obj->_10.y -= 6.2831855f;
+            }
+        }
+    }
+    for (i = 15; i < 35; i++) {
+        obj = &lbl_8036E548._2D94[i + 0x82];
+        obj->_26 = 0;
+        if (g_Minigame.turnOverStatus == 0 && g_Minigame.wallBall_coinsVisibleInd[i] == 1) {
+            obj->_26 = 1;
+            obj->_04.x = g_Minigame.wallBall_coinCoordinates[i].x;
+            obj->_04.y = -g_Minigame.wallBall_coinCoordinates[i].y;
+            obj->_04.z = g_Minigame.wallBall_coinCoordinates[i].z;
+            fn_8001D0D0(i + 0x82, 5.0f);
+            if (g_Minigame.wallBall_coinsVisibleFrameCounter[i] == 0) {
+                obj->_10.x = RandomF32_Game_Range(-3.1415927f, 3.1415927f);
+                memcpy(&dir, &g_Minigame.wallBall_coinVelocity[i], sizeof(Vec));
+                dir.y = 0.0f;
+                PSVECNormalize(&dir, &dir);
+                angle = acos(dir.x);
+                if (dir.z < 0.0f) {
+                    angle = 6.2831855f - angle;
+                }
+                obj->_10.y = angle;
+            } else if (lbl_80366158._28 == 0) {
+                memcpy(&dir, &g_Minigame.wallBall_coinVelocity[i], sizeof(Vec));
+                dir.y = 0.0f;
+                obj->_10.x += (0.05f * PSVECMag(&dir)) / lbl_3_data_2188C[3];
+            }
+        }
+    }
 }
 
 // .text:0x00119878 size:0xBC mapped:0x8075890C
@@ -661,8 +808,89 @@ f32 fn_3_119854(u8 index) {
 }
 
 // .text:0x001194FC size:0x358 mapped:0x80758590
+// 95.03%: as in fn_3_119934, frsp after acos is scheduled late; the target also keeps
+// &lbl_3_data_22660 in its own register (r25) and i in r22.
 void fn_3_1194FC(void) {
-    return;
+    Vec dir;
+    Vec fwd = { 0.0f, 0.0f, 1.0f };
+    s32 i;
+    UnkObj3310* obj;
+    UnkObj3310* alt;
+    UnkObj3310* shadow;
+    u8 state;
+    s32 base;
+    f32 angle;
+    f32 scale;
+
+    for (i = 0; i < 50; i++) {
+        obj = &lbl_8036E548._2D94[i + 0x85];
+        obj->_26 = 0;
+        obj->_00 = NULL;
+        alt = &lbl_8036E548._2D94[i + 0xB7];
+        alt->_26 = 0;
+        alt->_00 = NULL;
+        shadow = &lbl_8036E548._2D94[i + 0x28];
+        shadow->_26 = 0;
+        shadow->_00 = NULL;
+        state = g_Minigame.wallBall_coinsVisibleInd[i];
+        if (state != 0 && state != 3 && state != 4) {
+            if (g_Minigame._1B84[i] == 5) {
+                alt->_00 = NULL;
+                obj = alt;
+                base = 0xB7;
+            } else {
+                base = 0x85;
+                obj->_00 = fn_3_1194AC;
+            }
+            obj->_26 = 1;
+            obj->_04.x = g_Minigame.wallBall_coinCoordinates[i].x;
+            obj->_04.y = -g_Minigame.wallBall_coinCoordinates[i].y;
+            obj->_04.z = g_Minigame.wallBall_coinCoordinates[i].z;
+            if (g_Minigame.wallBall_coinsVisibleInd[i] == 2) {
+                scale = lbl_3_data_22660 - (g_Minigame._1C4C[i] * (lbl_3_data_22660 - lbl_3_data_22668)) / lbl_3_data_2266C;
+                if (lbl_80366158._28 == 0) {
+                    fn_8001D110(base + i, lbl_3_data_22660, scale, lbl_3_data_22660);
+                    if ((g_Minigame._1C4C[i] += -2 * g_Minigame._1C1A[i] + 1) >= 60) {
+                        g_Minigame._1C1A[i] = g_Minigame._1C1A[i] == 0;
+                    }
+                    g_Minigame._1C4C[i] += -2 * g_Minigame._1C1A[i] + 1;
+                }
+                obj->_10.x = 0.0f;
+                obj->_10.y = 0.0f;
+                obj->_10.z = 0.0f;
+                if (g_Minigame._1B84[i] == 5) {
+                    obj->_04.y -= 0.5f;
+                }
+            } else {
+                fn_8001D0D0(base + i, lbl_3_data_22660);
+                if (g_Minigame.wallBall_coinsVisibleInd[i] != 6) {
+                    dir.x = g_Minigame.wallBall_coinVelocity[i].x;
+                    dir.y = 0.0f;
+                    dir.z = g_Minigame.wallBall_coinVelocity[i].z;
+                    PSVECNormalize(&dir, &dir);
+                    angle = acos(PSVECDotProduct(&fwd, &dir));
+                    if (dir.x < 0.0f) {
+                        angle = 6.2831855f - angle;
+                    }
+                    if (lbl_80366158._28 == 0) {
+                        obj->_10.y = angle;
+                        obj->_10.x += -0.17453292f;
+                    }
+                }
+                if (g_Minigame._1B84[i] == 5 && g_Minigame.wallBall_coinsVisibleFrameCounter[i] == 1) {
+                    fn_3_15521C(i, &obj->_04, &obj->_10);
+                }
+                if (g_Minigame._1B84[i] == 5) {
+                    obj->_00 = fn_3_119468;
+                }
+                shadow->_26 = 1;
+                shadow->_04.x = g_Minigame.wallBall_coinCoordinates[i].x;
+                shadow->_04.y = -0.05f;
+                shadow->_04.z = g_Minigame.wallBall_coinCoordinates[i].z;
+                fn_8001D0D0(i + 0x28, lbl_3_data_22664);
+            }
+        }
+    }
 }
 
 // .text:0x001194AC size:0x50 mapped:0x80758540
