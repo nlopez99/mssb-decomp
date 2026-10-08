@@ -3,12 +3,14 @@
 // in .rodata, so MWCC does not pool .rodata and addresses constants one by one
 #include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
+#include "static/UnknownHomes_Static.h"
 #include "Dolphin/mtx.h"
 #include "musyx/musyx.h"
 #include "C3/control.h"
 #include "Dolphin/os.h"
 #include "game/rep_1838.h"
 #include "game/rep_AC8.h"
+#include "game/rep_1D58.h"
 #include "string.h"
 
 typedef struct StaC2Place {
@@ -87,18 +89,20 @@ typedef struct {
     /* 0x10 */ StaC2TexInfo* _10;
 } StaC2TexMap;
 
-typedef struct {
+typedef struct StaC2Bone {
     /* 0x00 */ u8 _00[0x14];
     /* 0x14 */ StaC2TexMap* _14;
-} StaC2Material;
-
-typedef struct {
-    /* 0x00 */ StaC2Material* _00;
-} StaC2Materials;
+    /* 0x18 */ u8 _18[0x1C - 0x18];
+    /* 0x1C */ Control control;
+    /* 0x60 */ u8 _60[0xEC - 0x60];
+    /* 0xEC */ MtxPtr _EC;
+} StaC2Bone;
 
 typedef struct StaC2Actor {
-    /* 0x00 */ u8 _00[0x18];
-    /* 0x18 */ StaC2Materials* _18;
+    /* 0x00 */ u8 _00[0x06];
+    /* 0x06 */ u16 _06;
+    /* 0x08 */ u8 _08[0x18 - 0x08];
+    /* 0x18 */ StaC2Bone** _18;
 } StaC2Actor;
 
 typedef struct {
@@ -117,11 +121,14 @@ typedef struct StaC2Draw {
     /* 0x00 */ Control control;
     /* 0x44 */ u8 _44[0x74 - 0x44];
     /* 0x74 */ StaC2Model* _74;
-    /* 0x78 */ u8 _78[0x9C - 0x78];
+    /* 0x78 */ struct StadiumObjectCollision* _78;
+    /* 0x7C */ u8 _7C[0x9C - 0x7C];
     /* 0x9C */ u8 _9C;
     /* 0x9D */ u8 _9D[0xA0 - 0x9D];
     /* 0xA0 */ Vec _A0;
-    /* 0xAC */ u8 _AC[0xC4 - 0xAC];
+    /* 0xAC */ Quaternion _AC;
+    /* 0xBC */ f32 _BC;
+    /* 0xC0 */ f32 _C0;
     /* 0xC4 */ StaC2Target* _C4;
     /* 0xC8 */ u8 _C8[0xCA - 0xC8];
     /* 0xCA */ u8 _CA;
@@ -251,11 +258,22 @@ extern struct {
 } g_Fielders[9];
 
 extern struct {
-    /* 0x00 */ u8 _00[0x14];
+    /* 0x00 */ StaC2Draw* _00;
+    /* 0x04 */ u8 _04[0x14 - 0x04];
     /* 0x14 */ StaC2ObjEntry* _14;
     /* 0x18 */ u8 _18[0x30 - 0x18];
     /* 0x30 */ u32 _30;
+    /* 0x34 */ u8 _34[0x3C - 0x34];
+    /* 0x3C */ u32* _3C;
+    /* 0x40 */ u16* _40;
+    /* 0x44 */ s32* _44;
+    /* 0x48 */ Vec* _48;
 } lbl_3_common_bss_350E4;
+
+extern struct {
+    /* 0x00 */ u8 _00[0x28];
+    /* 0x28 */ u8 _28;
+} lbl_80366158;
 
 extern void fn_800528C0(f32 x, f32 y, f32 z, s16* screenX, s16* screenY);
 extern struct {
@@ -263,6 +281,10 @@ extern struct {
     /* 0x2C50 */ StaC2Player* _2C50[13];
 } lbl_8036E548;
 
+extern s32 fn_8005268C(void);
+extern camera_803c639c_s* fn_80052734(s32 idx);
+extern void fn_80033CC8(StaC2Particle* p, void* texture);
+extern void fn_8003403C(f32 width, f32 height);
 extern StaC2SpriteRef lbl_80371C30[];
 
 // fn_3_B7F70 lies in unsplit code
@@ -331,8 +353,21 @@ void fn_3_D5C8C(void) {
 }
 
 // .text:0x000D5B6C size:0x120 mapped:0x80714C00
-void fn_3_D5B6C(void) {
-    return;
+void fn_3_D5B6C(u32* n) {
+    Control control;
+    Mtx m;
+    u16 next;
+    StaC2Draw* draw;
+
+    next = lbl_3_common_bss_350E4._40[*n] = lbl_3_common_bss_350E4._40[*n - 1] + lbl_3_common_bss_350E4._3C[*n - 1];
+    lbl_3_common_bss_350E4._44[next] = lbl_3_bss_A020;
+    lbl_3_common_bss_350E4._3C[*n]++;
+    draw = &lbl_3_common_bss_350E4._00[lbl_3_bss_A020];
+    control = draw->control;
+    CTRLBuildMatrix(&control, m);
+    fn_3_B8464(m, draw->_78);
+    fn_3_B8414(&lbl_3_common_bss_350E4._48[*n * 2], &lbl_3_common_bss_350E4._48[*n * 2 + 1]);
+    (*n)++;
 }
 
 // .text:0x000D55EC size:0x580 mapped:0x80714680
@@ -533,7 +568,7 @@ void fn_3_D1B24(void) {
 
 // .text:0x000D1AC4 size:0x60 mapped:0x80710B58
 void fn_3_D1AC4(StaC2Draw* draw) {
-    StaC2TexRegs* regs = draw->_74->_00->_18->_00->_14->_10->_04;
+    StaC2TexRegs* regs = draw->_74->_00->_18[0]->_14->_10->_04;
 
     if (draw->_CA == 0) {
         regs->_74 &= ~0x1FFF;
@@ -555,8 +590,23 @@ void fn_3_D1848(void) {
 }
 
 // .text:0x000D173C size:0x10C mapped:0x807107D0
-void fn_3_D173C(void) {
-    return;
+void fn_3_D173C(StaC2Draw* draw) {
+    Mtx m;
+    Mtx rot;
+    u32 i;
+    f32 angle = 3.1415927f;
+
+    PSMTXInverse(fn_80052734(fn_8005268C())->view, m);
+    PSMTXIdentity(rot);
+    rot[0][0] = cosf_kludge(angle);
+    rot[0][2] = -sinf_kludge(angle);
+    rot[2][0] = sinf_kludge(angle);
+    rot[2][2] = cosf_kludge(angle);
+    PSMTXConcat(m, rot, m);
+    m[0][3] = m[1][3] = m[2][3] = 0.0f;
+    for (i = 0; i < draw->_74->_00->_06; i++) {
+        PSMTXConcat(m, draw->_74->_00->_18[i]->_EC, draw->_74->_00->_18[i]->_EC);
+    }
 }
 
 // .text:0x000D141C size:0x320 mapped:0x807104B0
@@ -580,8 +630,22 @@ void fn_3_D1110(void) {
 }
 
 // .text:0x000D1004 size:0x10C mapped:0x80710098
-void fn_3_D1004(void) {
-    return;
+void fn_3_D1004(StaC2Draw* draw, f32 x, f32 y, f32 z, f32 rotY, f32 tilt) {
+    StaC2Bone* bone = draw->_74->_00->_18[3];
+    Vec axis = { 0.0f, 1.0f, 0.0f };
+    Quaternion q;
+
+    draw->_A0.x = x;
+    draw->_A0.y = y;
+    draw->_A0.z = z;
+    draw->_C0 = tilt;
+    draw->control.type = 0;
+    CTRLSetTranslation(&draw->control, draw->_A0.x, -draw->_A0.y, draw->_A0.z);
+    CTRLSetRotation(&draw->control, 0.0f, rotY, 0.0f);
+    C_QUATRotAxisRad(&q, &axis, 0.017453292f * draw->_C0);
+    PSQUATMultiply(&q, &draw->_AC, &q);
+    PSQUATNormalize(&q, &q);
+    CTRLSetQuat(&bone->control, q.x, q.y, q.z, q.w);
 }
 
 // .text:0x000D0918 size:0x6EC mapped:0x8070F9AC
@@ -714,8 +778,21 @@ void fn_3_CEE5C(void) {
 }
 
 // .text:0x000CED40 size:0x11C mapped:0x8070DDD4
-void fn_3_CED40(void) {
-    return;
+void fn_3_CED40(StaC2Particle* p, void* texture) {
+    fn_8003403C(p->_38, p->_3C);
+    fn_80033CC8(p, texture);
+    if (lbl_80366158._28 == 0) {
+        if (-p->delay < 5) {
+            p->_38 += 0.38;
+            p->_3C += 0.38;
+            p->color[3] += 34.0;
+        } else {
+            p->color[3] -= 4;
+        }
+        p->pos.x += p->vel.x;
+        p->pos.y += p->vel.y;
+        p->pos.z += p->vel.z;
+    }
 }
 
 // .text:0x000CED3C size:0x4 mapped:0x8070DDD0
@@ -863,7 +940,7 @@ void fn_3_CBAFC(void) {
 
 // .text:0x000CBA9C size:0x60 mapped:0x8070AB30
 void fn_3_CBA9C(StaC2Draw* draw) {
-    StaC2TexRegs* regs = draw->_74->_00->_18->_00->_14->_10->_04;
+    StaC2TexRegs* regs = draw->_74->_00->_18[0]->_14->_10->_04;
 
     if (draw->_CA == 0) {
         regs->_74 &= ~0x1FFF;
