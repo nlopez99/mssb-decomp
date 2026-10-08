@@ -1099,8 +1099,7 @@ void fn_3_138AA4(void) {
 }
 
 // .text:0x001384B4 size:0x5F0 mapped:0x80777548
-// 98.2%: FPRs differ (the sums, deviations and center.x), and the else branch of the
-// first deviation test shares its store with the then branch.
+// 99.45%: FPRs differ (the sums, deviations and center.x).
 void fn_3_1384B4(Unk3520Obj* obj) {
     s32 coins[100];
     Vec center = { 0.0f, 0.0f, 20.0f };
@@ -1444,7 +1443,7 @@ BOOL fn_3_1379A0(int fielderIdx) {
 }
 
 // .text:0x001373E0 size:0x5C0 mapped:0x80776474
-// 92.9%: the half-size constants are loaded through addi where the target loads them
+// 93.1%: the half-size constants are loaded through addi where the target loads them
 // directly, and the plane intersection schedules its stores differently.
 u8 fn_3_1373E0(VecSrcDst* seg, Vec* vel, VecSrcDst* out, f32 radius) {
     f32 planes[4][3] = { { -1.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, { 0.0f, -1.0f, 0.0f } };
@@ -2204,8 +2203,6 @@ out:
 }
 
 // .text:0x001354BC size:0x64 mapped:0x80774550
-// 99.2%: the scaled index and g_Minigame's base swap r0 and r3. With the locals declared
-// ax before az this matches, but the copy inlined in fn_3_1350BC swaps its fabs registers.
 BOOL fn_3_1354BC(u32 i, f32 x, f32 z) {
     BOOL ret = FALSE;
     f64 az;

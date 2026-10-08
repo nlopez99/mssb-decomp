@@ -2497,8 +2497,7 @@ BOOL fn_3_100018(void) {
     return lbl_3_common_bss_DE94._0000->_09B6 == 1;
 }
 
-// 99.30%: registers in the captain searches (0x48, 0x49, 0x55, 0x58, 0x59), 0x2F's modulo and
-// 0x66's distance sum.
+// 99.59%: registers in the captain searches (0x48, 0x49, 0x55, 0x58, 0x59) and 0x2F's modulo.
 // .text:0x000FDB30 size:0x24E8 mapped:0x8073CBC4
 BOOL fn_3_FDB30(void) {
     Unk3090Task* task = lbl_803CC1B8;
