@@ -161,10 +161,15 @@ void fn_3_FF98(void) {
 }
 
 // .text:0x0000FF4C size:0x4C mapped:0x8064EFE0
-// 91.8%: same operations; the target computes both masks and shifts before the * 8 terms.
+// 92.9%: same instructions in the same order; the registers differ.
 void fn_3_FF4C(void) {
-    g_Ball.StaticRandomInt1 = (g_Ball.StaticRandomInt1 * 8 + ((g_Ball.StaticRandomInt1 >> 1) + (g_Ball.StaticRandomInt1 & 0x505))) & 0x7FFF;
-    g_Ball.StaticRandomInt2 = (g_Ball.StaticRandomInt2 * 8 + ((g_Ball.StaticRandomInt2 >> 2) + (g_Ball.StaticRandomInt2 & 0x505))) & 0x7FFF;
+    s32 a = g_Ball.StaticRandomInt1 & 0x505;
+    s32 b = g_Ball.StaticRandomInt2 & 0x505;
+
+    a = (g_Ball.StaticRandomInt1 >> 1) + a;
+    b = (g_Ball.StaticRandomInt2 >> 2) + b;
+    g_Ball.StaticRandomInt1 = (g_Ball.StaticRandomInt1 * 8 + a) & 0x7FFF;
+    g_Ball.StaticRandomInt2 = (g_Ball.StaticRandomInt2 * 8 + b) & 0x7FFF;
 }
 
 // .text:0x0000FBA8 size:0x3A4 mapped:0x8064EC3C
