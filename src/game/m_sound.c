@@ -117,13 +117,13 @@ void fn_3_8FF18(void) {
 }
 
 // .text:0x0008FF5C size:0x108 mapped:0x806CEFF0
-void fn_3_8FF5C(void) {
-    return;
+SND_VOICEID fn_3_8FF5C(s32 sound, f32 x, f32 y, f32 z) {
+    return 0;
 }
 
 // .text:0x00090064 size:0xEC mapped:0x806CF0F8
-void fn_3_90064(int id) {
-    return;
+SND_VOICEID fn_3_90064(int id) {
+    return 0;
 }
 
 // .text:0x00090150 size:0xD0 mapped:0x806CF1E4

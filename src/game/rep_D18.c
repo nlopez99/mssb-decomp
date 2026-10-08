@@ -17,8 +17,8 @@ void fn_3_5B368(void) {
 }
 
 // .text:0x0005B220 size:0x148 mapped:0x8069A2B4
-void fn_3_5B220(void) {
-    return;
+int fn_3_5B220(int arg) {
+    return 0;
 }
 
 // .text:0x0005B0C4 size:0x15C mapped:0x8069A158

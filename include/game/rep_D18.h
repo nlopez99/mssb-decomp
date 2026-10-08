@@ -15,7 +15,7 @@ void fn_3_5ACA0(void);
 void fn_3_5AE0C(void);
 void fn_3_5AE9C(void);
 void fn_3_5B0C4(void);
-void fn_3_5B220(void);
+int fn_3_5B220(int arg);
 void fn_3_5B368(void);
 int fn_3_5B380(u16 buttons);
 void fn_3_5B408(void);

@@ -7,7 +7,7 @@ void fn_3_598D0(void) {
 }
 
 // .text:0x0005985C size:0x74 mapped:0x806988F0
-void fn_3_5985C(void) {
+void fn_3_5985C(s32 fielder, s32 action) {
     return;
 }
 
@@ -152,18 +152,18 @@ void fn_3_530EC(void) {
 }
 
 // .text:0x00052F4C size:0x1A0 mapped:0x80691FE0
-void fn_3_52F4C(void) {
+void fn_3_52F4C(s32 fielder, f32 x, f32 z) {
     return;
 }
 
 // .text:0x000526DC size:0x870 mapped:0x80691770
-void fn_3_526DC(void) {
+void fn_3_526DC(s32 fielder) {
     return;
 }
 
 // .text:0x00052560 size:0x17C mapped:0x806915F4
-void fn_3_52560(void) {
-    return;
+int fn_3_52560(int fielder, f32 x, f32 z) {
+    return 0;
 }
 
 // .text:0x000522E0 size:0x280 mapped:0x80691374
@@ -177,13 +177,13 @@ void fn_3_52084(void) {
 }
 
 // .text:0x00051DF0 size:0x294 mapped:0x80690E84
-void fn_3_51DF0(void) {
-    return;
+u8 fn_3_51DF0(f32 x, f32 z) {
+    return 0;
 }
 
 // .text:0x00051798 size:0x658 mapped:0x8069082C
-void fn_3_51798(void) {
-    return;
+BOOL fn_3_51798(s32 fielder, struct _VecXYZ* delta) {
+    return 0;
 }
 
 // .text:0x0005164C size:0x14C mapped:0x806906E0
@@ -1107,7 +1107,7 @@ void fn_3_258D8(void) {
 }
 
 // .text:0x00025844 size:0x94 mapped:0x806648D8
-void fn_3_25844(void) {
+void fn_3_25844(int fielder, int arg1) {
     return;
 }
 
@@ -1117,8 +1117,8 @@ void fn_3_25648(void) {
 }
 
 // .text:0x000253A4 size:0x2A4 mapped:0x80664438
-void fn_3_253A4(void) {
-    return;
+BOOL fn_3_253A4(s32 fielder, s32 angle) {
+    return 0;
 }
 
 // .text:0x000251E4 size:0x1C0 mapped:0x80664278

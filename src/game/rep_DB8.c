@@ -107,7 +107,7 @@ void fn_3_5D3FC(void) {
 }
 
 // .text:0x0005D094 size:0x368 mapped:0x8069C128
-void fn_3_5D094(void) {
+void fn_3_5D094(int arg) {
     return;
 }
 
@@ -127,7 +127,7 @@ void fn_3_5CD24(void) {
 }
 
 // .text:0x0005C74C size:0x5D8 mapped:0x8069B7E0
-void fn_3_5C74C(void) {
+void fn_3_5C74C(int arg) {
     return;
 }
 
