@@ -202,6 +202,10 @@ u32 lbl_3_data_27C54[16] = {
     0x00030000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 };
 
+static inline void fn_3BD8_set68(UnkTask3BD8* task, s32 idx, u8 value) {
+    lbl_80371C30[task->_14 + idx]._00->_68 = value;
+}
+
 // .text:0x0015F410 size:0x164 mapped:0x8079E4A4
 void fn_3_15F410(void) {
     if (g_GameLogic._125 < 3) {
@@ -353,7 +357,7 @@ void fn_3_15DB44(void) {
     s32 i;
     s32 j;
     s32 team;
-    u32 frame;
+    s32 frame;
     UnkSprite3BD8* sprite;
 
     if (task->_18 < 0xFFFE) {
@@ -440,7 +444,7 @@ void fn_3_15DB44(void) {
                 sprite->_68 = 0;
             }
         }
-        for (i = 2; i < 43; i++) {
+        for (i = 2; i <= 42; i++) {
             lbl_80371C30[task->_14 + i]._00->_68 = 4;
         }
         if (flag) {
@@ -489,7 +493,7 @@ void fn_3_15DB44(void) {
                 lbl_80371C30[task->_14 + 54]._00->_68 = 0;
             }
         }
-        for (i = 2; i < 43; i++) {
+        for (i = 2; i <= 42; i++) {
             lbl_80371C30[task->_14 + i]._00->_68 = 1;
         }
         if (done) {
@@ -499,7 +503,7 @@ void fn_3_15DB44(void) {
     } else if (task->_1A == 5) {
         lbl_3_common_bss_32724._D2 = 1;
         if (task->_18 == 1) {
-            for (i = 7; i < 49; i++) {
+            for (i = 7; i <= 48; i++) {
                 lbl_80371C30[task->_14 + i]._00->_68 = 4;
             }
         }
@@ -538,7 +542,7 @@ void fn_3_15DB44(void) {
         lbl_3_common_bss_32724._D2 = 1;
         if (task->_18 == 1) {
             task->_1E = g_GameLogic.scoreBook_batter_pitcherStatsDisplayed;
-            for (i = 7; i < 49; i++) {
+            for (i = 7; i <= 48; i++) {
                 lbl_80371C30[task->_14 + i]._00->_68 = 1;
             }
             for (i = 0; i < 6; i++) {
@@ -558,7 +562,7 @@ void fn_3_15DB44(void) {
     } else if (task->_1A == 7) {
         lbl_3_common_bss_32724._D2 = 1;
         if (task->_18 == 1) {
-            for (i = 2; i < 43; i++) {
+            for (i = 2; i <= 42; i++) {
                 if (i != 12 && i != 18 && i != 24 && i != 30 && i != 36 && i != 42) {
                     lbl_80371C30[task->_14 + i]._00->_68 = 4;
                 }
@@ -572,7 +576,7 @@ void fn_3_15DB44(void) {
         lbl_3_common_bss_32724._D2 = 1;
         if (task->_18 == 1) {
             task->_20 = g_GameLogic.scoreBook_scrollIndex;
-            for (i = 2; i < 43; i++) {
+            for (i = 2; i <= 42; i++) {
                 lbl_80371C30[task->_14 + i]._00->_68 = 1;
             }
             fn_3_15D1D8(task);
@@ -596,7 +600,7 @@ void fn_3_15DB44(void) {
                 lbl_80371C30[task->_14 + 53]._00->_68 = 1;
             }
         }
-        if ((s32)frame <= lbl_3_data_27C4C[0] + 5) {
+        if (frame <= lbl_3_data_27C4C[0] + 5) {
             if (task->_1E == 0) {
                 lbl_80371C30[task->_14 + 49]._00->_68 = 1;
                 lbl_80371C30[task->_14 + 50]._00->_68 = 4;
@@ -606,19 +610,19 @@ void fn_3_15DB44(void) {
             }
         }
         for (i = 0; i < 5; i++) {
-            if ((s32)frame <= lbl_3_data_27C4C[i] + 5) {
-                lbl_80371C30[task->_14 + i + 2]._00->_68 = 4;
+            if (frame <= lbl_3_data_27C4C[i] + 5) {
+                fn_3BD8_set68(task, i + 2, 4);
             }
         }
         for (i = 0; i < 6; i++) {
-            if ((s32)frame <= lbl_3_data_27C4C[i] + 5) {
-                lbl_80371C30[task->_14 + i + 43]._00->_68 = 4;
+            if (frame <= lbl_3_data_27C4C[i] + 5) {
+                fn_3BD8_set68(task, i + 43, 4);
             }
         }
         for (i = 0; i < 6; i++) {
-            if ((s32)frame <= lbl_3_data_27C4C[i] + 5) {
+            if (frame <= lbl_3_data_27C4C[i] + 5) {
                 for (j = 0; j < 6; j++) {
-                    lbl_80371C30[task->_14 + i * 6 + j + 7]._00->_68 = 4;
+                    fn_3BD8_set68(task, i * 6 + j + 7, 4);
                 }
             }
         }
@@ -641,14 +645,12 @@ void fn_3_15DB44(void) {
     }
     if (task->_20 == 0) {
         sprite = lbl_80371C30[task->_14 + 52]._00;
-        frame = sprite->_5C >> 16;
-        if (frame >= 302 || frame < 202) {
+        if ((sprite->_5C >> 16) >= 302 || (sprite->_5C >> 16) < 202) {
             sprite->_5C = 0xCA0000;
         }
     } else if (task->_20 == 4) {
         sprite = lbl_80371C30[task->_14 + 52]._00;
-        frame = sprite->_5C >> 16;
-        if (frame >= 201 || frame < 101) {
+        if ((sprite->_5C >> 16) >= 201 || (sprite->_5C >> 16) < 101) {
             sprite->_5C = 0x650000;
         }
     } else {
