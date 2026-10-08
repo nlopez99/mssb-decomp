@@ -857,8 +857,8 @@ void fn_3_119F6C(void) {
 }
 
 // .text:0x00119EE0 size:0x8C mapped:0x80758F74
-// 82.09%: the target loads the model through `addi r0,table,0x34; lwzx` (table plus the
-// member offset, indexed by i * 0x90); every spelling tried folds it into `lwz 0x34(table + i * 0x90)`.
+// 82.09%: the target loads the model with `addi r0,table,0x34; lwzx r3,i*0x90,r0`; the spellings
+// tried give `lwz 0x34(table + i*0x90)` or add 0x34 to the index instead.
 void fn_3_119EE0(s32 i) {
     UnkAnimCtrl3310* ctrl = lbl_8036E548._0068->_34[i]._00->_18[0]->_14->_08;
 
@@ -868,8 +868,8 @@ void fn_3_119EE0(s32 i) {
 }
 
 // .text:0x00119E30 size:0xB0 mapped:0x80758EC4
-// 92.61%: the target loads the model through `addi r0,table,0x34; lwzx` (table plus the
-// member offset, indexed by i * 0x90); every spelling tried folds it into `lwz 0x34(table + i * 0x90)`.
+// 92.61%: the target loads the model with `addi r0,table,0x34; lwzx r3,i*0x90,r0`; the spellings
+// tried give `lwz 0x34(table + i*0x90)` or add 0x34 to the index instead.
 void fn_3_119E30(s32 i) {
     UnkAnimCtrl3310* ctrl;
 
@@ -1012,6 +1012,7 @@ f32 fn_3_119854(u8 index) {
 }
 
 // .text:0x001194FC size:0x358 mapped:0x80758590
+// 99.93%: as in fn_3_119934, the acos compare takes its operands the other way round.
 void fn_3_1194FC(void) {
     Vec dir;
     Vec fwd = { 0.0f, 0.0f, 1.0f };
@@ -1096,8 +1097,8 @@ void fn_3_1194FC(void) {
 }
 
 // .text:0x001194AC size:0x50 mapped:0x80758540
-// 68.00%: the target loads the model through `addi r0,table,0x34; lwzx` (table plus the
-// member offset, indexed by i * 0x90); every spelling tried folds it into `lwz 0x34(table + i * 0x90)`.
+// 68.00%: the target loads the model with `addi r0,table,0x34; lwzx r3,i*0x90,r0`; the spellings
+// tried give `lwz 0x34(table + i*0x90)` or add 0x34 to the index instead.
 void fn_3_1194AC(s32 i) {
     lbl_8036E548._0068->_34[i]._00->_18[0]->_14->_08->_0C->_20 = lbl_3_data_2265C[MG._1AFF[i]];
 }
@@ -1235,8 +1236,8 @@ void fn_3_1189C8(s32 i, s32 anim, s32 frame, s32 duration, u8 loop) {
 }
 
 // .text:0x0011897C size:0x4C mapped:0x80757A10
-// 65.74%: the target loads the model through `addi r0,table,0x34; lwzx` (table plus the
-// member offset, indexed by i * 0x90); every spelling tried folds it into `lwz 0x34(table + i * 0x90)`.
+// 65.74%: the target loads the model with `addi r0,table,0x34; lwzx r3,i*0x90,r0`; the spellings
+// tried give `lwz 0x34(table + i*0x90)` or add 0x34 to the index instead.
 void fn_3_11897C(s32 i) {
     lbl_8036E548._0068->_34[i]._00->_14->_08->_0C->_20 = lbl_3_data_22670[MG._0000[i - 0x82]._2C];
 }
@@ -1269,8 +1270,8 @@ void fn_3_11887C(void) {
 }
 
 // .text:0x0011881C size:0x60 mapped:0x807578B0
-// 69.96%: the target loads the model through `addi r0,table,0x34; lwzx` (table plus the
-// member offset, indexed by i * 0x90); every spelling tried folds it into `lwz 0x34(table + i * 0x90)`.
+// 69.96%: the target loads the model with `addi r0,table,0x34; lwzx r3,i*0x90,r0`; the spellings
+// tried give `lwz 0x34(table + i*0x90)` or add 0x34 to the index instead.
 void fn_3_11881C(s32 i) {
     u8 v;
     if (i - 0xE9 < 4) {
