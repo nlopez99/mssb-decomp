@@ -40,7 +40,7 @@ void fn_3_CED3C(void);
 void fn_3_CED40(struct StaC2Particle* p, void* texture);
 void fn_3_CEE5C(struct StaC2Particle* p, void* texture);
 BOOL fn_3_CEFA8(struct StaC2Emitter* emitter);
-void fn_3_CF278(void);
+void fn_3_CF278(struct StaC2Draw* draw, Vec* pos);
 void fn_3_CF72C(void);
 void fn_3_CF92C(void);
 void fn_3_CF930(struct StaC2Draw* draw);

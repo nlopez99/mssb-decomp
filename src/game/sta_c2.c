@@ -198,6 +198,9 @@ typedef struct StaC2Draw {
             /* 0xA0 */ StaC2Link* link;
         };
         struct {
+            /* 0xA0 */ struct StaC2Emitter* smoke;
+        };
+        struct {
             /* 0xA0 */ struct StaC2Draw* host;
             /* 0xA4 */ struct StaC2Draw* follow;
             /* 0xA8 */ struct StaC2Emitter* emitter;
@@ -2112,8 +2115,56 @@ void fn_3_CF72C(void) {
 }
 
 // .text:0x000CF278 size:0x4B4 mapped:0x8070E30C
-void fn_3_CF278(void) {
-    return;
+// 97.71%: i and j swap registers, and the target loads pos->y before storing p->pos.x.
+void fn_3_CF278(StaC2Draw* draw, Vec* pos) {
+    StaC2Emitter* emitter = draw->smoke;
+    StaC2Particle* p = emitter->particles;
+    u32 j = 0;
+    u32 i = 0;
+    f32 angle;
+    f32 c;
+
+    emitter->_10 = lbl_3_bss_ADD0[0];
+    emitter->_18 = 100;
+    emitter->_20 = (StaC2EmitterOwner*)draw;
+    for (; p != NULL; i++, p = p->next) {
+        if (i < 10) {
+            p->_38 = p->_3C = 0.1f;
+            angle = 0.017453292f * (rand() % 360);
+            p->vel.x = 0.01 * cosf_kludge(angle);
+            p->vel.z = 0.01 * sinf_kludge(angle);
+            p->vel.y = -0.01f;
+            p->pos.x = pos->x + (rand() % 200 - 100) / 100.0f;
+            p->pos.y = -pos->y;
+            p->pos.z = pos->z + (rand() % 200 - 100) / 100.0f;
+            p->delay = 0;
+            p->color[0] = p->color[1] = p->color[2] = 255;
+            p->color[3] = 0;
+            p->duration = 0;
+            p->life = 30;
+        } else {
+            p->_38 = p->_3C = 0.1f;
+            angle = 0.017453292f * (18.0f * j + rand() % 33 - 16.0f);
+            p->vel.x = 0.02 * cosf_kludge(angle);
+            p->vel.z = 0.02 * sinf_kludge(angle);
+            p->vel.y = -0.01f;
+            c = cosf_kludge(angle);
+            c = 3.0 * c + (rand() % 100 - 50) / 100.0f;
+            p->pos.x = c + lbl_3_data_18730[draw->_9C].pos.x;
+            p->pos.y = -lbl_3_data_18730[draw->_9C].pos.y;
+            c = sinf_kludge(angle);
+            c = 3.0 * c + (rand() % 100 - 50) / 100.0f;
+            p->pos.z = c + lbl_3_data_18730[draw->_9C].pos.z;
+            p->delay = 15;
+            p->color[0] = p->color[1] = p->color[2] = 255;
+            p->color[3] = 0;
+            p->duration = 1;
+            p->life = 45;
+            j++;
+        }
+        p->_4D = 9;
+        p->_4E = 0;
+    }
 }
 
 // .text:0x000CEFA8 size:0x2D0 mapped:0x8070E03C
