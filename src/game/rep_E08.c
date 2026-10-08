@@ -537,9 +537,8 @@ void fn_3_631AC(s32 i) {
 }
 
 // .text:0x00062E70 size:0x33C mapped:0x806A1F04
-// Waits on fn_3_61B64, whose empty stub is inlined here. With the stub removed this
-// scores 99.77%: the target loads g_Fielders[i]._20D before minigamePlayerSelectedOrder, and
-// the inlined fn_3_62CA8 swaps r3 and r4.
+// 99.77%: the target loads g_Fielders[i]._20D before minigamePlayerSelectedOrder, and the
+// inlined fn_3_62CA8 has r3 and r4 swapped; no declaration order of fn_3_62CA8 fixes both.
 void fn_3_62E70(void) {
     s32 i;
 
@@ -1366,18 +1365,17 @@ BOOL fn_3_60D80(s32 i) {
 }
 
 // .text:0x00060A98 size:0x2E8 mapped:0x8069FB2C
-// 96.72%: registers only. The target keeps i in r30 and actorAnim in r29 (swapped here),
-// and computes nx and nz straight into f1 and f2; no declaration order found reproduces it.
 void fn_3_60A98(s32 i, UnkE08Actor* actor) {
     UnkE08Anim* anim = &g_UnkAnimation_31EAC[i];
     UnkE08Fielder* fielder = &g_Fielders[i];
+    s32 player = i;
     s16 actorAnim = actor->_62;
-    f32 dist;
-    f32 nx;
-    f32 scale;
-    f32 nz;
     f32 dx;
     f32 dz;
+    f32 dist;
+    f32 nz;
+    f32 scale;
+    f32 nx;
 
     if (actor == NULL) {
         return;
@@ -1401,16 +1399,18 @@ void fn_3_60A98(s32 i, UnkE08Actor* actor) {
         nx *= lbl_3_data_476C[fielder->_1C9];
         nz *= lbl_3_data_476C[fielder->_1C9];
     }
-    if (fn_3_B7CDC(nx + fielder->_000.x, nz + fielder->_000.z)) {
+    nx += fielder->_000.x;
+    nz += fielder->_000.z;
+    if (fn_3_B7CDC(nx, nz)) {
         fn_3_60804(i, FALSE);
         if (g_d_GameSettings.minigamesEnabled) {
             if (i == 0) {
-                i = g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder];
+                player = g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder];
             } else {
-                i = g_Minigame.minigameControlStruct._28[i - 2];
+                player = g_Minigame.minigameControlStruct._28[i - 2];
             }
         }
-        fn_8001B5EC(i, 0);
+        fn_8001B5EC(player, 0);
         fielder->_000.x = fielder->_0D4;
         fielder->_000.z = fielder->_0D8;
         fielder->_1FB = 0;
