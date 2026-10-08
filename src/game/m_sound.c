@@ -1026,7 +1026,7 @@ void fn_3_8F1C8(void) {
 }
 
 // .text:0x0008DA80 size:0x1748 mapped:0x806CCB14
-// 99.20%: the inlined fn_3_8C2DC re-extends sel in every branch where the target keeps one
+// 99.23%: the inlined fn_3_8C2DC re-extends sel in every branch where the target keeps one
 // (u8)sel in r23, and the inlined fn_3_8B258 copies swap its queue pointer and head registers;
 // the target also tests !(song == 4 || song == 0) as a value (cntlzw)
 void fn_3_8DA80(void) {
@@ -1768,7 +1768,6 @@ BOOL fn_3_8C4F0(u32 steps, u8 target) {
 }
 
 // .text:0x0008C2DC size:0x214 mapped:0x806CB370
-// 98.80%: the setup block takes r0/r5 for the constant 1 and 0x4330 the other way round
 bool fn_3_8C2DC(u32 steps, s32 sel) {
     u32 vol = fn_800A8864();
     u8 target;
@@ -1790,8 +1789,8 @@ bool fn_3_8C2DC(u32 steps, s32 sel) {
         lbl_3_bss_1764 = cur;
     }
     if (!lbl_3_common_bss_34C58._2F) {
-        lbl_3_common_bss_34C58._2F = 1;
         lbl_3_bss_176C = (f32)target / (f32)steps;
+        lbl_3_common_bss_34C58._2F = 1;
         lbl_3_bss_1764 = cur;
     }
     lbl_3_bss_1764 += lbl_3_bss_176C;
