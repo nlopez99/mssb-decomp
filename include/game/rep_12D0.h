@@ -8,7 +8,7 @@ void fn_3_76174(void);
 void fn_3_76558(void);
 void fn_3_76A9C(void);
 void fn_3_76C78(void);
-void fn_3_76D08(s16 rosterID, s32 result, s16 fielder, s32 streak);
+void fn_3_76D08(s32 rosterID, s32 result, s16 fielder, s32 streak);
 void fn_3_77914(void);
 void fn_3_78574(s32 fielder);
 void fn_3_78730(void);

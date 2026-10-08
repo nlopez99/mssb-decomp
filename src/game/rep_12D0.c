@@ -4,6 +4,7 @@
 #include "static/UnknownHomes_Static.h"
 #include "game/rep_18E8.h"
 #include "game/rep_3DA8.h"
+#include "game/rep_1838.h"
 
 extern struct {
     /* 0x00 */ u8 _00[0x12];
@@ -163,6 +164,8 @@ extern int fn_3_6C938(int, int);
 extern int random_fn_3_9EE24(int max);
 extern int fn_3_6D564(int team, int rosterID, int arg);
 extern void fn_3_9C794(void);
+
+extern s8 lbl_3_common_bss_32888[2][100];
 
 // rep_DB8's .data: MVP point weights
 extern u8 lbl_3_data_60F8[12];
@@ -1903,6 +1906,318 @@ positions:
     if (!g_d_GameSettings.exhibitionMatchInd) {
         fn_3_16230C(result, streak);
     }
+}
+
+// .text:0x00076D08 size:0xC0C mapped:0x806B5D9C
+void fn_3_76D08(s32 rosterID, s32 result, s16 fielder, s32 streak) {
+    int atBat = 0;
+    int pitcher = g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.awayTeamBattingInd_battingTeam][0][0];
+    Unk12D0PlayerStats* playerStats = &lbl_803537E4[g_GameLogic.teamBatting][rosterID];
+    Unk12D0PitcherStats* pitcherStats = &lbl_803535C8[g_GameLogic.teamFielding][pitcher];
+    int idx;
+    int i;
+    int runs;
+    s16 angle;
+
+    if (playerStats->_03 < 0xFE) {
+        playerStats->_03++;
+    } else {
+        playerStats->_03 = 0xFF;
+    }
+    idx = fn_3_7AEA8();
+    if (idx >= 100) {
+        for (i = 0; i < 99; i++) {
+            lbl_3_common_bss_32888[g_GameLogic.teamBatting][i] = lbl_3_common_bss_32888[g_GameLogic.teamBatting][i + 1];
+            lbl_803532A8[g_GameLogic.teamBatting][i]._0 = lbl_803532A8[g_GameLogic.teamBatting][i + 1]._0;
+            lbl_803532A8[g_GameLogic.teamBatting][i]._0b = lbl_803532A8[g_GameLogic.teamBatting][i + 1]._0b;
+            lbl_803532A8[g_GameLogic.teamBatting][i]._2 = lbl_803532A8[g_GameLogic.teamBatting][i + 1]._2;
+            lbl_803532A8[g_GameLogic.teamBatting][i]._3 = lbl_803532A8[g_GameLogic.teamBatting][i + 1]._3;
+            lbl_803532A8[g_GameLogic.teamBatting][i]._1 = lbl_803532A8[g_GameLogic.teamBatting][i + 1]._1;
+            lbl_803532A8[g_GameLogic.teamBatting][i]._1b = lbl_803532A8[g_GameLogic.teamBatting][i + 1]._1b;
+        }
+        idx = 99;
+    }
+    lbl_803532A8[g_GameLogic.teamBatting][idx]._0 = g_Scores._00;
+    lbl_803532A8[g_GameLogic.teamBatting][idx]._0b = g_GameLogic.currentBatterPerTeam[g_GameLogic.homeTeamBattingInd_fieldingTeam];
+    lbl_803532A8[g_GameLogic.teamBatting][idx]._2 = rosterID;
+    lbl_803532A8[g_GameLogic.teamBatting][idx]._3 = result;
+    lbl_3_common_bss_32888[g_GameLogic.teamBatting][idx] = lbl_3_common_bss_32A94._0;
+    lbl_803532A8[g_GameLogic.teamBatting][idx]._1 = fielder;
+    lbl_803532A8[g_GameLogic.teamBatting][idx]._1b = streak;
+    if (result == 10) {
+        angle = fn_3_9FB8C(g_Ball.landingSpotLocation.x, g_Ball.landingSpotLocation.z);
+        if (angle < 0x380) {
+            lbl_803532A8[g_GameLogic.teamBatting][idx]._1 = 8;
+        } else if (angle < 0x480) {
+            lbl_803532A8[g_GameLogic.teamBatting][idx]._1 = 7;
+        } else {
+            lbl_803532A8[g_GameLogic.teamBatting][idx]._1 = 6;
+        }
+    }
+    switch (result) {
+    case 1:
+        if (playerStats->_0D < 0xFE) {
+            playerStats->_0D++;
+        } else {
+            playerStats->_0D = 0xFF;
+        }
+        atBat = 1;
+        break;
+    case 2:
+        if (playerStats->_0E < 0xFE) {
+            playerStats->_0E++;
+        } else {
+            playerStats->_0E = 0xFF;
+        }
+        break;
+    case 3:
+        if (playerStats->_0F < 0xFE) {
+            playerStats->_0F++;
+        } else {
+            playerStats->_0F = 0xFF;
+        }
+        break;
+    case 7:
+        if (playerStats->_06 < 0xFE) {
+            playerStats->_06++;
+        } else {
+            playerStats->_06 = 0xFF;
+        }
+        if (playerStats->_05 < 0xFE) {
+            playerStats->_05++;
+        } else {
+            playerStats->_05 = 0xFF;
+        }
+        atBat = 1;
+        break;
+    case 8:
+        if (playerStats->_07 < 0xFE) {
+            playerStats->_07++;
+        } else {
+            playerStats->_07 = 0xFF;
+        }
+        if (playerStats->_05 < 0xFE) {
+            playerStats->_05++;
+        } else {
+            playerStats->_05 = 0xFF;
+        }
+        atBat = 1;
+        break;
+    case 9:
+        if (playerStats->_08 < 0xFE) {
+            playerStats->_08++;
+        } else {
+            playerStats->_08 = 0xFF;
+        }
+        if (playerStats->_05 < 0xFE) {
+            playerStats->_05++;
+        } else {
+            playerStats->_05 = 0xFF;
+        }
+        atBat = 1;
+        break;
+    case 10:
+        if (playerStats->_09 < 0xFE) {
+            playerStats->_09++;
+        } else {
+            playerStats->_09 = 0xFF;
+        }
+        if (playerStats->_05 < 0xFE) {
+            playerStats->_05++;
+        } else {
+            playerStats->_05 = 0xFF;
+        }
+        atBat = 1;
+        fn_3_76C78();
+        break;
+    case 13:
+        if (playerStats->_0A < 0xFE) {
+            playerStats->_0A++;
+        } else {
+            playerStats->_0A = 0xFF;
+        }
+        break;
+    case 14:
+        if (playerStats->_0B < 0xFE) {
+            playerStats->_0B++;
+        } else {
+            playerStats->_0B = 0xFF;
+        }
+        break;
+    case 15:
+        if (playerStats->_0C < 0xFE) {
+            playerStats->_0C++;
+        } else {
+            playerStats->_0C = 0xFF;
+        }
+        atBat = 1;
+        break;
+    default:
+        atBat = 1;
+        break;
+    }
+    if (playerStats->_04 < 0xFF - atBat) {
+        playerStats->_04 += atBat;
+    } else {
+        playerStats->_04 = 0xFF;
+    }
+    if (playerStats->_10 < 0xFF - streak) {
+        playerStats->_10 += streak;
+    } else {
+        playerStats->_10 = 0xFF;
+    }
+    if (g_RunningLogic._15 != 0) {
+        if (playerStats->_13 < 0xFF - atBat) {
+            playerStats->_13 += atBat;
+        } else {
+            playerStats->_13 = 0xFF;
+        }
+        if (result >= 7 && result <= 10) {
+            if (playerStats->_14 < 0xFE) {
+                playerStats->_14++;
+            } else {
+                playerStats->_14 = 0xFF;
+            }
+        }
+        if (result == 10) {
+            if (playerStats->_18 < 0xFE) {
+                playerStats->_18++;
+            } else {
+                playerStats->_18 = 0xFF;
+            }
+        }
+        if (streak != 0) {
+            if (playerStats->_17 < 0xFF - streak) {
+                playerStats->_17 += streak;
+            } else {
+                playerStats->_17 = 0xFF;
+            }
+        }
+    }
+    runs = g_Scores._04[g_GameLogic.homeTeamBattingInd_fieldingTeam][0] - g_Scores._A0;
+    for (i = 3; i >= 0; i--) {
+        if (runs <= 0) {
+            break;
+        }
+        if (g_Runners[i].runnerOnFieldOrOutOrScored == 3) {
+            if (lbl_803537E4[g_GameLogic.teamBatting][g_Runners[i].rosterID]._11 < 0xFE) {
+                lbl_803537E4[g_GameLogic.teamBatting][g_Runners[i].rosterID]._11++;
+            } else {
+                lbl_803537E4[g_GameLogic.teamBatting][g_Runners[i].rosterID]._11 = 0xFF;
+            }
+            runs--;
+            if (g_d_GameSettings.exhibitionMatchInd == 0 && g_GameLogic.teamBatting == lbl_3_common_bss_37400._40) {
+                fn_3_161588(11, g_Runners[i].rosterID);
+            }
+        }
+    }
+    g_Scores._B1[g_GameLogic.awayTeamBattingInd_battingTeam] = pitcher;
+    if (pitcherStats->_00 < 0xFFFE) {
+        pitcherStats->_00++;
+    } else {
+        pitcherStats->_00 = 0xFFFF;
+    }
+    if (pitcherStats->_1A < 0xFF - g_Strikes.outs - g_Strikes.storedOuts) {
+        pitcherStats->_1A += g_Strikes.outs - g_Strikes.storedOuts;
+    } else {
+        pitcherStats->_1A = 0xFF;
+    }
+    if (g_Scores._04[g_GameLogic.awayTeamBattingInd_battingTeam][0] > g_Scores._04[g_GameLogic.homeTeamBattingInd_fieldingTeam][0]) {
+        lbl_3_common_bss_32A38[g_GameLogic.awayTeamBattingInd_battingTeam][pitcher]._0 += g_Strikes.outs - g_Strikes.storedOuts;
+    }
+    if (result >= 7 && result <= 10) {
+        if (pitcherStats->_0A < 0xFFFE) {
+            pitcherStats->_0A++;
+        } else {
+            pitcherStats->_0A = 0xFFFF;
+        }
+    }
+    if (result == 10) {
+        if (pitcherStats->_0C < 0xFFFE) {
+            pitcherStats->_0C++;
+        } else {
+            pitcherStats->_0C = 0xFFFF;
+        }
+    }
+    if (result == 1) {
+        if (pitcherStats->_1C < 0xFE) {
+            pitcherStats->_1C++;
+        } else {
+            pitcherStats->_1C = 0xFF;
+        }
+    }
+    if (result == 2) {
+        if (g_Strikes._1E >= 0) {
+            if (lbl_803535C8[g_GameLogic.teamFielding][g_Strikes._1E]._06 < 0xFFFE) {
+                lbl_803535C8[g_GameLogic.teamFielding][g_Strikes._1E]._06++;
+            } else {
+                lbl_803535C8[g_GameLogic.teamFielding][g_Strikes._1E]._06 = 0xFFFF;
+            }
+        } else {
+            if (pitcherStats->_06 < 0xFFFE) {
+                pitcherStats->_06++;
+            } else {
+                pitcherStats->_06 = 0xFFFF;
+            }
+        }
+    }
+    if (result == 3) {
+        if (pitcherStats->_08 < 0xFFFE) {
+            pitcherStats->_08++;
+        } else {
+            pitcherStats->_08 = 0xFFFF;
+        }
+    }
+    if (lbl_3_common_bss_32A94._63[g_GameLogic.awayTeamBattingInd_battingTeam] != 0) {
+        if (lbl_3_common_bss_32A94._4C[g_GameLogic.awayTeamBattingInd_battingTeam] > 1) {
+            lbl_3_common_bss_32A94._63[g_GameLogic.awayTeamBattingInd_battingTeam] = 0;
+        } else {
+            if (lbl_3_common_bss_32A94._63[g_GameLogic.awayTeamBattingInd_battingTeam] == 1 &&
+                (result == 2 || result == 3 || result == 11 || result == 12)) {
+                lbl_3_common_bss_32A94._63[g_GameLogic.awayTeamBattingInd_battingTeam] = 2;
+            }
+            if (lbl_3_common_bss_32A94._63[g_GameLogic.awayTeamBattingInd_battingTeam] != 0 &&
+                (result == 7 || result == 8 || result == 9 || result == 10 ||
+                 g_Scores._04[g_GameLogic.homeTeamBattingInd_fieldingTeam][0] > 0 ||
+                 lbl_80353A90._BE[g_GameLogic.teamFielding][1][0] >= 0)) {
+                lbl_3_common_bss_32A94._63[g_GameLogic.awayTeamBattingInd_battingTeam] = 0;
+            }
+        }
+    }
+    if (g_FieldingLogic._113 == 9) {
+        if (g_Scores._A8[g_GameLogic.awayTeamBattingInd_battingTeam] < 0xFE) {
+            g_Scores._A8[g_GameLogic.awayTeamBattingInd_battingTeam]++;
+        } else {
+            g_Scores._A8[g_GameLogic.awayTeamBattingInd_battingTeam] = 0xFF;
+        }
+        if (lbl_803537E4[g_GameLogic.teamFielding][g_Fielders[g_FieldingLogic._0EA]._178]._15 < 0xFE) {
+            lbl_803537E4[g_GameLogic.teamFielding][g_Fielders[g_FieldingLogic._0EA]._178]._15++;
+        } else {
+            lbl_803537E4[g_GameLogic.teamFielding][g_Fielders[g_FieldingLogic._0EA]._178]._15 = 0xFF;
+        }
+    }
+    if (g_Ball.fielderWithBallIndexStored >= 0 && g_Ball.fielderWithBallIndexStored <= 8) {
+        if (lbl_803537E4[g_GameLogic.teamFielding][g_Fielders[g_Ball.fielderWithBallIndexStored]._178]._16 < 0xFE) {
+            lbl_803537E4[g_GameLogic.teamFielding][g_Fielders[g_Ball.fielderWithBallIndexStored]._178]._16++;
+        } else {
+            lbl_803537E4[g_GameLogic.teamFielding][g_Fielders[g_Ball.fielderWithBallIndexStored]._178]._16 = 0xFF;
+        }
+    }
+    if (g_FieldingLogic._133 == 2 && g_Ball.fielderWithBallIndexStored2 >= 0) {
+        if (lbl_803537E4[g_GameLogic.teamFielding][g_Fielders[g_Ball.fielderWithBallIndexStored2]._178]._16 < 0xFE) {
+            lbl_803537E4[g_GameLogic.teamFielding][g_Fielders[g_Ball.fielderWithBallIndexStored2]._178]._16++;
+        } else {
+            lbl_803537E4[g_GameLogic.teamFielding][g_Fielders[g_Ball.fielderWithBallIndexStored2]._178]._16 = 0xFF;
+        }
+    }
+    lbl_80353A90._08[g_GameLogic.teamBatting][g_Scores._00] =
+        g_Scores._04[g_GameLogic.homeTeamBattingInd_fieldingTeam][g_Scores._00];
+    lbl_80353A90._54[g_GameLogic.teamBatting][g_Scores._00] =
+        g_Scores._50[g_GameLogic.homeTeamBattingInd_fieldingTeam][g_Scores._00];
+    lbl_80353A90._08[g_GameLogic.teamBatting][0] = g_Scores._04[g_GameLogic.homeTeamBattingInd_fieldingTeam][0];
+    lbl_80353A90._54[g_GameLogic.teamBatting][0] = g_Scores._50[g_GameLogic.homeTeamBattingInd_fieldingTeam][0];
+    lbl_80353A90._F0[g_GameLogic.teamBatting] = g_Scores._A8[g_GameLogic.homeTeamBattingInd_fieldingTeam];
+    lbl_80353A90._F0[g_GameLogic.teamFielding] = g_Scores._A8[g_GameLogic.awayTeamBattingInd_battingTeam];
 }
 
 // .text:0x00076C78 size:0x90 mapped:0x806B5D0C
