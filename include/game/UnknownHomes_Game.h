@@ -2008,16 +2008,22 @@ typedef struct _MiniGameStruct {
     /*0x1CAD*/ u8 _1CAD[4];
     /*0x1CB1*/ u8 _1CB1[7];
     /*0x1CB8*/ VecXYZ _1CB8[4];
-    /*0x1CE8*/ VecXYZ _1CE8;
-    /*0x1CF4*/ VecXYZ _1CF4;
-    /*0x1D00*/ u8 _1D00[4];
-    /*0x1D04*/ VecXYZ _1D04;
-    /*0x1D10*/ VecXYZ _1D10;
-    /*0x1D1C*/ VecXYZ _1D1C;
-    /*0x1D28*/ VecXYZ _1D28;
-    /*0x1D34*/ VecXYZ _1D34;
-    /*0x1D40*/ f32 _1D40;
-    /*0x1D44*/ f32 _1D44;
+    union {
+        struct {
+            /*0x1CE8*/ VecXYZ _1CE8;
+            /*0x1CF4*/ VecXYZ _1CF4;
+            /*0x1D00*/ u8 _1D00[4];
+            /*0x1D04*/ VecXYZ _1D04;
+            /*0x1D10*/ VecXYZ _1D10;
+            /*0x1D1C*/ VecXYZ _1D1C;
+            /*0x1D28*/ VecXYZ _1D28;
+            /*0x1D34*/ VecXYZ _1D34;
+            /*0x1D40*/ f32 _1D40;
+            /*0x1D44*/ f32 _1D44;
+        };
+        // Star Dash (rep_3520) keeps each spoke's start and end points here
+        /*0x1CE8*/ VecXYZ starDashSpokes[4][2];
+    };
     /*0x1D48*/ f32 _1D48;
     /*0x1D4C*/ f32* starDashRelated_0_5Or1_5;
     /*0x1D50*/ s16 _1D50;

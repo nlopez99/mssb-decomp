@@ -2042,12 +2042,12 @@ void fn_3_135C18(void) {
 }
 
 // .text:0x00135A64 size:0x1B4 mapped:0x80774AF8
-// 96.5%: the spoke loop builds its g_Minigame base anew instead of copying r27, and
-// the saved registers follow from that.
+// 98.1%: registers only; the base of g_Minigame and its walkers take r25 to r27 in
+// another order.
 void fn_3_135A64(void) {
     int i;
-    int j;
     Unk3520Fielder* fielder;
+    int j;
     int angle;
     f32 dist;
 
@@ -2071,7 +2071,7 @@ void fn_3_135A64(void) {
                 if (fn_3_9FCF8(angle, g_Minigame._1D64[j]) > 0x200) {
                     continue;
                 }
-                dist = fn_3_9EFD0(&MG.spokes[j].start, &MG.spokes[j].end, (VecXYZ*)&fielder->pos, NULL);
+                dist = fn_3_9EFD0(&g_Minigame.starDashSpokes[j][0], &g_Minigame.starDashSpokes[j][1], (VecXYZ*)&fielder->pos, NULL);
                 if (dist < lbl_3_data_21A54[2] + lbl_3_data_47BC[fielder->_1C9] && dist >= 0.0f) {
                     fn_3_1360BC(i);
                     g_Minigame.starDashStunType[i] = 3;
