@@ -181,7 +181,7 @@ void fn_3_4C9C8(void);
 void fn_3_4CFB0(void);
 void fn_3_4D20C(s32 fielder);
 BOOL fn_3_4DB84(s32 fielder);
-void fn_3_4DC14(void);
+void fn_3_4DC14(s32 fielder);
 void fn_3_4E1BC(void);
 void fn_3_4E638(void);
 void fn_3_4EBC4(void);

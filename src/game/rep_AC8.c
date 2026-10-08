@@ -283,6 +283,14 @@ extern u8 lbl_3_data_84B8[30][2];
 extern u8 fn_800639BC(s8 fielder, VecXYZ* pos, VecXYZ* prev);
 extern void fn_80063958(s8 fielder);
 extern void fn_3_13A048(s32 to, s32 from);
+extern int RandomInt_Game_Range(int min, int max);
+extern s16 fn_3_9FD28(s16 ang);
+extern int fn_3_6D658(int team, int charID, int otherCharID);
+extern f32 lbl_3_data_4618[8];
+extern s16 lbl_3_data_4638[4];
+extern f32 lbl_3_data_48C4;
+extern s16 lbl_3_data_48C8[2][12];
+extern f32 lbl_3_data_5CDC[11];
 extern struct {
     /* 0x000 */ u8 _000[0x1D5];
     /* 0x1D5 */ u8 _1D5;
@@ -2401,8 +2409,153 @@ void fn_3_4E1BC(void) {
 }
 
 // .text:0x0004DC14 size:0x5A8 mapped:0x8068CCA8
-void fn_3_4DC14(void) {
-    return;
+// 98.65%: registers only; the callee-saved registers of slow, mode, travel and the angles
+// differ (for example travel in r30 against r25), and declaration orders tried do not fix it.
+void fn_3_4DC14(s32 fielder) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    s32 target = -1;
+    s32 pass = 0;
+    s32 i;
+    s32 travel;
+    BOOL slow;
+    s32 mode;
+    f32 speed;
+    f32 lift;
+    s32 hAngle;
+    s32 vAngle;
+    s32 spread;
+    s16 angle;
+    f32 cz;
+    f32 v;
+    f32 cx;
+    f32 h;
+
+    if (g_d_GameSettings.GameModeSelected != GAME_TYPE_TOY_FIELD) {
+        h = lbl_3_data_4618[0];
+        if (g_Ball.ballZoneAwayFromHome >= 3) {
+            h = lbl_3_data_4618[1];
+        }
+        for (i = 0; i < 9; i++) {
+            if (i != fielder && fn_3_6D658(g_GameLogic.teamFielding, f->_17A, g_Fielders[i]._17A) >= lbl_3_data_4638[2]) {
+                if (f->_084[i] < h && f->_084[i] < 999.9f) {
+                    target = i;
+                    h = f->_084[i];
+                }
+            }
+        }
+        if (target >= 0) {
+            pass = f->_259 ? 2 : 1;
+            playSoundEffect(0x1AB);
+        }
+    }
+    slow = FALSE;
+    speed = g_Ball.ballVelocity;
+    mode = 0;
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+        mode = 1;
+    }
+    if (speed < lbl_3_data_48C4) {
+        slow = TRUE;
+    }
+    if (speed > 0.5f) {
+        speed = 0.5f;
+    }
+    if (g_Ball.hardHitIndicator) {
+        lift = speed * lbl_3_data_5CDC[pass + 8];
+    } else {
+        lift = speed * lbl_3_data_5CDC[pass + 5];
+    }
+    travel = fn_3_9FD28(g_Ball.ballTravelAngle + 0x800);
+    if (pass != 0) {
+        angle = fn_3_9FB8C(g_Fielders[target]._000 - f->_000, g_Fielders[target]._008 - f->_008);
+        hAngle = angle + RandomInt_Game(0x200);
+        hAngle -= 0x100;
+        if (pass == 1) {
+            vAngle = RandomInt_Game(0x100) + 0x100;
+        } else {
+            vAngle = RandomInt_Game(0x100) + 0x200;
+        }
+    } else if (f->_254 == 0) {
+        vAngle = RandomInt_Game_Range(lbl_3_data_48C8[mode][0], lbl_3_data_48C8[mode][1]);
+        hAngle = fn_3_9FD28(RandomInt_Game_Range(lbl_3_data_48C8[mode][2], lbl_3_data_48C8[mode][3]) + travel);
+    } else if (!slow) {
+        vAngle = RandomInt_Game_Range(lbl_3_data_48C8[mode][4], lbl_3_data_48C8[mode][5]);
+        spread = RandomInt_Game_Range(lbl_3_data_48C8[mode][6], lbl_3_data_48C8[mode][7]);
+        if (f->_254 == 1) {
+            spread = -spread;
+        }
+        hAngle = fn_3_9FD28(spread + travel);
+    } else {
+        vAngle = RandomInt_Game_Range(lbl_3_data_48C8[mode][8], lbl_3_data_48C8[mode][9]);
+        spread = RandomInt_Game_Range(lbl_3_data_48C8[mode][10], lbl_3_data_48C8[mode][11]);
+        if (f->_254 == 1) {
+            spread = -spread;
+        }
+        hAngle = fn_3_9FD28(spread + travel);
+    }
+    getComponentsFromSAng(vAngle, &h, &v);
+    v *= lift;
+    getComponentsFromSAng(hAngle, &cx, &cz);
+    h *= speed;
+    cx *= h;
+    cz *= h;
+    g_Ball.physicsSubstruct.velocity.x = cx;
+    g_Ball.physicsSubstruct.velocity.y = v;
+    g_Ball.physicsSubstruct.velocity.z = cz;
+    g_Ball.physicsSubstruct.acceleration.x = 0.0f;
+    g_Ball.physicsSubstruct.acceleration.y = 0.0f;
+    g_Ball.physicsSubstruct.acceleration.z = 0.0f;
+    if (f->_258 == 4) {
+        if (f->_20F == 0) {
+            f->_1BC = radToShortAngle(f->_048);
+            f->_20F = 1;
+            f->_1B8 = 0;
+            f->_1BA = lbl_3_data_49DC[29];
+            f->_252 = 0;
+            f->_203 = 0;
+            f->_205 = 0;
+            f->_207 = 0;
+            f->_1EE = 0;
+        }
+    } else {
+        f->_1EE = g_Ball.ballEnergy * lbl_3_data_5CDC[4];
+    }
+    f->_252 = 0;
+    f->_256 = 0;
+    g_FieldingLogic._13B = 1;
+    g_Ball.ballState = 3;
+    g_Ball.fielderAboutToGetBall_hasBall = -1;
+    g_Ball.inAirOrBefore2ndBounceOrLowBallEnergy = 0;
+    g_Ball.warioWaluGarlicIsActive = 0;
+    g_Ball.ballIsRollingIndicator = 0;
+    if (g_Ball.numFieldersWhoHandledBallDuringPlay < 0xFE) {
+        g_Ball.numFieldersWhoHandledBallDuringPlay++;
+    } else {
+        g_Ball.numFieldersWhoHandledBallDuringPlay = 0xFF;
+    }
+    if (g_Ball.fielderWithBallIndexStored < 0) {
+        g_Ball.fielderWithBallIndexStored = fielder;
+    }
+    if (g_Ball.numFieldersWhoHandledBallDuringPlay == 1) {
+        if (fn_3_B7E10(g_Ball.AtBat_Contact_BallPos.x, g_Ball.AtBat_Contact_BallPos.z)) {
+            g_Ball.bobbleLocation_1fair_2foul = 2;
+            if (g_Ball.ballInitialHitDoneInd == 0 && g_Ball.framesOnGroundUntilPickedUp != 0) {
+                fn_3_A0F0();
+            }
+        } else {
+            g_Ball.bobbleLocation_1fair_2foul = 1;
+            if (g_Ball.ballInitialHitDoneInd == 0) {
+                g_Ball.ballInitialHitDoneInd = 1;
+            }
+        }
+    }
+    if (pass != 0) {
+        fn_3_90220(f->_17A, 0);
+    } else if (f->_258 != 4) {
+        fn_3_90220(f->_17A, 10);
+    }
+    playSoundEffect(0x16F);
+    g_Ball.currentStarSwing = 0;
 }
 
 // .text:0x0004DB84 size:0x90 mapped:0x8068CC18
