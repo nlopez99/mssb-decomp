@@ -8,6 +8,7 @@
 #include "game/rep_13B8.h"
 #include "game/rep_1838.h"
 #include "game/rep_1CB8.h"
+#include "game/rep_3AE8.h"
 
 extern struct {
     /* 0x00 */ s16 _00;
@@ -58,6 +59,7 @@ extern f32 lbl_3_data_4604;
 extern f32 lbl_3_data_47BC[5];
 extern f32 lbl_3_data_4930[43];
 extern f32 lbl_3_data_5CDC[11];
+extern f32 lbl_3_data_21438;
 extern u8 lbl_3_data_4608;
 
 // From m_sound.h, which declares fn_3_8FF5C as a void(void) placeholder.
@@ -1293,8 +1295,162 @@ void fn_3_B440(void) {
 }
 
 // .text:0x0000A970 size:0xAD0 mapped:0x80649A04
-void fn_3_A970(void) {
-    return;
+// Needs fn_3_6C38, still a stub that is inlined away here. With a real fn_3_6C38 body it
+// scores 99.67%: &velocity.x and &velocity.z swap r28/r27, and the star swing r5/r6.
+void fn_3_A970(int mode) {
+    f32 speed;
+    f32 angle;
+    BOOL ended;
+
+    if (mode != 1) {
+        if (g_Ball.framesSinceHit < 0x7FFE) {
+            g_Ball.framesSinceHit++;
+        } else {
+            g_Ball.framesSinceHit = 0x7FFF;
+        }
+        if (g_Ball.AtBat_ContactResult != 0) {
+            if (g_Ball.framesSinceBallHitGroundOrWasCaught == -1) {
+                g_Ball.framesSinceBallHitGroundOrWasCaught = 1;
+            } else if (g_Ball.framesSinceBallHitGroundOrWasCaught < 0x7FFE) {
+                g_Ball.framesSinceBallHitGroundOrWasCaught++;
+            } else {
+                g_Ball.framesSinceBallHitGroundOrWasCaught = 0x7FFF;
+            }
+        }
+        if (g_Ball.framesSinceLastBounce >= 0) {
+            if (g_Ball.framesSinceLastBounce < 0x7FFE) {
+                g_Ball.framesSinceLastBounce++;
+            } else {
+                g_Ball.framesSinceLastBounce = 0x7FFF;
+            }
+        }
+        if (g_Ball.ballBounceState != 0) {
+            g_Ball.ballBounceState--;
+        }
+        if (g_Ball.ballState == 2) {
+            if (g_Ball.framesSinceThrowStarted < 0x7FFE) {
+                g_Ball.framesSinceThrowStarted++;
+            } else {
+                g_Ball.framesSinceThrowStarted = 0x7FFF;
+            }
+            if (g_Ball.framesSinceThrowStarted == 2) {
+                fn_3_B440();
+            } else {
+                g_Ball.framesUntilThrowReachesDest--;
+                if (g_Ball.framesUntilThrowReachesDest < -1) {
+                    g_Ball.framesUntilThrowReachesDest = -1;
+                }
+            }
+        }
+    }
+    fn_3_A83C();
+    if (g_Ball.pauseBallMovementWhenInPlant) {
+        fn_3_65C8();
+        return;
+    }
+    if (g_Ball.catchAnimationTotalFrames) {
+        return;
+    }
+    if (g_Ball.warioWaluGarlicIsActive) {
+        g_Ball.AtBat_Contact_BallPos.x = g_Ball.warioStarHitCoords[0].x;
+        g_Ball.AtBat_Contact_BallPos.y = g_Ball.warioStarHitCoords[0].y;
+        g_Ball.AtBat_Contact_BallPos.z = g_Ball.warioStarHitCoords[0].z;
+    }
+    if (g_Minigame.GameMode_MiniGame == 1 && g_Ball.bODQualifyingHitInd) {
+        g_Ball.physicsSubstruct.velocity.y -= lbl_3_data_21438;
+    } else {
+        g_Ball.physicsSubstruct.velocity.y -= g_Ball.physicsSubstruct.gravity;
+        fn_3_DBD0();
+    }
+    g_Ball.physicsSubstruct.velocity.x += g_Ball.physicsSubstruct.acceleration.x;
+    g_Ball.physicsSubstruct.velocity.y += g_Ball.physicsSubstruct.acceleration.y;
+    g_Ball.physicsSubstruct.velocity.z += g_Ball.physicsSubstruct.acceleration.z;
+    if ((g_Ball.currentStarSwing == 5 || g_Ball.currentStarSwing == 6) &&
+        g_Ball.framesSinceHit > g_Ball.matchFramesAndBallAngle.bananaHitStartFrame &&
+        g_Ball.framesSinceHit < g_Ball.matchFramesAndBallAngle.bananaHitEndFrame) {
+        speed = VEC_LENGTH_XZ(&g_Ball.physicsSubstruct.velocity);
+        angle = game_atan2(g_Ball.physicsSubstruct.velocity.x, g_Ball.physicsSubstruct.velocity.z);
+        if (g_Ball.directionOfBananaHit) {
+            angle += g_hitFloats.DKStarAngleDelta;
+        } else {
+            angle -= g_hitFloats.DKStarAngleDelta;
+        }
+        getComponentsFromRad(angle, &g_Ball.physicsSubstruct.velocity.x, &g_Ball.physicsSubstruct.velocity.z);
+        g_Ball.physicsSubstruct.velocity.x *= speed;
+        g_Ball.physicsSubstruct.velocity.z *= speed;
+    }
+    g_Ball.AtBat_Contact_BallPos.x += g_Ball.physicsSubstruct.velocity.x;
+    g_Ball.AtBat_Contact_BallPos.y += g_Ball.physicsSubstruct.velocity.y;
+    g_Ball.AtBat_Contact_BallPos.z += g_Ball.physicsSubstruct.velocity.z;
+    if (g_Ball.currentStarSwing == 3 || g_Ball.currentStarSwing == 4) {
+        fn_3_A198();
+    }
+    fn_3_6C38();
+    if ((g_d_GameSettings.StadiumID == STADIUM_ID_MARIO_STADIUM || g_d_GameSettings.StadiumID == STADIUM_ID_WARIO_PALACE ||
+         g_d_GameSettings.StadiumID == STADIUM_ID_YOHSI_PARK || g_d_GameSettings.StadiumID == STADIUM_ID_PEACH_GARDEN ||
+         g_d_GameSettings.StadiumID == STADIUM_ID_DK_JUNGLE) &&
+        g_Ball.AtBat_Contact_BallPos.y < g_Ball.groundYForBounces) {
+        g_Ball.AtBat_Contact_BallPos.y = g_Ball.groundYForBounces;
+        if (g_Ball.physicsSubstruct.velocity.y < 0.0f) {
+            g_Ball.physicsSubstruct.velocity.y *= -1.0f;
+        }
+    }
+    g_Ball.ballDistanceFromHome = VEC_LENGTH_XZ(&g_Ball.AtBat_Contact_BallPos);
+    if (g_Minigame.GameMode_MiniGame == 1) {
+        return;
+    }
+    estimateAndSetFutureCoords(1);
+    if (g_Ball.currentStarSwing == 0) {
+        return;
+    }
+    ended = FALSE;
+    if (g_Ball.someCollisionInd) {
+        ended = TRUE;
+    } else if (g_Ball.numFieldersWhoHandledBallDuringPlay != 0) {
+        ended = TRUE;
+    }
+    if (g_Ball.currentStarSwing == 11 || g_Ball.currentStarSwing == 12) {
+        if (ended || g_Ball.AtBat_ContactResult != 0) {
+            g_Ball.currentStarSwing = 0;
+            g_Batter.invisibleBallForPeachStarHit = 0;
+            if (fn_3_15C014()) {
+                fn_3_15C000();
+            }
+        } else if (g_Ball.currentStarSwing == 12) {
+            if (g_Ball.framesSinceHit >= fn_3_15C014()) {
+                g_Ball.currentStarSwing = 0;
+                g_Batter.invisibleBallForPeachStarHit = 0;
+            } else if (g_Ball.framesSinceHit >= ((s16*)&g_hitShorts)[g_Ball.currentStarSwing - 2]) {
+                g_Batter.invisibleBallForPeachStarHit = 1;
+            }
+        } else if (g_Ball.framesSinceHit >= ((s16*)&g_hitShorts)[g_Ball.currentStarSwing]) {
+            g_Ball.currentStarSwing = 0;
+            g_Batter.invisibleBallForPeachStarHit = 0;
+        } else if (g_Ball.framesSinceHit >= ((s16*)&g_hitShorts)[g_Ball.currentStarSwing - 2]) {
+            g_Batter.invisibleBallForPeachStarHit = 1;
+        }
+        if (!g_Batter.invisibleBallForPeachStarHit) {
+            g_Ball.autoFielderAvoidDropSpotForPeachesStarHit = 0;
+        }
+    } else if (ended) {
+        g_Ball.currentStarSwing = 0;
+    } else if (g_Ball.ballIsRollingIndicator) {
+        g_Ball.currentStarSwing = 0;
+    } else if (g_Ball.framesSinceLastBounce == 0) {
+        if (g_Ball.currentStarSwing == 5 || g_Ball.currentStarSwing == 6) {
+            g_Ball.currentStarSwing = 0;
+        } else if (g_Ball.currentStarSwing == 7 || g_Ball.currentStarSwing == 8) {
+            g_Ball.currentStarSwing = 0;
+        } else if (g_Ball.currentStarSwing == 9 || g_Ball.currentStarSwing == 10) {
+            if (g_Ball.framesOnGroundUntilPickedUp >= g_hitShorts.NEggBounces) {
+                g_Ball.currentStarSwing = 0;
+            }
+        } else if (g_Ball.framesOnGroundUntilPickedUp >= g_hitShorts.framesOnGroundBeforeCheckingMinStarVelo) {
+            if (VEC_LENGTH_XZ(&g_Ball.physicsSubstruct.velocity) < g_hitFloats.minStarHitVelo) {
+                g_Ball.currentStarSwing = 0;
+            }
+        }
+    }
 }
 
 // .text:0x0000A83C size:0x134 mapped:0x806498D0
