@@ -115,7 +115,7 @@ extern u8 lbl_3_data_76FC[][3];
 extern VecXYZ lbl_3_data_21380;
 
 // .data 0x8080-0x8088: only this unit uses it, but splits.txt does not assign it here yet
-extern s16 lbl_3_data_8080[4];
+s16 lbl_3_data_8080[4] = {1, 100, 60, 0};
 
 BOOL fn_8001C920(int charID);
 extern int LERPToNewRange_Float(int value, int inMin, int inMax, int outMin, int outMax);
@@ -126,9 +126,6 @@ void fn_3_7BC20(void);
 void fn_3_7AB34(void);
 extern void changeScene(u8, s16);
 int fn_3_6D564(int team, int rosterID, int arg);
-
-// .text 0x6F4E8-0x6F6CC: only this unit calls it, but splits.txt does not assign it here yet
-BOOL fn_3_6F4E8(void);
 
 static s32 lbl_3_bss_172C[7];
 static s32 lbl_3_bss_1728;

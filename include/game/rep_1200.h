@@ -3,6 +3,7 @@
 
 #include "mssbTypes.h"
 
+BOOL fn_3_6F4E8(void);
 BOOL fn_3_6F6CC(void);
 BOOL fn_3_6F748(void);
 void fn_3_6FA28(void);
