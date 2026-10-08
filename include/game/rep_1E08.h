@@ -7,14 +7,15 @@
 struct UnkKey21F8;
 struct UnkPlayer1E08;
 struct UnkPanel1E08;
+struct UnkPanelList1E08;
 struct UnkAnim21F8;
 struct UnkEffect21F8;
 
 void fn_3_BA538(struct UnkPanel1E08* panel);
-void fn_3_BA7F4(void);
+BOOL fn_3_BA7F4(void* arg);
 void fn_3_BB07C(struct UnkPanel1E08* obj, f32 angle);
 void fn_3_BB15C(struct UnkPanel1E08* panel);
-void fn_3_BB454(void);
+void fn_3_BB454(struct UnkPanelList1E08* list);
 void fn_3_BB7F4(void);
 void fn_3_BBBC4(void);
 void fn_3_BBF94(void);
@@ -57,7 +58,7 @@ void fn_3_BF8F8(struct UnkEffect21F8* effect, Mtx m, Vec* pos,
                  f32 (*callback)(struct UnkAnim21F8*, int, Mtx, f32));
 f32 fn_3_BFB3C(struct UnkAnim21F8* anim, int frame, Mtx m, f32 t);
 f32 fn_3_BFDA4(struct UnkKey21F8* keys, int count, int frame, u8 current, u8* currentOut, f32 t);
-void fn_3_C0134(void);
+BOOL fn_3_C0134(void* arg);
 void fn_3_C0770(void);
 void fn_3_C07A0(void);
 void fn_3_C07B0(void);

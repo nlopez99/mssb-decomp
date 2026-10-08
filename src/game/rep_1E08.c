@@ -108,7 +108,7 @@ typedef union {
 } UnkColor1E08;
 
 typedef struct UnkPanel1E08 {
-    /* 0x00 */ u8 _00[0x4];
+    /* 0x00 */ struct UnkPanel1E08* next;
     /* 0x04 */ f32 _04;
     /* 0x08 */ f32 _08;
     /* 0x0C */ f32 _0C;
@@ -120,9 +120,14 @@ typedef struct UnkPanel1E08 {
     /* 0x3C */ f32 height;
     /* 0x40 */ UnkColor1E08 color0;
     /* 0x44 */ UnkColor1E08 color1;
-    /* 0x48 */ u8 _48[0x4A - 0x48];
+    /* 0x48 */ s16 _48;
     /* 0x4A */ s16 _4A;
 } UnkPanel1E08;
+
+typedef struct UnkPanelList1E08 {
+    /* 0x00 */ u8 _00[0xC];
+    /* 0x0C */ UnkPanel1E08* head;
+} UnkPanelList1E08;
 
 typedef struct UnkPlayer1E08 {
     /* 0x000 */ u8 _000[0x34];
@@ -260,7 +265,7 @@ extern void fn_80034CEC(UnkTask1E08* task);
 extern void fn_80034E20(UnkTask1E08* task, void* desc);
 extern void fn_8003A688(void* arg0, f32 x, f32 y);
 extern BOOL fn_80033928(s32 arg0);
-extern void* fn_80033A24(void (*update)(void), s32, s32, s32, s32, s32);
+extern void* fn_80033A24(BOOL (*update)(void*), s32, s32, s32, s32, s32);
 extern void fn_800BD670(UnkActor1E08* actor, s32 arg1);
 extern void fn_800BD8C4(UnkActor1E08* actor, s32 arg1);
 extern void fn_800BD548(void* model, s32 count, ...);
@@ -294,8 +299,8 @@ void fn_3_C0770(void) {
 }
 
 // .text:0x000C0134 size:0x63C mapped:0x806FF1C8
-void fn_3_C0134(void) {
-    return;
+BOOL fn_3_C0134(void* arg) {
+    return FALSE;
 }
 
 // .text:0x000BFDA4 size:0x390 mapped:0x806FEE38
@@ -1005,12 +1010,31 @@ void fn_3_BBBC4(void) {
 
 // .text:0x000BB7F4 size:0x3D0 mapped:0x806FA888
 void fn_3_BB7F4(void) {
-    return;
+    UnkPanelList1E08* list = fn_80033A24(fn_3_BA7F4, 0x80, 0, lbl_3_data_170D8[0], 1, 0x19);
+
+    if (list != NULL) {
+        fn_3_BB454(list);
+    }
 }
 
 // .text:0x000BB454 size:0x3A0 mapped:0x806FA4E8
-void fn_3_BB454(void) {
-    return;
+void fn_3_BB454(UnkPanelList1E08* list) {
+    UnkPanel1E08* panel;
+    u32 i;
+    s32 per;
+
+    panel = list->head;
+    i = 0;
+    do {
+        panel->_4A = i;
+        panel->width = lbl_3_data_170D8[3] / 100000.0f;
+        panel->height = lbl_3_data_170D8[4] / 100000.0f;
+        fn_3_BB15C(panel);
+        per = lbl_3_data_170D8[0] / 5;
+        panel->_48 = ((i % 5) * per + rand() % per) * 2;
+        i++;
+        panel = panel->next;
+    } while (panel != NULL);
 }
 
 // .text:0x000BB15C size:0x2F8 mapped:0x806FA1F0
@@ -1054,8 +1078,8 @@ void fn_3_BB07C(UnkPanel1E08* obj, f32 angle) {
 }
 
 // .text:0x000BA7F4 size:0x888 mapped:0x806F9888
-void fn_3_BA7F4(void) {
-    return;
+BOOL fn_3_BA7F4(void* arg) {
+    return FALSE;
 }
 
 // .text:0x000BA538 size:0x2BC mapped:0x806F95CC
