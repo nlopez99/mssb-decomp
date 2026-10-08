@@ -255,6 +255,7 @@ extern bool fn_800527C4(Vec* pos);
 extern void fn_80064430(Vec* pos, s32 type, f32 arg2, f32 arg3);
 extern BOOL fn_8001B728(s32, s32, Vec*);
 extern s32 fn_8005268C(void);
+extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_8003A144(void);
 extern void* fn_80039AB4(void);
 extern void SetDisplayStateTexture(void* tex, s32, s32);
@@ -400,7 +401,29 @@ void fn_3_F6FCC(void) {
 
 // .text:0x000F6C60 size:0x36C mapped:0x80735CF4
 void fn_3_F6C60(void) {
-    return;
+    s32 n;
+    u32 size;
+
+    size = (lbl_3_common_bss_350E4._30 * sizeof(u16)) + (lbl_3_common_bss_350E4._30 * sizeof(u32)) +
+           (lbl_3_common_bss_350E4._30 * sizeof(s32)) + (lbl_3_common_bss_350E4._30 * sizeof(Vec) * 2);
+    if (lbl_3_common_bss_350E4._48 == NULL) {
+        lbl_3_common_bss_350E4._48 = _OSAllocFromHeap(4, size);
+        lbl_3_common_bss_350E4._3C = (u32*)(lbl_3_common_bss_350E4._48 + lbl_3_common_bss_350E4._30 * 2);
+        lbl_3_common_bss_350E4._44 = (u32*)(lbl_3_common_bss_350E4._3C + lbl_3_common_bss_350E4._30);
+        lbl_3_common_bss_350E4._40 = (u16*)(lbl_3_common_bss_350E4._44 + lbl_3_common_bss_350E4._30);
+    }
+    memset(lbl_3_common_bss_350E4._48, 0, size);
+    n = 0;
+    if (lbl_3_bss_B21E) {
+        fn_3_F6A94(&n);
+    }
+    if (lbl_3_bss_B220.count) {
+        fn_3_F6938(&n);
+    }
+    if (lbl_3_bss_B21C) {
+        fn_3_F66C8(&n);
+    }
+    lbl_3_common_bss_350E4._64 = n;
 }
 
 // .text:0x000F6A94 size:0x1CC mapped:0x80735B28
