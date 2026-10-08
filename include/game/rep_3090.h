@@ -27,7 +27,7 @@ void fn_3_FD5A8(void);
 void fn_3_FD670(void);
 BOOL fn_3_FD9FC(void);
 void fn_3_FDA1C(void);
-void fn_3_FDB30(void);
+BOOL fn_3_FDB30(void);
 BOOL fn_3_100018(void);
 void fn_3_100038(void);
 BOOL fn_3_10007C(void);

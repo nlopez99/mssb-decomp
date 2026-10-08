@@ -133,7 +133,9 @@ extern struct {
 extern struct {
     /* 0x000 */ Vec _000;
     /* 0x00C */ f32 _00C;
-    /* 0x010 */ u8 _010[0x178 - 0x10];
+    /* 0x010 */ u8 _010[0x48 - 0x10];
+    /* 0x048 */ f32 _048;
+    /* 0x04C */ u8 _04C[0x178 - 0x4C];
     /* 0x178 */ s16 _178;
     /* 0x17A */ s16 _17A;
     /* 0x17C */ u8 _17C[0x218 - 0x17C];
@@ -1838,9 +1840,236 @@ void fn_3_101CC4(void) {
     return;
 }
 
+// 98.95%: fn_3_101CC4 is still a stub, so its guarded call in case 2 is inlined away and
+// the registers after it shift; the rest follows the target.
 // .text:0x001000D8 size:0x1BEC mapped:0x8073F16C
 void fn_3_1000D8(void) {
-    return;
+    Mtx rot;
+    Vec target;
+    Vec offset;
+    f32 angles[2];
+    f32 dist;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    f32 scale;
+    s16 id = lbl_3_common_bss_DE94._0000->_0946;
+
+    if (lbl_3_common_bss_DE94._0000->_09A8 == 0) {
+        switch (lbl_3_common_bss_DE94._0000->_09A7) {
+        case 0:
+        case 1:
+            VEC_COPY(&g_pCamera->_2840, &g_pCamera->_2858);
+            if (g_pCamera->_2840.y < 0.1f) {
+                g_pCamera->_2840.y = 0.1f;
+            }
+            angles[0] = fn_3_9FEA8(g_pCamera->_2870);
+            angles[1] = fn_3_9FEA8(g_pCamera->_2874);
+            fn_3_103E7C(angles);
+            dx = 100.0f * cosf_kludge(angles[0]) * cosf_kludge(angles[1]);
+            dy = 100.0f * sinf_kludge(angles[1]);
+            dz = 100.0f * sinf_kludge(angles[0]) * cosf_kludge(angles[1]);
+            g_pCamera->_284C.x = g_pCamera->_2858.x + dx;
+            g_pCamera->_284C.y = g_pCamera->_2858.y + dy;
+            g_pCamera->_284C.z = g_pCamera->_2858.z + dz;
+            fn_3_1040D8();
+            break;
+        case 2:
+            if (id < 13 && id >= 0 && lbl_3_common_bss_DE94._0000->_0950 <= 2) {
+                fn_3_101CC4();
+            }
+            if (lbl_3_common_bss_DE94._0000->_09AA == 0) {
+                VEC_COPY(&g_pCamera->_2840, &g_pCamera->_2858);
+                if (g_pCamera->_2840.y < 0.1f) {
+                    g_pCamera->_2840.y = 0.1f;
+                }
+                memcpy(&target, &lbl_3_common_bss_DE94._0000->_0088, sizeof(Vec));
+                fn_3_106270(&target);
+                VEC_COPY(&g_pCamera->_284C, &target);
+                fn_3_103C30(&target);
+                VEC_COPY(&g_pCamera->_284C, &target);
+                fn_3_1040D8();
+            } else if (lbl_3_common_bss_DE94._0000->_09AA == 1) {
+                VEC_COPY(&g_pCamera->_2840, &g_pCamera->_2858);
+                if (g_pCamera->_2840.y < 0.1f) {
+                    g_pCamera->_2840.y = 0.1f;
+                }
+                if (id < 9 && id >= 0) {
+                    PSMTXRotRad(rot, 'Y', -fn_3_9FEA8(1.5707964f + g_Fielders[id]._048));
+                    memcpy(&offset, &g_pCamera->_2840, sizeof(Vec));
+                    offset.x = g_pCamera->_2840.x - g_Fielders[id]._000.x;
+                    offset.y = g_pCamera->_2840.y - g_Fielders[id]._000.y;
+                    offset.z = g_pCamera->_2840.z - g_Fielders[id]._000.z;
+                    PSMTXMultVec(rot, &offset, &offset);
+                    offset.x += g_Fielders[id]._000.x;
+                    offset.y += g_Fielders[id]._000.y;
+                    offset.z += g_Fielders[id]._000.z;
+                    memcpy(&g_pCamera->_2840, &offset, sizeof(Vec));
+                } else if (id < 13 && id >= 0) {
+                    PSMTXRotRad(rot, 'Y', fn_3_9FEA8(g_Runners[id - 9].runningAngle));
+                    memcpy(&offset, &g_pCamera->_2840, sizeof(Vec));
+                    offset.x = g_pCamera->_2840.x - g_Runners[id - 9].position.x;
+                    offset.y = g_pCamera->_2840.y - g_Runners[id - 9].position.y;
+                    offset.z = g_pCamera->_2840.z - g_Runners[id - 9].position.z;
+                    PSMTXMultVec(rot, &offset, &offset);
+                    offset.x += g_Runners[id - 9].position.x;
+                    offset.y += g_Runners[id - 9].position.y;
+                    offset.z += g_Runners[id - 9].position.z;
+                    memcpy(&g_pCamera->_2840, &offset, sizeof(Vec));
+                } else if (id == 13) {
+                    PSMTXRotRad(rot, 'Y', atan2(-(g_Ball.pastCoordinates[0].x - g_Ball.AtBat_Contact_BallPos.x),
+                                                -(g_Ball.pastCoordinates[0].z - g_Ball.AtBat_Contact_BallPos.z)));
+                    memcpy(&offset, &g_pCamera->_2840, sizeof(Vec));
+                    offset.x = g_pCamera->_2840.x - g_Ball.AtBat_Contact_BallPos.x;
+                    offset.y = g_pCamera->_2840.y - g_Ball.AtBat_Contact_BallPos.y;
+                    offset.z = g_pCamera->_2840.z - g_Ball.AtBat_Contact_BallPos.z;
+                    PSMTXMultVec(rot, &offset, &offset);
+                    offset.x += g_Ball.AtBat_Contact_BallPos.x;
+                    offset.y += g_Ball.AtBat_Contact_BallPos.y;
+                    offset.z += g_Ball.AtBat_Contact_BallPos.z;
+                    memcpy(&g_pCamera->_2840, &offset, sizeof(Vec));
+                }
+                memcpy(&target, &lbl_3_common_bss_DE94._0000->_0088, sizeof(Vec));
+                fn_3_106270(&target);
+                VEC_COPY(&g_pCamera->_284C, &target);
+                fn_3_103C30(&target);
+                VEC_COPY(&g_pCamera->_284C, &target);
+                fn_3_1040D8();
+            }
+            if (g_pCamera->_284C.y < 0.1f) {
+                g_pCamera->_284C.y = 0.1f;
+            }
+            break;
+        }
+    } else {
+        switch (lbl_3_common_bss_DE94._0000->_09A9) {
+        case 0:
+        case 1:
+            lbl_3_common_bss_DE94._0000->_00A0 = 0.87266463f;
+            VEC_COPY(&g_pCamera->_2840, &g_Ball.AtBat_Contact_BallPos);
+            break;
+        case 2:
+        case 3:
+            lbl_3_common_bss_DE94._0000->_00A0 = 0.87266463f;
+            VEC_COPY(&g_pCamera->_2840, &g_Ball.pastCoordinates[1]);
+            break;
+        case 4:
+            dist = g_Ball.AtBat_Contact_BallPos.z - g_pCamera->_2858.z;
+            if (dist < 0.0f) {
+                dist = -g_Ball.AtBat_Contact_BallPos.z - g_pCamera->_2858.z;
+            }
+            dz = g_Ball.AtBat_Contact_BallPos.z - g_Ball.pastCoordinates[0].z;
+            dx = g_Ball.AtBat_Contact_BallPos.x - g_Ball.pastCoordinates[0].x;
+            dy = g_Ball.AtBat_Contact_BallPos.y - g_Ball.pastCoordinates[0].y;
+            if (dz == 0.0f) {
+                dz = 0.0001f;
+            }
+            scale = dist / dz;
+            g_pCamera->_2840.x = (g_Ball.AtBat_Contact_BallPos.x + dx) - dx * scale;
+            g_pCamera->_2840.y = (g_Ball.AtBat_Contact_BallPos.y + dy) - dy * scale;
+            g_pCamera->_2840.z = (g_Ball.AtBat_Contact_BallPos.z + dz) - dz * scale;
+            break;
+        case 6:
+            dist = g_Ball.AtBat_Contact_BallPos.z - g_pCamera->_2858.z;
+            if (dist < 0.0f) {
+                dist = -g_Ball.AtBat_Contact_BallPos.z - g_pCamera->_2858.z;
+            }
+            dz = g_Ball.AtBat_Contact_BallPos.z - g_Ball.pastCoordinates[0].z;
+            dx = g_Ball.AtBat_Contact_BallPos.x - g_Ball.pastCoordinates[0].x;
+            dy = g_Ball.AtBat_Contact_BallPos.y - g_Ball.pastCoordinates[0].y;
+            if (dz == 0.0f) {
+                dz = 0.0001f;
+            }
+            scale = dist / dz;
+            g_pCamera->_2840.x = dx * scale + (g_Ball.AtBat_Contact_BallPos.x - dx);
+            g_pCamera->_2840.y = dy * scale + (g_Ball.AtBat_Contact_BallPos.y - dy);
+            g_pCamera->_2840.z = dz * scale + (g_Ball.AtBat_Contact_BallPos.z - dz);
+            break;
+        case 5:
+            dist = g_Ball.AtBat_Contact_BallPos.z - g_pCamera->_2858.z;
+            if (dist < 0.0f) {
+                dist = -g_Ball.AtBat_Contact_BallPos.z - g_pCamera->_2858.z;
+            }
+            dz = g_Ball.AtBat_Contact_BallPos.z - g_Ball.pastCoordinates[0].z;
+            dx = g_Ball.AtBat_Contact_BallPos.x - g_Ball.pastCoordinates[0].x;
+            if (dz == 0.0f) {
+                dz = 0.0001f;
+            }
+            scale = dist / dz;
+            g_pCamera->_2840.x = (g_Ball.AtBat_Contact_BallPos.x + dx) - dx * scale;
+            g_pCamera->_2840.y = g_Ball.AtBat_Contact_BallPos.y;
+            g_pCamera->_2840.z = (g_Ball.AtBat_Contact_BallPos.z + dz) - dz * scale;
+            break;
+        case 7:
+            dist = g_Ball.AtBat_Contact_BallPos.z - g_pCamera->_2858.z;
+            if (dist < 0.0f) {
+                dist = -g_Ball.AtBat_Contact_BallPos.z - g_pCamera->_2858.z;
+            }
+            dz = g_Ball.AtBat_Contact_BallPos.z - g_Ball.pastCoordinates[0].z;
+            dx = g_Ball.AtBat_Contact_BallPos.x - g_Ball.pastCoordinates[0].x;
+            if (dz == 0.0f) {
+                dz = 0.0001f;
+            }
+            scale = dist / dz;
+            g_pCamera->_2840.x = dx * scale + (g_Ball.AtBat_Contact_BallPos.x - dx);
+            g_pCamera->_2840.y = g_Ball.AtBat_Contact_BallPos.y;
+            g_pCamera->_2840.z = dz * scale + (g_Ball.AtBat_Contact_BallPos.z - dz);
+            break;
+        case 8:
+            VEC_COPY(&g_pCamera->_2840, &g_pCamera->_2858);
+            dz = g_Ball.AtBat_Contact_BallPos.z - g_Ball.pastCoordinates[0].z;
+            dx = g_Ball.AtBat_Contact_BallPos.x - g_Ball.pastCoordinates[0].x;
+            PSMTXRotRad(rot, 'Y', -fn_3_9FEA8(1.5707964f + game_atan2(dx, dz)));
+            memcpy(&offset, &g_pCamera->_2840, sizeof(Vec));
+            offset.x = g_pCamera->_2840.x - g_Ball.AtBat_Contact_BallPos.x;
+            offset.y = g_pCamera->_2840.y - g_Ball.AtBat_Contact_BallPos.y;
+            offset.z = g_pCamera->_2840.z - g_Ball.AtBat_Contact_BallPos.z;
+            PSMTXMultVec(rot, &offset, &offset);
+            offset.x += g_Ball.AtBat_Contact_BallPos.x;
+            offset.y += g_Ball.AtBat_Contact_BallPos.y;
+            offset.z += g_Ball.AtBat_Contact_BallPos.z;
+            memcpy(&g_pCamera->_2840, &offset, sizeof(Vec));
+            break;
+        }
+        if (g_pCamera->_2840.y < 1.0f) {
+            g_pCamera->_2840.y = 1.0f;
+        }
+        switch (lbl_3_common_bss_DE94._0000->_09A9) {
+        case 0:
+            target.x = g_Ball.AtBat_Contact_BallPos.x + (g_Ball.AtBat_Contact_BallPos.x - g_Ball.pastCoordinates[0].x);
+            target.y = g_Ball.AtBat_Contact_BallPos.y + (g_Ball.AtBat_Contact_BallPos.y - g_Ball.pastCoordinates[0].y);
+            target.z = g_Ball.AtBat_Contact_BallPos.z + (g_Ball.AtBat_Contact_BallPos.z - g_Ball.pastCoordinates[0].z);
+            break;
+        case 1:
+            target.x = g_Ball.AtBat_Contact_BallPos.x + (g_Ball.AtBat_Contact_BallPos.x - g_Ball.pastCoordinates[0].x);
+            target.y = g_Ball.AtBat_Contact_BallPos.y;
+            target.z = g_Ball.AtBat_Contact_BallPos.z + (g_Ball.AtBat_Contact_BallPos.z - g_Ball.pastCoordinates[0].z);
+            break;
+        case 2:
+            VEC_COPY(&target, &g_Ball.pastCoordinates[2]);
+            break;
+        case 3:
+            target.x = g_Ball.pastCoordinates[2].x;
+            target.y = g_Ball.pastCoordinates[1].y;
+            target.z = g_Ball.pastCoordinates[2].z;
+            break;
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+            memcpy(&target, &lbl_3_common_bss_DE94._0000->_0088, sizeof(Vec));
+            fn_3_106270(&target);
+            break;
+        }
+        VEC_COPY(&g_pCamera->_284C, &target);
+        fn_3_103C30(&target);
+        VEC_COPY(&g_pCamera->_284C, &target);
+        fn_3_1040D8();
+        if (g_pCamera->_284C.y < 0.1f) {
+            g_pCamera->_284C.y = 0.1f;
+        }
+    }
 }
 
 // .text:0x0010007C size:0x5C mapped:0x8073F110
@@ -1875,8 +2104,8 @@ BOOL fn_3_100018(void) {
 }
 
 // .text:0x000FDB30 size:0x24E8 mapped:0x8073CBC4
-void fn_3_FDB30(void) {
-    return;
+BOOL fn_3_FDB30(void) {
+    return FALSE;
 }
 
 // 98.91%: registers only in case 1 (task->_1E in r7 and the table bases in r5/r6 in the
@@ -1923,9 +2152,40 @@ BOOL fn_3_FD9FC(void) {
     return lbl_3_common_bss_DE94._0000->_0018 == 1;
 }
 
+// 94.03%: differs only where fn_3_FDB30 is called; it is still a stub, so the call and
+// its result test are inlined away here.
 // .text:0x000FD670 size:0x38C mapped:0x8073C704
 void fn_3_FD670(void) {
-    return;
+    if (g_GameLogic.framesOfExitingToMenu == 0) {
+        fn_3_104338();
+        fn_3_1000D8();
+        lbl_3_common_bss_DE94._0000->_093C = lbl_3_common_bss_DE94._0000->_0938;
+        lbl_3_common_bss_DE94._0000->_0948 = lbl_3_common_bss_DE94._0000->_0946;
+        lbl_3_common_bss_DE94._0000->_0942 = lbl_3_common_bss_DE94._0000->_0940;
+        switch (lbl_3_common_bss_DE94._0000->_0944) {
+        case 0:
+            if (lbl_3_common_bss_DE94._0000->_09AE != 0) {
+                if (fn_3_FDB30()) {
+                    lbl_3_common_bss_DE94._0000->_09AE = 0;
+                    lbl_3_common_bss_DE94._0000->_09AF = 0;
+                    lbl_3_common_bss_DE94._0000->_09B0 = 0;
+                }
+            } else if (lbl_3_common_bss_DE94._0000->_09AD == 1) {
+                fn_3_105C28(lbl_3_common_bss_DE94._0000->_0990, lbl_3_common_bss_DE94._0000->_0118);
+                if (lbl_3_common_bss_DE94._0000->_0118 >= lbl_3_common_bss_DE94._0000->_011C - 1) {
+                    lbl_3_common_bss_DE94._0000->_09AD = 0;
+                } else {
+                    lbl_3_common_bss_DE94._0000->_0118 += 0x10000;
+                }
+            }
+            break;
+        case 1:
+            if (lbl_3_common_bss_DE94._0000->_09AE == 0) {
+                lbl_3_common_bss_DE94._0000->_0944 = 0;
+            }
+            break;
+        }
+    }
 }
 
 // .text:0x000FD5A8 size:0xC8 mapped:0x8073C63C
