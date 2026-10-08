@@ -10,13 +10,15 @@
 #include "game/rep_D0.h"
 #include "game/rep_720.h"
 #include "game/m_sound.h"
+#include "game/rep_4090.h"
 #include "string.h"
 
 typedef struct UnkAC8Fielder {
     /* 0x000 */ f32 _000;
     /* 0x004 */ f32 _004;
     /* 0x008 */ f32 _008;
-    /* 0x00C */ u8 _00C[0x14 - 0xC];
+    /* 0x00C */ f32 _00C;
+    /* 0x010 */ f32 _010;
     /* 0x014 */ f32 _014;
     /* 0x018 */ f32 _018;
     /* 0x01C */ f32 _01C;
@@ -70,7 +72,7 @@ typedef struct UnkAC8Fielder {
     /* 0x140 */ f32 _140;
     /* 0x144 */ f32 _144;
     /* 0x148 */ f32 _148;
-    /* 0x14C */ u8 _14C[0x150 - 0x14C];
+    /* 0x14C */ f32 _14C;
     /* 0x150 */ f32 _150;
     /* 0x154 */ f32 _154;
     /* 0x158 */ f32 _158;
@@ -273,6 +275,11 @@ extern VecXZ lbl_3_data_4554[4][3];
 extern VecXZ lbl_3_data_45B4[4];
 extern VecXZ lbl_3_data_45D4[4];
 extern VecXZ lbl_3_data_4290[7][2];
+extern u16 lbl_3_data_81DC[16];
+extern u8 lbl_3_data_8404[6][15][2];
+extern u8 lbl_3_data_84B8[30][2];
+extern u8 fn_800639BC(s8 fielder, VecXYZ* pos, VecXYZ* prev);
+extern void fn_80063958(s8 fielder);
 extern VecXZ lbl_3_data_4300[9];
 extern f32 lbl_3_data_4348[7][2];
 extern void fn_3_9F79C(f32 a, f32 b, f32 c, f32* x, f32* y);
@@ -1018,8 +1025,127 @@ void fn_3_54900(s32 fielder) {
 }
 
 // .text:0x000544B8 size:0x448 mapped:0x8069354C
+static inline SND_VOICEID playStadiumSound(s32 stadium, s32 sound) {
+    SND_VOICEID voice;
+    u8 vol;
+
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+        vol = lbl_3_data_84B8[sound][0];
+    } else {
+        vol = lbl_3_data_8404[stadium][sound][0];
+    }
+    voice = sndFXStartEx(lbl_3_data_81DC[stadium] + sound, vol, 63, 0);
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+        vol = lbl_3_data_84B8[sound][1];
+    } else {
+        vol = lbl_3_data_8404[stadium][sound][1];
+    }
+    sndFXCtrl(voice, 91, vol);
+    return voice;
+}
+
 void fn_3_544B8(void) {
-    return;
+    UnkAC8Fielder* f;
+    u32 kind;
+    s32 type;
+    s32 i;
+    VecSrcDst ray;
+    CollisionStruct hit;
+    VecXYZ pos;
+    VecXYZ prev;
+    f32 h;
+    f32 v;
+
+    for (i = 0; i < 9; i++) {
+        f = &g_Fielders[i];
+        if (g_d_GameSettings.minigamesEnabled && g_Minigame.minigameRelatedIndex != i) {
+            continue;
+        }
+        if ((g_GameLogic.gameStatus == 1 || g_GameLogic.gameStatus == 2) && f->_0B8 > 6.5f &&
+            g_Ball.totalFramesAtPlay > 1 && g_Ball.totalFramesAtPlay < 0x7FFF && i % 3 != g_Ball.totalFramesAtPlay % 3) {
+            f->_00C = f->_010;
+            type = f->_1E5[1];
+        } else {
+            ray.src.x = f->_000;
+            ray.src.y = -1.0f;
+            ray.src.z = f->_008;
+            ray.dst.x = f->_000;
+            ray.dst.y = 1.0f;
+            ray.dst.z = f->_008;
+            type = checkCollision(&ray, &hit, 0, 0);
+            if (type == 0) {
+                f->_00C = 0.0f;
+            } else {
+                f->_00C = -hit.position.y;
+            }
+            kind = type & 0x7F;
+            if (kind == 10) {
+                pos.x = f->_000;
+                pos.y = f->_00C;
+                pos.z = f->_008;
+                prev.x = f->_0D4;
+                prev.y = f->_00C;
+                prev.z = f->_0D8;
+                if (fn_800639BC(i, &pos, &prev) >= 2) {
+                    if (g_d_GameSettings.StadiumID == 4) {
+                        playStadiumSound(4, 7);
+                    } else if (g_d_GameSettings.StadiumID == 5) {
+                        playStadiumSound(5, 12);
+                    }
+                }
+            } else {
+                fn_80063958(i);
+            }
+            if (kind == 9) {
+                fn_3_16D5E4(i + 1);
+            }
+            f->_010 = f->_00C;
+        }
+        if (f->_203) {
+            f->_00C += f->_15C;
+        }
+        if (f->_205) {
+            f->_00C = f->_148;
+        }
+        if (f->_207) {
+            f->_00C = f->_148;
+        }
+        if (f->_252 == 4) {
+            f->_00C = f->_148;
+            if (f->_25C) {
+                f->_25E = 1;
+            } else {
+                f->_25E = 2;
+            }
+        } else if (f->_25E != 0) {
+            if (f->_25E == 2) {
+                f->_25E = 3;
+                f->_14C = 0.0f;
+                f->_25D = 0;
+                h = f->_148;
+                v = 0.5f * f->_164;
+                do {
+                    v -= lbl_3_data_4930[11];
+                    h += v;
+                    f->_25D++;
+                } while (!(h < 0.0f));
+                getComponentsFromSAng(f->_180, &f->_150, &f->_158);
+                f->_150 *= -lbl_3_data_4930[13];
+                f->_158 *= -lbl_3_data_4930[13];
+            } else if (f->_25E == 3) {
+                f->_25D--;
+                f->_14C -= lbl_3_data_4930[11];
+                f->_148 += f->_14C;
+                if (f->_148 < 0.0f) {
+                    f->_148 = 0.0f;
+                    f->_25E = 4;
+                    f->_25F = lbl_3_data_49DC[4];
+                }
+            }
+            f->_00C = f->_148;
+        }
+        f->_1E5[1] = type;
+    }
 }
 
 // .text:0x00053F48 size:0x570 mapped:0x80692FDC
@@ -2193,7 +2319,48 @@ void fn_3_4B514(s32 fielder) {
 
 // .text:0x0004B128 size:0x3EC mapped:0x8068A1BC
 void fn_3_4B128(s32 fielder) {
-    return;
+    f32 cx;
+    f32 cz;
+    f32 x;
+    f32 z;
+    s16 angle;
+
+    switch (fn_3_53130(fielder)) {
+    case 2:
+        return;
+    case 1:
+        break;
+    default:
+        if (g_FieldingLogic._0C4 >= 1 && g_FieldingLogic._0C4 <= 3 && g_FieldingLogic._0E6 == 1 &&
+            (g_FieldingLogic._0C4 == 2 || fielder != 7)) {
+            getComponentsFromSAng(fn_3_9FB8C(g_Ball.throwDestination.x - g_Ball.AtBat_Contact_BallPos.x,
+                                             g_Ball.throwDestination.z - g_Ball.AtBat_Contact_BallPos.z),
+                                  &cx, &cz);
+            x = 20.0f * cx + lbl_3_data_4444[g_FieldingLogic._0C4].x;
+            z = 20.0f * cz + lbl_3_data_4444[g_FieldingLogic._0C4].z;
+            angle = fn_3_9FB8C(x, z);
+            if (angle <= 0x800 &&
+                ((angle < 0x300 && fielder == 8) || (angle > 0x500 && fielder == 6) ||
+                 (angle < 0x400 && (fielder == 7 || fielder == 8)) || (angle >= 0x400 && (fielder == 7 || fielder == 6)))) {
+                if (z < lbl_3_data_4444[1].z) {
+                    if (x < 0.0f) {
+                        x = -35.0f;
+                    } else {
+                        x = 35.0f;
+                    }
+                    z = 30.0f;
+                }
+                fn_3_52F4C(fielder, x, z);
+            }
+        }
+        fn_3_526DC(fielder);
+        if (g_Fielders[fielder]._068 < 5.0f) {
+            fn_3_5985C(fielder, 12);
+        } else if (g_Ball.numberOfThrowsDuringPlay >= 2) {
+            fn_3_5985C(fielder, 12);
+        }
+        break;
+    }
 }
 
 // .text:0x0004A9AC size:0x77C mapped:0x80689A40
@@ -3958,8 +4125,145 @@ void fn_3_341E8(void) {
 }
 
 // .text:0x00033DD0 size:0x418 mapped:0x80672E64
-void fn_3_33DD0(void) {
-    return;
+// 99.81%: registers only; in the last test the target puts angle - center->_182 in r5 and its
+// sign in r4, this the reverse (as in fn_3_33088; the permuter found nothing).
+void fn_3_33DD0(s32* primary, s32* secondary) {
+    UnkAC8Fielder* center = &g_Fielders[7];
+    s32 side = 6;
+    s16 angle;
+    UnkAC8Fielder* f;
+    s32 centerState;
+    s32 sideState;
+    BOOL close;
+    f32 diff;
+
+    *secondary = -1;
+    angle = fn_3_9FB8C(g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x,
+                       g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z);
+    if (angle > g_Fielders[6]._182) {
+        *primary = 6;
+        return;
+    }
+    if (angle < g_Fielders[8]._182) {
+        *primary = 8;
+        return;
+    }
+    if (angle < g_Fielders[7]._182) {
+        side = 8;
+    }
+    f = &g_Fielders[side];
+    sideState = 10;
+    centerState = 10;
+    if (center->_1DB == 0) {
+        centerState = 0;
+    } else if (center->_1DD == 1) {
+        centerState = 1;
+    } else if (center->_1DD == 2) {
+        centerState = 2;
+    } else if (center->_1DD == 3) {
+        centerState = 3;
+    }
+    if (f->_1DB == 0) {
+        sideState = 0;
+    } else if (f->_1DD == 1) {
+        sideState = 1;
+    } else if (f->_1DD == 2) {
+        sideState = 2;
+    } else if (f->_1DD == 3) {
+        sideState = 3;
+    }
+    close = FALSE;
+    if (g_Ball.wallAndBallIntersectionDistFromHome > 40.0f) {
+        diff = center->_080 - f->_080;
+        if (diff < 0.0f) {
+            diff = -diff;
+        }
+        if (diff < 10.0f) {
+            close = TRUE;
+        }
+    }
+    if ((centerState == sideState && centerState < 10) || close) {
+        if (centerState == 0) {
+            if (center->_080 <= f->_080) {
+                *primary = 7;
+                if (f->_080 - center->_080 < 10.0f) {
+                    *secondary = side;
+                }
+            } else {
+                *primary = side;
+                if (center->_080 - f->_080 < 10.0f) {
+                    *secondary = 7;
+                }
+            }
+            return;
+        }
+        if (centerState == 1) {
+            if (center->_186 <= f->_186) {
+                *primary = 7;
+                if (f->_186 - center->_186 < 45) {
+                    *secondary = side;
+                }
+            } else {
+                *primary = side;
+                if (center->_186 - f->_186 < 45) {
+                    *secondary = 7;
+                }
+            }
+            return;
+        }
+    } else if (centerState < sideState) {
+        if (centerState == 0) {
+            *primary = 7;
+            if (sideState == 1 && f->_186 - center->_186 < 30) {
+                *secondary = side;
+            }
+            return;
+        }
+        if (centerState == 1) {
+            *primary = 7;
+            return;
+        }
+        if (sideState == 10) {
+            *primary = 7;
+            return;
+        }
+    } else if (sideState < centerState) {
+        if (sideState == 0) {
+            *primary = side;
+            if (centerState == 1 && center->_186 - f->_186 < 30) {
+                *secondary = 7;
+            }
+            return;
+        }
+        if (sideState == 1) {
+            *primary = side;
+            return;
+        }
+        if (centerState == 10) {
+            *primary = side;
+            return;
+        }
+    }
+    if (g_Ball.landingSpotZoneAwayFromHome >= 3) {
+        diff = center->_080 - f->_080;
+        if (diff < 0.0f) {
+            *primary = 7;
+            if (diff > -10.0f) {
+                *secondary = side;
+            }
+        } else {
+            *primary = side;
+            if (diff < 10.0f) {
+                *secondary = 7;
+            }
+        }
+    } else if (__abs(angle - center->_182) < __abs(angle - f->_182) + 0x40) {
+        *primary = 7;
+        *secondary = side;
+    } else {
+        *primary = side;
+        *secondary = 7;
+    }
 }
 
 // .text:0x00033D9C size:0x34 mapped:0x80672E30
