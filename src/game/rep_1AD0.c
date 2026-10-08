@@ -61,8 +61,12 @@ extern struct {
 } lbl_80354768;
 
 extern void fn_3_1DD48(void);
+extern int fn_3_B1CB0(void);
 extern void fn_3_B1DA4(int, int);
+extern int fn_3_B254C(void);
+extern void fn_3_B2630(void);
 extern int fn_3_B32B8(void);
+extern void fn_3_B3620(void);
 extern void fn_3_B3A28(void);
 extern void fn_3_B27A4(void);
 extern int fn_3_6BA64(void);
@@ -319,7 +323,27 @@ void fn_3_B0B5C(void) {
 
 // .text:0x000B0AAC size:0xB0 mapped:0x806EFB40
 void fn_3_B0AAC(void) {
-    return;
+    switch (g_Practice.tutorialState) {
+    case 0:
+        fn_3_B0874();
+        break;
+    case 1:
+        fn_3_B056C();
+        break;
+    case 2:
+        if (!fn_3_B254C()) {
+            fn_3_B056C();
+        } else {
+            fn_3_B1DA4(g_Practice.practiceLevel + 4, 0);
+            fn_3_5A6D4(7);
+        }
+        break;
+    case 3:
+        fn_3_B056C();
+        break;
+    }
+    g_GameLogic.TeamStars[1] = 5;
+    g_GameLogic.TeamStars[0] = 5;
 }
 
 // .text:0x000B0A88 size:0x24 mapped:0x806EFB1C
@@ -392,7 +416,52 @@ void fn_3_B0874(void) {
 
 // .text:0x000B056C size:0x308 mapped:0x806EF600
 void fn_3_B056C(void) {
-    return;
+    g_GameLogic.hudElementLoadingInd = 0;
+    if (g_Practice._1C7 != 0) {
+        fn_3_B3620();
+        return;
+    }
+    if (fn_3_B1CB0()) {
+        return;
+    }
+    if (g_Practice.instructionNumber >= 0) {
+        fn_3_B2630();
+        if (g_Practice.readyToMoveToNextInstruction != 0) {
+            return;
+        }
+        if (g_Practice.tutorialState == 2) {
+            return;
+        }
+    } else if (fn_3_B0464()) {
+        return;
+    }
+    if (g_Ball.totalFramesAtPlay < 0x7FFE) {
+        g_Ball.totalFramesAtPlay++;
+    } else {
+        g_Ball.totalFramesAtPlay = 0x7FFF;
+    }
+    if (g_Practice.frames_sinceMovedToFromMenu < 0xFFFE) {
+        g_Practice.frames_sinceMovedToFromMenu++;
+    } else {
+        g_Practice.frames_sinceMovedToFromMenu = 0xFFFF;
+    }
+    switch (g_GameLogic.gameStatus) {
+    case 0:
+        fn_3_B02A8();
+        break;
+    case 1:
+        fn_3_B025C();
+        break;
+    case 2:
+        fn_3_B01E0();
+        break;
+    case 7:
+        fn_3_B03F0();
+        break;
+    }
+    g_Strikes.strikes = 0;
+    g_Strikes.balls = 0;
+    g_Strikes.outs = 0;
 }
 
 // .text:0x000B0464 size:0x108 mapped:0x806EF4F8
