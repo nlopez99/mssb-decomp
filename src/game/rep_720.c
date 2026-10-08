@@ -55,6 +55,15 @@ extern struct {
     /* 0x5 */ u8 _5;
 } g_UnkSimulation_31AC0;
 
+typedef struct {
+    /* 0x000 */ u8 _000[0x25C];
+    /* 0x25C */ u8 _25C;
+} Unk720Replay;
+
+extern struct {
+    /* 0x0 */ Unk720Replay* _0;
+} lbl_3_common_bss_1323C;
+
 s16 lbl_3_data_A38[2] = { 1, 2 };
 u8 lbl_3_data_A3C[2] = { 25, 45 };
 
@@ -1113,8 +1122,64 @@ void fn_3_18FF8(void) {
 }
 
 // .text:0x0001850C size:0xAEC mapped:0x806575A0
+// 99.94%: the inlined fn_3_16900 and fn_3_1785C swap f28/f29/f30; fn_3_17DA0
+// matched once its copy of that camera code was written out with its own locals
 void fn_3_1850C(void) {
-    return;
+    u8 status = g_GameLogic.gameStatus;
+
+    if (status == GAME_STATUS_MVP_END_GAME || status == GAME_STATUS_MINIGAME_POST_MENU || status == GAME_STATUS_0x26 ||
+        status == GAME_STATUS_0x24 || status == GAME_STATUS_0x27) {
+        fn_3_16900();
+    } else if (status == GAME_STATUS_LOAD_GAME) {
+        g_GameLogic.sceneID = SCENE_ID_0;
+        g_GameLogic._106 = -1;
+        g_GameLogic.bOD_framesInLiveBallScene = -1;
+        g_pCamera->_28A0 = 0;
+    } else if (status == GAME_STATUS_GAME_START_MOVIE) {
+        fn_3_16328();
+        g_GameLogic.sceneID = SCENE_ID_0;
+        g_GameLogic._106 = -1;
+        g_GameLogic.bOD_framesInLiveBallScene = -1;
+        g_pCamera->_28A0 = 0;
+    } else if (status == GAME_STATUS_INNING_TRANSITION) {
+        fn_3_161C0();
+        g_GameLogic.sceneID = SCENE_ID_0;
+        g_GameLogic._106 = -1;
+        g_GameLogic.bOD_framesInLiveBallScene = -1;
+        g_pCamera->_28A0 = 0;
+    } else if (status == GAME_STATUS_END_OF_GAME) {
+        fn_3_16058();
+        g_GameLogic.sceneID = SCENE_ID_0;
+        g_GameLogic._106 = -1;
+        g_GameLogic.bOD_framesInLiveBallScene = -1;
+        g_pCamera->_28A0 = 0;
+    } else if (status == GAME_STATUS_TRANSITION_PREPARE_NEXT_PLAY || status == GAME_STATUS_PAUSED || status == GAME_STATUS_0xC) {
+        g_GameLogic.sceneID = SCENE_ID_0;
+        g_GameLogic._106 = -1;
+        g_GameLogic.bOD_framesInLiveBallScene = -1;
+        g_pCamera->_28A0 = 0;
+    } else if (lbl_3_common_bss_1323C._0->_25C != 0) {
+        fn_3_16014();
+        g_GameLogic.sceneID = SCENE_ID_0;
+        g_GameLogic._106 = -1;
+        g_GameLogic.bOD_framesInLiveBallScene = -1;
+        g_pCamera->_28A0 = 0;
+    } else if (g_Stats.replayInd != 0 && g_Stats._3C != 12 && g_Stats._3C != 1) {
+        fn_3_15F38();
+        g_GameLogic.sceneID = SCENE_ID_0;
+        g_GameLogic._106 = -1;
+        g_GameLogic.bOD_framesInLiveBallScene = -1;
+        g_pCamera->_28A0 = 0;
+    } else if (g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_WALLBALL ||
+               g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_CHAINCHOMP_SPRINT ||
+               g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_PIRANHA_PANIC ||
+               g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_STAR_DASH ||
+               g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_0x9 ||
+               g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_BARREL_BATTER) {
+        fn_3_1785C();
+    } else {
+        fn_3_17DA0();
+    }
 }
 
 // .text:0x00017DA0 size:0x76C mapped:0x80656E34
