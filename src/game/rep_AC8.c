@@ -7,6 +7,7 @@
 #include "game/rep_1CB8.h"
 #include "game/rep_3E58.h"
 #include "game/rep_540.h"
+#include "game/m_sound.h"
 
 typedef struct UnkAC8Fielder {
     /* 0x000 */ f32 _000;
@@ -63,7 +64,9 @@ typedef struct UnkAC8Fielder {
     /* 0x168 */ f32 _168;
     /* 0x16C */ u8 _16C[0x174 - 0x16C];
     /* 0x174 */ f32 _174;
-    /* 0x178 */ u8 _178[0x17E - 0x178];
+    /* 0x178 */ u8 _178[0x17A - 0x178];
+    /* 0x17A */ s16 _17A;
+    /* 0x17C */ u8 _17C[0x17E - 0x17C];
     /* 0x17E */ s16 _17E;
     /* 0x180 */ u8 _180[0x184 - 0x180];
     /* 0x184 */ s16 _184;
@@ -145,7 +148,8 @@ typedef struct UnkAC8Fielder {
     /* 0x20A */ u8 _20A[0x20B - 0x20A];
     /* 0x20B */ u8 _20B;
     /* 0x20C */ u8 _20C;
-    /* 0x20D */ u8 _20D[0x20F - 0x20D];
+    /* 0x20D */ u8 _20D;
+    /* 0x20E */ u8 _20E[0x20F - 0x20E];
     /* 0x20F */ u8 _20F;
     /* 0x210 */ u8 _210;
     /* 0x211 */ u8 _211;
@@ -177,7 +181,7 @@ typedef struct UnkAC8Fielder {
     /* 0x25F */ u8 _25F;
     /* 0x260 */ u8 _260;
     /* 0x261 */ u8 _261;
-    /* 0x262 */ u8 _262[0x263 - 0x262];
+    /* 0x262 */ u8 _262;
     /* 0x263 */ u8 _263;
     /* 0x264 */ u8 _264;
     /* 0x265 */ u8 _265[0x268 - 0x265];
@@ -2488,8 +2492,46 @@ void fn_3_25648(s32 fielder) {
 }
 
 // .text:0x000253A4 size:0x2A4 mapped:0x80664438
+// 99.29%: one `li r0,0` is scheduled an instruction earlier than in the target.
 BOOL fn_3_253A4(s32 fielder, s32 angle) {
-    return 0;
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+
+    if (f->_207 != 0 || f->_205 != 0 || f->_25E != 0) {
+        return FALSE;
+    }
+    f->_1C2 = angle;
+    f->_210 = 1;
+    f->_1BE = 0;
+    f->_1C0 = lbl_3_data_49DC[33];
+    f->_174 = lbl_3_data_4930[34];
+    if (f->_252 == 4 || f->_252 == 5) {
+        f->_174 = 0.0f;
+    }
+    if (f->_207 != 0) {
+        f->_174 = 0.0f;
+    }
+    if (g_d_GameSettings.minigamesEnabled) {
+        if (g_Minigame.minigameControlStruct.battingHandedness[f->_20D] == 0) {
+            fn_3_6C854(g_Minigame.minigameControlStruct.characterIndex[f->_20D], 2);
+        }
+    } else if (g_GameLogic._13E[g_GameLogic.teamFielding] == 0) {
+        fn_3_6C854(g_GameLogic.teamFielding, 2);
+    }
+    fn_3_90220(f->_17A, 10);
+    if (g_Ball.fielderWBallIndex == fielder) {
+        fn_3_A9354(fielder, 1);
+        g_FieldingLogic._13B = 1;
+        g_FieldingLogic._111 = 0;
+    }
+    if (f->_252 != 0) {
+        fn_3_27764(fielder);
+    }
+    f->_262 = 0;
+    f->_203 = 0;
+    f->_20F = 0;
+    f->_1EE = 0;
+    g_Ball.catchAnimationTotalFrames = 0;
+    return TRUE;
 }
 
 // .text:0x000251E4 size:0x1C0 mapped:0x80664278
