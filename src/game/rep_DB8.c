@@ -3,6 +3,7 @@
 #include "static/UnknownHomes_Static.h"
 #include "game/rep_DB8.h"
 #include "musyx/musyx.h"
+#include "PowerPC_EABI_Support/MSL_C/MSL_Common/rand.h"
 #include "game/rep_D18.h"
 #include "game/rep_1200.h"
 #include "game/rep_1188.h"
@@ -31,7 +32,9 @@ extern struct {
     /* 0x9A */ u8 _9A;
     /* 0x9B */ u8 _9B;
     /* 0x9C */ u8 _9C;
-    /* 0x9D */ u8 _9D[0xAC - 0x9D];
+    /* 0x9D */ u8 _9D[0xA4 - 0x9D];
+    /* 0xA4 */ u8 _A4;
+    /* 0xA5 */ u8 _A5[0xAC - 0xA5];
     /* 0xAC */ u8 _AC;
     /* 0xAD */ u8 _AD[0xCD - 0xAD];
     /* 0xCD */ u8 _CD;
@@ -42,7 +45,9 @@ extern struct {
 } lbl_3_common_bss_32724;
 
 extern struct {
-    /* 0x0000 */ u8 _0000[0x470F];
+    /* 0x0000 */ u8 _0000[0x46E4];
+    /* 0x46E4 */ s32 _46E4;
+    /* 0x46E8 */ u8 _46E8[0x470F - 0x46E8];
     /* 0x470F */ u8 _470F;
     /* 0x4710 */ u8 _4710;
 } lbl_8034E9A0;
@@ -149,14 +154,28 @@ extern void fn_800203E0(int, s8);
 extern int fn_3_6BD6C(void);
 extern void fn_3_7AF68(void);
 extern void fn_3_9DB5C(void);
+extern void fn_8002024C(void);
 extern int fn_8001C588(s16);
 
 extern struct {
-    /* 0x0000 */ u8 _0000[0x3081];
+    /* 0x0000 */ u8 _0000[0x2D77];
+    /* 0x2D77 */ u8 _2D77;
+    /* 0x2D78 */ u8 _2D78[0x2D7B - 0x2D78];
+    /* 0x2D7B */ u8 _2D7B;
+    /* 0x2D7C */ u8 _2D7C;
+    /* 0x2D7D */ u8 _2D7D[0x3081 - 0x2D7D];
     /* 0x3081 */ u8 _3081;
-    /* 0x3082 */ u8 _3082[0x3087 - 0x3082];
+    /* 0x3082 */ u8 _3082;
+    /* 0x3083 */ u8 _3083[0x3087 - 0x3083];
     /* 0x3087 */ u8 _3087;
 } lbl_8036E548;
+
+extern struct {
+    /* 0x0 */ struct {
+        /* 0x000 */ u8 _000[0x25C];
+        /* 0x25C */ u8 _25C;
+    }* _0;
+} lbl_3_common_bss_1323C;
 extern void fn_3_1DD48(void);
 extern void fn_3_7A154(int);
 extern void fn_3_90AB0(s32);
@@ -213,7 +232,17 @@ extern struct {
     /* 0x10 */ s16 _10;
 }* lbl_803CC1B8;
 
+typedef struct {
+    /* 0x0 */ s16 _0;
+    /* 0x2 */ s16 _2;
+    /* 0x4 */ s16 _4;
+    /* 0x6 */ s16 _6;
+} ChallengeStartDB8; // size 0x8
+
+extern ChallengeStartDB8 lbl_3_data_5FF4[2][4][2];
+extern s16 lbl_3_data_6074[4];
 extern s16 lbl_3_data_607C[16];
+extern u8 lbl_8010B600[][3];
 extern u8 lbl_3_data_6104[8];
 
 // .text:0x0006011C size:0x64C mapped:0x8069F1B0
@@ -295,7 +324,118 @@ void fn_3_5FE88(void) {
 
 // .text:0x0005F930 size:0x558 mapped:0x8069E9C4
 void fn_3_5F930(void) {
-    return;
+    s16 charID;
+    int i;
+    s32 j;
+
+    if (g_d_GameSettings.GameModeSelected == 4) {
+        if (g_UnkSimulation_31AC0._8 == 0) {
+            if (lbl_803C77B8[0]._02 & 0x1000) {
+                g_UnkSimulation_31AC0._8 = 1;
+            }
+        } else if (lbl_803C6CF8._715 == 1) {
+            if (g_GameLogic._125 == 1) {
+                lbl_8036E548._3082 = 1;
+            }
+            if (g_GameLogic._125 == 1 || g_GameLogic._125 >= 8 || g_GameLogic.FrameCountOfCurrentAtBat_Copy == 1) {
+                changeScene(3, 6);
+                if (g_GameLogic.FrameCountOfCurrentAtBat_Copy == 1) {
+                    g_GameLogic.FrameCountOfCurrentAtBat_Copy = 0;
+                }
+                if (lbl_8037169C._13 != 0) {
+                    g_GameLogic.framesOfExitingToMenu = 1;
+                }
+                return;
+            }
+        }
+    }
+    switch (g_GameLogic._125) {
+    case 0:
+        if (g_d_GameSettings.GameModeSelected == 5) {
+            fn_3_5B5A0();
+        }
+        fn_3_5F7A8();
+        g_GameLogic.FrameCountOfCurrentAtBat_Copy = 0;
+        g_GameLogic._125 = 1;
+        changeScene(13, 6);
+        lbl_3_common_bss_32724._9A = 0;
+        lbl_3_common_bss_32724._9C = 0;
+        lbl_803CBC3C[2] = 0;
+        lbl_803CBC3C[3] = 0;
+        lbl_8036E548._2D77 = 0;
+        lbl_8036E548._2D7B = 0;
+        lbl_8036E548._2D7C = 0;
+        break;
+    case 1:
+        if (fn_3_59BCC(g_GameLogic.FrameCountOfCurrentAtBat_Copy) != 0) {
+            g_GameLogic._125 = 2;
+            g_GameLogic.FrameCountOfCurrentAtBat_Copy = 0;
+            lbl_8036E548._2D77 = 0;
+            if (lbl_3_common_bss_32724._A4 != 0) {
+                fn_8002024C();
+            }
+        }
+        break;
+    case 2:
+        if (fn_3_750DC() != 0) {
+            g_GameLogic.FrameCountOfCurrentAtBat_Copy = 0;
+            g_GameLogic._125 = 5;
+        }
+        break;
+    case 5:
+        for (i = 1; i < 10; i++) {
+            if (g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.awayTeamBattingInd_battingTeam][i][1] == 1) {
+                charID = inMemRoster[g_GameLogic.teamFielding]
+                                    [g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.awayTeamBattingInd_battingTeam][i][0]]
+                                        .stats.CharID;
+            }
+        }
+        if (fn_8001C588(charID) != 0) {
+            g_GameLogic.FrameCountOfCurrentAtBat_Copy = 0;
+            lbl_8036E548._3081 = 0;
+            g_GameLogic._125 = 6;
+        }
+        break;
+    case 6:
+        if (fn_3_6BA64() != 0) {
+            g_GameLogic.FrameCountOfCurrentAtBat_Copy = 0;
+            g_GameLogic._125 = 7;
+        }
+        break;
+    case 7:
+        if (someAnimationIndFunction() != 0) {
+            g_GameLogic.FrameCountOfCurrentAtBat_Copy = 0;
+            g_GameLogic._125 = 8;
+        }
+        break;
+    case 8:
+        if (g_GameLogic.FrameCountOfCurrentPitch >= 240) {
+            if (g_d_GameSettings.GameModeSelected == 4 || g_d_GameSettings._10 == 2) {
+                g_GameLogic._125 = 9;
+            } else if (fn_3_6C938(1, 0x1300) != 0) {
+                g_GameLogic._125 = 9;
+            }
+        }
+        if (fn_3_FD9FC() != 0) {
+            g_GameLogic._125 = 9;
+        }
+        break;
+    case 9:
+        changeScene(3, 6);
+        if (lbl_8037169C._13 != 0) {
+            g_GameLogic._125 = 10;
+        }
+        break;
+    case 10:
+        lbl_3_common_bss_1323C._0->_25C = 1;
+        fn_3_FBD70();
+        fn_3_5A6D4(22);
+        break;
+    }
+    // An empty loop (its body presumably compiled out) leaves only the
+    // first test of its s32 counter, li r0,0 and cmpwi r0,9.
+    for (j = 0; j < 9; j++) {
+    }
 }
 
 // .text:0x0005F7A8 size:0x188 mapped:0x8069E83C
@@ -1445,7 +1585,87 @@ void fn_3_5BA2C(void) {
 
 // .text:0x0005B5A0 size:0x48C mapped:0x8069A634
 void fn_3_5B5A0(void) {
-    return;
+    int r;
+    s16 bases;
+    int batter;
+    int i;
+    int j;
+
+    g_d_GameSettings.challengeMinigame_baseCoinsEarned = 0;
+    g_d_GameSettings.bJMatchRelated = 0;
+    if (g_d_GameSettings.GameModeSelected == 5) {
+        if (g_GameLogic._13E[g_GameLogic.homeTeamInd] != 0) {
+            g_GameLogic.AIDifficulty0Special3Weak[0] = lbl_3_data_6074[g_d_GameSettings.challengeDifficulty];
+        } else {
+            g_GameLogic.AIDifficulty0Special3Weak[1] = lbl_3_data_6074[g_d_GameSettings.challengeDifficulty];
+        }
+        if (g_d_GameSettings.bJMatchInd == 1) {
+            g_Scores._00 = 9;
+            g_Scores._AA = 9;
+            g_Scores._AB = 9;
+            g_Scores._AD = 1;
+            g_GameLogic.homeTeamBattingInd_fieldingTeam ^= 1;
+            g_GameLogic.awayTeamBattingInd_battingTeam ^= 1;
+            g_GameLogic.teamBatting ^= 1;
+            g_GameLogic.teamFielding ^= 1;
+            r = rand() % 2;
+            g_GameLogic.currentBatterPerTeam[g_GameLogic.homeTeamBattingInd_fieldingTeam] =
+                lbl_3_data_5FF4[g_d_GameSettings.home_AwaySetting][g_d_GameSettings.challengeDifficulty][r]._6;
+            g_Strikes.outs = g_Strikes.storedOuts =
+                lbl_3_data_5FF4[g_d_GameSettings.home_AwaySetting][g_d_GameSettings.challengeDifficulty][r]._2;
+            g_Scores._04[g_GameLogic.homeTeamBattingInd_fieldingTeam][0] =
+                lbl_3_data_5FF4[g_d_GameSettings.home_AwaySetting][g_d_GameSettings.challengeDifficulty][r]._0;
+            if (g_Scores._04[g_GameLogic.homeTeamBattingInd_fieldingTeam][0] < 0) {
+                g_Scores._04[g_GameLogic.awayTeamBattingInd_battingTeam][0] =
+                    -g_Scores._04[g_GameLogic.homeTeamBattingInd_fieldingTeam][0];
+                g_Scores._04[g_GameLogic.homeTeamBattingInd_fieldingTeam][0] = 0;
+            }
+            bases = lbl_3_data_5FF4[g_d_GameSettings.home_AwaySetting][g_d_GameSettings.challengeDifficulty][r]._4;
+            g_Runners[1].rosterID = -1;
+            g_Runners[2].rosterID = -1;
+            g_Runners[3].rosterID = -1;
+            batter = g_GameLogic.currentBatterPerTeam[g_GameLogic.homeTeamBattingInd_fieldingTeam];
+            if (bases & 0x1) {
+                if (--batter < 1) {
+                    batter = 9;
+                }
+                g_Runners[1].rosterID =
+                    g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.homeTeamBattingInd_fieldingTeam][batter][0];
+            }
+            if (bases & 0x10) {
+                if (--batter < 1) {
+                    batter = 9;
+                }
+                g_Runners[2].rosterID =
+                    g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.homeTeamBattingInd_fieldingTeam][batter][0];
+            }
+            if (bases & 0x100) {
+                if (--batter < 1) {
+                    batter = 9;
+                }
+                g_Runners[3].rosterID =
+                    g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.homeTeamBattingInd_fieldingTeam][batter][0];
+            }
+            setBatterContactConstants();
+            fn_3_8A1D8();
+            g_d_GameSettings.home_AwaySetting ^= 1;
+        } else {
+            if (lbl_8034E9A0._46E4 == 9 || starMissionCompletionTracker._16C2 == 42) {
+                g_Scores._AA = lbl_8010B600[g_d_GameSettings.challengeDifficulty][1];
+            } else {
+                g_Scores._AA = lbl_8010B600[g_d_GameSettings.challengeDifficulty][0];
+            }
+            g_Scores._AB = g_Scores._AA + 3;
+        }
+        g_Scores._C7 = lbl_8010B600[g_d_GameSettings.challengeDifficulty][2];
+    }
+    for (i = 0; i < 54; i++) {
+        for (j = 0; j < 10; j++) {
+            if (starMissionCompletionTracker.characters[i].inGameMissionTracker[j].starMissionStatus != -2) {
+                starMissionCompletionTracker.characters[i].inGameMissionTracker[j].starMissionStatus = 0;
+            }
+        }
+    }
 }
 
 // .text:0x0005B41C size:0x184 mapped:0x8069A4B0
