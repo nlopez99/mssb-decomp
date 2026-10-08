@@ -1224,17 +1224,57 @@ void fn_3_F13F8(StaC5Draw* draw) {
 }
 
 // .text:0x000F0FA4 size:0x454 mapped:0x80730038
-void fn_3_F0FA4(void) {
-    return;
+void fn_3_F0FA4(StaC5Draw* draw) {
+    StaC5Model* model = draw->_74;
+
+    if (g_GameLogic.gameStatus == GAME_STATUS_PAUSED) {
+        return;
+    }
+    if (g_GameLogic.gameStatus == GAME_STATUS_INNING_TRANSITION) {
+        if (!draw->_99) {
+            fn_3_F1518(draw);
+        }
+        return;
+    }
+    if (draw->_99) {
+        draw->_99 = 0;
+    }
+    if (g_GameLogic.gameStatus == GAME_STATUS_DEFAULT) {
+        if (draw->_C6 >= 4) {
+            fn_3_F1518(draw);
+        }
+        return;
+    }
+    if (model->_58) {
+        AnimateActorBones(model->_00);
+    }
+    switch (draw->_C6) {
+    case 0:
+    case 1:
+        fn_3_F082C(draw);
+        break;
+    case 2:
+        fn_3_F0224(draw);
+        break;
+    case 4:
+        fn_3_EF930(draw);
+        break;
+    case 5:
+        fn_3_EF890(draw);
+        break;
+    case 6:
+        fn_3_EF800(draw);
+        break;
+    }
 }
 
 // .text:0x000F082C size:0x778 mapped:0x8072F8C0
-void fn_3_F082C(void) {
+void fn_3_F082C(StaC5Draw* draw) {
     return;
 }
 
 // .text:0x000F0224 size:0x608 mapped:0x8072F2B8
-void fn_3_F0224(void) {
+void fn_3_F0224(StaC5Draw* draw) {
     return;
 }
 
