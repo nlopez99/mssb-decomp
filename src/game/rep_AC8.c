@@ -105,7 +105,8 @@ typedef struct UnkAC8Fielder {
     /* 0x1A0 */ s16 _1A0;
     /* 0x1A2 */ s16 _1A2;
     /* 0x1A4 */ s16 _1A4;
-    /* 0x1A6 */ u8 _1A6[0x1AC - 0x1A6];
+    /* 0x1A6 */ s16 _1A6;
+    /* 0x1A8 */ u8 _1A8[0x1AC - 0x1A8];
     /* 0x1AC */ s16 _1AC;
     /* 0x1AE */ s16 _1AE;
     /* 0x1B0 */ s16 _1B0;
@@ -4187,7 +4188,45 @@ void fn_3_38FF8(void) {
 
 // .text:0x00038D10 size:0x2E8 mapped:0x80677DA4
 void fn_3_38D10(void) {
-    return;
+    s32 chaser;
+    s32 i;
+    f32 x;
+    f32 z;
+    f32 half;
+
+    if (g_Ball.AtBat_ContactResult == 0 && (g_FieldingLogic._0B0 == 3 || g_FieldingLogic._0B0 == 5) &&
+        g_Fielders[g_FieldingLogic._0B0]._080 < g_Fielders[g_FieldingLogic._0B0]._0E8) {
+        chaser = g_FieldingLogic._0B0;
+    } else {
+        if ((g_Fielders[3]._1DB == 0 || g_Fielders[5]._1DB == 0) && g_Ball.AtBat_ContactResult == 0) {
+            x = g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x;
+            z = g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z;
+        } else {
+            half = 0.5f * (g_Fielders[3]._070 + g_Fielders[5]._070);
+            for (i = 1; i < 120; i += 3) {
+                if (g_Ball.physicsSubstruct.futureCoordsAndDist[i].dist > half) {
+                    break;
+                }
+            }
+            x = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x;
+            z = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z;
+        }
+        chaser = fn_3_37114(3, 5, TRUE, x, z);
+        if (chaser < 0) {
+            if (g_Ball.ballZoneAwayFromHome >= 2 && lbl_3_bss_16C > 0xA00 && lbl_3_bss_16C < 0xE00) {
+                g_FieldingLogic._13A = 0;
+            }
+            return;
+        }
+    }
+    if (chaser == 3) {
+        fn_3_38790(3, TRUE);
+        fn_3_5985C(5, 12);
+    } else {
+        fn_3_38790(5, TRUE);
+        fn_3_5985C(3, 12);
+    }
+    g_FieldingLogic._13A = 0;
 }
 
 // .text:0x00038790 size:0x580 mapped:0x80677824
@@ -4281,7 +4320,32 @@ void fn_3_37588(void) {
 
 // .text:0x0003740C size:0x17C mapped:0x806764A0
 void fn_3_3740C(void) {
-    return;
+    f32 maxReach = 0.0f;
+    s32 bestDiff = 0x1000;
+    s32 best = -1;
+    s32 i;
+    s32 diff;
+
+    if (g_Ball.ballState == 0 && g_FieldingLogic._0B0 <= 5) {
+        for (i = 0; i < 6; i++) {
+            if (g_Fielders[i]._070 > maxReach) {
+                maxReach = g_Fielders[i]._070;
+            }
+        }
+        if (5.0f + maxReach < g_Ball.ballDistanceFromHome) {
+            for (i = 6; i < 9; i++) {
+                diff = __abs(g_Ball.ballAngleFromHome - g_Fielders[i]._180);
+                if (bestDiff > diff) {
+                    bestDiff = diff;
+                    best = i;
+                }
+            }
+            // Tests the loop counter, which is always 9 here, rather than best.
+            if (i >= 0) {
+                fn_3_38790(best, FALSE);
+            }
+        }
+    }
 }
 
 // .text:0x00037114 size:0x2F8 mapped:0x806761A8
@@ -5045,7 +5109,41 @@ void fn_3_308B8(s32 fielder, f32 x, f32 z) {
 
 // .text:0x0003061C size:0x29C mapped:0x8066F6B0
 void fn_3_3061C(void) {
-    return;
+    UnkAC8Fielder* f;
+    s32 i;
+    f32 dx;
+    f32 dz;
+    f32 dist;
+
+    for (i = 0; i < 9; i++) {
+        f = &g_Fielders[i];
+        if (f->_1F1 == 0) {
+            f->_1F1 = 1;
+            f->_000 = lbl_3_data_4290[g_d_GameSettings.StadiumID][g_GameLogic.awayTeamBattingInd_battingTeam ^ 1].x;
+            f->_004 = 0.0f;
+            f->_008 = lbl_3_data_4290[g_d_GameSettings.StadiumID][g_GameLogic.awayTeamBattingInd_battingTeam ^ 1].z;
+            f->_014 = lbl_3_data_450C[i].x;
+            f->_01C = lbl_3_data_450C[i].z;
+            f->_1A6 = RandomInt_Game(30);
+        }
+        dx = f->_014 - f->_000;
+        dz = f->_01C - f->_008;
+        dist = dolsqrtf2(dx * dx + dz * dz);
+        if (dist < 0.3f || f->_1A6 > g_GameLogic.FrameCountOfCurrentPitch) {
+            f->_030 = 0.0f;
+            f->_034 = 0.0f;
+            f->_050 = 0.0f;
+        } else {
+            f->_030 = 0.25f * (dx / dist) - 0.01f;
+            f->_000 += f->_030;
+            f->_034 = 0.25f * (dz / dist) - 0.01f;
+            f->_008 += f->_034;
+            f->_050 = 0.25f;
+        }
+    }
+    fn_3_313B0();
+    g_FieldingLogic._118 = 0;
+    g_Ball.framesSinceHit = 100;
 }
 
 // .text:0x00030564 size:0xB8 mapped:0x8066F5F8
