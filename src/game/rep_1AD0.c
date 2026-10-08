@@ -15,7 +15,8 @@
 #include "game/rep_1838.h"
 
 typedef struct Fielder1AD0 {
-    /* 0x000 */ u8 _000[0x1C7];
+    /* 0x000 */ Vec _000;
+    /* 0x00C */ u8 _00C[0x1C7 - 0xC];
     /* 0x1C7 */ u8 _1C7;
     /* 0x1C8 */ u8 _1C8[0x268 - 0x1C8];
 } Fielder1AD0; // size: 0x268
@@ -27,6 +28,8 @@ extern struct {
     /* 0x13 */ u8 _13;
 } g_RunningLogic;
 
+extern u8 lbl_3_data_FAF4[4][4];
+extern s16 lbl_3_data_FB04;
 extern s16 lbl_3_data_FB08[10][3];
 extern s16 lbl_3_data_FB44[10][3];
 extern s16 lbl_3_data_FB80[10][3];
@@ -357,17 +360,113 @@ void fn_3_B025C(void) {
 
 // .text:0x000B01E0 size:0x7C mapped:0x806EF274
 void fn_3_B01E0(void) {
-    return;
+    ballPhysica();
+    fn_3_598D0();
+    if (g_Ball.framesSinceHit == 60) {
+        g_Fielders[0]._000.x = g_Pitcher.pitcherCoord.x;
+        g_Fielders[0]._000.z = g_Pitcher.pitcherCoord.z;
+    }
+    fn_3_AFE0C();
+    if (g_Practice.instructionNumber < 0 && g_Practice.guidedPracticeCompletionRelated2 == 0) {
+        fn_3_B003C();
+    }
 }
 
 // .text:0x000B003C size:0x1A4 mapped:0x806EF0D0
 void fn_3_B003C(void) {
-    return;
+    if (g_Practice.practiceType_2 == 4) {
+        return;
+    }
+    if (g_Practice.guidedPracticeCompletionRelated2 != 0) {
+        return;
+    }
+    if (g_Ball.deadBallReason != 0) {
+        if (g_Ball.framesOnGroundUntilPickedUp == 0 && g_Practice._1B0 == 0 &&
+            g_Ball.matchFramesAndBallAngle.ballOverWallFrames < lbl_3_data_FB04) {
+            return;
+        }
+    } else if (g_Ball.framesSinceBallHitGroundOrWasCaught < lbl_3_data_FB04) {
+        return;
+    }
+    switch (g_Practice.practiceLevel) {
+    case 0:
+        if (g_Batter.hitGeneralType != 3) {
+            g_Practice.guidedPracticeCounter++;
+        }
+        break;
+    case 1:
+        if (g_Batter.hitGeneralType == 1 || (g_Batter.hitGeneralType == 2 && g_Batter.moonShotInd != 0)) {
+            g_Practice.guidedPracticeCounter++;
+        }
+        break;
+    case 2:
+        if (g_Batter.hitGeneralType == 3) {
+            g_Practice.guidedPracticeCounter++;
+        }
+        break;
+    case 3:
+        if (g_Batter.hitGeneralType == 2 && g_Batter.moonShotInd == 0) {
+            g_Practice.guidedPracticeCounter++;
+        }
+        break;
+    }
+    if (g_Practice.guidedPracticeCounter >= lbl_3_data_FAF4[g_Practice.practiceType_2][g_Practice.practiceLevel]) {
+        g_Practice.guidedPracticeCompletionRelated = 1;
+    }
+    g_Practice.guidedPracticeCompletionRelated2 = 1;
 }
 
 // .text:0x000AFE0C size:0x230 mapped:0x806EEEA0
 void fn_3_AFE0C(void) {
-    return;
+    s16 endFrame = 120;
+    InputStruct* input = &g_Controls[g_Practice.homeAway];
+
+    if (g_Practice.instructionNumber >= 0) {
+        if (g_Practice.allowPlayToEndIndicator != 0) {
+            endFrame = 60;
+        } else {
+            g_FieldingLogic._0AE = 0;
+            return;
+        }
+    } else if (g_Ball.AtBat_ContactResult == 0) {
+        g_FieldingLogic._0AE = 0;
+        return;
+    } else if (g_Practice.guidedPracticeCompletionRelated != 0) {
+        g_FieldingLogic._0AE = 0;
+        return;
+    } else if (g_Ball.deadBallReason == 1) {
+        if (g_Practice._1B0 == 0) {
+            if (input->newButtonInput & 0x1100) {
+                g_Practice._1B0 = 1;
+            }
+            endFrame = 300;
+        } else {
+            endFrame = 45;
+        }
+        lbl_3_common_bss_34C58._2A = 1;
+        lbl_3_common_bss_34C58._24 = 30;
+    } else if (g_Ball.framesSinceHit > 180) {
+        endFrame = 120;
+    }
+    if (g_FieldingLogic._0AE < 0x7FFE) {
+        g_FieldingLogic._0AE++;
+    } else {
+        g_FieldingLogic._0AE = 0x7FFF;
+    }
+    if (g_GameLogic.framePlayEnd > endFrame && g_FieldingLogic._0AE > endFrame - 90) {
+        g_FieldingLogic._0AE = 0;
+        g_FieldingLogic._0EE = 0;
+    }
+    if (g_FieldingLogic._0AE >= endFrame) {
+        fn_3_AFDC0();
+    } else if (g_FieldingLogic._0AE >= endFrame - 6) {
+        changeScene(3, 6);
+    } else if (g_FieldingLogic._0AE == endFrame - 30) {
+        g_FieldingLogic._10E = 1;
+        g_FieldingLogic._0EE = 1;
+    }
+    g_GameLogic.framePlayEnd = endFrame;
+    g_GameLogic.CountdownUntilFade = endFrame - g_FieldingLogic._0AE;
 }
 
 // .text:0x000AFDC0 size:0x4C mapped:0x806EEE54
