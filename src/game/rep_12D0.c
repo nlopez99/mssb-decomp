@@ -788,11 +788,9 @@ void fn_3_7AB34(void) {
 }
 
 // .text:0x0007A154 size:0x9E0 mapped:0x806B91E8
-// 99.53%: register numbers only, in the `arg0 == 0` block (g_Runners[3]'s pitcher index in r6
-// and teamFielding in r8 in the target) and `runs` incremented in place there.
 void fn_3_7A154(int arg0) {
     s32 i;
-    int runs;
+    s32 runs;
     int left;
     int flag = 0;
     int lead;
