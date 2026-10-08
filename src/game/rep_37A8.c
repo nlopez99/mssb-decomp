@@ -40,10 +40,11 @@ typedef struct UnkMgEntry3310 {
 typedef struct Unk37A8Piranha {
     /* 0x00 */ Vec pos;
     /* 0x0C */ Vec vel;
-    /* 0x18 */ u8 _18[0x1C - 0x18];
+    /* 0x18 */ f32 _18;
     /* 0x1C */ s32 _1C;
     /* 0x20 */ s16 _20;
-    /* 0x22 */ u8 _22[0x26 - 0x22];
+    /* 0x22 */ s16 _22;
+    /* 0x24 */ u8 _24[0x26 - 0x24];
     /* 0x26 */ u8 active;
     /* 0x27 */ u8 _27;
 } Unk37A8Piranha; // size: 0x28
@@ -52,25 +53,30 @@ typedef struct Unk37A8Piranha {
 typedef struct Unk37A8Cpu {
     /* 0x0 */ s16 _0;
     /* 0x2 */ u8 _2;
-    /* 0x3 */ u8 _3;
+    /* 0x3 */ s8 _3;
 } Unk37A8Cpu; // size: 0x4
 
 // This minigame's view of g_Minigame
 typedef struct Unk37A8Minigame {
     /* 0x0000 */ UnkMgEntry3310 _0000[3];
     /* 0x00A8 */ Unk37A8Piranha _00A8[40];
-    /* 0x06E8 */ u8 _06E8[0x193A - 0x6E8];
+    /* 0x06E8 */ u8 _06E8[0x17C8 - 0x6E8];
+    /* 0x17C8 */ s16 _17C8[50];
+    /* 0x182C */ u8 _182C[0x193A - 0x182C];
     /* 0x193A */ u8 _193A[100];
     /* 0x199E */ u8 _199E[0x1B44 - 0x199E];
     /* 0x1B44 */ s16 _1B44[4];
     /* 0x1B4C */ u8 _1B4C[0x1B58 - 0x1B4C];
     /* 0x1B58 */ u8 _1B58[4][10];
     /* 0x1B80 */ u8 _1B80[4];
-    /* 0x1B84 */ u8 _1B84[0x1BB6 - 0x1B84];
+    /* 0x1B84 */ u8 _1B84[50];
     /* 0x1BB6 */ s8 _1BB6[50];
-    /* 0x1BE8 */ u8 _1BE8[0x1C7E - 0x1BE8];
+    /* 0x1BE8 */ u8 _1BE8[50];
+    /* 0x1C1A */ u8 _1C1A[50];
+    /* 0x1C4C */ u8 _1C4C[50];
     /* 0x1C7E */ s8 _1C7E[4][3];
-    /* 0x1C8A */ u8 _1C8A[0x1C9A - 0x1C8A];
+    /* 0x1C8A */ u8 _1C8A[4];
+    /* 0x1C8E */ u8 _1C8E[0x1C9A - 0x1C8E];
     /* 0x1C9A */ u8 _1C9A[4];
     /* 0x1C9E */ u8 _1C9E[4];
     /* 0x1CA2 */ u8 _1CA2[0x1CA9 - 0x1CA2];
@@ -103,6 +109,7 @@ extern void changeScene(u8, s16);
 extern u8 lbl_800EFBA4[0x10];
 extern s16 lbl_3_data_7F10[54];
 extern Vec lbl_3_data_21B94[4];
+extern Vec lbl_3_data_21BC4[3][4];
 
 extern u8 lbl_3_data_21278[2];
 extern f32 lbl_3_data_21D34[4][3][3];
@@ -114,6 +121,8 @@ extern s16 lbl_3_data_21E04[2];
 extern u8 lbl_3_data_21E10[8];
 extern s16 lbl_3_data_21E68[26];
 extern s16 lbl_3_data_21EAC[4][2];
+extern s8 lbl_3_data_21EBC[4];
+extern s8 lbl_3_data_21EC0[4];
 
 f32 lbl_3_data_26698[3] = { 0.5f, 0.0f, -0.5f };
 s8 lbl_3_data_266A4 = -1;
@@ -239,7 +248,70 @@ void fn_3_145EB8(void) {
 
 // .text:0x00145B98 size:0x320 mapped:0x80784C2C
 void fn_3_145B98(void) {
-    return;
+    s32 list[4];
+    int team;
+    int coin;
+    int n;
+    int i;
+
+    if (g_Minigame.turnOverStatus != 0) {
+        return;
+    }
+    for (team = 0; team < 4; team++) {
+        if (g_Minigame.minigameControlStruct.characterIndex[team] < 0) {
+            continue;
+        }
+        if (MG._1C7E[team][2] < 0) {
+            for (i = 0; i < 3; i++) {
+                for (coin = 0; coin < 50; coin++) {
+                    if (MG._193A[coin] == 0) {
+                        MG._1C7E[team][i] = coin;
+                        MG._1BB6[coin] = team;
+                        MG._193A[coin] = 2;
+                        MG._17C8[coin] = 0;
+                        MG._1B84[coin] = RandomInt_Game(4);
+                        MG._1C1A[coin] = 0;
+                        MG._1C4C[coin] = 0;
+                        g_Minigame._1C8A[team]++;
+                        fn_3_145AD0(coin);
+                        break;
+                    }
+                }
+            }
+        } else if (MG._1C7E[team][0] < 0) {
+            MG._1C7E[team][0] = MG._1C7E[team][1];
+            MG._1C7E[team][1] = MG._1C7E[team][2];
+            for (coin = 0; coin < 50; coin++) {
+                if (MG._193A[coin] == 0) {
+                    MG._1C7E[team][2] = coin;
+                    MG._1BB6[coin] = team;
+                    MG._193A[coin] = 2;
+                    MG._17C8[coin] = 0;
+                    MG._1C1A[coin] = 0;
+                    MG._1C4C[coin] = 0;
+                    g_Minigame._1C8A[team]++;
+                    if (g_Minigame._1C8A[team] <= lbl_3_data_21E68[1]) {
+                        n = 0;
+                        for (i = 0; i < 4; i++) {
+                            if (MG._1CA9[i] == 1) {
+                                list[n] = i;
+                                n++;
+                            }
+                        }
+                        if (n == 0) {
+                            MG._1B84[coin] = RandomInt_Game(4);
+                        } else {
+                            MG._1B84[coin] = list[RandomInt_Game(n)];
+                        }
+                    } else {
+                        MG._1B84[coin] = 5;
+                        g_Minigame._1C8A[team] = 0;
+                    }
+                    break;
+                }
+            }
+        }
+    }
 }
 
 // .text:0x00145AD0 size:0xC8 mapped:0x80784B64
@@ -539,8 +611,47 @@ void fn_3_1430D0(s32 arg0, s32 player) {
 }
 
 // .text:0x00142DB4 size:0x31C mapped:0x80781E48
-void fn_3_142DB4(void) {
-    return;
+void fn_3_142DB4(int idx) {
+    UnkMgEntry3310* entry;
+    Unk37A8Piranha* piranha;
+    Unk37A8Fielder* fielder;
+    int i;
+    f32 size;
+    Vec d;
+
+    entry = &MG._0000[idx];
+    for (i = 0; i < 40; i++) {
+        if (MG._00A8[i].active == 0) {
+            break;
+        }
+    }
+    if (i < 40) {
+        piranha = &MG._00A8[i];
+        if (entry->_2B != 0) {
+            piranha->pos.x = lbl_3_data_21BC4[idx][3].x;
+            piranha->pos.y = lbl_3_data_21BC4[idx][3].y;
+            piranha->pos.z = lbl_3_data_21BC4[idx][3].z;
+        } else {
+            piranha->pos.x = lbl_3_data_21BC4[idx][2].x;
+            piranha->pos.y = lbl_3_data_21BC4[idx][2].y;
+            piranha->pos.z = lbl_3_data_21BC4[idx][2].z;
+        }
+        piranha->_22 = entry->_35;
+        fielder = &g_Fielders[entry->_34];
+        piranha->_1C = entry->_35;
+        d.x = lbl_3_data_21B94[g_Minigame._1CAD[entry->_35]].x - piranha->pos.x;
+        d.y = lbl_3_data_21B94[g_Minigame._1CAD[entry->_35]].y - piranha->pos.y;
+        d.z = lbl_3_data_21B94[g_Minigame._1CAD[entry->_35]].z - piranha->pos.z;
+        size = 0.01f * (lbl_3_data_7F10[fielder->_17A] * charSizeMultipliers[fielder->_17A][0]);
+        d.y += lbl_3_data_21D2C[1] + size;
+        piranha->vel.x = d.x / (f32)lbl_3_data_21E68[22];
+        piranha->vel.y = d.y / (f32)lbl_3_data_21E68[22];
+        piranha->vel.z = d.z / (f32)lbl_3_data_21E68[22];
+        piranha->_18 = 0.0f;
+        piranha->active = 2;
+        piranha->_20 = 0;
+        fn_3_15730C(i, piranha->pos.x, -piranha->pos.y, piranha->pos.z);
+    }
 }
 
 // .text:0x00142CA8 size:0x10C mapped:0x80781D3C
@@ -575,8 +686,91 @@ void fn_3_142C18(void) {
 }
 
 // .text:0x001428F0 size:0x328 mapped:0x80781984
-void fn_3_1428F0(void) {
-    return;
+BOOL fn_3_1428F0(s8 player, u8 force) {
+    Unk37A8Cpu* cpu;
+    s8 port;
+    u8 strength;
+    s8 target;
+    s8 coin;
+    s8 ready;
+    s8 count;
+    s8 i;
+    u8 kind;
+    u8 found;
+    UnkMgEntry3310* entry;
+
+    ready = -1;
+    found = FALSE;
+    count = 0;
+    target = MG._1DCC[player]._3;
+    port = g_Minigame.minigameControlStruct.characterIndex[player];
+    strength = g_Minigame.minigameControlStruct.aIStrength[player];
+    if (MG._1DCC[player]._0 >= 0) {
+        cpu->_0--;
+    }
+    cpu = &MG._1DCC[player];
+    coin = MG._1C7E[player][0];
+    if (coin < 0) {
+        return FALSE;
+    }
+    for (i = 0; i < 3; i++) {
+        if (MG._0000[i]._2A == 2) {
+            count++;
+            if (MG._0000[target]._2C == 4) {
+                ready = i;
+                break;
+            }
+        }
+    }
+    if (ready < 0 && cpu->_0 >= 0 && !force) {
+        return FALSE;
+    }
+    kind = MG._1B84[coin];
+    if (kind != 5 || (count != 0 && RandomInt_Game(100) >= lbl_3_data_21EC0[strength])) {
+        if (count == 0) {
+            return FALSE;
+        }
+        if (RandomInt_Game(100) < lbl_3_data_21EBC[strength]) {
+            found = TRUE;
+        }
+        if (!found) {
+            entry = &MG._0000[target];
+            if (entry->_2A == 2 && (kind == entry->_2C || kind == 5 || entry->_2C == 4)) {
+                found = TRUE;
+            }
+        }
+        if (!found) {
+            for (i = 0; i < 3; i++) {
+                if (MG._0000[i]._2A == 2 && (kind == MG._0000[i]._2C || kind == 5 || MG._0000[i]._2C == 4)) {
+                    target = i;
+                    found = TRUE;
+                    break;
+                }
+            }
+        }
+    }
+    if (found) {
+        switch (target) {
+        case 0:
+            g_Minigame._1D7C[port].newButtonInput |= 0x102;
+            g_Minigame._1D7C[port].buttonInput |= 0x102;
+            break;
+        case 1:
+            g_Minigame._1D7C[port].newButtonInput |= 0x108;
+            g_Minigame._1D7C[port].buttonInput |= 0x108;
+            break;
+        case 2:
+            g_Minigame._1D7C[port].newButtonInput |= 0x101;
+            g_Minigame._1D7C[port].buttonInput |= 0x101;
+            break;
+        }
+        cpu->_3 = target;
+    } else {
+        g_Minigame._1D7C[port].newButtonInput |= 0x200;
+        g_Minigame._1D7C[port].buttonInput |= 0x200;
+    }
+    cpu->_0 = RandomInt_Game_Range(lbl_3_data_21EAC[strength][0], lbl_3_data_21EAC[strength][1]);
+    return TRUE;
 }
 
 // .text:0x00142570 size:0x380 mapped:0x80781604
