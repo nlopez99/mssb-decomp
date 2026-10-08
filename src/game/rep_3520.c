@@ -2218,13 +2218,14 @@ BOOL fn_3_1354BC(u32 i, f32 x, f32 z) {
 }
 
 // .text:0x001350BC size:0x400 mapped:0x80774150
-// 97.2%: registers only, from the first saved ones on (r22 for g_Minigame, i in r31).
+// 98.9%: registers only; the coin walker c sits in r17 where the target has r21, and the
+// inlined fn_3_1354BC swaps its two fabs registers.
 Unk3520Coin* fn_3_1350BC(u32 player, u32 quadrant, u32 count, Unk3520Coin* coins) {
     u32 strength = g_Minigame.minigameControlStruct.aIStrength[player];
     Unk3520Coin* c;
-    u32 i;
-    u32 j;
     u32 k;
+    u32 j;
+    u32 i;
     f32 x;
     f32 z;
     f32 dx;
@@ -2239,15 +2240,15 @@ Unk3520Coin* fn_3_1350BC(u32 player, u32 quadrant, u32 count, Unk3520Coin* coins
             c->valid = TRUE;
             z = g_Minigame.wallBall_coinCoordinates[c->coin].z;
             x = g_Minigame.wallBall_coinCoordinates[c->coin].x;
-            dz = z - lbl_3_data_21A48.z;
             dx = x - lbl_3_data_21A48.x;
+            dz = z - lbl_3_data_21A48.z;
             if (dx * dx + dz * dz < 20.25f) {
                 c->valid = FALSE;
             } else if (player != g_Minigame._1D6D) {
                 if (g_Minigame._1D6D >= 0) {
                     fielder = &g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame._1D6D]];
-                    dz = z - fielder->pos.z;
                     dx = x - fielder->pos.x;
+                    dz = z - fielder->pos.z;
                     if (dx * dx + dz * dz <= lbl_3_data_21B38[strength] * lbl_3_data_21B38[strength]) {
                         c->valid = FALSE;
                     }
@@ -2262,24 +2263,24 @@ Unk3520Coin* fn_3_1350BC(u32 player, u32 quadrant, u32 count, Unk3520Coin* coins
                     } while (++j < lbl_3_data_21A88[g_Minigame.soloMinigameDifficulty]);
                 }
                 if (c->valid && MG.box._1E == 2) {
-                    dz = z - MG.box.pos.z;
                     dx = x - MG.box.pos.x;
+                    dz = z - MG.box.pos.z;
                     if (dx * dx + dz * dz <= lbl_3_data_21B58[strength] * lbl_3_data_21B58[strength]) {
                         c->valid = FALSE;
                     }
                 }
             }
             fielder = &g_Fielders[g_Minigame.minigameFielderIndex[player]];
-            dz = g_Minigame.wallBall_coinCoordinates[c->coin].z - fielder->pos.z;
             dx = g_Minigame.wallBall_coinCoordinates[c->coin].x - fielder->pos.x;
+            dz = g_Minigame.wallBall_coinCoordinates[c->coin].z - fielder->pos.z;
             c->score = dx * dx + dz * dz;
             for (k = 0; k < g_Minigame.miniGameNumberOfParticipants; k++) {
                 if (k == player) {
                     continue;
                 }
                 fielder = &g_Fielders[g_Minigame.minigameFielderIndex[k]];
-                dz = g_Minigame.wallBall_coinCoordinates[c->coin].z - fielder->pos.z;
                 dx = g_Minigame.wallBall_coinCoordinates[c->coin].x - fielder->pos.x;
+                dz = g_Minigame.wallBall_coinCoordinates[c->coin].z - fielder->pos.z;
                 dist = dx * dx + dz * dz;
                 if (dist < 36.0f && dist < c->score) {
                     c->score += 100.0f;
