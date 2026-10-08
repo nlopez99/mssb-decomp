@@ -230,14 +230,16 @@ void fn_3_7C190(void) {
 }
 
 // .text:0x0007BC20 size:0x570 mapped:0x806BACB4
-// 93.99%: the target keeps `type` in r4 and `sub` in r5 (r3 unused) and does not fold the
-// `type == 3` test right after `type = 3`; s32 types, a one-pass loop and declaration
-// orders did not reproduce either.
+// 98.65%: the target does not fold the `type == 3` test right after `type = 3` (s32 types,
+// moving the test out of the block and a one-pass loop did not reproduce it); the rest
+// are register numbers.
 void fn_3_7BC20(void) {
-    int sub = 0;
+    int endOfGame;
     int type = 0;
+    int sub = 0;
     int runners;
     int diff;
+    inMemCamera* cam;
     InMemBallType* ball = &g_Ball;
     inMemStrikes* strikes = &g_Strikes;
 
@@ -285,12 +287,14 @@ void fn_3_7BC20(void) {
             type = 0;
         }
     } else {
-        if (g_pCamera->_A50 >= 2) {
-            if (g_GameLogic.EventTriggers_EndOfGame != 0) {
-                if (g_pCamera->_A98 > 0 &&
+        endOfGame = g_GameLogic.EventTriggers_EndOfGame;
+        cam = g_pCamera;
+        if (cam->_A50 >= 2) {
+            if (endOfGame != 0) {
+                if (cam->_A98 > 0 &&
                     (lbl_3_common_bss_32A94._2 == 18 || lbl_3_common_bss_32A94._2 == 19 || lbl_3_common_bss_32A94._2 == 26)) {
                     type = 7;
-                } else if (g_pCamera->_A98 > 0 && lbl_3_common_bss_32A94._2 >= 20 && lbl_3_common_bss_32A94._2 <= 27) {
+                } else if (cam->_A98 > 0 && lbl_3_common_bss_32A94._2 >= 20 && lbl_3_common_bss_32A94._2 <= 27) {
                     type = 8;
                 }
             } else {
@@ -305,10 +309,10 @@ void fn_3_7BC20(void) {
                     runners++;
                 }
                 if (g_Scores._A6 <= 4 && runners == 3) {
-                    if (g_pCamera->_A98 > 0 &&
+                    if (cam->_A98 > 0 &&
                         (lbl_3_common_bss_32A94._2 == 18 || lbl_3_common_bss_32A94._2 == 19 || lbl_3_common_bss_32A94._2 == 26)) {
                         type = 7;
-                    } else if (g_pCamera->_A98 > 0 && lbl_3_common_bss_32A94._2 >= 20 && lbl_3_common_bss_32A94._2 <= 27) {
+                    } else if (cam->_A98 > 0 && lbl_3_common_bss_32A94._2 >= 20 && lbl_3_common_bss_32A94._2 <= 27) {
                         type = 8;
                     }
                 }
@@ -320,17 +324,17 @@ void fn_3_7BC20(void) {
                     runners++;
                 }
                 if (g_Scores._A6 <= runners && runners > 0) {
-                    if (g_pCamera->_A98 > 0 &&
+                    if (cam->_A98 > 0 &&
                         (lbl_3_common_bss_32A94._2 == 18 || lbl_3_common_bss_32A94._2 == 19 || lbl_3_common_bss_32A94._2 == 26)) {
                         type = 7;
-                    } else if (g_pCamera->_A98 > 0 && lbl_3_common_bss_32A94._2 >= 20 && lbl_3_common_bss_32A94._2 <= 27) {
+                    } else if (cam->_A98 > 0 && lbl_3_common_bss_32A94._2 >= 20 && lbl_3_common_bss_32A94._2 <= 27) {
                         type = 8;
                     }
                 }
             }
         }
-        if (lbl_3_common_bss_32A94._2 >= 36 && lbl_3_common_bss_32A94._2 <= 38 && g_pCamera->_A50 == 2) {
-            if (g_GameLogic.EventTriggers_EndOfGame != 0) {
+        if (lbl_3_common_bss_32A94._2 >= 36 && lbl_3_common_bss_32A94._2 <= 38 && cam->_A50 == 2) {
+            if (endOfGame != 0) {
                 type = 6;
             } else {
                 runners = 0;
