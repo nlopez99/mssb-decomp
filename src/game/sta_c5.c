@@ -15,6 +15,8 @@
 #include "game/rep_AC8.h"
 #include "game/rep_540.h"
 #include "game/m_sound.h"
+#include "game/rep_1838.h"
+#include "Dolphin/rand.h"
 
 typedef struct {
     /* 0x00 */ u8 _00[0x60];
@@ -60,10 +62,12 @@ typedef struct StaC5Draw {
     /* 0xAC */ f32 _AC;
     /* 0xB0 */ f32 _B0;
     /* 0xB4 */ f32 _B4;
-    /* 0xB8 */ u8 _B8[0xC1 - 0xB8];
+    /* 0xB8 */ f32 _B8;
+    /* 0xBC */ f32 _BC;
+    /* 0xC0 */ u8 _C0;
     /* 0xC1 */ u8 _C1;
     /* 0xC2 */ u8 _C2[0xC4 - 0xC2];
-    /* 0xC4 */ u8 _C4;
+    /* 0xC4 */ s8 _C4;
     /* 0xC5 */ u8 _C5;
     /* 0xC6 */ u8 _C6;
     /* 0xC7 */ u8 _C7;
@@ -95,6 +99,7 @@ extern struct {
 
 extern void AnimateActorBones(StaC5Actor* actor);
 extern void fn_800B4CA0(StaC5Actor* actor, f32 frame);
+extern f32 fn_800B4A94(StaC5Actor* actor);
 
 typedef struct StadiumSort1D58 {
     /* 0x00 */ f32 depth;
@@ -163,6 +168,17 @@ typedef struct {
     /* 0x13 */ u8 _13;
 } StaC5Callbacks; // size: 0x14
 
+typedef struct {
+    /* 0x000 */ Vec pos;
+    /* 0x00C */ u8 _00C[0x217 - 0x00C];
+    /* 0x217 */ u8 _217;
+    /* 0x218 */ u8 _218[0x268 - 0x218];
+} StaC5Fielder; // size: 0x268
+
+extern StaC5Fielder g_Fielders[9];
+extern s32 fn_800247E4(s32 x, s32 y, s32 width, s32 bytes);
+extern BOOL fn_800527C4(Vec* pos);
+
 extern u16 lbl_3_data_81DC[16];
 extern u8 lbl_3_data_8404[6][15][2];
 extern u8 lbl_3_data_84B8[30][2];
@@ -217,8 +233,10 @@ static u8 lbl_3_bss_B1BC[0x5C];
 static u8 lbl_3_bss_B160[0x5C];
 static u8 lbl_3_bss_B15C;
 static void* lbl_3_bss_B154[2];
-static s32 lbl_3_bss_B118[0xF];
-static u8 lbl_3_bss_AF18[0x200];
+static GXTexObj lbl_3_bss_B134;
+static Mtx23 lbl_3_bss_B11C;
+static u8* lbl_3_bss_B118;
+static s8 lbl_3_bss_AF18[0x200];
 static f32 lbl_3_bss_AF04[5];
 static f32 lbl_3_bss_AF00;
 static s32 lbl_3_bss_AEFC;
@@ -549,8 +567,25 @@ void fn_3_F2448(void) {
 }
 
 // .text:0x000F22FC size:0x14C mapped:0x80731390
-void fn_3_F22FC(void) {
-    return;
+void fn_3_F22FC(StaC5Draw* draw, s8 idx) {
+    Vec dir;
+    StaC5Draw* other;
+    u32 i;
+
+    PSVECSubtract(&g_Fielders[idx].pos, &draw->_A0, &dir);
+    dir.y = 0.0f;
+    PSVECNormalize(&dir, &dir);
+    fn_3_253A4(idx, fn_3_9FB8C(dir.x, dir.z));
+    fn_800527C4(&draw->_A0);
+    for (i = 0; i < lbl_3_bss_B21C; i++) {
+        other = &lbl_3_common_bss_350E4._00[lbl_3_bss_B21B + i];
+        if (other->_C6 == 3 && (s8)other->_C1 == idx) {
+            other->_B8 = 0.017453292f * (-other->_AC - 180.0f);
+            other->_C6 = 4;
+            other->_BC = 0.5f;
+            g_Fielders[idx]._217--;
+        }
+    }
 }
 
 // .text:0x000F1E2C size:0x4D0 mapped:0x80730EC0
@@ -576,8 +611,14 @@ void fn_3_F18A4(StaC5Draw* draw) {
 }
 
 // .text:0x000F1750 size:0x154 mapped:0x807307E4
-void fn_3_F1750(void) {
-    return;
+void fn_3_F1750(StaC5Draw* draw) {
+    StaC5Model* model = draw->_74;
+
+    if (!fn_800B4A94(model->_00)) {
+        fn_3_F3BB0(draw);
+    } else {
+        AnimateActorBones(model->_00);
+    }
 }
 
 // .text:0x000F1674 size:0xDC mapped:0x80730708
@@ -696,8 +737,34 @@ void fn_3_EF55C(void) {
 }
 
 // .text:0x000EF408 size:0x154 mapped:0x8072E49C
-void fn_3_EF408(void) {
-    return;
+void fn_3_EF408(StaC5Draw* draw) {
+    Vec to;
+    Vec facing;
+    Vec cross;
+    f32 angle;
+    f32 dot;
+
+    to.x = lbl_3_data_1B9A4[draw->_9C].pos.x - draw->_A0.x;
+    to.y = 0.0f;
+    to.z = lbl_3_data_1B9A4[draw->_9C].pos.z - draw->_A0.z;
+    PSVECNormalize(&to, &to);
+    angle = -(0.017453292f * draw->_AC);
+    facing.x = cos(angle);
+    facing.y = 0.0f;
+    facing.z = sin(angle);
+    PSVECNormalize(&facing, &facing);
+    dot = PSVECDotProduct(&to, &facing);
+    if (dot < -1.0) {
+        dot = -1.0f;
+    }
+    draw->_B4 = 57.29578f * (f32)acos(dot);
+    PSVECCrossProduct(&to, &facing, &cross);
+    if (cross.y < 0.0f) {
+        draw->_C4 = 1;
+    } else {
+        draw->_C4 = -1;
+    }
+    draw->_C6 = 0;
 }
 
 // .text:0x000EF3D4 size:0x34 mapped:0x8072E468
@@ -742,12 +809,64 @@ void fn_3_EEE3C(void) {
 
 // .text:0x000EECF4 size:0x148 mapped:0x8072DD88
 void fn_3_EECF4(void) {
-    return;
+    u32 x;
+    u32 y;
+    s32 offset;
+
+    lbl_3_bss_B11C[0][0] = 0.01f;
+    lbl_3_bss_B11C[0][1] = 0.0f;
+    lbl_3_bss_B11C[0][2] = 0.0f;
+    lbl_3_bss_B11C[1][0] = 0.0f;
+    lbl_3_bss_B11C[1][1] = 0.01f;
+    lbl_3_bss_B11C[1][2] = 0.0f;
+    GXSetIndTexMtx(GX_ITM_0, lbl_3_bss_B11C, 2);
+    lbl_3_bss_B118 = fn_3_B9534(0x10, 0x10, &lbl_3_bss_B134);
+    if (lbl_3_bss_B118 == NULL) {
+        OSErrorLine(4136, "error\n");
+    }
+    for (y = 0; y < 0x10; y++) {
+        for (x = 0; x < 0x10; x++) {
+            offset = fn_800247E4(x, y, 0x10, 2);
+            lbl_3_bss_B118[offset] = (u8)(rand() % 200) + 27;
+            lbl_3_bss_B118[offset + 1] = (u8)(rand() % 200) + 27;
+        }
+    }
+    memset(lbl_3_bss_AF18, 1, sizeof(lbl_3_bss_AF18));
 }
 
 // .text:0x000EEB94 size:0x160 mapped:0x8072DC28
 void fn_3_EEB94(void) {
-    return;
+    u32 x;
+    u32 y;
+    s32 offset;
+    s32 s;
+    s32 t;
+
+    for (y = 0; y < 0x10; y++) {
+        for (x = 0; x < 0x10; x++) {
+            offset = fn_800247E4(x, y, 0x10, 2);
+            s = lbl_3_bss_B118[offset];
+            t = lbl_3_bss_B118[offset + 1];
+            s += lbl_3_bss_AF18[offset] * (rand() % 14 + 8);
+            t += lbl_3_bss_AF18[offset + 1] * (rand() % 14 + 8);
+            if (s >= 227) {
+                s--;
+                lbl_3_bss_AF18[offset] = -1;
+            } else if (s <= 27) {
+                s++;
+                lbl_3_bss_AF18[offset] = 1;
+            }
+            if (t >= 227) {
+                t--;
+                lbl_3_bss_AF18[offset + 1] = -1;
+            } else if (t <= 27) {
+                t++;
+                lbl_3_bss_AF18[offset + 1] = 1;
+            }
+            lbl_3_bss_B118[offset] = s;
+            lbl_3_bss_B118[offset + 1] = t;
+        }
+    }
 }
 
 // .text:0x000EE96C size:0x228 mapped:0x8072DA00
