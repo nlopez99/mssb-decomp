@@ -822,8 +822,44 @@ void fn_3_D3F54(void) {
 }
 
 // .text:0x000D3CDC size:0x278 mapped:0x80712D70
-void fn_3_D3CDC(void) {
-    return;
+void fn_3_D3CDC(StaC2Draw* draw) {
+    Vec diff;
+    u8 right[4] = { 2, 3, 7, 8 };
+    u8 left[4] = { 4, 5, 6, 7 };
+    u32 i;
+    u8* order;
+    StaC2Player* player;
+
+    if (g_GameLogic.gameStatus != 2) {
+        if (draw->_99 & 2) {
+            draw->_99 &= 0xFD;
+        }
+    } else if (!(draw->_99 & 2)) {
+        if (draw->_A0.x > 0.0f) {
+            order = right;
+        } else {
+            order = left;
+        }
+        for (i = 0; i < 4; i++) {
+            player = lbl_8036E548._2C50[order[i]];
+            if (player != NULL) {
+                PSVECSubtract(&draw->_A0, &player->_34, &diff);
+                if (PSVECMag(&diff) <= 12.5f) {
+                    draw->_99 |= 2;
+                    if (fn_3_B7F70(10) < 4) {
+                        draw->_99 &= 0xFB;
+                        draw->_CC = 5;
+                        draw->_CB = draw->_CA;
+                        draw->_CA = 2;
+                        draw->_B0 = 0.5f;
+                        fn_80025EEC(draw->_8C, 0, 3);
+                    }
+                    break;
+                }
+            }
+        }
+    }
+    fn_3_D2220(draw);
 }
 
 // .text:0x000D3880 size:0x45C mapped:0x80712914

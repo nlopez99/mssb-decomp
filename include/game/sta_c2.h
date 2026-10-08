@@ -81,7 +81,7 @@ void fn_3_D2A0C(void);
 void fn_3_D30D0(void);
 void fn_3_D36B0(struct StaC2Draw* draw);
 void fn_3_D3880(void);
-void fn_3_D3CDC(void);
+void fn_3_D3CDC(struct StaC2Draw* draw);
 void fn_3_D3F54(void);
 void fn_3_D4780(void);
 void fn_3_D4CA4(void);
