@@ -34,6 +34,10 @@ jobs:
         run: python configure.py --help
       - name: Check placeholder symbol names against symbols.txt
         run: python tools/check_symbols.py
+      - name: Check REL function prototypes agree across files
+        run: python tools/check_prototypes.py
+      - name: Check no lesson is repeated in the matching notes
+        run: python tools/check_notes.py
       - name: Check our changes for whitespace errors
         # Existing upstream whitespace is outside this fork's setup changes.
         run: git diff --check 72de19a39880398a69339010350652ad97e2a79c HEAD
