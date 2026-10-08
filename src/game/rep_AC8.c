@@ -4772,7 +4772,24 @@ void fn_3_39EB0(void) {
 
 // .text:0x00039DC4 size:0xEC mapped:0x80678E58
 void fn_3_39DC4(void) {
-    return;
+    s32 i;
+
+    for (i = 0; i < 9; i++) {
+        g_FieldingLogic._0F8[i] = 0;
+        fn_3_5985C(i, 0);
+        g_Fielders[i]._020 = 10000.0f;
+        g_Fielders[i]._024 = 0.0f;
+    }
+    g_FieldingLogic._0B0 = -1;
+    g_FieldingLogic._0B2 = -1;
+    g_FieldingLogic._0B4 = -1;
+    g_FieldingLogic._0BE = -1;
+    g_FieldingLogic._139 = 0;
+    for (i = 0; i < 4; i++) {
+        g_FieldingLogic._0D0[i] = -1;
+        g_FieldingLogic._101[i] = 0;
+    }
+    fn_3_37610(120);
 }
 
 // .text:0x00039858 size:0x56C mapped:0x806788EC
@@ -4787,7 +4804,82 @@ void fn_3_393B0(void) {
 
 // .text:0x00038FF8 size:0x3B8 mapped:0x8067808C
 void fn_3_38FF8(void) {
+    s32 frame;
+    UnkAC8Fielder* f = &g_Fielders[g_FieldingLogic._0B0];
+    f32 reach = f->_070;
+    s32 pick;
+
+    for (frame = 1; frame < 61; frame += 3) {
+        if (g_Ball.physicsSubstruct.futureCoordsAndDist[frame].dist > reach) {
+            break;
+        }
+    }
+    if (g_FieldingLogic._0B0 != 1) {
+        if (frame <= 1) {
+            goto take;
+        }
+        if (f->_07C < 2.5f) {
+            if (lbl_3_bss_16C >= 0 &&
+                fn_3_9FCF8(lbl_3_bss_16C, (s16)fn_3_9FB8C(g_Ball.AtBat_Contact_BallPos.x - f->_000,
+                                                          g_Ball.AtBat_Contact_BallPos.z - f->_008)) < 0x100) {
+                goto keep;
+            }
+            if (g_FieldingLogic._0B0 >= 2 && g_FieldingLogic._0B0 <= 5 &&
+                (g_Ball.hitClassification2 == 2 || g_Ball.hitClassification2 == 3)) {
+                goto keep;
+            }
+        }
+    }
+    if (g_Fielders[g_FieldingLogic._0B0]._1DB == 0 || g_Fielders[g_FieldingLogic._0B2]._1DB == 0) {
+        pick = fn_3_36678(g_FieldingLogic._0B0, g_FieldingLogic._0B2, 3,
+                          g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x,
+                          g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z);
+    } else {
+        pick = fn_3_36678(g_FieldingLogic._0B0, g_FieldingLogic._0B2, 3,
+                          g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.x,
+                          g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.z);
+    }
+    if (pick >= 0) {
+        if (pick == g_FieldingLogic._0B2) {
+            goto take;
+        }
+        if (pick == g_FieldingLogic._0B0) {
+            goto keep;
+        }
+    }
+    if (g_Ball.framesSinceHit > 90) {
+        if (g_Ball.framesSinceBallHitGroundOrWasCaught >= 0) {
+            goto keep;
+        }
+        if (g_Fielders[g_FieldingLogic._0B0]._080 <= g_Fielders[g_FieldingLogic._0B2]._080) {
+            goto keep;
+        }
+        goto take;
+    }
     return;
+keep:
+    g_FieldingLogic._139 = 0;
+    if (g_FieldingLogic._0B0 == 0) {
+        return;
+    }
+    goto next;
+take:
+    if (g_FieldingLogic._13A != 0 && (g_FieldingLogic._0B2 == 3 || g_FieldingLogic._0B2 == 5)) {
+        fn_3_38D10();
+        if (g_FieldingLogic._13A != 0) {
+            if (g_Ball.ballDistanceFromHome - 3.0f > g_Fielders[g_FieldingLogic._0B0]._070) {
+                fn_3_38790(g_FieldingLogic._0B2, TRUE);
+                goto next;
+            }
+            return;
+        }
+    } else {
+        fn_3_38790(g_FieldingLogic._0B2, TRUE);
+    }
+next:
+    g_FieldingLogic._0B2 = g_FieldingLogic._0B4;
+    g_FieldingLogic._0B4 = -1;
+    g_FieldingLogic._139 = 0;
 }
 
 // .text:0x00038D10 size:0x2E8 mapped:0x80677DA4
@@ -4913,8 +5005,43 @@ void fn_3_378B4(void) {
 }
 
 // .text:0x00037610 size:0x2A4 mapped:0x806766A4
-void fn_3_37610(void) {
-    return;
+void fn_3_37610(s32 frame) {
+    s32 best = -1;
+    f32 bestTime = 1000.0f;
+    s32 i;
+
+    for (i = 0; i < 9; i++) {
+        UnkAC8Fielder* f = &g_Fielders[i];
+
+        if (f->_074 < 5.0f && f->_20F == 0 && f->_074 < bestTime &&
+            (f->_210 == 0 || !(0.05f * f->_1C0 + f->_074 > bestTime))) {
+            bestTime = f->_074;
+            best = i;
+        }
+    }
+    if (best >= 0) {
+        if (!(g_Fielders[best]._074 < 5.0f)) {
+            f32 dx = g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.x - g_Fielders[best]._000;
+            f32 dz = g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.z - g_Fielders[best]._008;
+            f32 dx2 = dx * dx;
+            f32 dz2 = dz * dz;
+
+            if (dolsqrtf2(dx2 + dz2) > 5.0f) {
+                best = -1;
+            }
+        }
+    }
+    if (best >= 0 && best != g_FieldingLogic._0B0 && g_FieldingLogic._0B0 >= 0) {
+        UnkAC8Fielder* f = &g_Fielders[g_FieldingLogic._0B0];
+
+        if (f->_074 < 8.0f && f->_20F == 0) {
+            best = -1;
+        }
+    }
+    fn_3_38790(best >= 0 ? best
+                         : fn_3_361D8(g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.x,
+                                      g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.z),
+               FALSE);
 }
 
 // .text:0x00037588 size:0x88 mapped:0x8067661C
@@ -5042,18 +5169,287 @@ nearest:
 }
 
 // .text:0x00036678 size:0xA9C mapped:0x8067570C
-void fn_3_36678(void) {
-    return;
+// 98.86%: the target keeps radToShortAngle's results unextended and passes them so to
+// fn_3_9FCF8, which needs s16 angles and s16 parameters; the file's s32 prototype then
+// extends them, and the swap and the closing angle gaps extend differently.
+s32 fn_3_36678(s32 a, s32 b, s32 mode, f32 x, f32 z) {
+    s32 angA;
+    s32 angB;
+    s16 diff;
+    f32 distA;
+    f32 distB;
+    f32 dx;
+    f32 dz;
+    f32 dx2;
+    f32 dz2;
+    f32 gap;
+    s16 offA;
+    s16 offB;
+
+    if (lbl_3_bss_16C < 0) {
+        return -1;
+    }
+    angA = radToShortAngle(atan2(z - g_Fielders[a]._008, x - g_Fielders[a]._000));
+    angB = radToShortAngle(atan2(z - g_Fielders[b]._008, x - g_Fielders[b]._000));
+    diff = fn_3_9FCF8(angA, angB);
+    dx = g_Fielders[a]._000 - x;
+    dz = g_Fielders[a]._008 - z;
+    dx2 = dx * dx;
+    dz2 = dz * dz;
+    distA = dolsqrtf2(dx2 + dz2);
+    dx = g_Fielders[b]._000 - x;
+    dz = g_Fielders[b]._008 - z;
+    dx2 = dx * dx;
+    dz2 = dz * dz;
+    distB = dolsqrtf2(dx2 + dz2);
+    if (diff <= 0x100) {
+        if (distA < distB) {
+            return a;
+        }
+        return b;
+    }
+    if (mode < 2) {
+        if (g_FieldingLogic._0B0 == a) {
+            distA -= 3.0f;
+            if (distA < 0.0f) {
+                distA = 0.0f;
+            }
+        } else if (g_FieldingLogic._0B0 == b) {
+            distB -= 3.0f;
+            if (distB < 0.0f) {
+                distB = 0.0f;
+            }
+        }
+        if (lbl_3_bss_170[3] >= 0) {
+            s32 turn = __abs(lbl_3_bss_170[0] - lbl_3_bss_170[3]);
+            if (turn > 0x800) {
+                turn = 0x1000 - turn;
+            }
+            if (turn <= 0x400) {
+                s32 holder = -1;
+                f32 range;
+                f32 cut;
+                f32 limit;
+
+                if (a == g_FieldingLogic._0B0) {
+                    holder = a;
+                }
+                if (b == g_FieldingLogic._0B0) {
+                    holder = b;
+                }
+                if (holder >= 0) {
+                    f32 toPoint;
+                    f32 toTarget;
+
+                    dx = g_Fielders[holder]._000 - x;
+                    dz = g_Fielders[holder]._008 - z;
+                    dx2 = dx * dx;
+                    dz2 = dz * dz;
+                    toPoint = dolsqrtf2(dx2 + dz2);
+                    dx = g_Fielders[holder]._0D4 - x;
+                    dz = g_Fielders[holder]._0D8 - z;
+                    dx2 = dx * dx;
+                    dz2 = dz * dz;
+                    toTarget = dolsqrtf2(dx2 + dz2);
+                    if (toPoint > toTarget) {
+                        goto compare;
+                    }
+                }
+                cut = 7.0f;
+                range = dolsqrtf2(x * x + z * z);
+                if (range < 30.0f) {
+                    cut = 4.0f;
+                } else if (range < 38.0f) {
+                    cut = 5.0f;
+                } else if (range < 46.0f) {
+                    cut = 6.0f;
+                }
+                limit = 8.0f;
+                if (range < 38.0f) {
+                    limit = 4.0f;
+                } else if (range < 46.0f) {
+                    limit = 0.2f * (range - 30.0f) + 4.0f;
+                }
+                if (a == g_FieldingLogic._0B0) {
+                    if (distA > limit) {
+                        distA -= cut;
+                    } else {
+                        distA = 0.0f;
+                    }
+                }
+                if (b == g_FieldingLogic._0B0 && distA > limit) {
+                    distB = distA - cut;
+                }
+            }
+        }
+    }
+compare:
+    if (distB < distA) {
+        f32 tf = distA;
+        s32 ti = a;
+        s16 ta = angA;
+
+        distA = distB;
+        a = b;
+        angA = angB;
+        distB = tf;
+        b = ti;
+        angB = ta;
+    }
+    if (mode < 3) {
+        if (distA < 2.0f) {
+            return a;
+        }
+        gap = distB - distA;
+        if (gap > 15.0f) {
+            if (gap > 20.0f && g_Ball.AtBat_ContactResult == 1 && a >= 6) {
+                return a;
+            }
+            if (g_Ball.ballState == 0 && g_Ball.AtBat_ContactResult == 1) {
+                if (a == 1 && gap > 20.0f) {
+                    return a;
+                }
+            } else {
+                return a;
+            }
+        }
+        if (gap > 10.0f && distA < 7.0f) {
+            return a;
+        }
+        if (distA < 5.0f && distB < 5.0f && diff <= 0x400) {
+            if (mode == 0) {
+                return -1;
+            }
+            return a;
+        }
+        if (diff <= 0x200 && gap > 5.0f && distA < 15.0f) {
+            return a;
+        }
+    }
+    offA = __abs(lbl_3_bss_16C - angA);
+    offB = __abs(lbl_3_bss_16C - angB);
+    if (offA > 0x800) {
+        offA = 0x1000 - offA;
+    }
+    if (offB > 0x800) {
+        offB = 0x1000 - offB;
+    }
+    if (__abs(offA - offB) <= 0x100) {
+        return a;
+    }
+    if (offA > 0x400) {
+        if (g_Ball.ballState == 0 && g_Ball.AtBat_ContactResult == 1 && b == 1) {
+            if (offB <= 0x200) {
+                return b;
+            }
+        } else if (offB <= 0x400) {
+            return b;
+        }
+        if (mode == 0) {
+            return -1;
+        }
+    }
+    if (offB > 0x400) {
+        if (g_Ball.ballState == 0 && g_Ball.AtBat_ContactResult == 1 && b == 1) {
+            if (offA <= 0x200) {
+                return a;
+            }
+        } else {
+            return a;
+        }
+    }
+    if (offA > offB) {
+        return b;
+    }
+    return a;
 }
 
 // .text:0x000365D0 size:0xA8 mapped:0x80675664
-void fn_3_365D0(void) {
-    return;
+s32 fn_3_365D0(s32 a, s32 b, s32 c, f32 x, f32 z) {
+    s32 r = fn_3_36678(b, c, 1, x, z);
+
+    if (r == -1) {
+        return a;
+    }
+    if (g_FieldingLogic._0B0 < 0) {
+        return fn_3_36678(a, r, 1, x, z);
+    }
+    return fn_3_36678(a, r, 0, x, z);
 }
 
 // .text:0x000361D8 size:0x3F8 mapped:0x8067526C
-void fn_3_361D8(void) {
-    return;
+// 88.11%: registers differ throughout, and the target extends each angle into r3/r4 at
+// every fn_3_9FCF8 call where this extends each angle once in place.
+s32 fn_3_361D8(f32 x, f32 z) {
+    s32 i;
+    s32 idx0;
+    s32 idx1;
+    s32 idx2;
+    s32 idx3;
+    f32 d0;
+    f32 d1;
+    f32 d2;
+    f32 d3;
+    s16 ang0;
+    s16 ang1;
+    s16 ang2;
+    s16 ang3;
+
+    idx0 = idx1 = idx2 = 0;
+    d0 = d1 = d2 = d3 = 999.9f;
+    idx3 = 0;
+    for (i = 0; i < 9; i++) {
+        f32 dx = g_Fielders[i]._000 - x;
+        f32 dz = g_Fielders[i]._008 - z;
+        f32 dist = dolsqrtf2(dx * dx + dz * dz);
+        s16 angle = fn_3_9FB8C(dx, dz);
+
+        if (d0 > dist) {
+            d2 = d1;
+            idx2 = idx1;
+            d1 = d0;
+            ang2 = ang1;
+            idx1 = idx0;
+            ang1 = ang0;
+            d0 = dist;
+            idx0 = i;
+            ang0 = angle;
+        } else if (d1 > dist) {
+            d2 = d1;
+            idx2 = idx1;
+            d1 = dist;
+            ang2 = ang1;
+            idx1 = i;
+            ang1 = angle;
+        } else if (d2 > dist) {
+            d3 = d2;
+            idx3 = idx2;
+            d2 = dist;
+            ang3 = ang2;
+            idx2 = i;
+            ang2 = angle;
+        } else if (d3 > dist) {
+            d3 = dist;
+            idx3 = i;
+            ang3 = angle;
+        }
+    }
+    if (d3 - 15.0f < d2) {
+        if (fn_3_9FCF8(ang1, ang2) < 0x180) {
+            if (fn_3_9FCF8(ang0, ang3) > 0x200 && fn_3_9FCF8(ang1, ang3) > 0x200) {
+                idx2 = idx3;
+            }
+        } else if (fn_3_9FCF8(ang0, ang2) < 0x180) {
+            if (fn_3_9FCF8(ang0, ang3) > 0x200 && fn_3_9FCF8(ang1, ang3) > 0x200) {
+                idx2 = idx3;
+            }
+        } else if (fn_3_9FCF8(ang0, ang1) < 0x180 && fn_3_9FCF8(ang0, ang3) > 0x200 &&
+                   fn_3_9FCF8(ang2, ang3) > 0x200) {
+            idx1 = idx2;
+            idx2 = idx3;
+        }
+    }
+    return fn_3_365D0(idx0, idx1, idx2, x, z);
 }
 
 // .text:0x00035E1C size:0x3BC mapped:0x80674EB0
