@@ -24,6 +24,7 @@
 #include "game/rep_E08.h"
 #include "game/rep_1838.h"
 #include "game/rep_3DA8.h"
+#include "game/rep_1B20.h"
 
 extern struct {
     /* 0x00 */ u8 _00[0x96];
@@ -194,7 +195,6 @@ extern struct {
 extern void fn_3_1DD48(void);
 extern void fn_3_7A154(int);
 extern void fn_3_1DC30(void);
-extern int fn_3_B32B8(void);
 extern void fn_3_79EF4(void);
 extern void fn_3_1637EC(void);
 extern int fn_80035838(void*, int);

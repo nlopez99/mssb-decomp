@@ -14,7 +14,7 @@ void fn_3_B28A8(void);
 void fn_3_B2AA0(void);
 void fn_3_B2E20(void);
 void fn_3_B3288(void);
-void fn_3_B32B8(void);
+int fn_3_B32B8(void);
 void fn_3_B3448(void);
 void fn_3_B3620(void);
 void fn_3_B3A28(void);

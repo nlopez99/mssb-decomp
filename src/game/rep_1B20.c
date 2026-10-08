@@ -17,8 +17,8 @@ void fn_3_B3448(void) {
 }
 
 // .text:0x000B32B8 size:0x190 mapped:0x806F234C
-void fn_3_B32B8(void) {
-    return;
+int fn_3_B32B8(void) {
+    return 0;
 }
 
 // .text:0x000B3288 size:0x30 mapped:0x806F231C
