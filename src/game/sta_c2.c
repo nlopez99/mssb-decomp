@@ -388,6 +388,8 @@ extern struct {
     /* 0x40 */ u16* _40;
     /* 0x44 */ s32* _44;
     /* 0x48 */ Vec* _48;
+    /* 0x4C */ u8 _4C[0x64 - 0x4C];
+    /* 0x64 */ s16 _64;
 } lbl_3_common_bss_350E4;
 
 extern struct {
@@ -411,6 +413,7 @@ extern void fn_80033620(StaC2Emitter* emitter);
 extern void* lbl_803CC1B8;
 extern void fn_80034CEC(StaC2Task* task);
 extern void fn_800B0A14_removeQueue(void);
+extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern StaC2SpriteRef lbl_80371C30[];
 
 // fn_3_B7F70 lies in unsplit code
@@ -460,7 +463,21 @@ void fn_3_D67CC(void) {
 
 // .text:0x000D6514 size:0x2B8 mapped:0x807155A8
 void fn_3_D6514(void) {
-    return;
+    u32 n;
+    s32 size;
+
+    size = (lbl_3_common_bss_350E4._30 * sizeof(u16)) + (lbl_3_common_bss_350E4._30 * sizeof(u32)) + (lbl_3_common_bss_350E4._30 * sizeof(s32)) + (lbl_3_common_bss_350E4._30 * sizeof(Vec) * 2);
+    if (lbl_3_common_bss_350E4._48 == NULL) {
+        lbl_3_common_bss_350E4._48 = _OSAllocFromHeap(4, size);
+        lbl_3_common_bss_350E4._3C = (u32*)(lbl_3_common_bss_350E4._48 + lbl_3_common_bss_350E4._30 * 2);
+        lbl_3_common_bss_350E4._44 = (s32*)(lbl_3_common_bss_350E4._3C + lbl_3_common_bss_350E4._30);
+        lbl_3_common_bss_350E4._40 = (u16*)(lbl_3_common_bss_350E4._44 + lbl_3_common_bss_350E4._30);
+    }
+    memset(lbl_3_common_bss_350E4._48, 0, size);
+    n = 0;
+    fn_3_D62F0(&n);
+    fn_3_D5C8C(&n);
+    lbl_3_common_bss_350E4._64 = n;
 }
 
 // .text:0x000D62F0 size:0x224 mapped:0x80715384
@@ -593,6 +610,7 @@ void fn_3_D5C8C(u32* n) {
     s32 next;
     s32 idx;
     StaC2Draw* draw;
+    StaC2Place* place;
 
     PSMTXIdentity(scale);
     PSMTXScale(scale, 2.0f, 2.0f, 2.0f);
@@ -600,7 +618,8 @@ void fn_3_D5C8C(u32* n) {
         next = lbl_3_common_bss_350E4._40[*n] = lbl_3_common_bss_350E4._40[*n - 1] + lbl_3_common_bss_350E4._3C[*n - 1];
         fn_3_B8574();
         for (i = 0; i < lbl_3_bss_A023; i++) {
-            if (group == lbl_3_data_18730[i]._0E && lbl_3_data_18730[i].type != 13) {
+            place = &lbl_3_data_18730[i];
+            if (group == place->_0E && place->type != 13) {
                 idx = i + lbl_3_bss_A022;
                 if (lbl_3_common_bss_350E4._00[idx]._90_6) {
                     lbl_3_common_bss_350E4._44[next] = idx;
