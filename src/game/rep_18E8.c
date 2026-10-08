@@ -36,7 +36,8 @@ typedef struct {
     /* 0x068 */ f32 _068;
     /* 0x06C */ u8 _06C[0x70 - 0x6C];
     /* 0x070 */ f32 _070;
-    /* 0x074 */ u8 _074[0xA8 - 0x74];
+    /* 0x074 */ u8 _074[0x84 - 0x74];
+    /* 0x084 */ f32 _084[9];
     /* 0x0A8 */ f32 _0A8[4];
     /* 0x0B8 */ f32 _0B8;
     /* 0x0BC */ u8 _0BC[0xF4 - 0xBC];
@@ -60,7 +61,8 @@ typedef struct {
     /* 0x1AC */ s16 _1AC;
     /* 0x1AE */ u8 _1AE[0x1C2 - 0x1AE];
     /* 0x1C2 */ s16 _1C2;
-    /* 0x1C4 */ u8 _1C4[0x1C9 - 0x1C4];
+    /* 0x1C4 */ u8 _1C4;
+    /* 0x1C5 */ u8 _1C5[0x1C9 - 0x1C5];
     /* 0x1C9 */ u8 _1C9;
     /* 0x1CA */ u8 _1CA[0x1CD - 0x1CA];
     /* 0x1CD */ u8 _1CD;
@@ -87,7 +89,9 @@ typedef struct {
     /* 0x200 */ u8 _200;
     /* 0x201 */ u8 _201[0x20D - 0x201];
     /* 0x20D */ u8 _20D;
-    /* 0x20E */ u8 _20E[0x211 - 0x20E];
+    /* 0x20E */ u8 _20E;
+    /* 0x20F */ u8 _20F;
+    /* 0x210 */ u8 _210;
     /* 0x211 */ u8 _211;
     /* 0x212 */ u8 _212;
     /* 0x213 */ u8 _213;
@@ -112,11 +116,16 @@ extern u8 lbl_3_data_4908[2];
 extern u8 lbl_3_data_7E34[54][4];
 extern u8 lbl_3_data_475C;
 extern s16 lbl_3_data_49DC[44];
+extern u8 lbl_3_data_4710[2];
 
 extern struct {
     /* 0x00 */ s16 _00;
     /* 0x02 */ u8 _02[0x4 - 0x2];
     /* 0x04 */ s16 _04;
+    /* 0x06 */ u8 _06[0x10 - 0x6];
+    /* 0x10 */ u8 _10;
+    /* 0x11 */ u8 _11;
+    /* 0x12 */ u8 _12;
 } g_RunningLogic;
 
 extern struct {
@@ -707,8 +716,6 @@ void fn_3_A9984(s32 fielder) {
 }
 
 // .text:0x000A96FC size:0x288 mapped:0x806E8790
-// 99.57%: registers only, in the countdown test against the 7E34 row; the
-// comparison operand order and decrement forms change nothing.
 void fn_3_A96FC(s32 fielder) {
     Unk18E8Fielder* f = &g_Fielders[fielder];
     InMemRunnerType* r = &g_Runners[f->_213];
@@ -732,8 +739,11 @@ void fn_3_A96FC(s32 fielder) {
             }
         }
     } else {
+        int release;
+
         g_FieldingLogic._0F6--;
-        if (lbl_3_data_7E34[f->_17A][2] - lbl_3_data_7E34[f->_17A][3] == g_FieldingLogic._0F6 && state == 3) {
+        release = lbl_3_data_7E34[f->_17A][2] - lbl_3_data_7E34[f->_17A][3];
+        if (release == g_FieldingLogic._0F6 && state == 3) {
             fn_3_A9354(fielder, 0);
             g_FieldingLogic._13B = 1;
             g_FieldingLogic._111 = 0;
@@ -1180,8 +1190,8 @@ void fn_3_A76B4(void) {
 }
 
 // .text:0x000A7040 size:0x674 mapped:0x806E60D4
-// 98.49%: before testing distanceFromBall - f->_050 < 1.8f, the target also compares
-// f->_050 + f->_05C with f->_058 and discards the result; no plausible source found for that.
+// 98.93%: the target's discarded compare of f->_050 + f->_05C with f->_058 comes from a
+// conditional with identical arms; the target computes the difference before it.
 void fn_3_A7040(s32 fielder) {
     Unk18E8Fielder* f;
     s32 base;
@@ -1259,7 +1269,7 @@ void fn_3_A7040(s32 fielder) {
                     if (fn_3_9FC1C(game_atan2(f->_000 - r->position.x, f->_008 - r->position.z), runAngle) < 0x100 &&
                         r->baseStandingOn < 0) {
                         if ((r->baseStandingOn < 0 || r->tagUpInd == 2) &&
-                            r->distanceFromBall - f->_050 < 1.8f) {
+                            r->distanceFromBall - (f->_050 + f->_05C > f->_058 ? f->_050 : f->_050) < 1.8f) {
                             g_FieldingLogic._111 = 2;
                             g_FieldingLogic._0E8 = i;
                             g_FieldingLogic._112 = 1;
@@ -2068,12 +2078,11 @@ void fn_3_A3C00(void) {
     lbl_3_bss_1800 = 0;
     for (i = 0; i < 4; i++) {
         if (lbl_3_bss_1808[i] >= 0) {
-            u8 dir = g_Runners[lbl_3_bss_1808[i]].runningDirectionCode;
-            if (dir == 1) {
+            if (g_Runners[lbl_3_bss_1808[i]].runningDirectionCode == 1) {
                 lbl_3_bss_1800 |= 1 << (i * 4);
-            } else if (dir == 3) {
+            } else if (g_Runners[lbl_3_bss_1808[i]].runningDirectionCode == 3) {
                 lbl_3_bss_1800 |= 2 << (i * 4);
-            } else if (dir == 2) {
+            } else if (g_Runners[lbl_3_bss_1808[i]].runningDirectionCode == 2) {
                 lbl_3_bss_1800 |= 4 << (i * 4);
             }
         }
@@ -2651,6 +2660,229 @@ s32 fn_3_A1D04(void) {
 }
 
 // .text:0x000A009C size:0x1C68 mapped:0x806DF130
-void fn_3_A009C(void) {
-    return;
+void fn_3_A009C(s32 fielder) {
+    Unk18E8Fielder* f = &g_Fielders[fielder];
+    BOOL flag = FALSE;
+    s32 runner;
+    s32 i;
+
+    if (g_FieldingLogic._130) {
+        if (!g_RunningLogic._10) {
+            if (g_Ball.ballZoneAwayFromHome >= 2) {
+                g_FieldingLogic._0C4 = 6;
+            } else {
+                return;
+            }
+        }
+    } else {
+        f32 range = lbl_3_data_4710[1] - lbl_3_data_4710[0];
+        s32 limit;
+
+        range *= g_AiLogic.aIDifficultyMultiplierArray[g_GameLogic.awayTeamBattingInd_battingTeam];
+        limit = lbl_3_data_4710[0] + (s32)range;
+
+        if (g_Ball.numberOfThrowsDuringPlay <= 1 && g_Ball.timeSinceBallPickedUp < limit &&
+            g_Ball.numberOfThrowsDuringPlay <= 1 &&
+            (g_FieldingLogic._107 != 2 || fielder != 1 || g_Ball.framesSinceHit >= 200)) {
+            g_FieldingLogic._0C4 = -1;
+            g_FieldingLogic._0CC = -1;
+            return;
+        }
+        if (g_FieldingLogic._116) {
+            return;
+        }
+        if (g_Strikes.outs >= 3 || g_Ball.AtBat_ContactResult == -1 || g_Ball.deadBallReason) {
+            g_FieldingLogic._0C4 = -1;
+            g_FieldingLogic._0CC = -1;
+            return;
+        }
+        if (!g_RunningLogic._10 && g_Ball.timeSinceBallPickedUp < 60) {
+            g_FieldingLogic._0C4 = -1;
+            g_FieldingLogic._0CC = -1;
+            return;
+        }
+    }
+    lbl_3_bss_1820 = 0;
+    lbl_3_bss_1804 = 0;
+    lbl_3_bss_1818 = 0;
+    for (i = 0; i < 4; i++) {
+        if (g_Runners[i].forceOutCd == 1) {
+            lbl_3_bss_1804 |= 1 << (i * 4);
+        }
+        if (g_Runners[i].runnerOnFieldOrOutOrScored == 1) {
+            lbl_3_bss_1820++;
+        }
+    }
+    if (g_FieldingLogic._10D) {
+        f->_192 = 45;
+    }
+    fn_3_A3B30();
+    fn_3_A4A10();
+    fn_3_A3C00();
+    fn_3_A384C();
+    runner = fn_3_A1D04();
+    if ((g_Ball.ballZoneAwayFromHome == 4 || (g_Ball.ballZoneAwayFromHome == 3 && fielder >= 6)) &&
+        g_FieldingLogic._0BE >= 0 && g_FieldingLogic._0BE != fielder) {
+        if (!fn_3_A222C() && !fn_3_A3374() && !fn_3_A1DA0()) {
+            g_FieldingLogic._0C4 = 6;
+            g_FieldingLogic._0CC = -1;
+            g_FieldingLogic._0DE = -1;
+        }
+        goto done;
+    }
+    if (g_Strikes.outs == 2) {
+        if (g_Runners[1].forceOutCd == 1 && lbl_3_bss_1858[1] <= 2) {
+            if (f->_1C4 <= 1 && lbl_3_bss_1858[1] <= 0) {
+                flag = TRUE;
+            }
+            if (fn_3_A37BC() && fn_3_A46A0(lbl_3_bss_1808[1])) {
+                goto done;
+            }
+        }
+        if ((lbl_3_bss_1824 & 1) && lbl_3_bss_1858[0] <= 6) {
+            if (lbl_3_bss_1858[0] >= 4) {
+                for (i = 1; i <= 3; i++) {
+                    InMemRunnerType* r = &g_Runners[i];
+                    if (r->runnerOnFieldOrOutOrScored == 1 &&
+                        (r->runningDirectionCode == 1 || r->runningDirectionCode == 2) && i == r->currentBase &&
+                        f->_0A8[r->nextBase] < 3.0f && lbl_3_bss_1858[lbl_3_bss_1808[i]] <= 3 &&
+                        r->distanceFromBall < 5.0f && fn_3_A46A0(lbl_3_bss_1808[i])) {
+                        goto done;
+                    }
+                }
+            }
+            if (f->_1C4 <= 1 && lbl_3_bss_1858[0] <= 0) {
+                flag = TRUE;
+            }
+            fn_3_A46A0(lbl_3_bss_1808[0]);
+            goto done;
+        }
+    }
+    if (lbl_3_bss_1824 == 1) {
+        if (f->_1C4 <= 1 && lbl_3_bss_1858[0] <= 0) {
+            flag = TRUE;
+        }
+        if (lbl_3_bss_1858[0] <= 6 && fn_3_A46A0(lbl_3_bss_1808[0])) {
+            goto done;
+        }
+    }
+    if (lbl_3_bss_181C == 3 && fn_3_A32B8()) {
+        goto done;
+    }
+    if (lbl_3_bss_181C == 2 && fn_3_A31E8()) {
+        goto done;
+    }
+    if (lbl_3_bss_1824 == 0x1000 && lbl_3_bss_1858[lbl_3_bss_1808[3]] <= 6 && fn_3_A46A0(lbl_3_bss_1808[3])) {
+        goto done;
+    }
+    if (lbl_3_bss_1824 == 0x100 && lbl_3_bss_1858[lbl_3_bss_1808[2]] <= 6 && fn_3_A46A0(lbl_3_bss_1808[2])) {
+        goto done;
+    }
+    if (lbl_3_bss_1824 == 0x10 && lbl_3_bss_1858[lbl_3_bss_1808[1]] <= 5 &&
+        g_Runners[lbl_3_bss_1808[1]].overrunBaseStage == 0 && fn_3_A46A0(lbl_3_bss_1808[1])) {
+        goto done;
+    }
+    if (lbl_3_bss_1824 == 0x1111 && fn_3_A2FD8()) {
+        goto done;
+    }
+    if (lbl_3_bss_1824 == 0x1011 && fn_3_A2DDC()) {
+        goto done;
+    }
+    if ((lbl_3_bss_1824 == 0x111 || lbl_3_bss_1824 == 0x11) && fn_3_A2C9C()) {
+        goto done;
+    }
+    if ((lbl_3_bss_1824 == 0x1001 || lbl_3_bss_1824 == 0x1101) && fn_3_A2B6C()) {
+        goto done;
+    }
+    if (lbl_3_bss_1824 == 0x101 && fn_3_A295C()) {
+        goto done;
+    }
+    if ((lbl_3_bss_1824 & 1) && g_Ball.ballZoneAwayFromHome <= 1) {
+        if (g_Ball.ballZoneWhenCaught <= 1) {
+            if (lbl_3_bss_1858[0] <= 6 && fn_3_A46A0(lbl_3_bss_1808[0])) {
+                goto done;
+            }
+        } else if (lbl_3_bss_1858[0] <= 4 && fn_3_A46A0(lbl_3_bss_1808[0])) {
+            goto done;
+        }
+    }
+    if (fn_3_A2404()) {
+        goto done;
+    }
+    if (fn_3_A25C4()) {
+        goto done;
+    }
+    if ((lbl_3_bss_1824 & 1) && lbl_3_bss_1858[0] <= 6 && fn_3_A46A0(lbl_3_bss_1808[0])) {
+        goto done;
+    }
+    if ((lbl_3_bss_1824 & 0x1000) && fn_3_A1F3C()) {
+        goto done;
+    }
+    if (g_Ball.ballZoneAwayFromHome >= 2 && fn_3_A2048()) {
+        goto done;
+    }
+    if (runner >= 0) {
+        fn_3_A46A0(runner);
+    } else {
+        for (i = 3; i >= 0; i--) {
+            if (g_Runners[i].runnerOnFieldOrOutOrScored == 1 && g_Runners[i].baseStandingOn < 0 &&
+                g_Runners[i].runningDirectionCode == 2) {
+                fn_3_A46A0(i);
+                break;
+            }
+        }
+    }
+
+done:
+    if (g_FieldingLogic._0C4 >= 0 && g_FieldingLogic._0C4 <= 3) {
+        s16 base = g_FieldingLogic._0C4;
+        s16 cover = g_FieldingLogic._0D0[base];
+        if (cover >= 0 && (g_Fielders[cover]._20F || g_Fielders[cover]._210 || g_Fielders[cover]._211)) {
+            g_FieldingLogic._0C4 = -1;
+            g_FieldingLogic._0CC = base;
+        }
+    }
+    if (g_RunningLogic._12 > 1 && g_Strikes.storedOuts <= 1 && (lbl_3_bss_1824 & 1) &&
+        g_Ball.ballZoneAwayFromHome <= 1 && g_Ball.ballZoneWhenCaught <= 1 && g_FieldingLogic._0C4 == 1 &&
+        lbl_3_bss_1858[0] <= 2) {
+        if (g_Runners[2].runnerOnFieldOrOutOrScored == 1 &&
+            (g_Runners[2].runningDirectionCode == 1 || g_Runners[2].runningDirectionCode == 2) &&
+            g_Runners[2].fractionalBasesRan <= 2.25f && g_Runners[2].baseStandingOn < 0) {
+            g_FieldingLogic._0C4 = -1;
+        }
+        if (g_Runners[3].runnerOnFieldOrOutOrScored == 1 &&
+            (g_Runners[3].runningDirectionCode == 1 || g_Runners[3].runningDirectionCode == 2) &&
+            g_Runners[3].fractionalBasesRan <= 3.25f && g_Runners[3].baseStandingOn < 0) {
+            g_FieldingLogic._0C4 = -1;
+        }
+    }
+    if (flag && g_FieldingLogic._0C4 >= 0 && g_FieldingLogic._0C4 <= 3 && f->_1E0 == 1) {
+        g_FieldingLogic._0C4 = -1;
+    }
+    if (g_FieldingLogic._0C4 == 6) {
+        if (g_FieldingLogic._0BE < 0) {
+            g_FieldingLogic._0C4 = -1;
+        } else if (g_FieldingLogic._0BE == fielder) {
+            g_FieldingLogic._0C4 = -1;
+        } else {
+            if (5.0f + g_Fielders[g_FieldingLogic._0BE]._0B8 > f->_0B8) {
+                g_FieldingLogic._0C4 = -1;
+            }
+            if (f->_084[g_FieldingLogic._0BE] < 5.0f) {
+                g_FieldingLogic._0C4 = -1;
+            }
+        }
+    }
+    if (f->_1ED == 0) {
+        if (g_FieldingLogic._0CC >= 0) {
+            if (g_Ball.numberOfThrowsDuringPlay == 1 && g_Ball.timeSinceBallPickedUp < 45 && g_FieldingLogic._114) {
+                g_FieldingLogic._0CC = -1;
+            } else {
+                fn_3_A3CC0();
+            }
+        }
+    } else {
+        g_FieldingLogic._0CC = -1;
+    }
+    fn_3_AB554();
 }
