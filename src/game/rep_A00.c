@@ -1231,7 +1231,7 @@ BOOL fn_3_2281C(int i) {
 }
 
 // .text:0x0002273C size:0xE0 mapped:0x806617D0
-BOOL fn_3_2273C(void) {
+BOOL fn_3_2273C(int unused) {
     int i;
 
     for (i = 0; i < 9; i++) {

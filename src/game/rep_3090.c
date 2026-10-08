@@ -2499,9 +2499,8 @@ BOOL fn_3_100018(void) {
     return lbl_3_common_bss_DE94._0000->_09B6 == 1;
 }
 
-// 99.22%: registers in the captain searches (0x48, 0x49, 0x55, 0x58, 0x59), 0x2F's modulo and
-// 0x66's distance sum; opcode 0x4D passes the script word to fn_3_2273C, which rep_A00.h
-// declares BOOL(void), so this build omits two loads there.
+// 99.30%: registers in the captain searches (0x48, 0x49, 0x55, 0x58, 0x59), 0x2F's modulo and
+// 0x66's distance sum.
 // .text:0x000FDB30 size:0x24E8 mapped:0x8073CBC4
 BOOL fn_3_FDB30(void) {
     Unk3090Task* task = lbl_803CC1B8;
@@ -2981,7 +2980,7 @@ BOOL fn_3_FDB30(void) {
             break;
         case 0x4D:
             fn_3_100038();
-            if (lbl_3_common_bss_DE94._0000->_0118 > 0x30000 && fn_3_2273C()) {
+            if (lbl_3_common_bss_DE94._0000->_0118 > 0x30000 && fn_3_2273C(cam->_0000[1])) {
                 cam->_0000 += 2;
                 continue;
             }
