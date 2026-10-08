@@ -607,7 +607,8 @@ void fn_3_8FC0C(void) {
 
 // .text:0x0008F21C size:0x9F0 mapped:0x806CE2B0
 // 99.37%: the target tests the stadium with four separate compares (this merges 2 and 3 into a
-// range check) and tests the flag through (-x | x) >> 31 where this has cmpwi
+// range check) and tests the flag through (-x | x) >> 31; "dome = dome != FALSE;" reproduces
+// that test (99.78%) but is no plausible source
 void fn_3_8F21C(void) {
     BOOL dome = FALSE;
     BOOL stop = FALSE;
