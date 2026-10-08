@@ -14,6 +14,8 @@
 #include "game/rep_AC8.h"
 #include "game/rep_23E8.h"
 #include "string.h"
+#include "game/m_sound.h"
+#include "game/rep_D0.h"
 
 typedef struct Rep1FD8Sprite {
     /* 0x00 */ u8 _00[0x48];
@@ -134,13 +136,25 @@ typedef struct Rep1FD8Draw {
     /* 0x7C */ u8 _7C[0x90 - 0x7C];
     /* 0x90 */ u8 _90_7 : 1;
     /* 0x90 */ u8 _90_0 : 7;
-    /* 0x91 */ u8 _91[0x9C - 0x91];
+    /* 0x91 */ u8 _91[0x99 - 0x91];
+    /* 0x99 */ u8 _99;
+    /* 0x9A */ u8 _9A[0x9C - 0x9A];
     /* 0x9C */ Vec _9C;
     /* 0xA8 */ u8 _A8;
     /* 0xA9 */ u8 _A9;
-    /* 0xAA */ u8 _AA[0xB0 - 0xAA];
-    /* 0xB0 */ u8 _B0;
-    /* 0xB1 */ u8 _B1[0xBD - 0xB1];
+    /* 0xAA */ u8 _AA[0xAC - 0xAA];
+    union {
+        struct {
+            /* 0xAC */ f32 _AC;
+            /* 0xB0 */ u8 _B0;
+            /* 0xB1 */ u8 _B1;
+            /* 0xB2 */ u8 _B2;
+        };
+        /* 0xAC */ Vec vel;
+    };
+    /* 0xB8 */ u16 _B8;
+    /* 0xBA */ u16 _BA;
+    /* 0xBC */ u8 _BC;
     /* 0xBD */ u8 _BD;
     /* 0xBE */ u8 _BE[0xE8 - 0xBE];
 } Rep1FD8Draw; // size: 0xE8
@@ -219,9 +233,18 @@ typedef struct Rep1FD8StadiumFile {
 
 extern Rep1FD8StadiumLights lbl_800F7478[14];
 extern Rep1FD8Light lbl_80367318[4];
+typedef struct Rep1FD8Fielder {
+    /* 0x00 */ u8 _00[0x34];
+    /* 0x34 */ f32 _34;
+    /* 0x38 */ f32 _38;
+    /* 0x3C */ f32 _3C;
+} Rep1FD8Fielder;
+
 extern struct {
-    /* 0x00 */ u8 _00[0x4];
-    /* 0x04 */ Rep1FD8StadiumFile* _04;
+    /* 0x0000 */ u8 _0000[0x4];
+    /* 0x0004 */ Rep1FD8StadiumFile* _04;
+    /* 0x0008 */ u8 _0008[0x2C50 - 0x8];
+    /* 0x2C50 */ Rep1FD8Fielder* _2C50[13];
 } lbl_8036E548;
 extern struct {
     /* 0x00 */ f32 _00;
@@ -240,6 +263,8 @@ extern struct {
 } lbl_80366158;
 extern void fn_80023B90(Rep1FD8LightData* data, Rep1FD8Light* light);
 extern void fn_800528B4(void);
+extern s16 fn_3_B7F70(s16 range);
+extern BOOL fn_80033928(u8 id);
 extern void SetDisplayStateTexture(void* tex, s32, s32);
 extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern Rep1FD8Spawner* fn_800339F0(Rep1FD8Spawner* start, u8 id);
@@ -423,8 +448,96 @@ void fn_3_C805C(u32* n, s32* count) {
 }
 
 // .text:0x000C7A0C size:0x650 mapped:0x80706AA0
-void fn_3_C7A0C(void) {
-    return;
+// 99.22%: only the inlined fn_3_C77AC differs, in the FPRs of its hoisted constants.
+void fn_3_C7A0C(Rep1FD8Draw* draw) {
+    Vec pos;
+    Rep1FD8Spawner* spawner;
+    f32 x;
+    f32 dist;
+
+    if (g_GameLogic.gameStatus != 2) {
+        if (draw->_99 == 0) {
+            draw->_9C.y = lbl_3_data_17514[draw->_A8].pos.y;
+            draw->_B0 = 0;
+            draw->_B2 = 1;
+            CTRLSetTranslation(&draw->control, draw->_9C.x, draw->_9C.y, draw->_9C.z);
+            pitchingMachinePitching(draw->_A8 + 62);
+            draw->_99 = 1;
+        }
+        if (g_GameLogic.gameStatus == 0) {
+            draw->_AC = lbl_3_data_17508[fn_3_B7F70(3)];
+        }
+    } else {
+        draw->_99 = 0;
+        switch (draw->_B0) {
+        case 0:
+            if (draw->_B2 != 0) {
+                if (g_Ball.ballState != 0) {
+                    draw->_B2 = 0;
+                } else if (g_Ball.physicsSubstruct.velocity.z < 0.0f) {
+                    draw->_B2 = 0;
+                } else if (g_Ball.deadBallReason != 0) {
+                    draw->_B2 = 0;
+                } else {
+                    x = g_Ball.physicsSubstruct.velocity.x / g_Ball.physicsSubstruct.velocity.z *
+                            (draw->_9C.z - g_Ball.AtBat_Contact_BallPos.z) +
+                        g_Ball.AtBat_Contact_BallPos.x;
+                    if (x < draw->_9C.x - 25.0f || x > 25.0f + draw->_9C.x) {
+                        draw->_B2 = 0;
+                    } else {
+                        dist = sqrt(pow(draw->_9C.x - g_Ball.AtBat_Contact_BallPos.x, 2.0) +
+                                    pow(draw->_9C.y + g_Ball.AtBat_Contact_BallPos.y, 2.0) +
+                                    pow(draw->_9C.z - g_Ball.AtBat_Contact_BallPos.z, 2.0));
+                        if (dist < 23.0f && g_Ball.AtBat_Contact_BallPos.y < 3.0f - draw->_9C.y) {
+                            draw->_B0 = 1;
+                        }
+                    }
+                }
+            }
+            break;
+        case 1:
+            if (draw->_9C.y <= lbl_3_data_17514[draw->_A8].pos.y - 2.5) {
+                draw->_9C.y = lbl_3_data_17514[draw->_A8].pos.y - 2.5;
+                draw->_B0 = 2;
+            } else {
+                draw->_9C.y -= 0.25;
+            }
+            break;
+        case 2:
+            draw->_9C.y += draw->_AC;
+            if (draw->_9C.y >= -5.0) {
+                draw->_9C.y = -5.0f;
+                memcpy(&pos, &draw->_9C, sizeof(Vec));
+                draw->_B0 = 3;
+                draw->_B1 = 0;
+                lbl_3_bss_9D81 = 1;
+                fn_800528AC(fn_3_C3A38);
+                fn_3_8BBC4(lbl_3_data_81DC[g_d_GameSettings.StadiumID] + 5, &pos, NULL, 9);
+            }
+            if (4.0f * draw->_AC + draw->_9C.y >= -5.0) {
+                spawner = fn_80033A24(fn_3_C75B8, 128, 0, 12, 1, draw->_A8 + 62);
+                if (spawner != NULL) {
+                    fn_3_C77AC(spawner, draw);
+                }
+            }
+            break;
+        case 3:
+            if (draw->_B1++ > 40) {
+                draw->_B0 = 4;
+                draw->_B1 = 0;
+            }
+            break;
+        case 4:
+            if (draw->_9C.y <= lbl_3_data_17514[draw->_A8].pos.y) {
+                draw->_9C.y = lbl_3_data_17514[draw->_A8].pos.y;
+                draw->_B0 = 0;
+            } else {
+                draw->_9C.y -= 0.2;
+            }
+            break;
+        }
+        CTRLSetTranslation(&draw->control, draw->_9C.x, draw->_9C.y, draw->_9C.z);
+    }
 }
 
 // .text:0x000C77AC size:0x260 mapped:0x80706840
@@ -587,12 +700,128 @@ void fn_3_C71CC(u32* n, s32* idx) {
 }
 
 // .text:0x000C63D0 size:0xDFC mapped:0x80705464
-void fn_3_C63D0(void) {
-    return;
+// 99.77%: the target tests checkCollision's result unsigned (cmplwi), and the inlined
+// fn_3_C48D0 and fn_3_C444C allocate their FPRs as in fn_3_C597C.
+void fn_3_C63D0(Rep1FD8Draw* draw) {
+    Vec pos;
+    Vec up = { 0.0f, 1.0f, 0.0f };
+    Vec axis;
+    Vec dir;
+    VecSrcDst seg;
+    CollisionStruct col;
+    Quaternion q;
+    Rep1FD8Spawner* spawner;
+    f32 angle;
+    f32 speed;
+    u32 i;
+    u8 hit = 0;
+
+    if (g_GameLogic.gameStatus != 2) {
+        if (draw->_99 == 0) {
+            draw->_9C.x = lbl_3_data_175FC[draw->_A8].pos.x;
+            draw->_9C.y = lbl_3_data_175FC[draw->_A8].pos.y;
+            draw->_9C.z = lbl_3_data_175FC[draw->_A8].pos.z;
+            draw->_BD = 0;
+            CTRLSetTranslation(&draw->control, draw->_9C.x, draw->_9C.y, draw->_9C.z);
+            draw->_90_7 = 0;
+            pitchingMachinePitching(draw->_A8 + 42);
+            pitchingMachinePitching(draw->_A8 + 52);
+            draw->_99 = 1;
+        }
+        return;
+    }
+    draw->_99 = 0;
+    switch (draw->_BD) {
+    case 0:
+        if (draw->_BC == 0) {
+            for (i = 6; i < 9; i++) {
+                if ((f32)sqrt(pow(lbl_8036E548._2C50[i]->_34 - draw->_9C.x, 2.0) +
+                              pow(lbl_8036E548._2C50[i]->_3C - draw->_9C.z, 2.0)) < 5.0) {
+                    draw->_9C.x = lbl_3_data_175FC[draw->_A8].pos.x;
+                    draw->_9C.y = lbl_3_data_175FC[draw->_A8].pos.y;
+                    draw->_9C.z = lbl_3_data_175FC[draw->_A8].pos.z;
+                    CTRLSetTranslation(&draw->control, draw->_9C.x, draw->_9C.y, draw->_9C.z);
+                    return;
+                }
+            }
+            draw->_BD = 1;
+            draw->_90_7 = 1;
+            angle = 3.1415927f * (draw->_B8 + fn_3_B7F70(draw->_BA)) / 180.0f;
+            speed = lbl_3_data_175F0[fn_3_B7F70(3)];
+            draw->vel.x = speed * cos(angle);
+            draw->vel.y = 0.37f;
+            draw->vel.z = speed * sin(angle);
+            spawner = fn_80033A24(fn_3_C4F00, 128, 0, 7, 1, draw->_A8 + 42);
+            if (spawner != NULL) {
+                fn_3_C5304(spawner, draw);
+                spawner->_10 = lbl_3_bss_9F0C[0];
+            }
+            draw->_BC = fn_3_B7F70(240) + 1;
+            playStadiumSound(3);
+        } else {
+            draw->_BC--;
+        }
+        break;
+    case 1:
+        seg.src = draw->_9C;
+        draw->_9C.x += draw->vel.x;
+        draw->_9C.y -= draw->vel.y;
+        draw->_9C.z += draw->vel.z;
+        seg.dst = draw->_9C;
+        draw->vel.y -= 0.0044f;
+        PSVECNormalize(&draw->vel, &dir);
+        PSVECCrossProduct(&dir, &up, &axis);
+        C_QUATRotAxisRad(&q, &axis, acos(PSVECDotProduct(&dir, &up)));
+        CTRLSetQuat(&draw->control, q.x, q.y, q.z, q.w);
+        if (draw->vel.y < 0.0f && checkCollision(&seg, &col, 0, 0) != 0) {
+            hit = 1;
+        }
+        if (fn_3_C625C(draw)) {
+            hit = 2;
+        }
+        if (hit != 0) {
+            pitchingMachinePitching(draw->_A8 + 42);
+            if (hit == 1) {
+                spawner = fn_80033A24(fn_3_C4724, 128, 0, 24, 1, draw->_A8 + 52);
+                if (spawner != NULL) {
+                    fn_3_C48D0(spawner, draw->_9C);
+                    spawner->_10 = lbl_3_bss_9F0C[0];
+                    spawner->timer = 30;
+                }
+            } else if (hit == 2) {
+                spawner = fn_80033A24(fn_3_C4724, 128, 0, 24, 1, draw->_A8 + 52);
+                if (spawner != NULL) {
+                    fn_3_C444C(spawner, draw);
+                    spawner->_10 = lbl_3_bss_9F0C[0];
+                    spawner->timer = 30;
+                }
+            }
+            draw->_BD = 3;
+            draw->_90_7 = 0;
+            draw->_9C.y = 10.0f;
+        }
+        break;
+    case 2:
+        if (fn_80033928(draw->_A8 + 52) == 0) {
+            draw->_BD = 3;
+        }
+        break;
+    case 3:
+        draw->_BD = 0;
+        draw->_9C.x = lbl_3_data_175FC[draw->_A8].pos.x;
+        draw->_9C.y = lbl_3_data_175FC[draw->_A8].pos.y;
+        draw->_9C.z = lbl_3_data_175FC[draw->_A8].pos.z;
+        draw->vel.y = 0.37f;
+        draw->_90_7 = 0;
+        draw->_BC = fn_3_B7F70(240) + 1;
+        CTRLSetRotation(&draw->control, 0.0f, lbl_3_data_175FC[draw->_A8].rotY, 0.0f);
+        break;
+    }
+    CTRLSetTranslation(&draw->control, draw->_9C.x, draw->_9C.y, draw->_9C.z);
 }
 
 // .text:0x000C625C size:0x174 mapped:0x807052F0
-BOOL fn_3_C625C(Rep1FD8Draw* draw) {
+u8 fn_3_C625C(Rep1FD8Draw* draw) {
     Vec pos = draw->_9C;
     Vec diff;
 
