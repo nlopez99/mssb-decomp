@@ -206,6 +206,14 @@ extern Unk12D0Play lbl_803532A8[2][100];
 extern s16 lbl_3_data_5EDC[22];
 extern s8 lbl_80354720[2][9][4];
 
+static inline int GetLineupPosition(int slot) {
+    return g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.awayTeamBattingInd_battingTeam][slot][1];
+}
+
+static inline int GetLineupPlayer(int slot) {
+    return g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.awayTeamBattingInd_battingTeam][slot][0];
+}
+
 // .text:0x0007C194 size:0x68 mapped:0x806BB228
 BOOL fn_3_7C194(void) {
     if (g_Stats.playFrameCounter < 90) {
@@ -694,7 +702,7 @@ int fn_3_7AEA8(void) {
 // .text:0x0007AD68 size:0x140 mapped:0x806B9DFC
 void fn_3_7AD68(void) {
     int i;
-    int pitcher = g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.awayTeamBattingInd_battingTeam][0][0];
+    int pitcher = GetLineupPlayer(0);
 
     if (lbl_3_common_bss_32A38[g_GameLogic.teamFielding][pitcher]._2 < 0) {
         lbl_3_common_bss_32A38[g_GameLogic.teamFielding][pitcher]._2 = 0;
@@ -702,8 +710,8 @@ void fn_3_7AD68(void) {
         lbl_3_common_bss_32A38[g_GameLogic.teamFielding][pitcher]._4 = 0;
     }
     for (i = 1; i < 10; i++) {
-        int pos = g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.awayTeamBattingInd_battingTeam][i][1];
-        int id = g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.awayTeamBattingInd_battingTeam][i][0];
+        int pos = GetLineupPosition(i);
+        int id = GetLineupPlayer(i);
         if (pos > 0 && lbl_3_common_bss_32A38[g_GameLogic.teamFielding][id]._2 == 0 &&
             pos != lbl_3_common_bss_32A38[g_GameLogic.teamFielding][id]._3) {
             lbl_3_common_bss_32A38[g_GameLogic.teamFielding][id]._3 = pos;
