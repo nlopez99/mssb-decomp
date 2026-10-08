@@ -12,6 +12,7 @@
 #include "C3/geoPalette.h"
 #include "game/rep_D0.h"
 #include "game/rep_1C0.h"
+#include "game/rep_1FD8.h"
 #include "game/rep_2998.h"
 #include "game/sta_c6.h"
 #include "game/m_sound.h"
@@ -267,7 +268,6 @@ extern void fn_800C07BC(void* base, void* tmp, s32 count, s32 size, s32 (*compar
 
 extern void fn_3_C1964(void);
 // Their units' headers still declare these void(void)
-extern StadiumObjectCollision* fn_3_C823C(s32 object, Mtx mtx);
 extern void fn_3_D55EC(Mtx view, StadiumSort1D58* sort);
 extern void fn_3_F6084(Mtx view, StadiumSort1D58* sort);
 extern StadiumObjectCollision* fn_3_F6504(s32 object, Mtx mtx);

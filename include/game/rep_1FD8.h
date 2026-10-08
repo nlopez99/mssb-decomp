@@ -2,6 +2,9 @@
 #define __GAME_rep_1FD8_H_
 
 #include "mssbTypes.h"
+#include "Dolphin/mtx.h"
+
+struct StadiumObjectCollision;
 
 void fn_3_C19C8(void);
 void fn_3_C1C18(void);
@@ -47,7 +50,7 @@ void fn_3_C75B8(void);
 void fn_3_C77AC(void);
 void fn_3_C7A0C(void);
 void fn_3_C805C(void);
-void fn_3_C823C(void);
+struct StadiumObjectCollision* fn_3_C823C(s32 idx, MtxPtr mtx);
 void fn_3_C82B4(void);
 void fn_3_C8650(void);
 

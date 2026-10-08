@@ -7,6 +7,7 @@
 #include "game/rep_1838.h"
 #include "game/rep_1D58.h"
 #include "game/m_sound.h"
+#include "game/rep_37A8.h"
 #include "game/rep_3880.h"
 #include "game/rep_3E58.h"
 #include "Dolphin/mtx.h"
@@ -121,7 +122,7 @@ typedef struct {
 } UnkMgMarker3310; // size: 0x40
 
 // g_Minigame's layout in the minigames this unit serves
-typedef struct {
+typedef struct UnkMgEntry3310 {
     /* 0x00 */ Vec pos;
     /* 0x0C */ Vec rot;
     /* 0x18 */ u8 _18[0x1A - 0x18];
@@ -222,8 +223,6 @@ extern void fn_800B4278(UnkModelSet3310* model);
 extern void fn_800ACFB0(void* data);
 extern void fn_800B993C(void);
 extern void fn_3_90CB0(void);
-// rep_37A8.h declares this as a void(void) placeholder
-extern void fn_3_143770(UnkMgEntry3310* entry);
 extern s32 fn_8005268C(void);
 extern void fn_80033B58(void* texture, s32 index, s32, s32);
 extern void fn_80024DB0(UnkAnimState3310* state);
@@ -257,8 +256,6 @@ extern void fn_80035B50(s32);
 extern void fn_80018B38(void);
 extern void fn_3_909B0(void);
 extern void fn_3_9081C(void);
-// rep_3D70.h declares this as a void(void) placeholder
-extern void fn_3_14225C(UnkModelSet3310* model);
 
 typedef struct {
     /* 0x00 */ u32 _00[4];
@@ -1104,7 +1101,7 @@ void fn_3_1194AC(s32 i) {
 void fn_3_119468(s32 i) {
     UnkModelSet3310* model = lbl_8036E548._0068->_34[i]._00;
     if (model->_98 & 9) {
-        fn_3_14225C(model);
+        fn_3_14225C();
     }
 }
 

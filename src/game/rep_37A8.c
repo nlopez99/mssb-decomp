@@ -72,7 +72,7 @@ void fn_3_143714(void) {
 }
 
 // .text:0x00143770 size:0x27C mapped:0x80782804
-void fn_3_143770(void) {
+void fn_3_143770(struct UnkMgEntry3310* entry) {
     return;
 }
 
