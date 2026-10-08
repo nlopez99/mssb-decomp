@@ -1013,7 +1013,6 @@ void fn_3_4BA0C(void) {
 }
 
 // .text:0x0004B8D0 size:0x13C mapped:0x8068A964
-// 98.92%: `base` and the _0D0 slot address swap r6/r7.
 void fn_3_4B8D0(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     s16 base = f->_18C;
@@ -1022,9 +1021,9 @@ void fn_3_4B8D0(s32 fielder) {
         return;
     }
     if (base <= 3) {
-        if (g_FieldingLogic._0D0[base] == fielder) {
-            g_FieldingLogic._0D0[base] = -1;
-            g_FieldingLogic._101[base] = 0;
+        if (g_FieldingLogic._0D0[f->_18C] == fielder) {
+            g_FieldingLogic._0D0[f->_18C] = -1;
+            g_FieldingLogic._101[f->_18C] = 0;
         }
         f->_18C = -1;
         f->_1D7 = 0;
@@ -1033,8 +1032,8 @@ void fn_3_4B8D0(s32 fielder) {
         }
     } else if (base == 5) {
         f->_18C = -1;
-        f->_1D7 = 0;
         g_FieldingLogic._0D8 = -1;
+        f->_1D7 = 0;
         g_FieldingLogic.playerAtMoundCutoffLocation = 0;
         if (f->_1D3 == 0xE) {
             fn_3_5985C(fielder, 0xC);
