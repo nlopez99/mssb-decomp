@@ -138,7 +138,7 @@ void fn_3_40D54(void);
 void fn_3_40D88(void);
 void fn_3_411AC(void);
 void fn_3_417D4(s32 fielder);
-void fn_3_4197C(void);
+void fn_3_4197C(BOOL nearBall);
 void fn_3_41D78(void);
 void fn_3_4207C(void);
 void fn_3_42850(s32 fielder);

@@ -141,7 +141,8 @@ typedef struct UnkAC8Fielder {
     /* 0x1DD */ u8 _1DD;
     /* 0x1DE */ u8 _1DE;
     /* 0x1DF */ u8 _1DF;
-    /* 0x1E0 */ u8 _1E0[0x1E3 - 0x1E0];
+    /* 0x1E0 */ u8 _1E0;
+    /* 0x1E1 */ u8 _1E1[0x1E3 - 0x1E1];
     /* 0x1E3 */ u8 _1E3;
     /* 0x1E4 */ u8 _1E4;
     /* 0x1E5 */ u8 _1E5[0x1E8 - 0x1E5];
@@ -2189,13 +2190,78 @@ void fn_3_4207C(void) {
 }
 
 // .text:0x00041D78 size:0x304 mapped:0x80680E0C
+// 99.04%: before the second search the target sets busy to 0 and copies it into j
+// (`mr r6,r5`); here j gets its own `li`.
 void fn_3_41D78(void) {
-    return;
+    BOOL thrown = FALSE;
+    BOOL busy;
+    s32 i;
+    s32 j;
+
+    if (g_Ball.deadBallReason == 0 && g_Ball.AtBat_ContactResult != -1 && g_Ball.ballState != 1 && g_FieldingLogic._13F == 0) {
+        if (g_Ball.ballState != 2 ||
+            ((g_Ball.framesUntilThrowReachesDest <= 0 || g_Ball.fielderBeingThrownTo < 0) &&
+             dolsqrtf2(SQ(g_Ball.throwStartingLocation.x - g_Ball.AtBat_Contact_BallPos.x) +
+                       SQ(g_Ball.throwStartingLocation.z - g_Ball.AtBat_Contact_BallPos.z)) > 5.0f + g_Ball.throwDistance)) {
+            for (i = 0; i < 9; i++) {
+                if (g_FieldingLogic._0F8[i] == 1 || g_FieldingLogic._0F8[i] == 7) {
+                    thrown = TRUE;
+                    break;
+                }
+            }
+            if (!thrown) {
+                fn_3_4197C(FALSE);
+                return;
+            }
+            busy = FALSE;
+            for (j = 0; j < 9; j++) {
+                if (g_Fielders[j]._1D3 == 2 || g_Fielders[j]._1D3 == 3 || g_Fielders[j]._1D3 == 4 || g_Fielders[j]._1D3 == 18) {
+                    busy = TRUE;
+                    break;
+                }
+            }
+            if (!busy) {
+                fn_3_4197C(FALSE);
+            }
+        }
+    }
 }
 
 // .text:0x0004197C size:0x3FC mapped:0x80680A10
-void fn_3_4197C(void) {
-    return;
+void fn_3_4197C(BOOL nearBall) {
+    f32 bestDist = 999.9f;
+    s32 i;
+    s32 best;
+
+    for (i = 0; i < 9; i++) {
+        UnkAC8Fielder* f = &g_Fielders[i];
+        f32 dist = dolsqrtf2(SQ(g_Ball.physicsSubstruct.futureCoordsAndDist[90].pos.x - f->_000) +
+                             SQ(g_Ball.physicsSubstruct.futureCoordsAndDist[90].pos.z - f->_008));
+        f32 score = dist;
+
+        if (nearBall == TRUE && f->_19C != 0 && f->_1E0 != 1 && f->_1E0 != 2 && dist < 3.0f) {
+            fn_3_5985C(i, 18);
+            fn_3_43038(i);
+            return;
+        }
+        if (g_FieldingLogic._0F8[i] == 4) {
+            score -= 3.0f;
+        }
+        if (g_FieldingLogic._0F8[i] == 1) {
+            if (bestDist > score - 5.0f) {
+                bestDist = score;
+                best = i;
+            }
+        } else if (bestDist > score) {
+            best = i;
+            bestDist = score;
+        }
+    }
+    if (g_Fielders[best]._18C != 0) {
+        fn_3_4B8D0(best);
+    }
+    fn_3_5985C(best, 18);
+    fn_3_43038(best);
 }
 
 // .text:0x000417D4 size:0x1A8 mapped:0x80680868
@@ -2567,7 +2633,61 @@ void fn_3_3B764(void) {
 
 // .text:0x0003B370 size:0x3F4 mapped:0x8067A404
 void fn_3_3B370(s32 fielder) {
-    return;
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+
+    if (g_Minigame.GameMode_MiniGame != MINI_GAME_ID_PIRANHA_PANIC && g_Minigame.GameMode_MiniGame != MINI_GAME_ID_STAR_DASH &&
+        g_Ball.framesSinceHit <= 0) {
+        return;
+    }
+    switch (fn_3_53130(fielder)) {
+    case 2:
+        return;
+    case 1:
+        break;
+    default: {
+        s32 target = lbl_3_bss_170[0];
+
+        if (g_FieldingLogic._10E) {
+            target = -1;
+        }
+        f->_19E = target;
+        if (!g_GameLogic.autoFielding[g_GameLogic.awayTeamBattingInd_battingTeam] && target >= 0 && f->_1A0 > 10) {
+            g_FieldingLogic._0CC = -1;
+        }
+        if (target >= 0 && g_FieldingLogic._070->_1A != 3 && g_FieldingLogic._070->_1A != 4) {
+            if (g_FieldingLogic._14A & 0x200) {
+                g_FieldingLogic._070->_0C = 0;
+            }
+            if (ACTIVE_TUTORIAL() && g_Practice.practice_fielding_enableSprinting) {
+                g_FieldingLogic._070->_0C = 0;
+            }
+        }
+        fn_3_3A584(fielder);
+        break;
+    }
+    }
+    if (g_Minigame.GameMode_MiniGame == MINI_GAME_ID_PIRANHA_PANIC || g_Minigame.GameMode_MiniGame == MINI_GAME_ID_STAR_DASH) {
+        return;
+    }
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+        return;
+    }
+    if (g_Ball.ballState != 0 && g_Ball.ballState != 3) {
+        if (f->_18C == 6) {
+            fn_3_5985C(fielder, 11);
+        } else {
+            fn_3_5985C(fielder, 12);
+        }
+        if (fielder <= 5) {
+            f->_1D5 = 3;
+        } else {
+            f->_1D5 = 2;
+        }
+        g_FieldingLogic._0B0 = -1;
+    }
+    if (f->_18C >= 0 && f->_18C <= 3 && f->_0A8[f->_18C] > 3.0f) {
+        fn_3_4B8D0(fielder);
+    }
 }
 
 // .text:0x0003AE34 size:0x53C mapped:0x80679EC8
@@ -3143,8 +3263,45 @@ void fn_3_33458(void) {
 }
 
 // .text:0x00033088 size:0x3D0 mapped:0x8067211C
+// 99.80%: the two angle differences in the last test take each other's registers.
 void fn_3_33088(void) {
-    return;
+    UnkAC8Fielder* center = &g_Fielders[7];
+    s16 angle = fn_3_9FB8C(g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x,
+                           g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z);
+    s32 side = 6;
+    UnkAC8Fielder* f;
+    f32 distCenter;
+    f32 distSide;
+
+    if (angle < g_Fielders[7]._182) {
+        side = 8;
+    }
+    f = &g_Fielders[side];
+    if (center->_1DD == 1 && f->_1DD == 1) {
+        if (center->_1DB == 0 && f->_1DB == 0 && center->_186 == f->_186) {
+            distCenter = dolsqrtf2(SQ(g_Ball.physicsSubstruct.futureCoordsAndDist[center->_186].pos.x - center->_000) +
+                                   SQ(g_Ball.physicsSubstruct.futureCoordsAndDist[center->_186].pos.z - center->_008));
+            distSide = dolsqrtf2(SQ(g_Ball.physicsSubstruct.futureCoordsAndDist[f->_186].pos.x - f->_000) +
+                                 SQ(g_Ball.physicsSubstruct.futureCoordsAndDist[f->_186].pos.z - f->_008));
+            if (distCenter < distSide) {
+                g_FieldingLogic._0B2 = 7;
+            } else {
+                g_FieldingLogic._0B2 = side;
+            }
+        } else if (center->_186 <= f->_186) {
+            g_FieldingLogic._0B2 = 7;
+        } else {
+            g_FieldingLogic._0B2 = side;
+        }
+    } else if (center->_1DD == 1) {
+        g_FieldingLogic._0B2 = 7;
+    } else if (f->_1DD == 1) {
+        g_FieldingLogic._0B2 = side;
+    } else if (__abs(angle - center->_182) < __abs(angle - f->_182) + 0x60) {
+        g_FieldingLogic._0B2 = 7;
+    } else {
+        g_FieldingLogic._0B2 = side;
+    }
 }
 
 // .text:0x000329A4 size:0x6E4 mapped:0x80671A38
@@ -4363,8 +4520,8 @@ void fn_3_261E8(s32 fielder) {
 }
 
 // .text:0x00025C40 size:0x5A8 mapped:0x80664CD4
-// 98.64%: registers only; the dive offset and the catch lerp take other float registers
-// and the lerp stores x before y.
+// 99.41%: registers only; the dive offset and the second branch's dx and dz take other
+// float registers, as do the lerp's differences.
 void fn_3_25C40(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     s32 ch = fielder;
@@ -4433,9 +4590,12 @@ void fn_3_25C40(s32 fielder) {
             getAnimRelatedCoordinates(ch, 78, &pos);
         }
         t = (f32)f->_24C / g_Ball.catchAnimationTotalFrames;
-        dx = (g_Ball.AtBat_Contact_BallPos.x - pos.x) * t;
-        dy = (g_Ball.AtBat_Contact_BallPos.y - pos.y) * t;
-        dz = (g_Ball.AtBat_Contact_BallPos.z - pos.z) * t;
+        dx = g_Ball.AtBat_Contact_BallPos.x - pos.x;
+        dy = g_Ball.AtBat_Contact_BallPos.y - pos.y;
+        dz = g_Ball.AtBat_Contact_BallPos.z - pos.z;
+        dx *= t;
+        dy *= t;
+        dz *= t;
         g_Ball.fielderActionCatchCoords.x = pos.x + dx;
         g_Ball.fielderActionCatchCoords.y = pos.y + dy;
         g_Ball.fielderActionCatchCoords.z = pos.z + dz;
