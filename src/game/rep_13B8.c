@@ -111,8 +111,36 @@ extern s16 lbl_3_data_21904[12];
 extern f32 lbl_3_data_2191C[2];
 
 // .text:0x0008A958 size:0x73C mapped:0x806C99EC
+// 97.75%: as in fn_3_7DD6C, the target keeps g_Runners in a saved register for the inlined
+// fn_3_889FC; the inlined fn_3_8A618 loop also has r5 and r6 swapped.
 void fn_3_8A958(void) {
-    return;
+    int i;
+
+    fn_3_87424();
+    fn_3_8679C();
+    if (g_GameLogic.gameStatus == 1) {
+        fn_3_8A7B4();
+    } else if (g_GameLogic.gameStatus == 2) {
+        fn_3_8A618();
+    }
+    for (i = 0; i < 4; i++) {
+        InMemRunnerType* r = &g_Runners[i];
+
+        if (r->runnerOnFieldOrOutOrScored != 0) {
+            fn_3_833EC(i);
+            r->distanceFromBall = VEC_DISTANCE_XZ(&g_Ball.AtBat_Contact_BallPos, &r->position);
+        }
+    }
+    fn_3_87AE8();
+    if (g_GameLogic.secondaryGameMode == 6) {
+        fn_3_87CC8();
+    } else {
+        fn_3_88408();
+        fn_3_88B18();
+        fn_3_889FC();
+        fn_3_87E80();
+    }
+    fn_3_8781C();
 }
 
 // .text:0x0008A7B4 size:0x1A4 mapped:0x806C9848
@@ -2436,8 +2464,31 @@ void fn_3_835B0(void) {
 }
 
 // .text:0x000833EC size:0x1C4 mapped:0x806C2480
-void fn_3_833EC(void) {
-    return;
+void fn_3_833EC(int runner) {
+    InMemRunnerType* r;
+
+    fn_3_8307C(runner);
+    r = &g_Runners[runner];
+    fn_3_7FD90(runner);
+    if (r->runningToDugoutInd != 0) {
+        r->baseRoundingState = 0;
+        r->actionCode = 0;
+    } else {
+        fn_3_7ECFC(runner);
+        fn_3_7F494(runner);
+        if (g_GameLogic.secondaryGameMode != 6) {
+            if (runner == 0 && r->nextBase == 1) {
+                fn_3_7F2D8();
+            } else if (r->baseRoundingState == 1) {
+                r->baseRoundingState = 0;
+            }
+            fn_3_7EBD4(runner);
+        }
+    }
+    fn_3_82670(runner);
+    fn_3_81190(runner);
+    fn_3_80028(runner);
+    fn_3_8307C(runner);
 }
 
 // .text:0x0008307C size:0x370 mapped:0x806C2110
@@ -4077,8 +4128,47 @@ void fn_3_7E2BC(void) {
 }
 
 // .text:0x0007DD6C size:0x550 mapped:0x806BCE00
+// 97.70%: the target keeps g_Runners in r25 through the loop, walks a copy and reuses it in the
+// inlined fn_3_889FC; this build recomputes it there, which shifts the saved registers.
 void fn_3_7DD6C(void) {
-    return;
+    int i;
+
+    fn_3_87424();
+    for (i = 0; i < 4; i++) {
+        InMemRunnerType* r = &g_Runners[i];
+        u8 state;
+
+        if (r->runnerOnFieldOrOutOrScored == 0) {
+            continue;
+        }
+        g_Minigame.runnerNum = i;
+        if (r->runningDirectionCode == 0) {
+            r->runningDirectionCode = 2;
+        }
+        r->turningAroundInd = 0;
+        state = g_Minigame._1B15[g_Minigame._18FC[i]];
+        if (state == 4) {
+        } else if (state == 1 || state == 2) {
+            fn_3_7D920(i);
+        } else if (state == 3) {
+            fn_3_7D79C(i);
+        } else {
+            if (g_GameLogic.gameStatus == 2 && g_Minigame.turnOverStatus == 0) {
+                fn_3_7DB30(i);
+            }
+            fn_3_833EC(i);
+        }
+    }
+    fn_3_87AE8();
+    if (g_GameLogic.secondaryGameMode == 6) {
+        fn_3_87CC8();
+    } else {
+        fn_3_88408();
+        fn_3_88B18();
+        fn_3_889FC();
+        fn_3_87E80();
+    }
+    fn_3_8781C();
 }
 
 // .text:0x0007DD24 size:0x48 mapped:0x806BCDB8
