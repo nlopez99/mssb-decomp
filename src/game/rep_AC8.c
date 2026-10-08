@@ -118,7 +118,9 @@ typedef struct UnkAC8Fielder {
     /* 0x1EE */ u8 _1EE;
     /* 0x1EF */ u8 _1EF[0x1F0 - 0x1EF];
     /* 0x1F0 */ u8 _1F0;
-    /* 0x1F1 */ u8 _1F1[0x1FC - 0x1F1];
+    /* 0x1F1 */ u8 _1F1[0x1F5 - 0x1F1];
+    /* 0x1F5 */ s8 _1F5;
+    /* 0x1F6 */ u8 _1F6[0x1FC - 0x1F6];
     /* 0x1FC */ u8 _1FC;
     /* 0x1FD */ u8 _1FD[0x1FF - 0x1FD];
     /* 0x1FF */ u8 _1FF;
@@ -138,7 +140,10 @@ typedef struct UnkAC8Fielder {
     /* 0x20D */ u8 _20D[0x20F - 0x20D];
     /* 0x20F */ u8 _20F;
     /* 0x210 */ u8 _210;
-    /* 0x211 */ u8 _211[0x216 - 0x211];
+    /* 0x211 */ u8 _211;
+    /* 0x212 */ u8 _212;
+    /* 0x213 */ u8 _213;
+    /* 0x214 */ u8 _214[0x216 - 0x214];
     /* 0x216 */ u8 _216;
     /* 0x217 */ u8 _217[0x21C - 0x217];
     /* 0x21C */ f32 _21C;
@@ -183,6 +188,7 @@ extern s32 fn_3_9FB8C(f32 x, f32 y);
 extern s16 fn_3_9FCA4(s16 a, s16 b);
 extern s16 fn_3_9FCF8(s16 a, s16 b);
 extern void getComponentsFromSAng(s16 ang, f32* x, f32* y);
+extern bool calculateLineIntersection(VecXZ* out, VecXZ* a, VecXZ* b);
 extern u8 lbl_3_data_46F8[][9];
 
 typedef struct {
@@ -418,8 +424,59 @@ void fn_3_55918(void) {
 }
 
 // .text:0x00055710 size:0x208 mapped:0x806947A4
-void fn_3_55710(void) {
-    return;
+void fn_3_55710(s32 fielder) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    s32 base = f->_1F5;
+    s32 i;
+
+    if (g_FieldingLogic._116 != 0) {
+        if (g_Runners[g_FieldingLogic._11B].baseStandingOn >= 0 || g_Runners[g_FieldingLogic._11B].runnerOnFieldOrOutOrScored == 2) {
+            g_FieldingLogic._116 = 0;
+            g_FieldingLogic._0EC = 0;
+        }
+        return;
+    }
+    if (g_FieldingLogic._125 >= 0) {
+        base = g_FieldingLogic._125;
+    }
+    if (base < 0) {
+        return;
+    }
+    for (i = 3; i >= 0; i--) {
+        InMemRunnerType* r = &g_Runners[i];
+
+        if (r->runnerOnFieldOrOutOrScored == 1 && r->forceOutCd <= 0 && r->baseRunningTowards == base &&
+            r->tagUpInd == 0 && r->baseStandingOn < 0 && r->actionCode != 0) {
+            if (r->actionCode == 2) {
+                f->_211 = 2;
+                f->_212 = 0;
+                g_FieldingLogic._116 = 2;
+                g_FieldingLogic._0EC = 6;
+                g_FieldingLogic._111 = 7;
+                g_FieldingLogic._13F = 2;
+                f->_213 = i;
+                if (g_GameLogic._13E[g_GameLogic.teamFielding] == 0) {
+                    fn_3_6C854(g_GameLogic.teamFielding, 2);
+                }
+            } else if (r->actionCode == 3) {
+                f->_211 = 1;
+                f->_212 = 0;
+                g_FieldingLogic._116 = 1;
+                g_FieldingLogic._0EC = r->actionFrames_countDown;
+                g_FieldingLogic._111 = 6;
+                g_FieldingLogic._13F = 1;
+                f->_213 = i;
+            } else if (r->actionFrames_countDown < 6) {
+                g_FieldingLogic._116 = 2;
+                g_FieldingLogic._0EC = 6;
+            } else {
+                g_FieldingLogic._116 = 1;
+                g_FieldingLogic._0EC = r->actionFrames_countDown;
+            }
+            g_FieldingLogic._11B = i;
+            return;
+        }
+    }
 }
 
 // .text:0x000555AC size:0x164 mapped:0x80694640
@@ -1019,8 +1076,27 @@ void fn_3_45B88(s32 fielder) {
 }
 
 // .text:0x0004597C size:0x20C mapped:0x80684A10
-void fn_3_4597C(void) {
-    return;
+// 99.77%: out.x and out.z land in f4/f3 where the target has f3/f4.
+void fn_3_4597C(s32 fielder) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    VecXZ out;
+    VecXZ path[2];
+    VecXZ perp[2];
+    f32 dx;
+    f32 dz;
+
+    path[0].x = g_Ball.AtBat_Contact_BallPos.x;
+    path[0].z = g_Ball.AtBat_Contact_BallPos.z;
+    path[1].x = g_Ball.throwTarget.x;
+    path[1].z = g_Ball.throwTarget.z;
+    dx = -(path[1].z - path[0].z);
+    dz = path[1].x - path[0].x;
+    perp[0].x = f->_000;
+    perp[0].z = f->_008;
+    perp[1].x = f->_000 + dx;
+    perp[1].z = f->_008 + dz;
+    calculateLineIntersection(&out, path, perp);
+    fn_3_52F4C(fielder, out.x, out.z);
 }
 
 // .text:0x00045860 size:0x11C mapped:0x806848F4
