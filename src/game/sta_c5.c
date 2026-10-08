@@ -499,10 +499,9 @@ void fn_3_F66C8(s32* n) {
     s32 j;
     s32 idx;
     u16 start;
-    f32(*corners)[2];
     f32 minX;
-    f32 maxX;
     f32 minZ;
+    f32 maxX;
     f32 maxZ;
     struct StadiumObjectCollision* collision;
     StaC5Draw* draw;
@@ -514,11 +513,10 @@ void fn_3_F66C8(s32* n) {
         lbl_3_common_bss_350E4._44[start] = idx;
         lbl_3_common_bss_350E4._3C[*n]++;
         draw = &lbl_3_common_bss_350E4._00[idx];
-        corners = lbl_3_data_1B824[draw->_9C];
-        minX = maxX = corners[0][0];
-        minZ = maxZ = corners[0][1];
+        minX = maxX = lbl_3_data_1B824[draw->_9C][0][0];
+        minZ = maxZ = lbl_3_data_1B824[draw->_9C][0][1];
         for (j = 1; j < 4; j++) {
-            f32* c = corners[j];
+            f32* c = lbl_3_data_1B824[draw->_9C][j];
 
             if (minX > c[0]) {
                 minX = c[0];
