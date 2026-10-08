@@ -206,7 +206,7 @@ typedef struct UnkAC8Fielder {
     /* 0x255 */ u8 _255;
     /* 0x256 */ u8 _256;
     /* 0x257 */ u8 _257;
-    /* 0x258 */ u8 _258[0x259 - 0x258];
+    /* 0x258 */ u8 _258;
     /* 0x259 */ u8 _259;
     /* 0x25A */ u8 _25A;
     /* 0x25B */ u8 _25B;
@@ -290,6 +290,9 @@ extern s16 lbl_3_data_49DC[44];
 extern f32 lbl_3_data_476C[5];
 extern s16 lbl_3_data_48A4[3][5];
 extern s16 lbl_3_data_4924[6];
+extern u8 lbl_3_data_4714[2][4][6];
+extern f32 lbl_3_data_5FC4[12];
+extern int RandomInt_Game(int max);
 extern f32 lbl_3_data_46F0;
 extern f32 lbl_3_data_46F4;
 extern f32 lbl_3_data_21A14[7];
@@ -1552,8 +1555,110 @@ void fn_3_4EFC8(void) {
 }
 
 // .text:0x0004EBC4 size:0x404 mapped:0x8068DC58
+// 99.10%: the target tests the frame count with `extsh.` and then copies it with an extra
+// `mr r6,r31`, one instruction this lacks.
 void fn_3_4EBC4(void) {
-    return;
+    s32 frames;
+    s32 best = -1;
+    s16 bestFrames = 9999;
+    s16 nextFrames = 9999;
+    BOOL high = FALSE;
+    s32 i;
+    s32 j;
+    BOOL waiting;
+
+    if (g_FieldingLogic._0C4 >= 0) {
+        g_Ball.fielderAboutToGetBall_hasBall = -1;
+        return;
+    }
+    if (g_Ball.fielderAboutToGetBall_hasBall < 0 &&
+        (g_Ball.matchFramesAndBallAngle.framesAfterReceivingThrow <= 0 || g_Ball.matchFramesAndBallAngle.framesAfterReceivingThrow >= 25)) {
+        frames = -1;
+        if (g_Ball.ballZoneAwayFromHome <= 1 && g_Ball.maxYOfHit <= 3.0f) {
+            high = TRUE;
+        }
+        for (i = 0; i < 9; i++) {
+            if (g_FieldingLogic._0F8[i] != 1) {
+                continue;
+            }
+            if (g_Fielders[i]._17E == -1 && g_Ball.fielderAboutToGetBall_hasBall == i) {
+                g_Ball.fielderAboutToGetBall_hasBall = -1;
+                continue;
+            }
+            if (g_Fielders[i]._1DD == 1 && i <= 5 && g_Fielders[i]._080 > 5.0f) {
+                high = TRUE;
+                continue;
+            }
+            if (i < 6 || !high) {
+                frames = g_Fielders[i]._17E;
+                if (frames >= 0) {
+                    if (g_Fielders[i]._19C != 0) {
+                        frames = g_Fielders[i]._17E + 60;
+                    } else if (g_Fielders[i]._1ED) {
+                        frames = g_Fielders[i]._17E + 60;
+                    }
+                    if (i == 0 && g_Fielders[i]._1DD == 1 && g_Fielders[i]._080 > g_Fielders[i]._070) {
+                        frames += 30;
+                    }
+                    if (frames < bestFrames) {
+                        best = i;
+                        bestFrames = frames;
+                    } else if (frames < nextFrames) {
+                        nextFrames = frames;
+                    }
+                }
+            } else {
+                break;
+            }
+        }
+        if (best >= 0) {
+            if (g_Fielders[best]._1DD == 1 && bestFrames < 60) {
+                if (bestFrames + 60 < nextFrames) {
+                    g_Ball.fielderAboutToGetBall_hasBall = best;
+                }
+                if (bestFrames < 30) {
+                    g_Ball.fielderAboutToGetBall_hasBall = best;
+                }
+                if (g_Ball.AtBat_ContactResult == 0) {
+                    if (g_Fielders[best]._1DB == 0) {
+                        g_Ball.fielderAboutToGetBall_hasBall = best;
+                    } else if (frames == best) {
+                        g_Ball.fielderAboutToGetBall_hasBall = best;
+                    }
+                } else {
+                    g_Ball.fielderAboutToGetBall_hasBall = best;
+                }
+            }
+            if (g_Fielders[best]._1DC == 4 && bestFrames < 60) {
+                g_Ball.fielderAboutToGetBall_hasBall = best;
+            }
+            if (g_Fielders[best]._1DC == 2 && bestFrames < 30) {
+                waiting = FALSE;
+                for (j = 0; j < 9; j++) {
+                    if (g_FieldingLogic._0F8[j] == 1) {
+                        if (g_Fielders[j]._1DD == 0) {
+                            waiting = TRUE;
+                            break;
+                        } else if (g_Fielders[j]._1DB == 0) {
+                            waiting = TRUE;
+                            break;
+                        } else if (g_Fielders[j]._1DC == 0 || g_Fielders[j]._1DC == 1) {
+                            waiting = TRUE;
+                            break;
+                        }
+                    }
+                }
+                if (!waiting) {
+                    g_Ball.fielderAboutToGetBall_hasBall = best;
+                }
+            }
+        }
+        if (g_Ball.fielderAboutToGetBall_hasBall >= 0) {
+            g_Ball.ballIsLooseInd_unused = 0;
+            g_Ball.looseBall_codeForHowLongUntilSomeoneWillGetIt = 0;
+            g_Ball.fielderBeingThrownTo = -1;
+        }
+    }
 }
 
 // .text:0x0004E638 size:0x58C mapped:0x8068D6CC
@@ -4433,8 +4538,78 @@ void fn_3_26A74(void) {
 }
 
 // .text:0x00026664 size:0x410 mapped:0x806656F8
-void fn_3_26664(void) {
-    return;
+void fn_3_26664(s32 fielder) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    s32 ch = fielder;
+    s32 toy;
+    s32 chance;
+
+    f->_258 = 0;
+    if (g_d_GameSettings.minigamesEnabled) {
+        if (fielder == 0) {
+            ch = g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder];
+        } else {
+            ch = g_Minigame.minigameControlStruct._28[fielder - 2];
+        }
+    }
+    if (ACTIVE_TUTORIAL() || g_Ball.numFieldersWhoHandledBallDuringPlay != 0 || g_Ball.hitWallInd != 0 ||
+        g_Ball.framesOnGroundUntilPickedUp >= 5) {
+        return;
+    }
+    if (checkFieldingStat(g_GameLogic.teamFielding, f->_178, 10)) {
+        fn_3_1682AC(lbl_8036E548._2C50[ch], 10);
+        playSoundEffect(0x1A8);
+        return;
+    }
+    toy = 0;
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+        toy = 1;
+    }
+    if (g_Ball.inAirOrBefore2ndBounceOrLowBallEnergy) {
+        if (f->_259) {
+            chance = lbl_3_data_4714[toy][f->_1C8][5];
+        } else if (f->_260) {
+            chance = lbl_3_data_4714[toy][f->_1C8][4];
+        } else if (f->_254 == 0) {
+            chance = lbl_3_data_4714[toy][f->_1C8][3];
+        } else {
+            chance = lbl_3_data_4714[toy][f->_1C8][4];
+        }
+        if (fielder == 0) {
+            chance *= 2;
+        }
+        chance *= 10;
+        if (!g_d_GameSettings.exhibitionMatchInd && g_d_GameSettings.humanTeamNumber == g_GameLogic.teamFielding &&
+            (g_d_GameSettings.challengeCaptainStarBought[3] || g_d_GameSettings._4F)) {
+            chance *= lbl_3_data_5FC4[6];
+        }
+        if (RandomInt_Game(1000) < chance) {
+            f->_258 = 3;
+        } else {
+            f->_258 = 1;
+        }
+    } else {
+        if (f->_259) {
+            chance = lbl_3_data_4714[toy][f->_1C8][2];
+        } else if (f->_260) {
+            chance = lbl_3_data_4714[toy][f->_1C8][1];
+        } else if (f->_254 == 0) {
+            chance = lbl_3_data_4714[toy][f->_1C8][0];
+        } else {
+            chance = lbl_3_data_4714[toy][f->_1C8][1];
+        }
+        chance *= 10;
+        if (!g_d_GameSettings.exhibitionMatchInd && g_d_GameSettings.humanTeamNumber == g_GameLogic.teamFielding &&
+            (g_d_GameSettings.challengeCaptainStarBought[3] || g_d_GameSettings._4F)) {
+            chance *= lbl_3_data_5FC4[6];
+        }
+        if (RandomInt_Game(1000) < chance) {
+            f->_258 = 2;
+        } else {
+            f->_258 = 0;
+        }
+    }
+    g_Ball.inAirOrBefore2ndBounceOrLowBallEnergy = 0;
 }
 
 // .text:0x000261E8 size:0x47C mapped:0x8066527C

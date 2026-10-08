@@ -13,7 +13,7 @@ BOOL fn_3_258D8(s32 fielder);
 void fn_3_25A68(s32 fielder);
 void fn_3_25C40(s32 fielder);
 void fn_3_261E8(s32 fielder);
-void fn_3_26664(void);
+void fn_3_26664(s32 fielder);
 void fn_3_26A74(void);
 void fn_3_27648(void);
 void fn_3_27738(s32 fielder);
