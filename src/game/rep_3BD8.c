@@ -1,29 +1,254 @@
 #include "game/rep_3BD8.h"
 #include "header_rep_data.h"
+#include "game/UnknownHomes_Game.h"
+#include "static/UnknownHomes_Static.h"
+#include "game/rep_16B8.h"
+
+typedef struct UnkTask3BD8 {
+    /* 0x00 */ void (*_00)(void);
+    /* 0x04 */ u8 _04[0x14 - 0x4];
+    /* 0x14 */ u16 _14;
+    /* 0x16 */ u8 _16[0x1A - 0x16];
+    /* 0x1A */ u16 _1A;
+} UnkTask3BD8;
+
+typedef struct {
+    /* 0x00 */ u8 _00[0x54];
+    /* 0x54 */ u32 _54;
+    /* 0x58 */ u32 _58;
+    /* 0x5C */ u32 _5C;
+    /* 0x60 */ u8 _60[0x64 - 0x60];
+    /* 0x64 */ u16 _64;
+    /* 0x66 */ u8 _66;
+    /* 0x67 */ u8 _67;
+    /* 0x68 */ u8 _68;
+} UnkSprite3BD8;
+
+typedef struct {
+    /* 0x00 */ UnkSprite3BD8* _00;
+    /* 0x04 */ u8 _04[0x8 - 0x4];
+} UnkSpriteRef3BD8; // size: 0x8
+
+extern UnkSpriteRef3BD8 lbl_80371C30[];
+extern void* lbl_803CC1B8;
+
+extern struct {
+    /* 0x000 */ u8 _000[0x104];
+    /* 0x104 */ u8 _104;
+} lbl_80353A90;
+
+extern struct {
+    /* 0x00 */ s32 _00;
+    /* 0x04 */ u8 _04[0xAD - 0x4];
+    /* 0xAD */ u8 _AD;
+} g_Scores;
+
+extern struct {
+    /* 0x00 */ u8 _00[0xCE];
+    /* 0xCE */ u8 _CE;
+    /* 0xCF */ u8 _CF;
+    /* 0xD0 */ u8 _D0;
+} lbl_3_common_bss_32724;
+
+extern struct {
+    /* 0x000 */ u8 _000[0x1D8];
+    /* 0x1D8 */ u8 _1D8;
+    /* 0x1D9 */ u8 _1D9;
+    /* 0x1DA */ s8 _1DA;
+} lbl_3_common_bss_34C90;
+
+extern void fn_80034CEC(UnkTask3BD8* task);
+extern void fn_80034E20(UnkTask3BD8* task, void* desc);
+extern void fn_800B0A14_removeQueue(void);
+extern void* fn_800B0A5C_insertQueue(void (*callback)(void), s32 arg1);
+extern void fn_8004D0F0(void);
+
+u32 lbl_3_data_273E0[16] = {
+    0x000000BE, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x000800FF, 0x02000000, 0x00000000, 0x00010000,
+    0x00030000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+};
+
+u32 lbl_3_data_27420[48] = {
+    0x00000000, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x010700FF, 0x01000000, 0x00000000, 0x00010000,
+    0x0000000F, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x00070000, 0x01000000, 0x00000000, 0x00010001,
+    0x0000000D, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x00070000, 0x01000000, 0x00000000, 0x00010000,
+    0x000000CB, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x010700FF, 0x02000000, 0x00000000, 0x00010000,
+    0x000000CF, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x010600FF, 0x02000000, 0x00000000, 0x00010000,
+    0x00030000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+};
+
+u32 lbl_3_data_274E0[472] = {
+    0x0000000A, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x010700FF, 0x0C000000, 0x00000000, 0x00010000,
+    0x0000000B, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01070000, 0x0C000000, 0x00000000, 0x00010000,
+    0x0000000C, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x00010031,
+    0x0000000C, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x00010030,
+    0x0000000C, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x0001002F,
+    0x0000000C, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x0001002E,
+    0x0000000C, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x0001002D,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x00010024,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x00010023,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x00010022,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x00010021,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x00010020,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x0001001F,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x0001001E,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x0001001D,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x0001001C,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x0001001B,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x0001001A,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x00010019,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x00010018,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x00010017,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x00010016,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x00010015,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x00010014,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x00010013,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x00010012,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x00010011,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x00010010,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x0001000F,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x0001000E,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x0001000D,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x0001000C,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x0001000B,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x0001000A,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x00010009,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x00010008,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x00010007,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x00010006,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x00010005,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x00010004,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x00010003,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x00010002,
+    0x00000018, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x00010001,
+    0x0000000E, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x0001002A,
+    0x0000000E, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x00010029,
+    0x0000000E, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x00010028,
+    0x0000000E, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x00010027,
+    0x0000000E, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x00010026,
+    0x0000000E, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x00010025,
+    0x00000004, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x0001002C,
+    0x00000005, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x01060000, 0x0C000000, 0x00000000, 0x0001002B,
+    0x00000001, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x010600FF, 0x0C000000, 0x00000000, 0x00010000,
+    0x0000001B, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x010600FF, 0x0C000000, 0x00000000, 0x00010000,
+    0x00000007, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x010600FF, 0x0C000000, 0x00000000, 0x00010000,
+    0x00000006, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x010600FF, 0x0C000000, 0x00000000, 0x00010000,
+    0x00000000, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x00060036, 0x0F000000, 0x00000000, 0x00010000,
+    0x00000000, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x00060036, 0x10000000, 0x00000000, 0x00010000,
+    0x00000002, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x010600FF, 0x0C000000, 0x00000000, 0x00010000,
+    0x00030000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+};
+
+u8 lbl_3_data_27C40[12] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
+
+u8 lbl_3_data_27C4C[8] = { 0x05, 0x07, 0x09, 0x0B, 0x0D, 0x0F, 0x00, 0x00 };
+
+u32 lbl_3_data_27C54[16] = {
+    0x000000BF, 0x00000000, 0x00000000, 0xFFFFFFFF, 0x010800FF, 0x02000000, 0x00000000, 0x00010000,
+    0x00030000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+};
 
 // .text:0x0015F410 size:0x164 mapped:0x8079E4A4
 void fn_3_15F410(void) {
-    return;
+    if (g_GameLogic._125 < 3) {
+        return;
+    }
+    if (g_GameLogic._125 == 3) {
+        lbl_3_common_bss_32724._CF = g_Scores._00;
+        lbl_3_common_bss_32724._D0 = g_Scores._AD;
+        fn_800B0A5C_insertQueue(fn_3_15F3C4, 2);
+    }
+    if (g_GameLogic._125 == 4 && g_GameLogic.FrameCountOfCurrentAtBat_Copy == 1) {
+        fn_800B0A5C_insertQueue(fn_3_15C638, 2);
+    }
+    if (g_GameLogic._125 == 7) {
+        if (g_GameLogic.FrameCountOfCurrentAtBat_Copy == 1) {
+            if (lbl_3_common_bss_34C90._1D8 == 0 && g_GameLogic._11A != 0) {
+                fn_800B0A5C_insertQueue(fn_3_91FC4, 2);
+                fn_800B0A5C_insertQueue(fn_3_15F220, 2);
+                g_GameLogic._11A = 0;
+            } else if (g_GameLogic._11A != 1) {
+                fn_800B0A5C_insertQueue(fn_3_15EE2C, 2);
+                g_GameLogic._11A = 1;
+            }
+        }
+    } else if (g_GameLogic._125 == 5) {
+        if (g_GameLogic.FrameCountOfCurrentAtBat_Copy == 1) {
+            fn_800B0A5C_insertQueue(fn_8004D0F0, 2);
+        }
+    }
 }
 
 // .text:0x0015F3C4 size:0x4C mapped:0x8079E458
 void fn_3_15F3C4(void) {
-    return;
+    fn_80034E20(lbl_803CC1B8, lbl_3_data_273E0);
+    ((UnkTask3BD8*)lbl_803CC1B8)->_00 = fn_3_15F380;
 }
 
 // .text:0x0015F380 size:0x44 mapped:0x8079E414
 void fn_3_15F380(void) {
-    return;
+    UnkTask3BD8* task = lbl_803CC1B8;
+
+    if (g_GameLogic._125 == 10) {
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+    }
 }
 
 // .text:0x0015F220 size:0x160 mapped:0x8079E2B4
 void fn_3_15F220(void) {
-    return;
+    UnkTask3BD8* task = lbl_803CC1B8;
+
+    fn_80034E20(task, lbl_3_data_27420);
+    if (!g_d_GameSettings.exhibitionMatchInd) {
+        lbl_80371C30[task->_14 + 1]._00->_64 = 14;
+    }
+    if (lbl_80353A90._104 == 3) {
+        lbl_80371C30[task->_14 + 3]._00->_64 = 0xCC;
+        lbl_80371C30[task->_14 + 4]._00->_64 = 0xD0;
+    } else if (lbl_80353A90._104 == 2) {
+        lbl_80371C30[task->_14 + 3]._00->_64 = 0xCD;
+        lbl_80371C30[task->_14 + 4]._00->_64 = 0xD1;
+    }
+    if (!g_d_GameSettings.exhibitionMatchInd && g_GameLogic.playOverFadeOutStarted >= 0) {
+        lbl_80371C30[task->_14 + 1]._00->_64 = 16;
+    }
+    task->_1A = 0;
+    ((UnkTask3BD8*)lbl_803CC1B8)->_00 = fn_3_15F088;
 }
 
 // .text:0x0015F088 size:0x198 mapped:0x8079E11C
 void fn_3_15F088(void) {
-    return;
+    UnkTask3BD8* task = lbl_803CC1B8;
+
+    if (g_GameLogic._125 != 10) {
+        if (lbl_3_common_bss_34C90._1DA == 0) {
+            lbl_80371C30[task->_14 + 1]._00->_68 = 1;
+            lbl_80371C30[task->_14 + 2]._00->_68 = 4;
+            if ((lbl_80371C30[task->_14 + 2]._00->_5C >> 16) > 10) {
+                lbl_80371C30[task->_14 + 2]._00->_5C = 0xA0000;
+            }
+        } else {
+            lbl_80371C30[task->_14 + 1]._00->_68 = 4;
+            if ((lbl_80371C30[task->_14 + 1]._00->_5C >> 16) > 10) {
+                lbl_80371C30[task->_14 + 1]._00->_5C = 0xA0000;
+            }
+            lbl_80371C30[task->_14 + 2]._00->_68 = 1;
+        }
+        if (lbl_3_common_bss_32724._CE != 0) {
+            lbl_80371C30[task->_14]._00->_68 = 4;
+            lbl_80371C30[task->_14 + 3]._00->_68 = 4;
+            lbl_80371C30[task->_14 + 4]._00->_54 &= ~2;
+            task->_1A++;
+            if (task->_1A >= 45) {
+                goto kill;
+            }
+        }
+        return;
+    }
+kill:
+    fn_80034CEC(task);
+    fn_800B0A14_removeQueue();
 }
 
 // .text:0x0015EE2C size:0x25C mapped:0x8079DEC0
@@ -48,10 +273,23 @@ void fn_3_15C6E4(void) {
 
 // .text:0x0015C638 size:0xAC mapped:0x8079B6CC
 void fn_3_15C638(void) {
-    return;
+    UnkTask3BD8* task = lbl_803CC1B8;
+
+    fn_80034E20(task, lbl_3_data_27C54);
+    if (lbl_80353A90._104 == 2) {
+        lbl_80371C30[task->_14]._00->_64 = 0xD3;
+    } else if (lbl_80353A90._104 == 3) {
+        lbl_80371C30[task->_14]._00->_64 = 0xC0;
+    }
+    ((UnkTask3BD8*)lbl_803CC1B8)->_00 = fn_3_15C5F4;
 }
 
 // .text:0x0015C5F4 size:0x44 mapped:0x8079B688
 void fn_3_15C5F4(void) {
-    return;
+    UnkTask3BD8* task = lbl_803CC1B8;
+
+    if (g_GameLogic._125 == 7) {
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+    }
 }
