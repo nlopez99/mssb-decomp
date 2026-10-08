@@ -185,7 +185,8 @@ typedef struct UnkAC8Fielder {
     /* 0x211 */ u8 _211;
     /* 0x212 */ u8 _212;
     /* 0x213 */ u8 _213;
-    /* 0x214 */ u8 _214[0x216 - 0x214];
+    /* 0x214 */ u8 _214;
+    /* 0x215 */ u8 _215;
     /* 0x216 */ u8 _216;
     /* 0x217 */ u8 _217;
     /* 0x218 */ u8 _218[0x21C - 0x218];
@@ -289,6 +290,7 @@ extern u8 lbl_3_data_48F8[8];
 extern s16 lbl_3_data_49DC[44];
 extern f32 lbl_3_data_476C[5];
 extern s16 lbl_3_data_48A4[3][5];
+extern u8 lbl_3_data_4900[2][3];
 extern s16 lbl_3_data_4924[6];
 extern u8 lbl_3_data_4714[2][4][6];
 extern f32 lbl_3_data_5FC4[12];
@@ -3431,12 +3433,106 @@ void fn_3_323A4(void) {
 
 // .text:0x00032090 size:0x314 mapped:0x80671124
 void fn_3_32090(void) {
-    return;
+    s32 i;
+    s32 stat;
+
+    for (i = 0; i < 9; i++) {
+        UnkAC8Fielder* f = &g_Fielders[i];
+
+        if (i == 1) {
+            f->_182 = 0x400;
+        } else if (f->_000 == 0.0f) {
+            f->_182 = 0x400;
+        } else {
+            s32 angle = 2048.0f * (f32)atan2(f->_008, f->_000) / 3.1415927f;
+
+            if (angle < 0) {
+                angle += 0x800;
+            }
+            f->_182 = angle;
+        }
+        f->_070 = dolsqrtf2(f->_000 * f->_000 + f->_008 * f->_008);
+    }
+    fn_3_31C50();
+    g_Ball.physicsSubstruct.velocity.x = 0.0f;
+    g_Ball.physicsSubstruct.velocity.y = 0.0f;
+    g_Ball.physicsSubstruct.velocity.z = 0.0f;
+    g_Ball.physicsSubstruct.acceleration.x = 0.0f;
+    g_Ball.physicsSubstruct.acceleration.y = 0.0f;
+    g_Ball.physicsSubstruct.acceleration.z = 0.0f;
+    g_Ball.ballState = 1;
+    g_Ball.AtBat_ContactResult = 2;
+    g_Ball.fielderAboutToGetBall_hasBall = 0;
+    g_Ball.fielderBeingThrownTo = -1;
+    g_Ball.ballIsLooseInd_unused = 0;
+    g_Ball.looseBall_codeForHowLongUntilSomeoneWillGetIt = 0;
+    if (g_FieldingLogic._107 == 1 || g_FieldingLogic._107 == 2) {
+        g_Ball.numberOfThrowsDuringPlay = 1;
+    }
+    if (g_Pitcher.pickOffLoc == 5) {
+        g_Ball.AtBat_Contact_BallPos.x = g_Fielders[1]._000;
+        g_Ball.AtBat_Contact_BallPos.y = g_Fielders[1]._004;
+        g_Ball.AtBat_Contact_BallPos.z = g_Fielders[1]._008;
+        g_Ball.fielderWBallIndex = 1;
+        return;
+    }
+    g_Ball.AtBat_Contact_BallPos.x = g_Fielders[0]._000;
+    g_Ball.AtBat_Contact_BallPos.y = g_Fielders[0]._004;
+    g_Ball.AtBat_Contact_BallPos.z = g_Fielders[0]._008;
+    g_Ball.fielderWBallIndex = 0;
+    if (g_Pitcher.pickOffLoc >= 1 && g_Pitcher.pickOffLoc <= 3) {
+        g_FieldingLogic._0C4 = g_Pitcher.pickOffLoc;
+    }
+    stat = checkFieldingStat(g_GameLogic.teamFielding, g_Fielders[0]._178, 5);
+    g_Fielders[0]._215 = lbl_3_data_4900[stat][2];
 }
 
 // .text:0x00031C50 size:0x440 mapped:0x80670CE4
 void fn_3_31C50(void) {
-    return;
+    f32 offset3;
+    f32 offset5;
+    s32 i;
+
+    if (g_Pitcher.pickOffLoc == 5) {
+        g_Fielders[0]._18C = 5;
+        g_FieldingLogic._0D8 = 0;
+        fn_3_5985C(0, 14);
+        g_Fielders[1]._18C = 0;
+        fn_3_5985C(1, 10);
+        g_FieldingLogic._0D0[0] = 1;
+    } else {
+        fn_3_5985C(0, 10);
+        g_Fielders[1]._18C = 0;
+        fn_3_5985C(1, 1);
+        g_FieldingLogic._0D0[0] = 1;
+    }
+    g_Fielders[2]._18C = 1;
+    fn_3_5985C(2, 1);
+    g_FieldingLogic._0D0[1] = 2;
+    g_Fielders[4]._18C = 3;
+    fn_3_5985C(4, 1);
+    g_FieldingLogic._0D0[3] = 4;
+    offset3 = __abs(g_Fielders[3]._182 - 0x400);
+    offset5 = __abs(g_Fielders[5]._182 - 0x400);
+    if (offset3 < offset5) {
+        g_Fielders[3]._18C = 2;
+        fn_3_5985C(3, 1);
+        g_FieldingLogic._0D0[2] = 3;
+        fn_3_5985C(5, 0);
+    } else {
+        g_Fielders[5]._18C = 2;
+        fn_3_5985C(5, 1);
+        g_FieldingLogic._0D0[2] = 5;
+        fn_3_5985C(3, 0);
+    }
+    for (i = 0; i < 9; i++) {
+        if (g_Fielders[i]._18C >= 0 && g_Fielders[i]._18C <= 3) {
+            g_Fielders[i]._1D7 = 1;
+        }
+    }
+    fn_3_49F40(6, 5);
+    fn_3_49F40(7, 1);
+    fn_3_49F40(8, 4);
 }
 
 // .text:0x00031A3C size:0x214 mapped:0x80670AD0
