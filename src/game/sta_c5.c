@@ -19,8 +19,31 @@
 #include "game/rep_23E8.h"
 #include "Dolphin/rand.h"
 
+typedef struct {
+    /* 0x00 */ void* data;
+    /* 0x04 */ u8 _04[0x06 - 0x04];
+    /* 0x06 */ u8 format;
+    /* 0x07 */ u8 count;
+} StaC5PosData;
+
+typedef struct {
+    /* 0x00 */ u8 type;
+    /* 0x04 */ u32 flags;
+    /* 0x08 */ void* list;
+    /* 0x0C */ u32 size;
+} StaC5DispEntry; // size: 0x10
+
+typedef struct {
+    /* 0x00 */ u8 _00[0x04];
+    /* 0x04 */ StaC5DispEntry* entries;
+    /* 0x08 */ u16 count;
+} StaC5DispData;
+
 typedef struct StaC5Shape {
-    /* 0x00 */ u8 _00[0x18];
+    /* 0x00 */ StaC5PosData* _00;
+    /* 0x04 */ u8 _04[0x10 - 0x04];
+    /* 0x10 */ StaC5DispData* _10;
+    /* 0x14 */ u8 _14[0x18 - 0x14];
     /* 0x18 */ Mtx _18;
 } StaC5Shape;
 
@@ -281,7 +304,10 @@ static Vec lbl_3_data_1BA7C = { 0.0f, 0.0f, 0.0f };
 // MWCC lays out .bss statics in reverse declaration order
 static s32 lbl_3_bss_B560[4];
 static StaC5Model* lbl_3_bss_B55C;
-static f32 lbl_3_bss_B260[0xBF];
+static struct {
+    /* 0x00 */ Vec pts[7];
+    /* 0x54 */ u8 _54[0x2FC - 0x54];
+} lbl_3_bss_B260;
 static u32 lbl_3_bss_B244[7];
 static struct {
     /* 0x00 */ u8 count;
@@ -829,8 +855,41 @@ void fn_3_F31E0(void) {
 }
 
 // .text:0x000F2FFC size:0x1E4 mapped:0x80732090
-void fn_3_F2FFC(void) {
-    return;
+void fn_3_F2FFC(StaC5Draw* draw, f32 x, f32 z) {
+    Vec dir;
+    s8 side;
+    f32 end;
+
+    side = (x - draw->_AC) / fabs_inline(x - draw->_AC);
+    if (side == 0) {
+        side = -(draw->_AC / fabs_inline(draw->_AC));
+    }
+    dir.x = x - draw->_AC;
+    dir.y = 0.0f;
+    dir.z = z - draw->_B0;
+    PSVECNormalize(&dir, &dir);
+    end = side * 80;
+    lbl_3_bss_B260.pts[0].x = draw->_AC + 10.0f * dir.x;
+    lbl_3_bss_B260.pts[0].y = 0.0f;
+    lbl_3_bss_B260.pts[0].z = draw->_B0 + 10.0f * dir.z;
+    lbl_3_bss_B260.pts[1].x = draw->_AC + 0.33333334f * (x - draw->_AC);
+    lbl_3_bss_B260.pts[1].y = 0.0f;
+    lbl_3_bss_B260.pts[1].z = draw->_B0 + 0.33333334f * (z - draw->_B0);
+    lbl_3_bss_B260.pts[2].x = draw->_AC + 0.6666667f * (x - draw->_AC);
+    lbl_3_bss_B260.pts[2].y = 0.0f;
+    lbl_3_bss_B260.pts[2].z = draw->_B0 + 0.6666667f * (z - draw->_B0);
+    lbl_3_bss_B260.pts[3].x = x;
+    lbl_3_bss_B260.pts[3].y = 0.0f;
+    lbl_3_bss_B260.pts[3].z = z;
+    lbl_3_bss_B260.pts[4].x = x + (end - x) / 3.0f;
+    lbl_3_bss_B260.pts[4].y = 0.0f;
+    lbl_3_bss_B260.pts[4].z = z;
+    lbl_3_bss_B260.pts[5].x = x + 2.0f * (end - x) / 3.0f;
+    lbl_3_bss_B260.pts[5].y = 0.0f;
+    lbl_3_bss_B260.pts[5].z = z;
+    lbl_3_bss_B260.pts[6].x = side * 80;
+    lbl_3_bss_B260.pts[6].y = 0.0f;
+    lbl_3_bss_B260.pts[6].z = z;
 }
 
 // .text:0x000F2938 size:0x6C4 mapped:0x807319CC
@@ -1359,6 +1418,7 @@ void fn_3_EE96C(Vec* pos) {
     f32 range;
     s32 scaleS;
     s32 scaleT;
+    f32 tilt;
 
     camera = fn_80052768_getCamera(fn_8005268C());
     PSVECSubtract(&camera->eye, &camera->target, &dir);
@@ -1376,9 +1436,10 @@ void fn_3_EE96C(Vec* pos) {
         dist = 20.0f;
     }
     PSMTXCopy(camera->view, view);
+    tilt = 1.0 - fabs_inline(0.5f * (down.y * view[1][1]));
     scale = 0.19999999f / dist;
     lbl_3_bss_B11C[0][0] = scale;
-    lbl_3_bss_B11C[1][1] = scale * (f32)(1.0 - fabs_inline(0.5f * (down.y * view[1][1])));
+    lbl_3_bss_B11C[1][1] = scale * tilt;
     if (range < 35.0f) {
         scaleS = GX_ITS_16;
         scaleT = GX_ITS_16;
@@ -1400,8 +1461,55 @@ void fn_3_EE96C(Vec* pos) {
 }
 
 // .text:0x000EE67C size:0x2F0 mapped:0x8072D710
-void fn_3_EE67C(void) {
-    return;
+void fn_3_EE67C(StaC5Shape* shape, MtxPtr view) {
+    Mtx mv;
+    GXVtxDescList desc[27];
+    StaC5DispEntry* entry;
+    s32 i;
+    s32 n;
+    s32 shift;
+    s32 attr;
+    u32 type;
+
+    PSMTXConcat(view, shape->_18, mv);
+    GXLoadPosMtxImm(mv, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    GXSetArray(GX_VA_POS, shape->_00->data, shape->_00->count * fn_3_EE0BC(shape->_00->format));
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, shape->_00->format >> 4, shape->_00->format & 0xF);
+    GXSetNumTexGens(1);
+    entry = shape->_10->entries;
+    for (i = 0; i < shape->_10->count; i++, entry++) {
+        switch (entry->type) {
+        case 1:
+            break;
+        case 2:
+            GXClearVtxDesc();
+            n = 0;
+            if (entry->flags & 3) {
+                desc[0].mAttr = GX_VA_PNMTXIDX;
+                desc[0].mType = entry->flags & 3;
+                n = 1;
+            }
+            for (shift = 2, attr = GX_VA_POS; attr < GX_NRM_MTX_ARRAY; attr++, shift += 2) {
+                type = (entry->flags >> shift) & 3;
+                if (type != 0) {
+                    desc[n].mAttr = attr;
+                    desc[n].mType = type;
+                    n++;
+                }
+            }
+            desc[n].mAttr = GX_VA_NULL;
+            GXSetVtxDescv(desc);
+            break;
+        case 3:
+            GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_REG, GX_SRC_REG, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+            fn_3_EE100(shape, view);
+            break;
+        }
+        if (entry->list != NULL) {
+            GXCallDisplayList(entry->list, entry->size);
+        }
+    }
 }
 
 // .text:0x000EE388 size:0x2F4 mapped:0x8072D41C
@@ -1504,8 +1612,8 @@ void fn_3_EE100(StaC5Shape* shape, MtxPtr view) {
 }
 
 // .text:0x000EE0BC size:0x44 mapped:0x8072D150
-s32 fn_3_EE0BC(u32 flags) {
-    switch ((flags >> 4) & 0xF) {
+s32 fn_3_EE0BC(u8 format) {
+    switch ((u8)(format >> 4)) {
     case 0:
     case 1:
         return 1;
