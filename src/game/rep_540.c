@@ -494,7 +494,6 @@ void fn_3_E2D4(void) {
 }
 
 // .text:0x0000DC48 size:0x68C mapped:0x8064CCDC
-// 99.9%: the wall normal's x and z are loaded into swapped FPRs (f0/f1) for the divides.
 void fn_3_DC48(BOOL fromPitcher) {
     VecSrcDst ray;
     CollisionStruct hit;
@@ -539,9 +538,9 @@ void fn_3_DC48(BOOL fromPitcher) {
         len = VEC_LENGTH_XZ(&hit.normal) == 0.0f ? 1.0f : VEC_LENGTH_XZ(&hit.normal);
         g_Ball._1BC0 = 1;
         g_Ball._19E4 = hit.normal.x / len;
+        g_Ball._19E8 = hit.normal.z / len;
         g_Ball.physicsSubstruct.throwYAtSelectedFuturePoint = 0.0f;
         g_Ball.frameBallWillHitWall = -1;
-        g_Ball._19E8 = hit.normal.z / len;
         for (i = 0; i < 360; i += 10) {
             if (g_Ball.physicsSubstruct.futureCoordsAndDist[i].dist > g_Ball.wallAndBallIntersectionDistFromHome) {
                 for (j = i - 9, k = 0; k < 10; j++, k++) {
