@@ -256,7 +256,9 @@ typedef struct StaC2Emitter {
     /* 0x00 */ u8 _00[0x0C];
     /* 0x0C */ StaC2Particle* particles;
     /* 0x10 */ void* _10;
-    /* 0x14 */ u8 _14[0x20 - 0x14];
+    /* 0x14 */ u8 _14[0x18 - 0x14];
+    /* 0x18 */ s32 _18;
+    /* 0x1C */ u8 _1C[0x20 - 0x1C];
     /* 0x20 */ StaC2EmitterOwner* _20;
 } StaC2Emitter;
 
@@ -1292,8 +1294,27 @@ void fn_3_CF278(void) {
 }
 
 // .text:0x000CEFA8 size:0x2D0 mapped:0x8070E03C
-void fn_3_CEFA8(void) {
-    return;
+BOOL fn_3_CEFA8(StaC2Emitter* emitter) {
+    StaC2Particle* p = emitter->particles;
+
+    fn_80033620(emitter);
+    do {
+        if (p->delay <= 0 && p->life != 0) {
+            if (p->duration == 0) {
+                fn_3_CEE5C(p, emitter->_10);
+            } else {
+                fn_3_CED40(p, emitter->_10);
+            }
+            p->life -= (lbl_80366158._28 == 0);
+        }
+        p->delay -= (lbl_80366158._28 == 0);
+        p = p->next;
+    } while (p != NULL);
+    emitter->_18 -= (lbl_80366158._28 == 0);
+    if (emitter->_18 == 0) {
+        return TRUE;
+    }
+    return FALSE;
 }
 
 // .text:0x000CEE5C size:0x14C mapped:0x8070DEF0
