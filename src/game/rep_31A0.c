@@ -1374,9 +1374,9 @@ void fn_3_10E60C(void) {
 }
 
 // .text:0x0010CC20 size:0x19EC mapped:0x8074BCB4
-// 99.47%: case 0's second loop allocates its pointers in other registers, the
-// "_1 == 1" skip in case 3 is a direct beq where the target branches over a b,
-// and the final loop and the lbl_3_data_18920 lookup differ in registers
+// 99.90%: case 3's "_1 == 1" skip is a direct beq where the target branches
+// over a b (one instruction short), and the lbl_3_data_18920 row lookup in
+// case 0 swaps r4 and r5
 void fn_3_10CC20(void) {
     s8 sel[4];
     u8 taken[12];
@@ -1389,7 +1389,6 @@ void fn_3_10CC20(void) {
     s32 k;
     int changed;
     u8 ready;
-    u8 n;
     s32 avail;
     s32 pick;
     int old;
@@ -1429,9 +1428,7 @@ void fn_3_10CC20(void) {
         if (changed) {
             fn_80050138(0, sel[0], sel[1], sel[2], sel[3], 0);
         }
-        ready = 0;
-        for (i = 0; i < 4; i++) {
-            input = &g_Controls[i];
+        for (i = 0, ready = 0; i < 4; i++) {
             if (g_Minigame._19DA[i] != 0) {
                 continue;
             }
@@ -1454,7 +1451,7 @@ void fn_3_10CC20(void) {
                     sndFXStartEx(0x1B8, lbl_800EFBA4[1], 0x3F, 0);
                 }
             } else if (g_Minigame._19E8[i]._1 != 0) {
-                if (input->newButtonInput & 0x200) {
+                if (g_Controls[i].newButtonInput & 0x200) {
                     if (lbl_803C6028._92 == 0) {
                         continue;
                     }
@@ -1474,7 +1471,7 @@ void fn_3_10CC20(void) {
                     ready++;
                 }
             } else {
-                buttons = input->newButtonInput;
+                buttons = g_Controls[i].newButtonInput;
                 if ((buttons & 0x100) && g_Minigame._19E8[i]._0 >= 0 && g_GameLogic.FrameCountOfCurrentAtBat_Copy > 30) {
                     if (g_Minigame._19E8[i]._6 != 0) {
                         sndFXStartEx(0x1BA, lbl_800EFBA4[3], 0x3F, 0);
@@ -1500,7 +1497,7 @@ void fn_3_10CC20(void) {
                 } else {
                 choose:
                     old = g_Minigame._19E8[i]._0;
-                    c = fn_80050760(i, input->buttonInput, input->newButtonInput, input->_08, 0);
+                    c = fn_80050760(i, g_Controls[i].buttonInput, g_Controls[i].newButtonInput, g_Controls[i]._08, 0);
                     if (c >= 0) {
                         g_Minigame._19E8[i]._0 = c;
                         if (old != g_Minigame._19E8[i]._0) {
@@ -1521,7 +1518,7 @@ void fn_3_10CC20(void) {
                     }
                 }
             }
-            if (g_Minigame._19E8[i]._6 == 0 && g_Minigame._19E8[i]._1 == 0 && (input->newButtonInput & 0x400)) {
+            if (g_Minigame._19E8[i]._6 == 0 && g_Minigame._19E8[i]._1 == 0 && (g_Controls[i].newButtonInput & 0x400)) {
                 g_Minigame._19D2[i] = 0;
                 g_Minigame.battingHandedness[i]++;
                 if (g_Minigame.battingHandedness[i] > 3) {
@@ -1535,7 +1532,7 @@ void fn_3_10CC20(void) {
                 } else {
                     g_Minigame.minigameControlStruct._8[i] = 0;
                 }
-            } else if (lbl_80361B20[g_Minigame._19E8[i]._0] != 0 && (input->newButtonInput & 0x800)) {
+            } else if (lbl_80361B20[g_Minigame._19E8[i]._0] != 0 && (g_Controls[i].newButtonInput & 0x800)) {
                 g_Minigame.minigameControlStruct._8[i] ^= 1;
                 if (g_Minigame.minigameControlStruct._8[i] != 0) {
                     sndFXStartEx(0x1BF, lbl_800EFBA4[8], 0x3F, 0);
@@ -1562,21 +1559,18 @@ void fn_3_10CC20(void) {
             } else if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD && g_d_GameSettings.exhibitionMatchInd != 0) {
                 g_Minigame._19DE = 2;
                 g_Minigame._19E6 = lbl_3_data_18920[g_Minigame.GameMode_MiniGame][4];
-            } else {
-                n = lbl_3_data_18920[g_Minigame.GameMode_MiniGame][4];
-                if (g_Minigame._19E7 >= n) {
-                    g_Minigame._19DE = 1;
-                    if (g_Minigame._19E7 >= n) {
-                        g_Minigame._1A0D = 0;
-                    } else {
-                        g_Minigame._1A0D = n - g_Minigame._19E7;
-                    }
-                    g_Minigame._1A0E = 4 - g_Minigame._19E7;
-                    g_Minigame._19E3 = g_Minigame._1A0D;
+            } else if (g_Minigame._19E7 >= lbl_3_data_18920[g_Minigame.GameMode_MiniGame][4]) {
+                g_Minigame._19DE = 1;
+                if (g_Minigame._19E7 >= lbl_3_data_18920[g_Minigame.GameMode_MiniGame][4]) {
+                    g_Minigame._1A0D = 0;
                 } else {
-                    g_Minigame._19E6 = n;
-                    g_Minigame._19DE = 2;
+                    g_Minigame._1A0D = lbl_3_data_18920[g_Minigame.GameMode_MiniGame][4] - g_Minigame._19E7;
                 }
+                g_Minigame._1A0E = 4 - g_Minigame._19E7;
+                g_Minigame._19E3 = g_Minigame._1A0D;
+            } else {
+                g_Minigame._19E6 = lbl_3_data_18920[g_Minigame.GameMode_MiniGame][4];
+                g_Minigame._19DE = 2;
             }
         }
     } else if (g_Minigame._19DE == 1) {
@@ -1874,10 +1868,9 @@ void fn_3_10CC20(void) {
     if (g_d_GameSettings.exhibitionMatchInd != 0 &&
         (g_Minigame._19DE == 1 || g_Minigame._19DE == 2 || g_Minigame._19DE == 3 || g_Minigame._19DE == 4 || g_Minigame._19DE == 5) &&
         g_GameLogic.FrameCountOfCurrentAtBat_Copy >= 30) {
-        sel[0] = -1;
-        sel[1] = -1;
-        sel[2] = -1;
-        sel[3] = -1;
+        for (i = 0; i < 4; i++) {
+            sel[i] = -1;
+        }
         for (i = 0; i < 4; i++) {
             sel[i] = -1;
             if (g_Minigame._19DA[i] != 0 && (g_Controls[i].newButtonInput & 0x100)) {
