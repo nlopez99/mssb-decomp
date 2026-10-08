@@ -479,7 +479,7 @@ static inline void spawnDrawEffect(StaC5Draw* draw) {
 }
 
 // .text:0x000F6FDC size:0x1468 mapped:0x80736070
-// 95.31%: register allocation differs throughout; the target also computes n1 + 2
+// 95.66%: register allocation differs throughout; the target also computes n1 + 2
 // between the two counting loops and stores pitcherModel to the s8 _C3 without extsb.
 void fn_3_F6FDC(void** files) {
     StaC5Draw* draw;
@@ -719,56 +719,52 @@ void fn_3_F6FDC(void** files) {
     draw->_94 = 0;
     draw->_96 = -1;
     draw->_98 = 1;
-    entry = ++draw;
-    count++;
 
-    lbl_3_bss_B21A = count;
-    entry->_9D = 4;
-    draw->_74 = &lbl_8036E548._6C->models[(u8)(j + 1)];
-    draw->_78 = NULL;
-    draw->_7C = NULL;
-    draw->_80 = NULL;
-    draw->_90_7 = 1;
-    draw->_90_6 = draw->_90_7 && draw->_78 != NULL;
-    draw->control.type = 0;
-    CTRLSetTranslation(&draw->control, 0.0f, -0.1f, 0.0f);
-    CTRLSetRotation(&draw->control, 0.0f, 0.0f, 0.0f);
-    draw->_90_5 = 1;
-    draw->_92 = 0xFF;
-    draw->_8C = &lbl_3_bss_B1BC;
-    draw->_84 = fn_3_EEFA4;
-    draw->_88 = NULL;
-    draw->_94 = 0;
-    draw->_96 = -1;
-    draw->_98 = 1;
+    lbl_3_bss_B21A = count + 1;
+    draw[1]._9D = 4;
+    draw[1]._74 = &lbl_8036E548._6C->models[(u8)(j + 1)];
+    draw[1]._78 = NULL;
+    draw[1]._7C = NULL;
+    draw[1]._80 = NULL;
+    draw[1]._90_7 = 1;
+    draw[1]._90_6 = draw[1]._90_7 && draw[1]._78 != NULL;
+    draw[1].control.type = 0;
+    CTRLSetTranslation(&draw[1].control, 0.0f, -0.1f, 0.0f);
+    CTRLSetRotation(&draw[1].control, 0.0f, 0.0f, 0.0f);
+    draw[1]._90_5 = 1;
+    draw[1]._92 = 0xFF;
+    draw[1]._8C = &lbl_3_bss_B1BC;
+    draw[1]._84 = fn_3_EEFA4;
+    draw[1]._88 = NULL;
+    draw[1]._94 = 0;
+    draw[1]._96 = -1;
+    draw[1]._98 = 1;
     fn_800B0A5C_insertQueue(fn_3_EEF24, 5);
-    entry = ++draw;
-    count++;
 
-    entry->_9D = 5;
-    draw->_74 = &lbl_8036E548._6C->models[(u8)(j + 3)];
-    draw->_78 = NULL;
-    draw->_7C = NULL;
-    draw->_80 = NULL;
-    draw->_90_7 = 1;
-    draw->_90_6 = draw->_90_7 && draw->_78 != NULL;
-    draw->control.type = 0;
-    CTRLSetTranslation(&draw->control, 0.0f, -0.2f, 0.0f);
-    CTRLSetRotation(&draw->control, 0.0f, 0.0f, 0.0f);
-    draw->_90_5 = 1;
-    draw->_92 = 0xFF;
-    draw->_8C = NULL;
-    draw->_84 = NULL;
-    draw->_94 = 0;
-    draw->_96 = -1;
-    draw->_98 = 1;
-    draw->_90_4 = 1;
-    draw->_90_3 = 1;
-    draw->_90_2 = 0;
-    draw->_90_1 = 0;
-    entry = ++draw;
-    count++;
-
+    draw[2]._9D = 5;
+    draw[2]._74 = &lbl_8036E548._6C->models[(u8)(j + 3)];
+    draw[2]._78 = NULL;
+    draw[2]._7C = NULL;
+    draw[2]._80 = NULL;
+    draw[2]._90_7 = 1;
+    draw[2]._90_6 = draw[2]._90_7 && draw[2]._78 != NULL;
+    draw[2].control.type = 0;
+    CTRLSetTranslation(&draw[2].control, 0.0f, -0.2f, 0.0f);
+    CTRLSetRotation(&draw[2].control, 0.0f, 0.0f, 0.0f);
+    draw[2]._90_5 = 1;
+    draw[2]._92 = 0xFF;
+    draw[2]._8C = NULL;
+    draw[2]._84 = NULL;
+    draw[2]._94 = 0;
+    draw[2]._96 = -1;
+    draw[2]._98 = 1;
+    draw[2]._90_4 = 1;
+    draw[2]._90_3 = 1;
+    draw[2]._90_2 = 0;
+    draw[2]._90_1 = 0;
+    draw += 3;
+    entry = draw;
+    count += 3;
     if (lbl_3_common_bss_350E4._30 > count) {
         for (i = count; i < lbl_3_common_bss_350E4._30; i++) {
             entry->_9D = 0;
