@@ -2761,8 +2761,20 @@ void fn_3_CBF80(StaC2Draw* draw) {
 }
 
 // .text:0x000CBC18 size:0x368 mapped:0x8070ACAC
-void fn_3_CBC18(void) {
-    return;
+// 99.33%: r30 and r31 swap between &g_Minigame and the springs of the inlined fn_3_CBAFC.
+void fn_3_CBC18(StaC2Draw* draw) {
+    draw->_A0.x = g_Minigame._1AE0;
+    draw->_A0.y = g_Minigame._1AE4;
+    draw->_A0.z = g_Minigame._1AE8;
+    draw->_C0 = -(57.29578f * shortAngleToRad(g_Minigame._1AF8));
+    CTRLSetTranslation(&draw->control, draw->_A0.x, -draw->_A0.y, draw->_A0.z);
+    CTRLSetRotation(&draw->control, 0.0f, draw->_C0, 0.0f);
+    fn_3_CBAFC(draw);
+    if (g_Minigame._1B19 != draw->_CA) {
+        draw->_CA = g_Minigame._1B19;
+        fn_3_CB8A8(draw);
+        fn_3_CBF80(draw);
+    }
 }
 
 // .text:0x000CBAFC size:0x11C mapped:0x8070AB90
