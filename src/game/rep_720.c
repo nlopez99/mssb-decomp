@@ -4,6 +4,7 @@
 #include "static/UnknownHomes_Static.h"
 #include "game/rep_3090.h"
 #include "game/rep_1838.h"
+#include "game/rep_D0.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/rand.h"
 
@@ -49,6 +50,7 @@ typedef struct {
 } lbl_3_data_1348_s;
 
 extern u32 lbl_3_bss_44;
+extern s32 fn_800527BC(void);
 
 extern struct {
     /* 0x0 */ u8 _0[0x5];
@@ -227,8 +229,69 @@ inline void fn_3_17B2C_inline(lbl_3_data_A40_s* p) {
 }
 
 // .text:0x0001CE90 size:0x9DC mapped:0x8065BF24
+// 99.91%: the inlined fn_3_166F4 and fn_3_17110 swap f28/f29/f30, as in fn_3_1850C
 void fn_3_1CE90(void) {
-    return;
+    g_pCamera = &g_Camera;
+    if (g_GameLogic.gameStatus == GAME_STATUS_DEFAULT || g_GameLogic.gameStatus == GAME_STATUS_TRANSITION_PREPARE_NEXT_PLAY) {
+        fn_3_1CBCC();
+    }
+restart:
+    g_pCamera->_28A8 = fn_800527BC();
+    if (g_pCamera->_28A8 > 2) {
+        g_pCamera->_28A8 = 2;
+    }
+    while (g_pCamera->_28A8 != 0) {
+        g_pCamera->_28A8 -= g_pCamera->_28A8 != 0;
+        lbl_3_common_bss_DE94._0000 = &g_pCamera->_120[g_pCamera->_28A8];
+        if (lbl_3_common_bss_DE94._0000->_09AB != 0) {
+            fn_3_FD670();
+            if (g_pCamera->_28A9 == 1) {
+                g_pCamera->_28A9 = 0;
+                goto restart;
+            }
+        } else if (g_GameLogic.gameStatus >= 0x1B && g_GameLogic.gameStatus <= 0x21) {
+            fn_3_166F4();
+        } else if (g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_NONE ||
+                   g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_TOY_FIELD || g_GameLogic.secondaryGameMode == 15 ||
+                   g_GameLogic.secondaryGameMode == 16) {
+            fn_3_1850C();
+        } else if (g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_PRACTICE_MENU) {
+            fn_3_166F4();
+        } else if (g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_BOBOMB_DERBY ||
+                   g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_WALLBALL ||
+                   g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_BARREL_BATTER ||
+                   g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_CHAINCHOMP_SPRINT ||
+                   g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_STAR_DASH ||
+                   g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_0x9 ||
+                   g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_PIRANHA_PANIC) {
+            fn_3_1850C();
+        } else if (g_GameLogic.secondaryGameMode == 14) {
+            fn_3_17110();
+        } else if (g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_PRACTICE_PITCHING ||
+                   g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_PRACTICE_BATTING ||
+                   g_GameLogic.secondaryGameMode == SECONDARY_GAME_MODE_PRACTICE_FIELDING) {
+            fn_3_1850C();
+            if (g_Practice.instructionNumber >= 0) {
+                fn_3_17760();
+            } else {
+                g_Camera._2818 = 0;
+            }
+        } else {
+            fn_3_17804();
+        }
+        fn_3_1CAC0();
+        if (g_GameLogic.sceneID == SCENE_ID_LIVE_BALL) {
+            g_UNK_StadiumDetails._774 = 1;
+        } else {
+            g_UNK_StadiumDetails._774 = 0;
+        }
+    }
+    if (g_Stats.replayInd != 0 && g_Stats._3C != 12) {
+        fn_3_15A98();
+    }
+    if (g_Stats._37 != 0) {
+        fn_3_15524();
+    }
 }
 
 // .text:0x0001CCC8 size:0x1C8 mapped:0x8065BD5C
