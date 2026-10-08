@@ -57,13 +57,23 @@ typedef struct {
     /* 0x04 */ Vec _04;
     /* 0x10 */ f32 _10;
     /* 0x14 */ f32 _14;
-} Unk3090TrackKey;
+    /* 0x18 */ f32 _18;
+    /* 0x1C */ f32 _1C;
+    /* 0x20 */ f32 _20;
+    /* 0x24 */ f32 _24;
+    /* 0x28 */ f32 _28;
+    /* 0x2C */ f32 _2C;
+    /* 0x30 */ f32 _30;
+    /* 0x34 */ u8 _34[0x40 - 0x34];
+} Unk3090TrackKey; // size: 0x40
 
 typedef struct {
-    /* 0x00 */ u8 _00[4];
+    /* 0x00 */ s16 _00;
+    /* 0x02 */ u8 _02[0x4 - 0x2];
     /* 0x04 */ u16 _04;
     /* 0x06 */ u8 _06;
-    /* 0x07 */ u8 _07[0xC - 0x7];
+    /* 0x07 */ u8 _07;
+    /* 0x08 */ s32 _08;
     /* 0x0C */ u8 _0C[1];
 } Unk3090Channel;
 
@@ -77,7 +87,17 @@ typedef struct Unk3090Track {
 typedef struct Unk3090View {
     /* 0x00 */ Mtx44 _00;
     /* 0x40 */ f32 _40;
-    /* 0x44 */ u8 _44[0x88 - 0x44];
+    /* 0x44 */ f32 _44;
+    /* 0x48 */ f32 _48;
+    /* 0x4C */ f32 _4C;
+    /* 0x50 */ f32 _50;
+    /* 0x54 */ f32 _54;
+    /* 0x58 */ Vec _58;
+    /* 0x64 */ Vec _64;
+    /* 0x70 */ Vec _70;
+    /* 0x7C */ f32 _7C;
+    /* 0x80 */ f32 _80;
+    /* 0x84 */ u8 _84;
 } Unk3090View; // size: 0x88
 
 extern struct {
@@ -1361,8 +1381,233 @@ void fn_3_1054CC(void) {
 }
 
 // .text:0x00104B3C size:0x990 mapped:0x80743BD0
-void fn_3_104B3C(void) {
-    return;
+void fn_3_104B3C(struct Unk3090Track* track, u32 time, s16 channel, u8 depth, struct Unk3090View* view) {
+    Unk3090View child;
+    Unk3090TrackKey buf;
+    Mtx44 base;
+    Mtx44 trans;
+    Mtx44 rot;
+    Mtx44 scale;
+    Mtx44 tmp;
+    Mtx44 rotX;
+    Mtx44 rotY;
+    Vec axes[3];
+    Vec pos;
+    Vec from;
+    Vec to;
+    Vec target;
+    Unk3090Channel* ch = (Unk3090Channel*)track->_08[channel + 1];
+    u8* keys = ch->_0C;
+    Unk3090TrackKey* key;
+    Unk3090TrackKey* next;
+    s32 stride;
+    u32 sec;
+    u16 frac;
+    u32 i;
+    f32 t;
+    f32 angle;
+
+    if (ch->_00 >= 0 && depth != 0) {
+        fn_3_104B3C(track, time, ch->_00, depth - 1, view);
+    }
+    stride = lbl_3_data_20FC4[ch->_06];
+    sec = time >> 16;
+    frac = time;
+    key = (Unk3090TrackKey*)(keys + (ch->_04 - 1) * stride);
+    if (ch->_04 != 1 && sec < key->_00) {
+        key = (Unk3090TrackKey*)keys;
+        next = (Unk3090TrackKey*)(keys + stride);
+        while ((u32)(next->_00 << 16) <= time) {
+            key = next;
+            next = (Unk3090TrackKey*)((u8*)next + stride);
+        }
+        if (key->_00 != sec || frac != 0) {
+            t = ((f32)(time - (key->_00 << 16)) / 65536.0f) / (f32)(next->_00 - key->_00);
+            i = 0;
+            do {
+                fn_3_105A10(&(&buf._04)[i], &(&next->_04)[i], &(&key->_04)[i], t);
+                i++;
+            } while (i < lbl_3_data_20FD0[ch->_06]);
+            key = &buf;
+        }
+    }
+    PSMTX44Identity(base);
+    switch (ch->_06) {
+    case 0:
+        view->_84 = 0;
+        PSMTX44Identity(trans);
+        trans[3][0] = key->_04.x;
+        trans[3][1] = -1.0f * key->_04.y;
+        trans[3][2] = key->_04.z;
+        view->_58.x = key->_04.x;
+        view->_58.y = -1.0f * key->_04.y;
+        view->_58.z = key->_04.z;
+        view->_7C = -1.0f * key->_14 + 1.5707964f;
+        view->_80 = key->_10 - 1.5707964f;
+        pos.x = -1.0f * key->_14 + 1.5707964f;
+        pos.y = key->_10 - 1.5707964f;
+        pos.z = key->_18;
+        PSMTX44Identity(rot);
+        PSMTX44RotRad(rotX, 'X', pos.x);
+        PSMTX44RotRad(rotY, 'Y', pos.y);
+        PSMTX44Concat(rot, rotX, rot);
+        PSMTX44Concat(rot, rotY, rot);
+        PSMTX44Identity(scale);
+        scale[0][0] = key->_1C;
+        scale[1][1] = key->_20;
+        scale[2][2] = key->_24;
+        view->_70.x = key->_1C;
+        view->_70.y = key->_20;
+        view->_70.z = key->_24;
+        if (ch->_07 & 1) {
+            view->_40 *= key->_28;
+        } else {
+            view->_40 = key->_28;
+        }
+        view->_44 = key->_2C;
+        if (view->_44 >= 0.0f) {
+            while ((f32)fabs(view->_44) > 1.0f) {
+                view->_44 -= 1.0f;
+            }
+        } else {
+            while ((f32)fabs(view->_44) > 1.0f) {
+                view->_44 += 1.0f;
+            }
+        }
+        view->_48 = key->_30;
+        if (view->_48 >= 0.0f) {
+            while ((f32)fabs(view->_48) > 1.0f) {
+                view->_48 -= 1.0f;
+            }
+        } else {
+            while ((f32)fabs(view->_48) > 1.0f) {
+                view->_48 += 1.0f;
+            }
+        }
+        break;
+    case 1:
+        view->_84 = 1;
+        PSMTX44Identity(trans);
+        trans[3][0] = key->_04.x;
+        trans[3][1] = -1.0f * key->_04.y;
+        trans[3][2] = key->_04.z;
+        view->_58.x = key->_04.x;
+        view->_58.y = -1.0f * key->_04.y;
+        view->_58.z = key->_04.z;
+        view->_7C = -1.0f * key->_14 + 1.5707964f;
+        view->_80 = key->_10 - 1.5707964f;
+        pos.x = key->_10 - 1.5707964f;
+        pos.y = -1.0f * key->_14 + 1.5707964f;
+        pos.z = key->_18;
+        PSMTX44Identity(rot);
+        PSMTX44RotRad(rotX, 'X', pos.x);
+        PSMTX44RotRad(rotY, 'Y', pos.y);
+        PSMTX44Concat(rot, rotX, rot);
+        PSMTX44Concat(rot, rotY, rot);
+        PSMTX44Identity(scale);
+        scale[0][0] = key->_1C;
+        scale[1][1] = key->_20;
+        scale[2][2] = key->_24;
+        view->_70.x = key->_1C;
+        view->_70.y = key->_20;
+        view->_70.z = key->_24;
+        view->_4C = key->_2C;
+        view->_50 = key->_30;
+        view->_54 = key->_30;
+        break;
+    case 2:
+        view->_84 = 2;
+        PSMTX44Identity(trans);
+        trans[3][0] = key->_04.x;
+        trans[3][1] = -1.0f * key->_04.y;
+        trans[3][2] = key->_04.z;
+        pos.x = trans[3][0];
+        pos.y = trans[3][1];
+        pos.z = trans[3][2];
+        PSMTX44Identity(rot);
+        fn_3_105BD8(&child);
+        fn_3_104B3C(track, time, ch->_08, 0xFF, &child);
+        target.x = view->_64.x = child._58.x;
+        target.y = view->_64.y = child._58.y;
+        target.z = view->_64.z = child._58.z;
+        if (lbl_3_common_bss_DE94._0000->_09B5 == 1) {
+            PSVECSubtract(&pos, &target, &pos);
+            fn_3_106270(&target);
+            PSVECAdd(&target, &pos, &pos);
+            memcpy(&view->_58, &pos, sizeof(Vec));
+        } else {
+            memcpy(&view->_58, &pos, sizeof(Vec));
+        }
+        PSVECSubtract(&view->_64, &view->_58, &pos);
+        view->_7C = atan2(-pos.x, -pos.z);
+        view->_80 = atan2(-pos.z, -pos.y);
+        axes[1].x = rot[1][0];
+        axes[1].y = rot[1][1];
+        axes[1].z = rot[1][2];
+        from.x = child._00[3][0];
+        from.y = child._00[3][1];
+        from.z = child._00[3][2];
+        to.x = trans[3][0];
+        to.y = trans[3][1];
+        to.z = trans[3][2];
+        PSVECSubtract(&from, &to, &axes[1]);
+        PSVECNormalize(&axes[1], &axes[1]);
+        rot[1][0] = axes[1].x;
+        rot[1][1] = axes[1].y;
+        rot[1][2] = axes[1].z;
+        if (axes[1].x == 0.0f && axes[1].z == 0.0f) {
+            pos.y = 0.0f;
+            pos.x = 0.0f;
+            pos.z = 1.0f;
+        } else {
+            pos.z = 0.0f;
+            pos.x = 0.0f;
+            pos.y = -1.0f;
+        }
+        axes[0].x = rot[0][0];
+        axes[0].y = rot[0][1];
+        axes[0].z = rot[0][2];
+        PSVECCrossProduct(&axes[1], &pos, &axes[0]);
+        PSVECNormalize(&axes[0], &axes[0]);
+        PSVECCrossProduct(&axes[0], &axes[1], &axes[2]);
+        PSVECNormalize(&axes[2], &axes[2]);
+        rot[0][0] = axes[0].x;
+        rot[0][1] = axes[0].y;
+        rot[0][2] = axes[0].z;
+        rot[1][0] = axes[1].x;
+        rot[1][1] = axes[1].y;
+        rot[1][2] = axes[1].z;
+        rot[2][0] = axes[2].x;
+        rot[2][1] = axes[2].y;
+        rot[2][2] = axes[2].z;
+        angle = key->_10;
+        if (angle >= 0.0f) {
+            while ((f32)fabs(angle) > 3.1415927f) {
+                angle -= 6.2831855f;
+            }
+        } else {
+            while ((f32)fabs(angle) > 3.1415927f) {
+                angle += 6.2831855f;
+            }
+        }
+        PSMTX44RotRad(rotY, 'Y', -angle);
+        PSMTX44Concat(base, rotY, tmp);
+        PSMTX44Concat(rot, tmp, rot);
+        PSMTX44Identity(scale);
+        scale[0][0] = key->_14;
+        scale[1][1] = key->_18;
+        scale[2][2] = key->_1C;
+        view->_70.x = key->_14;
+        view->_70.y = key->_18;
+        view->_70.z = key->_1C;
+        view->_4C = key->_24;
+        view->_50 = key->_28;
+        view->_54 = key->_28;
+        break;
+    }
+    PSMTX44Concat(view->_00, trans, view->_00);
+    PSMTX44Concat(view->_00, rot, view->_00);
+    PSMTX44Concat(view->_00, scale, view->_00);
 }
 
 // .text:0x00104B20 size:0x1C mapped:0x80743BB4
@@ -1734,17 +1979,19 @@ void fn_3_FCF20(void) {
 
 // .text:0x000FCEB0 size:0x70 mapped:0x8073BF44
 int fn_3_FCEB0(f32 time) {
+    lbl_3_common_bss_DE94_s2* cam = lbl_3_common_bss_DE94._0000;
     int i = 0;
 
     if (time < 0.0) {
         return -1;
     }
-    for (i = 0; i < lbl_3_common_bss_DE94._0000->_003C && time > lbl_3_common_bss_DE94._0000->_0034[i]._3C; i++) {
+    while (i < cam->_003C && time > cam->_0034[i]._3C) {
+        i++;
     }
-    if (i < lbl_3_common_bss_DE94._0000->_003C) {
-        return i;
+    if (i >= cam->_003C) {
+        return -1;
     }
-    return -1;
+    return i;
 }
 
 // .text:0x000FCEAC size:0x4 mapped:0x8073BF40
