@@ -206,6 +206,8 @@ void fn_3_1471C0(void) {
 }
 
 // .text:0x00146A90 size:0x730 mapped:0x80785B24
+// 85.24%: the fielder setup stores and the 100-coin loop use other registers and bases,
+// as in rep_3520's fn_3_13BCB8.
 void fn_3_146A90(void) {
     Unk37A8Fielder* fielder;
     s32 i;
@@ -433,6 +435,7 @@ void fn_3_145EB8(void) {
 }
 
 // .text:0x00145B98 size:0x320 mapped:0x80784C2C
+// 99.88%: registers only; g_Minigame and its stride-1 copy swap r26 and r28.
 void fn_3_145B98(void) {
     s32 list[4];
     int team;
@@ -517,6 +520,8 @@ void fn_3_145AD0(int player) {
 }
 
 // .text:0x001453BC size:0x714 mapped:0x80784450
+// 87.16%: registers and scheduling; the target reads the timer with lhau and keeps
+// other pointers in saved registers.
 void fn_3_1453BC(int coin) {
     UnkMgEntry3310* entry;
     Unk37A8Fielder* fielder;
@@ -684,6 +689,8 @@ static inline f32 Lerp37A8(f32 a, f32 b, f32 t) {
     return (b - a) * t + a;
 }
 
+// 82.86%: the target reloads _1B44[player] for the increment after comparing it, and
+// loads lbl_3_data_21D2C[1] before [0] in the interpolations.
 void fn_3_144ADC(int player) {
     Unk37A8Fielder* fielder;
     InputStruct* input;
@@ -723,6 +730,8 @@ void fn_3_144ADC(int player) {
 }
 
 // .text:0x0014471C size:0x3C0 mapped:0x807837B0
+// 85.68%: the target reads _193A[coin] with lbzu and re-forms g_Minigame + coin for
+// _1B84, saving a register; the FPRs of the speed path differ.
 void fn_3_14471C(int player) {
     Unk37A8Fielder* fielder;
     VecXYZ d;
@@ -784,6 +793,8 @@ void fn_3_14471C(int player) {
 }
 
 // .text:0x0014443C size:0x2E0 mapped:0x807834D0
+// 99.20%: FPRs only; the target loads lbl_3_data_21D1C[_2B * 2 + 1] before [0] in both
+// interpolations.
 void fn_3_14443C(void) {
     int i;
     int j;
@@ -912,6 +923,8 @@ void fn_3_14423C(void) {
 }
 
 // .text:0x0014402C size:0x210 mapped:0x807830C0
+// 74.65%: the target keeps idx * 0x38 in r30 and re-adds g_Minigame after each call,
+// where this keeps the entry address; the candidate list registers differ too.
 void fn_3_14402C(int idx) {
     s16* timer;
     s32 candidates[4];
@@ -969,6 +982,8 @@ void fn_3_143FAC(int idx) {
 }
 
 // .text:0x001439EC size:0x5C0 mapped:0x80782A80
+// 94.66%: registers only; the target copies idx to r23 on entry and the inlined
+// fn_3_1430D0 copies use other saved registers.
 void fn_3_1439EC(int idx) {
     UnkMgEntry3310* entry;
     s32 i;
@@ -1006,6 +1021,7 @@ void fn_3_1439EC(int idx) {
 }
 
 // .text:0x00143770 size:0x27C mapped:0x80782804
+// 98.54%: the target forms the list pointers before its first open[] store.
 s32 fn_3_143770(UnkMgEntry3310* entry) {
     s32 open[4];
     s32 free[4];
@@ -1080,6 +1096,8 @@ void fn_3_143714(void) {
 }
 
 // .text:0x00143358 size:0x3BC mapped:0x807823EC
+// 99.35%: registers only; the g_Minigame bases of _1C9E, _1C9A and _1B3C take other
+// volatile registers.
 void fn_3_143358(int idx) {
     Unk37A8Piranha* piranha;
     Unk37A8Fielder* fielder;
@@ -1263,6 +1281,8 @@ void fn_3_142C18(void) {
 }
 
 // .text:0x001428F0 size:0x328 mapped:0x80781984
+// 95.28%: the target reads cpu->_0 and cpu->_3 off g_Minigame + player * 4 before forming
+// cpu, and allocates the counters and flags in other saved registers.
 u8 fn_3_1428F0(s8 player, u8 force) {
     Unk37A8Cpu* cpu;
     s8 port;
@@ -1351,6 +1371,7 @@ u8 fn_3_1428F0(s8 player, u8 force) {
 }
 
 // .text:0x00142570 size:0x380 mapped:0x80781604
+// 98.24%: registers only; the fielder and piranha pointers and the dx/dz FPRs swap.
 s32 fn_3_142570(s8 player) {
     Unk37A8Fielder* fielder;
     Unk37A8Piranha* piranha;
@@ -1415,6 +1436,8 @@ s32 fn_3_142570(s8 player) {
 }
 
 // .text:0x00142284 size:0x2EC mapped:0x80781318
+// 99.21%: registers only; g_Minigame, eta and cpu sit in r29, r28 and r30 where the
+// target has r30, r29 and r28.
 void fn_3_142284(void) {
     Unk37A8Cpu* cpus = MG._1DCC;
     Unk37A8Cpu* cpu;
@@ -1511,6 +1534,8 @@ void fn_3_14225C(void) {
 }
 
 // .text:0x00142088 size:0x1D4 mapped:0x8078111C
+// 89.51%: the inlined fn_3_142030 factors (y / 4) * 16 + (x / 4) * 16 into one shift,
+// where the target hoists (y / 4) * 16 out of the inner loop.
 void fn_3_142088(void) {
     u32 y;
     u32 x;
