@@ -15,6 +15,7 @@
 #include "game/rep_3090.h"
 #include "game/rep_31A0.h"
 #include "game/rep_540.h"
+#include "game/rep_60.h"
 #include "game/rep_720.h"
 #include "game/rep_DB8.h"
 #include "game/rep_E08.h"
@@ -78,6 +79,7 @@ extern struct {
     /* 0x04 */ s32 _04;
     /* 0x08 */ s32 _08;
     /* 0x0C */ s32 _0C;
+    /* 0x10 */ u8 _10;
 } lbl_3_data_228;
 
 extern struct {
@@ -91,15 +93,30 @@ extern struct {
 
 extern u8 lbl_803CBC3C;
 
-extern struct {
+typedef struct UnkTaskD18 {
     /* 0x00 */ void (*callback)(void);
     /* 0x04 */ u8 _04[0x10 - 0x4];
     /* 0x10 */ s16 _10;
-}* lbl_803CC1B8;
+} UnkTaskD18;
 
+extern UnkTaskD18* lbl_803CC1B8;
+
+extern struct {
+    /* 0x000 */ u8 _000[0x715];
+    /* 0x715 */ s8 _715;
+} lbl_803C6CF8;
+
+extern void* ARAMTransfer(AramEntryD18* entry, int arg1, int arg2, u32 aram);
 extern void changeScene(u8, s16);
+extern void fn_80019A60(void* arg);
+extern void fn_8001A3FC(int arg);
+extern void fn_8001CE74(void);
+extern void fn_800216F8(u8 group, int (*callback)(void));
+extern int fn_80035838(AramEntryD18* entry, int count);
+extern int fn_3_1665E4(void);
 extern void fn_8001E474(void);
 extern void fn_8001F228(void);
+extern void* fn_800B0A5C_insertQueue(void (*)(void), s32);
 extern void fn_3_7D458(void);
 extern void fn_3_E19E8(void);
 extern void fn_3_1663AC(void);
@@ -476,5 +493,102 @@ void fn_3_59F40(void) {
 
 // .text:0x00059C2C size:0x314 mapped:0x80698CC0
 void fn_3_59C2C(void) {
-    return;
+    UnkTaskD18* task = lbl_803CC1B8;
+
+    switch (g_UnkSimulation_31AC0._4) {
+    case 0:
+        task->_10 = 0;
+        fn_800216F8(3, fn_3_91064);
+        g_UnkSimulation_31AC0._4++;
+        break;
+    case 1:
+        if (task->_10 != 0) {
+            task->_10 = 0;
+            g_UnkSimulation_31AC0._4++;
+        }
+        break;
+    case 2:
+        fn_800216F8(g_d_GameSettings.StadiumID + 39, fn_3_90798);
+        g_UnkSimulation_31AC0._4++;
+        break;
+    case 3:
+        if (task->_10 != 0) {
+            task->_10 = 0;
+            g_UnkSimulation_31AC0._4++;
+        }
+        break;
+    case 4:
+        lbl_3_data_228._10 = 0;
+        fn_800B0A5C_insertQueue(manageLoadingState, 0);
+        g_UnkSimulation_31AC0._4++;
+        break;
+    case 5:
+        if (lbl_3_data_228._10 == 1) {
+            g_UnkSimulation_31AC0._4++;
+        }
+        break;
+    case 6:
+        if (fn_80035838(lbl_3_data_3D80, 2) != 0) {
+            g_UnkSimulation_31AC0._4++;
+        }
+        break;
+    case 7:
+        if (fn_80035838(&lbl_3_data_3D80[14], 11) != 0) {
+            g_UnkSimulation_31AC0._4++;
+        }
+        break;
+    case 8:
+        if (fn_80035838(&lbl_3_data_3D80[29], 9) != 0) {
+            g_UnkSimulation_31AC0._4++;
+        }
+        break;
+    case 9:
+        lbl_3_common_bss_34C58._00 = (u32)ARAMTransfer(&lbl_3_data_3D70, 0, 0, 0);
+        g_UnkSimulation_31AC0._4++;
+        break;
+    case 10:
+        if (lbl_803C6CF8._715 == 1) {
+            fn_3_906FC();
+            lbl_3_common_bss_34C58._2C = 0;
+            g_UnkSimulation_31AC0._4++;
+        }
+        break;
+    case 11:
+        if (fn_3_90928() != 0) {
+            lbl_3_common_bss_34C58._2C = 0;
+            g_UnkSimulation_31AC0._4++;
+        }
+        break;
+    case 12:
+        fn_8001CE74();
+        fn_3_B42A8();
+        fn_8001A3FC(2);
+        lbl_8036E548._2D7D = 0;
+        fn_80019A60(&lbl_8036E548);
+        g_UnkSimulation_31AC0._4++;
+        break;
+    case 13:
+        if (lbl_8036E548._2D7D != 0) {
+            g_UnkSimulation_31AC0._4++;
+        }
+        break;
+    case 14:
+        if (fn_3_1665E4() != 0) {
+            g_UnkSimulation_31AC0._4++;
+        }
+        break;
+    case 15:
+        fn_3_106E50();
+        g_UnkSimulation_31AC0._4++;
+        break;
+    case 16:
+        if (lbl_803C6CF8._715 == 1) {
+            fn_3_106DFC();
+            g_UnkSimulation_31AC0._4++;
+        }
+        break;
+    default:
+        task->callback = fn_3_5AE0C;
+        break;
+    }
 }
