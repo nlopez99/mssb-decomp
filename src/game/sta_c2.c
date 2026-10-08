@@ -268,6 +268,11 @@ typedef struct {
 typedef struct {
     /* 0x00 */ u8 _00[0x48];
     /* 0x48 */ Vec _48;
+    /* 0x54 */ u32 _54;
+    /* 0x58 */ u8 _58[0x5C - 0x58];
+    /* 0x5C */ s32 _5C;
+    /* 0x60 */ u8 _60[0x69 - 0x60];
+    /* 0x69 */ u8 _69;
 } StaC2Sprite;
 
 typedef struct {
@@ -403,6 +408,9 @@ extern void fn_8003403C(f32 width, f32 height);
 extern void fn_80025EEC(StaC2Anim* anim, s32, s32);
 extern u16 lbl_3_data_81DC[16];
 extern void fn_80033620(StaC2Emitter* emitter);
+extern void* lbl_803CC1B8;
+extern void fn_80034CEC(StaC2Task* task);
+extern void fn_800B0A14_removeQueue(void);
 extern StaC2SpriteRef lbl_80371C30[];
 
 // fn_3_B7F70 lies in unsplit code
@@ -440,6 +448,10 @@ static u8 lbl_3_bss_A021;
 static u8 lbl_3_bss_A020;
 static u8* lbl_3_bss_A01C;
 static u8 lbl_3_bss_A018;
+
+static inline BOOL isSpriteDone(StaC2Task* task, s32 i) {
+    return lbl_80371C30[task->_14 + i]._00->_69 == 2 ? TRUE : FALSE;
+}
 
 // .text:0x000D67CC size:0x2244 mapped:0x80715860
 void fn_3_D67CC(void) {
@@ -1332,7 +1344,31 @@ void fn_3_CEBBC(Vec* pos, s32 i) {
 
 // .text:0x000CE954 size:0x268 mapped:0x8070D9E8
 void fn_3_CE954(void) {
-    return;
+    StaC2Task* task = lbl_803CC1B8;
+    s32 i;
+
+    for (i = 0; i < 10; i++) {
+        switch (lbl_3_bss_A898[i]) {
+        case 1:
+            fn_3_CEBBC(&lbl_3_bss_A820[i], i);
+            lbl_80371C30[task->_14 + i]._00->_5C = 0;
+            lbl_80371C30[task->_14 + i]._00->_54 |= 2;
+            lbl_3_bss_A898[i] = 2;
+            break;
+        case 2:
+            fn_3_CEBBC(&lbl_3_bss_A820[i], i);
+            if (isSpriteDone(task, i)) {
+                lbl_80371C30[task->_14 + i]._00->_54 &= ~2;
+                lbl_3_bss_A898[i] = 0;
+            }
+            break;
+        }
+    }
+    if (lbl_3_bss_A81C) {
+        fn_800B0A14_removeQueue();
+        fn_80034CEC(lbl_3_bss_A8A4);
+        lbl_3_bss_A81C = 0;
+    }
 }
 
 // .text:0x000CE8E4 size:0x70 mapped:0x8070D978
