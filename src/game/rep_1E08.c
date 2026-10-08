@@ -320,7 +320,7 @@ extern void convertTextureHeader(void* tex);
 extern void fn_800BD190(void* geo, void* tex);
 extern void fn_80025DDC(void* anim);
 extern void fn_80025C58(void* anim, UnkModel1E08* model);
-extern void fn_80025FFC(void* anim, UnkAnimEntry1E08* entry);
+extern void fn_80025FFC(void* anim, UnkAnimEntry1E08* entry, void* file);
 extern void fn_80025EEC(UnkAnimEntry1E08* entry, s32, s32);
 extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_800ACFB0(void* data);
@@ -534,11 +534,11 @@ void fn_3_BF6C0(void) {
 
 // .text:0x000BF238 size:0x488 mapped:0x806FE2CC
 void fn_3_BF238(void) {
-    s32 i;
-    s32 n;
     void* tex;
     void* layout;
     void* geo;
+    s32 i;
+    s32 n;
     void* anim;
     UnkModel1E08* model;
     UnkAnimEntry1E08* entry;
@@ -640,42 +640,48 @@ void fn_3_BF238(void) {
                     break;
                 case 6:
                 case 7:
+                    anim = (void*)lbl_3_common_bss_35154._00C[i];
                     entry = &lbl_3_common_bss_35154._014[i - 6];
-                    entry->_00 = (void*)lbl_3_common_bss_35154._00C[i];
-                    fn_80025FFC(entry->_2C, entry);
+                    entry->_00 = anim;
+                    fn_80025FFC(entry->_2C, entry, anim);
                     fn_80025EEC(entry, 0, 0);
                     break;
                 case 15:
                 case 16:
                 case 17:
+                    anim = (void*)lbl_3_common_bss_35154._00C[i];
                     entry = &lbl_3_common_bss_35154._014[i - 13];
-                    entry->_00 = (void*)lbl_3_common_bss_35154._00C[i];
-                    fn_80025FFC(entry->_2C, entry);
+                    entry->_00 = anim;
+                    fn_80025FFC(entry->_2C, entry, anim);
                     fn_80025EEC(entry, 0, 0);
                     break;
                 case 23:
+                    anim = (void*)lbl_3_common_bss_35154._00C[i];
                     entry = &lbl_3_common_bss_35154._014[i - 18];
-                    entry->_00 = (void*)lbl_3_common_bss_35154._00C[i];
-                    fn_80025FFC(entry->_2C, entry);
+                    entry->_00 = anim;
+                    fn_80025FFC(entry->_2C, entry, anim);
                     fn_80025EEC(entry, 0, 0);
                     break;
                 case 29:
+                    anim = (void*)lbl_3_common_bss_35154._00C[i];
                     entry = &lbl_3_common_bss_35154._014[i - 23];
-                    entry->_00 = (void*)lbl_3_common_bss_35154._00C[i];
-                    fn_80025FFC(entry->_2C, entry);
+                    entry->_00 = anim;
+                    fn_80025FFC(entry->_2C, entry, anim);
                     fn_80025EEC(entry, 0, 0);
                     break;
                 case 35:
+                    anim = (void*)lbl_3_common_bss_35154._00C[i];
                     entry = &lbl_3_common_bss_35154._014[i - 28];
-                    entry->_00 = (void*)lbl_3_common_bss_35154._00C[i];
-                    fn_80025FFC(entry->_2C, entry);
+                    entry->_00 = anim;
+                    fn_80025FFC(entry->_2C, entry, anim);
                     fn_80025EEC(entry, 0, 0);
                     break;
                 case 42:
                 case 43:
+                    anim = (void*)lbl_3_common_bss_35154._00C[i];
                     entry = &lbl_3_common_bss_35154._014[i - 34];
-                    entry->_00 = (void*)lbl_3_common_bss_35154._00C[i];
-                    fn_80025FFC(entry->_2C, entry);
+                    entry->_00 = anim;
+                    fn_80025FFC(entry->_2C, entry, anim);
                     fn_80025EEC(entry, 0, 0);
                     break;
                 }
