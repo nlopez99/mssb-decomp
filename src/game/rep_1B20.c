@@ -1004,7 +1004,35 @@ void fn_3_B274C(void) {
 
 // .text:0x000B2630 size:0x11C mapped:0x806F16C4
 void fn_3_B2630(void) {
-    return;
+    InputStruct* input = &g_Controls[g_Practice.homeAway];
+
+    if (g_Practice.framesOnAllInstructions < 0x7FFE) {
+        g_Practice.framesOnAllInstructions++;
+    } else {
+        g_Practice.framesOnAllInstructions = 0x7FFF;
+    }
+    if (g_Practice.instructionComplete_readyToAdvance == 0 && g_Practice.allInstructionsComplete == 0) {
+        if (g_Practice.framesOnCurrInstruction < 0x7FFE) {
+            g_Practice.framesOnCurrInstruction++;
+        } else {
+            g_Practice.framesOnCurrInstruction = 0x7FFF;
+        }
+    }
+    if (g_Practice.tutorialState == 1 && (input->newButtonInput & 0x1000)) {
+        if (g_Practice.tutorialState != 2) {
+            g_Practice.practiceState = 0;
+            g_Practice.tutorialState = 2;
+            g_Practice.framesSincePracticeMenuDefaultTransition = 0;
+        }
+    } else if (g_Practice.allInstructionsComplete != 0) {
+        if ((input->newButtonInput & 0x100) && g_Practice.tutorialState != 2) {
+            g_Practice.practiceState = 0;
+            g_Practice.tutorialState = 2;
+            g_Practice.framesSincePracticeMenuDefaultTransition = 0;
+        }
+    } else {
+        fn_3_B1DD0();
+    }
 }
 
 // .text:0x000B254C size:0xE4 mapped:0x806F15E0
@@ -1040,8 +1068,190 @@ int fn_3_B254C(void) {
 }
 
 // .text:0x000B1DD0 size:0x77C mapped:0x806F0E64
+// First draft (86.46%): the target keeps the stick-direction masks in r29-r31 and
+// lays out the command switch differently; registers and blocks differ throughout.
 void fn_3_B1DD0(void) {
-    return;
+    int i;
+    s16 cmd;
+    s16 team;
+    InputStruct* input;
+    InputStruct* ctrl = &g_Controls[g_Practice.homeAway];
+
+    g_Practice.inputs[0].newButtonInput = 0;
+    g_Practice.inputs[1].newButtonInput = 0;
+    if (g_Practice.instructionComplete_readyToAdvance != 0) {
+        if (g_Practice.currentMessageDoneTyping != 0 && (ctrl->newButtonInput & 0x100)) {
+            g_Practice.instructionComplete_readyToAdvance = 0;
+            g_Practice.framesOnCurrInstruction = 0;
+            g_Practice.currentMessageDoneTyping = 0;
+            g_Practice.instructionNumber++;
+        }
+        if (g_Practice.instructionComplete_readyToAdvance == 1) {
+            lbl_80366158._28 = 1;
+        }
+        g_Practice.readyToMoveToNextInstruction = 1;
+        return;
+    }
+    if (g_Practice.maybeInputResetCountdown != 0 && --g_Practice.maybeInputResetCountdown != 0) {
+        g_Practice.readyToMoveToNextInstruction = 1;
+        lbl_80366158._28 = 1;
+        return;
+    }
+    fn_3_B274C();
+    for (i = 0; i < 2; i++) {
+        if (g_Practice.cpuInputDuration[i] != 0 && --g_Practice.cpuInputDuration[i] != 0) {
+            input = &g_Practice.inputs[i];
+            input->buttonInput = g_Practice.cpuInput[i];
+            if ((input->buttonInput & 2) && (input->buttonInput & 8)) {
+                input->controlStickAngle = 0x200;
+            } else if ((input->buttonInput & 8) && (input->buttonInput & 1)) {
+                input->controlStickAngle = 0x600;
+            } else if ((input->buttonInput & 1) && (input->buttonInput & 4)) {
+                input->controlStickAngle = 0xA00;
+            } else if ((input->buttonInput & 4) && (input->buttonInput & 2)) {
+                input->controlStickAngle = 0xE00;
+            } else if (input->buttonInput & 2) {
+                input->controlStickAngle = 0;
+            } else if (input->buttonInput & 8) {
+                input->controlStickAngle = 0x400;
+            } else if (input->buttonInput & 1) {
+                input->controlStickAngle = 0x800;
+            } else if (input->buttonInput & 4) {
+                input->controlStickAngle = 0xC00;
+            }
+            if (input->controlStickAngle >= 0) {
+                input->controlStickMagnitude = 0x40;
+            }
+        }
+    }
+    if (g_Practice.cpuCommandDuration != 0 && --g_Practice.cpuCommandDuration != 0) {
+        return;
+    }
+    while (TRUE) {
+        cmd = g_Practice.commandList[g_Practice.commandIndex];
+        switch (cmd & 0xFF00) {
+        case 0x100:
+            g_Practice.cpuCommandDuration = g_Practice.commandList[++g_Practice.commandIndex] & 0xFFF;
+            g_Practice.commandIndex++;
+            return;
+        case 0x200:
+            g_Practice.maybeInputResetCountdown = g_Practice.commandList[++g_Practice.commandIndex] & 0xFFF;
+            g_Practice.commandIndex++;
+            return;
+        case 0x300:
+            g_Practice.instructionComplete_readyToAdvance = 1;
+            g_Practice.commandIndex++;
+            return;
+        case 0x400:
+            g_Practice.instructionComplete_readyToAdvance = 2;
+            g_Practice.commandIndex++;
+            return;
+        case 0x1100:
+        case 0x1300:
+            team = g_GameLogic.teamFielding;
+            if ((cmd & 0xFF00) == 0x1100) {
+                team = g_GameLogic.teamBatting;
+            }
+            g_Practice.inputs[team].newButtonInput |= g_Practice.commandList[++g_Practice.commandIndex] & 0xFFF;
+            break;
+        case 0x1200:
+        case 0x1400:
+            team = g_GameLogic.teamFielding;
+            if ((cmd & 0xFF00) == 0x1200) {
+                team = g_GameLogic.teamBatting;
+            }
+            input = &g_Practice.inputs[team];
+            g_Practice.cpuInput[team] = g_Practice.commandList[++g_Practice.commandIndex];
+            input->buttonInput |= g_Practice.cpuInput[team];
+            input->newButtonInput |= g_Practice.cpuInput[team];
+            g_Practice.commandIndex++;
+            if ((input->buttonInput & 2) && (input->buttonInput & 8)) {
+                input->controlStickAngle = 0x200;
+            } else if ((input->buttonInput & 8) && (input->buttonInput & 1)) {
+                input->controlStickAngle = 0x600;
+            } else if ((input->buttonInput & 1) && (input->buttonInput & 4)) {
+                input->controlStickAngle = 0xA00;
+            } else if ((input->buttonInput & 4) && (input->buttonInput & 2)) {
+                input->controlStickAngle = 0xE00;
+            } else if (input->buttonInput & 2) {
+                input->controlStickAngle = 0;
+            } else if (input->buttonInput & 8) {
+                input->controlStickAngle = 0x400;
+            } else if (input->buttonInput & 1) {
+                input->controlStickAngle = 0x800;
+            } else if (input->buttonInput & 4) {
+                input->controlStickAngle = 0xC00;
+            }
+            if (input->controlStickAngle >= 0) {
+                input->controlStickMagnitude = 0x40;
+            }
+            g_Practice.cpuInputDuration[team] = g_Practice.commandList[g_Practice.commandIndex] & 0xFFF;
+            break;
+        case 0x1500:
+            g_Practice.practice_runner_countInputForMashing = 1;
+            break;
+        case 0x1600:
+            g_Practice.practice_runner_countInputForMashing = 0;
+            break;
+        case 0x1700:
+            g_Practice.practice_fielding_enableSprinting = 1;
+            break;
+        case 0x1800:
+            g_Practice.practice_fielding_enableSprinting = 0;
+            break;
+        case 0x2100:
+            g_Practice.lakituTextIndex = g_Practice.commandList[++g_Practice.commandIndex] & 0xFFF;
+            break;
+        case 0x2200:
+            g_Practice.diagramTitleTextIndex = g_Practice.commandList[++g_Practice.commandIndex] & 0xFFF;
+            break;
+        case 0x2300:
+            g_Practice.diagramTitleTextIndex = 0;
+            break;
+        case 0x3100:
+            g_Practice.allowPlayToEndIndicator = 1;
+            break;
+        case 0x3200:
+            g_Practice.practice_hitHorizontalPower = g_Practice.commandList[++g_Practice.commandIndex];
+            g_Practice.practice_hitVerticalAngle = g_Practice.commandList[++g_Practice.commandIndex];
+            g_Practice.practice_hitHorizontalAngle = g_Practice.commandList[++g_Practice.commandIndex];
+            break;
+        case 0x3300:
+            g_Practice._1C6 = cmd;
+            g_Practice._1C6++;
+            break;
+        case 0x4100:
+            g_Practice.maybeControlFlag1 = 0;
+            g_Practice.maybeControlFlag2 = 0;
+            break;
+        case 0x4200:
+            g_Practice.maybeControlFlag1 = cmd;
+            break;
+        case 0x4300:
+            g_Practice.maybeControlFlag2 = cmd;
+            break;
+        case 0x4800:
+            g_Practice.textRelatedIndicator = 0;
+            break;
+        case 0x4900:
+            g_Practice.textRelatedIndicator = 1;
+            break;
+        case 0x5100:
+            g_Camera._2819 = 1;
+            g_Camera._2810 = (u8)cmd;
+            break;
+        case 0x5200:
+            g_Camera._2819 = 2;
+            break;
+        case 0x7F00:
+            g_Practice.allInstructionsComplete = 1;
+            lbl_80366158._28 = 1;
+            return;
+        default:
+            return;
+        }
+        g_Practice.commandIndex++;
+    }
 }
 
 // .text:0x000B1DA4 size:0x2C mapped:0x806F0E38
