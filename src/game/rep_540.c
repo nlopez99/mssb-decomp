@@ -135,15 +135,15 @@ void ballPhysica(void) {
 }
 
 // .text:0x00010030 size:0x11C mapped:0x8064F0C4
-// 99.7%: each seed sum adds the random product from r29 and the shifted rand() in the
-// other order (the same difference as its inlined copy in fn_3_FBA8).
 void fn_3_10030(void) {
     s32 r;
 
-    r = (lbl_3_data_228._00 % 10 + 1) * (g_Ball.StaticRandomInt1 * rand());
-    g_Ball.StaticRandomInt1 = (r + rand() * 16 + lbl_3_data_228._00 / 2 + g_d_GameSettings.FrameCountWhileNotAtMainMenu) & 0x7FFF;
-    r = (lbl_3_data_228._00 % 10 + 1) * ((g_Ball.StaticRandomInt2 + 1) * rand());
-    g_Ball.StaticRandomInt2 = (r + rand() * 8 + lbl_3_data_228._00 / 2 + (g_d_GameSettings.FrameCountWhileNotAtMainMenu >> 1)) & 0x7FFF;
+    r = (lbl_3_data_228._00 % 10 + 1) * (g_Ball.StaticRandomInt1 * rand()) + rand() * 16 + lbl_3_data_228._00 / 2 +
+        g_d_GameSettings.FrameCountWhileNotAtMainMenu;
+    g_Ball.StaticRandomInt1 = r & 0x7FFF;
+    r = (lbl_3_data_228._00 % 10 + 1) * ((g_Ball.StaticRandomInt2 + 1) * rand()) + rand() * 8 + lbl_3_data_228._00 / 2 +
+        (g_d_GameSettings.FrameCountWhileNotAtMainMenu >> 1);
+    g_Ball.StaticRandomInt2 = r & 0x7FFF;
 }
 
 // .text:0x0000FF98 size:0x98 mapped:0x8064F02C
@@ -168,8 +168,6 @@ void fn_3_FF4C(void) {
 }
 
 // .text:0x0000FBA8 size:0x3A4 mapped:0x8064EC3C
-// 99.9%: each seed sum adds the random product from r29 and the shifted rand() from r6
-// in the other order.
 void fn_3_FBA8(void) {
     s32 i;
 
