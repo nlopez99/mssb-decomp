@@ -3,10 +3,10 @@
 
 #include "mssbTypes.h"
 
-void fn_3_B1CB0(void);
-void fn_3_B1DA4(void);
+int fn_3_B1CB0(void);
+void fn_3_B1DA4(u8 level, u8 arg1);
 void fn_3_B1DD0(void);
-void fn_3_B254C(void);
+int fn_3_B254C(void);
 void fn_3_B2630(void);
 void fn_3_B274C(void);
 void fn_3_B27A4(void);
