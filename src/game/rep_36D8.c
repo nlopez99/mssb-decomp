@@ -54,7 +54,7 @@ extern struct {
 } lbl_3_common_bss_37400;
 
 extern u8 lbl_800EFBA4[0x10];
-extern u16 lbl_3_data_81FC[0x88];
+extern u16 lbl_3_data_81FC[0x39];
 extern u8 lbl_3_data_21278[2];
 extern u8 lbl_3_data_2127C[8][5];
 extern f32 lbl_3_data_217F8[3];

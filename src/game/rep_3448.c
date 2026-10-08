@@ -8,6 +8,7 @@
 #include "game/rep_31A0.h"
 #include "game/rep_720.h"
 #include "musyx/musyx.h"
+#include "C3/anim.h"
 
 typedef struct UnkTask3448 {
     /* 0x00 */ void (*_00)(void);
@@ -184,7 +185,7 @@ extern u16 lbl_3_data_B140[][2];
 extern s16 lbl_3_data_213EC[10];
 extern s16 lbl_3_data_21400[][2];
 extern u16 lbl_3_data_81DC[0x10];
-extern u16 lbl_3_data_81FC[0x88];
+extern u16 lbl_3_data_81FC[0x39];
 extern u8 lbl_3_data_8404[][0x1E];
 extern u8 lbl_3_data_84B8[0x3C];
 extern u8 lbl_3_data_84F4[0x3C];
@@ -786,7 +787,6 @@ extern void convertGeometryAndSknHeader(void* geo, void*);
 extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);
 extern void convertTextureHeader(void* tex);
 extern void fn_800BD190(void* geo, void* tex);
-extern void ANIMGet(void* anim);
 extern void fn_80025DDC(void* anim);
 extern void fn_80025FFC(void* anim, UnkAnimState3448* state);
 extern void fn_80025EEC(UnkAnimState3448* state, s32, s32);

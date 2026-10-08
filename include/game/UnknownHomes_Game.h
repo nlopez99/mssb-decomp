@@ -491,8 +491,13 @@ typedef struct _InMemPitcherType {
     /*0x074*/ VecXZ centerOfStrikeZone;
     /*0x07C*/ f32 strikeZoneLeft;
     /*0x080*/ f32 strikeZoneRight;
+    union {
+        struct {
     /*0x084*/ f32 beginningOfStrikeCheckZ; // 1.05
     /*0x088*/ f32 endingOfStrikeCheckZ;    // 0.5
+        };
+    /*0x084*/ f32 strikeCheckZ[2];
+    };
     /*0x08C*/ VecXZ pitcher;
     /*0x094*/ VecXYZ pitchRelease;
     /*0x0A0*/ f32 pitchLinearInterpolateX;
@@ -871,13 +876,13 @@ typedef enum _TUTORIAL_STATE {
 
 typedef struct _PracticeStruct {
     /*0x000*/ InputStruct inputs[2];
-    /*0x020*/ void* commandList; // unsure
+    /*0x020*/ s16* commandList; // unsure
     /*0x024*/ int homeAway;
     artificial_padding(0x24, 0x140, int);
     /*0x140*/ u16 totalFrames;
     /*0x142*/ u16 framesInCurrTransitionState;
     /*0x144*/ u16 framesSincePracticeMenuDefaultTransition;
-    /*0x146*/ frame_t practiceMenu_framesOnCurrMenuScreen;
+    /*0x146*/ u16 practiceMenu_framesOnCurrMenuScreen;
     /*0x148*/ u16 frames_sinceMovedToFromMenu;
     /*0x14A*/ frame_t _14A;
     /*0x14C*/ frame_t frames_sinceTimeCalled;
@@ -902,10 +907,18 @@ typedef struct _PracticeStruct {
     /*0x172*/ frame_t diagramTitleTextIndex_stored;
     /*0x174*/ frame_t cpuCommandDuration;
     /*0x176*/ frame_t maybeInputResetCountdown;
-    /*0x178*/ frame_t maybePreviousInput;
-    /*0x17A*/ frame_t _17A;
-    /*0x17C*/ frame_t cpu_inputDuration;
-    /*0x17E*/ frame_t _17E;
+    union {
+        struct {
+            /*0x178*/ frame_t maybePreviousInput;
+            /*0x17A*/ frame_t _17A;
+            /*0x17C*/ frame_t cpu_inputDuration;
+            /*0x17E*/ frame_t _17E;
+        };
+        struct {
+            /*0x178*/ u16 cpuInput[2];        // per team
+            /*0x17C*/ s16 cpuInputDuration[2]; // per team
+        };
+    };
     /*0x180*/ frame_t practice_hitHorizontalPower;
     /*0x182*/ frame_t practice_hitVerticalAngle;
     /*0x184*/ frame_t practice_hitHorizontalAngle;
@@ -923,7 +936,7 @@ typedef struct _PracticeStruct {
     /*0x19A*/ u8 subMenuCursor;
     artificial_padding(0x19a, 0x19c, u8);
     /*0x19C*/ u8 _19C;
-    artificial_padding(0x19c, 0x19e, u8);
+    /*0x19D*/ u8 _19D;
     /*0x19E*/ u8 pauseMenuLoading; // unsure
     /*0x19F*/ u8 _19F;
     artificial_padding(0x19f, 0x1a1, u8);
@@ -939,7 +952,7 @@ typedef struct _PracticeStruct {
     /*0x1AA*/ u8 transitioningIndicator; // unsure
     /*0x1AB*/ u8 _1AB[4];
     /*0x1AF*/ u8 returnToPracticeMenuState;
-    artificial_padding(0x1af, 0x1b1, u8);
+    /*0x1B0*/ u8 _1B0;
     /*0x1B1*/ u8 _1B1;
     /*0x1B2*/ u8 _1B2[4][4];
     /*0x1C2*/ s8 instructionNumber;
@@ -963,14 +976,29 @@ typedef struct _PracticeStruct {
     /*0x1D4*/ u8 loadingGuidedPractice; // unsure
     /*0x1D5*/ u8 _1D5;
     /*0x1D6*/ u8 practiceLevel_2;
-    artificial_padding(0x1d6, 0x1d9, u8);
+    /*0x1D7*/ u8 _1D7;
+    /*0x1D8*/ u8 _1D8;
     /*0x1D9*/ u8 _1D9;
     /*0x1DA*/ u8 _1DA;
-    artificial_padding(0x1da, 0x1e1, u8);
+    /*0x1DB*/ u8 _1DB;
+    /*0x1DC*/ u8 _1DC;
+    /*0x1DD*/ u8 _1DD;
+    /*0x1DE*/ u8 _1DE;
+    /*0x1DF*/ u8 _1DF;
+    /*0x1E0*/ u8 _1E0;
     /*0x1E1*/ u8 hitVariablesSetIndicator;
     /*0x1E2*/ u8 _1E2;
     /*0x1E3*/ u8 aiBuntIndicator; // unsure
-    artificial_padding(0x1e3, 0x1ee, u8);
+    /*0x1E4*/ u8 _1E4;
+    /*0x1E5*/ u8 _1E5;
+    /*0x1E6*/ u8 _1E6;
+    /*0x1E7*/ u8 _1E7;
+    /*0x1E8*/ u8 _1E8;
+    /*0x1E9*/ u8 _1E9;
+    /*0x1EA*/ u8 _1EA;
+    /*0x1EB*/ u8 _1EB;
+    /*0x1EC*/ u8 _1EC;
+    /*0x1ED*/ u8 _1ED;
     /*0x1EE*/ u8 _1EE;
     /*0x1EF*/ u8 rosterID; // unsure
 } PracticeStruct;          // size: 0x1f0
@@ -1127,7 +1155,8 @@ typedef struct _GameControlsStruct {
     /*0x00C*/ int homeTeamBattingInd_fieldingTeam;
     /*0x010*/ int awayTeamBattingInd_battingTeam;
     /*0x014*/ int AIDifficulty0Special3Weak[2];
-    artificial_padding(0x14, 0x24, u32[2]);
+    /*0x01C*/ int _1C;
+    /*0x020*/ int _20;
     /*0x024*/ LogoInfoStruct logo[2];
     /*0x03C*/ int battingOrderAndPositionMapping[2][10][2]; // first Pair Is Pitcher
     /*0x0DC*/ int currentBatterPerTeam[2];
@@ -1143,9 +1172,9 @@ typedef struct _GameControlsStruct {
     /*0x108*/ s16 _108;
     /*0x10A*/ s16 bOD_framesInLiveBallScene;
     /*0x10C*/ s16 frameCountdownAtBeginningOfAtBatLockout;
-    /*0x10E*/ s16 scoreBook_teamDisplayed;
-    /*0x110*/ s16 scoreBook_batter_pitcherStatsDisplayed;
-    /*0x112*/ s16 scoreBook_scrollIndex;
+    /*0x10E*/ u16 scoreBook_teamDisplayed;
+    /*0x110*/ u16 scoreBook_batter_pitcherStatsDisplayed;
+    /*0x112*/ u16 scoreBook_scrollIndex;
     /*0x114*/ s16 _114;
     /*0x116*/ s16 scoreBook_logoFadeDirectionLeft_Right;
     /*0x118*/ s16 _118;
@@ -1170,16 +1199,17 @@ typedef struct _GameControlsStruct {
     /*0x12E*/ u8 hudLoadingRelated; // unsure
     /*0x12F*/ u8 _12F;
     /*0x130*/ E(u8, WIN_TYPE) winType;
-    artificial_padding(0x130, 0x135, u8);
+    /*0x131*/ u8 _131[2];
+    /*0x133*/ u8 _133[2]; // per team, indexed by teamFielding
     /*0x135*/ u8 _135;
     /*0x136*/ u8 _136;
-    /*0x137*/ u8 playOverFadeOutStarted;
+    /*0x137*/ s8 playOverFadeOutStarted;
     /*0x138*/ u8 playOver;
     /*0x139*/ u8 playOverInd;
     /*0x13A*/ u8 walkOffWinInd; // unsure
     /*0x13B*/ u8 gameOverInd;
     /*0x13C*/ u8 scoutFlag_VsScreenInd;
-    artificial_padding(0x13C, 0x13E, u8);
+    /*0x13D*/ u8 _13D;
     /*0x13E*/ u8 _13E[2];
     /*0x140*/ u8 _140[2];
     /*0x142*/ u8 teamAIInd[2];
@@ -1961,8 +1991,7 @@ typedef struct _MiniGameStruct {
     /*0x1B2E*/ u8 _1B2E;
     /*0x1B2F*/ u8 _1B2F[4];
     /*0x1B33*/ u8 _1B33;
-    /*0x1B34*/ s16 _1B34;
-    /*0x1B36*/ u8 _1B36[6];
+    /*0x1B34*/ s16 _1B34[4]; // per player, read by fn_3_60D80 (rep_E08)
     /*0x1B3C*/ s16 _1B3C;
     /*0x1B3E*/ u8 _1B3E[6];
     /*0x1B44*/ s16 _1B44;
@@ -2027,10 +2056,16 @@ typedef struct _MiniGameStruct {
     /*0x1C81*/ u8 _1C81[9];
     /*0x1C8A*/ u8 _1C8A[4];
     /*0x1C8E*/ u8 _1C8E[4];
-    /*0x1C92*/ u8 _1C92[8];
-    /*0x1C9A*/ u8 _1C9A;
-    /*0x1C9B*/ u8 _1C9B;
-    /*0x1C9C*/ s16 _1C9C;
+    /*0x1C92*/ s8 _1C92[8]; // s8: fn_3_60D80 (rep_E08) compares with cmpwi
+    // Piranha Panic (rep_37A8) loops over four bytes here; fn_3_53130 indexes them per player
+    union {
+        struct {
+            /*0x1C9A*/ u8 _1C9A;
+            /*0x1C9B*/ u8 _1C9B;
+            /*0x1C9C*/ s16 _1C9C;
+        };
+        /*0x1C9A*/ u8 _1C9A_arr[4];
+    };
     /*0x1C9E*/ u8 _1C9E;
     /*0x1C9F*/ u8 _1C9F;
     /*0x1CA0*/ u8 _1CA0[2];
@@ -2155,9 +2190,14 @@ extern struct {
     /* 0x00 */ u32 _00;
     /* 0x04 */ u32 _04;
     /* 0x08 */ u32 _08;
-    /* 0x08 */ u32 _0C;
-    /* 0x10 */ u32 _10;
-    /* 0x14 */ u32 _14;
+    union {
+        struct {
+            /* 0x0C */ u32 _0C;
+            /* 0x10 */ u32 _10;
+            /* 0x14 */ u32 _14;
+        };
+        /* 0x0C */ u32 voices[3]; // m_sound's fn_3_90434 keys them off in a loop
+    };
     /* 0x18 */ u32 _18;
     /* 0x1C */ u32 _1C; // written to after sndFXStartEx
     /* 0x20 */ s16 _20;
@@ -2278,19 +2318,32 @@ typedef struct {
     /* 0x77 */ u8 _77;
     /* 0x78 */ u8 _78;
     /* 0x79 */ u8 _79[3];
-    /* 0x7C */ u8 _7C[4];
-    /* 0x80 */ u8 _80[28];
-    /* 0x9C */ u8 _9C[8];
-    /* 0xA4 */ u8 _A4[8];
-    /* 0xAC */ u8 _AC[8];
-    /* 0xB4 */ u8 _B4;
-    /* 0xB5 */ u8 _B5;
-    /* 0xB6 */ u8 _B6;
-    /* 0xB7 */ u8 _B7;
-    /* 0xB8 */ u8 _B8;
-    /* 0xB9 */ u8 _B9;
-    /* 0xBA */ u8 _BA;
-    /* 0xBB */ u8 _BB;
+    union {
+        struct {
+            /* 0x7C */ u8 _7C[4];
+            /* 0x80 */ u8 _80[28];
+            /* 0x9C */ u8 _9C[8];
+            /* 0xA4 */ u8 _A4[8];
+            /* 0xAC */ u8 _AC[8];
+            /* 0xB4 */ u8 _B4;
+            /* 0xB5 */ u8 _B5;
+            /* 0xB6 */ u8 _B6;
+            /* 0xB7 */ u8 _B7;
+            /* 0xB8 */ u8 _B8;
+            /* 0xB9 */ u8 _B9;
+            /* 0xBA */ u8 _BA;
+            /* 0xBB */ u8 _BB;
+        };
+        // Per-player state of the minigame fielder AI (rep_AC8's fn_3_2DDB4)
+        struct {
+            /* 0x7C */ VecXZ mgTarget[4];
+            /* 0x9C */ s16 mgTimer[4];
+            /* 0xA4 */ s16 mgDuration[4];
+            /* 0xAC */ s16 mgAngle[4];
+            /* 0xB4 */ u8 mgMode[4];
+            /* 0xB8 */ u8 mgStep[4];
+        };
+    };
 } AIStruct; // size 0xBC
 
 extern AIStruct g_AiLogic;
@@ -2606,12 +2659,16 @@ typedef struct {
 } FieldingLogicFielder; // size 0x6
 
 typedef struct {
-    /* 0x00 */ u8 _00[0x8];
+    /* 0x00 */ f32 _00;
+    /* 0x04 */ f32 _04;
     /* 0x08 */ f32 _08;
     /* 0x0C */ s16 _0C;
-    /* 0x0E */ u8 _0E[0x14 - 0xE];
+    /* 0x0E */ s16 _0E;
+    /* 0x10 */ s16 _10;
+    /* 0x12 */ s16 _12;
     /* 0x14 */ s16 _14;
-    /* 0x16 */ u8 _16[0x1A - 0x16];
+    /* 0x16 */ s16 _16;
+    /* 0x18 */ s16 _18;
     /* 0x1A */ u8 _1A;
     /* 0x1B */ u8 _1B;
 } FieldingLogicEntry; // size 0x1C
@@ -2619,6 +2676,8 @@ typedef struct {
 typedef struct {
     /* 0x0 */ s16 _0;
     /* 0x2 */ u8 _2;
+    /* 0x3 */ u8 _3;
+    /* 0x4 */ u8 _4;
 } FieldingLogic08C;
 
 typedef struct {
@@ -2631,12 +2690,13 @@ typedef struct {
     /* 0x0AE */ s16 _0AE;
     /* 0x0B0 */ s16 _0B0;
     /* 0x0B2 */ s16 _0B2;
-    /* 0x0B4 */ u8 _0B4[0xB8 - 0xB4];
+    /* 0x0B4 */ s16 _0B4;
+    /* 0x0B6 */ s16 _0B6;
     /* 0x0B8 */ s16 _0B8;
-    /* 0x0BA */ u8 _0BA[0xBC - 0xBA];
+    /* 0x0BA */ s16 _0BA;
     /* 0x0BC */ s16 _0BC;
     /* 0x0BE */ s16 _0BE;
-    /* 0x0C0 */ u8 _0C0[0xC2 - 0xC0];
+    /* 0x0C0 */ s16 _0C0;
     /* 0x0C2 */ s16 _0C2;
     /* 0x0C4 */ s16 _0C4;
     /* 0x0C6 */ s16 _0C6;
@@ -2646,7 +2706,7 @@ typedef struct {
     /* 0x0CE */ s16 _0CE;
     /* 0x0D0 */ s16 _0D0[4];
     /* 0x0D8 */ s16 _0D8;
-    /* 0x0DA */ u8 _0DA[0xDC - 0xDA];
+    /* 0x0DA */ s16 _0DA;
     /* 0x0DC */ s16 _0DC;
     /* 0x0DE */ s16 _0DE;
     /* 0x0E0 */ s16 _0E0;
@@ -2658,7 +2718,7 @@ typedef struct {
     /* 0x0EC */ s16 _0EC;
     /* 0x0EE */ s16 _0EE;
     /* 0x0F0 */ s16 _0F0;
-    /* 0x0F2 */ u8 _0F2[0xF4 - 0xF2];
+    /* 0x0F2 */ s16 _0F2;
     /* 0x0F4 */ s16 _0F4;
     /* 0x0F6 */ s16 _0F6;
     /* 0x0F8 */ u8 _0F8[9];
@@ -2732,8 +2792,7 @@ typedef struct {
     /* 0x147 */ u8 _147;
     /* 0x148 */ u16 _148;
     /* 0x14A */ u16 _14A;
-    /* 0x14C */ u8 _14C;
-    /* 0x14D */ u8 _14D;
+    /* 0x14C */ u16 _14C;
     /* 0x14E */ u8 _14E;
     /* 0x14F */ u8 _14F;
 } g_FieldingLogic_s; // size 0x150
@@ -2769,12 +2828,13 @@ typedef struct {
     /* 0x0028 */ s16 _28;
     artificial_padding(0x28, 0x32, s16);
     /* 0x0032 */ s16 _32;
-    artificial_padding(0x32, 0x36, s16);
+    /* 0x0034 */ s16 _34;
     /* 0x0036 */ u8 replayInd;
     /* 0x0037 */ u8 _37;
     /* 0x0038 */ u8 _38;
     /* 0x0039 */ u8 _39;
-    artificial_padding(0x39, 0x3C, u8);
+    /* 0x003A */ u8 _3A;
+    /* 0x003B */ u8 _3B;
     /* 0x003C */ u8 _3C;
     /* 0x003D */ u8 _3D;
     /* 0x003E */ u8 _3E;
@@ -2803,7 +2863,7 @@ typedef struct {
     /* 0x28 */ u8 _28[3];
     /* 0x2B */ u8 _2B[0x32 - 0x2B];
     /* 0x32 */ s16 _32;
-    /* 0x34 */ u8 _34[0x36 - 0x34];
+    /* 0x34 */ s16 _34;
     /* 0x36 */ u8 _36[5];
     /* 0x3B */ s8 _3B;
     /* 0x3C */ u8 _3C;
@@ -2813,11 +2873,13 @@ typedef struct {
     /* 0x40 */ u8 _40;
     /* 0x41 */ u8 _41;
     /* 0x42 */ u8 _42;
-    /* 0x43 */ u8 _43[0x4C - 0x43];
+    /* 0x43 */ u8 _43;
+    /* 0x44 */ s16 _44[2];
+    /* 0x48 */ s16 _48[2];
     /* 0x4C */ s16 _4C[2];
-    /* 0x50 */ u8 _50[0x52 - 0x50];
-    /* 0x52 */ s16 _52[2][2];
-    /* 0x5A */ u8 _5A[0x61 - 0x5A];
+    /* 0x50 */ s16 _50[2][2];
+    /* 0x58 */ s16 _58[2][2];
+    /* 0x60 */ u8 _60;
     /* 0x61 */ u8 _61;
     /* 0x62 */ u8 _62;
     /* 0x63 */ u8 _63[2];
@@ -2844,7 +2906,7 @@ extern s16 HitVertTrajRanges[2][5][5][2];
 
 extern BOOL getAnimRelatedCoordinates(int, int, VecXYZ*);
 extern void fn_3_6C854(int, int);
-extern void playSoundEffect(int);
+extern u32 playSoundEffect(int);
 extern void fn_3_5ED98(void);
 extern int RandomIndexFromWeights(u8* weights, int count);
 extern void fn_3_FBDAC(int);

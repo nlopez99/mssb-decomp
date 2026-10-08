@@ -6,7 +6,7 @@
 void fn_3_AC9F8(void);
 void fn_3_ACAF8(void);
 void fn_3_ACD38(void);
-void fn_3_AD164(void);
+void fn_3_AD164(int arg0);
 void fn_3_AD2A0(void);
 void fn_3_AD3BC(void);
 void fn_3_AD8CC(void);
@@ -22,7 +22,7 @@ void fn_3_AF428(void);
 void fn_3_AF5A4(void);
 void fn_3_AFA64(void);
 void fn_3_AFB64(void);
-void fn_3_AFD48(void);
+s32 fn_3_AFD48(u16 buttons);
 void fn_3_AFD80(u8);
 void fn_3_AFDA4(void);
 

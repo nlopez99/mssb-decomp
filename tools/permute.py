@@ -11,6 +11,7 @@
 #   then run the command it prints, e.g.
 #   (cd ~/.local/share/decomp-permuter && .venv/bin/python permuter.py nonmatchings/<function> -j 8 --stop-on-zero)
 #   python3 tools/permute.py <function> --best   # its best result so far
+#   python3 tools/permute.py <function> --stop   # stop that run and its workers
 #
 # --best prints the output folder with the lowest score and the source change
 # the permuter made there (its diff.txt), while the run goes on or after it.
@@ -36,8 +37,10 @@ import os
 import re
 import shlex
 import shutil
+import signal
 import subprocess
 import sys
+import time
 from typing import Any, Dict, List, Set, Tuple
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -168,13 +171,52 @@ def best(out_dir: str, max_lines: int = 80) -> int:
     return 0
 
 
+def stop(function: str) -> int:
+    # Stop this function's permuter and its compile workers, and nothing else:
+    # its multiprocessing workers do not name the function on their command
+    # line, so a pkill pattern either misses them or hits other runs too.
+    rows = []
+    for line in subprocess.run(["ps", "-Ao", "pid=,ppid=,command="], capture_output=True,
+                               text=True, check=True).stdout.splitlines():
+        pid, ppid, command = line.split(None, 2)
+        rows.append((int(pid), int(ppid), command))
+    # Spare this process and the shells that started it, whose command lines may name the run
+    parent = {pid: ppid for pid, ppid, _ in rows}
+    spare, pid = set(), os.getpid()
+    while pid > 1 and pid not in spare:
+        spare.add(pid)
+        pid = parent.get(pid, 1)
+    pattern = re.compile(r"permuter\.py .*nonmatchings/" + re.escape(function) + r"(/|\s|$)")
+    tree = {pid for pid, _, command in rows if pattern.search(command)} - spare
+    while True:
+        children = {pid for pid, ppid, _ in rows if ppid in tree} - tree - spare
+        if not children:
+            break
+        tree |= children
+    if not tree:
+        print(f"no permuter run for {function}")
+        return 1
+    for sig in (signal.SIGTERM, signal.SIGKILL):
+        for pid in tree:
+            try:
+                os.kill(pid, sig)
+            except ProcessLookupError:
+                pass
+        time.sleep(1)
+    print(f"stopped the permuter for {function} ({len(tree)} processes)")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Set up decomp-permuter for one function.")
     parser.add_argument("unit", help="unit name, source path or basename, or a function name")
     parser.add_argument("function", nargs="?", help="function to permute")
     parser.add_argument("-o", "--out", help="output directory (default: <permuter>/nonmatchings/<function>)")
     parser.add_argument("--best", action="store_true", help="print the best result so far instead of setting up")
+    parser.add_argument("--stop", action="store_true", help="stop this function's permuter run and its workers")
     args = parser.parse_args()
+    if args.stop:
+        return stop(args.function or args.unit)
     if args.best:
         return best(args.out or os.path.join(permuter_dir, "nonmatchings", args.function or args.unit))
 

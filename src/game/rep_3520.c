@@ -168,7 +168,7 @@ extern void changeScene(u8, s16);
 extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_800ACFB0(void* data);
 extern u8 lbl_803CBBC0;
-extern u16 lbl_3_data_81FC[0x88];
+extern u16 lbl_3_data_81FC[0x39];
 
 extern u8 lbl_800EFBA4[0x10];
 extern u8 lbl_3_data_21278[2];
@@ -1401,7 +1401,7 @@ u8 fn_3_137B10(Unk3520Obj* obj) {
 // .text:0x001379A0 size:0x170 mapped:0x80776A34
 // 90.7%: the unrolled fielder search walks other registers and offsets, and the
 // object loop strength-reduces differently.
-BOOL fn_3_1379A0(int fielderIdx) {
+u8 fn_3_1379A0(int fielderIdx) {
     Unk3520Fielder* fielder = &g_Fielders[fielderIdx];
     u32 player;
     u32 i;

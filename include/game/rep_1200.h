@@ -3,17 +3,18 @@
 
 #include "mssbTypes.h"
 
-void fn_3_6F6CC(void);
-void fn_3_6F748(void);
+BOOL fn_3_6F4E8(void);
+BOOL fn_3_6F6CC(void);
+BOOL fn_3_6F748(void);
 void fn_3_6FA28(void);
 void fn_3_6FB98(void);
 void fn_3_6FDA0(void);
 void fn_3_6FFC4(void);
 void fn_3_70280(void);
 void fn_3_703EC(void);
-void fn_3_70680(void);
-void fn_3_706B8(void);
-void fn_3_70768(void);
+BOOL fn_3_70680(f32 x);
+void fn_3_706B8(int which);
+int fn_3_70768(f32* outX, BOOL curve, f32 targetZ);
 void fn_3_70838(void);
 void fn_3_709B4(void);
 void fn_3_70AEC(void);

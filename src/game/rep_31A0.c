@@ -165,7 +165,7 @@ extern u8 lbl_3_data_188E8[3][6];
 extern u8 lbl_800E854C[12];
 extern u8 lbl_3_data_609C[12][6];
 extern s8 lbl_3_data_B060[8][3][5];
-extern s8 lbl_3_data_6104[8];
+extern u8 lbl_3_data_6104[8];
 extern u8 lbl_3_data_18918[8];
 extern u8 lbl_3_data_188FC[3][5];
 extern u8 lbl_3_data_18910[8];
@@ -180,8 +180,6 @@ extern void fn_8001CA40(int arg);
 extern void fn_80011BE4(int arg);
 extern void fn_80018B38(void);
 extern void fn_80035B50(int arg);
-extern void fn_3_909B0(void);
-extern void fn_3_9081C(void);
 extern void fn_3_9DC18(u8* list, int count, int arg2);
 extern void fn_3_1160B8(void);
 extern void fn_3_1160BC(void);
@@ -193,8 +191,6 @@ extern void fn_800B0A5C_insertQueue(void (*callback)(void), s32 arg1);
 extern void fn_8006C398(struct UnkStats3448* stats);
 extern void fn_80062A74(void);
 extern void fn_80062A94(void);
-extern void fn_3_8B318(int arg);
-extern int fn_3_90928(void);
 extern void fn_800189E4(void);
 extern int fn_80035838(AramEntry31A0* entry, int arg1);
 extern int fn_3_6C938(int, int);
@@ -216,17 +212,13 @@ extern void fn_8004D0F0(void);
 extern void fn_800189B8(void);
 extern void fn_80018B74(void);
 extern BOOL fn_80020388(void);
-extern void fn_3_908E8(void);
-extern BOOL fn_3_90860(void);
-extern BOOL fn_3_90A18(void);
-extern BOOL fn_3_90DD8(void);
 extern BOOL fn_80016F7C(void);
 extern void fn_8003A540(int arg);
 extern void minigamesSetSomePointers(void);
 extern void minigamesGXStuff(void);
 extern void fn_80011B64(int port);
 extern int fn_80016710(int charID, int port);
-extern void fn_800203E0(int, int);
+extern void fn_800203E0(int, s8);
 extern s16 fn_8006C13C(struct UnkStats3448* stats);
 extern void fn_800246D4(int (*compare)(const void*, const void*), void* src, void* dst, int size, int count);
 
@@ -656,19 +648,17 @@ f32 lbl_3_data_21D34[36] = {
     1.0f, -2.0f, 7.5f, 0.5f,
     -4.0f, 7.5f, 0.0f, -6.0f,
 };
-s16 lbl_3_data_21DC4 = 30;
-s16 lbl_3_data_21DC6 = 45;
+s16 lbl_3_data_21DC4[2] = { 30, 45 };
 s16 lbl_3_data_21DC8[30] = {
     20, 30, 20, 50, 60, 50, 20, 30,
     20, 50, 60, 50, 20, 30, 20, 50,
     60, 50, 40, 60, 40, 70, 90, 70,
     20, 30, 20, 50, 60, 50,
 };
-s16 lbl_3_data_21E04 = 180;
-s16 lbl_3_data_21E06 = 240;
+s16 lbl_3_data_21E04[2] = { 180, 240 };
 u8 lbl_3_data_21E08[8] = { 60, 60, 60, 90, 60, 0, 0, 0 };
 u8 lbl_3_data_21E10[8] = { 5, 5, 5, 5, 30, 40, 0, 0 };
-s16 lbl_3_data_21E18[2] = { 257, 514 };
+u8 lbl_3_data_21E18[2][2] = { { 1, 1 }, { 2, 2 } };
 u8 lbl_3_data_21E1C[2] = { 45, 30 };
 u8 lbl_3_data_21E20[3] = { 70, 20, 10 };
 f32 lbl_3_data_21E24[17] = {
@@ -689,7 +679,7 @@ u8 lbl_3_data_21E9C[16] = {
     40, 20, 20, 20, 50, 20, 20, 20,
 };
 s16 lbl_3_data_21EAC[8] = { 30, 60, 20, 35, 8, 15, 8, 15 };
-f32 lbl_3_data_21EBC = 10757.015f;
+s8 lbl_3_data_21EBC[4] = { 70, 40, 20, 15 };
 u8 lbl_3_data_21EC0[4] = { 30, 50, 70, 85 };
 u8 lbl_3_data_21EC4[4] = { 10, 6, 3, 0 };
 AramEntry31A0 lbl_3_data_21EC8[62] = {
@@ -2549,7 +2539,7 @@ void fn_3_10AD48(void) {
 }
 
 // .text:0x0010A0A0 size:0xCA8 mapped:0x80749134
-// 99.41%: registers differ, and the minigame level is incremented from the compared value instead of reloaded
+// 99.43%: registers differ, and the minigame level is incremented from the compared value instead of reloaded
 void fn_3_10A0A0(void) {
     struct UnkRecord3448 rec;
     int rank;
@@ -3225,7 +3215,6 @@ found:
 }
 
 // .text:0x001084B4 size:0x3A0 mapped:0x80747548
-// 99.96%: the lbl_3_data_6104 entry is loaded into r4 instead of r0 before its extsb
 void fn_3_1084B4(void) {
     lbl_80366158._28 = 1;
     if (lbl_3_common_bss_34C90._00A < 0x7FFE) {

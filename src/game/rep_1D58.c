@@ -8,12 +8,15 @@
 #include "Dolphin/os.h"
 #include "Dolphin/rand.h"
 #include "C3/actor.h"
+#include "C3/anim.h"
 #include "C3/control.h"
 #include "C3/geoPalette.h"
 #include "game/rep_D0.h"
 #include "game/rep_1C0.h"
 #include "game/rep_1FD8.h"
 #include "game/rep_2998.h"
+#include "game/sta_c2.h"
+#include "game/sta_c5.h"
 #include "game/sta_c6.h"
 #include "game/m_sound.h"
 #include "game/rep_4138.h"
@@ -142,7 +145,6 @@ extern struct {
 
 extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void* ARAMTransfer(AramEntry1D58* entry, int arg1, int arg2, u32 aram);
-extern void ANIMGet(void* anim);
 extern void LoadActorLayout(void* layout);
 extern void convertGeometryAndSknHeader(void* geo, void* skn);
 extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);
@@ -194,9 +196,6 @@ extern void fn_800C07BC(void* base, void* tmp, s32 count, s32 size, s32 (*compar
 
 extern void fn_3_C1964(void);
 // Their units' headers still declare these void(void)
-extern void fn_3_D55EC(Mtx view, StadiumSort1D58* sort);
-extern void fn_3_F6084(Mtx view, StadiumSort1D58* sort);
-extern StadiumObjectCollision* fn_3_F6504(s32 object, Mtx mtx);
 
 u8 lbl_3_data_11168[0x10] = { 0 };
 f32 lbl_3_data_11178[5] = { 18.0f, 90.0f, 162.0f, 234.0f, 306.0f };
@@ -276,7 +275,7 @@ void fn_3_B9D68(u8* types, s32 count, void** files, s32* indices) {
             layout = (u8*)files + (u32)files[k++];
             geo = (u8*)files + (u32)files[k++];
             if (!(types[i] == 2 || types[i] == 3)) {
-                ANIMGet((u8*)files + (u32)files[k++]);
+                ANIMGet((ANIMBank*)((u8*)files + (u32)files[k++]));
             }
             if (types[i] == 3 || types[i] == 5) {
                 skn = (u8*)files + (u32)files[k++];
@@ -295,7 +294,7 @@ void fn_3_B9D68(u8* types, s32 count, void** files, s32* indices) {
             }
             break;
         case 7:
-            ANIMGet((u8*)files + (u32)files[k++]);
+            ANIMGet((ANIMBank*)((u8*)files + (u32)files[k++]));
             break;
         case 8:
         case 9:
