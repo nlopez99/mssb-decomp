@@ -58,7 +58,7 @@ void fn_3_F3A5C(struct StaC5Draw* draw, f32 x, f32 y, f32 z, f32 rotY);
 void fn_3_F3AE0(struct StaC5Draw* draw);
 void fn_3_F3BB0(struct StaC5Draw* draw);
 BOOL fn_3_F3CD0(struct StaC5Emitter* emitter);
-void fn_3_F3EFC(void);
+void fn_3_F3EFC(struct StaC5Emitter* emitter);
 void fn_3_F42A0(void);
 void fn_3_F466C(void);
 void fn_3_F469C(void);

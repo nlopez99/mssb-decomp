@@ -186,6 +186,7 @@ typedef struct StaC5Emitter {
 
 extern void fn_80033620(StaC5Emitter* emitter);
 extern void fn_80033964(StaC5Emitter* emitter);
+extern StaC5Emitter* fn_80033A24(BOOL (*update)(StaC5Emitter*), s32, s32, s32, s32, s32);
 extern void fn_80033F64(f32, f32, f32);
 extern void fn_80033CC8(StaC5Particle* particle, void* arg1);
 
@@ -321,7 +322,7 @@ static Vec lbl_3_data_1BA70 = { 0.0f, 0.0f, 0.0f };
 static Vec lbl_3_data_1BA7C = { 0.0f, 0.0f, 0.0f };
 
 // MWCC lays out .bss statics in reverse declaration order
-static s32 lbl_3_bss_B560[4];
+static void* lbl_3_bss_B560[4];
 static StaC5Model* lbl_3_bss_B55C;
 static struct {
     /* 0x00 */ Vec pts[7];
@@ -789,12 +790,41 @@ void fn_3_F466C(void) {
 
 // .text:0x000F42A0 size:0x3CC mapped:0x80733334
 void fn_3_F42A0(void) {
-    return;
+    StaC5Emitter* emitter = fn_80033A24(fn_3_F3CD0, 0x80, 0, 8, 1, 0);
+
+    if (emitter != NULL) {
+        fn_3_F3EFC(emitter);
+    }
 }
 
 // .text:0x000F3EFC size:0x3A4 mapped:0x80732F90
-void fn_3_F3EFC(void) {
-    return;
+void fn_3_F3EFC(StaC5Emitter* emitter) {
+    StaC5Particle* p = emitter->particles;
+    u32 i = 0;
+
+    emitter->_10 = lbl_3_bss_B560[0];
+    while (p != NULL) {
+        p->_38 = p->_3C = 10.0f;
+        p->vel.x = p->vel.z = 0.0f;
+        p->vel.y = -0.05f;
+        p->pos.x = lbl_3_bss_B260.pts[0].x + (rand() % 600 - 300) / 100.0;
+        p->pos.y = -16.5 + (rand() % 600 - 300) / 100.0;
+        p->pos.z = lbl_3_bss_B260.pts[0].z + (rand() % 600 - 300) / 100.0;
+        p->_28 = 25.0 + (rand() % 300 - 150) / 10.0f;
+        p->_2C = 40.0 + (rand() % 300 - 150) / 10.0f;
+        p->index = i;
+        p->delay = (u8)i;
+        p->color[0] = p->color[1] = p->color[2] = 0xFF;
+        p->color[3] = 0;
+        p->life = 500 - p->index;
+        p->_1C = 0.3 + (rand() % 50) / 100.0f;
+        p->_20 = 0.0f;
+        p->_24 = 1 - (rand() % 2) * 2;
+        p->_4D = 15;
+        p->_4E = 0;
+        i++;
+        p = p->next;
+    }
 }
 
 // .text:0x000F3CD0 size:0x22C mapped:0x80732D64
