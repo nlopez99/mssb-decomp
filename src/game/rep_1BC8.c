@@ -31,7 +31,7 @@ void fn_3_B42A8(void) {
 }
 
 // .text:0x000B4124 size:0x184 mapped:0x806F31B8
-void fn_3_B4124(void) {
+void fn_3_B4124(int team, int slot, int charID, int handedness) {
     return;
 }
 
@@ -41,8 +41,8 @@ void fn_3_B3FE8(void) {
 }
 
 // .text:0x000B3CD4 size:0x314 mapped:0x806F2D68
-void fn_3_B3CD4(void) {
-    return;
+BOOL fn_3_B3CD4(void) {
+    return FALSE;
 }
 
 // .text:0x000B3CAC size:0x28 mapped:0x806F2D40
