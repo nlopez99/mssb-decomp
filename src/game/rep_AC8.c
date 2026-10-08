@@ -2608,7 +2608,75 @@ void fn_3_4CFB0(void) {
 
 // .text:0x0004C9C8 size:0x5E8 mapped:0x8068BA5C
 void fn_3_4C9C8(void) {
-    return;
+    s32 i;
+
+    if (g_FieldingLogic._0F8[1] == 0) {
+        g_Fielders[1]._18C = 0;
+        fn_3_5985C(1, 1);
+        g_FieldingLogic._0D0[0] = 1;
+    } else if (g_Ball.hitClassification2 == 7) {
+        g_Fielders[0]._18C = 0;
+        fn_3_5985C(0, 1);
+        g_FieldingLogic._0D0[0] = 0;
+    }
+    if (g_FieldingLogic._0F8[2] == 0) {
+        g_Fielders[2]._18C = 1;
+        fn_3_5985C(2, 1);
+        g_FieldingLogic._0D0[1] = 2;
+    } else if (g_Ball.physicsSubstruct.futureCoordsAndDist[g_Fielders[2]._186].pos.z < lbl_3_data_4444[1].z) {
+        g_Fielders[3]._18C = 1;
+        fn_3_5985C(3, 1);
+        g_FieldingLogic._0D0[1] = 3;
+    } else {
+        g_Fielders[0]._18C = 1;
+        fn_3_5985C(0, 1);
+        g_FieldingLogic._0D0[1] = 0;
+        g_Fielders[0]._1D8[0] = 1;
+    }
+    if (g_FieldingLogic._0F8[4] == 0) {
+        g_Fielders[4]._18C = 3;
+        fn_3_5985C(4, 1);
+        g_FieldingLogic._0D0[3] = 4;
+    } else if (g_Ball.physicsSubstruct.futureCoordsAndDist[g_Fielders[4]._186].pos.z < lbl_3_data_4444[3].z) {
+        g_Fielders[5]._18C = 3;
+        fn_3_5985C(5, 1);
+        g_FieldingLogic._0D0[3] = 5;
+    } else {
+        g_Fielders[0]._18C = 3;
+        fn_3_5985C(0, 1);
+        g_FieldingLogic._0D0[3] = 0;
+        g_Fielders[0]._1D8[0] = 1;
+    }
+    if (g_Ball.Hit_HorizontalAngle < 0x400 || g_Ball.hitClassification3 == 7) {
+        if (g_FieldingLogic._0F8[5] == 0) {
+            g_Fielders[5]._18C = 2;
+            fn_3_5985C(5, 1);
+            g_FieldingLogic._0D0[2] = 5;
+        } else if (g_FieldingLogic._0F8[3] == 0) {
+            g_Fielders[3]._18C = 2;
+            fn_3_5985C(3, 1);
+            g_FieldingLogic._0D0[2] = 3;
+        } else {
+            g_Fielders[3]._18C = 2;
+            g_Fielders[5]._18C = 2;
+        }
+    } else if (g_FieldingLogic._0F8[3] == 0) {
+        g_Fielders[3]._18C = 2;
+        fn_3_5985C(3, 1);
+        g_FieldingLogic._0D0[2] = 3;
+    } else if (g_FieldingLogic._0F8[5] == 0) {
+        g_Fielders[5]._18C = 2;
+        fn_3_5985C(5, 1);
+        g_FieldingLogic._0D0[2] = 5;
+    } else {
+        g_Fielders[3]._18C = 2;
+        g_Fielders[5]._18C = 2;
+    }
+    for (i = 0; i < 9; i++) {
+        if (g_Fielders[i]._18C >= 0 && g_Fielders[i]._18C <= 3) {
+            g_Fielders[i]._1D7 = 1;
+        }
+    }
 }
 
 // .text:0x0004BA0C size:0xFBC mapped:0x8068AAA0
