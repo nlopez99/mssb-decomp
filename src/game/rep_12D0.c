@@ -31,13 +31,15 @@ extern struct {
     /* 0x9C */ s16 _9C;
     /* 0x9E */ u8 _9E[0xA0 - 0x9E];
     /* 0xA0 */ s16 _A0;
-    /* 0xA2 */ u8 _A2[0xA8 - 0xA2];
+    /* 0xA2 */ u8 _A2[0xA4 - 0xA2];
+    /* 0xA4 */ s16 _A4;
+    /* 0xA6 */ u8 _A6[0xA8 - 0xA6];
     /* 0xA8 */ u8 _A8[2];
     /* 0xAA */ u8 _AA;
     /* 0xAB */ u8 _AB[0xAD - 0xAB];
     /* 0xAD */ u8 _AD;
     /* 0xAE */ s8 _AE;
-    /* 0xAF */ u8 _AF[0xB1 - 0xAF];
+    /* 0xAF */ s8 _AF[2];
     /* 0xB1 */ s8 _B1[2];
     /* 0xB3 */ s8 _B3[2];
     /* 0xB5 */ s8 _B5[2];
@@ -48,15 +50,26 @@ extern struct {
 } g_Scores;
 
 typedef struct Unk12D0PitcherStats {
-    /* 0x00 */ u8 _00[0xE];
+    /* 0x00 */ u16 _00;
+    /* 0x02 */ u8 _02[0x4 - 0x2];
+    /* 0x04 */ u16 _04;
+    /* 0x06 */ u8 _06[0xE - 0x6];
     /* 0x0E */ u16 _0E;
-    /* 0x10 */ u8 _10[0x1A - 0x10];
+    /* 0x10 */ u8 _10[0x13 - 0x10];
+    /* 0x13 */ u8 _13;
+    /* 0x14 */ u8 _14;
+    /* 0x15 */ u8 _15;
+    /* 0x16 */ u8 _16;
+    /* 0x17 */ u8 _17;
+    /* 0x18 */ u8 _18;
+    /* 0x19 */ u8 _19;
     /* 0x1A */ u8 _1A;
     /* 0x1B */ u8 _1B[0x1E - 0x1B];
 } Unk12D0PitcherStats; // size: 0x1E
 
 typedef struct Unk12D0PlayerStats {
-    /* 0x00 */ u8 _00[0x11];
+    /* 0x00 */ s16 _00;
+    /* 0x02 */ u8 _02[0x11 - 0x2];
     /* 0x11 */ u8 _11;
     /* 0x12 */ u8 _12;
     /* 0x13 */ u8 _13[0x15 - 0x13];
@@ -75,7 +88,7 @@ extern Unk12D0PlayerStats lbl_803537E4[2][9];
 
 extern struct {
     /* 0x00 */ u8 _00[8];
-    /* 0x08 */ s16 _08[2][19];
+    /* 0x08 */ u16 _08[2][19];
     /* 0x54 */ s16 _54[2][19];
     union {
         /* 0xA0 */ s8 _A0[50];
@@ -86,9 +99,23 @@ extern struct {
     };
     /* 0xE6 */ s8 _E6[2][5];
     /* 0xF0 */ u8 _F0[2];
+    /* 0xF2 */ u8 _F2;
+    /* 0xF3 */ s8 _F3;
+    /* 0xF4 */ s8 _F4;
+    /* 0xF5 */ s8 _F5;
+    /* 0xF6 */ u8 _F6;
+    /* 0xF7 */ u8 _F7;
 } lbl_80353A90;
 
-extern s8 lbl_3_common_bss_32A38[2][9][5];
+typedef struct {
+    /* 0x0 */ u8 _0;
+    /* 0x1 */ u8 _1;
+    /* 0x2 */ s8 _2;
+    /* 0x3 */ s8 _3;
+    /* 0x4 */ s8 _4;
+} Unk12D0PitcherGame; // size: 0x5
+
+extern Unk12D0PitcherGame lbl_3_common_bss_32A38[2][9];
 
 extern struct {
     /* 0x00 */ u8 _00[0x40];
@@ -172,12 +199,12 @@ void fn_3_7B130(void) {
     lbl_3_common_bss_32A94._41 = 0;
     lbl_3_common_bss_32A94._42 = 0;
     for (i = 0; i < 9; i++) {
-        lbl_3_common_bss_32A38[g_GameLogic.teamFielding][i][2] = -1;
-        lbl_3_common_bss_32A38[g_GameLogic.teamFielding][i][3] = -1;
-        lbl_3_common_bss_32A38[g_GameLogic.teamFielding][i][4] = -1;
+        lbl_3_common_bss_32A38[g_GameLogic.teamFielding][i]._2 = -1;
+        lbl_3_common_bss_32A38[g_GameLogic.teamFielding][i]._3 = -1;
+        lbl_3_common_bss_32A38[g_GameLogic.teamFielding][i]._4 = -1;
     }
     lbl_3_common_bss_32A38[g_GameLogic.teamFielding]
-                          [g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.awayTeamBattingInd_battingTeam][0][0]][2] = 0;
+                          [g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.awayTeamBattingInd_battingTeam][0][0]]._2 = 0;
 }
 
 // .text:0x0007AFE4 size:0x14C mapped:0x806BA078
@@ -253,17 +280,17 @@ void fn_3_7AD68(void) {
     int i;
     int pitcher = g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.awayTeamBattingInd_battingTeam][0][0];
 
-    if (lbl_3_common_bss_32A38[g_GameLogic.teamFielding][pitcher][2] < 0) {
-        lbl_3_common_bss_32A38[g_GameLogic.teamFielding][pitcher][2] = 0;
+    if (lbl_3_common_bss_32A38[g_GameLogic.teamFielding][pitcher]._2 < 0) {
+        lbl_3_common_bss_32A38[g_GameLogic.teamFielding][pitcher]._2 = 0;
     } else {
-        lbl_3_common_bss_32A38[g_GameLogic.teamFielding][pitcher][4] = 0;
+        lbl_3_common_bss_32A38[g_GameLogic.teamFielding][pitcher]._4 = 0;
     }
     for (i = 1; i < 10; i++) {
         int pos = g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.awayTeamBattingInd_battingTeam][i][1];
         int id = g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.awayTeamBattingInd_battingTeam][i][0];
-        if (pos > 0 && lbl_3_common_bss_32A38[g_GameLogic.teamFielding][id][2] == 0 &&
-            pos != lbl_3_common_bss_32A38[g_GameLogic.teamFielding][id][3]) {
-            lbl_3_common_bss_32A38[g_GameLogic.teamFielding][id][3] = pos;
+        if (pos > 0 && lbl_3_common_bss_32A38[g_GameLogic.teamFielding][id]._2 == 0 &&
+            pos != lbl_3_common_bss_32A38[g_GameLogic.teamFielding][id]._3) {
+            lbl_3_common_bss_32A38[g_GameLogic.teamFielding][id]._3 = pos;
         }
     }
 }
@@ -387,7 +414,7 @@ void fn_3_79EF4(void) {
     }
     if (lead >= 0) {
         lbl_3_common_bss_32A38[g_GameLogic.teamFielding]
-                              [g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.awayTeamBattingInd_battingTeam][0][0]][1] = 0;
+                              [g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.awayTeamBattingInd_battingTeam][0][0]]._1 = 0;
     }
 }
 
@@ -422,7 +449,7 @@ void fn_3_79DD4(void) {
 save:
     pitcher = g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.awayTeamBattingInd_battingTeam][0][0];
     g_Scores._B7[g_GameLogic.awayTeamBattingInd_battingTeam] = pitcher;
-    lbl_3_common_bss_32A38[g_GameLogic.teamFielding][pitcher][1] = 1;
+    lbl_3_common_bss_32A38[g_GameLogic.teamFielding][pitcher]._1 = 1;
 }
 
 // .text:0x00079ACC size:0x308 mapped:0x806B8B60
@@ -990,8 +1017,6 @@ void fn_3_78574(s32 fielder) {
 }
 
 // .text:0x00077914 size:0xC60 mapped:0x806B69A8
-// 99.64%: in the g_Scores copies after fn_3_76A9C, the g_Scores base, `&_04[H]` and the scaled
-// inning swap registers (r12, r10, r23) and one `add` is scheduled earlier; the rest matches.
 void fn_3_77914(void) {
     s32 pitcher = g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.awayTeamBattingInd_battingTeam][0][0];
     s16 result = 0;
@@ -1068,7 +1093,7 @@ void fn_3_77914(void) {
                 }
                 if (g_Scores._04[g_GameLogic.awayTeamBattingInd_battingTeam][0] >
                     g_Scores._04[g_GameLogic.homeTeamBattingInd_fieldingTeam][0]) {
-                    lbl_3_common_bss_32A38[g_GameLogic.awayTeamBattingInd_battingTeam][pitcher][0] +=
+                    lbl_3_common_bss_32A38[g_GameLogic.awayTeamBattingInd_battingTeam][pitcher]._0 +=
                         g_Strikes.outs - g_Strikes.storedOuts;
                 }
             }
@@ -1339,12 +1364,222 @@ void fn_3_76A9C(void) {
     }
 }
 
+// .text:0x00076558 size:0x544 mapped:0x806B55EC
 void fn_3_76558(void) {
-    return;
+    int i;
+    int team;
+    s32 j;
+
+    if (g_Scores._A4 == 0) {
+        lbl_80353A90._F2 = g_GameLogic.homeTeamInd;
+    }
+    if (g_Scores._A4 == 1) {
+        lbl_80353A90._F2 = g_GameLogic.homeTeamInd ^ 1;
+    }
+    if (g_Scores._A4 == 2) {
+        lbl_80353A90._F2 = 2;
+    }
+    if (g_Scores._A4 == 0 || g_Scores._A4 == 1) {
+        fn_3_76174();
+        if (lbl_803535C8[lbl_80353A90._F2][lbl_80353A90._F3]._13 < 0xFE) {
+            lbl_803535C8[lbl_80353A90._F2][lbl_80353A90._F3]._13++;
+        } else {
+            lbl_803535C8[lbl_80353A90._F2][lbl_80353A90._F3]._13 = 0xFF;
+        }
+        if (g_Scores._BB[g_Scores._A4] == 1) {
+            if (lbl_803535C8[lbl_80353A90._F2][lbl_80353A90._F3]._17 < 0xFE) {
+                lbl_803535C8[lbl_80353A90._F2][lbl_80353A90._F3]._17++;
+            } else {
+                lbl_803535C8[lbl_80353A90._F2][lbl_80353A90._F3]._17 = 0xFF;
+            }
+            if (lbl_80353A90._08[lbl_80353A90._F2 ^ 1][0] == 0) {
+                if (lbl_803535C8[lbl_80353A90._F2][lbl_80353A90._F3]._18 < 0xFE) {
+                    lbl_803535C8[lbl_80353A90._F2][lbl_80353A90._F3]._18++;
+                } else {
+                    lbl_803535C8[lbl_80353A90._F2][lbl_80353A90._F3]._18 = 0xFF;
+                }
+                if (lbl_3_common_bss_32A94._63[g_Scores._A4] == 1) {
+                    lbl_80353A90._F7 = 1;
+                }
+                if (lbl_3_common_bss_32A94._63[g_Scores._A4] == 2) {
+                    lbl_80353A90._F7 = 2;
+                }
+            }
+        }
+        if (lbl_80353A90._F3 != g_Scores._AF[g_Scores._A4]) {
+            if (lbl_803535C8[lbl_80353A90._F2][lbl_80353A90._F3]._16 < 0xFE) {
+                lbl_803535C8[lbl_80353A90._F2][lbl_80353A90._F3]._16++;
+            } else {
+                lbl_803535C8[lbl_80353A90._F2][lbl_80353A90._F3]._16 = 0xFF;
+            }
+        }
+        lbl_80353A90._F4 = g_Scores._B5[g_Scores._A4 ^ 1];
+        if (lbl_803535C8[lbl_80353A90._F2 ^ 1][lbl_80353A90._F4]._14 < 0xFE) {
+            lbl_803535C8[lbl_80353A90._F2 ^ 1][lbl_80353A90._F4]._14++;
+        } else {
+            lbl_803535C8[lbl_80353A90._F2 ^ 1][lbl_80353A90._F4]._14 = 0xFF;
+        }
+        if (g_Scores._BB[g_Scores._A4 ^ 1] == 1) {
+            if (lbl_803535C8[lbl_80353A90._F2 ^ 1][lbl_80353A90._F4]._17 < 0xFE) {
+                lbl_803535C8[lbl_80353A90._F2 ^ 1][lbl_80353A90._F4]._17++;
+            } else {
+                lbl_803535C8[lbl_80353A90._F2 ^ 1][lbl_80353A90._F4]._17 = 0xFF;
+            }
+        }
+        if (g_Scores._B7[g_Scores._A4] != lbl_80353A90._F3 && g_Scores._B7[g_Scores._A4] >= 0) {
+            lbl_80353A90._F5 = g_Scores._B7[g_Scores._A4];
+            if (lbl_803535C8[lbl_80353A90._F2][lbl_80353A90._F5]._15 < 0xFE) {
+                lbl_803535C8[lbl_80353A90._F2][lbl_80353A90._F5]._15++;
+            } else {
+                lbl_803535C8[lbl_80353A90._F2][lbl_80353A90._F5]._15 = 0xFF;
+            }
+        }
+        for (team = 0; team < 2; team++) {
+            for (i = 0; i < 9; i++) {
+                if (team == g_Scores._A4) {
+                    if (i == lbl_80353A90._F3) {
+                        lbl_3_common_bss_32A38[lbl_80353A90._F2][i]._1 = 0;
+                    }
+                    if (i == lbl_80353A90._F5) {
+                        lbl_3_common_bss_32A38[lbl_80353A90._F2][i]._1 = 0;
+                    }
+                }
+                if (team == (g_Scores._A4 ^ 1) && i == lbl_80353A90._F4) {
+                    lbl_3_common_bss_32A38[lbl_80353A90._F2 ^ 1][i]._1 = 0;
+                }
+            }
+        }
+    }
+    for (j = 0; j < 9; j++) {
+        lbl_803535C8[0][j]._19 += lbl_3_common_bss_32A38[0][j]._1;
+        lbl_803535C8[1][j]._19 += lbl_3_common_bss_32A38[1][j]._1;
+    }
+    lbl_80353A90._F6 = g_Scores._00;
+    fn_3_759BC();
+    if (!g_d_GameSettings.exhibitionMatchInd) {
+        fn_3_162D54();
+    }
 }
 
+// .text:0x00076174 size:0x3E4 mapped:0x806B5208
 void fn_3_76174(void) {
-    return;
+    int team;
+    int i;
+    int best;
+    int bestOuts;
+    Unk12D0PitcherStats* stats;
+    Unk12D0PitcherStats* cur;
+    Unk12D0PitcherStats* other;
+    Unk12D0PitcherStats* closerStats;
+    int w;
+    s8 starter;
+    s8* pStarter;
+    int closer;
+
+    w = g_Scores._A4;
+    team = w ^ g_GameLogic.homeTeamInd;
+    if (g_Scores._BB[w] == 1) {
+        lbl_80353A90._F3 = g_Scores._AF[w];
+        return;
+    }
+    if (g_Scores._04[1][g_Scores._00] > 0 && w == 1) {
+        lbl_80353A90._F3 = g_Scores._B1[w];
+        return;
+    }
+    if (g_Scores._00 < 5) {
+        lbl_80353A90._F3 = g_Scores._B1[w];
+        return;
+    }
+    closer = g_Scores._B3[w];
+    stats = lbl_803535C8[team];
+    closerStats = &stats[closer];
+    if (g_Scores._B9[w] == 1) {
+        if (g_Scores._00 == 5) {
+            if (closerStats->_1A >= 12) {
+                lbl_80353A90._F3 = g_Scores._AF[w];
+                return;
+            }
+        } else if (closerStats->_1A >= 15) {
+            lbl_80353A90._F3 = g_Scores._AF[w];
+            return;
+        }
+        bestOuts = 0;
+        best = -1;
+        for (i = 0; i < 9; i++) {
+            cur = &stats[i];
+            if (cur->_00 != 0 && closer != i) {
+                if (best == -1) {
+                    bestOuts = cur->_1A;
+                    best = i;
+                } else if (cur->_1A - bestOuts >= 3) {
+                    bestOuts = cur->_1A;
+                    best = i;
+                } else if (cur->_1A - bestOuts > -3) {
+                    other = &stats[best];
+                    if (cur->_04 < other->_04) {
+                        best = i;
+                    } else if (cur->_04 == other->_04) {
+                        if (cur->_00 - cur->_1A < other->_00 - other->_1A) {
+                            best = i;
+                        } else if (cur->_00 - cur->_1A == other->_00 - other->_1A) {
+                            if (cur->_1A > bestOuts) {
+                                best = i;
+                            } else if (bestOuts == cur->_1A && cur->_0E < other->_0E) {
+                                best = i;
+                            }
+                        }
+                    }
+                    if (cur->_1A > bestOuts) {
+                        bestOuts = cur->_1A;
+                    }
+                }
+            }
+        }
+        lbl_80353A90._F3 = lbl_803537E4[team][best]._00;
+        return;
+    }
+    bestOuts = 0;
+    best = -1;
+    if (g_Scores._BB[w] == 2) {
+        lbl_80353A90._F3 = closer;
+        return;
+    }
+    if (closer == -1 || closer == g_Scores._AF[w]) {
+        pStarter = &g_Scores._AF[w];
+        starter = *pStarter;
+        for (i = 0; i < 9; i++) {
+            if (starter != i && closer != i) {
+                if (best == -1) {
+                    if (lbl_3_common_bss_32A38[w][i]._0 != 0 && bestOuts == 0) {
+                        best = i;
+                        bestOuts = lbl_3_common_bss_32A38[w][i]._0;
+                    }
+                } else if (lbl_3_common_bss_32A38[w][i]._0 > bestOuts) {
+                    best = i;
+                    bestOuts = lbl_3_common_bss_32A38[w][i]._0;
+                } else if (bestOuts == lbl_3_common_bss_32A38[w][i]._0) {
+                    if (stats[i]._04 < stats[best]._04) {
+                        best = i;
+                    } else if (stats[i]._04 == stats[best]._04) {
+                        if (stats[i]._00 < stats[best]._00) {
+                            best = i;
+                        } else if (stats[i]._00 == stats[best]._00 && stats[i]._0E < stats[best]._0E) {
+                            best = i;
+                        }
+                    }
+                }
+            }
+        }
+        *pStarter = starter;
+    }
+    if (best == -1) {
+        lbl_80353A90._F3 = g_Scores._B3[w];
+    } else {
+        lbl_80353A90._F3 = lbl_803537E4[team][best]._00;
+    }
+    if (lbl_80353A90._F3 == -1) {
+        lbl_80353A90._F3 = g_Scores._B1[w];
+    }
 }
 
 void fn_3_759BC(void) {
