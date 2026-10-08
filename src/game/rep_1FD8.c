@@ -54,7 +54,8 @@ typedef struct Rep1FD8Particle {
 } Rep1FD8Particle;
 
 typedef struct Rep1FD8Spawner {
-    /* 0x00 */ u8 _00[0x0C];
+    /* 0x00 */ u8 _00[0x08];
+    /* 0x08 */ void* _08;
     /* 0x0C */ Rep1FD8Particle* particles;
     /* 0x10 */ void* _10;
     /* 0x14 */ u8 _14[0x18 - 0x14];
@@ -63,11 +64,54 @@ typedef struct Rep1FD8Spawner {
     /* 0x25 */ u8 _25;
 } Rep1FD8Spawner;
 
+typedef struct Rep1FD8SpawnerTask {
+    /* 0x00 */ u8 _00[0x14];
+    /* 0x14 */ Rep1FD8Spawner* spawners[6];
+} Rep1FD8SpawnerTask;
+
 extern u32 fn_8005268C(void);
 extern camera_803c639c_s* fn_80052734(s32 idx);
 extern void fn_80033CC8(Rep1FD8Particle* p, void* texture);
 extern void fn_8003403C(f32 width, f32 height);
 extern void fn_80033620(Rep1FD8Spawner* emitter);
+typedef struct Rep1FD8TexRegs {
+    /* 0x00 */ u8 _00[0x4];
+    /* 0x04 */ u32 _04;
+} Rep1FD8TexRegs;
+
+typedef struct Rep1FD8TexInfo {
+    /* 0x00 */ u8 _00[0x4];
+    /* 0x04 */ Rep1FD8TexRegs* _04;
+} Rep1FD8TexInfo;
+
+typedef struct Rep1FD8TexMap {
+    /* 0x00 */ u8 _00[0x10];
+    /* 0x10 */ Rep1FD8TexInfo* _10;
+} Rep1FD8TexMap;
+
+typedef struct Rep1FD8Bone {
+    /* 0x00 */ u8 _00[0x14];
+    /* 0x14 */ Rep1FD8TexMap* _14;
+} Rep1FD8Bone;
+
+typedef struct Rep1FD8Actor {
+    /* 0x00 */ u8 _00[0x18];
+    /* 0x18 */ Rep1FD8Bone** _18;
+} Rep1FD8Actor;
+
+typedef struct Rep1FD8Model {
+    /* 0x00 */ Rep1FD8Actor* _00;
+} Rep1FD8Model;
+
+typedef struct Rep1FD8Draw {
+    /* 0x00 */ u8 _00[0x74];
+    /* 0x74 */ Rep1FD8Model* _74;
+    /* 0x78 */ u8 _78[0xA9 - 0x78];
+    /* 0xA9 */ u8 _A9;
+    /* 0xAA */ u8 _AA[0xB0 - 0xAA];
+    /* 0xB0 */ u8 _B0;
+} Rep1FD8Draw;
+
 extern Rep1FD8Spawner* fn_80033A24(BOOL (*update)(Rep1FD8Spawner*), s32, s32, s32, s32, s32);
 extern Rep1FD8Task* fn_800B0A5C_insertQueue(void (*callback)(void), s32 priority);
 extern void fn_800528C0(f32 x, f32 y, f32 z, s16* screenX, s16* screenY);
@@ -154,8 +198,18 @@ void fn_3_C749C(void) {
 }
 
 // .text:0x000C7444 size:0x58 mapped:0x807064D8
-void fn_3_C7444(void) {
-    return;
+void fn_3_C7444(Rep1FD8Draw* draw) {
+    Rep1FD8TexRegs* regs = draw->_74->_00->_18[13]->_14->_10->_04;
+
+    switch (draw->_B0) {
+    case 0:
+        regs->_04 &= ~0x1FFF;
+        regs->_04 |= 2;
+        break;
+    default:
+        regs->_04 &= ~0x1FFF;
+        break;
+    }
 }
 
 // .text:0x000C71CC size:0x278 mapped:0x80706260
@@ -244,8 +298,16 @@ void fn_3_C414C(void) {
 }
 
 // .text:0x000C40EC size:0x60 mapped:0x80703180
-void fn_3_C40EC(void) {
-    return;
+void fn_3_C40EC(Rep1FD8Draw* draw) {
+    Rep1FD8TexRegs* regs = draw->_74->_00->_18[1]->_14->_10->_04;
+
+    if (draw->_A9 != 6) {
+        regs->_04 &= ~0x1FFF;
+        regs->_04 |= 0x19;
+    } else {
+        regs->_04 &= ~0x1FFF;
+        regs->_04 |= 0x1A;
+    }
 }
 
 // .text:0x000C4068 size:0x84 mapped:0x807030FC
@@ -484,7 +546,26 @@ u8 fn_3_C2AA0(Vec* pos, f32 width, f32 height) {
 
 // .text:0x000C298C size:0x114 mapped:0x80701A20
 void fn_3_C298C(void) {
-    return;
+    Rep1FD8SpawnerTask* task = lbl_803CC1B8;
+    u32 i;
+
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES) {
+        if (g_GameLogic.gameStatus == GAME_STATUS_PAUSED || g_GameLogic.gameStatus >= GAME_STATUS_MINIGAME_POST_MENU) {
+            if (g_Minigame._1A40 != 0 && g_Minigame._1A38 == 0) {
+                fn_800B0A14_removeQueue();
+            }
+        }
+    } else if (g_GameLogic._128 != 0 || g_d_GameSettings._13 != 0) {
+        fn_800B0A14_removeQueue();
+    }
+    for (i = 0; i < 6; i++) {
+        if (task->spawners[i] == NULL || task->spawners[i]->_08 == NULL) {
+            task->spawners[i] = fn_80033A24(fn_3_C30F0, 128, 0, 21, 1, 0);
+            if (task->spawners[i] != NULL) {
+                fn_3_C366C(task->spawners[i], i);
+            }
+        }
+    }
 }
 
 // .text:0x000C2974 size:0x18 mapped:0x80701A08
