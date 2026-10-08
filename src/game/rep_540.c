@@ -56,6 +56,7 @@ extern f32 lbl_3_data_45FC;
 extern u8 lbl_3_data_4600;
 extern f32 lbl_3_data_4604;
 extern f32 lbl_3_data_47BC[5];
+extern f32 lbl_3_data_4930[43];
 extern f32 lbl_3_data_5CDC[11];
 extern u8 lbl_3_data_4608;
 
@@ -185,8 +186,8 @@ void fn_3_F578(void) {
 }
 
 // .text:0x0000F1DC size:0x39C mapped:0x8064E270
-// ballZoneWhenCaught = -1 loads 255 into its own register; the target stores the s16 -1
-// register, as if the field were s8 (rep_18E8 reads it with extsb, rep_13B8 without).
+// 97.9%: ballZoneWhenCaught = -1 loads 255 into its own register; the target stores the
+// s16 -1 register, as if the field were s8 (rep_18E8 reads it with extsb, rep_13B8 without).
 void fn_3_F1DC(void) {
     u32 seed;
 
@@ -276,8 +277,101 @@ void fn_3_F1DC(void) {
 }
 
 // .text:0x0000EE4C size:0x390 mapped:0x8064DEE0
+// 96.7%: as in fn_3_F1DC, ballZoneWhenCaught = -1 needs its own li 255; the target stores
+// the -1 register, as if the field were s8. With an s8 field this order matches.
 void fn_3_EE4C(void) {
-    return;
+    f32 x;
+    f32 z;
+    f32 radius;
+    s32 i;
+    int j;
+    s16 angle;
+
+    g_Ball.offsetWhilePickedUpHistory[0].x = 0.0f;
+    g_Ball.offsetWhilePickedUpHistory[0].y = 0.0f;
+    g_Ball.offsetWhilePickedUpHistory[0].z = 0.0f;
+    g_Ball.framesSinceHit = 0;
+    g_Ball.framesSinceThrowStarted = -1;
+    g_Ball.framesSinceBallHitGroundOrWasCaught = -1;
+    g_Ball.framesSinceLastBounce = -1;
+    g_Ball.ballHitGrroundDistanceFromHome = 0.0f;
+    g_Ball.AtBat_ContactResult = 0;
+    g_Ball.ballInitialHitDoneInd = 0;
+    g_Ball.fairBallInd = -1;
+    g_Ball.howFoulTheBallWillBe = 0;
+    g_Ball.ballState = 0;
+    g_Ball.fielderAboutToGetBall_hasBall = -1;
+    g_Ball.fielderWBallIndex = -1;
+    g_Ball.maxYOfHit = 0.0f;
+    g_Ball.deadBallReason = 0;
+    g_Ball.someCollisionVariable = 0;
+    g_Ball.deadBallRBIsAddedInd = 0;
+    g_Ball.baseBallAndFielderAreOn = -1;
+    g_Ball.fielderBeingThrownTo = -1;
+    g_Ball.ballIsLooseInd_unused = 0;
+    g_Ball.homeRunClassification = 0;
+    g_Ball.lineDriveThroughPitcherInd = 0;
+    g_Ball.hitWallInd = 0;
+    g_Ball.collisionRelated = 0;
+    g_Ball.timeSinceBallPickedUp = -1;
+    g_Ball.matchFramesAndBallAngle.framesSinceLastThrow = -1;
+    g_Ball.groundRuleDoubleInd = 0;
+    g_Ball.matchFramesAndBallAngle.framesAfterReceivingThrow = 0;
+    g_Ball.numberOfThrowsDuringPlay = 0;
+    g_Ball.ballZoneWhenCaught = -1;
+    if (g_Ball.currentStarSwing == 3 || g_Ball.currentStarSwing == 4) {
+        g_Ball.warioStarHitCoords[0].x = g_Ball.AtBat_Contact_BallPos.x;
+        g_Ball.warioStarHitCoords[0].y = g_Ball.AtBat_Contact_BallPos.y;
+        g_Ball.warioStarHitCoords[0].z = g_Ball.AtBat_Contact_BallPos.z;
+        g_Ball.warioStarHitCoords[1].x = g_Ball.AtBat_Contact_BallPos.x;
+        g_Ball.warioStarHitCoords[1].y = g_Ball.AtBat_Contact_BallPos.y;
+        g_Ball.warioStarHitCoords[1].z = g_Ball.AtBat_Contact_BallPos.z;
+        g_Ball.warioStarHitCoords[2].x = g_Ball.AtBat_Contact_BallPos.x;
+        g_Ball.warioStarHitCoords[2].y = g_Ball.AtBat_Contact_BallPos.y;
+        g_Ball.warioStarHitCoords[2].z = g_Ball.AtBat_Contact_BallPos.z;
+        for (i = 0; i < 10; i++) {
+            g_Ball.warioStarHitCoords[i + 3].x = g_Ball.AtBat_Contact_BallPos.x;
+            g_Ball.warioStarHitCoords[i + 3].y = g_Ball.AtBat_Contact_BallPos.y;
+            g_Ball.warioStarHitCoords[i + 3].z = g_Ball.AtBat_Contact_BallPos.z;
+        }
+    }
+    if (g_Minigame.GameMode_MiniGame == 1) {
+        g_Batter.hitTrajectory = 3;
+        if (g_Batter.buntStatus) {
+            g_Batter.hitTrajectory = 6;
+        }
+        if (g_Ball.bODQualifyingHitInd) {
+            for (j = 0; j < 360; j += 5) {
+                if (g_Ball.physicsSubstruct.futureCoordsAndDist[j].dist > 80.0f) {
+                    angle = fn_3_9FB8C(g_Ball.physicsSubstruct.futureCoordsAndDist[j].pos.x,
+                                       g_Ball.physicsSubstruct.futureCoordsAndDist[j].pos.z);
+                    if (angle > 576 && angle < 1472) {
+                        g_Batter.hitTrajectory = 4;
+                    }
+                    break;
+                }
+            }
+        }
+    } else {
+        if (g_Minigame.GameMode_MiniGame == 3) {
+            g_Batter.hitTrajectory = 3;
+            if (g_Batter.buntStatus) {
+                g_Batter.hitTrajectory = 6;
+            }
+        }
+        estimateAndSetFutureCoords(0);
+        fn_3_C034();
+        if (g_Ball.autoFielderAvoidDropSpotForPeachesStarHit) {
+            if (g_Ball.currentStarSwing == 11) {
+                radius = RandomF32_Game_Range(lbl_3_data_4930[39], lbl_3_data_4930[40]);
+            } else {
+                radius = RandomF32_Game_Range(lbl_3_data_4930[41], lbl_3_data_4930[42]);
+            }
+            getComponentsFromSAng(RandomInt_Game(0x1000), &x, &z);
+            g_Ball.peachDaisyStarHitFielderLoc.x = x * radius + g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x;
+            g_Ball.peachDaisyStarHitFielderLoc.z = z * radius + g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z;
+        }
+    }
 }
 
 static inline s32 findClosestFutureFrame(s32 count, s32 step, f32 x, f32 z) {
