@@ -206,8 +206,8 @@ static u8 lbl_3_bss_17FC[4];
 static s32 lbl_3_bss_17F8;
 
 // .text:0x000ABDD0 size:0xC28 mapped:0x806EAE64
-// 99.05%: registers in the prologue are one off, and the 0.0f for the final distance
-// is addressed through addi in the base; statement orders tried.
+// 99.18%: the 0.0f stored to f->_050 and compared in the throw-distance root is
+// addressed through addi in the base, which shifts three FPRs; statement orders tried.
 void fn_3_ABDD0(s32 fielder) {
     Unk18E8Fielder* f = &g_Fielders[fielder];
     f32 x;
@@ -234,7 +234,7 @@ void fn_3_ABDD0(s32 fielder) {
         z = lbl_3_data_4444[g_FieldingLogic._0C4].z;
         g_Ball.fielderBeingThrownTo = g_FieldingLogic._0D0[g_FieldingLogic._0C4];
         skill = fn_3_6D658(g_GameLogic.teamFielding, g_Fielders[fielder]._17A,
-                           g_Fielders[g_FieldingLogic._0D0[g_FieldingLogic._0C4]]._17A);
+                           g_Fielders[g_Ball.fielderBeingThrownTo]._17A);
         if (skill >= lbl_3_data_4638[0] && g_FieldingLogic._0C4 == g_Fielders[g_Ball.fielderBeingThrownTo]._1F5) {
             g_FieldingLogic._13E = 1;
         }
