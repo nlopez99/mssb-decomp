@@ -2206,9 +2206,8 @@ out:
 // .text:0x001354BC size:0x64 mapped:0x80774550
 BOOL fn_3_1354BC(u32 i, f32 x, f32 z) {
     BOOL ret = FALSE;
-    Unk3520Minigame* mg = &MG;
-    f64 ax = fabs(mg->objs[i]._0.x - x);
-    f64 az = fabs(mg->objs[i]._0.z - z);
+    f64 ax = fabs(g_Minigame.starDashObjs[i]._0.x - x);
+    f64 az = fabs(g_Minigame.starDashObjs[i]._0.z - z);
     f32 dx = ax;
     f32 dz = az;
 
@@ -2219,8 +2218,7 @@ BOOL fn_3_1354BC(u32 i, f32 x, f32 z) {
 }
 
 // .text:0x001350BC size:0x400 mapped:0x80774150
-// 92.1%: the inlined fn_3_1354BC forms its own g_Minigame base where the target shares
-// the objs walker (with `s32 j` and MG.objs[i] there, 97.0%, but fn_3_1354BC drops to 83%).
+// 97.2%: registers only, from the first saved ones on (r22 for g_Minigame, i in r31).
 Unk3520Coin* fn_3_1350BC(u32 player, u32 quadrant, u32 count, Unk3520Coin* coins) {
     u32 strength = g_Minigame.minigameControlStruct.aIStrength[player];
     Unk3520Coin* c;
@@ -2257,7 +2255,7 @@ Unk3520Coin* fn_3_1350BC(u32 player, u32 quadrant, u32 count, Unk3520Coin* coins
                 if (c->valid) {
                     j = 0;
                     do {
-                        if (MG.objs[j]._3D >= 1 && MG.objs[j]._3D <= 3 && fn_3_1354BC(j, x, z)) {
+                        if (g_Minigame.starDashObjs[j]._3D >= 1 && g_Minigame.starDashObjs[j]._3D <= 3 && fn_3_1354BC(j, x, z)) {
                             c->valid = FALSE;
                             break;
                         }
