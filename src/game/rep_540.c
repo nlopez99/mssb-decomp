@@ -1227,8 +1227,6 @@ void fn_3_B940(void) {
 }
 
 // .text:0x0000B440 size:0x500 mapped:0x8064A4D4
-// 99.2%: the FPRs of the throw target, ball position and their distances are numbered
-// differently (target f4/f3/f1 for x, base f2/f1/f5).
 void fn_3_B440(void) {
     f32 dx;
     f32 dz;
@@ -1238,14 +1236,8 @@ void fn_3_B440(void) {
     if (g_Ball.framesUntilThrowReachesDest < 15) {
         return;
     }
-    dx = g_Ball.throwTarget.x - g_Ball.AtBat_Contact_BallPos.x;
-    if (dx < 0.0f) {
-        dx = -dx;
-    }
-    dz = g_Ball.throwTarget.z - g_Ball.AtBat_Contact_BallPos.z;
-    if (dz < 0.0f) {
-        dz = -dz;
-    }
+    dx = ABS(g_Ball.throwTarget.x - g_Ball.AtBat_Contact_BallPos.x);
+    dz = ABS(g_Ball.throwTarget.z - g_Ball.AtBat_Contact_BallPos.z);
     if (dx > dz) {
         if (g_Ball.throwTarget.x < g_Ball.AtBat_Contact_BallPos.x) {
             for (i = 10; i < 360; i += 10) {
