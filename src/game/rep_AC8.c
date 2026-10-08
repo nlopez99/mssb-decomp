@@ -6702,7 +6702,67 @@ void fn_3_33088(void) {
 
 // .text:0x000329A4 size:0x6E4 mapped:0x80671A38
 void fn_3_329A4(void) {
-    return;
+    s16 angle;
+
+    angle = g_Ball.Hit_HorizontalAngle;
+    if (g_Ball.Hit_VerticalAngle >= 0x400 && g_Ball.Hit_VerticalAngle <= 0xC00) {
+        angle += 0x800;
+        if (angle > 0x1000) {
+            angle -= 0x1000;
+        }
+    }
+    if (angle >= 0xE00) {
+        g_FieldingLogic._0B0 = 1;
+        fn_3_5985C(2, 0x10);
+    } else if (angle >= 0xA00) {
+        g_FieldingLogic._0B0 = 1;
+    } else if (angle >= 0x800) {
+        g_FieldingLogic._0B0 = 1;
+        fn_3_5985C(4, 0x10);
+    } else if (angle >= 0x400) {
+        if (g_Ball.Hit_VerticalAngle < 0x40) {
+            g_FieldingLogic._0B0 = 4;
+            fn_3_5985C(6, 0x10);
+        } else if (g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z < 10.0f) {
+            g_FieldingLogic._0B0 = 1;
+            fn_3_5985C(4, 0x10);
+            fn_3_5985C(6, 0x10);
+        } else if (g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z < 20.0f) {
+            g_FieldingLogic._0B0 = 4;
+            fn_3_5985C(5, 0x10);
+            fn_3_5985C(6, 0x10);
+        } else if (g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z < 40.0f) {
+            g_FieldingLogic._0B0 = 5;
+            fn_3_5985C(4, 0x10);
+            fn_3_5985C(6, 0x10);
+        } else {
+            g_FieldingLogic._0B0 = 6;
+            fn_3_5985C(5, 0x10);
+        }
+    } else if (g_Ball.Hit_VerticalAngle < 0x40) {
+        g_FieldingLogic._0B0 = 2;
+        fn_3_5985C(8, 0x10);
+    } else if (g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z < 10.0f) {
+        g_FieldingLogic._0B0 = 1;
+        fn_3_5985C(2, 0x10);
+        fn_3_5985C(8, 0x10);
+    } else if (g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z < 20.0f) {
+        g_FieldingLogic._0B0 = 2;
+        fn_3_5985C(3, 0x10);
+        fn_3_5985C(8, 0x10);
+    } else {
+        if (g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z < 40.0f) {
+            g_FieldingLogic._0B0 = 3;
+            fn_3_5985C(2, 0x10);
+            fn_3_5985C(8, 0x10);
+        }
+        g_FieldingLogic._0B0 = 8;
+        fn_3_5985C(3, 0x10);
+    }
+    fn_3_5985C(g_FieldingLogic._0B0, 0x15);
+    fn_3_4C9C8();
+    fn_3_47778();
+    fn_3_4A124();
 }
 
 // .text:0x00032810 size:0x194 mapped:0x806718A4
