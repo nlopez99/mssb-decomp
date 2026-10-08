@@ -1442,6 +1442,22 @@ typedef struct _BB_barrelStruct {
     /*0x033*/ u8 pad;
 } BB_barrelStruct; // size: 0x34
 
+// One of Star Dash's (rep_3520) four objects, at g_Minigame + 0xBB0
+typedef struct Unk3520Obj {
+    /* 0x00 */ Vec _0;
+    /* 0x0C */ Vec _C;
+    /* 0x18 */ Vec _18;
+    /* 0x24 */ Vec _24;
+    /* 0x30 */ f32 _30;
+    /* 0x34 */ f32 _34;
+    /* 0x38 */ s16 _38;
+    /* 0x3A */ s16 _3A;
+    /* 0x3C */ s8 _3C;
+    /* 0x3D */ u8 _3D;
+    /* 0x3E */ u8 _3E;
+    /* 0x3F */ u8 _3F;
+} Unk3520Obj; // size: 0x40
+
 typedef struct _UnkStructMinigame {
     /*0x000*/ VecXYZ _0;
     /*0x00C*/ VecXYZ _C;
@@ -1681,6 +1697,8 @@ typedef struct _MiniGameStruct {
     /*0x72B*/ u8 _72B;
     /*0x72C*/ MaybeWallBallStruct wallBallWalls[7];
     /*0x860*/ BB_barrelStruct barrels[15];
+    union {
+        struct {
     /*0xB6C*/ UnkStructMinigame _B6C;
     /*0xBD4*/ VecXYZ _BD4;
     /*0xBE0*/ f32 _BE0;
@@ -1699,6 +1717,13 @@ typedef struct _MiniGameStruct {
     /*0xC6D*/ u8 _C6D[64];
     /*0xCAD*/ u8 _CAD;
     /*0xCAE*/ u8 pad4[2];
+        };
+        // Star Dash (rep_3520) keeps its four objects here, after its coin bag
+        struct {
+            /*0xB6C*/ u8 _B6C_starDash[0x44];
+            /*0xBB0*/ Unk3520Obj starDashObjs[4];
+        };
+    };
     /*0xCB0*/ f32 _CB0;
     /*0xCB4*/ f32 _CB4;
     /*0xCB8*/ f32 _CB8;

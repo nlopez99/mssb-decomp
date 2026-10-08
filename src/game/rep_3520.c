@@ -24,22 +24,6 @@
 #include "Dolphin/rand.h"
 #include "musyx/musyx.h"
 
-// One of four objects at g_Minigame + 0xBB0
-typedef struct Unk3520Obj {
-    /* 0x00 */ Vec _0;
-    /* 0x0C */ Vec _C;
-    /* 0x18 */ Vec _18;
-    /* 0x24 */ Vec _24;
-    /* 0x30 */ f32 _30;
-    /* 0x34 */ f32 _34;
-    /* 0x38 */ s16 _38;
-    /* 0x3A */ s16 _3A;
-    /* 0x3C */ s8 _3C;
-    /* 0x3D */ u8 _3D;
-    /* 0x3E */ u8 _3E;
-    /* 0x3F */ u8 _3F;
-} Unk3520Obj; // size: 0x40
-
 // A spoke's end points, one per player at g_Minigame._1CE8
 typedef struct Unk3520Spoke {
     /* 0x00 */ VecXYZ start;
@@ -2520,8 +2504,8 @@ static inline s16 Unk3520_CircleAngle(int i, int offset) {
 }
 
 // .text:0x0013334C size:0x1170 mapped:0x807723E0
-// 96.9%: the loops over MG.objs and the players start their walkers from fresh
-// g_Minigame bases where the target copies a saved one, and registers follow.
+// 97.8%: the g_Minigame base the walkers copy is spilled to the stack where the target
+// keeps it in r14, and the registers of the player loop follow.
 void fn_3_13334C(void) {
     Unk3520Ai* ai = (Unk3520Ai*)&g_Minigame._1DCC;
     Unk3520Coin* coins;
@@ -2617,7 +2601,7 @@ void fn_3_13334C(void) {
                 if (dx * dx + dz * dz <= lbl_3_data_21B78[strength] * lbl_3_data_21B78[strength]) {
                     j = 0;
                     do {
-                        if (MG.objs[j]._3D >= 1 && MG.objs[j]._3D <= 3 && fn_3_1354BC(j, MG.bag.pos.x, MG.bag.pos.z)) {
+                        if (g_Minigame.starDashObjs[j]._3D >= 1 && g_Minigame.starDashObjs[j]._3D <= 3 && fn_3_1354BC(j, MG.bag.pos.x, MG.bag.pos.z)) {
                             break;
                         }
                     } while (++j < lbl_3_data_21A88[g_Minigame.soloMinigameDifficulty]);
@@ -2634,7 +2618,7 @@ void fn_3_13334C(void) {
                 if (dx * dx + dz * dz <= lbl_3_data_21B68[strength] * lbl_3_data_21B68[strength]) {
                     j = 0;
                     do {
-                        if (MG.objs[j]._3D >= 1 && MG.objs[j]._3D <= 3 && fn_3_1354BC(j, MG.box.pos.x, MG.box.pos.z)) {
+                        if (g_Minigame.starDashObjs[j]._3D >= 1 && g_Minigame.starDashObjs[j]._3D <= 3 && fn_3_1354BC(j, MG.box.pos.x, MG.box.pos.z)) {
                             break;
                         }
                     } while (++j < lbl_3_data_21A88[g_Minigame.soloMinigameDifficulty]);
@@ -2675,9 +2659,9 @@ void fn_3_13334C(void) {
             if (i != g_Minigame._1D6D) {
                 j = 0;
                 do {
-                    if (MG.objs[j]._3D >= 1 && MG.objs[j]._3D <= 3) {
-                        dz = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.z - MG.objs[j]._0.z;
-                        dx = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.x - MG.objs[j]._0.x;
+                    if (g_Minigame.starDashObjs[j]._3D >= 1 && g_Minigame.starDashObjs[j]._3D <= 3) {
+                        dz = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.z - g_Minigame.starDashObjs[j]._0.z;
+                        dx = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.x - g_Minigame.starDashObjs[j]._0.x;
                         if (dx * dx + dz * dz <= lbl_3_data_21B48[strength] * lbl_3_data_21B48[strength]) {
                             away = radToShortAngle(atan2(dz, dx));
                             input->controlStickAngle = fn_3_1345AC(input->controlStickAngle,
