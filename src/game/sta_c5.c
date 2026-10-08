@@ -121,7 +121,9 @@ typedef struct StaC5Ball {
     /* 0x00 */ Control control;
     /* 0x44 */ u8 _44[0x74 - 0x44];
     /* 0x74 */ StaC5Model* _74;
-    /* 0x78 */ u8 _78[0x99 - 0x78];
+    /* 0x78 */ u8 _78[0x7C - 0x78];
+    /* 0x7C */ void (*_7C)(struct StaC5Ball* obj);
+    /* 0x80 */ u8 _80[0x99 - 0x80];
     /* 0x99 */ u8 _99;
     /* 0x9A */ u8 _9A[0x9C - 0x9A];
     /* 0x9C */ u8 _9C;
@@ -756,7 +758,7 @@ void fn_3_F5C30(StaC5Ball* obj) {
 }
 
 // .text:0x000F56CC size:0x564 mapped:0x80734760
-void fn_3_F56CC(void) {
+void fn_3_F56CC(StaC5Ball* obj) {
     return;
 }
 
@@ -936,8 +938,47 @@ void fn_3_F4BA0(StaC5Ball* obj) {
 }
 
 // .text:0x000F46A0 size:0x500 mapped:0x80733734
-void fn_3_F46A0(void) {
-    return;
+// 96.91%: the entry schedules the copy of fwd (lwzu) and the two pool bases in another
+// order than the target; declaration orders tried change nothing.
+void fn_3_F46A0(StaC5Ball* obj) {
+    Vec dir;
+    Vec fwd = { 0.0f, 0.0f, -1.0f };
+    f32 angle;
+
+    dir.x = lbl_3_bss_AEEC - obj->pos.x;
+    dir.y = 0.0f;
+    dir.z = lbl_3_data_1BA48 - obj->pos.z;
+    PSVECNormalize(&dir, &dir);
+    angle = 57.29578f * (f32)acos(PSVECDotProduct(&dir, &fwd));
+    if (dir.x < 0.0f) {
+        angle = 360.0f - angle;
+    }
+    obj->_C0 = -angle;
+    CTRLSetRotation(&obj->control, 0.0f, obj->_C0, 0.0f);
+    if (g_GameLogic.gameStatus != GAME_STATUS_INNING_TRANSITION) {
+        fn_3_F5C30(obj);
+        obj->_7C = fn_3_F56CC;
+        return;
+    }
+    fn_3_F193C(obj->_A0);
+    switch (obj->_C4) {
+    case 0:
+        if (!lbl_3_bss_AEE1) {
+            fn_3_F31E0(obj->_A0, lbl_3_bss_AEEC, lbl_3_data_1BA48);
+            fn_3_F4C4C(obj);
+            obj->_A0->_C1 = 1;
+            obj->_C4 = 3;
+            lbl_3_bss_AEE1 = 1;
+            playStadiumSound(0);
+        }
+        break;
+    case 3:
+        fn_3_F4BA0(obj);
+        if ((u8)obj->_A0->_C1 == 0) {
+            lbl_3_bss_AEE1 = 0;
+        }
+        break;
+    }
 }
 
 // .text:0x000F469C size:0x4 mapped:0x80733730
