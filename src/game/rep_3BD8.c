@@ -588,7 +588,8 @@ void fn_3_15DB44(void) {
     } else {
         lbl_3_common_bss_32724._D2 = 1;
         lbl_80371C30[task->_14]._00->_68 = 4;
-        frame = lbl_80371C30[task->_14]._00->_5C >> 16;
+        sprite = lbl_80371C30[task->_14]._00;
+        frame = sprite->_5C >> 16;
         if (frame == 10) {
             lbl_80371C30[task->_14 + 54]._00->_68 = 4;
             lbl_80371C30[task->_14 + 51]._00->_68 = 4;
