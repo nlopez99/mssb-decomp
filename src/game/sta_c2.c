@@ -130,8 +130,15 @@ typedef struct StaC2Model {
     /* 0x60 */ u8 _60[0x90 - 0x60];
 } StaC2Model; // size: 0x90
 
+typedef struct StaC2ModelTable {
+    /* 0x00 */ u16 count;
+    /* 0x04 */ Mtx _04;
+    /* 0x34 */ StaC2Model models[1];
+} StaC2ModelTable;
+
 typedef struct {
-    /* 0x00 */ u8 _00[0xC];
+    /* 0x00 */ void* file;
+    /* 0x04 */ u8 _04[0xC - 0x4];
     /* 0x0C */ f32 frame;
     /* 0x10 */ f32 speed;
     /* 0x14 */ u8 _14[0x1A - 0x14];
@@ -153,7 +160,10 @@ typedef struct StaC2Draw {
     /* 0x44 */ u8 _44[0x74 - 0x44];
     /* 0x74 */ StaC2Model* _74;
     /* 0x78 */ struct StadiumObjectCollision* _78;
-    /* 0x7C */ u8 _7C[0x8C - 0x7C];
+    /* 0x7C */ void (*_7C)(struct StaC2Draw* draw);
+    /* 0x80 */ void* _80;
+    /* 0x84 */ void (*_84)(struct StaC2Draw* draw);
+    /* 0x88 */ u8 _88[0x8C - 0x88];
     /* 0x8C */ StaC2Anim* _8C;
     /* 0x90 */ u8 _90_7 : 1;
     /* 0x90 */ u8 _90_6 : 1;
@@ -181,6 +191,7 @@ typedef struct StaC2Draw {
             /* 0xCC */ f32 _CCf;
             /* 0xD0 */ s8 _D0;
             /* 0xD1 */ u8 _D1;
+            /* 0xD2 */ u8 _D2;
         };
         struct {
             /* 0xA0 */ u8 _A0_B0[0xB0 - 0xA0];
@@ -200,6 +211,18 @@ typedef struct StaC2Draw {
             /* 0xA4 */ f32 speed;
             /* 0xA8 */ u8* trigger;
             /* 0xAC */ u8 wait;
+            /* 0xAD */ u8 _AD;
+        };
+        struct {
+            /* 0xA0 */ s32 phase;
+        };
+        struct {
+            /* 0xA0 */ u8 _A0_AC_5[0xAC - 0xA0];
+            /* 0xAC */ u8 id;
+        };
+        struct {
+            /* 0xA0 */ u8 _A0_C0[0xC0 - 0xA0];
+            /* 0xC0 */ u8 id2;
         };
         struct {
             /* 0xA0 */ StaC2Link* link;
@@ -222,8 +245,8 @@ typedef struct StaC2Draw {
         };
         struct {
             /* 0xA0 */ u8 _A0_AC_2[0xAC - 0xA0];
-            /* 0xAC */ StaC2Target* from;
-            /* 0xB0 */ StaC2Target* to;
+            /* 0xAC */ struct StaC2Spring* from;
+            /* 0xB0 */ struct StaC2Spring* to;
             /* 0xB4 */ u8 counter;
         };
         struct {
@@ -291,7 +314,7 @@ typedef struct StaC2Emitter {
     /* 0x20 */ StaC2EmitterOwner* _20;
 } StaC2Emitter;
 
-typedef struct {
+typedef struct StaC2ObjEntry {
     /* 0x00 */ f32 _00;
     /* 0x04 */ s32 _04;
 } StaC2ObjEntry; // size: 0x8
@@ -426,10 +449,15 @@ extern StaC2Fielder g_Fielders[9];
 
 extern struct {
     /* 0x00 */ StaC2Draw* _00;
-    /* 0x04 */ u8 _04[0x14 - 0x04];
+    /* 0x04 */ StaC2Draw* _04;
+    /* 0x08 */ u8 _08[0x14 - 0x08];
     /* 0x14 */ StaC2ObjEntry* _14;
-    /* 0x18 */ u8 _18[0x30 - 0x18];
-    /* 0x30 */ u32 _30;
+    /* 0x18 */ u8 _18[0x20 - 0x18];
+    /* 0x20 */ s32 _20;
+    /* 0x24 */ s32 _24;
+    /* 0x28 */ s32 _28;
+    /* 0x2C */ s32 _2C;
+    /* 0x30 */ s32 _30;
     /* 0x34 */ u8 _34[0x3C - 0x34];
     /* 0x3C */ u32* _3C;
     /* 0x40 */ u16* _40;
@@ -439,6 +467,8 @@ extern struct {
     /* 0x64 */ s16 _64;
     /* 0x66 */ u8 _66[0x6B - 0x66];
     /* 0x6B */ u8 _6B;
+    /* 0x6C */ u8 _6C;
+    /* 0x6D */ u8 _6D;
 } lbl_3_common_bss_350E4;
 
 extern struct {
@@ -448,7 +478,9 @@ extern struct {
 
 extern void fn_800528C0(f32 x, f32 y, f32 z, s16* screenX, s16* screenY);
 extern struct {
-    /* 0x0000 */ u8 _0000[0x2C50];
+    /* 0x0000 */ u8 _0000[0x6C];
+    /* 0x006C */ StaC2ModelTable* _6C;
+    /* 0x0070 */ u8 _0070[0x2C50 - 0x70];
     /* 0x2C50 */ StaC2Player* _2C50[13];
 } lbl_8036E548;
 
@@ -462,6 +494,19 @@ extern void fn_80033620(StaC2Emitter* emitter);
 extern void* lbl_803CC1B8;
 extern void fn_80034CEC(StaC2Task* task);
 extern void fn_800B0A14_removeQueue(void);
+extern void fn_800ACF14(void* data);
+extern void* fn_800ACF34(u32 align, u32 size);
+extern void fn_800C07BC(void* base, void* tmp, s32 count, s32 size, s32 (*compare)(const void* a, const void* b));
+extern StaC2Task* fn_800B0A5C_insertQueue(void (*callback)(void), s32 priority);
+extern void fn_80034E20(StaC2Task* task, void* desc);
+extern u8 lbl_3_data_10D3C[0x160];
+extern StaC2ModelTable* ActorObjectInitTable(u16 count);
+extern void fn_800BDC88(StaC2ModelTable* table, u16 first, u16 last, void* model, void* anim, s32 arg5);
+extern void fn_800BD548(StaC2Model* model, s32 count, ...);
+extern void fn_80025DDC(void* anim);
+extern void fn_80025C58(void* anim, StaC2Model* model);
+extern void fn_80025FFC(void* anim, StaC2Anim* state);
+extern void fn_80035750(void* arg0, void* arg1, s32 arg2);
 extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_8004C094(Vec* pos);
 extern StaC2Emitter* fn_80033A24(BOOL (*update)(StaC2Emitter*), s32, s32, s32, s32, s32);
@@ -740,8 +785,77 @@ void fn_3_D5B6C(u32* n) {
 }
 
 // .text:0x000D55EC size:0x580 mapped:0x80714680
-void fn_3_D55EC(void) {
-    return;
+void fn_3_D55EC(Mtx view, StaC2ObjEntry* sort) {
+    s32 idx[3];
+    Vec pos;
+    StaC2ObjEntry entries[3];
+    StaC2Draw* tri;
+    StaC2Draw* draw;
+    void* tmp;
+    s32 n;
+    s32 m;
+    s32 i;
+
+    if (lbl_3_common_bss_350E4._6C) {
+        n = 0;
+        draw = &lbl_3_common_bss_350E4._00[lbl_3_common_bss_350E4._30 - 1];
+        i = lbl_3_common_bss_350E4._30 - 1;
+        do {
+            if (!draw->_90_7) {
+                sort[n]._00 = -512.0f;
+                sort[n]._04 = i;
+                n++;
+            }
+            draw--;
+        } while (i-- != 0);
+        draw = &lbl_3_common_bss_350E4._00[lbl_3_common_bss_350E4._30 - 1];
+        i = lbl_3_common_bss_350E4._30 - 1;
+        m = lbl_3_common_bss_350E4._30;
+        do {
+            if (draw->_90_7) {
+                if (draw->_90_5) {
+                    CTRLGetTranslation(&draw->control, &pos.x, &pos.y, &pos.z);
+                    PSMTXMultVec(view, &pos, &pos);
+                    m--;
+                    sort[m]._00 = pos.z;
+                    sort[m]._04 = i;
+                } else {
+                    sort[n]._00 = -512.0f;
+                    sort[n]._04 = i;
+                    n++;
+                }
+            }
+            draw--;
+        } while (i-- != 0);
+        tmp = fn_800ACF34(0x20, (lbl_3_common_bss_350E4._30 - m) * sizeof(StaC2ObjEntry));
+        fn_800C07BC(&sort[m], tmp, lbl_3_common_bss_350E4._30 - m, sizeof(StaC2ObjEntry), fn_3_D5470);
+        fn_800ACF14(tmp);
+        tmp = fn_800ACF34(0x20, (lbl_3_common_bss_350E4._30 - m) * sizeof(StaC2ObjEntry));
+        for (i = 0; i < lbl_3_bss_A027; i++) {
+            tri = &lbl_3_common_bss_350E4._00[lbl_3_bss_A026 + i];
+            if (tri->host->_D1 != 0) {
+                idx[0] = fn_3_D53C0(tri->id);
+                idx[1] = fn_3_D53C0(tri->host->_D2);
+                idx[2] = fn_3_D53C0(tri->follow->id2);
+                entries[0] = sort[idx[0]];
+                entries[1] = sort[idx[1]];
+                entries[2] = sort[idx[2]];
+                fn_800C07BC(idx, tmp, 3, sizeof(s32), fn_3_D5444);
+                sort[idx[0]] = entries[0];
+                sort[idx[1]] = entries[1];
+                sort[idx[2]] = entries[2];
+            }
+        }
+        fn_800ACF14(tmp);
+        fn_3_D5494(view);
+    } else {
+        draw = lbl_3_common_bss_350E4._00;
+        for (i = 0; i < lbl_3_common_bss_350E4._30; i++) {
+            CTRLGetTranslation(&draw->control, &pos.x, &pos.y, &pos.z);
+            sort[i]._00 = 1.0f;
+            sort[i]._04 = i;
+        }
+    }
 }
 
 // .text:0x000D5494 size:0x158 mapped:0x80714528
@@ -1704,7 +1818,7 @@ void fn_3_D141C(StaC2Draw* draw) {
     f32 angleZ;
 
     angleX = angleY = angleZ = 0.0f;
-    PSVECSubtract(&draw->to->_0C, &draw->from->_0C, &dir);
+    PSVECSubtract(draw->to->_0C, draw->from->_0C, &dir);
     horiz = vert = dir;
     horiz.x = sqrt(pow(horiz.z, 2.0) + pow(horiz.x, 2.0));
     horiz.z = 0.0f;
@@ -1753,7 +1867,7 @@ void fn_3_D1280(StaC2Draw* draw) {
         draw->control.type = 0;
     }
     fn_3_D141C(draw);
-    PSVECAdd(&draw->to->_0C, &draw->from->_0C, &mid);
+    PSVECAdd(draw->to->_0C, draw->from->_0C, &mid);
     PSVECScale(&mid, 0.5f, &mid);
     if (g_GameLogic.gameStatus == 2 && g_GameLogic.bOD_framesInLiveBallScene >= 0) {
         PSVECSubtract(&mid, &draw->_A0, &diff);
@@ -1774,7 +1888,7 @@ void fn_3_D1280(StaC2Draw* draw) {
 }
 
 // .text:0x000D127C size:0x4 mapped:0x80710310
-void fn_3_D127C(void) {
+void fn_3_D127C(StaC2Draw* draw) {
     return;
 }
 
@@ -2200,7 +2314,7 @@ void fn_3_CFA8C(StaC2Draw* draw) {
 }
 
 // .text:0x000CFA88 size:0x4 mapped:0x8070EB1C
-void fn_3_CFA88(void) {
+void fn_3_CFA88(StaC2Draw* draw) {
     return;
 }
 
@@ -2623,8 +2737,196 @@ void fn_3_CD958(void) {
 }
 
 // .text:0x000CCC24 size:0xD34 mapped:0x8070BCB8
-void fn_3_CCC24(void) {
-    return;
+// 98.25%: the target keeps the place pointer in r28 from the first instruction (one more
+// saved register, 112-byte frame); here it is rebuilt before its loop, shifting registers.
+void fn_3_CCC24(void** files, s32* indices) {
+    StaC2Draw* draw;
+    StaC2Draw* first;
+    StaC2Draw* head;
+    StaC2Place20* place;
+    u32 n;
+    u32 total;
+    u32 i;
+    u32 j;
+    u32 springModel;
+    u32 placeModel;
+    u32 count;
+    u8 end = FALSE;
+    u32 k;
+
+    for (n = 0; n < 10; n++) {
+        if (lbl_3_data_185D0[n].type == 13) {
+            break;
+        }
+    }
+    total = n + 5;
+    lbl_3_common_bss_350E4._6D = total;
+    lbl_8036E548._6C = ActorObjectInitTable(total);
+    j = 0;
+    fn_800BDC88(lbl_8036E548._6C, j, j, files[indices[1]], NULL, 0);
+    j++;
+    for (i = 0; i < 3; i++, j++) {
+        fn_800BDC88(lbl_8036E548._6C, j, j, files[indices[3]], NULL, 0);
+        fn_3_B97DC(&lbl_8036E548._6C->models[j], files[indices[3] + 2]);
+    }
+    springModel = j;
+    fn_800BDC88(lbl_8036E548._6C, j, j, files[indices[4]], NULL, 0);
+    j++;
+    placeModel = j;
+    for (i = 0; i < n; i++, j++) {
+        fn_800BDC88(lbl_8036E548._6C, j, j, files[indices[8]], NULL, 0);
+        fn_3_B97DC(&lbl_8036E548._6C->models[j], files[indices[8] + 2]);
+    }
+    for (i = 0; i < total; i++) {
+        fn_800BD548(&lbl_8036E548._6C->models[i], 4, lbl_3_common_bss_350E4._20, lbl_3_common_bss_350E4._24,
+                    lbl_3_common_bss_350E4._28, lbl_3_common_bss_350E4._2C);
+    }
+    if (files[indices[15]] != NULL && files[indices[17]] != NULL) {
+        fn_80025DDC(files[indices[15]]);
+        fn_80025C58(files[indices[15]], &lbl_8036E548._6C->models[0]);
+        lbl_3_bss_A764[0].file = files[indices[17]];
+        fn_80025FFC(files[indices[15]], &lbl_3_bss_A764[0]);
+        fn_80025EEC(&lbl_3_bss_A764[0], 0, 1);
+    }
+    fn_80035750(files[indices[25]], files[indices[24]], 5);
+    lbl_3_bss_A8A4 = fn_800B0A5C_insertQueue(fn_3_CE954, 2);
+    fn_80034E20(lbl_3_bss_A8A4, lbl_3_data_10D3C);
+    fn_3_D511C();
+
+    lbl_3_common_bss_350E4._30 = 67;
+    lbl_3_common_bss_350E4._00 = _OSAllocFromHeap(32, 67 * sizeof(StaC2Draw));
+    lbl_3_common_bss_350E4._04 = _OSAllocFromHeap(32, 67 * sizeof(StaC2Draw));
+    first = lbl_3_common_bss_350E4._00;
+    memset(first, 0, 10452);
+    lbl_3_bss_A02C = 0;
+    first->springs = lbl_3_bss_A8D0;
+    first->_74 = &lbl_8036E548._6C->models[0];
+    first->_78 = files[indices[13]];
+    first->_7C = fn_3_CBC18;
+    first->_80 = NULL;
+    first->_90_6 = 0;
+    first->_90_5 = 1;
+    first->_9C = 0;
+    first->_92 = 0xFF;
+    first->_84 = fn_3_CBA9C;
+    first->_8C = &lbl_3_bss_A764[0];
+    first->_94 = 0;
+    first->_96 = -1;
+    first->_98 = 1;
+    fn_3_CC5C4(first);
+    first->control.type = 0;
+    first->_CA = 0xFF;
+    lbl_3_bss_A02D++;
+    draw = first + 1;
+    count = 1;
+
+    for (i = 0; i < 3; i++) {
+        head = lbl_3_common_bss_350E4._00;
+        draw->type = 1;
+        draw->_74 = &lbl_8036E548._6C->models[i + 1];
+        draw->_78 = NULL;
+        draw->_7C = fn_3_D1848;
+        draw->_80 = NULL;
+        draw->_90_7 = 0;
+        draw->_90_6 = 0;
+        draw->speed = draw->_74->_54;
+        draw->_90_5 = 0;
+        draw->control.type = 0;
+        CTRLSetScale(&draw->control, 0.75f, 0.75f, 0.75f);
+        draw->_92 = 0xFF;
+        draw->_84 = fn_3_D173C;
+        draw->_8C = NULL;
+        draw->_94 = 0;
+        draw->_96 = -1;
+        draw->_98 = 1;
+        draw->trigger = &head->_CA;
+        draw->_9C = i;
+        draw->wait = i % 3 * 30;
+        draw->_AD = 0;
+        draw++;
+        count++;
+    }
+
+    for (i = 0; i < 3; i++) {
+        draw->from = &lbl_3_bss_A8D0[i];
+        draw->to = &lbl_3_bss_A8D0[i + 1];
+        draw->type = 2;
+        draw->_74 = &lbl_8036E548._6C->models[springModel];
+        draw->_78 = NULL;
+        draw->_7C = fn_3_D1280;
+        draw->_80 = NULL;
+        draw->_90_7 = 1;
+        draw->_90_6 = 0;
+        draw->_90_5 = 1;
+        draw->control.type = 0;
+        memset(&draw->_A0, 0, sizeof(Vec));
+        draw->_92 = 0xFF;
+        draw->_84 = fn_3_D127C;
+        draw->_8C = NULL;
+        draw->_94 = 0;
+        draw->_96 = -1;
+        draw->_98 = 1;
+        draw->_9C = i;
+        draw++;
+        count++;
+    }
+
+    place = lbl_3_data_185D0;
+    for (i = 0; i < 10; i++, place++) {
+        if (place->type == 13) {
+            end = TRUE;
+        }
+        if (end) {
+            for (k = i; k < 11; k++) {
+                lbl_3_data_185D0[k].type = 13;
+            }
+            break;
+        }
+        draw->type = place->type;
+        draw->phase = i * 30;
+        draw->_74 = &lbl_8036E548._6C->models[placeModel + i];
+        draw->_78 = NULL;
+        draw->_7C = fn_3_CFA8C;
+        draw->_80 = NULL;
+        draw->_90_7 = 1;
+        draw->_90_6 = draw->_90_7 && draw->_78 != NULL;
+        draw->control.type = 0;
+        CTRLSetScale(&draw->control, place->scale.x, place->scale.y, place->scale.z);
+        CTRLSetTranslation(&draw->control, place->pos.x, place->pos.y, place->pos.z);
+        CTRLSetRotation(&draw->control, 0.0f, -place->rotY, 0.0f);
+        draw->_90_5 = 0;
+        draw->_92 = 0xFF;
+        draw->_8C = NULL;
+        draw->_84 = fn_3_CFA88;
+        draw->_94 = 0;
+        draw->_96 = -1;
+        draw->_98 = 1;
+        end = FALSE;
+        draw++;
+        count++;
+    }
+
+    if (lbl_3_common_bss_350E4._30 > count) {
+    for (i = count; i < lbl_3_common_bss_350E4._30; i++, draw++) {
+        draw->type = 0xFF;
+        draw->_74 = NULL;
+        draw->_78 = NULL;
+        draw->_7C = NULL;
+        draw->_80 = NULL;
+        draw->_90_7 = 0;
+        draw->_90_6 = 0;
+        draw->_90_5 = 0;
+        draw->control.type = 0;
+        CTRLSetTranslation(&draw->control, 0.0f, 0.0f, 0.0f);
+        CTRLSetRotation(&draw->control, 0.0f, 0.0f, 0.0f);
+        draw->_92 = 0;
+        draw->_8C = NULL;
+        draw->_94 = 0;
+        draw->_96 = -1;
+    }
+    }
+    lbl_3_common_bss_350E4._48 = NULL;
+    fn_3_B97C8(fn_3_CD958);
 }
 
 // .text:0x000CC81C size:0x408 mapped:0x8070B8B0
