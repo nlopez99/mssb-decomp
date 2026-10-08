@@ -1433,7 +1433,7 @@ void fn_3_D2220(StaC2Draw* draw) {
 }
 
 // .text:0x000D1F2C size:0x2F4 mapped:0x80710FC0
-// 97.91%: callee-saved registers differ (the parameters against the step counter).
+// 98.99%: callee-saved registers differ (the parameters against the step counter).
 void fn_3_D1F2C(StaC2SpringParams* params, StaC2Spring* springs, s32 count, Vec* force, StaC2Draw* draw) {
     Vec accel;
     Vec scaled;
@@ -1444,12 +1444,12 @@ void fn_3_D1F2C(StaC2SpringParams* params, StaC2Spring* springs, s32 count, Vec*
     Vec tmp;
     Vec next;
     s32 step;
-    s32 i;
     StaC2Spring* s;
     f32 damp;
     f32 dt2;
     f32 pen;
     f32 dist;
+    s32 i;
 
     center = draw->_A0;
     center.y += 4.5;
