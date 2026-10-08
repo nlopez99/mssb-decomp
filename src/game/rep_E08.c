@@ -16,7 +16,9 @@ typedef struct UnkE08Fielder {
     /* 0x048 */ f32 _048;
     /* 0x04C */ u8 _04C[0x50 - 0x4C];
     /* 0x050 */ f32 _050;
-    /* 0x054 */ u8 _054[0xA8 - 0x54];
+    /* 0x054 */ u8 _054[0x58 - 0x54];
+    /* 0x058 */ f32 _058;
+    /* 0x05C */ u8 _05C[0xA8 - 0x5C];
     /* 0x0A8 */ f32 _0A8;
     /* 0x0AC */ u8 _0AC[0xB8 - 0xAC];
     /* 0x0B8 */ f32 _0B8;
@@ -49,11 +51,18 @@ typedef struct UnkE08Fielder {
     /* 0x1D6 */ u8 _1D6;
     /* 0x1D7 */ u8 _1D7[0x1E5 - 0x1D7];
     /* 0x1E5 */ u8 _1E5;
-    /* 0x1E6 */ u8 _1E6[0x1EE - 0x1E6];
+    /* 0x1E6 */ u8 _1E6[0x1EC - 0x1E6];
+    /* 0x1EC */ u8 _1EC;
+    /* 0x1ED */ u8 _1ED;
     /* 0x1EE */ u8 _1EE;
-    /* 0x1EF */ u8 _1EF[0x1FB - 0x1EF];
+    /* 0x1EF */ u8 _1EF[0x1F9 - 0x1EF];
+    /* 0x1F9 */ u8 _1F9;
+    /* 0x1FA */ u8 _1FA;
     /* 0x1FB */ u8 _1FB;
-    /* 0x1FC */ u8 _1FC[0x200 - 0x1FC];
+    /* 0x1FC */ u8 _1FC;
+    /* 0x1FD */ u8 _1FD;
+    /* 0x1FE */ u8 _1FE;
+    /* 0x1FF */ u8 _1FF;
     /* 0x200 */ u8 _200;
     /* 0x201 */ u8 _201[0x203 - 0x201];
     /* 0x203 */ u8 _203;
@@ -83,7 +92,9 @@ typedef struct UnkE08Fielder {
     /* 0x256 */ u8 _256;
     /* 0x257 */ u8 _257;
     /* 0x258 */ u8 _258;
-    /* 0x259 */ u8 _259[0x25C - 0x259];
+    /* 0x259 */ u8 _259;
+    /* 0x25A */ u8 _25A;
+    /* 0x25B */ u8 _25B;
     /* 0x25C */ u8 _25C;
     /* 0x25D */ u8 _25D;
     /* 0x25E */ u8 _25E;
@@ -97,11 +108,13 @@ typedef struct UnkE08Anim {
     /* 0x00 */ f32 _00;
     /* 0x04 */ u8 _04[0x10 - 0x4];
     /* 0x10 */ VecXYZ _10;
-    /* 0x1C */ u8 _1C[0x2C - 0x1C];
+    /* 0x1C */ VecXYZ _1C;
+    /* 0x28 */ u8 _28[0x2C - 0x28];
     /* 0x2C */ VecXYZ _2C;
     /* 0x38 */ s16 _38;
     /* 0x3A */ s16 _3A;
-    /* 0x3C */ u8 _3C[0x40 - 0x3C];
+    /* 0x3C */ s16 _3C;
+    /* 0x3E */ s16 _3E;
     /* 0x40 */ u8 _40;
     /* 0x41 */ u8 _41;
     /* 0x42 */ u8 _42;
@@ -125,20 +138,27 @@ typedef struct UnkE08Anim {
 typedef struct UnkE08Actor {
     /* 0x00 */ u8 _00[0x34];
     /* 0x34 */ VecXYZ _34;
-    /* 0x40 */ u8 _40[0x62 - 0x40];
+    /* 0x40 */ u8 _40[0x4C - 0x40];
+    /* 0x4C */ f32 _4C;
+    /* 0x50 */ u8 _50[0x62 - 0x50];
     /* 0x62 */ s16 _62;
     /* 0x64 */ u8 _64[0x68 - 0x64];
     /* 0x68 */ s16 _68;
     /* 0x6A */ s16 _6A;
-    /* 0x6C */ u8 _6C[0x252 - 0x6C];
+    /* 0x6C */ u8 _6C[0x16A - 0x6C];
+    /* 0x16A */ u16 _16A;
+    /* 0x16C */ u8 _16C[0x252 - 0x16C];
     /* 0x252 */ s8 _252;
-    /* 0x253 */ u8 _253[0x25E - 0x253];
+    /* 0x253 */ u8 _253[0x25D - 0x253];
+    /* 0x25D */ u8 _25D;
     /* 0x25E */ u8 _25E;
     /* 0x25F */ u8 _25F[0x26F - 0x25F];
     /* 0x26F */ u8 _26F;
-    /* 0x270 */ u8 _270[0x274 - 0x270];
+    /* 0x270 */ s16 _270;
+    /* 0x272 */ u8 _272[0x274 - 0x272];
     /* 0x274 */ u8 _274;
-} UnkE08Actor;
+    /* 0x275 */ u8 _275[0x27C - 0x275];
+} UnkE08Actor; // size: 0x27C
 
 typedef struct UnkE08Track {
     /* 0x00 */ s32 _00;
@@ -161,16 +181,21 @@ typedef struct UnkE08Tracks {
 extern struct {
     /* 0x0000 */ u8 _0000[0x60];
     /* 0x0060 */ UnkE08Tracks* _0060;
-    /* 0x0064 */ u8 _0064[0x2C50 - 0x64];
-    /* 0x2C50 */ UnkE08Actor* _2C50[10];
+    /* 0x0064 */ u8 _0064[0xC04 - 0x64];
+    /* 0x0C04 */ UnkE08Actor _0C04[13];
+    /* 0x2C50 */ UnkE08Actor* _2C50[13];
+    /* 0x2C84 */ u8 _2C84[0x307D - 0x2C84];
+    /* 0x307D */ u8 _307D;
 } lbl_8036E548;
 
 extern struct {
-    /* 0x0 */ u8 _0[0x4];
+    /* 0x0 */ u8 _0[0x2];
+    /* 0x2 */ s16 _2;
     /* 0x4 */ s16 _4;
-    /* 0x6 */ u8 _6[0x8 - 0x6];
+    /* 0x6 */ s16 _6;
     /* 0x8 */ u8 _8;
-    /* 0x9 */ u8 _9[0xB - 0x9];
+    /* 0x9 */ u8 _9;
+    /* 0xA */ u8 _A;
     /* 0xB */ u8 _B;
 } lbl_3_common_bss_32220;
 
@@ -216,6 +241,9 @@ extern UnkE08Fielder g_Fielders[9];
 extern UnkE08Anim g_UnkAnimation_31EAC[9];
 
 void fn_8001B4D8(int actor);
+s16 fn_8001B35C(int actor, int which);
+void** fn_800111D8(UnkE08Actor* actor);
+f32 fn_800B4A44(void* model, u16 anim);
 void fn_8004AE18(s32 fielder);
 void fn_8001B5EC(int actor, int flag);
 void QueueCharacterAnimation(int actor, int anim, u8, u8, s16, u8, int);
@@ -251,6 +279,14 @@ u16 lbl_3_data_6660[87][2] = {
     { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x101, 0x0 },
 };
 
+// The animation an actor plays, or 0xFFFF without an actor
+static inline int getActorAnim(UnkE08Actor* actor) {
+    if (actor != NULL) {
+        return actor->_16A;
+    }
+    return 0xFFFF;
+}
+
 // The minigame player slot whose fielder is `fielder`, or 4 when none is
 static inline s32 findMinigameSlot(s32 fielder) {
     s32 slot;
@@ -276,8 +312,192 @@ void fn_3_67130(void) {
 }
 
 // .text:0x000668BC size:0x874 mapped:0x806A5950
+// 99.53%: the target copies the actor pointer into a saved register right after its NULL
+// test (mr r26,r4) and reads it through both; registers differ in that first loop.
 void fn_3_668BC(void) {
-    return;
+    s32 i;
+    s32 slot;
+    s32 player;
+    UnkE08Actor* actor;
+    UnkE08Fielder* fielder;
+    UnkE08Anim* anim;
+    f32 length;
+    int animIndex;
+    s16 state;
+
+    if (g_GameLogic.gameStatus == 3 || g_GameLogic.gameStatus == 5) {
+        return;
+    }
+    for (i = 0; i < 13; i++) {
+        lbl_8036E548._0C04[i]._274 = 0;
+    }
+    if (g_d_GameSettings.minigamesEnabled) {
+        if (g_GameLogic.gameStatus >= 0x1B && g_GameLogic.gameStatus <= 0x21) {
+            return;
+        }
+        if (g_GameLogic.gameStatus == 5) {
+            return;
+        }
+    }
+    for (i = 0; i < 13; i++) {
+        if (lbl_8036E548._2C50[i] != NULL && lbl_8036E548._2C50[i]->_25D != 0) {
+            actor = lbl_8036E548._2C50[i];
+            length = 1.0f;
+            animIndex = getActorAnim(actor);
+            if (animIndex != 0xFFFF) {
+                length = fn_800B4A44(*fn_800111D8(actor), animIndex);
+            }
+            actor->_68 = length / actor->_4C;
+        }
+    }
+    if (g_Stats.replayInd != 0 && g_Stats.playFrameCounter == 1 && lbl_8036E548._2C50[9] != NULL && g_Stats._34 != 0) {
+        lbl_8036E548._2C50[9]->_68 = g_Stats._34 - 1;
+        lbl_8036E548._2C50[9]->_270 = g_Stats._34 - 1;
+    }
+    for (i = 0; i < 9; i++) {
+        fielder = &g_Fielders[i];
+        anim = &g_UnkAnimation_31EAC[i];
+        player = i;
+        actor = lbl_8036E548._2C50[i];
+        anim->_1C.x = anim->_10.x;
+        fielder->_20A = 0;
+        anim->_1C.y = anim->_10.y;
+        anim->_1C.z = anim->_10.z;
+        if (g_d_GameSettings.minigamesEnabled) {
+            slot = findMinigameSlot(i);
+            if (slot >= 4) {
+                continue;
+            }
+            player = g_Minigame.minigameControlStruct.characterIndex[slot];
+            actor = lbl_8036E548._2C50[slot];
+        }
+        if (anim->_50 != 0) {
+            fielder->_1EC = 1;
+        } else {
+            fielder->_1EC = 0;
+        }
+        if (anim->_4F != 0 && fielder->_24C <= 1) {
+            fielder->_1ED = 1;
+        } else {
+            fielder->_1ED = 0;
+        }
+        if (actor != NULL) {
+            if (anim->_42 != 0) {
+                getAnimRelatedCoordinates(player, 4, &anim->_2C);
+                fielder->_030 = anim->_2C.x - fielder->_000.x;
+                fielder->_034 = anim->_2C.z - fielder->_000.z;
+                fielder->_050 = dolsqrtf2(fielder->_030 * fielder->_030 + fielder->_034 * fielder->_034);
+                fielder->_000.x = anim->_2C.x;
+                fielder->_000.z = anim->_2C.z;
+                fielder->_1FB = 1;
+                fn_3_60A98(i, actor);
+            } else {
+                fielder->_1FB = 0;
+                if (fielder->_050 > fielder->_058) {
+                    fielder->_050 = fielder->_058;
+                }
+            }
+        }
+        fielder->_1F9 = anim->_43;
+        fielder->_25A = 0;
+        if (anim->_4F != 0 && anim->_4D != 0) {
+            switch (anim->_4D) {
+            case 1:
+            case 2:
+                fielder->_25A = 1;
+                break;
+            case 3:
+                fielder->_25A = 2;
+                break;
+            }
+        }
+        if (anim->_44 != 0) {
+            fielder->_1FD = 1;
+            if (fielder->_1AA < 0x7FFE) {
+                fielder->_1AA++;
+            } else {
+                fielder->_1AA = 0x7FFF;
+            }
+        } else {
+            fielder->_1FD = 0;
+            fielder->_1AA = 0;
+        }
+        if (actor != NULL && actor->_62 == 0xF) {
+            fielder->_1FE = 1;
+        } else {
+            fielder->_1FE = 0;
+        }
+        anim->_3C = fn_8001B35C(player, 1);
+        anim->_3E = fn_8001B35C(player, 0);
+    }
+    if (g_FieldingLogic._117 != 0) {
+        player = 0;
+        actor = lbl_8036E548._2C50[0];
+        if (g_d_GameSettings.minigamesEnabled) {
+            player = g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder];
+            actor = lbl_8036E548._2C50[player];
+        }
+        getAnimRelatedCoordinates(player, 4, &g_UnkAnimation_31EAC[0]._2C);
+        g_Pitcher.pitcherCoord.x = g_UnkAnimation_31EAC[0]._2C.x;
+        g_Pitcher.pitcherCoord.z = g_UnkAnimation_31EAC[0]._2C.z;
+        if (actor != NULL) {
+            state = actor->_62;
+            if (state == 0x40 || state == 0x42 || (state == 0x41 && actor->_68 < 30) ||
+                (state == 0x43 && actor->_68 < 30)) {
+                g_Pitcher.pitchDeliveryAnimationPlaying = 1;
+            } else {
+                g_Pitcher.pitchDeliveryAnimationPlaying = 0;
+            }
+        } else {
+            g_Pitcher.pitchDeliveryAnimationPlaying = 0;
+        }
+    }
+    if (lbl_8036E548._307D == 0) {
+        actor = lbl_8036E548._2C50[9];
+        if (g_d_GameSettings.minigamesEnabled) {
+            actor = &lbl_8036E548._0C04[g_Minigame.minigameControlStruct.characterIndex[g_Minigame.rosterID]];
+        }
+        if (lbl_3_common_bss_32220._8 == 0) {
+            if (actor != NULL && (actor->_62 == 0x4B || actor->_62 == 0x66)) {
+                g_Batter.noSwingAnimationInd = 1;
+            } else {
+                g_Batter.noSwingAnimationInd = 0;
+            }
+        }
+        if (actor != NULL) {
+            if (actor->_62 == 0x67) {
+                g_Batter.beginningOfABAnimationOccuring = 1;
+            } else {
+                g_Batter.beginningOfABAnimationOccuring = 0;
+            }
+            if (g_GameLogic.gameStatus == 1 || g_GameLogic.gameStatus == 2) {
+                if (actor->_62 == 0x4D) {
+                    lbl_3_common_bss_32220._A = 1;
+                    lbl_3_common_bss_32220._2++;
+                } else if (actor->_62 == 0x53) {
+                    lbl_3_common_bss_32220._A = 2;
+                    lbl_3_common_bss_32220._2++;
+                } else if (actor->_62 == 0x50) {
+                    lbl_3_common_bss_32220._A = 3;
+                    lbl_3_common_bss_32220._2++;
+                } else if (actor->_62 == 0x54) {
+                    lbl_3_common_bss_32220._A = 4;
+                    lbl_3_common_bss_32220._2++;
+                } else if (lbl_3_common_bss_32220._A != 0) {
+                    if (lbl_3_common_bss_32220._A == 9) {
+                        lbl_3_common_bss_32220._A = 0;
+                    } else {
+                        lbl_3_common_bss_32220._A = 9;
+                        lbl_3_common_bss_32220._2 = 0;
+                    }
+                }
+            }
+            state = actor->_62;
+            if (state == 0x5E || state == 0x62 || state == 0x5F || state == 0x60 || state == 0x61) {
+                lbl_3_common_bss_32220._6 = actor->_68;
+            }
+        }
+    }
 }
 
 // .text:0x000664FC size:0x3C0 mapped:0x806A5590

@@ -2776,7 +2776,7 @@ typedef struct {
     /* 0x0028 */ s16 _28;
     artificial_padding(0x28, 0x32, s16);
     /* 0x0032 */ s16 _32;
-    artificial_padding(0x32, 0x36, s16);
+    /* 0x0034 */ s16 _34;
     /* 0x0036 */ u8 replayInd;
     /* 0x0037 */ u8 _37;
     /* 0x0038 */ u8 _38;
