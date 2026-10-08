@@ -28,7 +28,7 @@ BOOL fn_3_CD968(Vec* pos, f32 width, f32 height);
 void fn_3_CDB48(struct StaC2Particle* p, struct StaC2Spawner* spawner);
 void fn_3_CDD90(struct StaC2Particle* p);
 void fn_3_CDFA4(void);
-void fn_3_CE56C(void);
+void fn_3_CE56C(struct StaC2Spawner* spawner, u8 idx);
 void fn_3_CE8E4(void);
 void fn_3_CE954(void);
 void fn_3_CEBBC(Vec* pos, s32 i);

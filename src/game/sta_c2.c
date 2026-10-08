@@ -327,8 +327,13 @@ typedef struct StaC2SpringParams {
 } StaC2SpringParams; // size: 0x28
 
 typedef struct StaC2Spawner {
-    /* 0x00 */ u8 _00[0x18];
+    /* 0x00 */ u8 _00[0x0C];
+    /* 0x0C */ StaC2Particle* particles;
+    /* 0x10 */ void* _10;
+    /* 0x14 */ u8 _14[0x18 - 0x14];
     /* 0x18 */ Vec pos;
+    /* 0x24 */ u8 idx;
+    /* 0x25 */ u8 _25;
 } StaC2Spawner;
 
 typedef struct StaC2Rec5C {
@@ -451,7 +456,7 @@ extern void AnimateActorBones(StaC2Actor* actor);
 extern void fn_800B4CA0(StaC2Actor* actor, f32 frame);
 
 // MWCC lays out .bss statics in reverse order of declaration
-static u8 lbl_3_bss_ADD0[0x30];
+static void* lbl_3_bss_ADD0[12];
 static StaC2Spring lbl_3_bss_ABD0[8];
 static StaC2Spring lbl_3_bss_A9D0[8];
 static StaC2Spring lbl_3_bss_A8D0[4];
@@ -1773,8 +1778,35 @@ void fn_3_CE8E4(void) {
 }
 
 // .text:0x000CE56C size:0x378 mapped:0x8070D600
-void fn_3_CE56C(void) {
-    return;
+void fn_3_CE56C(StaC2Spawner* spawner, u8 idx) {
+    StaC2Particle* p = spawner->particles;
+    s32 i;
+    f32 angle;
+
+    spawner->_10 = lbl_3_bss_ADD0[0];
+    spawner->pos = lbl_3_rodata_24A0[idx];
+    spawner->idx = idx;
+    spawner->_25 = 1;
+    for (i = 0; p != NULL; i++, p = p->next) {
+        angle = 0.017453292f * (rand() % 360);
+        p->vel.x = 0.01 * cosf_kludge(angle);
+        p->vel.z = 0.01 * sinf_kludge(angle);
+        p->vel.y = 0.12f;
+        p->delay = i * 4;
+        p->grow = 0.5f;
+        p->grow += (u32)rand() % 2500 / 1000.0;
+        p->_38 = 2.0 * p->grow;
+        p->_3C = 6.0 * p->grow;
+        p->growScale = rand() % 101 / 100.0;
+        p->pos.x = spawner->pos.x;
+        p->pos.y = spawner->pos.y;
+        p->pos.z = spawner->pos.z;
+        p->color[3] = p->alpha = 255.0f;
+        p->duration = p->life = rand() % 24 + 72;
+        p->_4D = 21;
+        p->_4E = 0;
+        p->_4C = i;
+    }
 }
 
 // .text:0x000CDFA4 size:0x5C8 mapped:0x8070D038
