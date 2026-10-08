@@ -14,6 +14,7 @@
 #include "game/rep_1D58.h"
 #include "game/rep_AC8.h"
 #include "game/rep_540.h"
+#include "game/m_sound.h"
 
 typedef struct {
     /* 0x00 */ u8 _00[0x60];
@@ -49,7 +50,9 @@ typedef struct StaC5Draw {
     /* 0x90 */ u8 _90_6 : 1;
     /* 0x90 */ u8 _90_5 : 1;
     /* 0x90 */ u8 _90_0 : 5;
-    /* 0x91 */ u8 _91[0x9C - 0x91];
+    /* 0x91 */ u8 _91[0x99 - 0x91];
+    /* 0x99 */ u8 _99;
+    /* 0x9A */ u8 _9A[0x9C - 0x9A];
     /* 0x9C */ u8 _9C;
     /* 0x9D */ u8 _9D;
     /* 0x9E */ u8 _9E[0xA0 - 0x9E];
@@ -59,7 +62,9 @@ typedef struct StaC5Draw {
     /* 0xB4 */ f32 _B4;
     /* 0xB8 */ u8 _B8[0xC1 - 0xB8];
     /* 0xC1 */ u8 _C1;
-    /* 0xC2 */ u8 _C2[0xC6 - 0xC2];
+    /* 0xC2 */ u8 _C2[0xC4 - 0xC2];
+    /* 0xC4 */ u8 _C4;
+    /* 0xC5 */ u8 _C5;
     /* 0xC6 */ u8 _C6;
     /* 0xC7 */ u8 _C7;
     /* 0xC8 */ u8 _C8[0xE8 - 0xC8];
@@ -105,7 +110,12 @@ extern struct {
     /* 0x20 */ u8 _20[0x30 - 0x20];
     /* 0x30 */ u32 _30;
     /* 0x34 */ void* _34;
-    /* 0x38 */ u8 _38[0x64 - 0x38];
+    /* 0x38 */ u8 _38[0x3C - 0x38];
+    /* 0x3C */ u32* _3C;
+    /* 0x40 */ u16* _40;
+    /* 0x44 */ u32* _44;
+    /* 0x48 */ Vec* _48;
+    /* 0x4C */ u8 _4C[0x64 - 0x4C];
     /* 0x64 */ u16 _64;
     /* 0x66 */ u8 _66[0x6D - 0x66];
     /* 0x6D */ u8 _6D;
@@ -193,7 +203,7 @@ static Vec lbl_3_data_1BA7C = { 0.0f, 0.0f, 0.0f };
 static s32 lbl_3_bss_B560[4];
 static s32 lbl_3_bss_B55C;
 static f32 lbl_3_bss_B260[0xBF];
-static s32 lbl_3_bss_B244[7];
+static u32 lbl_3_bss_B244[7];
 static u8 lbl_3_bss_B220[0x24];
 static u8 lbl_3_bss_B21F;
 static u8 lbl_3_bss_B21E;
@@ -210,16 +220,17 @@ static void* lbl_3_bss_B154[2];
 static s32 lbl_3_bss_B118[0xF];
 static u8 lbl_3_bss_AF18[0x200];
 static f32 lbl_3_bss_AF04[5];
-static struct {
-    /* 0x00 */ u8 _00;
-    /* 0x04 */ f32 _04;
-    /* 0x08 */ u8 _08[0x0C - 0x08];
-    /* 0x0C */ void* _0C;
-    /* 0x10 */ void* _10;
-    /* 0x14 */ void* _14;
-    /* 0x18 */ f32 _18;
-} lbl_3_bss_AEE8;
-static u8 lbl_3_bss_AEE0[8];
+static f32 lbl_3_bss_AF00;
+static s32 lbl_3_bss_AEFC;
+static s32 lbl_3_bss_AEF8;
+static void* lbl_3_bss_AEF4;
+static s32 lbl_3_bss_AEF0;
+static f32 lbl_3_bss_AEEC;
+static u8 lbl_3_bss_AEE8;
+static s32 lbl_3_bss_AEE4;
+static u8 lbl_3_bss_AEE2;
+static u8 lbl_3_bss_AEE1;
+static u8 lbl_3_bss_AEE0;
 
 // .text:0x000F6FDC size:0x1468 mapped:0x80736070
 void fn_3_F6FDC(void) {
@@ -228,7 +239,7 @@ void fn_3_F6FDC(void) {
 
 // .text:0x000F6FCC size:0x10 mapped:0x80736060
 void fn_3_F6FCC(void) {
-    lbl_3_bss_AEE8._00 = 1;
+    lbl_3_bss_AEE8 = 1;
 }
 
 // .text:0x000F6C60 size:0x36C mapped:0x80735CF4
@@ -252,8 +263,23 @@ void fn_3_F66C8(void) {
 }
 
 // .text:0x000F65C8 size:0x100 mapped:0x8073565C
-void fn_3_F65C8(void) {
-    return;
+void fn_3_F65C8(s32* n) {
+    Mtx m;
+    Control control;
+    StaC5Draw* draw;
+    struct StadiumObjectCollision* collision;
+    u16 start;
+
+    draw = &lbl_3_common_bss_350E4._00[lbl_3_bss_B21A];
+    start = lbl_3_common_bss_350E4._40[*n] = lbl_3_common_bss_350E4._40[*n - 1] + lbl_3_common_bss_350E4._3C[*n - 1];
+    lbl_3_common_bss_350E4._44[start] = lbl_3_bss_B21A;
+    lbl_3_common_bss_350E4._3C[*n]++;
+    collision = draw->_78;
+    control.type = 0;
+    CTRLBuildMatrix(&control, m);
+    fn_3_B8464(m, collision);
+    fn_3_B8414(&lbl_3_common_bss_350E4._48[*n * 2], &lbl_3_common_bss_350E4._48[*n * 2 + 1]);
+    (*n)++;
 }
 
 // .text:0x000F6504 size:0xC4 mapped:0x80735598
@@ -284,8 +310,30 @@ void fn_3_F6084(void) {
 }
 
 // .text:0x000F5F4C size:0x138 mapped:0x80734FE0
-void fn_3_F5F4C(void) {
-    return;
+void fn_3_F5F4C(MtxPtr mtx) {
+    Vec pos;
+    u32 i;
+    StaC5Draw* draw;
+    StadiumSort1D58* sort;
+    f32 near;
+
+    memcpy(&pos, &g_Ball.AtBat_Contact_BallPos, sizeof(Vec));
+    PSMTXMultVec(mtx, &pos, &pos);
+    for (i = 0; i < lbl_3_common_bss_350E4._30; i++) {
+        sort = &lbl_3_common_bss_350E4._14[i];
+        draw = &lbl_3_common_bss_350E4._00[sort->index];
+        if (draw->_90_7) {
+            if (draw->_9D == 1) {
+                sort->depth = 1.0f;
+            } else if (sort->depth < (near = 2.0f + pos.z)) {
+                sort->depth = 1.0f;
+            } else if (sort->depth > 10.0f + pos.z) {
+                sort->depth = 0.25f;
+            } else {
+                sort->depth = 1.0 - 0.75f * ((sort->depth - near) / 8);
+            }
+        }
+    }
 }
 
 // .text:0x000F5F28 size:0x24 mapped:0x80734FBC
@@ -419,8 +467,13 @@ void fn_3_F3CD0(void) {
 }
 
 // .text:0x000F3BB0 size:0x120 mapped:0x80732C44
-void fn_3_F3BB0(void) {
-    return;
+void fn_3_F3BB0(StaC5Draw* draw) {
+    fn_3_F3AE0(draw);
+    draw->_C1 = 0;
+    draw->_90_7 = 1;
+    draw->_74 = &lbl_8036E548._6C->models[lbl_3_bss_B219 + draw->_9C];
+    draw->_C4 = 0;
+    draw->_99 = 1;
 }
 
 // .text:0x000F3AE0 size:0xD0 mapped:0x80732B74
@@ -452,12 +505,22 @@ void fn_3_F3A04(StaC5Draw* draw) {
 
 // .text:0x000F38D4 size:0x130 mapped:0x80732968
 void fn_3_F38D4(void) {
-    return;
+    u32 i;
+
+    for (i = 0; i < 7; i++) {
+        lbl_3_bss_B244[i] = fn_3_F37BC(6, i);
+    }
 }
 
 // .text:0x000F37BC size:0x118 mapped:0x80732850
-void fn_3_F37BC(void) {
-    return;
+u32 fn_3_F37BC(u32 n, u32 k) {
+    u32 result = 1;
+    u32 i;
+
+    for (i = 1; i <= k; i++) {
+        result = result * (n - i + 1) / i;
+    }
+    return result;
 }
 
 // .text:0x000F31E0 size:0x5DC mapped:0x80732274
@@ -725,5 +788,23 @@ s32 fn_3_EE0BC(u32 flags) {
 
 // .text:0x000EDFAC size:0x110 mapped:0x8072D040
 void fn_3_EDFAC(void) {
-    return;
+    if (g_GameLogic.gameStatus == GAME_STATUS_MINIGAME_READY) {
+        return;
+    }
+    if (g_GameLogic.gameStatus == GAME_STATUS_PAUSED) {
+        if (!lbl_3_bss_B15C) {
+            fn_3_8B890(lbl_3_bss_AEFC);
+            fn_3_8B890(lbl_3_bss_AEF8);
+            lbl_3_bss_B15C = 1;
+        }
+        return;
+    }
+    if (lbl_3_bss_B15C) {
+        lbl_3_bss_AEFC = fn_3_8BBC4(lbl_3_data_81DC[g_d_GameSettings.StadiumID] + 6, NULL, NULL, 4);
+        lbl_3_bss_AEF8 = fn_3_8BBC4(lbl_3_data_81DC[g_d_GameSettings.StadiumID] + 7, NULL, NULL, 5);
+        lbl_3_bss_B15C = 0;
+    } else {
+        fn_3_8BA60(lbl_3_bss_AEFC, NULL, NULL);
+        fn_3_8BA60(lbl_3_bss_AEF8, NULL, NULL);
+    }
 }
