@@ -857,6 +857,8 @@ void fn_3_119F6C(void) {
 }
 
 // .text:0x00119EE0 size:0x8C mapped:0x80758F74
+// 82.09%: the target loads the model through `addi r0,table,0x34; lwzx` (table plus the
+// member offset, indexed by i * 0x90); every spelling tried folds it into `lwz 0x34(table + i * 0x90)`.
 void fn_3_119EE0(s32 i) {
     UnkAnimCtrl3310* ctrl = lbl_8036E548._0068->_34[i]._00->_18[0]->_14->_08;
 
@@ -866,6 +868,8 @@ void fn_3_119EE0(s32 i) {
 }
 
 // .text:0x00119E30 size:0xB0 mapped:0x80758EC4
+// 92.61%: the target loads the model through `addi r0,table,0x34; lwzx` (table plus the
+// member offset, indexed by i * 0x90); every spelling tried folds it into `lwz 0x34(table + i * 0x90)`.
 void fn_3_119E30(s32 i) {
     UnkAnimCtrl3310* ctrl;
 
@@ -912,6 +916,8 @@ void fn_3_119C34(void) {
 }
 
 // .text:0x00119934 size:0x300 mapped:0x807589C8
+// 99.92%: written `0.0f > dir.z`, which rounds acos's result early as the target does, but
+// the compare then takes its operands the other way round (fcmpo 0,z; ble against z,0; bge).
 void fn_3_119934(void) {
     UnkObj3310* obj;
     s32 i;
@@ -1006,8 +1012,8 @@ f32 fn_3_119854(u8 index) {
 }
 
 // .text:0x001194FC size:0x358 mapped:0x80758590
-// 95.03%: as in fn_3_119934, frsp after acos is scheduled late; the target also keeps
-// &lbl_3_data_22660 in its own register (r25) and i in r22.
+// 96.95%: as in fn_3_119934, the acos compare takes its operands the other way round; the
+// target also keeps &lbl_3_data_22660 in its own register (r25) and i in r22.
 void fn_3_1194FC(void) {
     Vec dir;
     Vec fwd = { 0.0f, 0.0f, 1.0f };
@@ -1092,6 +1098,8 @@ void fn_3_1194FC(void) {
 }
 
 // .text:0x001194AC size:0x50 mapped:0x80758540
+// 68.00%: the target loads the model through `addi r0,table,0x34; lwzx` (table plus the
+// member offset, indexed by i * 0x90); every spelling tried folds it into `lwz 0x34(table + i * 0x90)`.
 void fn_3_1194AC(s32 i) {
     lbl_8036E548._0068->_34[i]._00->_18[0]->_14->_08->_0C->_20 = lbl_3_data_2265C[MG._1AFF[i]];
 }
@@ -1226,6 +1234,8 @@ void fn_3_1189C8(s32 i, s32 anim, s32 frame, s32 duration, u8 loop) {
 }
 
 // .text:0x0011897C size:0x4C mapped:0x80757A10
+// 65.74%: the target loads the model through `addi r0,table,0x34; lwzx` (table plus the
+// member offset, indexed by i * 0x90); every spelling tried folds it into `lwz 0x34(table + i * 0x90)`.
 void fn_3_11897C(s32 i) {
     lbl_8036E548._0068->_34[i]._00->_14->_08->_0C->_20 = lbl_3_data_22670[MG._0000[i - 0x82]._2C];
 }
@@ -1258,6 +1268,8 @@ void fn_3_11887C(void) {
 }
 
 // .text:0x0011881C size:0x60 mapped:0x807578B0
+// 69.96%: the target loads the model through `addi r0,table,0x34; lwzx` (table plus the
+// member offset, indexed by i * 0x90); every spelling tried folds it into `lwz 0x34(table + i * 0x90)`.
 void fn_3_11881C(s32 i) {
     u8 v;
     if (i - 0xE9 < 4) {
@@ -1447,6 +1459,8 @@ void fn_3_117FC8(void) {
 }
 
 // .text:0x00117B78 size:0x450 mapped:0x80756C0C
+// 89.42%: the uv table and object pointer get other registers, and the rotation loop
+// orders its sin/cos calls and products differently.
 void fn_3_117B78(s32 i) {
     UnkObj3310* obj = &lbl_8036E548._2D94[i];
     u32 j;
@@ -1552,6 +1566,7 @@ void fn_3_1179EC(void) {
 }
 
 // .text:0x00117588 size:0x464 mapped:0x8075661C
+// 97.60%: the quad corners and the scale terms are computed in another order and FPRs differ.
 void fn_3_117588(s32 i) {
     GXColor color;
     f32 uv[4][2] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
