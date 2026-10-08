@@ -240,12 +240,92 @@ void fn_3_B116C(void) {
 
 // .text:0x000B1120 size:0x4C mapped:0x806F01B4
 void fn_3_B1120(void) {
-    return;
+    if (g_Practice.instructionNumber >= 0 || !fn_3_B32B8()) {
+        ballPhysica();
+        fn_3_598D0();
+        fn_3_8A958();
+        fn_3_B0E00();
+    }
 }
 
 // .text:0x000B0E00 size:0x320 mapped:0x806EFE94
 void fn_3_B0E00(void) {
-    return;
+    s16 endFrame = 7;
+
+    if (g_Practice.instructionNumber >= 0) {
+        if (g_Practice.allowPlayToEndIndicator != 0) {
+            endFrame = 60;
+        } else {
+            g_FieldingLogic._0AE = 0;
+            return;
+        }
+    } else if (g_Practice._1E4 != 2) {
+        if (g_Practice.practiceLevel == 0) {
+            if (g_Ball.numThrowsDuringPlay != 0) {
+                endFrame = lbl_3_data_FBF8[1];
+                if (g_Practice._1E4 == 0) {
+                    g_Practice._1E4 = 1;
+                    g_Practice.guidedPracticeCounter++;
+                }
+            }
+        } else if (g_Practice.practiceLevel == 1) {
+            if (g_Strikes.outs != 0 || g_Practice._1E4 == 1) {
+                endFrame = lbl_3_data_FBF8[2];
+                if (g_Practice._1E4 == 0) {
+                    g_Practice._1E4 = 1;
+                    g_Practice.guidedPracticeCounter++;
+                }
+            }
+            if (g_Runners[0].currentBase >= 1 && g_Ball.AtBat_ContactResult != 0) {
+                endFrame = lbl_3_data_FBF8[2];
+                if (g_Practice._1E4 == 0) {
+                    g_Practice._1E4 = 1;
+                }
+            }
+        } else if (g_Practice.practiceLevel == 2) {
+            if (g_Ball.numberOfThrowsDuringPlay != 0) {
+                endFrame = lbl_3_data_FBF8[3];
+                if (g_Practice._1E4 == 0) {
+                    if (g_Practice._1CB != 0) {
+                        g_Practice.guidedPracticeCounter++;
+                    }
+                    g_Practice._1E4 = 1;
+                }
+            } else if (g_Ball.framesSinceHit >= lbl_3_data_FBF8[4]) {
+                g_Practice._1E4 = 2;
+            }
+        } else if (g_Practice.practiceLevel == 3) {
+            if (g_Ball.numberOfThrowsDuringPlay != 0) {
+                endFrame = lbl_3_data_FBF8[5];
+                if (g_Practice._1E4 == 0) {
+                    if (g_FieldingLogic._114 == 2) {
+                        g_Practice.guidedPracticeCounter++;
+                    }
+                    g_Practice._1E4 = 1;
+                }
+            } else if (g_Ball.framesSinceBallHitGroundOrWasCaught >= lbl_3_data_FBF8[6]) {
+                g_Practice._1E4 = 2;
+            }
+        }
+        if (g_Practice.guidedPracticeCounter >= lbl_3_data_FAF4[g_Practice.practiceType_2][g_Practice.practiceLevel]) {
+            g_Practice.guidedPracticeCompletionRelated = 1;
+        }
+        if (g_Practice._1E4 == 0) {
+            return;
+        }
+    }
+    if (g_FieldingLogic._0AE < 0x7FFE) {
+        g_FieldingLogic._0AE++;
+    } else {
+        g_FieldingLogic._0AE = 0x7FFF;
+    }
+    if (g_Practice.guidedPracticeCompletionRelated == 0) {
+        if (g_FieldingLogic._0AE >= endFrame) {
+            fn_3_B0DB0();
+        } else if (g_FieldingLogic._0AE == endFrame - 6) {
+            changeScene(3, 6);
+        }
+    }
 }
 
 // .text:0x000B0DB0 size:0x50 mapped:0x806EFE44
