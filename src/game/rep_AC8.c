@@ -231,7 +231,8 @@ extern UnkAC8Fielder g_Fielders[9];
 extern struct {
     /* 0x00 */ u8 _00[0x4];
     /* 0x04 */ s16 _04;
-    /* 0x06 */ u8 _06[0x10 - 0x6];
+    /* 0x06 */ u8 _06[0xE - 0x6];
+    /* 0x0E */ s16 _0E;
     /* 0x10 */ u8 _10;
 } g_RunningLogic;
 
@@ -2005,8 +2006,107 @@ void fn_3_4F504(void) {
 }
 
 // .text:0x0004EFC8 size:0x53C mapped:0x8068E05C
-void fn_3_4EFC8(void) {
-    return;
+// 99.87%: registers only; the inlined fn_3_52560 takes dx and dz in each other's float
+// registers (as in fn_3_43038), and the last test's two sums swap r0 and r3.
+void fn_3_4EFC8(int fielder, BOOL flag) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    s32 i;
+    s32 start;
+    s32 frames;
+    s32 catchFrame;
+    s32 arrive;
+    s32 half;
+    s32 bestIdx = 0;
+    s32 found = 0;
+    s32 close = 0;
+    s32 result = 0;
+    f32 speed;
+    f32 dist;
+    f32 dz;
+    f32 dx;
+    f32 z;
+    f32 x;
+    f32 y;
+    f32 bestY = 99.0f;
+
+    start = f->_1D2 - g_Ball.framesSinceHit;
+    if (start < 1) {
+        start = 1;
+    }
+    i = start;
+    while (i < 360) {
+        if (g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y > 4.5f) {
+            i += 3;
+            continue;
+        }
+        frames = fn_3_52560(fielder, g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x,
+                            g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z);
+        catchFrame = start + frames - 5;
+        if (catchFrame < i) {
+            y = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y;
+            if (y < 2.0f) {
+                result = 1;
+                break;
+            }
+            if (found && bestY < y) {
+                i = bestIdx;
+                result = 2;
+                break;
+            }
+            bestY = y;
+            bestIdx = i;
+            found = 1;
+        } else {
+            if (catchFrame < i + 30) {
+                close = 1;
+            }
+            if (found) {
+                if (!flag) {
+                    result = 2;
+                    i = g_Ball.framesUntilBallHitsGround;
+                } else {
+                    i = bestIdx;
+                    result = 2;
+                }
+                break;
+            }
+        }
+        i++;
+    }
+    if (i >= 360) {
+        i = 359;
+    }
+    f->_186 = i + g_Ball.framesSinceHit;
+    if (result == 2 && g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y < 2.0f) {
+        result = 1;
+    }
+    if (result == 3 && !close) {
+        result = 4;
+    }
+    f->_1DD = result;
+    f->_1DA = 0;
+    if (result != 1 && result != 2) {
+        f->_1DA = 1;
+    }
+    if (dolsqrtf2(SQ(g_Ball.landingSpotLocation.x - g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x) +
+                  SQ(g_Ball.landingSpotLocation.z - g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z)) < 3.0f &&
+        result == 1) {
+        f->_1DB = 0;
+    } else {
+        f->_1DB = 1;
+    }
+    if (f->_1DB == 0) {
+        if (catchFrame + 30 < f->_186) {
+            g_FieldingLogic._0F2 |= 1 << fielder;
+        }
+    } else if (result == 1) {
+        arrive = f->_186 + fn_3_A6810(g_Ball.physicsSubstruct.futureCoordsAndDist[f->_186].pos.x,
+                                      g_Ball.physicsSubstruct.futureCoordsAndDist[f->_186].pos.z, lbl_3_data_4444[1].x,
+                                      lbl_3_data_4444[1].z);
+        if (arrive + 60 < g_RunningLogic._0E + 30) {
+            g_FieldingLogic._0F2 |= 1 << fielder;
+        }
+    }
 }
 
 // .text:0x0004EBC4 size:0x404 mapped:0x8068DC58
@@ -3133,8 +3233,44 @@ void fn_3_3F034(void) {
 }
 
 // .text:0x0003EB6C size:0x4C8 mapped:0x8067DC00
+// 97.61%: registers only. With fn_3_4EFC8 and fn_3_52560 taking s32 rather than int this
+// reaches 99.69%, but rep_13B8's callers of fn_3_52560 need int; the inlined fn_3_52560 also
+// takes dx and dz in each other's float registers (as in fn_3_43038).
 void fn_3_3EB6C(void) {
-    return;
+    UnkAC8Fielder* f;
+    s32 i;
+    int best;
+    s32 bestFrames = 9999;
+    s32 frames;
+    s32 total;
+
+    for (i = 0; i < 9; i++) {
+        f = &g_Fielders[i];
+        frames = fn_3_52560(i, g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x,
+                            g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z);
+        total = frames;
+        if (f->_1D3 == 2) {
+            total = frames - 15;
+        }
+        if (f->_18C >= 0 && f->_18C <= 3) {
+            total += 30;
+        }
+        if (g_Ball.someCollisionInd == 0 && 5.0f + f->_070 < g_Ball.physicsSubstruct.hitLandingSpotDistFromHome) {
+            total += 30;
+        }
+        if (g_Ball.ballZoneAwayFromHome >= 3 && i <= 5) {
+            total += 15;
+        }
+        if (total < bestFrames) {
+            best = i;
+            bestFrames = total;
+        }
+    }
+    fn_3_5985C(best, 3);
+    fn_3_4EFC8(best, FALSE);
+    g_Fielders[best]._1DC = 0;
+    fn_3_3E468();
+    g_FieldingLogic._0BE = -1;
 }
 
 // .text:0x0003E690 size:0x4DC mapped:0x8067D724
@@ -3142,10 +3278,7 @@ void fn_3_3E690(void) {
     return;
 }
 
-// .text:0x0003E468 size:0x228 mapped:0x8067D4FC
-// 92.16%: the target keeps the last loop's counter in r31 (with a stack frame), apart from
-// the zero the earlier stores use; here both share one register.
-void fn_3_3E468(void) {
+static inline void assignCutoffs(void) {
     s32 i;
     s32 j;
     s32 best;
@@ -3174,6 +3307,14 @@ void fn_3_3E468(void) {
         fn_3_5985C(best, 1);
         g_FieldingLogic._0D0[i] = best;
     }
+}
+
+// .text:0x0003E468 size:0x228 mapped:0x8067D4FC
+// 92.34%: the target keeps the last loop's counter in r31 (with a stack frame), apart from
+// the zero the earlier stores use; here both share one register. The body is an inline
+// helper so that fn_3_3EB6C inlines it as the target does.
+void fn_3_3E468(void) {
+    assignCutoffs();
 }
 
 // .text:0x0003E34C size:0x11C mapped:0x8067D3E0

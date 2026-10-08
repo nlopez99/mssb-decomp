@@ -185,7 +185,7 @@ void fn_3_4DC14(void);
 void fn_3_4E1BC(void);
 void fn_3_4E638(void);
 void fn_3_4EBC4(void);
-void fn_3_4EFC8(void);
+void fn_3_4EFC8(int fielder, BOOL flag);
 void fn_3_4F504(void);
 void fn_3_4FB34(void);
 s32 fn_3_50898(s32 fielder, f32* x, f32* z);
