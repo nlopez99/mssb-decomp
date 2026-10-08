@@ -2179,40 +2179,43 @@ void fn_3_135600(f32* outX, f32* outZ, f32 x, f32 z) {
 }
 
 // .text:0x00135520 size:0xE0 mapped:0x807745B4
+// Written with the else-ifs and gotos, it is long enough by MWCC's measure to stay a
+// call in fn_3_1350BC and fn_3_13334C, as in the target.
 u32 fn_3_135520(f32 x, f32 z, f32 r) {
     if (x >= 0.0f) {
         if (z >= 0.0f) {
             if (z <= r) {
                 return 1;
-            }
-            if (x <= r) {
+            } else if (x <= r) {
                 return 2;
             }
+            goto out;
         } else {
             if (x <= r) {
                 return 1;
-            }
-            if (z >= -r) {
+            } else if (z >= -r) {
                 return 2;
             }
+            goto out;
         }
     } else {
         if (z >= 0.0f) {
             if (x >= -r) {
                 return 1;
-            }
-            if (z <= r) {
+            } else if (z <= r) {
                 return 2;
             }
+            goto out;
         } else {
             if (z >= -r) {
                 return 1;
-            }
-            if (x >= -r) {
+            } else if (x >= -r) {
                 return 2;
             }
+            goto out;
         }
     }
+out:
     return 0;
 }
 
@@ -2232,8 +2235,8 @@ BOOL fn_3_1354BC(s32 i, f32 x, f32 z) {
 }
 
 // .text:0x001350BC size:0x400 mapped:0x80774150
-// 59.4%: fn_3_135520 is inlined here (the target calls it; see the auto-inline note in
-// structure.md); forced out of line, this scores 91.9%, registers and the objs loop differ.
+// 92.1%: the inlined fn_3_1354BC forms its own g_Minigame base where the target shares
+// the objs walker (with `s32 j` and MG.objs[i] there, 97.0%, but fn_3_1354BC drops to 83%).
 Unk3520Coin* fn_3_1350BC(u32 player, u32 quadrant, u32 count, Unk3520Coin* coins) {
     u32 strength = g_Minigame.minigameControlStruct.aIStrength[player];
     Unk3520Coin* c;
@@ -2517,8 +2520,8 @@ static inline s16 Unk3520_CircleAngle(int i, int offset) {
 }
 
 // .text:0x0013334C size:0x1170 mapped:0x807723E0
-// 85.2%: fn_3_135520 is inlined here (the target calls it), and the loops over
-// MG.objs and the players walk other registers.
+// 95.7%: the loops over MG.objs and the players walk other registers, and the inlined
+// fn_3_1344BC indexes g_Minigame through a walker where the target uses i.
 void fn_3_13334C(void) {
     Unk3520Ai* ai = (Unk3520Ai*)&g_Minigame._1DCC;
     Unk3520Coin* coins;
