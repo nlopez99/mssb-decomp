@@ -12,7 +12,7 @@ Keep a batch log in the batch worktree's `build/batch-<N>.md` (`build/` is ignor
 
 ## Steps
 
-1. **Plan.** Run `date +%s` and keep the number. Read `docs/backlog.md`. Queue about three claims per slot: follow-ups first (their data and helpers are in place, so they give the cheapest bytes), then untouched units, largest first. A claim is one unit, or several small units (under about 5 KB of code each) for one worker. `python3 tools/match.py <unit>` gives a unit's state. Done when the queue is written in the log.
+1. **Plan.** Run `date +%s` and keep the number. Read `docs/backlog.md`. Queue about three claims per slot, by expected bytes per hour rather than by kind: in batch 7, small untouched units of simple code (menus, minigame UI) went at 40–60 KB/h per worker, untouched game units and follow-ups with many unattempted functions at 15–40, and follow-ups left with only partials were slowest. A claim is one unit, or several small units (under about 5 KB of code each) for one worker. `python3 tools/match.py <unit>` gives a unit's state. Done when the queue is written in the log.
 
 2. **Start.** From the main checkout on an up-to-date `main`, run `python3 tools/worktree.py match/batch-<N> --base main`. For each slot, run `python3 tools/worktree.py b<N>/<unit> --base match/batch-<N>`, then start the worker with the Agent tool (`subagent_type: general-purpose`, `model: opus`, `run_in_background: true`) and a prompt written from [`worker-prompt.md`](worker-prompt.md). Before a claim starts, apply the backlog's split proposals for its unit (step 4). Done when four workers are running.
 
@@ -24,7 +24,7 @@ Keep a batch log in the batch worktree's `build/batch-<N>.md` (`build/` is ignor
    Log the report and refill the slot from the queue. Done when the branch is merged and the slot is busy again.
 
 4. **Triage escalations.**
-   - **Splits:** apply a proposal on the batch branch when its unit is next claimed, judged by the evidence rules in `docs/matching-notes.md` ("Unit boundaries"). New stubs are `void f(void) { return; }`, in reverse address order, with header prototypes; then `python3 tools/check_prototypes.py` must pass, since a prototype that contradicts another file's declaration breaks the build. Commit, and run `python3 tools/regress.py --base <previous tip>` in the batch worktree.
+   - **Splits:** apply a proposal on the batch branch when its unit is next claimed, judged by the evidence rules in `docs/matching-notes.md` ("Unit boundaries"). New stubs are `void f(void) { return; }`, in reverse address order, with header prototypes; a function that code already in the unit calls stays undefined instead (`missing`), since its empty stub would be inlined into that caller; then `python3 tools/check_prototypes.py` must pass, since a prototype that contradicts another file's declaration breaks the build. Commit, and run `python3 tools/regress.py --base <previous tip>` in the batch worktree.
    - **Another unit's header** (placeholder prototypes, wrong types): pass it to that unit's next worker, or to the cleanup worker in step 5.
    - **Shared types, `symbols.txt` outside a claim, open questions:** add them to `docs/backlog.md`.
    - **A running worker affected** by a change (its claim's header changed under it): tell it with SendMessage.
@@ -33,7 +33,7 @@ Keep a batch log in the batch worktree's `build/batch-<N>.md` (`build/` is ignor
    Done when every escalation from the report is applied, assigned or in the backlog.
 
 5. **End the batch.** After about three hours, stop refilling, and let the running workers finish. Then, on the batch branch:
-   1. Start a cleanup worker (the task form of `worker-prompt.md`) with `python3 tools/check_prototypes.py`'s lists and the caller cleanups from the log, and integrate it. Start it in the first slot that frees in the last hour, leaving the running claims' files alone, rather than after the last report.
+   1. Start a cleanup worker (the task form of `worker-prompt.md`) with `python3 tools/check_prototypes.py`'s lists and the caller cleanups from the log, and integrate it. Start it in the first slot that frees in the last hour, leaving the running claims' files alone, rather than after the last report. Fill the other slots that free in the last hour with small untouched units under 20–40 minute caps; they often finish inside them.
    2. Run `python3 tools/link_trial.py` in the batch worktree; commit the units it links.
    3. Apply the skill feedback that cost time, caused a mistake or recurred, in one commit; lessons go in the notes.
    4. Update `docs/backlog.md`: drop what was done, add the follow-ups and open escalations.
