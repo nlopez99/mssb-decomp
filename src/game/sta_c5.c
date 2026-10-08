@@ -1376,8 +1376,51 @@ void fn_3_F1E2C(StaC5Draw* draw) {
 }
 
 // .text:0x000F193C size:0x4F0 mapped:0x807309D0
-void fn_3_F193C(void) {
-    return;
+void fn_3_F193C(StaC5Draw* draw) {
+    VecSrcDst line;
+    CollisionStruct hit;
+    StaC5Model* model = draw->_74;
+    f32 rotY;
+    u8 type;
+    s32 idx;
+
+    switch ((u8)draw->_C1) {
+    case 0:
+        rotY = *draw->_BCp;
+        draw->_B4 = rotY;
+        draw->control.type = 0;
+        CTRLSetTranslation(&draw->control, draw->_A0.x, -draw->_A0.y, draw->_A0.z);
+        CTRLSetRotation(&draw->control, 0.0f, rotY, 0.0f);
+        break;
+    case 1:
+        if (!draw->_90_7) {
+            draw->_90_7 = 1;
+        }
+        memcpy(&line.src, &draw->_A0, sizeof(Vec));
+        line.src.y *= -1.0f;
+        fn_3_F2938(draw);
+        memcpy(&line.dst, &draw->_A0, sizeof(Vec));
+        line.dst.y *= -1.0f;
+        AnimateActorBones(model->_00);
+        type = checkCollision(&line, &hit, 0, FALSE) & 0xF;
+        if (type == BALL_COLLISION_TYPE_WALL || type == BALL_COLLISION_TYPE_UNCLIMBABLE_WALL) {
+            draw->_C1 = 2;
+            fn_3_8B890(lbl_3_data_1B820);
+            lbl_3_data_1B820 = -1;
+            playStadiumSound(3);
+            fn_3_F3A04(draw);
+            fn_3_F18A4(draw);
+        } else if (g_GameLogic.gameStatus == GAME_STATUS_LIVE_BALL) {
+            idx = fn_3_F2448(draw);
+            if ((s8)idx > -1) {
+                fn_3_F22FC(draw, idx);
+            }
+        }
+        break;
+    case 2:
+        fn_3_F1750(draw);
+        break;
+    }
 }
 
 // .text:0x000F18A4 size:0x98 mapped:0x80730938

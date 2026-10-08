@@ -44,7 +44,7 @@ void fn_3_F1518(struct StaC5Draw* draw);
 void fn_3_F1674(void);
 void fn_3_F1750(struct StaC5Draw* draw);
 void fn_3_F18A4(struct StaC5Draw* draw);
-void fn_3_F193C(void);
+void fn_3_F193C(struct StaC5Draw* draw);
 void fn_3_F1E2C(struct StaC5Draw* draw);
 void fn_3_F22FC(struct StaC5Draw* draw, s8 idx);
 s32 fn_3_F2448(struct StaC5Draw* draw);
