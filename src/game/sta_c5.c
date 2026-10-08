@@ -1002,7 +1002,6 @@ void fn_3_F31E0(void) {
 void fn_3_F2FFC(StaC5Draw* draw, f32 x, f32 z) {
     Vec dir;
     s8 side;
-    f32 end;
 
     side = (x - draw->_AC) / fabs_inline(x - draw->_AC);
     if (side == 0) {
@@ -1012,7 +1011,6 @@ void fn_3_F2FFC(StaC5Draw* draw, f32 x, f32 z) {
     dir.y = 0.0f;
     dir.z = z - draw->_B0;
     PSVECNormalize(&dir, &dir);
-    end = side * 80;
     lbl_3_bss_B260.pts[0].x = draw->_AC + 10.0f * dir.x;
     lbl_3_bss_B260.pts[0].y = 0.0f;
     lbl_3_bss_B260.pts[0].z = draw->_B0 + 10.0f * dir.z;
@@ -1025,10 +1023,10 @@ void fn_3_F2FFC(StaC5Draw* draw, f32 x, f32 z) {
     lbl_3_bss_B260.pts[3].x = x;
     lbl_3_bss_B260.pts[3].y = 0.0f;
     lbl_3_bss_B260.pts[3].z = z;
-    lbl_3_bss_B260.pts[4].x = x + (end - x) / 3.0f;
+    lbl_3_bss_B260.pts[4].x = x + (side * 80 - x) / 3.0f;
     lbl_3_bss_B260.pts[4].y = 0.0f;
     lbl_3_bss_B260.pts[4].z = z;
-    lbl_3_bss_B260.pts[5].x = x + 2.0f * (end - x) / 3.0f;
+    lbl_3_bss_B260.pts[5].x = x + 2.0f * (side * 80 - x) / 3.0f;
     lbl_3_bss_B260.pts[5].y = 0.0f;
     lbl_3_bss_B260.pts[5].z = z;
     lbl_3_bss_B260.pts[6].x = side * 80;
