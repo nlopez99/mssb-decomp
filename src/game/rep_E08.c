@@ -23,7 +23,8 @@ typedef struct UnkE08Fielder {
     /* 0x0D8 */ f32 _0D8;
     /* 0x0DC */ u8 _0DC[0xE8 - 0xDC];
     /* 0x0E8 */ f32 _0E8;
-    /* 0x0EC */ u8 _0EC[0x17A - 0xEC];
+    /* 0x0EC */ u8 _0EC[0x178 - 0xEC];
+    /* 0x178 */ s16 _178;
     /* 0x17A */ s16 _17A;
     /* 0x17C */ u8 _17C[0x1AA - 0x17C];
     /* 0x1AA */ s16 _1AA;
@@ -35,9 +36,19 @@ typedef struct UnkE08Fielder {
     /* 0x1D3 */ u8 _1D3;
     /* 0x1D4 */ u8 _1D4[0x1E5 - 0x1D4];
     /* 0x1E5 */ u8 _1E5;
-    /* 0x1E6 */ u8 _1E6[0x1FB - 0x1E6];
+    /* 0x1E6 */ u8 _1E6[0x1EE - 0x1E6];
+    /* 0x1EE */ u8 _1EE;
+    /* 0x1EF */ u8 _1EF[0x1FB - 0x1EF];
     /* 0x1FB */ u8 _1FB;
-    /* 0x1FC */ u8 _1FC[0x211 - 0x1FC];
+    /* 0x1FC */ u8 _1FC[0x200 - 0x1FC];
+    /* 0x200 */ u8 _200;
+    /* 0x201 */ u8 _201[0x207 - 0x201];
+    /* 0x207 */ u8 _207;
+    /* 0x208 */ u8 _208[0x20D - 0x208];
+    /* 0x20D */ u8 _20D;
+    /* 0x20E */ u8 _20E;
+    /* 0x20F */ u8 _20F;
+    /* 0x210 */ u8 _210;
     /* 0x211 */ u8 _211;
     /* 0x212 */ u8 _212;
     /* 0x213 */ u8 _213[0x215 - 0x213];
@@ -48,9 +59,19 @@ typedef struct UnkE08Fielder {
     /* 0x24E */ u8 _24E[0x252 - 0x24E];
     /* 0x252 */ u8 _252;
     /* 0x253 */ u8 _253;
-    /* 0x254 */ u8 _254[0x256 - 0x254];
+    /* 0x254 */ u8 _254;
+    /* 0x255 */ u8 _255;
     /* 0x256 */ u8 _256;
-    /* 0x257 */ u8 _257[0x268 - 0x257];
+    /* 0x257 */ u8 _257;
+    /* 0x258 */ u8 _258;
+    /* 0x259 */ u8 _259[0x25C - 0x259];
+    /* 0x25C */ u8 _25C;
+    /* 0x25D */ u8 _25D;
+    /* 0x25E */ u8 _25E;
+    /* 0x25F */ u8 _25F[0x261 - 0x25F];
+    /* 0x261 */ u8 _261;
+    /* 0x262 */ u8 _262;
+    /* 0x263 */ u8 _263[0x268 - 0x263];
 } UnkE08Fielder; // size: 0x268
 
 typedef struct UnkE08Anim {
@@ -91,6 +112,8 @@ typedef struct UnkE08Actor {
     /* 0x6A */ s16 _6A;
     /* 0x6C */ u8 _6C[0x252 - 0x6C];
     /* 0x252 */ s8 _252;
+    /* 0x253 */ u8 _253[0x26F - 0x253];
+    /* 0x26F */ u8 _26F;
 } UnkE08Actor;
 
 typedef struct UnkE08Track {
@@ -160,6 +183,7 @@ extern UnkE08CharEntry lbl_800E8558[54];
 extern u8 lbl_3_data_7760[][5];
 extern s16 lbl_3_data_7870[][3];
 extern u8 lbl_3_data_7D24[][5];
+extern u8 lbl_3_data_7F0C;
 extern u8 lbl_3_data_7E34[54][4];
 extern s16 lbl_3_data_7F10[54];
 extern f32 lbl_3_data_476C[5];
@@ -168,9 +192,40 @@ extern UnkE08Fielder g_Fielders[9];
 extern UnkE08Anim g_UnkAnimation_31EAC[9];
 
 void fn_8001B4D8(int actor);
+void fn_8004AE18(s32 fielder);
 void fn_8001B5EC(int actor, int flag);
 void QueueCharacterAnimation(int actor, int anim, u8, u8, s16, u8, int);
 void AnimateCharacter(int actor, int anim, u8, u8, u8, s16, u8, int);
+
+static u8 lbl_3_data_65F0[0x10] = { 4, 4, 4, 4, 4, 4, 4, 4, 4, 0x14, 5, 5, 5, 0xF, 0xF, 0 };
+static u8 lbl_3_data_6600 = 8;
+static u8 lbl_3_data_6604[0x2C] = {
+    0x14, 0x14, 0x14, 0x3C, 0x3C, 0x3C, 0x28, 0x28, 0x28, 0x28, 0x28, 0x28, 0x28, 0x28, 0x28,
+    0x50, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14, 0x14,
+    0x14, 0x14, 0x14, 0x14, 0x14, 0, 5, 5, 5, 0xF, 5, 5, 5, 0,
+};
+static u8 lbl_3_data_6630[2] = { 10, 30 };
+static s16 lbl_3_data_6634[8] = { 0x30, 0x32, 0x32, 0x50, 0x50, 0x19, 0x25, 0x25 };
+static s16 lbl_3_data_6644[3][3] = { { 0x13, 0x12, 0x11 }, { 0x19, 0x18, 0x17 }, { 0x16, 0x15, 0x14 } };
+static u8 lbl_3_data_6658[4] = { 0x14 };
+static s16 lbl_3_data_665C[2] = { 5, 0x14 };
+u16 lbl_3_data_6660[87][2] = {
+    { 0x16, 0x10 }, { 0x17, 0x11 }, { 0x18, 0x12 }, { 0x19, 0x13 }, { 0x1A, 0x14 }, { 0x1B, 0x15 },
+    { 0x20, 0x1C }, { 0x21, 0x1D }, { 0x22, 0x1E }, { 0x23, 0x1F }, { 0x26, 0x25 }, { 0x28, 0x27 },
+    { 0x3D, 0x3C }, { 0xFFFF, 0x0 }, { 0x4A, 0x4B }, { 0xFFFF, 0x0 }, { 0x2F, 0x34 }, { 0x30, 0x35 },
+    { 0x31, 0x36 }, { 0x32, 0x37 }, { 0x33, 0x38 }, { 0xFFFF, 0x0 }, { 0x41, 0x47 }, { 0x42, 0x48 },
+    { 0x43, 0x49 }, { 0x44, 0x4A }, { 0x45, 0x4B }, { 0x46, 0x4C }, { 0xFFFF, 0x0 }, { 0x2F, 0x34 },
+    { 0xFFFF, 0x0 }, { 0x0, 0x1 }, { 0x2, 0x3 }, { 0x4, 0x5 }, { 0x6, 0x7 }, { 0x8, 0x9 },
+    { 0xE, 0xF }, { 0xD, 0xC }, { 0xB, 0xA }, { 0x16, 0x17 }, { 0x18, 0x19 }, { 0x1A, 0x1B },
+    { 0x10, 0x11 }, { 0x12, 0x13 }, { 0x14, 0x15 }, { 0x20, 0x21 }, { 0x22, 0x23 }, { 0x1C, 0x1D },
+    { 0x1E, 0x1F }, { 0x24, 0x26 }, { 0x25, 0x28 }, { 0x27, 0x29 }, { 0x2A, 0x2B }, { 0x2C, 0x2D },
+    { 0x2E, 0x2F }, { 0x30, 0x31 }, { 0x32, 0x33 }, { 0x34, 0x35 }, { 0x36, 0x37 }, { 0x38, 0x39 },
+    { 0x3A, 0x3B }, { 0x3D, 0x3C }, { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x0, 0x0 },
+    { 0x1, 0x203 }, { 0x405, 0x607 }, { 0x809, 0xA0B }, { 0xC0D, 0xE }, { 0xF10, 0x1112 }, { 0x1314, 0x1516 },
+    { 0x1700, 0x0 }, { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x0, 0x100 }, { 0x0, 0x0 },
+    { 0x100, 0x0 }, { 0x101, 0x101 }, { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x1, 0x0 }, { 0x0, 0x101 },
+    { 0x0, 0x0 }, { 0x0, 0x0 }, { 0x101, 0x0 },
+};
 
 // .text:0x0006714C size:0x394 mapped:0x806A61E0
 void fn_3_6714C(BOOL arg0) {
@@ -325,12 +380,12 @@ void fn_3_63874(s32 i) {
 
 // .text:0x000631AC size:0x6C8 mapped:0x806A2240
 void fn_3_631AC(s32 i) {
-    s32 player = i + 9;
-    UnkE08Actor* actor = lbl_8036E548._2C50[player];
     InMemRunnerType* runner = &g_Runners[i];
+    BOOL slides;
+    s32 player = i + 9;
     UnkE08RunnerAnim* state = &lbl_3_common_bss_321A0[i];
     s16 actorAnim;
-    BOOL slides;
+    UnkE08Actor* actor = lbl_8036E548._2C50[player];
 
     if (g_d_GameSettings.minigamesEnabled) {
         player = g_Minigame._18FC[i];
@@ -612,21 +667,169 @@ void fn_3_61B64(void) {
 }
 
 // .text:0x00061544 size:0x620 mapped:0x806A05D8
-void fn_3_61544(void) {
-    return;
+BOOL fn_3_61544(s32 i) {
+    s32 player = i;
+    s32 animId = -1;
+    UnkE08Fielder* fielder = &g_Fielders[i];
+    UnkE08Anim* anim = &g_UnkAnimation_31EAC[i];
+    s32 frames = 0;
+    UnkE08Actor* actor;
+    u8 kind;
+    s32 turnAnim;
+
+    if (g_d_GameSettings.minigamesEnabled) {
+        if (i == 0) {
+            player = g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder];
+        } else {
+            player = g_Minigame.minigameControlStruct._28[i - 2];
+        }
+    }
+    actor = lbl_8036E548._2C50[player];
+    if (anim->_43 != 0) {
+        return FALSE;
+    }
+    if (anim->_4F == 0) {
+        if (fielder->_20F != 0) {
+            return FALSE;
+        }
+        if (fielder->_210 != 0) {
+            return FALSE;
+        }
+        if (fielder->_207 != 0) {
+            return FALSE;
+        }
+        if (anim->_4C != 0) {
+            anim->_4A--;
+            if (anim->_4C == 1 || anim->_4C == 2) {
+                if (anim->_4A <= lbl_3_data_665C[0]) {
+                    kind = fielder->_254;
+                    if (kind == 0) {
+                        animId = lbl_3_data_6644[0][anim->_4E];
+                    } else if ((kind == 1 && fielder->_1C7 == 0) || (kind == 2 && fielder->_1C7 != 0)) {
+                        animId = lbl_3_data_6644[1][anim->_4E];
+                    } else {
+                        animId = lbl_3_data_6644[2][anim->_4E];
+                    }
+                    frames = lbl_3_data_665C[0] - anim->_4A;
+                }
+            } else if (anim->_4C == 7 || anim->_4C == 8) {
+                if (fielder->_261 == 1) {
+                    if (anim->_40 != 0) {
+                        turnAnim = 0xE;
+                    } else {
+                        turnAnim = 0xD;
+                    }
+                } else if (fielder->_261 == 2) {
+                    if (anim->_40 != 0) {
+                        turnAnim = 0xD;
+                    } else {
+                        turnAnim = 0xE;
+                    }
+                } else {
+                    turnAnim = 0xC;
+                }
+                AnimateCharacter(player, turnAnim, 1, 1, 0, 0, anim->_40, -1);
+                anim->_46 = turnAnim;
+                anim->_4F = 1;
+                return TRUE;
+            } else if (anim->_4C == 3) {
+                if (anim->_4A <= lbl_3_data_665C[1]) {
+                    frames = lbl_3_data_665C[1] - anim->_4A;
+                    animId = 0x1B;
+                }
+            } else if (anim->_4C == 4) {
+                AnimateCharacter(player, 0x26, 0, 1, 0, lbl_3_data_7F0C - fielder->_25C, anim->_40, -1);
+                anim->_46 = 0x26;
+                anim->_4F = 1;
+                return TRUE;
+            } else if (anim->_4C == 5) {
+                animId = 0x29;
+                frames = lbl_3_data_6600 - anim->_4A;
+            }
+            if (animId >= 0 && frames >= 0) {
+                AnimateCharacter(player, animId, 0, 1, 0, frames, anim->_40, -1);
+                anim->_46 = animId;
+                anim->_4F = 1;
+                anim->_50 = lbl_3_data_6658[0];
+                return TRUE;
+            }
+        }
+    } else {
+        if (fielder->_20F != 0) {
+            goto reset;
+        }
+        if (fielder->_200 != 0) {
+            actor->_26F = 1;
+            if (g_d_GameSettings.minigamesEnabled) {
+                fn_8004AE18(fielder->_20D);
+            } else {
+                fn_8004AE18(i);
+            }
+        }
+        if (anim->_50 != 0) {
+            anim->_50--;
+        }
+        anim->_4A--;
+        if (anim->_46 == 0x26) {
+            if (fielder->_25C == 1) {
+                AnimateCharacter(player, 0x28, 0, 1, 0, 0, anim->_40, 0);
+            }
+            if (fielder->_25E == 4) {
+                goto reset;
+            }
+            return TRUE;
+        }
+        if (anim->_4A == 1 && (fielder->_258 != 1 || fielder->_252 != 1) && anim->_4C != 7 && anim->_4C != 8 &&
+            actor->_62 != 0x29) {
+            if (fielder->_258 == 3 && anim->_4C != 3) {
+                AnimateCharacter(player, 0x1C, 0, 1, 1, 0, anim->_40, 10);
+                fn_3_60804(i, TRUE);
+            } else {
+                fn_3_60804(i, TRUE);
+            }
+        }
+        if (actor->_62 == 0x1B && g_Ball.timeSinceBallPickedUp >= lbl_3_data_6630[0] &&
+            g_Ball.timeSinceBallPickedUp <= lbl_3_data_6630[1] &&
+            !checkFieldingStat(g_GameLogic.teamFielding, fielder->_178, 7) &&
+            !checkFieldingStat(g_GameLogic.teamFielding, fielder->_178, 8) &&
+            !checkFieldingStat(g_GameLogic.teamFielding, fielder->_178, 9) &&
+            (g_FieldingLogic._0C4 >= 0 || g_FieldingLogic._0C6 >= 0) && anim->_42 != 0) {
+            AnimateCharacter(player, 0x1A, 0, 1, 1, 0, anim->_40, -1);
+            fn_3_60804(i, TRUE);
+        }
+        if (anim->_4C == 7 || anim->_4C == 8) {
+            if (fielder->_262 == 0 && fielder->_252 == 0 && fielder->_1EE == 0) {
+                AnimateCharacter(player, 0, 0, 1, 1, 0, anim->_40, -1);
+                goto reset;
+            }
+            return TRUE;
+        }
+        if (actor->_68 <= 1) {
+        reset:
+            anim->_4C = 0;
+            anim->_4F = 0;
+            anim->_47 = 0;
+            anim->_46 = 0;
+            anim->_50 = 0;
+            fn_3_60804(i, FALSE);
+            return FALSE;
+        }
+        return TRUE;
+    }
+    return FALSE;
 }
 
 // .text:0x00061228 size:0x31C mapped:0x806A02BC
 BOOL fn_3_61228(s32 i) {
+    s16 timer;
+    BOOL turn = FALSE;
     UnkE08Anim* anim = &g_UnkAnimation_31EAC[i];
     UnkE08Throw* throwInfo = &g_UnkThrowing_31ACC;
-    g_FieldingLogic_s* logic = &g_FieldingLogic;
     UnkE08Fielder* fielder = &g_Fielders[i];
-    s32 player = i;
-    s32 animId = 0x1D;
-    BOOL turn = FALSE;
     UnkE08Actor* actor;
-    s16 timer;
+    s32 animId = 0x1D;
+    s32 player = i;
+    g_FieldingLogic_s* logic = &g_FieldingLogic;
 
     if (g_d_GameSettings.minigamesEnabled) {
         if (i == 0) {
@@ -662,62 +865,62 @@ BOOL fn_3_61228(s32 i) {
     if (fielder->_215 != 0) {
         return FALSE;
     }
-    if (throwInfo->_0E == 0) {
-        return FALSE;
-    }
-    switch (throwInfo->_0E) {
-    case 2:
-        animId = 0x1E;
-        break;
-    case 3:
-        animId = 0x1F;
-        break;
-    case 4:
-        animId = 0x1D;
-        break;
-    case 5:
-        animId = 0x1D;
-        break;
-    case 6:
-        animId = 0x1D;
-        break;
-    case 7:
-        animId = 0x1D;
-        turn = TRUE;
-        break;
-    }
-    if (turn) {
-        int facing = radToShortAngle(fielder->_048);
-        int target = fn_3_9FB8C(throwInfo->_00.x - fielder->_000.x, throwInfo->_00.z - fielder->_000.z);
-        int diff = fn_3_9FCA4(facing, target);
-        int adjust = -diff;
-
-        if (diff < -0x600 || diff > 0x600) {
-            if (diff < -0x600) {
-                adjust = -0x800 - diff;
-            } else {
-                adjust = 0x800 - diff;
-            }
-        } else if (diff > 0x200) {
-            adjust = 0x400 - diff;
-        } else if (diff < -0x200) {
-            adjust = -0x400 - diff;
+    if (throwInfo->_0E != 0) {
+        switch (throwInfo->_0E) {
+        case 2:
+            animId = 0x1E;
+            break;
+        case 3:
+            animId = 0x1F;
+            break;
+        case 4:
+            animId = 0x1D;
+            break;
+        case 5:
+            animId = 0x1D;
+            break;
+        case 6:
+            animId = 0x1D;
+            break;
+        case 7:
+            animId = 0x1D;
+            turn = TRUE;
+            break;
         }
-        fielder->_048 = shortAngleToRad_Capped(facing + adjust);
+        if (turn) {
+            int facing = radToShortAngle(fielder->_048);
+            int target = fn_3_9FB8C(throwInfo->_00.x - fielder->_000.x, throwInfo->_00.z - fielder->_000.z);
+            int diff = fn_3_9FCA4(facing, target);
+            int adjust = -diff;
+
+            if (diff < -0x600 || diff > 0x600) {
+                if (diff < -0x600) {
+                    adjust = -0x800 - diff;
+                } else {
+                    adjust = 0x800 - diff;
+                }
+            } else if (diff > 0x200) {
+                adjust = 0x400 - diff;
+            } else if (diff < -0x200) {
+                adjust = -0x400 - diff;
+            }
+            fielder->_048 = shortAngleToRad_Capped(facing + adjust);
+        }
+        AnimateCharacter(player, animId, 0, 1, 1, 0, anim->_40, -1);
+        throwInfo->_0F = animId;
+        anim->_43 = 1;
+        if (turn) {
+            anim->_43 = 2;
+        }
+        anim->_4C = 0;
+        anim->_4F = 0;
+        anim->_47 = 0;
+        anim->_46 = 0;
+        anim->_50 = 0;
+        fn_3_60804(i, TRUE);
+        return TRUE;
     }
-    AnimateCharacter(player, animId, 0, 1, 1, 0, anim->_40, -1);
-    throwInfo->_0F = animId;
-    anim->_43 = 1;
-    if (turn) {
-        anim->_43 = 2;
-    }
-    anim->_4C = 0;
-    anim->_4F = 0;
-    anim->_47 = 0;
-    anim->_46 = 0;
-    anim->_50 = 0;
-    fn_3_60804(i, TRUE);
-    return TRUE;
+    return FALSE;
 }
 
 // .text:0x00061148 size:0xE0 mapped:0x806A01DC
@@ -816,11 +1019,10 @@ fail:
 BOOL fn_3_60D80(s32 i) {
     s16 state;
     s16 timer;
-    UnkE08Anim* anim;
+    UnkE08Anim* anim = &g_UnkAnimation_31EAC[i];
     int player;
 
     player = g_Minigame.minigameControlStruct._28[i - 2];
-    anim = &g_UnkAnimation_31EAC[i];
     state = lbl_8036E548._2C50[player]->_62;
     timer = g_Minigame._1B34[player];
 
@@ -843,12 +1045,14 @@ BOOL fn_3_60D80(s32 i) {
 // .text:0x00060A98 size:0x2E8 mapped:0x8069FB2C
 void fn_3_60A98(s32 i, UnkE08Actor* actor) {
     UnkE08Anim* anim = &g_UnkAnimation_31EAC[i];
-    s16 actorAnim = actor->_62;
     UnkE08Fielder* fielder = &g_Fielders[i];
+    s16 actorAnim = actor->_62;
+    f32 dist;
+    f32 nx;
+    f32 scale;
+    f32 nz;
     f32 dx;
     f32 dz;
-    f32 dist;
-    f32 scale;
 
     if (actor == NULL) {
         return;
@@ -862,17 +1066,17 @@ void fn_3_60A98(s32 i, UnkE08Actor* actor) {
     if (dist <= 0.0f) {
         return;
     }
-    dx /= dist;
-    dz /= dist;
+    nx = dx / dist;
+    nz = dz / dist;
     if (actorAnim == 0x1A || actorAnim == 0x1B) {
         scale = 0.01f * (lbl_3_data_7F10[fielder->_17A] + 30) * charSizeMultipliers[fielder->_17A][0];
-        dx *= scale;
-        dz *= scale;
+        nx *= scale;
+        nz *= scale;
     } else {
-        dx *= lbl_3_data_476C[fielder->_1C9];
-        dz *= lbl_3_data_476C[fielder->_1C9];
+        nx *= lbl_3_data_476C[fielder->_1C9];
+        nz *= lbl_3_data_476C[fielder->_1C9];
     }
-    if (fn_3_B7CDC(dx + fielder->_000.x, dz + fielder->_000.z)) {
+    if (fn_3_B7CDC(nx + fielder->_000.x, nz + fielder->_000.z)) {
         fn_3_60804(i, FALSE);
         if (g_d_GameSettings.minigamesEnabled) {
             if (i == 0) {
