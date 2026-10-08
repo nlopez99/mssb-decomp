@@ -928,7 +928,8 @@ typedef struct _PracticeStruct {
     /*0x1A1*/ u8 aIEnabled;
     /*0x1A2*/ u8 practiceBatterHandedness; // unsure
     /*0x1A3*/ u8 freePracticeInd_writeOnly;
-    artificial_padding(0x1a3, 0x1aa, u8);
+    /*0x1A4*/ u8 _1A4;
+    artificial_padding(0x1a4, 0x1aa, u8);
     /*0x1AA*/ u8 transitioningIndicator; // unsure
     artificial_padding(0x1aa, 0x1af, u8);
     /*0x1AF*/ u8 returnToPracticeMenuState;
