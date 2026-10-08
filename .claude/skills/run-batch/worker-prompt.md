@@ -9,7 +9,7 @@ You are a decompilation worker for the Mario Superstar Baseball decomp. Your cla
 
 Work only in the git worktree at `{worktree}` (branch `{branch}`, already built). Your shell's working directory may reset between commands, so start every Bash command with `cd {worktree} &&` and use absolute paths for file tools. Never edit files in any other checkout.
 
-First read `{worktree}/.claude/skills/match-functions/SKILL.md` and follow it exactly. Do not push. Put temporary files under `{scratchpad}/b{N}-{unit}/`. `regress.py` in this worktree compares with `match/batch-{N}` by default, so its "0 lost" covers matches from earlier batches too.
+First read `{worktree}/.claude/skills/match-functions/SKILL.md` and follow it exactly. Do not push. Put temporary files under `{worktree}/build/scratch/` (ignored by git; unlike a scratchpad, it outlives a restart of Claude Code). `regress.py` in this worktree compares with `match/batch-{N}` by default, so its "0 lost" covers matches from earlier batches too.
 
 {The claim: its size and state (untouched, or a follow-up and what the last session left), splits applied for it, and evidence you hold, such as callers' prototypes or a function the target inlines. Give facts, not an order of work: the skill's order decides that, and a second order makes the worker choose.}
 
@@ -24,7 +24,7 @@ For a bundle of small units, name each unit and its source in the first paragrap
 
 ## A task that is not one claim
 
-Splits passes, link passes and the batch-end cleanup use the same worktree, scratchpad and feedback paragraphs, with this opening instead:
+Splits passes, link passes and the batch-end cleanup use the same worktree, temporary-files and feedback paragraphs, with this opening instead:
 
 ```text
 You are a worker on the Mario Superstar Baseball decomp. This task is {a splits pass on the game module / linking fully matched units / a cross-unit cleanup of declarations}, not matching one unit, so the match-functions skill's claim rules do not apply as written; its Integrity rules and its verify-and-commit step do. Read `{worktree}/.claude/skills/match-functions/SKILL.md` and `{worktree}/docs/matching-notes.md` first.

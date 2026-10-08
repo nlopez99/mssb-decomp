@@ -28,7 +28,8 @@
 # every relocation also points at the same thing. The report alone is not
 # enough: it ignores relocation targets, so a call to the wrong function
 # still scores 100%. Those functions are reported as "reloc". A function whose
-# source is still an upstream placeholder ("{ return; }") is reported as "stub".
+# source is still a placeholder ("{ return; }" or "{ return 0; }") is reported
+# as "stub".
 #
 # Exit codes: 0 = matches, 1 = does not match yet, 2 = build failed,
 #             3 = usage or lookup error.
@@ -678,9 +679,11 @@ def function_status(func: Dict[str, Any], base_syms: Optional[Dict[str, "Symbol"
         return "missing"
     if percent >= 100.0:
         return "match"
-    # An upstream placeholder, "{ return; }", compiles to a lone blr
+    # An upstream placeholder, "{ return; }", compiles to a lone blr, and one
+    # that returns a constant ("{ return 0; }") to two instructions; both are
+    # inlined into their callers like an empty stub
     base = base_syms.get(func["name"]) if base_syms else None
-    if base is not None and base.size == 4 and int(func["size"]) > 4:
+    if base is not None and base.size <= 8 and int(func["size"]) > 2 * base.size:
         return "stub"
     return "partial"
 
