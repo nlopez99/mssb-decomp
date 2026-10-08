@@ -7,7 +7,7 @@ void fn_3_59C2C(void);
 void fn_3_59F40(void);
 void fn_3_5A28C(void);
 void fn_3_5A684(void);
-void fn_3_5A6A0(void);
+void fn_3_5A6A0(int battingInd, int homeTeam, int arg2, int arg3);
 void fn_3_5A6D4(u8 status);
 void fn_3_5A6FC(void);
 void fn_3_5A87C(void);

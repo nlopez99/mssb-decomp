@@ -1155,7 +1155,8 @@ typedef struct _GameControlsStruct {
     /*0x00C*/ int homeTeamBattingInd_fieldingTeam;
     /*0x010*/ int awayTeamBattingInd_battingTeam;
     /*0x014*/ int AIDifficulty0Special3Weak[2];
-    artificial_padding(0x14, 0x24, u32[2]);
+    /*0x01C*/ int _1C;
+    /*0x020*/ int _20;
     /*0x024*/ LogoInfoStruct logo[2];
     /*0x03C*/ int battingOrderAndPositionMapping[2][10][2]; // first Pair Is Pitcher
     /*0x0DC*/ int currentBatterPerTeam[2];
