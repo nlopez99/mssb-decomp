@@ -2,12 +2,14 @@
 #define __GAME_rep_37A8_H_
 
 #include "mssbTypes.h"
+#include "Dolphin/gx.h"
 
 struct UnkMgEntry3310;
 
-void fn_3_141C8C(void);
+void fn_3_141C44(void);
+void fn_3_141C8C(void* arg0, GXTevStageID* stage, GXTexCoordID* coord, GXTexMapID* map, u8* arg4, u8* arg5);
 void fn_3_141F30(void);
-void fn_3_142030(void);
+s32 fn_3_142030(s32 x, s32 y, s32 width);
 void fn_3_142088(void);
 void fn_3_14225C(void);
 void fn_3_142284(void);
