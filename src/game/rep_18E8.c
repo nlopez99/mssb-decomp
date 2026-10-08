@@ -206,8 +206,6 @@ static u8 lbl_3_bss_17FC[4];
 static s32 lbl_3_bss_17F8;
 
 // .text:0x000ABDD0 size:0xC28 mapped:0x806EAE64
-// 99.18%: the 0.0f stored to f->_050 and compared in the throw-distance root is
-// addressed through addi in the base, which shifts three FPRs; statement orders tried.
 void fn_3_ABDD0(s32 fielder) {
     Unk18E8Fielder* f = &g_Fielders[fielder];
     f32 x;
@@ -304,9 +302,6 @@ void fn_3_ABDD0(s32 fielder) {
     } else {
         g_Ball.numThrowsDuringPlay = 0xFF;
     }
-    f->_050 = 0.0f;
-    f->_196 = 60;
-    f->_1E3 = 1;
     g_Ball.framesSinceThrowStarted = 0;
     g_Ball.ballState = 2;
     g_Ball.fielderWBallIndex = -1;
@@ -323,6 +318,9 @@ void fn_3_ABDD0(s32 fielder) {
     g_Ball.ballIsRollingIndicator = 0;
     g_FieldingLogic._11A = 0;
     g_FieldingLogic._11D = 0;
+    f->_050 = 0.0f;
+    f->_196 = 60;
+    f->_1E3 = 1;
     f->_1E4 = 0;
     g_Pitcher.pickOffLoc = -1;
     g_FieldingLogic._0CA = g_FieldingLogic._0C4;
