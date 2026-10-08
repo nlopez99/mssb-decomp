@@ -65,7 +65,7 @@ typedef struct StaC5Draw {
     /* 0xB8 */ f32 _B8;
     /* 0xBC */ f32 _BC;
     /* 0xC0 */ u8 _C0;
-    /* 0xC1 */ u8 _C1;
+    /* 0xC1 */ s8 _C1;
     /* 0xC2 */ u8 _C2[0xC4 - 0xC2];
     /* 0xC4 */ s8 _C4;
     /* 0xC5 */ u8 _C5;
@@ -220,7 +220,11 @@ static s32 lbl_3_bss_B560[4];
 static s32 lbl_3_bss_B55C;
 static f32 lbl_3_bss_B260[0xBF];
 static u32 lbl_3_bss_B244[7];
-static u8 lbl_3_bss_B220[0x24];
+static struct {
+    /* 0x00 */ u8 count;
+    /* 0x04 */ f32 _04;
+    /* 0x08 */ u8 _08[0x24 - 0x08];
+} lbl_3_bss_B220;
 static u8 lbl_3_bss_B21F;
 static u8 lbl_3_bss_B21E;
 static u8 lbl_3_bss_B21D;
@@ -266,13 +270,61 @@ void fn_3_F6C60(void) {
 }
 
 // .text:0x000F6A94 size:0x1CC mapped:0x80735B28
-void fn_3_F6A94(void) {
-    return;
+void fn_3_F6A94(s32* n) {
+    Mtx m;
+    Control control;
+    struct StadiumObjectCollision* collision;
+    s32 i;
+    u16 start;
+
+    start = lbl_3_common_bss_350E4._40[*n] = lbl_3_common_bss_350E4._3C[*n - 1] + lbl_3_common_bss_350E4._40[*n - 1];
+    for (i = 0; i < lbl_3_bss_B21E; i++) {
+        lbl_3_common_bss_350E4._44[start + i] = lbl_3_bss_B21D + i;
+        lbl_3_common_bss_350E4._3C[*n]++;
+    }
+    fn_3_B8574();
+    collision = lbl_3_common_bss_350E4._00[lbl_3_bss_B21D]._78;
+    control.type = 0;
+    CTRLSetTranslation(&control, -50.0f, 0.0f, 40.0f);
+    CTRLBuildMatrix(&control, m);
+    fn_3_B8464(m, collision);
+    control.type = 0;
+    CTRLSetTranslation(&control, 50.0f, -20.0f, 95.0f);
+    CTRLBuildMatrix(&control, m);
+    fn_3_B8464(m, collision);
+    if (lbl_3_common_bss_350E4._3C[*n] != 0) {
+        fn_3_B8414(&lbl_3_common_bss_350E4._48[*n * 2], &lbl_3_common_bss_350E4._48[*n * 2 + 1]);
+        (*n)++;
+    }
 }
 
 // .text:0x000F6938 size:0x15C mapped:0x807359CC
-void fn_3_F6938(void) {
-    return;
+void fn_3_F6938(s32* n) {
+    Mtx m;
+    Control control;
+    s32 i;
+    s32 idx;
+    StaC5Draw* draw;
+    struct StadiumObjectCollision* collision;
+    u16 start;
+
+    for (i = 0; i < lbl_3_bss_B220.count; i++) {
+        start = lbl_3_common_bss_350E4._40[*n] = lbl_3_common_bss_350E4._40[*n - 1] + lbl_3_common_bss_350E4._3C[*n - 1];
+        idx = lbl_3_bss_B21F + i;
+        lbl_3_common_bss_350E4._44[start] = idx;
+        lbl_3_common_bss_350E4._3C[*n]++;
+        draw = &lbl_3_common_bss_350E4._00[idx];
+        collision = draw->_78;
+        control.type = 0;
+        CTRLSetTranslation(&control, lbl_3_data_1B884[draw->_9C].pos.x, -lbl_3_data_1B884[draw->_9C].pos.y,
+                           lbl_3_data_1B884[draw->_9C].pos.z);
+        CTRLSetScale(&control, 1.5f, 1.5f, 1.5f);
+        CTRLBuildMatrix(&control, m);
+        fn_3_B8574();
+        fn_3_B8464(m, collision);
+        fn_3_B8414(&lbl_3_common_bss_350E4._48[*n * 2], &lbl_3_common_bss_350E4._48[*n * 2 + 1]);
+        (*n)++;
+    }
 }
 
 // .text:0x000F66C8 size:0x270 mapped:0x8073575C
@@ -309,7 +361,7 @@ struct StadiumObjectCollision* fn_3_F6504(s32 idx, MtxPtr mtx) {
             return NULL;
         }
     } else if (lbl_3_common_bss_350E4._00[idx]._9D == 0) {
-        if (lbl_3_common_bss_350E4._00[idx]._C1 == 2) {
+        if ((u8)lbl_3_common_bss_350E4._00[idx]._C1 == 2) {
             return NULL;
         }
         if (g_Ball.AtBat_ContactResult >= 2) {
@@ -557,8 +609,48 @@ void fn_3_F2938(void) {
 }
 
 // .text:0x000F2724 size:0x214 mapped:0x807317B8
-void fn_3_F2724(void) {
-    return;
+void fn_3_F2724(StaC5Draw* draw, StaC5Draw* target) {
+    Vec d;
+    f32 sn;
+    f32 cs;
+    f32 m00;
+    f32 m01;
+    f32 m10;
+    f32 m11;
+    f32 x;
+    f32 z;
+    s32 stadium;
+    u8 vol;
+    SND_VOICEID voice;
+
+    sn = sin(-(0.017453292f * draw->_B4));
+    cs = cos(-(0.017453292f * draw->_B4));
+    PSVECSubtract(&target->_A0, &draw->_A0, &d);
+    d.y = 0.0f;
+    m00 = cos(-(0.017453292f * draw->_B4));
+    m01 = sin(-(0.017453292f * draw->_B4));
+    m10 = sin(-(0.017453292f * draw->_B4));
+    m11 = cos(-(0.017453292f * draw->_B4));
+    x = d.x * m00 + d.z * m01;
+    z = d.x * -m10 + d.z * m11;
+    x = fabs(x);
+    z = fabs(z);
+    if (x <= 3.0 && z <= 1.75) {
+        target->_C6 = 5;
+        stadium = g_d_GameSettings.StadiumID;
+        if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+            vol = lbl_3_data_84B8[11][0];
+        } else {
+            vol = lbl_3_data_8404[stadium][11][0];
+        }
+        voice = sndFXStartEx(lbl_3_data_81DC[stadium] + 11, vol, 63, 0);
+        if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+            vol = lbl_3_data_84B8[11][1];
+        } else {
+            vol = lbl_3_data_8404[stadium][11][1];
+        }
+        sndFXCtrl(voice, 91, vol);
+    }
 }
 
 // .text:0x000F2448 size:0x2DC mapped:0x807314DC
@@ -579,7 +671,7 @@ void fn_3_F22FC(StaC5Draw* draw, s8 idx) {
     fn_800527C4(&draw->_A0);
     for (i = 0; i < lbl_3_bss_B21C; i++) {
         other = &lbl_3_common_bss_350E4._00[lbl_3_bss_B21B + i];
-        if (other->_C6 == 3 && (s8)other->_C1 == idx) {
+        if (other->_C6 == 3 && other->_C1 == idx) {
             other->_B8 = 0.017453292f * (-other->_AC - 180.0f);
             other->_C6 = 4;
             other->_BC = 0.5f;
@@ -645,8 +737,20 @@ void fn_3_F1674(void) {
 }
 
 // .text:0x000F1518 size:0x15C mapped:0x807305AC
-void fn_3_F1518(void) {
-    return;
+void fn_3_F1518(StaC5Draw* draw) {
+    draw->_C5 = lbl_3_data_1B9A4[draw->_9C]._14;
+    draw->_C6 = 1;
+    draw->_C7 = 0;
+    draw->_C1 = -1;
+    if (!draw->_90_7) {
+        draw->_90_7 = 1;
+    }
+    draw->_99 = 1;
+    draw->_B0 = 0.0f;
+    fn_3_F1448(draw);
+    fn_3_B97DC(draw->_74, lbl_3_bss_B154[0]);
+    draw->_74->_58 = 1;
+    draw->_C0 = 0;
 }
 
 // .text:0x000F1448 size:0xD0 mapped:0x807304DC
@@ -700,8 +804,44 @@ void fn_3_EFB54(void) {
 }
 
 // .text:0x000EF930 size:0x224 mapped:0x8072E9C4
-void fn_3_EF930(void) {
-    return;
+void fn_3_EF930(StaC5Draw* draw) {
+    Quaternion q;
+    Quaternion rot;
+    Vec cross;
+    Vec vel;
+    Vec down;
+    f32 angle;
+    Vec axis = { 0.0f, -1.0f, 0.0f };
+
+    vel.x = 0.3 * cosf_kludge(draw->_B8);
+    vel.y = draw->_BC;
+    vel.z = 0.3 * sinf_kludge(draw->_B8);
+    PSVECAdd(&draw->_A0, &vel, &draw->_A0);
+    if (draw->_BC < 0.0f && draw->_A0.y - 1.0f < 0.0f) {
+        draw->_A0.x -= vel.x;
+        draw->_A0.y = 1.0f;
+        draw->_A0.z -= vel.z;
+        draw->_C6 = 6;
+        draw->_C7 = 75;
+    } else {
+        draw->_BC -= 0.044;
+    }
+    C_QUATRotAxisRad(&rot, &axis, -(0.017453292f * draw->_AC));
+    vel.y = -vel.y;
+    down.x = -vel.x;
+    down.y = -0.5f;
+    down.z = -vel.z;
+    PSVECNormalize(&vel, &vel);
+    PSVECNormalize(&down, &down);
+    PSVECCrossProduct(&down, &vel, &cross);
+    angle = acos(PSVECDotProduct(&vel, &down));
+    if (1.0f != angle && -1.0f != angle) {
+        C_QUATRotAxisRad(&q, &cross, angle);
+        PSQUATMultiply(&q, &rot, &q);
+        PSQUATNormalize(&q, &q);
+        CTRLSetQuat(&draw->control, q.x, q.y, q.z, q.w);
+    }
+    CTRLSetTranslation(&draw->control, draw->_A0.x, -draw->_A0.y, draw->_A0.z);
 }
 
 // .text:0x000EF890 size:0xA0 mapped:0x8072E924
