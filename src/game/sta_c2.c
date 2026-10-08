@@ -7,6 +7,7 @@
 #include "Dolphin/mtx.h"
 #include "musyx/musyx.h"
 #include "C3/control.h"
+#include "Dolphin/gx.h"
 #include "Dolphin/os.h"
 #include "Dolphin/rand.h"
 #include "Dolphin/mtxext.h"
@@ -210,7 +211,14 @@ typedef struct StaC2Particle {
     /* 0x00 */ struct StaC2Particle* next;
     /* 0x04 */ Vec pos;
     /* 0x10 */ Vec vel;
-    /* 0x1C */ Vec _1C;
+    union {
+        /* 0x1C */ Vec _1C;
+        struct {
+            /* 0x1C */ f32 grow;
+            /* 0x20 */ f32 growScale;
+            /* 0x24 */ f32 alpha;
+        };
+    };
     /* 0x28 */ u8 _28[0x38 - 0x28];
     /* 0x38 */ f32 _38;
     /* 0x3C */ f32 _3C;
@@ -218,6 +226,10 @@ typedef struct StaC2Particle {
     /* 0x44 */ u8 _44[0x48 - 0x44];
     /* 0x48 */ s16 delay;
     /* 0x4A */ s16 life;
+    /* 0x4C */ u8 _4C;
+    /* 0x4D */ u8 _4D;
+    /* 0x4E */ u8 _4E;
+    /* 0x4F */ u8 duration;
 } StaC2Particle;
 
 typedef struct {
@@ -226,12 +238,17 @@ typedef struct {
 } StaC2EmitterSrc;
 
 typedef struct {
-    /* 0x00 */ u8 _00[0xA4];
+    /* 0x00 */ u8 _00[0xA0];
+    /* 0xA0 */ StaC2Draw* _A0;
     /* 0xA4 */ StaC2EmitterSrc* _A4;
+    /* 0xA8 */ struct StaC2Emitter* _A8;
 } StaC2EmitterOwner;
 
 typedef struct StaC2Emitter {
-    /* 0x00 */ u8 _00[0x20];
+    /* 0x00 */ u8 _00[0x0C];
+    /* 0x0C */ StaC2Particle* particles;
+    /* 0x10 */ void* _10;
+    /* 0x14 */ u8 _14[0x20 - 0x14];
     /* 0x20 */ StaC2EmitterOwner* _20;
 } StaC2Emitter;
 
@@ -372,6 +389,7 @@ extern void fn_80033CC8(StaC2Particle* p, void* texture);
 extern void fn_8003403C(f32 width, f32 height);
 extern void fn_80025EEC(StaC2Anim* anim, s32, s32);
 extern u16 lbl_3_data_81DC[16];
+extern void fn_80033620(StaC2Emitter* emitter);
 extern StaC2SpriteRef lbl_80371C30[];
 
 // fn_3_B7F70 lies in unsplit code
@@ -407,7 +425,7 @@ static u8 lbl_3_bss_A023;
 static u8 lbl_3_bss_A022;
 static u8 lbl_3_bss_A021;
 static u8 lbl_3_bss_A020;
-static s32 lbl_3_bss_A01C;
+static u8* lbl_3_bss_A01C;
 static u8 lbl_3_bss_A018;
 
 // .text:0x000D67CC size:0x2244 mapped:0x80715860
@@ -1001,8 +1019,48 @@ void fn_3_CFD58(void) {
 }
 
 // .text:0x000CFB44 size:0x214 mapped:0x8070EBD8
-void fn_3_CFB44(void) {
-    return;
+BOOL fn_3_CFB44(StaC2Emitter* emitter) {
+    StaC2Particle* p = emitter->particles;
+    StaC2EmitterOwner* owner = emitter->_20;
+    s32 alpha;
+
+    fn_80033620(emitter);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
+    do {
+        if (p->delay <= 0 && p->life != 0) {
+            fn_8003403C(p->_38, p->_3C);
+            fn_80033CC8(p, emitter->_10);
+            p->_38 += 0.1;
+            if (p->_38 < 0.0f) {
+                p->_38 = 0.0f;
+            }
+            p->_3C += 0.1;
+            if (p->_3C < 0.0f) {
+                p->_3C = 0.0f;
+            }
+            alpha = p->color[3];
+            alpha -= 8;
+            if (alpha < 0) {
+                alpha = 0;
+            }
+            p->color[3] = alpha;
+            p->pos.x += p->vel.x;
+            p->pos.y -= p->vel.y;
+            p->pos.z += p->vel.z;
+            p->life--;
+        }
+        p->delay--;
+        if (p->life == 0) {
+            fn_3_CFAB4(p, emitter);
+        }
+        p = p->next;
+    } while (p != NULL);
+    if (owner->_A0->_D1 == 0) {
+        owner->_A8 = NULL;
+        return TRUE;
+    }
+    return FALSE;
 }
 
 // .text:0x000CFAB4 size:0x90 mapped:0x8070EB48
@@ -1175,8 +1233,21 @@ void fn_3_CDFA4(void) {
 }
 
 // .text:0x000CDD90 size:0x214 mapped:0x8070CE24
-void fn_3_CDD90(void) {
-    return;
+void fn_3_CDD90(StaC2Particle* p) {
+    p->_38 += p->growScale * (4.0 * p->grow / p->duration);
+    p->_3C += p->growScale * (-2.0 * p->grow / p->duration);
+    p->alpha += -255.0f / p->duration;
+    if (p->alpha < 0.0f) {
+        p->alpha = 0.0f;
+    }
+    p->color[3] = p->alpha;
+    p->color[0] = lbl_3_bss_A01C[0] * (p->color[3] / 255.0);
+    p->color[1] = lbl_3_bss_A01C[1] * (p->color[3] / 255.0);
+    p->color[2] = lbl_3_bss_A01C[2] * (p->color[3] / 255.0);
+    p->pos.x += p->vel.x;
+    p->pos.y -= p->vel.y;
+    p->pos.z += p->vel.z;
+    p->life--;
 }
 
 // .text:0x000CDB48 size:0x248 mapped:0x8070CBDC
@@ -1185,6 +1256,8 @@ void fn_3_CDB48(void) {
 }
 
 // .text:0x000CD968 size:0x1E0 mapped:0x8070C9FC
+// 93.77%: the target loads pos->x before pos->y for the corners and computes them in other
+// FPRs; the permuter found nothing better.
 BOOL fn_3_CD968(Vec* pos, f32 width, f32 height) {
     Vec out;
     Vec corners[4];
