@@ -2801,7 +2801,8 @@ typedef struct {
     /* 0x0037 */ u8 _37;
     /* 0x0038 */ u8 _38;
     /* 0x0039 */ u8 _39;
-    artificial_padding(0x39, 0x3C, u8);
+    /* 0x003A */ u8 _3A;
+    /* 0x003B */ u8 _3B;
     /* 0x003C */ u8 _3C;
     /* 0x003D */ u8 _3D;
     /* 0x003E */ u8 _3E;
