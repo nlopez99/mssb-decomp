@@ -22,6 +22,7 @@
 #include "game/m_sound.h"
 #include "game/rep_D0.h"
 #include "musyx/musyx.h"
+#include "game/rep_2308.h"
 
 extern struct {
     /* 0x00 */ s32 _00;
@@ -74,6 +75,11 @@ extern struct {
 } lbl_8036E548;
 
 extern u8 lbl_803CBC3C[];
+
+extern struct {
+    /* 0x00 */ u8 _00[0x28];
+    /* 0x28 */ u8 _28;
+} lbl_80366158;
 extern u8 lbl_800E8558[][6];
 
 typedef struct {
@@ -101,6 +107,8 @@ extern u8 lbl_3_data_5F44[12];
 extern u8 lbl_3_data_5F50[2][5];
 extern f32 lbl_3_data_5F5C[8];
 extern s16 lbl_3_data_5F7C[10];
+extern s16 lbl_3_data_5F3C[4];
+extern s16 lbl_3_data_5FC0[2];
 extern f32 lbl_3_data_5F90[12];
 extern f32 lbl_3_data_2138C[4];
 extern u8 lbl_3_data_76FC[][3];
@@ -127,7 +135,41 @@ static s32 lbl_3_bss_1728;
 
 // .text:0x00075560 size:0x45C mapped:0x806B45F4
 void fn_3_75560(void) {
-    return;
+    if (fn_3_107DB4(g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder])) {
+        g_Pitcher.AIInd = 0;
+    }
+    if (g_Pitcher.currentStateFrameCounter < 0x7FFE) {
+        g_Pitcher.currentStateFrameCounter++;
+    } else {
+        g_Pitcher.currentStateFrameCounter = 0x7FFF;
+    }
+    fn_3_A83C();
+    switch (g_Pitcher.pitcherActionState) {
+    case PITCHER_ACTION_STATE_TRANSITION:
+        fn_3_75090();
+        break;
+    case PITCHER_ACTION_STATE_PRE_PITCH:
+        fn_3_74D0C();
+        break;
+    case PITCHER_ACTION_STATE_WINDUP:
+        fn_3_74128();
+        break;
+    case PITCHER_ACTION_STATE_IN_AIR:
+        fn_3_73F2C();
+        break;
+    case PITCHER_ACTION_STATE_NO_CONTACT:
+        fn_3_73DE8();
+        break;
+    case PITCHER_ACTION_STATE_HIT:
+        fn_3_738A8();
+        break;
+    case PITCHER_ACTION_STATE_POST_HIT:
+        fn_3_73718();
+        break;
+    case PITCHER_ACTION_STATE_HIT_BY_PITCH:
+        fn_3_6FB98();
+        break;
+    }
 }
 
 // .text:0x000754B8 size:0xA8 mapped:0x806B454C
@@ -412,8 +454,157 @@ void fn_3_74AC4(void) {
 }
 
 // .text:0x00074128 size:0x99C mapped:0x806B31BC
+// The target has `b <windup>; b <end>` after framesAHeldForChargePitches = 0 (the goto is
+// not folded), and passes &g_UnkSound_32718 to fn_3_CAF9C, which rep_2308.h declares void(void).
 void fn_3_74128(void) {
-    return;
+    InputStruct* input = &g_Controls[g_GameLogic.teams[g_GameLogic.teamFielding]];
+
+    if (ACTIVE_TUTORIAL()) {
+        input = &g_Practice.inputs[g_GameLogic.teamFielding];
+    } else if (fn_3_107DB4(g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder])) {
+        input = &g_Minigame._1D7C[g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder]];
+    } else if (g_d_GameSettings.minigamesEnabled && g_Minigame.minigamePlayerSelectedOrder >= 0) {
+        input = &g_Controls[g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder]];
+    }
+    if (g_Pitcher.framesAHeldForChargePitches) {
+        g_Pitcher.framesAHeldForChargePitches++;
+        if ((g_Pitcher.AIInd == 0 && !(input->buttonInput & INPUT_BUTTON_A)) ||
+            (g_Pitcher.AIInd == 1 && g_AiLogic.aIPitchType == 0)) {
+            g_Pitcher.ChargePitchType = 0;
+        } else {
+            g_Pitcher.ChargePitchType = 1;
+        }
+        if (g_Pitcher.framesAHeldForChargePitches >= lbl_3_data_5F3C[0]) {
+            g_Pitcher.framesAHeldForChargePitches = 0;
+            goto windup;
+        }
+    } else {
+    windup:
+        if (g_Pitcher.pitchTotalTimeCounter < 0x7FFE) {
+            g_Pitcher.pitchTotalTimeCounter++;
+        } else {
+            g_Pitcher.pitchTotalTimeCounter = 0x7FFF;
+        }
+        if (g_Pitcher.pitchTotalTimeCounter == 1) {
+            if (g_Pitcher.starPitchInd && !g_d_GameSettings.minigamesEnabled &&
+                g_GameLogic.TeamStars[g_GameLogic.teamFielding] &&
+                fn_3_6D564(g_GameLogic.teamFielding, g_Pitcher.rosterID, 0) >= lbl_3_data_5EDC[4] &&
+                (gameInitOptions.starSkillsSetting || g_d_GameSettings.GameModeSelected == GAME_TYPE_PRACTICE)) {
+                if (!g_Pitcher.captainStarPitch) {
+                    if (g_GameLogic.TeamStars[g_GameLogic.teamFielding] >= starPowerCosts.regularStarCost &&
+                        g_Pitcher.nonCaptainStarPitch) {
+                        fn_3_740D0();
+                    } else {
+                        g_Pitcher.starPitchInd = 0;
+                    }
+                } else if (g_GameLogic.Team_CaptainRosterLoc[g_GameLogic.teamFielding] != g_Pitcher.rosterID &&
+                           g_d_GameSettings.GameModeSelected != GAME_TYPE_PRACTICE) {
+                    if (g_GameLogic.TeamStars[g_GameLogic.teamFielding] >= starPowerCosts.nonCaptain_CaptainStarCost) {
+                        g_Pitcher.starPitchType = g_Pitcher.captainStarPitch;
+                    } else {
+                        g_Pitcher.starPitchInd = 0;
+                    }
+                } else if (g_GameLogic.TeamStars[g_GameLogic.teamFielding] >= starPowerCosts.captainStarCost) {
+                    g_Pitcher.starPitchType = g_Pitcher.captainStarPitch;
+                } else {
+                    g_Pitcher.starPitchInd = 0;
+                }
+            }
+            fn_3_73FAC();
+            g_Pitcher.unknownFrameCounter = 0;
+            g_Pitcher.pitchChargeUp = 0.0f;
+            g_Pitcher.pitchChargeUpAnimationProportion = 0.0f;
+        }
+        if (g_Pitcher.AIInd) {
+            if (g_AiLogic.aIPitchType == 1 || g_AiLogic.aIPitchType == 3) {
+                if (g_AiLogic.aIPitchType != 3) {
+                    if (g_AiLogic.aIPerfectCharge) {
+                        g_Pitcher.ChargePitchType = 3;
+                    } else {
+                        g_Pitcher.ChargePitchType = 2;
+                    }
+                }
+                g_Pitcher.pitchChargeUp = 1.0f;
+                g_Pitcher.unknownFrameCounter++;
+                g_Pitcher.pitchChargeUpAnimationProportion =
+                    1.0f - (f32)(g_Pitcher.windupCountdownUntilBallReleased - 1) / (f32)g_Pitcher.pitchWindUpCountDown;
+                if (g_Pitcher.pitchChargeUpAnimationProportion > 1.0f) {
+                    g_Pitcher.pitchChargeUpAnimationProportion = 1.0f;
+                }
+            } else if (g_Pitcher.starPitchInd) {
+                g_Pitcher.unknownFrameCounter++;
+            }
+        } else if (g_Pitcher.ChargePitchType == 1 || g_Pitcher.starPitchInd || g_Pitcher.ballHaloTrainInd_unused) {
+            if ((g_Pitcher.AIInd == 0 && (input->buttonInput & INPUT_BUTTON_A)) ||
+                (g_Pitcher.AIInd == 1 && g_AiLogic.aIPitchType == 1) || g_Pitcher.starPitchInd ||
+                g_Pitcher.ballHaloTrainInd_unused) {
+                g_Pitcher.unknownFrameCounter++;
+            } else {
+                g_Pitcher.ChargePitchType = 2;
+                if (g_Pitcher.windupCountdownUntilBallReleased < lbl_3_data_5F3C[2]) {
+                    g_Pitcher.ChargePitchType = 3;
+                    if (g_Minigame.GameMode_MiniGame == MINI_GAME_ID_WALLBALL) {
+                        playSoundEffect(0x1B5);
+                    } else if (g_d_GameSettings.GameModeSelected == GAME_TYPE_PRACTICE &&
+                               (g_Practice.practiceLevel == 5 ||
+                                (g_Practice.practiceType_2 == PRACTICE_TYPE_PITCHING && g_Practice.practiceLevel == 1))) {
+                        playSoundEffect(0x1B5);
+                    }
+                } else if (g_Minigame.GameMode_MiniGame == MINI_GAME_ID_WALLBALL) {
+                    playSoundEffect(0x1B4);
+                } else if (g_d_GameSettings.GameModeSelected == GAME_TYPE_PRACTICE &&
+                           (g_Practice.practiceLevel == 5 ||
+                            (g_Practice.practiceType_2 == PRACTICE_TYPE_PITCHING && g_Practice.practiceLevel == 1))) {
+                    playSoundEffect(0x1B4);
+                }
+            }
+            if (g_Pitcher.ChargePitchType) {
+                g_Pitcher.pitchChargeUp =
+                    1.0f - (f32)(g_Pitcher.windupCountdownUntilBallReleased - 1) / (f32)g_Pitcher.pitchWindUpCountDown;
+                if (g_Pitcher.pitchChargeUp > 1.0f) {
+                    g_Pitcher.pitchChargeUp = 1.0f;
+                }
+            } else {
+                g_Pitcher.pitchChargeUp = 0.0f;
+            }
+            g_Pitcher.pitchChargeUpAnimationProportion = g_Pitcher.pitchChargeUp;
+        } else if (g_Pitcher.ChargePitchType || g_Pitcher.TypeOfPitch == 2) {
+            g_Pitcher.pitchChargeUpAnimationProportion =
+                1.0f - (f32)(g_Pitcher.windupCountdownUntilBallReleased - 1) / (f32)g_Pitcher.pitchWindUpCountDown;
+            if (g_Pitcher.pitchChargeUpAnimationProportion > 1.0f) {
+                g_Pitcher.pitchChargeUpAnimationProportion = 1.0f;
+            }
+        }
+        if (--g_Pitcher.windupCountdownUntilBallReleased <= 0) {
+            if (g_Pitcher.ChargePitchType == 1) {
+                g_Pitcher.pitchChargeUp = RandomF32_Game_Range(lbl_3_data_5F08[11], lbl_3_data_5F08[12]);
+                g_Pitcher.overChargeInd = 1;
+            }
+            fn_3_7310C();
+            if (g_Pitcher.ChargePitchType == 3) {
+                g_UnkSound_32718._08 = 1;
+                fn_3_CAF9C();
+            }
+            if (g_Pitcher.specialPitchTypeCode != 1 && g_Pitcher.specialPitchTypeCode != 2 &&
+                g_Pitcher.specialPitchTypeCode != 3 && !g_Pitcher.nonCaptainStarPitchTriggeredType &&
+                g_d_GameSettings.GameModeSelected != GAME_TYPE_MINIGAMES) {
+                g_GameLogic.PauseSimulationFrameCount = lbl_3_data_5FC0[1];
+            } else {
+                g_GameLogic.PauseSimulationFrameCount = lbl_3_data_5FC0[0];
+            }
+            if (g_GameLogic.PauseSimulationFrameCount) {
+                lbl_80366158._28 = 1;
+            }
+            fn_3_750C4(PITCHER_ACTION_STATE_IN_AIR);
+            if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES &&
+                g_Minigame.GameMode_MiniGame == MINI_GAME_ID_BOBOMB_DERBY && !g_Minigame.bOD_KingBombInd) {
+                fn_3_156218();
+            }
+        }
+        g_Ball.AtBat_Contact_BallPos.x = g_Pitcher.ballCurrentPosition.x;
+        g_Ball.AtBat_Contact_BallPos.y = g_Pitcher.ballCurrentPosition.y;
+        g_Ball.AtBat_Contact_BallPos.z = g_Pitcher.ballCurrentPosition.z;
+    }
 }
 
 // .text:0x000740D0 size:0x58 mapped:0x806B3164
@@ -504,6 +695,8 @@ void fn_3_73DE8(void) {
 }
 
 // .text:0x000738A8 size:0x540 mapped:0x806B293C
+// Registers only: g_Scores._C7 and &g_Scores._04 swap r5/r6. The permuter matched it with
+// `... + 1 >= (margin = g_Scores._C7)` (a u8 local), which no programmer would write.
 void fn_3_738A8(void) {
     int endFrame = 120;
 
@@ -869,6 +1062,8 @@ void fn_3_72CA8(void) {
 }
 
 // .text:0x00072768 size:0x540 mapped:0x806B17FC
+// The setup before the frame loop is scheduled differently (the target loads cur.z once for
+// dz and the loop, and 18.44f early); the loop and everything after it match.
 void fn_3_72768(void) {
     InputStruct* input = &g_Controls[g_GameLogic.teams[g_GameLogic.teamFielding]];
     s16* pitchData;
@@ -951,6 +1146,8 @@ void fn_3_72768(void) {
 }
 
 // .text:0x00071248 size:0x1520 mapped:0x806B02DC
+// Mostly inlined copies of this file's functions; the remaining differences are those of
+// fn_3_709B4 and the scheduling of the bounce and collision blocks.
 void fn_3_71248(void) {
     VecSrcDst ray;
     CollisionStruct hit;
@@ -1272,6 +1469,8 @@ void fn_3_70AEC(void) {
 }
 
 // .text:0x000709B4 size:0x138 mapped:0x806AFA48
+// Registers only: after getComponentsFromRad the target holds 0.0f and the radius in f0
+// and y in f2; the base swaps them.
 void fn_3_709B4(void) {
     f32 angle;
     f32 y;
@@ -1322,6 +1521,7 @@ void fn_3_70838(void) {
 }
 
 // .text:0x00070768 size:0xD0 mapped:0x806AF7FC
+// Registers only: the last fmuls has its operands swapped (f0,f0,f1 in the target).
 int fn_3_70768(f32* outX, BOOL curve, f32 targetZ) {
     int frames = 0;
     f32 z = g_Pitcher.ballCurrentPosition.z;
@@ -1490,6 +1690,8 @@ void fn_3_70280(void) {
 }
 
 // .text:0x0006FFC4 size:0x2BC mapped:0x806AF058
+// Registers only: the target keeps the speed in f5 and the 0.01f term in f4 (fn_3_6FDA0,
+// written the same way, matches); declaration and statement orders did not change it.
 void fn_3_6FFC4(void) {
     int spread = g_Ball.StaticRandomInt1 % 257 - 128;
     int ang;
