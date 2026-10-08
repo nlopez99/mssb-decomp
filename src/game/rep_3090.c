@@ -1833,14 +1833,15 @@ void fn_3_103C30(Vec* pos) {
     }
 }
 
-// 99.80%: registers only, in code shared with fn_3_1000D8: the fielder angle sum, the
-// ball-direction atan2 arguments and the dist/dz temporaries of cases 4 and 5.
+// 99.82%: registers only, in code shared with fn_3_1000D8: the fielder angle sum, the
+// ball-direction atan2 arguments and the dist/delta temporaries of cases 4 to 7.
 // .text:0x00101CC4 size:0x1F6C mapped:0x80740D58
 void fn_3_101CC4(void) {
     Mtx rot;
     Vec target;
     Vec offset;
     f32 angles[2];
+    Vec delta;
     f32 dist;
     f32 dx;
     f32 dy;
@@ -1980,62 +1981,62 @@ void fn_3_101CC4(void) {
             if (dist < 0.0f) {
                 dist = -g_Ball.AtBat_Contact_BallPos.z - g_pCamera->_2858.z;
             }
-            dz = g_Ball.AtBat_Contact_BallPos.z - g_Ball.pastCoordinates[0].z;
-            dx = g_Ball.AtBat_Contact_BallPos.x - g_Ball.pastCoordinates[0].x;
-            dy = g_Ball.AtBat_Contact_BallPos.y - g_Ball.pastCoordinates[0].y;
-            if (dz == 0.0f) {
-                dz = 0.0001f;
+            delta.z = g_Ball.AtBat_Contact_BallPos.z - g_Ball.pastCoordinates[0].z;
+            delta.x = g_Ball.AtBat_Contact_BallPos.x - g_Ball.pastCoordinates[0].x;
+            delta.y = g_Ball.AtBat_Contact_BallPos.y - g_Ball.pastCoordinates[0].y;
+            if (delta.z == 0.0f) {
+                delta.z = 0.0001f;
             }
-            scale = dist / dz;
-            g_pCamera->_2840.x = (g_Ball.AtBat_Contact_BallPos.x + dx) - dx * scale;
-            g_pCamera->_2840.y = (g_Ball.AtBat_Contact_BallPos.y + dy) - dy * scale;
-            g_pCamera->_2840.z = (g_Ball.AtBat_Contact_BallPos.z + dz) - dz * scale;
+            scale = dist / delta.z;
+            g_pCamera->_2840.x = (g_Ball.AtBat_Contact_BallPos.x + delta.x) - delta.x * scale;
+            g_pCamera->_2840.y = (g_Ball.AtBat_Contact_BallPos.y + delta.y) - delta.y * scale;
+            g_pCamera->_2840.z = (g_Ball.AtBat_Contact_BallPos.z + delta.z) - delta.z * scale;
             break;
         case 6:
             dist = g_Ball.AtBat_Contact_BallPos.z - g_pCamera->_2858.z;
             if (dist < 0.0f) {
                 dist = -g_Ball.AtBat_Contact_BallPos.z - g_pCamera->_2858.z;
             }
-            dz = g_Ball.AtBat_Contact_BallPos.z - g_Ball.pastCoordinates[0].z;
-            dx = g_Ball.AtBat_Contact_BallPos.x - g_Ball.pastCoordinates[0].x;
-            dy = g_Ball.AtBat_Contact_BallPos.y - g_Ball.pastCoordinates[0].y;
-            if (dz == 0.0f) {
-                dz = 0.0001f;
+            delta.z = g_Ball.AtBat_Contact_BallPos.z - g_Ball.pastCoordinates[0].z;
+            delta.x = g_Ball.AtBat_Contact_BallPos.x - g_Ball.pastCoordinates[0].x;
+            delta.y = g_Ball.AtBat_Contact_BallPos.y - g_Ball.pastCoordinates[0].y;
+            if (delta.z == 0.0f) {
+                delta.z = 0.0001f;
             }
-            scale = dist / dz;
-            g_pCamera->_2840.x = dx * scale + (g_Ball.AtBat_Contact_BallPos.x - dx);
-            g_pCamera->_2840.y = dy * scale + (g_Ball.AtBat_Contact_BallPos.y - dy);
-            g_pCamera->_2840.z = dz * scale + (g_Ball.AtBat_Contact_BallPos.z - dz);
+            scale = dist / delta.z;
+            g_pCamera->_2840.x = delta.x * scale + (g_Ball.AtBat_Contact_BallPos.x - delta.x);
+            g_pCamera->_2840.y = delta.y * scale + (g_Ball.AtBat_Contact_BallPos.y - delta.y);
+            g_pCamera->_2840.z = delta.z * scale + (g_Ball.AtBat_Contact_BallPos.z - delta.z);
             break;
         case 5:
             dist = g_Ball.AtBat_Contact_BallPos.z - g_pCamera->_2858.z;
             if (dist < 0.0f) {
                 dist = -g_Ball.AtBat_Contact_BallPos.z - g_pCamera->_2858.z;
             }
-            dz = g_Ball.AtBat_Contact_BallPos.z - g_Ball.pastCoordinates[0].z;
-            dx = g_Ball.AtBat_Contact_BallPos.x - g_Ball.pastCoordinates[0].x;
-            if (dz == 0.0f) {
-                dz = 0.0001f;
+            delta.z = g_Ball.AtBat_Contact_BallPos.z - g_Ball.pastCoordinates[0].z;
+            delta.x = g_Ball.AtBat_Contact_BallPos.x - g_Ball.pastCoordinates[0].x;
+            if (delta.z == 0.0f) {
+                delta.z = 0.0001f;
             }
-            scale = dist / dz;
-            g_pCamera->_2840.x = (g_Ball.AtBat_Contact_BallPos.x + dx) - dx * scale;
+            scale = dist / delta.z;
+            g_pCamera->_2840.x = (g_Ball.AtBat_Contact_BallPos.x + delta.x) - delta.x * scale;
             g_pCamera->_2840.y = g_Ball.AtBat_Contact_BallPos.y;
-            g_pCamera->_2840.z = (g_Ball.AtBat_Contact_BallPos.z + dz) - dz * scale;
+            g_pCamera->_2840.z = (g_Ball.AtBat_Contact_BallPos.z + delta.z) - delta.z * scale;
             break;
         case 7:
             dist = g_Ball.AtBat_Contact_BallPos.z - g_pCamera->_2858.z;
             if (dist < 0.0f) {
                 dist = -g_Ball.AtBat_Contact_BallPos.z - g_pCamera->_2858.z;
             }
-            dz = g_Ball.AtBat_Contact_BallPos.z - g_Ball.pastCoordinates[0].z;
-            dx = g_Ball.AtBat_Contact_BallPos.x - g_Ball.pastCoordinates[0].x;
-            if (dz == 0.0f) {
-                dz = 0.0001f;
+            delta.z = g_Ball.AtBat_Contact_BallPos.z - g_Ball.pastCoordinates[0].z;
+            delta.x = g_Ball.AtBat_Contact_BallPos.x - g_Ball.pastCoordinates[0].x;
+            if (delta.z == 0.0f) {
+                delta.z = 0.0001f;
             }
-            scale = dist / dz;
-            g_pCamera->_2840.x = dx * scale + (g_Ball.AtBat_Contact_BallPos.x - dx);
+            scale = dist / delta.z;
+            g_pCamera->_2840.x = delta.x * scale + (g_Ball.AtBat_Contact_BallPos.x - delta.x);
             g_pCamera->_2840.y = g_Ball.AtBat_Contact_BallPos.y;
-            g_pCamera->_2840.z = dz * scale + (g_Ball.AtBat_Contact_BallPos.z - dz);
+            g_pCamera->_2840.z = delta.z * scale + (g_Ball.AtBat_Contact_BallPos.z - delta.z);
             break;
         case 8:
             VEC_COPY(&g_pCamera->_2840, &g_pCamera->_2858);
@@ -2104,14 +2105,15 @@ void fn_3_101CC4(void) {
     }
 }
 
-// 99.78%: registers only: the fielder angle sum (1.5707964f + _048), the ball-direction
-// atan2 arguments and the dist/dz temporaries of cases 4 and 5.
+// 99.79%: registers only: the fielder angle sum (1.5707964f + _048), the ball-direction
+// atan2 arguments and the dist/delta temporaries of cases 4 to 7.
 // .text:0x001000D8 size:0x1BEC mapped:0x8073F16C
 void fn_3_1000D8(void) {
     Mtx rot;
     Vec target;
     Vec offset;
     f32 angles[2];
+    Vec delta;
     f32 dist;
     f32 dx;
     f32 dy;
@@ -2222,62 +2224,62 @@ void fn_3_1000D8(void) {
             if (dist < 0.0f) {
                 dist = -g_Ball.AtBat_Contact_BallPos.z - g_pCamera->_2858.z;
             }
-            dz = g_Ball.AtBat_Contact_BallPos.z - g_Ball.pastCoordinates[0].z;
-            dx = g_Ball.AtBat_Contact_BallPos.x - g_Ball.pastCoordinates[0].x;
-            dy = g_Ball.AtBat_Contact_BallPos.y - g_Ball.pastCoordinates[0].y;
-            if (dz == 0.0f) {
-                dz = 0.0001f;
+            delta.z = g_Ball.AtBat_Contact_BallPos.z - g_Ball.pastCoordinates[0].z;
+            delta.x = g_Ball.AtBat_Contact_BallPos.x - g_Ball.pastCoordinates[0].x;
+            delta.y = g_Ball.AtBat_Contact_BallPos.y - g_Ball.pastCoordinates[0].y;
+            if (delta.z == 0.0f) {
+                delta.z = 0.0001f;
             }
-            scale = dist / dz;
-            g_pCamera->_2840.x = (g_Ball.AtBat_Contact_BallPos.x + dx) - dx * scale;
-            g_pCamera->_2840.y = (g_Ball.AtBat_Contact_BallPos.y + dy) - dy * scale;
-            g_pCamera->_2840.z = (g_Ball.AtBat_Contact_BallPos.z + dz) - dz * scale;
+            scale = dist / delta.z;
+            g_pCamera->_2840.x = (g_Ball.AtBat_Contact_BallPos.x + delta.x) - delta.x * scale;
+            g_pCamera->_2840.y = (g_Ball.AtBat_Contact_BallPos.y + delta.y) - delta.y * scale;
+            g_pCamera->_2840.z = (g_Ball.AtBat_Contact_BallPos.z + delta.z) - delta.z * scale;
             break;
         case 6:
             dist = g_Ball.AtBat_Contact_BallPos.z - g_pCamera->_2858.z;
             if (dist < 0.0f) {
                 dist = -g_Ball.AtBat_Contact_BallPos.z - g_pCamera->_2858.z;
             }
-            dz = g_Ball.AtBat_Contact_BallPos.z - g_Ball.pastCoordinates[0].z;
-            dx = g_Ball.AtBat_Contact_BallPos.x - g_Ball.pastCoordinates[0].x;
-            dy = g_Ball.AtBat_Contact_BallPos.y - g_Ball.pastCoordinates[0].y;
-            if (dz == 0.0f) {
-                dz = 0.0001f;
+            delta.z = g_Ball.AtBat_Contact_BallPos.z - g_Ball.pastCoordinates[0].z;
+            delta.x = g_Ball.AtBat_Contact_BallPos.x - g_Ball.pastCoordinates[0].x;
+            delta.y = g_Ball.AtBat_Contact_BallPos.y - g_Ball.pastCoordinates[0].y;
+            if (delta.z == 0.0f) {
+                delta.z = 0.0001f;
             }
-            scale = dist / dz;
-            g_pCamera->_2840.x = dx * scale + (g_Ball.AtBat_Contact_BallPos.x - dx);
-            g_pCamera->_2840.y = dy * scale + (g_Ball.AtBat_Contact_BallPos.y - dy);
-            g_pCamera->_2840.z = dz * scale + (g_Ball.AtBat_Contact_BallPos.z - dz);
+            scale = dist / delta.z;
+            g_pCamera->_2840.x = delta.x * scale + (g_Ball.AtBat_Contact_BallPos.x - delta.x);
+            g_pCamera->_2840.y = delta.y * scale + (g_Ball.AtBat_Contact_BallPos.y - delta.y);
+            g_pCamera->_2840.z = delta.z * scale + (g_Ball.AtBat_Contact_BallPos.z - delta.z);
             break;
         case 5:
             dist = g_Ball.AtBat_Contact_BallPos.z - g_pCamera->_2858.z;
             if (dist < 0.0f) {
                 dist = -g_Ball.AtBat_Contact_BallPos.z - g_pCamera->_2858.z;
             }
-            dz = g_Ball.AtBat_Contact_BallPos.z - g_Ball.pastCoordinates[0].z;
-            dx = g_Ball.AtBat_Contact_BallPos.x - g_Ball.pastCoordinates[0].x;
-            if (dz == 0.0f) {
-                dz = 0.0001f;
+            delta.z = g_Ball.AtBat_Contact_BallPos.z - g_Ball.pastCoordinates[0].z;
+            delta.x = g_Ball.AtBat_Contact_BallPos.x - g_Ball.pastCoordinates[0].x;
+            if (delta.z == 0.0f) {
+                delta.z = 0.0001f;
             }
-            scale = dist / dz;
-            g_pCamera->_2840.x = (g_Ball.AtBat_Contact_BallPos.x + dx) - dx * scale;
+            scale = dist / delta.z;
+            g_pCamera->_2840.x = (g_Ball.AtBat_Contact_BallPos.x + delta.x) - delta.x * scale;
             g_pCamera->_2840.y = g_Ball.AtBat_Contact_BallPos.y;
-            g_pCamera->_2840.z = (g_Ball.AtBat_Contact_BallPos.z + dz) - dz * scale;
+            g_pCamera->_2840.z = (g_Ball.AtBat_Contact_BallPos.z + delta.z) - delta.z * scale;
             break;
         case 7:
             dist = g_Ball.AtBat_Contact_BallPos.z - g_pCamera->_2858.z;
             if (dist < 0.0f) {
                 dist = -g_Ball.AtBat_Contact_BallPos.z - g_pCamera->_2858.z;
             }
-            dz = g_Ball.AtBat_Contact_BallPos.z - g_Ball.pastCoordinates[0].z;
-            dx = g_Ball.AtBat_Contact_BallPos.x - g_Ball.pastCoordinates[0].x;
-            if (dz == 0.0f) {
-                dz = 0.0001f;
+            delta.z = g_Ball.AtBat_Contact_BallPos.z - g_Ball.pastCoordinates[0].z;
+            delta.x = g_Ball.AtBat_Contact_BallPos.x - g_Ball.pastCoordinates[0].x;
+            if (delta.z == 0.0f) {
+                delta.z = 0.0001f;
             }
-            scale = dist / dz;
-            g_pCamera->_2840.x = dx * scale + (g_Ball.AtBat_Contact_BallPos.x - dx);
+            scale = dist / delta.z;
+            g_pCamera->_2840.x = delta.x * scale + (g_Ball.AtBat_Contact_BallPos.x - delta.x);
             g_pCamera->_2840.y = g_Ball.AtBat_Contact_BallPos.y;
-            g_pCamera->_2840.z = dz * scale + (g_Ball.AtBat_Contact_BallPos.z - dz);
+            g_pCamera->_2840.z = delta.z * scale + (g_Ball.AtBat_Contact_BallPos.z - delta.z);
             break;
         case 8:
             VEC_COPY(&g_pCamera->_2840, &g_pCamera->_2858);
