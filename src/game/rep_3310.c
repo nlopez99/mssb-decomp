@@ -122,14 +122,20 @@ typedef struct {
 // g_Minigame's layout in the minigames this unit serves
 typedef struct {
     /* 0x00 */ Vec pos;
-    /* 0x0C */ u8 _0C[0x1C - 0xC];
+    /* 0x0C */ Vec rot;
+    /* 0x18 */ u8 _18[0x1A - 0x18];
+    /* 0x1A */ s16 _1A;
     /* 0x1C */ s16 _1C;
-    /* 0x1E */ u8 _1E[0x28 - 0x1E];
+    /* 0x1E */ s16 _1E;
+    /* 0x20 */ u8 _20[0x26 - 0x20];
+    /* 0x26 */ s16 _26;
     /* 0x28 */ s16 _28;
     /* 0x2A */ u8 _2A;
     /* 0x2B */ u8 _2B;
     /* 0x2C */ u8 _2C;
-    /* 0x2D */ u8 _2D[0x33 - 0x2D];
+    /* 0x2D */ u8 _2D;
+    /* 0x2E */ u8 _2E;
+    /* 0x2F */ u8 _2F[0x33 - 0x2F];
     /* 0x33 */ u8 _33;
     /* 0x34 */ u8 _34[0x38 - 0x34];
 } UnkMgEntry3310; // size: 0x38
@@ -215,6 +221,8 @@ extern void fn_800B4278(UnkModelSet3310* model);
 extern void fn_800ACFB0(void* data);
 extern void fn_800B993C(void);
 extern void fn_3_90CB0(void);
+// rep_37A8.h declares this as a void(void) placeholder
+extern void fn_3_143770(UnkMgEntry3310* entry);
 extern s32 fn_8005268C(void);
 extern void fn_80033B58(void* texture, s32 index, s32, s32);
 extern void fn_80024DB0(UnkAnimState3310* state);
@@ -224,6 +232,7 @@ extern void fn_80024FA4(UnkActor3310* actor, void* anim, UnkAnimState3310* state
 extern u8 lbl_3_data_69D0[0x520];
 extern s16 lbl_3_data_217A4[12];
 extern s16 lbl_3_data_21A04[8];
+extern s16 lbl_3_data_21E68[26];
 extern Vec lbl_3_data_21380;
 extern f32 lbl_3_data_2188C[7];
 extern Vec lbl_3_data_21A48;
@@ -288,10 +297,11 @@ f32 lbl_3_data_22664 = 8.0f;
 f32 lbl_3_data_22668 = 1.0f;
 s32 lbl_3_data_2266C = 60;
 u8 lbl_3_data_22670[8] = { 2, 0, 3, 4, 1, 0, 0, 0 };
-f32 lbl_3_data_22678[4] = { 2.0f, 2.5f, 1.0f, 1.0f };
+f32 lbl_3_data_22678[2][2] = { { 2.0f, 2.5f }, { 1.0f, 1.0f } };
 f32 lbl_3_data_22688[3] = { 0.5f, 0.0f, -0.5f };
 f32 lbl_3_data_22694[6] = { 0.5f, 1.0f, 1.0f, 0.5f, 0.5f, 0.5f };
-s16 lbl_3_data_226AC[8] = { 0, 0, 20, 10, 0, 0, 0xF50, 0 };
+s16 lbl_3_data_226AC[6] = { 0, 0, 20, 10, 0, 0 };
+u8 lbl_3_data_226B8[2] = { 15, 80 };
 u8 lbl_3_data_226BC[8] = { 3, 1, 4, 2, 0, 0, 0, 0 };
 f32 lbl_3_data_226C4[4] = { 1.5f, 0.7f, 1.0f, 0.5f };
 f32 lbl_3_data_226D4[2] = { 1.0f, 30.0f };
@@ -944,13 +954,93 @@ void fn_3_119468(s32 i) {
 }
 
 // .text:0x001192B8 size:0x1B0 mapped:0x8075834C
+// 91.03%: the int-to-float conversions of _1A and lbl_3_data_21E68[6] and the loads
+// of the two scale rows are scheduled in another order.
 void fn_3_1192B8(void) {
-    return;
+    UnkObj3310* obj;
+    s32 i;
+    f32 t;
+
+    for (i = 0; i < 3; i++) {
+        obj = &lbl_8036E548._2D94[i + 0x82];
+        obj->_26 = 0;
+        if (MG._0000[i]._2A != 0) {
+            obj->_26 = 1;
+            obj->_04.x = MG._0000[i].pos.x;
+            obj->_04.y = -MG._0000[i].pos.y;
+            obj->_04.z = MG._0000[i].pos.z;
+            if (MG._0000[i]._2A != 3) {
+                fn_8001D0D0(i + 0x82, lbl_3_data_22678[0][MG._0000[i]._2B]);
+            } else {
+                t = (f32)MG._0000[i]._1A / (f32)lbl_3_data_21E68[6];
+                fn_8001D0D0(i + 0x82, (1.0f - t) * lbl_3_data_22678[0][MG._0000[i]._2B] +
+                                          lbl_3_data_22678[1][MG._0000[i]._2B] * t);
+            }
+            if (MG._0000[i]._2B == 0) {
+                obj->_10.y = MG._0000[i].rot.y;
+                obj->_10.x = 0.0f;
+                obj->_10.z = 0.0f;
+            } else {
+                obj->_10.y = lbl_3_data_22688[i];
+            }
+            if (MG._0000[i]._2A == 4 && MG._0000[i]._1C <= 0 && (MG._0000[i]._1A & 1)) {
+                obj->_26 = 0;
+            }
+            obj->_00 = fn_3_11897C;
+            fn_3_118B18(i);
+        }
+    }
 }
 
 // .text:0x00118B18 size:0x7A0 mapped:0x80757BAC
-void fn_3_118B18(void) {
-    return;
+// 92.53%: the target saves r27-r31 and keeps i * 0x38 in r29 to address the entry again
+// for the final rot stores; the base reuses the entry pointer, so one register fewer.
+void fn_3_118B18(s32 i) {
+    UnkMgEntry3310* entry = &MG._0000[i];
+    s16 frame;
+
+    entry->_28++;
+    if (entry->_2A == 1) {
+        if (entry->_1A <= 1) {
+            fn_3_1189C8(i, 2, 0, 0, 0);
+            fn_8001D0D0(i + 0x82, 0.01f);
+        } else {
+            fn_8001D0D0(i + 0x82, LinearInterpolateToNewRange(entry->_1A, 0.0f, lbl_3_data_21E68[5],
+                                                              lbl_3_data_22678[1][entry->_2B],
+                                                              lbl_3_data_22678[0][entry->_2B]));
+        }
+        if (entry->_1C == 1) {
+            fn_3_1189C8(i, 0, 0, 6, 1);
+        }
+    } else if (entry->_2A == 4) {
+        if (entry->_1A <= 1) {
+            fn_3_1189C8(i, 4, 0, 0, 0);
+        }
+    } else if (entry->_1E == 2) {
+        if (entry->_2B == 0) {
+            fn_3_1189C8(i, 1, 0, 0, 0);
+        } else {
+            fn_3_1189C8(i, 5, 0, 0, 0);
+        }
+    } else if (entry->_1E == lbl_3_data_21E68[7]) {
+        if (entry->_33 != 0) {
+            fn_3_1189C8(i, 0, 0, 6, 1);
+        }
+    } else {
+        if (entry->_2E != 0 && (entry->_26 == 1 || entry->_2B != 0)) {
+            frame = lbl_3_data_226B8[0] - lbl_3_data_21E68[13] - 1;
+            if (entry->_2B == 0) {
+                fn_3_143770(entry);
+            }
+            fn_3_1189C8(i, 3, frame, 2, 0);
+        }
+        if (entry->_33 == 3 && entry->_28 == lbl_3_data_226B8[1] - lbl_3_data_226AC[3]) {
+            fn_3_1189C8(i, 0, 0, 6, 1);
+            MG._0000[i].rot.z = 0.0f;
+            MG._0000[i].rot.x = 0.0f;
+            MG._0000[i].rot.y = lbl_3_data_22688[i];
+        }
+    }
 }
 
 // .text:0x001189C8 size:0x150 mapped:0x80757A5C
@@ -1431,7 +1521,7 @@ void fn_3_116840(void) {
             obj->_04.x = MG._0000[i].pos.x;
             obj->_04.y = -MG._0000[i].pos.y;
             obj->_04.z = MG._0000[i].pos.z;
-            fn_8001D0D0(i + 0x82, lbl_3_data_22678[MG._0000[i]._2B]);
+            fn_8001D0D0(i + 0x82, lbl_3_data_22678[0][MG._0000[i]._2B]);
             obj->_10.y = lbl_3_data_22688[i];
             obj->_00 = fn_3_11897C;
             if (MG._0000[i]._1C == 1) {
