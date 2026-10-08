@@ -22,7 +22,7 @@ void fn_3_AF428(void);
 void fn_3_AF5A4(void);
 void fn_3_AFA64(void);
 void fn_3_AFB64(void);
-void fn_3_AFD48(void);
+s32 fn_3_AFD48(u16 buttons);
 void fn_3_AFD80(u8);
 void fn_3_AFDA4(void);
 
