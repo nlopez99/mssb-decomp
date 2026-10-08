@@ -362,7 +362,6 @@ void fn_3_ABDD0(s32 fielder) {
 }
 
 // .text:0x000AB5B0 size:0x820 mapped:0x806EA644
-// 99.90%: registers only, in the index arithmetic of the covering fielder's _0F4 load.
 void fn_3_AB5B0(s32 maxFrames, f32* angleOut, f32* speedOut) {
     f32 speed = *speedOut;
     f32 best = -9999.9f;
@@ -399,7 +398,10 @@ void fn_3_AB5B0(s32 maxFrames, f32* angleOut, f32* speedOut) {
             playSoundEffect(0x1A8);
         }
     }
-    highLimit = g_Fielders[g_FieldingLogic._0D0[g_FieldingLogic._0C4]]._0F4 - 0.2f;
+    {
+        Unk18E8Fielder* receiver = &g_Fielders[g_FieldingLogic._0D0[g_FieldingLogic._0C4]];
+        highLimit = receiver->_0F4 - 0.2f;
+    }
     if (lowLimit < 0.5f * highLimit) {
         lowLimit = 0.5f * highLimit;
     }
