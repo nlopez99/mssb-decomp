@@ -44,6 +44,8 @@ void fn_3_F7B8(void);
 void fn_3_F9F8(void);
 void fn_3_FBA8(void);
 void fn_3_FF4C(void);
+void fn_3_FF98(void);
+void fn_3_10030(void);
 void ballPhysica(void);
 
 #endif // !__GAME_rep_540_H_
