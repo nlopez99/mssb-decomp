@@ -1,5 +1,23 @@
 #include "game/rep_1AD0.h"
 #include "header_rep_data.h"
+#include "game/UnknownHomes_Game.h"
+#include "game/rep_1BC8.h"
+#include "game/rep_D18.h"
+#include "game/rep_1200.h"
+#include "game/game_batter.h"
+#include "game/rep_13B8.h"
+#include "game/rep_AC8.h"
+#include "game/rep_1B20.h"
+
+typedef struct Fielder1AD0 {
+    /* 0x000 */ u8 _000[0x1C7];
+    /* 0x1C7 */ u8 _1C7;
+    /* 0x1C8 */ u8 _1C8[0x268 - 0x1C8];
+} Fielder1AD0; // size: 0x268
+
+extern Fielder1AD0 g_Fielders[9];
+
+extern void fn_3_1DD48(void);
 
 // .text:0x000B1C14 size:0x9C mapped:0x806F0CA8
 void fn_3_B1C14(void) {
@@ -8,7 +26,13 @@ void fn_3_B1C14(void) {
 
 // .text:0x000B1BCC size:0x48 mapped:0x806F0C60
 void fn_3_B1BCC(void) {
-    return;
+    g_Practice._1DD = 0;
+    g_Practice._1DE = 0;
+    g_Practice._1DF = 0;
+    g_Practice._1E0 = 0;
+    g_Practice._1E2 = 0;
+    g_Practice.maybeCommandData[0] = 0;
+    fn_3_B3C78(0);
 }
 
 // .text:0x000B1A30 size:0x19C mapped:0x806F0AC4
@@ -53,12 +77,20 @@ void fn_3_B0E00(void) {
 
 // .text:0x000B0DB0 size:0x50 mapped:0x806EFE44
 void fn_3_B0DB0(void) {
-    return;
+    g_Practice.allowPlayToEndIndicator = 0;
+    g_GameLogic.pre_PostMiniGameInd = 1;
+    g_GameLogic.minigameLastTurnSuccessInd = 1;
+    g_GameLogic.hudLoadingRelated = 1;
+    fn_3_1DD48();
+    fn_3_5A6D4(7);
 }
 
 // .text:0x000B0D7C size:0x34 mapped:0x806EFE10
 void fn_3_B0D7C(void) {
-    return;
+    g_Pitcher.handedness = g_Fielders[0]._1C7;
+    g_Pitcher.curveBallSpeed = 125;
+    g_Pitcher.fastBallSpeed = 145;
+    g_Pitcher.cursedBallStat = 100;
 }
 
 // .text:0x000B0D78 size:0x4 mapped:0x806EFE0C
@@ -68,12 +100,17 @@ void fn_3_B0D78(void) {
 
 // .text:0x000B0D2C size:0x4C mapped:0x806EFDC0
 void fn_3_B0D2C(void) {
-    return;
+    if (g_Practice.aiBuntIndicator == 0 && g_Pitcher.framesUntilUnhittable + 1 == swingSoundFrame[0][1]) {
+        g_AiLogic.batterAISwingInd = 1;
+    }
 }
 
 // .text:0x000B0CF4 size:0x38 mapped:0x806EFD88
 BOOL fn_3_B0CF4(void) {
-    return 0;
+    if (g_Practice.aiBuntIndicator == 0) {
+        return FALSE;
+    }
+    return g_Ball.pitchHangtimeCounter > 0;
 }
 
 // .text:0x000B0B5C size:0x198 mapped:0x806EFBF0
@@ -88,7 +125,7 @@ void fn_3_B0AAC(void) {
 
 // .text:0x000B0A88 size:0x24 mapped:0x806EFB1C
 void fn_3_B0A88(void) {
-    return;
+    fn_3_B3C78(0);
 }
 
 // .text:0x000B0874 size:0x214 mapped:0x806EF908
@@ -118,7 +155,12 @@ void fn_3_B02A8(void) {
 
 // .text:0x000B025C size:0x4C mapped:0x806EF2F0
 void fn_3_B025C(void) {
-    return;
+    if (g_Practice.instructionNumber >= 0 || !fn_3_B32B8()) {
+        fn_3_75560();
+        atBat_batter();
+        fn_3_8A958();
+        fn_3_31594();
+    }
 }
 
 // .text:0x000B01E0 size:0x7C mapped:0x806EF274
@@ -138,5 +180,9 @@ void fn_3_AFE0C(void) {
 
 // .text:0x000AFDC0 size:0x4C mapped:0x806EEE54
 void fn_3_AFDC0(void) {
-    return;
+    g_Practice.allowPlayToEndIndicator = 0;
+    g_GameLogic.pre_PostMiniGameInd = 1;
+    g_GameLogic.minigameLastTurnSuccessInd = 1;
+    fn_3_1DD48();
+    fn_3_5A6D4(7);
 }
