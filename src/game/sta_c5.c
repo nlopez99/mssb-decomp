@@ -19,6 +19,7 @@
 #include "game/rep_23E8.h"
 #include "Dolphin/rand.h"
 
+
 typedef struct {
     /* 0x00 */ void* data;
     /* 0x04 */ u8 _04[0x06 - 0x04];
@@ -47,11 +48,17 @@ typedef struct StaC5Shape {
     /* 0x18 */ Mtx _18;
 } StaC5Shape;
 
-typedef struct {
-    /* 0x00 */ u8 _00[0x60];
-    /* 0x60 */ u8 _60;
-    /* 0x61 */ u8 _61[0xA4 - 0x61];
-    /* 0xA4 */ u8 _A4;
+typedef struct StaC5Bone {
+    /* 0x000 */ u8 _000[0x14];
+    /* 0x014 */ StaC5Shape* _14;
+    /* 0x018 */ u8 _018[0x60 - 0x18];
+    /* 0x060 */ u8 _60;
+    /* 0x061 */ u8 _061[0xA4 - 0x61];
+    /* 0x0A4 */ u8 _A4;
+    /* 0x0A5 */ u8 _0A5[0xEC - 0xA5];
+    /* 0x0EC */ MtxPtr _EC;
+    /* 0x0F0 */ u8 _0F0[0x100 - 0xF0];
+    /* 0x100 */ struct StaC5Bone* _100;
 } StaC5Bone;
 
 typedef struct {
@@ -59,6 +66,8 @@ typedef struct {
     /* 0x06 */ u16 _06;
     /* 0x08 */ u8 _08[0x18 - 0x08];
     /* 0x18 */ StaC5Bone** _18;
+    /* 0x1C */ u8 _1C[0x74 - 0x1C];
+    /* 0x74 */ StaC5Bone* _74;
 } StaC5Actor;
 
 typedef struct {
@@ -246,6 +255,15 @@ extern bool fn_800527C4(Vec* pos);
 extern void fn_80064430(Vec* pos, s32 type, f32 arg2, f32 arg3);
 extern BOOL fn_8001B728(s32, s32, Vec*);
 extern s32 fn_8005268C(void);
+extern void fn_8003A144(void);
+extern void* fn_80039AB4(void);
+extern void SetDisplayStateTexture(void* tex, s32, s32);
+extern void DOSetWorldMatrix(StaC5Shape* shape, MtxPtr m);
+
+extern struct {
+    /* 0x00 */ u8 _00[0x1D];
+    /* 0x1D */ u8 _1D;
+} lbl_803C5090;
 extern camera_803c639c_s* fn_80052734(s32 idx);
 extern s16 fn_3_B7F70(s16 range);
 
@@ -1339,7 +1357,28 @@ void fn_3_EEF24(void) {
 
 // .text:0x000EEE3C size:0xE8 mapped:0x8072DED0
 void fn_3_EEE3C(void) {
-    return;
+    StaC5Actor* actor = lbl_3_bss_B55C->_00;
+    StaC5Bone* bone;
+    Vec pos;
+
+    lbl_803C5090._1D = 1;
+    fn_8003A144();
+    SetDisplayStateTexture(fn_80039AB4(), 0, 0);
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+    bone = actor->_74;
+    while (bone != NULL) {
+        pos.x = bone->_EC[0][3];
+        pos.y = bone->_EC[1][3];
+        pos.z = bone->_EC[2][3];
+        fn_3_EE96C(&pos);
+        if (bone->_14 != NULL) {
+            DOSetWorldMatrix(bone->_14, bone->_EC);
+            fn_3_EE67C(bone->_14, fn_80052734(fn_8005268C())->view);
+        }
+        bone = bone->_100;
+        GXSetTevDirect(GX_TEVSTAGE0);
+    }
 }
 
 // .text:0x000EECF4 size:0x148 mapped:0x8072DD88
