@@ -68,7 +68,7 @@ void fn_3_F4BA0(struct StaC5Ball* obj);
 void fn_3_F4C4C(struct StaC5Ball* obj);
 void fn_3_F4D00(struct StaC5Ball* obj);
 void fn_3_F4DAC(void);
-void fn_3_F4FBC(void);
+void fn_3_F4FBC(struct StaC5Ball* obj);
 void fn_3_F56CC(void);
 void fn_3_F5C30(struct StaC5Ball* obj);
 s32 fn_3_F5E78(u8 id);

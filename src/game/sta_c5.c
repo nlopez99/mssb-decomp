@@ -131,7 +131,7 @@ typedef struct StaC5Ball {
     /* 0xA8 */ Vec pos;
     /* 0xB4 */ Vec vel;
     /* 0xC0 */ f32 _C0;
-    /* 0xC4 */ s8 _C4;
+    /* 0xC4 */ u8 _C4;
     /* 0xC5 */ u8 _C5;
 } StaC5Ball;
 
@@ -761,8 +761,94 @@ void fn_3_F56CC(void) {
 }
 
 // .text:0x000F4FBC size:0x710 mapped:0x80734050
-void fn_3_F4FBC(void) {
-    return;
+// 99.60%: obj takes r29 where the target has r30, which it later reuses for
+// g_d_GameSettings in the sound helper; declaration orders tried change nothing.
+void fn_3_F4FBC(StaC5Ball* obj) {
+    Vec dir;
+    Vec unit;
+    Vec fwd = { 0.0f, 0.0f, -1.0f };
+    f32 dot;
+    f32 angle;
+    f32 dist;
+
+    if (!g_Ball.deadBallReason) {
+        dir.x = g_Ball.AtBat_Contact_BallPos.x - obj->pos.x;
+        dir.y = 0.0f;
+        dir.z = g_Ball.AtBat_Contact_BallPos.z - obj->pos.z;
+        PSVECNormalize(&dir, &dir);
+        dot = PSVECDotProduct(&dir, &fwd);
+        if (dot > 1.0f) {
+            dot = 1.0f;
+        } else if (dot < -1.0f) {
+            dot = -1.0f;
+        }
+        angle = 57.29578f * (f32)acos(dot);
+        if (angle > 90.0f) {
+            angle = 90.0f;
+        }
+        if (dir.x < 0.0f) {
+            angle = 360.0f - angle;
+        }
+        obj->_C0 = -angle;
+        CTRLSetRotation(&obj->control, 0.0f, obj->_C0, 0.0f);
+    }
+    switch (obj->_C4) {
+    case 0:
+        if (g_Ball.AtBat_ContactResult >= 2) {
+            break;
+        }
+        if (!lbl_3_bss_AEE2) {
+            lbl_3_bss_AEE2 = 1;
+            if (fn_3_B7F70(100) + 1 > 63) {
+                lbl_3_bss_AEE1 = 1;
+            }
+        }
+        if (!lbl_3_bss_AEE1) {
+            fn_3_F4DAC();
+            lbl_3_bss_AEE1 = 1;
+        }
+        break;
+    case 1:
+        if (g_Ball.physicsSubstruct.velocity.y < 0.0f) {
+            obj->_A0->_C1 = 1;
+            fn_3_F4C4C(obj);
+            obj->_C4 = 3;
+            dir.x = g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x;
+            dir.y = 0.0f;
+            dir.z = g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z;
+            dist = PSVECMag(&dir);
+            if (dist > 68.0f) {
+                PSVECNormalize(&dir, &unit);
+                PSVECScale(&unit, 68.0f, &dir);
+            }
+            if (dist < 52.0f) {
+                PSVECNormalize(&dir, &unit);
+                PSVECScale(&unit, 52.0f, &dir);
+            }
+            fn_3_F31E0(obj->_A0, dir.x, dir.z);
+            playStadiumSound(0);
+        }
+        break;
+    case 2:
+        dir.x = g_Ball.AtBat_Contact_BallPos.x;
+        dir.y = 0.0f;
+        dir.z = g_Ball.AtBat_Contact_BallPos.z;
+        if (g_Ball.AtBat_ContactResult >= 2) {
+            obj->_C4 = 0;
+            break;
+        }
+        if (PSVECMag(&dir) > 52.0f) {
+            if (dir.z < 45.0f) {
+                dir.z = 45.0f;
+            }
+            fn_3_F31E0(obj->_A0, dir.x, dir.z);
+            fn_3_F4C4C(obj);
+            obj->_A0->_C1 = 1;
+            obj->_C4 = 3;
+            playStadiumSound(0);
+        }
+        break;
+    }
 }
 
 // .text:0x000F4DAC size:0x210 mapped:0x80733E40
