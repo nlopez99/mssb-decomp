@@ -2232,10 +2232,10 @@ BOOL fn_3_1354BC(s32 i, f32 x, f32 z) {
 }
 
 // .text:0x001350BC size:0x400 mapped:0x80774150
-// 53%: fn_3_135520 is inlined here and the outer loop counts with ctr; the target calls
-// fn_3_135520, so the original callee was over the auto-inline limit.
+// 59.4%: fn_3_135520 is inlined here (the target calls it; see the auto-inline note in
+// structure.md); forced out of line, this scores 91.9%, registers and the objs loop differ.
 Unk3520Coin* fn_3_1350BC(u32 player, u32 quadrant, u32 count, Unk3520Coin* coins) {
-    u8 strength = g_Minigame.minigameControlStruct.aIStrength[player];
+    u32 strength = g_Minigame.minigameControlStruct.aIStrength[player];
     Unk3520Coin* c;
     u32 i;
     u32 j;
@@ -2247,71 +2247,75 @@ Unk3520Coin* fn_3_1350BC(u32 player, u32 quadrant, u32 count, Unk3520Coin* coins
     f32 dist;
     Unk3520Fielder* fielder;
 
-    if (count == 0) {
-        return NULL;
-    }
-    for (i = 0, c = coins; i < count; i++, c++) {
-        c->valid = TRUE;
-        z = g_Minigame.wallBall_coinCoordinates[c->coin].z;
-        x = g_Minigame.wallBall_coinCoordinates[c->coin].x;
-        dz = z - lbl_3_data_21A48.z;
-        dx = x - lbl_3_data_21A48.x;
-        if (dx * dx + dz * dz < 20.25f) {
-            c->valid = FALSE;
-        } else if (player != g_Minigame._1D6D) {
-            if (g_Minigame._1D6D >= 0) {
-                fielder = &g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame._1D6D]];
-                dz = z - fielder->pos.z;
-                dx = x - fielder->pos.x;
-                if (dx * dx + dz * dz <= lbl_3_data_21B38[strength] * lbl_3_data_21B38[strength]) {
-                    c->valid = FALSE;
-                }
-            }
-            if (c->valid) {
-                for (j = 0; j < lbl_3_data_21A88[g_Minigame.soloMinigameDifficulty]; j++) {
-                    if (MG.objs[j]._3D >= 1 && MG.objs[j]._3D <= 3 && fn_3_1354BC(j, x, z)) {
+    if (count != 0) {
+        i = 0;
+        c = coins;
+        do {
+            c->valid = TRUE;
+            z = g_Minigame.wallBall_coinCoordinates[c->coin].z;
+            x = g_Minigame.wallBall_coinCoordinates[c->coin].x;
+            dz = z - lbl_3_data_21A48.z;
+            dx = x - lbl_3_data_21A48.x;
+            if (dx * dx + dz * dz < 20.25f) {
+                c->valid = FALSE;
+            } else if (player != g_Minigame._1D6D) {
+                if (g_Minigame._1D6D >= 0) {
+                    fielder = &g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame._1D6D]];
+                    dz = z - fielder->pos.z;
+                    dx = x - fielder->pos.x;
+                    if (dx * dx + dz * dz <= lbl_3_data_21B38[strength] * lbl_3_data_21B38[strength]) {
                         c->valid = FALSE;
-                        break;
+                    }
+                }
+                if (c->valid) {
+                    j = 0;
+                    do {
+                        if (MG.objs[j]._3D >= 1 && MG.objs[j]._3D <= 3 && fn_3_1354BC(j, x, z)) {
+                            c->valid = FALSE;
+                            break;
+                        }
+                    } while (++j < lbl_3_data_21A88[g_Minigame.soloMinigameDifficulty]);
+                }
+                if (c->valid && MG.box._1E == 2) {
+                    dz = z - MG.box.pos.z;
+                    dx = x - MG.box.pos.x;
+                    if (dx * dx + dz * dz <= lbl_3_data_21B58[strength] * lbl_3_data_21B58[strength]) {
+                        c->valid = FALSE;
                     }
                 }
             }
-            if (c->valid && MG.box._1E == 2) {
-                dz = z - MG.box.pos.z;
-                dx = x - MG.box.pos.x;
-                if (dx * dx + dz * dz <= lbl_3_data_21B58[strength] * lbl_3_data_21B58[strength]) {
+            fielder = &g_Fielders[g_Minigame.minigameFielderIndex[player]];
+            dz = g_Minigame.wallBall_coinCoordinates[c->coin].z - fielder->pos.z;
+            dx = g_Minigame.wallBall_coinCoordinates[c->coin].x - fielder->pos.x;
+            c->score = dx * dx + dz * dz;
+            for (k = 0; k < g_Minigame.miniGameNumberOfParticipants; k++) {
+                if (k == player) {
+                    continue;
+                }
+                fielder = &g_Fielders[g_Minigame.minigameFielderIndex[k]];
+                dz = g_Minigame.wallBall_coinCoordinates[c->coin].z - fielder->pos.z;
+                dx = g_Minigame.wallBall_coinCoordinates[c->coin].x - fielder->pos.x;
+                dist = dx * dx + dz * dz;
+                if (dist < 36.0f && dist < c->score) {
+                    c->score += 100.0f;
+                }
+            }
+            if (g_Minigame._1D72 != 0 && player != g_Minigame._1D6D) {
+                if (c->quadrant == ((quadrant + 1) & 3)) {
+                    c->score += 10000.0f;
+                } else if (c->quadrant == ((quadrant + 2) & 3)) {
+                    c->score += 400.0f;
+                }
+                if (fn_3_135520(c->x, c->z, 2.0f * lbl_3_data_21A54[2])) {
                     c->valid = FALSE;
                 }
             }
-        }
-        fielder = &g_Fielders[g_Minigame.minigameFielderIndex[player]];
-        dz = g_Minigame.wallBall_coinCoordinates[c->coin].z - fielder->pos.z;
-        dx = g_Minigame.wallBall_coinCoordinates[c->coin].x - fielder->pos.x;
-        c->score = dx * dx + dz * dz;
-        for (k = 0; k < g_Minigame.miniGameNumberOfParticipants; k++) {
-            if (k == player) {
-                continue;
-            }
-            fielder = &g_Fielders[g_Minigame.minigameFielderIndex[k]];
-            dz = g_Minigame.wallBall_coinCoordinates[c->coin].z - fielder->pos.z;
-            dx = g_Minigame.wallBall_coinCoordinates[c->coin].x - fielder->pos.x;
-            dist = dx * dx + dz * dz;
-            if (dist < 36.0f && dist < c->score) {
-                c->score += 100.0f;
-            }
-        }
-        if (g_Minigame._1D72 != 0 && player != g_Minigame._1D6D) {
-            if (c->quadrant == ((quadrant + 1) & 3)) {
-                c->score += 10000.0f;
-            } else if (c->quadrant == ((quadrant + 2) & 3)) {
-                c->score += 400.0f;
-            }
-            if (fn_3_135520(c->x, c->z, 2.0f * lbl_3_data_21A54[2])) {
-                c->valid = FALSE;
-            }
-        }
+            c++;
+        } while (++i < count);
+        fn_800246D4(fn_3_135698, coins, coins, sizeof(Unk3520Coin), count);
+        return coins;
     }
-    fn_800246D4(fn_3_135698, coins, coins, sizeof(Unk3520Coin), count);
-    return coins;
+    return NULL;
 }
 
 // .text:0x00134D4C size:0x370 mapped:0x80773DE0
