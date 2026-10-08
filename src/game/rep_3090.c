@@ -2487,9 +2487,9 @@ void fn_3_FD408(u32 idx, Vec* pos, f32* angles) {
     }
 }
 
-// 92.13%: the target loads the int-to-float constant with `addi r5; lfd f1,0(r5)` at entry,
-// which renumbers most integer registers, and schedules the Catmull-Rom coefficients
-// (5.0f, 2.0f, 3.0f, 4.0f loads) in another order; the B-spline branch matches.
+// 93.12%: the target loads the int-to-float constant with `addi r5; lfd f1,0(r5)` at entry,
+// which renumbers most integer registers; in the Catmull-Rom branch this build loads -1.0f
+// through `addi` and the target 4.0f directly. The B-spline branch matches.
 // .text:0x000FCF24 size:0x4E4 mapped:0x8073BFB8
 void fn_3_FCF24(void) {
     lbl_3_common_bss_DE94_s2* cam = lbl_3_common_bss_DE94._0000;
@@ -2541,7 +2541,7 @@ void fn_3_FCF24(void) {
                                           b3 * cam->_001C[i + 3]._10) / 6.0f;
             } else {
                 b0 = (-1.0f * t3 + 2.0f * t2) - t;
-                b2 = t + (-3.0f * t3 + 4.0f * t2);
+                b2 = t + (4.0f * t2 + -3.0f * t3);
                 b1 = 2.0f + (3.0f * t3 - 5.0f * t2);
                 b3 = t3 - t2;
                 cam->_0034[total]._00.x = (b0 * cam->_001C[i]._00.x + b1 * cam->_001C[i + 1]._00.x + b2 * cam->_001C[i + 2]._00.x +
