@@ -14,7 +14,7 @@ struct StaC2Emitter;
 
 void fn_3_CB8A8(struct StaC2Draw* draw);
 void fn_3_CBA9C(struct StaC2Draw* draw);
-void fn_3_CBAFC(void);
+void fn_3_CBAFC(struct StaC2Draw* draw);
 void fn_3_CBC18(void);
 void fn_3_CBF80(struct StaC2Draw* draw);
 void fn_3_CC1D4(void);
@@ -79,7 +79,7 @@ Vec* fn_3_D2684(struct StaC2Draw* draw);
 void fn_3_D278C(void);
 void fn_3_D2A0C(void);
 void fn_3_D30D0(void);
-void fn_3_D36B0(void);
+void fn_3_D36B0(struct StaC2Draw* draw);
 void fn_3_D3880(void);
 void fn_3_D3CDC(void);
 void fn_3_D3F54(void);

@@ -437,6 +437,7 @@ extern void* lbl_803CC1B8;
 extern void fn_80034CEC(StaC2Task* task);
 extern void fn_800B0A14_removeQueue(void);
 extern void* _OSAllocFromHeap(u32 align, u32 size);
+extern void fn_8004C094(Vec* pos);
 extern StaC2SpriteRef lbl_80371C30[];
 
 // fn_3_B7F70 lies in unsplit code
@@ -826,8 +827,22 @@ void fn_3_D3880(void) {
 }
 
 // .text:0x000D36B0 size:0x1D0 mapped:0x80712744
-void fn_3_D36B0(void) {
-    return;
+void fn_3_D36B0(StaC2Draw* draw) {
+    draw->_A0.y += draw->_B0;
+    draw->_B0 -= 0.04f;
+    if (draw->_A0.y < 0.0f) {
+        draw->_A0.y = 0.0f;
+        if (!(draw->_99 & 4)) {
+            draw->_CB = draw->_CA;
+            draw->_CA = 1;
+            fn_80025EEC(draw->_8C, 0, 1);
+        }
+        draw->_99 &= 0xFB;
+        fn_8004C094(&draw->_A0);
+    }
+    fn_3_D2220(draw);
+    CTRLSetRotation(&draw->control, 0.0f, draw->_C0, 0.0f);
+    CTRLSetTranslation(&draw->control, draw->_A0.x, -draw->_A0.y, draw->_A0.z);
 }
 
 // .text:0x000D30D0 size:0x5E0 mapped:0x80712164
@@ -1936,8 +1951,20 @@ void fn_3_CBC18(void) {
 }
 
 // .text:0x000CBAFC size:0x11C mapped:0x8070AB90
-void fn_3_CBAFC(void) {
-    return;
+void fn_3_CBAFC(StaC2Draw* draw) {
+    StaC2Spring* springs = draw->springs;
+    Mtx m;
+    Vec axis = { 0.0f, 1.0f, 0.0f };
+    Vec force = { 0.0f, 0.0f, 0.0f };
+    Vec pos;
+
+    PSMTXRotAxisRad(m, &axis, 0.017453292f * draw->_C0);
+    PSMTXMultVec(m, &lbl_3_rodata_24E8, &pos);
+    PSVECAdd(&pos, &draw->_A0, &pos);
+    pos.y += 4.5;
+    springs[3]._0C[0] = pos;
+    springs[3]._0C[1] = springs[3]._0C[0];
+    fn_3_D1F2C(&lbl_3_bss_A8A8, draw->springs, 4, &force, draw);
 }
 
 // .text:0x000CBA9C size:0x60 mapped:0x8070AB30
