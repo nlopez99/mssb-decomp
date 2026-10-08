@@ -114,28 +114,74 @@ typedef struct {
 
 typedef struct StaC2Model {
     /* 0x00 */ StaC2Actor* _00;
-    /* 0x04 */ u8 _04[0x90 - 0x04];
+    /* 0x04 */ u8 _04[0x54 - 0x04];
+    /* 0x54 */ f32 _54;
+    /* 0x58 */ u8 _58;
+    /* 0x59 */ u8 _59;
+    /* 0x5A */ u8 _5A;
+    /* 0x5B */ u8 _5B;
+    /* 0x5C */ f32 _5C;
+    /* 0x60 */ u8 _60[0x90 - 0x60];
 } StaC2Model; // size: 0x90
+
+typedef struct {
+    /* 0x00 */ u8 _00[0xC];
+    /* 0x0C */ f32 frame;
+    /* 0x10 */ f32 speed;
+    /* 0x14 */ u8 _14[0x24 - 0x14];
+    /* 0x24 */ u16 length;
+} StaC2Anim;
+
+typedef struct {
+    /* 0x00 */ u8 _00[0x8];
+    /* 0x08 */ u32 _08;
+} StaC2Link;
 
 typedef struct StaC2Draw {
     /* 0x00 */ Control control;
     /* 0x44 */ u8 _44[0x74 - 0x44];
     /* 0x74 */ StaC2Model* _74;
     /* 0x78 */ struct StadiumObjectCollision* _78;
-    /* 0x7C */ u8 _7C[0x9C - 0x7C];
+    /* 0x7C */ u8 _7C[0x8C - 0x7C];
+    /* 0x8C */ StaC2Anim* _8C;
+    /* 0x90 */ u8 _90_7 : 1;
+    /* 0x90 */ u8 _90_6 : 1;
+    /* 0x90 */ u8 _90_5 : 1;
+    /* 0x90 */ u8 _90_0 : 5;
+    /* 0x91 */ u8 _91;
+    /* 0x92 */ u8 _92;
+    /* 0x93 */ u8 _93;
+    /* 0x94 */ s16 _94;
+    /* 0x96 */ s16 _96;
+    /* 0x98 */ u8 _98;
+    /* 0x99 */ u8 _99;
+    /* 0x9A */ u8 _9A[0x9C - 0x9A];
     /* 0x9C */ u8 _9C;
     /* 0x9D */ u8 _9D[0xA0 - 0x9D];
-    /* 0xA0 */ Vec _A0;
-    /* 0xAC */ Quaternion _AC;
-    /* 0xBC */ f32 _BC;
-    /* 0xC0 */ f32 _C0;
-    /* 0xC4 */ StaC2Target* _C4;
-    /* 0xC8 */ u8 _C8[0xCA - 0xC8];
-    /* 0xCA */ u8 _CA;
-    /* 0xCB */ u8 _CB[0xD0 - 0xCB];
-    /* 0xD0 */ s8 _D0;
-    /* 0xD1 */ u8 _D1;
-    /* 0xD2 */ u8 _D2[0xE8 - 0xD2];
+    union {
+        struct {
+            /* 0xA0 */ Vec _A0;
+            /* 0xAC */ Quaternion _AC;
+            /* 0xBC */ f32 _BC;
+            /* 0xC0 */ f32 _C0;
+            /* 0xC4 */ StaC2Target* _C4;
+            /* 0xC8 */ u8 _C8[0xCA - 0xC8];
+            /* 0xCA */ u8 _CA;
+            /* 0xCB */ u8 _CB[0xD0 - 0xCB];
+            /* 0xD0 */ s8 _D0;
+            /* 0xD1 */ u8 _D1;
+            /* 0xD2 */ u8 _D2[0xE8 - 0xD2];
+        };
+        struct {
+            /* 0xA0 */ f32 frame;
+            /* 0xA4 */ f32 speed;
+            /* 0xA8 */ u8* trigger;
+            /* 0xAC */ u8 wait;
+        };
+        struct {
+            /* 0xA0 */ StaC2Link* link;
+        };
+    };
 } StaC2Draw; // size: 0xE8
 
 typedef struct StaC2Particle {
@@ -252,10 +298,14 @@ static u8 lbl_3_data_188C4[0x1A] = {
 };
 f32 lbl_3_data_188E0 = 0.1f;
 
-extern struct {
+typedef struct {
     /* 0x000 */ Vec pos;
-    /* 0x00C */ u8 _00C[0x268 - 0xC];
-} g_Fielders[9];
+    /* 0x00C */ u8 _00C[0x210 - 0xC];
+    /* 0x210 */ u8 _210;
+    /* 0x211 */ u8 _211[0x268 - 0x211];
+} StaC2Fielder; // size: 0x268
+
+extern StaC2Fielder g_Fielders[9];
 
 extern struct {
     /* 0x00 */ StaC2Draw* _00;
@@ -290,6 +340,7 @@ extern StaC2SpriteRef lbl_80371C30[];
 // fn_3_B7F70 lies in unsplit code
 extern s16 fn_3_B7F70(s16 range);
 extern void AnimateActorBones(StaC2Actor* actor);
+extern void fn_800B4CA0(StaC2Actor* actor, f32 frame);
 
 // MWCC lays out .bss statics in reverse order of declaration
 static u8 lbl_3_bss_ADD0[0x30];
@@ -524,8 +575,32 @@ Vec* fn_3_D2684(StaC2Draw* draw) {
 }
 
 // .text:0x000D255C size:0x128 mapped:0x807115F0
-void fn_3_D255C(void) {
-    return;
+s8 fn_3_D255C(StaC2Draw* draw) {
+    Vec diff;
+    u8 right[9] = { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
+    u8 left[9] = { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
+    u32 i;
+    u8* order;
+    StaC2Fielder* fielder;
+
+    if (draw->_A0.y > 3.0) {
+        return -1;
+    }
+    if (draw->_A0.x > 0.0f) {
+        order = right;
+    } else {
+        order = left;
+    }
+    for (i = 0; i < 9; i++) {
+        fielder = &g_Fielders[order[i]];
+        if (fielder != NULL && fielder->_210 == 0) {
+            PSVECSubtract(&draw->_A0, &fielder->pos, &diff);
+            if (PSVECMag(&diff) <= 4.5) {
+                return order[i];
+            }
+        }
+    }
+    return -1;
 }
 
 // .text:0x000D24E8 size:0x74 mapped:0x8071157C
@@ -585,8 +660,34 @@ void fn_3_D196C(void) {
 }
 
 // .text:0x000D1848 size:0x124 mapped:0x807108DC
-void fn_3_D1848(void) {
-    return;
+void fn_3_D1848(StaC2Draw* draw) {
+    StaC2Model* model = draw->_74;
+
+    if (*draw->trigger != 0) {
+        if (draw->_90_7) {
+            draw->_90_7 = 0;
+            draw->wait = draw->_9C % 3 * 30;
+            draw->frame = 0.0f;
+            model->_5C = draw->frame;
+            model->_59 = 1;
+            fn_800B4CA0(model->_00, model->_5C);
+        }
+    } else if (draw->wait != 0) {
+        if (draw->_90_7) {
+            draw->_90_7 = 0;
+        }
+        draw->wait--;
+    } else {
+        if (!draw->_90_7) {
+            draw->_90_7 = 1;
+        }
+        draw->frame += draw->speed;
+        if (draw->frame > 100.0f) {
+            draw->frame -= 100.0f;
+            draw->wait = 90;
+        }
+        AnimateActorBones(model->_00);
+    }
 }
 
 // .text:0x000D173C size:0x10C mapped:0x807107D0
@@ -748,8 +849,31 @@ void fn_3_CFA88(void) {
 }
 
 // .text:0x000CF930 size:0x158 mapped:0x8070E9C4
-void fn_3_CF930(void) {
-    return;
+void fn_3_CF930(StaC2Draw* draw) {
+    StaC2Anim* anim = draw->_8C;
+    u16 length;
+    f32 speed;
+    f32 step;
+
+    if (anim != NULL) {
+        length = anim->length;
+        speed = anim->speed;
+        if (anim->frame == length) {
+            CTRLSetTranslation(&draw->control, lbl_3_data_18730[draw->_9C].pos.x, 5.0f,
+                               lbl_3_data_18730[draw->_9C].pos.z);
+            draw->_8C = NULL;
+            draw->_90_7 = 0;
+        }
+        step = 255.0f / (length / speed);
+        if (draw->_92 <= step) {
+            draw->_92 = 0;
+        } else {
+            draw->_92 -= step;
+        }
+    }
+    if (draw->link != NULL && draw->link->_08 == 0) {
+        draw->link = NULL;
+    }
 }
 
 // .text:0x000CF92C size:0x4 mapped:0x8070E9C0
@@ -773,8 +897,21 @@ void fn_3_CEFA8(void) {
 }
 
 // .text:0x000CEE5C size:0x14C mapped:0x8070DEF0
-void fn_3_CEE5C(void) {
-    return;
+void fn_3_CEE5C(StaC2Particle* p, void* texture) {
+    fn_8003403C(p->_38, p->_3C);
+    fn_80033CC8(p, texture);
+    if (lbl_80366158._28 == 0) {
+        if (-p->delay < 5) {
+            p->_38 += 0.38;
+            p->_3C += 0.38;
+            p->color[3] += 34.0;
+        } else {
+            p->color[3] += -6.8;
+        }
+        p->pos.x += p->vel.x;
+        p->pos.y += p->vel.y;
+        p->pos.z += p->vel.z;
+    }
 }
 
 // .text:0x000CED40 size:0x11C mapped:0x8070DDD4
