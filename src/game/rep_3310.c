@@ -8,6 +8,7 @@
 #include "game/rep_1D58.h"
 #include "game/m_sound.h"
 #include "game/rep_3880.h"
+#include "game/rep_3E58.h"
 #include "Dolphin/mtx.h"
 #include "C3/control.h"
 #include "Dolphin/gx.h"
@@ -233,6 +234,8 @@ extern u8 lbl_3_data_69D0[0x520];
 extern s16 lbl_3_data_217A4[12];
 extern s16 lbl_3_data_21A04[8];
 extern s16 lbl_3_data_21E68[26];
+extern VecXYZ lbl_3_data_21520[2][7];
+extern s16 lbl_3_data_21654[12];
 extern Vec lbl_3_data_21380;
 extern f32 lbl_3_data_2188C[7];
 extern Vec lbl_3_data_21A48;
@@ -498,8 +501,54 @@ void fn_3_11B75C(void) {
 }
 
 // .text:0x0011AC6C size:0xAF0 mapped:0x80759D00
+// 84.14%: the base inlines fn_3_1192B8, which the target calls; the rest follows its
+// inlined callees. fn_3_11D1B0 shows the same with fn_3_11CD00 and fn_3_11C02C.
 void fn_3_11AC6C(void) {
-    return;
+    s32 i;
+    UnkObj3310* obj;
+
+    if (g_GameLogic.gameStatus >= 0x1B && g_GameLogic.gameStatus <= 0x29) {
+        for (i = 0; i < lbl_8036E548._3078; i++) {
+            obj = &lbl_8036E548._2D94[i];
+            if (obj != NULL) {
+                obj->_26 = 0;
+            }
+        }
+        return;
+    }
+    switch (g_Minigame.GameMode_MiniGame) {
+    case MINI_GAME_ID_BOBOMB_DERBY:
+        fn_3_11AB2C();
+        break;
+    case MINI_GAME_ID_WALLBALL:
+        fn_3_11A408();
+        fn_3_11A210();
+        break;
+    case MINI_GAME_ID_BARREL_BATTER:
+        fn_3_119F6C();
+        fn_3_119D34();
+        break;
+    case MINI_GAME_ID_CHAINCHOMP_SPRINT:
+        fn_3_119934();
+        fn_3_119878();
+        break;
+    case MINI_GAME_ID_STAR_DASH:
+        fn_3_118164();
+        fn_3_1180A4();
+        fn_3_117FC8();
+        fn_3_11874C();
+        fn_3_117AE4();
+        fn_3_1179EC();
+        fn_3_117494();
+        break;
+    case MINI_GAME_ID_PIRANHA_PANIC:
+        fn_3_1194FC();
+        fn_3_1192B8();
+        fn_3_11874C();
+        fn_3_11887C();
+        fn_3_1183FC();
+        break;
+    }
 }
 
 // .text:0x0011AB2C size:0x140 mapped:0x80759BC0
@@ -572,8 +621,111 @@ void fn_3_11A92C(UnkObj3310* obj, s32 id) {
 }
 
 // .text:0x0011A408 size:0x524 mapped:0x8075949C
+// 97.15%: registers differ: the target keeps i * 0x28 in r25 and the wall cursor in r26,
+// and computes id after the category test.
 void fn_3_11A408(void) {
-    return;
+    UnkObj3310* obj;
+    UnkObj3310* shadow;
+    UnkModelSet3310* model;
+    UnkTexScroll3310* scroll;
+    u32 j;
+    u8 frame;
+    Vec pos;
+    MaybeWallBallStruct* wall;
+    s32 i;
+    s32 id;
+    u8 big = FALSE;
+
+    lbl_8036E548._2D94[0xFB]._26 = 0;
+    for (i = 0; i < 7; i++) {
+        lbl_8036E548._2D94[i + 0xE6]._26 = 0;
+        lbl_8036E548._2D94[i + 0xED]._26 = 0;
+        lbl_8036E548._2D94[i + 0xF4]._26 = 0;
+        lbl_8036E548._2D94[i + 0xFC]._26 = 0;
+        lbl_8036E548._2D94[i + 0x103]._26 = 0;
+        lbl_8036E548._2D94[i + 0x10A]._26 = 0;
+        wall = &g_Minigame.wallBallWalls[i];
+        if (g_Minigame.wallBallWalls[i]._28 == 0) {
+            continue;
+        } else if (g_Minigame.wallBallWalls[i]._28 == 4) {
+            id = i + (wall->coinGenerationCategory == 2) * 7 + 0xFC;
+            if (wall->coinGenerationCategory == 2) {
+                if (g_Minigame.wallBall_hitNoteBlock == 1) {
+                    pos.x = wall->_0.x;
+                    pos.y = g_Ball.AtBat_Contact_BallPos.y;
+                    pos.z = wall->_0.z;
+                    setAnim(&lbl_8036E548._0068->_34[id], lbl_3_common_bss_32724._70, 3);
+                    fn_3_151710((struct UnkModelRef3880*)&lbl_8036E548._0068->_34[id], &pos);
+                    fn_3_90064(0x2EB);
+                } else {
+                    setAnim(&lbl_8036E548._0068->_34[id], lbl_3_common_bss_32724._70, wall->coinGenerationCategory);
+                    fn_3_90064(0x2EC);
+                }
+            } else if (wall->coinGenerationCategory == 0) {
+                setAnim(&lbl_8036E548._0068->_34[id], lbl_3_common_bss_32724._70, wall->coinGenerationCategory);
+                fn_3_90064(0x2E2);
+            } else {
+                if (wall->coinGenerationCategory == 1) {
+                    big = TRUE;
+                }
+                fn_3_90064(0x2FF);
+            }
+            fn_3_14C348((Vec*)&wall->_0, big);
+            if (big) {
+                g_Minigame.wallBallWalls[i]._28 = 0;
+                continue;
+            }
+            g_Minigame.wallBallWalls[i]._28 = 5;
+        } else if (g_Minigame.wallBallWalls[i]._28 == 5) {
+            id = i + (wall->coinGenerationCategory == 2) * 7 + 0xFC;
+            frame = fn_3_11A350(id);
+            if (frame < (lbl_3_data_22634[wall->coinGenerationCategory] >> 1) && frame % 2 == 0) {
+                model = lbl_8036E548._0068->_34[id]._00;
+                for (j = 0; j < model->_06; j++) {
+                    scroll = model->_18[j]->_E8;
+                    if (scroll != NULL) {
+                        scroll->_00 += scroll->_08;
+                    }
+                }
+                continue;
+            }
+        } else {
+            if (wall->coinGenerationCategory == 0) {
+                if (wall->_24 > lbl_3_data_21654[wall->coinGenerationCategory + 4] / 2) {
+                    id = i + 0xED;
+                } else {
+                    id = 0xFB;
+                }
+            } else if (wall->coinGenerationCategory == 1) {
+                id = i + 0xF4;
+            } else {
+                id = i + 0x10A;
+                fn_3_1666B0((Vec*)&wall->_0);
+            }
+        }
+        obj = &lbl_8036E548._2D94[id];
+        obj->_26 = 1;
+        obj->_04.x = wall->_0.x;
+        obj->_04.y = -wall->_0.y;
+        obj->_04.z = wall->_0.z;
+        obj->_10.x = 0.0f;
+        obj->_10.y = 0.0f;
+        obj->_10.z = 0.0f;
+        obj->_10.x = wall->_18;
+        fn_8001D0D0(id, 1.75f);
+        if (-obj->_04.y <= lbl_3_data_21520[0][7].y && wall->_28 < 4) {
+            shadow = &lbl_8036E548._2D94[i + 0xE6];
+            shadow->_26 = 1;
+            shadow->_04.x = obj->_04.x;
+            shadow->_04.y = -obj->_04.y;
+            shadow->_04.z = obj->_04.z;
+            shadow->_04.y = -0.03f;
+            shadow->_10.x = 0.0f;
+            shadow->_10.y = 0.0f;
+            shadow->_10.z = 0.0f;
+            fn_8001D0D0(i + 0xE6, 1.75f * (1.0f - -obj->_04.y / lbl_3_data_21520[0][7].y));
+        }
+    }
 }
 
 // .text:0x0011A38C size:0x7C mapped:0x80759420
