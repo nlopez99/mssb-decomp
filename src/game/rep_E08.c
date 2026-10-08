@@ -18,7 +18,9 @@ typedef struct UnkE08Fielder {
     /* 0x050 */ f32 _050;
     /* 0x054 */ u8 _054[0xA8 - 0x54];
     /* 0x0A8 */ f32 _0A8;
-    /* 0x0AC */ u8 _0AC[0xD4 - 0xAC];
+    /* 0x0AC */ u8 _0AC[0xB8 - 0xAC];
+    /* 0x0B8 */ f32 _0B8;
+    /* 0x0BC */ u8 _0BC[0xD4 - 0xBC];
     /* 0x0D4 */ f32 _0D4;
     /* 0x0D8 */ f32 _0D8;
     /* 0x0DC */ u8 _0DC[0xE8 - 0xDC];
@@ -28,13 +30,24 @@ typedef struct UnkE08Fielder {
     /* 0x17A */ s16 _17A;
     /* 0x17C */ u8 _17C[0x1AA - 0x17C];
     /* 0x1AA */ s16 _1AA;
-    /* 0x1AC */ u8 _1AC[0x1C7 - 0x1AC];
+    /* 0x1AC */ u8 _1AC[0x1B4 - 0x1AC];
+    /* 0x1B4 */ s16 _1B4;
+    /* 0x1B6 */ u8 _1B6[0x1B8 - 0x1B6];
+    /* 0x1B8 */ s16 _1B8;
+    /* 0x1BA */ u8 _1BA[0x1BE - 0x1BA];
+    /* 0x1BE */ s16 _1BE;
+    /* 0x1C0 */ s16 _1C0;
+    /* 0x1C2 */ u8 _1C2[0x1C7 - 0x1C2];
     /* 0x1C7 */ u8 _1C7;
     /* 0x1C8 */ u8 _1C8;
     /* 0x1C9 */ u8 _1C9;
-    /* 0x1CA */ u8 _1CA[0x1D3 - 0x1CA];
+    /* 0x1CA */ u8 _1CA;
+    /* 0x1CB */ u8 _1CB;
+    /* 0x1CC */ u8 _1CC[0x1D3 - 0x1CC];
     /* 0x1D3 */ u8 _1D3;
-    /* 0x1D4 */ u8 _1D4[0x1E5 - 0x1D4];
+    /* 0x1D4 */ u8 _1D4[0x1D6 - 0x1D4];
+    /* 0x1D6 */ u8 _1D6;
+    /* 0x1D7 */ u8 _1D7[0x1E5 - 0x1D7];
     /* 0x1E5 */ u8 _1E5;
     /* 0x1E6 */ u8 _1E6[0x1EE - 0x1E6];
     /* 0x1EE */ u8 _1EE;
@@ -44,9 +57,13 @@ typedef struct UnkE08Fielder {
     /* 0x200 */ u8 _200;
     /* 0x201 */ u8 _201[0x203 - 0x201];
     /* 0x203 */ u8 _203;
-    /* 0x204 */ u8 _204[0x207 - 0x204];
+    /* 0x204 */ u8 _204;
+    /* 0x205 */ u8 _205;
+    /* 0x206 */ u8 _206;
     /* 0x207 */ u8 _207;
-    /* 0x208 */ u8 _208[0x20D - 0x208];
+    /* 0x208 */ u8 _208[0x20A - 0x208];
+    /* 0x20A */ u8 _20A;
+    /* 0x20B */ u8 _20B[0x20D - 0x20B];
     /* 0x20D */ u8 _20D;
     /* 0x20E */ u8 _20E;
     /* 0x20F */ u8 _20F;
@@ -115,8 +132,12 @@ typedef struct UnkE08Actor {
     /* 0x6A */ s16 _6A;
     /* 0x6C */ u8 _6C[0x252 - 0x6C];
     /* 0x252 */ s8 _252;
-    /* 0x253 */ u8 _253[0x26F - 0x253];
+    /* 0x253 */ u8 _253[0x25E - 0x253];
+    /* 0x25E */ u8 _25E;
+    /* 0x25F */ u8 _25F[0x26F - 0x25F];
     /* 0x26F */ u8 _26F;
+    /* 0x270 */ u8 _270[0x274 - 0x270];
+    /* 0x274 */ u8 _274;
 } UnkE08Actor;
 
 typedef struct UnkE08Track {
@@ -715,7 +736,255 @@ void fn_3_62904(void) {
 
 // .text:0x00061B64 size:0xDA0 mapped:0x806A0BF8
 void fn_3_61B64(s32 i) {
-    return;
+    s32 player = i;
+    UnkE08Anim* anim = &g_UnkAnimation_31EAC[i];
+    UnkE08Actor* actor;
+    UnkE08Throw* throwInfo = &g_UnkThrowing_31ACC;
+    UnkE08Fielder* fielder = &g_Fielders[i];
+    s16 actorAnim;
+    s32 animId;
+    s32 blend;
+
+    if (g_d_GameSettings.minigamesEnabled) {
+        if (i == 0) {
+            player = g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder];
+        } else {
+            player = g_Minigame.minigameControlStruct.characterIndex[fielder->_20D];
+        }
+    }
+    actor = lbl_8036E548._2C50[player];
+    if (actor == NULL) {
+        return;
+    }
+    actorAnim = actor->_62;
+    if (g_UnkThrowing_31ACC._0C == i && g_Ball.fielderWBallIndex == i) {
+        actor->_274 = 1;
+    }
+    if (g_Minigame.GameMode_MiniGame != 2) {
+        if (g_Minigame.GameMode_MiniGame == 5) {
+            if ((&g_Minigame._1C9A)[fielder->_20D] == 1) {
+                if (actorAnim != 0x24) {
+                    fn_3_90220(fielder->_17A, 10);
+                }
+                AnimateCharacter(player, 0x24, 1, 1, 0, 0, 0, -1);
+                anim->_43 = 0;
+                goto end;
+            }
+            if ((&g_Minigame._1C9A)[fielder->_20D] == 2) {
+                AnimateCharacter(player, 0, 1, 1, 0, 0, 0, -1);
+                goto end;
+            }
+            if (fn_3_60D80(i)) {
+                goto end;
+            }
+        }
+        if (g_Minigame.GameMode_MiniGame == 6 && g_Minigame.starDashStunType[fielder->_20D] == 2) {
+            if (actorAnim != 0x24 && actorAnim != 0x25) {
+                fn_3_90220(fielder->_17A, 10);
+                AnimateCharacter(player, 0x24, 0, 1, 0, 0, 0, -1);
+                QueueCharacterAnimation(player, 0x25, 0, 0, 0, 0, 0);
+            }
+            goto end;
+        }
+        if (fielder->_210 != 0) {
+            if (fielder->_210 == 1) {
+                if (fielder->_1BE == 1) {
+                    fn_3_60804(i, FALSE);
+                    if (actorAnim != 0x24) {
+                        fn_3_90220(fielder->_17A, 10);
+                    }
+                    AnimateCharacter(player, 0x24, 0, 1, 0, 0, anim->_40, -1);
+                }
+            } else {
+                if (fielder->_1BE == 1) {
+                    AnimateCharacter(player, 0x25, 0, 1, 1, 0, anim->_40, 0);
+                    fn_3_60804(i, TRUE);
+                }
+                if (fielder->_1C0 == 1) {
+                    AnimateCharacter(player, 0, 1, 1, 0, 0, anim->_40, -1);
+                    fn_3_60804(i, FALSE);
+                }
+            }
+            anim->_43 = 0;
+            goto end;
+        }
+        if (fn_3_61544(i)) {
+            if (!fn_3_61228(i)) {
+                fn_3_60E90(i);
+            }
+            goto end;
+        }
+        if (fielder->_20F != 0) {
+            if (fielder->_1B8 == 0) {
+                fn_3_60804(i, FALSE);
+            }
+            AnimateCharacter(player, 0x10, 1, 1, 0, 0, anim->_40, 0);
+            if (actorAnim != 0x10) {
+                fn_3_90220(fielder->_17A, 11);
+            }
+            anim->_43 = 0;
+            goto end;
+        }
+        if (throwInfo->_0C == i) {
+            if (!fn_3_61228(i) && !fn_3_60E90(i)) {
+                if (fielder->_205 >= 3) {
+                    AnimateCharacter(player, 0x27, 0, 1, 0, 0, anim->_40, -1);
+                } else if (anim->_00 > 0.02f) {
+                    if (g_Strikes.outs >= 3 && fielder->_1D6 == 0xD) {
+                        AnimateCharacter(player, 7, 1, 1, 0, 0, anim->_40, -1);
+                    } else if (g_Ball.fielderWBallIndex == i && fielder->_0B8 < 30.0f) {
+                        if (actorAnim == 5) {
+                            AnimateCharacter(player, 0x22, 1, 2, 0, 0, anim->_40, -1);
+                        } else {
+                            AnimateCharacter(player, 0x22, 1, 1, 0, 0, anim->_40, -1);
+                        }
+                    } else if (anim->_00 > 0.1f) {
+                        if (actorAnim == 0x22) {
+                            AnimateCharacter(player, 5, 1, 2, 0, 0, anim->_40, -1);
+                        } else {
+                            AnimateCharacter(player, 5, 1, 1, 0, 0, anim->_40, -1);
+                        }
+                    } else {
+                        AnimateCharacter(player, 7, 1, 1, 0, 0, anim->_40, -1);
+                    }
+                } else {
+                    AnimateCharacter(player, 1, 1, 1, 1, 0, anim->_40, -1);
+                }
+            }
+            goto end;
+        }
+        anim->_44 = 0;
+        if (fn_3_61148(i)) {
+            goto end;
+        }
+    }
+    if (fielder->_211 != 0 && fielder->_212 == 3) {
+        if (g_FieldingLogic._0F6 <= 1) {
+            fn_3_60804(player, FALSE);
+            anim->_44 = 0;
+            anim->_51 = 0;
+        }
+    } else if (fielder->_203 != 0) {
+        AnimateCharacter(player, 0x26, 0, 1, 0, 0, anim->_40, -1);
+    } else if (fielder->_207 != 0) {
+        if (fielder->_207 == 1) {
+            AnimateCharacter(player, 0x26, 0, 1, 0, 0, anim->_40, -1);
+        } else if (fielder->_207 == 2) {
+            AnimateCharacter(player, 0x28, 0, 1, 1, 0, anim->_40, -1);
+            actor->_26F = 1;
+        } else if (fielder->_207 == 3) {
+            if (fielder->_1B4 == 1) {
+                fn_3_60804(player, TRUE);
+            }
+        } else if (fielder->_207 == 4) {
+            actor->_26F = 0;
+            if (fielder->_1B4 == 1) {
+                AnimateCharacter(player, 0, 1, 1, 0, 0, anim->_40, -1);
+                fn_3_60804(player, FALSE);
+            }
+        }
+    } else if (fielder->_205 != 0) {
+        if (fielder->_205 == 1) {
+            AnimateCharacter(player, 0x26, 0, 1, 0, 0, anim->_40, -1);
+        } else if (fielder->_205 == 2) {
+            if (fielder->_206 != 0) {
+                s32 pose = 0x2A;
+
+                if (fielder->_206 == 3) {
+                    pose = 0x2B;
+                } else if (fielder->_206 == 4) {
+                    pose = 0x2C;
+                }
+                if (actorAnim == 0x2A || actorAnim == 0x2B || actorAnim == 0x2C) {
+                    AnimateCharacter(player, pose, 1, 2, 1, 0, anim->_40, -1);
+                } else {
+                    AnimateCharacter(player, pose, 1, 1, 1, 0, anim->_40, -1);
+                }
+            } else if (actorAnim == 0x2A) {
+                AnimateCharacter(player, 0x28, 1, 2, 1, 0, anim->_40, -1);
+            } else {
+                AnimateCharacter(player, 0x28, 1, 1, 1, 0, anim->_40, 0);
+            }
+        } else if (fielder->_205 >= 3) {
+            AnimateCharacter(player, 0x27, 0, 1, 0, 0, anim->_40, -1);
+        }
+    } else if (anim->_00 > 0.01f) {
+        if (fielder->_256 != 0) {
+            int facing = radToShortAngle(fielder->_048);
+            int target = fn_3_9FB8C(fielder->_030, fielder->_034);
+            int diff = fn_3_9FCA4(facing, target);
+
+            if (fielder->_256 == 1) {
+                animId = 8;
+                if (diff < -0x600 || diff > 0x600) {
+                    animId = 9;
+                } else if (diff > 0x200) {
+                    if (anim->_40 == 0) {
+                        animId = 0xA;
+                    } else {
+                        animId = 0xB;
+                    }
+                } else if (diff < -0x200) {
+                    if (anim->_40 == 0) {
+                        animId = 0xB;
+                    } else {
+                        animId = 0xA;
+                    }
+                }
+            }
+            AnimateCharacter(player, animId, 1, 1, 0, 0, anim->_40, -1);
+        } else if (fielder->_1CB == 1 && actorAnim == 0x28) {
+            AnimateCharacter(player, 2, 1, 2, 1, 0, anim->_40, -1);
+            fielder->_20A = 1;
+        } else if (anim->_00 > 0.1f) {
+            AnimateCharacter(player, 5, 1, 1, 0, 0, anim->_40, -1);
+        } else {
+            AnimateCharacter(player, 7, 1, 1, 0, 0, anim->_40, -1);
+        }
+    } else {
+        if (g_Minigame.GameMode_MiniGame == 2 && actorAnim >= 0x3F && actorAnim < 0x4B) {
+            return;
+        }
+        animId = 2;
+        if (anim->_41 == 1) {
+            animId = 0;
+        }
+        if (actorAnim == 0x24 || actorAnim == 0x25) {
+            if (actorAnim == 0x25) {
+                AnimateCharacter(player, 0, 1, 2, 1, 0, anim->_40, -1);
+            }
+        } else if (anim->_45 != 0) {
+            AnimateCharacter(player, 3, 1, 1, 0, 0, anim->_40, -1);
+        } else if (fielder->_1CB == 1 && actorAnim == 0x28) {
+            AnimateCharacter(player, animId, 1, 2, 1, 0, anim->_40, -1);
+            fielder->_20A = 1;
+        } else if (actorAnim == 0xF) {
+            AnimateCharacter(player, animId, 1, 2, 1, 0, anim->_40, -1);
+        } else if (i == 1 && g_Ball.framesSinceHit < 120) {
+            if (g_Ball.framesSinceHit >= 30 && g_Ball.framesSinceHit == 30) {
+                AnimateCharacter(player, 0x3E, 0, 1, 1, 0, anim->_40, -1);
+            }
+        } else if (actorAnim == 0x3E) {
+            AnimateCharacter(player, animId, 1, 2, 1, 0, anim->_40, -1);
+        } else {
+            blend = -1;
+            if (actorAnim == 0x40 || actorAnim == 0x42 || actorAnim == 0x49 || actorAnim == 0x4A) {
+                blend = 0;
+            }
+            AnimateCharacter(player, animId, 1, 1, 1, 0, anim->_40, blend);
+        }
+    }
+end:
+    if (anim->_42 != 0) {
+        actor->_34.x = anim->_10.x;
+        actor->_34.z = anim->_10.z;
+        anim->_42 = 1;
+    } else {
+        anim->_42 = 0;
+    }
+    if (fielder->_1CB == 1 && actorAnim == 0x28 && (actor->_68 <= 1 || actor->_25E == 1)) {
+        fn_3_60804(player, FALSE);
+    }
 }
 
 // .text:0x00061544 size:0x620 mapped:0x806A05D8
@@ -1074,7 +1343,7 @@ BOOL fn_3_60D80(s32 i) {
     s16 state;
     s16 timer;
     UnkE08Anim* anim = &g_UnkAnimation_31EAC[i];
-    int player;
+    s32 player;
 
     player = g_Minigame.minigameControlStruct._28[i - 2];
     state = lbl_8036E548._2C50[player]->_62;
