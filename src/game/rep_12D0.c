@@ -30,15 +30,22 @@ extern struct {
     /* 0x50 */ s16 _50[2][19];
     /* 0x9C */ u8 _9C[0xA8 - 0x9C];
     /* 0xA8 */ u8 _A8[2];
+    /* 0xAA */ u8 _AA;
+    /* 0xAB */ u8 _AB[0xAD - 0xAB];
+    /* 0xAD */ u8 _AD;
+    /* 0xAE */ u8 _AE[0xB7 - 0xAE];
+    /* 0xB7 */ s8 _B7[2];
 } g_Scores;
 
-typedef struct {
-    /* 0x00 */ u8 _00[0x1A];
+typedef struct Unk12D0PitcherStats {
+    /* 0x00 */ u8 _00[0xE];
+    /* 0x0E */ u16 _0E;
+    /* 0x10 */ u8 _10[0x1A - 0x10];
     /* 0x1A */ u8 _1A;
     /* 0x1B */ u8 _1B[0x1E - 0x1B];
 } Unk12D0PitcherStats; // size: 0x1E
 
-typedef struct {
+typedef struct Unk12D0PlayerStats {
     /* 0x00 */ u8 _00[0x15];
     /* 0x15 */ u8 _15;
     /* 0x16 */ u8 _16;
@@ -56,11 +63,250 @@ extern struct {
     /* 0x00 */ u8 _00[8];
     /* 0x08 */ s16 _08[2][19];
     /* 0x54 */ s16 _54[2][19];
-    /* 0xA0 */ u8 _A0[0xF0 - 0xA0];
+    /* 0xA0 */ s8 _A0[50];
+    /* 0xD2 */ u8 _D2[0xF0 - 0xD2];
     /* 0xF0 */ u8 _F0[2];
 } lbl_80353A90;
 
-extern u8 lbl_3_common_bss_32A38[2][9][5];
+extern s8 lbl_3_common_bss_32A38[2][9][5];
+
+extern int fn_3_6C938(int, int);
+
+typedef struct {
+    /* 0x0 */ u8 _0[2];
+    /* 0x2 */ u8 _2 : 4;
+    /* 0x2 */ u8 inning : 4;
+    /* 0x3 */ u8 _3;
+} Unk12D0Slot; // size: 0x4
+
+extern Unk12D0Slot lbl_80353260[2][9];
+extern s8 lbl_80354720[2][9][4];
+
+// .text:0x0007C194 size:0x68 mapped:0x806BB228
+BOOL fn_3_7C194(void) {
+    if (g_Stats.playFrameCounter < 90) {
+        return FALSE;
+    }
+    if (g_Stats.playFrameCounter > g_Stats._28 - 60) {
+        return FALSE;
+    }
+    return fn_3_6C938(1, 0x1100) != 0;
+}
+
+// .text:0x0007C190 size:0x4 mapped:0x806BB224
+void fn_3_7C190(void) {
+}
+
+// .text:0x0007BC0C size:0x14 mapped:0x806BACA0
+void fn_3_7BC0C(void) {
+    g_Stats._39 = 1;
+}
+
+// .text:0x0007BBF8 size:0x14 mapped:0x806BAC8C
+void fn_3_7BBF8(void) {
+    g_Stats._39 = 1;
+}
+
+// .text:0x0007BBC0 size:0x38 mapped:0x806BAC54
+Unk12D0PitcherStats* fn_3_7BBC0(void) {
+    return &lbl_803535C8[g_GameLogic.teamFielding]
+                        [g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.awayTeamBattingInd_battingTeam][0][0]];
+}
+
+// .text:0x0007BB74 size:0x4C mapped:0x806BAC08
+Unk12D0PlayerStats* fn_3_7BB74(void) {
+    return &lbl_803537E4[g_GameLogic.teamBatting]
+                        [g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.homeTeamBattingInd_fieldingTeam]
+                                                                   [g_GameLogic.currentBatterPerTeam[g_GameLogic.homeTeamBattingInd_fieldingTeam]][0]];
+}
+
+// .text:0x0007B130 size:0x1D8 mapped:0x806BA1C4
+void fn_3_7B130(void) {
+    s32 i;
+    int team;
+
+    for (team = 0; team < 2; team++) {
+        for (i = 0; i < 9; i++) {
+            if (lbl_80354720[team][i][3] == 1) {
+                lbl_80353260[team][i].inning = g_Scores._00;
+            }
+        }
+    }
+    for (i = 0; i < 5; i++) {
+        lbl_3_common_bss_32A94._36[i] = 0;
+    }
+    lbl_3_common_bss_32A94._32 = -1;
+    lbl_3_common_bss_32A94._34 = 0;
+    lbl_3_common_bss_32A94._3C = 0;
+    lbl_3_common_bss_32A94._60 = 1;
+    lbl_3_common_bss_32A94._62 = lbl_3_common_bss_32A94._61;
+    lbl_3_common_bss_32A94._61 = 0;
+    lbl_3_common_bss_32A94._3E = 0;
+    lbl_3_common_bss_32A94._3F = 0;
+    lbl_3_common_bss_32A94._40 = 0;
+    lbl_3_common_bss_32A94._41 = 0;
+    lbl_3_common_bss_32A94._42 = 0;
+    for (i = 0; i < 9; i++) {
+        lbl_3_common_bss_32A38[g_GameLogic.teamFielding][i][2] = -1;
+        lbl_3_common_bss_32A38[g_GameLogic.teamFielding][i][3] = -1;
+        lbl_3_common_bss_32A38[g_GameLogic.teamFielding][i][4] = -1;
+    }
+    lbl_3_common_bss_32A38[g_GameLogic.teamFielding]
+                          [g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.awayTeamBattingInd_battingTeam][0][0]][2] = 0;
+}
+
+// .text:0x0007AFE4 size:0x14C mapped:0x806BA078
+void fn_3_7AFE4(void) {
+    int i;
+    int team = g_Scores._AD;
+    int batter = g_GameLogic.currentBatterPerTeam[team];
+
+    lbl_3_common_bss_32A94._22 = -1;
+    lbl_3_common_bss_32A94._23 = 0;
+    lbl_3_common_bss_32A94._24 = 0;
+    lbl_3_common_bss_32A94._20 = -1;
+    lbl_3_common_bss_32A94._25 = 0;
+    lbl_3_common_bss_32A94._26 = 0;
+    if (lbl_3_common_bss_32A94._61 < 0xFE) {
+        lbl_3_common_bss_32A94._61++;
+    } else {
+        lbl_3_common_bss_32A94._61 = 0xFF;
+    }
+    if (batter == 1) {
+        if (lbl_3_common_bss_32A94._61 > 1 || g_Scores._00 != 1) {
+            lbl_3_common_bss_32A94._44[team]++;
+        }
+        fn_3_7AF68();
+    }
+    for (i = 0; i < 7; i++) {
+        lbl_3_common_bss_32A94._2B[i] = 0;
+    }
+}
+
+// .text:0x0007AF68 size:0x7C mapped:0x806BA000
+void fn_3_7AF68(void) {
+    int i;
+
+    lbl_3_common_bss_32A94._22 = -1;
+    lbl_3_common_bss_32A94._27 = 0;
+    for (i = 1; i < 4; i++) {
+        if (g_Runners[i].runnerOnFieldOrOutOrScored != 0) {
+            lbl_3_common_bss_32A94._28[i - 1] = 1;
+        } else {
+            lbl_3_common_bss_32A94._28[i - 1] = 0;
+        }
+    }
+}
+
+// .text:0x0007AEEC size:0x7C mapped:0x806B9F80
+void fn_3_7AEEC(void) {
+    int i;
+
+    lbl_3_common_bss_32A94._22 = -1;
+    lbl_3_common_bss_32A94._27 = 0;
+    for (i = 1; i < 4; i++) {
+        if (g_Runners[i].runnerOnFieldOrOutOrScored != 0) {
+            lbl_3_common_bss_32A94._28[i - 1] = 1;
+        } else {
+            lbl_3_common_bss_32A94._28[i - 1] = 0;
+        }
+    }
+}
+
+// .text:0x0007AEE8 size:0x4 mapped:0x806B9F7C
+void fn_3_7AEE8(void) {
+}
+
+// .text:0x0007AEA8 size:0x40 mapped:0x806B9F3C
+int fn_3_7AEA8(void) {
+    return g_GameLogic.currentBatterPerTeam[g_GameLogic.homeTeamBattingInd_fieldingTeam] +
+           (lbl_3_common_bss_32A94._44[g_GameLogic.homeTeamBattingInd_fieldingTeam] - 1) * 9 - 1;
+}
+
+// .text:0x0007AD68 size:0x140 mapped:0x806B9DFC
+void fn_3_7AD68(void) {
+    int i;
+    int pitcher = g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.awayTeamBattingInd_battingTeam][0][0];
+
+    if (lbl_3_common_bss_32A38[g_GameLogic.teamFielding][pitcher][2] < 0) {
+        lbl_3_common_bss_32A38[g_GameLogic.teamFielding][pitcher][2] = 0;
+    } else {
+        lbl_3_common_bss_32A38[g_GameLogic.teamFielding][pitcher][4] = 0;
+    }
+    for (i = 1; i < 10; i++) {
+        int pos = g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.awayTeamBattingInd_battingTeam][i][1];
+        int id = g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.awayTeamBattingInd_battingTeam][i][0];
+        if (pos > 0 && lbl_3_common_bss_32A38[g_GameLogic.teamFielding][id][2] == 0 &&
+            pos != lbl_3_common_bss_32A38[g_GameLogic.teamFielding][id][3]) {
+            lbl_3_common_bss_32A38[g_GameLogic.teamFielding][id][3] = pos;
+        }
+    }
+}
+
+// .text:0x0007AB34 size:0x44 mapped:0x806B9BC8
+void fn_3_7AB34(void) {
+    fn_3_7BBC0()->_0E++;
+}
+
+// .text:0x00079DD4 size:0x120 mapped:0x806B8E68
+void fn_3_79DD4(void) {
+    int lead;
+    int runners;
+    int pitcher;
+    int i;
+
+    lead = g_Scores._04[g_GameLogic.awayTeamBattingInd_battingTeam][0] -
+           g_Scores._04[g_GameLogic.homeTeamBattingInd_fieldingTeam][0];
+    g_Scores._B7[g_GameLogic.awayTeamBattingInd_battingTeam] = -1;
+    if (lead <= 0) {
+        return;
+    }
+    if (g_Scores._00 + 2 < g_Scores._AA || (g_Scores._00 + 2 == g_Scores._AA && g_Strikes.outs == 0)) {
+        goto save;
+    }
+    if (lead <= 3 && (g_Scores._00 < g_Scores._AA || (g_Scores._00 >= g_Scores._AA && g_Strikes.outs == 0))) {
+        goto save;
+    }
+    runners = 0;
+    for (i = 1; i < 4; i++) {
+        if (g_Runners[i].runnerOnFieldOrOutOrScored == 1) {
+            runners++;
+        }
+    }
+    if (lead > runners + 2) {
+        return;
+    }
+save:
+    pitcher = g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.awayTeamBattingInd_battingTeam][0][0];
+    g_Scores._B7[g_GameLogic.awayTeamBattingInd_battingTeam] = pitcher;
+    lbl_3_common_bss_32A38[g_GameLogic.teamFielding][pitcher][1] = 1;
+}
+
+// .text:0x00079A00 size:0xCC mapped:0x806B8A94
+void fn_3_79A00(void) {
+    s16 forceOut;
+
+    if (lbl_3_common_bss_32A94._25 == -1) {
+        return;
+    }
+    if (lbl_3_common_bss_32A94._25 == 0 && g_Strikes.runnerIndexForEachOutThisPitch[0] >= 0) {
+        if (g_Runners[g_Strikes.runnerIndexForEachOutThisPitch[0]].forceOutCd == 2) {
+            lbl_3_common_bss_32A94._25 = 1;
+        } else {
+            lbl_3_common_bss_32A94._25 = -1;
+        }
+    }
+    if (lbl_3_common_bss_32A94._25 == 1 && g_Strikes.runnerIndexForEachOutThisPitch[1] >= 0) {
+        forceOut = g_Runners[g_Strikes.runnerIndexForEachOutThisPitch[1]].forceOutCd;
+        if (forceOut == 2) {
+            lbl_3_common_bss_32A94._25 = 2;
+        } else if (forceOut == -1) {
+            lbl_3_common_bss_32A94._25 = 3;
+        } else {
+            lbl_3_common_bss_32A94._25 = -1;
+        }
+    }
+}
 
 // .text:0x000795A8 size:0x1C4 mapped:0x806B863C
 void fn_3_795A8(void) {
@@ -806,8 +1052,20 @@ positions:
     }
 }
 
+// .text:0x00076C78 size:0x90 mapped:0x806B5D0C
 void fn_3_76C78(void) {
-    return;
+    int i;
+
+    for (i = 0; i < 50; i++) {
+        if (lbl_80353A90._A0[i] == -1) {
+            if (g_GameLogic.teamBatting == 0) {
+                lbl_80353A90._A0[i] = g_Batter.rosterID;
+            } else {
+                lbl_80353A90._A0[i] = (s8)g_Batter.rosterID + 9;
+            }
+            return;
+        }
+    }
 }
 
 void fn_3_76558(void) {
