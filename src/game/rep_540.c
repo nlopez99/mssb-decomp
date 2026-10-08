@@ -1927,6 +1927,8 @@ void fn_3_9260(int collision) {
 }
 
 // .text:0x0000904C size:0x214 mapped:0x806480E0
+// The dead-ball code is written out: calling fn_3_9FA4 and fn_3_9E84 here makes this small
+// enough for MWCC to inline into fn_3_6C38, which calls it in the target.
 void fn_3_904C(void) {
     g_Ball.physicsSubstruct.velocity.x = 0.3f * g_Ball.physicsSubstruct.velocity.x;
     g_Ball.physicsSubstruct.velocity.y = 0.3f * g_Ball.physicsSubstruct.velocity.y;
