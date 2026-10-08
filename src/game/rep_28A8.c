@@ -125,7 +125,7 @@ extern s16 lbl_3_data_49DC[44];
 extern u16 lbl_3_data_81DC[16];
 extern u8 lbl_3_data_8404[6][15][2];
 extern u8 lbl_3_data_84B8[30][2];
-extern u8 lbl_3_data_88DC;
+extern u8 lbl_3_data_88DC[2];
 extern u8 lbl_3_data_21270[8];
 extern u8 lbl_3_common_bss_32234[6];
 
@@ -1901,7 +1901,7 @@ void fn_3_D9EA0(void) {
                     }
                     if (!lbl_3_common_bss_34C58._30) {
                         playStadiumSound(0xC);
-                        lbl_3_common_bss_34C58._30 = lbl_3_data_88DC;
+                        lbl_3_common_bss_34C58._30 = lbl_3_data_88DC[0];
                     }
                 }
             }

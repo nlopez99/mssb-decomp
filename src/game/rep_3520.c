@@ -168,7 +168,7 @@ extern void changeScene(u8, s16);
 extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_800ACFB0(void* data);
 extern u8 lbl_803CBBC0;
-extern u16 lbl_3_data_81FC[0x88];
+extern u16 lbl_3_data_81FC[0x39];
 
 extern u8 lbl_800EFBA4[0x10];
 extern u8 lbl_3_data_21278[2];
