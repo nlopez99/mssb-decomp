@@ -1969,12 +1969,12 @@ void fn_3_904C(void) {
 }
 
 // .text:0x00008CF0 size:0x35C mapped:0x80647D84
-// 99.9%: offset and ballTravelAngle are added from swapped volatile registers (r0/r3).
+// 99.94%: the target sets up &x before loading ballTravelAngle for the second
+// getComponentsFromSAng, the base &z.
 void fn_3_8CF0(f32* speed, int frames, u8* stopped, BOOL noKnockout) {
     f32 x;
     f32 z;
     f32 dist;
-    int offset;
     s32 code = g_Ball.collisionCode & 0x7F;
 
     if ((g_Ball.currentStarSwing == 9 || g_Ball.currentStarSwing == 10) && !noKnockout) {
@@ -1983,8 +1983,7 @@ void fn_3_8CF0(f32* speed, int frames, u8* stopped, BOOL noKnockout) {
         getComponentsFromSAng(RandomInt_Game(0x200) + 0x80, &x, &z);
         *speed = dist * z;
         dist = dist * x;
-        offset = RandomInt_Game(0x800) - 0x400;
-        getComponentsFromSAng(offset + g_Ball.ballTravelAngle, &x, &z);
+        getComponentsFromSAng(g_Ball.ballTravelAngle + RandomInt_Game(0x800) - 0x400, &x, &z);
         g_Ball.knockoutProcessedFlag = 1;
         g_Ball.savedVelocity.x = dist * x;
         g_Ball.savedVelocity.z = dist * z;
