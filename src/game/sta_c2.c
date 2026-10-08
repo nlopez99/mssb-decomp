@@ -452,7 +452,7 @@ extern struct {
     /* 0x2C50 */ StaC2Player* _2C50[13];
 } lbl_8036E548;
 
-extern s32 fn_8005268C(void);
+extern u32 fn_8005268C(void);
 extern camera_803c639c_s* fn_80052734(s32 idx);
 extern void fn_80033CC8(StaC2Particle* p, void* texture);
 extern void fn_8003403C(f32 width, f32 height);
@@ -2489,8 +2489,44 @@ void fn_3_CE56C(StaC2Spawner* spawner, u8 idx) {
 }
 
 // .text:0x000CDFA4 size:0x5C8 mapped:0x8070D038
-void fn_3_CDFA4(void) {
-    return;
+BOOL fn_3_CDFA4(StaC2Spawner* spawner) {
+    StaC2Particle* p = spawner->particles;
+    Vec pos;
+
+    if (g_GameLogic.gameStatus >= 27 && g_GameLogic.gameStatus <= 33) {
+        return FALSE;
+    }
+    if (g_GameLogic.gameStatus == 2 || g_GameLogic.gameStatus == 1) {
+        pos = spawner->pos;
+        if (!fn_3_CD968(&pos, 6.0f, 4.0f)) {
+            return FALSE;
+        }
+    }
+    fn_80033620((StaC2Emitter*)spawner);
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+    do {
+        if (p->delay <= 0 && p->life != 0) {
+            if (p->_4C % 3 == 0) {
+                GXSetBlendMode(GX_BM_SUBTRACT, GX_BL_ONE, GX_BL_ONE, GX_LO_CLEAR);
+                lbl_3_bss_A01C = (u8*)lbl_3_rodata_249C;
+            } else {
+                GXSetBlendMode(GX_BM_BLEND, GX_BL_ONE, GX_BL_ONE, GX_LO_CLEAR);
+                lbl_3_bss_A01C = (u8*)lbl_3_rodata_2498;
+            }
+            fn_8003403C(p->_38, p->_3C);
+            fn_80033CC8(p, spawner->_10);
+            if (fn_8005268C() == 0) {
+                fn_3_CDD90(p);
+            }
+        }
+        p->delay -= fn_8005268C() == 0;
+        if (p->life == 0) {
+            fn_3_CDB48(p, spawner);
+        }
+        p = p->next;
+    } while (p != NULL);
+    spawner->_25 = 1;
+    return FALSE;
 }
 
 // .text:0x000CDD90 size:0x214 mapped:0x8070CE24
@@ -2535,7 +2571,7 @@ void fn_3_CDB48(StaC2Particle* p, StaC2Spawner* spawner) {
 // .text:0x000CD968 size:0x1E0 mapped:0x8070C9FC
 // 93.77%: the target loads pos->x before pos->y for the corners and computes them in other
 // FPRs; the permuter found nothing better.
-BOOL fn_3_CD968(Vec* pos, f32 width, f32 height) {
+u8 fn_3_CD968(Vec* pos, f32 width, f32 height) {
     Vec out;
     Vec corners[4];
     camera_803c639c_s* camera;
