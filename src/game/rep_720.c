@@ -5,6 +5,7 @@
 #include "game/rep_3090.h"
 #include "game/rep_1838.h"
 #include "game/rep_D0.h"
+#include "game/rep_140.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/rand.h"
 
@@ -796,8 +797,22 @@ void fn_3_1AE44(u8 arg4, u16 arg5, f32 arg1, f32 arg2, f32 arg3) {
 }
 
 // .text:0x00019FA4 size:0xEA0 mapped:0x80659038
+// 96.99%: registers differ throughout, and the zoom lerps load lbl_3_data_A40's
+// _0C and the int-to-float constant with other addressing than the target
 void fn_3_19FA4(void) {
-    int r31;
+    VecXYZ points[5];
+    VecXZ keys[5];
+    s32 pitch[3];
+    s32 yaw[3];
+    VecXZ out;
+    s32 i;
+    int dur;
+    int sum;
+    int acc;
+    int d;
+    f32 t;
+    f32 zoom;
+
     if (g_pCamera->_000E < S16_MAX - 1) {
         g_pCamera->_000E++;
     } else {
@@ -808,18 +823,17 @@ void fn_3_19FA4(void) {
     }
 
     if (g_pCamera->_0014 == 0) {
-        r31 = g_pCamera->_000A[g_pCamera->_0013];
-        if (g_pCamera->_000E > r31) {
+        dur = g_pCamera->_000A[g_pCamera->_0013];
+        if (g_pCamera->_000E > dur) {
             g_pCamera->_000E = 1;
             g_pCamera->_0013++;
-            r31 = g_pCamera->_000A[(u8)g_pCamera->_0013];
+            dur = g_pCamera->_000A[(u8)g_pCamera->_0013];
             if (g_pCamera->_0013 >= g_pCamera->_0012 - 1) {
                 g_pCamera->_0014 = 1;
             }
         }
     }
-    if (g_pCamera->_0014 != 0)
-    {
+    if (g_pCamera->_0014 != 0) {
         f32 f28;
         lbl_3_data_A40_s* p = &lbl_3_data_A40[g_pCamera->_0004[g_pCamera->_0013]];
         VEC_COPY(&g_pCamera->_2858, &p->_00);
@@ -842,20 +856,128 @@ void fn_3_19FA4(void) {
             fn_3_1C8AC_inline(&v, _f31, _f6);
         }
     } else if (g_pCamera->_0015 != 0) {
-        int i;
-        int r9;
-        Vec sp50[5];
         for (i = 0; i < g_pCamera->_0012; i++) {
-            VEC_COPY(&sp50[i], &lbl_3_data_A40[i]._00);
+            lbl_3_data_A40_s* p = &lbl_3_data_A40[g_pCamera->_0004[i]];
+            VEC_COPY(&points[i], &p->_00);
         }
-        r9 = 0;
+        sum = 0;
+        for (i = 0; i < g_pCamera->_0012 - 1; i++) {
+            sum += g_pCamera->_000A[i];
+        }
+        t = (f32)g_pCamera->_0010 / (f32)sum;
+        fn_3_28E4((Vec*)&g_pCamera->_2858, (Vec*)points, g_pCamera->_0012, t);
+
+        keys[0].z = 0.0f;
+        sum = 0;
+        for (i = 1; i < g_pCamera->_0012; i++) {
+            sum += g_pCamera->_000A[i - 1];
+            keys[i].z = sum;
+        }
         for (i = 0; i < g_pCamera->_0012; i++) {
-            r9 += g_pCamera->_000A[i];
+            pitch[i] = lbl_3_data_A40[g_pCamera->_0004[i]]._10[0];
         }
-        
-        // fn_3_28E4();
+        acc = pitch[0];
+        (&points[0].x)[0] = acc;
+        for (i = 1; i < g_pCamera->_0012; i++) {
+            d = pitch[i] - pitch[i - 1];
+            if (d > 0x800) {
+                acc -= 0x1000 - d;
+            } else if (d < -0x800) {
+                acc += d + 0x1000;
+            } else {
+                acc += d;
+            }
+            (&points[0].x)[i] = acc;
+        }
+        for (i = 0; i < g_pCamera->_0012; i++) {
+            keys[i].x = (&points[0].x)[i];
+        }
+        running_roundBasePosition(t, &out, keys, g_pCamera->_0012);
+        g_pCamera->_2870 = fn_3_9FDD8(out.x);
+
+        for (i = 0; i < g_pCamera->_0012; i++) {
+            yaw[i] = lbl_3_data_A40[g_pCamera->_0004[i]]._10[1];
+        }
+        for (i = 0; i < g_pCamera->_0012; i++) {
+            (&points[0].x)[i] = yaw[i];
+        }
+        for (i = 0; i < g_pCamera->_0012; i++) {
+            keys[i].x = (&points[0].x)[i];
+        }
+        running_roundBasePosition(t, &out, keys, g_pCamera->_0012);
+        g_pCamera->_2874 = fn_3_9FDD8(out.x);
+
+        zoom = lbl_3_data_A40[g_pCamera->_0004[g_pCamera->_0013]]._0C;
+        g_pCamera->_2878 = (f32)g_pCamera->_000E * (lbl_3_data_A40[g_pCamera->_0004[g_pCamera->_0013 + 1]]._0C - zoom) / (f32)dur + zoom;
+        {
+            Vec v;
+            f32 _f30 = fn_3_9FEA8(g_pCamera->_2874);
+            f32 f30 = COSF(_f30) * 20.f;
+            f32 _f29 = SINF(_f30);
+
+            f32 _f28 = fn_3_9FEA8(g_pCamera->_2870);
+            f32 _f31 = COSF(_f28);
+            f32 _f6 = SINF(_f28);
+
+            v.x = _f31 * f30;
+            v.z = _f6 * f30;
+            v.y = _f29 * 20.f;
+            fn_3_1C8AC_inline(&v, _f31, _f6);
+        }
+        g_pCamera->_289C = radToShortAngle(g_pCamera->_2870);
+        g_pCamera->_289E = fn_3_9FF04(g_pCamera->_2874);
+        if (g_pCamera->_0010 < S16_MAX - 1) {
+            g_pCamera->_0010++;
+        } else {
+            g_pCamera->_0010 = S16_MAX;
+        }
+    } else {
+        lbl_3_data_A40_s* from = &lbl_3_data_A40[g_pCamera->_0004[g_pCamera->_0013]];
+        lbl_3_data_A40_s* to = &lbl_3_data_A40[g_pCamera->_0004[g_pCamera->_0013 + 1]];
+        f32 angle;
+        f32 diff;
+
+        g_pCamera->_2858.x = (f32)g_pCamera->_000E * (to->_00.x - from->_00.x) / (f32)dur + from->_00.x;
+        g_pCamera->_2858.y = (f32)g_pCamera->_000E * (to->_00.y - from->_00.y) / (f32)dur + from->_00.y;
+        g_pCamera->_2858.z = (f32)g_pCamera->_000E * (to->_00.z - from->_00.z) / (f32)dur + from->_00.z;
+        for (i = 0; i < 2; i++) {
+            angle = shortAngleToRad_Capped(from->_10[i]);
+            diff = shortAngleToRad_Capped(to->_10[i]) - angle;
+            if (diff > 3.1415927f) {
+                diff = -(6.2831855f - diff);
+            }
+            if (diff < -3.1415927f) {
+                diff += 6.2831855f;
+            }
+            diff = diff * (f32)g_pCamera->_000E / (f32)dur;
+            if (i == 0) {
+                g_pCamera->_2870 = diff + angle;
+                g_pCamera->_2870 = fn_3_9FEA8(g_pCamera->_2870);
+            } else {
+                g_pCamera->_2874 = diff + angle;
+                g_pCamera->_2874 = fn_3_9FEA8(g_pCamera->_2874);
+            }
+        }
+        zoom = from->_0C;
+        g_pCamera->_2878 = (f32)g_pCamera->_000E * (to->_0C - zoom) / (f32)dur + zoom;
+        {
+            Vec v;
+            f32 _f30 = fn_3_9FEA8(g_pCamera->_2874);
+            f32 f30 = COSF(_f30) * 20.f;
+            f32 _f29 = SINF(_f30);
+
+            f32 _f28 = fn_3_9FEA8(g_pCamera->_2870);
+            f32 _f31 = COSF(_f28);
+            f32 _f6 = SINF(_f28);
+
+            v.x = _f31 * f30;
+            v.z = _f6 * f30;
+            v.y = _f29 * 20.f;
+            fn_3_1C8AC_inline(&v, _f31, _f6);
+        }
+        g_pCamera->_289C = radToShortAngle(g_pCamera->_2870);
+        g_pCamera->_289E = fn_3_9FF04(g_pCamera->_2874);
     }
-    cos(r31);
 }
 
 // .text:0x00019CB0 size:0x2F4 mapped:0x80658D44
