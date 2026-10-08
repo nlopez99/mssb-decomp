@@ -2201,8 +2201,40 @@ void fn_3_499C4(s32 fielder, struct _VecXYZ* out) {
 }
 
 // .text:0x000494F4 size:0x4D0 mapped:0x80688588
-void fn_3_494F4(void) {
+// 99.35%: registers only; in the plant branch the target keeps dz, dx and the distance in
+// f8, f4 and f7 where this uses other float registers.
+void fn_3_494F4(s32 fielder) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+
+    if (g_Ball.pauseBallMovementWhenInPlant) {
+        f32 dz = g_Ball.AtBat_Contact_BallPos.z - f->_008;
+        f32 dx = g_Ball.AtBat_Contact_BallPos.x - f->_000;
+        f32 dist = dolsqrtf2(dx * dx + dz * dz);
+        f32 reach;
+
+        if (dist < lbl_3_data_4930[37]) {
+            goto stop;
+        }
+        reach = lbl_3_data_4930[36] - 1.0f;
+        dx /= dist;
+        dz /= dist;
+        fn_3_52F4C(fielder, reach * dx + f->_000, reach * dz + f->_008);
+    }
+    if (g_Ball.hitWallInd) {
+        if (f->_074 < lbl_3_data_4930[1]) {
+            goto stop;
+        }
+    } else if (dolsqrtf2(SQ(g_Ball.AtBat_Contact_BallPos.x - g_Ball.ballWillHitBallPos.x) +
+                         SQ(g_Ball.AtBat_Contact_BallPos.z - g_Ball.ballWillHitBallPos.z)) < lbl_3_data_4930[2] &&
+               f->_07C < lbl_3_data_4930[3]) {
+        goto stop;
+    }
+    if (g_Ball.hitClassification1 == 2 && f->_07C < lbl_3_data_4930[3]) {
+        goto stop;
+    }
     return;
+stop:
+    fn_3_530EC(fielder);
 }
 
 // .text:0x00048A54 size:0xAA0 mapped:0x80687AE8

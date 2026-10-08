@@ -164,7 +164,7 @@ void fn_3_480B8(void);
 void fn_3_483CC(s32 fielder);
 void fn_3_48480(s32 fielder);
 void fn_3_48A54(s32 fielder);
-void fn_3_494F4(void);
+void fn_3_494F4(s32 fielder);
 void fn_3_499C4(s32 fielder, struct _VecXYZ* out);
 void fn_3_49C18(s32 fielder);
 void fn_3_49EA8(s32 fielder);
