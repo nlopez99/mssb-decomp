@@ -102,7 +102,10 @@ typedef struct StaC5Draw {
     /* 0xB0 */ f32 _B0;
     /* 0xB4 */ f32 _B4;
     /* 0xB8 */ f32 _B8;
-    /* 0xBC */ f32 _BC;
+    union {
+        /* 0xBC */ f32 _BC;
+        /* 0xBC */ f32* _BCp;
+    };
     /* 0xC0 */ u8 _C0;
     /* 0xC1 */ s8 _C1;
     /* 0xC2 */ u8 _C2[0xC4 - 0xC2];
@@ -335,11 +338,9 @@ static struct {
     /* 0x54 */ u8 _54[0x2FC - 0x54];
 } lbl_3_bss_B260;
 static u32 lbl_3_bss_B244[7];
-static struct {
-    /* 0x00 */ u8 count;
-    /* 0x04 */ f32 _04;
-    /* 0x08 */ u8 _08[0x24 - 0x08];
-} lbl_3_bss_B220;
+static u8 lbl_3_bss_B228[0x1C];
+static f32 lbl_3_bss_B224;
+static u8 lbl_3_bss_B220;
 static u8 lbl_3_bss_B21F;
 static u8 lbl_3_bss_B21E;
 static u8 lbl_3_bss_B21D;
@@ -425,7 +426,7 @@ void fn_3_F6C60(void) {
     if (lbl_3_bss_B21E) {
         fn_3_F6A94(&n);
     }
-    if (lbl_3_bss_B220.count) {
+    if (lbl_3_bss_B220) {
         fn_3_F6938(&n);
     }
     if (lbl_3_bss_B21C) {
@@ -475,7 +476,7 @@ void fn_3_F6938(s32* n) {
     struct StadiumObjectCollision* collision;
     u16 start;
 
-    for (i = 0; i < lbl_3_bss_B220.count; i++) {
+    for (i = 0; i < lbl_3_bss_B220; i++) {
         start = lbl_3_common_bss_350E4._40[*n] = lbl_3_common_bss_350E4._40[*n - 1] + lbl_3_common_bss_350E4._3C[*n - 1];
         idx = lbl_3_bss_B21F + i;
         lbl_3_common_bss_350E4._44[start] = idx;
@@ -640,7 +641,7 @@ void fn_3_F6084(MtxPtr view, StadiumSort1D58* sort) {
         buf = fn_800ACF34(0x20, (lbl_3_common_bss_350E4._30 - m) * sizeof(StadiumSort1D58));
         fn_800C07BC(&sort[m], buf, lbl_3_common_bss_350E4._30 - m, sizeof(StadiumSort1D58), fn_3_F5F28);
         fn_800ACF14(buf);
-        for (i = 0; i < lbl_3_bss_B220.count; i++) {
+        for (i = 0; i < lbl_3_bss_B220; i++) {
             ball = (StaC5Ball*)&lbl_3_common_bss_350E4._00[lbl_3_bss_B21F + i];
             a = fn_3_F5E78(ball->_C5);
             b = fn_3_F5E78(ball->_A0->_C5);
@@ -769,7 +770,7 @@ void fn_3_F4DAC(void) {
     Vec vel;
     Vec dir;
     Vec forward = { 0.0f, 0.0f, 1.0f };
-    u8 step = 100 / lbl_3_bss_B220.count;
+    u8 step = 100 / lbl_3_bss_B220;
     u8 n = 0;
     f32 speed;
     f32 angle;
@@ -786,7 +787,7 @@ void fn_3_F4DAC(void) {
     if (angle < 18.0f) {
         roll = fn_3_B7F70(100);
         while (roll / step != 0) {
-            step += 100 / lbl_3_bss_B220.count;
+            step += 100 / lbl_3_bss_B220;
             n++;
         }
         draw = &lbl_3_common_bss_350E4._00[n + lbl_3_bss_B21F];
@@ -997,8 +998,13 @@ u32 fn_3_F37BC(u32 n, u32 k) {
 }
 
 // .text:0x000F31E0 size:0x5DC mapped:0x80732274
-void fn_3_F31E0(void) {
-    return;
+void fn_3_F31E0(StaC5Draw* draw, f32 x, f32 z) {
+    lbl_3_bss_B224 = 0.01f;
+    draw->_B8 = 0.7f;
+    fn_3_F2FFC(draw, x, z);
+    fn_3_F42A0();
+    fn_3_F3A5C(draw, lbl_3_bss_B260.pts[0].x, 16.5f, lbl_3_bss_B260.pts[0].z, *draw->_BCp);
+    lbl_3_bss_AEE4 = 0;
 }
 
 // .text:0x000F2FFC size:0x1E4 mapped:0x80732090

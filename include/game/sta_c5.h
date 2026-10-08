@@ -51,7 +51,7 @@ s32 fn_3_F2448(struct StaC5Draw* draw);
 void fn_3_F2724(struct StaC5Draw* draw, struct StaC5Draw* target);
 void fn_3_F2938(void);
 void fn_3_F2FFC(struct StaC5Draw* draw, f32 x, f32 z);
-void fn_3_F31E0(void);
+void fn_3_F31E0(struct StaC5Draw* draw, f32 x, f32 z);
 u32 fn_3_F37BC(u32 n, u32 k);
 void fn_3_F38D4(void);
 void fn_3_F3A04(struct StaC5Draw* draw);
