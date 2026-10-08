@@ -25,17 +25,26 @@ typedef struct UnkAC8Fielder {
     /* 0x04C */ u8 _04C[0x50 - 0x4C];
     /* 0x050 */ f32 _050;
     /* 0x054 */ f32 _054;
-    /* 0x058 */ u8 _058[0x68 - 0x58];
+    /* 0x058 */ f32 _058;
+    /* 0x05C */ u8 _05C[0x64 - 0x5C];
+    /* 0x064 */ f32 _064;
     /* 0x068 */ f32 _068;
     /* 0x06C */ u8 _06C[0x74 - 0x6C];
     /* 0x074 */ f32 _074;
     /* 0x078 */ u8 _078[0x84 - 0x78];
     /* 0x084 */ f32 _084[9];
-    /* 0x0A8 */ u8 _0A8[0xF4 - 0xA8];
+    /* 0x0A8 */ u8 _0A8[0xD4 - 0xA8];
+    /* 0x0D4 */ f32 _0D4;
+    /* 0x0D8 */ f32 _0D8;
+    /* 0x0DC */ u8 _0DC[0xF4 - 0xDC];
     /* 0x0F4 */ f32 _0F4;
-    /* 0x0F8 */ u8 _0F8[0x150 - 0xF8];
+    /* 0x0F8 */ u8 _0F8[0x140 - 0xF8];
+    /* 0x140 */ f32 _140;
+    /* 0x144 */ f32 _144;
+    /* 0x148 */ f32 _148;
+    /* 0x14C */ u8 _14C[0x150 - 0x14C];
     /* 0x150 */ f32 _150;
-    /* 0x154 */ u8 _154[0x158 - 0x154];
+    /* 0x154 */ f32 _154;
     /* 0x158 */ f32 _158;
     /* 0x15C */ f32 _15C;
     /* 0x160 */ f32 _160;
@@ -47,7 +56,8 @@ typedef struct UnkAC8Fielder {
     /* 0x190 */ s16 _190;
     /* 0x192 */ u8 _192[0x194 - 0x192];
     /* 0x194 */ s16 _194;
-    /* 0x196 */ u8 _196[0x19C - 0x196];
+    /* 0x196 */ u8 _196[0x19A - 0x196];
+    /* 0x19A */ s16 _19A;
     /* 0x19C */ s16 _19C;
     /* 0x19E */ s16 _19E;
     /* 0x1A0 */ s16 _1A0;
@@ -57,7 +67,8 @@ typedef struct UnkAC8Fielder {
     /* 0x1AC */ s16 _1AC;
     /* 0x1AE */ s16 _1AE;
     /* 0x1B0 */ s16 _1B0;
-    /* 0x1B2 */ u8 _1B2[0x1B6 - 0x1B2];
+    /* 0x1B2 */ s16 _1B2;
+    /* 0x1B4 */ u8 _1B4[0x1B6 - 0x1B4];
     /* 0x1B6 */ s16 _1B6;
     /* 0x1B8 */ s16 _1B8;
     /* 0x1BA */ s16 _1BA;
@@ -70,14 +81,17 @@ typedef struct UnkAC8Fielder {
     /* 0x1CA */ u8 _1CA;
     /* 0x1CB */ u8 _1CB[0x1CC - 0x1CB];
     /* 0x1CC */ u8 _1CC;
-    /* 0x1CD */ u8 _1CD[0x1D2 - 0x1CD];
+    /* 0x1CD */ u8 _1CD[0x1D1 - 0x1CD];
+    /* 0x1D1 */ u8 _1D1;
     /* 0x1D2 */ u8 _1D2;
     /* 0x1D3 */ u8 _1D3;
     /* 0x1D4 */ u8 _1D4;
     /* 0x1D5 */ u8 _1D5;
     /* 0x1D6 */ u8 _1D6;
     /* 0x1D7 */ u8 _1D7;
-    /* 0x1D8 */ u8 _1D8[0x1DE - 0x1D8];
+    /* 0x1D8 */ u8 _1D8[0x1D9 - 0x1D8];
+    /* 0x1D9 */ u8 _1D9;
+    /* 0x1DA */ u8 _1DA[0x1DE - 0x1DA];
     /* 0x1DE */ u8 _1DE;
     /* 0x1DF */ u8 _1DF;
     /* 0x1E0 */ u8 _1E0[0x1E8 - 0x1E0];
@@ -87,15 +101,21 @@ typedef struct UnkAC8Fielder {
     /* 0x1EE */ u8 _1EE;
     /* 0x1EF */ u8 _1EF[0x1F0 - 0x1EF];
     /* 0x1F0 */ u8 _1F0;
-    /* 0x1F1 */ u8 _1F1[0x1FF - 0x1F1];
+    /* 0x1F1 */ u8 _1F1[0x1FC - 0x1F1];
+    /* 0x1FC */ u8 _1FC;
+    /* 0x1FD */ u8 _1FD[0x1FF - 0x1FD];
     /* 0x1FF */ u8 _1FF;
-    /* 0x200 */ u8 _200[0x203 - 0x200];
+    /* 0x200 */ u8 _200[0x201 - 0x200];
+    /* 0x201 */ u8 _201;
+    /* 0x202 */ u8 _202[0x203 - 0x202];
     /* 0x203 */ u8 _203;
     /* 0x204 */ u8 _204;
     /* 0x205 */ u8 _205;
     /* 0x206 */ u8 _206[0x207 - 0x206];
     /* 0x207 */ u8 _207;
-    /* 0x208 */ u8 _208[0x20F - 0x208];
+    /* 0x208 */ u8 _208[0x209 - 0x208];
+    /* 0x209 */ u8 _209;
+    /* 0x20A */ u8 _20A[0x20F - 0x20A];
     /* 0x20F */ u8 _20F;
     /* 0x210 */ u8 _210;
     /* 0x211 */ u8 _211[0x21C - 0x211];
@@ -113,7 +133,7 @@ typedef struct UnkAC8Fielder {
     /* 0x256 */ u8 _256;
     /* 0x257 */ u8 _257[0x259 - 0x257];
     /* 0x259 */ u8 _259;
-    /* 0x25A */ u8 _25A[0x25B - 0x25A];
+    /* 0x25A */ u8 _25A;
     /* 0x25B */ u8 _25B;
     /* 0x25C */ u8 _25C;
     /* 0x25D */ u8 _25D;
@@ -137,6 +157,7 @@ extern struct {
 extern s16 radToShortAngle(f32 v);
 extern s32 fn_3_9FB8C(f32 x, f32 y);
 extern s16 fn_3_9FCA4(s16 a, s16 b);
+extern s16 fn_3_9FCF8(s16 a, s16 b);
 extern u8 lbl_3_data_46F8[][9];
 
 typedef struct {
@@ -452,7 +473,30 @@ void fn_3_526DC(s32 fielder) {
 
 // .text:0x00052560 size:0x17C mapped:0x806915F4
 int fn_3_52560(int fielder, f32 x, f32 z) {
-    return 0;
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    f32 dz;
+    f32 dx;
+    f32 dx2;
+    f32 dz2;
+    f32 dist;
+    f32 speed;
+    s32 extra;
+
+    if (x == f->_000 && z == f->_008) {
+        return 1;
+    }
+    dx = x - f->_000;
+    dz = z - f->_008;
+    dx2 = dx * dx;
+    dz2 = dz * dz;
+    dist = dolsqrtf2(dx2 + dz2);
+    extra = f->_1D1 / 2;
+    if (f->_058 == 0.0f) {
+        speed = 1.0f;
+    } else {
+        speed = f->_058;
+    }
+    return extra + (s32)(dist / speed);
 }
 
 // .text:0x000522E0 size:0x280 mapped:0x80691374
@@ -1069,8 +1113,51 @@ void fn_3_3AE34(s32 fielder) {
 }
 
 // .text:0x0003ACC0 size:0x174 mapped:0x80679D54
-void fn_3_3ACC0(void) {
+void fn_3_3ACC0(s32 fielder) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    s16 angle;
+    s16 facing;
+
+    if (g_Ball.fielderWithBallIndexStored >= 0) {
+        goto stop;
+    }
+    if (fielder != g_FieldingLogic._0B0) {
+        return;
+    }
+    if (g_FieldingLogic._139 != 0) {
+        return;
+    }
+    if (g_Ball.framesSinceHit < lbl_3_data_484C[0]) {
+        return;
+    }
+    if (g_Ball.framesSinceHit >= lbl_3_data_484C[1]) {
+        goto stop;
+    }
+    if (lbl_3_bss_170[0] >= 0 && (g_FieldingLogic._148 & 0x200)) {
+        goto stop;
+    }
+    if (ACTIVE_TUTORIAL() && g_Practice.practice_fielding_enableSprinting) {
+        goto stop;
+    }
+    if (f->_201 != 0 && fielder >= 6 && fielder <= 8 && g_Ball.ballZoneAwayFromHome == 0) {
+        return;
+    }
+    angle = lbl_3_bss_16C;
+    if (angle < 0) {
+        return;
+    }
+    facing = f->_19A;
+    if (facing < 0) {
+        if (g_Ball.framesSinceHit > f->_1D2 + 3) {
+            goto stop;
+        }
+    } else if (fn_3_9FCF8(angle, facing) < lbl_3_data_484C[2]) {
+        goto stop;
+    }
     return;
+stop:
+    f->_1FF = 2;
+    f->_201 = 0;
 }
 
 // .text:0x0003ABF0 size:0xD0 mapped:0x80679C84
@@ -1340,8 +1427,23 @@ void fn_3_30A58(void) {
 }
 
 // .text:0x000308B8 size:0x1A0 mapped:0x8066F94C
-void fn_3_308B8(void) {
-    return;
+void fn_3_308B8(s32 fielder, f32 x, f32 z) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    f32 dx;
+    f32 dz;
+
+    f->_014 = x;
+    f->_01C = z;
+    dx = x - f->_000;
+    dz = z - f->_008;
+    if (dx == 0.0f && dz == 0.0f) {
+        f->_050 = 0.0f;
+        f->_068 = 0.0f;
+        return;
+    }
+    f->_064 = atan2(dz, dx);
+    f->_068 = dolsqrtf2(dx * dx + dz * dz);
+    f->_1D9 = 1;
 }
 
 // .text:0x0003061C size:0x29C mapped:0x8066F6B0
@@ -1366,7 +1468,42 @@ void fn_3_300B8(void) {
 
 // .text:0x0002FF2C size:0x18C mapped:0x8066EFC0
 void fn_3_2FF2C(s32 fielder) {
-    return;
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+
+    if (f->_1B2 < 0x7FFE) {
+        f->_1B2++;
+    } else {
+        f->_1B2 = 0x7FFF;
+    }
+    if (f->_205 == 5 && f->_1B2 < lbl_3_data_49DC[6]) {
+        return;
+    }
+    if (f->_205 == 3 || f->_205 == 5) {
+        if (f->_205 == 3) {
+            f->_150 = f->_140 * lbl_3_data_4930[19];
+            f->_158 = f->_144 * lbl_3_data_4930[19];
+            f->_154 = lbl_3_data_4930[21];
+        } else {
+            f->_150 = f->_140 * lbl_3_data_4930[20];
+            f->_158 = f->_144 * lbl_3_data_4930[20];
+            f->_154 = lbl_3_data_4930[22];
+        }
+        f->_205++;
+    } else {
+        f->_150 *= lbl_3_data_4930[23];
+        f->_158 *= lbl_3_data_4930[23];
+        f->_154 += lbl_3_data_4930[24];
+    }
+    f->_000 += f->_150;
+    f->_008 += f->_158;
+    f->_148 += f->_154;
+    if (f->_148 <= 0.0f) {
+        f->_148 = 0.0f;
+        f->_205 = 0;
+        f->_1FC = 1;
+    }
+    f->_030 = f->_000 - f->_0D4;
+    f->_034 = f->_008 - f->_0D8;
 }
 
 // .text:0x0002FB9C size:0x390 mapped:0x8066EC30
@@ -1380,31 +1517,35 @@ void fn_3_2F924(void) {
 }
 
 // .text:0x0002F7D4 size:0x150 mapped:0x8066E868
-// 73.39%: the target reads lbl_3_data_4884[type] through two address registers and
-// converts _C to an integer before the _160/_168 stores.
 void fn_3_2F7D4(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     s32 type = f->_1CC;
+    s32 ch = fielder;
     s32 frames;
+    f32 v;
+    s32 extra;
 
     f->_203 = 1;
     f->_15C = 0.0f;
     if (g_d_GameSettings.minigamesEnabled) {
         if (fielder == 0) {
-            fielder = g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder];
+            ch = g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder];
         } else {
-            fielder = g_Minigame.minigameControlStruct._28[fielder - 2];
+            ch = g_Minigame.minigameControlStruct._28[fielder - 2];
         }
     }
     f->_164 = lbl_3_data_4884[type]._0;
-    f->_160 = f->_038 * 0.1f * lbl_3_data_4884[type]._8;
-    f->_168 = f->_03C * 0.1f * lbl_3_data_4884[type]._8;
+    v = scaleValue(f->_038, 0.1f);
+    f->_160 = v * lbl_3_data_4884[type]._8;
+    v = scaleValue(f->_03C, 0.1f);
+    f->_168 = v * lbl_3_data_4884[type]._8;
+    extra = lbl_3_data_4884[type]._C;
     frames = f->_164 / lbl_3_data_4884[type]._4;
     f->_1B0 = frames + 1;
-    f->_1AE = frames * 2 + (s32)lbl_3_data_4884[type]._C + 2;
+    f->_1AE = (frames + 1) + (frames + 1) + extra;
     f->_204 = 0;
     if (type != 0) {
-        fn_3_1682AC(lbl_8036E548._2C50[fielder], 6);
+        fn_3_1682AC(lbl_8036E548._2C50[ch], 6);
     }
 }
 
@@ -1474,8 +1615,23 @@ void fn_3_2D47C(void) {
 }
 
 // .text:0x0002D308 size:0x174 mapped:0x8066C39C
-void fn_3_2D308(void) {
-    return;
+void fn_3_2D308(s32 fielder) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    f32 dz;
+    f32 dx;
+    f32 dist;
+
+    f->_19E = -1;
+    dz = f->_01C - f->_008;
+    dx = f->_014 - f->_000;
+    dist = dolsqrtf2(dx * dx + dz * dz);
+    if (dist < 0.5f) {
+        f->_068 = dist;
+        f->_209 = 0;
+    } else {
+        f->_19E = fn_3_9FB8C(dx, dz);
+        f->_209 = 0;
+    }
 }
 
 // .text:0x0002D080 size:0x288 mapped:0x8066C114
@@ -1701,8 +1857,18 @@ void fn_3_25A68(s32 fielder) {
 }
 
 // .text:0x000258D8 size:0x190 mapped:0x8066496C
-void fn_3_258D8(void) {
-    return;
+BOOL fn_3_258D8(s32 fielder) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+
+    if (g_FieldingLogic._08C->_2 == 0) {
+        return FALSE;
+    }
+    if (f->_25A != 0) {
+        return FALSE;
+    }
+    fn_3_2F7D4(fielder);
+    g_FieldingLogic._08C->_2 = 0;
+    return TRUE;
 }
 
 // .text:0x00025844 size:0x94 mapped:0x806648D8
