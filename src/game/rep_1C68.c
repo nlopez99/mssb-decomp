@@ -1,5 +1,10 @@
 #include "game/rep_1C68.h"
 #include "header_rep_data.h"
+#include "game/UnknownHomes_Game.h"
+#include "game/rep_D18.h"
+#include "game/rep_1BC8.h"
+
+extern void fn_3_1DD48(void);
 
 // .text:0x000B77DC size:0x1D0 mapped:0x806F6870
 void fn_3_B77DC(void) {
@@ -8,12 +13,18 @@ void fn_3_B77DC(void) {
 
 // .text:0x000B7794 size:0x48 mapped:0x806F6828
 void fn_3_B7794(void) {
-    return;
+    g_Practice._1E8 = 1;
+    g_Practice._1E9 = 1;
+    g_Practice._1EA = 0;
+    g_Practice._1EB = 0;
+    g_Practice._1E7 = 0;
+    fn_3_B3C78(0);
 }
 
 // .text:0x000B777C size:0x18 mapped:0x806F6810
-void fn_3_B777C(void) {
-    return;
+void fn_3_B777C(u8 arg0) {
+    g_Practice._1E5 = arg0;
+    g_Practice.maybeCommandData[2] = 0;
 }
 
 // .text:0x000B7620 size:0x15C mapped:0x806F66B4
@@ -53,7 +64,11 @@ void fn_3_B6C9C(void) {
 
 // .text:0x000B6C50 size:0x4C mapped:0x806F5CE4
 void fn_3_B6C50(void) {
-    return;
+    g_Practice.allowPlayToEndIndicator = 0;
+    g_GameLogic.pre_PostMiniGameInd = 1;
+    g_GameLogic.minigameLastTurnSuccessInd = 1;
+    fn_3_1DD48();
+    fn_3_5A6D4(7);
 }
 
 // .text:0x000B6BA4 size:0xAC mapped:0x806F5C38
@@ -63,7 +78,8 @@ void fn_3_B6BA4(void) {
 
 // .text:0x000B6B70 size:0x34 mapped:0x806F5C04
 void fn_3_B6B70(void) {
-    return;
+    g_Practice._1DB = 0;
+    fn_3_B3C78(0);
 }
 
 // .text:0x000B6994 size:0x1DC mapped:0x806F5A28
