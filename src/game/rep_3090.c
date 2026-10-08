@@ -999,6 +999,8 @@ int fn_3_10698C(void** list) {
     return count;
 }
 
+// 99.34%: in the runner branch the target keeps the runner in r30 and the id in r29; this
+// build copies the id to r30 and puts the runner in r31.
 // .text:0x00106270 size:0x71C mapped:0x80745304
 void fn_3_106270(Vec* out) {
     g_Stats_s* stats = &g_Stats;
@@ -1161,6 +1163,8 @@ void fn_3_106014(f32 x, f32 y, f32 z) {
     }
 }
 
+// 98.12%: registers only in the vertex writes (FIFO base r7, colour bytes r6/r5/r4 and the
+// sums x + w, y + h in r3/r0 in the target).
 // .text:0x00105E00 size:0x214 mapped:0x80744E94
 void fn_3_105E00(int x, int y, int w, int h) {
     Mtx44 proj;
@@ -1198,6 +1202,7 @@ void fn_3_105E00(int x, int y, int w, int h) {
     GXEnd();
 }
 
+// 94.52%: the second division's mulhw and its addi 400 come one slot later in the target.
 // .text:0x00105CDC size:0x124 mapped:0x80744D70
 void fn_3_105CDC(void) {
     Vec* points = lbl_3_common_bss_DE94._0000->_0098;
@@ -1231,6 +1236,7 @@ void fn_3_105C84(struct Unk3090Track* track) {
     lbl_3_common_bss_DE94._0000->_011C = track->_04 << 16;
 }
 
+// 95.22%: registers only (key pointer r7, count r6, result r4, fraction r3 in the target).
 // .text:0x00105C28 size:0x5C mapped:0x80744CBC
 u32 fn_3_105C28(struct Unk3090Track* track, u32 time) {
     u16* key;
@@ -1240,8 +1246,8 @@ u32 fn_3_105C28(struct Unk3090Track* track, u32 time) {
     u16 frac;
     u32 sec;
 
-    key = (u16*)track->_08[0];
     sec = time >> 16;
+    key = (u16*)track->_08[0];
     frac = time;
     value = 0;
     count = *key;
@@ -1266,6 +1272,8 @@ void fn_3_105BD8(struct Unk3090View* view) {
     view->_40 = 1.0f;
 }
 
+// 70.04%: the target keeps 2x and 2z in f31/f30 and forms w*2y, y*2z and w*2x late; no
+// order of the products or of the matrix stores tried reproduces its schedule.
 // .text:0x00105ACC size:0x10C mapped:0x80744B60
 void fn_3_105ACC(Quaternion* q, Mtx out) {
     Mtx44 m;
@@ -1310,6 +1318,8 @@ void fn_3_105A10(Vec* out, Vec* from, Vec* to, f32 t) {
     memcpy(out, result, sizeof(Vec));
 }
 
+// 99.75%: registers only in the key search (the walking pointer and stride are r9 and r6
+// in the target, r7 and r10 here).
 // .text:0x001054D0 size:0x540 mapped:0x80744564
 void fn_3_1054D0(struct Unk3090Track* track, u32 time, s16 channel) {
     u16 frac = time;
@@ -1393,6 +1403,8 @@ void fn_3_1054CC(void) {
     return;
 }
 
+// 99.73%: registers only; the key count, time, stride and fraction take r5, r4, r6 and r3
+// in the target (r4, r5, r3, r6 here), and the forward vector rotates f3/f2/f0.
 // .text:0x00104B3C size:0x990 mapped:0x80743BD0
 void fn_3_104B3C(struct Unk3090Track* track, u32 time, s16 channel, u8 depth, struct Unk3090View* view) {
     Unk3090View child;
@@ -1623,6 +1635,8 @@ void fn_3_104B3C(struct Unk3090Track* track, u32 time, s16 channel, u8 depth, st
     PSMTX44Concat(view->_00, scale, view->_00);
 }
 
+// 97.43%: the target loads x, y and z into f2, f1 and f0; no declaration order tried
+// gives that assignment.
 // .text:0x00104B20 size:0x1C mapped:0x80743BB4
 void fn_3_104B20(Vec* out, Mtx44 mtx) {
     f32 z, y, x;
@@ -1642,15 +1656,15 @@ void fn_3_104AD4(Vec* out, Mtx44 mtx) {
 }
 
 // .text:0x00104A88 size:0x4C mapped:0x80743B1C
-void fn_3_104A88(Vec out, Mtx44 mtx) {
-    PSMTX44MultVec(mtx, &lbl_3_data_20FF8, &out);
-    PSVECNormalize(&out, &out);
+void fn_3_104A88(Vec dir, Mtx44 mtx) {
+    PSMTX44MultVec(mtx, &lbl_3_data_20FF8, &dir);
+    PSVECNormalize(&dir, &dir);
 }
 
 // .text:0x00104A3C size:0x4C mapped:0x80743AD0
-void fn_3_104A3C(Vec out, Mtx44 mtx) {
-    PSMTX44MultVec(mtx, &lbl_3_data_21004, &out);
-    PSVECNormalize(&out, &out);
+void fn_3_104A3C(Vec dir, Mtx44 mtx) {
+    PSMTX44MultVec(mtx, &lbl_3_data_21004, &dir);
+    PSVECNormalize(&dir, &dir);
 }
 
 // .text:0x001048E0 size:0x15C mapped:0x80743974
@@ -1749,6 +1763,8 @@ void fn_3_104338(void) {
     g_pCamera->_2878 = 1.0f;
 }
 
+// 99.35%: the camera block and g_pCamera swap r6/r7, which also swaps the order of the
+// first two stores into `from`.
 // .text:0x001040D8 size:0x260 mapped:0x8074316C
 void fn_3_1040D8(void) {
     Vec result;
@@ -1863,6 +1879,8 @@ void fn_3_FDB30(void) {
     return;
 }
 
+// 98.91%: registers only in case 1 (task->_1E in r7 and the table bases in r5/r6 in the
+// target, r6 and r4/r5 here).
 // .text:0x000FDA1C size:0x114 mapped:0x8073CAB0
 void fn_3_FDA1C(void) {
     Unk3090Task* task = lbl_803CC1B8;
@@ -1943,6 +1961,9 @@ void fn_3_FD408(u32 idx, Vec* pos, f32* angles) {
     }
 }
 
+// 92.13%: the target loads the int-to-float constant with `addi r5; lfd f1,0(r5)` at entry,
+// which renumbers most integer registers, and schedules the Catmull-Rom coefficients
+// (5.0f, 2.0f, 3.0f, 4.0f loads) in another order; the B-spline branch matches.
 // .text:0x000FCF24 size:0x4E4 mapped:0x8073BFB8
 void fn_3_FCF24(void) {
     lbl_3_common_bss_DE94_s2* cam = lbl_3_common_bss_DE94._0000;
@@ -1993,8 +2014,8 @@ void fn_3_FCF24(void) {
                 cam->_0034[total]._10 = (b0 * cam->_001C[i]._10 + b1 * cam->_001C[i + 1]._10 + b2 * cam->_001C[i + 2]._10 +
                                           b3 * cam->_001C[i + 3]._10) / 6.0f;
             } else {
-                b2 = t + (-3.0f * t3 + 4.0f * t2);
                 b0 = (-1.0f * t3 + 2.0f * t2) - t;
+                b2 = t + (-3.0f * t3 + 4.0f * t2);
                 b1 = 2.0f + (3.0f * t3 - 5.0f * t2);
                 b3 = t3 - t2;
                 cam->_0034[total]._00.x = (b0 * cam->_001C[i]._00.x + b1 * cam->_001C[i + 1]._00.x + b2 * cam->_001C[i + 2]._00.x +
@@ -2019,6 +2040,8 @@ void fn_3_FCF20(void) {
     return;
 }
 
+// 94.64%: registers only, the same rotation as fn_3_FCE38 (camera r5, key offset r6,
+// key count r7 in the target).
 // .text:0x000FCEB0 size:0x70 mapped:0x8073BF44
 int fn_3_FCEB0(f32 time) {
     lbl_3_common_bss_DE94_s2* cam = lbl_3_common_bss_DE94._0000;
@@ -2041,6 +2064,8 @@ void fn_3_FCEAC(void) {
     return;
 }
 
+// 94.14%: registers only; the target keeps the camera in r5, the key offset in r6 and
+// the key count in r7, where this build uses r7, r5 and r6.
 // .text:0x000FCE38 size:0x74 mapped:0x8073BECC
 int fn_3_FCE38(int i, f32 time) {
     lbl_3_common_bss_DE94_s2* cam = lbl_3_common_bss_DE94._0000;
