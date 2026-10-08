@@ -2220,7 +2220,7 @@ out:
 }
 
 // .text:0x001354BC size:0x64 mapped:0x80774550
-BOOL fn_3_1354BC(s32 i, f32 x, f32 z) {
+BOOL fn_3_1354BC(u32 i, f32 x, f32 z) {
     BOOL ret = FALSE;
     Unk3520Minigame* mg = &MG;
     f64 ax = fabs(mg->objs[i]._0.x - x);
@@ -2501,7 +2501,7 @@ s16 fn_3_1345AC(s16 angle, s16 target, int speed) {
 }
 
 // .text:0x001344BC size:0xF0 mapped:0x80773550
-BOOL fn_3_1344BC(int a, int b) {
+BOOL fn_3_1344BC(u32 a, u32 b) {
     f32 ax = g_Fielders[g_Minigame.minigameFielderIndex[a]].pos.x - lbl_3_data_21A48.x;
     f32 az = g_Fielders[g_Minigame.minigameFielderIndex[a]].pos.z - lbl_3_data_21A48.z;
     f32 bx = g_Fielders[g_Minigame.minigameFielderIndex[b]].pos.x - lbl_3_data_21A48.x;
@@ -2520,8 +2520,8 @@ static inline s16 Unk3520_CircleAngle(int i, int offset) {
 }
 
 // .text:0x0013334C size:0x1170 mapped:0x807723E0
-// 95.7%: the loops over MG.objs and the players walk other registers, and the inlined
-// fn_3_1344BC indexes g_Minigame through a walker where the target uses i.
+// 96.9%: the loops over MG.objs and the players start their walkers from fresh
+// g_Minigame bases where the target copies a saved one, and registers follow.
 void fn_3_13334C(void) {
     Unk3520Ai* ai = (Unk3520Ai*)&g_Minigame._1DCC;
     Unk3520Coin* coins;
