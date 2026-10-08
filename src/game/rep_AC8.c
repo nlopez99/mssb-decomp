@@ -1767,7 +1767,45 @@ void fn_3_4E638(void) {
 
 // .text:0x0004E1BC size:0x47C mapped:0x8068D250
 void fn_3_4E1BC(void) {
-    return;
+    s32 best[2];
+    f32 next = 9999.9f;
+    f32 nearest = 9999.9f;
+    s32 i;
+
+    for (i = 0; i < 9; i++) {
+        f32 dist = dolsqrtf2(SQ(g_Fielders[i]._000 - g_Ball.physicsSubstruct.futureCoordsAndDist[120].pos.x) +
+                             SQ(g_Fielders[i]._008 - g_Ball.physicsSubstruct.futureCoordsAndDist[120].pos.z));
+
+        if (dist < nearest) {
+            next = nearest;
+            nearest = dist;
+            best[1] = best[0];
+            best[0] = i;
+        } else if (dist < next) {
+            next = dist;
+            best[1] = i;
+        }
+    }
+    for (i = 0; i < 2; i++) {
+        UnkAC8Fielder* f = &g_Fielders[best[i]];
+
+        fn_3_43038(best[i]);
+        if (g_GameLogic.teamAIInd[g_GameLogic.awayTeamBattingInd_battingTeam]) {
+            fn_3_5985C(best[i], 18);
+        } else if (i == 0) {
+            fn_3_5985C(best[i], 15);
+            g_FieldingLogic._0B0 = best[i];
+        } else {
+            fn_3_5985C(best[i], 16);
+        }
+        if (f->_18C >= 0 && f->_18C <= 5) {
+            fn_3_4B8D0(best[i]);
+        }
+        if (f->_18C >= 7 && f->_18C <= 14) {
+            f->_18C = -1;
+            f->_1D7 = 0;
+        }
+    }
 }
 
 // .text:0x0004DC14 size:0x5A8 mapped:0x8068CCA8
