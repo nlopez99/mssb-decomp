@@ -2612,12 +2612,16 @@ typedef struct {
 } FieldingLogicFielder; // size 0x6
 
 typedef struct {
-    /* 0x00 */ u8 _00[0x8];
+    /* 0x00 */ f32 _00;
+    /* 0x04 */ f32 _04;
     /* 0x08 */ f32 _08;
     /* 0x0C */ s16 _0C;
-    /* 0x0E */ u8 _0E[0x14 - 0xE];
+    /* 0x0E */ s16 _0E;
+    /* 0x10 */ s16 _10;
+    /* 0x12 */ u8 _12[0x14 - 0x12];
     /* 0x14 */ s16 _14;
-    /* 0x16 */ u8 _16[0x1A - 0x16];
+    /* 0x16 */ s16 _16;
+    /* 0x18 */ u8 _18[0x1A - 0x18];
     /* 0x1A */ u8 _1A;
     /* 0x1B */ u8 _1B;
 } FieldingLogicEntry; // size 0x1C
