@@ -1274,8 +1274,8 @@ void fn_3_105BD8(struct Unk3090View* view) {
     view->_40 = 1.0f;
 }
 
-// 70.04%: the target keeps 2x and 2z in f31/f30 and forms w*2y, y*2z and w*2x late; no
-// order of the products or of the matrix stores tried reproduces its schedule.
+// 75.57%: the target keeps 2x and 2z in f31/f30 and schedules the products differently;
+// a search over the order of the nine products reached 78.3% with no natural order.
 // .text:0x00105ACC size:0x10C mapped:0x80744B60
 void fn_3_105ACC(Quaternion* q, Mtx out) {
     Mtx44 m;
@@ -1286,18 +1286,27 @@ void fn_3_105ACC(Quaternion* q, Mtx out) {
     f32 x2 = x + x;
     f32 y2 = y + y;
     f32 z2 = z + z;
+    f32 wz = w * z2;
+    f32 wy = w * y2;
+    f32 wx = w * x2;
+    f32 xx = x * x2;
+    f32 xy = x * y2;
+    f32 xz = x * z2;
+    f32 yy = y * y2;
+    f32 yz = y * z2;
+    f32 zz = z * z2;
 
-    m[0][0] = 1.0f - (y * y2 + z * z2);
-    m[1][0] = x * y2 - w * z2;
-    m[2][0] = x * z2 + w * y2;
+    m[0][0] = 1.0f - (yy + zz);
+    m[1][0] = xy - wz;
+    m[2][0] = xz + wy;
     m[3][0] = 0.0f;
-    m[0][1] = x * y2 + w * z2;
-    m[1][1] = 1.0f - (x * x2 + z * z2);
-    m[2][1] = y * z2 - w * x2;
+    m[0][1] = xy + wz;
+    m[1][1] = 1.0f - (xx + zz);
+    m[2][1] = yz - wx;
     m[3][1] = 0.0f;
-    m[0][2] = x * z2 - w * y2;
-    m[1][2] = y * z2 + w * x2;
-    m[2][2] = 1.0f - (x * x2 + y * y2);
+    m[0][2] = xz - wy;
+    m[1][2] = yz + wx;
+    m[2][2] = 1.0f - (xx + yy);
     m[3][2] = 0.0f;
     m[0][3] = 0.0f;
     m[1][3] = 0.0f;
