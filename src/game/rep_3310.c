@@ -264,19 +264,6 @@ typedef struct {
     /* 0x00 */ u32 _00[4];
 } UnkAramEntry3310; // size: 0x10
 
-// The float forms of MSL's math functions: each rounds its result before the caller uses it.
-static inline f32 acosf(f32 x) {
-    return acos(x);
-}
-
-static inline f32 sinf(f32 x) {
-    return sin(x);
-}
-
-static inline f32 cosf(f32 x) {
-    return cos(x);
-}
-
 static inline void setAnim(UnkActor3310* actor, void* anim, u16 frame) {
     actor->_04 = anim;
     actor->_0E = frame;
@@ -983,7 +970,7 @@ void fn_3_119934(void) {
                 memcpy(&dir, &g_Minigame.wallBall_coinVelocity[i], sizeof(Vec));
                 dir.y = 0.0f;
                 PSVECNormalize(&dir, &dir);
-                angle = acosf(dir.x);
+                angle = acosf_kludge(dir.x);
                 if (dir.z < 0.0f) {
                     angle = 6.2831855f - angle;
                 }
@@ -1081,7 +1068,7 @@ void fn_3_1194FC(void) {
                     dir.y = 0.0f;
                     dir.z = g_Minigame.wallBall_coinVelocity[i].z;
                     PSVECNormalize(&dir, &dir);
-                    angle = acosf(PSVECDotProduct(&fwd, &dir));
+                    angle = acosf_kludge(PSVECDotProduct(&fwd, &dir));
                     if (dir.x < 0.0f) {
                         angle = 6.2831855f - angle;
                     }
@@ -1507,8 +1494,8 @@ void fn_3_117B78(s32 i) {
     quad[2].z = quad[3].z = -size;
     for (j = 0; j < 4; j++) {
         memcpy(&tmp, &quad[j], sizeof(Vec));
-        quad[j].x = tmp.x * cosf(-obj->_10.y) + tmp.z * -sinf(-obj->_10.y);
-        quad[j].z = tmp.x * sinf(-obj->_10.y) + tmp.z * cosf(-obj->_10.y);
+        quad[j].x = tmp.x * cosf_kludge(-obj->_10.y) + tmp.z * -sinf_kludge(-obj->_10.y);
+        quad[j].z = tmp.x * sinf_kludge(-obj->_10.y) + tmp.z * cosf_kludge(-obj->_10.y);
     }
     quad[0].x += obj->_04.x;
     quad[1].x += obj->_04.x;
