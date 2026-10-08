@@ -491,8 +491,13 @@ typedef struct _InMemPitcherType {
     /*0x074*/ VecXZ centerOfStrikeZone;
     /*0x07C*/ f32 strikeZoneLeft;
     /*0x080*/ f32 strikeZoneRight;
+    union {
+        struct {
     /*0x084*/ f32 beginningOfStrikeCheckZ; // 1.05
     /*0x088*/ f32 endingOfStrikeCheckZ;    // 0.5
+        };
+    /*0x084*/ f32 strikeCheckZ[2];
+    };
     /*0x08C*/ VecXZ pitcher;
     /*0x094*/ VecXYZ pitchRelease;
     /*0x0A0*/ f32 pitchLinearInterpolateX;
@@ -966,11 +971,14 @@ typedef struct _PracticeStruct {
     artificial_padding(0x1d6, 0x1d9, u8);
     /*0x1D9*/ u8 _1D9;
     /*0x1DA*/ u8 _1DA;
-    artificial_padding(0x1da, 0x1e1, u8);
+    /*0x1DB*/ u8 _1DB;
+    artificial_padding(0x1db, 0x1e1, u8);
     /*0x1E1*/ u8 hitVariablesSetIndicator;
     /*0x1E2*/ u8 _1E2;
     /*0x1E3*/ u8 aiBuntIndicator; // unsure
-    artificial_padding(0x1e3, 0x1ee, u8);
+    artificial_padding(0x1e3, 0x1ec, u8);
+    /*0x1EC*/ u8 _1EC;
+    artificial_padding(0x1ec, 0x1ee, u8);
     /*0x1EE*/ u8 _1EE;
     /*0x1EF*/ u8 rosterID; // unsure
 } PracticeStruct;          // size: 0x1f0
@@ -1961,8 +1969,7 @@ typedef struct _MiniGameStruct {
     /*0x1B2E*/ u8 _1B2E;
     /*0x1B2F*/ u8 _1B2F[4];
     /*0x1B33*/ u8 _1B33;
-    /*0x1B34*/ s16 _1B34;
-    /*0x1B36*/ u8 _1B36[6];
+    /*0x1B34*/ s16 _1B34[4]; // per player, read by fn_3_60D80 (rep_E08)
     /*0x1B3C*/ s16 _1B3C;
     /*0x1B3E*/ u8 _1B3E[6];
     /*0x1B44*/ s16 _1B44;
@@ -2027,7 +2034,7 @@ typedef struct _MiniGameStruct {
     /*0x1C81*/ u8 _1C81[9];
     /*0x1C8A*/ u8 _1C8A[4];
     /*0x1C8E*/ u8 _1C8E[4];
-    /*0x1C92*/ u8 _1C92[8];
+    /*0x1C92*/ s8 _1C92[8]; // s8: fn_3_60D80 (rep_E08) compares with cmpwi
     // Piranha Panic (rep_37A8) loops over four bytes here; fn_3_53130 indexes them per player
     union {
         struct {
@@ -2781,7 +2788,7 @@ typedef struct {
     /* 0x0028 */ s16 _28;
     artificial_padding(0x28, 0x32, s16);
     /* 0x0032 */ s16 _32;
-    artificial_padding(0x32, 0x36, s16);
+    /* 0x0034 */ s16 _34;
     /* 0x0036 */ u8 replayInd;
     /* 0x0037 */ u8 _37;
     /* 0x0038 */ u8 _38;

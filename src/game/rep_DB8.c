@@ -132,7 +132,7 @@ void fn_3_5C74C(int arg) {
 }
 
 // .text:0x0005C69C size:0xB0 mapped:0x8069B730
-void fn_3_5C69C(void) {
+void fn_3_5C69C(int base) {
     return;
 }
 
