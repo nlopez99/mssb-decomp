@@ -1221,7 +1221,67 @@ void fn_3_4A408(void) {
 
 // .text:0x0004A124 size:0x2E4 mapped:0x806891B8
 void fn_3_4A124(void) {
-    return;
+    s32 i;
+
+    if (g_Ball.hitClassification3 == 5) {
+        if (g_FieldingLogic._0F8[2] == 1 || g_FieldingLogic._0F8[2] == 10 || g_FieldingLogic._0F8[2] == 11) {
+            fn_3_49F40(8, 0);
+            fn_3_49F40(6, 7);
+            fn_3_49F40(7, 1);
+        } else if (g_FieldingLogic._0F8[4] == 1 || g_FieldingLogic._0F8[4] == 10 || g_FieldingLogic._0F8[4] == 11) {
+            fn_3_49F40(6, 0);
+            fn_3_49F40(7, 1);
+            fn_3_49F40(8, 4);
+        } else {
+            fn_3_49F40(7, 0);
+            if (g_Ball.Hit_HorizontalAngle < 0x400) {
+                fn_3_49F40(8, 0);
+                fn_3_49F40(6, 7);
+            } else {
+                fn_3_49F40(6, 0);
+                fn_3_49F40(8, 4);
+            }
+        }
+    } else if (g_Ball.hitClassification3 == 6) {
+        fn_3_49F40(7, 0);
+        if (g_Ball.Hit_HorizontalAngle >= 0x3E0 && g_Ball.Hit_HorizontalAngle < 0x420) {
+            fn_3_49F40(8, 0);
+            fn_3_49F40(6, 0);
+        } else if (g_Ball.Hit_HorizontalAngle < 0x400) {
+            fn_3_49F40(8, 0);
+            fn_3_49F40(6, 7);
+        } else {
+            fn_3_49F40(6, 0);
+            fn_3_49F40(8, 6);
+        }
+    } else if (g_Ball.hitClassification3 == 7) {
+        if (g_FieldingLogic._0F8[1] != 1 && g_FieldingLogic._0F8[1] != 10 && g_FieldingLogic._0F8[1] != 11) {
+            fn_3_49F40(8, 0);
+            fn_3_49F40(6, 1);
+            fn_3_49F40(7, 1);
+        } else {
+            fn_3_49F40(6, 1);
+            fn_3_49F40(7, 1);
+            fn_3_49F40(8, 1);
+        }
+    } else if (g_Ball.hitClassification3 == 8) {
+        if (g_FieldingLogic._0F8[1] != 1 && g_FieldingLogic._0F8[1] != 10 && g_FieldingLogic._0F8[1] != 11) {
+            fn_3_49F40(6, 0);
+            fn_3_49F40(7, 1);
+            fn_3_49F40(8, 1);
+        } else {
+            fn_3_49F40(6, 1);
+            fn_3_49F40(7, 1);
+            fn_3_49F40(8, 1);
+        }
+    } else {
+        fn_3_49F40(6, 1);
+        fn_3_49F40(7, 1);
+        fn_3_49F40(8, 4);
+        for (i = 2; i < 6; i++) {
+            fn_3_49F40(i, 0);
+        }
+    }
 }
 
 // .text:0x00049F40 size:0x1E4 mapped:0x80688FD4
