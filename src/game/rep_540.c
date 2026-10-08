@@ -2039,9 +2039,16 @@ static inline void keepMinimumSpeed(void) {
     }
 }
 
+static inline void stopIfSlow(void) {
+    f32 speed = dolsqrtf2(SQ(g_Ball.physicsSubstruct.velocity.x) + SQ(g_Ball.physicsSubstruct.velocity.z));
+
+    if (speed < 0.0001f) {
+        g_Ball.physicsSubstruct.velocity.x = 0.0f;
+        g_Ball.physicsSubstruct.velocity.z = 0.0f;
+    }
+}
+
 // .text:0x00006C38 size:0x20B8 mapped:0x80645CCC
-// 99.3%: the target loads 0.005f through addi + lfs 0 where lift is computed, which
-// shifts the scheduling and registers around the bounce reflection.
 void fn_3_6C38(void) {
     VecSrcDst ray;
     CollisionStruct hit;
@@ -2051,7 +2058,6 @@ void fn_3_6C38(void) {
     Vec vel;
     f32 t;
     f32 diff;
-    f32 lift;
     f32 nx;
     f32 along1;
     f32 along2;
@@ -2146,17 +2152,13 @@ void fn_3_6C38(void) {
     } else {
         t = 1.0f - (ray.src.y - hit.position.y) / diff;
     }
-    lift = 0.005f + g_Ball.groundYForBounces;
-    g_Ball.AtBat_Contact_BallPos.x = hit.normal.x * lift + hit.position.x;
-    g_Ball.AtBat_Contact_BallPos.y = -(hit.normal.y * lift + hit.position.y);
-    g_Ball.AtBat_Contact_BallPos.z = hit.normal.z * lift + hit.position.z;
+    g_Ball.AtBat_Contact_BallPos.x = hit.normal.x * (0.005f + g_Ball.groundYForBounces) + hit.position.x;
+    g_Ball.AtBat_Contact_BallPos.y = -(hit.normal.y * (0.005f + g_Ball.groundYForBounces) + hit.position.y);
+    g_Ball.AtBat_Contact_BallPos.z = hit.normal.z * (0.005f + g_Ball.groundYForBounces) + hit.position.z;
     vel.x = g_Ball.physicsSubstruct.velocity.x;
     vel.y = -g_Ball.physicsSubstruct.velocity.y;
     vel.z = g_Ball.physicsSubstruct.velocity.z;
-    nx = hit.normal.x;
-    if (nx < 0.0f) {
-        nx = -nx;
-    }
+    nx = hit.normal.x < 0.0f ? -hit.normal.x : hit.normal.x;
     if (nx < 0.5f) {
         axis.x = 1.0f;
         axis.y = 0.0f;
@@ -2325,13 +2327,13 @@ void fn_3_6C38(void) {
             }
         } else {
             if (g_Ball.ballState != 0) {
-                g_Ball.physicsSubstruct.velocity.x *= 0.05f;
-                g_Ball.physicsSubstruct.velocity.y *= 0.05f;
-                g_Ball.physicsSubstruct.velocity.z *= 0.05f;
+                g_Ball.physicsSubstruct.velocity.x = 0.05f * g_Ball.physicsSubstruct.velocity.x;
+                g_Ball.physicsSubstruct.velocity.y = 0.05f * g_Ball.physicsSubstruct.velocity.y;
+                g_Ball.physicsSubstruct.velocity.z = 0.05f * g_Ball.physicsSubstruct.velocity.z;
             } else {
-                g_Ball.physicsSubstruct.velocity.x *= 0.3f;
-                g_Ball.physicsSubstruct.velocity.y *= 0.3f;
-                g_Ball.physicsSubstruct.velocity.z *= 0.3f;
+                g_Ball.physicsSubstruct.velocity.x = 0.3f * g_Ball.physicsSubstruct.velocity.x;
+                g_Ball.physicsSubstruct.velocity.y = 0.3f * g_Ball.physicsSubstruct.velocity.y;
+                g_Ball.physicsSubstruct.velocity.z = 0.3f * g_Ball.physicsSubstruct.velocity.z;
             }
             if (type == 7 || type == 8) {
                 if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
@@ -2366,9 +2368,8 @@ void fn_3_6C38(void) {
         if (g_d_GameSettings.StadiumID == STADIUM_ID_MARIO_STADIUM || g_d_GameSettings.StadiumID == STADIUM_ID_WARIO_PALACE ||
             g_d_GameSettings.StadiumID == STADIUM_ID_YOHSI_PARK || g_d_GameSettings.StadiumID == STADIUM_ID_PEACH_GARDEN ||
             g_d_GameSettings.StadiumID == STADIUM_ID_DK_JUNGLE) {
-            lift = 0.005f + g_Ball.groundYForBounces;
-            if (g_Ball.AtBat_Contact_BallPos.y < lift) {
-                g_Ball.AtBat_Contact_BallPos.y = lift;
+            if (g_Ball.AtBat_Contact_BallPos.y < 0.005f + g_Ball.groundYForBounces) {
+                g_Ball.AtBat_Contact_BallPos.y = 0.005f + g_Ball.groundYForBounces;
                 if (g_Ball.physicsSubstruct.velocity.y < 0.0f) {
                     g_Ball.physicsSubstruct.velocity.y *= -1.0f;
                 }
@@ -2392,10 +2393,7 @@ void fn_3_6C38(void) {
             }
         }
     }
-    if (dolsqrtf2(SQ(g_Ball.physicsSubstruct.velocity.x) + SQ(g_Ball.physicsSubstruct.velocity.z)) < 0.0001f) {
-        g_Ball.physicsSubstruct.velocity.x = 0.0f;
-        g_Ball.physicsSubstruct.velocity.z = 0.0f;
-    }
+    stopIfSlow();
     g_Ball.framesSinceLastBounce = 0;
     if (g_Ball.currentStarSwing == 3 || g_Ball.currentStarSwing == 4) {
         g_Ball.currentStarSwing = 0;
