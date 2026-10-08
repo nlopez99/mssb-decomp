@@ -4768,7 +4768,69 @@ void fn_3_3A1FC(s32 fielder) {
 
 // .text:0x00039EB0 size:0x34C mapped:0x80678F44
 void fn_3_39EB0(void) {
-    return;
+    BOOL ready = TRUE;
+    BOOL reset;
+
+    if (g_d_GameSettings.GameModeSelected == 2 && g_GameLogic.secondaryGameMode == 12) {
+        return;
+    }
+    if (g_Ball.deadBallReason != 0) {
+        return;
+    }
+    if (g_Ball.ballState == 1) {
+        return;
+    }
+    if (g_Ball.AtBat_ContactResult == 0 && g_Ball.maxYOfHit > 7.0f) {
+        if (g_Ball.framesSinceHit < lbl_3_data_49DC[41]) {
+            return;
+        }
+    } else if (g_Ball.framesSinceHit < lbl_3_data_49DC[42]) {
+        return;
+    }
+    if (g_Ball.ballState == 2 && g_Ball.framesUntilThrowReachesDest > 0 && g_Ball.fielderBeingThrownTo >= 0) {
+        if (g_Ball.framesSinceThrowStarted == 2 && g_FieldingLogic._0C4 != 6) {
+            fn_3_35E1C();
+        }
+        return;
+    }
+    if (--g_FieldingLogic._0DA > 0) {
+        ready = FALSE;
+    } else {
+        g_FieldingLogic._0DA = 0;
+    }
+    if (g_GameLogic.teamAIInd[g_GameLogic.awayTeamBattingInd_battingTeam] == 0 && (g_FieldingLogic._148 & 0x40)) {
+        return;
+    }
+    if (g_FieldingLogic._0B0 >= 0 && g_Fielders[g_FieldingLogic._0B0]._205 != 0) {
+        return;
+    }
+    if (!ready) {
+        return;
+    }
+    if (g_FieldingLogic._137 != 0) {
+        return;
+    }
+    if (g_Ball.catchAnimationTotalFrames != 0) {
+        return;
+    }
+    reset = FALSE;
+    if (g_FieldingLogic._0B0 < 0 && g_Ball.ballState == 3) {
+        reset = TRUE;
+    }
+    if (g_FieldingLogic._13B != 0 || reset) {
+        fn_3_39DC4();
+        if (g_FieldingLogic._0B0 >= 0) {
+            g_FieldingLogic._13B = 0;
+        }
+    } else if (g_FieldingLogic._0B4 >= 0) {
+        fn_3_38FF8();
+    } else if (g_FieldingLogic._13A != 0 && (g_FieldingLogic._0B0 == 3 || g_FieldingLogic._0B0 == 5)) {
+        fn_3_38D10();
+    } else if (g_Ball.AtBat_ContactResult == 0) {
+        fn_3_39858();
+    } else {
+        fn_3_393B0();
+    }
 }
 
 // .text:0x00039DC4 size:0xEC mapped:0x80678E58
@@ -5247,17 +5309,297 @@ void fn_3_38304(void) {
 
 // .text:0x00038234 size:0xD0 mapped:0x806772C8
 void fn_3_38234(void) {
-    return;
+    if (g_Ball.hitClassification2 <= 4 || g_Ball.hitClassification2 == 7) {
+        fn_3_38000();
+    } else if (g_Ball.maxYOfHit > 7.0f) {
+        fn_3_38304();
+    } else if (g_Ball.maxYOfHit < 4.0f) {
+        fn_3_38000();
+    } else if (g_Ball.someYCoord > 5.0f) {
+        fn_3_38304();
+    } else if (g_Ball.ballDistanceFromHome < 60.0f) {
+        if (lbl_3_bss_170[0] >= 0x900 && lbl_3_bss_170[0] < 0xF00) {
+            fn_3_38304();
+        } else {
+            fn_3_38000();
+        }
+    } else {
+        fn_3_38304();
+    }
 }
 
 // .text:0x00038000 size:0x234 mapped:0x80677094
 void fn_3_38000(void) {
-    return;
+    s16 angle = g_Ball.ballAngleFromHome;
+    f32 extra;
+    f32 reach;
+    s32 frame = 30;
+    f32 margin = 5.0f;
+    s32 outfielder = 0;
+    s32 pick;
+
+    if (angle >= 0x800) {
+        pick = 1;
+    } else {
+        if (angle < 0x300 &&
+            (angle < g_Fielders[2]._180 || fn_3_9FCF8(angle, g_Fielders[3]._180) >= 0x100)) {
+            outfielder = 8;
+            reach = g_Fielders[2]._070;
+        } else if (angle > 0x500 &&
+                   (angle >= g_Fielders[4]._180 || fn_3_9FCF8(angle, g_Fielders[5]._180) >= 0x100)) {
+            outfielder = 6;
+            reach = g_Fielders[4]._070;
+        } else if (angle < g_Fielders[3]._180) {
+            if (g_Fielders[3]._070 >= g_Fielders[2]._070) {
+                reach = g_Fielders[3]._070;
+            } else {
+                reach = g_Fielders[2]._070;
+            }
+        } else if (angle >= g_Fielders[5]._180) {
+            if (g_Fielders[5]._070 >= g_Fielders[4]._070) {
+                reach = g_Fielders[5]._070;
+            } else {
+                reach = g_Fielders[4]._070;
+            }
+        } else {
+            if (g_Fielders[3]._070 >= g_Fielders[5]._070) {
+                reach = g_Fielders[3]._070;
+            } else {
+                reach = g_Fielders[5]._070;
+            }
+        }
+        if (g_Ball.ballVelocity > 0.3f) {
+            extra = g_Ball.ballVelocity - 0.3f;
+            margin -= 10.0f * extra;
+            frame += (s32)(100.0f * extra);
+        }
+        if (reach + margin > g_Ball.ballDistanceFromHome) {
+            pick = fn_3_378B4();
+        } else {
+            pick = fn_3_361D8(g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.x,
+                              g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.z);
+            if (outfielder == 8 && pick == 3) {
+                pick = 8;
+            }
+            if (outfielder == 6 && pick == 5) {
+                pick = 6;
+            }
+        }
+    }
+    fn_3_38790(pick, FALSE);
 }
 
 // .text:0x000378B4 size:0x74C mapped:0x80676948
-void fn_3_378B4(void) {
-    return;
+s32 fn_3_378B4(void) {
+    s32 result = -1;
+    s32 throwAngle = lbl_3_bss_170[0];
+    s32 ballAngle = g_Ball.ballAngleFromHome;
+    s32 turn = 0x800;
+    s32 pad;
+
+    if (lbl_3_bss_170[0] >= 0 && lbl_3_bss_170[3] >= 0) {
+        turn = __abs(lbl_3_bss_170[0] - lbl_3_bss_170[3]);
+        if (turn > 0x800) {
+            turn = 0x1000 - turn;
+        }
+    }
+    if (g_FieldingLogic._0B0 == 0) {
+        if (ballAngle >= g_Fielders[0]._180 - 0x40 && ballAngle < g_Fielders[0]._180 + 0x40 &&
+            g_Ball.ballDistanceFromHome - g_Fielders[0]._070 < 3.0f) {
+            result = 0;
+            goto done;
+        }
+        if (ballAngle < g_Fielders[0]._180) {
+            if (throwAngle >= 0xF00 || (throwAngle >= 0 && throwAngle < 0x300)) {
+                result = 0;
+                goto done;
+            }
+            if (throwAngle >= 0xB00 && throwAngle < 0xF00 &&
+                g_Ball.ballDistanceFromHome - g_Fielders[0]._070 < 3.0f) {
+                result = 0;
+                goto done;
+            }
+        } else {
+            if (throwAngle >= 0x500 && throwAngle < 0x900) {
+                result = 0;
+                goto done;
+            }
+            if (throwAngle >= 0x900 && throwAngle < 0xD00 &&
+                g_Ball.ballDistanceFromHome - g_Fielders[0]._070 < 3.0f) {
+                result = 0;
+                goto done;
+            }
+        }
+    }
+    if (__abs(g_Fielders[2]._180 - g_Fielders[3]._180) < 0x40 &&
+        ((g_FieldingLogic._0B0 != 2 && g_FieldingLogic._0B0 != 3) || turn >= 0x400)) {
+        s32 mid = (g_Fielders[2]._180 + g_Fielders[3]._180) / 2;
+
+        if (ballAngle >= mid - 0x100 && ballAngle < mid + 0x100) {
+            if (g_Fielders[2]._070 < g_Fielders[3]._070) {
+                if (g_Fielders[2]._070 > g_Ball.ballDistanceFromHome) {
+                    result = 2;
+                    goto done;
+                }
+                if (3.0f + g_Fielders[3]._070 > g_Ball.ballDistanceFromHome) {
+                    result = 3;
+                    goto done;
+                }
+            } else {
+                if (g_Fielders[3]._070 > g_Ball.ballDistanceFromHome) {
+                    result = 2;
+                    goto done;
+                }
+                if (3.0f + g_Fielders[2]._070 > g_Ball.ballDistanceFromHome) {
+                    result = 3;
+                    goto done;
+                }
+            }
+        }
+    }
+    if (__abs(g_Fielders[4]._180 - g_Fielders[5]._180) < 0x40 &&
+        ((g_FieldingLogic._0B0 != 4 && g_FieldingLogic._0B0 != 5) || turn >= 0x400)) {
+        s32 mid = (g_Fielders[4]._180 + g_Fielders[5]._180) / 2;
+
+        if (ballAngle >= mid - 0x100 && ballAngle < mid + 0x100) {
+            if (g_Fielders[4]._070 <= g_Fielders[5]._070) {
+                if (g_Fielders[4]._070 > g_Ball.ballDistanceFromHome) {
+                    result = 4;
+                    goto done;
+                }
+                if (3.0f + g_Fielders[5]._070 > g_Ball.ballDistanceFromHome) {
+                    result = 5;
+                    goto done;
+                }
+            } else {
+                if (g_Fielders[5]._070 > g_Ball.ballDistanceFromHome) {
+                    result = 5;
+                    goto done;
+                }
+                if (3.0f + g_Fielders[4]._070 > g_Ball.ballDistanceFromHome) {
+                    result = 4;
+                    goto done;
+                }
+            }
+        }
+    }
+    if (ballAngle < g_Fielders[2]._180 + 0x40) {
+        if (g_FieldingLogic._0B0 == 3 && turn < 0x400) {
+            goto done;
+        }
+        result = 2;
+        goto done;
+    }
+    if (ballAngle >= g_Fielders[4]._180 - 0x40 && ballAngle < 0x800) {
+        if (g_FieldingLogic._0B0 == 5 && turn < 0x400) {
+            goto done;
+        }
+        result = 4;
+        goto done;
+    }
+    pad = 0;
+    if (g_FieldingLogic._0B0 == 3) {
+        pad = 0x20;
+    }
+    if (ballAngle >= g_Fielders[3]._180 - (pad + 0x40) && ballAngle < g_Fielders[3]._180 + (pad + 0x40)) {
+        if (g_FieldingLogic._0B0 == 2) {
+            if (throwAngle >= 0x500 && throwAngle < 0x900) {
+                result = 2;
+                goto done;
+            }
+            result = 3;
+            goto done;
+        }
+        if (g_FieldingLogic._0B0 == 5 && g_Fielders[3]._18C == 2 && turn < 0x400) {
+            goto done;
+        }
+        if (g_FieldingLogic._0B0 == 5 && g_Fielders[3]._18C == 2 && 5.0f + g_Fielders[3]._070 < g_Ball.ballDistanceFromHome) {
+            goto done;
+        }
+        result = 3;
+        goto done;
+    }
+    pad = 0;
+    if (g_FieldingLogic._0B0 == 2) {
+        pad = 0x20;
+    }
+    if (ballAngle >= g_Fielders[5]._180 - (pad + 0x40) && ballAngle < g_Fielders[5]._180 + (pad + 0x40)) {
+        if (g_FieldingLogic._0B0 == 4) {
+            if ((throwAngle >= 0 && throwAngle < 0x300) || throwAngle >= 0xF00) {
+                result = 4;
+                goto done;
+            }
+            result = 5;
+            goto done;
+        }
+        if (g_FieldingLogic._0B0 == 3 && g_Fielders[5]._18C == 2 && turn < 0x400) {
+            goto done;
+        }
+        if (g_FieldingLogic._0B0 == 3 && g_Fielders[5]._18C == 2 && 5.0f + g_Fielders[5]._070 < g_Ball.ballDistanceFromHome) {
+            goto done;
+        }
+        result = 5;
+        goto done;
+    }
+    if (ballAngle >= g_Fielders[2]._180 && ballAngle < g_Fielders[3]._180) {
+        if (throwAngle >= 0x300 && throwAngle < 0x700) {
+            result = 2;
+            goto done;
+        }
+        if (throwAngle >= 0x700 && throwAngle < 0x900) {
+            if (5.0f + g_Fielders[2]._008 > g_Ball.AtBat_Contact_BallPos.z) {
+                result = 2;
+                goto done;
+            }
+            goto done;
+        }
+        if (throwAngle >= 0xD00 || (throwAngle >= 0 && throwAngle < 0x300)) {
+            result = 3;
+            goto done;
+        }
+        goto done;
+    }
+    if (ballAngle >= g_Fielders[5]._180 && ballAngle < g_Fielders[4]._180) {
+        if (throwAngle >= 0x100 && throwAngle < 0x500) {
+            result = 4;
+            goto done;
+        }
+        if (throwAngle >= 0xF00 || (throwAngle >= 0 && throwAngle < 0x100)) {
+            if (5.0f + g_Fielders[4]._008 > g_Ball.AtBat_Contact_BallPos.z) {
+                result = 4;
+                goto done;
+            }
+            goto done;
+        }
+        if (throwAngle >= 0x500 && throwAngle < 0xB00) {
+            result = 5;
+            goto done;
+        }
+        goto done;
+    }
+    if (ballAngle >= g_Fielders[3]._180 && ballAngle < g_Fielders[5]._180) {
+        if (g_Ball.ballDistanceFromHome < 5.0f + g_Fielders[0]._070) {
+            if (ballAngle < g_Fielders[0]._180) {
+                if (throwAngle > 0xD00 || (throwAngle >= 0 && throwAngle < 0x100)) {
+                    result = 0;
+                    goto done;
+                }
+            } else if (throwAngle >= 0x700 && throwAngle < 0xB00) {
+                result = 0;
+                goto done;
+            }
+        }
+        if (throwAngle >= 0x500 && throwAngle < 0xB00) {
+            result = 3;
+            goto done;
+        }
+        if (throwAngle > 0xD00 || (throwAngle >= 0 && throwAngle < 0x300)) {
+            result = 5;
+            goto done;
+        }
+    }
+done:
+    return result;
 }
 
 // .text:0x00037610 size:0x2A4 mapped:0x806766A4
@@ -5302,7 +5644,15 @@ void fn_3_37610(s32 frame) {
 
 // .text:0x00037588 size:0x88 mapped:0x8067661C
 void fn_3_37588(void) {
-    return;
+    if (g_Ball.ballVelocity > 0.17f) {
+        fn_3_38790(fn_3_378B4(), FALSE);
+    } else if (g_Ball.AtBat_ContactResult == 0 && g_Ball.hitClassification1 != 0) {
+        fn_3_37610(g_Ball.framesUntilBallHitsGround);
+    } else if (g_Ball.AtBat_ContactResult == 0) {
+        fn_3_37610(30);
+    } else {
+        fn_3_37610(30);
+    }
 }
 
 // .text:0x0003740C size:0x17C mapped:0x806764A0

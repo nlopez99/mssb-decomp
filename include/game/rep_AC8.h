@@ -89,7 +89,7 @@ s32 fn_3_37114(s32 a, s32 b, BOOL wide, f32 x, f32 z);
 void fn_3_3740C(void);
 void fn_3_37588(void);
 void fn_3_37610(s32 frame);
-void fn_3_378B4(void);
+s32 fn_3_378B4(void);
 void fn_3_38000(void);
 void fn_3_38234(void);
 void fn_3_38304(void);
