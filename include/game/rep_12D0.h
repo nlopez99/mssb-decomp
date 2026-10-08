@@ -22,6 +22,7 @@ void fn_3_79A00(void);
 void fn_3_79ACC(void);
 void fn_3_79DD4(void);
 void fn_3_79EF4(void);
+void fn_3_7A154(int arg0);
 void fn_3_7AB34(void);
 void fn_3_7AB78(int countAppearance);
 int fn_3_7AEA8(void);
