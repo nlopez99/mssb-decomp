@@ -1321,6 +1321,8 @@ void fn_3_105E00(int x, int y, int w, int h) {
 }
 
 // 94.52%: the second division's mulhw and its addi 400 come one slot later in the target.
+// With fn_3_105E00 taking s16 parameters (and no casts here) this matches, but fn_3_105E00
+// then sign-extends before its sums and drops to 94.70%.
 // .text:0x00105CDC size:0x124 mapped:0x80744D70
 void fn_3_105CDC(void) {
     Vec* points = lbl_3_common_bss_DE94._0000->_0098;
@@ -1354,14 +1356,16 @@ void fn_3_105C84(struct Unk3090Track* track) {
     lbl_3_common_bss_DE94._0000->_011C = track->_04 << 16;
 }
 
-// 95.22%: registers only (key pointer r7, count r6, result r4, fraction r3 in the target).
+// 97.83%: registers only (the target keeps the key pointer in r7, the time's seconds in r5,
+// the fraction in r3 and the current key in r8); every declaration order was tried, and this
+// one matches fn_3_FD670, which inlines it.
 // .text:0x00105C28 size:0x5C mapped:0x80744CBC
 u32 fn_3_105C28(struct Unk3090Track* track, u32 time) {
-    u16* key;
-    u16 count;
-    u16* cur;
     u32 value;
+    u16* cur;
     u16 frac;
+    u16 count;
+    u16* key;
     u32 sec;
 
     sec = time >> 16;
@@ -3377,7 +3381,6 @@ BOOL fn_3_FD9FC(void) {
     return lbl_3_common_bss_DE94._0000->_0018 == 1;
 }
 
-// 99.80%: registers only, in the inlined fn_3_105C28 (key pointer and count swapped).
 // .text:0x000FD670 size:0x38C mapped:0x8073C704
 void fn_3_FD670(void) {
     if (g_GameLogic.framesOfExitingToMenu == 0) {
