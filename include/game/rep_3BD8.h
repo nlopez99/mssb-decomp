@@ -3,10 +3,12 @@
 
 #include "mssbTypes.h"
 
+struct UnkTask3BD8;
+
 void fn_3_15C5F4(void);
 void fn_3_15C638(void);
-void fn_3_15C6E4(void);
-void fn_3_15D1D8(void);
+void fn_3_15C6E4(struct UnkTask3BD8* task, s32 id, s32 value, s32 type);
+void fn_3_15D1D8(struct UnkTask3BD8* task);
 void fn_3_15DB44(void);
 void fn_3_15EE2C(void);
 void fn_3_15F088(void);
