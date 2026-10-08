@@ -929,8 +929,6 @@ void fn_3_119C34(void) {
 }
 
 // .text:0x00119934 size:0x300 mapped:0x807589C8
-// 99.92%: written `0.0f > dir.z`, which rounds acos's result early as the target does, but
-// the compare then takes its operands the other way round (fcmpo 0,z; ble against z,0; bge).
 void fn_3_119934(void) {
     UnkObj3310* obj;
     s32 i;
@@ -1025,7 +1023,6 @@ f32 fn_3_119854(u8 index) {
 }
 
 // .text:0x001194FC size:0x358 mapped:0x80758590
-// 99.93%: as in fn_3_119934, the acos compare takes its operands the other way round.
 void fn_3_1194FC(void) {
     Vec dir;
     Vec fwd = { 0.0f, 0.0f, 1.0f };
