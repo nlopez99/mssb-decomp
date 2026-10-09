@@ -360,11 +360,11 @@ void fn_2_6FE34(Obj0B08* obj) { lbl_2_data_2A210[obj->_94](obj); }
 void fn_2_6F88C(Obj0B08* obj) {
     s32 index = obj->_80;
     s32 target = lbl_2_bss_1A8248->_1610[0]._80;
-    s8 state;
+    s32 state;
     s32 slot;
     if (index >= 2 && index <= 6) {
-        state = lbl_2_bss_1A8248->_1610[0]._CD;
-        slot = lbl_2_bss_1A8248->_1610[0]._CC;
+        state = fn_2_68670(0);
+        slot = fn_2_68690(0);
         if (state == 1 && slot == index) {
             fn_2_68FBC(index, 1);
             obj->_C4 = 2;
@@ -418,6 +418,41 @@ void fn_2_6F6F4(Obj0B08* obj) { lbl_2_data_2A220[obj->_94](obj); }
 // .text:0x0006ED30 size:0x3D4
 
 // .text:0x0006EA74 size:0x2BC
+void fn_2_6EA74(Obj0B08* obj) {
+    s32 index = obj->_80;
+    s32 target = lbl_2_bss_1A8248->_1610[0]._80;
+    s32 state;
+    s32 slot;
+    if (index >= 2 && index <= 6) {
+        state = fn_2_68670(0);
+        slot = fn_2_68690(0);
+        if (state == 1 && slot == index) {
+            fn_2_68FBC(index, 1);
+            obj->_C4 = 2;
+            obj->_CB = 0;
+            obj->_94 = 3;
+            return;
+        }
+    }
+    if (fn_2_68C80(index, target)) {
+        if (index == 1 && lbl_2_bss_1A8248->_44F3 == 0) {
+            fn_2_68FBC(index, 1);
+            obj->_C4 = 2;
+            obj->_CB = 0;
+            obj->_94 = 3;
+            return;
+        } else if (index >= 2 && index <= 6) {
+            obj->_CB = 0;
+        } else {
+            obj->_CB = -1;
+        }
+    } else {
+        obj->_CB = -1;
+    }
+    if (obj->_A2-- == 0) {
+        obj->_94 = 0;
+    }
+}
 
 // .text:0x0006E88C size:0x1E8
 void fn_2_6E88C(Obj0B08* obj) {
