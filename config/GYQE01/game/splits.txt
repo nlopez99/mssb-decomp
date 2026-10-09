@@ -182,7 +182,7 @@ game/rep_1770.c:
 	.data       start:0x0000F4A8 end:0x0000F4E0
 
 game/rep_17E0.c:
-	.text       start:0x0009CAF0 end:0x0009CD90
+	.text       start:0x0009CAF0 end:0x0009EAE4
 	.rodata     start:0x000017E0 end:0x00001838
 
 game/rep_1838.c:
@@ -345,12 +345,12 @@ game/rep_31F0.c:
 	.bss        start:0x0000B698 end:0x0000B6B8
 
 game/rep_3290.c:
-	.text       start:0x001133C4 end:0x00114FC0
+	.text       start:0x001133C4 end:0x0011678C
 	.rodata     start:0x00003290 end:0x00003310
-	.data       start:0x00022558 end:0x00022580
+	.data       start:0x00022558 end:0x000225F0
 
 game/rep_3310.c:
-	.text       start:0x00116840 end:0x0011D3AC
+	.text       start:0x0011678C end:0x0011D3AC
 	.rodata     start:0x00003310 end:0x00003448
 	.data       start:0x000225F0 end:0x000226E0
 	.bss        start:0x0000B6B8 end:0x0000B700
