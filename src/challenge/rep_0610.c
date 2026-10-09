@@ -106,6 +106,24 @@ typedef struct UnkTask0610 {
 
 extern UnkTask0610* lbl_803CC1B8;
 
+typedef struct UnkTaskF50C {
+    /* 0x00 */ void (*_00)(void);
+    /* 0x04 */ u8 _04[0x14 - 0x4];
+    /* 0x14 */ f32 _14;
+    /* 0x18 */ f32 _18;
+    /* 0x1C */ f32 _1C;
+    /* 0x20 */ f32 _20;
+    /* 0x24 */ f32 _24;
+    /* 0x28 */ f32 _28;
+    /* 0x2C */ f32 _2C;
+    /* 0x30 */ f32 _30;
+    /* 0x34 */ f32 _34;
+    /* 0x38 */ u32 _38;
+    /* 0x3C */ s16 _3C;
+    /* 0x3E */ u8 _3E;
+    /* 0x3F */ u8 _3F;
+} UnkTaskF50C;
+
 // A task whose state lives in two bytes at 0x14
 typedef struct UnkTaskState0610 {
     /* 0x00 */ void (*_00)(void);
@@ -155,7 +173,7 @@ extern void fn_800385F0(struct Unk30C0*, f32, f32, f32, f32);
 extern void fn_80037AA0(struct Unk30C0*, s32, void (*)(s32), u16, UnkTimer0610*);
 extern void fn_800B0A14_removeQueue(void);
 extern void fn_80031CA4(Vec* pos, UnkBurst0610* glow);
-extern void fn_80030D88(Vec* pos, Vec* dir, void* burst, s32 n);
+extern void fn_80030D88(Vec* pos, Vec* dir, UnkBurst0610* burst, s32 n);
 extern void* ARAMTransfer(void* entry, int arg1, int arg2, u32 aram);
 extern void convertTextureHeader(void* tex);
 
@@ -189,9 +207,24 @@ extern UnkCamera0610 lbl_1_data_F4F8[];
 extern UnkCamera0610 lbl_1_data_AA54[];
 extern UnkCamera0610 lbl_1_data_AAC4[];
 extern UnkCamera0610 lbl_1_data_AB34[];
-extern void* lbl_1_data_F278[3];
+extern UnkBurst0610* lbl_1_data_F278[3];
 extern u8 lbl_1_data_F0A8[];
 extern UnkBurst0610 lbl_1_data_F0BC;
+extern u8 lbl_1_data_F284[];
+
+typedef struct UnkSpark0610 {
+    /* 0x00 */ void* _00;
+    /* 0x04 */ u8 _04[0x5C - 0x4];
+    /* 0x5C */ s32 _5C;
+    /* 0x60 */ s32 _60;
+    /* 0x64 */ u8 _64[0x68 - 0x64];
+} UnkSpark0610;
+
+extern UnkSpark0610 lbl_1_data_F10C;
+extern struct {
+    /* 0x0 */ void* _0;
+    /* 0x4 */ s32 _4;
+}* lbl_1_data_F174[2];
 extern void* lbl_1_data_F4DC[3];
 extern UnkBurst0610 lbl_1_data_F2A0;
 extern u16 lbl_1_data_F17C;
@@ -270,7 +303,15 @@ static struct Unk30C0 {
 } lbl_1_bss_30C0;
 static s32 lbl_1_bss_30BC;
 static u8 lbl_1_bss_30B8;
-static u8 lbl_1_bss_309C[0x1C];
+static u8 lbl_1_bss_30B7;
+static u8 lbl_1_bss_30B6;
+static s16 lbl_1_bss_30B4;
+static s32 lbl_1_bss_30B0;
+static s32 lbl_1_bss_30AC;
+static s32 lbl_1_bss_30A8;
+static u16 lbl_1_bss_30A4;
+static s32 lbl_1_bss_30A0;
+static s32 lbl_1_bss_309C;
 static void* lbl_1_bss_3098[1];
 static void* lbl_1_bss_3094;
 static s32 lbl_1_bss_3084[4];
@@ -550,6 +591,37 @@ void fn_1_F6E4(void) {
     }
 }
 
+// .text:0x0000F37C size:0x190
+// The target computes lbl_1_data_F10C's address before the 10.0f and creates the
+// int-to-float constant before 10.0f and 100000.0f; only scheduling differs
+void fn_1_F37C(void) {
+    fn_1_F798((UnkBurst0610*)&lbl_1_data_F10C, lbl_1_data_F0A8, 18);
+    if (lbl_803C77B8[0]._04 & 0x1100) {
+        UnkTaskF50C* task;
+        lbl_1_data_F10C._00 = lbl_1_bss_3098[0];
+        lbl_1_data_F174[0]->_0 = lbl_1_bss_3098[0];
+        lbl_1_data_F174[0]->_4 = 5;
+        task = (UnkTaskF50C*)fn_800B0A5C_insertQueue(fn_1_F50C, lbl_803CC1B8->_12 + 1);
+        task->_18 = 0.0f;
+        task->_14 = 0.0f;
+        task->_1C = 10.0f;
+        task->_20 = 0.0f;
+        task->_24 = 0.0f;
+        task->_28 = lbl_1_data_F10C._5C / 100000.0f;
+        task->_2C = 0.0f;
+        task->_30 = 0.0f;
+        task->_34 = lbl_1_data_F10C._60 / 100000.0f;
+        task->_3C = 0x20;
+        task->_3E = 1;
+        task->_38 = lbl_1_bss_30A4;
+        lbl_1_bss_30A4 += 2;
+        task->_3F = (lbl_803C77B8[0]._04 >> 12) & 1;
+    } else if (lbl_803C77B8[0]._04 & 0x200) {
+        lbl_1_bss_307C = 0;
+        lbl_1_bss_5F71 = 10;
+    }
+}
+
 // .text:0x0000F2F8 size:0x84
 void fn_1_F2F8(void) {
     if (lbl_803C77B8[0]._04 & 0x100) {
@@ -583,6 +655,25 @@ void fn_1_F1D8(void) {
     fn_80030D88((Vec*)&pos, &dir, lbl_1_data_F278[2], 5);
     if (--task->_20 == 0) {
         fn_800B0A14_removeQueue();
+    }
+}
+
+// .text:0x0000F0D0 size:0x108
+void fn_1_F0D0(void) {
+    fn_1_F798(lbl_1_data_F278[lbl_1_bss_30A8], lbl_1_data_F284, 16);
+    if (lbl_803C77B8[0]._04 & 0x1000) {
+        lbl_1_bss_30A8 = (lbl_1_bss_30A8 + 1) % 3;
+    } else if (lbl_803C77B8[0]._00 & 0x100) {
+        if (lbl_803C77B8[0]._02 & 0x100) {
+            UnkTask0610* task;
+            lbl_1_data_F278[0]->_00 = lbl_1_data_F278[1]->_00 = lbl_1_data_F278[2]->_00 = lbl_1_bss_3098[0];
+            task = fn_800B0A5C_insertQueue(fn_1_F1D8, 0);
+            task->_20 = 0xF0;
+            task->_24 = 4;
+        }
+    } else if (lbl_803C77B8[0]._04 & 0x200) {
+        lbl_1_bss_307C = 0;
+        lbl_1_bss_5F71 = 10;
     }
 }
 
