@@ -801,8 +801,8 @@ void fn_2_4D378(void) {
 }
 
 // .text:0x0004D194 size:0x1E4
-// The target loads lbl_2_bss_1A8248 with addi/lwz 0 into r3 at entry; this
-// build loads it with lwz sym@l into r5.
+// Scheduling only: where the inlined fn_2_4C6A8 begins, the target forms
+// g_d_GameSettings' address after the lbl_2_bss_1A8248 load, this build before.
 void fn_2_4D194(void) {
     GameInitVariables* settings = &g_d_GameSettings;
     s32 flag;
