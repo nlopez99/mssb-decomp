@@ -2,6 +2,7 @@
 #include "menus/rep_0788.h"
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/gx.h"
+#include "stdlib.h"
 
 typedef struct MenuEntry0788 {
     /* 0x0 */ void (*fn)(struct MenuTask0788* task, struct MenuItem0788* item);
@@ -185,11 +186,7 @@ extern struct {
     /* 0x442E */ u8 _442E;
     /* 0x442F */ u8 _442F;
     /* 0x4430 */ u8 _4430;
-    /* 0x4431 */ u8 _4431;
-    /* 0x4432 */ u8 _4432;
-    /* 0x4433 */ u8 _4433;
-    /* 0x4434 */ u8 _4434;
-    /* 0x4435 */ u8 _4435;
+    /* 0x4431 */ u8 _4431[5];
     /* 0x4436 */ u8 _4436[0x4437 - 0x4436];
     /* 0x4437 */ u8 _4437;
     /* 0x4438 */ u8 _4438;
@@ -241,6 +238,7 @@ extern struct {
 } *lbl_2_bss_1A8248;
 
 extern s16 lbl_2_data_3D30[][4];
+extern s16 lbl_2_data_2E44[4][4];
 extern s16 lbl_2_data_3714[20];
 extern s16 lbl_2_data_373C[20];
 extern s16 lbl_2_data_3764[20][4];
@@ -7984,6 +7982,19 @@ s16 fn_2_24E9C(void) {
     return ((MenuTask0788*)lbl_803CC1B8)->_10;
 }
 
+// .text:0x00024728 size:0xD8
+s32 fn_2_24728(s32 id) {
+    s32 i;
+
+    for (i = 0; i < 51; i++) {
+        if (lbl_2_bss_1A8248->_40F0[i]._1 == 0 && lbl_2_bss_1A8248->_40F0[i]._2 == 1 && lbl_2_bss_1A8248->_40F0[i]._5 == id &&
+            lbl_2_bss_1A8248->_4431[id] == 1) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 // .text:0x00024724 size:0x4
 void fn_2_24724(void) {}
 
@@ -8221,6 +8232,32 @@ s16 fn_2_201E4(s16 row, s16 col) {
         return -1;
     }
     return lbl_2_data_3D30[row][col];
+}
+
+// .text:0x000200E4 size:0x100
+s32 fn_2_200E4(void) {
+    s32 level;
+
+    if (lbl_2_bss_1A8248->_40F0[lbl_2_bss_1A8248->_16C0]._6 == 1) {
+        return 0;
+    }
+    if (lbl_2_bss_1A8248->_40F0[lbl_2_bss_1A8248->_16C0]._0 == 5) {
+        return 0;
+    }
+    level = lbl_2_bss_1A8248->_442B;
+    if (level > 3) {
+        level = 3;
+    }
+    if (lbl_2_data_2E44[lbl_2_bss_1A8248->_4415][level] >= rand() % 100 && lbl_2_bss_1A8248->_441C != 5) {
+        if (lbl_2_bss_1A8248->_4422 == 0) {
+            return 0;
+        }
+        if (lbl_2_bss_1A8248->_442B < 3) {
+            lbl_2_bss_1A8248->_442B++;
+        }
+        return 1;
+    }
+    return 0;
 }
 
 // .text:0x00020074 size:0x70
