@@ -842,7 +842,7 @@ config.libs = [
             Object(NonMatching, "challenge/rep_0610.c"),
             Object(NonMatching, "challenge/rep_74A0.c"),
             Object(NonMatching, "challenge/rep_7730.c"),
-            Object(NonMatching, "challenge/rep_7920.c"),
+            Object(Matching, "challenge/rep_7920.c"),
             Object(NonMatching, "challenge/rep_7978.c"),
             Object(NonMatching, "challenge/rep_7A28.c"),
             Object(NonMatching, "challenge/rep_7BA0.c"),
