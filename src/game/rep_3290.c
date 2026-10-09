@@ -377,9 +377,18 @@ void fn_3_115738(void) {
     }
 }
 
+static inline void clearWallFlags(void) {
+    s8 j;
+
+    j = 0;
+    do {
+        g_Minigame._1DC4[j] = 0;
+        j++;
+    } while (j < 4);
+}
+
 // .text:0x00115540 size:0x1F8 mapped:0x807545D4
 void fn_3_115540(void) {
-    s8 j;
     int i;
 
     if (fn_3_108854() == 0) {
@@ -388,11 +397,7 @@ void fn_3_115540(void) {
         } else if (g_Minigame.wallBallGameState == 2) {
             fn_3_1133C4();
             fn_3_75560();
-            j = 0;
-            do {
-                g_Minigame._1DC4[j] = 0;
-                j++;
-            } while (j < 4);
+            clearWallFlags();
             fn_3_113A48();
         }
         if (g_Minigame.ballStoppedBreakingWallsInd) {
