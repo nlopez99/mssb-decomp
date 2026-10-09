@@ -41,6 +41,13 @@ extern void fn_2_16A74(s32 arg0, s32 arg1);
 extern void fn_2_1C34(u16 buttons);
 extern s32 fn_2_14F8(s32 min, s32 max);
 extern void fn_2_1D54(s32* cursor, u8 arg1, s32 count);
+extern int fn_8006285C(void);
+extern void fn_800216F8(u8 group, int (*callback)(void));
+extern void initializeUnknown(void);
+extern void fn_80062A94(void);
+extern s32 fn_800697B0(void);
+extern void fn_8006496C(void);
+extern void fn_2_82E58(void);
 
 // One character's stats, as in inMemRoster and at the start of lbl_8034E9A0
 typedef struct CharEntry0318 {
@@ -89,6 +96,10 @@ extern struct {
     /* 0x441D */ u8 _441D;
     /* 0x441E */ u8 _441E;
     /* 0x441F */ s8 _441F;
+    /* 0x4420 */ u8 _4420[0x4445 - 0x4420];
+    /* 0x4445 */ u8 _4445;
+    /* 0x4446 */ u8 _4446[0x44EF - 0x4446];
+    /* 0x44EF */ s8 _44EF;
 } starMissionCompletionTracker;
 extern struct {
     /* 0x0 */ u8 _0[3];
@@ -238,7 +249,8 @@ extern struct {
     /* 0x08 */ u8 _08[2];
     /* 0x0A */ u8 _0A[0xE - 0xA];
     /* 0x0E */ u8 _0E;
-    /* 0x0F */ u8 _0F[0x12 - 0xF];
+    /* 0x0F */ u8 _0F[0x11 - 0xF];
+    /* 0x11 */ u8 _11;
     /* 0x12 */ s16 _12[2][9];
     /* 0x36 */ u8 _36[0x3C - 0x36];
 } lbl_803C5EA4;
@@ -249,6 +261,11 @@ extern struct {
     /* 0x4 */ u8 _4;
 } lbl_803CBD24;
 extern u8 lbl_803CB8D0[8];
+extern struct {
+    /* 0x00 */ u8 _00[0x10];
+    /* 0x10 */ s16 _10;
+}* lbl_803CC1B8;
+extern u8 lbl_80361B20[0x130];
 extern struct {
     /* 0x0 */ u8 _0[2];
     /* 0x2 */ u8 _2;
@@ -261,13 +278,17 @@ extern struct {
 extern struct {
     /* 0x0000 */ u8 _0000[0xCF5F];
     /* 0xCF5F */ u8 _CF5F;
-    /* 0xCF60 */ u8 _CF60[0xCFA1 - 0xCF60];
+    /* 0xCF60 */ u8 _CF60[0xCF70 - 0xCF60];
+    /* 0xCF70 */ u8 _CF70;
+    /* 0xCF71 */ u8 _CF71[0xCFA1 - 0xCF71];
     /* 0xCFA1 */ u8 _CFA1;
 } lbl_803297E0;
 
 typedef struct AramEntry0318 {
     /* 0x0 */ u32 _0[4];
 } AramEntry0318; // size: 0x10
+
+extern int fn_80035838(AramEntry0318* entry, int count);
 
 static char lbl_2_data_720[2][0x20] = { "BAT FIRST", "BAT LAST" };
 static char lbl_2_data_760[2][0x20] = { "FL", "PC" };
@@ -299,10 +320,14 @@ static char lbl_2_data_C84[2][8] = { "FIRST", "LAST" };
 static char lbl_2_data_C94[4][0x20] = {
     "EASY      MODE", "NORMAL    MODE", "HARD      MODE", "VERY HARD MODE",
 };
-static AramEntry0318 lbl_2_data_D14[16] = {
+static AramEntry0318 lbl_2_data_D14[1] = {
     { 0x0000040B, 0x4037CF5C, 0x18B3A800, 0x00208AF0 },
+};
+static AramEntry0318 lbl_2_data_D24[2] = {
     { 0x0000040B, 0x400ADFFC, 0x18AEE800, 0x0004BAB0 },
     { 0x0000040B, 0x400193E8, 0x191B8800, 0x000089D8 },
+};
+static AramEntry0318 lbl_2_data_D44[13] = {
     { 0x0000040B, 0x4010E5A0, 0x0E97A800, 0x0009BCAC },
     { 0x0000040B, 0x40016980, 0x0EA16800, 0x0000D6C4 },
     { 0x0000040B, 0x40016980, 0x0EA24000, 0x0000C944 },
@@ -898,7 +923,8 @@ void fn_2_BF90(void) {
     memset(lbl_8034E9A0._4757, 0, sizeof(lbl_8034E9A0._4757));
     for (i = 0; i < 12; i++) {
         if (lbl_80108EC4[i] == starMissionCompletionTracker._441F) {
-            grp = lbl_8034E9A0._470C = i;
+            lbl_8034E9A0._470C = i;
+            grp = lbl_8034E9A0._470C;
         }
     }
     lbl_2_bss_F468._10[1] = 0;
@@ -1738,6 +1764,92 @@ void fn_2_7D44(void) {
     fn_2_16A74(1, 0);
     fn_2_16A74(2, 0);
     fn_2_16A74(3, 0);
+}
+
+// .text:0x00006D3C size:0x7C8
+// 99%: registers only, in the written-out copy of fn_2_6884 (the target
+// keeps i in r3); calling fn_2_6884 there scores 98.3%.
+void fn_2_6D3C(void) {
+    s32 i;
+    s32 j;
+    u8 id;
+    s8 group;
+
+    if (g_d_GameSettings.GameModeSelected == 5 && lbl_803C5EA4._11 == 0) {
+        if (lbl_2_bss_F468._28[4] == 0) {
+            if (lbl_2_bss_F468._2D == 0) {
+                fn_800216F8(37, fn_8006285C);
+                lbl_2_bss_F468._2D = 1;
+                return;
+            }
+            if (lbl_2_bss_F468._2D == 1) {
+                if (lbl_803CC1B8->_10 == 0) {
+                    return;
+                }
+                lbl_803CC1B8->_10 = 0;
+                initializeUnknown();
+                fn_800B0A5C_insertQueue(fn_80062A94, 0x1000);
+                lbl_2_bss_F468._2D = 0;
+            }
+        }
+        lbl_2_bss_F468._28[4] = 1;
+        if (lbl_2_bss_F468._28[0] == 0 && fn_800697B0() != 0) {
+            return;
+        }
+        lbl_2_bss_F468._28[0] = 1;
+        if (lbl_2_bss_F468._28[1] == 0 && fn_80035838(lbl_2_data_D14, 6) == 0) {
+            return;
+        }
+        lbl_2_bss_F468._28[1] = 1;
+        if (lbl_2_bss_F468._28[2] == 0 && fn_80035838(lbl_2_data_D24, 9) == 0) {
+            return;
+        }
+        lbl_2_bss_F468._28[2] = 1;
+        if (lbl_2_bss_F468._28[3] == 0 && fn_80035838(lbl_2_data_D44, 15) == 0) {
+            return;
+        }
+        lbl_2_bss_F468._28[3] = 1;
+    }
+    if (g_d_GameSettings.GameModeSelected == 5 && starMissionCompletionTracker._4445 != 0) {
+        starMissionCompletionTracker._4445 = 0;
+        lbl_803297E0._CFA1 = 1;
+        if (lbl_80361B20[228] != 0) {
+            lbl_803297E0._CF70 = 0;
+        } else {
+            lbl_803297E0._CF70 = 1;
+        }
+        fn_2_BF90();
+        unsure_FillRosterPositions(1);
+    } else if (g_d_GameSettings.GameModeSelected == 5 && starMissionCompletionTracker._4445 == 0) {
+        if (starMissionCompletionTracker._441D == 9 && starMissionCompletionTracker._44EF != 0) {
+            fn_2_6784();
+        } else {
+            fn_2_6AF4();
+        }
+        for (i = 0; i < 9; i++) {
+            id = starMissionCompletionTracker._40B8[i]._0;
+            lbl_803C6724._02[0][i] = starMissionCompletionTracker._40B8[i]._0;
+            lbl_80354720[0][i]._1 = starMissionCompletionTracker._40B8[i]._2;
+            lbl_80354720[0][i]._0 = i;
+            lbl_803C6724._4A[0][i] = 1;
+            lbl_80354720[0][i]._2 = i;
+            lbl_8034E9A0._4757[id] = 1;
+            group = fn_2_C324(id);
+            if (group != -1) {
+                for (j = 0; j < 5; j++) {
+                    if (lbl_80108EDC[group][j] != -1) {
+                        lbl_8034E9A0._4757[lbl_80108EDC[group][j]] = 1;
+                    }
+                }
+            }
+        }
+        lbl_803297E0._CFA1 = 0;
+    }
+    if (g_d_GameSettings.GameModeSelected == 5) {
+        fn_8006496C();
+    }
+    fn_2_82E58();
+    lbl_803CBBCC->_4 = 1;
 }
 
 // .text:0x00006AF4 size:0x248
