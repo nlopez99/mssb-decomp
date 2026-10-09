@@ -127,11 +127,15 @@ extern struct {
     /* 0x37 */ u8 _37[2];
     /* 0x39 */ u8 _39[0x41 - 0x39];
     /* 0x41 */ u8 _41[2];
-    /* 0x43 */ u8 _43[0x59 - 0x43];
+    /* 0x43 */ u8 _43[2];
+    /* 0x45 */ u8 _45[0x56 - 0x45];
+    /* 0x56 */ u8 _56;
+    /* 0x57 */ u8 _57[0x59 - 0x57];
     /* 0x59 */ u8 _59[0x5F - 0x59];
     /* 0x5F */ u8 _5F[2];
     /* 0x61 */ s8 _61[2];
     /* 0x63 */ u8 _63[2];
+    /* 0x65 */ u8 _65[2];
 } lbl_2_bss_F468;
 extern UnkSpriteDesc0C50 lbl_2_data_2D33C[];
 extern UnkSpriteDesc0C50 lbl_2_data_2AF4C[];
@@ -1063,6 +1067,79 @@ void fn_2_78F78(UnkTask0C50* task, s32 index) {
     if (lbl_803C66B0._0D[index] == 1) {
         fn_80062674(index);
         lbl_803C66B0._0D[index] = 2;
+    }
+}
+
+// .text:0x00078AC0 size:0x4B8
+void fn_2_78AC0(UnkTask0C50* task, s32 index) {
+    s8 prev;
+    s8 found;
+    s8 sel;
+    s32 i;
+
+    sel = lbl_2_bss_F468._00[index];
+    prev = lbl_2_bss_F468._61[index];
+    if (prev != -1) {
+        for (i = 0; i < 9; i++) {
+            if (lbl_803C6724._14[index][i] == prev) {
+                found = i;
+            }
+        }
+    }
+    if (lbl_803C66B0._0D[index] == 0 ? TRUE : FALSE) {
+        lbl_80371C30[0xA + task->_14 + index]._00->_5C = 0xF0000;
+        lbl_80371C30[0xA + task->_14 + index]._00->_68 = 4;
+        lbl_80371C30[0x1E + task->_14 + index]._00->_68 = 4;
+        lbl_80371C30[0x93 + task->_14 + index]._00->_64 = 9;
+        lbl_80371C30[0x89 + task->_14 + index]._00->_5C = 0;
+        lbl_80371C30[0x89 + task->_14 + index]._00->_68 = 1;
+        lbl_80371C30[0x8D + task->_14 + index]._00->_5C = 0x140000;
+        lbl_80371C30[0x8D + task->_14 + index]._00->_68 = 4;
+        lbl_80371C30[0x6A + task->_14 + index]._00->_68 = 1;
+        if (g_d_GameSettings.GameModeSelected != 5) {
+            lbl_80371C30[0x8F + task->_14 + index]._00->_64 = 7;
+        }
+        if (prev != -1 && prev != sel) {
+            lbl_80371C30[0x46 + task->_14 + prev + index * 9]._00->_68 = 4;
+            if (lbl_803C6724._02[index][found] != -1 && lbl_803C6724._02[index][found] != 0x36) {
+                lbl_80371C30[0x34 + task->_14 + prev + index * 9]._00->_5C = 0xA0000;
+                lbl_80371C30[0x34 + task->_14 + prev + index * 9]._00->_68 = 1;
+            }
+        }
+        fn_800626EC(index);
+        lbl_803C66B0._0D[index] = 1;
+    }
+    if (lbl_803C66B0._0D[index] == 1) {
+        s32 n;
+        s32 expected = 1;
+
+        n = isAnimDone(task, index + 0x89, 5);
+        expected++;
+        n += isAnimDone(task, index + 0x6A, 10);
+        if (prev != -1 && lbl_2_bss_F468._56 == 0 && prev != sel && lbl_803C6724._02[index][found] != -1 &&
+            lbl_803C6724._02[index][found] != 0x36)
+        {
+            expected++;
+            n += isAnimDone(task, 0x34 + prev + index * 9, 20);
+        }
+        if (n == expected) {
+            lbl_2_bss_F468._61[index] = -1;
+            fn_80062674(index);
+            lbl_803C66B0._0D[index] = 2;
+            if (lbl_2_bss_F468._65[index]) {
+                if (g_d_GameSettings.GameModeSelected == 5) {
+                    fn_800625A4(0, 0x13);
+                    fn_800625A4(1, 0x13);
+                } else if (g_d_GameSettings._10 == 0) {
+                    fn_800625A4(index, 0x11);
+                } else {
+                    fn_800625A4(index, 0x11);
+                }
+                lbl_2_bss_F468._65[index] = 0;
+            } else if (lbl_2_bss_F468._56) {
+                fn_800625A4(index, 0xB);
+            }
+        }
     }
 }
 
