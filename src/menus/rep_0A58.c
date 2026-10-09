@@ -50,7 +50,7 @@ typedef struct AramEntry0A58 {
 typedef struct MenuSprite0A58 {
     /* 0x00 */ u8 _00[0x54];
     /* 0x54 */ u32 _54;
-    /* 0x58 */ u8 _58[0x5C - 0x58];
+    /* 0x58 */ u32 _58;
     /* 0x5C */ u32 _5C;
     /* 0x60 */ u8 _60[0x68 - 0x60];
     /* 0x68 */ u8 _68;
@@ -67,8 +67,16 @@ extern struct {
     /* 0x0000 */ u8 _0000[0x307A];
     /* 0x307A */ u8 _307A;
 } lbl_8036E548;
+// One text window per entry
+typedef struct MenuTextWindow0A58 {
+    /* 0x00 */ u8 _00[0x2F];
+    /* 0x2F */ u8 _2F;
+    /* 0x30 */ u8 _30[0x38 - 0x30];
+} MenuTextWindow0A58; // size: 0x38
+
 extern struct {
-    /* 0x000 */ u8 _000[0x7A0];
+    /* 0x000 */ MenuTextWindow0A58 _000[34];
+    /* 0x770 */ u8 _770[0x7A0 - 0x770];
     /* 0x7A0 */ void* _7A0;
 } lbl_80366B18;
 extern struct {
@@ -119,11 +127,15 @@ extern struct {
     /* 0x190000 */ s32 _190000;
     /* 0x190004 */ u8 _190004[0x1972BC - 0x190004];
     /* 0x1972BC */ u8 _1972BC;
-    /* 0x1972BD */ u8 _1972BD[0x1976FA - 0x1972BD];
+    /* 0x1972BD */ u8 _1972BD[0x1976F4 - 0x1972BD];
+    /* 0x1976F4 */ s16 _1976F4;
+    /* 0x1976F6 */ u8 _1976F6[0x1976FA - 0x1976F6];
     /* 0x1976FA */ s16 _1976FA;
     /* 0x1976FC */ u8 _1976FC[0x1976FE - 0x1976FC];
     /* 0x1976FE */ s16 _1976FE;
-    /* 0x197700 */ u8 _197700[0x197752 - 0x197700];
+    /* 0x197700 */ u8 _197700[0x197746 - 0x197700];
+    /* 0x197746 */ s16 _197746;
+    /* 0x197748 */ u8 _197748[0x197752 - 0x197748];
     /* 0x197752 */ s16 _197752;
     /* 0x197754 */ s16 _197754;
     /* 0x197756 */ u8 _197756[0x197822 - 0x197756];
@@ -137,11 +149,24 @@ extern void fn_8001F228(void);
 extern void fn_80021410(void);
 extern void fn_800ACFB0(void* data);
 extern void fn_80035B50(s32);
+extern void* ARAMTransfer(AramEntry0A58* entry, int arg1, int arg2, u32 aram);
+extern void fn_800111B4(void* arg);
+extern int fn_80035838(AramEntry0A58* entry, int count);
+extern void fn_800216F8(u8 group, int (*callback)(void));
+extern int fn_800627C4(void);
+extern void fn_80036134(MenuTask0A58* task, s32, s32, s32);
+extern void fn_8000FE54(void);
+extern u16 fn_8000F988(MenuTask0A58* task, s32, u16, s32, s32, s32);
+extern void fn_8000FE08(s32 id, s32, s32);
+extern void fn_8000F8F4(MenuTask0A58* task);
 
 extern void fn_2_47CFC(void);
 extern void fn_2_47FF8(void);
 extern void fn_2_4E7EC(void);
+extern void fn_2_4E858(MenuTask0A58* task);
+extern void fn_2_4E878(MenuTask0A58* task, u32* layout);
 extern void fn_2_68E68(void);
+extern void fn_2_8E8A4(void);
 
 static u32 lbl_2_data_1F8F0[0xB1] = {
     0x42415420, 0x46495253, 0x54000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
@@ -329,6 +354,29 @@ void fn_2_58510(MenuTask0A58* task, MenuItem0A58* item) {
     lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
 }
 
+// .text:0x00058470 size:0xA0
+void fn_2_58470(MenuTask0A58* task, MenuItem0A58* item) {
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        item->_04 = 0x26;
+        break;
+    case 2:
+        item->_04 = 0x25;
+        break;
+    case 5:
+    case 8:
+    case 1:
+    case 0x24:
+    case 0x25:
+        break;
+    }
+}
+
 // .text:0x00058328 size:0x148
 void fn_2_58328(MenuTask0A58* task, MenuItem0A58* item) {
     s16 state = fn_2_53BC8(item);
@@ -445,8 +493,8 @@ void fn_2_57F50(MenuTask0A58* task, MenuItem0A58* item) {
     }
 }
 
-// .text:0x00058470 size:0xA0
-void fn_2_58470(MenuTask0A58* task, MenuItem0A58* item) {
+// .text:0x000579B4 size:0x244
+void fn_2_579B4(MenuTask0A58* task, MenuItem0A58* item) {
     s16 state = fn_2_53BC8(item);
 
     if (state != -1) {
@@ -454,16 +502,31 @@ void fn_2_58470(MenuTask0A58* task, MenuItem0A58* item) {
     }
     switch (item->_04) {
     case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
         item->_04 = 0x26;
         break;
     case 2:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
+        if (lbl_2_data_1FD84[lbl_2_bss_1A824C->_1976FA + lbl_2_bss_1A824C->_1976FE] >= 2) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        } else {
+            lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        }
         item->_04 = 0x25;
         break;
-    case 5:
-    case 8:
-    case 1:
-    case 0x24:
     case 0x25:
+        if (lbl_2_data_1FD84[lbl_2_bss_1A824C->_1976FA + lbl_2_bss_1A824C->_1976FE] >= 2) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        } else {
+            lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        }
+        break;
+    case 5:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 1:
         break;
     }
 }
@@ -524,6 +587,172 @@ void fn_2_57724(MenuTask0A58* task, MenuItem0A58* item) {
     case 0x25:
         break;
     }
+}
+
+// .text:0x0005754C size:0x1D8
+void fn_2_5754C(MenuTask0A58* task, MenuItem0A58* item) {
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
+        item->_04 = 0x26;
+        break;
+    case 2:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        fn_80036134(task, 0x1D, lbl_2_bss_1A824C->_1976FA, 0xE);
+        lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0;
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
+        item->_04 = 0x25;
+        break;
+    case 0x25:
+        fn_80036134(task, 0x1D, lbl_2_bss_1A824C->_1976FA, 0xE);
+        break;
+    case 5:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 4:
+    case 1:
+        break;
+    }
+}
+
+// .text:0x000570E4 size:0x1B0
+void fn_2_570E4(MenuTask0A58* task, MenuItem0A58* item) {
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 2:
+        lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0;
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        fn_80036134(task, 0x1C, lbl_2_bss_1A824C->_1976F4, 0x1A);
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
+        item->_04 = 0x25;
+        break;
+    case 0x25:
+        fn_80036134(task, 0x1C, lbl_2_bss_1A824C->_1976F4, 0x1A);
+        break;
+    case 5:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 1:
+        break;
+    }
+}
+
+// .text:0x00056E8C size:0x258
+void fn_2_56E8C(MenuTask0A58* task, MenuItem0A58* item) {
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_12 = 0;
+        item->_14 = fn_8000F988(task, item->_0E, item->_10, 2, 0x215, 0);
+        item->_04 = 0x26;
+        break;
+    case 2:
+        fn_8000FE08(item->_14, 2, item->_0A + 0x215);
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        item->_04 = 3;
+        break;
+    case 3:
+        item->_12 += (0xFF - item->_12) / 4;
+        item->_12++;
+        if (item->_12 > 0xFF) {
+            item->_12 = 0xFF;
+        }
+        if (item->_12 >= 0xFF) {
+            item->_04 = 0x25;
+        }
+        break;
+    case 0x25:
+        item->_04 = 0x25;
+        break;
+    case 5:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 6;
+        break;
+    case 6:
+        item->_12 += -item->_12 / 4;
+        item->_12--;
+        if (item->_12 < 0) {
+            item->_12 = 0;
+        }
+        break;
+    case 1:
+    case 4:
+        break;
+    }
+    lbl_80366B18._000[item->_14]._2F = 1;
+    lbl_80371C30[task->_14 + item->_0E]._00->_58 = item->_12 | (lbl_80371C30[task->_14 + item->_0E]._00->_58 & 0xFFFFFF00);
+}
+
+// .text:0x00056C34 size:0x258
+void fn_2_56C34(MenuTask0A58* task, MenuItem0A58* item) {
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_12 = 0;
+        item->_14 = fn_8000F988(task, item->_0E, item->_10, 2, 0x213, 0);
+        item->_04 = 0x26;
+        break;
+    case 2:
+        fn_8000FE08(item->_14, 2, item->_0A + 0x213);
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        item->_04 = 3;
+        break;
+    case 3:
+        item->_12 += (0xFF - item->_12) / 4;
+        item->_12++;
+        if (item->_12 > 0xFF) {
+            item->_12 = 0xFF;
+        }
+        if (item->_12 >= 0xFF) {
+            item->_04 = 0x25;
+        }
+        break;
+    case 0x25:
+        item->_04 = 0x25;
+        break;
+    case 5:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 6;
+        break;
+    case 6:
+        item->_12 += -item->_12 / 4;
+        item->_12--;
+        if (item->_12 < 0) {
+            item->_12 = 0;
+        }
+        break;
+    case 1:
+    case 4:
+        break;
+    }
+    lbl_80366B18._000[item->_14]._2F = 1;
+    lbl_80371C30[task->_14 + item->_0E]._00->_58 = item->_12 | (lbl_80371C30[task->_14 + item->_0E]._00->_58 & 0xFFFFFF00);
 }
 
 // .text:0x00056160 size:0x260
@@ -783,6 +1012,56 @@ void fn_2_54B38(void) {
     GXSetZCompLoc(GX_FALSE);
 }
 
+// .text:0x000549B4 size:0x184
+void fn_2_549B4(void) {
+    MenuTask0A58* task = lbl_803CC1B8;
+    MenuTask0A58* child;
+
+    switch (task->_28) {
+    case 0:
+        lbl_80366B18._7A0 = ARAMTransfer(lbl_2_data_1FF94, 0, 1, 0);
+        task->_28 = 1;
+        break;
+    case 1:
+        if (lbl_803C6CF8._715 == 1) {
+            fn_800111B4(lbl_80366B18._7A0);
+            task->_28 = 2;
+        }
+        break;
+    case 2:
+        if (fn_80035838(&lbl_2_data_1FF84, 10) != 0) {
+            task->_28 = 3;
+        }
+        break;
+    case 3:
+        task->_10 = 0;
+        fn_800216F8(4, fn_800627C4);
+        task->_28 = 4;
+        break;
+    case 4:
+        if (task->_10 != 0) {
+            task->_10 = 0;
+            task->_28 = 5;
+        }
+        break;
+    case 5:
+        lbl_2_bss_1A824C->_197746 = 1;
+        child = fn_800B0A5C_insertQueue(fn_2_8E8A4, 2);
+        child->_28 = 0;
+        child->_16 = 12;
+        task->_10 = 0;
+        task->_28 = 6;
+        break;
+    case 6:
+        if (task->_10 == 1) {
+            task->_0C->_10 = 1;
+            fn_800B0A14_removeQueue();
+            task->_28 = 0;
+        }
+        break;
+    }
+}
+
 // .text:0x00054890 size:0x124
 void fn_2_54890(void) {
     MenuTask0A58* task;
@@ -1018,4 +1297,30 @@ s16 fn_2_53AA4(MenuItem0A58* item) {
         state = 33;
     }
     return state;
+}
+
+// .text:0x0005389C size:0x208
+void fn_2_5389C(void) {
+    MenuTask0A58* task = lbl_803CC1B8;
+
+    switch (task->_1C) {
+    case 0:
+        fn_2_4E878(task, lbl_2_data_1FFB4);
+        task->_1C = 1;
+        task->_18 = 0;
+        break;
+    case 1:
+        break;
+    }
+    fn_2_53F88(task);
+    fn_2_54120();
+    if (lbl_2_bss_1A8234->_162604[13][0] != 0) {
+        fn_8000F8F4(task);
+        fn_8000FE54();
+        fn_2_4E858(task);
+        fn_800B0A14_removeQueue();
+        task->_1C = 0;
+        task->_1E = 0;
+        lbl_2_bss_1A8234->_162604[13][0] = 0;
+    }
 }
