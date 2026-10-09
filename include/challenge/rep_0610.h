@@ -49,6 +49,7 @@ void* fn_1_106A4(void);
 void fn_1_106B4(void);
 void fn_1_106C4(void);
 void fn_1_1073C(struct UnkLight0610* arg0);
+void fn_1_107B8(void);
 void fn_1_10AA4(struct Unk10AA4* arg0, f32 arg1);
 void fn_1_10CEC(struct UnkCamera0610* arg0);
 void fn_1_10E2C(Mtx arg0, Mtx arg1, u32 arg2, u32 arg3, u32 arg4);

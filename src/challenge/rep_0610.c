@@ -5,6 +5,7 @@
 #include "Dolphin/mtx.h"
 #include "Dolphin/GX/GXTransform.h"
 #include "C3/control.h"
+#include "string.h"
 
 typedef struct LITObj {
     /* 0x00 */ u8 _00[0xC0];
@@ -90,7 +91,10 @@ typedef struct UnkTimer0610 {
     /* 0x11 */ u8 _11_0 : 3;
     /* 0x11 */ u8 _11_3 : 2;
     /* 0x11 */ u8 _11_5 : 3;
-} UnkTimer0610;
+    /* 0x12 */ u8 _12[0x1A - 0x12];
+    /* 0x1A */ u16 _1A;
+    /* 0x1C */ u32* _1C;
+} UnkTimer0610; // size: 0x20
 
 typedef struct UnkTask0610 {
     /* 0x00 */ void (*_00)(void);
@@ -306,7 +310,11 @@ static u8 lbl_1_bss_5F68;
 static u8 lbl_1_bss_5F64[4];
 static u8 lbl_1_bss_5F63;
 static s8 lbl_1_bss_5F62;
-static u8 lbl_1_bss_3258[0x2D0A];
+static s16 lbl_1_bss_5F60;
+static s32 lbl_1_bss_5F5C;
+static s32 lbl_1_bss_5F58;
+static u32 lbl_1_bss_3758[8][5][0x40];
+static UnkTimer0610 lbl_1_bss_3258[8][5];
 static UnkSlotState0610 lbl_1_bss_3218[8];
 static u8 lbl_1_bss_3216;
 static u8 lbl_1_bss_3215;
@@ -841,6 +849,38 @@ void fn_1_E8D4(void) {
     fn_1_D7A4(0);
     while (lbl_1_data_F4D4._4[lbl_1_data_F4D4._0]._00 != 0) {
         lbl_1_data_F4D4._0++;
+    }
+}
+
+// .text:0x0000DF14 size:0x184
+void fn_1_DF14(void) {
+    UnkTaskState0610* task = (UnkTaskState0610*)lbl_803CC1B8;
+    s32 slot = task->_14;
+    s32 i;
+    switch (task->_10) {
+    case 0:
+        lbl_1_bss_6940[lbl_1_bss_5F73]._44 = lbl_1_bss_3218[slot]._0;
+        lbl_1_bss_6940[lbl_1_bss_5F73]._45 = lbl_1_bss_3218[slot]._2;
+        fn_800B0A5C_insertQueue(fn_1_107B8, 0xFF);
+        lbl_1_bss_5F5C = 2;
+        lbl_803CC1B8->_10++;
+        break;
+    case 1:
+        if (lbl_1_bss_5F5C == 0) {
+            i = 5;
+            while (i--) {
+                if (lbl_1_bss_67B8[i] != NULL) {
+                    memcpy(&lbl_1_bss_3258[slot][i], lbl_1_bss_67B8[i], 0x20);
+                    lbl_1_bss_3258[slot][i]._1C = lbl_1_bss_3758[slot][i];
+                    memcpy(lbl_1_bss_3758[slot][i], lbl_1_bss_67B8[i]->_1C, lbl_1_bss_67B8[i]->_1A * 4);
+                } else {
+                    memset(&lbl_1_bss_3258[slot][i], 0, 0x20);
+                }
+            }
+            lbl_803CC1B8->_0C->_10 = 1;
+            fn_800B0A14_removeQueue();
+        }
+        break;
     }
 }
 
