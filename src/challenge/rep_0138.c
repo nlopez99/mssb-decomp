@@ -80,9 +80,21 @@ extern struct {
     /* 0x231 */ s8 _231;
     /* 0x232 */ u8 _232[0x234 - 0x232];
     /* 0x234 */ u8 _234;
-    /* 0x235 */ u8 _235[0x23C - 0x235];
+    /* 0x235 */ u8 _235[0x238 - 0x235];
+    /* 0x238 */ u8 _238;
+    /* 0x239 */ u8 _239;
+    /* 0x23A */ u8 _23A[0x23C - 0x23A];
     /* 0x23C */ s8 _23C;
 } lbl_1_common_bss_472B4;
+
+extern struct {
+    /* 0x00 */ f32 _00;
+    /* 0x04 */ f32 _04;
+    /* 0x08 */ f32 _08;
+    /* 0x0C */ f32 _0C;
+    /* 0x10 */ f32 _10;
+    /* 0x14 */ f32 _14;
+} lbl_1_data_200;
 
 typedef struct Fog0138 {
     /* 0x0 */ GXColor color;
@@ -99,6 +111,34 @@ extern struct {
 extern u8 lbl_1_bss_C2;
 extern s32 lbl_1_bss_C4;
 extern Fog0138* lbl_1_bss_4E0;
+
+// .text:0x3590 size:0x240
+void fn_1_8368(void) {
+    if (lbl_803C77B8[0]._04 & 1) {
+        if (--lbl_1_common_bss_472B4._22E < -1) {
+            lbl_1_common_bss_472B4._22E = lbl_1_common_bss_472B4._228 - 1;
+        }
+    } else if (lbl_803C77B8[0]._04 & 2) {
+        if (++lbl_1_common_bss_472B4._22E >= lbl_1_common_bss_472B4._228) {
+            lbl_1_common_bss_472B4._22E = -1;
+        }
+    } else if (lbl_803C77B8[0]._02 & 0x400) {
+        lbl_1_common_bss_472B4._239 ^= 1;
+    } else if (lbl_803C77B8[0]._02 & 0x100) {
+        lbl_1_common_bss_472B4._238 ^= 1;
+    }
+    lbl_1_data_200._00 += lbl_803C77B8[0]._10 / 128.0f;
+    lbl_1_data_200._08 += lbl_803C77B8[0]._11 / 128.0f;
+    lbl_1_data_200._0C += lbl_803C77B8[0]._12 / 128.0f;
+    lbl_1_data_200._14 += lbl_803C77B8[0]._13 / 128.0f;
+    if (!(lbl_803C77B8[0]._00 & 0x100)) {
+        lbl_1_data_200._04 -= lbl_803C77B8[0]._15 / 1024.0f;
+        lbl_1_data_200._04 += lbl_803C77B8[0]._14 / 1024.0f;
+    } else {
+        lbl_1_data_200._10 -= lbl_803C77B8[0]._15 / 1024.0f;
+        lbl_1_data_200._10 += lbl_803C77B8[0]._14 / 1024.0f;
+    }
+}
 
 // .text:0x37D0 size:0x7C
 void fn_1_85A8(void) {

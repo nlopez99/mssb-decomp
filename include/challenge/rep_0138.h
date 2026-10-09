@@ -21,6 +21,7 @@ void fn_1_78E4(void);
 void fn_1_7E04(f32 zoom);
 void fn_1_7EF8(void);
 void fn_1_7FF8(void);
+void fn_1_8368(void);
 void fn_1_85A8(void);
 
 #endif // !__CHALLENGE_rep_0138_H_
