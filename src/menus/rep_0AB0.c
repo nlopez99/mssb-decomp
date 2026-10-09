@@ -3317,6 +3317,112 @@ void fn_2_63570(MenuTask0AB0* task, MenuItem0AB0* item) {
     }
 }
 
+// .text:0x00062D18 size:0x858
+void fn_2_62D18(MenuTask0AB0* task, MenuItem0AB0* item) {
+    s32 digit;
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 2:
+        lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0;
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        if (item->_0C == 6) {
+            switch (item->_10) {
+            case 0:
+                digit = (lbl_2_bss_1A824C->_1972C4[item->_0A]._0 / 1000) % 10;
+                break;
+            case 1:
+                digit = (lbl_2_bss_1A824C->_1972C4[item->_0A]._0 / 100) % 10;
+                break;
+            case 2:
+                digit = (lbl_2_bss_1A824C->_1972C4[item->_0A]._0 / 10) % 10;
+                break;
+            case 3:
+                digit = lbl_2_bss_1A824C->_1972C4[item->_0A]._0 % 10;
+                break;
+            }
+        } else {
+            switch (item->_10) {
+            case 0:
+                digit = (lbl_2_bss_1A824C->_1972EC[lbl_2_bss_1A824C->_1976FA][item->_0A]._0 / 1000) % 10;
+                break;
+            case 1:
+                digit = (lbl_2_bss_1A824C->_1972EC[lbl_2_bss_1A824C->_1976FA][item->_0A]._0 / 100) % 10;
+                break;
+            case 2:
+                digit = (lbl_2_bss_1A824C->_1972EC[lbl_2_bss_1A824C->_1976FA][item->_0A]._0 / 10) % 10;
+                break;
+            case 3:
+                digit = lbl_2_bss_1A824C->_1972EC[lbl_2_bss_1A824C->_1976FA][item->_0A]._0 % 10;
+                break;
+            }
+        }
+        fn_800363D8(task, item->_0E, 1, 0x16, digit);
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
+        item->_04 = 0x25;
+        break;
+    case 0x11:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        if (item->_0C == 6) {
+            switch (item->_10) {
+            case 0:
+                digit = (lbl_2_bss_1A824C->_1972C4[item->_0A]._0 / 1000) % 10;
+                break;
+            case 1:
+                digit = (lbl_2_bss_1A824C->_1972C4[item->_0A]._0 / 100) % 10;
+                break;
+            case 2:
+                digit = (lbl_2_bss_1A824C->_1972C4[item->_0A]._0 / 10) % 10;
+                break;
+            case 3:
+                digit = lbl_2_bss_1A824C->_1972C4[item->_0A]._0 % 10;
+                break;
+            }
+        } else {
+            switch (item->_10) {
+            case 0:
+                digit = (lbl_2_bss_1A824C->_1972EC[lbl_2_bss_1A824C->_1976FA][item->_0A]._0 / 1000) % 10;
+                break;
+            case 1:
+                digit = (lbl_2_bss_1A824C->_1972EC[lbl_2_bss_1A824C->_1976FA][item->_0A]._0 / 100) % 10;
+                break;
+            case 2:
+                digit = (lbl_2_bss_1A824C->_1972EC[lbl_2_bss_1A824C->_1976FA][item->_0A]._0 / 10) % 10;
+                break;
+            case 3:
+                digit = lbl_2_bss_1A824C->_1972EC[lbl_2_bss_1A824C->_1976FA][item->_0A]._0 % 10;
+                break;
+            }
+        }
+        fn_800363D8(task, item->_0E, 1, 0x16, digit);
+        item->_04 = 0x25;
+        break;
+    case 5:
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 4;
+        item->_04 = 6;
+        break;
+    case 6:
+        if ((lbl_80371C30[task->_14 + item->_0E]._00->_5C >> 16) == 0) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_68 = 0;
+            item->_04 = 7;
+        }
+        break;
+    case 7:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        break;
+    case 1:
+    case 0x25:
+        break;
+    }
+}
+
 // .text:0x00062A38 size:0x2E0
 // The target computes hundreds into a saved register before the first call;
 // here MWCC forwards it to the last call. Types and statement orders tried.
