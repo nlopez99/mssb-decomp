@@ -47,6 +47,7 @@ void fn_2_7630C(struct UnkTask0C50* task, u8 index);
 void fn_2_7664C(void);
 void fn_2_76650(struct UnkTask0C50* task, u8 index, u32 mask);
 void fn_2_78034(struct UnkTask0C50* task, s32 index);
+void fn_2_7805C(struct UnkTask0C50* task, s32 index);
 void fn_2_78F78(struct UnkTask0C50* task, s32 index);
 void fn_2_7912C(struct UnkTask0C50* task, s32 index);
 void fn_2_79394(struct UnkTask0C50* task, s32 index);

@@ -43,7 +43,8 @@ extern struct {
     /* 0x07 */ u8 _07;
     /* 0x08 */ u8 _08[0xD - 0x8];
     /* 0x0D */ u8 _0D[0x55 - 0xD];
-    /* 0x55 */ u8 _55[0x5D - 0x55];
+    /* 0x55 */ u8 _55[4];
+    /* 0x59 */ u8 _59[4];
     /* 0x5D */ u8 _5D[0x64 - 0x5D];
 } lbl_803C66B0;
 
@@ -118,10 +119,13 @@ extern struct {
 } lbl_2_bss_F410;
 extern struct {
     /* 0x00 */ s32 _00[4];
-    /* 0x10 */ u8 _10[0x41 - 0x10];
+    /* 0x10 */ u8 _10[0x37 - 0x10];
+    /* 0x37 */ u8 _37[2];
+    /* 0x39 */ u8 _39[0x41 - 0x39];
     /* 0x41 */ u8 _41[2];
     /* 0x43 */ u8 _43[0x59 - 0x43];
-    /* 0x59 */ u8 _59[0x61 - 0x59];
+    /* 0x59 */ u8 _59[0x5F - 0x59];
+    /* 0x5F */ u8 _5F[2];
     /* 0x61 */ s8 _61[2];
     /* 0x63 */ u8 _63[2];
 } lbl_2_bss_F468;
@@ -1058,6 +1062,53 @@ void fn_2_78F78(UnkTask0C50* task, s32 index) {
     }
 }
 
+// .text:0x0007805C size:0x310
+void fn_2_7805C(UnkTask0C50* task, s32 index) {
+    s32 n;
+    s8 prev;
+    s32 expected;
+    s8 found;
+    s32 i;
+
+    prev = lbl_2_bss_F468._61[index];
+    for (i = 0; i < 9; i++) {
+        if (lbl_803C6724._02[index + 2][i] == prev) {
+            found = i;
+        }
+    }
+    if (lbl_803C66B0._0D[index] == 0 ? TRUE : FALSE) {
+        if (prev != lbl_2_bss_F468._00[index]) {
+            lbl_80371C30[0x46 + task->_14 + prev + index * 9]._00->_68 = 4;
+            if (lbl_803C6724._02[index][found] != -1 && lbl_803C6724._02[index][found] != 0x36) {
+                lbl_80371C30[0x34 + task->_14 + prev + index * 9]._00->_68 = 1;
+            }
+        }
+        if (lbl_2_bss_F468._37[index]) {
+            lbl_80371C30[0x93 + task->_14 + index]._00->_64 = 9;
+            lbl_80371C30[0x93 + task->_14 + index]._00->_5C = 0xA0000;
+            lbl_80371C30[0x93 + task->_14 + index]._00->_68 = 0;
+        }
+        fn_800626EC(index);
+        lbl_803C66B0._0D[index] = 1;
+    }
+    if (lbl_803C66B0._0D[index] == 1) {
+        n = 0;
+        expected = 0;
+        if (lbl_2_bss_F468._61[index] != lbl_2_bss_F468._00[index] && lbl_803C6724._02[index][found] != -1 &&
+            lbl_803C6724._02[index][found] != 0x36)
+        {
+            expected++;
+            n += isAnimDone(task, 0x34 + prev + index * 9, 20);
+        }
+        if (n == expected) {
+            lbl_2_bss_F468._5F[index] = 0;
+            lbl_2_bss_F468._61[index] = -1;
+            fn_80062674(index);
+            lbl_803C66B0._0D[index] = 2;
+        }
+    }
+}
+
 // .text:0x00078034 size:0x28
 void fn_2_78034(UnkTask0C50* task, s32 index) {
     if (lbl_803C66B0._0D[index] == 0 ? TRUE : FALSE) {
@@ -1157,6 +1208,45 @@ void fn_2_760CC(UnkTask0C50* task) {
     lbl_80371C30[task->_14 + 0x8B]._00->_68 = 4;
     lbl_80371C30[task->_14 + 0x78]._00->_68 = 1;
     lbl_80371C30[task->_14 + 0x7C]._00->_68 = 1;
+}
+
+// .text:0x0007630C size:0x340
+void fn_2_7630C(UnkTask0C50* task, u8 index) {
+    u8 slot;
+    s32 a;
+    s32 b;
+    u8 c;
+    u8 d;
+
+    if (g_d_GameSettings._10 == 0) {
+        slot = lbl_803C66B0._59[0];
+    } else {
+        slot = lbl_803C66B0._59[index];
+    }
+    a = lbl_800FE5D4[lbl_2_bss_F410._10[slot]];
+    b = lbl_800FE5D4[lbl_803C6724._00[slot]];
+    c = lbl_8034E9A0._0034[a / 9][a % 9]._00;
+    d = lbl_8034E9A0._0034[b / 9][b % 9]._00;
+    lbl_80371C30[0x82 + task->_14 + slot]._00->_5C = lbl_2_data_2B3A4[c] << 16;
+    lbl_80371C30[0x85 + task->_14 + slot]._00->_5C = 0xA0000;
+    lbl_80371C30[0x87 + task->_14 + slot]._00->_5C = 0xA0000;
+    lbl_80371C30[0x85 + task->_14 + slot]._00->_68 = 0;
+    lbl_80371C30[0x87 + task->_14 + slot]._00->_68 = 0;
+    fn_800363D8(task, slot + 0x89, 1, 3, lbl_2_data_2B3A4[c]);
+    fn_800363D8(task, slot + 0x8B, 1, 3, lbl_2_data_2B3A4[d]);
+    lbl_80371C30[0x7E + task->_14 + slot]._00->_5C = lbl_2_data_2B3A4[c] << 16;
+    lbl_80371C30[0x1A + task->_14 + slot]._00->_54 |= 2;
+    lbl_80371C30[0x1A + task->_14 + slot]._00->_68 = 1;
+    lbl_80371C30[0x80 + task->_14 + slot]._00->_5C = 0;
+    lbl_80371C30[0x89 + task->_14 + slot]._00->_5C = 0;
+    lbl_80371C30[0x8B + task->_14 + slot]._00->_5C = 0xA0000;
+    lbl_80371C30[0x78 + task->_14 + slot]._00->_5C = 0;
+    lbl_80371C30[0x7C + task->_14 + slot]._00->_5C = 0;
+    lbl_80371C30[0x80 + task->_14 + slot]._00->_68 = 1;
+    lbl_80371C30[0x89 + task->_14 + slot]._00->_68 = 1;
+    lbl_80371C30[0x8B + task->_14 + slot]._00->_68 = 4;
+    lbl_80371C30[0x78 + task->_14 + slot]._00->_68 = 1;
+    lbl_80371C30[0x7C + task->_14 + slot]._00->_68 = 1;
 }
 
 // .text:0x0007609C size:0x30
