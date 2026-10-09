@@ -916,14 +916,12 @@ void fn_2_7F714(UnkTask0C50* task, s32 index) {
 }
 
 // .text:0x0007F2BC size:0x458
-// 99.69%: the loop counter and foundSel sit in swapped volatile registers (r6/r7); no
-// declaration order at either scope moved them.
 void fn_2_7F2BC(UnkTask0C50* task, s32 index) {
     s32 foundPrev;
-    s32 foundSel;
     s32 sel;
     s32 prev;
     s32 i;
+    s32 foundSel;
 
     if (lbl_803C66B0._0D[index] == 0 ? TRUE : FALSE) {
         sel = lbl_2_bss_F468._00[index];
@@ -3792,11 +3790,10 @@ void fn_2_72814(UnkTask0C50* task) {
 }
 
 // .text:0x0007265C size:0x1B8
-// 98.36%: the found flag and &g_d_GameSettings sit in swapped saved registers.
 void fn_2_7265C(void) {
-    s32 found = FALSE;
     s32 mode;
     s32 i;
+    s32 found = FALSE;
 
     if (g_d_GameSettings.GameModeSelected == 5 && lbl_803C5EA4._11 == 0) {
         lbl_803C5EA4._11 = 1;
