@@ -648,17 +648,13 @@ void fn_2_8975C(void) {
 }
 
 // .text:0x000895F8 size:0x164
-// 94.78%: the target tests useSaved and sets result after both loads, using r3
-// as the address of lbl_2_bss_33FBCC first; here both come before the loads.
 s32 fn_2_895F8(u8 useSaved) {
     s32 result;
     s32 v = lbl_2_bss_F410._54;
     s32 saved = lbl_2_bss_33FBCC._1C;
 
-    if (useSaved) {
-        v = saved;
-    }
     result = 0;
+    v = useSaved ? saved : v;
     switch (lbl_2_bss_33FBCC._05) {
     case 0:
         switch (v) {
