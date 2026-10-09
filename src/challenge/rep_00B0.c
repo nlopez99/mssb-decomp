@@ -314,7 +314,6 @@ void fn_1_3E38(Vec* pos, u32 material) {
 
 // .text:0x000025BC size:0x187C
 void fn_1_25BC(void* mesh) {
-    MeshVtx00B0* first;
     u32 count;
     u32 n;
     u32 nverts;
@@ -322,12 +321,14 @@ void fn_1_25BC(void* mesh) {
     u32 i;
     u32 mat;
     MeshVtx00B0* vtx;
+    MeshVtx00B0* first;
     u8* p;
 
     p = mesh;
     do {
         count = ((MeshHdr00B0*)p)->count;
-        if (!((MeshHdr00B0*)p)->strip) {
+        n = ((MeshHdr00B0*)p)->strip;
+        if (!n) {
             vtx = (MeshVtx00B0*)(p + 4);
             n = count * 3;
             GDBegin(GX_TRIANGLES, GX_VTXFMT0, n);
@@ -351,13 +352,12 @@ void fn_1_25BC(void* mesh) {
             nverts = 0;
             vtx = (MeshVtx00B0*)(p + 4);
             mat = vtx->material;
-            for (i = count + 2; i != 0; i--) {
+            for (i = count + 2; i != 0; i--, vtx++) {
                 nverts++;
                 if (mat != vtx->material) {
                     mat = vtx->material;
                     nverts += 2;
                 }
-                vtx++;
             }
             mat = ((MeshVtx00B0*)(p + 4))->material;
             vtx = (MeshVtx00B0*)(p + 4);
