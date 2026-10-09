@@ -1,6 +1,7 @@
 #include "menus/rep_0C50.h"
 #include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
+#include "string.h"
 
 typedef struct UnkTask0C50 {
     /* 0x00 */ void (*_00)(void);
@@ -125,6 +126,8 @@ extern UnkSpriteDesc0C50 lbl_2_data_2AF4C[];
 extern u8 lbl_2_data_2B3A4[];
 
 extern u8 lbl_800FE5D4[];
+extern u8 lbl_80108EC4[];
+extern u8 lbl_2_data_2AF08[];
 
 extern struct {
     /* 0x00 */ u8 _00[0x10];
@@ -281,6 +284,39 @@ void fn_2_8082C(UnkTask0C50* task, s32 index) {
         if (n == 2) {
             fn_80062674(index);
             lbl_803C66B0._0D[index] = 2;
+        }
+    }
+}
+
+// .text:0x000802EC size:0x214
+void fn_2_802EC(UnkTask0C50* task) {
+    if (lbl_803C66B0._0D[1] == 0 ? TRUE : FALSE) {
+        lbl_80371C30[task->_14 + 0x81]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + 0x81]._00->_5C = 0;
+        lbl_80371C30[task->_14 + 0x81]._00->_68 = 1;
+        lbl_80371C30[task->_14 + 0x84]._00->_54 &= ~2;
+        lbl_80371C30[task->_14 + 0x84]._00->_68 = 0;
+        lbl_80371C30[task->_14 + 0x7D]._00->_5C = 0;
+        lbl_80371C30[task->_14 + 0x7D]._00->_68 = 1;
+        lbl_80371C30[task->_14 + 0x98]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + 0x86]._00->_5C = 0;
+        lbl_80371C30[task->_14 + 0x86]._00->_68 = 1;
+        lbl_80371C30[task->_14 + 0x8A]._00->_5C = 0;
+        lbl_80371C30[task->_14 + 0x8A]._00->_68 = 1;
+        fn_2_7630C(task, 1);
+        fn_2_74F40(task, 1);
+        fn_800626EC(1);
+        lbl_803C66B0._0D[1] = 1;
+    }
+    if (lbl_803C66B0._0D[1] == 1) {
+        s32 n = isAnimDone(task, 0x81, 20);
+
+        n += isAnimDone(task, 0x7D, 20);
+        n += isAnimDone(task, 0x86, 10);
+        n += isAnimDone(task, 0x8A, 5);
+        if (n == 4) {
+            fn_80062674(1);
+            lbl_803C66B0._0D[1] = 2;
         }
     }
 }
@@ -513,6 +549,34 @@ void fn_2_79B24(UnkTask0C50* task, s32 index) {
     }
 }
 
+// .text:0x00079930 size:0x1F4
+void fn_2_79930(UnkTask0C50* task, s32 index) {
+    if (lbl_803C66B0._0D[index] == 0 ? TRUE : FALSE) {
+        s32 i;
+
+        for (i = 0; i < 9; i++) {
+            s32 slot = lbl_803C6724._02[index + 2][i];
+            s32 value = lbl_803C6724._02[index][i];
+
+            lbl_80371C30[0x34 + task->_14 + slot + index * 9]._00->_54 |= 2;
+            lbl_80371C30[0x34 + task->_14 + slot + index * 9]._00->_5C = 0;
+            lbl_80371C30[0x34 + task->_14 + slot + index * 9]._00->_68 = 1;
+            lbl_80371C30[0x58 + task->_14 + slot + index * 9]._00->_5C = value << 16;
+        }
+        fn_2_75BE4(task, index);
+        if (lbl_2_bss_F468._00[index] == 9) {
+            lbl_80371C30[0x93 + task->_14 + index]._00->_5C = 0;
+            lbl_80371C30[0x93 + task->_14 + index]._00->_68 = 1;
+            lbl_80371C30[0x95 + task->_14 + index]._00->_5C = 0;
+            lbl_80371C30[0x95 + task->_14 + index]._00->_68 = 1;
+            lbl_80371C30[0x91 + task->_14 + index]._00->_5C = 0xA0000;
+            lbl_80371C30[0x91 + task->_14 + index]._00->_68 = 4;
+        }
+        fn_800626EC(index);
+        lbl_803C66B0._0D[index] = 1;
+    }
+}
+
 // .text:0x00079764 size:0x1CC
 void fn_2_79764(UnkTask0C50* task, s32 index) {
     if (lbl_803C66B0._0D[index] == 1 ? TRUE : FALSE) {
@@ -591,6 +655,73 @@ void fn_2_78034(UnkTask0C50* task, s32 index) {
 
 // .text:0x0007664C size:0x4
 void fn_2_7664C(void) {
+}
+
+// .text:0x00076650 size:0x224
+void fn_2_76650(UnkTask0C50* task, u8 index, u32 mask) {
+    s32 values[2];
+    s32 n;
+    s32 i;
+
+    memset(values, -1, 2);
+    for (i = 0, n = 0; i < 14; i++) {
+        if (mask & (1 << i)) {
+            switch (i) {
+            case 0:
+                i++;
+                break;
+            case 1:
+                values[n++] = 1;
+                break;
+            case 2:
+                values[n++] = 2;
+                break;
+            case 3:
+                values[n++] = 3;
+                break;
+            case 4:
+                values[n++] = 4;
+                break;
+            case 5:
+                values[n++] = 5;
+                break;
+            case 6:
+                values[n++] = 6;
+                break;
+            case 7:
+                values[n++] = 7;
+                break;
+            case 8:
+                values[n++] = 8;
+                break;
+            case 9:
+                values[n++] = 9;
+                break;
+            case 10:
+                values[n++] = 10;
+                break;
+            case 11:
+                values[n++] = 11;
+                break;
+            case 12:
+                values[n++] = 12;
+                break;
+            default:
+                values[n++] = 13;
+                break;
+            }
+        }
+    }
+    for (i = 0; i < 2; i++) {
+        values[i]--;
+    }
+    for (i = 0; i < 2; i++) {
+        if (values[i] < 0) {
+            values[i] = 12;
+        }
+    }
+    lbl_80371C30[0xCE + task->_14 + index]._00->_5C = values[0] << 16;
+    lbl_80371C30[0xD0 + task->_14 + index]._00->_5C = values[1] << 16;
 }
 
 // .text:0x0007609C size:0x30
@@ -936,6 +1067,28 @@ void fn_2_72CB4(UnkTask0C50* task) {
             lbl_803CBBC4._0 = 0;
             lbl_803CBBC4._4 = 1;
         }
+    }
+}
+
+// .text:0x00072A88 size:0x22C
+void fn_2_72A88(UnkTask0C50* task) {
+    s32 found = -1;
+    s32 i;
+
+    if (lbl_803CBBC4._2 == 0 ? TRUE : FALSE) {
+        for (i = 0; i < 6; i++) {
+            if (lbl_80108EC4[i] == lbl_800FE930[lbl_80361B20._F4][lbl_2_bss_F410._10[0]]) {
+                found = i;
+                break;
+            }
+        }
+        lbl_80371C30[task->_14 + 2]._00->_5C = lbl_2_data_2AF08[found] << 18;
+        lbl_80371C30[task->_14 + 3]._00->_5C = lbl_2_data_2AF08[found] << 18;
+        for (i = 0; i < 8; i++) {
+            lbl_80371C30[task->_14 + 4 + i]._00->_5C = lbl_803C6724._02[0][1 + i] << 16;
+        }
+        lbl_803CBBC4._2 = 1;
+        lbl_803CBBC4._3 = 1;
     }
 }
 
