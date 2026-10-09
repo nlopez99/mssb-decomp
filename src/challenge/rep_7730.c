@@ -1407,31 +1407,107 @@ void fn_1_1FD78(GameTask7730* task) {
     }
 }
 
+// .text:0x0001F900 size:0x478
+void fn_1_1F900(GameTask7730* task) {
+    u32 ids[4];
+    s32 i;
+    s32 j;
+    s32 k;
+    s32 x;
+    s32 y;
+    u32 tlut;
+
+    for (i = 0; i < task->_1C; i++) {
+        k = i % 480 % 48;
+        x = k % 8;
+        y = k / 8;
+        for (j = 0; j < task->_22; j++) {
+            ids[j] = lbl_1_bss_6E24[(x + y) % 8];
+        }
+        GXSetNumTevStages(task->_22);
+        GXSetNumTexGens(task->_22);
+        for (j = 0; j < task->_22; j++) {
+            GXSetTexCoordGen2(j, GX_TG_MTX2X4, GX_TG_TEX0, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
+            if (j != 0) {
+                GXSetTevColorIn(j, GX_CC_CPREV, GX_CC_TEXC, GX_CC_RASA, GX_CC_ZERO);
+                GXSetTevColorOp(j, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+                GXSetTevAlphaIn(j, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_APREV);
+                GXSetTevAlphaOp(j, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+            } else {
+                GXSetTevColorIn(j, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_TEXC);
+                GXSetTevColorOp(j, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+                GXSetTevAlphaIn(j, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_RASA);
+                GXSetTevAlphaOp(j, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+            }
+            tlut = ids[j] & 0x7FFFFFFF;
+            GXLoadTexObj(&lbl_1_bss_6EA4[ids[j]], j);
+            if (ids[j] & 0x80000000) {
+                GXLoadTlut(&lbl_1_bss_6E44[tlut], j);
+            }
+        }
+        GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+        GXPosition3f32(x * task->_23, y * task->_23, 0.0f);
+        GXColor1u32(0xFFFFFF80);
+        GXTexCoord2s16(0, 0);
+        GXPosition3f32(x * task->_23, y * task->_23 + task->_23, 0.0f);
+        GXColor1u32(0xFFFFFF80);
+        GXTexCoord2s16(0, 0x100);
+        GXPosition3f32(x * task->_23 + task->_23, y * task->_23 + task->_23, 0.0f);
+        GXColor1u32(0xFFFFFF80);
+        GXTexCoord2s16(0x100, 0x100);
+        GXPosition3f32(x * task->_23 + task->_23, y * task->_23, 0.0f);
+        GXColor1u32(0xFFFFFF80);
+        GXTexCoord2s16(0x100, 0);
+    }
+}
+
 // .text:0x0001F618 size:0x2E8
-// 96.94%: in the target's inlined fn_1_20640 the id is reread from the stack after
-// GXLoadTexObj and one fewer register is saved; registers differ throughout.
+// 97.62%: same instructions, callee-saved registers assigned in another order (task in
+// r26, the count in r27 in the target).
 void fn_1_1F618(GameTask7730* task) {
     s32 i;
-    u32 id;
+    u32 ids[1];
     f32 z;
+    s32 j;
+    u32 tlut;
 
     i = task->_1C;
     while (i-- != 0) {
-        id = i % 4;
-        fn_1_20640(task, &id);
+        ids[0] = i % 4;
+        GXSetNumTevStages(task->_22);
+        GXSetNumTexGens(task->_22);
+        for (j = 0; j < task->_22; j++) {
+            GXSetTexCoordGen2(j, GX_TG_MTX2X4, GX_TG_TEX0, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
+            if (j != 0) {
+                GXSetTevColorIn(j, GX_CC_CPREV, GX_CC_TEXC, GX_CC_RASA, GX_CC_ZERO);
+                GXSetTevColorOp(j, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+                GXSetTevAlphaIn(j, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_APREV);
+                GXSetTevAlphaOp(j, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+            } else {
+                GXSetTevColorIn(j, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_TEXC);
+                GXSetTevColorOp(j, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+                GXSetTevAlphaIn(j, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_RASA);
+                GXSetTevAlphaOp(j, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+            }
+            tlut = ids[j] & 0x7FFFFFFF;
+            GXLoadTexObj(&lbl_1_bss_6EA4[ids[j]], j);
+            if (ids[j] & 0x80000000) {
+                GXLoadTlut(&lbl_1_bss_6E44[tlut], j);
+            }
+        }
         GXBegin(GX_QUADS, GX_VTXFMT0, 4);
         z = 0.5f - 0.0001f * i;
         GXPosition3f32(0.0f, 0.0f, z);
-        GXColor1u32(0xFFFFFFFF);
+        GXColor1u32(0xFFFFFF80);
         GXTexCoord2s16(0, 0);
         GXPosition3f32(0.0f, 448.0f, z);
-        GXColor1u32(0xFFFFFFFF);
+        GXColor1u32(0xFFFFFF80);
         GXTexCoord2s16(0, 0x100);
         GXPosition3f32(640.0f, 448.0f, z);
-        GXColor1u32(0xFFFFFFFF);
+        GXColor1u32(0xFFFFFF80);
         GXTexCoord2s16(0x100, 0x100);
         GXPosition3f32(640.0f, 0.0f, z);
-        GXColor1u32(0xFFFFFFFF);
+        GXColor1u32(0xFFFFFF80);
         GXTexCoord2s16(0x100, 0);
     }
 }
