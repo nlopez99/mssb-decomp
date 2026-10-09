@@ -1969,8 +1969,6 @@ void fn_3_129A18(void) {
 }
 
 // .text:0x0012955C size:0x4BC mapped:0x807685F0
-// 99.67%: in the two lookup loops the target keeps i in r12 and r31, the sprite in r11 and
-// r12; declaration orders and separate loop variables did not change it.
 void fn_3_12955C(void) {
     UnkTask3448* task = lbl_803CC1B8;
     UnkSprite3448* sprite;
@@ -2018,10 +2016,10 @@ void fn_3_12955C(void) {
                 }
                 sprite = lbl_80371C30[task->_14 + i]._00;
                 if (sprite->_5C >> 16 < lbl_3_data_A8B8[j]) {
-                    sprite->_68 = 1;
+                    lbl_80371C30[task->_14 + i]._00->_68 = 1;
                     lbl_3_common_bss_32724._BB = 1;
                 } else {
-                    sprite->_68 = 0;
+                    lbl_80371C30[task->_14 + i]._00->_68 = 0;
                 }
             }
             if (!lbl_3_common_bss_32724._BB) {
@@ -2035,10 +2033,10 @@ void fn_3_12955C(void) {
                 }
                 sprite = lbl_80371C30[task->_14 + i]._00;
                 if (sprite->_5C >> 16 > lbl_3_data_A8B8[j]) {
-                    sprite->_68 = 4;
+                    lbl_80371C30[task->_14 + i]._00->_68 = 4;
                     lbl_3_common_bss_32724._BB = 1;
                 } else {
-                    sprite->_68 = 0;
+                    lbl_80371C30[task->_14 + i]._00->_68 = 0;
                 }
             }
             if (!lbl_3_common_bss_32724._BB) {
