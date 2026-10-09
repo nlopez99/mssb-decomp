@@ -6,6 +6,9 @@
 #include "game/rep_FE0.h"
 #include "game/rep_1838.h"
 #include "Dolphin/rand.h"
+#include "game/rep_3310.h"
+#include "game/rep_EA0.h"
+#include "game/rep_2BF8.h"
 
 typedef struct {
     /* 0x000 */ u8 _000[0x34];
@@ -45,6 +48,10 @@ extern struct {
     /* 0x2D68 */ s16 _2D68;
     /* 0x2D6A */ u8 _2D6A[0x2D94 - 0x2D6A];
     /* 0x2D94 */ Unk2940Obj* _2D94;
+    /* 0x2D98 */ u8 _2D98[0x307A - 0x2D98];
+    /* 0x307A */ u8 _307A;
+    /* 0x307B */ u8 _307B[0x3087 - 0x307B];
+    /* 0x3087 */ u8 _3087;
 } lbl_8036E548;
 
 typedef struct {
@@ -100,6 +107,62 @@ extern int fn_8004ACC4(int arg0);
 
 extern void fn_3_6A250(void);
 extern void fn_3_6A25C(void);
+extern void fn_3_6B674(void);
+// rep_3448, being written in parallel
+extern void fn_3_12D1F4(void);
+
+// .text:0x000E19E8 size:0x278 mapped:0x80720A7C
+// fn_3_E11E0 is inlined here, where the target calls it; extra statements in
+// fn_3_E11E0 did not keep it out.
+void fn_3_E19E8(void) {
+    lbl_8036E548._3087 = 1;
+    if (g_GameLogic.gameStatus == 5 && g_GameLogic._125 == 5) {
+        fn_3_11D1B0();
+    }
+    if (g_GameLogic.gameStatus == 0x1B) {
+        return;
+    }
+    if (lbl_8036E548._307A == 0) {
+        fn_3_E12F8();
+    } else if ((g_GameLogic.gameStatus >= 0x1C && g_GameLogic.gameStatus <= 0x1E) || g_GameLogic.gameStatus == 0x1F) {
+        if (g_GameLogic.gameStatus == 0x1E) {
+            fn_3_E11E0();
+        }
+    } else {
+        switch (g_GameLogic.gameStatus) {
+        case 0x0E:
+        case 0x22:
+        case 0x24:
+        case 0x26:
+        case 0x27:
+            lbl_8036E548._3087 = g_d_GameSettings.GameModeSelected != 6;
+            fn_3_E07DC();
+            fn_3_116B74();
+            break;
+        case 4:
+            return;
+        case 5:
+            break;
+        default:
+            fn_3_697CC();
+            fn_3_685F0();
+            fn_3_E1478();
+            fn_3_6B674();
+            if (g_d_GameSettings.GameModeSelected == 6) {
+                fn_3_E0668();
+            } else {
+                fn_3_11AC6C();
+            }
+            fn_3_6AB58();
+            break;
+        }
+    }
+    if (g_d_GameSettings.GameModeSelected == 6) {
+        fn_3_EDD10();
+    } else {
+        fn_3_12D1F4();
+    }
+}
 
 // .text:0x000E1964 size:0x84 mapped:0x807209F8
 // Same body as fn_3_E0758, yet the target starts the loop with li r29,0; mr r27,r29

@@ -84,6 +84,13 @@ extern void fn_800246D4(int (*compare)(const void*, const void*), void* src, voi
 extern void Set_803cb848(int);
 extern void changeScene(u8, s16);
 extern int fn_3_6C938(int, int);
+extern void fn_3_1608F0(int, int, int);
+extern u8 lbl_3_data_21671;
+extern s16 lbl_3_data_21672;
+extern struct {
+    /* 0x00 */ u8 _00[0x40];
+    /* 0x40 */ s16 _40;
+} lbl_3_common_bss_37400;
 
 // .text:0x001166CC size:0xC0 mapped:0x80755760
 void fn_3_1166CC(void) {
@@ -291,6 +298,97 @@ void fn_3_115540(void) {
             }
         }
         fn_3_115108();
+    }
+}
+
+// .text:0x00115108 size:0x438 mapped:0x8075419C
+void fn_3_115108(void) {
+    BOOL done = FALSE;
+    s16 mult;
+    int points;
+    s16 lost;
+    s16 i;
+    s16 k;
+
+    if (g_Pitcher.pitcherActionState == 4) {
+        if (g_Pitcher.currentStateFrameCounter > 0x4A) {
+            done = TRUE;
+        } else if (g_Minigame.soloMinigameDifficulty == 3 && g_Pitcher.currentStateFrameCounter == 0x4A) {
+            g_Minigame._1A8C[0] = 1;
+        }
+    } else if (g_Minigame.postBallStoppedCounter > lbl_3_data_2167C[2]) {
+        done = TRUE;
+    } else if (g_Minigame.soloMinigameDifficulty == 3 && g_Minigame.postBallStoppedCounter == lbl_3_data_2167C[2]) {
+        g_Minigame._1A8C[0] = 1;
+    }
+    if (done) {
+        if (!g_Minigame.wallBall_hitBowserWall) {
+            mult = 1;
+            if ((g_Minigame.multiPlayerInd || g_Minigame._1A3C || g_Minigame.soloMinigameDifficulty != 3) &&
+                g_Scores._00 == g_Scores._AA) {
+                mult = lbl_3_data_21672;
+            }
+            if (g_Minigame.wallBall_hitNoteBlock == 1) {
+                points = g_Minigame.wallBall_UnknownAlways0 + lbl_3_data_21654[10] * mult;
+                g_Minigame.miniGameCurrentPoints[g_Minigame.minigamePlayerSelectedOrder] += points;
+                g_Minigame.wallBall_UnknownAlways0 = 0;
+            } else {
+                points = g_Minigame.miniGameLatestPoints[g_Minigame.minigamePlayerSelectedOrder] * mult;
+                g_Minigame.miniGameCurrentPoints[g_Minigame.minigamePlayerSelectedOrder] += points;
+            }
+        } else {
+            points = 0;
+            if (g_Minigame.multiPlayerInd || g_Minigame._1A3C || g_Minigame.soloMinigameDifficulty != 3) {
+                lost = g_Minigame.miniGameCurrentPoints[g_Minigame.minigamePlayerSelectedOrder] / 2;
+                g_Minigame.miniGameCurrentPoints[g_Minigame.minigamePlayerSelectedOrder] -= lost;
+                for (i = 0; i < 4; i++) {
+                    if (i != g_Minigame.minigamePlayerSelectedOrder) {
+                        g_Minigame.miniGameCurrentPoints[i] += lost / 3;
+                    }
+                }
+                points = -lost;
+            }
+        }
+        if (!g_d_GameSettings.exhibitionMatchInd && g_Minigame.minigamePlayerSelectedOrder == lbl_3_common_bss_37400._40) {
+            fn_3_1608F0(1, points, g_Minigame.wallBall_hitNoteBlock);
+        }
+        g_Minigame.wallBallSomeXPos = g_Pitcher.pitcherCoord.x;
+        g_Minigame.wallBallSomeZPos = g_Pitcher.pitcherCoord.z;
+        g_Minigame.turnNumberWithinRound++;
+        if (g_Minigame.turnNumberWithinRound >= g_Minigame.miniGameNumberOfParticipants) {
+            g_Minigame.turnNumberWithinRound -= g_Minigame.miniGameNumberOfParticipants;
+            g_Scores._00++;
+            if (!g_Minigame.multiPlayerInd && !g_Minigame._1A3C && g_Minigame.soloMinigameDifficulty == 3) {
+                g_Scores._00--;
+                if (g_Minigame.wallBall_hitNoteBlock == 1) {
+                    if (g_Scores._AA < lbl_3_data_21671) {
+                        g_Scores._AA++;
+                    }
+                } else {
+                    g_Scores._AA--;
+                    if (g_Minigame.wallBall_hitBowserWall) {
+                        for (k = 0; k < 1; k++) {
+                            if (g_Scores._AA == 0) {
+                                break;
+                            }
+                            g_Scores._AA--;
+                        }
+                    }
+                }
+            }
+        }
+        fn_3_1500C8();
+        if (g_Scores._00 > g_Scores._AA) {
+            sndFXStartEx(0x1BE, lbl_800EFBA4[7], 0x3F, 0);
+            fn_3_5A6D4(0xF);
+        } else {
+            g_Minigame.wallBallGameState = 0;
+            fn_3_5A6D4(7);
+            if ((g_Minigame.multiPlayerInd || g_Minigame._1A3C || g_Minigame.soloMinigameDifficulty != 3) &&
+                g_Minigame.turnNumberWithinRound == 0) {
+                fn_3_10F550(4, 0);
+            }
+        }
     }
 }
 
