@@ -10922,16 +10922,13 @@ s32 fn_3_2CBE0(s32 player) {
 }
 
 // .text:0x0002C698 size:0x548 mapped:0x8066B72C
-// 96.66%: the target's early returns branch as nested ifs do (bne +8; b end after
-// the mode == 8 and throw-frame tests); the && chains here merge them.
+// 96.98%: some early returns branch as nested ifs do in the target (bne +8; b end
+// after the mode == 8 and throw-frame tests); the && chains here merge them.
 void fn_3_2C698(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     s32 player = fielder;
 
-    if (g_GameLogic.secondaryGameMode == 7) {
-        return;
-    }
-    if (g_GameLogic.secondaryGameMode == 8) {
+    if (g_GameLogic.secondaryGameMode == 7 || g_GameLogic.secondaryGameMode == 8) {
         return;
     }
     if (g_d_GameSettings.minigamesEnabled) {
