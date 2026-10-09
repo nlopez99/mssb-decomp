@@ -489,6 +489,96 @@ s32 fn_2_895F8(u8 useSaved) {
     return result;
 }
 
+// .text:0x00089038 size:0x5C0
+void fn_2_89038(MenuTask0DE0* task) {
+    s8 digits[3];
+    s32 i;
+    s32 j;
+    s32 done;
+    s32 total;
+    s32 value;
+
+    if (lbl_2_bss_33FBCC._18 == 0 ? TRUE : FALSE) {
+        for (i = 0; i < 3; i++) {
+            if (lbl_80354768._CF5E[i] != 0) {
+                value = lbl_80354768.trackers[i]._43BC;
+                digits[0] = value / 100;
+                digits[1] = (value - digits[0] * 100) / 10;
+                digits[2] = value - (u8)digits[0] * 100 - (u8)digits[1] * 10;
+                for (j = 0; j < 3; j++) {
+                    lbl_80371C30[task->_14 + 14 + i * 3 + j]._00->_54 |= 2;
+                    lbl_80371C30[task->_14 + 14 + i * 3 + j]._00->_5C = 0;
+                    fn_800363D8(task, 14 + i * 3 + j, 1, 13, digits[j]);
+                    lbl_80371C30[task->_14 + 14 + i * 3 + j]._00->_68 = 1;
+                }
+                if (lbl_2_bss_F410._50 == i) {
+                    lbl_80371C30[task->_14 + 4 + i]._00->_68 = 1;
+                    lbl_80371C30[task->_14 + 7 + i]._00->_64 = 19;
+                    lbl_80371C30[task->_14 + 7 + i]._00->_5C = 0;
+                    lbl_80371C30[task->_14 + 7 + i]._00->_68 = 1;
+                } else {
+                    lbl_80371C30[task->_14 + 4 + i]._00->_68 = 1;
+                    lbl_80371C30[task->_14 + 7 + i]._00->_64 = 18;
+                    lbl_80371C30[task->_14 + 7 + i]._00->_68 = 1;
+                    if (lbl_80354768.trackers[i]._1606 == 0 ||
+                        (lbl_80354768.trackers[i]._1606 != 0 && lbl_80354768.trackers[i]._441B != 0)) {
+                        lbl_80371C30[task->_14 + 11 + i]._00->_5C = 0x1A0000;
+                        lbl_80371C30[task->_14 + 11 + i]._00->_68 = 0;
+                        if (lbl_80354768.trackers[i]._444B != -1) {
+                            lbl_80371C30[task->_14 + 50 + i]._00->_54 |= 2;
+                            lbl_80371C30[task->_14 + 50 + i]._00->_5C = 0;
+                            fn_800363D8(task, i + 50, 4, 100, lbl_80354768.trackers[i]._444B);
+                            lbl_80371C30[task->_14 + 50 + i]._00->_68 = 1;
+                        } else {
+                            lbl_80371C30[task->_14 + 53 + i]._00->_54 &= ~2;
+                            lbl_80371C30[task->_14 + 53 + i]._00->_68 = 0;
+                            lbl_80371C30[task->_14 + 53 + i]._00->_54 |= 2;
+                            lbl_80371C30[task->_14 + 53 + i]._00->_68 = 1;
+                            lbl_80371C30[task->_14 + 50 + i]._00->_54 &= ~2;
+                        }
+                    }
+                }
+            } else if (lbl_2_bss_F410._50 == i) {
+                lbl_80371C30[task->_14 + 7 + i]._00->_64 = 19;
+                lbl_80371C30[task->_14 + 7 + i]._00->_68 = 1;
+            }
+        }
+        lbl_2_bss_33FBCC._18 = 1;
+        lbl_2_bss_33FBCC._19 = 1;
+    }
+    if (lbl_2_bss_33FBCC._19 == 1 ? TRUE : FALSE) {
+        done = 0;
+        total = 0;
+        for (i = 0; i < 3; i++) {
+            if (lbl_80354768._CF5E[i] != 0) {
+                for (j = 0; j < 3; j++) {
+                    total++;
+                    done += isAnimDone(task, 14 + i * 3 + j, 21);
+                }
+                if (lbl_80354768.trackers[i]._1606 == 0 ||
+                    (lbl_80354768.trackers[i]._1606 != 0 && lbl_80354768.trackers[i]._441B != 0)) {
+                    if (lbl_2_bss_F410._50 == i) {
+                        total++;
+                        done += isAnimDone(task, i + 11, 21);
+                    }
+                    if (lbl_80354768.trackers[i]._444B != -1) {
+                        total++;
+                        done += isAnimDone(task, i + 50, 10);
+                    } else {
+                        total++;
+                        done += isAnimDone(task, i + 53, 14);
+                    }
+                }
+            }
+        }
+        if (done == total) {
+            lbl_2_bss_33FBCC._18 = 0;
+            lbl_2_bss_33FBCC._17 = 0;
+            lbl_2_bss_33FBCC._19 = 0;
+        }
+    }
+}
+
 // .text:0x00088D90 size:0x2A8
 void fn_2_88D90(MenuTask0DE0* task) {
     s32 i;
