@@ -666,6 +666,82 @@ void fn_1_1ADA4(void) {
     }
 }
 
+// .text:0x0001A850 size:0x554
+void fn_1_1A850(Mtx mtx, Camera74A0* cam, u8 r, u8 g, u8 b, u8 a) {
+    GXCullMode cull;
+    Mtx m;
+
+    GXGetCullMode(&cull);
+    PSMTXConcat(cam->_00, mtx, m);
+    GXLoadPosMtxImm(m, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    GXSetNumTevStages(1);
+    GXSetNumChans(1);
+    GXSetNumTexGens(0);
+    GXSetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+    GXSetChanCtrl(GX_COLOR0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetChanCtrl(GX_ALPHA0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_COPY);
+    GXSetCullMode(GX_CULL_NONE);
+    GXSetZMode(GX_TRUE, GX_ALWAYS, GX_TRUE);
+    GXSetLineWidth(7, GX_TO_ZERO);
+    GXBegin(GX_LINES, GX_VTXFMT0, 22);
+    GXPosition3f32(-0.01f, 0.0f, 0.0f);
+    GXColor4u8(r, g, b, a);
+    GXPosition3f32(0.2f, 0.0f, 0.0f);
+    GXColor4u8(r, g, b, a);
+    GXPosition3f32(0.0f, 0.0f, 0.01f);
+    GXColor4u8(r, g, b, a);
+    GXPosition3f32(0.2f, 0.0f, 0.0f);
+    GXColor4u8(r, g, b, a);
+    GXPosition3f32(0.0f, 0.0f, -0.01f);
+    GXColor4u8(r, g, b, a);
+    GXPosition3f32(0.2f, 0.0f, 0.0f);
+    GXColor4u8(r, g, b, a);
+    GXPosition3f32(-0.01f, 0.0f, 0.0f);
+    GXColor4u8(r, g, b, a);
+    GXPosition3f32(0.0f, 0.0f, 0.01f);
+    GXColor4u8(r, g, b, a);
+    GXPosition3f32(-0.01f, 0.0f, 0.0f);
+    GXColor4u8(r, g, b, a);
+    GXPosition3f32(0.0f, 0.0f, -0.01f);
+    GXColor4u8(r, g, b, a);
+    GXPosition3f32(0.0f, 0.0f, 0.0f);
+    GXColor4u8(0, 0xFF, 0, a);
+    GXPosition3f32(0.0f, 0.05f, 0.0f);
+    GXColor4u8(0, 0xFF, 0, a);
+    GXPosition3f32(-0.005f, 0.0f, 0.0f);
+    GXColor4u8(0, 0xFF, 0, a);
+    GXPosition3f32(0.0f, 0.05f, 0.0f);
+    GXColor4u8(0, 0xFF, 0, a);
+    GXPosition3f32(0.005f, 0.0f, 0.0f);
+    GXColor4u8(0, 0xFF, 0, a);
+    GXPosition3f32(0.0f, 0.05f, 0.0f);
+    GXColor4u8(0, 0xFF, 0, a);
+    GXPosition3f32(0.0f, 0.0f, 0.0f);
+    GXColor4u8(0xFF, 0, 0xFF, a);
+    GXPosition3f32(0.0f, 0.0f, 0.05f);
+    GXColor4u8(0xFF, 0, 0xFF, a);
+    GXPosition3f32(-0.005f, 0.0f, 0.0f);
+    GXColor4u8(0xFF, 0, 0xFF, a);
+    GXPosition3f32(0.0f, 0.0f, 0.05f);
+    GXColor4u8(0xFF, 0, 0xFF, a);
+    GXPosition3f32(0.005f, 0.0f, 0.0f);
+    GXColor4u8(0xFF, 0, 0xFF, a);
+    GXPosition3f32(0.0f, 0.0f, 0.05f);
+    GXColor4u8(0xFF, 0, 0xFF, a);
+    GXEnd();
+    GXSetLineWidth(6, GX_TO_ZERO);
+    GXSetCullMode(cull);
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
+}
+
 // .text:0x0001A774 size:0xDC
 void fn_1_1A774(void) {
     s32 i;
