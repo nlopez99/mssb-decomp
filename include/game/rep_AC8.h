@@ -116,7 +116,7 @@ void fn_3_3C1A8(s32 fielder);
 void fn_3_3C220(s32 fielder);
 BOOL fn_3_3C270(s32 fielder);
 BOOL fn_3_3C484(s32 fielder);
-void fn_3_3C594(void);
+BOOL fn_3_3C594(s32 fielder);
 BOOL fn_3_3CB8C(s32 fielder);
 void fn_3_3CCB0(s32 fielder);
 void fn_3_3D304(s32 fielder);

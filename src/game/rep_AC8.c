@@ -4831,7 +4831,52 @@ void fn_3_3D304(s32 fielder) {
 
 // .text:0x0003CCB0 size:0x654 mapped:0x8067BD44
 void fn_3_3CCB0(s32 fielder) {
-    return;
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    s32 base;
+
+    if (f->_1EC == 0 && fn_3_53130(fielder) == 0 && g_Ball.deadBallReason == 0) {
+        if (g_FieldingLogic._0C4 == 5 && f->_18C == 5) {
+            fn_3_3BE50(fielder);
+            return;
+        }
+        if (fielder <= 5) {
+            if (fn_3_3C594(fielder)) {
+                return;
+            }
+            if (fn_3_3C484(fielder)) {
+                return;
+            }
+        }
+        for (base = 0; base < 4; base++) {
+            if (fielder == g_FieldingLogic._0D0[base]) {
+                f->_18C = base;
+                fn_3_5985C(fielder, 1);
+                return;
+            }
+        }
+        if (fielder >= 6) {
+            if (fn_3_3CB8C(fielder)) {
+                return;
+            }
+            if (f->_18C != 7) {
+                fn_3_49EA8(fielder);
+                return;
+            }
+        } else if (f->_070 > 45.0f) {
+            f->_18C = fn_3_3D7D4(fielder);
+            f->_1D7 = 2;
+            fn_3_5985C(fielder, 14);
+            f->_1D6 = 11;
+            return;
+        }
+        if (f->_1DE) {
+            fn_3_3C270(fielder);
+            return;
+        }
+        f->_030 = 0.0f;
+        f->_034 = 0.0f;
+        f->_050 = 0.0f;
+    }
 }
 
 // .text:0x0003CB8C size:0x124 mapped:0x8067BC20
@@ -4866,8 +4911,76 @@ take:
 }
 
 // .text:0x0003C594 size:0x5F8 mapped:0x8067B628
-void fn_3_3C594(void) {
-    return;
+// 97.40%: registers only; the target saves r29 as well and keeps the loop counter in r10 and
+// the hoisted fielderWBallIndex in r9 through the cutoff check. Explicit locals for the hoisted
+// g_Ball fields scored lower.
+BOOL fn_3_3C594(s32 fielder) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    s32 other;
+    s32 base;
+
+    for (base = 0; base < 4; base++) {
+        if (g_FieldingLogic._101[base] != 0) {
+            continue;
+        }
+        other = g_FieldingLogic._0D0[base];
+        if (g_Ball.fielderWBallIndex == other) {
+            continue;
+        }
+        if (f->_0A8[base] < 1.0f) {
+            goto takeBase;
+        }
+        if (!(f->_0A8[base] < g_Fielders[other]._0A8[base] - 2.0f)) {
+            continue;
+        }
+        if (fielder != 0 || !(g_Ball.ballDistanceFromHome < 18.0f) || !(g_Ball.ballVelocity < 0.15f)) {
+            goto takeBase;
+        }
+        if (base == 1 && g_Ball.ballAngleFromHome > 0x200 && g_Ball.ballAngleFromHome < 0x400) {
+            if (f->_0A8[base] < g_Fielders[other]._0A8[base] - 5.0f) {
+                goto takeBase;
+            }
+            continue;
+        }
+        if (base != 3 || g_Ball.ballAngleFromHome <= 0x400 || g_Ball.ballAngleFromHome >= 0x600) {
+            goto takeBase;
+        }
+        if (f->_0A8[base] < g_Fielders[other]._0A8[base] - 5.0f) {
+            goto takeBase;
+        }
+    }
+    if (!g_FieldingLogic.playerAtMoundCutoffLocation && (other = g_FieldingLogic._0D8) != -1 &&
+        (f->_0B8 < 5.0f || f->_0B8 + 3.0f < g_Fielders[other]._0B8)) {
+        goto takeCutoff;
+    }
+    return FALSE;
+
+takeBase:
+    if (g_Ball.fielderBeingThrownTo == other) {
+        g_Ball.fielderBeingThrownTo = fielder;
+    }
+    if (other >= 0) {
+        fn_3_4B8D0(other);
+        fn_3_5985C(other, 12);
+        g_Fielders[other]._1D5 = 3;
+    }
+    f->_18C = base;
+    f->_1D7 = 1;
+    fn_3_5985C(fielder, 1);
+    g_FieldingLogic._0D0[base] = fielder;
+    return TRUE;
+
+takeCutoff:
+    if (other >= 0 && g_Ball.fielderWBallIndex != other) {
+        fn_3_4B8D0(other);
+        fn_3_5985C(other, 12);
+        g_Fielders[other]._1D5 = 4;
+    }
+    f->_18C = 5;
+    f->_1D7 = 2;
+    fn_3_5985C(fielder, 14);
+    g_FieldingLogic._0D8 = fielder;
+    return TRUE;
 }
 
 // .text:0x0003C484 size:0x110 mapped:0x8067B518
