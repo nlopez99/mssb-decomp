@@ -194,11 +194,7 @@ extern Camera0DE0 lbl_2_bss_1A81D4;
 extern s8 lbl_2_bss_33FBF5;
 extern u8 lbl_803CBBC0;
 
-extern f32 lbl_2_bss_B2A0;
 extern u8 lbl_2_bss_33FBF0[];
-extern f32 lbl_2_bss_B29C;
-extern u8 lbl_2_bss_B2A4;
-extern u8 lbl_2_bss_B2A5;
 
 extern f32 fn_2_4A1E8(f32 x, f32 z);
 extern void fn_2_48D54(void);
@@ -324,6 +320,12 @@ Vec lbl_2_data_2E9C4 = { 0.0f, 0.0f, 0.0f };
 Vec lbl_2_data_2E9D0 = { 0.0f, 0.0f, 0.0f };
 Vec lbl_2_data_2E9DC = { -1.5707964f, 0.0f, 0.0f };
 Vec lbl_2_data_2E9E8 = { 0.0f, 0.0f, 0.0f };
+
+u8 lbl_2_bss_B2A5;
+u8 lbl_2_bss_B2A4;
+f32 lbl_2_bss_B2A0;
+f32 lbl_2_bss_B29C;
+u8 lbl_2_bss_B298[4];
 
 extern u8 lbl_2_data_2E9F8[];
 extern u8 lbl_2_data_2ECE4[];
