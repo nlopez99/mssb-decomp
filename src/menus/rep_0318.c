@@ -45,7 +45,12 @@ extern struct {
     /* 0x26 */ u8 _26[0xA0 - 0x26];
 } inMemRoster[2][9];
 extern struct {
-    /* 0x0000 */ u8 _0000[0x40B8];
+    /* 0x0000 */ struct {
+        /* 0x00 */ u8 _00[0x31];
+        /* 0x31 */ u8 _31;
+        /* 0x32 */ u8 _32[0x34 - 0x32];
+    } characters[54];
+    /* 0x0AF8 */ u8 _0AF8[0x40B8 - 0xAF8];
     /* 0x40B8 */ struct {
         /* 0x0 */ s16 _0;
         /* 0x2 */ u8 _2;
@@ -56,7 +61,7 @@ extern struct {
     /* 0x40EE */ u8 _40EE[0x441D - 0x40EE];
     /* 0x441D */ u8 _441D;
     /* 0x441E */ u8 _441E;
-    /* 0x441F */ u8 _441F;
+    /* 0x441F */ s8 _441F;
 } starMissionCompletionTracker;
 extern struct {
     /* 0x0 */ u8 _0[3];
@@ -119,19 +124,25 @@ extern struct {
     /* 0x08 */ u16 _8;
 }* lbl_803CBBCC;
 typedef struct CharEntry0318 {
-    /* 0x00 */ u8 _00[0x3B];
+    /* 0x00 */ u8 _00[0x24];
+    /* 0x24 */ s16 _24;
+    /* 0x26 */ u8 _26[0x3B - 0x26];
     /* 0x3B */ u8 _3B[0x36];
     /* 0x71 */ u8 _71[0xA0 - 0x71];
 } CharEntry0318; // size: 0xA0
 
 extern struct {
     /* 0x0000 */ CharEntry0318 _0000[6][9];
-    /* 0x21C0 */ u8 _21C0[0x46E0 - 0x21C0];
+    /* 0x21C0 */ u8 _21C0[0x4380 - 0x21C0];
+    /* 0x4380 */ u8 _4380[6][4][0x12];
+    /* 0x4530 */ u8 _4530[0x46E0 - 0x4530];
     /* 0x46E0 */ s32 _46E0[2];
     /* 0x46E8 */ s32 _46E8;
     /* 0x46EC */ u8 _46EC[0x46F8 - 0x46EC];
     /* 0x46F8 */ s8 _46F8[2];
-    /* 0x46FA */ u8 _46FA[0x472A - 0x46FA];
+    /* 0x46FA */ u8 _46FA[0x470C - 0x46FA];
+    /* 0x470C */ u8 _470C;
+    /* 0x470D */ u8 _470D[0x472A - 0x470D];
     /* 0x472A */ u8 _472A;
     /* 0x472B */ u8 _472B[0x472E - 0x472B];
     /* 0x472E */ u16 _472E[6][3];
@@ -171,6 +182,7 @@ extern Slot0318 lbl_80354720[2][9];
 extern Slot0318 lbl_80353B98[2][9];
 extern u8 lbl_80109038[9];
 extern u8 lbl_803CB748[6];
+extern u8 lbl_80108EC4[12];
 extern s16 lbl_80108EDC[28][5];
 extern u8 lbl_800FDE84[];
 extern struct {
@@ -617,6 +629,29 @@ found:
     return -1;
 }
 
+// .text:0x0000BF90 size:0x394
+// 98%: the target gives grp and the last loop's counter one register (r26)
+// and loads 0 twice before the stores to _10.
+void fn_2_BF90(void) {
+    s32 i;
+    s32 grp = -1;
+
+    memset(lbl_8034E9A0._4757, 0, sizeof(lbl_8034E9A0._4757));
+    for (i = 0; i < 12; i++) {
+        if (lbl_80108EC4[i] == starMissionCompletionTracker._441F) {
+            grp = lbl_8034E9A0._470C = i;
+        }
+    }
+    lbl_2_bss_F468._10[1] = 0;
+    lbl_2_bss_F468._10[0] = 0;
+    for (i = 0; i < 9; i++) {
+        lbl_803C6724._02[1][i] = lbl_8034E9A0._4380[grp][lbl_2_bss_F468._10[1]][i];
+    }
+    for (i = 0; i < 9; i++) {
+        fn_2_CA60(i, 1);
+    }
+}
+
 // .text:0x0000B66C size:0x2B4
 void fn_2_B66C(void) {
     s32 i;
@@ -956,6 +991,36 @@ void fn_2_7D44(void) {
     fn_2_16A74(1, 0);
     fn_2_16A74(2, 0);
     fn_2_16A74(3, 0);
+}
+
+// .text:0x00006AF4 size:0x248
+// 98%: registers only.
+void fn_2_6AF4(void) {
+    s32 i;
+    u8 grp;
+    u8 id;
+
+    for (i = 0; i < 12; i++) {
+        if (starMissionCompletionTracker._441F == lbl_80108EC4[i]) {
+            grp = i;
+            break;
+        }
+    }
+    for (i = 0; i < 9; i++) {
+        id = lbl_8034E9A0._4380[grp][0][i];
+        lbl_80354720[1][i]._0 = i;
+        lbl_80354720[1][i]._2 = i;
+        lbl_80354720[1][i]._1 = i;
+        lbl_803C6724._02[1][i] = lbl_8034E9A0._0000[(u8)(id / 9)][(u8)(id % 9)]._24;
+        lbl_803C6724._4A[1][i] = 1;
+    }
+    lbl_8034E9A0._46E0[0] = starMissionCompletionTracker._441D;
+    lbl_8034E9A0._46E0[1] = starMissionCompletionTracker._441F;
+    for (i = 0; i < 9; i++) {
+        if (starMissionCompletionTracker.characters[lbl_803C6724._02[1][i]]._31 == 1) {
+            lbl_803C6724._02[1][i] = 54;
+        }
+    }
 }
 
 // .text:0x00006884 size:0x270
