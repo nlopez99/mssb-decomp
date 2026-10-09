@@ -235,6 +235,7 @@ extern u16 lbl_1_data_F56C;
 extern u16 lbl_1_data_F56E;
 extern u8 lbl_1_data_A940[];
 extern u8 lbl_1_data_ABA8;
+extern Vec lbl_1_data_AD0C;
 extern f32 lbl_1_data_ADC0;
 extern f32 lbl_1_data_F568;
 extern u8 lbl_1_data_ADC4[0x1C];
@@ -332,6 +333,14 @@ static s32 lbl_1_bss_307C;
 static u8 lbl_1_bss_3078;
 static s32 lbl_1_bss_3074;
 static s32 lbl_1_bss_3070;
+
+// .text:0x00017D90 size:0x16C
+void fn_1_17D90(void) {
+    fn_800AD038(lbl_80366158._08);
+    lbl_803CC1B8->_10 = 0;
+    lbl_803CC1B8->_00 = fn_1_17B5C;
+    fn_1_E8D4();
+}
 
 // .text:0x00017954 size:0x78
 void fn_1_17954(void) {
@@ -484,6 +493,21 @@ void fn_1_1347C(void) {
     lbl_1_bss_67E0._0F8 = 0.0f;
     lbl_1_bss_67E0._0F0 = 0;
     lbl_1_bss_67E0._0F2 = 0;
+}
+
+// .text:0x000126CC size:0x154
+// The target converts the six pad values first (slots in the order _10, _11,
+// _15, _14, _12, _13) and schedules everything differently; 34%
+void fn_1_126CC(void) {
+    Unk8036E548Actor* actor = &lbl_8036E548._0C04[lbl_1_bss_5F73];
+    actor->_034 += lbl_803C77B8[0]._10 / 768.0f;
+    actor->_038 = actor->_038 + lbl_803C77B8[0]._15 / 768.0f - lbl_803C77B8[0]._14 / 768.0f;
+    lbl_1_data_AD0C.x -= lbl_803C77B8[0]._13 * 0.001953125f;
+    actor->_03C += lbl_803C77B8[0]._11 / 768.0f;
+    actor->_040 = lbl_1_data_AD0C.x;
+    lbl_1_data_AD0C.y -= lbl_803C77B8[0]._12 * 0.001953125f;
+    actor->_044 = lbl_1_data_AD0C.y;
+    actor->_048 = lbl_1_data_AD0C.z;
 }
 
 // .text:0x00011C98 size:0x68

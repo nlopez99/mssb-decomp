@@ -53,6 +53,7 @@ void fn_1_10CEC(struct UnkCamera0610* arg0);
 void fn_1_10E2C(Mtx arg0, Mtx arg1, u32 arg2, u32 arg3, u32 arg4);
 void fn_1_116EC(void* arg0);
 void fn_1_11C98(void);
+void fn_1_126CC(void);
 void fn_1_129D0(void);
 void fn_1_1347C(void);
 void fn_1_135C0(void);
@@ -74,5 +75,7 @@ void fn_1_176EC(void);
 void fn_1_1770C(void);
 void fn_1_17954(void);
 void fn_1_179CC(void);
+void fn_1_17B5C(void);
+void fn_1_17D90(void);
 
 #endif // !__CHALLENGE_rep_0610_H_
