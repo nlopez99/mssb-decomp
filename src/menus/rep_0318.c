@@ -459,6 +459,21 @@ void fn_2_CCBC(void) {
     fn_2_7504();
 }
 
+// .text:0x0000CA60 size:0x25C
+// 95%: registers only (fn_2_A1A0 inlined, see there).
+void fn_2_CA60(u8 idx, u8 team) {
+    s8 id = lbl_803C6724._02[team][idx];
+
+    if (id != -1 && id != 54) {
+        lbl_80354720[team][idx]._1 = idx;
+        lbl_80354720[team][idx]._0 = idx;
+        inMemRoster[team][idx].CharID = id;
+    } else {
+        fn_2_A1A0(idx, team);
+    }
+    fn_2_C698(idx, team);
+}
+
 // .text:0x0000C698 size:0x144
 void fn_2_C698(u8 idx, u8 team) {
     s32 id;
@@ -630,6 +645,35 @@ s32 fn_2_A50C(void) {
         }
     }
     return 0;
+}
+
+static inline s32 fn_2_SlotOf(s8* shared, s8* own) {
+    if (g_d_GameSettings._10 == 0 && lbl_2_bss_100B8._2E[0] != 0) {
+        return *shared;
+    }
+    return *own;
+}
+
+// .text:0x0000A1A0 size:0xE8
+// 91%: the target computes i + 2 and &_02[1][i] before each test of the
+// condition, and allocates registers differently.
+void fn_2_A1A0(u8 idx, u8 team) {
+    s32 i;
+    s8 id = 0;
+
+retry:
+    if (lbl_8034E9A0._4757[id] != 0) {
+        goto retry;
+    }
+    for (i = 0; i < idx; i++) {
+        if (fn_2_SlotOf(&lbl_803C6724._02[0][i], &lbl_803C6724._02[team][i]) == id) {
+            goto retry;
+        }
+        if (fn_2_SlotOf(&lbl_803C6724._02[1][i], &lbl_803C6724._02[team][i]) == id) {
+            goto retry;
+        }
+    }
+    lbl_803C6724._02[team][idx] = id;
 }
 
 // .text:0x0000A040 size:0x160
