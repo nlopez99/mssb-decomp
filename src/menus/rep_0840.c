@@ -25,7 +25,7 @@ typedef struct AramEntry0840 {
     /* 0x0 */ u32 _0[4];
 } AramEntry0840; // size: 0x10
 
-extern MenuTask0840* lbl_803CC1B8;
+extern void* lbl_803CC1B8;
 extern struct {
     /* 0x000 */ u8 _000[0x7A8];
     /* 0x7A8 */ void* _7A8;
@@ -312,7 +312,7 @@ void fn_2_408BC(void) {
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -334,13 +334,13 @@ void fn_2_4078C(void) {
         break;
     case 2:
         lbl_2_bss_1A824C->_19783E = 1;
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -380,7 +380,7 @@ void fn_2_405B4(void) {
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -410,13 +410,13 @@ void fn_2_4041C(void) {
         break;
     case 2:
         lbl_2_bss_1A8248->_40EE[lbl_2_bss_1A8248->_16C2]._3 = 3;
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -515,7 +515,7 @@ void fn_2_3FDE0(void) {
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -582,14 +582,14 @@ void fn_2_3FA14(void) {
         if (task->_14-- == 0) {
             lbl_2_bss_1A824C->_197740 = 1;
             lbl_2_bss_1A824C->_19773E = 0;
-            lbl_803CC1B8->_0C->_10 = 1;
+            ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
             fn_800B0A14_removeQueue();
             task->_28 = 0;
         }
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -652,14 +652,14 @@ void fn_2_3F66C(void) {
         if (task->_14-- == 0) {
             lbl_2_bss_1A824C->_197740 = 1;
             lbl_2_bss_1A824C->_19773E = 0;
-            lbl_803CC1B8->_0C->_10 = 1;
+            ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
             fn_800B0A14_removeQueue();
             task->_28 = 0;
         }
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -691,7 +691,7 @@ void fn_2_3F55C(void) {
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -723,7 +723,7 @@ void fn_2_3F44C(void) {
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -768,7 +768,7 @@ void fn_2_3F29C(void) {
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -802,7 +802,7 @@ void fn_2_3F188(void) {
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -841,7 +841,7 @@ void fn_2_3F004(void) {
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -875,7 +875,7 @@ void fn_2_3EEF0(void) {
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -909,7 +909,7 @@ void fn_2_3EDD8(void) {
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -943,7 +943,7 @@ void fn_2_3ECC0(void) {
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -977,7 +977,7 @@ void fn_2_3EBA8(void) {
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -1009,13 +1009,13 @@ void fn_2_3EA44(void) {
         if (lbl_2_bss_1A8248->_441C == 5) {
             lbl_2_bss_1A8248->_40EE[lbl_2_bss_1A8248->_16C2]._3 = 3;
         }
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -1050,7 +1050,7 @@ void fn_2_3E918(void) {
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -1085,7 +1085,7 @@ void fn_2_3E7EC(void) {
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -1193,7 +1193,7 @@ void fn_2_3E38C(void) {
         break;
     case 14:
         fn_2_1C41C();
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
         break;
@@ -1211,7 +1211,7 @@ void fn_2_3E38C(void) {
         lbl_2_bss_1A824C->_1976A8 = fn_80062890(60);
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -1288,7 +1288,7 @@ void fn_2_3E058(void) {
         break;
     case 14:
         fn_2_1C41C();
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
         break;
@@ -1305,7 +1305,7 @@ void fn_2_3E058(void) {
         lbl_2_bss_1A824C->_1976A8 = fn_80062890(60);
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -1338,7 +1338,7 @@ void fn_2_3DF28(void) {
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -1374,7 +1374,7 @@ void fn_2_3DDC4(void) {
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -1410,7 +1410,7 @@ void fn_2_3DC60(void) {
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -1452,7 +1452,7 @@ void fn_2_3DAB8(void) {
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -1516,7 +1516,7 @@ void fn_2_3D878(void) {
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -1579,13 +1579,13 @@ void fn_2_3D5C4(void) {
         break;
     case 6:
         fn_2_450E4();
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -1760,7 +1760,7 @@ void fn_2_3CD34(void) {
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -1936,7 +1936,7 @@ void fn_2_3C53C(void) {
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -1975,7 +1975,7 @@ void fn_2_3C3EC(void) {
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -2027,7 +2027,7 @@ void fn_2_3C168(void) {
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -2064,7 +2064,7 @@ void fn_2_3C03C(void) {
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -2145,7 +2145,7 @@ void fn_2_3BD88(void) {
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -2186,7 +2186,7 @@ void fn_2_3BC24(void) {
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -2235,7 +2235,7 @@ void fn_2_3BA40(void) {
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -2455,7 +2455,7 @@ void fn_2_3AF08(void) {
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -2570,7 +2570,7 @@ void fn_2_3A8FC(void) {
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
@@ -2865,7 +2865,7 @@ void fn_2_399C0(void) {
         break;
     }
     if (lbl_2_bss_1A824C->_19783F == 1) {
-        lbl_803CC1B8->_0C->_10 = 1;
+        ((MenuTask0840*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
     }
