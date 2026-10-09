@@ -129,7 +129,8 @@ extern struct {
     /* 0x19770C */ u8 _19770C[0x19772E - 0x19770C];
     /* 0x19772E */ s16 _19772E;
     /* 0x197730 */ s16 _197730;
-    /* 0x197732 */ u8 _197732[0x197746 - 0x197732];
+    /* 0x197732 */ s16 _197732;
+    /* 0x197734 */ u8 _197734[0x197746 - 0x197734];
     /* 0x197746 */ s16 _197746;
     /* 0x197748 */ u8 _197748[0x197845 - 0x197748];
     /* 0x197845 */ u8 _197845;
@@ -227,6 +228,11 @@ extern struct {
     /* 0x3078 */ u16 _3078;
     /* 0x307A */ u8 _307A;
 } *lbl_2_bss_340140;
+
+extern struct {
+    /* 0x00000 */ u8 _00000[0x32A86 - 0x00000];
+    /* 0x32A86 */ u8 _32A86;
+} *lbl_2_bss_1A8230;
 // END STRUCTS
 
 extern void* fn_800B0A5C_insertQueue(void (*)(void), s32);
@@ -250,7 +256,9 @@ extern s32 fn_8006C268(s16* totals);
 extern void fn_8006C2B4(s16* totals, Unk1A8240Entry* stats);
 extern struct {
     /* 0x00 */ u8 _00;
-    /* 0x01 */ u8 _01[0x8 - 0x1];
+    /* 0x01 */ u8 _01[0x5 - 0x1];
+    /* 0x05 */ u8 _05;
+    /* 0x06 */ u8 _06[0x8 - 0x6];
     /* 0x08 */ u8 _08;
     /* 0x09 */ u8 _09;
 } lbl_8034E978;
@@ -262,9 +270,28 @@ extern struct {
 } lbl_800FEF70[];
 
 extern struct {
-    /* 0x00 */ u8 _00[0x13];
+    /* 0x00 */ u8 _00[0x12];
+    /* 0x12 */ u8 _12;
     /* 0x13 */ u8 _13;
 } lbl_8037169C;
+
+extern struct {
+    /* 0x0 */ u8 _0[0x4];
+    /* 0x4 */ u16 _4;
+} *lbl_803CBBCC;
+
+extern struct {
+    /* 0x0000 */ u8 _0000[0x46F8];
+    /* 0x46F8 */ s8 _46F8;
+} lbl_8034E9A0;
+
+extern u8 lbl_803616CC[0x454];
+extern u8 lbl_80361B20[0x130];
+extern u8 starMissionCompletionTracker[0x4508];
+extern u8 lbl_800E877C[0x38];
+extern u8 lbl_2_bss_1A8250[0x1978FC];
+extern void* lbl_2_bss_3401BC;
+extern u8 lbl_2_bss_3401C0[0x74];
 
 extern u8 lbl_800EFBA4[0x10];
 
@@ -290,6 +317,14 @@ extern void fn_2_8AEE0(void);
 extern void fn_2_8DFB0(void);
 extern void fn_2_8E6A4(void);
 extern void fn_2_68E68(void);
+extern void fn_2_11A0(s32);
+extern void fn_2_54474(void);
+extern void fn_2_6AB3C(s32, Vec*, f32);
+extern void fn_2_6ACF4(void);
+extern void fn_2_71F60(void);
+extern void fn_2_904A8(void);
+extern void fn_2_9257C(void);
+extern void fn_8000F4B8(s32, s32, s32, s32);
 extern void fn_2_72054(s32, s32);
 extern s32 lbl_2_data_35A0[];
 extern void fn_2_8FD14(void);
@@ -4893,6 +4928,98 @@ void fn_2_5E84C(void) {
     for (j = 0; j < 5; j++) {
         lbl_2_bss_1A824C->_1972C4[j]._0 = lbl_2_bss_1A8240->_000[j]._0;
         lbl_2_bss_1A824C->_1972C4[j]._6 = lbl_2_bss_1A8240->_000[j]._6;
+    }
+}
+
+// .text:0x0005E104 size:0x748
+void fn_2_5E104(void) {
+    MenuTask0AB0* task;
+    MenuTask0AB0* child;
+    Vec pos;
+    s32 i;
+
+    lbl_2_bss_1A824C = (void*)lbl_2_bss_1A8250;
+    lbl_2_bss_1A8248 = (void*)starMissionCompletionTracker;
+    task = lbl_803CC1B8;
+    lbl_2_bss_1A8244 = (void*)lbl_80361B20;
+    lbl_2_bss_1A8240 = (void*)lbl_803616CC;
+    lbl_2_bss_1A823C = (void*)lbl_800E877C;
+    lbl_2_bss_1A8234 = (void*)lbl_2_bss_1A8250;
+    lbl_2_bss_1A8230 = (void*)&lbl_2_bss_1A8250[0x162998];
+    lbl_2_bss_340140 = (void*)&lbl_8036E548;
+    lbl_2_bss_3401BC = lbl_2_bss_3401C0;
+    switch (lbl_803CBBCC->_4) {
+    case 0:
+        fn_8001F228();
+        memset(lbl_2_bss_1A8250, 0, sizeof(lbl_2_bss_1A8250));
+        fn_2_54474();
+        lbl_803CBBCC->_4 = 1;
+        fn_2_5EB78();
+        fn_2_5E84C();
+        g_d_GameSettings.StadiumID = 0;
+        lbl_2_bss_1A824C->_197863 = lbl_8034E9A0._46F8;
+        fn_8000F4B8(0, -1, -1, -1);
+        lbl_2_bss_1A823C->_32 = 0;
+        break;
+    case 1:
+        child = fn_800B0A5C_insertQueue(fn_2_5ED3C, 2);
+        child->_28 = 0;
+        task->_10 = 0;
+        lbl_803CBBCC->_4 = 2;
+        break;
+    case 2:
+        if (task->_10 == 1) {
+            lbl_803CBBCC->_4 = 3;
+        }
+        break;
+    case 3:
+        lbl_2_bss_1A8234->_162992 = 0;
+        fn_2_5AF24();
+        fn_2_6ACF4();
+        fn_800B0A5C_insertQueue(fn_2_71F60, 2);
+        pos.x = 0.0f;
+        pos.y = 0.0f;
+        pos.z = 0.0f;
+        fn_2_6AB3C(0, &pos, 0.0f);
+        fn_2_72054(0, 0);
+        fn_2_904A8();
+        fn_800B0A5C_insertQueue(fn_2_9257C, 2);
+        for (i = 0; i < lbl_2_bss_340140->_3078; i++) {
+            fn_2_903A8(i);
+            fn_2_92654(i, 0);
+        }
+        fn_800B0A5C_insertQueue(fn_2_5DC5C, 2);
+        task->_10 = 0;
+        lbl_2_bss_1A824C->_197730 = 0;
+        lbl_2_bss_1A824C->_197732 = 0;
+        lbl_803CBBCC->_4 = 4;
+        break;
+    case 4:
+        lbl_803CBBCC->_4 = 5;
+        break;
+    case 5:
+        changeScene(1, 6);
+        lbl_803CBBCC->_4 = 6;
+        break;
+    case 6:
+        if (lbl_8037169C._12 != 0) {
+            lbl_803CBBCC->_4 = 7;
+        }
+        break;
+    case 7:
+        if (task->_10 == 1) {
+            lbl_8034E978._05 = 1;
+            lbl_2_bss_1A8234->_162992 = 1;
+            lbl_2_bss_1A8230->_32A86 = 1;
+            lbl_803CBBCC->_4 = 8;
+        }
+        break;
+    case 8:
+        fn_2_5EE34();
+        lbl_803CBBCC->_4 = 0;
+        fn_2_11A0(5);
+        lbl_2_bss_1A823C->_32 = 0;
+        break;
     }
 }
 
