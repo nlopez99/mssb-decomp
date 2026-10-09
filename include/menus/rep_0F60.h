@@ -26,6 +26,7 @@ void fn_2_8D9DC(s32 mode);
 void fn_2_8DB14(void);
 void fn_2_8DC00(void);
 void fn_2_8DCD8(void);
+void fn_2_8DFB0(void);
 void fn_2_8E478(void);
 void fn_2_8E6A4(void);
 void fn_2_8E8A4(void);

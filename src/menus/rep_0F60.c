@@ -144,6 +144,12 @@ typedef struct Anims0F60 {
     /* 0x50 */ u8 _50[0x74 - 0x50];
 } Anims0F60; // size: 0x74
 
+typedef struct AramReq0F60 {
+    /* 0x00 */ AramEntry0F60 entry;
+    /* 0x10 */ s32 _10[4];
+    /* 0x20 */ void (*_20)(void);
+} AramReq0F60; // size: 0x24
+
 typedef struct Game0F60 {
     /* 0x0000 */ u8 _0000[0x68];
     /* 0x0068 */ ModelTable0F60* _0068;
@@ -347,6 +353,12 @@ s32 lbl_2_data_2FDC0[32] = {
 };
 void* lbl_2_data_2FE40[2] = { lbl_800F5D98, lbl_800F71D8 };
 AramEntry0F60 lbl_2_data_2FE48 = { 0x0000040B, 0x400D198C, 0x191D5800, 0x0005D268 };
+AramReq0F60 lbl_2_data_2FE58 = {
+    { 0x0000040B, 0x400204C0, 0x191C1800, 0x00013FCC },
+    { 0, 0, 0, 2 },
+    fn_2_8ACDC,
+};
+u8 lbl_2_data_2FE7C[8] = { 5, 6, 9, 11, 7, 8, 10, 12 };
 s32 lbl_2_data_2FE84[10] = { 1, 1, 5, 5, 5, 5, 5, 5, 2, 5 };
 s32 lbl_2_data_2FEAC[10] = { 2, 11, 4, 7, 10, 2, 8, 11, 38, 0 };
 Vec lbl_2_data_2FED4 = { 0.0f, 0.0f, 0.0f };
@@ -520,6 +532,60 @@ void fn_2_8E478(void) {
         fn_80052D70();
         lbl_2_bss_1A824C->_1978F3 = 1;
         lbl_2_bss_340140->_307A = 4;
+        ((MenuTask0F60*)lbl_803CC1B8)->_0C->_10 = 1;
+        fn_800B0A14_removeQueue();
+        task->_28 = 0;
+        break;
+    }
+}
+
+// .text:0x0008DFB0 size:0x4C8
+void fn_2_8DFB0(void) {
+    MenuTask0F60* task = lbl_803CC1B8;
+
+    switch (task->_28) {
+    case 0:
+        lbl_2_bss_340140 = &lbl_8036E548;
+        task->_14 = 0;
+        fn_2_4E824();
+        fn_80052D70();
+        fn_2_48DB4();
+        fn_2_93C64();
+        task->_28 = 1;
+        break;
+    case 1:
+        lbl_2_bss_1A824C->_197746 = 0;
+        lbl_2_bss_340140->_2D9C = ARAMTransfer(&lbl_2_data_2FE58.entry, 0, 0, 0);
+        task->_14++;
+        task->_28 = 2;
+        break;
+    case 2:
+        if (lbl_803C6CF8._715 == 1) {
+            task->_28 = 5;
+        }
+        break;
+    case 5:
+        fn_2_8B2C0();
+        task->_28 = 6;
+        break;
+    case 6:
+        fn_2_8B158();
+        fn_2_8C724();
+        fn_80052D70();
+        task->_28 = 7;
+        break;
+    case 7:
+        task->_28 = 8;
+        break;
+    case 8:
+        lbl_2_bss_340140->_307A = 3;
+        task->_28 = 9;
+        break;
+    case 9:
+        task->_28 = 10;
+        break;
+    case 10:
+        lbl_2_bss_340140->_307A = 3;
         ((MenuTask0F60*)lbl_803CC1B8)->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
@@ -797,6 +863,11 @@ void fn_2_8CCAC(s32 idx, s32 arg1) {
     }
 }
 
+// .text:0x0008CC88 size:0x24
+s32 fn_2_8CC88(s32 idx) {
+    return lbl_8036E548._2C50[idx]->_068 == 0;
+}
+
 // .text:0x0008C910 size:0x378
 void fn_2_8C910(void) {
     int i;
@@ -843,11 +914,6 @@ void fn_2_8C910(void) {
         convertTextureHeader(tex);
         fn_800BD190(geo, tex);
     }
-}
-
-// .text:0x0008CC88 size:0x24
-s32 fn_2_8CC88(s32 idx) {
-    return lbl_8036E548._2C50[idx]->_068 == 0;
 }
 
 // .text:0x0008C80C size:0x104
