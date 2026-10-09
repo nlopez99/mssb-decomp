@@ -140,8 +140,7 @@ extern struct {
 
 extern struct {
     /* 0x000000 */ u8 _000000[0x1972BE];
-    /* 0x1972BE */ u8 _1972BE;
-    /* 0x1972BF */ u8 _1972BF;
+    /* 0x1972BE */ s16 _1972BE;
     /* 0x1972C0 */ u8 _1972C0;
     /* 0x1972C1 */ u8 _1972C1[0x197740 - 0x1972C1];
     /* 0x197740 */ s16 _197740;
@@ -155,6 +154,8 @@ extern Tracker1028* lbl_2_bss_1A8248;
 typedef struct {
     /* 0x00 */ u8 _00[0x10];
     /* 0x10 */ s16 _10;
+    /* 0x12 */ u8 _12[0x28 - 0x12];
+    /* 0x28 */ s8 _28;
 } MenuTask1028;
 
 extern MenuTask1028* lbl_803CC1B8;
@@ -544,6 +545,7 @@ void fn_2_91058(Item1028* item) {
 // .text:0x00090EC4 size:0x194
 void fn_2_90EC4(Item1028* item) {
     MenuTask1028* task = lbl_803CC1B8;
+    MenuTask1028* sub;
     Mtx mtx;
     Vec step;
     fn_2_90DE4(item, 0.0f);
@@ -557,7 +559,8 @@ void fn_2_90EC4(Item1028* item) {
     if (item->_00.y >= 0.0f) {
         fn_2_46D34(lbl_2_data_38BC[0]);
         if (lbl_2_bss_1A8248->_43BE < 999) {
-            *((u8*)fn_800B0A5C_insertQueue(fn_2_3FA14, 2) + 0x28) = 0;
+            sub = fn_800B0A5C_insertQueue(fn_2_3FA14, 2);
+            sub->_28 = 0;
             task->_10 = 0;
         } else {
             lbl_2_bss_1A824C->_197740 = 1;
@@ -572,8 +575,10 @@ void fn_2_90E98(Item1028* item) { fn_2_92654(item->_78, 0); }
 // .text:0x00090DE4 size:0xB4
 void fn_2_90DE4(Item1028* item, f32 floor) {
     f32 y;
+    f32 s;
     if (item->_B5 != 0) {
-        y = 1.5f * -(f32)sin(item->_88);
+        s = sin(item->_88);
+        y = 1.5f * -s;
         item->_88 += 0.07f;
         if (y >= floor) {
             item->_88 = 0.0f;
@@ -795,8 +800,9 @@ void fn_2_9033C(s32 index, Vec* pos, f32 arg2) {
 
 // .text:0x0009007C size:0x2C0
 void fn_2_9007C(void) {
-    fn_2_8FE9C(lbl_2_bss_1A824C->_1972BE);
-    fn_2_8FDB0(lbl_2_bss_1A824C->_1972BE);
+    s32 index = lbl_2_bss_1A824C->_1972BE;
+    fn_2_8FE9C(index);
+    fn_2_8FDB0(index);
 }
 
 // .text:0x0008FE9C size:0x1E0
@@ -819,7 +825,9 @@ void fn_2_8FE9C(s32 index) {
         pos.y += 0.05f;
     }
     memcpy(&lbl_2_data_308F4, item, sizeof(Vec));
-    item->_00 = pos;
+    item->_00.x = pos.x;
+    item->_00.y = pos.y;
+    item->_00.z = pos.z;
     item->_44 = lbl_2_bss_B640;
 }
 
@@ -828,7 +836,7 @@ void fn_2_8FDB0(s32 index) {
     Item1028* item = &lbl_2_bss_1A8248->_21E0[index];
     Mtx mtx;
     Vec step;
-    if (item->_30 != 0.0f) {
+    if (!(item->_30 <= 0.0f)) {
         PSMTXRotRad(mtx, 'Y', item->_44);
         step.x = 0.0f;
         step.y = 0.0f;
