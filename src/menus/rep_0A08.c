@@ -184,10 +184,10 @@ extern struct {
     /* 0x52 */ u8 _52;
 } lbl_803C50E8;
 extern struct {
-    /* 0x00 */ u8 _00[0x58];
-    /* 0x58 */ s16 _58;
-    /* 0x5A */ s16 _5A;
-} gameInitOptions;
+    /* 0x00 */ u8 _00[0x30];
+    /* 0x30 */ s16 _30;
+    /* 0x32 */ s16 _32;
+} lbl_800E877C;
 
 typedef struct AramEntry0A08 {
     /* 0x0 */ u32 _0[4];
@@ -204,8 +204,6 @@ AramEntry0A08 lbl_2_data_1F894 = { 0x0000040B, 0x4037CF5C, 0x18B3A800, 0x00208AF
 s16 lbl_2_bss_9E08;
 
 // .text:0x00053408 size:0x1A8
-// The target reads 0x800E877C as its own object (gameInitOptions+0x28 with
-// offsets 0x30 and 0x32); symbols.txt lumps it into gameInitOptions.
 void fn_2_53408(void) {
     switch (lbl_2_bss_33FBCC._00) {
     case 0:
@@ -217,12 +215,12 @@ void fn_2_53408(void) {
             } else {
                 lbl_2_bss_33FBCC._00 = 2;
             }
-            if (gameInitOptions._58 == 10 && lbl_803C50E8._47 != 0) {
+            if (lbl_800E877C._30 == 10 && lbl_803C50E8._47 != 0) {
                 changeScene(6, 6);
                 changeScene(3, 6);
                 fn_80035B50(8);
-                gameInitOptions._58 = 9;
-                gameInitOptions._5A = 0;
+                lbl_800E877C._30 = 9;
+                lbl_800E877C._32 = 0;
                 fn_80042D38(5);
                 lbl_2_bss_33FBCC._00 = 0;
                 lbl_2_bss_F410._50 = 0;
