@@ -288,14 +288,23 @@ void fn_2_12988(void) {
     lbl_8034E9A0._46F4 = lbl_803C7898._8;
 }
 
+static inline void setOrder0438(s32 captain, s32 count) {
+    s32 j;
+
+    for (j = 0; j < count; j++) {
+        lbl_803C6724._02[0][j] = lbl_8034E9A0._4380[captain][0][j];
+        lbl_803C6724._14[0][j] = j;
+        starMissionCompletionTracker._40BB[j][0] = j;
+    }
+}
+
 // .text:0x00012238 size:0x194
-// 73.81%: the target unrolls the second loop by three under ctr with no extsb;
-// an int counter unrolls it fully, an s8 one keeps it rolled with extsb.
+// 92.29%: the target tests 0 < 9 before the batting-order loop (li; cmpwi; bge),
+// and its strength-reduced pointers sit in other registers.
 void fn_2_12238(void) {
     s32 i;
     s32 captain;
     s32 id;
-    s8 j;
 
     id = lbl_800FE930[lbl_80361B20._F4][lbl_2_bss_F410._10[0]];
     for (i = 0; i < 6; i++) {
@@ -307,11 +316,7 @@ void fn_2_12238(void) {
     if (i == 6) {
         OSPanic("teamselect.c", 1113, " Captain Not Found ");
     }
-    for (j = 0; j < 9; j++) {
-        lbl_803C6724._02[0][j] = lbl_8034E9A0._4380[captain][0][j];
-        lbl_803C6724._14[0][j] = j;
-        starMissionCompletionTracker._40BB[j][0] = j;
-    }
+    setOrder0438(captain, 9);
     fn_800678CC(0);
 }
 
