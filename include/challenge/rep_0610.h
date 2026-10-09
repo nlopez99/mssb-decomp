@@ -48,7 +48,7 @@ void fn_1_F1D8(void);
 void fn_1_F37C(void);
 void fn_1_F50C(void);
 void fn_1_F6E4(void);
-void fn_1_F798(struct UnkBurst0610* arg0, void* arg1, s32 arg2);
+void fn_1_F798(struct UnkBurst0610* arg0, u8* ids, s32 count);
 void fn_1_F2F8(void);
 void fn_1_10458(void);
 void fn_1_10560(void);

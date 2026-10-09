@@ -1329,6 +1329,163 @@ void fn_1_10458(void) {
     }
 }
 
+// .text:0x0000F798 size:0x400
+void fn_1_F798(UnkBurst0610* arg0, u8* ids, s32 count) {
+    s32* params = (s32*)arg0;
+    s32 step;
+    s32 big;
+    s32 huge;
+    s32 v;
+    if (lbl_803C77B8[0]._00 & 0x400) {
+        step = 10;
+        big = 100;
+        huge = 10000;
+    } else if (lbl_803C77B8[0]._00 & 0x800) {
+        step = 20;
+        huge = 1000000;
+        big = 10000;
+    } else {
+        step = 1;
+        huge = 100000;
+        big = 1000;
+    }
+    if (lbl_803C77B8[0]._04 & 8) {
+        if (lbl_1_bss_307C != 0) {
+            lbl_1_bss_307C--;
+        } else {
+            lbl_1_bss_307C = count - 1;
+        }
+    } else if (lbl_803C77B8[0]._04 & 4) {
+        if (++lbl_1_bss_307C == count) {
+            lbl_1_bss_307C = 0;
+        }
+    } else if (lbl_803C77B8[0]._04 & 1) {
+        switch (ids[lbl_1_bss_307C]) {
+        case 1:
+            params[ids[lbl_1_bss_307C]] = (params[ids[lbl_1_bss_307C]] + 41) % 42;
+            break;
+        case 2:
+            params[2] -= step;
+            if (params[2] < 1) {
+                params[2] = 1;
+            }
+            break;
+        case 3:
+        case 4:
+        case 5:
+        case 8:
+        case 9:
+        case 20:
+            if (params[ids[lbl_1_bss_307C]] - big > 0) {
+                params[ids[lbl_1_bss_307C]] -= big;
+            }
+            break;
+        case 6:
+            params[6] -= step;
+            if (params[6] < 1) {
+                params[6] = 1;
+                if (params[7] > params[6]) {
+                    params[7] = params[6];
+                }
+            }
+            break;
+        case 7:
+        case 11:
+        case 21:
+        case 22:
+            params[ids[lbl_1_bss_307C]] -= step;
+            if (params[ids[lbl_1_bss_307C]] < 0) {
+                params[ids[lbl_1_bss_307C]] = 0;
+            }
+            break;
+        case 10:
+            params[ids[lbl_1_bss_307C]] ^= 1;
+            break;
+        case 12:
+        case 13:
+            params[ids[lbl_1_bss_307C]] -= huge;
+            if (params[ids[lbl_1_bss_307C]] < 0) {
+                params[ids[lbl_1_bss_307C]] = 0;
+            }
+            break;
+        case 23:
+        case 24:
+            params[ids[lbl_1_bss_307C]] -= big;
+            break;
+        case 14:
+        case 15:
+            params[ids[lbl_1_bss_307C]] -= huge;
+        case 16:
+            v = (params[16] >> 8) & 0xFF;
+            v -= step;
+            if (v < 0) {
+                v = 0;
+            }
+            params[16] = v * 0x01010100;
+            break;
+        }
+    } else if (lbl_803C77B8[0]._04 & 2) {
+        switch (ids[lbl_1_bss_307C]) {
+        case 1:
+            params[ids[lbl_1_bss_307C]] = (params[ids[lbl_1_bss_307C]] + 1) % 42;
+            break;
+        case 2:
+            params[2] += step;
+            break;
+        case 3:
+        case 4:
+        case 5:
+        case 8:
+        case 9:
+        case 20:
+            params[ids[lbl_1_bss_307C]] += big;
+            break;
+        case 6:
+            params[6] += step;
+            break;
+        case 7:
+            params[7] += step;
+            if (params[7] > params[6]) {
+                params[7] = params[6];
+            }
+            break;
+        case 11:
+        case 21:
+            params[ids[lbl_1_bss_307C]] += step;
+            if (params[ids[lbl_1_bss_307C]] > 255) {
+                params[ids[lbl_1_bss_307C]] = 255;
+            }
+            break;
+        case 22:
+            params[ids[lbl_1_bss_307C]] += step;
+            break;
+        case 10:
+            params[ids[lbl_1_bss_307C]] ^= 1;
+            break;
+        case 12:
+        case 13:
+            params[ids[lbl_1_bss_307C]] += huge;
+            break;
+        case 23:
+        case 24:
+            params[ids[lbl_1_bss_307C]] += big;
+            break;
+        case 14:
+        case 15:
+            params[ids[lbl_1_bss_307C]] += huge;
+            break;
+        case 16:
+            v = (params[16] >> 8) & 0xFF;
+            v += step;
+            if (v > 255) {
+                v = 255;
+            }
+            params[16] = v * 0x01010100;
+            break;
+        }
+    }
+}
+
 // .text:0x0000F6E4 size:0xB4
 void fn_1_F6E4(void) {
     UnkBurst0610* burst = &lbl_1_data_F0BC;
