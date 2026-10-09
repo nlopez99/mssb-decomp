@@ -229,6 +229,10 @@ void fn_1_295E8(void) {
     fn_1_29414(task);
 }
 
+static inline void fn_1_7BF0_menuControl(Menu7BF0* menu, u16 held, u16 pressed, u16 repeat) {
+    fn_80048820(menu, held, pressed, repeat, (held & PAD_BUTTON_Y) ? 0x91 : ((held & PAD_BUTTON_X) ? 0x50 : 0));
+}
+
 // .text:0xF00 size:0x15C
 void fn_1_2948C(Task7BF0* task) {
     u16 held = lbl_803C77B8[0]._00;
@@ -243,8 +247,7 @@ void fn_1_2948C(Task7BF0* task) {
             fn_800A97D0(0x10, 0x1E);
         }
     } else if (task->_14 != 0) {
-        fn_80048820(&lbl_1_bss_471BC, held, pressed, repeat,
-                    (held & PAD_BUTTON_Y) ? 0x91 : ((held & PAD_BUTTON_X) ? 0x50 : 0));
+        fn_1_7BF0_menuControl(&lbl_1_bss_471BC, lbl_803C77B8[0]._00, lbl_803C77B8[0]._02, repeat);
         held &= ~(PAD_BUTTON_X | PAD_BUTTON_Y);
         pressed &= ~(PAD_BUTTON_X | PAD_BUTTON_Y);
         repeat &= ~(PAD_BUTTON_X | PAD_BUTTON_Y);
