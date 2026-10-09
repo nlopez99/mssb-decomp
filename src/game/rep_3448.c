@@ -238,7 +238,6 @@ extern u16 lbl_3_data_2145C[2];
 extern u8 lbl_3_data_21460[8];
 extern u8 lbl_3_data_21468[4][6];
 extern u8 lbl_3_data_21480[8];
-extern u8 lbl_3_data_21268[8];
 extern s16 lbl_3_data_21654[12];
 extern s16 lbl_3_data_21672;
 extern s16 lbl_3_data_21788[4];

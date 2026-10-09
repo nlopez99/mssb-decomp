@@ -62,13 +62,6 @@ extern s16 lbl_3_data_21788[4];
 extern s16 lbl_3_data_21790[4];
 extern u8 lbl_3_data_21798[12];
 extern s16 lbl_3_data_217A4[12];
-// rep_31A0.c defines these with other types; the code reads bytes.
-extern s8 lbl_3_data_217BC[8];
-extern u8 lbl_3_data_217C4[4];
-extern s8 lbl_3_data_217C8[4];
-extern s8 lbl_3_data_217CC[4];
-extern s8 lbl_3_data_217D0[4];
-extern s8 lbl_3_data_217D4[4];
 
 typedef struct {
     /* 0x0 */ s8 idx;
