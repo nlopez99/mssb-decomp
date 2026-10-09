@@ -51,7 +51,7 @@ typedef struct Obj0B08 {
     /* 0xAE */ s16 _AE;
     /* 0xB0 */ s16 _B0;
     /* 0xB2 */ s16 _B2;
-    /* 0xB4 */ u8 _B4[0xB6 - 0xB4];
+    /* 0xB4 */ s16 _B4;
     /* 0xB6 */ u8 _B6;
     /* 0xB7 */ u8 _B7;
     /* 0xB8 */ u8 _B8;
@@ -248,11 +248,16 @@ u8 lbl_2_bss_A174[0x6CC];
 f32 lbl_2_bss_A170;
 
 // .text:0x00072054 size:0x28
-// Outside this unit's splits.txt range, but inlined into its functions
-static inline void fn_2_72054(s32 index, u8 type) {
+void fn_2_72054(s32 index, u8 type) {
     Obj0B08* obj = &lbl_2_bss_1A8248->_1610[index];
     obj->_C3 = type;
     obj->_94 = 0;
+}
+
+// .text:0x00072038 size:0x1C
+void fn_2_72038(s32 index, s16 value) {
+    Obj0B08* obj = &lbl_2_bss_1A8248->_1610[index];
+    obj->_B4 = value;
 }
 
 // .text:0x00071F60 size:0xD8

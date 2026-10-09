@@ -144,5 +144,7 @@ void fn_2_71EC4(struct Obj0B08* obj);
 void fn_2_71EFC(struct Obj0B08* obj);
 void fn_2_71F20(struct Obj0B08* obj);
 void fn_2_71F60(void);
+void fn_2_72038(s32 index, s16 value);
+void fn_2_72054(s32 index, u8 type);
 
 #endif // !__MENUS_rep_0B08_H_
