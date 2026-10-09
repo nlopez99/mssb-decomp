@@ -24,7 +24,7 @@ typedef struct _GameInitVariables {
         /*0x13*/ u8 _13;
         /*0x13*/ u8 _13_arr[7]; // indexed by MINI_GAME_ID in fn_3_10F1D4
     };
-    artificial_padding(0x13, 0x20, u8[7]);
+    /*0x1A*/ u8 _1A[6];
     /*0x20*/ s16 _20[4][2];
     /*0x30*/ s16 challengeMinigame_baseCoinsEarned;
     /*0x32*/ u8 bJMatchRelated;
