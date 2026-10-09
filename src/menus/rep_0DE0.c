@@ -203,6 +203,7 @@ Vec lbl_2_data_2E9D0 = { 0.0f, 0.0f, 0.0f };
 Vec lbl_2_data_2E9DC = { -1.5707964f, 0.0f, 0.0f };
 Vec lbl_2_data_2E9E8 = { 0.0f, 0.0f, 0.0f };
 
+u8 lbl_2_bss_B2A8[0x10];
 u8 lbl_2_bss_B2A5;
 u8 lbl_2_bss_B2A4;
 f32 lbl_2_bss_B2A0;
