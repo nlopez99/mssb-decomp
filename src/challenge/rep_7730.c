@@ -1510,10 +1510,8 @@ void fn_1_23AD8(Mtx44 m, Vec* eye, Vec* at) {
 }
 
 // .text:0x00023804 size:0x2D4
-// 95.10%: the target keeps the copy n in r31 and rows in r29; this form puts n in r24
-// and shifts the other saved registers by one.
 void fn_1_23804(s32 arg0, s32 arg1, s32 rows, s32 cols, f32 arg4, f32 arg5) {
-    int n;
+    s32 n;
 
     fn_1_26A34();
     GXLoadPosMtxImm(lbl_1_bss_43EE0._00, GX_PNMTX0);
@@ -1526,7 +1524,11 @@ void fn_1_23804(s32 arg0, s32 arg1, s32 rows, s32 cols, f32 arg4, f32 arg5) {
             GXPosition3f32(lbl_1_bss_F6E0[cols][rows].x, lbl_1_bss_F6E0[cols][rows].z, lbl_1_bss_F6E0[cols][rows].y);
             GXColor1u32((rows & 1) ? 0xFFFFFFFF : 0x0000FFFF);
             GXPosition3f32(lbl_1_bss_F6E0[cols][rows - 1].x, lbl_1_bss_F6E0[cols][rows - 1].z, lbl_1_bss_F6E0[cols][rows - 1].y);
-            GXColor1u32((rows & 1) ? 0x0000FFFF : 0xFFFFFFFF);
+            if (rows & 1) {
+                GXColor1u32(0x0000FFFF);
+            } else {
+                GXColor1u32(0xFFFFFFFF);
+            }
         }
     }
     GXBegin(GX_LINESTRIP, GX_VTXFMT0, 8);
