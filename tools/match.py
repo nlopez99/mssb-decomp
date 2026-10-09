@@ -545,7 +545,8 @@ def m2c_draft(unit: Dict[str, Any], function: str, build_context: bool) -> str:
     command = [m2c, "-t", "ppc-mwcc-c", "-f", function]
     note = ""
     ctx = context_path(unit)
-    if ctx and build_context:
+    # --no-build still builds a missing context, or a batch's drafts all come out untyped
+    if ctx and (build_context or not os.path.exists(os.path.join(root_dir, ctx))):
         # Best effort: without it m2c still runs, just without types
         subprocess.run(["ninja", ctx], cwd=root_dir, capture_output=True)
     with tempfile.TemporaryDirectory(prefix="match-m2c-") as tmp:
