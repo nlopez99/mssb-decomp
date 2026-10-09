@@ -11,6 +11,7 @@
 #include "C3/anim.h"
 #include "game/rep_16B8.h"
 #include "game/rep_1770.h"
+#include "game/rep_2BF8.h"
 #include "string.h"
 
 typedef struct UnkTask3448 {
@@ -827,10 +828,6 @@ extern void fn_800528C0(f32 x, f32 y, f32 z, s16* screenX, s16* screenY);
 extern void fn_800B0A14_removeQueue(void);
 extern UnkTask3448* fn_800B0A5C_insertQueue(void (*)(void), s32);
 extern void* ARAMTransfer(UnkAramEntry3448* entry, int arg1, int arg2, u32 aram);
-extern void fn_3_E911C(void);
-// rep_2BF8, not yet in its source
-extern void fn_3_EA454(void);
-extern void fn_3_EB6E0(void);
 // Unassigned code between rep_1770 and rep_1838
 extern void fn_8000F8F4(UnkTask3448* task);
 extern void fn_8000FEE8(s32 id);

@@ -9,6 +9,7 @@
 #include "game/rep_3310.h"
 #include "game/rep_EA0.h"
 #include "game/rep_2BF8.h"
+#include "game/rep_3448.h"
 #include "game/rep_3880.h"
 #include "game/rep_3CE0.h"
 
@@ -134,8 +135,6 @@ extern int fn_8004ACC4(int arg0);
 extern void fn_3_6A250(void);
 extern void fn_3_6A25C(void);
 extern void fn_3_6B674(void);
-// rep_3448, being written in parallel
-extern void fn_3_12D1F4(void);
 
 // .text:0x000E19E8 size:0x278 mapped:0x80720A7C
 void fn_3_E19E8(void) {

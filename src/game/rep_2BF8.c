@@ -147,7 +147,7 @@ extern void fn_80050F78(s32);
 extern void fn_80051D00(void);
 extern void fn_80053FE8(void);
 
-// rep_3448
+// rep_3448: rep_3448.h declares fn_3_125424 with rep_3448's own task type, so these stay local
 extern u32 fn_3_12536C(void);
 extern u32 fn_3_125424(UnkTask2BF8* task, s32 i, u32 frame);
 extern void fn_3_1254F8(void);
