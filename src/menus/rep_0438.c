@@ -1,4 +1,5 @@
 #include "menus/rep_0438.h"
+#include "menus/rep_04B0.h"
 #include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/os.h"
@@ -188,8 +189,6 @@ static inline void copyChar0438(CharEntry0438* dst, CharEntry0438* src) {
 extern void fn_800AD038(s32 arg0);
 extern void fn_800628D4(s32 charID);
 extern void fn_8004EEF4(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-extern s32 fn_2_15104(s32 arg0, s32 arg1, u8 arg2, s32 arg3);
-extern void fn_2_15E80(s32 arg0);
 extern void fn_800678CC(s32 arg0);
 
 // .text:0x00012C34 size:0xA4

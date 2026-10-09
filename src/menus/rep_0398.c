@@ -2,6 +2,7 @@
 #include "menus/rep_0398.h"
 #include "menus/rep_0278.h"
 #include "menus/rep_0318.h"
+#include "menus/rep_04B0.h"
 #include "static/UnknownHomes_Static.h"
 #include "musyx/musyx.h"
 
@@ -116,7 +117,6 @@ extern s32 fn_2_14F8(s32 min, s32 max);
 extern void fn_2_2DC(void);
 extern void fn_2_328(void);
 extern void fn_2_11A0(s32 arg0);
-extern void fn_2_15A90(s32* index, s32 arg1, u8 arg2);
 extern void fn_2_836A4(void);
 extern void fn_2_85108(void);
 extern void* fn_800B0A5C_insertQueue(void (*)(void), s32);
