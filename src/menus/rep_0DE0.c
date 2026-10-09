@@ -102,7 +102,7 @@ extern struct {
     /* 0x05 */ u8 _05;
     /* 0x06 */ u8 _06;
     /* 0x07 */ u8 _07[6];
-    /* 0x0D */ u8 _0D;
+    /* 0x0D */ s8 _0D;
     /* 0x0E */ u8 _0E;
     /* 0x0F */ s8 _0F;
     /* 0x10 */ s8 _10;
@@ -225,6 +225,13 @@ extern struct {
 
 extern void fn_80034E20(MenuTask0DE0* task, void* desc);
 extern void changeScene(u8, s16);
+extern void fn_80034CEC(MenuTask0DE0* task);
+extern void fn_800B0A14_removeQueue(void);
+
+extern struct {
+    /* 0x0 */ u8 _0[0x3];
+    /* 0x3 */ u8 _3;
+} lbl_8034E978;
 extern s32 fn_80042DA8(MenuTask0DE0* task, s32 index, s32 value);
 extern void fn_800363D8(MenuTask0DE0* task, s32 id, s32 part, s32 kind, s32 value);
 
@@ -301,6 +308,81 @@ void fn_2_8ABFC(void) {
         lbl_2_bss_F410._50 = lbl_80361B20._F6;
     }
     ((MenuTask0DE0*)lbl_803CC1B8)->_00 = fn_2_8A824;
+}
+
+// .text:0x0008A824 size:0x3D8
+void fn_2_8A824(void) {
+    MenuTask0DE0* task = lbl_803CC1B8;
+    s32 done;
+    s32 total;
+    s32 i;
+
+    switch (lbl_2_bss_33FBCC._17) {
+    case 0x49:
+        fn_2_89038(task);
+        break;
+    case 0x4A:
+        fn_2_88D90(task);
+        break;
+    case 0x4B:
+        fn_2_887F8(task);
+        break;
+    case 0x4C:
+        fn_2_883C8(task);
+        break;
+    case 0x4D:
+        fn_2_88250(task);
+        break;
+    case 0x4E:
+        fn_2_87FB0(task);
+        break;
+    case 0x4F:
+        fn_2_87998(task);
+        break;
+    case 0x50:
+        if (lbl_2_bss_33FBCC._18 == 0 ? TRUE : FALSE) {
+            fn_2_8A008(task);
+            lbl_2_bss_33FBCC._18 = 1;
+            lbl_2_bss_33FBCC._19 = 1;
+        }
+        if (lbl_2_bss_33FBCC._19 == 1 ? TRUE : FALSE) {
+            done = 0;
+            total = 0;
+            for (i = 0; i < 3; i++) {
+                if (lbl_80354768._CF5E[i] != 0) {
+                    if (lbl_80354768.trackers[i]._444B != -1) {
+                        total++;
+                        done += isAnimDone(task, i + 50, 10);
+                    } else if (lbl_80354768.trackers[i]._1606 == 0) {
+                        total++;
+                        done += isAnimDone(task, i + 53, 14);
+                    }
+                }
+            }
+            if (done == total) {
+                lbl_2_bss_33FBCC._17 = 0;
+                lbl_2_bss_33FBCC._18 = 0;
+                lbl_2_bss_33FBCC._19 = 0;
+            }
+        }
+        break;
+    }
+    for (i = 0; i < 3; i++) {
+        if (lbl_2_bss_F410._50 == i) {
+            lbl_80371C30[task->_14 + 63 + i]._00->_54 |= 2;
+        } else {
+            lbl_80371C30[task->_14 + 63 + i]._00->_54 &= ~2;
+        }
+    }
+    if (lbl_2_bss_33FBCC._1A != 0) {
+        lbl_2_bss_33FBCC._1A = 0;
+        lbl_2_bss_33FBCC._17 = 0;
+        lbl_2_bss_33FBCC._18 = 0;
+        lbl_2_bss_33FBCC._19 = 0;
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+        lbl_8034E978._3 = 0;
+    }
 }
 
 // .text:0x00089F70 size:0x98
@@ -439,6 +521,74 @@ void fn_2_88D90(MenuTask0DE0* task) {
         if (done == TRUE) {
             lbl_8034E9A0._48AF = 1;
             lbl_2_bss_33FBCC._1A = 1;
+            lbl_2_bss_33FBCC._17 = 0;
+            lbl_2_bss_33FBCC._18 = 0;
+            lbl_2_bss_33FBCC._19 = 0;
+        }
+    }
+}
+
+// .text:0x000883C8 size:0x430
+void fn_2_883C8(MenuTask0DE0* task) {
+    s32 done;
+    s32 total;
+    s32 i;
+
+    if ((lbl_2_bss_33FBCC._18 == 0 ? TRUE : FALSE) && lbl_2_bss_33FBCC._0D != lbl_2_bss_F410._50) {
+        for (i = 0; i < 3; i++) {
+            if (lbl_80354768._CF5E[i] != 0) {
+                if (lbl_2_bss_F410._50 == i) {
+                    lbl_80371C30[task->_14 + 4 + i]._00->_68 = 1;
+                    lbl_80371C30[task->_14 + 7 + i]._00->_64 = 19;
+                    lbl_80371C30[task->_14 + 7 + i]._00->_68 = 1;
+                    if (lbl_80354768.trackers[i]._1606 == 0 ||
+                        (lbl_80354768.trackers[i]._1606 != 0 && lbl_80354768.trackers[i]._441B != 0)) {
+                        lbl_80371C30[task->_14 + 11 + i]._00->_5C = 0x1A0000;
+                        lbl_80371C30[task->_14 + 11 + i]._00->_68 = 4;
+                    }
+                } else if (lbl_2_bss_33FBCC._0D == i && i != lbl_2_bss_33FBCC._0F) {
+                    lbl_80371C30[task->_14 + 4 + i]._00->_68 = 1;
+                    lbl_80371C30[task->_14 + 7 + i]._00->_64 = 18;
+                    lbl_80371C30[task->_14 + 7 + i]._00->_68 = 1;
+                    if (lbl_80354768.trackers[i]._1606 == 0 ||
+                        (lbl_80354768.trackers[i]._1606 != 0 && lbl_80354768.trackers[i]._441B != 0)) {
+                        lbl_80371C30[task->_14 + 11 + i]._00->_5C = 0x160000;
+                        lbl_80371C30[task->_14 + 11 + i]._00->_68 = 1;
+                    }
+                }
+            } else if (lbl_2_bss_F410._50 == i) {
+                lbl_80371C30[task->_14 + 7 + i]._00->_64 = 19;
+                lbl_80371C30[task->_14 + 7 + i]._00->_68 = 1;
+            } else {
+                lbl_80371C30[task->_14 + 7 + i]._00->_64 = 18;
+                lbl_80371C30[task->_14 + 7 + i]._00->_68 = 1;
+            }
+        }
+        lbl_2_bss_33FBCC._18 = 1;
+        lbl_2_bss_33FBCC._19 = 1;
+    }
+    if ((lbl_2_bss_33FBCC._19 == 1 ? TRUE : FALSE) && lbl_2_bss_33FBCC._0D != lbl_2_bss_F410._50) {
+        done = 0;
+        total = 0;
+        for (i = 0; i < 3; i++) {
+            if (lbl_80354768._CF5E[i] != 0) {
+                if (lbl_2_bss_F410._50 == i) {
+                    if (lbl_80354768.trackers[i]._1606 == 0 ||
+                        (lbl_80354768.trackers[i]._1606 != 0 && lbl_80354768.trackers[i]._441B != 0)) {
+                        total++;
+                        done += isAnimDone(task, i + 11, 22);
+                    }
+                } else if (lbl_2_bss_33FBCC._0D == i && i != lbl_2_bss_33FBCC._0F) {
+                    if (lbl_80354768.trackers[i]._1606 == 0 ||
+                        (lbl_80354768.trackers[i]._1606 != 0 && lbl_80354768.trackers[i]._441B != 0)) {
+                        total++;
+                        done += isAnimDone(task, i + 11, 26);
+                    }
+                }
+            }
+        }
+        if (done == total) {
+            lbl_2_bss_33FBCC._0D = lbl_2_bss_F410._50;
             lbl_2_bss_33FBCC._17 = 0;
             lbl_2_bss_33FBCC._18 = 0;
             lbl_2_bss_33FBCC._19 = 0;
