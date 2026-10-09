@@ -32,7 +32,9 @@ typedef struct MenuMissionPair08E8 {
 typedef struct MenuCharDef08E8 {
     /* 0x00 */ s8 _00;
     /* 0x01 */ s8 _01;
-    /* 0x02 */ u8 _02[0x1C - 0x2];
+    /* 0x02 */ s8 _02;
+    /* 0x03 */ s8 _03;
+    /* 0x04 */ u8 _04[0x1C - 0x4];
 } MenuCharDef08E8; // size: 0x1C
 
 typedef struct MenuCharacter08E8 {
@@ -2612,8 +2614,9 @@ s32 fn_2_44E2C(s32 id) {
 }
 
 // .text:0x00044504 size:0x928
-// First draft: the target reads _31 without extsb (lbz then cmpwi) in the
-// unrolled roster loop and allocates registers differently throughout.
+// The target reads _31 in the first roster loop through a pointer (add, then
+// lbz with no extsb) where this indexes it (lbzx, extsb); the rest follows
+// from that in register numbers.
 void fn_2_44504(void) {
     s32 i;
     s32 k;
@@ -2633,30 +2636,34 @@ void fn_2_44504(void) {
     n = 0;
     for (i = 0; i < 0x36; i++) {
         if (((MenuCharacter08E8*)lbl_2_bss_1A8248)[i]._31 == 1 && i != lbl_803CB8F0[lbl_2_bss_1A8248->_441C]) {
-            lbl_2_bss_1A824C->_1977A2[n++] = i;
+            lbl_2_bss_1A824C->_1977A2[n] = i;
+            n++;
         }
     }
     for (i = 0, k = 0; i < 9; i++) {
         if (stars + k < 0x20) {
             id = lbl_2_bss_1A8248->_40B8[i]._0;
             if (((MenuCharacter08E8*)lbl_2_bss_1A8248)[id]._05 == 4) {
-                lbl_2_bss_1A824C->_1977A2[n++] = id;
+                lbl_2_bss_1A824C->_1977A2[n] = id;
+                n++;
                 k++;
             }
         }
     }
     for (i = 0, k = 0; i < n; i++) {
         id = lbl_2_bss_1A824C->_1977A2[i];
-        if (id != 10000 && ((MenuCharacter08E8*)lbl_2_bss_1A8248)[id]._00->_02[0] == 4) {
-            lbl_2_bss_1A824C->_197818[k++] = id;
+        if (id != 10000 && ((MenuCharacter08E8*)lbl_2_bss_1A8248)[id]._00->_02 == 4) {
+            lbl_2_bss_1A824C->_197818[k] = id;
+            k++;
             lbl_2_bss_1A824C->_1977A2[i] = 10000;
         }
     }
     if (stars >= 10) {
         for (i = 0, k = 0; i < n; i++) {
             id = lbl_2_bss_1A824C->_1977A2[i];
-            if (id != 10000 && ((MenuCharacter08E8*)lbl_2_bss_1A8248)[id]._00->_02[1] == 1) {
-                lbl_2_bss_1A824C->_19780E[k++] = id;
+            if (id != 10000 && ((MenuCharacter08E8*)lbl_2_bss_1A8248)[id]._00->_03 == 1) {
+                lbl_2_bss_1A824C->_19780E[k] = id;
+                k++;
                 lbl_2_bss_1A824C->_1977A2[i] = 10000;
             }
         }
@@ -2668,7 +2675,7 @@ void fn_2_44504(void) {
     for (i = 0; i < n + 1; i++) {
         id = lbl_2_bss_1A824C->_1977A2[i];
         if (id != 10000) {
-            lbl_2_bss_1A824C->_197450[i + 1].key = (s8)((MenuCharacter08E8*)lbl_2_bss_1A8248)[id]._00->_02[0];
+            lbl_2_bss_1A824C->_197450[i + 1].key = ((MenuCharacter08E8*)lbl_2_bss_1A8248)[id]._00->_02;
             lbl_2_bss_1A824C->_197450[i + 1].value = lbl_2_bss_1A824C->_1977A2[i];
         } else {
             lbl_2_bss_1A824C->_197450[i + 1].key = 10000;
@@ -2681,7 +2688,8 @@ void fn_2_44504(void) {
     }
     for (i = 0, k = 0; i < 0x36; i++) {
         if (lbl_2_bss_1A824C->_197450[i + 1].value != 10000) {
-            lbl_2_bss_1A824C->_1977A2[k++] = lbl_2_bss_1A824C->_197450[i + 1].value;
+            lbl_2_bss_1A824C->_1977A2[k] = lbl_2_bss_1A824C->_197450[i + 1].value;
+            k++;
         }
     }
     for (i = 0; i < 5; i++) {
