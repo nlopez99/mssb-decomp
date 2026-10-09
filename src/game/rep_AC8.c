@@ -405,7 +405,12 @@ static s16 lbl_3_bss_C8[2];
 
 // .text:0x000598D0 size:0x48 mapped:0x80698964
 void fn_3_598D0(void) {
-    return;
+    fn_3_58688();
+    if (g_GameLogic.teamAIInd[g_GameLogic.awayTeamBattingInd_battingTeam]) {
+        fn_3_583B8();
+    } else {
+        fn_3_3B9E4();
+    }
 }
 
 // .text:0x0005985C size:0x74 mapped:0x806988F0
@@ -904,7 +909,30 @@ void fn_3_58688(void) {
 
 // .text:0x000583B8 size:0x2D0 mapped:0x8069744C
 void fn_3_583B8(void) {
-    return;
+    s32 i;
+
+    for (i = 19; i > 0; i--) {
+        lbl_3_bss_170[i] = -1;
+    }
+    lbl_3_bss_170[0] = -1;
+    lbl_3_bss_16C = -1;
+    g_FieldingLogic._148 = 0;
+    g_FieldingLogic._14A = 0;
+    g_FieldingLogic._14C = 0;
+    if (g_Ball.framesSinceHit <= 0) {
+        return;
+    }
+    if (g_Ball.framesSinceHit == 1) {
+        fn_3_411AC();
+    } else {
+        if (g_FieldingLogic._13B) {
+            fn_3_3F034();
+            g_FieldingLogic._13B = 0;
+        }
+        fn_3_57A14();
+        fn_3_57144();
+    }
+    fn_3_55370();
 }
 
 // .text:0x00057BB4 size:0x804 mapped:0x80696C48
@@ -1093,7 +1121,68 @@ reset:
 
 // .text:0x00057144 size:0x344 mapped:0x806961D8
 void fn_3_57144(void) {
-    return;
+    UnkAC8Fielder* f;
+    s32 i;
+    f32 dx;
+    f32 dz;
+    f32 dx2;
+    f32 dz2;
+
+    if (g_GameLogic.teamAIInd[g_GameLogic.awayTeamBattingInd_battingTeam] &&
+        g_Ball.matchFramesAndBallAngle.framesAfterReceivingThrow == 20) {
+        fn_3_4197C(1);
+    }
+    if (g_FieldingLogic._123 && g_Ball.AtBat_ContactResult != 0) {
+        g_FieldingLogic._123 = 0;
+    }
+    if (g_FieldingLogic._124) {
+        g_FieldingLogic._124--;
+    }
+    fn_3_51220();
+    for (i = 0; i < 9; i++) {
+        fn_3_55EEC(i);
+        lbl_3_data_3C40[g_Fielders[i]._1D3]._4(i);
+        fn_3_55CC4(i);
+    }
+    if (g_GameLogic.teamAIInd[g_GameLogic.awayTeamBattingInd_battingTeam]) {
+        fn_3_4EBC4();
+    } else {
+        f = &g_Fielders[g_FieldingLogic._0B0];
+        if (g_FieldingLogic._0C4 >= 0) {
+            g_Ball.fielderAboutToGetBall_hasBall = -1;
+        } else if (g_FieldingLogic._0B0 >= 0 && g_Ball.looseBall_5FrameCountdown == 0) {
+            if (g_Ball.AtBat_ContactResult == 0) {
+                if (f->_080 < 5.0f) {
+                    g_Ball.fielderAboutToGetBall_hasBall = g_FieldingLogic._0B0;
+                } else {
+                    g_Ball.fielderAboutToGetBall_hasBall = -1;
+                }
+            } else {
+                dx = f->_000 - g_Ball.physicsSubstruct.futureCoordsAndDist[1].pos.x;
+                dz = f->_008 - g_Ball.physicsSubstruct.futureCoordsAndDist[1].pos.z;
+                dx2 = dx * dx;
+                dz2 = dz * dz;
+                if (dolsqrtf2(dx2 + dz2) <= f->_074) {
+                    if (fn_3_9CE0(f->_000, f->_008) < f->_0E8) {
+                        g_Ball.fielderAboutToGetBall_hasBall = g_FieldingLogic._0B0;
+                    } else {
+                        g_Ball.fielderAboutToGetBall_hasBall = -1;
+                    }
+                }
+            }
+            if (g_Ball.fielderAboutToGetBall_hasBall >= 0) {
+                g_Ball.ballIsLooseInd_unused = 0;
+                g_Ball.looseBall_codeForHowLongUntilSomeoneWillGetIt = 0;
+                g_Ball.fielderBeingThrownTo = -1;
+            }
+        }
+    }
+    if (g_Ball.framesSinceHit > 5) {
+        fn_3_45E98();
+        fn_3_4BA0C();
+        fn_3_49F3C();
+    }
+    fn_3_55918();
 }
 
 // .text:0x00055EEC size:0x1258 mapped:0x80694F80
@@ -6810,7 +6899,53 @@ void fn_3_3BE50(s32 fielder) {
 
 // .text:0x0003B9E4 size:0x46C mapped:0x8067AA78
 void fn_3_3B9E4(void) {
-    return;
+    InputStruct* input;
+    s32 i;
+
+    input = &g_Controls[g_GameLogic.teams[g_GameLogic.teamFielding]];
+    g_FieldingLogic._0B6 = g_FieldingLogic._0B0;
+    for (i = 19; i > 0; i--) {
+        lbl_3_bss_170[i] = lbl_3_bss_170[i - 1];
+    }
+    fn_3_A7EF8();
+    if (ACTIVE_TUTORIAL()) {
+        input = &g_Practice.inputs[g_GameLogic.teamFielding];
+    }
+    lbl_3_bss_170[0] = input->controlStickAngle;
+    if (lbl_3_bss_170[0] == -1) {
+        for (i = 1; i < 20; i++) {
+            lbl_3_bss_170[i] = -1;
+        }
+    }
+    if (lbl_3_bss_170[1] >= 0 && lbl_3_bss_170[2] >= 0) {
+        lbl_3_bss_16C = lbl_3_bss_170[0];
+    } else {
+        lbl_3_bss_16C = -1;
+    }
+    g_FieldingLogic._148 = input->buttonInput;
+    g_FieldingLogic._14A = input->newButtonInput;
+    g_FieldingLogic._14C = input->_08;
+    fn_3_3B99C();
+    if (g_Ball.framesSinceHit <= 0) {
+        return;
+    }
+    if (g_Ball.framesSinceHit == 1) {
+        fn_3_34450();
+    } else {
+        if (g_Ball.framesSinceHit > 3) {
+            fn_3_39EB0();
+        }
+        fn_3_57144();
+    }
+    fn_3_55370();
+    if (g_Ball.ballState == 1) {
+        g_FieldingLogic._0B0 = g_Ball.fielderWBallIndex;
+        g_FieldingLogic._139 = 0;
+    } else if (g_Ball.ballState == 2) {
+        if (g_FieldingLogic._0C2 < 0) {
+            g_FieldingLogic._0B0 = -1;
+        }
+    }
 }
 
 // .text:0x0003B99C size:0x48 mapped:0x8067AA30
