@@ -3,16 +3,26 @@
 #include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/gx.h"
+#include "Dolphin/pad.h"
 #include "C3/anim.h"
 
 typedef struct Task0010 {
     /* 0x00 */ void (*_00)(void);
-    /* 0x04 */ u8 _04[0x10 - 0x4];
+    /* 0x04 */ u8 _04[0xC - 0x4];
+    /* 0x0C */ struct Task0010* _0C;
     /* 0x10 */ s16 _10;
     /* 0x12 */ u8 _12[0x14 - 0x12];
+    /* 0x14 */ s16 _14;
+    /* 0x16 */ s16 _16;
+} Task0010;
+
+// The task of the unused loader chain fn_1_1634, fn_1_15CC and fn_1_1538
+typedef struct LoadTask0010 {
+    /* 0x00 */ void (*_00)(void);
+    /* 0x04 */ u8 _04[0x14 - 0x4];
     /* 0x14 */ void* _14;
     /* 0x18 */ void* _18;
-} Task0010;
+} LoadTask0010;
 
 typedef struct Model0010 {
     /* 0x00 */ u32 _00;
@@ -22,13 +32,21 @@ typedef struct Model0010 {
     /* 0x10 */ u32 _10;
 } Model0010;
 
+// A texture file: a count, then 0x20-byte entries
+typedef struct Tex0010 {
+    /* 0x00 */ s32 _00;
+    /* 0x04 */ struct {
+        u8 _00[0x20];
+    } _04[1];
+} Tex0010;
+
 typedef struct Draw0010 {
     /* 0x00 */ s32 _00;
-    /* 0x04 */ void (*_04)(void);
-    /* 0x08 */ void* _08;
+    /* 0x04 */ void (*_04)(struct Draw0010* draw);
+    /* 0x08 */ Tex0010* _08;
     /* 0x0C */ s32 _0C;
-    /* 0x10 */ s32 _10;
-    /* 0x14 */ s32 _14;
+    /* 0x10 */ u32 _10;
+    /* 0x14 */ GXColor _14;
 } Draw0010; // size: 0x18
 
 extern void* lbl_803CC1B8;
@@ -56,6 +74,18 @@ extern void LoadActorLayout(void* layout);
 extern void convertGeometryAndSknHeader(void* geo, void* skn);
 extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);
 extern void fn_80025DDC(void* anim);
+extern void SetDisplayStateTexture(void* tex, s32 arg1, s32 arg2);
+extern void gOz_GXSetTexture(s32 arg0, s32 arg1, s32 arg2);
+extern void fn_1_66C4(void);
+extern void fn_1_8B90(void);
+extern void fn_1_A2E4(void);
+extern void fn_1_17D90(void);
+extern void fn_1_1D514(void);
+extern void fn_1_24778(void);
+extern void fn_1_26AF8(void);
+extern void fn_1_28200(void);
+extern void fn_1_2852C(void);
+extern void fn_1_29A9C(void);
 extern void fn_80009144(void);
 
 static s32 lbl_1_data_0[7][4] = {
@@ -72,7 +102,7 @@ static Draw0010 lbl_1_data_70[2] = {
     { 0, fn_1_1240 },
 };
 static s32 lbl_1_data_A0 = 2;
-static s32 lbl_1_data_A4 = -1;
+static GXColor lbl_1_data_A4 = { 0xFF, 0xFF, 0xFF, 0xFF };
 GXColor lbl_1_data_A8 = { 0x11, 0x77, 0x55, 0x00 };
 u32 lbl_1_data_AC[15][4] = {
     { 0x00000000, 0x01070000, 0x00000000, 0x01070000 },
@@ -92,7 +122,7 @@ u32 lbl_1_data_AC[15][4] = {
     { 0x00000000, 0x00040000, 0x0A8C0000, 0x00040000 },
 };
 
-u32 lbl_1_bss_0;
+s32 lbl_1_bss_0;
 
 // .text:0x00001948 size:0x24
 void fn_1_1948(void) {
@@ -103,28 +133,95 @@ void fn_1_1948(void) {
     }
 }
 
+// .text:0x000016A0 size:0x2A8
+void fn_1_16A0(void) {
+    Task0010* task = lbl_803CC1B8;
+
+    if (lbl_803C77B8[0]._04 == PAD_BUTTON_UP) {
+        if (--task->_16 < 0) {
+            task->_16 = 9;
+        }
+    } else if (lbl_803C77B8[0]._04 == PAD_BUTTON_DOWN) {
+        if (++task->_16 >= 10) {
+            task->_16 = 0;
+        }
+    } else if (lbl_803C77B8[0]._02 == PAD_BUTTON_A) {
+        switch ((u8)task->_16) {
+        case 0:
+            fn_800B0A5C_insertQueue(fn_1_66C4, 10);
+            ((Task0010*)lbl_803CC1B8)->_00 = fn_1_1948;
+            break;
+        case 1:
+            fn_800B0A5C_insertQueue(fn_1_8B90, 10);
+            ((Task0010*)lbl_803CC1B8)->_00 = fn_1_1948;
+            break;
+        case 2:
+            fn_800B0A5C_insertQueue(fn_1_17D90, 10);
+            ((Task0010*)lbl_803CC1B8)->_00 = fn_1_1948;
+            break;
+        case 3:
+            fn_800B0A5C_insertQueue(fn_1_28200, 10);
+            ((Task0010*)lbl_803CC1B8)->_00 = fn_1_1948;
+            break;
+        case 4:
+            fn_800B0A5C_insertQueue(fn_1_1D514, 10);
+            ((Task0010*)lbl_803CC1B8)->_00 = fn_1_1948;
+            break;
+        case 5:
+            fn_800B0A5C_insertQueue(fn_1_26AF8, 10);
+            ((Task0010*)lbl_803CC1B8)->_00 = fn_1_1948;
+            break;
+        case 6:
+            fn_800B0A5C_insertQueue(fn_1_A2E4, 10);
+            ((Task0010*)lbl_803CC1B8)->_00 = fn_1_1948;
+            break;
+        case 7:
+            fn_800B0A5C_insertQueue(fn_1_24778, 10);
+            ((Task0010*)lbl_803CC1B8)->_00 = fn_1_1948;
+            break;
+        case 8:
+            fn_800B0A5C_insertQueue(fn_1_2852C, 10);
+            ((Task0010*)lbl_803CC1B8)->_00 = fn_1_1948;
+            break;
+        case 9:
+            fn_800B0A5C_insertQueue(fn_1_29A9C, 10);
+            ((Task0010*)lbl_803CC1B8)->_00 = fn_1_1948;
+            break;
+        case 10:
+        case 11:
+        case 12:
+        case 13:
+            break;
+        }
+    } else if (lbl_803C77B8[0]._02 == PAD_BUTTON_START) {
+        task->_0C->_10 = 1;
+    } else if ((lbl_803C77B8[0]._00 & (PAD_BUTTON_B | PAD_BUTTON_Y)) == (PAD_BUTTON_B | PAD_BUTTON_Y)) {
+        task->_00 = fn_1_58C;
+    }
+}
+
 // .text:0x00001634 size:0x6C
 void fn_1_1634(void) {
     if (lbl_803C6CF8._715 == 1) {
-        ((Task0010*)lbl_803CC1B8)->_14 = ARAMTransfer(lbl_1_data_0[3], 0, 0, 0);
-        ((Task0010*)lbl_803CC1B8)->_00 = fn_1_15CC;
+        ((LoadTask0010*)lbl_803CC1B8)->_14 = ARAMTransfer(lbl_1_data_0[3], 0, 0, 0);
+        ((LoadTask0010*)lbl_803CC1B8)->_00 = fn_1_15CC;
     }
 }
 
 // .text:0x000015CC size:0x68
 void fn_1_15CC(void) {
-    Task0010* task = lbl_803CC1B8;
+    LoadTask0010* task = lbl_803CC1B8;
 
     if (lbl_803C6CF8._715 == 1) {
         task->_18 = (u8*)task->_14 + *(u32*)task->_14;
         convertTextureHeader(task->_18);
-        ((Task0010*)lbl_803CC1B8)->_00 = fn_1_1538;
+        ((LoadTask0010*)lbl_803CC1B8)->_00 = fn_1_1538;
     }
 }
 
 // .text:0x00001538 size:0x94
 void fn_1_1538(void) {
-    Task0010* task = lbl_803CC1B8;
+    LoadTask0010* task = lbl_803CC1B8;
 
     fn_800A7D4C(0, &lbl_1_data_70[lbl_803CBBC0]);
     lbl_1_data_70[lbl_803CBBC0]._08 = task->_18;
@@ -134,7 +231,55 @@ void fn_1_1538(void) {
 }
 
 // .text:0x00001240 size:0x2F8
-void fn_1_1240(void) {}
+void fn_1_1240(Draw0010* draw) {
+    Mtx44 proj;
+    Mtx mtx;
+    GXColor color;
+
+    SetDisplayStateTexture(&draw->_08->_04[draw->_0C], 0, 0);
+    PSMTXIdentity(mtx);
+    C_MTXOrtho(proj, 0.0f, 448.0f, 0.0f, 640.0f, 0.0f, 1.0f);
+    GXLoadPosMtxImm(mtx, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    GXSetProjection(proj, GX_ORTHOGRAPHIC);
+    gOz_GXSetTexture(0, 0, 0);
+    color.r = draw->_14.r;
+    color.g = draw->_14.g;
+    color.b = draw->_14.b;
+    color.a = draw->_14.a;
+    GXSetChanMatColor(GX_COLOR0A0, color);
+    GXSetNumChans(1);
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_REG, GX_SRC_REG, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetNumTevStages(1);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_RASC, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO);
+    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_RASA, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO);
+    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    GXSetTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2X4, GX_TG_TEX0, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
+    GXSetNumTexGens(1);
+    if (draw->_10 == 1) {
+        GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+        GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_RASC);
+        GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_TEXA);
+    } else if (draw->_10 == 2) {
+        GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+        GXSetTevOp(GX_TEVSTAGE0, GX_MODULATE);
+    }
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    GXPosition3f32(0.0f, 0.0f, 0.0f);
+    GXColor1u32(0xFFFFFFFF);
+    GXTexCoord2u16(0, 0);
+    GXPosition3f32(256.0f, 0.0f, 0.0f);
+    GXColor1u32(0xFFFFFFFF);
+    GXTexCoord2u16(1, 0);
+    GXPosition3f32(256.0f, 256.0f, 0.0f);
+    GXColor1u32(0xFFFFFFFF);
+    GXTexCoord2u16(1, 1);
+    GXPosition3f32(0.0f, 256.0f, 0.0f);
+    GXColor1u32(0xFFFFFFFF);
+    GXTexCoord2u16(0, 1);
+}
 
 // .text:0x000011D0 size:0x70
 void fn_1_11D0(void) {
@@ -149,8 +294,8 @@ void fn_1_11D0(void) {
 void fn_1_1148(void) {
     Task0010* task = lbl_803CC1B8;
 
-    *(u16*)((u8*)task + 0x16) = 0;
-    *(u16*)((u8*)task + 0x14) = 0;
+    task->_16 = 0;
+    task->_14 = 0;
     resetAllDrawingStructs();
     fn_80009144();
     fn_800AD054(lbl_80366158._08, lbl_80366158._04);

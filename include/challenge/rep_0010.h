@@ -5,6 +5,7 @@
 
 struct ANIMBank;
 struct Model0010;
+struct Draw0010;
 
 void fn_1_0(struct ANIMBank* bank);
 void fn_1_20(struct Model0010* model);
@@ -22,7 +23,7 @@ void _unresolved(void);
 void _prolog(void);
 void fn_1_1148(void);
 void fn_1_11D0(void);
-void fn_1_1240(void);
+void fn_1_1240(struct Draw0010* draw);
 void fn_1_1538(void);
 void fn_1_15CC(void);
 void fn_1_1634(void);
