@@ -19,7 +19,10 @@ typedef struct UnkTask2BF8 {
     /* 0x1E */ u16 _1E;
     /* 0x20 */ u16 _20;
     /* 0x22 */ u16 _22;
-    /* 0x24 */ u8 _24[4];
+    union {
+        /* 0x24 */ u8 _24_arr[4];
+        /* 0x24 */ SND_VOICEID voice;
+    };
 } UnkTask2BF8;
 
 typedef struct {
@@ -118,6 +121,7 @@ extern UnkSpriteDesc2BF8 lbl_3_data_900C[13];
 extern u16 lbl_3_data_81DC[0x10];
 extern u8 lbl_3_data_8404[6][15][2];
 extern u8 lbl_3_data_84B8[30][2];
+extern s16 lbl_3_data_189C4[3][7];
 
 extern void fn_80034CEC(UnkTask2BF8* task);
 extern void fn_80034E20(UnkTask2BF8* task, UnkSpriteDesc2BF8* desc);
@@ -142,7 +146,7 @@ extern void fn_3_12A6C4(void);
 extern void fn_3_12B7A0(void);
 extern void fn_3_12C3F0(void);
 
-static inline void playStadiumSound(int id) {
+static inline SND_VOICEID playStadiumSound(int id) {
     int stadium = g_d_GameSettings.StadiumID;
     SND_VOICEID voice = sndFXStartEx(lbl_3_data_81DC[stadium] + id,
                                      g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD
@@ -153,6 +157,15 @@ static inline void playStadiumSound(int id) {
     sndFXCtrl(voice, 0x5B,
               g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD ? lbl_3_data_84B8[id][1]
                                                                       : lbl_3_data_8404[stadium][id][1]);
+    return voice;
+}
+
+static inline u32 getFrame(UnkTask2BF8* task, u32 i) {
+    return lbl_80371C30[task->_14 + i]._00->_5C >> 16;
+}
+
+static inline BOOL isSpriteDone(UnkTask2BF8* task, u32 i) {
+    return lbl_80371C30[task->_14 + i]._00->_69 == 2 ? TRUE : FALSE;
 }
 
 static inline void setScreen(u8 id) {
@@ -876,6 +889,173 @@ void fn_3_EC804(void) {
     }
 }
 
+// .text:0x000EC014 size:0x7F0 mapped:0x8072B0A8
+// 99.92%: the stadium of the playStadiumSound(2) copy sits in r28 in the target, r24 in the base.
+void fn_3_EC014(void) {
+    UnkTask2BF8* task = lbl_803CC1B8;
+    MiniGameStruct* minigame;
+    u32 count;
+    u32 i;
+    s32 sym;
+
+    if (lbl_3_common_bss_32724._96 != 0 || g_GameLogic.gameStatus == GAME_STATUS_TRANSITION || task->_1C == 7) {
+        if (task->_1C != 0 && task->voice != SND_ID_ERROR) {
+            sndFXKeyOff(task->voice);
+            sndFXCtrl(task->voice, 7, 0);
+            task->voice = SND_ID_ERROR;
+        }
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    minigame = &g_Minigame;
+    if (g_Minigame._19CE != 0) {
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    switch (task->_1C) {
+    case 0:
+        fn_80034E20(task, lbl_3_data_19988);
+        i = 0;
+        do {
+            g_Minigame._1931[i] = 0;
+        } while (++i < 3);
+        task->voice = SND_ID_ERROR;
+        task->_1C = 1;
+        break;
+    case 1:
+        if (isSpriteDone(task, 0) && lbl_80371C30[task->_14 + 12]._00->_69 == 2) {
+            i = 0;
+            do {
+                lbl_80371C30[task->_14 + 1 + i]._00->_68 = 1;
+            } while (++i < 3);
+            lbl_80371C30[task->_14 + 13]._00->_68 = 1;
+            lbl_80371C30[task->_14 + 14]._00->_68 = 1;
+            task->voice = playStadiumSound(2);
+            task->_1C = 2;
+        }
+        break;
+    case 2:
+        i = 0;
+        do {
+            if (isSpriteDone(task, 1 + i)) {
+                lbl_80371C30[task->_14 + 1 + i]._00->_5C = 0;
+                g_Minigame._192A[i]++;
+                if (g_Minigame._192A[i] >= 7) {
+                    g_Minigame._192A[i] = 0;
+                }
+                switch (g_Minigame._1931[i]) {
+                case 0:
+                    if (g_Minigame._1927[i] >= 1) {
+                        lbl_80371C30[task->_14 + 1 + i]._00->_64 = 31;
+                        g_Minigame._1931[i] = 1;
+                    }
+                    break;
+                case 1:
+                    if (g_Minigame._1927[i] >= 2 &&
+                        g_Minigame._192E[i] == lbl_3_data_189C4[i][(g_Minigame._192A[i] + 1) % 7]) {
+                        lbl_80371C30[task->_14 + 1 + i]._00->_64 = 32;
+                        g_Minigame._1931[i] = 2;
+                    }
+                    break;
+                case 2:
+                    if (g_Minigame._192E[i] == lbl_3_data_189C4[i][g_Minigame._192A[i]]) {
+                        lbl_80371C30[task->_14 + 1 + i]._00->_68 = 0;
+                        g_Minigame._1927[i] = 3;
+                        playStadiumSound(3);
+                        if (i == 2) {
+                            sndFXKeyOff(task->voice);
+                            sndFXCtrl(task->voice, 7, 0);
+                            task->voice = SND_ID_ERROR;
+                        }
+                        g_Minigame._1931[i] = 3;
+                    }
+                    break;
+                case 3:
+                    break;
+                }
+            }
+        } while (++i < 3);
+        count = 0;
+        i = 0;
+        do {
+            if (g_Minigame._1931[i] == 3) {
+                count++;
+            }
+        } while (++i < 3);
+        if (count >= 3) {
+            task->_1C = 3;
+        }
+        break;
+    case 3:
+        i = 0;
+        do {
+            lbl_80371C30[task->_14 + 5 + i]._00->_68 = 1;
+        } while (++i < 3);
+        switch (g_Minigame._192D) {
+        case 0:
+        case 3:
+        case 4:
+        case 5:
+            g_Minigame._1934 = 1;
+            task->_1C = 4;
+            break;
+        case 1:
+        case 2:
+        case 6:
+        case 7:
+        case 8:
+            g_Minigame._1934 = 2;
+            task->_1C = 8;
+            break;
+        }
+        break;
+    case 4:
+        if (lbl_80371C30[task->_14 + 5]._00->_69 == 2) {
+            task->_1C = 5;
+        }
+        break;
+    case 5:
+        lbl_80371C30[task->_14]._00->_68 = 4;
+        lbl_80371C30[task->_14 + 12]._00->_68 = 4;
+        lbl_80371C30[task->_14 + 13]._00->_68 = 4;
+        task->_1C = 6;
+        break;
+    case 6:
+        if (getFrame(task, 0) == 0 && getFrame(task, 12) == 0 && getFrame(task, 13) == 0) {
+            switch (minigame->_192D) {
+            case 0:
+                fn_800B0A5C_insertQueue(fn_3_ECD48, 2);
+                break;
+            case 3:
+                fn_800B0A5C_insertQueue(fn_3_EC804, 2)->_18 = 0;
+                break;
+            case 4:
+                fn_800B0A5C_insertQueue(fn_3_EC804, 2)->_18 = 1;
+                break;
+            case 5:
+                fn_800B0A5C_insertQueue(fn_3_ECBB0, 2);
+                break;
+            }
+            task->_1C = 7;
+        }
+        break;
+    case 7:
+    case 8:
+        break;
+    }
+    i = 0;
+    do {
+        sym = lbl_3_data_189C4[i][g_Minigame._192A[i]];
+        fn_800363D8(task, i + 5, 1, 33, lbl_3_data_19B88[sym]);
+        fn_800363D8(task, i + 5, 2, 34, lbl_3_data_19B88[sym]);
+        sym = lbl_3_data_189C4[i][(g_Minigame._192A[i] + 1) % 7];
+        fn_800363D8(task, i + 8, 1, 33, lbl_3_data_19B88[sym]);
+        fn_800363D8(task, i + 8, 2, 34, lbl_3_data_19B88[sym]);
+    } while (++i < 3);
+}
+
 // .text:0x000EBFD4 size:0x40 mapped:0x8072B068
 u32 fn_3_EBFD4(void) {
     if (lbl_3_common_bss_32724._96 != 0 || g_GameLogic.gameStatus == GAME_STATUS_LIVE_BALL ||
@@ -973,7 +1153,7 @@ void fn_3_EAEF4(void) {
             diff = g_Minigame.miniGameCurrentPoints[i] - g_Minigame.minigamePoints_current_Latest[i][0];
             if (diff > 0) {
                 g_Minigame._19A0 = 1;
-                t->_24[i] = 1;
+                t->_24_arr[i] = 1;
                 if ((lbl_80371C30[task->_14]._00->_5C >> 16) >= 10) {
                     step = diff / 8;
                     if (step != 0) {
@@ -984,8 +1164,8 @@ void fn_3_EAEF4(void) {
                 }
                 playSound = 1;
             } else if (diff == 0) {
-                if (t->_24[i] != 0) {
-                    t->_24[i] = 0;
+                if (t->_24_arr[i] != 0) {
+                    t->_24_arr[i] = 0;
                     lbl_80371C30[task->_14 + 0x19 + i]._00->_5C = 0;
                     lbl_80371C30[task->_14 + 0x19 + i]._00->_68 = 1;
                     lbl_80371C30[task->_14 + 0x1D + i * 3]._00->_5C = 0;
@@ -1053,6 +1233,7 @@ void fn_3_EAEF4(void) {
 }
 
 // .text:0x000EA8FC size:0x5F8 mapped:0x80729990
+// 99.63%: the target keeps i in r21, sign in r22 and points in r23; the base rotates them.
 void fn_3_EA8FC(void) {
     UnkTask2BF8* task = lbl_803CC1B8;
     u32 i;
