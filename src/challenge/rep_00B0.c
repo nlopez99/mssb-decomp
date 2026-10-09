@@ -359,17 +359,17 @@ void fn_1_25BC(void* mesh) {
                     nverts += 2;
                 }
             }
-            mat = ((MeshVtx00B0*)(p + 4))->material;
+            m = ((MeshVtx00B0*)(p + 4))->material;
             vtx = (MeshVtx00B0*)(p + 4);
             GDBegin(GX_TRIANGLESTRIP, GX_VTXFMT0, nverts);
             for (n = count + 2; n != 0; n--) {
-                m = vtx->material;
-                if (mat != m) {
-                    mat = m;
-                    fn_1_3E38(&vtx[-2].pos, m);
-                    fn_1_3E38(&vtx[-1].pos, m);
+                nverts = vtx->material;
+                if (m != nverts) {
+                    m = nverts;
+                    fn_1_3E38(&vtx[-2].pos, nverts);
+                    fn_1_3E38(&vtx[-1].pos, nverts);
                 }
-                fn_1_3E38(&vtx->pos, m);
+                fn_1_3E38(&vtx->pos, nverts);
                 vtx++;
             }
             n = count + 2;
