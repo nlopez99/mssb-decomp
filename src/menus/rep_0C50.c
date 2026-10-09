@@ -1050,8 +1050,6 @@ void fn_2_7EE7C(UnkTask0C50* task, s32 index) {
 }
 
 // .text:0x0007E974 size:0x508
-// 98.00%: the target keeps off unextended and sign-extends it at each use; the base extends
-// it once where it is set.
 void fn_2_7E974(UnkTask0C50* task, s32 index) {
     if (lbl_803C66B0._0D[index] == 0 ? TRUE : FALSE) {
         s8 off;
@@ -1081,7 +1079,11 @@ void fn_2_7E974(UnkTask0C50* task, s32 index) {
         lbl_80371C30[0x97 + task->_14 + index]._00->_68 = 4;
         lbl_80371C30[0xAC + task->_14 + index]._00->_68 = 4;
         if (g_d_GameSettings._10 == 0) {
-            off = lbl_8034E9A0._46F8[0] == 0;
+            if (lbl_8034E9A0._46F8[0] == 0) {
+                off = 1;
+            } else {
+                off = 0;
+            }
             if (lbl_2_bss_F468._37[1]) {
                 lbl_80371C30[task->_14 + 0x98]._00->_68 = 4;
             }
