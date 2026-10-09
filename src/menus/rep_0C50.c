@@ -577,6 +577,69 @@ void fn_2_7F714(UnkTask0C50* task, s32 index) {
     }
 }
 
+// .text:0x0007F2BC size:0x458
+// 99.69%: the loop counter and foundSel sit in swapped volatile registers (r6/r7); no
+// declaration order at either scope moved them.
+void fn_2_7F2BC(UnkTask0C50* task, s32 index) {
+    s32 foundPrev;
+    s32 foundSel;
+    s32 sel;
+    s32 prev;
+    s32 i;
+
+    if (lbl_803C66B0._0D[index] == 0 ? TRUE : FALSE) {
+        sel = lbl_2_bss_F468._00[index];
+        prev = lbl_2_bss_F468._00[index + 2];
+        for (i = 0; i < 9; i++) {
+            if (lbl_803C6724._14[index][i] == sel) {
+                foundSel = i;
+            }
+            if (lbl_803C6724._14[index][i] == prev) {
+                foundPrev = i;
+            }
+        }
+        if (sel != 9 && sel != 10) {
+            if (lbl_803C6724._02[index][foundSel] != -1 && lbl_803C6724._02[index][foundSel] != 0x36) {
+                lbl_80371C30[0x34 + task->_14 + sel + index * 9]._00->_5C = 0;
+                lbl_80371C30[0x34 + task->_14 + sel + index * 9]._00->_68 = 1;
+            }
+            lbl_80371C30[0x46 + task->_14 + sel + index * 9]._00->_5C = 0;
+            lbl_80371C30[0x46 + task->_14 + sel + index * 9]._00->_68 = 1;
+            lbl_80371C30[0x22 + task->_14 + sel + index * 9]._00->_54 |= 2;
+        }
+        if (prev != 9 && prev != 10) {
+            if (lbl_2_bss_F468._00[index + 2] != lbl_2_bss_F468._00[index]) {
+                lbl_80371C30[0x46 + task->_14 + prev + index * 9]._00->_5C = 0xF0000;
+                lbl_80371C30[0x46 + task->_14 + prev + index * 9]._00->_68 = 4;
+                if (lbl_8034E9A0._46E0[index] == lbl_803C6724._02[index][foundPrev]) {
+                    lbl_80371C30[0x34 + task->_14 + prev + index * 9]._00->_68 = 1;
+                } else {
+                    lbl_80371C30[0x34 + task->_14 + prev + index * 9]._00->_68 = 4;
+                }
+            }
+            lbl_80371C30[0x22 + task->_14 + prev + index * 9]._00->_54 &= ~2;
+        }
+        fn_2_75BE4(task, index);
+        fn_2_74F40(task, index);
+        if (lbl_80371C30[0x93 + task->_14 + index]._00->_5C >> 16 == 10 &&
+            lbl_8034E9A0._46E0[index] != lbl_803C6724._02[index][foundPrev])
+        {
+            lbl_80371C30[0x93 + task->_14 + index]._00->_5C = 0xA0000;
+            lbl_80371C30[0x93 + task->_14 + index]._00->_68 = 4;
+            lbl_80371C30[0x95 + task->_14 + index]._00->_5C = 0xA0000;
+            lbl_80371C30[0x95 + task->_14 + index]._00->_68 = 4;
+        } else if (lbl_80371C30[0x8F + task->_14 + index]._00->_5C >> 16 == 10 && sel == 10) {
+            lbl_80371C30[0x91 + task->_14 + index]._00->_5C = 0xA0000;
+            lbl_80371C30[0x91 + task->_14 + index]._00->_68 = 4;
+        }
+        if (sel == prev) {
+            lbl_80371C30[0x34 + task->_14 + sel + index * 9]._00->_68 = 4;
+        }
+        fn_800626EC(index);
+        lbl_803C66B0._0D[index] = 1;
+    }
+}
+
 // .text:0x0007EF68 size:0xC8
 void fn_2_7EF68(UnkTask0C50* task, s32 index) {
     s32 i;
