@@ -1352,8 +1352,9 @@ void fn_1_23804(s32 arg0, s32 arg1, s32 rows, s32 cols, f32 arg4, f32 arg5) {
 }
 
 // .text:0x00023098 size:0x76C
-// 85.64%: draft; the frustum setup keeps near and far live longer (five saved FPRs, not
-// four), and the target computes (cols - 1) * 1344 once where this folds it into offsets.
+// 91.66%: the frustum setup keeps near and far live longer (five saved FPRs, not
+// four; the target stores -far once through frsp), and the last loop reads the last row
+// through a pointer where the target adds j * 12 to its base.
 s32 fn_1_23098(Mtx44 proj, Mtx view, s32 rows, s32 cols, f32 near, f32 far) {
     Mtx44 m;
     Mtx inv;
@@ -1371,6 +1372,8 @@ s32 fn_1_23098(Mtx44 proj, Mtx view, s32 rows, s32 cols, f32 near, f32 far) {
     s32 i;
     s32 n;
     s32 last;
+    s32 c;
+    Vec* row;
 
     origin.x = 0.0f;
     origin.y = 0.0f;
@@ -1442,9 +1445,10 @@ s32 fn_1_23098(Mtx44 proj, Mtx view, s32 rows, s32 cols, f32 near, f32 far) {
         }
     }
     PSMTXInverse(view, inv);
+    c = cols - 1;
     PSMTXMultVec(inv, &hit[1], &hit[2]);
-    lbl_1_bss_F6E0[cols - 1][0].x = hit[2].x;
-    lbl_1_bss_F6E0[cols - 1][0].y = hit[2].z;
+    lbl_1_bss_F6E0[c][0].x = hit[2].x;
+    lbl_1_bss_F6E0[c][0].y = hit[2].z;
     hit[2].x = -hit[1].x;
     hit[2].y = hit[1].y;
     hit[2].z = hit[1].z;
@@ -1452,8 +1456,8 @@ s32 fn_1_23098(Mtx44 proj, Mtx view, s32 rows, s32 cols, f32 near, f32 far) {
     lbl_1_bss_F6E0[0][0].x = hit[2].x;
     lbl_1_bss_F6E0[0][0].y = hit[2].z;
     PSMTXMultVec(inv, &hit[0], &hit[2]);
-    lbl_1_bss_F6E0[cols - 1][1].x = hit[2].x;
-    lbl_1_bss_F6E0[cols - 1][1].y = hit[2].z;
+    lbl_1_bss_F6E0[c][1].x = hit[2].x;
+    lbl_1_bss_F6E0[c][1].y = hit[2].z;
     hit[2].x = -hit[0].x;
     hit[2].y = hit[0].y;
     hit[2].z = hit[0].z;
@@ -1470,23 +1474,23 @@ s32 fn_1_23098(Mtx44 proj, Mtx view, s32 rows, s32 cols, f32 near, f32 far) {
     if (dy < 0.0f) {
         dy = -dy;
     }
-    n = rows * (dy + 2.0f / rows) * 0.5f;
+    n = rows * (dy + 2.0f / rows) / 2.0f;
     if (n < 2) {
         n = 2;
     }
     last = n - 1;
     lbl_1_bss_F6E0[0][last].x = lbl_1_bss_F6E0[0][1].x;
     lbl_1_bss_F6E0[0][last].y = lbl_1_bss_F6E0[0][1].y;
-    lbl_1_bss_F6E0[cols - 1][last].x = lbl_1_bss_F6E0[cols - 1][1].x;
-    lbl_1_bss_F6E0[cols - 1][last].y = lbl_1_bss_F6E0[cols - 1][1].y;
+    lbl_1_bss_F6E0[c][last].x = lbl_1_bss_F6E0[c][1].x;
+    lbl_1_bss_F6E0[c][last].y = lbl_1_bss_F6E0[c][1].y;
     PSVECSubtract(&hit[0], &hit[1], &hit[2]);
     i = last;
     while (--i != 0) {
         PSVECScale(&hit[2], (f32)i / (f32)last, &hit[3]);
         PSVECAdd(&hit[1], &hit[3], &hit[3]);
         PSMTX44MultVec(m, &hit[3], &origin);
-        lbl_1_bss_F6E0[cols - 1][i].x = origin.x;
-        lbl_1_bss_F6E0[cols - 1][i].y = origin.z;
+        lbl_1_bss_F6E0[c][i].x = origin.x;
+        lbl_1_bss_F6E0[c][i].y = origin.z;
         hit[3].x = -hit[3].x;
         PSMTX44MultVec(m, &hit[3], &origin);
         lbl_1_bss_F6E0[0][i].x = origin.x;
@@ -1494,11 +1498,12 @@ s32 fn_1_23098(Mtx44 proj, Mtx view, s32 rows, s32 cols, f32 near, f32 far) {
     }
     hit[0].y = 0.0f;
     hit[1].y = 0.0f;
+    row = lbl_1_bss_F6E0[cols - 1];
     for (i = 0; i < n; i++) {
         hit[0].x = lbl_1_bss_F6E0[0][i].x;
         hit[0].z = lbl_1_bss_F6E0[0][i].y;
-        hit[1].x = lbl_1_bss_F6E0[cols - 1][i].x - hit[0].x;
-        hit[1].z = lbl_1_bss_F6E0[cols - 1][i].y - hit[0].z;
+        hit[1].x = row[i].x - hit[0].x;
+        hit[1].z = row[i].y - hit[0].z;
         last = cols - 1;
         while (--last != 0) {
             PSVECScale(&hit[1], (f32)last / (f32)(cols - 1), &hit[2]);
@@ -1511,12 +1516,9 @@ s32 fn_1_23098(Mtx44 proj, Mtx view, s32 rows, s32 cols, f32 near, f32 far) {
 }
 
 // .text:0x00022F4C size:0x14C
-// 77.45%: the target indexes out/cur/prev with one byte offset (lfsx) and keeps a dead
-// counter; this form walks separate registers, and 4.0/2.0 load in the other order.
 void fn_1_22F4C(s32 rows, s32 cols, f32* out, f32* cur, f32* prev) {
     s32 y;
     s32 x;
-    s32 row;
     f64 c;
     f32 a;
     f32 b;
@@ -1525,16 +1527,14 @@ void fn_1_22F4C(s32 rows, s32 cols, f32* out, f32* cur, f32* prev) {
     c = c * c;
     a = c;
     b = 2.0 - 4.0 * c;
-    row = 0;
     for (y = 0; y < rows; y++) {
         for (x = 0; x < cols; x++) {
-            out[row + x] = b * cur[row + x] +
+            out[y * cols + x] = b * cur[y * cols + x] +
                      a * (cur[x + cols * ((y + rows - 1) % rows)] + cur[x + cols * ((y + 1) % rows)] +
-                          cur[(x + cols - 1) % cols + row] + cur[(x + 1) % cols + row]) -
-                     prev[row + x];
-            out[row + x] *= lbl_1_data_104C4;
+                          cur[(x + cols - 1) % cols + y * cols] + cur[(x + 1) % cols + y * cols]) -
+                     prev[y * cols + x];
+            out[y * cols + x] *= lbl_1_data_104C4;
         }
-        row += cols;
     }
 }
 
