@@ -127,7 +127,7 @@ void fn_2_513E4(void) {
 }
 
 // .text:0x000513E0 size:0x4
-void fn_2_513E0(void) {
+void fn_2_513E0(void* text, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
 }
 
 // .text:0x000513DC size:0x4
