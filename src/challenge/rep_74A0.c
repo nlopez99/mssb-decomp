@@ -76,9 +76,27 @@ typedef struct ModelTable74A0 {
 
 typedef struct Particle74A0 {
     /* 0x00 */ struct Particle74A0* next;
-    /* 0x04 */ u8 _04[0xC - 0x4];
+    /* 0x04 */ f32 _04;
+    /* 0x08 */ f32 _08;
     /* 0x0C */ f32 _0C;
     /* 0x10 */ Vec _10;
+    /* 0x1C */ f32 _1C;
+    /* 0x20 */ f32 _20;
+    /* 0x24 */ f32 _24;
+    /* 0x28 */ Vec _28;
+    /* 0x34 */ u8 _34[0x38 - 0x34];
+    /* 0x38 */ f32 _38;
+    /* 0x3C */ f32 _3C;
+    /* 0x40 */ union {
+        u32 rgba;
+        u8 c[4];
+    } _40;
+    /* 0x44 */ union {
+        u32 rgba;
+        u8 c[4];
+    } _44;
+    /* 0x48 */ u8 _48[0x4A - 0x48];
+    /* 0x4A */ s16 _4A;
 } Particle74A0;
 
 typedef struct LITObj {
@@ -131,6 +149,8 @@ extern void fn_800ACFB0(void* ptr);
 extern void fn_800B2C88(Node74A0* node, u16 index, Mtx out);
 extern void fn_800B806C(s32 arg0, f32 top, f32 bottom, f32 left, f32 right, f32 nearZ, f32 farZ, f32 arg7);
 extern void makeLookAtMatrix(Mtx m, const Vec* camPos, const Vec* camUp, const Vec* target);
+extern void fn_800BD670(ModelTable74A0* table, MtxPtr mtx);
+extern void fn_800BD8C4(ModelTable74A0* table, MtxPtr mtx);
 extern void LITAlloc(LITObj** light);
 extern void LITInitDir(LITObj* light, f32 nx, f32 ny, f32 nz);
 extern void LITInitAttn(LITObj* light, f32 a0, f32 a1, f32 a2, f32 k0, f32 k1, f32 k2);
@@ -243,6 +263,35 @@ void fn_1_1D470(void) {
 // .text:0x0001D450 size:0x20
 void fn_1_1D450(void) {
     fn_1_1CBE4();
+}
+
+// .text:0x0001D110 size:0x340
+void fn_1_1D110(void) {
+    Task74A0* task = lbl_803CC1B8;
+    s32 i;
+
+    fn_1_1B038();
+    for (i = 0; i < 24; i++) {
+        Actor74A0* actor = &lbl_8036E548._C04[i];
+        Model74A0* model = &lbl_8036E548._060->models[i];
+
+
+        model->_6C = (task->_16 != 1) & (i == task->_14);
+        CTRLSetTranslation(&model->_10, actor->_034.x, actor->_034.y, actor->_034.z);
+        CTRLSetRotation(&model->_10, 57.295776f * actor->_040.x, 57.295776f * actor->_040.y,
+                        57.295776f * actor->_040.z);
+        model->_54 = actor->_04C;
+        model->_5A = 1;
+    }
+    if (lbl_1_bss_69F5 == 0) {
+        fn_800BD670(lbl_8036E548._060, lbl_1_bss_69FC._10);
+    } else {
+        fn_1_1A290(lbl_8036E548._060, lbl_1_bss_69FC._10);
+    }
+    for (i = 0; i < 24; i++) {
+        lbl_8036E548._060->models[i]._6C = 1;
+    }
+    fn_800BD8C4(lbl_8036E548._060, lbl_1_bss_69FC._10);
 }
 
 // .text:0x0001D10C size:0x4
@@ -466,6 +515,33 @@ s32 fn_1_19D1C(u32 fmt) {
     return 0;
 }
 
+// .text:0x00018EE4 size:0x2F8
+void fn_1_18EE4(Particle74A0* p) {
+    s32 min;
+    u8 base = min = lbl_1_data_FB24[5];
+    u8 range;
+    f32 scale;
+
+
+    p->_04 = (p->_4A * 2) / (f32)lbl_1_data_FB24[0] - 1.0f;
+    p->_08 = -1.0f;
+    p->_0C = 50.0f * (rand() / 32767.0f) + 50.0f;
+    fn_1_18E04(p, 0.0f);
+    p->_1C = p->_20 = p->_24 = 0.0f;
+    scale = lbl_1_data_FB24[2] / 100000.0f;
+    p->_28.x = scale * (rand() / 32767.0f);
+    p->_28.y = scale * (rand() / 32767.0f);
+    p->_28.z = scale * (rand() / 32767.0f);
+    p->_44.c[3] = 0xFF;
+    p->_40.c[3] = 0xFF;
+    range = 255 - min;
+    p->_40.c[1] = base + rand() % range;
+    p->_40.c[2] = base + rand() % range;
+    p->_44.c[0] = base + rand() % range;
+    p->_44.c[1] = base + rand() % range;
+    p->_44.c[2] = base + rand() % range;
+}
+
 // .text:0x00018E04 size:0xE0
 void fn_1_18E04(Particle74A0* p, f32 angle) {
     f32 s;
@@ -479,6 +555,51 @@ void fn_1_18E04(Particle74A0* p, f32 angle) {
     p->_10.x = (s * lbl_1_data_FB24[1]) / 100000.0f;
     p->_10.y = (c * lbl_1_data_FB24[1]) / 100000.0f;
     p->_10.z = 0.0f;
+}
+
+// .text:0x000182C0 size:0x2BC
+void fn_1_182C0(Particle74A0* p) {
+    Control ctrl;
+    Vec v[4];
+    Mtx m;
+    Mtx44 proj;
+    f32 h;
+    f32 w;
+    s32 i;
+
+    w = p->_38 / 2;
+    h = p->_3C / 2;
+    ctrl.type = 0;
+    v[0].x = -w;
+    v[0].y = -h;
+    v[1].x = w;
+    v[1].y = -h;
+    v[2].x = w;
+    v[2].y = h;
+    v[3].x = -w;
+    v[3].y = h;
+    v[0].z = v[1].z = v[2].z = v[3].z = 0.0f;
+    CTRLSetRotation(&ctrl, p->_1C, p->_20, p->_24);
+    CTRLSetTranslation(&ctrl, 0.5f * p->_04 / 2 * p->_0C, 0.35f * p->_08 / 2 * p->_0C, -1.5f);
+    CTRLBuildMatrix(&ctrl, m);
+    GXLoadPosMtxImm(m, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    C_MTXOrtho(proj, -0.175f * p->_0C, 0.175f * p->_0C, 0.25f * p->_0C, -0.25f * p->_0C, 1.0f, 512.0f);
+    GXSetProjection(proj, GX_ORTHOGRAPHIC);
+    GXSetCullMode(GX_CULL_BACK);
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    for (i = 0; i < 4; i++) {
+        GXPosition3f32(v[i].x, v[i].y, v[i].z);
+        GXColor1u32(p->_40.rgba);
+    }
+    GXEnd();
+    GXSetCullMode(GX_CULL_FRONT);
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    for (i = 0; i < 4; i++) {
+        GXPosition3f32(v[i].x, v[i].y, v[i].z);
+        GXColor1u32(p->_44.rgba);
+    }
+    GXEnd();
 }
 
 // .text:0x00018174 size:0x14C
