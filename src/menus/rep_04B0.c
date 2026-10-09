@@ -24,7 +24,7 @@ typedef struct State04B0 {
     /* 0x4D */ s8 _4D;
     /* 0x4E */ s8 _4E;
     /* 0x4F */ s8 _4F;
-    /* 0x50 */ u8 _50;
+    /* 0x50 */ s8 _50;
     /* 0x51 */ s8 _51;
     /* 0x52 */ u8 _52[2];
 } State04B0; // size: 0x54
@@ -32,6 +32,13 @@ typedef struct State04B0 {
 extern State04B0 lbl_2_bss_100B8;
 extern u8 lbl_80361B20[0x130];
 extern u8 lbl_80108EC4[];
+extern u8 lbl_800FE5D4[];
+extern u8 lbl_800FE930[2][6];
+
+extern struct {
+    /* 0x00 */ u8 _00[0x74];
+    /* 0x74 */ u8 _74[4];
+} lbl_803C6028;
 
 typedef struct Select04B0 {
     /* 0x00 */ u8 _00[0x10];
@@ -57,6 +64,7 @@ typedef struct Camera04B0 {
 } Camera04B0; // size: 0x58
 
 extern Camera04B0 lbl_2_bss_1010C;
+extern Vec lbl_2_data_20F8[];
 
 typedef struct Light04B0 {
     /* 0x00 */ u8 _00[0x14];
@@ -72,7 +80,8 @@ extern struct {
 } lbl_8036E548;
 
 extern struct {
-    /* 0x0000 */ u8 _0000[0x46FC];
+    /* 0x0000 */ u8 _0000[0x46F8];
+    /* 0x46F8 */ s8 _46F8[4];
     /* 0x46FC */ u8 _46FC;
     /* 0x46FD */ s8 _46FD;
     /* 0x46FE */ s8 _46FE;
@@ -89,8 +98,13 @@ extern struct {
 extern void AnimateCharacter(int actor, int anim, u8, u8, u8, s16, u8, int);
 extern void QueueCharacterAnimation(int actor, int anim, u8, u8, s16, u8, int);
 extern void LITXForm(LITObj* light, Mtx view);
+static inline void fn_2_13CA0(Pad04B0* pad);
+static inline void fn_2_13BA4(Pad04B0* pad);
 extern s32 fn_2_14F8(s32 min, s32 max);
 extern void fn_2_1A88(void);
+extern void fn_8004E504(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+extern s32 fn_8004E62C(s32 player, u16 arg1, u16 arg2, u16 arg3);
+extern s32 fn_8004D57C(u16 arg0, u16 arg1, u16 arg2);
 extern void makeLookAtMatrix(Mtx m, const Vec* camPos, const Vec* camUp, const Vec* target);
 extern void fn_80052D70(void* camera);
 extern void fn_80052968(void);
@@ -314,6 +328,54 @@ void fn_2_14FB8(s32 team) {
     lbl_2_bss_F410._10[team] = i;
 }
 
+// .text:0x00014CA0 size:0x318
+void fn_2_14CA0(u8 port, Pad04B0* pad) {
+    s32 player;
+    s32 id;
+    s32 i;
+
+    if (g_d_GameSettings.GameModeSelected != 5) {
+        if (g_d_GameSettings._10 == 0 && port != 0) {
+            player = lbl_8034E9A0._46F8[0] == 0;
+            lbl_803C6028._74[player] = 1;
+        } else {
+            player = lbl_8034E9A0._46F8[port];
+            lbl_803C6028._74[player] = 0;
+        }
+        switch (player) {
+        case 0:
+            fn_8004E504(0, lbl_2_bss_F410._10[port], -1, -1, -1);
+            break;
+        case 1:
+            fn_8004E504(0, -1, lbl_2_bss_F410._10[port], -1, -1);
+            break;
+        case 2:
+            fn_8004E504(0, -1, -1, lbl_2_bss_F410._10[port], -1);
+            break;
+        case 3:
+            fn_8004E504(0, -1, -1, -1, lbl_2_bss_F410._10[port]);
+            break;
+        }
+        id = fn_8004E62C(player, pad->_0, pad->_2, pad->_4);
+        for (i = 0; i < 12; i++) {
+            if (lbl_800FE5D4[i] == id) {
+                id = i;
+                break;
+            }
+        }
+        lbl_2_bss_F410._10[port] = id;
+    } else {
+        id = fn_8004D57C(pad->_0, pad->_2, pad->_4);
+        for (i = 0; i < 6; i++) {
+            if (id == lbl_800FE930[lbl_80361B20[0xF4]][i]) {
+                id = i;
+                break;
+            }
+        }
+        lbl_2_bss_F410._10[0] = id;
+    }
+}
+
 // .text:0x00014BB8 size:0xE8
 void fn_2_14BB8(u8 port, s32 mode) {
     switch (mode) {
@@ -325,6 +387,70 @@ void fn_2_14BB8(u8 port, s32 mode) {
     case 1:
         AnimateCharacter(port, 0x69, 1, 1, 1, 0, 0, -1);
         lbl_2_bss_100B8._40[port] = 1;
+        break;
+    }
+}
+
+// .text:0x00014574 size:0x21C
+void fn_2_14574(Pad04B0* pad) {
+    f32 pos;
+
+    if (pad->_4 & 8) {
+        if (pad->_0 & 0x200) {
+            lbl_2_bss_1010C._48.x += 0.1f;
+        } else if (pad->_0 & 0x100) {
+            lbl_2_bss_1010C._48.y += 1.0f;
+        } else if (pad->_0 & 0x400) {
+            lbl_2_bss_1010C._48.z += 0.1f;
+        }
+    } else if (pad->_4 & 4) {
+        if (pad->_0 & 0x200) {
+            lbl_2_bss_1010C._48.x -= 0.1f;
+        } else if (pad->_0 & 0x100) {
+            lbl_2_bss_1010C._48.y -= 0.1f;
+        } else if (pad->_0 & 0x400) {
+            lbl_2_bss_1010C._48.z -= 0.1f;
+        }
+    } else if (pad->_4 & 1) {
+        if (pad->_0 & 0x200) {
+            pos = 320.0f + lbl_2_data_20F8[0].x;
+            pos -= 0.1;
+            lbl_2_data_20F8[0].x = pos - 320.0f;
+        } else if (pad->_0 & 0x100) {
+            pos = 320.0f + lbl_2_data_20F8[0].y;
+            pos -= 0.1;
+            lbl_2_data_20F8[0].y = pos - 320.0f;
+        }
+    } else if (pad->_4 & 2) {
+        if (pad->_0 & 0x200) {
+            pos = 320.0f + lbl_2_data_20F8[0].x;
+            pos += 0.1;
+            lbl_2_data_20F8[0].x = pos - 320.0f;
+        } else if (pad->_0 & 0x100) {
+            pos = 320.0f + lbl_2_data_20F8[0].y;
+            pos += 0.1;
+            lbl_2_data_20F8[0].y = pos - 320.0f;
+        }
+    }
+}
+
+// .text:0x00014220 size:0x354
+void fn_2_14220(Pad04B0* pad) {
+    switch (lbl_2_bss_100B8._50) {
+    case 0:
+        fn_2_14164(pad);
+        break;
+    case 1:
+        fn_2_1406C(pad);
+        break;
+    case 2:
+        fn_2_13D70(pad);
+        break;
+    case 3:
+        fn_2_13CA0(pad);
+        break;
+    case 4:
+        fn_2_13BA4(pad);
         break;
     }
 }
@@ -399,6 +525,51 @@ void fn_2_13D70(Pad04B0* pad) {
             lbl_80361B20[i] = 0;
         }
     } else if (pad->_2 & 0x200) {
+        lbl_2_bss_100B8._50 = 0;
+    }
+}
+
+// .text:0x00013CA0 size:0xD0
+// Outside the unit's .text range: inlined into fn_2_14220 (see report)
+static inline void fn_2_13CA0(Pad04B0* pad) {
+    if (pad->_4 & 8) {
+        lbl_2_bss_100B8._4E--;
+        if (lbl_2_bss_100B8._4E < 0) {
+            lbl_2_bss_100B8._4E = 5;
+        }
+    } else if (pad->_4 & 4) {
+        lbl_2_bss_100B8._4E++;
+        if (lbl_2_bss_100B8._4E == 6) {
+            lbl_2_bss_100B8._4E = 0;
+        }
+    } else if (pad->_4 & 1) {
+        lbl_80361B20[0xF5] ^= 1;
+    } else if (pad->_4 & 2) {
+        lbl_80361B20[0xF5] ^= 1;
+    } else if (pad->_2 & 0x200) {
+        lbl_2_bss_100B8._50 = 0;
+    }
+}
+
+// .text:0x00013BA4 size:0xFC
+// Outside the unit's .text range: inlined into fn_2_14220 (see report)
+static inline void fn_2_13BA4(Pad04B0* pad) {
+    if (pad->_4 & 8) {
+        lbl_2_bss_100B8._4F--;
+        if (lbl_2_bss_100B8._4F < 0) {
+            lbl_2_bss_100B8._4F = 3;
+        }
+    } else if (pad->_4 & 4) {
+        lbl_2_bss_100B8._4F++;
+        if (lbl_2_bss_100B8._4F == 4) {
+            lbl_2_bss_100B8._4F = 0;
+        }
+    } else if (pad->_4 & 1) {
+        lbl_80361B20[0xE4 + lbl_2_bss_100B8._4F] ^= 1;
+    } else if (pad->_4 & 2) {
+        lbl_80361B20[0xE4 + lbl_2_bss_100B8._4F] ^= 1;
+    } else if (pad->_2 & 0x200) {
+        lbl_2_bss_100B8._4F = 0;
         lbl_2_bss_100B8._50 = 0;
     }
 }
