@@ -76,6 +76,7 @@ void fn_2_7EF68(struct UnkTask0C50* task, s32 index);
 void fn_2_7F030(struct UnkTask0C50* task, s32 index);
 void fn_2_7F714(struct UnkTask0C50* task, s32 index);
 void fn_2_7F8BC(struct UnkTask0C50* task, s32 index);
+void fn_2_7FAFC(struct UnkTask0C50* task, s32 index);
 void fn_2_800B0(struct UnkTask0C50* task, s32 index);
 void fn_2_802EC(struct UnkTask0C50* task);
 void fn_2_80500(struct UnkTask0C50* task, s32 index);
