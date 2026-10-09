@@ -1343,12 +1343,13 @@ void fn_2_76098(void) {
 
 // .text:0x00075BE4 size:0x4B4
 void fn_2_75BE4(UnkTask0C50* task, s32 index) {
-    s8 level = 0;
+    s32 level;
     s32 i;
     s32 sum = 0;
     s32 avg = 0;
     s32 count = 0;
 
+    level = 0;
     for (i = 0; i < 9; i++) {
         if (lbl_803C6724._26[index][i] != 0 && lbl_803C6724._02[index][i] != lbl_8034E9A0._46E0[index]) {
             sum += lbl_803C6724._26[index][i];
