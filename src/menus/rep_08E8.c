@@ -41,7 +41,7 @@ typedef struct MenuCharacter08E8 {
     /* 0x05 */ s8 _05;
     /* 0x06 */ s8 _06;
     /* 0x07 */ s8 _07;
-    /* 0x08 */ u8 _08[0x9 - 0x8];
+    /* 0x08 */ u8 _08;
     /* 0x09 */ MenuMissionPair08E8 _09[10];
     /* 0x1D */ MenuMissionPair08E8 _1D[10];
     /* 0x31 */ s8 _31;
@@ -114,8 +114,9 @@ typedef struct MenuTracker08E8 {
     /* 0x4483 */ s8 _4483[0x36];
     /* 0x44B9 */ s8 _44B9[0x36];
     /* 0x44EF */ s8 _44EF;
-    /* 0x44F0 */ u8 _44F0[0x44F7 - 0x44F0];
-    /* 0x44F7 */ u8 _44F7;
+    /* 0x44F0 */ u8 _44F0[0x44F6 - 0x44F0];
+    /* 0x44F6 */ s8 _44F6;
+    /* 0x44F7 */ s8 _44F7;
     /* 0x44F8 */ s8 _44F8[5];
     /* 0x44FD */ s8 _44FD;
 } MenuTracker08E8;
@@ -491,6 +492,7 @@ extern void fn_800BDA24(MenuActorRef08E8* ref);
 extern u8 fn_800B3C04(s32 arg0, MenuActor08E8* actor, Mtx mtx);
 extern void fn_80024DB0(MenuAnimState08E8* anim);
 extern s32 fn_80062890(s32 id);
+extern s32 fn_8006C5CC(void);
 extern void fn_80024FA4(MenuActorRef08E8* model, u32 animId, MenuAnimState08E8* anim, s32 arg3);
 
 // rep_0B08
@@ -1985,6 +1987,166 @@ void fn_2_472C4(s16* cursor, s16* page, s16 count, s16 cols, s16 flags) {
     }
 }
 
+// .text:0x00046D94 size:0x530
+// Registers only, as in fn_2_472C4: the target keeps cols in r9, rem in r3,
+// last in r0 and flags & 4 in r10 from the first divide on.
+void fn_2_46D94(s16* cursor, s16* page, s16 count, s16 cols, u32 flags) {
+    s16 last;
+    s16 rem;
+    s16 step;
+    s16 pos;
+
+    if (count == 0) {
+        return;
+    }
+    if ((cols == 0) | (count < cols)) {
+        cols = count;
+    }
+    rem = cols;
+    if (count % cols != 0) {
+        rem = count % cols;
+    }
+    last = count - cols;
+    if (flags & 4) {
+        last = count - rem;
+    }
+    switch (lbl_803C77B8[lbl_2_bss_1A824C->_197863]._04) {
+    case 0x8:
+        if (page != NULL) {
+            if (--*cursor < 0) {
+                if (*page != 0) {
+                    (*page)--;
+                    if (!(flags & 0x10)) {
+                        sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+                    }
+                } else if (flags & 1) {
+                    if (flags & 4) {
+                        *cursor = rem - 1;
+                    } else {
+                        *cursor = cols - 1;
+                    }
+                    *page = last;
+                    if (!(flags & 0x10)) {
+                        sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+                    }
+                    break;
+                }
+                (*cursor)++;
+            } else if (!(flags & 0x10)) {
+                sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+            }
+        } else {
+            if (--*cursor < 0) {
+                if (flags & 1) {
+                    *cursor = count - 1;
+                    if (!(flags & 0x10)) {
+                        sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+                    }
+                } else {
+                    (*cursor)++;
+                }
+            } else if (!(flags & 0x10)) {
+                sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+            }
+        }
+        break;
+    case 0x4:
+        if (page != NULL) {
+            if (*cursor + *page >= count - 1) {
+                if (*page < last) {
+                    (*page)++;
+                    (*cursor)--;
+                } else if (flags & 1) {
+                    *cursor = 0;
+                    *page = 0;
+                } else {
+                    break;
+                }
+                if (!(flags & 0x10)) {
+                    sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+                }
+            } else if (*cursor >= cols - 1) {
+                if (*page < last) {
+                    (*page)++;
+                } else if (flags & 1) {
+                    *cursor = 0;
+                    *page = 0;
+                } else {
+                    break;
+                }
+                if (!(flags & 0x10)) {
+                    sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+                }
+            } else {
+                (*cursor)++;
+                if (!(flags & 0x10)) {
+                    sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+                }
+            }
+        } else {
+            if (++*cursor >= count) {
+                if (flags & 1) {
+                    *cursor = 0;
+                } else {
+                    (*cursor)--;
+                    break;
+                }
+            }
+            if (!(flags & 0x10)) {
+                sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+            }
+        }
+        break;
+    case 0x20:
+        if (!(flags & 8) && page != NULL && count > cols) {
+            pos = *page;
+            step = cols - pos % cols;
+            if (pos == last) {
+                if (flags & 2) {
+                    *page = 0;
+                } else {
+                    *page = last;
+                    return;
+                }
+            } else {
+                pos += step;
+                *page = pos;
+                if (pos > last) {
+                    *page = last;
+                }
+            }
+            *cursor = 0;
+            if (!(flags & 0x10)) {
+                sndFXStartEx(0x1B8, lbl_800EFBA4[1], 0x3F, 0);
+            }
+        }
+        break;
+    case 0x40:
+        if (!(flags & 8) && page != NULL && count > cols) {
+            step = *page % cols;
+            if (step == 0) {
+                step = cols;
+            }
+            if (*page <= 0) {
+                if (flags & 2) {
+                    *page = last;
+                    *cursor = 0;
+                    if (!(flags & 0x10)) {
+                        sndFXStartEx(0x1B8, lbl_800EFBA4[1], 0x3F, 0);
+                    }
+                }
+            } else {
+                *page -= step;
+                *cursor = 0;
+                if (!(flags & 0x10)) {
+                    sndFXStartEx(0x1B8, lbl_800EFBA4[1], 0x3F, 0);
+                }
+            }
+        }
+        break;
+    }
+}
+
 // .text:0x00046D34 size:0x60
 void fn_2_46D34(s32 delta) {
     lbl_2_bss_1A8248->_43BE = lbl_2_bss_1A8248->_43BC;
@@ -2046,7 +2208,7 @@ void fn_2_46ADC(void) {
         c->_05 = c->_00->_01;
         c->_07 = 0;
         c->_06 = 0;
-        c->_08[0] = 0;
+        c->_08 = 0;
         for (j = 0; j < 10; j++) {
             c->_09[j]._0 = c->_1D[j]._0 = 0;
             c->_09[j]._1 = c->_1D[j]._1 = 0;
@@ -2137,7 +2299,7 @@ void fn_2_46418(void) {
     for (i = 0; i < 0x36; i++) {
         ((MenuCharacter08E8*)lbl_2_bss_1A8248)[i]._07 = 0;
         ((MenuCharacter08E8*)lbl_2_bss_1A8248)[i]._06 = 0;
-        ((MenuCharacter08E8*)lbl_2_bss_1A8248)[i]._08[0] = 0;
+        ((MenuCharacter08E8*)lbl_2_bss_1A8248)[i]._08 = 0;
         ((MenuCharacter08E8*)lbl_2_bss_1A8248)[i]._31 = 0;
     }
     lbl_2_bss_1A8248->_442A = lbl_2_bss_1A8248->_15F0;
@@ -2150,7 +2312,7 @@ void fn_2_460F8(void) {
     for (i = 0; i < 0x36; i++) {
         ((MenuCharacter08E8*)lbl_2_bss_1A8248)[i]._07 = 0;
         ((MenuCharacter08E8*)lbl_2_bss_1A8248)[i]._06 = 0;
-        ((MenuCharacter08E8*)lbl_2_bss_1A8248)[i]._08[0] = 0;
+        ((MenuCharacter08E8*)lbl_2_bss_1A8248)[i]._08 = 0;
         ((MenuCharacter08E8*)lbl_2_bss_1A8248)[i]._31 = 0;
     }
     memcpy(lbl_2_bss_1A8248->_0AF8, lbl_2_bss_1A8248, sizeof(lbl_2_bss_1A8248->_0AF8));
@@ -2548,6 +2710,170 @@ void fn_2_43E8C(void) {
         }
     }
     lbl_2_bss_1A824C->_1978F4 = 0;
+}
+
+// .text:0x000439D0 size:0x4BC
+void fn_2_439D0(void) {
+    s32 i;
+    s32 j;
+    s32 goal;
+    s32 team;
+    s32 cup;
+    s32 level;
+    MenuCharacter08E8* c;
+
+    for (i = 0; i < 0x36; i++) {
+        if (lbl_800E8558[i]._3 == 1) {
+            c = &((MenuCharacter08E8*)lbl_2_bss_1A8248)[i];
+            if (c->_31 == 1) {
+                for (j = 0; j < 10; j++) {
+                    goal = lbl_80109AE8[lbl_800E8558[i]._2][j]._0;
+                    team = lbl_80109AE8[lbl_800E8558[i]._2][j]._2;
+                    cup = lbl_80109AE8[lbl_800E8558[i]._2][j]._4;
+                    level = lbl_80109AE8[lbl_800E8558[i]._2][j]._6;
+                    if (goal == -1 || c->_09[j]._0 != 0) {
+                        continue;
+                    }
+                    switch (goal) {
+                    case 61:
+                        if (lbl_2_bss_1A8248->_441C == cup && lbl_2_bss_1A8248->_4415 >= level) {
+                            c->_09[j]._0 = -2;
+                        }
+                        break;
+                    case 60:
+                        if (lbl_2_bss_1A8248->_4415 >= level) {
+                            c->_09[j]._0 = -2;
+                        }
+                        break;
+                    case 69:
+                        if (lbl_2_bss_1A8248->_4415 >= level) {
+                            c->_09[j]._0 = -2;
+                        }
+                        break;
+                    case 66:
+                        if (lbl_2_bss_1A8248->_44F7 == 0) {
+                            c->_09[j]._0 = -2;
+                        }
+                        break;
+                    case 62:
+                        if (fn_2_44368() == 1 && lbl_2_bss_1A8248->_4415 >= level) {
+                            c->_09[j]._0 = -2;
+                        }
+                        break;
+                    case 63:
+                        if (lbl_2_bss_1A8248->_441C == team && lbl_2_bss_1A8248->_44F6 == 0 &&
+                            lbl_2_bss_1A8248->_4415 >= level) {
+                            c->_09[j]._0 = -2;
+                        }
+                        break;
+                    case 64:
+                        if (fn_2_442E8() == 1 && lbl_2_bss_1A8248->_4415 >= level) {
+                            c->_09[j]._0 = -2;
+                        }
+                        break;
+                    case 67:
+                        if (fn_2_44238(i) == 1 && lbl_2_bss_1A8248->_4415 >= level) {
+                            c->_09[j]._0 = -2;
+                        }
+                        break;
+                    case 68:
+                        if (fn_2_44238(i) == 1 && lbl_2_bss_1A8248->_4415 >= level) {
+                            c->_09[j]._0 = -2;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// .text:0x0004358C size:0x444
+// Only the lis registers of lbl_800E8558 and g_d_GameSettings are swapped
+// (r3 and r4 in the target), the same kind of difference as fn_2_42708's.
+void fn_2_4358C(void) {
+    MenuCharacter08E8* c;
+    s32 i;
+    s32 j;
+    s32 goal;
+    s32 k;
+    s32 team;
+    s32 count;
+    s32 level;
+    s32 player;
+
+    for (i = 0; i < 0x36; i++) {
+        if (lbl_800E8558[i]._3 == 1) {
+            c = &((MenuCharacter08E8*)lbl_2_bss_1A8248)[i];
+            if (c->_31 == 1) {
+                for (j = 0; j < 10; j++) {
+                    goal = lbl_80109AE8[lbl_800E8558[i]._2][j]._0;
+                    team = lbl_80109AE8[lbl_800E8558[i]._2][j]._2;
+                    level = lbl_80109AE8[lbl_800E8558[i]._2][j]._6;
+                    if (goal == -1 || c->_09[j]._0 != 0) {
+                        continue;
+                    }
+                    if (lbl_2_bss_1A823C->_30 == 3) {
+                        switch (goal) {
+                        case 73:
+                            if (lbl_2_bss_1A824C->_197843 == 0 && lbl_2_bss_1A8248->_441E == team &&
+                                lbl_2_bss_1A8248->_4415 >= level) {
+                                count = 0;
+                                for (k = 0; k < 9; k++) {
+                                    if (lbl_2_bss_1A8248->_40B8[k]._0 == i) {
+                                        count++;
+                                    }
+                                }
+                                if (count > 0) {
+                                    c->_09[j]._0 = -2;
+                                }
+                            }
+                            break;
+                        case 66:
+                            count = 0;
+                            for (k = 0; k < 9; k++) {
+                                if (lbl_2_bss_1A8248->_40B8[k]._0 == 12 && lbl_2_bss_1A8248->_4415 >= level) {
+                                    count++;
+                                }
+                            }
+                            if (count == 0) {
+                                lbl_2_bss_1A8248->_44F7 = 1;
+                            }
+                            break;
+                        }
+                    } else if (lbl_2_bss_1A823C->_30 == 5) {
+                        player = g_d_GameSettings._36;
+                        if (goal == 65 && lbl_2_bss_1A824C->_197843 == 0 && player == i &&
+                            lbl_2_bss_1A8248->_4415 >= level) {
+                            if (!(c->_08 & (1 << lbl_2_bss_1A8248->_4420))) {
+                                c->_08 |= 1 << lbl_2_bss_1A8248->_4420;
+                            }
+                            if (c->_08 == 31) {
+                                c->_09[j]._0 = -2;
+                            }
+                        }
+                    } else if (lbl_2_bss_1A823C->_30 == 4) {
+                        if (goal == 72 && lbl_2_bss_1A824C->_197843 == 0 && lbl_2_bss_1A8248->_4415 >= level &&
+                            fn_8006C79C(19) == FALSE) {
+                            count = 0;
+                            for (k = 0; k < 9; k++) {
+                                if (lbl_2_bss_1A8248->_40B8[k]._0 == i) {
+                                    count++;
+                                }
+                            }
+                            if (count > 0) {
+                                c->_09[j]._0 = -2;
+                            }
+                        }
+                    }
+                    if (goal == 71 && fn_8006C5CC() == 1 && lbl_2_bss_1A8248->_4415 >= level &&
+                        team == lbl_2_bss_1A8248->_441C) {
+                        c->_09[j]._0 = -2;
+                    }
+                }
+            }
+        }
+    }
 }
 
 // .text:0x00043404 size:0x188
