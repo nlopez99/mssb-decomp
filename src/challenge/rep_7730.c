@@ -37,11 +37,14 @@ extern void fn_800B1188(void);
 extern void fn_800B24D4(s32 id);
 extern void fn_800A7D4C(s32, void*);
 extern void fn_80038CD0(u8 count, void* arg1, struct RopeNode7730* nodes, f32 arg3, f32 arg4);
-extern void fn_80038B48(void* arg0, struct ChainNode7730* nodes, u8 count, Vec* force);
+extern void fn_80038B48(void* arg0, struct RopeNode7730* nodes, u8 count, Vec* force);
 extern void fn_80038E2C(void* arg0);
 extern void fn_1_AF4(s32 arg0, s32 arg1, f32 arg2);
 extern void fn_1_272DC(void* arg0, s32 arg1);
 extern void fn_1_273D8(void* arg0);
+extern void fn_1_26D28(void* arg0, u16 held, u16 pressed, u16 repeat, s8* stick);
+extern void fn_1_27330(void* arg0);
+extern void fn_80037BAC(void* arg0);
 
 extern u8 lbl_803CBBC0;
 
@@ -130,16 +133,19 @@ typedef struct GameTask7730 {
 
 typedef struct ChainTask7730 {
     /* 0x00 */ void (*_00)(void);
-    /* 0x04 */ u8 _04[0x22 - 0x4];
+    /* 0x04 */ u8 _04[0x14 - 0x4];
+    /* 0x14 */ f32 _14;
+    /* 0x18 */ u16 _18;
+    /* 0x1A */ u16 _1A;
+    /* 0x1C */ u16 _1C;
+    /* 0x1E */ u16 _1E;
+    /* 0x20 */ u16 _20;
     /* 0x22 */ u16 _22;
-    /* 0x24 */ u8 _24[0x2B - 0x24];
+    /* 0x24 */ u16 _24;
+    /* 0x26 */ u8 _26[0x2A - 0x26];
+    /* 0x2A */ u8 _2A;
     /* 0x2B */ u8 _2B;
 } ChainTask7730;
-
-typedef struct ChainNode7730 {
-    /* 0x00 */ f32 _00;
-    /* 0x04 */ u8 _04[0x40 - 0x4];
-} ChainNode7730; // size: 0x40
 
 typedef struct CameraTask7730 {
     /* 0x00 */ void (*_00)(void);
@@ -182,11 +188,27 @@ typedef struct Tex7730 {
 } Tex7730;
 
 typedef struct RopeNode7730 {
-    /* 0x00 */ u8 _00[0xC];
+    /* 0x00 */ f32 _00;
+    /* 0x04 */ u8 _04[0xC - 0x4];
     /* 0x0C */ Vec _0C;
-    /* 0x18 */ u8 _18[0x3C - 0x18];
+    /* 0x18 */ u8 _18[0x24 - 0x18];
+    /* 0x24 */ Vec _24;
+    /* 0x30 */ Vec _30;
     /* 0x3C */ s32 _3C;
 } RopeNode7730; // size: 0x40
+
+typedef struct SimParams7730 {
+    /* 0x00 */ f32 _00;
+    /* 0x04 */ f32 _04;
+    /* 0x08 */ f32 _08;
+    /* 0x0C */ f32 _0C;
+    /* 0x10 */ f32 _10;
+    /* 0x14 */ f32 _14;
+    /* 0x18 */ f32 _18;
+    /* 0x1C */ f32 _1C;
+    /* 0x20 */ s32 _20;
+    /* 0x24 */ f32 _24;
+} SimParams7730; // size: 0x28
 
 typedef struct RopeParams7730 {
     /* 0x00 */ u8 _00[0x18];
@@ -459,20 +481,17 @@ static DrawEntry7730 lbl_1_data_107E4[2] = {
 
 // .bss statics, declared in reverse address order (MWCC lays them out in reverse)
 static Mtx44 lbl_1_bss_47010;
-static u8 lbl_1_bss_45868[0x17A8];
-static ChainNode7730 lbl_1_bss_43F68[100];
+static struct {
+    /* 0x0000 */ SimParams7730 _0000;
+    /* 0x0028 */ u8 _0028[0x17A8 - 0x28];
+} lbl_1_bss_45868;
+static RopeNode7730 lbl_1_bss_43F68[100];
 static u8 lbl_1_bss_43EE0[0x88];
 static u8 lbl_1_bss_F6E0[0x34800];
 static u8 lbl_1_bss_76E0[0x8000];
 static u8 lbl_1_bss_74E0[0x200];
 static RopeNode7730 lbl_1_bss_6FE0[20];
-static struct {
-    /* 0x00 */ u8 _00[0x18];
-    /* 0x18 */ f32 _18;
-    /* 0x1C */ f32 _1C;
-    /* 0x20 */ s32 _20;
-    /* 0x24 */ f32 _24;
-} lbl_1_bss_6FB8;
+static SimParams7730 lbl_1_bss_6FB8;
 static u8 lbl_1_bss_6FB4[4];
 static Vec lbl_1_bss_6FA8;
 static void* lbl_1_bss_6FA4;
@@ -586,6 +605,64 @@ void fn_1_267BC(void) {
     }
 }
 
+// .text:0x00024A8C size:0x1C0
+// 92.90%: the final call's argument setup is scheduled differently (the target converts
+// task->_24 after loading 0.015625f and the pool addresses).
+void fn_1_24A8C(void) {
+    ChainTask7730* task = lbl_803CC1B8;
+    f32 dt;
+
+    fn_80038E2C(&lbl_1_bss_45868);
+    lbl_1_bss_45868._0000._00 = task->_1A;
+    lbl_1_bss_45868._0000._04 = task->_14;
+    lbl_1_bss_45868._0000._08 = task->_18 / 64.0f;
+    lbl_1_bss_45868._0000._0C = task->_1C / 64.0f;
+    lbl_1_bss_45868._0000._10 = task->_1E / 64.0f;
+    lbl_1_bss_45868._0000._14 = task->_20 / 10000.0f;
+    lbl_1_bss_45868._0000._20 = task->_2A;
+    dt = 1.0f / lbl_1_bss_45868._0000._20;
+    lbl_1_bss_45868._0000._18 = dt;
+    lbl_1_bss_45868._0000._1C = dt * dt;
+    lbl_1_bss_45868._0000._24 = 1.0f / (2.0f * dt);
+    if (lbl_803C77B8[0]._00 & 0x40) {
+        lbl_1_bss_45868._0000._20 = 1;
+    }
+    fn_80038CD0(task->_2B, &lbl_1_bss_45868, lbl_1_bss_43F68, 10.0f, task->_24 * 0.015625f);
+}
+
+// .text:0x000248BC size:0x1D0
+void fn_1_248BC(s32 count) {
+    u8 width;
+    GXTexOffset texOffsets;
+    s32 i;
+
+    GXGetLineWidth(&width, &texOffsets);
+    GXSetLineWidth(24, texOffsets);
+    GXBegin(GX_LINESTRIP, GX_VTXFMT0, count);
+    i = count;
+    while (i-- != 0) {
+        GXPosition3f32(lbl_1_bss_43F68[i]._0C.x, lbl_1_bss_43F68[i]._0C.y, lbl_1_bss_43F68[i]._0C.z);
+        GXColor1u32(lbl_1_data_10384[i]);
+    }
+    GXSetLineWidth(width, texOffsets);
+    GXBegin(GX_LINES, GX_VTXFMT0, count * 4);
+    i = count;
+    while (i-- != 0) {
+        GXPosition3f32(lbl_1_bss_43F68[i]._0C.x, lbl_1_bss_43F68[i]._0C.y, lbl_1_bss_43F68[i]._0C.z);
+        GXColor1u32(lbl_1_data_10384[i]);
+        GXPosition3f32(lbl_1_data_104A4 * lbl_1_bss_43F68[i]._30.x + lbl_1_bss_43F68[i]._0C.x,
+                       lbl_1_data_104A4 * lbl_1_bss_43F68[i]._30.y + lbl_1_bss_43F68[i]._0C.y,
+                       lbl_1_data_104A4 * lbl_1_bss_43F68[i]._30.z + lbl_1_bss_43F68[i]._0C.z);
+        GXColor1u32(lbl_1_data_10384[i]);
+        GXPosition3f32(lbl_1_bss_43F68[i]._0C.x, lbl_1_bss_43F68[i]._0C.y, lbl_1_bss_43F68[i]._0C.z);
+        GXColor1u32(lbl_1_data_10384[i] ^ 0xFFFFFF00);
+        GXPosition3f32(lbl_1_data_104A4 * lbl_1_bss_43F68[i]._24.x + lbl_1_bss_43F68[i]._0C.x,
+                       lbl_1_data_104A4 * lbl_1_bss_43F68[i]._24.y + lbl_1_bss_43F68[i]._0C.y,
+                       lbl_1_data_104A4 * lbl_1_bss_43F68[i]._24.z + lbl_1_bss_43F68[i]._0C.z);
+        GXColor1u32(lbl_1_data_10384[i] ^ 0xFFFFFF00);
+    }
+}
+
 // .text:0x000247A0 size:0x11C
 void fn_1_247A0(void) {
     ChainTask7730* task = lbl_803CC1B8;
@@ -594,7 +671,7 @@ void fn_1_247A0(void) {
     force.x = task->_22 * (lbl_803C77B8[0]._10 * lbl_1_bss_43F68[task->_2B - 1]._00);
     force.y = task->_22 * (lbl_803C77B8[0]._13 * lbl_1_bss_43F68[task->_2B - 1]._00);
     force.z = task->_22 * (lbl_803C77B8[0]._11 * lbl_1_bss_43F68[task->_2B - 1]._00);
-    fn_80038B48(lbl_1_bss_45868, lbl_1_bss_43F68, task->_2B, &force);
+    fn_80038B48(&lbl_1_bss_45868, lbl_1_bss_43F68, task->_2B, &force);
 }
 
 // .text:0x00024778 size:0x28
@@ -969,6 +1046,45 @@ void fn_1_1F23C(Actor7730* actor) {
     actor->_0EC += 2.0f;
     ((CameraTask7730*)lbl_803CC1B8)->_2C &= ~2;
     ((CameraTask7730*)lbl_803CC1B8)->_2C |= 2;
+}
+
+// .text:0x0001F05C size:0x1E0
+void fn_1_1F05C(void) {
+    CameraTask7730* task;
+
+    if (((CameraTask7730*)lbl_803CC1B8)->_2C & 1) {
+        ((CameraTask7730*)lbl_803CC1B8)->_10 = fn_1_1E90C(((CameraTask7730*)lbl_803CC1B8)->_10, lbl_803C77B8[0]._00,
+                                                          lbl_803C77B8[0]._02, lbl_803C77B8[0]._04);
+    } else {
+        fn_1_26D28(lbl_1_bss_6D48, lbl_803C77B8[0]._00, lbl_803C77B8[0]._02, lbl_803C77B8[0]._04,
+                   &lbl_803C77B8[0]._10);
+    }
+    if (lbl_803C77B8[0]._02 & 0x200) {
+        task = lbl_803CC1B8;
+        if (task->_2C & 1) {
+            task->_00 = fn_1_24778;
+        } else {
+            task->_2C ^= 1;
+        }
+    } else if (lbl_803C77B8[0]._02 & 0x1000) {
+        ((CameraTask7730*)lbl_803CC1B8)->_2C ^= 1;
+    }
+    fn_1_27330(lbl_1_bss_6D48);
+    task = lbl_803CC1B8;
+    switch (task->_28) {
+    case 0:
+        if (task->_2C & 4) {
+            task->_2C ^= 4;
+            fn_1_1DD94();
+        }
+        fn_80037BAC(&lbl_1_bss_6BF4);
+        break;
+    }
+    task = lbl_803CC1B8;
+    if (task->_2C & 1) {
+        fn_1_1E8C0(task->_10);
+    }
+    fn_1_1EFF4();
 }
 
 // .text:0x0001EFF4 size:0x68
