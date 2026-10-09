@@ -23,6 +23,8 @@ extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);
 extern void fn_800AD038(void* arg0);
 extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_800B472C(void* arg0);
+extern void fn_800A7D4C(s32 arg0, void* arg1);
+extern u8 lbl_803CBBC0;
 
 extern struct {
     /* 0x00 */ u8 _00[0x8];
@@ -55,12 +57,12 @@ typedef struct Draw0138 {
     /* 0x00 */ u8 _00[0x4];
     /* 0x04 */ void (*_04)(void* arg0);
     /* 0x08 */ Mtx _08;
-    /* 0x38 */ u8 _38[0x68 - 0x38];
+    /* 0x38 */ Mtx _38;
     /* 0x68 */ Layout0138* _68;
 } Draw0138; // size: 0x6C
 
 extern struct {
-    /* 0x000 */ u8 _000[0x30];
+    /* 0x000 */ Mtx _000;
     /* 0x030 */ u16 _030;
     /* 0x032 */ u8 _032[0x4C - 0x32];
     /* 0x04C */ f32 _04C;
@@ -83,7 +85,7 @@ extern struct {
     /* 0x235 */ u8 _235[0x238 - 0x235];
     /* 0x238 */ u8 _238;
     /* 0x239 */ u8 _239;
-    /* 0x23A */ u8 _23A[0x23C - 0x23A];
+    /* 0x23A */ u16 _23A;
     /* 0x23C */ s8 _23C;
 } lbl_1_common_bss_472B4;
 
@@ -473,6 +475,22 @@ void fn_1_7848(void) {
 void fn_1_77EC(void* arg0) {
     GXSetCullMode(lbl_1_data_8C4);
     fn_1_73B8(arg0, 3, lbl_1_data_848[0], lbl_1_data_848[1], lbl_1_data_848[2]);
+}
+
+// .text:0x24A8 size:0x138
+void fn_1_7280(void) {
+    Draw0138* draw;
+
+    draw = &lbl_1_common_bss_472B4._05C[lbl_803CBBC0];
+    PSMTXCopy(lbl_1_common_bss_472B4._000, draw->_38);
+    fn_800A7D4C(0, &lbl_1_data_8B4[lbl_803CBBC0]);
+    fn_800A7D4C(0, draw);
+    fn_800A7D4C(0, &lbl_1_data_8A4[lbl_803CBBC0]);
+    draw = &lbl_1_common_bss_472B4._05C[lbl_803CBBC0] + 2;
+    PSMTXRotRad(draw->_08, 'Y', 0.0000958738f * lbl_1_common_bss_472B4._23A);
+    PSMTXCopy(lbl_1_common_bss_472B4._000, draw->_38);
+    fn_800A7D4C(0, draw);
+    fn_800A7D4C(0, &lbl_1_data_88C[lbl_803CBBC0]);
 }
 
 // .text:0x23A4 size:0x104

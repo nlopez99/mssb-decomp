@@ -14,6 +14,7 @@ void fn_1_6848(void);
 struct File0138;
 
 void fn_1_717C(struct File0138* file);
+void fn_1_7280(void);
 void fn_1_73B8(void* arg0, s32 count, ...);
 void fn_1_77EC(void* arg0);
 void fn_1_7848(void);
