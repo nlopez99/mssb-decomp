@@ -32,6 +32,7 @@ extern void fn_80035CA4(s32 id);
 extern void fn_2_11A0(s32 arg0);
 extern void fn_80021AC0(s32 team, s32 slot);
 extern void fn_800AD038(s32 arg0);
+extern void fn_80066EAC(s32 team);
 extern void fn_800203E0(int, s8);
 extern void sndFXRelated(s32 arg0);
 extern s32 randRange_FUN_80042bf0(s32 min, s32 max);
@@ -40,11 +41,35 @@ extern void fn_2_1C34(u16 buttons);
 extern s32 fn_2_14F8(s32 min, s32 max);
 extern void fn_2_1D54(s32* cursor, u8 arg1, s32 count);
 
-extern struct {
-    /* 0x00 */ u8 _00[0x24];
+// One character's stats, as in inMemRoster and at the start of lbl_8034E9A0
+typedef struct CharEntry0318 {
+    /* 0x00 */ u8 _00[0x1E];
+    /* 0x1E */ u8 _1E[2];
+    /* 0x20 */ u32 _20;
     /* 0x24 */ s16 CharID;
-    /* 0x26 */ u8 _26[0xA0 - 0x26];
-} inMemRoster[2][9];
+    /* 0x26 */ u8 _26;
+    /* 0x27 */ u8 _27;
+    /* 0x28 */ u8 _28[2];
+    /* 0x2A */ u8 _2A[2];
+    /* 0x2C */ u8 _2C;
+    /* 0x2D */ u8 _2D;
+    /* 0x2E */ u8 _2E;
+    /* 0x2F */ u8 _2F;
+    /* 0x30 */ u8 _30;
+    /* 0x31 */ u8 _31;
+    /* 0x32 */ u8 _32;
+    /* 0x33 */ u8 _33;
+    /* 0x34 */ u8 _34;
+    /* 0x35 */ u8 _35[2];
+    /* 0x37 */ u8 _37[4];
+    /* 0x3B */ u8 _3B[0x36];
+    /* 0x71 */ u8 _71;
+    /* 0x72 */ u8 _72[2];
+    /* 0x74 */ u16 _74[21];
+    /* 0x9E */ u8 _9E[2];
+} CharEntry0318; // size: 0xA0
+
+extern CharEntry0318 inMemRoster[2][9];
 extern struct {
     /* 0x0000 */ struct {
         /* 0x00 */ u8 _00[0x31];
@@ -124,14 +149,6 @@ extern struct {
     /* 0x06 */ u16 _6;
     /* 0x08 */ u16 _8;
 }* lbl_803CBBCC;
-typedef struct CharEntry0318 {
-    /* 0x00 */ u8 _00[0x24];
-    /* 0x24 */ s16 _24;
-    /* 0x26 */ u8 _26[0x3B - 0x26];
-    /* 0x3B */ u8 _3B[0x36];
-    /* 0x71 */ u8 _71[0xA0 - 0x71];
-} CharEntry0318; // size: 0xA0
-
 extern struct {
     /* 0x0000 */ CharEntry0318 _0000[6][9];
     /* 0x21C0 */ u8 _21C0[0x4380 - 0x21C0];
@@ -206,7 +223,9 @@ extern struct {
     /* 0x08 */ u8 _08[2];
     /* 0x0A */ u8 _0A[0xE - 0xA];
     /* 0x0E */ u8 _0E;
-    /* 0x0F */ u8 _0F[0x3C - 0xF];
+    /* 0x0F */ u8 _0F[0x12 - 0xF];
+    /* 0x12 */ s16 _12[2][9];
+    /* 0x36 */ u8 _36[0x3C - 0x36];
 } lbl_803C5EA4;
 extern struct {
     /* 0x0 */ u8 _0[2];
@@ -298,6 +317,7 @@ s16 lbl_2_data_E88[2][9] = {
 };
 
 static s8 lbl_2_bss_3E0[3];
+static u8 lbl_2_bss_3A8[56];
 static u8 lbl_2_bss_3A0;
 
 // .text:0x000110B0 size:0x244
@@ -1026,6 +1046,78 @@ retry:
     return ret;
 }
 
+// .text:0x00008940 size:0x3B8
+void fn_2_8940(void) {
+    CharEntry0318* dst;
+    CharEntry0318* src;
+    s32 t;
+    s32 i;
+    s8 id;
+    u16 value;
+
+    for (t = 0; t < 2; t++) {
+        for (i = 0; i < 9; i++) {
+            id = lbl_803C6724._02[t][i];
+            src = &lbl_8034E9A0._0000[id / 9][id % 9];
+            dst = &inMemRoster[t][i];
+            memcpy(dst->_00, src->_00, sizeof(dst->_00));
+            dst->CharID = src->CharID;
+            dst->_26 = src->_26;
+            dst->_27 = src->_27;
+            memcpy(dst->_28, src->_28, sizeof(dst->_28));
+            memcpy(dst->_2A, src->_2A, sizeof(dst->_2A));
+            dst->_2C = src->_2C;
+            dst->_2D = src->_2D;
+            dst->_2E = src->_2E;
+            dst->_2F = src->_2F;
+            dst->_30 = src->_30;
+            dst->_31 = src->_31;
+            dst->_32 = src->_32;
+            dst->_33 = src->_33;
+            dst->_34 = src->_34;
+            memcpy(dst->_35, src->_35, sizeof(dst->_35));
+            dst->_20 = src->_20;
+            memcpy(dst->_37, src->_37, sizeof(dst->_37));
+            memcpy(dst->_3B, src->_3B, sizeof(dst->_3B));
+            dst->_71 = src->_71;
+            dst->_74[0] = src->_74[0];
+            dst->_74[1] = src->_74[1];
+            dst->_74[2] = src->_74[2];
+            dst->_74[3] = src->_74[3];
+            dst->_74[4] = src->_74[4];
+            dst->_74[5] = src->_74[5];
+            dst->_74[6] = src->_74[6];
+            dst->_74[7] = src->_74[7];
+            dst->_74[8] = src->_74[8];
+            dst->_74[9] = src->_74[9];
+            dst->_74[10] = src->_74[10];
+            dst->_74[11] = src->_74[11];
+            dst->_74[12] = src->_74[12];
+            dst->_74[13] = src->_74[13];
+            dst->_74[14] = src->_74[14];
+            dst->_74[15] = src->_74[15];
+            dst->_74[16] = src->_74[16];
+            dst->_74[17] = src->_74[17];
+            dst->_74[18] = src->_74[18];
+            dst->_74[19] = src->_74[19];
+            dst->_74[20] = src->_74[20];
+            lbl_80354720[t][i]._2 = lbl_803C6724._14[t][i];
+            if (t == 0 && g_d_GameSettings.GameModeSelected == 5) {
+                value = lbl_2_bss_3A8[starMissionCompletionTracker._40B8[i]._0];
+                dst->_26 = value / 2;
+                dst->_27 = value % 2;
+            }
+        }
+    }
+    for (t = 0; t < 2; t++) {
+        for (i = 0; i < 9; i++) {
+            lbl_803C5EA4._12[t][i] = lbl_803C6724._02[t][i];
+        }
+    }
+    fn_80066EAC(0);
+    fn_80066EAC(1);
+}
+
 // .text:0x0000893C size:0x4
 void fn_2_893C(void) {}
 
@@ -1132,7 +1224,7 @@ void fn_2_6AF4(void) {
         lbl_80354720[1][i]._0 = i;
         lbl_80354720[1][i]._2 = i;
         lbl_80354720[1][i]._1 = i;
-        lbl_803C6724._02[1][i] = lbl_8034E9A0._0000[(u8)(id / 9)][(u8)(id % 9)]._24;
+        lbl_803C6724._02[1][i] = lbl_8034E9A0._0000[(u8)(id / 9)][(u8)(id % 9)].CharID;
         lbl_803C6724._4A[1][i] = 1;
     }
     lbl_8034E9A0._46E0[0] = starMissionCompletionTracker._441D;
