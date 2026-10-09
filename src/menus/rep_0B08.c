@@ -165,7 +165,9 @@ extern struct {
     /* 0x197746 */ s16 _197746;
     /* 0x197748 */ u8 _197748[0x197756 - 0x197748];
     /* 0x197756 */ s16 _197756[14];
-    /* 0x197772 */ u8 _197772[0x197863 - 0x197772];
+    /* 0x197772 */ u8 _197772[0x197843 - 0x197772];
+    /* 0x197843 */ s8 _197843;
+    /* 0x197844 */ u8 _197844[0x197863 - 0x197844];
     /* 0x197863 */ s8 _197863;
     /* 0x197864 */ u8 _197864[0x1978F1 - 0x197864];
     /* 0x1978F1 */ u8 _1978F1;
@@ -177,6 +179,9 @@ extern s32 fn_80062890(s32 id);
 extern void fn_800B0A14_removeQueue(void);
 extern s32 fn_2_8CC88(s32);
 extern void fn_2_46C88(s32 arg0, s32 arg1);
+extern void fn_2_8F73C(s32 arg0, s32 arg1);
+extern void fn_2_9033C(s32 arg0, Vec* pos, f32 arg2);
+extern void fn_2_92654(s32 arg0, s32 arg1);
 extern f32 fn_2_4A18C(f32 angle);
 extern f32 fn_2_4A1E8(f32 x, f32 z);
 extern s16 fn_2_4A150(s16 angle);
@@ -318,6 +323,44 @@ void fn_2_70494(Obj0B08* obj) { obj->_94 = 2; }
 void fn_2_7045C(Obj0B08* obj) { lbl_2_data_2A208[obj->_94](obj); }
 
 // .text:0x00070110 size:0x34C
+void fn_2_70110(Obj0B08* obj) {
+    s32 index = obj->_80;
+    Obj0B08* other;
+    f32 diff;
+    s32 hit;
+    s32 i;
+    fn_2_68F08(obj->_80, 1);
+    fn_2_68FBC(obj->_80, 1);
+    if (obj->_CD == 1) {
+        other = &lbl_2_bss_1A8248->_1610[obj->_CE];
+        diff = fn_2_68940(obj->_CE, index);
+        if (other->_C3 == 7 && (obj->_94 == 0 || obj->_94 == 1)) {
+            if ((f32)fabs(diff) < 1.5707964f) {
+                lbl_2_bss_1A824C->_1978F1 = 0;
+            } else {
+                lbl_2_bss_1A824C->_1978F1 = 2;
+            }
+        } else {
+            lbl_2_bss_1A824C->_1978F1 = 1;
+        }
+    }
+    for (i = 1; i < 7; i++) {
+        hit = fn_2_68C80(index, i);
+        if (hit && i == 1 && lbl_2_bss_1A8248->_44F3 == 0) {
+            obj->_C4 = 2;
+            obj->_CB = i;
+            setObjType(&lbl_2_bss_1A8248->_1610[index], 3);
+            return;
+        }
+        if (hit && i >= 2 && i <= 6) {
+            obj->_CB = i;
+            setObjType(&lbl_2_bss_1A8248->_1610[index], 4);
+            return;
+        }
+        obj->_CB = -1;
+    }
+    obj->_94 = 1;
+}
 
 // .text:0x0006FE6C size:0x2A4
 void fn_2_6FE6C(Obj0B08* obj) {
@@ -793,6 +836,38 @@ void fn_2_6C970(Obj0B08* obj) { obj->_94 = 2; }
 void fn_2_6C938(Obj0B08* obj) { lbl_2_data_2A28C[obj->_94](obj); }
 
 // .text:0x0006C5E0 size:0x358
+void fn_2_6C5E0(Obj0B08* obj) {
+    s32 index = obj->_80;
+    s32 flag;
+    Vec pos;
+    fn_2_68F08(index, 1);
+    obj->_BA = 11;
+    if (lbl_2_bss_1A8248->_4439 == 1) {
+        memcpy(&obj->_74, &lbl_2_data_2EA4[40], sizeof(Vec));
+        flag = 1;
+    } else if (obj->_00.x > lbl_2_data_2EA4[40].x && obj->_00.z > lbl_2_data_2EA4[40].z) {
+        memcpy(&obj->_74, &lbl_2_data_2EA4[42], sizeof(Vec));
+        flag = 0;
+    } else {
+        memcpy(&obj->_74, &lbl_2_data_2EA4[40], sizeof(Vec));
+        flag = 1;
+    }
+    fn_2_6A450(index, obj->_74.x, obj->_74.z);
+    fn_2_68FBC(index, 0);
+    if (lbl_2_bss_1A824C->_197843 == 0) {
+        pos.x = 2.0f * obj->_00.x;
+        pos.y = 2.0f * (0.3f + obj->_00.y);
+        pos.z = 2.0f * obj->_00.z;
+        fn_2_9033C(0x1C, &pos, 0.0f);
+        fn_2_92654(0x1C, 10);
+        fn_2_8F73C(0x1C, 1);
+    }
+    if (flag == 1) {
+        obj->_94 = 1;
+    } else {
+        obj->_94 = 2;
+    }
+}
 
 // .text:0x0006C348 size:0x298
 void fn_2_6C348(Obj0B08* obj) {
