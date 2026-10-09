@@ -14,6 +14,7 @@ struct Unk67E0;
 struct Unk0060;
 
 void fn_1_C5A8(void);
+void fn_1_C9E0(struct UnkCamera0610* arg0);
 void fn_1_CB9C(s32 arg0);
 void fn_1_CC24(void);
 void fn_1_CCC8(void);

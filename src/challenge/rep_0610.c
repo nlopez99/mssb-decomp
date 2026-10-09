@@ -3,10 +3,7 @@
 #include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/mtx.h"
-#include "Dolphin/GX/GXTransform.h"
-#include "Dolphin/GX/GXGeometry.h"
-#include "Dolphin/GX/GXPixel.h"
-#include "Dolphin/GX/GXTev.h"
+#include "Dolphin/gx.h"
 #include "C3/control.h"
 #include "string.h"
 
@@ -188,6 +185,7 @@ extern void fn_80026130(s32, void*, f32);
 extern void fn_800385F0(struct Unk30C0*, f32, f32, f32, f32);
 extern void fn_80037AA0(struct Unk30C0*, s32, void (*)(s32), u16, UnkTimer0610*);
 extern void fn_800B0A14_removeQueue(void);
+extern void fn_1_F2C(s32, s32, s32);
 extern void fn_8002F1AC(Vec* pos, u32 id);
 extern void fn_8002F258(Vec* pos, u32 id, void* params);
 extern void minigamesSetSomePointers(void);
@@ -269,6 +267,7 @@ extern u8 lbl_1_data_ABA8;
 extern Vec lbl_1_data_AD0C;
 extern f32 lbl_1_data_ADC0;
 extern f32 lbl_1_data_F568;
+extern f32 lbl_1_data_F570[6];
 extern u8 lbl_1_data_ADC4[0x1C];
 extern u8 lbl_1_data_ADE0[];
 
@@ -340,11 +339,17 @@ static u8 lbl_1_bss_3216;
 static u8 lbl_1_bss_3215;
 static u8 lbl_1_bss_3214;
 static struct Unk30C0 {
-    /* 0x00 */ u8 _00[0x50];
-    /* 0x50 */ f32 _50;
-    /* 0x54 */ u8 _54[0x58 - 0x54];
-    /* 0x58 */ Mtx _58;
-    /* 0x88 */ u8 _88[0x154 - 0x88];
+    /* 0x000 */ Vec _000;
+    /* 0x00C */ Vec _00C;
+    /* 0x018 */ u8 _018[0x50 - 0x18];
+    /* 0x050 */ f32 _050;
+    /* 0x054 */ u8 _054[0x58 - 0x54];
+    /* 0x058 */ Mtx _058;
+    /* 0x088 */ u8 _088[0x128 - 0x88];
+    /* 0x128 */ Vec _128;
+    /* 0x134 */ u8 _134[0x140 - 0x134];
+    /* 0x140 */ Vec _140;
+    /* 0x14C */ u8 _14C[0x154 - 0x14C];
 } lbl_1_bss_30C0;
 static s32 lbl_1_bss_30BC;
 static u8 lbl_1_bss_30B8;
@@ -704,6 +709,8 @@ void fn_1_12F18(UnkCamera0610* arg0) {
 }
 
 // .text:0x00012820 size:0x1B0
+// Only i and &arg0->_34[i] swap r30 and r31; declaration orders and the
+// permuter (only a dead `if (1)`) did not fix it
 void fn_1_12820(Unk0060* arg0, Mtx arg1) {
     GXColor color = { 0x64, 0x72, 0x6C, 0xFF };
     Mtx m;
@@ -1302,7 +1309,7 @@ void fn_1_CCC8(void) {
         } else {
             fn_800385F0(&lbl_1_bss_30C0, -1.0f, 0.5f, 0.1f, 1.0f);
         }
-        lbl_1_bss_30C0._50 = lbl_1_data_F568;
+        lbl_1_bss_30C0._050 = lbl_1_data_F568;
         fn_80037AA0(&lbl_1_bss_30C0, 0, fn_1_CB9C, task->_18, task->_14);
         fn_800B0A14_removeQueue();
     }
@@ -1329,9 +1336,37 @@ void fn_1_CB9C(s32 arg0) {
     if (arg0 != 0) {
         lbl_1_bss_30BC = 0;
     } else {
-        PSMTXCopy(lbl_1_data_F4F8[lbl_803CBBC0]._08, lbl_1_bss_30C0._58);
+        PSMTXCopy(lbl_1_data_F4F8[lbl_803CBBC0]._08, lbl_1_bss_30C0._058);
         fn_800A7D4C(8, &lbl_1_data_F4F8[lbl_803CBBC0]);
     }
+}
+
+// .text:0x0000C9E0 size:0x1BC
+void fn_1_C9E0(UnkCamera0610* arg0) {
+    Mtx m;
+    Vec v;
+    fn_1_F2C(4, 0, 0);
+    PSMTXConcat(lbl_1_bss_68FC._10, arg0->_08, m);
+    GXLoadPosMtxImm(m, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+    GXSetZMode(GX_TRUE, GX_ALWAYS, GX_TRUE);
+    GXBegin(GX_LINES, GX_VTXFMT0, 6);
+    GXPosition3f32(lbl_1_bss_30C0._00C.x, lbl_1_bss_30C0._00C.y, lbl_1_bss_30C0._00C.z);
+    GXColor1u32(0xFF0000FF);
+    GXPosition3f32(lbl_1_bss_30C0._000.x, lbl_1_bss_30C0._000.y, lbl_1_bss_30C0._000.z);
+    GXColor1u32(0x00FF00FF);
+    GXPosition3f32(0.0f, 0.0f, 0.0f);
+    GXColor1u32(0x000000FF);
+    PSVECScale(&lbl_1_bss_30C0._128, lbl_1_data_F570[0], &v);
+    GXPosition3f32(v.x, v.y, v.z);
+    GXColor1u32(0x000000FF);
+    GXPosition3f32(0.0f, 0.0f, 0.0f);
+    GXColor1u32(0xFFFFFFFF);
+    PSVECScale(&lbl_1_bss_30C0._140, lbl_1_data_F570[0], &v);
+    GXPosition3f32(v.x, v.y, v.z);
+    GXColor1u32(0xFFFFFFFF);
+    GXEnd();
 }
 
 // .text:0x0000C5A8 size:0x4
