@@ -31,7 +31,7 @@ extern void fn_80021410(void);
 extern void fn_80035CA4(s32 id);
 extern void fn_2_11A0(s32 arg0);
 extern void fn_80021AC0(s32 team, s32 slot);
-extern void fn_800AD038(s32 arg0);
+extern void fn_800AD038(void* arg0);
 extern void fn_80066EAC(s32 team);
 extern s32 fn_80050760(s32 team, u16 held, u16 trg, u16 rep, s32 arg4);
 extern void fn_800203E0(int, s8);
@@ -159,7 +159,7 @@ extern struct {
     /* 0x4380 */ u8 _4380[6][4][0x12];
     /* 0x4530 */ u8 _4530[0x46E0 - 0x4530];
     /* 0x46E0 */ s32 _46E0[2];
-    /* 0x46E8 */ s32 _46E8;
+    /* 0x46E8 */ void* _46E8;
     /* 0x46EC */ u8 _46EC[0x46F8 - 0x46EC];
     /* 0x46F8 */ s8 _46F8[4];
     /* 0x46FC */ s8 _46FC[4];
