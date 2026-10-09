@@ -97,7 +97,7 @@ game/rep_DB8.c:
 	.data       start:0x00004290 end:0x000065F0
 
 game/rep_E08.c:
-	.text       start:0x00060768 end:0x000674E0
+	.text       start:0x00060768 end:0x0006750C
 	.rodata     start:0x00000E08 end:0x00000EA0
 	.data       start:0x000065F0 end:0x00006804
 
