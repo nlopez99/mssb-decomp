@@ -508,7 +508,7 @@ static AramEntry7730 lbl_1_data_10518[21] = {
     { 0x0000040B, 0x400D04E0, 0x075FD000, 0x00087390 },
 };
 
-static void (*lbl_1_data_10668[1])(s16) = { fn_1_1DE60 };
+static s16 (*lbl_1_data_10668[1])(s16, u16, u16, u16) = { fn_1_1DE60 };
 
 static void (*lbl_1_data_1066C[1])(s16) = { fn_1_1DE5C };
 
@@ -1676,6 +1676,53 @@ s16 fn_1_1E290(s16 sel, u16 held, u16 pressed, u16 repeat) {
 
 // .text:0x0001E28C size:0x4
 void fn_1_1E28C(void) {}
+
+// .text:0x0001DE60 size:0x42C
+// 99.03%: as in fn_1_1E290, each inlined fn_1_1DD48 loads 0.01f before the field in the
+// target, which also takes lbl_1_bss_6BE4's address into r5.
+s16 fn_1_1DE60(s16 sel, u16 held, u16 pressed, u16 repeat) {
+    if (sel < 0 || sel >= 4) {
+        return sel;
+    }
+    {
+        if (repeat & 1) {
+            switch (sel) {
+            case 0:
+                lbl_1_bss_6BE4._0 = fn_1_1DD48(held, 1, lbl_1_bss_6BE4._0, 0.0001f, 0.01f, 0.1f, 0.0f, 1.0f);
+                break;
+            case 1:
+                lbl_1_bss_6BE4._4.x = fn_1_1DD48(held, 1, lbl_1_bss_6BE4._4.x, 0.0001f, 0.01f, 0.1f, -10.0f, 10.0f);
+                break;
+            case 2:
+                lbl_1_bss_6BE4._4.y = fn_1_1DD48(held, 1, lbl_1_bss_6BE4._4.y, 0.0001f, 0.01f, 0.1f, -10.0f, 10.0f);
+                break;
+            case 3:
+                lbl_1_bss_6BE4._4.z = fn_1_1DD48(held, 1, lbl_1_bss_6BE4._4.z, 0.0001f, 0.01f, 0.1f, -10.0f, 10.0f);
+                break;
+            }
+        } else if (repeat & 2) {
+            switch (sel) {
+            case 0:
+                lbl_1_bss_6BE4._0 = fn_1_1DD48(held, 0, lbl_1_bss_6BE4._0, 0.0001f, 0.01f, 0.1f, 0.0f, 1.0f);
+                break;
+            case 1:
+                lbl_1_bss_6BE4._4.x = fn_1_1DD48(held, 0, lbl_1_bss_6BE4._4.x, 0.0001f, 0.01f, 0.1f, -10.0f, 10.0f);
+                break;
+            case 2:
+                lbl_1_bss_6BE4._4.y = fn_1_1DD48(held, 0, lbl_1_bss_6BE4._4.y, 0.0001f, 0.01f, 0.1f, -10.0f, 10.0f);
+                break;
+            case 3:
+                lbl_1_bss_6BE4._4.z = fn_1_1DD48(held, 0, lbl_1_bss_6BE4._4.z, 0.0001f, 0.01f, 0.1f, -10.0f, 10.0f);
+                break;
+            }
+        } else if (repeat & 8) {
+            sel--;
+        } else if (repeat & 4) {
+            sel++;
+        }
+    }
+    return sel;
+}
 
 // .text:0x0001DE5C size:0x4
 void fn_1_1DE5C(s16 arg0) {}
