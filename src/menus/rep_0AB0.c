@@ -4411,6 +4411,141 @@ void fn_2_5FDC4(MenuTask0AB0* task, MenuItem0AB0* item) {
     }
 }
 
+// .text:0x0005F458 size:0x96C
+// d0 to d2 hold different digits in each case, as the original's registers show
+void fn_2_5F458(MenuTask0AB0* task, MenuItem0AB0* item) {
+    s32 value;
+    s32 d0;
+    s32 d1;
+    s32 d2;
+    s32 ones;
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 2:
+        if (item->_0A >= 0 && item->_0A <= 5) {
+            value = lbl_2_bss_1A824C->_197404._00[item->_0A];
+            switch (item->_0A) {
+            case 0:
+                lbl_80371C30[task->_14 + item->_0E]._00->_64 = 0x75;
+                d2 = (value / 1000) % 10;
+                d1 = (value / 100) % 10;
+                d0 = (value / 10) % 10;
+                ones = value % 10;
+                if (value < 1000) {
+                    d2 = 10;
+                }
+                if (value < 100) {
+                    d1 = 10;
+                }
+                if (value < 10) {
+                    d0 = 10;
+                }
+                fn_800363D8(task, item->_0E, 1, 6, ones);
+                fn_800363D8(task, item->_0E, 2, 6, d0);
+                fn_800363D8(task, item->_0E, 3, 6, d1);
+                fn_800363D8(task, item->_0E, 4, 6, d2);
+                break;
+            case 1:
+                if (value < 10) {
+                    lbl_80371C30[task->_14 + item->_0E]._00->_64 = 0x79;
+                } else if (value < 100) {
+                    lbl_80371C30[task->_14 + item->_0E]._00->_64 = 0x78;
+                } else if (value < 1000) {
+                    lbl_80371C30[task->_14 + item->_0E]._00->_64 = 0x77;
+                } else if (value < 10000) {
+                    lbl_80371C30[task->_14 + item->_0E]._00->_64 = 0x76;
+                }
+                fn_800363D8(task, item->_0E, 1, 6, value % 10);
+                fn_800363D8(task, item->_0E, 2, 6, (value / 10) % 10);
+                fn_800363D8(task, item->_0E, 3, 6, (value / 100) % 10);
+                fn_800363D8(task, item->_0E, 4, 6, (value / 1000) % 10);
+                break;
+            case 2:
+                if (value < 10) {
+                    lbl_80371C30[task->_14 + item->_0E]._00->_64 = 0x7D;
+                } else if (value < 100) {
+                    lbl_80371C30[task->_14 + item->_0E]._00->_64 = 0x7C;
+                }
+                fn_800363D8(task, item->_0E, 1, 6, value % 10);
+                fn_800363D8(task, item->_0E, 2, 6, (value / 10) % 10);
+                break;
+            case 3:
+                lbl_80371C30[task->_14 + item->_0E]._00->_64 = 0x7B;
+                d0 = (value / 100) % 10;
+                d1 = (value / 10) % 10;
+                ones = value % 10;
+                if (value < 100) {
+                    d0 = 10;
+                }
+                if (value < 10) {
+                    d1 = 10;
+                }
+                fn_800363D8(task, item->_0E, 1, 6, ones);
+                fn_800363D8(task, item->_0E, 2, 6, d1);
+                fn_800363D8(task, item->_0E, 3, 6, d0);
+                break;
+            case 4:
+                lbl_80371C30[task->_14 + item->_0E]._00->_64 = 0x7A;
+                d0 = (value / 1000) % 10;
+                d1 = (value / 100) % 10;
+                d2 = (value / 10) % 10;
+                ones = value % 10;
+                if (value < 1000) {
+                    d0 = 10;
+                }
+                if (value < 100) {
+                    d1 = 10;
+                }
+                if (value < 10) {
+                    d2 = 10;
+                }
+                fn_800363D8(task, item->_0E, 1, 6, ones);
+                fn_800363D8(task, item->_0E, 2, 6, d2);
+                fn_800363D8(task, item->_0E, 3, 6, d1);
+                fn_800363D8(task, item->_0E, 4, 6, d0);
+                break;
+            case 5:
+                if (value < 10) {
+                    lbl_80371C30[task->_14 + item->_0E]._00->_64 = 0x80;
+                } else if (value < 100) {
+                    lbl_80371C30[task->_14 + item->_0E]._00->_64 = 0x7F;
+                } else if (value < 1000) {
+                    lbl_80371C30[task->_14 + item->_0E]._00->_64 = 0x7E;
+                }
+                fn_800363D8(task, item->_0E, 1, 6, value % 10);
+                fn_800363D8(task, item->_0E, 2, 6, (value / 10) % 10);
+                fn_800363D8(task, item->_0E, 3, 6, (value / 100) % 10);
+                break;
+            }
+        }
+        lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0;
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
+        item->_04 = 0x25;
+        break;
+    case 5:
+        item->_06 = 0xA;
+        item->_04 = 6;
+        break;
+    case 6:
+        if (item->_06-- <= 0) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        }
+        break;
+    case 1:
+    case 0x25:
+        break;
+    }
+}
+
 // .text:0x0005F2A8 size:0x1B0
 void fn_2_5F2A8(MenuTask0AB0* task, MenuItem0AB0* item) {
     s16 state = fn_2_53BC8(item);
