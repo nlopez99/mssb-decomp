@@ -3948,168 +3948,167 @@ void fn_3_4BA0C(void) {
     UnkAC8Fielder* f;
     s32 i;
     s32 base;
-    s32 fielder;
+    s16 fielder;
     s32 action;
     s32 pick;
     s32 farBase = -1;
-    s32 first = -1;
-    s32 second = -1;
-    s32 third = -1;
+    s32 first;
+    s32 second;
+    s32 third;
     f32 d0;
-    f32 d1 = 999.9f;
-    f32 d2 = 999.9f;
+    f32 d1;
+    f32 d2;
 
-    if (g_Strikes.outs >= 3 || !g_RunningLogic._10) {
-        return;
-    }
-    for (base = 0; base < 4; base++) {
-        if (g_FieldingLogic._0D0[base] == -1) {
-            break;
-        }
-    }
-    if (g_Fielders[0]._1D8[0] == 1 && g_Fielders[0]._18C != 1 && g_Fielders[0]._18C != 3) {
-        g_Fielders[0]._1D8[0] = 0;
-    }
-    for (i = 0; i < 4; i++) {
-        if (g_FieldingLogic._101[i] == 0) {
-            fielder = g_FieldingLogic._0D0[i];
-            if (fielder >= 0) {
-                action = g_FieldingLogic._0F8[fielder];
-                switch (action) {
-                case 7:
-                    if (i == g_FieldingLogic._0CC) {
-                        if (!(g_Fielders[fielder]._0A8[g_FieldingLogic._0CC] < 3.0f)) {
-                            fn_3_4B8D0(fielder);
-                        }
-                    } else if (g_Fielders[fielder]._0A8[i] > 2.5f) {
-                        fn_3_4B8D0(fielder);
-                    }
-                    break;
-                case 1:
-                case 10:
-                case 11:
-                    if (g_Fielders[fielder]._0A8[i] > 2.0f) {
-                        fn_3_4B8D0(fielder);
-                    }
-                    break;
-                }
-                if (action == 2 && g_Fielders[g_FieldingLogic._0D0[i]]._0A8[i] > 25.0f && farBase == -1) {
-                    farBase = i;
-                }
-            }
-        }
-    }
-    for (i = 0; i < 6; i++) {
-        if (g_Fielders[i]._1ED == 0 &&
-            (g_FieldingLogic._0F8[i] == 0 || g_FieldingLogic._0F8[i] == 8 || g_FieldingLogic._0F8[i] == 9 ||
-             (g_FieldingLogic._0F8[i] == 9 && g_FieldingLogic._0D8 == i))) {
-            if (first == -1) {
-                first = i;
-            } else if (second == -1) {
-                second = i;
-            } else {
-                third = i;
-            }
-        }
-    }
-    if (base < 4) {
-        if (g_Ball.fielderWBallIndex >= 0) {
-            f = &g_Fielders[g_Ball.fielderWBallIndex];
-            if (f->_0A8[base] <= lbl_3_data_4780[f->_1C9]) {
-                f->_18C = base;
-                g_FieldingLogic._0D0[base] = g_Ball.fielderWBallIndex;
-                f->_1D7 = 1;
-                g_FieldingLogic._101[base] = 1;
-                return;
-            }
-        }
-        if (first != -1) {
-            d0 = dolsqrtf2(SQ(g_Fielders[first]._000 - lbl_3_data_4444[base].x) +
-                           SQ(g_Fielders[first]._008 - lbl_3_data_4444[base].z));
-            if (second >= 0) {
-                d1 = dolsqrtf2(SQ(g_Fielders[second]._000 - lbl_3_data_4444[base].x) +
-                               SQ(g_Fielders[second]._008 - lbl_3_data_4444[base].z));
-            }
-            if (third >= 0) {
-                d2 = dolsqrtf2(SQ(g_Fielders[third]._000 - lbl_3_data_4444[base].x) +
-                               SQ(g_Fielders[third]._008 - lbl_3_data_4444[base].z));
-            }
-            if (d0 < d1) {
-                if (d0 < d2) {
-                    third = first;
-                }
-            } else if (d1 < d2) {
-                third = second;
-            }
-            f = &g_Fielders[third];
-            f->_18C = base;
-            f->_1D7 = 1;
-            fn_3_5985C(third, 1);
-            g_FieldingLogic._0D0[base] = third;
-            if (g_FieldingLogic._0D8 == third) {
-                g_FieldingLogic._0D8 = -1;
-                g_FieldingLogic.playerAtMoundCutoffLocation = 0;
-            }
-        }
-    } else if (farBase >= 0) {
-        pick = -1;
-        for (i = 0; i < 6; i++) {
-            if (g_FieldingLogic._0F8[i] == 0 || g_FieldingLogic._0F8[i] == 8 || g_FieldingLogic._0F8[i] == 9) {
-                if (g_Fielders[i]._0A8[farBase] < 20.0f) {
-                    if (pick == -1) {
-                        pick = i;
-                    } else if (3.0f + g_Fielders[i]._0A8[farBase] < g_Fielders[pick]._0A8[farBase]) {
-                        pick = i;
-                    }
-                }
-            }
-        }
-        if (pick >= 0) {
-            fn_3_5985C(g_FieldingLogic._0D0[farBase], 12);
-            g_Fielders[g_FieldingLogic._0D0[farBase]]._1D5 = 3;
-            fn_3_4B8D0(g_FieldingLogic._0D0[farBase]);
-            f = &g_Fielders[pick];
-            f->_18C = farBase;
-            f->_1D7 = 1;
-            fn_3_5985C(pick, 1);
-            g_FieldingLogic._0D0[farBase] = pick;
-            if (g_FieldingLogic._0D8 == pick) {
-                g_FieldingLogic._0D8 = -1;
-                g_FieldingLogic.playerAtMoundCutoffLocation = 0;
-            }
-        }
-    } else if ((g_FieldingLogic._0D8 == -1 || g_Fielders[g_FieldingLogic._0D8]._18C != 5) &&
-               (g_Ball.ballState != 0 || g_Ball.ballZoneAwayFromHome > 1)) {
-        for (i = 0; i < 9; i++) {
-            if (g_FieldingLogic._0F8[i] == 7) {
-                if (g_Fielders[i]._0B8 < 8.0f) {
-                    return;
-                }
+    if (g_Strikes.outs < 3 && g_RunningLogic._10) {
+        for (base = 0; base < 4; base++) {
+            if (g_FieldingLogic._0D0[base] == -1) {
                 break;
             }
         }
-        if (first >= 0) {
-            d0 = g_Fielders[first]._0B8;
-            if (second >= 0) {
-                d1 = g_Fielders[second]._0B8;
+        if (g_Fielders[0]._1D8[0] == 1 && g_Fielders[0]._18C != 1 && g_Fielders[0]._18C != 3) {
+            g_Fielders[0]._1D8[0] = 0;
+        }
+        for (i = 0; i < 4; i++) {
+            if (g_FieldingLogic._101[i] == 0) {
+                fielder = g_FieldingLogic._0D0[i];
+                if (fielder >= 0) {
+                    action = g_FieldingLogic._0F8[fielder];
+                    if (action == 7) {
+                        if (i == g_FieldingLogic._0CC) {
+                            if (!(g_Fielders[fielder]._0A8[g_FieldingLogic._0CC] < 3.0f)) {
+                                fn_3_4B8D0(fielder);
+                            }
+                        } else if (g_Fielders[fielder]._0A8[i] > 2.5f) {
+                            fn_3_4B8D0(fielder);
+                        }
+                    } else if (action == 1 || action == 10 || action == 11) {
+                        if (g_Fielders[fielder]._0A8[i] > 2.0f) {
+                            fn_3_4B8D0(fielder);
+                        }
+                    }
+                    if (action == 2 && g_Fielders[g_FieldingLogic._0D0[i]]._0A8[i] > 25.0f && farBase == -1) {
+                        farBase = i;
+                    }
+                }
             }
-            if (third >= 0) {
-                d2 = g_Fielders[second]._0B8;
+        }
+        third = -1;
+        d2 = 999.9f;
+        second = -1;
+        d1 = 999.9f;
+        first = -1;
+        for (i = 0; i < 6; i++) {
+            if (g_Fielders[i]._1ED == 0 &&
+                (g_FieldingLogic._0F8[i] == 0 || g_FieldingLogic._0F8[i] == 8 || g_FieldingLogic._0F8[i] == 9 ||
+                 (g_FieldingLogic._0F8[i] == 9 && g_FieldingLogic._0D8 == i))) {
+                if (first == -1) {
+                    first = i;
+                } else if (second == -1) {
+                    second = i;
+                } else {
+                    third = i;
+                }
             }
-            if (d0 < d1) {
-                if (!(d0 < d2)) {
+        }
+        if (base < 4) {
+            if (g_Ball.fielderWBallIndex >= 0) {
+                f = &g_Fielders[g_Ball.fielderWBallIndex];
+                if (f->_0A8[base] <= lbl_3_data_4780[f->_1C9]) {
+                    f->_18C = base;
+                    g_FieldingLogic._0D0[base] = g_Ball.fielderWBallIndex;
+                    f->_1D7 = 1;
+                    g_FieldingLogic._101[base] = 1;
+                    return;
+                }
+            }
+            if (first != -1) {
+                d0 = dolsqrtf2(SQ(g_Fielders[first]._000 - lbl_3_data_4444[base].x) +
+                               SQ(g_Fielders[first]._008 - lbl_3_data_4444[base].z));
+                if (second >= 0) {
+                    d1 = dolsqrtf2(SQ(g_Fielders[second]._000 - lbl_3_data_4444[base].x) +
+                                   SQ(g_Fielders[second]._008 - lbl_3_data_4444[base].z));
+                }
+                if (third >= 0) {
+                    d2 = dolsqrtf2(SQ(g_Fielders[third]._000 - lbl_3_data_4444[base].x) +
+                                   SQ(g_Fielders[third]._008 - lbl_3_data_4444[base].z));
+                }
+                if (d0 < d1) {
+                    if (d0 < d2) {
+                        third = first;
+                    }
+                } else if (d1 < d2) {
+                    third = second;
+                }
+                f = &g_Fielders[third];
+                f->_18C = base;
+                f->_1D7 = 1;
+                fn_3_5985C(third, 1);
+                g_FieldingLogic._0D0[base] = third;
+                if (g_FieldingLogic._0D8 == third) {
+                    g_FieldingLogic._0D8 = -1;
+                    g_FieldingLogic.playerAtMoundCutoffLocation = 0;
+                }
+            }
+        } else if (farBase >= 0) {
+            pick = -1;
+            for (i = 0; i < 6; i++) {
+                if (g_FieldingLogic._0F8[i] == 0 || g_FieldingLogic._0F8[i] == 8 || g_FieldingLogic._0F8[i] == 9) {
+                    if (g_Fielders[i]._0A8[farBase] < 20.0f) {
+                        if (pick == -1) {
+                            pick = i;
+                        } else if (3.0f + g_Fielders[i]._0A8[farBase] < g_Fielders[pick]._0A8[farBase]) {
+                            pick = i;
+                        }
+                    }
+                }
+            }
+            if (pick >= 0) {
+                fn_3_5985C(g_FieldingLogic._0D0[farBase], 12);
+                g_Fielders[g_FieldingLogic._0D0[farBase]]._1D5 = 3;
+                fn_3_4B8D0(g_FieldingLogic._0D0[farBase]);
+                f = &g_Fielders[pick];
+                f->_18C = farBase;
+                f->_1D7 = 1;
+                fn_3_5985C(pick, 1);
+                g_FieldingLogic._0D0[farBase] = pick;
+                if (g_FieldingLogic._0D8 == pick) {
+                    g_FieldingLogic._0D8 = -1;
+                    g_FieldingLogic.playerAtMoundCutoffLocation = 0;
+                }
+            }
+        } else if ((g_FieldingLogic._0D8 == -1 || g_Fielders[g_FieldingLogic._0D8]._18C != 5) &&
+                   (g_Ball.ballState != 0 || g_Ball.ballZoneAwayFromHome > 1)) {
+            for (i = 0; i < 9; i++) {
+                if (g_FieldingLogic._0F8[i] == 7) {
+                    if (g_Fielders[i]._0B8 < 8.0f) {
+                        return;
+                    }
+                    break;
+                }
+            }
+            if (first >= 0) {
+                d0 = g_Fielders[first]._0B8;
+                if (second >= 0) {
+                    d1 = g_Fielders[second]._0B8;
+                }
+                if (third >= 0) {
+                    d2 = g_Fielders[second]._0B8;
+                }
+                if (d0 < d1) {
+                    if (!(d0 < d2)) {
+                        first = third;
+                    }
+                } else if (d1 < d2) {
+                    first = second;
+                } else {
                     first = third;
                 }
-            } else if (d1 < d2) {
-                first = second;
-            } else {
-                first = third;
+                f = &g_Fielders[first];
+                f->_18C = 5;
+                f->_1D7 = 2;
+                fn_3_5985C(first, 14);
+                g_FieldingLogic._0D8 = first;
             }
-            f = &g_Fielders[first];
-            f->_18C = 5;
-            f->_1D7 = 2;
-            fn_3_5985C(first, 14);
-            g_FieldingLogic._0D8 = first;
         }
     }
 }
@@ -8818,6 +8817,13 @@ void fn_3_34A40(s32 fielder) {
     f32 scale;
     f32 x;
     f32 z;
+    f32 dx;
+    f32 dz;
+    f32 dx2;
+    f32 dz2;
+    f32 speed;
+    s32 extra;
+    s32 frames;
 
     if (g_Ball.fielderWBallIndex >= 0 && g_Ball.fielderWBallIndex != fielder) {
         if (f->_050 == 0.0f) {
@@ -8862,9 +8868,24 @@ void fn_3_34A40(s32 fielder) {
                 f->_1D6 = 8;
             }
         } else if (g_Ball.AtBat_ContactResult == 0) {
-            if (g_Ball.framesUntilBallHitsGround - fn_3_52560(fielder, g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x,
-                                                             g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z) >
-                10) {
+            x = g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x;
+            z = g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z;
+            if (x == f->_000 && z == f->_008) {
+                frames = 1;
+            } else {
+                dx = x - f->_000;
+                dz = z - f->_008;
+                dx2 = dx * dx;
+                dz2 = dz * dz;
+                dist = dolsqrtf2(dx2 + dz2);
+                extra = f->_1D1 / 2;
+                speed = f->_058;
+                if (speed == 0.0f) {
+                    speed = 1.0f;
+                }
+                frames = extra + (s32)(dist / speed);
+            }
+            if (g_Ball.framesUntilBallHitsGround - frames > 10) {
                 fn_3_52F4C(fielder, g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x,
                            g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z);
             } else {
@@ -8875,9 +8896,24 @@ void fn_3_34A40(s32 fielder) {
                                    g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z);
                         break;
                     }
-                    if (i - fn_3_52560(fielder, g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x,
-                                       g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z) >
-                        5) {
+                    x = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x;
+                    z = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z;
+                    if (x == f->_000 && z == f->_008) {
+                        frames = 1;
+                    } else {
+                        dx = x - f->_000;
+                        dz = z - f->_008;
+                        dx2 = dx * dx;
+                        dz2 = dz * dz;
+                        dist = dolsqrtf2(dx2 + dz2);
+                        extra = f->_1D1 / 2;
+                        speed = f->_058;
+                        if (speed == 0.0f) {
+                            speed = 1.0f;
+                        }
+                        frames = extra + (s32)(dist / speed);
+                    }
+                    if (i - frames > 5) {
                         fn_3_52F4C(fielder, g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x,
                                    g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z);
                         break;
