@@ -140,6 +140,12 @@ typedef struct UnkTaskF50C {
     /* 0x3F */ u8 _3F;
 } UnkTaskF50C;
 
+typedef struct UnkTaskMenu0610 {
+    /* 0x00 */ void (*_00)(void);
+    /* 0x04 */ u8 _04[0x20 - 0x4];
+    /* 0x20 */ u8 _20;
+} UnkTaskMenu0610;
+
 // A task whose state lives in two bytes at 0x14
 typedef struct UnkTaskState0610 {
     /* 0x00 */ void (*_00)(void);
@@ -188,6 +194,7 @@ extern void fn_80026130(s32, void*, f32);
 extern void fn_800385F0(struct Unk30C0*, f32, f32, f32, f32);
 extern void fn_80037AA0(struct Unk30C0*, s32, void (*)(s32), u16, UnkTimer0610*);
 extern void fn_800B0A14_removeQueue(void);
+extern void minigamesSetSomePointers(void);
 extern void fn_800BD2CC(s32 arg0, GXColor color);
 extern void fn_800BD670(void* model, Mtx mtx);
 extern void fn_800BDA94(Unk0060Elem* model, Mtx mtx);
@@ -500,6 +507,75 @@ void fn_1_15170(void) {
         fn_1_148CC();
     } else if (lbl_803C77B8[0]._04 & 0x100) {
         lbl_1_bss_5F71 = 1;
+    }
+}
+
+// .text:0x00014FB8 size:0x1B8
+void fn_1_14FB8(void) {
+    u16 buttons = lbl_803C77B8[0]._04;
+    UnkTaskMenu0610* task = (UnkTaskMenu0610*)lbl_803CC1B8;
+    if (buttons & 8) {
+        if (task->_20 != 0) {
+            task->_20--;
+        } else {
+            task->_20 = 8;
+        }
+    } else if (buttons & 4) {
+        task->_20++;
+        if (task->_20 == 9) {
+            task->_20 = 0;
+        }
+    } else if (lbl_803C77B8[0]._00 & 0x100) {
+        switch (task->_20) {
+        case 0:
+            if (buttons & 0x100) {
+                lbl_1_bss_5F71 = 3;
+            }
+            break;
+        case 1:
+            if (buttons & 0x100) {
+                lbl_1_bss_5F71 = 4;
+            }
+            break;
+        case 2:
+            if (buttons & 0x100) {
+                lbl_1_bss_5F71 = 5;
+            }
+            break;
+        case 3:
+            if (buttons & 0x100) {
+                lbl_1_bss_5F71 = 6;
+            }
+            break;
+        case 4:
+            if (lbl_803C77B8[0]._02 & 0x100) {
+                lbl_1_bss_5F71 = 2;
+            }
+            break;
+        case 5:
+            if (lbl_803C77B8[0]._02 & 0x100) {
+                lbl_1_bss_5F71 = 8;
+            }
+            break;
+        case 6:
+            if (lbl_803C77B8[0]._02 & 0x100) {
+                lbl_1_bss_5F71 = 7;
+            }
+            break;
+        case 7:
+            if (buttons & 0x100) {
+                lbl_1_bss_5F71 = 9;
+            }
+            break;
+        case 8:
+            if (buttons & 0x100) {
+                lbl_1_bss_5F71 = 10;
+            }
+            break;
+        }
+    } else if (lbl_803C77B8[0]._02 & 0x200) {
+        lbl_1_bss_5F71 = 0;
+        minigamesSetSomePointers();
     }
 }
 
