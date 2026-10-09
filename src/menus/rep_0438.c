@@ -1,6 +1,7 @@
 #include "menus/rep_0438.h"
 #include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
+#include "Dolphin/os.h"
 #include "string.h"
 
 extern struct {
@@ -10,7 +11,9 @@ extern struct {
 } lbl_8034E978;
 
 extern struct {
-    /* 0x0000 */ u8 _0000[0x46E0];
+    /* 0x0000 */ u8 _0000[0x4380];
+    /* 0x4380 */ u8 _4380[6][4][0x12];
+    /* 0x4530 */ u8 _4530[0x46E0 - 0x4530];
     /* 0x46E0 */ s32 _46E0;
     /* 0x46E4 */ s32 _46E4;
     /* 0x46E8 */ s32 _46E8;
@@ -79,6 +82,25 @@ extern struct {
     /* 0x4 */ u16 _4;
 }* lbl_803CBBCC;
 
+extern struct {
+    /* 0x00 */ u8 _00[0xF4];
+    /* 0xF4 */ u8 _F4;
+} lbl_80361B20;
+
+extern struct {
+    /* 0x00 */ u8 _00[2];
+    /* 0x02 */ u8 _02[2][9];
+    /* 0x14 */ u8 _14[2][9];
+} lbl_803C6724;
+
+extern struct {
+    /* 0x0000 */ u8 _0000[0x40BB];
+    /* 0x40BB */ u8 _40BB[9][6];
+} starMissionCompletionTracker;
+
+extern u8 lbl_800FE930[2][6];
+extern u8 lbl_80108EC4[];
+
 extern s8 lbl_2_bss_100B4;
 extern u16 lbl_2_bss_AE0;
 
@@ -87,6 +109,7 @@ extern void fn_800628D4(s32 charID);
 extern void fn_8004EEF4(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern s32 fn_2_15104(s32 arg0, s32 arg1, u8 arg2, s32 arg3);
 extern void fn_2_15E80(s32 arg0);
+extern void fn_800678CC(s32 arg0);
 
 // .text:0x00012B60 size:0xD4
 void fn_2_12B60(void) {
@@ -201,6 +224,33 @@ void fn_2_1216C(void) {
         ports[lbl_8034E9A0._46F8[0]] = 1;
     }
     fn_8004EEF4(ports[0], ports[1], ports[2], ports[3], 1);
+}
+
+// .text:0x00012238 size:0x194
+// 73.81%: the target unrolls the second loop by three under ctr with no extsb;
+// an int counter unrolls it fully, an s8 one keeps it rolled with extsb.
+void fn_2_12238(void) {
+    s32 i;
+    s32 captain;
+    s32 id;
+    s8 j;
+
+    id = lbl_800FE930[lbl_80361B20._F4][lbl_2_bss_F410._10[0]];
+    for (i = 0; i < 6; i++) {
+        if (lbl_80108EC4[i] == id) {
+            captain = i;
+            break;
+        }
+    }
+    if (i == 6) {
+        OSPanic("teamselect.c", 1113, " Captain Not Found ");
+    }
+    for (j = 0; j < 9; j++) {
+        lbl_803C6724._02[0][j] = lbl_8034E9A0._4380[captain][0][j];
+        lbl_803C6724._14[0][j] = j;
+        starMissionCompletionTracker._40BB[j][0] = j;
+    }
+    fn_800678CC(0);
 }
 
 // .text:0x000120D0 size:0x9C
