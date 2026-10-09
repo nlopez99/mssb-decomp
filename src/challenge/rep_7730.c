@@ -632,7 +632,7 @@ static struct {
     /* 0x54 */ u8 _54[0x58 - 0x54];
 } lbl_1_bss_43EE0;
 static Vec lbl_1_bss_F6E0[160][112];
-static f32 lbl_1_bss_76E0[64 * 128];
+static f32 lbl_1_bss_76E0[2][32 * 128];
 static f32 lbl_1_bss_74E0[128];
 static RopeNode7730 lbl_1_bss_6FE0[20];
 static SimParams7730 lbl_1_bss_6FB8;
@@ -1296,9 +1296,205 @@ void fn_1_24410(void) {
     for (j = 0; j < 32; j++) {
         idx = (rand() % 32) * 128;
         idx += rand() % 128;
-        lbl_1_bss_76E0[idx] = 1.0f;
+        lbl_1_bss_76E0[0][idx] = 1.0f;
     }
     ((WaveTask7730*)lbl_803CC1B8)->_00 = fn_1_23B54;
+}
+
+// .text:0x00023B54 size:0x8BC
+// 98.05%: registers differ in the inlined fn_1_22F4C (index offsets) and in the height
+// loop (16.0f and the conversion constant swap f1/f2).
+void fn_1_23B54(void) {
+    WaveTask7730* task = lbl_803CC1B8;
+    s32 i;
+    s32 idx;
+    s32 j;
+    s32 n;
+    s32 frame;
+    f32 x;
+    f32 fx;
+    f32 fy;
+    f32 y;
+    f32 max;
+    f32 min;
+    Vec* p;
+
+    for (i = 0; i < 8; i++) {
+        switch (i) {
+        case 0:
+            if (i == task->_26) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    if (task->_27 == 2) {
+                        task->_27 = 112;
+                    }
+                    task->_27--;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    if (task->_27 == 112) {
+                        task->_27 = 2;
+                    }
+                    task->_27++;
+                }
+            }
+            break;
+        case 1:
+            if (i == task->_26) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    if (task->_28 == 2) {
+                        task->_28 = 160;
+                    }
+                    task->_28--;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    if (task->_28 == 160) {
+                        task->_28 = 2;
+                    }
+                    task->_28++;
+                }
+            }
+            break;
+        case 2:
+            if (i == task->_26 && (lbl_803C77B8[0]._04 & 3)) {
+                task->_2A = !task->_2A;
+            }
+            break;
+        case 3:
+            if (i == task->_26) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    if (task->_14 > 1.0f) {
+                        task->_14 -= 1.0f;
+                    }
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    if (task->_14 < 512.0f) {
+                        task->_14 += 1.0f;
+                    }
+                }
+            }
+            break;
+        case 4:
+            if (i == task->_26) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    if (task->_18 > 1.0f) {
+                        task->_18 -= 1.0f;
+                    }
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    if (task->_18 < 512.0f) {
+                        task->_18 += 1.0f;
+                    }
+                }
+            }
+            break;
+        case 5:
+            if (i == task->_26 && (lbl_803C77B8[0]._04 & 3)) {
+                task->_2B = !task->_2B;
+            }
+            break;
+        case 6:
+            if (i == task->_26) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    if (task->_1C > 0.0f) {
+                        task->_1C -= 0.001f;
+                    }
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    if (task->_1C < 1.0f) {
+                        task->_1C += 0.001f;
+                    }
+                }
+            }
+            break;
+        case 7:
+            if (i == task->_26) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    if (task->_20 > 0.0f) {
+                        task->_20 -= 0.001f;
+                    }
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    if (task->_20 < 1.0f) {
+                        task->_20 += 0.001f;
+                    }
+                }
+            }
+            break;
+        }
+    }
+    if (lbl_803C77B8[0]._04 & 8) {
+        if (task->_26 == 0) {
+            task->_26 = 8;
+        }
+        task->_26--;
+    } else if (lbl_803C77B8[0]._04 & 4) {
+        task->_26++;
+        if (task->_26 == 8) {
+            task->_26 = 0;
+        }
+    } else if (lbl_803C77B8[0]._02 & 0x200) {
+        ((WaveTask7730*)lbl_803CC1B8)->_00 = fn_1_24778;
+    } else if (lbl_803C77B8[0]._04 & 0x100) {
+        for (j = 0; j < 16; j++) {
+            idx = (rand() % 32) * 128;
+            idx += rand() % 128;
+            lbl_1_bss_76E0[0][idx] += task->_1C;
+        }
+    }
+    fn_1_121D4(&lbl_1_bss_43EE0);
+    if (task->_2A == 0) {
+        task->_29 = fn_1_23098(lbl_1_bss_47010, lbl_1_bss_43EE0._00, task->_27, task->_28, task->_18, task->_14);
+        if (task->_2B != 0) {
+            frame = task->_2C++;
+            fn_1_22F4C(32, 128, lbl_1_bss_76E0[1 - (frame & 1)], lbl_1_bss_76E0[frame & 1],
+                       lbl_1_bss_76E0[1 - (frame & 1)]);
+            max = -100.0f;
+            min = 100.0f;
+            for (i = 0; i < task->_28; i++) {
+                p = lbl_1_bss_F6E0[i];
+                for (j = 0; j < task->_29; j++) {
+                    x = p->x;
+                    y = p->y;
+                    idx = task->_2C;
+                    if (x < 0.0f) {
+                        n = -x;
+                    } else {
+                        n = x;
+                    }
+                    n = n / 2 * 2;
+                    if (x < 0.0f) {
+                        fx = x + (n + 2);
+                    } else {
+                        fx = x - n;
+                    }
+                    fx = 64.0f * fx;
+                    if (y < 0.0f) {
+                        n = -y;
+                    } else {
+                        n = y;
+                    }
+                    n = n / 2 * 2;
+                    if (y < 0.0f) {
+                        fy = y + (n + 2);
+                    } else {
+                        fy = y - n;
+                    }
+                    fy = 16.0f * fy;
+                    p->z = lbl_1_bss_76E0[idx & 1][(s32)fx + ((s32)fy << 7)];
+                    if (p->z < min) {
+                        min = p->z;
+                    } else if (p->z > max) {
+                        max = p->z;
+                    }
+                    p++;
+                }
+            }
+        } else {
+            max = min = 0.0f;
+            for (i = 0; i < task->_28; i++) {
+                p = lbl_1_bss_F6E0[i];
+                for (j = 0; j < task->_29; j++) {
+                    p->z = min;
+                    p++;
+                }
+            }
+        }
+    }
+    fn_1_23804(10, 10, task->_29, task->_28, max, min);
+    task->_24++;
 }
 
 // .text:0x00023AD8 size:0x7C
