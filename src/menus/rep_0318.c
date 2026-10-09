@@ -38,6 +38,7 @@ extern s32 randRange_FUN_80042bf0(s32 min, s32 max);
 extern void fn_2_16A74(s32 arg0, s32 arg1);
 extern void fn_2_1C34(u16 buttons);
 extern s32 fn_2_14F8(s32 min, s32 max);
+extern void fn_2_1D54(s32* cursor, u8 arg1, s32 count);
 
 extern struct {
     /* 0x00 */ u8 _00[0x24];
@@ -139,8 +140,9 @@ extern struct {
     /* 0x46E0 */ s32 _46E0[2];
     /* 0x46E8 */ s32 _46E8;
     /* 0x46EC */ u8 _46EC[0x46F8 - 0x46EC];
-    /* 0x46F8 */ s8 _46F8[2];
-    /* 0x46FA */ u8 _46FA[0x470B - 0x46FA];
+    /* 0x46F8 */ s8 _46F8[4];
+    /* 0x46FC */ s8 _46FC[4];
+    /* 0x4700 */ u8 _4700[0x470B - 0x4700];
     /* 0x470B */ u8 _470B;
     /* 0x470C */ u8 _470C;
     /* 0x470D */ u8 _470D[0x472A - 0x470D];
@@ -201,8 +203,7 @@ extern struct {
 } lbl_803C66B0;
 extern struct {
     /* 0x00 */ u8 _00[0x8];
-    /* 0x08 */ u8 _08;
-    /* 0x09 */ u8 _09;
+    /* 0x08 */ u8 _08[2];
     /* 0x0A */ u8 _0A[0xE - 0xA];
     /* 0x0E */ u8 _0E;
     /* 0x0F */ u8 _0F[0x3C - 0xF];
@@ -471,6 +472,36 @@ void fn_2_EC54(s32 port) {
 void fn_2_EC34(void) {
     if (lbl_2_bss_F468._56 == 0) {
         lbl_2_bss_F468._56 = 1;
+    }
+}
+
+// .text:0x0000EAE0 size:0x154
+// 81%: the target addresses the cursor as word i + 8 of lbl_2_bss_F410,
+// saves r27-r31, and allocates registers differently.
+void fn_2_EAE0(void) {
+    s32 i;
+    s32 x;
+
+    for (i = 0; i < (g_d_GameSettings._10 == 1) + 1; i++) {
+        if (lbl_803C5EA4._08[i] != 0) {
+            if (lbl_8034E9A0._4757[lbl_800FDE84[lbl_2_bss_F410._20[i]]] != 0) {
+                do {
+                    do {
+                        lbl_2_bss_F410._20[i]++;
+                        if (lbl_2_bss_F410._20[i] == 54) {
+                            lbl_2_bss_F410._20[i] = 0;
+                        }
+                    } while (lbl_8034E9A0._4757[lbl_800FDE84[lbl_2_bss_F410._20[i]]] != 0);
+                } while (lbl_2_bss_F410._20[0] == lbl_2_bss_F410._20[1]);
+            }
+            while (1) {
+                x = lbl_8034E9A0._46F8[i];
+                if (lbl_8034E9A0._46FC[x] != 0) {
+                    x = lbl_8034E9A0._46F8[0] == 0;
+                }
+                fn_2_1D54(&lbl_2_bss_F410._20[i], x, 54);
+            }
+        }
     }
 }
 
@@ -1193,8 +1224,8 @@ void fn_2_6608(void) {
         }
     }
     if (lbl_2_bss_F468._56 != 0) {
-        lbl_803C5EA4._09 = 0;
-        lbl_803C5EA4._08 = 0;
+        lbl_803C5EA4._08[1] = 0;
+        lbl_803C5EA4._08[0] = 0;
         lbl_2_bss_100B8._30[1] = 0;
         lbl_2_bss_100B8._30[0] = 0;
         if (g_d_GameSettings._10 == 0) {
