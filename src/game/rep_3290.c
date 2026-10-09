@@ -17,6 +17,8 @@
 #include "game/rep_540.h"
 #include "game/rep_3090.h"
 #include "musyx/musyx.h"
+#include "game/rep_CC8.h"
+#include "game/sta_c4.h"
 
 typedef struct {
     /* 0x000 */ VecXYZ _000;
@@ -27,7 +29,9 @@ typedef struct {
     /* 0x03C */ f32 _03C;
     /* 0x040 */ u8 _040[0x50 - 0x40];
     /* 0x050 */ f32 _050;
-    /* 0x054 */ u8 _054[0x268 - 0x54];
+    /* 0x054 */ u8 _054[0x20D - 0x54];
+    /* 0x20D */ s8 _20D;
+    /* 0x20E */ u8 _20E[0x268 - 0x20E];
 } Unk3290Fielder; // size: 0x268
 
 extern Unk3290Fielder g_Fielders[9];
@@ -85,6 +89,12 @@ extern void Set_803cb848(int);
 extern void changeScene(u8, s16);
 extern int fn_3_6C938(int, int);
 extern void fn_3_1608F0(int, int, int);
+extern void minigamesSetSomePointers(void);
+extern void minigamesGXStuff(void);
+extern void minigamesSetSomePointers2(void);
+extern u8 lbl_3_common_bss_32234[6];
+extern u8 lbl_3_data_2127C[8][5];
+extern u8 lbl_3_data_2166C[5];
 extern u8 lbl_3_data_21671;
 extern s16 lbl_3_data_21672;
 extern struct {
@@ -113,8 +123,131 @@ void fn_3_11669C(void) {
     }
 }
 
+// .text:0x001160BC size:0x5E0 mapped:0x80755150
+// The target inlines fn_3_115540 here too; MWCC keeps it a call in this build.
+void fn_3_1160BC(void) {
+    switch (g_GameLogic.gameStatus) {
+    case 4:
+        fn_3_115C24();
+        break;
+    case 26:
+        fn_3_115BDC();
+        break;
+    case 6:
+        fn_3_115B5C();
+        break;
+    case 7:
+        fn_3_115AB4();
+        break;
+    case 0:
+        fn_3_115978();
+        break;
+    case 1:
+        fn_3_115540();
+        break;
+    case 25:
+        fn_3_1158B0();
+        break;
+    case 3:
+        fn_3_115738();
+        break;
+    case 15:
+        fn_3_115828();
+        break;
+    }
+}
+
 // .text:0x001160B8 size:0x4 mapped:0x8075514C
 void fn_3_1160B8(void) {}
+
+// .text:0x00115C24 size:0x494 mapped:0x80754CB8
+// The target saves one register fewer (four stw, not stmw r27) and keeps the coin loop's
+// counter in the register of the zero it stores, behind an explicit 0 < 100 guard.
+void fn_3_115C24(void) {
+    int i;
+    int n;
+    s8 fielder;
+    u8 strength;
+
+    if (g_GameLogic._125 == 0) {
+        fn_3_59A90();
+        g_GameLogic.secondaryGameMode = 4;
+        for (i = 0; i < 4; i++) {
+            g_Minigame.miniGameCurrentPoints[i] = 0;
+            g_Minigame.miniGameLatestPoints[i] = 0;
+            g_Minigame.minigamePoints_current_Latest[i][0] = 0;
+            g_Minigame.minigamePoints_current_Latest[i][1] = 0;
+            g_Minigame.minigameControlStruct._28[i] = -1;
+            g_Minigame.minigameFielderIndex[i] = -1;
+            g_Minigame._18FC[i] = -1;
+            g_Minigame._1900[i] = -1;
+            g_Minigame.minigameControlStruct._24[i] = 0;
+        }
+        g_Scores._00 = 0;
+        g_Minigame.turnNumberWithinRound = 0;
+        g_Minigame.pointsReqToWin_challenge = 0;
+        g_Minigame.rosterID = -1;
+        g_Minigame._17C0 = 0;
+        g_Minigame._1A37 = 0;
+        g_Minigame.miniGameTurnCounter = 0;
+        if (!g_Minigame.multiPlayerInd) {
+            g_Scores._AA = lbl_3_data_2166C[g_Minigame.soloMinigameDifficulty];
+            strength = lbl_3_data_2127C[g_Minigame.GameMode_MiniGame][g_Minigame.soloMinigameDifficulty];
+            for (i = 0; i < 4; i++) {
+                g_Minigame.minigameControlStruct.aIStrength[i] = strength;
+            }
+        } else {
+            if (g_Minigame._1A3C) {
+                for (i = 0; i < 4; i++) {
+                    g_Minigame.minigameControlStruct.aIStrength[i] = lbl_3_data_2127C[7][0];
+                }
+            }
+            g_Scores._AA = lbl_3_data_2166C[4];
+        }
+        n = 0;
+        for (i = 0; i < 4; i++) {
+            if (g_Minigame.minigameControlStruct.characterIndex[i] >= 0) {
+                g_Minigame.minigameControlStruct._28[n] = i;
+                fielder = n + 2;
+                g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]] = fielder;
+                g_Minigame.minigameControlStruct._14[n] = i;
+                g_Fielders[fielder]._20D = i;
+                n++;
+            }
+        }
+        fn_3_58870();
+        fn_3_114A88(TRUE);
+        for (i = 0; i < 7; i++) {
+            g_Minigame.wallBallWalls[i]._28 = 0;
+            g_Minigame.wallBallWalls[i].wallPos = i;
+            g_Minigame.wallIndexTracker[i] = i;
+        }
+        g_Minigame.wallBallGameState = 0;
+        g_Minigame._1A80 = 0;
+        g_Minigame._1A78 = 0;
+        for (i = 0; i < 2; i++) {
+            g_Minigame.wallBallSpecialWallPos[i] = (i & 1) ? 0 : 6;
+        }
+        g_Minigame.wallBallPitcherRotationCounter = 0;
+        g_Minigame.wallBallRotatePitchersInd = 0;
+        g_Minigame.wallBall_hitNoteBlock = 0;
+        g_Minigame.wallBall_hitBowserWall = 0;
+        g_Minigame._1A8B = -1;
+        g_Minigame.wallBall_UnknownAlways0 = 0;
+        g_Minigame._1A8C[0] = 0;
+        for (i = 0; i < 100; i++) {
+            g_Minigame.wallBall_coinsVisibleInd[i] = 0;
+        }
+        minigamesSetSomePointers();
+        minigamesGXStuff();
+        minigamesSetSomePointers2();
+        fn_3_F8ABC();
+        g_GameLogic._125++;
+    } else {
+        lbl_3_common_bss_32234[1] = 1;
+        fn_3_5A6D4(5);
+    }
+}
 
 // .text:0x00115BDC size:0x48 mapped:0x80754C70
 void fn_3_115BDC(void) {
