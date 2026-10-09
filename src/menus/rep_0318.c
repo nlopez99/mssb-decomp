@@ -1099,12 +1099,10 @@ void fn_2_EAE0(void) {
 }
 
 // .text:0x0000DFAC size:0xB34
-// 99.8%: registers only, in the final _26 store's id / 9 and id % 9.
 void fn_2_DFAC(s32 port) {
     s32 cap;
     s32 i;
     s32 g;
-    CharEntry0318* entry;
     s32 j;
     s32 c;
     s32 id;
@@ -1232,8 +1230,7 @@ done:
     fn_2_C698(slot, port);
     lbl_803C5EA4._0C[port] = slot;
     lbl_803C5EA4._0A[port] = 1;
-    entry = &lbl_8034E9A0._0000[id / 9][id % 9];
-    lbl_803C6724._26[port][slot] = entry->_3B[cap];
+    lbl_803C6724._26[port][slot] = lbl_8034E9A0._0000[id / 9][id % 9]._3B[cap];
     fn_800625A4(port, 15);
     if (lbl_2_bss_F468._37[port] != 0) {
         lbl_2_bss_F468._41[port] = 0;
