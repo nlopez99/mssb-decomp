@@ -750,11 +750,10 @@ void fn_3_65FE0(void) {
 // .text:0x000657E4 size:0x7FC mapped:0x806A4878
 void fn_3_657E4(void) {
     BOOL ended;
-    BOOL won;
+    BOOL flag;
     s32 i;
     s32 actor;
     s32 charID;
-    BOOL human;
     s8 winner;
 
     ended = FALSE;
@@ -780,20 +779,20 @@ void fn_3_657E4(void) {
             }
         } else if (g_GameLogic.gameStatus == 0x27 && g_Minigame._1A3D == 1) {
             winner = g_Minigame._1908;
-            won = FALSE;
+            flag = FALSE;
             for (i = 0; i < 4; i++) {
                 if (g_Minigame._1E08[i][0] == winner && g_Minigame._1E08[i][1] == 0) {
-                    won = TRUE;
+                    flag = TRUE;
                     break;
                 }
             }
             if (g_Minigame._1E08[0][1] == 0 && g_Minigame._1E08[1][1] == 0 && g_Minigame._1E08[2][1] == 0 &&
                 g_Minigame._1E08[3][1] == 0) {
-                lbl_3_common_bss_32234[2 + winner] = 2;
-            } else if (won) {
-                lbl_3_common_bss_32234[2 + winner] = 0;
+                lbl_3_common_bss_32234[2 + g_Minigame._1908] = 2;
+            } else if (flag) {
+                lbl_3_common_bss_32234[2 + g_Minigame._1908] = 0;
             } else {
-                lbl_3_common_bss_32234[2 + winner] = 1;
+                lbl_3_common_bss_32234[2 + g_Minigame._1908] = 1;
             }
         } else if (g_Minigame.miniGameNumberOfParticipants == 1) {
             for (i = 0; i < 4; i++) {
@@ -837,18 +836,18 @@ void fn_3_657E4(void) {
                 actor = g_Minigame.minigameControlStruct.characterIndex[i];
             }
             if (!g_d_GameSettings.minigamesEnabled) {
-                human = TRUE;
+                flag = TRUE;
             } else if (g_Minigame._19E8[i]._4 == 0 || g_Minigame._19E8[i]._4 == 2) {
-                human = TRUE;
+                flag = TRUE;
             } else {
-                human = FALSE;
+                flag = FALSE;
             }
             if (lbl_3_common_bss_32234[2 + i] == 0) {
-                AnimateCharacter(actor, 0x69, 1, 1, 1, 0, human, 0);
+                AnimateCharacter(actor, 0x69, 1, 1, 1, 0, flag, 0);
             } else if (lbl_3_common_bss_32234[2 + i] == 1) {
-                AnimateCharacter(actor, 0x6F, 1, 1, 1, 0, human, 0);
+                AnimateCharacter(actor, 0x6F, 1, 1, 1, 0, flag, 0);
             } else {
-                AnimateCharacter(actor, 0x72, 1, 1, 1, 0, human, 0);
+                AnimateCharacter(actor, 0x72, 1, 1, 1, 0, flag, 0);
             }
             if (!g_d_GameSettings.minigamesEnabled) {
                 break;
@@ -872,30 +871,30 @@ void fn_3_657E4(void) {
                 continue;
             }
             if (!g_d_GameSettings.minigamesEnabled) {
-                human = TRUE;
+                flag = TRUE;
                 charID = lbl_80353A90._103;
             } else if (g_Minigame._19E8[i]._4 == 0 || g_Minigame._19E8[i]._4 == 2) {
-                human = TRUE;
+                flag = TRUE;
                 charID = g_Minigame.minigameControlStruct._4[i];
             } else {
-                human = FALSE;
+                flag = FALSE;
                 charID = g_Minigame.minigameControlStruct._4[i];
             }
             if (lbl_3_common_bss_32234[2 + i] == 0) {
-                AnimateCharacter(actor, 0x6D, 0, 1, 1, 0, human, -1);
-                QueueCharacterAnimation(actor, 0x6B, 1, 1, 0, human, -1);
+                AnimateCharacter(actor, 0x6D, 0, 1, 1, 0, flag, -1);
+                QueueCharacterAnimation(actor, 0x6B, 1, 1, 0, flag, -1);
                 fn_3_90220(charID, 7);
             } else if (lbl_3_common_bss_32234[2 + i] == 1) {
-                AnimateCharacter(actor, 0x70, 0, 1, 1, 0, human, -1);
-                QueueCharacterAnimation(actor, 0x71, 1, 1, 0, human, -1);
+                AnimateCharacter(actor, 0x70, 0, 1, 1, 0, flag, -1);
+                QueueCharacterAnimation(actor, 0x71, 1, 1, 0, flag, -1);
                 if (g_Minigame.miniGameNumberOfParticipants > 1) {
                     fn_3_90150(charID, 9);
                 } else {
                     fn_3_90220(charID, 9);
                 }
             } else {
-                AnimateCharacter(actor, 0x73, 0, 1, 1, 0, human, -1);
-                QueueCharacterAnimation(actor, 0x74, 1, 1, 0, human, -1);
+                AnimateCharacter(actor, 0x73, 0, 1, 1, 0, flag, -1);
+                QueueCharacterAnimation(actor, 0x74, 1, 1, 0, flag, -1);
             }
             if (!g_d_GameSettings.minigamesEnabled) {
                 break;
