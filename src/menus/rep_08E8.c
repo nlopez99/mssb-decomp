@@ -1621,8 +1621,10 @@ u16* fn_2_4917C(u16* text, s32 value, s32 flags, s32 width, s32 arg4) {
     char* p;
     s32 count = 0;
     s32 i;
+    s32 j;
     s32 digit;
     s32 v;
+    s32 n;
 
     if (flags & 0x20) {
         flags |= 4;
@@ -1677,30 +1679,30 @@ u16* fn_2_4917C(u16* text, s32 value, s32 flags, s32 width, s32 arg4) {
         buf[9] = '0';
         buf[10] = 0;
     } else {
-        i = (value < -999999999) + 10;
-        buf[i] = 0;
-        i--;
-        v = value;
-        if (v < 0) {
-            v *= -1;
+        j = (value < -999999999) + 10;
+        buf[j] = 0;
+        j--;
+        n = value;
+        if (n < 0) {
+            n *= -1;
         }
-        p = &buf[i];
-        while (v != 0) {
-            *p = v % 10 + '0';
-            v /= 10;
-            i--;
+        p = &buf[j];
+        while (n != 0) {
+            *p = n % 10 + '0';
+            n /= 10;
+            j--;
             p--;
         }
         if (value < 0) {
             if ((flags & 0x20) || (flags & 0x40) || (flags & 0x80)) {
-                buf[i] = ' ';
+                buf[j] = ' ';
             } else {
-                buf[i] = '-';
+                buf[j] = '-';
             }
-            i--;
+            j--;
         }
-        for (; i >= 0; i--) {
-            buf[i] = ' ';
+        for (; j >= 0; j--) {
+            buf[j] = ' ';
         }
     }
 
