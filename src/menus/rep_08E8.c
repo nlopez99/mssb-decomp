@@ -2198,13 +2198,14 @@ void fn_2_4777C(void) {
 }
 
 // .text:0x00047540 size:0x23C
-// Registers only: the four maxima land in other volatile registers.
+// Registers only: max2 and i take each other's registers in the loop (r5
+// and r8 in the target), and the rounded values' registers follow from that.
 void fn_2_47540(void) {
-    u32 max3 = 0;
-    u32 max2 = 0;
-    u32 max0 = 0;
     u32 max1 = 0;
     s32 i;
+    u32 max0 = 0;
+    u32 max3 = 0;
+    u32 max2 = 0;
     u32 size;
     u8* buf;
 
@@ -2226,10 +2227,14 @@ void fn_2_47540(void) {
             max0 = size;
         }
     }
-    lbl_8036E548._2C94 = max1 = (max1 + 0x1F) & ~0x1F;
-    lbl_8036E548._2C9C = max3 = (max3 + 0x1F) & ~0x1F;
-    lbl_8036E548._2C90 = max0 = (max0 + 0x1F) & ~0x1F;
-    lbl_8036E548._2C98 = max2 = (max2 + 0x1F) & ~0x1F;
+    max3 = (max3 + 0x1F) & ~0x1F;
+    max0 = (max0 + 0x1F) & ~0x1F;
+    max1 = (max1 + 0x1F) & ~0x1F;
+    max2 = (max2 + 0x1F) & ~0x1F;
+    lbl_8036E548._2C98 = max2;
+    lbl_8036E548._2C94 = max1;
+    lbl_8036E548._2C9C = max3;
+    lbl_8036E548._2C90 = max0;
     buf = _OSAllocFromHeap(0x20, (max2 + (max1 + max3 + max0)) * 4);
     lbl_8036E548._2C88 = buf;
     for (i = 0; i < 4; i++) {
