@@ -7,6 +7,7 @@
 struct MenuModelList08E8;
 struct SortEntry08E8;
 
+void fn_2_42BE8(void);
 void fn_2_42EB0(void);
 void fn_2_42FC8(void);
 void fn_2_430F4(void);
@@ -38,6 +39,7 @@ void fn_2_45FDC(void);
 void fn_2_460EC(s32 arg0);
 void fn_2_460F0(void);
 void fn_2_460F4(void);
+void fn_2_460F8(void);
 void fn_2_46418(void);
 void fn_2_4668C(s32 id);
 void fn_2_466AC(void);

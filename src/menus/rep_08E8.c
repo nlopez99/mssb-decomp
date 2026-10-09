@@ -60,7 +60,8 @@ typedef struct MenuTracker08E8 {
     /* 0x0000 */ MenuCharacter08E8 _0000[0x36];
     /* 0x0AF8 */ MenuCharacter08E8 _0AF8[0x36];
     /* 0x15F0 */ u8 _15F0;
-    /* 0x15F1 */ u8 _15F1[0x1606 - 0x15F1];
+    /* 0x15F1 */ s8 _15F1[0x14];
+    /* 0x1605 */ u8 _1605;
     /* 0x1606 */ u8 _1606;
     /* 0x1607 */ u8 _1607[0x16C0 - 0x1607];
     /* 0x16C0 */ s16 _16C0;
@@ -361,6 +362,7 @@ extern void LITInitAttn(LITObj* light, f32 a0, f32 a1, f32 a2, f32 k0, f32 k1, f
 extern void LITInitPos(LITObj* light, f32 x, f32 y, f32 z);
 extern void LITInitColor(LITObj* light, GXColor color);
 extern void LITInitDir(LITObj* light, f32 nx, f32 ny, f32 nz);
+extern BOOL fn_8006C79C(s32 index);
 extern BOOL fn_8006CDC0(s32 index);
 extern void starMissionRelated2(void);
 extern void fn_8003BF54(s32, s32, s32, s32, s32, s32, s32, s32, s32);
@@ -1740,6 +1742,25 @@ void fn_2_46418(void) {
     lbl_2_bss_1A8248->_442A = lbl_2_bss_1A8248->_15F0;
 }
 
+// .text:0x000460F8 size:0x320
+void fn_2_460F8(void) {
+    s32 i;
+
+    for (i = 0; i < 0x36; i++) {
+        ((MenuCharacter08E8*)lbl_2_bss_1A8248)[i]._07 = 0;
+        ((MenuCharacter08E8*)lbl_2_bss_1A8248)[i]._06 = 0;
+        ((MenuCharacter08E8*)lbl_2_bss_1A8248)[i]._08[0] = 0;
+        ((MenuCharacter08E8*)lbl_2_bss_1A8248)[i]._31 = 0;
+    }
+    memcpy(lbl_2_bss_1A8248->_0AF8, lbl_2_bss_1A8248, sizeof(lbl_2_bss_1A8248->_0AF8));
+    lbl_2_bss_1A8248->_15F0 = lbl_2_bss_1A8248->_442A;
+    for (i = 0; i < 20; i++) {
+        if (lbl_2_bss_1A8248->_15F1[i] == 0) {
+            lbl_2_bss_1A8248->_15F1[i] = lbl_2_bss_1A8248->_43C2[i];
+        }
+    }
+}
+
 // .text:0x000460F4 size:0x4
 void fn_2_460F4(void) {
 }
@@ -2291,6 +2312,69 @@ void fn_2_42EB0(void) {
                     need = lbl_8010A768[lbl_800E8558[i]._2][j]._4;
                     if (kind != -1 && c->_09[j]._1 == 0 && kind == 18 && lbl_2_bss_1A8248->_4415 >= need && lbl_2_bss_1A8248->_442A == 1) {
                         c->_09[j]._1 = 1;
+                    }
+                    if (goal != -1 && c->_09[j]._0 < 0) {
+                        c->_09[j]._1 = 1;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// .text:0x00042BE8 size:0x2C8
+// Only the lbl_80109AE8 and lbl_8010A768 bases differ: the target forms
+// lbl_80109AE8 first, in the lower register (fn_2_466AC, written the same
+// way without the two guards, matches).
+void fn_2_42BE8(void) {
+    s32 i;
+    s32 j;
+    s16 kind;
+    s16 goal;
+    s16 need;
+    s16 level;
+    s16 extra;
+    MenuCharacter08E8* c;
+
+    for (i = 0; i < 0x36; i++) {
+        if (lbl_800E8558[i]._3 == 1) {
+            c = &((MenuCharacter08E8*)lbl_2_bss_1A8248)[i];
+            if (c->_31 == 1) {
+                for (j = 0; j < 10; j++) {
+                    kind = lbl_8010A768[lbl_800E8558[i]._2][j]._2;
+                    goal = lbl_80109AE8[lbl_800E8558[i]._2][j]._0;
+                    need = lbl_8010A768[lbl_800E8558[i]._2][j]._4;
+                    level = lbl_8010A768[lbl_800E8558[i]._2][j]._6;
+                    extra = lbl_8010A768[lbl_800E8558[i]._2][j]._8;
+                    if (kind != -1 && c->_09[j]._1 == 0) {
+                        switch (kind) {
+                        case 1:
+                            if (fn_8006CDC0(i) >= need && lbl_2_bss_1A8248->_4415 >= level) {
+                                c->_09[j]._1 = 1;
+                            }
+                            break;
+                        case 22:
+                            if (fn_8006C79C(need) == 1 && lbl_2_bss_1A8248->_4415 >= level) {
+                                c->_09[j]._1 = 1;
+                            }
+                            break;
+                        case 24:
+                            if (lbl_2_bss_1A8248->_4426 != 0 && lbl_2_bss_1A8248->_441C == need && lbl_2_bss_1A8248->_4415 >= level) {
+                                c->_09[j]._1 = 1;
+                            }
+                            break;
+                        case 25:
+                            if ((lbl_2_bss_1A8248->_4426 & (1 << level)) && lbl_2_bss_1A8248->_441C == need &&
+                                lbl_2_bss_1A8248->_4415 >= extra) {
+                                c->_09[j]._1 = 1;
+                            }
+                            break;
+                        case 26:
+                            if (fn_2_44238(need) == 1 && lbl_2_bss_1A8248->_441E == level && lbl_2_bss_1A8248->_4415 >= extra) {
+                                c->_09[j]._1 = 1;
+                            }
+                            break;
+                        }
                     }
                     if (goal != -1 && c->_09[j]._0 < 0) {
                         c->_09[j]._1 = 1;
