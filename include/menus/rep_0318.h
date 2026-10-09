@@ -10,7 +10,7 @@ void fn_2_3204(void);
 void fn_2_323C(void);
 s32 fn_2_33BC(void);
 void fn_2_348C(void);
-s32 fn_2_35D0(u8 port);
+u8 fn_2_35D0(u8 port);
 void fn_2_3624(u8 port);
 void fn_2_4970(u8 port, s32 id);
 void fn_2_5184(u8 port);
