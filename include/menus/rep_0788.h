@@ -6,7 +6,7 @@
 struct MenuTask0788;
 struct MenuItem0788;
 
-void fn_2_1C714(void);
+void fn_2_1C714(s32 id);
 void fn_2_1C860(void);
 void fn_2_1CF94(void);
 void fn_2_1D440(void);
