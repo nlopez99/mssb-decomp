@@ -138,7 +138,11 @@ typedef struct Menu0318 {
     /* 0x056 */ u8 _56;
     /* 0x057 */ u8 _57[0x59 - 0x57];
     /* 0x059 */ u8 _59[2];
-    /* 0x05B */ u8 _5B[0xC4C - 0x5B];
+    /* 0x05B */ u8 _5B[0x61 - 0x5B];
+    /* 0x061 */ s8 _61[2];
+    /* 0x063 */ u8 _63[0x65 - 0x63];
+    /* 0x065 */ u8 _65[2];
+    /* 0x067 */ u8 _67[0xC4C - 0x67];
 } Menu0318; // size: 0xC4C
 
 extern Menu0318 lbl_2_bss_F468;
@@ -175,7 +179,9 @@ extern struct {
     /* 0x46EC */ u8 _46EC[0x46F8 - 0x46EC];
     /* 0x46F8 */ s8 _46F8[4];
     /* 0x46FC */ s8 _46FC[4];
-    /* 0x4700 */ u8 _4700[0x470B - 0x4700];
+    /* 0x4700 */ u8 _4700[2];
+    /* 0x4702 */ u8 _4702;
+    /* 0x4703 */ u8 _4703[0x470B - 0x4703];
     /* 0x470B */ u8 _470B;
     /* 0x470C */ u8 _470C;
     /* 0x470D */ u8 _470D[0x472A - 0x470D];
@@ -222,6 +228,7 @@ extern struct {
     /* 0x048 */ u8 _048[0xBE4 - 0x48];
 } lbl_2_bss_DCE8;
 extern u8 lbl_80109038[9];
+extern u8 lbl_80108DB8[0x24];
 extern u8 lbl_803CB748[6];
 extern u8 lbl_80108EC4[12];
 extern u8 lbl_800EFBA4[0x10];
@@ -589,6 +596,168 @@ void fn_2_FAA0(u8 port) {
                 }
             }
         found:
+            if (g_d_GameSettings._10 == 0 && port != 0) {
+                if (lbl_8034E9A0._46F8[0] == 0) {
+                    fn_800506E8(1, id, 1);
+                } else {
+                    fn_800506E8(1, id, 1);
+                }
+            } else {
+                fn_800506E8(lbl_8034E9A0._46F8[port], id, 1);
+            }
+            lbl_803C6724._02[port][i] = id;
+            lbl_8034E9A0._4757[id] = 1;
+            lbl_803C6724._26[port][i] = lbl_8034E9A0._0000[id / 9][id % 9]._3B[cap];
+        }
+    }
+}
+
+// .text:0x0000F200 size:0x8A0
+void fn_2_F200(u8 port) {
+    s8 pool[8];
+    s8 classes[9];
+    s32 i;
+    s32 k;
+    s32 g;
+    s32 j;
+    s16 id;
+    s32 cur;
+    s8 n;
+    u8 c1 = 0;
+    u8 c2 = 0;
+    u8 c3 = 0;
+    u8 c0 = 0;
+    u8 f1 = 0;
+    u8 f2 = 0;
+    u8 f3 = 0;
+    u8 f0 = 0;
+    s32 cap = lbl_8034E9A0._46E0[port];
+
+    memset(classes, -1, sizeof(classes));
+    for (i = 0; i < 9; i++) {
+        cur = lbl_803C6724._02[port][i];
+        if (cur != -1 && cur != 54) {
+            classes[i] = lbl_8034E9A0._0000[cur / 9][cur % 9]._31;
+            switch (classes[i]) {
+            case 0:
+                c0++;
+                if (c0 >= 2) {
+                    f0 = 1;
+                }
+                break;
+            case 1:
+                c1++;
+                if (c1 >= 2) {
+                    f1 = 1;
+                }
+                break;
+            case 2:
+                c2++;
+                if (c2 >= 2) {
+                    f2 = 1;
+                }
+                break;
+            case 3:
+                c3++;
+                if (c3 >= 2) {
+                    f3 = 1;
+                }
+                break;
+            }
+        }
+    }
+    for (i = 0; i < 9; i++) {
+        if (lbl_803C6724._02[port][i] == -1 || lbl_803C6724._02[port][i] == 54) {
+            memset(pool, -1, sizeof(pool));
+            n = -1;
+            if (!f0) {
+                for (k = 0; k < 32; k++) {
+                    id = lbl_80108DB8[k];
+                    if (lbl_8034E9A0._0000[id / 9][id % 9]._31 == 0 && lbl_8034E9A0._4757[id] == 0) {
+                        n++;
+                        pool[n] = id;
+                    }
+                }
+                if (pool[0] == -1) {
+                    goto random;
+                }
+                id = pool[randRange_FUN_80042bf0(0, n)];
+                c0++;
+                if (c0 >= 2) {
+                    f0 = 1;
+                }
+                goto found;
+            }else if (!f1) {
+                for (j = 0; j < 32; j++) {
+                    id = lbl_80108DB8[j];
+                    if (lbl_8034E9A0._0000[id / 9][id % 9]._31 == 1 && lbl_8034E9A0._4757[id] == 0) {
+                        n++;
+                        pool[n] = id;
+                    }
+                }
+                if (pool[0] == -1) {
+                    goto random;
+                }
+                id = pool[randRange_FUN_80042bf0(0, n)];
+                c1++;
+                if (c1 >= 2) {
+                    f1 = 1;
+                }
+                goto found;
+            }else if (!f2) {
+                for (j = 0; j < 32; j++) {
+                    id = lbl_80108DB8[j];
+                    if (lbl_8034E9A0._0000[id / 9][id % 9]._31 == 2 && lbl_8034E9A0._4757[id] == 0) {
+                        n++;
+                        pool[n] = id;
+                    }
+                }
+                if (pool[0] == -1) {
+                    goto random;
+                }
+                id = pool[randRange_FUN_80042bf0(0, n)];
+                c2++;
+                if (c2 >= 2) {
+                    f2 = 1;
+                }
+                goto found;
+            }else if (!f3) {
+                for (j = 0; j < 32; j++) {
+                    id = lbl_80108DB8[j];
+                    if (lbl_8034E9A0._0000[id / 9][id % 9]._31 == 3 && lbl_8034E9A0._4757[id] == 0) {
+                        n++;
+                        pool[n] = id;
+                    }
+                }
+                if (pool[0] == -1) {
+                    goto random;
+                }
+                id = pool[randRange_FUN_80042bf0(0, n)];
+                c3++;
+                if (c3 >= 2) {
+                    f3 = 1;
+                }
+                goto found;
+            }
+        random:
+            do {
+                id = randRange_FUN_80042bf0(0, 0x35);
+            } while (lbl_8034E9A0._4757[id] != 0);
+        found:
+            fn_80067B40(port, id, 1);
+            for (g = 0; g < 9; g++) {
+                for (j = 0; j < 5; j++) {
+                    if (id == lbl_80108EDC[g][j]) {
+                        lbl_8034E9A0._4757[lbl_80108EDC[g][1]] = 1;
+                        lbl_8034E9A0._4757[lbl_80108EDC[g][2]] = 1;
+                        lbl_8034E9A0._4757[lbl_80108EDC[g][3]] = 1;
+                        lbl_8034E9A0._4757[lbl_80108EDC[g][4]] = 1;
+                        id = lbl_80108EDC[g][0];
+                        goto done;
+                    }
+                }
+            }
+        done:
             if (g_d_GameSettings._10 == 0 && port != 0) {
                 if (lbl_8034E9A0._46F8[0] == 0) {
                     fn_800506E8(1, id, 1);
@@ -1765,6 +1934,101 @@ void fn_2_7D44(void) {
     fn_2_16A74(1, 0);
     fn_2_16A74(2, 0);
     fn_2_16A74(3, 0);
+}
+
+// .text:0x00007504 size:0x840
+// 99.8%: registers only: the target gives t r10 and cap and the inner i r11
+// in the star-mission loop, the reverse of this.
+void fn_2_7504(void) {
+    s32 free = 0;
+    u8 unique;
+    s32 i;
+    s32 id;
+    s32 t;
+    u8 keep = 0;
+    s32 cap;
+
+    lbl_803CBD24._2 = 0;
+    lbl_803CBD24._3 = 0xFF;
+    lbl_2_bss_F468._61[1] = -1;
+    lbl_2_bss_F468._61[0] = -1;
+    lbl_2_bss_F468._65[1] = 0;
+    lbl_2_bss_F468._65[0] = 0;
+    if (lbl_803CBBCC->_6 != 9) {
+        if (g_d_GameSettings._10 == 0 && g_d_GameSettings.GameModeSelected != 5) {
+            lbl_2_bss_100B8._2E[0] = 1;
+            lbl_2_bss_100B8._2E[1] = 1;
+        } else {
+            lbl_2_bss_100B8._2E[1] = 0;
+            lbl_2_bss_100B8._2E[0] = 0;
+        }
+        if (g_d_GameSettings.GameModeSelected == 5) {
+            for (t = 0; t < 2; t++) {
+                if (t == 0) {
+                    cap = starMissionCompletionTracker._441D;
+                    unique = 1;
+                    for (i = 1; i < 9; i++) {
+                        if (starMissionCompletionTracker._40B8[0]._3 == starMissionCompletionTracker._40B8[i]._3) {
+                            unique = 0;
+                        }
+                    }
+                    keep = unique;
+                } else {
+                    cap = starMissionCompletionTracker._441F;
+                }
+                for (i = 0; i < 9; i++) {
+                    id = lbl_803C6724._02[t][i];
+                    if (t == 0 && lbl_803297E0._CFA1 == 0) {
+                        lbl_803C6724._14[t][i] = starMissionCompletionTracker._40B8[i]._3;
+                    } else if (t == 0 && keep) {
+                        lbl_803C6724._14[t][i] = starMissionCompletionTracker._40B8[i]._3;
+                    } else {
+                        lbl_803C6724._14[t][i] = i;
+                    }
+                    lbl_803C6724._26[t][i] = lbl_8034E9A0._0000[id / 9][id % 9]._3B[cap];
+                }
+            }
+            for (i = 0; i < 54; i++) {
+                lbl_2_bss_3A8[i] = lbl_8034E9A0._0000[i / 9][i % 9]._27 + lbl_8034E9A0._0000[i / 9][i % 9]._26 * 2;
+            }
+            if (lbl_803CBBCC->_6 != 11 && lbl_803297E0._CFA1 == 0) {
+                for (i = 0; i < 9; i++) {
+                    lbl_2_bss_3A8[starMissionCompletionTracker._40B8[i]._0] = starMissionCompletionTracker._40B8[i]._4;
+                }
+            }
+        }
+    } else {
+        for (t = 0; t < 2; t++) {
+            for (i = 0; i < 9; i++) {
+                lbl_803C6724._14[t][i] = i;
+                lbl_803C6724._4A[t][i] = 0;
+                lbl_803C6724._26[t][i] = 0;
+                if (i != 0) {
+                    lbl_803C6724._02[t][i] = -1;
+                }
+            }
+        }
+    }
+    if (g_d_GameSettings.GameModeSelected == 5) {
+        for (t = 0; t < 2; t++) {
+            fn_800678CC(t);
+        }
+    }
+    lbl_8034E9A0._4702 = 1;
+    if (g_d_GameSettings.GameModeSelected == 5) {
+        for (i = 0; i < 54; i++) {
+            if (lbl_8034E9A0._4757[i] == 0) {
+                free++;
+            }
+        }
+        if (free == 0) {
+            lbl_2_bss_F468._3F[0] = 1;
+            lbl_2_bss_F468._37[0] = 1;
+            lbl_2_bss_F468._00[0] = 9;
+        } else {
+            lbl_2_bss_F468._3F[0] = 0;
+        }
+    }
 }
 
 // .text:0x00006D3C size:0x7C8
