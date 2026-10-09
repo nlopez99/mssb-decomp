@@ -6830,7 +6830,7 @@ void fn_2_2A77C(MenuTask0788* task, MenuItem0788* item) {
 }
 
 // .text:0x0002A338 size:0x444
-// 96.30%: the target loads lbl_2_bss_1A824C with `lwz rX,sym@l` before the mission tables,
+// 97.23%: the target loads lbl_2_bss_1A824C with `lwz rX,sym@l` before the mission tables,
 // this build with `addi; lwz 0`, and the table loads are scheduled in another order.
 void fn_2_2A338(MenuTask0788* task, MenuItem0788* item) {
     s16 state = fn_2_53BC8(item);
@@ -6852,8 +6852,8 @@ void fn_2_2A338(MenuTask0788* task, MenuItem0788* item) {
         break;
     case 2:
     case 8:
-        textId = lbl_8010A768[lbl_2_bss_1A824C->_197706][lbl_2_bss_1A824C->_197710]._0;
         textAlt = lbl_8010A768[lbl_2_bss_1A824C->_197706][lbl_2_bss_1A824C->_197710]._2;
+        textId = lbl_8010A768[lbl_2_bss_1A824C->_197706][lbl_2_bss_1A824C->_197710]._0;
         flags = lbl_80109AE8[lbl_2_bss_1A824C->_197706][lbl_2_bss_1A824C->_197710]._4;
         minLevel = lbl_80109AE8[lbl_2_bss_1A824C->_197706][lbl_2_bss_1A824C->_197710]._6;
         chr = &lbl_2_bss_1A8248->_0000[lbl_800E869C[lbl_2_bss_1A824C->_197706]];
