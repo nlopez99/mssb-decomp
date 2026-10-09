@@ -7410,13 +7410,125 @@ void fn_3_33D9C(void) {
 }
 
 // .text:0x000334EC size:0x8B0 mapped:0x80672580
-void fn_3_334EC(void) {
-    return;
+// 99.84%: registers only; in the near-mound branch the target keeps the zero stored to _0B0
+// in r5 and g_FieldingLogic in r4, this one step higher. Declaration batches did not move them.
+void fn_3_334EC(s32 arg0) {
+    s32 best;
+    s32 i;
+    s32 margin;
+    s16 prev;
+    f32 dx;
+    f32 dz;
+    f32 dx2;
+    f32 dz2;
+    f32 bestDist;
+    f32 dist;
+
+    if (g_Ball.hitClassification2 == 1) {
+        fn_3_323A4();
+    } else if (g_Ball.maxYOfHit >= 5.0f && arg0 == 0) {
+        dx = g_Fielders[0]._000 - g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x;
+        dz = g_Fielders[0]._008 - g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z;
+        dx2 = dx * dx;
+        dz2 = dz * dz;
+        dist = dolsqrtf2(dx2 + dz2);
+        bestDist = dist;
+        bestDist += 3.0f;
+        best = 0;
+        for (i = 1; i < 6; i++) {
+            dx = g_Fielders[i]._000 - g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x;
+            dz = g_Fielders[i]._008 - g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z;
+            dx2 = dx * dx;
+            dz2 = dz * dz;
+            dist = dolsqrtf2(dx2 + dz2);
+            if (i == 3 || i == 5) {
+                dist -= 3.0f;
+            }
+            if (dist < bestDist) {
+                bestDist = dist;
+                best = i;
+            }
+        }
+        g_FieldingLogic._0B0 = best;
+        fn_3_5985C(best, 21);
+        if ((g_FieldingLogic._0B0 == 3 || g_FieldingLogic._0B0 == 5) && g_Ball.landingSpotAngle >= 0x3B8 &&
+            g_Ball.landingSpotAngle <= 0x448) {
+            if (g_FieldingLogic._0B0 == 3) {
+                g_FieldingLogic._0B2 = 5;
+            } else {
+                g_FieldingLogic._0B2 = 3;
+            }
+            g_FieldingLogic._13A = 1;
+        }
+    } else {
+        margin = 0x8C - g_Ball.Hit_HorizontalPower;
+        if (margin < 0) {
+            margin = 0;
+        }
+        if (margin > 0x40) {
+            margin = 0x40;
+        }
+        if (g_Ball.Hit_HorizontalAngle >= 0x3A8 - margin && g_Ball.Hit_HorizontalAngle < margin + 0x458 && arg0 == 0) {
+            g_FieldingLogic._0B0 = 0;
+            if (g_Ball.Hit_HorizontalAngle < g_Fielders[3]._182 + (g_Fielders[5]._182 - g_Fielders[3]._182) / 2) {
+                g_FieldingLogic._0B2 = 3;
+            } else {
+                g_FieldingLogic._0B2 = 5;
+            }
+            if (g_Ball.landingSpotAngle >= 0x3B8 && g_Ball.landingSpotAngle <= 0x448) {
+                g_FieldingLogic._13A = 1;
+                if (g_FieldingLogic._0B2 == 3) {
+                    fn_3_5985C(5, 22);
+                } else {
+                    fn_3_5985C(3, 22);
+                }
+            }
+        } else if (g_Ball.Hit_HorizontalAngle < g_Fielders[2]._182 + (g_Fielders[3]._182 - g_Fielders[2]._182) / 7) {
+            g_FieldingLogic._0B0 = 2;
+        } else if (g_Ball.Hit_HorizontalAngle < g_Fielders[2]._182 + (g_Fielders[3]._182 - g_Fielders[2]._182) * 2 / 5) {
+            g_FieldingLogic._0B0 = 2;
+            g_FieldingLogic._0B2 = 3;
+            fn_3_5985C(3, 22);
+        } else if (g_Ball.Hit_HorizontalAngle < g_Fielders[3]._182 + (g_Fielders[5]._182 - g_Fielders[3]._182) / 2) {
+            g_FieldingLogic._0B0 = 3;
+        } else if (g_Ball.Hit_HorizontalAngle < g_Fielders[5]._182 + (g_Fielders[4]._182 - g_Fielders[5]._182) * 3 / 5) {
+            g_FieldingLogic._0B0 = 5;
+        } else if (g_Ball.Hit_HorizontalAngle < g_Fielders[4]._182 - (g_Fielders[4]._182 - g_Fielders[5]._182) / 5) {
+            g_FieldingLogic._0B0 = 4;
+            g_FieldingLogic._0B2 = 5;
+            fn_3_5985C(5, 22);
+        } else {
+            g_FieldingLogic._0B0 = 4;
+        }
+    }
+    fn_3_5985C(g_FieldingLogic._0B0, 21);
+    if (arg0 == 0) {
+        prev = g_FieldingLogic._0B2;
+        if (prev < 0) {
+            fn_3_33088();
+            fn_3_5985C(g_FieldingLogic._0B2, 22);
+        } else {
+            fn_3_33088();
+            g_FieldingLogic._0B4 = g_FieldingLogic._0B2;
+            g_FieldingLogic._0B2 = prev;
+            fn_3_5985C(prev, 22);
+            fn_3_5985C(g_FieldingLogic._0B4, 23);
+            g_FieldingLogic._139 = 1;
+        }
+        fn_3_4C9C8();
+        fn_3_47778();
+        fn_3_4A124();
+    }
 }
 
 // .text:0x00033458 size:0x94 mapped:0x806724EC
 void fn_3_33458(void) {
-    return;
+    fn_3_334EC(1);
+    fn_3_33088();
+    fn_3_5985C(g_FieldingLogic._0B2, 22);
+    fn_3_4C9C8();
+    fn_3_47778();
+    fn_3_4A124();
 }
 
 // .text:0x00033088 size:0x3D0 mapped:0x8067211C
