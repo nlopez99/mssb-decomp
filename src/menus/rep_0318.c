@@ -430,41 +430,36 @@ void fn_2_110B0(void) {
 }
 
 // .text:0x000104FC size:0xBB4
-// 98%: registers for team, count, held, trg and rep, and the target keeps a
-// dead branch around the fn_80050760 argument choice.
+// 99%: registers in the trigger-L and Z paths, and the target keeps a dead
+// branch around the fn_80050760 argument choice.
 void fn_2_104FC(u16 port) {
-    s32 team = lbl_803C66B0._59[port];
+    u16 pad[3];
     s8 count = 0;
+    s32 team = lbl_803C66B0._59[port];
     s8 slot;
     s32 i;
     s32 g;
     s32 j;
     s32 sel;
     s32 id;
-    u16 held;
-    u16 trg;
-    u16 rep;
 
     if (lbl_803C66B0._5D[team] != 0) {
-        held = trg = rep = 0;
+        pad[0] = pad[1] = pad[2] = 0;
     } else if (g_d_GameSettings._10 == 1 && lbl_2_bss_100B8._2E[team] != 0) {
-        held = lbl_8034E9A0._472C[port][0];
-        trg = lbl_8034E9A0._472C[port][1];
-        rep = lbl_8034E9A0._472C[port][2];
-        held &= 0x200;
-        trg &= 0x200;
-        rep &= 0x200;
+        pad[0] = lbl_8034E9A0._472C[port][0] & 0x200;
+        pad[1] = lbl_8034E9A0._472C[port][1] & 0x200;
+        pad[2] = lbl_8034E9A0._472C[port][2] & 0x200;
     } else if (lbl_2_bss_F468._52[team] != 0) {
-        held = trg = rep = 0;
+        pad[0] = pad[1] = pad[2] = 0;
     } else {
-        held = lbl_8034E9A0._472C[port][0];
-        trg = lbl_8034E9A0._472C[port][1];
-        rep = lbl_8034E9A0._472C[port][2];
+        pad[0] = lbl_8034E9A0._472C[port][0];
+        pad[1] = lbl_8034E9A0._472C[port][1];
+        pad[2] = lbl_8034E9A0._472C[port][2];
     }
-    if (trg & 0x1000) {
+    if (pad[1] & 0x1000) {
         return;
     }
-    if (trg & 0x40) {
+    if (pad[1] & 0x40) {
         if (fn_2_35D0(team)) {
             return;
         }
@@ -479,7 +474,7 @@ void fn_2_104FC(u16 port) {
             if (lbl_8034E9A0._46FC[sel] != 0) {
                 sel = lbl_8034E9A0._46F8[0] == 0;
             }
-            lbl_2_bss_F410._20[team] = fn_80050760(sel, held, trg, rep, 0);
+            lbl_2_bss_F410._20[team] = fn_80050760(sel, pad[0], pad[1], pad[2], 0);
             return;
         }
         if (g_d_GameSettings.GameModeSelected == 5) {
@@ -516,7 +511,7 @@ void fn_2_104FC(u16 port) {
         } else {
             sndFXStartEx(0x1BA, lbl_800EFBA4[3], 0x3F, 0);
         }
-    } else if (trg & 0x800) {
+    } else if (pad[1] & 0x800) {
         if (fn_2_35D0(team)) {
             return;
         }
@@ -548,7 +543,7 @@ void fn_2_104FC(u16 port) {
         lbl_2_bss_F468._00[team] = 10;
         lbl_2_bss_F468._3D[team] = 0;
         lbl_2_bss_F468._52[team] = 1;
-    } else if (trg & 0x10) {
+    } else if (pad[1] & 0x10) {
         if (fn_2_35D0(team)) {
             return;
         }
@@ -571,7 +566,7 @@ void fn_2_104FC(u16 port) {
             lbl_2_bss_F468._47[team] = 0;
             sndFXStartEx(0x1BF, lbl_800EFBA4[8], 0x3F, 0);
         }
-    } else if (trg & 0x20) {
+    } else if (pad[1] & 0x20) {
         if (fn_2_35D0(team)) {
             return;
         }
@@ -593,7 +588,7 @@ void fn_2_104FC(u16 port) {
             fn_800625A4(team, 26);
         }
     } else {
-        fn_2_ED94(team, held, trg, rep);
+        fn_2_ED94(team, pad[0], pad[1], pad[2]);
     }
 }
 
@@ -2633,15 +2628,16 @@ void fn_2_7D44(void) {
 }
 
 // .text:0x00007504 size:0x840
-// 99.8%: registers only: the target gives t r10 and cap and the inner i r11
-// in the star-mission loop, the reverse of this.
+// 99.9%: registers only: the target gives keep r12 and t r10 in the
+// star-mission loop, the reverse of this.
 void fn_2_7504(void) {
     s32 free = 0;
-    u8 unique;
     s32 i;
     s32 id;
-    s32 t;
     u8 keep = 0;
+    s32 j;
+    s32 t;
+    u8 unique;
     s32 cap;
 
     lbl_803CBD24._2 = 0;
@@ -2672,16 +2668,16 @@ void fn_2_7504(void) {
                 } else {
                     cap = starMissionCompletionTracker._441F;
                 }
-                for (i = 0; i < 9; i++) {
-                    id = lbl_803C6724._02[t][i];
+                for (j = 0; j < 9; j++) {
+                    id = lbl_803C6724._02[t][j];
                     if (t == 0 && lbl_803297E0._CFA1 == 0) {
-                        lbl_803C6724._14[t][i] = starMissionCompletionTracker._40B8[i]._3;
+                        lbl_803C6724._14[t][j] = starMissionCompletionTracker._40B8[j]._3;
                     } else if (t == 0 && keep) {
-                        lbl_803C6724._14[t][i] = starMissionCompletionTracker._40B8[i]._3;
+                        lbl_803C6724._14[t][j] = starMissionCompletionTracker._40B8[j]._3;
                     } else {
-                        lbl_803C6724._14[t][i] = i;
+                        lbl_803C6724._14[t][j] = j;
                     }
-                    lbl_803C6724._26[t][i] = lbl_8034E9A0._0000[id / 9][id % 9]._3B[cap];
+                    lbl_803C6724._26[t][j] = lbl_8034E9A0._0000[id / 9][id % 9]._3B[cap];
                 }
             }
             for (i = 0; i < 54; i++) {
