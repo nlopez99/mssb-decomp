@@ -20,7 +20,7 @@ void fn_2_151BC(u8 port);
 void fn_2_1560C(u8 port);
 void fn_2_15A90(s32* value, u8 port, s32 max);
 void fn_2_15AFC(s32 port, u16 hold, u16 trg, u16 rep);
-void fn_2_15E80(void);
+void fn_2_15E80(u8 port);
 void fn_2_1641C(void);
 void fn_2_16460(void);
 void fn_2_16664(void);
