@@ -165,17 +165,8 @@ void fn_3_E19E8(void) {
 }
 
 // .text:0x000E1964 size:0x84 mapped:0x807209F8
-// Same body as fn_3_E0758, yet the target starts the loop with li r29,0; mr r27,r29
-// and allocates i and obj differently.
 void fn_3_E1964(void) {
-    Unk2940Obj* obj;
-    int i;
-
-    for (i = 0; i < 30; i++) {
-        obj = &lbl_8036E548._2D94[i];
-        fn_8001D0D0(i, lbl_3_data_18D98[0]);
-        obj->_14 = shortAngleToRad_Capped(rand() % 4096);
-    }
+    fn_3_E0758();
 }
 
 // .text:0x000E1478 size:0x4EC mapped:0x8072050C
