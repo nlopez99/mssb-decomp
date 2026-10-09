@@ -18,6 +18,8 @@ void fn_2_8C910(void);
 s32 fn_2_8CC88(s32 idx);
 void fn_2_8CCAC(s32 idx, s32 arg1);
 void fn_2_8CCCC(s32 idx, s32 arg1, s32 arg2, u8 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7);
+void fn_2_8CD58(s32 idx, s32 anim, u8 arg2, s32 arg3, s16 arg4, s32 arg5, u8 arg6);
+void fn_2_8D024(void);
 void fn_2_8D24C(struct Obj0F60* obj);
 void fn_2_8D270(u8 idx);
 void fn_2_8D9DC(s32 mode);
