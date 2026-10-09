@@ -8794,12 +8794,149 @@ void fn_3_35E1C(void) {
 
 // .text:0x00035D28 size:0xF4 mapped:0x80674DBC
 void fn_3_35D28(s32 fielder) {
-    return;
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+
+    if (g_Ball.framesSinceHit <= 0) {
+        return;
+    }
+    if (fn_3_53130(fielder) != 0) {
+        return;
+    }
+    fn_3_34A40(fielder);
+    fn_3_4207C(fielder);
+    if (g_Ball.ballState != 0 && g_Ball.ballState != 3) {
+        fn_3_5985C(fielder, 12);
+        if (fielder <= 5) {
+            f->_1D5 = 3;
+        } else {
+            f->_1D5 = 2;
+        }
+    }
 }
 
 // .text:0x00034A40 size:0x12E8 mapped:0x80673AD4
-void fn_3_34A40(void) {
-    return;
+void fn_3_34A40(s32 fielder) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    s32 i;
+    s32 k;
+    f32 dist;
+    f32 scale;
+    f32 x;
+    f32 z;
+
+    if (g_Ball.fielderWBallIndex >= 0 && g_Ball.fielderWBallIndex != fielder) {
+        if (f->_050 == 0.0f) {
+            f->_068 = 0.0f;
+            f->_014 = f->_000;
+            f->_018 = f->_004;
+            f->_01C = f->_008;
+            f->_030 = 0.0f;
+            f->_034 = 0.0f;
+        }
+    } else {
+        f->_1D6 = 0;
+        f->_1EA[1] = 0;
+        f->_1A4 = 0;
+        if (g_Ball.fielderAboutToGetBall_hasBall >= 0) {
+            if (g_Ball.AtBat_ContactResult != 0 || g_Ball.hitClassification1 != 2) {
+                goto lead;
+            }
+            dist = dolsqrtf2(SQ(g_Ball.ballWillHitBallPos.x - g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x) +
+                             SQ(g_Ball.ballWillHitBallPos.z - g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z));
+            if (g_Ball.ballVelocity > 0.0f || dist > 20.0f) {
+                if (g_Ball.physicsSubstruct.hitLandingSpotDistFromHome < 3.0f) {
+                    if (f->_070 < 15.0f) {
+                        fn_3_52F4C(fielder, f->_000, f->_008);
+                    } else {
+                        fn_3_52F4C(fielder, 15.0f * (f->_000 / f->_070), 15.0f * (f->_008 / f->_070));
+                    }
+                } else {
+                    fn_3_52F4C(fielder,
+                               15.0f * (g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x /
+                                        g_Ball.physicsSubstruct.hitLandingSpotDistFromHome) +
+                                   g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x,
+                               15.0f * (g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z /
+                                        g_Ball.physicsSubstruct.hitLandingSpotDistFromHome) +
+                                   g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z);
+                }
+            } else {
+                fn_3_52F4C(fielder, g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x,
+                           g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z);
+            }
+            if (f->_068 < 10.0f) {
+                f->_1D6 = 8;
+            }
+        } else if (g_Ball.AtBat_ContactResult == 0) {
+            if (g_Ball.framesUntilBallHitsGround - fn_3_52560(fielder, g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x,
+                                                             g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z) >
+                10) {
+                fn_3_52F4C(fielder, g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x,
+                           g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z);
+            } else {
+                for (k = 10; k <= 60; k += 10) {
+                    i = g_Ball.framesUntilBallHitsGround + k;
+                    if (k == 60) {
+                        fn_3_52F4C(fielder, g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x,
+                                   g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z);
+                        break;
+                    }
+                    if (i - fn_3_52560(fielder, g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x,
+                                       g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z) >
+                        5) {
+                        fn_3_52F4C(fielder, g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x,
+                                   g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z);
+                        break;
+                    }
+                }
+            }
+            if (fielder <= 5) {
+                if (f->_080 < 10.0f) {
+                    f->_1D6 = 8;
+                }
+            } else if (g_FieldingLogic._0B0 <= 5 &&
+                       g_Ball.ballDistanceFromHome < g_Fielders[g_FieldingLogic._0B0]._070) {
+                if (f->_080 < 5.0f) {
+                    f->_1D6 = 8;
+                }
+            } else if (f->_080 < 10.0f) {
+                f->_1D6 = 8;
+            }
+        } else {
+        lead:
+            dist = f->_07C;
+            scale = 1.0f + ((dist - 15.0f) / 100.0f + (g_Ball.ballVelocity - 0.6f));
+            x = scale * (f->_074 * g_Ball.ballVelocityPercent.x) + g_Ball.AtBat_Contact_BallPos.x;
+            z = scale * (f->_074 * g_Ball.ballVelocityPercent.z) + g_Ball.AtBat_Contact_BallPos.z;
+            if (fielder >= 6 && f->_070 < 50.0f) {
+                x = f->_000;
+                z = f->_008;
+            }
+            fn_3_52F4C(fielder, x, z);
+            if (f->_074 < 20.0f && dist < 5.0f) {
+                if (lbl_3_bss_170[0] >= 0) {
+                    if (__abs(lbl_3_bss_170[0] -
+                              radToShortAngle(atan2(g_Ball.AtBat_Contact_BallPos.z - f->_008,
+                                                    g_Ball.AtBat_Contact_BallPos.x - f->_000))) > 0x80) {
+                        f->_1D6 = 8;
+                    }
+                } else {
+                    f->_1D6 = 8;
+                }
+            }
+        }
+    }
+    if (f->_050 < 0.01f && f->_1D6 == 8) {
+        f->_068 = 0.0f;
+        f->_050 = 0.0f;
+        f->_014 = f->_000;
+        f->_01C = f->_008;
+        f->_1A0 = 0;
+        f->_1D6 = 0;
+    }
+    fn_3_526DC(fielder);
+    if (f->_050 != 0.0f) {
+        f->_17E = f->_068 / f->_050;
+    }
 }
 
 // .text:0x00034450 size:0x5F0 mapped:0x806734E4

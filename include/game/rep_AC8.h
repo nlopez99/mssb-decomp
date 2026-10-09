@@ -79,7 +79,7 @@ void fn_3_33D9C(void);
 void fn_3_33DD0(s32* primary, s32* secondary);
 void fn_3_341E8(void);
 void fn_3_34450(void);
-void fn_3_34A40(void);
+void fn_3_34A40(s32 fielder);
 void fn_3_35D28(s32 fielder);
 void fn_3_35E1C(void);
 s32 fn_3_361D8(f32 x, f32 z);
