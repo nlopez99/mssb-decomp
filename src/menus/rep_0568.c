@@ -334,6 +334,10 @@ static inline void setRefAnim(ActorRef0568* ref, AnimBank0568* bank, s32 seq, f3
     ref->_60 = speed;
 }
 
+static inline ActorRef0568* getRef(u8 index) {
+    return &lbl_8036E548._0060->_34[index];
+}
+
 #define GET_MODEL_ID(index) \
     (lbl_8036E548._2C50[index] != NULL ? lbl_8036E548._2C50[index]->_162[4] : 0xFFFF)
 
@@ -1143,9 +1147,8 @@ done:
 }
 
 // .text:0x00016F78 size:0x6D0
-// 97.89%: _34[index]._08 is stored with stwx from an index-folded offset, the
-// fn_800B2B74 arguments load in the other order, and the target tests
-// hasAltAnims through neg/or/srwi. where this compiles to clrlwi.
+// 98.59%: the fn_800B2B74 arguments load in the other order, and the target
+// tests hasAltAnims through neg/or/srwi. where this compiles to clrlwi.
 void fn_2_16F78(u8 index) {
     Player0568* player = &lbl_8036E548._0C04[index];
     void* tex;
@@ -1213,7 +1216,7 @@ void fn_2_16F78(u8 index) {
     player->_03C = pos->z;
     player->_04C = 0.5f;
     player->_25D = 0;
-    lbl_8036E548._0060->_34[index]._08 = fn_2_190B8;
+    getRef(index)->_08 = fn_2_190B8;
     player->_000 = ref->_00;
     fn_800B2B74(ref->_00, player->_162[19]);
     fn_800B2B74(ref->_00, player->_162[25]);
