@@ -8,6 +8,17 @@
 extern void* lbl_803CC1B8;
 
 extern void convertTextureHeader(void* tex);
+extern s32 fn_80035838(void* entry, s32 arg1);
+extern s32 fn_80035DD4(s32 arg0);
+extern void fn_80034E20(void* task, struct SpriteDesc7730* desc);
+
+extern struct {
+    /* 0x00 */ u8 _00[0x38];
+    /* 0x38 */ struct {
+        /* 0x00 */ u8 _00[0x8];
+        /* 0x08 */ s32* _08;
+    }* _38;
+} lbl_803C4BE0[20];
 
 extern void* ARAMTransfer(void* entry, int arg1, int arg2, u32 aram);
 extern void* fn_800B0A5C_insertQueue(void (*)(void), s32);
@@ -24,8 +35,10 @@ extern void fn_800B24D4(s32 id);
 extern void fn_800A7D4C(s32, void*);
 extern void fn_80038CD0(u8 count, void* arg1, struct RopeNode7730* nodes, f32 arg3, f32 arg4);
 extern void fn_80038B48(void* arg0, struct ChainNode7730* nodes, u8 count, Vec* force);
+extern void fn_80038E2C(void* arg0);
 extern void fn_1_AF4(s32 arg0, s32 arg1, f32 arg2);
 extern void fn_1_272DC(void* arg0, s32 arg1);
+extern void fn_1_273D8(void* arg0);
 
 extern u8 lbl_803CBBC0;
 
@@ -127,22 +140,25 @@ typedef struct ChainNode7730 {
 
 typedef struct CameraTask7730 {
     /* 0x00 */ void (*_00)(void);
-    /* 0x04 */ u8 _04[0x14 - 0x4];
+    /* 0x04 */ u8 _04[0x10 - 0x4];
+    /* 0x10 */ s16 _10;
+    /* 0x12 */ u8 _12[0x14 - 0x12];
     /* 0x14 */ f32 _14;
     /* 0x18 */ f32 _18;
     /* 0x1C */ f32 _1C;
     /* 0x20 */ f32 _20;
     /* 0x24 */ f32 _24;
-    /* 0x28 */ u8 _28[0x2C - 0x28];
+    /* 0x28 */ s32 _28;
     /* 0x2C */ u32 _2C;
 } CameraTask7730;
 
 typedef struct Actor7730 {
-    /* 0x00 */ u8 _00[0x50];
-    /* 0x50 */ f32 _50;
-    /* 0x54 */ u8 _54[0xEC - 0x54];
-    /* 0xEC */ f32 _EC;
-} Actor7730;
+    /* 0x000 */ u8 _000[0x50];
+    /* 0x050 */ f32 _050;
+    /* 0x054 */ u8 _054[0xEC - 0x54];
+    /* 0x0EC */ f32 _0EC;
+    /* 0x0F0 */ u8 _0F0[0x154 - 0xF0];
+} Actor7730; // size: 0x154
 
 typedef struct Tex7730 {
     /* 0x00 */ void* image;
@@ -172,13 +188,23 @@ typedef struct RopeNode7730 {
 typedef struct RopeParams7730 {
     /* 0x00 */ u8 _00[0x18];
     /* 0x18 */ f32 _18;
-    /* 0x1C */ u8 _1C[0x20 - 0x1C];
+    /* 0x1C */ f32 _1C;
     /* 0x20 */ u8 _20;
     /* 0x21 */ u8 _21;
     /* 0x22 */ u8 _22;
     /* 0x23 */ u8 _23;
     /* 0x24 */ u8 _24;
+    /* 0x25 */ u8 _25;
 } RopeParams7730;
+
+typedef struct SpriteDesc7730 {
+    /* 0x00 */ u16 _00;
+    /* 0x02 */ u16 _02;
+    /* 0x04 */ s32 _04[3];
+    /* 0x10 */ u8 _10[2];
+    /* 0x12 */ s16 _12;
+    /* 0x14 */ s32 _14[3];
+} SpriteDesc7730; // size: 0x20
 
 typedef struct DrawEntry7730 {
     /* 0x00 */ u32 _00;
@@ -195,7 +221,7 @@ typedef struct AramEntry7730 {
     /* 0x0 */ u32 _0[4];
 } AramEntry7730; // size: 0x10
 
-AramEntry7730 lbl_1_data_FB98[64] = {
+static AramEntry7730 lbl_1_data_FB98[64] = {
     { 0x0000040B, 0x4023491C, 0x19135800, 0x00082928 },
     { 0x0000040B, 0x4013764C, 0x1A635000, 0x0007DB48 },
     { 0x0000040B, 0x4003E3DC, 0x1A6B3000, 0x00021420 },
@@ -262,7 +288,7 @@ AramEntry7730 lbl_1_data_FB98[64] = {
     { 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
 };
 
-char lbl_1_data_FF98[47][20] = {
+static char lbl_1_data_FF98[47][20] = {
     "game_td",
     "result",
     "operation",
@@ -312,60 +338,60 @@ char lbl_1_data_FF98[47][20] = {
     "fade06",
 };
 
-u16 lbl_1_data_10344[32] = {
-    0x0000, 0x0000, 0x0000, 0x0000,
-    0x0000, 0x0000, 0xFFFF, 0xFFFF,
-    0x0104, 0x00FF, 0x0000, 0x0000,
-    0x0000, 0x0000, 0x0000, 0x0000,
-    0x0003, 0x0000, 0x0000, 0x0000,
-    0x0000, 0x0000, 0x0000, 0x0000,
-    0x0000, 0x0000, 0x0000, 0x0000,
-    0x0000, 0x0000, 0x0000, 0x0000,
+// Read by fn_80034E20; a _00 of 3 ends the list.
+static SpriteDesc7730 lbl_1_data_10344[2] = {
+    { 0, 0, { 0, 0, -1 }, { 1, 4 }, 0xFF, { 0, 0, 0 } },
+    { 3 },
 };
 
-u32 lbl_1_data_10384[72] = {
-    0xFF0000FF, 0x00FF00FF, 0xFFFF00FF, 0x0000FFFF,
-    0xFF00FFFF, 0x00FFFFFF, 0xFFFFFFFF, 0xFF0000FF,
-    0x00FF00FF, 0xFFFF00FF, 0x0000FFFF, 0xFF00FFFF,
-    0x00FFFFFF, 0xFFFFFFFF, 0xFF0000FF, 0x00FF00FF,
-    0xFFFF00FF, 0x0000FFFF, 0xFF00FFFF, 0x00FFFFFF,
-    0xFFFFFFFF, 0xFF0000FF, 0x00FF00FF, 0xFFFF00FF,
-    0x0000FFFF, 0xFF00FFFF, 0x00FFFFFF, 0xFFFFFFFF,
-    0xFF0000FF, 0x00FF00FF, 0xFFFF00FF, 0x0000FFFF,
-    0xFF00FFFF, 0x00FFFFFF, 0xFFFFFFFF, 0xFF0000FF,
-    0x00FF00FF, 0xFFFF00FF, 0x0000FFFF, 0xFF00FFFF,
-    0x00FFFFFF, 0xFFFFFFFF, 0xFF0000FF, 0x00FF00FF,
-    0xFFFF00FF, 0x0000FFFF, 0xFF00FFFF, 0x00FFFFFF,
-    0xFFFFFFFF, 0xFF0000FF, 0x00FF00FF, 0xFFFF00FF,
-    0x0000FFFF, 0xFF00FFFF, 0x00FFFFFF, 0xFFFFFFFF,
-    0x00000064, 0x43480000, 0x42C80000, 0x41A00000,
-    0x0000000A, 0x3F800000, 0x3F800000, 0x00000000,
-    0xBF800000, 0x00000000, 0x00000000, 0x00000000,
-    0xC0A00000, 0x00000000, 0x00000000, 0x00000000,
+static u32 lbl_1_data_10384[56] = {
+    0xFF0000FF, 0x00FF00FF, 0xFFFF00FF, 0x0000FFFF, 0xFF00FFFF, 0x00FFFFFF, 0xFFFFFFFF,
+    0xFF0000FF, 0x00FF00FF, 0xFFFF00FF, 0x0000FFFF, 0xFF00FFFF, 0x00FFFFFF, 0xFFFFFFFF,
+    0xFF0000FF, 0x00FF00FF, 0xFFFF00FF, 0x0000FFFF, 0xFF00FFFF, 0x00FFFFFF, 0xFFFFFFFF,
+    0xFF0000FF, 0x00FF00FF, 0xFFFF00FF, 0x0000FFFF, 0xFF00FFFF, 0x00FFFFFF, 0xFFFFFFFF,
+    0xFF0000FF, 0x00FF00FF, 0xFFFF00FF, 0x0000FFFF, 0xFF00FFFF, 0x00FFFFFF, 0xFFFFFFFF,
+    0xFF0000FF, 0x00FF00FF, 0xFFFF00FF, 0x0000FFFF, 0xFF00FFFF, 0x00FFFFFF, 0xFFFFFFFF,
+    0xFF0000FF, 0x00FF00FF, 0xFFFF00FF, 0x0000FFFF, 0xFF00FFFF, 0x00FFFFFF, 0xFFFFFFFF,
+    0xFF0000FF, 0x00FF00FF, 0xFFFF00FF, 0x0000FFFF, 0xFF00FFFF, 0x00FFFFFF, 0xFFFFFFFF,
 };
+static s32 lbl_1_data_10464 = 100;
+static f32 lbl_1_data_10468 = 200.0f;
+static f32 lbl_1_data_1046C = 100.0f;
+static f32 lbl_1_data_10470 = 20.0f;
+static s32 lbl_1_data_10474 = 10;
+static f32 lbl_1_data_10478 = 1.0f;
+static f32 lbl_1_data_1047C = 1.0f;
+static Vec lbl_1_data_10480 = { 0.0f, -1.0f, 0.0f };
+static Vec lbl_1_data_1048C = { 0.0f, 0.0f, -5.0f };
+static Vec lbl_1_data_10498 = { 0.0f, 0.0f, 0.0f };
 
-f32 lbl_1_data_104A4 = 50.0f;
+static f32 lbl_1_data_104A4 = 50.0f;
 
-void (*lbl_1_data_104A8[4])(void) = { fn_1_1F2D8, fn_1_24410, fn_1_22644, fn_1_2040C };
-u32 lbl_1_data_104B8[6] = { 0x3E99999A, 0x3D010204, 0x3F800000, 0x3F7AE148, 0x3D4CCCCD, 0x00000400 };
+static void (*lbl_1_data_104A8[4])(void) = { fn_1_1F2D8, fn_1_24410, fn_1_22644, fn_1_2040C };
+static f32 lbl_1_data_104B8 = 0.3f;
+static f32 lbl_1_data_104BC = 0.031496063f;
+static f32 lbl_1_data_104C0 = 1.0f;
+static f32 lbl_1_data_104C4 = 0.98f;
+static f32 lbl_1_data_104C8 = 0.05f;
+static s32 lbl_1_data_104CC = 0x400;
 
-f32 lbl_1_data_104D0[3] = { 0.125f, 0.125f, 0.125f };
+static f32 lbl_1_data_104D0[3] = { 0.125f, 0.125f, 0.125f };
 
-GXColor lbl_1_data_104DC[6] = {
+static GXColor lbl_1_data_104DC[6] = {
     { 0xFF, 0x80, 0x80, 0xFF }, { 0x80, 0xFF, 0x80, 0xFF }, { 0x80, 0x80, 0xFF, 0xFF },
     { 0xFF, 0xFF, 0x80, 0xFF }, { 0xFF, 0x80, 0xFF, 0xFF }, { 0x80, 0xFF, 0xFF, 0xFF },
 };
 
-u32 lbl_1_data_104F4[5] = {
+static u32 lbl_1_data_104F4[5] = {
     0x0000040B, 0x40000528, 0x09438800, 0x00000424,
     0x3E000000,
 };
 
-void* lbl_1_data_10508[2] = { fn_1_1FD78, fn_1_1F418 };
+static void* lbl_1_data_10508[2] = { fn_1_1FD78, fn_1_1F418 };
 
-void* lbl_1_data_10510[2] = { fn_1_1F900, fn_1_1F618 };
+static void* lbl_1_data_10510[2] = { fn_1_1F900, fn_1_1F618 };
 
-AramEntry7730 lbl_1_data_10518[21] = {
+static AramEntry7730 lbl_1_data_10518[21] = {
     { 0x0000040B, 0x40168A6C, 0x06CFD000, 0x000C69A8 },
     { 0x0000040B, 0x401331E0, 0x06DC4000, 0x000B67C4 },
     { 0x0000040B, 0x4011924C, 0x06E7A800, 0x000A5764 },
@@ -389,13 +415,13 @@ AramEntry7730 lbl_1_data_10518[21] = {
     { 0x0000040B, 0x400D04E0, 0x075FD000, 0x00087390 },
 };
 
-void (*lbl_1_data_10668[1])(s16) = { fn_1_1DE60 };
+static void (*lbl_1_data_10668[1])(s16) = { fn_1_1DE60 };
 
-void (*lbl_1_data_1066C[1])(s16) = { fn_1_1DE5C };
+static void (*lbl_1_data_1066C[1])(s16) = { fn_1_1DE5C };
 
-s32 lbl_1_data_10670 = 4;
+static s32 lbl_1_data_10670 = 4;
 
-AramEntry7730 lbl_1_data_10674[21] = {
+static AramEntry7730 lbl_1_data_10674[21] = {
     { 0x0000040B, 0x40168A6C, 0x06CFD000, 0x000C69A8 },
     { 0x0000040B, 0x401331E0, 0x06DC4000, 0x000B67C4 },
     { 0x0000040B, 0x4011924C, 0x06E7A800, 0x000A5764 },
@@ -419,14 +445,14 @@ AramEntry7730 lbl_1_data_10674[21] = {
     { 0x0000040B, 0x400D04E0, 0x075FD000, 0x00087390 },
 };
 
-u8 lbl_1_data_107C4[4][8] = {
+static u8 lbl_1_data_107C4[4][8] = {
     { 0, 1, 2, 3, 4, 5, 6, 7 },
     { 1, 2, 3, 4, 5, 6, 7, 8 },
     { 2, 3, 4, 5, 6, 7, 8, 9 },
     { 3, 4, 5, 6, 7, 8, 9, 10 },
 };
 
-DrawEntry7730 lbl_1_data_107E4[2] = {
+static DrawEntry7730 lbl_1_data_107E4[2] = {
     { 0, fn_1_1D694 },
     { 0, fn_1_1D694 },
 };
@@ -454,7 +480,7 @@ static GXTexObj lbl_1_bss_6EA4[8];
 static GXTlutObj lbl_1_bss_6E44[8];
 static u32 lbl_1_bss_6E24[8];
 static u8 lbl_1_bss_6D48[0xDC];
-static u8 lbl_1_bss_6BF4[0x154];
+static Actor7730 lbl_1_bss_6BF4;
 static struct {
     /* 0x0 */ f32 _0;
     /* 0x4 */ Vec _4;
@@ -523,6 +549,36 @@ void fn_1_26928(void) {
     fn_800B1188();
 }
 
+// .text:0x000267F4 size:0x134
+void fn_1_267F4(void) {
+    LoadTask7730* task = lbl_803CC1B8;
+    s32 id;
+
+    switch (task->_1E) {
+    case 0:
+        if (fn_80035838(&lbl_1_data_FB98[task->_20], 0) != 0) {
+            task->_1E++;
+        }
+        break;
+    case 1:
+        task->_14 = fn_800B0A5C_insertQueue(fn_1_267BC, 1);
+        ((SprTask7730*)task->_14)->_10 = 0;
+        id = fn_80035DD4(0);
+        if (id == -1) {
+            OSPanic("spr.c", 245, "It is a number not registered. \n");
+        }
+        task->_18 = *lbl_803C4BE0[id]._38->_08;
+        fn_80034E20(task->_14, lbl_1_data_10344);
+        task->_21 = 0;
+        task->_22 = 0;
+        task->_24 = 0;
+        task->_1A = 0;
+        task->_1C = 0;
+        ((LoadTask7730*)lbl_803CC1B8)->_00 = fn_1_25F98;
+        break;
+    }
+}
+
 // .text:0x000267BC size:0x38
 void fn_1_267BC(void) {
     if (((SprTask7730*)lbl_803CC1B8)->_10 != 0) {
@@ -580,6 +636,48 @@ void fn_1_23AD8(Mtx44 m, Vec* eye, Vec* at) {
     C_MTXFrustum(m, -0.175f, 0.175f, 0.25f, -0.25f, 1.0f, 512.0f);
 }
 
+// .text:0x00022F4C size:0x14C
+// 77.45%: the target indexes out/cur/prev with one byte offset (lfsx) and keeps a dead
+// counter; this form walks separate registers, and 4.0/2.0 load in the other order.
+void fn_1_22F4C(s32 rows, s32 cols, f32* out, f32* cur, f32* prev) {
+    s32 y;
+    s32 x;
+    s32 row;
+    f64 c;
+    f32 a;
+    f32 b;
+
+    c = (1.0 / 60.0) * lbl_1_data_104C0 / lbl_1_data_104BC;
+    c = c * c;
+    a = c;
+    b = 2.0 - 4.0 * c;
+    row = 0;
+    for (y = 0; y < rows; y++) {
+        for (x = 0; x < cols; x++) {
+            out[row + x] = b * cur[row + x] +
+                     a * (cur[x + cols * ((y + rows - 1) % rows)] + cur[x + cols * ((y + 1) % rows)] +
+                          cur[(x + cols - 1) % cols + row] + cur[(x + 1) % cols + row]) -
+                     prev[row + x];
+            out[row + x] *= lbl_1_data_104C4;
+        }
+        row += cols;
+    }
+}
+
+// .text:0x00022DF4 size:0x158
+void fn_1_22DF4(RopeParams7730* params) {
+    params->_18 = 0.01f;
+    params->_1C = 20.0f;
+    params->_25 = 0;
+    params->_20 = 10;
+    params->_21 = 10;
+    params->_22 = 1;
+    params->_23 = 0;
+    params->_24 = 0;
+    fn_80038E2C(&lbl_1_bss_6FB8);
+    fn_1_21180(params);
+}
+
 // .text:0x000225B8 size:0x8C
 void fn_1_225B8(void) {
     SprTask7730* task = lbl_803CC1B8;
@@ -619,6 +717,31 @@ void fn_1_21180(RopeParams7730* params) {
     lbl_1_bss_6FA8.y = lbl_1_bss_6FE0[last]._0C.y;
     lbl_1_bss_6FA8.z = lbl_1_bss_6FE0[last]._0C.z;
     lbl_1_bss_6FE0[last]._3C = params->_23;
+}
+
+// .text:0x00021040 size:0x140
+void fn_1_21040(void) {
+    s32 i;
+    u32 color;
+
+    GXBegin(GX_LINES, GX_VTXFMT0, 44);
+    for (i = 0; i < 11; i++) {
+        color = 0xFFFFFFFF;
+        if (i == 5) {
+            color = 0xFF0000FF;
+        }
+        GXPosition3f32((i - 5) * 10, 0.0f, -50.0f);
+        GXColor1u32(color);
+        GXPosition3f32((i - 5) * 10, 0.0f, 50.0f);
+        GXColor1u32(color);
+        if (i == 5) {
+            color = 0x00FF00FF;
+        }
+        GXPosition3f32(-50.0f, 0.0f, (i - 5) * 10);
+        GXColor1u32(color);
+        GXPosition3f32(50.0f, 0.0f, (i - 5) * 10);
+        GXColor1u32(color);
+    }
 }
 
 // .text:0x00020F8C size:0xB4
@@ -744,12 +867,31 @@ void fn_1_2004C(void) {
     }
 }
 
+// .text:0x0001F2D8 size:0x140
+void fn_1_1F2D8(void) {
+    fn_1_273D8(lbl_1_bss_6D48);
+    ((CameraTask7730*)lbl_803CC1B8)->_00 = fn_1_1F05C;
+    ((CameraTask7730*)lbl_803CC1B8)->_2C = 0;
+    ((CameraTask7730*)lbl_803CC1B8)->_28 = 0;
+    ((CameraTask7730*)lbl_803CC1B8)->_14 = 2.0f;
+    ((CameraTask7730*)lbl_803CC1B8)->_18 = 0.2f;
+    ((CameraTask7730*)lbl_803CC1B8)->_1C = 0.2f;
+    ((CameraTask7730*)lbl_803CC1B8)->_20 = 1.0f;
+    ((CameraTask7730*)lbl_803CC1B8)->_24 = 1.0f;
+    fn_1_1F23C(&lbl_1_bss_6BF4);
+    ((CameraTask7730*)lbl_803CC1B8)->_10 = 0;
+    lbl_1_bss_6BE4._0 = 0.0f;
+    lbl_1_bss_6BE4._4.x = 0.0f;
+    lbl_1_bss_6BE4._4.y = 0.0f;
+    lbl_1_bss_6BE4._4.z = 0.0f;
+}
+
 // .text:0x0001F23C size:0x9C
 void fn_1_1F23C(Actor7730* actor) {
-    fn_800385F0(lbl_1_bss_6BF4, ((CameraTask7730*)lbl_803CC1B8)->_14, ((CameraTask7730*)lbl_803CC1B8)->_18,
+    fn_800385F0(&lbl_1_bss_6BF4, ((CameraTask7730*)lbl_803CC1B8)->_14, ((CameraTask7730*)lbl_803CC1B8)->_18,
                 ((CameraTask7730*)lbl_803CC1B8)->_1C, ((CameraTask7730*)lbl_803CC1B8)->_20);
-    actor->_50 = -((CameraTask7730*)lbl_803CC1B8)->_24;
-    actor->_EC += 2.0f;
+    actor->_050 = -((CameraTask7730*)lbl_803CC1B8)->_24;
+    actor->_0EC += 2.0f;
     ((CameraTask7730*)lbl_803CC1B8)->_2C &= ~2;
     ((CameraTask7730*)lbl_803CC1B8)->_2C |= 2;
 }
@@ -759,7 +901,7 @@ void fn_1_1EFF4(void) {
     fn_1_272DC(lbl_1_bss_6D48, 0);
     fn_1_AF4(20, 20, 1.0f);
     if (((CameraTask7730*)lbl_803CC1B8)->_2C & 2) {
-        fn_1_1E5D0(lbl_1_bss_6BF4);
+        fn_1_1E5D0(&lbl_1_bss_6BF4);
     }
 }
 
@@ -805,7 +947,7 @@ void fn_1_1DD94(void) {
     v.x = lbl_1_bss_6BE4._4.x;
     v.y = lbl_1_bss_6BE4._4.y;
     v.z = lbl_1_bss_6BE4._4.z;
-    fn_80037B18(lbl_1_bss_6BF4, &v, lbl_1_bss_6BE4._0);
+    fn_80037B18(&lbl_1_bss_6BF4, &v, lbl_1_bss_6BE4._0);
 }
 
 // .text:0x0001DD48 size:0x4C
