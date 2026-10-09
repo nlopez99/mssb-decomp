@@ -3625,6 +3625,122 @@ void fn_2_33E70(MenuTask0788* task, MenuItem0788* item) {
     }
 }
 
+// .text:0x000338D4 size:0x59C
+void fn_2_338D4(MenuTask0788* task, MenuItem0788* item) {
+    s16 part = item->_10 & 0xF;
+    s16 kind = item->_10 >> 4;
+    s16 state = fn_2_53BC8(item);
+    s16 x0;
+    s16 y0;
+    s16 x1;
+    s16 y1;
+    s16 value;
+    s16 count;
+    s16 digit;
+    s16 width;
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 2:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
+        switch (kind) {
+        case 0:
+            value = lbl_2_bss_1A824C->_197766;
+            count = __abs(value);
+            break;
+        case 1:
+            value = lbl_2_bss_1A824C->_197768;
+            count = __abs(value);
+            break;
+        case 2:
+            value = lbl_2_bss_1A824C->_19776A;
+            count = __abs(value);
+            break;
+        case 3:
+            value = lbl_2_bss_1A824C->_19776C;
+            count = __abs(value);
+            break;
+        }
+        if (count == 10000) {
+            fn_800363D8(task, item->_0E, 1, 0x2C, 23);
+        } else {
+            switch (item->_0A) {
+            case 0:
+                digit = count % 10;
+                fn_800363D8(task, item->_0E, 1, 0x2C, kind == 3 ? digit : digit + 12);
+                break;
+            case 1:
+                digit = (count / 10) % 10;
+                if (count < 10) {
+                    digit = 23;
+                } else if (kind != 3) {
+                    digit += 12;
+                }
+                fn_800363D8(task, item->_0E, 1, 0x2C, digit);
+                break;
+            case 2:
+                digit = (count / 100) % 10;
+                if (count < 100) {
+                    digit = 23;
+                } else if (kind != 3) {
+                    digit += 12;
+                }
+                fn_800363D8(task, item->_0E, 1, 0x2C, digit);
+                break;
+            case 3:
+                if (value < 0) {
+                    digit = kind == 3 ? 11 : 22;
+                } else if (value > 0) {
+                    digit = kind == 3 ? 10 : 23;
+                } else {
+                    digit = 23;
+                }
+                fn_800363D8(task, item->_0E, 1, 0x2C, digit);
+                fn_80036270(task, 0x280, 0, 0, &x0, &y0);
+                fn_80036270(task, 0x280, 2, 0, &x0, &y0);
+                fn_80036270(task, 0x280, 1, 0, &x1, &y1);
+                width = __abs(x1 - x0);
+                fn_80036270(task, 0x280, part, 0, &x0, &y0);
+                if (count == 0) {
+                    x0 = 0;
+                } else if (count < 10) {
+                    x0 = width * 2;
+                } else if (count < 100) {
+                    x0 = width;
+                } else {
+                    x0 = 0;
+                }
+                lbl_80371C30[task->_14 + item->_0E]._00->_48 = x0;
+                break;
+            }
+        }
+        item->_04 = 0x25;
+        break;
+    case 5:
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 4;
+        item->_04 = 6;
+        break;
+    case 6:
+        if ((lbl_80371C30[task->_14 + item->_0E]._00->_5C >> 16) == 0) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_68 = 0;
+            item->_04 = 7;
+        }
+        break;
+    case 7:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        break;
+    case 0x25:
+        break;
+    }
+}
+
 // .text:0x00033720 size:0x1B4
 void fn_2_33720(MenuTask0788* task, MenuItem0788* item) {
     s16 state = fn_2_53BC8(item);
@@ -5044,6 +5160,112 @@ void fn_2_2F544(MenuTask0788* task, MenuItem0788* item) {
         }
         break;
     case 1:
+    case 0x25:
+        break;
+    }
+}
+
+// .text:0x0002EFCC size:0x578
+void fn_2_2EFCC(MenuTask0788* task, MenuItem0788* item) {
+    s16 state = fn_2_53BC8(item);
+    s32 digit;
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_0A) {
+    case 0:
+        digit = lbl_2_bss_1A824C->_197736 / 100;
+        break;
+    case 1:
+        digit = (lbl_2_bss_1A824C->_197736 / 10) % 10;
+        break;
+    case 2:
+        digit = lbl_2_bss_1A824C->_197736 % 10;
+        break;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 2:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0;
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
+        lbl_2_bss_1A824C->_197734 = lbl_2_bss_1A8248->_43BC;
+        lbl_2_bss_1A824C->_197736 = lbl_2_bss_1A824C->_19773C = lbl_2_bss_1A8248->_43BC;
+        switch (item->_0A) {
+        case 0:
+            digit = lbl_2_bss_1A824C->_197736 / 100;
+            break;
+        case 1:
+            digit = (lbl_2_bss_1A824C->_197736 / 10) % 10;
+            break;
+        case 2:
+            digit = lbl_2_bss_1A824C->_197736 % 10;
+            break;
+        }
+        fn_800363D8(task, item->_0E, 1, 0xD, digit);
+        item->_04 = 3;
+        break;
+    case 3:
+        if ((lbl_80371C30[task->_14 + item->_0E]._00->_5C >> 16) >= 21) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_68 = 0;
+            item->_04 = 0x25;
+        }
+        break;
+    case 0x11:
+        if (lbl_2_bss_1A824C->_197736 != lbl_2_bss_1A824C->_19773C) {
+            fn_800363D8(task, item->_0E, 1, 0xD, digit);
+            item->_04 = 0x12;
+        } else {
+            item->_04 = 0x25;
+        }
+        break;
+    case 0x12:
+        item->_04 = 0x25;
+        break;
+    case 0x14:
+        if (lbl_2_bss_1A824C->_197736 != lbl_2_bss_1A824C->_19773C) {
+            fn_800363D8(task, item->_0E, 1, 0xD, digit);
+            item->_04 = 0x15;
+        } else {
+            item->_04 = 0x25;
+        }
+        break;
+    case 0x15:
+        item->_04 = 0x25;
+        break;
+    case 0x1E:
+    case 0x21:
+        switch (item->_0A) {
+        case 0:
+            digit = lbl_2_bss_1A8248->_43BC / 100;
+            break;
+        case 1:
+            digit = (lbl_2_bss_1A8248->_43BC / 10) % 10;
+            break;
+        case 2:
+            digit = lbl_2_bss_1A8248->_43BC % 10;
+            break;
+        }
+        fn_800363D8(task, item->_0E, 1, 0xD, digit);
+        item->_04 = 0x25;
+        break;
+    case 5:
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 4;
+        item->_04 = 6;
+        break;
+    case 6:
+        if ((lbl_80371C30[task->_14 + item->_0E]._00->_5C >> 16) == 0) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_68 = 0;
+            item->_04 = 7;
+        }
+        break;
+    case 7:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        break;
     case 0x25:
         break;
     }
