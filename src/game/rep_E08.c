@@ -379,7 +379,6 @@ void fn_3_6714C(BOOL arg0) {
     s32 slot;
     UnkE08Anim* anim;
     UnkE08Actor* actor;
-    UnkE08RunnerAnim* state;
 
     fn_8001C528();
     lbl_3_common_bss_32230._0 = 0;
@@ -404,6 +403,7 @@ void fn_3_6714C(BOOL arg0) {
                 continue;
             }
         }
+        actor = lbl_8036E548._2C50[slot];
         anim->_38 = 0;
         anim->_3A = 0;
         anim->_42 = 0;
@@ -416,7 +416,6 @@ void fn_3_6714C(BOOL arg0) {
         anim->_50 = 0;
         anim->_51 = 0;
         anim->_00 = 0.0f;
-        actor = lbl_8036E548._2C50[slot];
         if (actor != NULL && getActorModel(actor) == NULL) {
             fn_3_60804(i, FALSE);
         }
@@ -424,11 +423,10 @@ void fn_3_6714C(BOOL arg0) {
     if (lbl_8036E548._307D == 0) {
         for (i = 0; i < 4; i++) {
             if (!g_d_GameSettings.minigamesEnabled || (i == 0 && g_Minigame.rosterID >= 0) || g_Minigame._18FC[i] >= 0) {
-                state = &lbl_3_common_bss_321A0[i];
-                state->_10 = -1;
-                state->_18 = 0;
-                state->_19 = 0;
-                state->_16 = 0;
+                lbl_3_common_bss_321A0[i]._10 = -1;
+                lbl_3_common_bss_321A0[i]._18 = 0;
+                lbl_3_common_bss_321A0[i]._19 = 0;
+                lbl_3_common_bss_321A0[i]._16 = 0;
             }
         }
     }
@@ -908,13 +906,13 @@ void fn_3_657E4(void) {
 void fn_3_64BDC(void) {
     VecSrcDst line;
     CollisionStruct hit;
-    UnkE08Actor* actor;
     s32 kind;
     s32 player;
+    UnkE08Actor* actor;
     s32 windup;
-    s16 counter;
     u8 lefty;
-    u8 speed;
+    s32 speed;
+    s16 counter;
 
     player = 0;
     lefty = FALSE;
@@ -992,7 +990,7 @@ void fn_3_64BDC(void) {
         if (lbl_3_common_bss_32230._2 != 1 &&
             (g_GameLogic.secondaryGameMode != 0xB || g_Practice.instructionNumber >= 0 ||
              g_Practice.guidedPracticeCompletionRelated == 0) &&
-            actor->_62 != 0x41 && actor->_62 != 0x43) {
+            actor->_64 != 0x41 && actor->_64 != 0x43) {
             if (g_Minigame.GameMode_MiniGame == 2) {
                 if (g_Minigame.soloMinigameDifficulty != 3) {
                     AnimateCharacter(player, 0x3F, 1, 1, 1, 0, lefty, 0xC);
@@ -1056,9 +1054,8 @@ void fn_3_64BDC(void) {
         }
         return;
     }
-    if (g_Pitcher.pitcherActionState == 4) {
-        if (g_Ball.postPitchResultCounter > 1 && lbl_3_common_bss_32230._2 != 3 &&
-            (g_Minigame.GameMode_MiniGame != 2 || g_Minigame.soloMinigameDifficulty == 3)) {
+    if (g_Pitcher.pitcherActionState == 4 && g_Ball.postPitchResultCounter > 1 && lbl_3_common_bss_32230._2 != 3) {
+        if (g_Minigame.GameMode_MiniGame != 2 || g_Minigame.soloMinigameDifficulty == 3) {
             if (g_GameLogic.secondaryGameMode == 0xB && g_Practice.instructionNumber < 0 &&
                 g_Practice.guidedPracticeCompletionRelated != 0) {
                 if (lbl_3_common_bss_32230._2 != 4) {
@@ -1103,16 +1100,16 @@ void fn_3_64BDC(void) {
             AnimateCharacter(player, 0x45, 0, 1, 1, 0, lefty, -1);
             lbl_3_common_bss_32230._2 = 5;
         }
-        g_Pitcher.pitcherCoord.x = g_UnkAnimation_31EAC[0]._2C.x;
-        g_Pitcher.pitcherCoord.z = g_UnkAnimation_31EAC[0]._2C.z;
+        g_Pitcher.pitcher.x = g_UnkAnimation_31EAC[0]._2C.x;
+        g_Pitcher.pitcher.z = g_UnkAnimation_31EAC[0]._2C.z;
         if (g_d_GameSettings.minigamesEnabled) {
             g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame.minigamePlayerSelectedOrder]]._000.x =
-                g_UnkAnimation_31EAC[0]._2C.x;
+                g_Pitcher.pitcher.x;
             g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame.minigamePlayerSelectedOrder]]._000.z =
-                g_UnkAnimation_31EAC[0]._2C.z;
+                g_Pitcher.pitcher.z;
         } else {
-            g_Fielders[0]._000.x = g_UnkAnimation_31EAC[0]._2C.x;
-            g_Fielders[0]._000.z = g_UnkAnimation_31EAC[0]._2C.z;
+            g_Fielders[0]._000.x = g_Pitcher.pitcher.x;
+            g_Fielders[0]._000.z = g_Pitcher.pitcher.z;
         }
         line.src.x = g_Fielders[0]._000.x;
         line.src.y = -1.0f;
@@ -1122,7 +1119,7 @@ void fn_3_64BDC(void) {
         line.dst.z = g_Fielders[0]._000.z;
         checkCollision(&line, &hit, 0, FALSE);
         g_Fielders[0]._00C = -hit.position.y;
-        g_Fielders[0]._010 = -hit.position.y;
+        g_Fielders[0]._010 = g_Fielders[0]._00C;
     }
 }
 
