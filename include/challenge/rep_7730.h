@@ -5,8 +5,12 @@
 #include "Dolphin/mtx.h"
 
 struct Actor7730;
+struct RopeParams7730;
 
-void fn_1_1D694(void);
+struct DrawEntry7730;
+
+void fn_1_1D694(struct DrawEntry7730* entry);
+void fn_1_1D944(void);
 void fn_1_1DA54(void);
 void fn_1_1DCE4(void);
 f32 fn_1_1DD48(u16 buttons, s32 negate, f32 value, f32 step, f32 normal, f32 fast, f32 min, f32 max);
@@ -22,7 +26,9 @@ f32 fn_1_1DE50(void);
 void fn_1_1DE5C(s16 arg0);
 void fn_1_1DE60(s16 arg0);
 void fn_1_1E28C(void);
+void fn_1_1E5D0(void* arg0);
 void fn_1_1E8C0(s32 arg0);
+void fn_1_1EFF4(void);
 void fn_1_1F23C(struct Actor7730* actor);
 void fn_1_1F2D8(void);
 void fn_1_1F418(void);
@@ -35,6 +41,7 @@ void fn_1_20890(void);
 void fn_1_20BD8(void);
 void fn_1_20DC8(void);
 void fn_1_20F8C(void);
+void fn_1_21180(struct RopeParams7730* params);
 void fn_1_21408(void);
 void fn_1_225B8(void);
 void fn_1_22644(void);
@@ -45,6 +52,8 @@ void fn_1_24778(void);
 void fn_1_267BC(void);
 void fn_1_26928(void);
 void fn_1_26A34(void);
+void fn_1_25C68(void);
+void fn_1_267F4(void);
 void fn_1_26AF8(void);
 
 #endif // !__CHALLENGE_rep_7730_H_
