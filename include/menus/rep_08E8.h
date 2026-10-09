@@ -4,6 +4,7 @@
 #include "mssbTypes.h"
 #include "Dolphin/mtx.h"
 
+struct MenuModelList08E8;
 struct SortEntry08E8;
 
 void fn_2_42EB0(void);
@@ -49,9 +50,12 @@ void fn_2_474FC(void);
 void fn_2_4777C(void);
 void fn_2_477C0(void);
 void fn_2_47AFC(void);
+void fn_2_47B24(struct MenuModelList08E8* list);
+void fn_2_47FF8(void);
 void fn_2_481B8(void);
 void fn_2_487A0(void);
 void fn_2_489DC(void);
+void fn_2_48A1C(void);
 void fn_2_48BE0(void);
 void fn_2_48D08(void);
 void fn_2_48D54(void);
@@ -71,6 +75,9 @@ f32 fn_2_4A1E8(f32 x, f32 y);
 s16 fn_2_4A234(f32 x, f32 y);
 s32 fn_2_4A2C4(f32 angle);
 s16 fn_2_4A310(s16 a, s16 b);
+void fn_2_4AB1C(void);
+void fn_2_4ACF8(void);
+void fn_2_4AEE4(void);
 void fn_2_4B1AC(void);
 void fn_2_4B2D0(void);
 void fn_2_4C314(void);

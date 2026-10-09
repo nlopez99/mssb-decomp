@@ -82,7 +82,10 @@ typedef struct MenuTracker08E8 {
     /* 0x4423 */ u8 _4423;
     /* 0x4424 */ u8 _4424;
     /* 0x4425 */ u8 _4425;
-    /* 0x4426 */ u8 _4426[0x442A - 0x4426];
+    /* 0x4426 */ u8 _4426;
+    /* 0x4427 */ u8 _4427;
+    /* 0x4428 */ u8 _4428;
+    /* 0x4429 */ u8 _4429;
     /* 0x442A */ u8 _442A;
     /* 0x442B */ u8 _442B[0x444B - 0x442B];
     /* 0x444B */ s8 _444B;
@@ -93,6 +96,8 @@ typedef struct MenuTracker08E8 {
     /* 0x44EF */ u8 _44EF;
     /* 0x44F0 */ u8 _44F0[0x44F7 - 0x44F0];
     /* 0x44F7 */ u8 _44F7;
+    /* 0x44F8 */ s8 _44F8[5];
+    /* 0x44FD */ s8 _44FD;
 } MenuTracker08E8;
 
 extern MenuTracker08E8* lbl_2_bss_1A8248;
@@ -114,15 +119,33 @@ extern struct {
     /* 0x1972B8 */ u8 _1972B8;
     /* 0x1972B9 */ u8 _1972B9[0x19769C - 0x1972B9];
     /* 0x19769C */ s32 _19769C;
-    /* 0x1976A0 */ u8 _1976A0[0x197778 - 0x1976A0];
+    /* 0x1976A0 */ u8 _1976A0[0x19776E - 0x1976A0];
+    /* 0x19776E */ s16 _19776E;
+    /* 0x197770 */ s16 _197770;
+    /* 0x197772 */ s16 _197772;
+    /* 0x197774 */ s16 _197774;
+    /* 0x197776 */ s16 _197776;
     /* 0x197778 */ s16 _197778;
     /* 0x19777A */ s16 _19777A;
-    /* 0x19777C */ u8 _19777C[0x197796 - 0x19777C];
+    /* 0x19777C */ s16 _19777C;
+    /* 0x19777E */ s16 _19777E;
+    /* 0x197780 */ s16 _197780;
+    /* 0x197782 */ s16 _197782;
+    /* 0x197784 */ u8 _197784[0x197792 - 0x197784];
+    /* 0x197792 */ s16 _197792;
+    /* 0x197794 */ s16 _197794;
     /* 0x197796 */ s16 _197796;
     /* 0x197798 */ s16 _197798;
     /* 0x19779A */ u8 _19779A[0x197843 - 0x19779A];
     /* 0x197843 */ s8 _197843;
-    /* 0x197844 */ u8 _197844[0x197866 - 0x197844];
+    /* 0x197844 */ u8 _197844[0x197846 - 0x197844];
+    /* 0x197846 */ u8 _197846;
+    /* 0x197847 */ u8 _197847;
+    /* 0x197848 */ u8 _197848[0x19784A - 0x197848];
+    /* 0x19784A */ u8 _19784A;
+    /* 0x19784B */ u8 _19784B[0x197863 - 0x19784B];
+    /* 0x197863 */ s8 _197863;
+    /* 0x197864 */ u8 _197864[0x197866 - 0x197864];
     /* 0x197866 */ s8 _197866;
     /* 0x197867 */ u8 _197867;
     /* 0x197868 */ s8 _197868[0x36];
@@ -151,18 +174,55 @@ typedef struct MenuPlayer08E8 {
     /* 0x04C */ u8 _04C[0x27C - 0x4C];
 } MenuPlayer08E8; // size: 0x27C
 
+typedef struct MenuModelList08E8 {
+    /* 0x0 */ u16 _00;
+} MenuModelList08E8;
+
+typedef struct MenuActor08E8 {
+    /* 0x00 */ u8 _00[0x98];
+    /* 0x98 */ u8 _98;
+} MenuActor08E8;
+
+typedef struct MenuActorRef08E8 {
+    /* 0x00 */ MenuActor08E8* _00;
+    /* 0x04 */ void* _04;
+    /* 0x08 */ u8 _08[0xE - 0x8];
+    /* 0x0E */ u16 _0E;
+    /* 0x10 */ u8 _10[0x54 - 0x10];
+    /* 0x54 */ f32 _54;
+    /* 0x58 */ u8 _58;
+    /* 0x59 */ u8 _59;
+    /* 0x5A */ u8 _5A;
+    /* 0x5B */ u8 _5B;
+    /* 0x5C */ f32 _5C;
+    /* 0x60 */ f32 _60;
+    /* 0x64 */ u8 _64[0x68 - 0x64];
+    /* 0x68 */ void* _68;
+    /* 0x6C */ u8 _6C;
+} MenuActorRef08E8;
+
+typedef struct MenuFielder08E8 {
+    /* 0x000 */ u8 _000[0x34];
+    /* 0x034 */ f32 _034;
+    /* 0x038 */ f32 _038;
+    /* 0x03C */ f32 _03C;
+    /* 0x040 */ u8 _040[0x25D - 0x40];
+    /* 0x25D */ u8 _25D;
+} MenuFielder08E8;
+
 typedef struct LITObj {
     /* 0x00 */ u8 _00[0xC0];
 } LITObj; // size: 0xC0
 
 extern struct {
     /* 0x0000 */ u8 _0000[0x60];
-    /* 0x0060 */ void* _0060;
+    /* 0x0060 */ MenuModelList08E8* _0060;
     /* 0x0064 */ u8 _0064[0xAC - 0x64];
     /* 0x00AC */ LITObj* _00AC[4];
     /* 0x00BC */ u8 _00BC[0xC04 - 0xBC];
     /* 0x0C04 */ MenuPlayer08E8 _0C04[4];
-    /* 0x15F4 */ u8 _15F4[0x2C88 - 0x15F4];
+    /* 0x15F4 */ u8 _15F4[0x2C50 - 0x15F4];
+    /* 0x2C50 */ MenuFielder08E8* _2C50[14];
     /* 0x2C88 */ void* _2C88;
     /* 0x2C8C */ void* _2C8C;
 } lbl_8036E548;
@@ -201,6 +261,27 @@ extern struct {
 } lbl_80366B18;
 extern MenuMissionDef08E8 lbl_80109AE8[32][10];
 extern MenuMissionDef08E8 lbl_8010A768[32][10];
+// The menus' camera
+typedef struct MenuCamera08E8 {
+    /* 0x00 */ Mtx _00;
+    /* 0x30 */ u8 _30[0x3C - 0x30];
+    /* 0x3C */ f32 _3C;
+    /* 0x40 */ Vec _40;
+    /* 0x4C */ Vec _4C;
+    /* 0x58 */ u8 _58[0x5C - 0x58];
+} MenuCamera08E8; // size: 0x5C
+
+extern MenuCamera08E8 lbl_2_bss_1A81D4;
+extern struct {
+    /* 0x0000 */ u8 _0000[0x307A];
+    /* 0x307A */ u8 _307A;
+} *lbl_2_bss_340140;
+extern struct {
+    /* 0x00 */ u8 _00[0x8];
+    /* 0x08 */ u16 _08;
+    /* 0x0A */ u8 _0A[0x2E - 0xA];
+    /* 0x2E */ u16 _2E;
+} lbl_80353A90;
 extern u8 lbl_803CBBC0;
 extern u32 lbl_803CBD0C;
 extern u8 lbl_803CB8F0[8];
@@ -208,6 +289,10 @@ extern u8 lbl_800F5D98[];
 extern u8 lbl_800F71D8[];
 extern u8 lbl_2_data_2E64[];
 extern s16 lbl_2_data_373C[20];
+extern f32 lbl_2_data_3804[][3];
+extern s32 lbl_2_data_3840[][3];
+extern s32 lbl_2_data_387C[][3];
+extern s32 lbl_2_data_38B8;
 extern u8 lbl_2_data_3CC0[];
 extern s16 lbl_2_data_3EC8[6];
 extern s16 lbl_2_data_3ED4[6];
@@ -231,9 +316,28 @@ extern void* _OSAllocFromHeap(u32 align, u32 size);
 // rep_09B8 (an empty function there)
 extern void fn_2_513E0(void* text, s32, s32, s32, s32, s32, s32, s32);
 
+extern void fn_80052968(void);
+extern MenuActorRef08E8* fn_800111D8(MenuFielder08E8* fielder);
+extern camera_803c639c_s* fn_80052734(s32);
+extern s32 fn_800527BC(void);
+extern void ACTSetAnimation(MenuActor08E8* actor, void* animBank, char* sequenceName, u16 seqNum, f32 time, f32 speed);
+extern void fn_800B4CA0(MenuActor08E8* actor, f32 frame);
+extern void fn_800B4C04(MenuActor08E8* actor, f32 speed);
+extern void fn_800B4AFC(MenuActor08E8* actor, u8 flag);
+extern void Set_FUN_800b2b6c(MenuActor08E8* actor, void* arg1);
+extern void fn_800BDA24(MenuActorRef08E8* ref);
+extern u8 fn_800B3C04(s32 arg0, MenuActor08E8* actor, Mtx mtx);
+
 // rep_0B08
+extern void fn_2_6A87C(void);
 extern void fn_2_68690(s32);
 extern void fn_2_68DAC(s32, Vec*);
+
+// rep_1028
+extern void fn_2_9007C(void);
+
+// rep_10C0
+extern void fn_2_93BF8(MenuCamera08E8* camera);
 
 Vec lbl_2_data_12EA8 = { 0.8f, 0.8f, 0.8f };
 Vec lbl_2_data_12EB4 = { 0.8f, 0.8f, 0.8f };
@@ -310,7 +414,8 @@ AramEntry08E8 lbl_2_data_132DC = { { 0x0000040B, 0x4023491C, 0x19135800, 0x00082
 Vec lbl_2_data_132EC = { 0.0f, 0.0f, 0.0f };
 u32 lbl_2_data_132F8[3] = { 0 };
 Vec lbl_2_data_13304 = { 0.0f, 0.0f, 0.0f };
-u32 lbl_2_data_13310[5] = { 0, 0, 0, 2, (u32)fn_2_481B8 };
+Vec lbl_2_data_13310 = { 0.0f, 0.0f, 0.0f };
+DrawCallback08E8 lbl_2_data_1331C = { 2, fn_2_481B8 };
 u32 lbl_2_data_13324[20] = {
     0x00000000, 0x00000004, 0x00000014, 0x00013880, 0x00007530, 0x000130B0, 0x0000003C, 0x0000000A, 0x0001A9C8, 0x00018A88,
     0x00000000, 0x0000003C, 0x00C35000, 0x00000000, 0x00000000, 0x00000000, 0xFFFFFF00, 0x00000000, 0x000124F8, 0x00000000,
@@ -591,6 +696,110 @@ void fn_2_4B1AC(void) {
     starMissionRelated2();
 }
 
+// .text:0x0004AEE4 size:0x2C8
+void fn_2_4AEE4(void) {
+    GameInitVariables* settings = &g_d_GameSettings;
+    s32 total;
+
+    fn_2_4B2D0();
+    if (lbl_2_bss_1A824C->_197843 == 0) {
+        lbl_2_bss_1A824C->_19777C = lbl_2_data_3840[lbl_2_bss_1A8248->_4420][settings->_3A];
+        lbl_2_bss_1A824C->_19777E = settings->_20[settings->_35][0] * lbl_2_data_3804[lbl_2_bss_1A8248->_4420][settings->_3A];
+        total = lbl_2_bss_1A824C->_19777C + lbl_2_bss_1A824C->_19777E;
+        fn_2_46D34(total);
+        lbl_2_bss_1A824C->_197780 = total;
+        lbl_2_bss_1A824C->_197798 = total;
+    } else if (lbl_2_bss_1A824C->_197843 == 1) {
+        total = lbl_2_data_387C[lbl_2_bss_1A8248->_4420][settings->_3A];
+        fn_2_46D34(total);
+        lbl_2_bss_1A824C->_197782 = total;
+        lbl_2_bss_1A824C->_197798 = total;
+    } else if (lbl_2_bss_1A824C->_197843 == 2) {
+        lbl_2_bss_1A824C->_197796 = 0;
+        lbl_2_bss_1A824C->_197798 = 0;
+    }
+    if (lbl_2_bss_1A8248->_44F8[lbl_2_bss_1A8248->_4420] > 0) {
+        lbl_2_bss_1A8248->_44F8[lbl_2_bss_1A8248->_4420]--;
+    }
+    if (lbl_2_bss_1A824C->_197843 == 0 && !(lbl_2_bss_1A8248->_4428 & (1 << lbl_2_bss_1A8248->_4420))) {
+        lbl_2_bss_1A8248->_4423++;
+        lbl_2_bss_1A8248->_4428 |= 1 << lbl_2_bss_1A8248->_4420;
+    }
+}
+
+// .text:0x0004ACF8 size:0x1EC
+void fn_2_4ACF8(void) {
+    GameInitVariables* settings = &g_d_GameSettings;
+
+    fn_2_4B2D0();
+    if (lbl_2_bss_1A824C->_197843 == 0) {
+        fn_2_46D34(settings->challengeMinigame_baseCoinsEarned);
+        lbl_2_bss_1A824C->_197792 = settings->challengeMinigame_baseCoinsEarned;
+        lbl_2_bss_1A824C->_197798 = settings->challengeMinigame_baseCoinsEarned;
+    } else if (lbl_2_bss_1A824C->_197843 == 1) {
+        fn_2_46D34(lbl_2_data_38B8);
+        lbl_2_bss_1A824C->_197794 = lbl_2_data_38B8;
+        lbl_2_bss_1A824C->_197798 = lbl_2_data_38B8;
+    } else if (lbl_2_bss_1A824C->_197843 == 2) {
+        lbl_2_bss_1A824C->_197796 = 0;
+        lbl_2_bss_1A824C->_197798 = 0;
+    }
+    if (lbl_2_bss_1A8248->_44FD > 0) {
+        lbl_2_bss_1A8248->_44FD--;
+    }
+    if (lbl_2_bss_1A824C->_197843 == 0 && lbl_2_bss_1A8248->_4429 == 0) {
+        lbl_2_bss_1A8248->_4429 = 1;
+    }
+}
+
+// .text:0x0004AB1C size:0x1DC
+// The target keeps the dead loads and clamps of stars and coins after
+// fn_2_4B2D0; this build drops them. Everything else matches.
+void fn_2_4AB1C(void) {
+    s32 stars;
+    s32 coins;
+
+    fn_2_4B2D0();
+    stars = lbl_80353A90._08;
+    coins = lbl_80353A90._2E;
+    if (stars < 0) {
+        stars = 0;
+    }
+    if (stars > 99) {
+        stars = 99;
+    }
+    if (coins > 99) {
+        coins = 99;
+    }
+    if (lbl_2_bss_1A824C->_197843 == 0) {
+        lbl_2_bss_1A824C->_19776E = 0;
+        lbl_2_bss_1A824C->_197772 = 0;
+        lbl_2_bss_1A824C->_197776 = 0;
+        lbl_2_bss_1A824C->_197798 = lbl_2_bss_1A824C->_19776E + lbl_2_bss_1A824C->_197772 + lbl_2_bss_1A824C->_197776;
+    } else if (lbl_2_bss_1A824C->_197843 == 1) {
+        lbl_2_bss_1A824C->_197770 = 0;
+        lbl_2_bss_1A824C->_197774 = 0;
+        lbl_2_bss_1A824C->_197798 = lbl_2_bss_1A824C->_197770 + lbl_2_bss_1A824C->_197774;
+    } else if (lbl_2_bss_1A824C->_197843 == 2) {
+        lbl_2_bss_1A824C->_197796 = 0;
+        lbl_2_bss_1A824C->_197798 = 0;
+    }
+    if (lbl_2_bss_1A8248->_441C != 5 || (s32)lbl_2_bss_1A8248->_44EF != 1) {
+        if (!(lbl_2_bss_1A8248->_4427 & (1 << lbl_2_bss_1A8248->_441E))) {
+            lbl_2_bss_1A8248->_4427 |= 1 << lbl_2_bss_1A8248->_441E;
+        }
+    }
+    if (lbl_2_bss_1A824C->_197843 == 0) {
+        if (lbl_2_bss_1A8248->_441C == 5 && (s32)lbl_2_bss_1A8248->_44EF == 1) {
+            lbl_2_bss_1A8248->_4422++;
+        } else if (!(lbl_2_bss_1A8248->_4426 & (1 << lbl_2_bss_1A8248->_441E))) {
+            lbl_2_bss_1A8248->_4422++;
+            lbl_2_bss_1A8248->_4426 |= 1 << lbl_2_bss_1A8248->_441E;
+        }
+    }
+    starMissionRelated2();
+}
+
 // .text:0x0004A310 size:0x30
 s16 fn_2_4A310(s16 a, s16 b) {
     s16 d = __abs(a - b);
@@ -828,6 +1037,30 @@ void fn_2_48BE0(void) {
     player->_048 = lbl_2_data_132EC.z;
 }
 
+// .text:0x00048A1C size:0x1C4
+void fn_2_48A1C(void) {
+    Vec pos;
+    Vec delta;
+    MenuPlayer08E8* player = &lbl_8036E548._0C04[lbl_2_bss_1A824C->_19769C];
+
+    memcpy(&pos, &player->_034, sizeof(Vec));
+    PSVECSubtract(&pos, &lbl_2_data_13310, &delta);
+    delta.x *= -1.0f;
+    delta.z *= -1.0f;
+    pos.x += lbl_803C77B8[lbl_2_bss_1A824C->_197863]._10 / 768.0f;
+    pos.z += lbl_803C77B8[lbl_2_bss_1A824C->_197863]._11 / 768.0f;
+    if (0.0f != delta.x || 0.0f != delta.z) {
+        lbl_2_bss_55BC = fn_2_4A1E8(delta.z, delta.x);
+    }
+    memcpy(&lbl_2_data_13310, &player->_034, sizeof(Vec));
+    player->_034 = pos.x;
+    player->_038 = pos.y;
+    player->_03C = pos.z;
+    player->_040 = lbl_2_data_13304.x;
+    player->_044 = lbl_2_bss_55BC;
+    player->_048 = lbl_2_data_13304.z;
+}
+
 // .text:0x000489DC size:0x40
 void fn_2_489DC(void) {
     fn_800A7D4C(0xC, &lbl_2_data_13228[lbl_803CBBC0]);
@@ -837,6 +1070,88 @@ void fn_2_489DC(void) {
 void fn_2_481B8(void) {
     camera_803c639c_s* camera = fn_80052768_getCamera(0);
     fn_800BD670(lbl_8036E548._0060, camera->view);
+}
+
+// .text:0x00047FF8 size:0x1C0
+void fn_2_47FF8(void) {
+    Mtx44 proj;
+
+    C_MTXFrustum(proj, -0.175f, 0.175f, 0.25f, -0.25f, 1.0f, 512.0f);
+    GXSetProjection(proj, GX_PERSPECTIVE);
+    fn_2_48D54();
+    if (lbl_2_bss_1A824C->_19784A != 0) {
+        if (lbl_2_bss_1A824C->_197846 == 1) {
+            if (lbl_2_bss_1A824C->_197847 == 0) {
+                fn_2_6A87C();
+            } else {
+                fn_2_6A87C();
+                fn_2_93BF8(&lbl_2_bss_1A81D4);
+            }
+        } else if (lbl_2_bss_1A824C->_197846 == 2) {
+            fn_2_9007C();
+        } else {
+            fn_2_93BF8(&lbl_2_bss_1A81D4);
+        }
+    } else {
+        fn_2_93BF8(&lbl_2_bss_1A81D4);
+    }
+    memcpy(&fn_80052768_getCamera(0)->eye, &lbl_2_bss_1A81D4._4C, sizeof(Vec));
+    memcpy(&fn_80052768_getCamera(0)->target, &lbl_2_bss_1A81D4._40, sizeof(Vec));
+    fn_80052768_getCamera(0)->zoom = lbl_2_bss_1A81D4._3C;
+    PSMTXCopy(lbl_2_bss_1A81D4._00, fn_80052768_getCamera(0)->view);
+    fn_80052968();
+}
+
+// .text:0x00047B24 size:0x1D8
+void fn_2_47B24(MenuModelList08E8* list) {
+    Mtx m;
+    MtxPtr view;
+    MenuActor08E8* actor;
+    u16 i;
+    u16 j;
+    MenuActorRef08E8* ref;
+    MenuFielder08E8* fielder;
+
+    if (lbl_2_bss_340140->_307A == 3) {
+        return;
+    }
+    for (i = 0; i < list->_00; i++) {
+        fielder = lbl_8036E548._2C50[i];
+        if (fielder == NULL || fielder->_25D == 0) {
+            continue;
+        }
+        ref = fn_800111D8(fielder);
+        if (ref->_00 == NULL) {
+            continue;
+        }
+        if (ref->_58 != 0) {
+            ACTSetAnimation(ref->_00, ref->_04, NULL, ref->_0E, 0.0f, ref->_60);
+        }
+        if (ref->_59 != 0) {
+            fn_800B4CA0(ref->_00, ref->_5C);
+        }
+        if (ref->_5A != 0) {
+            fn_800B4C04(ref->_00, ref->_54);
+        }
+        if (ref->_5B & 2) {
+            fn_800B4AFC(ref->_00, ref->_5B & 1);
+        }
+        Set_FUN_800b2b6c(ref->_00, ref->_68);
+        if (ref->_6C != 0) {
+            fn_800BDA24(ref);
+        }
+        for (j = 0; j < fn_800527BC(); j++) {
+            view = fn_80052734(j)->view;
+            PSMTXTrans(m, fielder->_034, fielder->_038, fielder->_03C);
+            PSMTXConcat(view, m, m);
+            actor = ref->_00;
+            actor->_98 = (actor->_98 & (u8)~(3 << (j * 3))) | (fn_800B3C04(j, actor, m) << (j * 3));
+        }
+        ref->_58 = 0;
+        ref->_59 = 0;
+        ref->_5A = 0;
+        ref->_5B &= 1;
+    }
 }
 
 // .text:0x00047AFC size:0x28
