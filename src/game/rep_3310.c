@@ -320,21 +320,7 @@ static inline void clearObjs(void) {
 }
 
 static inline void showPipes(void) {
-    s32 i;
-    UnkObj3310* obj;
-
-    for (i = 0; i < 7; i++) {
-        obj = &lbl_8036E548._2D94[i + 0xE9];
-        obj->_26 = 0;
-        if (i >= 4) {
-            obj->_26 = 1;
-            obj->_04.x = lbl_3_data_21BC4[i - 4].pos.x;
-            obj->_04.y = -lbl_3_data_21BC4[i - 4].pos.y;
-            obj->_04.z = lbl_3_data_21BC4[i - 4].pos.z;
-            fn_8001D110(i + 0xE9, lbl_3_data_226C4[0], lbl_3_data_226C4[1], lbl_3_data_226C4[0]);
-            obj->_00 = fn_3_11881C;
-        }
-    }
+    fn_3_11678C();
     lbl_8036E548._2D94[0xF0]._26 = 0;
     lbl_8036E548._2D94[0xF1]._26 = 0;
     lbl_8036E548._2D94[0xF2]._26 = 0;
@@ -1743,3 +1729,21 @@ void fn_3_116840(void) {
     }
 }
 
+// .text:0x0011678C size:0xB4 mapped:0x80755820
+void fn_3_11678C(void) {
+    UnkObj3310* obj;
+    s32 i;
+
+    for (i = 0; i < 7; i++) {
+        obj = &lbl_8036E548._2D94[i + 0xE9];
+        obj->_26 = 0;
+        if (i >= 4) {
+            obj->_26 = 1;
+            obj->_04.x = lbl_3_data_21BC4[i - 4].pos.x;
+            obj->_04.y = -lbl_3_data_21BC4[i - 4].pos.y;
+            obj->_04.z = lbl_3_data_21BC4[i - 4].pos.z;
+            fn_8001D110(i + 0xE9, lbl_3_data_226C4[0], lbl_3_data_226C4[1], lbl_3_data_226C4[0]);
+            obj->_00 = fn_3_11881C;
+        }
+    }
+}

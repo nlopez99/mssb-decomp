@@ -4,6 +4,8 @@
 #include "static/UnknownHomes_Static.h"
 #include "game/rep_F80.h"
 #include "game/rep_FE0.h"
+#include "game/rep_1838.h"
+#include "Dolphin/rand.h"
 
 typedef struct {
     /* 0x000 */ u8 _000[0x34];
@@ -26,11 +28,23 @@ typedef struct {
     /* 0x278 */ u8 _278;
 } Unk2940Actor;
 
+typedef struct Unk2940Obj {
+    /* 0x00 */ void (*_00)(s32);
+    /* 0x04 */ VecXYZ _04;
+    /* 0x10 */ f32 _10;
+    /* 0x14 */ f32 _14;
+    /* 0x18 */ u8 _18[0x26 - 0x18];
+    /* 0x26 */ u8 _26;
+    /* 0x27 */ u8 _27;
+} Unk2940Obj; // size: 0x28
+
 extern struct {
     /* 0x0000 */ u8 _0000[0x2C50];
     /* 0x2C50 */ Unk2940Actor* _2C50[13];
     /* 0x2C84 */ u8 _2C84[0x2D68 - 0x2C84];
     /* 0x2D68 */ s16 _2D68;
+    /* 0x2D6A */ u8 _2D6A[0x2D94 - 0x2D6A];
+    /* 0x2D94 */ Unk2940Obj* _2D94;
 } lbl_8036E548;
 
 typedef struct {
@@ -57,7 +71,28 @@ typedef struct {
 
 extern Unk2940Fielder g_Fielders[9];
 extern Unk2940Animation g_UnkAnimation_31EAC[9];
-extern VecXYZ lbl_3_data_18DD4[4];
+f32 lbl_3_data_18D98[14] = {
+    1.0f, 1.2f, 18.8f, 0.15f, 19.5f, 0.7f, 0.0f, 0.15f, 38.8f, 0.0f, -18.8f, 0.15f, 19.5f, -0.7f,
+};
+f32 lbl_3_data_18DD0 = 0.2f;
+VecXYZ lbl_3_data_18DD4[4] = {
+    { -225.0f, -30.0f, 0.0f },
+    { -75.0f, -30.0f, 0.0f },
+    { 75.0f, -30.0f, 0.0f },
+    { 225.0f, -30.0f, 0.0f },
+};
+VecXYZ lbl_3_data_18E04[16] = {
+    { 0.0f, 0.0f, 0.0f },   { 0.0f, 0.0f, 0.0f },  { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f },
+    { -1.2f, 0.0f, 0.0f },  { 1.2f, 0.0f, 0.0f },  { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f },
+    { -2.4f, 0.0f, 0.0f },  { 0.0f, 0.0f, 0.0f },  { 2.4f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f },
+    { -3.6f, 0.0f, 0.0f },  { -1.2f, 0.0f, 0.0f }, { 1.2f, 0.0f, 0.0f }, { 3.6f, 0.0f, 0.0f },
+};
+f32 lbl_3_data_18EC4[3] = { -1.5f, 0.0f, 1.5f };
+
+extern s16 lbl_3_data_18BB0[2][2];
+extern u8 lbl_3_data_18910[8];
+
+extern void fn_8001D0D0(s32 id, f32 scale);
 extern VecXZ lbl_3_data_217D8[4];
 
 extern Unk2940Actor* fn_800111FC(Unk2940Actor* actor, int arg1);
@@ -65,6 +100,20 @@ extern int fn_8004ACC4(int arg0);
 
 extern void fn_3_6A250(void);
 extern void fn_3_6A25C(void);
+
+// .text:0x000E1964 size:0x84 mapped:0x807209F8
+// Same body as fn_3_E0758, yet the target starts the loop with li r29,0; mr r27,r29
+// and allocates i and obj differently.
+void fn_3_E1964(void) {
+    Unk2940Obj* obj;
+    int i;
+
+    for (i = 0; i < 30; i++) {
+        obj = &lbl_8036E548._2D94[i];
+        fn_8001D0D0(i, lbl_3_data_18D98[0]);
+        obj->_14 = shortAngleToRad_Capped(rand() % 4096);
+    }
+}
 
 // .text:0x000E1478 size:0x4EC mapped:0x8072050C
 void fn_3_E1478(void) {
@@ -272,6 +321,40 @@ void fn_3_E11E0(void) {
                 actor->_044 = 0.0f;
                 actor->_048 = 0.0f;
             }
+        }
+    }
+}
+
+// .text:0x000E0758 size:0x84 mapped:0x8071F7EC
+void fn_3_E0758(void) {
+    Unk2940Obj* obj;
+    int i;
+
+    for (i = 0; i < 30; i++) {
+        obj = &lbl_8036E548._2D94[i];
+        fn_8001D0D0(i, lbl_3_data_18D98[0]);
+        obj->_14 = shortAngleToRad_Capped(rand() % 4096);
+    }
+}
+
+// .text:0x000E0668 size:0xF0 mapped:0x8071F6FC
+void fn_3_E0668(void) {
+    Unk2940Obj* obj;
+    int i;
+
+    for (i = 0; i < 30; i++) {
+        obj = &lbl_8036E548._2D94[i];
+        if (g_Minigame.wallBall_coinsVisibleInd[i] == 0) {
+            obj->_26 = 0;
+        } else if (g_Minigame.wallBall_coinsVisibleFrameCounter[0] > lbl_3_data_18BB0[g_Minigame._199E][1] &&
+                   (g_Minigame.wallBall_coinsVisibleFrameCounter[0] & 1)) {
+            obj->_26 = 0;
+        } else {
+            obj->_26 = 1;
+            obj->_04.x = g_Minigame.wallBall_coinCoordinates[i].x;
+            obj->_04.y = -g_Minigame.wallBall_coinCoordinates[i].y;
+            obj->_04.z = g_Minigame.wallBall_coinCoordinates[i].z;
+            obj->_14 = fn_3_9FEA8(obj->_14 + lbl_3_data_18DD0);
         }
     }
 }
