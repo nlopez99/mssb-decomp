@@ -28,6 +28,7 @@ s32 fn_2_73B54(s32 arg0);
 s32 fn_2_73B94(s32 arg0);
 s32 fn_2_73BF0(s32 arg0);
 void fn_2_73CBC(struct UnkTask0C50* task);
+void fn_2_73EFC(struct UnkTask0C50* task);
 void fn_2_744C8(void);
 void fn_2_74518(void);
 void fn_2_74564(struct UnkTask0C50* task);
