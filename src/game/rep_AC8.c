@@ -9071,8 +9071,65 @@ found:
 
 
 // .text:0x00027860 size:0x508 mapped:0x806668F4
-void fn_3_27860(void) {
-    return;
+void fn_3_27860(s32 fielder) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    f32 dx;
+    f32 dz;
+    f32 dx2;
+    f32 dz2;
+
+    f->_24C--;
+    f->_24E++;
+    if (f->_25B) {
+        if (f->_24C <= 0) {
+            f->_252 = 0;
+        }
+    } else if (g_Ball.fielderWBallIndex >= 0) {
+        fn_3_27764(fielder);
+    } else if (g_Ball.deadBallReason) {
+        fn_3_27764(fielder);
+    } else if (f->_24C > 0) {
+        if (f->_264) {
+            dx = g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x - f->_000;
+            dz = g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z - f->_008;
+            dx2 = dx * dx;
+            dz2 = dz * dz;
+            if (dolsqrtf2(dx2 + dz2) < 5.0f) {
+                g_FieldingLogic._144 = 1;
+            }
+        }
+    } else {
+        g_FieldingLogic._070->_1A = 0;
+        g_FieldingLogic._070->_14 = -1;
+        g_FieldingLogic._070->_0C = -1;
+        g_FieldingLogic._070->_0E = -1;
+        if (g_Ball.currentStarSwing == 1 || g_Ball.currentStarSwing == 2) {
+            f->_258 = 4;
+            fn_3_4DC14(fielder);
+            return;
+        }
+        if (f->_258 == 2 || f->_258 == 3) {
+            fn_3_4DC14(fielder);
+            if (g_d_GameSettings.minigamesEnabled) {
+                if (g_Minigame.minigameControlStruct.battingHandedness[f->_20D] == 0) {
+                    fn_3_6C854(g_Minigame.minigameControlStruct.characterIndex[f->_20D], 0);
+                }
+            } else if (g_GameLogic._13E[g_GameLogic.teamFielding] == 0) {
+                fn_3_6C854(g_GameLogic.teamFielding, 0);
+            }
+        } else {
+            fn_3_26A74(fielder);
+            if (f->_258 == 0 || f->_258 == 1) {
+                if (g_d_GameSettings.minigamesEnabled) {
+                    if (g_Minigame.minigameControlStruct.battingHandedness[f->_20D] == 0) {
+                        fn_3_6C854(g_Minigame.minigameControlStruct.characterIndex[f->_20D], 0);
+                    }
+                } else if (g_GameLogic._13E[g_GameLogic.teamFielding] == 0) {
+                    fn_3_6C854(g_GameLogic.teamFielding, 0);
+                }
+            }
+        }
+    }
 }
 
 // .text:0x00027764 size:0xFC mapped:0x806667F8
