@@ -74,7 +74,7 @@ extern CharEntry0318 inMemRoster[2][9];
 extern struct {
     /* 0x0000 */ struct {
         /* 0x00 */ u8 _00[0x31];
-        /* 0x31 */ u8 _31;
+        /* 0x31 */ s8 _31;
         /* 0x32 */ u8 _32[0x34 - 0x32];
     } characters[54];
     /* 0x0AF8 */ u8 _0AF8[0x40B8 - 0xAF8];
@@ -1343,7 +1343,6 @@ void fn_2_7D44(void) {
 }
 
 // .text:0x00006AF4 size:0x248
-// 98%: registers only.
 void fn_2_6AF4(void) {
     s32 i;
     u8 grp;
@@ -1357,10 +1356,10 @@ void fn_2_6AF4(void) {
     }
     for (i = 0; i < 9; i++) {
         id = lbl_8034E9A0._4380[grp][0][i];
+        lbl_803C6724._02[1][i] = lbl_8034E9A0._0000[(u8)(id / 9)][(u8)(id % 9)].CharID;
         lbl_80354720[1][i]._0 = i;
         lbl_80354720[1][i]._2 = i;
         lbl_80354720[1][i]._1 = i;
-        lbl_803C6724._02[1][i] = lbl_8034E9A0._0000[(u8)(id / 9)][(u8)(id % 9)].CharID;
         lbl_803C6724._4A[1][i] = 1;
     }
     lbl_8034E9A0._46E0[0] = starMissionCompletionTracker._441D;
