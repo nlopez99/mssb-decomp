@@ -94,7 +94,7 @@ extern u8 lbl_1_bss_2FEE;
 extern s16 lbl_1_bss_3054;
 extern s16 lbl_1_bss_3056;
 
-static inline s32 fn_1_A024_visible(List02A8* list) {
+static inline s32 ListVisible02A8(List02A8* list) {
     if (list->_08 + list->_0C < list->_10) {
         return list->_0C;
     }
@@ -140,15 +140,17 @@ void fn_1_C188(void) {
 
 // .text:0x0000BFB0 size:0x1D8
 void fn_1_BFB0(void) {
+    u16 trg = lbl_803C77B8[0]._02;
+    u16 rep = lbl_803C77B8[0]._04;
     s16 n;
 
-    if (lbl_803C77B8[0]._02 & 0x100) {
-        fn_1_BF34(lbl_1_bss_3056 % 13 + lbl_1_data_17C4[lbl_1_bss_3056 / 13]);
-    } else if (lbl_803C77B8[0]._02 & 0x1200) {
+    if (trg & 0x100) {
+        fn_1_BF34((u16)(lbl_1_bss_3056 % 13 + lbl_1_data_17C4[lbl_1_bss_3056 / 13]));
+    } else if (trg & 0x1200) {
         fn_1_A718();
         ((Task02A8*)lbl_803CC1B8)->_00 = fn_1_A348;
-    } else if (lbl_803C77B8[0]._04 & 1) {
-        if (lbl_803C77B8[0]._04 & 0x800) {
+    } else if (rep & 1) {
+        if (rep & 0x800) {
             lbl_1_bss_3056 -= 10;
         } else {
             lbl_1_bss_3056 -= 1;
@@ -156,9 +158,9 @@ void fn_1_BFB0(void) {
         if (lbl_1_bss_3056 < 0) {
             lbl_1_bss_3056 = 233;
         }
-    } else if (lbl_803C77B8[0]._04 & 2) {
+    } else if (rep & 2) {
         n = lbl_1_bss_3056 + 1;
-        if (lbl_803C77B8[0]._04 & 0x800) {
+        if (rep & 0x800) {
             n = lbl_1_bss_3056 + 10;
         }
         lbl_1_bss_3056 = n;
@@ -212,15 +214,17 @@ void fn_1_BDD8(void) {
 
 // .text:0x0000BC00 size:0x1D8
 void fn_1_BC00(void) {
+    u16 trg = lbl_803C77B8[0]._02;
+    u16 rep = lbl_803C77B8[0]._04;
     s16 n;
 
-    if (lbl_803C77B8[0]._02 & 0x100) {
-        fn_1_BF34(lbl_1_bss_3054 % 13 + lbl_1_data_17E8[lbl_1_bss_3054 / 13]);
-    } else if (lbl_803C77B8[0]._02 & 0x1200) {
+    if (trg & 0x100) {
+        fn_1_BF34((u16)(lbl_1_bss_3054 % 13 + lbl_1_data_17E8[lbl_1_bss_3054 / 13]));
+    } else if (trg & 0x1200) {
         fn_1_A718();
         ((Task02A8*)lbl_803CC1B8)->_00 = fn_1_A348;
-    } else if (lbl_803C77B8[0]._04 & 1) {
-        if (lbl_803C77B8[0]._04 & 0x800) {
+    } else if (rep & 1) {
+        if (rep & 0x800) {
             lbl_1_bss_3054 -= 10;
         } else {
             lbl_1_bss_3054 -= 1;
@@ -228,9 +232,9 @@ void fn_1_BC00(void) {
         if (lbl_1_bss_3054 < 0) {
             lbl_1_bss_3054 = 181;
         }
-    } else if (lbl_803C77B8[0]._04 & 2) {
+    } else if (rep & 2) {
         n = lbl_1_bss_3054 + 1;
-        if (lbl_803C77B8[0]._04 & 0x800) {
+        if (rep & 0x800) {
             n = lbl_1_bss_3054 + 10;
         }
         lbl_1_bss_3054 = n;
@@ -314,15 +318,20 @@ void fn_1_B4A4(void) {
     }
 }
 
+// Loads a sound group into its slot of the bank table; the slot is computed by the caller
+static inline void LoadGroup02A8(s32 group, s32 slot) {
+    fn_80021518(group, lbl_800EF808.groups[slot]);
+}
+
 // .text:0x0000A908 size:0x54
 s32 fn_1_A908(u8* arg0) {
-    fn_80021518(lbl_1_data_17A4[lbl_1_bss_2FD9], lbl_800EF808.groups[lbl_1_bss_2FD9 + 5]);
+    LoadGroup02A8(lbl_1_data_17A4[lbl_1_bss_2FD9], lbl_1_bss_2FD9 + 5);
     return 0;
 }
 
 // .text:0x0000A8B4 size:0x54
 s32 fn_1_A8B4(u8* arg0) {
-    fn_80021518(lbl_1_data_17A4[lbl_1_data_1CA0], lbl_800EF808.groups[lbl_1_data_1CA0 + 5]);
+    LoadGroup02A8(lbl_1_data_17A4[lbl_1_data_1CA0], lbl_1_data_1CA0 + 5);
     return 0;
 }
 
@@ -341,7 +350,7 @@ s32 fn_1_A838(u8* arg0) {
 
 // .text:0x0000A7E4 size:0x54
 s32 fn_1_A7E4(u8* arg0) {
-    fn_80021518(lbl_1_data_1884[lbl_1_bss_2FDB], lbl_800EF808.groups[lbl_1_bss_2FDB + 42]);
+    LoadGroup02A8(lbl_1_data_1884[lbl_1_bss_2FDB], lbl_1_bss_2FDB + 42);
     return 0;
 }
 
@@ -398,17 +407,19 @@ void fn_1_A634(void) {
 
 // .text:0x0000A464 size:0x1D0
 void fn_1_A464(void) {
+    u16 trg = lbl_803C77B8[0]._02;
+    u16 rep = lbl_803C77B8[0]._04;
     s16 n;
 
-    if (lbl_803C77B8[0]._02 & 0x100) {
+    if (trg & 0x100) {
         fn_1_BEF4(lbl_1_data_1CA8);
         lbl_1_data_1CA8 = fn_1_BF34(lbl_1_data_1CA4);
-    } else if (lbl_803C77B8[0]._02 & 0x1200) {
+    } else if (trg & 0x1200) {
         fn_1_A718();
         fn_800ACFB0(lbl_800EF808.groups[3]);
         ((Task02A8*)lbl_803CC1B8)->_00 = fn_1_A348;
-    } else if (lbl_803C77B8[0]._04 & 1) {
-        if (lbl_803C77B8[0]._04 & 0x800) {
+    } else if (rep & 1) {
+        if (rep & 0x800) {
             lbl_1_data_1CA4 -= 10;
         } else {
             lbl_1_data_1CA4 -= 1;
@@ -416,9 +427,9 @@ void fn_1_A464(void) {
         if (lbl_1_data_1CA4 < 0x1AD) {
             lbl_1_data_1CA4 = 0x1B6;
         }
-    } else if (lbl_803C77B8[0]._04 & 2) {
+    } else if (rep & 2) {
         n = lbl_1_data_1CA4 + 1;
-        if (lbl_803C77B8[0]._04 & 0x800) {
+        if (rep & 0x800) {
             n = lbl_1_data_1CA4 + 10;
         }
         lbl_1_data_1CA4 = n;
@@ -430,14 +441,17 @@ void fn_1_A464(void) {
 
 // .text:0x0000A348 size:0x11C
 void fn_1_A348(void) {
-    if (lbl_803C77B8[0]._04 & 8) {
+    u16 rep = lbl_803C77B8[0]._04;
+    u16 trg = lbl_803C77B8[0]._02;
+
+    if (rep & 8) {
         lbl_1_common_bss_49A78._00 = (lbl_1_common_bss_49A78._00 + 4) % 5;
-    } else if (lbl_803C77B8[0]._04 & 4) {
+    } else if (rep & 4) {
         lbl_1_common_bss_49A78._00 = (lbl_1_common_bss_49A78._00 + 6) % 5;
-    } else if (lbl_803C77B8[0]._02 & 0x100) {
+    } else if (trg & 0x100) {
         ((Task02A8*)lbl_803CC1B8)->_00 = lbl_1_data_1C8C[lbl_1_common_bss_49A78._00];
         lbl_1_common_bss_49A78._01 = 0;
-    } else if (lbl_803C77B8[0]._02 & 0x1200) {
+    } else if (trg & 0x1200) {
         lbl_1_bss_2FDA = 0;
         lbl_1_bss_2FD9 = 0;
         ((Task02A8*)lbl_803CC1B8)->_00 = fn_1_C2A4;
@@ -472,8 +486,8 @@ void fn_1_A250(void) {
 
 // .text:0x0000A210 size:0x40
 char* fn_1_A210(char* path) {
-    char* name = path;
     char c;
+    char* name = path;
 
     if (path == NULL) {
         return NULL;
@@ -496,15 +510,16 @@ void fn_1_A1F4(List02A8* list, ListEntry02A8* entries, s32 count, s32 page) {
 }
 
 // .text:0x0000A184 size:0x70
+// Differs only in registers: the entry pointer takes r3 and the string r4, the
+// target the reverse (r5/r3). Declaration orders and loop forms did not change it.
 void fn_1_A184(List02A8* list) {
-    s32 n = fn_1_A024_visible(list);
+    s32 n = ListVisible02A8(list);
     ListEntry02A8* entry = &list->_00[list->_08];
     s32 i;
     char* p;
 
     for (i = 0; i < n; i++, entry++) {
-        p = entry->_00;
-        if (p != NULL) {
+        if ((p = entry->_00) != NULL) {
             while (*p++ != 0) {
             }
         }
@@ -518,7 +533,15 @@ void fn_1_A024(List02A8* list, s32 dir) {
     s32 count = list->_10;
     s32 cur = list->_04;
     s32 rel = cur - top;
-    s32 n = fn_1_A024_visible(list);
+    s32 n;
+
+    if (top + page < count) {
+        n = page;
+    } else if (count < page) {
+        n = count;
+    } else {
+        n = count - top;
+    }
 
     switch (dir) {
     case 0:
