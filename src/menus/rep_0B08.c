@@ -217,11 +217,6 @@ static inline void scaleVec(Vec* src, Vec* dst, f32 scale) {
 
 static inline f32 calcAngle(f32 dx, f32 dz) { return atan2(-dx, -dz); }
 
-static inline void setObjType(Obj0B08* obj, u8 type) {
-    obj->_C3 = type;
-    obj->_94 = 0;
-}
-
 Obj0B08Fn lbl_2_data_2A1E8[3] = { fn_2_71C6C, fn_2_71B80, fn_2_71A70 };
 Obj0B08Fn lbl_2_data_2A1F4[3] = { fn_2_71098, fn_2_709A0, fn_2_705C0 };
 Obj0B08Fn lbl_2_data_2A200[2] = { fn_2_704AC, fn_2_704A0 };
@@ -251,6 +246,14 @@ Vec lbl_2_data_2A340 = { 0.0f, 0.0f, 0.0f };
 
 u8 lbl_2_bss_A174[0x6CC];
 f32 lbl_2_bss_A170;
+
+// .text:0x00072054 size:0x28
+// Outside this unit's splits.txt range, but inlined into its functions
+static inline void fn_2_72054(s32 index, u8 type) {
+    Obj0B08* obj = &lbl_2_bss_1A8248->_1610[index];
+    obj->_C3 = type;
+    obj->_94 = 0;
+}
 
 // .text:0x00071F60 size:0xD8
 void fn_2_71F60(void) {
@@ -308,7 +311,7 @@ void fn_2_71A70(Obj0B08* obj) {
     fn_2_68260(obj);
     if (obj->_38 <= 0.0f) {
         obj->_34 = obj->_4C;
-        setObjType(&lbl_2_bss_1A8248->_1610[index], 3);
+        fn_2_72054(index, 3);
     }
 }
 
@@ -349,14 +352,14 @@ void fn_2_71098(Obj0B08* obj) {
         if (hit && i == 1 && lbl_2_bss_1A8248->_44F3 == 0) {
             obj->_C4 = 2;
             obj->_CB = i;
-            setObjType(&lbl_2_bss_1A8248->_1610[index], 3);
+            fn_2_72054(index, 3);
             return;
         }
         if (hit && i >= 2 && i <= 6) {
             obj->_BA = 4;
             obj->_C4 = 1;
             obj->_B2 = fn_2_689CC(0);
-            setObjType(&lbl_2_bss_1A8248->_1610[index], 4);
+            fn_2_72054(index, 4);
             return;
         }
         obj->_CB = -1;
@@ -377,7 +380,7 @@ void fn_2_71098(Obj0B08* obj) {
         obj->_BA = 4;
         obj->_C4 = 1;
         obj->_B2 = fn_2_689CC(0);
-        setObjType(&lbl_2_bss_1A8248->_1610[index], 4);
+        fn_2_72054(index, 4);
     }
     if (obj->_50 <= 0.0f) {
         obj->_BA = 9;
@@ -390,7 +393,7 @@ void fn_2_71098(Obj0B08* obj) {
         fn_2_68FBC(index, 1);
         obj->_C4 = 1;
         obj->_B2 = fn_2_689CC(0);
-        setObjType(&lbl_2_bss_1A8248->_1610[index], 4);
+        fn_2_72054(index, 4);
     }
 }
 
@@ -418,14 +421,14 @@ void fn_2_709A0(Obj0B08* obj) {
         if (hit && i == 1 && lbl_2_bss_1A8248->_44F3 == 0) {
             obj->_C4 = 2;
             obj->_CB = i;
-            setObjType(&lbl_2_bss_1A8248->_1610[index], 3);
+            fn_2_72054(index, 3);
             return;
         }
         if (hit && i >= 2 && i <= 6) {
             obj->_BA = 4;
             obj->_C4 = 1;
             obj->_B2 = fn_2_689CC(0);
-            setObjType(&lbl_2_bss_1A8248->_1610[index], 4);
+            fn_2_72054(index, 4);
             return;
         }
         obj->_CB = -1;
@@ -462,7 +465,7 @@ void fn_2_709A0(Obj0B08* obj) {
         obj->_BA = 4;
         obj->_C4 = 1;
         obj->_B2 = fn_2_689CC(0);
-        setObjType(&lbl_2_bss_1A8248->_1610[index], 4);
+        fn_2_72054(index, 4);
     }
 }
 
@@ -477,14 +480,14 @@ void fn_2_705C0(Obj0B08* obj) {
     fn_2_68260(obj);
     if (obj->_38 <= 0.0f) {
         obj->_34 = obj->_4C;
-        setObjType(&lbl_2_bss_1A8248->_1610[index], 4);
+        fn_2_72054(index, 4);
     }
     for (i = 1; i < 7; i++) {
         hit = fn_2_68C80(index, i);
         if (hit && i == 1 && lbl_2_bss_1A8248->_44F3 == 0) {
             obj->_C4 = 2;
             obj->_CB = i;
-            setObjType(&lbl_2_bss_1A8248->_1610[index], 3);
+            fn_2_72054(index, 3);
             return;
         }
         obj->_CB = -1;
@@ -504,7 +507,7 @@ void fn_2_705C0(Obj0B08* obj) {
         obj->_BA = 4;
         obj->_C4 = 1;
         obj->_B2 = fn_2_689CC(0);
-        setObjType(&lbl_2_bss_1A8248->_1610[index], 4);
+        fn_2_72054(index, 4);
     }
 }
 
@@ -554,12 +557,12 @@ void fn_2_70110(Obj0B08* obj) {
         if (hit && i == 1 && lbl_2_bss_1A8248->_44F3 == 0) {
             obj->_C4 = 2;
             obj->_CB = i;
-            setObjType(&lbl_2_bss_1A8248->_1610[index], 3);
+            fn_2_72054(index, 3);
             return;
         }
         if (hit && i >= 2 && i <= 6) {
             obj->_CB = i;
-            setObjType(&lbl_2_bss_1A8248->_1610[index], 4);
+            fn_2_72054(index, 4);
             return;
         }
         obj->_CB = -1;
@@ -592,12 +595,12 @@ void fn_2_6FE6C(Obj0B08* obj) {
         if (hit && i == 1 && lbl_2_bss_1A8248->_44F3 == 0) {
             obj->_C4 = 2;
             obj->_CB = i;
-            setObjType(&lbl_2_bss_1A8248->_1610[index], 3);
+            fn_2_72054(index, 3);
             break;
         }
         if (hit && i >= 2 && i <= 6) {
             obj->_CB = i;
-            setObjType(&lbl_2_bss_1A8248->_1610[index], 4);
+            fn_2_72054(index, 4);
             break;
         }
         obj->_CB = -1;
@@ -1209,7 +1212,7 @@ void fn_2_6CBB0(Obj0B08* obj) {
     fn_2_69E1C(index);
     fn_2_68260(obj);
     if (obj->_38 <= 0.0f) {
-        setObjType(&lbl_2_bss_1A8248->_1610[index], 3);
+        fn_2_72054(index, 3);
     }
 }
 
@@ -1314,7 +1317,7 @@ void fn_2_6C2E8(Obj0B08* obj) {
 // .text:0x0006C2C4 size:0x24
 void fn_2_6C2C4(Obj0B08* obj) {
     lbl_2_bss_1A8248->_442F = 0;
-    setObjType(&lbl_2_bss_1A8248->_1610[1], 0);
+    fn_2_72054(1, 0);
 }
 
 // .text:0x0006C28C size:0x38
@@ -1501,7 +1504,7 @@ void fn_2_6B4FC(Obj0B08* obj) {
     s32 index = obj->_80;
     fn_2_698EC(index, 1.5f);
     if (obj->_D0 == 0) {
-        setObjType(&lbl_2_bss_1A8248->_1610[index], 0);
+        fn_2_72054(index, 0);
     }
 }
 
@@ -2421,7 +2424,7 @@ void fn_2_683EC(void) {
     fn_2_6AABC(1, &lbl_2_data_2EA4[lbl_2_bss_1A8248->_1610[0]._B2]);
     obj->_30 = obj->_34 = obj->_4C;
     lbl_2_bss_1A8248->_1610[1]._B2 = lbl_2_bss_1A8248->_1610[0]._B2;
-    setObjType(&lbl_2_bss_1A8248->_1610[1], 6);
+    fn_2_72054(1, 6);
     lbl_2_bss_1A8248->_442F = 1;
 }
 
@@ -2431,13 +2434,13 @@ void fn_2_6832C(void) {
     fn_2_6AABC(1, &lbl_2_data_2EA4[5]);
     obj->_30 = obj->_34 = obj->_4C;
     lbl_2_bss_1A8248->_1610[1]._B2 = 5;
-    setObjType(&lbl_2_bss_1A8248->_1610[1], 6);
+    fn_2_72054(1, 6);
     lbl_2_bss_1A8248->_442F = 1;
 }
 
 // .text:0x00068308 size:0x24
 void fn_2_68308(void) {
-    setObjType(&lbl_2_bss_1A8248->_1610[1], 0);
+    fn_2_72054(1, 0);
     lbl_2_bss_1A8248->_442F = 0;
 }
 
