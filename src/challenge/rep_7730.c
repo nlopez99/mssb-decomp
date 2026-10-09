@@ -556,7 +556,7 @@ static struct {
 } lbl_1_bss_45868;
 static RopeNode7730 lbl_1_bss_43F68[100];
 static struct {
-    /* 0x00 */ u8 _00[0x30];
+    /* 0x00 */ Mtx _00;
     /* 0x30 */ s16 _30;
     /* 0x32 */ s16 _32;
     /* 0x34 */ u8 _34[0x38 - 0x34];
@@ -565,7 +565,7 @@ static struct {
     /* 0x48 */ Vec _48;
     /* 0x54 */ u8 _54[0x88 - 0x54];
 } lbl_1_bss_43EE0;
-static u8 lbl_1_bss_F6E0[0x34800];
+static Vec lbl_1_bss_F6E0[160][112];
 static f32 lbl_1_bss_76E0[64 * 128];
 static f32 lbl_1_bss_74E0[128];
 static RopeNode7730 lbl_1_bss_6FE0[20];
@@ -823,6 +823,46 @@ void fn_1_23AD8(Mtx44 m, Vec* eye, Vec* at) {
     at->y = 0.0f;
     at->z = 0.0f;
     C_MTXFrustum(m, -0.175f, 0.175f, 0.25f, -0.25f, 1.0f, 512.0f);
+}
+
+// .text:0x00023804 size:0x2D4
+// 92.06%: the target counts the inner loop in the register cols arrived in and keeps a
+// copy of cols in r31; this form gives the loop's values other saved registers.
+void fn_1_23804(s32 arg0, s32 arg1, s32 rows, s32 cols, f32 arg4, f32 arg5) {
+    s32 i;
+    s32 j;
+
+    fn_1_26A34();
+    GXLoadPosMtxImm(lbl_1_bss_43EE0._00, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    i = rows;
+    while (--i != 0) {
+        GXBegin(GX_TRIANGLESTRIP, GX_VTXFMT0, cols * 2);
+        j = cols;
+        while (j-- != 0) {
+            GXPosition3f32(lbl_1_bss_F6E0[j][i].x, lbl_1_bss_F6E0[j][i].z, lbl_1_bss_F6E0[j][i].y);
+            GXColor1u32((i & 1) ? 0xFFFFFFFF : 0x0000FFFF);
+            GXPosition3f32(lbl_1_bss_F6E0[j][i - 1].x, lbl_1_bss_F6E0[j][i - 1].z, lbl_1_bss_F6E0[j][i - 1].y);
+            GXColor1u32((i & 1) ? 0x0000FFFF : 0xFFFFFFFF);
+        }
+    }
+    GXBegin(GX_LINESTRIP, GX_VTXFMT0, 8);
+    GXPosition3f32(-25.0f, 0.0f, -25.0f);
+    GXColor1u32(0xFF0000FF);
+    GXPosition3f32(-25.0f, 0.0f, 25.0f);
+    GXColor1u32(0xFF0000FF);
+    GXPosition3f32(-25.0f, 0.0f, 25.0f);
+    GXColor1u32(0x0000FFFF);
+    GXPosition3f32(25.0f, 0.0f, 25.0f);
+    GXColor1u32(0x0000FFFF);
+    GXPosition3f32(25.0f, 0.0f, 25.0f);
+    GXColor1u32(0xFF0000FF);
+    GXPosition3f32(25.0f, 0.0f, -25.0f);
+    GXColor1u32(0xFF0000FF);
+    GXPosition3f32(25.0f, 0.0f, -25.0f);
+    GXColor1u32(0x0000FFFF);
+    GXPosition3f32(-25.0f, 0.0f, -25.0f);
+    GXColor1u32(0x0000FFFF);
 }
 
 // .text:0x00022F4C size:0x14C
@@ -1561,6 +1601,47 @@ void fn_1_1E5D0(Actor7730* actor) {
         GXPosition3f32(v[1].x, v[1].y, v[1].z);
         GXColor4u8(0xFF, 0, 0xFF, 0xFF);
     }
+}
+
+// .text:0x0001E290 size:0x340
+// 98.85%: in each inlined fn_1_1DD48 the target loads 0.01f before the field and forms
+// lbl_1_bss_6BF4's address in r5, not r6.
+s16 fn_1_1E290(s16 sel, u16 held, u16 pressed, u16 repeat) {
+    if (sel < 0 || sel >= 3) {
+        return sel;
+    }
+    {
+        if (repeat & 1) {
+            switch (sel) {
+            case 0:
+                lbl_1_bss_6BF4._140.x = fn_1_1DD48(held, 1, lbl_1_bss_6BF4._140.x, 0.0001f, 0.01f, 0.1f, -10.0f, 10.0f);
+                break;
+            case 1:
+                lbl_1_bss_6BF4._140.y = fn_1_1DD48(held, 1, lbl_1_bss_6BF4._140.y, 0.0001f, 0.01f, 0.1f, -10.0f, 10.0f);
+                break;
+            case 2:
+                lbl_1_bss_6BF4._140.z = fn_1_1DD48(held, 1, lbl_1_bss_6BF4._140.z, 0.0001f, 0.01f, 0.1f, -10.0f, 10.0f);
+                break;
+            }
+        } else if (repeat & 2) {
+            switch (sel) {
+            case 0:
+                lbl_1_bss_6BF4._140.x = fn_1_1DD48(held, 0, lbl_1_bss_6BF4._140.x, 0.0001f, 0.01f, 0.1f, -10.0f, 10.0f);
+                break;
+            case 1:
+                lbl_1_bss_6BF4._140.y = fn_1_1DD48(held, 0, lbl_1_bss_6BF4._140.y, 0.0001f, 0.01f, 0.1f, -10.0f, 10.0f);
+                break;
+            case 2:
+                lbl_1_bss_6BF4._140.z = fn_1_1DD48(held, 0, lbl_1_bss_6BF4._140.z, 0.0001f, 0.01f, 0.1f, -10.0f, 10.0f);
+                break;
+            }
+        } else if (repeat & 8) {
+            sel--;
+        } else if (repeat & 4) {
+            sel++;
+        }
+    }
+    return sel;
 }
 
 // .text:0x0001E28C size:0x4
