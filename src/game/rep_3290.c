@@ -237,6 +237,63 @@ void fn_3_115738(void) {
     }
 }
 
+// .text:0x00115540 size:0x1F8 mapped:0x807545D4
+void fn_3_115540(void) {
+    s8 j;
+    int i;
+
+    if (fn_3_108854() == 0) {
+        if (g_Minigame.wallBallRotatePitchersInd) {
+            fn_3_114A88(FALSE);
+        } else if (g_Minigame.wallBallGameState == 2) {
+            fn_3_1133C4();
+            fn_3_75560();
+            j = 0;
+            do {
+                g_Minigame._1DC4[j] = 0;
+                j++;
+            } while (j < 4);
+            fn_3_113A48();
+        }
+        if (g_Minigame.ballStoppedBreakingWallsInd) {
+            if (g_Minigame.postBallStoppedCounter < 0x7FFE) {
+                g_Minigame.postBallStoppedCounter++;
+            } else {
+                g_Minigame.postBallStoppedCounter = 0x7FFF;
+            }
+        }
+        fn_3_2EA24();
+        if (g_Minigame.wallBallGameState == 0) {
+            fn_3_114384();
+            fn_3_1500C8();
+        } else if (g_Minigame.wallBallGameState == 1) {
+            fn_3_114204();
+        } else if (g_Minigame.wallBallGameState == 2) {
+            fn_3_113F14();
+            fn_3_113D20();
+        }
+        for (i = 0; i < 100; i++) {
+            if (g_Minigame.wallBall_coinsVisibleInd[i]) {
+                g_Minigame.wallBall_coinsVisibleFrameCounter[i]++;
+                g_Minigame.wallBall_coinCoordinates[i].x += g_Minigame.wallBall_coinVelocity[i].x;
+                g_Minigame.wallBall_coinCoordinates[i].y += g_Minigame.wallBall_coinVelocity[i].y;
+                g_Minigame.wallBall_coinCoordinates[i].z += g_Minigame.wallBall_coinVelocity[i].z;
+                g_Minigame.wallBall_coinVelocity[i].y -= lbl_3_data_21634[2];
+                if (g_Minigame.wallBall_coinCoordinates[i].y < lbl_3_data_219B8[14]) {
+                    g_Minigame.wallBall_coinCoordinates[i].y = lbl_3_data_219B8[14];
+                    g_Minigame.wallBall_coinVelocity[i].y = -g_Minigame.wallBall_coinVelocity[i].y * lbl_3_data_21634[3];
+                    g_Minigame.wallBall_coinVelocity[i].x *= lbl_3_data_21634[4];
+                    g_Minigame.wallBall_coinVelocity[i].z *= lbl_3_data_21634[4];
+                }
+                if (g_Minigame.wallBall_coinsVisibleFrameCounter[i] > lbl_3_data_2167C[4]) {
+                    g_Minigame.wallBall_coinsVisibleInd[i] = 0;
+                }
+            }
+        }
+        fn_3_115108();
+    }
+}
+
 // .text:0x0011502C size:0xDC mapped:0x807540C0
 void fn_3_11502C(void) {
     if (g_Minigame.turnOverStatus == 1) {
