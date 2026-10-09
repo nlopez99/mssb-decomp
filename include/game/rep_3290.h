@@ -31,7 +31,5 @@ void fn_3_115BDC(void);
 void fn_3_115C24(void);
 void fn_3_1160B8(void);
 void fn_3_1160BC(void);
-void fn_3_11669C(void);
-void fn_3_1166CC(void);
 
 #endif // !__GAME_rep_3290_H_

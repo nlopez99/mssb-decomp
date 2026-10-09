@@ -308,23 +308,9 @@ f32 lbl_3_data_226DC = 4.0f;
 static u8 lbl_3_bss_B6C0[0x40]; // unreferenced
 static f32 lbl_3_bss_B6BC;
 
-static inline void clearObjs(void) {
-    u32 i;
-    UnkObj3310* obj;
-
-    for (i = 0; i < 40; i++) {
-        obj = &lbl_8036E548._2D94[i];
-        obj->_26 = 0;
-        obj->_00 = NULL;
-    }
-}
-
 static inline void showPipes(void) {
     fn_3_11678C();
-    lbl_8036E548._2D94[0xF0]._26 = 0;
-    lbl_8036E548._2D94[0xF1]._26 = 0;
-    lbl_8036E548._2D94[0xF2]._26 = 0;
-    lbl_8036E548._2D94[0xF3]._26 = 0;
+    fn_3_11669C();
 }
 
 // .text:0x0011D2C8 size:0xE4 mapped:0x8075C35C
@@ -1666,14 +1652,14 @@ void fn_3_116B74(void) {
     case MINI_GAME_ID_STAR_DASH:
         fn_3_118164();
         fn_3_117FC8();
-        clearObjs();
+        fn_3_1166CC();
         fn_3_1179EC();
         fn_3_117494();
         break;
     case MINI_GAME_ID_PIRANHA_PANIC:
         fn_3_1194FC();
         fn_3_116840();
-        clearObjs();
+        fn_3_1166CC();
         showPipes();
         break;
     }
@@ -1745,5 +1731,26 @@ void fn_3_11678C(void) {
             fn_8001D110(i + 0xE9, lbl_3_data_226C4[0], lbl_3_data_226C4[1], lbl_3_data_226C4[0]);
             obj->_00 = fn_3_11881C;
         }
+    }
+}
+
+// .text:0x001166CC size:0xC0 mapped:0x80755760
+void fn_3_1166CC(void) {
+    int i;
+    UnkObj3310* obj;
+
+    for (i = 0; i < 40; i++) {
+        obj = &lbl_8036E548._2D94[i];
+        obj->_26 = 0;
+        obj->_00 = NULL;
+    }
+}
+
+// .text:0x0011669C size:0x30 mapped:0x80755730
+void fn_3_11669C(void) {
+    int i;
+
+    for (i = 0; i < 4; i++) {
+        lbl_8036E548._2D94[0xF0 + i]._26 = 0;
     }
 }

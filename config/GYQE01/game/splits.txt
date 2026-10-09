@@ -346,12 +346,12 @@ game/rep_31F0.c:
 	.bss        start:0x0000B698 end:0x0000B6B8
 
 game/rep_3290.c:
-	.text       start:0x001133C4 end:0x0011678C
+	.text       start:0x001133C4 end:0x0011669C
 	.rodata     start:0x00003290 end:0x00003310
 	.data       start:0x00022558 end:0x000225F0
 
 game/rep_3310.c:
-	.text       start:0x0011678C end:0x0011D3AC
+	.text       start:0x0011669C end:0x0011D3AC
 	.rodata     start:0x00003310 end:0x00003448
 	.data       start:0x000225F0 end:0x000226E0
 	.bss        start:0x0000B6B8 end:0x0000B700

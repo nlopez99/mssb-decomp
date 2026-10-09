@@ -52,18 +52,6 @@ extern struct {
     /* 0x13 */ u8 _13;
 } lbl_8037169C;
 
-typedef struct Unk3290Obj {
-    /* 0x00 */ void (*_00)(s32);
-    /* 0x04 */ u8 _04[0x26 - 0x04];
-    /* 0x26 */ u8 _26;
-    /* 0x27 */ u8 _27;
-} Unk3290Obj; // size: 0x28
-
-extern struct {
-    /* 0x0000 */ u8 _0000[0x2D94];
-    /* 0x2D94 */ Unk3290Obj* _2D94;
-} lbl_8036E548;
-
 extern u8 lbl_800EFBA4[0x10];
 
 extern s16 lbl_3_data_5F3C[4];
@@ -101,27 +89,6 @@ extern struct {
     /* 0x00 */ u8 _00[0x40];
     /* 0x40 */ s16 _40;
 } lbl_3_common_bss_37400;
-
-// .text:0x001166CC size:0xC0 mapped:0x80755760
-void fn_3_1166CC(void) {
-    int i;
-    Unk3290Obj* obj;
-
-    for (i = 0; i < 40; i++) {
-        obj = &lbl_8036E548._2D94[i];
-        obj->_26 = 0;
-        obj->_00 = NULL;
-    }
-}
-
-// .text:0x0011669C size:0x30 mapped:0x80755730
-void fn_3_11669C(void) {
-    int i;
-
-    for (i = 0; i < 4; i++) {
-        lbl_8036E548._2D94[0xF0 + i]._26 = 0;
-    }
-}
 
 // .text:0x001160BC size:0x5E0 mapped:0x80755150
 void fn_3_1160BC(void) {
