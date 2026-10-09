@@ -331,8 +331,8 @@ void fn_2_11698(void) {
 }
 
 // .text:0x00011340 size:0x358
-// 96.96%: the target keeps lbl_803CBCD8._0 in r0 for the whole function, adds 1 to the
-// g_d_GameSettings base for PlayerPorts[1] and loads the wraparound 0 early; registers differ.
+// 98.36%: the target loads the wraparound 0 into r6 early (`mr r4,r6`) and swaps the
+// registers of the two button words; the rest matches.
 void fn_2_11340(u8 port) {
     s32 prev;
     s32 r;
@@ -399,7 +399,7 @@ void fn_2_11340(u8 port) {
             lbl_803CBCD8._0 = 1;
             lbl_803CBCD8._1 = 6;
         }
-    } else if (pressed & 0x100) {
+    } else if (lbl_8034E9A0._472E[port][0] & 0x100) {
         if (lbl_2_bss_F410._44 < 6) {
             if (lbl_80361B20._F5 == 0 && lbl_2_data_130C[lbl_2_bss_F410._44] == 1) {
                 sndFXStartEx(0x1BA, lbl_800EFBA4[3], 0x3F, 0);
@@ -412,7 +412,7 @@ void fn_2_11340(u8 port) {
                 lbl_803CBBCC->_4 = 4;
             }
         }
-    } else if (pressed & 0x200) {
+    } else if (lbl_8034E9A0._472E[port][0] & 0x200) {
         if (lbl_803CBCD8._0 == 0 && lbl_803C66B0._5D == 0) {
             fn_2_2DC();
             fn_2_1C34(0x200);
