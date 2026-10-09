@@ -185,6 +185,7 @@ extern void fn_80026130(s32, void*, f32);
 extern void fn_800385F0(struct Unk30C0*, f32, f32, f32, f32);
 extern void fn_80037AA0(struct Unk30C0*, s32, void (*)(s32), u16, UnkTimer0610*);
 extern void fn_800B0A14_removeQueue(void);
+extern void makeLookAtMatrix(Mtx m, const Vec* camPos, const Vec* camUp, const Vec* target);
 extern void fn_1_F2C(s32, s32, s32);
 extern void fn_8002F1AC(Vec* pos, u32 id);
 extern void fn_8002F258(Vec* pos, u32 id, void* params);
@@ -265,6 +266,7 @@ extern u8 lbl_1_data_A940[];
 extern s16 lbl_1_data_A978[];
 extern u8 lbl_1_data_ABA8;
 extern Vec lbl_1_data_AD0C;
+extern Vec lbl_1_data_AD24;
 extern f32 lbl_1_data_ADC0;
 extern f32 lbl_1_data_F568;
 extern f32 lbl_1_data_F570[6];
@@ -303,8 +305,8 @@ static struct {
 static struct Unk67E0 {
     /* 0x000 */ Mtx _000;
     /* 0x030 */ LITObj _030;
-    /* 0x0F0 */ s16 _0F0;
-    /* 0x0F2 */ s16 _0F2;
+    /* 0x0F0 */ u16 _0F0;
+    /* 0x0F2 */ u16 _0F2;
     /* 0x0F4 */ u8 _0F4[0xF8 - 0xF4];
     /* 0x0F8 */ f32 _0F8;
     /* 0x0FC */ Vec _0FC;
@@ -762,6 +764,35 @@ void fn_1_126CC(void) {
     lbl_1_data_AD0C.y -= lbl_803C77B8[0]._12 * 0.001953125f;
     actor->_044 = lbl_1_data_AD0C.y;
     actor->_048 = lbl_1_data_AD0C.z;
+}
+
+// .text:0x00011D00 size:0x208
+void fn_1_11D00(struct Unk67E0* arg0) {
+    Mtx rotX;
+    Mtx rotY;
+    Mtx m;
+    Vec rot;
+    Vec v = { 0.0f, 0.0f, 100.0f };
+    GXColor color = { 0xFF, 0xFF, 0xFF, 0xFF };
+    if (!(lbl_803C77B8[0]._00 & 0x10)) {
+        arg0->_0F0 -= lbl_803C77B8[0]._13 * 4;
+        arg0->_0F2 += lbl_803C77B8[0]._12 * 4;
+        arg0->_0F8 += lbl_803C77B8[0]._11 / 256.0f;
+        arg0->_0FC.y += lbl_803C77B8[0]._15 / 1024.0f;
+        arg0->_0FC.y -= lbl_803C77B8[0]._14 / 1024.0f;
+    }
+    rot.x = arg0->_0F0;
+    rot.y = arg0->_0F2;
+    rot.z = 0.0f;
+    PSVECScale(&rot, 0.0000958738f, &rot);
+    PSMTXRotRad(rotX, 'X', rot.x);
+    PSMTXRotRad(rotY, 'Y', rot.y);
+    PSMTXConcat(rotX, rotY, m);
+    v.z = -arg0->_0F8;
+    PSMTXMultVec(m, &v, &v);
+    PSVECAdd(&v, &arg0->_0FC, &arg0->_108);
+    PSMTXMultVec(m, &lbl_1_data_AD24, &v);
+    makeLookAtMatrix(arg0->_000, &arg0->_108, &v, &arg0->_0FC);
 }
 
 // .text:0x00011C98 size:0x68
