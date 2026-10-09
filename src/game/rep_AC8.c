@@ -1124,6 +1124,8 @@ reset:
 }
 
 // .text:0x00057144 size:0x344 mapped:0x806961D8
+// 99.50%: the target calls the empty fn_3_49F3C after fn_3_4BA0C; here the call is
+// inlined away, and dead statements in fn_3_49F3C do not keep it.
 void fn_3_57144(void) {
     UnkAC8Fielder* f;
     s32 i;
@@ -1190,6 +1192,8 @@ void fn_3_57144(void) {
 }
 
 // .text:0x00055EEC size:0x1258 mapped:0x80694F80
+// 99.68%: registers only, in the inlined fn_3_51DF0 (zone) and in the written-out
+// copy of fn_3_555AC, whose negated x the target keeps in x's own register.
 void fn_3_55EEC(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     s32 frames;
@@ -2980,6 +2984,8 @@ s32 fn_3_50898(s32 fielder, f32* x, f32* z) {
 }
 
 // .text:0x0004FB34 size:0xD64 mapped:0x8068EBC8
+// 99.55%: registers only; the target keeps margin, step and close in other saved
+// registers, and the inlined fn_3_52560 swaps dx and dz as in fn_3_4EFC8.
 void fn_3_4FB34(int fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     s32 i;
@@ -3133,8 +3139,8 @@ void fn_3_4FB34(int fielder) {
         f->_1DB = 1;
     }
     if (fielder <= 5 && (f->_1DD == 1 || f->_1DD == 2)) {
-        zone = fn_3_51DF0(g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x,
-                          g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z);
+        z = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z;
+        zone = fn_3_51DF0(g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x, z);
         if (f->_1DD == 2) {
             if (zone >= 2) {
                 f->_1DD = 4;
@@ -3944,6 +3950,8 @@ void fn_3_4C9C8(void) {
 }
 
 // .text:0x0004BA0C size:0xFBC mapped:0x8068AAA0
+// 92.09%: first draft; the inlined fn_3_4B8D0/fn_3_5985C stores recompute
+// &g_FieldingLogic._0F8[fielder] in the target, and loop registers differ.
 void fn_3_4BA0C(void) {
     UnkAC8Fielder* f;
     s32 i;
@@ -5487,6 +5495,8 @@ done:
 }
 
 // .text:0x000433E0 size:0x13E4 mapped:0x80682474
+// 99.93%: the last root's stack slot and the dx/dz registers of the final frame count
+// differ; an s32 inline copy of fn_3_52560 there reaches 99.97% (see fn_3_34A40).
 void fn_3_433E0(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     f32 x;
@@ -8809,6 +8819,8 @@ void fn_3_35D28(s32 fielder) {
 }
 
 // .text:0x00034A40 size:0x12E8 mapped:0x80673AD4
+// 99.20%: the frame counts' roots take stack slots in another order; as calls of an
+// s32 fn_3_52560 they match the target's slots (99.29%), see fn_3_433E0.
 void fn_3_34A40(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     s32 i;
@@ -10910,6 +10922,8 @@ s32 fn_3_2CBE0(s32 player) {
 }
 
 // .text:0x0002C698 size:0x548 mapped:0x8066B72C
+// 96.66%: the target's early returns branch as nested ifs do (bne +8; b end after
+// the mode == 8 and throw-frame tests); the && chains here merge them.
 void fn_3_2C698(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     s32 player = fielder;
@@ -11590,6 +11604,8 @@ BOOL fn_3_2A164(s32 fielder) {
 }
 
 // .text:0x00028CA8 size:0x14BC mapped:0x80667D3C
+// 53.51%: first draft, written so that fn_3_2A288 stops inlining it; the shared
+// tail blocks (search, catch, dive) are laid out in another order than the target's.
 s32 fn_3_28CA8(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     s32 frame = -1;
@@ -11868,6 +11884,8 @@ dive_at:
 }
 
 // .text:0x00028224 size:0xA84 mapped:0x806672B8
+// 96.71%: first draft; registers differ (the target reloads f->_19A, the base
+// keeps it in r29) and the two backward searches are not yet in the target's form.
 s32 fn_3_28224(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     f32 reach = f->_0F4;
