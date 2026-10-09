@@ -86,7 +86,6 @@ extern void fn_80011578(void);
 extern void fn_8004C094(Vec*);
 extern void fn_3_1608F0(int, int, int);
 extern void fn_800246D4(int (*compare)(const void*, const void*), void* src, void* dst, int size, int count);
-extern void fn_3_9E078(int* order, int count, int);
 extern void minigamesSetSomePointers(void);
 extern void minigamesGXStuff(void);
 extern void minigamesSetSomePointers2(void);
