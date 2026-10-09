@@ -7,13 +7,8 @@
 #include "Dolphin/vec.h"
 #include "string.h"
 
-typedef struct Actor0F60 {
-    /* 0x00 */ u8 _00[0x99];
-    /* 0x99 */ u8 _99;
-} Actor0F60;
-
 typedef struct Model0F60 {
-    /* 0x00 */ Actor0F60* _00;
+    /* 0x00 */ struct ActorObj0F60* _00;
     /* 0x04 */ u8 _04[0x10 - 0x04];
     /* 0x10 */ Control control;
     /* 0x54 */ u8 _54[0x6C - 0x54];
@@ -29,9 +24,21 @@ typedef struct ModelTable0F60 {
     /* 0x34 */ Model0F60 models[1];
 } ModelTable0F60;
 
+typedef struct Bone0F60 {
+    /* 0x000 */ u16 _000;
+    /* 0x002 */ u8 _002[0x136 - 0x2];
+    /* 0x136 */ u8 _136;
+} Bone0F60;
+
 typedef struct ActorObj0F60 {
-    /* 0x00 */ u8 _00[0x8C];
+    /* 0x00 */ u8 _00[0x6];
+    /* 0x06 */ u16 _06;
+    /* 0x08 */ u8 _08[0x18 - 0x8];
+    /* 0x18 */ Bone0F60** _18;
+    /* 0x1C */ u8 _1C[0x8C - 0x1C];
     /* 0x8C */ f32 _8C;
+    /* 0x90 */ u8 _90[0x99 - 0x90];
+    /* 0x99 */ u8 _99;
 } ActorObj0F60;
 
 typedef struct AnimSet0F60 {
@@ -42,9 +49,11 @@ typedef struct AnimSet0F60 {
 typedef struct ActorRef0F60 {
     /* 0x00 */ ActorObj0F60* _00;
     /* 0x04 */ AnimSet0F60* _04;
-    /* 0x08 */ u8 _08[0xE - 0x8];
+    /* 0x08 */ void (*_08)(struct Player0F60* player);
+    /* 0x0C */ u8 _0C[0xE - 0xC];
     /* 0x0E */ s16 _0E;
-    /* 0x10 */ u8 _10[0x58 - 0x10];
+    /* 0x10 */ Control control;
+    /* 0x54 */ f32 _54;
     /* 0x58 */ u8 _58;
     /* 0x59 */ u8 _59;
     /* 0x5A */ u8 _5A;
@@ -53,25 +62,37 @@ typedef struct ActorRef0F60 {
     /* 0x60 */ f32 _60;
 } ActorRef0F60;
 
+typedef struct AnimPart0F60 {
+    /* 0x00 */ u32* _00;
+    /* 0x04 */ u8 _04[0x14 - 0x4];
+    /* 0x14 */ f32 _14;
+    /* 0x18 */ u8 _18[0x64 - 0x18];
+} AnimPart0F60; // size: 0x64
+
 typedef struct AnimState0F60 {
-    /* 0x00 */ u8 _00[0x4];
-    /* 0x04 */ u8 _04[0x68 - 0x4];
-    /* 0x68 */ u8 _68[0xCC - 0x68];
+    /* 0x00 */ AnimPart0F60 _00;
+    /* 0x64 */ AnimPart0F60 _64;
+    /* 0xC8 */ u8 _C8[0xCC - 0xC8];
     /* 0xCC */ u8 _CC;
-} AnimState0F60;
+    /* 0xCD */ u8 _CD[0xD4 - 0xCD];
+} AnimState0F60; // size: 0xD4
 
 typedef struct Player0F60 {
     /* 0x000 */ ActorObj0F60* _000;
     /* 0x004 */ u8 _004[0x8 - 0x4];
-    /* 0x008 */ void* _008;
+    /* 0x008 */ u32* _008;
     /* 0x00C */ u8 _00C[0x10 - 0xC];
     /* 0x010 */ AnimSet0F60* _010;
     /* 0x014 */ u8 _014[0x2C - 0x14];
     /* 0x02C */ AnimState0F60* _02C;
     /* 0x030 */ AnimState0F60* _030;
-    /* 0x034 */ u8 _034[0x4C - 0x34];
+    /* 0x034 */ u8 _034[0x40 - 0x34];
+    /* 0x040 */ f32 _040;
+    /* 0x044 */ f32 _044;
+    /* 0x048 */ f32 _048;
     /* 0x04C */ f32 _04C;
-    /* 0x050 */ u8 _050[0x60 - 0x50];
+    /* 0x050 */ u8 _050[0x5C - 0x50];
+    /* 0x05C */ s32 _05C;
     /* 0x060 */ s16 _060;
     /* 0x062 */ s16 _062;
     /* 0x064 */ s16 _064;
@@ -80,13 +101,18 @@ typedef struct Player0F60 {
     /* 0x06A */ s16 _06A;
     /* 0x06C */ s16 _06C;
     /* 0x06E */ s16 _06E;
-    /* 0x070 */ u8 _070[0x16A - 0x70];
-    /* 0x16A */ u16 _16A;
-    /* 0x16C */ u8 _16C[0x252 - 0x16C];
-    /* 0x252 */ u8 _252;
+    /* 0x070 */ u8 _070[0x162 - 0x70];
+    union {
+        /* 0x162 */ u16 _162[120];
+        struct {
+            /* 0x162 */ u16 _162_[4];
+            /* 0x16A */ u16 _16A;
+        };
+    };
+    /* 0x252 */ s8 _252;
     /* 0x253 */ u8 _253;
     /* 0x254 */ u8 _254;
-    /* 0x255 */ u8 _255;
+    /* 0x255 */ s8 _255;
     /* 0x256 */ u8 _256;
     /* 0x257 */ s8 _257;
     /* 0x258 */ u8 _258[0x25D - 0x258];
@@ -109,7 +135,13 @@ typedef struct Player0F60 {
     /* 0x26D */ u8 _26D;
     /* 0x26E */ u8 _26E;
     /* 0x26F */ u8 _26F;
-    /* 0x270 */ u8 _270[0x27C - 0x270];
+    /* 0x270 */ u8 _270;
+    /* 0x271 */ u8 _271;
+    /* 0x272 */ u8 _272;
+    /* 0x273 */ u8 _273;
+    /* 0x274 */ u8 _274[0x277 - 0x274];
+    /* 0x277 */ u8 _277;
+    /* 0x278 */ u8 _278[0x27C - 0x278];
 } Player0F60; // size: 0x27C
 
 typedef struct Entry0F60 {
@@ -151,7 +183,9 @@ typedef struct AramReq0F60 {
 } AramReq0F60; // size: 0x24
 
 typedef struct Game0F60 {
-    /* 0x0000 */ u8 _0000[0x68];
+    /* 0x0000 */ u8 _0000[0x60];
+    /* 0x0060 */ ModelTable0F60* _0060;
+    /* 0x0064 */ u8 _0064[0x68 - 0x64];
     /* 0x0068 */ ModelTable0F60* _0068;
     /* 0x006C */ u8 _006C[0xAC - 0x6C];
     /* 0x00AC */ s32 _00AC;
@@ -160,7 +194,8 @@ typedef struct Game0F60 {
     /* 0x00B8 */ s32 _00B8;
     /* 0x00BC */ u8 _00BC[0x13C - 0xBC];
     /* 0x013C */ s32 _013C;
-    /* 0x0140 */ u8 _0140[0xC04 - 0x140];
+    /* 0x0140 */ AnimState0F60 _0140[9];
+    /* 0x08B4 */ u8 _08B4[0xC04 - 0x8B4];
     /* 0x0C04 */ Player0F60 _0C04[9];
     /* 0x2260 */ u8 _2260[0x2C50 - 0x2260];
     /* 0x2C50 */ Player0F60* _2C50[9];
@@ -267,6 +302,24 @@ extern void fn_800B2B4C(ActorObj0F60* actor, f32 arg1);
 extern void fn_80025EEC(void* state, s32 arg1, s32 arg2);
 extern void fn_8001B5EC(s32 idx, u8 arg1);
 extern void fn_8001B308(s32 idx, u8 arg1);
+extern void fn_8002399C(ActorRef0F60* ref, s32 arg1, s32 idx, void* layout, ANIMBank* anims, void* skn);
+extern void fn_800B2B74(ActorObj0F60* actor, u16 id);
+extern void fn_800B2BA8(ActorObj0F60* actor, u16 id, void* src, u16 index);
+extern void fn_800126EC(AnimPart0F60* part, void* tex, u8* ids);
+extern void fn_8001D180(s32 idx, s32 arg1, s32 arg2);
+extern void fn_80025DDC(void* anim);
+extern void fn_80014990(s32 idx, void* anim, void* arg2);
+extern void fn_80025C58(void* anim, ActorRef0F60* ref);
+extern void fn_800B2C08(ActorObj0F60* actor, u16 id);
+extern void fn_8001FC4C(Player0F60* player);
+extern void fn_800638B4(Player0F60* player, ActorRef0F60* ref);
+extern void fn_80063010(Player0F60* player, ActorRef0F60* ref);
+extern void fn_8004B7B4(Player0F60* player, ActorRef0F60* ref);
+extern void fn_800637BC(Player0F60* player, ActorRef0F60* ref);
+extern void fn_8004BD6C(Player0F60* player, ActorRef0F60* ref);
+extern void fn_800637D4(Player0F60* player, ActorRef0F60* ref);
+extern void fn_80052634(Player0F60* player, ActorRef0F60* ref);
+extern void fn_80062ED4(Player0F60* player, ActorRef0F60* ref);
 extern void fn_800B0A14_removeQueue(void);
 extern void fn_2_4E824(void);
 extern void fn_2_48DB4(void);
@@ -382,7 +435,7 @@ void fn_2_8EA80(void) {
         task->_28 = 1;
         break;
     case 1:
-        lbl_2_bss_340140->_0C04[task->_14]._008 = ARAMTransfer(&lbl_2_data_2F990[lbl_2_bss_1A8248->_441C], 0, 0, 0);
+        lbl_2_bss_340140->_0C04[task->_14]._008 = (u32*)ARAMTransfer(&lbl_2_data_2F990[lbl_2_bss_1A8248->_441C], 0, 0, 0);
         task->_14++;
         task->_28 = 2;
         break;
@@ -392,7 +445,7 @@ void fn_2_8EA80(void) {
         }
         break;
     case 3:
-        lbl_2_bss_340140->_0C04[task->_14]._008 = ARAMTransfer(&lbl_2_data_2F990[task->_14 + 5], 0, 0, 0);
+        lbl_2_bss_340140->_0C04[task->_14]._008 = (u32*)ARAMTransfer(&lbl_2_data_2F990[task->_14 + 5], 0, 0, 0);
         task->_14++;
         task->_28 = 4;
         break;
@@ -442,7 +495,7 @@ void fn_2_8E8A4(void) {
         task->_28 = 1;
         break;
     case 1:
-        lbl_2_bss_340140->_0C04[task->_14]._008 = ARAMTransfer(&lbl_2_data_2F990[task->_16], 0, 0, 0);
+        lbl_2_bss_340140->_0C04[task->_14]._008 = (u32*)ARAMTransfer(&lbl_2_data_2F990[task->_16], 0, 0, 0);
         task->_14++;
         task->_28 = 2;
         break;
@@ -480,7 +533,7 @@ void fn_2_8E6A4(void) {
         task->_28 = 1;
         break;
     case 1:
-        lbl_2_bss_340140->_0C04[task->_14]._008 = ARAMTransfer(&lbl_2_data_2FA60[lbl_2_data_2FDC0[task->_16]], 0, 0, 0);
+        lbl_2_bss_340140->_0C04[task->_14]._008 = (u32*)ARAMTransfer(&lbl_2_data_2FA60[lbl_2_data_2FDC0[task->_16]], 0, 0, 0);
         task->_14++;
         task->_28 = 2;
         break;
@@ -610,7 +663,7 @@ void fn_2_8DCD8(void) {
     size = (max + 0x1F) & ~0x1F;
     lbl_2_bss_340140->_2C8C = _OSAllocFromHeap(0x20, size * lbl_2_bss_1A824C->_197746);
     for (i = 0; i < lbl_2_bss_1A824C->_197746; i++) {
-        lbl_2_bss_340140->_0C04[i]._008 = lbl_2_bss_340140->_2C8C + i * size;
+        lbl_2_bss_340140->_0C04[i]._008 = (u32*)(lbl_2_bss_340140->_2C8C + i * size);
     }
 
     max = 0;
@@ -659,7 +712,7 @@ void fn_2_8DC00(void) {
     size = (max + 0x1F) & ~0x1F;
     lbl_2_bss_340140->_2C8C = _OSAllocFromHeap(0x20, size * lbl_2_bss_1A824C->_197746);
     for (i = 0; i < lbl_2_bss_1A824C->_197746; i++) {
-        lbl_2_bss_340140->_0C04[i]._008 = lbl_2_bss_340140->_2C8C + i * size;
+        lbl_2_bss_340140->_0C04[i]._008 = (u32*)(lbl_2_bss_340140->_2C8C + i * size);
     }
 }
 
@@ -703,6 +756,245 @@ void fn_2_8D9DC(s32 mode) {
         }
         fn_2_8D270(i);
     }
+}
+
+static inline BOOL fn_2_8D270_isSpecial(s8 kind) {
+    BOOL special = FALSE;
+
+    if (kind == 0x12 || kind == 0x26 || kind == 0x28 || kind == 0x29) {
+        special = TRUE;
+    }
+    return special;
+}
+
+// .text:0x0008D270 size:0x76C
+// 95.47%: the target keeps the raw idx in r25 and p in r30, re-zero-extends idx for each call,
+// tests the special kinds through neg/or/srwi., and copies the bone loop's zero with mr.
+void fn_2_8D270(u8 idx) {
+    Player0F60* p = &lbl_2_bss_340140->_0C04[idx];
+    ActorRef0F60* ref = fn_800111D8(p);
+    u32* base = p->_008;
+    void* tex;
+    void* layout;
+    void* geo;
+    void* skn;
+    Model0F60* model;
+    AnimState0F60* anim;
+    u16 count;
+    int j;
+    int i;
+    s32 id;
+    s32 a;
+    s32 b;
+    u16 bone;
+    void* sub;
+    void* sub2;
+
+    for (i = 0; i < 15; i++) {
+        if (p->_008[i] == 0) {
+            break;
+        }
+        p->_008[i] = (u32)base + base[i];
+    }
+    tex = (void*)p->_008[0];
+    convertTextureHeader(tex);
+    layout = (void*)p->_008[1];
+    if (layout != NULL) {
+        geo = (void*)p->_008[2];
+        skn = (void*)p->_008[3];
+        LoadActorLayout(layout);
+        convertGeometryAndSknHeader(geo, skn);
+        haveActLayoutPointToGeoHeader(layout, geo);
+        fn_800BD190(geo, tex);
+    } else {
+        return;
+    }
+    p->_010 = (AnimSet0F60*)p->_008[4];
+    ANIMGet((ANIMBank*)p->_010);
+    fn_8002399C(ref, p->_255, idx, layout, (ANIMBank*)p->_010, skn);
+    model = &lbl_2_bss_340140->_0060->models[idx];
+    if (p == NULL && lbl_2_bss_340140->_0060 == NULL && model == NULL) {
+        return;
+    }
+    count = model->_00->_06;
+    memset(p->_162, 0xFF, sizeof(p->_162));
+    for (j = 0; j < count; j++) {
+        bone = model->_00->_18[j]->_000;
+        if (bone != 0xFFFF) {
+            p->_162[bone] = j;
+        }
+    }
+    fn_800B2B74(ref->_00, p->_162[19]);
+    fn_800B2B74(ref->_00, p->_162[25]);
+    fn_800B2B74(ref->_00, p->_162[36]);
+    p->_000 = ref->_00;
+    id = p->_162[3];
+    if (id != 0xFFFF) {
+        fn_800B2B54(p->_000, id, 0xD);
+    }
+    fn_800BD548((Model0F60*)ref, 4, lbl_2_bss_340140->_00AC, lbl_2_bss_340140->_00B0, lbl_2_bss_340140->_00B4,
+                lbl_2_bss_340140->_00B8);
+    p->_040 = p->_044 = p->_048 = 0.0f;
+    CTRLSetTranslation(&ref->control, 0.0f, 0.0f, 0.0f);
+    CTRLSetRotation(&ref->control, 0.0f, 0.0f, 0.0f);
+    ref->_54 = 0.5f;
+    ref->_5A = 1;
+    id = p->_162[3];
+    if (id != 0xFFFF) {
+        fn_800B2BA8(ref->_00, id, NULL, 0);
+        ref->_00->_18[(u16)id]->_136 = 1;
+    }
+    id = p->_162[2];
+    if (id != 0xFFFF) {
+        fn_800B2BA8(ref->_00, id, NULL, 0);
+        ref->_00->_18[(u16)id]->_136 = 1;
+    }
+    id = p->_162[1];
+    if (id != 0xFFFF) {
+        fn_800B2BA8(ref->_00, id, NULL, 0);
+        ref->_00->_18[(u16)id]->_136 = 1;
+    }
+    id = p->_162[36];
+    if (id != 0xFFFF) {
+        fn_800B2BA8(ref->_00, id, NULL, 0);
+    }
+    id = p->_162[46];
+    if (id != 0xFFFF) {
+        fn_800B2BA8(ref->_00, id, NULL, 0);
+        ref->_00->_18[(u16)id]->_136 = 1;
+    }
+    anim = &lbl_2_bss_340140->_0140[p->_255];
+    if (p->_008[5] != 0) {
+        p->_030 = &lbl_2_bss_340140->_0140[idx];
+        anim->_00._00 = p->_008;
+        fn_800126EC(&anim->_00, tex, &lbl_2_data_2FE7C[0]);
+        anim->_64._00 = p->_008;
+        fn_800126EC(&anim->_64, tex, &lbl_2_data_2FE7C[4]);
+    }
+    if (fn_2_8D270_isSpecial(p->_252)) {
+        switch (p->_252) {
+        case 0x12:
+            a = 4;
+            b = 5;
+            break;
+        case 0x26:
+            a = 2;
+            b = 3;
+            break;
+        case 0x28:
+        case 0x29:
+            a = 6;
+            b = 7;
+            break;
+        }
+    } else {
+        a = 1;
+        b = 0;
+    }
+    fn_8001D180(idx, a, 1);
+    fn_8001D180(idx, b, 1);
+    p->_02C = NULL;
+    sub = (void*)p->_008[13];
+    if (sub != NULL) {
+        sub2 = (void*)p->_008[14];
+        if (sub2 != NULL) {
+            fn_80025DDC(sub);
+            fn_80014990(idx, sub, sub2);
+            fn_80025C58(sub, ref);
+        }
+    }
+    p->_030->_CC = 1;
+    p->_030->_64._14 = 0.5f;
+    p->_030->_00._14 = 0.5f;
+    fn_800B2C08(ref->_00, p->_16A);
+    fn_8001FC4C(p);
+    ref->_08 = (void (*)(Player0F60*))fn_2_8D24C;
+    p->_060 = -1;
+    p->_062 = -1;
+    p->_064 = -1;
+    p->_066 = -1;
+    p->_068 = -1;
+    p->_06A = -1;
+    p->_06C = -1;
+    p->_06E = -1;
+    p->_25D = 0;
+    p->_25E = 0;
+    p->_25F = 0;
+    p->_260 = 0;
+    p->_261 = 0;
+    p->_262 = 1;
+    p->_263 = 1;
+    p->_264 = 1;
+    p->_265 = 0;
+    p->_266 = 0;
+    p->_267 = 0;
+    p->_268 = 0;
+    p->_269 = 0;
+    p->_26A = 0;
+    p->_26B = 0;
+    p->_26C = 0;
+    p->_26D = 0;
+    p->_26E = 0;
+    p->_270 = 0;
+    p->_271 = 0;
+    p->_272 = 0;
+    p->_273 = 0;
+    p->_277 = 0xFF;
+    p->_05C = 0;
+    p->_04C = 0.5f;
+    switch (p->_252) {
+    case 2:
+        fn_800638B4(p, ref);
+        break;
+    case 6:
+    case 10:
+        ref->_00->_99 = 1;
+        break;
+    case 33:
+    case 34:
+    case 35:
+    case 36:
+        fn_80063010(p, ref);
+        break;
+    case 19:
+        fn_8004B7B4(p, ref);
+        break;
+    case 12:
+    case 42:
+        ref->_00->_99 = 1;
+        break;
+    case 24:
+    case 25:
+    case 26:
+        ref->_00->_99 = 1;
+        break;
+    case 20:
+    case 43:
+        fn_800637BC(p, ref);
+        break;
+    case 38:
+        ref->_00->_99 = 1;
+        fn_8004BD6C(p, ref);
+        break;
+    case 41:
+        fn_800637D4(p, ref);
+    case 18:
+    case 40:
+        fn_8004BD6C(p, ref);
+        break;
+    case 14:
+    case 37:
+        fn_80052634(p, ref);
+        break;
+    case 16:
+    case 44:
+    case 45:
+    case 46:
+    case 47:
+        fn_80062ED4(p, ref);
+        break;
+    }
+    fn_2_8CD58(idx, 0, 1, 1, 0, 0, 0);
 }
 
 // .text:0x0008D24C size:0x24
@@ -793,11 +1085,11 @@ void fn_2_8CD58(s32 idx, s32 anim, u8 arg2, s32 arg3, s16 arg4, s32 arg5, u8 arg
         ref->_00->_8C = 0.0f;
     }
     if (p->_02C != NULL) {
-        fn_80025EEC(p->_02C->_04, a, b);
+        fn_80025EEC(p->_02C->_00._04, a, b);
     }
     if (p->_030 != NULL && p->_030->_CC != 0) {
-        fn_80025EEC(p->_030->_68, a, b);
-        fn_80025EEC(p->_030->_04, a, b);
+        fn_80025EEC(p->_030->_64._04, a, b);
+        fn_80025EEC(p->_030->_00._04, a, b);
     }
     set = p->_010;
     if (set != NULL) {
