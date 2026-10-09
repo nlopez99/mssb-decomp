@@ -251,6 +251,8 @@ extern void fn_80026130(s32, void*, f32);
 extern void fn_800385F0(struct Unk30C0*, f32, f32, f32, f32);
 extern void fn_80037AA0(struct Unk30C0*, s32, void (*)(s32), u16, UnkTimer0610*);
 extern void fn_800B0A14_removeQueue(void);
+extern void fn_80011640(Mtx src, Mtx dst);
+extern void fn_80052968(void);
 extern void fn_800245EC(Mtx44 proj, Mtx view, Vec* points, f32 (*out)[2], s32 count, s32 arg5);
 extern void* fn_80039AB4(void);
 extern void fn_800B2BA8(UnkList0610* dst, u16 id, UnkList0610* src, u16 index);
@@ -1204,6 +1206,22 @@ void fn_1_126CC(void) {
     actor->_040 = lbl_1_data_AD0C.x;
     actor->_044 = lbl_1_data_AD0C.y;
     actor->_048 = lbl_1_data_AD0C.z;
+}
+
+// .text:0x000121D4 size:0x4F8
+void fn_1_121D4(struct Unk67E0* arg0) {
+    switch (arg0->_114) {
+    case 0:
+        fn_1_11F08(arg0);
+        break;
+    case 1:
+        fn_1_11D00(arg0);
+        break;
+    }
+    fn_80011640(arg0->_000, arg0->_000);
+    PSVECSubtract(&arg0->_108, &arg0->_0FC, (Vec*)&arg0->_030._58);
+    PSVECNormalize((Vec*)&arg0->_030._58, (Vec*)&arg0->_030._58);
+    fn_80052968();
 }
 
 // .text:0x00011F08 size:0x2CC
