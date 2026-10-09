@@ -1856,6 +1856,42 @@ void fn_2_45810(void) {
     }
 }
 
+// .text:0x000454E8 size:0x328
+void fn_2_454E8(void) {
+    s32 i;
+    s32 j;
+    s32 done;
+    s32 total;
+    u8 mission;
+    MenuCharEntry08E8* entry;
+
+    fn_2_45810();
+    for (i = 0; i < 0x36; i++) {
+        done = fn_8006CDC0(i);
+        if (lbl_800E8558[i]._3 == 1) {
+            mission = lbl_800E8558[i]._2;
+            total = 0;
+            for (j = 0; j < 10; j++) {
+                if (lbl_80109AE8[mission][j]._0 != -1) {
+                    total++;
+                }
+            }
+            lbl_800E8558[i]._2 = mission;
+        } else {
+            total = 0;
+        }
+        if (done == total && total != 0) {
+            lbl_2_bss_1A8248->_43D6[i] = 1;
+            for (j = 0; j < 0x36; j++) {
+                entry = &lbl_800E8558[j];
+                if (entry->_1 == i) {
+                    lbl_2_bss_1A8248->_43D6[j] = 1;
+                }
+            }
+        }
+    }
+}
+
 // .text:0x00045354 size:0x194
 void fn_2_45354(void) {
     s32 i;
@@ -1903,17 +1939,18 @@ void fn_2_45204(void) {
 }
 
 // .text:0x000450E4 size:0x120
-// Registers only: the inner compare is cmpw r0,r10 in the target.
 void fn_2_450E4(void) {
     s32 id;
     s32 i;
     s32 j;
+    MenuCharEntry08E8* entry;
 
     for (i = 0; i < lbl_2_bss_1A824C->_197866; i++) {
         id = lbl_2_bss_1A824C->_197868[i];
         lbl_2_bss_1A8248->_43D6[id] = 1;
         for (j = 0; j < 0x36; j++) {
-            if (lbl_800E8558[j]._1 == id) {
+            entry = &lbl_800E8558[j];
+            if (entry->_1 == id) {
                 lbl_2_bss_1A8248->_43D6[j] = 1;
             }
         }

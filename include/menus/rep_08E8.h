@@ -26,6 +26,7 @@ void fn_2_44F64(void);
 void fn_2_450E4(void);
 void fn_2_45204(void);
 void fn_2_45354(void);
+void fn_2_454E8(void);
 void fn_2_45810(void);
 s32 fn_2_45938(s32 slot);
 void fn_2_45978(void);
