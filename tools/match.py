@@ -660,15 +660,15 @@ def print_listing(insns: List[Insn], symbols: Dict[str, Symbol], max_lines: int,
 def print_draft(draft: Optional[str], function: str, max_lines: int, full: bool) -> None:
     if draft is None:
         return
+    # Keep the whole draft, so reading the rest needs no second run
+    path = os.path.join(build_dir, "m2c", f"{function}.c")
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w") as f:
+        f.write(draft)
     lines = draft.splitlines()
-    print("\nm2c draft (a starting point; it will not match as written):")
+    print(f"\nm2c draft (a starting point; it will not match as written; saved in {os.path.relpath(path, root_dir)}):")
     for n, line in enumerate(lines):
         if not full and n >= max_lines:
-            # Keep the whole draft, so reading the rest needs no second run
-            path = os.path.join(build_dir, "m2c", f"{function}.c")
-            os.makedirs(os.path.dirname(path), exist_ok=True)
-            with open(path, "w") as f:
-                f.write(draft)
             print(f"... truncated at {max_lines} of {len(lines)} lines; the whole draft is in {os.path.relpath(path, root_dir)}")
             break
         print(line)
