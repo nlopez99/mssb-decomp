@@ -55,6 +55,25 @@ typedef struct UnkAnimRef0610 {
     }* _4;
 } UnkAnimRef0610;
 
+typedef struct UnkPoseBlock0610 {
+    /* 0x00 */ u8 _00[0x5C];
+} UnkPoseBlock0610; // size: 0x5C
+
+typedef struct UnkPose0610 {
+    /* 0x00 */ u8 _00[0x4];
+    /* 0x04 */ UnkPoseBlock0610 _04;
+    /* 0x60 */ u8 _60;
+    /* 0x61 */ u8 _61[0x68 - 0x61];
+    /* 0x68 */ UnkPoseBlock0610 _68;
+    /* 0xC4 */ u8 _C4;
+    /* 0xC5 */ u8 _C5[0xCD - 0xC5];
+    /* 0xCD */ u8 _CD;
+    /* 0xCE */ u8 _CE;
+    /* 0xCF */ u8 _CF;
+    /* 0xD0 */ u8 _D0;
+    /* 0xD1 */ u8 _D1[0xD4 - 0xD1];
+} UnkPose0610; // size: 0xD4
+
 typedef struct Unk8036E548Actor {
     /* 0x000 */ u8 _000[0x4];
     /* 0x004 */ UnkList0610* _004;
@@ -64,7 +83,8 @@ typedef struct Unk8036E548Actor {
     }* _008;
     /* 0x00C */ u8 _00C[0x10 - 0xC];
     /* 0x010 */ UnkAnimRef0610* _010[1];
-    /* 0x014 */ u8 _014[0x34 - 0x14];
+    /* 0x014 */ u8 _014[0x30 - 0x14];
+    /* 0x030 */ struct UnkPose0610* _030;
     /* 0x034 */ f32 _034;
     /* 0x038 */ f32 _038;
     /* 0x03C */ f32 _03C;
@@ -87,7 +107,8 @@ typedef struct Unk8036E548 {
     /* 0x0060 */ Unk0060* _0060;
     /* 0x0064 */ u8 _0064[0xAC - 0x64];
     /* 0x00AC */ LITObj* _00AC[3];
-    /* 0x00B8 */ u8 _00B8[0xC04 - 0xB8];
+    /* 0x00B8 */ u8 _00B8[0x140 - 0xB8];
+    /* 0x0140 */ UnkPose0610 _0140[13];
     /* 0x0C04 */ Unk8036E548Actor _0C04[13];
     /* 0x2C50 */ Unk8036E548Actor* _2C50[13];
 } Unk8036E548;
@@ -322,7 +343,8 @@ static struct Unk67E0 {
     /* 0x118 */ u8 _118;
 } lbl_1_bss_67E0;
 static UnkTimer0610* lbl_1_bss_67B8[10];
-static u8 lbl_1_bss_60EC[0x6CC];
+static u8 lbl_1_bss_6764[0x54];
+static UnkPoseBlock0610 lbl_1_bss_60EC[18];
 static UnkTask0610* lbl_1_bss_60E8;
 static void* lbl_1_bss_60E4;
 static s32 lbl_1_bss_60E0;
@@ -1395,6 +1417,40 @@ void fn_1_D4BC(void) {
         }
     }
     g->_2C50[0]->_276 |= 1;
+}
+
+// .text:0x0000D300 size:0x1BC
+// The target's switch has a second, dead `b <default>` before case 0, and its
+// epilogue restores r0 before r28-r31
+void fn_1_D300(Unk8036E548Actor* arg0) {
+    s32 first;
+    s32 second;
+    switch (lbl_1_bss_6940[lbl_1_bss_5F73]._44) {
+    case 0:
+    case 1:
+        first = 1;
+        second = 2;
+        break;
+    default:
+        if (lbl_1_bss_5F69 != 0) {
+            first = 1;
+            second = 4;
+        } else {
+            first = 3;
+            second = 2;
+        }
+        break;
+    }
+    lbl_8036E548._2C50[lbl_1_bss_5F73]->_030 = &lbl_8036E548._0140[lbl_1_bss_5F73];
+    memcpy(&lbl_8036E548._2C50[lbl_1_bss_5F73]->_030->_04, &lbl_1_bss_60EC[first], sizeof(UnkPoseBlock0610));
+    memcpy(&lbl_8036E548._2C50[lbl_1_bss_5F73]->_030->_68, &lbl_1_bss_60EC[second], sizeof(UnkPoseBlock0610));
+    lbl_8036E548._2C50[lbl_1_bss_5F73]->_030->_60 = lbl_1_bss_5F73;
+    lbl_8036E548._2C50[lbl_1_bss_5F73]->_030->_C4 = lbl_1_bss_5F73;
+    lbl_8036E548._2C50[lbl_1_bss_5F73]->_030->_CD = arg0->_25A;
+    lbl_8036E548._2C50[lbl_1_bss_5F73]->_030->_CE = arg0->_25B;
+    lbl_8036E548._2C50[lbl_1_bss_5F73]->_030->_CF = lbl_1_bss_5F73;
+    lbl_8036E548._2C50[lbl_1_bss_5F73]->_030->_D0 = lbl_1_bss_5F73;
+    *(UnkList0610**)lbl_8036E548._2C50[lbl_1_bss_5F73] = lbl_8036E548._0060->_34[lbl_1_bss_5F73]._00;
 }
 
 // .text:0x0000D2F0 size:0x10

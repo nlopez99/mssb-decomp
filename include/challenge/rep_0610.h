@@ -22,6 +22,7 @@ void fn_1_CCC8(void);
 void fn_1_CDC8(void);
 void fn_1_D13C(void);
 void fn_1_D2F0(void);
+void fn_1_D300(struct Unk8036E548Actor* arg0);
 void fn_1_D4BC(void);
 void fn_1_D590(s32 arg0, s32 arg1, f32 arg2);
 u8 fn_1_D638(void);
