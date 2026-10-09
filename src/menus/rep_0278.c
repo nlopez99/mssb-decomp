@@ -2,6 +2,7 @@
 #include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
 #include "musyx/musyx.h"
+#include "Dolphin/pad.h"
 #include "string.h"
 
 typedef struct {
@@ -47,7 +48,15 @@ extern struct {
 
 extern struct {
     /* 0x00 */ s32 _00;
+    /* 0x04 */ s32 _04;
 } lbl_2_bss_F410;
+
+extern struct {
+    /* 0x00 */ u8 _00[0x27];
+    /* 0x27 */ u8 _27;
+    /* 0x28 */ u8 _28;
+    /* 0x29 */ u8 _29;
+} lbl_80366158;
 
 extern u8 lbl_803C5EA4[0x3A];
 extern u8 lbl_800EFBA4[0x10];
@@ -171,5 +180,80 @@ void fn_2_1A88(void) {
     }
     while (n < 4) {
         lbl_8034E9A0._46F8[n++] = -1;
+    }
+}
+
+// .text:0x00001800 size:0x288
+// The same code as fn_2_1578, with the same remaining difference.
+void fn_2_1800(void) {
+    UnkPad0278 pad;
+
+    memset(&pad, 0, sizeof(pad));
+    pad._0 = lbl_8034E9A0._472C[0]._0;
+    pad._2 = lbl_8034E9A0._472C[0]._2;
+    pad._4 = lbl_8034E9A0._472C[0]._4;
+    if (lbl_803C66B0._55 != 0) {
+        return;
+    }
+    if (pad._2 & PAD_BUTTON_A) {
+        fn_2_1DC8();
+        lbl_80366158._27 = 0;
+        sndFXStartEx(0x1B8, lbl_800EFBA4[1], 0x3F, 0);
+    } else if (pad._2 & PAD_BUTTON_B) {
+        lbl_80366158._29 = 2;
+        lbl_8034E9A0._472A = 0;
+        lbl_803CBBCC->_4 = 6;
+        sndFXStartEx(0x1B9, lbl_800EFBA4[2], 0x3F, 0);
+    } else if ((pad._4 & PAD_BUTTON_UP) || (pad._4 & PAD_BUTTON_DOWN)) {
+        lbl_2_bss_F410._04 = lbl_2_bss_F410._00;
+        if (pad._4 & PAD_BUTTON_UP) {
+            if (--lbl_2_bss_F410._00 < 0) {
+                lbl_2_bss_F410._00 = 6;
+            }
+        } else if (pad._4 & PAD_BUTTON_DOWN) {
+            if (++lbl_2_bss_F410._00 == 7) {
+                lbl_2_bss_F410._00 = 0;
+            }
+        }
+        fn_800625A4(0, 0x56);
+        sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+    }
+}
+
+// .text:0x00001578 size:0x288
+// 99.38%: registers of the pad copy's _0 and _4 swap, and the target tests
+// PAD_BUTTON_UP again inside the cursor branch where this reuses the first test.
+void fn_2_1578(void) {
+    UnkPad0278 pad;
+
+    memset(&pad, 0, sizeof(pad));
+    pad._0 = lbl_8034E9A0._472C[0]._0;
+    pad._2 = lbl_8034E9A0._472C[0]._2;
+    pad._4 = lbl_8034E9A0._472C[0]._4;
+    if (lbl_803C66B0._55 != 0) {
+        return;
+    }
+    if (pad._2 & PAD_BUTTON_A) {
+        fn_2_1DC8();
+        lbl_80366158._27 = 0;
+        sndFXStartEx(0x1B8, lbl_800EFBA4[1], 0x3F, 0);
+    } else if (pad._2 & PAD_BUTTON_B) {
+        lbl_80366158._29 = 2;
+        lbl_8034E9A0._472A = 0;
+        lbl_803CBBCC->_4 = 6;
+        sndFXStartEx(0x1B9, lbl_800EFBA4[2], 0x3F, 0);
+    } else if ((pad._4 & PAD_BUTTON_UP) || (pad._4 & PAD_BUTTON_DOWN)) {
+        lbl_2_bss_F410._04 = lbl_2_bss_F410._00;
+        if (pad._4 & PAD_BUTTON_UP) {
+            if (--lbl_2_bss_F410._00 < 0) {
+                lbl_2_bss_F410._00 = 6;
+            }
+        } else if (pad._4 & PAD_BUTTON_DOWN) {
+            if (++lbl_2_bss_F410._00 == 7) {
+                lbl_2_bss_F410._00 = 0;
+            }
+        }
+        fn_800625A4(0, 0x56);
+        sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
     }
 }
