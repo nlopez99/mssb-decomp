@@ -8,6 +8,7 @@
 struct Actor7730;
 struct RopeParams7730;
 struct Tex7730;
+struct GameTask7730;
 
 struct DrawEntry7730;
 
@@ -34,14 +35,15 @@ void fn_1_1EFF4(void);
 void fn_1_1F05C(void);
 void fn_1_1F23C(struct Actor7730* actor);
 void fn_1_1F2D8(void);
-void fn_1_1F418(void);
-void fn_1_1F618(void);
-void fn_1_1F900(void);
-void fn_1_1FD78(void);
+void fn_1_1F418(struct GameTask7730* task);
+void fn_1_1F618(struct GameTask7730* task);
+void fn_1_1F900(struct GameTask7730* task);
+void fn_1_1FD78(struct GameTask7730* task);
 void fn_1_2004C(void);
 void fn_1_202A4(void);
 void fn_1_2040C(void);
 GXBool fn_1_2051C(struct Tex7730* tex, GXTexObj* obj, GXTlutObj* tlutObj, GXTlut tlutName);
+void fn_1_20640(struct GameTask7730* task, u32* ids);
 void fn_1_207D4(void);
 void fn_1_20890(void);
 void fn_1_20BD8(void);
@@ -49,6 +51,7 @@ void fn_1_20DC8(void);
 void fn_1_20F8C(void);
 void fn_1_21040(void);
 void fn_1_21180(struct RopeParams7730* params);
+void fn_1_21298(struct RopeParams7730* params);
 void fn_1_21408(void);
 void fn_1_225B8(void);
 void fn_1_22644(void);

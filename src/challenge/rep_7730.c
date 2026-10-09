@@ -28,6 +28,9 @@ extern void fn_800385F0(void* arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4);
 extern void fn_80035A00(void);
 extern void fn_80048C14(s32 arg0);
 extern void fn_80048E00(s32 arg0, s32 arg1);
+extern void fn_80048C1C(void);
+extern void fn_80048C28(void);
+extern void fn_80048D4C(void);
 
 extern void fn_800AD038(s32 arg0);
 extern void fn_800B1188(void);
@@ -377,19 +380,16 @@ static s32 lbl_1_data_104CC = 0x400;
 
 static f32 lbl_1_data_104D0[3] = { 0.125f, 0.125f, 0.125f };
 
-static GXColor lbl_1_data_104DC[6] = {
-    { 0xFF, 0x80, 0x80, 0xFF }, { 0x80, 0xFF, 0x80, 0xFF }, { 0x80, 0x80, 0xFF, 0xFF },
-    { 0xFF, 0xFF, 0x80, 0xFF }, { 0xFF, 0x80, 0xFF, 0xFF }, { 0x80, 0xFF, 0xFF, 0xFF },
-};
+static u32 lbl_1_data_104DC[6] = { 0xFF8080FF, 0x80FF80FF, 0x8080FFFF, 0xFFFF80FF, 0xFF80FFFF, 0x80FFFFFF };
 
 static u32 lbl_1_data_104F4[5] = {
     0x0000040B, 0x40000528, 0x09438800, 0x00000424,
     0x3E000000,
 };
 
-static void* lbl_1_data_10508[2] = { fn_1_1FD78, fn_1_1F418 };
+static void (*lbl_1_data_10508[2])(GameTask7730*) = { fn_1_1FD78, fn_1_1F418 };
 
-static void* lbl_1_data_10510[2] = { fn_1_1F900, fn_1_1F618 };
+static void (*lbl_1_data_10510[2])(GameTask7730*) = { fn_1_1F900, fn_1_1F618 };
 
 static AramEntry7730 lbl_1_data_10518[21] = {
     { 0x0000040B, 0x40168A6C, 0x06CFD000, 0x000C69A8 },
@@ -698,6 +698,32 @@ void fn_1_225B8(void) {
     }
 }
 
+// .text:0x00021298 size:0x170
+void fn_1_21298(RopeParams7730* params) {
+    s32 i;
+
+    if (params->_22 != 0) {
+        GXBegin(GX_LINESTRIP, GX_VTXFMT0, (params->_21 - 1) * 2);
+        i = params->_21;
+        while (--i != 0) {
+            GXPosition3f32(lbl_1_bss_6FE0[i]._0C.x, 0.0f, lbl_1_bss_6FE0[i]._0C.z);
+            GXColor1u32(0x80);
+            GXPosition3f32(lbl_1_bss_6FE0[i - 1]._0C.x, 0.0f, lbl_1_bss_6FE0[i - 1]._0C.z);
+            GXColor1u32(0x80);
+        }
+    }
+    if (params->_24 != 0) {
+        GXBegin(GX_LINESTRIP, GX_VTXFMT0, (params->_21 - 1) * 2);
+        i = params->_21;
+        while (--i != 0) {
+            GXPosition3f32(lbl_1_bss_6FE0[i]._0C.x, -lbl_1_bss_6FE0[i]._0C.y, lbl_1_bss_6FE0[i]._0C.z);
+            GXColor1u32(lbl_1_data_104DC[i % 6]);
+            GXPosition3f32(lbl_1_bss_6FE0[i - 1]._0C.x, -lbl_1_bss_6FE0[i - 1]._0C.y, lbl_1_bss_6FE0[i - 1]._0C.z);
+            GXColor1u32(lbl_1_data_104DC[i % 6]);
+        }
+    }
+}
+
 // .text:0x00021180 size:0x118
 void fn_1_21180(RopeParams7730* params) {
     f32 dt;
@@ -799,6 +825,36 @@ void fn_1_207D4(void) {
     GXSetNumTexGens(1);
 }
 
+// .text:0x00020640 size:0x194
+void fn_1_20640(GameTask7730* task, u32* ids) {
+    s32 i;
+    u32 id;
+    u32 tlut;
+
+    GXSetNumTevStages(task->_22);
+    GXSetNumTexGens(task->_22);
+    for (i = 0; i < task->_22; i++) {
+        GXSetTexCoordGen2(i, GX_TG_MTX2X4, GX_TG_TEX0, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
+        if (i != 0) {
+            GXSetTevColorIn(i, GX_CC_CPREV, GX_CC_TEXC, GX_CC_RASA, GX_CC_ZERO);
+            GXSetTevColorOp(i, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+            GXSetTevAlphaIn(i, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_APREV);
+            GXSetTevAlphaOp(i, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+        } else {
+            GXSetTevColorIn(i, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_TEXC);
+            GXSetTevColorOp(i, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+            GXSetTevAlphaIn(i, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_RASA);
+            GXSetTevAlphaOp(i, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+        }
+        id = ids[i];
+        tlut = id & 0x7FFFFFFF;
+        GXLoadTexObj(&lbl_1_bss_6EA4[id], i);
+        if (id & 0x80000000) {
+            GXLoadTlut(&lbl_1_bss_6E44[tlut], i);
+        }
+    }
+}
+
 // .text:0x0002051C size:0x124
 GXBool fn_1_2051C(Tex7730* tex, GXTexObj* obj, GXTlutObj* tlutObj, GXTlut tlutName) {
     GXBool mipmap = tex->minLOD != tex->maxLOD;
@@ -837,6 +893,25 @@ void fn_1_2040C(void) {
     fn_80048E00(1, 0);
     fn_800AD038(lbl_80366158._08);
     ((GameTask7730*)lbl_803CC1B8)->_00 = fn_1_2004C;
+}
+
+// .text:0x000202A4 size:0x168
+void fn_1_202A4(void) {
+    GameTask7730* task = lbl_803CC1B8;
+    u32 color;
+
+    fn_80048C1C();
+    lbl_1_data_10508[task->_20](task);
+    if (lbl_803C77B8[0]._02 & 0x200) {
+        color = 0x11775500;
+        GXSetCopyClear(*(GXColor*)&color, 0xFFFFFF);
+        ((GameTask7730*)lbl_803CC1B8)->_0C->_10 = 1;
+        fn_800B0A14_removeQueue();
+    }
+    fn_80048D4C();
+    fn_1_207D4();
+    lbl_1_data_10510[task->_20](task);
+    fn_80048C28();
 }
 
 // .text:0x0002004C size:0x258
