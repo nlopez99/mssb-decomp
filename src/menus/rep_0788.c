@@ -12,7 +12,8 @@ typedef struct MenuEntry0788 {
 } MenuEntry0788; // size: 0x10
 
 typedef struct MenuTask0788 {
-    /* 0x00 */ u8 _00[0x10];
+    /* 0x00 */ u8 _00[0xC];
+    /* 0x0C */ struct MenuTask0788* _0C;
     /* 0x10 */ s16 _10;
     /* 0x12 */ u8 _12[0x14 - 0x12];
     /* 0x14 */ u16 _14;
@@ -21,6 +22,8 @@ typedef struct MenuTask0788 {
     /* 0x1A */ s16 _1A;
     /* 0x1C */ u16 _1C;
     /* 0x1E */ u16 _1E;
+    /* 0x20 */ u8 _20[0x28 - 0x20];
+    /* 0x28 */ s8 _28;
 } MenuTask0788;
 
 typedef struct MenuItem0788 {
@@ -68,12 +71,21 @@ typedef struct MenuMissionPair0788 {
     /* 0x1 */ s8 _1;
 } MenuMissionPair0788; // size: 0x2
 
+typedef struct MenuScoutTable0788 {
+    /* 0x0 */ u8 _0[0x4];
+    /* 0x4 */ s8 _4[4][6];
+} MenuScoutTable0788;
+
 // The layout of starMissionCompletionTracker's ChallengeTrackingStruct
 typedef struct MenuCharacter0788 {
-    /* 0x00 */ u8 _00[0x9];
+    /* 0x00 */ MenuScoutTable0788* _00;
+    /* 0x04 */ u8 _04[0x6 - 0x4];
+    /* 0x06 */ s8 _06;
+    /* 0x07 */ u8 _07[0x9 - 0x7];
     /* 0x09 */ MenuMissionPair0788 _09[10];
     /* 0x1D */ MenuMissionPair0788 _1D[10];
-    /* 0x31 */ u8 _31[0x34 - 0x31];
+    /* 0x31 */ u8 _31;
+    /* 0x32 */ u8 _32[0x34 - 0x32];
 } MenuCharacter0788; // size: 0x34
 
 typedef struct MenuMissionDef0788 {
@@ -465,6 +477,7 @@ extern void fn_2_45810(void);
 extern void fn_2_45978(void);
 extern void fn_2_467FC(void);
 extern void fn_2_46ADC(void);
+extern void fn_2_46D94(s16*, s16*, s32, s32, s32);
 extern void fn_2_47CFC(void);
 extern s32 fn_2_4C3D8(s32 index);
 extern void fn_2_47FF8(void);
@@ -9191,6 +9204,69 @@ void fn_2_1FF10(void) {}
 
 // .text:0x0001FF0C size:0x4
 void fn_2_1FF0C(void) {}
+// .text:0x0001CF94 size:0x4AC
+void fn_2_1CF94(void) {
+    MenuTask0788* task = lbl_803CC1B8;
+    MenuCharacter0788* chr;
+    s32 j;
+    s32 i;
+
+    switch (task->_28) {
+    case 0:
+        lbl_2_bss_1A824C->_19771A = 0;
+        lbl_2_bss_1A824C->_19771C = 0;
+        lbl_2_bss_1A824C->_19771E = 0x36;
+        task->_28 = 1;
+        break;
+    case 1:
+        if (lbl_803C77B8[lbl_2_bss_1A824C->_197863]._04 == 8 || lbl_803C77B8[lbl_2_bss_1A824C->_197863]._04 == 4) {
+            fn_2_46D94(&lbl_2_bss_1A824C->_19771A, &lbl_2_bss_1A824C->_19771C, lbl_2_bss_1A824C->_19771E, 10, 9);
+        }
+        lbl_2_bss_1A824C->_197716 = lbl_2_bss_1A824C->_19771A + lbl_2_bss_1A824C->_19771C;
+        chr = &lbl_2_bss_1A8248->_0000[lbl_2_bss_1A824C->_197716];
+        if (lbl_803C77B8[lbl_2_bss_1A824C->_197863]._04 & 1) {
+            if (chr->_06 > 0 && chr->_06 != chr->_00->_4[lbl_2_bss_1A8248->_4415][lbl_2_bss_1A8248->_441C]) {
+                chr->_06--;
+            }
+        } else if (lbl_803C77B8[lbl_2_bss_1A824C->_197863]._04 & 2) {
+            if (chr->_06 < chr->_00->_4[lbl_2_bss_1A8248->_4415][lbl_2_bss_1A8248->_441C]) {
+                chr->_06++;
+            }
+        }
+        if (lbl_803C77B8[lbl_2_bss_1A824C->_197863]._02 & 0x300) {
+            task->_14 = 16;
+            task->_28 = 2;
+        }
+        if (lbl_803C77B8[lbl_2_bss_1A824C->_197863]._02 & 0x40) {
+            for (i = 0; i < 54; i++) {
+                chr = &lbl_2_bss_1A8248->_0000[i];
+                for (j = 0; j < 10; j++) {
+                    if (chr->_00->_4[lbl_2_bss_1A8248->_4415][lbl_2_bss_1A8248->_441C] != 0) {
+                        chr->_06 = 0;
+                    }
+                }
+                lbl_2_bss_1A8248->_444D[i] = 0;
+                chr->_31 = 0;
+            }
+        } else if (lbl_803C77B8[lbl_2_bss_1A824C->_197863]._02 & 0x20) {
+            for (i = 0; i < 54; i++) {
+                chr = &lbl_2_bss_1A8248->_0000[i];
+                for (j = 0; j < 10; j++) {
+                    if (chr->_00->_4[lbl_2_bss_1A8248->_4415][lbl_2_bss_1A8248->_441C] != 0) {
+                        chr->_06 = chr->_00->_4[lbl_2_bss_1A8248->_4415][lbl_2_bss_1A8248->_441C];
+                    }
+                }
+            }
+        }
+        break;
+    case 2:
+        task->_0C->_10 = 1;
+        fn_800B0A14_removeQueue();
+        task->_28 = 0;
+        break;
+    }
+}
+
 // .text:0x0001C714 size:0x14C
 void fn_2_1C714(s32 id) {
     s32 i;
