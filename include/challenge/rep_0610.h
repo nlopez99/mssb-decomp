@@ -9,6 +9,7 @@ struct UnkLight0610;
 struct UnkList0610;
 struct UnkBurst0610;
 struct UnkCamera0610;
+struct Unk8036E548Actor;
 
 void fn_1_C5A8(void);
 void fn_1_CB9C(s32 arg0);
@@ -57,6 +58,7 @@ void fn_1_126CC(void);
 void fn_1_129D0(void);
 void fn_1_1347C(void);
 void fn_1_135C0(void);
+void fn_1_14710(struct Unk8036E548Actor* arg0);
 void fn_1_14888(struct UnkLight0610* arg0);
 void fn_1_148CC(void);
 void fn_1_14928(void);

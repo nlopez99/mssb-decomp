@@ -65,7 +65,8 @@ typedef struct Unk8036E548Actor {
     /* 0x044 */ f32 _044;
     /* 0x048 */ f32 _048;
     /* 0x04C */ u8 _04C[0x72 - 0x4C];
-    /* 0x072 */ u8 _072[0x276 - 0x72];
+    /* 0x072 */ u16 _072[120];
+    /* 0x162 */ u16 _162[(0x276 - 0x162) / 2];
     /* 0x276 */ u8 _276;
     /* 0x277 */ u8 _277[0x27C - 0x277];
 } Unk8036E548Actor; // size: 0x27C
@@ -233,6 +234,13 @@ extern UnkBurst0610 lbl_1_data_F2A0;
 extern u16 lbl_1_data_F17C;
 extern u16 lbl_1_data_F56C;
 extern u16 lbl_1_data_F56E;
+typedef struct UnkPair0610 {
+    /* 0x0 */ u16 _0;
+    /* 0x2 */ u16 _2;
+} UnkPair0610;
+
+extern UnkPair0610 lbl_1_data_1DC0[];
+extern UnkPair0610 lbl_1_data_1E18[];
 extern u8 lbl_1_data_A940[];
 extern u8 lbl_1_data_ABA8;
 extern Vec lbl_1_data_AD0C;
@@ -268,7 +276,7 @@ static Unk6940 lbl_1_bss_6940[2];
 static struct {
     /* 0x00 */ u8 _00[0x10];
     /* 0x10 */ Mtx _10;
-    /* 0x40 */ u8 _40[0x4];
+    /* 0x40 */ u8 _40[4];
 } lbl_1_bss_68FC;
 static struct {
     /* 0x000 */ Mtx _000;
@@ -476,6 +484,51 @@ void fn_1_14888(UnkLight0610* arg0) {
         fn_800B9AA8(&lbl_1_bss_67E0._030);
     } else {
         fn_800B9AA8(arg0->_70);
+    }
+}
+
+// .text:0x00014710 size:0x178
+void fn_1_14710(Unk8036E548Actor* arg0) {
+    s32 i;
+    UnkPair0610* pair;
+    UnkPair0610* list;
+    u16 a;
+    u16 b;
+    for (i = 0; i < 120; i++) {
+        arg0->_072[i] = i;
+    }
+    pair = lbl_1_data_1DC0;
+    i = 0;
+    do {
+        a = arg0->_162[pair->_0];
+        b = arg0->_162[pair->_2];
+        if (a != 0xFFFF && b != 0xFFFF) {
+            arg0->_072[a] = b;
+            arg0->_072[b] = a;
+        }
+        pair++;
+    } while (lbl_1_data_1DC0[++i]._0 != 0xFFFF);
+    switch (lbl_1_bss_68FC._40[lbl_1_bss_5F73]) {
+    case 0x10:
+    case 0x2C:
+    case 0x2D:
+    case 0x2E:
+    case 0x2F:
+        list = lbl_1_data_1E18;
+        break;
+    default:
+        list = NULL;
+        break;
+    }
+    if (list != NULL) {
+        for (pair = list; pair->_0 != 0xFFFF; pair++) {
+            a = arg0->_162[pair->_0];
+            b = arg0->_162[pair->_2];
+            if (a != 0xFFFF && b != 0xFFFF) {
+                arg0->_072[a] = b;
+                arg0->_072[b] = a;
+            }
+        }
     }
 }
 
