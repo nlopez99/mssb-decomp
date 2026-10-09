@@ -11884,7 +11884,7 @@ dive_at:
 }
 
 // .text:0x00028224 size:0xA84 mapped:0x806672B8
-// 96.71%: first draft; registers differ (the target reloads f->_19A, the base
+// 96.91%: first draft; registers differ (the target reloads f->_19A, the base
 // keeps it in r29) and the two backward searches are not yet in the target's form.
 s32 fn_3_28224(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
@@ -11917,7 +11917,7 @@ s32 fn_3_28224(s32 fielder) {
         return 0;
     }
     if (i < lbl_3_data_49DC[1] &&
-        fn_3_9FCF8(fn_3_9FB8C(g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x - f->_000,
+        fn_3_9FCF8((s16)fn_3_9FB8C(g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x - f->_000,
                               g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z - f->_008),
                    f->_19A) <= 0x300) {
         f->_128 = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x;
@@ -11926,7 +11926,8 @@ s32 fn_3_28224(s32 fielder) {
         if (!(dolsqrtf2(SQ(f->_000 - f->_128) + SQ(f->_008 - f->_130)) > lbl_3_data_4930[4])) {
             line.src.x = f->_000;
             line.src.z = f->_008;
-            line.dst.y = line.src.y = -lbl_3_data_4930[5];
+            line.dst.y = -lbl_3_data_4930[5];
+            line.src.y = -lbl_3_data_4930[5];
             dx = f->_128 - f->_000;
             dz = f->_130 - f->_008;
             dist = dolsqrtf2(dx * dx + dz * dz);
@@ -11981,7 +11982,8 @@ s32 fn_3_28224(s32 fielder) {
     }
     line.src.x = f->_000;
     line.src.z = f->_008;
-    line.dst.y = line.src.y = -lbl_3_data_4930[5];
+    line.dst.y = -lbl_3_data_4930[5];
+    line.src.y = -lbl_3_data_4930[5];
     line.dst.x = f->_038 * lbl_3_data_4930[4] + f->_000;
     line.dst.z = f->_03C * lbl_3_data_4930[4] + f->_008;
     if ((checkCollision(&line, &hit, 0, FALSE) & 0x7F) != 2) {
