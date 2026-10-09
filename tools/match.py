@@ -690,7 +690,8 @@ def function_status(func: Dict[str, Any], base_syms: Optional[Dict[str, "Symbol"
 
 def stub_callees(unit: Dict[str, Any], statuses: Dict[str, str]) -> Dict[str, List[str]]:
     # An empty stub is inlined into its callers, so a caller cannot match until
-    # each stub it calls in this unit has a body: list those per function
+    # each stub it calls in this unit has a body: list those per function. A
+    # callee absent from the source is called, not inlined, so it blocks nothing
     path = asm_path(unit)
     if not os.path.exists(path):
         return {}
@@ -704,7 +705,7 @@ def stub_callees(unit: Dict[str, Any], statuses: Dict[str, str]) -> Dict[str, Li
             m = re.search(r"\tbl?\s+([A-Za-z_][\w.@]*)\s*$", line)
             if current and m:
                 callee = m.group(1)
-                if callee != current and statuses.get(callee) in ("stub", "missing"):
+                if callee != current and statuses.get(callee) == "stub":
                     if callee not in waits.setdefault(current, []):
                         waits[current].append(callee)
     return waits
