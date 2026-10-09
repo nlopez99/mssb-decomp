@@ -62,7 +62,7 @@ void fn_2_C7DC(u8 idx, u8 team);
 void fn_2_CA60(u8 idx, u8 team);
 void fn_2_CCBC(void);
 void fn_2_CCE0(u8 port);
-void fn_2_CE44(u8 port);
+void fn_2_CE44(s32 port);
 void fn_2_DFAC(s32 port);
 void fn_2_EAE0(void);
 void fn_2_EC34(void);
