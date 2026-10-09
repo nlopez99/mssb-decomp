@@ -242,7 +242,7 @@ typedef struct RopeNode7730 {
     /* 0x00 */ f32 _00;
     /* 0x04 */ u8 _04[0xC - 0x4];
     /* 0x0C */ Vec _0C;
-    /* 0x18 */ u8 _18[0x24 - 0x18];
+    /* 0x18 */ Vec _18;
     /* 0x24 */ Vec _24;
     /* 0x30 */ Vec _30;
     /* 0x3C */ s32 _3C;
@@ -937,6 +937,170 @@ void fn_1_22DF4(RopeParams7730* params) {
     fn_1_21180(params);
 }
 
+// .text:0x00022874 size:0x580
+// 99.77%: only volatile registers in the setup of the three step products differ.
+s32 fn_1_22874(RopeParams7730* params) {
+    RopeParams7730* task = lbl_803CC1B8;
+    s32 step;
+    f32 coarse;
+    f32 medium;
+    f32 fine;
+    s32 i;
+    u8 count;
+
+    if (lbl_803C77B8[0]._00 & 0x20) {
+        step = 100;
+    } else if (lbl_803C77B8[0]._15 >= 0x50) {
+        step = 1;
+    } else {
+        step = 10;
+    }
+    coarse = 0.001f * step;
+    medium = 0.01f * step;
+    fine = 0.0001f * step;
+    for (i = 0; i < 14; i++) {
+        switch (i) {
+        case 0:
+            if (i == task->_25) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    task->_20--;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    task->_20++;
+                }
+                if (task->_20 == 0) {
+                    task->_20++;
+                }
+            }
+            break;
+        case 1:
+            count = task->_21;
+            if (i == task->_25) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    task->_21--;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    task->_21++;
+                }
+                if (task->_21 < 2) {
+                    task->_21++;
+                }
+            }
+            break;
+        case 2:
+            if (i == task->_25) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    lbl_1_bss_6FB8._00 -= coarse;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    lbl_1_bss_6FB8._00 += coarse;
+                }
+            }
+            break;
+        case 3:
+            if (i == task->_25) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    task->_18 -= medium;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    task->_18 += medium;
+                }
+            }
+            break;
+        case 4:
+            if (i == task->_25) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    lbl_1_bss_6FB8._08 -= medium;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    lbl_1_bss_6FB8._08 += medium;
+                }
+            }
+            break;
+        case 5:
+            if (i == task->_25) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    lbl_1_bss_6FB8._0C -= medium;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    lbl_1_bss_6FB8._0C += medium;
+                }
+            }
+            break;
+        case 6:
+            if (i == task->_25) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    lbl_1_bss_6FB8._10 -= medium;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    lbl_1_bss_6FB8._10 += medium;
+                }
+            }
+            break;
+        case 7:
+            if (i == task->_25) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    lbl_1_bss_6FB8._14 -= fine;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    lbl_1_bss_6FB8._14 += fine;
+                }
+            }
+            break;
+        case 8:
+            if (i == task->_25) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    task->_1C -= step;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    task->_1C += step;
+                }
+            }
+            break;
+        case 9:
+            if (i == task->_25 && (lbl_803C77B8[0]._04 & 3)) {
+                task->_22 = !task->_22;
+            }
+            break;
+        case 10:
+            if (i == task->_25 && (lbl_803C77B8[0]._04 & 3)) {
+                task->_23 = !task->_23;
+            }
+            break;
+        case 11:
+            if (i == task->_25) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    lbl_1_data_104D0[0] -= 0.125;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    lbl_1_data_104D0[0] += 0.125;
+                }
+            }
+            break;
+        case 12:
+            if (i == task->_25) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    lbl_1_data_104D0[1] -= 0.125;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    lbl_1_data_104D0[1] += 0.125;
+                }
+            }
+            break;
+        case 13:
+            if (i == task->_25) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    lbl_1_data_104D0[2] -= 0.125;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    lbl_1_data_104D0[2] += 0.125;
+                }
+            }
+            break;
+        }
+    }
+    if (lbl_803C77B8[0]._04 & 8) {
+        if (task->_25 == 0) {
+            task->_25 = 14;
+        }
+        task->_25--;
+    } else if (lbl_803C77B8[0]._04 & 4) {
+        task->_25++;
+        if (task->_25 == 14) {
+            task->_25 = 0;
+        }
+    }
+    return count != task->_21;
+}
+
 // .text:0x00022644 size:0x230
 void fn_1_22644(void) {
     SprTask7730* task = lbl_803CC1B8;
@@ -966,6 +1130,44 @@ void fn_1_225B8(void) {
         }
         break;
     }
+}
+
+// .text:0x00021CE8 size:0x8D0
+void fn_1_21CE8(void) {
+    RopeParams7730* task = lbl_803CC1B8;
+    Vec force;
+    f32 scale;
+
+    if (fn_1_22874(task) || (lbl_803C77B8[0]._02 & 0x100)) {
+        fn_1_21180(task);
+    } else if (lbl_803C77B8[0]._02 & 0x200) {
+        ((SprTask7730*)lbl_803CC1B8)->_00 = fn_1_21408;
+    }
+    if (task->_23 != 0) {
+        if (lbl_803C77B8[3]._15 >= 0x50) {
+            scale = 0.0001f * task->_1C;
+        } else {
+            scale = 0.00001f * task->_1C;
+        }
+        lbl_1_bss_6FE0[task->_21 - 1]._0C.x += lbl_803C77B8[3]._10 * scale;
+        lbl_1_bss_6FE0[task->_21 - 1]._0C.y += lbl_803C77B8[3]._13 * scale;
+        lbl_1_bss_6FE0[task->_21 - 1]._0C.z += lbl_803C77B8[3]._11 * scale;
+        memcpy(&lbl_1_bss_6FE0[task->_21 - 1]._18, &lbl_1_bss_6FE0[task->_21 - 1]._0C, sizeof(Vec));
+        force.x = 0.0f;
+        force.y = 0.0f;
+        force.z = 0.0f;
+    } else {
+        force.x = task->_1C * (lbl_803C77B8[3]._10 * lbl_1_bss_6FE0[task->_21 - 1]._00);
+        force.y = task->_1C * (lbl_803C77B8[3]._13 * lbl_1_bss_6FE0[task->_21 - 1]._00);
+        force.z = task->_1C * (lbl_803C77B8[3]._11 * lbl_1_bss_6FE0[task->_21 - 1]._00);
+    }
+    fn_80038B48(&lbl_1_bss_6FB8, lbl_1_bss_6FE0, task->_21, &force);
+    fn_1_26A34();
+    GXLoadPosMtxImm(lbl_1_bss_43EE0._00, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    fn_1_21040();
+    fn_1_21298(task);
+    fn_1_20950(lbl_1_bss_6FE0, task->_21 - 1, lbl_1_bss_43EE0._00);
 }
 
 // .text:0x00021298 size:0x170
