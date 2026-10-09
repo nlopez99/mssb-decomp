@@ -62,6 +62,7 @@ void fn_2_47AFC(void);
 void fn_2_47B24(struct MenuModelList08E8* list);
 void fn_2_47FF8(void);
 void fn_2_481B8(void);
+void fn_2_481F4(void);
 void fn_2_487A0(void);
 void fn_2_489DC(void);
 void fn_2_48A1C(void);

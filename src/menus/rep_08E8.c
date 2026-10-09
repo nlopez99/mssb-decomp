@@ -9,6 +9,14 @@
 #include "math.h"
 #include "string.h"
 
+typedef struct MenuTask08E8 {
+    /* 0x00 */ u8 _00[0xC];
+    /* 0x0C */ struct MenuTask08E8* _0C;
+    /* 0x10 */ s16 _10;
+    /* 0x12 */ u8 _12[0x16 - 0x12];
+    /* 0x16 */ s16 _16;
+} MenuTask08E8;
+
 typedef struct AramEntry08E8 {
     /* 0x0 */ u32 _0[4];
 } AramEntry08E8; // size: 0x10
@@ -373,6 +381,9 @@ extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_2_513E0(void* text, s32, s32, s32, s32, s32, s32, s32);
 
 extern void fn_80052968(void);
+extern void* lbl_803CC1B8;
+extern s32 fn_80016710(s32, s32);
+extern void fn_800B0A14_removeQueue(void);
 extern void fn_80023B04(s32);
 extern void fn_80014204(s32);
 extern void* fn_80023AA4(void);
@@ -397,6 +408,7 @@ extern void fn_2_9007C(void);
 
 // rep_10C0
 extern void fn_2_93BF8(MenuCamera08E8* camera);
+extern void fn_2_93C64(void);
 
 Vec lbl_2_data_12EA8 = { 0.8f, 0.8f, 0.8f };
 Vec lbl_2_data_12EB4 = { 0.8f, 0.8f, 0.8f };
@@ -482,7 +494,11 @@ u32 lbl_2_data_13324[20] = {
 u32* lbl_2_data_13374 = lbl_2_data_13324;
 
 // .bss
-static u8 lbl_2_bss_55C0[0x28];
+static u16 lbl_2_bss_55C8[0x10];
+static u16 lbl_2_bss_55C6;
+static s16 lbl_2_bss_55C4;
+static u16 lbl_2_bss_55C2;
+static u8 lbl_2_bss_55C0;
 static f32 lbl_2_bss_55BC;
 static f32 lbl_2_bss_55B8;
 
@@ -1292,6 +1308,33 @@ void fn_2_487A0(void) {
         GXPosition3f32(f, 0.0f, 24.0f);
         GXColor4u8(0, 0xFF, 0, 0xC8);
         GXEnd();
+    }
+}
+
+// .text:0x000481F4 size:0x5AC
+void fn_2_481F4(void) {
+    MenuTask08E8* task = lbl_803CC1B8;
+    u8 team = lbl_2_bss_1A8248->_441D;
+
+    switch (lbl_2_bss_55C0) {
+    case 0:
+        fn_2_4E824();
+        fn_2_48DB4();
+        fn_2_93C64();
+        fn_2_478F4();
+        lbl_8036E548._2D77 = 0;
+        lbl_2_bss_55C0 = 1;
+        break;
+    case 1:
+        if (fn_80016710(team, task->_16) != 0) {
+            lbl_2_bss_1A824C->_19769C = task->_16;
+            fn_2_48D08();
+            lbl_2_bss_55C0 = 0;
+            lbl_8036E548._2D77 = 0;
+            ((MenuTask08E8*)lbl_803CC1B8)->_0C->_10 = 1;
+            fn_800B0A14_removeQueue();
+        }
+        break;
     }
 }
 
