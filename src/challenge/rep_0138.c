@@ -553,6 +553,35 @@ void fn_1_66C4(void) {
     lbl_803CC1B8->_00 = fn_1_6848;
 }
 
+// .text:0x17A0 size:0x14C
+void fn_1_6578(GXTexObj* obj, u16* image, s32 width, s32 height) {
+    GXTexFilter filter;
+    f32* scale;
+    s32 w = width;
+    s32 h = height;
+    s32 offset = 0;
+    s32 i;
+
+    if (lbl_1_data_A20 == 0) {
+        width /= 4;
+        height /= 4;
+        fn_1_6050(image, width, height, 1.0f);
+        filter = GX_LINEAR;
+    } else {
+        scale = lbl_1_data_A24;
+        for (i = 0; i <= lbl_1_data_A20; i++) {
+            fn_1_6050(image + offset, w, h, *scale);
+            offset += w * h;
+            w /= 2;
+            h /= 2;
+            scale++;
+        }
+        filter = lbl_1_data_A38;
+    }
+    GXInitTexObj(obj, image, width, height, GX_TF_IA8, GX_REPEAT, GX_REPEAT, lbl_1_data_A20);
+    GXInitTexObjLOD(obj, filter, GX_LINEAR, 0.0f, lbl_1_data_A20, lbl_1_data_A34, GX_FALSE, GX_FALSE, GX_ANISO_1);
+}
+
 // .text:0xB4C size:0x19C
 // Registers differ in every case, and the target adds the tile offset as the
 // left operand last; no statement split or declaration order reproduced it.

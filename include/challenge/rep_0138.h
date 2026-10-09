@@ -3,12 +3,15 @@
 
 #include "mssbTypes.h"
 #include "Dolphin/mtx.h"
+#include "Dolphin/gx.h"
 
 void fn_1_4DD8(u16* data);
 void fn_1_54E0(MtxPtr view);
 void fn_1_5540(void);
 void fn_1_5698(void);
 s32 fn_1_5924(s32 width, s32 x, s32 y, s32 bpp, s32 arg4);
+void fn_1_6050(u16* image, s32 width, s32 height, f32 scale);
+void fn_1_6578(GXTexObj* obj, u16* image, s32 width, s32 height);
 void fn_1_66C4(void);
 void fn_1_6848(void);
 struct File0138;
