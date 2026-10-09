@@ -11,6 +11,8 @@
 #include "game/rep_720.h"
 #include "game/m_sound.h"
 #include "game/rep_4090.h"
+#include "game/rep_3DA8.h"
+#include "game/rep_CC8.h"
 #include "string.h"
 
 typedef struct UnkAC8Fielder {
@@ -280,8 +282,6 @@ extern s16 fn_3_9FCF8(s32 a, s32 b);
 extern void getComponentsFromSAng(s16 ang, f32* x, f32* y);
 extern bool calculateLineIntersection(VecXZ* out, VecXZ* a, VecXZ* b);
 extern f32 fn_3_9EFD0(VecXYZ* start, VecXYZ* end, VecXYZ* point, VecXYZ* closest);
-extern void fn_3_161588(s32 event, s32 player);
-extern void fn_3_59918(int, int);
 extern u8 lbl_800E8558[][6];
 extern struct {
     /* 0x00 */ u8 _00[0x40];
