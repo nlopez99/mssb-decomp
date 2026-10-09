@@ -351,6 +351,50 @@ void fn_1_F2C(s32 mode, s32 frac, s32 normals) {
     GXSetTevOp(GX_TEVSTAGE0, mode);
 }
 
+// .text:0x00000AF4 size:0x438
+void fn_1_AF4(s32 nx, s32 nz, f32 size) {
+    s32 i;
+    f32 x0;
+    f32 x;
+    f32 z0;
+    f32 w;
+    f32 d;
+
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2X4, GX_TG_TEX0, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
+    GXSetNumChans(1);
+    GXSetNumTexGens(0);
+    GXSetNumTevStages(1);
+    GXSetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
+    w = nx * size;
+    d = nz * size;
+    x0 = -size * nz / 2.0f;
+    z0 = -size * nx / 2.0f;
+    x = x0;
+    GXBegin(GX_LINES, GX_VTXFMT0, (nz + 1) * 2);
+    for (i = nz; i >= 0; i--) {
+        GXPosition3f32(x, 0.0f, z0);
+        GXColor1u32(0xFFFFFFFF);
+        GXPosition3f32(x, 0.0f, z0 + w);
+        GXColor1u32(0xFFFFFFFF);
+        x += size;
+    }
+    GXBegin(GX_LINES, GX_VTXFMT0, (nx + 1) * 2);
+    for (i = nx; i >= 0; i--) {
+        GXPosition3f32(x0, 0.0f, z0);
+        GXColor1u32(0xFFFFFFFF);
+        GXPosition3f32(x0 + d, 0.0f, z0);
+        GXColor1u32(0xFFFFFFFF);
+        z0 += size;
+    }
+}
+
 // .text:0x000005E8 size:0x4
 void fn_1_5E8(void) {}
 
