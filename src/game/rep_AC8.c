@@ -277,6 +277,13 @@ extern s16 fn_3_9FCF8(s32 a, s32 b);
 extern void getComponentsFromSAng(s16 ang, f32* x, f32* y);
 extern bool calculateLineIntersection(VecXZ* out, VecXZ* a, VecXZ* b);
 extern f32 fn_3_9EFD0(VecXYZ* start, VecXYZ* end, VecXYZ* point, VecXYZ* closest);
+extern void fn_3_161588(s32 event, s32 player);
+extern void fn_3_59918(int, int);
+extern u8 lbl_800E8558[][6];
+extern struct {
+    /* 0x00 */ u8 _00[0x40];
+    /* 0x40 */ s16 _40;
+} lbl_3_common_bss_37400;
 extern u8 lbl_3_data_46F8[][9];
 
 typedef struct {
@@ -4911,13 +4918,10 @@ take:
 }
 
 // .text:0x0003C594 size:0x5F8 mapped:0x8067B628
-// 97.40%: registers only; the target saves r29 as well and keeps the loop counter in r10 and
-// the hoisted fielderWBallIndex in r9 through the cutoff check. Explicit locals for the hoisted
-// g_Ball fields scored lower.
 BOOL fn_3_3C594(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
-    s32 other;
     s32 base;
+    s32 other;
 
     for (base = 0; base < 4; base++) {
         if (g_FieldingLogic._101[base] != 0) {
@@ -4950,7 +4954,7 @@ BOOL fn_3_3C594(s32 fielder) {
         }
     }
     if (!g_FieldingLogic.playerAtMoundCutoffLocation && (other = g_FieldingLogic._0D8) != -1 &&
-        (f->_0B8 < 5.0f || f->_0B8 + 3.0f < g_Fielders[other]._0B8)) {
+        (f->_0B8 < 5.0f || f->_0B8 + 3.0f < g_Fielders[g_FieldingLogic._0D8]._0B8)) {
         goto takeCutoff;
     }
     return FALSE;
@@ -9116,8 +9120,262 @@ void fn_3_27648(void) {
 }
 
 // .text:0x00026A74 size:0xBD4 mapped:0x80665B08
-void fn_3_26A74(void) {
-    return;
+// Credits a fielder's catch in the stats when the fielding team is the player's
+static inline void creditCatch(s32 fielder) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+
+    g_FieldingLogic._133 = 2;
+    g_UnkSound_32718._08 = 4;
+    g_FieldingLogic._134 = fielder;
+    if (g_d_GameSettings.exhibitionMatchInd == 0 && lbl_3_common_bss_37400._40 == g_GameLogic.teamFielding &&
+        g_Ball.AtBat_ContactResult == 3) {
+        fn_3_161588(2, f->_178);
+    }
+}
+
+// 99.96%: registers only; the target loads f->_118 into f1 and f->_000 into f3 for the
+// distance to the fielder's start spot, this swaps them.
+void fn_3_26A74(s32 fielder) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    InMemRunnerType* r;
+    s32 i;
+    s32 frames;
+    s32 extra;
+    f32 z;
+    f32 x;
+    f32 dz;
+    f32 dx;
+    f32 dx2;
+    f32 dz2;
+    f32 dist;
+    f32 speed;
+
+    if (g_Ball.ballState == 1) {
+        if (g_d_GameSettings.GameModeSelected != GAME_TYPE_TOY_FIELD && fielder != g_FieldingLogic._0B0) {
+            fn_3_5985C(fielder, 12);
+        }
+        f->_252 = 0;
+        f->_050 = 0.0f;
+        f->_194 = 0;
+        f->_1E9 = 0;
+        f->_1DF = 0;
+        f->_205 = 0;
+        f->_25E = 0;
+        if (f->_1E8) {
+            f->_1E8 = 2;
+        }
+        if (g_Ball.fielderWBallIndex >= 0 && g_Ball.catchAnimationTotalFrames) {
+            g_Ball.catchAnimationTotalFrames = 0;
+            g_Ball.AtBat_Contact_BallPos.x = g_Ball.fielderActionCatchCoords.x;
+            g_Ball.AtBat_Contact_BallPos.y = g_Ball.fielderActionCatchCoords.y;
+            g_Ball.AtBat_Contact_BallPos.z = g_Ball.fielderActionCatchCoords.z;
+        }
+        return;
+    }
+
+    if (g_Ball.AtBat_ContactResult == 0 || (g_Ball.framesOnGroundUntilPickedUp == 0 &&
+                                            g_Ball.numberOfThrowsDuringPlay == 0 &&
+                                            g_Ball.numFieldersWhoHandledBallDuringPlay == 1)) {
+        if (g_Ball.fairBallInd == -1) {
+            if (fn_3_B7E10(g_Ball.AtBat_Contact_BallPos.x, g_Ball.AtBat_Contact_BallPos.z)) {
+                g_Ball.fairBallInd = 1;
+            } else {
+                g_Ball.fairBallInd = 0;
+            }
+        }
+        g_Ball.AtBat_ContactResult = 3;
+        if (g_FieldingLogic._108) {
+            g_FieldingLogic._108 = 2;
+        }
+    } else if (g_Ball.AtBat_ContactResult == 1) {
+        if (g_Ball.ballInitialHitDoneInd == 0 &&
+            fn_3_B7E10(g_Ball.AtBat_Contact_BallPos.x, g_Ball.AtBat_Contact_BallPos.z)) {
+            fn_3_A0F0();
+        } else {
+            g_Ball.AtBat_ContactResult = 2;
+            if (g_FieldingLogic._108) {
+                g_FieldingLogic._108 = 2;
+            }
+        }
+        if (g_Ball.fairBallInd == -1) {
+            if (g_Ball.AtBat_ContactResult == -1) {
+                g_Ball.fairBallInd = 1;
+            } else {
+                g_Ball.fairBallInd = 0;
+            }
+        }
+        if (g_Ball.ballState == 0 && g_Ball.AtBat_ContactResult != -1 && g_FieldingLogic._108 == 0 &&
+            g_Ball.hangtimeOfHit + 15 > g_Ball.framesSinceHit) {
+            if (g_FieldingLogic._108 == 0 && g_d_GameSettings.GameModeSelected != GAME_TYPE_TOY_FIELD) {
+                fn_3_59918(4, 0);
+            }
+        }
+    }
+
+    if (f->_252 == 2) {
+        g_FieldingLogic._11F = 1;
+    } else {
+        g_FieldingLogic._11F = 0;
+    }
+    if (f->_1D7 == 1) {
+        fn_3_5372C(fielder);
+        if (g_FieldingLogic._0D0[f->_18C] == fielder && g_FieldingLogic._101[f->_18C] == 1) {
+            g_Ball.baseBallAndFielderAreOn = f->_18C;
+            for (i = 0; i < 4; i++) {
+                r = &g_Runners[i];
+                if (r->runnerOnFieldOrOutOrScored == 1) {
+                    if (f->_18C == r->baseStandingOn && r->timeStandingOnBase < 120 &&
+                        (r->tagUpInd != 2 || r->startingBase_baseAchieved == r->baseStandingOn)) {
+                        fn_3_59918(2, 0);
+                    }
+                } else if (r->runnerOnFieldOrOutOrScored == 3 && f->_18C == 0 && r->timeStandingOnBase < 60) {
+                    fn_3_59918(2, 0);
+                }
+            }
+        }
+    }
+    g_FieldingLogic._114 = f->_259;
+    if (g_FieldingLogic._115 < 0) {
+        g_FieldingLogic._115 = f->_259;
+    }
+    if (g_Ball.numberOfThrowsDuringPlay == 0) {
+        x = f->_118;
+        z = f->_11C;
+        if (x == f->_000 && z == f->_008) {
+            frames = 1;
+        } else {
+            dx = x - f->_000;
+            dz = z - f->_008;
+            dx2 = dx * dx;
+            dz2 = dz * dz;
+            dist = dolsqrtf2(dx2 + dz2);
+            extra = f->_1D1 / 2;
+            speed = f->_058;
+            if (speed == 0.0f) {
+                speed = 1.0f;
+            }
+            frames = extra + (s32)(dist / speed);
+        }
+        if (g_Ball.framesSinceHit - frames < lbl_3_data_49DC[38]) {
+            g_FieldingLogic._133 = 1;
+        }
+    }
+    if (g_Ball.AtBat_ContactResult == 3 && g_Ball.numberOfThrowsDuringPlay == 0) {
+        if (f->_252 == 4 || f->_252 == 5) {
+            creditCatch(fielder);
+        } else if (f->_203) {
+            if (g_Ball.AtBat_Contact_BallPos.y > f->_0F4 + lbl_3_data_4930[38]) {
+                creditCatch(fielder);
+            }
+        } else {
+            if (g_FieldingLogic._133 == 1 && f->_259) {
+                creditCatch(fielder);
+            }
+            if (g_d_GameSettings.exhibitionMatchInd == 0 && lbl_3_common_bss_37400._40 == g_GameLogic.teamFielding &&
+                g_Ball.AtBat_ContactResult == 3 && f->_259 == 2) {
+                fn_3_161588(3, f->_178);
+            }
+        }
+    }
+    if (g_Ball.currentStarSwing == 1 || g_Ball.currentStarSwing == 2) {
+        f->_1EF = (&g_hitShorts.fireballStunFrames)[g_Batter.lightFireballStunID];
+    }
+    if (g_d_GameSettings.exhibitionMatchInd == 0 && lbl_3_common_bss_37400._40 == g_GameLogic.teamFielding &&
+        g_FieldingLogic._107 == 0) {
+        if (g_Ball.numFieldersWhoHandledBallDuringPlay == 0) {
+            fn_3_161588(1, f->_178);
+        }
+        if (g_Ball.numFieldersWhoHandledBallDuringPlay != 0 && g_Ball.numberOfThrowsDuringPlay == 0) {
+            fn_3_161588(9, f->_178);
+        }
+        if (f->_252 == 6) {
+            fn_3_161588(4, f->_178);
+        } else if (f->_252 == 5) {
+            fn_3_161588(5, f->_178);
+        }
+    }
+    fn_3_5985C(fielder, 10);
+    g_FieldingLogic._0B0 = -1;
+    if (g_Ball.numberOfThrowsDuringPlay < 0xFE) {
+        g_Ball.numberOfThrowsDuringPlay++;
+    } else {
+        g_Ball.numberOfThrowsDuringPlay = 0xFF;
+    }
+    if (g_Ball.numFieldersWhoHandledBallDuringPlay < 0xFE) {
+        g_Ball.numFieldersWhoHandledBallDuringPlay++;
+    } else {
+        g_Ball.numFieldersWhoHandledBallDuringPlay = 0xFF;
+    }
+    g_Ball.AtBat_Contact_BallPos.x = f->_000;
+    g_Ball.AtBat_Contact_BallPos.y = f->_004;
+    g_Ball.AtBat_Contact_BallPos.z = f->_008;
+    g_Ball.physicsSubstruct.velocity.x = 0.0f;
+    g_Ball.physicsSubstruct.velocity.y = 0.0f;
+    g_Ball.physicsSubstruct.velocity.z = 0.0f;
+    g_Ball.physicsSubstruct.acceleration.x = 0.0f;
+    g_Ball.physicsSubstruct.acceleration.y = 0.0f;
+    g_Ball.physicsSubstruct.acceleration.z = 0.0f;
+    g_Ball.ballState = 1;
+    g_Ball.fielderWBallIndex = fielder;
+    g_Ball.fielderAboutToGetBall_hasBall = fielder;
+    g_Ball.fielderBeingThrownTo = -1;
+    g_Ball.ballIsLooseInd_unused = 0;
+    g_Ball.looseBall_codeForHowLongUntilSomeoneWillGetIt = 0;
+    g_Ball.timeSinceBallPickedUp = 0;
+    g_Ball.looseBall_5FrameCountdown = 0;
+    g_Ball.ballPickedUpCaught.x = f->_000;
+    g_Ball.ballPickedUpCaught.z = f->_008;
+    g_Ball.framesOnGroundUntilPickedUp = 0;
+    g_Ball.ballInitialHitDoneInd = 1;
+    g_Ball.warioWaluGarlicIsActive = 0;
+    g_Ball.catchAnimationTotalFrames = 0;
+    g_Ball.ballIsRollingIndicator = 0;
+    if (g_Ball.ballZoneWhenCaught < 0) {
+        g_Ball.ballZoneWhenCaught = g_Ball.ballZoneAwayFromHome;
+    }
+    if (g_Ball.fielderWithBallIndexStored == -1) {
+        g_Ball.fielderWithBallIndexStored = fielder;
+    }
+    if (g_Ball.fielderWithBallIndexStored2 == -1) {
+        g_Ball.fielderWithBallIndexStored2 = fielder;
+    }
+    f->_252 = 0;
+    f->_050 = 0.0f;
+    f->_194 = 0;
+    f->_1E9 = 0;
+    f->_1DF = 0;
+    f->_215 = 0;
+    f->_265 = 0;
+    if (f->_1E8) {
+        f->_1E8 = 2;
+    }
+    g_FieldingLogic._0C4 = -1;
+    g_FieldingLogic._0CC = -1;
+    g_FieldingLogic._0DE = -1;
+    g_FieldingLogic._0DC = g_Ball.baseBallAndFielderAreOn;
+    g_FieldingLogic._0E2 = -1;
+    g_FieldingLogic._0B0 = -1;
+    g_FieldingLogic._0B2 = -1;
+    g_FieldingLogic._0B4 = -1;
+    g_FieldingLogic._12C = 0;
+    g_FieldingLogic._140 = 0;
+    g_FieldingLogic._142 = 0;
+    g_FieldingLogic._109 = 0;
+    g_Batter.invisibleBallForPeachStarHit = 0;
+    g_Minigame._19C6 = f->_20D;
+    if (g_FieldingLogic._143 == 1) {
+        g_FieldingLogic._143 = 2;
+    }
+    if (g_Ball.currentStarSwing) {
+        g_Ball.currentStarSwing = 0;
+    }
+    if (lbl_800E8558[f->_17A][2] == 0x19) {
+        fn_3_16696C();
+    }
+    fn_3_8FF5C(0x16C, g_Ball.AtBat_Contact_BallPos.x, g_Ball.AtBat_Contact_BallPos.y, g_Ball.AtBat_Contact_BallPos.z);
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+        playStadiumSound(g_d_GameSettings.StadiumID, 22);
+    }
 }
 
 // .text:0x00026664 size:0x410 mapped:0x806656F8
