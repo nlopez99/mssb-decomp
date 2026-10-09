@@ -2,6 +2,8 @@
 #include "header_rep_data.h"
 #include "menus/rep_08E8.h"
 #include "static/UnknownHomes_Static.h"
+#include "menus/rep_0F60.h"
+#include "C3/control.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/vec.h"
 #include "musyx/musyx.h"
@@ -137,7 +139,9 @@ extern struct {
     /* 0x1972B8 */ u8 _1972B8;
     /* 0x1972B9 */ u8 _1972B9[0x19769C - 0x1972B9];
     /* 0x19769C */ s32 _19769C;
-    /* 0x1976A0 */ u8 _1976A0[0x19776E - 0x1976A0];
+    /* 0x1976A0 */ u8 _1976A0[0x197746 - 0x1976A0];
+    /* 0x197746 */ s16 _197746;
+    /* 0x197748 */ u8 _197748[0x19776E - 0x197748];
     /* 0x19776E */ s16 _19776E;
     /* 0x197770 */ s16 _197770;
     /* 0x197772 */ s16 _197772;
@@ -188,7 +192,8 @@ typedef struct MenuPlayer08E8 {
     /* 0x018 */ s32 _018;
     /* 0x01C */ s32 _01C;
     /* 0x020 */ s32 _020;
-    /* 0x024 */ u8 _024[0x34 - 0x24];
+    /* 0x024 */ u8 _024[0x30 - 0x24];
+    /* 0x030 */ struct MenuPose08E8* _030;
     /* 0x034 */ f32 _034;
     /* 0x038 */ f32 _038;
     /* 0x03C */ f32 _03C;
@@ -199,12 +204,10 @@ typedef struct MenuPlayer08E8 {
     /* 0x255 */ s8 _255;
     /* 0x256 */ u8 _256;
     /* 0x257 */ s8 _257;
-    /* 0x258 */ u8 _258[0x27C - 0x258];
+    /* 0x258 */ u8 _258[0x25D - 0x258];
+    /* 0x25D */ u8 _25D;
+    /* 0x25E */ u8 _25E[0x27C - 0x25E];
 } MenuPlayer08E8; // size: 0x27C
-
-typedef struct MenuModelList08E8 {
-    /* 0x0 */ u16 _00;
-} MenuModelList08E8;
 
 typedef struct MenuActor08E8 {
     /* 0x00 */ u8 _00[0x98];
@@ -216,7 +219,7 @@ typedef struct MenuActorRef08E8 {
     /* 0x04 */ void* _04;
     /* 0x08 */ u8 _08[0xE - 0x8];
     /* 0x0E */ u16 _0E;
-    /* 0x10 */ u8 _10[0x54 - 0x10];
+    /* 0x10 */ Control _10;
     /* 0x54 */ f32 _54;
     /* 0x58 */ u8 _58;
     /* 0x59 */ u8 _59;
@@ -227,7 +230,43 @@ typedef struct MenuActorRef08E8 {
     /* 0x64 */ u8 _64[0x68 - 0x64];
     /* 0x68 */ void* _68;
     /* 0x6C */ u8 _6C;
-} MenuActorRef08E8;
+    /* 0x6D */ u8 _6D[0x90 - 0x6D];
+} MenuActorRef08E8; // size: 0x90
+
+typedef struct MenuModelList08E8 {
+    /* 0x00 */ u16 _00;
+    /* 0x02 */ u8 _02[0x34 - 0x2];
+    /* 0x34 */ MenuActorRef08E8 _34[1];
+} MenuModelList08E8;
+
+typedef struct MenuAnimState08E8 {
+    /* 0x00 */ f32 _00;
+    /* 0x04 */ f32 _04;
+    /* 0x08 */ u8 _08[0x11 - 0x8];
+    /* 0x11 */ u8 _11_7 : 1;
+    /* 0x11 */ u8 _11_0 : 7;
+    /* 0x12 */ u8 _12[0x20 - 0x12];
+} MenuAnimState08E8; // size: 0x20
+
+typedef struct MenuPoseBlock08E8 {
+    /* 0x00 */ void* _00;
+    /* 0x04 */ u8 _04[0xC - 0x4];
+    /* 0x0C */ MenuAnimState08E8 _0C;
+    /* 0x2C */ u32 _2C;
+    /* 0x30 */ u8 _30[0x5C - 0x30];
+} MenuPoseBlock08E8; // size: 0x5C
+
+typedef struct MenuPose08E8 {
+    /* 0x00 */ u8* _00;
+    /* 0x04 */ MenuPoseBlock08E8 _04;
+    /* 0x60 */ u8 _60;
+    /* 0x61 */ u8 _61[0x64 - 0x61];
+    /* 0x64 */ u8* _64;
+    /* 0x68 */ MenuPoseBlock08E8 _68;
+    /* 0xC4 */ u8 _C4;
+    /* 0xC5 */ u8 _C5[0xCC - 0xC5];
+    /* 0xCC */ u8 _CC;
+} MenuPose08E8;
 
 typedef struct MenuFielder08E8 {
     /* 0x000 */ u8 _000[0x34];
@@ -253,7 +292,7 @@ extern struct {
     /* 0x0064 */ u8 _0064[0xAC - 0x64];
     /* 0x00AC */ LITObj* _00AC[4];
     /* 0x00BC */ u8 _00BC[0x13C - 0xBC];
-    /* 0x013C */ void* _013C;
+    /* 0x013C */ MenuModelList08E8* _013C;
     /* 0x0140 */ u8 _0140[0xC04 - 0x140];
     /* 0x0C04 */ MenuPlayer08E8 _0C04[4];
     /* 0x15F4 */ u8 _15F4[0x2C50 - 0x15F4];
@@ -397,6 +436,8 @@ extern void fn_800B4AFC(MenuActor08E8* actor, u8 flag);
 extern void Set_FUN_800b2b6c(MenuActor08E8* actor, void* arg1);
 extern void fn_800BDA24(MenuActorRef08E8* ref);
 extern u8 fn_800B3C04(s32 arg0, MenuActor08E8* actor, Mtx mtx);
+extern void fn_80024DB0(MenuAnimState08E8* anim);
+extern void fn_80024FA4(MenuActorRef08E8* model, u32 animId, MenuAnimState08E8* anim, s32 arg3);
 
 // rep_0B08
 extern void fn_2_6A87C(void);
@@ -658,6 +699,16 @@ void fn_2_4D67C(void) {
     fn_2_45E48();
 }
 
+// .text:0x0004D378 size:0x304
+void fn_2_4D378(void) {
+    lbl_2_bss_1A824C->_197843 = -1;
+    lbl_2_bss_1A8248->_441E = lbl_2_bss_1A8248->_40EE[lbl_2_bss_1A8248->_16C2]._5;
+    lbl_2_bss_1A8248->_441F = lbl_803CB8F0[lbl_2_bss_1A8248->_441E];
+    fn_2_4C3EC();
+    fn_2_45FDC();
+    fn_2_45E48();
+}
+
 // .text:0x0004D194 size:0x1E4
 // The target loads lbl_2_bss_1A8248 with addi/lwz 0 into r3 at entry; this
 // build loads it with lwz sym@l into r5.
@@ -796,6 +847,8 @@ void fn_2_4C3EC(void) {
     s32 j;
     s32 teams[6];
     u8* seen = lbl_80361C18;
+    u8 id;
+    MenuCharacter08E8* c;
 
     for (i = 0; i < 6; i++) {
         teams[i] = 0;
@@ -806,12 +859,14 @@ void fn_2_4C3EC(void) {
     for (i = 0; i < 6; i++) {
         if (teams[i] != 0) {
             for (j = 0; j < 9; j++) {
-                seen[lbl_8034E9A0._4380[i][j]] = 1;
+                id = lbl_8034E9A0._4380[i][j];
+                seen[id] = 1;
             }
         }
     }
     for (i = 0; i < 0x36; i++) {
-        if (fn_2_44F34(i) && ((MenuCharacter08E8*)lbl_2_bss_1A8248)[i]._31 == 1) {
+        c = &((MenuCharacter08E8*)lbl_2_bss_1A8248)[i];
+        if (c->_05 <= 3 && c->_31 == 1) {
             seen[i] = 1;
         }
     }
@@ -1374,6 +1429,76 @@ void fn_2_47FF8(void) {
     fn_80052968();
 }
 
+static inline void fn_2_47CFC_startAnim(MenuAnimState08E8* anim, f32 speed) {
+    if (anim != NULL) {
+        anim->_04 = speed;
+    }
+    if (anim != NULL) {
+        anim->_11_7 = 1;
+    }
+    fn_80024DB0(anim);
+}
+
+static inline void fn_2_47CFC_startPose(MenuPoseBlock08E8* block, MenuActorRef08E8* model) {
+    MenuAnimState08E8* anim = &block->_0C;
+
+    if (anim != NULL) {
+        anim->_04 = 0.5f;
+    }
+    if (anim != NULL) {
+        anim->_11_7 = 1;
+    }
+    fn_80024DB0(anim);
+    fn_80024FA4(model, block->_2C, &block->_0C, -1);
+}
+
+// .text:0x00047CFC size:0x2FC
+void fn_2_47CFC(void) {
+    Mtx44 proj;
+    Vec scale;
+    MenuActorRef08E8* ref;
+    MenuPlayer08E8* player;
+    MenuPose08E8* pose;
+    MenuPoseBlock08E8* block;
+    s32 i;
+
+    C_MTXFrustum(proj, -0.175f, 0.175f, 0.25f, -0.25f, 1.0f, 512.0f);
+    GXSetProjection(proj, GX_PERSPECTIVE);
+    fn_2_8D024();
+    for (i = 0; i < lbl_2_bss_1A824C->_197746; i++) {
+        player = &lbl_8036E548._0C04[i];
+        ref = &lbl_8036E548._0060->_34[i];
+        ref->_6C = player->_25D & 1;
+        CTRLSetTranslation(&ref->_10, lbl_8036E548._0C04[i]._034, lbl_8036E548._0C04[i]._038,
+                           lbl_8036E548._0C04[i]._03C);
+        CTRLSetRotation(&ref->_10, 57.295776f * player->_040, 57.295776f * player->_044,
+                        57.295776f * player->_048);
+        if (lbl_2_bss_1A824C->_197848[0] == 0) {
+            memcpy(&scale, &lbl_2_data_12EA8, sizeof(Vec));
+            if (lbl_2_bss_1A8248->_441C == 5 && i == 0) {
+                PSVECScale(&scale, 0.8f, &scale);
+                CTRLSetScale(&ref->_10, scale.x, scale.y, scale.z);
+            } else {
+                CTRLSetScale(&ref->_10, scale.x, scale.y, scale.z);
+            }
+        } else {
+            memcpy(&scale, &lbl_2_data_12EB4, sizeof(Vec));
+            CTRLSetScale(&ref->_10, scale.x, scale.y, scale.z);
+        }
+        ref->_54 = 0.5f;
+        ref->_5A = 1;
+        pose = player->_030;
+        if (pose != NULL) {
+            block = &pose->_04;
+            if (block->_00 != NULL && pose->_68._00 != NULL && pose->_CC != 0) {
+                fn_2_47CFC_startPose(block, &lbl_8036E548._013C->_34[pose->_60]);
+                fn_2_47CFC_startPose(&player->_030->_68, &lbl_8036E548._013C->_34[player->_030->_C4]);
+            }
+        }
+    }
+    fn_2_47B24(lbl_8036E548._0060);
+}
+
 // .text:0x00047B24 size:0x1D8
 void fn_2_47B24(MenuModelList08E8* list) {
     Mtx m;
@@ -1818,8 +1943,8 @@ void fn_2_460EC(s32 arg0) {
 
 // .text:0x00045FDC size:0x110
 void fn_2_45FDC(void) {
-    s32 i;
     MenuCharacter08E8* c;
+    s32 i;
 
     for (i = 0; i < 0x36; i++) {
         c = &((MenuCharacter08E8*)lbl_2_bss_1A8248)[i];
