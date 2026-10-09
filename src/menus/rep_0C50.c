@@ -295,13 +295,14 @@ void fn_2_82CF0(void) {
 }
 
 // .text:0x0008279C size:0x554
-// 99.55%: registers only: flag and the _46F8 load in the first loop, the second
-// starMissionCompletionTracker read, and the add operands of the unrolled clearing loop.
+// 99.57%: registers only: flag and the _46F8 load in the first loop, and the add operands
+// of the unrolled clearing loop (reading task->_14 there through an inline accessor fixes them).
 void fn_2_8279C(void) {
     UnkTask0C50* task = lbl_803CC1B8;
     s8 off;
     s32 value;
     s32 a;
+    s16 b;
     u8 c;
     s32 i;
     int j;
@@ -342,11 +343,11 @@ void fn_2_8279C(void) {
     }
     if (g_d_GameSettings.GameModeSelected == 5) {
         lbl_80371C30[task->_14 + 0x98]._00->_54 &= ~2;
-        a = (s16)starMissionCompletionTracker._441D;
+        a = b = starMissionCompletionTracker._441D;
         c = lbl_8034E9A0._0020[a / 9][a % 9]._14;
         fn_800363D8(task, 0x89, 1, 3, lbl_2_data_2B3A4[c]);
         fn_800363D8(task, 0x8B, 1, 3, lbl_2_data_2B3A4[c]);
-        a = starMissionCompletionTracker._441F;
+        a = b = starMissionCompletionTracker._441F;
         c = lbl_8034E9A0._0020[a / 9][a % 9]._14;
         fn_800363D8(task, 0x8A, 1, 3, lbl_2_data_2B3A4[c]);
         fn_800363D8(task, 0x8C, 1, 3, lbl_2_data_2B3A4[c]);
@@ -3617,17 +3618,13 @@ void fn_2_7308C(void) {
 }
 
 // .text:0x0007302C size:0x60
-// 58.54%: the base counts the search loop with mtctr/bdnz; the target compares the counter
-// on every pass. int/s32 counters, break or return, and local bounds did not change it.
 s32 fn_2_7302C(void) {
     s32 i;
-    u8* p = lbl_800FE930[lbl_80361B20._F4];
 
-    for (i = 0; i < (lbl_80361B20._F4 != 0) + 5; i++) {
-        if (lbl_8034E9A0._46E0[0] == *p) {
+    for (i = 0; i < (lbl_80361B20._F4 ? 6 : 5); i++) {
+        if (lbl_8034E9A0._46E0[0] == lbl_800FE930[lbl_80361B20._F4][i]) {
             return i;
         }
-        p++;
     }
     return i;
 }
