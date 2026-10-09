@@ -825,7 +825,7 @@ config.libs = [
             Object(NonMatching, "menus/rep_0DE0.c"),
             Object(NonMatching, "menus/rep_0F10.c"),
             Object(NonMatching, "menus/rep_0F60.c"),
-            Object(NonMatching, "menus/rep_0FD8.c"),
+            Object(Matching, "menus/rep_0FD8.c"),
             Object(NonMatching, "menus/rep_1028.c"),
             Object(NonMatching, "menus/rep_10C0.c"),
             Object(Matching, "menus/rep_11C0.c"),
