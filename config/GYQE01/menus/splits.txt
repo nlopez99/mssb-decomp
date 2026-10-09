@@ -177,13 +177,15 @@ menus/rep_0D90.c:
 	.rodata     start:0x00000D90 end:0x00000DE0
 
 menus/rep_0DE0.c:
-	.text       start:0x0008563C end:0x0008AC84
+	.text       start:0x0008563C end:0x00087998
 	.rodata     start:0x00000DE0 end:0x00000F10
-	.data       start:0x0002E608 end:0x0002F990
+	.data       start:0x0002E608 end:0x0002E9F8
 	.bss        start:0x0000B298 end:0x0000B2B8
 
 menus/rep_0F10.c:
+	.text       start:0x00087998 end:0x0008AC84
 	.rodata     start:0x00000F10 end:0x00000F60
+	.data       start:0x0002E9F8 end:0x0002F990
 
 menus/rep_0F60.c:
 	.text       start:0x0008ACDC end:0x0008ED4C
