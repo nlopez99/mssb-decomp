@@ -345,15 +345,9 @@ static u8 static_clamp(int v, int min, int max) {
 }
 
 // .text:0x0009EEB8 size:0xF4 mapped:0x806DDF4C
-// The branch form of |max| is what RandomIndexFromWeights and fn_3_9E368 inline (both match);
-// this copy and the ones in fn_3_9E078 and RandomInt_Game_Range compute it branch-free (ABS) in the target.
 int RandomInt_Game(int max) {
     int ret;
-    int absmax = max;
-
-    if (max < 0) {
-        absmax = -max;
-    }
+    int absmax = ABS(max);
 
     if (absmax <= 1) {
         return 0;
@@ -461,6 +455,39 @@ void fn_3_9E7D4(int team) {
     }
 }
 
+// RandomInt_Game with |max| taken by a branch: the form RandomIndexFromWeights and fn_3_9E368 inline.
+static inline int RandomInt_Branch(int max) {
+    int ret;
+    int absmax = max;
+
+    if (max < 0) {
+        absmax = -max;
+    }
+
+    if (absmax <= 1) {
+        return 0;
+    }
+
+    g_Ball.StaticRandomInt1 = g_Ball.StaticRandomInt1 - ((u8)g_Ball.StaticRandomInt2) +
+                              g_Ball.StaticRandomInt2 / absmax + g_Ball.totalFramesAtPlay;
+
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_PRACTICE && g_Practice.instructionNumber >= 0) {
+        return 0;
+    }
+
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES) {
+        g_Ball.StaticRandomInt1 += rand();
+    }
+
+    ret = g_Ball.StaticRandomInt1 % absmax;
+    ret = ABS(ret);
+    if (max < 0) {
+        return -ret;
+    } else {
+        return ret;
+    }
+}
+
 // .text:0x0009E5A0 size:0x234 mapped:0x806DD634
 int RandomIndexFromWeights(u8* weights, int count) {
     int local[10];
@@ -472,7 +499,7 @@ int RandomIndexFromWeights(u8* weights, int count) {
         local[i] = weights[i];
         total += local[i];
     }
-    r = RandomInt_Game(total);
+    r = RandomInt_Branch(total);
     for (i = 0; i < count; i++) {
         if (r < local[i]) {
             return i;
@@ -493,7 +520,7 @@ int fn_3_9E368(int* weights, int count) {
         local[i] = weights[i];
         total += local[i];
     }
-    r = RandomInt_Game(total);
+    r = RandomInt_Branch(total);
     for (i = 0; i < count; i++) {
         if (r < local[i]) {
             return i;
@@ -504,8 +531,8 @@ int fn_3_9E368(int* weights, int count) {
 }
 
 // .text:0x0009E078 size:0x2F0 mapped:0x806DD10C
-// The target's inlined random helpers take |n| branch-free (srawi/xor) and keep n in its own
-// register; here they branch, and the copy loop allocates differently.
+// The target's inlined random helpers compute i + 1 in each branch and keep a copy of it for
+// the sign test, where this hoists n; the copy loop also allocates differently.
 void fn_3_9E078(int* order, int count, BOOL useGameRandom) {
     int src[20];
     int used[20];
