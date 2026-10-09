@@ -362,7 +362,7 @@ extern void convertGeometryAndSknHeader(void* geo, void* skn);
 extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);
 extern void fn_800BD190(void* geo, void* tex);
 extern void ANIMGet(void* bank);
-extern void fn_8002399C(ActorRef0568* ref, s32 arg1, s32 arg2, void* layout, void* anim, void* skn);
+extern void fn_8002399C(ActorRef0568* ref, int arg1, int arg2, void* layout, void* anim, void* skn);
 extern void fn_800BD548(void* model, s32 count, ...);
 extern void fn_800B2C08(Actor0568* actor, u16 id);
 extern void fn_8001FC4C(Player0568* player);
@@ -1157,6 +1157,8 @@ void fn_2_16F78(u8 index) {
     s32 second;
     Pose0568* pose;
     Vec* pos;
+    void* animA;
+    void* animB;
     ActorRef0568* elem;
 
     player->_255 = index;
@@ -1267,10 +1269,14 @@ void fn_2_16F78(u8 index) {
     }
     fn_8001D180(index, first, 1);
     fn_8001D180(index, second, 1);
-    if (player->_008[13] != 0 && player->_008[14] != 0) {
-        fn_80025DDC((void*)player->_008[13]);
-        fn_80014990(index, (void*)player->_008[13], (void*)player->_008[14]);
-        fn_80025C58((void*)player->_008[13], ref);
+    animA = (void*)player->_008[13];
+    if (animA != NULL) {
+        animB = (void*)player->_008[14];
+        if (animB != NULL) {
+            fn_80025DDC(animA);
+            fn_80014990(index, animA, animB);
+            fn_80025C58(animA, ref);
+        }
     }
     player->_030->_CC = 1;
     player->_030->_68._10 = 0.5f;
