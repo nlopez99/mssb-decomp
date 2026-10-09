@@ -19,6 +19,7 @@ void fn_2_16D38(void);
 void fn_2_16DA8(void);
 void fn_2_16F0C(u8 index);
 void fn_2_16F78(u8 index);
+void fn_2_17648(void);
 void fn_2_17AB8(void);
 void fn_2_17C88(void);
 void fn_2_17ED8(void);

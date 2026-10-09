@@ -46,17 +46,21 @@ typedef struct PoseBlock0568 {
 
 // One pose block per player in lbl_8036E548
 typedef struct Pose0568 {
-    /* 0x00 */ u8 _00[0x4];
+    /* 0x00 */ u8* _00;
     /* 0x04 */ PoseBlock0568 _04;
-    /* 0x60 */ u8 _60[0x68 - 0x60];
+    /* 0x60 */ s8 _60;
+    /* 0x61 */ u8 _61[0x64 - 0x61];
+    /* 0x64 */ u8* _64;
     /* 0x68 */ PoseBlock0568 _68;
-    /* 0xC4 */ u8 _C4[0xCC - 0xC4];
+    /* 0xC4 */ s8 _C4;
+    /* 0xC5 */ u8 _C5[0xC8 - 0xC5];
+    /* 0xC8 */ s32 _C8;
     /* 0xCC */ u8 _CC;
     /* 0xCD */ u8 _CD;
     /* 0xCE */ u8 _CE;
-    /* 0xCF */ u8 _CF;
+    /* 0xCF */ s8 _CF;
     /* 0xD0 */ s8 _D0;
-    /* 0xD1 */ u8 _D1;
+    /* 0xD1 */ s8 _D1;
     /* 0xD2 */ u8 _D2[0xD4 - 0xD2];
 } Pose0568; // size: 0xD4
 
@@ -154,6 +158,8 @@ extern struct {
     /* 0x46F8 */ s8 _46F8[2];
     /* 0x46FA */ u8 _46FA[0x4701 - 0x46FA];
     /* 0x4701 */ u8 _4701;
+    /* 0x4702 */ u8 _4702[0x4755 - 0x4702];
+    /* 0x4755 */ u8 _4755;
 } lbl_8034E9A0;
 
 extern struct {
@@ -220,7 +226,10 @@ extern struct {
     /* 0x00 */ u8 _00[0x8];
     /* 0x08 */ s32 _08;
     /* 0x0C */ s32 _0C;
-    /* 0x10 */ s32 _10[4];
+    /* 0x10 */ s32 _10[2];
+    /* 0x18 */ s32 _18[4];
+    /* 0x28 */ u8 _28[0x30 - 0x28];
+    /* 0x30 */ s32 _30[2];
 } lbl_2_bss_F410;
 
 extern struct {
@@ -251,6 +260,7 @@ extern struct {
 } lbl_2_data_2780;
 
 extern u8* lbl_2_bss_122C;
+extern u8* lbl_2_bss_1228;
 
 extern u8 lbl_2_data_2794[];
 
@@ -259,6 +269,7 @@ typedef struct AramEntry0568 {
 } AramEntry0568; // size: 0x10
 
 extern AramEntry0568 lbl_2_data_241C[54];
+extern AramEntry0568* lbl_2_data_277C;
 
 extern struct {
     /* 0x000 */ u8 _000[0x715];
@@ -667,6 +678,77 @@ s32 fn_2_18650(s32 index) {
     return 0;
 }
 
+// .text:0x00018398 size:0x2B8
+void fn_2_18398(void) {
+    Task0568* task = lbl_803CC1B8;
+    s8 id;
+    s32 idx;
+    u8 mode;
+    u8 type;
+
+    switch (task->_1D) {
+    case 0:
+        id = lbl_2_bss_100B8._02[lbl_2_bss_100B8._01];
+        if (id == -1) {
+            lbl_2_bss_100B8._18 = 0;
+            lbl_2_bss_100B8._1B = 1;
+            lbl_2_bss_100B8._1A = 0;
+            lbl_2_bss_100B8._32 = 0;
+            lbl_2_bss_1224 = NULL;
+            fn_800B0A14_removeQueue();
+            break;
+        }
+        task->_1E = id;
+        lbl_2_bss_100B8._02[lbl_2_bss_100B8._01] = -1;
+        lbl_2_bss_100B8._01 = (lbl_2_bss_100B8._01 + 1) % 10;
+        lbl_2_bss_100B8._1A = 1;
+        lbl_2_bss_100B8._1B = 0;
+        lbl_2_bss_100B8._27[task->_1E] = task->_1E;
+        task->_1D = 1;
+        task->_10 = 0;
+        mode = g_d_GameSettings.GameModeSelected;
+        type = lbl_8034E9A0._4755;
+        if (type == 0) {
+            if (mode == 5) {
+                task->_18[task->_1E] = lbl_800FE930[lbl_80361B20._F4][lbl_2_bss_F410._10[(u8)task->_1E]];
+            } else {
+                task->_18[task->_1E] = lbl_800FE5D4[lbl_2_bss_F410._10[(u8)task->_1E]];
+            }
+            if (task->_1E == 2) {
+                task->_1E = 0;
+            }
+        } else if (type == 1) {
+            idx = task->_1E;
+            switch (idx) {
+            case 0:
+            case 1:
+                task->_18[idx] = inMemRoster[idx][lbl_2_bss_F410._30[idx] - (idx * 11 + 2)].stats.CharID;
+                break;
+            case 2:
+            case 3:
+                task->_18[idx] = lbl_2_bss_F410._18[idx];
+                break;
+            }
+        }
+    case 1:
+        fn_2_18148(task);
+        if (lbl_2_bss_100B4[0] != 0 && lbl_2_bss_100B4[1] == 0) {
+            lbl_2_bss_100B8._18 = 0;
+            lbl_2_bss_100B8._1B = 1;
+            lbl_2_bss_100B8._1A = 0;
+            lbl_2_bss_100B8._32 = 0;
+            lbl_2_bss_1224 = NULL;
+            task->_1D = 0;
+            fn_800B0A14_removeQueue();
+        } else if (lbl_2_bss_100B8._18 != 0) {
+            lbl_2_bss_100B8._18 = 0;
+            lbl_2_bss_100B8._1A = 0;
+            task->_1D = 0;
+        }
+        break;
+    }
+}
+
 // .text:0x00018148 size:0x250
 void fn_2_18148(Task0568* task) {
     switch (task->_21) {
@@ -750,6 +832,46 @@ void fn_2_17AB8(void) {
         lbl_2_bss_101AC[i]._00 = lbl_2_bss_122C + size * i;
         lbl_2_bss_101AC[i]._61 = -1;
         lbl_2_bss_101AC[i]._60 = -1;
+    }
+}
+
+// .text:0x00017648 size:0x470
+void fn_2_17648(void) {
+    s32 i;
+    s32 j;
+    s32 k;
+    u32 max = 0;
+    u32 size;
+
+    for (i = 0; i < 12; i++) {
+        for (j = 0; j < 9; j++) {
+            if (i * 9 + j == 53 || j != 0) {
+                goto done;
+            }
+            for (k = 0; k < 6; k++) {
+                size = lbl_2_data_277C[lbl_8034E9A0._0000[i][j].CharID + k]._0[1] & 0x0FFFFFFF;
+                if (max < size) {
+                    max = size;
+                }
+            }
+        }
+    }
+done:
+    size = (max + 0x1F) & ~0x1F;
+    lbl_2_bss_1228 = _OSAllocFromHeap(0x20, size * lbl_2_bss_100B8._2D * 2);
+    for (i = 0; i < lbl_2_bss_100B8._2D; i++) {
+        lbl_8036E548._0140[i]._00 = lbl_2_bss_1228 + size * (i * 2);
+        lbl_8036E548._0140[i]._64 = lbl_2_bss_1228 + size * (i * 2 + 1);
+    }
+    for (i = 0; i < lbl_2_bss_100B8._2D; i++) {
+        lbl_8036E548._0140[i]._CF = -1;
+        lbl_8036E548._0140[i]._D1 = -1;
+        lbl_8036E548._0140[i]._D0 = -1;
+        lbl_8036E548._0140[i]._CD = 0xFF;
+        lbl_8036E548._0140[i]._C8 = 0;
+        lbl_8036E548._0140[i]._CC = 0;
+        lbl_8036E548._0140[i]._60 = i * 2;
+        lbl_8036E548._0140[i]._C4 = i * 2 + 1;
     }
 }
 
