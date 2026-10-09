@@ -42,10 +42,6 @@ extern struct {
 } lbl_80366B18;
 
 extern u16 lbl_2_data_1F3A0[8];
-extern u16 lbl_2_bss_9600[2];
-extern u16 lbl_2_bss_9608[2][0x100];
-extern u16 lbl_2_bss_9604[2];
-extern u16 lbl_2_bss_9A08[2][0x100];
 
 typedef struct MenuTask09B8 {
     /* 0x00 */ u8 _00[0xC];
@@ -57,8 +53,24 @@ typedef struct MenuTask09B8 {
 
 extern void* lbl_803CC1B8;
 extern u8* lbl_2_data_1E99C[];
-extern u8 lbl_2_bss_5600[0x4000];
 extern void fn_800B0A14_removeQueue(void);
+extern u16 lbl_2_data_1F3B0[];
+extern u16* lbl_2_data_1F3E0[2];
+extern u16* lbl_2_data_1F3E8[2];
+
+static u16 lbl_2_bss_9A08[2][0x100];
+static u16 lbl_2_bss_9608[2][0x100];
+static u16 lbl_2_bss_9604[2];
+u16 lbl_2_bss_9600[2];
+u8 lbl_2_bss_5600[0x4000];
+static u16* lbl_2_bss_55F8[2];
+static u16* lbl_2_bss_55F0[2];
+static u16* lbl_2_bss_55E8[2];
+
+typedef struct MenuItem09B8 {
+    /* 0x00 */ u8 _00[0x10];
+    /* 0x10 */ u16 _10;
+} MenuItem09B8;
 
 extern void* fn_800B0A5C_insertQueue(void (*)(void), s32);
 
@@ -120,6 +132,15 @@ void fn_2_513E0(void) {
 
 // .text:0x000513DC size:0x4
 void fn_2_513DC(void) {
+}
+
+// .text:0x0005135C size:0x80
+void fn_2_5135C(MenuItem09B8* item, s32 k) {
+    if (item->_10 % lbl_2_data_1F3B0[k] == 1) {
+        lbl_2_bss_55F0[k] = lbl_2_data_1F3E0[k];
+        lbl_2_bss_55E8[k] = lbl_2_data_1F3E8[k];
+        lbl_2_bss_55F8[k] = lbl_2_bss_1A824C->_1954AC[k];
+    }
 }
 
 // .text:0x00051358 size:0x4
@@ -246,6 +267,25 @@ void fn_2_50DB4(s32 idx, s32 sel, u16* p) {
         lbl_2_bss_9608[idx][lbl_2_bss_9600[idx]] = c;
         lbl_2_bss_9600[idx]++;
         if (lbl_2_bss_9600[idx] == 0x100) {
+            return;
+        }
+    } while (!(c & 0x4000) || (c & 0x3FFF));
+}
+
+// .text:0x00050D40 size:0x74
+void fn_2_50D40(s32 idx) {
+    u16* src;
+    u16 c;
+
+    if (lbl_2_bss_9604[idx] != 0) {
+        lbl_2_bss_9604[idx]--;
+    }
+    src = lbl_2_bss_9608[idx];
+    do {
+        c = *src++;
+        lbl_2_bss_9A08[idx][lbl_2_bss_9604[idx]] = c;
+        lbl_2_bss_9604[idx]++;
+        if (lbl_2_bss_9604[idx] == 0x100) {
             return;
         }
     } while (!(c & 0x4000) || (c & 0x3FFF));

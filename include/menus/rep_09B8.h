@@ -3,12 +3,15 @@
 
 #include "mssbTypes.h"
 
+struct MenuItem09B8;
+
 s16 fn_2_4EB9C(void);
 void fn_2_50898(s32 arg0);
 void fn_2_509A4(void);
 void fn_2_50B0C(s16 arg0, s16 arg1);
 void fn_2_50BF4(s16 arg0);
 void fn_2_50CC0(s32 arg0);
+void fn_2_50D40(s32 idx);
 void fn_2_50DB4(s32 idx, s32 sel, u16* p);
 void fn_2_50E5C(s32 idx);
 void fn_2_50F20(s32 idx, s32 sel, u16* p);
@@ -20,6 +23,7 @@ void fn_2_512B4(void);
 s32 fn_2_512B8(void);
 void fn_2_512C0(s32 idx);
 void fn_2_51358(void);
+void fn_2_5135C(struct MenuItem09B8* item, s32 k);
 void fn_2_513DC(void);
 void fn_2_513E0(void);
 void fn_2_513E4(void);
