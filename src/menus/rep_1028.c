@@ -164,7 +164,7 @@ extern Spot1028 lbl_2_data_3198[];
 extern Spot1028 lbl_2_data_369C[];
 extern s32 lbl_2_data_38BC[];
 
-// Outside this unit's ranges: lbl_2_data_30900 lumps this table with the next unit's data.
+// Read only by this unit, but past the end of its .data range in splits.txt (0x30900).
 extern Item1028IndexFn lbl_2_data_30900[6];
 
 extern void fn_800BD2CC(s32 arg0, GXColor color);
