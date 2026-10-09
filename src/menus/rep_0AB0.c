@@ -64,6 +64,15 @@ typedef struct AramEntry0AB0 {
     /* 0x0 */ u32 _0[4];
 } AramEntry0AB0; // size: 0x10
 
+typedef struct Unk1A8240Entry {
+    /* 0x00 */ s16 _00[6];
+    /* 0x0C */ u8 _0C[6];
+    /* 0x12 */ u8 _12;
+    /* 0x13 */ u8 _13;
+    /* 0x14 */ u8 _14;
+    /* 0x15 */ u8 _15;
+} Unk1A8240Entry; // size: 0x16
+
 extern void* lbl_803CC1B8;
 extern MenuSpriteRef0AB0 lbl_80371C30[];
 // BEGIN STRUCTS
@@ -84,12 +93,20 @@ extern struct {
     /* 0x1972BC */ u8 _1972BC;
     /* 0x1972BD */ u8 _1972BD[0x1972C0 - 0x1972BD];
     /* 0x1972C0 */ u8 _1972C0;
-    /* 0x1972C1 */ u8 _1972C1[0x197416 - 0x1972C1];
+    /* 0x1972C1 */ u8 _1972C1[0x1972EC - 0x1972C1];
+    /* 0x1972EC */ s32 _1972EC[7][5][2];
+    /* 0x197404 */ u8 _197404[0x197416 - 0x197404];
     /* 0x197416 */ u8 _197416;
     /* 0x197417 */ u8 _197417[0x197418 - 0x197417];
     /* 0x197418 */ u8 _197418;
     /* 0x197419 */ u8 _197419[0x197430 - 0x197419];
     /* 0x197430 */ s16 _197430[8];
+    /* 0x197440 */ u8 _197440[0x1976FA - 0x197440];
+    /* 0x1976FA */ s16 _1976FA;
+    /* 0x1976FC */ u8 _1976FC[0x1976FE - 0x1976FC];
+    /* 0x1976FE */ s16 _1976FE;
+    /* 0x197700 */ u8 _197700[0x197730 - 0x197700];
+    /* 0x197730 */ s16 _197730;
 } *lbl_2_bss_1A824C;
 
 extern struct {
@@ -106,7 +123,8 @@ extern struct {
 } lbl_803C6CF8;
 
 extern struct {
-    /* 0x000 */ u8 _000[0x400 - 0x000];
+    /* 0x000 */ u8 _000[0x140 - 0x000];
+    /* 0x140 */ Unk1A8240Entry _140[32];
     /* 0x400 */ s8 _400[16];
 } *lbl_2_bss_1A8240;
 
@@ -1765,6 +1783,96 @@ void fn_2_67B94(MenuTask0AB0* task, MenuItem0AB0* item) {
     }
 }
 
+// .text:0x00067588 size:0x1F8
+void fn_2_67588(MenuTask0AB0* task, MenuItem0AB0* item) {
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 2:
+        if (lbl_2_bss_1A824C->_197730 == 2 || lbl_2_bss_1A824C->_197730 == 5) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        } else {
+            lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        }
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
+        item->_04 = 0x25;
+        break;
+    case 8:
+    case 0x1E:
+    case 0x21:
+        item->_06 = 1;
+        item->_04++;
+        break;
+    case 9:
+    case 0x1F:
+    case 0x22:
+        if (item->_06-- <= 0) {
+            if (lbl_2_bss_1A824C->_197730 == 2 || lbl_2_bss_1A824C->_197730 == 5) {
+                lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+            } else {
+                lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+            }
+            item->_04 = 0x25;
+        }
+        break;
+    case 1:
+    case 0x25:
+        break;
+    }
+}
+
+// .text:0x00067390 size:0x1F8
+void fn_2_67390(MenuTask0AB0* task, MenuItem0AB0* item) {
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 2:
+        if (lbl_2_bss_1A824C->_197730 == 2 || lbl_2_bss_1A824C->_197730 == 5) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        } else {
+            lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        }
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
+        item->_04 = 0x25;
+        break;
+    case 8:
+    case 0x1E:
+    case 0x21:
+        item->_06 = 1;
+        item->_04++;
+        break;
+    case 9:
+    case 0x1F:
+    case 0x22:
+        if (item->_06-- <= 0) {
+            if (lbl_2_bss_1A824C->_197730 == 2 || lbl_2_bss_1A824C->_197730 == 5) {
+                lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+            } else {
+                lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+            }
+            item->_04 = 0x25;
+        }
+        break;
+    case 1:
+    case 0x25:
+        break;
+    }
+}
+
 // .text:0x000671DC size:0x1B4
 void fn_2_671DC(MenuTask0AB0* task, MenuItem0AB0* item) {
     s16 state = fn_2_53BC8(item);
@@ -1798,6 +1906,48 @@ void fn_2_671DC(MenuTask0AB0* task, MenuItem0AB0* item) {
         lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
         break;
     case 0x25:
+        break;
+    }
+}
+
+// .text:0x00066FC8 size:0x214
+void fn_2_66FC8(MenuTask0AB0* task, MenuItem0AB0* item) {
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 2:
+        fn_800363D8(task, item->_0E, 2, 0x3A, item->_0A);
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0;
+        item->_04 = 0x25;
+        break;
+    case 0x25:
+        if (lbl_2_bss_1A824C->_1976FE == item->_0A) {
+            if ((lbl_80371C30[task->_14 + item->_0E]._00->_5C >> 16) >= 5) {
+                lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0x50000;
+                lbl_80371C30[task->_14 + item->_0E]._00->_68 = 0;
+            } else {
+                lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
+            }
+        } else {
+            if ((lbl_80371C30[task->_14 + item->_0E]._00->_5C >> 16) == 0) {
+                lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0;
+                lbl_80371C30[task->_14 + item->_0E]._00->_68 = 0;
+            } else {
+                lbl_80371C30[task->_14 + item->_0E]._00->_68 = 4;
+            }
+        }
+        fn_800363D8(task, item->_0E, 2, 0x3A, item->_0A);
+        break;
+    case 1:
+    case 5:
         break;
     }
 }
@@ -1852,6 +2002,43 @@ void fn_2_66CC4(MenuTask0AB0* task, MenuItem0AB0* item) {
         item->_04 = 0x26;
         break;
     case 2:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        item->_04 = 0x25;
+        break;
+    case 5:
+        item->_06 = 0x28;
+        item->_04 = 6;
+        break;
+    case 6:
+        if (item->_06-- <= 0) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        }
+        break;
+    case 1:
+    case 0x25:
+        break;
+    }
+}
+
+// .text:0x00066AEC size:0x1D8
+void fn_2_66AEC(MenuTask0AB0* task, MenuItem0AB0* item) {
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 2:
+        fn_800363D8(task, item->_0E, 1, 0x43, item->_10);
+        if ((s32)lbl_2_bss_1A8240->_140[item->_10]._13 > 0) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0;
+        } else {
+            lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0x10000;
+        }
         lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
         item->_04 = 0x25;
         break;
@@ -2003,6 +2190,81 @@ void fn_2_66038(MenuTask0AB0* task, MenuItem0AB0* item) {
     }
 }
 
+// .text:0x00065E50 size:0x1E8
+void fn_2_65E50(MenuTask0AB0* task, MenuItem0AB0* item) {
+    struct Unk80354768* p = &lbl_80354768;
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 2:
+        fn_800363D8(task, item->_0E, 1, 0x43, item->_10);
+        if ((s32)p->_CF18[lbl_800E869C[item->_10]] == 1) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0;
+        } else {
+            lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0x10000;
+        }
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        item->_04 = 0x25;
+        break;
+    case 5:
+        item->_06 = 0x28;
+        item->_04 = 6;
+        break;
+    case 6:
+        if (item->_06-- <= 0) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        }
+        break;
+    case 1:
+    case 0x25:
+        break;
+    }
+}
+
+// .text:0x00065C84 size:0x1CC
+void fn_2_65C84(MenuTask0AB0* task, MenuItem0AB0* item) {
+    struct Unk80354768* p = &lbl_80354768;
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 2:
+        if ((s32)p->_CF18[lbl_800E869C[item->_10]] == 1) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+            lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0x30000;
+        } else {
+            lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        }
+        item->_04 = 0x25;
+        break;
+    case 5:
+        item->_06 = 0x28;
+        item->_04 = 6;
+        break;
+    case 6:
+        if (item->_06-- <= 0) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        }
+        break;
+    case 1:
+    case 0x25:
+        break;
+    }
+}
+
 // .text:0x00065850 size:0x1B0
 void fn_2_65850(MenuTask0AB0* task, MenuItem0AB0* item) {
     struct Unk80354768* p = &lbl_80354768;
@@ -2107,6 +2369,196 @@ void fn_2_650A4(MenuTask0AB0* task, MenuItem0AB0* item) {
     }
 }
 
+// .text:0x00064C50 size:0x1D0
+void fn_2_64C50(MenuTask0AB0* task, MenuItem0AB0* item) {
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 1:
+        break;
+    case 2:
+        lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0;
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
+        item->_04 = 0x25;
+        break;
+    case 5:
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 4;
+        item->_04 = 6;
+        break;
+    case 6:
+        if ((lbl_80371C30[task->_14 + item->_0E]._00->_5C >> 16) == 0) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_68 = 0;
+            item->_04 = 7;
+        }
+        break;
+    case 7:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        break;
+    case 0x25:
+        break;
+    }
+}
+
+// .text:0x000646FC size:0x1D0
+void fn_2_646FC(MenuTask0AB0* task, MenuItem0AB0* item) {
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 1:
+        break;
+    case 2:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0;
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
+        item->_04 = 0x25;
+        break;
+    case 5:
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 4;
+        item->_04 = 6;
+        break;
+    case 6:
+        if ((lbl_80371C30[task->_14 + item->_0E]._00->_5C >> 16) == 0) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_68 = 0;
+            item->_04 = 7;
+        }
+        break;
+    case 7:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        break;
+    case 0x25:
+        break;
+    }
+}
+
+// .text:0x0006452C size:0x1D0
+void fn_2_6452C(MenuTask0AB0* task, MenuItem0AB0* item) {
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 1:
+        break;
+    case 2:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0;
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
+        item->_04 = 0x25;
+        break;
+    case 5:
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 4;
+        item->_04 = 6;
+        break;
+    case 6:
+        if ((lbl_80371C30[task->_14 + item->_0E]._00->_5C >> 16) == 0) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_68 = 0;
+            item->_04 = 7;
+        }
+        break;
+    case 7:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        break;
+    case 0x25:
+        break;
+    }
+}
+
+// .text:0x00064128 size:0x1D0
+void fn_2_64128(MenuTask0AB0* task, MenuItem0AB0* item) {
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 1:
+        break;
+    case 2:
+        lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0;
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
+        item->_04 = 0x25;
+        break;
+    case 5:
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 4;
+        item->_04 = 6;
+        break;
+    case 6:
+        if ((lbl_80371C30[task->_14 + item->_0E]._00->_5C >> 16) == 0) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_68 = 0;
+            item->_04 = 7;
+        }
+        break;
+    case 7:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        break;
+    case 0x25:
+        break;
+    }
+}
+
+// .text:0x00063F58 size:0x1D0
+void fn_2_63F58(MenuTask0AB0* task, MenuItem0AB0* item) {
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 1:
+        break;
+    case 2:
+        lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0;
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
+        item->_04 = 0x25;
+        break;
+    case 5:
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 4;
+        item->_04 = 6;
+        break;
+    case 6:
+        if ((lbl_80371C30[task->_14 + item->_0E]._00->_5C >> 16) == 0) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_68 = 0;
+            item->_04 = 7;
+        }
+        break;
+    case 7:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        break;
+    case 0x25:
+        break;
+    }
+}
+
 // .text:0x00063DBC size:0x19C
 void fn_2_63DBC(MenuTask0AB0* task, MenuItem0AB0* item) {
     s16 state = fn_2_53BC8(item);
@@ -2147,6 +2599,44 @@ void fn_2_63DBC(MenuTask0AB0* task, MenuItem0AB0* item) {
     }
 }
 
+// .text:0x00063BEC size:0x1D0
+void fn_2_63BEC(MenuTask0AB0* task, MenuItem0AB0* item) {
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 1:
+        break;
+    case 2:
+        lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0;
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
+        item->_04 = 0x25;
+        break;
+    case 5:
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 4;
+        item->_04 = 6;
+        break;
+    case 6:
+        if ((lbl_80371C30[task->_14 + item->_0E]._00->_5C >> 16) == 0) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_68 = 0;
+            item->_04 = 7;
+        }
+        break;
+    case 7:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        break;
+    case 0x25:
+        break;
+    }
+}
+
 // .text:0x00063A64 size:0x188
 void fn_2_63A64(MenuTask0AB0* task, MenuItem0AB0* item) {
     s16 state = fn_2_53BC8(item);
@@ -2175,6 +2665,83 @@ void fn_2_63A64(MenuTask0AB0* task, MenuItem0AB0* item) {
         }
         break;
     case 1:
+    case 0x25:
+        break;
+    }
+}
+
+// .text:0x00063874 size:0x1F0
+void fn_2_63874(MenuTask0AB0* task, MenuItem0AB0* item) {
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 1:
+        break;
+    case 2:
+        lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0;
+        fn_800363D8(task, item->_0E, 1, 0x12, item->_0A);
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
+        item->_04 = 0x25;
+        break;
+    case 5:
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 4;
+        item->_04 = 6;
+        break;
+    case 6:
+        if ((lbl_80371C30[task->_14 + item->_0E]._00->_5C >> 16) == 0) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_68 = 0;
+            item->_04 = 7;
+        }
+        break;
+    case 7:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        break;
+    case 0x25:
+        break;
+    }
+}
+
+// .text:0x000636A4 size:0x1D0
+void fn_2_636A4(MenuTask0AB0* task, MenuItem0AB0* item) {
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 1:
+        break;
+    case 2:
+        lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0;
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
+        item->_04 = 0x25;
+        break;
+    case 5:
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 4;
+        item->_04 = 6;
+        break;
+    case 6:
+        if ((lbl_80371C30[task->_14 + item->_0E]._00->_5C >> 16) == 0) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_68 = 0;
+            item->_04 = 7;
+        }
+        break;
+    case 7:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        break;
     case 0x25:
         break;
     }
@@ -2214,6 +2781,49 @@ void fn_2_63570(MenuTask0AB0* task, MenuItem0AB0* item) {
     }
 }
 
+// .text:0x000623AC size:0x204
+void fn_2_623AC(MenuTask0AB0* task, MenuItem0AB0* item) {
+    GameInitVariables* settings = &g_d_GameSettings;
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 2:
+    case 0x11:
+        if (lbl_2_bss_1A824C->_1976FA == 6 && settings->_12 <= 1) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+            item->_04 = 0x25;
+        } else {
+            if (lbl_2_bss_1A824C->_1976FA == 6) {
+                lbl_80371C30[task->_14 + item->_0E]._00->_5C = fn_8006C100(lbl_2_bss_1A824C->_1972EC[lbl_2_bss_1A824C->_1976FA][item->_0A][0]) << 16;
+                lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+            } else {
+                lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+            }
+            item->_04 = 0x25;
+        }
+        break;
+    case 5:
+        item->_06 = 0x1A;
+        item->_04 = 6;
+        break;
+    case 6:
+        if (item->_06-- <= 0) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        }
+        break;
+    case 1:
+    case 0x25:
+        break;
+    }
+}
+
 // .text:0x00061F5C size:0x1B4
 void fn_2_61F5C(MenuTask0AB0* task, MenuItem0AB0* item) {
     s16 state = fn_2_53BC8(item);
@@ -2229,6 +2839,44 @@ void fn_2_61F5C(MenuTask0AB0* task, MenuItem0AB0* item) {
     case 1:
         break;
     case 2:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
+        item->_04 = 0x25;
+        break;
+    case 5:
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 4;
+        item->_04 = 6;
+        break;
+    case 6:
+        if ((lbl_80371C30[task->_14 + item->_0E]._00->_5C >> 16) == 0) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_68 = 0;
+            item->_04 = 7;
+        }
+        break;
+    case 7:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        break;
+    case 0x25:
+        break;
+    }
+}
+
+// .text:0x00061D90 size:0x1CC
+void fn_2_61D90(MenuTask0AB0* task, MenuItem0AB0* item) {
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 1:
+        break;
+    case 2:
+        fn_800363D8(task, item->_0E, 1, 0x5F, item->_0A);
         lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
         lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
         item->_04 = 0x25;
@@ -2302,6 +2950,79 @@ void fn_2_61644(MenuTask0AB0* task, MenuItem0AB0* item) {
         break;
     case 2:
         lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        item->_04 = 0x25;
+        break;
+    case 5:
+        item->_06 = 0x28;
+        item->_04 = 6;
+        break;
+    case 6:
+        if (item->_06-- <= 0) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        }
+        break;
+    case 1:
+    case 0x25:
+        break;
+    }
+}
+
+// .text:0x00061468 size:0x1DC
+void fn_2_61468(MenuTask0AB0* task, MenuItem0AB0* item) {
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 2:
+        fn_800363D8(task, item->_0E, 1, 0x43, item->_10);
+        if ((s32)lbl_2_bss_1A8244->_00[lbl_800E869C[item->_10]] == 1) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0;
+        } else {
+            lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0x10000;
+        }
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        item->_04 = 0x25;
+        break;
+    case 5:
+        item->_06 = 0x28;
+        item->_04 = 6;
+        break;
+    case 6:
+        if (item->_06-- <= 0) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        }
+        break;
+    case 1:
+    case 0x25:
+        break;
+    }
+}
+
+// .text:0x000612A8 size:0x1C0
+void fn_2_612A8(MenuTask0AB0* task, MenuItem0AB0* item) {
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 2:
+        if ((s32)lbl_2_bss_1A8244->_00[lbl_800E869C[item->_10]] == 1) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+            lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
+        } else {
+            lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        }
         item->_04 = 0x25;
         break;
     case 5:
@@ -2678,6 +3399,44 @@ void fn_2_5F2A8(MenuTask0AB0* task, MenuItem0AB0* item) {
         }
         break;
     case 1:
+    case 0x25:
+        break;
+    }
+}
+
+// .text:0x0005EEBC size:0x1D0
+void fn_2_5EEBC(MenuTask0AB0* task, MenuItem0AB0* item) {
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 1:
+        break;
+    case 2:
+        lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0;
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 0;
+        item->_04 = 0x25;
+        break;
+    case 5:
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
+        item->_04 = 6;
+        break;
+    case 6:
+        if ((lbl_80371C30[task->_14 + item->_0E]._00->_5C >> 16) >= 10) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_68 = 0;
+            item->_04 = 7;
+        }
+        break;
+    case 7:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        break;
     case 0x25:
         break;
     }
