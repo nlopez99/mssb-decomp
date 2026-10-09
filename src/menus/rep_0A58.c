@@ -1370,17 +1370,14 @@ void fn_2_54B38(void) {
 }
 
 // .text:0x00054BB0 size:0xDCC
-// 98.40%: only the prologue's scheduling differs; the target forms lbl_803CC1B8's
-// address with addi and loads through it (the form of a variable read twice), which
-// shifts the setup of the pointer stores and every later branch by one instruction.
 void fn_2_54BB0(void) {
     MenuSave0A58* save;
     Vec pos;
     MenuTask0A58* task = lbl_803CC1B8;
     MenuTask0A58* child;
 
-    lbl_2_bss_1A8248 = (void*)starMissionCompletionTracker;
     lbl_2_bss_1A824C = (void*)lbl_2_bss_1A8250;
+    lbl_2_bss_1A8248 = (void*)starMissionCompletionTracker;
     lbl_2_bss_1A8244 = (void*)lbl_80361B20;
     lbl_2_bss_1A823C = (void*)lbl_800E877C;
     lbl_2_bss_1A8234 = (void*)lbl_2_bss_1A8250;
