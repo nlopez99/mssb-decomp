@@ -406,23 +406,22 @@ void fn_3_E11E0(void) {
 }
 
 // .text:0x000E07DC size:0xA04 mapped:0x8071F870
-// Remaining: the stadium block, where the target takes lbl_8036E548's address before the
-// search loop and reads the row's _C through its own pointer, and register numbers elsewhere.
+// Remaining: the target holds &lbl_8036E548 in a saved register across the stadium block's
+// call (and stores _24BD after the search loop), and register numbers elsewhere.
 void fn_3_E07DC(void) {
+    Unk2940Actor* actor;
     VecXYZ pos;
     s32 ids[4];
     s32* p;
-    Unk2940Pos* row;
     BOOL start;
-    BOOL won;
     BOOL show = TRUE;
     int count;
+    BOOL won;
     int best;
     int stadium;
     int i;
     int slot;
     int n;
-    Unk2940Actor* actor;
 
     start = FALSE;
     won = g_Minigame.challenge_minigame_haven_tWonYetIndicator;
@@ -557,20 +556,19 @@ void fn_3_E07DC(void) {
         }
     }
     if (!g_d_GameSettings.minigamesEnabled) {
+        lbl_8036E548._24BD = 1;
         for (stadium = 0; stadium < 6; stadium++) {
             if (g_d_GameSettings.StadiumID == lbl_3_data_18910[stadium]) {
                 break;
             }
         }
-        lbl_8036E548._24BD = 1;
-        row = &lbl_3_data_2130C[stadium];
-        fn_3_9F79C(row->_C, lbl_3_data_2130C[stadium]._0, row->_8, &pos.x, &pos.z);
+        fn_3_9F79C(lbl_3_data_2130C[stadium]._C, lbl_3_data_2130C[stadium]._0, lbl_3_data_2130C[stadium]._8, &pos.x, &pos.z);
         pos.y = lbl_3_data_2130C[stadium]._4;
         lbl_8036E548._2294 = pos.x + lbl_3_data_18E04[0][0].x;
         lbl_8036E548._2298 = pos.y + lbl_3_data_18E04[0][0].y;
         lbl_8036E548._229C = pos.z + lbl_3_data_18E04[0][0].z;
         lbl_8036E548._2298 = -lbl_8036E548._2298;
-        lbl_8036E548._22A4 = row->_C;
+        lbl_8036E548._22A4 = lbl_3_data_2130C[stadium]._C;
         return;
     }
     slot = 0;
