@@ -75,7 +75,9 @@ typedef struct {
     /* 0x04 */ u16 _04; // newly pressed, or held with key repeat
     /* 0x06 */ u8 _06[0x08 - 0x06];
     /* 0x08 */ s8 _08; // -1 when no controller is connected
-    /* 0x09 */ u8 _09[0x10 - 0x09];
+    /* 0x09 */ u8 _09[0x0C - 0x09];
+    /* 0x0C */ s8 _0C;
+    /* 0x0D */ u8 _0D[0x10 - 0x0D];
     /* 0x10 */ s8 _10;
     /* 0x11 */ s8 _11;
     /* 0x12 */ s8 _12;

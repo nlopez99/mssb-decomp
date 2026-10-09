@@ -675,6 +675,29 @@ BOOL fn_3_163948(void) {
     return ret;
 }
 
+// .text:0x001637EC size:0x15C mapped:0x807A2880
+void fn_3_1637EC(void) {
+    StarMissionCompletionTracker* tracker = &starMissionCompletionTracker;
+    u8 mission = tracker->_441C;
+    u8 level = tracker->_4415;
+    s16 ids[9];
+    s32 i;
+    ChallengeTrackingStruct* c;
+
+    for (i = 0; i < 9; i++) {
+        ids[i] = inMemRoster[1][i].stats.CharID;
+    }
+    for (i = 0; i < 9; i++) {
+        if (ids[i] != -1) {
+            c = &tracker->characters[ids[i]];
+            if (c->scoutFlagPointer->_4[level][mission] != 0 &&
+                c->scoutFlagsAchieved < c->scoutFlagPointer->_4[level][mission]) {
+                c->scoutFlagsAchieved = c->scoutFlagPointer->_4[level][mission];
+            }
+        }
+    }
+}
+
 // .text:0x00162D54 size:0xA98 mapped:0x807A1DE8
 // 99.79%: in the win-mission loop the target forms starMissionCompletionTracker's address before
 // lbl_80109AE8's and keeps m in r6 and the status pointer in r4; the base swaps both pairs.
@@ -802,29 +825,6 @@ void fn_3_162D54(void) {
                 MISSION_STATUS(k, i) = -2;
             } else {
                 MISSION_STATUS(k, i) = 0;
-            }
-        }
-    }
-}
-
-// .text:0x001637EC size:0x15C mapped:0x807A2880
-void fn_3_1637EC(void) {
-    StarMissionCompletionTracker* tracker = &starMissionCompletionTracker;
-    u8 mission = tracker->_441C;
-    u8 level = tracker->_4415;
-    s16 ids[9];
-    s32 i;
-    ChallengeTrackingStruct* c;
-
-    for (i = 0; i < 9; i++) {
-        ids[i] = inMemRoster[1][i].stats.CharID;
-    }
-    for (i = 0; i < 9; i++) {
-        if (ids[i] != -1) {
-            c = &tracker->characters[ids[i]];
-            if (c->scoutFlagPointer->_4[level][mission] != 0 &&
-                c->scoutFlagsAchieved < c->scoutFlagPointer->_4[level][mission]) {
-                c->scoutFlagsAchieved = c->scoutFlagPointer->_4[level][mission];
             }
         }
     }

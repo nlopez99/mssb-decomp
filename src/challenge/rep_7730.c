@@ -87,7 +87,7 @@ extern void fn_80048C1C(void);
 extern void fn_80048C28(void);
 extern void fn_80048D4C(void);
 
-extern void fn_800AD038(s32 arg0);
+extern void fn_800AD038(void* arg0);
 extern void fn_800B1188(void);
 extern void fn_800B24D4(s32 id);
 extern void fn_800A7D4C(s32, void*);
@@ -124,7 +124,7 @@ extern u8 lbl_803CBBC0;
 
 extern struct {
     /* 0x00 */ u8 _00[0x8];
-    /* 0x08 */ s32 _08;
+    /* 0x08 */ void* _08;
 } lbl_80366158;
 
 extern struct {

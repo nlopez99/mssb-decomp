@@ -14,6 +14,7 @@
 #include "game/rep_3DA8.h"
 #include "game/rep_CC8.h"
 #include "game/rep_31A0.h"
+#include "game/rep_3520.h"
 #include "string.h"
 
 typedef struct UnkAC8Fielder {
@@ -288,6 +289,8 @@ extern struct {
 
 // rep_1838.h declares fn_3_9FB8C as returning s16 and fn_3_9FCF8 as taking s16s: callers here
 // sign-extend fn_3_9FB8C's result and pass fn_3_9FCF8 unextended ints, which it extends itself.
+// Including rep_1838.h would make these two a redeclaration error, so its other functions are
+// declared here too.
 extern s16 radToShortAngle(f32 v);
 extern s32 fn_3_9FB8C(f32 x, f32 y);
 extern s16 fn_3_9FCA4(s16 a, s16 b);
@@ -324,7 +327,6 @@ extern u8 lbl_3_data_8404[6][15][2];
 extern u8 lbl_3_data_84B8[30][2];
 extern u8 fn_800639BC(s8 fielder, VecXYZ* pos, VecXYZ* prev);
 extern void fn_80063958(s8 fielder);
-extern void fn_3_13A048(s32 to, s32 from);
 extern int RandomInt_Game_Range(int min, int max);
 extern s16 fn_3_9FD28(s16 ang);
 extern int fn_3_6D658(int team, int charID, int otherCharID);
@@ -384,7 +386,6 @@ extern f32 fn_3_9FEA8(f32 v);
 extern s16 fn_3_9FE6C_normalizeAngle(s16);
 extern f32 shortAngleToRad_Capped(s16);
 extern void getComponentsFromRad(f32 v, f32* x, f32* y);
-extern u8 fn_3_1379A0(int fielderIdx);
 
 // Per-action fielder handlers, indexed by the fielder's action (_1D3)
 typedef struct {

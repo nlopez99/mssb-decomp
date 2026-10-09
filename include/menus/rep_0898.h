@@ -3,5 +3,7 @@
 
 #include "mssbTypes.h"
 
+void fn_2_42270(s32 index);
+void fn_2_422FC(s32 index);
 
 #endif // !__MENUS_rep_0898_H_
