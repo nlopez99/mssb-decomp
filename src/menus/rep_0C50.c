@@ -120,7 +120,8 @@ extern struct {
 extern struct {
     /* 0x00 */ s32 _00[4];
     /* 0x10 */ u8 _10[0x41 - 0x10];
-    /* 0x41 */ u8 _41[0x59 - 0x41];
+    /* 0x41 */ u8 _41[2];
+    /* 0x43 */ u8 _43[0x59 - 0x43];
     /* 0x59 */ u8 _59[0x61 - 0x59];
     /* 0x61 */ s8 _61[2];
     /* 0x63 */ u8 _63[2];
@@ -185,6 +186,7 @@ extern void changeScene(u8, s16);
 extern s32 fn_2_8794(s32 flag, s32 value);
 extern void fn_2_CCE0(u8 index);
 extern void fn_2_16A74(s32 port, s32 flag);
+extern void fn_2_102C8(u8 index);
 
 static inline BOOL isAnimDone(UnkTask0C50* task, s32 index, s32 value) {
     return fn_80042DA8(task, index, value) ? TRUE : FALSE;
@@ -361,6 +363,20 @@ void fn_2_805DC(UnkTask0C50* task, s32 index) {
             lbl_803C66B0._0D[index] = 2;
             g_d_GameSettings._10 = 0;
         }
+    }
+}
+
+// .text:0x000808D8 size:0x284
+void fn_2_808D8(UnkTask0C50* task, s32 index) {
+    if (lbl_803C66B0._0D[index] == 0 ? TRUE : FALSE) {
+        if (g_d_GameSettings.GameModeSelected != 5) {
+            fn_2_7630C(task, index);
+        } else {
+            fn_2_760CC(task);
+        }
+        fn_2_74F40(task, index);
+        fn_800626EC(index);
+        lbl_803C66B0._0D[index] = 1;
     }
 }
 
@@ -766,6 +782,49 @@ void fn_2_79634(UnkTask0C50* task, s32 index) {
     if (lbl_803C66B0._0D[index] == 1 ? TRUE : FALSE) {
         fn_80062674(index);
         lbl_803C66B0._0D[index] = 2;
+    }
+}
+
+// .text:0x0007912C size:0x268
+void fn_2_7912C(UnkTask0C50* task, s32 index) {
+    s32 i;
+
+    if (lbl_803C66B0._0D[index] == 0 ? TRUE : FALSE) {
+        if (lbl_803C66B0._00[0] == 2) {
+            for (i = 1; i < 9; i++) {
+                s8 slot = lbl_803C6724._02[index + 2][i];
+                s8 value = lbl_803C6724._02[index][slot];
+
+                if (value != -1 && value != 0x36) {
+                    lbl_80371C30[0x34 + task->_14 + i + index * 9]._00->_68 = 4;
+                }
+            }
+            fn_2_75BE4(task, index);
+        }
+        fn_800626EC(index);
+        lbl_803C66B0._0D[index] = 1;
+    }
+    if (lbl_803C66B0._0D[index] == 1) {
+        s32 n = 0;
+        s32 expected = 0;
+
+        for (i = 1; i < 9; i++) {
+            s8 slot = lbl_803C6724._02[index + 2][i];
+            s8 value = lbl_803C6724._02[index][slot];
+
+            if (value != -1 && value != 0x36) {
+                expected++;
+                n += isAnimDone(task, 0x34 + i + index * 9, 0);
+            }
+        }
+        if ((lbl_803C66B0._00[0] != 2 || fn_2_75B58(task, index)) && n == expected) {
+            fn_80062674(index);
+            lbl_803C66B0._0D[index] = 2;
+            if (lbl_2_bss_F468._43[index]) {
+                fn_2_102C8(index);
+                lbl_2_bss_F468._43[index] = 0;
+            }
+        }
     }
 }
 
