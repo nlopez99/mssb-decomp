@@ -5011,7 +5011,86 @@ void fn_3_40C04(void) {
 
 // .text:0x000402A8 size:0x95C mapped:0x8067F33C
 void fn_3_402A8(void) {
-    return;
+    s32 infield;
+    s32 open = 0;
+    s16 angle;
+    s32 i;
+    f32 dx;
+    f32 dz;
+    f32 dx2;
+    f32 dz2;
+    f32 dist3;
+    f32 dist5;
+
+    for (i = 0; i < 9; i++) {
+        if (g_Fielders[i]._1DB == 0) {
+            open |= 1 << (i * 3);
+        }
+    }
+    infield = open & 0x9249;
+    if ((infield && g_Ball.landingSpotZoneAwayFromHome <= 1 && g_Ball.maxYOfHit >= 8.0f) ||
+        ((g_Fielders[0]._1DB == 0 || g_Fielders[1]._1DB == 0) && g_Ball.physicsSubstruct.hitLandingSpotDistFromHome < 16.0f)) {
+        angle = fn_3_9FB8C(g_Ball.landingSpotLocation.x, g_Ball.landingSpotLocation.z);
+        if (g_Fielders[1]._1DB == 0 &&
+            (g_Ball.physicsSubstruct.hitLandingSpotDistFromHome < 7.0f || (angle > 0xA00 && angle < 0xE00))) {
+            fn_3_5985C(1, 3);
+        } else if ((g_Ball.physicsSubstruct.hitLandingSpotDistFromHome < 22.0f && angle > 0x300 && angle < 0x500) ||
+                   (g_Ball.physicsSubstruct.hitLandingSpotDistFromHome < 24.0f && angle > 0x300 && angle < 0x500 &&
+                    (open & 1)) ||
+                   (g_Ball.physicsSubstruct.hitLandingSpotDistFromHome < 15.5f && angle > 0x200 && angle < 0x600)) {
+            fn_3_5985C(0, 3);
+        } else if (angle < 0x2C0) {
+            fn_3_5985C(2, 3);
+        } else if (angle < 0x400) {
+            fn_3_5985C(3, 3);
+        } else if (angle < 0x540) {
+            fn_3_5985C(5, 3);
+        } else if (angle < 0x800) {
+            fn_3_5985C(4, 3);
+        } else {
+            goto outfield;
+        }
+    } else {
+    outfield:
+        if (open & 0x01240000) {
+            angle = fn_3_9FB8C(g_Ball.landingSpotLocation.x, g_Ball.landingSpotLocation.z);
+            if (g_Ball.Hit_HorizontalAngle < 0x3C0) {
+                fn_3_5985C(8, 3);
+                fn_3_5985C(7, 3);
+                fn_3_5985C(3, 3);
+            } else if (g_Ball.Hit_HorizontalAngle > 0x440) {
+                fn_3_5985C(6, 3);
+                fn_3_5985C(7, 3);
+                fn_3_5985C(5, 3);
+            } else {
+                fn_3_5985C(6, 3);
+                fn_3_5985C(7, 3);
+                fn_3_5985C(8, 3);
+                dx = g_Fielders[3]._000 - g_Ball.landingSpotLocation.x;
+                dz = g_Fielders[3]._008 - g_Ball.landingSpotLocation.z;
+                dx2 = dx * dx;
+                dz2 = dz * dz;
+                dist3 = dolsqrtf2(dx2 + dz2);
+                dx = g_Fielders[5]._000 - g_Ball.landingSpotLocation.x;
+                dz = g_Fielders[5]._008 - g_Ball.landingSpotLocation.z;
+                dx2 = dx * dx;
+                dz2 = dz * dz;
+                dist5 = dolsqrtf2(dx2 + dz2);
+                if (g_Ball.landingSpotZoneAwayFromHome < 3 || !(g_Ball.maxYOfHit >= 8.0f)) {
+                    if (dist3 < dist5) {
+                        fn_3_5985C(3, 3);
+                    } else {
+                        fn_3_5985C(5, 3);
+                    }
+                }
+            }
+        } else {
+            fn_3_3FCF0(infield);
+        }
+    }
+    fn_3_4C9C8();
+    fn_3_47778();
+    fn_3_4A124();
 }
 
 // .text:0x0003FCF0 size:0x5B8 mapped:0x8067ED84
