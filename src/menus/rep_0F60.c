@@ -419,6 +419,8 @@ Vec lbl_2_data_2FEE0 = { 0.0f, 0.0f, 0.0f };
 f32 lbl_2_bss_B2B8;
 
 // .text:0x0008EA80 size:0x2CC
+// 98.83%: in the inlined fn_2_8D9DC the target loads lbl_2_bss_340140 into r3, so the clrlwi
+// of fn_2_8D270's argument comes after the stwx; here it lands in r4 and the clrlwi moves up.
 void fn_2_8EA80(void) {
     MenuTask0F60* task = lbl_803CC1B8;
 
@@ -480,6 +482,9 @@ void fn_2_8EA80(void) {
 }
 
 // .text:0x0008E8A4 size:0x1DC
+// 96.76%: in the inlined fn_2_8D9DC the target loads lbl_2_bss_340140 into r3, so the clrlwi
+// of fn_2_8D270's argument comes after the stwx; here it lands in r4 and the clrlwi moves up;
+// the loop's 0x1C is also not hoisted into r25.
 void fn_2_8E8A4(void) {
     MenuTask0F60* task = lbl_803CC1B8;
 
@@ -518,6 +523,8 @@ void fn_2_8E8A4(void) {
 }
 
 // .text:0x0008E6A4 size:0x200
+// 98.36%: in the inlined fn_2_8D9DC the target loads lbl_2_bss_340140 into r3, so the clrlwi
+// of fn_2_8D270's argument comes after the stwx; here it lands in r4 and the clrlwi moves up.
 void fn_2_8E6A4(void) {
     MenuTask0F60* task = lbl_803CC1B8;
 
@@ -647,6 +654,7 @@ void fn_2_8DFB0(void) {
 }
 
 // .text:0x0008DCD8 size:0x2D8
+// 99.95%: the copy of fn_2_8DB14's last loop tests its bound in r3 instead of r0.
 void fn_2_8DCD8(void) {
     u32 max;
     s32 i;
@@ -1161,6 +1169,8 @@ s32 fn_2_8CC88(s32 idx) {
 }
 
 // .text:0x0008C910 size:0x378
+// 88.85%: the target swaps hdr and i (r31/r30), steps i before the other loop counters, and
+// indexes the last seven banks as (i + k) * 4 where MWCC folds k into the displacement here.
 void fn_2_8C910(void) {
     int i;
     s32 k;
