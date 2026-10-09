@@ -138,7 +138,9 @@ extern struct {
     /* 0x19542C */ s32 _19542C[15];
     /* 0x195468 */ u8 _195468[0x1972B8 - 0x195468];
     /* 0x1972B8 */ u8 _1972B8;
-    /* 0x1972B9 */ u8 _1972B9[0x19769C - 0x1972B9];
+    /* 0x1972B9 */ u8 _1972B9[0x197450 - 0x1972B9];
+    /* 0x197450 */ SortEntry08E8 _197450[55];
+    /* 0x197608 */ u8 _197608[0x19769C - 0x197608];
     /* 0x19769C */ s32 _19769C;
     /* 0x1976A0 */ u8 _1976A0[0x1976A8 - 0x1976A0];
     /* 0x1976A8 */ s32 _1976A8;
@@ -165,7 +167,11 @@ extern struct {
     /* 0x197794 */ s16 _197794;
     /* 0x197796 */ s16 _197796;
     /* 0x197798 */ s16 _197798;
-    /* 0x19779A */ u8 _19779A[0x197843 - 0x19779A];
+    /* 0x19779A */ u8 _19779A[0x1977A2 - 0x19779A];
+    /* 0x1977A2 */ s16 _1977A2[0x36];
+    /* 0x19780E */ s16 _19780E[5];
+    /* 0x197818 */ s16 _197818[5];
+    /* 0x197822 */ u8 _197822[0x197843 - 0x197822];
     /* 0x197843 */ s8 _197843;
     /* 0x197844 */ u8 _197844[0x197846 - 0x197844];
     /* 0x197846 */ u8 _197846;
@@ -493,6 +499,7 @@ extern u8 fn_800B3C04(s32 arg0, MenuActor08E8* actor, Mtx mtx);
 extern void fn_80024DB0(MenuAnimState08E8* anim);
 extern s32 fn_80062890(s32 id);
 extern s32 fn_8006C5CC(void);
+extern s32 fn_8006C6C4(void);
 extern void fn_80024FA4(MenuActorRef08E8* model, u32 animId, MenuAnimState08E8* anim, s32 arg3);
 
 // rep_0B08
@@ -2602,6 +2609,88 @@ s32 fn_2_44E2C(s32 id) {
         return count;
     }
     return 0;
+}
+
+// .text:0x00044504 size:0x928
+// First draft: the target reads _31 without extsb (lbz then cmpwi) in the
+// unrolled roster loop and allocates registers differently throughout.
+void fn_2_44504(void) {
+    s32 i;
+    s32 k;
+    s32 n;
+    s32 stars;
+    s16 id;
+    s16 tmp;
+
+    for (i = 0; i < 0x36; i++) {
+        lbl_2_bss_1A824C->_1977A2[i] = 10000;
+    }
+    for (i = 0; i < 5; i++) {
+        lbl_2_bss_1A824C->_19780E[i] = -1;
+        lbl_2_bss_1A824C->_197818[i] = -1;
+    }
+    stars = fn_8006C6C4();
+    n = 0;
+    for (i = 0; i < 0x36; i++) {
+        if (((MenuCharacter08E8*)lbl_2_bss_1A8248)[i]._31 == 1 && i != lbl_803CB8F0[lbl_2_bss_1A8248->_441C]) {
+            lbl_2_bss_1A824C->_1977A2[n++] = i;
+        }
+    }
+    for (i = 0, k = 0; i < 9; i++) {
+        if (stars + k < 0x20) {
+            id = lbl_2_bss_1A8248->_40B8[i]._0;
+            if (((MenuCharacter08E8*)lbl_2_bss_1A8248)[id]._05 == 4) {
+                lbl_2_bss_1A824C->_1977A2[n++] = id;
+                k++;
+            }
+        }
+    }
+    for (i = 0, k = 0; i < n; i++) {
+        id = lbl_2_bss_1A824C->_1977A2[i];
+        if (id != 10000 && ((MenuCharacter08E8*)lbl_2_bss_1A8248)[id]._00->_02[0] == 4) {
+            lbl_2_bss_1A824C->_197818[k++] = id;
+            lbl_2_bss_1A824C->_1977A2[i] = 10000;
+        }
+    }
+    if (stars >= 10) {
+        for (i = 0, k = 0; i < n; i++) {
+            id = lbl_2_bss_1A824C->_1977A2[i];
+            if (id != 10000 && ((MenuCharacter08E8*)lbl_2_bss_1A8248)[id]._00->_02[1] == 1) {
+                lbl_2_bss_1A824C->_19780E[k++] = id;
+                lbl_2_bss_1A824C->_1977A2[i] = 10000;
+            }
+        }
+    }
+    for (i = 0; i < 55; i++) {
+        lbl_2_bss_1A824C->_197450[i].key = 10000;
+        lbl_2_bss_1A824C->_197450[i].value = 10000;
+    }
+    for (i = 0; i < n + 1; i++) {
+        id = lbl_2_bss_1A824C->_1977A2[i];
+        if (id != 10000) {
+            lbl_2_bss_1A824C->_197450[i + 1].key = (s8)((MenuCharacter08E8*)lbl_2_bss_1A8248)[id]._00->_02[0];
+            lbl_2_bss_1A824C->_197450[i + 1].value = lbl_2_bss_1A824C->_1977A2[i];
+        } else {
+            lbl_2_bss_1A824C->_197450[i + 1].key = 10000;
+            lbl_2_bss_1A824C->_197450[i + 1].value = 10000;
+        }
+    }
+    fn_2_44414(lbl_2_bss_1A824C->_197450);
+    for (i = 0; i < 0x36; i++) {
+        lbl_2_bss_1A824C->_1977A2[i] = -1;
+    }
+    for (i = 0, k = 0; i < 0x36; i++) {
+        if (lbl_2_bss_1A824C->_197450[i + 1].value != 10000) {
+            lbl_2_bss_1A824C->_1977A2[k++] = lbl_2_bss_1A824C->_197450[i + 1].value;
+        }
+    }
+    for (i = 0; i < 5; i++) {
+        if (lbl_2_bss_1A824C->_197818[i] == 38) {
+            tmp = lbl_2_bss_1A824C->_197818[2];
+            lbl_2_bss_1A824C->_197818[2] = lbl_2_bss_1A824C->_197818[i];
+            lbl_2_bss_1A824C->_197818[i] = tmp;
+        }
+    }
 }
 
 // .text:0x00044414 size:0xF0

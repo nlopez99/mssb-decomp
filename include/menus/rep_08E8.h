@@ -23,6 +23,7 @@ s32 fn_2_44238(s32 id);
 s32 fn_2_442E8(void);
 s32 fn_2_44368(void);
 void fn_2_44414(struct SortEntry08E8* entries);
+void fn_2_44504(void);
 s32 fn_2_44E2C(s32 id);
 s32 fn_2_44F14(s32 id);
 s32 fn_2_44F34(s32 id);
