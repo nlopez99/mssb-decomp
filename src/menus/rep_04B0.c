@@ -15,8 +15,13 @@ typedef struct Pad04B0 {
 
 typedef struct State04B0 {
     /* 0x00 */ u8 _00[0x10];
-    /* 0x10 */ u8 _10[4];
-    /* 0x14 */ u8 _14[8];
+    /* 0x10 */ u8 _10[2];
+    /* 0x12 */ u8 _12[2];
+    /* 0x14 */ u8 _14[4];
+    /* 0x18 */ u8 _18;
+    /* 0x19 */ u8 _19;
+    /* 0x1A */ u8 _1A;
+    /* 0x1B */ u8 _1B;
     /* 0x1C */ u8 _1C[8];
     /* 0x24 */ u8 _24[0x40 - 0x24];
     /* 0x40 */ u8 _40[6];
@@ -41,7 +46,8 @@ extern struct {
     /* 0x00 */ u8 _00[0x74];
     /* 0x74 */ u8 _74[4];
     /* 0x78 */ u8 _78[0x7F - 0x78];
-    /* 0x7F */ s8 _7F[4];
+    /* 0x7F */ s8 _7F[1];
+    /* 0x80 */ s8 _80;
 } lbl_803C6028;
 
 typedef struct Select04B0 {
@@ -54,14 +60,17 @@ extern Select04B0 lbl_2_bss_F410;
 
 extern struct {
     /* 0x00 */ u8 _00[0x45];
-    /* 0x45 */ u8 _45[2];
+    /* 0x45 */ u8 _45[1];
+    /* 0x46 */ u8 _46;
     /* 0x47 */ u8 _47[2];
     /* 0x49 */ u8 _49[0x4B - 0x49];
     /* 0x4B */ u8 _4B[2];
 } lbl_2_bss_F468;
 
 extern struct {
-    /* 0x00 */ u8 _00[0x59];
+    /* 0x00 */ u8 _00[0xE];
+    /* 0x0E */ u8 _0E;
+    /* 0x0F */ u8 _0F[0x59 - 0xF];
     /* 0x59 */ u8 _59[2];
 } lbl_803C66B0;
 
@@ -71,6 +80,16 @@ extern struct {
 } lbl_803297E0;
 
 extern u8 lbl_800EFBA4[0x10];
+
+extern struct {
+    /* 0x0 */ u8 _0[0x5];
+    /* 0x5 */ u8 _5;
+} lbl_803C5EA4;
+
+extern struct {
+    /* 0x0 */ u8 _0;
+    /* 0x1 */ u8 _1;
+} lbl_803C6724;
 extern u8 lbl_803CBBC4;
 
 typedef struct LITObj {
@@ -105,19 +124,19 @@ extern struct {
 } lbl_8036E548;
 
 extern struct {
-    /* 0x0000 */ u8 _0000[0x46F8];
+    /* 0x0000 */ u8 _0000[0x46E4];
+    /* 0x46E4 */ s32 _46E4;
+    /* 0x46E8 */ u8 _46E8[0x46F8 - 0x46E8];
     /* 0x46F8 */ s8 _46F8[4];
-    /* 0x46FC */ u8 _46FC;
-    /* 0x46FD */ s8 _46FD;
-    /* 0x46FE */ s8 _46FE;
-    /* 0x46FF */ s8 _46FF;
-    /* 0x4700 */ u8 _4700[0x4729 - 0x4700];
+    /* 0x46FC */ s8 _46FC[4];
+    /* 0x4700 */ u8 _4700[4];
+    /* 0x4704 */ u8 _4704;
+    /* 0x4705 */ u8 _4705[0x4729 - 0x4705];
     /* 0x4729 */ u8 _4729;
-    /* 0x472A */ u8 _472A[0x4730 - 0x472A];
-    /* 0x4730 */ struct {
-        /* 0x0 */ u16 _0;
-        /* 0x2 */ u8 _2[4];
-    } _4730[4];
+    /* 0x472A */ u8 _472A[2];
+    /* 0x472C */ Pad04B0 _472C[4];
+    /* 0x4744 */ u8 _4744[0x4757 - 0x4744];
+    /* 0x4757 */ u8 _4757[4];
 } lbl_8034E9A0;
 
 extern void AnimateCharacter(int actor, int anim, u8, u8, u8, s16, u8, int);
@@ -131,6 +150,7 @@ extern void fn_2_12238(void);
 extern void fn_800625A4(s32 port, s32 arg1);
 extern void fn_2_1A88(void);
 extern void fn_8004E504(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+extern void fn_8004E5B4(s32 arg0, s32 arg1, s32 arg2);
 extern s32 fn_8004E62C(s32 player, u16 arg1, u16 arg2, u16 arg3);
 extern s32 fn_8004D57C(u16 arg0, u16 arg1, u16 arg2);
 extern void makeLookAtMatrix(Mtx m, const Vec* camPos, const Vec* camUp, const Vec* target);
@@ -292,10 +312,10 @@ void fn_2_16460(void) {
 // .text:0x0001641C size:0x44
 void fn_2_1641C(void) {
     fn_2_1A88();
-    lbl_8034E9A0._46FC = 0;
-    lbl_8034E9A0._46FD = -1;
-    lbl_8034E9A0._46FE = -1;
-    lbl_8034E9A0._46FF = -1;
+    lbl_8034E9A0._46FC[0] = 0;
+    lbl_8034E9A0._46FC[1] = -1;
+    lbl_8034E9A0._46FC[2] = -1;
+    lbl_8034E9A0._46FC[3] = -1;
     lbl_8034E9A0._4729 = 0;
 }
 
@@ -366,7 +386,7 @@ void fn_2_15AFC(s32 port, u16 hold, u16 trg, u16 rep) {
 
 // .text:0x00015A90 size:0x6C
 void fn_2_15A90(s32* value, u8 port, s32 max) {
-    u16 buttons = lbl_8034E9A0._4730[port]._0;
+    u16 buttons = lbl_8034E9A0._472C[port]._4;
 
     if (buttons & 1) {
         (*value)--;
@@ -481,6 +501,82 @@ void fn_2_14BB8(u8 port, s32 mode) {
         AnimateCharacter(port, 0x69, 1, 1, 1, 0, 0, -1);
         lbl_2_bss_100B8._40[port] = 1;
         break;
+    }
+}
+
+// .text:0x00014790 size:0x428
+void fn_2_14790(void) {
+    s8 port = -1;
+    s32 i;
+    s32 prev;
+
+    if (lbl_2_bss_100B8._19 == 0 || lbl_2_bss_100B8._1A != 0 || g_d_GameSettings.GameModeSelected == 5) {
+        return;
+    }
+    if (lbl_803C66B0._0E == 1) {
+        return;
+    }
+    for (i = 1; i < 4; i++) {
+        if (lbl_8034E9A0._46FC[i] != 0 && (lbl_803C77B8[i]._02 & 0x100)) {
+            port = i;
+            break;
+        }
+    }
+    if (port != -1 && lbl_803C5EA4._5 == 0) {
+        if (lbl_2_bss_100B8._10[1] != 0) {
+            lbl_2_bss_100B8._10[1] = 0;
+            lbl_2_bss_100B8._12[1] = 0;
+            fn_8004E5B4(1, lbl_8034E9A0._46E4, 0);
+            lbl_8034E9A0._4757[lbl_8034E9A0._46E4] = 0;
+            lbl_8034E9A0._46E4 = -1;
+        }
+        lbl_8034E9A0._46FC[port] = 0;
+        lbl_803C5EA4._5 = 1;
+        lbl_8034E9A0._46F8[port] = lbl_8034E9A0._46F8[1];
+        lbl_8034E9A0._46F8[1] = port;
+        lbl_803C66B0._59[0] = 0;
+        lbl_803C66B0._59[1] = 1;
+        if (lbl_8034E9A0._4757[0] != 0 || lbl_2_bss_F410._10[0] == 0) {
+            lbl_803C6724._1 = 1;
+        } else {
+            lbl_803C6724._1 = 0;
+        }
+        lbl_803C6028._74[lbl_8034E9A0._46F8[1]] = 0;
+        fn_800625A4(1, 1);
+        g_d_GameSettings._10 = 1;
+        lbl_803297E0._CF5D[1] = 0;
+        lbl_803C6028._80 = -1;
+        if (lbl_2_bss_F410._10[0] == 0) {
+            lbl_2_bss_F410._10[1] = 1;
+        } else {
+            lbl_2_bss_F410._10[1] = 0;
+        }
+        lbl_803C6028._74[lbl_8034E9A0._46F8[1]] = 0;
+        switch (lbl_8034E9A0._46F8[1]) {
+        case 0:
+            fn_8004E504(0, lbl_2_bss_F410._10[1], -1, -1, -1);
+            break;
+        case 1:
+            fn_8004E504(0, -1, lbl_2_bss_F410._10[1], -1, -1);
+            break;
+        case 2:
+            fn_8004E504(0, -1, -1, lbl_2_bss_F410._10[1], -1);
+            break;
+        case 3:
+            fn_8004E504(0, -1, -1, -1, lbl_2_bss_F410._10[1]);
+            break;
+        }
+        prev = -1;
+        while (!fn_2_15104(lbl_2_bss_F410._10[1], prev, 1, 1)) {
+            prev = lbl_2_bss_F410._10[1];
+        }
+        lbl_8034E9A0._4704 = 0;
+        if (lbl_2_bss_F468._46 != 0) {
+            lbl_2_bss_F468._46 = 0;
+            sndFXStartEx(0x1B9, lbl_800EFBA4[2], 0x3F, 0);
+        }
+        lbl_8034E9A0._472C[1]._0 = lbl_8034E9A0._472C[1]._2 = lbl_8034E9A0._472C[1]._4 = 0;
+        sndFXStartEx(0x1B8, lbl_800EFBA4[1], 0x3F, 0);
     }
 }
 
