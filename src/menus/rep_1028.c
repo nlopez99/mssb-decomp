@@ -358,11 +358,11 @@ void fn_2_91D74(Item1028* item) {
 
 // .text:0x00091C4C size:0x128
 void fn_2_91C4C(Item1028* item) {
+    s32 index = item->_78;
     Model1028* model;
-    switch (item->_A8) {
-    case 1:
+    if (item->_A8 == 1) {
         if (lbl_2_bss_3401BC != NULL) {
-            model = &lbl_2_bss_340140->_68->_34[item->_78];
+            model = &lbl_2_bss_340140->_68->_34[index];
             model->_54 = 0.0f;
             model->_5A = 1;
             model->_5C = 0.0f;
@@ -371,10 +371,9 @@ void fn_2_91C4C(Item1028* item) {
             model->_58 = 0;
             item->_90 = 2;
         }
-        break;
-    case 2:
-        if (fn_2_8F774(item->_78) == 0.0f && lbl_2_bss_3401BC != NULL) {
-            model = &lbl_2_bss_340140->_68->_34[item->_78];
+    } else if (item->_A8 == 2) {
+        if (fn_2_8F774(index) == 0.0f && lbl_2_bss_3401BC != NULL) {
+            model = &lbl_2_bss_340140->_68->_34[index];
             model->_54 = 0.0f;
             model->_5A = 1;
             model->_5C = 0.0f;
@@ -383,7 +382,6 @@ void fn_2_91C4C(Item1028* item) {
             model->_58 = 0;
             item->_90 = 2;
         }
-        break;
     }
 }
 
