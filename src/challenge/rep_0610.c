@@ -123,15 +123,20 @@ typedef struct Unk8036E548Actor {
     /* 0x040 */ f32 _040;
     /* 0x044 */ f32 _044;
     /* 0x048 */ f32 _048;
-    /* 0x04C */ u8 _04C[0x72 - 0x4C];
+    /* 0x04C */ u8 _04C[0x62 - 0x4C];
+    /* 0x062 */ s16 _062;
+    /* 0x064 */ u8 _064[0x72 - 0x64];
     /* 0x072 */ u16 _072[120];
-    /* 0x162 */ u16 _162[(0x25A - 0x162) / 2];
+    /* 0x162 */ u16 _162[(0x254 - 0x162) / 2];
+    /* 0x254 */ u8 _254;
+    /* 0x255 */ u8 _255[0x25A - 0x255];
     /* 0x25A */ u8 _25A;
     /* 0x25B */ u8 _25B;
     /* 0x25C */ u8 _25C[0x276 - 0x25C];
     /* 0x276 */ u8 _276;
     /* 0x277 */ u8 _277;
-    /* 0x278 */ u8 _278[0x27C - 0x278];
+    /* 0x278 */ u8 _278;
+    /* 0x279 */ u8 _279[0x27C - 0x279];
 } Unk8036E548Actor; // size: 0x27C
 
 typedef struct Unk8036E548 {
@@ -340,6 +345,7 @@ extern UnkPair0610 lbl_1_data_1E18[];
 extern u8 lbl_1_data_A940[];
 extern u8 lbl_1_data_2390[7];
 extern s16 lbl_1_data_A978[];
+extern u8 lbl_1_data_A938[8];
 extern u8 lbl_1_data_ABA8;
 extern Vec lbl_1_data_AD0C;
 extern Vec lbl_1_data_AD18;
@@ -1180,6 +1186,51 @@ void fn_1_10AA4(Unk10AA4* arg0, f32 arg1) {
     if (lbl_1_bss_67B8[0] != NULL) {
         lbl_1_bss_67B8[0]->_04 = arg1;
     }
+}
+
+// .text:0x000107B8 size:0x2EC
+// Inlines fn_1_D300 and inherits its difference; registers differ at the top
+void fn_1_107B8(void) {
+    u8 slot = lbl_1_bss_6940[lbl_1_bss_5F73]._44;
+    u8 anim;
+    UnkAnimRef0610* ref;
+    Unk0060Elem* elem;
+    lbl_8036E548._0C04[lbl_1_bss_5F73]._278 = slot == 0;
+    switch (slot) {
+    case 0:
+        lbl_8036E548._0C04[lbl_1_bss_5F73]._254 = 9;
+        break;
+    case 1:
+        lbl_8036E548._0C04[lbl_1_bss_5F73]._254 = 10;
+        break;
+    case 2:
+        lbl_8036E548._0C04[lbl_1_bss_5F73]._254 = 2;
+        break;
+    case 3:
+        lbl_8036E548._0C04[lbl_1_bss_5F73]._254 = 0;
+        break;
+    case 4:
+        lbl_8036E548._0C04[lbl_1_bss_5F73]._254 = 1;
+        break;
+    default:
+        lbl_8036E548._0C04[lbl_1_bss_5F73]._254 = 9;
+        break;
+    }
+    anim = lbl_1_bss_6940[lbl_1_bss_5F73]._45;
+    lbl_8036E548._0C04[lbl_1_bss_5F73]._062 = lbl_1_data_A938[slot] + anim;
+    ref = lbl_8036E548._0C04[lbl_1_bss_5F73]._010[slot];
+    elem = &lbl_8036E548._0060->_34[lbl_1_bss_5F73];
+    elem->_04 = ref;
+    elem->_0E = anim;
+    elem->_5C = 0.0f;
+    elem->_58 = 1;
+    elem->_59 = ref != NULL;
+    elem->_5A = ref != NULL;
+    elem->_60 = 0.0f;
+    fn_1_ECF8(lbl_1_bss_5F73, lbl_1_bss_6940[lbl_1_bss_5F73]._44, lbl_1_bss_5F69);
+    lbl_1_bss_5F5C = 0;
+    fn_1_D300(&lbl_8036E548._0C04[lbl_1_bss_5F73]);
+    fn_800B0A14_removeQueue();
 }
 
 // .text:0x0001073C size:0x7C
