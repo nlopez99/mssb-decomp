@@ -35,7 +35,9 @@ typedef struct UnkList0610 {
 
 typedef struct Unk0060Elem {
     /* 0x00 */ UnkList0610* _00;
-    /* 0x04 */ u8 _04[0x68 - 0x4];
+    /* 0x04 */ u8 _04[0x10 - 0x4];
+    /* 0x10 */ Control _10;
+    /* 0x54 */ u8 _54[0x68 - 0x54];
     /* 0x68 */ void* _68;
     /* 0x6C */ u8 _6C;
     /* 0x6D */ u8 _6D[0x90 - 0x6D];
@@ -444,6 +446,22 @@ void fn_1_16400(s8 arg0) {
 
 // .text:0x000163FC size:0x4
 void fn_1_163FC(void) {}
+
+// .text:0x0001620C size:0x1F0
+void fn_1_1620C(void) {
+    s32 i = 0;
+    do {
+        lbl_8036E548._0C04[i]._034 = 0.0f;
+        lbl_8036E548._0C04[i]._038 = 0.0f;
+        lbl_8036E548._0C04[i]._03C = 10.0f;
+        lbl_8036E548._0C04[i]._040 = 0.0f;
+        lbl_8036E548._0C04[i]._044 = 0.0f;
+        lbl_8036E548._0C04[i]._048 = 0.0f;
+        CTRLSetTranslation(&lbl_8036E548._0060->_34[i]._10, 0.0f, 0.0f, 0.0f);
+        CTRLSetRotation(&lbl_8036E548._0060->_34[i]._10, 0.0f, 0.0f, 0.0f);
+    } while (++i < 1);
+    fn_1_1347C();
+}
 
 // .text:0x000161D0 size:0x3C
 void fn_1_161D0(void) {
