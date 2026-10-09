@@ -13,7 +13,9 @@ typedef struct Obj0B08 {
     /* 0x00 */ Vec _00;
     /* 0x0C */ Vec _0C;
     /* 0x18 */ Vec _18;
-    /* 0x24 */ u8 _24[0x30 - 0x24];
+    /* 0x24 */ f32 _24;
+    /* 0x28 */ f32 _28;
+    /* 0x2C */ f32 _2C;
     /* 0x30 */ f32 _30;
     /* 0x34 */ f32 _34;
     /* 0x38 */ f32 _38;
@@ -26,7 +28,8 @@ typedef struct Obj0B08 {
     /* 0x70 */ f32 _70;
     /* 0x74 */ u8 _74[0x80 - 0x74];
     /* 0x80 */ s32 _80;
-    /* 0x84 */ u8 _84[0x8C - 0x84];
+    /* 0x84 */ s32 _84;
+    /* 0x88 */ u8 _88[0x8C - 0x88];
     /* 0x8C */ f32 _8C;
     /* 0x90 */ u8 _90[0x94 - 0x90];
     /* 0x94 */ s16 _94;
@@ -62,6 +65,8 @@ typedef struct Tracker0B08 {
     /* 0x441C */ u8 _441C;
     /* 0x441D */ u8 _441D[0x442F - 0x441D];
     /* 0x442F */ u8 _442F;
+    /* 0x4430 */ u8 _4430[0x44F2 - 0x4430];
+    /* 0x44F2 */ u8 _44F2;
 } Tracker0B08;
 
 typedef struct {
@@ -71,11 +76,61 @@ typedef struct {
 
 extern StadiumLights0B08 lbl_800F7478[14];
 
+typedef struct {
+    /* 0x0 */ s16 _0;
+    /* 0x2 */ s16 _2;
+    /* 0x4 */ u8 _4;
+    /* 0x5 */ u8 _5;
+} AnimEntry0B08; // size: 0x6
+
+// A player record in lbl_8036E548
+typedef struct {
+    /* 0x000 */ u8 _000[0x34];
+    /* 0x034 */ Vec _034;
+    /* 0x040 */ u8 _040[0x44 - 0x40];
+    /* 0x044 */ f32 _044;
+    /* 0x048 */ u8 _048[0x68 - 0x48];
+    /* 0x068 */ s16 _068;
+    /* 0x06A */ u8 _06A[0x25D - 0x6A];
+    /* 0x25D */ u8 _25D;
+    /* 0x25E */ u8 _25E[0x277 - 0x25E];
+    /* 0x277 */ u8 _277;
+    /* 0x278 */ u8 _278[0x27C - 0x278];
+} Player0B08; // size: 0x27C
+
+extern struct {
+    /* 0x0000 */ u8 _0000[0xC04];
+    /* 0x0C04 */ Player0B08 _0C04[18];
+} lbl_8036E548;
+
+extern struct {
+    /* 0x0 */ s16 _0;
+    /* 0x2 */ s16 _2;
+    /* 0x4 */ s16 _4;
+} lbl_2_data_2E80[6];
+extern Vec lbl_2_data_2EA4[57];
+extern AnimEntry0B08 lbl_2_data_3C84[];
+
+extern struct {
+    /* 0x000000 */ u8 _000000[0x1972BC];
+    /* 0x1972BC */ u8 _1972BC;
+    /* 0x1972BD */ u8 _1972BD[0x197746 - 0x1972BD];
+    /* 0x197746 */ s16 _197746;
+    /* 0x197748 */ u8 _197748[0x197756 - 0x197748];
+    /* 0x197756 */ s16 _197756[14];
+} *lbl_2_bss_1A824C;
+
+extern void fn_2_8CD58(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6);
 extern void fn_800BD2CC(s32 arg0, GXColor color);
+extern s32 fn_80062890(s32 id);
+extern void fn_800B0A14_removeQueue(void);
+extern s32 fn_2_8CC88(s32);
 extern f32 fn_2_4A18C(f32 angle);
 
 // Points to starMissionCompletionTracker
 extern Tracker0B08* lbl_2_bss_1A8248;
+
+static inline f32 calcAngle(f32 dx, f32 dz) { return atan2(-dx, -dz); }
 
 static inline void setObjType(Obj0B08* obj, u8 type) {
     obj->_C3 = type;
@@ -112,6 +167,19 @@ Vec lbl_2_data_2A340 = { 0.0f, 0.0f, 0.0f };
 f32 lbl_2_bss_A170;
 
 // .text:0x00071F60 size:0xD8
+void fn_2_71F60(void) {
+    s32 i;
+    if (lbl_2_bss_1A8248->_44F2 == 1 || lbl_2_bss_1A8248->_44F2 == 2 || lbl_2_bss_1A8248->_44F2 == 3) {
+        return;
+    }
+    for (i = 0; i < 8; i++) {
+        fn_2_71F20(&lbl_2_bss_1A8248->_1610[i]);
+    }
+    if (lbl_2_bss_1A824C->_1972BC != 0) {
+        lbl_2_bss_1A824C->_1972BC = 0;
+        fn_800B0A14_removeQueue();
+    }
+}
 
 // .text:0x00071F20 size:0x40
 void fn_2_71F20(Obj0B08* obj) {
@@ -236,6 +304,13 @@ void fn_2_6D250(Obj0B08* obj) { lbl_2_data_2A268[obj->_94](obj); }
 // .text:0x0006D164 size:0xEC
 
 // .text:0x0006D088 size:0xDC
+void fn_2_6D088(Obj0B08* obj) {
+    if (fn_2_8CC88(obj->_84) != 0) {
+        fn_2_68FBC(obj->_80, 7);
+        obj->_A2 = 30;
+        obj->_94 = 2;
+    }
+}
 
 // .text:0x0006D078 size:0x10
 void fn_2_6D078(Obj0B08* obj) { obj->_A2--; }
@@ -312,6 +387,18 @@ void fn_2_6BF88(Obj0B08* obj) { lbl_2_data_2A2AC[obj->_94](obj); }
 // .text:0x0006BE80 size:0x108
 
 // .text:0x0006BDE0 size:0xA0
+void fn_2_6BDE0(Obj0B08* obj) {
+    s32 alpha;
+    fn_2_68F08(obj->_80, 1);
+    obj->_8C += 0.1;
+    alpha = 256.0f * obj->_8C;
+    if (alpha < 0xFF) {
+        fn_2_68D90(obj->_80, alpha);
+    } else {
+        fn_2_68D90(obj->_80, 0xFF);
+        obj->_94 = 2;
+    }
+}
 
 // .text:0x0006BDD4 size:0xC
 void fn_2_6BDD4(Obj0B08* obj) { obj->_94 = 2; }
@@ -322,6 +409,18 @@ void fn_2_6BD9C(Obj0B08* obj) { lbl_2_data_2A2B8[obj->_94](obj); }
 // .text:0x0006BCAC size:0xF0
 
 // .text:0x0006BC0C size:0xA0
+void fn_2_6BC0C(Obj0B08* obj) {
+    s32 alpha;
+    fn_2_68F08(obj->_80, 1);
+    obj->_8C += 0.1;
+    alpha = 256.0f * obj->_8C;
+    if (alpha < 0xFF) {
+        fn_2_68D90(obj->_80, alpha);
+    } else {
+        fn_2_68D90(obj->_80, 0xFF);
+        obj->_94 = 2;
+    }
+}
 
 // .text:0x0006BC00 size:0xC
 void fn_2_6BC00(Obj0B08* obj) { obj->_94 = 2; }
@@ -338,6 +437,18 @@ void fn_2_6BB7C(Obj0B08* obj) {
 }
 
 // .text:0x0006BAD8 size:0xA4
+void fn_2_6BAD8(Obj0B08* obj) {
+    s32 alpha;
+    obj->_8C -= 0.1;
+    alpha = 255.0f * obj->_8C;
+    if (alpha > 1) {
+        fn_2_68D90(obj->_80, alpha);
+    } else {
+        fn_2_68D90(obj->_80, 0);
+        fn_2_68F08(obj->_80, 0);
+        obj->_94 = 2;
+    }
+}
 
 // .text:0x0006BAAC size:0x2C
 void fn_2_6BAAC(Obj0B08* obj) {
@@ -411,6 +522,22 @@ void fn_2_6ACF0(void) {}
 // .text:0x0006ABFC size:0xF4
 
 // .text:0x0006AB3C size:0xC0
+void fn_2_6AB3C(s32 index, Vec* pos, f32 angle) {
+    Obj0B08* obj = &lbl_2_bss_1A8248->_1610[index];
+    memcpy(&obj->_00, pos, sizeof(Vec));
+    obj->_0C.x = 0.0f;
+    obj->_0C.y = 0.0f;
+    obj->_0C.z = 0.0f;
+    obj->_18.x = 0.0f;
+    obj->_18.y = 0.0f;
+    obj->_18.z = 0.0f;
+    obj->_30 = angle;
+    obj->_6C = obj->_00.x;
+    obj->_70 = obj->_00.z;
+    obj->_38 = 0.0f;
+    obj->_BB = 0;
+    obj->_30 = obj->_34 = calcAngle(-obj->_00.x, -obj->_00.z);
+}
 
 // .text:0x0006AABC size:0x80
 void fn_2_6AABC(s32 index, Vec* pos) {
@@ -436,6 +563,28 @@ void fn_2_6AAB8(void) {}
 // .text:0x0006A708 size:0x174
 
 // .text:0x0006A628 size:0xE0
+void fn_2_6A628(void) {
+    Mtx m;
+    Vec v;
+    Tracker0B08* tracker = lbl_2_bss_1A8248;
+    if (!(tracker->_1610[0]._38 <= 0.0f)) {
+        PSMTXRotRad(m, 'Y', tracker->_1610[0]._4C);
+        v.x = 0.0f;
+        v.y = 0.0f;
+        v.z = -tracker->_1610[0]._38;
+        PSMTXMultVec(m, &v, &v);
+        tracker->_1610[0]._18.x = v.x;
+        tracker->_1610[0]._18.z = v.z;
+        tracker->_1610[0]._00.x += tracker->_1610[0]._18.x;
+        tracker->_1610[0]._00.z += tracker->_1610[0]._18.z;
+    }
+    tracker->_1610[0]._0C.x = tracker->_1610[0]._00.x;
+    tracker->_1610[0]._0C.z = tracker->_1610[0]._00.z;
+    if (0.0f == tracker->_1610[0]._38) {
+        tracker->_1610[0]._24 = 0.0f;
+        tracker->_1610[0]._2C = 0.0f;
+    }
+}
 
 // .text:0x0006A5A8 size:0x80
 void fn_2_6A5A8(s32 index) {
@@ -476,8 +625,22 @@ void fn_2_696D4(s32 index) {
 // .text:0x00069070 size:0x260
 
 // .text:0x00068FBC size:0xB4
+void fn_2_68FBC(s32 index, s32 anim) {
+    Obj0B08* obj = &lbl_2_bss_1A8248->_1610[index];
+    AnimEntry0B08* entry = &lbl_2_data_3C84[anim];
+    if (lbl_2_bss_1A824C->_197756[obj->_80] != anim) {
+        fn_2_8CD58(obj->_80, entry->_0, entry->_4, 1, entry->_2, 0, 0);
+        lbl_2_bss_1A824C->_197756[obj->_80] = anim;
+    }
+}
 
 // .text:0x00068F24 size:0x98
+void fn_2_68F24(s32 index, s32 anim) {
+    Obj0B08* obj = &lbl_2_bss_1A8248->_1610[index];
+    AnimEntry0B08* entry = &lbl_2_data_3C84[anim];
+    fn_2_8CD58(obj->_80, entry->_0, entry->_4, 1, entry->_2, 0, 0);
+    lbl_2_bss_1A824C->_197756[obj->_80] = anim;
+}
 
 // .text:0x00068F08 size:0x1C
 void fn_2_68F08(s32 index, s8 value) {
@@ -486,6 +649,19 @@ void fn_2_68F08(s32 index, s8 value) {
 }
 
 // .text:0x00068E68 size:0xA0
+void fn_2_68E68(void) {
+    Obj0B08* obj;
+    Player0B08* player;
+    s32 i;
+    for (i = 0; i < lbl_2_bss_1A824C->_197746; i++) {
+        player = &lbl_8036E548._0C04[i];
+        obj = &lbl_2_bss_1A8248->_1610[i];
+        memcpy(&player->_034, &obj->_00, sizeof(Vec));
+        player->_044 = obj->_4C;
+        player->_25D = obj->_C0;
+        player->_277 = obj->_CA;
+    }
+}
 
 // .text:0x00068DE8 size:0x80
 void fn_2_68DE8(s32 index, Vec* out) {
@@ -513,6 +689,24 @@ void fn_2_68D90(s32 index, u8 value) {
 // .text:0x00068A88 size:0xCC
 
 // .text:0x000689CC size:0xBC
+s16 fn_2_689CC(s32 index) {
+    Vec pos;
+    Vec point;
+    s32 i;
+    s32 bestIndex = 0;
+    f32 dist;
+    f32 best = 10000.0f;
+    memcpy(&pos, &lbl_2_bss_1A8248->_1610[index]._00, sizeof(Vec));
+    for (i = 0; i < 51; i++) {
+        memcpy(&point, &lbl_2_data_2EA4[i], sizeof(Vec));
+        dist = PSVECDistance(&pos, &point);
+        if (dist < best) {
+            best = dist;
+            bestIndex = i;
+        }
+    }
+    return bestIndex;
+}
 
 // .text:0x00068940 size:0x8C
 f32 fn_2_68940(s32 index, s32 target) {
@@ -523,6 +717,14 @@ f32 fn_2_68940(s32 index, s32 target) {
 }
 
 // .text:0x000688A4 size:0x9C
+f32 fn_2_688A4(s32 index, s32 point) {
+    Vec pos;
+    Obj0B08* obj = &lbl_2_bss_1A8248->_1610[index];
+    f32 angle;
+    memcpy(&pos, &lbl_2_data_2EA4[point], sizeof(Vec));
+    angle = atan2(-(pos.x - obj->_00.x), -(pos.z - obj->_00.z));
+    return fn_2_4A18C(obj->_4C) - angle;
+}
 
 // .text:0x000687A4 size:0x100
 
@@ -574,8 +776,29 @@ void fn_2_68638(s32 index, s8 value) {
 // .text:0x000684D0 size:0x168
 
 // .text:0x000683EC size:0xE4
+void fn_2_683EC(void) {
+    Obj0B08* obj;
+    Tracker0B08* tracker = lbl_2_bss_1A8248;
+    tracker->_1610[1]._00.x = tracker->_1610[0]._00.x;
+    tracker->_1610[1]._00.y = tracker->_1610[0]._00.y;
+    tracker->_1610[1]._00.z = tracker->_1610[0]._00.z;
+    obj = &lbl_2_bss_1A8248->_1610[1];
+    fn_2_6AABC(1, &lbl_2_data_2EA4[lbl_2_bss_1A8248->_1610[0]._B2]);
+    obj->_30 = obj->_34 = obj->_4C;
+    lbl_2_bss_1A8248->_1610[1]._B2 = lbl_2_bss_1A8248->_1610[0]._B2;
+    setObjType(&lbl_2_bss_1A8248->_1610[1], 6);
+    lbl_2_bss_1A8248->_442F = 1;
+}
 
 // .text:0x0006832C size:0xC0
+void fn_2_6832C(void) {
+    Obj0B08* obj = &lbl_2_bss_1A8248->_1610[1];
+    fn_2_6AABC(1, &lbl_2_data_2EA4[5]);
+    obj->_30 = obj->_34 = obj->_4C;
+    lbl_2_bss_1A8248->_1610[1]._B2 = 5;
+    setObjType(&lbl_2_bss_1A8248->_1610[1], 6);
+    lbl_2_bss_1A8248->_442F = 1;
+}
 
 // .text:0x00068308 size:0x24
 void fn_2_68308(void) {
@@ -584,3 +807,19 @@ void fn_2_68308(void) {
 }
 
 // .text:0x00068260 size:0xA8
+void fn_2_68260(Obj0B08* obj) {
+    u8 stage = lbl_2_bss_1A8248->_441C;
+    s32 base = lbl_2_data_2E80[stage]._0 * 2;
+    s32 a = base - lbl_2_data_2E80[stage]._4 * 2;
+    s32 b = base - lbl_2_data_2E80[stage]._2 * 2;
+    Player0B08* player;
+    if (obj->_80 == 0 && (player = &lbl_8036E548._0C04[0]) != NULL) {
+        if (player->_068 == a || player->_068 == b) {
+            if (stage == 5) {
+                fn_80062890(1);
+            } else {
+                fn_80062890(0);
+            }
+        }
+    }
+}
