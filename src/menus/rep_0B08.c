@@ -39,7 +39,7 @@ typedef struct Obj0B08 {
     /* 0x94 */ s16 _94;
     /* 0x96 */ s16 _96;
     /* 0x98 */ s16 _98;
-    /* 0x9A */ u8 _9A[0x9C - 0x9A];
+    /* 0x9A */ s16 _9A;
     /* 0x9C */ s16 _9C;
     /* 0x9E */ u8 _9E[0xA0 - 0x9E];
     /* 0xA0 */ s16 _A0;
@@ -171,6 +171,8 @@ extern f32 fn_2_4A18C(f32 angle);
 extern f32 fn_2_4A1E8(f32 x, f32 z);
 extern s16 fn_2_4A150(s16 angle);
 extern s32 fn_2_4A2C4(f32 angle);
+extern s16 fn_2_4A234(f32 x, f32 z);
+extern s16 fn_2_4A310(s16 a, s16 b);
 
 // Points to starMissionCompletionTracker
 extern Tracker0B08* lbl_2_bss_1A8248;
@@ -315,6 +317,35 @@ void fn_2_6FE34(Obj0B08* obj) { lbl_2_data_2A210[obj->_94](obj); }
 // .text:0x0006FB0C size:0x328
 
 // .text:0x0006F88C size:0x280
+void fn_2_6F88C(Obj0B08* obj) {
+    s32 index = obj->_80;
+    s32 target = lbl_2_bss_1A8248->_1610[0]._80;
+    s8 state;
+    s32 slot;
+    if (index >= 2 && index <= 6) {
+        state = lbl_2_bss_1A8248->_1610[0]._CD;
+        slot = lbl_2_bss_1A8248->_1610[0]._CC;
+        if (state == 1 && slot == index) {
+            fn_2_68FBC(index, 1);
+            obj->_C4 = 2;
+            obj->_CB = 0;
+            obj->_94 = 2;
+            return;
+        }
+    }
+    if (fn_2_68C80(index, target)) {
+        if (index == 1) {
+            fn_2_68FBC(index, 1);
+            obj->_C4 = 2;
+            obj->_CB = 0;
+            obj->_94 = 2;
+        } else if (index >= 2 && index <= 6) {
+            obj->_CB = 0;
+        }
+    } else {
+        obj->_CB = -1;
+    }
+}
 
 // .text:0x0006F78C size:0x100
 void fn_2_6F78C(Obj0B08* obj) {
@@ -528,6 +559,16 @@ void fn_2_6D078(Obj0B08* obj) { obj->_A2--; }
 void fn_2_6D040(Obj0B08* obj) { lbl_2_data_2A274[obj->_94](obj); }
 
 // .text:0x0006CDD4 size:0x26C
+void fn_2_6CDD4(Obj0B08* obj) {
+    s32 index = obj->_80;
+    fn_2_68F08(obj->_80, 1);
+    memcpy(&obj->_74, &lbl_2_data_2EA4[lbl_2_bss_1A8248->_1610[0]._B0], sizeof(Vec));
+    fn_2_6A450(index, obj->_74.x, obj->_74.z);
+    obj->_BA = 12;
+    fn_2_69E1C(index);
+    fn_2_68FBC(index, 0);
+    obj->_94 = 1;
+}
 
 // .text:0x0006CCB8 size:0x11C
 void fn_2_6CCB8(Obj0B08* obj) {
@@ -1161,8 +1202,68 @@ s32 fn_2_69554(s32 index, f32 x, f32 z) {
 }
 
 // .text:0x000692D0 size:0x284
+void fn_2_692D0(s32 index, f32 dx, f32 dz, s32 frames, f32* outX, f32* outZ, f32* outDist) {
+    Obj0B08* obj = &lbl_2_bss_1A8248->_1610[index];
+    f32 dist = 0.0f;
+    f32 speed = obj->_38;
+    f32 len;
+    f32 nx;
+    f32 nz;
+    s16 angle;
+    s32 i;
+    if (0.0f == dx && 0.0f == dz) {
+        *outX = obj->_00.x;
+        *outZ = obj->_00.z;
+        *outDist = dist;
+        return;
+    }
+    len = dolsqrtf2(dx * dx + dz * dz);
+    nx = dx / len;
+    nz = dz / len;
+    angle = fn_2_4A234(nx, nz);
+    if (!(obj->_38 < 0.05f) && obj->_9A >= 0 && fn_2_4A310(angle, obj->_9A) > 0x2A8) {
+        speed = 0.0f;
+    }
+    for (i = 0; i <= obj->_B7; i++) {
+        speed += obj->_44;
+        if (speed > obj->_40) {
+            dist += obj->_40;
+            break;
+        }
+        dist += speed;
+    }
+    frames -= i + 1;
+    dist = obj->_40 * frames + dist;
+    *outDist = dist;
+    *outX = nx * dist + obj->_00.x;
+    *outZ = nz * dist + obj->_00.z;
+}
 
 // .text:0x00069070 size:0x260
+f32 fn_2_69070(s32 index, f32 x, f32 z) {
+    Obj0B08* obj = &lbl_2_bss_1A8248->_1610[index];
+    f32 dz;
+    f32 dx;
+    f32 sqx;
+    f32 sqz;
+    f32 proj;
+    f32 dist;
+    if (obj->_38 < 0.01f) {
+        dx = obj->_00.x - x;
+        dz = obj->_00.z - z;
+        sqx = dx * dx;
+        sqz = dz * dz;
+        return dolsqrtf2(sqx + sqz);
+    }
+    dx = x - obj->_00.x;
+    dz = z - obj->_00.z;
+    proj = obj->_24 * dx + obj->_2C * dz;
+    dist = dx * dx + dz * dz - proj * proj;
+    if (dist < 0.0f) {
+        return 0.0f;
+    }
+    return dolsqrtf2(dist);
+}
 
 // .text:0x00068FBC size:0xB4
 void fn_2_68FBC(s32 index, s32 anim) {
@@ -1223,7 +1324,7 @@ void fn_2_68D90(s32 index, u8 value) {
 }
 
 // .text:0x00068C80 size:0x110
-s32 fn_2_68C80(s32 index, s32 target) {
+u8 fn_2_68C80(s32 index, s32 target) {
     Obj0B08* obj = &lbl_2_bss_1A8248->_1610[index];
     Obj0B08* other = &lbl_2_bss_1A8248->_1610[target];
     f32 dist = PSVECDistance(&obj->_00, &other->_00);
