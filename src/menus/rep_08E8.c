@@ -101,7 +101,7 @@ typedef struct MenuTracker08E8 {
     /* 0x444D */ s8 _444D[0x36];
     /* 0x4483 */ s8 _4483[0x36];
     /* 0x44B9 */ s8 _44B9[0x36];
-    /* 0x44EF */ u8 _44EF;
+    /* 0x44EF */ s8 _44EF;
     /* 0x44F0 */ u8 _44F0[0x44F7 - 0x44F0];
     /* 0x44F7 */ u8 _44F7;
     /* 0x44F8 */ s8 _44F8[5];
@@ -292,6 +292,11 @@ typedef struct MenuMissionDef08E8 {
 
 extern MenuCharEntry08E8 lbl_800E8558[54];
 extern MenuCharDef08E8 lbl_801094E4[54];
+extern u8 lbl_80361C18[0x38];
+extern struct {
+    /* 0x0000 */ u8 _0000[0x4380];
+    /* 0x4380 */ u8 _4380[6][0x48];
+} lbl_8034E9A0;
 typedef struct MenuTextLayout08E8 {
     /* 0x00 */ s32 _00;
     /* 0x04 */ s32 _04[15];
@@ -350,6 +355,11 @@ extern void fn_800A7D4C(s32, void*);
 extern void fn_800BD670(void* model, MtxPtr mtx);
 extern void fn_80031CA4(Vec* pos, u32* glow);
 extern void LITXForm(LITObj* light, Mtx view);
+extern void LITAlloc(LITObj** light);
+extern void LITInitAttn(LITObj* light, f32 a0, f32 a1, f32 a2, f32 k0, f32 k1, f32 k2);
+extern void LITInitPos(LITObj* light, f32 x, f32 y, f32 z);
+extern void LITInitColor(LITObj* light, GXColor color);
+extern void LITInitDir(LITObj* light, f32 nx, f32 ny, f32 nz);
 extern BOOL fn_8006CDC0(s32 index);
 extern void starMissionRelated2(void);
 extern void fn_8003BF54(s32, s32, s32, s32, s32, s32, s32, s32, s32);
@@ -723,6 +733,33 @@ void fn_2_4C6A8(void) {
     }
 }
 
+// .text:0x0004C3EC size:0x2BC
+void fn_2_4C3EC(void) {
+    s32 i;
+    s32 j;
+    s32 teams[6];
+    u8* seen = lbl_80361C18;
+
+    for (i = 0; i < 6; i++) {
+        teams[i] = 0;
+    }
+    for (i = 0; i < 0x36; i++) {
+        seen[i] = 0;
+    }
+    for (i = 0; i < 6; i++) {
+        if (teams[i] != 0) {
+            for (j = 0; j < 9; j++) {
+                seen[lbl_8034E9A0._4380[i][j]] = 1;
+            }
+        }
+    }
+    for (i = 0; i < 0x36; i++) {
+        if (fn_2_44F34(i) && ((MenuCharacter08E8*)lbl_2_bss_1A8248)[i]._31 == 1) {
+            seen[i] = 1;
+        }
+    }
+}
+
 // .text:0x0004C3D8 size:0x14
 s32 fn_2_4C3D8(s32 index) {
     return lbl_2_data_3EC8[index];
@@ -870,13 +907,13 @@ void fn_2_4AB1C(void) {
         lbl_2_bss_1A824C->_197796 = 0;
         lbl_2_bss_1A824C->_197798 = 0;
     }
-    if (lbl_2_bss_1A8248->_441C != 5 || (s32)lbl_2_bss_1A8248->_44EF != 1) {
+    if (lbl_2_bss_1A8248->_441C != 5 || lbl_2_bss_1A8248->_44EF != 1) {
         if (!(lbl_2_bss_1A8248->_4427 & (1 << lbl_2_bss_1A8248->_441E))) {
             lbl_2_bss_1A8248->_4427 |= 1 << lbl_2_bss_1A8248->_441E;
         }
     }
     if (lbl_2_bss_1A824C->_197843 == 0) {
-        if (lbl_2_bss_1A8248->_441C == 5 && (s32)lbl_2_bss_1A8248->_44EF == 1) {
+        if (lbl_2_bss_1A8248->_441C == 5 && lbl_2_bss_1A8248->_44EF == 1) {
             lbl_2_bss_1A8248->_4422++;
         } else if (!(lbl_2_bss_1A8248->_4426 & (1 << lbl_2_bss_1A8248->_441E))) {
             lbl_2_bss_1A8248->_4422++;
@@ -1078,6 +1115,35 @@ void fn_2_4906C(void) {
     for (i = 0; i < 15; i++) {
         lbl_2_bss_1A824C->_19542C[i] = lbl_80366B18._798[lbl_2_bss_1A824C->_1972B8]->_04[i];
     }
+}
+
+// .text:0x00048DB4 size:0x2B8
+void fn_2_48DB4(void) {
+    GXColor color0 = { 0xFF, 0xFF, 0xFF, 0xFF };
+    GXColor color1 = { 0xFF, 0xFF, 0xFF, 0xFF };
+    GXColor color2 = { 0xFF, 0xFF, 0xFF, 0xFF };
+
+    LITAlloc(&lbl_8036E548._00AC[0]);
+    LITAlloc(&lbl_8036E548._00AC[1]);
+    LITAlloc(&lbl_8036E548._00AC[2]);
+    LITAlloc(&lbl_8036E548._00AC[3]);
+    LITInitAttn(lbl_8036E548._00AC[0], 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+    LITInitPos(lbl_8036E548._00AC[0], 5.0f, -40.0f, -35.0f);
+    LITInitDir(lbl_8036E548._00AC[0], 0.0f, 0.0f, 0.0f);
+    LITInitColor(lbl_8036E548._00AC[0], color2);
+    LITInitDir(lbl_8036E548._00AC[0], -5.0f, -40.0f, -35.0f);
+    LITInitAttn(lbl_8036E548._00AC[1], 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+    LITInitPos(lbl_8036E548._00AC[1], -5.0f, -45.0f, -30.0f);
+    LITInitDir(lbl_8036E548._00AC[1], 0.0f, 0.0f, 0.0f);
+    LITInitColor(lbl_8036E548._00AC[1], color1);
+    LITInitAttn(lbl_8036E548._00AC[2], 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+    LITInitPos(lbl_8036E548._00AC[2], 0.0f, -40.0f, -35.0f);
+    LITInitDir(lbl_8036E548._00AC[2], 0.0f, 0.0f, 0.0f);
+    LITInitColor(lbl_8036E548._00AC[2], color0);
+    LITInitAttn(lbl_8036E548._00AC[3], 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+    LITInitPos(lbl_8036E548._00AC[3], 0.0f, -40.0f, -35.0f);
+    LITInitDir(lbl_8036E548._00AC[3], 0.0f, 0.0f, 0.0f);
+    LITInitColor(lbl_8036E548._00AC[3], color0);
 }
 
 // .text:0x00048D54 size:0x60
