@@ -13,6 +13,7 @@
 #include "game/rep_1188.h"
 #include "Dolphin/gx.h"
 #include "string.h"
+#include "Dolphin/rand.h"
 #include "musyx/musyx.h"
 
 // g_Minigame's three entries in this minigame
@@ -174,6 +175,12 @@ extern struct {
 extern int LERPToNewRange_Float(int value, int inMin, int inMax, int outMin, int outMax);
 extern f32 lbl_3_data_47BC[5];
 extern s8 lbl_3_data_21EC0[4];
+extern s8 lbl_3_data_21E20[3];
+extern u16 lbl_3_data_81FC[0x39];
+extern struct {
+    /* 0x0000 */ u8 _0000[0x2C50];
+    /* 0x2C50 */ struct UnkPlayer3880* _2C50[13];
+} lbl_8036E548;
 
 f32 lbl_3_data_26698[3] = { 0.5f, 0.0f, -0.5f };
 s8 lbl_3_data_266A4 = -1;
@@ -197,7 +204,24 @@ void fn_3_147358(void) {
 
 // .text:0x001471C4 size:0x194 mapped:0x80786258
 void fn_3_1471C4(void) {
-    return;
+    switch (g_GameLogic.gameStatus) {
+    case GAME_STATUS_LOAD_GAME:
+        fn_3_146A90();
+        break;
+    case GAME_STATUS_TRANSITION_MINIGAME_TO_BATTING:
+        fn_3_1469CC();
+        break;
+    case GAME_STATUS_DEFAULT:
+        fn_3_146928();
+        break;
+    case GAME_STATUS_AT_BAT:
+        break;
+    case GAME_STATUS_LIVE_BALL:
+        fn_3_146408();
+        break;
+    case GAME_STATUS_INNING_TRANSITION:
+        break;
+    }
 }
 
 // .text:0x001471C0 size:0x4 mapped:0x80786254
@@ -367,7 +391,31 @@ void fn_3_146928(void) {
 
 // .text:0x00146408 size:0x520 mapped:0x8078549C
 void fn_3_146408(void) {
-    return;
+    int i;
+
+    if (fn_3_108854() != 0) {
+        return;
+    }
+    if (g_Minigame.turnOverStatus == 0) {
+        g_Minigame._17C0++;
+    }
+    if (g_Minigame._17C4 != 0) {
+        g_Minigame._17C4--;
+        if (g_Minigame._17C4 < 600 && g_Minigame._17C4 != 0 && g_Minigame._17C4 % 60 == 0) {
+            fn_3_90064(lbl_3_data_81FC[40]);
+        }
+    }
+    fn_3_145EB8();
+    fn_3_14443C();
+    for (i = 0; i < 40; i++) {
+        if (MG._00A8[i].active) {
+            fn_3_143358(i);
+        }
+    }
+    fn_3_142284();
+    fn_3_144CB8();
+    fn_3_142CA8();
+    fn_3_1461A4();
 }
 
 // .text:0x001461A4 size:0x264 mapped:0x80785238
@@ -681,12 +729,142 @@ void fn_3_1453BC(int coin) {
 
 // .text:0x00144CB8 size:0x704 mapped:0x80783D4C
 void fn_3_144CB8(void) {
-    return;
+    Unk37A8Fielder* fielder;
+    InputStruct* input;
+    s8 list[4];
+    s8* p;
+    s8* q;
+    s8* r;
+    s8 tmp;
+    s8 roll;
+    int coin;
+    int left;
+    int player;
+    int i;
+    int j;
+
+    for (player = 0; player < 4; player++) {
+        if (g_Minigame.minigameFielderIndex[player] < 0) {
+            continue;
+        }
+        input = &g_Controls[g_Minigame.minigameControlStruct.characterIndex[player]];
+        fielder = &g_Fielders[g_Minigame.minigameFielderIndex[player]];
+        if (g_Minigame.minigameControlStruct.battingHandedness[player] != 0) {
+            input = &g_Minigame._1D7C[g_Minigame.minigameControlStruct.characterIndex[player]];
+        }
+        if (g_Minigame._1CA5[player] != 0) {
+            fn_3_144ADC(player);
+        } else if (g_Minigame._1C9A_arr[player] == 1) {
+            MG._1B3C[player]--;
+            if (MG._1B3C[player] <= 0) {
+                g_Minigame._1C9A_arr[player] = 2;
+                MG._1B3C[player] = lbl_3_data_21E68[15];
+            } else {
+                fielder->pos.x += fielder->_038 * lbl_3_data_21E24[14];
+                fielder->pos.y += fielder->_050;
+                fielder->pos.z += fielder->_03C * lbl_3_data_21E24[14];
+                fielder->_050 -= lbl_3_data_21E24[16];
+            }
+            fn_3_1573AC(lbl_8036E548._2C50[player]);
+        } else if (g_Minigame._1C9A_arr[player] == 2) {
+            if (g_Minigame.turnOverStatus == 0) {
+                MG._1B3C[player]--;
+                if (MG._1B3C[player] <= 0) {
+                    fielder->pos.x = lbl_3_data_21B94[g_Minigame._1CAD[player]].x;
+                    fielder->pos.y = lbl_3_data_21B94[g_Minigame._1CAD[player]].y;
+                    fielder->pos.z = lbl_3_data_21B94[g_Minigame._1CAD[player]].z;
+                    fielder->_00C = lbl_3_data_21D2C[0];
+                    g_Minigame._1C9A_arr[player] = 0;
+                    g_Minigame._1CA5[player] = 2;
+                }
+            }
+        } else if (MG._1B34[player] >= 0) {
+            MG._1B34[player]++;
+            left = LERPToNewRange_Float(MG._1B50[player], 0, lbl_3_data_21E68[19], lbl_3_data_21E68[2], lbl_3_data_21E68[3]);
+            if (MG._1B34[player] == lbl_3_data_21E68[4]) {
+                fn_3_14471C(player);
+                MG._1C7E[player][0] = -1;
+            } else if (MG._1B34[player] >= left) {
+                MG._1B34[player] = -1;
+                g_Minigame._1C92[player] = -1;
+            }
+        } else if (input->newButtonInput & 0x200) {
+            if (g_Minigame.turnOverStatus != 0) {
+                continue;
+            }
+            g_Minigame._1C92[player] = 3;
+            goto throw_coin;
+        } else if (input->newButtonInput & 0x100) {
+            if (g_Minigame.turnOverStatus != 0) {
+                continue;
+            }
+            if (input->controlStickAngle >= 0xE00 || (input->buttonInput & 2)) {
+                g_Minigame._1C92[player] = 0;
+            } else if (input->controlStickAngle >= 0xA00) {
+                continue;
+            } else if (input->controlStickAngle >= 0x600 || (input->buttonInput & 1)) {
+                g_Minigame._1C92[player] = 2;
+            } else if (input->controlStickAngle >= 0x200 || (input->buttonInput & 8)) {
+                g_Minigame._1C92[player] = 1;
+            } else if (input->controlStickAngle >= 0 || (input->buttonInput & 2)) {
+                g_Minigame._1C92[player] = 0;
+            } else {
+                continue;
+            }
+        throw_coin:
+            coin = MG._1C7E[player][0];
+            if (MG._1B84[coin] != 5 || g_Minigame._1C92[player] != 3) {
+                MG._1BE8[coin] = g_Minigame._1C92[player];
+                fielder->_10C = lbl_3_data_21BC4[MG._1BE8[coin]][1].x;
+                fielder->_110 = lbl_3_data_21BC4[MG._1BE8[coin]][1].y;
+                fielder->_114 = lbl_3_data_21BC4[MG._1BE8[coin]][1].z;
+            } else {
+                p = list;
+                for (i = 0; i < 4; i++) {
+                    if (i != player) {
+                        *p++ = i;
+                    }
+                }
+                for (i = 0; i < 2; i++) {
+                    for (j = i + 1; j < 3; j++) {
+                        if (g_Minigame.miniGameCurrentPoints[list[i]] < g_Minigame.miniGameCurrentPoints[list[j]]) {
+                            tmp = list[i];
+                            list[i] = list[j];
+                            list[j] = tmp;
+                        }
+                    }
+                }
+                roll = rand() % 100;
+                for (i = 0; i < 3; i++) {
+                    roll -= lbl_3_data_21E20[i];
+                    if (roll < 0) {
+                        roll = list[i];
+                        break;
+                    }
+                }
+                fielder->_10C = lbl_3_data_21B94[roll].x + 1.5 * (s8)(__abs(roll - player) / (roll - player));
+                fielder->_110 = 0.0f;
+                fielder->_114 = lbl_3_data_21B94[roll].z;
+                MG._1BE8[coin] = -1 - roll;
+            }
+            g_Minigame._1C8E[player] = MG._1C7E[player][0];
+            MG._193A[coin] = 3;
+            MG._1B34[player] = 0;
+            if (g_Minigame._1C92[player] == 3) {
+                MG._193A[coin] = 4;
+            }
+            fielder->_048 = game_atan2(fielder->_10C - fielder->pos.x, fielder->_114 - fielder->pos.z);
+        } else if (input->buttonInput & 4) {
+            g_Minigame._1CA5[player] = 1;
+            MG._1B44[player] = 0;
+            fn_3_90064(0x2DB);
+        }
+    }
 }
 
 // .text:0x00144ADC size:0x1DC mapped:0x80783B70
-static inline f32 Lerp37A8(f32 a, f32 b, f32 t) {
-    return (b - a) * t + a;
+static inline f32 Lerp37A8(f32 to, f32 from, f32 t) {
+    return (to - from) * t + from;
 }
 
 // 82.86%: the target reloads _1B44[player] for the increment after comparing it, and
@@ -707,7 +885,7 @@ void fn_3_144ADC(int player) {
     }
     switch (g_Minigame._1CA5[player]) {
     case 1:
-        fielder->_00C = Lerp37A8(lbl_3_data_21D2C[1], lbl_3_data_21D2C[0], (f32)MG._1B44[player] / (f32)lbl_3_data_21E68[16]);
+        fielder->_00C = Lerp37A8(lbl_3_data_21D2C[0], lbl_3_data_21D2C[1], (f32)MG._1B44[player] / (f32)lbl_3_data_21E68[16]);
         if (MG._1B44[player] >= lbl_3_data_21E68[16]) {
             g_Minigame._1CA5[player] = 2;
             MG._1B44[player] = 0;
@@ -720,7 +898,7 @@ void fn_3_144ADC(int player) {
         }
         break;
     case 3:
-        fielder->_00C = Lerp37A8(lbl_3_data_21D2C[0], lbl_3_data_21D2C[1], (f32)MG._1B44[player] / (f32)lbl_3_data_21E68[16]);
+        fielder->_00C = Lerp37A8(lbl_3_data_21D2C[1], lbl_3_data_21D2C[0], (f32)MG._1B44[player] / (f32)lbl_3_data_21E68[16]);
         if (MG._1B44[player] >= lbl_3_data_21E68[16]) {
             g_Minigame._1CA5[player] = 0;
             MG._1B44[player] = 0;
@@ -822,7 +1000,7 @@ void fn_3_14443C(void) {
             fn_3_14402C(i);
         } else if (MG._0000[i]._2A == 1) {
             MG._0000[i]._1C--;
-            MG._0000[i].pos.y = Lerp37A8(lbl_3_data_21D1C[MG._0000[i]._2B * 2], lbl_3_data_21D1C[MG._0000[i]._2B * 2 + 1],
+            MG._0000[i].pos.y = Lerp37A8(lbl_3_data_21D1C[MG._0000[i]._2B * 2 + 1], lbl_3_data_21D1C[MG._0000[i]._2B * 2],
                                          (f32)MG._0000[i]._1A / (f32)lbl_3_data_21E68[5]);
             if (MG._0000[i]._1C <= 0) {
                 MG._0000[i]._2A = 2;
