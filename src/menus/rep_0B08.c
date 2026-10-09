@@ -249,6 +249,7 @@ Obj0B08Fn lbl_2_data_2A2EC[21] = {
 };
 Vec lbl_2_data_2A340 = { 0.0f, 0.0f, 0.0f };
 
+u8 lbl_2_bss_A174[0x6CC];
 f32 lbl_2_bss_A170;
 
 // .text:0x00071F60 size:0xD8
