@@ -38,7 +38,7 @@ s32 fn_2_69554(s32 index, f32 x, f32 z);
 void fn_2_696D4(s32 index);
 void fn_2_69710(s32 index);
 void fn_2_698EC(s32 index, f32 limit);
-void fn_2_699D4(void);
+void fn_2_699D4(s32 index);
 void fn_2_69E1C(s32 index);
 void fn_2_6A450(s32 index, f32 x, f32 z);
 void fn_2_6A5A8(s32 index);

@@ -303,6 +303,46 @@ void fn_2_71A38(Obj0B08* obj) { lbl_2_data_2A1F4[obj->_94](obj); }
 // .text:0x000709A0 size:0x6F8
 
 // .text:0x000705C0 size:0x3E0
+void fn_2_705C0(Obj0B08* obj) {
+    s32 index = obj->_80;
+    Obj0B08* other;
+    f32 diff;
+    s32 hit;
+    s32 i;
+    fn_2_69E1C(index);
+    fn_2_68260(obj);
+    if (obj->_38 <= 0.0f) {
+        obj->_34 = obj->_4C;
+        setObjType(&lbl_2_bss_1A8248->_1610[index], 4);
+    }
+    for (i = 1; i < 7; i++) {
+        hit = fn_2_68C80(index, i);
+        if (hit && i == 1 && lbl_2_bss_1A8248->_44F3 == 0) {
+            obj->_C4 = 2;
+            obj->_CB = i;
+            setObjType(&lbl_2_bss_1A8248->_1610[index], 3);
+            return;
+        }
+        obj->_CB = -1;
+    }
+    if (obj->_CD == 1) {
+        other = &lbl_2_bss_1A8248->_1610[obj->_CE];
+        diff = fn_2_68940(obj->_CE, index);
+        if (other->_C3 == 7 && (obj->_94 == 0 || obj->_94 == 1)) {
+            if ((f32)fabs(diff) < 1.5707964f) {
+                lbl_2_bss_1A824C->_1978F1 = 0;
+            } else {
+                lbl_2_bss_1A824C->_1978F1 = 2;
+            }
+        } else {
+            lbl_2_bss_1A824C->_1978F1 = 1;
+        }
+        obj->_BA = 4;
+        obj->_C4 = 1;
+        obj->_B2 = fn_2_689CC(0);
+        setObjType(&lbl_2_bss_1A8248->_1610[index], 4);
+    }
+}
 
 // .text:0x00070588 size:0x38
 void fn_2_70588(Obj0B08* obj) { lbl_2_data_2A200[obj->_94](obj); }
@@ -1463,6 +1503,77 @@ void fn_2_6A450(s32 index, f32 x, f32 z) {
 // .text:0x00069E1C size:0x634
 
 // .text:0x000699D4 size:0x448
+void fn_2_699D4(s32 index) {
+    Obj0B08* obj = &lbl_2_bss_1A8248->_1610[index];
+    Mtx m;
+    Vec v;
+    f32 dz;
+    f32 dx;
+    f32 sqx;
+    f32 sqz;
+    f32 dist;
+    f32 step;
+    f32 diff;
+    f32 absDiff;
+    if (obj->_38 <= 0.0f) {
+        obj->_38 = 0.0f;
+    }
+    obj->_50 -= obj->_38;
+    dx = obj->_00.x - obj->_0C.x;
+    dz = obj->_00.z - obj->_0C.z;
+    sqx = dx * dx;
+    sqz = dz * dz;
+    dist = dolsqrtf2(sqx + sqz);
+    if (dist < obj->_38) {
+        obj->_50 = -1.0f;
+    }
+    if (obj->_BA != 4 && obj->_BA != 0x18 && obj->_50 > 0.0f) {
+        obj->_4C = atan2(-(obj->_0C.x - obj->_00.x), -(obj->_0C.z - obj->_00.z));
+    }
+    PSMTXRotRad(m, 'Y', obj->_34);
+    v.x = 0.0f;
+    v.y = 0.0f;
+    v.z = 0.0f;
+    PSMTXMultVec(m, &v, &v);
+    obj->_18.x = v.x;
+    obj->_18.z = v.z;
+    obj->_00.x += obj->_18.x;
+    obj->_00.z += obj->_18.z;
+    if (obj->_BA != 4 && obj->_BA != 0x18 && obj->_50 > 0.0f) {
+        obj->_4C = atan2(-(obj->_0C.x - obj->_00.x), -(obj->_0C.z - obj->_00.z));
+        diff = fn_2_4A18C(obj->_34 - obj->_4C);
+        absDiff = fabs(diff);
+        if (absDiff > 2.268928f) {
+            step = 1.5707964f;
+        } else if (absDiff > 1.5707964f) {
+            step = 0.69813174f;
+        } else if (absDiff > 0.69813174f) {
+            step = 0.34906587f;
+        } else if (absDiff > 0.34906587f) {
+            step = 0.17453294f;
+        } else if (absDiff > 0.17453294f) {
+            step = 0.08726647f;
+        } else if (absDiff > 0.08726647f) {
+            step = 0.034906585f;
+        } else if (absDiff > 0.034906585f) {
+            step = 0.017453292f;
+        } else if (absDiff > 0.017453292f) {
+            step = 0.008726646f;
+        } else if (absDiff < 0.017453292f) {
+            step = 0.0034906587f;
+        }
+        if ((diff < 0.02 && diff > 0.0f) || (diff > -0.02 && diff < 0.0f)) {
+        } else if (diff < 0.0f) {
+            obj->_34 += step;
+        } else {
+            obj->_34 -= step;
+        }
+        obj->_4C = obj->_34;
+    }
+    if (0.0f == obj->_38 && obj->_BD == 0) {
+        obj->_BC = 1;
+    }
+}
 
 // .text:0x000698EC size:0xE8
 void fn_2_698EC(s32 index, f32 limit) {
