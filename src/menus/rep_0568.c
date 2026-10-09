@@ -483,6 +483,8 @@ static inline u8 enableOption(s8* option) {
 }
 
 // .text:0x000197AC size:0x558
+// 99.82%: in the pad._2 & 1 handler, cases 0 and 2 load the old option byte
+// into r4/r3 and the constant 1 into r3/r0; this source swaps those registers.
 void fn_2_197AC(u8 index) {
     u8 changed = 0;
     Pad0568 pad;
@@ -1109,6 +1111,7 @@ void fn_2_17648(void) {
 
     for (i = 0; i < 12; i++) {
         for (j = 0; j < 9; j++) {
+            // The original stops after each team's first entry
             if (i * 9 + j == 53 || j != 0) {
                 goto done;
             }
@@ -1140,9 +1143,11 @@ done:
 }
 
 // .text:0x00016F78 size:0x6D0
+// 97.89%: _34[index]._08 is stored with stwx from an index-folded offset, the
+// fn_800B2B74 arguments load in the other order, and the target tests
+// hasAltAnims through neg/or/srwi. where this compiles to clrlwi.
 void fn_2_16F78(u8 index) {
     Player0568* player = &lbl_8036E548._0C04[index];
-    u32* data;
     void* tex;
     void* layout;
     void* geo;
@@ -1154,6 +1159,7 @@ void fn_2_16F78(u8 index) {
     u16 bone;
     s32 i;
     s32 first;
+    u32* data;
     s32 second;
     Pose0568* pose;
     Vec* pos;
@@ -1294,6 +1300,8 @@ void fn_2_16F78(u8 index) {
 }
 
 // .text:0x00016F0C size:0x6C
+// 85.56%: the target schedules the 0x27C multiply before the pose load and
+// keeps the index in r0; the s8 locals add no extsb only with _252 typed s8.
 void fn_2_16F0C(u8 index) {
     s8 a = lbl_8036E548._0C04[index]._252;
     Player0568* player = &lbl_8036E548._0C04[index];
@@ -1352,6 +1360,8 @@ void fn_2_16CE0(void) {
 }
 
 // .text:0x00016A98 size:0x248
+// 98.63%: the target computes &pose->_68 before moving value into r5 for the
+// second fn_80025EEC call; only that pair of instructions is swapped.
 void fn_2_16A98(s32 index, s32 anim, u8 loop, s8 arg3, s16 frame, s32 arg5, u8 frames) {
     f32 speed = 0.0f;
     Player0568* player = lbl_8036E548._2C50[index];
