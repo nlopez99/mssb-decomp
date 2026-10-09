@@ -939,6 +939,157 @@ void fn_1_25C68(void) {
     task->_2C = 0;
 }
 
+// .text:0x00025064 size:0xC04
+// 98.08%: what differs is the tail of each inlined fn_1_24A8C (three copies), as in that
+// function, and the branch offsets after them.
+void fn_1_25064(void) {
+    ChainTask7730* task = lbl_803CC1B8;
+    s32 i;
+    u32 color;
+    s32 big;
+    s32 small;
+
+    if (lbl_803C77B8[0]._00 & 0x20) {
+        big = 4;
+        small = 1;
+    } else {
+        big = 64;
+        small = 10;
+    }
+    for (i = 0; i < 11; i++) {
+        switch (i) {
+        case 0:
+            if (i == task->_2C) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    task->_2B--;
+                    fn_1_24A8C();
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    task->_2B++;
+                    fn_1_24A8C();
+                }
+            }
+            break;
+        case 1:
+            if (i == task->_2C) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    task->_2A--;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    task->_2A++;
+                }
+                if (task->_2A == 0) {
+                    task->_2A = 1;
+                }
+            }
+            break;
+        case 2:
+            if (i == task->_2C) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    task->_18 -= big;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    task->_18 += big;
+                }
+            }
+            break;
+        case 3:
+            if (i == task->_2C) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    task->_1C -= big;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    task->_1C += big;
+                }
+            }
+            break;
+        case 4:
+            if (i == task->_2C) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    task->_1A -= small;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    task->_1A += small;
+                }
+            }
+            break;
+        case 5:
+            if (i == task->_2C) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    task->_24 -= big;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    task->_24 += big;
+                }
+            }
+            break;
+        case 6:
+            if (i == task->_2C) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    task->_22--;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    task->_22++;
+                }
+            }
+            break;
+        case 7:
+            if (i == task->_2C) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    task->_20 -= small;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    task->_20 += small;
+                }
+            }
+            break;
+        case 8:
+            if (i == task->_2C) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    task->_26 -= small;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    task->_26 += small;
+                }
+            }
+            break;
+        case 9:
+            if (i == task->_2C) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    task->_1E -= big;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    task->_1E += big;
+                }
+            }
+            break;
+        case 10:
+            if (i == task->_2C) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    task->_28 -= small;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    task->_28 += small;
+                }
+            }
+            break;
+        }
+    }
+    if (lbl_803C77B8[0]._04 & 8) {
+        if (task->_2C == 0) {
+            task->_2C = 11;
+        }
+        task->_2C--;
+    } else if (lbl_803C77B8[0]._04 & 4) {
+        task->_2C++;
+        if (task->_2C == 11) {
+            task->_2C = 0;
+        }
+    } else if (lbl_803C77B8[0]._02 & 0x100) {
+        fn_1_24A8C();
+    } else if (lbl_803C77B8[0]._02 & 0x200) {
+        color = 0x11775500;
+        GXSetCopyClear(*(GXColor*)&color, 0xFFFFFF);
+        ((MenuTask7730*)lbl_803CC1B8)->_0C->_10 = 1;
+        fn_800B0A14_removeQueue();
+    }
+    fn_1_247A0();
+    fn_1_26A34();
+    GXLoadPosMtxImm(lbl_1_bss_43F38, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    fn_1_AF4(11, 11, 50.0f);
+    fn_1_248BC(task->_2B);
+}
+
 // .text:0x00024C4C size:0x418
 void fn_1_24C4C(PhysNode7730* nodes, s32 count, Vec* external, f32 k, f32 damping, f32 rest, f32 drag) {
     ChainTask7730* task = lbl_803CC1B8;
