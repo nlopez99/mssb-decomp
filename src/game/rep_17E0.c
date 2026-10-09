@@ -212,6 +212,20 @@ void fn_3_9E078(int* order, int count, BOOL useGameRandom) {
     }
 }
 
+// .text:0x0009DC18 size:0x460 mapped:0x806DCCAC
+void fn_3_9DC18(u8* list, int count, BOOL useGameRandom) {
+    int order[10];
+    u32 i;
+
+    for (i = 0; i < count; i++) {
+        order[i] = list[i];
+    }
+    fn_3_9E078(order, count, useGameRandom);
+    for (i = 0; i < count; i++) {
+        list[i] = order[i];
+    }
+}
+
 // .text:0x0009DBE4 size:0x34 mapped:0x806DCC78
 void fn_3_9DBE4(void) {
     lbl_3_common_bss_32A94._7D[0] = 0;
@@ -247,7 +261,6 @@ void fn_3_9DB5C(void) {
 // .text:0x0009D6A4 size:0x4B8 mapped:0x806DC738
 void fn_3_9D6A4(void) {
     int i;
-    s16 position;
     BOOL caught = FALSE;
 
     if (g_Stats.replayInd == 0) {
@@ -266,11 +279,10 @@ void fn_3_9D6A4(void) {
                         if (lbl_3_common_bss_32A94._1F == -1) {
                             for (i = 0; i < 5; i++) {
                                 if (lbl_3_common_bss_32A94._10[i][0] == -1) {
-                                    position = g_Fielders[g_Ball.fielderWBallIndex]._18C;
                                     lbl_3_common_bss_32A94._10[i][0] = g_Ball.fielderWBallIndex;
                                     lbl_3_common_bss_32A94._10[i][1] = g_Strikes.outs - g_Strikes.storedOuts;
-                                    if (position >= 0 && position <= 3) {
-                                        switch (position) {
+                                    if (g_Fielders[g_Ball.fielderWBallIndex]._18C >= 0 && g_Fielders[g_Ball.fielderWBallIndex]._18C <= 3) {
+                                        switch (g_Fielders[g_Ball.fielderWBallIndex]._18C) {
                                         case 0:
                                             if ((g_RunningLogic._02 & 0x1111) == 0x1111) {
                                                 lbl_3_common_bss_32A94._10[i][2] = 0;
