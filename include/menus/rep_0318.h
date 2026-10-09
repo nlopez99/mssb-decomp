@@ -4,6 +4,7 @@
 #include "mssbTypes.h"
 
 void fn_2_2BB8(void);
+void fn_2_2D1C(void);
 void fn_2_2FC0(u8 arg0, s32 arg1, s32 arg2);
 void fn_2_3204(void);
 void fn_2_323C(void);
@@ -22,6 +23,7 @@ void fn_2_61A0(void);
 void fn_2_6484(void);
 void fn_2_6608(void);
 void fn_2_6784(void);
+void fn_2_6884(void);
 void fn_2_6D3C(void);
 void fn_2_7504(void);
 void fn_2_7D44(void);
@@ -43,6 +45,7 @@ void fn_2_B508(void);
 s8 fn_2_C324(s32 charID);
 void fn_2_C484(u8 team, s16 charID);
 void fn_2_C698(u8 idx, u8 team);
+void fn_2_C7DC(u8 idx, u8 team);
 void fn_2_CA60(u8 idx, u8 team);
 void fn_2_CCBC(void);
 void fn_2_CCE0(u8 port);

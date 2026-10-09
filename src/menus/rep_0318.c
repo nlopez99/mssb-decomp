@@ -28,6 +28,7 @@ extern void sndFXRelated(s32 arg0);
 extern s32 randRange_FUN_80042bf0(s32 min, s32 max);
 extern void fn_2_16A74(s32 arg0, s32 arg1);
 extern void fn_2_1C34(u16 buttons);
+extern s32 fn_2_14F8(s32 min, s32 max);
 
 extern struct {
     /* 0x00 */ u8 _00[0x24];
@@ -245,7 +246,10 @@ static u8 lbl_2_data_E14[40] = {
     4, 3, 1, 2, 5, 1, 2, 4, 6, 8, 7, 6, 8, 5, 3, 3, 5, 7, 4, 6,
 };
 static char* lbl_2_data_E3C[10] = { "P", "C", "1B", "2B", "3B", "SS", "LF", "CF", "RF", "  ?  " };
-s16 lbl_2_data_E64[18] = { 33, 11, 14, 10, 9, 19, 37, 40, 16, 3, 6, 20, 2, 13, 12, 7, 28, 41 };
+s16 lbl_2_data_E64[2][9] = {
+    { 33, 11, 14, 10, 9, 19, 37, 40, 16 },
+    { 3, 6, 20, 2, 13, 12, 7, 28, 41 },
+};
 s16 lbl_2_data_E88[2][9] = {
     { 0, 1, 4, 5, 6, 13, 12, 21, 24 },
     { 10, 11, 2, 3, 17, 40, 20, 16, 14 },
@@ -472,6 +476,42 @@ void fn_2_CA60(u8 idx, u8 team) {
         fn_2_A1A0(idx, team);
     }
     fn_2_C698(idx, team);
+}
+
+// .text:0x0000C7DC size:0x284
+// 86%: the idx == 0 block's stores are scheduled differently, and the
+// retry loop compares its operands in the other order.
+void fn_2_C7DC(u8 idx, u8 team) {
+    s32 i;
+    s32 id;
+
+retry:
+    if (idx == 0) {
+        lbl_80354720[team][idx]._1 = idx;
+        lbl_80353B98[team][idx]._1 = idx;
+        lbl_80353B98[team][idx]._0 = idx;
+        lbl_80354720[team][idx]._0 = idx;
+        lbl_80354720[team][idx]._2 = idx;
+        inMemRoster[team][idx].CharID = lbl_8034E9A0._46E0[team];
+        lbl_80353B98[team][idx]._2 = idx;
+    } else {
+        do {
+            id = fn_2_14F8(0, 0x35);
+        } while (lbl_8034E9A0._4757[lbl_800FDE84[id]] != 0);
+        for (i = 0; i < idx; i++) {
+            if (inMemRoster[0][i].CharID == id || inMemRoster[1][i].CharID == id) {
+                goto retry;
+            }
+        }
+        lbl_80354720[team][idx]._1 = idx;
+        lbl_80353B98[team][idx]._1 = idx;
+        lbl_80353B98[team][idx]._0 = idx;
+        lbl_80354720[team][idx]._0 = idx;
+        lbl_80354720[team][idx]._2 = idx;
+        inMemRoster[team][idx].CharID = id;
+        lbl_80353B98[team][idx]._2 = idx;
+        fn_2_C698(idx, team);
+    }
 }
 
 // .text:0x0000C698 size:0x144
@@ -821,6 +861,32 @@ void fn_2_7D44(void) {
     fn_2_16A74(1, 0);
     fn_2_16A74(2, 0);
     fn_2_16A74(3, 0);
+}
+
+// .text:0x00006884 size:0x270
+void fn_2_6884(void) {
+    s32 i;
+    s32 j;
+    u8 id;
+    s8 group;
+
+    for (i = 0; i < 9; i++) {
+        id = starMissionCompletionTracker._40B8[i]._0;
+        lbl_803C6724._02[0][i] = starMissionCompletionTracker._40B8[i]._0;
+        lbl_80354720[0][i]._1 = starMissionCompletionTracker._40B8[i]._2;
+        lbl_80354720[0][i]._0 = i;
+        lbl_803C6724._4A[0][i] = 1;
+        lbl_80354720[0][i]._2 = i;
+        lbl_8034E9A0._4757[id] = 1;
+        group = fn_2_C324(id);
+        if (group != -1) {
+            for (j = 0; j < 5; j++) {
+                if (lbl_80108EDC[group][j] != -1) {
+                    lbl_8034E9A0._4757[lbl_80108EDC[group][j]] = 1;
+                }
+            }
+        }
+    }
 }
 
 // .text:0x00006784 size:0x100
@@ -1181,6 +1247,28 @@ void fn_2_2FC0(u8 arg0, s32 arg1, s32 arg2) {
         break;
     case 11:
         break;
+    }
+}
+
+// .text:0x00002D1C size:0x2A4
+void fn_2_2D1C(void) {
+    s32 t;
+    s32 i;
+
+    lbl_8034E9A0._46E0[0] = 10;
+    lbl_8034E9A0._46E0[1] = 2;
+    for (t = 0; t < 2; t++) {
+        for (i = 0; i < 9; i++) {
+            lbl_803C6724._02[t][i] = lbl_2_data_E64[t][i];
+            lbl_803C6724._26[t][i] = lbl_8034E9A0._0000[lbl_2_data_E64[t][i] / 9][lbl_2_data_E64[t][i] % 9]._3B[lbl_8034E9A0._46E0[t]];
+        }
+    }
+    for (t = 0; t < 2; t++) {
+        for (i = 0; i < 9; i++) {
+            lbl_80354720[t][i]._2 = i;
+            lbl_80354720[t][i]._1 = i;
+            lbl_80354720[t][i]._0 = i;
+        }
     }
 }
 
