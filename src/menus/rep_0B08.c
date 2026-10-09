@@ -1,3 +1,4 @@
+#include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
 #include "menus/rep_0B08.h"
 #include "Dolphin/gx.h"
@@ -31,7 +32,7 @@ typedef struct Obj0B08 {
     /* 0x84 */ s32 _84;
     /* 0x88 */ u8 _88[0x8C - 0x88];
     /* 0x8C */ f32 _8C;
-    /* 0x90 */ u8 _90[0x94 - 0x90];
+    /* 0x90 */ f32 _90;
     /* 0x94 */ s16 _94;
     /* 0x96 */ u8 _96[0xA0 - 0x96];
     /* 0xA0 */ s16 _A0;
@@ -58,12 +59,20 @@ typedef struct Obj0B08 {
     /* 0xD4 */ Obj0B08Fn _D4;
 } Obj0B08; // size: 0xD8
 
+typedef struct Item0B08 {
+    /* 0x00 */ Vec _00;
+    /* 0x0C */ u8 _0C[0xBC - 0xC];
+} Item0B08; // size: 0xBC
+
 typedef struct Tracker0B08 {
     /* 0x0000 */ u8 _0000[0x1610];
     /* 0x1610 */ Obj0B08 _1610[14];
-    /* 0x21E0 */ u8 _21E0[0x441C - 0x21E0];
+    /* 0x21E0 */ Item0B08 _21E0[46];
+    /* 0x43A8 */ u8 _43A8[0x441C - 0x43A8];
     /* 0x441C */ u8 _441C;
-    /* 0x441D */ u8 _441D[0x442F - 0x441D];
+    /* 0x441D */ u8 _441D;
+    /* 0x441E */ u8 _441E;
+    /* 0x441F */ u8 _441F[0x442F - 0x441F];
     /* 0x442F */ u8 _442F;
     /* 0x4430 */ u8 _4430[0x44F2 - 0x4430];
     /* 0x44F2 */ u8 _44F2;
@@ -109,6 +118,9 @@ extern struct {
     /* 0x4 */ s16 _4;
 } lbl_2_data_2E80[6];
 extern Vec lbl_2_data_2EA4[57];
+extern Vec lbl_2_data_3150[];
+extern f32 lbl_2_data_3EF4[6];
+extern f32 lbl_2_data_3F5C;
 extern AnimEntry0B08 lbl_2_data_3C84[];
 
 extern struct {
@@ -125,10 +137,17 @@ extern void fn_800BD2CC(s32 arg0, GXColor color);
 extern s32 fn_80062890(s32 id);
 extern void fn_800B0A14_removeQueue(void);
 extern s32 fn_2_8CC88(s32);
+extern void fn_2_46C88(u8 arg0, s32 arg1);
 extern f32 fn_2_4A18C(f32 angle);
 
 // Points to starMissionCompletionTracker
 extern Tracker0B08* lbl_2_bss_1A8248;
+
+static inline void scaleVec(Vec* src, Vec* dst, f32 scale) {
+    dst->x = src->x * scale;
+    dst->y = src->y * scale;
+    dst->z = src->z * scale;
+}
 
 static inline f32 calcAngle(f32 dx, f32 dz) { return atan2(-dx, -dz); }
 
@@ -196,6 +215,15 @@ void fn_2_71EC4(Obj0B08* obj) { lbl_2_data_2A1E8[obj->_94](obj); }
 // .text:0x00071C6C size:0x258
 
 // .text:0x00071B80 size:0xEC
+void fn_2_71B80(Obj0B08* obj) {
+    fn_2_69E1C(obj->_80);
+    fn_2_68260(obj);
+    if (obj->_50 <= 0.0f) {
+        obj->_BA = 4;
+        obj->_C4 = 1;
+        obj->_94 = 2;
+    }
+}
 
 // .text:0x00071A70 size:0x110
 
@@ -212,6 +240,11 @@ void fn_2_71A38(Obj0B08* obj) { lbl_2_data_2A1F4[obj->_94](obj); }
 void fn_2_70588(Obj0B08* obj) { lbl_2_data_2A200[obj->_94](obj); }
 
 // .text:0x000704AC size:0xDC
+void fn_2_704AC(Obj0B08* obj) {
+    fn_2_68F08(obj->_80, 1);
+    fn_2_68FBC(obj->_80, 1);
+    obj->_94 = 1;
+}
 
 // .text:0x000704A0 size:0xC
 void fn_2_704A0(Obj0B08* obj) { obj->_94 = 2; }
@@ -269,11 +302,27 @@ void fn_2_6E848(Obj0B08* obj) { lbl_2_data_2A234[obj->_94](obj); }
 // .text:0x0006D968 size:0x1C8
 
 // .text:0x0006D878 size:0xF0
+void fn_2_6D878(Obj0B08* obj) {
+    s32 index = obj->_80;
+    if (fn_2_68670(0) == 0) {
+        obj->_A2 = 120;
+        fn_2_68FBC(index, 1);
+        obj->_BA = 9;
+        obj->_38 = obj->_50 = 0.0f;
+        obj->_94 = 2;
+    }
+}
 
 // .text:0x0006D840 size:0x38
 void fn_2_6D840(Obj0B08* obj) { lbl_2_data_2A248[obj->_94](obj); }
 
 // .text:0x0006D754 size:0xEC
+void fn_2_6D754(Obj0B08* obj) {
+    fn_2_68F08(obj->_80, 1);
+    fn_2_68FBC(obj->_80, 1);
+    obj->_34 = obj->_4C = 0.0f;
+    obj->_94 = 1;
+}
 
 // .text:0x0006D748 size:0xC
 void fn_2_6D748(Obj0B08* obj) { obj->_94 = 1; }
@@ -284,6 +333,13 @@ void fn_2_6D710(Obj0B08* obj) { lbl_2_data_2A250[obj->_94](obj); }
 // .text:0x0006D5D4 size:0x13C
 
 // .text:0x0006D4F8 size:0xDC
+void fn_2_6D4F8(Obj0B08* obj) {
+    if (fn_2_8CC88(obj->_84) != 0) {
+        fn_2_68FBC(obj->_80, 5);
+        obj->_A2 = 30;
+        obj->_94 = 2;
+    }
+}
 
 // .text:0x0006D4E8 size:0x10
 void fn_2_6D4E8(Obj0B08* obj) { obj->_A2--; }
@@ -294,6 +350,13 @@ void fn_2_6D4B0(Obj0B08* obj) { lbl_2_data_2A25C[obj->_94](obj); }
 // .text:0x0006D374 size:0x13C
 
 // .text:0x0006D298 size:0xDC
+void fn_2_6D298(Obj0B08* obj) {
+    if (fn_2_8CC88(obj->_84) != 0) {
+        fn_2_68FBC(obj->_80, 6);
+        obj->_A2 = 30;
+        obj->_94 = 2;
+    }
+}
 
 // .text:0x0006D288 size:0x10
 void fn_2_6D288(Obj0B08* obj) { obj->_A2--; }
@@ -302,6 +365,12 @@ void fn_2_6D288(Obj0B08* obj) { obj->_A2--; }
 void fn_2_6D250(Obj0B08* obj) { lbl_2_data_2A268[obj->_94](obj); }
 
 // .text:0x0006D164 size:0xEC
+void fn_2_6D164(Obj0B08* obj) {
+    fn_2_68F08(obj->_80, 1);
+    obj->_4C = obj->_34 = 0.0f;
+    fn_2_68FBC(obj->_80, 4);
+    obj->_94 = 1;
+}
 
 // .text:0x0006D088 size:0xDC
 void fn_2_6D088(Obj0B08* obj) {
@@ -362,6 +431,13 @@ void fn_2_6C2C4(Obj0B08* obj) {
 void fn_2_6C28C(Obj0B08* obj) { lbl_2_data_2A29C[obj->_94](obj); }
 
 // .text:0x0006C190 size:0xFC
+void fn_2_6C190(Obj0B08* obj) {
+    fn_2_68F08(obj->_80, 1);
+    fn_2_68FBC(obj->_80, 1);
+    obj->_34 = obj->_4C;
+    fn_2_46C88(lbl_2_bss_1A8248->_441E, 0);
+    obj->_94 = 1;
+}
 
 // .text:0x0006C120 size:0x70
 void fn_2_6C120(Obj0B08* obj) {
@@ -407,6 +483,14 @@ void fn_2_6BDD4(Obj0B08* obj) { obj->_94 = 2; }
 void fn_2_6BD9C(Obj0B08* obj) { lbl_2_data_2A2B8[obj->_94](obj); }
 
 // .text:0x0006BCAC size:0xF0
+void fn_2_6BCAC(Obj0B08* obj) {
+    fn_2_68F08(obj->_80, 0);
+    fn_2_68F24(obj->_80, 9);
+    obj->_34 = obj->_4C = 0.0f;
+    fn_2_68D90(obj->_80, 0xFF);
+    obj->_8C = 0.0f;
+    obj->_94 = 1;
+}
 
 // .text:0x0006BC0C size:0xA0
 void fn_2_6BC0C(Obj0B08* obj) {
@@ -481,6 +565,12 @@ void fn_2_6B4C4(Obj0B08* obj) { lbl_2_data_2A2E0[obj->_94](obj); }
 // .text:0x0006B120 size:0x118
 
 // .text:0x0006B024 size:0xFC
+void fn_2_6B024(Obj0B08* obj) {
+    fn_2_698EC(obj->_80, 0.0f);
+    if (obj->_D0 == 0) {
+        obj->_C4 = 1;
+    }
+}
 
 // .text:0x0006AFD4 size:0x50
 s32 fn_2_6AFD4(s32 index) {
@@ -520,6 +610,27 @@ void fn_2_6AF80(s32 index, u8 value) {
 void fn_2_6ACF0(void) {}
 
 // .text:0x0006ABFC size:0xF4
+void fn_2_6ABFC(s32 index, s32 point) {
+    Obj0B08* obj = &lbl_2_bss_1A8248->_1610[index];
+    if (index < 2) {
+        memcpy(&obj->_00, &lbl_2_data_2EA4[point], sizeof(Vec));
+    } else if (index >= 2 && index <= 6) {
+        memcpy(&obj->_00, &lbl_2_data_2EA4[point], sizeof(Vec));
+    } else {
+        memcpy(&obj->_00, &lbl_2_data_3150[index - 7], sizeof(Vec));
+    }
+    obj->_0C.x = 0.0f;
+    obj->_0C.y = 0.0f;
+    obj->_0C.z = 0.0f;
+    obj->_18.x = 0.0f;
+    obj->_18.y = 0.0f;
+    obj->_18.z = 0.0f;
+    obj->_6C = obj->_00.x;
+    obj->_70 = obj->_00.z;
+    obj->_38 = 0.0f;
+    obj->_BB = 0;
+    obj->_30 = obj->_34 = obj->_4C;
+}
 
 // .text:0x0006AB3C size:0xC0
 void fn_2_6AB3C(s32 index, Vec* pos, f32 angle) {
@@ -605,6 +716,25 @@ void fn_2_6A5A8(s32 index) {
 // .text:0x000699D4 size:0x448
 
 // .text:0x000698EC size:0xE8
+void fn_2_698EC(s32 index, f32 limit) {
+    Obj0B08* obj = &lbl_2_bss_1A8248->_1610[index];
+    f32 height;
+    if (obj->_D0 != 0) {
+        height = -sinf_kludge(obj->_90) * 1.6f;
+        obj->_90 += 0.07f;
+        if (obj->_00.y > limit) {
+            obj->_90 = 0.0f;
+            height = 0.0f;
+            obj->_D0 = 0;
+            if (obj->_C3 == 0x13) {
+                fn_2_68F08(obj->_80, 0);
+            }
+        }
+        obj->_00.y = height;
+    } else {
+        obj->_00.y = 0.0f;
+    }
+}
 
 // .text:0x00069710 size:0x1DC
 
@@ -687,6 +817,18 @@ void fn_2_68D90(s32 index, u8 value) {
 // .text:0x00068B54 size:0x12C
 
 // .text:0x00068A88 size:0xCC
+s32 fn_2_68A88(s32 index, s32 item) {
+    Vec pos;
+    Obj0B08* obj = &lbl_2_bss_1A8248->_1610[index];
+    Item0B08* it = &lbl_2_bss_1A8248->_21E0[item];
+    f32 dist;
+    scaleVec(&it->_00, &pos, 0.5f);
+    dist = PSVECDistance(&obj->_00, &pos);
+    if (dist < lbl_2_data_3F5C + lbl_2_data_3EF4[lbl_2_bss_1A8248->_441C] && obj->_C0 != 0) {
+        return 1;
+    }
+    return 0;
+}
 
 // .text:0x000689CC size:0xBC
 s16 fn_2_689CC(s32 index) {
