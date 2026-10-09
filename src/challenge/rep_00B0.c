@@ -141,6 +141,11 @@ static inline void GDColor1x8(u8 index) {
     GDWrite_u8(index);
 }
 
+// A material's colour index: two shades per material, the dark one when bit 7 is set
+static inline void GDColorMaterial00B0(u32 material) {
+    GDColor1x8((material >> 7) + ((material & 0x7F) - 1) * 2);
+}
+
 // .text:0x00004A24 size:0x3B4
 void fn_1_4A24(Ray00B0* ray, void* mesh) {
     Vec v[3];
@@ -303,7 +308,92 @@ void fn_1_4074(Vec* pos) {
 // .text:0x00003E38 size:0x23C
 void fn_1_3E38(Vec* pos, u32 material) {
     GDPosition3f32(pos->x, pos->y, pos->z);
-    GDColor1x8((material >> 7) + ((material & 0x7F) - 1) * 2);
+    GDColorMaterial00B0(material);
+}
+
+// .text:0x000025BC size:0x187C
+void fn_1_25BC(void* mesh) {
+    MeshVtx00B0* first;
+    MeshVtx00B0* vtx;
+    u32 count;
+    u32 n;
+    u32 i;
+    u32 nverts;
+    u32 mat;
+    u32 m;
+    u8* p;
+
+    p = mesh;
+    do {
+        count = ((MeshHdr00B0*)p)->count;
+        if (!((MeshHdr00B0*)p)->strip) {
+            vtx = (MeshVtx00B0*)(p + 4);
+            n = count * 3;
+            GDBegin(GX_TRIANGLES, GX_VTXFMT0, n);
+            for (; n != 0; n--) {
+                GDPosition3f32(vtx->pos.x, vtx->pos.y, vtx->pos.z);
+                m = ((u32)vtx->material >> 7) + (((u32)vtx->material & 0x7F) - 1) * 2;
+                GDColor1x8(m);
+                vtx++;
+            }
+            n = count;
+            vtx = (MeshVtx00B0*)(p + 4);
+            for (; n != 0; n--) {
+                GDBegin(GX_LINESTRIP, GX_VTXFMT0, 4);
+                first = vtx;
+                fn_1_4074(&vtx++->pos);
+                fn_1_4074(&vtx++->pos);
+                fn_1_4074(&vtx++->pos);
+                fn_1_4074(&first->pos);
+            }
+        } else {
+            nverts = 0;
+            vtx = (MeshVtx00B0*)(p + 4);
+            mat = vtx->material;
+            for (i = count + 2; i != 0; i--) {
+                nverts++;
+                if (mat != vtx->material) {
+                    mat = vtx->material;
+                    nverts += 2;
+                }
+                vtx++;
+            }
+            mat = ((MeshVtx00B0*)(p + 4))->material;
+            vtx = (MeshVtx00B0*)(p + 4);
+            GDBegin(GX_TRIANGLESTRIP, GX_VTXFMT0, nverts);
+            for (n = count + 2; n != 0; n--) {
+                m = vtx->material;
+                if (mat != m) {
+                    mat = m;
+                    fn_1_3E38(&vtx[-2].pos, m);
+                    fn_1_3E38(&vtx[-1].pos, m);
+                }
+                fn_1_3E38(&vtx->pos, m);
+                vtx++;
+            }
+            n = count + 2;
+            first = (MeshVtx00B0*)(p + 4);
+            GDBegin(GX_LINESTRIP, GX_VTXFMT0, n);
+            for (; n != 0; n--) {
+                fn_1_4074(&first++->pos);
+            }
+            n = (count + 3) >> 1;
+            first = (MeshVtx00B0*)(p + 4);
+            GDBegin(GX_LINESTRIP, GX_VTXFMT0, n);
+            for (; n != 0; n--) {
+                fn_1_4074(&first->pos);
+                first += 2;
+            }
+            n = (count + 2) >> 1;
+            first = (MeshVtx00B0*)(p + 4) + 1;
+            GDBegin(GX_LINESTRIP, GX_VTXFMT0, n);
+            for (; n != 0; n--) {
+                fn_1_4074(&first->pos);
+                first += 2;
+            }
+        }
+        p = (u8*)vtx;
+    } while (*(u32*)p != 0);
 }
 
 // .text:0x00001DBC size:0x800
