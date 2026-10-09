@@ -8,15 +8,17 @@
 
 // A ring buffer of 32 commands
 typedef struct UnkQueue0010 {
-    /* 0x00 */ u8 _00[0x15];
+    /* 0x00 */ u8 _00[0x14];
+    /* 0x14 */ u8 state;
     /* 0x15 */ u8 head;
     /* 0x16 */ u8 tail;
     /* 0x17 */ s8 entries[32];
 } UnkQueue0010;
 
-typedef struct {
+typedef struct UnkTask0010 {
     /* 0x00 */ void (*_00)(void);
-    /* 0x04 */ u8 _04[0x10 - 0x4];
+    /* 0x04 */ u8 _04[0xC - 0x4];
+    /* 0x0C */ struct UnkTask0010* _0C;
     /* 0x10 */ s16 _10;
     /* 0x12 */ u8 _12[0x14 - 0x12];
     /* 0x14 */ u16 _14;
@@ -86,6 +88,8 @@ extern void* ARAMTransfer(void* entry, void* dst, s32 arg2, u32 aram);
 extern void fn_800216F8(u8 group, int (*callback)(void));
 extern int fn_2_10FC(void);
 extern void fn_2_11A0(s32 arg0);
+extern BOOL fn_80022A24(u8 stadium, u8 arg1);
+extern void fn_800229CC(void);
 extern void fn_2_11D8(void);
 
 // .text:0x00000A14 size:0x5C
@@ -131,6 +135,36 @@ void fn_2_978(void) {
 void fn_2_940(void) {
     if (lbl_803CBBCC->_00 == 5) {
         fn_800B0A14_removeQueue();
+    }
+}
+
+// .text:0x00000794 size:0x1AC
+// 85.70%: only the inlined fn_2_978's switch differs (see there).
+void fn_2_794(void) {
+    UnkTask0010* task = lbl_803CC1B8;
+
+    switch (lbl_803CBBCC->_00) {
+    case 0:
+        task->_10 = 0;
+        fn_2_A14();
+        fn_800B0A5C_insertQueue(fn_2_940, 0x100);
+        lbl_803CBBCC->_00++;
+        break;
+    case 1:
+        lbl_803CBBCC->_00 = 3;
+        break;
+    case 3:
+        fn_2_978();
+        lbl_803CBBCC->_00 = 4;
+    case 4:
+        if (task->_10 == 0) {
+            break;
+        }
+        lbl_803CBBCC->_00 = 5;
+    case 5:
+        task->_0C->_10 = task->_10;
+        fn_800B0A14_removeQueue();
+        break;
     }
 }
 
@@ -211,6 +245,28 @@ BOOL fn_2_4C4(UnkQueue0010* queue, s8 command) {
     queue->head = next;
     queue->entries[queue->head] = command;
     return TRUE;
+}
+
+// .text:0x00000374 size:0x150
+void fn_2_374(void) {
+    UnkQueue0010* queue = lbl_803CC1B8;
+
+    switch (queue->state) {
+    case 0:
+        queue->state = fn_2_510(queue);
+        break;
+    case 1:
+        if (!fn_80022A24(g_d_GameSettings.StadiumID, g_d_GameSettings.miniGameStadiumIndicator)) {
+            break;
+        }
+        if ((queue->state = fn_2_510(queue)) != 2) {
+            break;
+        }
+    case 2:
+        fn_800229CC();
+        queue->state = fn_2_510(queue);
+        break;
+    }
 }
 
 // .text:0x00000328 size:0x4C
