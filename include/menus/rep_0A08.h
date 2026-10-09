@@ -10,6 +10,7 @@ void fn_2_51A1C(void);
 void fn_2_51C58(void);
 void fn_2_520A4(void);
 void fn_2_52198(void);
+void fn_2_52260(void);
 void fn_2_52648(s32 priority);
 void fn_2_5268C(void);
 void fn_2_52690(void);
