@@ -346,6 +346,8 @@ void fn_1_1D450(void) {
 }
 
 // .text:0x0001D110 size:0x340
+// 99.86%: in the inlined fn_1_1A1EC the target keeps the node in r23 and the
+// child in r26; here both share r26.
 void fn_1_1D110(void) {
     Task74A0* task = lbl_803CC1B8;
     Model74A0* model;
@@ -384,6 +386,8 @@ void fn_1_1D0E8(Model74A0* model) {
 }
 
 // .text:0x0001CBE4 size:0x504
+// 99.31%: registers only; the target keeps task in r31, the zero in r30 and
+// the 0.0f address in r29 (here r29, r31, r30).
 void fn_1_1CBE4(void) {
     Task74A0* task = lbl_803CC1B8;
     u32 i;
@@ -516,6 +520,7 @@ void fn_1_1C8C0(void) {
 }
 
 // .text:0x0001C3CC size:0x4F4
+// 84.07%: differs only in its inlined copy of fn_1_1B2C8.
 void fn_1_1C3CC(void) {
     Task74A0* task = lbl_803CC1B8;
     Mtx44 m;
@@ -757,6 +762,8 @@ void fn_1_1B424(void) {
 }
 
 // .text:0x0001B2C8 size:0x15C
+// 32.40%: the target converts every stick value and loads every field before
+// the first store; no statement order or local tried reproduces that schedule.
 void fn_1_1B2C8(void) {
     Actor74A0* actor = &lbl_8036E548._C04[((Task74A0*)lbl_803CC1B8)->_14];
 
@@ -1040,6 +1047,8 @@ void fn_1_1A1EC(Model74A0* model, Mtx mtx) {
 }
 
 // .text:0x00019D60 size:0x48C
+// 78.84%: the target unrolls the vertex descriptor loop 6 times (13 passes),
+// and its prim->type tree has one more `b`; no loop form tried unrolls it here.
 void fn_1_19D60(Shape74A0* shape, Mtx mtx) {
     GXColor color;
     Mtx m;
@@ -1169,7 +1178,6 @@ void fn_1_18EE4(Particle74A0* p) {
     u8 range;
     f32 scale;
 
-
     p->_04 = (p->_4A * 2) / (f32)lbl_1_data_FB24[0] - 1.0f;
     p->_08 = -1.0f;
     p->_0C = 50.0f * (rand() / 32767.0f) + 50.0f;
@@ -1205,6 +1213,7 @@ void fn_1_18E04(Particle74A0* p, f32 angle) {
 }
 
 // .text:0x0001857C size:0x888
+// 99.96%: the inlined fn_1_18EE4 keeps its scale in f30, the target in f31.
 BOOL fn_1_1857C(Emitter74A0* e) {
     Vec up = { 0.0f, 1.0f, 0.0f };
     Vec dir;
