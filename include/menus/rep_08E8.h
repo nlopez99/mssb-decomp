@@ -88,6 +88,8 @@ f32 fn_2_4A1E8(f32 x, f32 y);
 s16 fn_2_4A234(f32 x, f32 y);
 s32 fn_2_4A2C4(f32 angle);
 s16 fn_2_4A310(s16 a, s16 b);
+void fn_2_4A340(void);
+void fn_2_4A6E8(void);
 void fn_2_4AB1C(void);
 void fn_2_4ACF8(void);
 void fn_2_4AEE4(void);
