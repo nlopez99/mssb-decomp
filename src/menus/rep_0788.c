@@ -5362,7 +5362,7 @@ void fn_2_2EBE4(MenuTask0788* task, MenuItem0788* item) {
         }
         break;
     case 8:
-        fn_800363D8(task, item->_0E, 4, 0x64, (s8) lbl_2_bss_1A8248->_444B);
+        fn_800363D8(task, item->_0E, 4, 0x64, lbl_2_bss_1A8248->_444B);
         lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
         lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0xB0000;
         lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
@@ -7066,8 +7066,8 @@ void fn_2_29884(MenuTask0788* task, MenuItem0788* item) {
 // .text:0x0002926C size:0x618
 void fn_2_2926C(MenuTask0788* task, MenuItem0788* item) {
     s16 state = fn_2_53BC8(item);
-    s32 id;
     s32 flag;
+    s32 id;
     s32 done;
     s32 kind;
 
@@ -7161,8 +7161,8 @@ void fn_2_2926C(MenuTask0788* task, MenuItem0788* item) {
 // .text:0x00028EA0 size:0x3CC
 void fn_2_28EA0(MenuTask0788* task, MenuItem0788* item) {
     s16 state = fn_2_53BC8(item);
-    s32 id;
     s32 flag;
+    s32 id;
     s32 done;
     s32 kind;
 
