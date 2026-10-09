@@ -1,6 +1,6 @@
 #include "challenge/rep_00B0.h"
+#include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
-#include "math.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/gd.h"
 #include "Dolphin/mtx.h"
@@ -12,6 +12,28 @@ typedef struct Box00B0 {
     /* 0x00 */ Vec min;
     /* 0x0C */ Vec max;
 } Box00B0; // size: 0x18
+
+// A ray along the view axis of mtx, and the nearest hit found along it
+typedef struct Ray00B0 {
+    /* 0x00 */ Mtx mtx;
+    /* 0x30 */ u8 _30[0x60 - 0x30];
+    /* 0x60 */ Vec normal;
+    /* 0x6C */ f32 length;
+    /* 0x70 */ f32 nearest;
+    /* 0x74 */ u16 material;
+} Ray00B0; // size: 0x78
+
+// A collision mesh: runs of triangles or triangle strips, each after a header
+typedef struct MeshHdr00B0 {
+    /* 0x0 */ u8 _0;
+    /* 0x1 */ u8 strip;
+    /* 0x2 */ u16 count;
+} MeshHdr00B0;
+
+typedef struct MeshVtx00B0 {
+    /* 0x0 */ Vec pos;
+    /* 0xC */ u16 material;
+} MeshVtx00B0; // size: 0x10
 
 typedef struct Draw00B0 {
     /* 0x0 */ s32 _0;
@@ -117,6 +139,159 @@ static inline void GDPosition3f32(f32 x, f32 y, f32 z) {
 
 static inline void GDColor1x8(u8 index) {
     GDWrite_u8(index);
+}
+
+// .text:0x00004A24 size:0x3B4
+void fn_1_4A24(Ray00B0* ray, void* mesh) {
+    Vec v[3];
+    Vec e[3];
+    f32 t;
+    u32 count;
+    u32 flip;
+    u32 ok;
+    MeshVtx00B0* vtx;
+    u8 strip;
+
+    vtx = mesh;
+    while (TRUE) {
+        count = ((MeshHdr00B0*)vtx)->count;
+        if (count == 0) {
+            break;
+        }
+        strip = ((MeshHdr00B0*)vtx)->strip;
+        vtx = (MeshVtx00B0*)((MeshHdr00B0*)vtx + 1);
+        if (!strip) {
+            do {
+                PSMTXMultVec(ray->mtx, &vtx[0].pos, &v[0]);
+                PSMTXMultVec(ray->mtx, &vtx[1].pos, &v[1]);
+                PSMTXMultVec(ray->mtx, &vtx[2].pos, &v[2]);
+                ok = v[0].x * v[1].y - v[1].x * v[0].y >= 0.0f;
+                ok &= v[1].x * v[2].y - v[2].x * v[1].y >= 0.0f;
+                ok &= v[2].x * v[0].y - v[0].x * v[2].y >= 0.0f;
+                if (ok)
+                {
+                    PSVECSubtract(&v[1], &v[0], &e[0]);
+                    PSVECSubtract(&v[2], &v[1], &e[1]);
+                    PSVECCrossProduct(&e[0], &e[1], &e[2]);
+                    t = -PSVECDotProduct(&e[2], &v[0]) / e[2].z;
+                    if (t >= 0.0f && ray->nearest > t) {
+                        ray->nearest = t;
+                        ray->material = vtx[2].material;
+                        ray->normal = e[2];
+                    }
+                }
+                vtx += 3;
+            } while (--count);
+        } else {
+            flip = 0;
+            PSMTXMultVec(ray->mtx, &vtx[0].pos, &v[0]);
+            PSMTXMultVec(ray->mtx, &vtx[1].pos, &v[1]);
+            vtx += 2;
+            do {
+                PSMTXMultVec(ray->mtx, &vtx->pos, &v[2]);
+                e[0].x = v[0].x * v[1].y - v[1].x * v[0].y;
+                e[0].y = v[1].x * v[2].y - v[2].x * v[1].y;
+                e[0].z = v[2].x * v[0].y - v[0].x * v[2].y;
+                ok = flip ? (e[0].x <= 0.0f) & (e[0].y <= 0.0f) & (e[0].z <= 0.0f)
+                          : (e[0].x >= 0.0f) & (e[0].y >= 0.0f) & (e[0].z >= 0.0f);
+                if (ok)
+                {
+                    PSVECSubtract(&v[1], &v[0], &e[0]);
+                    PSVECSubtract(&v[2], &v[1], &e[1]);
+                    PSVECCrossProduct(&e[0], &e[1], &e[2]);
+                    t = -PSVECDotProduct(&e[2], &v[0]) / e[2].z;
+                    if (t >= 0.0f && ray->nearest > t) {
+                        ray->nearest = t;
+                        ray->material = vtx->material;
+                        if (!flip) {
+                            ray->normal = e[2];
+                        } else {
+                            ray->normal.x = -e[2].x;
+                            ray->normal.y = -e[2].y;
+                            ray->normal.z = -e[2].z;
+                        }
+                    }
+                }
+                flip ^= 1;
+                vtx++;
+                v[0] = v[1];
+                v[1] = v[2];
+            } while (--count);
+        }
+    }
+}
+
+// .text:0x00004728 size:0x2FC
+u32 fn_1_4728(Vec* line, Vec* out) {
+    u8 hit[256];
+    Vec d[4];
+    Ray00B0 ray;
+    Mtx inv;
+    Box00B0* box;
+    s32 n;
+    u8* p;
+    u32 miss;
+    void** list;
+    f32 dist;
+
+    box = *lbl_1_common_bss_472B4._224;
+    memset(hit, 1, lbl_1_common_bss_472B4._228);
+    n = lbl_1_common_bss_472B4._228;
+    p = hit;
+    miss = 1;
+    do {
+        PSVECSubtract(&line[0], &box->min, &d[0]);
+        PSVECSubtract(&box->max, &line[0], &d[1]);
+        PSVECSubtract(&line[1], &box->min, &d[2]);
+        PSVECSubtract(&box->max, &line[1], &d[3]);
+        if (!(((*(u32*)&d[0].x & *(u32*)&d[2].x) | (*(u32*)&d[1].x & *(u32*)&d[3].x)) & 0x80000000) &&
+            !(((*(u32*)&d[0].y & *(u32*)&d[2].y) | (*(u32*)&d[1].y & *(u32*)&d[3].y)) & 0x80000000) &&
+            !(((*(u32*)&d[0].z & *(u32*)&d[2].z) | (*(u32*)&d[1].z & *(u32*)&d[3].z)) & 0x80000000))
+        {
+            *p = 0;
+            miss = 0;
+        }
+        n--;
+        box++;
+        p++;
+    } while (n != 0);
+    if (miss) {
+        return 0;
+    }
+    makeLookAtMatrix(ray.mtx, &line[0], &lbl_1_data_218, &line[1]);
+    dist = dolsqrtf2(PSVECSquareDistance(&line[1], &line[0]));
+    ray.length = dist;
+    p = hit;
+    n = lbl_1_common_bss_472B4._228;
+    list = lbl_1_common_bss_472B4._224 + 1;
+    ray.nearest = dist;
+    ray.material = 0;
+    do {
+        if (*p++ == 0) {
+            fn_1_4A24(&ray, *list);
+        }
+        n--;
+        list++;
+    } while (n != 0);
+    if (ray.material) {
+        PSMTXInverse(ray.mtx, inv);
+        lbl_1_data_224.z = -ray.nearest;
+        PSMTXMultVec(inv, &lbl_1_data_224, &out[0]);
+        PSMTXTranspose(ray.mtx, inv);
+        PSMTXMultVec(inv, &ray.normal, &out[1]);
+        PSVECNormalize(&out[1], &out[1]);
+        return ray.material;
+    }
+    return 0;
+}
+
+// .text:0x00004290 size:0x498
+void fn_1_4290(Vec* line) {
+    GDBegin(GX_LINES, GX_VTXFMT0, 2);
+    GDPosition3f32(line[0].x, line[0].y, line[0].z);
+    GDColor1x8(19);
+    GDPosition3f32(line[1].x, line[1].y, line[1].z);
+    GDColor1x8(20);
 }
 
 // .text:0x00004074 size:0x21C
