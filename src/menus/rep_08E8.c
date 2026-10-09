@@ -2427,3 +2427,132 @@ void fn_2_42BE8(void) {
         }
     }
 }
+
+// .text:0x00042708 size:0x4E0
+// Only the lbl_80109AE8 and lbl_8010A768 bases differ: the target forms
+// lbl_80109AE8 first, in the lower register (fn_2_466AC, written the same
+// way without the two guards, matches).
+void fn_2_42708(void) {
+    s32 i;
+    s32 j;
+    s32 found;
+    s16 kind;
+    s16 goal;
+    s16 need;
+    s16 level;
+    s16 extra;
+    MenuCharacter08E8* c;
+
+    for (i = 0; i < 0x36; i++) {
+        if (lbl_800E8558[i]._3 == 1) {
+            c = &((MenuCharacter08E8*)lbl_2_bss_1A8248)[i];
+            if (c->_31 == 1) {
+                for (j = 0; j < 10; j++) {
+                    kind = lbl_8010A768[lbl_800E8558[i]._2][j]._2;
+                    goal = lbl_80109AE8[lbl_800E8558[i]._2][j]._0;
+                    need = lbl_8010A768[lbl_800E8558[i]._2][j]._4;
+                    level = lbl_8010A768[lbl_800E8558[i]._2][j]._6;
+                    extra = lbl_8010A768[lbl_800E8558[i]._2][j]._8;
+                    if (kind != -1 && c->_09[j]._1 == 0) {
+                        switch (kind) {
+                        case 1:
+                            if (fn_8006CDC0(i) >= need && lbl_2_bss_1A8248->_4415 >= level) {
+                                c->_09[j]._1 = 1;
+                            }
+                            break;
+                        case 3:
+                            if ((lbl_2_bss_1A8248->_4428 & 1) && lbl_2_bss_1A8248->_4415 >= need) {
+                                c->_09[j]._1 = 1;
+                            }
+                            break;
+                        case 4:
+                            if ((lbl_2_bss_1A8248->_4428 & 2) && lbl_2_bss_1A8248->_4415 >= need) {
+                                c->_09[j]._1 = 1;
+                            }
+                            break;
+                        case 5:
+                            if ((lbl_2_bss_1A8248->_4428 & 4) && lbl_2_bss_1A8248->_4415 >= need) {
+                                c->_09[j]._1 = 1;
+                            }
+                            break;
+                        case 6:
+                            if ((lbl_2_bss_1A8248->_4428 & 8) && lbl_2_bss_1A8248->_4415 >= need) {
+                                c->_09[j]._1 = 1;
+                            }
+                            break;
+                        case 7:
+                            if ((lbl_2_bss_1A8248->_4428 & 0x10) && lbl_2_bss_1A8248->_4415 >= need) {
+                                c->_09[j]._1 = 1;
+                            }
+                            break;
+                        case 8:
+                            if ((lbl_2_bss_1A8248->_4428 & 1) && lbl_2_bss_1A8248->_441C == need && lbl_2_bss_1A8248->_4415 >= level) {
+                                c->_09[j]._1 = 1;
+                            }
+                            break;
+                        case 9:
+                            if ((lbl_2_bss_1A8248->_4428 & 2) && lbl_2_bss_1A8248->_441C == need && lbl_2_bss_1A8248->_4415 >= level) {
+                                c->_09[j]._1 = 1;
+                            }
+                            break;
+                        case 10:
+                            if ((lbl_2_bss_1A8248->_4428 & 4) && lbl_2_bss_1A8248->_441C == need && lbl_2_bss_1A8248->_4415 >= level) {
+                                c->_09[j]._1 = 1;
+                            }
+                            break;
+                        case 11:
+                            if ((lbl_2_bss_1A8248->_4428 & 8) && lbl_2_bss_1A8248->_441C == need && lbl_2_bss_1A8248->_4415 >= level) {
+                                c->_09[j]._1 = 1;
+                            }
+                            break;
+                        case 12:
+                            if ((lbl_2_bss_1A8248->_4428 & 0x10) && lbl_2_bss_1A8248->_441C == need && lbl_2_bss_1A8248->_4415 >= level) {
+                                c->_09[j]._1 = 1;
+                            }
+                            break;
+                        case 13:
+                            found = fn_8006C79C(i);
+                            if ((lbl_2_bss_1A8248->_4428 & 1) && found == 1 && lbl_2_bss_1A8248->_4415 >= level) {
+                                c->_09[j]._1 = 1;
+                            }
+                            break;
+                        case 14:
+                            found = fn_8006C79C(i);
+                            if ((lbl_2_bss_1A8248->_4428 & 2) && found == 1 && lbl_2_bss_1A8248->_4415 >= level) {
+                                c->_09[j]._1 = 1;
+                            }
+                            break;
+                        case 15:
+                            found = fn_8006C79C(i);
+                            if ((lbl_2_bss_1A8248->_4428 & 4) && found == 1 && lbl_2_bss_1A8248->_4415 >= level) {
+                                c->_09[j]._1 = 1;
+                            }
+                            break;
+                        case 16:
+                            found = fn_8006C79C(i);
+                            if ((lbl_2_bss_1A8248->_4428 & 8) && found == 1 && lbl_2_bss_1A8248->_4415 >= level) {
+                                c->_09[j]._1 = 1;
+                            }
+                            break;
+                        case 17:
+                            found = fn_8006C79C(i);
+                            if ((lbl_2_bss_1A8248->_4428 & 0x10) && found == 1 && lbl_2_bss_1A8248->_4415 >= level) {
+                                c->_09[j]._1 = 1;
+                            }
+                            break;
+                        case 20:
+                            if (lbl_2_bss_1A8248->_441C == need && lbl_2_bss_1A8248->_43BC >= level &&
+                                lbl_2_bss_1A8248->_4415 >= extra) {
+                                c->_09[j]._1 = 1;
+                            }
+                            break;
+                        }
+                    }
+                    if (goal != -1 && c->_09[j]._0 < 0) {
+                        c->_09[j]._1 = 1;
+                    }
+                }
+            }
+        }
+    }
+}
