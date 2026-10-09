@@ -6,6 +6,7 @@
 #include "Dolphin/mtx.h"
 #include "Dolphin/vec.h"
 #include "stl/math.h"
+#include "stdlib.h"
 #include "string.h"
 
 typedef void (*Obj0B08Fn)(struct Obj0B08* obj);
@@ -498,6 +499,50 @@ void fn_2_6F6F4(Obj0B08* obj) { lbl_2_data_2A220[obj->_94](obj); }
 // .text:0x0006F104 size:0x5F0
 
 // .text:0x0006ED30 size:0x3D4
+void fn_2_6ED30(Obj0B08* obj) {
+    s32 index = obj->_80;
+    s32 target = lbl_2_bss_1A8248->_1610[0]._80;
+    s32 state;
+    s32 slot;
+    fn_2_69E1C(index);
+    if (index >= 2 && index <= 6) {
+        state = fn_2_68670(0);
+        slot = fn_2_68690(0);
+        if (state == 1 && slot == index) {
+            fn_2_68FBC(index, 1);
+            obj->_C4 = 2;
+            obj->_CB = 0;
+            obj->_94 = 3;
+            return;
+        }
+    }
+    if (fn_2_68C80(index, target)) {
+        if (index == 1 && lbl_2_bss_1A8248->_44F3 == 0) {
+            fn_2_68FBC(index, 1);
+            obj->_C4 = 2;
+            obj->_CB = 0;
+            obj->_94 = 3;
+            return;
+        } else if (index >= 2 && index <= 6) {
+            obj->_CB = 0;
+        } else {
+            obj->_CB = -1;
+        }
+    } else {
+        obj->_CB = -1;
+    }
+    if (obj->_50 <= 0.0f) {
+        obj->_AE = obj->_B2;
+        obj->_B2 = obj->_B0;
+        if (rand() % 100 < 10) {
+            fn_2_68FBC(index, 1);
+            obj->_A2 = rand() % 180 + 60;
+            obj->_94 = 2;
+        } else {
+            obj->_94 = 0;
+        }
+    }
+}
 
 // .text:0x0006EA74 size:0x2BC
 void fn_2_6EA74(Obj0B08* obj) {
@@ -581,6 +626,48 @@ void fn_2_6E848(Obj0B08* obj) { lbl_2_data_2A234[obj->_94](obj); }
 // .text:0x0006E1D0 size:0x678
 
 // .text:0x0006DE54 size:0x37C
+void fn_2_6DE54(Obj0B08* obj) {
+    s32 index = obj->_80;
+    s32 target = lbl_2_bss_1A8248->_1610[0]._80;
+    s32 state;
+    s32 slot;
+    fn_2_69E1C(index);
+    if (index >= 2 && index <= 6) {
+        state = fn_2_68670(0);
+        slot = fn_2_68690(0);
+        if (state == 1 && slot == index) {
+            fn_2_68FBC(index, 1);
+            obj->_C4 = 2;
+            obj->_CB = 0;
+            obj->_94 = 4;
+            return;
+        }
+    }
+    if (fn_2_68C80(index, target)) {
+        if (index == 1) {
+            fn_2_68FBC(index, 1);
+            obj->_C4 = 2;
+            obj->_CB = 0;
+            obj->_94 = 3;
+            return;
+        } else if (index >= 2 && index <= 6) {
+            obj->_CB = 0;
+            obj->_CF = -1;
+            obj->_94 = 0;
+        }
+    } else {
+        obj->_CB = -1;
+    }
+    if (obj->_50 <= 0.0f) {
+        obj->_AE = obj->_B2;
+        obj->_B2 = obj->_B0;
+        obj->_A2 = 120;
+        fn_2_68FBC(index, 1);
+        obj->_BA = 9;
+        obj->_38 = obj->_50 = 0.0f;
+        obj->_94 = 2;
+    }
+}
 
 // .text:0x0006DB30 size:0x324
 void fn_2_6DB30(Obj0B08* obj) {
