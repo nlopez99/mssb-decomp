@@ -3,6 +3,8 @@
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/vec.h"
+#include "musyx/musyx.h"
+#include "string.h"
 
 typedef struct MenuTask0840 {
     /* 0x00 */ u8 _00[0xC];
@@ -44,7 +46,8 @@ typedef struct MenuSlot0840 {
 } MenuSlot0840; // size: 0xA
 
 extern struct {
-    /* 0x0000 */ u8 _0000[0x16C2];
+    /* 0x0000 */ u8 _0000[0x16C0];
+    /* 0x16C0 */ s16 _16C0;
     /* 0x16C2 */ s16 _16C2;
     /* 0x16C4 */ u8 _16C4[0x40EE - 0x16C4];
     /* 0x40EE */ MenuSlot0840 _40EE[0x33];
@@ -68,6 +71,8 @@ extern struct {
     /* 0x4431 */ u8 _4431[5];
     /* 0x4436 */ u8 _4436[0x4439 - 0x4436];
     /* 0x4439 */ u8 _4439;
+    /* 0x443A */ u8 _443A[0x44F4 - 0x443A];
+    /* 0x44F4 */ s8 _44F4;
 } *lbl_2_bss_1A8248;
 
 extern struct {
@@ -92,6 +97,12 @@ extern struct {
     /* 0x197854 */ s8 _197854;
     /* 0x197855 */ u8 _197855[0x197863 - 0x197855];
     /* 0x197863 */ s8 _197863;
+    /* 0x197864 */ u8 _197864[0x197866 - 0x197864];
+    /* 0x197866 */ s8 _197866;
+    /* 0x197867 */ s8 _197867;
+    /* 0x197868 */ u8 _197868[0x1978EF - 0x197868];
+    /* 0x1978EF */ s8 _1978EF;
+    /* 0x1978F0 */ s8 _1978F0;
 } *lbl_2_bss_1A824C;
 
 extern void* fn_800B0A5C_insertQueue(void (*)(void), s32);
@@ -102,7 +113,11 @@ extern s32 fn_80062890(s32 id);
 
 extern void fn_2_72054(s32, s32);
 extern s32 fn_2_8CC88(s32);
-extern Vec lbl_2_data_3198[70];
+extern struct {
+    /* 0x00 */ Vec _00;
+    /* 0x0C */ u8 _0C[0x14 - 0xC];
+} lbl_2_data_3198[42];
+extern u8 lbl_800EFBA4[0x10];
 extern s32 lbl_2_data_3C40[7];
 extern u8 lbl_2_data_3CC8[8];
 extern s16 lbl_2_data_1056C[4][6];
@@ -110,7 +125,13 @@ extern s16 lbl_2_data_3CE8[6][6];
 
 extern s32 fn_2_45938(s32);
 extern void fn_8006877C(s32);
+extern void fn_2_42490(void);
 extern void fn_2_44504(void);
+extern void fn_2_450E4(void);
+extern void fn_2_45354(void);
+extern void fn_2_6AABC(s32, Vec*);
+extern void fn_2_6AF80(s32, s32);
+extern s32 fn_2_6AF9C(s32);
 extern void fn_2_46C2C(s32, Vec*);
 extern void fn_2_4A6E8(void);
 extern void fn_2_90428(s32);
@@ -360,7 +381,7 @@ void fn_2_3F29C(void) {
             fn_2_92654(8, 0);
             fn_2_90428(9);
             fn_2_92654(9, 11);
-            fn_2_46C2C(0, &lbl_2_data_3198[15]);
+            fn_2_46C2C(0, &lbl_2_data_3198[9]._00);
             lbl_2_bss_1A8248->_441A = 0;
             lbl_2_bss_1A8248->_40EE[41]._6 = 0;
             fn_80062890(5);
@@ -370,7 +391,7 @@ void fn_2_3F29C(void) {
         break;
     case 2:
         if (task->_14 == 70) {
-            fn_2_46C2C(0, &lbl_2_data_3198[15]);
+            fn_2_46C2C(0, &lbl_2_data_3198[9]._00);
         }
         if (task->_14-- == 0) {
             task->_28 = 3;
@@ -917,6 +938,144 @@ void fn_2_3D878(void) {
     }
 }
 
+// .text:0x0003D5C4 size:0x2B4
+void fn_2_3D5C4(void) {
+    MenuTask0840* task = lbl_803CC1B8;
+
+    switch (task->_28) {
+    case 0:
+        fn_2_45354();
+        lbl_2_bss_1A824C->_197867 = 0;
+        task->_14 = 1;
+        if (lbl_2_bss_1A824C->_197866 == 0) {
+            task->_28 = 6;
+        } else {
+            task->_28 = 1;
+        }
+        break;
+    case 1:
+        if (task->_14-- == 0) {
+            task->_28 = 2;
+        }
+        break;
+    case 2:
+        if (lbl_2_bss_1A8248->_44F4 != 0) {
+            lbl_2_bss_1A8234->_162604[1][4] = 1;
+        } else {
+            lbl_2_bss_1A8234->_162604[1][42] = 1;
+        }
+        task->_14 = 12;
+        fn_80062890(56);
+        task->_28 = 3;
+        break;
+    case 3:
+        if (task->_14-- == 0) {
+            task->_28 = 4;
+        }
+        break;
+    case 4:
+        if (lbl_803C77B8[lbl_2_bss_1A824C->_197863]._02 & 0x300) {
+            if (lbl_2_bss_1A8248->_44F4 != 0) {
+                lbl_2_bss_1A8234->_162604[8][4] = 1;
+            } else {
+                lbl_2_bss_1A8234->_162604[8][42] = 1;
+            }
+            sndFXStartEx(0x1B8, lbl_800EFBA4[1], 0x3F, 0);
+            task->_14 = 12;
+            task->_28 = 5;
+        }
+        break;
+    case 5:
+        lbl_2_bss_1A824C->_197867++;
+        if (lbl_2_bss_1A824C->_197866 <= lbl_2_bss_1A824C->_197867) {
+            task->_28 = 6;
+        } else {
+            task->_28 = 2;
+        }
+        break;
+    case 6:
+        fn_2_450E4();
+        lbl_803CC1B8->_0C->_10 = 1;
+        fn_800B0A14_removeQueue();
+        task->_28 = 0;
+        break;
+    }
+    if (lbl_2_bss_1A824C->_19783F == 1) {
+        lbl_803CC1B8->_0C->_10 = 1;
+        fn_800B0A14_removeQueue();
+        task->_28 = 0;
+    }
+}
+
+// .text:0x0003C53C size:0x2A0
+void fn_2_3C53C(void) {
+    MenuTask0840* task = lbl_803CC1B8;
+
+    switch (task->_28) {
+    case 0:
+        lbl_2_bss_1A824C->_1978F0 = 0;
+        fn_2_42490();
+        if (lbl_2_bss_1A824C->_1978EF > 0) {
+            task->_14 = 1;
+            task->_28 = 1;
+        } else {
+            task->_28 = 7;
+        }
+        break;
+    case 1:
+        if (task->_14-- == 0) {
+            task->_28 = 2;
+        }
+        break;
+    case 2:
+        lbl_2_bss_1A8234->_162604[1][60] = 1;
+        fn_80062890(56);
+        task->_14 = 10;
+        task->_28 = 3;
+        break;
+    case 3:
+        if (task->_14-- == 0) {
+            task->_28 = 4;
+        }
+        break;
+    case 4:
+        if (lbl_803C77B8[lbl_2_bss_1A824C->_197863]._02 & 0x100) {
+            lbl_2_bss_1A8234->_162604[8][60] = 1;
+            task->_14 = 10;
+            sndFXStartEx(0x1B8, lbl_800EFBA4[1], 0x3F, 0);
+            task->_28 = 5;
+        } else if (lbl_803C77B8[lbl_2_bss_1A824C->_197863]._02 & 0x200) {
+            lbl_2_bss_1A8234->_162604[8][60] = 1;
+            task->_14 = 10;
+            sndFXStartEx(0x1B9, lbl_800EFBA4[2], 0x3F, 0);
+            task->_28 = 5;
+        }
+        break;
+    case 5:
+        if (task->_14-- == 0) {
+            lbl_2_bss_1A824C->_1978F0++;
+            if (lbl_2_bss_1A824C->_1978F0 == lbl_2_bss_1A824C->_1978EF) {
+                task->_28 = 7;
+            } else {
+                task->_28 = 2;
+            }
+        }
+        break;
+    case 6:
+        break;
+    case 7:
+        task->_0C->_10 = 1;
+        fn_800B0A14_removeQueue();
+        task->_28 = 0;
+        break;
+    }
+    if (lbl_2_bss_1A824C->_19783F == 1) {
+        lbl_803CC1B8->_0C->_10 = 1;
+        fn_800B0A14_removeQueue();
+        task->_28 = 0;
+    }
+}
+
 // .text:0x0003C3EC size:0x150
 void fn_2_3C3EC(void) {
     MenuTask0840* task = lbl_803CC1B8;
@@ -1033,6 +1192,87 @@ void fn_2_3C03C(void) {
         }
         break;
     case 3:
+        task->_0C->_10 = 1;
+        fn_800B0A14_removeQueue();
+        task->_28 = 0;
+        break;
+    }
+    if (lbl_2_bss_1A824C->_19783F == 1) {
+        lbl_803CC1B8->_0C->_10 = 1;
+        fn_800B0A14_removeQueue();
+        task->_28 = 0;
+    }
+}
+
+// .text:0x0003BD88 size:0x2B4
+void fn_2_3BD88(void) {
+    MenuTask0840* task = lbl_803CC1B8;
+    Vec pos;
+
+    switch (task->_28) {
+    case 0:
+        task->_14 = 1;
+        task->_28 = 1;
+        break;
+    case 1:
+        if (task->_14-- == 0) {
+            fn_2_72054(0, 19);
+            task->_14 = 50;
+            task->_28 = 2;
+        }
+        break;
+    case 2:
+        if (task->_14 == 12) {
+            if (lbl_2_bss_1A8248->_16C2 == 18) {
+                fn_2_92654(25, 9);
+            } else {
+                fn_2_92654(26, 9);
+            }
+        }
+        if (task->_14-- == 0) {
+            fn_80062890(11);
+        }
+        if (fn_2_6AF9C(0) == 1) {
+            fn_2_6AF80(0, 0);
+            task->_28 = 3;
+        }
+        break;
+    case 3:
+        task->_28 = 4;
+        break;
+    case 4:
+        if (lbl_2_bss_1A8248->_16C0 == 48) {
+            memcpy(&pos, &lbl_2_data_3198[26]._00, sizeof(Vec));
+            PSVECScale(&pos, 0.5f, &pos);
+            fn_2_6AABC(0, &pos);
+            fn_2_92654(26, 9);
+        } else {
+            memcpy(&pos, &lbl_2_data_3198[25]._00, sizeof(Vec));
+            PSVECScale(&pos, 0.5f, &pos);
+            fn_2_6AABC(0, &pos);
+            fn_2_92654(25, 9);
+        }
+        task->_28 = 5;
+        break;
+    case 5:
+        fn_2_72054(0, 20);
+        task->_28 = 6;
+        break;
+    case 6:
+        if (fn_2_6AF9C(0) == 1) {
+            fn_2_6AF80(0, 0);
+            fn_2_72054(0, 4);
+            if (lbl_2_bss_1A8248->_16C0 == 48) {
+                lbl_2_bss_1A8248->_16C2 = 50;
+                lbl_2_bss_1A8248->_16C0 = 50;
+            } else {
+                lbl_2_bss_1A8248->_16C2 = 18;
+                lbl_2_bss_1A8248->_16C0 = 18;
+            }
+            task->_28 = 7;
+        }
+        break;
+    case 7:
         task->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
