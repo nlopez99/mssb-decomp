@@ -1548,9 +1548,8 @@ void fn_1_23804(s32 arg0, s32 arg1, s32 rows, s32 cols, f32 arg4, f32 arg5) {
 }
 
 // .text:0x00023098 size:0x76C
-// 91.66%: the frustum setup keeps near and far live longer (five saved FPRs, not
-// four; the target stores -far once through frsp), and the last loop reads the last row
-// through a pointer where the target adds j * 12 to its base.
+// 93.07%: the frustum setup keeps near and far live longer (five saved FPRs, not four):
+// the target subtracts frsp(-far) where this folds -near - -far into -near + far.
 s32 fn_1_23098(Mtx44 proj, Mtx view, s32 rows, s32 cols, f32 near, f32 far) {
     Mtx44 m;
     Mtx inv;
@@ -1694,8 +1693,8 @@ s32 fn_1_23098(Mtx44 proj, Mtx view, s32 rows, s32 cols, f32 near, f32 far) {
     }
     hit[0].y = 0.0f;
     hit[1].y = 0.0f;
-    row = lbl_1_bss_F6E0[cols - 1];
     for (i = 0; i < n; i++) {
+        row = lbl_1_bss_F6E0[cols - 1];
         hit[0].x = lbl_1_bss_F6E0[0][i].x;
         hit[0].z = lbl_1_bss_F6E0[0][i].y;
         hit[1].x = row[i].x - hit[0].x;
