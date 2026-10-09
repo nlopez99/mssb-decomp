@@ -145,6 +145,15 @@ extern struct {
 extern MenuTextWindow0788 lbl_80366B18[];
 extern u8 lbl_800E869C[0x20];
 
+typedef struct MenuCharEntry0788 {
+    /* 0x0 */ u8 _0[0x2];
+    /* 0x2 */ u8 _2;
+    /* 0x3 */ u8 _3;
+    /* 0x4 */ u8 _4[0x6 - 0x4];
+} MenuCharEntry0788; // size: 0x6
+
+extern MenuCharEntry0788 lbl_800E8558[54];
+
 extern struct {
     /* 0x00 */ u8 _00[0xE4];
     /* 0xE4 */ u8 _E4[3];
@@ -9260,6 +9269,103 @@ void fn_2_1CF94(void) {
         }
         break;
     case 2:
+        task->_0C->_10 = 1;
+        fn_800B0A14_removeQueue();
+        task->_28 = 0;
+        break;
+    }
+}
+
+// .text:0x0001C860 size:0x734
+// 97.35%: in case 2 the target keeps lbl_800E8558's flag byte in a register and tests it
+// again with `cmpwi` before the mission table read; register numbers differ in its loops.
+void fn_2_1C860(void) {
+    MenuTask0788* task = lbl_803CC1B8;
+    MenuCharacter0788* chr;
+    MenuCharEntry0788* entry;
+    s32 j;
+    s32 i;
+
+    switch (task->_28) {
+    case 0:
+        lbl_2_bss_1A824C->_19771A = 0;
+        lbl_2_bss_1A824C->_19771C = 0;
+        lbl_2_bss_1A824C->_197720 = 0;
+        lbl_2_bss_1A824C->_197722 = 0;
+        lbl_2_bss_1A824C->_19771E = 0x36;
+        lbl_2_bss_1A824C->_197724 = 10;
+        task->_28 = 1;
+        break;
+    case 1:
+        if (lbl_803C77B8[lbl_2_bss_1A824C->_197863]._04 == 8 || lbl_803C77B8[lbl_2_bss_1A824C->_197863]._04 == 4) {
+            fn_2_46D94(&lbl_2_bss_1A824C->_19771A, &lbl_2_bss_1A824C->_19771C, lbl_2_bss_1A824C->_19771E, 10, 9);
+        }
+        lbl_2_bss_1A824C->_197716 = lbl_2_bss_1A824C->_19771A + lbl_2_bss_1A824C->_19771C;
+        if (lbl_803C77B8[lbl_2_bss_1A824C->_197863]._02 & 0x100) {
+            task->_28 = 2;
+        } else if (lbl_803C77B8[lbl_2_bss_1A824C->_197863]._02 & 0x200) {
+            task->_28 = 3;
+        }
+        if (lbl_803C77B8[lbl_2_bss_1A824C->_197863]._02 & 0x40) {
+            for (i = 0; i < 54; i++) {
+                chr = &lbl_2_bss_1A8248->_0000[i];
+                if (lbl_800E8558[i]._3 == 1) {
+                    for (j = 0; j < 10; j++) {
+                        if (lbl_80109AE8[lbl_800E8558[i]._2][j]._0 != -1) {
+                            chr->_09[j]._0 = 0;
+                        }
+                    }
+                }
+            }
+        } else if (lbl_803C77B8[lbl_2_bss_1A824C->_197863]._02 & 0x20) {
+            for (i = 0; i < 54; i++) {
+                chr = &lbl_2_bss_1A8248->_0000[i];
+                if (lbl_800E8558[i]._3 == 1) {
+                    for (j = 0; j < 10; j++) {
+                        if (lbl_80109AE8[lbl_800E8558[i]._2][j]._0 != -1) {
+                            chr->_09[j]._0 = -2;
+                        }
+                    }
+                }
+            }
+        }
+        break;
+    case 2:
+        if (lbl_803C77B8[lbl_2_bss_1A824C->_197863]._04 == 8 || lbl_803C77B8[lbl_2_bss_1A824C->_197863]._04 == 4) {
+            fn_2_46D94(&lbl_2_bss_1A824C->_197720, &lbl_2_bss_1A824C->_197722, lbl_2_bss_1A824C->_197724, 10, 9);
+        }
+        lbl_2_bss_1A824C->_197718 = lbl_2_bss_1A824C->_197720 + lbl_2_bss_1A824C->_197722;
+        i = fn_8006CDC0(lbl_2_bss_1A824C->_197716);
+        j = fn_2_44E2C(lbl_2_bss_1A824C->_197716);
+        chr = &lbl_2_bss_1A8248->_0000[lbl_2_bss_1A824C->_197716];
+        if ((lbl_803C77B8[lbl_2_bss_1A824C->_197863]._02 & 0x103) && i != j && lbl_800E8558[lbl_2_bss_1A824C->_197716]._3 == 1) {
+            entry = &lbl_800E8558[lbl_2_bss_1A824C->_197716];
+            if (entry->_3 == 1 && lbl_80109AE8[entry->_2][lbl_2_bss_1A824C->_197718]._0 != -1) {
+                if (chr->_09[lbl_2_bss_1A824C->_197718]._0 < 0) {
+                    chr->_09[lbl_2_bss_1A824C->_197718]._0 = 0;
+                } else {
+                    chr->_09[lbl_2_bss_1A824C->_197718]._0 = -2;
+                }
+                fn_8006CDC0(lbl_2_bss_1A824C->_197716);
+            }
+        } else if (lbl_803C77B8[lbl_2_bss_1A824C->_197863]._02 & 0x200) {
+            task->_28 = 1;
+        }
+        if (lbl_803C77B8[lbl_2_bss_1A824C->_197863]._02 & 0x40) {
+            for (j = 0; j < 10; j++) {
+                if (lbl_800E8558[lbl_2_bss_1A824C->_197716]._3 == 1 && lbl_80109AE8[lbl_800E8558[lbl_2_bss_1A824C->_197716]._2][j]._0 != -1) {
+                    chr->_09[j]._0 = 0;
+                }
+            }
+        } else if (lbl_803C77B8[lbl_2_bss_1A824C->_197863]._02 & 0x20) {
+            for (j = 0; j < 10; j++) {
+                if (lbl_800E8558[lbl_2_bss_1A824C->_197716]._3 == 1 && lbl_80109AE8[lbl_800E8558[lbl_2_bss_1A824C->_197716]._2][j]._0 != -1) {
+                    chr->_09[j]._0 = -2;
+                }
+            }
+        }
+        break;
+    case 3:
         task->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
