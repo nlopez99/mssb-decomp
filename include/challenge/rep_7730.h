@@ -3,9 +3,11 @@
 
 #include "mssbTypes.h"
 #include "Dolphin/mtx.h"
+#include "Dolphin/gx.h"
 
 struct Actor7730;
 struct RopeParams7730;
+struct Tex7730;
 
 struct DrawEntry7730;
 
@@ -35,7 +37,10 @@ void fn_1_1F418(void);
 void fn_1_1F618(void);
 void fn_1_1F900(void);
 void fn_1_1FD78(void);
+void fn_1_2004C(void);
+void fn_1_202A4(void);
 void fn_1_2040C(void);
+GXBool fn_1_2051C(struct Tex7730* tex, GXTexObj* obj, GXTlutObj* tlutObj, GXTlut tlutName);
 void fn_1_207D4(void);
 void fn_1_20890(void);
 void fn_1_20BD8(void);
@@ -49,6 +54,7 @@ void fn_1_23AD8(Mtx44 m, Vec* eye, Vec* at);
 void fn_1_24410(void);
 void fn_1_246AC(void);
 void fn_1_24778(void);
+void fn_1_247A0(void);
 void fn_1_267BC(void);
 void fn_1_26928(void);
 void fn_1_26A34(void);

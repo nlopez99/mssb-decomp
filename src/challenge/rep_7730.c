@@ -7,6 +7,8 @@
 
 extern void* lbl_803CC1B8;
 
+extern void convertTextureHeader(void* tex);
+
 extern void* ARAMTransfer(void* entry, int arg1, int arg2, u32 aram);
 extern void* fn_800B0A5C_insertQueue(void (*)(void), s32);
 extern void fn_800B0A14_removeQueue(void);
@@ -21,6 +23,7 @@ extern void fn_800B1188(void);
 extern void fn_800B24D4(s32 id);
 extern void fn_800A7D4C(s32, void*);
 extern void fn_80038CD0(u8 count, void* arg1, struct RopeNode7730* nodes, f32 arg3, f32 arg4);
+extern void fn_80038B48(void* arg0, struct ChainNode7730* nodes, u8 count, Vec* force);
 extern void fn_1_AF4(s32 arg0, s32 arg1, f32 arg2);
 extern void fn_1_272DC(void* arg0, s32 arg1);
 
@@ -94,6 +97,34 @@ typedef struct AnimTask7730 {
     /* 0x2C */ void* _2C;
 } AnimTask7730;
 
+typedef struct GameTask7730 {
+    /* 0x00 */ void (*_00)(void);
+    /* 0x04 */ u8 _04[0xC - 0x4];
+    /* 0x0C */ SprTask7730* _0C;
+    /* 0x10 */ u8 _10[0x14 - 0x10];
+    /* 0x14 */ u8* _14;
+    /* 0x18 */ u8* _18;
+    /* 0x1C */ s32 _1C;
+    /* 0x20 */ u8 _20;
+    /* 0x21 */ u8 _21;
+    /* 0x22 */ u8 _22;
+    /* 0x23 */ u8 _23;
+    /* 0x24 */ u8 _24;
+} GameTask7730;
+
+typedef struct ChainTask7730 {
+    /* 0x00 */ void (*_00)(void);
+    /* 0x04 */ u8 _04[0x22 - 0x4];
+    /* 0x22 */ u16 _22;
+    /* 0x24 */ u8 _24[0x2B - 0x24];
+    /* 0x2B */ u8 _2B;
+} ChainTask7730;
+
+typedef struct ChainNode7730 {
+    /* 0x00 */ f32 _00;
+    /* 0x04 */ u8 _04[0x40 - 0x4];
+} ChainNode7730; // size: 0x40
+
 typedef struct CameraTask7730 {
     /* 0x00 */ void (*_00)(void);
     /* 0x04 */ u8 _04[0x14 - 0x4];
@@ -112,6 +143,24 @@ typedef struct Actor7730 {
     /* 0x54 */ u8 _54[0xEC - 0x54];
     /* 0xEC */ f32 _EC;
 } Actor7730;
+
+typedef struct Tex7730 {
+    /* 0x00 */ void* image;
+    /* 0x04 */ void* tlut;
+    /* 0x08 */ u16 height;
+    /* 0x0A */ u16 width;
+    /* 0x0C */ u8 wrapS;
+    /* 0x0D */ u8 wrapT;
+    /* 0x0E */ u8 minFilter;
+    /* 0x0F */ u8 magFilter;
+    /* 0x10 */ f32 lodBias;
+    /* 0x14 */ u8 _14;
+    /* 0x15 */ u8 minLOD;
+    /* 0x16 */ u8 maxLOD;
+    /* 0x17 */ u8 format;
+    /* 0x18 */ u16 tlutEntries;
+    /* 0x1A */ u8 tlutFormat;
+} Tex7730;
 
 typedef struct RopeNode7730 {
     /* 0x00 */ u8 _00[0xC];
@@ -385,7 +434,7 @@ DrawEntry7730 lbl_1_data_107E4[2] = {
 // .bss statics, declared in reverse address order (MWCC lays them out in reverse)
 static Mtx44 lbl_1_bss_47010;
 static u8 lbl_1_bss_45868[0x17A8];
-static u8 lbl_1_bss_43F68[0x1900];
+static ChainNode7730 lbl_1_bss_43F68[100];
 static u8 lbl_1_bss_43EE0[0x88];
 static u8 lbl_1_bss_F6E0[0x34800];
 static u8 lbl_1_bss_76E0[0x8000];
@@ -401,9 +450,10 @@ static struct {
 static u8 lbl_1_bss_6FB4[4];
 static Vec lbl_1_bss_6FA8;
 static void* lbl_1_bss_6FA4;
-static u8 lbl_1_bss_6EA4[0x100];
-static u8 lbl_1_bss_6E44[0x60];
-static u8 lbl_1_bss_6D48[0xFC];
+static GXTexObj lbl_1_bss_6EA4[8];
+static GXTlutObj lbl_1_bss_6E44[8];
+static u32 lbl_1_bss_6E24[8];
+static u8 lbl_1_bss_6D48[0xDC];
 static u8 lbl_1_bss_6BF4[0x154];
 static struct {
     /* 0x0 */ f32 _0;
@@ -478,6 +528,17 @@ void fn_1_267BC(void) {
     if (((SprTask7730*)lbl_803CC1B8)->_10 != 0) {
         fn_800B0A14_removeQueue();
     }
+}
+
+// .text:0x000247A0 size:0x11C
+void fn_1_247A0(void) {
+    ChainTask7730* task = lbl_803CC1B8;
+    Vec force;
+
+    force.x = task->_22 * (lbl_803C77B8[0]._10 * lbl_1_bss_43F68[task->_2B - 1]._00);
+    force.y = task->_22 * (lbl_803C77B8[0]._13 * lbl_1_bss_43F68[task->_2B - 1]._00);
+    force.z = task->_22 * (lbl_803C77B8[0]._11 * lbl_1_bss_43F68[task->_2B - 1]._00);
+    fn_80038B48(lbl_1_bss_45868, lbl_1_bss_43F68, task->_2B, &force);
 }
 
 // .text:0x00024778 size:0x28
@@ -613,6 +674,74 @@ void fn_1_207D4(void) {
     GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
     GXSetNumChans(1);
     GXSetNumTexGens(1);
+}
+
+// .text:0x0002051C size:0x124
+GXBool fn_1_2051C(Tex7730* tex, GXTexObj* obj, GXTlutObj* tlutObj, GXTlut tlutName) {
+    GXBool mipmap = tex->minLOD != tex->maxLOD;
+
+    if (tex->tlut != NULL) {
+        GXInitTexObjCI(obj, tex->image, tex->width, tex->height, tex->format, tex->wrapS, tex->wrapT, mipmap,
+                       tlutName);
+        GXInitTlutObj(tlutObj, tex->tlut, tex->tlutFormat, tex->tlutEntries);
+    } else {
+        GXInitTexObj(obj, tex->image, tex->width, tex->height, tex->format, tex->wrapS, tex->wrapT, mipmap);
+    }
+    GXInitTexObjLOD(obj, tex->minFilter, tex->magFilter, tex->minLOD, tex->maxLOD, tex->lodBias, GX_FALSE, GX_FALSE,
+                    GX_ANISO_1);
+    return tex->tlut != NULL;
+}
+
+// .text:0x0002040C size:0x110
+void fn_1_2040C(void) {
+    GameTask7730* task = lbl_803CC1B8;
+    Mtx m;
+
+    task->_1C = 0;
+    task->_23 = 0;
+    task->_24 = 0;
+    task->_20 = 0;
+    task->_21 = 0;
+    task->_22 = 1;
+    C_MTXOrtho(lbl_1_bss_47010, 0.0f, 448.0f, 0.0f, 640.0f, 0.5f, -1.0f);
+    GXSetProjection(lbl_1_bss_47010, GX_ORTHOGRAPHIC);
+    PSMTXIdentity(m);
+    GXLoadPosMtxImm(m, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    GXLoadTexMtxImm(m, GX_TEXMTX0, GX_MTX2x4);
+    fn_80048C14(3);
+    fn_80048E00(0, 32);
+    fn_80048E00(1, 0);
+    fn_800AD038(lbl_80366158._08);
+    ((GameTask7730*)lbl_803CC1B8)->_00 = fn_1_2004C;
+}
+
+// .text:0x0002004C size:0x258
+void fn_1_2004C(void) {
+    u32 i;
+    GameTask7730* task = lbl_803CC1B8;
+    s32 ids[9] = { 5, 6, 7, 8, 9, 13, 0x60, 0x61, 0x55 };
+
+    switch (task->_21) {
+    case 0:
+        task->_18 = ARAMTransfer(lbl_1_data_10518, 0, 0, 0);
+        task->_21++;
+        break;
+    case 1:
+        if (lbl_803C6CF8._715 == 1) {
+            task->_14 = task->_18 + *(s32*)(task->_18 + 0x14);
+            convertTextureHeader(task->_14);
+            for (i = 0; i < 8; i++) {
+                lbl_1_bss_6E24[i] = i;
+                if (fn_1_2051C((Tex7730*)(task->_14 + ids[i] * 32 + 4), &lbl_1_bss_6EA4[i], &lbl_1_bss_6E44[i], i)) {
+                    lbl_1_bss_6E24[i] |= 0x80000000;
+                }
+            }
+            task->_21 = 0;
+            ((GameTask7730*)lbl_803CC1B8)->_00 = fn_1_202A4;
+        }
+        break;
+    }
 }
 
 // .text:0x0001F23C size:0x9C
