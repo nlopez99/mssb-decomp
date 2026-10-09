@@ -9,8 +9,18 @@
 #include "Dolphin/mtx.h"
 #include "string.h"
 
+typedef struct Node0568 {
+    /* 0x000 */ u16 _000;
+    /* 0x002 */ u8 _002[0x136 - 0x2];
+    /* 0x136 */ u8 _136;
+} Node0568;
+
 typedef struct Actor0568 {
-    /* 0x00 */ u8 _00[0x98];
+    /* 0x00 */ u8 _00[0x6];
+    /* 0x06 */ u16 _06;
+    /* 0x08 */ u8 _08[0x18 - 0x8];
+    /* 0x18 */ Node0568** _18;
+    /* 0x1C */ u8 _1C[0x98 - 0x1C];
     /* 0x98 */ u8 _98;
 } Actor0568;
 
@@ -42,7 +52,9 @@ typedef struct ModelList0568 {
 } ModelList0568;
 
 typedef struct PoseBlock0568 {
-    /* 0x00 */ u8 _00[0x5C];
+    /* 0x00 */ u8 _00[0x10];
+    /* 0x10 */ f32 _10;
+    /* 0x14 */ u8 _14[0x5C - 0x14];
 } PoseBlock0568; // size: 0x5C
 
 // One pose block per player in lbl_8036E548
@@ -72,9 +84,9 @@ typedef struct AnimBank0568 {
 
 // A player record in lbl_8036E548
 typedef struct Player0568 {
-    /* 0x000 */ void* _000;
+    /* 0x000 */ Actor0568* _000;
     /* 0x004 */ u8 _004[0x8 - 0x4];
-    /* 0x008 */ void* _008;
+    /* 0x008 */ u32* _008;
     /* 0x00C */ u8 _00C[0x10 - 0xC];
     /* 0x010 */ AnimBank0568* _010[7];
     /* 0x02C */ u8* _02C;
@@ -82,19 +94,23 @@ typedef struct Player0568 {
     /* 0x034 */ f32 _034;
     /* 0x038 */ f32 _038;
     /* 0x03C */ f32 _03C;
-    /* 0x040 */ u8 _040[0x4C - 0x40];
+    /* 0x040 */ f32 _040;
+    /* 0x044 */ f32 _044;
+    /* 0x048 */ f32 _048;
     /* 0x04C */ f32 _04C;
     /* 0x050 */ u8 _050[0x62 - 0x50];
     /* 0x062 */ s16 _062;
     /* 0x064 */ u8 _064[0x68 - 0x64];
     /* 0x068 */ s16 _068;
-    /* 0x06A */ u8 _06A[0x16A - 0x6A];
-    /* 0x16A */ u16 _16A;
-    /* 0x16C */ u8 _16C[0x252 - 0x16C];
-    /* 0x252 */ u8 _252;
+    /* 0x06A */ u8 _06A[0x162 - 0x6A];
+    /* 0x162 */ u16 _162[50];
+    /* 0x1C6 */ u8 _1C6[0x252 - 0x1C6];
+    /* 0x252 */ s8 _252;
     /* 0x253 */ u8 _253;
     /* 0x254 */ u8 _254;
-    /* 0x255 */ u8 _255[0x25D - 0x255];
+    /* 0x255 */ s8 _255;
+    /* 0x256 */ u8 _256[0x25C - 0x256];
+    /* 0x25C */ u8 _25C;
     /* 0x25D */ u8 _25D;
     /* 0x25E */ u8 _25E[0x265 - 0x25E];
     /* 0x265 */ u8 _265;
@@ -106,7 +122,11 @@ typedef struct Player0568 {
 } Player0568; // size: 0x27C
 
 extern struct {
-    /* 0x0000 */ u8 _0000[0x13C];
+    /* 0x0000 */ u8 _0000[0x60];
+    /* 0x0060 */ struct ModelList0568* _0060;
+    /* 0x0064 */ u8 _0064[0xAC - 0x64];
+    /* 0x00AC */ void* _00AC[4];
+    /* 0x00BC */ u8 _00BC[0x13C - 0xBC];
     /* 0x013C */ void* _013C;
     /* 0x0140 */ Pose0568 _0140[13];
     /* 0x0C04 */ Player0568 _0C04[13];
@@ -280,6 +300,8 @@ extern u8* lbl_2_bss_122C;
 extern u8* lbl_2_bss_1228;
 
 extern u8 lbl_2_data_2794[];
+extern u8 lbl_2_data_278C[2][4];
+extern Vec lbl_2_data_20F8[2];
 
 typedef struct AramEntry0568 {
     /* 0x0 */ u32 _0[4];
@@ -293,8 +315,27 @@ extern struct {
     /* 0x715 */ s8 _715;
 } lbl_803C6CF8;
 
+static inline s32 hasAltAnims(s8 type) {
+    s32 result = 0;
+
+    if (type == 0x12 || type == 0x26 || type == 0x28 || type == 0x29) {
+        result = 1;
+    }
+    return result != 0;
+}
+
+static inline void setRefAnim(ActorRef0568* ref, AnimBank0568* bank, s32 seq, f32 speed) {
+    ref->_04 = bank;
+    ref->_0E = seq;
+    ref->_5C = 0.0f;
+    ref->_58 = 1;
+    ref->_59 = bank != NULL;
+    ref->_5A = bank != NULL;
+    ref->_60 = speed;
+}
+
 static inline u16 getModelId(s32 index) {
-    return lbl_8036E548._2C50[index] != NULL ? lbl_8036E548._2C50[index]->_16A : 0xFFFF;
+    return lbl_8036E548._2C50[index] != NULL ? lbl_8036E548._2C50[index]->_162[4] : 0xFFFF;
 }
 
 extern Mtx lbl_2_bss_1010C;
@@ -314,6 +355,25 @@ typedef struct Obj0568 {
 extern void fn_2_16460(void);
 extern void* fn_800B0A5C_insertQueue(void (*)(void), s32);
 extern void fn_800B0A14_removeQueue(void);
+extern void convertTextureHeader(void* tex);
+extern void LoadActorLayout(void* layout);
+extern void convertGeometryAndSknHeader(void* geo, void* skn);
+extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);
+extern void fn_800BD190(void* geo, void* tex);
+extern void ANIMGet(void* bank);
+extern void fn_8002399C(ActorRef0568* ref, s32 arg1, s32 arg2, void* layout, void* anim, void* skn);
+extern void fn_800BD548(void* model, s32 count, ...);
+extern void fn_800B2C08(Actor0568* actor, u16 id);
+extern void fn_8001FC4C(Player0568* player);
+extern void fn_800B2B74(Actor0568* actor, u16 id);
+extern void fn_800B2BA8(Actor0568* dst, u16 id, Actor0568* src, u16 index);
+extern void fn_800126EC(void* pose, void* tex, u8* arg2);
+extern void fn_8001D180(s32 index, s32 arg1, s32 arg2);
+extern void fn_80025DDC(void* anim);
+extern void fn_80014990(s32 index, void* arg1, void* arg2);
+extern void fn_80025C58(void* anim, ActorRef0568* ref);
+extern void fn_800638B4(Player0568* player, ActorRef0568* ref);
+extern void fn_8004B7B4(Player0568* player, ActorRef0568* ref);
 extern void fn_80023B04(s32);
 extern void fn_80014204(s32);
 extern void* fn_80023AA4(void);
@@ -977,7 +1037,7 @@ done:
     size = (max + 0x1F) & ~0x1F;
     lbl_8036E548._2C8C = _OSAllocFromHeap(0x20, size * lbl_2_bss_100B8._2D);
     for (i = 0; i < lbl_2_bss_100B8._2D; i++) {
-        lbl_8036E548._0C04[i]._008 = lbl_8036E548._2C8C + size * i;
+        lbl_8036E548._0C04[i]._008 = (u32*)(lbl_8036E548._2C8C + size * i);
     }
 }
 
@@ -1032,6 +1092,151 @@ done:
         lbl_8036E548._0140[i]._60 = i * 2;
         lbl_8036E548._0140[i]._C4 = i * 2 + 1;
     }
+}
+
+// .text:0x00016F78 size:0x6D0
+void fn_2_16F78(u8 index) {
+    Player0568* player = &lbl_8036E548._0C04[index];
+    u32* data;
+    void* tex;
+    void* layout;
+    void* geo;
+    void* skn;
+    void* anim;
+    ActorRef0568* ref;
+    u16 count;
+    u16 id;
+    s32 i;
+    s32 first;
+    s32 second;
+    Pose0568* pose;
+    Vec* pos;
+
+    player->_255 = index;
+    data = player->_008;
+    for (i = 0; i < 15; i++) {
+        if (player->_008[i] == 0) {
+            break;
+        }
+        player->_008[i] = (u32)data + data[i];
+    }
+    tex = (void*)player->_008[0];
+    layout = (void*)player->_008[1];
+    geo = (void*)player->_008[2];
+    skn = (void*)player->_008[3];
+    convertTextureHeader(tex);
+    LoadActorLayout(layout);
+    convertGeometryAndSknHeader(geo, skn);
+    haveActLayoutPointToGeoHeader(layout, geo);
+    fn_800BD190(geo, tex);
+    anim = player->_010[5] = (AnimBank0568*)player->_008[4];
+    ANIMGet(player->_010[5]);
+    ref = fn_800111D8(player);
+    fn_8002399C(ref, index, index, layout, anim, skn);
+    setRefAnim(&lbl_8036E548._0060->_34[index], player->_010[5], 0, 0.0f);
+    count = lbl_8036E548._0060->_34[index]._00->_06;
+    memset(player->_162, 0xFF, sizeof(player->_162));
+    for (i = 0; i < count; i++) {
+        id = lbl_8036E548._0060->_34[index]._00->_18[i]->_000;
+        if (id != 0xFFFF) {
+            player->_162[id] = i;
+        }
+    }
+    fn_800BD548(&lbl_8036E548._0060->_34[index], 4, lbl_8036E548._00AC[0], lbl_8036E548._00AC[1],
+                lbl_8036E548._00AC[2], lbl_8036E548._00AC[3]);
+    player->_040 = player->_044 = player->_048 = 0.0f;
+    CTRLSetTranslation(&lbl_8036E548._0060->_34[index]._10, 0.0f, 0.0f, 0.0f);
+    CTRLSetRotation(&lbl_8036E548._0060->_34[index]._10, 0.0f, 0.0f, 0.0f);
+    lbl_8036E548._0060->_34[index]._54 = 0.5f;
+    lbl_8036E548._0060->_34[index]._5A = 1;
+    fn_800B2C08(lbl_8036E548._0060->_34[index]._00, getModelId(index));
+    fn_8001FC4C(lbl_8036E548._2C50[index]);
+    pos = &lbl_2_data_20F8[index];
+    player->_034 = pos->x;
+    player->_038 = pos->y;
+    player->_03C = pos->z;
+    player->_04C = 0.5f;
+    player->_25D = 0;
+    lbl_8036E548._0060->_34[index]._08 = fn_2_190B8;
+    player->_000 = ref->_00;
+    fn_800B2B74(ref->_00, player->_162[19]);
+    fn_800B2B74(ref->_00, player->_162[25]);
+    id = player->_162[3];
+    if (id != 0xFFFF) {
+        fn_800B2B54(player->_000, id, 13);
+    }
+    id = player->_162[3];
+    if (id != 0xFFFF) {
+        fn_800B2BA8(ref->_00, id, NULL, 0);
+        ref->_00->_18[id]->_136 = 1;
+    }
+    id = player->_162[2];
+    if (id != 0xFFFF) {
+        fn_800B2BA8(ref->_00, id, NULL, 0);
+        ref->_00->_18[id]->_136 = 1;
+    }
+    id = player->_162[1];
+    if (id != 0xFFFF) {
+        fn_800B2BA8(ref->_00, id, NULL, 0);
+        ref->_00->_18[id]->_136 = 1;
+    }
+    id = player->_162[36];
+    if (id != 0xFFFF) {
+        fn_800B2BA8(ref->_00, id, NULL, 0);
+    }
+    id = player->_162[46];
+    if (id != 0xFFFF) {
+        fn_800B2BA8(ref->_00, id, NULL, 0);
+        ref->_00->_18[id]->_136 = 1;
+    }
+    pose = &lbl_8036E548._0140[player->_255];
+    if (player->_008[5] != 0) {
+        player->_030 = &lbl_8036E548._0140[index];
+        pose->_00 = (u8*)player->_008;
+        fn_800126EC(pose, tex, lbl_2_data_278C[0]);
+        pose->_64 = (u8*)player->_008;
+        fn_800126EC(&pose->_64, tex, lbl_2_data_278C[1]);
+    }
+    if (hasAltAnims(player->_252)) {
+        switch (player->_252) {
+        case 0x12:
+            first = 4;
+            second = 5;
+            break;
+        case 0x26:
+            first = 2;
+            second = 3;
+            break;
+        case 0x28:
+        case 0x29:
+            first = 6;
+            second = 7;
+            break;
+        }
+    } else {
+        first = 1;
+        second = 0;
+    }
+    fn_8001D180(index, first, 1);
+    fn_8001D180(index, second, 1);
+    if (player->_008[13] != 0 && player->_008[14] != 0) {
+        fn_80025DDC((void*)player->_008[13]);
+        fn_80014990(index, (void*)player->_008[13], (void*)player->_008[14]);
+        fn_80025C58((void*)player->_008[13], ref);
+    }
+    player->_030->_CC = 1;
+    player->_030->_68._10 = 0.5f;
+    player->_030->_04._10 = 0.5f;
+    switch (player->_252) {
+    case 2:
+        fn_800638B4(player, ref);
+        break;
+    case 0x13:
+        player->_25C = 1;
+        fn_8004B7B4(player, ref);
+        break;
+    }
+    fn_2_16A98(index, 0, 1, 0, 0, 0, 0);
 }
 
 // .text:0x00016F0C size:0x6C
