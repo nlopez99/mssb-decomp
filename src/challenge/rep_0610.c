@@ -320,6 +320,7 @@ extern u8 lbl_1_data_2390[7];
 extern s16 lbl_1_data_A978[];
 extern u8 lbl_1_data_ABA8;
 extern Vec lbl_1_data_AD0C;
+extern Vec lbl_1_data_AD18;
 extern Vec lbl_1_data_AD24;
 extern f32 lbl_1_data_ADC0;
 extern f32 lbl_1_data_F568;
@@ -361,7 +362,7 @@ static struct Unk67E0 {
     /* 0x030 */ LITObj _030;
     /* 0x0F0 */ u16 _0F0;
     /* 0x0F2 */ u16 _0F2;
-    /* 0x0F4 */ u8 _0F4[0xF8 - 0xF4];
+    /* 0x0F4 */ f32 _0F4;
     /* 0x0F8 */ f32 _0F8;
     /* 0x0FC */ Vec _0FC;
     /* 0x108 */ Vec _108;
@@ -930,6 +931,45 @@ void fn_1_126CC(void) {
     actor->_040 = lbl_1_data_AD0C.x;
     actor->_044 = lbl_1_data_AD0C.y;
     actor->_048 = lbl_1_data_AD0C.z;
+}
+
+// .text:0x00011F08 size:0x2CC
+void fn_1_11F08(struct Unk67E0* arg0) {
+    Mtx rotX;
+    Mtx rotY;
+    Mtx m;
+    Vec rot;
+    Vec v = { 0.0f, 0.0f, 100.0f };
+    f32 cosY;
+    f32 sinY;
+    camera_803c639c_s* camera;
+    if (!(lbl_803C77B8[0]._00 & 0x10)) {
+        arg0->_0F0 -= lbl_803C77B8[0]._13 * 4;
+        arg0->_0F2 += lbl_803C77B8[0]._12 * 4;
+        arg0->_0F4 = lbl_803C77B8[0]._10 / -256.0f;
+        arg0->_0F8 = lbl_803C77B8[0]._11 / 256.0f;
+        arg0->_108.y += lbl_803C77B8[0]._15 / 1024.0f;
+        arg0->_108.y -= lbl_803C77B8[0]._14 / 1024.0f;
+    }
+    rot.x = arg0->_0F0;
+    rot.y = arg0->_0F2;
+    rot.z = 0.0f;
+    PSVECScale(&rot, 0.0000958738f, &rot);
+    PSMTXRotRad(rotX, 'X', rot.x);
+    PSMTXRotRad(rotY, 'Y', rot.y);
+    sinY = rotY[0][2];
+    cosY = rotY[0][0];
+    PSMTXConcat(rotY, rotX, m);
+    PSMTXMultVec(m, &v, &arg0->_0FC);
+    arg0->_108.x += arg0->_0F8 * sinY - arg0->_0F4 * cosY;
+    arg0->_108.z += arg0->_0F8 * cosY + arg0->_0F4 * sinY;
+    arg0->_0FC.x += arg0->_108.x;
+    arg0->_0FC.y += arg0->_108.y;
+    arg0->_0FC.z += arg0->_108.z;
+    makeLookAtMatrix(arg0->_000, &arg0->_108, &lbl_1_data_AD18, &arg0->_0FC);
+    camera = fn_80052768_getCamera(0);
+    memcpy(&camera->eye, &arg0->_108, sizeof(Vec));
+    memcpy(&camera->target, &arg0->_0FC, sizeof(Vec));
 }
 
 // .text:0x00011D00 size:0x208

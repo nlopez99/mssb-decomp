@@ -64,6 +64,7 @@ void fn_1_10E2C(Mtx arg0, Mtx arg1, u32 arg2, u32 arg3, u32 arg4);
 void fn_1_116EC(void* arg0);
 void fn_1_11C98(void);
 void fn_1_11D00(struct Unk67E0* arg0);
+void fn_1_11F08(struct Unk67E0* arg0);
 void fn_1_121D4(struct Unk67E0* arg0);
 void fn_1_126CC(void);
 void fn_1_12820(struct Unk0060* arg0, Mtx arg1);
