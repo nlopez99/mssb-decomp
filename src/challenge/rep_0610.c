@@ -519,6 +519,19 @@ void fn_1_17B5C(void) {
     fn_80052D70(lbl_803CC1B8);
 }
 
+// .text:0x000179CC size:0x190
+// Inherits fn_1_126CC's difference through its inlined copy
+void fn_1_179CC(void) {
+    switch (lbl_1_bss_5F72) {
+    case 0:
+        fn_1_121D4(&lbl_1_bss_67E0);
+        break;
+    case 1:
+        fn_1_126CC();
+        break;
+    }
+}
+
 // .text:0x00017954 size:0x78
 void fn_1_17954(void) {
     Mtx44 m;
@@ -2217,8 +2230,6 @@ void fn_1_DF14(void) {
 }
 
 // .text:0x0000DE1C size:0xF8
-// fn_1_D8A0 is inlined here, where the target calls it; it stays a call only
-// with about 21 more statements in fn_1_D8A0 (measured with dummy stores)
 void fn_1_DE1C(void) {
     UnkTaskState0610* task = (UnkTaskState0610*)lbl_803CC1B8;
     switch (task->_14) {
