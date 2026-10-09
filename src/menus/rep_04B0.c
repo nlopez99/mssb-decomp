@@ -55,9 +55,14 @@ extern struct {
 } lbl_803C6028;
 
 typedef struct Select04B0 {
-    /* 0x00 */ u8 _00[0x10];
-    /* 0x10 */ s32 _10[2];
-    /* 0x18 */ u8 _18[0x58 - 0x18];
+    union {
+        // Menu cursors, one word each
+        /* 0x00 */ s32 _00[0x58 / 4];
+        struct {
+            /* 0x00 */ u8 _pad00[0x10];
+            /* 0x10 */ s32 _10[2];
+        };
+    };
 } Select04B0; // size: 0x58
 
 extern Select04B0 lbl_2_bss_F410;
@@ -267,6 +272,7 @@ Vec lbl_2_data_20EC = { 0.8f, -1.1f, -4.9f };
 
 // .text:0x00016724 size:0x14C
 void fn_2_16724(void) {
+    GXColor color = { 0xFF, 0xFF, 0xFF, 0xFF }; // unused; its initializer is lbl_2_rodata_500
     Mtx44 proj;
 
     lbl_2_bss_1010C._48.x = lbl_2_data_20EC.x;
@@ -352,14 +358,17 @@ void fn_2_1641C(void) {
 }
 
 // .text:0x00015E80 size:0x59C
+// 97.52%: after the cursor loop the target re-extends port from the raw parameter and
+// frees a saved register (one fewer here), and it keeps a redundant `bne` before the
+// branch to the shared fn_2_15AFC call.
 void fn_2_15E80(u8 port) {
     Pad04B0 pad;
     s32 i;
     s32 first;
     s32 prev;
     s32 cur;
-    u8 idx = lbl_803C66B0._59[port];
     s32 slot = lbl_8034E9A0._46F8[port] + 4;
+    s32 idx = lbl_803C66B0._59[port];
 
     if (lbl_2_bss_100B8._19 == 0 || lbl_2_bss_100B8._1A != 0 || lbl_803C66B0._55[port] != 0 ||
         lbl_803297E0._CF5D[idx] != 0) {
@@ -443,16 +452,16 @@ void fn_2_15E80(u8 port) {
 
     if (lbl_2_bss_100B8._10[idx] == 0 || pad._0 != 0 || pad._2 != 0) {
         lbl_803C6724._0[port] = lbl_2_bss_F410._10[idx];
-        first = ((s32*)&lbl_2_bss_F410)[slot];
+        first = lbl_2_bss_F410._00[slot];
         do {
-            prev = ((s32*)&lbl_2_bss_F410)[slot];
+            prev = lbl_2_bss_F410._00[slot];
             fn_2_14CA0(idx, &pad);
-            cur = ((s32*)&lbl_2_bss_F410)[slot];
+            cur = lbl_2_bss_F410._00[slot];
         } while (lbl_8034E9A0._4757[lbl_800FE5D4[cur]] != 0 && first != cur && prev != cur);
         if (lbl_2_bss_F410._10[port] == lbl_2_bss_F410._10[port ^ 1] && lbl_803C5EA4._5 != 0) {
-            ((s32*)&lbl_2_bss_F410)[slot]++;
-            if (((s32*)&lbl_2_bss_F410)[slot] >= 12) {
-                ((s32*)&lbl_2_bss_F410)[slot] = 0;
+            lbl_2_bss_F410._00[slot]++;
+            if (lbl_2_bss_F410._00[slot] >= 12) {
+                lbl_2_bss_F410._00[slot] = 0;
             }
         } else if ((pad._4 & 0xF) == 0 || (pad._4 & 0x20)) {
     call:
@@ -554,6 +563,9 @@ void fn_2_15A90(s32* value, u8 port, s32 max) {
 }
 
 // .text:0x0001560C size:0x484
+// 95.59%: registers in the non-mode-5 branch. The target scales port for
+// lbl_2_bss_F410._10[port] from the raw parameter (clrlslwi) apart from the (u8)port
+// it keeps for the other arrays; here both share one scaled index.
 void fn_2_1560C(u8 port) {
     s32 player;
 
