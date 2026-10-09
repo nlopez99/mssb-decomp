@@ -42,7 +42,7 @@ void fn_3_BD6AC(s32 arg0, f32 x, f32 y, f32 z);
 void fn_3_BD758(void);
 BOOL fn_3_BD7D0(void);
 void fn_3_BD7D8(void);
-void fn_3_BD7DC(s32 arg0);
+void fn_3_BD7DC(MtxPtr mtx);
 void fn_3_BD80C(s32 arg0);
 void fn_3_BD8D8(void);
 void fn_3_BD8FC(struct UnkSpark1E08* spark);

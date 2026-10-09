@@ -10,6 +10,6 @@ BOOL fn_3_B7CDC(f32 x, f32 z);
 BOOL fn_3_B7D6C(f32 x, f32 z);
 BOOL fn_3_B7DD8(f32 x, f32 z);
 BOOL fn_3_B7E10(f32 x, f32 z);
-int fn_3_B7E44(s16 angle, f32 dist);
+int fn_3_B7E44(f32 dist, s16 angle);
 
 #endif // !__GAME_rep_1CB8_H_

@@ -9,7 +9,7 @@ extern f32 lbl_3_data_4444[10];
 // .text:0x000B7E44 size:0xAC mapped:0x806F6ED8
 // The target loads 0.06 through `addi; lfd 0(rX)` before the int-to-float
 // conversion; this version loads it directly and schedules it later.
-int fn_3_B7E44(s16 angle, f32 dist) {
+int fn_3_B7E44(f32 dist, s16 angle) {
     int diff;
     f32 offset;
 

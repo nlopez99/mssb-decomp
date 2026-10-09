@@ -688,9 +688,37 @@ def function_status(func: Dict[str, Any], base_syms: Optional[Dict[str, "Symbol"
     return "partial"
 
 
+def defined_in_source(unit: Dict[str, Any], function: str) -> bool:
+    path = os.path.join(root_dir, unit.get("metadata", {}).get("source_path", ""))
+    if not os.path.isfile(path):
+        return False
+    with open(path) as f:
+        return re.search(rf"^[^;\n]*\b{re.escape(function)}\s*\([^;{{]*\)\s*\{{", f.read(), re.M) is not None
+
+
+def order_inversions(target_syms: Dict[str, Symbol], base_syms: Optional[Dict[str, Symbol]]) -> List[Tuple[str, str]]:
+    # objdiff pairs functions by name, so a function the source puts in the
+    # wrong place still matches; only linking fails. List each function the
+    # build emits before one that precedes it in the target
+    if not base_syms:
+        return []
+    both = [
+        (t.value, base_syms[name].value, name)
+        for name, t in target_syms.items()
+        if t.kind == 2 and name in base_syms and base_syms[name].kind == 2 and base_syms[name].section == t.section
+    ]
+    both.sort()
+    inversions = []
+    for (_, prev_base, prev), (_, cur_base, cur) in zip(both, both[1:]):
+        if cur_base < prev_base:
+            inversions.append((cur, prev))
+    return inversions
+
+
 def stub_callees(unit: Dict[str, Any], statuses: Dict[str, str]) -> Dict[str, List[str]]:
     # An empty stub is inlined into its callers, so a caller cannot match until
-    # each stub it calls in this unit has a body: list those per function
+    # each stub it calls in this unit has a body: list those per function. A
+    # callee absent from the source is called, not inlined, so it blocks nothing
     path = asm_path(unit)
     if not os.path.exists(path):
         return {}
@@ -704,7 +732,7 @@ def stub_callees(unit: Dict[str, Any], statuses: Dict[str, str]) -> Dict[str, Li
             m = re.search(r"\tbl?\s+([A-Za-z_][\w.@]*)\s*$", line)
             if current and m:
                 callee = m.group(1)
-                if callee != current and statuses.get(callee) in ("stub", "missing"):
+                if callee != current and statuses.get(callee) == "stub":
                     if callee not in waits.setdefault(current, []):
                         waits[current].append(callee)
     return waits
@@ -902,6 +930,7 @@ def run(args: argparse.Namespace, unit: Dict[str, Any], function: Optional[str],
                 status = check_function(unit, f, target_syms, base_syms)[0]
             statuses[f["name"]] = status
         waits = stub_callees(unit, statuses)
+        inversions = order_inversions(target_syms, base_syms)
         if funcs:
             matched = all(s == "match" for s in statuses.values())
         else:  # data-only unit
@@ -923,13 +952,17 @@ def run(args: argparse.Namespace, unit: Dict[str, Any], function: Optional[str],
                     for f in funcs
                 ],
                 base_only=base_only,
+                order_inversions=[list(pair) for pair in inversions],
             )
             print(json.dumps(result, indent=1))
         else:
             built = f" (built in {result['build']['seconds']:.2f}s)" if "build" in result else ""
             print(f"{unit['name']}  {result['source']}{built}")
             print_unit(unit, report_unit, statuses, base_only, args.all, waits)
-        return EXIT_MATCH if matched else EXIT_MISMATCH
+            for early, late in inversions:
+                print(f"order: {early} is emitted before {late}, unlike the target; move it in the source"
+                      " (objdiff pairs by name, so only linking would show this)")
+        return EXIT_MATCH if matched and not inversions else EXIT_MISMATCH
 
     func = next((f for f in report_unit.get("functions", []) if f["name"] == function), None)
     if func is None:
@@ -961,7 +994,12 @@ def run(args: argparse.Namespace, unit: Dict[str, Any], function: Optional[str],
     print(f"{unit['name']}  {result['source']}{built}")
     print(f"{function}  size {int(func['size']):#x}  {shown}  {status.upper()}")
     if status == "missing":
-        print("not in the source yet; target assembly:")
+        if defined_in_source(unit, function):
+            print("in the source, but objdiff cannot pair it: usually a callee inlined into it"
+                  " (an empty stub or a small function the target calls) or the function itself"
+                  " inlined away; target assembly:")
+        else:
+            print("not in the source yet; target assembly:")
         print_listing(target, target_syms, args.max_lines, args.full)
         print_draft(draft, function, args.max_lines, args.full)
         return EXIT_MISMATCH

@@ -1,0 +1,96 @@
+#ifndef __MENUS_rep_0C50_H_
+#define __MENUS_rep_0C50_H_
+
+#include "mssbTypes.h"
+
+struct UnkTask0C50;
+
+void fn_2_7207C(void);
+void fn_2_72594(void);
+void fn_2_72630(void);
+void fn_2_7265C(void);
+void fn_2_72814(struct UnkTask0C50* task);
+void fn_2_728C0(struct UnkTask0C50* task);
+void fn_2_7293C(struct UnkTask0C50* task);
+void fn_2_729E0(struct UnkTask0C50* task);
+void fn_2_72A58(void);
+void fn_2_72A88(struct UnkTask0C50* task);
+void fn_2_72CB4(struct UnkTask0C50* task);
+void fn_2_72D60(struct UnkTask0C50* task);
+void fn_2_72DDC(struct UnkTask0C50* task);
+void fn_2_72E54(struct UnkTask0C50* task);
+void fn_2_73028(void);
+s32 fn_2_7302C(void);
+void fn_2_7308C(void);
+void fn_2_73758(void);
+void fn_2_738C8(void);
+void fn_2_73994(struct UnkTask0C50* task, s32 index);
+s32 fn_2_73B54(s32 arg0);
+s32 fn_2_73B94(s32 arg0);
+s32 fn_2_73BF0(s32 arg0);
+void fn_2_73CBC(struct UnkTask0C50* task);
+void fn_2_73EFC(struct UnkTask0C50* task);
+void fn_2_744C8(void);
+void fn_2_74518(void);
+void fn_2_74564(struct UnkTask0C50* task);
+void fn_2_7463C(struct UnkTask0C50* task);
+void fn_2_747FC(void);
+void fn_2_74CD8(void);
+void fn_2_74D8C(void);
+s32 fn_2_74DB8(s32 arg0);
+void fn_2_74E14(struct UnkTask0C50* task, s32 index, s32 count, u8 sel);
+void fn_2_74F40(struct UnkTask0C50* task, s32 index);
+u8 fn_2_75B58(struct UnkTask0C50* task, s32 index);
+void fn_2_75BE4(struct UnkTask0C50* task, s32 index);
+void fn_2_76098(void);
+void fn_2_7609C(struct UnkTask0C50* task, u8 flag, u8 skip);
+void fn_2_760CC(struct UnkTask0C50* task);
+void fn_2_7630C(struct UnkTask0C50* task, u8 index);
+void fn_2_7664C(void);
+void fn_2_76650(struct UnkTask0C50* task, u8 index, u32 mask);
+void fn_2_78034(struct UnkTask0C50* task, s32 index);
+void fn_2_7805C(struct UnkTask0C50* task, s32 index);
+void fn_2_78AC0(struct UnkTask0C50* task, s32 index);
+void fn_2_78F78(struct UnkTask0C50* task, s32 index);
+void fn_2_7912C(struct UnkTask0C50* task, s32 index);
+void fn_2_79394(struct UnkTask0C50* task, s32 index);
+void fn_2_79634(struct UnkTask0C50* task, s32 index);
+void fn_2_79688(struct UnkTask0C50* task, s32 index);
+void fn_2_79764(struct UnkTask0C50* task, s32 index);
+void fn_2_79930(struct UnkTask0C50* task, s32 index);
+void fn_2_79B24(struct UnkTask0C50* task, s32 index);
+void fn_2_79CF8(struct UnkTask0C50* task, s32 index);
+void fn_2_79FAC(struct UnkTask0C50* task, s32 index);
+void fn_2_7A194(struct UnkTask0C50* task, s32 index);
+void fn_2_7A460(struct UnkTask0C50* task, s32 index);
+void fn_2_7A5B8(struct UnkTask0C50* task, s32 index);
+void fn_2_7A748(struct UnkTask0C50* task, s32 index);
+void fn_2_7A9D8(struct UnkTask0C50* task, s32 index);
+void fn_2_7AC64(struct UnkTask0C50* task, s32 index);
+void fn_2_7D85C(struct UnkTask0C50* task, s32 index);
+void fn_2_7E194(struct UnkTask0C50* task, s32 index);
+void fn_2_7E380(struct UnkTask0C50* task, s32 index);
+void fn_2_7E860(struct UnkTask0C50* task, s32 index);
+void fn_2_7E974(struct UnkTask0C50* task, s32 index);
+void fn_2_7EE7C(struct UnkTask0C50* task, s32 index);
+void fn_2_7EF68(struct UnkTask0C50* task, s32 index);
+void fn_2_7F030(struct UnkTask0C50* task, s32 index);
+void fn_2_7F2BC(struct UnkTask0C50* task, s32 index);
+void fn_2_7F714(struct UnkTask0C50* task, s32 index);
+void fn_2_7F8BC(struct UnkTask0C50* task, s32 index);
+void fn_2_7FAFC(struct UnkTask0C50* task, s32 index);
+void fn_2_800B0(struct UnkTask0C50* task, s32 index);
+void fn_2_802EC(struct UnkTask0C50* task);
+void fn_2_80500(struct UnkTask0C50* task, s32 index);
+void fn_2_805DC(struct UnkTask0C50* task, s32 index);
+void fn_2_8082C(struct UnkTask0C50* task, s32 index);
+void fn_2_808D8(struct UnkTask0C50* task, s32 index);
+void fn_2_80B5C(struct UnkTask0C50* task, s32 index);
+void fn_2_80C2C(struct UnkTask0C50* task, s32 index);
+void fn_2_80E0C(struct UnkTask0C50* task, s32 index);
+void fn_2_81628(void);
+void fn_2_8279C(void);
+void fn_2_82CF0(void);
+void fn_2_82DE8(void);
+
+#endif // !__MENUS_rep_0C50_H_

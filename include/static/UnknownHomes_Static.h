@@ -24,7 +24,7 @@ typedef struct _GameInitVariables {
         /*0x13*/ u8 _13;
         /*0x13*/ u8 _13_arr[7]; // indexed by MINI_GAME_ID in fn_3_10F1D4
     };
-    artificial_padding(0x13, 0x20, u8[7]);
+    /*0x1A*/ u8 _1A[6];
     /*0x20*/ s16 _20[4][2];
     /*0x30*/ s16 challengeMinigame_baseCoinsEarned;
     /*0x32*/ u8 bJMatchRelated;
@@ -73,10 +73,15 @@ typedef struct {
     /* 0x00 */ u16 _00; // buttons held
     /* 0x02 */ u16 _02; // buttons newly pressed
     /* 0x04 */ u16 _04; // newly pressed, or held with key repeat
-    /* 0x06 */ u8 _06[0x10 - 0x06];
+    /* 0x06 */ u8 _06[0x08 - 0x06];
+    /* 0x08 */ s8 _08; // -1 when no controller is connected
+    /* 0x09 */ u8 _09[0x0C - 0x09];
+    /* 0x0C */ s8 _0C;
+    /* 0x0D */ u8 _0D[0x10 - 0x0D];
     /* 0x10 */ s8 _10;
     /* 0x11 */ s8 _11;
-    /* 0x12 */ u8 _12[0x14 - 0x12];
+    /* 0x12 */ s8 _12;
+    /* 0x13 */ s8 _13;
     /* 0x14 */ u8 _14;
     /* 0x15 */ u8 _15;
     /* 0x16 */ u8 _16[0x20 - 0x16];
