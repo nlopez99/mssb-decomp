@@ -8,9 +8,15 @@
 #include "string.h"
 #include "Dolphin/rand.h"
 
+typedef struct Task74A0Parent {
+    /* 0x00 */ u8 _00[0x10];
+    /* 0x10 */ s16 _10;
+} Task74A0Parent;
+
 typedef struct Task74A0 {
     /* 0x00 */ void (*_00)(void);
-    /* 0x04 */ u8 _04[0x10 - 0x04];
+    /* 0x04 */ u8 _04[0xC - 0x04];
+    /* 0x0C */ Task74A0Parent* _0C;
     /* 0x10 */ s16 _10;
     /* 0x12 */ u8 _12[0x14 - 0x12];
     /* 0x14 */ u8 _14;
@@ -128,6 +134,9 @@ typedef struct Particle74A0 {
 typedef struct Emitter74A0 {
     /* 0x00 */ u8 _00[0xC];
     /* 0x0C */ Particle74A0* _0C;
+    /* 0x10 */ void* _10;
+    /* 0x14 */ u16 _14 : 4;
+    /* 0x14 */ u16 count : 12;
 } Emitter74A0;
 
 typedef struct LITObj {
@@ -195,6 +204,8 @@ extern void fn_800BD548(Model74A0* model, s32 count, ...);
 extern void fn_800B2C08(Node74A0* node, s32 arg1);
 extern Emitter74A0* fn_80033A24(BOOL (*update)(Emitter74A0*), s32, s32, s32, s32, s32);
 extern u8 lbl_803CBBC0;
+extern void SetFog(GXFogType type, f32 startZ, f32 endZ, f32 nearZ, f32 farZ, GXColor color);
+extern void minigamesSetSomePointers(void);
 extern void* ARAMTransfer(void* entry, int arg1, int arg2, u32 aram);
 
 extern struct {
@@ -526,6 +537,171 @@ void fn_1_1C3CC(void) {
     fn_1_1D110();
     if (task->_18 != 0) {
         fn_1_1A3B4();
+    }
+}
+
+// .text:0x0001B7DC size:0xBF0
+void fn_1_1B7DC(void) {
+    Task74A0* task = lbl_803CC1B8;
+    GXColor black = { 0, 0, 0, 0 };
+
+    if (lbl_803C77B8[0]._02 & PAD_BUTTON_B) {
+        fn_800AD038(lbl_80366158._08);
+        SetFog(GX_FOG_NONE, 0.0f, 0.0f, 0.0f, 0.0f, black);
+        ((Task74A0*)lbl_803CC1B8)->_0C->_10 = 1;
+        minigamesSetSomePointers();
+    } else if (lbl_803C77B8[0]._04 & PAD_BUTTON_UP) {
+        if (task->_15 != 0) {
+            task->_15--;
+        } else if (lbl_1_bss_69F5) {
+            task->_15 = 10;
+        } else {
+            task->_15 = 6;
+        }
+    } else if (lbl_803C77B8[0]._04 & PAD_BUTTON_DOWN) {
+        task->_15++;
+        if (task->_15 > 6 && task->_15 < 11 && !lbl_1_bss_69F5) {
+            task->_15 = 0;
+        }
+        if (task->_15 == 11) {
+            task->_15 = 0;
+        }
+    } else if (lbl_803C77B8[0]._04 & PAD_BUTTON_LEFT) {
+        switch (task->_15) {
+        case 0:
+            if (task->_14 != 0) {
+                task->_14--;
+            } else {
+                task->_14 = 23;
+            }
+            break;
+        case 1:
+            if (task->_16 != 0) {
+                task->_16--;
+            } else {
+                task->_16 = 2;
+            }
+            break;
+        case 2:
+            if (task->_17 != 0) {
+                task->_17--;
+            } else {
+                task->_17 = 1;
+            }
+            break;
+        case 3:
+            if (task->_18 != 0) {
+                task->_18--;
+            } else {
+                task->_18 = 1;
+            }
+            break;
+        case 4:
+            lbl_1_bss_69F4 = !lbl_1_bss_69F4;
+            if (lbl_1_bss_69F4) {
+                SetFog(GX_FOG_EXPONENT, 0.0f, 500.0f, 1.0f, 512.0f, lbl_1_data_FB08);
+            } else {
+                SetFog(GX_FOG_NONE, 0.0f, 0.0f, 0.0f, 0.0f, black);
+            }
+            break;
+        case 6:
+            lbl_1_bss_69F5 = !lbl_1_bss_69F5;
+            break;
+        case 7:
+            if (lbl_1_bss_69F5) {
+                lbl_1_bss_69F9--;
+            }
+            break;
+        case 8:
+            if (lbl_1_bss_69F5) {
+                lbl_1_bss_69F8--;
+            }
+            break;
+        case 9:
+            if (lbl_1_bss_69F5) {
+                lbl_1_bss_69F7--;
+            }
+            break;
+        case 10:
+            if (lbl_1_bss_69F5) {
+                lbl_1_bss_69F6--;
+            }
+            break;
+        case 5:
+            lbl_1_bss_69F3 = !lbl_1_bss_69F3;
+            if (lbl_1_bss_69F3) {
+                fn_1_1957C();
+            } else {
+                minigamesSetSomePointers();
+            }
+            break;
+        }
+    } else if (lbl_803C77B8[0]._04 & PAD_BUTTON_RIGHT) {
+        switch (task->_15) {
+        case 0:
+            task->_14++;
+            if (task->_14 == 24) {
+                task->_14 = 0;
+            }
+            break;
+        case 1:
+            task->_16++;
+            if (task->_16 == 3) {
+                task->_16 = 0;
+            }
+            break;
+        case 2:
+            task->_17++;
+            if (task->_17 == 2) {
+                task->_17 = 0;
+            }
+            break;
+        case 3:
+            task->_18++;
+            if (task->_18 == 2) {
+                task->_18 = 0;
+            }
+            break;
+        case 4:
+            lbl_1_bss_69F4 = !lbl_1_bss_69F4;
+            if (lbl_1_bss_69F4) {
+                SetFog(GX_FOG_EXPONENT, 0.0f, 500.0f, 1.0f, 512.0f, lbl_1_data_FB08);
+            } else {
+                SetFog(GX_FOG_NONE, 0.0f, 0.0f, 0.0f, 0.0f, black);
+            }
+            break;
+        case 6:
+            lbl_1_bss_69F5 = !lbl_1_bss_69F5;
+            break;
+        case 7:
+            if (lbl_1_bss_69F5) {
+                lbl_1_bss_69F9++;
+            }
+            break;
+        case 8:
+            if (lbl_1_bss_69F5) {
+                lbl_1_bss_69F8++;
+            }
+            break;
+        case 9:
+            if (lbl_1_bss_69F5) {
+                lbl_1_bss_69F7++;
+            }
+            break;
+        case 10:
+            if (lbl_1_bss_69F5) {
+                lbl_1_bss_69F6++;
+            }
+            break;
+        case 5:
+            lbl_1_bss_69F3 = !lbl_1_bss_69F3;
+            if (lbl_1_bss_69F3) {
+                fn_1_1994C();
+            } else {
+                minigamesSetSomePointers();
+            }
+            break;
+        }
     }
 }
 
@@ -1026,6 +1202,52 @@ void fn_1_18E04(Particle74A0* p, f32 angle) {
     p->_10.x = (s * lbl_1_data_FB24[1]) / 100000.0f;
     p->_10.y = (c * lbl_1_data_FB24[1]) / 100000.0f;
     p->_10.z = 0.0f;
+}
+
+// .text:0x0001857C size:0x888
+BOOL fn_1_1857C(Emitter74A0* e) {
+    Vec up = { 0.0f, 1.0f, 0.0f };
+    Vec dir;
+    Particle74A0* p;
+    f32 angle;
+    f32 delta;
+
+    fn_1_18174();
+    p = fn_1_17F28(e->_0C, e->count);
+    e->_0C = p;
+    do {
+        if (p->_48 <= 0) {
+            fn_1_182C0(p);
+            PSVECAdd(&p->_10, (Vec*)&p->_04, (Vec*)&p->_04);
+            PSVECAdd(&p->_28, (Vec*)&p->_1C, (Vec*)&p->_1C);
+            if (fabs(p->_04) > 1.0) {
+                p->_04 = fabs(p->_04) / p->_04;
+                p->_10.x *= -1.0f;
+            } else if (rand() % 5 == 0) {
+                memcpy(&dir, &p->_10, sizeof(Vec));
+                PSVECNormalize(&dir, &dir);
+                angle = 57.29578f * (f32)acos(PSVECDotProduct(&up, &dir));
+                if (dir.x < 0.0f) {
+                    angle *= -1.0f;
+                }
+                delta = 20.0 * (2.0 * (rand() / 32767.0f - 0.5));
+                if (fabs(angle + delta) > 20.0) {
+                    angle = 20.0 * (fabs(angle) / angle);
+                } else {
+                    angle = angle + delta;
+                }
+                fn_1_18E04(p, angle);
+            }
+            if (p->_08 > 1.0f) {
+                fn_1_18EE4(p);
+            }
+        } else {
+            p->_48--;
+        }
+        p = p->next;
+    } while (p != NULL);
+    fn_1_17FF0();
+    return FALSE;
 }
 
 // .text:0x000182C0 size:0x2BC
