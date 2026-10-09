@@ -109,7 +109,7 @@ typedef struct UnkPose0610 {
 } UnkPose0610; // size: 0xD4
 
 typedef struct Unk8036E548Actor {
-    /* 0x000 */ u8 _000[0x4];
+    /* 0x000 */ UnkList0610* _000;
     /* 0x004 */ UnkList0610* _004;
     /* 0x008 */ struct {
         /* 0x00 */ u8 _00[0x10];
@@ -2095,8 +2095,7 @@ void fn_1_D4BC(void) {
 }
 
 // .text:0x0000D300 size:0x1BC
-// The target's switch has a second, dead `b <default>` before case 0, and its
-// epilogue restores r0 before r28-r31
+// Only the epilogue differs: the target restores r0 before r28-r31
 void fn_1_D300(Unk8036E548Actor* arg0) {
     s32 first;
     s32 second;
@@ -2106,6 +2105,9 @@ void fn_1_D300(Unk8036E548Actor* arg0) {
         first = 1;
         second = 2;
         break;
+    case 2:
+    case 3:
+    case 4:
     default:
         if (lbl_1_bss_5F69 != 0) {
             first = 1;
@@ -2125,7 +2127,7 @@ void fn_1_D300(Unk8036E548Actor* arg0) {
     lbl_8036E548._2C50[lbl_1_bss_5F73]->_030->_CE = arg0->_25B;
     lbl_8036E548._2C50[lbl_1_bss_5F73]->_030->_CF = lbl_1_bss_5F73;
     lbl_8036E548._2C50[lbl_1_bss_5F73]->_030->_D0 = lbl_1_bss_5F73;
-    *(UnkList0610**)lbl_8036E548._2C50[lbl_1_bss_5F73] = lbl_8036E548._0060->_34[lbl_1_bss_5F73]._00;
+    lbl_8036E548._2C50[lbl_1_bss_5F73]->_000 = lbl_8036E548._0060->_34[lbl_1_bss_5F73]._00;
 }
 
 // .text:0x0000D2F0 size:0x10
