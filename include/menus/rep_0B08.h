@@ -29,7 +29,7 @@ void fn_2_68D90(s32 index, u8 value);
 void fn_2_68DAC(s32 index, Vec* pos);
 void fn_2_68DE8(s32 index, Vec* out);
 void fn_2_68E68(void);
-void fn_2_68F08(s32 index, s8 value);
+void fn_2_68F08(int index, s8 value);
 void fn_2_68F24(s32 index, s32 anim);
 void fn_2_68FBC(s32 index, s32 anim);
 void fn_2_69070(void);

@@ -30,7 +30,7 @@ typedef struct Obj0B08 {
     /* 0x54 */ u8 _54[0x6C - 0x54];
     /* 0x6C */ f32 _6C;
     /* 0x70 */ f32 _70;
-    /* 0x74 */ u8 _74[0x80 - 0x74];
+    /* 0x74 */ Vec _74;
     /* 0x80 */ s32 _80;
     /* 0x84 */ s32 _84;
     /* 0x88 */ f32 _88;
@@ -46,7 +46,7 @@ typedef struct Obj0B08 {
     /* 0xA2 */ s16 _A2;
     /* 0xA4 */ u8 _A4[0xAC - 0xA4];
     /* 0xAC */ s16 _AC;
-    /* 0xAE */ u8 _AE[0xB0 - 0xAE];
+    /* 0xAE */ s16 _AE;
     /* 0xB0 */ s16 _B0;
     /* 0xB2 */ s16 _B2;
     /* 0xB4 */ u8 _B4[0xB6 - 0xB4];
@@ -166,7 +166,7 @@ extern void fn_800BD2CC(s32 arg0, GXColor color);
 extern s32 fn_80062890(s32 id);
 extern void fn_800B0A14_removeQueue(void);
 extern s32 fn_2_8CC88(s32);
-extern void fn_2_46C88(u8 arg0, s32 arg1);
+extern void fn_2_46C88(s32 arg0, s32 arg1);
 extern f32 fn_2_4A18C(f32 angle);
 extern f32 fn_2_4A1E8(f32 x, f32 z);
 extern s16 fn_2_4A150(s16 angle);
@@ -245,6 +245,15 @@ void fn_2_71EFC(Obj0B08* obj) { fn_2_68F08(obj->_80, 0); }
 void fn_2_71EC4(Obj0B08* obj) { lbl_2_data_2A1E8[obj->_94](obj); }
 
 // .text:0x00071C6C size:0x258
+void fn_2_71C6C(Obj0B08* obj) {
+    s32 index = obj->_80;
+    fn_2_68F08(index, 1);
+    memcpy(&obj->_74, &lbl_2_data_2EA4[lbl_2_bss_1A8248->_1610[0]._B0], sizeof(Vec));
+    fn_2_6A450(index, obj->_74.x, obj->_74.z);
+    obj->_BA = 13;
+    fn_2_68FBC(index, 0);
+    obj->_94 = 1;
+}
 
 // .text:0x00071B80 size:0xEC
 void fn_2_71B80(Obj0B08* obj) {
@@ -340,6 +349,40 @@ void fn_2_6F6F4(Obj0B08* obj) { lbl_2_data_2A220[obj->_94](obj); }
 // .text:0x0006EA74 size:0x2BC
 
 // .text:0x0006E88C size:0x1E8
+void fn_2_6E88C(Obj0B08* obj) {
+    f32 step;
+    f32 diff;
+    f32 absDiff;
+    obj->_4C = atan2(-(lbl_2_bss_1A8248->_1610[0]._00.x - obj->_00.x), -(lbl_2_bss_1A8248->_1610[0]._00.z - obj->_00.z));
+    diff = fn_2_4A18C(obj->_34 - obj->_4C);
+    absDiff = fabs(diff);
+    if (absDiff > 2.268928f) {
+        step = 1.5707964f;
+    } else if (absDiff > 1.5707964f) {
+        step = 0.69813174f;
+    } else if (absDiff > 0.69813174f) {
+        step = 0.34906587f;
+    } else if (absDiff > 0.34906587f) {
+        step = 0.17453294f;
+    } else if (absDiff > 0.17453294f) {
+        step = 0.08726647f;
+    } else if (absDiff > 0.08726647f) {
+        step = 0.034906585f;
+    } else if (absDiff > 0.034906585f) {
+        step = 0.017453292f;
+    } else if (absDiff > 0.017453292f) {
+        step = 0.008726646f;
+    } else if (absDiff < 0.017453292f) {
+        step = 0.0034906587f;
+    }
+    if ((diff < 0.02 && diff > 0.0f) || (diff > -0.02 && diff < 0.0f)) {
+    } else if (diff < 0.0f) {
+        obj->_34 += step;
+    } else {
+        obj->_34 -= step;
+    }
+    obj->_4C = obj->_34;
+}
 
 // .text:0x0006E880 size:0xC
 void fn_2_6E880(Obj0B08* obj) { obj->_94 = 4; }
@@ -517,6 +560,28 @@ void fn_2_6CBB0(Obj0B08* obj) {
 void fn_2_6CB78(Obj0B08* obj) { lbl_2_data_2A280[obj->_94](obj); }
 
 // .text:0x0006C988 size:0x1F0
+void fn_2_6C988(Obj0B08* obj) {
+    Mtx m;
+    Vec offset;
+    Vec v;
+    Tracker0B08* tracker;
+    fn_2_68F08(obj->_80, 1);
+    tracker = lbl_2_bss_1A8248;
+    PSVECSubtract(&lbl_2_data_2EA4[tracker->_1610[0]._B0], &lbl_2_data_2EA4[tracker->_1610[0]._AE], &offset);
+    PSVECScale(&offset, 0.5f, &offset);
+    PSMTXRotRad(m, 'Y', tracker->_1610[0]._4C);
+    v.x = 0.0f;
+    v.y = 0.0f;
+    v.z = -1.2f;
+    PSMTXMultVec(m, &v, &v);
+    PSVECAdd(&offset, &v, &offset);
+    memcpy(&obj->_00, &lbl_2_data_2EA4[lbl_2_bss_1A8248->_1610[0]._AE], sizeof(Vec));
+    PSVECAdd(&obj->_00, &offset, &obj->_00);
+    fn_2_68FBC(obj->_80, 1);
+    obj->_4C = atan2(-(tracker->_1610[0]._00.x - obj->_00.x), -(tracker->_1610[0]._00.z - obj->_00.z));
+    fn_2_46C88(obj->_80, 0);
+    obj->_94 = 1;
+}
 
 // .text:0x0006C97C size:0xC
 void fn_2_6C97C(Obj0B08* obj) { obj->_94 = 2; }
@@ -900,6 +965,11 @@ void fn_2_6AABC(s32 index, Vec* pos) {
 void fn_2_6AAB8(void) {}
 
 // .text:0x0006A87C size:0x23C
+void fn_2_6A87C(void) {
+    lbl_2_bss_1A8248->_1610[0]._BB = 0;
+    fn_2_6A708();
+    fn_2_6A628();
+}
 
 // .text:0x0006A708 size:0x174
 void fn_2_6A708(void) {
@@ -1113,7 +1183,7 @@ void fn_2_68F24(s32 index, s32 anim) {
 }
 
 // .text:0x00068F08 size:0x1C
-void fn_2_68F08(s32 index, s8 value) {
+void fn_2_68F08(int index, s8 value) {
     Obj0B08* obj = &lbl_2_bss_1A8248->_1610[index];
     obj->_C0 = value;
 }
