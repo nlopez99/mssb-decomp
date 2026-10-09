@@ -30,6 +30,8 @@ void fn_1_1B0FC(void);
 void fn_1_1B2C8(void);
 void fn_1_1B424(void);
 void fn_1_1B6BC(void);
+void fn_1_1C3CC(void);
+void fn_1_1C8C0(void);
 void fn_1_1CBE4(void);
 void fn_1_1D0E8(struct Model74A0* model);
 void fn_1_1D10C(void);

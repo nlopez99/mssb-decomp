@@ -111,8 +111,8 @@ typedef struct Light74A0 {
 typedef struct Actor74A0 {
     /* 0x000 */ u8 _000[0x4];
     /* 0x004 */ Node74A0* _004;
-    /* 0x008 */ void** _008;
-    /* 0x00C */ void** _00C;
+    /* 0x008 */ u32* _008;
+    /* 0x00C */ u8 _00C[0x10 - 0xC];
     /* 0x010 */ void* _010;
     /* 0x014 */ u8 _014[0x34 - 0x14];
     /* 0x034 */ Vec _034;
@@ -151,6 +151,17 @@ extern void fn_800B806C(s32 arg0, f32 top, f32 bottom, f32 left, f32 right, f32 
 extern void makeLookAtMatrix(Mtx m, const Vec* camPos, const Vec* camUp, const Vec* target);
 extern void fn_800BD670(ModelTable74A0* table, MtxPtr mtx);
 extern void fn_800BD8C4(ModelTable74A0* table, MtxPtr mtx);
+extern ModelTable74A0* ActorObjectInitTable(u16 count);
+extern void ANIMGet(void* bank);
+extern void convertTextureHeader(void* tex);
+extern void LoadActorLayout(void* layout);
+extern void convertGeometryAndSknHeader(void* geo, void* skn);
+extern void fn_800BCE38(void* geo);
+extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);
+extern void fn_800BD190(void* geo, void* tex);
+extern void fn_800BDC88(ModelTable74A0* table, u16 first, u16 last, void* layout, void* anim, void* skn);
+extern void fn_800BD548(Model74A0* model, s32 count, ...);
+extern void fn_800B2C08(Node74A0* node, s32 arg1);
 extern void LITAlloc(LITObj** light);
 extern void LITInitDir(LITObj* light, f32 nx, f32 ny, f32 nz);
 extern void LITInitAttn(LITObj* light, f32 a0, f32 a1, f32 a2, f32 k0, f32 k1, f32 k2);
@@ -222,7 +233,7 @@ static Vec lbl_1_data_FB18 = { 0.0f, 0.0f, 0.0f };
 s32 lbl_1_data_FB24[6] = { 50, 2000, 1200000, 100000, 100000, 60 };
 
 static Camera74A0 lbl_1_bss_6B7C;
-static u8 lbl_1_bss_6AAC[0xD0];
+static void* lbl_1_bss_6AAC[0x34];
 static u8 lbl_1_bss_6A94[0x18];
 static Bss69FC lbl_1_bss_69FC;
 static u8 lbl_1_bss_69F9;
@@ -268,14 +279,14 @@ void fn_1_1D450(void) {
 // .text:0x0001D110 size:0x340
 void fn_1_1D110(void) {
     Task74A0* task = lbl_803CC1B8;
+    Model74A0* model;
+    Actor74A0* actor;
     s32 i;
 
     fn_1_1B038();
     for (i = 0; i < 24; i++) {
-        Actor74A0* actor = &lbl_8036E548._C04[i];
-        Model74A0* model = &lbl_8036E548._060->models[i];
-
-
+        actor = &lbl_8036E548._C04[i];
+        model = &lbl_8036E548._060->models[i];
         model->_6C = (task->_16 != 1) & (i == task->_14);
         CTRLSetTranslation(&model->_10, actor->_034.x, actor->_034.y, actor->_034.z);
         CTRLSetRotation(&model->_10, 57.295776f * actor->_040.x, 57.295776f * actor->_040.y,
@@ -289,7 +300,8 @@ void fn_1_1D110(void) {
         fn_1_1A290(lbl_8036E548._060, lbl_1_bss_69FC._10);
     }
     for (i = 0; i < 24; i++) {
-        lbl_8036E548._060->models[i]._6C = 1;
+        model = &lbl_8036E548._060->models[i];
+        model->_6C = 1;
     }
     fn_800BD8C4(lbl_8036E548._060, lbl_1_bss_69FC._10);
 }
@@ -300,6 +312,87 @@ void fn_1_1D10C(void) {}
 // .text:0x0001D0E8 size:0x24
 void fn_1_1D0E8(Model74A0* model) {
     fn_800B9AA8(model->_70);
+}
+
+// .text:0x0001C8C0 size:0x324
+void fn_1_1C8C0(void) {
+    u32* hdr;
+    void* layout;
+    void* skn;
+    void* geo;
+    void* tex;
+    u32 i;
+    u32 j;
+    void* anim;
+    Actor74A0* actor;
+    Model74A0* model;
+
+    lbl_8036E548._060 = ActorObjectInitTable(24);
+    for (i = 0; i < 24; i++) {
+        if (i < 24) {
+            hdr = lbl_8036E548._C04[i]._008;
+            if (lbl_1_bss_6A94[i] != 0) {
+                for (j = 0; j < 5; j++) {
+                    if (j == 4) {
+                        lbl_8036E548._C04[i]._010 = (void*)((u32)hdr + hdr[j]);
+                        ANIMGet(lbl_8036E548._C04[i]._010);
+                    } else {
+                        lbl_8036E548._C04[i]._008[j] = (u32)hdr + hdr[j];
+                    }
+                }
+            } else {
+                hdr[0] = (u32)hdr + hdr[0];
+                lbl_8036E548._C04[i]._008[1] = (u32)hdr + hdr[1];
+                lbl_8036E548._C04[i]._008[2] = (u32)hdr + hdr[2];
+            }
+            tex = (void*)lbl_8036E548._C04[i]._008[0];
+            geo = (void*)lbl_8036E548._C04[i]._008[1];
+            layout = (void*)lbl_8036E548._C04[i]._008[2];
+            if (lbl_1_bss_6A94[i] != 0) {
+                skn = (void*)lbl_8036E548._C04[i]._008[3];
+            } else {
+                skn = NULL;
+            }
+            convertTextureHeader(tex);
+            LoadActorLayout(layout);
+            if (lbl_1_bss_6A94[i] != 0) {
+                convertGeometryAndSknHeader(geo, skn);
+            } else {
+                fn_800BCE38(geo);
+            }
+            lbl_1_bss_6AAC[i] = tex;
+            haveActLayoutPointToGeoHeader(layout, geo);
+            fn_800BD190(geo, tex);
+        }
+        if (lbl_1_bss_6A94[i] != 0) {
+            anim = lbl_8036E548._C04[i]._010;
+        } else {
+            anim = NULL;
+        }
+        actor = &lbl_8036E548._C04[i];
+        fn_800BDC88(lbl_8036E548._060, i, i, layout, anim, skn);
+        fn_800BD548(&lbl_8036E548._060->models[i], 3, lbl_8036E548._0AC[0], lbl_8036E548._0AC[1],
+                    lbl_8036E548._0AC[2], lbl_8036E548._0AC[3]);
+        CTRLSetTranslation(&lbl_8036E548._060->models[i]._10, 0.0f, 0.0f, 0.0f);
+        CTRLSetRotation(&lbl_8036E548._060->models[i]._10, 0.0f, 0.0f, 0.0f);
+        model = &lbl_8036E548._060->models[i];
+        model->_54 = 0.5f;
+        model->_5A = 1;
+        lbl_8036E548._060->models[i]._00->_098 |= 4;
+        if (i == 1) {
+            fn_800B2C08(lbl_8036E548._060->models[i]._00, 0);
+        } else {
+            fn_800B2C08(lbl_8036E548._060->models[i]._00, 1);
+        }
+        actor->_004 = lbl_8036E548._060->models[i]._00;
+        actor->_034.x = 0.0f;
+        actor->_034.y = 0.0f;
+        actor->_034.z = 10.0f;
+        actor->_04C = 0.5f;
+        actor->_25D = i == 0;
+        lbl_8036E548._060->models[i]._08 = fn_1_1D0E8;
+    }
+    ((Task74A0*)lbl_803CC1B8)->_00 = fn_1_1C3CC;
 }
 
 // .text:0x0001B6BC size:0x120
@@ -482,6 +575,7 @@ void fn_1_1A290(ModelTable74A0* table, Mtx mtx) {
 // .text:0x0001A1EC size:0xA4
 void fn_1_1A1EC(Model74A0* model, Mtx mtx) {
     Node74A0* node = model->_00;
+    Node74A0* child;
 
     if (model->_08 != NULL) {
         model->_08(model);
@@ -491,11 +585,11 @@ void fn_1_1A1EC(Model74A0* model, Mtx mtx) {
         GXInvalidateVtxCache();
         fn_1_19D60(node->_014, mtx);
     } else {
-        for (node = node->_074; node != NULL; node = node->_100) {
-            if (node->_014 != NULL) {
-                DOSetWorldMatrix(node->_014, node->_0EC);
+        for (child = node->_074; child != NULL; child = child->_100) {
+            if (child->_014 != NULL) {
+                DOSetWorldMatrix(child->_014, child->_0EC);
             }
-            fn_1_19D60(node->_014, mtx);
+            fn_1_19D60(child->_014, mtx);
         }
     }
 }
