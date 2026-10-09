@@ -1549,8 +1549,9 @@ void fn_1_23804(s32 arg0, s32 arg1, s32 rows, s32 cols, f32 arg4, f32 arg5) {
 }
 
 // .text:0x00023098 size:0x76C
-// 93.07%: the frustum setup keeps near and far live longer (five saved FPRs, not four):
-// the target subtracts frsp(-far) where this folds -near - -far into -near + far.
+// 93.07%: the target subtracts frsp(-far) where this folds -near - -far into -near + far,
+// so far stays live (five saved FPRs, not four); an f64 local for -far gives the frsp and
+// four FPRs but other registers (92.79%).
 s32 fn_1_23098(Mtx44 proj, Mtx view, s32 rows, s32 cols, f32 near, f32 far) {
     Mtx44 m;
     Mtx inv;
