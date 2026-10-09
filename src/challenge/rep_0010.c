@@ -16,6 +16,15 @@ typedef struct Task0010 {
     /* 0x16 */ s16 _16;
 } Task0010;
 
+// The model viewer task run by fn_1_1E0
+typedef struct ViewTask0010 {
+    /* 0x00 */ void (*_00)(void);
+    /* 0x04 */ Task0010* _04;
+    /* 0x08 */ u8 _08[0x14 - 0x8];
+    /* 0x14 */ void* _14;
+    /* 0x18 */ u8 _18;
+} ViewTask0010;
+
 // The task of the unused loader chain fn_1_1634, fn_1_15CC and fn_1_1538
 typedef struct LoadTask0010 {
     /* 0x00 */ void (*_00)(void);
@@ -76,6 +85,13 @@ extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);
 extern void fn_80025DDC(void* anim);
 extern void SetDisplayStateTexture(void* tex, s32 arg1, s32 arg2);
 extern void gOz_GXSetTexture(s32 arg0, s32 arg1, s32 arg2);
+extern void LoadFile(void* list, void* dest, s32 arg2, s32 arg3, s32 arg4);
+extern BOOL fn_800A8518(s32 arg0);
+extern u32 fn_800A88C8(void);
+extern void fn_800A8B78(void* arg0);
+extern void fn_800ACFB0(void* data);
+extern void fn_800B0A14_removeQueue(void);
+extern u8 lbl_800F1D78[][16];
 extern void fn_1_66C4(void);
 extern void fn_1_8B90(void);
 extern void fn_1_A2E4(void);
@@ -123,6 +139,7 @@ u32 lbl_1_data_AC[15][4] = {
 };
 
 s32 lbl_1_bss_0;
+u8 lbl_1_bss_4[0x5C];
 
 // .text:0x00001948 size:0x24
 void fn_1_1948(void) {
@@ -417,7 +434,78 @@ void fn_1_568(void) {
 }
 
 // .text:0x000001E0 size:0x388
-void fn_1_1E0(void) {}
+void fn_1_1E0(void) {
+    ViewTask0010* task = lbl_803CC1B8;
+
+    switch (((Task0010*)lbl_803CC1B8)->_10) {
+    case 0:
+        LoadFile(lbl_1_data_AC, lbl_1_bss_4, 0, 0, 1);
+        ((Task0010*)lbl_803CC1B8)->_10++;
+    case 1:
+        if (fn_800A8518(1) != 0) {
+            ((Task0010*)lbl_803CC1B8)->_10++;
+        }
+        break;
+    case 2:
+        if (lbl_803C77B8[0]._04 & PAD_BUTTON_A) {
+            task->_14 = ARAMTransfer(lbl_800F1D78[task->_18], 0, 0, 0);
+            ((Task0010*)lbl_803CC1B8)->_10++;
+        }
+        break;
+    case 3:
+        if (lbl_803C6CF8._715 == 1) {
+            switch (task->_18 % 19) {
+            case 0:
+                fn_1_20(task->_14);
+                break;
+            case 1:
+                fn_1_E8(task->_14);
+                break;
+            case 2:
+            case 3:
+            case 4:
+            case 5:
+            case 6:
+            case 7:
+            case 8:
+            case 9:
+            case 10:
+            case 11:
+            case 12:
+            case 13:
+            case 14:
+            case 15:
+            case 16:
+            case 17:
+            case 18:
+                fn_1_0(task->_14);
+                break;
+            }
+            fn_800ACFB0(task->_14);
+            if (lbl_803C77B8[0]._00 & PAD_BUTTON_B) {
+                ((Task0010*)lbl_803CC1B8)->_10++;
+            } else {
+                task->_14 = ARAMTransfer(lbl_800F1D78[++task->_18], 0, 0, 0);
+            }
+        }
+        break;
+    case 4:
+        if (fn_800A8518(3) != 0) {
+            ((Task0010*)lbl_803CC1B8)->_10++;
+        }
+        break;
+    case 5:
+        if (fn_800A88C8() == 0) {
+            fn_800A8B78(lbl_1_bss_4);
+            ((Task0010*)lbl_803CC1B8)->_10++;
+        }
+        break;
+    case 6:
+        task->_04->_10 = 1;
+        fn_800B0A14_removeQueue();
+        break;
+    }
+}
 
 // .text:0x000001B0 size:0x30
 void fn_1_1B0(u32* base, s32 count) {
@@ -432,23 +520,14 @@ void fn_1_1B0(u32* base, s32 count) {
 }
 
 // .text:0x000000E8 size:0xC8
-// 97.40%: the target fixes _08 to _10 through a pointer to _08 (addi r3,r31,8);
-// a pointer local, an inline helper or an array field all fold back into r31.
 void fn_1_E8(Model0010* model) {
-    if (model->_00 != 0) {
-        model->_00 += (u32)model;
-    }
-    if (model->_04 != 0) {
-        model->_04 += (u32)model;
-    }
-    if (model->_08 != 0) {
-        model->_08 += (u32)model;
-    }
-    if (model->_0C != 0) {
-        model->_0C += (u32)model;
-    }
-    if (model->_10 != 0) {
-        model->_10 += (u32)model;
+    s32 i;
+    u32* data = (u32*)model;
+
+    for (i = 0; i < 5; i++) {
+        if (data[i] != 0) {
+            data[i] += (u32)model;
+        }
     }
     convertTextureHeader((void*)model->_00);
     LoadActorLayout((void*)model->_04);
@@ -460,23 +539,14 @@ void fn_1_E8(Model0010* model) {
 }
 
 // .text:0x00000020 size:0xC8
-// 97.40%: the target fixes _08 to _10 through a pointer to _08 (addi r3,r31,8);
-// a pointer local, an inline helper or an array field all fold back into r31.
 void fn_1_20(Model0010* model) {
-    if (model->_00 != 0) {
-        model->_00 += (u32)model;
-    }
-    if (model->_04 != 0) {
-        model->_04 += (u32)model;
-    }
-    if (model->_08 != 0) {
-        model->_08 += (u32)model;
-    }
-    if (model->_0C != 0) {
-        model->_0C += (u32)model;
-    }
-    if (model->_10 != 0) {
-        model->_10 += (u32)model;
+    s32 i;
+    u32* data = (u32*)model;
+
+    for (i = 0; i < 5; i++) {
+        if (data[i] != 0) {
+            data[i] += (u32)model;
+        }
     }
     convertTextureHeader((void*)model->_00);
     LoadActorLayout((void*)model->_04);
