@@ -855,11 +855,13 @@ void fn_2_8FDB0(s32 index) {
 
 // .text:0x0008FD14 size:0x9C
 void fn_2_8FD14(void) {
+    Shadow1028* shadow;
+    Item1028* item;
     s32 i;
     for (i = 0; i < lbl_2_bss_340140->_3078; i++) {
         if (lbl_2_bss_340140->_2D94 != NULL) {
-            Item1028* item = &lbl_2_bss_1A8248->_21E0[i];
-            Shadow1028* shadow = &lbl_2_bss_340140->_2D94[i];
+            shadow = &lbl_2_bss_340140->_2D94[i];
+            item = &lbl_2_bss_1A8248->_21E0[i];
             memcpy(&shadow->_04, item, sizeof(Vec));
             shadow->_14 = item->_28;
             shadow->_26 = item->_AA;
