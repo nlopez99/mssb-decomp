@@ -2018,8 +2018,8 @@ void fn_2_472C4(s16* cursor, s16* page, s16 count, s16 cols, s16 flags) {
 }
 
 // .text:0x00046D94 size:0x530
-// Registers only, as in fn_2_472C4: the target keeps cols in r9, rem in r3,
-// last in r0 and flags & 4 in r10 from the first divide on.
+// Registers only: the target holds count in r8 and cols in r9 from the first
+// divide on (r3 and r8 here), and the case 0x8 temporaries follow from that.
 void fn_2_46D94(s16* cursor, s16* page, s16 count, s16 cols, u32 flags) {
     s16 last;
     s16 rem;
@@ -2032,13 +2032,15 @@ void fn_2_46D94(s16* cursor, s16* page, s16 count, s16 cols, u32 flags) {
     if ((cols == 0) | (count < cols)) {
         cols = count;
     }
-    rem = cols;
     if (count % cols != 0) {
         rem = count % cols;
+    } else {
+        rem = cols;
     }
-    last = count - cols;
     if (flags & 4) {
         last = count - rem;
+    } else {
+        last = count - cols;
     }
     switch (lbl_803C77B8[lbl_2_bss_1A824C->_197863]._04) {
     case 0x8:
