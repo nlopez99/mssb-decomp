@@ -507,20 +507,20 @@ void fn_2_CA60(u8 idx, u8 team) {
 }
 
 // .text:0x0000C7DC size:0x284
-// 86%: the idx == 0 block's stores are scheduled differently, and the
-// retry loop compares its operands in the other order.
+// 88%: the slot stores are scheduled differently, and the retry loop
+// compares its operands in the other order.
 void fn_2_C7DC(u8 idx, u8 team) {
     s32 i;
     s32 id;
 
 retry:
     if (idx == 0) {
+        inMemRoster[team][idx].CharID = lbl_8034E9A0._46E0[team];
         lbl_80354720[team][idx]._1 = idx;
-        lbl_80353B98[team][idx]._1 = idx;
-        lbl_80353B98[team][idx]._0 = idx;
         lbl_80354720[team][idx]._0 = idx;
         lbl_80354720[team][idx]._2 = idx;
-        inMemRoster[team][idx].CharID = lbl_8034E9A0._46E0[team];
+        lbl_80353B98[team][idx]._1 = idx;
+        lbl_80353B98[team][idx]._0 = idx;
         lbl_80353B98[team][idx]._2 = idx;
     } else {
         do {
@@ -531,12 +531,12 @@ retry:
                 goto retry;
             }
         }
+        inMemRoster[team][idx].CharID = id;
         lbl_80354720[team][idx]._1 = idx;
-        lbl_80353B98[team][idx]._1 = idx;
-        lbl_80353B98[team][idx]._0 = idx;
         lbl_80354720[team][idx]._0 = idx;
         lbl_80354720[team][idx]._2 = idx;
-        inMemRoster[team][idx].CharID = id;
+        lbl_80353B98[team][idx]._1 = idx;
+        lbl_80353B98[team][idx]._0 = idx;
         lbl_80353B98[team][idx]._2 = idx;
         fn_2_C698(idx, team);
     }
