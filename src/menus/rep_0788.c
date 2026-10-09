@@ -63,7 +63,7 @@ typedef struct MenuTextWindow0788 {
 
 typedef struct MenuMissionPair0788 {
     /* 0x0 */ s8 _0;
-    /* 0x1 */ u8 _1;
+    /* 0x1 */ s8 _1;
 } MenuMissionPair0788; // size: 0x2
 
 // The layout of starMissionCompletionTracker's ChallengeTrackingStruct
@@ -76,7 +76,10 @@ typedef struct MenuCharacter0788 {
 
 typedef struct MenuMissionDef0788 {
     /* 0x0 */ s16 _0;
-    /* 0x2 */ u8 _2[0xA - 0x2];
+    /* 0x2 */ s16 _2;
+    /* 0x4 */ s16 _4;
+    /* 0x6 */ s16 _6;
+    /* 0x8 */ u8 _8[0xA - 0x8];
 } MenuMissionDef0788; // size: 0xA
 
 typedef struct MenuRosterEntry0788 {
@@ -97,6 +100,7 @@ typedef struct MenuSlot0788 {
 extern void* lbl_803CC1B8;
 extern u8 lbl_803CB8F0[8];
 extern MenuMissionDef0788 lbl_80109AE8[32][10];
+extern MenuMissionDef0788 lbl_8010A768[32][10];
 extern s16 lbl_8010B3E8[34];
 extern s16 lbl_8010B444[5][11];
 extern struct {
@@ -6503,6 +6507,95 @@ void fn_2_2A77C(MenuTask0788* task, MenuItem0788* item) {
         break;
     }
     lbl_80366B18[item->_14]._2F = 0;
+    lbl_80371C30[task->_14 + item->_0E]._00->_58 = item->_12 | (lbl_80371C30[task->_14 + item->_0E]._00->_58 & 0xFFFFFF00);
+}
+
+// .text:0x0002A338 size:0x444
+void fn_2_2A338(MenuTask0788* task, MenuItem0788* item) {
+    s16 state = fn_2_53BC8(item);
+    s16 textId;
+    s16 textAlt;
+    s16 flags;
+    s16 minLevel;
+    MenuCharacter0788* chr;
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_12 = 0;
+        item->_14 = fn_8000F988(task, item->_0E, item->_10, 0, lbl_8010A768[0][0]._0, 0);
+        item->_04 = 0x26;
+        break;
+    case 2:
+    case 8:
+        textId = lbl_8010A768[lbl_2_bss_1A824C->_197706][lbl_2_bss_1A824C->_197710]._0;
+        textAlt = lbl_8010A768[lbl_2_bss_1A824C->_197706][lbl_2_bss_1A824C->_197710]._2;
+        flags = lbl_80109AE8[lbl_2_bss_1A824C->_197706][lbl_2_bss_1A824C->_197710]._4;
+        minLevel = lbl_80109AE8[lbl_2_bss_1A824C->_197706][lbl_2_bss_1A824C->_197710]._6;
+        chr = &lbl_2_bss_1A8248->_0000[lbl_800E869C[lbl_2_bss_1A824C->_197706]];
+        if (textAlt != -1 && chr->_09[lbl_2_bss_1A824C->_197710]._1 == 0) {
+            if (lbl_2_bss_1A8248->_4415 < minLevel) {
+                fn_8000FE08(item->_14, 0, 0x1C6);
+            } else if ((flags & 2) && lbl_2_bss_1A8248->_4415 < 1) {
+                fn_8000FE08(item->_14, 0, 0x1C6);
+            } else if ((flags & 4) && lbl_2_bss_1A8248->_4415 < 2) {
+                fn_8000FE08(item->_14, 0, 0x1C6);
+            } else if ((flags & 8) && lbl_2_bss_1A8248->_4415 < 3) {
+                fn_8000FE08(item->_14, 0, 0x1C6);
+            } else {
+                fn_8000FE08(item->_14, 0, 0x1C5);
+            }
+        } else if (textAlt != -1 && chr->_09[lbl_2_bss_1A824C->_197710]._1 == 1 && chr->_09[lbl_2_bss_1A824C->_197710]._0 == 0) {
+            if (lbl_2_bss_1A8248->_4415 < minLevel) {
+                fn_8000FE08(item->_14, 0, 0x1C6);
+            } else if ((flags & 2) && lbl_2_bss_1A8248->_4415 < 1) {
+                fn_8000FE08(item->_14, 0, 0x1C6);
+            } else if ((flags & 4) && lbl_2_bss_1A8248->_4415 < 2) {
+                fn_8000FE08(item->_14, 0, 0x1C6);
+            } else if ((flags & 8) && lbl_2_bss_1A8248->_4415 < 3) {
+                fn_8000FE08(item->_14, 0, 0x1C6);
+            } else {
+                fn_8000FE08(item->_14, 0, textId);
+            }
+        } else {
+            fn_8000FE08(item->_14, 0, textId);
+        }
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        item->_04 = 3;
+        break;
+    case 3:
+        item->_12 += (0xFF - item->_12) / 4;
+        item->_12++;
+        if (item->_12 > 0xFF) {
+            item->_12 = 0xFF;
+        }
+        if (item->_12 >= 0xFF) {
+            item->_04 = 0x25;
+        }
+        break;
+    case 0x25:
+        item->_04 = 0x25;
+        break;
+    case 5:
+        item->_06 = 9;
+        item->_04 = 6;
+        break;
+    case 6:
+        item->_12 += -item->_12 / 4;
+        item->_12--;
+        if (item->_12 < 0) {
+            item->_12 = 0;
+        }
+        if (item->_12 <= 0 || item->_06-- <= 0) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+            item->_04 = 7;
+        }
+        break;
+    }
+    lbl_80366B18[item->_14]._2F = 1;
     lbl_80371C30[task->_14 + item->_0E]._00->_58 = item->_12 | (lbl_80371C30[task->_14 + item->_0E]._00->_58 & 0xFFFFFF00);
 }
 
