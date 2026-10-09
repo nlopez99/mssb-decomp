@@ -126,6 +126,8 @@ extern struct {
     /* 0x04 */ s32 _04;
     /* 0x08 */ u8 _08[0x10 - 0x8];
     /* 0x10 */ s32 _10[2];
+    /* 0x18 */ u8 _18[0x4C - 0x18];
+    /* 0x4C */ s32 _4C;
 } lbl_2_bss_F410;
 extern struct {
     /* 0x00 */ s32 _00[4];
@@ -149,6 +151,7 @@ extern u8 lbl_2_data_2B3A4[];
 
 extern u8 lbl_800FE5D4[];
 extern u8 lbl_80108EC4[];
+extern u8 lbl_803CB8D0[];
 extern u8 lbl_2_data_2AF08[];
 
 extern struct {
@@ -2080,4 +2083,91 @@ void fn_2_72594(void) {
     }
     fn_800363D8(task, 2, 1, 0x35, 0);
     ((UnkTask0C50*)lbl_803CC1B8)->_00 = fn_2_7207C;
+}
+
+// .text:0x0007207C size:0x518
+void fn_2_7207C(void) {
+    UnkTask0C50* task = lbl_803CC1B8;
+    s32 i;
+
+    switch (lbl_803C66B0._5D[0]) {
+    case 0x1E:
+        if (lbl_803C66B0._0D[0x12] == 0 ? TRUE : FALSE) {
+            lbl_80371C30[task->_14]._00->_5C = 0;
+            lbl_80371C30[task->_14]._00->_68 = 1;
+            lbl_80371C30[task->_14 + 2]._00->_68 = 1;
+            for (i = 0; i < 4; i++) {
+                lbl_80371C30[3 + task->_14 + i]._00->_58 &= ~0xFF;
+            }
+            lbl_80371C30[3 + task->_14 + lbl_803CB8D0[lbl_2_bss_F410._4C]]._00->_68 = 1;
+            lbl_80371C30[3 + task->_14 + lbl_803CB8D0[lbl_2_bss_F410._4C]]._00->_58 = (lbl_80371C30[3 + task->_14 + lbl_803CB8D0[lbl_2_bss_F410._4C]]._00->_58 & ~0xFF) | 0xFF;
+            lbl_80371C30[7 + task->_14 + lbl_803CB8D0[lbl_2_bss_F410._4C]]._00->_5C = 0;
+            lbl_80371C30[7 + task->_14 + lbl_803CB8D0[lbl_2_bss_F410._4C]]._00->_68 = 1;
+            fn_800626EC(0);
+            lbl_803C66B0._0D[0x12] = 1;
+        }
+        if (lbl_803C66B0._0D[0x12] == 1) {
+            s32 n = isAnimDone(task, 0, 0x16);
+
+            n += isAnimDone(task, lbl_803CB8D0[lbl_2_bss_F410._4C] + 7, 5);
+            if (n == 2) {
+                lbl_803C66B0._5D[1] = 0;
+                fn_80062674(0);
+                lbl_803C66B0._0D[0x12] = 2;
+            }
+        }
+        break;
+    case 0x1F:
+        if (lbl_803C66B0._0D[0x12] == 0 ? TRUE : FALSE) {
+            lbl_80371C30[task->_14]._00->_68 = 1;
+            fn_800626EC(0);
+            lbl_803C66B0._0D[0x12] = 1;
+        }
+        if (lbl_803C66B0._0D[0x12] == 1) {
+            if (fn_80042DA8(task, 0, 0x1C)) {
+                fn_80062674(0);
+                lbl_803C66B0._0D[0x12] = 2;
+            }
+        }
+        break;
+    case 0x20:
+        if (lbl_803C66B0._0D[0x12] == 0 ? TRUE : FALSE) {
+            for (i = 0; i < 4; i++) {
+                lbl_80371C30[3 + task->_14 + i]._00->_68 = 0;
+                lbl_80371C30[7 + task->_14 + i]._00->_68 = 0;
+                lbl_80371C30[3 + task->_14 + i]._00->_5C = 0;
+                lbl_80371C30[7 + task->_14 + i]._00->_5C = 0;
+                lbl_80371C30[3 + task->_14 + i]._00->_58 &= ~0xFF;
+            }
+            lbl_80371C30[3 + task->_14 + lbl_803CB8D0[lbl_2_bss_F410._4C]]._00->_68 = 1;
+            lbl_80371C30[3 + task->_14 + lbl_803CB8D0[lbl_2_bss_F410._4C]]._00->_58 = (lbl_80371C30[3 + task->_14 + lbl_803CB8D0[lbl_2_bss_F410._4C]]._00->_58 & ~0xFF) | 0xFF;
+            lbl_80371C30[7 + task->_14 + lbl_803CB8D0[lbl_2_bss_F410._4C]]._00->_5C = 0;
+            lbl_80371C30[7 + task->_14 + lbl_803CB8D0[lbl_2_bss_F410._4C]]._00->_68 = 1;
+            fn_800626EC(0);
+            lbl_803C66B0._0D[0x12] = 1;
+        }
+        if (lbl_803C66B0._0D[0x12] == 1) {
+            if (fn_80042DA8(task, lbl_803CB8D0[lbl_2_bss_F410._4C] + 7, 5)) {
+                fn_80062674(0);
+                lbl_803C66B0._0D[0x12] = 2;
+            }
+        }
+        break;
+    case 0x21:
+        if (lbl_803C66B0._0D[0x12] == 0 ? TRUE : FALSE) {
+            lbl_80371C30[task->_14]._00->_68 = 1;
+            fn_800626EC(0);
+            lbl_803C66B0._0D[0x12] = 1;
+        }
+        if (lbl_803C66B0._0D[0x12] == 1) {
+            fn_80062674(0);
+            lbl_803C66B0._0D[0x12] = 2;
+        }
+        break;
+    }
+    if (lbl_8034E9A0._472A == 1) {
+        lbl_8034E9A0._472A = 0xFF;
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+    }
 }
