@@ -887,8 +887,6 @@ void fn_2_6E880(Obj0B08* obj) { obj->_94 = 4; }
 void fn_2_6E848(Obj0B08* obj) { lbl_2_data_2A234[obj->_94](obj); }
 
 // .text:0x0006E1D0 size:0x678
-// 99.95%: list[pick] and obj->_B2 load into each other's registers in the
-// _B2 comparison; declaration orders and operand orders did not change it.
 void fn_2_6E1D0(Obj0B08* obj) {
     s32 index = obj->_80;
     s32 target = lbl_2_bss_1A8248->_1610[0]._80;
@@ -905,8 +903,11 @@ void fn_2_6E1D0(Obj0B08* obj) {
     if (obj->_CF == -1) {
         obj->_CF = 0;
         pick = 0;
-    } else if (list[pick] == obj->_B2) {
-        pick ^= 1;
+    } else {
+        chosen = list[pick];
+        if (chosen == obj->_B2) {
+            pick ^= 1;
+        }
     }
     chosen = list[pick];
     lbl_2_bss_1A8248->_1610[index]._B0 = chosen;
