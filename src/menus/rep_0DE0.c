@@ -194,14 +194,8 @@ extern Camera0DE0 lbl_2_bss_1A81D4;
 extern s8 lbl_2_bss_33FBF5;
 extern u8 lbl_803CBBC0;
 
-extern CameraPose0DE0 lbl_2_data_2E944[];
-extern StateEntry0DE0 lbl_2_data_2E9B4[];
-extern Vec lbl_2_data_2E9C4;
-extern Vec lbl_2_data_2E9DC;
-extern Vec lbl_2_data_2E9E8;
 extern f32 lbl_2_bss_B2A0;
 extern u8 lbl_2_bss_33FBF0[];
-extern Vec lbl_2_data_2E9D0;
 extern f32 lbl_2_bss_B29C;
 extern u8 lbl_2_bss_B2A4;
 extern u8 lbl_2_bss_B2A5;
@@ -312,6 +306,24 @@ static s16 lbl_2_data_2E8F0[5][8] = {
     { 13, 14, 15, 16, 4, 17, 6, 7 },
 };
 static s8 lbl_2_data_2E940[4] = { 20, 24, 25, 30 };
+
+CameraPose0DE0 lbl_2_data_2E944[4] = {
+    { { 1.1f, -10.47f, -0.56f }, { 1.1f, -9.47f, -0.52f } },
+    { { 1.34f, -11.88f, -0.65f }, { 1.34f, -10.88f, -0.61f } },
+    { { 1.25f, -11.83f, -0.7f }, { 1.25f, -10.83f, -0.66f } },
+    { { 1.32f, -11.88f, -0.69f }, { 1.32f, -10.88f, -0.65f } },
+};
+u8 lbl_2_data_2E9A4[0x10] = {
+    0x00, 0x00, 0x04, 0x0B, 0x40, 0x02, 0x04, 0xC0, 0x19, 0x1C, 0x18, 0x00, 0x00, 0x01, 0x3F, 0xCC,
+};
+StateEntry0DE0 lbl_2_data_2E9B4[2] = {
+    { 2, fn_2_86F40 },
+    { 2, fn_2_86F40 },
+};
+Vec lbl_2_data_2E9C4 = { 0.0f, 0.0f, 0.0f };
+Vec lbl_2_data_2E9D0 = { 0.0f, 0.0f, 0.0f };
+Vec lbl_2_data_2E9DC = { -1.5707964f, 0.0f, 0.0f };
+Vec lbl_2_data_2E9E8 = { 0.0f, 0.0f, 0.0f };
 
 extern u8 lbl_2_data_2E9F8[];
 extern u8 lbl_2_data_2ECE4[];
@@ -496,6 +508,8 @@ void fn_2_8A008(MenuTask0DE0* task) {
 }
 
 // .text:0x00089F70 size:0x98
+// 78.29%: the target reaches the three descriptors from one pool base named
+// lbl_2_data_2E9F8, which only a .data section starting there gives (see report).
 void fn_2_89F70(void) {
     MenuTask0DE0* task = lbl_803CC1B8;
     void* desc;
@@ -638,6 +652,8 @@ void fn_2_8975C(void) {
 }
 
 // .text:0x000895F8 size:0x164
+// 94.78%: the target tests useSaved and sets result after both loads, using r3
+// as the address of lbl_2_bss_33FBCC first; here both come before the loads.
 s32 fn_2_895F8(u8 useSaved) {
     s32 result;
     s32 v = lbl_2_bss_F410._54;
@@ -1159,6 +1175,8 @@ void fn_2_87998(MenuTask0DE0* task) {
 }
 
 // .text:0x0008782C size:0x16C
+// 98.35%: the target computes i + 1 and i + 2 from the loop's last i without
+// changing it; base[++i] matches all but those registers.
 void fn_2_8782C(void) {
     u32* base;
     int i;
@@ -1390,6 +1408,8 @@ void fn_2_868C8(void) {
 }
 
 // .text:0x00086470 size:0x458
+// 90.55%: in each grid case the target forms the row factor's address with addi
+// and loads it with lfs 0(rX) (one more instruction), and allocates around it.
 void fn_2_86470(void) {
     Vec pos;
     Vec delta;
