@@ -1128,8 +1128,6 @@ void fn_3_64BDC(void) {
 }
 
 // .text:0x00063AF8 size:0x10E4 mapped:0x806A2B8C
-// 99.99%: two branch targets. With no batter-box reason the target skips to the end, and after the
-// in-window bunt (0x59 from frame 5) it skips the 0x5B check; a goto past that check matches the second.
 void fn_3_63AF8(void) {
     UnkE08Actor* actor;
     s32 i;
@@ -1166,235 +1164,248 @@ void fn_3_63AF8(void) {
             if (g_Strikes.outs < 3) {
                 AnimateCharacter(player, 0x65, 1, 1, 1, 0, lefty, 0xA);
             }
-        } else if (lbl_3_common_bss_32234[0] == 0 && g_Runners[0].batterStayInBattersBoxReason != 0 && g_Runners[0].batterStayInBattersBoxReason >= 2) {
-            if (lbl_3_common_bss_32220._9 == 0) {
-                if (g_Batter.hitTrajectory == 2) {
-                    lbl_3_common_bss_32220._9 = 1;
-                } else if (g_Batter.hitTrajectory == 5) {
-                    if (g_Ball.framesSinceHit >= 5) {
-                        lbl_3_common_bss_32220._9 = 1;
-                    }
-                } else if (g_Batter.hitTrajectory == 6) {
-                    AnimateCharacter(player, 0x64, 0, 2, 1, 0, lefty, -1);
-                    lbl_3_common_bss_32220._9 = 1;
-                } else if (g_Batter.hitTrajectory == 3) {
-                    AnimateCharacter(player, 0x63, 0, 2, 1, 0, lefty, -1);
-                    lbl_3_common_bss_32220._9 = 1;
-                } else if (g_Batter.hitTrajectory == 4) {
-                    AnimateCharacter(player, 0x51, 0, 2, 1, 8, lefty, 0);
-                    QueueCharacterAnimation(player, 0x52, 1, 1, 0, lefty, -1);
-                    lbl_3_common_bss_32220._9 = 1;
-                }
-            }
-        } else if (lbl_3_common_bss_32234[0] != 0) {
-            walkup = FALSE;
-            if (g_d_GameSettings.GameModeSelected != 2) {
-                if (g_d_GameSettings.GameModeSelected == 6) {
-                    if (g_Minigame._19A5 != 0) {
-                        walkup = TRUE;
-                        g_Minigame._19A5 = 0;
-                    }
-                } else if (g_Pitcher.nPitchesThisAB == 0 && g_Pitcher.nPickoffAttempts == 0 &&
-                           g_GameLogic.playBatterWalkupAnimation == 1) {
-                    walkup = TRUE;
-                }
-            }
-            if (g_GameLogic.scoutFlag_VsScreenInd != 0) {
-                walkup = FALSE;
-            }
-            if (walkup) {
-                AnimateCharacter(player, 0x67, 0, 1, 1, 0, lefty, 0);
-                QueueCharacterAnimation(player, 0x4B, 1, 1, 0, lefty, 0);
-            } else {
-                AnimateCharacter(player, 0x4B, 1, 2, 1, 0, lefty, 0);
-                lbl_3_common_bss_32220._9 = 0;
-                lbl_3_common_bss_32220._0 = 0;
-            }
         } else {
-            if ((g_Ball.totalFramesAtPlay == 3 || g_GameLogic.gameStatus == 0) && g_Batter.swingInd == 0 &&
-                g_Batter.buntStatus == 0) {
-                AnimateCharacter(player, 0x4B, 1, 2, 1, 0, lefty, 0xA);
-                lbl_3_common_bss_32220._9 = 0;
-                lbl_3_common_bss_32220._0 = 0;
+            if (lbl_3_common_bss_32234[0] == 0) {
+                if (g_Runners[0].batterStayInBattersBoxReason == 0) {
+                    goto end;
+                }
+                if (g_Runners[0].batterStayInBattersBoxReason >= 2) {
+                    if (lbl_3_common_bss_32220._9 == 0) {
+                        if (g_Batter.hitTrajectory == 2) {
+                            lbl_3_common_bss_32220._9 = 1;
+                        } else if (g_Batter.hitTrajectory == 5) {
+                            if (g_Ball.framesSinceHit >= 5) {
+                                lbl_3_common_bss_32220._9 = 1;
+                            }
+                        } else if (g_Batter.hitTrajectory == 6) {
+                            AnimateCharacter(player, 0x64, 0, 2, 1, 0, lefty, -1);
+                            lbl_3_common_bss_32220._9 = 1;
+                        } else if (g_Batter.hitTrajectory == 3) {
+                            AnimateCharacter(player, 0x63, 0, 2, 1, 0, lefty, -1);
+                            lbl_3_common_bss_32220._9 = 1;
+                        } else if (g_Batter.hitTrajectory == 4) {
+                            AnimateCharacter(player, 0x51, 0, 2, 1, 8, lefty, 0);
+                            QueueCharacterAnimation(player, 0x52, 1, 1, 0, lefty, -1);
+                            lbl_3_common_bss_32220._9 = 1;
+                        }
+                    }
+                    goto end;
+                }
             }
-            if (g_Pitcher.pitchTotalTimeCounter == 0) {
-                if (g_Batter.swingInd != 0 || g_Batter.buntStatus != 0) {
+            if (lbl_3_common_bss_32234[0] != 0) {
+                walkup = FALSE;
+                if (g_d_GameSettings.GameModeSelected != 2) {
+                    if (g_d_GameSettings.GameModeSelected == 6) {
+                        if (g_Minigame._19A5 != 0) {
+                            walkup = TRUE;
+                            g_Minigame._19A5 = 0;
+                        }
+                    } else if (g_Pitcher.nPitchesThisAB == 0 && g_Pitcher.nPickoffAttempts == 0 &&
+                               g_GameLogic.playBatterWalkupAnimation == 1) {
+                        walkup = TRUE;
+                    }
+                }
+                if (g_GameLogic.scoutFlag_VsScreenInd != 0) {
+                    walkup = FALSE;
+                }
+                if (walkup) {
+                    AnimateCharacter(player, 0x67, 0, 1, 1, 0, lefty, 0);
+                    QueueCharacterAnimation(player, 0x4B, 1, 1, 0, lefty, 0);
+                } else {
+                    AnimateCharacter(player, 0x4B, 1, 2, 1, 0, lefty, 0);
+                    lbl_3_common_bss_32220._9 = 0;
                     lbl_3_common_bss_32220._0 = 0;
                 }
-                if (g_d_GameSettings.GameModeSelected != 2 && g_d_GameSettings.GameModeSelected != 7) {
-                    counter = 0x7FFF;
-                    if (lbl_3_common_bss_32220._0 < 0x7FFE) {
-                        counter = lbl_3_common_bss_32220._0 + 1;
-                    }
-                    lbl_3_common_bss_32220._0 = counter;
-                    if (counter > 0x258 && g_Batter.chargeStatus == 0 && g_Ball.StaticRandomInt1 % 120 == 0) {
-                        lbl_3_common_bss_32220._0 = 0;
-                        AnimateCharacter(player, 0x66, 0, 2, 1, 0, lefty, -1);
-                        QueueCharacterAnimation(player, 0x4B, 1, 1, 0, lefty, 0xF);
-                    }
-                }
-            }
-            if (g_Batter.chargeStatus != 0 && g_Batter.swingInd == 0) {
-                if (g_Pitcher.pitcherActionState != 5) {
-                    if (g_Batter.chargeStatus == 3) {
-                        if (actor->_62 != 0x58 && actor->_62 != 0x68 && actor->_62 != 0x4B) {
-                            if (actor->_62 == 0x55) {
-                                AnimateCharacter(player, 0x58, 1, 1, 1, 0, lefty, 0x14);
-                                QueueCharacterAnimation(player, 0x4B, 1, 1, 0, lefty, 0xC);
-                            } else {
-                                AnimateCharacter(player, 0x68, 0, 1, 1, 0, lefty, 0x14);
-                                QueueCharacterAnimation(player, 0x4B, 1, 1, 0, lefty, 0xC);
-                            }
-                        }
-                    } else if (g_Batter.chargeStatus == 1 && g_Batter.chargeFrames == 1) {
-                        if (actor->_62 == 0x4B) {
-                            AnimateCharacter(player, 0x4C, 0, 3, 1, g_Batter.chargeFrames, lefty, 0x14);
-                        } else {
-                            AnimateCharacter(player, 0x4C, 0, 3, 1, g_Batter.chargeFrames, lefty, 0);
-                        }
-                        QueueCharacterAnimation(player, 0x55, 1, 1, 0, lefty, 0xC);
-                    }
-                }
-            } else if (lbl_3_common_bss_32220._B != 0) {
-                if (g_Pitcher.pitcherActionState == 4 && g_Ball.postPitchResultCounter >= 3) {
-                    lbl_3_common_bss_32220._B = 0;
-                    if (actor->_62 == 0x55) {
-                        AnimateCharacter(player, 0x58, 0, 1, 1, 0, lefty, 0x14);
-                        QueueCharacterAnimation(player, 0x4B, 1, 1, 0, lefty, -1);
-                    } else {
-                        AnimateCharacter(player, 0x68, 0, 1, 1, 0, lefty, 0x14);
-                        QueueCharacterAnimation(player, 0x4B, 1, 1, 0, lefty, 0xC);
-                    }
-                } else {
-                    lbl_3_common_bss_32220._4++;
-                }
-            } else if (g_Pitcher.pitcherActionState == 2 && g_Batter.buntStatus == 0 && g_Batter.swingInd == 0 &&
-                       g_Pitcher.windupCountdownUntilBallReleased <= 8) {
-                AnimateCharacter(player, 0x57, 0, 3, 1, 0, lefty, 0x14);
-                QueueCharacterAnimation(player, 0x56, 1, 1, 0, lefty, 0);
-                lbl_3_common_bss_32220._B = 1;
-                lbl_3_common_bss_32220._4 = 0;
-            }
-            if (g_Batter.buntStatus != 0) {
-                lbl_3_common_bss_32220._B = 0;
-                if (g_Pitcher.strikeOutOrWalk != 2) {
-                    if (g_Batter.missedBuntStatus == 1) {
-                        AnimateCharacter(player, 0x5C, 0, 1, 1, 0, lefty, -1);
-                        QueueCharacterAnimation(player, 0x4B, 1, 1, 0, lefty, 0xA);
-                    } else if (g_Batter.buntStatus == 1) {
-                        if (g_Pitcher.framesUntilUnhittable > 5 && g_Pitcher.framesUntilUnhittable < 0xF) {
-                            AnimateCharacter(player, 0x59, 0, 1, 1, 5, lefty, -1);
-                        } else {
-                            AnimateCharacter(player, 0x59, 0, 1, 1, 0, lefty, -1);
-                        }
-                    } else if (g_Batter.buntStatus == 2) {
-                        AnimateCharacter(player, 0x5A, 0, 2, 1, 0, lefty, -1);
-                    } else if (g_Batter.buntStatus == 4 && g_Pitcher.pitcherActionState != 4 &&
-                               g_Pitcher.pitcherActionState != 5) {
-                        AnimateCharacter(player, 0x5B, 0, 1, 1, 0, lefty, -1);
-                    } else if (g_Batter.buntStatus == 4 && g_Pitcher.pitcherActionState == 4) {
-                        AnimateCharacter(player, 0x4B, 1, 2, 1, 0, lefty, 0xF);
-                    } else if ((g_Batter.buntStatus == 5 || g_Batter.buntStatus == 7) && actor->_62 != 0x4B) {
-                        AnimateCharacter(player, 0x5B, 0, 1, 1, 0, lefty, -1);
-                    }
-                }
-                if (actor->_62 == 0x5B && actor->_64 != 0x4B && actor->_6A > 0 && g_Batter.buntStatus != 1 &&
-                    lbl_3_common_bss_32220._B == 0) {
-                    AnimateCharacter(player, 0x4B, 1, 2, 1, 0, lefty, 0xF);
-                }
-            } else if (g_Batter.swingInd != 0) {
-                lbl_3_common_bss_32220._B = 0;
-                if (g_Batter.framesSinceStartOfSwing == 1) {
-                    if (g_Batter.swingMissThatWasHittable != 0) {
-                        lbl_3_common_bss_32220._C = g_Pitcher.framesUntilBallReachesBatterZ - 6;
-                    } else {
-                        lbl_3_common_bss_32220._C = 0;
-                    }
-                    lbl_3_common_bss_32220._D = 0;
-                }
-                if (lbl_3_common_bss_32220._C <= 0 && lbl_3_common_bss_32220._D == 0) {
-                    if (g_Batter.hitGeneralType == 0) {
-                        AnimateCharacter(player, 0x4D, 0, 1, 1, -lbl_3_common_bss_32220._C, lefty, 2);
-                        QueueCharacterAnimation(player, 0x50, 0, 1, 0, lefty, 0);
-                    } else {
-                        AnimateCharacter(player, 0x53, 0, 1, 1, -lbl_3_common_bss_32220._C, lefty, 2);
-                        QueueCharacterAnimation(player, 0x54, 0, 1, 0, lefty, 0);
-                    }
-                    lbl_3_common_bss_32220._D = 1;
-                } else {
-                    lbl_3_common_bss_32220._C--;
-                }
-                if ((actor->_62 == 0x50 || actor->_62 == 0x54) && actor->_64 != 0x4E && actor->_64 != 0x4F &&
-                    actor->_6A > 0) {
-                    if (actor->_62 == 0x54) {
-                        AnimateCharacter(player, 0x4F, 0, 2, 1, 0, lefty, -1);
-                    } else {
-                        AnimateCharacter(player, 0x4E, 0, 2, 1, 0, lefty, -1);
-                    }
-                }
-                if ((actor->_62 == 0x4E || actor->_62 == 0x4F) && actor->_64 != 0x4B && actor->_6A > 0 &&
-                    lbl_3_common_bss_32220._B == 0) {
-                    AnimateCharacter(player, 0x4B, 1, 2, 1, 0, lefty, 0xA);
-                }
-            }
-            forced = FALSE;
-            for (i = 1; i < 4; i++) {
-                if (g_Runners[i].runnerOnFieldOrOutOrScored == 1 && g_Runners[i].furthestBaseForcedToGoToOnWalk != 0) {
-                    forced = TRUE;
-                }
-            }
-            if (g_Batter.hitByPitch != 0) {
-                if (lbl_3_common_bss_32220._8 == 0 || lbl_3_common_bss_32220._8 == 5) {
-                    AnimateCharacter(player, 0x62, 0, 1, 1, 0, lefty, -1);
-                    lbl_3_common_bss_32220._8 = 3;
-                    fn_3_90220(g_Batter.charID, 0xA);
-                }
             } else {
-                ended = FALSE;
-                if (g_Pitcher.pitcherActionState == 5) {
-                    ended = TRUE;
-                } else if (g_Strikes.GameControls_StrikeBallBitVector >= 0x20 && g_Batter.missSwingOrBunt == 1 &&
-                           (actor->_62 == 0x4D || actor->_62 == 0x53) && actor->_68 == 1 &&
-                           g_Batter.contactMadeInd == 0) {
-                    ended = TRUE;
+                if ((g_Ball.totalFramesAtPlay == 3 || g_GameLogic.gameStatus == 0) && g_Batter.swingInd == 0 &&
+                    g_Batter.buntStatus == 0) {
+                    AnimateCharacter(player, 0x4B, 1, 2, 1, 0, lefty, 0xA);
+                    lbl_3_common_bss_32220._9 = 0;
+                    lbl_3_common_bss_32220._0 = 0;
                 }
-                if (g_Pitcher.strikeOutOrWalk == 2) {
-                    if (forced) {
-                        if (g_Ball.framesSinceHit > 0) {
-                            AnimateCharacter(player, 0x66, 0, 1, 1, 0, lefty, -1);
-                        }
-                    } else if (g_Batter.buntStatus == 4) {
-                        AnimateCharacter(player, 0x61, 0, 1, 1, 0, lefty, 0);
-                    } else {
-                        AnimateCharacter(player, 0x61, 0, 1, 1, 0, lefty, 0);
+                if (g_Pitcher.pitchTotalTimeCounter == 0) {
+                    if (g_Batter.swingInd != 0 || g_Batter.buntStatus != 0) {
+                        lbl_3_common_bss_32220._0 = 0;
                     }
-                } else if (ended && lbl_3_common_bss_32220._8 == 0) {
-                    if (g_Batter.buntStatus == 4) {
-                        AnimateCharacter(player, 0x5F, 0, 1, 1, 0, lefty, -1);
-                        lbl_3_common_bss_32220._8 = 1;
-                    } else if (actor->_62 == 0x4D || actor->_62 == 0x53) {
-                        if (forced && g_Strikes.storedOuts < 2) {
-                            AnimateCharacter(player, 0x5E, 0, 2, 1, 0, lefty, -1);
-                            QueueCharacterAnimation(player, 0x66, 1, 1, 0, lefty, -1);
-                        } else if (actor->_62 == 0x53) {
-                            AnimateCharacter(player, 0x60, 0, 2, 1, 0, lefty, -1);
-                        } else {
-                            AnimateCharacter(player, 0x5E, 0, 2, 1, 0, lefty, -1);
+                    if (g_d_GameSettings.GameModeSelected != 2 && g_d_GameSettings.GameModeSelected != 7) {
+                        counter = 0x7FFF;
+                        if (lbl_3_common_bss_32220._0 < 0x7FFE) {
+                            counter = lbl_3_common_bss_32220._0 + 1;
                         }
-                        lbl_3_common_bss_32220._8 = 1;
-                    } else if (actor->_62 == 0x4B || actor->_62 == 0x4C || actor->_62 == 0x55 ||
-                               actor->_62 == 0x56 || actor->_62 == 0x57 || actor->_62 == 0x58 ||
-                               actor->_62 == 0x68) {
-                        AnimateCharacter(player, 0x5F, 0, 1, 1, 0, lefty, -1);
-                        lbl_3_common_bss_32220._8 = 1;
-                    } else if (actor->_62 == 0x4E || actor->_62 == 0x4F) {
-                        AnimateCharacter(player, 0x5F, 0, 2, 1, 0, lefty, -1);
-                        lbl_3_common_bss_32220._8 = 1;
+                        lbl_3_common_bss_32220._0 = counter;
+                        if (counter > 0x258 && g_Batter.chargeStatus == 0 && g_Ball.StaticRandomInt1 % 120 == 0) {
+                            lbl_3_common_bss_32220._0 = 0;
+                            AnimateCharacter(player, 0x66, 0, 2, 1, 0, lefty, -1);
+                            QueueCharacterAnimation(player, 0x4B, 1, 1, 0, lefty, 0xF);
+                        }
+                    }
+                }
+                if (g_Batter.chargeStatus != 0 && g_Batter.swingInd == 0) {
+                    if (g_Pitcher.pitcherActionState != 5) {
+                        if (g_Batter.chargeStatus == 3) {
+                            if (actor->_62 != 0x58 && actor->_62 != 0x68 && actor->_62 != 0x4B) {
+                                if (actor->_62 == 0x55) {
+                                    AnimateCharacter(player, 0x58, 1, 1, 1, 0, lefty, 0x14);
+                                    QueueCharacterAnimation(player, 0x4B, 1, 1, 0, lefty, 0xC);
+                                } else {
+                                    AnimateCharacter(player, 0x68, 0, 1, 1, 0, lefty, 0x14);
+                                    QueueCharacterAnimation(player, 0x4B, 1, 1, 0, lefty, 0xC);
+                                }
+                            }
+                        } else if (g_Batter.chargeStatus == 1 && g_Batter.chargeFrames == 1) {
+                            if (actor->_62 == 0x4B) {
+                                AnimateCharacter(player, 0x4C, 0, 3, 1, g_Batter.chargeFrames, lefty, 0x14);
+                            } else {
+                                AnimateCharacter(player, 0x4C, 0, 3, 1, g_Batter.chargeFrames, lefty, 0);
+                            }
+                            QueueCharacterAnimation(player, 0x55, 1, 1, 0, lefty, 0xC);
+                        }
+                    }
+                } else if (lbl_3_common_bss_32220._B != 0) {
+                    if (g_Pitcher.pitcherActionState == 4 && g_Ball.postPitchResultCounter >= 3) {
+                        lbl_3_common_bss_32220._B = 0;
+                        if (actor->_62 == 0x55) {
+                            AnimateCharacter(player, 0x58, 0, 1, 1, 0, lefty, 0x14);
+                            QueueCharacterAnimation(player, 0x4B, 1, 1, 0, lefty, -1);
+                        } else {
+                            AnimateCharacter(player, 0x68, 0, 1, 1, 0, lefty, 0x14);
+                            QueueCharacterAnimation(player, 0x4B, 1, 1, 0, lefty, 0xC);
+                        }
+                    } else {
+                        lbl_3_common_bss_32220._4++;
+                    }
+                } else if (g_Pitcher.pitcherActionState == 2 && g_Batter.buntStatus == 0 && g_Batter.swingInd == 0 &&
+                           g_Pitcher.windupCountdownUntilBallReleased <= 8) {
+                    AnimateCharacter(player, 0x57, 0, 3, 1, 0, lefty, 0x14);
+                    QueueCharacterAnimation(player, 0x56, 1, 1, 0, lefty, 0);
+                    lbl_3_common_bss_32220._B = 1;
+                    lbl_3_common_bss_32220._4 = 0;
+                }
+                if (g_Batter.buntStatus != 0) {
+                    lbl_3_common_bss_32220._B = 0;
+                    if (g_Pitcher.strikeOutOrWalk != 2) {
+                        if (g_Batter.missedBuntStatus == 1) {
+                            AnimateCharacter(player, 0x5C, 0, 1, 1, 0, lefty, -1);
+                            QueueCharacterAnimation(player, 0x4B, 1, 1, 0, lefty, 0xA);
+                        } else if (g_Batter.buntStatus == 1) {
+                            if (g_Pitcher.framesUntilUnhittable > 5 && g_Pitcher.framesUntilUnhittable < 0xF) {
+                                AnimateCharacter(player, 0x59, 0, 1, 1, 5, lefty, -1);
+                                goto skip;
+                            } else {
+                                AnimateCharacter(player, 0x59, 0, 1, 1, 0, lefty, -1);
+                            }
+                        } else if (g_Batter.buntStatus == 2) {
+                            AnimateCharacter(player, 0x5A, 0, 2, 1, 0, lefty, -1);
+                        } else if (g_Batter.buntStatus == 4 && g_Pitcher.pitcherActionState != 4 &&
+                                   g_Pitcher.pitcherActionState != 5) {
+                            AnimateCharacter(player, 0x5B, 0, 1, 1, 0, lefty, -1);
+                        } else if (g_Batter.buntStatus == 4 && g_Pitcher.pitcherActionState == 4) {
+                            AnimateCharacter(player, 0x4B, 1, 2, 1, 0, lefty, 0xF);
+                        } else if ((g_Batter.buntStatus == 5 || g_Batter.buntStatus == 7) && actor->_62 != 0x4B) {
+                            AnimateCharacter(player, 0x5B, 0, 1, 1, 0, lefty, -1);
+                        }
+                    }
+                    if (actor->_62 == 0x5B && actor->_64 != 0x4B && actor->_6A > 0 && g_Batter.buntStatus != 1 &&
+                        lbl_3_common_bss_32220._B == 0) {
+                        AnimateCharacter(player, 0x4B, 1, 2, 1, 0, lefty, 0xF);
+                    }
+                skip:;
+                } else if (g_Batter.swingInd != 0) {
+                    lbl_3_common_bss_32220._B = 0;
+                    if (g_Batter.framesSinceStartOfSwing == 1) {
+                        if (g_Batter.swingMissThatWasHittable != 0) {
+                            lbl_3_common_bss_32220._C = g_Pitcher.framesUntilBallReachesBatterZ - 6;
+                        } else {
+                            lbl_3_common_bss_32220._C = 0;
+                        }
+                        lbl_3_common_bss_32220._D = 0;
+                    }
+                    if (lbl_3_common_bss_32220._C <= 0 && lbl_3_common_bss_32220._D == 0) {
+                        if (g_Batter.hitGeneralType == 0) {
+                            AnimateCharacter(player, 0x4D, 0, 1, 1, -lbl_3_common_bss_32220._C, lefty, 2);
+                            QueueCharacterAnimation(player, 0x50, 0, 1, 0, lefty, 0);
+                        } else {
+                            AnimateCharacter(player, 0x53, 0, 1, 1, -lbl_3_common_bss_32220._C, lefty, 2);
+                            QueueCharacterAnimation(player, 0x54, 0, 1, 0, lefty, 0);
+                        }
+                        lbl_3_common_bss_32220._D = 1;
+                    } else {
+                        lbl_3_common_bss_32220._C--;
+                    }
+                    if ((actor->_62 == 0x50 || actor->_62 == 0x54) && actor->_64 != 0x4E && actor->_64 != 0x4F &&
+                        actor->_6A > 0) {
+                        if (actor->_62 == 0x54) {
+                            AnimateCharacter(player, 0x4F, 0, 2, 1, 0, lefty, -1);
+                        } else {
+                            AnimateCharacter(player, 0x4E, 0, 2, 1, 0, lefty, -1);
+                        }
+                    }
+                    if ((actor->_62 == 0x4E || actor->_62 == 0x4F) && actor->_64 != 0x4B && actor->_6A > 0 &&
+                        lbl_3_common_bss_32220._B == 0) {
+                        AnimateCharacter(player, 0x4B, 1, 2, 1, 0, lefty, 0xA);
+                    }
+                }
+                forced = FALSE;
+                for (i = 1; i < 4; i++) {
+                    if (g_Runners[i].runnerOnFieldOrOutOrScored == 1 &&
+                        g_Runners[i].furthestBaseForcedToGoToOnWalk != 0) {
+                        forced = TRUE;
+                    }
+                }
+                if (g_Batter.hitByPitch != 0) {
+                    if (lbl_3_common_bss_32220._8 == 0 || lbl_3_common_bss_32220._8 == 5) {
+                        AnimateCharacter(player, 0x62, 0, 1, 1, 0, lefty, -1);
+                        lbl_3_common_bss_32220._8 = 3;
+                        fn_3_90220(g_Batter.charID, 0xA);
+                    }
+                } else {
+                    ended = FALSE;
+                    if (g_Pitcher.pitcherActionState == 5) {
+                        ended = TRUE;
+                    } else if (g_Strikes.GameControls_StrikeBallBitVector >= 0x20 && g_Batter.missSwingOrBunt == 1 &&
+                               (actor->_62 == 0x4D || actor->_62 == 0x53) && actor->_68 == 1 &&
+                               g_Batter.contactMadeInd == 0) {
+                        ended = TRUE;
+                    }
+                    if (g_Pitcher.strikeOutOrWalk == 2) {
+                        if (forced) {
+                            if (g_Ball.framesSinceHit > 0) {
+                                AnimateCharacter(player, 0x66, 0, 1, 1, 0, lefty, -1);
+                            }
+                        } else if (g_Batter.buntStatus == 4) {
+                            AnimateCharacter(player, 0x61, 0, 1, 1, 0, lefty, 0);
+                        } else {
+                            AnimateCharacter(player, 0x61, 0, 1, 1, 0, lefty, 0);
+                        }
+                    } else if (ended && lbl_3_common_bss_32220._8 == 0) {
+                        if (g_Batter.buntStatus == 4) {
+                            AnimateCharacter(player, 0x5F, 0, 1, 1, 0, lefty, -1);
+                            lbl_3_common_bss_32220._8 = 1;
+                        } else if (actor->_62 == 0x4D || actor->_62 == 0x53) {
+                            if (forced && g_Strikes.storedOuts < 2) {
+                                AnimateCharacter(player, 0x5E, 0, 2, 1, 0, lefty, -1);
+                                QueueCharacterAnimation(player, 0x66, 1, 1, 0, lefty, -1);
+                            } else if (actor->_62 == 0x53) {
+                                AnimateCharacter(player, 0x60, 0, 2, 1, 0, lefty, -1);
+                            } else {
+                                AnimateCharacter(player, 0x5E, 0, 2, 1, 0, lefty, -1);
+                            }
+                            lbl_3_common_bss_32220._8 = 1;
+                        } else if (actor->_62 == 0x4B || actor->_62 == 0x4C || actor->_62 == 0x55 ||
+                                   actor->_62 == 0x56 || actor->_62 == 0x57 || actor->_62 == 0x58 ||
+                                   actor->_62 == 0x68) {
+                            AnimateCharacter(player, 0x5F, 0, 1, 1, 0, lefty, -1);
+                            lbl_3_common_bss_32220._8 = 1;
+                        } else if (actor->_62 == 0x4E || actor->_62 == 0x4F) {
+                            AnimateCharacter(player, 0x5F, 0, 2, 1, 0, lefty, -1);
+                            lbl_3_common_bss_32220._8 = 1;
+                        }
                     }
                 }
             }
         }
     }
+end:
     actor->_273 = 1;
 }
 
