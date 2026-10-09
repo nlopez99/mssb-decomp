@@ -141,7 +141,7 @@ extern struct {
     /* 0x19784B */ u8 _19784B[0x19785E - 0x19784B];
     /* 0x19785E */ s8 _19785E;
     /* 0x19785F */ u8 _19785F[0x197862 - 0x19785F];
-    /* 0x197862 */ u8 _197862;
+    /* 0x197862 */ s8 _197862;
     /* 0x197863 */ s8 _197863;
 } *lbl_2_bss_1A824C;
 
@@ -206,7 +206,9 @@ extern struct {
 
 extern struct {
     /* 0x00 */ u8 _00[54];
-    /* 0x36 */ u8 _36[0xF4 - 0x36];
+    /* 0x36 */ u8 _36[0xC6 - 0x36];
+    /* 0xC6 */ u8 _C6[5][4];
+    /* 0xDA */ u8 _DA[0xF4 - 0xDA];
     /* 0xF4 */ u8 _F4;
 } *lbl_2_bss_1A8244;
 
@@ -272,6 +274,7 @@ extern struct {
 } lbl_8036E548;
 extern u8 lbl_800E869C[0x36];
 extern u8 lbl_2_bss_33FBF0[5];
+extern u8 lbl_2_bss_33FBF5;
 
 // rep_0788; its header declares fn_2_1FF0C and fn_2_1FF10 as void(void)
 extern void fn_2_1FF0C(s32 index);
@@ -4820,6 +4823,50 @@ void fn_2_5ED3C(void) {
         fn_800B0A14_removeQueue();
         task->_28 = 0;
         break;
+    }
+}
+
+// .text:0x0005EB78 size:0x1C4
+void fn_2_5EB78(void) {
+    u8 flags[4];
+    s32 i;
+    s32 j;
+
+    lbl_2_bss_33FBF5 = 0;
+    for (i = 0; i < 4; i++) {
+        flags[i] = 0;
+    }
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 5; j++) {
+            if (lbl_2_bss_1A8244->_C6[j][i] != 0) {
+                flags[i] = 1;
+            }
+        }
+    }
+    for (i = 0; i < 4; i++) {
+        lbl_2_bss_33FBF0[i] = flags[i];
+    }
+    if (lbl_2_bss_1A824C->_197862 == 1) {
+        lbl_2_bss_1A8240->_000[0]._0 = 9999;
+        lbl_2_bss_1A8240->_000[1]._0 = 123;
+        lbl_2_bss_1A8240->_000[2]._0 = 45;
+        lbl_2_bss_1A8240->_000[3]._0 = 6;
+        lbl_2_bss_1A8240->_000[4]._0 = 0;
+        lbl_2_bss_1A8240->_000[0]._6 = 0;
+        lbl_2_bss_1A8240->_000[1]._6 = 1;
+        lbl_2_bss_1A8240->_000[2]._6 = 2;
+        lbl_2_bss_1A8240->_000[3]._6 = 3;
+        lbl_2_bss_1A8240->_000[4]._6 = 4;
+        lbl_2_bss_1A8240->_028[0][0]._0 = 9876;
+        lbl_2_bss_1A8240->_028[0][1]._0 = 543;
+        lbl_2_bss_1A8240->_028[0][2]._0 = 21;
+        lbl_2_bss_1A8240->_028[0][3]._0 = 1;
+        lbl_2_bss_1A8240->_028[0][4]._0 = 0;
+        lbl_2_bss_1A8240->_028[0][0]._6 = 0;
+        lbl_2_bss_1A8240->_028[0][1]._6 = 1;
+        lbl_2_bss_1A8240->_028[0][2]._6 = 2;
+        lbl_2_bss_1A8240->_028[0][3]._6 = 3;
+        lbl_2_bss_1A8240->_028[0][4]._6 = 4;
     }
 }
 
