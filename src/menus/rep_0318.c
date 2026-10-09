@@ -960,14 +960,13 @@ s32 fn_2_A50C(void) {
 }
 
 // .text:0x0000A288 size:0x284
-// 74%: the target walks lbl_2_bss_3E0 with a pointer from [1] and keeps no
-// counter for the outer loop; registers differ throughout.
 void fn_2_A288(void) {
     s32 i;
     s32 k;
     s32 j;
     s32 grp;
     u8 count = 0;
+    s32 v;
 
     for (i = 0; i < 12; i++) {
         if (lbl_80108EC4[i] == lbl_8034E9A0._46E0[0]) {
@@ -976,16 +975,17 @@ void fn_2_A288(void) {
             lbl_8034E9A0._470C = i;
         }
     }
-    for (k = 0; k < 2; k++) {
+    for (k = 1; k < 3; k++) {
         for (j = 1; j < 9; j++) {
-            if (lbl_8034E9A0._4380[grp][k + 1][j] == lbl_8034E9A0._46E0[1] && lbl_8034E9A0._4380[grp][k + 1][j] != 0xFF) {
-                lbl_2_bss_3E0[k] = -1;
+            v = lbl_8034E9A0._4380[grp][k][j];
+            if (v == lbl_8034E9A0._46E0[1] && v != 0xFF) {
+                lbl_2_bss_3E0[k - 1] = -1;
             }
         }
-        if (lbl_2_bss_3E0[k] != -1) {
-            lbl_2_bss_3E0[k] = 1;
+        if (lbl_2_bss_3E0[k - 1] != -1) {
+            lbl_2_bss_3E0[k - 1] = 1;
         } else {
-            lbl_2_bss_3E0[k] = 0;
+            lbl_2_bss_3E0[k - 1] = 0;
         }
     }
     if (lbl_2_bss_3E0[1] == 0) {
