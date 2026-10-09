@@ -49,6 +49,7 @@ extern void fn_80038E2C(void* arg0);
 extern void fn_1_AF4(s32 arg0, s32 arg1, f32 arg2);
 extern void fn_1_272DC(void* arg0, s32 arg1);
 extern void fn_1_273D8(void* arg0);
+extern void fn_1_F2C(s32 arg0, s32 arg1, s32 arg2);
 extern void fn_1_26D28(void* arg0, u16 held, u16 pressed, u16 repeat, s8* stick);
 extern void fn_1_27330(void* arg0);
 extern void fn_80037BAC(void* arg0);
@@ -203,11 +204,18 @@ typedef struct CameraTask7730 {
 } CameraTask7730;
 
 typedef struct Actor7730 {
-    /* 0x000 */ u8 _000[0x50];
+    /* 0x000 */ Vec _000;
+    /* 0x00C */ Vec _00C;
+    /* 0x018 */ u8 _018[0x50 - 0x18];
     /* 0x050 */ f32 _050;
-    /* 0x054 */ u8 _054[0xEC - 0x54];
-    /* 0x0EC */ f32 _0EC;
-    /* 0x0F0 */ u8 _0F0[0x154 - 0xF0];
+    /* 0x054 */ u8 _054[0x58 - 0x54];
+    /* 0x058 */ Mtx _058;
+    /* 0x088 */ u8 _088[0xE8 - 0x88];
+    /* 0x0E8 */ Vec _0E8;
+    /* 0x0F4 */ Vec _0F4;
+    /* 0x100 */ u8 _100[0x140 - 0x100];
+    /* 0x140 */ Vec _140;
+    /* 0x14C */ u8 _14C[0x154 - 0x14C];
 } Actor7730; // size: 0x154
 
 typedef struct Tex7730 {
@@ -1329,6 +1337,35 @@ void fn_1_1FD78(GameTask7730* task) {
     }
 }
 
+// .text:0x0001F618 size:0x2E8
+// 96.94%: in the target's inlined fn_1_20640 the id is reread from the stack after
+// GXLoadTexObj and one fewer register is saved; registers differ throughout.
+void fn_1_1F618(GameTask7730* task) {
+    s32 i;
+    u32 id;
+    f32 z;
+
+    i = task->_1C;
+    while (i-- != 0) {
+        id = i % 4;
+        fn_1_20640(task, &id);
+        GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+        z = 0.5f - 0.0001f * i;
+        GXPosition3f32(0.0f, 0.0f, z);
+        GXColor1u32(0xFFFFFFFF);
+        GXTexCoord2s16(0, 0);
+        GXPosition3f32(0.0f, 448.0f, z);
+        GXColor1u32(0xFFFFFFFF);
+        GXTexCoord2s16(0, 0x100);
+        GXPosition3f32(640.0f, 448.0f, z);
+        GXColor1u32(0xFFFFFFFF);
+        GXTexCoord2s16(0x100, 0x100);
+        GXPosition3f32(640.0f, 0.0f, z);
+        GXColor1u32(0xFFFFFFFF);
+        GXTexCoord2s16(0x100, 0);
+    }
+}
+
 // .text:0x0001F418 size:0x200
 void fn_1_1F418(GameTask7730* task) {
     s32 i;
@@ -1425,7 +1462,7 @@ void fn_1_1F23C(Actor7730* actor) {
     fn_800385F0(&lbl_1_bss_6BF4, ((CameraTask7730*)lbl_803CC1B8)->_14, ((CameraTask7730*)lbl_803CC1B8)->_18,
                 ((CameraTask7730*)lbl_803CC1B8)->_1C, ((CameraTask7730*)lbl_803CC1B8)->_20);
     actor->_050 = -((CameraTask7730*)lbl_803CC1B8)->_24;
-    actor->_0EC += 2.0f;
+    actor->_0E8.y += 2.0f;
     ((CameraTask7730*)lbl_803CC1B8)->_2C &= ~2;
     ((CameraTask7730*)lbl_803CC1B8)->_2C |= 2;
 }
@@ -1481,6 +1518,49 @@ void fn_1_1EFF4(void) {
 // .text:0x0001E8C0 size:0x4C
 void fn_1_1E8C0(s32 arg0) {
     lbl_1_data_1066C[((SprTask7730*)lbl_803CC1B8)->_28](arg0 - 8);
+}
+
+// .text:0x0001E5D0 size:0x2F0
+void fn_1_1E5D0(Actor7730* actor) {
+    Vec v[2];
+
+    fn_1_F2C(4, 0, 0);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_COPY);
+    PSMTXMultVec(actor->_058, &actor->_00C, &v[0]);
+    PSMTXMultVec(actor->_058, &actor->_000, &v[1]);
+    GXBegin(GX_LINES, GX_VTXFMT0, 2);
+    GXPosition3f32(v[0].x, v[0].y, v[0].z);
+    GXColor4u8(0xFF, 0x40, 0x40, 0xFF);
+    GXPosition3f32(v[1].x, v[1].y, v[1].z);
+    GXColor4u8(0x40, 0xFF, 0x40, 0xFF);
+    GXBegin(GX_LINES, GX_VTXFMT0, 4);
+    PSVECScale(&actor->_0E8, 1.0f, &v[0]);
+    PSVECAdd(&v[0], &actor->_0F4, &v[1]);
+    GXPosition3f32(v[0].x, v[0].y, v[0].z);
+    GXColor4u8(0xFF, 0, 0, 0xFF);
+    GXPosition3f32(v[1].x, v[1].y, v[1].z);
+    GXColor4u8(0xFF, 0, 0, 0xFF);
+    PSVECScale(&actor->_140, 1.0f, &v[1]);
+    PSVECAdd(&v[0], &v[1], &v[1]);
+    GXPosition3f32(v[0].x, v[0].y, v[0].z);
+    GXColor4u8(0, 0, 0xFF, 0xFF);
+    GXPosition3f32(v[1].x, v[1].y, v[1].z);
+    GXColor4u8(0, 0, 0xFF, 0xFF);
+    if (((CameraTask7730*)lbl_803CC1B8)->_28 == 0) {
+        PSVECSubtract(&actor->_000, &actor->_00C, &v[0]);
+        PSVECScale(&v[0], lbl_1_bss_6BE4._0, &v[0]);
+        PSVECAdd(&actor->_00C, &v[0], &v[0]);
+        PSMTXMultVec(actor->_058, &v[0], &v[0]);
+        v[1].x = lbl_1_bss_6BE4._4.x;
+        v[1].y = lbl_1_bss_6BE4._4.y;
+        v[1].z = lbl_1_bss_6BE4._4.z;
+        PSVECAdd(&v[0], &v[1], &v[1]);
+        GXBegin(GX_LINES, GX_VTXFMT0, 2);
+        GXPosition3f32(v[0].x, v[0].y, v[0].z);
+        GXColor4u8(0xFF, 0, 0xFF, 0xFF);
+        GXPosition3f32(v[1].x, v[1].y, v[1].z);
+        GXColor4u8(0xFF, 0, 0xFF, 0xFF);
+    }
 }
 
 // .text:0x0001E28C size:0x4

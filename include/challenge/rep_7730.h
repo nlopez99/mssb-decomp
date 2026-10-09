@@ -31,7 +31,7 @@ f32 fn_1_1DE50(void);
 void fn_1_1DE5C(s16 arg0);
 void fn_1_1DE60(s16 arg0);
 void fn_1_1E28C(void);
-void fn_1_1E5D0(void* arg0);
+void fn_1_1E5D0(struct Actor7730* actor);
 void fn_1_1E8C0(s32 arg0);
 s16 fn_1_1E90C(s16 value, u16 held, u16 pressed, u16 repeat);
 void fn_1_1EFF4(void);
