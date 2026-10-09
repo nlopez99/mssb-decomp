@@ -362,20 +362,18 @@ void fn_2_92CB0(void) {
     Vec prevPos;
     Vec cur;
     Vec prevTarget;
-    f32 x;
-    f32 y;
-    f32 z;
+    Vec pos;
 
     if (lbl_2_bss_1A824C->_197855 != 0) {
-        x = lbl_2_bss_1A824C->_197608.x;
-        y = lbl_2_bss_1A824C->_197608.y;
-        z = lbl_2_bss_1A824C->_197608.z;
+        pos.x = lbl_2_bss_1A824C->_197608.x;
+        pos.y = lbl_2_bss_1A824C->_197608.y;
+        pos.z = lbl_2_bss_1A824C->_197608.z;
         prevPos.x = lbl_2_bss_1A824C->_19762C.x;
         prevPos.y = lbl_2_bss_1A824C->_19762C.y;
         prevPos.z = lbl_2_bss_1A824C->_19762C.z;
-        cur.x = x;
-        cur.y = y;
-        cur.z = z;
+        cur.x = pos.x;
+        cur.y = pos.y;
+        cur.z = pos.z;
         prevTarget.x = lbl_2_bss_1A824C->_197620.x;
         prevTarget.y = lbl_2_bss_1A824C->_197620.y;
         prevTarget.z = lbl_2_bss_1A824C->_197620.z;
@@ -387,9 +385,9 @@ void fn_2_92CB0(void) {
         lbl_2_bss_1A824C->_19762C.x = result.x;
         lbl_2_bss_1A824C->_19762C.y = result.y;
         lbl_2_bss_1A824C->_19762C.z = result.z;
-        lbl_2_bss_1A824C->_197620.x = x;
-        lbl_2_bss_1A824C->_197620.y = y;
-        lbl_2_bss_1A824C->_197620.z = z;
+        lbl_2_bss_1A824C->_197620.x = pos.x;
+        lbl_2_bss_1A824C->_197620.y = pos.y;
+        lbl_2_bss_1A824C->_197620.z = pos.z;
     }
 }
 
