@@ -2290,7 +2290,7 @@ void fn_2_472C4(s16* cursor, s16* page, s16 count, s16 cols, s16 flags) {
         if (!(flags & 8) && page != NULL && count > cols) {
             pos = *page;
             step = cols - pos % cols;
-            if (pos == last) {
+            if (last == pos) {
                 if (flags & 2) {
                     *page = 0;
                 } else {
@@ -2332,8 +2332,8 @@ void fn_2_472C4(s16* cursor, s16* page, s16 count, s16 cols, s16 flags) {
 }
 
 // .text:0x00046D94 size:0x530
-// Registers only: the target holds count in r8 and cols in r9 from the first
-// divide on (r3 and r8 here), and the case 0x8 temporaries follow from that.
+// Registers only: in case 0x20 the target loads pos into r5 and extends last
+// into r6, the reverse of this build.
 void fn_2_46D94(s16* cursor, s16* page, s16 count, s16 cols, u32 flags) {
     s16 last;
     s16 rem;
@@ -2447,7 +2447,7 @@ void fn_2_46D94(s16* cursor, s16* page, s16 count, s16 cols, u32 flags) {
         if (!(flags & 8) && page != NULL && count > cols) {
             pos = *page;
             step = cols - pos % cols;
-            if (pos == last) {
+            if (last == pos) {
                 if (flags & 2) {
                     *page = 0;
                 } else {
@@ -3371,14 +3371,14 @@ void fn_2_432EC(void) {
 
 // .text:0x000430F4 size:0x1F8
 // Registers only: the target keeps all four mission fields in saved registers
-// (r28-r31) and the inlined fn_2_44238 count in r12.
+// (r28-r31; goal is in r9 here) and the inlined fn_2_44238 count in r12.
 void fn_2_430F4(void) {
     s32 i;
     s32 j;
-    s16 goal;
     s16 level;
     s16 need;
     s16 kind;
+    s16 goal;
     MenuCharacter08E8* c;
 
     for (i = 0; i < 0x36; i++) {
@@ -3387,8 +3387,8 @@ void fn_2_430F4(void) {
             if (c->_31 == 1) {
                 for (j = 0; j < 10; j++) {
                     goal = lbl_80109AE8[lbl_800E8558[i]._2][j]._0;
-                    level = lbl_8010A768[lbl_800E8558[i]._2][j]._6;
                     need = lbl_8010A768[lbl_800E8558[i]._2][j]._4;
+                    level = lbl_8010A768[lbl_800E8558[i]._2][j]._6;
                     kind = lbl_8010A768[lbl_800E8558[i]._2][j]._2;
                     if (kind != -1 && c->_09[j]._1 == 0) {
                         switch (kind) {
