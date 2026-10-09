@@ -776,12 +776,11 @@ static inline BOOL fn_2_8D270_isSpecial(s8 kind) {
 }
 
 // .text:0x0008D270 size:0x76C
-// 95.47%: the target keeps the raw idx in r25 and p in r30, re-zero-extends idx for each call,
+// 95.58%: the target keeps the raw idx in r25 and p in r30, re-zero-extends idx for each call,
 // tests the special kinds through neg/or/srwi., and copies the bone loop's zero with mr.
 void fn_2_8D270(u8 idx) {
     Player0F60* p = &lbl_2_bss_340140->_0C04[idx];
     ActorRef0F60* ref = fn_800111D8(p);
-    u32* base = p->_008;
     void* tex;
     void* layout;
     void* geo;
@@ -796,6 +795,7 @@ void fn_2_8D270(u8 idx) {
     s32 b;
     u16 bone;
     void* sub;
+    u32* base = p->_008;
     void* sub2;
 
     for (i = 0; i < 15; i++) {
