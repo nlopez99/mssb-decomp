@@ -88,6 +88,8 @@ void fn_2_808D8(struct UnkTask0C50* task, s32 index);
 void fn_2_80B5C(struct UnkTask0C50* task, s32 index);
 void fn_2_80C2C(struct UnkTask0C50* task, s32 index);
 void fn_2_80E0C(struct UnkTask0C50* task, s32 index);
+void fn_2_81628(void);
+void fn_2_8279C(void);
 void fn_2_82CF0(void);
 void fn_2_82DE8(void);
 
