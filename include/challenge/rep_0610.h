@@ -19,6 +19,8 @@ void fn_1_C9E0(struct UnkCamera0610* arg0);
 void fn_1_CB9C(s32 arg0);
 void fn_1_CC24(void);
 void fn_1_CCC8(void);
+void fn_1_CDC8(void);
+void fn_1_D13C(void);
 void fn_1_D2F0(void);
 void fn_1_D4BC(void);
 void fn_1_D590(s32 arg0, s32 arg1, f32 arg2);

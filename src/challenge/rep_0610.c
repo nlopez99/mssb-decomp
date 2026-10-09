@@ -73,7 +73,10 @@ typedef struct Unk8036E548Actor {
     /* 0x048 */ f32 _048;
     /* 0x04C */ u8 _04C[0x72 - 0x4C];
     /* 0x072 */ u16 _072[120];
-    /* 0x162 */ u16 _162[(0x276 - 0x162) / 2];
+    /* 0x162 */ u16 _162[(0x25A - 0x162) / 2];
+    /* 0x25A */ u8 _25A;
+    /* 0x25B */ u8 _25B;
+    /* 0x25C */ u8 _25C[0x276 - 0x25C];
     /* 0x276 */ u8 _276;
     /* 0x277 */ u8 _277;
     /* 0x278 */ u8 _278[0x27C - 0x278];
@@ -185,6 +188,7 @@ extern void fn_80026130(s32, void*, f32);
 extern void fn_800385F0(struct Unk30C0*, f32, f32, f32, f32);
 extern void fn_80037AA0(struct Unk30C0*, s32, void (*)(s32), u16, UnkTimer0610*);
 extern void fn_800B0A14_removeQueue(void);
+extern void fn_800B2B74(UnkList0610* list, u16 id);
 extern void fn_80052D70(UnkTask0610* task);
 extern void makeLookAtMatrix(Mtx m, const Vec* camPos, const Vec* camUp, const Vec* target);
 extern void fn_1_F2C(s32, s32, s32);
@@ -251,16 +255,17 @@ typedef struct UnkFootprint0610 {
 } UnkFootprint0610;
 
 extern UnkFootprint0610* lbl_1_data_F174[2];
-extern void* lbl_1_data_F4DC[3];
-extern UnkBurst0610 lbl_1_data_F2A0;
-extern u16 lbl_1_data_F17C;
-extern u16 lbl_1_data_F56C;
-extern u16 lbl_1_data_F56E;
 typedef struct UnkPair0610 {
     /* 0x0 */ u16 _0;
     /* 0x2 */ u16 _2;
 } UnkPair0610;
 
+extern void* lbl_1_data_F4DC[3];
+extern UnkPair0610 lbl_1_data_F4E8[4];
+extern UnkBurst0610 lbl_1_data_F2A0;
+extern u16 lbl_1_data_F17C;
+extern u16 lbl_1_data_F56C;
+extern u16 lbl_1_data_F56E;
 extern UnkPair0610 lbl_1_data_1DC0[];
 extern UnkPair0610 lbl_1_data_1E18[];
 extern u8 lbl_1_data_A940[];
@@ -317,7 +322,8 @@ static struct Unk67E0 {
     /* 0x118 */ u8 _118;
 } lbl_1_bss_67E0;
 static UnkTimer0610* lbl_1_bss_67B8[10];
-static u8 lbl_1_bss_60E8[0x6D0];
+static u8 lbl_1_bss_60EC[0x6CC];
+static UnkTask0610* lbl_1_bss_60E8;
 static void* lbl_1_bss_60E4;
 static s32 lbl_1_bss_60E0;
 static s32 lbl_1_bss_60DC;
@@ -1394,6 +1400,38 @@ void fn_1_D4BC(void) {
 // .text:0x0000D2F0 size:0x10
 void fn_1_D2F0(void) {
     lbl_1_bss_30B8 = 1;
+}
+
+// .text:0x0000D13C size:0x1B4
+void fn_1_D13C(void) {
+    u16 ids[2];
+    s32 kind;
+    s32 i;
+    Unk8036E548Actor* actor = &lbl_8036E548._0C04[lbl_1_bss_5F73];
+    lbl_1_bss_60E8 = fn_800B0A5C_insertQueue(fn_1_CDC8, lbl_803CC1B8->_12 + 1);
+    lbl_1_bss_60E8->_10 = lbl_1_bss_6940[lbl_1_bss_5F73]._44;
+    switch (lbl_1_bss_68FC._40[lbl_1_bss_5F73]) {
+    case 0x27:
+        break;
+    case 0x26:
+        kind = 0;
+        break;
+    case 0x12:
+        kind = 3;
+        break;
+    case 0x28:
+        kind = 1;
+        break;
+    case 0x29:
+        kind = 2;
+        break;
+    }
+    actor->_25A = (lbl_1_bss_6940[lbl_1_bss_5F73]._44 < 2) == (lbl_1_bss_5F69 == 0);
+    ids[actor->_25A] = lbl_8036E548._0C04[lbl_1_bss_5F73]._162[lbl_1_data_F4E8[kind]._0];
+    ids[!actor->_25A] = lbl_8036E548._0C04[lbl_1_bss_5F73]._162[lbl_1_data_F4E8[kind]._2];
+    for (i = 0; i < 2; i++) {
+        fn_800B2B74(lbl_8036E548._0060->_34[lbl_1_bss_5F73]._00, ids[i]);
+    }
 }
 
 // .text:0x0000CCC8 size:0x100
