@@ -3,6 +3,7 @@
 #include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/gx.h"
+#include "string.h"
 
 extern void fn_80048C1C(void);
 extern void fn_80048C28(void);
@@ -19,6 +20,22 @@ extern void fn_800BCE38(void* geo);
 extern void fn_800BD190(void* geo, void* tex);
 extern void convertTextureHeader(void* tex);
 extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);
+extern void fn_800AD038(void* arg0);
+extern void* _OSAllocFromHeap(u32 align, u32 size);
+extern void fn_800B472C(void* arg0);
+
+extern struct {
+    /* 0x00 */ u8 _00[0x8];
+    /* 0x08 */ void* _08;
+} lbl_80366158;
+
+typedef struct Task0138 {
+    /* 0x00 */ void (*_00)(void);
+    /* 0x04 */ u8 _04[0x10 - 0x4];
+    /* 0x10 */ s16 _10;
+} Task0138;
+
+extern Task0138* lbl_803CC1B8;
 
 typedef struct Layout0138 {
     /* 0x0 */ u8 _0[0x6];
@@ -34,23 +51,35 @@ typedef struct File0138 {
     /* 0x14 */ u32 _14;
 } File0138;
 
+typedef struct Draw0138 {
+    /* 0x00 */ u8 _00[0x4];
+    /* 0x04 */ void (*_04)(void* arg0);
+    /* 0x08 */ Mtx _08;
+    /* 0x38 */ u8 _38[0x68 - 0x38];
+    /* 0x68 */ Layout0138* _68;
+} Draw0138; // size: 0x6C
+
 extern struct {
-    /* 0x000 */ u8 _000[0x58];
+    /* 0x000 */ u8 _000[0x30];
+    /* 0x030 */ u16 _030;
+    /* 0x032 */ u8 _032[0x4C - 0x32];
+    /* 0x04C */ f32 _04C;
+    /* 0x050 */ f32 _050;
+    /* 0x054 */ f32 _054;
     /* 0x058 */ void* _058;
-    /* 0x05C */ u8 _05C[0xC4 - 0x5C];
-    /* 0x0C4 */ Layout0138* _0C4;
-    /* 0x0C8 */ u8 _0C8[0x130 - 0xC8];
-    /* 0x130 */ Layout0138* _130;
-    /* 0x134 */ u8 _134[0x19C - 0x134];
-    /* 0x19C */ Layout0138* _19C;
-    /* 0x1A0 */ u8 _1A0[0x208 - 0x1A0];
-    /* 0x208 */ Layout0138* _208;
-    /* 0x20C */ u8 _20C[0x224 - 0x20C];
+    /* 0x05C */ Draw0138 _05C[4];
+    /* 0x20C */ u8 _20C[0x21C - 0x20C];
+    /* 0x21C */ void* _21C;
+    /* 0x220 */ u8 _220[0x224 - 0x220];
     /* 0x224 */ u32* _224;
     /* 0x228 */ s16 _228;
     /* 0x22A */ s16 _22A;
     /* 0x22C */ s16 _22C;
     /* 0x22E */ s16 _22E;
+    /* 0x230 */ s8 _230;
+    /* 0x231 */ s8 _231;
+    /* 0x232 */ u8 _232[0x234 - 0x232];
+    /* 0x234 */ u8 _234;
 } lbl_1_common_bss_472B4;
 
 typedef struct Fog0138 {
@@ -167,16 +196,84 @@ void fn_1_717C(File0138* file) {
     fn_800BD190(geo, tex);
     haveActLayoutPointToGeoHeader(layout, geo);
     lbl_1_common_bss_472B4._22A = layout->_6;
-    lbl_1_common_bss_472B4._130 = layout;
-    lbl_1_common_bss_472B4._0C4 = layout;
+    lbl_1_common_bss_472B4._05C[1]._68 = layout;
+    lbl_1_common_bss_472B4._05C[0]._68 = layout;
     layout = (Layout0138*)((u8*)file + file->_04);
     geo = (u8*)file + file->_10;
     fn_800B49E4(layout);
     fn_800BCE38(geo);
     fn_800BD190(geo, tex);
     haveActLayoutPointToGeoHeader(layout, geo);
-    lbl_1_common_bss_472B4._208 = layout;
-    lbl_1_common_bss_472B4._19C = layout;
+    lbl_1_common_bss_472B4._05C[3]._68 = layout;
+    lbl_1_common_bss_472B4._05C[2]._68 = layout;
+}
+
+// .text:0x18EC size:0x184
+void fn_1_66C4(void) {
+    Task0138* task = lbl_803CC1B8;
+    s32 save230;
+    s32 save231;
+
+    fn_800AD038(lbl_80366158._08);
+    task->_10 = 0;
+    save230 = lbl_1_common_bss_472B4._230;
+    save231 = lbl_1_common_bss_472B4._231;
+    memset(&lbl_1_common_bss_472B4, 0, 0x240);
+    lbl_1_common_bss_472B4._230 = save230;
+    lbl_1_common_bss_472B4._231 = save231;
+    lbl_1_common_bss_472B4._21C = _OSAllocFromHeap(0x20, 0x80000);
+    lbl_1_common_bss_472B4._04C = -6.0f;
+    lbl_1_common_bss_472B4._050 = -10.666667f;
+    lbl_1_common_bss_472B4._030 = 0xF36C;
+    lbl_1_common_bss_472B4._054 = 0.63f;
+    lbl_1_common_bss_472B4._22E = -1;
+    lbl_1_common_bss_472B4._234 = 0;
+    PSMTXIdentity(lbl_1_common_bss_472B4._05C[0]._08);
+    lbl_1_common_bss_472B4._05C[0]._04 = fn_1_77EC;
+    lbl_1_common_bss_472B4._05C[1] = lbl_1_common_bss_472B4._05C[0];
+    lbl_1_common_bss_472B4._05C[2]._04 = fn_800B472C;
+    lbl_1_common_bss_472B4._05C[3] = lbl_1_common_bss_472B4._05C[2];
+    lbl_803CC1B8->_00 = fn_1_6848;
+}
+
+// .text:0xB4C size:0x19C
+// Registers differ in every case, and the target adds the tile offset as the
+// left operand last; no statement split or declaration order reproduced it.
+s32 fn_1_5924(s32 width, s32 x, s32 y, s32 bpp, s32 arg4) {
+    s32 offset;
+    s32 row;
+    s32 col;
+
+    switch (bpp) {
+    case 4:
+        row = (y / 8) * width * 8;
+        row += (y % 8) * 8;
+        row += x % 8;
+        offset = (x / 8) * 32 + row;
+        return offset;
+    case 8:
+        row = (y / 4) * width * 4;
+        row += (y % 4) * 8;
+        row += x % 8;
+        offset = (x / 8) * 32 + row;
+        return offset;
+    case 16:
+        row = (y / 4) * width * 4;
+        row += (y % 4) * 4;
+        row += x % 4;
+        offset = (x / 4) * 16 + row;
+        return offset;
+    case 32:
+        row = (y / 4) * width * 4;
+        row += (y % 4) * 4;
+        row += x % 4;
+        offset = (x / 4) * 16 + row;
+        if (arg4 != 0) {
+            offset += 16;
+        }
+        return offset;
+    }
+    return offset;
 }
 
 // .text:0x768 size:0x4
