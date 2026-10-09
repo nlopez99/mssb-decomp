@@ -9,6 +9,7 @@ struct Actor7730;
 struct RopeParams7730;
 struct Tex7730;
 struct GameTask7730;
+struct SprTask7730;
 
 struct DrawEntry7730;
 
@@ -49,6 +50,7 @@ void fn_1_207D4(void);
 void fn_1_20890(void);
 void fn_1_20BD8(void);
 void fn_1_20DC8(void);
+void fn_1_20E00(struct SprTask7730* task);
 void fn_1_20F8C(void);
 void fn_1_21040(void);
 void fn_1_21180(struct RopeParams7730* params);

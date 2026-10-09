@@ -28,6 +28,7 @@ extern void fn_800385F0(void* arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4);
 extern void fn_80035A00(void);
 extern void fn_80048C14(s32 arg0);
 extern void fn_80048E00(s32 arg0, s32 arg1);
+extern s32 fn_80048EA8(s32 arg0);
 extern void fn_80048C1C(void);
 extern void fn_80048C28(void);
 extern void fn_80048D4C(void);
@@ -45,6 +46,18 @@ extern void fn_1_273D8(void* arg0);
 extern void fn_1_26D28(void* arg0, u16 held, u16 pressed, u16 repeat, s8* stick);
 extern void fn_1_27330(void* arg0);
 extern void fn_80037BAC(void* arg0);
+extern void LITAlloc(void** light);
+extern void LITInitAttn(void* light, f32 a0, f32 a1, f32 a2, f32 k0, f32 k1, f32 k2);
+extern void LITInitPos(void* light, f32 x, f32 y, f32 z);
+extern void LITInitDir(void* light, f32 nx, f32 ny, f32 nz);
+extern void LITInitColor(void* light, GXColor color);
+extern struct ModelTable7730* ActorObjectInitTable(u16 count);
+extern void fn_800BDC88(struct ModelTable7730* table, u16 first, u16 last, void* model, void* anim, void* arg5);
+extern void LoadActorLayout(void* layout);
+extern void convertGeometryAndSknHeader(void* geo, void* skn);
+extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);
+extern void fn_800B2C08(void* actor, s32 arg1);
+extern void fn_800BD548(void* model, s32 count, ...);
 
 extern u8 lbl_803CBBC0;
 
@@ -123,7 +136,7 @@ typedef struct GameTask7730 {
     /* 0x10 */ u8 _10[0x14 - 0x10];
     /* 0x14 */ u8* _14;
     /* 0x18 */ u8* _18;
-    /* 0x1C */ s32 _1C;
+    /* 0x1C */ u32 _1C;
     /* 0x20 */ u8 _20;
     /* 0x21 */ u8 _21;
     /* 0x22 */ u8 _22;
@@ -230,6 +243,17 @@ typedef struct SpriteDesc7730 {
     /* 0x12 */ s16 _12;
     /* 0x14 */ s32 _14[3];
 } SpriteDesc7730; // size: 0x20
+
+typedef struct Model7730 {
+    /* 0x00 */ void* _00;
+    /* 0x04 */ u8 _04[0x90 - 0x04];
+} Model7730; // size: 0x90
+
+typedef struct ModelTable7730 {
+    /* 0x00 */ u16 count;
+    /* 0x04 */ Mtx _04;
+    /* 0x34 */ Model7730 models[1];
+} ModelTable7730;
 
 typedef struct DrawEntry7730 {
     /* 0x00 */ u32 _00;
@@ -504,7 +528,7 @@ static struct {
     /* 0x0 */ f32 _0;
     /* 0x4 */ Vec _4;
 } lbl_1_bss_6BE4;
-static s32 lbl_1_bss_6BE0;
+static ModelTable7730* lbl_1_bss_6BE0;
 static s32 lbl_1_bss_6BDC;
 static s32 lbl_1_bss_6BD8;
 
@@ -866,11 +890,57 @@ void fn_1_20F8C(void) {
     }
 }
 
+// .text:0x00020E00 size:0x18C
+void fn_1_20E00(SprTask7730* task) {
+    GXColor color = { 0x80, 0x80, 0xFF, 0xFF };
+    u16 i;
+    u8* layout;
+    u8* geo;
+
+    LITAlloc(&lbl_1_bss_6FA4);
+    LITInitAttn(lbl_1_bss_6FA4, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+    LITInitPos(lbl_1_bss_6FA4, 5.0f, 5.0f, 5.0f);
+    LITInitDir(lbl_1_bss_6FA4, 0.0f, 0.0f, 0.0f);
+    LITInitColor(lbl_1_bss_6FA4, color);
+    layout = (u8*)task->_14 + ((u32*)task->_14)[0];
+    geo = (u8*)task->_14 + ((u32*)task->_14)[1];
+    lbl_1_bss_6BE0 = ActorObjectInitTable(20);
+    LoadActorLayout(layout);
+    convertGeometryAndSknHeader(geo, NULL);
+    haveActLayoutPointToGeoHeader(layout, geo);
+    for (i = 0; i < 20; i++) {
+        fn_800BDC88(lbl_1_bss_6BE0, i, i, layout, NULL, NULL);
+        fn_800B2C08(lbl_1_bss_6BE0->models[i]._00, 0);
+        fn_800BD548(&lbl_1_bss_6BE0->models[i], 1, lbl_1_bss_6FA4);
+    }
+}
+
 // .text:0x00020DC8 size:0x38
 void fn_1_20DC8(void) {
     SprTask7730* task = fn_800B0A5C_insertQueue(fn_1_20BD8, 1);
     task->_25 = 0;
     task->_10 = 0;
+}
+
+// .text:0x00020BD8 size:0x1F0
+void fn_1_20BD8(void) {
+    SprTask7730* task = lbl_803CC1B8;
+    SprTask7730* child;
+
+    switch (task->_25) {
+    case 0:
+        child = fn_800B0A5C_insertQueue(fn_1_20F8C, 1);
+        child->_10 = 0;
+        task->_25++;
+        break;
+    case 1:
+        if (task->_10 != 0) {
+            fn_1_20E00(task);
+            task->_0C->_10 = 1;
+            fn_800B0A14_removeQueue();
+        }
+        break;
+    }
 }
 
 // .text:0x00020890 size:0xC0
@@ -1016,6 +1086,78 @@ void fn_1_2004C(void) {
             ((GameTask7730*)lbl_803CC1B8)->_00 = fn_1_202A4;
         }
         break;
+    }
+}
+
+// .text:0x0001F418 size:0x200
+void fn_1_1F418(GameTask7730* task) {
+    s32 i;
+    s32 value;
+    u8 sel;
+
+    for (i = 0; i < 4; i++) {
+        sel = task->_21;
+        switch (i) {
+        case 0:
+            if (i == sel) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    if (task->_20 == 0) {
+                        task->_20 = 2;
+                    }
+                    task->_20--;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    task->_20++;
+                    if (task->_20 == 2) {
+                        task->_20 = 0;
+                    }
+                }
+            }
+            break;
+        case 1:
+            value = fn_80048EA8(0);
+            if (i == task->_21) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    value--;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    value++;
+                }
+                fn_80048E00(0, value);
+            }
+            break;
+        case 2:
+            value = fn_80048EA8(1);
+            if (i == task->_21) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    value--;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    value++;
+                }
+                fn_80048E00(1, value);
+            }
+            break;
+        case 3:
+            if (i == sel) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    if (task->_1C != 0) {
+                        task->_1C--;
+                    }
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    task->_1C++;
+                }
+            }
+            break;
+        }
+    }
+    if (lbl_803C77B8[0]._04 & 8) {
+        if (task->_21 == 0) {
+            task->_21 = 4;
+        }
+        task->_21--;
+    } else if (lbl_803C77B8[0]._04 & 4) {
+        task->_21++;
+        if (task->_21 == 4) {
+            task->_21 = 0;
+        }
     }
 }
 
