@@ -32,9 +32,9 @@ challenge/rep_02A8.c:
 	.bss        start:0x00002FD8 end:0x00003070
 
 challenge/rep_0610.c:
-	.text       start:0x0000C5AC end:0x00017EFC
+	.text       start:0x0000C2DC end:0x00017EFC
 	.rodata     start:0x00000610 end:0x000074A0
-	.data       start:0x00001E18 end:0x00002390
+	.data       start:0x00001DC0 end:0x0000F888
 	.bss        start:0x00003070 end:0x000069F0
 
 challenge/rep_74A0.c:
@@ -43,8 +43,9 @@ challenge/rep_74A0.c:
 	.bss        start:0x000069F0 end:0x00006BD8
 
 challenge/rep_7730.c:
-	.text       start:0x0001D694 end:0x00026AF8
+	.text       start:0x0001D694 end:0x00026B7C
 	.rodata     start:0x00007730 end:0x00007920
+	.data       start:0x0000FB98 end:0x000108E0
 	.bss        start:0x00006BD8 end:0x00047050
 
 challenge/rep_7920.c:
