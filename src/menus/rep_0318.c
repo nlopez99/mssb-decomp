@@ -364,6 +364,8 @@ s16 lbl_2_data_E88[2][9] = {
     { 10, 11, 2, 3, 17, 40, 20, 16, 14 },
 };
 
+static u8 lbl_2_bss_408[0x350];
+static s16 lbl_2_bss_3E4[2][9];
 static s8 lbl_2_bss_3E0[4];
 static u8 lbl_2_bss_3A8[56];
 static u8 lbl_2_bss_3A0;
@@ -1773,6 +1775,227 @@ void fn_2_95D8(void) {
     }
     if (lbl_803CBBCC->_4 == 4) {
         return;
+    }
+}
+
+// .text:0x00008CF8 size:0x8E0
+void fn_2_8CF8(u16 team) {
+    CharEntry0318* dst;
+    CharEntry0318* src;
+    s32 t;
+    s32 i;
+
+    if (lbl_2_bss_100B8._30[team] != 0) {
+        if (g_d_GameSettings._10 != 1) {
+            for (t = 0; t < 2; t++) {
+                for (i = 0; i < 9; i++) {
+                    src = &inMemRoster[t][i];
+                    dst = &lbl_2_bss_E8CC[t][i];
+                    memcpy(dst->_00, src->_00, sizeof(dst->_00));
+                    dst->CharID = src->CharID;
+                    dst->_26 = src->_26;
+                    dst->_27 = src->_27;
+                    memcpy(dst->_28, src->_28, sizeof(dst->_28));
+                    memcpy(dst->_2A, src->_2A, sizeof(dst->_2A));
+                    dst->_2C = src->_2C;
+                    dst->_2D = src->_2D;
+                    dst->_2E = src->_2E;
+                    dst->_2F = src->_2F;
+                    dst->_30 = src->_30;
+                    dst->_31 = src->_31;
+                    dst->_32 = src->_32;
+                    dst->_33 = src->_33;
+                    dst->_34 = src->_34;
+                    memcpy(dst->_35, src->_35, sizeof(dst->_35));
+                    dst->_20 = src->_20;
+                    memcpy(dst->_37, src->_37, sizeof(dst->_37));
+                    memcpy(dst->_3B, src->_3B, sizeof(dst->_3B));
+                    dst->_71 = src->_71;
+                    dst->_74[0] = src->_74[0];
+                    dst->_74[1] = src->_74[1];
+                    dst->_74[2] = src->_74[2];
+                    dst->_74[3] = src->_74[3];
+                    dst->_74[4] = src->_74[4];
+                    dst->_74[5] = src->_74[5];
+                    dst->_74[6] = src->_74[6];
+                    dst->_74[7] = src->_74[7];
+                    dst->_74[8] = src->_74[8];
+                    dst->_74[9] = src->_74[9];
+                    dst->_74[10] = src->_74[10];
+                    dst->_74[11] = src->_74[11];
+                    dst->_74[12] = src->_74[12];
+                    dst->_74[13] = src->_74[13];
+                    dst->_74[14] = src->_74[14];
+                    dst->_74[15] = src->_74[15];
+                    dst->_74[16] = src->_74[16];
+                    dst->_74[17] = src->_74[17];
+                    dst->_74[18] = src->_74[18];
+                    dst->_74[19] = src->_74[19];
+                    dst->_74[20] = src->_74[20];
+                    lbl_2_bss_DCE8._000[t][i]._0 = lbl_80354720[t][i]._0;
+                    lbl_2_bss_DCE8._000[t][i]._1 = lbl_80354720[t][i]._1;
+                    lbl_2_bss_DCE8._000[t][i]._2 = lbl_80354720[t][i]._2;
+                    lbl_2_bss_DCE8._000[t][i]._3 = lbl_80354720[t][i]._3;
+                    lbl_2_bss_3E4[t][i] = inMemRoster[t][i].CharID;
+                }
+            }
+        } else {
+            for (i = 0; i < 9; i++) {
+                src = &inMemRoster[team][i];
+                dst = &lbl_2_bss_E8CC[team][i];
+                memcpy(dst->_00, src->_00, sizeof(dst->_00));
+                dst->CharID = src->CharID;
+                dst->_26 = src->_26;
+                dst->_27 = src->_27;
+                memcpy(dst->_28, src->_28, sizeof(dst->_28));
+                memcpy(dst->_2A, src->_2A, sizeof(dst->_2A));
+                dst->_2C = src->_2C;
+                dst->_2D = src->_2D;
+                dst->_2E = src->_2E;
+                dst->_2F = src->_2F;
+                dst->_30 = src->_30;
+                dst->_31 = src->_31;
+                dst->_32 = src->_32;
+                dst->_33 = src->_33;
+                dst->_34 = src->_34;
+                memcpy(dst->_35, src->_35, sizeof(dst->_35));
+                dst->_20 = src->_20;
+                memcpy(dst->_37, src->_37, sizeof(dst->_37));
+                memcpy(dst->_3B, src->_3B, sizeof(dst->_3B));
+                dst->_71 = src->_71;
+                dst->_74[0] = src->_74[0];
+                dst->_74[1] = src->_74[1];
+                dst->_74[2] = src->_74[2];
+                dst->_74[3] = src->_74[3];
+                dst->_74[4] = src->_74[4];
+                dst->_74[5] = src->_74[5];
+                dst->_74[6] = src->_74[6];
+                dst->_74[7] = src->_74[7];
+                dst->_74[8] = src->_74[8];
+                dst->_74[9] = src->_74[9];
+                dst->_74[10] = src->_74[10];
+                dst->_74[11] = src->_74[11];
+                dst->_74[12] = src->_74[12];
+                dst->_74[13] = src->_74[13];
+                dst->_74[14] = src->_74[14];
+                dst->_74[15] = src->_74[15];
+                dst->_74[16] = src->_74[16];
+                dst->_74[17] = src->_74[17];
+                dst->_74[18] = src->_74[18];
+                dst->_74[19] = src->_74[19];
+                dst->_74[20] = src->_74[20];
+                lbl_2_bss_DCE8._000[team][i]._0 = lbl_80354720[team][i]._0;
+                lbl_2_bss_DCE8._000[team][i]._1 = lbl_80354720[team][i]._1;
+                lbl_2_bss_DCE8._000[team][i]._2 = lbl_80354720[team][i]._2;
+                lbl_2_bss_DCE8._000[team][i]._3 = lbl_80354720[team][i]._3;
+                lbl_2_bss_3E4[team][i] = inMemRoster[team][i].CharID;
+            }
+        }
+        fn_2_9ACC(team);
+    } else if (g_d_GameSettings._10 != 1) {
+        for (t = 0; t < 2; t++) {
+            for (i = 0; i < 9; i++) {
+                src = &lbl_2_bss_E8CC[t][i];
+                dst = &inMemRoster[t][i];
+                memcpy(dst->_00, src->_00, sizeof(dst->_00));
+                dst->CharID = src->CharID;
+                dst->_26 = src->_26;
+                dst->_27 = src->_27;
+                memcpy(dst->_28, src->_28, sizeof(dst->_28));
+                memcpy(dst->_2A, src->_2A, sizeof(dst->_2A));
+                dst->_2C = src->_2C;
+                dst->_2D = src->_2D;
+                dst->_2E = src->_2E;
+                dst->_2F = src->_2F;
+                dst->_30 = src->_30;
+                dst->_31 = src->_31;
+                dst->_32 = src->_32;
+                dst->_33 = src->_33;
+                dst->_34 = src->_34;
+                memcpy(dst->_35, src->_35, sizeof(dst->_35));
+                dst->_20 = src->_20;
+                memcpy(dst->_37, src->_37, sizeof(dst->_37));
+                memcpy(dst->_3B, src->_3B, sizeof(dst->_3B));
+                dst->_71 = src->_71;
+                dst->_74[0] = src->_74[0];
+                dst->_74[1] = src->_74[1];
+                dst->_74[2] = src->_74[2];
+                dst->_74[3] = src->_74[3];
+                dst->_74[4] = src->_74[4];
+                dst->_74[5] = src->_74[5];
+                dst->_74[6] = src->_74[6];
+                dst->_74[7] = src->_74[7];
+                dst->_74[8] = src->_74[8];
+                dst->_74[9] = src->_74[9];
+                dst->_74[10] = src->_74[10];
+                dst->_74[11] = src->_74[11];
+                dst->_74[12] = src->_74[12];
+                dst->_74[13] = src->_74[13];
+                dst->_74[14] = src->_74[14];
+                dst->_74[15] = src->_74[15];
+                dst->_74[16] = src->_74[16];
+                dst->_74[17] = src->_74[17];
+                dst->_74[18] = src->_74[18];
+                dst->_74[19] = src->_74[19];
+                dst->_74[20] = src->_74[20];
+                lbl_80354720[t][i]._0 = lbl_2_bss_DCE8._000[t][i]._0;
+                lbl_80354720[t][i]._1 = lbl_2_bss_DCE8._000[t][i]._1;
+                lbl_80354720[t][i]._2 = lbl_2_bss_DCE8._000[t][i]._2;
+                lbl_80354720[t][i]._3 = lbl_2_bss_DCE8._000[t][i]._3;
+                inMemRoster[t][i].CharID = lbl_2_bss_3E4[t][i];
+            }
+        }
+    } else {
+        for (i = 0; i < 9; i++) {
+            src = &lbl_2_bss_E8CC[team][i];
+            dst = &inMemRoster[team][i];
+            memcpy(dst->_00, src->_00, sizeof(dst->_00));
+            dst->CharID = src->CharID;
+            dst->_26 = src->_26;
+            dst->_27 = src->_27;
+            memcpy(dst->_28, src->_28, sizeof(dst->_28));
+            memcpy(dst->_2A, src->_2A, sizeof(dst->_2A));
+            dst->_2C = src->_2C;
+            dst->_2D = src->_2D;
+            dst->_2E = src->_2E;
+            dst->_2F = src->_2F;
+            dst->_30 = src->_30;
+            dst->_31 = src->_31;
+            dst->_32 = src->_32;
+            dst->_33 = src->_33;
+            dst->_34 = src->_34;
+            memcpy(dst->_35, src->_35, sizeof(dst->_35));
+            dst->_20 = src->_20;
+            memcpy(dst->_37, src->_37, sizeof(dst->_37));
+            memcpy(dst->_3B, src->_3B, sizeof(dst->_3B));
+            dst->_71 = src->_71;
+            dst->_74[0] = src->_74[0];
+            dst->_74[1] = src->_74[1];
+            dst->_74[2] = src->_74[2];
+            dst->_74[3] = src->_74[3];
+            dst->_74[4] = src->_74[4];
+            dst->_74[5] = src->_74[5];
+            dst->_74[6] = src->_74[6];
+            dst->_74[7] = src->_74[7];
+            dst->_74[8] = src->_74[8];
+            dst->_74[9] = src->_74[9];
+            dst->_74[10] = src->_74[10];
+            dst->_74[11] = src->_74[11];
+            dst->_74[12] = src->_74[12];
+            dst->_74[13] = src->_74[13];
+            dst->_74[14] = src->_74[14];
+            dst->_74[15] = src->_74[15];
+            dst->_74[16] = src->_74[16];
+            dst->_74[17] = src->_74[17];
+            dst->_74[18] = src->_74[18];
+            dst->_74[19] = src->_74[19];
+            dst->_74[20] = src->_74[20];
+            lbl_80354720[team][i]._0 = lbl_2_bss_DCE8._000[team][i]._0;
+            lbl_80354720[team][i]._1 = lbl_2_bss_DCE8._000[team][i]._1;
+            lbl_80354720[team][i]._2 = lbl_2_bss_DCE8._000[team][i]._2;
+            lbl_80354720[team][i]._3 = lbl_2_bss_DCE8._000[team][i]._3;
+            inMemRoster[team][i].CharID = lbl_2_bss_3E4[team][i];
+        }
     }
 }
 
