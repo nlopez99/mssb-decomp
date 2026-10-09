@@ -2,12 +2,17 @@
 #include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
+#include "C3/control.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/mtx.h"
+#include "Dolphin/PPCArch.h"
+#include "Dolphin/OS/OSCache.h"
+#include "string.h"
 
 extern void* lbl_803CC1B8;
 
 extern void convertTextureHeader(void* tex);
+extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern s32 fn_80035838(void* entry, s32 arg1);
 extern s32 fn_80035DD4(s32 arg0);
 extern void fn_80034E20(void* task, struct SpriteDesc7730* desc);
@@ -58,6 +63,8 @@ extern void convertGeometryAndSknHeader(void* geo, void* skn);
 extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);
 extern void fn_800B2C08(void* actor, s32 arg1);
 extern void fn_800BD548(void* model, s32 count, ...);
+extern void fn_800BDA24(struct Model7730* model);
+extern void fn_800BD670(struct ModelTable7730* table, MtxPtr mtx);
 
 extern u8 lbl_803CBBC0;
 
@@ -126,7 +133,7 @@ typedef struct AnimTask7730 {
     /* 0x26 */ u16 _26;
     /* 0x28 */ u16 _28;
     /* 0x2A */ u8 _2A[0x2C - 0x2A];
-    /* 0x2C */ void* _2C;
+    /* 0x2C */ struct Tex7730* _2C;
 } AnimTask7730;
 
 typedef struct GameTask7730 {
@@ -244,9 +251,18 @@ typedef struct SpriteDesc7730 {
     /* 0x14 */ s32 _14[3];
 } SpriteDesc7730; // size: 0x20
 
+typedef struct ModelActor7730 {
+    /* 0x00 */ u8 _00[0x98];
+    /* 0x98 */ u8 _98;
+} ModelActor7730;
+
 typedef struct Model7730 {
-    /* 0x00 */ void* _00;
-    /* 0x04 */ u8 _04[0x90 - 0x04];
+    /* 0x00 */ ModelActor7730* _00;
+    /* 0x04 */ u8 _04[0x10 - 0x04];
+    /* 0x10 */ Control _10;
+    /* 0x54 */ u8 _54[0x6C - 0x54];
+    /* 0x6C */ u8 _6C;
+    /* 0x6D */ u8 _6D[0x90 - 0x6D];
 } Model7730; // size: 0x90
 
 typedef struct ModelTable7730 {
@@ -510,7 +526,12 @@ static struct {
     /* 0x0028 */ u8 _0028[0x17A8 - 0x28];
 } lbl_1_bss_45868;
 static RopeNode7730 lbl_1_bss_43F68[100];
-static u8 lbl_1_bss_43EE0[0x88];
+static struct {
+    /* 0x00 */ u8 _00[0x3C];
+    /* 0x3C */ Vec _3C;
+    /* 0x48 */ Vec _48;
+    /* 0x54 */ u8 _54[0x88 - 0x54];
+} lbl_1_bss_43EE0;
 static u8 lbl_1_bss_F6E0[0x34800];
 static u8 lbl_1_bss_76E0[0x8000];
 static u8 lbl_1_bss_74E0[0x200];
@@ -779,6 +800,17 @@ void fn_1_22DF4(RopeParams7730* params) {
     fn_1_21180(params);
 }
 
+// .text:0x00022644 size:0x230
+void fn_1_22644(void) {
+    SprTask7730* task = lbl_803CC1B8;
+
+    fn_800AD038(lbl_80366158._08);
+    task->_25 = 0;
+    fn_1_22DF4(lbl_803CC1B8);
+    fn_1_23AD8(lbl_1_bss_47010, &lbl_1_bss_43EE0._48, &lbl_1_bss_43EE0._3C);
+    ((SprTask7730*)lbl_803CC1B8)->_00 = fn_1_225B8;
+}
+
 // .text:0x000225B8 size:0x8C
 void fn_1_225B8(void) {
     SprTask7730* task = lbl_803CC1B8;
@@ -941,6 +973,51 @@ void fn_1_20BD8(void) {
         }
         break;
     }
+}
+
+// .text:0x00020950 size:0x288
+void fn_1_20950(RopeNode7730* nodes, s32 count, Mtx mtx) {
+    Vec dir;
+    Vec v;
+    Quaternion q;
+    Quaternion q2;
+    Mtx m;
+    f32 angle;
+    Model7730* model;
+    s32 i;
+
+    i = 20;
+    while (i-- != 0) {
+        model = &lbl_1_bss_6BE0->models[i];
+        model->_6C = i < count;
+        if (i < count) {
+            PSVECSubtract(&nodes[i + 1]._0C, &nodes[i]._0C, &dir);
+            PSVECScale(&dir, 0.5f, &v);
+            PSVECAdd(&nodes[i]._0C, &v, &v);
+            CTRLSetTranslation(&model->_10, v.x, -v.y, v.z);
+            if (PSVECMag(&dir)) {
+                PSVECNormalize(&dir, &dir);
+                dir.y = -dir.y;
+                v.x = 1.0f;
+                v.y = 0.0f;
+                v.z = 0.0f;
+                C_QUATRotAxisRad(&q, &v, 3.1415925f * (2.5 + (i & 1)) / 6.0);
+                angle = acos(PSVECDotProduct(&dir, &v));
+                PSVECCrossProduct(&v, &dir, &v);
+                if (PSVECMag(&v)) {
+                    C_QUATRotAxisRad(&q2, &v, angle);
+                    PSQUATMultiply(&q2, &q, &q);
+                }
+                CTRLSetQuat(&model->_10, q.x, q.y, q.z, q.w);
+            }
+            CTRLSetScale(&model->_10, lbl_1_data_104D0[0], lbl_1_data_104D0[1], lbl_1_data_104D0[2]);
+            fn_800BDA24(model);
+        }
+        PSMTXTrans(m, 0.0f, 0.0f, 0.0f);
+        PSMTXConcat(mtx, m, m);
+        model->_00->_98 |= 3;
+    }
+    fn_800BD670(lbl_1_bss_6BE0, mtx);
 }
 
 // .text:0x00020890 size:0xC0
@@ -1311,6 +1388,67 @@ void fn_1_1DCE4(void) {
 
     task->_14 = ARAMTransfer(lbl_1_data_10674, 0, 0, 0);
     ((SprTask7730*)lbl_803CC1B8)->_00 = fn_1_1DA54;
+}
+
+// .text:0x0001DA54 size:0x290
+void fn_1_1DA54(void) {
+    AnimTask7730* task = lbl_803CC1B8;
+    u32 size;
+
+    if (lbl_803C6CF8._715 == 1) {
+        task->_18 = task->_14 + *(u32*)(task->_14 + 0x14);
+        convertTextureHeader(task->_18);
+        task->_28 = 2;
+        task->_1C = 3;
+        task->_1E = 0;
+        task->_22 = 3;
+        task->_20 = 3;
+        task->_24 = 0;
+        task->_26 = 0;
+        task->_2C = _OSAllocFromHeap(32, 32);
+        memcpy(task->_2C, task->_18 + 0x44, 32);
+        if (task->_2C->tlut != NULL) {
+            switch (task->_2C->tlutFormat) {
+            case GX_TL_IA8:
+            case GX_TL_RGB565:
+            case GX_TL_RGB5A3:
+                size = task->_2C->tlutEntries * 2;
+                task->_2C->tlut = _OSAllocFromHeap(32, size);
+                memcpy(task->_2C->tlut, ((Tex7730*)(task->_18 + 0x44))->tlut, size);
+                break;
+            }
+            DCStoreRangeNoSync(task->_2C->tlut, size);
+            switch (task->_2C->format) {
+            case GX_TF_C4:
+                size = ((task->_2C->width + 7) / 8 * 8) * ((task->_2C->height + 7) / 8 * 8);
+                break;
+            case GX_TF_C8:
+                size = ((task->_2C->width + 7) / 8 * 8) * ((task->_2C->height + 3) / 4 * 4);
+                break;
+            default:
+                fn_800AD038(lbl_80366158._08);
+                ((AnimTask7730*)lbl_803CC1B8)->_0C->_10 = 1;
+                fn_800B0A14_removeQueue();
+                return;
+            }
+        } else {
+            switch (task->_2C->format) {
+            case GX_TF_CMPR:
+                size = ((task->_2C->width + 7) / 8 * 8) * ((task->_2C->height + 7) / 8 * 8);
+                break;
+            default:
+                fn_800AD038(lbl_80366158._08);
+                ((AnimTask7730*)lbl_803CC1B8)->_0C->_10 = 1;
+                fn_800B0A14_removeQueue();
+                return;
+            }
+        }
+        task->_2C->image = _OSAllocFromHeap(32, size);
+        memcpy(task->_2C->image, ((Tex7730*)(task->_18 + 0x44))->image, size);
+        DCStoreRangeNoSync(task->_2C->image, size);
+        PPCSync();
+        ((AnimTask7730*)lbl_803CC1B8)->_00 = fn_1_1D944;
+    }
 }
 
 // .text:0x0001D944 size:0x110
