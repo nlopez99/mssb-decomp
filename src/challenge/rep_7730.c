@@ -65,6 +65,9 @@ extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);
 extern void fn_800B2C08(void* actor, s32 arg1);
 extern void fn_800BD548(void* model, s32 count, ...);
 extern void fn_800BDA24(struct Model7730* model);
+extern void fn_80023F0C(void* src, struct Tex7730* dst, s32 srcX, s32 srcY, s32 w, s32 h, s32 dstX, s32 dstY);
+extern void gOz_GXSetTexture(s32, s32, s32);
+extern void SetDisplayStateTexture(void* tex, s32, s32);
 extern void fn_800BD670(struct ModelTable7730* table, MtxPtr mtx);
 
 extern u8 lbl_803CBBC0;
@@ -292,9 +295,9 @@ typedef struct ModelTable7730 {
 typedef struct DrawEntry7730 {
     /* 0x00 */ u32 _00;
     /* 0x04 */ void (*_04)(struct DrawEntry7730*);
-    /* 0x08 */ void* _08;
+    /* 0x08 */ struct Tex7730* _08;
     /* 0x0C */ void* _0C;
-    /* 0x10 */ void* _10;
+    /* 0x10 */ u8* _10;
     /* 0x14 */ u16 _14;
     /* 0x16 */ u16 _16;
     /* 0x18 */ u8 _18;
@@ -525,11 +528,11 @@ static AramEntry7730 lbl_1_data_10674[21] = {
     { 0x0000040B, 0x400D04E0, 0x075FD000, 0x00087390 },
 };
 
-static u8 lbl_1_data_107C4[4][8] = {
-    { 0, 1, 2, 3, 4, 5, 6, 7 },
-    { 1, 2, 3, 4, 5, 6, 7, 8 },
-    { 2, 3, 4, 5, 6, 7, 8, 9 },
-    { 3, 4, 5, 6, 7, 8, 9, 10 },
+static u8 lbl_1_data_107C4[32] = {
+    0, 1, 2, 3, 4, 5, 6, 7,
+    1, 2, 3, 4, 5, 6, 7, 8,
+    2, 3, 4, 5, 6, 7, 8, 9,
+    3, 4, 5, 6, 7, 8, 9, 10,
 };
 
 static DrawEntry7730 lbl_1_data_107E4[2] = {
@@ -1222,6 +1225,110 @@ void fn_1_2004C(void) {
     }
 }
 
+// .text:0x0001FD78 size:0x2D4
+void fn_1_1FD78(GameTask7730* task) {
+    s32 value;
+    u8 sel;
+    u32 step;
+    s32 i;
+
+    step = 1;
+    if (lbl_803C77B8[0]._00 & 0x20) {
+        step = 100;
+    }
+    for (i = 0; i < 6; i++) {
+        sel = task->_21;
+        switch (i) {
+        case 0:
+            if (i == sel) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    if (task->_20 == 0) {
+                        task->_20 = 2;
+                    }
+                    task->_20--;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    task->_20++;
+                    if (task->_20 == 2) {
+                        task->_20 = 0;
+                    }
+                }
+            }
+            break;
+        case 1:
+            value = fn_80048EA8(0);
+            if (i == task->_21) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    value--;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    value++;
+                }
+                fn_80048E00(0, value);
+            }
+            break;
+        case 2:
+            value = fn_80048EA8(1);
+            if (i == task->_21) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    value--;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    value++;
+                }
+                fn_80048E00(1, value);
+            }
+            break;
+        case 3:
+            if (i == sel) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    if (task->_1C <= step) {
+                        task->_1C = 0;
+                    } else {
+                        task->_1C -= step;
+                    }
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    task->_1C += step;
+                    if (task->_1C > 0x1000) {
+                        task->_1C = 0x1000;
+                    }
+                }
+            }
+            break;
+        case 4:
+            if (i == sel) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    task->_23--;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    task->_23++;
+                }
+            }
+            break;
+        case 5:
+            if (i == sel) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    if (task->_22 > 1) {
+                        task->_22--;
+                    }
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    if (task->_22 < 4) {
+                        task->_22++;
+                    }
+                }
+            }
+            break;
+        }
+    }
+    if (lbl_803C77B8[0]._04 & 8) {
+        if (task->_21 == 0) {
+            task->_21 = 6;
+        }
+        task->_21--;
+    } else if (lbl_803C77B8[0]._04 & 4) {
+        task->_21++;
+        if (task->_21 == 6) {
+            task->_21 = 0;
+        }
+    }
+}
+
 // .text:0x0001F418 size:0x200
 void fn_1_1F418(GameTask7730* task) {
     s32 i;
@@ -1528,4 +1635,57 @@ void fn_1_1D944(void) {
     lbl_1_data_107E4[lbl_803CBBC0]._10 = lbl_1_data_107C4;
     lbl_1_data_107E4[lbl_803CBBC0]._08 = task->_2C;
     fn_800A7D4C(0, &lbl_1_data_107E4[lbl_803CBBC0]);
+}
+
+// .text:0x0001D694 size:0x2B0
+// 93.47%: the target divides height and width with signed shifts (srawi/addze), 16 bytes
+// less stack; this form's u16 division compiles to srwi and allocation follows.
+void fn_1_1D694(DrawEntry7730* entry) {
+    Mtx44 proj;
+    Mtx m;
+    Tex7730* tex;
+    u8* map;
+    void* src;
+    s32 y;
+    s32 x;
+    s32 rows;
+    s32 cols;
+
+    if (entry->_18 != 0) {
+        tex = entry->_08;
+        map = entry->_10;
+        src = entry->_0C;
+        memset(tex->image, 0, tex->width * tex->height);
+        rows = tex->height / 64;
+        cols = tex->width / 32;
+        for (y = 0; y < rows; y++) {
+            for (x = 0; x < cols; x++) {
+                if (x & lbl_803CBBC0) {
+                    fn_80023F0C(src, tex, (map[y * cols + x] % cols) * 32, (map[y * cols + x] / cols) * 64, 32, 64,
+                                x * 32, y * 64);
+                }
+            }
+        }
+        DCStoreRange(tex->image, tex->width * tex->height);
+    }
+    C_MTXOrtho(proj, 0.0f, 448.0f, 0.0f, 640.0f, 0.0f, 1.0f);
+    PSMTXIdentity(m);
+    GXSetProjection(proj, GX_ORTHOGRAPHIC);
+    GXLoadPosMtxImm(m, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    gOz_GXSetTexture(0, 0, 0);
+    SetDisplayStateTexture(entry->_08, 0, 0);
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    GXPosition3f32(0.0f, 0.0f, -0.5f);
+    GXColor1u32(0xFFFFFFFF);
+    GXTexCoord2s16(0, 0);
+    GXPosition3f32(0.0f, entry->_08->height, -0.5f);
+    GXColor1u32(0xFFFFFFFF);
+    GXTexCoord2s16(0, 1);
+    GXPosition3f32(entry->_08->width, entry->_08->height, -0.5f);
+    GXColor1u32(0xFFFFFFFF);
+    GXTexCoord2s16(1, 1);
+    GXPosition3f32(entry->_08->width, 0.0f, -0.5f);
+    GXColor1u32(0xFFFFFFFF);
+    GXTexCoord2s16(1, 0);
 }
