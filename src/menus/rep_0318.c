@@ -1511,7 +1511,8 @@ void fn_2_CA60(u8 idx, u8 team) {
 }
 
 // .text:0x0000C7DC size:0x284
-// 88%: the slot stores are scheduled differently, and the retry loop
+// 92%: the slot stores are scheduled differently (each branch's store order
+// moves them; every order of either set was tried), and the retry loop
 // compares its operands in the other order.
 void fn_2_C7DC(u8 idx, u8 team) {
     s32 i;
@@ -1536,12 +1537,12 @@ retry:
             }
         }
         inMemRoster[team][idx].CharID = id;
-        lbl_80354720[team][idx]._1 = idx;
-        lbl_80354720[team][idx]._0 = idx;
-        lbl_80354720[team][idx]._2 = idx;
         lbl_80353B98[team][idx]._1 = idx;
         lbl_80353B98[team][idx]._0 = idx;
         lbl_80353B98[team][idx]._2 = idx;
+        lbl_80354720[team][idx]._0 = idx;
+        lbl_80354720[team][idx]._1 = idx;
+        lbl_80354720[team][idx]._2 = idx;
         fn_2_C698(idx, team);
     }
 }
