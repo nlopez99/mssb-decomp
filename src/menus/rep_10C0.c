@@ -329,9 +329,9 @@ void fn_2_92F2C(Camera10C0* camera) {
         camera->_30 -= lbl_803C77B8[lbl_2_bss_1A824C->_197863]._13;
         camera->_32 += lbl_803C77B8[lbl_2_bss_1A824C->_197863]._12;
         camera->_34 = lbl_803C77B8[lbl_2_bss_1A824C->_197863]._10 / -256.0f;
-        camera->_38 = lbl_803C77B8[lbl_2_bss_1A824C->_197863]._11 * 0.00390625f;
-        camera->_4C.y += lbl_803C77B8[lbl_2_bss_1A824C->_197863]._15 * 0.0009765625f;
-        camera->_4C.y -= lbl_803C77B8[lbl_2_bss_1A824C->_197863]._14 * 0.0009765625f;
+        camera->_38 = lbl_803C77B8[lbl_2_bss_1A824C->_197863]._11 / 256.0f;
+        camera->_4C.y += lbl_803C77B8[lbl_2_bss_1A824C->_197863]._15 / 1024.0f;
+        camera->_4C.y -= lbl_803C77B8[lbl_2_bss_1A824C->_197863]._14 / 1024.0f;
     }
     if (lbl_803C77B8[lbl_2_bss_1A824C->_197863]._04 & PAD_BUTTON_Y) {
         camera->_3C -= 0.01f;
