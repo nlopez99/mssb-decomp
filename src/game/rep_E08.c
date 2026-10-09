@@ -432,14 +432,14 @@ void fn_3_67130(void) {
 }
 
 // .text:0x000668BC size:0x874 mapped:0x806A5950
-// 99.92%: in the first loop the actor's saved copy and the animation index swap r26 and r28; the
-// last state test reads 0x5E, 0x5F-0x61, 0x62 in the target and 0x62, 0x5E-0x60, 0x61 here.
+// 99.99%: the last state test reads 0x5E, 0x5F-0x61, 0x62 in the target and 0x62, 0x5E-0x60, 0x61
+// here; no order or grouping of the five equalities, nor a switch, gave the target's.
 void fn_3_668BC(void) {
     f32 length;
     s32 i;
+    UnkE08Actor* actor;
     s32 slot;
     s32 player;
-    UnkE08Actor* actor;
     UnkE08Fielder* fielder;
     UnkE08Anim* anim;
     s16 state;
