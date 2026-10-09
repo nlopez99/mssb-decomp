@@ -255,9 +255,13 @@ extern s16 translateStarSwing(u8 index);
 extern s32 fn_80064918(s16 id);
 extern u8 lbl_800EFBA4[0x10];
 extern u8 fn_80067B40(u8 team, u8 charID, s32 arg2);
+extern u8 lbl_80108ED0[0xC];
 
 static inline BOOL isAnimDone(UnkTask0C50* task, s32 index, s32 value) {
-    return fn_80042DA8(task, index, value) ? TRUE : FALSE;
+    if (fn_80042DA8(task, index, value)) {
+        return TRUE;
+    }
+    return FALSE;
 }
 
 // .text:0x00082DE8 size:0x70
@@ -288,6 +292,80 @@ void fn_2_82CF0(void) {
         fn_80034CEC(task);
         fn_800B0A14_removeQueue();
     }
+}
+
+// .text:0x0008279C size:0x554
+// 99.55%: registers only: flag and the _46F8 load in the first loop, the second
+// starMissionCompletionTracker read, and the add operands of the unrolled clearing loop.
+void fn_2_8279C(void) {
+    UnkTask0C50* task = lbl_803CC1B8;
+    s8 off;
+    s32 value;
+    s32 a;
+    u8 c;
+    s32 i;
+    int j;
+
+    lbl_8034E9A0._474C = task;
+    fn_80034E20(task, lbl_2_data_2B59C);
+    for (i = 0; i < 2; i++) {
+        if (g_d_GameSettings._10 == 0 && i != 0) {
+            if (g_d_GameSettings._10 == 0) {
+                if (lbl_8034E9A0._46F8[0] == 0) {
+                    off = 1;
+                } else {
+                    off = 0;
+                }
+            }
+            lbl_80371C30[0x7A + task->_14 + i]._00->_5C = off << 16;
+            lbl_80371C30[0x18 + task->_14 + i]._00->_5C = (off + 4) << 16;
+        } else {
+            BOOL flag = FALSE;
+
+            lbl_80371C30[0x7A + task->_14 + i]._00->_5C = lbl_8034E9A0._46F8[i] << 16;
+            if (g_d_GameSettings._10 == 0 && i != 0) {
+                flag = TRUE;
+            }
+            if (flag) {
+                if (lbl_8034E9A0._46F8[i] == -1) {
+                    value = (i != 0) + 4;
+                } else {
+                    value = lbl_8034E9A0._46F8[i] + 4;
+                }
+            } else {
+                value = lbl_8034E9A0._46F8[i];
+            }
+            lbl_80371C30[0x18 + task->_14 + i]._00->_5C = value << 16;
+        }
+        lbl_80371C30[0x1A + task->_14 + i]._00->_54 &= ~2;
+        lbl_80371C30[0xB2 + task->_14 + i]._00->_54 &= ~2;
+    }
+    if (g_d_GameSettings.GameModeSelected == 5) {
+        lbl_80371C30[task->_14 + 0x98]._00->_54 &= ~2;
+        a = (s16)starMissionCompletionTracker._441D;
+        c = lbl_8034E9A0._0020[a / 9][a % 9]._14;
+        fn_800363D8(task, 0x89, 1, 3, lbl_2_data_2B3A4[c]);
+        fn_800363D8(task, 0x8B, 1, 3, lbl_2_data_2B3A4[c]);
+        a = starMissionCompletionTracker._441F;
+        c = lbl_8034E9A0._0020[a / 9][a % 9]._14;
+        fn_800363D8(task, 0x8A, 1, 3, lbl_2_data_2B3A4[c]);
+        fn_800363D8(task, 0x8C, 1, 3, lbl_2_data_2B3A4[c]);
+    }
+    for (j = 0; j < 10; j++) {
+        lbl_80371C30[0x6E + task->_14 + j]._00->_5C = 0;
+        lbl_80371C30[0x6E + task->_14 + j]._00->_68 = 0;
+    }
+    lbl_80371C30[task->_14 + 0x1C]._00->_54 &= ~2;
+    lbl_80371C30[task->_14 + 0x1D]._00->_54 &= ~2;
+    lbl_80371C30[task->_14 + 0x1E]._00->_54 &= ~2;
+    lbl_80371C30[task->_14 + 0x1F]._00->_54 &= ~2;
+    lbl_80371C30[task->_14 + 0x84]._00->_54 &= ~2;
+    lbl_80371C30[task->_14 + 0xAE]._00->_54 &= ~2;
+    lbl_80371C30[task->_14 + 0xAF]._00->_54 &= ~2;
+    lbl_8034E9A0._48B2 = 0;
+    lbl_8034E9A0._48B1 = 0;
+    lbl_8034E9A0._4760 = 0;
+    ((UnkTask0C50*)lbl_803CC1B8)->_00 = fn_2_81628;
 }
 
 // .text:0x00081628 size:0x1174
@@ -428,80 +506,6 @@ void fn_2_81628(void) {
         fn_80034CEC(task);
         fn_800B0A14_removeQueue();
     }
-}
-
-// .text:0x0008279C size:0x554
-// 99.55%: registers only: flag and the _46F8 load in the first loop, the second
-// starMissionCompletionTracker read, and the add operands of the unrolled clearing loop.
-void fn_2_8279C(void) {
-    UnkTask0C50* task = lbl_803CC1B8;
-    s8 off;
-    s32 value;
-    s32 a;
-    u8 c;
-    s32 i;
-    int j;
-
-    lbl_8034E9A0._474C = task;
-    fn_80034E20(task, lbl_2_data_2B59C);
-    for (i = 0; i < 2; i++) {
-        if (g_d_GameSettings._10 == 0 && i != 0) {
-            if (g_d_GameSettings._10 == 0) {
-                if (lbl_8034E9A0._46F8[0] == 0) {
-                    off = 1;
-                } else {
-                    off = 0;
-                }
-            }
-            lbl_80371C30[0x7A + task->_14 + i]._00->_5C = off << 16;
-            lbl_80371C30[0x18 + task->_14 + i]._00->_5C = (off + 4) << 16;
-        } else {
-            BOOL flag = FALSE;
-
-            lbl_80371C30[0x7A + task->_14 + i]._00->_5C = lbl_8034E9A0._46F8[i] << 16;
-            if (g_d_GameSettings._10 == 0 && i != 0) {
-                flag = TRUE;
-            }
-            if (flag) {
-                if (lbl_8034E9A0._46F8[i] == -1) {
-                    value = (i != 0) + 4;
-                } else {
-                    value = lbl_8034E9A0._46F8[i] + 4;
-                }
-            } else {
-                value = lbl_8034E9A0._46F8[i];
-            }
-            lbl_80371C30[0x18 + task->_14 + i]._00->_5C = value << 16;
-        }
-        lbl_80371C30[0x1A + task->_14 + i]._00->_54 &= ~2;
-        lbl_80371C30[0xB2 + task->_14 + i]._00->_54 &= ~2;
-    }
-    if (g_d_GameSettings.GameModeSelected == 5) {
-        lbl_80371C30[task->_14 + 0x98]._00->_54 &= ~2;
-        a = (s16)starMissionCompletionTracker._441D;
-        c = lbl_8034E9A0._0020[a / 9][a % 9]._14;
-        fn_800363D8(task, 0x89, 1, 3, lbl_2_data_2B3A4[c]);
-        fn_800363D8(task, 0x8B, 1, 3, lbl_2_data_2B3A4[c]);
-        a = starMissionCompletionTracker._441F;
-        c = lbl_8034E9A0._0020[a / 9][a % 9]._14;
-        fn_800363D8(task, 0x8A, 1, 3, lbl_2_data_2B3A4[c]);
-        fn_800363D8(task, 0x8C, 1, 3, lbl_2_data_2B3A4[c]);
-    }
-    for (j = 0; j < 10; j++) {
-        lbl_80371C30[0x6E + task->_14 + j]._00->_5C = 0;
-        lbl_80371C30[0x6E + task->_14 + j]._00->_68 = 0;
-    }
-    lbl_80371C30[task->_14 + 0x1C]._00->_54 &= ~2;
-    lbl_80371C30[task->_14 + 0x1D]._00->_54 &= ~2;
-    lbl_80371C30[task->_14 + 0x1E]._00->_54 &= ~2;
-    lbl_80371C30[task->_14 + 0x1F]._00->_54 &= ~2;
-    lbl_80371C30[task->_14 + 0x84]._00->_54 &= ~2;
-    lbl_80371C30[task->_14 + 0xAE]._00->_54 &= ~2;
-    lbl_80371C30[task->_14 + 0xAF]._00->_54 &= ~2;
-    lbl_8034E9A0._48B2 = 0;
-    lbl_8034E9A0._48B1 = 0;
-    lbl_8034E9A0._4760 = 0;
-    ((UnkTask0C50*)lbl_803CC1B8)->_00 = fn_2_81628;
 }
 
 // .text:0x00080F5C size:0x6CC
@@ -890,8 +894,6 @@ void fn_2_7F8BC(UnkTask0C50* task, s32 index) {
 }
 
 // .text:0x0007F714 size:0x1A8
-// 99.20%: done lands in r29 in the target and r26 in the base, below the inlined
-// fn_2_75B58's locals.
 void fn_2_7F714(UnkTask0C50* task, s32 index) {
     if (lbl_803C66B0._0D[index] == 1) {
         s8 sel = lbl_2_bss_F468._00[index];
@@ -1332,6 +1334,316 @@ void fn_2_7D85C(UnkTask0C50* task, s32 index) {
     }
 }
 
+// .text:0x0007BFF8 size:0x1864
+// 99.97%: registers only: the first isAnimDone result in the second part goes to n's r27 in
+// the target and r22 in the base, and expected is set after the last call's arguments.
+void fn_2_7BFF8(UnkTask0C50* task, s32 index) {
+    s32 a;
+    s32 b;
+    u8 c;
+    u8 d;
+    s32 i;
+    s32 off;
+    u8 found;
+    u8 slot;
+    s32 p93;
+    s32 p95;
+    s32 a95;
+    s32 p8F;
+    s32 a8F;
+    s32 p91;
+    s32 a93;
+    s32 a91;
+
+    if (lbl_803C66B0._0D[index] == 0 ? TRUE : FALSE) {
+        if (g_d_GameSettings.GameModeSelected != 5) {
+            a = lbl_800FE5D4[lbl_2_bss_F410._10[index]];
+            b = lbl_800FE5D4[lbl_803C6724._00[index]];
+        } else if (index != 0) {
+            a = b = starMissionCompletionTracker._441F;
+        } else {
+            a = b = starMissionCompletionTracker._441D;
+        }
+        c = lbl_8034E9A0._0020[a / 9][a % 9]._14;
+        d = lbl_8034E9A0._0020[b / 9][b % 9]._14;
+        lbl_80371C30[0x82 + task->_14 + index]._00->_5C = lbl_2_data_2B3A4[c] << 16;
+        lbl_80371C30[0x7E + task->_14 + index]._00->_5C = lbl_2_data_2B3A4[c] << 16;
+        fn_800363D8(task, index + 0x89, 1, 3, lbl_2_data_2B3A4[c]);
+        fn_800363D8(task, index + 0x8B, 1, 3, lbl_2_data_2B3A4[d]);
+        lbl_80371C30[task->_14 + 6]._00->_68 = 1;
+        lbl_80371C30[task->_14 + 8]._00->_68 = 1;
+        lbl_80371C30[0x1A + task->_14 + index]._00->_54 |= 2;
+        lbl_80371C30[0x1A + task->_14 + index]._00->_68 = 1;
+        lbl_80371C30[0x89 + task->_14 + index]._00->_5C = 0;
+        lbl_80371C30[0x89 + task->_14 + index]._00->_68 = 1;
+        lbl_80371C30[0x85 + task->_14 + index]._00->_5C = 0;
+        lbl_80371C30[0x85 + task->_14 + index]._00->_68 = 1;
+        lbl_80371C30[0x82 + task->_14 + index]._00->_54 &= ~2;
+        lbl_80371C30[0x7A + task->_14 + index]._00->_54 &= ~2;
+        lbl_80371C30[0x82 + task->_14 + index]._00->_5C = lbl_80108ED0[lbl_8034E9A0._46E0[1]] << 16;
+        lbl_80371C30[0x7E + task->_14 + index]._00->_5C = lbl_2_bss_F410._10[index] << 16;
+        lbl_80371C30[0x7A + task->_14 + index]._00->_5C = lbl_8034E9A0._46F8[1] << 16;
+        lbl_80371C30[task->_14 + 0x84]._00->_54 &= ~2;
+        lbl_80371C30[0x97 + task->_14 + index]._00->_64 = 0x77;
+        lbl_80371C30[0x97 + task->_14 + index]._00->_5C = 0;
+        lbl_80371C30[0x97 + task->_14 + index]._00->_54 &= ~2;
+        lbl_80371C30[0xB0 + task->_14 + index]._00->_54 &= ~2;
+        for (i = 0; i < 9; i++) {
+            lbl_80371C30[0x22 + task->_14 + i + index * 9]._00->_54 &= ~2;
+        }
+        lbl_80371C30[task->_14 + index]._00->_64 = 0x48;
+        lbl_80371C30[2 + task->_14 + index]._00->_64 = 0x48;
+        lbl_80371C30[4 + task->_14 + index]._00->_64 = 0x51;
+        lbl_80371C30[task->_14 + index]._00->_5C = 0x280000;
+        lbl_80371C30[2 + task->_14 + index]._00->_5C = 0x280000;
+        lbl_80371C30[4 + task->_14 + index]._00->_5C = 0;
+        lbl_80371C30[task->_14 + index]._00->_68 = 4;
+        lbl_80371C30[2 + task->_14 + index]._00->_68 = 4;
+        lbl_80371C30[4 + task->_14 + index]._00->_68 = 1;
+        lbl_80371C30[0x10 + task->_14 + index]._00->_5C = lbl_8034E9A0._470D[index] << 16;
+        lbl_80371C30[0x14 + task->_14 + index]._00->_5C = lbl_8034E9A0._470D[index] << 16;
+        lbl_80371C30[task->_14 + 0x1C]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + 0x1D]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + 0x1E]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + 0x1F]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + 0x78]._00->_54 &= ~2;
+        lbl_80371C30[task->_14 + 0x79]._00->_54 &= ~2;
+        lbl_80371C30[task->_14 + 0x7C]._00->_54 &= ~2;
+        lbl_80371C30[task->_14 + 0x7D]._00->_54 &= ~2;
+        lbl_80371C30[task->_14 + 0x80]._00->_54 &= ~2;
+        lbl_80371C30[task->_14 + 0x81]._00->_54 &= ~2;
+        if (g_d_GameSettings.GameModeSelected != 5) {
+            lbl_80371C30[4 + task->_14 + index]._00->_5C = 0;
+            lbl_80371C30[4 + task->_14 + index]._00->_68 = 1;
+            if (g_d_GameSettings._10 == 0 && index == 0) {
+                lbl_80371C30[0x1C + task->_14 + index]._00->_5C = 0;
+                lbl_80371C30[0x1C + task->_14 + index]._00->_68 = 0;
+                lbl_80371C30[0xC + task->_14 + index]._00->_5C = 0x140000;
+                lbl_80371C30[0xC + task->_14 + index]._00->_68 = 4;
+                lbl_80371C30[0xE + task->_14 + index]._00->_5C = 0x180000;
+                lbl_80371C30[0xE + task->_14 + index]._00->_68 = 4;
+                lbl_80371C30[0x12 + task->_14 + index]._00->_5C = 0x140000;
+                lbl_80371C30[0x12 + task->_14 + index]._00->_68 = 4;
+            } else {
+                lbl_80371C30[0x1C + task->_14 + index]._00->_5C = 0;
+                lbl_80371C30[0x1C + task->_14 + index]._00->_68 = 1;
+                lbl_80371C30[0x89 + task->_14 + index]._00->_5C = 0;
+                lbl_80371C30[0x89 + task->_14 + index]._00->_68 = 1;
+                lbl_80371C30[0x97 + task->_14 + index]._00->_54 &= ~2;
+                lbl_80371C30[0xC + task->_14 + index]._00->_54 |= 2;
+                lbl_80371C30[0x12 + task->_14 + index]._00->_54 |= 2;
+                lbl_80371C30[0xC + task->_14 + index]._00->_5C = 0x140000;
+                lbl_80371C30[0xC + task->_14 + index]._00->_68 = 1;
+                lbl_80371C30[0xE + task->_14 + index]._00->_5C = 0x180000;
+                lbl_80371C30[0xE + task->_14 + index]._00->_68 = 4;
+                lbl_80371C30[0x12 + task->_14 + index]._00->_5C = 0x140000;
+                lbl_80371C30[0x12 + task->_14 + index]._00->_68 = 1;
+            }
+            lbl_80371C30[0x6A + task->_14 + index]._00->_5C = 0;
+            lbl_80371C30[0x6A + task->_14 + index]._00->_68 = 1;
+            for (i = 0; i < 9; i++) {
+                if (lbl_803C6724._02[index][i] == lbl_8034E9A0._46E0[index]) {
+                    found = lbl_803C6724._14[index][i];
+                }
+            }
+            // The target stores the word back unchanged.
+            lbl_8034E9A0._46E0[index] = lbl_8034E9A0._46E0[index];
+            for (i = 0; i < 9; i++) {
+                if (g_d_GameSettings._10 == 0 && lbl_2_bss_F468._37[index] == 0 && index == 1) {
+                    if (i == found) {
+                        off = lbl_8034E9A0._46F8[0] == 0;
+                        lbl_80371C30[0x46 + task->_14 + i + index * 9]._00->_64 = off + 17;
+                        lbl_80371C30[0x46 + task->_14 + i + index * 9]._00->_54 |= 2;
+                    } else {
+                        lbl_80371C30[0x46 + task->_14 + i + index * 9]._00->_54 &= ~2;
+                    }
+                } else {
+                    if (g_d_GameSettings._10 == 0) {
+                        if (lbl_8034E9A0._46F8[0] == 0) {
+                            off = 1;
+                        } else {
+                            off = 0;
+                        }
+                    }
+                    if (g_d_GameSettings._10 == 0 && index != 0) {
+                        lbl_80371C30[0x46 + task->_14 + i + index * 9]._00->_64 = off + 17;
+                    } else {
+                        lbl_80371C30[0x46 + task->_14 + i + index * 9]._00->_64 = lbl_8034E9A0._46F8[index] + 17;
+                    }
+                    lbl_80371C30[0x46 + task->_14 + i + index * 9]._00->_5C = 0;
+                    lbl_80371C30[0x46 + task->_14 + i + index * 9]._00->_54 |= 2;
+                    lbl_80371C30[0x46 + task->_14 + i + index * 9]._00->_68 = 0;
+                }
+                if (lbl_803C6724._02[index][i] != -1) {
+                    lbl_80371C30[0x34 + task->_14 + i + index * 9]._00->_54 |= 2;
+                    if (i == lbl_2_bss_F468._00[index]) {
+                        lbl_80371C30[0x34 + task->_14 + i + index * 9]._00->_5C = 0xA0000;
+                        lbl_80371C30[0x34 + task->_14 + i + index * 9]._00->_68 = 0;
+                    } else {
+                        lbl_80371C30[0x34 + task->_14 + i + index * 9]._00->_5C = 0x140000;
+                        lbl_80371C30[0x34 + task->_14 + i + index * 9]._00->_68 = 0;
+                    }
+                    slot = lbl_803C6724._14[index][i];
+                    lbl_80371C30[0x58 + task->_14 + slot + index * 9]._00->_5C = lbl_803C6724._02[index][i] << 16;
+                    lbl_80371C30[0x58 + task->_14 + slot + index * 9]._00->_68 = 0;
+                } else {
+                    lbl_80371C30[0x34 + task->_14 + i + index * 9]._00->_54 &= ~2;
+                }
+            }
+            fn_2_75BE4(task, index);
+            if (g_d_GameSettings._10 != 0 || index == 0) {
+                lbl_80371C30[0x93 + task->_14 + index]._00->_68 = 1;
+                lbl_80371C30[0x95 + task->_14 + index]._00->_5C = 0;
+                lbl_80371C30[0x91 + task->_14 + index]._00->_68 = 1;
+                lbl_80371C30[0x8F + task->_14 + index]._00->_68 = 1;
+                lbl_80371C30[0x91 + task->_14 + index]._00->_5C = 0;
+                lbl_80371C30[0x91 + task->_14 + index]._00->_68 = 0;
+            }
+            lbl_80371C30[task->_14 + 0xAE]._00->_54 |= 2;
+            lbl_80371C30[task->_14 + 0xAF]._00->_54 |= 2;
+        } else {
+            lbl_80371C30[0x1C + task->_14 + index]._00->_5C = 0;
+            lbl_80371C30[0x1C + task->_14 + index]._00->_68 = 1;
+            lbl_80371C30[0x89 + task->_14 + index]._00->_5C = 0;
+            lbl_80371C30[0x89 + task->_14 + index]._00->_68 = 1;
+            if (g_d_GameSettings._10 == 0) {
+                if (lbl_8034E9A0._46F8[0] == 0) {
+                    off = 1;
+                } else {
+                    off = 0;
+                }
+            }
+            for (i = 0; i < 9; i++) {
+                if (index != 0) {
+                    lbl_80371C30[0x46 + task->_14 + i + index * 9]._00->_64 = off + 17;
+                } else {
+                    lbl_80371C30[0x46 + task->_14 + i + index * 9]._00->_64 = lbl_8034E9A0._46F8[index] + 17;
+                }
+                lbl_80371C30[0x46 + task->_14 + i + index * 9]._00->_5C = 0;
+                if (i == lbl_2_bss_F468._00[index]) {
+                    lbl_80371C30[0x46 + task->_14 + i + index * 9]._00->_54 |= 2;
+                    lbl_80371C30[0x46 + task->_14 + i + index * 9]._00->_68 = 1;
+                } else {
+                    lbl_80371C30[0x46 + task->_14 + i + index * 9]._00->_54 |= 2;
+                    lbl_80371C30[0x46 + task->_14 + i + index * 9]._00->_68 = 0;
+                }
+                if (lbl_803C6724._02[index][i] != -1) {
+                    lbl_80371C30[0x34 + task->_14 + i + index * 9]._00->_54 |= 2;
+                    if (i == lbl_2_bss_F468._00[index]) {
+                        lbl_80371C30[0x34 + task->_14 + i + index * 9]._00->_5C = 0xA0000;
+                        lbl_80371C30[0x34 + task->_14 + i + index * 9]._00->_68 = 0;
+                    } else {
+                        lbl_80371C30[0x34 + task->_14 + i + index * 9]._00->_5C = 0x140000;
+                        lbl_80371C30[0x34 + task->_14 + i + index * 9]._00->_68 = 0;
+                    }
+                    slot = lbl_803C6724._14[index][i];
+                    lbl_80371C30[0x58 + task->_14 + slot + index * 9]._00->_5C = lbl_803C6724._02[index][i] << 16;
+                    lbl_80371C30[0x58 + task->_14 + slot + index * 9]._00->_68 = 0;
+                } else {
+                    lbl_80371C30[0x34 + task->_14 + i + index * 9]._00->_54 &= ~2;
+                }
+            }
+            fn_2_75BE4(task, index);
+            lbl_80371C30[0x6A + task->_14 + index]._00->_5C = 0xA0000;
+            lbl_80371C30[0x6A + task->_14 + index]._00->_68 = 1;
+        }
+        if (lbl_803CBBCC->_6 == 11) {
+            if (g_d_GameSettings.GameModeSelected != 5) {
+                if (index == 0 && g_d_GameSettings._10 == 0) {
+                    p93 = 0;
+                    p95 = 0;
+                    a93 = 0;
+                    a95 = 0;
+                    p8F = 0;
+                    p91 = 0;
+                    a8F = 0;
+                    a91 = 0;
+                } else {
+                    p93 = 0;
+                    p95 = 0;
+                    a93 = 1;
+                    a95 = 1;
+                    p8F = 0;
+                    p91 = 0;
+                    a8F = 1;
+                    a91 = 0;
+                }
+                lbl_80371C30[0x93 + task->_14 + index]._00->_5C = p93 << 16;
+                lbl_80371C30[0x93 + task->_14 + index]._00->_68 = a93;
+                lbl_80371C30[0x95 + task->_14 + index]._00->_5C = p95 << 16;
+                lbl_80371C30[0x95 + task->_14 + index]._00->_68 = a95;
+                lbl_80371C30[0x8F + task->_14 + index]._00->_5C = p8F << 16;
+                lbl_80371C30[0x8F + task->_14 + index]._00->_68 = a8F;
+                lbl_80371C30[0x91 + task->_14 + index]._00->_5C = p91 << 16;
+                lbl_80371C30[0x91 + task->_14 + index]._00->_68 = a91;
+            } else {
+                if (index == 1) {
+                    lbl_80371C30[0x93 + task->_14 + index]._00->_54 &= ~2;
+                } else {
+                    lbl_80371C30[0x93 + task->_14 + index]._00->_54 |= 2;
+                    lbl_80371C30[0x93 + task->_14 + index]._00->_5C = 0;
+                    lbl_80371C30[0x93 + task->_14 + index]._00->_68 = 1;
+                    lbl_80371C30[0x95 + task->_14 + index]._00->_5C = 0;
+                    lbl_80371C30[0x95 + task->_14 + index]._00->_68 = 1;
+                }
+                lbl_80371C30[0x8F + task->_14 + index]._00->_54 &= ~2;
+            }
+        }
+        if (lbl_2_bss_F468._3F && lbl_2_bss_F468._37[0] && index == 0 && g_d_GameSettings.GameModeSelected == 5) {
+            if (g_d_GameSettings.GameModeSelected != 5 || index == 0) {
+                lbl_80371C30[0x93 + task->_14 + index]._00->_5C = 0;
+                lbl_80371C30[0x93 + task->_14 + index]._00->_68 = 1;
+                lbl_80371C30[0x95 + task->_14 + index]._00->_5C = 0;
+                lbl_80371C30[0x95 + task->_14 + index]._00->_68 = 1;
+            }
+            if (g_d_GameSettings.GameModeSelected == 5) {
+                lbl_80371C30[0x8F + task->_14 + index]._00->_68 = 1;
+                lbl_80371C30[0x91 + task->_14 + index]._00->_5C = 0;
+                lbl_80371C30[0x91 + task->_14 + index]._00->_68 = 0;
+            }
+        }
+        fn_800626EC(index);
+        lbl_803C66B0._0D[index] = 1;
+    }
+    if (lbl_803C66B0._0D[index] == 1) {
+        s32 n;
+        s32 expected;
+
+        if (g_d_GameSettings.GameModeSelected != 5) {
+            n = isAnimDone(task, index, 20);
+            n += isAnimDone(task, index + 2, 20);
+            if (g_d_GameSettings._10 == 0 && index == 0) {
+                n += isAnimDone(task, index + 0x6A, 30);
+                n += isAnimDone(task, index + 0xC, 10);
+                n += isAnimDone(task, index + 0xE, 14);
+                expected = 6;
+                n += isAnimDone(task, index + 0x12, 10);
+            } else {
+                n += isAnimDone(task, index + 0x1C, 10);
+                n += isAnimDone(task, index + 0x6A, 10);
+                n += isAnimDone(task, index + 0xC, 30);
+                n += isAnimDone(task, index + 0xE, 14);
+                n += isAnimDone(task, index + 0x12, 30);
+                expected = 8;
+                n += isAnimDone(task, index + 0x89, 5);
+            }
+        } else {
+            n = isAnimDone(task, index, 20);
+            n += isAnimDone(task, index + 2, 20);
+            n += isAnimDone(task, index + 0x1C, 10);
+            n += isAnimDone(task, index + 0x6A, 10);
+            expected = 5;
+            n += isAnimDone(task, index + 0x89, 5);
+        }
+        expected++;
+        n += isAnimDone(task, index + 0x85, 10);
+        if (fn_2_75B58(task, index) && n == expected) {
+            fn_80062674(index);
+            lbl_803C66B0._0D[index] = 2;
+        }
+    }
+}
+
 // .text:0x0007AE3C size:0x11BC
 // 95.54%: registers only: the target keeps off in r0 and index * 9 in r12 through the first
 // pass, which shifts the other temporaries; declaration orders and types did not move them.
@@ -1539,7 +1851,6 @@ void fn_2_7AE3C(UnkTask0C50* task, s32 index) {
 }
 
 // .text:0x0007AC64 size:0x1D8
-// 99.92%: the first isAnimDone result lands in r29 in the target and r24 in the base.
 void fn_2_7AC64(UnkTask0C50* task, s32 index) {
     if (lbl_803C66B0._0D[index] == 1 ? TRUE : FALSE) {
         s32 n;
