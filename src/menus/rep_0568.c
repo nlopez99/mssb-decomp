@@ -353,6 +353,8 @@ typedef struct Obj0568 {
 } Obj0568;
 
 extern void fn_2_16460(void);
+extern void fn_2_166CC(void);
+extern void fn_2_16724(void);
 extern void* fn_800B0A5C_insertQueue(void (*)(void), s32);
 extern void fn_800B0A14_removeQueue(void);
 extern void convertTextureHeader(void* tex);
@@ -827,6 +829,50 @@ void fn_2_18FBC(void) {
     lbl_2_bss_100B8._01 = 0;
     for (i = 0; i < 10; i++) {
         lbl_2_bss_100B8._02[i] = -1;
+    }
+}
+
+// .text:0x000188EC size:0x6D0
+void fn_2_188EC(void) {
+    Task0568* task = lbl_803CC1B8;
+    Task0568* child;
+    s32 i;
+
+    lbl_8036E548._307A = 0;
+    lbl_8036E548._307C = 0;
+    switch (task->_1C) {
+    case 0:
+        fn_2_166CC();
+        fn_2_16724();
+        fn_2_17ED8();
+        fn_2_16DA8();
+        task->_1C++;
+        break;
+    case 1:
+        child = fn_800B0A5C_insertQueue(fn_2_18748, 0);
+        child->_1D = 0;
+        child->_1F = 0;
+        child->_1E = 0;
+        task->_1C++;
+        break;
+    case 2:
+        if (lbl_2_bss_100B4[0] != 0) {
+            for (i = 0; i < lbl_2_bss_100B8._2D; i++) {
+                if (lbl_2_bss_100B8._40[i] == 0) {
+                    goto notLoaded;
+                }
+            }
+            for (i = 0; i < lbl_2_bss_100B8._2D; i++) {
+                lbl_8036E548._2C50[i] = NULL;
+            }
+            fn_800B0A14_removeQueue();
+            break;
+        }
+    notLoaded:
+        if (lbl_2_bss_100B8._19 != 0) {
+            fn_2_16870();
+        }
+        break;
     }
 }
 
