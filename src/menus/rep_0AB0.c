@@ -303,7 +303,7 @@ extern u8 lbl_800E869C[0x36];
 extern u8 lbl_2_bss_33FBF0[5];
 extern u8 lbl_2_bss_33FBF5;
 
-// rep_0788; its header declares fn_2_1FF0C and fn_2_1FF10 as void(void)
+// rep_0788
 extern void fn_2_1FF0C(s32 index);
 extern void fn_2_1FF10(s32 index);
 extern void fn_2_1FF14(s32 count);
