@@ -491,22 +491,22 @@ extern void fn_2_47CFC(void);
 extern s32 fn_2_4C3D8(s32 index);
 extern void fn_2_47FF8(void);
 extern void fn_2_68E68(void);
-extern void fn_2_686D0(s32, s32);
-extern s32 fn_2_689CC(s32);
+extern void fn_2_686D0(s32, s8);
+extern s16 fn_2_689CC(s32);
 extern void fn_2_68DAC(s32, Vec*);
 extern void fn_2_6AABC(s32, Vec*);
 extern void fn_2_6ABFC(s32, s32);
 extern void fn_2_6ACF4(void);
 extern void fn_2_6AE08(void);
 extern void fn_2_71F60(void);
-extern void fn_2_72054(s32, s32);
+extern void fn_2_72054(s32, u8);
 extern void fn_2_8AEE0(void);
 extern void fn_2_8FD14(void);
 extern void fn_2_90428(s32);
 extern void fn_2_904A8(void);
 extern void fn_2_90538(void);
 extern void fn_2_9257C(void);
-extern void fn_2_92654(s32, s32);
+extern void fn_2_92654(s32, u8);
 extern void fn_2_93C64(void);
 extern void fn_2_94604(s32);
 extern void fn_2_9461C(s32);
@@ -8578,7 +8578,7 @@ s16 fn_2_24E9C(void) {
 // .text:0x00024800 size:0x69C
 void fn_2_24800(void) {
     s16 mode;
-    s16 value;
+    s32 value;
     s32 index;
     s32 i;
     Vec pos;

@@ -116,7 +116,7 @@ extern void fn_2_2DC(void);
 extern void fn_2_328(void);
 extern void fn_2_11A0(s32 arg0);
 extern void fn_2_15A90(s32* index, s32 arg1, u8 arg2);
-extern void fn_2_2FC0(s32, s32, s32);
+extern void fn_2_2FC0(u8, s32, s32);
 extern void fn_2_836A4(void);
 extern void fn_2_85108(void);
 extern void* fn_800B0A5C_insertQueue(void (*)(void), s32);

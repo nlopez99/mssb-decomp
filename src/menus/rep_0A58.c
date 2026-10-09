@@ -224,7 +224,7 @@ extern void fn_2_46D94(s16*, s16*, s32, s32, s32);
 extern void fn_2_6AB3C(s32, Vec*, f32);
 extern void fn_2_6ACF4(void);
 extern void fn_2_71F60(void);
-extern void fn_2_72054(s32, s32);
+extern void fn_2_72054(s32, u8);
 extern void fn_2_94604(s32);
 extern void fn_2_9461C(s32);
 extern void fn_2_94854(s32);
