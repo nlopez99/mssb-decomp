@@ -70,6 +70,7 @@ void fn_1_12820(struct Unk0060* arg0, Mtx arg1);
 void fn_1_129D0(void);
 void fn_1_12F18(struct UnkCamera0610* arg0);
 void fn_1_12F8C(struct Unk0060* arg0, Mtx arg1);
+void fn_1_131E4(void);
 void fn_1_1347C(void);
 void fn_1_135C0(void);
 void fn_1_14710(struct Unk8036E548Actor* arg0);

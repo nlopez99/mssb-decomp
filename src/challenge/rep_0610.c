@@ -120,8 +120,8 @@ typedef struct Unk8036E548 {
     /* 0x0000 */ u8 _0000[0x60];
     /* 0x0060 */ Unk0060* _0060;
     /* 0x0064 */ u8 _0064[0xAC - 0x64];
-    /* 0x00AC */ LITObj* _00AC[3];
-    /* 0x00B8 */ u8 _00B8[0x140 - 0xB8];
+    /* 0x00AC */ LITObj* _00AC[4];
+    /* 0x00BC */ u8 _00BC[0x140 - 0xBC];
     /* 0x0140 */ UnkPose0610 _0140[13];
     /* 0x0C04 */ Unk8036E548Actor _0C04[13];
     /* 0x2C50 */ Unk8036E548Actor* _2C50[13];
@@ -223,6 +223,11 @@ extern void fn_80026130(s32, void*, f32);
 extern void fn_800385F0(struct Unk30C0*, f32, f32, f32, f32);
 extern void fn_80037AA0(struct Unk30C0*, s32, void (*)(s32), u16, UnkTimer0610*);
 extern void fn_800B0A14_removeQueue(void);
+extern void LITAlloc(LITObj** light);
+extern void LITInitAttn(LITObj* light, f32 a0, f32 a1, f32 a2, f32 k0, f32 k1, f32 k2);
+extern void LITInitColor(LITObj* light, GXColor color);
+extern void LITInitDir(LITObj* light, f32 nx, f32 ny, f32 nz);
+extern void LITInitPos(LITObj* light, f32 x, f32 y, f32 z);
 extern void ACTSetAnimation(UnkList0610* actor, void* animBank, char* sequenceName, u16 seqNum, f32 time, f32 speed);
 extern void fn_800B4CA0(UnkList0610* actor, f32 frame);
 extern void fn_800B4C04(UnkList0610* actor, f32 speed);
@@ -781,6 +786,34 @@ void fn_1_1347C(void) {
     lbl_1_bss_67E0._0F8 = 0.0f;
     lbl_1_bss_67E0._0F0 = 0;
     lbl_1_bss_67E0._0F2 = 0;
+}
+
+// .text:0x000131E4 size:0x298
+void fn_1_131E4(void) {
+    GXColor white = { 0xFF, 0xFF, 0xFF, 0xFF };
+    GXColor blue = { 0x00, 0x00, 0xFF, 0xFF };
+    GXColor red = { 0xFF, 0x00, 0x00, 0xFF };
+    LITAlloc(&lbl_8036E548._00AC[0]);
+    LITAlloc(&lbl_8036E548._00AC[1]);
+    LITAlloc(&lbl_8036E548._00AC[2]);
+    LITAlloc(&lbl_8036E548._00AC[3]);
+    LITInitAttn(lbl_8036E548._00AC[0], 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+    LITInitPos(lbl_8036E548._00AC[0], 5.0f, -10.0f, 5.0f);
+    LITInitDir(lbl_8036E548._00AC[0], 0.0f, 0.0f, 0.0f);
+    LITInitColor(lbl_8036E548._00AC[0], white);
+    LITInitDir(lbl_8036E548._00AC[0], -5.0f, 0.0f, -5.0f);
+    LITInitAttn(lbl_8036E548._00AC[1], 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+    LITInitPos(lbl_8036E548._00AC[1], -5.0f, -10.0f, 0.0f);
+    LITInitDir(lbl_8036E548._00AC[1], 0.0f, 0.0f, 0.0f);
+    LITInitColor(lbl_8036E548._00AC[1], white);
+    LITInitAttn(lbl_8036E548._00AC[2], 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+    LITInitPos(lbl_8036E548._00AC[2], 0.0f, -10.0f, 5.0f);
+    LITInitDir(lbl_8036E548._00AC[2], 0.0f, 0.0f, 0.0f);
+    LITInitColor(lbl_8036E548._00AC[2], white);
+    LITInitAttn(lbl_8036E548._00AC[3], 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+    LITInitPos(lbl_8036E548._00AC[3], 0.0f, -10.0f, -5.0f);
+    LITInitDir(lbl_8036E548._00AC[3], 0.0f, 0.0f, 0.0f);
+    LITInitColor(lbl_8036E548._00AC[3], white);
 }
 
 // .text:0x00012F8C size:0x258
