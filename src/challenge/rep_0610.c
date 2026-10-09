@@ -4,6 +4,9 @@
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/mtx.h"
 #include "Dolphin/GX/GXTransform.h"
+#include "Dolphin/GX/GXGeometry.h"
+#include "Dolphin/GX/GXPixel.h"
+#include "Dolphin/GX/GXTev.h"
 #include "C3/control.h"
 #include "string.h"
 
@@ -26,17 +29,21 @@ typedef struct UnkList0610 {
     /* 0x06 */ u16 _06;
     /* 0x08 */ u8 _08[0x18 - 0x8];
     /* 0x18 */ UnkNode0610** _18;
+    /* 0x1C */ u8 _1C[0x98 - 0x1C];
+    /* 0x98 */ u8 _98;
 } UnkList0610;
 
 typedef struct Unk0060Elem {
     /* 0x00 */ UnkList0610* _00;
     /* 0x04 */ u8 _04[0x68 - 0x4];
     /* 0x68 */ void* _68;
-    /* 0x6C */ u8 _6C[0x90 - 0x6C];
+    /* 0x6C */ u8 _6C;
+    /* 0x6D */ u8 _6D[0x90 - 0x6D];
 } Unk0060Elem; // size: 0x90
 
 typedef struct Unk0060 {
-    /* 0x00 */ u8 _00[0x34];
+    /* 0x00 */ u16 _00;
+    /* 0x02 */ u8 _02[0x34 - 0x2];
     /* 0x34 */ Unk0060Elem _34[1];
 } Unk0060;
 
@@ -69,7 +76,8 @@ typedef struct Unk8036E548Actor {
     /* 0x072 */ u16 _072[120];
     /* 0x162 */ u16 _162[(0x276 - 0x162) / 2];
     /* 0x276 */ u8 _276;
-    /* 0x277 */ u8 _277[0x27C - 0x277];
+    /* 0x277 */ u8 _277;
+    /* 0x278 */ u8 _278[0x27C - 0x278];
 } Unk8036E548Actor; // size: 0x27C
 
 typedef struct Unk8036E548 {
@@ -178,6 +186,9 @@ extern void fn_80026130(s32, void*, f32);
 extern void fn_800385F0(struct Unk30C0*, f32, f32, f32, f32);
 extern void fn_80037AA0(struct Unk30C0*, s32, void (*)(s32), u16, UnkTimer0610*);
 extern void fn_800B0A14_removeQueue(void);
+extern void fn_800BD2CC(s32 arg0, GXColor color);
+extern void fn_800BD670(void* model, Mtx mtx);
+extern void fn_800BDA94(Unk0060Elem* model, Mtx mtx);
 extern void fn_800B2C88(UnkList0610* list, u16 index, Mtx out);
 extern void fn_800B806C(s32, f32, f32, f32, f32, f32, f32, f32);
 extern void fn_80031CA4(Vec* pos, UnkBurst0610* glow);
@@ -246,6 +257,7 @@ typedef struct UnkPair0610 {
 extern UnkPair0610 lbl_1_data_1DC0[];
 extern UnkPair0610 lbl_1_data_1E18[];
 extern u8 lbl_1_data_A940[];
+extern s16 lbl_1_data_A978[];
 extern u8 lbl_1_data_ABA8;
 extern Vec lbl_1_data_AD0C;
 extern f32 lbl_1_data_ADC0;
@@ -282,7 +294,7 @@ static struct {
     /* 0x10 */ Mtx _10;
     /* 0x40 */ u8 _40[4];
 } lbl_1_bss_68FC;
-static struct {
+static struct Unk67E0 {
     /* 0x000 */ Mtx _000;
     /* 0x030 */ LITObj _030;
     /* 0x0F0 */ s16 _0F0;
@@ -297,7 +309,8 @@ static struct {
 static UnkTimer0610* lbl_1_bss_67B8[10];
 static u8 lbl_1_bss_60E8[0x6D0];
 static void* lbl_1_bss_60E4;
-static u8 lbl_1_bss_5F7C[0x168];
+static u8 lbl_1_bss_5F80[0x164];
+static void* lbl_1_bss_5F7C[1];
 static u8 lbl_1_bss_5F78;
 static f32 lbl_1_bss_5F74;
 static u8 lbl_1_bss_5F73;
@@ -554,6 +567,53 @@ void fn_1_1347C(void) {
     lbl_1_bss_67E0._0F8 = 0.0f;
     lbl_1_bss_67E0._0F0 = 0;
     lbl_1_bss_67E0._0F2 = 0;
+}
+
+// .text:0x00012F18 size:0x74
+void fn_1_12F18(UnkCamera0610* arg0) {
+    fn_1_12820(lbl_8036E548._0060, arg0->_08);
+    if (lbl_1_data_A978[lbl_1_bss_68FC._40[0]] >= 0) {
+        fn_800BD670(lbl_1_bss_5F7C[0], arg0->_08);
+    }
+}
+
+// .text:0x00012820 size:0x1B0
+void fn_1_12820(Unk0060* arg0, Mtx arg1) {
+    GXColor color = { 0x64, 0x72, 0x6C, 0xFF };
+    Mtx m;
+    u16 i;
+    u8 alpha = 0xFF;
+    fn_1_17954();
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
+    GXSetCullMode(GX_CULL_BACK);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_OR);
+    GXSetAlphaCompare(GX_GREATER, 0, GX_AOP_AND, GX_ALWAYS, 0);
+    for (i = 0; i < arg0->_00; i++) {
+        Unk8036E548Actor* actor = &lbl_8036E548._0C04[i];
+        if (arg0->_34[i]._00 == NULL) {
+            continue;
+        }
+        arg0->_34[i]._00->_98 = 0xFF;
+        if (arg0->_34[i]._6C == 0) {
+            continue;
+        }
+        if (alpha != actor->_277) {
+            alpha = actor->_277;
+            if (0xFF - alpha != 0) {
+                color.a = alpha;
+                if (alpha == 0) {
+                    continue;
+                }
+                fn_800BD2CC(1, color);
+            } else {
+                color.a = 0xFF;
+                fn_800BD2CC(0, color);
+            }
+        }
+        PSMTXTrans(m, lbl_8036E548._0C04[i]._034, lbl_8036E548._0C04[i]._038, lbl_8036E548._0C04[i]._03C);
+        PSMTXConcat(arg1, m, m);
+        fn_800BDA94(&arg0->_34[i], m);
+    }
 }
 
 // .text:0x000126CC size:0x154
