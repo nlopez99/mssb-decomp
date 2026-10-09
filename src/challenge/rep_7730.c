@@ -512,7 +512,7 @@ static s16 (*lbl_1_data_10668[1])(s16, u16, u16, u16) = { fn_1_1DE60 };
 
 static void (*lbl_1_data_1066C[1])(s16) = { fn_1_1DE5C };
 
-static s32 lbl_1_data_10670 = 4;
+static s32 lbl_1_data_10670[1] = { 4 };
 
 static AramEntry7730 lbl_1_data_10674[21] = {
     { 0x0000040B, 0x40168A6C, 0x06CFD000, 0x000C69A8 },
@@ -1583,6 +1583,89 @@ void fn_1_1EFF4(void) {
     if (((CameraTask7730*)lbl_803CC1B8)->_2C & 2) {
         fn_1_1E5D0(&lbl_1_bss_6BF4);
     }
+}
+
+// .text:0x0001E90C size:0x6E8
+s16 fn_1_1E90C(s16 sel, u16 held, u16 pressed, u16 repeat) {
+    f32 a = ((CameraTask7730*)lbl_803CC1B8)->_14;
+    f32 b = ((CameraTask7730*)lbl_803CC1B8)->_18;
+    f32 c = ((CameraTask7730*)lbl_803CC1B8)->_1C;
+    f32 d = ((CameraTask7730*)lbl_803CC1B8)->_20;
+    f32 e = ((CameraTask7730*)lbl_803CC1B8)->_24;
+    s16 next;
+    s32 count;
+
+    next = lbl_1_data_10668[((CameraTask7730*)lbl_803CC1B8)->_28](sel - 8, held, pressed, repeat) + 8;
+    if (sel != next) {
+        count = lbl_1_data_10670[((CameraTask7730*)lbl_803CC1B8)->_28] + 8;
+        sel = (next + count) % count;
+    } else if (pressed & 0x100) {
+        switch (sel) {
+        case 0:
+            break;
+        case 1:
+            fn_1_1F23C(&lbl_1_bss_6BF4);
+            break;
+        case 2:
+            ((CameraTask7730*)lbl_803CC1B8)->_2C ^= 4;
+            break;        case 3:
+            break;
+        }
+    } else if (repeat & 1) {
+        switch (sel) {
+        case 0:
+            ((CameraTask7730*)lbl_803CC1B8)->_28 = (((CameraTask7730*)lbl_803CC1B8)->_28 + 7) % 8;
+            break;
+        case 3:
+            a = fn_1_1DD48(held, 1, a, 0.0001f, 0.01f, 0.1f, 1.0f, 10.0f);
+            break;
+        case 4:
+            b = fn_1_1DD48(held, 1, b, 0.0001f, 0.01f, 0.1f, 0.0f, 1.0f);
+            break;
+        case 5:
+            c = fn_1_1DD48(held, 1, c, 0.0001f, 0.01f, 0.1f, 1.0f, 10.0f);
+            break;
+        case 7:
+            e = fn_1_1DD48(held, 1, e, 0.0001f, 0.01f, 0.1f, 0.0f, 10.0f);
+            break;
+        }
+    } else if (repeat & 2) {
+        switch (sel) {
+        case 0:
+            ((CameraTask7730*)lbl_803CC1B8)->_28 = (((CameraTask7730*)lbl_803CC1B8)->_28 + 1) % 8;
+            break;
+        case 3:
+            a = fn_1_1DD48(held, 0, a, 0.0001f, 0.01f, 0.1f, 1.0f, 10.0f);
+            break;
+        case 4:
+            b = fn_1_1DD48(held, 0, b, 0.0001f, 0.01f, 0.1f, 0.0f, 1.0f);
+            break;
+        case 5:
+            c = fn_1_1DD48(held, 0, c, 0.0001f, 0.01f, 0.1f, 1.0f, 10.0f);
+            break;
+        case 6:
+            d = fn_1_1DD48(held, 0, d, 0.0001f, 0.01f, 0.1f, 0.0f, 10.0f);
+            break;
+        case 7:
+            e = fn_1_1DD48(held, 0, e, 0.0001f, 0.01f, 0.1f, 0.0f, 10.0f);
+            break;
+        }
+    } else if (repeat & 8) {
+        if (sel < 8) {
+            count = lbl_1_data_10670[((CameraTask7730*)lbl_803CC1B8)->_28];
+            sel = (count + 8 + sel - 1) % (count + 8);
+        }
+    } else if (repeat & 4) {
+        if (sel < 8) {
+            sel = (sel + 1) % (lbl_1_data_10670[((CameraTask7730*)lbl_803CC1B8)->_28] + 8);
+        }
+    }
+    ((CameraTask7730*)lbl_803CC1B8)->_14 = a;
+    ((CameraTask7730*)lbl_803CC1B8)->_18 = b;
+    ((CameraTask7730*)lbl_803CC1B8)->_1C = c;
+    ((CameraTask7730*)lbl_803CC1B8)->_20 = d;
+    ((CameraTask7730*)lbl_803CC1B8)->_24 = e;
+    return sel;
 }
 
 // .text:0x0001E8C0 size:0x4C
