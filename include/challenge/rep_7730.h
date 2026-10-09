@@ -77,6 +77,7 @@ void fn_1_24A8C(void);
 void fn_1_267BC(void);
 void fn_1_26928(void);
 void fn_1_26A34(void);
+void fn_1_24C4C(struct PhysNode7730* nodes, s32 count, Vec* external, f32 k, f32 damping, f32 rest, f32 drag);
 void fn_1_25064(void);
 void fn_1_25C68(void);
 void fn_1_25F98(void);

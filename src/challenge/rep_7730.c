@@ -249,6 +249,16 @@ typedef struct RopeNode7730 {
     /* 0x3C */ s32 _3C;
 } RopeNode7730; // size: 0x40
 
+typedef struct PhysNode7730 {
+    /* 0x00 */ f32 _00;
+    /* 0x04 */ u8 _04[0x8 - 0x4];
+    /* 0x08 */ Vec _08;
+    /* 0x14 */ u8 _14[0x20 - 0x14];
+    /* 0x20 */ Vec _20;
+    /* 0x2C */ Vec _2C;
+    /* 0x38 */ u32 _38;
+} PhysNode7730; // size: 0x3C
+
 typedef struct SimParams7730 {
     /* 0x00 */ f32 _00;
     /* 0x04 */ f32 _04;
@@ -713,6 +723,87 @@ void fn_1_25C68(void) {
     fn_1_24A8C();
     ((ChainTask7730*)lbl_803CC1B8)->_00 = fn_1_25064;
     task->_2C = 0;
+}
+
+// .text:0x00024C4C size:0x418
+void fn_1_24C4C(PhysNode7730* nodes, s32 count, Vec* external, f32 k, f32 damping, f32 rest, f32 drag) {
+    ChainTask7730* task = lbl_803CC1B8;
+    Vec d;
+    Vec dv;
+    Vec spring;
+    f32 first;
+    f32 mag;
+    f32 len;
+    f32 friction;
+    f32 force;
+    s32 i;
+    PhysNode7730* prev;
+    s32 j;
+
+    first = 1.0f;
+    i = count;
+    while (i-- != 0) {
+        if (nodes[i]._38 != 0) {
+            nodes[i]._2C.z = 0.0f;
+            nodes[i]._2C.y = 0.0f;
+            nodes[i]._2C.x = 0.0f;
+        } else {
+            nodes[i]._2C.z = 0.0f;
+            nodes[i]._2C.x = 0.0f;
+            nodes[i]._2C.y = -9.80665f * nodes[i]._00;
+        }
+        mag = PSVECMag(&nodes[i]._20);
+        if (mag) {
+            PSVECScale(&nodes[i]._20, -1.0f * drag, &d);
+            PSVECNormalize(&d, &d);
+            PSVECScale(&d, task->_20 / 10000.0f * (mag * mag), &d);
+            PSVECAdd(&nodes[i]._2C, &d, &nodes[i]._2C);
+        }
+        if (first) {
+            PSVECAdd(&nodes[i]._2C, external, &nodes[i]._2C);
+            first = 0.0f;
+        }
+    }
+    j = count;
+    while (--j != 0) {
+        prev = &nodes[j - 1];
+        PSVECSubtract(&nodes[j]._08, &prev->_08, &d);
+        PSVECSubtract(&nodes[j]._20, &prev->_20, &dv);
+        PSVECScale(&dv, drag, &dv);
+        len = PSVECMag(&d);
+        mag = damping * (PSVECDotProduct(&dv, &d) / len);
+        PSVECNormalize(&d, &spring);
+        force = k * (len - rest);
+        PSVECScale(&spring, -(force + mag), &spring);
+        if (nodes[j]._38 == 0) {
+            PSVECAdd(&nodes[j]._2C, &spring, &nodes[j]._2C);
+        }
+        PSVECScale(&spring, -1.0f, &spring);
+        if (prev->_38 == 0) {
+            PSVECAdd(&prev->_2C, &spring, &prev->_2C);
+        }
+    }
+    i = count;
+    while (i-- != 0) {
+        if (nodes[i]._38 == 0 && nodes[i]._08.y <= task->_28 / 1000.0f && PSVECMag(&nodes[i]._20) != 0.0f) {
+            friction = task->_1E / 64.0f * nodes[i]._2C.y;
+            if (friction < 0.0f) {
+                friction = -friction;
+            }
+            memcpy(&d, &nodes[i]._2C, sizeof(Vec));
+            d.y = 0.0f;
+            mag = PSVECMag(&d);
+            if (mag) {
+                PSVECNormalize(&d, &d);
+                if (friction > mag) {
+                    PSVECScale(&d, -mag, &d);
+                } else {
+                    PSVECScale(&d, -friction, &d);
+                }
+                PSVECAdd(&d, &nodes[i]._2C, &nodes[i]._2C);
+            }
+        }
+    }
 }
 
 // .text:0x00024A8C size:0x1C0
