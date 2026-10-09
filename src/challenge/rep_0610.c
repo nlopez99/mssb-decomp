@@ -409,11 +409,11 @@ static UnkTask0610* lbl_1_bss_60E8;
 static void* lbl_1_bss_60E4;
 static Unk0060* lbl_1_bss_60E0;
 static s32 lbl_1_bss_60DC;
-static s8 lbl_1_bss_60A4[0x36];
+static u8 lbl_1_bss_60A4[0x36];
 static s32 lbl_1_bss_60A0;
 static u8 lbl_1_bss_5F88[0x118];
 static u8 lbl_1_bss_5F80[8];
-static void* lbl_1_bss_5F7C[1];
+static Unk0060* lbl_1_bss_5F7C[1];
 static u8 lbl_1_bss_5F78;
 static f32 lbl_1_bss_5F74;
 static u8 lbl_1_bss_5F73;
@@ -481,8 +481,8 @@ void fn_1_17D90(void) {
 }
 
 // .text:0x00017B5C size:0x234
-// The target's unrolled flag loop keeps more values live (r30, r31 saved), and
-// its search tests fixed offsets of lbl_1_data_2390 after one lbzu; 71%
+// The target's search tests fixed offsets of lbl_1_data_2390 after one lbzu,
+// and its unrolled flag loop is scheduled differently; 88%
 void fn_1_17B5C(void) {
     s32 i;
     s32 first;
@@ -1798,6 +1798,53 @@ void fn_1_F040(void) {
         lbl_1_bss_307C = 0;
         lbl_1_bss_5F71 = 10;
     }
+}
+
+// .text:0x0000ECF8 size:0x348
+// Inlines fn_1_D300 (see there); registers and the search loops' scheduling
+// differ
+void fn_1_ECF8(s32 idx, s32 slot, s32 flag) {
+    u16 idA;
+    u16 idB;
+    s32 first;
+    s32 second;
+    s32 i;
+    if (lbl_1_bss_60A4[lbl_1_bss_68FC._40[idx]] == 0) {
+        return;
+    }
+    idA = lbl_8036E548._0C04[idx]._162[0x13];
+    idB = lbl_8036E548._0C04[idx]._162[0x19];
+    switch (slot) {
+    case 0:
+    case 1:
+    case 5:
+    case 6:
+        first = 1;
+        second = 2;
+        break;
+    default:
+        if (flag != 0) {
+            first = 1;
+            second = 4;
+        } else {
+            first = 3;
+            second = 2;
+        }
+        break;
+    }
+    for (i = 0; i < lbl_1_bss_5F7C[0]->_34[first - 1]._00->_06; i++) {
+        if (lbl_1_bss_5F7C[0]->_34[first - 1]._00->_18[i]->_14 != NULL) {
+            fn_800B2BA8(lbl_8036E548._0060->_34[idx]._00, idA, lbl_1_bss_5F7C[0]->_34[first - 1]._00, i);
+            break;
+        }
+    }
+    for (i = 0; i < lbl_1_bss_5F7C[0]->_34[second - 1]._00->_06; i++) {
+        if (lbl_1_bss_5F7C[0]->_34[second - 1]._00->_18[i]->_14 != NULL) {
+            fn_800B2BA8(lbl_8036E548._0060->_34[idx]._00, idB, lbl_1_bss_5F7C[0]->_34[second - 1]._00, i);
+            break;
+        }
+    }
+    fn_1_D300(&lbl_8036E548._0C04[lbl_1_bss_5F73]);
 }
 
 // .text:0x0000EA20 size:0x2D8

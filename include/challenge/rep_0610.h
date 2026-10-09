@@ -43,7 +43,7 @@ void fn_1_DF14(void);
 void fn_1_E8D4(void);
 void fn_1_E9F8(struct UnkList0610* arg0, s32 arg1, s32 arg2);
 void fn_1_EA20(void);
-void fn_1_ECF8(u8 arg0, u8 arg1, u8 arg2);
+void fn_1_ECF8(s32 idx, s32 slot, s32 flag);
 void fn_1_F040(void);
 void fn_1_F0D0(void);
 void fn_1_F1D8(void);
