@@ -280,7 +280,7 @@ extern struct {
     /* 0x4 */ u16 _4;
 } *lbl_803CBBCC;
 
-extern struct {
+extern struct Unk8034E9A0 {
     /* 0x0000 */ u8 _0000[0x46F8];
     /* 0x46F8 */ s8 _46F8;
 } lbl_8034E9A0;
@@ -4933,14 +4933,14 @@ void fn_2_5E84C(void) {
 
 // .text:0x0005E104 size:0x748
 void fn_2_5E104(void) {
-    MenuTask0AB0* task;
+    struct Unk8034E9A0* data = &lbl_8034E9A0;
+    MenuTask0AB0* task = lbl_803CC1B8;
     MenuTask0AB0* child;
     Vec pos;
     s32 i;
 
     lbl_2_bss_1A824C = (void*)lbl_2_bss_1A8250;
     lbl_2_bss_1A8248 = (void*)starMissionCompletionTracker;
-    task = lbl_803CC1B8;
     lbl_2_bss_1A8244 = (void*)lbl_80361B20;
     lbl_2_bss_1A8240 = (void*)lbl_803616CC;
     lbl_2_bss_1A823C = (void*)lbl_800E877C;
@@ -4957,7 +4957,7 @@ void fn_2_5E104(void) {
         fn_2_5EB78();
         fn_2_5E84C();
         g_d_GameSettings.StadiumID = 0;
-        lbl_2_bss_1A824C->_197863 = lbl_8034E9A0._46F8;
+        lbl_2_bss_1A824C->_197863 = data->_46F8;
         fn_8000F4B8(0, -1, -1, -1);
         lbl_2_bss_1A823C->_32 = 0;
         break;
@@ -4977,9 +4977,7 @@ void fn_2_5E104(void) {
         fn_2_5AF24();
         fn_2_6ACF4();
         fn_800B0A5C_insertQueue(fn_2_71F60, 2);
-        pos.x = 0.0f;
-        pos.y = 0.0f;
-        pos.z = 0.0f;
+        pos.x = pos.y = pos.z = 0.0f;
         fn_2_6AB3C(0, &pos, 0.0f);
         fn_2_72054(0, 0);
         fn_2_904A8();
