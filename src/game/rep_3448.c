@@ -1927,8 +1927,8 @@ remove:
 }
 
 // .text:0x00129A18 size:0x270 mapped:0x80768AAC
-// 99.94%: the target forms lbl_3_data_21268's address (lis) before lbl_3_data_A8B8's; loop
-// placements of p and declaration orders did not change it.
+// 99.94%: the target forms lbl_3_data_21268's address (lis) before lbl_3_data_A8B8's. A
+// `u8* modes = lbl_3_data_21268` local (permuter) fixes that but swaps two loop increments (99.87%).
 void fn_3_129A18(void) {
     UnkTask3448* task = lbl_803CC1B8;
     u16* p;
