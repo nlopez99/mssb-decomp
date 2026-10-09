@@ -3258,8 +3258,112 @@ BOOL fn_3_4DB84(s32 fielder) {
 }
 
 // .text:0x0004D20C size:0x978 mapped:0x8068C2A0
+// 97.22%: the target branches over a separate `b` for the early return of the pitcher, and
+// both inlined fn_3_52F4C copies keep dx and dz in the other saved FPRs.
 void fn_3_4D20C(s32 fielder) {
-    return;
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    s32 base;
+    f32 dx;
+    f32 dz;
+    f32 dist;
+    f32 step;
+    f32 x;
+    f32 z;
+
+    if ((g_Ball.homeRunClassification == 0 || fielder > 1) && g_Ball.framesSinceHit >= 15 &&
+        (fielder != 1 || g_FieldingLogic._118 == 0) && (g_Ball.framesSinceHit >= f->_1D2 - 15 || fielder == 0)) {
+        if (g_Ball.framesSinceHit < f->_1D2 && fielder == 0) {
+            return;
+        }
+        if (fn_3_53130(fielder) == 0) {
+            if (g_FieldingLogic._0C4 == f->_18C) {
+                fn_3_A7C88();
+            }
+            if (f->_1D7 == 1) {
+                if (f->_216) {
+                    dz = f->_01C - f->_008;
+                    dx = f->_014 - f->_000;
+                    dist = dolsqrtf2(dx * dx + dz * dz);
+                    if (dist < f->_058) {
+                        step = dist;
+                    } else {
+                        step = f->_058;
+                    }
+                    f->_030 = dx * step;
+                    f->_034 = dz * step;
+                    f->_050 = step;
+                    f->_000 += f->_030;
+                    f->_008 += f->_034;
+                    f->_068 = dist - step;
+                } else if (f->_252) {
+                    fn_3_261E8(fielder);
+                    f->_1A2 = 0;
+                } else {
+                    base = f->_18C;
+                    if (g_FieldingLogic._101[base] == 0) {
+                        if (f->_1D8[0] == 1) {
+                            if (g_Fielders[0]._18C == 1) {
+                                x = lbl_3_data_4444[1].x;
+                                dx = x - g_Fielders[0]._000;
+                                if (dx > 15.0f) {
+                                    dx = 15.0f;
+                                }
+                                z = lbl_3_data_4444[1].z - dx / 3.0f;
+                            } else if (g_Fielders[0]._18C == 3) {
+                                x = lbl_3_data_4444[3].x;
+                                dx = g_Fielders[0]._000 - x;
+                                if (dx > 15.0f) {
+                                    dx = 15.0f;
+                                }
+                                z = lbl_3_data_4444[3].z - dx / 3.0f;
+                            } else {
+                                x = lbl_3_data_4444[g_Fielders[0]._18C].x;
+                                z = lbl_3_data_4444[g_Fielders[0]._18C].z;
+                            }
+                            fn_3_52F4C(0, x, z);
+                        } else {
+                            fn_3_52F4C(fielder, lbl_3_data_4444[base].x, lbl_3_data_4444[base].z);
+                        }
+                        fn_3_526DC(fielder);
+                    } else if (g_FieldingLogic._101[base] == 1) {
+                        if (f->_0A8[base] > lbl_3_data_4780[f->_1C9]) {
+                            f->_014 = lbl_3_data_4444[base].x;
+                            f->_01C = lbl_3_data_4444[f->_18C].z;
+                            f->_030 = 0.03f * (lbl_3_data_4444[base].x - f->_000) / f->_0A8[f->_18C];
+                            f->_034 = 0.03f * (lbl_3_data_4444[base].z - f->_008) / f->_0A8[f->_18C];
+                            f->_050 = 0.03f;
+                            f->_068 = f->_0A8[f->_18C];
+                            f->_000 += f->_030;
+                            f->_008 += f->_034;
+                        } else {
+                            dz = lbl_3_data_4444[base].z - f->_008;
+                            dx = lbl_3_data_4444[base].x - f->_000;
+                            if (dolsqrtf2(dx * dx + dz * dz) < 0.1f) {
+                                f->_000 = lbl_3_data_4444[f->_18C].x;
+                                f->_008 = lbl_3_data_4444[f->_18C].z;
+                                fn_3_530EC(fielder);
+                            } else {
+                                f->_030 = dx / 5.0f;
+                                f->_034 = dz / 5.0f;
+                                f->_000 += f->_030;
+                                f->_008 += f->_034;
+                            }
+                        }
+                        f->_030 = 0.0f;
+                        f->_034 = 0.0f;
+                        f->_050 = 0.0f;
+                    }
+                }
+            }
+            if (f->_1D7 == 1 && f->_050 != 0.0f) {
+                f->_17E = f->_068 / f->_058;
+            }
+            fn_3_5372C(fielder);
+            if (g_Ball.fielderBeingThrownTo == fielder) {
+                fn_3_4E638();
+            }
+        }
+    }
 }
 
 // .text:0x0004CFB0 size:0x25C mapped:0x8068C044
