@@ -8,6 +8,7 @@
 #include "Dolphin/PPCArch.h"
 #include "Dolphin/OS/OSCache.h"
 #include "string.h"
+#include "Dolphin/rand.h"
 
 extern void* lbl_803CC1B8;
 
@@ -166,6 +167,23 @@ typedef struct ChainTask7730 {
     /* 0x2A */ u8 _2A;
     /* 0x2B */ u8 _2B;
 } ChainTask7730;
+
+typedef struct WaveTask7730 {
+    /* 0x00 */ void (*_00)(void);
+    /* 0x04 */ u8 _04[0x14 - 0x4];
+    /* 0x14 */ f32 _14;
+    /* 0x18 */ f32 _18;
+    /* 0x1C */ f32 _1C;
+    /* 0x20 */ f32 _20;
+    /* 0x24 */ u16 _24;
+    /* 0x26 */ u8 _26;
+    /* 0x27 */ u8 _27;
+    /* 0x28 */ u8 _28;
+    /* 0x29 */ u8 _29;
+    /* 0x2A */ u8 _2A;
+    /* 0x2B */ u8 _2B;
+    /* 0x2C */ u8 _2C;
+} WaveTask7730;
 
 typedef struct CameraTask7730 {
     /* 0x00 */ void (*_00)(void);
@@ -527,14 +545,18 @@ static struct {
 } lbl_1_bss_45868;
 static RopeNode7730 lbl_1_bss_43F68[100];
 static struct {
-    /* 0x00 */ u8 _00[0x3C];
+    /* 0x00 */ u8 _00[0x30];
+    /* 0x30 */ s16 _30;
+    /* 0x32 */ s16 _32;
+    /* 0x34 */ u8 _34[0x38 - 0x34];
+    /* 0x38 */ f32 _38;
     /* 0x3C */ Vec _3C;
     /* 0x48 */ Vec _48;
     /* 0x54 */ u8 _54[0x88 - 0x54];
 } lbl_1_bss_43EE0;
 static u8 lbl_1_bss_F6E0[0x34800];
-static u8 lbl_1_bss_76E0[0x8000];
-static u8 lbl_1_bss_74E0[0x200];
+static f32 lbl_1_bss_76E0[64 * 128];
+static f32 lbl_1_bss_74E0[128];
 static RopeNode7730 lbl_1_bss_6FE0[20];
 static SimParams7730 lbl_1_bss_6FB8;
 static u8 lbl_1_bss_6FB4[4];
@@ -745,6 +767,40 @@ void fn_1_246AC(void) {
         task->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
     }
+}
+
+// .text:0x00024410 size:0x29C
+void fn_1_24410(void) {
+    WaveTask7730* task = lbl_803CC1B8;
+    s32 i;
+    s32 j;
+    s32 idx;
+
+    fn_1_23AD8(lbl_1_bss_47010, &lbl_1_bss_43EE0._48, &lbl_1_bss_43EE0._3C);
+    lbl_1_bss_43EE0._30 = 0;
+    lbl_1_bss_43EE0._38 = 0.0f;
+    lbl_1_bss_43EE0._32 = 0;
+    task->_27 = 64;
+    task->_29 = 64;
+    task->_28 = 64;
+    task->_2A = 0;
+    task->_14 = 500.0f;
+    task->_18 = 32.0f;
+    task->_24 = 0;
+    task->_1C = 0.15f;
+    task->_20 = 0.08f;
+    task->_2B = 1;
+    for (i = 0; i < 128; i++) {
+        lbl_1_bss_74E0[i] = cos(3.1415925f * (2.0f * (i / 128.0f)));
+    }
+    task->_2C = 0;
+    memset(lbl_1_bss_76E0, 0, sizeof(lbl_1_bss_76E0));
+    for (j = 0; j < 32; j++) {
+        idx = (rand() % 32) * 128;
+        idx += rand() % 128;
+        lbl_1_bss_76E0[idx] = 1.0f;
+    }
+    ((WaveTask7730*)lbl_803CC1B8)->_00 = fn_1_23B54;
 }
 
 // .text:0x00023AD8 size:0x7C

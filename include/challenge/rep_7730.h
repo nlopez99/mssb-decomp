@@ -63,6 +63,7 @@ void fn_1_22644(void);
 void fn_1_22DF4(struct RopeParams7730* params);
 void fn_1_22F4C(s32 rows, s32 cols, f32* out, f32* cur, f32* prev);
 void fn_1_23AD8(Mtx44 m, Vec* eye, Vec* at);
+void fn_1_23B54(void);
 void fn_1_24410(void);
 void fn_1_246AC(void);
 void fn_1_24778(void);
