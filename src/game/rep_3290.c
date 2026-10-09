@@ -124,7 +124,6 @@ void fn_3_11669C(void) {
 }
 
 // .text:0x001160BC size:0x5E0 mapped:0x80755150
-// The target inlines fn_3_115540 here too; MWCC keeps it a call in this build.
 void fn_3_1160BC(void) {
     switch (g_GameLogic.gameStatus) {
     case 4:
@@ -387,9 +386,31 @@ static inline void clearWallFlags(void) {
     } while (j < 4);
 }
 
+static inline void updateCoins(void) {
+    int i;
+
+    for (i = 0; i < 100; i++) {
+        if (g_Minigame.wallBall_coinsVisibleInd[i]) {
+            g_Minigame.wallBall_coinsVisibleFrameCounter[i]++;
+            g_Minigame.wallBall_coinCoordinates[i].x += g_Minigame.wallBall_coinVelocity[i].x;
+            g_Minigame.wallBall_coinCoordinates[i].y += g_Minigame.wallBall_coinVelocity[i].y;
+            g_Minigame.wallBall_coinCoordinates[i].z += g_Minigame.wallBall_coinVelocity[i].z;
+            g_Minigame.wallBall_coinVelocity[i].y -= lbl_3_data_21634[2];
+            if (g_Minigame.wallBall_coinCoordinates[i].y < lbl_3_data_219B8[14]) {
+                g_Minigame.wallBall_coinCoordinates[i].y = lbl_3_data_219B8[14];
+                g_Minigame.wallBall_coinVelocity[i].y = -g_Minigame.wallBall_coinVelocity[i].y * lbl_3_data_21634[3];
+                g_Minigame.wallBall_coinVelocity[i].x *= lbl_3_data_21634[4];
+                g_Minigame.wallBall_coinVelocity[i].z *= lbl_3_data_21634[4];
+            }
+            if (g_Minigame.wallBall_coinsVisibleFrameCounter[i] > lbl_3_data_2167C[4]) {
+                g_Minigame.wallBall_coinsVisibleInd[i] = 0;
+            }
+        }
+    }
+}
+
 // .text:0x00115540 size:0x1F8 mapped:0x807545D4
 void fn_3_115540(void) {
-    int i;
 
     if (fn_3_108854() == 0) {
         if (g_Minigame.wallBallRotatePitchersInd) {
@@ -417,24 +438,7 @@ void fn_3_115540(void) {
             fn_3_113F14();
             fn_3_113D20();
         }
-        for (i = 0; i < 100; i++) {
-            if (g_Minigame.wallBall_coinsVisibleInd[i]) {
-                g_Minigame.wallBall_coinsVisibleFrameCounter[i]++;
-                g_Minigame.wallBall_coinCoordinates[i].x += g_Minigame.wallBall_coinVelocity[i].x;
-                g_Minigame.wallBall_coinCoordinates[i].y += g_Minigame.wallBall_coinVelocity[i].y;
-                g_Minigame.wallBall_coinCoordinates[i].z += g_Minigame.wallBall_coinVelocity[i].z;
-                g_Minigame.wallBall_coinVelocity[i].y -= lbl_3_data_21634[2];
-                if (g_Minigame.wallBall_coinCoordinates[i].y < lbl_3_data_219B8[14]) {
-                    g_Minigame.wallBall_coinCoordinates[i].y = lbl_3_data_219B8[14];
-                    g_Minigame.wallBall_coinVelocity[i].y = -g_Minigame.wallBall_coinVelocity[i].y * lbl_3_data_21634[3];
-                    g_Minigame.wallBall_coinVelocity[i].x *= lbl_3_data_21634[4];
-                    g_Minigame.wallBall_coinVelocity[i].z *= lbl_3_data_21634[4];
-                }
-                if (g_Minigame.wallBall_coinsVisibleFrameCounter[i] > lbl_3_data_2167C[4]) {
-                    g_Minigame.wallBall_coinsVisibleInd[i] = 0;
-                }
-            }
-        }
+        updateCoins();
         fn_3_115108();
     }
 }
