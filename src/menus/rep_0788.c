@@ -9210,10 +9210,10 @@ void fn_2_1FF14(s32 count) {
 }
 
 // .text:0x0001FF10 size:0x4
-void fn_2_1FF10(void) {}
+void fn_2_1FF10(s32 index) {}
 
 // .text:0x0001FF0C size:0x4
-void fn_2_1FF0C(void) {}
+void fn_2_1FF0C(s32 index) {}
 // .text:0x0001CF94 size:0x4AC
 void fn_2_1CF94(void) {
     MenuTask0788* task = lbl_803CC1B8;
