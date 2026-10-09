@@ -2374,8 +2374,8 @@ void fn_1_1D944(void) {
 }
 
 // .text:0x0001D694 size:0x2B0
-// 93.47%: the target divides height and width with signed shifts (srawi/addze), 16 bytes
-// less stack; this form's u16 division compiles to srwi and allocation follows.
+// 95.65%: saved registers of the tile loops differ, and the target's frame is 16 bytes
+// smaller. Dividing the u16 sizes by s32 tile sizes gives the target's srawi/addze.
 void fn_1_1D694(DrawEntry7730* entry) {
     Mtx44 proj;
     Mtx m;
@@ -2386,14 +2386,16 @@ void fn_1_1D694(DrawEntry7730* entry) {
     s32 x;
     s32 rows;
     s32 cols;
+    s32 tileW = 32;
+    s32 tileH = 64;
 
     if (entry->_18 != 0) {
         tex = entry->_08;
         map = entry->_10;
         src = entry->_0C;
         memset(tex->image, 0, tex->width * tex->height);
-        rows = tex->height / 64;
-        cols = tex->width / 32;
+        rows = tex->height / tileH;
+        cols = tex->width / tileW;
         for (y = 0; y < rows; y++) {
             for (x = 0; x < cols; x++) {
                 if (x & lbl_803CBBC0) {
