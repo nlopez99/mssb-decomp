@@ -749,6 +749,54 @@ void fn_2_B324(void) {
     }
 }
 
+// .text:0x0000AEE8 size:0x43C
+void fn_2_AEE8(void) {
+    u8 order[2][54];
+    u8 value[54];
+    s32 t;
+    s32 i;
+    s32 j;
+    u8 max;
+    u8 tmpOrder;
+    u8 tmpValue;
+    s32 cap;
+    s32 row;
+    s32 col;
+
+    for (t = 0; t < 2; t++) {
+        for (i = 0; i < 54; i++) {
+            order[t][i] = i;
+        }
+    }
+    for (t = 0; t < 2; t++) {
+        cap = lbl_8034E9A0._46E0[t];
+        row = cap / 9;
+        col = cap % 9;
+        for (i = 0; i < 54; i++) {
+            value[i] = lbl_8034E9A0._0000[row][col]._3B[i];
+        }
+        for (i = 0; i < 54; i++) {
+            max = value[i];
+            for (j = i + 1; j < 54; j++) {
+                if (max < value[j]) {
+                    tmpValue = value[i];
+                    max = value[j];
+                    tmpOrder = order[t][i];
+                    value[i] = value[j];
+                    order[t][i] = order[t][j];
+                    value[j] = tmpValue;
+                    order[t][j] = tmpOrder;
+                }
+            }
+        }
+    }
+    for (t = 0; t < 2; t++) {
+        for (i = 0; i < 54; i++) {
+            lbl_8034E9A0._478D[t][i] = order[t][i];
+        }
+    }
+}
+
 // .text:0x0000ABC0 size:0x328
 // 97.5%: registers only.
 void fn_2_ABC0(u8 port) {
