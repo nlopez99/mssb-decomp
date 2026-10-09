@@ -1061,11 +1061,10 @@ void fn_2_EC34(void) {
 }
 
 // .text:0x0000EAE0 size:0x154
-// 81%: the target addresses the cursor as word i + 8 of lbl_2_bss_F410,
-// saves r27-r31, and allocates registers differently.
+// 82%: the target addresses the cursor as word i + 8 of lbl_2_bss_F410
+// (86% with that cast), saves r27-r31, and allocates registers differently.
 void fn_2_EAE0(void) {
     s32 i;
-    s32 x;
 
     for (i = 0; i < (g_d_GameSettings._10 == 1) + 1; i++) {
         if (lbl_803C5EA4._08[i] != 0) {
@@ -1080,11 +1079,9 @@ void fn_2_EAE0(void) {
                 } while (lbl_2_bss_F410._20[0] == lbl_2_bss_F410._20[1]);
             }
             while (1) {
-                x = lbl_8034E9A0._46F8[i];
-                if (lbl_8034E9A0._46FC[x] != 0) {
-                    x = lbl_8034E9A0._46F8[0] == 0;
-                }
-                fn_2_1D54(&lbl_2_bss_F410._20[i], x, 54);
+                fn_2_1D54(&lbl_2_bss_F410._20[i],
+                          lbl_8034E9A0._46FC[lbl_8034E9A0._46F8[i]] == 0 ? lbl_8034E9A0._46F8[i] : lbl_8034E9A0._46F8[0] == 0,
+                          54);
             }
         }
     }
