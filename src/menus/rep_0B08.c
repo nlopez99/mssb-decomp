@@ -28,7 +28,8 @@ typedef struct Obj0B08 {
     /* 0x48 */ u8 _48[0x4C - 0x48];
     /* 0x4C */ f32 _4C;
     /* 0x50 */ f32 _50;
-    /* 0x54 */ u8 _54[0x6C - 0x54];
+    /* 0x54 */ f32 _54;
+    /* 0x58 */ u8 _58[0x6C - 0x58];
     /* 0x6C */ f32 _6C;
     /* 0x70 */ f32 _70;
     /* 0x74 */ Vec _74;
@@ -42,7 +43,7 @@ typedef struct Obj0B08 {
     /* 0x98 */ s16 _98;
     /* 0x9A */ s16 _9A;
     /* 0x9C */ s16 _9C;
-    /* 0x9E */ u8 _9E[0xA0 - 0x9E];
+    /* 0x9E */ s16 _9E;
     /* 0xA0 */ s16 _A0;
     /* 0xA2 */ s16 _A2;
     /* 0xA4 */ u8 _A4[0xAC - 0xA4];
@@ -156,6 +157,7 @@ extern s16 lbl_2_data_3D30[][4];
 extern f32 lbl_2_data_3EF4[6];
 extern f32 lbl_2_data_3F0C[8];
 extern f32 lbl_2_data_3F2C[6];
+extern f32 lbl_2_data_3F44[6];
 extern f32 lbl_2_data_3F5C;
 extern AnimEntry0B08 lbl_2_data_3C84[];
 
@@ -1501,6 +1503,148 @@ void fn_2_6A450(s32 index, f32 x, f32 z) {
 }
 
 // .text:0x00069E1C size:0x634
+void fn_2_69E1C(s32 index) {
+    Obj0B08* obj = &lbl_2_bss_1A8248->_1610[index];
+    Mtx m;
+    Vec v;
+    s16 angle;
+    s16 target;
+    f32 dz;
+    f32 dx;
+    f32 sqx;
+    f32 sqz;
+    f32 dist;
+    f32 step;
+    f32 diff;
+    f32 absDiff;
+    if (obj->_50 > 0.0f) {
+        angle = fn_2_4A2C4(obj->_4C);
+        target = fn_2_4A2C4(obj->_54);
+        fn_2_4A310(angle, target);
+        obj->_BC = 0;
+        obj->_BD = 0;
+        if (obj->_9E < 0x7FFE) {
+            obj->_9E++;
+        } else {
+            obj->_9E = 0x7FFF;
+        }
+    } else {
+        obj->_BC = 1;
+        if (obj->_9E > 45) {
+            obj->_9E = 45;
+        }
+        if (obj->_9E != 0) {
+            obj->_9E--;
+        }
+    }
+    switch (obj->_BA) {
+    case 0:
+        fn_2_69710(index);
+        break;
+    case 1:
+    case 5:
+        obj->_38 -= 0.0005f;
+        break;
+    case 2:
+    case 6:
+        obj->_38 -= 0.001f;
+        break;
+    case 3:
+    case 7:
+        obj->_38 -= 0.002f;
+        break;
+    case 4:
+    case 8:
+        obj->_BA += 20;
+        break;
+    case 24:
+    case 28:
+        obj->_38 -= 0.005f;
+        break;
+    case 9:
+        obj->_38 = 0.0f;
+        break;
+    case 10:
+        obj->_38 = 0.08f;
+        break;
+    case 11:
+        obj->_38 = 0.12f;
+        break;
+    case 12:
+        if (index == 0) {
+            obj->_38 = lbl_2_data_3F44[lbl_2_bss_1A8248->_441C];
+        } else {
+            obj->_38 = 0.04f;
+        }
+        break;
+    case 13:
+        obj->_38 = 0.012f;
+        break;
+    case 14:
+        obj->_38 = 0.025f;
+        break;
+    }
+    if (obj->_38 <= 0.0f) {
+        obj->_38 = 0.0f;
+    }
+    obj->_50 -= obj->_38;
+    dx = obj->_00.x - obj->_0C.x;
+    dz = obj->_00.z - obj->_0C.z;
+    sqx = dx * dx;
+    sqz = dz * dz;
+    dist = dolsqrtf2(sqx + sqz);
+    if (dist < obj->_38) {
+        obj->_50 = -1.0f;
+    }
+    if (!(obj->_38 <= 0.0f)) {
+        if (obj->_BA != 4 && obj->_BA != 0x18 && obj->_50 > 0.0f) {
+            obj->_4C = atan2(-(obj->_0C.x - obj->_00.x), -(obj->_0C.z - obj->_00.z));
+        }
+        PSMTXRotRad(m, 'Y', obj->_34);
+        v.x = 0.0f;
+        v.y = 0.0f;
+        v.z = -obj->_38;
+        PSMTXMultVec(m, &v, &v);
+        obj->_18.x = v.x;
+        obj->_18.z = v.z;
+        obj->_00.x += obj->_18.x;
+        obj->_00.z += obj->_18.z;
+        if (obj->_BA != 4 && obj->_BA != 0x18 && obj->_50 > 0.0f) {
+            obj->_4C = atan2(-(obj->_0C.x - obj->_00.x), -(obj->_0C.z - obj->_00.z));
+            diff = fn_2_4A18C(obj->_34 - obj->_4C);
+            absDiff = fabs(diff);
+            if (absDiff > 2.268928f) {
+                step = 1.5707964f;
+            } else if (absDiff > 1.5707964f) {
+                step = 0.69813174f;
+            } else if (absDiff > 0.69813174f) {
+                step = 0.34906587f;
+            } else if (absDiff > 0.34906587f) {
+                step = 0.17453294f;
+            } else if (absDiff > 0.17453294f) {
+                step = 0.08726647f;
+            } else if (absDiff > 0.08726647f) {
+                step = 0.034906585f;
+            } else if (absDiff > 0.034906585f) {
+                step = 0.017453292f;
+            } else if (absDiff > 0.017453292f) {
+                step = 0.008726646f;
+            } else if (absDiff < 0.017453292f) {
+                step = 0.0034906587f;
+            }
+            if ((diff < 0.02 && diff > 0.0f) || (diff > -0.02 && diff < 0.0f)) {
+            } else if (diff < 0.0f) {
+                obj->_34 += step;
+            } else {
+                obj->_34 -= step;
+            }
+            obj->_4C = obj->_34;
+        }
+    }
+    if (0.0f == obj->_38 && obj->_BD == 0) {
+        obj->_BC = 1;
+    }
+}
 
 // .text:0x000699D4 size:0x448
 void fn_2_699D4(s32 index) {
