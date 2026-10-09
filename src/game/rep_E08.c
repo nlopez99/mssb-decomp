@@ -754,7 +754,8 @@ void fn_3_657E4(void) {
     s32 i;
     s32 actor;
     s32 charID;
-    u8 human;
+    BOOL human;
+    s8 winner;
 
     ended = FALSE;
     if (g_GameLogic.gameStatus == 0xE) {
@@ -778,20 +779,21 @@ void fn_3_657E4(void) {
                 lbl_3_common_bss_32234[2] = 0;
             }
         } else if (g_GameLogic.gameStatus == 0x27 && g_Minigame._1A3D == 1) {
+            winner = g_Minigame._1908;
             won = FALSE;
             for (i = 0; i < 4; i++) {
-                if (g_Minigame._1E08[i][0] == g_Minigame._1908 && g_Minigame._1E08[i][1] == 0) {
+                if (g_Minigame._1E08[i][0] == winner && g_Minigame._1E08[i][1] == 0) {
                     won = TRUE;
                     break;
                 }
             }
             if (g_Minigame._1E08[0][1] == 0 && g_Minigame._1E08[1][1] == 0 && g_Minigame._1E08[2][1] == 0 &&
                 g_Minigame._1E08[3][1] == 0) {
-                lbl_3_common_bss_32234[2 + g_Minigame._1908] = 2;
+                lbl_3_common_bss_32234[2 + winner] = 2;
             } else if (won) {
-                lbl_3_common_bss_32234[2 + g_Minigame._1908] = 0;
+                lbl_3_common_bss_32234[2 + winner] = 0;
             } else {
-                lbl_3_common_bss_32234[2 + g_Minigame._1908] = 1;
+                lbl_3_common_bss_32234[2 + winner] = 1;
             }
         } else if (g_Minigame.miniGameNumberOfParticipants == 1) {
             for (i = 0; i < 4; i++) {
@@ -1126,6 +1128,7 @@ void fn_3_64BDC(void) {
 // .text:0x00063AF8 size:0x10E4 mapped:0x806A2B8C
 void fn_3_63AF8(void) {
     UnkE08Actor* actor;
+    s32 i;
     s32 player;
     BOOL forced;
     BOOL ended;
@@ -1159,31 +1162,24 @@ void fn_3_63AF8(void) {
             if (g_Strikes.outs < 3) {
                 AnimateCharacter(player, 0x65, 1, 1, 1, 0, lefty, 0xA);
             }
-        } else if (lbl_3_common_bss_32234[0] == 0 && g_Runners[0].batterStayInBattersBoxReason != 0 &&
-                   g_Runners[0].batterStayInBattersBoxReason >= 2) {
+        } else if (lbl_3_common_bss_32234[0] == 0 && g_Runners[0].batterStayInBattersBoxReason != 0 && g_Runners[0].batterStayInBattersBoxReason >= 2) {
             if (lbl_3_common_bss_32220._9 == 0) {
-                switch (g_Batter.hitTrajectory) {
-                case 2:
+                if (g_Batter.hitTrajectory == 2) {
                     lbl_3_common_bss_32220._9 = 1;
-                    break;
-                case 5:
+                } else if (g_Batter.hitTrajectory == 5) {
                     if (g_Ball.framesSinceHit >= 5) {
                         lbl_3_common_bss_32220._9 = 1;
                     }
-                    break;
-                case 6:
+                } else if (g_Batter.hitTrajectory == 6) {
                     AnimateCharacter(player, 0x64, 0, 2, 1, 0, lefty, -1);
                     lbl_3_common_bss_32220._9 = 1;
-                    break;
-                case 3:
+                } else if (g_Batter.hitTrajectory == 3) {
                     AnimateCharacter(player, 0x63, 0, 2, 1, 0, lefty, -1);
                     lbl_3_common_bss_32220._9 = 1;
-                    break;
-                case 4:
+                } else if (g_Batter.hitTrajectory == 4) {
                     AnimateCharacter(player, 0x51, 0, 2, 1, 8, lefty, 0);
                     QueueCharacterAnimation(player, 0x52, 1, 1, 0, lefty, -1);
                     lbl_3_common_bss_32220._9 = 1;
-                    break;
                 }
             }
         } else if (lbl_3_common_bss_32234[0] != 0) {
@@ -1237,19 +1233,14 @@ void fn_3_63AF8(void) {
             if (g_Batter.chargeStatus != 0 && g_Batter.swingInd == 0) {
                 if (g_Pitcher.pitcherActionState != 5) {
                     if (g_Batter.chargeStatus == 3) {
-                        switch (actor->_62) {
-                        case 0x58:
-                        case 0x68:
-                        case 0x4B:
-                            break;
-                        case 0x55:
-                            AnimateCharacter(player, 0x58, 1, 1, 1, 0, lefty, 0x14);
-                            QueueCharacterAnimation(player, 0x4B, 1, 1, 0, lefty, 0xC);
-                            break;
-                        default:
-                            AnimateCharacter(player, 0x68, 0, 1, 1, 0, lefty, 0x14);
-                            QueueCharacterAnimation(player, 0x4B, 1, 1, 0, lefty, 0xC);
-                            break;
+                        if (actor->_62 != 0x58 && actor->_62 != 0x68 && actor->_62 != 0x4B) {
+                            if (actor->_62 == 0x55) {
+                                AnimateCharacter(player, 0x58, 1, 1, 1, 0, lefty, 0x14);
+                                QueueCharacterAnimation(player, 0x4B, 1, 1, 0, lefty, 0xC);
+                            } else {
+                                AnimateCharacter(player, 0x68, 0, 1, 1, 0, lefty, 0x14);
+                                QueueCharacterAnimation(player, 0x4B, 1, 1, 0, lefty, 0xC);
+                            }
                         }
                     } else if (g_Batter.chargeStatus == 1 && g_Batter.chargeFrames == 1) {
                         if (actor->_62 == 0x4B) {
@@ -1343,14 +1334,10 @@ void fn_3_63AF8(void) {
                 }
             }
             forced = FALSE;
-            if (g_Runners[1].runnerOnFieldOrOutOrScored == 1 && g_Runners[1].furthestBaseForcedToGoToOnWalk != 0) {
-                forced = TRUE;
-            }
-            if (g_Runners[2].runnerOnFieldOrOutOrScored == 1 && g_Runners[2].furthestBaseForcedToGoToOnWalk != 0) {
-                forced = TRUE;
-            }
-            if (g_Runners[3].runnerOnFieldOrOutOrScored == 1 && g_Runners[3].furthestBaseForcedToGoToOnWalk != 0) {
-                forced = TRUE;
+            for (i = 1; i < 4; i++) {
+                if (g_Runners[i].runnerOnFieldOrOutOrScored == 1 && g_Runners[i].furthestBaseForcedToGoToOnWalk != 0) {
+                    forced = TRUE;
+                }
             }
             if (g_Batter.hitByPitch != 0) {
                 if (lbl_3_common_bss_32220._8 == 0 || lbl_3_common_bss_32220._8 == 5) {
@@ -1391,7 +1378,8 @@ void fn_3_63AF8(void) {
                             AnimateCharacter(player, 0x5E, 0, 2, 1, 0, lefty, -1);
                         }
                         lbl_3_common_bss_32220._8 = 1;
-                    } else if (actor->_62 == 0x4B || actor->_62 == 0x4C || (actor->_62 >= 0x55 && actor->_62 <= 0x58) ||
+                    } else if (actor->_62 == 0x4B || actor->_62 == 0x4C || actor->_62 == 0x55 ||
+                               actor->_62 == 0x56 || actor->_62 == 0x57 || actor->_62 == 0x58 ||
                                actor->_62 == 0x68) {
                         AnimateCharacter(player, 0x5F, 0, 1, 1, 0, lefty, -1);
                         lbl_3_common_bss_32220._8 = 1;
