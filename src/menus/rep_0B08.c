@@ -1,6 +1,7 @@
 #include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
 #include "menus/rep_0B08.h"
+#include "static/UnknownHomes_Static.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/mtx.h"
 #include "Dolphin/vec.h"
@@ -38,7 +39,9 @@ typedef struct Obj0B08 {
     /* 0x94 */ s16 _94;
     /* 0x96 */ s16 _96;
     /* 0x98 */ s16 _98;
-    /* 0x9A */ u8 _9A[0xA0 - 0x9A];
+    /* 0x9A */ u8 _9A[0x9C - 0x9A];
+    /* 0x9C */ s16 _9C;
+    /* 0x9E */ u8 _9E[0xA0 - 0x9E];
     /* 0xA0 */ s16 _A0;
     /* 0xA2 */ s16 _A2;
     /* 0xA4 */ u8 _A4[0xAC - 0xA4];
@@ -54,7 +57,9 @@ typedef struct Obj0B08 {
     /* 0xBA */ u8 _BA;
     /* 0xBB */ u8 _BB;
     /* 0xBC */ u8 _BC;
-    /* 0xBD */ u8 _BD[0xC0 - 0xBD];
+    /* 0xBD */ u8 _BD;
+    /* 0xBE */ u8 _BE;
+    /* 0xBF */ u8 _BF;
     /* 0xC0 */ u8 _C0;
     /* 0xC1 */ u8 _C1;
     /* 0xC2 */ u8 _C2;
@@ -152,6 +157,8 @@ extern struct {
     /* 0x197746 */ s16 _197746;
     /* 0x197748 */ u8 _197748[0x197756 - 0x197748];
     /* 0x197756 */ s16 _197756[14];
+    /* 0x197772 */ u8 _197772[0x197863 - 0x197772];
+    /* 0x197863 */ s8 _197863;
 } *lbl_2_bss_1A824C;
 
 extern void fn_2_8CD58(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6);
@@ -161,6 +168,9 @@ extern void fn_800B0A14_removeQueue(void);
 extern s32 fn_2_8CC88(s32);
 extern void fn_2_46C88(u8 arg0, s32 arg1);
 extern f32 fn_2_4A18C(f32 angle);
+extern f32 fn_2_4A1E8(f32 x, f32 z);
+extern s16 fn_2_4A150(s16 angle);
+extern s32 fn_2_4A2C4(f32 angle);
 
 // Points to starMissionCompletionTracker
 extern Tracker0B08* lbl_2_bss_1A8248;
@@ -344,6 +354,27 @@ void fn_2_6E848(Obj0B08* obj) { lbl_2_data_2A234[obj->_94](obj); }
 // .text:0x0006DB30 size:0x324
 
 // .text:0x0006D968 size:0x1C8
+void fn_2_6D968(Obj0B08* obj) {
+    s32 index = obj->_80;
+    f32 diff;
+    obj->_4C = atan2(-(lbl_2_bss_1A8248->_1610[0]._00.x - obj->_00.x), -(lbl_2_bss_1A8248->_1610[0]._00.z - obj->_00.z));
+    diff = fn_2_4A18C(obj->_34 - obj->_4C);
+    if ((diff < 0.02 && diff > 0.0f) || (diff > -0.02 && diff < 0.0f)) {
+        obj->_94 = 4;
+    } else if (diff < 0.0f) {
+        obj->_34 += 0.05235988f;
+    } else {
+        obj->_34 -= 0.05235988f;
+    }
+    obj->_4C = obj->_34;
+    if (fn_2_68670(0) == 0) {
+        obj->_A2 = 120;
+        fn_2_68FBC(index, 1);
+        obj->_BA = 9;
+        obj->_38 = obj->_50 = 0.0f;
+        obj->_94 = 2;
+    }
+}
 
 // .text:0x0006D878 size:0xF0
 void fn_2_6D878(Obj0B08* obj) {
@@ -738,6 +769,39 @@ void fn_2_6AF80(s32 index, u8 value) {
 }
 
 // .text:0x0006AE08 size:0x178
+void fn_2_6AE08(void) {
+    Obj0B08* obj;
+    s32 i;
+    for (i = 0; i < 8; i++) {
+        obj = &lbl_2_bss_1A8248->_1610[i];
+        memset(obj, 0, sizeof(Obj0B08));
+        obj->_80 = i;
+        obj->_84 = i;
+        obj->_8C = 0.0f;
+        obj->_B6 = 10;
+        obj->_40 = 0.0003f * obj->_B6 + 0.1f;
+        obj->_B8 = 10;
+        obj->_B7 = 15;
+        obj->_44 = obj->_40 / obj->_B7;
+        obj->_BB = 0;
+        obj->_C0 = 0;
+        obj->_96 = i;
+        obj->_98 = -1;
+        obj->_BC = 1;
+        obj->_C3 = 0;
+        obj->_94 = 0;
+        obj->_C6 = -1;
+        obj->_C4 = 0;
+        obj->_C5 = 0;
+        obj->_88 = 0.0f;
+        obj->_C1 = 0;
+        obj->_BA = 12;
+        obj->_AC = 0;
+        obj->_CA = 0xFF;
+        obj->_CB = -1;
+        obj->_CC = -1;
+    }
+}
 
 // .text:0x0006ACF4 size:0x114
 void fn_2_6ACF4(void) {
@@ -838,6 +902,25 @@ void fn_2_6AAB8(void) {}
 // .text:0x0006A87C size:0x23C
 
 // .text:0x0006A708 size:0x174
+void fn_2_6A708(void) {
+    Vec pos;
+    Vec delta;
+    Obj0B08* obj = &lbl_2_bss_1A8248->_1610[0];
+    memcpy(&pos, &obj->_00, sizeof(Vec));
+    PSVECSubtract(&pos, &lbl_2_data_2A340, &delta);
+    delta.x *= -1.0f;
+    delta.z *= -1.0f;
+    pos.x += lbl_803C77B8[lbl_2_bss_1A824C->_197863]._10 / 768.0f;
+    pos.z += lbl_803C77B8[lbl_2_bss_1A824C->_197863]._11 / 768.0f;
+    if (0.0f != delta.x || 0.0f != delta.z) {
+        lbl_2_bss_A170 = fn_2_4A1E8(delta.z, delta.x);
+    }
+    memcpy(&lbl_2_data_2A340, &obj->_00, sizeof(Vec));
+    obj->_00.x = pos.x;
+    obj->_00.y = pos.y;
+    obj->_00.z = pos.z;
+    obj->_4C = lbl_2_bss_A170;
+}
 
 // .text:0x0006A628 size:0xE0
 void fn_2_6A628(void) {
@@ -918,6 +1001,57 @@ void fn_2_698EC(s32 index, f32 limit) {
 }
 
 // .text:0x00069710 size:0x1DC
+void fn_2_69710(s32 index) {
+    Obj0B08* obj = &lbl_2_bss_1A8248->_1610[index];
+    s16 angle;
+    s16 target;
+    s16 diff;
+    if (obj->_9C == 0) {
+        angle = fn_2_4A2C4(obj->_4C);
+        target = fn_2_4A2C4(obj->_30);
+        diff = fn_2_4A150(angle - target);
+        if (diff < 0x200) {
+            obj->_BE = 0;
+        } else if (diff < 0x600) {
+            obj->_BE = 3;
+        } else if (diff < 0xA00) {
+            obj->_BE = 1;
+        } else if (diff < 0xE00) {
+            obj->_BE = 2;
+        } else {
+            obj->_BE = 0;
+        }
+        if (obj->_BC != 1) {
+            if (obj->_BE == 1) {
+                obj->_BE = 5;
+            } else {
+                obj->_BE = 4;
+            }
+        }
+    }
+    if (obj->_BE == 4 || obj->_BE == 5) {
+        obj->_38 += 0.5f * obj->_44;
+    } else {
+        obj->_38 += obj->_44;
+    }
+    if (obj->_C1 == 0 && obj->_C2 != 0 && obj->_A0 == 0) {
+        obj->_A0 = 30;
+    }
+    if (obj->_C1 != 0) {
+        if (obj->_38 > obj->_40) {
+            obj->_38 = obj->_40;
+        }
+        obj->_A0 = 0;
+    } else if (obj->_A0 != 0) {
+        if (obj->_38 >= obj->_40) {
+            obj->_38 = obj->_40;
+        } else {
+            obj->_A0 = 0;
+        }
+    } else if (obj->_38 > 0.12f) {
+        obj->_38 = 0.12f;
+    }
+}
 
 // .text:0x000696D4 size:0x3C
 void fn_2_696D4(s32 index) {
@@ -930,6 +1064,31 @@ void fn_2_696D4(s32 index) {
 }
 
 // .text:0x00069554 size:0x180
+s32 fn_2_69554(s32 index, f32 x, f32 z) {
+    Obj0B08* obj = &lbl_2_bss_1A8248->_1610[index];
+    f32 dz;
+    f32 dx;
+    f32 sqx;
+    f32 sqz;
+    f32 dist;
+    f32 speed;
+    s32 half;
+    if (x == obj->_00.x && z == obj->_00.z) {
+        return 1;
+    }
+    dz = z - obj->_00.z;
+    dx = x - obj->_00.x;
+    sqx = dx * dx;
+    sqz = dz * dz;
+    dist = dolsqrtf2(sqx + sqz);
+    half = obj->_B7 / 2;
+    if (0.0f == obj->_40) {
+        speed = 1.0f;
+    } else {
+        speed = obj->_40;
+    }
+    return half + (s32)(dist / speed);
+}
 
 // .text:0x000692D0 size:0x284
 
