@@ -3589,8 +3589,9 @@ void fn_2_62D18(MenuTask0AB0* task, MenuItem0AB0* item) {
 }
 
 // .text:0x00062A38 size:0x2E0
-// The target computes hundreds into a saved register before the first call;
-// here MWCC forwards it to the last call. Types and statement orders tried.
+// Registers differ: the target keeps value / 100 in a scratch register and
+// hundreds in r28; here both share one saved register. "%=" stops MWCC from
+// forwarding hundreds to the last call, which "(value / 100) % 10" allows.
 void fn_2_62A38(MenuTask0AB0* task, MenuItem0AB0* item) {
     s32 value;
     s32 hundreds;
@@ -3611,7 +3612,8 @@ void fn_2_62A38(MenuTask0AB0* task, MenuItem0AB0* item) {
             lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
             lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
             value = lbl_2_bss_1A824C->_1972EC[lbl_2_bss_1A824C->_1976FA][item->_0A]._4;
-            hundreds = (value / 100) % 10;
+            hundreds = value / 100;
+            hundreds %= 10;
             fn_800363D8(task, item->_0E, 3, 6, value % 10);
             fn_800363D8(task, item->_0E, 4, 6, (value / 10) % 10);
             fn_800363D8(task, item->_0E, 5, 6, hundreds);
