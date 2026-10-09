@@ -1171,19 +1171,20 @@ void fn_2_87998(MenuTask0DE0* task) {
 }
 
 // .text:0x0008782C size:0x16C
-// 98.35%: the target computes i + 1 and i + 2 from the loop's last i without
-// changing it; base[++i] matches all but those registers.
 void fn_2_8782C(void) {
     u32* base;
     int i;
+    int j;
 
     lbl_2_bss_340140->_3078 = 0;
     base = lbl_2_bss_340140->_2D9C;
     for (i = 0; i < 15; i++) {
         lbl_2_bss_340140->_2DA0[i] = (u8*)base + base[i];
     }
-    lbl_2_bss_34009C._64 = (u8*)base + base[++i];
-    lbl_2_bss_34009C._68 = (u8*)base + base[++i];
+    j = i + 1;
+    lbl_2_bss_34009C._64 = (u8*)base + base[j];
+    j = i + 2;
+    lbl_2_bss_34009C._68 = (u8*)base + base[j];
     for (i = 0; i < 5; i++) {
         void* layout = lbl_2_bss_340140->files[i].layout;
         void* geo = lbl_2_bss_340140->files[i].geo;
