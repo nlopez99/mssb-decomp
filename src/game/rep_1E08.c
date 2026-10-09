@@ -257,7 +257,7 @@ typedef struct {
     /* 0x2C50 */ UnkPlayer1E08* _2C50[13];
     /* 0x2C84 */ u8 _2C84[0x3070 - 0x2C84];
     /* 0x3070 */ void (*_3070)(s32);
-    /* 0x3074 */ void (*_3074)(s32);
+    /* 0x3074 */ void (*_3074)(MtxPtr);
 } Unk8036E548;
 
 extern Unk8036E548 lbl_8036E548;
@@ -310,7 +310,7 @@ extern void fn_80034E20(UnkTask1E08* task, void* desc);
 extern void fn_8003A688(void* arg0, f32 x, f32 y);
 extern BOOL fn_80033928(s32 arg0);
 extern void* fn_80033A24(BOOL (*update)(void*), s32, s32, s32, s32, s32);
-extern void fn_800BD670(UnkActor1E08* actor, s32 arg1);
+extern void fn_800BD670(UnkActor1E08* actor, MtxPtr mtx);
 extern void fn_800BD8C4(UnkActor1E08* actor, s32 arg1);
 extern void fn_800BD548(void* model, s32 count, ...);
 extern void fn_8006C43C(void (*callback)(struct UnkPlayer3F60*, u16, s32, f32));
@@ -960,8 +960,8 @@ void fn_3_BD80C(s32 arg0) {
 }
 
 // .text:0x000BD7DC size:0x30 mapped:0x806FC870
-void fn_3_BD7DC(s32 arg0) {
-    fn_800BD670(lbl_8036E548._0070, arg0);
+void fn_3_BD7DC(MtxPtr mtx) {
+    fn_800BD670(lbl_8036E548._0070, mtx);
 }
 
 // .text:0x000BD7D8 size:0x4 mapped:0x806FC86C
