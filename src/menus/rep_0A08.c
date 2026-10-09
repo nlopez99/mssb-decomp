@@ -78,7 +78,10 @@ extern struct {
     /* 0x4711 */ u8 _4711;
     /* 0x4712 */ u8 _4712[0x472B - 0x4712];
     /* 0x472B */ u8 _472B;
-    /* 0x472C */ u8 _472C[0x4754 - 0x472C];
+    /* 0x472C */ u16 _472C;
+    /* 0x472E */ u16 _472E;
+    /* 0x4730 */ u16 _4730;
+    /* 0x4732 */ u8 _4732[0x4754 - 0x4732];
     /* 0x4754 */ u8 _4754;
     /* 0x4755 */ u8 _4755;
     /* 0x4756 */ u8 _4756;
@@ -122,7 +125,7 @@ extern struct {
     /* 0x0C */ u8 _0C;
     /* 0x0D */ u8 _0D;
     /* 0x0E */ u8 _0E;
-    /* 0x0F */ u8 _0F;
+    /* 0x0F */ s8 _0F;
     /* 0x10 */ u8 _10;
     /* 0x11 */ u8 _11;
     /* 0x12 */ u16 _12;
@@ -141,8 +144,20 @@ extern struct {
     /* 0x23 */ u8 _23;
 } lbl_2_bss_33FBCC;
 
+typedef struct MenuTask0A08 {
+    /* 0x00 */ u8 _00[0x10];
+    /* 0x10 */ s16 _10;
+} MenuTask0A08;
+
 extern void* fn_800B0A5C_insertQueue(void (*)(void), s32);
 extern void fn_800678CC(s32 team);
+extern void fn_8004A34C(void* arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+extern s32 fn_8004CA6C(u16 buttons);
+extern void fn_8004CC2C(void);
+extern void fn_8003BF54(int, int, int, int, int, int, int, int, int);
+extern void fn_2_460EC(s32 arg0);
+extern void* lbl_803CC1B8;
+extern u8 lbl_2_bss_33FB4C[0x80];
 extern void fn_80053FE8(void);
 extern void fn_2_82DE8(void);
 extern void fn_2_89F70(void);
@@ -277,6 +292,66 @@ void fn_2_520A4(void) {
         break;
     case 4:
         fn_2_51A1C();
+        break;
+    }
+}
+
+// .text:0x00051A1C size:0x23C
+void fn_2_51A1C(void) {
+    switch (lbl_2_bss_33FBCC._12) {
+    case 0:
+        if (lbl_2_bss_33FBCC._14 == 0) {
+            fn_8004A34C(lbl_2_bss_33FB4C, 0, 0x2E, 0, 0);
+        } else {
+            fn_8004A34C(lbl_2_bss_33FB4C, 0, 0x2F, 0, 0);
+        }
+        lbl_2_bss_33FBCC._12 = 1;
+        break;
+    case 1:
+        lbl_2_bss_33FBCC._12 = 2;
+        break;
+    case 2:
+        switch (fn_8004CA6C(lbl_8034E9A0._472E)) {
+        case 0:
+            break;
+        case 1:
+            fn_8004CC2C();
+            break;
+        case 3:
+            if (++lbl_2_bss_33FBCC._14 == 2) {
+                fn_2_460EC(lbl_8034E9A0._4754);
+                fn_8003BF54(0, 0, 0, 0, 1, 5, 3, lbl_8034E9A0._4754, 3);
+                lbl_803C50E8._52 = 4;
+                ((MenuTask0A08*)lbl_803CC1B8)->_10 = 0;
+                lbl_2_bss_33FBCC._14 = 0;
+                lbl_2_bss_33FBCC._12 = 3;
+            } else {
+                lbl_2_bss_33FBCC._12 = 0;
+            }
+            break;
+        case 2:
+            fn_8004CC2C();
+            break;
+        case 4:
+            lbl_2_bss_33FBCC._22 = 0x52;
+            lbl_2_bss_33FBCC._0E = 1;
+            lbl_2_bss_33FBCC._0F = -1;
+            lbl_2_bss_33FBCC._12 = 0;
+            lbl_2_bss_33FBCC._14 = 0;
+            lbl_2_bss_9E08 = 5;
+            break;
+        }
+        break;
+    case 3:
+        if (((MenuTask0A08*)lbl_803CC1B8)->_10 != 0) {
+            lbl_2_bss_33FBCC._17 = 0x50;
+            lbl_2_bss_33FBCC._22 = 0x52;
+            lbl_2_bss_33FBCC._0E = 1;
+            lbl_2_bss_33FBCC._0F = -1;
+            lbl_2_bss_33FBCC._12 = 0;
+            lbl_2_bss_33FBCC._14 = 0;
+            lbl_2_bss_9E08 = 5;
+        }
         break;
     }
 }
