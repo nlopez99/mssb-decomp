@@ -49,7 +49,7 @@ void fn_2_468DC(void);
 void fn_2_46ADC(void);
 s32 fn_2_46C24(void);
 void fn_2_46C2C(s32 unused, Vec* src);
-void fn_2_46C88(s32 id);
+void fn_2_46C88(s32 id, s32 unused);
 s32 fn_2_46D00(void);
 void fn_2_46D34(s32 delta);
 void fn_2_472C4(s16* cursor, s16* page, s16 count, s16 cols, s16 flags);

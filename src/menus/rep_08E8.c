@@ -1648,7 +1648,7 @@ s32 fn_2_46D00(void) {
 }
 
 // .text:0x00046C88 size:0x78
-void fn_2_46C88(s32 id) {
+void fn_2_46C88(s32 id, s32 unused) {
     Vec pos;
 
     fn_2_68690(0);
