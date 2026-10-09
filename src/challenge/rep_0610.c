@@ -72,12 +72,18 @@ typedef struct Unk0060 {
     /* 0x34 */ Unk0060Elem _34[1];
 } Unk0060;
 
+typedef struct UnkKey0610 {
+    /* 0x0 */ f32 _0;
+    /* 0x4 */ u8 _4[0x10 - 0x4];
+} UnkKey0610; // size: 0x10
+
 typedef struct UnkAnimRef0610 {
     /* 0x0 */ u8 _0[0x4];
     /* 0x4 */ struct {
         /* 0x0 */ s32 _0;
-        /* 0x4 */ f32* _4;
-        /* 0x8 */ u8 _8[0xC - 0x8];
+        /* 0x4 */ struct UnkKey0610* _4;
+        /* 0x8 */ u16 _8;
+        /* 0xA */ u8 _A[0xC - 0xA];
     }* _4;
 } UnkAnimRef0610;
 
@@ -137,6 +143,9 @@ typedef struct Unk8036E548 {
     /* 0x0140 */ UnkPose0610 _0140[13];
     /* 0x0C04 */ Unk8036E548Actor _0C04[13];
     /* 0x2C50 */ Unk8036E548Actor* _2C50[13];
+    /* 0x2C84 */ u8 _2C84[0x3083 - 0x2C84];
+    /* 0x3083 */ u8 _3083;
+    /* 0x3084 */ u8 _3084;
 } Unk8036E548;
 
 extern Unk8036E548 lbl_8036E548;
@@ -235,6 +244,7 @@ extern void fn_80026130(s32, void*, f32);
 extern void fn_800385F0(struct Unk30C0*, f32, f32, f32, f32);
 extern void fn_80037AA0(struct Unk30C0*, s32, void (*)(s32), u16, UnkTimer0610*);
 extern void fn_800B0A14_removeQueue(void);
+extern void fn_80039A4C(void);
 extern void LITAlloc(LITObj** light);
 extern void LITInitAttn(LITObj* light, f32 a0, f32 a1, f32 a2, f32 k0, f32 k1, f32 k2);
 extern void LITInitColor(LITObj* light, GXColor color);
@@ -402,7 +412,7 @@ static s8 lbl_1_bss_5F70;
 static u32 lbl_1_bss_5F6C;
 static u8 lbl_1_bss_5F69;
 static u8 lbl_1_bss_5F68;
-static u8 lbl_1_bss_5F64[4];
+static f32 lbl_1_bss_5F64;
 static u8 lbl_1_bss_5F63;
 static s8 lbl_1_bss_5F62;
 static s16 lbl_1_bss_5F60;
@@ -1421,6 +1431,72 @@ void fn_1_F040(void) {
     }
 }
 
+// .text:0x0000EA20 size:0x2D8
+// Case 0's loop differs: the target tests the count through a value loaded
+// before the loop but reloads the animation pointer in the body; 86%
+void fn_1_EA20(void) {
+    switch (lbl_1_bss_30B0) {
+    case 0: {
+        Unk0060Elem* elem = &lbl_8036E548._0060->_34[lbl_1_bss_5F73];
+        s32 i;
+        UnkAnimRef0610* ref;
+        s32 anim;
+        lbl_1_bss_5F68 = 1;
+        lbl_1_bss_5F64 = 0.0f;
+        elem->_5C = 0.0f;
+        elem->_59 = 1;
+        lbl_1_bss_30B0 = 1;
+        lbl_1_bss_5F58 = 0;
+        ref = lbl_8036E548._0C04[lbl_1_bss_5F73]._010[lbl_1_bss_6940[lbl_1_bss_5F73]._44];
+        anim = lbl_1_bss_6940[lbl_1_bss_5F73]._45;
+        for (i = 0; i < ref->_4[anim]._8; i++) {
+            if (lbl_1_bss_5F58 < ref->_4[anim]._4[i]._0) {
+                lbl_1_bss_5F58 = ref->_4[anim]._4[i]._0;
+            }
+        }
+        break;
+    }
+    case 1:
+        if (lbl_803C77B8[0]._02 & 0x200) {
+            lbl_1_bss_30B0 = 0;
+            lbl_1_bss_5F71 = 1;
+        } else if (lbl_803C77B8[0]._04 & 1) {
+            if (--lbl_1_bss_30B4 < 0) {
+                lbl_1_bss_30B4 = lbl_1_bss_5F58 - 2;
+            }
+        } else if (lbl_803C77B8[0]._04 & 2) {
+            if (++lbl_1_bss_30B4 > lbl_1_bss_5F58 - 2) {
+                lbl_1_bss_30B4 = 0;
+            }
+        } else if (lbl_803C77B8[0]._04 & 0x100) {
+            lbl_1_bss_5F68 = 0;
+            fn_80039A4C();
+            lbl_8036E548._3084 = lbl_1_bss_5F73;
+            lbl_1_bss_30B0 = 2;
+            lbl_8036E548._2C50[lbl_1_bss_5F73] = &lbl_8036E548._0C04[lbl_1_bss_5F73];
+        }
+        break;
+    default:
+        if (lbl_1_bss_30B0 - 2 == lbl_1_bss_30B4 * 2) {
+            lbl_8036E548._3083 = 1;
+        }
+        lbl_1_bss_30B0++;
+        if (lbl_803C77B8[0]._02 & 0x200) {
+            lbl_1_bss_30B0 = 0;
+            lbl_8036E548._3083 = 0;
+        } else if (lbl_803C77B8[0]._02 & 0x100) {
+            Unk0060Elem* elem = &lbl_8036E548._0060->_34[lbl_1_bss_5F73];
+            elem->_5C = 0.0f;
+            elem->_59 = 1;
+            fn_80039A4C();
+            lbl_8036E548._3084 = lbl_1_bss_5F73;
+            lbl_1_bss_30B0 = 2;
+            lbl_8036E548._2C50[lbl_1_bss_5F73] = &lbl_8036E548._0C04[lbl_1_bss_5F73];
+        }
+        break;
+    }
+}
+
 // .text:0x0000E9F8 size:0x28
 void fn_1_E9F8(UnkList0610* arg0, s32 arg1, s32 arg2) {
     s32 i;
@@ -1531,7 +1607,7 @@ void fn_1_D7A4(s32 arg0) {
             lbl_1_bss_3218[i]._6 = set->_10[i]._1;
             if (set->_10[i]._6 == -2) {
                 if (ref != NULL) {
-                    lbl_1_bss_3218[i]._4 = *ref->_4[frame]._4;
+                    lbl_1_bss_3218[i]._4 = ref->_4[frame]._4->_0;
                 } else {
                     lbl_1_bss_3218[i]._4 = 0;
                 }
