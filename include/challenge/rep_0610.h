@@ -71,6 +71,7 @@ void fn_1_14928(void);
 void fn_1_1496C(void);
 void fn_1_14FB8(void);
 void fn_1_15170(void);
+void fn_1_151F8(void);
 u16 fn_1_160D8(s8 arg0, s8 arg1);
 void fn_1_160F8(s32 arg0);
 void fn_1_161D0(void);

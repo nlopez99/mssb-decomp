@@ -125,17 +125,11 @@ extern UnkTask0610* lbl_803CC1B8;
 typedef struct UnkTaskF50C {
     /* 0x00 */ void (*_00)(void);
     /* 0x04 */ u8 _04[0x14 - 0x4];
-    /* 0x14 */ f32 _14;
-    /* 0x18 */ f32 _18;
-    /* 0x1C */ f32 _1C;
-    /* 0x20 */ f32 _20;
-    /* 0x24 */ f32 _24;
-    /* 0x28 */ f32 _28;
-    /* 0x2C */ f32 _2C;
-    /* 0x30 */ f32 _30;
-    /* 0x34 */ f32 _34;
+    /* 0x14 */ Vec _14;
+    /* 0x20 */ Vec _20;
+    /* 0x2C */ Vec _2C;
     /* 0x38 */ u32 _38;
-    /* 0x3C */ s16 _3C;
+    /* 0x3C */ u16 _3C;
     /* 0x3E */ u8 _3E;
     /* 0x3F */ u8 _3F;
 } UnkTaskF50C;
@@ -194,6 +188,8 @@ extern void fn_80026130(s32, void*, f32);
 extern void fn_800385F0(struct Unk30C0*, f32, f32, f32, f32);
 extern void fn_80037AA0(struct Unk30C0*, s32, void (*)(s32), u16, UnkTimer0610*);
 extern void fn_800B0A14_removeQueue(void);
+extern void fn_8002F1AC(Vec* pos, u32 id);
+extern void fn_8002F258(Vec* pos, u32 id, void* params);
 extern void minigamesSetSomePointers(void);
 extern void fn_800BD2CC(s32 arg0, GXColor color);
 extern void fn_800BD670(void* model, Mtx mtx);
@@ -249,10 +245,12 @@ typedef struct UnkSpark0610 {
 } UnkSpark0610;
 
 extern UnkSpark0610 lbl_1_data_F10C;
-extern struct {
+typedef struct UnkFootprint0610 {
     /* 0x0 */ void* _0;
     /* 0x4 */ s32 _4;
-}* lbl_1_data_F174[2];
+} UnkFootprint0610;
+
+extern UnkFootprint0610* lbl_1_data_F174[2];
 extern void* lbl_1_data_F4DC[3];
 extern UnkBurst0610 lbl_1_data_F2A0;
 extern u16 lbl_1_data_F17C;
@@ -499,6 +497,40 @@ u16 fn_1_160D8(s8 arg0, s8 arg1) {
         return 0xFF0F;
     }
     return 0xFFFF;
+}
+
+// .text:0x000151F8 size:0x214
+void fn_1_151F8(void) {
+    if (lbl_803C77B8[0]._04 & 8) {
+        if (--lbl_1_bss_307C < 0) {
+            lbl_1_bss_307C = 1;
+        }
+    } else if (lbl_803C77B8[0]._04 & 4) {
+        if (++lbl_1_bss_307C >= 2) {
+            lbl_1_bss_307C = 0;
+        }
+    } else if (lbl_803C77B8[0]._04 & 1) {
+        switch (lbl_1_bss_307C) {
+        case 0:
+            fn_1_161D0();
+            break;
+        case 1:
+            fn_1_160F8(-1);
+            break;
+        }
+    } else if (lbl_803C77B8[0]._04 & 2) {
+        switch (lbl_1_bss_307C) {
+        case 0:
+            fn_1_161D0();
+            break;
+        case 1:
+            fn_1_160F8(1);
+            break;
+        }
+    } else if (lbl_803C77B8[0]._04 & 0x200) {
+        lbl_1_bss_307C = 0;
+        lbl_1_bss_5F71 = 1;
+    }
 }
 
 // .text:0x00015170 size:0x88
@@ -889,6 +921,47 @@ void fn_1_F6E4(void) {
     }
 }
 
+// .text:0x0000F50C size:0x1D8
+void fn_1_F50C(void) {
+    UnkTaskF50C* task = (UnkTaskF50C*)lbl_803CC1B8;
+    Unk8036E548Actor* actor = &lbl_8036E548._0C04[lbl_1_bss_5F73];
+    VecXYZ pos;
+    if (actor != NULL) {
+        actor->_034 = task->_14.x;
+        actor->_038 = task->_14.y;
+        actor->_03C = task->_14.z;
+    }
+    fn_80030D88(&task->_14, &task->_20, (UnkBurst0610*)&lbl_1_data_F10C, 5);
+    if (task->_3E != 0) {
+        task->_3E = 0;
+        if (task->_3F != 0) {
+            getAnimRelatedCoordinates(0, 0x1E, &pos);
+            pos.y = 0.0f;
+            fn_8002F258((Vec*)&pos, task->_38, lbl_1_data_F174[0]);
+            getAnimRelatedCoordinates(0, 0x22, &pos);
+            pos.y = 0.0f;
+            fn_8002F258((Vec*)&pos, task->_38 + 1, lbl_1_data_F174[0]);
+        } else {
+            fn_8002F258(&task->_14, task->_38, lbl_1_data_F174[0]);
+        }
+    } else if (task->_3F != 0) {
+        getAnimRelatedCoordinates(0, 0x1E, &pos);
+        pos.y = 0.0f;
+        fn_8002F1AC((Vec*)&pos, task->_38);
+        getAnimRelatedCoordinates(0, 0x22, &pos);
+        pos.y = 0.0f;
+        fn_8002F1AC((Vec*)&pos, task->_38 + 1);
+    } else {
+        fn_8002F1AC(&task->_14, task->_38);
+    }
+    PSVECAdd(&task->_20, &task->_2C, &task->_20);
+    PSVECAdd(&task->_20, &task->_14, &task->_14);
+    task->_3C--;
+    if (task->_3C == 0) {
+        fn_800B0A14_removeQueue();
+    }
+}
+
 // .text:0x0000F37C size:0x190
 // The target computes lbl_1_data_F10C's address before the 10.0f and creates the
 // int-to-float constant before 10.0f and 100000.0f; only scheduling differs
@@ -900,15 +973,15 @@ void fn_1_F37C(void) {
         lbl_1_data_F174[0]->_0 = lbl_1_bss_3098[0];
         lbl_1_data_F174[0]->_4 = 5;
         task = (UnkTaskF50C*)fn_800B0A5C_insertQueue(fn_1_F50C, lbl_803CC1B8->_12 + 1);
-        task->_18 = 0.0f;
-        task->_14 = 0.0f;
-        task->_1C = 10.0f;
-        task->_20 = 0.0f;
-        task->_24 = 0.0f;
-        task->_28 = lbl_1_data_F10C._5C / 100000.0f;
-        task->_2C = 0.0f;
-        task->_30 = 0.0f;
-        task->_34 = lbl_1_data_F10C._60 / 100000.0f;
+        task->_14.y = 0.0f;
+        task->_14.x = 0.0f;
+        task->_14.z = 10.0f;
+        task->_20.x = 0.0f;
+        task->_20.y = 0.0f;
+        task->_20.z = lbl_1_data_F10C._5C / 100000.0f;
+        task->_2C.x = 0.0f;
+        task->_2C.y = 0.0f;
+        task->_2C.z = lbl_1_data_F10C._60 / 100000.0f;
         task->_3C = 0x20;
         task->_3E = 1;
         task->_38 = lbl_1_bss_30A4;
