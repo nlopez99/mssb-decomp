@@ -688,6 +688,14 @@ def function_status(func: Dict[str, Any], base_syms: Optional[Dict[str, "Symbol"
     return "partial"
 
 
+def defined_in_source(unit: Dict[str, Any], function: str) -> bool:
+    path = os.path.join(root_dir, unit.get("metadata", {}).get("source_path", ""))
+    if not os.path.isfile(path):
+        return False
+    with open(path) as f:
+        return re.search(rf"^[^;\n]*\b{re.escape(function)}\s*\([^;{{]*\)\s*\{{", f.read(), re.M) is not None
+
+
 def stub_callees(unit: Dict[str, Any], statuses: Dict[str, str]) -> Dict[str, List[str]]:
     # An empty stub is inlined into its callers, so a caller cannot match until
     # each stub it calls in this unit has a body: list those per function. A
@@ -962,7 +970,12 @@ def run(args: argparse.Namespace, unit: Dict[str, Any], function: Optional[str],
     print(f"{unit['name']}  {result['source']}{built}")
     print(f"{function}  size {int(func['size']):#x}  {shown}  {status.upper()}")
     if status == "missing":
-        print("not in the source yet; target assembly:")
+        if defined_in_source(unit, function):
+            print("in the source, but objdiff cannot pair it: usually a callee inlined into it"
+                  " (an empty stub or a small function the target calls) or the function itself"
+                  " inlined away; target assembly:")
+        else:
+            print("not in the source yet; target assembly:")
         print_listing(target, target_syms, args.max_lines, args.full)
         print_draft(draft, function, args.max_lines, args.full)
         return EXIT_MISMATCH
