@@ -8,7 +8,19 @@
 #include "string.h"
 
 typedef struct LITObj {
-    /* 0x00 */ u8 _00[0xC0];
+    /* 0x00 */ u8 _00[0x40];
+    /* 0x40 */ f32 _40;
+    /* 0x44 */ f32 _44;
+    /* 0x48 */ f32 _48;
+    /* 0x4C */ u8 _4C[0x58 - 0x4C];
+    /* 0x58 */ f32 _58;
+    /* 0x5C */ f32 _5C;
+    /* 0x60 */ f32 _60;
+    /* 0x64 */ u8 _64[0x70 - 0x64];
+    /* 0x70 */ u8 _70;
+    /* 0x71 */ u8 _71;
+    /* 0x72 */ u8 _72;
+    /* 0x73 */ u8 _73[0xC0 - 0x73];
 } LITObj; // size: 0xC0
 
 // Animation or track list: a count and a list of nodes
@@ -386,7 +398,7 @@ static f32 lbl_1_bss_5F74;
 static u8 lbl_1_bss_5F73;
 static u8 lbl_1_bss_5F72;
 static u8 lbl_1_bss_5F71;
-static u8 lbl_1_bss_5F70;
+static s8 lbl_1_bss_5F70;
 static u32 lbl_1_bss_5F6C;
 static u8 lbl_1_bss_5F69;
 static u8 lbl_1_bss_5F68;
@@ -500,6 +512,78 @@ void fn_1_168C8(void) {
         } else {
             lbl_803CC1B8->_00 = fn_1_1770C;
         }
+    }
+}
+
+// .text:0x000165E0 size:0x2E8
+void fn_1_165E0(void) {
+    s16 delta = 0;
+    LITObj* light = lbl_8036E548._00AC[lbl_1_bss_5F70];
+    if (lbl_803C77B8[0]._04 & 1) {
+        delta = -1;
+    } else if (lbl_803C77B8[0]._04 & 2) {
+        delta = 1;
+    } else if (lbl_803C77B8[0]._04 & 8) {
+        if (--lbl_1_bss_307C < 0) {
+            lbl_1_bss_307C = 9;
+        }
+    } else if (lbl_803C77B8[0]._04 & 4) {
+        if (++lbl_1_bss_307C >= 10) {
+            lbl_1_bss_307C = 0;
+        }
+    } else if (lbl_803C77B8[0]._02 & 0x200) {
+        lbl_1_bss_5F70 = 0;
+        lbl_1_bss_307C = 0;
+        lbl_1_bss_5F71 = 1;
+    }
+    if (lbl_803C77B8[0]._00 & 0x400) {
+        delta *= 10;
+    }
+    switch (lbl_1_bss_307C) {
+    case 0:
+        lbl_1_bss_5F70 += delta;
+        if (lbl_1_bss_5F70 < 0) {
+            lbl_1_bss_5F70 = 2;
+        } else if (lbl_1_bss_5F70 >= 3) {
+            lbl_1_bss_5F70 = 0;
+        }
+        break;
+    case 1:
+        light->_70 += delta;
+        if (light->_70 > 255) {
+            light->_70 = 0;
+        }
+        break;
+    case 2:
+        light->_71 += delta;
+        if (light->_71 > 255) {
+            light->_71 = 0;
+        }
+        break;
+    case 3:
+        light->_72 += delta;
+        if (light->_72 > 255) {
+            light->_72 = 0;
+        }
+        break;
+    case 4:
+        light->_40 += delta;
+        break;
+    case 5:
+        light->_44 += delta;
+        break;
+    case 6:
+        light->_48 += delta;
+        break;
+    case 7:
+        light->_58 += delta;
+        break;
+    case 8:
+        light->_5C += delta;
+        break;
+    case 9:
+        light->_60 += delta;
+        break;
     }
 }
 
