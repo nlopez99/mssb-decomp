@@ -86,11 +86,21 @@ typedef struct Item0B08 {
     /* 0x0C */ u8 _0C[0xBC - 0xC];
 } Item0B08; // size: 0xBC
 
+typedef struct Slot0B08 {
+    /* 0x0 */ u8 _0[0x4];
+    /* 0x4 */ u8 _4;
+    /* 0x5 */ u8 _5;
+    /* 0x6 */ u8 _6;
+    /* 0x7 */ u8 _7[0xA - 0x7];
+} Slot0B08; // size: 0xA
+
 typedef struct Tracker0B08 {
     /* 0x0000 */ u8 _0000[0x1610];
     /* 0x1610 */ Obj0B08 _1610[14];
-    /* 0x21E0 */ Item0B08 _21E0[46];
-    /* 0x43A8 */ u8 _43A8[0x441C - 0x43A8];
+    /* 0x21E0 */ Item0B08 _21E0[42];
+    /* 0x40B8 */ u8 _40B8[0x40EE - 0x40B8];
+    /* 0x40EE */ Slot0B08 _40EE[50];
+    /* 0x42E2 */ u8 _42E2[0x441C - 0x42E2];
     /* 0x441C */ u8 _441C;
     /* 0x441D */ u8 _441D;
     /* 0x441E */ u8 _441E;
@@ -150,10 +160,12 @@ extern struct {
     /* 0x00 */ Vec _00;
     /* 0x0C */ u8 _0C[0x14 - 0xC];
 } lbl_2_data_3198[];
+extern s16 lbl_2_data_3C20[5];
 extern s16* lbl_2_data_3C2C[5];
 extern s32 lbl_2_data_3C40[7];
 extern s32 lbl_2_data_3C5C[7];
 extern s16 lbl_2_data_3D30[][4];
+extern s16 lbl_2_data_3ED4[5];
 extern f32 lbl_2_data_3EF4[6];
 extern f32 lbl_2_data_3F0C[8];
 extern f32 lbl_2_data_3F2C[6];
@@ -539,6 +551,62 @@ void fn_2_6F72C(Obj0B08* obj) {
 void fn_2_6F6F4(Obj0B08* obj) { lbl_2_data_2A220[obj->_94](obj); }
 
 // .text:0x0006F104 size:0x5F0
+void fn_2_6F104(Obj0B08* obj) {
+    s16 list[4];
+    s32 count = 0;
+    s32 index;
+    s32 target = lbl_2_bss_1A8248->_1610[0]._80;
+    s32 state;
+    s32 slot;
+    s32 i;
+    s16 id;
+    s16 pick;
+    list[0] = list[1] = list[2] = list[3] = 0;
+    index = obj->_80;
+    fn_2_68F08(obj->_80, 1);
+    for (i = 0; i < 4; i++) {
+        id = lbl_2_data_3D30[lbl_2_bss_1A8248->_1610[index]._B2][i];
+        if (id != -1 && lbl_2_bss_1A8248->_40EE[id]._6 == 0 && lbl_2_bss_1A8248->_40EE[id]._4 != 7 &&
+            lbl_2_bss_1A8248->_40EE[id]._4 != 8) {
+            list[count] = id;
+            count++;
+        }
+    }
+    pick = rand() % count;
+    lbl_2_bss_1A8248->_1610[index]._B0 = list[pick];
+    memcpy(&obj->_74, &lbl_2_data_2EA4[lbl_2_bss_1A8248->_1610[index]._B0], sizeof(Vec));
+    fn_2_6A450(index, obj->_74.x, obj->_74.z);
+    obj->_BA = 13;
+    fn_2_69E1C(index);
+    fn_2_68FBC(index, 0);
+    if (index >= 2 && index <= 6) {
+        state = fn_2_68670(0);
+        slot = fn_2_68690(0);
+        if (state == 1 && slot == index) {
+            fn_2_68FBC(index, 1);
+            obj->_C4 = 2;
+            obj->_CB = 0;
+            obj->_94 = 3;
+            return;
+        }
+    }
+    if (fn_2_68C80(index, target)) {
+        if (index == 1 && lbl_2_bss_1A8248->_44F3 == 0) {
+            fn_2_68FBC(index, 1);
+            obj->_C4 = 2;
+            obj->_CB = 0;
+            obj->_94 = 3;
+        } else if (index >= 2 && index <= 6) {
+            obj->_CB = 0;
+        } else {
+            obj->_CB = -1;
+            obj->_94 = 1;
+        }
+    } else {
+        obj->_CB = -1;
+        obj->_94 = 1;
+    }
+}
 
 // .text:0x0006ED30 size:0x3D4
 void fn_2_6ED30(Obj0B08* obj) {
@@ -666,6 +734,73 @@ void fn_2_6E880(Obj0B08* obj) { obj->_94 = 4; }
 void fn_2_6E848(Obj0B08* obj) { lbl_2_data_2A234[obj->_94](obj); }
 
 // .text:0x0006E1D0 size:0x678
+// 99.95%: list[pick] and obj->_B2 load into each other's registers in the
+// _B2 comparison; declaration orders and operand orders did not change it.
+void fn_2_6E1D0(Obj0B08* obj) {
+    s32 index = obj->_80;
+    s32 target = lbl_2_bss_1A8248->_1610[0]._80;
+    s16 count;
+    s16 pick;
+    s16 chosen;
+    s16* list;
+    s32 state;
+    s32 slot;
+    fn_2_68F08(obj->_80, 1);
+    count = lbl_2_data_3C20[index - 2];
+    list = lbl_2_data_3C2C[index - 2];
+    pick = rand() % count;
+    if (obj->_CF == -1) {
+        obj->_CF = 0;
+        pick = 0;
+    } else if (list[pick] == obj->_B2) {
+        pick ^= 1;
+    }
+    chosen = list[pick];
+    lbl_2_bss_1A8248->_1610[index]._B0 = chosen;
+    memcpy(&obj->_74, &lbl_2_data_2EA4[lbl_2_bss_1A8248->_1610[index]._B0], sizeof(Vec));
+    fn_2_6A450(index, obj->_74.x, obj->_74.z);
+    obj->_BA = 13;
+    fn_2_69E1C(index);
+    fn_2_68FBC(index, 0);
+    if (index >= 2 && index <= 6) {
+        state = fn_2_68670(0);
+        slot = fn_2_68690(0);
+        if (state == 1 && slot == index) {
+            fn_2_68FBC(index, 1);
+            obj->_C4 = 2;
+            obj->_CB = 0;
+            obj->_94 = 4;
+            return;
+        }
+    }
+    if (fn_2_68C80(index, target)) {
+        if (index == 1) {
+            fn_2_68FBC(index, 1);
+            obj->_C4 = 2;
+            obj->_CB = 0;
+            obj->_94 = 3;
+        } else if (index >= 2 && index <= 6) {
+            if (((lbl_2_bss_1A8248->_1610[index]._B2 == chosen && lbl_2_bss_1A8248->_1610[index]._B0 == chosen) ||
+                 (lbl_2_bss_1A8248->_1610[index]._B2 == lbl_2_data_3ED4[index - 2] &&
+                  lbl_2_bss_1A8248->_1610[index]._B0 == lbl_2_data_3ED4[index - 2])) &&
+                obj->_50 <= 0.01f) {
+                obj->_A2 = 120;
+                fn_2_68FBC(index, 1);
+                obj->_BA = 9;
+                obj->_38 = obj->_50 = 0.0f;
+                obj->_CF = 0;
+                obj->_94 = 2;
+            } else {
+                obj->_CB = 0;
+                obj->_CF = -1;
+                obj->_94 = 0;
+            }
+        }
+    } else {
+        obj->_CB = -1;
+        obj->_94 = 1;
+    }
+}
 
 // .text:0x0006DE54 size:0x37C
 void fn_2_6DE54(Obj0B08* obj) {
