@@ -16,6 +16,13 @@ extern void fn_8004CC2C(void);
 extern void changeScene(u8, s16);
 extern void fn_800678CC(s32 team);
 extern void unsure_FillRosterPositions(u8 team);
+extern void characterSelectScreen(s32 team);
+extern void fn_80067F70(s32 team);
+extern void fn_800684A4(void);
+extern void fn_800671FC(void);
+extern void fn_800649BC(void);
+extern void fn_80069854(void);
+extern void fn_2_72630(void);
 extern void fn_800203E0(int, s8);
 extern void sndFXRelated(s32 arg0);
 extern s32 randRange_FUN_80042bf0(s32 min, s32 max);
@@ -57,7 +64,7 @@ typedef struct Menu0318 {
     /* 0x033 */ u8 _33;
     /* 0x034 */ u8 _34;
     /* 0x035 */ u8 _35;
-    /* 0x036 */ u8 _36;
+    /* 0x036 */ s8 _36;
     /* 0x037 */ u8 _37[2];
     /* 0x039 */ u8 _39[2];
     /* 0x03B */ u8 _3B[2];
@@ -95,7 +102,7 @@ extern u8 lbl_2_data_3CE0[8];
 
 extern struct {
     /* 0x00 */ u8 _00[0x4];
-    /* 0x04 */ s16 _4;
+    /* 0x04 */ u16 _4;
     /* 0x06 */ u16 _6;
 }* lbl_803CBBCC;
 typedef struct CharEntry0318 {
@@ -177,6 +184,8 @@ extern struct {
 extern struct {
     /* 0x0000 */ u8 _0000[0xCF5F];
     /* 0xCF5F */ u8 _CF5F;
+    /* 0xCF60 */ u8 _CF60[0xCFA1 - 0xCF60];
+    /* 0xCFA1 */ u8 _CFA1;
 } lbl_803297E0;
 
 typedef struct AramEntry0318 {
@@ -243,6 +252,58 @@ s16 lbl_2_data_E88[2][9] = {
 };
 
 static u8 lbl_2_bss_3A0;
+
+// .text:0x000110B0 size:0x244
+// Inlines fn_2_323C, which the target calls; it pairs once fn_2_323C counts
+// about four more statements (four dead-store blocks there match it).
+void fn_2_110B0(void) {
+    switch (lbl_803CBBCC->_4) {
+    case 0:
+        if (g_d_GameSettings.GameModeSelected == 5 || lbl_803CBBCC->_6 != 9) {
+            lbl_803CBBCC->_4 = 5;
+        } else {
+            lbl_803297E0._CFA1 = 0;
+            lbl_803CBBCC->_4 = 1;
+        }
+        break;
+    case 1:
+        fn_2_86EC();
+        break;
+    case 2:
+        if ((g_d_GameSettings.GameModeSelected == 5 ? lbl_8037169C._12 : 1) != 0) {
+            fn_2_6608();
+        }
+        break;
+    case 3:
+        if (lbl_2_bss_F468._36 < 0 && lbl_803C66B0._5D == 0 && lbl_803C66B0._5E == 0) {
+            fn_2_72630();
+            lbl_2_bss_F468._33 = 0;
+            lbl_803CBBCC->_4 = 4;
+        } else {
+            lbl_2_bss_F468._36--;
+        }
+        break;
+    case 4:
+        fn_2_6484();
+        break;
+    case 5:
+        fn_2_6D3C();
+        break;
+    case 6:
+        fn_2_323C();
+        break;
+    case 7:
+        if (lbl_2_bss_F468._36 < 0) {
+            fn_2_6138();
+        } else {
+            lbl_2_bss_F468._36--;
+        }
+        break;
+    case 8:
+        fn_2_61A0();
+        break;
+    }
+}
 
 // .text:0x000102C8 size:0x234
 void fn_2_102C8(u8 port) {
@@ -795,35 +856,38 @@ void fn_2_6608(void) {
 void fn_2_6484(void) {
     switch (lbl_2_bss_F468._33) {
     case 0:
-        if (lbl_803C66B0._5D == 0 || lbl_803C66B0._5E == 0) {
-            if (lbl_2_bss_F468._34 == 0) {
-                fn_800625A4(0, 0x1E);
-                lbl_2_bss_F468._34 = 1;
-            }
-            lbl_2_bss_F468._33 = 1;
+        if (lbl_803C66B0._5D != 0 && lbl_803C66B0._5E != 0) {
+            break;
         }
+        if (lbl_2_bss_F468._34 == 0) {
+            fn_800625A4(0, 0x1E);
+            lbl_2_bss_F468._34 = 1;
+        }
+        lbl_2_bss_F468._33 = 1;
         break;
     case 1:
-        if (lbl_803C66B0._5D == 0 || lbl_803C66B0._5E == 0) {
-            fn_2_87A8();
+        if (lbl_803C66B0._5D != 0 && lbl_803C66B0._5E != 0) {
+            break;
         }
+        fn_2_87A8();
         break;
     case 2:
-        if (lbl_803C66B0._5D == 0 || lbl_803C66B0._5E == 0) {
-            lbl_8034E9A0._472A = 1;
-            if (lbl_2_bss_F468._35 == 0) {
-                lbl_2_bss_F468._2E = 0;
-                lbl_2_bss_100B4 = 1;
-                lbl_803CBBCC->_4 = 8;
-                fn_800625A4(0, 0x13);
-                fn_800625A4(1, 0x13);
-            } else {
-                fn_800625A4(1, 0x12);
-                lbl_803CBBCC->_4 = 2;
-            }
-            lbl_2_bss_F468._35 = 0;
-            lbl_2_bss_F468._33 = 0;
+        if (lbl_803C66B0._5D != 0 && lbl_803C66B0._5E != 0) {
+            break;
         }
+        lbl_8034E9A0._472A = 1;
+        if (lbl_2_bss_F468._35 == 0) {
+            lbl_2_bss_F468._2E = 0;
+            lbl_2_bss_100B4 = 1;
+            lbl_803CBBCC->_4 = 8;
+            fn_800625A4(0, 0x13);
+            fn_800625A4(1, 0x13);
+        } else {
+            fn_800625A4(1, 0x12);
+            lbl_803CBBCC->_4 = 2;
+        }
+        lbl_2_bss_F468._35 = 0;
+        lbl_2_bss_F468._33 = 0;
         break;
     }
 }
@@ -980,13 +1044,16 @@ s32 fn_2_33BC(void) {
 
 // .text:0x0000323C size:0x180
 void fn_2_323C(void) {
+    s32 result;
+
     switch (lbl_2_bss_3A0) {
     case 0:
         fn_800B0A5C_insertQueue(fn_8004D0F0, 0x3000);
         lbl_2_bss_3A0++;
         break;
     case 1:
-        switch (fn_8004CA6C(lbl_8034E9A0._472E[lbl_803CBD24._4][0])) {
+        result = fn_8004CA6C(lbl_8034E9A0._472E[lbl_803CBD24._4][0]);
+        switch (result) {
         case 0:
             break;
         case 1:
@@ -1020,6 +1087,57 @@ void fn_2_323C(void) {
 // .text:0x00003204 size:0x38
 void fn_2_3204(void) {
     fn_2_2FC0(lbl_803297E0._CF5F, 1, 1);
+}
+
+// .text:0x00002FC0 size:0x244
+// 96.8%: registers in the fn_2_348C loop. Calling fn_2_348C() there matches this
+// function, but then fn_2_3204 and fn_2_323C inline it; the target calls it.
+void fn_2_2FC0(u8 arg0, s32 arg1, s32 arg2) {
+    s32 i;
+    s32 j;
+    s32 locked;
+
+    switch (arg0) {
+    case 9:
+        fn_800684A4();
+        if (arg2 == 0) {
+            break;
+        }
+    case 10:
+        memset(lbl_8034E9A0._4757, 0, sizeof(lbl_8034E9A0._4757));
+        lbl_8034E9A0._4757[lbl_8034E9A0._46E0[0]] = 1;
+        lbl_8034E9A0._4757[lbl_8034E9A0._46E0[1]] = 1;
+        for (i = 0; i < 6; i++) {
+            locked = g_d_GameSettings._1A[i] == 0;
+            for (j = 0; j < 54; j++) {
+                if (lbl_803CB748[i] == lbl_800E8558[j]._2) {
+                    lbl_8034E9A0._4757[j] = locked;
+                }
+            }
+            lbl_803CB748[i] = lbl_803CB748[i];
+        }
+        fn_80067F70(0);
+        fn_80067F70(1);
+        fn_2_8940();
+        fn_800678CC(0);
+        fn_800678CC(1);
+        unsure_FillRosterPositions(0);
+        unsure_FillRosterPositions(1);
+        characterSelectScreen(0);
+        characterSelectScreen(1);
+        fn_80069854();
+        if (arg2 == 0) {
+            break;
+        }
+    case 12:
+        fn_800671FC();
+        if (arg1 != 0) {
+            fn_800649BC();
+        }
+        break;
+    case 11:
+        break;
+    }
 }
 
 // .text:0x00002BB8 size:0x164
