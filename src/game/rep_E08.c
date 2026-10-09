@@ -374,6 +374,8 @@ void fn_3_674E0(void) {
 }
 
 // .text:0x0006714C size:0x394 mapped:0x806A61E0
+// 99.98%: without an actor model the target branches straight to the fn_3_60804 call (beq +0x150);
+// this build branches to the NULL compare before it.
 void fn_3_6714C(BOOL arg0) {
     s32 i;
     s32 slot;
@@ -638,8 +640,8 @@ void fn_3_664FC(void) {
     for (i = 0; i < 9; i++) {
         g_UnkAnimation_31EAC[i]._48 = 0;
     }
-    if (g_GameLogic.gameStatus == 0xB || (u8)(g_GameLogic.gameStatus - 3) <= 2 ||
-        g_GameLogic.secondaryGameMode == 0xA || g_GameLogic.secondaryGameMode == 0x12 ||
+    if (g_GameLogic.gameStatus == 0xB || g_GameLogic.gameStatus == 3 || g_GameLogic.gameStatus == 4 ||
+        g_GameLogic.gameStatus == 5 || g_GameLogic.secondaryGameMode == 0xA || g_GameLogic.secondaryGameMode == 0x12 ||
         (g_d_GameSettings.GameModeSelected == GAME_TYPE_PRACTICE && g_Practice.tutorialState == 0)) {
         if (g_d_GameSettings.GameModeSelected == GAME_TYPE_PRACTICE && g_GameLogic.secondaryGameMode == 0xA &&
             g_Practice.practiceType_1 == 6) {
@@ -681,7 +683,8 @@ void fn_3_66140(void) {
         fn_3_657E4();
     } else if (g_GameLogic.gameStatus >= 0x1B && g_GameLogic.gameStatus <= 0x29) {
         fn_3_65FE0();
-    } else if (((u8)(g_GameLogic.gameStatus - 3) <= 4 || g_GameLogic.secondaryGameMode == 0xA ||
+    } else if ((g_GameLogic.gameStatus == 3 || g_GameLogic.gameStatus == 4 || g_GameLogic.gameStatus == 5 ||
+                 g_GameLogic.gameStatus == 6 || g_GameLogic.gameStatus == 7 || g_GameLogic.secondaryGameMode == 0xA ||
                 g_GameLogic.secondaryGameMode == 0x12 || g_GameLogic.secondaryGameMode == 0xF) &&
                (g_Minigame.GameMode_MiniGame != 2 || g_GameLogic.gameStatus != 7)) {
         for (i = 0; i < 4; i++) {
@@ -1125,6 +1128,8 @@ void fn_3_64BDC(void) {
 }
 
 // .text:0x00063AF8 size:0x10E4 mapped:0x806A2B8C
+// 99.99%: two branch targets. With no batter-box reason the target skips to the end, and after the
+// in-window bunt (0x59 from frame 5) it skips the 0x5B check; a goto past that check matches the second.
 void fn_3_63AF8(void) {
     UnkE08Actor* actor;
     s32 i;
