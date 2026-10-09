@@ -30,7 +30,8 @@ typedef struct UnkAC8Fielder {
     /* 0x034 */ f32 _034;
     /* 0x038 */ f32 _038;
     /* 0x03C */ f32 _03C;
-    /* 0x040 */ u8 _040[0x48 - 0x40];
+    /* 0x040 */ f32 _040;
+    /* 0x044 */ f32 _044;
     /* 0x048 */ f32 _048;
     /* 0x04C */ f32 _04C;
     /* 0x050 */ f32 _050;
@@ -55,7 +56,8 @@ typedef struct UnkAC8Fielder {
     /* 0x0D8 */ f32 _0D8;
     /* 0x0DC */ u8 _0DC[0xE8 - 0xDC];
     /* 0x0E8 */ f32 _0E8;
-    /* 0x0EC */ u8 _0EC[0xF4 - 0xEC];
+    /* 0x0EC */ f32 _0EC;
+    /* 0x0F0 */ f32 _0F0;
     /* 0x0F4 */ f32 _0F4;
     /* 0x0F8 */ f32 _0F8;
     /* 0x0FC */ f32 _0FC;
@@ -211,7 +213,8 @@ typedef struct UnkAC8Fielder {
     /* 0x234 */ f32 _234;
     /* 0x238 */ f32 _238;
     /* 0x23C */ f32 _23C;
-    /* 0x240 */ u8 _240[0x248 - 0x240];
+    /* 0x240 */ f32 _240;
+    /* 0x244 */ f32 _244;
     /* 0x248 */ f32 _248;
     /* 0x24C */ s16 _24C;
     /* 0x24E */ s16 _24E;
@@ -273,6 +276,7 @@ extern s16 fn_3_9FCA4(s16 a, s16 b);
 extern s16 fn_3_9FCF8(s32 a, s32 b);
 extern void getComponentsFromSAng(s16 ang, f32* x, f32* y);
 extern bool calculateLineIntersection(VecXZ* out, VecXZ* a, VecXZ* b);
+extern f32 fn_3_9EFD0(VecXYZ* start, VecXYZ* end, VecXYZ* point, VecXYZ* closest);
 extern u8 lbl_3_data_46F8[][9];
 
 typedef struct {
@@ -8410,8 +8414,104 @@ void fn_3_2C238(s32 fielder, s32 arg1, s32 arg2, u8 arg3, u8 arg4) {
 }
 
 // .text:0x0002BB04 size:0x734 mapped:0x8066AB98
-void fn_3_2BB04(void) {
-    return;
+BOOL fn_3_2BB04(s32 fielder) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    f32 stepX = f->_040;
+    f32 stepZ = f->_044;
+    s32 canDive = TRUE;
+    s32 angled = FALSE;
+    f32 len;
+    f32 dx;
+    f32 dz;
+    f32 dist;
+    s32 i;
+    s32 diff;
+    VecXYZ pts[4]; // segment start and end, point, closest point
+
+    len = dolsqrtf2(stepX * stepX + stepZ * stepZ);
+    if (len) {
+        stepX = 0.1f * (stepX / len);
+        stepZ = 0.1f * (stepZ / len);
+    }
+    if (g_Ball.ballState == 3 || g_Ball.hitWallInd || fielder == 1) {
+        canDive = FALSE;
+    }
+    if (g_Ball.framesOnGroundUntilPickedUp) {
+        if (g_Ball.hitClassification1 == 2) {
+            if (g_Ball.ballVelocity < 0.1f) {
+                canDive = FALSE;
+            }
+        } else if (g_Ball.ballVelocity < 0.05f) {
+            canDive = FALSE;
+        }
+    }
+    if (canDive) {
+        for (i = 1; i < lbl_3_data_49DC[11]; i++) {
+            if (g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y < f->_0F4) {
+                dx = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x - (i * stepX + f->_000);
+                dz = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z - (i * stepZ + f->_008);
+                dist = dolsqrtf2(dx * dx + dz * dz);
+                if (dist < f->_0E8) {
+                    diff = fn_3_9FE6C_normalizeAngle(g_Ball.ballTravelAngle + 0x800);
+                    diff = fn_3_9FCA4(diff, fn_3_9FB8C(dx, dz));
+                    angled = TRUE;
+                    if (diff <= 0x400 && diff >= -0x400) {
+                        goto found;
+                    }
+                }
+            }
+        }
+    } else {
+        for (i = 1; i < lbl_3_data_49DC[11]; i++) {
+            if (g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y < f->_0F4) {
+                dx = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x - (i * stepX + f->_000);
+                dz = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z - (i * stepZ + f->_008);
+                dist = dolsqrtf2(dx * dx + dz * dz);
+                if (dist < f->_0EC) {
+                    goto found;
+                }
+            }
+        }
+    }
+    return FALSE;
+
+found:
+    fn_3_2C238(fielder, 1, i, 0, canDive);
+    if (g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y < f->_0FC) {
+        f->_253 = 0;
+    } else if (g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y < f->_0F8) {
+        f->_253 = 1;
+    } else {
+        f->_253 = 2;
+    }
+    if (canDive && angled) {
+        pts[0].x = f->_000;
+        pts[0].y = f->_004;
+        pts[0].z = f->_008;
+        pts[1].x = 0.0f;
+        pts[1].y = 0.0f;
+        pts[1].z = 0.0f;
+        pts[2].x = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x;
+        pts[2].z = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z;
+        pts[2].y = 0.0f;
+        if (fn_3_9EFD0(&pts[0], &pts[1], &pts[2], &pts[3]) > f->_0F0) {
+            if (diff > 0) {
+                f->_254 = 2;
+            } else if (diff <= 0) {
+                f->_254 = 1;
+            }
+        }
+    }
+    dx = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x - g_Ball.AtBat_Contact_BallPos.x;
+    dz = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z - g_Ball.AtBat_Contact_BallPos.z;
+    if (dx == 0.0f && dz == 0.0f) {
+        f->_240 = g_Ball.AtBat_Contact_BallPos.x;
+        f->_244 = g_Ball.AtBat_Contact_BallPos.z;
+    } else {
+        f->_240 = dx;
+        f->_244 = dz;
+    }
+    return TRUE;
 }
 
 // .text:0x0002B694 size:0x470 mapped:0x8066A728
@@ -8489,13 +8589,164 @@ void fn_3_2B5C0(s32 fielder) {
 }
 
 // .text:0x0002AD68 size:0x858 mapped:0x80669DFC
-void fn_3_2AD68(void) {
-    return;
+BOOL fn_3_2AD68(s32 fielder) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    f32 maxY = 1.2f * f->_0F4;
+    s32 frames = g_Ball.framesUntilThrowReachesDest;
+    s32 i;
+    s32 k;
+    f32 dx;
+    f32 dz;
+    f32 dx2;
+    f32 dz2;
+    f32 dist;
+    s32 diff;
+    VecXYZ pts[4]; // segment start and end, point, closest point
+
+    if (g_FieldingLogic._0C4 < 0) {
+        return FALSE;
+    }
+    if (g_Ball.framesSinceThrowStarted <= 3) {
+        return FALSE;
+    }
+    if (f->_1A8 != 0) {
+        return FALSE;
+    }
+    if (f->_252 == 2) {
+        return FALSE;
+    }
+    if (g_FieldingLogic._0F8[fielder] == 15) {
+        if (g_FieldingLogic._13C == 0) {
+            return FALSE;
+        }
+        if (f->_068 > f->_0E8) {
+            return FALSE;
+        }
+        for (i = lbl_3_data_49DC[23]; i <= lbl_3_data_49DC[22]; i++) {
+            if (!(g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y > f->_0F4)) {
+                dx = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x - f->_000;
+                dz = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z - f->_008;
+                dx2 = dx * dx;
+                dz2 = dz * dz;
+                dist = dolsqrtf2(dx2 + dz2);
+                if (dist < f->_0E8) {
+                    break;
+                }
+            }
+        }
+        if (i > lbl_3_data_49DC[22]) {
+            return FALSE;
+        }
+        goto found;
+    }
+    if (fielder != g_Ball.fielderBeingThrownTo) {
+        return FALSE;
+    }
+    if (g_FieldingLogic._0C4 <= 3) {
+        if (fn_3_9CE0(lbl_3_data_4444[g_FieldingLogic._0C4].x, lbl_3_data_4444[g_FieldingLogic._0C4].z) < f->_0E8) {
+            i = frames - 1;
+            if (i <= 2) {
+                return FALSE;
+            }
+            if (i > lbl_3_data_49DC[12]) {
+                return FALSE;
+            }
+            if (f->_1F5 != g_FieldingLogic._0C4 && i > lbl_3_data_49DC[13]) {
+                return FALSE;
+            }
+            for (k = 0; k < 10; k++) {
+                if (g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y > maxY) {
+                    i++;
+                    break;
+                }
+                dx = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x - f->_000;
+                dz = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z - f->_008;
+                dx2 = dx * dx;
+                dz2 = dz * dz;
+                dist = dolsqrtf2(dx2 + dz2);
+                if (dist > lbl_3_data_4794[f->_1C9]) {
+                    i++;
+                    break;
+                }
+                i--;
+            }
+            goto found;
+        }
+        if (g_Ball.framesSinceThrowStarted <= 20) {
+            return FALSE;
+        }
+        if (fn_3_2ACD8(fielder, frames - 2)) {
+            return TRUE;
+        }
+    } else if (g_FieldingLogic._0C4 == 5 || g_FieldingLogic._0C4 == 6) {
+        for (i = lbl_3_data_49DC[23]; i <= lbl_3_data_49DC[22]; i++) {
+            if (!(g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y > f->_0F4)) {
+                dx = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x - f->_000;
+                dz = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z - f->_008;
+                dx2 = dx * dx;
+                dz2 = dz * dz;
+                dist = dolsqrtf2(dx2 + dz2);
+                if (dist < f->_0E8) {
+                    break;
+                }
+            }
+        }
+        if (i > lbl_3_data_49DC[22]) {
+            return FALSE;
+        }
+        goto found;
+    }
+    return FALSE;
+
+found:
+    fn_3_2C238(fielder, 2, i, 0, 1);
+    if (g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y < f->_0FC) {
+        f->_253 = 0;
+    } else if (g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y < f->_0F8) {
+        f->_253 = 1;
+    } else {
+        f->_253 = 2;
+    }
+    pts[0].x = f->_000;
+    pts[0].y = f->_004;
+    pts[0].z = f->_008;
+    pts[1].x = 0.0f;
+    pts[1].y = 0.0f;
+    pts[1].z = 0.0f;
+    pts[2].x = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x;
+    pts[2].z = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z;
+    pts[2].y = 0.0f;
+    if (fn_3_9EFD0(&pts[0], &pts[1], &pts[2], &pts[3]) > f->_0F0) {
+        dx = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x - f->_000;
+        dz = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z - f->_008;
+        diff = fn_3_9FE6C_normalizeAngle(g_Ball.ballTravelAngle + 0x800);
+        diff = fn_3_9FCA4(diff, fn_3_9FB8C(dx, dz));
+        if (diff > 0) {
+            f->_254 = 2;
+        } else if (diff <= 0) {
+            f->_254 = 1;
+        }
+    }
+    f->_240 = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x - g_Ball.AtBat_Contact_BallPos.x;
+    f->_244 = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z - g_Ball.AtBat_Contact_BallPos.z;
+    return TRUE;
 }
 
+
 // .text:0x0002ACD8 size:0x90 mapped:0x80669D6C
-void fn_3_2ACD8(void) {
-    return;
+BOOL fn_3_2ACD8(s32 fielder, s32 frame) {
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+
+    if (frame < 1) {
+        return FALSE;
+    }
+    if (fn_3_2BB04(fielder)) {
+        return TRUE;
+    }
+    f->_014 = g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.x;
+    f->_01C = g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.z;
+    f->_216 = 1;
+    return FALSE;
 }
 
 // .text:0x0002A69C size:0x63C mapped:0x80669730
