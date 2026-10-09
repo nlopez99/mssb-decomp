@@ -330,21 +330,6 @@ static inline int getActorAnim(UnkE08Actor* actor) {
     return 0xFFFF;
 }
 
-// Sets an actor's remaining frames from its animation's length
-static inline void updateAnimLength(UnkE08Actor* actor) {
-    f32 length;
-    int animIndex;
-
-    if (actor != NULL && actor->_25D != 0) {
-        length = 1.0f;
-        animIndex = getActorAnim(actor);
-        if (animIndex != 0xFFFF) {
-            length = fn_800B4A44(*fn_800111D8(actor), animIndex);
-        }
-        actor->_68 = length / actor->_4C;
-    }
-}
-
 // Whether there is no actor or the actor has no model
 #define ACTOR_HAS_NO_MODEL(actor) ((actor) == NULL || (actor)->_30 == NULL)
 
@@ -447,9 +432,10 @@ void fn_3_67130(void) {
 }
 
 // .text:0x000668BC size:0x874 mapped:0x806A5950
-// 99.62%: the target copies the actor pointer into a saved register right after its NULL
-// test (mr r26,r4) and reads it through both; registers differ in that first loop.
+// 99.92%: in the first loop the actor's saved copy and the animation index swap r26 and r28; the
+// last state test reads 0x5E, 0x5F-0x61, 0x62 in the target and 0x62, 0x5E-0x60, 0x61 here.
 void fn_3_668BC(void) {
+    f32 length;
     s32 i;
     s32 slot;
     s32 player;
@@ -474,7 +460,14 @@ void fn_3_668BC(void) {
     }
     for (i = 0; i < 13; i++) {
         actor = lbl_8036E548._2C50[i];
-        updateAnimLength(actor);
+        if (lbl_8036E548._2C50[i] != NULL && actor->_25D != 0) {
+            length = 1.0f;
+            player = getActorAnim(actor);
+            if (player != 0xFFFF) {
+                length = fn_800B4A44(*fn_800111D8(actor), player);
+            }
+            actor->_68 = length / actor->_4C;
+        }
     }
     if (g_Stats.replayInd != 0 && g_Stats.playFrameCounter == 1 && lbl_8036E548._2C50[9] != NULL && g_Stats._34 != 0) {
         lbl_8036E548._2C50[9]->_68 = g_Stats._34 - 1;
