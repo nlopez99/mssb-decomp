@@ -13,7 +13,12 @@ typedef struct LITObj {
 
 // Animation or track list: a count and a list of nodes
 typedef struct UnkNode0610 {
-    /* 0x00 */ u8 _00[0xE8];
+    /* 0x00 */ u16 _00;
+    /* 0x02 */ u8 _02[0x64 - 0x2];
+    /* 0x64 */ f32 _64;
+    /* 0x68 */ f32 _68;
+    /* 0x6C */ f32 _6C;
+    /* 0x70 */ u8 _70[0xE8 - 0x70];
     /* 0xE8 */ struct {
         /* 0x0 */ f32 _0;
         /* 0x4 */ u8 _4[0xC - 0x4];
@@ -32,9 +37,18 @@ typedef struct UnkList0610 {
 
 typedef struct Unk0060Elem {
     /* 0x00 */ UnkList0610* _00;
-    /* 0x04 */ u8 _04[0x10 - 0x4];
+    /* 0x04 */ void* _04;
+    /* 0x08 */ u8 _08[0xE - 0x8];
+    /* 0x0E */ u16 _0E;
     /* 0x10 */ Control _10;
-    /* 0x54 */ u8 _54[0x68 - 0x54];
+    /* 0x54 */ f32 _54;
+    /* 0x58 */ u8 _58;
+    /* 0x59 */ u8 _59;
+    /* 0x5A */ u8 _5A;
+    /* 0x5B */ u8 _5B;
+    /* 0x5C */ f32 _5C;
+    /* 0x60 */ f32 _60;
+    /* 0x64 */ u8 _64[0x68 - 0x64];
     /* 0x68 */ void* _68;
     /* 0x6C */ u8 _6C;
     /* 0x6D */ u8 _6D[0x90 - 0x6D];
@@ -209,6 +223,13 @@ extern void fn_80026130(s32, void*, f32);
 extern void fn_800385F0(struct Unk30C0*, f32, f32, f32, f32);
 extern void fn_80037AA0(struct Unk30C0*, s32, void (*)(s32), u16, UnkTimer0610*);
 extern void fn_800B0A14_removeQueue(void);
+extern void ACTSetAnimation(UnkList0610* actor, void* animBank, char* sequenceName, u16 seqNum, f32 time, f32 speed);
+extern void fn_800B4CA0(UnkList0610* actor, f32 frame);
+extern void fn_800B4C04(UnkList0610* actor, f32 speed);
+extern void fn_800B4AFC(UnkList0610* actor, s32 flag);
+extern void Set_FUN_800b2b6c(UnkList0610* actor, void* arg1);
+extern void fn_800BDA24(Unk0060Elem* model);
+extern u8 fn_800B3C04(s32 arg0, UnkList0610* actor, Mtx mtx);
 extern void fn_800B2B74(UnkList0610* list, u16 id);
 extern void fn_80052D70(UnkTask0610* task);
 extern void makeLookAtMatrix(Mtx m, const Vec* camPos, const Vec* camUp, const Vec* target);
@@ -760,6 +781,58 @@ void fn_1_1347C(void) {
     lbl_1_bss_67E0._0F8 = 0.0f;
     lbl_1_bss_67E0._0F0 = 0;
     lbl_1_bss_67E0._0F2 = 0;
+}
+
+// .text:0x00012F8C size:0x258
+void fn_1_12F8C(Unk0060* arg0, Mtx arg1) {
+    Mtx m;
+    Vec v;
+    u16 i;
+    for (i = 0; i < arg0->_00; i++) {
+        Unk0060Elem* elem = &arg0->_34[i];
+        UnkList0610* model;
+        if (elem->_00 == NULL) {
+            continue;
+        }
+        if (elem->_58 != 0) {
+            ACTSetAnimation(elem->_00, elem->_04, NULL, elem->_0E, 0.0f, elem->_60);
+        }
+        if (elem->_59 != 0) {
+            fn_800B4CA0(elem->_00, elem->_5C);
+        }
+        if (elem->_5A != 0) {
+            fn_800B4C04(elem->_00, elem->_54);
+        }
+        if (elem->_5B & 2) {
+            fn_800B4AFC(elem->_00, (elem->_5B & 1) != 0);
+        }
+        Set_FUN_800b2b6c(elem->_00, elem->_68);
+        if (arg0->_34[i]._6C != 0) {
+            fn_800BDA24(elem);
+            if (lbl_1_bss_3081 != 0) {
+                v.x = lbl_1_bss_67E0._108.x - lbl_8036E548._0C04[i]._034;
+                v.y = lbl_1_bss_67E0._108.y - lbl_8036E548._0C04[i]._038;
+                v.z = lbl_1_bss_67E0._108.z - lbl_8036E548._0C04[i]._03C;
+                fn_80026134(0, &v);
+                fn_80026130(0, lbl_1_data_ADC4, lbl_1_data_ADC0);
+            }
+            if (lbl_1_bss_308C != 0) {
+                lbl_1_bss_308C = 0;
+                for (i = 0; i < elem->_00->_06; i++) {
+                    UnkNode0610* node = elem->_00->_18[i];
+                    OSReport("#%3d %f %f %f\n", node->_00, node->_64, node->_68, node->_6C);
+                }
+            }
+        }
+        PSMTXTrans(m, lbl_8036E548._0C04[i]._034, lbl_8036E548._0C04[i]._038, lbl_8036E548._0C04[i]._03C);
+        PSMTXConcat(arg1, m, m);
+        model = elem->_00;
+        model->_98 = (model->_98 & 0xFC) | fn_800B3C04(0, model, m);
+        arg0->_34[i]._58 = 0;
+        arg0->_34[i]._59 = 0;
+        arg0->_34[i]._5A = 0;
+        arg0->_34[i]._5B &= 1;
+    }
 }
 
 // .text:0x00012F18 size:0x74
