@@ -1275,6 +1275,82 @@ void fn_1_116EC(void* arg0) {
     SetDisplayStateTexture(arg0, 0, 0);
 }
 
+// .text:0x00010E2C size:0x430
+// Only the scheduling around the fifteenth vertex's color store differs
+void fn_1_10E2C(Mtx arg0, Mtx arg1, u32 color0, u32 color1, u32 color2) {
+    GXCullMode cullMode;
+    Mtx m;
+    GXGetCullMode(&cullMode);
+    PSMTXConcat(arg1, arg0, m);
+    GXLoadPosMtxImm(m, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    GXSetNumTevStages(1);
+    GXSetNumChans(1);
+    GXSetNumTexGens(0);
+    GXSetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+    GXSetChanCtrl(GX_COLOR0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetChanCtrl(GX_ALPHA0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_COPY);
+    GXSetCullMode(GX_CULL_NONE);
+    GXSetZMode(GX_TRUE, GX_ALWAYS, GX_TRUE);
+    GXSetLineWidth(7, GX_TO_ZERO);
+    GXBegin(GX_LINES, GX_VTXFMT0, 22);
+    GXPosition3f32(-0.01f, 0.0f, 0.0f);
+    GXColor1u32(color0);
+    GXPosition3f32(0.2f, 0.0f, 0.0f);
+    GXColor1u32(color0);
+    GXPosition3f32(0.0f, 0.0f, 0.01f);
+    GXColor1u32(color0);
+    GXPosition3f32(0.2f, 0.0f, 0.0f);
+    GXColor1u32(color0);
+    GXPosition3f32(0.0f, 0.0f, -0.01f);
+    GXColor1u32(color0);
+    GXPosition3f32(0.2f, 0.0f, 0.0f);
+    GXColor1u32(color0);
+    GXPosition3f32(-0.01f, 0.0f, 0.0f);
+    GXColor1u32(color0);
+    GXPosition3f32(0.0f, 0.0f, 0.01f);
+    GXColor1u32(color0);
+    GXPosition3f32(-0.01f, 0.0f, 0.0f);
+    GXColor1u32(color0);
+    GXPosition3f32(0.0f, 0.0f, -0.01f);
+    GXColor1u32(color0);
+    GXPosition3f32(0.0f, 0.0f, 0.0f);
+    GXColor1u32(color1);
+    GXPosition3f32(0.0f, 0.05f, 0.0f);
+    GXColor1u32(color1);
+    GXPosition3f32(-0.005f, 0.0f, 0.0f);
+    GXColor1u32(color1);
+    GXPosition3f32(0.0f, 0.05f, 0.0f);
+    GXColor1u32(color1);
+    GXPosition3f32(0.005f, 0.0f, 0.0f);
+    GXColor1u32(color1);
+    GXPosition3f32(0.0f, 0.05f, 0.0f);
+    GXColor1u32(color1);
+    GXPosition3f32(0.0f, 0.0f, 0.0f);
+    GXColor1u32(color2);
+    GXPosition3f32(0.0f, 0.0f, 0.05f);
+    GXColor1u32(color2);
+    GXPosition3f32(-0.005f, 0.0f, 0.0f);
+    GXColor1u32(color2);
+    GXPosition3f32(0.0f, 0.0f, 0.05f);
+    GXColor1u32(color2);
+    GXPosition3f32(0.005f, 0.0f, 0.0f);
+    GXColor1u32(color2);
+    GXPosition3f32(0.0f, 0.0f, 0.05f);
+    GXColor1u32(color2);
+    GXEnd();
+    GXSetLineWidth(6, GX_TO_ZERO);
+    GXSetCullMode(cullMode);
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
+}
+
 // .text:0x00010CEC size:0x140
 void fn_1_10CEC(UnkCamera0610* arg0) {
     Mtx part;
