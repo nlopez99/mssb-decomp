@@ -299,6 +299,7 @@ typedef struct {
 extern UnkAC8Data47D0 lbl_3_data_47D0[6];
 extern VecXZ lbl_3_data_4444[5];
 extern f32 lbl_3_data_4780[5];
+extern VecXZ lbl_3_data_4484[6];
 extern VecXZ lbl_3_data_44B4[11];
 extern VecXZ lbl_3_data_450C[9];
 extern VecXZ lbl_3_data_4554[4][3];
@@ -5076,7 +5077,72 @@ void fn_3_3E34C(s32 fielder) {
 
 // .text:0x0003DB78 size:0x7D4 mapped:0x8067CC0C
 void fn_3_3DB78(s32 fielder) {
-    return;
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    f32 offX;
+    f32 offZ;
+
+    if (fn_3_53130(fielder) != 0) {
+        return;
+    }
+    if (g_Ball.homeRunClassification && fielder <= 1) {
+        return;
+    }
+    if (f->_18C == 5) {
+        if (g_FieldingLogic._0C4 == 5) {
+            fn_3_3BE50(fielder);
+            fn_3_A7C88();
+            if (g_Ball.fielderBeingThrownTo == fielder) {
+                fn_3_4E638();
+            }
+            return;
+        }
+        offZ = 2.0f;
+        offX = 2.0f;
+        if (f->_000 < 0.0f) {
+            offX = -2.0f;
+        }
+        if (f->_008 < lbl_3_data_4444[4].z) {
+            offZ = -2.0f;
+        }
+        if (g_FieldingLogic.playerAtMoundCutoffLocation && f->_050 <= 0.03f) {
+            fn_3_530EC(fielder);
+            return;
+        }
+        fn_3_52F4C(fielder, lbl_3_data_4444[4].x + offX, lbl_3_data_4444[4].z + offZ);
+        fn_3_526DC(fielder);
+        if (f->_068 < 3.0f) {
+            g_FieldingLogic.playerAtMoundCutoffLocation = 1;
+            f->_068 = 0.0f;
+            f->_1D6 = 8;
+        } else {
+            g_FieldingLogic.playerAtMoundCutoffLocation = 0;
+            f->_1D6 = 11;
+        }
+    } else if (f->_18C == 7) {
+        fn_3_52F4C(fielder, lbl_3_data_44B4[fielder + 2].x, lbl_3_data_44B4[fielder + 2].z);
+        fn_3_526DC(fielder);
+        if (f->_068 == 0.0f) {
+            fn_3_5985C(fielder, 0);
+        }
+    } else if (f->_18C >= 8 && f->_18C <= 13) {
+        fn_3_52F4C(fielder, lbl_3_data_4484[f->_18C - 8].x, lbl_3_data_4484[f->_18C - 8].z);
+        fn_3_526DC(fielder);
+        if (f->_068 == 0.0f) {
+            fn_3_5985C(fielder, 0);
+        }
+    } else if (f->_18C == 14) {
+        if (f->_1DE == 0) {
+            fn_3_5985C(fielder, 0);
+            f->_18C = -1;
+        } else {
+            fn_3_526DC(fielder);
+        }
+    } else if (f->_18C == 15) {
+        fn_3_526DC(fielder);
+        if (f->_068 == 0.0f) {
+            fn_3_5985C(fielder, 0);
+        }
+    }
 }
 
 // .text:0x0003D7D4 size:0x3A4 mapped:0x8067C868
