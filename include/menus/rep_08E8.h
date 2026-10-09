@@ -77,7 +77,7 @@ void fn_2_48D08(void);
 void fn_2_48D54(void);
 void fn_2_48DB4(void);
 void fn_2_4906C(void);
-void fn_2_4917C(void* text, s32 value, s32 flags, s32 width, s32 arg4);
+u16* fn_2_4917C(u16* text, s32 value, s32 flags, s32 width, s32 arg4);
 void fn_2_49DB8(s32 arg0, s32 arg1, s32 value, s32 flags, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
 void fn_2_49E5C(s32 arg0, s32 arg1, s32 value, s32 flags, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
 s32 fn_2_49EFC(u16* str, u16 font);
