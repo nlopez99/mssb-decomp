@@ -5,6 +5,8 @@
 
 struct Pad04B0;
 
+void fn_2_13BA4(struct Pad04B0* pad);
+void fn_2_13CA0(struct Pad04B0* pad);
 void fn_2_13D70(struct Pad04B0* pad);
 void fn_2_1406C(struct Pad04B0* pad);
 void fn_2_14164(struct Pad04B0* pad);

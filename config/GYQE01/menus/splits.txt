@@ -65,7 +65,7 @@ menus/rep_0438.c:
 	.bss        start:0x00000AE0 end:0x00001220
 
 menus/rep_04B0.c:
-	.text       start:0x00013D70 end:0x00016870
+	.text       start:0x00013BA4 end:0x00016870
 	.rodata     start:0x000004B0 end:0x00000568
 	.data       start:0x000019E8 end:0x000020F8
 

@@ -176,8 +176,6 @@ extern struct {
 extern void AnimateCharacter(int actor, int anim, u8, u8, u8, s16, u8, int);
 extern void QueueCharacterAnimation(int actor, int anim, u8, u8, s16, u8, int);
 extern void LITXForm(LITObj* light, Mtx view);
-static inline void fn_2_13CA0(Pad04B0* pad);
-static inline void fn_2_13BA4(Pad04B0* pad);
 extern s32 fn_2_14F8(s32 min, s32 max);
 extern u8 fn_2_35D0(u8 port);
 extern void fn_2_12238(void);
@@ -1035,8 +1033,7 @@ void fn_2_13D70(Pad04B0* pad) {
 }
 
 // .text:0x00013CA0 size:0xD0
-// Outside the unit's .text range: inlined into fn_2_14220 (see report)
-static inline void fn_2_13CA0(Pad04B0* pad) {
+void fn_2_13CA0(Pad04B0* pad) {
     if (pad->_4 & 8) {
         lbl_2_bss_100B8._4E--;
         if (lbl_2_bss_100B8._4E < 0) {
@@ -1057,8 +1054,7 @@ static inline void fn_2_13CA0(Pad04B0* pad) {
 }
 
 // .text:0x00013BA4 size:0xFC
-// Outside the unit's .text range: inlined into fn_2_14220 (see report)
-static inline void fn_2_13BA4(Pad04B0* pad) {
+void fn_2_13BA4(Pad04B0* pad) {
     if (pad->_4 & 8) {
         lbl_2_bss_100B8._4F--;
         if (lbl_2_bss_100B8._4F < 0) {
