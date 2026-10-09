@@ -16,15 +16,63 @@ extern void convertTextureHeader(void* tex);
 extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern s32 fn_80035838(void* entry, s32 arg1);
 extern s32 fn_80035DD4(s32 arg0);
-extern void fn_80034E20(void* task, struct SpriteDesc7730* desc);
+extern void fn_80034E20(struct SpriteTask7730* task, struct SpriteDesc7730* desc);
+
+typedef struct AnimFrame7730 {
+    /* 0x00 */ u8 _00[0xC];
+    /* 0x0C */ struct {
+        /* 0x00 */ u8 _00[0xA];
+        /* 0x0A */ u16 _0A;
+    }* _0C;
+} AnimFrame7730;
+
+typedef struct AnimSet7730 {
+    /* 0x00 */ s32 _00;
+    /* 0x04 */ u8 _04[0x8 - 0x4];
+    /* 0x08 */ AnimFrame7730* _08[1];
+} AnimSet7730;
 
 extern struct {
-    /* 0x00 */ u8 _00[0x38];
+    /* 0x00 */ u8 _00[0x34];
+    /* 0x34 */ u8* _34;
     /* 0x38 */ struct {
         /* 0x00 */ u8 _00[0x8];
-        /* 0x08 */ s32* _08;
+        /* 0x08 */ AnimSet7730* _08;
     }* _38;
 } lbl_803C4BE0[20];
+
+typedef struct Sprite7730 {
+    /* 0x00 */ u8 _00[0x48];
+    /* 0x48 */ f32 _48;
+    /* 0x4C */ f32 _4C;
+    /* 0x50 */ u8 _50[0x5C - 0x50];
+    /* 0x5C */ s32 _5C;
+    /* 0x60 */ u8 _60[0x66 - 0x60];
+    /* 0x66 */ u8 _66;
+    /* 0x67 */ u8 _67;
+    /* 0x68 */ u8 _68;
+} Sprite7730;
+
+extern struct {
+    /* 0x00 */ Sprite7730* _00;
+    /* 0x04 */ u8 _04[0x8 - 0x4];
+} lbl_80371C30[];
+
+typedef struct SpriteTask7730 {
+    /* 0x00 */ u8 _00[0x10];
+    /* 0x10 */ s16 _10;
+    /* 0x12 */ u8 _12[0x14 - 0x12];
+    /* 0x14 */ u16 _14;
+} SpriteTask7730;
+
+typedef struct AnimKey7730 {
+    /* 0x00 */ u8 _00[0x6];
+    /* 0x06 */ u16 _06;
+    /* 0x08 */ u8 _08[0x50 - 0x8];
+} AnimKey7730;
+
+extern void fn_80034CEC(SpriteTask7730* task);
+extern void fn_8000CEF0(void* anim, u8 frame, s32 arg2, u8 arg3, AnimKey7730* key);
 
 extern void* ARAMTransfer(void* entry, int arg1, int arg2, u32 aram);
 extern void* fn_800B0A5C_insertQueue(void (*)(void), s32);
@@ -111,10 +159,10 @@ typedef struct LoadTask7730 {
     /* 0x0C */ SprTask7730* _0C;
     /* 0x10 */ s16 _10;
     /* 0x12 */ u8 _12[0x14 - 0x12];
-    /* 0x14 */ void* _14;
+    /* 0x14 */ struct SpriteTask7730* _14;
     /* 0x18 */ u16 _18;
-    /* 0x1A */ u16 _1A;
-    /* 0x1C */ u16 _1C;
+    /* 0x1A */ s16 _1A;
+    /* 0x1C */ s16 _1C;
     /* 0x1E */ u8 _1E;
     /* 0x1F */ u8 _1F;
     /* 0x20 */ u8 _20;
@@ -288,7 +336,9 @@ typedef struct RopeParams7730 {
 typedef struct SpriteDesc7730 {
     /* 0x00 */ u16 _00;
     /* 0x02 */ u16 _02;
-    /* 0x04 */ s32 _04[3];
+    /* 0x04 */ f32 _04;
+    /* 0x08 */ f32 _08;
+    /* 0x0C */ s32 _0C;
     /* 0x10 */ u8 _10[2];
     /* 0x12 */ s16 _12;
     /* 0x14 */ s32 _14[3];
@@ -448,7 +498,7 @@ static char lbl_1_data_FF98[47][20] = {
 
 // Read by fn_80034E20; a _00 of 3 ends the list.
 static SpriteDesc7730 lbl_1_data_10344[2] = {
-    { 0, 0, { 0, 0, -1 }, { 1, 4 }, 0xFF, { 0, 0, 0 } },
+    { 0, 0, 0.0f, 0.0f, -1, { 1, 4 }, 0xFF, { 0, 0, 0 } },
     { 3 },
 };
 
@@ -674,12 +724,12 @@ void fn_1_267F4(void) {
         break;
     case 1:
         task->_14 = fn_800B0A5C_insertQueue(fn_1_267BC, 1);
-        ((SprTask7730*)task->_14)->_10 = 0;
+        task->_14->_10 = 0;
         id = fn_80035DD4(0);
         if (id == -1) {
             OSPanic("spr.c", 245, "It is a number not registered. \n");
         }
-        task->_18 = *lbl_803C4BE0[id]._38->_08;
+        task->_18 = lbl_803C4BE0[id]._38->_08->_00;
         fn_80034E20(task->_14, lbl_1_data_10344);
         task->_21 = 0;
         task->_22 = 0;
@@ -695,6 +745,170 @@ void fn_1_267F4(void) {
 void fn_1_267BC(void) {
     if (((SprTask7730*)lbl_803CC1B8)->_10 != 0) {
         fn_800B0A14_removeQueue();
+    }
+}
+
+// .text:0x00025F98 size:0x824
+// 99.85%: in case 3 the target keeps the sprite index's shift in r6 and the key in r0;
+// the base swaps them.
+void fn_1_25F98(void) {
+    LoadTask7730* task = lbl_803CC1B8;
+    AnimKey7730 key;
+    s32 i;
+
+    for (i = 0; i < 6; i++) {
+        switch (i) {
+        case 0:
+            if (i == task->_22) {
+                if (lbl_803C77B8[0]._04 & 2) {
+                    fn_80034CEC(task->_14);
+                    task->_21++;
+                    if (task->_21 == task->_18) {
+                        task->_21 = 0;
+                    }
+                    task->_24 = 0;
+                    lbl_1_data_10344[0]._02 = task->_21;
+                    fn_80034E20(task->_14, lbl_1_data_10344);
+                } else if (lbl_803C77B8[0]._04 & 1) {
+                    fn_80034CEC(task->_14);
+                    if (task->_21 == 0) {
+                        task->_21 = task->_18;
+                    }
+                    task->_21--;
+                    task->_24 = 0;
+                    lbl_1_data_10344[0]._02 = task->_21;
+                    fn_80034E20(task->_14, lbl_1_data_10344);
+                } else if (lbl_803C77B8[0]._02 & 0x100) {
+                    lbl_80371C30[task->_14->_14]._00->_68 = 1;
+                } else if (lbl_803C77B8[0]._02 & 0x200) {
+                    lbl_80371C30[task->_14->_14]._00->_68 = 0;
+                } else if (lbl_803C77B8[0]._02 & 0x400) {
+                    lbl_80371C30[task->_14->_14]._00->_5C = 0;
+                }
+            }
+            break;
+        case 1:
+            if (i == task->_22) {
+                if (lbl_803C77B8[0]._02 & 0x100) {
+                    task->_23 = !task->_23;
+                }
+                if (task->_23 != 0) {
+                    lbl_80371C30[task->_14->_14]._00->_68 = 0;
+                } else {
+                    lbl_80371C30[task->_14->_14]._00->_68 = 1;
+                }
+                if (lbl_803C77B8[0]._04 & 2) {
+                    if (task->_23 != 0) {
+                        lbl_80371C30[task->_14->_14]._00->_68 = 1;
+                    }
+                } else if (lbl_803C77B8[0]._04 & 1) {
+                    if (task->_23 != 0) {
+                        lbl_80371C30[task->_14->_14]._00->_68 = 4;
+                    }
+                }
+            }
+            break;
+        case 2:
+            if (i == task->_22) {
+                if (lbl_803C77B8[0]._04 & 2) {
+                    task->_24++;
+                } else if (lbl_803C77B8[0]._04 & 1) {
+                    task->_24--;
+                }
+            }
+            fn_8000CEF0(lbl_803C4BE0[lbl_80371C30[task->_14->_14]._00->_66]._38, task->_21, 0, task->_24, &key);
+            break;
+        case 3:
+            if (i == task->_22) {
+                if (lbl_803C77B8[0]._04 & 2) {
+                    key._06++;
+                } else if (lbl_803C77B8[0]._04 & 1) {
+                    key._06--;
+                }
+                lbl_803C4BE0[lbl_80371C30[task->_14->_14]._00->_66]._38->_08->_08[task->_21]->_0C->_0A = key._06;
+            }
+            break;
+        case 4:
+            if (i == task->_22) {
+                if (lbl_803C77B8[0]._04 & 0x800) {
+                    task->_1A = 0;
+                } else if (lbl_803C77B8[0]._04 & 0x400) {
+                    task->_1A = 320;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    task->_1A += 8;
+                } else if (lbl_803C77B8[0]._04 & 1) {
+                    task->_1A -= 8;
+                }
+                lbl_1_data_10344[0]._04 = task->_1A;
+                lbl_80371C30[task->_14->_14]._00->_48 = task->_1A;
+            }
+            break;
+        case 5:
+            if (i == task->_22) {
+                if (lbl_803C77B8[0]._04 & 0x800) {
+                    task->_1C = 0;
+                } else if (lbl_803C77B8[0]._04 & 0x400) {
+                    task->_1C = 224;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    task->_1C += 8;
+                } else if (lbl_803C77B8[0]._04 & 1) {
+                    task->_1C -= 8;
+                }
+                lbl_1_data_10344[0]._08 = task->_1C;
+                lbl_80371C30[task->_14->_14]._00->_4C = task->_1C;
+            }
+            break;
+        }
+    }
+    if (lbl_803C77B8[0]._02 & 4) {
+        task->_22++;
+        if (task->_22 == 6) {
+            task->_22 = 0;
+        }
+    } else if (lbl_803C77B8[0]._02 & 8) {
+        if (task->_22 == 0) {
+            task->_22 = 6;
+        }
+        task->_22--;
+    }
+    if (lbl_803C77B8[0]._02 & 0x1000) {
+        fn_80034CEC(task->_14);
+        task->_14->_10 = 1;
+        ((LoadTask7730*)lbl_803CC1B8)->_00 = fn_1_26928;
+        fn_80035A00();
+    }
+    {
+        Mtx m = {
+            { 1.0f, 0.0f, 0.0f, 0.0f },
+            { 0.0f, 1.0f, 0.0f, 0.0f },
+            { 0.0f, 0.0f, 1.0f, 0.0f },
+        };
+
+        if (lbl_1_bss_6BD8 != 0) {
+            GXClearVtxDesc();
+            GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+            GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+            GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+            GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U16, 0);
+            GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+            GXSetNumChans(0);
+            GXSetNumTexGens(1);
+            GXSetNumTevStages(1);
+            GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR_NULL);
+            GXSetTevOp(GX_TEVSTAGE0, GX_REPLACE);
+            GXLoadPosMtxImm(m, GX_PNMTX0);
+            GXSetCurrentMtx(GX_PNMTX0);
+            SetDisplayStateTexture(lbl_803C4BE0[lbl_80371C30[task->_14->_14]._00->_66]._34 + lbl_1_bss_6BDC * 32 + 4, 0, 0);
+            GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+            GXPosition3f32(-0.5f, -0.35f, -2.0f);
+            GXTexCoord2s16(0, 0);
+            GXPosition3f32(-0.5f, 0.35f, -2.0f);
+            GXTexCoord2s16(0, 1);
+            GXPosition3f32(0.5f, 0.35f, -2.0f);
+            GXTexCoord2s16(1, 1);
+            GXPosition3f32(0.5f, -0.35f, -2.0f);
+            GXTexCoord2s16(1, 0);
+        }
     }
 }
 
