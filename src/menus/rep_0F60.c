@@ -87,7 +87,9 @@ typedef struct Player0F60 {
     /* 0x253 */ u8 _253;
     /* 0x254 */ u8 _254;
     /* 0x255 */ u8 _255;
-    /* 0x256 */ u8 _256[0x25D - 0x256];
+    /* 0x256 */ u8 _256;
+    /* 0x257 */ s8 _257;
+    /* 0x258 */ u8 _258[0x25D - 0x258];
     /* 0x25D */ u8 _25D;
     /* 0x25E */ u8 _25E;
     /* 0x25F */ u8 _25F;
@@ -134,6 +136,14 @@ typedef struct AramEntry0F60 {
     /* 0xC */ u32 _C;
 } AramEntry0F60; // size: 0x10
 
+typedef struct Anims0F60 {
+    /* 0x00 */ u8 _00[0x10];
+    /* 0x10 */ ANIMBank* _10[7];
+    /* 0x2C */ ANIMBank* _2C[2];
+    /* 0x34 */ ANIMBank* _34[7];
+    /* 0x50 */ u8 _50[0x74 - 0x50];
+} Anims0F60; // size: 0x74
+
 typedef struct Game0F60 {
     /* 0x0000 */ u8 _0000[0x68];
     /* 0x0068 */ ModelTable0F60* _0068;
@@ -142,7 +152,9 @@ typedef struct Game0F60 {
     /* 0x00B0 */ s32 _00B0;
     /* 0x00B4 */ s32 _00B4;
     /* 0x00B8 */ s32 _00B8;
-    /* 0x00BC */ u8 _00BC[0xC04 - 0xBC];
+    /* 0x00BC */ u8 _00BC[0x13C - 0xBC];
+    /* 0x013C */ s32 _013C;
+    /* 0x0140 */ u8 _0140[0xC04 - 0x140];
     /* 0x0C04 */ Player0F60 _0C04[9];
     /* 0x2260 */ u8 _2260[0x2C50 - 0x2260];
     /* 0x2C50 */ Player0F60* _2C50[9];
@@ -150,12 +162,25 @@ typedef struct Game0F60 {
     /* 0x2C88 */ u8* _2C88;
     /* 0x2C8C */ u8* _2C8C;
     /* 0x2C90 */ u32 _2C90;
-    /* 0x2C94 */ u8 _2C94[0x2D94 - 0x2C94];
+    /* 0x2C94 */ u8 _2C94[0x2D6A - 0x2C94];
+    /* 0x2D6A */ s8 _2D6A[9];
+    /* 0x2D73 */ u8 _2D73[0x2D77 - 0x2D73];
+    /* 0x2D77 */ u8 _2D77;
+    /* 0x2D78 */ u8 _2D78[0x2D7B - 0x2D78];
+    /* 0x2D7B */ u8 _2D7B;
+    /* 0x2D7C */ u8 _2D7C[0x2D7F - 0x2D7C];
+    /* 0x2D7F */ s8 _2D7F[9];
+    /* 0x2D88 */ u8 _2D88;
+    /* 0x2D89 */ s8 _2D89[4];
+    /* 0x2D8D */ u8 _2D8D[0x2D94 - 0x2D8D];
     /* 0x2D94 */ Entry0F60* _2D94;
     /* 0x2D98 */ u8 _2D98[0x2D9C - 0x2D98];
     /* 0x2D9C */ s32* _2D9C;
-    /* 0x2DA0 */ ActorFiles0F60 _2DA0[4];
-    /* 0x2DD0 */ u8 _2DD0[0x3078 - 0x2DD0];
+    union {
+        /* 0x2DA0 */ ActorFiles0F60 _2DA0[19];
+        /* 0x2DA0 */ void* _2DA0w[57];
+    };
+    /* 0x2E84 */ u8 _2E84[0x3078 - 0x2E84];
     /* 0x3078 */ u16 _3078;
     /* 0x307A */ u8 _307A;
 } Game0F60;
@@ -192,8 +217,8 @@ typedef struct Obj0F60 {
 
 extern Game0F60* lbl_2_bss_340140;
 extern Game0F60 lbl_8036E548;
-extern u8* lbl_2_bss_3401BC;
-extern u8 lbl_2_bss_3401C0[0x74];
+extern Anims0F60* lbl_2_bss_3401BC;
+extern Anims0F60 lbl_2_bss_3401C0;
 extern Tracker0F60* lbl_2_bss_1A8248;
 extern void* lbl_803CC1B8;
 extern struct {
@@ -226,6 +251,9 @@ extern f32 fn_2_4A1E8(f32 x, f32 y);
 extern void fn_2_190DC(ModelTable0F60* table, MtxPtr view);
 extern void* ARAMTransfer(AramEntry0F60* entry, s32 arg1, s32 arg2, u32 aram);
 extern void fn_80052D70(void);
+extern void fn_80023B04(void);
+extern void fn_80014204(s16 count);
+extern s32 fn_80023AA4(void);
 extern ActorRef0F60* fn_800111D8(Player0F60* player);
 extern f32 fn_800B4A44(ActorObj0F60* actor, u16 anim);
 extern void fn_800B2B54(ActorObj0F60* actor, u16 anim, s32 arg2);
@@ -332,7 +360,7 @@ void fn_2_8EA80(void) {
     switch (task->_28) {
     case 0:
         lbl_2_bss_340140 = &lbl_8036E548;
-        lbl_2_bss_3401BC = lbl_2_bss_3401C0;
+        lbl_2_bss_3401BC = &lbl_2_bss_3401C0;
         task->_14 = 0;
         fn_2_4E824();
         fn_80052D70();
@@ -497,6 +525,58 @@ void fn_2_8E478(void) {
         task->_28 = 0;
         break;
     }
+}
+
+// .text:0x0008DCD8 size:0x2D8
+void fn_2_8DCD8(void) {
+    u32 max;
+    s32 i;
+    s32 size;
+    u32 size2;
+    s32 j;
+
+    max = 0;
+    for (i = 0; i < 13; i++) {
+        if (max < (lbl_2_data_2F990[i]._4 & 0x0FFFFFFF)) {
+            max = lbl_2_data_2F990[i]._4 & 0x0FFFFFFF;
+        }
+    }
+    size = (max + 0x1F) & ~0x1F;
+    lbl_2_bss_340140->_2C8C = _OSAllocFromHeap(0x20, size * lbl_2_bss_1A824C->_197746);
+    for (i = 0; i < lbl_2_bss_1A824C->_197746; i++) {
+        lbl_2_bss_340140->_0C04[i]._008 = lbl_2_bss_340140->_2C8C + i * size;
+    }
+
+    max = 0;
+    for (i = 0; i < lbl_2_bss_1A824C->_197746; i++) {
+        if (max < (lbl_2_data_2F990[i]._4 & 0x0FFFFFFF)) {
+            max = lbl_2_data_2F990[i]._4 & 0x0FFFFFFF;
+        }
+    }
+    size2 = (max + 0x1F) & ~0x1F;
+    lbl_2_bss_340140->_2C90 = size2;
+    lbl_2_bss_340140->_2C88 = _OSAllocFromHeap(0x20, size2 * lbl_2_bss_1A824C->_197746);
+    for (i = 0; i < lbl_2_bss_1A824C->_197746; i++) {
+        lbl_2_bss_340140->_0C04[i]._010 = NULL;
+    }
+
+    fn_80023B04();
+    fn_80014204(lbl_2_bss_1A824C->_197746);
+    lbl_2_bss_340140->_013C = fn_80023AA4();
+    for (j = 0; j < lbl_2_bss_1A824C->_197746; j++) {
+        lbl_2_bss_340140->_0C04[j]._255 = j;
+        lbl_2_bss_340140->_2C50[j] = NULL;
+        lbl_2_bss_340140->_2D6A[j] = -1;
+        lbl_2_bss_340140->_0C04[j]._257 = -1;
+    }
+    for (i = 0; i < 9; i++) {
+        lbl_2_bss_340140->_2D7F[i] = -1;
+    }
+    for (i = 0; i < 4; i++) {
+        lbl_2_bss_340140->_2D89[i] = -1;
+    }
+    lbl_2_bss_340140->_2D77 = 0;
+    lbl_2_bss_340140->_2D7B = 0;
 }
 
 // .text:0x0008DC00 size:0xD8
@@ -717,6 +797,54 @@ void fn_2_8CCAC(s32 idx, s32 arg1) {
     }
 }
 
+// .text:0x0008C910 size:0x378
+void fn_2_8C910(void) {
+    int i;
+    s32 k;
+    s32* hdr;
+    void* layout;
+    void* geo;
+    void* tex;
+
+    lbl_2_bss_340140->_3078 = 0;
+    hdr = lbl_2_bss_340140->_2D9C;
+    for (i = 0; i < 57; i++) {
+        lbl_2_bss_340140->_2DA0w[i] = (u8*)hdr + hdr[i];
+    }
+    for (k = 0; k < 7; k++, i++) {
+        lbl_2_bss_3401BC->_10[k] = (ANIMBank*)((u8*)hdr + hdr[i]);
+        ANIMGet(lbl_2_bss_3401BC->_10[k]);
+    }
+    for (k = 0; k < 2; k++, i++) {
+        lbl_2_bss_3401BC->_2C[k] = (ANIMBank*)((u8*)hdr + hdr[i]);
+        ANIMGet(lbl_2_bss_3401BC->_2C[k]);
+    }
+    lbl_2_bss_3401BC->_34[0] = (ANIMBank*)((u8*)hdr + hdr[i]);
+    ANIMGet(lbl_2_bss_3401BC->_34[0]);
+    lbl_2_bss_3401BC->_34[1] = (ANIMBank*)((u8*)hdr + hdr[i + 1]);
+    ANIMGet(lbl_2_bss_3401BC->_34[1]);
+    lbl_2_bss_3401BC->_34[2] = (ANIMBank*)((u8*)hdr + hdr[i + 2]);
+    ANIMGet(lbl_2_bss_3401BC->_34[2]);
+    lbl_2_bss_3401BC->_34[3] = (ANIMBank*)((u8*)hdr + hdr[i + 3]);
+    ANIMGet(lbl_2_bss_3401BC->_34[3]);
+    lbl_2_bss_3401BC->_34[4] = (ANIMBank*)((u8*)hdr + hdr[i + 4]);
+    ANIMGet(lbl_2_bss_3401BC->_34[4]);
+    lbl_2_bss_3401BC->_34[5] = (ANIMBank*)((u8*)hdr + hdr[i + 5]);
+    ANIMGet(lbl_2_bss_3401BC->_34[5]);
+    lbl_2_bss_3401BC->_34[6] = (ANIMBank*)((u8*)hdr + hdr[i + 6]);
+    ANIMGet(lbl_2_bss_3401BC->_34[6]);
+    for (i = 0; i < 19; i++) {
+        layout = lbl_2_bss_340140->_2DA0[i].layout;
+        geo = lbl_2_bss_340140->_2DA0[i].geo;
+        tex = lbl_2_bss_340140->_2DA0[i].tex;
+        LoadActorLayout(layout);
+        convertGeometryAndSknHeader(geo, NULL);
+        haveActLayoutPointToGeoHeader(layout, geo);
+        convertTextureHeader(tex);
+        fn_800BD190(geo, tex);
+    }
+}
+
 // .text:0x0008CC88 size:0x24
 s32 fn_2_8CC88(s32 idx) {
     return lbl_8036E548._2C50[idx]->_068 == 0;
@@ -755,7 +883,7 @@ void fn_2_8C724(void) {
 
 // .text:0x0008B2C0 size:0x158
 void fn_2_8B2C0(void) {
-    s32 i;
+    int i;
     s32* hdr;
     void* layout;
     void* geo;
@@ -763,18 +891,9 @@ void fn_2_8B2C0(void) {
 
     lbl_2_bss_340140->_3078 = 0;
     hdr = lbl_2_bss_340140->_2D9C;
-    lbl_2_bss_340140->_2DA0[0].layout = (u8*)hdr + hdr[0];
-    lbl_2_bss_340140->_2DA0[0].geo = (u8*)hdr + hdr[1];
-    lbl_2_bss_340140->_2DA0[0].tex = (u8*)hdr + hdr[2];
-    lbl_2_bss_340140->_2DA0[1].layout = (u8*)hdr + hdr[3];
-    lbl_2_bss_340140->_2DA0[1].geo = (u8*)hdr + hdr[4];
-    lbl_2_bss_340140->_2DA0[1].tex = (u8*)hdr + hdr[5];
-    lbl_2_bss_340140->_2DA0[2].layout = (u8*)hdr + hdr[6];
-    lbl_2_bss_340140->_2DA0[2].geo = (u8*)hdr + hdr[7];
-    lbl_2_bss_340140->_2DA0[2].tex = (u8*)hdr + hdr[8];
-    lbl_2_bss_340140->_2DA0[3].layout = (u8*)hdr + hdr[9];
-    lbl_2_bss_340140->_2DA0[3].geo = (u8*)hdr + hdr[10];
-    lbl_2_bss_340140->_2DA0[3].tex = (u8*)hdr + hdr[11];
+    for (i = 0; i < 12; i++) {
+        lbl_2_bss_340140->_2DA0w[i] = (u8*)hdr + hdr[i];
+    }
     for (i = 0; i < 4; i++) {
         layout = lbl_2_bss_340140->_2DA0[i].layout;
         geo = lbl_2_bss_340140->_2DA0[i].geo;
@@ -848,7 +967,7 @@ void fn_2_8ACE0(void) {
         CTRLSetTranslation(&lbl_2_bss_340140->_0068->models[i].control, pos.x, pos.y, pos.z);
         CTRLSetRotation(&lbl_2_bss_340140->_0068->models[i].control, 57.295776f * lbl_2_data_2FED4.x,
                         57.295776f * lbl_2_data_2FED4.y, 57.295776f * lbl_2_data_2FED4.z);
-        lbl_2_bss_340140->_0068->models[i]._6C = lbl_2_bss_3401BC[i + 0x50];
+        lbl_2_bss_340140->_0068->models[i]._6C = lbl_2_bss_3401BC->_50[i];
     }
 }
 
