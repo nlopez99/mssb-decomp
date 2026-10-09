@@ -430,7 +430,7 @@ void fn_2_110B0(void) {
 }
 
 // .text:0x000104FC size:0xBB4
-// 99%: registers in the trigger-L and Z paths, and the target keeps a dead
+// 99.5%: registers in the trigger-L path, and the target keeps a dead
 // branch around the fn_80050760 argument choice.
 void fn_2_104FC(u16 port) {
     u16 pad[3];
@@ -438,6 +438,7 @@ void fn_2_104FC(u16 port) {
     s32 team = lbl_803C66B0._59[port];
     s8 slot;
     s32 i;
+    s32 cursor;
     s32 g;
     s32 j;
     s32 sel;
@@ -480,8 +481,9 @@ void fn_2_104FC(u16 port) {
         if (g_d_GameSettings.GameModeSelected == 5) {
             return;
         }
+        cursor = lbl_2_bss_F468._00[team];
         for (i = 0; i < 9; i++) {
-            if (lbl_803C6724._14[team][i] == lbl_2_bss_F468._00[team]) {
+            if (lbl_803C6724._14[team][i] == cursor) {
                 slot = i;
                 break;
             }
