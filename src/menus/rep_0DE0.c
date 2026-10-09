@@ -842,6 +842,98 @@ void fn_2_87FB0(MenuTask0DE0* task) {
     }
 }
 
+// .text:0x00087998 size:0x618
+void fn_2_87998(MenuTask0DE0* task) {
+    u8 digits[3];
+    s32 done;
+    s32 total;
+    s32 i;
+    s32 j;
+    s32 value;
+
+    if (lbl_2_bss_33FBCC._18 == 0 ? TRUE : FALSE) {
+        fn_2_8A008(task);
+        for (i = 0; i < 3; i++) {
+            if (lbl_80354768._CF5E[i] != 0) {
+                if (lbl_2_bss_F410._50 == i) {
+                    lbl_80371C30[task->_14 + 56 + i]._00->_54 |= 2;
+                    fn_800363D8(task, i + 56, 1, 5, i);
+                    value = lbl_80354768.trackers[i]._43BC;
+                    digits[0] = value / 100;
+                    digits[1] = (value - digits[0] * 100) / 10;
+                    digits[2] = (value - digits[0] * 100) - digits[1] * 10;
+                    for (j = 0; j < 3; j++) {
+                        lbl_80371C30[task->_14 + 14 + i * 3 + j]._00->_54 |= 2;
+                        lbl_80371C30[task->_14 + 14 + i * 3 + j]._00->_5C = 0;
+                        fn_800363D8(task, 14 + i * 3 + j, 1, 13, digits[j]);
+                        lbl_80371C30[task->_14 + 14 + i * 3 + j]._00->_68 = 1;
+                    }
+                    lbl_80371C30[task->_14 + 11 + i]._00->_5C = 0;
+                    lbl_80371C30[task->_14 + 11 + i]._00->_68 = 1;
+                    lbl_80371C30[task->_14 + 4 + i]._00->_68 = 1;
+                    lbl_80371C30[task->_14 + 7 + i]._00->_64 = 19;
+                    lbl_80371C30[task->_14 + 7 + i]._00->_5C = 0;
+                    lbl_80371C30[task->_14 + 7 + i]._00->_68 = 1;
+                } else {
+                    lbl_80371C30[task->_14 + 4 + i]._00->_68 = 1;
+                    lbl_80371C30[task->_14 + 7 + i]._00->_64 = 18;
+                    lbl_80371C30[task->_14 + 7 + i]._00->_68 = 1;
+                    lbl_80371C30[task->_14 + 11 + i]._00->_5C = 0x1A0000;
+                    lbl_80371C30[task->_14 + 11 + i]._00->_68 = 0;
+                }
+                if ((lbl_80354768.trackers[i]._444B == -1 && lbl_80354768.trackers[i]._1606 == 0) ||
+                    (lbl_80354768.trackers[i]._444B == -1 && lbl_80354768.trackers[i]._1606 != 0 &&
+                     lbl_80354768.trackers[i]._441B != 0)) {
+                    lbl_80371C30[task->_14 + 53 + i]._00->_5C = 0;
+                    lbl_80371C30[task->_14 + 53 + i]._00->_68 = 1;
+                }
+            }
+        }
+        lbl_80371C30[task->_14 + 7 + lbl_2_bss_33FBCC._10]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + 7 + lbl_2_bss_33FBCC._10]._00->_5C = 0;
+        lbl_80371C30[task->_14 + 7 + lbl_2_bss_33FBCC._10]._00->_68 = 1;
+        lbl_80371C30[task->_14 + 4 + lbl_2_bss_33FBCC._10]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + 66 + lbl_2_bss_33FBCC._10]._00->_54 &= ~2;
+        lbl_2_bss_33FBCC._10 = -1;
+        lbl_2_bss_33FBCC._18 = 1;
+        lbl_2_bss_33FBCC._19 = 1;
+    }
+    if (lbl_2_bss_33FBCC._19 == 1 ? TRUE : FALSE) {
+        done = 0;
+        total = 0;
+        for (i = 0; i < 3; i++) {
+            if (lbl_80354768._CF5E[i] != 0) {
+                if (lbl_2_bss_F410._50 == i) {
+                    if (lbl_80354768.trackers[i]._1606 == 0 ||
+                        (lbl_80354768.trackers[i]._1606 != 0 && lbl_80354768.trackers[i]._441B != 0)) {
+                        total++;
+                        done += isAnimDone(task, i + 11, 21);
+                    }
+                    for (j = 0; j < 3; j++) {
+                        total++;
+                        done += isAnimDone(task, 14 + i * 3 + j, 21);
+                    }
+                }
+                if (lbl_80354768.trackers[i]._444B != -1) {
+                    total++;
+                    done += isAnimDone(task, i + 50, 10);
+                }
+                if ((lbl_80354768.trackers[i]._444B == -1 && lbl_80354768.trackers[i]._1606 == 0) ||
+                    (lbl_80354768.trackers[i]._444B == -1 && lbl_80354768.trackers[i]._1606 != 0 &&
+                     lbl_80354768.trackers[i]._441B != 0)) {
+                    total++;
+                    done += isAnimDone(task, i + 53, 14);
+                }
+            }
+        }
+        if (done == total) {
+            lbl_2_bss_33FBCC._18 = 0;
+            lbl_2_bss_33FBCC._17 = 0;
+            lbl_2_bss_33FBCC._19 = 0;
+        }
+    }
+}
+
 // .text:0x0008782C size:0x16C
 void fn_2_8782C(void) {
     u32* base;
