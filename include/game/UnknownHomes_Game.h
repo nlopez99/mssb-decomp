@@ -2127,12 +2127,15 @@ typedef struct _MiniGameStruct {
             /*0x1DCF*/ s8 _1DCF;
         };
         /*0x1DCE*/ s16 _1DCE_s16;
+        /*0x1DCE*/ u16 _1DCE_u16; // Barrel Batter (rep_34B0): the CPU's swing buttons
     };
     union {
         /*0x1DD0*/ s8 _1DD0;
         /*0x1DD0*/ u8 _1DD0_u8;
     };
-    /*0x1DD1*/ u8 _1DD1[0x1DEC - 0x1DD1];
+    /*0x1DD1*/ u8 _1DD1;
+    /*0x1DD2*/ s8 _1DD2; // Barrel Batter (rep_34B0): sort direction of the CPU's target barrels
+    /*0x1DD3*/ u8 _1DD3[0x1DEC - 0x1DD3];
     /*0x1DEC*/ f32 _1DEC;
     /*0x1DF0*/ f32 _1DF0;
     // Bob-omb Derby (rep_31F0) reads _1DF4 to _1DF7, Barrel Batter (rep_34B0) stores _1DF4_s16,
