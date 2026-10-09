@@ -69,10 +69,18 @@ extern struct {
 
 extern u32 lbl_2_bss_B644;
 
-extern u32 lbl_2_data_0[2][23];
-extern u8 lbl_2_data_C8[];
-extern u8 lbl_2_data_C0[];
-extern UnkQueue0010* lbl_2_bss_4[5];
+u32 lbl_2_data_0[2][23] = {
+    { 0xA40, 0, 0, 0, 0x900, 0x5E60, 0x4DE0, 0x2700, 0, 0, 0, 0, 0, 0x400, 0x8C0, 0x20, 0x6A0 },
+    { 0 },
+};
+u32 lbl_2_data_B8[2] = { 0 };
+struct {
+    /* 0x0 */ s32 _0;
+    /* 0x4 */ void (*_4)(void);
+} lbl_2_data_C0 = { 0, fn_2_0 };
+u32 lbl_2_data_C8[4] = { 0x00000000, 0x000046E0, 0x06CF8800, 0x000046E0 };
+UnkQueue0010* lbl_2_bss_4[5];
+u32 lbl_2_bss_0;
 
 extern void* fn_800B0A5C_insertQueue(void (*callback)(void), s32 priority);
 extern void fn_800B0A14_removeQueue(void);
@@ -344,7 +352,7 @@ void fn_2_110(void) {
 void _prolog(void) {
     lbl_803CBBCC = &lbl_800E877C;
     lbl_800E877C._02 = 0;
-    fn_800A7D4C(0, lbl_2_data_C0);
+    fn_800A7D4C(0, &lbl_2_data_C0);
     fn_800B0A5C_insertQueue(fn_2_708, 0x8000);
     fn_80062744();
     fn_8001E474();
@@ -359,7 +367,7 @@ void _epilog(void) {
 
 // .text:0x0000003C size:0x2C
 void fn_2_3C(void) {
-    fn_800A7D4C(0, lbl_2_data_C0);
+    fn_800A7D4C(0, &lbl_2_data_C0);
 }
 
 // .text:0x00000000 size:0x3C
