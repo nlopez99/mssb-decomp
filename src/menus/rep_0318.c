@@ -139,7 +139,8 @@ extern struct {
     /* 0x4755 */ u8 _4755;
     /* 0x4756 */ u8 _4756;
     /* 0x4757 */ u8 _4757[0x36];
-    /* 0x478D */ u8 _478D[0x48AD - 0x478D];
+    /* 0x478D */ u8 _478D[2][0x36];
+    /* 0x47F9 */ u8 _47F9[0x48AD - 0x47F9];
     /* 0x48AD */ u8 _48AD;
     /* 0x48AE */ u8 _48AE;
     /* 0x48AF */ u8 _48AF;
@@ -711,6 +712,43 @@ void fn_2_B324(void) {
         lbl_80354720[0][i]._3 = -1;
         inMemRoster[0][i].CharID = 0;
         inMemRoster[1][i].CharID = 0;
+    }
+}
+
+// .text:0x0000ABC0 size:0x328
+// 97.5%: registers only.
+void fn_2_ABC0(u8 port) {
+    u8 order[54];
+    u8 value[54];
+    s32 i;
+    s32 j;
+    u8 max;
+    u8 tmpOrder;
+    u8 tmpValue;
+    s32 cap = lbl_8034E9A0._46E0[port];
+    s32 row = cap / 9;
+    s32 col = cap % 9;
+
+    for (i = 0; i < 54; i++) {
+        value[i] = lbl_8034E9A0._0000[row][col]._3B[i];
+        order[i] = i;
+    }
+    for (i = 0; i < 54; i++) {
+        max = value[i];
+        for (j = i + 1; j < 54; j++) {
+            if (max < value[j]) {
+                tmpValue = value[i];
+                max = value[j];
+                tmpOrder = order[i];
+                value[i] = value[j];
+                order[i] = order[j];
+                value[j] = tmpValue;
+                order[j] = tmpOrder;
+            }
+        }
+    }
+    for (i = 0; i < 54; i++) {
+        lbl_8034E9A0._478D[port][i] = order[i];
     }
 }
 
