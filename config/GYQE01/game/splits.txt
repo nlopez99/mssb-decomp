@@ -311,8 +311,9 @@ game/sta_c6.c:
 	.bss        start:0x0000AE50 end:0x0000AEE0
 
 game/rep_2BF8.c:
-	.text       start:0x000E9D30 end:0x000EA340
+	.text       start:0x000E911C end:0x000EDFAC
 	.rodata     start:0x00002BF8 end:0x00002C60
+	.data       start:0x00019770 end:0x0001B820
 
 game/sta_c5.c:
 	.text       start:0x000EDFAC end:0x000F8444
@@ -355,12 +356,12 @@ game/rep_3310.c:
 	.bss        start:0x0000B6B8 end:0x0000B700
 
 game/rep_3448.c:
-	.text       start:0x0011D3AC end:0x001293D0
+	.text       start:0x0011D3AC end:0x0012DB54
 	.rodata     start:0x00003448 end:0x000034B0
 	.data       start:0x000226E0 end:0x0002650C
 
 game/rep_34B0.c:
-	.text       start:0x0012E8FC end:0x00132EDC
+	.text       start:0x0012DB54 end:0x00132EDC
 	.rodata     start:0x000034B0 end:0x00003520
 	.data       start:0x00026510 end:0x0002657C
 
