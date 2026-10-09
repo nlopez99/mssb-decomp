@@ -33,6 +33,7 @@ extern void fn_2_11A0(s32 arg0);
 extern void fn_80021AC0(s32 team, s32 slot);
 extern void fn_800AD038(s32 arg0);
 extern void fn_80066EAC(s32 team);
+extern s32 fn_80050760(s32 team, u16 held, u16 trg, u16 rep, s32 arg4);
 extern void fn_800203E0(int, s8);
 extern void sndFXRelated(s32 arg0);
 extern s32 randRange_FUN_80042bf0(s32 min, s32 max);
@@ -98,7 +99,8 @@ typedef struct Menu0318 {
     /* 0x000 */ s32 _00[2];
     /* 0x008 */ s32 _08[2];
     /* 0x010 */ s32 _10[2];
-    /* 0x018 */ u8 _18[0x28 - 0x18];
+    /* 0x018 */ u8 _18[0x20 - 0x18];
+    /* 0x020 */ s32 _20[2];
     /* 0x028 */ u8 _28[5];
     /* 0x02D */ u8 _2D;
     /* 0x02E */ u8 _2E;
@@ -116,7 +118,9 @@ typedef struct Menu0318 {
     /* 0x041 */ u8 _41[2];
     /* 0x043 */ u8 _43[2];
     /* 0x045 */ u8 _45[2];
-    /* 0x047 */ u8 _47[0x4F - 0x47];
+    /* 0x047 */ u8 _47[2];
+    /* 0x049 */ u8 _49[2];
+    /* 0x04B */ u8 _4B[0x4F - 0x4B];
     /* 0x04F */ u8 _4F;
     /* 0x050 */ u8 _50[0x56 - 0x50];
     /* 0x056 */ u8 _56;
@@ -203,6 +207,12 @@ extern Slot0318 lbl_80353B98[2][9];
 extern u8 lbl_80109038[9];
 extern u8 lbl_803CB748[6];
 extern u8 lbl_80108EC4[12];
+extern u8 lbl_800EFBA4[0x10];
+extern struct {
+    /* 0x00 */ u8 _00[0x74];
+    /* 0x74 */ u8 _74[2];
+    /* 0x76 */ u8 _76[0x94 - 0x76];
+} lbl_803C6028;
 extern s16 lbl_80108EDC[28][5];
 extern u8 lbl_800FDE84[];
 extern struct {
@@ -458,6 +468,94 @@ void fn_2_FAA0(u8 port) {
             lbl_803C6724._26[port][i] = lbl_8034E9A0._0000[id / 9][id % 9]._3B[cap];
         }
     }
+}
+
+// .text:0x0000ED94 size:0x46C
+// 96%: the target forms &lbl_2_bss_F410._20[port] from the unextended port and
+// allocates registers differently.
+s32 fn_2_ED94(u8 port, u16 held, u16 trg, u16 rep) {
+    s32 team;
+
+    if (lbl_2_bss_F468._41[port] == 0) {
+        if ((held & 8) || (held & 4) || (held & 1) || (held & 2)) {
+            if (lbl_2_bss_F468._45[port] != 0) {
+                if (lbl_2_bss_F468._47[port] == 0 && (held & 2)) {
+                    lbl_2_bss_F468._47[port] = 1;
+                    lbl_2_bss_F468._49[port] = 0;
+                    sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+                } else if (lbl_2_bss_F468._47[port] == 1 && (held & 1)) {
+                    lbl_2_bss_F468._47[port] = 0;
+                    lbl_2_bss_F468._49[port] = 0;
+                    sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+                }
+                rep = 0;
+                trg = 0;
+                held = 0;
+            }
+            if (lbl_2_bss_F468._59[port] != 0) {
+                rep = 0;
+                trg = 0;
+                held = 0;
+            }
+            fn_2_57F0(port, held, trg, rep);
+            return 1;
+        }
+    } else if (lbl_2_bss_F468._59[port] != 0) {
+        lbl_2_bss_F468._41[port] = 0;
+        fn_800625A4(port, 0xD);
+        return 1;
+    } else if (lbl_2_bss_F468._00[port] != 9) {
+        lbl_2_bss_F468._20[port] = lbl_2_bss_F410._20[port];
+        if (lbl_2_bss_F468._45[port] != 0) {
+            if (lbl_2_bss_F468._47[port] == 0 && (held & 2)) {
+                lbl_2_bss_F468._47[port] = 1;
+                lbl_2_bss_F468._49[port] = 0;
+                sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+            } else if (lbl_2_bss_F468._47[port] == 1 && (held & 1)) {
+                lbl_2_bss_F468._47[port] = 0;
+                lbl_2_bss_F468._49[port] = 0;
+                sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+            }
+            if (g_d_GameSettings._10 == 0 && port != 0) {
+                team = lbl_8034E9A0._46F8[0] == 0;
+                lbl_803C6028._74[team] = 1;
+                lbl_2_bss_F410._20[port] = fn_80050760(team, 0, 0, 0, 0);
+            } else {
+                team = lbl_8034E9A0._46F8[port];
+                if (lbl_8034E9A0._46FC[team] != 0) {
+                    team = lbl_8034E9A0._46F8[0] == 0;
+                }
+                lbl_2_bss_F410._20[port] = fn_80050760(team, 0, 0, 0, 0);
+            }
+        } else {
+            if (g_d_GameSettings._10 == 0 && port != 0) {
+                team = lbl_8034E9A0._46F8[0] == 0;
+                lbl_803C6028._74[team] = 1;
+                lbl_2_bss_F410._20[port] = fn_80050760(team, held, trg, rep, 0);
+            } else {
+                team = lbl_8034E9A0._46F8[port];
+                if (lbl_8034E9A0._46FC[team] != 0) {
+                    team = lbl_8034E9A0._46F8[0] == 0;
+                }
+                lbl_2_bss_F410._20[port] = fn_80050760(team, held, trg, rep, 0);
+            }
+        }
+    }
+    if (trg & 0x100) {
+        if (fn_2_35D0(port)) {
+            return 1;
+        }
+        fn_2_DFAC(port);
+        return 1;
+    }
+    if (trg & 0x200) {
+        if (fn_2_35D0(port)) {
+            return 1;
+        }
+        fn_2_CE44(port);
+        return 1;
+    }
+    return 0;
 }
 
 // .text:0x0000EC54 size:0x140

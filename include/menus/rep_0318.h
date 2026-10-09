@@ -15,6 +15,7 @@ void fn_2_3624(u8 port);
 void fn_2_5184(u8 port);
 void fn_2_52CC(void);
 void fn_2_5444(u8 port);
+void fn_2_57F0(u8 port, u16 held, u16 trg, u16 rep);
 s32 fn_2_57E8(s32 arg0, s32 arg1);
 void fn_2_5F80(void);
 void fn_2_6098(u8 port);
@@ -56,6 +57,8 @@ void fn_2_C7DC(u8 idx, u8 team);
 void fn_2_CA60(u8 idx, u8 team);
 void fn_2_CCBC(void);
 void fn_2_CCE0(u8 port);
+void fn_2_CE44(u8 port);
+void fn_2_DFAC(u8 port);
 void fn_2_EAE0(void);
 void fn_2_EC34(void);
 void fn_2_F200(u8 port);
@@ -65,5 +68,6 @@ void fn_2_102C8(u8 port);
 void fn_2_110B0(void);
 void fn_2_104FC(u16 port);
 void fn_2_EC54(s32 port);
+s32 fn_2_ED94(u8 port, u16 held, u16 trg, u16 rep);
 
 #endif // !__MENUS_rep_0318_H_
