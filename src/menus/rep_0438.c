@@ -89,7 +89,7 @@ extern struct {
 
 extern struct {
     /* 0x00 */ u8 _00[2];
-    /* 0x02 */ u8 _02[2][9];
+    /* 0x02 */ s8 _02[2][9];
     /* 0x14 */ u8 _14[2][9];
 } lbl_803C6724;
 
@@ -104,30 +104,93 @@ extern u8 lbl_80108EC4[];
 extern s8 lbl_2_bss_100B4;
 extern u16 lbl_2_bss_AE0;
 
+typedef struct CharEntry0438 {
+    /* 0x00 */ u8 _00[0x1E];
+    /* 0x1E */ u8 _1E[2];
+    /* 0x20 */ u32 _20;
+    /* 0x24 */ s16 CharID;
+    /* 0x26 */ u8 _26;
+    /* 0x27 */ u8 _27;
+    /* 0x28 */ u8 _28[2];
+    /* 0x2A */ u8 _2A[2];
+    /* 0x2C */ u8 _2C;
+    /* 0x2D */ u8 _2D;
+    /* 0x2E */ u8 _2E;
+    /* 0x2F */ u8 _2F;
+    /* 0x30 */ u8 _30;
+    /* 0x31 */ u8 _31;
+    /* 0x32 */ u8 _32;
+    /* 0x33 */ u8 _33;
+    /* 0x34 */ u8 _34;
+    /* 0x35 */ u8 _35[2];
+    /* 0x37 */ u8 _37[4];
+    /* 0x3B */ u8 _3B[0x36];
+    /* 0x71 */ u8 _71;
+    /* 0x72 */ u8 _72[2];
+    /* 0x74 */ u16 _74[21];
+    /* 0x9E */ u8 _9E[2];
+} CharEntry0438; // size: 0xA0
+
+typedef struct {
+    /* 0x0 */ s8 _0;
+    /* 0x1 */ s8 _1;
+    /* 0x2 */ s8 _2;
+    /* 0x3 */ s8 _3;
+} Slot0438;
+
+extern Slot0438 lbl_80354720[2][9];
+extern CharEntry0438 inMemRoster[2][9];
+
+static inline void copyChar0438(CharEntry0438* dst, CharEntry0438* src) {
+    memcpy(dst->_00, src->_00, sizeof(dst->_00));
+    dst->CharID = src->CharID;
+    dst->_26 = src->_26;
+    dst->_27 = src->_27;
+    memcpy(dst->_28, src->_28, sizeof(dst->_28));
+    memcpy(dst->_2A, src->_2A, sizeof(dst->_2A));
+    dst->_2C = src->_2C;
+    dst->_2D = src->_2D;
+    dst->_2E = src->_2E;
+    dst->_2F = src->_2F;
+    dst->_30 = src->_30;
+    dst->_31 = src->_31;
+    dst->_32 = src->_32;
+    dst->_33 = src->_33;
+    dst->_34 = src->_34;
+    memcpy(dst->_35, src->_35, sizeof(dst->_35));
+    dst->_20 = src->_20;
+    memcpy(dst->_37, src->_37, sizeof(dst->_37));
+    memcpy(dst->_3B, src->_3B, sizeof(dst->_3B));
+    dst->_71 = src->_71;
+    dst->_74[0] = src->_74[0];
+    dst->_74[1] = src->_74[1];
+    dst->_74[2] = src->_74[2];
+    dst->_74[3] = src->_74[3];
+    dst->_74[4] = src->_74[4];
+    dst->_74[5] = src->_74[5];
+    dst->_74[6] = src->_74[6];
+    dst->_74[7] = src->_74[7];
+    dst->_74[8] = src->_74[8];
+    dst->_74[9] = src->_74[9];
+    dst->_74[10] = src->_74[10];
+    dst->_74[11] = src->_74[11];
+    dst->_74[12] = src->_74[12];
+    dst->_74[13] = src->_74[13];
+    dst->_74[14] = src->_74[14];
+    dst->_74[15] = src->_74[15];
+    dst->_74[16] = src->_74[16];
+    dst->_74[17] = src->_74[17];
+    dst->_74[18] = src->_74[18];
+    dst->_74[19] = src->_74[19];
+    dst->_74[20] = src->_74[20];
+}
+
 extern void fn_800AD038(s32 arg0);
 extern void fn_800628D4(s32 charID);
 extern void fn_8004EEF4(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern s32 fn_2_15104(s32 arg0, s32 arg1, u8 arg2, s32 arg3);
 extern void fn_2_15E80(s32 arg0);
 extern void fn_800678CC(s32 arg0);
-
-// .text:0x00012B60 size:0xD4
-void fn_2_12B60(void) {
-    s32 prev[2];
-    s32 i;
-
-    prev[0] = lbl_2_bss_F410._10[0];
-    prev[1] = lbl_2_bss_F410._10[1];
-    fn_2_15E80(0);
-    if (g_d_GameSettings._10 == 1) {
-        fn_2_15E80(1);
-    }
-    for (i = 0; i < 2; i++) {
-        while (fn_2_15104(lbl_2_bss_F410._10[i], prev[i], i, 1) == 0 && lbl_2_bss_100B8._10[i] != 0) {
-            prev[i] = lbl_2_bss_F410._10[i];
-        }
-    }
-}
 
 // .text:0x00012C34 size:0xA4
 void fn_2_12C34(void) {
@@ -153,6 +216,24 @@ void fn_2_12C34(void) {
         index++;
         if (index == 21) {
             index = 5;
+        }
+    }
+}
+
+// .text:0x00012B60 size:0xD4
+void fn_2_12B60(void) {
+    s32 prev[2];
+    s32 i;
+
+    prev[0] = lbl_2_bss_F410._10[0];
+    prev[1] = lbl_2_bss_F410._10[1];
+    fn_2_15E80(0);
+    if (g_d_GameSettings._10 == 1) {
+        fn_2_15E80(1);
+    }
+    for (i = 0; i < 2; i++) {
+        while (fn_2_15104(lbl_2_bss_F410._10[i], prev[i], i, 1) == 0 && lbl_2_bss_100B8._10[i] != 0) {
+            prev[i] = lbl_2_bss_F410._10[i];
         }
     }
 }
@@ -207,25 +288,6 @@ void fn_2_12988(void) {
     lbl_8034E9A0._46F4 = lbl_803C7898._8;
 }
 
-// .text:0x0001216C size:0xCC
-void fn_2_1216C(void) {
-    s8 ports[4];
-
-    memset(ports, 2, 4);
-    if (g_d_GameSettings._10 == 0) {
-        ports[lbl_8034E9A0._46F8[0]] = 1;
-        if (lbl_8034E9A0._46F8[0] == 0) {
-            ports[1] = 2;
-        } else {
-            ports[0] = 2;
-        }
-    } else {
-        ports[lbl_8034E9A0._46F8[1]] = 1;
-        ports[lbl_8034E9A0._46F8[0]] = 1;
-    }
-    fn_8004EEF4(ports[0], ports[1], ports[2], ports[3], 1);
-}
-
 // .text:0x00012238 size:0x194
 // 73.81%: the target unrolls the second loop by three under ctr with no extsb;
 // an int counter unrolls it fully, an s8 one keeps it rolled with extsb.
@@ -253,6 +315,25 @@ void fn_2_12238(void) {
     fn_800678CC(0);
 }
 
+// .text:0x0001216C size:0xCC
+void fn_2_1216C(void) {
+    s8 ports[4];
+
+    memset(ports, 2, 4);
+    if (g_d_GameSettings._10 == 0) {
+        ports[lbl_8034E9A0._46F8[0]] = 1;
+        if (lbl_8034E9A0._46F8[0] == 0) {
+            ports[1] = 2;
+        } else {
+            ports[0] = 2;
+        }
+    } else {
+        ports[lbl_8034E9A0._46F8[1]] = 1;
+        ports[lbl_8034E9A0._46F8[0]] = 1;
+    }
+    fn_8004EEF4(ports[0], ports[1], ports[2], ports[3], 1);
+}
+
 // .text:0x000120D0 size:0x9C
 void fn_2_120D0(void) {
     lbl_8034E9A0._48AD = 1;
@@ -267,4 +348,18 @@ void fn_2_120D0(void) {
     lbl_8034E978._26 = 1;
     fn_800AD038(lbl_8034E9A0._46E8);
     g_d_GameSettings._10 = 0;
+}
+
+// .text:0x00011EA8 size:0x228
+void fn_2_11EA8(void) {
+    s32 i;
+    s8 id;
+
+    for (i = 0; i < 9; i++) {
+        id = lbl_803C6724._02[0][i];
+        copyChar0438(&inMemRoster[0][i], &((CharEntry0438(*)[9])&lbl_8034E9A0)[id / 9][id % 9]);
+        lbl_80354720[0][i]._2 = i;
+        lbl_80354720[0][i]._1 = i;
+        lbl_80354720[0][i]._0 = i;
+    }
 }
