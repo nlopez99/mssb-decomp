@@ -19,7 +19,7 @@ typedef struct UnkTask2BF8 {
     /* 0x1E */ u16 _1E;
     /* 0x20 */ u16 _20;
     /* 0x22 */ u16 _22;
-    /* 0x24 */ s32 _24;
+    /* 0x24 */ u8 _24[4];
 } UnkTask2BF8;
 
 typedef struct {
@@ -98,6 +98,7 @@ extern struct {
     /* 0x398 */ u8 _398;
 } lbl_800EF808;
 
+extern u8 lbl_800EFBA4[0x10];
 extern s16 lbl_80109410[8];
 extern UnkSpriteRef2BF8 lbl_80371C30[];
 extern void* lbl_803CC1B8;
@@ -876,7 +877,7 @@ void fn_3_EC804(void) {
 }
 
 // .text:0x000EBFD4 size:0x40 mapped:0x8072B068
-BOOL fn_3_EBFD4(void) {
+u32 fn_3_EBFD4(void) {
     if (lbl_3_common_bss_32724._96 != 0 || g_GameLogic.gameStatus == GAME_STATUS_LIVE_BALL ||
         g_GameLogic.gameStatus == GAME_STATUS_TRANSITION) {
         return TRUE;
@@ -885,7 +886,7 @@ BOOL fn_3_EBFD4(void) {
 }
 
 // .text:0x000EB684 size:0x5C mapped:0x8072A718
-BOOL fn_3_EB684(void) {
+u32 fn_3_EB684(void) {
     if (lbl_3_common_bss_32724._96 != 0 || lbl_3_common_bss_32724._B7 != 0) {
         return TRUE;
     }
@@ -894,6 +895,254 @@ BOOL fn_3_EB684(void) {
         return TRUE;
     }
     return FALSE;
+}
+
+// .text:0x000EAEF4 size:0x790 mapped:0x80729F88
+void fn_3_EAEF4(void) {
+    UnkTask2BF8* task = lbl_803CC1B8;
+    u32 playSound = 0;
+    UnkTask2BF8* t = lbl_803CC1B8;
+    u8* flags = g_Minigame._1DF4_u8;
+    s32 leader;
+    u32 tied;
+    u32 n;
+    s32 diff;
+    s32 step;
+    s32 ch;
+    u32 i;
+
+    if (fn_3_EB684()) {
+        lbl_3_common_bss_32724._D6 = 0;
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    switch (task->_1C) {
+    case 0:
+        i = 0;
+        do {
+            flags[i] = 0;
+        } while (++i < 4);
+        lbl_3_common_bss_32724._D6 = 1;
+        lbl_3_common_bss_32724._B7 = 0;
+        fn_80034E20(task, lbl_3_data_1A168);
+        i = 0;
+        do {
+            ch = g_Minigame.minigameControlStruct.characterIndex[i];
+            fn_800363D8(task, i + 9, 1, 0x65, ch);
+            lbl_80371C30[task->_14 + 0x11 + i]._00->_5C = inMemRoster[0][ch].stats.CharID << 16;
+        } while (++i < g_Minigame.miniGameNumberOfParticipants);
+        i = 0;
+        do {
+            lbl_80371C30[task->_14 + 0x29 + i]._00->_54 &= ~2;
+        } while (++i < 4);
+        task->_1C = 1;
+        break;
+    case 1:
+        g_Minigame._19A0 = 0;
+        i = 0;
+        do {
+            diff = g_Minigame.miniGameCurrentPoints[i] - g_Minigame.minigamePoints_current_Latest[i][0];
+            if (diff < 0) {
+                g_Minigame._19A0 = 1;
+                if ((lbl_80371C30[task->_14]._00->_5C >> 16) >= 10) {
+                    step = diff / 8;
+                    if (step != 0) {
+                        g_Minigame.minigamePoints_current_Latest[i][0] += step;
+                    } else {
+                        g_Minigame.minigamePoints_current_Latest[i][0] += diff / __abs(diff);
+                    }
+                }
+                playSound = 1;
+            }
+        } while (++i < g_Minigame.miniGameNumberOfParticipants);
+        if (g_Minigame._19A0 == 0) {
+            i = 0;
+            do {
+                if (g_Minigame.miniGameCurrentPoints[i] != g_Minigame.minigamePoints_current_Latest[i][0]) {
+                    g_Minigame._19A0 = 1;
+                    task->_1C = 2;
+                }
+            } while (++i < g_Minigame.miniGameNumberOfParticipants);
+        }
+        break;
+    case 2:
+        g_Minigame._19A0 = 0;
+        i = 0;
+        do {
+            diff = g_Minigame.miniGameCurrentPoints[i] - g_Minigame.minigamePoints_current_Latest[i][0];
+            if (diff > 0) {
+                g_Minigame._19A0 = 1;
+                t->_24[i] = 1;
+                if ((lbl_80371C30[task->_14]._00->_5C >> 16) >= 10) {
+                    step = diff / 8;
+                    if (step != 0) {
+                        g_Minigame.minigamePoints_current_Latest[i][0] += step;
+                    } else {
+                        g_Minigame.minigamePoints_current_Latest[i][0] += diff / __abs(diff);
+                    }
+                }
+                playSound = 1;
+            } else if (diff == 0) {
+                if (t->_24[i] != 0) {
+                    t->_24[i] = 0;
+                    lbl_80371C30[task->_14 + 0x19 + i]._00->_5C = 0;
+                    lbl_80371C30[task->_14 + 0x19 + i]._00->_68 = 1;
+                    lbl_80371C30[task->_14 + 0x1D + i * 3]._00->_5C = 0;
+                    lbl_80371C30[task->_14 + 0x1E + i * 3]._00->_5C = 0;
+                    lbl_80371C30[task->_14 + 0x1F + i * 3]._00->_5C = 0;
+                }
+            }
+        } while (++i < g_Minigame.miniGameNumberOfParticipants);
+        if (g_Minigame._19A0 == 0) {
+            i = 0;
+            do {
+                if (g_Minigame.miniGameCurrentPoints[i] != g_Minigame.minigamePoints_current_Latest[i][0]) {
+                    g_Minigame._19A0 = 1;
+                }
+            } while (++i < g_Minigame.miniGameNumberOfParticipants);
+            task->_1C = 1;
+        }
+        break;
+    }
+    if (g_UnkSound_32718._07 == 5) {
+        task->_22 = 1;
+    }
+    lbl_80371C30[task->_14]._00->_64 = lbl_3_data_1A728[g_Minigame._19C6];
+    if (task->_22 != 0) {
+        lbl_80371C30[task->_14]._00->_68 = 1;
+    } else {
+        fn_3_125424(task, 0, 10);
+    }
+    leader = fn_3_107CD0();
+    tied = fn_3_107C88();
+    i = 0;
+    do {
+        n = g_Minigame.minigamePoints_current_Latest[i][0];
+        if (n > 999) {
+            n = 999;
+        }
+        fn_800363D8(task, 0x1D + i * 3, 1, 0x66, (n % 1000) / 100);
+        fn_800363D8(task, 0x1E + i * 3, 1, 0x66, (n % 100) / 10);
+        fn_800363D8(task, 0x1F + i * 3, 1, 0x66, n % 10);
+        if (tied == 0 && g_Minigame.minigamePoints_current_Latest[i][0] == g_Minigame.minigamePoints_current_Latest[leader][0]) {
+            lbl_80371C30[task->_14 + 0x29 + i]._00->_54 |= 2;
+        } else {
+            lbl_80371C30[task->_14 + 0x29 + i]._00->_54 &= ~2;
+        }
+    } while (++i < g_Minigame.miniGameNumberOfParticipants);
+    i = 0;
+    do {
+        if (flags[i] != 0) {
+            switch (flags[i]) {
+            case 1:
+                lbl_80371C30[task->_14 + 0xD + i]._00->_64 = 0x60;
+                break;
+            case 2:
+                lbl_80371C30[task->_14 + 0xD + i]._00->_64 = 0x61;
+                break;
+            }
+            lbl_80371C30[task->_14 + 0xD + i]._00->_5C = 0;
+            lbl_80371C30[task->_14 + 0xD + i]._00->_68 = 1;
+            flags[i] = 0;
+        }
+    } while (++i < g_Minigame.miniGameNumberOfParticipants);
+    if (playSound && g_Minigame._1939 == 0) {
+        sndFXStartEx(0x1C0, lbl_800EFBA4[9], 0x3F, 0);
+    }
+}
+
+// .text:0x000EA8FC size:0x5F8 mapped:0x80729990
+void fn_3_EA8FC(void) {
+    UnkTask2BF8* task = lbl_803CC1B8;
+    u32 i;
+    int player;
+    s32 sign;
+    int points;
+
+    if (task->_18 != 0) {
+        if (fn_3_EB684()) {
+            lbl_3_common_bss_32724._D6 = 0;
+            fn_80034CEC(task);
+            fn_800B0A14_removeQueue();
+            return;
+        }
+    } else if (fn_3_EBFD4()) {
+        lbl_3_common_bss_32724._D6 = 0;
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    switch (task->_1C) {
+    case 0:
+        fn_80034E20(task, lbl_3_data_1A730);
+        if (task->_18 != 0) {
+            lbl_80371C30[task->_14]._00->_5C = 10 << 16;
+        } else {
+            lbl_80371C30[task->_14]._00->_64 =
+                lbl_3_data_1A158[g_Batter.batterHand + (g_Minigame.miniGameNumberOfParticipants - 1) * 2];
+            lbl_80371C30[task->_14]._00->_5C = 10 << 16;
+            lbl_80371C30[task->_14 + 1]._00->_64 = 0x58;
+            lbl_80371C30[task->_14 + 2]._00->_64 = 0x58;
+            lbl_80371C30[task->_14 + 3]._00->_64 = 0x58;
+            lbl_80371C30[task->_14 + 4]._00->_64 = 0x58;
+        }
+        task->_1C = 1;
+        break;
+    case 1:
+        i = 0;
+        do {
+            if (task->_18 != 0) {
+                player = i;
+            } else {
+                player = g_Minigame.minigameControlStruct
+                             ._14[(g_Minigame.turnNumberWithinRound + i) % g_Minigame.miniGameNumberOfParticipants];
+            }
+            points = g_Minigame.minigamePoints_current_Latest[player][1];
+            if (points != 0) {
+                if (points < 0) {
+                    points *= -1;
+                    sign = 89;
+                } else {
+                    sign = 90;
+                }
+                if (points > 999) {
+                    points = 999;
+                }
+                if (task->_18 != 0) {
+                    if (points >= 100) {
+                        lbl_80371C30[task->_14 + 1 + i]._00->_5C = 2 << 16;
+                    } else if (points >= 10) {
+                        lbl_80371C30[task->_14 + 1 + i]._00->_5C = 1 << 16;
+                    } else {
+                        lbl_80371C30[task->_14 + 1 + i]._00->_5C = 0 << 16;
+                    }
+                } else if (points >= 100) {
+                    lbl_80371C30[task->_14 + 1 + i]._00->_5C = ((g_Batter.batterHand != 0 ? 0 : 3) + 2) << 16;
+                } else if (points >= 10) {
+                    lbl_80371C30[task->_14 + 1 + i]._00->_5C = ((g_Batter.batterHand != 0 ? 0 : 3) + 1) << 16;
+                } else {
+                    lbl_80371C30[task->_14 + 1 + i]._00->_5C = (g_Batter.batterHand != 0 ? 0 : 3) << 16;
+                }
+                fn_800363D8(task, 5 + i * 4, 1, sign, 11);
+                fn_800363D8(task, 6 + i * 4, 1, sign, points % 1000 / 100);
+                fn_800363D8(task, 7 + i * 4, 1, sign, points % 100 / 10);
+                fn_800363D8(task, 8 + i * 4, 1, sign, points % 10);
+                if (g_Minigame._19A0 != 0) {
+                    fn_3_125424(task, 5 + i * 4, 8);
+                    fn_3_125424(task, 6 + i * 4, 8);
+                    fn_3_125424(task, 7 + i * 4, 8);
+                    fn_3_125424(task, 8 + i * 4, 8);
+                } else {
+                    lbl_80371C30[task->_14 + 5 + i * 4]._00->_68 = 1;
+                    lbl_80371C30[task->_14 + 6 + i * 4]._00->_68 = 1;
+                    lbl_80371C30[task->_14 + 7 + i * 4]._00->_68 = 1;
+                    lbl_80371C30[task->_14 + 8 + i * 4]._00->_68 = 1;
+                }
+            }
+        } while (++i < g_Minigame.miniGameNumberOfParticipants);
+        break;
+    }
 }
 
 // .text:0x000EA454 size:0x4A8 mapped:0x807294E8
