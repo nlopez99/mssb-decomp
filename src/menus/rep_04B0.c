@@ -26,7 +26,9 @@ typedef struct State04B0 {
     /* 0x24 */ u8 _24[0x2D - 0x24];
     /* 0x2D */ u8 _2D;
     /* 0x2E */ u8 _2E[0x40 - 0x2E];
-    /* 0x40 */ u8 _40[6];
+    /* 0x40 */ u8 _40[2];
+    /* 0x42 */ u8 _42[2];
+    /* 0x44 */ u8 _44[2];
     /* 0x46 */ u8 _46[5];
     /* 0x4B */ s8 _4B;
     /* 0x4C */ s8 _4C;
@@ -131,9 +133,16 @@ typedef struct Light04B0 {
 
 extern Light04B0 lbl_2_bss_10164;
 
+typedef struct Team04B0 {
+    /* 0x000 */ u8 _000[0x25D];
+    /* 0x25D */ u8 _25D;
+} Team04B0;
+
 extern struct {
-    /* 0x00 */ u8 _00[0xAC];
-    /* 0xAC */ LITObj* _AC[4];
+    /* 0x0000 */ u8 _0000[0xAC];
+    /* 0x00AC */ LITObj* _00AC[4];
+    /* 0x00BC */ u8 _00BC[0x2C50 - 0xBC];
+    /* 0x2C50 */ Team04B0* _2C50[2];
 } lbl_8036E548;
 
 extern struct {
@@ -166,6 +175,7 @@ extern void fn_800625A4(s32 port, s32 arg1);
 extern void fn_2_1A88(void);
 extern void fn_8004E504(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern void fn_8004E5B4(s32 arg0, s32 arg1, s32 arg2);
+extern void fn_8004D4F0(s32 arg0, s32 arg1, s32 arg2);
 extern s32 fn_8004E62C(s32 player, u16 arg1, u16 arg2, u16 arg3);
 extern s32 fn_8004D57C(u16 arg0, u16 arg1, u16 arg2);
 extern void makeLookAtMatrix(Mtx m, const Vec* camPos, const Vec* camUp, const Vec* target);
@@ -282,7 +292,7 @@ void fn_2_16664(void) {
     s32 i;
 
     for (i = 0; i < 4; i++) {
-        LITXForm(lbl_8036E548._AC[i], lbl_2_bss_10164._14);
+        LITXForm(lbl_8036E548._00AC[i], lbl_2_bss_10164._14);
     }
 }
 
@@ -412,6 +422,74 @@ void fn_2_15A90(s32* value, u8 port, s32 max) {
         (*value)++;
         if (*value > max) {
             *value = 0;
+        }
+    }
+}
+
+// .text:0x0001560C size:0x484
+void fn_2_1560C(u8 port) {
+    s32 player;
+
+    if (g_d_GameSettings.GameModeSelected == 5) {
+        if (lbl_2_bss_100B8._1C[0] != 0 || lbl_2_bss_100B8._42[0] != 0) {
+            return;
+        }
+        lbl_8034E9A0._46E0[0] = lbl_800FE930[lbl_80361B20[0xF4]][lbl_2_bss_F410._10[0]];
+        lbl_2_bss_100B8._10[0] = 1;
+        lbl_2_bss_100B8._12[0] = 1;
+        fn_8004D4F0(lbl_8034E9A0._46F8[0], lbl_8034E9A0._46E0[0], 1);
+        fn_2_14BB8(0, 0);
+        lbl_803CBBCC->_4 = 4;
+    } else {
+        if (lbl_2_bss_100B8._1C[port] != 0 || lbl_2_bss_100B8._42[port] != 0) {
+            return;
+        }
+        if (g_d_GameSettings._10 == 0 && lbl_8036E548._2C50[port]->_25D == 0 && port != 0) {
+            return;
+        }
+        fn_2_14BB8(port, 0);
+        if (lbl_2_bss_100B8._10[port] != 0) {
+            return;
+        }
+        lbl_8034E9A0._46E0[port] = lbl_800FE5D4[lbl_2_bss_F410._10[port]];
+        if (g_d_GameSettings._10 == 0 && port != 0) {
+            if (lbl_8034E9A0._46F8[0] == 0) {
+                fn_8004E5B4(1, lbl_8034E9A0._46E0[port], 1);
+            } else {
+                fn_8004E5B4(0, lbl_8034E9A0._46E0[port], 1);
+            }
+        } else {
+            fn_8004E5B4(lbl_8034E9A0._46F8[port], lbl_8034E9A0._46E0[port], 1);
+        }
+        lbl_2_bss_100B8._10[port] = 1;
+        lbl_2_bss_100B8._12[port] = 1;
+        lbl_8034E9A0._4757[lbl_800FE5D4[lbl_2_bss_F410._10[port]]] = 1;
+        if (port == 0 && g_d_GameSettings._10 == 0 && g_d_GameSettings.GameModeSelected != 5) {
+            fn_800625A4(1, 6);
+            player = lbl_8034E9A0._46F8[0] == 0;
+            lbl_803C66B0._59[port] = 1;
+            lbl_803C6028._74[player] = 1;
+            if (lbl_2_bss_F410._10[0] == 0) {
+                lbl_2_bss_F410._10[1] = 1;
+            } else {
+                lbl_2_bss_F410._10[1] = 0;
+            }
+            switch (player) {
+            case 0:
+                fn_8004E504(0, lbl_2_bss_F410._10[1], -1, -1, -1);
+                break;
+            case 1:
+                fn_8004E504(0, -1, lbl_2_bss_F410._10[1], -1, -1);
+                break;
+            case 2:
+                fn_8004E504(0, -1, -1, lbl_2_bss_F410._10[1], -1);
+                break;
+            case 3:
+                fn_8004E504(0, -1, -1, -1, lbl_2_bss_F410._10[1]);
+                break;
+            }
+            lbl_803C6724._1 = lbl_2_bss_F410._10[1];
+            fn_2_15104(lbl_2_bss_F410._10[1], -1, 1, 1);
         }
     }
 }
