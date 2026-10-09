@@ -1374,18 +1374,9 @@ void fn_3_55EEC(s32 fielder) {
                 f->_1E5[0] = 0;
             }
         }
-    } else {
-        switch (g_GameLogic.gameStatus) {
-        case 2:
-            if (g_Ball.framesSinceHit >= 60) {
-                break;
-            }
-        case 0:
-        case 1:
-        case 7:
-            f->_1E5[0] = 2;
-            break;
-        }
+    } else if (g_GameLogic.gameStatus == 1 || g_GameLogic.gameStatus == 7 || g_GameLogic.gameStatus == 0 ||
+               (g_GameLogic.gameStatus == 2 && g_Ball.framesSinceHit < 60)) {
+        f->_1E5[0] = 2;
     }
 }
 
@@ -5546,7 +5537,11 @@ void fn_3_433E0(s32 fielder) {
                 g_Ball.physicsSubstruct.futureCoordsAndDist[f->_184].pos.x;
             z = 0.5f * (g_Ball.physicsSubstruct.futureCoordsAndDist[f->_184].pos.z / dist) +
                 g_Ball.physicsSubstruct.futureCoordsAndDist[f->_184].pos.z;
-            x = x < 0.0f ? x + 10.0f : x - 10.0f;
+            if (x < 0.0f) {
+                x += 10.0f;
+            } else {
+                x -= 10.0f;
+            }
             z += 8.0f;
             fn_3_52F4C(fielder, x, z);
         }
