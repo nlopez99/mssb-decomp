@@ -43,23 +43,33 @@ typedef struct Unk8036E548Actor {
             /* 0x4 */ u8 _4[0xC - 0x4];
         }* _4;
     }* _010[1];
-    /* 0x014 */ u8 _014[0x27C - 0x14];
+    /* 0x014 */ u8 _014[0x38 - 0x14];
+    /* 0x038 */ f32 _038;
+    /* 0x03C */ u8 _03C[0x276 - 0x3C];
+    /* 0x276 */ u8 _276;
+    /* 0x277 */ u8 _277[0x27C - 0x277];
 } Unk8036E548Actor; // size: 0x27C
 
-extern struct {
+typedef struct Unk8036E548 {
     /* 0x0000 */ u8 _0000[0x60];
     /* 0x0060 */ Unk0060Elem* _0060;
     /* 0x0064 */ u8 _0064[0xAC - 0x64];
     /* 0x00AC */ LITObj* _00AC[3];
     /* 0x00B8 */ u8 _00B8[0xC04 - 0xB8];
     /* 0x0C04 */ Unk8036E548Actor _0C04[13];
-} lbl_8036E548;
+    /* 0x2C50 */ Unk8036E548Actor* _2C50[13];
+} Unk8036E548;
+
+extern Unk8036E548 lbl_8036E548;
 
 typedef struct UnkTask0610 {
     /* 0x00 */ void (*_00)(void);
     /* 0x04 */ u8 _04[0xC - 0x4];
     /* 0x0C */ struct UnkTask0610* _0C;
     /* 0x10 */ s16 _10;
+    /* 0x12 */ u16 _12;
+    /* 0x14 */ void* _14;
+    /* 0x18 */ u16 _18;
 } UnkTask0610;
 
 extern UnkTask0610* lbl_803CC1B8;
@@ -82,7 +92,8 @@ typedef struct UnkCamera0610 {
     /* 0x08 */ Mtx _08;
 } UnkCamera0610; // size: 0x38
 
-extern UnkTask0610* fn_800B0A5C_insertQueue(void (*callback)(void), s32 arg1);
+extern UnkTask0610* fn_800B0A5C_insertQueue(void (*callback)(void), u16 arg1);
+extern void fn_8004B208(s32, s32, s32);
 extern void SetDisplayStateTexture(void*, s32, s32);
 extern void fn_800B9A9C(u8, f32);
 extern void fn_800B9AA8(LITObj* light);
@@ -98,6 +109,8 @@ extern UnkCamera0610 lbl_1_data_F4F8[];
 extern void* lbl_1_data_F4DC[3];
 extern UnkBurst0610 lbl_1_data_F2A0;
 extern u16 lbl_1_data_F17C;
+extern u16 lbl_1_data_F56C;
+extern u16 lbl_1_data_F56E;
 extern f32 lbl_1_data_ADC0;
 extern u8 lbl_1_data_ADC4[0x1C];
 
@@ -151,7 +164,11 @@ static u8 lbl_1_bss_5F71;
 static u8 lbl_1_bss_5F70;
 static u32 lbl_1_bss_5F6C;
 static u8 lbl_1_bss_5F69;
-static u8 lbl_1_bss_3218[0x2D51];
+static u8 lbl_1_bss_5F68;
+static u8 lbl_1_bss_5F64[4];
+static u8 lbl_1_bss_5F63;
+static s8 lbl_1_bss_5F62;
+static u8 lbl_1_bss_3218[0x2D4A];
 static u8 lbl_1_bss_3216;
 static u8 lbl_1_bss_3215;
 static u8 lbl_1_bss_3214;
@@ -203,6 +220,23 @@ void fn_1_163FC(void) {}
 // .text:0x000161D0 size:0x3C
 void fn_1_161D0(void) {
     lbl_1_bss_5F78 ^= 1;
+    fn_800B9A9C(lbl_1_bss_5F78, lbl_1_bss_5F74);
+}
+
+// .text:0x000160F8 size:0xD8
+void fn_1_160F8(s32 arg0) {
+    f32 step = 0.01f;
+    if (lbl_803C77B8[0]._00 & 0x400) {
+        step *= 10.0f;
+    }
+    step *= arg0;
+    lbl_1_bss_5F74 += step;
+    if (lbl_1_bss_5F74 > 1.0f) {
+        lbl_1_bss_5F74 = 0.0f;
+    }
+    if (lbl_1_bss_5F74 < 0.0f) {
+        lbl_1_bss_5F74 = 1.0f;
+    }
     fn_800B9A9C(lbl_1_bss_5F78, lbl_1_bss_5F74);
 }
 
@@ -409,9 +443,64 @@ u8 fn_1_D638(void) {
     return ret;
 }
 
+// .text:0x0000D590 size:0xA8
+void fn_1_D590(s32 arg0, s32 arg1, f32 arg2) {
+    if (lbl_1_bss_3215 == 0 || lbl_1_bss_3216 == 0) {
+        return;
+    }
+    if (lbl_1_bss_3216 == 2) {
+        if ((s32)arg2 == 0) {
+            lbl_1_bss_3214 += (lbl_1_bss_3214 != 0);
+        }
+        if (lbl_1_bss_3214 == 3) {
+            lbl_1_bss_3214 = 0;
+        }
+        if (lbl_1_bss_3214 != 2) {
+            return;
+        }
+    }
+    fn_8004B208(arg0, arg1, lbl_1_bss_5F62 < 0 ? 0 : lbl_1_bss_5F62);
+}
+
+// .text:0x0000D4BC size:0xD4
+void fn_1_D4BC(void) {
+    VecXYZ pos;
+    Unk8036E548* g = &lbl_8036E548;
+    Unk8036E548Actor* actor = &g->_0C04[0];
+    if (actor != NULL) {
+        actor->_276 >>= 1;
+        actor->_276 <<= 3;
+        getAnimRelatedCoordinates(0, 0x1E, &pos);
+        if (actor->_038 - pos.y < 0.3f) {
+            actor->_276 |= 2;
+        }
+        getAnimRelatedCoordinates(0, 0x22, &pos);
+        if (actor->_038 - pos.y < 0.3f) {
+            actor->_276 |= 4;
+        }
+    }
+    g->_2C50[0]->_276 |= 1;
+}
+
 // .text:0x0000D2F0 size:0x10
 void fn_1_D2F0(void) {
     lbl_1_bss_30B8 = 1;
+}
+
+// .text:0x0000CC24 size:0xA4
+void fn_1_CC24(void) {
+    UnkTask0610* task;
+    if (lbl_1_bss_30BC == 0) {
+        lbl_1_bss_30BC = 1;
+        task = fn_800B0A5C_insertQueue(fn_1_CCC8, lbl_803CC1B8->_12 + 1);
+        if (lbl_1_bss_5F69 != 0) {
+            task->_14 = lbl_1_bss_67B8[1];
+            task->_18 = lbl_1_data_F56C;
+        } else {
+            task->_14 = lbl_1_bss_67B8[2];
+            task->_18 = lbl_1_data_F56E;
+        }
+    }
 }
 
 // .text:0x0000CB9C size:0x88
