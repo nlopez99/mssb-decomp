@@ -40,9 +40,18 @@ typedef struct ModelList0568 {
     /* 0x34 */ ActorRef0568 _34[1];
 } ModelList0568;
 
+typedef struct PoseBlock0568 {
+    /* 0x00 */ u8 _00[0x5C];
+} PoseBlock0568; // size: 0x5C
+
 // One pose block per player in lbl_8036E548
 typedef struct Pose0568 {
-    /* 0x00 */ u8 _00[0xCD];
+    /* 0x00 */ u8 _00[0x4];
+    /* 0x04 */ PoseBlock0568 _04;
+    /* 0x60 */ u8 _60[0x68 - 0x60];
+    /* 0x68 */ PoseBlock0568 _68;
+    /* 0xC4 */ u8 _C4[0xCC - 0xC4];
+    /* 0xCC */ u8 _CC;
     /* 0xCD */ u8 _CD;
     /* 0xCE */ u8 _CE;
     /* 0xCF */ u8 _CF;
@@ -51,18 +60,32 @@ typedef struct Pose0568 {
     /* 0xD2 */ u8 _D2[0xD4 - 0xD2];
 } Pose0568; // size: 0xD4
 
+typedef struct AnimBank0568 {
+    /* 0x00 */ u8 _00[0xA];
+    /* 0x0A */ u16 _0A;
+} AnimBank0568;
+
 // A player record in lbl_8036E548
 typedef struct Player0568 {
-    /* 0x000 */ u8 _000[0x8];
+    /* 0x000 */ void* _000;
+    /* 0x004 */ u8 _004[0x8 - 0x4];
     /* 0x008 */ void* _008;
-    /* 0x00C */ u8 _00C[0x30 - 0xC];
+    /* 0x00C */ u8 _00C[0x10 - 0xC];
+    /* 0x010 */ AnimBank0568* _010[7];
+    /* 0x02C */ u8* _02C;
     /* 0x030 */ Pose0568* _030;
     /* 0x034 */ f32 _034;
     /* 0x038 */ f32 _038;
     /* 0x03C */ f32 _03C;
-    /* 0x040 */ u8 _040[0x62 - 0x40];
+    /* 0x040 */ u8 _040[0x4C - 0x40];
+    /* 0x04C */ f32 _04C;
+    /* 0x050 */ u8 _050[0x62 - 0x50];
     /* 0x062 */ s16 _062;
-    /* 0x064 */ u8 _064[0x252 - 0x64];
+    /* 0x064 */ u8 _064[0x68 - 0x64];
+    /* 0x068 */ s16 _068;
+    /* 0x06A */ u8 _06A[0x16A - 0x6A];
+    /* 0x16A */ u16 _16A;
+    /* 0x16C */ u8 _16C[0x252 - 0x16C];
     /* 0x252 */ u8 _252;
     /* 0x253 */ u8 _253;
     /* 0x254 */ u8 _254;
@@ -70,15 +93,22 @@ typedef struct Player0568 {
     /* 0x25D */ u8 _25D;
     /* 0x25E */ u8 _25E[0x265 - 0x25E];
     /* 0x265 */ u8 _265;
-    /* 0x266 */ u8 _266[0x27C - 0x266];
+    /* 0x266 */ u8 _266[0x268 - 0x266];
+    /* 0x268 */ s8 _268;
+    /* 0x269 */ u8 _269[0x26C - 0x269];
+    /* 0x26C */ u8 _26C;
+    /* 0x26D */ u8 _26D[0x27C - 0x26D];
 } Player0568; // size: 0x27C
 
 extern struct {
-    /* 0x0000 */ u8 _0000[0x140];
+    /* 0x0000 */ u8 _0000[0x13C];
+    /* 0x013C */ void* _013C;
     /* 0x0140 */ Pose0568 _0140[13];
     /* 0x0C04 */ Player0568 _0C04[13];
     /* 0x2C50 */ Player0568* _2C50[13];
-    /* 0x2C84 */ u8 _2C84[0x2D94 - 0x2C84];
+    /* 0x2C84 */ u8 _2C84[0x2C8C - 0x2C84];
+    /* 0x2C8C */ u8* _2C8C;
+    /* 0x2C90 */ u8 _2C90[0x2D94 - 0x2C90];
     /* 0x2D94 */ struct {
         /* 0x00 */ u8 _00[0x28];
     }* _2D94;
@@ -93,7 +123,8 @@ extern struct {
     /* 0x00 */ s8 _00;
     /* 0x01 */ s8 _01;
     /* 0x02 */ s8 _02[10];
-    /* 0x0C */ u8 _0C[0x14 - 0xC];
+    /* 0x0C */ s32 _0C;
+    /* 0x10 */ u8 _10[4];
     /* 0x14 */ u8 _14[4];
     /* 0x18 */ u8 _18;
     /* 0x19 */ u8 _19;
@@ -111,8 +142,15 @@ extern struct {
     /* 0x46 */ u8 _46[2];
 } lbl_2_bss_100B8;
 
+typedef struct Char0568 {
+    /* 0x00 */ u8 _00[0x24];
+    /* 0x24 */ s16 CharID;
+    /* 0x26 */ u8 _26[0xA0 - 0x26];
+} Char0568; // size: 0xA0
+
 extern struct {
-    /* 0x0000 */ u8 _0000[0x46F8];
+    /* 0x0000 */ Char0568 _0000[12][9];
+    /* 0x4380 */ u8 _4380[0x46F8 - 0x4380];
     /* 0x46F8 */ s8 _46F8[2];
     /* 0x46FA */ u8 _46FA[0x4701 - 0x46FA];
     /* 0x4701 */ u8 _4701;
@@ -165,12 +203,14 @@ extern struct {
 typedef struct Task0568 {
     /* 0x00 */ u8 _00[0x10];
     /* 0x10 */ s16 _10;
-    /* 0x12 */ u8 _12[0x18 - 0x12];
-    /* 0x18 */ u8 _18[4];
+    /* 0x12 */ u8 _12[0x14 - 0x12];
+    /* 0x14 */ Player0568* _14;
+    /* 0x18 */ s8 _18[4];
     /* 0x1C */ u8 _1C;
     /* 0x1D */ u8 _1D;
     /* 0x1E */ u8 _1E;
-    /* 0x1F */ u8 _1F[0x21 - 0x1F];
+    /* 0x1F */ u8 _1F;
+    /* 0x20 */ u8 _20;
     /* 0x21 */ u8 _21;
 } Task0568;
 
@@ -190,7 +230,7 @@ extern struct {
 
 extern u8 lbl_800FE930[][6];
 extern u8 lbl_800FE5D4[];
-extern u8 lbl_2_bss_100B4;
+extern u8 lbl_2_bss_100B4[2];
 
 typedef struct Slot0568 {
     /* 0x00 */ u8* _00;
@@ -212,6 +252,23 @@ extern struct {
 
 extern u8* lbl_2_bss_122C;
 
+extern u8 lbl_2_data_2794[];
+
+typedef struct AramEntry0568 {
+    /* 0x0 */ u32 _0[4];
+} AramEntry0568; // size: 0x10
+
+extern AramEntry0568 lbl_2_data_241C[54];
+
+extern struct {
+    /* 0x000 */ u8 _000[0x715];
+    /* 0x715 */ s8 _715;
+} lbl_803C6CF8;
+
+static inline u16 getModelId(s32 index) {
+    return lbl_8036E548._2C50[index] != NULL ? lbl_8036E548._2C50[index]->_16A : 0xFFFF;
+}
+
 extern Mtx lbl_2_bss_1010C;
 
 extern struct {
@@ -229,6 +286,14 @@ typedef struct Obj0568 {
 extern void fn_2_16460(void);
 extern void* fn_800B0A5C_insertQueue(void (*)(void), s32);
 extern void fn_800B0A14_removeQueue(void);
+extern void fn_80023B04(s32);
+extern void fn_80014204(s32);
+extern void* fn_80023AA4(void);
+extern void* ARAMTransfer(AramEntry0568* entry, void* dst, s32 arg2, u32 aram);
+extern void fn_2_14BB8(u8 index, s32 flag);
+extern ActorRef0568* fn_800111D8(Player0568* player);
+extern void fn_800B2B54(void* actor, u16 id, s32 mode);
+extern void fn_80025EEC(void* state, s32, s32);
 extern void fn_2_11A0(s32 arg0);
 extern void changeScene(u8, s16);
 extern void fn_800625A4(s32 index, s32 value);
@@ -571,7 +636,7 @@ void fn_2_18748(void) {
             } else {
                 task->_1D = 0;
             }
-        } else if (lbl_2_bss_100B4 != 0) {
+        } else if (lbl_2_bss_100B4[0] != 0) {
             task->_1E = 0;
             task->_1D = 0;
             fn_800B0A14_removeQueue();
@@ -600,6 +665,79 @@ s32 fn_2_18650(s32 index) {
         return 1;
     }
     return 0;
+}
+
+// .text:0x00018148 size:0x250
+void fn_2_18148(Task0568* task) {
+    switch (task->_21) {
+    case 0:
+        task->_14 = &lbl_8036E548._0C04[task->_1E];
+        task->_14->_252 = task->_18[task->_1E];
+        task->_20 = lbl_2_bss_100B8._46[task->_1E];
+        lbl_8036E548._0C04[task->_1E]._25D = 0;
+        task->_14->_068 = -1;
+        lbl_2_bss_100B4[1] = 1;
+        task->_21++;
+        break;
+    case 1:
+        ARAMTransfer(&lbl_2_data_241C[task->_18[task->_1E]], task->_14->_008, 0, 0);
+        task->_21++;
+        break;
+    case 2:
+        if (lbl_803C6CF8._715 == 1) {
+            fn_2_16F78(task->_1E);
+            if (g_d_GameSettings._10 == 0 && lbl_803C66B0._59[0] == 0 && task->_1E == 1) {
+                lbl_8036E548._0C04[task->_1E]._25D = 0;
+            } else {
+                lbl_8036E548._0C04[task->_1E]._25D = task->_20 != 0;
+            }
+            if (g_d_GameSettings.GameModeSelected == 5 || g_d_GameSettings._10 != 0 || lbl_803CBBCC->_6 == 5) {
+                fn_2_14BB8(task->_1E, 1);
+            } else if (lbl_2_bss_100B8._10[0] != 0) {
+                fn_2_14BB8(task->_1E, task->_1E != 0);
+            }
+            task->_21 = 0;
+            lbl_2_bss_100B8._32 = 1;
+            lbl_2_bss_100B4[1] = 0;
+            lbl_2_bss_100B8._18 = 1;
+            lbl_2_bss_100B8._42[task->_1E] = 0;
+        }
+        break;
+    }
+}
+
+// .text:0x00017ED8 size:0x270
+void fn_2_17ED8(void) {
+    fn_2_17C88();
+    fn_80014204(lbl_2_bss_100B8._2D);
+    lbl_8036E548._013C = fn_80023AA4();
+    fn_80023B04(4);
+}
+
+// .text:0x00017C88 size:0x250
+void fn_2_17C88(void) {
+    s32 i;
+    s32 j;
+    u32 max = 0;
+    u32 size;
+
+    for (i = 0; i < 12; i++) {
+        for (j = 0; j < 9; j++) {
+            if (i * 9 + j == 53) {
+                goto done;
+            }
+            size = lbl_2_data_241C[lbl_8034E9A0._0000[i][j].CharID]._0[1] & 0x0FFFFFFF;
+            if (max < size) {
+                max = size;
+            }
+        }
+    }
+done:
+    size = (max + 0x1F) & ~0x1F;
+    lbl_8036E548._2C8C = _OSAllocFromHeap(0x20, size * lbl_2_bss_100B8._2D);
+    for (i = 0; i < lbl_2_bss_100B8._2D; i++) {
+        lbl_8036E548._0C04[i]._008 = lbl_8036E548._2C8C + size * i;
+    }
 }
 
 // .text:0x00017AB8 size:0x1D0
@@ -671,6 +809,62 @@ void fn_2_16CE0(void) {
             lbl_2_bss_100B8._40[i] = 1;
         }
     }
+}
+
+// .text:0x00016A98 size:0x248
+void fn_2_16A98(s32 index, s32 anim, u8 loop, s8 arg3, s16 frame, s32 arg5, u8 frames) {
+    f32 speed = 0.0f;
+    Player0568* player = lbl_8036E548._2C50[index];
+    ActorRef0568* ref;
+    AnimBank0568* bank;
+    s32 slot;
+    s32 seq;
+    u8 value;
+
+    if (player == NULL) {
+        return;
+    }
+    ref = fn_800111D8(player);
+    if (frames != 0) {
+        speed = 1.0f / frames;
+    }
+    if (player->_26C == 0) {
+        fn_800B2B54(player->_000, getModelId(index), 13);
+    } else {
+        fn_800B2B54(player->_000, getModelId(index), 1);
+    }
+    if (anim < 3) {
+        slot = 5;
+        seq = anim;
+    }
+    value = lbl_2_data_2794[seq];
+    if (player->_02C != NULL) {
+        fn_80025EEC(player->_02C + 4, 5, value);
+    }
+    if (player->_030 != NULL && player->_030->_CC != 0) {
+        fn_80025EEC(&player->_030->_68, 5, value);
+        fn_80025EEC(&player->_030->_04, 5, value);
+    }
+    if (index < lbl_2_bss_100B8._2D && (bank = player->_010[slot]) != NULL) {
+        if (seq >= bank->_0A) {
+            return;
+        }
+        ref->_04 = bank;
+        ref->_0E = seq;
+        ref->_5C = 0.0f;
+        ref->_58 = 1;
+        ref->_59 = bank != NULL;
+        ref->_5A = bank != NULL;
+        ref->_60 = speed;
+    }
+    if (loop) {
+        ref->_5B = 3;
+    } else {
+        ref->_5B = 2;
+    }
+    ref->_5C = frame * player->_04C;
+    ref->_59 = 1;
+    player->_268 = arg3;
 }
 
 // .text:0x00016A74 size:0x24
