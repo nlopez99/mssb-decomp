@@ -251,6 +251,8 @@ extern void fn_80026130(s32, void*, f32);
 extern void fn_800385F0(struct Unk30C0*, f32, f32, f32, f32);
 extern void fn_80037AA0(struct Unk30C0*, s32, void (*)(s32), u16, UnkTimer0610*);
 extern void fn_800B0A14_removeQueue(void);
+extern void fn_800245EC(Mtx44 proj, Mtx view, Vec* points, f32 (*out)[2], s32 count, s32 arg5);
+extern void* fn_80039AB4(void);
 extern void fn_800B2BA8(UnkList0610* dst, u16 id, UnkList0610* src, u16 index);
 extern void fn_80039A4C(void);
 extern void LITAlloc(LITObj** light);
@@ -354,6 +356,9 @@ extern u8 lbl_1_data_ABA8;
 extern s8 lbl_1_data_AC90[];
 extern Vec lbl_1_data_AD0C;
 extern Vec lbl_1_data_AD18;
+extern Vec lbl_1_data_AD30[8];
+extern u8 lbl_1_data_AD90[6][4];
+extern u32 lbl_1_data_ADA8[6];
 extern Vec lbl_1_data_AD24;
 extern f32 lbl_1_data_ADC0;
 extern f32 lbl_1_data_F568;
@@ -1274,6 +1279,83 @@ void fn_1_11C98(void) {
     s32 i;
     for (i = 0; i < 3; i++) {
         LITXForm(lbl_8036E548._00AC[i], lbl_1_bss_68FC._10);
+    }
+}
+
+// .text:0x00011714 size:0x584
+void fn_1_11714(UnkCamera0610* arg0) {
+    Mtx44 proj;
+    f32 uv[8][2];
+    s32 i;
+    u8* face;
+    fn_1_17954();
+    GXLoadPosMtxImm(arg0->_08, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    GXSetColorUpdate(GX_TRUE);
+    C_MTXFrustum(proj, -0.000175f, 0.000175f, 0.00025f, -0.00025f, 0.001f, 512.0f);
+    fn_800245EC(proj, lbl_1_bss_68FC._10, lbl_1_data_AD30, uv, 8, 1);
+    SetDisplayStateTexture(fn_80039AB4(), 0, 0);
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
+    GXSetNumTevStages(1);
+    GXSetNumChans(1);
+    GXSetNumTexGens(1);
+    GXSetTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2X4, GX_TG_TEX0, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
+    GXSetTevOp(GX_TEVSTAGE0, GX_REPLACE);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    GXSetChanCtrl(GX_COLOR0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetChanCtrl(GX_ALPHA0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_COPY);
+    GXBegin(GX_QUADS, GX_VTXFMT0, 24);
+    for (i = 0; i < 24; i++) {
+        s32 v = lbl_1_data_AD90[i / 4][i % 4];
+        GXPosition3f32(lbl_1_data_AD30[v].x, lbl_1_data_AD30[v].y, lbl_1_data_AD30[v].z);
+        GXColor1u32(lbl_1_data_ADA8[i / 4]);
+        GXTexCoord2f32(uv[v][0], uv[v][1]);
+    }
+    GXEnd();
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    GXSetNumTexGens(0);
+    GXSetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+    for (i = 0; i < 6; i++) {
+        face = lbl_1_data_AD90[i];
+        GXBegin(GX_LINESTRIP, GX_VTXFMT0, 6);
+        GXWGFifo.f32 = lbl_1_data_AD30[face[0]].x;
+        GXWGFifo.f32 = lbl_1_data_AD30[face[0]].y;
+        GXWGFifo.f32 = lbl_1_data_AD30[face[0]].z;
+        GXWGFifo.u32 = 0xFFFFFFFF;
+        GXWGFifo.f32 = lbl_1_data_AD30[face[1]].x;
+        GXWGFifo.f32 = lbl_1_data_AD30[face[1]].y;
+        GXWGFifo.f32 = lbl_1_data_AD30[face[1]].z;
+        GXWGFifo.u32 = 0xFFFFFFFF;
+        GXWGFifo.f32 = lbl_1_data_AD30[face[2]].x;
+        GXWGFifo.f32 = lbl_1_data_AD30[face[2]].y;
+        GXWGFifo.f32 = lbl_1_data_AD30[face[2]].z;
+        GXWGFifo.u32 = 0xFFFFFFFF;
+        GXWGFifo.f32 = lbl_1_data_AD30[face[3]].x;
+        GXWGFifo.f32 = lbl_1_data_AD30[face[3]].y;
+        GXWGFifo.f32 = lbl_1_data_AD30[face[3]].z;
+        GXWGFifo.u32 = 0xFFFFFFFF;
+        GXWGFifo.f32 = lbl_1_data_AD30[face[0]].x;
+        GXWGFifo.f32 = lbl_1_data_AD30[face[0]].y;
+        GXWGFifo.f32 = lbl_1_data_AD30[face[0]].z;
+        GXWGFifo.u32 = 0xFFFFFFFF;
+        GXWGFifo.f32 = lbl_1_data_AD30[face[2]].x;
+        GXWGFifo.f32 = lbl_1_data_AD30[face[2]].y;
+        GXWGFifo.f32 = lbl_1_data_AD30[face[2]].z;
+        GXWGFifo.u32 = 0xFFFFFFFF;
+        GXEnd();
     }
 }
 
