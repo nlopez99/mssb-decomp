@@ -159,6 +159,8 @@ extern void* lbl_803CC1B8;
 extern struct {
     /* 0x0000 */ u8 _0000[0x4756];
     /* 0x4756 */ u8 _4756;
+    /* 0x4757 */ u8 _4757[0x48AF - 0x4757];
+    /* 0x48AF */ u8 _48AF;
 } lbl_8034E9A0;
 
 extern struct {
@@ -205,8 +207,36 @@ extern void fn_2_48D54(void);
 extern void fn_2_190DC(ModelTable0DE0* table, Mtx view);
 extern void fn_800A7D4C(s32 arg0, void* arg1);
 extern void fn_800B806C(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7);
+typedef struct Tracker0DE0 {
+    /* 0x0000 */ u8 _0000[0x1606];
+    /* 0x1606 */ s8 _1606;
+    /* 0x1607 */ u8 _1607[0x441B - 0x1607];
+    /* 0x441B */ u8 _441B;
+    /* 0x441C */ u8 _441C[0x444B - 0x441C];
+    /* 0x444B */ s8 _444B;
+    /* 0x444C */ u8 _444C[0x4508 - 0x444C];
+} Tracker0DE0; // size: 0x4508
+
+extern struct {
+    /* 0x0000 */ Tracker0DE0 trackers[3];
+    /* 0xCF18 */ u8 _CF18[0xCF5E - 0xCF18];
+    /* 0xCF5E */ u8 _CF5E[3];
+} lbl_80354768;
+
 extern void fn_80034E20(MenuTask0DE0* task, void* desc);
+extern void changeScene(u8, s16);
+extern s32 fn_80042DA8(MenuTask0DE0* task, s32 index, s32 value);
+extern void fn_800363D8(MenuTask0DE0* task, s32 id, s32 part, s32 kind, s32 value);
+
+static inline BOOL isAnimDone(MenuTask0DE0* task, s32 index, s32 value) {
+    return fn_80042DA8(task, index, value) ? TRUE : FALSE;
+}
 extern void LITXForm(LITObj* light, Mtx view);
+extern void LITAlloc(LITObj** light);
+extern void LITInitAttn(LITObj* light, f32 a0, f32 a1, f32 a2, f32 k0, f32 k1, f32 k2);
+extern void LITInitPos(LITObj* light, f32 x, f32 y, f32 z);
+extern void LITInitColor(LITObj* light, GXColor color);
+extern void LITInitDir(LITObj* light, f32 nx, f32 ny, f32 nz);
 extern void fn_800BDA94(Model0DE0* model, Mtx mtx);
 extern void LoadActorLayout(void* layout);
 extern void convertGeometryAndSknHeader(void* geo, void* skn);
@@ -371,6 +401,51 @@ s32 fn_2_895F8(u8 useSaved) {
     return result;
 }
 
+// .text:0x00088D90 size:0x2A8
+void fn_2_88D90(MenuTask0DE0* task) {
+    s32 i;
+    BOOL done;
+
+    if (lbl_2_bss_33FBCC._18 == 0 ? TRUE : FALSE) {
+        lbl_80371C30[task->_14]._00->_5C = 0x190000;
+        lbl_80371C30[task->_14]._00->_68 = 4;
+        for (i = 0; i < 3; i++) {
+            lbl_80371C30[task->_14 + 4 + i]._00->_68 = 4;
+            if (lbl_80354768._CF5E[i] != 0) {
+                lbl_80371C30[task->_14 + 14 + i * 3]._00->_68 = 4;
+                lbl_80371C30[task->_14 + 15 + i * 3]._00->_68 = 4;
+                lbl_80371C30[task->_14 + 16 + i * 3]._00->_68 = 4;
+                lbl_80371C30[task->_14 + 56 + i]._00->_68 = 4;
+                if (lbl_80354768.trackers[i]._1606 != 0 && lbl_80354768.trackers[i]._441B == 0) {
+                    lbl_80371C30[task->_14 + 59 + i]._00->_68 = 4;
+                } else {
+                    lbl_80371C30[task->_14 + 23 + i]._00->_68 = 4;
+                    lbl_80371C30[task->_14 + 11 + i]._00->_5C = 0x160000;
+                    lbl_80371C30[task->_14 + 11 + i]._00->_68 = 4;
+                    if (lbl_80354768.trackers[i]._444B != -1) {
+                        lbl_80371C30[task->_14 + 50 + i]._00->_68 = 4;
+                    }
+                }
+            }
+        }
+        lbl_2_bss_33FBCC._18 = 1;
+        lbl_2_bss_33FBCC._19 = 1;
+    }
+    if (lbl_2_bss_33FBCC._19 == 1 ? TRUE : FALSE) {
+        done = isAnimDone(task, 0, 0);
+        if ((lbl_80371C30[task->_14]._00->_5C >> 16) == 3) {
+            changeScene(3, 6);
+        }
+        if (done == TRUE) {
+            lbl_8034E9A0._48AF = 1;
+            lbl_2_bss_33FBCC._1A = 1;
+            lbl_2_bss_33FBCC._17 = 0;
+            lbl_2_bss_33FBCC._18 = 0;
+            lbl_2_bss_33FBCC._19 = 0;
+        }
+    }
+}
+
 // .text:0x00088250 size:0x178
 void fn_2_88250(MenuTask0DE0* task) {
     if (lbl_2_bss_33FBCC._18 == 0 ? TRUE : FALSE) {
@@ -389,6 +464,51 @@ void fn_2_88250(MenuTask0DE0* task) {
         lbl_2_bss_33FBCC._17 = 0;
         lbl_2_bss_33FBCC._18 = 0;
         lbl_2_bss_33FBCC._19 = 0;
+    }
+}
+
+// .text:0x00087FB0 size:0x2A0
+void fn_2_87FB0(MenuTask0DE0* task) {
+    s32 i;
+    s32 done;
+    s32 total;
+
+    if (lbl_2_bss_33FBCC._18 == 0 ? TRUE : FALSE) {
+        fn_2_8A008(task);
+        lbl_80371C30[task->_14 + 7 + lbl_2_bss_33FBCC._10]._00->_64 = 18;
+        lbl_80371C30[task->_14 + 7 + lbl_2_bss_33FBCC._10]._00->_5C = 0;
+        lbl_80371C30[task->_14 + 7 + lbl_2_bss_33FBCC._10]._00->_68 = 1;
+        lbl_80371C30[task->_14 + 7 + lbl_2_bss_F410._50]._00->_64 = 18;
+        lbl_80371C30[task->_14 + 7 + lbl_2_bss_F410._50]._00->_68 = 1;
+        lbl_80371C30[task->_14 + 4 + lbl_2_bss_33FBCC._10]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + 66 + lbl_2_bss_33FBCC._10]._00->_54 &= ~2;
+        lbl_2_bss_33FBCC._18 = 1;
+        lbl_2_bss_33FBCC._0D = lbl_2_bss_33FBCC._10;
+        lbl_2_bss_F410._50 = lbl_2_bss_33FBCC._10;
+        lbl_2_bss_33FBCC._10 = -1;
+        lbl_2_bss_33FBCC._19 = 1;
+    }
+    if (lbl_2_bss_33FBCC._19 == 1 ? TRUE : FALSE) {
+        done = 0;
+        total = 0;
+        for (i = 0; i < 3; i++) {
+            if (lbl_80354768._CF5E[i] != 0) {
+                if (lbl_80354768.trackers[i]._444B != -1) {
+                    total++;
+                    done += isAnimDone(task, i + 50, 10);
+                } else if (lbl_80354768.trackers[i]._1606 == 0) {
+                    total++;
+                    done += isAnimDone(task, i + 53, 14);
+                }
+            }
+        }
+        if (done == total) {
+            lbl_80371C30[task->_14 + 7 + lbl_2_bss_F410._50]._00->_64 = 19;
+            lbl_80371C30[task->_14 + 7 + lbl_2_bss_F410._50]._00->_68 = 1;
+            lbl_2_bss_33FBCC._17 = 0;
+            lbl_2_bss_33FBCC._18 = 0;
+            lbl_2_bss_33FBCC._19 = 0;
+        }
     }
 }
 
@@ -540,6 +660,40 @@ void fn_2_86DCC(void) {
     lbl_2_bss_1A81D4._38 = 0.0f;
     lbl_2_bss_1A81D4._30 = 0xC19F;
     lbl_2_bss_1A81D4._32 = 0;
+}
+
+// .text:0x00086A80 size:0x34C
+void fn_2_86A80(void) {
+    GXColor white = { 255, 255, 255, 255 };
+    GXColor blue = { 0, 0, 255, 255 };
+    GXColor red = { 255, 0, 0, 255 };
+    GXColor unused = { 255, 255, 255, 255 };
+
+    LITAlloc(&lbl_2_bss_340140->_00AC[0]);
+    LITAlloc(&lbl_2_bss_340140->_00AC[1]);
+    LITAlloc(&lbl_2_bss_340140->_00AC[2]);
+    LITAlloc(&lbl_2_bss_340140->_00AC[3]);
+
+    LITInitAttn(lbl_2_bss_340140->_00AC[0], 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+    LITInitPos(lbl_2_bss_340140->_00AC[0], 5.0f, 0.0f, 5.0f);
+    LITInitDir(lbl_2_bss_340140->_00AC[0], 0.0f, 0.0f, 0.0f);
+    LITInitColor(lbl_2_bss_340140->_00AC[0], red);
+    LITInitDir(lbl_2_bss_340140->_00AC[0], -5.0f, 0.0f, -5.0f);
+
+    LITInitAttn(lbl_2_bss_340140->_00AC[1], 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+    LITInitPos(lbl_2_bss_340140->_00AC[1], -5.0f, 5.0f, 0.0f);
+    LITInitDir(lbl_2_bss_340140->_00AC[1], 0.0f, 0.0f, 0.0f);
+    LITInitColor(lbl_2_bss_340140->_00AC[1], blue);
+
+    LITInitAttn(lbl_2_bss_340140->_00AC[2], 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+    LITInitPos(lbl_2_bss_340140->_00AC[2], 0.0f, 0.0f, 5.0f);
+    LITInitDir(lbl_2_bss_340140->_00AC[2], 0.0f, 0.0f, 0.0f);
+    LITInitColor(lbl_2_bss_340140->_00AC[2], white);
+
+    LITInitAttn(lbl_2_bss_340140->_00AC[3], 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+    LITInitPos(lbl_2_bss_340140->_00AC[3], 0.0f, 0.0f, -5.0f);
+    LITInitDir(lbl_2_bss_340140->_00AC[3], 0.0f, 0.0f, 0.0f);
+    LITInitColor(lbl_2_bss_340140->_00AC[3], white);
 }
 
 // .text:0x00086A0C size:0x74
