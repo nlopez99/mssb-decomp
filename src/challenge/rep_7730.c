@@ -117,6 +117,7 @@ extern void fn_800B2C08(void* actor, s32 arg1);
 extern void fn_800BD548(void* model, s32 count, ...);
 extern void fn_800BDA24(struct Model7730* model);
 extern void fn_80023F0C(void* src, struct Tex7730* dst, s32 srcX, s32 srcY, s32 w, s32 h, s32 dstX, s32 dstY);
+static inline void fn_1_1D590(void* src, struct Tex7730* tex, u8* map, s32 tileW, s32 tileH);
 extern void gOz_GXSetTexture(s32, s32, s32);
 extern void SetDisplayStateTexture(void* tex, s32, s32);
 extern void fn_800BD670(struct ModelTable7730* table, MtxPtr mtx);
@@ -3091,37 +3092,12 @@ void fn_1_1D944(void) {
 }
 
 // .text:0x0001D694 size:0x2B0
-// 95.65%: saved registers of the tile loops differ, and the target's frame is 16 bytes
-// smaller. Dividing the u16 sizes by s32 tile sizes gives the target's srawi/addze.
 void fn_1_1D694(DrawEntry7730* entry) {
-    Mtx44 proj;
+    Mtx proj; // a 3x4 matrix in the original (its frame), though C_MTXOrtho writes 4x4
     Mtx m;
-    Tex7730* tex;
-    u8* map;
-    void* src;
-    s32 y;
-    s32 x;
-    s32 rows;
-    s32 cols;
-    s32 tileW = 32;
-    s32 tileH = 64;
 
     if (entry->_18 != 0) {
-        tex = entry->_08;
-        map = entry->_10;
-        src = entry->_0C;
-        memset(tex->image, 0, tex->width * tex->height);
-        rows = tex->height / tileH;
-        cols = tex->width / tileW;
-        for (y = 0; y < rows; y++) {
-            for (x = 0; x < cols; x++) {
-                if (x & lbl_803CBBC0) {
-                    fn_80023F0C(src, tex, (map[y * cols + x] % cols) * 32, (map[y * cols + x] / cols) * 64, 32, 64,
-                                x * 32, y * 64);
-                }
-            }
-        }
-        DCStoreRange(tex->image, tex->width * tex->height);
+        fn_1_1D590(entry->_0C, entry->_08, entry->_10, 32, 64);
     }
     C_MTXOrtho(proj, 0.0f, 448.0f, 0.0f, 640.0f, 0.0f, 1.0f);
     PSMTXIdentity(m);
@@ -3143,4 +3119,26 @@ void fn_1_1D694(DrawEntry7730* entry) {
     GXPosition3f32(entry->_08->width, 0.0f, -0.5f);
     GXColor1u32(0xFFFFFFFF);
     GXTexCoord2s16(1, 0);
+}
+
+// .text:0x0001D590 size:0x104
+// Outside this unit's .text range in splits.txt; inlined into fn_1_1D694 above.
+static inline void fn_1_1D590(void* src, Tex7730* tex, u8* map, s32 tileW, s32 tileH) {
+    s32 y;
+    s32 x;
+    s32 rows;
+    s32 cols;
+
+    memset(tex->image, 0, tex->width * tex->height);
+    rows = tex->height / tileH;
+    cols = tex->width / tileW;
+    for (y = 0; y < rows; y++) {
+        for (x = 0; x < cols; x++) {
+            if (x & lbl_803CBBC0) {
+                fn_80023F0C(src, tex, tileW * (map[y * cols + x] % cols), tileH * (map[y * cols + x] / cols), tileW,
+                            tileH, x * tileW, y * tileH);
+            }
+        }
+    }
+    DCStoreRange(tex->image, tex->width * tex->height);
 }
