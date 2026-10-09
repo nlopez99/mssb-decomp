@@ -167,9 +167,11 @@ typedef struct ChainTask7730 {
     /* 0x20 */ u16 _20;
     /* 0x22 */ u16 _22;
     /* 0x24 */ u16 _24;
-    /* 0x26 */ u8 _26[0x2A - 0x26];
+    /* 0x26 */ u16 _26;
+    /* 0x28 */ u16 _28;
     /* 0x2A */ u8 _2A;
     /* 0x2B */ u8 _2B;
+    /* 0x2C */ u8 _2C;
 } ChainTask7730;
 
 typedef struct WaveTask7730 {
@@ -555,6 +557,7 @@ static struct {
     /* 0x0028 */ u8 _0028[0x17A8 - 0x28];
 } lbl_1_bss_45868;
 static RopeNode7730 lbl_1_bss_43F68[100];
+static Mtx lbl_1_bss_43F38;
 static struct {
     /* 0x00 */ Mtx _00;
     /* 0x30 */ s16 _30;
@@ -563,7 +566,7 @@ static struct {
     /* 0x38 */ f32 _38;
     /* 0x3C */ Vec _3C;
     /* 0x48 */ Vec _48;
-    /* 0x54 */ u8 _54[0x88 - 0x54];
+    /* 0x54 */ u8 _54[0x58 - 0x54];
 } lbl_1_bss_43EE0;
 static Vec lbl_1_bss_F6E0[160][112];
 static f32 lbl_1_bss_76E0[64 * 128];
@@ -681,6 +684,33 @@ void fn_1_267BC(void) {
     if (((SprTask7730*)lbl_803CC1B8)->_10 != 0) {
         fn_800B0A14_removeQueue();
     }
+}
+
+// .text:0x00025C68 size:0x330
+// 97.15%: only the inlined fn_1_24A8C's final call differs, as in fn_1_24A8C.
+void fn_1_25C68(void) {
+    ChainTask7730* task = lbl_803CC1B8;
+    u32 color;
+
+    color = 0;
+    GXSetCopyClear(*(GXColor*)&color, 0xFFFFFF);
+    C_MTXFrustum(lbl_1_bss_47010, -224.0f, 224.0f, -320.0f, 320.0f, 1.0f, 512.0f);
+    C_MTXLookAt(lbl_1_bss_43F38, &lbl_1_data_1048C, &lbl_1_data_10480, &lbl_1_data_10498);
+    task->_18 = 64.0f * lbl_1_data_10468;
+    task->_1C = 64.0f * lbl_1_data_1046C;
+    task->_1A = lbl_1_data_10470;
+    task->_1E = 32;
+    task->_2A = lbl_1_data_10474;
+    task->_22 = 10;
+    task->_2B = 20;
+    task->_20 = 64.0f * lbl_1_data_1047C;
+    task->_24 = 64.0f * lbl_1_data_10478;
+    task->_14 = 0.5f;
+    task->_26 = 100;
+    task->_28 = 10;
+    fn_1_24A8C();
+    ((ChainTask7730*)lbl_803CC1B8)->_00 = fn_1_25064;
+    task->_2C = 0;
 }
 
 // .text:0x00024A8C size:0x1C0
