@@ -138,8 +138,9 @@ u32 lbl_1_data_AC[15][4] = {
     { 0x00000000, 0x00040000, 0x0A8C0000, 0x00040000 },
 };
 
-s32 lbl_1_bss_0;
+// MWCC lays out .bss in reverse declaration order
 u8 lbl_1_bss_4[0x5C];
+s32 lbl_1_bss_0;
 
 // .text:0x00001948 size:0x24
 void fn_1_1948(void) {
@@ -410,6 +411,78 @@ void fn_1_AF4(s32 nx, s32 nz, f32 size) {
         GXColor1u32(0xFFFFFFFF);
         z0 += size;
     }
+}
+
+// .text:0x000005EC size:0x508
+void fn_1_5EC(void) {
+    Mtx44 proj;
+    Mtx mtx;
+
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2X4, GX_TG_TEX0, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
+    GXSetNumChans(1);
+    GXSetNumTexGens(0);
+    GXSetNumTevStages(1);
+    GXSetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
+    GXSetZMode(GX_TRUE, GX_ALWAYS, GX_TRUE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+    C_MTXOrtho(proj, 0.0f, 448.0f, 0.0f, 640.0f, 0.0f, 1.0f);
+    GXSetProjection(proj, GX_ORTHOGRAPHIC);
+    PSMTXIdentity(mtx);
+    GXLoadPosMtxImm(mtx, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    GXPosition3f32(0.0f, 0.0f, -0.5f);
+    GXColor1u32(0x808080FF);
+    GXPosition3f32(0.0f, 448.0f, -0.5f);
+    GXColor1u32(0x808080FF);
+    GXPosition3f32(640.0f, 448.0f, -0.5f);
+    GXColor1u32(0x808080FF);
+    GXPosition3f32(640.0f, 0.0f, -0.5f);
+    GXColor1u32(0x808080FF);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_ONE, GX_LO_CLEAR);
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    GXPosition3f32(100.0f, 100.0f, -0.5f);
+    GXColor1u32(0x00FF0080);
+    GXPosition3f32(50.0f, 150.0f, -0.5f);
+    GXColor1u32(0x00FF0080);
+    GXPosition3f32(100.0f, 200.0f, -0.5f);
+    GXColor1u32(0x00FF0080);
+    GXPosition3f32(150.0f, 150.0f, -0.5f);
+    GXColor1u32(0x00FF0080);
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    GXPosition3f32(120.0f, 100.0f, -0.5f);
+    GXColor1u32(0xFF000080);
+    GXPosition3f32(70.0f, 150.0f, -0.5f);
+    GXColor1u32(0xFF000080);
+    GXPosition3f32(120.0f, 200.0f, -0.5f);
+    GXColor1u32(0xFF000080);
+    GXPosition3f32(170.0f, 150.0f, -0.5f);
+    GXColor1u32(0xFF000080);
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    GXPosition3f32(120.0f, 220.0f, -0.5f);
+    GXColor1u32(0xFF000080);
+    GXPosition3f32(70.0f, 270.0f, -0.5f);
+    GXColor1u32(0xFF000080);
+    GXPosition3f32(120.0f, 320.0f, -0.5f);
+    GXColor1u32(0xFF000080);
+    GXPosition3f32(170.0f, 270.0f, -0.5f);
+    GXColor1u32(0xFF000080);
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    GXPosition3f32(100.0f, 220.0f, -0.5f);
+    GXColor1u32(0x00FF0080);
+    GXPosition3f32(50.0f, 270.0f, -0.5f);
+    GXColor1u32(0x00FF0080);
+    GXPosition3f32(100.0f, 320.0f, -0.5f);
+    GXColor1u32(0x00FF0080);
+    GXPosition3f32(150.0f, 270.0f, -0.5f);
+    GXColor1u32(0x00FF0080);
 }
 
 // .text:0x000005E8 size:0x4
