@@ -9,13 +9,13 @@ Sections:
 challenge/rep_0010.c:
 	.text       start:0x00000000 end:0x0000196C
 	.rodata     start:0x00000000 end:0x000000B0
-	.data       start:0x00000000 end:0x00000200
+	.data       start:0x00000000 end:0x000001F0
 	.bss        start:0x00000000 end:0x00000060
 
 challenge/rep_00B0.c:
 	.text       start:0x0000196C end:0x00004DD8
 	.rodata     start:0x000000B0 end:0x00000138
-	.data       start:0x00000200 end:0x000002A8
+	.data       start:0x000001F0 end:0x000002A8
 	.bss        start:0x00000060 end:0x000000C0
 
 challenge/rep_0138.c:
