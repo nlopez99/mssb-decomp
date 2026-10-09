@@ -3,6 +3,7 @@
 
 #include "mssbTypes.h"
 #include "Dolphin/mtx.h"
+#include "Dolphin/GX/GXTypes.h"
 
 struct Unk10AA4;
 struct UnkLight0610;
@@ -54,6 +55,7 @@ void fn_1_106C4(void);
 void fn_1_1073C(struct UnkLight0610* arg0);
 void fn_1_107B8(void);
 void fn_1_10AA4(struct Unk10AA4* arg0, f32 arg1);
+void fn_1_10ACC(Mtx m, Vec* pos, void* arg2, GXColor* color, f32 length);
 void fn_1_10CEC(struct UnkCamera0610* arg0);
 void fn_1_10E2C(Mtx arg0, Mtx arg1, u32 arg2, u32 arg3, u32 arg4);
 void fn_1_116EC(void* arg0);
@@ -88,6 +90,7 @@ void fn_1_176EC(void);
 void fn_1_1770C(void);
 void fn_1_17954(void);
 void fn_1_179CC(void);
+void fn_1_17B5C(void);
 void fn_1_17B5C(void);
 void fn_1_17D90(void);
 

@@ -185,6 +185,7 @@ extern void fn_80026130(s32, void*, f32);
 extern void fn_800385F0(struct Unk30C0*, f32, f32, f32, f32);
 extern void fn_80037AA0(struct Unk30C0*, s32, void (*)(s32), u16, UnkTimer0610*);
 extern void fn_800B0A14_removeQueue(void);
+extern void fn_80052D70(UnkTask0610* task);
 extern void makeLookAtMatrix(Mtx m, const Vec* camPos, const Vec* camUp, const Vec* target);
 extern void fn_1_F2C(s32, s32, s32);
 extern void fn_8002F1AC(Vec* pos, u32 id);
@@ -263,6 +264,7 @@ typedef struct UnkPair0610 {
 extern UnkPair0610 lbl_1_data_1DC0[];
 extern UnkPair0610 lbl_1_data_1E18[];
 extern u8 lbl_1_data_A940[];
+extern u8 lbl_1_data_2390[7];
 extern s16 lbl_1_data_A978[];
 extern u8 lbl_1_data_ABA8;
 extern Vec lbl_1_data_AD0C;
@@ -317,7 +319,12 @@ static struct Unk67E0 {
 static UnkTimer0610* lbl_1_bss_67B8[10];
 static u8 lbl_1_bss_60E8[0x6D0];
 static void* lbl_1_bss_60E4;
-static u8 lbl_1_bss_5F80[0x164];
+static s32 lbl_1_bss_60E0;
+static s32 lbl_1_bss_60DC;
+static s8 lbl_1_bss_60A4[0x36];
+static s32 lbl_1_bss_60A0;
+static u8 lbl_1_bss_5F88[0x118];
+static u8 lbl_1_bss_5F80[8];
 static void* lbl_1_bss_5F7C[1];
 static u8 lbl_1_bss_5F78;
 static f32 lbl_1_bss_5F74;
@@ -383,6 +390,31 @@ void fn_1_17D90(void) {
     lbl_803CC1B8->_10 = 0;
     lbl_803CC1B8->_00 = fn_1_17B5C;
     fn_1_E8D4();
+}
+
+// .text:0x00017B5C size:0x234
+// The target's unrolled flag loop keeps more values live (r30, r31 saved), and
+// its search tests fixed offsets of lbl_1_data_2390 after one lbzu; 71%
+void fn_1_17B5C(void) {
+    s32 i;
+    s32 first;
+    lbl_1_bss_5F62 = -1;
+    lbl_1_bss_5F60 = 4;
+    for (i = 0; i < 0x36; i++) {
+        lbl_1_bss_60A4[i] = lbl_1_data_A978[i] != -1;
+    }
+    for (first = 0; first < 7; first++) {
+        if (lbl_1_data_2390[first] != 0) {
+            break;
+        }
+    }
+    lbl_1_bss_68FC._40[0] = 0;
+    lbl_1_bss_6940[0]._44 = first;
+    lbl_1_bss_6940[0]._45 = 0;
+    lbl_1_bss_6940[0]._46 = 0;
+    lbl_1_bss_5F5C = 0;
+    lbl_803CC1B8->_00 = fn_1_176EC;
+    fn_80052D70(lbl_803CC1B8);
 }
 
 // .text:0x00017954 size:0x78
@@ -752,16 +784,16 @@ void fn_1_12820(Unk0060* arg0, Mtx arg1) {
 }
 
 // .text:0x000126CC size:0x154
-// The target converts the six pad values first (slots in the order _10, _11,
-// _15, _14, _12, _13) and schedules everything differently; 34%
+// The conversions' stack slots match the target; the scheduling of the
+// loads, conversions and stores differs throughout; 37%
 void fn_1_126CC(void) {
     Unk8036E548Actor* actor = &lbl_8036E548._0C04[lbl_1_bss_5F73];
     actor->_034 += lbl_803C77B8[0]._10 / 768.0f;
-    actor->_038 = actor->_038 + lbl_803C77B8[0]._15 / 768.0f - lbl_803C77B8[0]._14 / 768.0f;
-    lbl_1_data_AD0C.x -= lbl_803C77B8[0]._13 * 0.001953125f;
     actor->_03C += lbl_803C77B8[0]._11 / 768.0f;
+    actor->_038 = actor->_038 + lbl_803C77B8[0]._15 / 768.0f - lbl_803C77B8[0]._14 / 768.0f;
+    lbl_1_data_AD0C.y -= lbl_803C77B8[0]._12 / 512.0f;
+    lbl_1_data_AD0C.x -= lbl_803C77B8[0]._13 / 512.0f;
     actor->_040 = lbl_1_data_AD0C.x;
-    lbl_1_data_AD0C.y -= lbl_803C77B8[0]._12 * 0.001953125f;
     actor->_044 = lbl_1_data_AD0C.y;
     actor->_048 = lbl_1_data_AD0C.z;
 }
@@ -838,6 +870,39 @@ void fn_1_10CEC(UnkCamera0610* arg0) {
             fn_1_10E2C(part, m, color0, color1, color2);
         }
     }
+}
+
+// .text:0x00010ACC size:0x220
+void fn_1_10ACC(Mtx m, Vec* pos, void* arg2, GXColor* color, f32 length) {
+    GXCullMode cullMode;
+    GXGetCullMode(&cullMode);
+    GXLoadPosMtxImm(m, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    GXSetNumTevStages(1);
+    GXSetNumChans(1);
+    GXSetNumTexGens(0);
+    GXSetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+    GXSetChanCtrl(GX_COLOR0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetChanCtrl(GX_ALPHA0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_COPY);
+    GXSetCullMode(GX_CULL_NONE);
+    GXSetZMode(GX_TRUE, GX_ALWAYS, GX_TRUE);
+    GXSetLineWidth(10, GX_TO_ZERO);
+    GXBegin(GX_LINES, GX_VTXFMT0, 2);
+    GXPosition3f32(pos->x, pos->y, pos->z);
+    GXColor4u8(color->r, color->g, color->b, color->a);
+    GXPosition3f32(pos->x + length, pos->y + length, pos->z + length);
+    GXColor4u8(color->r, color->g, color->b, color->a);
+    GXEnd();
+    GXSetLineWidth(6, GX_TO_ZERO);
+    GXSetCullMode(cullMode);
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
 }
 
 // .text:0x00010AA4 size:0x28
