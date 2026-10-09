@@ -58,7 +58,7 @@ A pragma or a section score is also an escalation: if a pragma gives a large gai
 ## Lookups
 
 - Units and their paths: `objdiff.json` (`name`, `metadata.source_path`).
-- Symbols and sizes: `config/GYQE01/symbols.txt` for the main DOL; `config/GYQE01/{game,menus,challenge}/symbols.txt` for the RELs. A build rewrites these files (dtk adds `data:` tags), so edit an entry by pattern rather than by its exact old text, and check the result with `grep`.
+- Symbols and sizes: `config/GYQE01/symbols.txt` for the main DOL; `config/GYQE01/{game,menus,challenge}/symbols.txt` for the RELs. A build rewrites these files (dtk adds `data:` tags), so edit an entry by pattern rather than by its exact old text, and check the result with `grep`; run `ninja` after the edit, since `match.py` rebuilds only the unit's own object and compares against the target objects the last full build split.
 - Assembly of whole units: `build/GYQE01/<module>/asm/<module>/<unit>.s`; main-DOL code with no source: `build/GYQE01/asm/auto_*.s`.
 - The objects being compared: `target_path` and `base_path` in `objdiff.json`. `build/binutils/powerpc-eabi-objdump -t <object>` lists their symbols, which shows section layout, pool symbols (`...rodata.0`) and weak objects. `ninja -t commands <base_path>` prints the exact compile command for scratch experiments.
 - SDK declarations: `include/Dolphin/` (GX enums in `GX/GXEnum.h`, `OSPanic` and `OSErrorLine` in `os.h`); `memset` comes from `"string.h"`.
