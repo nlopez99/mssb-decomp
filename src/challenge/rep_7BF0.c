@@ -203,6 +203,8 @@ static Menu7BF0 lbl_1_bss_471BC;
 static Sim7BF0 lbl_1_bss_47068;
 
 // .text:0x1510 size:0x1C0
+// Only register numbers differ, in the inlined fn_1_2935C and fn_1_28C34 code;
+// no statement order or title argument changed them.
 void fn_1_29A9C(void) {
     fn_1_2935C(&lbl_1_bss_47068);
     fn_1_273D8(&lbl_1_bss_471D8);
