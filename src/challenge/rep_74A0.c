@@ -95,9 +95,14 @@ typedef struct Particle74A0 {
         u32 rgba;
         u8 c[4];
     } _44;
-    /* 0x48 */ u8 _48[0x4A - 0x48];
+    /* 0x48 */ s16 _48;
     /* 0x4A */ s16 _4A;
 } Particle74A0;
+
+typedef struct Emitter74A0 {
+    /* 0x00 */ u8 _00[0xC];
+    /* 0x0C */ Particle74A0* _0C;
+} Emitter74A0;
 
 typedef struct LITObj {
     /* 0x00 */ u8 _00[0xC0];
@@ -162,6 +167,7 @@ extern void fn_800BD190(void* geo, void* tex);
 extern void fn_800BDC88(ModelTable74A0* table, u16 first, u16 last, void* layout, void* anim, void* skn);
 extern void fn_800BD548(Model74A0* model, s32 count, ...);
 extern void fn_800B2C08(Node74A0* node, s32 arg1);
+extern Emitter74A0* fn_80033A24(BOOL (*update)(Emitter74A0*), s32, s32, s32, s32, s32);
 extern void LITAlloc(LITObj** light);
 extern void LITInitDir(LITObj* light, f32 nx, f32 ny, f32 nz);
 extern void LITInitAttn(LITObj* light, f32 a0, f32 a1, f32 a2, f32 k0, f32 k1, f32 k2);
@@ -607,6 +613,40 @@ s32 fn_1_19D1C(u32 fmt) {
         return 4;
     }
     return 0;
+}
+
+// .text:0x0001994C size:0x3D0
+void fn_1_1994C(void) {
+    Emitter74A0* e = fn_80033A24(fn_1_1857C, 0, 0, lbl_1_data_FB24[0], 1, 0x80);
+
+    if (e != NULL) {
+        fn_1_191DC(e);
+    }
+}
+
+// .text:0x0001957C size:0x3D0
+void fn_1_1957C(void) {
+    Emitter74A0* e = fn_80033A24(fn_1_1857C, 0, 0, lbl_1_data_FB24[0], 1, 0x80);
+
+    if (e != NULL) {
+        fn_1_191DC(e);
+    }
+}
+
+// .text:0x000191DC size:0x3A0
+void fn_1_191DC(Emitter74A0* e) {
+    Particle74A0* p = e->_0C;
+    u32 i = 0;
+
+    do {
+        p->_4A = i;
+        p->_38 = lbl_1_data_FB24[3] / 100000.0f;
+        p->_3C = lbl_1_data_FB24[4] / 100000.0f;
+        fn_1_18EE4(p);
+        p->_48 = ((i % 5) * (lbl_1_data_FB24[0] / 5) + rand() % (lbl_1_data_FB24[0] / 5)) * 2;
+        i++;
+        p = p->next;
+    } while (p != NULL);
 }
 
 // .text:0x00018EE4 size:0x2F8
