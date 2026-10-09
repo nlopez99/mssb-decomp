@@ -315,13 +315,13 @@ void fn_1_3E38(Vec* pos, u32 material) {
 // .text:0x000025BC size:0x187C
 void fn_1_25BC(void* mesh) {
     MeshVtx00B0* first;
-    MeshVtx00B0* vtx;
     u32 count;
     u32 n;
-    u32 i;
     u32 nverts;
-    u32 mat;
     u32 m;
+    u32 i;
+    u32 mat;
+    MeshVtx00B0* vtx;
     u8* p;
 
     p = mesh;
