@@ -56,7 +56,9 @@ extern struct {
     /* 0x43BE */ s16 _43BE;
     /* 0x43C0 */ u8 _43C0[0x43C2 - 0x43C0];
     /* 0x43C2 */ s8 _43C2[0x14];
-    /* 0x43D6 */ u8 _43D6[0x4415 - 0x43D6];
+    /* 0x43D6 */ u8 _43D6[0x440C - 0x43D6];
+    /* 0x440C */ u8 _440C[6];
+    /* 0x4412 */ u8 _4412[0x4415 - 0x4412];
     /* 0x4415 */ u8 _4415;
     /* 0x4416 */ u8 _4416[0x4418 - 0x4416];
     /* 0x4418 */ u8 _4418;
@@ -330,6 +332,105 @@ void fn_2_4041C(void) {
     case 2:
         lbl_2_bss_1A8248->_40EE[lbl_2_bss_1A8248->_16C2]._3 = 3;
         lbl_803CC1B8->_0C->_10 = 1;
+        fn_800B0A14_removeQueue();
+        task->_28 = 0;
+        break;
+    }
+    if (lbl_2_bss_1A824C->_19783F == 1) {
+        lbl_803CC1B8->_0C->_10 = 1;
+        fn_800B0A14_removeQueue();
+        task->_28 = 0;
+    }
+}
+
+// .text:0x0003FDE0 size:0x63C
+void fn_2_3FDE0(void) {
+    MenuTask0840* task = lbl_803CC1B8;
+    s16 id;
+    s32 i;
+
+    switch (task->_28) {
+    case 0:
+        task->_14 = 70;
+        id = lbl_2_data_3CE8[lbl_2_bss_1A8248->_441C][lbl_2_bss_1A8248->_4422 + 1];
+        lbl_2_bss_1A824C->_197851 = -1;
+        if (lbl_2_data_3CE8[lbl_2_bss_1A8248->_441C][lbl_2_bss_1A8248->_4422] != 5) {
+            for (i = 0; i < 0x33; i++) {
+                if (id == lbl_2_bss_1A8248->_40EE[i]._2 && lbl_2_bss_1A8248->_40EE[i]._3 == 1) {
+                    lbl_2_bss_1A8248->_40EE[i]._3 = 0;
+                    lbl_2_bss_1A824C->_197851 = id;
+                }
+            }
+        }
+        if (lbl_2_bss_1A824C->_197851 != -1) {
+            lbl_2_bss_1A8248->_440C[lbl_2_bss_1A824C->_197851] = 1;
+            switch (lbl_2_bss_1A8248->_441C) {
+            case 0:
+                if (lbl_2_bss_1A824C->_197851 == 3) {
+                    for (i = 0; i < 0x33; i++) {
+                        if ((lbl_2_bss_1A8248->_40EE[i]._2 == 6 && lbl_2_bss_1A8248->_40EE[i]._3 == 1) || (lbl_2_bss_1A8248->_40EE[i]._2 == 8 && lbl_2_bss_1A8248->_40EE[i]._3 == 1)) {
+                            lbl_2_bss_1A8248->_40EE[i]._3 = 0;
+                        }
+                    }
+                }
+                break;
+            case 1:
+                if (lbl_2_bss_1A824C->_197851 == 3) {
+                    for (i = 0; i < 0x33; i++) {
+                        if ((lbl_2_bss_1A8248->_40EE[i]._2 == 6 && lbl_2_bss_1A8248->_40EE[i]._3 == 1) || (lbl_2_bss_1A8248->_40EE[i]._2 == 8 && lbl_2_bss_1A8248->_40EE[i]._3 == 1)) {
+                            lbl_2_bss_1A8248->_40EE[i]._3 = 0;
+                        }
+                    }
+                }
+                break;
+            case 2:
+                if (lbl_2_bss_1A824C->_197851 == 1) {
+                    for (i = 0; i < 0x33; i++) {
+                        if ((lbl_2_bss_1A8248->_40EE[i]._2 == 6 && lbl_2_bss_1A8248->_40EE[i]._3 == 1) || (lbl_2_bss_1A8248->_40EE[i]._2 == 7 && lbl_2_bss_1A8248->_40EE[i]._3 == 1)) {
+                            lbl_2_bss_1A8248->_40EE[i]._3 = 0;
+                        }
+                    }
+                }
+                break;
+            case 3:
+                break;
+            }
+            lbl_2_bss_1A8234->_162604[3][15] = 1;
+            fn_80062890(4);
+            task->_28 = 1;
+        } else {
+            task->_28 = 4;
+        }
+        break;
+    case 1:
+        if (task->_14-- == 0) {
+            fn_2_92654(lbl_2_bss_1A824C->_197851 + 1, 7);
+            if (lbl_2_bss_1A824C->_197851 == 2) {
+                fn_2_92654(7, 7);
+            }
+            task->_14 = 60;
+            task->_28 = 2;
+        }
+        break;
+    case 2:
+        if (task->_14-- == 0) {
+            if (lbl_2_bss_1A824C->_197851 == 5) {
+                lbl_2_bss_1A8234->_162604[3][17] = 1;
+                task->_14 = 16;
+                task->_28 = 3;
+            } else {
+                task->_28 = 4;
+            }
+        }
+        break;
+    case 3:
+        if (task->_14-- == 0) {
+            lbl_2_bss_1A8248->_441A = 1;
+            task->_28 = 4;
+        }
+        break;
+    case 4:
+        task->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
         break;
