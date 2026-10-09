@@ -102,6 +102,13 @@ extern struct {
 } lbl_800EF808;
 
 extern u8 lbl_800EFBA4[0x10];
+extern struct {
+    /* 0x00 */ s32 _00;
+} g_Scores;
+extern struct {
+    /* 0x00 */ u8 _00[0x10];
+    /* 0x10 */ u8 _10;
+} lbl_8037169C;
 extern s16 lbl_80109410[8];
 extern UnkSpriteRef2BF8 lbl_80371C30[];
 extern void* lbl_803CC1B8;
@@ -162,6 +169,10 @@ static inline SND_VOICEID playStadiumSound(int id) {
 
 static inline u32 getFrame(UnkTask2BF8* task, u32 i) {
     return lbl_80371C30[task->_14 + i]._00->_5C >> 16;
+}
+
+static inline UnkSprite2BF8* getSprite(UnkTask2BF8* task, u32 i) {
+    return lbl_80371C30[task->_14 + i]._00;
 }
 
 static inline BOOL isSpriteDone(UnkTask2BF8* task, u32 i) {
@@ -1063,6 +1074,187 @@ u32 fn_3_EBFD4(void) {
         return TRUE;
     }
     return FALSE;
+}
+
+// .text:0x000EB6E0 size:0x8F4 mapped:0x8072A774
+void fn_3_EB6E0(void) {
+    UnkTask2BF8* task = lbl_803CC1B8;
+    u32 playSound = 0;
+    MiniGameStruct* minigame = &g_Minigame;
+    UnkTask2BF8* t = lbl_803CC1B8;
+    s32 leader;
+    u32 tied;
+    u32 n;
+    s32 diff;
+    s32 step;
+    s32 idx;
+    s32 ch;
+    u32 i;
+
+    if (minigame->GameMode_MiniGame != 0) {
+        if (fn_3_12536C()) {
+            fn_80034CEC(task);
+            fn_800B0A14_removeQueue();
+            return;
+        }
+    } else if (fn_3_EBFD4()) {
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    switch (task->_1C) {
+    case 0:
+        fn_80034E20(task, lbl_3_data_19B98);
+        if (minigame->GameMode_MiniGame != 0) {
+            i = 0;
+            do {
+                lbl_80371C30[task->_14 + 1 + i]._00->_5C = 0 << 16;
+            } while (++i < 4);
+        } else {
+            i = 0;
+            do {
+                lbl_80371C30[task->_14 + 1 + i]._00->_5C = 1 << 16;
+            } while (++i < 4);
+        }
+        i = 0;
+        do {
+            lbl_80371C30[task->_14 + 41 + i]._00->_54 &= ~2;
+        } while (++i < 4);
+        task->_1E = g_Minigame.turnNumberWithinRound;
+        lbl_80371C30[task->_14]._00->_64 =
+            lbl_3_data_1A158[g_Batter.batterHand + (g_Minigame.miniGameNumberOfParticipants - 1) * 2];
+        task->_20 = 0;
+        if (minigame->GameMode_MiniGame != 0 && (g_Scores._00 != 1 || g_Minigame.turnNumberWithinRound != 0)) {
+            task->_1E--;
+            lbl_80371C30[task->_14]._00->_5C = 10 << 16;
+            task->_20 = 1;
+        }
+        task->_1C = 1;
+        break;
+    case 1:
+        g_Minigame._19A0 = 0;
+        i = 0;
+        do {
+            idx = g_Minigame.minigameControlStruct._14[(task->_1E + i) % g_Minigame.miniGameNumberOfParticipants];
+            diff = g_Minigame.miniGameCurrentPoints[idx] - g_Minigame.minigamePoints_current_Latest[idx][0];
+            if (diff < 0) {
+                g_Minigame._19A0 = 1;
+                step = diff / 8;
+                if (step != 0) {
+                    g_Minigame.minigamePoints_current_Latest[idx][0] += step;
+                } else {
+                    g_Minigame.minigamePoints_current_Latest[idx][0] += diff / __abs(diff);
+                }
+                playSound = 1;
+            }
+        } while (++i < g_Minigame.miniGameNumberOfParticipants);
+        if (g_Minigame._19A0 == 0) {
+            i = 0;
+            do {
+                if (g_Minigame.miniGameCurrentPoints[i] != g_Minigame.minigamePoints_current_Latest[i][0]) {
+                    g_Minigame._19A0 = 1;
+                    task->_1C = 2;
+                }
+            } while (++i < g_Minigame.miniGameNumberOfParticipants);
+        }
+        break;
+    case 2:
+        g_Minigame._19A0 = 0;
+        i = 0;
+        do {
+            idx = g_Minigame.minigameControlStruct._14[(task->_1E + i) % g_Minigame.miniGameNumberOfParticipants];
+            diff = g_Minigame.miniGameCurrentPoints[idx] - g_Minigame.minigamePoints_current_Latest[idx][0];
+            if (diff > 0) {
+                g_Minigame._19A0 = 1;
+                t->_24_arr[idx] = 1;
+                step = diff / 8;
+                if (step != 0) {
+                    g_Minigame.minigamePoints_current_Latest[idx][0] += step;
+                } else {
+                    g_Minigame.minigamePoints_current_Latest[idx][0] += diff / __abs(diff);
+                }
+                playSound = 1;
+            } else if (diff == 0) {
+                g_Minigame.minigamePoints_current_Latest[idx][0] = g_Minigame.miniGameCurrentPoints[idx];
+                if (t->_24_arr[idx] != 0) {
+                    t->_24_arr[idx] = 0;
+                    lbl_80371C30[task->_14 + 21 + i]._00->_5C = 0;
+                    lbl_80371C30[task->_14 + 21 + i]._00->_68 = 1;
+                    lbl_80371C30[task->_14 + 25 + i * 4]._00->_5C = 0;
+                    lbl_80371C30[task->_14 + 26 + i * 4]._00->_5C = 0;
+                    lbl_80371C30[task->_14 + 27 + i * 4]._00->_5C = 0;
+                    lbl_80371C30[task->_14 + 28 + i * 4]._00->_5C = 0;
+                }
+            }
+        } while (++i < g_Minigame.miniGameNumberOfParticipants);
+        if (g_Minigame._19A0 == 0) {
+            i = 0;
+            do {
+                if (g_Minigame.miniGameCurrentPoints[i] != g_Minigame.minigamePoints_current_Latest[i][0]) {
+                    g_Minigame._19A0 = 1;
+                }
+            } while (++i < g_Minigame.miniGameNumberOfParticipants);
+            task->_1C = 1;
+        }
+        break;
+    }
+    switch (task->_20) {
+    case 0:
+        if (fn_3_125424(task, 0, 10)) {
+            task->_20 = 2;
+        }
+        break;
+    case 1:
+        if (lbl_8037169C._10 == 0) {
+            getSprite(task, 0)->_68 = 1;
+            if (isSpriteDone(task, 0)) {
+                getSprite(task, 0)->_68 = 0;
+                lbl_80371C30[task->_14]._00->_5C = 10 << 16;
+                task->_1E++;
+                task->_20 = 2;
+            }
+        }
+        break;
+    case 2:
+        if (minigame->GameMode_MiniGame == 1) {
+            if (g_GameLogic.gameStatus == GAME_STATUS_DEFAULT || g_GameLogic.gameStatus == GAME_STATUS_AT_BAT) {
+                fn_3_125424(task, 0, 10);
+            } else {
+                fn_3_125424(task, 0, 0);
+            }
+        }
+        break;
+    }
+    leader = fn_3_107CD0();
+    tied = fn_3_107C88();
+    i = 0;
+    do {
+        idx = g_Minigame.minigameControlStruct._14[(task->_1E + i) % g_Minigame.miniGameNumberOfParticipants];
+        ch = g_Minigame.minigameControlStruct.characterIndex[idx];
+        fn_800363D8(task, i + 5, 1, 0x65, ch);
+        lbl_80371C30[task->_14 + 13 + i]._00->_5C = inMemRoster[0][ch].stats.CharID << 16;
+        n = g_Minigame.minigamePoints_current_Latest[idx][0];
+        if ((lbl_80371C30[task->_14 + 1 + i]._00->_5C >> 16) == 0) {
+            if (n > 9999) {
+                n = 9999;
+            }
+        } else if (n > 999) {
+            n = 999;
+        }
+        fn_800363D8(task, 25 + i * 4, 1, 0x66, (n % 10000) / 1000);
+        fn_800363D8(task, 26 + i * 4, 1, 0x66, (n % 1000) / 100);
+        fn_800363D8(task, 27 + i * 4, 1, 0x66, (n % 100) / 10);
+        fn_800363D8(task, 28 + i * 4, 1, 0x66, n % 10);
+        if (tied == 0 &&
+            g_Minigame.minigamePoints_current_Latest[idx][0] == g_Minigame.minigamePoints_current_Latest[leader][0]) {
+            lbl_80371C30[task->_14 + 41 + i]._00->_54 |= 2;
+        } else {
+            lbl_80371C30[task->_14 + 41 + i]._00->_54 &= ~2;
+        }
+    } while (++i < g_Minigame.miniGameNumberOfParticipants);
+    if (playSound && minigame->GameMode_MiniGame == 0) {
+        sndFXStartEx(0x1C0, lbl_800EFBA4[9], 0x3F, 0);
+    }
 }
 
 // .text:0x000EB684 size:0x5C mapped:0x8072A718
