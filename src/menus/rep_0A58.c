@@ -414,6 +414,8 @@ static MenuEntry0A58 lbl_2_data_205D4[43] = {
     { fn_2_55AD4, 0x002A, 0x0000, 0x0006, 0x002F, 0x0000, 0x0000 },
 };
 
+// Nothing reads it; it fills the unit's .bss range after lbl_2_bss_9E10
+static u8 lbl_2_bss_9E14[0x354];
 s8 lbl_2_bss_9E10;
 
 // .text:0x00058510 size:0x2C
