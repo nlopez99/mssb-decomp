@@ -1,6 +1,9 @@
 #include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
 #include "menus/rep_04B0.h"
+#include "menus/rep_0278.h"
+#include "menus/rep_0318.h"
+#include "menus/rep_0568.h"
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/mtx.h"
@@ -177,10 +180,7 @@ extern void AnimateCharacter(int actor, int anim, u8, u8, u8, s16, u8, int);
 extern void QueueCharacterAnimation(int actor, int anim, u8, u8, s16, u8, int);
 extern void LITXForm(LITObj* light, Mtx view);
 extern s32 fn_2_14F8(s32 min, s32 max);
-extern u8 fn_2_35D0(u8 port);
 extern void fn_2_12238(void);
-extern void fn_2_1C34(u16 buttons);
-extern void fn_2_16A74(s32 arg0, s32 arg1);
 extern void fn_800625A4(s32 port, s32 arg1);
 extern void fn_2_1A88(void);
 extern void fn_8004E504(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
@@ -192,7 +192,6 @@ extern void makeLookAtMatrix(Mtx m, const Vec* camPos, const Vec* camUp, const V
 extern void fn_80052D70(void* camera);
 extern void fn_80052968(void);
 extern void fn_800B806C(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7);
-extern void fn_2_16A48(s32 port, u8 value);
 extern void fn_8001CB10(void* arg0, s32 arg1);
 extern void fn_8001CCC8(void);
 

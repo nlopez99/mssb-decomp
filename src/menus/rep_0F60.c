@@ -1,6 +1,7 @@
 #include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
 #include "menus/rep_0F60.h"
+#include "menus/rep_10C0.h"
 #include "static/UnknownHomes_Static.h"
 #include "C3/control.h"
 #include "C3/anim.h"
@@ -324,10 +325,6 @@ extern void fn_800B0A14_removeQueue(void);
 extern void fn_2_4E824(void);
 extern void fn_2_48DB4(void);
 extern void fn_2_93C64(void);
-extern void fn_2_94604(s32);
-extern void fn_2_9461C(s32);
-extern void fn_2_94634(s32);
-extern void fn_2_94854(s32);
 
 AramEntry0F60 lbl_2_data_2F990[13] = {
     { 0x0000040B, 0x4005A338, 0x19233000, 0x0003A448 },

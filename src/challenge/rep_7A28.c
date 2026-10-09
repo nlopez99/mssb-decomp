@@ -2,6 +2,7 @@
 #include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
+#include "challenge/rep_0010.h"
 #include "Dolphin/mtx.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/pad.h"
@@ -127,8 +128,6 @@ extern void fn_80048BEC(Menu7A28* menu, s32 arg1, s32 arg2);
 extern void fn_8003414C(Mtx mtx);
 extern void minigamesGXStuff(void);
 extern void GXDrawSphere1(u8 subdivisions);
-extern void fn_1_AF4(s32 arg0, s32 arg1, f32 arg2);
-extern void fn_1_F2C(s32 arg0, s32 arg1, s32 arg2);
 extern void fn_1_26D28(Camera7A28* cam, u16 held, u16 pressed, u16 repeat, s8* stick);
 extern void fn_1_272DC(Camera7A28* cam, s32 id);
 extern void fn_1_27330(Camera7A28* cam);

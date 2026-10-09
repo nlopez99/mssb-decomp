@@ -1,6 +1,7 @@
 #include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
 #include "menus/rep_0568.h"
+#include "menus/rep_04B0.h"
 #include "menus/rep_11C0.h"
 #include "static/UnknownHomes_Static.h"
 #include "C3/control.h"
@@ -383,7 +384,6 @@ extern void fn_80023B04(s32);
 extern void fn_80014204(s32);
 extern void* fn_80023AA4(void);
 extern void* ARAMTransfer(AramEntry0568* entry, void* dst, s32 arg2, u32 aram);
-extern void fn_2_14BB8(u8 index, s32 flag);
 extern ActorRef0568* fn_800111D8(Player0568* player);
 extern void fn_800B2B54(void* actor, u16 id, s32 mode);
 extern void fn_80025EEC(void* state, s32, s32);

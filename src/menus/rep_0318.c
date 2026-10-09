@@ -1,4 +1,6 @@
 #include "menus/rep_0318.h"
+#include "menus/rep_0278.h"
+#include "menus/rep_0568.h"
 #include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
 #include "musyx/musyx.h"
@@ -38,10 +40,7 @@ extern s32 fn_80050760(s32 team, u16 held, u16 trg, u16 rep, s32 arg4);
 extern void fn_800203E0(int, s8);
 extern void sndFXRelated(s32 arg0);
 extern s32 randRange_FUN_80042bf0(s32 min, s32 max);
-extern void fn_2_16A74(s32 arg0, s32 arg1);
-extern void fn_2_1C34(u16 buttons);
 extern s32 fn_2_14F8(s32 min, s32 max);
-extern void fn_2_1D54(s32* cursor, u8 arg1, s32 count);
 extern int fn_8006285C(void);
 extern void fn_800216F8(u8 group, int (*callback)(void));
 extern void initializeUnknown(void);

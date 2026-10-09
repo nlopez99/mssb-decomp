@@ -1,5 +1,7 @@
 #include "header_rep_data.h"
 #include "menus/rep_0730.h"
+#include "menus/rep_0B08.h"
+#include "menus/rep_0F60.h"
 #include "menus/rep_0788.h"
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/gx.h"
@@ -135,11 +137,9 @@ extern s32 fn_2_4E9A8(void);
 extern s32 fn_2_4EAF4(void);
 extern s32 fn_2_4EB2C(void);
 extern s32 fn_2_4EB64(void);
-extern void fn_2_68FBC(s32, s32);
 extern void fn_2_54474(void);
 extern void fn_2_8ACB0(s32, s32);
 extern void fn_2_8AEE0(void);
-extern void fn_2_8CCAC(s32, s32);
 extern void fn_2_8E478(void);
 extern void fn_2_8EA80(void);
 

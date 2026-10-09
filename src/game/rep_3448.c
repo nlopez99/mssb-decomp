@@ -833,7 +833,6 @@ extern void fn_3_E911C(void);
 extern void fn_3_EA454(void);
 extern void fn_3_EB6E0(void);
 // Unassigned code between rep_1770 and rep_1838
-extern BOOL fn_3_9E834(void);
 extern void fn_8000F8F4(UnkTask3448* task);
 extern void fn_8000FEE8(s32 id);
 extern void fn_8004CC2C(void);

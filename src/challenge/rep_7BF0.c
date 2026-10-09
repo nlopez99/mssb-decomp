@@ -2,6 +2,7 @@
 #include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
+#include "challenge/rep_0010.h"
 #include "Dolphin/mtx.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/pad.h"
@@ -136,7 +137,6 @@ extern void fn_80037768(Sim7BF0* sim, s32 arg1, s32 count, f32 length, f32 cente
 extern void fn_800383BC(Sim7BF0* sim);
 extern void fn_80037054(Sim7BF0* sim, Env7BF0* env);
 extern void gOz_GXSetTexture(s32, s32, s32);
-extern void fn_1_AF4(s32 arg0, s32 arg1, f32 arg2);
 extern void fn_1_26D28(Camera7BF0* cam, u16 held, u16 pressed, u16 repeat, s8* stick);
 extern void fn_1_272DC(Camera7BF0* cam, s32 id);
 extern void fn_1_27330(Camera7BF0* cam);

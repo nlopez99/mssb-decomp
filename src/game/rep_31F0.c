@@ -83,7 +83,6 @@ extern s8 lbl_3_data_214E8[4][3];
 extern s8 lbl_3_data_214F4[4][3];
 extern s16 lbl_3_data_217A4[12];
 
-extern int fn_3_9E368(int* weights, int count);
 extern void fn_8003A540(int);
 extern void fn_3_1608F0(int, int, int);
 extern void changeScene(u8, s16);

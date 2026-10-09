@@ -152,7 +152,6 @@ extern void fn_3_7AFE4(void);
 extern void fn_3_1E178(void);
 extern void fn_3_1E154(void);
 extern void fn_3_7CE90(void);
-extern void fn_3_9E7D4(int);
 extern void fn_8006C9D8(void);
 extern void fn_3_1E328(void);
 extern void fn_3_7B308(void);
