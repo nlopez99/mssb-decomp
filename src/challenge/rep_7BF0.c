@@ -3,30 +3,12 @@
 #include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
 #include "challenge/rep_0010.h"
+#include "challenge/rep_7978.h"
 #include "Dolphin/mtx.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/pad.h"
 
 // A rigid-body simulation viewer: a bat swung by the settings in its menus
-
-// rep_7978's debug camera
-typedef struct Camera7BF0 {
-    /* 0x00 */ Mtx _00;
-    /* 0x30 */ Mtx44 _30;
-    /* 0x70 */ Vec _70;
-    /* 0x7C */ Vec _7C;
-    /* 0x88 */ Vec _88;
-    /* 0x94 */ u8 _94[0xA4 - 0x94];
-    /* 0xA4 */ f32 _A4;
-    /* 0xA8 */ f32 _A8;
-    /* 0xAC */ f32 _AC;
-    /* 0xB0 */ f32 _B0;
-    /* 0xB4 */ f32 _B4;
-    /* 0xB8 */ f32 _B8;
-    /* 0xBC */ f32 _BC;
-    /* 0xC0 */ u8 _C0[0xD8 - 0xC0];
-    /* 0xD8 */ void* _D8;
-} Camera7BF0; // size: 0xDC
 
 typedef struct Sim7BF0 {
     /* 0x000 */ Vec _00;
@@ -137,10 +119,6 @@ extern void fn_80037768(Sim7BF0* sim, s32 arg1, s32 count, f32 length, f32 cente
 extern void fn_800383BC(Sim7BF0* sim);
 extern void fn_80037054(Sim7BF0* sim, Env7BF0* env);
 extern void gOz_GXSetTexture(s32, s32, s32);
-extern void fn_1_26D28(Camera7BF0* cam, u16 held, u16 pressed, u16 repeat, s8* stick);
-extern void fn_1_272DC(Camera7BF0* cam, s32 id);
-extern void fn_1_27330(Camera7BF0* cam);
-extern void fn_1_273D8(Camera7BF0* cam);
 
 static Settings7BF0 lbl_1_data_11300 = {
     150000, 50000, 6250, 12500, 5000, 500000, 2000000, 0, 0, 0, 0, 0, 0, 19, 0, 0,
@@ -198,7 +176,7 @@ static MenuItem7BF0 lbl_1_data_114B4[26] = {
 };
 static MenuItem7BF0* lbl_1_data_1192C[2] = { lbl_1_data_11430, lbl_1_data_114B4 };
 
-static Camera7BF0 lbl_1_bss_471D8;
+static Camera7978 lbl_1_bss_471D8;
 static Menu7BF0 lbl_1_bss_471BC;
 static Sim7BF0 lbl_1_bss_47068;
 
@@ -423,12 +401,12 @@ s32 fn_1_289E0(Menu7BF0* menu, u16 pressed) {
 }
 
 // .text:0x434 size:0x20
-void fn_1_289C0(Camera7BF0* cam) {
+void fn_1_289C0(Camera7978* cam) {
     fn_1_273D8(cam);
 }
 
 // .text:0x0 size:0x434
-void fn_1_2858C(Camera7BF0* cam, u16 held, u16 pressed, u16 repeat, s8* stick) {
+void fn_1_2858C(Camera7978* cam, u16 held, u16 pressed, u16 repeat, s8* stick) {
     Mtx m;
     Quaternion q;
     Vec v;

@@ -3,22 +3,13 @@
 #include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
 #include "challenge/rep_0010.h"
+#include "challenge/rep_7978.h"
 #include "Dolphin/mtx.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/pad.h"
 #include "string.h"
 
 // A particle effect editor: a debug camera, an emitter position and a menu per effect
-
-// rep_7978's debug camera
-typedef struct Camera7A28 {
-    /* 0x00 */ Mtx _00;
-    /* 0x30 */ Mtx44 _30;
-    /* 0x70 */ Vec _70;
-    /* 0x7C */ Vec _7C;
-    /* 0x88 */ Vec _88;
-    /* 0x94 */ u8 _94[0xDC - 0x94];
-} Camera7A28; // size: 0xDC
 
 // One line of a debug menu: an integer setting with its range and steps
 typedef struct MenuItem7A28 {
@@ -54,7 +45,7 @@ typedef struct Task7A28 {
     /* 0x0C */ Task7A28Parent* _0C;
     /* 0x10 */ s16 _10;
     /* 0x12 */ u8 _12[0x14 - 0x12];
-    /* 0x14 */ Camera7A28* _14;
+    /* 0x14 */ Camera7978* _14;
     /* 0x18 */ void* _18;
     /* 0x1C */ Menu7A28* _1C;
     /* 0x20 */ Vec _20;
@@ -128,10 +119,6 @@ extern void fn_80048BEC(Menu7A28* menu, s32 arg1, s32 arg2);
 extern void fn_8003414C(Mtx mtx);
 extern void minigamesGXStuff(void);
 extern void GXDrawSphere1(u8 subdivisions);
-extern void fn_1_26D28(Camera7A28* cam, u16 held, u16 pressed, u16 repeat, s8* stick);
-extern void fn_1_272DC(Camera7A28* cam, s32 id);
-extern void fn_1_27330(Camera7A28* cam);
-extern void fn_1_273D8(Camera7A28* cam);
 
 static void (*lbl_1_data_108E8[2])(void) = { fn_1_27AD4, fn_1_276CC };
 static void (*lbl_1_data_108F0[2])(void) = { fn_1_27AD0, fn_1_27594 };
@@ -218,7 +205,7 @@ void fn_1_28200(void) {
 
     task->_10 = 0;
     fn_800AD038(lbl_80366158._08);
-    task->_14 = _OSAllocFromHeap(0x20, sizeof(Camera7A28));
+    task->_14 = _OSAllocFromHeap(0x20, sizeof(Camera7978));
     fn_1_273D8(task->_14);
     task->_1C = _OSAllocFromHeap(0x20, sizeof(Menu7A28));
     task->_1C->_08 = 16;
