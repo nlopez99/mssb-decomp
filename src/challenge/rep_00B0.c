@@ -232,12 +232,13 @@ u32 fn_1_4728(Vec* line, Vec* out) {
     Vec d[4];
     Ray00B0 ray;
     Mtx inv;
-    Box00B0* box;
-    s32 n;
-    u8* p;
-    u32 miss;
+    s32 k;
     void** list;
+    s32 n;
+    u32 miss;
     f32 dist;
+    Box00B0* box;
+    u8* p;
 
     box = *lbl_1_common_bss_472B4._224;
     memset(hit, 1, lbl_1_common_bss_472B4._228);
@@ -257,8 +258,8 @@ u32 fn_1_4728(Vec* line, Vec* out) {
             miss = 0;
         }
         n--;
-        box++;
         p++;
+        box++;
     } while (n != 0);
     if (miss) {
         return 0;
@@ -267,7 +268,7 @@ u32 fn_1_4728(Vec* line, Vec* out) {
     dist = dolsqrtf2(PSVECSquareDistance(&line[1], &line[0]));
     ray.length = dist;
     p = hit;
-    n = lbl_1_common_bss_472B4._228;
+    k = lbl_1_common_bss_472B4._228;
     list = lbl_1_common_bss_472B4._224 + 1;
     ray.nearest = dist;
     ray.material = 0;
@@ -275,9 +276,9 @@ u32 fn_1_4728(Vec* line, Vec* out) {
         if (*p++ == 0) {
             fn_1_4A24(&ray, *list);
         }
-        n--;
+        k--;
         list++;
-    } while (n != 0);
+    } while (k != 0);
     if (ray.material) {
         PSMTXInverse(ray.mtx, inv);
         lbl_1_data_224.z = -ray.nearest;
