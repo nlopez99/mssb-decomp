@@ -1991,6 +1991,7 @@ void fn_2_A288(void) {
     s32 k;
     s32 j;
     s32 grp;
+    s32 other;
     u8 count = 0;
     s32 v;
 
@@ -2001,10 +2002,11 @@ void fn_2_A288(void) {
             lbl_8034E9A0._470C = i;
         }
     }
+    other = lbl_8034E9A0._46E0[1];
     for (k = 1; k < 3; k++) {
         for (j = 1; j < 9; j++) {
             v = lbl_8034E9A0._4380[grp][k][j];
-            if (v == lbl_8034E9A0._46E0[1] && v != 0xFF) {
+            if (v == other && v != 0xFF) {
                 lbl_2_bss_3E0[k - 1] = -1;
             }
         }
@@ -2014,11 +2016,10 @@ void fn_2_A288(void) {
             lbl_2_bss_3E0[k - 1] = 0;
         }
     }
-    if (lbl_2_bss_3E0[1] == 0) {
-        count++;
-    }
-    if (lbl_2_bss_3E0[2] == 0) {
-        count++;
+    for (k = 1; k < 3; k++) {
+        if (lbl_2_bss_3E0[k] == 0) {
+            count++;
+        }
     }
     if (count == 2) {
         lbl_2_bss_3E0[0] = -1;
@@ -2696,8 +2697,6 @@ void fn_2_86EC(void) {
 }
 
 // .text:0x00007DDC size:0x910
-// 99.97%: registers only: the target gives the loop counter in the
-// fn_80067B40(0, ..., 2) loop r24, not c's r23.
 void fn_2_7DDC(void) {
     u8 ports[4];
     s32 k;
@@ -2765,18 +2764,18 @@ void fn_2_7DDC(void) {
                 }
             }
         }
-        for (i = 0; i < 9; i++) {
-            lbl_8034E9A0._4757[lbl_803C6724._02[0][i]] = 1;
-            fn_800506E8(0, lbl_803C6724._02[0][i], 1);
-            if (fn_80067B40(0, lbl_803C6724._02[0][i], 2)) {
-                for (g = 0; g < 9; g++) {
-                    for (j = 0; j < 5; j++) {
-                        if (lbl_803C6724._02[0][i] == lbl_80108EDC[g][j]) {
-                            for (k = 0; k < 5; k++) {
-                                if (lbl_80108EDC[g][k] == -1) {
+        for (k = 0; k < 9; k++) {
+            lbl_8034E9A0._4757[lbl_803C6724._02[0][k]] = 1;
+            fn_800506E8(0, lbl_803C6724._02[0][k], 1);
+            if (fn_80067B40(0, lbl_803C6724._02[0][k], 2)) {
+                for (i = 0; i < 9; i++) {
+                    for (g = 0; g < 5; g++) {
+                        if (lbl_803C6724._02[0][k] == lbl_80108EDC[i][g]) {
+                            for (c = 0; c < 5; c++) {
+                                if (lbl_80108EDC[i][c] == -1) {
                                     goto next;
                                 }
-                                lbl_8034E9A0._4757[lbl_80108EDC[g][k]] = 1;
+                                lbl_8034E9A0._4757[lbl_80108EDC[i][c]] = 1;
                             }
                         }
                     }
