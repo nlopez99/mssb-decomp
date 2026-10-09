@@ -5,6 +5,7 @@
 #include "C3/control.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/mtx.h"
+#include "Dolphin/mtxext.h"
 #include "Dolphin/PPCArch.h"
 #include "Dolphin/OS/OSCache.h"
 #include "string.h"
@@ -913,7 +914,6 @@ void fn_1_25F98(void) {
 }
 
 // .text:0x00025C68 size:0x330
-// 97.15%: only the inlined fn_1_24A8C's final call differs, as in fn_1_24A8C.
 void fn_1_25C68(void) {
     ChainTask7730* task = lbl_803CC1B8;
     u32 color;
@@ -940,8 +940,6 @@ void fn_1_25C68(void) {
 }
 
 // .text:0x00025064 size:0xC04
-// 98.08%: what differs is the tail of each inlined fn_1_24A8C (three copies), as in that
-// function, and the branch offsets after them.
 void fn_1_25064(void) {
     ChainTask7730* task = lbl_803CC1B8;
     s32 i;
@@ -1172,8 +1170,9 @@ void fn_1_24C4C(PhysNode7730* nodes, s32 count, Vec* external, f32 k, f32 dampin
 }
 
 // .text:0x00024A8C size:0x1C0
-// 92.90%: the final call's argument setup is scheduled differently (the target converts
-// task->_24 after loading 0.015625f and the pool addresses).
+// 89.78%: here the target loads the final 0.015625f with addi and lfs 0(rX), and schedules the
+// call setup differently; its inlined copies in fn_1_25064 and fn_1_25C68 load it directly and
+// match only with `/ 64.0f` (`* 0.015625f` scored 92.90% here and broke both callers).
 void fn_1_24A8C(void) {
     ChainTask7730* task = lbl_803CC1B8;
     f32 dt;
@@ -1193,7 +1192,7 @@ void fn_1_24A8C(void) {
     if (lbl_803C77B8[0]._00 & 0x40) {
         lbl_1_bss_45868._0000._20 = 1;
     }
-    fn_80038CD0(task->_2B, &lbl_1_bss_45868, lbl_1_bss_43F68, 10.0f, task->_24 * 0.015625f);
+    fn_80038CD0(task->_2B, &lbl_1_bss_45868, lbl_1_bss_43F68, 10.0f, task->_24 / 64.0f);
 }
 
 // .text:0x000248BC size:0x1D0
@@ -1350,6 +1349,165 @@ void fn_1_23804(s32 arg0, s32 arg1, s32 rows, s32 cols, f32 arg4, f32 arg5) {
     GXColor1u32(0x0000FFFF);
     GXPosition3f32(-25.0f, 0.0f, -25.0f);
     GXColor1u32(0x0000FFFF);
+}
+
+// .text:0x00023098 size:0x76C
+// 85.64%: draft; the frustum setup keeps near and far live longer (five saved FPRs, not
+// four), and the target computes (cols - 1) * 1344 once where this folds it into offsets.
+s32 fn_1_23098(Mtx44 proj, Mtx view, s32 rows, s32 cols, f32 near, f32 far) {
+    Mtx44 m;
+    Mtx inv;
+    Vec hit[4];
+    Vec start[4];
+    Vec normal;
+    Vec origin;
+    f32 t[4];
+    f32 d;
+    f32 nh;
+    f32 fh;
+    f32 nw;
+    f32 fw;
+    f32 dy;
+    s32 i;
+    s32 n;
+    s32 last;
+
+    origin.x = 0.0f;
+    origin.y = 0.0f;
+    origin.z = 0.0f;
+    normal.x = 0.0f;
+    normal.y = -1.0f;
+    normal.z = 0.0f;
+    PSMTXMultVec(view, &origin, &origin);
+    PSMTXMultVec(view, &normal, &normal);
+    PSVECSubtract(&normal, &origin, &normal);
+    PSVECNormalize(&normal, &normal);
+    d = -PSVECDotProduct(&normal, &origin);
+    nh = (448.0f * near / 1280.0f) * 0.5f;
+    fh = (448.0f * far / 1280.0f) * 0.5f;
+    nw = (640.0f * near / 1280.0f) * 0.5f;
+    fw = (640.0f * far / 1280.0f) * 0.5f;
+    start[0].x = nw;
+    start[0].y = 0.0f;
+    start[0].z = -near;
+    start[1].x = fw;
+    start[1].y = 0.0f;
+    start[1].z = -far;
+    start[2].x = fw;
+    start[2].y = fh;
+    start[2].z = -far;
+    start[3].x = fw;
+    start[3].y = -fh;
+    start[3].z = -far;
+    hit[0].x = 0.0f;
+    hit[0].y = nh;
+    hit[0].z = 0.0f;
+    hit[1].x = 0.0f;
+    hit[1].y = fh;
+    hit[1].z = 0.0f;
+    hit[2].x = nw - fw;
+    hit[2].y = nh - fh;
+    hit[2].z = -near - -far;
+    hit[3].x = nw - fw;
+    hit[3].y = -(nh - fh);
+    hit[3].z = -near - -far;
+    for (i = 0; i < 4; i++) {
+        t[i] = PSVECDotProduct(&normal, &hit[i]);
+        if (t[i] == 0.0f) {
+            hit[i].z = 0.0f;
+        } else {
+            t[i] = -(d + PSVECDotProduct(&normal, &start[i])) / t[i];
+            PSVECScale(&hit[i], t[i], &hit[i]);
+            PSVECAdd(&start[i], &hit[i], &hit[i]);
+        }
+        if (t[i] < 0.0f) {
+            t[i] = -t[i];
+        }
+    }
+    if (hit[2].z <= -near && hit[2].z >= -far && hit[3].z <= -near && hit[3].z >= -far) {
+        memcpy(&hit[0], &hit[2], sizeof(Vec));
+        memcpy(&hit[1], &hit[3], sizeof(Vec));
+    } else if (!(t[0] <= 1.0f && t[1] <= 1.0f)) {
+        if (t[0] <= 1.0f || t[1] <= 1.0f) {
+            if (hit[2].z <= -near && hit[2].z >= -far) {
+                memcpy(&hit[3], &hit[2], sizeof(Vec));
+            }
+            if (t[0] < 1.0f) {
+                memcpy(&hit[1], &hit[3], sizeof(Vec));
+            } else {
+                memcpy(&hit[0], &hit[3], sizeof(Vec));
+            }
+        } else {
+            return 0;
+        }
+    }
+    PSMTXInverse(view, inv);
+    PSMTXMultVec(inv, &hit[1], &hit[2]);
+    lbl_1_bss_F6E0[cols - 1][0].x = hit[2].x;
+    lbl_1_bss_F6E0[cols - 1][0].y = hit[2].z;
+    hit[2].x = -hit[1].x;
+    hit[2].y = hit[1].y;
+    hit[2].z = hit[1].z;
+    PSMTXMultVec(inv, &hit[2], &hit[2]);
+    lbl_1_bss_F6E0[0][0].x = hit[2].x;
+    lbl_1_bss_F6E0[0][0].y = hit[2].z;
+    PSMTXMultVec(inv, &hit[0], &hit[2]);
+    lbl_1_bss_F6E0[cols - 1][1].x = hit[2].x;
+    lbl_1_bss_F6E0[cols - 1][1].y = hit[2].z;
+    hit[2].x = -hit[0].x;
+    hit[2].y = hit[0].y;
+    hit[2].z = hit[0].z;
+    PSMTXMultVec(inv, &hit[2], &hit[2]);
+    lbl_1_bss_F6E0[0][1].x = hit[2].x;
+    lbl_1_bss_F6E0[0][1].y = hit[2].z;
+    PSMTX44Identity(m);
+    memcpy(m, view, sizeof(Mtx));
+    PSMTX44Concat(proj, m, m);
+    C_MTX44Inverse(m, m);
+    PSMTX44MultVec(proj, &hit[0], &hit[0]);
+    PSMTX44MultVec(proj, &hit[1], &hit[1]);
+    dy = hit[0].y - hit[1].y;
+    if (dy < 0.0f) {
+        dy = -dy;
+    }
+    n = rows * (dy + 2.0f / rows) * 0.5f;
+    if (n < 2) {
+        n = 2;
+    }
+    last = n - 1;
+    lbl_1_bss_F6E0[0][last].x = lbl_1_bss_F6E0[0][1].x;
+    lbl_1_bss_F6E0[0][last].y = lbl_1_bss_F6E0[0][1].y;
+    lbl_1_bss_F6E0[cols - 1][last].x = lbl_1_bss_F6E0[cols - 1][1].x;
+    lbl_1_bss_F6E0[cols - 1][last].y = lbl_1_bss_F6E0[cols - 1][1].y;
+    PSVECSubtract(&hit[0], &hit[1], &hit[2]);
+    i = last;
+    while (--i != 0) {
+        PSVECScale(&hit[2], (f32)i / (f32)last, &hit[3]);
+        PSVECAdd(&hit[1], &hit[3], &hit[3]);
+        PSMTX44MultVec(m, &hit[3], &origin);
+        lbl_1_bss_F6E0[cols - 1][i].x = origin.x;
+        lbl_1_bss_F6E0[cols - 1][i].y = origin.z;
+        hit[3].x = -hit[3].x;
+        PSMTX44MultVec(m, &hit[3], &origin);
+        lbl_1_bss_F6E0[0][i].x = origin.x;
+        lbl_1_bss_F6E0[0][i].y = origin.z;
+    }
+    hit[0].y = 0.0f;
+    hit[1].y = 0.0f;
+    for (i = 0; i < n; i++) {
+        hit[0].x = lbl_1_bss_F6E0[0][i].x;
+        hit[0].z = lbl_1_bss_F6E0[0][i].y;
+        hit[1].x = lbl_1_bss_F6E0[cols - 1][i].x - hit[0].x;
+        hit[1].z = lbl_1_bss_F6E0[cols - 1][i].y - hit[0].z;
+        last = cols - 1;
+        while (--last != 0) {
+            PSVECScale(&hit[1], (f32)last / (f32)(cols - 1), &hit[2]);
+            PSVECAdd(&hit[0], &hit[2], &hit[2]);
+            lbl_1_bss_F6E0[last][i].x = hit[2].x;
+            lbl_1_bss_F6E0[last][i].y = hit[2].z;
+        }
+    }
+    return n;
 }
 
 // .text:0x00022F4C size:0x14C

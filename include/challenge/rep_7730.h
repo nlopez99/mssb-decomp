@@ -65,6 +65,7 @@ void fn_1_22644(void);
 s32 fn_1_22874(struct RopeParams7730* params);
 void fn_1_22DF4(struct RopeParams7730* params);
 void fn_1_22F4C(s32 rows, s32 cols, f32* out, f32* cur, f32* prev);
+s32 fn_1_23098(Mtx44 proj, Mtx view, s32 rows, s32 cols, f32 near, f32 far);
 void fn_1_23804(s32 arg0, s32 arg1, s32 rows, s32 cols, f32 arg4, f32 arg5);
 void fn_1_23AD8(Mtx44 m, Vec* eye, Vec* at);
 void fn_1_23B54(void);
