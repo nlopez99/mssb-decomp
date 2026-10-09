@@ -315,13 +315,13 @@ extern struct {
     /* 0x715 */ s8 _715;
 } lbl_803C6CF8;
 
-static inline s32 hasAltAnims(s8 type) {
-    s32 result = 0;
+static inline u8 hasAltAnims(s8 type) {
+    u8 result = 0;
 
     if (type == 0x12 || type == 0x26 || type == 0x28 || type == 0x29) {
         result = 1;
     }
-    return result != 0;
+    return result;
 }
 
 static inline void setRefAnim(ActorRef0568* ref, AnimBank0568* bank, s32 seq, f32 speed) {
@@ -334,9 +334,8 @@ static inline void setRefAnim(ActorRef0568* ref, AnimBank0568* bank, s32 seq, f3
     ref->_60 = speed;
 }
 
-static inline u16 getModelId(s32 index) {
-    return lbl_8036E548._2C50[index] != NULL ? lbl_8036E548._2C50[index]->_162[4] : 0xFFFF;
-}
+#define GET_MODEL_ID(index) \
+    (lbl_8036E548._2C50[index] != NULL ? lbl_8036E548._2C50[index]->_162[4] : 0xFFFF)
 
 extern Mtx lbl_2_bss_1010C;
 
@@ -1198,7 +1197,7 @@ void fn_2_16F78(u8 index) {
     elem = &lbl_8036E548._0060->_34[index];
     elem->_54 = 0.5f;
     elem->_5A = 1;
-    fn_800B2C08(lbl_8036E548._0060->_34[index]._00, getModelId(index));
+    fn_800B2C08(lbl_8036E548._0060->_34[index]._00, GET_MODEL_ID(index));
     fn_8001FC4C(lbl_8036E548._2C50[index]);
     pos = &lbl_2_data_20F8[index];
     player->_034 = pos->x;
@@ -1364,9 +1363,9 @@ void fn_2_16A98(s32 index, s32 anim, u8 loop, s8 arg3, s16 frame, s32 arg5, u8 f
         speed = 1.0f / frames;
     }
     if (player->_26C == 0) {
-        fn_800B2B54(player->_000, getModelId(index), 13);
+        fn_800B2B54(player->_000, GET_MODEL_ID(index), 13);
     } else {
-        fn_800B2B54(player->_000, getModelId(index), 1);
+        fn_800B2B54(player->_000, GET_MODEL_ID(index), 1);
     }
     if (anim < 3) {
         slot = 5;
@@ -1384,13 +1383,7 @@ void fn_2_16A98(s32 index, s32 anim, u8 loop, s8 arg3, s16 frame, s32 arg5, u8 f
         if (seq >= bank->_0A) {
             return;
         }
-        ref->_04 = bank;
-        ref->_0E = seq;
-        ref->_5C = 0.0f;
-        ref->_58 = 1;
-        ref->_59 = bank != NULL;
-        ref->_5A = bank != NULL;
-        ref->_60 = speed;
+        setRefAnim(ref, bank, seq, speed);
     }
     if (loop) {
         ref->_5B = 3;
