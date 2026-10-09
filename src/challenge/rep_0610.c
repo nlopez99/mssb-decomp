@@ -32,17 +32,20 @@ typedef struct Unk0060Elem {
     /* 0x38 */ u8 _38[0x90 - 0x38];
 } Unk0060Elem; // size: 0x90
 
+typedef struct UnkAnimRef0610 {
+    /* 0x0 */ u8 _0[0x4];
+    /* 0x4 */ struct {
+        /* 0x0 */ s32 _0;
+        /* 0x4 */ f32* _4;
+        /* 0x8 */ u8 _8[0xC - 0x8];
+    }* _4;
+} UnkAnimRef0610;
+
 typedef struct Unk8036E548Actor {
     /* 0x000 */ u8 _000[0x4];
     /* 0x004 */ UnkList0610* _004;
     /* 0x008 */ u8 _008[0x10 - 0x8];
-    /* 0x010 */ struct {
-        /* 0x0 */ u8 _0[0x4];
-        /* 0x4 */ struct {
-            /* 0x0 */ s32 _0;
-            /* 0x4 */ u8 _4[0xC - 0x4];
-        }* _4;
-    }* _010[1];
+    /* 0x010 */ UnkAnimRef0610* _010[1];
     /* 0x014 */ u8 _014[0x38 - 0x14];
     /* 0x038 */ f32 _038;
     /* 0x03C */ u8 _03C[0x276 - 0x3C];
@@ -62,13 +65,18 @@ typedef struct Unk8036E548 {
 
 extern Unk8036E548 lbl_8036E548;
 
+typedef struct UnkTimer0610 {
+    /* 0x0 */ f32 _0;
+    /* 0x4 */ f32 _4;
+} UnkTimer0610;
+
 typedef struct UnkTask0610 {
     /* 0x00 */ void (*_00)(void);
     /* 0x04 */ u8 _04[0xC - 0x4];
     /* 0x0C */ struct UnkTask0610* _0C;
     /* 0x10 */ s16 _10;
     /* 0x12 */ u16 _12;
-    /* 0x14 */ void* _14;
+    /* 0x14 */ struct UnkTimer0610* _14;
     /* 0x18 */ u16 _18;
 } UnkTask0610;
 
@@ -76,12 +84,17 @@ extern UnkTask0610* lbl_803CC1B8;
 extern u8 lbl_803CBBC0;
 
 extern struct {
+    /* 0x000 */ u8 _000[0x715];
+    /* 0x715 */ s8 _715;
+} lbl_803C6CF8;
+
+extern struct {
     /* 0x00 */ u8 _00[0x8];
     /* 0x08 */ void* _08;
 } lbl_80366158;
 
 typedef struct UnkBurst0610 {
-    /* 0x00 */ s32 _00;
+    /* 0x00 */ void* _00;
     /* 0x04 */ u8 _04[0x50 - 0x4];
 } UnkBurst0610;
 
@@ -104,15 +117,48 @@ extern void fn_800324EC(u16, s32, s32, UnkBurst0610*);
 extern void fn_8002955C(Vec* pos, s32 arg1, UnkBurst0610* burst);
 extern void fn_80026134(s32, Vec*);
 extern void fn_80026130(s32, void*, f32);
+extern void fn_800385F0(struct Unk30C0*, f32, f32, f32, f32);
+extern void fn_80037AA0(struct Unk30C0*, s32, void (*)(s32), u16, UnkTimer0610*);
+extern void fn_800B0A14_removeQueue(void);
+extern void* ARAMTransfer(void* entry, int arg1, int arg2, u32 aram);
+extern void convertTextureHeader(void* tex);
 
+typedef struct UnkSlot0610 {
+    /* 0x0 */ s8 _0;
+    /* 0x1 */ s8 _1;
+    /* 0x2 */ s16 _2;
+    /* 0x4 */ s16 _4;
+    /* 0x6 */ s16 _6;
+} UnkSlot0610; // size: 0x8
+
+typedef struct UnkSlotSet0610 {
+    /* 0x00 */ u8 _00[0x10];
+    /* 0x10 */ UnkSlot0610 _10[8];
+} UnkSlotSet0610; // size: 0x50
+
+typedef struct UnkSlotState0610 {
+    /* 0x0 */ s16 _0;
+    /* 0x2 */ s16 _2;
+    /* 0x4 */ s16 _4;
+    /* 0x6 */ s16 _6;
+} UnkSlotState0610; // size: 0x8
+
+extern struct {
+    /* 0x0 */ s16 _0;
+    /* 0x2 */ s16 _2;
+    /* 0x4 */ UnkSlotSet0610* _4;
+} lbl_1_data_F4D4;
 extern UnkCamera0610 lbl_1_data_F4F8[];
 extern void* lbl_1_data_F4DC[3];
 extern UnkBurst0610 lbl_1_data_F2A0;
 extern u16 lbl_1_data_F17C;
 extern u16 lbl_1_data_F56C;
 extern u16 lbl_1_data_F56E;
+extern u8 lbl_1_data_A940[];
 extern f32 lbl_1_data_ADC0;
+extern f32 lbl_1_data_F568;
 extern u8 lbl_1_data_ADC4[0x1C];
+extern u8 lbl_1_data_ADE0[];
 
 typedef struct UnkLight0610 {
     /* 0x00 */ u8 _00[0x34];
@@ -151,11 +197,10 @@ static struct {
     /* 0x114 */ u8 _114[0x118 - 0x114];
     /* 0x118 */ u8 _118;
 } lbl_1_bss_67E0;
-static struct {
-    /* 0x0 */ u8 _0[0x4];
-    /* 0x4 */ f32 _4;
-}* lbl_1_bss_67B8[10];
-static s32 lbl_1_bss_5F7C[0x20F];
+static UnkTimer0610* lbl_1_bss_67B8[10];
+static u8 lbl_1_bss_60E8[0x6D0];
+static void* lbl_1_bss_60E4;
+static u8 lbl_1_bss_5F7C[0x168];
 static u8 lbl_1_bss_5F78;
 static f32 lbl_1_bss_5F74;
 static u8 lbl_1_bss_5F73;
@@ -168,19 +213,24 @@ static u8 lbl_1_bss_5F68;
 static u8 lbl_1_bss_5F64[4];
 static u8 lbl_1_bss_5F63;
 static s8 lbl_1_bss_5F62;
-static u8 lbl_1_bss_3218[0x2D4A];
+static u8 lbl_1_bss_3258[0x2D0A];
+static UnkSlotState0610 lbl_1_bss_3218[8];
 static u8 lbl_1_bss_3216;
 static u8 lbl_1_bss_3215;
 static u8 lbl_1_bss_3214;
-static struct {
-    /* 0x00 */ u8 _00[0x58];
+static struct Unk30C0 {
+    /* 0x00 */ u8 _00[0x50];
+    /* 0x50 */ f32 _50;
+    /* 0x54 */ u8 _54[0x58 - 0x54];
     /* 0x58 */ Mtx _58;
     /* 0x88 */ u8 _88[0x154 - 0x88];
 } lbl_1_bss_30C0;
 static s32 lbl_1_bss_30BC;
 static u8 lbl_1_bss_30B8;
-static s32 lbl_1_bss_3098[8];
-static s32 lbl_1_bss_3084[5];
+static u8 lbl_1_bss_309C[0x1C];
+static void* lbl_1_bss_3098[1];
+static void* lbl_1_bss_3094;
+static u32 lbl_1_bss_3084[4];
 static u8 lbl_1_bss_3081;
 static u8 lbl_1_bss_3080;
 static s32 lbl_1_bss_307C;
@@ -334,7 +384,7 @@ void fn_1_106B4(void) {
 }
 
 // .text:0x000106A4 size:0x10
-s32 fn_1_106A4(void) {
+void* fn_1_106A4(void) {
     return lbl_1_bss_3098[0];
 }
 
@@ -344,13 +394,67 @@ void fn_1_10670(void) {
     task->_10 = 0;
 }
 
+// .text:0x00010560 size:0x110
+void fn_1_10560(void) {
+    switch (lbl_803CC1B8->_10) {
+    case 0:
+        lbl_1_bss_3094 = ARAMTransfer(lbl_1_data_ADE0, 0, 0, 0);
+        lbl_803CC1B8->_10 = 1;
+        break;
+    case 1:
+        if (lbl_803C6CF8._715 == 1) {
+            lbl_1_bss_3098[0] = (u8*)lbl_1_bss_3094 + *(u32*)lbl_1_bss_3094;
+            convertTextureHeader(lbl_1_bss_3098[0]);
+            lbl_1_bss_60E4 = ARAMTransfer(lbl_1_data_A940, 0, 1, 0);
+            lbl_803CC1B8->_10 = 2;
+        }
+        break;
+    case 2:
+        if (lbl_803C6CF8._715 == 1) {
+            convertTextureHeader(lbl_1_bss_60E4);
+            fn_800B0A14_removeQueue();
+        }
+        break;
+    }
+}
+
+// .text:0x00010458 size:0x108
+void fn_1_10458(void) {
+    if (lbl_1_bss_3098[0] == 0) {
+        if (lbl_1_bss_3094 == 0) {
+            fn_1_10670();
+        }
+    } else {
+        u16 buttons = lbl_803C77B8[0]._04;
+        if (buttons & 8) {
+            if (lbl_1_bss_307C != 0) {
+                lbl_1_bss_307C--;
+            } else {
+                lbl_1_bss_307C = 6;
+            }
+        } else if (buttons & 4) {
+            if (++lbl_1_bss_307C == 7) {
+                lbl_1_bss_307C = 0;
+            }
+        } else if (buttons & 1) {
+        } else if (buttons & 2) {
+        } else if (buttons & 0x100) {
+            lbl_1_bss_5F71 += lbl_1_bss_307C + 1;
+            lbl_1_bss_307C = 0;
+        } else if (buttons & 0x200) {
+            lbl_1_bss_307C = 0;
+            lbl_1_bss_5F71 = 1;
+        }
+    }
+}
+
 // .text:0x0000F2F8 size:0x84
 void fn_1_F2F8(void) {
     if (lbl_803C77B8[0]._04 & 0x100) {
         lbl_80108B90._00 = lbl_1_bss_3098[0];
         fn_800324EC(lbl_1_data_F17C, 0, -1, &lbl_80108B90);
     } else if (lbl_803C77B8[0]._04 & 0x200) {
-        lbl_80108B90._00 = 0;
+        lbl_80108B90._00 = NULL;
         lbl_1_bss_307C = 0;
         lbl_1_bss_5F71 = 10;
     }
@@ -375,6 +479,36 @@ void fn_1_E9F8(UnkList0610* arg0, s32 arg1, s32 arg2) {
         arg1++;
         if (arg1 == arg0->_06) {
             arg1 = 0;
+        }
+    }
+}
+
+// .text:0x0000D7A4 size:0xFC
+void fn_1_D7A4(s32 arg0) {
+    UnkSlotSet0610* set = &lbl_1_data_F4D4._4[arg0];
+    s32 i = 8;
+    while (i--) {
+        if (set->_10[i]._0 != 0) {
+            s16 id;
+            s16 frame;
+            UnkAnimRef0610* ref;
+            lbl_1_bss_3218[i]._0 = id = set->_10[i]._2;
+            ref = lbl_8036E548._0C04[lbl_1_bss_5F73]._010[id];
+            lbl_1_bss_3218[i]._2 = frame = set->_10[i]._4;
+            lbl_1_bss_3218[i]._6 = set->_10[i]._1;
+            if (set->_10[i]._6 == -2) {
+                if (ref != NULL) {
+                    lbl_1_bss_3218[i]._4 = *ref->_4[frame]._4;
+                } else {
+                    lbl_1_bss_3218[i]._4 = 0;
+                }
+            } else {
+                lbl_1_bss_3218[i]._4 = set->_10[i]._6;
+            }
+        } else {
+            lbl_1_bss_3218[i]._0 = -1;
+            lbl_1_bss_3218[i]._6 = 0;
+            lbl_1_bss_3218[i]._4 = 0;
         }
     }
 }
@@ -485,6 +619,21 @@ void fn_1_D4BC(void) {
 // .text:0x0000D2F0 size:0x10
 void fn_1_D2F0(void) {
     lbl_1_bss_30B8 = 1;
+}
+
+// .text:0x0000CCC8 size:0x100
+void fn_1_CCC8(void) {
+    UnkTask0610* task = lbl_803CC1B8;
+    if (task->_14 != NULL && task->_14->_0 < task->_14->_4) {
+        if (lbl_1_bss_5F69 != 0) {
+            fn_800385F0(&lbl_1_bss_30C0, 1.0f, 0.5f, 0.1f, 1.0f);
+        } else {
+            fn_800385F0(&lbl_1_bss_30C0, -1.0f, 0.5f, 0.1f, 1.0f);
+        }
+        lbl_1_bss_30C0._50 = lbl_1_data_F568;
+        fn_80037AA0(&lbl_1_bss_30C0, 0, fn_1_CB9C, task->_18, task->_14);
+        fn_800B0A14_removeQueue();
+    }
 }
 
 // .text:0x0000CC24 size:0xA4
