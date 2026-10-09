@@ -1151,12 +1151,14 @@ void fn_2_16F78(u8 index) {
     void* anim;
     ActorRef0568* ref;
     u16 count;
-    u16 id;
+    int id;
+    u16 bone;
     s32 i;
     s32 first;
     s32 second;
     Pose0568* pose;
     Vec* pos;
+    ActorRef0568* elem;
 
     player->_255 = index;
     data = player->_008;
@@ -1183,9 +1185,9 @@ void fn_2_16F78(u8 index) {
     count = lbl_8036E548._0060->_34[index]._00->_06;
     memset(player->_162, 0xFF, sizeof(player->_162));
     for (i = 0; i < count; i++) {
-        id = lbl_8036E548._0060->_34[index]._00->_18[i]->_000;
-        if (id != 0xFFFF) {
-            player->_162[id] = i;
+        bone = lbl_8036E548._0060->_34[index]._00->_18[i]->_000;
+        if (bone != 0xFFFF) {
+            player->_162[bone] = i;
         }
     }
     fn_800BD548(&lbl_8036E548._0060->_34[index], 4, lbl_8036E548._00AC[0], lbl_8036E548._00AC[1],
@@ -1193,8 +1195,9 @@ void fn_2_16F78(u8 index) {
     player->_040 = player->_044 = player->_048 = 0.0f;
     CTRLSetTranslation(&lbl_8036E548._0060->_34[index]._10, 0.0f, 0.0f, 0.0f);
     CTRLSetRotation(&lbl_8036E548._0060->_34[index]._10, 0.0f, 0.0f, 0.0f);
-    lbl_8036E548._0060->_34[index]._54 = 0.5f;
-    lbl_8036E548._0060->_34[index]._5A = 1;
+    elem = &lbl_8036E548._0060->_34[index];
+    elem->_54 = 0.5f;
+    elem->_5A = 1;
     fn_800B2C08(lbl_8036E548._0060->_34[index]._00, getModelId(index));
     fn_8001FC4C(lbl_8036E548._2C50[index]);
     pos = &lbl_2_data_20F8[index];
@@ -1214,17 +1217,17 @@ void fn_2_16F78(u8 index) {
     id = player->_162[3];
     if (id != 0xFFFF) {
         fn_800B2BA8(ref->_00, id, NULL, 0);
-        ref->_00->_18[id]->_136 = 1;
+        ref->_00->_18[(u16)id]->_136 = 1;
     }
     id = player->_162[2];
     if (id != 0xFFFF) {
         fn_800B2BA8(ref->_00, id, NULL, 0);
-        ref->_00->_18[id]->_136 = 1;
+        ref->_00->_18[(u16)id]->_136 = 1;
     }
     id = player->_162[1];
     if (id != 0xFFFF) {
         fn_800B2BA8(ref->_00, id, NULL, 0);
-        ref->_00->_18[id]->_136 = 1;
+        ref->_00->_18[(u16)id]->_136 = 1;
     }
     id = player->_162[36];
     if (id != 0xFFFF) {
@@ -1233,7 +1236,7 @@ void fn_2_16F78(u8 index) {
     id = player->_162[46];
     if (id != 0xFFFF) {
         fn_800B2BA8(ref->_00, id, NULL, 0);
-        ref->_00->_18[id]->_136 = 1;
+        ref->_00->_18[(u16)id]->_136 = 1;
     }
     pose = &lbl_8036E548._0140[player->_255];
     if (player->_008[5] != 0) {
