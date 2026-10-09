@@ -413,6 +413,126 @@ void fn_2_89F70(void) {
     ((MenuTask0DE0*)lbl_803CC1B8)->_00 = fn_2_8975C;
 }
 
+// .text:0x0008975C size:0x814
+void fn_2_8975C(void) {
+    MenuTask0DE0* task = lbl_803CC1B8;
+    s32 count;
+    s32 i;
+    s32 done;
+    s32 total;
+    s32 a;
+    s32 b;
+
+    switch (lbl_2_bss_33FBCC._05) {
+    case 0:
+        count = 2;
+        break;
+    case 1:
+    case 2:
+        count = 4;
+        break;
+    case 3:
+        count = 5;
+        break;
+    }
+    switch (lbl_2_bss_33FBCC._22) {
+    case 0x51:
+        if (lbl_2_bss_33FBCC._20 == 0) {
+            lbl_80371C30[task->_14 + 1]._00->_68 = 1;
+            switch (lbl_2_bss_33FBCC._05) {
+            case 0:
+                fn_800363D8(task, 3, 1, 0xCF, 0x13);
+                fn_800363D8(task, 4, 1, 0xCF, 0x18);
+                break;
+            case 1:
+                fn_800363D8(task, 3, 1, 0xCF, 0x14);
+                fn_800363D8(task, 4, 1, 0xCF, 0x16);
+                fn_800363D8(task, 5, 1, 0xCF, 0x17);
+                fn_800363D8(task, 6, 1, 0xCF, 0x18);
+                break;
+            case 2:
+                fn_800363D8(task, 3, 1, 0xCF, 0x15);
+                fn_800363D8(task, 4, 1, 0xCF, 0x16);
+                fn_800363D8(task, 5, 1, 0xCF, 0x17);
+                fn_800363D8(task, 6, 1, 0xCF, 0x18);
+                break;
+            case 3:
+                fn_800363D8(task, 3, 1, 0xCF, 0x14);
+                fn_800363D8(task, 4, 1, 0xCF, 0x15);
+                fn_800363D8(task, 5, 1, 0xCF, 0x16);
+                fn_800363D8(task, 6, 1, 0xCF, 0x17);
+                fn_800363D8(task, 7, 1, 0xCF, 0x18);
+                break;
+            }
+            for (i = 0; i < count; i++) {
+                lbl_80371C30[task->_14 + 3 + i]._00->_68 = 1;
+            }
+            lbl_2_bss_33FBCC._20 = 1;
+            lbl_2_bss_33FBCC._21 = 1;
+        }
+        if (lbl_2_bss_33FBCC._21 != 0) {
+            done = 0;
+            total = 0;
+            for (i = 0; i < count; i++) {
+                if (i == 0) {
+                    total++;
+                    done += isAnimDone(task, i + 3, 8);
+                } else {
+                    total++;
+                    done += isAnimDone(task, i + 3, 3);
+                }
+            }
+            if (done == total) {
+                lbl_2_bss_33FBCC._20 = 0;
+                lbl_2_bss_33FBCC._21 = 0;
+                lbl_2_bss_33FBCC._22 = 0;
+            }
+        }
+        break;
+    case 0x52:
+        if (lbl_2_bss_33FBCC._20 == 0) {
+            lbl_80371C30[task->_14]._00->_68 = 4;
+            lbl_80371C30[task->_14 + 1]._00->_68 = 4;
+            for (i = 0; i < count; i++) {
+                lbl_80371C30[task->_14 + 3 + i]._00->_5C = 0x30000;
+                lbl_80371C30[task->_14 + 3 + i]._00->_68 = 4;
+            }
+            lbl_2_bss_33FBCC._20 = 1;
+            lbl_2_bss_33FBCC._21 = 1;
+        }
+        if (lbl_2_bss_33FBCC._21 != 0 && isAnimDone(task, 1, 0) == TRUE) {
+            lbl_2_bss_33FBCC._20 = 0;
+            lbl_2_bss_33FBCC._21 = 0;
+            lbl_2_bss_33FBCC._22 = 0;
+        }
+        break;
+    case 0x53:
+        if (lbl_2_bss_33FBCC._20 == 0) {
+            a = fn_2_895F8(FALSE);
+            b = fn_2_895F8(TRUE);
+            lbl_80371C30[task->_14 + 3 + a]._00->_5C = 0x80000;
+            lbl_80371C30[task->_14 + 3 + a]._00->_68 = 0;
+            lbl_80371C30[task->_14 + 3 + b]._00->_5C = 0x30000;
+            lbl_80371C30[task->_14 + 3 + b]._00->_68 = 0;
+            lbl_2_bss_33FBCC._20 = 1;
+            lbl_2_bss_33FBCC._21 = 1;
+        }
+        if (lbl_2_bss_33FBCC._21 != 0) {
+            fn_2_895F8(FALSE);
+            fn_2_895F8(TRUE);
+            lbl_2_bss_33FBCC._20 = 0;
+            lbl_2_bss_33FBCC._21 = 0;
+            lbl_2_bss_33FBCC._22 = 0;
+        }
+        break;
+    }
+    if (lbl_2_bss_33FBCC._0E != 0 && lbl_2_bss_33FBCC._21 == 0) {
+        lbl_2_bss_33FBCC._0E = 0;
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+    }
+}
+
 // .text:0x000895F8 size:0x164
 s32 fn_2_895F8(u8 useSaved) {
     s32 result;
