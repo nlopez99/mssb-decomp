@@ -80,6 +80,8 @@ extern struct {
     /* 0x231 */ s8 _231;
     /* 0x232 */ u8 _232[0x234 - 0x232];
     /* 0x234 */ u8 _234;
+    /* 0x235 */ u8 _235[0x23C - 0x235];
+    /* 0x23C */ s8 _23C;
 } lbl_1_common_bss_472B4;
 
 typedef struct Fog0138 {
@@ -108,6 +110,94 @@ void fn_1_85A8(void) {
         if (++lbl_1_common_bss_472B4._22E >= lbl_1_common_bss_472B4._22A) {
             lbl_1_common_bss_472B4._22E = -1;
         }
+    }
+}
+
+// .text:0x3220 size:0x370
+void fn_1_7FF8(void) {
+    switch (lbl_803C77B8[0]._04) {
+    case 8:
+        if (--lbl_1_common_bss_472B4._23C < 0) {
+            lbl_1_common_bss_472B4._23C = 5;
+        }
+        break;
+    case 4:
+        if (++lbl_1_common_bss_472B4._23C >= 6) {
+            lbl_1_common_bss_472B4._23C = 0;
+        }
+        break;
+    case 1:
+        switch (lbl_1_common_bss_472B4._23C) {
+        case 0:
+            switch (--lbl_1_bss_4E0->color.a) {
+            case 0xFF:
+                lbl_1_bss_4E0->color.a = 7;
+                break;
+            case 3:
+                lbl_1_bss_4E0->color.a = 2;
+                break;
+            case 1:
+                lbl_1_bss_4E0->color.a = 0;
+                break;
+            }
+            break;
+        case 1:
+            lbl_1_bss_4E0->color.r--;
+            break;
+        case 2:
+            lbl_1_bss_4E0->color.g--;
+            break;
+        case 3:
+            lbl_1_bss_4E0->color.b--;
+            break;
+        case 4:
+            if ((lbl_1_bss_4E0->start -= 1.0f) < 0.0f) {
+                lbl_1_bss_4E0->start = 0.0f;
+            }
+            break;
+        case 5:
+            if ((lbl_1_bss_4E0->end -= 1.0f) < 0.0f) {
+                lbl_1_bss_4E0->end = 0.0f;
+            }
+            break;
+        }
+        break;
+    case 2:
+        switch (lbl_1_common_bss_472B4._23C) {
+        case 0:
+            switch (++lbl_1_bss_4E0->color.a) {
+            case 1:
+                lbl_1_bss_4E0->color.a = 2;
+                break;
+            case 3:
+                lbl_1_bss_4E0->color.a = 4;
+                break;
+            case 8:
+                lbl_1_bss_4E0->color.a = 0;
+                break;
+            }
+            break;
+        case 1:
+            lbl_1_bss_4E0->color.r++;
+            break;
+        case 2:
+            lbl_1_bss_4E0->color.g++;
+            break;
+        case 3:
+            lbl_1_bss_4E0->color.b++;
+            break;
+        case 4:
+            if ((lbl_1_bss_4E0->start += 1.0f) > 512.0f) {
+                lbl_1_bss_4E0->start = 512.0f;
+            }
+            break;
+        case 5:
+            if ((lbl_1_bss_4E0->end += 1.0f) > 512.0f) {
+                lbl_1_bss_4E0->end = 512.0f;
+            }
+            break;
+        }
+        break;
     }
 }
 
