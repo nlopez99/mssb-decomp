@@ -1,6 +1,5 @@
 #include "menus/rep_0318.h"
 #include "header_rep_data.h"
-#include "game/UnknownHomes_Game.h"
 #include "static/UnknownHomes_Static.h"
 #include "musyx/musyx.h"
 #include "string.h"
@@ -20,6 +19,30 @@ extern void sndFXRelated(s32 arg0);
 extern s16 randRange_FUN_80042bf0(s32 min, s32 max);
 extern void fn_2_16A74(s32 arg0, s32 arg1);
 extern void fn_2_1C34(u16 buttons);
+
+extern struct {
+    /* 0x00 */ u8 _00[0x24];
+    /* 0x24 */ s16 CharID;
+    /* 0x26 */ u8 _26[0xA0 - 0x26];
+} inMemRoster[2][9];
+extern struct {
+    /* 0x0000 */ u8 _0000[0x40B8];
+    /* 0x40B8 */ struct {
+        /* 0x0 */ s16 _0;
+        /* 0x2 */ u8 _2;
+        /* 0x3 */ s8 _3;
+        /* 0x4 */ u8 _4;
+        /* 0x5 */ u8 _5;
+    } _40B8[9];
+    /* 0x40EE */ u8 _40EE[0x441D - 0x40EE];
+    /* 0x441D */ u8 _441D;
+    /* 0x441E */ u8 _441E;
+    /* 0x441F */ u8 _441F;
+} starMissionCompletionTracker;
+extern struct {
+    /* 0x0 */ u8 _0[3];
+    /* 0x3 */ u8 _3;
+} gameInitOptions;
 
 typedef struct Menu0318 {
     /* 0x000 */ s32 _00[2];
@@ -327,7 +350,7 @@ found:
         return group;
     }
     for (i = 0; i < 9; i++) {
-        id = inMemRoster[0][i].stats.CharID;
+        id = inMemRoster[0][i].CharID;
         for (j = 0; j < 5; j++) {
             if (id == lbl_80108EDC[group][j] && id != charID) {
                 return group;
@@ -438,7 +461,7 @@ s32 fn_2_9F70(s8 port) {
     }
 retry:
     for (i = 0; i < 9; i++) {
-        u8 id = inMemRoster[other][i].stats.CharID;
+        u8 id = inMemRoster[other][i].CharID;
         for (j = 0; j < 9; j++) {
             if (id == 0) {
                 if (ret == 1 || ret == 2) {
@@ -685,7 +708,7 @@ void fn_2_5F80(void) {
         for (i = 0; i < 9; i++) {
             for (j = 0; j < 9; j++) {
                 if (lbl_80354720[t][i]._2 == lbl_80354720[t][j]._2) {
-                    lbl_803C6724._02[t][i] = inMemRoster[t][j].stats.CharID;
+                    lbl_803C6724._02[t][i] = inMemRoster[t][j].CharID;
                 }
             }
             lbl_803C6724._14[t][i] = i;
