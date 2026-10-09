@@ -32,8 +32,34 @@ typedef struct Bss69FC {
     /* 0x58 */ u8 _58[0x98 - 0x58];
 } Bss69FC; // size: 0x98
 
+typedef struct VtxArray74A0 {
+    /* 0x00 */ void* data;
+    /* 0x04 */ u8 _04[0x6 - 0x4];
+    /* 0x06 */ u8 fmt;
+    /* 0x07 */ u8 count;
+    /* 0x08 */ u8 _08[0x10 - 0x8];
+} VtxArray74A0; // size: 0x10
+
+typedef struct Prim74A0 {
+    /* 0x00 */ u8 type;
+    /* 0x04 */ u32 desc;
+    /* 0x08 */ void* list;
+    /* 0x0C */ u32 size;
+} Prim74A0; // size: 0x10
+
+typedef struct DList74A0 {
+    /* 0x00 */ u8 _00[0x4];
+    /* 0x04 */ Prim74A0* prims;
+    /* 0x08 */ u32 count;
+} DList74A0;
+
 typedef struct Shape74A0 {
-    /* 0x00 */ u8 _00[0x18];
+    /* 0x00 */ VtxArray74A0* pos;
+    /* 0x04 */ u8 _04[0x8 - 0x4];
+    /* 0x08 */ VtxArray74A0* texCoords;
+    /* 0x0C */ u8 _0C[0x10 - 0xC];
+    /* 0x10 */ DList74A0* dlist;
+    /* 0x14 */ u8 numTexCoords;
     /* 0x18 */ Mtx _18;
 } Shape74A0;
 
@@ -168,6 +194,14 @@ extern void fn_800BDC88(ModelTable74A0* table, u16 first, u16 last, void* layout
 extern void fn_800BD548(Model74A0* model, s32 count, ...);
 extern void fn_800B2C08(Node74A0* node, s32 arg1);
 extern Emitter74A0* fn_80033A24(BOOL (*update)(Emitter74A0*), s32, s32, s32, s32, s32);
+extern u8 lbl_803CBBC0;
+extern void* ARAMTransfer(void* entry, int arg1, int arg2, u32 aram);
+
+extern struct {
+    /* 0x000 */ u8 _000[0x715];
+    /* 0x715 */ s8 _715;
+} lbl_803C6CF8;
+extern void fn_800A7D4C(s32 arg0, struct DrawEntry74A0* entry);
 extern void LITAlloc(LITObj** light);
 extern void LITInitDir(LITObj* light, f32 nx, f32 ny, f32 nz);
 extern void LITInitAttn(LITObj* light, f32 a0, f32 a1, f32 a2, f32 k0, f32 k1, f32 k2);
@@ -216,9 +250,7 @@ typedef struct AramEntry74A0 {
 typedef struct DrawEntry74A0 {
     /* 0x0 */ u32 _0;
     /* 0x4 */ void (*_4)(void);
-    /* 0x8 */ u32 _8;
-    /* 0xC */ u32 _C;
-} DrawEntry74A0; // size: 0x10
+} DrawEntry74A0; // size: 0x8
 
 static char lbl_1_data_F888[7][0x20] = {
     "CAMERA", "MODEL", "OFF", "ON", "MIX", "BONE_ONLY", "MODEL_ONLY",
@@ -251,8 +283,8 @@ static AramEntry74A0 lbl_1_data_F968[24] = {
     { 0x0000040B, 0x40006588, 0x0E977800, 0x00002F60 },
 };
 
-static DrawEntry74A0 lbl_1_data_FAE8 = { 0, fn_1_1ADA4 };
-static DrawEntry74A0 lbl_1_data_FAF8 = { 0, fn_1_1A774 };
+static DrawEntry74A0 lbl_1_data_FAE8[2] = { { 0, fn_1_1ADA4 }, { 0, NULL } };
+static DrawEntry74A0 lbl_1_data_FAF8[2] = { { 0, fn_1_1A774 }, { 0, NULL } };
 static GXColor lbl_1_data_FB08 = { 0xFF, 0xFF, 0xFF, 0xFF };
 static Vec lbl_1_data_FB0C = { 0.0f, 1.0f, 0.0f };
 static Vec lbl_1_data_FB18 = { 0.0f, 0.0f, 0.0f };
@@ -340,6 +372,57 @@ void fn_1_1D0E8(Model74A0* model) {
     fn_800B9AA8(model->_70);
 }
 
+// .text:0x0001CBE4 size:0x504
+void fn_1_1CBE4(void) {
+    Task74A0* task = lbl_803CC1B8;
+    u32 i;
+    char* name;
+
+    switch (task->_10) {
+    case 0:
+        for (i = 0; i < 24; i++) {
+            lbl_1_bss_6A94[i] = 0;
+        }
+        task->_14 = 0;
+        task->_16 = 0;
+        task->_17 = 0;
+        task->_18 = 1;
+        fn_1_1B6BC();
+        fn_1_1B0FC();
+        ((Task74A0*)lbl_803CC1B8)->_10 = 2;
+        break;
+    case 1:
+        task->_14++;
+        if (task->_14 == 24) {
+            ((Task74A0*)lbl_803CC1B8)->_10 = 8;
+        } else {
+            ((Task74A0*)lbl_803CC1B8)->_10 = 2;
+        }
+        break;
+    case 2:
+        name = (char*)lbl_1_data_F968[task->_14]._0[0];
+        if (name == "test/obj/skin/mario/model11.dat" || name == "test/obj/skin/test01/model11.dat" ||
+            name == "test/obj/skin/test02/model11.dat" || name == "test/obj/skin/test03/model11.dat" ||
+            name == "test/obj/skin/test04/model11.dat" || name == "test/obj/skin/test05/model11.dat" ||
+            name == "test/obj/skin/test06/model11.dat" || name == "test/obj/skin/test07/model11.dat") {
+            lbl_1_bss_6A94[task->_14] = 1;
+        }
+        lbl_8036E548._C04[task->_14]._008 = ARAMTransfer(&lbl_1_data_F968[task->_14], 0, 0, 0);
+        ((Task74A0*)lbl_803CC1B8)->_10++;
+        break;
+    case 3:
+        if (lbl_803C6CF8._715 == 1) {
+            task->_10 = 1;
+        }
+        break;
+    case 8:
+        task->_14 = 0;
+        ((Task74A0*)lbl_803CC1B8)->_10 = 0;
+        ((Task74A0*)lbl_803CC1B8)->_00 = fn_1_1C8C0;
+        break;
+    }
+}
+
 // .text:0x0001C8C0 size:0x324
 void fn_1_1C8C0(void) {
     u32* hdr;
@@ -419,6 +502,31 @@ void fn_1_1C8C0(void) {
         lbl_8036E548._060->models[i]._08 = fn_1_1D0E8;
     }
     ((Task74A0*)lbl_803CC1B8)->_00 = fn_1_1C3CC;
+}
+
+// .text:0x0001C3CC size:0x4F4
+void fn_1_1C3CC(void) {
+    Task74A0* task = lbl_803CC1B8;
+    Mtx44 m;
+
+    C_MTXFrustum(m, -0.175f, 0.175f, 0.25f, -0.25f, 1.0f, 512.0f);
+    GXSetProjection(m, GX_PERSPECTIVE);
+    fn_1_1B7DC();
+    if (task->_17 != 0) {
+        fn_1_1B2C8();
+    } else {
+        fn_1_1B424();
+    }
+    PSMTXCopy(lbl_1_bss_6B7C._00, lbl_1_bss_69FC._10);
+    lbl_1_bss_69F2 = task->_14;
+    fn_800A7D4C(0, &lbl_1_data_FAE8[lbl_803CBBC0]);
+    if (task->_16 != 2) {
+        fn_800A7D4C(0, &lbl_1_data_FAF8[lbl_803CBBC0]);
+    }
+    fn_1_1D110();
+    if (task->_18 != 0) {
+        fn_1_1A3B4();
+    }
 }
 
 // .text:0x0001B6BC size:0x120
@@ -679,9 +787,83 @@ void fn_1_1A1EC(Model74A0* model, Mtx mtx) {
     }
 }
 
+// .text:0x00019D60 size:0x48C
+void fn_1_19D60(Shape74A0* shape, Mtx mtx) {
+    GXColor color;
+    Mtx m;
+    GXVtxDescList desc[GX_VA_MAX_ATTR + 1];
+    VtxArray74A0* arr;
+    Prim74A0* prim;
+    s32 i;
+    u32 j;
+    s32 n;
+    s32 attr;
+    s32 shift;
+    u32 type;
+
+    color.r = lbl_1_bss_69F9;
+    color.g = lbl_1_bss_69F8;
+    color.b = lbl_1_bss_69F7;
+    color.a = lbl_1_bss_69F6;
+    GXSetChanMatColor(GX_COLOR0A0, color);
+    GXSetNumChans(1);
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_REG, GX_SRC_REG, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_REG, GX_SRC_REG, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetNumTevStages(1);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_RASC, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO);
+    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_RASA, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO);
+    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    PSMTXConcat(mtx, shape->_18, m);
+    GXLoadPosMtxImm(m, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    arr = shape->pos;
+    GXSetArray(GX_VA_POS, arr->data, arr->count * fn_1_19D1C(arr->fmt));
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, shape->pos->fmt >> 4, shape->pos->fmt & 0xF);
+    if (shape->texCoords != NULL) {
+        for (i = 0; i < shape->numTexCoords; i++) {
+            arr = &shape->texCoords[i];
+            GXSetArray(GX_VA_TEX0 + i, arr->data, arr->count * fn_1_19D1C(arr->fmt));
+            GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0 + i, GX_TEX_ST, shape->texCoords[i].fmt >> 4, shape->texCoords[i].fmt & 0xF);
+            GXSetTexCoordGen2(i, GX_TG_MTX2X4, GX_TG_TEX0 + i, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
+        }
+    }
+    prim = shape->dlist->prims;
+    for (j = 0; j < shape->dlist->count; j++, prim++) {
+        switch (prim->type) {
+        case 0:
+        case 1:
+            break;
+        case 2:
+            GXClearVtxDesc();
+            n = 0;
+            if (prim->desc & 3) {
+                desc[0].mAttr = GX_VA_PNMTXIDX;
+                desc[0].mType = prim->desc & 3;
+                n = 1;
+            }
+            for (attr = GX_VA_POS, shift = 2; attr <= GX_POS_MTX_ARRAY; attr++, shift += 2) {
+                type = (prim->desc >> shift) & 3;
+                if (type != 0) {
+                    desc[n].mAttr = attr;
+                    desc[n].mType = type;
+                    n++;
+                }
+            }
+            desc[n].mAttr = GX_VA_NULL;
+            GXSetVtxDescv(desc);
+            break;
+        }
+        if (prim->list != NULL) {
+            GXCallDisplayList(prim->list, prim->size);
+        }
+    }
+}
+
 // .text:0x00019D1C size:0x44
-s32 fn_1_19D1C(u32 fmt) {
-    switch ((fmt >> 4) & 0xF) {
+s32 fn_1_19D1C(u8 fmt) {
+    switch ((u8)(fmt >> 4)) {
     case 0:
     case 1:
         return 1;
