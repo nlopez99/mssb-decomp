@@ -57,9 +57,10 @@ typedef struct Unk8036E548Actor {
     }* _008;
     /* 0x00C */ u8 _00C[0x10 - 0xC];
     /* 0x010 */ UnkAnimRef0610* _010[1];
-    /* 0x014 */ u8 _014[0x38 - 0x14];
+    /* 0x014 */ u8 _014[0x34 - 0x14];
+    /* 0x034 */ f32 _034;
     /* 0x038 */ f32 _038;
-    /* 0x03C */ u8 _03C[0x40 - 0x3C];
+    /* 0x03C */ f32 _03C;
     /* 0x040 */ f32 _040;
     /* 0x044 */ f32 _044;
     /* 0x048 */ f32 _048;
@@ -172,6 +173,8 @@ extern void fn_80026130(s32, void*, f32);
 extern void fn_800385F0(struct Unk30C0*, f32, f32, f32, f32);
 extern void fn_80037AA0(struct Unk30C0*, s32, void (*)(s32), u16, UnkTimer0610*);
 extern void fn_800B0A14_removeQueue(void);
+extern void fn_800B2C88(UnkList0610* list, u16 index, Mtx out);
+extern void fn_800B806C(s32, f32, f32, f32, f32, f32, f32, f32);
 extern void fn_80031CA4(Vec* pos, UnkBurst0610* glow);
 extern void fn_80030D88(Vec* pos, Vec* dir, UnkBurst0610* burst, s32 n);
 extern void* ARAMTransfer(void* entry, int arg1, int arg2, u32 aram);
@@ -231,6 +234,7 @@ extern u16 lbl_1_data_F17C;
 extern u16 lbl_1_data_F56C;
 extern u16 lbl_1_data_F56E;
 extern u8 lbl_1_data_A940[];
+extern u8 lbl_1_data_ABA8;
 extern f32 lbl_1_data_ADC0;
 extern f32 lbl_1_data_F568;
 extern u8 lbl_1_data_ADC4[0x1C];
@@ -268,9 +272,13 @@ static struct {
 static struct {
     /* 0x000 */ Mtx _000;
     /* 0x030 */ LITObj _030;
-    /* 0x0F0 */ u8 _0F0[0x108 - 0xF0];
+    /* 0x0F0 */ s16 _0F0;
+    /* 0x0F2 */ s16 _0F2;
+    /* 0x0F4 */ u8 _0F4[0xF8 - 0xF4];
+    /* 0x0F8 */ f32 _0F8;
+    /* 0x0FC */ Vec _0FC;
     /* 0x108 */ Vec _108;
-    /* 0x114 */ u8 _114[0x118 - 0x114];
+    /* 0x114 */ s32 _114;
     /* 0x118 */ u8 _118;
 } lbl_1_bss_67E0;
 static UnkTimer0610* lbl_1_bss_67B8[10];
@@ -314,7 +322,10 @@ static s32 lbl_1_bss_30A0;
 static s32 lbl_1_bss_309C;
 static void* lbl_1_bss_3098[1];
 static void* lbl_1_bss_3094;
-static s32 lbl_1_bss_3084[4];
+static u8 lbl_1_bss_3090;
+static s32 lbl_1_bss_308C;
+static s32 lbl_1_bss_3088;
+static s32 lbl_1_bss_3084[1];
 static u8 lbl_1_bss_3081;
 static u8 lbl_1_bss_3080;
 static s32 lbl_1_bss_307C;
@@ -459,6 +470,22 @@ void fn_1_14888(UnkLight0610* arg0) {
     }
 }
 
+// .text:0x0001347C size:0x144
+void fn_1_1347C(void) {
+    lbl_1_bss_67E0._108.x = 0.0f;
+    lbl_1_bss_67E0._108.y = -0.8f;
+    lbl_1_bss_67E0._108.z = 0.0f;
+    lbl_1_bss_67E0._0FC.x = 0.0f;
+    lbl_1_bss_67E0._0FC.y = 0.0f;
+    lbl_1_bss_67E0._0FC.z = 10.0f;
+    fn_1_17954();
+    fn_800B806C(0, -240.0f, 240.0f, -320.0f, 320.0f, -512.0f, -0.001f, 1280.0f);
+    lbl_1_bss_67E0._114 = 0;
+    lbl_1_bss_67E0._0F8 = 0.0f;
+    lbl_1_bss_67E0._0F0 = 0;
+    lbl_1_bss_67E0._0F2 = 0;
+}
+
 // .text:0x00011C98 size:0x68
 void fn_1_11C98(void) {
     s32 i;
@@ -470,6 +497,38 @@ void fn_1_11C98(void) {
 // .text:0x000116EC size:0x28
 void fn_1_116EC(void* arg0) {
     SetDisplayStateTexture(arg0, 0, 0);
+}
+
+// .text:0x00010CEC size:0x140
+void fn_1_10CEC(UnkCamera0610* arg0) {
+    Mtx part;
+    Mtx m;
+    s32 i;
+    u32 color0;
+    u32 color1;
+    u32 color2;
+    if (lbl_1_data_ABA8 == 0) {
+        PSMTXTrans(m, lbl_8036E548._0C04[lbl_1_bss_5F73]._034, lbl_8036E548._0C04[lbl_1_bss_5F73]._038,
+                   lbl_8036E548._0C04[lbl_1_bss_5F73]._03C);
+        PSMTXConcat(arg0->_08, m, m);
+        for (i = 0; i < lbl_8036E548._0060->_34[lbl_1_bss_5F73]._00->_06; i++) {
+            if (i != lbl_1_bss_5F6C) {
+                color0 = 0x80008080;
+                color1 = 0x80800080;
+                color2 = 0x00808080;
+            } else if (lbl_1_bss_3090++ & 0x20) {
+                color0 = 0xFF8080FF;
+                color1 = 0x80FF80FF;
+                color2 = 0x8080FFFF;
+            } else {
+                color0 = 0xFFFFFFFF;
+                color1 = 0xFFFFFFFF;
+                color2 = 0xFFFFFFFF;
+            }
+            fn_800B2C88(lbl_8036E548._0060->_34[lbl_1_bss_5F73]._00, i, part);
+            fn_1_10E2C(part, m, color0, color1, color2);
+        }
+    }
 }
 
 // .text:0x00010AA4 size:0x28
