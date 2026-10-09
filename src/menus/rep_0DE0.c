@@ -329,6 +329,13 @@ extern u8 lbl_2_data_2E9F8[];
 extern u8 lbl_2_data_2ECE4[];
 extern u8 lbl_2_data_2F964[];
 
+static inline void placeInGrid(s32 i, Vec* pos, s32 columns, f32 dx, f32 dz) {
+    f32 x = i % columns;
+    f32 z = i / columns;
+
+    CTRLSetTranslation(&lbl_2_bss_340140->_0068->models[i].control, pos->x + x * dx, pos->y, pos->z - z * dz);
+}
+
 // .text:0x0008ABFC size:0x88
 void fn_2_8ABFC(void) {
     MenuTask0DE0* task = lbl_803CC1B8;
@@ -1401,8 +1408,6 @@ void fn_2_868C8(void) {
 }
 
 // .text:0x00086470 size:0x458
-// 90.55%: in each grid case the target forms the row factor's address with addi
-// and loads it with lfs 0(rX) (one more instruction), and allocates around it.
 void fn_2_86470(void) {
     Vec pos;
     Vec delta;
@@ -1426,17 +1431,13 @@ void fn_2_86470(void) {
         obj->_10.y = lbl_2_data_2E9DC.y;
         obj->_10.z = lbl_2_data_2E9DC.z;
         if (lbl_2_bss_33FBF5 == 0) {
-            CTRLSetTranslation(&lbl_2_bss_340140->_0068->models[i].control, pos.x + (i % 5) * 0.79f, pos.y,
-                               pos.z - (i / 5) * 0.614f);
+            placeInGrid(i, &pos, 5, 0.79f, 0.614f);
         } else if (lbl_2_bss_33FBF5 == 1) {
-            CTRLSetTranslation(&lbl_2_bss_340140->_0068->models[i].control, pos.x + (i % 6) * 0.75f, pos.y,
-                               pos.z - (i / 6) * 0.69f);
+            placeInGrid(i, &pos, 6, 0.75f, 0.69f);
         } else if (lbl_2_bss_33FBF5 == 2) {
-            CTRLSetTranslation(&lbl_2_bss_340140->_0068->models[i].control, pos.x + (i % 5) * 0.89f, pos.y,
-                               pos.z - (i / 5) * 0.544f);
+            placeInGrid(i, &pos, 5, 0.89f, 0.544f);
         } else {
-            CTRLSetTranslation(&lbl_2_bss_340140->_0068->models[i].control, pos.x + (i % 6) * 0.742f, pos.y,
-                               pos.z - (i / 6) * 0.542f);
+            placeInGrid(i, &pos, 6, 0.742f, 0.542f);
         }
         CTRLSetRotation(&lbl_2_bss_340140->_0068->models[i].control, 57.295776f * lbl_2_data_2E9DC.x,
                         57.295776f * lbl_2_data_2E9DC.y, 57.295776f * lbl_2_data_2E9DC.z);
