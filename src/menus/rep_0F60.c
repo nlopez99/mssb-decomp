@@ -1239,6 +1239,42 @@ void fn_2_8C724(void) {
     }
 }
 
+// .text:0x0008B418 size:0x130C
+void fn_2_8B418(void) {
+    lbl_2_bss_340140->_3078 = 29;
+    lbl_2_bss_340140->_2D94 = _OSAllocFromHeap(0x20, lbl_2_bss_340140->_3078 * sizeof(Entry0F60));
+    lbl_2_bss_340140->_0068 = ActorObjectInitTable(lbl_2_bss_340140->_3078);
+    fn_2_8C80C(0, 0, 1, NULL, 0);
+    fn_2_8C80C(1, 1, 1, NULL, 0);
+    fn_2_8C80C(2, 2, 1, NULL, 0);
+    fn_2_8C80C(3, 3, 1, NULL, 0);
+    fn_2_8C80C(4, 4, 1, NULL, 0);
+    fn_2_8C80C(5, 5, 1, NULL, 0);
+    fn_2_8C80C(6, 6, 1, NULL, 0);
+    fn_2_8C80C(7, 7, 1, NULL, 0);
+    fn_2_8C80C(8, 8, 1, NULL, 0);
+    fn_2_8C80C(9, 9, 1, NULL, 0);
+    fn_2_8C80C(10, 10, 1, NULL, 0);
+    fn_2_8C80C(10, 11, 1, NULL, 0);
+    fn_2_8C80C(10, 12, 1, NULL, 0);
+    fn_2_8C80C(10, 13, 1, NULL, 0);
+    fn_2_8C80C(10, 14, 1, NULL, 0);
+    fn_2_8C80C(10, 15, 1, NULL, 0);
+    fn_2_8C80C(11, 16, 1, NULL, 0);
+    fn_2_8C80C(11, 17, 1, NULL, 0);
+    fn_2_8C80C(11, 18, 1, NULL, 0);
+    fn_2_8C80C(11, 19, 1, NULL, 0);
+    fn_2_8C80C(11, 20, 1, NULL, 0);
+    fn_2_8C80C(11, 21, 1, NULL, 0);
+    fn_2_8C80C(12, 22, 1, NULL, 0);
+    fn_2_8C80C(13, 23, 1, NULL, 0);
+    fn_2_8C80C(14, 24, 1, NULL, 0);
+    fn_2_8C80C(15, 25, 1, NULL, 0);
+    fn_2_8C80C(16, 26, 1, NULL, 0);
+    fn_2_8C80C(17, 27, 1, NULL, 0);
+    fn_2_8C80C(18, 28, 1, NULL, 0);
+}
+
 // .text:0x0008B2C0 size:0x158
 void fn_2_8B2C0(void) {
     int i;
