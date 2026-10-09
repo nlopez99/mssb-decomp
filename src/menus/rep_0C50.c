@@ -369,8 +369,8 @@ void fn_2_8279C(void) {
 }
 
 // .text:0x00081628 size:0x1174
-// 88.65%: the base inlines fn_2_7F8BC (case 15), which the target calls; the inlined
-// fn_2_80E0C also shares its register differences (i, n and expected rotated).
+// 99.75%: registers only: the inlined fn_2_80E0C (case 1) rotates i, n and expected, as
+// in that function, and sets expected before the second call's arguments.
 void fn_2_81628(void) {
     UnkTask0C50* task = lbl_8034E9A0._474C;
     s32 i;
@@ -882,7 +882,9 @@ void fn_2_7F8BC(UnkTask0C50* task, s32 index) {
             }
         }
         value = lbl_803C6724._02[index][found];
-        lbl_80371C30[0x34 + task->_14 + sel + index * 9]._00->_54 |= 2;
+        // Written out, this keeps fn_2_7F8BC out of fn_2_81628, which calls it in the target.
+        lbl_80371C30[0x34 + task->_14 + sel + index * 9]._00->_54 =
+            lbl_80371C30[0x34 + task->_14 + sel + index * 9]._00->_54 | 2;
         lbl_80371C30[0x34 + task->_14 + sel + index * 9]._00->_5C = 0;
         lbl_80371C30[0x34 + task->_14 + sel + index * 9]._00->_68 = 1;
         lbl_80371C30[0x58 + task->_14 + sel + index * 9]._00->_5C = value << 16;
