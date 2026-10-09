@@ -4,6 +4,7 @@
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/mtx.h"
 #include "Dolphin/GX/GXTransform.h"
+#include "C3/control.h"
 
 typedef struct LITObj {
     /* 0x00 */ u8 _00[0xC0];
@@ -27,10 +28,16 @@ typedef struct UnkList0610 {
 } UnkList0610;
 
 typedef struct Unk0060Elem {
-    /* 0x00 */ u8 _00[0x34];
-    /* 0x34 */ UnkList0610* _34;
-    /* 0x38 */ u8 _38[0x90 - 0x38];
+    /* 0x00 */ UnkList0610* _00;
+    /* 0x04 */ u8 _04[0x68 - 0x4];
+    /* 0x68 */ void* _68;
+    /* 0x6C */ u8 _6C[0x90 - 0x6C];
 } Unk0060Elem; // size: 0x90
+
+typedef struct Unk0060 {
+    /* 0x00 */ u8 _00[0x34];
+    /* 0x34 */ Unk0060Elem _34[1];
+} Unk0060;
 
 typedef struct UnkAnimRef0610 {
     /* 0x0 */ u8 _0[0x4];
@@ -48,14 +55,19 @@ typedef struct Unk8036E548Actor {
     /* 0x010 */ UnkAnimRef0610* _010[1];
     /* 0x014 */ u8 _014[0x38 - 0x14];
     /* 0x038 */ f32 _038;
-    /* 0x03C */ u8 _03C[0x276 - 0x3C];
+    /* 0x03C */ u8 _03C[0x40 - 0x3C];
+    /* 0x040 */ f32 _040;
+    /* 0x044 */ f32 _044;
+    /* 0x048 */ f32 _048;
+    /* 0x04C */ u8 _04C[0x72 - 0x4C];
+    /* 0x072 */ u8 _072[0x276 - 0x72];
     /* 0x276 */ u8 _276;
     /* 0x277 */ u8 _277[0x27C - 0x277];
 } Unk8036E548Actor; // size: 0x27C
 
 typedef struct Unk8036E548 {
     /* 0x0000 */ u8 _0000[0x60];
-    /* 0x0060 */ Unk0060Elem* _0060;
+    /* 0x0060 */ Unk0060* _0060;
     /* 0x0064 */ u8 _0064[0xAC - 0x64];
     /* 0x00AC */ LITObj* _00AC[3];
     /* 0x00B8 */ u8 _00B8[0xC04 - 0xB8];
@@ -66,8 +78,12 @@ typedef struct Unk8036E548 {
 extern Unk8036E548 lbl_8036E548;
 
 typedef struct UnkTimer0610 {
-    /* 0x0 */ f32 _0;
-    /* 0x4 */ f32 _4;
+    /* 0x00 */ f32 _00;
+    /* 0x04 */ f32 _04;
+    /* 0x08 */ u8 _08[0x11 - 0x8];
+    /* 0x11 */ u8 _11_0 : 3;
+    /* 0x11 */ u8 _11_3 : 2;
+    /* 0x11 */ u8 _11_5 : 3;
 } UnkTimer0610;
 
 typedef struct UnkTask0610 {
@@ -78,6 +94,9 @@ typedef struct UnkTask0610 {
     /* 0x12 */ u16 _12;
     /* 0x14 */ struct UnkTimer0610* _14;
     /* 0x18 */ u16 _18;
+    /* 0x1A */ u8 _1A[0x20 - 0x1A];
+    /* 0x20 */ s32 _20;
+    /* 0x24 */ s32 _24;
 } UnkTask0610;
 
 extern UnkTask0610* lbl_803CC1B8;
@@ -120,6 +139,7 @@ extern void fn_80026130(s32, void*, f32);
 extern void fn_800385F0(struct Unk30C0*, f32, f32, f32, f32);
 extern void fn_80037AA0(struct Unk30C0*, s32, void (*)(s32), u16, UnkTimer0610*);
 extern void fn_800B0A14_removeQueue(void);
+extern void fn_80030D88(Vec* pos, Vec* dir, void* burst, s32 n);
 extern void* ARAMTransfer(void* entry, int arg1, int arg2, u32 aram);
 extern void convertTextureHeader(void* tex);
 
@@ -132,7 +152,8 @@ typedef struct UnkSlot0610 {
 } UnkSlot0610; // size: 0x8
 
 typedef struct UnkSlotSet0610 {
-    /* 0x00 */ u8 _00[0x10];
+    /* 0x00 */ s8 _00;
+    /* 0x01 */ u8 _01[0x10 - 0x1];
     /* 0x10 */ UnkSlot0610 _10[8];
 } UnkSlotSet0610; // size: 0x50
 
@@ -149,6 +170,10 @@ extern struct {
     /* 0x4 */ UnkSlotSet0610* _4;
 } lbl_1_data_F4D4;
 extern UnkCamera0610 lbl_1_data_F4F8[];
+extern UnkCamera0610 lbl_1_data_AA54[];
+extern UnkCamera0610 lbl_1_data_AAC4[];
+extern UnkCamera0610 lbl_1_data_AB34[];
+extern void* lbl_1_data_F278[3];
 extern void* lbl_1_data_F4DC[3];
 extern UnkBurst0610 lbl_1_data_F2A0;
 extern u16 lbl_1_data_F17C;
@@ -190,7 +215,7 @@ static struct {
     /* 0x40 */ u8 _40[0x4];
 } lbl_1_bss_68FC;
 static struct {
-    /* 0x000 */ u8 _000[0x30];
+    /* 0x000 */ Mtx _000;
     /* 0x030 */ LITObj _030;
     /* 0x0F0 */ u8 _0F0[0x108 - 0xF0];
     /* 0x108 */ Vec _108;
@@ -234,7 +259,9 @@ static u32 lbl_1_bss_3084[4];
 static u8 lbl_1_bss_3081;
 static u8 lbl_1_bss_3080;
 static s32 lbl_1_bss_307C;
-static s32 lbl_1_bss_3070[3];
+static u8 lbl_1_bss_3078;
+static s32 lbl_1_bss_3074;
+static s32 lbl_1_bss_3070;
 
 // .text:0x00017954 size:0x78
 void fn_1_17954(void) {
@@ -256,6 +283,30 @@ s32 fn_1_16590(void) {
 // .text:0x00016558 size:0x38
 s32 fn_1_16558(s32 arg0, s32 arg1) {
     return lbl_8036E548._0C04[lbl_1_bss_5F73]._010[arg0]->_4[arg1]._0;
+}
+
+// .text:0x0001644C size:0x10C
+void fn_1_1644C(void) {
+    s32 idx = lbl_1_bss_5F73;
+    Unk8036E548Actor* actor = lbl_8036E548._2C50[idx];
+    Unk0060Elem* elem;
+    s32 i;
+    lbl_1_bss_5F69 ^= 1;
+    if (actor == NULL) {
+        return;
+    }
+    elem = &lbl_8036E548._0060->_34[idx];
+    if (lbl_1_bss_5F69 == 0) {
+        elem->_68 = NULL;
+    } else {
+        elem->_68 = actor->_072;
+    }
+    fn_1_ECF8(lbl_1_bss_5F73, lbl_1_bss_6940[lbl_1_bss_5F73]._44, lbl_1_bss_5F69);
+    for (i = 0; i < 4; i++) {
+        if (lbl_1_bss_67B8[i] != NULL) {
+            lbl_1_bss_67B8[i]->_11_3 = 3;
+        }
+    }
 }
 
 // .text:0x00016400 size:0x4C
@@ -348,7 +399,7 @@ void fn_1_10AA4(Unk10AA4* arg0, f32 arg1) {
     arg0->_54 = arg1;
     arg0->_5A = 1;
     if (lbl_1_bss_67B8[0] != NULL) {
-        lbl_1_bss_67B8[0]->_4 = arg1;
+        lbl_1_bss_67B8[0]->_04 = arg1;
     }
 }
 
@@ -460,6 +511,30 @@ void fn_1_F2F8(void) {
     }
 }
 
+// .text:0x0000F1D8 size:0x120
+void fn_1_F1D8(void) {
+    UnkTask0610* task = lbl_803CC1B8;
+    Unk8036E548Actor* actor = lbl_8036E548._2C50[lbl_1_bss_5F73];
+    VecXYZ pos;
+    Mtx m;
+    Control ctrl;
+    Vec dir;
+    getAnimRelatedCoordinates(0, task->_24, &pos);
+    ctrl.type = 0;
+    CTRLSetRotation(&ctrl, actor->_040, actor->_044, actor->_048);
+    CTRLBuildMatrix(&ctrl, m);
+    dir.x = 0.0f;
+    dir.y = 0.0f;
+    dir.z = 1.0f;
+    PSMTXMultVec(m, &dir, &dir);
+    fn_80030D88((Vec*)&pos, &dir, lbl_1_data_F278[0], 5);
+    fn_80030D88((Vec*)&pos, &dir, lbl_1_data_F278[1], 5);
+    fn_80030D88((Vec*)&pos, &dir, lbl_1_data_F278[2], 5);
+    if (--task->_20 == 0) {
+        fn_800B0A14_removeQueue();
+    }
+}
+
 // .text:0x0000F040 size:0x90
 void fn_1_F040(void) {
     Vec pos = { 0.0f, -5.0f, 0.0f };
@@ -481,6 +556,27 @@ void fn_1_E9F8(UnkList0610* arg0, s32 arg1, s32 arg2) {
             arg1 = 0;
         }
     }
+}
+
+// .text:0x0000E8D4 size:0x124
+void fn_1_E8D4(void) {
+    fn_1_D7A4(0);
+    while (lbl_1_data_F4D4._4[lbl_1_data_F4D4._0]._00 != 0) {
+        lbl_1_data_F4D4._0++;
+    }
+}
+
+// .text:0x0000D8A0 size:0x118
+void fn_1_D8A0(void) {
+    fn_1_17954();
+    fn_1_179CC();
+    PSMTXCopy(lbl_1_bss_67E0._000, lbl_1_bss_68FC._10);
+    fn_800A7D4C(7, &lbl_1_data_AA54[lbl_803CBBC0]);
+    if (lbl_1_bss_3078 != 0) {
+        fn_800A7D4C(7, &lbl_1_data_AB34[lbl_803CBBC0]);
+    }
+    fn_800A7D4C(7, &lbl_1_data_AAC4[lbl_803CBBC0]);
+    fn_1_129D0();
 }
 
 // .text:0x0000D7A4 size:0xFC
@@ -516,7 +612,7 @@ void fn_1_D7A4(s32 arg0) {
 // .text:0x0000D71C size:0x88
 f32 fn_1_D71C(s32 arg0) {
     s32 i;
-    UnkList0610* list = lbl_8036E548._0060[arg0]._34;
+    UnkList0610* list = lbl_8036E548._0060->_34[arg0]._00;
     for (i = 0; i < list->_06; i++) {
         if (list->_18[i]->_E8 != NULL && list->_18[i]->_E8->_C != NULL) {
             break;
@@ -624,7 +720,7 @@ void fn_1_D2F0(void) {
 // .text:0x0000CCC8 size:0x100
 void fn_1_CCC8(void) {
     UnkTask0610* task = lbl_803CC1B8;
-    if (task->_14 != NULL && task->_14->_0 < task->_14->_4) {
+    if (task->_14 != NULL && task->_14->_00 < task->_14->_04) {
         if (lbl_1_bss_5F69 != 0) {
             fn_800385F0(&lbl_1_bss_30C0, 1.0f, 0.5f, 0.1f, 1.0f);
         } else {
