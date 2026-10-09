@@ -140,6 +140,8 @@ extern struct {
 } lbl_3_common_bss_34C90;
 
 extern u8 lbl_800EFBA4[0x10];
+extern u8 lbl_800E8558[][6];
+extern u8 lbl_80361B20[];
 extern struct {
     /* 0x00 */ u8 _00[0x12];
     /* 0x12 */ u8 _12;
@@ -204,12 +206,16 @@ extern UnkSpriteDesc3448 lbl_3_data_92D4[];
 extern u16 lbl_3_data_93D4[8][2];
 extern u16 lbl_3_data_93F4[5][2];
 extern UnkSpriteDesc3448 lbl_3_data_9408[];
+extern u16 lbl_3_data_9D48;
+extern u16 lbl_3_data_9D4C;
+extern u8 lbl_3_data_9D50[10][5];
 extern u16 lbl_3_data_9D84[8];
 extern UnkSpriteDesc3448 lbl_3_data_9D94[];
 extern u16 lbl_3_data_9EB4[2][2];
 extern u8 lbl_3_data_9EBC[2][8];
 extern UnkSpriteDesc3448 lbl_3_data_9ECC[];
 extern UnkSpriteDesc3448 lbl_3_data_9FB4[];
+extern u8 lbl_3_data_A594[4];
 extern UnkSpriteDesc3448 lbl_3_data_A598[];
 extern u16 lbl_3_data_A8B8[0x98];
 extern u16 lbl_3_data_A9E8[8];
@@ -1414,6 +1420,246 @@ void fn_3_12B7A0(void) {
     task->_18 = 0;
     task->_1A = 0;
     ((UnkTask3448*)lbl_803CC1B8)->_00 = fn_3_12A910;
+}
+
+// .text:0x0012A910 size:0xE90 mapped:0x807699A4
+// 99.99%: the target loads the lbl_3_data_9D50 entry of the last loop into r29 (who's
+// register), the base into r0; storing it through who or n first changed nothing.
+void fn_3_12A910(void) {
+    UnkTask3448* task = lbl_803CC1B8;
+    UnkSprite3448* sprite;
+    u8* rec;
+    s32 frame;
+    int i;
+    int n;
+    int who;
+    BOOL show;
+    s8 idx;
+
+    task->_18++;
+    task->_1A++;
+    if (lbl_3_common_bss_32724._96) {
+        goto remove;
+    }
+    if (g_GameLogic.gameStatus == GAME_STATUS_TOY_STADIUM_CHARACTER_SELECT || g_GameLogic.gameStatus == GAME_STATUS_0x20 ||
+        (g_GameLogic.gameStatus == GAME_STATUS_0x1F && g_GameLogic._125 == 0)) {
+    } else {
+        goto remove;
+    }
+    if (task->_1C == 0) {
+        task->_1C = 1;
+    } else if (task->_1C == 1) {
+        sprite = lbl_80371C30[task->_14]._00;
+        if ((s32)(sprite->_5C >> 16) >= lbl_3_data_9D4C) {
+            sprite->_68 = 0;
+            lbl_80371C30[task->_14 + 17]._00->_68 = 0;
+            task->_1C = 2;
+        }
+    } else if (task->_1C == 2) {
+        for (i = 0; i < 4; i++) {
+            if (g_Minigame._19DA[i] >= 0) {
+                if (g_Minigame._19E8[i]._0 >= 0 && g_Minigame._19E8[i]._7) {
+                    lbl_80371C30[task->_14 + 9 + i]._00->_68 = 1;
+                } else {
+                    sprite = lbl_80371C30[task->_14 + 9 + i]._00;
+                    frame = sprite->_5C >> 16;
+                    if (frame < 10) {
+                        sprite->_68 = 1;
+                    } else if (frame > 10) {
+                        sprite->_68 = 4;
+                    } else {
+                        sprite->_68 = 0;
+                    }
+                }
+                lbl_80371C30[task->_14 + 13 + i]._00->_68 = 1;
+                lbl_80371C30[task->_14 + 1 + i]._00->_68 = 1;
+            } else {
+                lbl_80371C30[task->_14 + 9 + i]._00->_68 = 4;
+                lbl_80371C30[task->_14 + 13 + i]._00->_68 = 4;
+                lbl_80371C30[task->_14 + 1 + i]._00->_68 = 4;
+            }
+        }
+        for (i = 0; i < 4; i++) {
+            if (g_Minigame._19DA[i] == 0) {
+                fn_800363D8(task, i + 13, 1, 26, i);
+            } else if (g_Minigame._19DA[i] == 1) {
+                fn_800363D8(task, i + 13, 1, 26, i + 4);
+            }
+        }
+        if (g_Minigame._19DE == 4) {
+            lbl_80371C30[task->_14 + 66]._00->_72 = 3 - g_Minigame._18A2[0];
+            lbl_80371C30[task->_14 + 67]._00->_72 = 3 - g_Minigame._18A2[0];
+            lbl_80371C30[task->_14 + 66]._00->_68 = 1;
+            lbl_80371C30[task->_14 + 67]._00->_68 = 1;
+            for (i = 0; i < 4; i++) {
+                if (g_Minigame.minigameControlStruct.aIStrength[g_Minigame._18A2[0]] == i) {
+                    lbl_80371C30[task->_14 + 68 + i]._00->_68 = 1;
+                    sprite = lbl_80371C30[task->_14 + 68 + i]._00;
+                    if ((s32)(sprite->_5C >> 16) >= 50) {
+                        sprite->_5C = 10 << 16;
+                    }
+                } else {
+                    lbl_80371C30[task->_14 + 68 + i]._00->_68 = 0;
+                    lbl_80371C30[task->_14 + 68 + i]._00->_5C = 0;
+                }
+            }
+        } else {
+            lbl_80371C30[task->_14 + 66]._00->_68 = 4;
+            lbl_80371C30[task->_14 + 67]._00->_68 = 4;
+        }
+        if (g_GameLogic._125 == 6) {
+            n = 0;
+            for (i = 0; i < 4; i++) {
+                if (g_Minigame._19DA[i] == 0) {
+                    who = i;
+                    n++;
+                }
+            }
+            if (n > 1 || g_Minigame._1A3C || g_d_GameSettings.GameModeSelected == 6) {
+                task->_1C = 5;
+                lbl_3_common_bss_32724._DB = 4;
+            } else {
+                task->_1C = 3;
+                lbl_3_common_bss_32724._DB = who;
+            }
+            task->_1A = 0;
+        } else if (g_GameLogic._125 == 3 && g_d_GameSettings.GameModeSelected != 6) {
+            task->_1C = 6;
+            task->_1A = 0;
+        }
+    } else if (task->_1C == 6) {
+        if (task->_1A == 1) {
+            lbl_80371C30[task->_14]._00->_68 = 1;
+            lbl_80371C30[task->_14 + 17]._00->_68 = 1;
+        }
+        if ((s32)(lbl_80371C30[task->_14]._00->_5C >> 16) >= 30) {
+            goto remove;
+        }
+    } else if (task->_1C == 7) {
+        if (task->_1A >= 30) {
+            if (lbl_3_common_bss_32724._DB != 4) {
+                lbl_80371C30[task->_14]._00->_64 = lbl_3_data_9D48;
+                lbl_80371C30[task->_14]._00->_5C = lbl_3_data_9D4C << 16;
+                lbl_80371C30[task->_14]._00->_68 = 0;
+                lbl_80371C30[task->_14 + 17]._00->_64 = lbl_3_data_9D48;
+                lbl_80371C30[task->_14 + 17]._00->_5C = lbl_3_data_9D4C << 16;
+                lbl_80371C30[task->_14 + 17]._00->_68 = 0;
+            }
+            task->_1C = 2;
+        }
+    }
+    for (i = 0; i < 4; i++) {
+        show = FALSE;
+        if (g_Minigame._19DA[i] >= 0 && (!g_Minigame._190A || i == g_d_GameSettings._35)) {
+            if (g_d_GameSettings.GameModeSelected == 6) {
+                if (g_Minigame._19E8[i]._0 >= 0) {
+                    show = TRUE;
+                }
+            } else if (g_Minigame._19DE != 8 || g_Minigame._1908 == i) {
+                show = TRUE;
+            }
+        }
+        if (show) {
+            lbl_80371C30[task->_14 + 18 + i]._00->_68 = 1;
+        } else {
+            lbl_80371C30[task->_14 + 18 + i]._00->_68 = 4;
+        }
+        if (g_Minigame._19E8[i]._0 < 0 || !g_Minigame._19E8[i]._7) {
+            lbl_80371C30[task->_14 + 18 + i]._00->_54 &= ~2;
+        } else {
+            lbl_80371C30[task->_14 + 18 + i]._00->_54 |= 2;
+        }
+        lbl_80371C30[task->_14 + 22 + i]._00->_5C = lbl_3_data_A594[g_Minigame.battingHandedness[i]] << 16;
+    }
+    for (i = 0; i < 4; i++) {
+        show = FALSE;
+        if (g_Minigame._19DA[i] >= 0 && (!g_Minigame._190A || i == g_d_GameSettings._35)) {
+            if (g_d_GameSettings.GameModeSelected == 6) {
+                if (g_Minigame._19E8[i]._0 >= 0 && !g_Minigame._19E8[i]._1) {
+                    show = TRUE;
+                }
+            } else if ((g_Minigame._19DE != 8 || g_Minigame._1908 == i) && g_Minigame._19E8[i]._0 >= 0 &&
+                       !g_Minigame._19E8[i]._6 && !g_Minigame._19E8[i]._1) {
+                show = TRUE;
+            }
+        }
+        if (show && lbl_800E8558[g_Minigame._19E8[i]._0][0] && g_Minigame._19E8[i]._7) {
+            lbl_80371C30[task->_14 + 30 + i]._00->_54 |= 2;
+        } else {
+            lbl_80371C30[task->_14 + 30 + i]._00->_54 &= ~2;
+        }
+    }
+    for (i = 0; i < 4; i++) {
+        show = FALSE;
+        if (g_Minigame._19DA[i] >= 0 && (!g_Minigame._190A || i == g_d_GameSettings._35)) {
+            if (g_d_GameSettings.GameModeSelected == 6) {
+                if (g_Minigame._19E8[i]._0 >= 0) {
+                    show = TRUE;
+                }
+            } else if ((g_Minigame._19DE != 8 || g_Minigame._1908 == i) && g_Minigame._19E8[i]._0 >= 0 &&
+                       !g_Minigame._19E8[i]._6) {
+                show = TRUE;
+            }
+        }
+        if (show &&
+            ((g_d_GameSettings.exhibitionMatchInd && lbl_80361B20[g_Minigame._19E8[i]._0]) ||
+             (!g_d_GameSettings.exhibitionMatchInd && starMissionCompletionTracker._43D6[g_Minigame._19E8[i]._0])) &&
+            g_Minigame._19E8[i]._7) {
+            lbl_80371C30[task->_14 + 34 + i]._00->_54 |= 2;
+            lbl_80371C30[task->_14 + 34 + i]._00->_68 = 1;
+            lbl_80371C30[task->_14 + 38 + i]._00->_68 = 1;
+            if (g_Minigame.minigameControlStruct._8[i]) {
+                sprite = lbl_80371C30[task->_14 + 38 + i]._00;
+                if (sprite->_64 == 62) {
+                    sprite->_64 = 64;
+                    lbl_80371C30[task->_14 + 38 + i]._00->_5C = 0;
+                }
+            } else {
+                sprite = lbl_80371C30[task->_14 + 38 + i]._00;
+                if (sprite->_64 == 64) {
+                    sprite->_64 = 62;
+                    lbl_80371C30[task->_14 + 38 + i]._00->_5C = 0;
+                }
+            }
+        } else {
+            lbl_80371C30[task->_14 + 34 + i]._00->_54 &= ~2;
+            lbl_80371C30[task->_14 + 34 + i]._00->_5C = 0;
+            lbl_80371C30[task->_14 + 34 + i]._00->_68 = 0;
+            lbl_80371C30[task->_14 + 38 + i]._00->_5C = 0;
+            lbl_80371C30[task->_14 + 38 + i]._00->_68 = 0;
+        }
+    }
+    for (i = 0; i < 4; i++) {
+        if (g_Minigame._19DA[i] >= 0 && (idx = g_Minigame._19E8[i]._0) >= 0 && g_Minigame._19E8[i]._7) {
+            if (idx != lbl_80371C30[task->_14 + 62 + i]._00->_5C >> 16) {
+                lbl_80371C30[task->_14 + 42 + i]._00->_5C = 0;
+                lbl_80371C30[task->_14 + 46 + i]._00->_5C = 0;
+            }
+            lbl_80371C30[task->_14 + 42 + i]._00->_54 |= 2;
+            lbl_80371C30[task->_14 + 42 + i]._00->_68 = 1;
+            lbl_80371C30[task->_14 + 46 + i]._00->_54 |= 2;
+            lbl_80371C30[task->_14 + 46 + i]._00->_68 = 1;
+            lbl_80371C30[task->_14 + 62 + i]._00->_5C = g_Minigame._19E8[i]._0 << 16;
+            lbl_80371C30[task->_14 + 54 + i]._00->_54 |= 2;
+            lbl_80371C30[task->_14 + 54 + i]._00->_68 = 1;
+            rec = lbl_800E8558[g_Minigame._19E8[i]._0];
+            lbl_80371C30[task->_14 + 58 + i]._00->_5C = lbl_3_data_9D50[rec[0]][rec[5]] << 16;
+        } else {
+            lbl_80371C30[task->_14 + 42 + i]._00->_5C = 0;
+            lbl_80371C30[task->_14 + 42 + i]._00->_54 &= ~2;
+            lbl_80371C30[task->_14 + 46 + i]._00->_5C = 0;
+            lbl_80371C30[task->_14 + 46 + i]._00->_54 &= ~2;
+            lbl_80371C30[task->_14 + 62 + i]._00->_5C = 54 << 16;
+            lbl_80371C30[task->_14 + 54 + i]._00->_5C = 0;
+            lbl_80371C30[task->_14 + 54 + i]._00->_54 &= ~2;
+        }
+    }
+    return;
+
+remove:
+    fn_80034CEC(task);
+    fn_800B0A14_removeQueue();
+    lbl_3_common_bss_32724._DA = 2;
 }
 
 // .text:0x0012A6C4 size:0x24C mapped:0x80769758
