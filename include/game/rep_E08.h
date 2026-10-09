@@ -31,5 +31,6 @@ void fn_3_664FC(void);
 void fn_3_668BC(void);
 void fn_3_67130(void);
 void fn_3_6714C(BOOL arg0);
+void fn_3_674E0(void);
 
 #endif // !__GAME_rep_E08_H_
