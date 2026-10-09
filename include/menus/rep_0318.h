@@ -12,6 +12,7 @@ s32 fn_2_33BC(void);
 void fn_2_348C(void);
 s32 fn_2_35D0(u8 port);
 void fn_2_3624(u8 port);
+void fn_2_4970(u8 port, s32 id);
 void fn_2_5184(u8 port);
 void fn_2_52CC(void);
 void fn_2_5444(u8 port);
