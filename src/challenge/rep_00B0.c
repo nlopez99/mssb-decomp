@@ -313,12 +313,13 @@ void fn_1_3E38(Vec* pos, u32 material) {
 }
 
 // .text:0x000025BC size:0x187C
+// n, m and nverts are reused (n for the strip flag, nverts for each strip vertex's
+// material): only then does MWCC allocate them as in the target
 void fn_1_25BC(void* mesh) {
     u32 count;
     u32 n;
     u32 nverts;
     u32 m;
-    u32 i;
     u32 mat;
     MeshVtx00B0* vtx;
     MeshVtx00B0* first;
@@ -352,7 +353,7 @@ void fn_1_25BC(void* mesh) {
             nverts = 0;
             vtx = (MeshVtx00B0*)(p + 4);
             mat = vtx->material;
-            for (i = count + 2; i != 0; i--, vtx++) {
+            for (n = count + 2; n != 0; vtx++, n--) {
                 nverts++;
                 if (mat != vtx->material) {
                     mat = vtx->material;
