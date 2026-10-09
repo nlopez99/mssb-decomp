@@ -1103,7 +1103,7 @@ void fn_2_EAE0(void) {
 }
 
 // .text:0x0000DFAC size:0xB34
-// 98.3%: the final stores to lbl_803C5EA4 and _26 are scheduled differently.
+// 99.2%: the final stores to lbl_803C5EA4 and _26 are scheduled differently.
 void fn_2_DFAC(s32 port) {
     s32 cap;
     s32 i;
@@ -1112,7 +1112,7 @@ void fn_2_DFAC(s32 port) {
     s32 c;
     s32 id;
     s8 cursor;
-    s8 slot = 0;
+    char slot = 0;
     s8 group = -1;
     s8 used = 0;
     s8 freeCount = 0;
