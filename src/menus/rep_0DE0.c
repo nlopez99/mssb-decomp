@@ -211,14 +211,26 @@ extern void fn_2_48D54(void);
 extern void fn_2_190DC(ModelTable0DE0* table, Mtx view);
 extern void fn_800A7D4C(s32 arg0, void* arg1);
 extern void fn_800B806C(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7);
+typedef struct TrackerSlot0DE0 {
+    /* 0x0 */ s16 _0;
+    /* 0x2 */ u8 _2[0x6 - 0x2];
+} TrackerSlot0DE0; // size: 0x6
+
 typedef struct Tracker0DE0 {
     /* 0x0000 */ u8 _0000[0x1606];
     /* 0x1606 */ s8 _1606;
-    /* 0x1607 */ u8 _1607[0x43BC - 0x1607];
+    /* 0x1607 */ u8 _1607[0x40B8 - 0x1607];
+    /* 0x40B8 */ TrackerSlot0DE0 _40B8[9];
+    /* 0x40EE */ u8 _40EE[0x43BC - 0x40EE];
     /* 0x43BC */ s16 _43BC;
-    /* 0x43BE */ u8 _43BE[0x441B - 0x43BE];
+    /* 0x43BE */ u8 _43BE[0x4415 - 0x43BE];
+    /* 0x4415 */ u8 _4415;
+    /* 0x4416 */ u8 _4416;
+    /* 0x4417 */ u8 _4417[0x441B - 0x4417];
     /* 0x441B */ u8 _441B;
-    /* 0x441C */ u8 _441C[0x444B - 0x441C];
+    /* 0x441C */ u8 _441C;
+    /* 0x441D */ u8 _441D;
+    /* 0x441E */ u8 _441E[0x444B - 0x441E];
     /* 0x444B */ s8 _444B;
     /* 0x444C */ u8 _444C[0x4508 - 0x444C];
 } Tracker0DE0; // size: 0x4508
@@ -303,6 +315,7 @@ static s8 lbl_2_data_2E940[4] = { 20, 24, 25, 30 };
 
 extern u8 lbl_2_data_2E9F8[];
 extern u8 lbl_2_data_2ECE4[];
+extern u8 lbl_2_data_2F964[];
 
 // .text:0x0008ABFC size:0x88
 void fn_2_8ABFC(void) {
@@ -388,6 +401,97 @@ void fn_2_8A824(void) {
         fn_80034CEC(task);
         fn_800B0A14_removeQueue();
         lbl_8034E978._3 = 0;
+    }
+}
+
+// .text:0x0008A008 size:0x81C
+// 99.56%: the target walks lbl_2_data_2F964 with lbzu from its first compare on,
+// where this keeps a second pointer for the rest of the unrolled search.
+void fn_2_8A008(MenuTask0DE0* task) {
+    s32 flags[3];
+    s32 i;
+    s32 k;
+    s32 n;
+    s32 face;
+    u8 id;
+
+    memset(flags, 0, 3);
+    for (i = 0; i < 3; i++) {
+        if (lbl_80354768._CF5E[i] != 0) {
+            lbl_80371C30[task->_14 + 4 + i]._00->_64 = 17;
+            fn_800363D8(task, i + 56, 1, 5, i);
+            if (lbl_80354768.trackers[i]._1606 != 0 && lbl_80354768.trackers[i]._441B == 0) {
+                lbl_80371C30[task->_14 + 59 + i]._00->_54 |= 2;
+                fn_800363D8(task, i + 59, 1, 4, lbl_80354768.trackers[i]._4416);
+                lbl_80371C30[task->_14 + 59 + i]._00->_5C = 0;
+                lbl_80371C30[task->_14 + 59 + i]._00->_68 = 1;
+                fn_800363D8(task, i + 4, 1, 6, lbl_80354768.trackers[i]._4416);
+                lbl_80371C30[task->_14 + 11 + i]._00->_54 &= ~2;
+                lbl_80371C30[task->_14 + 23 + i]._00->_54 &= ~2;
+                lbl_80371C30[task->_14 + 50 + i]._00->_54 &= ~2;
+                lbl_80371C30[task->_14 + 53 + i]._00->_54 &= ~2;
+            } else {
+                lbl_80371C30[task->_14 + 59 + i]._00->_54 &= ~2;
+                lbl_80371C30[task->_14 + 11 + i]._00->_54 |= 2;
+                lbl_80371C30[task->_14 + 23 + i]._00->_54 |= 2;
+                lbl_80371C30[task->_14 + 56 + i]._00->_54 |= 2;
+                lbl_80371C30[task->_14 + 50 + i]._00->_54 |= 2;
+                lbl_80371C30[task->_14 + 53 + i]._00->_54 |= 2;
+                lbl_80371C30[task->_14 + 14 + i * 3]._00->_54 |= 2;
+                lbl_80371C30[task->_14 + 15 + i * 3]._00->_54 |= 2;
+                lbl_80371C30[task->_14 + 16 + i * 3]._00->_54 |= 2;
+                id = lbl_80354768.trackers[i]._441D;
+                for (k = 0; k < 6; k++) {
+                    if (lbl_2_data_2F964[k] == id) {
+                        face = k;
+                    }
+                }
+                lbl_80354768.trackers[i]._441D = id;
+                lbl_80371C30[task->_14 + 11 + i]._00->_5C = 0;
+                fn_800363D8(task, i + 11, 1, 84, face);
+                lbl_80371C30[task->_14 + 11 + i]._00->_58 = (lbl_80371C30[task->_14 + 11 + i]._00->_58 & ~0xFF) | 0xFF;
+                lbl_80371C30[task->_14 + 11 + i]._00->_68 = 1;
+                if (lbl_80354768.trackers[i]._444B != -1) {
+                    lbl_80371C30[task->_14 + 50 + i]._00->_54 |= 2;
+                    lbl_80371C30[task->_14 + 50 + i]._00->_5C = 0;
+                    fn_800363D8(task, i + 50, 4, 100, lbl_80354768.trackers[i]._444B);
+                    lbl_80371C30[task->_14 + 50 + i]._00->_68 = 1;
+                    lbl_80371C30[task->_14 + 53 + i]._00->_54 &= ~2;
+                    lbl_80371C30[task->_14 + 53 + i]._00->_68 = 0;
+                } else {
+                    lbl_80371C30[task->_14 + 53 + i]._00->_54 |= 2;
+                    lbl_80371C30[task->_14 + 53 + i]._00->_68 = 1;
+                    lbl_80371C30[task->_14 + 50 + i]._00->_54 &= ~2;
+                }
+                fn_800363D8(task, i + 4, 1, 6, lbl_80354768.trackers[i]._4415);
+                n = 0;
+                for (k = 0; k < 9; k++) {
+                    if (lbl_80354768.trackers[i]._40B8[k]._0 != lbl_80354768.trackers[i]._441D) {
+                        lbl_80371C30[task->_14 + 26 + i * 8 + n]._00->_5C = lbl_80354768.trackers[i]._40B8[k]._0 << 16;
+                        n++;
+                    }
+                }
+            }
+        } else {
+            lbl_80371C30[task->_14 + 4 + i]._00->_64 = 1;
+            lbl_80371C30[task->_14 + 4 + i]._00->_5C = 0;
+            lbl_80371C30[task->_14 + 4 + i]._00->_68 = 1;
+            fn_800363D8(task, i + 4, 1, 6, 4);
+            lbl_80371C30[task->_14 + 11 + i]._00->_54 &= ~2;
+            lbl_80371C30[task->_14 + 23 + i]._00->_54 &= ~2;
+            lbl_80371C30[task->_14 + 56 + i]._00->_54 &= ~2;
+            lbl_80371C30[task->_14 + 50 + i]._00->_54 &= ~2;
+            lbl_80371C30[task->_14 + 53 + i]._00->_54 &= ~2;
+            lbl_80371C30[task->_14 + 59 + i]._00->_54 &= ~2;
+            lbl_80371C30[task->_14 + 14 + i * 3]._00->_54 &= ~2;
+            lbl_80371C30[task->_14 + 15 + i * 3]._00->_54 &= ~2;
+            lbl_80371C30[task->_14 + 16 + i * 3]._00->_54 &= ~2;
+        }
+        if (lbl_2_bss_F410._50 == i) {
+            lbl_80371C30[task->_14 + 63 + i]._00->_54 |= 2;
+        } else {
+            lbl_80371C30[task->_14 + 63 + i]._00->_54 &= ~2;
+        }
     }
 }
 
