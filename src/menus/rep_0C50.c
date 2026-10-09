@@ -65,7 +65,11 @@ extern struct {
 
 extern struct {
     /* 0x00 */ u8 _00[2];
-    /* 0x02 */ s8 _02[10][9];
+    /* 0x02 */ s8 _02[2][9];
+    /* 0x14 */ s8 _14[2][9];
+    /* 0x26 */ u8 _26[2][9];
+    /* 0x38 */ s8 _38[2][9];
+    /* 0x4A */ s8 _4A[2][9];
 } lbl_803C6724;
 
 extern struct {
@@ -440,7 +444,7 @@ void fn_2_7F8BC(UnkTask0C50* task, s32 index) {
         s32 i;
 
         for (i = 0; i < 9; i++) {
-            if (lbl_803C6724._02[index + 2][i] == sel) {
+            if (lbl_803C6724._14[index][i] == sel) {
                 found = i;
                 break;
             }
@@ -465,7 +469,7 @@ void fn_2_7F714(UnkTask0C50* task, s32 index) {
         s32 i;
 
         for (i = 0; i < 9; i++) {
-            if (lbl_803C6724._02[index + 2][i] == sel) {
+            if (lbl_803C6724._14[index][i] == sel) {
                 break;
             }
         }
@@ -504,10 +508,10 @@ void fn_2_7F030(UnkTask0C50* task, s32 index) {
         n = 0;
         expected = 0;
         for (i = 0; i < 9; i++) {
-            if (lbl_803C6724._02[index + 2][i] == sel) {
+            if (lbl_803C6724._14[index][i] == sel) {
                 foundSel = i;
             }
-            if (lbl_803C6724._02[index + 2][i] == prev) {
+            if (lbl_803C6724._14[index][i] == prev) {
                 foundPrev = i;
             }
         }
@@ -565,10 +569,10 @@ void fn_2_7D85C(UnkTask0C50* task, s32 index) {
         prev = lbl_2_bss_F468._00[index + 2];
 
         for (i = 0; i < 9; i++) {
-            if (lbl_803C6724._02[index + 2][i] == sel) {
+            if (lbl_803C6724._14[index][i] == sel) {
                 foundSel = i;
             }
-            if (lbl_803C6724._02[index + 2][i] == prev) {
+            if (lbl_803C6724._14[index][i] == prev) {
                 foundPrev = i;
             }
         }
@@ -611,7 +615,7 @@ void fn_2_7E194(UnkTask0C50* task, s32 index) {
         if (g_d_GameSettings._10 == 0 && index == 0) {
             for (i = 0; i < 9; i++) {
                 if (lbl_803C6724._02[1][i] == lbl_8034E9A0._46E0[1]) {
-                    id = lbl_803C6724._02[3][i];
+                    id = lbl_803C6724._14[1][i];
                 }
             }
             expected++;
@@ -773,7 +777,7 @@ void fn_2_7A194(UnkTask0C50* task, s32 index) {
         s32 i;
 
         for (i = 0; i < 9; i++) {
-            if (lbl_803C6724._02[index + 2][i] == prev) {
+            if (lbl_803C6724._14[index][i] == prev) {
                 found = i;
                 break;
             }
@@ -809,7 +813,7 @@ void fn_2_79FAC(UnkTask0C50* task, s32 index) {
         s8 id;
 
         for (i = 0; i < 9; i++) {
-            if (lbl_803C6724._02[index + 2][i] == sel) {
+            if (lbl_803C6724._14[index][i] == sel) {
                 found = i;
                 break;
             }
@@ -835,7 +839,7 @@ void fn_2_79CF8(UnkTask0C50* task, s32 index) {
         s32 i;
 
         for (i = 0; i < 9; i++) {
-            if (sel == lbl_803C6724._02[index + 2][i]) {
+            if (sel == lbl_803C6724._14[index][i]) {
                 found = i;
                 break;
             }
@@ -868,7 +872,7 @@ void fn_2_79B24(UnkTask0C50* task, s32 index) {
         s32 i;
 
         for (i = 0; i < 9; i++) {
-            if (sel == lbl_803C6724._02[index + 2][i]) {
+            if (sel == lbl_803C6724._14[index][i]) {
                 found = i;
                 break;
             }
@@ -890,7 +894,7 @@ void fn_2_79930(UnkTask0C50* task, s32 index) {
         s32 i;
 
         for (i = 0; i < 9; i++) {
-            s32 slot = lbl_803C6724._02[index + 2][i];
+            s32 slot = lbl_803C6724._14[index][i];
             s32 value = lbl_803C6724._02[index][i];
 
             lbl_80371C30[0x34 + task->_14 + slot + index * 9]._00->_54 |= 2;
@@ -925,8 +929,8 @@ void fn_2_79764(UnkTask0C50* task, s32 index) {
         }
         if (fn_2_75B58(task, index) && n == total) {
             for (i = 0; i < 9; i++) {
-                if (lbl_803C6724._02[index + 8][i] == 0) {
-                    lbl_803C6724._02[index + 8][i] = 1;
+                if (lbl_803C6724._4A[index][i] == 0) {
+                    lbl_803C6724._4A[index][i] = 1;
                 }
             }
             fn_80062674(index);
@@ -1001,7 +1005,7 @@ void fn_2_7912C(UnkTask0C50* task, s32 index) {
     if (lbl_803C66B0._0D[index] == 0 ? TRUE : FALSE) {
         if (lbl_803C66B0._00[0] == 2) {
             for (i = 1; i < 9; i++) {
-                s8 slot = lbl_803C6724._02[index + 2][i];
+                s8 slot = lbl_803C6724._14[index][i];
                 s8 value = lbl_803C6724._02[index][slot];
 
                 if (value != -1 && value != 0x36) {
@@ -1018,7 +1022,7 @@ void fn_2_7912C(UnkTask0C50* task, s32 index) {
         s32 expected = 0;
 
         for (i = 1; i < 9; i++) {
-            s8 slot = lbl_803C6724._02[index + 2][i];
+            s8 slot = lbl_803C6724._14[index][i];
             s8 value = lbl_803C6724._02[index][slot];
 
             if (value != -1 && value != 0x36) {
@@ -1072,7 +1076,7 @@ void fn_2_7805C(UnkTask0C50* task, s32 index) {
 
     prev = lbl_2_bss_F468._61[index];
     for (i = 0; i < 9; i++) {
-        if (lbl_803C6724._02[index + 2][i] == prev) {
+        if (lbl_803C6724._14[index][i] == prev) {
             found = i;
         }
     }
@@ -1258,6 +1262,46 @@ void fn_2_7609C(UnkTask0C50* task, u8 flag, u8 skip) {
 
 // .text:0x00076098 size:0x4
 void fn_2_76098(void) {
+}
+
+// .text:0x00075BE4 size:0x4B4
+void fn_2_75BE4(UnkTask0C50* task, s32 index) {
+    s8 level = 0;
+    s32 i;
+    s32 sum = 0;
+    s32 avg = 0;
+    s32 count = 0;
+
+    for (i = 0; i < 9; i++) {
+        if (lbl_803C6724._26[index][i] != 0 && lbl_803C6724._02[index][i] != lbl_8034E9A0._46E0[index]) {
+            sum += lbl_803C6724._26[index][i];
+            count++;
+        }
+    }
+    if (count != 0) {
+        avg = sum / count;
+    }
+    if (avg >= 70) {
+        level = 5;
+    } else if (avg <= 69 && avg >= 55) {
+        level = 4;
+    } else if (avg <= 54 && avg >= 35) {
+        level = 3;
+    } else if (avg <= 34 && avg >= 15) {
+        level = 2;
+    } else if (avg <= 14 && avg > 0) {
+        level = 1;
+    }
+    lbl_8034E9A0._470F[index] = level;
+    for (i = 0; i < 5; i++) {
+        if (lbl_80371C30[0x6E + task->_14 + i + index * 5]._00->_5C >> 16 == 30) {
+            lbl_80371C30[0x6E + task->_14 + i + index * 5]._00->_68 = 1;
+        }
+    }
+    for (i = 0; i < level; i++) {
+        lbl_80371C30[0x6E + task->_14 + i + index * 5]._00->_5C = 0;
+        lbl_80371C30[0x6E + task->_14 + i + index * 5]._00->_68 = 1;
+    }
 }
 
 // .text:0x00075B58 size:0x8C
