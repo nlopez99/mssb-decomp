@@ -2099,11 +2099,9 @@ retry:
 }
 
 // .text:0x00009ACC size:0x4A4
-// 95%: registers in the stats copy (r0/r3 swapped) and the team loop counter.
-// The copy is fn_2_8940's; an inline helper shared by both may be the original.
 void fn_2_9ACC(u16 team) {
-    s32 t;
     s32 i;
+    s32 t;
     CharEntry0318* dst;
     CharEntry0318* src;
 
@@ -2153,11 +2151,11 @@ void fn_2_9ACC(u16 team) {
                 dst->_74[18] = src->_74[18];
                 dst->_74[19] = src->_74[19];
                 dst->_74[20] = src->_74[20];
+                inMemRoster[team][i].CharID = lbl_8034E9A0._46E0[team];
                 lbl_80354720[team][i]._0 = lbl_2_bss_DCE8._000[team][i]._0;
                 lbl_80354720[team][i]._1 = lbl_2_bss_DCE8._000[team][i]._1;
                 lbl_80354720[team][i]._2 = lbl_2_bss_DCE8._000[team][i]._2;
                 lbl_80354720[team][i]._3 = lbl_2_bss_DCE8._000[team][i]._3;
-                inMemRoster[team][i].CharID = lbl_8034E9A0._46E0[team];
             }
         }
     } else {
@@ -2207,11 +2205,11 @@ void fn_2_9ACC(u16 team) {
                     dst->_74[18] = src->_74[18];
                     dst->_74[19] = src->_74[19];
                     dst->_74[20] = src->_74[20];
+                    inMemRoster[t][i].CharID = lbl_8034E9A0._46E0[t];
                     lbl_80354720[t][i]._0 = lbl_2_bss_DCE8._000[t][i]._0;
                     lbl_80354720[t][i]._1 = lbl_2_bss_DCE8._000[t][i]._1;
                     lbl_80354720[t][i]._2 = lbl_2_bss_DCE8._000[t][i]._2;
                     lbl_80354720[t][i]._3 = lbl_2_bss_DCE8._000[t][i]._3;
-                    inMemRoster[t][i].CharID = lbl_8034E9A0._46E0[t];
                 }
             }
         }
@@ -4231,6 +4229,7 @@ void fn_2_3204(void) {
 // .text:0x00002FC0 size:0x244
 // 96.8%: registers in the fn_2_348C loop. Calling fn_2_348C() there matches this
 // function, but then fn_2_3204 and fn_2_323C inline it; the target calls it.
+// Five dead stores after the call keep it out of both (MWCC's inline size limit).
 void fn_2_2FC0(u8 arg0, s32 arg1, s32 arg2) {
     s32 i;
     s32 j;
