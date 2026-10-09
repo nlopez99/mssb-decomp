@@ -1633,16 +1633,15 @@ found:
 }
 
 // .text:0x0000BF90 size:0x394
-// 98%: the target gives grp and the last loop's counter one register (r26)
-// and loads 0 twice before the stores to _10.
 void fn_2_BF90(void) {
     s32 i;
+    s32 j;
     s32 grp = -1;
 
     memset(lbl_8034E9A0._4757, 0, sizeof(lbl_8034E9A0._4757));
-    for (i = 0; i < 12; i++) {
-        if (lbl_80108EC4[i] == starMissionCompletionTracker._441F) {
-            lbl_8034E9A0._470C = i;
+    for (j = 0; j < 12; j++) {
+        if (lbl_80108EC4[j] == starMissionCompletionTracker._441F) {
+            lbl_8034E9A0._470C = j;
             grp = lbl_8034E9A0._470C;
         }
     }
@@ -1825,7 +1824,8 @@ void fn_2_B324(void) {
 }
 
 // .text:0x0000AEE8 size:0x43C
-// 99.9%: the target keeps cap in r29 apart from the remainder in r26.
+// 99.9%: the target keeps cap in r29 apart from the remainder in r26; the
+// permuter matched it only with a redundant copy (`id = ...; cap = id;`).
 void fn_2_AEE8(void) {
     u8 order[2][54];
     u8 value[54];
