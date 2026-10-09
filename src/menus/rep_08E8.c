@@ -95,7 +95,8 @@ typedef struct MenuTracker08E8 {
     /* 0x4428 */ u8 _4428;
     /* 0x4429 */ u8 _4429;
     /* 0x442A */ u8 _442A;
-    /* 0x442B */ u8 _442B[0x444B - 0x442B];
+    /* 0x442B */ u8 _442B[0x444A - 0x442B];
+    /* 0x444A */ u8 _444A;
     /* 0x444B */ s8 _444B;
     /* 0x444C */ u8 _444C;
     /* 0x444D */ s8 _444D[0x36];
@@ -386,7 +387,7 @@ extern u8 fn_800B3C04(s32 arg0, MenuActor08E8* actor, Mtx mtx);
 
 // rep_0B08
 extern void fn_2_6A87C(void);
-extern void fn_2_68690(s32);
+extern s32 fn_2_68690(s32);
 extern void fn_2_68DAC(s32, Vec*);
 
 // rep_1028
@@ -599,6 +600,44 @@ void fn_2_4E7EC(void) {
 // .text:0x0004E7A4 size:0x48
 void fn_2_4E7A4(void) {
     fn_8003BF54(0, 0, 0, 1, 1, 4, 1, 3, 0);
+}
+
+// .text:0x0004DEE8 size:0x2D8
+void fn_2_4DEE8(void) {
+    lbl_2_bss_1A824C->_197843 = -1;
+    lbl_2_bss_1A8248->_441E = 1;
+    lbl_2_bss_1A8248->_441F = 0x13;
+    lbl_2_bss_1A8248->_444A = 0;
+    fn_2_45FDC();
+    fn_2_45E48();
+}
+
+// .text:0x0004DC24 size:0x2C4
+void fn_2_4DC24(void) {
+    lbl_2_bss_1A824C->_197843 = -1;
+    lbl_2_bss_1A8248->_441E = 1;
+    fn_2_45FDC();
+    fn_2_45E48();
+}
+
+// .text:0x0004D960 size:0x2C4
+void fn_2_4D960(void) {
+    lbl_2_bss_1A824C->_197843 = -1;
+    lbl_2_bss_1A8248->_441E = 1;
+    fn_2_45FDC();
+    fn_2_45E48();
+}
+
+// .text:0x0004D67C size:0x2E4
+void fn_2_4D67C(void) {
+    s32 team;
+
+    lbl_2_bss_1A824C->_197843 = -1;
+    team = fn_2_68690(0);
+    lbl_2_bss_1A8248->_441E = team;
+    lbl_2_bss_1A8248->_4420 = team - 2;
+    fn_2_45FDC();
+    fn_2_45E48();
 }
 
 // .text:0x0004D194 size:0x1E4
