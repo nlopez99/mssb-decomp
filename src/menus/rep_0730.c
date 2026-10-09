@@ -159,18 +159,20 @@ struct {
 } lbl_2_data_4BA8 = { { 0x00, 0x00, 0x00, 0x00 }, { 0x01000001, 0x02010000 } };
 
 // .text:0x0001B7B4 size:0x79C
-// 96.56%: the target schedules the pointer setup differently, computes &lbl_8034E9A0 before
-// case 0's memset and keeps `flag` in r22; registers differ from there.
+// 98.12%: the target computes &lbl_8034E9A0 before case 0's memset (into r30) and names
+// g_d_GameSettings there, and keeps `flag` in r22; the rest is register numbers.
 void fn_2_1B7B4(void) {
-    struct Unk8034E9A0* data = &lbl_8034E9A0;
-    GameInitVariables* settings = &g_d_GameSettings;
+    struct Unk8034E9A0* data;
+    GameInitVariables* settings;
     MenuTask0730* task;
     MenuTask0730* sub;
     s32 flag;
 
-    lbl_2_bss_1A8248 = (void*)starMissionCompletionTracker;
+    settings = &g_d_GameSettings;
+    data = &lbl_8034E9A0;
     task = lbl_803CC1B8;
     lbl_2_bss_1A824C = (void*)lbl_2_bss_1A8250;
+    lbl_2_bss_1A8248 = (void*)starMissionCompletionTracker;
     lbl_2_bss_1A8238 = (void*)&starMissionCompletionTracker[0x1610];
     lbl_2_bss_1A8244 = (void*)lbl_80361B20;
     lbl_2_bss_1A823C = (void*)lbl_800E877C;
