@@ -2702,6 +2702,47 @@ void fn_2_65850(MenuTask0AB0* task, MenuItem0AB0* item) {
     }
 }
 
+// .text:0x00065648 size:0x208
+void fn_2_65648(MenuTask0AB0* task, MenuItem0AB0* item) {
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 1:
+        break;
+    case 2:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
+        item->_04 = 0x25;
+        break;
+    case 0x25:
+        if ((lbl_80371C30[task->_14 + item->_0E]._00->_5C >> 16) >= 0x78) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0xD0000;
+        }
+        break;
+    case 5:
+        lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0xC0000;
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 4;
+        item->_04 = 6;
+        break;
+    case 6:
+        if ((lbl_80371C30[task->_14 + item->_0E]._00->_5C >> 16) == 0) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_68 = 0;
+            item->_04 = 7;
+        }
+        break;
+    case 7:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        break;
+    }
+}
+
 // .text:0x000653D4 size:0x274
 void fn_2_653D4(MenuTask0AB0* task, MenuItem0AB0* item) {
     s16 state = fn_2_53BC8(item);
@@ -3053,6 +3094,53 @@ void fn_2_6452C(MenuTask0AB0* task, MenuItem0AB0* item) {
     case 7:
         lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
         break;
+    case 0x25:
+        break;
+    }
+}
+
+// .text:0x000642F8 size:0x234
+void fn_2_642F8(MenuTask0AB0* task, MenuItem0AB0* item) {
+    s32 value;
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 2:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        if (item->_0C == 6) {
+            value = lbl_2_bss_1A824C->_1972C4[item->_0A]._6;
+        } else {
+            value = lbl_2_bss_1A824C->_1972EC[lbl_2_bss_1A824C->_1976FA][item->_0A]._6;
+        }
+        lbl_80371C30[task->_14 + item->_0E]._00->_5C = value << 16;
+        item->_04 = 0x25;
+        break;
+    case 0x11:
+        if (item->_0C == 6) {
+            value = lbl_2_bss_1A824C->_1972C4[item->_0A]._6;
+        } else {
+            value = lbl_2_bss_1A824C->_1972EC[lbl_2_bss_1A824C->_1976FA][item->_0A]._6;
+        }
+        lbl_80371C30[task->_14 + item->_0E]._00->_5C = value << 16;
+        item->_04 = 0x25;
+        break;
+    case 5:
+        item->_06 = 0x1A;
+        item->_04 = 6;
+        break;
+    case 6:
+        if (item->_06-- <= 0) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        }
+        break;
+    case 1:
     case 0x25:
         break;
     }
@@ -4599,6 +4687,43 @@ void fn_2_5F2A8(MenuTask0AB0* task, MenuItem0AB0* item) {
         break;
     case 2:
         fn_800363D8(task, item->_0E, 1, 0x71, lbl_2_bss_1A824C->_197404._12);
+        lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0;
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
+        item->_04 = 0x25;
+        break;
+    case 5:
+        item->_06 = 0xA;
+        item->_04 = 6;
+        break;
+    case 6:
+        if (item->_06-- <= 0) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        }
+        break;
+    case 1:
+    case 0x25:
+        break;
+    }
+}
+
+// .text:0x0005F08C size:0x21C
+void fn_2_5F08C(MenuTask0AB0* task, MenuItem0AB0* item) {
+    s32 value;
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 2:
+        value = lbl_2_bss_1A824C->_197404._13;
+        fn_800363D8(task, item->_0E, 1, 6, value % 10);
+        fn_800363D8(task, item->_0E, 2, 6, (value / 10) % 10);
         lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0;
         lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
         lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
