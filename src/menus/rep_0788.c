@@ -3709,8 +3709,8 @@ void fn_2_33E70(MenuTask0788* task, MenuItem0788* item) {
 }
 
 // .text:0x000338D4 size:0x59C
-// 96.89%: register allocation differs, and in cases 1 and 2 the target branches around the
-// `+ 12` (`bne; b`) where this build skips it with `beq`.
+// 99.11%: in case 0 the target sign-extends the `+ 12` sum before the choice, and in cases 1
+// and 2 it branches around the `+ 12` (`bne; b`) where this build skips it with `beq`.
 void fn_2_338D4(MenuTask0788* task, MenuItem0788* item) {
     s16 part = item->_10 & 0xF;
     s16 value;
@@ -3738,19 +3738,19 @@ void fn_2_338D4(MenuTask0788* task, MenuItem0788* item) {
         switch (kind) {
         case 0:
             value = lbl_2_bss_1A824C->_197766;
-            count = __abs(value);
+            count = __abs(lbl_2_bss_1A824C->_197766);
             break;
         case 1:
             value = lbl_2_bss_1A824C->_197768;
-            count = __abs(value);
+            count = __abs(lbl_2_bss_1A824C->_197768);
             break;
         case 2:
             value = lbl_2_bss_1A824C->_19776A;
-            count = __abs(value);
+            count = __abs(lbl_2_bss_1A824C->_19776A);
             break;
         case 3:
             value = lbl_2_bss_1A824C->_19776C;
-            count = __abs(value);
+            count = __abs(lbl_2_bss_1A824C->_19776C);
             break;
         }
         if (count == 10000) {
@@ -3759,14 +3759,15 @@ void fn_2_338D4(MenuTask0788* task, MenuItem0788* item) {
             switch (item->_0A) {
             case 0:
                 digit = count % 10;
-                fn_800363D8(task, item->_0E, 1, 0x2C, kind == 3 ? digit : digit + 12);
+                digit = kind == 3 ? digit : digit + 12;
+                fn_800363D8(task, item->_0E, 1, 0x2C, digit);
                 break;
             case 1:
                 digit = (count / 10) % 10;
                 if (count < 10) {
                     digit = 23;
                 } else if (kind != 3) {
-                    digit += 12;
+                    digit = digit + 12;
                 }
                 fn_800363D8(task, item->_0E, 1, 0x2C, digit);
                 break;
@@ -3775,7 +3776,7 @@ void fn_2_338D4(MenuTask0788* task, MenuItem0788* item) {
                 if (count < 100) {
                     digit = 23;
                 } else if (kind != 3) {
-                    digit += 12;
+                    digit = digit + 12;
                 }
                 fn_800363D8(task, item->_0E, 1, 0x2C, digit);
                 break;
