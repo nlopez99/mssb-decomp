@@ -144,6 +144,11 @@ extern struct {
 } lbl_2_data_2E80[6];
 extern Vec lbl_2_data_2EA4[57];
 extern Vec lbl_2_data_3150[];
+extern struct {
+    /* 0x00 */ Vec _00;
+    /* 0x0C */ u8 _0C[0x14 - 0xC];
+} lbl_2_data_3198[];
+extern s16* lbl_2_data_3C2C[5];
 extern s32 lbl_2_data_3C40[7];
 extern s32 lbl_2_data_3C5C[7];
 extern s16 lbl_2_data_3D30[][4];
@@ -355,6 +360,40 @@ void fn_2_6FE6C(Obj0B08* obj) {
 void fn_2_6FE34(Obj0B08* obj) { lbl_2_data_2A210[obj->_94](obj); }
 
 // .text:0x0006FB0C size:0x328
+void fn_2_6FB0C(Obj0B08* obj) {
+    s32 index = obj->_80;
+    s32 target = lbl_2_bss_1A8248->_1610[0]._80;
+    s32 state;
+    s32 slot;
+    fn_2_68F08(obj->_80, 1);
+    fn_2_68FBC(obj->_80, 1);
+    obj->_34 = obj->_4C;
+    if (index >= 2 && index <= 6) {
+        state = fn_2_68670(0);
+        slot = fn_2_68690(0);
+        if (state == 1 && slot == index) {
+            fn_2_68FBC(index, 1);
+            obj->_C4 = 2;
+            obj->_CB = 0;
+            obj->_94 = 2;
+            return;
+        }
+    }
+    if (fn_2_68C80(index, target)) {
+        if (index == 1) {
+            fn_2_68FBC(index, 1);
+            obj->_C4 = 2;
+            obj->_CB = 0;
+            obj->_94 = 2;
+            return;
+        } else if (index >= 2 && index <= 6) {
+            obj->_CB = 0;
+        }
+    } else {
+        obj->_CB = -1;
+    }
+    obj->_94 = 1;
+}
 
 // .text:0x0006F88C size:0x280
 void fn_2_6F88C(Obj0B08* obj) {
@@ -501,6 +540,51 @@ void fn_2_6E848(Obj0B08* obj) { lbl_2_data_2A234[obj->_94](obj); }
 // .text:0x0006DE54 size:0x37C
 
 // .text:0x0006DB30 size:0x324
+void fn_2_6DB30(Obj0B08* obj) {
+    s32 index = obj->_80;
+    s32 target = lbl_2_bss_1A8248->_1610[0]._80;
+    s32 state;
+    s32 slot;
+    fn_2_69E1C(index);
+    if (index >= 2 && index <= 6) {
+        if (index == 2) {
+            index = 2;
+        }
+        state = fn_2_68670(0);
+        slot = fn_2_68690(0);
+        if (state == 1 && slot == index) {
+            fn_2_68FBC(index, 1);
+            obj->_C4 = 2;
+            obj->_CB = 0;
+            obj->_94 = 4;
+            return;
+        }
+    }
+    if (fn_2_68C80(index, target)) {
+        if (index == 1) {
+            fn_2_68FBC(index, 1);
+            obj->_C4 = 2;
+            obj->_CB = 0;
+            obj->_94 = 4;
+            return;
+        } else if (index >= 2 && index <= 6) {
+            if (lbl_2_bss_1A8248->_1610[index]._B2 == *lbl_2_data_3C2C[index - 2]) {
+                obj->_CB = 0;
+                obj->_A2 = 120;
+                obj->_CF = 0;
+            } else {
+                obj->_CB = 0;
+                obj->_CF = -1;
+                obj->_94 = 0;
+            }
+        }
+    } else {
+        obj->_CB = -1;
+    }
+    if (obj->_A2-- == 0) {
+        obj->_94 = 0;
+    }
+}
 
 // .text:0x0006D968 size:0x1C8
 void fn_2_6D968(Obj0B08* obj) {
@@ -889,6 +973,27 @@ void fn_2_6BA50(Obj0B08* obj) {
 void fn_2_6BA18(Obj0B08* obj) { lbl_2_data_2A2D4[obj->_94](obj); }
 
 // .text:0x0006B744 size:0x2D4
+void fn_2_6B744(Obj0B08* obj) {
+    s32 index = obj->_80;
+    Vec pos;
+    fn_2_68F08(index, 1);
+    obj->_BA = 12;
+    obj->_D0 = 1;
+    obj->_90 = 0.0f;
+    obj->_00.y = 0.0f;
+    if (lbl_2_bss_1A8248->_1610[index]._B0 == 0x30) {
+        memcpy(&pos, &lbl_2_data_3198[25]._00, sizeof(Vec));
+        PSVECScale(&pos, 0.5f, &pos);
+        memcpy(&obj->_74, &pos, sizeof(Vec));
+    } else {
+        memcpy(&pos, &lbl_2_data_3198[26]._00, sizeof(Vec));
+        PSVECScale(&pos, 0.5f, &pos);
+        memcpy(&obj->_74, &pos, sizeof(Vec));
+    }
+    fn_2_6A450(index, obj->_74.x, obj->_74.z);
+    fn_2_68FBC(index, 8);
+    obj->_94 = 1;
+}
 
 // .text:0x0006B620 size:0x124
 void fn_2_6B620(Obj0B08* obj) {
