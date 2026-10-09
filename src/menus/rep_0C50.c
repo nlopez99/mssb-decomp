@@ -1647,8 +1647,8 @@ void fn_2_7BFF8(UnkTask0C50* task, s32 index) {
 }
 
 // .text:0x0007AE3C size:0x11BC
-// 95.54%: registers only: the target keeps off in r0 and index * 9 in r12 through the first
-// pass, which shifts the other temporaries; declaration orders and types did not move them.
+// 99.78%: registers only: where the first pass highlights the found slot, the target
+// computes with r0 and the base with r22/r23; assigning off there instead costs more.
 void fn_2_7AE3C(UnkTask0C50* task, s32 index) {
     s32 i;
     s8 found;
@@ -1687,19 +1687,23 @@ void fn_2_7AE3C(UnkTask0C50* task, s32 index) {
         if (g_d_GameSettings.GameModeSelected != 5) {
             lbl_80371C30[0x1C + task->_14 + index]._00->_5C = 0;
             lbl_80371C30[0x1C + task->_14 + index]._00->_68 = 1;
-            for (i = 0; i < 9; i++) {
-                if (lbl_803C6724._02[index][i] == lbl_8034E9A0._46E0[index]) {
-                    found = lbl_803C6724._14[index][i];
+            {
+                s32 cur = lbl_8034E9A0._46E0[index];
+
+                for (i = 0; i < 9; i++) {
+                    if (lbl_803C6724._02[index][i] == cur) {
+                        found = lbl_803C6724._14[index][i];
+                    }
                 }
+                lbl_8034E9A0._46E0[index] = cur;
             }
-            // The target stores the word back unchanged.
-            lbl_8034E9A0._46E0[index] = lbl_8034E9A0._46E0[index];
             for (i = 0; i < 9; i++) {
                 id = lbl_803C6724._14[index][i];
                 if (g_d_GameSettings._10 == 0 && lbl_2_bss_F468._37[index] == 0 && index == 1) {
                     if (i == found) {
-                        off = lbl_8034E9A0._46F8[0] == 0;
-                        lbl_80371C30[0x46 + task->_14 + i + index * 9]._00->_64 = off + 17;
+                        s8 first = lbl_8034E9A0._46F8[0] == 0;
+
+                        lbl_80371C30[0x46 + task->_14 + i + index * 9]._00->_64 = first + 17;
                         lbl_80371C30[0x46 + task->_14 + i + index * 9]._00->_54 |= 2;
                     } else {
                         lbl_80371C30[0x46 + task->_14 + i + index * 9]._00->_54 &= ~2;
@@ -1807,9 +1811,9 @@ void fn_2_7AE3C(UnkTask0C50* task, s32 index) {
                         lbl_80371C30[0x34 + task->_14 + id + index * 9]._00->_5C = 0x140000;
                         lbl_80371C30[0x34 + task->_14 + id + index * 9]._00->_68 = 0;
                     }
-                    lbl_80371C30[0x58 + task->_14 + lbl_803C6724._14[index][i] + index * 9]._00->_5C =
-                        lbl_803C6724._02[index][i] << 16;
-                    lbl_80371C30[0x58 + task->_14 + lbl_803C6724._14[index][i] + index * 9]._00->_68 = 0;
+                    id = lbl_803C6724._14[index][i];
+                    lbl_80371C30[0x58 + task->_14 + id + index * 9]._00->_5C = lbl_803C6724._02[index][i] << 16;
+                    lbl_80371C30[0x58 + task->_14 + id + index * 9]._00->_68 = 0;
                 } else {
                     lbl_80371C30[0x34 + task->_14 + i + index * 9]._00->_54 &= ~2;
                 }
