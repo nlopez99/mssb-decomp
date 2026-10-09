@@ -3223,9 +3223,8 @@ void fn_2_439D0(void) {
 }
 
 // .text:0x0004358C size:0x444
-// Only the lis registers of lbl_800E8558 and g_d_GameSettings are swapped
-// (r3 and r4 in the target), the same kind of difference as fn_2_42708's.
 void fn_2_4358C(void) {
+    GameInitVariables* settings = &g_d_GameSettings;
     MenuCharacter08E8* c;
     s32 i;
     s32 j;
@@ -3276,7 +3275,7 @@ void fn_2_4358C(void) {
                             break;
                         }
                     } else if (lbl_2_bss_1A823C->_30 == 5) {
-                        player = g_d_GameSettings._36;
+                        player = settings->_36;
                         if (goal == 65 && lbl_2_bss_1A824C->_197843 == 0 && player == i &&
                             lbl_2_bss_1A8248->_4415 >= level) {
                             if (!(c->_08 & (1 << lbl_2_bss_1A8248->_4420))) {
@@ -3340,9 +3339,6 @@ void fn_2_43404(void) {
 }
 
 // .text:0x000432EC size:0x118
-// Only the lbl_80109AE8 and lbl_8010A768 bases differ: the target forms
-// lbl_80109AE8 first, in the lower register (fn_2_466AC, written the same
-// way without the two guards, matches).
 void fn_2_432EC(void) {
     s32 i;
     s32 j;
@@ -3357,10 +3353,10 @@ void fn_2_432EC(void) {
             c = &((MenuCharacter08E8*)lbl_2_bss_1A8248)[i];
             if (c->_31 == 1) {
                 for (j = 0; j < 10; j++) {
+                    goal = lbl_80109AE8[lbl_800E8558[i]._2][j]._0;
                     kind = lbl_8010A768[lbl_800E8558[i]._2][j]._2;
                     need = lbl_8010A768[lbl_800E8558[i]._2][j]._4;
                     level = lbl_8010A768[lbl_800E8558[i]._2][j]._6;
-                    goal = lbl_80109AE8[lbl_800E8558[i]._2][j]._0;
                     if (goal != -1 && c->_09[j]._0 < 0) {
                         c->_09[j]._1 = 1;
                     }
@@ -3418,9 +3414,6 @@ void fn_2_430F4(void) {
 }
 
 // .text:0x00042FC8 size:0x12C
-// Only the lbl_80109AE8 and lbl_8010A768 bases differ: the target forms
-// lbl_80109AE8 first, in the lower register (fn_2_466AC, written the same
-// way without the two guards, matches).
 void fn_2_42FC8(void) {
     s32 i;
     s32 j;
@@ -3435,8 +3428,8 @@ void fn_2_42FC8(void) {
             c = &((MenuCharacter08E8*)lbl_2_bss_1A8248)[i];
             if (c->_31 == 1) {
                 for (j = 0; j < 10; j++) {
-                    kind = lbl_8010A768[lbl_800E8558[i]._2][j]._2;
                     goal = lbl_80109AE8[lbl_800E8558[i]._2][j]._0;
+                    kind = lbl_8010A768[lbl_800E8558[i]._2][j]._2;
                     need = lbl_8010A768[lbl_800E8558[i]._2][j]._4;
                     level = lbl_8010A768[lbl_800E8558[i]._2][j]._6;
                     if (kind != -1 && c->_09[j]._1 == 0 && kind == 1 && fn_8006CDC0(i) >= need && lbl_2_bss_1A8248->_4415 >= level) {
@@ -3452,9 +3445,6 @@ void fn_2_42FC8(void) {
 }
 
 // .text:0x00042EB0 size:0x118
-// Only the lbl_80109AE8 and lbl_8010A768 bases differ: the target forms
-// lbl_80109AE8 first, in the lower register (fn_2_466AC, written the same
-// way without the two guards, matches).
 void fn_2_42EB0(void) {
     s32 i;
     s32 j;
@@ -3468,8 +3458,8 @@ void fn_2_42EB0(void) {
             c = &((MenuCharacter08E8*)lbl_2_bss_1A8248)[i];
             if (c->_31 == 1) {
                 for (j = 0; j < 10; j++) {
-                    kind = lbl_8010A768[lbl_800E8558[i]._2][j]._2;
                     goal = lbl_80109AE8[lbl_800E8558[i]._2][j]._0;
+                    kind = lbl_8010A768[lbl_800E8558[i]._2][j]._2;
                     need = lbl_8010A768[lbl_800E8558[i]._2][j]._4;
                     if (kind != -1 && c->_09[j]._1 == 0 && kind == 18 && lbl_2_bss_1A8248->_4415 >= need && lbl_2_bss_1A8248->_442A == 1) {
                         c->_09[j]._1 = 1;
@@ -3484,9 +3474,6 @@ void fn_2_42EB0(void) {
 }
 
 // .text:0x00042BE8 size:0x2C8
-// Only the lbl_80109AE8 and lbl_8010A768 bases differ: the target forms
-// lbl_80109AE8 first, in the lower register (fn_2_466AC, written the same
-// way without the two guards, matches).
 void fn_2_42BE8(void) {
     s32 i;
     s32 j;
@@ -3502,8 +3489,8 @@ void fn_2_42BE8(void) {
             c = &((MenuCharacter08E8*)lbl_2_bss_1A8248)[i];
             if (c->_31 == 1) {
                 for (j = 0; j < 10; j++) {
-                    kind = lbl_8010A768[lbl_800E8558[i]._2][j]._2;
                     goal = lbl_80109AE8[lbl_800E8558[i]._2][j]._0;
+                    kind = lbl_8010A768[lbl_800E8558[i]._2][j]._2;
                     need = lbl_8010A768[lbl_800E8558[i]._2][j]._4;
                     level = lbl_8010A768[lbl_800E8558[i]._2][j]._6;
                     extra = lbl_8010A768[lbl_800E8558[i]._2][j]._8;
@@ -3547,9 +3534,6 @@ void fn_2_42BE8(void) {
 }
 
 // .text:0x00042708 size:0x4E0
-// Only the lbl_80109AE8 and lbl_8010A768 bases differ: the target forms
-// lbl_80109AE8 first, in the lower register (fn_2_466AC, written the same
-// way without the two guards, matches).
 void fn_2_42708(void) {
     s32 i;
     s32 j;
@@ -3566,8 +3550,8 @@ void fn_2_42708(void) {
             c = &((MenuCharacter08E8*)lbl_2_bss_1A8248)[i];
             if (c->_31 == 1) {
                 for (j = 0; j < 10; j++) {
-                    kind = lbl_8010A768[lbl_800E8558[i]._2][j]._2;
                     goal = lbl_80109AE8[lbl_800E8558[i]._2][j]._0;
+                    kind = lbl_8010A768[lbl_800E8558[i]._2][j]._2;
                     need = lbl_8010A768[lbl_800E8558[i]._2][j]._4;
                     level = lbl_8010A768[lbl_800E8558[i]._2][j]._6;
                     extra = lbl_8010A768[lbl_800E8558[i]._2][j]._8;
