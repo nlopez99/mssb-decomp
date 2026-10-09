@@ -3419,7 +3419,89 @@ void fn_3_4B128(s32 fielder) {
 
 // .text:0x0004A9AC size:0x77C mapped:0x80689A40
 void fn_3_4A9AC(s32 fielder) {
-    return;
+    UnkAC8Fielder* f = &g_Fielders[fielder];
+    s32 target = g_Ball.fielderAboutToGetBall_hasBall;
+    s32 kind;
+    s32 i;
+    f32 x;
+    f32 z;
+    f32 dx;
+    f32 dz;
+    f32 dx2;
+    f32 dz2;
+
+    switch (fn_3_53130(fielder)) {
+    case 2:
+        return;
+    case 1:
+        break;
+    default:
+        if (f->_1C5 == 0) {
+            fn_3_4A408(fielder, &x, &z);
+        } else if (target == -1) {
+            x = f->_000;
+            z = f->_008;
+        } else if (f->_074 < 5.0f) {
+            x = f->_000;
+            z = f->_008;
+        } else if (g_Ball.ballState == 3) {
+            x = 10.0f * g_Ball.ballVelocityPercent.x + g_Ball.AtBat_Contact_BallPos.x;
+            z = 10.0f * g_Ball.ballVelocityPercent.z + g_Ball.AtBat_Contact_BallPos.z;
+        } else if (f->_050 == 0.0f && f->_084[target] < 15.0f) {
+            x = f->_000;
+            z = f->_008;
+        } else {
+            x = 10.0f * g_Ball.ballVelocityPercent.x + g_Fielders[target]._014;
+            z = 10.0f * g_Ball.ballVelocityPercent.z + g_Fielders[target]._01C;
+        }
+        fn_3_52F4C(fielder, x, z);
+        if (fielder >= 6) {
+            if (target >= 6 && f->_068 < 20.0f) {
+                f->_1D6 = 5;
+            }
+            if (f->_068 < 15.0f) {
+                f->_1D6 = 7;
+            } else if (f->_068 < 20.0f) {
+                f->_1D6 = 6;
+            }
+            kind = fn_3_B7E44(f->_070, f->_180);
+            if (kind == 2) {
+                f->_1D6 = 8;
+            }
+            if (kind == 1) {
+                f->_1D6 = 5;
+            }
+        } else if (target <= 5 && f->_068 < 10.0f) {
+            f->_1D6 = 7;
+        }
+        for (i = 0; i < 9; i++) {
+            if (i != fielder && f->_084[i] < 3.0f) {
+                f->_1D6 = 9;
+                break;
+            }
+        }
+        fn_3_526DC(fielder);
+        break;
+    }
+    if (g_Ball.ballState != 0 && g_Ball.ballState != 3) {
+        fn_3_5985C(fielder, 12);
+        if (fielder <= 5) {
+            f->_1D6 = 7;
+        } else {
+            f->_1D6 = 6;
+        }
+    }
+    if (g_Ball.AtBat_ContactResult != 0 && f->_084[target] > 5.0f + f->_074) {
+        dx = g_Ball.physicsSubstruct.futureCoordsAndDist[5].pos.x - f->_000;
+        dz = g_Ball.physicsSubstruct.futureCoordsAndDist[5].pos.z - f->_008;
+        dx2 = dx * dx;
+        dz2 = dz * dz;
+        if (dolsqrtf2(dx2 + dz2) < f->_074 && f->_1C5) {
+            fn_3_43038(fielder);
+            fn_3_5985C(fielder, 18);
+            g_Ball.fielderAboutToGetBall_hasBall = -1;
+        }
+    }
 }
 
 // .text:0x0004A408 size:0x5A4 mapped:0x8068949C
