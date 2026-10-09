@@ -946,10 +946,10 @@ void fn_2_F200(u8 port) {
 }
 
 // .text:0x0000ED94 size:0x46C
-// 96%: the target forms &lbl_2_bss_F410._20[port] from the unextended port and
-// allocates registers differently.
+// 99.2%: the target forms &lbl_2_bss_F410._20[port] from the unextended port
+// (rlwinm) instead of reusing port * 4 from lbl_2_bss_F468._00[port].
 s32 fn_2_ED94(u8 port, u16 held, u16 trg, u16 rep) {
-    s32 team;
+    s8 team;
 
     if (lbl_2_bss_F468._41[port] == 0) {
         if ((held & 8) || (held & 4) || (held & 1) || (held & 2)) {
@@ -996,11 +996,7 @@ s32 fn_2_ED94(u8 port, u16 held, u16 trg, u16 rep) {
                 lbl_803C6028._74[team] = 1;
                 lbl_2_bss_F410._20[port] = fn_80050760(team, 0, 0, 0, 0);
             } else {
-                team = lbl_8034E9A0._46F8[port];
-                if (lbl_8034E9A0._46FC[team] != 0) {
-                    team = lbl_8034E9A0._46F8[0] == 0;
-                }
-                lbl_2_bss_F410._20[port] = fn_80050760(team, 0, 0, 0, 0);
+                lbl_2_bss_F410._20[port] = fn_80050760(lbl_8034E9A0._46FC[lbl_8034E9A0._46F8[port]] == 0 ? lbl_8034E9A0._46F8[port] : lbl_8034E9A0._46F8[0] == 0, 0, 0, 0, 0);
             }
         } else {
             if (g_d_GameSettings._10 == 0 && port != 0) {
@@ -1008,11 +1004,7 @@ s32 fn_2_ED94(u8 port, u16 held, u16 trg, u16 rep) {
                 lbl_803C6028._74[team] = 1;
                 lbl_2_bss_F410._20[port] = fn_80050760(team, held, trg, rep, 0);
             } else {
-                team = lbl_8034E9A0._46F8[port];
-                if (lbl_8034E9A0._46FC[team] != 0) {
-                    team = lbl_8034E9A0._46F8[0] == 0;
-                }
-                lbl_2_bss_F410._20[port] = fn_80050760(team, held, trg, rep, 0);
+                lbl_2_bss_F410._20[port] = fn_80050760(lbl_8034E9A0._46FC[lbl_8034E9A0._46F8[port]] == 0 ? lbl_8034E9A0._46F8[port] : lbl_8034E9A0._46F8[0] == 0, held, trg, rep, 0);
             }
         }
     }
@@ -1874,7 +1866,6 @@ void fn_2_AEE8(void) {
 }
 
 // .text:0x0000ABC0 size:0x328
-// 97.5%: registers only.
 void fn_2_ABC0(u8 port) {
     u8 order[54];
     u8 value[54];
@@ -1884,8 +1875,8 @@ void fn_2_ABC0(u8 port) {
     u8 tmpOrder;
     u8 tmpValue;
     s32 cap = lbl_8034E9A0._46E0[port];
-    s32 row = cap / 9;
     s32 col = cap % 9;
+    s32 row = cap / 9;
 
     for (i = 0; i < 54; i++) {
         value[i] = lbl_8034E9A0._0000[row][col]._3B[i];
