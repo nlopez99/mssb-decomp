@@ -6,6 +6,7 @@
 #include "game/rep_1668.h"
 #include "game/rep_16B8.h"
 #include "game/rep_1770.h"
+#include "game/rep_31A0.h"
 
 typedef struct UnkTask2BF8 {
     /* 0x00 */ void (*_00)(void);
@@ -28,7 +29,7 @@ typedef struct {
     /* 0x50 */ u8 _50[0x54 - 0x50];
     /* 0x54 */ u32 _54;
     /* 0x58 */ u32 _58;
-    /* 0x5C */ s32 _5C;
+    /* 0x5C */ u32 _5C;
     /* 0x60 */ u8 _60[0x64 - 0x60];
     /* 0x64 */ u16 _64;
     /* 0x66 */ u8 _66;
@@ -97,6 +98,7 @@ extern struct {
     /* 0x398 */ u8 _398;
 } lbl_800EF808;
 
+extern s16 lbl_80109410[8];
 extern UnkSpriteRef2BF8 lbl_80371C30[];
 extern void* lbl_803CC1B8;
 
@@ -138,6 +140,19 @@ extern void fn_3_129458(void);
 extern void fn_3_12A6C4(void);
 extern void fn_3_12B7A0(void);
 extern void fn_3_12C3F0(void);
+
+static inline void playStadiumSound(int id) {
+    int stadium = g_d_GameSettings.StadiumID;
+    SND_VOICEID voice = sndFXStartEx(lbl_3_data_81DC[stadium] + id,
+                                     g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD
+                                         ? lbl_3_data_84B8[id][0]
+                                         : lbl_3_data_8404[stadium][id][0],
+                                     0x3F, 0);
+
+    sndFXCtrl(voice, 0x5B,
+              g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD ? lbl_3_data_84B8[id][1]
+                                                                      : lbl_3_data_8404[stadium][id][1]);
+}
 
 static inline void setScreen(u8 id) {
     lbl_8034E978._00 = id;
@@ -662,24 +677,13 @@ void fn_3_ED490(void) {
 // .text:0x000ED2F4 size:0x19C mapped:0x8072C388
 void fn_3_ED2F4(void) {
     UnkTask2BF8* task = lbl_803CC1B8;
-    SND_VOICEID voice;
-    int stadium;
 
     if (lbl_3_common_bss_32724._96 == 0) {
         if (g_UnkSound_32718._07 == 0) {
             lbl_80371C30[task->_14]._00->_68 = 1;
             if (task->_1C == 0) {
                 if (lbl_800EF808._398 == 1) {
-                    stadium = g_d_GameSettings.StadiumID;
-                    voice = sndFXStartEx(lbl_3_data_81DC[stadium] + 0x1B,
-                                         g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD
-                                             ? lbl_3_data_84B8[0x1B][0]
-                                             : lbl_3_data_8404[stadium][0x1B][0],
-                                         0x3F, 0);
-                    sndFXCtrl(voice, 0x5B,
-                              g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD
-                                  ? lbl_3_data_84B8[0x1B][1]
-                                  : lbl_3_data_8404[stadium][0x1B][1]);
+                    playStadiumSound(0x1B);
                 }
                 task->_1C = 1;
             }
@@ -714,19 +718,10 @@ void fn_3_ED244(void) {
 // .text:0x000ED0F4 size:0x150 mapped:0x8072C188
 void fn_3_ED0F4(void) {
     UnkTask2BF8* task = lbl_803CC1B8;
-    SND_VOICEID voice;
-    int stadium;
 
     fn_80034E20(task, lbl_3_data_8F64);
     lbl_80371C30[task->_14 + 1]._00->_64 = lbl_3_data_8FC4[g_Minigame._1921 - 1];
-    stadium = g_d_GameSettings.StadiumID;
-    voice = sndFXStartEx(lbl_3_data_81DC[stadium] + 0x1C,
-                         g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD ? lbl_3_data_84B8[0x1C][0]
-                                                                                 : lbl_3_data_8404[stadium][0x1C][0],
-                         0x3F, 0);
-    sndFXCtrl(voice, 0x5B,
-              g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD ? lbl_3_data_84B8[0x1C][1]
-                                                                      : lbl_3_data_8404[stadium][0x1C][1]);
+    playStadiumSound(0x1C);
     task->_18 = 0;
     g_Minigame._19CD = 1;
     ((UnkTask2BF8*)lbl_803CC1B8)->_00 = fn_3_ED058;
@@ -743,6 +738,57 @@ void fn_3_ED058(void) {
         fn_80034CEC(task);
         fn_800B0A14_removeQueue();
         g_Minigame._19CD = 3;
+    }
+}
+
+// .text:0x000ECD48 size:0x310 mapped:0x8072BDDC
+void fn_3_ECD48(void) {
+    UnkTask2BF8* task = lbl_803CC1B8;
+    u8* flags = g_Minigame._1DF4_u8;
+    u32 i;
+
+    if (lbl_3_common_bss_32724._96 != 0) {
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    if (g_GameLogic.gameStatus == GAME_STATUS_TRANSITION) {
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    switch (task->_1C) {
+    case 0:
+        fn_80034E20(task, lbl_3_data_19770);
+        playStadiumSound(0x11);
+        task->_1C = 1;
+        task->_1E = 0;
+        break;
+    case 1:
+        if ((lbl_80371C30[task->_14]._00->_5C >> 16) == 160) {
+            i = 0;
+            do {
+                lbl_80371C30[task->_14 + 1 + g_Minigame._1935[i + 1]]._00->_68 = 1;
+            } while (++i < g_Minigame.miniGameNumberOfParticipants - 1);
+            task->_1C = 2;
+        }
+        task->_1E++;
+        if (task->_1E == 60) {
+            playStadiumSound(0x12);
+        }
+        break;
+    case 2:
+        if ((lbl_80371C30[task->_14 + 1 + g_Minigame._1935[1]]._00->_5C >> 16) >= 6) {
+            i = 0;
+            do {
+                flags[g_Minigame._1935[i + 1]] = 2;
+            } while (++i < g_Minigame.miniGameNumberOfParticipants - 1);
+            g_Minigame._1934 = 2;
+            task->_1C = 3;
+        }
+        break;
+    case 3:
+        break;
     }
 }
 
@@ -785,6 +831,50 @@ void fn_3_ECBB0(void) {
     }
 }
 
+// .text:0x000EC804 size:0x3AC mapped:0x8072B898
+void fn_3_EC804(void) {
+    UnkTask2BF8* task = lbl_803CC1B8;
+    u8* flags = g_Minigame._1DF4_u8;
+
+    if (lbl_3_common_bss_32724._96 != 0) {
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    if (g_GameLogic.gameStatus == GAME_STATUS_TRANSITION) {
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    switch (task->_1C) {
+    case 0:
+        fn_80034E20(task, lbl_3_data_19910);
+        lbl_80371C30[task->_14]._00->_64 = lbl_3_data_19970[g_Minigame._1935[1]];
+        lbl_80371C30[task->_14 + 1]._00->_64 = (task->_18 != 0) + 15;
+        task->_1E = lbl_3_data_19978[g_Minigame._1935[1]];
+        task->_20 = lbl_3_data_19980[g_Minigame._1935[1]];
+        playStadiumSound(0x10);
+        task->_1C = 1;
+        break;
+    case 1:
+        if (task->_1E == (lbl_80371C30[task->_14]._00->_5C >> 16)) {
+            if (task->_18 != 0) {
+                playStadiumSound(7);
+            } else {
+                playStadiumSound(6);
+            }
+        }
+        if ((lbl_80371C30[task->_14]._00->_5C >> 16) >= task->_20) {
+            flags[g_Minigame._1935[1]] = 2;
+            g_Minigame._1934 = 2;
+            task->_1C = 2;
+        }
+        break;
+    case 2:
+        break;
+    }
+}
+
 // .text:0x000EBFD4 size:0x40 mapped:0x8072B068
 BOOL fn_3_EBFD4(void) {
     if (lbl_3_common_bss_32724._96 != 0 || g_GameLogic.gameStatus == GAME_STATUS_LIVE_BALL ||
@@ -804,6 +894,88 @@ BOOL fn_3_EB684(void) {
         return TRUE;
     }
     return FALSE;
+}
+
+// .text:0x000EA454 size:0x4A8 mapped:0x807294E8
+void fn_3_EA454(void) {
+    UnkTask2BF8* task = lbl_803CC1B8;
+    UnkRank31A0 ranks[4];
+    u32 i;
+    u32 j;
+    s16 points;
+
+    if (lbl_3_common_bss_32724._96 != 0) {
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD && lbl_3_common_bss_34C90._1D2 == 5) {
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    if (g_GameLogic.gameStatus == GAME_STATUS_MINIGAME_POST_MENU &&
+        (lbl_3_common_bss_34C90._1D2 == 7 || g_GameLogic.framesOfExitingToMenu != 0)) {
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    if (g_GameLogic.gameStatus == 38) {
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    if (g_GameLogic.gameStatus == 36) {
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    switch (task->_1C) {
+    case 0:
+        fn_80034E20(task, lbl_3_data_1A9F0);
+        lbl_80371C30[task->_14]._00->_64 = lbl_3_data_1AF70[g_Minigame.GameMode_MiniGame];
+        if (g_Minigame.GameMode_MiniGame != 0 && g_Minigame.multiPlayerInd == 0 && g_Minigame._1A3C == 0) {
+            if (g_Minigame._190A != 0) {
+                lbl_80371C30[task->_14 + 1]._00->_64 = lbl_3_data_1AF88[g_Minigame.soloMinigameDifficulty];
+            } else {
+                lbl_80371C30[task->_14 + 1]._00->_64 = lbl_3_data_1AF80[g_Minigame.soloMinigameDifficulty];
+            }
+        } else {
+            lbl_80371C30[task->_14 + 1]._00->_64 = 0x175;
+        }
+        fn_3_1079C8(ranks, 0);
+        lbl_80371C30[task->_14 + 2]._00->_64 = lbl_3_data_1AF90[g_Minigame.miniGameNumberOfParticipants - 1];
+        i = 0;
+        do {
+            s32 ch = g_Minigame.minigameControlStruct.characterIndex[i];
+
+            lbl_80371C30[task->_14 + 3 + i]._00->_5C = lbl_3_data_1AF98[g_Minigame.GameMode_MiniGame] << 16;
+            lbl_80371C30[task->_14 + 7 + i]._00->_5C = ch << 16;
+            if (fn_3_107C40()) {
+                lbl_80371C30[task->_14 + 19 + i]._00->_64 = 0x175;
+            } else {
+                j = 0;
+                do {
+                    if (i == ranks[j].id) {
+                        lbl_80371C30[task->_14 + 19 + i]._00->_64 = lbl_3_data_1AFA8[ranks[j].rank];
+                        break;
+                    }
+                } while (++j < g_Minigame.miniGameNumberOfParticipants);
+            }
+            points = g_Minigame.miniGameCurrentPoints[i];
+            if (points > lbl_80109410[g_Minigame.GameMode_MiniGame]) {
+                points = lbl_80109410[g_Minigame.GameMode_MiniGame];
+            }
+            fn_800363D8(task, 27 + i * 4, 1, 102, points % 10000 / 1000);
+            fn_800363D8(task, 28 + i * 4, 1, 102, points % 1000 / 100);
+            fn_800363D8(task, 29 + i * 4, 1, 102, points % 100 / 10);
+            fn_800363D8(task, 30 + i * 4, 1, 102, points % 10);
+        } while (++i < g_Minigame.miniGameNumberOfParticipants);
+        task->_1C = 1;
+        break;
+    case 1:
+        break;
+    }
 }
 
 // .text:0x000EA340 size:0x114 mapped:0x807293D4
