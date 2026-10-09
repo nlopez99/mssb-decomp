@@ -2465,7 +2465,6 @@ void fn_2_7DDC(void) {
     s32 j;
     s32 g;
     s32 i;
-    s32 t;
     s32 c;
     s16 id;
 
@@ -2628,15 +2627,13 @@ void fn_2_7D44(void) {
 }
 
 // .text:0x00007504 size:0x840
-// 99.9%: registers only: the target gives keep r12 and t r10 in the
-// star-mission loop, the reverse of this.
 void fn_2_7504(void) {
     s32 free = 0;
     s32 i;
     s32 id;
-    u8 keep = 0;
-    s32 j;
     s32 t;
+    s32 j;
+    u8 keep = 0;
     u8 unique;
     s32 cap;
 
