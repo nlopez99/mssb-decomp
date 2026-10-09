@@ -31,6 +31,28 @@ extern struct {
     /* 0x7A8 */ void* _7A8;
 } lbl_80366B18;
 extern struct {
+    /* 0x00 */ u8 _00;
+    /* 0x01 */ u8 _01[0x3 - 0x1];
+    /* 0x03 */ u8 _03;
+    /* 0x04 */ u8 _04[0x8 - 0x4];
+    /* 0x08 */ u8 _08;
+    /* 0x09 */ u8 _09;
+    /* 0x0A */ u8 _0A[0x26 - 0xA];
+    /* 0x26 */ u8 _26;
+} lbl_8034E978;
+extern struct {
+    /* 0x00 */ u8 _00[0x8];
+    /* 0x08 */ u16 _08;
+    /* 0x0A */ u8 _0A[0x10 - 0xA];
+} lbl_800FEF70[];
+extern struct {
+    /* 0x00 */ u8 _00[0x12];
+    /* 0x12 */ u8 _12;
+    /* 0x13 */ u8 _13;
+} lbl_8037169C;
+extern u8 lbl_800E869C[0x20];
+extern s16 lbl_8010B438[6];
+extern struct {
     /* 0x000 */ u8 _000[0x715];
     /* 0x715 */ s8 _715;
 } lbl_803C6CF8;
@@ -114,7 +136,10 @@ extern struct {
     /* 0x1972B9 */ u8 _1972B9;
     /* 0x1972BA */ u8 _1972BA[0x1976A8 - 0x1972BA];
     /* 0x1976A8 */ s32 _1976A8;
-    /* 0x1976AC */ u8 _1976AC[0x19770C - 0x1976AC];
+    /* 0x1976AC */ u8 _1976AC[0x197706 - 0x1976AC];
+    /* 0x197706 */ s16 _197706;
+    /* 0x197708 */ s16 _197708;
+    /* 0x19770A */ s16 _19770A;
     /* 0x19770C */ s16 _19770C;
     /* 0x19770E */ s16 _19770E;
     /* 0x197710 */ s16 _197710;
@@ -125,7 +150,9 @@ extern struct {
     /* 0x197728 */ s16 _197728;
     /* 0x19772A */ s16 _19772A;
     /* 0x19772C */ s16 _19772C;
-    /* 0x19772E */ u8 _19772E[0x197734 - 0x19772E];
+    /* 0x19772E */ u8 _19772E[0x197730 - 0x19772E];
+    /* 0x197730 */ s16 _197730;
+    /* 0x197732 */ u8 _197732[0x197734 - 0x197732];
     /* 0x197734 */ s16 _197734;
     /* 0x197736 */ s16 _197736;
     /* 0x197738 */ s16 _197738;
@@ -163,6 +190,8 @@ extern void fn_800B0A14_removeQueue(void);
 extern void* ARAMTransfer(AramEntry0840* entry, int arg1, int arg2, u32 aram);
 extern void fn_800111B4(void* arg);
 extern s32 fn_80062890(s32 id);
+extern void fn_80053FE8(void);
+extern void changeScene(u8, s16);
 extern u8 fn_80068514(s32, s32);
 extern u8 fn_8006862C(s32, s32);
 extern void fn_8006C6C4(void);
@@ -181,6 +210,7 @@ extern s16 lbl_2_data_1056C[4][6];
 extern s16 lbl_2_data_3CE8[6][6];
 extern s16 lbl_2_data_373C[20];
 extern s16 lbl_2_data_3764[20][4];
+extern s16 lbl_2_data_296B8[36];
 
 extern s32 fn_2_45938(s32);
 extern void fn_8006877C(s32);
@@ -193,6 +223,7 @@ extern void fn_2_432EC(void);
 extern void fn_2_43E8C(void);
 extern void fn_2_44014(void);
 extern void fn_2_45E48(void);
+extern s32 fn_2_44F14(s32);
 extern void fn_2_46D34(s32);
 extern void fn_2_46D94(s16*, s16*, s32, s32, s32);
 extern void fn_2_50B0C(s16, s32);
@@ -215,6 +246,13 @@ extern void fn_2_94854(s32);
 
 AramEntry0840 lbl_2_data_12298 = { { 0x00000000, 0x000150CE, 0x08E98800, 0x000150D0 } };
 s16 lbl_2_data_122A8[4][2] = { { 3, 0 }, { 2, 1 }, { 3, 1 }, { 4, 1 } };
+
+
+static inline void setScreen(u8 id) {
+    lbl_8034E978._00 = id;
+    lbl_8034E978._09 = lbl_8034E978._08;
+    lbl_8034E978._08 = lbl_800FEF70[id]._08;
+}
 
 // .text:0x000409CC size:0xD0
 void fn_2_409CC(void) {
@@ -2180,6 +2218,226 @@ void fn_2_3BA40(void) {
         }
         break;
     case 4:
+        task->_0C->_10 = 1;
+        fn_800B0A14_removeQueue();
+        task->_28 = 0;
+        break;
+    }
+    if (lbl_2_bss_1A824C->_19783F == 1) {
+        lbl_803CC1B8->_0C->_10 = 1;
+        fn_800B0A14_removeQueue();
+        task->_28 = 0;
+    }
+}
+
+// .text:0x0003AF08 size:0xB38
+void fn_2_3AF08(void) {
+    MenuTask0840* task = lbl_803CC1B8;
+    MenuTask0840* child;
+    s32 i;
+    s32 j;
+
+    switch (task->_28) {
+    case 0:
+        for (i = 0; i < 20; i++) {
+        }
+        j = 0;
+        for (i = 0; i < 20; i++) {
+            if (lbl_2_bss_1A8248->_43C2[i] == 1 && lbl_2_data_373C[i] == 0) {
+                lbl_2_bss_1A824C->_1978B3[j++] = 1;
+            }
+        }
+        changeScene(3, 6);
+        task->_28 = 1;
+        break;
+    case 1:
+        if (lbl_8037169C._13 != 0) {
+            task->_28 = 2;
+        }
+        break;
+    case 2:
+        lbl_2_bss_1A824C->_197730 = 6;
+        lbl_2_bss_1A8248->_44F2 = 2;
+        lbl_2_bss_1A824C->_197706 = 0;
+        lbl_2_bss_1A824C->_197708 = 1;
+        lbl_2_bss_1A824C->_19770A = 0;
+        lbl_2_bss_1A8234->_162604[1][49] = 1;
+        lbl_2_bss_1A8234->_162604[1][52] = 1;
+        lbl_8034E978._03 = lbl_2_bss_1A8248->_4415;
+        fn_800B0A5C_insertQueue(fn_80053FE8, 0);
+        lbl_8034E978._00 = 14;
+        setScreen(14);
+        changeScene(1, 6);
+        task->_28 = 3;
+        break;
+    case 3:
+        task->_14--;
+        if (lbl_8037169C._12 != 0) {
+            task->_28 = 4;
+        }
+        break;
+    case 4:
+        task->_14 = 40;
+        lbl_2_bss_1A8234->_162604[1][50] = 1;
+        task->_28 = 5;
+        break;
+    case 5:
+        if (task->_14-- <= 0) {
+            task->_28 = 6;
+        }
+        break;
+    case 6:
+        if (lbl_803C77B8[lbl_2_bss_1A824C->_197863]._04 & 1) {
+            lbl_2_bss_1A824C->_197708--;
+            if (lbl_2_bss_1A824C->_197708 == 0 && (lbl_2_bss_1A824C->_19770A == 0 || lbl_2_bss_1A824C->_19770A == 5)) {
+                lbl_2_bss_1A824C->_197708 = 4;
+            } else if (lbl_2_bss_1A824C->_197708 < 0) {
+                lbl_2_bss_1A824C->_197708 = 5;
+            }
+            sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+        } else if (lbl_803C77B8[lbl_2_bss_1A824C->_197863]._04 & 2) {
+            lbl_2_bss_1A824C->_197708++;
+            if (lbl_2_bss_1A824C->_197708 == 5 && (lbl_2_bss_1A824C->_19770A == 0 || lbl_2_bss_1A824C->_19770A == 5)) {
+                lbl_2_bss_1A824C->_197708 = 1;
+            } else if (lbl_2_bss_1A824C->_197708 > 5) {
+                lbl_2_bss_1A824C->_197708 = 0;
+            }
+            sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+        }
+        if (lbl_803C77B8[lbl_2_bss_1A824C->_197863]._04 & 8) {
+            lbl_2_bss_1A824C->_19770A--;
+            if (lbl_2_bss_1A824C->_19770A == 0 && (lbl_2_bss_1A824C->_197708 == 0 || lbl_2_bss_1A824C->_197708 == 5)) {
+                lbl_2_bss_1A824C->_19770A = 4;
+            } else if (lbl_2_bss_1A824C->_19770A < 0) {
+                lbl_2_bss_1A824C->_19770A = 5;
+            }
+            sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+        } else if (lbl_803C77B8[lbl_2_bss_1A824C->_197863]._04 & 4) {
+            lbl_2_bss_1A824C->_19770A++;
+            if (lbl_2_bss_1A824C->_19770A == 5 && (lbl_2_bss_1A824C->_197708 == 0 || lbl_2_bss_1A824C->_197708 == 5)) {
+                lbl_2_bss_1A824C->_19770A = 1;
+            } else if (lbl_2_bss_1A824C->_19770A > 5) {
+                lbl_2_bss_1A824C->_19770A = 0;
+            }
+            sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+        }
+        lbl_2_bss_1A824C->_197706 = lbl_2_data_296B8[lbl_2_bss_1A824C->_197708 + lbl_2_bss_1A824C->_19770A * 6];
+        if (lbl_803C77B8[lbl_2_bss_1A824C->_197863]._02 & 0x40) {
+            lbl_2_bss_1A824C->_197730 = 1;
+            lbl_2_bss_1A8234->_162604[11][52] = 1;
+            lbl_2_bss_1A8234->_162604[8][50] = 1;
+            sndFXStartEx(0x1B8, lbl_800EFBA4[1], 0x3F, 0);
+            task->_14 = 50;
+            task->_28 = 7;
+        } else if (lbl_803C77B8[lbl_2_bss_1A824C->_197863]._02 & 0x20) {
+            lbl_2_bss_1A824C->_197730 = 1;
+            lbl_2_bss_1A8234->_162604[12][52] = 1;
+            lbl_2_bss_1A8234->_162604[8][50] = 1;
+            sndFXStartEx(0x1B8, lbl_800EFBA4[1], 0x3F, 0);
+            task->_14 = 50;
+            task->_28 = 7;
+        } else if (lbl_803C77B8[lbl_2_bss_1A824C->_197863]._02 & 0x100) {
+            if (fn_8006C79C(lbl_800E869C[lbl_2_bss_1A824C->_197706]) == 1) {
+                lbl_2_bss_1A824C->_197712 = 0;
+                lbl_2_bss_1A824C->_197710 = 0;
+                lbl_2_bss_1A824C->_19770C = 0;
+                lbl_2_bss_1A824C->_19770E = 0;
+                lbl_2_bss_1A824C->_197714 = lbl_8010B438[fn_2_44F14(lbl_800E869C[lbl_2_bss_1A824C->_197706])];
+                sndFXStartEx(0x1BF, lbl_800EFBA4[8], 0x3F, 0);
+                task->_28 = 8;
+            } else {
+                sndFXStartEx(0x1BA, lbl_800EFBA4[3], 0x3F, 0);
+            }
+        } else if (lbl_803C77B8[lbl_2_bss_1A824C->_197863]._02 & 0x200) {
+            lbl_2_bss_1A8234->_162604[8][50] = 1;
+            task->_14 = 40;
+            task->_28 = 14;
+            sndFXStartEx(0x1B9, lbl_800EFBA4[2], 0x3F, 0);
+        }
+        break;
+    case 7:
+        if (task->_14-- == 0) {
+            task->_28 = 10;
+        }
+        break;
+    case 8:
+        child = fn_800B0A5C_insertQueue(fn_2_3A8FC, 2);
+        child->_28 = 0;
+        task->_10 = 0;
+        task->_28 = 9;
+        break;
+    case 9:
+        if (task->_10 == 1) {
+            task->_28 = 6;
+        }
+        break;
+    case 10:
+        task->_14 = 30;
+        setScreen(15);
+        lbl_2_bss_1A8234->_162604[1][51] = 1;
+        task->_28 = 11;
+        break;
+    case 11:
+        if (task->_14-- <= 0) {
+            task->_28 = 12;
+        }
+        break;
+    case 12:
+        if (lbl_803C77B8[lbl_2_bss_1A824C->_197863]._02 & 0x40) {
+            lbl_2_bss_1A824C->_197730 = 6;
+            lbl_2_bss_1A8234->_162604[11][52] = 1;
+            lbl_2_bss_1A8234->_162604[8][51] = 1;
+            sndFXStartEx(0x1B8, lbl_800EFBA4[1], 0x3F, 0);
+            task->_14 = 30;
+            setScreen(14);
+            task->_28 = 13;
+        } else if (lbl_803C77B8[lbl_2_bss_1A824C->_197863]._02 & 0x20) {
+            lbl_2_bss_1A824C->_197730 = 6;
+            lbl_2_bss_1A8234->_162604[12][52] = 1;
+            lbl_2_bss_1A8234->_162604[8][51] = 1;
+            sndFXStartEx(0x1B8, lbl_800EFBA4[1], 0x3F, 0);
+            task->_14 = 30;
+            setScreen(14);
+            task->_28 = 13;
+        } else if (lbl_803C77B8[lbl_2_bss_1A824C->_197863]._02 & 0x200) {
+            lbl_2_bss_1A8234->_162604[8][51] = 1;
+            task->_14 = 30;
+            sndFXStartEx(0x1B9, lbl_800EFBA4[2], 0x3F, 0);
+            task->_28 = 14;
+        }
+        break;
+    case 13:
+        if (task->_14-- == 0) {
+            task->_28 = 4;
+        }
+        break;
+    case 14:
+        if (task->_14-- == 0) {
+            changeScene(3, 6);
+            task->_28 = 15;
+        }
+        break;
+    case 15:
+        if (lbl_8037169C._13 != 0) {
+            task->_28 = 16;
+        }
+        break;
+    case 16:
+        lbl_2_bss_1A8248->_44F2 = 0;
+        lbl_8034E978._26 = 1;
+        lbl_2_bss_1A8234->_162604[8][49] = 1;
+        lbl_2_bss_1A8234->_162604[8][52] = 1;
+        task->_14 = 50;
+        changeScene(1, 6);
+        task->_28 = 17;
+        break;
+    case 17:
+        task->_14--;
+        if (lbl_8037169C._12 != 0) {
+            task->_28 = 18;
+        }
+        break;
+    case 18:
         task->_0C->_10 = 1;
         fn_800B0A14_removeQueue();
         task->_28 = 0;
