@@ -6,6 +6,9 @@
 struct Camera0DE0;
 struct MenuTask0DE0;
 
+void fn_2_8563C(struct Camera0DE0* camera);
+void fn_2_858A4(struct Camera0DE0* camera);
+void fn_2_85AC0(struct Camera0DE0* camera);
 void fn_2_85D6C(struct Camera0DE0* camera);
 void fn_2_86470(void);
 void fn_2_868C8(void);

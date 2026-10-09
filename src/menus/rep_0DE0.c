@@ -169,10 +169,10 @@ extern struct {
 typedef struct Camera0DE0 {
     /* 0x00 */ Mtx mtx;
     /* 0x30 */ u16 _30;
-    /* 0x32 */ s16 _32;
-    /* 0x34 */ u8 _34[0x38 - 0x34];
+    /* 0x32 */ u16 _32;
+    /* 0x34 */ f32 _34;
     /* 0x38 */ f32 _38;
-    /* 0x3C */ Vec rot;
+    /* 0x3C */ Vec target;
     /* 0x48 */ Vec pos;
     /* 0x54 */ s32 _54;
     /* 0x58 */ u8 _58[0x5C - 0x58];
@@ -180,7 +180,7 @@ typedef struct Camera0DE0 {
 
 typedef struct CameraPose0DE0 {
     /* 0x00 */ Vec pos;
-    /* 0x0C */ Vec rot;
+    /* 0x0C */ Vec target;
 } CameraPose0DE0; // size: 0x18
 
 typedef struct StateEntry0DE0 {
@@ -213,6 +213,8 @@ extern void convertGeometryAndSknHeader(void* geo, void* skn);
 extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);
 extern void convertTextureHeader(void* tex);
 extern void fn_800BD190(void* geo, void* tex);
+extern void fn_80011640(Mtx src, Mtx dst);
+extern void makeLookAtMatrix(Mtx m, const Vec* camPos, const Vec* camUp, const Vec* target);
 extern void fn_800BDC88(ModelTable0DE0* table, u16 first, u16 last, void* model, void* anim, s32 arg5);
 extern void fn_800BD548(Model0DE0* model, s32 count, ...);
 extern void* _OSAllocFromHeap(u32 align, u32 size);
@@ -528,9 +530,9 @@ void fn_2_86DCC(void) {
     lbl_2_bss_1A81D4.pos.x = lbl_2_data_2E944[lbl_2_bss_33FBF5].pos.x;
     lbl_2_bss_1A81D4.pos.y = lbl_2_data_2E944[lbl_2_bss_33FBF5].pos.y;
     lbl_2_bss_1A81D4.pos.z = lbl_2_data_2E944[lbl_2_bss_33FBF5].pos.z;
-    lbl_2_bss_1A81D4.rot.x = lbl_2_data_2E944[lbl_2_bss_33FBF5].rot.x;
-    lbl_2_bss_1A81D4.rot.y = lbl_2_data_2E944[lbl_2_bss_33FBF5].rot.y;
-    lbl_2_bss_1A81D4.rot.z = lbl_2_data_2E944[lbl_2_bss_33FBF5].rot.z;
+    lbl_2_bss_1A81D4.target.x = lbl_2_data_2E944[lbl_2_bss_33FBF5].target.x;
+    lbl_2_bss_1A81D4.target.y = lbl_2_data_2E944[lbl_2_bss_33FBF5].target.y;
+    lbl_2_bss_1A81D4.target.z = lbl_2_data_2E944[lbl_2_bss_33FBF5].target.z;
     C_MTXFrustum(proj, -0.175f, 0.175f, 0.25f, -0.25f, 1.0f, 512.0f);
     GXSetProjection(proj, GX_PERSPECTIVE);
     fn_800B806C(0, -240.0f, 240.0f, -320.0f, 320.0f, -512.0f, -1.0f, 1280.0f);
@@ -585,4 +587,126 @@ void fn_2_868C8(void) {
     obj->_10.x = lbl_2_data_2E9C4.x;
     obj->_10.y = lbl_2_bss_B29C;
     obj->_10.z = lbl_2_data_2E9C4.z;
+}
+
+// .text:0x00085D6C size:0x704
+void fn_2_85D6C(Camera0DE0* camera) {
+    switch (lbl_2_bss_B2A5) {
+    case 0:
+        fn_2_8563C(camera);
+        break;
+    case 1:
+        fn_2_85AC0(camera);
+        break;
+    case 2:
+        fn_2_858A4(camera);
+        break;
+    }
+    fn_80011640(camera->mtx, camera->mtx);
+}
+
+// .text:0x00085AC0 size:0x2AC
+void fn_2_85AC0(Camera0DE0* camera) {
+    Vec up = { 0.0f, 1.0f, 0.0f };
+    Vec angles;
+    Vec dir = { 0.0f, 0.0f, 1.0f };
+    Mtx rotX;
+    Mtx rotY;
+    Mtx rot;
+    f32 c;
+    f32 s;
+
+    if (!(lbl_803C77B8[0]._00 & PAD_TRIGGER_Z)) {
+        camera->_30 -= lbl_803C77B8[0]._13;
+        camera->_32 += lbl_803C77B8[0]._12;
+        camera->_34 = lbl_803C77B8[0]._10 / -256.0f;
+        camera->_38 = lbl_803C77B8[0]._11 / 256.0f;
+        camera->pos.y += lbl_803C77B8[0]._15 / 1024.0f;
+        camera->pos.y -= lbl_803C77B8[0]._14 / 1024.0f;
+    }
+    angles.x = camera->_30;
+    angles.y = camera->_32;
+    angles.z = 0.0f;
+    PSVECScale(&angles, 0.0000958738f, &angles);
+    PSMTXRotRad(rotX, 'X', angles.x);
+    PSMTXRotRad(rotY, 'Y', angles.y);
+    s = rotY[0][2];
+    c = rotY[0][0];
+    PSMTXConcat(rotY, rotX, rot);
+    PSMTXMultVec(rot, &dir, &camera->target);
+    camera->pos.x += camera->_38 * s - camera->_34 * c;
+    camera->pos.z += camera->_38 * c + camera->_34 * s;
+    camera->target.x += camera->pos.x;
+    camera->target.y += camera->pos.y;
+    camera->target.z += camera->pos.z;
+    makeLookAtMatrix(camera->mtx, &camera->pos, &up, &camera->target);
+}
+
+// .text:0x000858A4 size:0x21C
+void fn_2_858A4(Camera0DE0* camera) {
+    Vec up = { 0.0f, 1.0f, 0.0f };
+    Vec angles;
+    Vec dir = { 0.0f, 0.0f, 1.0f };
+    Mtx rotX;
+    Mtx rotY;
+    Mtx rot;
+
+    if (!(lbl_803C77B8[0]._00 & PAD_TRIGGER_Z)) {
+        camera->_30 -= lbl_803C77B8[0]._13;
+        camera->_32 += lbl_803C77B8[0]._12;
+        camera->_38 += lbl_803C77B8[0]._11 / 256.0f;
+        camera->target.y += lbl_803C77B8[0]._15 / 1024.0f;
+        camera->target.y -= lbl_803C77B8[0]._14 / 1024.0f;
+    }
+    angles.x = camera->_30;
+    angles.y = camera->_32;
+    angles.z = 0.0f;
+    PSVECScale(&angles, 0.0000958738f, &angles);
+    PSMTXRotRad(rotX, 'X', angles.x);
+    PSMTXRotRad(rotY, 'Y', angles.y);
+    PSMTXConcat(rotX, rotY, rot);
+    dir.z = -camera->_38;
+    PSMTXMultVec(rot, &dir, &dir);
+    PSVECAdd(&dir, &camera->target, &camera->pos);
+    PSMTXMultVec(rot, &up, &dir);
+    makeLookAtMatrix(camera->mtx, &camera->pos, &dir, &camera->target);
+}
+
+// .text:0x0008563C size:0x268
+void fn_2_8563C(Camera0DE0* camera) {
+    Vec up = { 0.0f, 1.0f, 0.0f };
+    Vec angles;
+    Vec dir = { 0.0f, 0.0f, 1.0f };
+    Mtx rotX;
+    Mtx rotY;
+    Mtx rot;
+    f32 c;
+    f32 s;
+
+    camera->_30 = 0xC19F;
+    camera->_32 = 0;
+    camera->_34 = 0.0f;
+    camera->_38 = 0.0f;
+    angles.x = camera->_30;
+    angles.y = camera->_32;
+    angles.z = 0.0f;
+    PSVECScale(&angles, 0.0000958738f, &angles);
+    PSMTXRotRad(rotX, 'X', angles.x);
+    PSMTXRotRad(rotY, 'Y', angles.y);
+    s = rotY[0][2];
+    c = rotY[0][0];
+    PSMTXConcat(rotY, rotX, rot);
+    PSMTXMultVec(rot, &dir, &camera->target);
+    camera->pos.x += camera->_38 * s - camera->_34 * c;
+    camera->pos.z += camera->_38 * c + camera->_34 * s;
+    camera->target.x += camera->pos.x;
+    camera->target.y += camera->pos.y;
+    camera->target.z += camera->pos.z;
+    camera->pos.x = lbl_2_data_2E944[lbl_2_bss_33FBF5].pos.x;
+    camera->pos.y = lbl_2_data_2E944[lbl_2_bss_33FBF5].pos.y;
+    camera->pos.z = lbl_2_data_2E944[lbl_2_bss_33FBF5].pos.z;
+    camera->target.x = lbl_2_data_2E944[lbl_2_bss_33FBF5].target.x;
+    camera->target.y = lbl_2_data_2E944[lbl_2_bss_33FBF5].target.y;
+    camera->target.z = lbl_2_data_2E944[lbl_2_bss_33FBF5].target.z;
+    makeLookAtMatrix(camera->mtx, &camera->pos, &up, &camera->target);
 }
