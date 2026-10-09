@@ -1,6 +1,7 @@
 #include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
 #include "menus/rep_0568.h"
+#include "menus/rep_11C0.h"
 #include "static/UnknownHomes_Static.h"
 #include "C3/control.h"
 #include "Dolphin/gx.h"
@@ -81,7 +82,8 @@ extern struct {
     /* 0x2D94 */ struct {
         /* 0x00 */ u8 _00[0x28];
     }* _2D94;
-    /* 0x2D98 */ u8 _2D98[0x307A - 0x2D98];
+    /* 0x2D98 */ u8 _2D98[0x3078 - 0x2D98];
+    /* 0x3078 */ u16 _3078;
     /* 0x307A */ u8 _307A;
     /* 0x307B */ u8 _307B;
     /* 0x307C */ u8 _307C;
@@ -101,16 +103,37 @@ extern struct {
     /* 0x27 */ s8 _27[4];
     /* 0x2B */ u8 _2B[0x2D - 0x2B];
     /* 0x2D */ u8 _2D;
-    /* 0x2E */ u8 _2E[0x40 - 0x2E];
+    /* 0x2E */ u8 _2E[0x32 - 0x2E];
+    /* 0x32 */ u8 _32;
+    /* 0x33 */ u8 _33[0x40 - 0x33];
     /* 0x40 */ u8 _40[2];
     /* 0x42 */ u8 _42[4];
     /* 0x46 */ u8 _46[2];
 } lbl_2_bss_100B8;
 
 extern struct {
-    /* 0x0000 */ u8 _0000[0x4701];
+    /* 0x0000 */ u8 _0000[0x46F8];
+    /* 0x46F8 */ s8 _46F8[2];
+    /* 0x46FA */ u8 _46FA[0x4701 - 0x46FA];
     /* 0x4701 */ u8 _4701;
 } lbl_8034E9A0;
+
+extern struct {
+    /* 0x00 */ u8 _00[0x26];
+    /* 0x26 */ u8 _26;
+} lbl_8034E978;
+
+extern struct {
+    /* 0x00 */ u8 _00[0x13];
+    /* 0x13 */ u8 _13;
+} lbl_8037169C;
+
+extern struct {
+    /* 0x00 */ u8 _00[0x55];
+    /* 0x55 */ u8 _55[4];
+    /* 0x59 */ u8 _59[4];
+    /* 0x5D */ u8 _5D[4];
+} lbl_803C66B0;
 
 extern struct {
     /* 0x000 */ u8 _000[0x396];
@@ -125,23 +148,76 @@ extern struct {
 } lbl_80366158;
 
 extern struct {
-    /* 0x0 */ u8 _0[0x6];
-    /* 0x6 */ u8 _6;
-    /* 0x7 */ u8 _7;
-    /* 0x8 */ u8 _8;
+    /* 0x0 */ u16 _0;
+    /* 0x2 */ s16 _2;
+    /* 0x4 */ s16 _4;
+    /* 0x6 */ s8 _6;
+    /* 0x7 */ s8 _7;
+    /* 0x8 */ s8 _8;
+    /* 0x9 */ u8 _9[0xB - 0x9];
+    /* 0xB */ u8 _B;
+    /* 0xC */ u8 _C;
+    /* 0xD */ u8 _D;
+    /* 0xE */ u8 _E;
+    /* 0xF */ u8 _F;
 } lbl_2_bss_1033C;
 
 typedef struct Task0568 {
     /* 0x00 */ u8 _00[0x10];
-    /* 0x10 */ s32 _10;
-    /* 0x14 */ u8 _14[0x18 - 0x14];
+    /* 0x10 */ s16 _10;
+    /* 0x12 */ u8 _12[0x18 - 0x12];
     /* 0x18 */ u8 _18[4];
     /* 0x1C */ u8 _1C;
     /* 0x1D */ u8 _1D;
     /* 0x1E */ u8 _1E;
+    /* 0x1F */ u8 _1F[0x21 - 0x1F];
+    /* 0x21 */ u8 _21;
 } Task0568;
 
+extern void* lbl_803CC1B8;
+
+extern struct {
+    /* 0x00 */ u8 _00[0x8];
+    /* 0x08 */ s32 _08;
+    /* 0x0C */ s32 _0C;
+    /* 0x10 */ s32 _10[4];
+} lbl_2_bss_F410;
+
+extern struct {
+    /* 0x00 */ u8 _00[0xF4];
+    /* 0xF4 */ u8 _F4;
+} lbl_80361B20;
+
+extern u8 lbl_800FE930[][6];
+extern u8 lbl_800FE5D4[];
+extern u8 lbl_2_bss_100B4;
+
+typedef struct Slot0568 {
+    /* 0x00 */ u8* _00;
+    /* 0x04 */ u8 _04[0x60 - 0x4];
+    /* 0x60 */ s8 _60;
+    /* 0x61 */ s8 _61;
+    /* 0x62 */ u8 _62[0x64 - 0x62];
+} Slot0568; // size: 0x64
+
+extern Slot0568 lbl_2_bss_101AC[4];
+
+extern u8 lbl_800F71D8[];
+
+extern struct {
+    /* 0x0 */ u8* _0;
+    /* 0x4 */ s32 _4;
+    /* 0x8 */ s32 _8;
+} lbl_2_data_2780;
+
+extern u8* lbl_2_bss_122C;
+
 extern Mtx lbl_2_bss_1010C;
+
+extern struct {
+    /* 0x0 */ u8 _0[0x6];
+    /* 0x6 */ u16 _6;
+}* lbl_803CBBCC;
 
 Task0568* lbl_2_bss_1224;
 
@@ -152,6 +228,12 @@ typedef struct Obj0568 {
 
 extern void fn_2_16460(void);
 extern void* fn_800B0A5C_insertQueue(void (*)(void), s32);
+extern void fn_800B0A14_removeQueue(void);
+extern void fn_2_11A0(s32 arg0);
+extern void changeScene(u8, s16);
+extern void fn_800625A4(s32 index, s32 value);
+extern void fn_8003BF54(s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_800B9AA8(void* arg0);
 extern void ACTSetAnimation(Actor0568* actor, void* animBank, char* sequenceName, u16 seqNum, f32 time, f32 speed);
 extern void fn_800B4CA0(Actor0568* actor, f32 frame);
@@ -161,7 +243,73 @@ extern void Set_FUN_800b2b6c(Actor0568* actor, void* arg1);
 extern void fn_800BDA24(ActorRef0568* ref);
 extern void fn_800BDA94(ActorRef0568* ref, Mtx view);
 extern void fn_80021204(void);
+extern void fn_80021228(u8 arg0);
+extern void initializeUnknown(void);
+extern void fn_80062A74(void);
+extern void fn_80062A94(void);
+extern void fn_800A97EC(s32 arg0, s32 arg1, s32 arg2);
 extern s32 fn_8003AE70(s32 index);
+
+// .text:0x00019D04 size:0x228
+void fn_2_19D04(void) {
+    switch (lbl_2_bss_1033C._0) {
+    case 0:
+        if (lbl_8037169C._13 == 0) {
+            break;
+        }
+        lbl_2_bss_1033C._0 = 1;
+    case 1:
+        changeScene(1, 6);
+        lbl_2_bss_F410._08 = 0;
+        lbl_2_bss_F410._0C = 0;
+        fn_2_96D20();
+        fn_800625A4(0, 0x59);
+        lbl_2_bss_1033C._4 = 0;
+        lbl_2_bss_1033C._2 = 0;
+        lbl_2_bss_1033C._B = 0;
+        fn_2_19520();
+        lbl_2_bss_1033C._D = lbl_2_bss_1033C._6 != 0;
+        lbl_2_bss_1033C._0 = 2;
+        break;
+    case 2:
+        if (lbl_803C66B0._5D[0] == 0) {
+            lbl_2_bss_1033C._0 = 3;
+        }
+        break;
+    case 3:
+        fn_2_197AC(lbl_8034E9A0._46F8[0]);
+        break;
+    case 5:
+        fn_2_194E8();
+        fn_8003BF54(0, 0, 0, 0, 1, 4, 1, 0, 4);
+        ((Task0568*)lbl_803CC1B8)->_10 = 0;
+        lbl_2_bss_1033C._0 = 6;
+        break;
+    case 6:
+        if (((Task0568*)lbl_803CC1B8)->_10 == 0) {
+            break;
+        }
+        switch (((Task0568*)lbl_803CC1B8)->_10) {
+        case 1:
+        case 11:
+            fn_800625A4(0, 0x5A);
+            lbl_2_bss_1033C._0 = 4;
+            break;
+        default:
+            lbl_2_bss_1033C._0 = 5;
+            break;
+        }
+        break;
+    case 4:
+        if (lbl_803C66B0._55[0] == 0) {
+            lbl_2_bss_1033C._F = 1;
+            lbl_2_bss_1033C._0 = 0;
+            lbl_8034E978._26 = 1;
+            fn_2_11A0(5);
+        }
+        break;
+    }
+}
 
 // .text:0x00019778 size:0x34
 void fn_2_19778(void) {
@@ -172,6 +320,46 @@ void fn_2_19778(void) {
     lbl_2_bss_1033C._6 = a;
     lbl_2_bss_1033C._8 = b;
     lbl_2_bss_1033C._7 = c;
+}
+
+// .text:0x000195DC size:0x19C
+void fn_2_195DC(void) {
+    switch (lbl_2_bss_1033C._2) {
+    case 0:
+        if (lbl_2_bss_1033C._6 != 0 && lbl_800EF808._398 == 0) {
+            initializeUnknown();
+            fn_800B0A5C_insertQueue(fn_80062A94, 0x1000);
+        } else if (lbl_2_bss_1033C._6 == 0 && lbl_800EF808._398 != 0) {
+            fn_80062A74();
+        }
+        lbl_800EF808._398 = lbl_2_bss_1033C._6;
+        lbl_2_bss_1033C._D = lbl_2_bss_1033C._6;
+        break;
+    case 1:
+        if (lbl_2_bss_1033C._7 != lbl_800EF808._396) {
+            fn_80062A74();
+            if (lbl_2_bss_1033C._7 == 1) {
+                lbl_800EF808._396 = 1;
+            } else if (lbl_2_bss_1033C._7 == 0) {
+                lbl_800EF808._396 = 0;
+            } else {
+                lbl_800EF808._396 = 2;
+            }
+            fn_80021228(lbl_800EF808._396);
+            fn_800B0A5C_insertQueue(fn_80062A94, 0x1000);
+            lbl_800EF808._396 = lbl_2_bss_1033C._7;
+        }
+        break;
+    case 2:
+        if (lbl_2_bss_1033C._8 != 0) {
+            lbl_80366158._1F = 1;
+            fn_800A97EC(0, 50, 1);
+        } else {
+            lbl_80366158._1F = 0;
+        }
+        break;
+    }
+    lbl_2_bss_1033C._B = 0;
 }
 
 // .text:0x000195D8 size:0x4
@@ -347,6 +535,51 @@ void fn_2_18FBC(void) {
     }
 }
 
+// .text:0x00018748 size:0x1A4
+void fn_2_18748(void) {
+    Task0568* task = lbl_803CC1B8;
+    s32 i;
+
+    switch (task->_1D) {
+    case 0:
+        for (i = 0; i < lbl_2_bss_100B8._2D; i++) {
+            if (g_d_GameSettings.GameModeSelected == 5) {
+                task->_18[i] = lbl_800FE930[lbl_80361B20._F4][lbl_2_bss_F410._10[task->_1E]];
+            } else {
+                task->_18[i] = lbl_800FE5D4[lbl_2_bss_F410._10[task->_1E]];
+            }
+            if (task->_1E == 2) {
+                task->_1E = 0;
+            }
+        }
+        task->_10 = 0;
+        task->_21 = 0;
+        task->_1D++;
+    case 1:
+        fn_2_18148(task);
+        if (lbl_2_bss_100B8._18 != 0) {
+            lbl_2_bss_100B8._18 = 0;
+            lbl_2_bss_100B8._32 = 0;
+            task->_21 = 0;
+            task->_10 = 0;
+            task->_1E++;
+            if (task->_1E >= lbl_2_bss_100B8._2D) {
+                task->_1E = 0;
+                task->_1D = 0;
+                lbl_2_bss_100B8._19 = 1;
+                fn_800B0A14_removeQueue();
+            } else {
+                task->_1D = 0;
+            }
+        } else if (lbl_2_bss_100B4 != 0) {
+            task->_1E = 0;
+            task->_1D = 0;
+            fn_800B0A14_removeQueue();
+        }
+        break;
+    }
+}
+
 // .text:0x00018650 size:0xF8
 s32 fn_2_18650(s32 index) {
     s32 next = (lbl_2_bss_100B8._00 + 1) % 10;
@@ -369,6 +602,19 @@ s32 fn_2_18650(s32 index) {
     return 0;
 }
 
+// .text:0x00017AB8 size:0x1D0
+void fn_2_17AB8(void) {
+    s32 size = ((((u32*)lbl_2_data_2780._0)[1] & 0x0FFFFFFF) + 0x1F) & ~0x1F;
+    s32 i;
+
+    lbl_2_bss_122C = _OSAllocFromHeap(0x20, size * lbl_2_bss_100B8._2D);
+    for (i = 0; i < lbl_2_bss_100B8._2D; i++) {
+        lbl_2_bss_101AC[i]._00 = lbl_2_bss_122C + size * i;
+        lbl_2_bss_101AC[i]._61 = -1;
+        lbl_2_bss_101AC[i]._60 = -1;
+    }
+}
+
 // .text:0x00016F0C size:0x6C
 void fn_2_16F0C(u8 index) {
     s8 a = lbl_8036E548._0C04[index]._252;
@@ -382,6 +628,27 @@ void fn_2_16F0C(u8 index) {
         lbl_8036E548._0140[index]._CD = player->_265;
     }
     player->_030 = &lbl_8036E548._0140[index];
+}
+
+// .text:0x00016DA8 size:0x164
+void fn_2_16DA8(void) {
+    s32 i;
+
+    lbl_8036E548._3078 = 0;
+    for (i = 0; i < lbl_2_bss_100B8._2D; i++) {
+        lbl_8036E548._2C50[i] = &lbl_8036E548._0C04[i];
+    }
+    i = 3;
+    do {
+        lbl_2_bss_100B8._42[i] = 0;
+    } while (i-- != 0);
+    if (lbl_803CBBCC->_6 == 5 || g_d_GameSettings.GameModeSelected == 5) {
+        lbl_2_bss_100B8._46[0] = 1;
+        lbl_2_bss_100B8._46[1] = 0;
+    } else {
+        lbl_2_bss_100B8._46[0] = 1;
+        lbl_2_bss_100B8._46[1] = 1;
+    }
 }
 
 // .text:0x00016D38 size:0x70
