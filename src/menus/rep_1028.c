@@ -174,6 +174,7 @@ extern void fn_800B0A14_removeQueue(void);
 extern void fn_2_8AC84(s32 index, u8 value);
 
 static inline f32 calcAngle(f32 dx, f32 dz) { return atan2(-dx, -dz); }
+static inline Shadow1028* getShadows(void) { return lbl_2_bss_340140->_2D94; }
 
 u32 lbl_2_data_2FFF8[0x7F8 / 4] = {
     0x42415420, 0x46495253, 0x54000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
@@ -333,33 +334,22 @@ void fn_2_91D74(Item1028* item) {
     fn_2_8AC84(item->_78, 1);
     if (item->_78 >= 1 && item->_78 <= 7) {
         fn_2_8FB68(item->_78, 0);
-    } else {
-        switch (item->_78) {
-        case 8:
-            fn_2_8FBF8(item->_78, 0);
-            break;
-        default:
-            fn_2_8FAE0(item->_78, 0);
-            break;
-        case 22:
-            fn_2_8FA58(item->_78, 0);
-            break;
-        case 24:
-            fn_2_8F9D0(item->_78, 0);
-            break;
-        case 27:
-            fn_2_8F948(item->_78, 0);
-            break;
-        case 25:
-            fn_2_8F8C0(item->_78, 0);
-            break;
-        case 26:
-            fn_2_8F838(item->_78, 0);
-            break;
-        case 28:
-            fn_2_8F7B0(item->_78, 0);
-            break;
-        }
+    } else if (item->_78 == 8) {
+        fn_2_8FBF8(item->_78, 0);
+    } else if (item->_78 >= 10 && item->_78 <= 15) {
+        fn_2_8FAE0(item->_78, 0);
+    } else if (item->_78 == 22) {
+        fn_2_8FA58(item->_78, 0);
+    } else if (item->_78 == 24) {
+        fn_2_8F9D0(item->_78, 0);
+    } else if (item->_78 == 27) {
+        fn_2_8F948(item->_78, 0);
+    } else if (item->_78 == 25) {
+        fn_2_8F8C0(item->_78, 0);
+    } else if (item->_78 == 26) {
+        fn_2_8F838(item->_78, 0);
+    } else if (item->_78 == 28) {
+        fn_2_8F7B0(item->_78, 0);
     }
     fn_2_8F6D0(item->_78, 0);
     item->_90 = 1;
@@ -725,9 +715,10 @@ void fn_2_9061C(Item1028* item) { item->_90 = 3; }
 
 // .text:0x00090538 size:0xE4
 void fn_2_90538(void) {
+    Item1028* item;
     s32 i;
     for (i = 0; i < 29; i++) {
-        Item1028* item = &lbl_2_bss_1A8248->_21E0[i];
+        item = &lbl_2_bss_1A8248->_21E0[i];
         memset(item, 0, sizeof(Item1028));
         item->_78 = i;
         item->_7C = i;
@@ -752,9 +743,10 @@ void fn_2_90538(void) {
 
 // .text:0x000904A8 size:0x90
 void fn_2_904A8(void) {
+    Item1028* item;
     s32 i;
     for (i = 0; i < 29; i++) {
-        Item1028* item = &lbl_2_bss_1A8248->_21E0[i];
+        item = &lbl_2_bss_1A8248->_21E0[i];
         item->_78 = i;
         item->_7C = i;
         item->_84 = 0.0f;
@@ -895,8 +887,8 @@ void fn_2_8FBF8(s32 index, s16 frame) {
     s32 anim;
     Model1028* model;
     if (lbl_2_bss_3401BC != NULL) {
-        anim = lbl_2_bss_3401BC->_0C[index];
         model = &lbl_2_bss_340140->_68->_34[index];
+        anim = lbl_2_bss_3401BC->_0C[index];
         model->_04 = anim;
         model->_0E = frame;
         model->_5C = 0.0f;
@@ -916,8 +908,8 @@ void fn_2_8FB68(s32 index, s16 frame) {
     s32 anim;
     Model1028* model;
     if (lbl_2_bss_3401BC != NULL) {
-        anim = lbl_2_bss_3401BC->_0C[index];
         model = &lbl_2_bss_340140->_68->_34[index];
+        anim = lbl_2_bss_3401BC->_0C[index];
         model->_04 = anim;
         model->_0E = frame;
         model->_5C = 0.0f;
@@ -1106,7 +1098,7 @@ u8 fn_2_8F720(s32 index) {
 // .text:0x0008F6D0 size:0x50
 void fn_2_8F6D0(s32 index, s32 kind) {
     Item1028* item = &lbl_2_bss_1A8248->_21E0[index];
-    Shadow1028* shadows = lbl_2_bss_340140->_2D94;
+    Shadow1028* shadows = getShadows();
     if (shadows != NULL) {
         item->_A6 = 0;
         shadows[index]._00 = lbl_2_data_30900[kind];
