@@ -50,6 +50,7 @@ extern void fn_1_AF4(s32 arg0, s32 arg1, f32 arg2);
 extern void fn_1_272DC(void* arg0, s32 arg1);
 extern void fn_1_273D8(void* arg0);
 extern void fn_1_F2C(s32 arg0, s32 arg1, s32 arg2);
+extern void fn_1_121D4(void* arg0);
 extern void fn_1_26D28(void* arg0, u16 held, u16 pressed, u16 repeat, s8* stick);
 extern void fn_1_27330(void* arg0);
 extern void fn_80037BAC(void* arg0);
@@ -262,7 +263,8 @@ typedef struct SimParams7730 {
 } SimParams7730; // size: 0x28
 
 typedef struct RopeParams7730 {
-    /* 0x00 */ u8 _00[0x18];
+    /* 0x00 */ void (*_00)(void);
+    /* 0x04 */ u8 _04[0x18 - 0x4];
     /* 0x18 */ f32 _18;
     /* 0x1C */ f32 _1C;
     /* 0x20 */ u8 _20;
@@ -1168,6 +1170,50 @@ void fn_1_21CE8(void) {
     fn_1_21040();
     fn_1_21298(task);
     fn_1_20950(lbl_1_bss_6FE0, task->_21 - 1, lbl_1_bss_43EE0._00);
+}
+
+// .text:0x00021408 size:0x8E0
+void fn_1_21408(void) {
+    RopeParams7730* task = lbl_803CC1B8;
+    Vec force;
+    f32 scale;
+
+    if (lbl_803C77B8[0]._02 & 0x1000) {
+        task->_00 = fn_1_21CE8;
+    } else if (lbl_803C77B8[0]._02 & 0x100) {
+        fn_1_21180(task);
+    } else if (lbl_803C77B8[0]._02 & 0x200) {
+        lbl_1_bss_6BE0 = NULL;
+        task->_00 = fn_1_24778;
+    }
+    fn_1_121D4(&lbl_1_bss_43EE0);
+    if (task->_23 != 0) {
+        if (lbl_803C77B8[3]._15 >= 0x50) {
+            scale = 0.0001f * task->_1C;
+        } else {
+            scale = 0.00001f * task->_1C;
+        }
+        lbl_1_bss_6FE0[task->_21 - 1]._0C.x += lbl_803C77B8[3]._10 * scale;
+        lbl_1_bss_6FE0[task->_21 - 1]._0C.y += lbl_803C77B8[3]._13 * scale;
+        lbl_1_bss_6FE0[task->_21 - 1]._0C.z += lbl_803C77B8[3]._11 * scale;
+        memcpy(&lbl_1_bss_6FE0[task->_21 - 1]._18, &lbl_1_bss_6FE0[task->_21 - 1]._0C, sizeof(Vec));
+        force.x = 0.0f;
+        force.y = 0.0f;
+        force.z = 0.0f;
+    } else {
+        force.x = task->_1C * (lbl_803C77B8[3]._10 * lbl_1_bss_6FE0[task->_21 - 1]._00);
+        force.y = task->_1C * (lbl_803C77B8[3]._13 * lbl_1_bss_6FE0[task->_21 - 1]._00);
+        force.z = task->_1C * (lbl_803C77B8[3]._11 * lbl_1_bss_6FE0[task->_21 - 1]._00);
+    }
+    fn_80038B48(&lbl_1_bss_6FB8, lbl_1_bss_6FE0, task->_21, &force);
+    fn_1_26A34();
+    GXLoadPosMtxImm(lbl_1_bss_43EE0._00, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    fn_1_21040();
+    fn_1_21298(task);
+    if (lbl_1_bss_6BE0 != NULL) {
+        fn_1_20950(lbl_1_bss_6FE0, task->_21 - 1, lbl_1_bss_43EE0._00);
+    }
 }
 
 // .text:0x00021298 size:0x170
