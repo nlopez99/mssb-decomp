@@ -39,7 +39,7 @@ void fn_2_24728(void);
 void fn_2_24800(void);
 s16 fn_2_24E9C(void);
 void fn_2_24EB0(s16 value);
-void fn_2_24EC4(void);
+void fn_2_24EC4(struct MenuTask0788* task, struct MenuItem0788* item);
 void fn_2_25050(struct MenuTask0788* task, struct MenuItem0788* item);
 void fn_2_25200(struct MenuTask0788* task, struct MenuItem0788* item);
 void fn_2_253B0(struct MenuTask0788* task, struct MenuItem0788* item);

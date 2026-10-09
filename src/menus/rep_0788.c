@@ -131,7 +131,7 @@ extern struct {
     /* 0x43BC */ s16 _43BC;
     /* 0x43BE */ s16 _43BE;
     /* 0x43C0 */ u8 _43C0[0x43C2 - 0x43C0];
-    /* 0x43C2 */ u8 _43C2[0x14];
+    /* 0x43C2 */ s8 _43C2[0x14];
     /* 0x43D6 */ u8 _43D6[0x440C - 0x43D6];
     /* 0x440C */ u8 _440C;
     /* 0x440D */ u8 _440D;
@@ -226,6 +226,7 @@ extern struct {
 } *lbl_2_bss_1A8248;
 
 extern s16 lbl_2_data_3D30[][4];
+extern s16 lbl_2_data_38C0[6];
 
 
 extern struct {
@@ -375,7 +376,7 @@ extern struct {
     /* 0x197863 */ s8 _197863;
     /* 0x197864 */ u8 _197864;
     /* 0x197865 */ u8 _197865[0x197867 - 0x197865];
-    /* 0x197867 */ u8 _197867;
+    /* 0x197867 */ s8 _197867;
     /* 0x197868 */ s8 _197868[4];
     /* 0x19786C */ u8 _19786C[0x19789E - 0x19786C];
     /* 0x19789E */ u8 _19789E;
@@ -2682,7 +2683,6 @@ void fn_2_3697C(MenuTask0788* task, MenuItem0788* item) {
 
 // .text:0x00036590 size:0x1C0
 void fn_2_36590(MenuTask0788* task, MenuItem0788* item) {
-
     s16 state = fn_2_53BC8(item);
 
     if (state != -1) {
@@ -2699,7 +2699,7 @@ void fn_2_36590(MenuTask0788* task, MenuItem0788* item) {
         fn_80036134(task, 0x12, lbl_2_bss_1A824C->_1972B0, item->_0E);
         item->_04 = 0x25;
         break;
-    case 37:
+    case 0x25:
         fn_80036134(task, 0x12, lbl_2_bss_1A824C->_1972B0, item->_0E);
         break;
     case 5:
@@ -2708,6 +2708,8 @@ void fn_2_36590(MenuTask0788* task, MenuItem0788* item) {
         break;
     case 6:
         lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        break;
+    case 1:
         break;
     }
 }
@@ -2740,6 +2742,40 @@ void fn_2_363C8(MenuTask0788* task, MenuItem0788* item) {
         break;
     case 6:
         lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        break;
+    }
+}
+
+// .text:0x00036204 size:0x1C4
+void fn_2_36204(MenuTask0788* task, MenuItem0788* item) {
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 2:
+        if (lbl_2_bss_1A824C->_1972AC[item->_0A] == 3) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+            lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
+        }
+        item->_04 = 0x25;
+        break;
+    case 5:
+        if (lbl_2_bss_1A824C->_1972AC[item->_0A] == 3) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_68 = 0;
+        }
+        item->_04 = 6;
+        break;
+    case 6:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        break;
+    case 1:
+    case 0x25:
         break;
     }
 }
@@ -3922,6 +3958,40 @@ void fn_2_31F50(MenuTask0788* task, MenuItem0788* item) {
     }
 }
 
+// .text:0x00031D94 size:0x1BC
+void fn_2_31D94(MenuTask0788* task, MenuItem0788* item) {
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 2:
+        fn_800363D8(task, item->_0E, 1, 0x83, lbl_2_data_38C0[lbl_2_bss_1A8248->_441C]);
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
+        item->_04 = 0x25;
+        break;
+    case 5:
+        item->_06 = 3;
+        item->_04 = 6;
+        break;
+    case 6:
+        if (item->_06-- <= 0) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_68 = 0;
+            lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        }
+        break;
+    case 1:
+    case 0x25:
+        break;
+    }
+}
+
 // .text:0x00031BE0 size:0x1B4
 void fn_2_31BE0(MenuTask0788* task, MenuItem0788* item) {
     s16 state = fn_2_53BC8(item);
@@ -4019,6 +4089,40 @@ void fn_2_316F8(MenuTask0788* task, MenuItem0788* item) {
         break;
     case 37:
     case 1:
+        break;
+    }
+}
+
+// .text:0x00031538 size:0x1C0
+void fn_2_31538(MenuTask0788* task, MenuItem0788* item) {
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 2:
+        fn_800363D8(task, item->_0E, 1, 0x83, lbl_2_bss_1A824C->_197868[lbl_2_bss_1A824C->_197867]);
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
+        item->_04 = 0x25;
+        break;
+    case 5:
+        item->_06 = 3;
+        item->_04 = 6;
+        break;
+    case 6:
+        if (item->_06-- <= 0) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_68 = 0;
+            lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        }
+        break;
+    case 1:
+    case 0x25:
         break;
     }
 }
@@ -4225,6 +4329,45 @@ void fn_2_30C4C(MenuTask0788* task, MenuItem0788* item) {
         break;
     case 5:
         item->_06 = 0xE;
+        item->_04 = 6;
+        break;
+    case 6:
+        if (item->_06-- <= 0) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        }
+        break;
+    case 0x25:
+        break;
+    }
+}
+
+// .text:0x000306D8 size:0x1BC
+void fn_2_306D8(MenuTask0788* task, MenuItem0788* item) {
+    s16 state = fn_2_53BC8(item);
+    s32 index;
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 2:
+        index = item->_0A + lbl_2_bss_1A824C->_19772A;
+        fn_800363D8(task, item->_0E, 1, 0x65, lbl_2_bss_1A824C->_19789F[index] != 2 ? index : 20);
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        item->_04 = 0x25;
+        break;
+    case 8:
+    case 0x11:
+        index = item->_0A + lbl_2_bss_1A824C->_19772A;
+        fn_800363D8(task, item->_0E, 1, 0x65, lbl_2_bss_1A824C->_19789F[index] != 2 ? index : 20);
+        item->_04 = 0x25;
+        break;
+    case 5:
+        item->_06 = 14;
         item->_04 = 6;
         break;
     case 6:
@@ -4944,6 +5087,41 @@ void fn_2_2CDA4(MenuTask0788* task, MenuItem0788* item) {
     }
 }
 
+// .text:0x0002CA30 size:0x19C
+void fn_2_2CA30(MenuTask0788* task, MenuItem0788* item) {
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 2:
+        if (lbl_2_bss_1A8248->_43C2[item->_0A] == 1) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        } else {
+            lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        }
+        item->_04 = 0x25;
+        break;
+    case 5:
+        item->_06 = 30;
+        item->_04 = 6;
+        break;
+    case 6:
+        if (item->_06-- <= 0) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        }
+        break;
+    case 1:
+    case 0x25:
+        break;
+    }
+}
+
 // .text:0x0002C4E4 size:0x1B4
 void fn_2_2C4E4(MenuTask0788* task, MenuItem0788* item) {
     s16 state = fn_2_53BC8(item);
@@ -5074,6 +5252,40 @@ void fn_2_2AEDC(MenuTask0788* task, MenuItem0788* item) {
         break;
     case 37:
     case 1:
+        break;
+    }
+}
+
+// .text:0x0002AD30 size:0x1AC
+void fn_2_2AD30(MenuTask0788* task, MenuItem0788* item) {
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 2:
+        determineIfMissionDescriptionIsShown(lbl_800E869C[lbl_2_bss_1A824C->_197706]);
+        lbl_80371C30[task->_14 + item->_0E]._00->_5C = lbl_2_bss_1A824C->_197706 << 16;
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        item->_04 = 0x25;
+        break;
+    case 5:
+        item->_06 = 9;
+        item->_04 = 6;
+        break;
+    case 6:
+        if (item->_06-- <= 0) {
+            lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+            item->_04 = 7;
+        }
+        break;
+    case 1:
+    case 0x25:
         break;
     }
 }
@@ -5549,14 +5761,13 @@ void fn_2_279F4(MenuTask0788* task, MenuItem0788* item) {
 
 // .text:0x00027660 size:0x1C4
 void fn_2_27660(MenuTask0788* task, MenuItem0788* item) {
-
     s16 state = fn_2_53BC8(item);
 
     if (state != -1) {
         item->_04 = state;
     }
     switch (item->_04) {
-    case 37:
+    case 0x25:
     case 1:
         break;
     case 0:
@@ -5582,14 +5793,13 @@ void fn_2_27660(MenuTask0788* task, MenuItem0788* item) {
 
 // .text:0x0002749C size:0x1C4
 void fn_2_2749C(MenuTask0788* task, MenuItem0788* item) {
-
     s16 state = fn_2_53BC8(item);
 
     if (state != -1) {
         item->_04 = state;
     }
     switch (item->_04) {
-    case 37:
+    case 0x25:
     case 1:
         break;
     case 0:
@@ -6175,6 +6385,37 @@ void fn_2_25050(MenuTask0788* task, MenuItem0788* item) {
     case 5:
         lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
         item->_04 = 0x26;
+        break;
+    }
+}
+
+// .text:0x00024EC4 size:0x18C
+void fn_2_24EC4(MenuTask0788* task, MenuItem0788* item) {
+    s16 state = fn_2_53BC8(item);
+
+    if (state != -1) {
+        item->_04 = state;
+    }
+    switch (item->_04) {
+    case 0:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        item->_04 = 0x26;
+        break;
+    case 2:
+        lbl_2_bss_1A824C->_19774E = 0;
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
+        item->_04 = 0x25;
+        break;
+    case 5:
+        lbl_80371C30[task->_14 + item->_0E]._00->_68 = 0;
+        item->_04 = 6;
+        break;
+    case 6:
+        lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
+        break;
+    case 1:
+    case 0x25:
         break;
     }
 }
