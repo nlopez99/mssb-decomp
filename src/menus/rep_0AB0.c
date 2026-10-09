@@ -301,7 +301,7 @@ extern struct {
 } lbl_8036E548;
 extern u8 lbl_800E869C[0x36];
 extern u8 lbl_2_bss_33FBF0[5];
-extern u8 lbl_2_bss_33FBF5;
+extern s8 lbl_2_bss_33FBF5;
 
 // rep_0788
 extern void fn_2_1FF0C(s32 index);
