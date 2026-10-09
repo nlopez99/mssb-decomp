@@ -204,6 +204,11 @@ typedef struct Slot0318 {
 } Slot0318;
 extern Slot0318 lbl_80354720[2][9];
 extern Slot0318 lbl_80353B98[2][9];
+extern CharEntry0318 lbl_2_bss_E8CC[2][9];
+extern struct {
+    /* 0x000 */ Slot0318 _000[2][9];
+    /* 0x048 */ u8 _048[0xBE4 - 0x48];
+} lbl_2_bss_DCE8;
 extern u8 lbl_80109038[9];
 extern u8 lbl_803CB748[6];
 extern u8 lbl_80108EC4[12];
@@ -1180,6 +1185,126 @@ retry:
         }
     }
     return ret;
+}
+
+// .text:0x00009ACC size:0x4A4
+// 95%: registers in the stats copy (r0/r3 swapped) and the team loop counter.
+// The copy is fn_2_8940's; an inline helper shared by both may be the original.
+void fn_2_9ACC(u16 team) {
+    s32 t;
+    s32 i;
+    CharEntry0318* dst;
+    CharEntry0318* src;
+
+    if (g_d_GameSettings._10 == 1) {
+        for (i = 0; i < 9; i++) {
+            if (lbl_2_bss_100B8._30[team] != 0) {
+                src = &lbl_2_bss_E8CC[team][i];
+                dst = &inMemRoster[team][i];
+                memcpy(dst->_00, src->_00, sizeof(dst->_00));
+                dst->CharID = src->CharID;
+                dst->_26 = src->_26;
+                dst->_27 = src->_27;
+                memcpy(dst->_28, src->_28, sizeof(dst->_28));
+                memcpy(dst->_2A, src->_2A, sizeof(dst->_2A));
+                dst->_2C = src->_2C;
+                dst->_2D = src->_2D;
+                dst->_2E = src->_2E;
+                dst->_2F = src->_2F;
+                dst->_30 = src->_30;
+                dst->_31 = src->_31;
+                dst->_32 = src->_32;
+                dst->_33 = src->_33;
+                dst->_34 = src->_34;
+                memcpy(dst->_35, src->_35, sizeof(dst->_35));
+                dst->_20 = src->_20;
+                memcpy(dst->_37, src->_37, sizeof(dst->_37));
+                memcpy(dst->_3B, src->_3B, sizeof(dst->_3B));
+                dst->_71 = src->_71;
+                dst->_74[0] = src->_74[0];
+                dst->_74[1] = src->_74[1];
+                dst->_74[2] = src->_74[2];
+                dst->_74[3] = src->_74[3];
+                dst->_74[4] = src->_74[4];
+                dst->_74[5] = src->_74[5];
+                dst->_74[6] = src->_74[6];
+                dst->_74[7] = src->_74[7];
+                dst->_74[8] = src->_74[8];
+                dst->_74[9] = src->_74[9];
+                dst->_74[10] = src->_74[10];
+                dst->_74[11] = src->_74[11];
+                dst->_74[12] = src->_74[12];
+                dst->_74[13] = src->_74[13];
+                dst->_74[14] = src->_74[14];
+                dst->_74[15] = src->_74[15];
+                dst->_74[16] = src->_74[16];
+                dst->_74[17] = src->_74[17];
+                dst->_74[18] = src->_74[18];
+                dst->_74[19] = src->_74[19];
+                dst->_74[20] = src->_74[20];
+                lbl_80354720[team][i]._0 = lbl_2_bss_DCE8._000[team][i]._0;
+                lbl_80354720[team][i]._1 = lbl_2_bss_DCE8._000[team][i]._1;
+                lbl_80354720[team][i]._2 = lbl_2_bss_DCE8._000[team][i]._2;
+                lbl_80354720[team][i]._3 = lbl_2_bss_DCE8._000[team][i]._3;
+                inMemRoster[team][i].CharID = lbl_8034E9A0._46E0[team];
+            }
+        }
+    } else {
+        for (t = 0; t < 2; t++) {
+            for (i = 0; i < 9; i++) {
+                if (lbl_2_bss_100B8._30[t] != 0) {
+                    src = &lbl_2_bss_E8CC[t][i];
+                    dst = &inMemRoster[t][i];
+                    memcpy(dst->_00, src->_00, sizeof(dst->_00));
+                    dst->CharID = src->CharID;
+                    dst->_26 = src->_26;
+                    dst->_27 = src->_27;
+                    memcpy(dst->_28, src->_28, sizeof(dst->_28));
+                    memcpy(dst->_2A, src->_2A, sizeof(dst->_2A));
+                    dst->_2C = src->_2C;
+                    dst->_2D = src->_2D;
+                    dst->_2E = src->_2E;
+                    dst->_2F = src->_2F;
+                    dst->_30 = src->_30;
+                    dst->_31 = src->_31;
+                    dst->_32 = src->_32;
+                    dst->_33 = src->_33;
+                    dst->_34 = src->_34;
+                    memcpy(dst->_35, src->_35, sizeof(dst->_35));
+                    dst->_20 = src->_20;
+                    memcpy(dst->_37, src->_37, sizeof(dst->_37));
+                    memcpy(dst->_3B, src->_3B, sizeof(dst->_3B));
+                    dst->_71 = src->_71;
+                    dst->_74[0] = src->_74[0];
+                    dst->_74[1] = src->_74[1];
+                    dst->_74[2] = src->_74[2];
+                    dst->_74[3] = src->_74[3];
+                    dst->_74[4] = src->_74[4];
+                    dst->_74[5] = src->_74[5];
+                    dst->_74[6] = src->_74[6];
+                    dst->_74[7] = src->_74[7];
+                    dst->_74[8] = src->_74[8];
+                    dst->_74[9] = src->_74[9];
+                    dst->_74[10] = src->_74[10];
+                    dst->_74[11] = src->_74[11];
+                    dst->_74[12] = src->_74[12];
+                    dst->_74[13] = src->_74[13];
+                    dst->_74[14] = src->_74[14];
+                    dst->_74[15] = src->_74[15];
+                    dst->_74[16] = src->_74[16];
+                    dst->_74[17] = src->_74[17];
+                    dst->_74[18] = src->_74[18];
+                    dst->_74[19] = src->_74[19];
+                    dst->_74[20] = src->_74[20];
+                    lbl_80354720[t][i]._0 = lbl_2_bss_DCE8._000[t][i]._0;
+                    lbl_80354720[t][i]._1 = lbl_2_bss_DCE8._000[t][i]._1;
+                    lbl_80354720[t][i]._2 = lbl_2_bss_DCE8._000[t][i]._2;
+                    lbl_80354720[t][i]._3 = lbl_2_bss_DCE8._000[t][i]._3;
+                    inMemRoster[t][i].CharID = lbl_8034E9A0._46E0[t];
+                }
+            }
+        }
+    }
 }
 
 // .text:0x00008940 size:0x3B8
