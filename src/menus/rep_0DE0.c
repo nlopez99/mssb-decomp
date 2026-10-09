@@ -417,15 +417,12 @@ void fn_2_8A824(void) {
 }
 
 // .text:0x0008A008 size:0x81C
-// 99.56%: the target walks lbl_2_data_2F964 with lbzu from its first compare on,
-// where this keeps a second pointer for the rest of the unrolled search.
 void fn_2_8A008(MenuTask0DE0* task) {
     s32 flags[3];
     s32 i;
     s32 k;
     s32 n;
     s32 face;
-    u8 id;
 
     memset(flags, 0, 3);
     for (i = 0; i < 3; i++) {
@@ -452,13 +449,13 @@ void fn_2_8A008(MenuTask0DE0* task) {
                 lbl_80371C30[task->_14 + 14 + i * 3]._00->_54 |= 2;
                 lbl_80371C30[task->_14 + 15 + i * 3]._00->_54 |= 2;
                 lbl_80371C30[task->_14 + 16 + i * 3]._00->_54 |= 2;
-                id = lbl_80354768.trackers[i]._441D;
                 for (k = 0; k < 6; k++) {
-                    if (lbl_2_data_2F964[k] == id) {
+                    if (lbl_2_data_2F964[k] == lbl_80354768.trackers[i]._441D) {
                         face = k;
                     }
                 }
-                lbl_80354768.trackers[i]._441D = id;
+                // The target stores the field back unchanged here
+                lbl_80354768.trackers[i]._441D = lbl_80354768.trackers[i]._441D;
                 lbl_80371C30[task->_14 + 11 + i]._00->_5C = 0;
                 fn_800363D8(task, i + 11, 1, 84, face);
                 lbl_80371C30[task->_14 + 11 + i]._00->_58 = (lbl_80371C30[task->_14 + 11 + i]._00->_58 & ~0xFF) | 0xFF;
@@ -476,8 +473,7 @@ void fn_2_8A008(MenuTask0DE0* task) {
                     lbl_80371C30[task->_14 + 50 + i]._00->_54 &= ~2;
                 }
                 fn_800363D8(task, i + 4, 1, 6, lbl_80354768.trackers[i]._4415);
-                n = 0;
-                for (k = 0; k < 9; k++) {
+                for (k = 0, n = 0; k < 9; k++) {
                     if (lbl_80354768.trackers[i]._40B8[k]._0 != lbl_80354768.trackers[i]._441D) {
                         lbl_80371C30[task->_14 + 26 + i * 8 + n]._00->_5C = lbl_80354768.trackers[i]._40B8[k]._0 << 16;
                         n++;
