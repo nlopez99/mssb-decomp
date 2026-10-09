@@ -18,7 +18,7 @@ s32 fn_2_68690(s32 index);
 s32 fn_2_686B0(s32 index);
 void fn_2_686D0(s32 index, s8 value);
 s32 fn_2_686EC(s32 index, s32 target);
-s32 fn_2_687A4(s32 index, s32 target, s32 point);
+u8 fn_2_687A4(s32 index, s32 target, s32 point);
 f32 fn_2_688A4(s32 index, s32 point);
 f32 fn_2_68940(s32 index, s32 target);
 s16 fn_2_689CC(s32 index);
