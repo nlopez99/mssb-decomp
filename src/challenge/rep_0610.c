@@ -51,7 +51,11 @@ typedef struct UnkAnimRef0610 {
 typedef struct Unk8036E548Actor {
     /* 0x000 */ u8 _000[0x4];
     /* 0x004 */ UnkList0610* _004;
-    /* 0x008 */ u8 _008[0x10 - 0x8];
+    /* 0x008 */ struct {
+        /* 0x00 */ u8 _00[0x10];
+        /* 0x10 */ void* _10;
+    }* _008;
+    /* 0x00C */ u8 _00C[0x10 - 0xC];
     /* 0x010 */ UnkAnimRef0610* _010[1];
     /* 0x014 */ u8 _014[0x38 - 0x14];
     /* 0x038 */ f32 _038;
@@ -94,12 +98,23 @@ typedef struct UnkTask0610 {
     /* 0x12 */ u16 _12;
     /* 0x14 */ struct UnkTimer0610* _14;
     /* 0x18 */ u16 _18;
-    /* 0x1A */ u8 _1A[0x20 - 0x1A];
+    /* 0x1A */ u8 _1A[0x1C - 0x1A];
+    /* 0x1C */ s32 _1C;
     /* 0x20 */ s32 _20;
     /* 0x24 */ s32 _24;
 } UnkTask0610;
 
 extern UnkTask0610* lbl_803CC1B8;
+
+// A task whose state lives in two bytes at 0x14
+typedef struct UnkTaskState0610 {
+    /* 0x00 */ void (*_00)(void);
+    /* 0x04 */ u8 _04[0x10 - 0x4];
+    /* 0x10 */ s16 _10;
+    /* 0x12 */ u16 _12;
+    /* 0x14 */ u8 _14;
+    /* 0x15 */ s8 _15;
+} UnkTaskState0610;
 extern u8 lbl_803CBBC0;
 
 extern struct {
@@ -139,6 +154,7 @@ extern void fn_80026130(s32, void*, f32);
 extern void fn_800385F0(struct Unk30C0*, f32, f32, f32, f32);
 extern void fn_80037AA0(struct Unk30C0*, s32, void (*)(s32), u16, UnkTimer0610*);
 extern void fn_800B0A14_removeQueue(void);
+extern void fn_80031CA4(Vec* pos, UnkBurst0610* glow);
 extern void fn_80030D88(Vec* pos, Vec* dir, void* burst, s32 n);
 extern void* ARAMTransfer(void* entry, int arg1, int arg2, u32 aram);
 extern void convertTextureHeader(void* tex);
@@ -174,6 +190,8 @@ extern UnkCamera0610 lbl_1_data_AA54[];
 extern UnkCamera0610 lbl_1_data_AAC4[];
 extern UnkCamera0610 lbl_1_data_AB34[];
 extern void* lbl_1_data_F278[3];
+extern u8 lbl_1_data_F0A8[];
+extern UnkBurst0610 lbl_1_data_F0BC;
 extern void* lbl_1_data_F4DC[3];
 extern UnkBurst0610 lbl_1_data_F2A0;
 extern u16 lbl_1_data_F17C;
@@ -255,7 +273,7 @@ static u8 lbl_1_bss_30B8;
 static u8 lbl_1_bss_309C[0x1C];
 static void* lbl_1_bss_3098[1];
 static void* lbl_1_bss_3094;
-static u32 lbl_1_bss_3084[4];
+static s32 lbl_1_bss_3084[4];
 static u8 lbl_1_bss_3081;
 static u8 lbl_1_bss_3080;
 static s32 lbl_1_bss_307C;
@@ -273,6 +291,25 @@ void fn_1_17954(void) {
 // .text:0x000176EC size:0x20
 void fn_1_176EC(void) {
     fn_1_1496C();
+}
+
+// .text:0x000168C8 size:0xB0
+void fn_1_168C8(void) {
+    UnkTask0610* task = lbl_803CC1B8;
+    if (lbl_1_bss_3084[0] == 0) {
+        lbl_1_bss_3084[0] = 1;
+        task->_1C = OSGetTick();
+        fn_1_135C0();
+        task->_1C = OSGetTick() - task->_1C;
+    } else {
+        lbl_1_bss_3084[0] = 0;
+        task->_10 = 0;
+        if (lbl_8036E548._0C04[0]._008->_10 != NULL) {
+            lbl_803CC1B8->_00 = fn_1_1770C;
+        } else {
+            lbl_803CC1B8->_00 = fn_1_1770C;
+        }
+    }
 }
 
 // .text:0x00016590 size:0x50
@@ -499,6 +536,20 @@ void fn_1_10458(void) {
     }
 }
 
+// .text:0x0000F6E4 size:0xB4
+void fn_1_F6E4(void) {
+    UnkBurst0610* burst = &lbl_1_data_F0BC;
+    Vec pos = { 0.0f, 0.0f, 10.0f };
+    fn_1_F798(burst, lbl_1_data_F0A8, 12);
+    if (lbl_803C77B8[0]._04 & 0x100) {
+        burst->_00 = lbl_1_bss_3098[0];
+        fn_80031CA4(&pos, burst);
+    } else if (lbl_803C77B8[0]._04 & 0x200) {
+        lbl_1_bss_307C = 0;
+        lbl_1_bss_5F71 = 10;
+    }
+}
+
 // .text:0x0000F2F8 size:0x84
 void fn_1_F2F8(void) {
     if (lbl_803C77B8[0]._04 & 0x100) {
@@ -564,6 +615,37 @@ void fn_1_E8D4(void) {
     while (lbl_1_data_F4D4._4[lbl_1_data_F4D4._0]._00 != 0) {
         lbl_1_data_F4D4._0++;
     }
+}
+
+// .text:0x0000DE1C size:0xF8
+// fn_1_D8A0 is inlined here, where the target calls it; it stays a call only
+// with about 21 more statements in fn_1_D8A0 (measured with dummy stores)
+void fn_1_DE1C(void) {
+    UnkTaskState0610* task = (UnkTaskState0610*)lbl_803CC1B8;
+    switch (task->_14) {
+    case 0:
+        if (task->_15 == 0) {
+            task->_00 = fn_1_D9B8;
+        } else {
+            while (task->_15-- != 0) {
+                if (lbl_1_bss_3218[task->_15]._0 >= 0) {
+                    UnkTaskState0610* sub = (UnkTaskState0610*)fn_800B0A5C_insertQueue(fn_1_DF14, lbl_803CC1B8->_12 + 1);
+                    sub->_10 = 0;
+                    sub->_14 = task->_15;
+                    task->_10 = 0;
+                    task->_14++;
+                    break;
+                }
+            }
+        }
+        break;
+    case 1:
+        if (task->_10 != 0) {
+            task->_14 = 0;
+        }
+        break;
+    }
+    fn_1_D8A0();
 }
 
 // .text:0x0000D8A0 size:0x118
