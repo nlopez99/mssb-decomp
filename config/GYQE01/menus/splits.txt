@@ -199,13 +199,13 @@ menus/rep_0FD8.c:
 	.bss        start:0x0000B2C0 end:0x0000B640
 
 menus/rep_1028.c:
-	.text       start:0x0008F0F4 end:0x00092654
+	.text       start:0x0008F0F4 end:0x0009267C
 	.rodata     start:0x00001028 end:0x000010C0
-	.data       start:0x0002FFF8 end:0x00030900
+	.data       start:0x0002FFF8 end:0x00030918
 	.bss        start:0x0000B640 end:0x0000B644
 
 menus/rep_10C0.c:
-	.text       start:0x000927C8 end:0x0009486C
+	.text       start:0x0009267C end:0x0009486C
 	.rodata     start:0x000010C0 end:0x000011C0
 
 menus/rep_11C0.c:

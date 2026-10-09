@@ -164,9 +164,6 @@ extern Spot1028 lbl_2_data_3198[];
 extern Spot1028 lbl_2_data_369C[];
 extern s32 lbl_2_data_38BC[];
 
-// Read only by this unit, but past the end of its .data range in splits.txt (0x30900).
-extern Item1028IndexFn lbl_2_data_30900[6];
-
 extern void fn_800BD2CC(s32 arg0, GXColor color);
 extern f32 fn_800B4A94(void* actor);
 extern s32 fn_80062890(s32 id);
@@ -265,12 +262,12 @@ Item1028Fn lbl_2_data_308B4[16] = {
     fn_2_916C0, fn_2_91450, fn_2_911E0, fn_2_90DAC, fn_2_90BD0, fn_2_909F4, fn_2_908FC, fn_2_907F4,
 };
 Vec lbl_2_data_308F4 = { 0.0f, 0.0f, 0.0f };
+Item1028IndexFn lbl_2_data_30900[6] = { fn_2_8F688, fn_2_8F640, fn_2_8F528, fn_2_8F3D4, fn_2_8F27C, fn_2_8F0F4 };
 
 f32 lbl_2_bss_B640;
 
 // .text:0x00092654 size:0x28
-// Outside this unit's .text range, but inlined into its functions.
-static inline void fn_2_92654(s32 index, u8 type) {
+void fn_2_92654(s32 index, u8 type) {
     Item1028* item = &lbl_2_bss_1A8248->_21E0[index];
     item->_AB = type;
     item->_90 = 0;

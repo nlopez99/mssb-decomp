@@ -104,5 +104,6 @@ void fn_2_924B0(struct Item1028* item);
 void fn_2_92504(struct Item1028* item);
 void fn_2_9253C(struct Item1028* item);
 void fn_2_9257C(void);
+void fn_2_92654(s32 index, u8 type);
 
 #endif // !__MENUS_rep_1028_H_
