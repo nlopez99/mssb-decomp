@@ -5,6 +5,7 @@
 #include "Dolphin/gx.h"
 #include "Dolphin/mtx.h"
 #include "Dolphin/vec.h"
+#include "musyx/musyx.h"
 
 typedef struct Pad04B0 {
     /* 0x0 */ u16 _0;
@@ -13,7 +14,8 @@ typedef struct Pad04B0 {
 } Pad04B0;
 
 typedef struct State04B0 {
-    /* 0x00 */ u8 _00[0x14];
+    /* 0x00 */ u8 _00[0x10];
+    /* 0x10 */ u8 _10[4];
     /* 0x14 */ u8 _14[8];
     /* 0x1C */ u8 _1C[8];
     /* 0x24 */ u8 _24[0x40 - 0x24];
@@ -38,6 +40,8 @@ extern u8 lbl_800FE930[2][6];
 extern struct {
     /* 0x00 */ u8 _00[0x74];
     /* 0x74 */ u8 _74[4];
+    /* 0x78 */ u8 _78[0x7F - 0x78];
+    /* 0x7F */ s8 _7F[4];
 } lbl_803C6028;
 
 typedef struct Select04B0 {
@@ -47,6 +51,27 @@ typedef struct Select04B0 {
 } Select04B0; // size: 0x58
 
 extern Select04B0 lbl_2_bss_F410;
+
+extern struct {
+    /* 0x00 */ u8 _00[0x45];
+    /* 0x45 */ u8 _45[2];
+    /* 0x47 */ u8 _47[2];
+    /* 0x49 */ u8 _49[0x4B - 0x49];
+    /* 0x4B */ u8 _4B[2];
+} lbl_2_bss_F468;
+
+extern struct {
+    /* 0x00 */ u8 _00[0x59];
+    /* 0x59 */ u8 _59[2];
+} lbl_803C66B0;
+
+extern struct {
+    /* 0x0000 */ u8 _0000[0xCF5D];
+    /* 0xCF5D */ u8 _CF5D[2];
+} lbl_803297E0;
+
+extern u8 lbl_800EFBA4[0x10];
+extern u8 lbl_803CBBC4;
 
 typedef struct LITObj {
     /* 0x00 */ u8 _00[0xC0];
@@ -101,6 +126,9 @@ extern void LITXForm(LITObj* light, Mtx view);
 static inline void fn_2_13CA0(Pad04B0* pad);
 static inline void fn_2_13BA4(Pad04B0* pad);
 extern s32 fn_2_14F8(s32 min, s32 max);
+extern u8 fn_2_35D0(u8 port);
+extern void fn_2_12238(void);
+extern void fn_800625A4(s32 port, s32 arg1);
 extern void fn_2_1A88(void);
 extern void fn_8004E504(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern s32 fn_8004E62C(s32 player, u16 arg1, u16 arg2, u16 arg3);
@@ -269,6 +297,71 @@ void fn_2_1641C(void) {
     lbl_8034E9A0._46FE = -1;
     lbl_8034E9A0._46FF = -1;
     lbl_8034E9A0._4729 = 0;
+}
+
+// .text:0x00015AFC size:0x384
+void fn_2_15AFC(s32 port, u16 hold, u16 trg, u16 rep) {
+    s8 players[4];
+    s32 id;
+    s32 i;
+
+    if (lbl_8034E9A0._46F8[port] != -1) {
+        if (lbl_803297E0._CF5D[lbl_803C66B0._59[port]] != 0) {
+            if (g_d_GameSettings._10 == 0 && lbl_803C66B0._59[0] == 1) {
+                players[lbl_803C66B0._59[port]] = lbl_803C66B0._59[0];
+            } else {
+                players[lbl_803C66B0._59[port]] = lbl_8034E9A0._46F8[lbl_803C66B0._59[port]];
+            }
+            if (lbl_803C6028._7F[players[lbl_803C66B0._59[port]]] < 0 ? TRUE : FALSE) {
+                if (g_d_GameSettings.GameModeSelected != 5) {
+                    id = fn_8004E62C(players[lbl_803C66B0._59[port]], hold, trg, rep);
+                    for (i = 0; i < 12; i++) {
+                        if (lbl_800FE5D4[i] == id) {
+                            id = i;
+                            break;
+                        }
+                    }
+                    lbl_2_bss_F410._10[lbl_803C66B0._59[port]] = id;
+                    fn_800625A4(lbl_803C66B0._59[port], 3);
+                } else {
+                    id = fn_8004D57C(hold, trg, rep);
+                    for (i = 0; i < 6; i++) {
+                        if (id == lbl_800FE930[lbl_80361B20[0xF4]][i]) {
+                            id = i;
+                            break;
+                        }
+                    }
+                    lbl_2_bss_F410._10[0] = id;
+                    fn_2_12238();
+                    lbl_803CBBC4 = 3;
+                }
+                lbl_803297E0._CF5D[lbl_803C66B0._59[port]] = 0;
+            }
+        } else if (lbl_803297E0._CF5D[lbl_803C66B0._59[port]] == 0) {
+            if (trg & 0x100) {
+                if (fn_2_35D0(lbl_803C66B0._59[port]) == 0) {
+                    fn_2_1560C(lbl_803C66B0._59[port]);
+                }
+            } else if (trg & 0x200) {
+                if (fn_2_35D0(lbl_803C66B0._59[port]) == 0) {
+                    fn_2_151BC(lbl_803C66B0._59[port]);
+                }
+            } else if (trg & 0x20) {
+                if (fn_2_35D0(lbl_803C66B0._59[port]) == 0 && g_d_GameSettings.GameModeSelected != 5) {
+                    lbl_803297E0._CF5D[lbl_803C66B0._59[port]] = 1;
+                }
+            } else if (trg & 0x10) {
+                if (fn_2_35D0(lbl_803C66B0._59[port]) == 0) {
+                                if (lbl_2_bss_100B8._10[lbl_803C66B0._59[port]] == 0) {
+                        lbl_2_bss_F468._45[lbl_803C66B0._59[port]] = 1;
+                        lbl_2_bss_F468._4B[lbl_803C66B0._59[port]] = 1;
+                        lbl_2_bss_F468._47[lbl_803C66B0._59[port]] = 0;
+                        sndFXStartEx(0x1BF, lbl_800EFBA4[8], 0x3F, 0);
+                    }
+                }
+            }
+        }
+    }
 }
 
 // .text:0x00015A90 size:0x6C
