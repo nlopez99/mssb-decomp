@@ -9,8 +9,7 @@ extern struct {
     /* 0x196F34 */ u8 _196F34[0x196FB8 - 0x196F34];
     /* 0x196FB8 */ s32 _196FB8;
     /* 0x196FBC */ u8 _196FBC[0x196FCA - 0x196FBC];
-    /* 0x196FCA */ s16 _196FCA;
-    /* 0x196FCC */ s16 _196FCC;
+    /* 0x196FCA */ s16 _196FCA[2];
     /* 0x196FCE */ u8 _196FCE[0x196FD6 - 0x196FCE];
     /* 0x196FD6 */ s16 _196FD6;
     /* 0x196FD8 */ u8 _196FD8[0x196FE0 - 0x196FD8];
@@ -37,6 +36,8 @@ extern struct {
 extern u16 lbl_2_data_1F3A0[8];
 extern u16 lbl_2_bss_9600[2];
 extern u16 lbl_2_bss_9608[2][0x100];
+extern u16 lbl_2_bss_9604[2];
+extern u16 lbl_2_bss_9A08[2][0x100];
 
 typedef struct MenuTask09B8 {
     /* 0x00 */ u8 _00[0x28];
@@ -152,13 +153,57 @@ void fn_2_51190(s32 arg0, s32 arg1) {
     }
     lbl_2_bss_1A824C->_196FB8 = arg0;
     lbl_2_bss_1A824C->_196F30 = arg1;
-    lbl_2_bss_1A824C->_196FCA = 0;
+    lbl_2_bss_1A824C->_196FCA[0] = 0;
     lbl_2_bss_1A824C->_197298 = 0;
     lbl_2_bss_1A824C->_19729C = 0;
 }
 
 // .text:0x0005118C size:0x4
 void fn_2_5118C(void) {
+}
+
+// .text:0x000510A8 size:0xE4
+void fn_2_510A8(void) {
+    s32 i;
+
+    lbl_2_bss_9604[1] = 0;
+    lbl_2_bss_9604[0] = 0;
+    lbl_2_bss_1A824C->_196FCA[1] = 1;
+    lbl_2_bss_1A824C->_196FCA[0] = 1;
+    for (i = 0; i < 0x100; i++) {
+        lbl_2_bss_9A08[0][i] = 0;
+        lbl_2_bss_9A08[1][i] = 0;
+    }
+}
+
+// .text:0x00050FC8 size:0xE0
+void fn_2_50FC8(s32 idx) {
+    s32 i;
+
+    lbl_2_bss_9604[idx] = 0;
+    lbl_2_bss_1A824C->_196FCA[idx] = 1;
+    for (i = 0; i < 0x100; i++) {
+        lbl_2_bss_9A08[idx][i] = 0;
+    }
+}
+
+// .text:0x00050F20 size:0xA8
+void fn_2_50F20(s32 idx, s32 sel, u16* p) {
+    u16** table = lbl_80366B18._798[lbl_2_bss_1A824C->_1972B8] + 1;
+    u16 c;
+
+    if (lbl_2_bss_9604[idx] != 0) {
+        lbl_2_bss_9604[idx]--;
+    }
+    p = sel == -1 ? p : table[sel];
+    do {
+        c = *p++;
+        lbl_2_bss_9A08[idx][lbl_2_bss_9604[idx]] = c;
+        lbl_2_bss_9604[idx]++;
+        if (lbl_2_bss_9604[idx] == 0x100) {
+            return;
+        }
+    } while (!(c & 0x4000) || (c & 0x3FFF));
 }
 
 // .text:0x00050E5C size:0xC4
@@ -195,8 +240,8 @@ void fn_2_50CC0(s32 arg0) {
     MenuTask09B8* task;
 
     lbl_2_bss_1A824C->_196FD6 = arg0;
-    lbl_2_bss_1A824C->_196FCC = 0;
-    lbl_2_bss_1A824C->_196FCA = 0;
+    lbl_2_bss_1A824C->_196FCA[1] = 0;
+    lbl_2_bss_1A824C->_196FCA[0] = 0;
     lbl_2_bss_1A824C->_19729E = 0;
     lbl_2_bss_1A824C->_19729C = 0;
     task = fn_800B0A5C_insertQueue(fn_2_509A4, 4);
