@@ -1,16 +1,22 @@
 #include "menus/rep_09B8.h"
 #include "header_rep_data.h"
+#include "string.h"
 
 extern struct {
     /* 0x000000 */ u8 _000000[0x1954AC];
     /* 0x1954AC */ u16* _1954AC[1];
-    /* 0x1954B0 */ u8 _1954B0[0x196F30 - 0x1954B0];
+    /* 0x1954B0 */ u8 _1954B0[0x196F1C - 0x1954B0];
+    /* 0x196F1C */ u8* _196F1C;
+    /* 0x196F20 */ u8 _196F20[0x196F30 - 0x196F20];
     /* 0x196F30 */ s32 _196F30;
-    /* 0x196F34 */ u8 _196F34[0x196FB8 - 0x196F34];
+    /* 0x196F34 */ s32 _196F34;
+    /* 0x196F38 */ u8 _196F38[0x196FB8 - 0x196F38];
     /* 0x196FB8 */ s32 _196FB8;
     /* 0x196FBC */ u8 _196FBC[0x196FCA - 0x196FBC];
     /* 0x196FCA */ s16 _196FCA[2];
-    /* 0x196FCE */ u8 _196FCE[0x196FD6 - 0x196FCE];
+    /* 0x196FCE */ u8 _196FCE[0x196FD2 - 0x196FCE];
+    /* 0x196FD2 */ s16 _196FD2;
+    /* 0x196FD4 */ s16 _196FD4;
     /* 0x196FD6 */ s16 _196FD6;
     /* 0x196FD8 */ u8 _196FD8[0x196FE0 - 0x196FD8];
     /* 0x196FE0 */ s16 _196FE0;
@@ -26,6 +32,8 @@ extern struct {
     /* 0x19729E */ s16 _19729E;
     /* 0x1972A0 */ u8 _1972A0[0x1972B8 - 0x1972A0];
     /* 0x1972B8 */ u8 _1972B8;
+    /* 0x1972B9 */ u8 _1972B9[0x19783F - 0x1972B9];
+    /* 0x19783F */ u8 _19783F;
 } *lbl_2_bss_1A824C;
 
 extern struct {
@@ -40,9 +48,17 @@ extern u16 lbl_2_bss_9604[2];
 extern u16 lbl_2_bss_9A08[2][0x100];
 
 typedef struct MenuTask09B8 {
-    /* 0x00 */ u8 _00[0x28];
+    /* 0x00 */ u8 _00[0xC];
+    /* 0x0C */ struct MenuTask09B8* _0C;
+    /* 0x10 */ s16 _10;
+    /* 0x12 */ u8 _12[0x28 - 0x12];
     /* 0x28 */ s8 _28;
 } MenuTask09B8;
+
+extern void* lbl_803CC1B8;
+extern u8* lbl_2_data_1E99C[];
+extern u8 lbl_2_bss_5600[0x4000];
+extern void fn_800B0A14_removeQueue(void);
 
 extern void* fn_800B0A5C_insertQueue(void (*)(void), s32);
 
@@ -246,4 +262,86 @@ void fn_2_50CC0(s32 arg0) {
     lbl_2_bss_1A824C->_19729C = 0;
     task = fn_800B0A5C_insertQueue(fn_2_509A4, 4);
     task->_28 = 0;
+}
+
+// .text:0x00050BF4 size:0xCC
+void fn_2_50BF4(s16 arg0) {
+    lbl_2_bss_1A824C->_196FD4 = 0;
+    lbl_2_bss_1A824C->_196FD2 = 0;
+    lbl_2_bss_1A824C->_196FD6 = arg0;
+    lbl_2_bss_1A824C->_196FCA[1] = 0;
+    lbl_2_bss_1A824C->_196FCA[0] = 0;
+    lbl_2_bss_1A824C->_19729E = 0;
+    lbl_2_bss_1A824C->_19729C = 0;
+    memcpy(lbl_2_bss_5600, lbl_2_data_1E99C[lbl_2_bss_1A824C->_196FD6], sizeof(lbl_2_bss_5600));
+    lbl_2_bss_1A824C->_196F1C = lbl_2_bss_5600;
+    fn_2_4EB9C();
+}
+
+// .text:0x00050B0C size:0xE8
+void fn_2_50B0C(s16 arg0, s16 arg1) {
+    lbl_2_bss_1A824C->_196FD4 = 0;
+    lbl_2_bss_1A824C->_196FD2 = 0;
+    lbl_2_bss_1A824C->_196FD6 = arg0;
+    lbl_2_bss_1A824C->_196F30 = lbl_2_bss_1A824C->_196F34 = arg1;
+    lbl_2_bss_1A824C->_196FCA[1] = 0;
+    lbl_2_bss_1A824C->_196FCA[0] = 0;
+    lbl_2_bss_1A824C->_19729E = 0;
+    lbl_2_bss_1A824C->_19729C = 0;
+    memcpy(lbl_2_bss_5600, lbl_2_data_1E99C[lbl_2_bss_1A824C->_196FD6], sizeof(lbl_2_bss_5600));
+    lbl_2_bss_1A824C->_196F1C = lbl_2_bss_5600;
+    fn_2_4EB9C();
+}
+
+// .text:0x000509A4 size:0x168
+void fn_2_509A4(void) {
+    MenuTask09B8* task = lbl_803CC1B8;
+    s16 result;
+
+    switch (task->_28) {
+    case 0:
+        lbl_2_bss_1A824C->_196FD4 = 0;
+        lbl_2_bss_1A824C->_196FD2 = 0;
+        memcpy(lbl_2_bss_5600, lbl_2_data_1E99C[lbl_2_bss_1A824C->_196FD6], sizeof(lbl_2_bss_5600));
+        lbl_2_bss_1A824C->_196F1C = lbl_2_bss_5600;
+        task->_28++;
+    case 1:
+        result = fn_2_4EB9C();
+        if (result != 0) {
+            switch (result) {
+            case 1:
+                ((MenuTask09B8*)lbl_803CC1B8)->_0C->_10 = 1;
+                fn_800B0A14_removeQueue();
+                break;
+            default:
+                ((MenuTask09B8*)lbl_803CC1B8)->_0C->_10 = 1;
+                fn_800B0A14_removeQueue();
+                break;
+            }
+            task->_28 = 0;
+        }
+        break;
+    case 2:
+        break;
+    }
+    if (lbl_2_bss_1A824C->_19783F == 1) {
+        ((MenuTask09B8*)lbl_803CC1B8)->_0C->_10 = 1;
+        fn_800B0A14_removeQueue();
+        task->_28 = 0;
+    }
+}
+
+// .text:0x00050898 size:0x10C
+void fn_2_50898(s32 arg0) {
+    s32 i;
+
+    lbl_2_bss_1A824C->_196FB8 = arg0;
+    lbl_2_bss_1A824C->_196FE0 = 1;
+    lbl_2_bss_1A824C->_196FE4 = 1;
+    for (i = 0; i < 0xA8; i++) {
+        lbl_2_bss_1A824C->_196FE8[i] = 0;
+    }
+    lbl_2_bss_1A824C->_196FD2 = 1;
+    lbl_2_bss_1A824C->_196F30 = 1;
+    lbl_2_bss_1A824C->_197298 = 0;
 }
