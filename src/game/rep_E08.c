@@ -345,13 +345,8 @@ static inline void updateAnimLength(UnkE08Actor* actor) {
     }
 }
 
-// The actor's model, or NULL without an actor
-static inline void* getActorModel(UnkE08Actor* actor) {
-    if (actor != NULL) {
-        return actor->_30;
-    }
-    return NULL;
-}
+// Whether there is no actor or the actor has no model
+#define ACTOR_HAS_NO_MODEL(actor) ((actor) == NULL || (actor)->_30 == NULL)
 
 // The minigame player slot whose fielder is `fielder`, or 4 when none is
 static inline s32 findMinigameSlot(s32 fielder) {
@@ -374,8 +369,6 @@ void fn_3_674E0(void) {
 }
 
 // .text:0x0006714C size:0x394 mapped:0x806A61E0
-// 99.98%: without an actor model the target branches straight to the fn_3_60804 call (beq +0x150);
-// this build branches to the NULL compare before it.
 void fn_3_6714C(BOOL arg0) {
     s32 i;
     s32 slot;
@@ -418,7 +411,7 @@ void fn_3_6714C(BOOL arg0) {
         anim->_50 = 0;
         anim->_51 = 0;
         anim->_00 = 0.0f;
-        if (actor != NULL && getActorModel(actor) == NULL) {
+        if (actor != NULL && ACTOR_HAS_NO_MODEL(actor)) {
             fn_3_60804(i, FALSE);
         }
     }
