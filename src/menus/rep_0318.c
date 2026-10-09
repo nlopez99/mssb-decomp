@@ -140,7 +140,8 @@ extern struct {
     /* 0x46E8 */ s32 _46E8;
     /* 0x46EC */ u8 _46EC[0x46F8 - 0x46EC];
     /* 0x46F8 */ s8 _46F8[2];
-    /* 0x46FA */ u8 _46FA[0x470C - 0x46FA];
+    /* 0x46FA */ u8 _46FA[0x470B - 0x46FA];
+    /* 0x470B */ u8 _470B;
     /* 0x470C */ u8 _470C;
     /* 0x470D */ u8 _470D[0x472A - 0x470D];
     /* 0x472A */ u8 _472A;
@@ -867,6 +868,46 @@ s32 fn_2_A50C(void) {
         }
     }
     return 0;
+}
+
+// .text:0x0000A288 size:0x284
+// 74%: the target walks lbl_2_bss_3E0 with a pointer from [1] and keeps no
+// counter for the outer loop; registers differ throughout.
+void fn_2_A288(void) {
+    s32 i;
+    s32 k;
+    s32 j;
+    s32 grp;
+    u8 count = 0;
+
+    for (i = 0; i < 12; i++) {
+        if (lbl_80108EC4[i] == lbl_8034E9A0._46E0[0]) {
+            grp = lbl_8034E9A0._470B = i;
+        } else if (lbl_80108EC4[i] == lbl_8034E9A0._46E0[1]) {
+            lbl_8034E9A0._470C = i;
+        }
+    }
+    for (k = 0; k < 2; k++) {
+        for (j = 1; j < 9; j++) {
+            if (lbl_8034E9A0._4380[grp][k + 1][j] == lbl_8034E9A0._46E0[1] && lbl_8034E9A0._4380[grp][k + 1][j] != 0xFF) {
+                lbl_2_bss_3E0[k] = -1;
+            }
+        }
+        if (lbl_2_bss_3E0[k] != -1) {
+            lbl_2_bss_3E0[k] = 1;
+        } else {
+            lbl_2_bss_3E0[k] = 0;
+        }
+    }
+    if (lbl_2_bss_3E0[1] == 0) {
+        count++;
+    }
+    if (lbl_2_bss_3E0[2] == 0) {
+        count++;
+    }
+    if (count == 2) {
+        lbl_2_bss_3E0[0] = -1;
+    }
 }
 
 // .text:0x0000A1A0 size:0xE8
