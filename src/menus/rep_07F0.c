@@ -85,9 +85,7 @@ extern struct {
     /* 0x197863 */ s8 _197863;
 } *lbl_2_bss_1A824C;
 
-extern GXColor lbl_2_data_12270;
-extern u8 lbl_2_data_12170[];
-extern u8 lbl_2_data_12180[];
+extern u32 lbl_803CB850[4];
 extern void* lbl_803CC1B8;
 
 extern void* _OSAllocFromHeap(u32 align, u32 size);
@@ -120,6 +118,46 @@ extern s32 fn_2_4EABC(void);
 extern void fn_2_515DC(s32 arg0);
 extern void fn_2_54474(void);
 extern void fn_2_4E824(void);
+
+typedef struct UnkEntry07F0 {
+    /* 0x00 */ void (*_00)(void);
+    /* 0x04 */ s32 _04;
+    /* 0x08 */ u32 _08;
+    /* 0x0C */ u32 _0C;
+    /* 0x10 */ u32 _10;
+    /* 0x14 */ u32 _14;
+    /* 0x18 */ u32 _18;
+    /* 0x1C */ u32 _1C;
+} UnkEntry07F0; // size: 0x20
+
+typedef struct UnkTable07F0 {
+    /* 0x00 */ s32* _00;
+    /* 0x04 */ s32 _04;
+    /* 0x08 */ u32* _08[4];
+    /* 0x18 */ struct UnkTable07F0* _18;
+    /* 0x1C */ u32* _1C[3];
+    /* 0x28 */ UnkEntry07F0 _28[4];
+    /* 0xA8 */ u32 _A8[3];
+} UnkTable07F0; // size: 0xB4
+
+u32 lbl_2_data_12170[4] = { 0, 0x0033452C, 0x05245800, 0x0033452C };
+u32 lbl_2_data_12180[4] = { 0, 0x01700804, 0x0557A000, 0x01700804 };
+s32 lbl_2_data_12190[11] = { 1, 0, 0x12, 0, 0, 0x6E, 0x16, 0, 0, -0x80, 0x7FFFFFFF };
+UnkTable07F0 lbl_2_data_121BC = {
+    lbl_2_data_12190,
+    -1,
+    { &lbl_803CB850[2], &lbl_803CB850[2], &lbl_803CB850[2], &lbl_803CB850[2] },
+    &lbl_2_data_121BC,
+    { &lbl_803CB850[2], &lbl_803CB850[2], &lbl_803CB850[2] },
+    {
+        { fn_2_37D94, 0, 0x00010064, 0x00800000, 0, 0, 9, 0 },
+        { fn_2_37D8C, 1, 0x00010010, 0, 0, 0, 0x80000005, 0 },
+        { fn_2_37D90, 0, 0x00010064, 0x00800000, 0, 0, 9, 0 },
+        { fn_2_37D88, 1, 0x00010010, 0, 0, 0, 0x20000005, 0 },
+    },
+    { 0x000A0019, 0x002D0000, 0x11775500 },
+};
+GXColor lbl_2_data_12270 = { 0 };
 
 // .text:0x00037D94 size:0x4
 void fn_2_37D94(void) {}
