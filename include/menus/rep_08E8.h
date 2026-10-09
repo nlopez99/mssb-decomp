@@ -115,6 +115,7 @@ void fn_2_4D67C(void);
 void fn_2_4D960(void);
 void fn_2_4DC24(void);
 void fn_2_4DEE8(void);
+void fn_2_4E1C0(void);
 void fn_2_4E7A4(void);
 void fn_2_4E7EC(void);
 void fn_2_4E824(void);
