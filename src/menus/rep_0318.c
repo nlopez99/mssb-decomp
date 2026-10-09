@@ -750,6 +750,7 @@ void fn_2_B324(void) {
 }
 
 // .text:0x0000AEE8 size:0x43C
+// 99.9%: the target keeps cap in r29 apart from the remainder in r26.
 void fn_2_AEE8(void) {
     u8 order[2][54];
     u8 value[54];
@@ -1341,6 +1342,45 @@ void fn_2_5F80(void) {
 // .text:0x000057E8 size:0x8
 s32 fn_2_57E8(s32 arg0, s32 arg1) {
     return (s8)arg1;
+}
+
+// .text:0x00005444 size:0x3A4
+// 97%: the target keeps the loop counter in r30 and sets up the bases in
+// another order (inMemRoster before starMissionCompletionTracker).
+void fn_2_5444(u8 port) {
+    s32 i;
+
+    lbl_2_bss_F468._3D[port] = 0;
+    if (g_d_GameSettings.GameModeSelected == 5) {
+        for (i = 0; i < 9; i++) {
+            starMissionCompletionTracker._40B8[i]._0 = lbl_803C6724._02[0][i];
+            inMemRoster[0][i].CharID = lbl_803C6724._02[0][i];
+            lbl_80354720[0][i]._2 = lbl_803C6724._14[0][i];
+            starMissionCompletionTracker._40B8[i]._2 = i;
+            starMissionCompletionTracker._40B8[i]._3 = lbl_803C6724._14[0][i];
+        }
+        fn_800625A4(0, 0x13);
+        fn_800625A4(1, 0x13);
+        lbl_2_bss_F468._2E = 0;
+        lbl_2_bss_100B4 = 1;
+        lbl_803CBBCC->_4 = 8;
+    } else if (g_d_GameSettings._10 == 0 && lbl_2_bss_100B8._2E[0] != 0) {
+        fn_800625A4(1, 0x11);
+        lbl_8034E9A0._472A = 0xFF;
+        lbl_2_bss_F468._36 = 30;
+        lbl_803CBBCC->_4 = 3;
+    } else if (g_d_GameSettings._10 == 0) {
+        fn_2_52CC();
+        fn_800625A4(0, 0x11);
+    } else if (g_d_GameSettings._10 == 1) {
+        lbl_2_bss_100B8._2E[port] = 1;
+        fn_800625A4(port, 0x11);
+        if (lbl_2_bss_100B8._2E[0] != 0 && lbl_2_bss_100B8._2E[1] != 0) {
+            lbl_2_bss_F468._4F = 1;
+            lbl_2_bss_F468._36 = 30;
+            lbl_803CBBCC->_4 = 7;
+        }
+    }
 }
 
 // .text:0x000052CC size:0x178
