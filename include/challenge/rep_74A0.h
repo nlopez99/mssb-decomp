@@ -27,6 +27,7 @@ s32 fn_1_19D1C(u32 fmt);
 void fn_1_19D60(struct Shape74A0* shape, Mtx mtx);
 void fn_1_1A1EC(struct Model74A0* model, Mtx mtx);
 void fn_1_1A290(struct ModelTable74A0* table, Mtx mtx);
+void fn_1_1A3B4(void);
 void fn_1_1A774(void);
 void fn_1_1A850(Mtx m, struct Camera74A0* cam, u8 r, u8 g, u8 b, u8 a);
 void fn_1_1ADA4(void);

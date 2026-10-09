@@ -189,6 +189,26 @@ typedef struct Camera74A0 {
     /* 0x54 */ u8 _54[0x5C - 0x54];
 } Camera74A0; // size: 0x5C
 
+typedef struct Tex74A0 {
+    /* 0x00 */ void* image;
+    /* 0x04 */ void* tlut;
+    /* 0x08 */ u16 height;
+    /* 0x0A */ u16 width;
+    /* 0x0C */ u8 _0C[0x17 - 0xC];
+    /* 0x17 */ u8 format;
+    /* 0x18 */ u16 tlutEntries;
+    /* 0x1A */ u8 tlutFormat;
+    /* 0x1B */ u8 _1B;
+    /* 0x1C */ u16 _1C;
+    /* 0x1E */ u16 _1E;
+} Tex74A0; // size: 0x20
+
+typedef struct TexFile74A0 {
+    /* 0x00 */ u16 count;
+    /* 0x02 */ u16 _02;
+    /* 0x04 */ Tex74A0 tex[1];
+} TexFile74A0;
+
 typedef struct AramEntry74A0 {
     /* 0x0 */ u32 _0[4];
 } AramEntry74A0; // size: 0x10
@@ -561,6 +581,65 @@ void fn_1_1A774(void) {
             fn_1_1A850(m, &lbl_1_bss_6B7C, r, g, b, a);
         }
     }
+}
+
+// .text:0x0001A3B4 size:0x3C0
+void fn_1_1A3B4(void) {
+    GXTexObj obj;
+    GXTlutObj tlut;
+    GXColor white = { 0xFF, 0xFF, 0xFF, 0xFF };
+    TexFile74A0* file = lbl_1_bss_6AAC[((Task74A0*)lbl_803CC1B8)->_14];
+    Tex74A0* tex;
+    u16 count = file->count;
+    u32 i;
+    Tex74A0* first = &file->tex[file->tex[0]._1C];
+
+    tex = first;
+    if (first->tlut != NULL) {
+        for (i = 0; i < count; tex++, i++) {
+            GXInitTlutObj(&tlut, tex->tlut, tex->tlutFormat, tex->tlutEntries);
+            GXLoadTlut(&tlut, GX_TLUT0);
+            GXInitTexObjCI(&obj, tex->image, tex->width, tex->height, tex->format, GX_CLAMP, GX_CLAMP, GX_FALSE,
+                           GX_TLUT0);
+            GXInitTexObjLOD(&obj, GX_NEAR, GX_NEAR, 0.0f, 0.0f, 0.0f, GX_FALSE, GX_FALSE, GX_ANISO_1);
+            GXLoadTexObj(&obj, GX_TEXMAP0);
+        }
+    } else {
+        for (i = 0; i < count; tex++, i++) {
+            GXInitTexObj(&obj, tex->image, tex->width, tex->height, tex->format, GX_CLAMP, GX_CLAMP, GX_FALSE);
+            GXInitTexObjLOD(&obj, GX_NEAR, GX_NEAR, 0.0f, 0.0f, 0.0f, GX_FALSE, GX_FALSE, GX_ANISO_1);
+            GXLoadTexObj(&obj, GX_TEXMAP0);
+        }
+    }
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_REG, GX_SRC_REG, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetNumChans(1);
+    GXSetNumTexGens(1);
+    GXSetNumTevStages(1);
+    GXSetTevColor(GX_TEVREG0, white);
+    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_TEXC);
+    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_A0);
+    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    GXSetBlendMode(GX_BM_NONE, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_OR);
+    GXSetCullMode(GX_CULL_NONE);
+    GXLoadPosMtxImm(lbl_1_bss_6B7C._00, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    GXPosition3f32(-3.0f, 0.0f, 20.0f);
+    GXTexCoord2f32(0.0f, 1.0f);
+    GXPosition3f32(-3.0f, -3.0f, 20.0f);
+    GXTexCoord2f32(0.0f, 0.0f);
+    GXPosition3f32(0.0f, -3.0f, 20.0f);
+    GXTexCoord2f32(1.0f, 0.0f);
+    GXPosition3f32(0.0f, 0.0f, 20.0f);
+    GXTexCoord2f32(1.0f, 1.0f);
+    GXEnd();
 }
 
 // .text:0x0001A290 size:0x124
