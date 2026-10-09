@@ -112,8 +112,6 @@ extern void fn_3_6B674(void);
 extern void fn_3_12D1F4(void);
 
 // .text:0x000E19E8 size:0x278 mapped:0x80720A7C
-// fn_3_E11E0 is inlined here, where the target calls it; extra statements in
-// fn_3_E11E0 did not keep it out.
 void fn_3_E19E8(void) {
     lbl_8036E548._3087 = 1;
     if (g_GameLogic.gameStatus == 5 && g_GameLogic._125 == 5) {
@@ -124,38 +122,28 @@ void fn_3_E19E8(void) {
     }
     if (lbl_8036E548._307A == 0) {
         fn_3_E12F8();
-    } else if ((g_GameLogic.gameStatus >= 0x1C && g_GameLogic.gameStatus <= 0x1E) || g_GameLogic.gameStatus == 0x1F) {
+    } else if ((u8)(g_GameLogic.gameStatus - 0x1C) <= 2 || g_GameLogic.gameStatus == 0x1F) {
         if (g_GameLogic.gameStatus == 0x1E) {
             fn_3_E11E0();
         }
-    } else {
-        switch (g_GameLogic.gameStatus) {
-        case 0x0E:
-        case 0x22:
-        case 0x24:
-        case 0x26:
-        case 0x27:
-            lbl_8036E548._3087 = g_d_GameSettings.GameModeSelected != 6;
-            fn_3_E07DC();
-            fn_3_116B74();
-            break;
-        case 4:
-            return;
-        case 5:
-            break;
-        default:
-            fn_3_697CC();
-            fn_3_685F0();
-            fn_3_E1478();
-            fn_3_6B674();
-            if (g_d_GameSettings.GameModeSelected == 6) {
-                fn_3_E0668();
-            } else {
-                fn_3_11AC6C();
-            }
-            fn_3_6AB58();
-            break;
+    } else if (g_GameLogic.gameStatus == 0x0E || g_GameLogic.gameStatus == 0x22 || g_GameLogic.gameStatus == 0x24 ||
+               g_GameLogic.gameStatus == 0x26 || g_GameLogic.gameStatus == 0x27) {
+        lbl_8036E548._3087 = g_d_GameSettings.GameModeSelected != 6;
+        fn_3_E07DC();
+        fn_3_116B74();
+    } else if (g_GameLogic.gameStatus == 4) {
+        return;
+    } else if (g_GameLogic.gameStatus != 5) {
+        fn_3_697CC();
+        fn_3_685F0();
+        fn_3_E1478();
+        fn_3_6B674();
+        if (g_d_GameSettings.GameModeSelected == 6) {
+            fn_3_E0668();
+        } else {
+            fn_3_11AC6C();
         }
+        fn_3_6AB58();
     }
     if (g_d_GameSettings.GameModeSelected == 6) {
         fn_3_EDD10();
@@ -351,31 +339,43 @@ void fn_3_E12F8(void) {
 void fn_3_E11E0(void) {
     int i;
     Unk2940Actor* actor;
+    VecXYZ* pos;
 
     lbl_8036E548._2D68 = -1;
     for (i = 0; i < 4; i++) {
         actor = lbl_8036E548._2C50[i];
-        if (actor != NULL) {
-            actor->_25D = 0;
-            if (g_Minigame._1A13[i] == 0 && g_Minigame._19E8[i]._2 >= 0 && g_Minigame._19E8[i]._7 != 0 &&
-                g_Minigame._19DA[i] >= 0) {
-                if (!g_d_GameSettings.exhibitionMatchInd) {
-                    if (g_Minigame._19DA[i] >= 1) {
-                        continue;
-                    }
-                } else if (g_Minigame._19E6 == 1 && g_d_GameSettings.GameModeSelected != GAME_TYPE_TOY_FIELD &&
-                           g_Minigame._1A3C == 0 && g_Minigame._19DA[i] >= 1) {
-                    continue;
-                }
-                actor->_25D = 1;
-                actor->_034 = lbl_3_data_18DD4[i].x;
-                actor->_038 = -lbl_3_data_18DD4[i].y;
-                actor->_03C = lbl_3_data_18DD4[i].z;
-                actor->_040 = 0.0f;
-                actor->_044 = 0.0f;
-                actor->_048 = 0.0f;
-            }
+        if (actor == NULL) {
+            continue;
         }
+        actor->_25D = 0;
+        if (g_Minigame._1A13[i] != 0) {
+            continue;
+        }
+        if (g_Minigame._19E8[i]._2 < 0) {
+            continue;
+        }
+        if (g_Minigame._19E8[i]._7 == 0) {
+            continue;
+        }
+        if (g_Minigame._19DA[i] < 0) {
+            continue;
+        }
+        if (!g_d_GameSettings.exhibitionMatchInd) {
+            if (g_Minigame._19DA[i] >= 1) {
+                continue;
+            }
+        } else if (g_Minigame._19E6 == 1 && g_d_GameSettings.GameModeSelected != GAME_TYPE_TOY_FIELD &&
+                   g_Minigame._1A3C == 0 && g_Minigame._19DA[i] >= 1) {
+            continue;
+        }
+        pos = &lbl_3_data_18DD4[i];
+        actor->_25D = 1;
+        actor->_034 = pos->x;
+        actor->_038 = -pos->y;
+        actor->_03C = pos->z;
+        actor->_040 = 0.0f;
+        actor->_044 = 0.0f;
+        actor->_048 = 0.0f;
     }
 }
 
