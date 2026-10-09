@@ -13,7 +13,9 @@ struct UnkCamera0610;
 struct Unk8036E548Actor;
 struct Unk67E0;
 struct Unk0060;
+struct UnkNode0610;
 
+void fn_1_C2DC(struct UnkNode0610* node, char* text, s32 depth, s32 maxDepth, s32 indent, s32* selected, s32* top, s32* lines);
 void fn_1_C5A8(void);
 void fn_1_C9E0(struct UnkCamera0610* arg0);
 void fn_1_CB9C(s32 arg0);
@@ -83,6 +85,7 @@ void fn_1_1496C(void);
 void fn_1_14FB8(void);
 void fn_1_15170(void);
 void fn_1_151F8(void);
+void fn_1_1540C(void);
 void fn_1_15CE0(void);
 u16 fn_1_160D8(s8 arg0, s8 arg1);
 void fn_1_160F8(s32 arg0);

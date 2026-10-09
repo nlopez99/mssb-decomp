@@ -26,7 +26,9 @@ typedef struct LITObj {
 // Animation or track list: a count and a list of nodes
 typedef struct UnkNode0610 {
     /* 0x00 */ u16 _00;
-    /* 0x02 */ u8 _02[0x64 - 0x2];
+    /* 0x02 */ u8 _02[0x14 - 0x2];
+    /* 0x14 */ void* _14;
+    /* 0x18 */ u8 _18[0x64 - 0x18];
     /* 0x64 */ f32 _64;
     /* 0x68 */ f32 _68;
     /* 0x6C */ f32 _6C;
@@ -249,6 +251,7 @@ extern void fn_80026130(s32, void*, f32);
 extern void fn_800385F0(struct Unk30C0*, f32, f32, f32, f32);
 extern void fn_80037AA0(struct Unk30C0*, s32, void (*)(s32), u16, UnkTimer0610*);
 extern void fn_800B0A14_removeQueue(void);
+extern void fn_800B2BA8(UnkList0610* dst, u16 id, UnkList0610* src, u16 index);
 extern void fn_80039A4C(void);
 extern void LITAlloc(LITObj** light);
 extern void LITInitAttn(LITObj* light, f32 a0, f32 a1, f32 a2, f32 k0, f32 k1, f32 k2);
@@ -348,6 +351,7 @@ extern u8 lbl_1_data_2390[7];
 extern s16 lbl_1_data_A978[];
 extern u8 lbl_1_data_A938[8];
 extern u8 lbl_1_data_ABA8;
+extern s8 lbl_1_data_AC90[];
 extern Vec lbl_1_data_AD0C;
 extern Vec lbl_1_data_AD18;
 extern Vec lbl_1_data_AD24;
@@ -403,7 +407,7 @@ static u8 lbl_1_bss_6764[0x54];
 static UnkPoseBlock0610 lbl_1_bss_60EC[18];
 static UnkTask0610* lbl_1_bss_60E8;
 static void* lbl_1_bss_60E4;
-static s32 lbl_1_bss_60E0;
+static Unk0060* lbl_1_bss_60E0;
 static s32 lbl_1_bss_60DC;
 static s8 lbl_1_bss_60A4[0x36];
 static s32 lbl_1_bss_60A0;
@@ -761,6 +765,92 @@ void fn_1_15CE0(void) {
     } else if (lbl_803C77B8[0]._04 & 0x200) {
         lbl_1_bss_307C = 0;
         lbl_1_bss_5F71 = 1;
+    }
+}
+
+// .text:0x0001540C size:0x354
+// fn_1_1644C is inlined here twice, where the target calls it; the rest is
+// believed right
+void fn_1_1540C(void) {
+    char text[0x28];
+    s32 top;
+    s32 lines;
+    s32 selected;
+    u16 id;
+    lines = 20;
+    selected = lbl_1_bss_5F6C;
+    if (lbl_1_bss_3088 > selected) {
+        lbl_1_bss_3088 = selected;
+    } else if (lbl_1_bss_3088 < selected - 19) {
+        lbl_1_bss_3088 = selected - 19;
+    }
+    top = lbl_1_bss_3088;
+    fn_1_C2DC(lbl_8036E548._0060->_34[lbl_1_bss_5F73]._00->_18[0], text, 0, 19, 4, &selected, &top, &lines);
+    if (lbl_803C77B8[0]._04 & 8) {
+        if (--lbl_1_bss_307C < 0) {
+            lbl_1_bss_307C = 5;
+        }
+    } else if (lbl_803C77B8[0]._04 & 4) {
+        if (++lbl_1_bss_307C >= 6) {
+            lbl_1_bss_307C = 0;
+        }
+    } else if (lbl_803C77B8[0]._04 & 1) {
+        switch (lbl_1_bss_307C) {
+        case 0:
+            lbl_1_bss_3080 ^= 1;
+            break;
+        case 1:
+            lbl_1_data_ABA8 ^= 1;
+            break;
+        case 2:
+            fn_1_16400(-1);
+            break;
+        case 4:
+            if (lbl_1_data_AC90[0] >= 0) {
+                lbl_1_data_AC90[0]--;
+            }
+            break;
+        case 5:
+            fn_1_1644C();
+            break;
+        }
+    } else if (lbl_803C77B8[0]._04 & 2) {
+        switch (lbl_1_bss_307C) {
+        case 0:
+            lbl_1_bss_3080 ^= 1;
+            break;
+        case 1:
+            lbl_1_data_ABA8 ^= 1;
+            break;
+        case 2:
+            fn_1_16400(1);
+            break;
+        case 4:
+            if (lbl_1_data_AC90[0] < 4) {
+                lbl_1_data_AC90[0]++;
+            }
+            break;
+        case 5:
+            fn_1_1644C();
+            break;
+        }
+    } else if (lbl_803C77B8[0]._04 & 0x200) {
+        lbl_1_bss_307C = 0;
+        lbl_1_bss_5F71 = 1;
+    }
+    id = lbl_8036E548._0C04[0]._162[0x24];
+    if (id != 0xFFFF) {
+        if (lbl_1_data_AC90[0] >= 0) {
+            UnkList0610* src = lbl_1_bss_60E0->_34[lbl_1_data_AC90[0]]._00;
+            s32 i;
+            for (i = 0; i < src->_06; i++) {
+                if (src->_18[i]->_14 != NULL) {
+                    fn_800B2BA8(lbl_8036E548._0060->_34[0]._00, id, src, i);
+                }
+            }
+        } else {
+            fn_800B2BA8(lbl_8036E548._0060->_34[0]._00, id, NULL, 0);
+        }
     }
 }
 
