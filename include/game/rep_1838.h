@@ -11,6 +11,13 @@
 #define SANG_ANG_270 (SANG_ANG_90 * 3)
 #define SANG_ANG_360 (SANG_MAX_ANGLE)
 
+void fn_3_9DC18(u8* list, int count, BOOL useGameRandom);
+void fn_3_9E078(int* order, int count, BOOL useGameRandom);
+int fn_3_9E368(int* weights, int count);
+int RandomIndexFromWeights(u8* weights, int count);
+void fn_3_9E7D4(int team);
+BOOL fn_3_9E834(void);
+BOOL fn_3_9EA1C(int team);
 f32 RandomF32_UNK_Range(f32 a, f32 b);
 f32 RandomF32_Game_Range(f32 a, f32 b);
 int RandomInt_Game_Range(int min, int max);

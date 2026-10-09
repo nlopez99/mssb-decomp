@@ -182,11 +182,11 @@ game/rep_1770.c:
 	.data       start:0x0000F4A8 end:0x0000F4E0
 
 game/rep_17E0.c:
-	.text       start:0x0009CAF0 end:0x0009EAE4
+	.text       start:0x0009CAF0 end:0x0009DC18
 	.rodata     start:0x000017E0 end:0x00001838
 
 game/rep_1838.c:
-	.text       start:0x0009EAE4 end:0x000A009C
+	.text       start:0x0009DC18 end:0x000A009C
 	.rodata     start:0x00001838 end:0x000018E8
 
 game/rep_18E8.c:
