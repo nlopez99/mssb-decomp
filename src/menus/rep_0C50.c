@@ -82,8 +82,7 @@ extern struct {
     /* 0x0000 */ u8 _0000[0x34];
     /* 0x0034 */ UnkRosterEntry0C50 _0034[2][9];
     /* 0x0B74 */ u8 _0B74[0x46E0 - 0xB74];
-    /* 0x46E0 */ s32 _46E0;
-    /* 0x46E4 */ s32 _46E4;
+    /* 0x46E0 */ s32 _46E0[2];
     /* 0x46E8 */ u8 _46E8[0x46F8 - 0x46E8];
     /* 0x46F8 */ s8 _46F8;
     /* 0x46F9 */ u8 _46F9[0x470F - 0x46F9];
@@ -485,6 +484,50 @@ void fn_2_7EF68(UnkTask0C50* task, s32 index) {
     }
 }
 
+// .text:0x0007F030 size:0x28C
+void fn_2_7F030(UnkTask0C50* task, s32 index) {
+    s32 n;
+    s32 expected;
+    s32 i;
+    s32 sel;
+    s32 prev;
+    s32 foundPrev;
+    s32 foundSel;
+
+    sel = lbl_2_bss_F468._00[index];
+    prev = lbl_2_bss_F468._00[index + 2];
+    if (lbl_803C66B0._0D[index] == 1 ? TRUE : FALSE) {
+        n = 0;
+        expected = 0;
+        for (i = 0; i < 9; i++) {
+            if (lbl_803C6724._02[index + 2][i] == sel) {
+                foundSel = i;
+            }
+            if (lbl_803C6724._02[index + 2][i] == prev) {
+                foundPrev = i;
+            }
+        }
+        if (sel == prev) {
+            expected++;
+            n += isAnimDone(task, 0x34 + sel + index * 9, 0);
+        } else if (lbl_803C6724._02[index][foundSel] != -1 && lbl_803C6724._02[index][foundSel] != 0x36) {
+            expected++;
+            n += isAnimDone(task, 0x34 + sel + index * 9, 10);
+        }
+        if (lbl_8034E9A0._46E0[index] == lbl_803C6724._02[index][foundPrev]) {
+            expected++;
+            n += isAnimDone(task, 0x34 + prev + index * 9, 20);
+        }
+        if (fn_2_75B58(task, index) && n == expected) {
+            if (sel == prev) {
+                lbl_80371C30[0x34 + task->_14 + sel + index * 9]._00->_54 &= ~2;
+            }
+            fn_80062674(index);
+            lbl_803C66B0._0D[index] = 2;
+        }
+    }
+}
+
 // .text:0x0007EE7C size:0xEC
 void fn_2_7EE7C(UnkTask0C50* task, s32 index) {
     s32 sel = lbl_2_bss_F468._00[index];
@@ -563,7 +606,7 @@ void fn_2_7E194(UnkTask0C50* task, s32 index) {
         n += isAnimDone(task, index + 0x89, 5);
         if (g_d_GameSettings._10 == 0 && index == 0) {
             for (i = 0; i < 9; i++) {
-                if (lbl_803C6724._02[1][i] == lbl_8034E9A0._46E4) {
+                if (lbl_803C6724._02[1][i] == lbl_8034E9A0._46E0[1]) {
                     id = lbl_803C6724._02[3][i];
                 }
             }
@@ -617,6 +660,35 @@ void fn_2_7AC64(UnkTask0C50* task, s32 index) {
                 lbl_803C66B0._0D[index] = 2;
             }
         }
+    }
+}
+
+// .text:0x0007A9D8 size:0x28C
+void fn_2_7A9D8(UnkTask0C50* task, s32 index) {
+    if (lbl_803C66B0._0D[index] == 0 ? TRUE : FALSE) {
+        lbl_80371C30[task->_14 + index]._00->_5C = 0x140000;
+        lbl_80371C30[2 + task->_14 + index]._00->_5C = 0x140000;
+        lbl_80371C30[task->_14 + index]._00->_68 = 4;
+        lbl_80371C30[2 + task->_14 + index]._00->_68 = 4;
+        lbl_80371C30[4 + task->_14 + index]._00->_5C = 0x1E0000;
+        lbl_80371C30[4 + task->_14 + index]._00->_68 = 4;
+        lbl_80371C30[0x85 + task->_14 + index]._00->_5C = 0xA0000;
+        lbl_80371C30[0x85 + task->_14 + index]._00->_68 = 4;
+        lbl_80371C30[0x89 + task->_14 + index]._00->_5C = 0x50000;
+        lbl_80371C30[0x89 + task->_14 + index]._00->_68 = 4;
+        lbl_80371C30[0x6A + task->_14 + index]._00->_5C = 0xA0000;
+        lbl_80371C30[0x6A + task->_14 + index]._00->_68 = 4;
+        lbl_80371C30[0x34 + task->_14 + index]._00->_68 = 4;
+        lbl_80371C30[0x93 + task->_14 + index]._00->_68 = 4;
+        lbl_80371C30[0x8F + task->_14 + index]._00->_68 = 4;
+        lbl_80371C30[0xB2 + task->_14 + index]._00->_54 &= ~2;
+        lbl_80371C30[0xAE + task->_14 + index]._00->_54 &= ~2;
+        lbl_80371C30[0x97 + task->_14 + index]._00->_54 &= ~2;
+        lbl_80371C30[0xAC + task->_14 + index]._00->_54 &= ~2;
+        lbl_80371C30[0xC + task->_14 + index]._00->_54 &= ~2;
+        lbl_80371C30[0x12 + task->_14 + index]._00->_54 &= ~2;
+        fn_800626EC(index);
+        lbl_803C66B0._0D[index] = 1;
     }
 }
 
@@ -1296,7 +1368,7 @@ s32 fn_2_7302C(void) {
     u8* p = lbl_800FE930[lbl_80361B20._F4];
 
     for (i = 0; i < (lbl_80361B20._F4 != 0) + 5; i++) {
-        if (lbl_8034E9A0._46E0 == *p) {
+        if (lbl_8034E9A0._46E0[0] == *p) {
             return i;
         }
         p++;
