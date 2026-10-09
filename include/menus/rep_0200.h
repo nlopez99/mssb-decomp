@@ -3,5 +3,6 @@
 
 #include "mssbTypes.h"
 
+void fn_2_121C(void);
 
 #endif // !__MENUS_rep_0200_H_

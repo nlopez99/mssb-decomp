@@ -8,7 +8,7 @@ Sections:
 
 menus/rep_0010.c:
 	.text       start:0x00000000 end:0x00000A70
-	.rodata     start:0x00000010 end:0x00000060
+	.rodata     start:0x00000000 end:0x00000060
 	.data       start:0x00000000 end:0x00000128
 	.bss        start:0x00000000 end:0x00000018
 
@@ -65,7 +65,7 @@ menus/rep_0438.c:
 	.bss        start:0x00000AE0 end:0x00001220
 
 menus/rep_04B0.c:
-	.text       start:0x00013D70 end:0x00016870
+	.text       start:0x00013BA4 end:0x00016870
 	.rodata     start:0x000004B0 end:0x00000568
 	.data       start:0x000019E8 end:0x000020F8
 
@@ -148,7 +148,7 @@ menus/rep_0AB0.c:
 	.bss        start:0x0000A168 end:0x0000A170
 
 menus/rep_0B08.c:
-	.text       start:0x00068260 end:0x00072038
+	.text       start:0x00068260 end:0x0007207C
 	.rodata     start:0x00000B08 end:0x00000C50
 	.data       start:0x0002A1E8 end:0x0002A3C0
 	.bss        start:0x0000A170 end:0x0000A840
@@ -177,13 +177,15 @@ menus/rep_0D90.c:
 	.rodata     start:0x00000D90 end:0x00000DE0
 
 menus/rep_0DE0.c:
-	.text       start:0x0008563C end:0x0008AC84
+	.text       start:0x0008563C end:0x00087998
 	.rodata     start:0x00000DE0 end:0x00000F10
-	.data       start:0x0002E608 end:0x0002F990
+	.data       start:0x0002E608 end:0x0002E9F8
 	.bss        start:0x0000B298 end:0x0000B2B8
 
 menus/rep_0F10.c:
+	.text       start:0x00087998 end:0x0008AC84
 	.rodata     start:0x00000F10 end:0x00000F60
+	.data       start:0x0002E9F8 end:0x0002F990
 
 menus/rep_0F60.c:
 	.text       start:0x0008ACDC end:0x0008ED4C
@@ -197,13 +199,13 @@ menus/rep_0FD8.c:
 	.bss        start:0x0000B2C0 end:0x0000B640
 
 menus/rep_1028.c:
-	.text       start:0x0008F0F4 end:0x00092654
+	.text       start:0x0008F0F4 end:0x0009267C
 	.rodata     start:0x00001028 end:0x000010C0
-	.data       start:0x0002FFF8 end:0x00030900
+	.data       start:0x0002FFF8 end:0x00030918
 	.bss        start:0x0000B640 end:0x0000B644
 
 menus/rep_10C0.c:
-	.text       start:0x000927C8 end:0x0009486C
+	.text       start:0x0009267C end:0x0009486C
 	.rodata     start:0x000010C0 end:0x000011C0
 
 menus/rep_11C0.c:
