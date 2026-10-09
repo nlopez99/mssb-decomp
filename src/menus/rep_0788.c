@@ -2972,7 +2972,7 @@ void fn_2_36074(MenuTask0788* task, MenuItem0788* item) {
     case 6:
         lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
         break;
-    case 37:
+    case 0x25:
     case 1:
         break;
     }
@@ -3033,7 +3033,7 @@ void fn_2_35DB4(MenuTask0788* task, MenuItem0788* item) {
         item->_04 = 0x25;
         break;
     case 5:
-    case 37:
+    case 0x25:
     case 1:
         break;
     }
@@ -3166,7 +3166,7 @@ void fn_2_35754(MenuTask0788* task, MenuItem0788* item) {
         item->_04 = 0x25;
         break;
     case 5:
-    case 37:
+    case 0x25:
     case 1:
         break;
     }
@@ -3195,7 +3195,7 @@ void fn_2_353FC(MenuTask0788* task, MenuItem0788* item) {
             item->_04 = 0x25;
         }
         break;
-    case 37:
+    case 0x25:
         if (lbl_2_bss_1A824C->_1976DA == 0) {
             if ((lbl_80371C30[task->_14 + item->_0E]._00->_5C >> 16) <= 5) {
                 lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0x50000;
@@ -3263,7 +3263,7 @@ void fn_2_3523C(MenuTask0788* task, MenuItem0788* item) {
     case 3:
         item->_04 = 0x25;
         break;
-    case 37:
+    case 0x25:
         item->_04 = 0x25;
         break;
     case 5:
@@ -3330,7 +3330,7 @@ void fn_2_34F6C(MenuTask0788* task, MenuItem0788* item) {
     case 5:
         lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
         break;
-    case 37:
+    case 0x25:
     case 1:
         break;
     }
@@ -3359,7 +3359,7 @@ void fn_2_34D70(MenuTask0788* task, MenuItem0788* item) {
     case 3:
         item->_04 = 0x25;
         break;
-    case 37:
+    case 0x25:
         item->_04 = 0x25;
         break;
     case 5:
@@ -3399,7 +3399,7 @@ void fn_2_34BCC(MenuTask0788* task, MenuItem0788* item) {
             lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
         }
         break;
-    case 37:
+    case 0x25:
     case 1:
         break;
     }
@@ -3503,7 +3503,7 @@ void fn_2_346D8(MenuTask0788* task, MenuItem0788* item) {
             lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
         }
         break;
-    case 37:
+    case 0x25:
     case 1:
         break;
     }
@@ -3573,7 +3573,7 @@ void fn_2_3439C(MenuTask0788* task, MenuItem0788* item) {
             lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
         }
         break;
-    case 37:
+    case 0x25:
     case 1:
         break;
     }
@@ -3606,7 +3606,7 @@ void fn_2_34214(MenuTask0788* task, MenuItem0788* item) {
             lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
         }
         break;
-    case 37:
+    case 0x25:
     case 1:
         break;
     }
@@ -3687,16 +3687,18 @@ void fn_2_33E70(MenuTask0788* task, MenuItem0788* item) {
 }
 
 // .text:0x000338D4 size:0x59C
+// 96.89%: register allocation differs, and in cases 1 and 2 the target branches around the
+// `+ 12` (`bne; b`) where this build skips it with `beq`.
 void fn_2_338D4(MenuTask0788* task, MenuItem0788* item) {
     s16 part = item->_10 & 0xF;
+    s16 value;
+    s16 count;
     s16 kind = item->_10 >> 4;
     s16 state = fn_2_53BC8(item);
     s16 x0;
     s16 y0;
     s16 x1;
     s16 y1;
-    s16 value;
-    s16 count;
     s16 digit;
     s16 width;
 
@@ -3757,9 +3759,17 @@ void fn_2_338D4(MenuTask0788* task, MenuItem0788* item) {
                 break;
             case 3:
                 if (value < 0) {
-                    digit = kind == 3 ? 11 : 22;
+                    if (kind == 3) {
+                        digit = 11;
+                    } else {
+                        digit = 22;
+                    }
                 } else if (value > 0) {
-                    digit = kind == 3 ? 10 : 23;
+                    if (kind == 3) {
+                        digit = 10;
+                    } else {
+                        digit = 23;
+                    }
                 } else {
                     digit = 23;
                 }
@@ -3857,7 +3867,7 @@ void fn_2_33614(MenuTask0788* task, MenuItem0788* item) {
         item->_04 = 0x25;
         break;
     case 5:
-    case 37:
+    case 0x25:
     case 1:
         break;
     }
@@ -3903,7 +3913,7 @@ void fn_2_331C8(MenuTask0788* task, MenuItem0788* item) {
             }
         }
         break;
-    case 37:
+    case 0x25:
         if (lbl_2_bss_1A824C->_1976DE == 0) {
             if ((lbl_80371C30[task->_14 + item->_0E]._00->_5C >> 16) <= 5) {
                 lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0x50000;
@@ -4069,7 +4079,7 @@ void fn_2_32C64(MenuTask0788* task, MenuItem0788* item) {
         item->_04 = 0x25;
         break;
     case 5:
-    case 37:
+    case 0x25:
     case 1:
         break;
     }
@@ -4098,7 +4108,7 @@ void fn_2_32A78(MenuTask0788* task, MenuItem0788* item) {
     case 3:
         item->_04 = 0x25;
         break;
-    case 37:
+    case 0x25:
         item->_04 = 0x25;
         break;
     case 5:
@@ -4164,7 +4174,7 @@ void fn_2_327D4(MenuTask0788* task, MenuItem0788* item) {
         item->_04 = 0x25;
         break;
     case 5:
-    case 37:
+    case 0x25:
     case 1:
         break;
     }
@@ -4193,7 +4203,7 @@ void fn_2_325E8(MenuTask0788* task, MenuItem0788* item) {
     case 3:
         item->_04 = 0x25;
         break;
-    case 37:
+    case 0x25:
         item->_04 = 0x25;
         break;
     case 5:
@@ -4267,7 +4277,7 @@ void fn_2_322E4(MenuTask0788* task, MenuItem0788* item) {
             lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
         }
         break;
-    case 37:
+    case 0x25:
     case 1:
         break;
     }
@@ -4296,7 +4306,7 @@ void fn_2_320D8(MenuTask0788* task, MenuItem0788* item) {
     case 3:
         item->_04 = 0x25;
         break;
-    case 37:
+    case 0x25:
         item->_04 = 0x25;
         break;
     case 5:
@@ -4335,7 +4345,7 @@ void fn_2_31F50(MenuTask0788* task, MenuItem0788* item) {
             lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
         }
         break;
-    case 37:
+    case 0x25:
     case 1:
         break;
     }
@@ -4437,7 +4447,7 @@ void fn_2_31A90(MenuTask0788* task, MenuItem0788* item) {
             lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
         }
         break;
-    case 37:
+    case 0x25:
     case 1:
         break;
     }
@@ -4508,7 +4518,7 @@ void fn_2_316F8(MenuTask0788* task, MenuItem0788* item) {
             lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
         }
         break;
-    case 37:
+    case 0x25:
     case 1:
         break;
     }
@@ -4601,7 +4611,7 @@ void fn_2_31250(MenuTask0788* task, MenuItem0788* item) {
         lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
         item->_04 = 0x25;
         break;
-    case 17:
+    case 0x11:
         item->_04 = 0x25;
         break;
     case 5:
@@ -4668,7 +4678,7 @@ void fn_2_30EF8(MenuTask0788* task, MenuItem0788* item) {
         item->_04 = 0x26;
         break;
     case 2:
-    case 17:
+    case 0x11:
         lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0;
         lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
         lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
@@ -4745,7 +4755,7 @@ void fn_2_30C4C(MenuTask0788* task, MenuItem0788* item) {
         lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
         item->_04 = 0x25;
         break;
-    case 17:
+    case 0x11:
         item->_04 = 0x25;
         break;
     case 5:
@@ -4883,7 +4893,7 @@ void fn_2_3039C(MenuTask0788* task, MenuItem0788* item) {
         item->_04 = 0x25;
         break;
     case 8:
-    case 17:
+    case 0x11:
         value = lbl_2_data_3764[item->_0A + lbl_2_bss_1A824C->_19772A][lbl_2_bss_1A8248->_4415];
         fn_800363D8(task, item->_0E, 1, 0x66, (value / 100) % 10);
         fn_800363D8(task, item->_0E, 2, 0x66, (value / 10) % 10);
@@ -4926,7 +4936,7 @@ void fn_2_300BC(MenuTask0788* task, MenuItem0788* item) {
         lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
         item->_04 = 0x25;
         break;
-    case 17:
+    case 0x11:
         if (lbl_2_bss_1A824C->_197728 == item->_0A) {
             lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
         } else {
@@ -4937,7 +4947,7 @@ void fn_2_300BC(MenuTask0788* task, MenuItem0788* item) {
         }
         item->_04 = 0x12;
         break;
-    case 18:
+    case 0x12:
         if (lbl_2_bss_1A824C->_197728 != item->_0A) {
             if ((lbl_80371C30[task->_14 + item->_0E]._00->_5C >> 16) == 0) {
                 lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0;
@@ -4983,7 +4993,7 @@ void fn_2_2FE50(MenuTask0788* task, MenuItem0788* item) {
         }
         item->_04 = 0x25;
         break;
-    case 17:
+    case 0x11:
         lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0;
         if (lbl_2_bss_1A824C->_197728 == item->_0A) {
             lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
@@ -5025,7 +5035,7 @@ void fn_2_2FD00(MenuTask0788* task, MenuItem0788* item) {
         lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
         item->_04 = 0x25;
         break;
-    case 17:
+    case 0x11:
         item->_04 = 0x25;
         break;
     case 5:
@@ -5058,7 +5068,7 @@ void fn_2_2FBCC(MenuTask0788* task, MenuItem0788* item) {
         lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
         item->_04 = 0x25;
         break;
-    case 17:
+    case 0x11:
         item->_04 = 0x25;
         break;
     case 5:
@@ -5092,7 +5102,7 @@ void fn_2_2FA7C(MenuTask0788* task, MenuItem0788* item) {
         lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
         item->_04 = 0x25;
         break;
-    case 17:
+    case 0x11:
         item->_04 = 0x25;
         break;
     case 5:
@@ -5164,7 +5174,7 @@ void fn_2_2F710(MenuTask0788* task, MenuItem0788* item) {
         lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
         item->_04 = 0x25;
         break;
-    case 17:
+    case 0x11:
         item->_04 = 0x25;
         break;
     case 5:
@@ -5186,6 +5196,8 @@ void fn_2_2F710(MenuTask0788* task, MenuItem0788* item) {
 }
 
 // .text:0x0002F544 size:0x1CC
+// 97.74%: the target walks the roster with a pointer (`lha 0x40B8(rX)`, `rX += 6`),
+// this build indexes it (`addi; lhax`).
 void fn_2_2F544(MenuTask0788* task, MenuItem0788* item) {
     s16 state = fn_2_53BC8(item);
     s16 list[16];
@@ -5455,11 +5467,11 @@ void fn_2_2E7D0(MenuTask0788* task, MenuItem0788* item) {
             item->_04 = 0x25;
         }
         break;
-    case 20:
+    case 0x14:
         item->_06 = 0x1E;
         item->_04 = 0x15;
         break;
-    case 21:
+    case 0x15:
         if (item->_06-- <= 0) {
             lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
             lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0;
@@ -5467,7 +5479,7 @@ void fn_2_2E7D0(MenuTask0788* task, MenuItem0788* item) {
             item->_04 = 0x16;
         }
         break;
-    case 22:
+    case 0x16:
         if ((lbl_80371C30[task->_14 + item->_0E]._00->_5C >> 16) >= 0xE) {
             lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0xE0000;
             lbl_80371C30[task->_14 + item->_0E]._00->_68 = 0;
@@ -5616,7 +5628,7 @@ void fn_2_2E17C(MenuTask0788* task, MenuItem0788* item) {
     case 5:
         lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
         break;
-    case 37:
+    case 0x25:
     case 1:
         break;
     }
@@ -5684,7 +5696,7 @@ void fn_2_2DE78(MenuTask0788* task, MenuItem0788* item) {
             lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
         }
         break;
-    case 37:
+    case 0x25:
     case 1:
         break;
     }
@@ -5836,7 +5848,7 @@ void fn_2_2D640(MenuTask0788* task, MenuItem0788* item) {
         }
         item->_04 = 0x25;
         break;
-    case 37:
+    case 0x25:
         if (lbl_2_bss_1A824C->_197706 == item->_10) {
             lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
             lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
@@ -5877,7 +5889,7 @@ void fn_2_2D508(MenuTask0788* task, MenuItem0788* item) {
     case 5:
         lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
         break;
-    case 37:
+    case 0x25:
     case 1:
         break;
     }
@@ -5973,14 +5985,14 @@ void fn_2_2CF58(MenuTask0788* task, MenuItem0788* item) {
         item->_04 = 0x25;
         break;
     case 8:
-    case 30:
-    case 33:
+    case 0x1E:
+    case 0x21:
         item->_06 = 1;
         item->_04 += 1;
         break;
     case 9:
-    case 31:
-    case 34:
+    case 0x1F:
+    case 0x22:
         if (item->_06-- <= 0) {
             lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
             item->_04 = 0x25;
@@ -6240,7 +6252,7 @@ void fn_2_2C378(MenuTask0788* task, MenuItem0788* item) {
             lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
         }
         break;
-    case 37:
+    case 0x25:
     case 1:
         break;
     }
@@ -6351,7 +6363,7 @@ void fn_2_2BDA4(MenuTask0788* task, MenuItem0788* item) {
             lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
         }
         break;
-    case 37:
+    case 0x25:
     case 1:
         break;
     }
@@ -6639,7 +6651,7 @@ void fn_2_2AEDC(MenuTask0788* task, MenuItem0788* item) {
             item->_04 = 7;
         }
         break;
-    case 37:
+    case 0x25:
     case 1:
         break;
     }
@@ -6735,6 +6747,8 @@ void fn_2_2AA8C(MenuTask0788* task, MenuItem0788* item) {
 }
 
 // .text:0x0002A77C size:0x310
+// 96.94%: in case 2 the target keeps fn_8006CDC0's result in r8 and adds the two table
+// values in the other operand order; locals and declaration orders did not change it.
 void fn_2_2A77C(MenuTask0788* task, MenuItem0788* item) {
     s16 state = fn_2_53BC8(item);
     u8 id;
@@ -6794,6 +6808,8 @@ void fn_2_2A77C(MenuTask0788* task, MenuItem0788* item) {
 }
 
 // .text:0x0002A338 size:0x444
+// 96.30%: the target loads lbl_2_bss_1A824C with `lwz rX,sym@l` before the mission tables,
+// this build with `addi; lwz 0`, and the table loads are scheduled in another order.
 void fn_2_2A338(MenuTask0788* task, MenuItem0788* item) {
     s16 state = fn_2_53BC8(item);
     s16 textId;
@@ -6901,7 +6917,7 @@ void fn_2_2A21C(MenuTask0788* task, MenuItem0788* item) {
     case 5:
         lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
         break;
-    case 37:
+    case 0x25:
     case 1:
         break;
     }
@@ -6969,7 +6985,7 @@ void fn_2_29F18(MenuTask0788* task, MenuItem0788* item) {
             lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
         }
         break;
-    case 37:
+    case 0x25:
     case 1:
         break;
     }
@@ -7243,7 +7259,7 @@ void fn_2_28D24(MenuTask0788* task, MenuItem0788* item) {
         lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
         item->_04 = 0x25;
         break;
-    case 37:
+    case 0x25:
         lbl_80371C30[task->_14 + item->_0E]._00->_54 |= 2;
         break;
     case 5:
@@ -7294,7 +7310,7 @@ void fn_2_28948(MenuTask0788* task, MenuItem0788* item) {
         }
         item->_04 = 0x25;
         break;
-    case 37:
+    case 0x25:
         if (lbl_2_bss_1A824C->_1978F6 == 0) {
             lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
             lbl_80371C30[task->_14 + item->_0E]._00->_68 = 0;
@@ -7376,7 +7392,7 @@ void fn_2_284B0(MenuTask0788* task, MenuItem0788* item) {
         lbl_80371C30[task->_14 + item->_0E]._00->_68 = 0;
         item->_04 = 0x25;
         break;
-    case 17:
+    case 0x11:
         if (lbl_2_bss_1A824C->_197706 == item->_10) {
             lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
             item->_04 = 0x25;
@@ -7388,7 +7404,7 @@ void fn_2_284B0(MenuTask0788* task, MenuItem0788* item) {
         lbl_80371C30[task->_14 + item->_0E]._00->_68 = 4;
         item->_04 = 0x12;
         break;
-    case 18:
+    case 0x12:
         if (lbl_2_bss_1A824C->_197706 != item->_10) {
             if ((lbl_80371C30[task->_14 + item->_0E]._00->_5C >> 16) == 0) {
                 lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0;
@@ -7438,7 +7454,7 @@ void fn_2_2835C(MenuTask0788* task, MenuItem0788* item) {
     case 5:
         lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
         break;
-    case 37:
+    case 0x25:
     case 1:
         break;
     }
@@ -7464,7 +7480,7 @@ void fn_2_28224(MenuTask0788* task, MenuItem0788* item) {
     case 5:
         lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
         break;
-    case 37:
+    case 0x25:
     case 1:
         break;
     }
@@ -7564,7 +7580,7 @@ void fn_2_27D8C(MenuTask0788* task, MenuItem0788* item) {
             lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
         }
         break;
-    case 37:
+    case 0x25:
     case 1:
         break;
     }
@@ -7635,7 +7651,7 @@ void fn_2_279F4(MenuTask0788* task, MenuItem0788* item) {
             lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
         }
         break;
-    case 37:
+    case 0x25:
     case 1:
         break;
     }
@@ -7843,7 +7859,7 @@ void fn_2_26F80(MenuTask0788* task, MenuItem0788* item) {
         item->_04 = 0x25;
         break;
     case 5:
-    case 37:
+    case 0x25:
     case 1:
         break;
     }
@@ -7877,12 +7893,12 @@ void fn_2_26C70(MenuTask0788* task, MenuItem0788* item) {
             item->_04 = 0x25;
         }
         break;
-    case 17:
+    case 0x11:
         lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0x012C0000;
         lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
         item->_04 = 0x12;
         break;
-    case 18:
+    case 0x12:
         if ((lbl_80371C30[task->_14 + item->_0E]._00->_5C >> 16) >= 0x15E) {
             lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0x015E0000;
             lbl_80371C30[task->_14 + item->_0E]._00->_68 = 0;
@@ -7909,6 +7925,8 @@ void fn_2_26C70(MenuTask0788* task, MenuItem0788* item) {
 }
 
 // .text:0x00026AF4 size:0x17C
+// 96.56%: the target's compare tree pivots on case 4 and this build's on case 3, over the
+// same cases 0 to 4 and 0x25; no set of extra empty cases reproduced it.
 void fn_2_26AF4(MenuTask0788* task, MenuItem0788* item) {
     s16 state = fn_2_53BC8(item);
 
@@ -7934,7 +7952,7 @@ void fn_2_26AF4(MenuTask0788* task, MenuItem0788* item) {
         }
         break;
     case 4:
-    case 37:
+    case 0x25:
     case 1:
         break;
     }
@@ -7966,23 +7984,23 @@ void fn_2_26864(MenuTask0788* task, MenuItem0788* item) {
             item->_04 = 0x25;
         }
         break;
-    case 37:
+    case 0x25:
         if ((lbl_80371C30[task->_14 + item->_0E]._00->_5C >> 16) >= 0x78) {
             lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0x320000;
         }
         break;
-    case 17:
+    case 0x11:
         lbl_80371C30[task->_14 + item->_0E]._00->_5C = 0x780000;
         lbl_80371C30[task->_14 + item->_0E]._00->_68 = 1;
         item->_04 = 0x12;
         break;
-    case 18:
+    case 0x12:
         if ((lbl_80371C30[task->_14 + item->_0E]._00->_5C >> 16) >= 0x82) {
             lbl_80371C30[task->_14 + item->_0E]._00->_68 = 0;
             item->_04 = 0x13;
         }
         break;
-    case 19:
+    case 0x13:
         lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
         break;
     case 5:
@@ -8008,7 +8026,7 @@ void fn_2_26774(MenuTask0788* task, MenuItem0788* item) {
         item->_04 = 0x25;
         break;
     case 5:
-    case 37:
+    case 0x25:
     case 1:
         break;
     }
@@ -8031,7 +8049,7 @@ void fn_2_26684(MenuTask0788* task, MenuItem0788* item) {
         item->_04 = 0x25;
         break;
     case 5:
-    case 37:
+    case 0x25:
     case 1:
         break;
     }
@@ -8221,7 +8239,7 @@ void fn_2_25D98(MenuTask0788* task, MenuItem0788* item) {
         item->_04 = 0x25;
         break;
     case 5:
-    case 37:
+    case 0x25:
     case 1:
         break;
     }
@@ -8421,7 +8439,7 @@ void fn_2_253B0(MenuTask0788* task, MenuItem0788* item) {
     case 6:
         lbl_80371C30[task->_14 + item->_0E]._00->_54 &= ~2;
         break;
-    case 37:
+    case 0x25:
     case 1:
         break;
     }
@@ -8450,7 +8468,7 @@ void fn_2_25200(MenuTask0788* task, MenuItem0788* item) {
     case 3:
         item->_04 = 0x25;
         break;
-    case 37:
+    case 0x25:
         item->_04 = 0x25;
         break;
     case 5:
@@ -8483,7 +8501,7 @@ void fn_2_25050(MenuTask0788* task, MenuItem0788* item) {
     case 3:
         item->_04 = 0x25;
         break;
-    case 37:
+    case 0x25:
         item->_04 = 0x25;
         break;
     case 5:
@@ -8868,7 +8886,7 @@ s32 fn_2_20CB0(s32 kind) {
     case 4:
         ret = 1;
         break;
-    case 10:
+    case 0xA:
         ret = 2;
         break;
     case 2:
