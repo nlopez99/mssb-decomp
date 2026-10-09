@@ -1879,6 +1879,8 @@ void fn_1_CC24(void) {
 }
 
 // .text:0x0000CB9C size:0x88
+// Only the first PSMTXCopy's address registers differ (r3/r4/r5 rotated);
+// local pointers, index casts and the permuter did not fix it
 void fn_1_CB9C(s32 arg0) {
     if (arg0 != 0) {
         lbl_1_bss_30BC = 0;
