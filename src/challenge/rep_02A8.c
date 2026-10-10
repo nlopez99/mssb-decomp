@@ -639,12 +639,9 @@ void fn_1_BA64(void) {
 }
 
 // .text:0x0000B5B8 size:0x4AC
-// Registers differ: rep & 0x800 and trg swap r3/r4/r5, and the loop counter
-// takes r29 where the target reuses the data base's r30.
 void fn_1_B5B8(void) {
     u16 rep = lbl_803C77B8[0]._04;
     u16 trg = lbl_803C77B8[0]._02;
-    s8 i;
     s16 n;
     s32 fx;
 
@@ -668,12 +665,8 @@ void fn_1_B5B8(void) {
             } else if (lbl_1_bss_2FE1 == 3) {
                 lbl_1_bss_3044 = fn_80062890(lbl_1_bss_2FE6);
             }
-        } else if (trg & 0x1200) {
-            for (i = (s8)lbl_800EF808._390 - 1; i > 0; i--) {
-                if (!fn_800214D0()) {
-                    break;
-                }
-            }
+        } else if (lbl_803C77B8[0]._02 & 0x1200) {
+            fn_1_A718();
             fn_800ACFB0(lbl_800EF808.groups[0x29]);
             fn_800ACFB0(lbl_800EF808.groups[1]);
             ((Task02A8*)lbl_803CC1B8)->_00 = fn_1_A348;
