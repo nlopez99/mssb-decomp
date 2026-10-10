@@ -11,7 +11,7 @@ void fn_2_68308(void);
 void fn_2_6832C(void);
 void fn_2_683EC(void);
 s32 fn_2_684D0(s32 index);
-void fn_2_68638(s32 index, s8 value);
+void fn_2_68638(s32 index, s32 value);
 void fn_2_68654(s32 index, s8 value);
 s32 fn_2_68670(s32 index);
 s32 fn_2_68690(s32 index);
