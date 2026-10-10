@@ -42,6 +42,8 @@ typedef struct UnkNode0610 {
         /* 0x4 */ u8 _4[0xC - 0x4];
         /* 0xC */ void* _C;
     }* _E8;
+    /* 0x0EC */ u8 _EC[0x136 - 0xEC];
+    /* 0x136 */ u8 _136;
 } UnkNode0610;
 
 typedef struct UnkList0610 {
@@ -51,12 +53,14 @@ typedef struct UnkList0610 {
     /* 0x18 */ UnkNode0610** _18;
     /* 0x1C */ u8 _1C[0x98 - 0x1C];
     /* 0x98 */ u8 _98;
+    /* 0x99 */ u8 _99;
 } UnkList0610;
 
 typedef struct Unk0060Elem {
     /* 0x00 */ UnkList0610* _00;
     /* 0x04 */ void* _04;
-    /* 0x08 */ u8 _08[0xE - 0x8];
+    /* 0x08 */ void* _08;
+    /* 0x0C */ u8 _0C[0xE - 0xC];
     /* 0x0E */ u16 _0E;
     /* 0x10 */ Control _10;
     /* 0x54 */ f32 _54;
@@ -98,7 +102,9 @@ typedef struct UnkAnimRef0610 {
 } UnkAnimRef0610;
 
 typedef struct UnkPoseBlock0610 {
-    /* 0x00 */ u8 _00[0x5C];
+    /* 0x00 */ u32 _00;
+    /* 0x04 */ u8 _04[0xC - 0x4];
+    /* 0x0C */ u8 _0C[0x5C - 0xC];
 } UnkPoseBlock0610; // size: 0x5C
 
 typedef struct UnkPose0610 {
@@ -135,8 +141,11 @@ typedef struct UnkTimer0610 {
 typedef struct Unk8036E548Actor {
     /* 0x000 */ UnkList0610* _000;
     /* 0x004 */ UnkList0610* _004;
-    /* 0x008 */ struct {
-        /* 0x00 */ u8 _00[0x10];
+    /* 0x008 */ struct UnkActorFiles0610 {
+        /* 0x00 */ void* _00;
+        /* 0x04 */ void* _04;
+        /* 0x08 */ void* _08;
+        /* 0x0C */ void* _0C;
         /* 0x10 */ void* _10;
     }* _008;
     /* 0x00C */ u8 _00C[0x10 - 0xC];
@@ -152,11 +161,14 @@ typedef struct Unk8036E548Actor {
     /* 0x040 */ f32 _040;
     /* 0x044 */ f32 _044;
     /* 0x048 */ f32 _048;
-    /* 0x04C */ u8 _04C[0x62 - 0x4C];
+    /* 0x04C */ f32 _04C;
+    /* 0x050 */ u8 _050[0x62 - 0x50];
     /* 0x062 */ s16 _062;
     /* 0x064 */ u8 _064[0x72 - 0x64];
     /* 0x072 */ u16 _072[120];
-    /* 0x162 */ u16 _162[(0x254 - 0x162) / 2];
+    /* 0x162 */ u16 _162[120];
+    /* 0x252 */ s8 _252;
+    /* 0x253 */ u8 _253;
     /* 0x254 */ u8 _254;
     /* 0x255 */ u8 _255[0x25A - 0x255];
     /* 0x25A */ u8 _25A;
@@ -333,6 +345,22 @@ extern void LoadActorLayout(void* layout);
 extern void convertGeometryAndSknHeader(void* geo, void* skn);
 extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);
 extern void fn_800BD190(void* geo, void* tex);
+extern void fn_80023B04(s32 count, void* work);
+extern void fn_8002399C(Unk0060Elem* elem, s32 arg1, s32 arg2, void* layout, void* anim, void* skn);
+extern void fn_80025C58(void* anim, Unk0060Elem* elem);
+extern void fn_80025DDC(void* anim);
+extern void fn_80025EEC(void* pose, s32 arg1, s32 arg2);
+extern void fn_80025FFC(void* anim, void* pose, void* file);
+extern UnkTask0610* fn_8004B7B4(Unk8036E548Actor* actor, Unk0060Elem* elem, Unk0060* model);
+extern UnkTask0610* fn_80052634(Unk8036E548Actor* actor, Unk0060Elem* elem, Unk0060* model);
+extern UnkTask0610* fn_80062ED4(Unk8036E548Actor* actor, Unk0060Elem* elem, Unk0060* model);
+extern void fn_80063010(Unk8036E548Actor* actor, Unk0060Elem* elem);
+extern UnkTask0610* fn_800637BC(Unk8036E548Actor* actor, Unk0060Elem* elem, Unk0060* model);
+extern UnkTask0610* fn_800637D4(Unk8036E548Actor* actor, Unk0060Elem* elem, Unk0060* model);
+extern UnkTask0610* fn_800638B4(Unk8036E548Actor* actor, Unk0060Elem* elem, Unk0060* model);
+extern void fn_800B2C08(UnkList0610* list, s32 arg1);
+extern void fn_800BD548(Unk0060Elem* elem, s32 count, ...);
+extern void fn_8001FC4C(Unk8036E548Actor* actor);
 
 typedef struct UnkSlot0610 {
     /* 0x0 */ s8 _0;
@@ -2326,9 +2354,9 @@ static UnkTexFile0610* lbl_1_bss_60E4;
 static Unk0060* lbl_1_bss_60E0;
 static u32* lbl_1_bss_60DC;
 static u8 lbl_1_bss_60A4[0x36];
-static void* lbl_1_bss_60A0[1];
+static u32* lbl_1_bss_60A0[1];
 static u8 lbl_1_bss_5F88[0x118];
-static u8 lbl_1_bss_5F80[8];
+static Unk0060* lbl_1_bss_5F80[2];
 static Unk0060* lbl_1_bss_5F7C[1];
 static u8 lbl_1_bss_5F78;
 static f32 lbl_1_bss_5F74;
@@ -3523,6 +3551,245 @@ void fn_1_14710(Unk8036E548Actor* arg0) {
                 arg0->_072[b] = a;
             }
         }
+    }
+}
+
+// .text:0x000135C0 size:0x1150
+// Draft: registers differ throughout; the target addresses lbl_1_bss_60A0 through
+// a pointer, and the four-entry pose loop and model setup are scheduled differently
+void fn_1_135C0(void) {
+    s32 i;
+    s32 j;
+    Unk8036E548Actor* actor;
+    struct UnkActorFiles0610* file;
+    s32 count;
+    u16 id;
+    void* tex;
+    void* layout;
+    void* geo;
+    void* skn;
+    void* model;
+    UnkAnimRef0610* anim;
+    Unk0060Elem* elem;
+    u32 flag;
+
+    fn_80023B04(13, &lbl_1_bss_3070);
+    lbl_8036E548._0060 = ActorObjectInitTable(1);
+    lbl_1_bss_5F80[0] = ActorObjectInitTable(1);
+    lbl_1_bss_5F7C[0] = ActorObjectInitTable(5);
+    j = 0;
+    memset(lbl_1_bss_5F88, 0, sizeof(lbl_1_bss_5F88));
+    lbl_8036E548._0C04[0]._252 = lbl_1_bss_68FC._40[0];
+    actor = lbl_8036E548._0C04;
+    if (j < 1) {
+        file = lbl_8036E548._0C04[0]._008;
+        if (file->_00 != NULL) {
+            lbl_8036E548._0C04[0]._008->_00 = (u8*)file + (u32)file->_00;
+        }
+        if (file->_04 != NULL) {
+            lbl_8036E548._0C04[0]._008->_04 = (u8*)file + (u32)file->_04;
+        }
+        if (file->_08 != NULL) {
+            lbl_8036E548._0C04[0]._008->_08 = (u8*)file + (u32)file->_08;
+        }
+        if (file->_0C != NULL) {
+            lbl_8036E548._0C04[0]._008->_0C = (u8*)file + (u32)file->_0C;
+        }
+        if (file->_10 != NULL) {
+            lbl_8036E548._0C04[0]._008->_10 = (u8*)file + (u32)file->_10;
+        }
+        if (lbl_1_data_A978[lbl_1_bss_68FC._40[0]] >= 0) {
+            for (i = 0; i < 16; i++) {
+                lbl_1_bss_60A0[0][i] += (u32)lbl_1_bss_60A0[0];
+            }
+        }
+        tex = lbl_8036E548._0C04[0]._008->_00;
+        layout = lbl_8036E548._0C04[0]._008->_04;
+        geo = lbl_8036E548._0C04[0]._008->_08;
+        skn = lbl_8036E548._0C04[0]._008->_0C;
+        convertTextureHeader(tex);
+        LoadActorLayout(layout);
+        convertGeometryAndSknHeader(geo, skn);
+        haveActLayoutPointToGeoHeader(layout, geo);
+        fn_800BD190(geo, tex);
+        if (lbl_1_data_A978[lbl_1_bss_68FC._40[0]] >= 0) {
+            for (i = 0; i <= 7; i += 2) {
+                void* l = (void*)lbl_1_bss_60A0[0][i];
+                void* g = (void*)lbl_1_bss_60A0[0][i + 1];
+                LoadActorLayout(l);
+                convertGeometryAndSknHeader(g, NULL);
+                haveActLayoutPointToGeoHeader(l, g);
+                fn_800BD190(g, tex);
+                fn_800BDC88(lbl_1_bss_5F7C[0], (u16)i / 2, (u16)i / 2, l, NULL, 0);
+            }
+            for (i = 0; i < lbl_1_bss_5F7C[0]->_00; i++) {
+                lbl_1_bss_5F7C[0]->_34[i]._6C = 1;
+                CTRLSetTranslation(&lbl_1_bss_5F7C[0]->_34[i]._10, i, 0.0f, 0.0f);
+                CTRLSetRotation(&lbl_1_bss_5F7C[0]->_34[i]._10, 0.0f, 0.0f, 0.0f);
+            }
+        }
+    }
+    if (j < 1) {
+        if (lbl_8036E548._0C04[0]._010[lbl_1_bss_6940[lbl_1_bss_5F73]._44] == NULL) {
+            lbl_1_bss_6940[lbl_1_bss_5F73]._44 = 0;
+            for (; lbl_1_bss_6940[lbl_1_bss_5F73]._44 < 7; lbl_1_bss_6940[lbl_1_bss_5F73]._44++) {
+                if (lbl_8036E548._0C04[0]._010[lbl_1_bss_6940[lbl_1_bss_5F73]._44] != NULL) {
+                    break;
+                }
+            }
+        }
+        anim = lbl_8036E548._0C04[0]._010[lbl_1_bss_6940[lbl_1_bss_5F73]._44];
+        if (lbl_1_bss_6940[lbl_1_bss_5F73]._45 >= anim->_A) {
+            lbl_1_bss_6940[lbl_1_bss_5F73]._45 = 0;
+        }
+    }
+    fn_8002399C(lbl_8036E548._0060->_34, 0, 0, layout, anim, skn);
+    model = lbl_8036E548._0C04[lbl_1_bss_5F73]._010[lbl_1_bss_6940[lbl_1_bss_5F73]._44];
+    elem = &lbl_8036E548._0060->_34[lbl_1_bss_5F73];
+    elem->_04 = model;
+    elem->_0E = lbl_1_bss_6940[lbl_1_bss_5F73]._45;
+    flag = model != NULL;
+    elem->_5C = 0.0f;
+    elem->_58 = 1;
+    elem->_59 = flag;
+    elem->_5A = flag;
+    elem->_60 = 0.0f;
+    lbl_1_bss_67CC[0] = lbl_8036E548._0C04[0]._008->_10;
+    if (lbl_1_bss_67CC[0] != NULL && lbl_1_bss_6940[lbl_1_bss_5F73]._46 == 0) {
+        fn_80025DDC(lbl_1_bss_67CC[0]);
+        fn_80025C58(lbl_1_bss_67CC[0], lbl_8036E548._0060->_34);
+        if (lbl_1_data_A978[lbl_1_bss_68FC._40[0]] >= 0) {
+            for (i = 0; i < 4; i++) {
+                lbl_1_bss_67CC[i + 1] = (void*)lbl_1_bss_60A0[0][i + 8];
+                fn_80025DDC(lbl_1_bss_67CC[i + 1]);
+                fn_80025C58(lbl_1_bss_67CC[i + 1], &lbl_1_bss_5F7C[0]->_34[i]);
+                if (i + 1 == 4) {
+                    lbl_1_bss_60EC[i + 1]._00 = lbl_1_bss_60A0[0][15];
+                } else {
+                    lbl_1_bss_60EC[i + 1]._00 = lbl_1_bss_60A0[0][i + 13];
+                    fn_80025FFC(lbl_1_bss_67CC[i + 1], &lbl_1_bss_60EC[i + 1], lbl_1_bss_60A0[0]);
+                    fn_80025EEC(&lbl_1_bss_60EC[i + 1], 0, 0);
+                }
+                lbl_1_bss_67B8[i + 1] = (UnkTimer0610*)lbl_1_bss_60EC[i + 1]._0C;
+            }
+            fn_1_D300(actor);
+        }
+        if (lbl_1_bss_3070 != 0) {
+            lbl_1_bss_60EC[0]._00 = lbl_1_bss_60A0[0][12];
+            fn_80025FFC(lbl_1_bss_67CC[0], &lbl_1_bss_60EC[0], lbl_1_bss_60A0[0]);
+            fn_80025EEC(&lbl_1_bss_60EC[0], 0, 0);
+            lbl_1_bss_67B8[0] = (UnkTimer0610*)lbl_1_bss_60EC[0]._0C;
+        }
+    } else {
+        lbl_1_bss_67B8[0] = NULL;
+    }
+    count = lbl_8036E548._0060->_34[0]._00->_06;
+    memset(lbl_8036E548._0C04[0]._162, 0xFF, sizeof(lbl_8036E548._0C04[0]._162));
+    for (i = 0; i < count; i++) {
+        id = lbl_8036E548._0060->_34[0]._00->_18[i]->_00;
+        if (id != 0xFFFF) {
+            lbl_8036E548._0C04[0]._162[id] = i;
+        }
+    }
+    fn_800BD548(lbl_8036E548._0060->_34, 3, lbl_8036E548._00AC[0], lbl_8036E548._00AC[1], lbl_8036E548._00AC[2],
+                lbl_8036E548._00AC[3]);
+    lbl_8036E548._0C04[0]._03C = lbl_8036E548._0C04[0]._038 = lbl_8036E548._0C04[0]._034 = 0.0f;
+    lbl_8036E548._0C04[0]._048 = lbl_8036E548._0C04[0]._044 = lbl_8036E548._0C04[0]._040 = 0.0f;
+    CTRLSetTranslation(&lbl_8036E548._0060->_34[0]._10, 0.0f, 0.0f, 0.0f);
+    CTRLSetRotation(&lbl_8036E548._0060->_34[0]._10, 0.0f, 0.0f, 0.0f);
+    lbl_8036E548._0060->_34[0]._54 = 0.5f;
+    lbl_8036E548._0060->_34[0]._5A = 1;
+    elem = lbl_8036E548._0060->_34;
+    id = lbl_8036E548._0C04[0]._162[3];
+    if (id != 0xFFFF) {
+        fn_800B2BA8(lbl_8036E548._0060->_34[0]._00, id, NULL, 0);
+        elem->_00->_18[id]->_136 = 1;
+    }
+    id = lbl_8036E548._0C04[0]._162[2];
+    if (id != 0xFFFF) {
+        fn_800B2BA8(elem->_00, id, NULL, 0);
+        elem->_00->_18[id]->_136 = 1;
+    }
+    id = lbl_8036E548._0C04[0]._162[1];
+    if (id != 0xFFFF) {
+        fn_800B2BA8(elem->_00, id, NULL, 0);
+        elem->_00->_18[id]->_136 = 1;
+    }
+    if (lbl_8036E548._0C04[0]._162[36] != 0xFFFF) {
+        fn_800B2BA8(elem->_00, lbl_8036E548._0C04[0]._162[36], NULL, 0);
+    }
+    id = lbl_8036E548._0C04[0]._162[46];
+    if (id != 0xFFFF) {
+        fn_800B2BA8(elem->_00, id, NULL, 0);
+        elem->_00->_18[id]->_136 = 1;
+    }
+    fn_800B2C08(lbl_8036E548._0060->_34[0]._00, 4);
+    fn_8001FC4C(lbl_8036E548._2C50[0]);
+    lbl_8036E548._0C04[0]._004 = lbl_8036E548._0060->_34[0]._00;
+    lbl_8036E548._0C04[0]._034 = 0.0f;
+    lbl_8036E548._0C04[0]._038 = 0.0f;
+    lbl_8036E548._0C04[0]._03C = 10.0f;
+    lbl_8036E548._0C04[0]._04C = 0.5f;
+    lbl_8036E548._0C04[0]._25C[1] = 1;
+    lbl_8036E548._0C04[0]._252 = lbl_1_bss_68FC._40[0];
+    lbl_8036E548._0C04[0]._25C[0] = 1;
+    lbl_8036E548._0C04[0]._277 = 0xFF;
+    lbl_8036E548._0060->_34[0]._08 = fn_1_14888;
+    if (lbl_1_bss_60A4[lbl_1_bss_68FC._40[0]] != 0) {
+        fn_800B2B74(lbl_8036E548._0060->_34[0]._00, lbl_8036E548._0C04[0]._162[19]);
+        fn_800B2B74(lbl_8036E548._0060->_34[0]._00, lbl_8036E548._0C04[0]._162[25]);
+        fn_1_ECF8(lbl_1_bss_5F73, 0, 0);
+        fn_800B2B74(lbl_8036E548._0060->_34[0]._00, lbl_8036E548._0C04[0]._162[36]);
+    }
+    switch (lbl_8036E548._0C04[0]._252) {
+    case 33:
+    case 34:
+    case 35:
+    case 36:
+        fn_80063010(actor, elem);
+        break;
+    case 2:
+        lbl_1_bss_60E8 = fn_800638B4(actor, &lbl_8036E548._0060->_34[(s8)lbl_8036E548._0C04[0]._255[0]],
+                                     lbl_8036E548._0060);
+        break;
+    case 19:
+        lbl_1_bss_60E8 = fn_8004B7B4(actor, &lbl_8036E548._0060->_34[(s8)lbl_8036E548._0C04[0]._255[0]],
+                                     lbl_8036E548._0060);
+        break;
+    case 20:
+    case 43:
+        lbl_1_bss_60E8 = fn_800637BC(actor, &lbl_8036E548._0060->_34[(s8)lbl_8036E548._0C04[0]._255[0]],
+                                     lbl_8036E548._0060);
+        break;
+    case 38:
+        lbl_8036E548._0060->_34[(s8)lbl_8036E548._0C04[0]._255[0]]._00->_99 = 1;
+        fn_1_D13C();
+        fn_1_D300(actor);
+        break;
+    case 41:
+        lbl_1_bss_60E8 = fn_800637D4(actor, &lbl_8036E548._0060->_34[(s8)lbl_8036E548._0C04[0]._255[0]],
+                                     lbl_8036E548._0060);
+    case 18:
+    case 40:
+        fn_1_D13C();
+        fn_1_D300(actor);
+        break;
+    case 14:
+    case 37:
+        lbl_1_bss_60E8 = fn_80052634(actor, &lbl_8036E548._0060->_34[(s8)lbl_8036E548._0C04[0]._255[0]],
+                                     lbl_8036E548._0060);
+        break;
+    case 16:
+    case 44:
+    case 45:
+    case 46:
+    case 47:
+        lbl_1_bss_60E8 = fn_80062ED4(actor, &lbl_8036E548._0060->_34[(s8)lbl_8036E548._0C04[0]._255[0]],
+                                     lbl_8036E548._0060);
+        break;
+    default:
+        lbl_1_bss_60E8 = NULL;
+        break;
     }
 }
 
