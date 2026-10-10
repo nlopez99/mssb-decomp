@@ -1170,9 +1170,9 @@ void fn_1_24C4C(PhysNode7730* nodes, s32 count, Vec* external, f32 k, f32 dampin
 }
 
 // .text:0x00024A8C size:0x1C0
-// 89.78%: here the target loads the final 0.015625f with addi and lfs 0(rX), and schedules the
-// call setup differently; its inlined copies in fn_1_25064 and fn_1_25C68 load it directly and
-// match only with `/ 64.0f` (`* 0.015625f` scored 92.90% here and broke both callers).
+// 92.90%: the final call's argument setup is scheduled differently (the target converts
+// task->_24 after loading 0.015625f and the pool addresses). Writing it `/ 64.0f` matches the
+// inlined copies in fn_1_25064 and fn_1_25C68 but drops this function to 89.78%.
 void fn_1_24A8C(void) {
     ChainTask7730* task = lbl_803CC1B8;
     f32 dt;
@@ -1192,7 +1192,7 @@ void fn_1_24A8C(void) {
     if (lbl_803C77B8[0]._00 & 0x40) {
         lbl_1_bss_45868._0000._20 = 1;
     }
-    fn_80038CD0(task->_2B, &lbl_1_bss_45868, lbl_1_bss_43F68, 10.0f, task->_24 / 64.0f);
+    fn_80038CD0(task->_2B, &lbl_1_bss_45868, lbl_1_bss_43F68, 10.0f, task->_24 * 0.015625f);
 }
 
 // .text:0x000248BC size:0x1D0
