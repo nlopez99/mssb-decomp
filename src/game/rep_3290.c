@@ -127,12 +127,12 @@ void fn_3_1160BC(void) {
 void fn_3_1160B8(void) {}
 
 // .text:0x00115C24 size:0x494 mapped:0x80754CB8
-// The target saves one register fewer (four stw, not stmw r27) and keeps the coin loop's
-// counter in the register of the zero it stores, behind an explicit 0 < 100 guard.
+// 97.25%: the target indexes g_Fielders with n + 2 as stored (no clrlwi) and without strength
+// reduction; an int fielder strength-reduces, a u8 one truncates.
 void fn_3_115C24(void) {
-    int i;
+    s32 i;
     int n;
-    s8 fielder;
+    u8 fielder;
     u8 strength;
 
     if (g_GameLogic._125 == 0) {
@@ -177,8 +177,8 @@ void fn_3_115C24(void) {
                 fielder = n + 2;
                 g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]] = fielder;
                 g_Minigame.minigameControlStruct._14[n] = i;
-                g_Fielders[fielder]._20D = i;
                 n++;
+                g_Fielders[fielder]._20D = i;
             }
         }
         fn_3_58870();
