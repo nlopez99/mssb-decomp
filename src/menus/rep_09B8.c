@@ -4583,20 +4583,26 @@ typedef struct MenuItem09B8 {
 
 extern void* fn_800B0A5C_insertQueue(void (*)(void), s32);
 
+// .text:0x0005156C size:0x70
+static inline u16* fn_2_5156C(s32 idx, u16 k) {
+    if (k == 0) {
+        return lbl_80366B18._798[lbl_2_bss_1A824C->_1972B8][idx + 1];
+    } else {
+        return lbl_80366B18._798[lbl_2_bss_1A824C->_1972B8][idx + 1];
+    }
+}
+
 // .text:0x00051470 size:0xF8
 // 98.39%: only the trailing blr differs; dtk split it off as fn_2_51568, past
-// the end of this unit's .text range in splits.txt (0x51568).
+// the end of this unit's .text range in splits.txt (0x51568), like the
+// inlined fn_2_5156C above.
 u16 fn_2_51470(s32 idx, u16 k) {
     u16 sum = 0;
     u16 c;
     u16* p;
     u16 val;
 
-    if (k == 0) {
-        p = lbl_80366B18._798[lbl_2_bss_1A824C->_1972B8][idx + 1];
-    } else {
-        p = lbl_80366B18._798[lbl_2_bss_1A824C->_1972B8][idx + 1];
-    }
+    p = fn_2_5156C(idx, k);
     for (;;) {
         c = *p++;
         if (c & 0x4000) {
