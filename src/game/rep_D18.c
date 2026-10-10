@@ -17,6 +17,7 @@
 #include "game/rep_540.h"
 #include "game/rep_3448.h"
 #include "game/rep_3DA8.h"
+#include "game/rep_3E00.h"
 #include "game/rep_60.h"
 #include "game/rep_720.h"
 #include "game/rep_DB8.h"
@@ -139,7 +140,6 @@ extern void fn_8001A3FC(int arg);
 extern void fn_8001CE74(void);
 extern void fn_800216F8(u8 group, int (*callback)(void));
 extern int fn_80035838(AramEntryD18* entry, int count);
-extern int fn_3_1665E4(void);
 extern void fn_8001E474(void);
 extern void fn_8001F228(void);
 extern void* fn_800B0A5C_insertQueue(void (*)(void), s32);
