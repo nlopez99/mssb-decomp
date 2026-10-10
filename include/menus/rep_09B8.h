@@ -28,5 +28,6 @@ void fn_2_513E0(void* text, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s3
 void fn_2_513E4(void);
 u16 fn_2_513E8(u16* p, u16 k);
 u16 fn_2_51470(s32 idx, u16 k);
+u16* fn_2_5156C(s32 idx, u16 k);
 
 #endif // !__MENUS_rep_09B8_H_
