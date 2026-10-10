@@ -2468,7 +2468,8 @@ void fn_3_127B68(void) {
 }
 
 // .text:0x001274B4 size:0x6B4 mapped:0x80766548
-// 99.95%: the target keeps the stadium in r22, the base in r18.
+// 99.95%: the target keeps the stadium in r22, the base in r18 (declaration orders and the
+// stadium's type do not change it).
 void fn_3_1274B4(void) {
     UnkTask3448* task = lbl_803CC1B8;
     UnkRecord3448* rec;
@@ -3753,6 +3754,7 @@ void fn_3_122D24(void) {
 
 // .text:0x001226D4 size:0x650 mapped:0x80761768
 // 99.67%: the first digit loop computes its digit into r0 and copies it to r29 in the target.
+// Declaration orders, another counter, a digit local and an inline loop helper do not produce it.
 void fn_3_1226D4(void) {
     UnkTask3448* task = lbl_803CC1B8;
     MiniGameStruct* minigame = &g_Minigame;
@@ -4106,7 +4108,8 @@ void fn_3_121908(void) {
 }
 
 // .text:0x00121304 size:0x604 mapped:0x80760398
-// 99.82%: the target keeps i in r19 and leaderPoints in r22, the base the reverse.
+// 99.82%: the target keeps i in r19 and leaderPoints in r22, the base the reverse. Moving i, leader
+// or leaderPoints anywhere, and the order of the leader/tied/i setup, change nothing.
 void fn_3_121304(void) {
     UnkTask3448* task = lbl_803CC1B8;
     s16* points;
@@ -4685,7 +4688,8 @@ void fn_3_11F480(void) {
 }
 
 // .text:0x0011F02C size:0x454 mapped:0x8075E0C0
-// 99.73%: the target keeps i in r19 and leaderPoints in r21, the base the reverse.
+// 99.73%: the target keeps i in r19 and leaderPoints in r21, the base the reverse. Moving any two
+// declarations, other counters for case 0's loops and indexing leaderPoints directly change nothing.
 void fn_3_11F02C(void) {
     u32 i;
     UnkTask3448* task = lbl_803CC1B8;

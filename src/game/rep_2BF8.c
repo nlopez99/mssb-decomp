@@ -907,7 +907,9 @@ void fn_3_EC804(void) {
 }
 
 // .text:0x000EC014 size:0x7F0 mapped:0x8072B0A8
-// 99.92%: the stadium of the playStadiumSound(2) copy sits in r28 in the target, r24 in the base.
+// 99.92%: the stadium of the playStadiumSound(2) copy sits in r28 in the target, r24 in the base
+// (helper forms, an in-place copy with locals at every position, and block-scoped locals change
+// nothing), and case 2's first offset adds _14 + i in the target, i + _14 here.
 void fn_3_EC014(void) {
     UnkTask2BF8* task = lbl_803CC1B8;
     MiniGameStruct* minigame;
