@@ -21,6 +21,7 @@ void fn_3_1658F0(void);
 void fn_3_165978(void);
 void fn_3_16598C(void);
 BOOL fn_3_1659A0(s32 type);
+BOOL fn_3_165D24(void);
 void fn_3_1663AC(void);
 
 #endif // !__GAME_rep_3DA8_H_
