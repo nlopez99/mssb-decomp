@@ -232,6 +232,7 @@ typedef struct UnkTaskState0610 {
 extern u8 lbl_803CBBC0;
 
 extern void fn_8003A2C0(void);
+extern void fn_1_26B7C(UnkTimer0610* timer);
 extern s32 fn_80024DB0(UnkTimer0610* timer);
 extern void fn_80024FA4(Unk0060Elem* model, void* anim, UnkTimer0610* timer, s32 arg3);
 extern void fn_8003414C(Mtx m);
@@ -2421,6 +2422,8 @@ void fn_1_17954(void) {
 }
 
 // .text:0x0001770C size:0x248
+// The data pool base and the bss pool base swap r29/r30; statement orders and
+// the permuter did not fix it; 96.6%
 void fn_1_1770C(void) {
     u8 active;
     lbl_1_data_ABB4[lbl_1_bss_5F71]();
@@ -2714,11 +2717,180 @@ void fn_1_15CE0(void) {
     }
 }
 
+// .text:0x00015760 size:0x580
+// fn_1_1644C is inlined here twice where the target calls it (see fn_1_1540C)
+void fn_1_15760(void) {
+    s32 i = 0;
+    lbl_1_bss_5F73 = 0;
+    if (lbl_1_bss_5F5C == 0) {
+        if (lbl_803C77B8[0]._04 & 8) {
+            if (--lbl_1_bss_307C < 0) {
+                lbl_1_bss_307C = 7;
+            }
+        } else if (lbl_803C77B8[0]._04 & 4) {
+            if (++lbl_1_bss_307C >= 8) {
+                lbl_1_bss_307C = 0;
+            }
+        } else if (lbl_803C77B8[0]._04 & 1) {
+            switch (lbl_1_bss_307C) {
+            case 0: {
+                u8 prev = lbl_1_bss_6940[lbl_1_bss_5F73]._44;
+                u8 slot = prev;
+                do {
+                    if (slot == 0) {
+                        slot = 6;
+                    } else {
+                        slot--;
+                    }
+                } while (lbl_1_data_2390[slot] == 0);
+                lbl_1_bss_6940[lbl_1_bss_5F73]._44 = slot;
+                if (prev != slot) {
+                    lbl_1_bss_5F5C = 1;
+                    lbl_1_bss_6940[lbl_1_bss_5F73]._45 = 0;
+                }
+                break;
+            }
+            case 1: {
+                u8 prev = lbl_1_bss_6940[lbl_1_bss_5F73]._45;
+                if (prev != 0) {
+                    lbl_1_bss_6940[lbl_1_bss_5F73]._45 = prev - 1;
+                } else {
+                    lbl_1_bss_6940[lbl_1_bss_5F73]._45 =
+                        lbl_8036E548._0C04[lbl_1_bss_5F73]._010[lbl_1_bss_6940[lbl_1_bss_5F73]._44]->_A - 1;
+                }
+                if (prev != lbl_1_bss_6940[lbl_1_bss_5F73]._45) {
+                    lbl_1_bss_5F5C = 1;
+                }
+                break;
+            }
+            case 2:
+                if ((lbl_1_data_ABA4 -= 0.01f) < 0.0f) {
+                    lbl_1_data_ABA4 = 0.0f;
+                }
+                break;
+            case 3:
+                fn_1_1644C();
+                break;
+            case 4:
+                lbl_1_bss_3081 ^= 1;
+                break;
+            case 5:
+                fn_1_D6B4();
+                break;
+            case 6:
+                if (lbl_1_bss_5F68 ^= 1) {
+                    lbl_8036E548._0060->_34[0]._5C = 0.0f;
+                    lbl_8036E548._0060->_34[0]._59 = 1;
+                }
+                break;
+            }
+        } else if (lbl_803C77B8[0]._04 & 2) {
+            switch (lbl_1_bss_307C) {
+            case 0: {
+                u8 prev = lbl_1_bss_6940[lbl_1_bss_5F73]._44;
+                u8 slot = prev;
+                do {
+                    if (++slot == 7) {
+                        slot = 0;
+                    }
+                } while (lbl_1_data_2390[slot] == 0);
+                lbl_1_bss_6940[lbl_1_bss_5F73]._44 = slot;
+                if (prev != slot) {
+                    lbl_1_bss_5F5C = 1;
+                    lbl_1_bss_6940[lbl_1_bss_5F73]._45 = 0;
+                }
+                break;
+            }
+            case 1: {
+                u8 prev = lbl_1_bss_6940[lbl_1_bss_5F73]._45;
+                if (++lbl_1_bss_6940[lbl_1_bss_5F73]._45 ==
+                    lbl_8036E548._0C04[lbl_1_bss_5F73]._010[lbl_1_bss_6940[lbl_1_bss_5F73]._44]->_A) {
+                    lbl_1_bss_6940[lbl_1_bss_5F73]._45 = 0;
+                }
+                if (prev != lbl_1_bss_6940[lbl_1_bss_5F73]._45) {
+                    lbl_1_bss_5F5C = 1;
+                }
+                break;
+            }
+            case 2:
+                lbl_1_data_ABA4 += 0.01f;
+                break;
+            case 3:
+                fn_1_1644C();
+                break;
+            case 4:
+                lbl_1_bss_3081 ^= 1;
+                break;
+            case 5:
+                fn_1_D688();
+                break;
+            case 6:
+                if (lbl_1_bss_5F68 ^= 1) {
+                    lbl_8036E548._0060->_34[0]._5C = 0.0f;
+                    lbl_8036E548._0060->_34[0]._59 = 1;
+                    for (i = 0; i < 5; i++) {
+                        if (lbl_1_bss_67B8[i] != NULL) {
+                            fn_1_26B7C(lbl_1_bss_67B8[i]);
+                        }
+                    }
+                }
+                break;
+            }
+        } else if (lbl_803C77B8[0]._04 & 0x1000) {
+            if (lbl_1_bss_30BC == 0) {
+                UnkTask0610* task;
+                lbl_1_bss_30BC = 1;
+                task = fn_800B0A5C_insertQueue(fn_1_CCC8, lbl_803CC1B8->_12 + 1);
+                if (lbl_1_bss_5F69 != 0) {
+                    task->_14 = lbl_1_bss_67B8[1];
+                    task->_18 = lbl_1_data_F56C;
+                } else {
+                    task->_14 = lbl_1_bss_67B8[2];
+                    task->_18 = lbl_1_data_F56E;
+                }
+            }
+        } else if (lbl_803C77B8[0]._04 & 0x400) {
+            switch (lbl_1_bss_307C) {
+            case 6:
+                if ((lbl_803C77B8[0]._04 & 0x400) && lbl_1_bss_5F68 != 0) {
+                    lbl_1_bss_5F64 = lbl_1_data_ABA4;
+                }
+                break;
+            }
+        } else if (lbl_803C77B8[0]._04 & 0x800) {
+            switch (lbl_1_bss_307C) {
+            case 6:
+                if ((lbl_803C77B8[0]._04 & 0x800) && lbl_1_bss_5F68 != 0) {
+                    lbl_1_bss_5F64 = -lbl_1_data_ABA4;
+                }
+                break;
+            }
+        } else if (lbl_803C77B8[0]._04 & 0x100) {
+            switch (lbl_1_bss_307C) {
+            case 6:
+                if ((lbl_803C77B8[0]._04 & 0x100) && lbl_1_bss_5F68 != 0) {
+                    lbl_1_bss_5F64 = 1.0f;
+                }
+                break;
+            case 5:
+                if (lbl_803C77B8[0]._04 & 0x100) {
+                    fn_1_D650();
+                }
+                break;
+            }
+        } else if (lbl_803C77B8[0]._04 & 0x200) {
+            lbl_1_bss_307C = 0;
+            lbl_1_bss_5F71 = 1;
+        }
+    }
+    fn_1_D71C(lbl_1_bss_5F73);
+}
+
 // .text:0x0001540C size:0x354
-// fn_1_1644C is inlined here twice, where the target calls it; the rest is
-// believed right
+// Matches once fn_1_1644C stays a call (checked by padding fn_1_1644C with dead
+// statements in a scratch copy); MWCC inlines fn_1_1644C as written
 void fn_1_1540C(void) {
-    char text[0x28];
+    char text[0x18];
     s32 top;
     s32 lines;
     s32 selected;
@@ -2913,6 +3085,8 @@ void fn_1_14FB8(void) {
 }
 
 // .text:0x0001496C size:0x64C
+// The target loads lbl_1_bss_6940[lbl_1_bss_5F73]._46 at entry (unused) before
+// clearing lbl_1_bss_5F73; otherwise registers only
 void fn_1_1496C(void) {
     UnkTaskMenu0610* task;
     s32 i;
@@ -3142,6 +3316,8 @@ void fn_1_12F18(UnkCamera0610* arg0) {
 }
 
 // .text:0x000129D0 size:0x548
+// The target keeps 0.0f and 57.295776f in f31/f30 across the CTRL calls and
+// tests the BOOL from fn_1_D660 (cmpwi) where this tests the byte (cmplwi)
 void fn_1_129D0(void) {
     Unk8036E548Actor* actor;
     Unk0060* model;
@@ -3809,6 +3985,7 @@ void fn_1_10458(void) {
 }
 
 // .text:0x00010044 size:0x414
+// Only fn_800330CC's argument setup differs: the target loads r8 (0) before r7
 void fn_1_10044(void) {
     Mtx rotX;
     Mtx rotY;
@@ -4441,6 +4618,7 @@ void fn_1_E8D4(void) {
 }
 
 // .text:0x0000E098 size:0x83C
+// Case 10 allocates one register fewer than the target (r21); registers only
 void fn_1_E098(void) {
     UnkSlotState0610* st = lbl_1_bss_3218;
     s32 i;
@@ -4478,6 +4656,7 @@ void fn_1_E098(void) {
                 UnkTaskState0610* task = (UnkTaskState0610*)lbl_803CC1B8;
                 u8* frame;
                 u8* animId;
+                u8 anim45;
                 Unk0060Elem* elem;
                 UnkAnimRef0610* anim;
                 task->_00 = fn_1_DE1C;
@@ -4488,8 +4667,9 @@ void fn_1_E098(void) {
                 *frame = lbl_1_bss_3218[task->_15]._2;
                 anim = lbl_8036E548._0C04[lbl_1_bss_5F73]._010[*animId];
                 elem = &lbl_8036E548._0060->_34[lbl_1_bss_5F73];
+                anim45 = *frame;
                 elem->_04 = anim;
-                elem->_0E = *frame;
+                elem->_0E = anim45;
                 elem->_5C = 0.0f;
                 elem->_58 = 1;
                 elem->_5A = elem->_59 = anim != NULL;
@@ -4672,12 +4852,14 @@ void fn_1_DE1C(void) {
 }
 
 // .text:0x0000D9B8 size:0x464
+// Registers only: the target keeps lbl_1_bss_5F73 in r29 and elem in r12
 void fn_1_D9B8(void) {
     UnkTaskState0610* task;
     UnkList0610* list;
     Unk0060Elem* elem;
     UnkAnimRef0610* anim;
     Unk6940* state;
+    u8 anim45;
     f32 start;
     s16 limit;
     s32 id;
@@ -4706,8 +4888,9 @@ void fn_1_D9B8(void) {
         state->_45 = lbl_1_bss_3218[task->_15]._2;
         anim = lbl_8036E548._0C04[lbl_1_bss_5F73]._010[lbl_1_bss_6940[lbl_1_bss_5F73]._44];
         elem = &lbl_8036E548._0060->_34[lbl_1_bss_5F73];
+        anim45 = state->_45;
         elem->_04 = anim;
-        elem->_0E = state->_45;
+        elem->_0E = anim45;
         elem->_5C = 0.0f;
         elem->_58 = 1;
         elem->_5A = elem->_59 = anim != NULL;
@@ -4958,6 +5141,8 @@ void fn_1_D13C(void) {
 }
 
 // .text:0x0000CDC8 size:0x374
+// _0060->_34[idx]._00 loads as add+lwz 52 where the target forms idx*144+52 and
+// uses lwzx (fn_1_D13C gets it right); the setup block is scheduled differently
 void fn_1_CDC8(void) {
     UnkList0610** lists[2];
     UnkTimer0610* timers[2];
