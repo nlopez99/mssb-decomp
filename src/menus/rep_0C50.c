@@ -3684,7 +3684,8 @@ void fn_2_72D60(UnkTask0C50* task) {
 }
 
 // .text:0x00072CB4 size:0xAC
-// 90.00%: task and &lbl_803CBBC4 sit in swapped saved registers (r31/r30), as in fn_2_72814.
+// 90.00%: task and &lbl_803CBBC4 sit in swapped saved registers (r31/r30), as in fn_2_72814;
+// (s8) on the first isAnimDone result swaps them back but adds an extsb (97.56%).
 void fn_2_72CB4(UnkTask0C50* task) {
     if (lbl_803CBBC4._3 == 1 ? TRUE : FALSE) {
         s32 n = isAnimDone(task, 0, 0);
@@ -3743,7 +3744,8 @@ void fn_2_729E0(UnkTask0C50* task) {
 }
 
 // .text:0x0007293C size:0xA4
-// 89.51%: task and &lbl_803CBBC4 sit in swapped saved registers (r31/r30), as in fn_2_72814.
+// 89.51%: task and &lbl_803CBBC4 sit in swapped saved registers (r31/r30), as in fn_2_72814;
+// (s8) on the first isAnimDone result swaps them back but adds an extsb (97.44%).
 void fn_2_7293C(UnkTask0C50* task) {
     if (lbl_803CBBC4._3 == 1 ? TRUE : FALSE) {
         s32 n = isAnimDone(task, 0, 25);
@@ -3770,8 +3772,9 @@ void fn_2_728C0(UnkTask0C50* task) {
 }
 
 // .text:0x00072814 size:0xAC
-// 90.00%: task and &lbl_803CBBC4 sit in swapped saved registers (r31/r30);
-// declaration orders, an array type for lbl_803CBBC4 and the permuter did not move them.
+// 90.00%: task and &lbl_803CBBC4 sit in swapped saved registers (r31/r30). Only a separate
+// variable for the first isAnimDone result moves them ((s8) or an s16 wrapper: 97.56%, plus an
+// extsb); int/u8/u16 casts, a reused result local and helper forms of the _3 test did not.
 void fn_2_72814(UnkTask0C50* task) {
     if (lbl_803CBBC4._3 == 1 ? TRUE : FALSE) {
         s32 n = isAnimDone(task, 0, 0);
