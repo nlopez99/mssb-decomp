@@ -355,15 +355,14 @@ void fn_2_1641C(void) {
 }
 
 // .text:0x00015E80 size:0x59C
-// 97.52%: after the cursor loop the target re-extends port from the raw parameter and
-// frees a saved register (one fewer here), and it keeps a redundant `bne` before the
-// branch to the shared fn_2_15AFC call.
+// 99.62%: the target keeps the zero stored to _4A/_4B in r4 (r0 here), and a redundant
+// `bne` before the branch to the shared fn_2_15AFC call.
 void fn_2_15E80(u8 port) {
     Pad04B0 pad;
-    s32 i;
-    s32 first;
     s32 prev;
+    s32 first;
     s32 cur;
+    s32 i;
     s32 slot = lbl_8034E9A0._46F8[port] + 4;
     s32 idx = lbl_803C66B0._59[port];
 
@@ -455,7 +454,7 @@ void fn_2_15E80(u8 port) {
             fn_2_14CA0(idx, &pad);
             cur = lbl_2_bss_F410._00[slot];
         } while (lbl_8034E9A0._4757[lbl_800FE5D4[cur]] != 0 && first != cur && prev != cur);
-        if (lbl_2_bss_F410._10[port] == lbl_2_bss_F410._10[port ^ 1] && lbl_803C5EA4._5 != 0) {
+        if (lbl_2_bss_F410._00[port + 4] == lbl_2_bss_F410._00[(port ^ 1) + 4] && lbl_803C5EA4._5 != 0) {
             lbl_2_bss_F410._00[slot]++;
             if (lbl_2_bss_F410._00[slot] >= 12) {
                 lbl_2_bss_F410._00[slot] = 0;
