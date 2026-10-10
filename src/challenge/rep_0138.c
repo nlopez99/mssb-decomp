@@ -4,6 +4,8 @@
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/gx.h"
 #include "string.h"
+#include "stdarg.h"
+#include "C3/control.h"
 
 extern void fn_80048C1C(void);
 extern void fn_80048C28(void);
@@ -24,6 +26,10 @@ extern void fn_800AD038(void* arg0);
 extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_800B472C(void* arg0);
 extern void fn_800A7D4C(s32 arg0, void* arg1);
+extern void fn_1_196C(void);
+extern s32 fn_800B7D3C(s32 arg0, Vec* corners, Mtx mtx);
+extern void DOVARender(struct DObj0138* obj, MtxPtr camera, u8 numLights, va_list* list);
+extern void fn_800B996C(void (*callback)(GXTevStageID, GXIndTexStageID, GXIndTexMtxID, GXTexCoordID, GXTexMapID));
 extern u8 lbl_803CBBC0;
 
 extern struct {
@@ -39,9 +45,43 @@ typedef struct Task0138 {
 
 extern Task0138* lbl_803CC1B8;
 
+typedef struct DObj0138 {
+    /* 0x00 */ u8 _00[0x18];
+    /* 0x18 */ Mtx _18;
+    /* 0x48 */ u8 _48[0x54 - 0x48];
+    /* 0x54 */ f32 _54;
+    /* 0x58 */ f32 _58;
+    /* 0x5C */ f32 _5C;
+    /* 0x60 */ f32 _60;
+    /* 0x64 */ f32 _64;
+    /* 0x68 */ f32 _68;
+} DObj0138;
+
+typedef struct GeoEntry0138 {
+    /* 0x0 */ DObj0138* _0;
+    /* 0x4 */ u32 _4;
+} GeoEntry0138;
+
+typedef struct Geo0138 {
+    /* 0x00 */ u8 _00[0x10];
+    /* 0x10 */ GeoEntry0138* _10;
+} Geo0138;
+
+typedef struct LayoutEntry0138 {
+    /* 0x00 */ Control* _00;
+    /* 0x04 */ u8 _04[0x14 - 0x4];
+    /* 0x14 */ u16 _14;
+    /* 0x16 */ u8 _16[0x1A - 0x16];
+    /* 0x1A */ u16 _1A;
+} LayoutEntry0138; // size: 0x1C
+
 typedef struct Layout0138 {
-    /* 0x0 */ u8 _0[0x6];
-    /* 0x6 */ u16 _6;
+    /* 0x00 */ u8 _00[0x6];
+    /* 0x06 */ u16 _6;
+    /* 0x08 */ u8 _08[0x10 - 0x8];
+    /* 0x10 */ Geo0138* _10;
+    /* 0x14 */ u8 _14[0x20 - 0x14];
+    /* 0x20 */ LayoutEntry0138 _20[1];
 } Layout0138;
 
 typedef struct File0138 {
@@ -80,10 +120,12 @@ extern struct {
     /* 0x22E */ s16 _22E;
     /* 0x230 */ s8 _230;
     /* 0x231 */ s8 _231;
-    /* 0x232 */ u8 _232[0x234 - 0x232];
+    /* 0x232 */ u8 _232;
+    /* 0x233 */ s8 _233;
     /* 0x234 */ u8 _234;
-    /* 0x235 */ u8 _235[0x238 - 0x235];
-    /* 0x238 */ u8 _238;
+    /* 0x235 */ s8 _235;
+    /* 0x236 */ u8 _236[0x238 - 0x236];
+    /* 0x238 */ s8 _238;
     /* 0x239 */ u8 _239;
     /* 0x23A */ u16 _23A;
     /* 0x23C */ s8 _23C;
@@ -278,10 +320,21 @@ static u8 lbl_1_data_A6D = 1;
 static f32 lbl_1_data_A70 = 1.0f;
 static f32 lbl_1_data_A74[2][3] = { { 0.5f, 0.0f, 0.0f }, { 0.0f, 0.5f, 0.0f } };
 
-extern u8 lbl_1_bss_C2;
-extern s32 lbl_1_bss_C4;
-extern GXTexObj lbl_1_bss_4E4;
-extern Fog0138* lbl_1_bss_4E0;
+static u16 lbl_1_bss_520[0x1544] ATTRIBUTE_ALIGN(32);
+static GXTexObj lbl_1_bss_4E4;
+static Fog0138* lbl_1_bss_4E0;
+static u8 lbl_1_bss_2E0[0x200];
+static u8 lbl_1_bss_E0[0x200];
+static u8 lbl_1_bss_DC;
+static GXIndTexScale lbl_1_bss_D8;
+static GXIndTexScale lbl_1_bss_D4;
+static u8 lbl_1_bss_D1;
+static u8 lbl_1_bss_D0;
+static u8 lbl_1_bss_C8[8];
+static s32 lbl_1_bss_C4;
+static u8 lbl_1_bss_C2;
+static u8 lbl_1_bss_C1;
+static u8 lbl_1_bss_C0;
 
 // .text:0x37D0 size:0x7C
 void fn_1_85A8(void) {
@@ -477,6 +530,140 @@ void fn_1_77EC(void* arg0) {
     fn_1_73B8(arg0, 3, lbl_1_data_848[0], lbl_1_data_848[1], lbl_1_data_848[2]);
 }
 
+// .text:0x25E0 size:0x434
+void fn_1_73B8(void* arg0, u8 count, ...) {
+    u16 idx;
+    Draw0138* draw = arg0;
+    MtxPtr world;
+    Layout0138* layout;
+    DObj0138* obj;
+    Geo0138* geo;
+    MtxPtr camera;
+    s32 i;
+    s32 end;
+
+    Mtx mtx;
+    Vec corners[8];
+    va_list args;
+
+    layout = draw->_68;
+    geo = layout->_10;
+    if (lbl_1_data_8C8 == 1) {
+        memset(lbl_1_bss_2E0, 0, sizeof(lbl_1_bss_2E0));
+        lbl_1_data_8C8 = 0;
+    } else if (lbl_1_data_8C8 == 2) {
+        memset(lbl_1_bss_2E0, 1, sizeof(lbl_1_bss_2E0));
+        lbl_1_data_8C8 = 0;
+    }
+    end = layout->_6;
+    lbl_1_common_bss_472B4._22C = 0;
+    if (lbl_1_common_bss_472B4._22E < 0) {
+        i = 0;
+    } else {
+        i = lbl_1_common_bss_472B4._22E;
+        end = lbl_1_common_bss_472B4._22E + 1;
+    }
+    world = draw->_08;
+    camera = draw->_38;
+    for (; i < end; i++) {
+        if (lbl_1_bss_2E0[i] == 0 && (idx = layout->_20[i]._14) != 0xFFFF) {
+            if (layout->_20[i]._1A & 1) {
+                GXSetZMode(GX_FALSE, GX_ALWAYS, GX_TRUE);
+            } else {
+                GXSetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
+            }
+            switch (layout->_20[i]._1A & 6) {
+            case 2:
+                GXSetBlendMode(GX_BM_BLEND, GX_BL_ONE, GX_BL_ONE, GX_LO_CLEAR);
+                break;
+            case 4:
+                GXSetBlendMode(GX_BM_BLEND, GX_BL_DSTCOL, GX_BL_ZERO, GX_LO_CLEAR);
+                break;
+            default:
+                GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+                break;
+            }
+            obj = geo->_10[idx]._0;
+            CTRLBuildMatrix(layout->_20[i]._00, obj->_18);
+            PSMTXConcat(world, obj->_18, obj->_18);
+            PSMTXConcat(camera, obj->_18, mtx);
+            corners[0].x = obj->_58;
+            corners[0].y = obj->_60;
+            corners[0].z = obj->_64;
+            corners[1].x = obj->_54;
+            corners[1].y = obj->_60;
+            corners[1].z = obj->_64;
+            corners[2].x = obj->_54;
+            corners[2].y = obj->_60;
+            corners[2].z = obj->_68;
+            corners[3].x = obj->_58;
+            corners[3].y = obj->_60;
+            corners[3].z = obj->_68;
+            corners[4].x = obj->_58;
+            corners[4].y = obj->_5C;
+            corners[4].z = obj->_64;
+            corners[5].x = obj->_54;
+            corners[5].y = obj->_5C;
+            corners[5].z = obj->_64;
+            corners[6].x = obj->_54;
+            corners[6].y = obj->_5C;
+            corners[6].z = obj->_68;
+            corners[7].x = obj->_58;
+            corners[7].y = obj->_5C;
+            corners[7].z = obj->_68;
+            if (fn_800B7D3C(0, corners, mtx) != 0) {
+                lbl_1_common_bss_472B4._22C++;
+                va_start(args, count);
+                DOVARender(obj, camera, count, &args);
+            }
+        }
+    }
+    if (lbl_1_bss_C1 != 0) {
+        end = layout->_6;
+        if (lbl_1_common_bss_472B4._22E < 0) {
+            i = 0;
+        } else {
+            i = lbl_1_common_bss_472B4._22E;
+            end = lbl_1_common_bss_472B4._22E + 1;
+        }
+        for (; i < end; i++) {
+            if (lbl_1_bss_2E0[i] == 0 && layout->_20[i]._14 != 0xFFFF) {
+                obj = geo->_10[layout->_20[i]._14]._0;
+                CTRLBuildMatrix(layout->_20[i]._00, obj->_18);
+                PSMTXConcat(world, obj->_18, obj->_18);
+                PSMTXConcat(camera, obj->_18, mtx);
+                corners[0].x = obj->_58;
+                corners[0].y = obj->_60;
+                corners[0].z = obj->_64;
+                corners[1].x = obj->_54;
+                corners[1].y = obj->_60;
+                corners[1].z = obj->_64;
+                corners[2].x = obj->_54;
+                corners[2].y = obj->_60;
+                corners[2].z = obj->_68;
+                corners[3].x = obj->_58;
+                corners[3].y = obj->_60;
+                corners[3].z = obj->_68;
+                corners[4].x = obj->_58;
+                corners[4].y = obj->_5C;
+                corners[4].z = obj->_64;
+                corners[5].x = obj->_54;
+                corners[5].y = obj->_5C;
+                corners[5].z = obj->_64;
+                corners[6].x = obj->_54;
+                corners[6].y = obj->_5C;
+                corners[6].z = obj->_68;
+                corners[7].x = obj->_58;
+                corners[7].y = obj->_5C;
+                corners[7].z = obj->_68;
+                if (fn_800B7D3C(0, corners, mtx) != 0) {
+                    fn_1_4E98(obj, camera);
+                }
+            }
+        }
+    }
+}
+
 // .text:0x24A8 size:0x138
 void fn_1_7280(void) {
     Draw0138* draw;
@@ -523,6 +710,81 @@ void fn_1_717C(File0138* file) {
     haveActLayoutPointToGeoHeader(layout, geo);
     lbl_1_common_bss_472B4._05C[3]._68 = layout;
     lbl_1_common_bss_472B4._05C[2]._68 = layout;
+}
+
+// .text:0x203C size:0x368
+void fn_1_6E14(void) {
+    fn_1_7960();
+    if (lbl_1_common_bss_472B4._238 == 0) {
+        fn_1_7280();
+    } else {
+        fn_1_196C();
+    }
+    if (lbl_803C77B8[0]._02 & 0x1000) {
+        SetFogNoneAgain();
+        lbl_803CC1B8->_00 = fn_1_66C4;
+    } else if (lbl_803C77B8[0]._02 & 0x200) {
+        lbl_1_common_bss_472B4._235 = 0;
+        lbl_1_common_bss_472B4._238 = 0;
+        lbl_1_common_bss_472B4._232 ^= 1;
+        lbl_1_common_bss_472B4._22E = -1;
+    }
+    if (lbl_1_common_bss_472B4._232 != 0) {
+        switch (lbl_803C77B8[0]._04) {
+        case 8:
+            if (--lbl_1_common_bss_472B4._233 < 0) {
+                lbl_1_common_bss_472B4._233 = 7;
+            }
+            break;
+        case 4:
+            if (++lbl_1_common_bss_472B4._233 >= 8) {
+                lbl_1_common_bss_472B4._233 = 0;
+            }
+            break;
+        case 0x100:
+            switch (lbl_1_common_bss_472B4._233) {
+            case 0:
+                lbl_1_common_bss_472B4._235 = 1;
+                lbl_1_common_bss_472B4._232 = 0;
+                break;
+            case 1:
+                lbl_1_common_bss_472B4._22E = -1;
+                lbl_1_common_bss_472B4._235 = 1;
+                lbl_1_common_bss_472B4._232 = 0;
+                break;
+            case 2:
+                lbl_1_common_bss_472B4._235 = 1;
+                lbl_1_common_bss_472B4._232 = 0;
+                break;
+            case 3:
+                lbl_1_common_bss_472B4._235 = 1;
+                lbl_1_common_bss_472B4._232 = 0;
+                break;
+            case 4:
+                lbl_1_common_bss_472B4._234 ^= 1;
+                break;
+            case 5:
+                lbl_1_common_bss_472B4._235 = 1;
+                lbl_1_common_bss_472B4._232 = 0;
+                break;
+            case 6:
+                lbl_1_bss_C0 ^= 1;
+                break;
+            case 7:
+                lbl_1_bss_C1 ^= 1;
+                break;
+            }
+            break;
+        }
+    }
+    if (lbl_1_common_bss_472B4._235 != 0) {
+        lbl_1_data_860[lbl_1_common_bss_472B4._233]();
+    }
+    if (lbl_1_bss_C0 != 0) {
+        fn_800B996C(fn_1_5544);
+    } else {
+        fn_800B996C(NULL);
+    }
 }
 
 // .text:0x18EC size:0x184
@@ -662,6 +924,30 @@ void fn_1_5698(void) {
     GXEnd();
     GXSetNumIndStages(0);
     GXSetTevDirect(GX_TEVSTAGE0);
+}
+
+// .text:0x76C size:0x154
+void fn_1_5544(GXTevStageID stage, GXIndTexStageID indStage, GXIndTexMtxID mtx, GXTexCoordID coord, GXTexMapID map) {
+    GXLoadTexObj(&lbl_1_bss_4E4, map);
+    if (lbl_1_bss_DC != 0) {
+        if (lbl_1_bss_DC & 2) {
+            map--;
+        }
+        if (lbl_1_bss_DC & 4) {
+            coord--;
+        }
+        GXSetTevOrder(stage, coord, map, GX_COLOR_NULL);
+        GXSetTevColorIn(stage, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_TEXC);
+        GXSetTevColorOp(stage, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+        GXSetTevAlphaIn(stage, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_TEXA);
+        GXSetTevAlphaOp(stage, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    } else {
+        GXSetNumIndStages(1);
+        GXSetIndTexMtx(mtx, lbl_1_data_A74, lbl_1_data_A70);
+        GXSetIndTexOrder(indStage, coord, map);
+        GXSetIndTexCoordScale(indStage, lbl_1_bss_D8, lbl_1_bss_D4);
+        GXSetTevIndWarp(stage, indStage, lbl_1_data_A6D, lbl_1_bss_D1, mtx);
+    }
 }
 
 // .text:0x768 size:0x4
