@@ -70,6 +70,7 @@ extern BOOL fn_80021518(s32 group, void* data);
 extern void fn_80021954(void** group);
 extern void fn_80021980(void* group);
 extern void fn_800ACFB0(void* ptr);
+extern s32 fn_80062890(s16 arg0);
 extern void* fn_800B0A5C_insertQueue(void (*callback)(void), s32 arg1);
 extern void fn_800B0A14_removeQueue(void);
 
@@ -596,6 +597,103 @@ void fn_1_BA64(void) {
         task->_00 = fn_1_B5B8;
         lbl_1_bss_2FDF = 0;
         break;
+    }
+}
+
+// .text:0x0000B5B8 size:0x4AC
+// Registers differ (rep & 0x800, trg and the loop counter), and the target
+// converts fx with clrlwi before the inlined sndFXStartEx where this copies it.
+void fn_1_B5B8(void) {
+    u16 rep = lbl_803C77B8[0]._04;
+    u16 trg = lbl_803C77B8[0]._02;
+    s8 i;
+    s16 n;
+    s32 fx;
+
+    if (rep & 0x800) {
+        lbl_1_bss_2FE0 = 0;
+    } else if (rep & 0x400) {
+        lbl_1_bss_2FE0 = 1;
+    } else if (lbl_1_bss_2FE0 == 0) {
+        if (trg & 0x100) {
+            if (lbl_1_bss_2FE1 == 0) {
+                fn_1_BEF4(lbl_1_bss_3050);
+                lbl_1_bss_3050 = fn_1_BF34(lbl_1_data_1CA2);
+            } else if (lbl_1_bss_2FE1 == 1) {
+                fx = lbl_1_data_188C[lbl_1_bss_2FE2];
+                fn_1_BEF4(lbl_1_bss_304C);
+                lbl_1_bss_304C = fn_1_BF34(fx);
+            } else if (lbl_1_bss_2FE1 == 2) {
+                fx = lbl_1_data_18EC[lbl_1_bss_2FE4];
+                fn_1_BEF4(lbl_1_bss_3048);
+                lbl_1_bss_3048 = fn_1_BF34(fx);
+            } else if (lbl_1_bss_2FE1 == 3) {
+                lbl_1_bss_3044 = fn_80062890(lbl_1_bss_2FE6);
+            }
+        } else if (trg & 0x1200) {
+            for (i = (s8)lbl_800EF808._390 - 1; i > 0; i--) {
+                if (!fn_800214D0()) {
+                    break;
+                }
+            }
+            fn_800ACFB0(lbl_800EF808.groups[0x29]);
+            fn_800ACFB0(lbl_800EF808.groups[1]);
+            ((Task02A8*)lbl_803CC1B8)->_00 = fn_1_A348;
+        } else if (rep & 1) {
+            if (lbl_1_bss_2FE1 == 0) {
+                if (rep & 0x800) {
+                    lbl_1_data_1CA2 -= 10;
+                } else {
+                    lbl_1_data_1CA2 -= 1;
+                }
+                if (lbl_1_data_1CA2 < 0x151) {
+                    lbl_1_data_1CA2 = 0x1B6;
+                }
+            } else if (lbl_1_bss_2FE1 == 1) {
+                if (--lbl_1_bss_2FE2 < 0) {
+                    lbl_1_bss_2FE2 = 47;
+                }
+            } else if (lbl_1_bss_2FE1 == 2) {
+                if (--lbl_1_bss_2FE4 < 0) {
+                    lbl_1_bss_2FE4 = 23;
+                }
+            } else if (lbl_1_bss_2FE1 == 3) {
+                if (--lbl_1_bss_2FE6 < 0) {
+                    lbl_1_bss_2FE6 = 68;
+                }
+            }
+        } else if (rep & 2) {
+            if (lbl_1_bss_2FE1 == 0) {
+                n = lbl_1_data_1CA2 + 1;
+                if (rep & 0x800) {
+                    n = lbl_1_data_1CA2 + 10;
+                }
+                lbl_1_data_1CA2 = n;
+                if (n > 0x1B6) {
+                    lbl_1_data_1CA2 = 0x151;
+                }
+            } else if (lbl_1_bss_2FE1 == 1) {
+                if (++lbl_1_bss_2FE2 > 47) {
+                    lbl_1_bss_2FE2 = 0;
+                }
+            } else if (lbl_1_bss_2FE1 == 2) {
+                if (++lbl_1_bss_2FE4 > 23) {
+                    lbl_1_bss_2FE4 = 0;
+                }
+            } else if (lbl_1_bss_2FE1 == 3) {
+                if (++lbl_1_bss_2FE6 > 68) {
+                    lbl_1_bss_2FE6 = 0;
+                }
+            }
+        } else if (rep & 8) {
+            if (--lbl_1_bss_2FE1 < 0) {
+                lbl_1_bss_2FE1 = 3;
+            }
+        } else if (rep & 4) {
+            if (++lbl_1_bss_2FE1 > 3) {
+                lbl_1_bss_2FE1 = 0;
+            }
+        }
     }
 }
 
