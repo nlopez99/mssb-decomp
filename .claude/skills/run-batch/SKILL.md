@@ -40,7 +40,7 @@ Keep a batch log in the batch worktree's `build/batch-<N>.md` (`build/` is ignor
    2. Run `python3 tools/link_trial.py` in the batch worktree; commit the units it links.
    3. Apply the skill feedback that cost time, caused a mistake or recurred, in one commit; lessons go in the notes.
    4. Update `docs/backlog.md`: drop what was done, add the follow-ups and open escalations.
-   5. Run `python3 tools/regress.py --base main`: its summary is the pull request's evidence, with the per-unit strict byte gains from the reports and the wall time.
+   5. Undo any trade merged during the batch: the pull request carries no dropped score (batch 10's maintainer chose to give up 3.9 KB of matched inlined copies rather than push past the hook). Run `python3 tools/regress.py --base main`: its summary is the pull request's evidence, with the per-unit strict byte gains from the reports and the wall time.
    6. Ask the user before pushing. Push with the output sent to a file, since the pre-push hook runs `regress.py` and a pipe to `tail` breaks it. Open the pull request (CONTRIBUTING's evidence and AI disclosure), wait for `gh pr checks`, then run `python3 tools/publish_report.py` on its tip, so the Report run on `main` finds a report when it is merged.
 
    Done when the pull request's checks pass and its report is published.
