@@ -500,18 +500,14 @@ void fn_3_5A87C(void) {
         g_Scores._AB = 5;
         g_Scores._AA = 5;
     }
-    g_GameLogic._13E[0] = 0;
-    g_GameLogic._140[0] = 0;
-    g_GameLogic.batterHandedness[0] = 0;
-    g_GameLogic.teamAIInd[0] = 0;
-    g_GameLogic.autoFielding[0] = 0;
-    g_GameLogic.battingAIInd[0] = 0;
-    g_GameLogic._13E[1] = 0;
-    g_GameLogic._140[1] = 0;
-    g_GameLogic.batterHandedness[1] = 0;
-    g_GameLogic.teamAIInd[1] = 0;
-    g_GameLogic.autoFielding[1] = 0;
-    g_GameLogic.battingAIInd[1] = 0;
+    for (i = 0; i < 2; i++) {
+        g_GameLogic._13E[i] = 0;
+        g_GameLogic._140[i] = 0;
+        g_GameLogic.batterHandedness[i] = 0;
+        g_GameLogic.teamAIInd[i] = 0;
+        g_GameLogic.autoFielding[i] = 0;
+        g_GameLogic.battingAIInd[i] = 0;
+    }
     g_GameLogic.AIDifficulty0Special3Weak[0] = gameInitOptions._3;
     g_GameLogic.AIDifficulty0Special3Weak[1] = gameInitOptions._3;
     g_GameLogic.homeTeamBattingInd_fieldingTeam = 0;
@@ -655,6 +651,10 @@ void fn_3_5A684(void) {
     g_Strikes.forcedOutToEndInningInd = 0;
 }
 
+static inline s16 getSlotCharID(u8 slot) {
+    return inMemRoster[slot / 9][slot % 9].stats.CharID;
+}
+
 // .text:0x0005A28C size:0x3F8 mapped:0x80699320
 void fn_3_5A28C(void) {
     UnkTaskD18* task = lbl_803CC1B8;
@@ -687,7 +687,7 @@ void fn_3_5A28C(void) {
         }
         break;
     case 4:
-        group = fn_800698F8(inMemRoster[lbl_800EF808._39A / 9][lbl_800EF808._39A % 9].stats.CharID);
+        group = fn_800698F8(getSlotCharID(lbl_800EF808._39A));
         fn_800216F8(group + 5, fn_3_90F48);
         g_UnkSimulation_31AC0._4++;
         break;
