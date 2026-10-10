@@ -3572,6 +3572,7 @@ void fn_1_135C0(void) {
     UnkAnimRef0610* anim;
     Unk0060Elem* elem;
     u32 flag;
+    u8 frame;
 
     fn_80023B04(13, &lbl_1_bss_3070);
     lbl_8036E548._0060 = ActorObjectInitTable(1);
@@ -3645,9 +3646,10 @@ void fn_1_135C0(void) {
     }
     fn_8002399C(lbl_8036E548._0060->_34, 0, 0, layout, anim, skn);
     model = lbl_8036E548._0C04[lbl_1_bss_5F73]._010[lbl_1_bss_6940[lbl_1_bss_5F73]._44];
+    frame = lbl_1_bss_6940[lbl_1_bss_5F73]._45;
     elem = &lbl_8036E548._0060->_34[lbl_1_bss_5F73];
     elem->_04 = model;
-    elem->_0E = lbl_1_bss_6940[lbl_1_bss_5F73]._45;
+    elem->_0E = frame;
     flag = model != NULL;
     elem->_5C = 0.0f;
     elem->_58 = 1;
