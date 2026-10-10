@@ -485,7 +485,9 @@ void fn_3_145EB8(void) {
 }
 
 // .text:0x00145B98 size:0x320 mapped:0x80784C2C
-// 99.88%: registers only; g_Minigame and its stride-1 copy swap r26 and r28.
+// 99.88%: registers only; g_Minigame and its stride-1 copy swap r26 and r28. The permuter
+// matched it with `mg = &g_Minigame;` (MiniGameStruct*) atop the team loop and
+// `((Unk37A8Minigame*)mg)->_1CA9[i]`; without that cast it scores 98.22%.
 void fn_3_145B98(void) {
     s32 list[4];
     int team;
@@ -570,7 +572,7 @@ void fn_3_145AD0(int player) {
 }
 
 // .text:0x001453BC size:0x714 mapped:0x80784450
-// 87.16%: registers and scheduling; the target reads the timer with lhau and keeps
+// 87.25%: registers and scheduling; the target reads the timer with lhau and keeps
 // other pointers in saved registers.
 void fn_3_1453BC(int coin) {
     UnkMgEntry3310* entry;
@@ -609,7 +611,7 @@ void fn_3_1453BC(int coin) {
             fn_3_154238(coin);
             if (g_Minigame._1CA5[player] == 0 && MG._1C9A[player] == 0) {
                 MG._1C9A[player] = 1;
-                MG._1B3C[player] = lbl_3_data_21E68[14];
+                (&g_Minigame._1B3C)[player] = lbl_3_data_21E68[14];
                 MG._1B50[player] = 0;
                 fielder = &g_Fielders[g_Minigame.minigameFielderIndex[player]];
                 dir.x = 0.0f;
@@ -617,9 +619,9 @@ void fn_3_1453BC(int coin) {
                 dir.z = -1.0f;
                 PSVECNormalize(&dir, &dir);
                 fielder->_038 = dir.x;
-                g_Minigame._1DF4_u8[player] = 1;
                 fielder->_03C = dir.z;
                 fielder->_050 = lbl_3_data_21E24[15];
+                g_Minigame._1DF4_u8[player] = 1;
                 fn_3_6C854(g_Minigame.minigameControlStruct.characterIndex[player], 2);
                 if (g_Minigame._1CB1[player] < 0xFFFE) {
                     g_Minigame._1CB1[player]++;
@@ -1276,8 +1278,6 @@ void fn_3_143714(void) {
 }
 
 // .text:0x00143358 size:0x3BC mapped:0x807823EC
-// 99.35%: registers only; the g_Minigame bases of _1C9E, _1C9A and _1B3C take other
-// volatile registers.
 void fn_3_143358(int idx) {
     Unk37A8Piranha* piranha;
     Unk37A8Fielder* fielder;
@@ -1304,7 +1304,7 @@ void fn_3_143358(int idx) {
     if (piranha->pos.y < lbl_3_data_21E24[13]) {
         if (piranha->pos.z < 0.0f) {
             if (piranha->active == 2) {
-                MG._1C9E[piranha->_1C] = 0;
+                (&g_Minigame._1C9E)[piranha->_1C] = 0;
             }
             piranha->active = 0;
             return;
@@ -1326,21 +1326,21 @@ void fn_3_143358(int idx) {
         dist = dolsqrtf2(xx + zz);
         if (lbl_3_data_21E24[2] + lbl_3_data_47BC[fielder->_1C9] > dist) {
             if (piranha->active == 2) {
-                MG._1C9E[piranha->_1C] = 0;
+                (&g_Minigame._1C9E)[piranha->_1C] = 0;
             }
             piranha->active = 0;
             if (MG._1C9A[i] == 0) {
                 MG._1C9A[i] = 1;
-                MG._1B3C[i] = lbl_3_data_21E68[14];
+                (&g_Minigame._1B3C)[i] = lbl_3_data_21E68[14];
                 MG._1B50[i] = 0;
                 dir.x = piranha->vel.x;
                 dir.y = 0.0f;
                 dir.z = piranha->vel.z;
                 PSVECNormalize(&dir, &dir);
                 fielder->_038 = dir.x;
-                g_Minigame._1DF4_u8[i] = 1;
                 fielder->_03C = dir.z;
                 fielder->_050 = lbl_3_data_21E24[15];
+                g_Minigame._1DF4_u8[i] = 1;
                 fn_3_6C854(g_Minigame.minigameControlStruct.characterIndex[i], 2);
                 if (g_Minigame._1CB1[i] < 0xFFFE) {
                     g_Minigame._1CB1[i]++;
