@@ -27,6 +27,13 @@ extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_800B472C(void* arg0);
 extern void fn_800A7D4C(s32 arg0, void* arg1);
 extern void fn_1_196C(void);
+extern void* ARAMTransfer(void* entry, s32 arg1, s32 arg2, u32 aram);
+extern void fn_800B9AA8(void* light);
+extern void LITAlloc(void** light);
+extern void LITInitAttn(void* light, f32 a0, f32 a1, f32 a2, f32 k0, f32 k1, f32 k2);
+extern void LITInitColor(void* light, GXColor color);
+extern void LITInitDir(void* light, f32 nx, f32 ny, f32 nz);
+extern void LITInitPos(void* light, f32 x, f32 y, f32 z);
 extern void makeLookAtMatrix(Mtx m, const Vec* camPos, const Vec* camUp, const Vec* target);
 extern void fn_80011640(Mtx src, Mtx dst);
 extern void fn_800B9950(s32 arg0, f32 arg1, f32 arg2);
@@ -42,9 +49,18 @@ extern struct {
 
 typedef struct Task0138 {
     /* 0x00 */ void (*_00)(void);
-    /* 0x04 */ u8 _04[0x10 - 0x4];
+    /* 0x04 */ u8 _04[0xC - 0x4];
+    /* 0x0C */ struct Task0138* _0C;
     /* 0x10 */ s16 _10;
+    /* 0x12 */ u8 _12[0x14 - 0x12];
+    /* 0x14 */ void* _14;
+    /* 0x18 */ s16 _18;
 } Task0138;
+
+extern struct {
+    /* 0x000 */ u8 _000[0x715];
+    /* 0x715 */ s8 _715;
+} lbl_803C6CF8;
 
 extern Task0138* lbl_803CC1B8;
 
@@ -156,127 +172,157 @@ typedef struct Callback0138 {
     /* 0x4 */ void (*_4)(void);
 } Callback0138;
 
-static Fog0138 lbl_1_data_2A8[120] = {
-    { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
-    { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
-    { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
-    { { 0x42, 0x20, 0x00, 0x00 }, 1.0f, 1.0f },
-    { { 0x00, 0x70, 0x01, 0x0A }, 80.0f, 1.0f },
-    { { 0x3F, 0x80, 0x00, 0x00 }, 5.87809954e-39f, 80.0f },
-    { { 0x3F, 0x80, 0x00, 0x00 }, 1.0f, 5.87809954e-39f },
-    { { 0x37, 0xF4, 0x03, 0xC5 }, 0.0f, 7.70371978e-34f },
-    { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
-    { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
-    { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
-    { { 0x42, 0x28, 0x00, 0x00 }, 1.5f, 1.5f },
-    { { 0x0F, 0xA0, 0x01, 0xC0 }, 80.0f, 1.0f },
-    { { 0x3F, 0x80, 0x00, 0x00 }, 1.26224486e-29f, 80.0f },
-    { { 0x3F, 0x80, 0x00, 0x00 }, 1.0f, 1.02555288e-29f },
-    { { 0x37, 0xF4, 0x03, 0xC5 }, 0.0f, 5.77778983e-34f },
-    { { 0xFF, 0xDC, 0x96, 0x00 }, 0.0f, 512.0f },
-    { { 0xFF, 0xDC, 0x96, 0x00 }, 0.0f, 512.0f },
-    { { 0xFF, 0xDC, 0x96, 0x00 }, 0.0f, 512.0f },
-    { { 0x42, 0x28, 0x00, 0x00 }, 1.5f, 1.5f },
-    { { 0x0F, 0xA0, 0x01, 0xC0 }, 80.0f, 1.0f },
-    { { 0x3F, 0x80, 0x00, 0x00 }, 1.26224486e-29f, 80.0f },
-    { { 0x3F, 0x80, 0x00, 0x00 }, 1.0f, 1.02555288e-29f },
-    { { 0x37, 0xF4, 0x03, 0xC5 }, 0.0f, 7.37270057e-34f },
-    { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
-    { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
-    { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
-    { { 0x42, 0x20, 0x00, 0x00 }, 1.0f, 1.0f },
-    { { 0x0B, 0x70, 0x01, 0xC0 }, 80.0f, 1.0f },
-    { { 0x3F, 0x80, 0x00, 0x00 }, 3.69791715e-32f, 80.0f },
-    { { 0x3F, 0x80, 0x00, 0x00 }, 1.0f, 3.69791715e-32f },
-    { { 0x37, 0xF4, 0x03, 0xC5 }, 0.0f, 6.74075481e-34f },
-    { { 0x96, 0xAA, 0xDC, 0x02 }, 80.0f, 300.0f },
-    { { 0x96, 0xAA, 0xDC, 0x02 }, 80.0f, 300.0f },
-    { { 0x96, 0xAA, 0xDC, 0x02 }, 80.0f, 300.0f },
-    { { 0x42, 0x20, 0x00, 0x00 }, 1.0f, 1.0f },
-    { { 0x0B, 0x70, 0x01, 0xC0 }, 80.0f, 1.0f },
-    { { 0x3F, 0x80, 0x00, 0x00 }, 3.69791715e-32f, 80.0f },
-    { { 0x3F, 0x80, 0x00, 0x00 }, 1.0f, 3.69791715e-32f },
-    { { 0x00, 0x00, 0x00, 0x00 }, 2.35095283e-38f, 6.74075481e-34f },
-    { { 0xAA, 0xBE, 0xD2, 0x07 }, 0.0f, 380.0f },
-    { { 0xAA, 0xBE, 0xD2, 0x07 }, 0.0f, 380.0f },
-    { { 0xAA, 0xBE, 0xD2, 0x07 }, 0.0f, 380.0f },
-    { { 0x42, 0x48, 0x00, 0x00 }, 1.0f, 1.0f },
-    { { 0x0B, 0x80, 0x01, 0xC0 }, 50.0f, 1.0f },
-    { { 0x3F, 0x80, 0x00, 0x00 }, 1.17555713e-38f, 50.0f },
-    { { 0x3F, 0x80, 0x00, 0x00 }, 1.0f, 4.93064397e-32f },
-    { { 0x39, 0x2B, 0x92, 0xA6 }, 0.0f, 6.01853108e-34f },
-    { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
-    { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
-    { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
-    { { 0x42, 0x20, 0x00, 0x00 }, 1.0f, 1.0f },
-    { { 0x00, 0x70, 0x01, 0x0A }, 80.0f, 1.0f },
-    { { 0x3F, 0x80, 0x00, 0x00 }, 5.87809954e-39f, 80.0f },
-    { { 0x3F, 0x80, 0x00, 0x00 }, 1.0f, 5.87809954e-39f },
-    { { 0x37, 0xF4, 0x03, 0xC5 }, 0.0f, 7.70371978e-34f },
-    { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
-    { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
-    { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
-    { { 0x42, 0x20, 0x00, 0x00 }, 1.0f, 1.0f },
-    { { 0x00, 0x70, 0x01, 0x0A }, 80.0f, 1.0f },
-    { { 0x3F, 0x80, 0x00, 0x00 }, 5.87809954e-39f, 80.0f },
-    { { 0x3F, 0x80, 0x00, 0x00 }, 1.0f, 5.87809954e-39f },
-    { { 0x37, 0xF4, 0x03, 0xC5 }, 0.0f, 7.70371978e-34f },
-    { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
-    { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
-    { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
-    { { 0x42, 0x28, 0x00, 0x00 }, 1.5f, 1.5f },
-    { { 0x0F, 0xA0, 0x01, 0xC0 }, 80.0f, 1.0f },
-    { { 0x3F, 0x80, 0x00, 0x00 }, 1.26224486e-29f, 80.0f },
-    { { 0x3F, 0x80, 0x00, 0x00 }, 1.0f, 1.02555288e-29f },
-    { { 0x37, 0xF4, 0x03, 0xC5 }, 0.0f, 5.77778983e-34f },
-    { { 0xFF, 0xDC, 0x96, 0x00 }, 0.0f, 512.0f },
-    { { 0xFF, 0xDC, 0x96, 0x00 }, 0.0f, 512.0f },
-    { { 0xFF, 0xDC, 0x96, 0x00 }, 0.0f, 512.0f },
-    { { 0x42, 0x28, 0x00, 0x00 }, 1.5f, 1.5f },
-    { { 0x0F, 0xA0, 0x01, 0xC0 }, 80.0f, 1.0f },
-    { { 0x3F, 0x80, 0x00, 0x00 }, 1.26224486e-29f, 80.0f },
-    { { 0x3F, 0x80, 0x00, 0x00 }, 1.0f, 1.02555288e-29f },
-    { { 0x37, 0xF4, 0x03, 0xC5 }, 0.0f, 7.37270057e-34f },
-    { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
-    { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
-    { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
-    { { 0x42, 0x20, 0x00, 0x00 }, 1.0f, 1.0f },
-    { { 0x0B, 0x70, 0x01, 0xC0 }, 80.0f, 1.0f },
-    { { 0x3F, 0x80, 0x00, 0x00 }, 3.69791715e-32f, 80.0f },
-    { { 0x3F, 0x80, 0x00, 0x00 }, 1.0f, 3.69791715e-32f },
-    { { 0x37, 0xF4, 0x03, 0xC5 }, 0.0f, 6.74075481e-34f },
-    { { 0x96, 0xAA, 0xDC, 0x02 }, 80.0f, 300.0f },
-    { { 0x96, 0xAA, 0xDC, 0x02 }, 80.0f, 300.0f },
-    { { 0x96, 0xAA, 0xDC, 0x02 }, 80.0f, 300.0f },
-    { { 0x42, 0x20, 0x00, 0x00 }, 1.0f, 1.0f },
-    { { 0x0B, 0x70, 0x01, 0xC0 }, 80.0f, 1.0f },
-    { { 0x3F, 0x80, 0x00, 0x00 }, 3.69791715e-32f, 80.0f },
-    { { 0x3F, 0x80, 0x00, 0x00 }, 1.0f, 3.69791715e-32f },
-    { { 0x00, 0x00, 0x00, 0x00 }, 2.35095283e-38f, 6.74075481e-34f },
-    { { 0xAA, 0xBE, 0xD2, 0x07 }, 0.0f, 380.0f },
-    { { 0xAA, 0xBE, 0xD2, 0x07 }, 0.0f, 380.0f },
-    { { 0xAA, 0xBE, 0xD2, 0x07 }, 0.0f, 380.0f },
-    { { 0x42, 0x48, 0x00, 0x00 }, 1.0f, 1.0f },
-    { { 0x0B, 0x80, 0x01, 0xC0 }, 50.0f, 1.0f },
-    { { 0x3F, 0x80, 0x00, 0x00 }, 1.17555713e-38f, 50.0f },
-    { { 0x3F, 0x80, 0x00, 0x00 }, 1.0f, 4.93064397e-32f },
-    { { 0x39, 0x2B, 0x92, 0xA6 }, 0.0f, 6.01853108e-34f },
-    { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
-    { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
-    { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
-    { { 0x42, 0x20, 0x00, 0x00 }, 1.0f, 1.0f },
-    { { 0x00, 0x70, 0x01, 0x0A }, 80.0f, 1.0f },
-    { { 0x3F, 0x80, 0x00, 0x00 }, 5.87809954e-39f, 80.0f },
-    { { 0x3F, 0x80, 0x00, 0x00 }, 1.0f, 5.87809954e-39f },
-    { { 0x37, 0xF4, 0x03, 0xC5 }, 0.0f, 7.70371978e-34f },
-    { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
-    { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
-    { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
-    { { 0x42, 0x20, 0x00, 0x00 }, 1.0f, 1.0f },
-    { { 0x00, 0x70, 0x01, 0x0A }, 80.0f, 1.0f },
-    { { 0x3F, 0x80, 0x00, 0x00 }, 5.87809954e-39f, 80.0f },
-    { { 0x3F, 0x80, 0x00, 0x00 }, 1.0f, 5.87809954e-39f },
-    { { 0x37, 0xF4, 0x03, 0xC5 }, 0.0f, 7.70371978e-34f },
+static Fog0138 lbl_1_data_2A8[15][8] = {
+    {
+        { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
+        { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
+        { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
+        { { 0x42, 0x20, 0x00, 0x00 }, 1.0f, 1.0f },
+        { { 0x00, 0x70, 0x01, 0x0A }, 80.0f, 1.0f },
+        { { 0x3F, 0x80, 0x00, 0x00 }, 5.87809954e-39f, 80.0f },
+        { { 0x3F, 0x80, 0x00, 0x00 }, 1.0f, 5.87809954e-39f },
+        { { 0x37, 0xF4, 0x03, 0xC5 }, 0.0f, 7.70371978e-34f },
+    },
+    {
+        { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
+        { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
+        { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
+        { { 0x42, 0x28, 0x00, 0x00 }, 1.5f, 1.5f },
+        { { 0x0F, 0xA0, 0x01, 0xC0 }, 80.0f, 1.0f },
+        { { 0x3F, 0x80, 0x00, 0x00 }, 1.26224486e-29f, 80.0f },
+        { { 0x3F, 0x80, 0x00, 0x00 }, 1.0f, 1.02555288e-29f },
+        { { 0x37, 0xF4, 0x03, 0xC5 }, 0.0f, 5.77778983e-34f },
+    },
+    {
+        { { 0xFF, 0xDC, 0x96, 0x00 }, 0.0f, 512.0f },
+        { { 0xFF, 0xDC, 0x96, 0x00 }, 0.0f, 512.0f },
+        { { 0xFF, 0xDC, 0x96, 0x00 }, 0.0f, 512.0f },
+        { { 0x42, 0x28, 0x00, 0x00 }, 1.5f, 1.5f },
+        { { 0x0F, 0xA0, 0x01, 0xC0 }, 80.0f, 1.0f },
+        { { 0x3F, 0x80, 0x00, 0x00 }, 1.26224486e-29f, 80.0f },
+        { { 0x3F, 0x80, 0x00, 0x00 }, 1.0f, 1.02555288e-29f },
+        { { 0x37, 0xF4, 0x03, 0xC5 }, 0.0f, 7.37270057e-34f },
+    },
+    {
+        { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
+        { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
+        { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
+        { { 0x42, 0x20, 0x00, 0x00 }, 1.0f, 1.0f },
+        { { 0x0B, 0x70, 0x01, 0xC0 }, 80.0f, 1.0f },
+        { { 0x3F, 0x80, 0x00, 0x00 }, 3.69791715e-32f, 80.0f },
+        { { 0x3F, 0x80, 0x00, 0x00 }, 1.0f, 3.69791715e-32f },
+        { { 0x37, 0xF4, 0x03, 0xC5 }, 0.0f, 6.74075481e-34f },
+    },
+    {
+        { { 0x96, 0xAA, 0xDC, 0x02 }, 80.0f, 300.0f },
+        { { 0x96, 0xAA, 0xDC, 0x02 }, 80.0f, 300.0f },
+        { { 0x96, 0xAA, 0xDC, 0x02 }, 80.0f, 300.0f },
+        { { 0x42, 0x20, 0x00, 0x00 }, 1.0f, 1.0f },
+        { { 0x0B, 0x70, 0x01, 0xC0 }, 80.0f, 1.0f },
+        { { 0x3F, 0x80, 0x00, 0x00 }, 3.69791715e-32f, 80.0f },
+        { { 0x3F, 0x80, 0x00, 0x00 }, 1.0f, 3.69791715e-32f },
+        { { 0x00, 0x00, 0x00, 0x00 }, 2.35095283e-38f, 6.74075481e-34f },
+    },
+    {
+        { { 0xAA, 0xBE, 0xD2, 0x07 }, 0.0f, 380.0f },
+        { { 0xAA, 0xBE, 0xD2, 0x07 }, 0.0f, 380.0f },
+        { { 0xAA, 0xBE, 0xD2, 0x07 }, 0.0f, 380.0f },
+        { { 0x42, 0x48, 0x00, 0x00 }, 1.0f, 1.0f },
+        { { 0x0B, 0x80, 0x01, 0xC0 }, 50.0f, 1.0f },
+        { { 0x3F, 0x80, 0x00, 0x00 }, 1.17555713e-38f, 50.0f },
+        { { 0x3F, 0x80, 0x00, 0x00 }, 1.0f, 4.93064397e-32f },
+        { { 0x39, 0x2B, 0x92, 0xA6 }, 0.0f, 6.01853108e-34f },
+    },
+    {
+        { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
+        { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
+        { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
+        { { 0x42, 0x20, 0x00, 0x00 }, 1.0f, 1.0f },
+        { { 0x00, 0x70, 0x01, 0x0A }, 80.0f, 1.0f },
+        { { 0x3F, 0x80, 0x00, 0x00 }, 5.87809954e-39f, 80.0f },
+        { { 0x3F, 0x80, 0x00, 0x00 }, 1.0f, 5.87809954e-39f },
+        { { 0x37, 0xF4, 0x03, 0xC5 }, 0.0f, 7.70371978e-34f },
+    },
+    {
+        { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
+        { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
+        { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
+        { { 0x42, 0x20, 0x00, 0x00 }, 1.0f, 1.0f },
+        { { 0x00, 0x70, 0x01, 0x0A }, 80.0f, 1.0f },
+        { { 0x3F, 0x80, 0x00, 0x00 }, 5.87809954e-39f, 80.0f },
+        { { 0x3F, 0x80, 0x00, 0x00 }, 1.0f, 5.87809954e-39f },
+        { { 0x37, 0xF4, 0x03, 0xC5 }, 0.0f, 7.70371978e-34f },
+    },
+    {
+        { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
+        { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
+        { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
+        { { 0x42, 0x28, 0x00, 0x00 }, 1.5f, 1.5f },
+        { { 0x0F, 0xA0, 0x01, 0xC0 }, 80.0f, 1.0f },
+        { { 0x3F, 0x80, 0x00, 0x00 }, 1.26224486e-29f, 80.0f },
+        { { 0x3F, 0x80, 0x00, 0x00 }, 1.0f, 1.02555288e-29f },
+        { { 0x37, 0xF4, 0x03, 0xC5 }, 0.0f, 5.77778983e-34f },
+    },
+    {
+        { { 0xFF, 0xDC, 0x96, 0x00 }, 0.0f, 512.0f },
+        { { 0xFF, 0xDC, 0x96, 0x00 }, 0.0f, 512.0f },
+        { { 0xFF, 0xDC, 0x96, 0x00 }, 0.0f, 512.0f },
+        { { 0x42, 0x28, 0x00, 0x00 }, 1.5f, 1.5f },
+        { { 0x0F, 0xA0, 0x01, 0xC0 }, 80.0f, 1.0f },
+        { { 0x3F, 0x80, 0x00, 0x00 }, 1.26224486e-29f, 80.0f },
+        { { 0x3F, 0x80, 0x00, 0x00 }, 1.0f, 1.02555288e-29f },
+        { { 0x37, 0xF4, 0x03, 0xC5 }, 0.0f, 7.37270057e-34f },
+    },
+    {
+        { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
+        { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
+        { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
+        { { 0x42, 0x20, 0x00, 0x00 }, 1.0f, 1.0f },
+        { { 0x0B, 0x70, 0x01, 0xC0 }, 80.0f, 1.0f },
+        { { 0x3F, 0x80, 0x00, 0x00 }, 3.69791715e-32f, 80.0f },
+        { { 0x3F, 0x80, 0x00, 0x00 }, 1.0f, 3.69791715e-32f },
+        { { 0x37, 0xF4, 0x03, 0xC5 }, 0.0f, 6.74075481e-34f },
+    },
+    {
+        { { 0x96, 0xAA, 0xDC, 0x02 }, 80.0f, 300.0f },
+        { { 0x96, 0xAA, 0xDC, 0x02 }, 80.0f, 300.0f },
+        { { 0x96, 0xAA, 0xDC, 0x02 }, 80.0f, 300.0f },
+        { { 0x42, 0x20, 0x00, 0x00 }, 1.0f, 1.0f },
+        { { 0x0B, 0x70, 0x01, 0xC0 }, 80.0f, 1.0f },
+        { { 0x3F, 0x80, 0x00, 0x00 }, 3.69791715e-32f, 80.0f },
+        { { 0x3F, 0x80, 0x00, 0x00 }, 1.0f, 3.69791715e-32f },
+        { { 0x00, 0x00, 0x00, 0x00 }, 2.35095283e-38f, 6.74075481e-34f },
+    },
+    {
+        { { 0xAA, 0xBE, 0xD2, 0x07 }, 0.0f, 380.0f },
+        { { 0xAA, 0xBE, 0xD2, 0x07 }, 0.0f, 380.0f },
+        { { 0xAA, 0xBE, 0xD2, 0x07 }, 0.0f, 380.0f },
+        { { 0x42, 0x48, 0x00, 0x00 }, 1.0f, 1.0f },
+        { { 0x0B, 0x80, 0x01, 0xC0 }, 50.0f, 1.0f },
+        { { 0x3F, 0x80, 0x00, 0x00 }, 1.17555713e-38f, 50.0f },
+        { { 0x3F, 0x80, 0x00, 0x00 }, 1.0f, 4.93064397e-32f },
+        { { 0x39, 0x2B, 0x92, 0xA6 }, 0.0f, 6.01853108e-34f },
+    },
+    {
+        { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
+        { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
+        { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
+        { { 0x42, 0x20, 0x00, 0x00 }, 1.0f, 1.0f },
+        { { 0x00, 0x70, 0x01, 0x0A }, 80.0f, 1.0f },
+        { { 0x3F, 0x80, 0x00, 0x00 }, 5.87809954e-39f, 80.0f },
+        { { 0x3F, 0x80, 0x00, 0x00 }, 1.0f, 5.87809954e-39f },
+        { { 0x37, 0xF4, 0x03, 0xC5 }, 0.0f, 7.70371978e-34f },
+    },
+    {
+        { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
+        { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
+        { { 0xAA, 0xBE, 0xD2, 0x00 }, 80.0f, 450.0f },
+        { { 0x42, 0x20, 0x00, 0x00 }, 1.0f, 1.0f },
+        { { 0x00, 0x70, 0x01, 0x0A }, 80.0f, 1.0f },
+        { { 0x3F, 0x80, 0x00, 0x00 }, 5.87809954e-39f, 80.0f },
+        { { 0x3F, 0x80, 0x00, 0x00 }, 1.0f, 5.87809954e-39f },
+        { { 0x37, 0xF4, 0x03, 0xC5 }, 0.0f, 7.70371978e-34f },
+    },
 };
 static void* lbl_1_data_848[3] = { 0 };
 static s32 lbl_1_data_854 = 0x40;
@@ -291,28 +337,28 @@ static Callback0138 lbl_1_data_8B4[2] = { { 0, fn_1_7848 }, { 0, fn_1_7848 } };
 static GXCullMode lbl_1_data_8C4 = GX_CULL_BACK;
 static u8 lbl_1_data_8C8 = 1;
 static s32 lbl_1_data_8CC = 7;
-static u32 lbl_1_data_8D0[21][4] = {
-    { 0x0000040B, 0x40168A6C, 0x06CFD000, 0x000C69A8 },
-    { 0x0000040B, 0x401331E0, 0x06DC4000, 0x000B67C4 },
-    { 0x0000040B, 0x4011924C, 0x06E7A800, 0x000A5764 },
-    { 0x0000040B, 0x400FBAE0, 0x06F20000, 0x000BE038 },
-    { 0x0000040B, 0x400E5AC0, 0x06FDE800, 0x000B4FB8 },
-    { 0x0000040B, 0x40131200, 0x07093800, 0x000A317C },
-    { 0x0000040B, 0x4011B660, 0x07137000, 0x000D0294 },
-    { 0x0000040B, 0x4011B660, 0x07137000, 0x000D0294 },
-    { 0x0000040B, 0x4011B660, 0x07137000, 0x000D0294 },
-    { 0x0000040B, 0x40141C60, 0x07207800, 0x000CE904 },
-    { 0x0000040B, 0x4013CA40, 0x072D6800, 0x000CA560 },
-    { 0x0000040B, 0x40141C60, 0x07207800, 0x000CE904 },
-    { 0x0000040B, 0x4016C138, 0x073A1000, 0x000ED41C },
-    { 0x0000040B, 0x401157B8, 0x0748E800, 0x000CA83C },
-    { 0x0000040B, 0x4016C138, 0x073A1000, 0x000ED41C },
-    { 0x0000040B, 0x400EB1C0, 0x07559800, 0x000A3510 },
-    { 0x0000040B, 0x400EB1C0, 0x07559800, 0x000A3510 },
-    { 0x0000040B, 0x400EB1C0, 0x07559800, 0x000A3510 },
-    { 0x0000040B, 0x400D04E0, 0x075FD000, 0x00087390 },
-    { 0x0000040B, 0x400D04E0, 0x075FD000, 0x00087390 },
-    { 0x0000040B, 0x400D04E0, 0x075FD000, 0x00087390 },
+static u32 lbl_1_data_8D0[21 * 4] = {
+    0x0000040B, 0x40168A6C, 0x06CFD000, 0x000C69A8,
+    0x0000040B, 0x401331E0, 0x06DC4000, 0x000B67C4,
+    0x0000040B, 0x4011924C, 0x06E7A800, 0x000A5764,
+    0x0000040B, 0x400FBAE0, 0x06F20000, 0x000BE038,
+    0x0000040B, 0x400E5AC0, 0x06FDE800, 0x000B4FB8,
+    0x0000040B, 0x40131200, 0x07093800, 0x000A317C,
+    0x0000040B, 0x4011B660, 0x07137000, 0x000D0294,
+    0x0000040B, 0x4011B660, 0x07137000, 0x000D0294,
+    0x0000040B, 0x4011B660, 0x07137000, 0x000D0294,
+    0x0000040B, 0x40141C60, 0x07207800, 0x000CE904,
+    0x0000040B, 0x4013CA40, 0x072D6800, 0x000CA560,
+    0x0000040B, 0x40141C60, 0x07207800, 0x000CE904,
+    0x0000040B, 0x4016C138, 0x073A1000, 0x000ED41C,
+    0x0000040B, 0x401157B8, 0x0748E800, 0x000CA83C,
+    0x0000040B, 0x4016C138, 0x073A1000, 0x000ED41C,
+    0x0000040B, 0x400EB1C0, 0x07559800, 0x000A3510,
+    0x0000040B, 0x400EB1C0, 0x07559800, 0x000A3510,
+    0x0000040B, 0x400EB1C0, 0x07559800, 0x000A3510,
+    0x0000040B, 0x400D04E0, 0x075FD000, 0x00087390,
+    0x0000040B, 0x400D04E0, 0x075FD000, 0x00087390,
+    0x0000040B, 0x400D04E0, 0x075FD000, 0x00087390,
 };
 static u8 lbl_1_data_A20 = 3;
 static f32 lbl_1_data_A24[4] = { 0.0625f, 0.25f, 0.5f, 1.0f };
@@ -505,6 +551,8 @@ void fn_1_7E04(f32 zoom) {
 }
 
 // .text:0x2B88 size:0x4A4
+// Only the inlined fn_1_7E04 differs: the common block and 1.0f's addresses
+// come in r4 and r3 in the target, swapped here.
 void fn_1_7960(void) {
     Vec rot;
     Vec target = { 0.0f, 0.0f, 100.0f };
@@ -517,13 +565,13 @@ void fn_1_7960(void) {
     lbl_1_common_bss_472B4._030 -= lbl_803C77B8[0]._13 * 2;
     lbl_1_common_bss_472B4._032 += lbl_803C77B8[0]._12 * 2;
     lbl_1_common_bss_472B4._034 = lbl_803C77B8[0]._10 / -128.0f;
-    lbl_1_common_bss_472B4._038 = lbl_803C77B8[0]._11 * 0.0078125f;
+    lbl_1_common_bss_472B4._038 = lbl_803C77B8[0]._11 / 128.0f;
     if (lbl_803C77B8[0]._00 & 0x10) {
         lbl_1_common_bss_472B4._054 -= lbl_803C77B8[0]._14 / 4096.0f;
         lbl_1_common_bss_472B4._054 += lbl_803C77B8[0]._15 / 4096.0f;
     } else {
-        lbl_1_common_bss_472B4._048.y -= lbl_803C77B8[0]._15 * 0.0009765625f;
-        lbl_1_common_bss_472B4._048.y += lbl_803C77B8[0]._14 * 0.0009765625f;
+        lbl_1_common_bss_472B4._048.y -= lbl_803C77B8[0]._15 / 1024.0f;
+        lbl_1_common_bss_472B4._048.y += lbl_803C77B8[0]._14 / 1024.0f;
     }
     rot.x = lbl_1_common_bss_472B4._030;
     rot.y = lbl_1_common_bss_472B4._032;
@@ -583,6 +631,8 @@ void fn_1_77EC(void* arg0) {
 }
 
 // .text:0x25E0 size:0x434
+// Registers differ (draw, count and the loop pointers take other saved registers);
+// declaration-order batches and a permuter session found no match.
 void fn_1_73B8(void* arg0, u8 count, ...) {
     u16 idx;
     Draw0138* draw = arg0;
@@ -839,6 +889,78 @@ void fn_1_6E14(void) {
     }
 }
 
+// .text:0x1A70 size:0x5CC
+// MWCC inlines fn_1_4DD8 into the inlined fn_1_717C here, where the target calls
+// it; with fn_1_4DD8 external it scores 98.88% (task and width registers swapped).
+void fn_1_6848(void) {
+    Task0138* task = lbl_803CC1B8;
+
+    switch (task->_10) {
+    case 0:
+        fn_800B9AA8(NULL);
+        fn_1_6578(&lbl_1_bss_4E4, lbl_1_bss_520, lbl_1_data_854, lbl_1_data_854);
+        fn_800B996C(fn_1_5544);
+        LITAlloc(&lbl_1_data_848[0]);
+        LITAlloc(&lbl_1_data_848[1]);
+        LITAlloc(&lbl_1_data_848[2]);
+        {
+        GXColor colors[3] = { { 0xFF, 0x00, 0x00, 0xFF }, { 0x00, 0x00, 0xFF, 0xFF }, { 0x00, 0xFF, 0x00, 0xFF } };
+        LITInitAttn(lbl_1_data_848[0], 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+        LITInitPos(lbl_1_data_848[0], 10000.0f, -200.0f, 0.0f);
+        LITInitDir(lbl_1_data_848[0], 0.0f, 0.0f, 0.0f);
+        LITInitColor(lbl_1_data_848[0], colors[0]);
+        LITInitAttn(lbl_1_data_848[1], 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+        LITInitPos(lbl_1_data_848[1], 0.0f, -200.0f, 10000.0f);
+        LITInitDir(lbl_1_data_848[1], 0.0f, 0.0f, 0.0f);
+        LITInitColor(lbl_1_data_848[1], colors[1]);
+        LITInitAttn(lbl_1_data_848[2], 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+        LITInitPos(lbl_1_data_848[2], 10000.0f, -200.0f, 10000.0f);
+        LITInitDir(lbl_1_data_848[2], 0.0f, 0.0f, 0.0f);
+        LITInitColor(lbl_1_data_848[2], colors[2]);
+        }
+        task->_10 = 1;
+    case 1:
+        switch (lbl_803C77B8[0]._04) {
+        case 8:
+            if (--lbl_1_common_bss_472B4._230 < 0) {
+                lbl_1_common_bss_472B4._230 = lbl_1_data_8CC - 1;
+            }
+            break;
+        case 4:
+            if (++lbl_1_common_bss_472B4._230 >= lbl_1_data_8CC) {
+                lbl_1_common_bss_472B4._230 = 0;
+            }
+            break;
+        case 0x200:
+            if (++lbl_1_common_bss_472B4._231 > 2) {
+                lbl_1_common_bss_472B4._231 = 0;
+            }
+            break;
+        case 0x100:
+            task->_10 = 2;
+            break;
+        case 0x1000:
+            fn_800B996C(NULL);
+            task->_0C->_10 = 1;
+            break;
+        }
+        break;
+    case 2:
+        task->_18 = lbl_1_common_bss_472B4._231 + lbl_1_common_bss_472B4._230 * 3;
+        task->_14 = ARAMTransfer(&lbl_1_data_8D0[task->_18 * 4], 0, 0, 0);
+        task->_10 = 3;
+        lbl_1_bss_4E0 = &lbl_1_data_2A8[lbl_1_common_bss_472B4._230][lbl_1_common_bss_472B4._231];
+        break;
+    case 3:
+        if (lbl_803C6CF8._715 == 1) {
+            fn_1_717C(task->_14);
+            DCFlushRangeNoSync(task->_14, lbl_1_data_8D0[task->_18 * 4 + 1] & 0x0FFFFFFF);
+            lbl_803CC1B8->_00 = fn_1_6E14;
+        }
+        break;
+    }
+}
+
 // .text:0x18EC size:0x184
 void fn_1_66C4(void) {
     Task0138* task = lbl_803CC1B8;
@@ -896,6 +1018,110 @@ void fn_1_6578(GXTexObj* obj, u16* image, s32 width, s32 height) {
     GXInitTexObjLOD(obj, filter, GX_LINEAR, 0.0f, lbl_1_data_A20, lbl_1_data_A34, GX_FALSE, GX_FALSE, GX_ANISO_1);
 }
 
+// .text:0x1278 size:0x528
+// Float registers differ: the target keeps each of a and b in one register
+// through the acos branches and orders the compares' operands by them.
+void fn_1_6050(u16* image, s32 width, s32 height, f32 scale) {
+    f32 a;
+    s32 size;
+    u8 hi;
+    f32 nx;
+    s32 y;
+    f32 ny;
+    f32 tx;
+    f32 z2;
+    f32 ty;
+    f32 angle;
+    u8 lo;
+    f32 s;
+    s32 x;
+    f32 b;
+
+    Mtx m;
+    Vec dir;
+    Vec flat;
+    Vec axis;
+    Quaternion q;
+
+    size = width * 2 * height;
+    memset(image, 0, size);
+    for (y = 0; y < height; y++) {
+        ny = 2.0f * ((f32)y / height - 0.5f);
+        ty = ny * 0.5f + 0.5f;
+        for (x = 0; x < width; x++) {
+            nx = 2.0f * ((f32)x / width - 0.5f);
+            tx = nx * 0.5f + 0.5f;
+            if (y == height / 2) {
+                z2 = 1.0f - nx * nx;
+            } else {
+                z2 = 1.0f - nx * nx - ny * ny;
+            }
+            if (z2 < 0.0f) {
+                dir.x = nx;
+                dir.y = ny;
+                dir.z = 0.0f;
+                PSVECNormalize(&dir, &dir);
+            } else {
+                dir.x = nx;
+                dir.y = ny;
+                dir.z = -sqrt(z2);
+            }
+            if (scale != 1.0f) {
+                PSVECCrossProduct(&lbl_1_data_A3C, &dir, &axis);
+                if (PSVECMag(&axis) != 0.0f) {
+                    PSVECNormalize(&axis, &axis);
+                    angle = (f32)acos(PSVECDotProduct(&lbl_1_data_A3C, &dir)) * scale * 0.5f;
+                    s = sin(angle);
+                    q.w = cos(angle);
+                    q.x = axis.x * s;
+                    q.y = axis.y * s;
+                    q.z = axis.z * s;
+                    PSMTXQuat(m, &q);
+                    PSMTXMultVec(m, &lbl_1_data_A3C, &dir);
+                }
+            }
+            flat.x = dir.x;
+            flat.y = 0.0f;
+            flat.z = dir.z;
+            if (PSVECMag(&flat) == 0.0f) {
+                a = b = 0.0f;
+            } else {
+                PSVECNormalize(&flat, &flat);
+                if (ny == 0.0f) {
+                    a = 0.5f;
+                } else {
+                    a = acos(PSVECDotProduct(&flat, &dir));
+                    PSVECCrossProduct(&flat, &dir, &axis);
+                    if (PSVECMag(&axis) == 0.0f) {
+                        a = 0.0f;
+                    } else if (axis.x < 0.0f) {
+                        a = -a;
+                    }
+                    a = a / 3.1415927f + 0.5f;
+                }
+                if (nx == 0.0f) {
+                    b = 0.5f;
+                } else {
+                    b = acos(PSVECDotProduct(&lbl_1_data_A3C, &flat));
+                    PSVECCrossProduct(&lbl_1_data_A3C, &flat, &axis);
+                    if (PSVECMag(&axis) == 0.0f) {
+                        b = 0.0f;
+                    } else if (axis.y > 0.0f) {
+                        b = -b;
+                    }
+                    b = b / 3.1415927f + 0.5f;
+                }
+                b -= tx;
+                a -= ty;
+            }
+            lo = 128.0f * a + 128.0f;
+            hi = 128.0f * b + 128.0f;
+            image[(x / 4) * 16 + (y / 4) * width * 4 + (y % 4) * 4 + x % 4] = (hi << 8) | lo;
+        }
+    }
+    DCFlushRange(image, size);
+}
+
 // .text:0xB4C size:0x19C
 // Registers differ in every case, and the target adds the tile offset as the
 // left operand last; no statement split or declaration order reproduced it.
@@ -925,9 +1151,9 @@ s32 fn_1_5924(s32 width, s32 x, s32 y, s32 bpp, s32 arg4) {
         return offset;
     case 32:
         row = (y / 4) * width * 4;
-        row += (y % 4) * 4;
+        row += (y % 4) * 8;
         row += x % 4;
-        offset = (x / 4) * 16 + row;
+        offset = (x / 8) * 16 + row;
         if (arg4 != 0) {
             offset += 16;
         }
