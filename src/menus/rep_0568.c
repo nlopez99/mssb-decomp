@@ -480,15 +480,13 @@ void fn_2_19D04(void) {
 }
 
 static inline u8 enableOption(s8* option) {
-    s8 old = *option;
+    BOOL wasOff = *option == 0;
 
     *option = 1;
-    return old == 0;
+    return wasOff;
 }
 
 // .text:0x000197AC size:0x558
-// 99.82%: in the pad._2 & 1 handler, cases 0 and 2 load the old option byte
-// into r4/r3 and the constant 1 into r3/r0; this source swaps those registers.
 void fn_2_197AC(u8 index) {
     u8 changed = 0;
     Pad0568 pad;
