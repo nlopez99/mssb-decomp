@@ -173,7 +173,6 @@ extern u8 lbl_800FE930[2][6];
 extern u8 lbl_800FE5D4[12];
 extern u8 lbl_80108EC4[];
 
-// symbols.txt sizes this 0x1, but fn_2_12F88 reads the byte after it.
 extern struct {
     /* 0x0 */ s8 _0;
     /* 0x1 */ u8 _1;
