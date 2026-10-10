@@ -14,6 +14,7 @@ struct RopeNode7730;
 
 struct DrawEntry7730;
 
+void fn_1_1D590(void* src, struct Tex7730* tex, u8* map, s32 tileW, s32 tileH);
 void fn_1_1D694(struct DrawEntry7730* entry);
 void fn_1_1D944(void);
 void fn_1_1DA54(void);

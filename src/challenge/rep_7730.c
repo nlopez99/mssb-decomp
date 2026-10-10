@@ -117,7 +117,6 @@ extern void fn_800B2C08(void* actor, s32 arg1);
 extern void fn_800BD548(void* model, s32 count, ...);
 extern void fn_800BDA24(struct Model7730* model);
 extern void fn_80023F0C(void* src, struct Tex7730* dst, s32 srcX, s32 srcY, s32 w, s32 h, s32 dstX, s32 dstY);
-static inline void fn_1_1D590(void* src, struct Tex7730* tex, u8* map, s32 tileW, s32 tileH);
 extern void gOz_GXSetTexture(s32, s32, s32);
 extern void SetDisplayStateTexture(void* tex, s32, s32);
 extern void fn_800BD670(struct ModelTable7730* table, MtxPtr mtx);
@@ -3125,8 +3124,7 @@ void fn_1_1D694(DrawEntry7730* entry) {
 }
 
 // .text:0x0001D590 size:0x104
-// Outside this unit's .text range in splits.txt; inlined into fn_1_1D694 above.
-static inline void fn_1_1D590(void* src, Tex7730* tex, u8* map, s32 tileW, s32 tileH) {
+void fn_1_1D590(void* src, Tex7730* tex, u8* map, s32 tileW, s32 tileH) {
     s32 y;
     s32 x;
     s32 rows;
