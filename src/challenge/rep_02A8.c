@@ -761,13 +761,12 @@ static inline void LoadGroup02A8(s32 group, s32 slot) {
 
 // .text:0x0000A95C size:0xB48
 // The listener setup schedules its constants' addresses in another order (the
-// target forms 1.0f's second), n takes r29 for r31, and the copy loops read the
-// selectors into r0 where the target uses r4/r5.
+// target forms 1.0f's second), and the copy loops read the selectors into r0
+// where the target uses r4/r5.
 void fn_1_A95C(void) {
     u16 hold = lbl_803C77B8[0]._00;
     u16 trg = lbl_803C77B8[0]._02;
     u16 rep = lbl_803C77B8[0]._04;
-    s8 n;
     u16 fx;
     s32 i;
 
@@ -797,11 +796,7 @@ void fn_1_A95C(void) {
         lbl_1_common_bss_49994._E0 = 1;
     } else if (trg & 0x1200) {
         lbl_1_common_bss_49994._E0 = 0;
-        for (n = (s8)lbl_800EF808._390 - 1; n > 0; n--) {
-            if (!fn_800214D0()) {
-                break;
-            }
-        }
+        fn_1_A718();
         ((Task02A8*)lbl_803CC1B8)->_00 = fn_1_A348;
     } else if (hold & 0x800) {
         if (rep & 1) {
