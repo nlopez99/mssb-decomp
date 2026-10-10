@@ -1377,8 +1377,6 @@ void fn_1_54E0(MtxPtr view) {
 }
 
 // .text:0xC0 size:0x648
-// The per-vertex index switches build another compare tree (the target tests 2
-// first), and some saved registers differ.
 void fn_1_4E98(DObj0138* obj, MtxPtr camera) {
     s32 nrmIdx;
     s32 handled;
@@ -1386,7 +1384,7 @@ void fn_1_4E98(DObj0138* obj, MtxPtr camera) {
     s32 size;
     u8 fmt;
     s16* v;
-    u16 count;
+    s32 count;
     s32 i;
     u32 done;
     s32 attr;
@@ -1424,6 +1422,8 @@ void fn_1_4E98(DObj0138* obj, MtxPtr camera) {
     GXSetCurrentMtx(GX_PNMTX0);
     for (i = 0; i < obj->_10->_8; i++) {
         switch (obj->_10->_4[i]._0) {
+        case 1:
+            break;
         case 2:
             memset(desc, 0, sizeof(desc));
             vcd = obj->_10->_4[i]._4;
@@ -1433,6 +1433,8 @@ void fn_1_4E98(DObj0138* obj, MtxPtr camera) {
                     desc[attr] = type;
                 }
             }
+            break;
+        case 3:
             break;
         }
         dl = obj->_10->_4[i]._8;
@@ -1501,6 +1503,8 @@ void fn_1_4E98(DObj0138* obj, MtxPtr camera) {
                     switch (attr) {
                     case GX_VA_POS:
                         switch (type) {
+                        case 1:
+                            break;
                         case 2:
                             posIdx = *dl;
                             break;
@@ -1511,6 +1515,8 @@ void fn_1_4E98(DObj0138* obj, MtxPtr camera) {
                         break;
                     case GX_VA_NRM:
                         switch (type) {
+                        case 1:
+                            break;
                         case 2:
                             nrmIdx = *dl;
                             break;
@@ -1537,7 +1543,8 @@ void fn_1_4E98(DObj0138* obj, MtxPtr camera) {
                 scale = 1 << (fmt & 0xF);
                 switch ((fmt >> 4) & 0xF) {
                 case 3:
-                    v = &arr->_0[stride * posIdx];
+                    v = arr->_0;
+                    v += stride * posIdx;
                     x = v[0] / scale;
                     y = v[1] / scale;
                     z = v[2] / scale;
@@ -1551,7 +1558,8 @@ void fn_1_4E98(DObj0138* obj, MtxPtr camera) {
                 scale = 1 << (fmt & 0xF);
                 switch ((fmt >> 4) & 0xF) {
                 case 3:
-                    v = &arr->_0[stride * nrmIdx];
+                    v = arr->_0;
+                    v += stride * nrmIdx;
                     x += v[0] / scale;
                     y += v[1] / scale;
                     z += v[2] / scale;
