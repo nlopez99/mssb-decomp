@@ -17,5 +17,6 @@ void fn_1_4074(Vec* pos);
 void fn_1_4290(Vec* line);
 u32 fn_1_4728(Vec* line, Vec* out);
 void fn_1_4A24(struct Ray00B0* ray, void* mesh);
+void fn_1_4DD8(u16* data);
 
 #endif // !__CHALLENGE_rep_00B0_H_

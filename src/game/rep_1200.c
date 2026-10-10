@@ -40,6 +40,8 @@ extern struct {
 extern struct {
     /* 0x00 */ u8 _00[0x10];
     /* 0x10 */ u8 _10;
+    /* 0x11 */ u8 _11;
+    /* 0x12 */ u8 _12;
 } g_RunningLogic;
 
 extern struct {
@@ -691,10 +693,9 @@ void fn_3_73DE8(void) {
 }
 
 // .text:0x000738A8 size:0x540 mapped:0x806B293C
-// Registers only: g_Scores._C7 and &g_Scores._04 swap r5/r6. The permuter matched it with
-// `... + 1 >= (margin = g_Scores._C7)` (a u8 local), which no programmer would write.
 void fn_3_738A8(void) {
     int endFrame = 120;
+    int diff;
 
     if (g_Pitcher.pitchTotalTimeCounter < 0x7FFE) {
         g_Pitcher.pitchTotalTimeCounter++;
@@ -733,12 +734,13 @@ void fn_3_738A8(void) {
                 if (g_Scores._00 >= g_Scores._AA && g_Scores._04[0][0] == g_Scores._04[1][0]) {
                     fn_3_59918(13, 0);
                     g_GameLogic.gameOverInd = 1;
-                } else if (g_Scores._C7 &&
-                           g_Scores._04[g_GameLogic.homeTeamBattingInd_fieldingTeam][0] -
-                                   g_Scores._04[g_GameLogic.awayTeamBattingInd_battingTeam][0] + 1 >=
-                               g_Scores._C7) {
-                    fn_3_59918(17, 0);
-                    g_GameLogic.gameOverInd = 1;
+                } else if (g_Scores._C7) {
+                    diff = g_Scores._04[g_GameLogic.homeTeamBattingInd_fieldingTeam][0] -
+                           g_Scores._04[g_GameLogic.awayTeamBattingInd_battingTeam][0] + 1;
+                    if (diff >= g_Scores._C7) {
+                        fn_3_59918(17, 0);
+                        g_GameLogic.gameOverInd = 1;
+                    }
                 }
             }
             g_Pitcher.walkedInRunInd = 1;
@@ -1058,8 +1060,8 @@ void fn_3_72CA8(void) {
 }
 
 // .text:0x00072768 size:0x540 mapped:0x806B17FC
-// The setup before the frame loop is scheduled differently (the target loads cur.z once for
-// dz and the loop, and 18.44f early); the loop and everything after it match.
+// The setup before the frame loop is still scheduled differently (94.18%; this statement order
+// was the best of all 5040 orders of the setup block, the source's earlier one 89.28%).
 void fn_3_72768(void) {
     InputStruct* input = &g_Controls[g_GameLogic.teams[g_GameLogic.teamFielding]];
     s16* pitchData;
@@ -1078,17 +1080,17 @@ void fn_3_72768(void) {
         input = &g_Controls[g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder]];
     }
     pitchData = lbl_3_data_5D6C[g_Pitcher.specialPitchTypeCode];
-    z = g_Pitcher.ballCurrentPosition.z;
-    g_Pitcher.ballVelocity.z = -(g_Pitcher.pitchSpeed / g_Pitcher.pitchSpeedScaler);
     g_Pitcher.moundZ = 18.44f;
+    g_Pitcher.pitchZ_whenAirResistanceStarts = g_Pitcher.moundZ * (100 - pitchData[4]) / 100.0f;
+    g_Pitcher.ballVelocity.z = -(g_Pitcher.pitchSpeed / g_Pitcher.pitchSpeedScaler);
+    g_Pitcher.airResistance_veloAdj = 0.001f * pitchData[3];
+    z = g_Pitcher.ballCurrentPosition.z;
     g_Pitcher.ballVelocity.x = -((g_Pitcher.pitchStartingPosition_AIMaxCurve - g_Pitcher.ballCurrentPosition.x) *
                                  g_Pitcher.ballVelocity.z /
                                  (g_Pitcher.ballCurrentPosition.z - g_Pitcher.frontOfPlateZ));
-    g_Pitcher.pitchZ_whenAirResistanceStarts = g_Pitcher.moundZ * (100 - pitchData[4]) / 100.0f;
     g_Pitcher.ballVelocity.y = -((g_Pitcher.eggBallBounceYHeight - g_Pitcher.ballCurrentPosition.y) *
                                  g_Pitcher.ballVelocity.z /
                                  (g_Pitcher.ballCurrentPosition.z - g_Pitcher.frontOfPlateZ));
-    g_Pitcher.airResistance_veloAdj = 0.001f * pitchData[3];
     vz = g_Pitcher.ballVelocity.z;
     for (frame = 1; frame < 0xFFFF; frame++) {
         if (z <= g_Pitcher.moundZ && !g_Pitcher.pitchInAirInd) {
@@ -1466,8 +1468,6 @@ void fn_3_70AEC(void) {
 }
 
 // .text:0x000709B4 size:0x138 mapped:0x806AFA48
-// Registers only: after getComponentsFromRad the target holds 0.0f and the radius in f0
-// and y in f2; the base swaps them.
 void fn_3_709B4(void) {
     f32 angle;
     f32 y;
@@ -1483,10 +1483,10 @@ void fn_3_709B4(void) {
         angle += 3.1415927f;
         getComponentsFromRad(angle, &y, &z);
         radius = 0.01f * lbl_3_data_5F50[g_Pitcher.starPitchType - 7][4];
+        g_Pitcher.starPitchPositionAdjustment.y = y * radius + radius;
+        g_Pitcher.starPitchPositionAdjustment.z = z * radius;
         g_Pitcher.starPitchPositionAdjustment.x = 0.0f;
         g_Pitcher.bulletPitchLoopAngleRadians = angle;
-        g_Pitcher.starPitchPositionAdjustment.y = radius * y + radius;
-        g_Pitcher.starPitchPositionAdjustment.z = radius * z;
     }
 }
 
@@ -1687,23 +1687,8 @@ void fn_3_70280(void) {
 }
 
 // .text:0x0006FFC4 size:0x2BC mapped:0x806AF058
-// Registers only: the target keeps the speed in f5 and the 0.01f term in f4 (fn_3_6FDA0,
-// written the same way, matches); declaration and statement orders did not change it.
 void fn_3_6FFC4(void) {
-    int spread = g_Ball.StaticRandomInt1 % 257 - 128;
-    int ang;
-    f32 z;
-    f32 x;
-    f32 extra;
-    f32 speed;
-
-    ang = fn_3_9FB8C(g_Pitcher.ballVelocity.x, -g_Pitcher.ballVelocity.z);
-    getComponentsFromSAng(ang + spread, &x, &z);
-    extra = 0.01f * (g_Ball.StaticRandomInt2 % 10);
-    speed = dolsqrtf2(SQ(g_Pitcher.ballVelocity.x) + SQ(g_Pitcher.ballVelocity.z));
-    g_Ball.physicsSubstruct.velocity.x = (0.1f + extra) * (x * speed);
-    g_Ball.physicsSubstruct.velocity.z = (0.1f + extra) * (z * speed);
-    g_Ball.physicsSubstruct.velocity.y = 0.0f;
+    fn_3_6FDA0();
     g_Pitcher.strikeOutOrWalk = 3;
     g_Pitcher.miniGameRelated = 1;
     g_Pitcher.framesSinceAtBatEnded = 0;
@@ -1855,6 +1840,51 @@ BOOL fn_3_6F6CC(void) {
         if (g_Runners[i].runnerOnFieldOrOutOrScored == 1 && g_Runners[i].percentTowardsNextBase > 0.5f) {
             g_Pitcher.pickOffLoc = 4;
             fn_3_5C69C(0);
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+// .text:0x0006F4E8 size:0x1E4 mapped:0x806AE57C
+BOOL fn_3_6F4E8(void) {
+    int i;
+    int j;
+    int forced = 0;
+
+    if (g_Strikes.outs >= 3) {
+        return FALSE;
+    }
+    if (g_Strikes.outs >= 2 && g_Pitcher.strikeOutOrWalk == 1) {
+        return FALSE;
+    }
+    if (g_Pitcher.strikeOutOrWalk == 2) {
+        if (g_RunningLogic._12 == 4) {
+            return FALSE;
+        }
+        for (i = 1; i < 4; i++) {
+            if ((g_Runners[i].runnerOnFieldOrOutOrScored == 1 || g_Runners[i].runnerOnFieldOrOutOrScored == 3) &&
+                g_Runners[i].furthestBaseForcedToGoToOnWalk == 1) {
+                forced = 1;
+            }
+        }
+        if (forced == 0) {
+            return FALSE;
+        }
+    }
+    for (i = 1; i < 4; i++) {
+        if (g_Runners[i].runnerOnFieldOrOutOrScored == 1 && g_Runners[i].furthestBaseForcedToGoToOnWalk != 0) {
+            g_Pitcher.pickOffLoc = 5;
+            fn_3_5C69C(1);
+            if (g_Pitcher.strikeOutOrWalk == 1) {
+                g_Strikes.outs++;
+                for (j = 0; j < 3; j++) {
+                    if (g_Strikes.runnerIndexForEachOutThisPitch[j] == -1) {
+                        g_Strikes.runnerIndexForEachOutThisPitch[j] = 0;
+                        break;
+                    }
+                }
+            }
             return TRUE;
         }
     }

@@ -42,7 +42,7 @@ extern void fn_80036C88(u32* arg0, u32* arg1);
 extern void fn_8004B270(void);
 extern void* fn_800B0A5C_insertQueue(void (*)(void), s32);
 extern void fn_800B0D28(u32* arg0);
-extern void fn_800BF038(int arg0);
+extern void fn_800BF038(void (*callback)(void));
 extern void fn_3_C0824(void);
 
 UnkAramEntry0 lbl_3_data_0 = { { 0x00000000, 0x000046E0, 0x06CF8800, 0x000046E0 } };
@@ -73,7 +73,7 @@ void _prolog(void) {
 // .text:0x00000464 size:0x38 mapped:0x8063F4F8
 void _epilog(void) {
     g_d_GameSettings._55 = 0;
-    fn_800BF038(0);
+    fn_800BF038(NULL);
     fn_3_BF20C();
 }
 

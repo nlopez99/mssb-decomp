@@ -5,5 +5,7 @@
 
 void fn_3_160578(void);
 void fn_3_160814(s32 type);
+void fn_3_1608F0(int event, int value, int flag);
+void fn_3_161078(void);
 
 #endif // !__GAME_rep_3D50_H_

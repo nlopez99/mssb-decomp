@@ -23,6 +23,7 @@
 #include "string.h"
 #include "Dolphin/rand.h"
 #include "musyx/musyx.h"
+#include "game/rep_3D50.h"
 
 // A spoke's end points, one per player at g_Minigame._1CE8
 typedef struct Unk3520Spoke {
@@ -156,7 +157,6 @@ extern struct {
 } lbl_3_common_bss_37400;
 
 extern void fn_80011604(s8, void*);
-extern void fn_3_1608F0(int, int, int);
 extern void minigamesSetSomePointers(void);
 extern void minigamesGXStuff(void);
 extern void minigamesSetSomePointers2(void);

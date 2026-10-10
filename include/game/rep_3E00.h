@@ -4,5 +4,6 @@
 #include "mssbTypes.h"
 
 void fn_3_166448(void);
+BOOL fn_3_1665E4(void);
 
 #endif // !__GAME_rep_3E00_H_

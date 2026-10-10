@@ -355,8 +355,8 @@ void fn_2_1641C(void) {
 }
 
 // .text:0x00015E80 size:0x59C
-// 99.62%: the target keeps the zero stored to _4A/_4B in r4 (r0 here), and a redundant
-// `bne` before the branch to the shared fn_2_15AFC call.
+// 99.93%: the target keeps the zero stored to _4A/_4B in r4 (r0 here). The target
+// tests pad._2 twice on one cr0 (`bne; beq`), so the original repeats that test.
 void fn_2_15E80(u8 port) {
     Pad04B0 pad;
     s32 prev;
@@ -446,7 +446,7 @@ void fn_2_15E80(u8 port) {
         }
     }
 
-    if (lbl_2_bss_100B8._10[idx] == 0 || pad._0 != 0 || pad._2 != 0) {
+    if (lbl_2_bss_100B8._10[idx] == 0 || pad._0 != 0 || pad._2 != 0 || pad._2 != 0) {
         lbl_803C6724._0[port] = lbl_2_bss_F410._10[idx];
         first = lbl_2_bss_F410._00[slot];
         do {
@@ -559,9 +559,6 @@ void fn_2_15A90(s32* value, u8 port, s32 max) {
 }
 
 // .text:0x0001560C size:0x484
-// 95.59%: registers in the non-mode-5 branch. The target scales port for
-// lbl_2_bss_F410._10[port] from the raw parameter (clrlslwi) apart from the (u8)port
-// it keeps for the other arrays; here both share one scaled index.
 void fn_2_1560C(u8 port) {
     s32 player;
 
@@ -586,7 +583,7 @@ void fn_2_1560C(u8 port) {
         if (lbl_2_bss_100B8._10[port] != 0) {
             return;
         }
-        lbl_8034E9A0._46E0[port] = lbl_800FE5D4[lbl_2_bss_F410._10[port]];
+        lbl_8034E9A0._46E0[port] = lbl_800FE5D4[lbl_2_bss_F410._10[(u8)port]];
         if (g_d_GameSettings._10 == 0 && port != 0) {
             if (lbl_8034E9A0._46F8[0] == 0) {
                 fn_8004E5B4(1, lbl_8034E9A0._46E0[port], 1);
@@ -598,11 +595,11 @@ void fn_2_1560C(u8 port) {
         }
         lbl_2_bss_100B8._10[port] = 1;
         lbl_2_bss_100B8._12[port] = 1;
-        lbl_8034E9A0._4757[lbl_800FE5D4[lbl_2_bss_F410._10[port]]] = 1;
+        lbl_8034E9A0._4757[lbl_800FE5D4[lbl_2_bss_F410._10[(u8)port]]] = 1;
         if (port == 0 && g_d_GameSettings._10 == 0 && g_d_GameSettings.GameModeSelected != 5) {
             fn_800625A4(1, 6);
-            player = lbl_8034E9A0._46F8[0] == 0;
             lbl_803C66B0._59[port] = 1;
+            player = lbl_8034E9A0._46F8[0] == 0;
             lbl_803C6028._74[player] = 1;
             if (lbl_2_bss_F410._10[0] == 0) {
                 lbl_2_bss_F410._10[1] = 1;

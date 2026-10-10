@@ -13,13 +13,13 @@ challenge/rep_0010.c:
 	.bss        start:0x00000000 end:0x00000060
 
 challenge/rep_00B0.c:
-	.text       start:0x0000196C end:0x00004DD8
+	.text       start:0x0000196C end:0x00004E98
 	.rodata     start:0x000000B0 end:0x00000138
 	.data       start:0x00000200 end:0x000002A8
 	.bss        start:0x00000060 end:0x000000C0
 
 challenge/rep_0138.c:
-	.text       start:0x00004DD8 end:0x00008624
+	.text       start:0x00004E98 end:0x00008624
 	.rodata     start:0x00000138 end:0x00000250
 	.data       start:0x000002A8 end:0x00000AB0
 	.bss        start:0x000000C0 end:0x00002FA8

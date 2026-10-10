@@ -3,6 +3,7 @@
 #include "game/UnknownHomes_Game.h"
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/rand.h"
+#include "game/rep_3310.h"
 
 typedef struct ScoutFlagTable {
     /* 0x0 */ u8 _0[4];
@@ -27,12 +28,27 @@ typedef struct {
     /* 0x12 */ UnkBss37400Entry _12[9];
     /* 0x3F */ u8 _3F;
     /* 0x40 */ s16 _40;
-    /* 0x42 */ u8 _42[0x46 - 0x42];
+    /* 0x42 */ s16 _42;
+    /* 0x44 */ s16 _44;
     /* 0x46 */ u8 _46;
     /* 0x47 */ u8 _47;
     /* 0x48 */ u8 _48;
     /* 0x49 */ s8 _49;
+    /* 0x4A */ s8 _4A;
 } UnkBss37400;
+
+typedef struct {
+    /* 0x00 */ u8 _00[0x26];
+    /* 0x26 */ u8 _26;
+    /* 0x27 */ u8 _27[0x28 - 0x27];
+} Unk3DA8Actor; // size: 0x28
+
+extern struct {
+    /* 0x0000 */ u8 _0000[0x2D94];
+    /* 0x2D94 */ Unk3DA8Actor* _2D94;
+    /* 0x2D98 */ u8 _2D98[0x3078 - 0x2D98];
+    /* 0x3078 */ u16 _3078;
+} lbl_8036E548;
 
 extern UnkBss37400 lbl_3_common_bss_37400;
 
@@ -81,10 +97,13 @@ extern struct {
     /* 0xA0 */ s16 _A0;
     /* 0xA2 */ u8 _A2[0xA4 - 0xA2];
     /* 0xA4 */ s16 _A4;
-    /* 0xA6 */ u8 _A6[0xAA - 0xA6];
+    /* 0xA6 */ s16 _A6;
+    /* 0xA8 */ u8 _A8[0xAA - 0xA8];
     /* 0xAA */ u8 _AA;
     /* 0xAB */ u8 _AB[0xAD - 0xAB];
     /* 0xAD */ u8 _AD;
+    /* 0xAE */ u8 _AE[0xC6 - 0xAE];
+    /* 0xC6 */ u8 _C6;
 } g_Scores;
 
 typedef struct {
@@ -121,7 +140,7 @@ extern struct {
 } lbl_80353A90;
 
 extern struct {
-    /* 0x00 */ u8 _00[2];
+    /* 0x00 */ s16 _00;
     /* 0x02 */ s16 _02;
     /* 0x04 */ u8 _04[0x10 - 0x4];
     /* 0x10 */ u8 _10;
@@ -130,9 +149,242 @@ extern struct {
 } g_RunningLogic;
 
 extern struct {
+    /* 0x00 */ u8 _00[0xAC];
+    /* 0xAC */ u8 _AC;
+    /* 0xAD */ u8 _AD[0xB3 - 0xAD];
+    /* 0xB3 */ u8 _B3;
+} lbl_3_common_bss_32724;
+
+extern struct {
     /* 0x0000 */ u8 _0000[0x46E4];
     /* 0x46E4 */ s32 _46E4;
 } lbl_8034E9A0;
+
+// .text:0x001663AC size:0x9C mapped:0x807A5440
+void fn_3_1663AC(void) {
+    int i;
+
+    if (g_GameLogic.secondaryGameMode == 10 || g_GameLogic.secondaryGameMode == 18) {
+        if (lbl_8036E548._3078 != 0) {
+            for (i = 0; i < lbl_8036E548._3078; i++) {
+                if (&lbl_8036E548._2D94[i] != NULL) {
+                    lbl_8036E548._2D94[i]._26 = 0;
+                }
+            }
+        }
+    } else if (g_Practice.practiceLevel == 4) {
+        fn_3_11AB2C();
+    }
+}
+
+// .text:0x00165D24 size:0x688 mapped:0x807A4DB8
+// MWCC inlines fn_3_1659A0 at all twelve calls here, which the target makes with bl; eight
+// dead statements in fn_3_1659A0 stop that (88.74% then), so it was larger by MWCC's measure.
+BOOL fn_3_165D24(void) {
+    StarMissionCompletionTracker* tracker = &starMissionCompletionTracker;
+    UnkBss37400* bss = &lbl_3_common_bss_37400;
+    InMemRunnerType* runners = g_Runners;
+    InMemPitcherType* pitcher = &g_Pitcher;
+    InMemBatterType* batter = &g_Batter;
+    u8 mission = tracker->_441C;
+    u8 level = tracker->_4415;
+    s16 id = 0;
+    ChallengeTrackingStruct* c;
+
+    bss->_47 = 0;
+    bss->_42 = 0;
+    if (bss->_48 != 0) {
+        if (bss->_48 == 2) {
+            bss->_46 = 0;
+            bss->_48 = 0;
+            return FALSE;
+        }
+        switch (bss->_46) {
+            case 8:
+                if (lbl_3_common_bss_32A94._61 >= 4 ||
+                    g_Scores._04[g_GameLogic.homeTeamBattingInd_fieldingTeam][g_Scores._00] != 0) {
+                    bss->_46 = 0;
+                    bss->_48 = 0;
+                }
+                break;
+            case 9:
+            case 10:
+                if (bss->_44 != runners[3].rosterID || g_Strikes.outs == 2) {
+                    bss->_46 = 0;
+                    bss->_48 = 0;
+                }
+                break;
+            case 11:
+                if (bss->_44 != runners[1].rosterID) {
+                    bss->_46 = 0;
+                    bss->_48 = 0;
+                }
+                break;
+        }
+        return FALSE;
+    }
+    bss->_46 = 0;
+    lbl_3_common_bss_34C58._32 = 0;
+    if (g_d_GameSettings.bJMatchInd == 1) {
+        if (fn_3_1659A0(12)) {
+            bss->_46 = 12;
+        }
+    } else if (g_GameLogic.teamBatting == g_d_GameSettings.humanTeamNumber) {
+        if (g_RunningLogic._10 >= 2 && batter->rosterID == g_GameLogic.Team_CaptainRosterLoc[g_GameLogic.teamBatting] &&
+            pitcher->rosterID == g_GameLogic.Team_CaptainRosterLoc[g_GameLogic.teamFielding]) {
+            if (fn_3_1659A0(3)) {
+                bss->_46 = 3;
+            }
+        } else if (g_RunningLogic._10 >= 2 &&
+                   g_Scores._04[g_GameLogic.homeTeamBattingInd_fieldingTeam][0] <
+                       g_Scores._04[g_GameLogic.awayTeamBattingInd_battingTeam][0] &&
+                   g_Scores._A6 <= 3) {
+            if (fn_3_1659A0(4)) {
+                bss->_46 = 4;
+            }
+        } else if ((g_RunningLogic._00 & 0x1000) && g_Strikes.outs <= 1) {
+            switch (g_Batter.characterClass) {
+                case 0:
+                case 1:
+                    if (fn_3_1659A0(9)) {
+                        bss->_46 = 9;
+                    }
+                    break;
+                case 2:
+                case 3:
+                    if (fn_3_1659A0(10)) {
+                        bss->_46 = 10;
+                    }
+                    break;
+            }
+        } else if (g_RunningLogic._00 == 0x11 &&
+                   inMemRoster[g_GameLogic.teamBatting][runners[1].rosterID].stats.CharacterClass == 2) {
+            if (fn_3_1659A0(11)) {
+                bss->_46 = 11;
+            }
+        } else {
+            id = pitcher->scoutFlagRelated;
+            if (id != -1) {
+                c = &tracker->characters[id];
+                if (c->scoutFlagPointer->_4[level][mission] != 0 &&
+                    c->scoutFlagsAchieved < c->scoutFlagPointer->_4[level][mission] && fn_3_1659A0(2)) {
+                    bss->_46 = 2;
+                }
+            }
+        }
+    } else if (g_GameLogic.teamBatting != g_d_GameSettings.humanTeamNumber) {
+        if (g_RunningLogic._10 >= 3 && g_Scores._04[g_Scores._AD][g_Scores._00] == 0) {
+            if (fn_3_1659A0(5)) {
+                bss->_46 = 5;
+            }
+        } else if ((g_RunningLogic._00 & 0x10) && g_Strikes.outs <= 1) {
+            if (fn_3_1659A0(6)) {
+                bss->_46 = 6;
+            }
+        } else if (g_Batter.rosterID == g_GameLogic.Team_CaptainRosterLoc[g_GameLogic.teamBatting]) {
+            if (fn_3_1659A0(7)) {
+                bss->_46 = 7;
+            }
+        } else if (g_Scores._C6 == 1) {
+            if (fn_3_1659A0(8)) {
+                bss->_46 = 8;
+            }
+        } else {
+            id = batter->charIDForScoutFlagMission;
+            if (id != -1) {
+                c = &tracker->characters[id];
+                if (c->scoutFlagPointer->_4[level][mission] != 0 &&
+                    c->scoutFlagsAchieved < c->scoutFlagPointer->_4[level][mission] && fn_3_1659A0(1)) {
+                    bss->_46 = 1;
+                }
+            }
+        }
+    }
+    switch (bss->_46) {
+        case 9:
+            bss->_44 = runners[3].rosterID;
+            break;
+        case 10:
+            bss->_44 = runners[3].rosterID;
+            break;
+        case 11:
+            bss->_44 = runners[1].rosterID;
+            break;
+    }
+    if (bss->_46 != 0) {
+        fn_3_1658F0();
+        if (bss->_46 == 2 || bss->_46 == 1) {
+            fn_3_16440C();
+        } else {
+            fn_3_163E94();
+        }
+        tracker->_43C0 = id;
+        tracker->_44F1 = 1;
+        lbl_3_common_bss_32724._B3 = 1;
+        g_GameLogic.IsStarChance = 0;
+        lbl_3_common_bss_32724._AC = 0;
+        lbl_3_common_bss_37400._4A = 0;
+        return TRUE;
+    }
+    return FALSE;
+}
+
+// .text:0x001659A0 size:0x384 mapped:0x807A4A34
+BOOL fn_3_1659A0(s32 type) {
+    StarMissionCompletionTracker* tracker = &starMissionCompletionTracker;
+    UnkBss37400* bss = &lbl_3_common_bss_37400;
+    u8 level = tracker->_4415;
+    u8 kind;
+    BOOL found;
+    s32 r;
+    s32 chance;
+
+    kind = bss->_46;
+    if (kind == 2 || kind == 1) {
+        found = fn_3_163A7C();
+    } else {
+        found = fn_3_163BD4();
+    }
+    if (!found) {
+        return FALSE;
+    }
+    r = rand() % 100;
+    if (bss->_4A == 0) {
+        chance = (s8)lbl_80109420[type]._0[level];
+    } else {
+        chance = (s8)lbl_80109420[type]._0[level + 4];
+    }
+    if (r <= chance) {
+        return TRUE;
+    }
+    return FALSE;
+}
+
+// .text:0x0016598C size:0x14 mapped:0x807A4A20
+void fn_3_16598C(void) {
+    lbl_3_common_bss_37400._4A = 0;
+}
+
+// .text:0x00165978 size:0x14 mapped:0x807A4A0C
+void fn_3_165978(void) {
+    lbl_3_common_bss_37400._4A = 0;
+}
+
+// .text:0x001658F0 size:0x88 mapped:0x807A4984
+void fn_3_1658F0(void) {
+    UnkBss37400* bss = &lbl_3_common_bss_37400;
+    s32 i;
+
+    for (i = 0; i < 9; i++) {
+        bss->_12[i]._1 = 0;
+        bss->_12[i]._0 = 0;
+        bss->_12[i]._2 = 0;
+        bss->_12[i]._3 = 0;
+        bss->_12[i]._4 = 0;
+        bss->_00[i]._0 = 0;
+        bss->_00[i]._1 = 0;
+    }
+}
 
 // .text:0x00164A74 size:0xE7C mapped:0x807A3B08
 void fn_3_164A74(void) {
@@ -637,8 +889,8 @@ BOOL fn_3_163A7C(void) {
     InMemPitcherType* pitcher = &g_Pitcher;
     s16 ids[9];
     s32 i;
-    s32 charID;
     BOOL ret;
+    s32 charID;
 
     for (i = 0; i < 9; i++) {
         ids[i] = inMemRoster[1][i].stats.CharID;
@@ -699,8 +951,8 @@ void fn_3_1637EC(void) {
 }
 
 // .text:0x00162D54 size:0xA98 mapped:0x807A1DE8
-// 99.79%: in the win-mission loop the target forms starMissionCompletionTracker's address before
-// lbl_80109AE8's and keeps m in r6 and the status pointer in r4; the base swaps both pairs.
+// 99.92%: in the win-mission loop the target loads the entry's _2 before _1 and forms
+// starMissionCompletionTracker's address before lbl_80109AE8's; the base swaps both pairs.
 void fn_3_162D54(void) {
     s32 i;
     s32 k;
@@ -758,10 +1010,9 @@ void fn_3_162D54(void) {
             }
         }
         if (g_Scores._A4 == side) {
-            entry = &lbl_800E8558[lbl_80353A90._103];
-            id = entry->_1;
-            m = lbl_80109AE8[entry->_2];
-            for (i = 0; i < 10; m++, i++) {
+            id = lbl_800E8558[lbl_80353A90._103]._1;
+            m = lbl_80109AE8[lbl_800E8558[lbl_80353A90._103]._2];
+            for (i = 0; i < 10; i++, m++) {
                 if (MISSION_STATUS(id, i) >= 0 && m->type == 1) {
                     MISSION_STATUS(id, i) = -1;
                 }

@@ -155,7 +155,7 @@ extern struct {
 
 extern struct {
     /* 0x00 */ u8 _00[0x98];
-    /* 0x98 */ s32 _98;
+    /* 0x98 */ void* _98;
 } lbl_800EF808;
 
 extern struct {
@@ -330,7 +330,7 @@ extern void fn_80021410(void);
 extern void fn_80035CA4(int arg);
 extern void fn_80035B50(int arg);
 extern void fn_800AD054(s32 arg0, s32 arg1);
-extern void fn_800ACFB0(s32 arg0);
+extern void fn_800ACFB0(void* arg0);
 extern void fn_80021AC0(s32 arg0, s32 arg1);
 extern void fn_80021AC4(void);
 extern s32 fn_80062578(void);

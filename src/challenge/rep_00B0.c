@@ -146,6 +146,20 @@ static inline void GDColorMaterial00B0(u32 material) {
     GDColor1x8((material >> 7) + ((material & 0x7F) - 1) * 2);
 }
 
+// .text:0x00004DD8 size:0xC0
+// Relocates the collision table: its entries are offsets from the file's start
+void fn_1_4DD8(u16* data) {
+    s32 i;
+    u32* table;
+
+    lbl_1_common_bss_472B4._228 = data[0];
+    lbl_1_common_bss_472B4._224 = (void**)(data + 2);
+    table = (u32*)lbl_1_common_bss_472B4._224;
+    for (i = lbl_1_common_bss_472B4._228; i >= 0; i--) {
+        *table++ += (u32)data;
+    }
+}
+
 // .text:0x00004A24 size:0x3B4
 void fn_1_4A24(Ray00B0* ray, void* mesh) {
     Vec v[3];

@@ -10,6 +10,8 @@
 #include "Dolphin/OS/OSCache.h"
 #include "string.h"
 #include "Dolphin/rand.h"
+#include "challenge/rep_0010.h"
+#include "challenge/rep_7978.h"
 
 extern void* lbl_803CC1B8;
 
@@ -95,13 +97,7 @@ extern void fn_800A7D4C(s32, void*);
 extern void fn_80038CD0(u8 count, void* arg1, struct RopeNode7730* nodes, f32 arg3, f32 arg4);
 extern void fn_80038B48(void* arg0, struct RopeNode7730* nodes, u8 count, Vec* force);
 extern void fn_80038E2C(void* arg0);
-extern void fn_1_AF4(s32 arg0, s32 arg1, f32 arg2);
-extern void fn_1_272DC(void* arg0, s32 arg1);
-extern void fn_1_273D8(void* arg0);
-extern void fn_1_F2C(s32 arg0, s32 arg1, s32 arg2);
 extern void fn_1_121D4(void* arg0);
-extern void fn_1_26D28(void* arg0, u16 held, u16 pressed, u16 repeat, s8* stick);
-extern void fn_1_27330(void* arg0);
 extern void fn_80037BAC(void* arg0);
 extern void LITAlloc(void** light);
 extern void LITInitAttn(void* light, f32 a0, f32 a1, f32 a2, f32 k0, f32 k1, f32 k2);
@@ -642,7 +638,7 @@ static void* lbl_1_bss_6FA4;
 static GXTexObj lbl_1_bss_6EA4[8];
 static GXTlutObj lbl_1_bss_6E44[8];
 static u32 lbl_1_bss_6E24[8];
-static u8 lbl_1_bss_6D48[0xDC];
+static Camera7978 lbl_1_bss_6D48;
 static Actor7730 lbl_1_bss_6BF4;
 static struct {
     /* 0x0 */ f32 _0;
@@ -2645,7 +2641,7 @@ void fn_1_1F418(GameTask7730* task) {
 
 // .text:0x0001F2D8 size:0x140
 void fn_1_1F2D8(void) {
-    fn_1_273D8(lbl_1_bss_6D48);
+    fn_1_273D8(&lbl_1_bss_6D48);
     ((CameraTask7730*)lbl_803CC1B8)->_00 = fn_1_1F05C;
     ((CameraTask7730*)lbl_803CC1B8)->_2C = 0;
     ((CameraTask7730*)lbl_803CC1B8)->_28 = 0;
@@ -2680,7 +2676,7 @@ void fn_1_1F05C(void) {
         ((CameraTask7730*)lbl_803CC1B8)->_10 = fn_1_1E90C(((CameraTask7730*)lbl_803CC1B8)->_10, lbl_803C77B8[0]._00,
                                                           lbl_803C77B8[0]._02, lbl_803C77B8[0]._04);
     } else {
-        fn_1_26D28(lbl_1_bss_6D48, lbl_803C77B8[0]._00, lbl_803C77B8[0]._02, lbl_803C77B8[0]._04,
+        fn_1_26D28(&lbl_1_bss_6D48, lbl_803C77B8[0]._00, lbl_803C77B8[0]._02, lbl_803C77B8[0]._04,
                    &lbl_803C77B8[0]._10);
     }
     if (lbl_803C77B8[0]._02 & 0x200) {
@@ -2693,7 +2689,7 @@ void fn_1_1F05C(void) {
     } else if (lbl_803C77B8[0]._02 & 0x1000) {
         ((CameraTask7730*)lbl_803CC1B8)->_2C ^= 1;
     }
-    fn_1_27330(lbl_1_bss_6D48);
+    fn_1_27330(&lbl_1_bss_6D48);
     task = lbl_803CC1B8;
     switch (task->_28) {
     case 0:
@@ -2713,7 +2709,7 @@ void fn_1_1F05C(void) {
 
 // .text:0x0001EFF4 size:0x68
 void fn_1_1EFF4(void) {
-    fn_1_272DC(lbl_1_bss_6D48, 0);
+    fn_1_272DC(&lbl_1_bss_6D48, 0);
     fn_1_AF4(20, 20, 1.0f);
     if (((CameraTask7730*)lbl_803CC1B8)->_2C & 2) {
         fn_1_1E5D0(&lbl_1_bss_6BF4);

@@ -20,6 +20,7 @@
 #include "static/UnknownHomes_Static.h"
 #include "musyx/musyx.h"
 #include "string.h"
+#include "game/rep_3D50.h"
 
 extern struct {
     /* 0x00 */ s32 _00;
@@ -78,7 +79,6 @@ extern void changeScene(u8, s16);
 extern void fn_800246D4(int (*compare)(const void*, const void*), void* src, void* dst, int size, int count);
 extern int fn_3_6C938(int, int);
 extern void fn_8004C108(VecXYZ* pos, int arg1);
-extern void fn_3_1608F0(int, int, int);
 
 
 // .text:0x001324E8 size:0x9F4 mapped:0x8077157C

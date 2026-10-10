@@ -730,6 +730,13 @@ typedef struct _GameControlOptions {
     /*0x006*/ bool _6;
 } GameControlOptions; // size: 0x7
 
+// Per-team options read from 0x7, two bytes ahead of controlOptions.
+typedef struct _GameTeamOptions {
+    /*0x000*/ u8 _0;
+    /*0x001*/ u8 _1;
+    /*0x002*/ u8 _2[5];
+} GameTeamOptions; // size: 0x7
+
 typedef struct _GameInitOptions {
     /*0x000*/ u8 inningSetting;
     /*0x001*/ u8 _1;
@@ -738,9 +745,14 @@ typedef struct _GameInitOptions {
     /*0x004*/ u8 starSkillsSetting;
     /*0x005*/ u8 runsNeededForMercy;
     /*0x006*/ u8 _6;
-    /*0x007*/ u8 _7;
-    /*0x008*/ u8 _8;
-    /*0x009*/ GameControlOptions controlOptions[4];
+    union {
+        struct {
+            /*0x007*/ u8 _7;
+            /*0x008*/ u8 _8;
+            /*0x009*/ GameControlOptions controlOptions[4];
+        };
+        /*0x007*/ GameTeamOptions teamOptions[4]; // per team, from 0x7
+    };
     /*0x025*/ u8 _25;
     /*0x026*/ u8 _26;
     /*0x027*/ u8 _27;
@@ -2826,10 +2838,17 @@ typedef struct {
 } ReplayState; // size: 0x45F0
 
 typedef struct {
-    u8 pad[0x24];
+    /* 0x0000 */ f32 _00[7];
+    /* 0x001C */ s16 _1C;
+    /* 0x001E */ s16 _1E;
+    /* 0x0020 */ s16 _20;
+    /* 0x0022 */ u8 _22[0x24 - 0x22];
     /* 0x0024 */ s32 playFrameCounter;
     /* 0x0028 */ s16 _28;
-    artificial_padding(0x28, 0x32, s16);
+    /* 0x002A */ s16 _2A;
+    /* 0x002C */ s16 _2C;
+    /* 0x002E */ s16 _2E;
+    /* 0x0030 */ s16 _30;
     /* 0x0032 */ s16 _32;
     /* 0x0034 */ s16 _34;
     /* 0x0036 */ u8 replayInd;

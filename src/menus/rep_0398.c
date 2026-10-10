@@ -428,15 +428,15 @@ void fn_2_11698(void) {
 }
 
 // .text:0x00011340 size:0x358
-// 98.36%: the target loads the wraparound 0 into r6 early (`mr r4,r6`) and swaps the
-// registers of the two button words; the rest matches.
+// 98.90%: the target loads the wraparound 0 into r6 before the button tests (`mr r4,r6`);
+// the rest matches.
 void fn_2_11340(u8 port) {
     s32 prev;
-    s32 r;
     s32 i;
     u8 found;
     u16 held;
     u16 pressed;
+    s32 r;
 
     found = 0;
     if (lbl_803CBCD8._0 != 0) {
@@ -469,12 +469,12 @@ void fn_2_11340(u8 port) {
     } else if (port != 0) {
         return;
     }
-    held = lbl_8034E9A0._472E[port][1];
     pressed = lbl_8034E9A0._472E[port][0];
+    held = lbl_8034E9A0._472E[port][1];
     if (held & 1) {
         if (lbl_803C66B0._5D != 0x24) {
-            r = lbl_2_bss_F410._44 - 1;
-            if (r < 0) {
+            r = lbl_2_bss_F410._44;
+            if (--r < 0) {
                 r = 5;
             }
             lbl_2_bss_F410._44 = r;
@@ -483,8 +483,8 @@ void fn_2_11340(u8 port) {
         }
     } else if (held & 2) {
         if (lbl_803C66B0._5D != 0x24) {
-            r = lbl_2_bss_F410._44 + 1;
-            if (r == 6) {
+            r = lbl_2_bss_F410._44;
+            if (++r == 6) {
                 r = 0;
             }
             lbl_2_bss_F410._44 = r;

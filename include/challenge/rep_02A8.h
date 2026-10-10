@@ -33,7 +33,7 @@ void fn_1_BA64(void);
 void fn_1_BC00(void);
 void fn_1_BDD8(void);
 void fn_1_BEF4(s16 vid);
-s32 fn_1_BF34(s32 fx);
+s32 fn_1_BF34(s16 fx);
 void fn_1_BFB0(void);
 void fn_1_C188(void);
 void fn_1_C2A4(void);

@@ -7,6 +7,7 @@
 #include "C3/anim.h"
 #include "Dolphin/vec.h"
 #include "string.h"
+#include "menus/rep_08E8.h"
 
 typedef struct Model0F60 {
     /* 0x00 */ struct ActorObj0F60* _00;
@@ -194,7 +195,7 @@ typedef struct Game0F60 {
     /* 0x00B4 */ s32 _00B4;
     /* 0x00B8 */ s32 _00B8;
     /* 0x00BC */ u8 _00BC[0x13C - 0xBC];
-    /* 0x013C */ s32 _013C;
+    /* 0x013C */ void* _013C;
     /* 0x0140 */ AnimState0F60 _0140[9];
     /* 0x08B4 */ u8 _08B4[0xC04 - 0x8B4];
     /* 0x0C04 */ Player0F60 _0C04[9];
@@ -289,13 +290,12 @@ extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);
 extern void convertTextureHeader(void* tex);
 extern void fn_800BD190(void* geo, void* tex);
 extern void fn_800B9AA8(void* arg0);
-extern f32 fn_2_4A1E8(f32 x, f32 y);
 extern void fn_2_190DC(ModelTable0F60* table, MtxPtr view);
 extern void* ARAMTransfer(AramEntry0F60* entry, s32 arg1, s32 arg2, u32 aram);
 extern void fn_80052D70(void);
 extern void fn_80023B04(void);
 extern void fn_80014204(s16 count);
-extern s32 fn_80023AA4(void);
+extern void* fn_80023AA4(void);
 extern ActorRef0F60* fn_800111D8(Player0F60* player);
 extern f32 fn_800B4A44(ActorObj0F60* actor, u16 anim);
 extern void fn_800B2B54(ActorObj0F60* actor, u16 anim, s32 arg2);
@@ -322,8 +322,6 @@ extern void fn_800637D4(Player0F60* player, ActorRef0F60* ref);
 extern void fn_80052634(Player0F60* player, ActorRef0F60* ref);
 extern void fn_80062ED4(Player0F60* player, ActorRef0F60* ref);
 extern void fn_800B0A14_removeQueue(void);
-extern void fn_2_4E824(void);
-extern void fn_2_48DB4(void);
 extern void fn_2_93C64(void);
 
 AramEntry0F60 lbl_2_data_2F990[13] = {

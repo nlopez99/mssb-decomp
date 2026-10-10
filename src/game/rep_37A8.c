@@ -15,6 +15,7 @@
 #include "string.h"
 #include "Dolphin/rand.h"
 #include "musyx/musyx.h"
+#include "game/rep_3D50.h"
 
 // g_Minigame's three entries in this minigame
 typedef struct UnkMgEntry3310 {
@@ -165,7 +166,6 @@ extern void minigamesSetSomePointers2(void);
 extern void fn_3_59A90(void);
 extern void fn_3_591AC(void);
 extern void fn_3_58870(void);
-extern void fn_3_1608F0(int, int, int);
 extern void fn_80062BE4(Vec* pos);
 extern u8 lbl_3_data_21E18[2][2];
 extern struct {

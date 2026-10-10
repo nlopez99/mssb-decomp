@@ -19,5 +19,7 @@ void fn_3_9B7F4(void);
 void fn_3_9BEE0(struct UnkTask1770* task);
 void fn_3_9C014(void);
 void fn_3_9C28C(void);
+void fn_3_9C578(void);
+void fn_3_9C794(void);
 
 #endif // !__GAME_rep_1770_H_

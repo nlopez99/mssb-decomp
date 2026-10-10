@@ -5,6 +5,7 @@
 #include "Dolphin/pad.h"
 #include "Dolphin/gx.h"
 #include "string.h"
+#include "menus/rep_08E8.h"
 
 typedef struct {
     /* 0x00 */ u8 _00[0x10];
@@ -112,12 +113,8 @@ extern void fn_8006877C(s32 arg0);
 extern void fn_800A86B4(s32 arg0);
 extern void fn_2_245C8(void);
 extern void fn_2_42388(void);
-extern void fn_2_4E7EC(void);
-extern void fn_2_4E8E0(void);
-extern s32 fn_2_4EABC(void);
 extern void fn_2_515DC(s32 arg0);
 extern void fn_2_54474(void);
-extern void fn_2_4E824(void);
 
 typedef struct UnkEntry07F0 {
     /* 0x00 */ void (*_00)(void);

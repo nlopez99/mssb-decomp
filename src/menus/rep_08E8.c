@@ -10,6 +10,8 @@
 #include "stdlib.h"
 #include "math.h"
 #include "string.h"
+#include "menus/rep_09B8.h"
+#include "menus/rep_0B08.h"
 
 typedef struct MenuTask08E8 {
     /* 0x00 */ u8 _00[0xC];
@@ -484,7 +486,6 @@ extern void fn_8003BF54(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void* _OSAllocFromHeap(u32 align, u32 size);
 
 // rep_09B8 (an empty function there)
-extern void fn_2_513E0(void* text, s32, s32, s32, s32, s32, s32, s32);
 
 extern void fn_80052968(void);
 extern void* lbl_803CC1B8;
@@ -510,9 +511,6 @@ extern s32 fn_8006C6C4(void);
 extern void fn_80024FA4(MenuActorRef08E8* model, u32 animId, MenuAnimState08E8* anim, s32 arg3);
 
 // rep_0B08
-extern void fn_2_6A87C(void);
-extern s32 fn_2_68690(s32);
-extern void fn_2_68DAC(s32, Vec*);
 
 // rep_1028
 extern void fn_2_9007C(void);

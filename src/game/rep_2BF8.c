@@ -181,9 +181,8 @@ static inline UnkSprite2BF8* getSprite(UnkTask2BF8* task, u32 i) {
     return lbl_80371C30[task->_14 + i]._00;
 }
 
-static inline BOOL isSpriteDone(UnkTask2BF8* task, u32 i) {
-    return lbl_80371C30[task->_14 + i]._00->_69 == 2 ? TRUE : FALSE;
-}
+// A macro, not an inline: case 2 of fn_3_EC014 indexes with `_14 + 1 + i`, its textual expansion.
+#define isSpriteDone(task, i) (lbl_80371C30[(task)->_14 + i]._00->_69 == 2 ? TRUE : FALSE)
 
 static inline void setScreen(u8 id) {
     lbl_8034E978._00 = id;
@@ -907,9 +906,9 @@ void fn_3_EC804(void) {
 }
 
 // .text:0x000EC014 size:0x7F0 mapped:0x8072B0A8
-// 99.92%: the stadium of the playStadiumSound(2) copy sits in r28 in the target, r24 in the base
+// 99.96%: the stadium of the playStadiumSound(2) copy sits in r28 in the target, r24 in the base
 // (helper forms, an in-place copy with locals at every position, and block-scoped locals change
-// nothing), and case 2's first offset adds _14 + i in the target, i + _14 here.
+// nothing).
 void fn_3_EC014(void) {
     UnkTask2BF8* task = lbl_803CC1B8;
     MiniGameStruct* minigame;

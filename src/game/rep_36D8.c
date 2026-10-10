@@ -20,6 +20,7 @@
 #include "Dolphin/mtx.h"
 #include "Dolphin/rand.h"
 #include "string.h"
+#include "game/rep_3D50.h"
 
 // The chain chomp, at g_Minigame._CB0
 typedef struct Unk36D8Chomp {
@@ -84,7 +85,6 @@ extern void fn_800528B4(void);
 extern void fn_800115C8(u8);
 extern void fn_80011578(void);
 extern void fn_8004C094(Vec*);
-extern void fn_3_1608F0(int, int, int);
 extern void fn_800246D4(int (*compare)(const void*, const void*), void* src, void* dst, int size, int count);
 extern void minigamesSetSomePointers(void);
 extern void minigamesGXStuff(void);

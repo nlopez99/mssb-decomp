@@ -8,6 +8,7 @@
 #include "Dolphin/vec.h"
 #include "musyx/musyx.h"
 #include "string.h"
+#include "menus/rep_08E8.h"
 
 typedef struct MenuTask0A58 {
     /* 0x00 */ u8 _00[0xC];
@@ -214,16 +215,9 @@ extern void fn_800363D8(MenuTask0A58* task, s32, s32, s32, s32);
 extern u32 fn_80036214(MenuTask0A58* task, s32, s32, s32);
 extern void fn_8000F8F4(MenuTask0A58* task);
 
-extern void fn_2_47CFC(void);
-extern void fn_2_47FF8(void);
-extern void fn_2_4E7EC(void);
-extern void fn_2_4E858(MenuTask0A58* task);
-extern void fn_2_4E878(MenuTask0A58* task, u32* layout);
 extern void fn_2_68E68(void);
 extern void fn_2_8E8A4(void);
-extern void fn_2_489DC(void);
 extern void fn_2_11A0(s32);
-extern void fn_2_46D94(s16*, s16*, s32, s32, s32);
 extern void fn_2_6ACF4(void);
 extern void fn_2_71F60(void);
 extern void fn_2_93C64(void);
