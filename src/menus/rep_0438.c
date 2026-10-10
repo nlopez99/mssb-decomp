@@ -178,7 +178,57 @@ extern struct {
     /* 0x0 */ s8 _0;
     /* 0x1 */ u8 _1;
 } lbl_2_bss_100B4;
-extern u16 lbl_2_bss_AE0;
+typedef struct AramEntry0438 {
+    /* 0x0 */ u32 _0[4];
+} AramEntry0438; // size: 0x10
+
+// The debug-menu tables; nothing in the unit reads them.
+char lbl_2_data_15C8[2][0x20] = { "BAT FIRST", "BAT LAST" };
+char lbl_2_data_1608[2][0x20] = { "FL", "PC" };
+char lbl_2_data_1648[4][4] = { "RR", "RL", "LR", "LL" };
+char lbl_2_data_1658[2][0x20] = { "OFF", "ON" };
+char lbl_2_data_1698[5][0x20] = {
+    "SELECT DEBUG MENU", "HIDE CHARA SET", "STAR PLAYER SET", "KOOPA STA FLAG SET", "CHALLE LEVEL FREE SET",
+};
+char lbl_2_data_1738[8][0x20] = {
+    "1P >", "COM1>", "2P >", "COM2>", "3P >", "COM3>", "4P >", "COM4>",
+};
+u32 lbl_2_data_1838[8] = { 0xFF0F, 0x880F, 0x0FFF, 0x088F, 0xF0FF, 0x808F, 0xF00F, 0x800F };
+s16 lbl_2_data_1858[12] = { 0, 4, 10, 6, 2, 9, 1, 5, 11, 17, 3, 19 };
+u8 lbl_2_data_1870[2][13] = {
+    { 0, 2, 6, 8, 4, 10, 1, 3, 7, 5, 9, 11 },
+    { 0, 6, 2, 8, 4, 10, 5, 11, 3, 9, 1, 7 },
+};
+u8 lbl_2_data_188C[40] = {
+    2, 5, 4, 3, 8, 3, 4, 5, 2, 6, 0, 1, 8, 6, 7, 1, 2, 0, 7, 4,
+    4, 3, 1, 2, 5, 1, 2, 4, 6, 8, 7, 6, 8, 5, 3, 3, 5, 7, 4, 6,
+};
+AramEntry0438 lbl_2_data_18B4[1] = {
+    { 0x0000040B, 0x4037CF5C, 0x18B3A800, 0x00208AF0 },
+};
+AramEntry0438 lbl_2_data_18C4[2] = {
+    { 0x0000040B, 0x400ADFFC, 0x18AEE800, 0x0004BAB0 },
+    { 0x0000040B, 0x400193E8, 0x191B8800, 0x000089D8 },
+};
+AramEntry0438 lbl_2_data_18E4[13] = {
+    { 0x0000040B, 0x4010E5A0, 0x0E97A800, 0x0009BCAC },
+    { 0x0000040B, 0x40016980, 0x0EA16800, 0x0000D6C4 },
+    { 0x0000040B, 0x40016980, 0x0EA24000, 0x0000C944 },
+    { 0x0000040B, 0x40016980, 0x0EA31000, 0x0000E700 },
+    { 0x0000040B, 0x40016980, 0x0EA3F800, 0x0000D64C },
+    { 0x0000040B, 0x40016980, 0x0EA4D000, 0x0000C900 },
+    { 0x0000040B, 0x40016980, 0x0EA5A000, 0x0000CFFC },
+    { 0x0000040B, 0x40016980, 0x0EA67000, 0x0000D720 },
+    { 0x0000040B, 0x40016980, 0x0EA74800, 0x0000D6CC },
+    { 0x0000040B, 0x40016980, 0x0EA82000, 0x0000D21C },
+    { 0x0000040B, 0x40016980, 0x0EA8F800, 0x0000D0BC },
+    { 0x0000040B, 0x40016980, 0x0EA9D000, 0x0000B544 },
+    { 0x0000040B, 0x40016980, 0x0EAA8800, 0x0000C4F8 },
+};
+
+// Nothing in the unit reads lbl_2_bss_AE4.
+u8 lbl_2_bss_AE4[0x73C];
+u16 lbl_2_bss_AE0;
 
 typedef struct CharEntry0438 {
     /* 0x00 */ u8 _00[0x1E];
