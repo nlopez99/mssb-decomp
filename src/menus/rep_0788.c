@@ -187,7 +187,7 @@ typedef struct MenuParam0788 {
     /* 0x04 */ u8 _04[0xBC - 0x4];
 } MenuParam0788; // size: 0xBC
 
-extern struct {
+extern struct MenuWork0788 {
     /* 0x0000 */ MenuCharacter0788 _0000[0x36];
     /* 0x0AF8 */ u8 _0AF8[0x15F1 - 0xAF8];
     /* 0x15F1 */ s8 _15F1[0x14];
@@ -3787,8 +3787,8 @@ void fn_2_33E70(MenuTask0788* task, MenuItem0788* item) {
 }
 
 // .text:0x000338D4 size:0x59C
-// 99.11%: in case 0 the target sign-extends the `+ 12` sum before the choice, and in cases 1
-// and 2 it branches around the `+ 12` (`bne; b`) where this build skips it with `beq`.
+// 99.39%: in cases 1 and 2 the target branches around the `+ 12` (`bne; b`) where this
+// build skips it with `beq`; an empty `kind == 3` branch or a ternary did not reproduce it.
 void fn_2_338D4(MenuTask0788* task, MenuItem0788* item) {
     s16 part = item->_10 & 0xF;
     s16 value;
@@ -3837,7 +3837,7 @@ void fn_2_338D4(MenuTask0788* task, MenuItem0788* item) {
             switch (item->_0A) {
             case 0:
                 digit = count % 10;
-                digit = kind == 3 ? digit : digit + 12;
+                digit = kind == 3 ? digit : (s16)(digit + 12);
                 fn_800363D8(task, item->_0E, 1, 0x2C, digit);
                 break;
             case 1:
@@ -5297,13 +5297,14 @@ void fn_2_2F710(MenuTask0788* task, MenuItem0788* item) {
 }
 
 // .text:0x0002F544 size:0x1CC
-// 97.74%: the target walks the roster with a pointer (`lha 0x40B8(rX)`, `rX += 6`),
-// this build indexes it (`addi; lhax`).
+// 99.70%: the target keeps the roster id in r7 and the list pointer in r5, this build the
+// reverse; declaration orders, a temporary and a permuter session did not swap them.
 void fn_2_2F544(MenuTask0788* task, MenuItem0788* item) {
     s16 state = fn_2_53BC8(item);
     s16 list[16];
     s16* entry;
     s16 i;
+    struct MenuWork0788* work;
 
     if (state != -1) {
         item->_04 = state;
@@ -5314,10 +5315,11 @@ void fn_2_2F544(MenuTask0788* task, MenuItem0788* item) {
         item->_04 = 0x26;
         break;
     case 2:
+        work = lbl_2_bss_1A8248;
         entry = list;
         for (i = 0; i < 9; i++) {
-            if (lbl_2_bss_1A8248->_40B8[i]._0 != lbl_803CB8F0[lbl_2_bss_1A8248->_441C]) {
-                *entry++ = lbl_2_bss_1A8248->_40B8[i]._0;
+            if (work->_40B8[i]._0 != lbl_803CB8F0[work->_441C]) {
+                *entry++ = work->_40B8[i]._0;
             }
         }
         lbl_80371C30[task->_14 + item->_0E]._00->_5C = list[item->_0A] << 16;
@@ -6909,15 +6911,13 @@ void fn_2_2A77C(MenuTask0788* task, MenuItem0788* item) {
 }
 
 // .text:0x0002A338 size:0x444
-// 97.23%: the target loads lbl_2_bss_1A824C with `lwz rX,sym@l` before the mission tables,
-// this build with `addi; lwz 0`, and the table loads are scheduled in another order.
 void fn_2_2A338(MenuTask0788* task, MenuItem0788* item) {
     s16 state = fn_2_53BC8(item);
     s16 textId;
-    s16 textAlt;
+    MenuCharacter0788* chr;
     s16 flags;
     s16 minLevel;
-    MenuCharacter0788* chr;
+    s16 textAlt;
 
     if (state != -1) {
         item->_04 = state;
@@ -6931,11 +6931,11 @@ void fn_2_2A338(MenuTask0788* task, MenuItem0788* item) {
         break;
     case 2:
     case 8:
-        textAlt = lbl_8010A768[lbl_2_bss_1A824C->_197706][lbl_2_bss_1A824C->_197710]._2;
         textId = lbl_8010A768[lbl_2_bss_1A824C->_197706][lbl_2_bss_1A824C->_197710]._0;
-        flags = lbl_80109AE8[lbl_2_bss_1A824C->_197706][lbl_2_bss_1A824C->_197710]._4;
-        minLevel = lbl_80109AE8[lbl_2_bss_1A824C->_197706][lbl_2_bss_1A824C->_197710]._6;
         chr = &lbl_2_bss_1A8248->_0000[lbl_800E869C[lbl_2_bss_1A824C->_197706]];
+        flags = lbl_80109AE8[lbl_2_bss_1A824C->_197706][lbl_2_bss_1A824C->_197710]._4;
+        textAlt = lbl_8010A768[lbl_2_bss_1A824C->_197706][lbl_2_bss_1A824C->_197710]._2;
+        minLevel = lbl_80109AE8[lbl_2_bss_1A824C->_197706][lbl_2_bss_1A824C->_197710]._6;
         if (textAlt != -1 && chr->_09[lbl_2_bss_1A824C->_197710]._1 == 0) {
             if (lbl_2_bss_1A8248->_4415 < minLevel) {
                 fn_8000FE08(item->_14, 0, 0x1C6);
