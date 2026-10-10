@@ -10,6 +10,7 @@
 #include "stl/math.h"
 #include "stdlib.h"
 #include "string.h"
+#include "menus/rep_08E8.h"
 
 typedef void (*Obj0B08Fn)(struct Obj0B08* obj);
 
@@ -195,13 +196,6 @@ extern struct {
 extern void fn_800BD2CC(s32 arg0, GXColor color);
 extern s32 fn_80062890(s32 id);
 extern void fn_800B0A14_removeQueue(void);
-extern void fn_2_46C88(s32 arg0, s32 arg1);
-extern f32 fn_2_4A18C(f32 angle);
-extern f32 fn_2_4A1E8(f32 x, f32 z);
-extern s16 fn_2_4A150(s16 angle);
-extern s32 fn_2_4A2C4(f32 angle);
-extern s16 fn_2_4A234(f32 x, f32 z);
-extern s16 fn_2_4A310(s16 a, s16 b);
 
 // Points to starMissionCompletionTracker
 extern Tracker0B08* lbl_2_bss_1A8248;

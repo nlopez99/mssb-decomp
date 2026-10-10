@@ -3,6 +3,7 @@
 #include "static/UnknownHomes_Static.h"
 #include "string.h"
 #include "musyx/musyx.h"
+#include "menus/rep_08E8.h"
 
 typedef struct MenuSaveSlot0A08 {
     /* 0x0000 */ u8 _0000[0xAF8];
@@ -190,7 +191,6 @@ extern void fn_8004A34C(void* arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern s32 fn_8004CA6C(u16 buttons);
 extern void fn_8004CC2C(void);
 extern void fn_8003BF54(int, int, int, int, int, int, int, u8, int);
-extern void fn_2_460EC(s32 arg0);
 extern void* lbl_803CC1B8;
 extern void fn_800B0A14_removeQueue(void);
 extern u8 lbl_2_bss_33FB4C[0x80];

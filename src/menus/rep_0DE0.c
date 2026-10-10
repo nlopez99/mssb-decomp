@@ -7,6 +7,7 @@
 #include "Dolphin/mtx.h"
 #include "Dolphin/vec.h"
 #include "string.h"
+#include "menus/rep_08E8.h"
 
 typedef struct LITObj {
     /* 0x00 */ u8 _00[0xC0];
@@ -123,8 +124,6 @@ extern u8 lbl_803CBBC0;
 
 extern u8 lbl_2_bss_33FBF0[];
 
-extern f32 fn_2_4A1E8(f32 x, f32 z);
-extern void fn_2_48D54(void);
 extern void fn_2_190DC(ModelTable0DE0* table, Mtx view);
 extern void fn_800A7D4C(s32 arg0, void* arg1);
 extern void fn_800B806C(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7);

@@ -9,6 +9,7 @@
 #include "Dolphin/vec.h"
 #include "stdlib.h"
 #include "string.h"
+#include "menus/rep_08E8.h"
 
 typedef struct MenuEntry0788 {
     /* 0x0 */ void (*fn)(struct MenuTask0788* task, struct MenuItem0788* item);
@@ -494,17 +495,6 @@ extern BOOL fn_8006C79C(s32 index);
 extern BOOL fn_8006CDC0(s32 index);
 extern BOOL determineIfMissionDescriptionIsShown(s32 index);
 
-extern s32 fn_2_44E2C(s32 id);
-extern s32 fn_2_44F14(s32 id);
-extern void fn_2_42EB0(void);
-extern void fn_2_432EC(void);
-extern void fn_2_45810(void);
-extern void fn_2_45978(void);
-extern void fn_2_467FC(void);
-extern void fn_2_46ADC(void);
-extern void fn_2_46D94(s16*, s16*, s32, s32, s32);
-extern void fn_2_46C2C(s32 unused, Vec* src);
-extern void fn_2_46D34(s32 delta);
 extern void fn_2_3F66C(void);
 extern void fn_2_3FA14(void);
 extern void fn_2_11A0(s32 arg0);
@@ -535,28 +525,6 @@ extern void fn_2_3DAB8(void);
 extern void fn_2_3DC60(void);
 extern void fn_2_3DDC4(void);
 extern void fn_2_422FC(s32 index);
-extern void fn_2_42708(void);
-extern void fn_2_42BE8(void);
-extern void fn_2_42FC8(void);
-extern void fn_2_430F4(void);
-extern void fn_2_43404(void);
-extern void fn_2_4358C(void);
-extern void fn_2_439D0(void);
-extern void fn_2_44F64(void);
-extern s32 fn_2_45938(s32 slot);
-extern void fn_2_460F8(void);
-extern void fn_2_4ACF8(void);
-extern void fn_2_4AEE4(void);
-extern void fn_2_4B1AC(void);
-extern void fn_2_4C36C(void);
-extern void fn_2_4C81C(void);
-extern void fn_2_4C9C4(void);
-extern void fn_2_4CEE0(void);
-extern void fn_2_4D194(void);
-extern void fn_2_4D378(void);
-extern void fn_2_4D67C(void);
-extern void fn_2_4DEE8(void);
-extern void fn_2_4E1C0(void);
 extern struct {
     /* 0x00 */ u8 _00[0x30];
     /* 0x30 */ u16 _30;
@@ -577,9 +545,6 @@ extern u8 lbl_80361B20[0x130];
 extern u8 lbl_2_data_3CE0[8];
 extern s16 lbl_2_data_38CC[10];
 extern s16 lbl_2_data_2E6C[10];
-extern void fn_2_47CFC(void);
-extern s32 fn_2_4C3D8(s32 index);
-extern void fn_2_47FF8(void);
 extern void fn_2_68E68(void);
 extern void fn_2_6ACF4(void);
 extern void fn_2_6AE08(void);
@@ -594,8 +559,6 @@ extern void fn_2_93C64(void);
 // rep_0A58
 extern s16 fn_2_53AA4(MenuItem0788* item);
 extern s16 fn_2_53BC8(MenuItem0788* item);
-extern void fn_2_4E858(MenuTask0788* task);
-extern void fn_2_4E878(MenuTask0788* task, u32* layout);
 extern void fn_2_53CEC(MenuTask0788* task);
 extern void fn_2_53DF8(MenuTask0788* task);
 extern void fn_2_53F04(MenuTask0788* task);

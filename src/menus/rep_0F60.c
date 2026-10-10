@@ -7,6 +7,7 @@
 #include "C3/anim.h"
 #include "Dolphin/vec.h"
 #include "string.h"
+#include "menus/rep_08E8.h"
 
 typedef struct Model0F60 {
     /* 0x00 */ struct ActorObj0F60* _00;
@@ -289,7 +290,6 @@ extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);
 extern void convertTextureHeader(void* tex);
 extern void fn_800BD190(void* geo, void* tex);
 extern void fn_800B9AA8(void* arg0);
-extern f32 fn_2_4A1E8(f32 x, f32 y);
 extern void fn_2_190DC(ModelTable0F60* table, MtxPtr view);
 extern void* ARAMTransfer(AramEntry0F60* entry, s32 arg1, s32 arg2, u32 aram);
 extern void fn_80052D70(void);
@@ -322,8 +322,6 @@ extern void fn_800637D4(Player0F60* player, ActorRef0F60* ref);
 extern void fn_80052634(Player0F60* player, ActorRef0F60* ref);
 extern void fn_80062ED4(Player0F60* player, ActorRef0F60* ref);
 extern void fn_800B0A14_removeQueue(void);
-extern void fn_2_4E824(void);
-extern void fn_2_48DB4(void);
 extern void fn_2_93C64(void);
 
 AramEntry0F60 lbl_2_data_2F990[13] = {
