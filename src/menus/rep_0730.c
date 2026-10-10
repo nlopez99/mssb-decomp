@@ -286,6 +286,8 @@ extern void* ARAMTransfer(void* entry, s32 arg1, s32 arg2, u32 aram);
 extern void convertTextureHeader(void* tex);
 extern void fn_8004B1B8(void* tex);
 
+static inline s32 fn_2_1A420(void);
+
 extern void fn_2_409CC(void);
 extern void fn_2_37460(void);
 extern void fn_2_379D0(void);
@@ -326,14 +328,13 @@ struct {
 } lbl_2_data_4BA8 = { { 0x00, 0x00, 0x00, 0x00 }, { 0x01000001, 0x02010000 } };
 
 // .text:0x0001B7B4 size:0x79C
-// 98.12%: the target computes &lbl_8034E9A0 before case 0's memset (into r30) and names
-// g_d_GameSettings there, and keeps `flag` in r22; the rest is register numbers.
+// 98.17%: case 0 inlines fn_2_1C0D4 (0x1C0D4, outside the split), whose original keeps
+// &lbl_8034E9A0 in a saved register from before its memset; a copy of it propagates the address.
 void fn_2_1B7B4(void) {
     struct Unk8034E9A0* data;
     GameInitVariables* settings;
     MenuTask0730* task;
     MenuTask0730* sub;
-    s32 flag;
 
     settings = &g_d_GameSettings;
     data = &lbl_8034E9A0;
@@ -385,20 +386,7 @@ void fn_2_1B7B4(void) {
         lbl_2_bss_1A823C->_32 = 4;
         break;
     case 4:
-        flag = 0;
-        if (lbl_2_bss_1A823C->_30 == 3) {
-            fn_2_4AB1C();
-            if (lbl_2_bss_1A824C->_197843 == 0) {
-                if (lbl_2_bss_1A8248->_441C == 5) {
-                    if (fn_2_46D00() != 0) {
-                        flag = 1;
-                    }
-                } else if (lbl_2_bss_1A8248->_4426 & 0x20) {
-                    flag = 1;
-                }
-            }
-        }
-        lbl_2_bss_1A8248->_44F4 = flag != 0;
+        lbl_2_bss_1A8248->_44F4 = fn_2_1A420();
         if (lbl_2_bss_1A8248->_44F4 == 0) {
             lbl_2_bss_1A823C->_32 = 12;
         } else {
@@ -997,4 +985,23 @@ void fn_2_1A4C8(void) {
     lbl_2_bss_1A824C->_19785A = 0;
     lbl_2_bss_1A824C->_19785B = 0;
     lbl_2_bss_1A824C->_19785C = 0;
+}
+
+// .text:0x0001A420 size:0xA8
+static inline s32 fn_2_1A420(void) {
+    s32 flag = 0;
+
+    if (lbl_2_bss_1A823C->_30 == 3) {
+        fn_2_4AB1C();
+        if (lbl_2_bss_1A824C->_197843 == 0) {
+            if (lbl_2_bss_1A8248->_441C == 5) {
+                if (fn_2_46D00() != 0) {
+                    flag = 1;
+                }
+            } else if (lbl_2_bss_1A8248->_4426 & 0x20) {
+                flag = 1;
+            }
+        }
+    }
+    return flag != 0;
 }
