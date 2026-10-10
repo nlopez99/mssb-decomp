@@ -27,6 +27,9 @@ extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_800B472C(void* arg0);
 extern void fn_800A7D4C(s32 arg0, void* arg1);
 extern void fn_1_196C(void);
+extern void makeLookAtMatrix(Mtx m, const Vec* camPos, const Vec* camUp, const Vec* target);
+extern void fn_80011640(Mtx src, Mtx dst);
+extern void fn_800B9950(s32 arg0, f32 arg1, f32 arg2);
 extern s32 fn_800B7D3C(s32 arg0, Vec* corners, Mtx mtx);
 extern void DOVARender(struct DObj0138* obj, MtxPtr camera, u8 numLights, va_list* list);
 extern void fn_800B996C(void (*callback)(GXTevStageID, GXIndTexStageID, GXIndTexMtxID, GXTexCoordID, GXTexMapID));
@@ -104,9 +107,11 @@ typedef struct Draw0138 {
 extern struct {
     /* 0x000 */ Mtx _000;
     /* 0x030 */ u16 _030;
-    /* 0x032 */ u8 _032[0x4C - 0x32];
-    /* 0x04C */ f32 _04C;
-    /* 0x050 */ f32 _050;
+    /* 0x032 */ u16 _032;
+    /* 0x034 */ f32 _034;
+    /* 0x038 */ f32 _038;
+    /* 0x03C */ Vec _03C;
+    /* 0x048 */ Vec _048;
     /* 0x054 */ f32 _054;
     /* 0x058 */ void* _058;
     /* 0x05C */ Draw0138 _05C[4];
@@ -499,6 +504,53 @@ void fn_1_7E04(f32 zoom) {
     fn_800B806C(0, -240.0f * scale, 240.0f * scale, -320.0f * scale, 320.0f * scale, -512.0f, -1.0f, 1280.0f);
 }
 
+// .text:0x2B88 size:0x4A4
+void fn_1_7960(void) {
+    Vec rot;
+    Vec target = { 0.0f, 0.0f, 100.0f };
+    f32 cosY;
+    f32 sinY;
+    Mtx rotX;
+    Mtx rotY;
+    Mtx rotXY;
+
+    lbl_1_common_bss_472B4._030 -= lbl_803C77B8[0]._13 * 2;
+    lbl_1_common_bss_472B4._032 += lbl_803C77B8[0]._12 * 2;
+    lbl_1_common_bss_472B4._034 = lbl_803C77B8[0]._10 / -128.0f;
+    lbl_1_common_bss_472B4._038 = lbl_803C77B8[0]._11 * 0.0078125f;
+    if (lbl_803C77B8[0]._00 & 0x10) {
+        lbl_1_common_bss_472B4._054 -= lbl_803C77B8[0]._14 / 4096.0f;
+        lbl_1_common_bss_472B4._054 += lbl_803C77B8[0]._15 / 4096.0f;
+    } else {
+        lbl_1_common_bss_472B4._048.y -= lbl_803C77B8[0]._15 * 0.0009765625f;
+        lbl_1_common_bss_472B4._048.y += lbl_803C77B8[0]._14 * 0.0009765625f;
+    }
+    rot.x = lbl_1_common_bss_472B4._030;
+    rot.y = lbl_1_common_bss_472B4._032;
+    rot.z = 0.0f;
+    PSVECScale(&rot, 0.0000958738f, &rot);
+    PSMTXRotRad(rotX, 'X', rot.x);
+    PSMTXRotRad(rotY, 'Y', rot.y);
+    sinY = rotY[0][2];
+    cosY = rotY[0][0];
+    PSMTXConcat(rotY, rotX, rotXY);
+    PSMTXMultVec(rotXY, &target, &lbl_1_common_bss_472B4._03C);
+    lbl_1_common_bss_472B4._048.x += lbl_1_common_bss_472B4._038 * sinY - lbl_1_common_bss_472B4._034 * cosY;
+    lbl_1_common_bss_472B4._048.z += lbl_1_common_bss_472B4._038 * cosY + lbl_1_common_bss_472B4._034 * sinY;
+    lbl_1_common_bss_472B4._03C.x += lbl_1_common_bss_472B4._048.x;
+    lbl_1_common_bss_472B4._03C.y += lbl_1_common_bss_472B4._048.y;
+    lbl_1_common_bss_472B4._03C.z += lbl_1_common_bss_472B4._048.z;
+    makeLookAtMatrix(lbl_1_common_bss_472B4._000, &lbl_1_common_bss_472B4._048, (Vec*)lbl_1_data_87C, &lbl_1_common_bss_472B4._03C);
+    fn_1_7E04(lbl_1_common_bss_472B4._054);
+    fn_1_54E0(lbl_1_common_bss_472B4._000);
+    fn_80011640(lbl_1_common_bss_472B4._000, lbl_1_common_bss_472B4._000);
+    if (lbl_1_bss_C0 != 0) {
+        fn_800B9950(3, (0xFFFF - lbl_1_common_bss_472B4._032) / 32768.0f, (s16)lbl_1_common_bss_472B4._030 / 32768.0f);
+    } else {
+        fn_800B9950(3, 0.0f, 0.0f);
+    }
+}
+
 // .text:0x2B0C size:0x7C
 void fn_1_78E4(void) {
     GXSetCopyClear(lbl_1_data_858, 0xFFFFFF);
@@ -801,8 +853,8 @@ void fn_1_66C4(void) {
     lbl_1_common_bss_472B4._230 = save230;
     lbl_1_common_bss_472B4._231 = save231;
     lbl_1_common_bss_472B4._21C = _OSAllocFromHeap(0x20, 0x80000);
-    lbl_1_common_bss_472B4._04C = -6.0f;
-    lbl_1_common_bss_472B4._050 = -10.666667f;
+    lbl_1_common_bss_472B4._048.y = -6.0f;
+    lbl_1_common_bss_472B4._048.z = -10.666667f;
     lbl_1_common_bss_472B4._030 = 0xF36C;
     lbl_1_common_bss_472B4._054 = 0.63f;
     lbl_1_common_bss_472B4._22E = -1;
