@@ -390,6 +390,8 @@ void fn_3_146928(void) {
 }
 
 // .text:0x00146408 size:0x520 mapped:0x8078549C
+// 98.08%: the target keeps the coin loop's &g_Minigame in r26 through the piranha loop
+// (mr r28,r26) for the points loop; this reloads it (see registers.md, "Unsolved").
 void fn_3_146408(void) {
     int i;
 
@@ -728,6 +730,8 @@ void fn_3_1453BC(int coin) {
 }
 
 // .text:0x00144CB8 size:0x704 mapped:0x80783D4C
+// 97.69%: registers and scheduling only; the list sort's pointers and counters and the
+// sign/1.5 block after rand() use other volatile registers.
 void fn_3_144CB8(void) {
     Unk37A8Fielder* fielder;
     InputStruct* input;
@@ -861,15 +865,12 @@ void fn_3_144CB8(void) {
 }
 
 // .text:0x00144ADC size:0x1DC mapped:0x80783B70
-static inline f32 Lerp37A8(f32 to, f32 from, f32 t) {
-    return (to - from) * t + from;
-}
-
-// 82.86%: the target reloads _1B44[player] for the increment after comparing it, and
-// loads lbl_3_data_21D2C[1] before [0] in the interpolations.
+// 98.91%: the target reloads _1B44[player] for the increment after comparing it (its copy
+// inlined into fn_3_144CB8 does not).
 void fn_3_144ADC(int player) {
     Unk37A8Fielder* fielder;
     InputStruct* input;
+    f32 d;
 
     input = &g_Controls[g_Minigame.minigameControlStruct.characterIndex[player]];
     fielder = &g_Fielders[g_Minigame.minigameFielderIndex[player]];
@@ -883,7 +884,8 @@ void fn_3_144ADC(int player) {
     }
     switch (g_Minigame._1CA5[player]) {
     case 1:
-        fielder->_00C = Lerp37A8(lbl_3_data_21D2C[0], lbl_3_data_21D2C[1], (f32)MG._1B44[player] / (f32)lbl_3_data_21E68[16]);
+        d = lbl_3_data_21D2C[0] - lbl_3_data_21D2C[1];
+        fielder->_00C = d * ((f32)MG._1B44[player] / (f32)lbl_3_data_21E68[16]) + lbl_3_data_21D2C[1];
         if (MG._1B44[player] >= lbl_3_data_21E68[16]) {
             g_Minigame._1CA5[player] = 2;
             MG._1B44[player] = 0;
@@ -896,7 +898,8 @@ void fn_3_144ADC(int player) {
         }
         break;
     case 3:
-        fielder->_00C = Lerp37A8(lbl_3_data_21D2C[1], lbl_3_data_21D2C[0], (f32)MG._1B44[player] / (f32)lbl_3_data_21E68[16]);
+        d = lbl_3_data_21D2C[1] - lbl_3_data_21D2C[0];
+        fielder->_00C = d * ((f32)MG._1B44[player] / (f32)lbl_3_data_21E68[16]) + lbl_3_data_21D2C[0];
         if (MG._1B44[player] >= lbl_3_data_21E68[16]) {
             g_Minigame._1CA5[player] = 0;
             MG._1B44[player] = 0;
@@ -969,9 +972,10 @@ void fn_3_14471C(int player) {
 }
 
 // .text:0x0014443C size:0x2E0 mapped:0x807834D0
-// 99.20%: FPRs only; the target loads lbl_3_data_21D1C[_2B * 2 + 1] before [0] in both
-// interpolations.
+// 99.53%: FPRs only; the target loads lbl_3_data_21D1C[_2B * 2 + 1] before [_2B * 2] in the
+// first interpolation, and the second one's FPRs differ.
 void fn_3_14443C(void) {
+    f32 d;
     int i;
     int j;
 
@@ -998,8 +1002,8 @@ void fn_3_14443C(void) {
             fn_3_14402C(i);
         } else if (MG._0000[i]._2A == 1) {
             MG._0000[i]._1C--;
-            MG._0000[i].pos.y = Lerp37A8(lbl_3_data_21D1C[MG._0000[i]._2B * 2 + 1], lbl_3_data_21D1C[MG._0000[i]._2B * 2],
-                                         (f32)MG._0000[i]._1A / (f32)lbl_3_data_21E68[5]);
+            d = lbl_3_data_21D1C[MG._0000[i]._2B * 2 + 1] - lbl_3_data_21D1C[MG._0000[i]._2B * 2];
+            MG._0000[i].pos.y = d * ((f32)MG._0000[i]._1A / (f32)lbl_3_data_21E68[5]) + lbl_3_data_21D1C[MG._0000[i]._2B * 2];
             if (MG._0000[i]._1C <= 0) {
                 MG._0000[i]._2A = 2;
                 MG._0000[i]._1A = 0;
