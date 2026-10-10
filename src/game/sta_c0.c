@@ -162,7 +162,7 @@ extern s32 fn_800247E4(s32 x, s32 y, s32 width, s32 bytes);
 extern u16 lbl_3_data_81DC[16];
 
 // MWCC lays out .bss statics in reverse order of declaration
-static u8 lbl_3_bss_9FCC[0x10];
+static u8 lbl_3_bss_9FCC[0xC];
 static StaC0Anim lbl_3_bss_9F70;
 static u8 lbl_3_bss_9F6C;
 static GXTexObj lbl_3_bss_9F4C;

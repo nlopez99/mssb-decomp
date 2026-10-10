@@ -2826,10 +2826,17 @@ typedef struct {
 } ReplayState; // size: 0x45F0
 
 typedef struct {
-    u8 pad[0x24];
+    /* 0x0000 */ f32 _00[7];
+    /* 0x001C */ s16 _1C;
+    /* 0x001E */ s16 _1E;
+    /* 0x0020 */ s16 _20;
+    /* 0x0022 */ u8 _22[0x24 - 0x22];
     /* 0x0024 */ s32 playFrameCounter;
     /* 0x0028 */ s16 _28;
-    artificial_padding(0x28, 0x32, s16);
+    /* 0x002A */ s16 _2A;
+    /* 0x002C */ s16 _2C;
+    /* 0x002E */ s16 _2E;
+    /* 0x0030 */ s16 _30;
     /* 0x0032 */ s16 _32;
     /* 0x0034 */ s16 _34;
     /* 0x0036 */ u8 replayInd;

@@ -2396,7 +2396,7 @@ void fn_2_68654(s32 index, s8 value) {
 }
 
 // .text:0x00068638 size:0x1C
-void fn_2_68638(s32 index, s8 value) {
+void fn_2_68638(s32 index, s32 value) {
     Obj0B08* obj = &lbl_2_bss_1A8248->_1610[index];
     obj->_CE = value;
 }

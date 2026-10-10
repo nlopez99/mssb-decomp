@@ -33,8 +33,23 @@ extern struct {
 extern struct {
     /* 0x00 */ void* _00[1];
     /* 0x04 */ UnkAnimState3E00 _04[1];
+    /* 0x60 */ u8 _60[0xD8 - 0x60];
+    /* 0xD8 */ u8 _D8;
 } lbl_3_common_bss_32724;
 
+typedef struct {
+    /* 0x00 */ u32 _00[4];
+} UnkAramEntry3E00; // size: 0x10
+
+extern struct {
+    /* 0x000 */ u8 _000[0x715];
+    /* 0x715 */ s8 _715;
+} lbl_803C6CF8;
+
+// .data outside this unit's split
+extern UnkAramEntry3E00 lbl_3_data_284E8[2];
+
+extern void* ARAMTransfer(void* entry, int arg1, int arg2, u32 aram);
 extern void LoadActorLayout(void* layout);
 extern void convertGeometryAndSknHeader(void* geo, void*);
 extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);
@@ -46,6 +61,28 @@ extern void fn_80025C58(void* anim, void*);
 extern void fn_80025DDC(void* anim);
 extern void fn_80025FFC(void* anim, UnkAnimState3E00* state);
 extern void fn_80025EEC(UnkAnimState3E00* state, s32, s32);
+
+// .text:0x001665E4 size:0xCC mapped:0x807A5678
+BOOL fn_3_1665E4(void) {
+    switch (lbl_3_common_bss_32724._D8) {
+        case 0:
+            lbl_8036E548._2D9C = ARAMTransfer(&lbl_3_data_284E8[1], 0, 0, 0);
+            lbl_3_common_bss_32724._D8++;
+            break;
+        case 1:
+            if (lbl_803C6CF8._715 == 1) {
+                lbl_3_common_bss_32724._D8++;
+            }
+            break;
+        case 2:
+            fn_3_166448();
+            lbl_3_common_bss_32724._D8++;
+            break;
+        default:
+            return TRUE;
+    }
+    return FALSE;
+}
 
 // .text:0x00166448 size:0x19C mapped:0x807A54DC
 void fn_3_166448(void) {
