@@ -8027,7 +8027,7 @@ void fn_2_26C70(MenuTask0788* task, MenuItem0788* item) {
 
 // .text:0x00026AF4 size:0x17C
 // 96.56%: the target's compare tree pivots on case 4 and this build's on case 3, over the
-// same cases 0 to 4 and 0x25; no set of extra empty cases reproduced it.
+// same cases 0 to 4 and 0x25; no set of extra empty cases reproduced it (5 and 7 give 99.76%).
 void fn_2_26AF4(MenuTask0788* task, MenuItem0788* item) {
     s16 state = fn_2_53BC8(item);
 
