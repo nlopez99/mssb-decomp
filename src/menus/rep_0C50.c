@@ -675,7 +675,8 @@ void fn_2_8082C(UnkTask0C50* task, s32 index) {
 }
 
 // .text:0x000805DC size:0x250
-// 99.93%: the first isAnimDone result reuses task's r29 in the target and gets r26 in the base.
+// 99.93%: the first isAnimDone result reuses task's r29 in the target and gets r26 in the base;
+// (s8) on that result gives the target's registers plus an extsb.
 void fn_2_805DC(UnkTask0C50* task, s32 index) {
     if (lbl_803C66B0._0D[index] == 0 ? TRUE : FALSE) {
         u8 off;
@@ -796,7 +797,7 @@ void fn_2_800B0(UnkTask0C50* task, s32 index) {
 
 // .text:0x0007FAFC size:0x5B4
 // 99.97%: the first isAnimDone result lands in r28 and n in r27 in the target; the base
-// keeps both in r27.
+// keeps both in r27. (s8) on the first result separates them as the target does, plus an extsb.
 void fn_2_7FAFC(UnkTask0C50* task, s32 index) {
     if (lbl_803C66B0._0D[index] == 0 ? TRUE : FALSE) {
         s32 a;
