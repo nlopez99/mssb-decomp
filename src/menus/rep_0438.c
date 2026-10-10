@@ -293,7 +293,6 @@ extern void fn_8004D0F0(void);
 extern s32 fn_8004CA6C(u16 buttons);
 
 // .text:0x00012F88 size:0xC1C
-// 99.87%: only the inlined setOrder0438 differs, as in fn_2_12238.
 void fn_2_12F88(void) {
     s32 i;
     s32 j;
@@ -507,7 +506,6 @@ void fn_2_12F88(void) {
 }
 
 // .text:0x00012CD8 size:0x2B0
-// 99.40%: only the inlined setOrder0438 differs, as in fn_2_12238.
 void fn_2_12CD8(void) {
     if (lbl_803CBBCC->_6 == 5) {
         lbl_2_bss_F410._10[0] = 0;
@@ -630,16 +628,6 @@ void fn_2_12988(void) {
     lbl_8034E9A0._46F4 = lbl_803C7898._8;
 }
 
-static inline void setOrder0438(s32 captain, s32 count) {
-    int j;
-
-    for (j = 0; j < count; j++) {
-        lbl_803C6724._02[0][j] = lbl_8034E9A0._4380[captain][0][j];
-        lbl_803C6724._14[0][j] = j;
-        starMissionCompletionTracker._40BB[j][0] = j;
-    }
-}
-
 // .text:0x000123CC size:0x5BC
 void fn_2_123CC(void) {
     s32 i;
@@ -733,8 +721,6 @@ void fn_2_123CC(void) {
 }
 
 // .text:0x00012238 size:0x194
-// 98.97%: the batting-order loop's counter and its two store pointers take
-// r7/r8/r9 in the other order, and two of the unrolled stores swap.
 void fn_2_12238(void) {
     s32 i;
     s32 captain;
@@ -750,7 +736,11 @@ void fn_2_12238(void) {
     if (i == 6) {
         OSPanic("teamselect.c", 1113, " Captain Not Found ");
     }
-    setOrder0438(captain, 9);
+    for (i = 0; i < 9; i++) {
+        lbl_803C6724._02[0][i] = lbl_8034E9A0._4380[captain][0][i];
+        starMissionCompletionTracker._40BB[i][0] = i;
+        lbl_803C6724._14[0][i] = i;
+    }
     fn_800678CC(0);
 }
 
