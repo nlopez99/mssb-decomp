@@ -258,10 +258,7 @@ extern u8 fn_80067B40(u8 team, u8 charID, s32 arg2);
 extern u8 lbl_80108ED0[0xC];
 
 static inline BOOL isAnimDone(UnkTask0C50* task, s32 index, s32 value) {
-    if (fn_80042DA8(task, index, value)) {
-        return TRUE;
-    }
-    return FALSE;
+    return !!fn_80042DA8(task, index, value);
 }
 
 // .text:0x00082DE8 size:0x70
@@ -370,8 +367,6 @@ void fn_2_8279C(void) {
 }
 
 // .text:0x00081628 size:0x1174
-// 99.75%: registers only: the inlined fn_2_80E0C (case 1) rotates i, n and expected, as
-// in that function, and sets expected before the second call's arguments.
 void fn_2_81628(void) {
     UnkTask0C50* task = lbl_8034E9A0._474C;
     s32 i;
@@ -584,19 +579,19 @@ void fn_2_80F5C(UnkTask0C50* task, s32 index) {
 }
 
 // .text:0x00080E0C size:0x150
-// 98.76%: task and index sit in r28/r29 in the target and r27/r28 in the base, with expected
-// in r27 against r29.
 void fn_2_80E0C(UnkTask0C50* task, s32 index) {
     if (lbl_803C66B0._0D[index] == 1 ? TRUE : FALSE) {
-        s32 n = isAnimDone(task, index, 20);
-        s32 expected = 2;
+        s32 n;
+        s32 expected = 0;
 
+        n = isAnimDone(task, index, 20);
+        expected += 2;
         n += isAnimDone(task, index + 2, 20);
         if (index == 0 || lbl_2_bss_100B8._10 != 0 || g_d_GameSettings._10 != 0) {
             n += isAnimDone(task, index + 0x85, 10);
             n += isAnimDone(task, index + 0x87, 10);
             n += isAnimDone(task, index + 0x89, 5);
-            expected = 6;
+            expected += 4;
             n += isAnimDone(task, index + 0x8B, 10);
         }
         if (n == expected) {
@@ -675,8 +670,6 @@ void fn_2_8082C(UnkTask0C50* task, s32 index) {
 }
 
 // .text:0x000805DC size:0x250
-// 99.93%: the first isAnimDone result reuses task's r29 in the target and gets r26 in the base;
-// (s8) on that result gives the target's registers plus an extsb.
 void fn_2_805DC(UnkTask0C50* task, s32 index) {
     if (lbl_803C66B0._0D[index] == 0 ? TRUE : FALSE) {
         u8 off;
@@ -796,8 +789,6 @@ void fn_2_800B0(UnkTask0C50* task, s32 index) {
 }
 
 // .text:0x0007FAFC size:0x5B4
-// 99.97%: the first isAnimDone result lands in r28 and n in r27 in the target; the base
-// keeps both in r27. (s8) on the first result separates them as the target does, plus an extsb.
 void fn_2_7FAFC(UnkTask0C50* task, s32 index) {
     if (lbl_803C66B0._0D[index] == 0 ? TRUE : FALSE) {
         s32 a;
@@ -3588,8 +3579,6 @@ void fn_2_73758(void) {
 }
 
 // .text:0x0007308C size:0x6CC
-// 99.91%: registers only: &lbl_803CBBC4 in the inlined fn_2_72DDC and fn_2_72814 gets r29
-// in the base and r28 in the target, as in the standalone fn_2_72814 and fn_2_72CB4.
 void fn_2_7308C(void) {
     UnkTask0C50* task = lbl_803CC1B8;
 
@@ -3685,8 +3674,6 @@ void fn_2_72D60(UnkTask0C50* task) {
 }
 
 // .text:0x00072CB4 size:0xAC
-// 90.00%: task and &lbl_803CBBC4 sit in swapped saved registers (r31/r30), as in fn_2_72814;
-// (s8) on the first isAnimDone result swaps them back but adds an extsb (97.56%).
 void fn_2_72CB4(UnkTask0C50* task) {
     if (lbl_803CBBC4._3 == 1 ? TRUE : FALSE) {
         s32 n = isAnimDone(task, 0, 0);
@@ -3745,8 +3732,6 @@ void fn_2_729E0(UnkTask0C50* task) {
 }
 
 // .text:0x0007293C size:0xA4
-// 89.51%: task and &lbl_803CBBC4 sit in swapped saved registers (r31/r30), as in fn_2_72814;
-// (s8) on the first isAnimDone result swaps them back but adds an extsb (97.44%).
 void fn_2_7293C(UnkTask0C50* task) {
     if (lbl_803CBBC4._3 == 1 ? TRUE : FALSE) {
         s32 n = isAnimDone(task, 0, 25);
@@ -3773,9 +3758,6 @@ void fn_2_728C0(UnkTask0C50* task) {
 }
 
 // .text:0x00072814 size:0xAC
-// 90.00%: task and &lbl_803CBBC4 sit in swapped saved registers (r31/r30). Only a separate
-// variable for the first isAnimDone result moves them ((s8) or an s16 wrapper: 97.56%, plus an
-// extsb); int/u8/u16 casts, a reused result local and helper forms of the _3 test did not.
 void fn_2_72814(UnkTask0C50* task) {
     if (lbl_803CBBC4._3 == 1 ? TRUE : FALSE) {
         s32 n = isAnimDone(task, 0, 0);
