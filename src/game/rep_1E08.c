@@ -22,6 +22,9 @@
 #include "game/rep_2308.h"
 #include "game/sta_c2.h"
 #include "game/sta_c4.h"
+#include "game/m_sound.h"
+#include "game/rep_1D58.h"
+#include "game/rep_EA0.h"
 
 typedef struct {
     /* 0x00 */ void (*_00)(void);
@@ -186,7 +189,7 @@ typedef struct {
 } UnkAnimEntry1E08; // size: 0x5C
 
 typedef struct {
-    /* 0x00 */ u8 _00[0x18];
+    /* 0x00 */ void* files[6];
     /* 0x18 */ u8* _18;
 } UnkAramFile1E08;
 
@@ -243,6 +246,19 @@ typedef struct {
     /* 0x00 */ f32 _00[3];
     /* 0x0C */ s32 _0C[0x10];
 } UnkVecTable1E08; // size: 0x4C
+
+typedef struct {
+    /* 0x00 */ void* _00;
+    /* 0x04 */ s32 _04[2];
+    /* 0x0C */ s32 _0C;
+    /* 0x10 */ s32 _10[14];
+} UnkFxParams1E08; // size: 0x48
+
+typedef struct {
+    /* 0x00 */ void* _00;
+    /* 0x04 */ s32 _04[19];
+    /* 0x50 */ f32 _50;
+} UnkFxShape1E08; // size: 0x54
 
 extern Unk1E08State lbl_3_common_bss_35154;
 
@@ -1827,9 +1843,8 @@ static u32 lbl_3_data_16EC0[3] = {
     0x8F5C0AFF, 0xFF0000FF, 0xF1DA95FF,
 };
 
-static u32 lbl_3_data_16ECC[14] = {
-    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
-    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+static u32* lbl_3_data_16ECC[14] = {
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 };
 
 static u32 lbl_3_data_16F04[24] = {
@@ -1838,16 +1853,17 @@ static u32 lbl_3_data_16F04[24] = {
     0xFFFF60FF, 0x98FB98FF, 0x6060FFFF, 0x7FFFD4FF, 0x60FF60FF, 0xAFEEEEFF, 0x40FFFFFF, 0xFF6060FF,
 };
 
-static s32 lbl_3_data_16F64[0x12] = {
-    0, 11, 150000, 300, 400, 500, 300, 255,
-    2, 15, 100, 100, 10, 64, 64, 192,
-    60, 128,
+static UnkFxParams1E08 lbl_3_data_16F64 = {
+    NULL,
+    { 11, 150000 },
+    300,
+    { 400, 500, 300, 255, 2, 15, 100, 100, 10, 64, 64, 192, 60, 128 },
 };
 
-static s32 lbl_3_data_16FAC[0x15] = {
-    0, 12, 1, 480000, 30000, 68000, 40, 20,
-    101000, 101000, 0, 128, 12000000, 0, 0, 0,
-    0, 0, 0, 0, 1056964608,
+static UnkFxShape1E08 lbl_3_data_16FAC = {
+    NULL,
+    { 12, 1, 480000, 30000, 68000, 40, 20, 101000, 101000, 0, 128, 12000000, 0, 0, 0, 0, 0, 0, 0 },
+    0.5f,
 };
 
 s32 lbl_3_data_17000[0x36] = {
@@ -1911,6 +1927,9 @@ extern void fn_800246D4(int (*compare)(const void*, const void*), void* src, voi
 extern void fn_800245EC(camera_803c639c_s* camera, Mtx view, Vec* points, f32* out, s32 count, s32 arg5);
 extern void fn_80033B58(void* texture, s32 index, s32, s32);
 extern u16 lbl_800F7860[4][2];
+extern void fn_80028628(Vec* pos, Vec* eye, UnkFxParams1E08* params, u16* shape, u32* color, UnkFxShape1E08* arg5, BOOL flag);
+extern void fn_8004B1B8(void* arg0, UnkAramFile1E08* file);
+extern void fn_80035750(void* arg0, void* arg1, s32 arg2);
 extern void fn_8003A550(s32 idx, VecXYZ* pos, Vec* dir, BOOL flag);
 
 // .text:0x000C07B0 size:0x60 mapped:0x806FF844
@@ -2111,7 +2130,36 @@ BOOL fn_3_BF878(void) {
 
 // .text:0x000BF6C0 size:0x1B8 mapped:0x806FE754
 void fn_3_BF6C0(void) {
-    return;
+    s32 indices[8];
+    UnkModelTable1E08* table;
+    u8* file;
+    s32 i;
+
+    if (lbl_803C6CF8._715 == 1) {
+        fn_3_B9D68(lbl_3_data_11378, 6, lbl_3_common_bss_35154._008->files, indices);
+        lbl_3_common_bss_35154._004 = lbl_3_common_bss_35154._008->files[0];
+        fn_8004B1B8(lbl_3_common_bss_35154._004, lbl_3_common_bss_35154._008);
+        fn_80035750(lbl_3_common_bss_35154._008->files[1], lbl_3_common_bss_35154._008->files[2], 4);
+        table = ActorObjectInitTable(1);
+        lbl_8036E548._0070 = (UnkActor1E08*)table;
+        fn_800BDC88(table, 0, 0, lbl_3_common_bss_35154._008->files[indices[4]], NULL, NULL);
+        fn_8003A85C(lbl_3_data_111A8[g_d_GameSettings.StadiumID]);
+        fn_8003A848(lbl_3_data_111B0[g_d_GameSettings.StadiumID][0], lbl_3_data_111B0[g_d_GameSettings.StadiumID][1],
+                    lbl_3_data_111B0[g_d_GameSettings.StadiumID][2]);
+        file = lbl_3_common_bss_35154._008->_18;
+        lbl_3_common_bss_35154._3B1 = 1;
+        for (i = 0; i < 13; i++) {
+            if (lbl_8036E548._2C50[i] != NULL) {
+                fn_8003A6B0(i, file + 4, lbl_3_data_111C8[lbl_8036E548._2C50[i]->_252]._00,
+                            lbl_3_data_111C8[lbl_8036E548._2C50[i]->_252]._04);
+            } else {
+                fn_8003A6B0(i, file + 4, lbl_3_data_111C8[0]._00, lbl_3_data_111C8[0]._04);
+            }
+        }
+        fn_3_6750C(lbl_3_common_bss_35154._004);
+        lbl_3_common_bss_35154._00C = ARAMTransfer(lbl_3_data_115EC, 0, 0, 0);
+        lbl_803CC1B8->_00 = fn_3_BF238;
+    }
 }
 
 // .text:0x000BF238 size:0x488 mapped:0x806FE2CC
@@ -2309,8 +2357,6 @@ void fn_3_BF158(void) {
 }
 
 // .text:0x000BF070 size:0xE8 mapped:0x806FE104
-// The target reaches 0x111A8, +8 and +0x20 (lbl_3_data_111C8) from one pool base:
-// statics of this file outside its .data range; defined as statics it scores 100% (reloc).
 void fn_3_BF070(void) {
     u8* file;
     s32 i;
@@ -2766,7 +2812,24 @@ void fn_3_BC850(void* arg0, s32 index) {
 
 // .text:0x000BC6D8 size:0x178 mapped:0x806FB76C
 void fn_3_BC6D8(Vec* pos, Vec* eye, int type, BOOL flag) {
-    return;
+    s32 saved;
+    u32* color;
+
+    saved = lbl_3_data_16F64._0C;
+    lbl_3_data_16F64._00 = g_UNK_StadiumDetails._04;
+    lbl_3_data_16FAC._00 = g_UNK_StadiumDetails._04;
+    lbl_3_data_16F64._0C = saved * (lbl_3_data_16E88[type % 14] / 100000.0f);
+    color = lbl_3_data_16ECC[type] != NULL ? lbl_3_data_16ECC[type] : &lbl_3_data_16F04[lbl_3_bss_9968 & 0xF];
+    fn_80028628(pos, eye, &lbl_3_data_16F64, lbl_3_data_16E50[type % 14], color, &lbl_3_data_16FAC, flag);
+    lbl_3_bss_9968 += rand();
+    lbl_3_data_16F64._0C = saved;
+    if (type == 13) {
+        fn_3_90064(0x2D9);
+    } else if (type >= 4 && type <= 7) {
+        fn_3_90064(0x2D7);
+    } else {
+        fn_3_90064(0x2D8);
+    }
 }
 
 // .text:0x000BC2DC size:0x3FC mapped:0x806FB370
