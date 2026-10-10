@@ -479,7 +479,7 @@ void fn_1_BFB0(void) {
 }
 
 // .text:0x0000BF34 size:0x7C
-s32 fn_1_BF34(s32 fx) {
+s32 fn_1_BF34(s16 fx) {
     SND_VOICEID vid = sndFXStartEx(fx, 0x7F, 0x3F, 0);
 
     OSReport("sndFXReverb was %s.\n", sndFXCtrl(vid, 0x5B, fn_800211F0()) ? "succeed" : "failed");
@@ -601,8 +601,8 @@ void fn_1_BA64(void) {
 }
 
 // .text:0x0000B5B8 size:0x4AC
-// Registers differ (rep & 0x800, trg and the loop counter), and the target
-// converts fx with clrlwi before the inlined sndFXStartEx where this copies it.
+// Registers differ: rep & 0x800 and trg swap r3/r4/r5, and the loop counter
+// takes r29 where the target reuses the data base's r30.
 void fn_1_B5B8(void) {
     u16 rep = lbl_803C77B8[0]._04;
     u16 trg = lbl_803C77B8[0]._02;
