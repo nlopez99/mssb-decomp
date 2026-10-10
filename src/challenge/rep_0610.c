@@ -4616,7 +4616,8 @@ void fn_1_E8D4(void) {
 }
 
 // .text:0x0000E098 size:0x83C
-// Case 10 allocates one register fewer than the target (r21); registers only
+// Registers only: case 10 and the column loop use one register fewer than the
+// target (r21)
 void fn_1_E098(void) {
     UnkSlotState0610* st = lbl_1_bss_3218;
     s32 i;
@@ -4690,6 +4691,9 @@ void fn_1_E098(void) {
             u16 pressed;
             u16 held;
             u8 selRow;
+            s16* limit;
+            s16* frame;
+            s16* loop;
             u8 selCol;
             u16 color;
             s32 col;
@@ -4705,6 +4709,9 @@ void fn_1_E098(void) {
             selRow = lbl_1_bss_30B6;
             selCol = lbl_1_bss_30B7;
             for (col = 0; col < 4; col++) {
+                limit = &st->_4;
+                frame = &st->_2;
+                loop = &st->_6;
                 if (i != selRow || col != selCol) {
                     color = 0xFFFF;
                 } else if (held & 0x100) {
@@ -4716,12 +4723,12 @@ void fn_1_E098(void) {
                 case 0:
                     if (color == 0xF00F && ref != NULL) {
                         if (pressed & 1) {
-                            if (st->_4 >= 0) {
-                                st->_4--;
+                            if (*limit >= 0) {
+                                (*limit)--;
                             }
                         } else if (pressed & 2) {
-                            if (st->_4 < (s16)key->_4->_0) {
-                                st->_4++;
+                            if (*limit < (s16)key->_4->_0) {
+                                (*limit)++;
                             }
                         }
                     }
@@ -4739,26 +4746,26 @@ void fn_1_E098(void) {
                             }
                         }
                         if (prev != st->_0) {
-                            st->_2 = 0;
+                            *frame = 0;
                         }
                     }
                     break;
                 case 2:
                     if (color == 0xF00F && ref != NULL) {
                         if (pressed & 1) {
-                            if (st->_2 > 0) {
-                                st->_2--;
+                            if (*frame > 0) {
+                                (*frame)--;
                             }
                         } else if (pressed & 2) {
-                            if (st->_2 < ref->_A - 1) {
-                                st->_2++;
+                            if (*frame < ref->_A - 1) {
+                                (*frame)++;
                             }
                         }
                     }
                     break;
                 case 3:
                     if (color == 0xF00F && ref != NULL && (pressed & 3)) {
-                        st->_6 = !st->_6;
+                        *loop = !*loop;
                     }
                     break;
                 }
