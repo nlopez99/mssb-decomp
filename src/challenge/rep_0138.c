@@ -365,7 +365,7 @@ static f32 lbl_1_data_A24[4] = { 0.0625f, 0.25f, 0.5f, 1.0f };
 static f32 lbl_1_data_A34 = 2.0f;
 static GXTexFilter lbl_1_data_A38 = GX_LIN_MIP_LIN;
 static Vec lbl_1_data_A3C = { 0.0f, 0.0f, -1.0f };
-static f32 lbl_1_data_A48[9] = { 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+static Vec lbl_1_data_A48[3] = { { 0.0f, 0.0f, -1.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f } };
 static u8 lbl_1_data_A6C = 1;
 static u8 lbl_1_data_A6D = 1;
 static f32 lbl_1_data_A70 = 1.0f;
@@ -1019,8 +1019,8 @@ void fn_1_6578(GXTexObj* obj, u16* image, s32 width, s32 height) {
 }
 
 // .text:0x1278 size:0x528
-// Float registers differ: the target keeps each of a and b in one register
-// through the acos branches and orders the compares' operands by them.
+// Only commutative operands are swapped: ny * 0.5f + 0.5f and the angle's
+// products put the constant first here, the variable first in the target.
 void fn_1_6050(u16* image, s32 width, s32 height, f32 scale) {
     f32 a;
     s32 size;
@@ -1062,13 +1062,13 @@ void fn_1_6050(u16* image, s32 width, s32 height, f32 scale) {
                 dir.z = 0.0f;
                 PSVECNormalize(&dir, &dir);
             } else {
+                dir.z = -sqrt(z2);
                 dir.x = nx;
                 dir.y = ny;
-                dir.z = -sqrt(z2);
             }
             if (scale != 1.0f) {
                 PSVECCrossProduct(&lbl_1_data_A3C, &dir, &axis);
-                if (PSVECMag(&axis) != 0.0f) {
+                if (PSVECMag(&axis)) {
                     PSVECNormalize(&axis, &axis);
                     angle = (f32)acos(PSVECDotProduct(&lbl_1_data_A3C, &dir)) * scale * 0.5f;
                     s = sin(angle);
@@ -1083,7 +1083,7 @@ void fn_1_6050(u16* image, s32 width, s32 height, f32 scale) {
             flat.x = dir.x;
             flat.y = 0.0f;
             flat.z = dir.z;
-            if (PSVECMag(&flat) == 0.0f) {
+            if (!PSVECMag(&flat)) {
                 a = b = 0.0f;
             } else {
                 PSVECNormalize(&flat, &flat);
@@ -1092,24 +1092,134 @@ void fn_1_6050(u16* image, s32 width, s32 height, f32 scale) {
                 } else {
                     a = acos(PSVECDotProduct(&flat, &dir));
                     PSVECCrossProduct(&flat, &dir, &axis);
-                    if (PSVECMag(&axis) == 0.0f) {
+                    if (!PSVECMag(&axis)) {
                         a = 0.0f;
                     } else if (axis.x < 0.0f) {
                         a = -a;
                     }
-                    a = a / 3.1415927f + 0.5f;
+                    a /= 3.1415927f;
+                    a += 0.5f;
                 }
                 if (nx == 0.0f) {
                     b = 0.5f;
                 } else {
                     b = acos(PSVECDotProduct(&lbl_1_data_A3C, &flat));
                     PSVECCrossProduct(&lbl_1_data_A3C, &flat, &axis);
-                    if (PSVECMag(&axis) == 0.0f) {
+                    if (!PSVECMag(&axis)) {
                         b = 0.0f;
                     } else if (axis.y > 0.0f) {
                         b = -b;
                     }
-                    b = b / 3.1415927f + 0.5f;
+                    b /= 3.1415927f;
+                    b += 0.5f;
+                }
+                b -= tx;
+                a -= ty;
+            }
+            lo = 128.0f * a + 128.0f;
+            hi = 128.0f * b + 128.0f;
+            image[(x / 4) * 16 + (y / 4) * width * 4 + (y % 4) * 4 + x % 4] = (hi << 8) | lo;
+        }
+    }
+    DCFlushRange(image, size);
+}
+
+// .text:0xCE8 size:0x590
+// Float registers differ (scale and the angle take other saved registers);
+// otherwise the same code as fn_1_6050, which differs in operand order only.
+void fn_1_5AC0(u16* image, s32 width, s32 height, f32 scale) {
+    f32 tx;
+    s32 y;
+    f32 b;
+    u8 inside;
+    s32 size;
+    f32 s;
+    f32 nx;
+    u8 hi;
+    s32 x;
+    f32 ny;
+    f32 a;
+    u8 lo;
+    f32 ty;
+    f32 z2;
+    f32 angle;
+
+    Mtx m;
+    Vec dir;
+    Vec flat;
+    Vec axis;
+    Quaternion q;
+
+    size = width * 2 * height;
+    memset(image, 0, size);
+    for (y = 0; y < height; y++) {
+        ny = 2.0f * ((f32)y / height - 0.5f);
+        ty = ny * 0.5f + 0.5f;
+        for (x = 0; x < width; x++) {
+            nx = 2.0f * ((f32)x / width - 0.5f);
+            tx = nx * 0.5f + 0.5f;
+            inside = (ny > 0.2f) & (ny < 0.8f) & (nx > 0.2f) & (nx < 0.8f);
+            if (y == height / 2) {
+                z2 = 1.0f - nx * nx;
+            } else {
+                z2 = 1.0f - nx * nx - ny * ny;
+            }
+            if (z2 < 0.0f) {
+                dir.x = nx;
+                dir.y = ny;
+                dir.z = 0.0f;
+                PSVECNormalize(&dir, &dir);
+            } else {
+                dir.z = -sqrt(z2);
+                dir.x = nx;
+                dir.y = ny;
+            }
+            if (inside && scale != 1.0f) {
+                PSVECCrossProduct(&lbl_1_data_A48[0], &dir, &axis);
+                if (PSVECMag(&axis)) {
+                    PSVECNormalize(&axis, &axis);
+                    angle = (f32)acos(PSVECDotProduct(&lbl_1_data_A48[0], &dir)) * scale * 0.5f;
+                    s = sin(angle);
+                    q.w = cos(angle);
+                    q.x = axis.x * s;
+                    q.y = axis.y * s;
+                    q.z = axis.z * s;
+                    PSMTXQuat(m, &q);
+                    PSMTXMultVec(m, &lbl_1_data_A48[0], &dir);
+                }
+            }
+            flat.x = dir.x;
+            flat.y = 0.0f;
+            flat.z = dir.z;
+            if (!PSVECMag(&flat)) {
+                a = b = 0.0f;
+            } else {
+                PSVECNormalize(&flat, &flat);
+                if (ny == 0.0f) {
+                    a = 0.5f;
+                } else {
+                    a = acos(PSVECDotProduct(&flat, &dir));
+                    PSVECCrossProduct(&flat, &dir, &axis);
+                    if (!PSVECMag(&axis)) {
+                        a = 0.0f;
+                    } else if (axis.x < 0.0f) {
+                        a = -a;
+                    }
+                    a /= 3.1415927f;
+                    a += 0.5f;
+                }
+                if (nx == 0.0f) {
+                    b = 0.5f;
+                } else {
+                    b = acos(PSVECDotProduct(&lbl_1_data_A48[0], &flat));
+                    PSVECCrossProduct(&lbl_1_data_A48[0], &flat, &axis);
+                    if (!PSVECMag(&axis)) {
+                        b = 0.0f;
+                    } else if (axis.y > 0.0f) {
+                        b = -b;
+                    }
+                    b /= 3.1415927f;
+                    b += 0.5f;
                 }
                 b -= tx;
                 a -= ty;
