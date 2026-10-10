@@ -1377,8 +1377,8 @@ void fn_1_54E0(MtxPtr view) {
 }
 
 // .text:0xC0 size:0x648
-// Draft: the opcode cases' block order, the per-vertex inner switches' compare
-// trees and the position/normal reads (scheduled differently) still differ.
+// Draft: the per-vertex index switches build another compare tree (the target
+// tests 2 first), and the position and normal reads are scheduled differently.
 void fn_1_4E98(DObj0138* obj, MtxPtr camera) {
     Mtx mtx;
     s32 desc[21];
@@ -1446,6 +1446,11 @@ void fn_1_4E98(DObj0138* obj, MtxPtr camera) {
                 dl += 1;
                 done += 1;
                 break;
+            case 0x61:
+                handled = TRUE;
+                dl += 5;
+                done += 5;
+                break;
             case 0x08:
                 handled = TRUE;
                 dl += 6;
@@ -1470,11 +1475,6 @@ void fn_1_4E98(DObj0138* obj, MtxPtr camera) {
                 dl += 1;
                 done += 1;
                 break;
-            case 0x61:
-                handled = TRUE;
-                dl += 5;
-                done += 5;
-                break;
             case 0x80:
             case 0x90:
             case 0x98:
@@ -1493,12 +1493,13 @@ void fn_1_4E98(DObj0138* obj, MtxPtr camera) {
             GXBegin(GX_LINES, GX_VTXFMT0, count * 2);
             while (count-- != 0) {
                 for (attr = GX_VA_POS; attr <= GX_VA_TEX7; attr++) {
-                    if (desc[attr] == 0) {
+                    type = desc[attr];
+                    if (type == 0) {
                         continue;
                     }
                     switch (attr) {
                     case GX_VA_POS:
-                        switch (desc[attr]) {
+                        switch (type) {
                         case 2:
                             posIdx = *dl;
                             break;
@@ -1508,7 +1509,7 @@ void fn_1_4E98(DObj0138* obj, MtxPtr camera) {
                         }
                         break;
                     case GX_VA_NRM:
-                        switch (desc[attr]) {
+                        switch (type) {
                         case 2:
                             nrmIdx = *dl;
                             break;
@@ -1518,7 +1519,7 @@ void fn_1_4E98(DObj0138* obj, MtxPtr camera) {
                         }
                         break;
                     }
-                    switch (desc[attr]) {
+                    switch (type) {
                     case 2:
                         dl += 1;
                         done += 1;
