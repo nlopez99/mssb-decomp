@@ -11,7 +11,7 @@ void fn_2_836A4(void);
 void fn_2_83744(struct UnkTask0CA0* task);
 void fn_2_837D8(struct UnkTask0CA0* task);
 void fn_2_83974(struct UnkTask0CA0* task);
-void fn_2_83B34(void);
+void fn_2_83B34(struct UnkTask0CA0* task, s32 sel);
 void fn_2_84194(struct UnkTask0CA0* task);
 void fn_2_84388(struct UnkTask0CA0* task);
 void fn_2_845A8(void);
