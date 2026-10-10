@@ -87,24 +87,24 @@ extern void fn_800B0A14_removeQueue(void);
 extern UnkTask3D50* fn_800B0A5C_insertQueue(void (*)(void), u16);
 
 // .text:0x00161078 size:0x510 mapped:0x807A010C
-// Registers differ throughout (player in r0 where the target keeps it in r10, the mode-flag
-// loop's k, anyMode and inMode rotated).
+// 95.90%: the prologue allocates differently (player in r0 where the target keeps it in r10,
+// the entry pointer and the id/set loads in other registers); the loops match apart from that.
 void fn_3_161078(void) {
     s32 player = g_d_GameSettings._35;
-    u8* time = &g_Minigame._1CB1[player];
+    u8* place = &g_Minigame.minigameControlStruct._1C[player];
     s16* points = &g_Minigame.miniGameCurrentPoints[player];
     u8 difficulty = g_d_GameSettings.challengeDifficulty;
     u8 mode = g_Minigame.GameMode_MiniGame;
-    u8* place = &g_Minigame.minigameControlStruct._1C[player];
+    u8* time = &g_Minigame._1CB1[player];
     u8 id = lbl_800E8558[g_Minigame.minigameControlStruct._4[player]]._1;
     u8 set = lbl_800E8558[g_Minigame.minigameControlStruct._4[player]]._2;
-    s32 i;
     s32 j;
+    s32 beaten;
+    s32 count;
+    s32 i;
     s32 k;
     s32 anyMode;
     s32 inMode;
-    s32 count;
-    s32 beaten;
     s32 target;
     UnkMissionDef3D50* def;
 

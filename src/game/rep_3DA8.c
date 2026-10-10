@@ -951,8 +951,8 @@ void fn_3_1637EC(void) {
 }
 
 // .text:0x00162D54 size:0xA98 mapped:0x807A1DE8
-// 99.79%: in the win-mission loop the target forms starMissionCompletionTracker's address before
-// lbl_80109AE8's and keeps m in r6 and the status pointer in r4; the base swaps both pairs.
+// 99.92%: in the win-mission loop the target loads the entry's _2 before _1 and forms
+// starMissionCompletionTracker's address before lbl_80109AE8's; the base swaps both pairs.
 void fn_3_162D54(void) {
     s32 i;
     s32 k;
@@ -1010,10 +1010,9 @@ void fn_3_162D54(void) {
             }
         }
         if (g_Scores._A4 == side) {
-            entry = &lbl_800E8558[lbl_80353A90._103];
-            id = entry->_1;
-            m = lbl_80109AE8[entry->_2];
-            for (i = 0; i < 10; m++, i++) {
+            id = lbl_800E8558[lbl_80353A90._103]._1;
+            m = lbl_80109AE8[lbl_800E8558[lbl_80353A90._103]._2];
+            for (i = 0; i < 10; i++, m++) {
                 if (MISSION_STATUS(id, i) >= 0 && m->type == 1) {
                     MISSION_STATUS(id, i) = -1;
                 }
