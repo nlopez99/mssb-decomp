@@ -27,6 +27,7 @@ extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_800B472C(void* arg0);
 extern void fn_800A7D4C(s32 arg0, void* arg1);
 extern void fn_1_196C(void);
+extern void fn_1_4DD8(u16* data);
 extern void* ARAMTransfer(void* entry, s32 arg1, s32 arg2, u32 aram);
 extern void fn_800B9AA8(void* light);
 extern void LITAlloc(void** light);
@@ -412,7 +413,7 @@ static u8 lbl_1_bss_C2;
 static u8 lbl_1_bss_C1;
 static u8 lbl_1_bss_C0;
 
-// .text:0x37D0 size:0x7C
+// .text:0x3710 size:0x7C
 void fn_1_85A8(void) {
     if (lbl_803C77B8[0]._04 & 1) {
         if (--lbl_1_common_bss_472B4._22E < -1) {
@@ -425,7 +426,7 @@ void fn_1_85A8(void) {
     }
 }
 
-// .text:0x3590 size:0x240
+// .text:0x34D0 size:0x240
 void fn_1_8368(void) {
     if (lbl_803C77B8[0]._04 & 1) {
         if (--lbl_1_common_bss_472B4._22E < -1) {
@@ -453,7 +454,7 @@ void fn_1_8368(void) {
     }
 }
 
-// .text:0x3220 size:0x370
+// .text:0x3160 size:0x370
 void fn_1_7FF8(void) {
     switch (lbl_803C77B8[0]._04) {
     case 8:
@@ -541,7 +542,7 @@ void fn_1_7FF8(void) {
     }
 }
 
-// .text:0x3120 size:0x100
+// .text:0x3060 size:0x100
 void fn_1_7EF8(void) {
     switch (lbl_803C77B8[0]._04) {
     case 4:
@@ -565,7 +566,7 @@ void fn_1_7EF8(void) {
     }
 }
 
-// .text:0x302C size:0xF4
+// .text:0x2F6C size:0xF4
 void fn_1_7E04(f32 zoom) {
     Mtx44 proj;
     f32 scale = 1.0f / zoom;
@@ -575,7 +576,7 @@ void fn_1_7E04(f32 zoom) {
     fn_800B806C(0, -240.0f * scale, 240.0f * scale, -320.0f * scale, 320.0f * scale, -512.0f, -1.0f, 1280.0f);
 }
 
-// .text:0x2B88 size:0x4A4
+// .text:0x2AC8 size:0x4A4
 // Only the inlined fn_1_7E04 differs: the common block and 1.0f's addresses
 // come in r4 and r3 in the target, swapped here.
 void fn_1_7960(void) {
@@ -624,7 +625,7 @@ void fn_1_7960(void) {
     }
 }
 
-// .text:0x2B0C size:0x7C
+// .text:0x2A4C size:0x7C
 void fn_1_78E4(void) {
     GXSetCopyClear(lbl_1_data_858, 0xFFFFFF);
     if (lbl_1_bss_C4 != 0) {
@@ -636,26 +637,26 @@ void fn_1_78E4(void) {
     GXSetAlphaCompare(GX_GREATER, 0, GX_AOP_AND, GX_ALWAYS, 0);
 }
 
-// .text:0x2A94 size:0x78
+// .text:0x29D4 size:0x78
 void fn_1_786C(void) {
     fn_80048D4C();
     GXSetCopyClear(lbl_1_data_858, 0xFFFFFF);
     SetFog(lbl_1_bss_4E0->color.a, lbl_1_bss_4E0->start, lbl_1_bss_4E0->end, 1.0f, 512.0f, lbl_1_bss_4E0->color);
 }
 
-// .text:0x2A70 size:0x24
+// .text:0x29B0 size:0x24
 void fn_1_7848(void) {
     fn_80048C28();
     fn_80048C1C();
 }
 
-// .text:0x2A14 size:0x5C
+// .text:0x2954 size:0x5C
 void fn_1_77EC(void* arg0) {
     GXSetCullMode(lbl_1_data_8C4);
     fn_1_73B8(arg0, 3, lbl_1_data_848[0], lbl_1_data_848[1], lbl_1_data_848[2]);
 }
 
-// .text:0x25E0 size:0x434
+// .text:0x2520 size:0x434
 // Registers differ (draw, count and the loop pointers take other saved registers);
 // declaration-order batches and a permuter session found no match.
 void fn_1_73B8(void* arg0, u8 count, ...) {
@@ -791,7 +792,7 @@ void fn_1_73B8(void* arg0, u8 count, ...) {
     }
 }
 
-// .text:0x24A8 size:0x138
+// .text:0x23E8 size:0x138
 void fn_1_7280(void) {
     Draw0138* draw;
 
@@ -807,9 +808,7 @@ void fn_1_7280(void) {
     fn_800A7D4C(0, &lbl_1_data_88C[lbl_803CBBC0]);
 }
 
-// .text:0x23A4 size:0x104
-// MWCC inlines fn_1_4DD8 here, where the target calls it; with that call it
-// matches (body checked against a copy without fn_1_4DD8's definition).
+// .text:0x22E4 size:0x104
 void fn_1_717C(File0138* file) {
     void* geo;
     Layout0138* layout;
@@ -839,7 +838,7 @@ void fn_1_717C(File0138* file) {
     lbl_1_common_bss_472B4._05C[2]._68 = layout;
 }
 
-// .text:0x203C size:0x368
+// .text:0x1F7C size:0x368
 void fn_1_6E14(void) {
     fn_1_7960();
     if (lbl_1_common_bss_472B4._238 == 0) {
@@ -914,9 +913,8 @@ void fn_1_6E14(void) {
     }
 }
 
-// .text:0x1A70 size:0x5CC
-// MWCC inlines fn_1_4DD8 into the inlined fn_1_717C here, where the target calls
-// it; with fn_1_4DD8 external it scores 98.88% (task and width registers swapped).
+// .text:0x19B0 size:0x5CC
+// Registers differ: the task and the inlined fn_1_6578's width swap r26/r27.
 void fn_1_6848(void) {
     Task0138* task = lbl_803CC1B8;
 
@@ -986,7 +984,7 @@ void fn_1_6848(void) {
     }
 }
 
-// .text:0x18EC size:0x184
+// .text:0x182C size:0x184
 void fn_1_66C4(void) {
     Task0138* task = lbl_803CC1B8;
     s32 save230;
@@ -1014,7 +1012,7 @@ void fn_1_66C4(void) {
     lbl_803CC1B8->_00 = fn_1_6848;
 }
 
-// .text:0x17A0 size:0x14C
+// .text:0x16E0 size:0x14C
 void fn_1_6578(GXTexObj* obj, u16* image, s32 width, s32 height) {
     GXTexFilter filter;
     f32* scale;
@@ -1043,7 +1041,7 @@ void fn_1_6578(GXTexObj* obj, u16* image, s32 width, s32 height) {
     GXInitTexObjLOD(obj, filter, GX_LINEAR, 0.0f, lbl_1_data_A20, lbl_1_data_A34, GX_FALSE, GX_FALSE, GX_ANISO_1);
 }
 
-// .text:0x1278 size:0x528
+// .text:0x11B8 size:0x528
 // Only commutative operands are swapped: ny * 0.5f + 0.5f and the angle's
 // products put the constant first here, the variable first in the target.
 void fn_1_6050(u16* image, s32 width, s32 height, f32 scale) {
@@ -1149,7 +1147,7 @@ void fn_1_6050(u16* image, s32 width, s32 height, f32 scale) {
     DCFlushRange(image, size);
 }
 
-// .text:0xCE8 size:0x590
+// .text:0xC28 size:0x590
 // Float registers differ (scale and the angle take other saved registers);
 // otherwise the same code as fn_1_6050, which differs in operand order only.
 void fn_1_5AC0(u16* image, s32 width, s32 height, f32 scale) {
@@ -1257,7 +1255,7 @@ void fn_1_5AC0(u16* image, s32 width, s32 height, f32 scale) {
     DCFlushRange(image, size);
 }
 
-// .text:0xB4C size:0x19C
+// .text:0xA8C size:0x19C
 // Registers differ in every case, and the target adds the tile offset as the
 // left operand last; no statement split or declaration order reproduced it.
 s32 fn_1_5924(s32 width, s32 x, s32 y, s32 bpp, s32 arg4) {
@@ -1297,7 +1295,7 @@ s32 fn_1_5924(s32 width, s32 x, s32 y, s32 bpp, s32 arg4) {
     return offset;
 }
 
-// .text:0x8C0 size:0x28C
+// .text:0x800 size:0x28C
 void fn_1_5698(void) {
     Mtx44 proj;
     Mtx view;
@@ -1339,7 +1337,7 @@ void fn_1_5698(void) {
     GXSetTevDirect(GX_TEVSTAGE0);
 }
 
-// .text:0x76C size:0x154
+// .text:0x6AC size:0x154
 void fn_1_5544(GXTevStageID stage, GXIndTexStageID indStage, GXIndTexMtxID mtx, GXTexCoordID coord, GXTexMapID map) {
     GXLoadTexObj(&lbl_1_bss_4E4, map);
     if (lbl_1_bss_DC != 0) {
@@ -1363,11 +1361,11 @@ void fn_1_5544(GXTevStageID stage, GXIndTexStageID indStage, GXIndTexMtxID mtx, 
     }
 }
 
-// .text:0x768 size:0x4
+// .text:0x6A8 size:0x4
 void fn_1_5540(void) {
 }
 
-// .text:0x708 size:0x60
+// .text:0x648 size:0x60
 void fn_1_54E0(MtxPtr view) {
     s32 i;
 
@@ -1376,7 +1374,7 @@ void fn_1_54E0(MtxPtr view) {
     }
 }
 
-// .text:0xC0 size:0x648
+// .text:0x0 size:0x648
 void fn_1_4E98(DObj0138* obj, MtxPtr camera) {
     s32 nrmIdx;
     s32 handled;
@@ -1569,18 +1567,5 @@ void fn_1_4E98(DObj0138* obj, MtxPtr camera) {
                 GXColor1u32(0x0000FFFF);
             }
         }
-    }
-}
-
-// .text:0x0 size:0xC0
-void fn_1_4DD8(u16* data) {
-    s32 i;
-    u32* table;
-
-    lbl_1_common_bss_472B4._228 = data[0];
-    lbl_1_common_bss_472B4._224 = (u32*)(data + 2);
-    table = lbl_1_common_bss_472B4._224;
-    for (i = lbl_1_common_bss_472B4._228; i >= 0; i--) {
-        *table++ += (u32)data;
     }
 }

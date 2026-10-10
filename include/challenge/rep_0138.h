@@ -5,7 +5,6 @@
 #include "Dolphin/mtx.h"
 #include "Dolphin/gx.h"
 
-void fn_1_4DD8(u16* data);
 struct DObj0138;
 void fn_1_4E98(struct DObj0138* obj, MtxPtr camera);
 void fn_1_54E0(MtxPtr view);
