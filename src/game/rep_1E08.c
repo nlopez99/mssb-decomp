@@ -2853,6 +2853,7 @@ void fn_3_BD434(s32 stadium, s32 mode) {
 }
 
 // .text:0x000BD1D8 size:0x25C mapped:0x806FC26C
+// Registers only: hw and nh swap f6/f3; declaration and statement orders (96 variants) did not fix it.
 void fn_3_BD1D8(Mtx view) {
     VecSrcDst seg;
     CollisionStruct col;
@@ -3358,6 +3359,8 @@ void fn_3_BB07C(UnkPanel1E08* obj, f32 angle) {
 }
 
 // .text:0x000BA7F4 size:0x888 mapped:0x806F9888
+// Registers only: in the inlined fn_3_BB15C copy the target keeps spin in f31, here f30;
+// a 720-variant declaration-order batch and a permuter session found nothing plausible.
 BOOL fn_3_BA7F4(void* arg) {
     UnkPanelList1E08* list = arg;
     Vec up = { 0.0f, 1.0f, 0.0f };
