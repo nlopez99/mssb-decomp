@@ -3555,8 +3555,8 @@ void fn_1_14710(Unk8036E548Actor* arg0) {
 }
 
 // .text:0x000135C0 size:0x1150
-// Draft: registers differ throughout; the target addresses lbl_1_bss_60A0 through
-// a pointer, and the four-entry pose loop and model setup are scheduled differently
+// Draft: registers differ throughout (the target keeps &lbl_8036E548 in r22 from
+// the top), and the four-entry pose loop is scheduled differently
 void fn_1_135C0(void) {
     s32 i;
     s32 j;
@@ -3580,7 +3580,7 @@ void fn_1_135C0(void) {
     lbl_1_bss_5F7C[0] = ActorObjectInitTable(5);
     j = 0;
     memset(lbl_1_bss_5F88, 0, sizeof(lbl_1_bss_5F88));
-    lbl_8036E548._0C04[0]._252 = lbl_1_bss_68FC._40[0];
+    lbl_8036E548._0C04[0]._252 = lbl_1_bss_68FC._40[j];
     actor = lbl_8036E548._0C04;
     if (j < 1) {
         file = lbl_8036E548._0C04[0]._008;
@@ -3599,9 +3599,9 @@ void fn_1_135C0(void) {
         if (file->_10 != NULL) {
             lbl_8036E548._0C04[0]._008->_10 = (u8*)file + (u32)file->_10;
         }
-        if (lbl_1_data_A978[lbl_1_bss_68FC._40[0]] >= 0) {
+        if (lbl_1_data_A978[lbl_1_bss_68FC._40[j]] >= 0) {
             for (i = 0; i < 16; i++) {
-                lbl_1_bss_60A0[0][i] += (u32)lbl_1_bss_60A0[0];
+                lbl_1_bss_60A0[j][i] += (u32)lbl_1_bss_60A0[j];
             }
         }
         tex = lbl_8036E548._0C04[0]._008->_00;
@@ -3613,10 +3613,10 @@ void fn_1_135C0(void) {
         convertGeometryAndSknHeader(geo, skn);
         haveActLayoutPointToGeoHeader(layout, geo);
         fn_800BD190(geo, tex);
-        if (lbl_1_data_A978[lbl_1_bss_68FC._40[0]] >= 0) {
+        if (lbl_1_data_A978[lbl_1_bss_68FC._40[j]] >= 0) {
             for (i = 0; i <= 7; i += 2) {
-                void* l = (void*)lbl_1_bss_60A0[0][i];
-                void* g = (void*)lbl_1_bss_60A0[0][i + 1];
+                void* l = (void*)lbl_1_bss_60A0[j][i];
+                void* g = (void*)lbl_1_bss_60A0[j][i + 1];
                 LoadActorLayout(l);
                 convertGeometryAndSknHeader(g, NULL);
                 haveActLayoutPointToGeoHeader(l, g);
@@ -3660,7 +3660,7 @@ void fn_1_135C0(void) {
     if (lbl_1_bss_67CC[0] != NULL && lbl_1_bss_6940[lbl_1_bss_5F73]._46 == 0) {
         fn_80025DDC(lbl_1_bss_67CC[0]);
         fn_80025C58(lbl_1_bss_67CC[0], lbl_8036E548._0060->_34);
-        if (lbl_1_data_A978[lbl_1_bss_68FC._40[0]] >= 0) {
+        if (lbl_1_data_A978[lbl_1_bss_68FC._40[j]] >= 0) {
             for (i = 0; i < 4; i++) {
                 lbl_1_bss_67CC[i + 1] = (void*)lbl_1_bss_60A0[0][i + 8];
                 fn_80025DDC(lbl_1_bss_67CC[i + 1]);
@@ -3733,11 +3733,11 @@ void fn_1_135C0(void) {
     lbl_8036E548._0C04[0]._03C = 10.0f;
     lbl_8036E548._0C04[0]._04C = 0.5f;
     lbl_8036E548._0C04[0]._25C[1] = 1;
-    lbl_8036E548._0C04[0]._252 = lbl_1_bss_68FC._40[0];
+    lbl_8036E548._0C04[0]._252 = lbl_1_bss_68FC._40[j];
     lbl_8036E548._0C04[0]._25C[0] = 1;
     lbl_8036E548._0C04[0]._277 = 0xFF;
     lbl_8036E548._0060->_34[0]._08 = fn_1_14888;
-    if (lbl_1_bss_60A4[lbl_1_bss_68FC._40[0]] != 0) {
+    if (lbl_1_bss_60A4[lbl_1_bss_68FC._40[j]] != 0) {
         fn_800B2B74(lbl_8036E548._0060->_34[0]._00, lbl_8036E548._0C04[0]._162[19]);
         fn_800B2B74(lbl_8036E548._0060->_34[0]._00, lbl_8036E548._0C04[0]._162[25]);
         fn_1_ECF8(lbl_1_bss_5F73, 0, 0);
