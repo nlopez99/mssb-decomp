@@ -642,7 +642,8 @@ void fn_2_80B5C(UnkTask0C50* task, s32 index) {
 
 // .text:0x000808D8 size:0x284
 // 87.04%: the inlined fn_2_760CC is scheduled differently: the target forms &lbl_2_bss_F410
-// before the branch and saves r25. Writing the body out in place scores lower (85.43%).
+// before the branch, saves r25 and has a 48-byte frame (12 bytes of locals) to the base's 32.
+// Writing the body out in place scores lower (85.43%).
 void fn_2_808D8(UnkTask0C50* task, s32 index) {
     if (lbl_803C66B0._0D[index] == 0 ? TRUE : FALSE) {
         if (g_d_GameSettings.GameModeSelected != 5) {
@@ -3201,7 +3202,7 @@ void fn_2_74CD8(void) {
 
 // .text:0x000747FC size:0x4DC
 // 98.97%: the target reads lbl_2_bss_A844 through addi and lwz 0 and loads the 0 for _4751
-// earlier; an array type for lbl_2_bss_A844 compiles the same.
+// earlier; lbl_2_bss_A844[lbl_8034E9A0._4751] after the store gives the addi but a lwzx (97.96%).
 void fn_2_747FC(void) {
     UnkTask0C50* task = lbl_803CC1B8;
     s32 sel = lbl_2_bss_F410._00;
