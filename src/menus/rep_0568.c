@@ -1146,7 +1146,8 @@ done:
 
 // .text:0x00016F78 size:0x6D0
 // 98.59%: the fn_800B2B74 arguments load in the other order, and the target
-// tests hasAltAnims through neg/or/srwi. where this compiles to clrlwi.
+// tests hasAltAnims through neg/or/srwi. where this compiles to clrlwi; only
+// `return result != 0;` tested as `hasAltAnims(...) & 1` gave that (99.08%).
 void fn_2_16F78(u8 index) {
     Player0568* player = &lbl_8036E548._0C04[index];
     void* tex;

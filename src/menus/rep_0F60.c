@@ -774,7 +774,8 @@ static inline BOOL fn_2_8D270_isSpecial(s8 kind) {
 
 // .text:0x0008D270 size:0x76C
 // 95.58%: the target keeps the raw idx in r25 and p in r30, re-zero-extends idx for each call,
-// tests the special kinds through neg/or/srwi., and copies the bone loop's zero with mr.
+// tests the special kinds through neg/or/srwi. (as `return special != 0;` tested with `& 1`,
+// 96.13%, like rep_0568's hasAltAnims), and copies the bone loop's zero with mr.
 void fn_2_8D270(u8 idx) {
     Player0F60* p = &lbl_2_bss_340140->_0C04[idx];
     ActorRef0F60* ref = fn_800111D8(p);
