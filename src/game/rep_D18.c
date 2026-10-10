@@ -460,6 +460,7 @@ void fn_3_5ACA0(void) {
 // .text:0x0005A87C size:0x424 mapped:0x80699910
 void fn_3_5A87C(void) {
     int i;
+    int home;
     u8 mode;
 
     lbl_80366158._28 = 0;
@@ -515,25 +516,26 @@ void fn_3_5A87C(void) {
     g_GameLogic.homeTeamInd = g_d_GameSettings.home_AwaySetting;
     g_GameLogic.teamBatting = g_d_GameSettings.home_AwaySetting;
     g_GameLogic.teamFielding = g_d_GameSettings.home_AwaySetting ^ 1;
-    g_GameLogic._1C = (&g_d_GameSettings.maybeHomeAway)[g_d_GameSettings.home_AwaySetting];
-    g_GameLogic._20 = (&g_d_GameSettings.maybeHomeAway)[g_d_GameSettings.home_AwaySetting ^ 1];
+    home = g_d_GameSettings.home_AwaySetting;
+    g_GameLogic._1C = (&g_d_GameSettings.maybeHomeAway)[home];
+    g_GameLogic._20 = (&g_d_GameSettings.maybeHomeAway)[home ^ 1];
     if (mode == GAME_TYPE_PRACTICE) {
-        g_GameLogic.AIDifficulty0Special3Weak[g_d_GameSettings.home_AwaySetting] = 1;
+        g_GameLogic.AIDifficulty0Special3Weak[home] = 1;
         g_GameLogic.AIDifficulty0Special3Weak[g_GameLogic.homeTeamInd ^ 1] = 1;
     } else if (g_d_GameSettings._10 == 0) {
         g_GameLogic._13E[1] = 1;
-        g_GameLogic._140[g_d_GameSettings.home_AwaySetting ^ 1] = 1;
-        lbl_3_common_bss_37400._40 = 0;
+        g_GameLogic._140[home ^ 1] = 1;
         g_GameLogic.batterHandedness[g_GameLogic.homeTeamInd ^ 1] = 1;
+        lbl_3_common_bss_37400._40 = 0;
         g_GameLogic.teamAIInd[g_GameLogic.homeTeamInd ^ 1] = 1;
         g_GameLogic.autoFielding[g_GameLogic.homeTeamInd ^ 1] = 1;
         g_GameLogic.battingAIInd[g_GameLogic.homeTeamInd ^ 1] = 1;
         g_GameLogic.AIDifficulty0Special3Weak[g_GameLogic.homeTeamInd] = 1;
     } else if (g_d_GameSettings._10 == 3) {
         g_GameLogic._13E[0] = 1;
-        g_GameLogic._140[g_d_GameSettings.home_AwaySetting] = 1;
-        lbl_3_common_bss_37400._40 = 1;
+        g_GameLogic._140[home] = 1;
         g_GameLogic.batterHandedness[g_GameLogic.homeTeamInd] = 1;
+        lbl_3_common_bss_37400._40 = 1;
         g_GameLogic.teamAIInd[g_GameLogic.homeTeamInd] = 1;
         g_GameLogic.autoFielding[g_GameLogic.homeTeamInd] = 1;
         g_GameLogic.battingAIInd[g_GameLogic.homeTeamInd] = 1;
