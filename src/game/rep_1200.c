@@ -1468,8 +1468,6 @@ void fn_3_70AEC(void) {
 }
 
 // .text:0x000709B4 size:0x138 mapped:0x806AFA48
-// Registers only: after getComponentsFromRad the target holds 0.0f and the radius in f0
-// and y in f2; the base swaps them.
 void fn_3_709B4(void) {
     f32 angle;
     f32 y;
@@ -1485,10 +1483,10 @@ void fn_3_709B4(void) {
         angle += 3.1415927f;
         getComponentsFromRad(angle, &y, &z);
         radius = 0.01f * lbl_3_data_5F50[g_Pitcher.starPitchType - 7][4];
+        g_Pitcher.starPitchPositionAdjustment.y = y * radius + radius;
+        g_Pitcher.starPitchPositionAdjustment.z = z * radius;
         g_Pitcher.starPitchPositionAdjustment.x = 0.0f;
         g_Pitcher.bulletPitchLoopAngleRadians = angle;
-        g_Pitcher.starPitchPositionAdjustment.y = radius * y + radius;
-        g_Pitcher.starPitchPositionAdjustment.z = radius * z;
     }
 }
 
