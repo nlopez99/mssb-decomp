@@ -1377,29 +1377,32 @@ void fn_1_54E0(MtxPtr view) {
 }
 
 // .text:0xC0 size:0x648
-// Draft: the per-vertex index switches build another compare tree (the target
-// tests 2 first), and the position and normal reads are scheduled differently.
+// The per-vertex index switches build another compare tree (the target tests 2
+// first), and some saved registers differ.
 void fn_1_4E98(DObj0138* obj, MtxPtr camera) {
+    s32 nrmIdx;
+    s32 handled;
+    s32 posIdx;
+    s32 size;
+    u8 fmt;
+    s16* v;
+    u16 count;
+    s32 i;
+    u32 done;
+    s32 attr;
+    f32 x;
+    u8* dl;
+    f32 y;
+    VtxArray0138* arr;
+    f32 z;
+    f32 scale;
+    s32 shift;
+    u8 stride;
+    s32 type;
+    u32 vcd;
+
     Mtx mtx;
     s32 desc[21];
-    s32 i;
-    s32 attr;
-    u32 vcd;
-    s32 shift;
-    s32 type;
-    u8* dl;
-    u32 done;
-    s32 handled;
-    s32 size;
-    u16 count;
-    u16 posIdx;
-    u16 nrmIdx;
-    f32 scale;
-    f32 x;
-    f32 y;
-    f32 z;
-    s16* v;
-    VtxArray0138* arr;
 
     if (obj->_0C == NULL || obj->_00 == NULL || obj->_10 == NULL) {
         return;
@@ -1424,13 +1427,11 @@ void fn_1_4E98(DObj0138* obj, MtxPtr camera) {
         case 2:
             memset(desc, 0, sizeof(desc));
             vcd = obj->_10->_4[i]._4;
-            shift = 2;
-            for (attr = GX_VA_POS; attr <= GX_VA_TEX7; attr++) {
+            for (attr = GX_VA_POS, shift = 2; attr <= GX_VA_TEX7; attr++, shift += 2) {
                 type = (vcd >> shift) & 3;
                 if (type != 0) {
                     desc[attr] = type;
                 }
-                shift += 2;
             }
             break;
         }
@@ -1531,10 +1532,12 @@ void fn_1_4E98(DObj0138* obj, MtxPtr camera) {
                     }
                 }
                 arr = obj->_00;
-                scale = 1 << (arr->_6 & 0xF);
-                switch ((arr->_6 >> 4) & 0xF) {
+                fmt = arr->_6;
+                stride = arr->_7;
+                scale = 1 << (fmt & 0xF);
+                switch ((fmt >> 4) & 0xF) {
                 case 3:
-                    v = &arr->_0[arr->_7 * posIdx];
+                    v = &arr->_0[stride * posIdx];
                     x = v[0] / scale;
                     y = v[1] / scale;
                     z = v[2] / scale;
@@ -1543,10 +1546,12 @@ void fn_1_4E98(DObj0138* obj, MtxPtr camera) {
                 GXPosition3f32(x, y, z);
                 GXColor1u32(0xFF0000FF);
                 arr = obj->_0C;
-                scale = 1 << (arr->_6 & 0xF);
-                switch ((arr->_6 >> 4) & 0xF) {
+                fmt = arr->_6;
+                stride = arr->_7;
+                scale = 1 << (fmt & 0xF);
+                switch ((fmt >> 4) & 0xF) {
                 case 3:
-                    v = &arr->_0[arr->_7 * nrmIdx];
+                    v = &arr->_0[stride * nrmIdx];
                     x += v[0] / scale;
                     y += v[1] / scale;
                     z += v[2] / scale;
