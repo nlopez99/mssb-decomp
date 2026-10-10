@@ -91,7 +91,7 @@ menus/rep_06E0.c:
 	.rodata     start:0x000006E0 end:0x00000730
 
 menus/rep_0730.c:
-	.text       start:0x0001A4C8 end:0x0001BF50
+	.text       start:0x0001A420 end:0x0001C21C
 	.rodata     start:0x00000730 end:0x00000788
 	.data       start:0x00004B90 end:0x00004C68
 
