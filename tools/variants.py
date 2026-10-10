@@ -25,7 +25,8 @@
 # @{i@|j@} at each use; statement orders as @perm{ with @, between statements.
 #
 # --header FILE passes a header copy to every run, as match.py --source does.
-# The best variants are written to build/variants/<function>/<rank>.c.
+# The best variants are written to build/variants/<function>/<run>/<rank>.c,
+# a new <run> directory each time. Lines left blank only by markers are dropped.
 #
 # Exit codes: 0 = some variant matches, 1 = none does, 3 = usage error.
 ###
@@ -106,12 +107,18 @@ def sites(parts: List[Any]) -> List[List[str]]:
     return [p for p in parts if isinstance(p, list)]
 
 
+SITE = "\x00"
+
+
 def render(parts: List[Any], choice: Sequence[int]) -> str:
     out = []
     it = iter(choice)
     for p in parts:
-        out.append(p[next(it)] if isinstance(p, list) else p)
-    return "".join(out)
+        out.append(SITE + p[next(it)] + SITE if isinstance(p, list) else p)
+    # A line left blank only by a marker (an empty choice, or a marker on a
+    # line of its own) is dropped, so a winning variant can be copied as is.
+    lines = [line for line in "".join(out).split("\n") if not (SITE in line and not line.replace(SITE, "").strip())]
+    return "\n".join(lines).replace(SITE, "")
 
 
 def describe(choice: Sequence[int], kinds: List[str]) -> str:
@@ -168,8 +175,13 @@ def main() -> int:
             total *= c
         if not counts:
             raise UsageError("the template has no markers")
-        out_dir = os.path.join(root_dir, "build", "variants", args.function)
-        os.makedirs(out_dir, exist_ok=True)
+        # Each run writes to its own directory, so an earlier run's winners
+        # are never overwritten.
+        fn_dir = os.path.join(root_dir, "build", "variants", args.function)
+        os.makedirs(fn_dir, exist_ok=True)
+        run = 1 + max([int(d) for d in os.listdir(fn_dir) if d.isdigit()], default=0)
+        out_dir = os.path.join(fn_dir, str(run))
+        os.makedirs(out_dir)
         print(f"{len(counts)} sites ({' x '.join(map(str, counts))}) = {total} variants")
         if args.dry_run:
             path = os.path.join(out_dir, "first.c")
