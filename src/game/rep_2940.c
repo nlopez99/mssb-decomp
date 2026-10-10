@@ -45,15 +45,9 @@ typedef struct Unk2940Obj {
 } Unk2940Obj; // size: 0x28
 
 extern struct {
-    /* 0x0000 */ u8 _0000[0x2294];
-    /* 0x2294 */ f32 _2294;
-    /* 0x2298 */ f32 _2298;
-    /* 0x229C */ f32 _229C;
-    /* 0x22A0 */ u8 _22A0[0x22A4 - 0x22A0];
-    /* 0x22A4 */ f32 _22A4;
-    /* 0x22A8 */ u8 _22A8[0x24BD - 0x22A8];
-    /* 0x24BD */ u8 _24BD;
-    /* 0x24BE */ u8 _24BE[0x2C50 - 0x24BE];
+    /* 0x0000 */ u8 _0000[0x2260];
+    /* 0x2260 */ Unk2940Actor _2260;
+    /* 0x24DC */ u8 _24DC[0x2C50 - 0x24DC];
     /* 0x2C50 */ Unk2940Actor* _2C50[13];
     /* 0x2C84 */ u8 _2C84[0x2D68 - 0x2C84];
     /* 0x2D68 */ s16 _2D68;
@@ -405,20 +399,19 @@ void fn_3_E11E0(void) {
 }
 
 // .text:0x000E07DC size:0xA04 mapped:0x8071F870
-// Remaining: the target holds &lbl_8036E548 in a saved register across the stadium block's
-// call (and stores _24BD after the search loop), and register numbers elsewhere.
 void fn_3_E07DC(void) {
     Unk2940Actor* actor;
     VecXYZ pos;
     s32 ids[4];
-    s32* p;
     BOOL start;
     BOOL show = TRUE;
-    int count;
     BOOL won;
-    int best;
-    int stadium;
     int i;
+    int count;
+    s32* p;
+    int best;
+    int j;
+    int stadium;
     int slot;
     int n;
 
@@ -485,9 +478,9 @@ void fn_3_E07DC(void) {
                 }
             } else {
                 p = ids;
-                for (i = 0; i < 4; i++) {
-                    if (g_Minigame._1E22[i] == best) {
-                        *p++ = i;
+                for (j = 0; j < 4; j++) {
+                    if (g_Minigame._1E22[j] == best) {
+                        *p++ = j;
                         count++;
                     }
                 }
@@ -555,19 +548,20 @@ void fn_3_E07DC(void) {
         }
     }
     if (!g_d_GameSettings.minigamesEnabled) {
-        lbl_8036E548._24BD = 1;
+        actor = &lbl_8036E548._2260;
         for (stadium = 0; stadium < 6; stadium++) {
             if (g_d_GameSettings.StadiumID == lbl_3_data_18910[stadium]) {
                 break;
             }
         }
+        actor->_25D = 1;
         fn_3_9F79C(lbl_3_data_2130C[stadium]._C, lbl_3_data_2130C[stadium]._0, lbl_3_data_2130C[stadium]._8, &pos.x, &pos.z);
         pos.y = lbl_3_data_2130C[stadium]._4;
-        lbl_8036E548._2294 = pos.x + lbl_3_data_18E04[0][0].x;
-        lbl_8036E548._2298 = pos.y + lbl_3_data_18E04[0][0].y;
-        lbl_8036E548._229C = pos.z + lbl_3_data_18E04[0][0].z;
-        lbl_8036E548._2298 = -lbl_8036E548._2298;
-        lbl_8036E548._22A4 = lbl_3_data_2130C[stadium]._C;
+        actor->_034 = pos.x + lbl_3_data_18E04[0][0].x;
+        actor->_038 = pos.y + lbl_3_data_18E04[0][0].y;
+        actor->_03C = pos.z + lbl_3_data_18E04[0][0].z;
+        actor->_038 = -actor->_038;
+        actor->_044 = lbl_3_data_2130C[stadium]._C;
         return;
     }
     slot = 0;
