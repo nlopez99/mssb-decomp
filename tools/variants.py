@@ -24,6 +24,13 @@
 # swaps as @{s32@|int@} at each declaration; loop-counter choice as
 # @{i@|j@} at each use; statement orders as @perm{ with @, between statements.
 #
+# Copy the template from the current source: drops are measured against the
+# unit's source as it is now. Redirect the output to a file rather than piping
+# it to head or sed, which kill the run. Scores are objdiff's, which ignore
+# branch targets: check a control-flow change with match.py --source.
+# Markers do not nest: to vary both the order of a block and a form inside
+# it, run the @perm{ batch with one form, then again with the other.
+#
 # --header FILE passes a header copy to every run, as match.py --source does.
 # The best variants are written to build/variants/<function>/<run>/<rank>.c,
 # a new <run> directory each time. Lines left blank only by markers are dropped.
@@ -35,6 +42,7 @@ import argparse
 import concurrent.futures
 import itertools
 import json
+import math
 import os
 import random
 import re
@@ -87,10 +95,28 @@ def parse_template(text: str) -> Tuple[List[Any], List[str]]:
     return parts, kinds
 
 
-def permutations(body: str) -> List[str]:
+class Orders:
+    """Every order of a block's items, built on demand: a 15-item block has
+    over 10^12 orders, so they cannot be listed, only sampled."""
+
+    def __init__(self, items: List[str], join: str, head: str = "", tail: str = ""):
+        self.items, self.join, self.head, self.tail = items, join, head, tail
+
+    def __len__(self) -> int:
+        return math.factorial(len(self.items))
+
+    def __getitem__(self, n: int) -> str:
+        pool = list(self.items)
+        order = []
+        for k in range(len(pool), 0, -1):
+            n, i = divmod(n, k)
+            order.append(pool.pop(i))
+        return self.head + self.join.join(order) + self.tail
+
+
+def permutations(body: str) -> Orders:
     if "@," in body:
-        items = body.split("@,")
-        return ["".join(order) for order in itertools.permutations(items)]
+        return Orders(body.split("@,"), "")
     lines = body.split("\n")
     # Keep the block's leading and trailing whitespace lines in place.
     head = []
@@ -100,11 +126,11 @@ def permutations(body: str) -> List[str]:
     while lines and not lines[-1].strip():
         tail.insert(0, lines.pop())
     items = [line for line in lines if line.strip()]
-    return ["\n".join(head + list(order) + tail) for order in itertools.permutations(items)]
+    return Orders(items, "\n", "".join(h + "\n" for h in head), "".join("\n" + t for t in tail))
 
 
-def sites(parts: List[Any]) -> List[List[str]]:
-    return [p for p in parts if isinstance(p, list)]
+def sites(parts: List[Any]) -> List[Any]:
+    return [p for p in parts if not isinstance(p, str)]
 
 
 SITE = "\x00"
@@ -114,7 +140,7 @@ def render(parts: List[Any], choice: Sequence[int]) -> str:
     out = []
     it = iter(choice)
     for p in parts:
-        out.append(SITE + p[next(it)] + SITE if isinstance(p, list) else p)
+        out.append(p if isinstance(p, str) else SITE + p[next(it)] + SITE)
     # A line left blank only by a marker (an empty choice, or a marker on a
     # line of its own) is dropped, so a winning variant can be copied as is.
     lines = [line for line in "".join(out).split("\n") if not (SITE in line and not line.replace(SITE, "").strip())]
@@ -165,6 +191,7 @@ def main() -> int:
     parser.add_argument("--header", action="append", default=[], help="header copy passed to every run")
     parser.add_argument("--dry-run", action="store_true", help="count the variants and write the first; compile nothing")
     args = parser.parse_args()
+    sys.stdout.reconfigure(line_buffering=True)
 
     try:
         with open(args.template) as f:
