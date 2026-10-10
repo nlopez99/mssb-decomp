@@ -432,8 +432,6 @@ void fn_3_67130(void) {
 }
 
 // .text:0x000668BC size:0x874 mapped:0x806A5950
-// 99.99%: the last state test reads 0x5E, 0x5F-0x61, 0x62 in the target and 0x62, 0x5E-0x60, 0x61
-// here; no order or grouping of the five equalities, nor a switch, gave the target's.
 void fn_3_668BC(void) {
     f32 length;
     s32 i;
@@ -612,7 +610,7 @@ void fn_3_668BC(void) {
                 }
             }
             state = actor->_62;
-            if (state == 0x5E || state == 0x62 || state == 0x5F || state == 0x60 || state == 0x61) {
+            if (state == 0x5E || (u16)(state - 0x5F) <= 2 || state == 0x62) {
                 lbl_3_common_bss_32220._6 = actor->_68;
             }
         }

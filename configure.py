@@ -709,7 +709,7 @@ config.libs = [
             Object(NonMatching, "game/rep_D18.c"),
             Object(NonMatching, "game/rep_D68.c"),
             Object(NonMatching, "game/rep_DB8.c"),
-            Object(NonMatching, "game/rep_E08.c"),
+            Object(Matching, "game/rep_E08.c"),
             Object(NonMatching, "game/rep_EA0.c"),
             Object(Matching, "game/rep_F80.c"),
             Object(Matching, "game/rep_FE0.c"),
