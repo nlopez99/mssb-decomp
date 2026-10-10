@@ -181,13 +181,15 @@ static Menu7BF0 lbl_1_bss_471BC;
 static Sim7BF0 lbl_1_bss_47068;
 
 // .text:0x1510 size:0x1C0
-// Only register numbers differ, in the inlined fn_1_2935C and fn_1_28C34 code;
-// no statement order or title argument changed them.
+// 92.01%: only register numbers differ, in the inlined fn_1_2935C code (the copy of
+// &lbl_1_data_11300 in r9 where the target has r5); a title local fixed fn_1_28C34's copy.
 void fn_1_29A9C(void) {
+    char* title = NULL;
+
     fn_1_2935C(&lbl_1_bss_47068);
     fn_1_273D8(&lbl_1_bss_471D8);
     lbl_1_data_11300._38 = 0;
-    fn_1_28C34(&lbl_1_bss_471BC, 0, NULL);
+    fn_1_28C34(&lbl_1_bss_471BC, 0, title);
     fn_800B806C(0, -240.0f, 240.0f, -320.0f, 320.0f, -512.0f, -1.0f, 1280.0f);
     ((Task7BF0*)lbl_803CC1B8)->_00 = fn_1_295E8;
 }
