@@ -355,8 +355,8 @@ void fn_2_1641C(void) {
 }
 
 // .text:0x00015E80 size:0x59C
-// 99.62%: the target keeps the zero stored to _4A/_4B in r4 (r0 here), and a redundant
-// `bne` before the branch to the shared fn_2_15AFC call.
+// 99.93%: the target keeps the zero stored to _4A/_4B in r4 (r0 here). The target
+// tests pad._2 twice on one cr0 (`bne; beq`), so the original repeats that test.
 void fn_2_15E80(u8 port) {
     Pad04B0 pad;
     s32 prev;
@@ -446,7 +446,7 @@ void fn_2_15E80(u8 port) {
         }
     }
 
-    if (lbl_2_bss_100B8._10[idx] == 0 || pad._0 != 0 || pad._2 != 0) {
+    if (lbl_2_bss_100B8._10[idx] == 0 || pad._0 != 0 || pad._2 != 0 || pad._2 != 0) {
         lbl_803C6724._0[port] = lbl_2_bss_F410._10[idx];
         first = lbl_2_bss_F410._00[slot];
         do {
