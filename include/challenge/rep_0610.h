@@ -105,6 +105,7 @@ s32 fn_1_16558(s32 arg0, s32 arg1);
 s32 fn_1_16590(void);
 void fn_1_165E0(void);
 void fn_1_168C8(void);
+void fn_1_16978(void);
 void fn_1_176EC(void);
 void fn_1_1770C(void);
 void fn_1_17954(void);

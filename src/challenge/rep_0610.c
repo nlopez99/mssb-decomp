@@ -2361,7 +2361,7 @@ static u8 lbl_1_bss_3080;
 static s32 lbl_1_bss_307C;
 static u8 lbl_1_bss_3078;
 static s32 lbl_1_bss_3074;
-static s32 lbl_1_bss_3070;
+static u8 lbl_1_bss_3070;
 
 // .text:0x00017D90 size:0x16C
 void fn_1_17D90(void) {
@@ -2905,6 +2905,63 @@ void fn_1_14FB8(void) {
     } else if (lbl_803C77B8[0]._02 & 0x200) {
         lbl_1_bss_5F71 = 0;
         minigamesSetSomePointers();
+    }
+}
+
+// .text:0x0001496C size:0x64C
+void fn_1_1496C(void) {
+    UnkTaskMenu0610* task;
+    s32 i;
+    lbl_1_bss_5F73 = 0;
+    task = (UnkTaskMenu0610*)lbl_803CC1B8;
+    if (lbl_803C77B8[0]._04 & 1) {
+        if (lbl_1_bss_68FC._40[lbl_1_bss_5F73] != 0) {
+            do {
+                lbl_1_bss_68FC._40[lbl_1_bss_5F73]--;
+            } while (++lbl_1_bss_5F73 < 1);
+        } else {
+            do {
+                lbl_1_bss_68FC._40[lbl_1_bss_5F73] = 0x35;
+            } while (++lbl_1_bss_5F73 < 1);
+        }
+    } else if (lbl_803C77B8[0]._04 & 2) {
+        do {
+            lbl_1_bss_68FC._40[lbl_1_bss_5F73]++;
+            if (lbl_1_bss_68FC._40[lbl_1_bss_5F73] == 0x36) {
+                lbl_1_bss_68FC._40[lbl_1_bss_5F73] = 0;
+            }
+        } while (++lbl_1_bss_5F73 < 1);
+    } else if (lbl_803C77B8[0]._02 & 0x400) {
+        do {
+            lbl_1_bss_6940[lbl_1_bss_5F73]._46 ^= 1;
+        } while (++lbl_1_bss_5F73 < 1);
+    } else if (lbl_803C77B8[0]._02 & 0x800) {
+        lbl_1_bss_3074 = 0x402 - lbl_1_bss_3074;
+    } else if (lbl_803C77B8[0]._02 & 0x40) {
+        lbl_1_bss_3070 = 1;
+    } else if (lbl_803C77B8[0]._02 & 0x20) {
+        lbl_1_bss_3070 = 0;
+    }
+    if (lbl_803C77B8[0]._02 & 0x100) {
+        memset(lbl_8036E548._0C04, 0, sizeof(lbl_8036E548._0C04));
+        for (i = 0; i < 13; i++) {
+            lbl_8036E548._2C50[i] = &lbl_8036E548._0C04[0];
+        }
+        lbl_8036E548._2C50[0]->_255[0] = 0;
+        lbl_8036E548._2C50[0]->_254 = 0;
+        fn_1_1347C();
+        fn_1_131E4();
+        task->_20 = 0;
+        lbl_803CC1B8->_10 = 0;
+        lbl_803CC1B8->_00 = fn_1_16978;
+        lbl_803CC1B8->_10 = 0;
+        lbl_1_bss_5F68 = 0;
+        lbl_1_bss_5F64 = 0.0f;
+    } else if (lbl_803C77B8[0]._02 & 0x200) {
+        memset(&lbl_8036E548, 0, 0x3154);
+        lbl_1_bss_3070 = 0;
+        fn_800AD038(lbl_80366158._08);
+        lbl_803CC1B8->_0C->_10 = 1;
     }
 }
 
