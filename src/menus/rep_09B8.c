@@ -139,28 +139,48 @@ typedef struct MenuItem09B8 {
 extern void* fn_800B0A5C_insertQueue(void (*)(void), s32);
 
 // .text:0x00051470 size:0xF8
+// 98.39%: only the trailing blr differs; dtk split it off as fn_2_51568, past
+// the end of this unit's .text range in splits.txt (0x51568).
 u16 fn_2_51470(s32 idx, u16 k) {
+    u16 sum = 0;
+    u16 c;
     u16* p;
+    u16 val;
 
     if (k == 0) {
         p = lbl_80366B18._798[lbl_2_bss_1A824C->_1972B8][idx + 1];
     } else {
         p = lbl_80366B18._798[lbl_2_bss_1A824C->_1972B8][idx + 1];
     }
-    return fn_2_513E8(p, k);
+    for (;;) {
+        c = *p++;
+        if (c & 0x4000) {
+            switch (c & 0x3FFF) {
+            case 2:
+                sum += lbl_2_data_1F3A0[k] / 2;
+                break;
+            case 3:
+                sum += lbl_2_data_1F3A0[k];
+                break;
+            default:
+                return (u16)sum;
+            }
+        } else {
+            if (c & 0x8000) {
+                val = lbl_2_data_1F3A0[k];
+            } else {
+                val = lbl_2_data_1F3A0[k] / 2;
+            }
+            sum += val;
+        }
+    }
 }
 
-// .text:0x0005146C size:0x4
-void fn_2_5146C(void) {
-}
-
-// .text:0x000513E8 size:0x84
-// 93%: sum takes r5 for the target's r7, the target truncates it on return
-// (clrlwi, here mr) and ends without the trailing blr.
+// .text:0x000513E8 size:0x88
 u16 fn_2_513E8(u16* p, u16 k) {
-    u16 sum = 0;
     u16 c;
     u16 val;
+    u16 sum = 0;
 
     for (;;) {
         c = *p++;
@@ -173,7 +193,7 @@ u16 fn_2_513E8(u16* p, u16 k) {
                 sum += lbl_2_data_1F3A0[k];
                 break;
             default:
-                return sum;
+                return (u16)sum;
             }
         } else {
             if (c & 0x8000) {
@@ -207,11 +227,7 @@ void fn_2_5135C(MenuItem09B8* item, s32 k) {
     }
 }
 
-// .text:0x00051358 size:0x4
-void fn_2_51358(void) {
-}
-
-// .text:0x000512C0 size:0x98
+// .text:0x000512C0 size:0x9C
 // 94.74%: the target's switch has one more `b` after the dispatch and its only
 // blr in the middle; case orders and a default did not reproduce it.
 void fn_2_512C0(s32 idx) {

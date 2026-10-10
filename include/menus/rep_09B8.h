@@ -22,13 +22,11 @@ void fn_2_51190(s32 arg0, s32 arg1);
 void fn_2_512B4(void);
 s32 fn_2_512B8(void);
 void fn_2_512C0(s32 idx);
-void fn_2_51358(void);
 void fn_2_5135C(struct MenuItem09B8* item, s32 k);
 void fn_2_513DC(void);
 void fn_2_513E0(void* text, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7);
 void fn_2_513E4(void);
 u16 fn_2_513E8(u16* p, u16 k);
-void fn_2_5146C(void);
 u16 fn_2_51470(s32 idx, u16 k);
 
 #endif // !__MENUS_rep_09B8_H_
