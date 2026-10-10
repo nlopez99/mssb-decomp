@@ -14,6 +14,11 @@ typedef struct {
 } Unk2390Spark; // size: 0x44
 
 typedef struct {
+    /* 0x00 */ s32 _00;
+    /* 0x04 */ s32 _04[21];
+} Unk2390Burst; // size: 0x58
+
+typedef struct {
     /* 0x000 */ u8 _000[0x25A];
     /* 0x25A */ u8 _25A;
 } Unk2390Actor;
@@ -67,10 +72,36 @@ Unk2390Spark lbl_3_data_18180[3] = {
 };
 static Vec lbl_3_data_1824C = { 0.0f, 0.0f, 1.0f };
 static Vec lbl_3_data_18258 = { 0.0f, 0.0f, -0.2f };
+static s32 lbl_3_data_18264[1] = { 0 };
+Unk2390Burst lbl_3_data_18268 = {
+    0, { 0x19, 0x64, 0x28, 0x3C, 0x4650, 0x4E20, 0xFFE17B80, 0x1E8480, 0x13880, 0x186A0, 0xC8, 0xFFFFFFFF, 0, 0, 1, 0, 0, 0, 0, 0, 0 },
+};
 
+static void* lbl_3_bss_9FDC[15];
+
+extern void convertTextureHeader(void* tex);
+extern void fn_8002955C(Vec* pos, s32 arg1, Unk2390Burst* burst);
 extern void fn_8002F5F4(Vec* pos, Vec* dir, Unk2390Spark* spark);
 extern void fn_80030470(Vec* pos, Vec* dir, Vec* back, Unk2390Trail* trail, s32 n);
 extern void fn_80030D88(Vec* pos, Vec* dir, Unk2390Trail* trail, s32 n);
+
+// .text:0x000CB6EC size:0x4C mapped:0x8070A780
+void fn_3_CB6EC(f32 x, f32 y, f32 z) {
+    Vec pos;
+
+    pos.x = x;
+    pos.y = y;
+    pos.z = z;
+    lbl_3_data_18268._00 = lbl_3_common_bss_35154._004;
+    fn_8002955C(&pos, 0, &lbl_3_data_18268);
+}
+
+// .text:0x000CB6B4 size:0x38 mapped:0x8070A748
+void fn_3_CB6B4(u32* file) {
+    file[0] += (u32)file;
+    lbl_3_bss_9FDC[0] = (void*)file[0];
+    convertTextureHeader(lbl_3_bss_9FDC[0]);
+}
 
 // .text:0x000CB538 size:0x17C mapped:0x8070A5CC
 void fn_3_CB538(s32 type) {
