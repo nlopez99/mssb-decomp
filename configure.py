@@ -699,7 +699,7 @@ config.libs = [
             Object(NonMatching, "game/game_batter.c"),
             Object(NonMatching, "game/rep_720.c"),
             Object(NonMatching, "game/rep_868.c"),
-            Object(NonMatching, "game/rep_8C8.c"),
+            Object(Matching, "game/rep_8C8.c"),
             Object(Matching, "game/rep_940.c"),
             Object(NonMatching, "game/rep_9B0.c"),
             Object(Matching, "game/rep_A00.c"),
