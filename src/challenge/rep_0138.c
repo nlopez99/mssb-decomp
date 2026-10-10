@@ -64,8 +64,33 @@ extern struct {
 
 extern Task0138* lbl_803CC1B8;
 
+typedef struct VtxArray0138 {
+    /* 0x0 */ s16* _0;
+    /* 0x4 */ u8 _4[0x6 - 0x4];
+    /* 0x6 */ u8 _6; // low nibble: fraction bits, high nibble: component type
+    /* 0x7 */ u8 _7; // components per element
+} VtxArray0138;
+
+typedef struct DispEntry0138 {
+    /* 0x0 */ u8 _0;
+    /* 0x1 */ u8 _1[0x4 - 0x1];
+    /* 0x4 */ u32 _4; // vertex descriptor, two bits per attribute
+    /* 0x8 */ u8* _8; // display list
+    /* 0xC */ u32 _C; // display list size
+} DispEntry0138; // size: 0x10
+
+typedef struct Disp0138 {
+    /* 0x0 */ u8 _0[0x4];
+    /* 0x4 */ DispEntry0138* _4;
+    /* 0x8 */ u16 _8;
+} Disp0138;
+
 typedef struct DObj0138 {
-    /* 0x00 */ u8 _00[0x18];
+    /* 0x00 */ VtxArray0138* _00;
+    /* 0x04 */ u8 _04[0xC - 0x4];
+    /* 0x0C */ VtxArray0138* _0C;
+    /* 0x10 */ Disp0138* _10;
+    /* 0x14 */ u8 _14[0x18 - 0x14];
     /* 0x18 */ Mtx _18;
     /* 0x48 */ u8 _48[0x54 - 0x48];
     /* 0x54 */ f32 _54;
@@ -1348,6 +1373,188 @@ void fn_1_54E0(MtxPtr view) {
 
     for (i = 0; i < 3; i++) {
         LITXForm(lbl_1_data_848[i], view);
+    }
+}
+
+// .text:0xC0 size:0x648
+// Draft: the opcode cases' block order, the per-vertex inner switches' compare
+// trees and the position/normal reads (scheduled differently) still differ.
+void fn_1_4E98(DObj0138* obj, MtxPtr camera) {
+    Mtx mtx;
+    s32 desc[21];
+    s32 i;
+    s32 attr;
+    u32 vcd;
+    s32 shift;
+    s32 type;
+    u8* dl;
+    u32 done;
+    s32 handled;
+    s32 size;
+    u16 count;
+    u16 posIdx;
+    u16 nrmIdx;
+    f32 scale;
+    f32 x;
+    f32 y;
+    f32 z;
+    s16* v;
+    VtxArray0138* arr;
+
+    if (obj->_0C == NULL || obj->_00 == NULL || obj->_10 == NULL) {
+        return;
+    }
+    GXSetZMode(GX_TRUE, GX_ALWAYS, GX_FALSE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+    GXSetCullMode(GX_CULL_NONE);
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    GXSetNumChans(1);
+    GXSetNumTevStages(1);
+    GXSetNumTexGens(0);
+    GXSetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
+    PSMTXConcat(camera, obj->_18, mtx);
+    GXLoadPosMtxImm(mtx, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    for (i = 0; i < obj->_10->_8; i++) {
+        switch (obj->_10->_4[i]._0) {
+        case 2:
+            memset(desc, 0, sizeof(desc));
+            vcd = obj->_10->_4[i]._4;
+            shift = 2;
+            for (attr = GX_VA_POS; attr <= GX_VA_TEX7; attr++) {
+                type = (vcd >> shift) & 3;
+                if (type != 0) {
+                    desc[attr] = type;
+                }
+                shift += 2;
+            }
+            break;
+        }
+        dl = obj->_10->_4[i]._8;
+        if (dl == NULL) {
+            continue;
+        }
+        for (done = 0; done < obj->_10->_4[i]._C;) {
+            handled = FALSE;
+            switch (*dl) {
+            case 0x00:
+                handled = TRUE;
+                dl += 1;
+                done += 1;
+                break;
+            case 0x08:
+                handled = TRUE;
+                dl += 6;
+                done += 6;
+                break;
+            case 0x10:
+                handled = TRUE;
+                size = *(u16*)dl * 4 + 5;
+                dl += size;
+                done += size;
+                break;
+            case 0x20:
+            case 0x28:
+            case 0x30:
+            case 0x38:
+                handled = TRUE;
+                dl += 5;
+                break;
+            case 0x40:
+            case 0x48:
+                handled = TRUE;
+                dl += 1;
+                done += 1;
+                break;
+            case 0x61:
+                handled = TRUE;
+                dl += 5;
+                done += 5;
+                break;
+            case 0x80:
+            case 0x90:
+            case 0x98:
+            case 0xA0:
+            case 0xA8:
+            case 0xB0:
+            case 0xB8:
+                break;
+            }
+            if (handled) {
+                continue;
+            }
+            count = *(u16*)(dl + 1);
+            dl += 3;
+            done += 3;
+            GXBegin(GX_LINES, GX_VTXFMT0, count * 2);
+            while (count-- != 0) {
+                for (attr = GX_VA_POS; attr <= GX_VA_TEX7; attr++) {
+                    if (desc[attr] == 0) {
+                        continue;
+                    }
+                    switch (attr) {
+                    case GX_VA_POS:
+                        switch (desc[attr]) {
+                        case 2:
+                            posIdx = *dl;
+                            break;
+                        case 3:
+                            posIdx = *(u16*)dl;
+                            break;
+                        }
+                        break;
+                    case GX_VA_NRM:
+                        switch (desc[attr]) {
+                        case 2:
+                            nrmIdx = *dl;
+                            break;
+                        case 3:
+                            nrmIdx = *(u16*)dl;
+                            break;
+                        }
+                        break;
+                    }
+                    switch (desc[attr]) {
+                    case 2:
+                        dl += 1;
+                        done += 1;
+                        break;
+                    case 3:
+                        dl += 2;
+                        done += 2;
+                        break;
+                    }
+                }
+                arr = obj->_00;
+                scale = 1 << (arr->_6 & 0xF);
+                switch ((arr->_6 >> 4) & 0xF) {
+                case 3:
+                    v = &arr->_0[arr->_7 * posIdx];
+                    x = v[0] / scale;
+                    y = v[1] / scale;
+                    z = v[2] / scale;
+                    break;
+                }
+                GXPosition3f32(x, y, z);
+                GXColor1u32(0xFF0000FF);
+                arr = obj->_0C;
+                scale = 1 << (arr->_6 & 0xF);
+                switch ((arr->_6 >> 4) & 0xF) {
+                case 3:
+                    v = &arr->_0[arr->_7 * nrmIdx];
+                    x += v[0] / scale;
+                    y += v[1] / scale;
+                    z += v[2] / scale;
+                    break;
+                }
+                GXPosition3f32(x, y, z);
+                GXColor1u32(0x0000FFFF);
+            }
+        }
     }
 }
 
