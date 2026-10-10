@@ -693,10 +693,9 @@ void fn_3_73DE8(void) {
 }
 
 // .text:0x000738A8 size:0x540 mapped:0x806B293C
-// Registers only: g_Scores._C7 and &g_Scores._04 swap r5/r6. The permuter matched it with
-// `... + 1 >= (margin = g_Scores._C7)` (a u8 local), which no programmer would write.
 void fn_3_738A8(void) {
     int endFrame = 120;
+    int diff;
 
     if (g_Pitcher.pitchTotalTimeCounter < 0x7FFE) {
         g_Pitcher.pitchTotalTimeCounter++;
@@ -735,12 +734,13 @@ void fn_3_738A8(void) {
                 if (g_Scores._00 >= g_Scores._AA && g_Scores._04[0][0] == g_Scores._04[1][0]) {
                     fn_3_59918(13, 0);
                     g_GameLogic.gameOverInd = 1;
-                } else if (g_Scores._C7 &&
-                           g_Scores._04[g_GameLogic.homeTeamBattingInd_fieldingTeam][0] -
-                                   g_Scores._04[g_GameLogic.awayTeamBattingInd_battingTeam][0] + 1 >=
-                               g_Scores._C7) {
-                    fn_3_59918(17, 0);
-                    g_GameLogic.gameOverInd = 1;
+                } else if (g_Scores._C7) {
+                    diff = g_Scores._04[g_GameLogic.homeTeamBattingInd_fieldingTeam][0] -
+                           g_Scores._04[g_GameLogic.awayTeamBattingInd_battingTeam][0] + 1;
+                    if (diff >= g_Scores._C7) {
+                        fn_3_59918(17, 0);
+                        g_GameLogic.gameOverInd = 1;
+                    }
                 }
             }
             g_Pitcher.walkedInRunInd = 1;
@@ -1689,23 +1689,8 @@ void fn_3_70280(void) {
 }
 
 // .text:0x0006FFC4 size:0x2BC mapped:0x806AF058
-// Registers only: the target keeps the speed in f5 and the 0.01f term in f4 (fn_3_6FDA0,
-// written the same way, matches); declaration and statement orders did not change it.
 void fn_3_6FFC4(void) {
-    int spread = g_Ball.StaticRandomInt1 % 257 - 128;
-    int ang;
-    f32 z;
-    f32 x;
-    f32 extra;
-    f32 speed;
-
-    ang = fn_3_9FB8C(g_Pitcher.ballVelocity.x, -g_Pitcher.ballVelocity.z);
-    getComponentsFromSAng(ang + spread, &x, &z);
-    extra = 0.01f * (g_Ball.StaticRandomInt2 % 10);
-    speed = dolsqrtf2(SQ(g_Pitcher.ballVelocity.x) + SQ(g_Pitcher.ballVelocity.z));
-    g_Ball.physicsSubstruct.velocity.x = (0.1f + extra) * (x * speed);
-    g_Ball.physicsSubstruct.velocity.z = (0.1f + extra) * (z * speed);
-    g_Ball.physicsSubstruct.velocity.y = 0.0f;
+    fn_3_6FDA0();
     g_Pitcher.strikeOutOrWalk = 3;
     g_Pitcher.miniGameRelated = 1;
     g_Pitcher.framesSinceAtBatEnded = 0;
