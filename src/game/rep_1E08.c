@@ -25,6 +25,7 @@
 #include "game/m_sound.h"
 #include "game/rep_1D58.h"
 #include "game/rep_EA0.h"
+#include "game/rep_140.h"
 
 typedef struct {
     /* 0x00 */ void (*_00)(void);
@@ -104,8 +105,8 @@ typedef struct UnkEffect21F8 {
 
 typedef struct {
     /* 0x000 */ Vec _000;
-    /* 0x00C */ u8 _00C[0x3A8 - 0xC];
-} UnkScreen1E08; // size: 0x3A8
+    /* 0x00C */ u8 _00C[0x1BC - 0xC];
+} UnkScreen1E08; // size: 0x1BC
 
 typedef union {
     /* 0x0 */ u32 rgba;
@@ -147,7 +148,8 @@ typedef struct UnkPlayer1E08 {
     /* 0x034 */ VecXYZ _034;
     /* 0x040 */ u8 _040[0x44 - 0x40];
     /* 0x044 */ f32 _044;
-    /* 0x048 */ u8 _048[0x252 - 0x48];
+    /* 0x048 */ u8 _048[0x162 - 0x48];
+    /* 0x162 */ u16 _162[(0x252 - 0x162) / 2];
     /* 0x252 */ s8 _252;
     /* 0x253 */ u8 _253[0x25A - 0x253];
     /* 0x25A */ u8 _25A;
@@ -246,6 +248,16 @@ typedef struct {
     /* 0x00 */ f32 _00[3];
     /* 0x0C */ s32 _0C[0x10];
 } UnkVecTable1E08; // size: 0x4C
+
+typedef struct {
+    /* 0x00 */ u8 _00[0xEC];
+    /* 0xEC */ MtxPtr mtx;
+} UnkBone1E08;
+
+typedef struct {
+    /* 0x00 */ u8 _00[0x18];
+    /* 0x18 */ UnkBone1E08** bones;
+} UnkSkeleton1E08;
 
 typedef struct {
     /* 0x00 */ void* _00;
@@ -1880,13 +1892,19 @@ s32 lbl_3_data_170D8[6] = {
     50, 2000, 1200000, 100000, 100000, 60,
 };
 
+static u8 lbl_3_bss_9D00[0x20];
+static s16 lbl_3_bss_9CFC;
+static Vec lbl_3_bss_9CE4[2];
+static Vec lbl_3_bss_9B34[2][18];
 static UnkScreen1E08 lbl_3_bss_9978;
 static Vec lbl_3_bss_996C;
 static s32 lbl_3_bss_9968;
 static f32 lbl_3_bss_9964;
 static s32 lbl_3_bss_9960;
 static u8 lbl_3_bss_995C;
-static s16 lbl_3_bss_9952[5];
+static s32 lbl_3_bss_9958;
+static s16 lbl_3_bss_9954;
+static s16 lbl_3_bss_9952;
 static u8 lbl_3_bss_9950;
 
 extern void* ARAMTransfer(void* entry, int arg1, int arg2, u32 aram);
@@ -1930,6 +1948,9 @@ extern u16 lbl_800F7860[4][2];
 extern void fn_80028628(Vec* pos, Vec* eye, UnkFxParams1E08* params, u16* shape, u32* color, UnkFxShape1E08* arg5, BOOL flag);
 extern void fn_8004B1B8(void* arg0, UnkAramFile1E08* file);
 extern void fn_80035750(void* arg0, void* arg1, s32 arg2);
+extern UnkSkeleton1E08** fn_800111D8(UnkPlayer1E08* player);
+extern s32 fn_8005268C(void);
+extern camera_803c639c_s* fn_80052734(s32 index);
 extern void fn_8003A550(s32 idx, VecXYZ* pos, Vec* dir, BOOL flag);
 
 // .text:0x000C07B0 size:0x60 mapped:0x806FF844
@@ -1947,11 +1968,128 @@ void fn_3_C07A0(void) {
 // .text:0x000C0770 size:0x30 mapped:0x806FF804
 void fn_3_C0770(void) {
     pitchingMachinePitching(0x10);
-    lbl_3_bss_9952[0] = 0;
+    lbl_3_bss_9952 = 0;
 }
 
 // .text:0x000C0134 size:0x63C mapped:0x806FF1C8
+// Registers only: the target keeps player in r27, the bone in r28 and the drawing
+// loop's counter in r26 with n in r12; declaration orders did not reach it.
 BOOL fn_3_C0134(void* arg) {
+    Vec tmp;
+    Vec offs[2];
+    Vec pts[2][48];
+
+    UnkSkeleton1E08** skel;
+    UnkBone1E08* bone;
+    UnkPlayer1E08* player;
+    s32 n;
+    s32 i;
+    u16 idx;
+    f32 t;
+    u32 color;
+    for (i = 0; i < 13; i++) {
+        player = lbl_8036E548._2C50[i];
+        if (player != NULL && player->_252 == (s8)g_Batter.charID) {
+            break;
+        }
+    }
+    if (i >= 13) {
+        return TRUE;
+    }
+    skel = fn_800111D8(player);
+    switch (lbl_3_bss_995C) {
+    case 0:
+        lbl_3_bss_9958 = 0;
+        lbl_3_bss_9954 = 0;
+        lbl_3_bss_9952 = 1;
+        lbl_3_bss_9CFC = 0;
+        lbl_3_bss_995C++;
+        break;
+    case 1:
+        if (!lbl_80366158._28) {
+            lbl_3_bss_9958 += (lbl_80366158._28 == 0) * 16;
+            lbl_3_bss_9952 += !(lbl_3_bss_9CFC | (lbl_80366158._28 != 0));
+            if (lbl_3_bss_9958 >= 0xFF) {
+                lbl_3_bss_9958 = 0xFF;
+                lbl_3_bss_995C++;
+            }
+        }
+        break;
+    case 2:
+        break;
+    case 3:
+        if (!lbl_80366158._28) {
+            lbl_3_bss_9958 -= (lbl_80366158._28 == 0) * 16;
+            lbl_3_bss_9952 -= !(lbl_3_bss_9CFC | (lbl_80366158._28 != 0));
+            if (lbl_3_bss_9952 < 2) {
+                lbl_3_bss_9958 = 0;
+                lbl_3_bss_995C = 0;
+                return TRUE;
+            }
+        }
+        break;
+    }
+    if (!lbl_80366158._28) {
+        idx = player->_162[lbl_3_data_115FC[6]];
+        if (idx != 0xFFFF) {
+            bone = (*skel)->bones[idx];
+            offs[0].x = lbl_3_data_115FC[0] / 100000.0f;
+            offs[0].y = lbl_3_data_115FC[1] / 100000.0f;
+            offs[0].z = lbl_3_data_115FC[2] / 100000.0f;
+            offs[1].x = lbl_3_data_115FC[3] / 100000.0f;
+            offs[1].y = lbl_3_data_115FC[4] / 100000.0f;
+            offs[1].z = lbl_3_data_115FC[5] / 100000.0f;
+            if (lbl_3_bss_9952 > 1 && lbl_3_bss_9CFC == 0 && !lbl_80366158._28) {
+                lbl_3_bss_9B34[0][0].x = lbl_3_bss_9CE4[0].x;
+                lbl_3_bss_9B34[0][0].y = lbl_3_bss_9CE4[0].y;
+                lbl_3_bss_9B34[0][0].z = lbl_3_bss_9CE4[0].z;
+                lbl_3_bss_9B34[1][0].x = lbl_3_bss_9CE4[1].x;
+                lbl_3_bss_9B34[1][0].y = lbl_3_bss_9CE4[1].y;
+                lbl_3_bss_9B34[1][0].z = lbl_3_bss_9CE4[1].z;
+                memmove(&lbl_3_bss_9B34[0][1], &lbl_3_bss_9B34[0][0], (lbl_3_bss_9952 - 1) * sizeof(Vec));
+                memmove(&lbl_3_bss_9B34[1][1], &lbl_3_bss_9B34[1][0], (lbl_3_bss_9952 - 1) * sizeof(Vec));
+            }
+            PSMTXMultVec(bone->mtx, &offs[0], &tmp);
+            lbl_3_bss_9B34[0][0].x = player->_034.x + tmp.x;
+            lbl_3_bss_9B34[0][0].y = player->_034.y + tmp.y;
+            lbl_3_bss_9B34[0][0].z = player->_034.z + tmp.z;
+            PSMTXMultVec(bone->mtx, &offs[1], &tmp);
+            lbl_3_bss_9B34[1][0].x = player->_034.x + tmp.x;
+            lbl_3_bss_9B34[1][0].y = player->_034.y + tmp.y;
+            lbl_3_bss_9B34[1][0].z = player->_034.z + tmp.z;
+            if (lbl_3_bss_9CFC == 0 && !lbl_80366158._28) {
+                lbl_3_bss_9CE4[0].x = lbl_3_bss_9B34[0][0].x;
+                lbl_3_bss_9CE4[0].y = lbl_3_bss_9B34[0][0].y;
+                lbl_3_bss_9CE4[0].z = lbl_3_bss_9B34[0][0].z;
+                lbl_3_bss_9CE4[1].x = lbl_3_bss_9B34[1][0].x;
+                lbl_3_bss_9CE4[1].y = lbl_3_bss_9B34[1][0].y;
+                lbl_3_bss_9CE4[1].z = lbl_3_bss_9B34[1][0].z;
+            }
+        }
+        lbl_3_bss_9954 = (lbl_3_bss_9954 + (lbl_80366158._28 == 0)) % 16;
+    }
+    if (lbl_3_bss_9952 >= 3) {
+        fn_3_310C(pts[0], lbl_3_bss_9B34[0], lbl_3_bss_9952, lbl_3_bss_9952 * 3 + 1);
+        fn_3_310C(pts[1], lbl_3_bss_9B34[1], lbl_3_bss_9952, lbl_3_bss_9952 * 3 + 1);
+        GXLoadPosMtxImm(fn_80052734(fn_8005268C())->view, GX_PNMTX0);
+        fn_80033B58(lbl_3_common_bss_35154._004, 1, 0, 0);
+        GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+        GXSetCullMode(GX_CULL_NONE);
+        GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_ONE, GX_LO_CLEAR);
+        GXBegin(GX_TRIANGLESTRIP, GX_VTXFMT0, ((lbl_3_bss_9952 - 1) * 3 + 1) * 2);
+        for (i = 0; i < (lbl_3_bss_9952 - 1) * 3 + 1; i++) {
+            t = (f32)i / (f32)((lbl_3_bss_9952 - 1) * 3);
+            color = (lbl_3_bss_9958 - i * lbl_3_bss_9958 / ((lbl_3_bss_9952 - 1) * 3)) | 0xFFFFFF00;
+            GXPosition3f32(pts[0][i].x, pts[0][i].y, pts[0][i].z);
+            GXColor1u32(color);
+            GXTexCoord2f32(t, 0.0f);
+            GXPosition3f32(pts[1][i].x, pts[1][i].y, pts[1][i].z);
+            GXColor1u32(color);
+            GXTexCoord2f32(t, 1.0f);
+        }
+        GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+    }
+    lbl_3_bss_9CFC = (lbl_3_bss_9CFC + 2 - (lbl_80366158._28 == 0)) % 2;
     return FALSE;
 }
 
