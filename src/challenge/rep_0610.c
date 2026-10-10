@@ -83,14 +83,18 @@ typedef struct UnkKey0610 {
     /* 0x4 */ u8 _4[0x10 - 0x4];
 } UnkKey0610; // size: 0x10
 
+typedef struct UnkAnimKey0610 {
+    /* 0x0 */ s32 _0;
+    /* 0x4 */ struct UnkKey0610* _4;
+    /* 0x8 */ u16 _8;
+    /* 0xA */ u8 _A[0xC - 0xA];
+} UnkAnimKey0610; // size: 0xC
+
 typedef struct UnkAnimRef0610 {
     /* 0x0 */ u8 _0[0x4];
-    /* 0x4 */ struct {
-        /* 0x0 */ s32 _0;
-        /* 0x4 */ struct UnkKey0610* _4;
-        /* 0x8 */ u16 _8;
-        /* 0xA */ u8 _A[0xC - 0xA];
-    }* _4;
+    /* 0x4 */ UnkAnimKey0610* _4;
+    /* 0x8 */ u8 _8[0xA - 0x8];
+    /* 0xA */ u16 _A;
 } UnkAnimRef0610;
 
 typedef struct UnkPoseBlock0610 {
@@ -4436,6 +4440,176 @@ void fn_1_E8D4(void) {
     }
 }
 
+// .text:0x0000E098 size:0x83C
+void fn_1_E098(void) {
+    UnkSlotState0610* st = lbl_1_bss_3218;
+    s32 i;
+    s32 j;
+    for (i = 0; i < 11; i++, st++) {
+        switch (i) {
+        case 8:
+            if (i == lbl_1_bss_30B6) {
+                s16 prev = lbl_1_data_F4D4._2;
+                if (lbl_803C77B8[0]._04 & 1) {
+                    if (lbl_1_data_F4D4._2 == 0) {
+                        lbl_1_data_F4D4._2 = lbl_1_data_F4D4._0;
+                    }
+                    lbl_1_data_F4D4._2--;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    if (++lbl_1_data_F4D4._2 == lbl_1_data_F4D4._0) {
+                        lbl_1_data_F4D4._2 = 0;
+                    }
+                }
+                if (prev != lbl_1_data_F4D4._2) {
+                    fn_1_D7A4(lbl_1_data_F4D4._2);
+                }
+            }
+            break;
+        case 9:
+            if (i == lbl_1_bss_30B6 && (lbl_803C77B8[0]._02 & 0x100)) {
+                UnkTaskState0610* task = (UnkTaskState0610*)lbl_803CC1B8;
+                task->_00 = fn_1_DE1C;
+                task->_14 = 0;
+                task->_15 = 8;
+            }
+            break;
+        case 10:
+            if (i == lbl_1_bss_30B6 && (lbl_803C77B8[0]._02 & 0x100)) {
+                UnkTaskState0610* task = (UnkTaskState0610*)lbl_803CC1B8;
+                u8* frame;
+                u8* animId;
+                Unk0060Elem* elem;
+                UnkAnimRef0610* anim;
+                task->_00 = fn_1_DE1C;
+                task->_15 = 0;
+                animId = &lbl_1_bss_6940[lbl_1_bss_5F73]._44;
+                frame = &lbl_1_bss_6940[lbl_1_bss_5F73]._45;
+                *animId = lbl_1_bss_3218[task->_15]._0;
+                *frame = lbl_1_bss_3218[task->_15]._2;
+                elem = &lbl_8036E548._0060->_34[lbl_1_bss_5F73];
+                anim = lbl_8036E548._0C04[lbl_1_bss_5F73]._010[*animId];
+                elem->_04 = anim;
+                elem->_0E = *frame;
+                elem->_5C = 0.0f;
+                elem->_58 = 1;
+                elem->_5A = elem->_59 = anim != NULL;
+                elem->_60 = 0.0f;
+                j = 5;
+                while (j--) {
+                    if (lbl_1_bss_3258[task->_15][j]._08 != 0) {
+                        lbl_1_bss_67B8[j] = &lbl_1_bss_3258[task->_15][i];
+                        lbl_1_bss_67B8[j]->_00 = 0.0f;
+                    } else {
+                        lbl_1_bss_67B8[j] = NULL;
+                    }
+                }
+                fn_1_D300(&lbl_8036E548._0C04[lbl_1_bss_5F73]);
+            }
+            break;
+        default: {
+            UnkAnimRef0610* ref;
+            UnkAnimKey0610* key;
+            u16 pressed;
+            u16 held;
+            u16 color;
+            s32 col;
+            if (st->_0 >= 0) {
+                ref = lbl_8036E548._0C04[lbl_1_bss_5F73]._010[st->_0];
+                key = &ref->_4[st->_2];
+            } else {
+                ref = NULL;
+                key = NULL;
+            }
+            pressed = lbl_803C77B8[0]._04;
+            held = lbl_803C77B8[0]._00;
+            for (col = 0; col < 4; col++) {
+                if (i != lbl_1_bss_30B6 || col != lbl_1_bss_30B7) {
+                    color = 0xFFFF;
+                } else if (held & 0x100) {
+                    color = 0xF00F;
+                } else {
+                    color = 0xFF0F;
+                }
+                switch (col) {
+                case 0:
+                    if (color == 0xF00F && ref != NULL) {
+                        if (pressed & 1) {
+                            if (st->_4 >= 0) {
+                                st->_4--;
+                            }
+                        } else if (pressed & 2) {
+                            if (st->_4 < (s16)key->_4->_0) {
+                                st->_4++;
+                            }
+                        }
+                    }
+                    break;
+                case 1:
+                    if (color == 0xF00F) {
+                        s16 prev = st->_0;
+                        if (pressed & 1) {
+                            if (prev >= 0) {
+                                st->_0 = prev - 1;
+                            }
+                        } else if (pressed & 2) {
+                            if (prev < 6) {
+                                st->_0 = prev + 1;
+                            }
+                        }
+                        if (prev != st->_0) {
+                            st->_2 = 0;
+                        }
+                    }
+                    break;
+                case 2:
+                    if (color == 0xF00F && ref != NULL) {
+                        if (pressed & 1) {
+                            if (st->_2 > 0) {
+                                st->_2--;
+                            }
+                        } else if (pressed & 2) {
+                            if (st->_2 < ref->_A - 1) {
+                                st->_2++;
+                            }
+                        }
+                    }
+                    break;
+                case 3:
+                    if (color == 0xF00F && ref != NULL && (pressed & 3)) {
+                        st->_6 = !st->_6;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        }
+    }
+    if (!(lbl_803C77B8[0]._00 & 0x100)) {
+        if (lbl_803C77B8[0]._04 & 8) {
+            if (lbl_1_bss_30B6 == 0) {
+                lbl_1_bss_30B6 = 11;
+            }
+            lbl_1_bss_30B6--;
+        } else if (lbl_803C77B8[0]._04 & 4) {
+            if (++lbl_1_bss_30B6 == 11) {
+                lbl_1_bss_30B6 = 0;
+            }
+        } else if (lbl_803C77B8[0]._04 & 1) {
+            if (lbl_1_bss_30B7 == 0) {
+                lbl_1_bss_30B7 = 4;
+            }
+            lbl_1_bss_30B7--;
+        } else if (lbl_803C77B8[0]._04 & 2) {
+            if (++lbl_1_bss_30B7 == 4) {
+                lbl_1_bss_30B7 = 0;
+            }
+        } else if (lbl_803C77B8[0]._04 & 0x200) {
+            lbl_1_bss_5F71 = 1;
+        }
+    }
+}
+
 // .text:0x0000DF14 size:0x184
 void fn_1_DF14(void) {
     UnkTaskState0610* task = (UnkTaskState0610*)lbl_803CC1B8;
@@ -4534,7 +4708,7 @@ void fn_1_D9B8(void) {
         elem->_0E = lbl_1_bss_6940[lbl_1_bss_5F73]._45;
         elem->_5C = 0.0f;
         elem->_58 = 1;
-        elem->_59 = elem->_5A = anim != NULL;
+        elem->_5A = elem->_59 = anim != NULL;
         elem->_60 = 0.0f;
         start = lbl_1_bss_67B8[0]->_00;
         i = 5;
