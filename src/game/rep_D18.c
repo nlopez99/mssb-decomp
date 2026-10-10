@@ -339,18 +339,17 @@ void fn_3_5B0C4(void) {
     lbl_3_data_228._04++;
 }
 
-// Registers differ from the setup through the stores (97.07%); the instructions
-// and their order match.
+// Registers differ from the setup through the stores (97.17%); the instructions and their
+// order match. Declaration, type and statement orders and a loop over the logos did not help.
 // .text:0x0005AE9C size:0x228 mapped:0x80699F30
 void fn_3_5AE9C(void) {
-    int logo0;
-    int logo1;
+    int logo[2];
     u8 side;
 
     changeScene(4, 0);
     side = g_d_GameSettings.home_AwaySetting;
-    logo0 = lbl_8034E9A0._470D[side];
-    logo1 = lbl_8034E9A0._470D[side ^ 1];
+    logo[0] = lbl_8034E9A0._470D[side];
+    logo[1] = lbl_8034E9A0._470D[side ^ 1];
     g_GameLogic.framesOfExitingToMenu = 0;
     g_UnkSimulation_31AC0._4 = 0;
     g_UnkSimulation_31AC0._9 = 0;
@@ -371,12 +370,12 @@ void fn_3_5AE9C(void) {
     lbl_8036E548._2D5C = -1;
     g_GameLogic.teams[0] = g_d_GameSettings.PlayerPorts[0];
     g_GameLogic.teams[1] = g_d_GameSettings.PlayerPorts[1] % 4;
-    g_GameLogic.logo[0].ID = logo0;
-    g_GameLogic.logo[1].ID = logo1;
-    g_GameLogic.logo[0].variationID = logo0 % 4;
-    g_GameLogic.logo[1].variationID = logo1 % 4;
-    g_GameLogic.logo[0].captain = logo0 / 4;
-    g_GameLogic.logo[1].captain = logo1 / 4;
+    g_GameLogic.logo[0].ID = logo[0];
+    g_GameLogic.logo[1].ID = logo[1];
+    g_GameLogic.logo[0].variationID = logo[0] % 4;
+    g_GameLogic.logo[1].variationID = logo[1] % 4;
+    g_GameLogic.logo[0].captain = logo[0] / 4;
+    g_GameLogic.logo[1].captain = logo[1] / 4;
     g_Scores._C7 = gameInitOptions.runsNeededForMercy;
     if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD || g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES) {
         g_d_GameSettings.minigamesEnabled = 1;
