@@ -719,7 +719,7 @@ config.libs = [
             Object(Matching, "game/rep_1188.c"),
             Object(NonMatching, "game/rep_1200.c"),
             Object(NonMatching, "game/rep_12D0.c"),
-            Object(NonMatching, "game/rep_1330.c"),
+            Object(Matching, "game/rep_1330.c"),
             Object(NonMatching, "game/rep_13B8.c"),
             Object(NonMatching, "game/m_sound.c"),
             Object(Matching, "game/rep_1610.c"),
