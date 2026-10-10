@@ -292,7 +292,7 @@ void fn_2_50D40(s32 idx) {
 }
 
 // .text:0x00050CC0 size:0x80
-void fn_2_50CC0(s32 arg0) {
+void fn_2_50CC0(s16 arg0) {
     MenuTask09B8* task;
 
     lbl_2_bss_1A824C->_196FD6 = arg0;
