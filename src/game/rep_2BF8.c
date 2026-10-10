@@ -1431,13 +1431,12 @@ void fn_3_EAEF4(void) {
 }
 
 // .text:0x000EA8FC size:0x5F8 mapped:0x80729990
-// 99.63%: the target keeps i in r21, sign in r22 and points in r23; the base rotates them.
 void fn_3_EA8FC(void) {
     UnkTask2BF8* task = lbl_803CC1B8;
-    u32 i;
     int player;
-    s32 sign;
     int points;
+    s32 sign;
+    u32 i;
 
     if (task->_18 != 0) {
         if (fn_3_EB684()) {
