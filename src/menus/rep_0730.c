@@ -3,6 +3,7 @@
 #include "menus/rep_0B08.h"
 #include "menus/rep_0F60.h"
 #include "menus/rep_0788.h"
+#include "menus/rep_08E8.h"
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/vec.h"
@@ -215,6 +216,7 @@ extern struct {
     /* 0x19785C */ u8 _19785C;
     /* 0x19785D */ u8 _19785D[0x197863 - 0x19785D];
     /* 0x197863 */ s8 _197863;
+    /* 0x197864 */ u8 _197864;
 } *lbl_2_bss_1A824C;
 
 extern struct {
@@ -285,8 +287,19 @@ extern void fn_800B0A14_removeQueue(void);
 extern void* ARAMTransfer(void* entry, s32 arg1, s32 arg2, u32 aram);
 extern void convertTextureHeader(void* tex);
 extern void fn_8004B1B8(void* tex);
+extern void fn_80068720(s32);
+extern void fn_80021410(void);
+extern void fn_800ACFB0(void* data);
 
-static inline s32 fn_2_1A420(void);
+extern struct {
+    /* 0x00 */ u8 _00[0x9C];
+    /* 0x9C */ void* _9C;
+} lbl_800EF808;
+
+extern struct {
+    /* 0x000 */ u8 _000[0x7A8];
+    /* 0x7A8 */ void* _7A8;
+} lbl_80366B18;
 
 extern void fn_2_409CC(void);
 extern void fn_2_37460(void);
@@ -327,18 +340,77 @@ struct {
     u32 _4[2];
 } lbl_2_data_4BA8 = { { 0x00, 0x00, 0x00, 0x00 }, { 0x01000001, 0x02010000 } };
 
+// .text:0x0001C0D4 size:0x148
+void fn_2_1C0D4(void) {
+    struct Unk8034E9A0* data = &lbl_8034E9A0;
+    s32 i;
+
+    lbl_2_bss_1A823C->_34 = 1;
+    memset(lbl_2_bss_1A8250, 0, sizeof(lbl_2_bss_1A8250));
+    for (i = 0; i < 8; i++) {
+        lbl_2_bss_1A824C->_197756[i] = -1;
+    }
+    fn_2_54474();
+    lbl_2_bss_1A8248->_44F2 = 0;
+    lbl_2_bss_1A824C->_1976D6 = 0;
+    lbl_2_bss_1A824C->_197833 = 0;
+    lbl_2_bss_1A8234->_162992 = 0;
+    lbl_2_bss_1A824C->_197838 = 0;
+    lbl_2_bss_1A824C->_197835 = 0;
+    g_d_GameSettings.StadiumID = 0;
+    lbl_2_bss_1A824C->_197863 = data->_46F8;
+    lbl_2_bss_1A824C->_197848 = 0;
+}
+
+// .text:0x0001BFD0 size:0x104
+void fn_2_1BFD0(void) {
+    fn_80068720(10);
+    lbl_2_bss_1A824C->_1972BC[0] = 1;
+    lbl_2_bss_1A824C->_1972BE[2] = 1;
+    lbl_2_bss_1A824C->_1976D6 = 0;
+    lbl_2_bss_1A8248->_44F2 = 0;
+    if (lbl_2_bss_1A824C->_197864 == 0) {
+        fn_2_4E7EC();
+    }
+    fn_8001F228();
+    fn_80021410();
+    fn_800ACFB0(lbl_800EF808._9C);
+    if (lbl_2_bss_1A8248->_44F4 != 0) {
+        fn_2_4E8BC();
+        fn_2_4E904();
+        fn_2_4E928();
+    } else {
+        fn_2_4E928();
+    }
+    fn_2_4E94C();
+    if (lbl_80366B18._7A8 != NULL) {
+        fn_800ACFB0(lbl_80366B18._7A8);
+        lbl_80366B18._7A8 = NULL;
+    }
+    lbl_2_bss_1A823C->_34 = 0;
+}
+
+// .text:0x0001BF50 size:0x80
+void fn_2_1BF50(void) {
+    fn_80068720(13);
+    lbl_2_bss_1A824C->_1972BC[0] = 1;
+    lbl_2_bss_1A824C->_1972BE[2] = 1;
+    lbl_2_bss_1A824C->_1976D6 = 0;
+    lbl_2_bss_1A8248->_44F2 = 0;
+    fn_2_4E898();
+    lbl_2_bss_1A823C->_34 = 0;
+}
+
 // .text:0x0001B7B4 size:0x79C
-// 98.17%: case 0 inlines fn_2_1C0D4 (0x1C0D4, outside the split), whose original keeps
-// &lbl_8034E9A0 in a saved register from before its memset; a copy of it propagates the address.
 void fn_2_1B7B4(void) {
     struct Unk8034E9A0* data;
     GameInitVariables* settings;
     MenuTask0730* task;
     MenuTask0730* sub;
 
+    task = lbl_803CC1B8;
     settings = &g_d_GameSettings;
     data = &lbl_8034E9A0;
-    task = lbl_803CC1B8;
     lbl_2_bss_1A824C = (void*)lbl_2_bss_1A8250;
     lbl_2_bss_1A8248 = (void*)starMissionCompletionTracker;
     lbl_2_bss_1A8238 = (void*)&starMissionCompletionTracker[0x1610];
@@ -351,26 +423,7 @@ void fn_2_1B7B4(void) {
     case 0:
         fn_8006C488();
         fn_8001F228();
-        lbl_2_bss_1A823C->_34 = 1;
-        memset(lbl_2_bss_1A8250, 0, sizeof(lbl_2_bss_1A8250));
-        lbl_2_bss_1A824C->_197756[0] = -1;
-        lbl_2_bss_1A824C->_197756[1] = -1;
-        lbl_2_bss_1A824C->_197756[2] = -1;
-        lbl_2_bss_1A824C->_197756[3] = -1;
-        lbl_2_bss_1A824C->_197756[4] = -1;
-        lbl_2_bss_1A824C->_197756[5] = -1;
-        lbl_2_bss_1A824C->_197756[6] = -1;
-        lbl_2_bss_1A824C->_197756[7] = -1;
-        fn_2_54474();
-        lbl_2_bss_1A8248->_44F2 = 0;
-        lbl_2_bss_1A824C->_1976D6 = 0;
-        lbl_2_bss_1A824C->_197833 = 0;
-        lbl_2_bss_1A8234->_162992 = 0;
-        lbl_2_bss_1A824C->_197838 = 0;
-        lbl_2_bss_1A824C->_197835 = 0;
-        settings->StadiumID = 0;
-        lbl_2_bss_1A824C->_197863 = lbl_8034E9A0._46F8;
-        lbl_2_bss_1A824C->_197848 = 0;
+        fn_2_1C0D4();
         fn_8000F4B8(0, -1, -1, -1);
         lbl_2_bss_1A823C->_32 = 2;
         break;
@@ -988,7 +1041,7 @@ void fn_2_1A4C8(void) {
 }
 
 // .text:0x0001A420 size:0xA8
-static inline s32 fn_2_1A420(void) {
+s32 fn_2_1A420(void) {
     s32 flag = 0;
 
     if (lbl_2_bss_1A823C->_30 == 3) {
@@ -1003,5 +1056,5 @@ static inline s32 fn_2_1A420(void) {
             }
         }
     }
-    return flag != 0;
+    return !!flag;
 }
