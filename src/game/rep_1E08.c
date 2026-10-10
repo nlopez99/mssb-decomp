@@ -2006,8 +2006,8 @@ void fn_3_C0770(void) {
 }
 
 // .text:0x000C0134 size:0x63C mapped:0x806FF1C8
-// Registers only: the target keeps player in r27, the bone in r28 and the drawing
-// loop's counter in r26 with n in r12; declaration orders did not reach it.
+// Registers only, in the drawing loop: the target swaps the 0x4330 and GX FIFO bases
+// (r5/r8) and the float registers of i and n; loop-bound and n forms did not fix it.
 BOOL fn_3_C0134(void* arg) {
     Vec tmp;
     Vec offs[2];
@@ -2111,9 +2111,10 @@ BOOL fn_3_C0134(void* arg) {
         GXSetCullMode(GX_CULL_NONE);
         GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_ONE, GX_LO_CLEAR);
         GXBegin(GX_TRIANGLESTRIP, GX_VTXFMT0, ((lbl_3_bss_9952 - 1) * 3 + 1) * 2);
+        n = (lbl_3_bss_9952 - 1) * 3;
         for (i = 0; i < (lbl_3_bss_9952 - 1) * 3 + 1; i++) {
-            t = (f32)i / (f32)((lbl_3_bss_9952 - 1) * 3);
-            color = (lbl_3_bss_9958 - i * lbl_3_bss_9958 / ((lbl_3_bss_9952 - 1) * 3)) | 0xFFFFFF00;
+            t = (f32)i / (f32)n;
+            color = (lbl_3_bss_9958 - i * lbl_3_bss_9958 / n) | 0xFFFFFF00;
             GXPosition3f32(pts[0][i].x, pts[0][i].y, pts[0][i].z);
             GXColor1u32(color);
             GXTexCoord2f32(t, 0.0f);
@@ -3135,8 +3136,8 @@ void fn_3_BD1D4(void) {
 }
 
 // .text:0x000BCA20 size:0x7B4 mapped:0x806FBAB4
-// Draft: scheduling and float registers differ throughout (depth and size swap with
-// invZoom), and the frame is 0x10 smaller with r23/r24 unused.
+// Draft: scheduling and float registers differ throughout (the target keeps depth in
+// f24 and invZoom in f28); a 1000-variant sample of f32 declaration orders gave 87.98%.
 void fn_3_BCA20(void) {
     UnkSpriteVtx1E08 vtx[4];
     camera_803c639c_s* camera;
@@ -3152,16 +3153,16 @@ void fn_3_BCA20(void) {
     s32 i;
     s32 j;
     s32 alpha;
-    f32 depth;
     f32 invZoom;
+    f32 s;
+    f32 size;
+    f32 fade;
+    f32 scale;
+    f32 angle;
+    f32 c;
+    f32 depth;
     f32 dist;
     f32 maxDist;
-    f32 fade;
-    f32 angle;
-    f32 size;
-    f32 c;
-    f32 s;
-    f32 scale;
 
     camera = fn_80052768_getCamera(0);
     depth = -lbl_3_bss_9978._000.z / 1280.0f;
