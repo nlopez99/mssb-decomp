@@ -40,6 +40,8 @@ extern struct {
 extern struct {
     /* 0x00 */ u8 _00[0x10];
     /* 0x10 */ u8 _10;
+    /* 0x11 */ u8 _11;
+    /* 0x12 */ u8 _12;
 } g_RunningLogic;
 
 extern struct {
@@ -1855,6 +1857,51 @@ BOOL fn_3_6F6CC(void) {
         if (g_Runners[i].runnerOnFieldOrOutOrScored == 1 && g_Runners[i].percentTowardsNextBase > 0.5f) {
             g_Pitcher.pickOffLoc = 4;
             fn_3_5C69C(0);
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+// .text:0x0006F4E8 size:0x1E4 mapped:0x806AE57C
+BOOL fn_3_6F4E8(void) {
+    int i;
+    int j;
+    int forced = 0;
+
+    if (g_Strikes.outs >= 3) {
+        return FALSE;
+    }
+    if (g_Strikes.outs >= 2 && g_Pitcher.strikeOutOrWalk == 1) {
+        return FALSE;
+    }
+    if (g_Pitcher.strikeOutOrWalk == 2) {
+        if (g_RunningLogic._12 == 4) {
+            return FALSE;
+        }
+        for (i = 1; i < 4; i++) {
+            if ((g_Runners[i].runnerOnFieldOrOutOrScored == 1 || g_Runners[i].runnerOnFieldOrOutOrScored == 3) &&
+                g_Runners[i].furthestBaseForcedToGoToOnWalk == 1) {
+                forced = 1;
+            }
+        }
+        if (forced == 0) {
+            return FALSE;
+        }
+    }
+    for (i = 1; i < 4; i++) {
+        if (g_Runners[i].runnerOnFieldOrOutOrScored == 1 && g_Runners[i].furthestBaseForcedToGoToOnWalk != 0) {
+            g_Pitcher.pickOffLoc = 5;
+            fn_3_5C69C(1);
+            if (g_Pitcher.strikeOutOrWalk == 1) {
+                g_Strikes.outs++;
+                for (j = 0; j < 3; j++) {
+                    if (g_Strikes.runnerIndexForEachOutThisPitch[j] == -1) {
+                        g_Strikes.runnerIndexForEachOutThisPitch[j] = 0;
+                        break;
+                    }
+                }
+            }
             return TRUE;
         }
     }
