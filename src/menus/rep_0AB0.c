@@ -1,5 +1,9 @@
 #include "header_rep_data.h"
 #include "menus/rep_0AB0.h"
+#include "menus/rep_0788.h"
+#include "menus/rep_0B08.h"
+#include "menus/rep_1028.h"
+#include "menus/rep_10C0.h"
 #include "static/UnknownHomes_Static.h"
 #include "musyx/musyx.h"
 #include "Dolphin/gx.h"
@@ -304,10 +308,6 @@ extern u8 lbl_2_bss_33FBF0[5];
 extern s8 lbl_2_bss_33FBF5;
 
 // rep_0788
-extern void fn_2_1FF0C(s32 index);
-extern void fn_2_1FF10(s32 index);
-extern void fn_2_1FF14(s32 count);
-extern void fn_2_1FFC4(s32 count);
 
 extern void fn_2_47CFC(void);
 extern void fn_2_47FF8(void);
@@ -319,21 +319,14 @@ extern void fn_2_8E6A4(void);
 extern void fn_2_68E68(void);
 extern void fn_2_11A0(s32);
 extern void fn_2_54474(void);
-extern void fn_2_6AB3C(s32, Vec*, f32);
 extern void fn_2_6ACF4(void);
 extern void fn_2_71F60(void);
 extern void fn_2_904A8(void);
 extern void fn_2_9257C(void);
 extern void fn_8000F4B8(s32, s32, s32, s32);
-extern void fn_2_72054(s32, u8);
 extern s32 lbl_2_data_35A0[];
 extern void fn_2_8FD14(void);
-extern void fn_2_903A8(s32);
-extern void fn_2_92654(s32, u8);
 extern void fn_2_93C64(void);
-extern void fn_2_94604(s32);
-extern void fn_2_9461C(s32);
-extern void fn_2_94854(s32);
 
 // rep_0A58
 extern s16 fn_2_53BC8(MenuItem0AB0* item);

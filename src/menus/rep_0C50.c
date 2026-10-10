@@ -258,10 +258,7 @@ extern u8 fn_80067B40(u8 team, u8 charID, s32 arg2);
 extern u8 lbl_80108ED0[0xC];
 
 static inline BOOL isAnimDone(UnkTask0C50* task, s32 index, s32 value) {
-    if (fn_80042DA8(task, index, value)) {
-        return TRUE;
-    }
-    return FALSE;
+    return !!fn_80042DA8(task, index, value);
 }
 
 // .text:0x00082DE8 size:0x70
@@ -295,13 +292,14 @@ void fn_2_82CF0(void) {
 }
 
 // .text:0x0008279C size:0x554
-// 99.55%: registers only: flag and the _46F8 load in the first loop, the second
-// starMissionCompletionTracker read, and the add operands of the unrolled clearing loop.
+// 99.57%: registers only: flag and the _46F8 load in the first loop, and the add operands
+// of the unrolled clearing loop (reading task->_14 there through an inline accessor fixes them).
 void fn_2_8279C(void) {
     UnkTask0C50* task = lbl_803CC1B8;
     s8 off;
     s32 value;
     s32 a;
+    s16 b;
     u8 c;
     s32 i;
     int j;
@@ -342,11 +340,11 @@ void fn_2_8279C(void) {
     }
     if (g_d_GameSettings.GameModeSelected == 5) {
         lbl_80371C30[task->_14 + 0x98]._00->_54 &= ~2;
-        a = (s16)starMissionCompletionTracker._441D;
+        a = b = starMissionCompletionTracker._441D;
         c = lbl_8034E9A0._0020[a / 9][a % 9]._14;
         fn_800363D8(task, 0x89, 1, 3, lbl_2_data_2B3A4[c]);
         fn_800363D8(task, 0x8B, 1, 3, lbl_2_data_2B3A4[c]);
-        a = starMissionCompletionTracker._441F;
+        a = b = starMissionCompletionTracker._441F;
         c = lbl_8034E9A0._0020[a / 9][a % 9]._14;
         fn_800363D8(task, 0x8A, 1, 3, lbl_2_data_2B3A4[c]);
         fn_800363D8(task, 0x8C, 1, 3, lbl_2_data_2B3A4[c]);
@@ -369,8 +367,6 @@ void fn_2_8279C(void) {
 }
 
 // .text:0x00081628 size:0x1174
-// 99.75%: registers only: the inlined fn_2_80E0C (case 1) rotates i, n and expected, as
-// in that function, and sets expected before the second call's arguments.
 void fn_2_81628(void) {
     UnkTask0C50* task = lbl_8034E9A0._474C;
     s32 i;
@@ -583,19 +579,19 @@ void fn_2_80F5C(UnkTask0C50* task, s32 index) {
 }
 
 // .text:0x00080E0C size:0x150
-// 98.76%: task and index sit in r28/r29 in the target and r27/r28 in the base, with expected
-// in r27 against r29.
 void fn_2_80E0C(UnkTask0C50* task, s32 index) {
     if (lbl_803C66B0._0D[index] == 1 ? TRUE : FALSE) {
-        s32 n = isAnimDone(task, index, 20);
-        s32 expected = 2;
+        s32 n;
+        s32 expected = 0;
 
+        n = isAnimDone(task, index, 20);
+        expected += 2;
         n += isAnimDone(task, index + 2, 20);
         if (index == 0 || lbl_2_bss_100B8._10 != 0 || g_d_GameSettings._10 != 0) {
             n += isAnimDone(task, index + 0x85, 10);
             n += isAnimDone(task, index + 0x87, 10);
             n += isAnimDone(task, index + 0x89, 5);
-            expected = 6;
+            expected += 4;
             n += isAnimDone(task, index + 0x8B, 10);
         }
         if (n == expected) {
@@ -646,7 +642,8 @@ void fn_2_80B5C(UnkTask0C50* task, s32 index) {
 
 // .text:0x000808D8 size:0x284
 // 87.04%: the inlined fn_2_760CC is scheduled differently: the target forms &lbl_2_bss_F410
-// before the branch and saves r25. Writing the body out in place scores lower (85.43%).
+// before the branch, saves r25 and has a 48-byte frame (12 bytes of locals) to the base's 32.
+// Writing the body out in place scores lower (85.43%).
 void fn_2_808D8(UnkTask0C50* task, s32 index) {
     if (lbl_803C66B0._0D[index] == 0 ? TRUE : FALSE) {
         if (g_d_GameSettings.GameModeSelected != 5) {
@@ -674,7 +671,6 @@ void fn_2_8082C(UnkTask0C50* task, s32 index) {
 }
 
 // .text:0x000805DC size:0x250
-// 99.93%: the first isAnimDone result reuses task's r29 in the target and gets r26 in the base.
 void fn_2_805DC(UnkTask0C50* task, s32 index) {
     if (lbl_803C66B0._0D[index] == 0 ? TRUE : FALSE) {
         u8 off;
@@ -794,8 +790,6 @@ void fn_2_800B0(UnkTask0C50* task, s32 index) {
 }
 
 // .text:0x0007FAFC size:0x5B4
-// 99.97%: the first isAnimDone result lands in r28 and n in r27 in the target; the base
-// keeps both in r27.
 void fn_2_7FAFC(UnkTask0C50* task, s32 index) {
     if (lbl_803C66B0._0D[index] == 0 ? TRUE : FALSE) {
         s32 a;
@@ -1337,8 +1331,6 @@ void fn_2_7D85C(UnkTask0C50* task, s32 index) {
 }
 
 // .text:0x0007BFF8 size:0x1864
-// 99.97%: registers only: the first isAnimDone result in the second part goes to n's r27 in
-// the target and r22 in the base, and expected is set after the last call's arguments.
 void fn_2_7BFF8(UnkTask0C50* task, s32 index) {
     s32 a;
     s32 b;
@@ -1609,16 +1601,17 @@ void fn_2_7BFF8(UnkTask0C50* task, s32 index) {
     }
     if (lbl_803C66B0._0D[index] == 1) {
         s32 n;
-        s32 expected;
+        s32 expected = 0;
 
         if (g_d_GameSettings.GameModeSelected != 5) {
             n = isAnimDone(task, index, 20);
+            expected += 2;
             n += isAnimDone(task, index + 2, 20);
             if (g_d_GameSettings._10 == 0 && index == 0) {
                 n += isAnimDone(task, index + 0x6A, 30);
                 n += isAnimDone(task, index + 0xC, 10);
                 n += isAnimDone(task, index + 0xE, 14);
-                expected = 6;
+                expected += 4;
                 n += isAnimDone(task, index + 0x12, 10);
             } else {
                 n += isAnimDone(task, index + 0x1C, 10);
@@ -1626,15 +1619,16 @@ void fn_2_7BFF8(UnkTask0C50* task, s32 index) {
                 n += isAnimDone(task, index + 0xC, 30);
                 n += isAnimDone(task, index + 0xE, 14);
                 n += isAnimDone(task, index + 0x12, 30);
-                expected = 8;
+                expected += 6;
                 n += isAnimDone(task, index + 0x89, 5);
             }
         } else {
             n = isAnimDone(task, index, 20);
+            expected += 2;
             n += isAnimDone(task, index + 2, 20);
             n += isAnimDone(task, index + 0x1C, 10);
             n += isAnimDone(task, index + 0x6A, 10);
-            expected = 5;
+            expected += 3;
             n += isAnimDone(task, index + 0x89, 5);
         }
         expected++;
@@ -3208,7 +3202,7 @@ void fn_2_74CD8(void) {
 
 // .text:0x000747FC size:0x4DC
 // 98.97%: the target reads lbl_2_bss_A844 through addi and lwz 0 and loads the 0 for _4751
-// earlier; an array type for lbl_2_bss_A844 compiles the same.
+// earlier; lbl_2_bss_A844[lbl_8034E9A0._4751] after the store gives the addi but a lwzx (97.96%).
 void fn_2_747FC(void) {
     UnkTask0C50* task = lbl_803CC1B8;
     s32 sel = lbl_2_bss_F410._00;
@@ -3586,8 +3580,6 @@ void fn_2_73758(void) {
 }
 
 // .text:0x0007308C size:0x6CC
-// 99.91%: registers only: &lbl_803CBBC4 in the inlined fn_2_72DDC and fn_2_72814 gets r29
-// in the base and r28 in the target, as in the standalone fn_2_72814 and fn_2_72CB4.
 void fn_2_7308C(void) {
     UnkTask0C50* task = lbl_803CC1B8;
 
@@ -3617,17 +3609,13 @@ void fn_2_7308C(void) {
 }
 
 // .text:0x0007302C size:0x60
-// 58.54%: the base counts the search loop with mtctr/bdnz; the target compares the counter
-// on every pass. int/s32 counters, break or return, and local bounds did not change it.
 s32 fn_2_7302C(void) {
     s32 i;
-    u8* p = lbl_800FE930[lbl_80361B20._F4];
 
-    for (i = 0; i < (lbl_80361B20._F4 != 0) + 5; i++) {
-        if (lbl_8034E9A0._46E0[0] == *p) {
+    for (i = 0; i < (lbl_80361B20._F4 ? 6 : 5); i++) {
+        if (lbl_8034E9A0._46E0[0] == lbl_800FE930[lbl_80361B20._F4][i]) {
             return i;
         }
-        p++;
     }
     return i;
 }
@@ -3687,7 +3675,6 @@ void fn_2_72D60(UnkTask0C50* task) {
 }
 
 // .text:0x00072CB4 size:0xAC
-// 90.00%: task and &lbl_803CBBC4 sit in swapped saved registers (r31/r30), as in fn_2_72814.
 void fn_2_72CB4(UnkTask0C50* task) {
     if (lbl_803CBBC4._3 == 1 ? TRUE : FALSE) {
         s32 n = isAnimDone(task, 0, 0);
@@ -3746,7 +3733,6 @@ void fn_2_729E0(UnkTask0C50* task) {
 }
 
 // .text:0x0007293C size:0xA4
-// 89.51%: task and &lbl_803CBBC4 sit in swapped saved registers (r31/r30), as in fn_2_72814.
 void fn_2_7293C(UnkTask0C50* task) {
     if (lbl_803CBBC4._3 == 1 ? TRUE : FALSE) {
         s32 n = isAnimDone(task, 0, 25);
@@ -3773,8 +3759,6 @@ void fn_2_728C0(UnkTask0C50* task) {
 }
 
 // .text:0x00072814 size:0xAC
-// 90.00%: task and &lbl_803CBBC4 sit in swapped saved registers (r31/r30);
-// declaration orders, an array type for lbl_803CBBC4 and the permuter did not move them.
 void fn_2_72814(UnkTask0C50* task) {
     if (lbl_803CBBC4._3 == 1 ? TRUE : FALSE) {
         s32 n = isAnimDone(task, 0, 0);

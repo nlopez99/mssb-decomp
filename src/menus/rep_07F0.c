@@ -1,4 +1,5 @@
 #include "menus/rep_07F0.h"
+#include "menus/rep_0898.h"
 #include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/pad.h"
@@ -110,7 +111,6 @@ extern u8 fn_8006862C(s32 arg0, s32 arg1);
 extern void fn_8006877C(s32 arg0);
 extern void fn_800A86B4(s32 arg0);
 extern void fn_2_245C8(void);
-extern void fn_2_422FC(s32 arg0);
 extern void fn_2_42388(void);
 extern void fn_2_4E7EC(void);
 extern void fn_2_4E8E0(void);

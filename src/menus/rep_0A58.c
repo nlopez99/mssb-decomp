@@ -1,5 +1,8 @@
 #include "header_rep_data.h"
 #include "menus/rep_0A58.h"
+#include "menus/rep_0788.h"
+#include "menus/rep_0B08.h"
+#include "menus/rep_10C0.h"
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/vec.h"
@@ -221,19 +224,10 @@ extern void fn_2_8E8A4(void);
 extern void fn_2_489DC(void);
 extern void fn_2_11A0(s32);
 extern void fn_2_46D94(s16*, s16*, s32, s32, s32);
-extern void fn_2_6AB3C(s32, Vec*, f32);
 extern void fn_2_6ACF4(void);
 extern void fn_2_71F60(void);
-extern void fn_2_72054(s32, u8);
-extern void fn_2_94604(s32);
-extern void fn_2_9461C(s32);
-extern void fn_2_94854(s32);
 extern void fn_2_93C64(void);
 // rep_0788's header declares these two stubs void(void); the callers here pass an index
-extern void fn_2_1FF0C(s32 index);
-extern void fn_2_1FF10(s32 index);
-extern void fn_2_1FF14(s32 count);
-extern void fn_2_1FFC4(s32 count);
 
 static u32 lbl_2_data_1F8F0[0xB1] = {
     0x42415420, 0x46495253, 0x54000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,

@@ -63,11 +63,23 @@ extern s16 lbl_3_data_21790[4];
 extern u8 lbl_3_data_21798[12];
 extern s16 lbl_3_data_217A4[12];
 
+typedef struct {
+    /* 0x0 */ s8 idx;
+    /* 0x1 */ s8 _1;
+    /* 0x2 */ s16 _2;
+} UnkBarrelTarget34B0; // size: 0x4
+
+typedef struct UnkBarrelCell34B0 {
+    /* 0x0 */ u8 state;
+    /* 0x1 */ u8 colour;
+} UnkBarrelCell34B0; // size: 0x2
+
 extern void changeScene(u8, s16);
+extern void fn_800246D4(int (*compare)(const void*, const void*), void* src, void* dst, int size, int count);
 extern int fn_3_6C938(int, int);
 extern void fn_8004C108(VecXYZ* pos, int arg1);
 extern void fn_3_1608F0(int, int, int);
-extern void fn_3_12DB80(void);
+
 
 // .text:0x001324E8 size:0x9F4 mapped:0x8077157C
 void fn_3_1324E8(void) {
@@ -866,4 +878,277 @@ void fn_3_12E8FC(void) {
             }
         }
     }
+}
+
+// .text:0x0012E83C size:0xC0 mapped:0x8076D8D0
+void fn_3_12E83C(void) {
+    int points;
+
+    if (g_Minigame.barrelBatter_barrelsHit <= 1) {
+        points = lbl_3_data_217A4[5] * g_Minigame.barrelBatter_barrelsHit;
+    } else {
+        points = g_Minigame.barrelBatter_barrelsHit * ((g_Minigame.barrelBatter_barrelsHit - 1) * lbl_3_data_217A4[5]);
+    }
+    g_Minigame.miniGameCurrentPoints[g_Minigame.rosterID] += points;
+    g_Minigame._1DF4_s16 = points;
+    if (!g_d_GameSettings.exhibitionMatchInd && g_Minigame.rosterID == lbl_3_common_bss_37400._40) {
+        fn_3_1608F0(2, points, g_Minigame.barrelBatter_barrelsHit);
+    }
+}
+
+// .text:0x0012E808 size:0x34 mapped:0x8076D89C
+void fn_3_12E808(void) {
+    memset(g_Minigame._1D7C, 0, 0x78);
+}
+
+// .text:0x0012E384 size:0x484 mapped:0x8076D418
+u8 fn_3_12E384(UnkBarrelCell34B0* cells, s8 idx, u8 colour) {
+    u8 n;
+
+    if (colour == cells[idx].colour && cells[idx].state == 2) {
+        cells[idx].state = 0;
+        n = 1;
+        if (idx / 3 > 0) {
+            n += fn_3_12E384(cells, idx - 3, colour);
+        }
+        if (idx / 3 < 4) {
+            n += fn_3_12E384(cells, idx + 3, colour);
+        }
+        if (idx % 3 > 0) {
+            n += fn_3_12E384(cells, idx - 1, colour);
+        }
+        if (idx % 3 < 2) {
+            n += fn_3_12E384(cells, idx + 1, colour);
+        }
+        return n;
+    }
+    return 0;
+}
+
+// .text:0x0012E17C size:0x208 mapped:0x8076D210
+void fn_3_12E17C(s8* hits, s16* points, u8 lookahead) {
+    UnkBarrelCell34B0 cells[15];
+    UnkBarrelCell34B0 copy[15];
+    s8 j;
+    s8 k;
+    s8 m;
+    s8 i;
+    s8 col;
+    s8 row;
+    s8 n;
+    s16 score;
+    s16 best;
+
+    i = 0;
+    do {
+        j = 0;
+        do {
+            cells[j].state = g_Minigame.barrels[j].barrelState;
+            cells[j].colour = g_Minigame.barrels[j].barrelColour;
+        } while (++j < 15);
+        hits[i] = fn_3_12E384(cells, i, cells[i].colour);
+        if (hits[i] >= 2) {
+            points[i] = (hits[i] - 1) * hits[i];
+        } else {
+            points[i] = hits[i];
+        }
+        if (lookahead) {
+            m = 0;
+            do {
+                col = 0;
+                do {
+                    row = 0;
+                    do {
+                        if (cells[col + row * 3].state != 2) {
+                            memcpy(&cells[col + row * 3], &cells[col + 1 + row * 3], sizeof(UnkBarrelCell34B0));
+                            cells[col + 1 + row * 3].state = 0;
+                        }
+                    } while (++row < 5);
+                } while (++col < 2);
+            } while (++m < 2);
+            best = 0;
+            j = 0;
+            do {
+                k = 0;
+                do {
+                    memcpy(&copy[k], &cells[k], sizeof(UnkBarrelCell34B0));
+                } while (++k < 15);
+                n = fn_3_12E384(copy, j, copy[j].colour);
+                if (n >= 2) {
+                    score = (n - 1) * n;
+                } else {
+                    score = n;
+                }
+                if (score > best) {
+                    best = score;
+                }
+            } while (++j < 15);
+            points[i] += best;
+        }
+    } while (++i < 15);
+}
+
+// .text:0x0012E084 size:0xF8 mapped:0x8076D118
+int fn_3_12E084(const void* a, const void* b) {
+    const UnkBarrelTarget34B0* x = a;
+    const UnkBarrelTarget34B0* y = b;
+    MiniGameStruct* mg = &g_Minigame;
+    s8 dx;
+    s8 dy;
+
+    if (x->_2 != y->_2) {
+        return y->_2 - x->_2;
+    }
+    if (x->_1 != y->_1) {
+        if (mg->_1DD2) {
+            return x->_1 - y->_1;
+        }
+        return y->_1 - x->_1;
+    }
+    dx = __abs(2 - x->idx / 3);
+    dy = __abs(2 - y->idx / 3);
+    if (dx != dy) {
+        return dx - dy;
+    }
+    dx = __abs(1 - x->idx % 3);
+    dy = __abs(1 - y->idx % 3);
+    return dx - dy;
+}
+
+// .text:0x0012DDCC size:0x2B8 mapped:0x8076CE60
+void fn_3_12DDCC(void) {
+    MiniGameStruct* mg = &g_Minigame;
+    UnkBarrelTarget34B0 targets[15];
+    s16 points[15];
+    s8 hits[15];
+    u8 strength;
+    u32 lookahead;
+    s8 row;
+    s8 col;
+    s8 i;
+    s16 bomb;
+
+    strength = mg->minigameControlStruct.aIStrength[mg->rosterID];
+    bomb = mg->bB_bombBarrelID;
+    if (bomb >= 0) {
+        row = bomb / 3;
+        col = bomb % 3;
+    } else {
+        if (mg->bB_pitchesRemainingInTurn > 2 && lbl_3_data_217C4[strength]) {
+            lookahead = RandomInt_Game(100) < lbl_3_data_217C8[strength];
+        } else {
+            lookahead = FALSE;
+        }
+        if (lookahead) {
+            fn_3_12E17C(hits, points, TRUE);
+        } else {
+            fn_3_12E17C(hits, points, FALSE);
+        }
+        i = 0;
+        do {
+            targets[i].idx = i;
+            targets[i]._1 = hits[i];
+            targets[i]._2 = points[i];
+        } while (++i < 15);
+        if (lookahead) {
+            mg->_1DD2 = 1;
+        } else {
+            mg->_1DD2 = 0;
+        }
+        fn_800246D4(fn_3_12E084, targets, targets, sizeof(UnkBarrelTarget34B0), 15);
+        row = targets[0].idx / 3;
+        col = targets[0].idx % 3;
+    }
+    if (g_Batter.batterHand) {
+        row = 4 - row;
+    }
+    mg->_1DCC = swingSoundFrame[0][1] + lbl_3_data_217BC[row];
+    switch (col) {
+    case 0:
+        mg->_1DCE_u16 = 8;
+        break;
+    case 1:
+    default:
+        mg->_1DCE_u16 = 0;
+        break;
+    case 2:
+        mg->_1DCE_u16 = 4;
+        break;
+    }
+    if (RandomInt_Game(100) < lbl_3_data_217CC[strength]) {
+        mg->_1DCC += (RandomInt_Game(2) ? 1 : -1) * (RandomInt_Game(lbl_3_data_217D0[strength]) + 1);
+    }
+    if (RandomInt_Game(100) < lbl_3_data_217D4[strength]) {
+        mg->_1DCE_u16 = 0;
+    }
+}
+
+// .text:0x0012DD88 size:0x44 mapped:0x8076CE1C
+BOOL fn_3_12DD88(void) {
+    u32 i = 0;
+
+    do {
+        if (g_Minigame.barrels[i].barrelState != 2) {
+            break;
+        }
+    } while (++i < 15);
+    return i >= 15;
+}
+
+// .text:0x0012DB80 size:0x208 mapped:0x8076CC14
+void fn_3_12DB80(void) {
+    MiniGameStruct* mg = &g_Minigame;
+    s8 i;
+    s8 idx;
+
+    i = 0;
+    do {
+        g_Minigame._1DBC[i] = 0;
+    } while (++i < 4);
+    i = 0;
+    do {
+        idx = g_Minigame.minigameControlStruct.characterIndex[i];
+        if (idx >= 0 && idx < 4 && i == g_Minigame.rosterID && g_Minigame.minigameControlStruct.battingHandedness[i]) {
+            g_Minigame._1DBC[idx] = 1;
+            memset(&g_Minigame._1D7C[idx], 0, sizeof(InputStruct));
+            switch (g_Pitcher.pitcherActionState) {
+            case 3:
+                if (mg->_1DD1) {
+                    if (g_Pitcher.framesUntilBallReachesBatterZ <= mg->_1DCC) {
+                        switch (mg->_1DD0) {
+                        case 0:
+                            g_Minigame._1D7C[idx].newButtonInput |= INPUT_BUTTON_A;
+                            g_Minigame._1D7C[idx].buttonInput |= INPUT_BUTTON_A;
+                            mg->_1DD0++;
+                            break;
+                        case 1:
+                            g_Minigame._1D7C[idx].newButtonInput |= mg->_1DCE_u16;
+                            g_Minigame._1D7C[idx].buttonInput |= mg->_1DCE_u16 | INPUT_BUTTON_A;
+                            mg->_1DD0++;
+                            break;
+                        case 2:
+                            g_Minigame._1D7C[idx].buttonInput |= INPUT_BUTTON_A;
+                            if (g_Batter.framesSinceStartOfSwing > 0) {
+                                g_Minigame._1D7C[idx].buttonInput |= mg->_1DCE_u16;
+                            }
+                            break;
+                        }
+                    }
+                } else if (fn_3_12DD88()) {
+                    fn_3_12DDCC();
+                    mg->_1DD1 = 1;
+                }
+                break;
+            }
+        }
+    } while (++i < 4);
+}
+
+// .text:0x0012DB54 size:0x2C mapped:0x8076CBE8
+void fn_3_12DB54(void) {
+    s8 i = 0;
+
+    do {
+        g_Minigame._1DBC[i] = 0;
+    } while (++i < 4);
 }

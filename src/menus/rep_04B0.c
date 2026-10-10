@@ -1,6 +1,9 @@
 #include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
 #include "menus/rep_04B0.h"
+#include "menus/rep_0278.h"
+#include "menus/rep_0318.h"
+#include "menus/rep_0568.h"
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/mtx.h"
@@ -177,10 +180,7 @@ extern void AnimateCharacter(int actor, int anim, u8, u8, u8, s16, u8, int);
 extern void QueueCharacterAnimation(int actor, int anim, u8, u8, s16, u8, int);
 extern void LITXForm(LITObj* light, Mtx view);
 extern s32 fn_2_14F8(s32 min, s32 max);
-extern u8 fn_2_35D0(u8 port);
 extern void fn_2_12238(void);
-extern void fn_2_1C34(u16 buttons);
-extern void fn_2_16A74(s32 arg0, s32 arg1);
 extern void fn_800625A4(s32 port, s32 arg1);
 extern void fn_2_1A88(void);
 extern void fn_8004E504(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
@@ -192,7 +192,6 @@ extern void makeLookAtMatrix(Mtx m, const Vec* camPos, const Vec* camUp, const V
 extern void fn_80052D70(void* camera);
 extern void fn_80052968(void);
 extern void fn_800B806C(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7);
-extern void fn_2_16A48(s32 port, u8 value);
 extern void fn_8001CB10(void* arg0, s32 arg1);
 extern void fn_8001CCC8(void);
 
@@ -356,15 +355,14 @@ void fn_2_1641C(void) {
 }
 
 // .text:0x00015E80 size:0x59C
-// 97.52%: after the cursor loop the target re-extends port from the raw parameter and
-// frees a saved register (one fewer here), and it keeps a redundant `bne` before the
-// branch to the shared fn_2_15AFC call.
+// 99.62%: the target keeps the zero stored to _4A/_4B in r4 (r0 here), and a redundant
+// `bne` before the branch to the shared fn_2_15AFC call.
 void fn_2_15E80(u8 port) {
     Pad04B0 pad;
-    s32 i;
-    s32 first;
     s32 prev;
+    s32 first;
     s32 cur;
+    s32 i;
     s32 slot = lbl_8034E9A0._46F8[port] + 4;
     s32 idx = lbl_803C66B0._59[port];
 
@@ -456,7 +454,7 @@ void fn_2_15E80(u8 port) {
             fn_2_14CA0(idx, &pad);
             cur = lbl_2_bss_F410._00[slot];
         } while (lbl_8034E9A0._4757[lbl_800FE5D4[cur]] != 0 && first != cur && prev != cur);
-        if (lbl_2_bss_F410._10[port] == lbl_2_bss_F410._10[port ^ 1] && lbl_803C5EA4._5 != 0) {
+        if (lbl_2_bss_F410._00[port + 4] == lbl_2_bss_F410._00[(port ^ 1) + 4] && lbl_803C5EA4._5 != 0) {
             lbl_2_bss_F410._00[slot]++;
             if (lbl_2_bss_F410._00[slot] >= 12) {
                 lbl_2_bss_F410._00[slot] = 0;

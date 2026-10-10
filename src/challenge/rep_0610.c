@@ -2,6 +2,7 @@
 #include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
 #include "static/UnknownHomes_Static.h"
+#include "challenge/rep_0010.h"
 #include "Dolphin/mtx.h"
 #include "Dolphin/gx.h"
 #include "C3/control.h"
@@ -272,7 +273,6 @@ extern u8 fn_800B3C04(s32 arg0, UnkList0610* actor, Mtx mtx);
 extern void fn_800B2B74(UnkList0610* list, u16 id);
 extern void fn_80052D70(UnkTask0610* task);
 extern void makeLookAtMatrix(Mtx m, const Vec* camPos, const Vec* camUp, const Vec* target);
-extern void fn_1_F2C(s32, s32, s32);
 extern void fn_8002F1AC(Vec* pos, u32 id);
 extern void fn_8002F258(Vec* pos, u32 id, void* params);
 extern void minigamesSetSomePointers(void);

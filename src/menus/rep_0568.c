@@ -1,6 +1,7 @@
 #include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
 #include "menus/rep_0568.h"
+#include "menus/rep_04B0.h"
 #include "menus/rep_11C0.h"
 #include "static/UnknownHomes_Static.h"
 #include "C3/control.h"
@@ -383,7 +384,6 @@ extern void fn_80023B04(s32);
 extern void fn_80014204(s32);
 extern void* fn_80023AA4(void);
 extern void* ARAMTransfer(AramEntry0568* entry, void* dst, s32 arg2, u32 aram);
-extern void fn_2_14BB8(u8 index, s32 flag);
 extern ActorRef0568* fn_800111D8(Player0568* player);
 extern void fn_800B2B54(void* actor, u16 id, s32 mode);
 extern void fn_80025EEC(void* state, s32, s32);
@@ -480,15 +480,13 @@ void fn_2_19D04(void) {
 }
 
 static inline u8 enableOption(s8* option) {
-    s8 old = *option;
+    BOOL wasOff = *option == 0;
 
     *option = 1;
-    return old == 0;
+    return wasOff;
 }
 
 // .text:0x000197AC size:0x558
-// 99.82%: in the pad._2 & 1 handler, cases 0 and 2 load the old option byte
-// into r4/r3 and the constant 1 into r3/r0; this source swaps those registers.
 void fn_2_197AC(u8 index) {
     u8 changed = 0;
     Pad0568 pad;
@@ -1148,7 +1146,8 @@ done:
 
 // .text:0x00016F78 size:0x6D0
 // 98.59%: the fn_800B2B74 arguments load in the other order, and the target
-// tests hasAltAnims through neg/or/srwi. where this compiles to clrlwi.
+// tests hasAltAnims through neg/or/srwi. where this compiles to clrlwi; only
+// `return result != 0;` tested as `hasAltAnims(...) & 1` gave that (99.08%).
 void fn_2_16F78(u8 index) {
     Player0568* player = &lbl_8036E548._0C04[index];
     void* tex;
@@ -1303,12 +1302,17 @@ void fn_2_16F78(u8 index) {
 }
 
 // .text:0x00016F0C size:0x6C
-// 85.56%: the target schedules the 0x27C multiply before the pose load and
-// keeps the index in r0; the s8 locals add no extsb only with _252 typed s8.
+// 92.15%: the target loads a, then b (no extsb), then forms player; here b is
+// extended and the row bases take one register higher. A no-op mask on b
+// (permuter) drops the extsb (96.59%), so b's conversion is still wrong.
 void fn_2_16F0C(u8 index) {
-    s8 a = lbl_8036E548._0C04[index]._252;
-    Player0568* player = &lbl_8036E548._0C04[index];
-    s8 b = lbl_8036E548._0C04[index]._254;
+    s8 b;
+    Player0568* player;
+    u8 a;
+
+    player = &lbl_8036E548._0C04[index];
+    b = lbl_8036E548._0C04[index]._254;
+    a = lbl_8036E548._0C04[index]._252;
 
     if (lbl_8036E548._0140[index]._D0 == -1) {
         lbl_8036E548._0140[index]._CF = a;

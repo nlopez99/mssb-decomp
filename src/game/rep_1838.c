@@ -4,6 +4,8 @@
 #include "Dolphin/rand.h"
 #include "static/UnknownHomes_Static.h"
 
+extern u8 lbl_80361B20[0x130];
+
 // .text:0x000A0018 size:0x84 mapped:0x806DF0AC
 f32 shortAngleToRad_Capped(s16 ang) {
     f32 v = shortAngleToRad(ang);
@@ -408,4 +410,171 @@ f32 RandomF32_Game_Range(f32 a, f32 b) {
 // .text:0x0009EAE4 size:0xE8 mapped:0x806DDB78
 f32 RandomF32_UNK_Range(f32 a, f32 b) {
     return random_fn_3_9EE24((int)((b - a) * 1000.f) + 1) * (1.f / 1000.f) + a;
+}
+
+// .text:0x0009EA1C size:0xC8 mapped:0x806DDAB0
+BOOL fn_3_9EA1C(int team) {
+    int i;
+
+    for (i = 1; i < 10; i++) {
+        if (g_GameLogic.battingOrderAndPositionMapping[team][i][1] % 10 == 9) {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+// .text:0x0009E834 size:0x1E8 mapped:0x806DD8C8
+BOOL fn_3_9E834(void) {
+    int i;
+
+    if (!g_d_GameSettings.exhibitionMatchInd) {
+        for (i = 0; i < 54; i++) {
+            if (starMissionCompletionTracker._43D6[i]) {
+                return TRUE;
+            }
+        }
+    } else {
+        for (i = 0; i < 54; i++) {
+            if (lbl_80361B20[i]) {
+                return TRUE;
+            }
+        }
+    }
+    return FALSE;
+}
+
+// .text:0x0009E7D4 size:0x60 mapped:0x806DD868
+void fn_3_9E7D4(int team) {
+    if (g_d_GameSettings.GameModeSelected != 2 || g_GameLogic.secondaryGameMode != 0xF) {
+        if (g_GameLogic.currentBatterPerTeam[team] == 9) {
+            g_GameLogic.currentBatterPerTeam[team] = 1;
+        } else {
+            g_GameLogic.currentBatterPerTeam[team]++;
+        }
+    }
+}
+
+// RandomInt_Game with |max| taken by a branch: the form RandomIndexFromWeights and fn_3_9E368 inline.
+static inline int RandomInt_Branch(int max) {
+    int ret;
+    int absmax = max;
+
+    if (max < 0) {
+        absmax = -max;
+    }
+
+    if (absmax <= 1) {
+        return 0;
+    }
+
+    g_Ball.StaticRandomInt1 = g_Ball.StaticRandomInt1 - ((u8)g_Ball.StaticRandomInt2) +
+                              g_Ball.StaticRandomInt2 / absmax + g_Ball.totalFramesAtPlay;
+
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_PRACTICE && g_Practice.instructionNumber >= 0) {
+        return 0;
+    }
+
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES) {
+        g_Ball.StaticRandomInt1 += rand();
+    }
+
+    ret = g_Ball.StaticRandomInt1 % absmax;
+    ret = ABS(ret);
+    if (max < 0) {
+        return -ret;
+    } else {
+        return ret;
+    }
+}
+
+// .text:0x0009E5A0 size:0x234 mapped:0x806DD634
+int RandomIndexFromWeights(u8* weights, int count) {
+    int local[10];
+    int i;
+    int total = 0;
+    int r;
+
+    for (i = 0; i < count; i++) {
+        local[i] = weights[i];
+        total += local[i];
+    }
+    r = RandomInt_Branch(total);
+    for (i = 0; i < count; i++) {
+        if (r < local[i]) {
+            return i;
+        }
+        r -= local[i];
+    }
+    return 0;
+}
+
+// .text:0x0009E368 size:0x238 mapped:0x806DD3FC
+int fn_3_9E368(int* weights, int count) {
+    int local[10];
+    int i;
+    int total = 0;
+    int r;
+
+    for (i = 0; i < count; i++) {
+        local[i] = weights[i];
+        total += local[i];
+    }
+    r = RandomInt_Branch(total);
+    for (i = 0; i < count; i++) {
+        if (r < local[i]) {
+            return i;
+        }
+        r -= local[i];
+    }
+    return 0;
+}
+
+// .text:0x0009E078 size:0x2F0 mapped:0x806DD10C
+// The target's inlined random helpers compute i + 1 in each branch and keep a copy of it for
+// the sign test, where this hoists n; the copy loop also allocates differently.
+void fn_3_9E078(int* order, int count, BOOL useGameRandom) {
+    int src[20];
+    int used[20];
+    int i;
+    int j;
+    int r;
+    int n;
+
+    for (i = 0; i < count; i++) {
+        used[i] = 0;
+        src[i] = order[i];
+    }
+    for (i = count - 1; i >= 0; i--) {
+        n = i + 1;
+        if (useGameRandom) {
+            r = RandomInt_Game(n);
+        } else {
+            r = random_fn_3_9EE24(n);
+        }
+        for (j = 0; j < count; j++) {
+            if (used[j] == 0) {
+                if (r == 0) {
+                    order[i] = src[j];
+                    used[j] = 1;
+                    break;
+                }
+                r--;
+            }
+        }
+    }
+}
+
+// .text:0x0009DC18 size:0x460 mapped:0x806DCCAC
+void fn_3_9DC18(u8* list, int count, BOOL useGameRandom) {
+    int order[10];
+    u32 i;
+
+    for (i = 0; i < count; i++) {
+        order[i] = list[i];
+    }
+    fn_3_9E078(order, count, useGameRandom);
+    for (i = 0; i < count; i++) {
+        list[i] = order[i];
+    }
 }

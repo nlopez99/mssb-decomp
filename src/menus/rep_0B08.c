@@ -1,6 +1,8 @@
 #include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
 #include "menus/rep_0B08.h"
+#include "menus/rep_0F60.h"
+#include "menus/rep_1028.h"
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/mtx.h"
@@ -190,15 +192,10 @@ extern struct {
     /* 0x1978F1 */ u8 _1978F1;
 } *lbl_2_bss_1A824C;
 
-extern void fn_2_8CD58(s32 idx, s32 anim, u8 arg2, s32 arg3, s16 arg4, s32 arg5, u8 arg6);
 extern void fn_800BD2CC(s32 arg0, GXColor color);
 extern s32 fn_80062890(s32 id);
 extern void fn_800B0A14_removeQueue(void);
-extern s32 fn_2_8CC88(s32);
 extern void fn_2_46C88(s32 arg0, s32 arg1);
-extern void fn_2_8F73C(s32 arg0, u8 arg1);
-extern void fn_2_9033C(s32 arg0, Vec* pos, f32 arg2);
-extern void fn_2_92654(s32 arg0, u8 arg1);
 extern f32 fn_2_4A18C(f32 angle);
 extern f32 fn_2_4A1E8(f32 x, f32 z);
 extern s16 fn_2_4A150(s16 angle);

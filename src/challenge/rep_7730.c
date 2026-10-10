@@ -5,6 +5,7 @@
 #include "C3/control.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/mtx.h"
+#include "Dolphin/mtxext.h"
 #include "Dolphin/PPCArch.h"
 #include "Dolphin/OS/OSCache.h"
 #include "string.h"
@@ -631,7 +632,7 @@ static struct {
     /* 0x54 */ u8 _54[0x58 - 0x54];
 } lbl_1_bss_43EE0;
 static Vec lbl_1_bss_F6E0[160][112];
-static f32 lbl_1_bss_76E0[64 * 128];
+static f32 lbl_1_bss_76E0[2][32 * 128];
 static f32 lbl_1_bss_74E0[128];
 static RopeNode7730 lbl_1_bss_6FE0[20];
 static SimParams7730 lbl_1_bss_6FB8;
@@ -913,7 +914,6 @@ void fn_1_25F98(void) {
 }
 
 // .text:0x00025C68 size:0x330
-// 97.15%: only the inlined fn_1_24A8C's final call differs, as in fn_1_24A8C.
 void fn_1_25C68(void) {
     ChainTask7730* task = lbl_803CC1B8;
     u32 color;
@@ -940,8 +940,6 @@ void fn_1_25C68(void) {
 }
 
 // .text:0x00025064 size:0xC04
-// 98.08%: what differs is the tail of each inlined fn_1_24A8C (three copies), as in that
-// function, and the branch offsets after them.
 void fn_1_25064(void) {
     ChainTask7730* task = lbl_803CC1B8;
     s32 i;
@@ -1173,7 +1171,8 @@ void fn_1_24C4C(PhysNode7730* nodes, s32 count, Vec* external, f32 k, f32 dampin
 
 // .text:0x00024A8C size:0x1C0
 // 92.90%: the final call's argument setup is scheduled differently (the target converts
-// task->_24 after loading 0.015625f and the pool addresses).
+// task->_24 after loading 0.015625f and the pool addresses). Writing it `/ 64.0f` matches the
+// inlined copies in fn_1_25064 and fn_1_25C68 but drops this function to 89.78%.
 void fn_1_24A8C(void) {
     ChainTask7730* task = lbl_803CC1B8;
     f32 dt;
@@ -1297,9 +1296,205 @@ void fn_1_24410(void) {
     for (j = 0; j < 32; j++) {
         idx = (rand() % 32) * 128;
         idx += rand() % 128;
-        lbl_1_bss_76E0[idx] = 1.0f;
+        lbl_1_bss_76E0[0][idx] = 1.0f;
     }
     ((WaveTask7730*)lbl_803CC1B8)->_00 = fn_1_23B54;
+}
+
+// .text:0x00023B54 size:0x8BC
+// 98.05%: registers differ in the inlined fn_1_22F4C (index offsets) and in the height
+// loop (16.0f and the conversion constant swap f1/f2).
+void fn_1_23B54(void) {
+    WaveTask7730* task = lbl_803CC1B8;
+    s32 i;
+    s32 idx;
+    s32 j;
+    s32 n;
+    s32 frame;
+    f32 x;
+    f32 fx;
+    f32 fy;
+    f32 y;
+    f32 max;
+    f32 min;
+    Vec* p;
+
+    for (i = 0; i < 8; i++) {
+        switch (i) {
+        case 0:
+            if (i == task->_26) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    if (task->_27 == 2) {
+                        task->_27 = 112;
+                    }
+                    task->_27--;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    if (task->_27 == 112) {
+                        task->_27 = 2;
+                    }
+                    task->_27++;
+                }
+            }
+            break;
+        case 1:
+            if (i == task->_26) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    if (task->_28 == 2) {
+                        task->_28 = 160;
+                    }
+                    task->_28--;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    if (task->_28 == 160) {
+                        task->_28 = 2;
+                    }
+                    task->_28++;
+                }
+            }
+            break;
+        case 2:
+            if (i == task->_26 && (lbl_803C77B8[0]._04 & 3)) {
+                task->_2A = !task->_2A;
+            }
+            break;
+        case 3:
+            if (i == task->_26) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    if (task->_14 > 1.0f) {
+                        task->_14 -= 1.0f;
+                    }
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    if (task->_14 < 512.0f) {
+                        task->_14 += 1.0f;
+                    }
+                }
+            }
+            break;
+        case 4:
+            if (i == task->_26) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    if (task->_18 > 1.0f) {
+                        task->_18 -= 1.0f;
+                    }
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    if (task->_18 < 512.0f) {
+                        task->_18 += 1.0f;
+                    }
+                }
+            }
+            break;
+        case 5:
+            if (i == task->_26 && (lbl_803C77B8[0]._04 & 3)) {
+                task->_2B = !task->_2B;
+            }
+            break;
+        case 6:
+            if (i == task->_26) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    if (task->_1C > 0.0f) {
+                        task->_1C -= 0.001f;
+                    }
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    if (task->_1C < 1.0f) {
+                        task->_1C += 0.001f;
+                    }
+                }
+            }
+            break;
+        case 7:
+            if (i == task->_26) {
+                if (lbl_803C77B8[0]._04 & 1) {
+                    if (task->_20 > 0.0f) {
+                        task->_20 -= 0.001f;
+                    }
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    if (task->_20 < 1.0f) {
+                        task->_20 += 0.001f;
+                    }
+                }
+            }
+            break;
+        }
+    }
+    if (lbl_803C77B8[0]._04 & 8) {
+        if (task->_26 == 0) {
+            task->_26 = 8;
+        }
+        task->_26--;
+    } else if (lbl_803C77B8[0]._04 & 4) {
+        task->_26++;
+        if (task->_26 == 8) {
+            task->_26 = 0;
+        }
+    } else if (lbl_803C77B8[0]._02 & 0x200) {
+        ((WaveTask7730*)lbl_803CC1B8)->_00 = fn_1_24778;
+    } else if (lbl_803C77B8[0]._04 & 0x100) {
+        for (j = 0; j < 16; j++) {
+            idx = (rand() % 32) * 128;
+            idx += rand() % 128;
+            lbl_1_bss_76E0[0][idx] += task->_1C;
+        }
+    }
+    fn_1_121D4(&lbl_1_bss_43EE0);
+    if (task->_2A == 0) {
+        task->_29 = fn_1_23098(lbl_1_bss_47010, lbl_1_bss_43EE0._00, task->_27, task->_28, task->_18, task->_14);
+        if (task->_2B != 0) {
+            frame = task->_2C++;
+            fn_1_22F4C(32, 128, lbl_1_bss_76E0[1 - (frame & 1)], lbl_1_bss_76E0[frame & 1],
+                       lbl_1_bss_76E0[1 - (frame & 1)]);
+            max = -100.0f;
+            min = 100.0f;
+            for (i = 0; i < task->_28; i++) {
+                p = lbl_1_bss_F6E0[i];
+                for (j = 0; j < task->_29; j++) {
+                    x = p->x;
+                    y = p->y;
+                    idx = task->_2C;
+                    if (x < 0.0f) {
+                        n = -x;
+                    } else {
+                        n = x;
+                    }
+                    n = n / 2 * 2;
+                    if (x < 0.0f) {
+                        fx = x + (n + 2);
+                    } else {
+                        fx = x - n;
+                    }
+                    fx = 64.0f * fx;
+                    if (y < 0.0f) {
+                        n = -y;
+                    } else {
+                        n = y;
+                    }
+                    n = n / 2 * 2;
+                    if (y < 0.0f) {
+                        fy = y + (n + 2);
+                    } else {
+                        fy = y - n;
+                    }
+                    fy = 16.0f * fy;
+                    p->z = lbl_1_bss_76E0[idx & 1][(s32)fx + ((s32)fy << 7)];
+                    if (p->z < min) {
+                        min = p->z;
+                    } else if (p->z > max) {
+                        max = p->z;
+                    }
+                    p++;
+                }
+            }
+        } else {
+            max = min = 0.0f;
+            for (i = 0; i < task->_28; i++) {
+                p = lbl_1_bss_F6E0[i];
+                for (j = 0; j < task->_29; j++) {
+                    p->z = min;
+                    p++;
+                }
+            }
+        }
+    }
+    fn_1_23804(10, 10, task->_29, task->_28, max, min);
+    task->_24++;
 }
 
 // .text:0x00023AD8 size:0x7C
@@ -1314,10 +1509,8 @@ void fn_1_23AD8(Mtx44 m, Vec* eye, Vec* at) {
 }
 
 // .text:0x00023804 size:0x2D4
-// 95.10%: the target keeps the copy n in r31 and rows in r29; this form puts n in r24
-// and shifts the other saved registers by one.
 void fn_1_23804(s32 arg0, s32 arg1, s32 rows, s32 cols, f32 arg4, f32 arg5) {
-    int n;
+    s32 n;
 
     fn_1_26A34();
     GXLoadPosMtxImm(lbl_1_bss_43EE0._00, GX_PNMTX0);
@@ -1330,7 +1523,11 @@ void fn_1_23804(s32 arg0, s32 arg1, s32 rows, s32 cols, f32 arg4, f32 arg5) {
             GXPosition3f32(lbl_1_bss_F6E0[cols][rows].x, lbl_1_bss_F6E0[cols][rows].z, lbl_1_bss_F6E0[cols][rows].y);
             GXColor1u32((rows & 1) ? 0xFFFFFFFF : 0x0000FFFF);
             GXPosition3f32(lbl_1_bss_F6E0[cols][rows - 1].x, lbl_1_bss_F6E0[cols][rows - 1].z, lbl_1_bss_F6E0[cols][rows - 1].y);
-            GXColor1u32((rows & 1) ? 0x0000FFFF : 0xFFFFFFFF);
+            if (rows & 1) {
+                GXColor1u32(0x0000FFFF);
+            } else {
+                GXColor1u32(0xFFFFFFFF);
+            }
         }
     }
     GXBegin(GX_LINESTRIP, GX_VTXFMT0, 8);
@@ -1352,13 +1549,174 @@ void fn_1_23804(s32 arg0, s32 arg1, s32 rows, s32 cols, f32 arg4, f32 arg5) {
     GXColor1u32(0x0000FFFF);
 }
 
+// .text:0x00023098 size:0x76C
+// 93.07%: the target subtracts frsp(-far) where this folds -near - -far into -near + far,
+// so far stays live (five saved FPRs, not four); an f64 local for -far gives the frsp and
+// four FPRs but other registers (92.79%).
+s32 fn_1_23098(Mtx44 proj, Mtx view, s32 rows, s32 cols, f32 near, f32 far) {
+    Mtx44 m;
+    Mtx inv;
+    Vec hit[4];
+    Vec start[4];
+    Vec normal;
+    Vec origin;
+    f32 t[4];
+    f32 d;
+    f32 nh;
+    f32 fh;
+    f32 nw;
+    f32 fw;
+    f32 dy;
+    s32 i;
+    s32 n;
+    s32 last;
+    s32 c;
+    Vec* row;
+
+    origin.x = 0.0f;
+    origin.y = 0.0f;
+    origin.z = 0.0f;
+    normal.x = 0.0f;
+    normal.y = -1.0f;
+    normal.z = 0.0f;
+    PSMTXMultVec(view, &origin, &origin);
+    PSMTXMultVec(view, &normal, &normal);
+    PSVECSubtract(&normal, &origin, &normal);
+    PSVECNormalize(&normal, &normal);
+    d = -PSVECDotProduct(&normal, &origin);
+    nh = (448.0f * near / 1280.0f) * 0.5f;
+    fh = (448.0f * far / 1280.0f) * 0.5f;
+    nw = (640.0f * near / 1280.0f) * 0.5f;
+    fw = (640.0f * far / 1280.0f) * 0.5f;
+    start[0].x = nw;
+    start[0].y = 0.0f;
+    start[0].z = -near;
+    start[1].x = fw;
+    start[1].y = 0.0f;
+    start[1].z = -far;
+    start[2].x = fw;
+    start[2].y = fh;
+    start[2].z = -far;
+    start[3].x = fw;
+    start[3].y = -fh;
+    start[3].z = -far;
+    hit[0].x = 0.0f;
+    hit[0].y = nh;
+    hit[0].z = 0.0f;
+    hit[1].x = 0.0f;
+    hit[1].y = fh;
+    hit[1].z = 0.0f;
+    hit[2].x = nw - fw;
+    hit[2].y = nh - fh;
+    hit[2].z = -near - -far;
+    hit[3].x = nw - fw;
+    hit[3].y = -(nh - fh);
+    hit[3].z = -near - -far;
+    for (i = 0; i < 4; i++) {
+        t[i] = PSVECDotProduct(&normal, &hit[i]);
+        if (t[i] == 0.0f) {
+            hit[i].z = 0.0f;
+        } else {
+            t[i] = -(d + PSVECDotProduct(&normal, &start[i])) / t[i];
+            PSVECScale(&hit[i], t[i], &hit[i]);
+            PSVECAdd(&start[i], &hit[i], &hit[i]);
+        }
+        if (t[i] < 0.0f) {
+            t[i] = -t[i];
+        }
+    }
+    if (hit[2].z <= -near && hit[2].z >= -far && hit[3].z <= -near && hit[3].z >= -far) {
+        memcpy(&hit[0], &hit[2], sizeof(Vec));
+        memcpy(&hit[1], &hit[3], sizeof(Vec));
+    } else if (!(t[0] <= 1.0f && t[1] <= 1.0f)) {
+        if (t[0] <= 1.0f || t[1] <= 1.0f) {
+            if (hit[2].z <= -near && hit[2].z >= -far) {
+                memcpy(&hit[3], &hit[2], sizeof(Vec));
+            }
+            if (t[0] < 1.0f) {
+                memcpy(&hit[1], &hit[3], sizeof(Vec));
+            } else {
+                memcpy(&hit[0], &hit[3], sizeof(Vec));
+            }
+        } else {
+            return 0;
+        }
+    }
+    PSMTXInverse(view, inv);
+    c = cols - 1;
+    PSMTXMultVec(inv, &hit[1], &hit[2]);
+    lbl_1_bss_F6E0[c][0].x = hit[2].x;
+    lbl_1_bss_F6E0[c][0].y = hit[2].z;
+    hit[2].x = -hit[1].x;
+    hit[2].y = hit[1].y;
+    hit[2].z = hit[1].z;
+    PSMTXMultVec(inv, &hit[2], &hit[2]);
+    lbl_1_bss_F6E0[0][0].x = hit[2].x;
+    lbl_1_bss_F6E0[0][0].y = hit[2].z;
+    PSMTXMultVec(inv, &hit[0], &hit[2]);
+    lbl_1_bss_F6E0[c][1].x = hit[2].x;
+    lbl_1_bss_F6E0[c][1].y = hit[2].z;
+    hit[2].x = -hit[0].x;
+    hit[2].y = hit[0].y;
+    hit[2].z = hit[0].z;
+    PSMTXMultVec(inv, &hit[2], &hit[2]);
+    lbl_1_bss_F6E0[0][1].x = hit[2].x;
+    lbl_1_bss_F6E0[0][1].y = hit[2].z;
+    PSMTX44Identity(m);
+    memcpy(m, view, sizeof(Mtx));
+    PSMTX44Concat(proj, m, m);
+    C_MTX44Inverse(m, m);
+    PSMTX44MultVec(proj, &hit[0], &hit[0]);
+    PSMTX44MultVec(proj, &hit[1], &hit[1]);
+    dy = hit[0].y - hit[1].y;
+    if (dy < 0.0f) {
+        dy = -dy;
+    }
+    n = rows * (dy + 2.0f / rows) / 2.0f;
+    if (n < 2) {
+        n = 2;
+    }
+    last = n - 1;
+    lbl_1_bss_F6E0[0][last].x = lbl_1_bss_F6E0[0][1].x;
+    lbl_1_bss_F6E0[0][last].y = lbl_1_bss_F6E0[0][1].y;
+    lbl_1_bss_F6E0[c][last].x = lbl_1_bss_F6E0[c][1].x;
+    lbl_1_bss_F6E0[c][last].y = lbl_1_bss_F6E0[c][1].y;
+    PSVECSubtract(&hit[0], &hit[1], &hit[2]);
+    i = last;
+    while (--i != 0) {
+        PSVECScale(&hit[2], (f32)i / (f32)last, &hit[3]);
+        PSVECAdd(&hit[1], &hit[3], &hit[3]);
+        PSMTX44MultVec(m, &hit[3], &origin);
+        lbl_1_bss_F6E0[c][i].x = origin.x;
+        lbl_1_bss_F6E0[c][i].y = origin.z;
+        hit[3].x = -hit[3].x;
+        PSMTX44MultVec(m, &hit[3], &origin);
+        lbl_1_bss_F6E0[0][i].x = origin.x;
+        lbl_1_bss_F6E0[0][i].y = origin.z;
+    }
+    hit[0].y = 0.0f;
+    hit[1].y = 0.0f;
+    for (i = 0; i < n; i++) {
+        row = lbl_1_bss_F6E0[cols - 1];
+        hit[0].x = lbl_1_bss_F6E0[0][i].x;
+        hit[0].z = lbl_1_bss_F6E0[0][i].y;
+        hit[1].x = row[i].x - hit[0].x;
+        hit[1].z = row[i].y - hit[0].z;
+        last = cols - 1;
+        while (--last != 0) {
+            PSVECScale(&hit[1], (f32)last / (f32)(cols - 1), &hit[2]);
+            PSVECAdd(&hit[0], &hit[2], &hit[2]);
+            lbl_1_bss_F6E0[last][i].x = hit[2].x;
+            lbl_1_bss_F6E0[last][i].y = hit[2].z;
+        }
+    }
+    return n;
+}
+
 // .text:0x00022F4C size:0x14C
-// 77.45%: the target indexes out/cur/prev with one byte offset (lfsx) and keeps a dead
-// counter; this form walks separate registers, and 4.0/2.0 load in the other order.
 void fn_1_22F4C(s32 rows, s32 cols, f32* out, f32* cur, f32* prev) {
     s32 y;
     s32 x;
-    s32 row;
     f64 c;
     f32 a;
     f32 b;
@@ -1367,16 +1725,14 @@ void fn_1_22F4C(s32 rows, s32 cols, f32* out, f32* cur, f32* prev) {
     c = c * c;
     a = c;
     b = 2.0 - 4.0 * c;
-    row = 0;
     for (y = 0; y < rows; y++) {
         for (x = 0; x < cols; x++) {
-            out[row + x] = b * cur[row + x] +
+            out[y * cols + x] = b * cur[y * cols + x] +
                      a * (cur[x + cols * ((y + rows - 1) % rows)] + cur[x + cols * ((y + 1) % rows)] +
-                          cur[(x + cols - 1) % cols + row] + cur[(x + 1) % cols + row]) -
-                     prev[row + x];
-            out[row + x] *= lbl_1_data_104C4;
+                          cur[(x + cols - 1) % cols + y * cols] + cur[(x + 1) % cols + y * cols]) -
+                     prev[y * cols + x];
+            out[y * cols + x] *= lbl_1_data_104C4;
         }
-        row += cols;
     }
 }
 
@@ -2738,37 +3094,12 @@ void fn_1_1D944(void) {
 }
 
 // .text:0x0001D694 size:0x2B0
-// 95.65%: saved registers of the tile loops differ, and the target's frame is 16 bytes
-// smaller. Dividing the u16 sizes by s32 tile sizes gives the target's srawi/addze.
 void fn_1_1D694(DrawEntry7730* entry) {
-    Mtx44 proj;
+    Mtx proj; // a 3x4 matrix in the original (its frame), though C_MTXOrtho writes 4x4
     Mtx m;
-    Tex7730* tex;
-    u8* map;
-    void* src;
-    s32 y;
-    s32 x;
-    s32 rows;
-    s32 cols;
-    s32 tileW = 32;
-    s32 tileH = 64;
 
     if (entry->_18 != 0) {
-        tex = entry->_08;
-        map = entry->_10;
-        src = entry->_0C;
-        memset(tex->image, 0, tex->width * tex->height);
-        rows = tex->height / tileH;
-        cols = tex->width / tileW;
-        for (y = 0; y < rows; y++) {
-            for (x = 0; x < cols; x++) {
-                if (x & lbl_803CBBC0) {
-                    fn_80023F0C(src, tex, (map[y * cols + x] % cols) * 32, (map[y * cols + x] / cols) * 64, 32, 64,
-                                x * 32, y * 64);
-                }
-            }
-        }
-        DCStoreRange(tex->image, tex->width * tex->height);
+        fn_1_1D590(entry->_0C, entry->_08, entry->_10, 32, 64);
     }
     C_MTXOrtho(proj, 0.0f, 448.0f, 0.0f, 640.0f, 0.0f, 1.0f);
     PSMTXIdentity(m);
@@ -2790,4 +3121,25 @@ void fn_1_1D694(DrawEntry7730* entry) {
     GXPosition3f32(entry->_08->width, 0.0f, -0.5f);
     GXColor1u32(0xFFFFFFFF);
     GXTexCoord2s16(1, 0);
+}
+
+// .text:0x0001D590 size:0x104
+void fn_1_1D590(void* src, Tex7730* tex, u8* map, s32 tileW, s32 tileH) {
+    s32 y;
+    s32 x;
+    s32 rows;
+    s32 cols;
+
+    memset(tex->image, 0, tex->width * tex->height);
+    rows = tex->height / tileH;
+    cols = tex->width / tileW;
+    for (y = 0; y < rows; y++) {
+        for (x = 0; x < cols; x++) {
+            if (x & lbl_803CBBC0) {
+                fn_80023F0C(src, tex, tileW * (map[y * cols + x] % cols), tileH * (map[y * cols + x] / cols), tileW,
+                            tileH, x * tileW, y * tileH);
+            }
+        }
+    }
+    DCStoreRange(tex->image, tex->width * tex->height);
 }

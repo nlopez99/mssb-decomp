@@ -1,6 +1,7 @@
 #include "game/UnknownHomes_Game.h"
 #include "header_rep_data.h"
 #include "menus/rep_0F60.h"
+#include "menus/rep_10C0.h"
 #include "static/UnknownHomes_Static.h"
 #include "C3/control.h"
 #include "C3/anim.h"
@@ -324,10 +325,6 @@ extern void fn_800B0A14_removeQueue(void);
 extern void fn_2_4E824(void);
 extern void fn_2_48DB4(void);
 extern void fn_2_93C64(void);
-extern void fn_2_94604(s32);
-extern void fn_2_9461C(s32);
-extern void fn_2_94634(s32);
-extern void fn_2_94854(s32);
 
 AramEntry0F60 lbl_2_data_2F990[13] = {
     { 0x0000040B, 0x4005A338, 0x19233000, 0x0003A448 },
@@ -777,7 +774,8 @@ static inline BOOL fn_2_8D270_isSpecial(s8 kind) {
 
 // .text:0x0008D270 size:0x76C
 // 95.58%: the target keeps the raw idx in r25 and p in r30, re-zero-extends idx for each call,
-// tests the special kinds through neg/or/srwi., and copies the bone loop's zero with mr.
+// tests the special kinds through neg/or/srwi. (as `return special != 0;` tested with `& 1`,
+// 96.13%, like rep_0568's hasAltAnims), and copies the bone loop's zero with mr.
 void fn_2_8D270(u8 idx) {
     Player0F60* p = &lbl_2_bss_340140->_0C04[idx];
     ActorRef0F60* ref = fn_800111D8(p);

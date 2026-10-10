@@ -180,12 +180,10 @@ extern void fn_8001CA40(int arg);
 extern void fn_80011BE4(int arg);
 extern void fn_80018B38(void);
 extern void fn_80035B50(int arg);
-extern void fn_3_9DC18(u8* list, int count, int arg2);
 extern void fn_3_1160B8(void);
 extern void fn_3_1160BC(void);
 extern void fn_3_1471C4(void);
 extern void fn_3_1471C0(void);
-extern void fn_3_9E078(int* order, int count, int arg2);
 extern void changeScene(u8, s16);
 extern void fn_800B0A5C_insertQueue(void (*callback)(void), s32 arg1);
 extern void fn_8006C398(struct UnkStats3448* stats);
@@ -456,12 +454,13 @@ s16 lbl_3_data_217A4[12] = {
     20, 30, 80, 180, 45, 4, 20, 30,
     120, 130, 90, 0,
 };
-s16 lbl_3_data_217BC[4] = { 256, -3, -1024, 0 };
-s16 lbl_3_data_217C4[2] = { 257, 257 };
-u8 lbl_3_data_217C8[4] = { 15, 20, 30, 50 };
-f32 lbl_3_data_217CC = 11723.279f;
-s16 lbl_3_data_217D0[2] = { 770, 513 };
-u8 lbl_3_data_217D4[4] = { 30, 25, 15, 15 };
+// Per-AI-strength byte tables read by rep_34B0's fn_3_12DDCC.
+s8 lbl_3_data_217BC[8] = { 1, 0, -1, -3, -4, 0, 0, 0 };
+u8 lbl_3_data_217C4[4] = { 1, 1, 1, 1 };
+s8 lbl_3_data_217C8[4] = { 15, 20, 30, 50 };
+s8 lbl_3_data_217CC[4] = { 70, 55, 45, 30 };
+s8 lbl_3_data_217D0[4] = { 3, 2, 2, 1 };
+s8 lbl_3_data_217D4[4] = { 30, 25, 15, 15 };
 VecXZ lbl_3_data_217D8[4] = {
     { 1.5f, 0.0f },
     { 0.5f, 0.0f },

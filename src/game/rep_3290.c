@@ -8,6 +8,17 @@
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/rand.h"
 #include "string.h"
+#include "game/rep_D18.h"
+#include "game/rep_31A0.h"
+#include "game/rep_28A8.h"
+#include "game/rep_AC8.h"
+#include "game/rep_1188.h"
+#include "game/rep_1200.h"
+#include "game/rep_540.h"
+#include "game/rep_3090.h"
+#include "musyx/musyx.h"
+#include "game/rep_CC8.h"
+#include "game/sta_c4.h"
 
 typedef struct {
     /* 0x000 */ VecXYZ _000;
@@ -18,13 +29,30 @@ typedef struct {
     /* 0x03C */ f32 _03C;
     /* 0x040 */ u8 _040[0x50 - 0x40];
     /* 0x050 */ f32 _050;
-    /* 0x054 */ u8 _054[0x268 - 0x54];
+    /* 0x054 */ u8 _054[0x20D - 0x54];
+    /* 0x20D */ s8 _20D;
+    /* 0x20E */ u8 _20E[0x268 - 0x20E];
 } Unk3290Fielder; // size: 0x268
 
 extern Unk3290Fielder g_Fielders[9];
 extern struct {
     /* 0x00 */ s32 _00;
+    /* 0x04 */ u8 _04[0xAA - 0x04];
+    /* 0xAA */ u8 _AA;
 } g_Scores;
+
+extern struct {
+    /* 0x0 */ u8 _0[0x5];
+    /* 0x5 */ u8 _5;
+    /* 0x6 */ u8 _6;
+} g_UnkSimulation_31AC0;
+
+extern struct {
+    /* 0x00 */ u8 _00[0x13];
+    /* 0x13 */ u8 _13;
+} lbl_8037169C;
+
+extern u8 lbl_800EFBA4[0x10];
 
 extern s16 lbl_3_data_5F3C[4];
 extern f32 lbl_3_data_450C[18];
@@ -45,6 +73,459 @@ extern f32 lbl_3_data_219B8[19];
 
 extern void fn_8004C108(VecXYZ* pos, int arg1);
 extern void fn_800246D4(int (*compare)(const void*, const void*), void* src, void* dst, int size, int count);
+extern void Set_803cb848(int);
+extern void changeScene(u8, s16);
+extern int fn_3_6C938(int, int);
+extern void fn_3_1608F0(int, int, int);
+extern void minigamesSetSomePointers(void);
+extern void minigamesGXStuff(void);
+extern void minigamesSetSomePointers2(void);
+extern u8 lbl_3_common_bss_32234[6];
+extern u8 lbl_3_data_2127C[8][5];
+extern u8 lbl_3_data_2166C[5];
+extern u8 lbl_3_data_21671;
+extern s16 lbl_3_data_21672;
+extern struct {
+    /* 0x00 */ u8 _00[0x40];
+    /* 0x40 */ s16 _40;
+} lbl_3_common_bss_37400;
+
+// .text:0x001160BC size:0x5E0 mapped:0x80755150
+void fn_3_1160BC(void) {
+    switch (g_GameLogic.gameStatus) {
+    case 4:
+        fn_3_115C24();
+        break;
+    case 26:
+        fn_3_115BDC();
+        break;
+    case 6:
+        fn_3_115B5C();
+        break;
+    case 7:
+        fn_3_115AB4();
+        break;
+    case 0:
+        fn_3_115978();
+        break;
+    case 1:
+        fn_3_115540();
+        break;
+    case 25:
+        fn_3_1158B0();
+        break;
+    case 3:
+        fn_3_115738();
+        break;
+    case 15:
+        fn_3_115828();
+        break;
+    }
+}
+
+// .text:0x001160B8 size:0x4 mapped:0x8075514C
+void fn_3_1160B8(void) {}
+
+// .text:0x00115C24 size:0x494 mapped:0x80754CB8
+// The target saves one register fewer (four stw, not stmw r27) and keeps the coin loop's
+// counter in the register of the zero it stores, behind an explicit 0 < 100 guard.
+void fn_3_115C24(void) {
+    int i;
+    int n;
+    s8 fielder;
+    u8 strength;
+
+    if (g_GameLogic._125 == 0) {
+        fn_3_59A90();
+        g_GameLogic.secondaryGameMode = 4;
+        for (i = 0; i < 4; i++) {
+            g_Minigame.miniGameCurrentPoints[i] = 0;
+            g_Minigame.miniGameLatestPoints[i] = 0;
+            g_Minigame.minigamePoints_current_Latest[i][0] = 0;
+            g_Minigame.minigamePoints_current_Latest[i][1] = 0;
+            g_Minigame.minigameControlStruct._28[i] = -1;
+            g_Minigame.minigameFielderIndex[i] = -1;
+            g_Minigame._18FC[i] = -1;
+            g_Minigame._1900[i] = -1;
+            g_Minigame.minigameControlStruct._24[i] = 0;
+        }
+        g_Scores._00 = 0;
+        g_Minigame.turnNumberWithinRound = 0;
+        g_Minigame.pointsReqToWin_challenge = 0;
+        g_Minigame.rosterID = -1;
+        g_Minigame._17C0 = 0;
+        g_Minigame._1A37 = 0;
+        g_Minigame.miniGameTurnCounter = 0;
+        if (!g_Minigame.multiPlayerInd) {
+            g_Scores._AA = lbl_3_data_2166C[g_Minigame.soloMinigameDifficulty];
+            strength = lbl_3_data_2127C[g_Minigame.GameMode_MiniGame][g_Minigame.soloMinigameDifficulty];
+            for (i = 0; i < 4; i++) {
+                g_Minigame.minigameControlStruct.aIStrength[i] = strength;
+            }
+        } else {
+            if (g_Minigame._1A3C) {
+                for (i = 0; i < 4; i++) {
+                    g_Minigame.minigameControlStruct.aIStrength[i] = lbl_3_data_2127C[7][0];
+                }
+            }
+            g_Scores._AA = lbl_3_data_2166C[4];
+        }
+        n = 0;
+        for (i = 0; i < 4; i++) {
+            if (g_Minigame.minigameControlStruct.characterIndex[i] >= 0) {
+                g_Minigame.minigameControlStruct._28[n] = i;
+                fielder = n + 2;
+                g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]] = fielder;
+                g_Minigame.minigameControlStruct._14[n] = i;
+                g_Fielders[fielder]._20D = i;
+                n++;
+            }
+        }
+        fn_3_58870();
+        fn_3_114A88(TRUE);
+        for (i = 0; i < 7; i++) {
+            g_Minigame.wallBallWalls[i]._28 = 0;
+            g_Minigame.wallBallWalls[i].wallPos = i;
+            g_Minigame.wallIndexTracker[i] = i;
+        }
+        g_Minigame.wallBallGameState = 0;
+        g_Minigame._1A80 = 0;
+        g_Minigame._1A78 = 0;
+        for (i = 0; i < 2; i++) {
+            g_Minigame.wallBallSpecialWallPos[i] = (i & 1) ? 0 : 6;
+        }
+        g_Minigame.wallBallPitcherRotationCounter = 0;
+        g_Minigame.wallBallRotatePitchersInd = 0;
+        g_Minigame.wallBall_hitNoteBlock = 0;
+        g_Minigame.wallBall_hitBowserWall = 0;
+        g_Minigame._1A8B = -1;
+        g_Minigame.wallBall_UnknownAlways0 = 0;
+        g_Minigame._1A8C[0] = 0;
+        for (i = 0; i < 100; i++) {
+            g_Minigame.wallBall_coinsVisibleInd[i] = 0;
+        }
+        minigamesSetSomePointers();
+        minigamesGXStuff();
+        minigamesSetSomePointers2();
+        fn_3_F8ABC();
+        g_GameLogic._125++;
+    } else {
+        lbl_3_common_bss_32234[1] = 1;
+        fn_3_5A6D4(5);
+    }
+}
+
+// .text:0x00115BDC size:0x48 mapped:0x80754C70
+void fn_3_115BDC(void) {
+    sndFXStartEx(0x1BD, lbl_800EFBA4[6], 0x3F, 0);
+    fn_3_114A88(TRUE);
+    fn_3_5A6D4(6);
+}
+
+// .text:0x00115B5C size:0x80 mapped:0x80754BF0
+void fn_3_115B5C(void) {
+    g_Scores._00++;
+    g_Minigame.turnNumberWithinRound = 0;
+    fn_3_5A6D4(7);
+    if (g_Minigame.multiPlayerInd || g_Minigame._1A3C || g_Minigame.soloMinigameDifficulty != 3) {
+        fn_3_10F550(4, 0);
+    }
+}
+
+// .text:0x00115AB4 size:0xA8 mapped:0x80754B48
+void fn_3_115AB4(void) {
+    g_Minigame.minigamePlayerSelectedOrder = g_Minigame.minigameControlStruct._14[g_Minigame.turnNumberWithinRound];
+    g_GameLogic.pre_PostMiniGameInd = 1;
+    g_Minigame.miniGameLatestPoints[0] = 0;
+    g_Minigame.miniGameLatestPoints[1] = 0;
+    g_Minigame.miniGameLatestPoints[2] = 0;
+    g_Minigame.miniGameLatestPoints[3] = 0;
+    fn_3_F578();
+    fn_3_753E8(FALSE);
+    fn_3_6EBB4(g_Minigame.minigamePlayerSelectedOrder);
+    g_Batter.batPosition2.x = maybeInitialBatPos.x;
+    g_Batter.batPosition2.y = maybeInitialBatPos.y;
+    g_Batter.batPosition2.z = maybeInitialBatPos.z;
+    fn_3_5A6D4(0);
+}
+
+// .text:0x00115978 size:0x13C mapped:0x80754A0C
+void fn_3_115978(void) {
+    fn_3_1158F8();
+    g_Minigame.turnOverStatus = 0;
+    g_Minigame.ballStoppedBreakingWallsInd = 0;
+    g_Minigame.postBallStoppedCounter = 0;
+    g_Minigame.wallBallPitchPower = 0;
+    g_Minigame.wallBallPitchPowerRemaining = 0;
+    g_Minigame.wallBall_hitNoteBlock = 0;
+    g_Minigame.wallBall_hitBowserWall = 0;
+    g_Minigame._1A8B = -1;
+    g_Ball.totalFramesAtPlay = 0;
+    if (g_Minigame.miniGameTurnCounter == 0) {
+        if (g_GameLogic.pre_PostMiniGameInd) {
+            g_GameLogic.minigameLastTurnSuccessInd = 1;
+            g_GameLogic.hudElementLoadingInd = 1;
+        } else {
+            g_GameLogic.minigameLastTurnSuccessInd = 0;
+        }
+        g_GameLogic.pre_PostMiniGameInd = 0;
+    } else if (g_Minigame.soloMinigameDifficulty != 3) {
+        g_Minigame.wallBallPitcherRotationCounter = 0;
+        g_Minigame.wallBallRotatePitchersInd = 1;
+        fn_3_114A88(FALSE);
+    } else {
+        g_GameLogic.minigameLastTurnSuccessInd = 0;
+    }
+    changeScene(1, 6);
+    fn_3_5A6D4(1);
+}
+
+// .text:0x001158F8 size:0x80 mapped:0x8075498C
+void fn_3_1158F8(void) {
+    fn_3_6EBB4(g_Minigame.minigamePlayerSelectedOrder);
+    fn_3_F1DC();
+    fn_3_751B4();
+    fn_3_58870();
+    memset(g_Minigame._1D7C, 0, 0x78);
+    Set_803cb848(1);
+    g_FieldingLogic._0AE = 0;
+    g_UnkSimulation_31AC0._5 = 0;
+    g_UnkSimulation_31AC0._6 = 4;
+}
+
+// .text:0x001158B0 size:0x48 mapped:0x80754944
+void fn_3_1158B0(void) {
+    if (g_Scores._00 >= g_Scores._AA) {
+        fn_3_5A6D4(0xF);
+    } else {
+        fn_3_5A6D4(6);
+    }
+}
+
+// .text:0x00115828 size:0x88 mapped:0x807548BC
+void fn_3_115828(void) {
+    fn_3_DE4FC();
+    if (g_Minigame.soloMinigameDifficulty <= 2 && !g_Minigame.multiPlayerInd) {
+        if (g_Minigame.minigameControlStruct._1C[g_Minigame._1908] == 1 &&
+            g_Minigame.challenge_minigame_haven_tWonYetIndicator == 0) {
+            g_Minigame._1A37 = 1;
+        } else {
+            g_Minigame._1A37 = 2;
+        }
+    }
+    fn_3_5A6D4(0xE);
+}
+
+// .text:0x00115738 size:0xF0 mapped:0x807547CC
+void fn_3_115738(void) {
+    switch (g_GameLogic._125) {
+    case 0:
+        changeScene(1, 6);
+        g_GameLogic._125 = 1;
+        break;
+    case 1:
+        if (g_GameLogic.FrameCountOfCurrentPitch >= lbl_3_data_18C48[2] ||
+            (g_GameLogic.FrameCountOfCurrentPitch >= lbl_3_data_18C48[1] && fn_3_6C938(1, 0x1100))) {
+            changeScene(3, 6);
+            g_GameLogic._125 = 2;
+        }
+        break;
+    case 2:
+        if (lbl_8037169C._13) {
+            fn_3_FBD70();
+            fn_3_FBD58();
+            g_GameLogic._125 = 3;
+        }
+        break;
+    case 3:
+        fn_3_5A6D4(7);
+        break;
+    }
+}
+
+static inline void clearWallFlags(void) {
+    s8 j;
+
+    j = 0;
+    do {
+        g_Minigame._1DC4[j] = 0;
+        j++;
+    } while (j < 4);
+}
+
+static inline void updateCoins(void) {
+    int i;
+
+    for (i = 0; i < 100; i++) {
+        if (g_Minigame.wallBall_coinsVisibleInd[i]) {
+            g_Minigame.wallBall_coinsVisibleFrameCounter[i]++;
+            g_Minigame.wallBall_coinCoordinates[i].x += g_Minigame.wallBall_coinVelocity[i].x;
+            g_Minigame.wallBall_coinCoordinates[i].y += g_Minigame.wallBall_coinVelocity[i].y;
+            g_Minigame.wallBall_coinCoordinates[i].z += g_Minigame.wallBall_coinVelocity[i].z;
+            g_Minigame.wallBall_coinVelocity[i].y -= lbl_3_data_21634[2];
+            if (g_Minigame.wallBall_coinCoordinates[i].y < lbl_3_data_219B8[14]) {
+                g_Minigame.wallBall_coinCoordinates[i].y = lbl_3_data_219B8[14];
+                g_Minigame.wallBall_coinVelocity[i].y = -g_Minigame.wallBall_coinVelocity[i].y * lbl_3_data_21634[3];
+                g_Minigame.wallBall_coinVelocity[i].x *= lbl_3_data_21634[4];
+                g_Minigame.wallBall_coinVelocity[i].z *= lbl_3_data_21634[4];
+            }
+            if (g_Minigame.wallBall_coinsVisibleFrameCounter[i] > lbl_3_data_2167C[4]) {
+                g_Minigame.wallBall_coinsVisibleInd[i] = 0;
+            }
+        }
+    }
+}
+
+// .text:0x00115540 size:0x1F8 mapped:0x807545D4
+void fn_3_115540(void) {
+
+    if (fn_3_108854() == 0) {
+        if (g_Minigame.wallBallRotatePitchersInd) {
+            fn_3_114A88(FALSE);
+        } else if (g_Minigame.wallBallGameState == 2) {
+            fn_3_1133C4();
+            fn_3_75560();
+            clearWallFlags();
+            fn_3_113A48();
+        }
+        if (g_Minigame.ballStoppedBreakingWallsInd) {
+            if (g_Minigame.postBallStoppedCounter < 0x7FFE) {
+                g_Minigame.postBallStoppedCounter++;
+            } else {
+                g_Minigame.postBallStoppedCounter = 0x7FFF;
+            }
+        }
+        fn_3_2EA24();
+        if (g_Minigame.wallBallGameState == 0) {
+            fn_3_114384();
+            fn_3_1500C8();
+        } else if (g_Minigame.wallBallGameState == 1) {
+            fn_3_114204();
+        } else if (g_Minigame.wallBallGameState == 2) {
+            fn_3_113F14();
+            fn_3_113D20();
+        }
+        updateCoins();
+        fn_3_115108();
+    }
+}
+
+// .text:0x00115108 size:0x438 mapped:0x8075419C
+void fn_3_115108(void) {
+    BOOL done = FALSE;
+    s16 mult;
+    int points;
+    s16 lost;
+    s16 i;
+    s16 k;
+
+    if (g_Pitcher.pitcherActionState == 4) {
+        if (g_Pitcher.currentStateFrameCounter > 0x4A) {
+            done = TRUE;
+        } else if (g_Minigame.soloMinigameDifficulty == 3 && g_Pitcher.currentStateFrameCounter == 0x4A) {
+            g_Minigame._1A8C[0] = 1;
+        }
+    } else if (g_Minigame.postBallStoppedCounter > lbl_3_data_2167C[2]) {
+        done = TRUE;
+    } else if (g_Minigame.soloMinigameDifficulty == 3 && g_Minigame.postBallStoppedCounter == lbl_3_data_2167C[2]) {
+        g_Minigame._1A8C[0] = 1;
+    }
+    if (done) {
+        if (!g_Minigame.wallBall_hitBowserWall) {
+            mult = 1;
+            if ((g_Minigame.multiPlayerInd || g_Minigame._1A3C || g_Minigame.soloMinigameDifficulty != 3) &&
+                g_Scores._00 == g_Scores._AA) {
+                mult = lbl_3_data_21672;
+            }
+            if (g_Minigame.wallBall_hitNoteBlock == 1) {
+                points = g_Minigame.wallBall_UnknownAlways0 + lbl_3_data_21654[10] * mult;
+                g_Minigame.miniGameCurrentPoints[g_Minigame.minigamePlayerSelectedOrder] += points;
+                g_Minigame.wallBall_UnknownAlways0 = 0;
+            } else {
+                points = g_Minigame.miniGameLatestPoints[g_Minigame.minigamePlayerSelectedOrder] * mult;
+                g_Minigame.miniGameCurrentPoints[g_Minigame.minigamePlayerSelectedOrder] += points;
+            }
+        } else {
+            points = 0;
+            if (g_Minigame.multiPlayerInd || g_Minigame._1A3C || g_Minigame.soloMinigameDifficulty != 3) {
+                lost = g_Minigame.miniGameCurrentPoints[g_Minigame.minigamePlayerSelectedOrder] / 2;
+                g_Minigame.miniGameCurrentPoints[g_Minigame.minigamePlayerSelectedOrder] -= lost;
+                for (i = 0; i < 4; i++) {
+                    if (i != g_Minigame.minigamePlayerSelectedOrder) {
+                        g_Minigame.miniGameCurrentPoints[i] += lost / 3;
+                    }
+                }
+                points = -lost;
+            }
+        }
+        if (!g_d_GameSettings.exhibitionMatchInd && g_Minigame.minigamePlayerSelectedOrder == lbl_3_common_bss_37400._40) {
+            fn_3_1608F0(1, points, g_Minigame.wallBall_hitNoteBlock);
+        }
+        g_Minigame.wallBallSomeXPos = g_Pitcher.pitcherCoord.x;
+        g_Minigame.wallBallSomeZPos = g_Pitcher.pitcherCoord.z;
+        g_Minigame.turnNumberWithinRound++;
+        if (g_Minigame.turnNumberWithinRound >= g_Minigame.miniGameNumberOfParticipants) {
+            g_Minigame.turnNumberWithinRound -= g_Minigame.miniGameNumberOfParticipants;
+            g_Scores._00++;
+            if (!g_Minigame.multiPlayerInd && !g_Minigame._1A3C && g_Minigame.soloMinigameDifficulty == 3) {
+                g_Scores._00--;
+                if (g_Minigame.wallBall_hitNoteBlock == 1) {
+                    if (g_Scores._AA < lbl_3_data_21671) {
+                        g_Scores._AA++;
+                    }
+                } else {
+                    g_Scores._AA--;
+                    if (g_Minigame.wallBall_hitBowserWall) {
+                        for (k = 0; k < 1; k++) {
+                            if (g_Scores._AA == 0) {
+                                break;
+                            }
+                            g_Scores._AA--;
+                        }
+                    }
+                }
+            }
+        }
+        fn_3_1500C8();
+        if (g_Scores._00 > g_Scores._AA) {
+            sndFXStartEx(0x1BE, lbl_800EFBA4[7], 0x3F, 0);
+            fn_3_5A6D4(0xF);
+        } else {
+            g_Minigame.wallBallGameState = 0;
+            fn_3_5A6D4(7);
+            if ((g_Minigame.multiPlayerInd || g_Minigame._1A3C || g_Minigame.soloMinigameDifficulty != 3) &&
+                g_Minigame.turnNumberWithinRound == 0) {
+                fn_3_10F550(4, 0);
+            }
+        }
+    }
+}
+
+// .text:0x0011502C size:0xDC mapped:0x807540C0
+void fn_3_11502C(void) {
+    if (g_Minigame.turnOverStatus == 1) {
+        g_Minigame.turnOverStatus = 2;
+        g_GameLogic.CountdownUntilFade = lbl_3_data_2167C[0];
+    }
+    if (--g_GameLogic.CountdownUntilFade == 7) {
+        changeScene(3, 6);
+    }
+    if (g_GameLogic.CountdownUntilFade <= 0) {
+        fn_3_114FC0();
+    }
+}
+
+// .text:0x00114FC0 size:0x6C mapped:0x80754054
+void fn_3_114FC0(void) {
+    g_GameLogic.pre_PostMiniGameInd = 1;
+    g_GameLogic.minigameLastTurnSuccessInd = 1;
+    g_GameLogic.hudLoadingRelated = 1;
+    if (++g_Minigame.turnNumberWithinRound >= g_Minigame.miniGameNumberOfParticipants) {
+        fn_3_5A6D4(0x19);
+    } else {
+        fn_3_5A6D4(7);
+    }
+}
 
 // .text:0x00114A88 size:0x538 mapped:0x80753B1C
 void fn_3_114A88(BOOL instant) {

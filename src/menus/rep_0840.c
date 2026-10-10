@@ -1,5 +1,10 @@
 #include "header_rep_data.h"
 #include "menus/rep_0840.h"
+#include "menus/rep_09B8.h"
+#include "menus/rep_0B08.h"
+#include "menus/rep_0F60.h"
+#include "menus/rep_1028.h"
+#include "menus/rep_10C0.h"
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/vec.h"
@@ -205,8 +210,6 @@ extern u8 fn_8006862C(s32, s32);
 extern void fn_8006C6C4(void);
 extern BOOL fn_8006C79C(s32 index);
 
-extern void fn_2_72054(s32, u8);
-extern s32 fn_2_8CC88(s32);
 extern struct {
     /* 0x00 */ Vec _00;
     /* 0x0C */ u8 _0C[0x14 - 0xC];
@@ -237,23 +240,11 @@ extern void fn_2_45E48(void);
 extern s32 fn_2_44F14(s32);
 extern void fn_2_46D34(s32);
 extern void fn_2_46D94(s16*, s16*, s32, s32, s32);
-extern void fn_2_50B0C(s16, s16);
-extern void fn_2_50CC0(s32);
 extern void fn_2_44504(void);
 extern void fn_2_450E4(void);
 extern void fn_2_45354(void);
-extern void fn_2_6AABC(s32, Vec*);
-extern void fn_2_6AF80(s32, u8);
-extern s32 fn_2_6AF9C(s32);
 extern void fn_2_46C2C(s32, Vec*);
 extern void fn_2_4A6E8(void);
-extern void fn_2_8F758(s32, u8);
-extern void fn_2_90428(s32);
-extern void fn_2_92654(s32, u8);
-extern void fn_2_94604(s32);
-extern void fn_2_9461C(s32);
-extern void fn_2_94634(s32);
-extern void fn_2_94854(s32);
 
 AramEntry0840 lbl_2_data_12298 = { { 0x00000000, 0x000150CE, 0x08E98800, 0x000150D0 } };
 s16 lbl_2_data_122A8[4][2] = { { 3, 0 }, { 2, 1 }, { 3, 1 }, { 4, 1 } };

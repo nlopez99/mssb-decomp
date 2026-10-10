@@ -3,6 +3,17 @@
 
 #include "mssbTypes.h"
 
+struct UnkBarrelCell34B0;
+
+void fn_3_12DB54(void);
+void fn_3_12DB80(void);
+BOOL fn_3_12DD88(void);
+void fn_3_12DDCC(void);
+int fn_3_12E084(const void* a, const void* b);
+void fn_3_12E17C(s8* hits, s16* points, u8 lookahead);
+u8 fn_3_12E384(struct UnkBarrelCell34B0* cells, s8 idx, u8 colour);
+void fn_3_12E808(void);
+void fn_3_12E83C(void);
 void fn_3_12E8FC(void);
 void fn_3_12EB10(void);
 u8 fn_3_12ED80(void);

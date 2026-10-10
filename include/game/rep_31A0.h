@@ -26,6 +26,15 @@ typedef struct UnkRecord3448 {
     /* 0x6 */ s16 _06;
 } UnkRecord3448; // size: 0x8
 
+extern u8 lbl_3_data_21268[8];
+// Indexed by AI strength (rep_34B0's fn_3_12DDCC)
+extern s8 lbl_3_data_217BC[8];
+extern u8 lbl_3_data_217C4[4];
+extern s8 lbl_3_data_217C8[4];
+extern s8 lbl_3_data_217CC[4];
+extern s8 lbl_3_data_217D0[4];
+extern s8 lbl_3_data_217D4[4];
+
 void fn_3_106DFC(void);
 BOOL fn_3_106E50(void);
 void fn_3_106EB0(void);

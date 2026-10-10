@@ -6,6 +6,9 @@
 
 struct UnkObj3310;
 
+void fn_3_11669C(void);
+void fn_3_1166CC(void);
+void fn_3_11678C(void);
 void fn_3_116840(void);
 void fn_3_1169D0(void);
 void fn_3_116B38(void);

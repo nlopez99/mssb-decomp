@@ -193,8 +193,6 @@ static s8 lbl_1_bss_2FAA;
 static u16 lbl_1_bss_2FA8;
 
 // .text:0x00009AB0 size:0x3F0
-// Differs only in registers: task takes r28 and the BC8 base r29, the target the
-// reverse; locals, declaration order and fn_1_90E4's form did not change it.
 void fn_1_9AB0(void) {
     Task0250* task = lbl_803CC1B8;
 
@@ -213,7 +211,7 @@ void fn_1_9AB0(void) {
         break;
     case 1:
         if (lbl_1_bss_2FC4 > 11) {
-            task->_10 = 2;
+            ((Task0250*)lbl_803CC1B8)->_10 = 2;
         } else if (fn_80035838(&lbl_1_data_F0C[lbl_1_bss_2FC4], lbl_1_bss_2FC4) != 0) {
             lbl_1_bss_2FC4++;
         }
