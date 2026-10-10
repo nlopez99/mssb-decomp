@@ -11251,14 +11251,16 @@ void fn_2_1CF94(void) {
 }
 
 // .text:0x0001C860 size:0x734
-// 97.35%: in case 2 the target keeps lbl_800E8558's flag byte in a register and tests it
-// again with `cmpwi` before the mission table read; register numbers differ in its loops.
+// 99.57%: in case 2 the target tests entry->_3 == 1 a second time (`cmpwi` on the byte
+// loaded for the outer test) where this build folds it; task and chr swap r28/r29.
 void fn_2_1C860(void) {
     MenuTask0788* task = lbl_803CC1B8;
     MenuCharacter0788* chr;
     MenuCharEntry0788* entry;
+    s16 mission;
     s32 j;
     s32 i;
+    u8 id;
 
     switch (task->_28) {
     case 0:
@@ -11314,7 +11316,8 @@ void fn_2_1C860(void) {
         chr = &lbl_2_bss_1A8248->_0000[lbl_2_bss_1A824C->_197716];
         if ((lbl_803C77B8[lbl_2_bss_1A824C->_197863]._02 & 0x103) && i != j && lbl_800E8558[lbl_2_bss_1A824C->_197716]._3 == 1) {
             entry = &lbl_800E8558[lbl_2_bss_1A824C->_197716];
-            if (entry->_3 == 1 && lbl_80109AE8[entry->_2][lbl_2_bss_1A824C->_197718]._0 != -1) {
+            mission = lbl_80109AE8[entry->_2][lbl_2_bss_1A824C->_197718]._0;
+            if (entry->_3 == 1 && mission != -1) {
                 if (chr->_09[lbl_2_bss_1A824C->_197718]._0 < 0) {
                     chr->_09[lbl_2_bss_1A824C->_197718]._0 = 0;
                 } else {
@@ -11327,13 +11330,15 @@ void fn_2_1C860(void) {
         }
         if (lbl_803C77B8[lbl_2_bss_1A824C->_197863]._02 & 0x40) {
             for (j = 0; j < 10; j++) {
-                if (lbl_800E8558[lbl_2_bss_1A824C->_197716]._3 == 1 && lbl_80109AE8[lbl_800E8558[lbl_2_bss_1A824C->_197716]._2][j]._0 != -1) {
+                id = lbl_800E8558[lbl_2_bss_1A824C->_197716]._2;
+                if (lbl_800E8558[lbl_2_bss_1A824C->_197716]._3 == 1 && lbl_80109AE8[id][j]._0 != -1) {
                     chr->_09[j]._0 = 0;
                 }
             }
         } else if (lbl_803C77B8[lbl_2_bss_1A824C->_197863]._02 & 0x20) {
             for (j = 0; j < 10; j++) {
-                if (lbl_800E8558[lbl_2_bss_1A824C->_197716]._3 == 1 && lbl_80109AE8[lbl_800E8558[lbl_2_bss_1A824C->_197716]._2][j]._0 != -1) {
+                id = lbl_800E8558[lbl_2_bss_1A824C->_197716]._2;
+                if (lbl_800E8558[lbl_2_bss_1A824C->_197716]._3 == 1 && lbl_80109AE8[id][j]._0 != -1) {
                     chr->_09[j]._0 = -2;
                 }
             }
