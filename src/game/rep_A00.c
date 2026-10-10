@@ -21,6 +21,7 @@
 #include "game/rep_9B0.h"
 #include "game/rep_D18.h"
 #include "game/rep_3090.h"
+#include "game/rep_3DA8.h"
 
 typedef struct {
     /* 0x00 */ Vec _00;
@@ -216,7 +217,6 @@ UnkA00Task* fn_800B0A5C_insertQueue(void (*)(void), s32);
 void fn_80052798(s32);
 BOOL fn_3_6B4C8(void);
 BOOL fn_3_6C938(s32, s32);
-BOOL fn_3_165D24(void);
 void QueueCharacterAnimation(int actor, int anim, u8, u8, s16, u8, int);
 void AnimateCharacter(int actor, int anim, u8, u8, u8, s16, u8, int);
 

@@ -22,6 +22,7 @@
 #include "Dolphin/mtx.h"
 #include "Dolphin/rand.h"
 #include "string.h"
+#include "game/rep_3D50.h"
 
 extern struct {
     /* 0x00 */ s32 _00;
@@ -84,7 +85,6 @@ extern s8 lbl_3_data_214F4[4][3];
 extern s16 lbl_3_data_217A4[12];
 
 extern void fn_8003A540(int);
-extern void fn_3_1608F0(int, int, int);
 extern void changeScene(u8, s16);
 extern int fn_3_6C938(int, int);
 extern void minigamesSetSomePointers(void);

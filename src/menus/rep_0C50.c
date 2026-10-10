@@ -3,6 +3,8 @@
 #include "static/UnknownHomes_Static.h"
 #include "string.h"
 #include "musyx/musyx.h"
+#include "menus/rep_0318.h"
+#include "menus/rep_0568.h"
 
 typedef struct UnkTask0C50 {
     /* 0x00 */ void (*_00)(void);
@@ -245,10 +247,6 @@ extern void fn_8004F964(void);
 extern void fn_80053FE8(void);
 extern void fn_80051D00(void);
 extern void changeScene(u8, s16);
-extern s32 fn_2_8794(s32 flag, s32 value);
-extern void fn_2_CCE0(u8 index);
-extern void fn_2_16A74(s32 port, s32 flag);
-extern void fn_2_102C8(u8 index);
 extern s8 translateStarPitchHitIndex(u8 index);
 extern s16 translateStarPitch(u8 index);
 extern s16 translateStarSwing(u8 index);

@@ -6,6 +6,7 @@
 #include "string.h"
 #include "stdarg.h"
 #include "C3/control.h"
+#include "challenge/rep_00B0.h"
 
 extern void fn_80048C1C(void);
 extern void fn_80048C28(void);
@@ -26,8 +27,6 @@ extern void fn_800AD038(void* arg0);
 extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_800B472C(void* arg0);
 extern void fn_800A7D4C(s32 arg0, void* arg1);
-extern void fn_1_196C(void);
-extern void fn_1_4DD8(u16* data);
 extern void* ARAMTransfer(void* entry, s32 arg1, s32 arg2, u32 aram);
 extern void fn_800B9AA8(void* light);
 extern void LITAlloc(void** light);

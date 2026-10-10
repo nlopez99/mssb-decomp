@@ -10,6 +10,7 @@
 #include "stdlib.h"
 #include "string.h"
 #include "menus/rep_08E8.h"
+#include "menus/rep_0898.h"
 
 typedef struct MenuEntry0788 {
     /* 0x0 */ void (*fn)(struct MenuTask0788* task, struct MenuItem0788* item);
@@ -505,7 +506,6 @@ extern void fn_2_38538(void);
 extern void fn_2_38F48(void);
 extern void fn_2_39408(void);
 extern void fn_2_40B90(void);
-extern void fn_2_42388(void);
 extern void fn_2_515DC(s32 arg0);
 extern void fn_800203E0(int, s8);
 extern void changeScene(u8, s16);
@@ -524,7 +524,6 @@ extern void fn_2_3D878(void);
 extern void fn_2_3DAB8(void);
 extern void fn_2_3DC60(void);
 extern void fn_2_3DDC4(void);
-extern void fn_2_422FC(s32 index);
 extern struct {
     /* 0x00 */ u8 _00[0x30];
     /* 0x30 */ u16 _30;

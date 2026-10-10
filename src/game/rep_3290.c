@@ -19,6 +19,7 @@
 #include "musyx/musyx.h"
 #include "game/rep_CC8.h"
 #include "game/sta_c4.h"
+#include "game/rep_3D50.h"
 
 typedef struct {
     /* 0x000 */ VecXYZ _000;
@@ -76,7 +77,6 @@ extern void fn_800246D4(int (*compare)(const void*, const void*), void* src, voi
 extern void Set_803cb848(int);
 extern void changeScene(u8, s16);
 extern int fn_3_6C938(int, int);
-extern void fn_3_1608F0(int, int, int);
 extern void minigamesSetSomePointers(void);
 extern void minigamesGXStuff(void);
 extern void minigamesSetSomePointers2(void);

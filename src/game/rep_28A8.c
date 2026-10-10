@@ -28,6 +28,7 @@
 #include "game/m_sound.h"
 #include "musyx/musyx.h"
 #include "Dolphin/rand.h"
+#include "game/rep_3D50.h"
 
 extern struct {
     /* 0x000 */ s32 _000;
@@ -219,7 +220,6 @@ extern void fn_800203E0(int, int);
 extern BOOL fn_80016F7C(void);
 extern void fn_3_E1964(void);
 extern void fn_3_1E154(void);
-extern void fn_3_1608F0(int, int, int);
 extern void possiblyTransitionBlackScreen(void);
 extern void* fn_800B0A5C_insertQueue(void (*callback)(void), s32 arg1);
 

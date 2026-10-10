@@ -10,6 +10,7 @@
 #include "Dolphin/OS/OSCache.h"
 #include "string.h"
 #include "Dolphin/rand.h"
+#include "challenge/rep_0010.h"
 
 extern void* lbl_803CC1B8;
 
@@ -95,10 +96,8 @@ extern void fn_800A7D4C(s32, void*);
 extern void fn_80038CD0(u8 count, void* arg1, struct RopeNode7730* nodes, f32 arg3, f32 arg4);
 extern void fn_80038B48(void* arg0, struct RopeNode7730* nodes, u8 count, Vec* force);
 extern void fn_80038E2C(void* arg0);
-extern void fn_1_AF4(s32 arg0, s32 arg1, f32 arg2);
 extern void fn_1_272DC(void* arg0, s32 arg1);
 extern void fn_1_273D8(void* arg0);
-extern void fn_1_F2C(s32 arg0, s32 arg1, s32 arg2);
 extern void fn_1_121D4(void* arg0);
 extern void fn_1_26D28(void* arg0, u16 held, u16 pressed, u16 repeat, s8* stick);
 extern void fn_1_27330(void* arg0);
