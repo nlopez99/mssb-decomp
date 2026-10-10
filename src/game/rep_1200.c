@@ -1060,8 +1060,8 @@ void fn_3_72CA8(void) {
 }
 
 // .text:0x00072768 size:0x540 mapped:0x806B17FC
-// The setup before the frame loop is scheduled differently (the target loads cur.z once for
-// dz and the loop, and 18.44f early); the loop and everything after it match.
+// The setup before the frame loop is still scheduled differently (94.18%; this statement order
+// was the best of all 5040 orders of the setup block, the source's earlier one 89.28%).
 void fn_3_72768(void) {
     InputStruct* input = &g_Controls[g_GameLogic.teams[g_GameLogic.teamFielding]];
     s16* pitchData;
@@ -1080,17 +1080,17 @@ void fn_3_72768(void) {
         input = &g_Controls[g_Minigame.minigameControlStruct.characterIndex[g_Minigame.minigamePlayerSelectedOrder]];
     }
     pitchData = lbl_3_data_5D6C[g_Pitcher.specialPitchTypeCode];
-    z = g_Pitcher.ballCurrentPosition.z;
-    g_Pitcher.ballVelocity.z = -(g_Pitcher.pitchSpeed / g_Pitcher.pitchSpeedScaler);
     g_Pitcher.moundZ = 18.44f;
+    g_Pitcher.pitchZ_whenAirResistanceStarts = g_Pitcher.moundZ * (100 - pitchData[4]) / 100.0f;
+    g_Pitcher.ballVelocity.z = -(g_Pitcher.pitchSpeed / g_Pitcher.pitchSpeedScaler);
+    g_Pitcher.airResistance_veloAdj = 0.001f * pitchData[3];
+    z = g_Pitcher.ballCurrentPosition.z;
     g_Pitcher.ballVelocity.x = -((g_Pitcher.pitchStartingPosition_AIMaxCurve - g_Pitcher.ballCurrentPosition.x) *
                                  g_Pitcher.ballVelocity.z /
                                  (g_Pitcher.ballCurrentPosition.z - g_Pitcher.frontOfPlateZ));
-    g_Pitcher.pitchZ_whenAirResistanceStarts = g_Pitcher.moundZ * (100 - pitchData[4]) / 100.0f;
     g_Pitcher.ballVelocity.y = -((g_Pitcher.eggBallBounceYHeight - g_Pitcher.ballCurrentPosition.y) *
                                  g_Pitcher.ballVelocity.z /
                                  (g_Pitcher.ballCurrentPosition.z - g_Pitcher.frontOfPlateZ));
-    g_Pitcher.airResistance_veloAdj = 0.001f * pitchData[3];
     vz = g_Pitcher.ballVelocity.z;
     for (frame = 1; frame < 0xFFFF; frame++) {
         if (z <= g_Pitcher.moundZ && !g_Pitcher.pitchInAirInd) {
