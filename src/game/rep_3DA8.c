@@ -3,6 +3,7 @@
 #include "game/UnknownHomes_Game.h"
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/rand.h"
+#include "game/rep_3310.h"
 
 typedef struct ScoutFlagTable {
     /* 0x0 */ u8 _0[4];
@@ -32,7 +33,21 @@ typedef struct {
     /* 0x47 */ u8 _47;
     /* 0x48 */ u8 _48;
     /* 0x49 */ s8 _49;
+    /* 0x4A */ s8 _4A;
 } UnkBss37400;
+
+typedef struct {
+    /* 0x00 */ u8 _00[0x26];
+    /* 0x26 */ u8 _26;
+    /* 0x27 */ u8 _27[0x28 - 0x27];
+} Unk3DA8Actor; // size: 0x28
+
+extern struct {
+    /* 0x0000 */ u8 _0000[0x2D94];
+    /* 0x2D94 */ Unk3DA8Actor* _2D94;
+    /* 0x2D98 */ u8 _2D98[0x3078 - 0x2D98];
+    /* 0x3078 */ u16 _3078;
+} lbl_8036E548;
 
 extern UnkBss37400 lbl_3_common_bss_37400;
 
@@ -133,6 +148,79 @@ extern struct {
     /* 0x0000 */ u8 _0000[0x46E4];
     /* 0x46E4 */ s32 _46E4;
 } lbl_8034E9A0;
+
+// .text:0x001663AC size:0x9C mapped:0x807A5440
+void fn_3_1663AC(void) {
+    int i;
+
+    if (g_GameLogic.secondaryGameMode == 10 || g_GameLogic.secondaryGameMode == 18) {
+        if (lbl_8036E548._3078 != 0) {
+            for (i = 0; i < lbl_8036E548._3078; i++) {
+                if (&lbl_8036E548._2D94[i] != NULL) {
+                    lbl_8036E548._2D94[i]._26 = 0;
+                }
+            }
+        }
+    } else if (g_Practice.practiceLevel == 4) {
+        fn_3_11AB2C();
+    }
+}
+
+// .text:0x001659A0 size:0x384 mapped:0x807A4A34
+BOOL fn_3_1659A0(s32 type) {
+    StarMissionCompletionTracker* tracker = &starMissionCompletionTracker;
+    UnkBss37400* bss = &lbl_3_common_bss_37400;
+    u8 mission = tracker->_441C;
+    u8 level = tracker->_4415;
+    BOOL found;
+    s32 r;
+    s8 chance;
+
+    if (bss->_46 == 2 || bss->_46 == 1) {
+        found = fn_3_163A7C();
+    } else {
+        found = fn_3_163BD4();
+    }
+    if (!found) {
+        return FALSE;
+    }
+    r = rand() % 100;
+    if (bss->_4A == 0) {
+        chance = lbl_80109420[type]._0[level];
+    } else {
+        chance = lbl_80109420[type]._0[level + 4];
+    }
+    if (r <= chance) {
+        return TRUE;
+    }
+    return FALSE;
+}
+
+// .text:0x0016598C size:0x14 mapped:0x807A4A20
+void fn_3_16598C(void) {
+    lbl_3_common_bss_37400._4A = 0;
+}
+
+// .text:0x00165978 size:0x14 mapped:0x807A4A0C
+void fn_3_165978(void) {
+    lbl_3_common_bss_37400._4A = 0;
+}
+
+// .text:0x001658F0 size:0x88 mapped:0x807A4984
+void fn_3_1658F0(void) {
+    UnkBss37400* bss = &lbl_3_common_bss_37400;
+    s32 i;
+
+    for (i = 0; i < 9; i++) {
+        bss->_12[i]._1 = 0;
+        bss->_12[i]._0 = 0;
+        bss->_12[i]._2 = 0;
+        bss->_12[i]._3 = 0;
+        bss->_12[i]._4 = 0;
+        bss->_00[i]._0 = 0;
+        bss->_00[i]._1 = 0;
+    }
+}
 
 // .text:0x00164A74 size:0xE7C mapped:0x807A3B08
 void fn_3_164A74(void) {
