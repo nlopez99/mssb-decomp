@@ -730,6 +730,13 @@ typedef struct _GameControlOptions {
     /*0x006*/ bool _6;
 } GameControlOptions; // size: 0x7
 
+// Per-team options read from 0x7, two bytes ahead of controlOptions.
+typedef struct _GameTeamOptions {
+    /*0x000*/ u8 _0;
+    /*0x001*/ u8 _1;
+    /*0x002*/ u8 _2[5];
+} GameTeamOptions; // size: 0x7
+
 typedef struct _GameInitOptions {
     /*0x000*/ u8 inningSetting;
     /*0x001*/ u8 _1;
@@ -738,9 +745,14 @@ typedef struct _GameInitOptions {
     /*0x004*/ u8 starSkillsSetting;
     /*0x005*/ u8 runsNeededForMercy;
     /*0x006*/ u8 _6;
-    /*0x007*/ u8 _7;
-    /*0x008*/ u8 _8;
-    /*0x009*/ GameControlOptions controlOptions[4];
+    union {
+        struct {
+            /*0x007*/ u8 _7;
+            /*0x008*/ u8 _8;
+            /*0x009*/ GameControlOptions controlOptions[4];
+        };
+        /*0x007*/ GameTeamOptions teamOptions[4]; // per team, from 0x7
+    };
     /*0x025*/ u8 _25;
     /*0x026*/ u8 _26;
     /*0x027*/ u8 _27;
