@@ -1330,8 +1330,6 @@ void fn_2_7D85C(UnkTask0C50* task, s32 index) {
 }
 
 // .text:0x0007BFF8 size:0x1864
-// 99.97%: registers only: the first isAnimDone result in the second part goes to n's r27 in
-// the target and r22 in the base, and expected is set after the last call's arguments.
 void fn_2_7BFF8(UnkTask0C50* task, s32 index) {
     s32 a;
     s32 b;
@@ -1602,16 +1600,17 @@ void fn_2_7BFF8(UnkTask0C50* task, s32 index) {
     }
     if (lbl_803C66B0._0D[index] == 1) {
         s32 n;
-        s32 expected;
+        s32 expected = 0;
 
         if (g_d_GameSettings.GameModeSelected != 5) {
             n = isAnimDone(task, index, 20);
+            expected += 2;
             n += isAnimDone(task, index + 2, 20);
             if (g_d_GameSettings._10 == 0 && index == 0) {
                 n += isAnimDone(task, index + 0x6A, 30);
                 n += isAnimDone(task, index + 0xC, 10);
                 n += isAnimDone(task, index + 0xE, 14);
-                expected = 6;
+                expected += 4;
                 n += isAnimDone(task, index + 0x12, 10);
             } else {
                 n += isAnimDone(task, index + 0x1C, 10);
@@ -1619,15 +1618,16 @@ void fn_2_7BFF8(UnkTask0C50* task, s32 index) {
                 n += isAnimDone(task, index + 0xC, 30);
                 n += isAnimDone(task, index + 0xE, 14);
                 n += isAnimDone(task, index + 0x12, 30);
-                expected = 8;
+                expected += 6;
                 n += isAnimDone(task, index + 0x89, 5);
             }
         } else {
             n = isAnimDone(task, index, 20);
+            expected += 2;
             n += isAnimDone(task, index + 2, 20);
             n += isAnimDone(task, index + 0x1C, 10);
             n += isAnimDone(task, index + 0x6A, 10);
-            expected = 5;
+            expected += 3;
             n += isAnimDone(task, index + 0x89, 5);
         }
         expected++;
