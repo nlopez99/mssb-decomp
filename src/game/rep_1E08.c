@@ -2851,8 +2851,8 @@ void fn_3_BDCA4(void) {
 }
 
 // .text:0x000BD8FC size:0x3A8 mapped:0x806FC990
-// The first branch loads -1 twice; the target copies color0 into color1 (mr r30,r31),
-// and the last branch forms 0xFFFFFF00 twice where the target reuses color1's register.
+// The first branch loads -1 twice where the target copies color0 into color1 (mr r30,r31),
+// and the last branch's `or` takes its operands in the other order.
 void fn_3_BD8FC(UnkSpark1E08* spark) {
     Mtx m;
     Vec dir;
@@ -2880,8 +2880,7 @@ void fn_3_BD8FC(UnkSpark1E08* spark) {
             color0 = 0xFFFFFFFF;
             color1 = ((spark->_044 - (n - 18)) * 0x7F8 / 8) | 0xFFFFFF00;
         } else {
-            color1 = 0xFFFFFF00;
-            color0 = ((n - 2 - spark->_044) * 255 / 8) | color1;
+            color0 = ((n - 2 - spark->_044) * 255 / 8) | (color1 = 0xFFFFFF00);
         }
     }
     scale = 0.00078125f * spark->_048;
