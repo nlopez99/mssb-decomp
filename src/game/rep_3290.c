@@ -127,12 +127,12 @@ void fn_3_1160BC(void) {
 void fn_3_1160B8(void) {}
 
 // .text:0x00115C24 size:0x494 mapped:0x80754CB8
-// 97.25%: the target indexes g_Fielders with n + 2 as stored (no clrlwi) and without strength
+// 97.51%: the target indexes g_Fielders with n + 2 as stored (no clrlwi) and without strength
 // reduction; an int fielder strength-reduces, a u8 one truncates.
 void fn_3_115C24(void) {
+    u8 fielder;
     s32 i;
     int n;
-    u8 fielder;
     u8 strength;
 
     if (g_GameLogic._125 == 0) {
