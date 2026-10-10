@@ -4486,8 +4486,8 @@ void fn_1_E098(void) {
                 frame = &lbl_1_bss_6940[lbl_1_bss_5F73]._45;
                 *animId = lbl_1_bss_3218[task->_15]._0;
                 *frame = lbl_1_bss_3218[task->_15]._2;
-                elem = &lbl_8036E548._0060->_34[lbl_1_bss_5F73];
                 anim = lbl_8036E548._0C04[lbl_1_bss_5F73]._010[*animId];
+                elem = &lbl_8036E548._0060->_34[lbl_1_bss_5F73];
                 elem->_04 = anim;
                 elem->_0E = *frame;
                 elem->_5C = 0.0f;
@@ -4677,6 +4677,7 @@ void fn_1_D9B8(void) {
     UnkList0610* list;
     Unk0060Elem* elem;
     UnkAnimRef0610* anim;
+    Unk6940* state;
     f32 start;
     s16 limit;
     s32 id;
@@ -4700,12 +4701,13 @@ void fn_1_D9B8(void) {
                 task->_15 = 0;
             }
         } while ((id = lbl_1_bss_3218[task->_15]._0) < 0);
+        state = &lbl_1_bss_6940[lbl_1_bss_5F73];
         lbl_1_bss_6940[lbl_1_bss_5F73]._44 = id;
-        lbl_1_bss_6940[lbl_1_bss_5F73]._45 = lbl_1_bss_3218[task->_15]._2;
-        elem = &lbl_8036E548._0060->_34[lbl_1_bss_5F73];
+        state->_45 = lbl_1_bss_3218[task->_15]._2;
         anim = lbl_8036E548._0C04[lbl_1_bss_5F73]._010[lbl_1_bss_6940[lbl_1_bss_5F73]._44];
+        elem = &lbl_8036E548._0060->_34[lbl_1_bss_5F73];
         elem->_04 = anim;
-        elem->_0E = lbl_1_bss_6940[lbl_1_bss_5F73]._45;
+        elem->_0E = state->_45;
         elem->_5C = 0.0f;
         elem->_58 = 1;
         elem->_5A = elem->_59 = anim != NULL;
@@ -4715,10 +4717,11 @@ void fn_1_D9B8(void) {
         while (i--) {
             UnkTimer0610* timer = &lbl_1_bss_3258[task->_15][i];
             if (timer->_08 != 0) {
+                u16 time = lbl_1_bss_67B8[0]->_0C;
                 lbl_1_bss_67B8[i] = timer;
                 if (lbl_1_bss_3218[task->_15]._6 != 0 && lbl_1_bss_67B8[i]->_18 < start) {
                     lbl_1_bss_67B8[i]->_00 = start;
-                    lbl_1_bss_67B8[i]->_0C = lbl_1_bss_67B8[0]->_0C;
+                    lbl_1_bss_67B8[i]->_0C = time;
                 } else {
                     lbl_1_bss_67B8[i]->_00 = 0.0f;
                     lbl_1_bss_67B8[i]->_0C = 0;
