@@ -15,7 +15,7 @@ struct Unk67E0;
 struct Unk0060;
 struct UnkNode0610;
 
-void fn_1_C2DC(struct UnkNode0610* node, char* text, s32 depth, s32 maxDepth, s32 indent, s32* selected, s32* top, s32* lines);
+s32 fn_1_C2DC(struct UnkNode0610* node, char* text, s32 depth, s32 maxDepth, s32 indent, s32* selected, s32* top, s32* lines);
 void fn_1_C5A8(void);
 void fn_1_C5AC(struct UnkCamera0610* arg0);
 void fn_1_C9E0(struct UnkCamera0610* arg0);

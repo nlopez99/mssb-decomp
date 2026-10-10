@@ -27,7 +27,10 @@ typedef struct LITObj {
 // Animation or track list: a count and a list of nodes
 typedef struct UnkNode0610 {
     /* 0x00 */ u16 _00;
-    /* 0x02 */ u8 _02[0x14 - 0x2];
+    /* 0x02 */ u8 _02[0x8 - 0x2];
+    /* 0x08 */ struct UnkNode0610* _08; // next sibling
+    /* 0x0C */ u8 _0C[0x10 - 0xC];
+    /* 0x10 */ struct UnkNode0610* _10; // first child
     /* 0x14 */ void* _14;
     /* 0x18 */ u8 _18[0x64 - 0x18];
     /* 0x64 */ f32 _64;
@@ -215,6 +218,22 @@ typedef struct UnkTaskState0610 {
 } UnkTaskState0610;
 extern u8 lbl_803CBBC0;
 
+extern void fn_8003A2C0(void);
+extern u32 fn_80024D2C(UnkTimer0610* timer);
+
+extern struct {
+    /* 0x00 */ f32 _00;
+    /* 0x04 */ f32 _04;
+    /* 0x08 */ f32 _08;
+    /* 0x0C */ f32 _0C;
+    /* 0x10 */ u8 _10[0x14 - 0x10];
+    /* 0x14 */ u16 _14;
+    /* 0x16 */ u8 _16;
+    /* 0x17 */ u8 _17;
+    /* 0x18 */ u8 _18[0x1D - 0x18];
+    /* 0x1D */ u8 _1D;
+} lbl_803C5090;
+
 extern struct {
     /* 0x000 */ u8 _000[0x715];
     /* 0x715 */ s8 _715;
@@ -234,7 +253,7 @@ extern UnkBurst0610 lbl_80108B90;
 
 typedef struct UnkCamera0610 {
     /* 0x00 */ u8 _00[0x4];
-    /* 0x04 */ void* _04;
+    /* 0x04 */ void (*_04)(struct UnkCamera0610* arg0);
     /* 0x08 */ Mtx _08;
 } UnkCamera0610; // size: 0x38
 
@@ -336,6 +355,11 @@ typedef struct UnkFileEntry0610 {
     /* 0x8 */ u32 _8;
     /* 0xC */ u32 _C;
 } UnkFileEntry0610;
+
+typedef struct UnkDraw0610 {
+    /* 0x0 */ s32 _0;
+    /* 0x4 */ void (*_4)(void);
+} UnkDraw0610;
 
 extern u8 lbl_800F787C[];
 
@@ -1493,35 +1517,33 @@ static s16 lbl_1_data_A978[54] = {
     50, 51, 52, 53,
 };
 static UnkCamera0610 lbl_1_data_A9E4[2] = {
-    0, 0, 0, 0, (void*)fn_1_11714, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-    0.0f, 0, 0, 0, 0, (void*)fn_1_11714, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-    0.0f, 0.0f,
+    0, 0, 0, 0, fn_1_11714, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0, 0, 0, 0, fn_1_11714, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
 };
 static UnkCamera0610 lbl_1_data_AA54[2] = {
-    0, 0, 0, 0x02, (void*)fn_1_1125C, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-    0.0f, 0.0f, 0, 0, 0, 0x02, (void*)fn_1_1125C, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-    0.0f, 0.0f, 0.0f, 0.0f,
+    0, 0, 0, 0x02, fn_1_1125C, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 0, 0, 0, 0x02, fn_1_1125C, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 0.0f,
 };
 static UnkCamera0610 lbl_1_data_AAC4[2] = {
-    0, 0, 0, 0x02, (void*)fn_1_10CEC, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-    0.0f, 0.0f, 0, 0, 0, 0x02, (void*)fn_1_10CEC, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-    0.0f, 0.0f, 0.0f, 0.0f,
+    0, 0, 0, 0x02, fn_1_10CEC, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 0, 0, 0, 0x02, fn_1_10CEC, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 0.0f,
 };
 static UnkCamera0610 lbl_1_data_AB34[2] = {
-    0, 0, 0, 0x02, (void*)fn_1_C5AC, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-    0.0f, 0.0f, 0, 0, 0, 0x02, (void*)fn_1_C5AC, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-    0.0f, 0.0f, 0.0f, 0.0f,
+    0, 0, 0, 0x02, fn_1_C5AC, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 0, 0, 0, 0x02, fn_1_C5AC, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 0.0f,
 };
 static f32 lbl_1_data_ABA4 = 0.5f;
 static u8 lbl_1_data_ABA8 = 0x01;
 static char* lbl_1_data_ABAC[2] = {
     "MARIO CRAY", "MARIO GRASS",
 };
-static void* lbl_1_data_ABB4[18] = {
-    (void*)fn_1_15170, (void*)fn_1_14FB8, (void*)fn_1_165E0, (void*)fn_1_15CE0, (void*)fn_1_15760,
-    (void*)fn_1_1540C, (void*)fn_1_151F8, (void*)fn_1_E098, (void*)fn_1_EA20, (void*)fn_1_106C4,
-    (void*)fn_1_10458, (void*)fn_1_10044, (void*)fn_1_FB98, (void*)fn_1_F6E4, (void*)fn_1_F37C,
-    (void*)fn_1_F2F8, (void*)fn_1_F0D0, (void*)fn_1_F040,
+static void (*lbl_1_data_ABB4[18])(void) = {
+    fn_1_15170, fn_1_14FB8, fn_1_165E0, fn_1_15CE0, fn_1_15760, fn_1_1540C, fn_1_151F8, fn_1_E098,
+    fn_1_EA20, fn_1_106C4, fn_1_10458, fn_1_10044, fn_1_FB98, fn_1_F6E4, fn_1_F37C, fn_1_F2F8,
+    fn_1_F0D0, fn_1_F040,
 };
 static char lbl_1_data_ABFC[0x40] = {
     0x43, 0x41, 0x4D, 0x45, 0x52, 0x41, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -1533,17 +1555,21 @@ static char lbl_1_data_AC3C[0x40] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0,
 };
-static void* lbl_1_data_AC7C[5] = {
-    (void*)0x00000002, (void*)fn_1_17954, (void*)0x00000002, (void*)fn_1_17954, (void*)0xC0000000,
+static UnkDraw0610 lbl_1_data_AC7C[2] = {
+    2, fn_1_17954, 2, fn_1_17954,
+};
+static u32 lbl_1_data_AC8C[1] = {
+    0xC0000000,
 };
 static s8 lbl_1_data_AC90 = -1;
 static u8 lbl_1_data_AC91 = 0x0A;
 static char* lbl_1_data_AC94[2] = {
     "raw", "reduct",
 };
-static void* lbl_1_data_AC9C[28] = {
-    (void*)0x00000002, (void*)fn_1_12F18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (void*)0x00000002,
-    (void*)fn_1_12F18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+static UnkCamera0610 lbl_1_data_AC9C[2] = {
+    0, 0, 0, 0x02, fn_1_12F18, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 0, 0, 0, 0x02, fn_1_12F18, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 0.0f,
 };
 static Vec lbl_1_data_AD0C = {
     0.0f, 0.0f, 0.0f,
@@ -2168,9 +2194,8 @@ static UnkPair0610 lbl_1_data_F4E8[4] = {
     0x14, 0x1A, 0x3C, 0x3D, 0x3C, 0x3D, 0x4A, 0x4B,
 };
 static UnkCamera0610 lbl_1_data_F4F8[2] = {
-    0, 0, 0, 0, (void*)fn_1_C9E0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-    0.0f, 0, 0, 0, 0, (void*)fn_1_C9E0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-    0.0f, 0.0f,
+    0, 0, 0, 0, fn_1_C9E0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0, 0, 0, 0, fn_1_C9E0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
 };
 static f32 lbl_1_data_F568 = 0.5f;
 static u16 lbl_1_data_F56C = 0x14;
@@ -2353,6 +2378,44 @@ void fn_1_17954(void) {
     Mtx44 m;
     C_MTXFrustum(m, -0.000175f, 0.000175f, 0.00025f, -0.00025f, 0.001f, 512.0f);
     GXSetProjection(m, GX_PERSPECTIVE);
+}
+
+// .text:0x0001770C size:0x248
+void fn_1_1770C(void) {
+    u8 active;
+    lbl_1_data_ABB4[lbl_1_bss_5F71]();
+    active = 0;
+    if (lbl_1_bss_5F71 != 0 && (lbl_1_bss_5F68 == 0 || lbl_1_bss_5F64 != 0.0f)) {
+        active = 1;
+    }
+    lbl_1_bss_3215 = active;
+    if (lbl_1_bss_5F5C == 1) {
+        fn_800B0A5C_insertQueue(fn_1_107B8, 0xFF);
+        lbl_1_bss_5F5C = 2;
+    }
+    fn_1_179CC();
+    PSMTXCopy(lbl_1_bss_67E0._000, lbl_1_bss_68FC._10);
+    fn_1_129D0();
+    PSMTXCopy(lbl_1_bss_68FC._10, lbl_1_data_AAC4[lbl_803CBBC0]._08);
+    fn_800A7D4C(7, &lbl_1_data_AAC4[lbl_803CBBC0]);
+    if (lbl_1_bss_3078 != 0) {
+        fn_800A7D4C(7, &lbl_1_data_AB34[lbl_803CBBC0]);
+    }
+    PSMTXCopy(lbl_1_bss_68FC._10, lbl_1_data_AA54[lbl_803CBBC0]._08);
+    fn_800A7D4C(7, &lbl_1_data_AA54[lbl_803CBBC0]);
+    if (lbl_1_data_1F1A != 0) {
+        PSMTXCopy(lbl_1_bss_68FC._10, lbl_1_data_A9E4[lbl_803CBBC0]._08);
+        fn_800A7D4C(9, &lbl_1_data_A9E4[lbl_803CBBC0]);
+    }
+    lbl_803C5090._1D = 1;
+    lbl_803C5090._00 = 1.0f;
+    lbl_803C5090._04 = 1.0f;
+    lbl_803C5090._17 = 0xFF;
+    lbl_803C5090._08 = 0.0f;
+    lbl_803C5090._0C = 0.0f;
+    lbl_803C5090._14 = 0x1C0;
+    fn_8003A2C0();
+    fn_800A7D4C(0, &lbl_1_data_AC7C[lbl_803CBBC0]);
 }
 
 // .text:0x000176EC size:0x20
@@ -4293,6 +4356,96 @@ void fn_1_D13C(void) {
     }
 }
 
+// .text:0x0000CDC8 size:0x374
+void fn_1_CDC8(void) {
+    UnkList0610** lists[2];
+    UnkTimer0610* timers[2];
+    u16 ids[2];
+    Unk8036E548Actor* actor;
+    UnkList0610* list;
+    u16 id;
+    s32 pair;
+    s32 both;
+    s32 i;
+    s32 j;
+    if (lbl_1_bss_30B8 != 0) {
+        lbl_1_bss_30B8 = 0;
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    actor = &lbl_8036E548._0C04[lbl_1_bss_5F73];
+    id = actor->_162[25];
+    fn_800B2BA8(lbl_8036E548._0060->_34[lbl_1_bss_5F73]._00, actor->_162[19], NULL, 0);
+    fn_800B2BA8(lbl_8036E548._0060->_34[lbl_1_bss_5F73]._00, id, NULL, 0);
+    switch (lbl_1_bss_68FC._40[lbl_1_bss_5F73]) {
+    case 0x27:
+        break;
+    case 0x26:
+        pair = 0;
+        break;
+    case 0x12:
+        pair = 3;
+        break;
+    case 0x28:
+        pair = 1;
+        break;
+    case 0x29:
+        pair = 2;
+        break;
+    }
+    lists[0] = &lbl_1_bss_5F7C[0]->_34[1]._00;
+    actor->_25A = (lbl_1_bss_6940[lbl_1_bss_5F73]._44 < 2) == (lbl_1_bss_5F69 == 0);
+    timers[lbl_1_bss_5F69] = lbl_1_bss_67B8[2];
+    timers[!lbl_1_bss_5F69] = lbl_1_bss_67B8[1];
+    ids[0] = lbl_8036E548._0C04[lbl_1_bss_5F73]._162[lbl_1_data_F4E8[pair]._2];
+    ids[1] = lbl_8036E548._0C04[lbl_1_bss_5F73]._162[lbl_1_data_F4E8[pair]._0];
+    lists[1] = &lbl_1_bss_5F7C[0]->_34[0]._00;
+    i = 0;
+    switch (lbl_1_bss_6940[lbl_1_bss_5F73]._44) {
+    case 0:
+    case 1:
+    case 5:
+    case 6:
+        both = 1;
+        break;
+    case 2:
+    case 3:
+    case 4:
+        both = 0;
+        break;
+    }
+    do {
+        if (timers[i] != NULL) {
+            if (fn_80024D2C(timers[i]) & 0x20000000) {
+                list = *lists[i];
+                for (j = 0; j < list->_06; j++) {
+                    if (list->_18[j]->_14 != NULL) {
+                        fn_800B2BA8(lbl_8036E548._0060->_34[lbl_1_bss_5F73]._00, ids[i], list, j);
+                        break;
+                    }
+                }
+            } else {
+                fn_800B2BA8(lbl_8036E548._0060->_34[lbl_1_bss_5F73]._00, ids[i], NULL, 0);
+            }
+        }
+        i++;
+    } while ((both != 0 || lbl_1_bss_68FC._40[lbl_1_bss_5F73] == 38) && i < 2);
+    if (i == 1) {
+        if (lbl_1_bss_5F69 != 0) {
+            lists[0] = &lbl_1_bss_5F7C[0]->_34[2]._00;
+        } else {
+            lists[0] = &lbl_1_bss_5F7C[0]->_34[2]._00;
+        }
+        list = *lists[0];
+        for (j = 0; j < list->_06; j++) {
+            if ((*lists[0])->_18[j]->_14 != NULL) {
+                fn_800B2BA8(lbl_8036E548._0060->_34[lbl_1_bss_5F73]._00, ids[i], list, j);
+                break;
+            }
+        }
+    }
+}
+
 // .text:0x0000CCC8 size:0x100
 void fn_1_CCC8(void) {
     UnkTask0610* task = lbl_803CC1B8;
@@ -4366,3 +4519,37 @@ void fn_1_C9E0(UnkCamera0610* arg0) {
 
 // .text:0x0000C5A8 size:0x4
 void fn_1_C5A8(void) {}
+
+// .text:0x0000C2DC size:0x2CC
+s32 fn_1_C2DC(UnkNode0610* node, char* text, s32 depth, s32 maxDepth, s32 indent, s32* selected, s32* top,
+              s32* lines) {
+    if (*top == 0) {
+        text[depth] = '+';
+        text[depth + 1] = 0;
+        *lines -= 1;
+        if (*lines == 0) {
+            return indent;
+        }
+    } else {
+        *top -= 1;
+    }
+    *selected -= 1;
+    if (node->_10 != NULL) {
+        if (node->_08 != NULL) {
+            text[depth] = '|';
+        } else {
+            text[depth] = ' ';
+        }
+        indent = fn_1_C2DC(node->_10, text, depth + 1, maxDepth, indent, selected, top, lines);
+        if (*lines == 0) {
+            return indent;
+        }
+    }
+    if (node->_08 != NULL) {
+        indent = fn_1_C2DC(node->_08, text, depth, maxDepth, indent, selected, top, lines);
+        if (*lines == 0) {
+            return indent;
+        }
+    }
+    return indent;
+}
