@@ -7,6 +7,7 @@
 #include "C3/actor.h"
 #include "C3/anim.h"
 #include "Dolphin/gx.h"
+#include "Dolphin/mtxext.h"
 #include "Dolphin/rand.h"
 #include "string.h"
 #include "game/rep_3AE8.h"
@@ -221,10 +222,10 @@ typedef struct {
     /* 0x3E4 */ UnkMarker1E08 _3E4;
     /* 0x40C */ s32 _40C[3];
     /* 0x418 */ u8 _418;
-    /* 0x419 */ s8 _419;
+    /* 0x419 */ u8 _419;
     /* 0x41A */ u8 _41A[0x41C - 0x41A];
     /* 0x41C */ Vec _41C;
-    /* 0x428 */ u8 _428[0x440 - 0x428];
+    /* 0x428 */ Vec _428[2];
     /* 0x440 */ Vec _440;
     /* 0x44C */ Vec _44C;
     /* 0x458 */ u8 _458[0x464 - 0x458];
@@ -264,6 +265,8 @@ typedef struct {
 typedef struct {
     /* 0x00 */ u8 _00[0x18];
     /* 0x18 */ UnkBone1E08** bones;
+    /* 0x1C */ u8 _1C[0x98 - 0x1C];
+    /* 0x98 */ u8 _98;
 } UnkSkeleton1E08;
 
 typedef struct {
@@ -280,6 +283,23 @@ typedef struct {
 } UnkFxShape1E08; // size: 0x54
 
 extern Unk1E08State lbl_3_common_bss_35154;
+
+typedef struct {
+    /* 0x00 */ u8 _00[0x48];
+    /* 0x48 */ Vec _48;
+    /* 0x54 */ u32 _54;
+    /* 0x58 */ u32 _58;
+    /* 0x5C */ u32 _5C;
+    /* 0x60 */ u8 _60[0x69 - 0x60];
+    /* 0x69 */ u8 _69;
+} UnkSprite1E08;
+
+typedef struct {
+    /* 0x00 */ UnkSprite1E08* _00;
+    /* 0x04 */ u8 _04[0x8 - 0x4];
+} UnkSpriteRef1E08; // size: 0x8
+
+extern UnkSpriteRef1E08 lbl_80371C30[];
 
 typedef struct {
     /* 0x0000 */ u8 _0000[0x70];
@@ -1964,6 +1984,8 @@ extern void fn_800B2160(s32 mode);
 extern void fn_800B21A8(void);
 extern void DrawSprite_TexObj(UnkSpriteVtx1E08* vtx, GXTexObj* tex, s32 arg2);
 extern void fn_8003A550(s32 idx, VecXYZ* pos, Vec* dir, BOOL flag);
+extern void fn_800363D8(UnkTask1E08* task, s32 id, s32 part, s32 kind, s32 value);
+extern void fn_8003656C(UnkTask1E08* task, s32 id, s32 part, s32 kind, s32 value);
 
 // .text:0x000C07B0 size:0x60 mapped:0x806FF844
 void fn_3_C07B0(void) {
@@ -2539,7 +2561,207 @@ void fn_3_BEFF8(void) {
 
 // .text:0x000BE1D4 size:0xE24 mapped:0x806FD268
 void fn_3_BE1D4(void) {
-    return;
+    UnkTask1E08* task = lbl_803CC1B8;
+    UnkSkeleton1E08** skel;
+    UnkPlayer1E08* player;
+    s32 alpha;
+    s32 i;
+    Vec pos;
+
+    if (lbl_3_common_bss_35154._000 == NULL) {
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    if (lbl_3_common_bss_35154._3AC & 3) {
+        if (g_d_GameSettings._55 || lbl_3_common_bss_35154._479) {
+            lbl_80371C30[task->_14 + lbl_3_common_bss_35154._41A[0]]._00->_54 &= ~2;
+            lbl_80371C30[task->_14 + lbl_3_common_bss_35154._41A[0]]._00->_5C = 0;
+            lbl_3_common_bss_35154._3AC &= ~3;
+        } else {
+            lbl_80371C30[task->_14 + lbl_3_common_bss_35154._419]._00->_48.x = lbl_3_common_bss_35154._41C.x;
+            lbl_80371C30[task->_14 + lbl_3_common_bss_35154._419]._00->_48.y = lbl_3_common_bss_35154._41C.y;
+            lbl_80371C30[task->_14 + lbl_3_common_bss_35154._419]._00->_48.z = lbl_3_common_bss_35154._41C.z;
+            if (lbl_3_common_bss_35154._3AC & 1) {
+                if (lbl_3_common_bss_35154._419 == 4) {
+                    lbl_3_common_bss_35154._41A[0] = 3;
+                } else {
+                    lbl_3_common_bss_35154._41A[0] = lbl_3_common_bss_35154._419;
+                }
+                lbl_80371C30[task->_14 + lbl_3_common_bss_35154._41A[0]]._00->_54 |= 2;
+                lbl_3_common_bss_35154._3AC &= ~3;
+                lbl_3_common_bss_35154._3AC |= 2;
+                if (lbl_3_common_bss_35154._419 == 4) {
+                    lbl_3_common_bss_35154._3AC |= 0x40;
+                }
+            } else if ((lbl_80371C30[task->_14 + lbl_3_common_bss_35154._41A[0]]._00->_69 == 2 ? TRUE : FALSE) &&
+                       g_Ball.framesSinceHit > 0) {
+                lbl_80371C30[task->_14 + lbl_3_common_bss_35154._41A[0]]._00->_54 &= ~2;
+                lbl_80371C30[task->_14 + lbl_3_common_bss_35154._41A[0]]._00->_5C = 0;
+                lbl_3_common_bss_35154._3AC &= ~3;
+            }
+        }
+    }
+    if (lbl_3_common_bss_35154._3AC & 0x30) {
+        if (g_d_GameSettings._55 || lbl_3_common_bss_35154._479) {
+            lbl_80371C30[task->_14 + 7]._00->_54 &= ~2;
+            lbl_80371C30[task->_14 + 7]._00->_5C = 0;
+            lbl_80371C30[task->_14 + 8]._00->_54 &= ~2;
+            lbl_80371C30[task->_14 + 9]._00->_54 &= ~2;
+            lbl_80371C30[task->_14 + 8]._00->_5C = 0;
+            lbl_80371C30[task->_14 + 9]._00->_5C = 0;
+            lbl_3_common_bss_35154._3AC &= ~0x30;
+        } else {
+            skel = NULL;
+            for (i = 0; i < 9; i++) {
+                player = lbl_8036E548._2C50[i];
+                if (player != NULL && player->_252 == g_Pitcher.charID) {
+                    skel = fn_800111D8(player);
+                    break;
+                }
+            }
+            if (skel != NULL && !((*skel)->_98 & 9)) {
+                alpha = 0;
+            } else {
+                alpha = 0xFF;
+            }
+            PSMTXMultVec(fn_80052734(0)->view, &lbl_3_common_bss_35154._428[0], &pos);
+            PSMTX44MultVec(fn_80052734(0)->proj, &pos, &pos);
+            if (g_Stats.replayInd) {
+                pos.y = 0.0f;
+            }
+            pos.x *= 320.0f;
+            pos.y *= 224.0f;
+            for (i = 4; i < 10; i++) {
+                fn_800363D8(task, 8, i, 13, (s8)lbl_3_common_bss_35154._467[0] - 1);
+            }
+            for (i = 1; i < 5; i++) {
+                fn_8003656C(task, 6, i, 17, (s8)lbl_3_common_bss_35154._467[0] - 1);
+            }
+            if (lbl_3_common_bss_35154._3AC & 0x10) {
+                lbl_3_common_bss_35154._3AC &= ~0x30;
+                lbl_3_common_bss_35154._3AC |= 0x20;
+                lbl_80371C30[task->_14 + 7]._00->_48.x = 320.0f + pos.x;
+                lbl_80371C30[task->_14 + 7]._00->_48.y = 224.0f - pos.y;
+                lbl_80371C30[task->_14 + 7]._00->_48.z = 0.0f;
+                lbl_80371C30[task->_14 + 7]._00->_54 |= 2;
+                lbl_80371C30[task->_14 + 7]._00->_58 = (lbl_80371C30[task->_14 + 7]._00->_58 & 0xFFFFFF00) | (alpha & 0xFF);
+                playSoundEffect(0x1A5);
+            } else if ((lbl_80371C30[task->_14 + 7]._00->_5C >> 16) == 0x23) {
+                lbl_80371C30[task->_14 + 7]._00->_54 &= ~2;
+                lbl_80371C30[task->_14 + 7]._00->_5C = 0;
+                if ((s8)lbl_3_common_bss_35154._467[0] != 0) {
+                    lbl_80371C30[task->_14 + 8]._00->_48.x = 320.0f;
+                    lbl_80371C30[task->_14 + 8]._00->_48.y = 224.0f - pos.y;
+                    lbl_80371C30[task->_14 + 8]._00->_48.z = 0.0f;
+                    lbl_80371C30[task->_14 + 9]._00->_48.x = 320.0f;
+                    lbl_80371C30[task->_14 + 9]._00->_48.y = 224.0f;
+                    lbl_80371C30[task->_14 + 9]._00->_48.z = 0.0f;
+                    lbl_80371C30[task->_14 + 8]._00->_54 |= 2;
+                    lbl_80371C30[task->_14 + 9]._00->_54 |= 2;
+                    lbl_80371C30[task->_14 + 8]._00->_58 = (lbl_80371C30[task->_14 + 8]._00->_58 & 0xFFFFFF00) | (alpha & 0xFF);
+                    lbl_80371C30[task->_14 + 9]._00->_58 = (lbl_80371C30[task->_14 + 9]._00->_58 & 0xFFFFFF00) | (alpha & 0xFF);
+                    fn_3_BDE14();
+                    playSoundEffect(0x1A6);
+                } else {
+                    lbl_3_common_bss_35154._3AC &= ~0x30;
+                }
+            } else if ((lbl_80371C30[task->_14 + 8]._00->_5C >> 16) == 0x3C) {
+                lbl_80371C30[task->_14 + 8]._00->_54 &= ~2;
+                lbl_80371C30[task->_14 + 9]._00->_54 &= ~2;
+                lbl_80371C30[task->_14 + 8]._00->_5C = 0;
+                lbl_80371C30[task->_14 + 9]._00->_5C = 0;
+                lbl_3_common_bss_35154._3AC &= ~0x30;
+            }
+        }
+    }
+    if (lbl_3_common_bss_35154._3AC & 0xC0) {
+        if (g_d_GameSettings._55 || lbl_3_common_bss_35154._479) {
+            lbl_80371C30[task->_14 + 5]._00->_54 &= ~2;
+            lbl_80371C30[task->_14 + 6]._00->_54 &= ~2;
+            lbl_80371C30[task->_14 + 5]._00->_5C = 0;
+            lbl_80371C30[task->_14 + 6]._00->_5C = 0;
+            lbl_3_common_bss_35154._3AC &= ~0xC0;
+        } else if ((s8)lbl_3_common_bss_35154._467[0] != 0) {
+            PSMTXMultVec(fn_80052734(0)->view, &lbl_3_common_bss_35154._428[1], &pos);
+            PSMTX44MultVec(fn_80052734(0)->proj, &pos, &pos);
+            pos.x *= 320.0f;
+            pos.y *= 224.0f;
+            for (i = 4; i < 10; i++) {
+                fn_800363D8(task, 5, i, 13, (s8)lbl_3_common_bss_35154._467[0] - 1);
+            }
+            for (i = 1; i < 5; i++) {
+                fn_8003656C(task, 6, i, 17, (s8)lbl_3_common_bss_35154._467[0] - 1);
+            }
+            lbl_80371C30[task->_14 + 5]._00->_48.x = 320.0f;
+            lbl_80371C30[task->_14 + 5]._00->_48.y = 224.0f - pos.y;
+            lbl_80371C30[task->_14 + 5]._00->_48.z = 0.0f;
+            lbl_80371C30[task->_14 + 6]._00->_48.x = 320.0f;
+            lbl_80371C30[task->_14 + 6]._00->_48.y = 224.0f;
+            lbl_80371C30[task->_14 + 6]._00->_48.z = 0.0f;
+            if (lbl_3_common_bss_35154._3AC & 0x40) {
+                lbl_80371C30[task->_14 + 5]._00->_54 |= 2;
+                lbl_80371C30[task->_14 + 6]._00->_54 |= 2;
+                lbl_3_common_bss_35154._3AC &= ~0xC0;
+                lbl_3_common_bss_35154._3AC |= 0x80;
+            } else if ((lbl_80371C30[task->_14 + 5]._00->_5C >> 16) == 0x34) {
+                lbl_80371C30[task->_14 + 5]._00->_54 &= ~2;
+                lbl_80371C30[task->_14 + 6]._00->_54 &= ~2;
+                lbl_80371C30[task->_14 + 5]._00->_5C = 0;
+                lbl_80371C30[task->_14 + 6]._00->_5C = 0;
+                lbl_3_common_bss_35154._3AC &= ~0xC0;
+            }
+        } else {
+            lbl_3_common_bss_35154._3AC &= ~0xC0;
+        }
+    }
+    if (lbl_3_common_bss_35154._3AC & 0x300) {
+        if (g_d_GameSettings._55 || lbl_3_common_bss_35154._479) {
+            lbl_80371C30[task->_14 + 4]._00->_54 &= ~2;
+            lbl_80371C30[task->_14 + 4]._00->_5C = 0;
+            lbl_3_common_bss_35154._3AC &= ~0x300;
+        } else {
+            PSMTXMultVec(fn_80052734(0)->view, &lbl_3_common_bss_35154._428[1], &pos);
+            PSMTX44MultVec(fn_80052734(0)->proj, &pos, &pos);
+            pos.x *= 320.0f;
+            pos.y *= 224.0f;
+            lbl_80371C30[task->_14 + 4]._00->_48.x = 320.0f + pos.x;
+            lbl_80371C30[task->_14 + 4]._00->_48.y = 224.0f - pos.y;
+            lbl_80371C30[task->_14 + 4]._00->_48.z = 0.0f;
+            if (lbl_3_common_bss_35154._3AC & 0x100) {
+                lbl_80371C30[task->_14 + 4]._00->_54 |= 2;
+                lbl_3_common_bss_35154._3AC &= ~0x300;
+                lbl_3_common_bss_35154._3AC |= 0x200;
+                playSoundEffect(0x1A5);
+            } else if ((lbl_80371C30[task->_14 + 4]._00->_5C >> 16) == 0x23) {
+                lbl_80371C30[task->_14 + 4]._00->_54 &= ~2;
+                lbl_80371C30[task->_14 + 4]._00->_5C = 0;
+                lbl_3_common_bss_35154._3AC &= ~0x300;
+                playSoundEffect(0x1A6);
+            }
+        }
+    }
+    if (lbl_3_common_bss_35154._3AC & 0xC) {
+        if (g_d_GameSettings._55 || lbl_3_common_bss_35154._479) {
+            lbl_80371C30[task->_14 + 10]._00->_54 &= ~2;
+            lbl_80371C30[task->_14 + 10]._00->_5C = 0;
+            lbl_3_common_bss_35154._3AC &= ~0xC;
+            return;
+        }
+        lbl_80371C30[task->_14 + 10]._00->_48.x = lbl_3_common_bss_35154._3E4.pos.x;
+        lbl_80371C30[task->_14 + 10]._00->_48.y = lbl_3_common_bss_35154._3E4.pos.y;
+        lbl_80371C30[task->_14 + 10]._00->_48.z = lbl_3_common_bss_35154._3E4.pos.z;
+        if (lbl_3_common_bss_35154._3AC & 4) {
+            lbl_80371C30[task->_14 + 10]._00->_54 |= 2;
+            lbl_3_common_bss_35154._3AC &= ~0xC;
+            lbl_3_common_bss_35154._3AC |= 8;
+        } else if (lbl_3_common_bss_35154._3E4.visible == 0) {
+            lbl_80371C30[task->_14 + 10]._00->_54 &= ~2;
+            lbl_80371C30[task->_14 + 10]._00->_5C = 0;
+            lbl_3_common_bss_35154._3AC &= ~0xC;
+        } else if (lbl_80371C30[task->_14 + 10]._00->_69 == 2 ? TRUE : FALSE) {
+            lbl_80371C30[task->_14 + 10]._00->_5C = 0;
+        }
+    }
 }
 
 // .text:0x000BE174 size:0x60 mapped:0x806FD208
