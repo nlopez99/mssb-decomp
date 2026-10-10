@@ -77,18 +77,6 @@ extern u8 lbl_3_data_1C90[8];
 extern u8 lbl_3_data_1C98[2][5][3][4];
 extern f32 lbl_3_data_1D10[6];
 
-extern struct {
-    /* 0x000 */ u8 _000[0x168];
-    /* 0x168 */ s16 _168[2][10][2];
-    /* 0x1B8 */ u8 _1B8[0x202 - 0x1B8];
-    /* 0x202 */ u8 _202[2];
-    /* 0x204 */ u8 _204[0x20A - 0x204];
-    /* 0x20A */ u8 _20A[2][9];
-    /* 0x21C */ u8 _21C[2];
-} lbl_3_common_bss_34C90;
-
-extern s8 lbl_80354720[2][9][4];
-
 // .data shared with other units
 extern u8 lbl_3_data_1924[4][4];
 extern f32 lbl_3_data_4474[4];
@@ -877,27 +865,5 @@ void fn_3_1E3EC(void) {
         (g_RunningLogic._02 == 0x11 || g_RunningLogic._02 == 0x111) &&
         RandomInt_Game(100) < lbl_3_data_1C10[0][g_Batter.characterClass][g_AiLogic.aIBatterDifficulty]) {
         g_AiLogic.batterAIBuntInd = 1;
-    }
-}
-
-// .text:0x0001E178 size:0x1B0 mapped:0x8065D20C
-// Inlines fn_3_20AB0, which the target calls; it matches when that body is not in this file,
-// as do fn_3_1E154 and fn_3_1E328 (left out here), so 0x1E154-0x1E3EC is likely rep_868's.
-void fn_3_1E178(void) {
-    s32 i;
-    int t;
-    s32 j;
-
-    fn_3_20AB0();
-    for (i = 0; i < 10; i++) {
-        lbl_3_common_bss_34C90._168[g_GameLogic.homeTeamBattingInd_fieldingTeam][i][0] =
-            g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.homeTeamBattingInd_fieldingTeam][i][0];
-        lbl_3_common_bss_34C90._168[g_GameLogic.homeTeamBattingInd_fieldingTeam][i][1] =
-            g_GameLogic.battingOrderAndPositionMapping[g_GameLogic.homeTeamBattingInd_fieldingTeam][i][1];
-    }
-    for (t = 0; t < 2; t++) {
-        for (j = 0; j < 9; j++) {
-            lbl_3_common_bss_34C90._20A[t][j] = lbl_80354720[t][j][3];
-        }
     }
 }

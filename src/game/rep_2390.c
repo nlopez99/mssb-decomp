@@ -78,6 +78,7 @@ Unk2390Burst lbl_3_data_18268 = {
 };
 
 static void* lbl_3_bss_9FDC[15];
+static s32 lbl_3_bss_9FD8;
 
 extern void convertTextureHeader(void* tex);
 extern void fn_8002955C(Vec* pos, s32 arg1, Unk2390Burst* burst);
