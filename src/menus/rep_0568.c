@@ -1301,12 +1301,17 @@ void fn_2_16F78(u8 index) {
 }
 
 // .text:0x00016F0C size:0x6C
-// 85.56%: the target schedules the 0x27C multiply before the pose load and
-// keeps the index in r0; the s8 locals add no extsb only with _252 typed s8.
+// 92.15%: the target loads a, then b (no extsb), then forms player; here b is
+// extended and the row bases take one register higher. A no-op mask on b
+// (permuter) drops the extsb (96.59%), so b's conversion is still wrong.
 void fn_2_16F0C(u8 index) {
-    s8 a = lbl_8036E548._0C04[index]._252;
-    Player0568* player = &lbl_8036E548._0C04[index];
-    s8 b = lbl_8036E548._0C04[index]._254;
+    s8 b;
+    Player0568* player;
+    u8 a;
+
+    player = &lbl_8036E548._0C04[index];
+    b = lbl_8036E548._0C04[index]._254;
+    a = lbl_8036E548._0C04[index]._252;
 
     if (lbl_8036E548._0140[index]._D0 == -1) {
         lbl_8036E548._0140[index]._CF = a;
