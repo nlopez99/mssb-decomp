@@ -195,7 +195,7 @@ typedef struct Game0F60 {
     /* 0x00B4 */ s32 _00B4;
     /* 0x00B8 */ s32 _00B8;
     /* 0x00BC */ u8 _00BC[0x13C - 0xBC];
-    /* 0x013C */ s32 _013C;
+    /* 0x013C */ void* _013C;
     /* 0x0140 */ AnimState0F60 _0140[9];
     /* 0x08B4 */ u8 _08B4[0xC04 - 0x8B4];
     /* 0x0C04 */ Player0F60 _0C04[9];
@@ -295,7 +295,7 @@ extern void* ARAMTransfer(AramEntry0F60* entry, s32 arg1, s32 arg2, u32 aram);
 extern void fn_80052D70(void);
 extern void fn_80023B04(void);
 extern void fn_80014204(s16 count);
-extern s32 fn_80023AA4(void);
+extern void* fn_80023AA4(void);
 extern ActorRef0F60* fn_800111D8(Player0F60* player);
 extern f32 fn_800B4A44(ActorObj0F60* actor, u16 anim);
 extern void fn_800B2B54(ActorObj0F60* actor, u16 anim, s32 arg2);
