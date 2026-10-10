@@ -970,6 +970,9 @@ def run(args: argparse.Namespace, unit: Dict[str, Any], function: Optional[str],
         raise UsageError(f"{unit['name']} has no function named '{function}' in the target")
     status, target, rows = check_function(unit, func, target_syms, base_syms)
     percent = func.get("fuzzy_match_percent")
+    # A function written on the wrong side of a neighbour still pairs by name
+    inversions = [pair for pair in order_inversions(target_syms, base_syms) if function in pair]
+    in_order = not inversions
     draft = m2c_draft(unit, function, not args.no_build) if status == "missing" or args.m2c else None
 
     if args.json:
@@ -978,7 +981,8 @@ def run(args: argparse.Namespace, unit: Dict[str, Any], function: Optional[str],
             size=int(func["size"]),
             percent=percent,
             status=status,
-            matched=status == "match",
+            matched=status == "match" and in_order,
+            order_inversions=[list(pair) for pair in inversions],
             diff=[
                 {"mark": m, "offset": t.offset if t else None, "target": t.text if t else None, "base": b.text if b else None}
                 for m, t, b in rows
@@ -988,12 +992,15 @@ def run(args: argparse.Namespace, unit: Dict[str, Any], function: Optional[str],
         if draft is not None:
             result["m2c"] = draft
         print(json.dumps(result, indent=1))
-        return EXIT_MATCH if status == "match" else EXIT_MISMATCH
+        return EXIT_MATCH if status == "match" and in_order else EXIT_MISMATCH
 
     built = f"  (built in {result['build']['seconds']:.2f}s)" if "build" in result else ""
     shown = f"{percent:.2f}%" if percent is not None else "-"
     print(f"{unit['name']}  {result['source']}{built}")
     print(f"{function}  size {int(func['size']):#x}  {shown}  {status.upper()}")
+    for early, late in inversions:
+        print(f"order: {early} is emitted before {late}, unlike the target; move it in the source"
+              " (objdiff pairs by name, so only linking would show this)")
     if status == "missing":
         if defined_in_source(unit, function):
             print("in the source, but objdiff cannot pair it: usually a callee inlined into it"
@@ -1011,7 +1018,7 @@ def run(args: argparse.Namespace, unit: Dict[str, Any], function: Optional[str],
     if status != "match" or args.full:
         print_diff(rows, target_syms, base_syms, args.context, args.max_lines, args.full)
     print_draft(draft, function, args.max_lines, args.full)
-    return EXIT_MATCH if status == "match" else EXIT_MISMATCH
+    return EXIT_MATCH if status == "match" and in_order else EXIT_MISMATCH
 
 
 if __name__ == "__main__":
