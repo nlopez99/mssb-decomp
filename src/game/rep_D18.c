@@ -140,7 +140,7 @@ extern void fn_8004CC2C(void);
 
 static AramEntryD18 lbl_3_data_3D60 = { { 0x0000040B, 0x400098A0, 0x0773D800, 0x00003C88 } };
 static AramEntryD18 lbl_3_data_3D70 = { { 0x0000040B, 0x40000970, 0x07741800, 0x00000368 } };
-static AramEntryD18 lbl_3_data_3D80[67] = {
+static AramEntryD18 lbl_3_data_3D80[62] = {
     { { 0x0000040B, 0x4013764C, 0x1A635000, 0x0007DB48 } },
     { { 0x0000040B, 0x4003E3DC, 0x1A6B3000, 0x00021420 } },
     { { 0x0000040B, 0x4002EC10, 0x1A6D4800, 0x00013108 } },
@@ -203,6 +203,8 @@ static AramEntryD18 lbl_3_data_3D80[67] = {
     { { 0x00000000, 0x00028240, 0x1ACB8000, 0x00028240 } },
     { { 0x00000000, 0x00028240, 0x1ACE0800, 0x00028240 } },
     { { 0x00000000, 0x00028240, 0x1AD09000, 0x00028240 } },
+};
+static AramEntryD18 lbl_3_data_4160[5] = {
     { { 0x0000040B, 0x40001640, 0x08EB4800, 0x00000C38 } },
     { { 0x0000040B, 0x400B2D00, 0x08EB5800, 0x0006A948 } },
     { { 0x00000000, 0x00000686, 0x08F20800, 0x00000688 } },
@@ -574,7 +576,7 @@ void fn_3_59F40(void) {
         }
         break;
     case 12:
-        lbl_80366B18._7B0 = ARAMTransfer(&lbl_3_data_3D80[62], 0, 1, 0);
+        lbl_80366B18._7B0 = ARAMTransfer(&lbl_3_data_4160[2], 0, 1, 0);
         g_UnkSimulation_31AC0._4++;
         break;
     case 13:
