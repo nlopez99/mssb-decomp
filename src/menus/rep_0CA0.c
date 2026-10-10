@@ -81,6 +81,7 @@ extern struct {
 extern struct {
     /* 0x00 */ u8 _00[0x57];
     /* 0x57 */ u8 _57;
+    /* 0x58 */ u8 _58;
 } lbl_2_bss_F468;
 
 extern struct {
@@ -102,9 +103,14 @@ extern struct {
 } lbl_800FEF70[]; // size: 0x10
 
 extern struct {
-    /* 0x0 */ u8 _0[0x6];
+    /* 0x0 */ u8 _0[0x2];
+    /* 0x2 */ u16 _2;
+    /* 0x4 */ u8 _4[0x6 - 0x4];
     /* 0x6 */ u16 _6;
 }* lbl_803CBBCC;
+
+static u8 lbl_2_bss_ABC4[0x6D4];
+static u8 lbl_2_bss_ABC0;
 
 static char lbl_2_data_2D998[2][0x20] = { "BAT FIRST", "BAT LAST" };
 static char lbl_2_data_2D9D8[2][0x20] = { "FL", "PC" };
@@ -235,6 +241,85 @@ void fn_2_84FA8(void) {
     lbl_803CBCD8._4 = 0;
     task->_18 = 0;
     ((UnkTask0CA0*)lbl_803CC1B8)->_00 = fn_2_845A8;
+}
+
+// .text:0x000845A8 size:0xA00
+void fn_2_845A8(void) {
+    UnkTask0CA0* task = lbl_803CC1B8;
+    u8 base;
+    s32 first;
+    s32 i;
+    s32 sel;
+    s32 icon;
+
+    if (lbl_803CBCD8._4) {
+        lbl_803CBCD8._4 = 0;
+        lbl_2_data_2E2EC = -1;
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    lbl_2_data_2E2ED = -1;
+    switch (lbl_803C66B0._5D) {
+    case 39:
+        fn_2_84388(task);
+        break;
+    case 36:
+        fn_2_84194(task);
+        break;
+    case 38:
+        fn_2_837D8(task);
+        break;
+    case 37:
+        fn_2_83974(task);
+        break;
+    case 49:
+        fn_2_83744(task);
+        break;
+    case 40:
+        fn_2_83B34(task, lbl_2_bss_F410._44);
+        break;
+    }
+    if (lbl_803CBCD8._4 == 0 && lbl_803C66B0._5D != 37 && lbl_803C66B0._5D != 36) {
+        sel = lbl_2_bss_F410._44;
+        if (lbl_803CBBCC->_2 != 13 && lbl_2_bss_F468._58 == 0 && lbl_2_data_2E2EC == sel &&
+            lbl_2_data_2E2ED == -1) {
+            if (lbl_80361B20._F5 == 0 && lbl_2_data_2DC84[sel] == 1) {
+                fn_800363D8(task, 0, 1, 0x20, 0x12);
+                fn_800363D8(task, 1, 1, 0x20, 0x12);
+                return;
+            }
+            for (i = 0; i < 3; i++) {
+                if (task->_18 == i * 100) {
+                    base = lbl_2_data_2DC84[sel];
+                    first = base + i * 6;
+                    if (lbl_2_bss_ABC0) {
+                        icon = base + 12;
+                        lbl_2_bss_ABC0 = 0;
+                    } else if (i != 0) {
+                        icon = base + (i - 1) * 6;
+                    } else {
+                        icon = base;
+                    }
+                    lbl_80371C30[task->_14]._00->_5C = 0;
+                    lbl_80371C30[task->_14 + 1]._00->_5C = 0xA0000;
+                    fn_800363D8(task, 0, 1, 0x20, first);
+                    fn_800363D8(task, 1, 1, 0x20, icon);
+                    lbl_80371C30[task->_14]._00->_58 = (lbl_80371C30[task->_14]._00->_58 & 0xFFFFFF00) | 0xFF;
+                    lbl_80371C30[task->_14 + 1]._00->_58 = (lbl_80371C30[task->_14 + 1]._00->_58 & 0xFFFFFF00) | 0xFF;
+                    lbl_80371C30[task->_14]._00->_68 = 1;
+                    lbl_80371C30[task->_14 + 1]._00->_68 = 4;
+                }
+            }
+            fn_80042DA8(task, 0, 10);
+            fn_80042DA8(task, 1, 0);
+            task->_18++;
+            if ((s32)task->_18 > 300) {
+                task->_18 = 0;
+                lbl_2_bss_ABC0 = 1;
+            }
+        }
+    }
 }
 
 // .text:0x00084388 size:0x220
