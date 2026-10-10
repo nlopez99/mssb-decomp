@@ -1042,8 +1042,6 @@ void fn_1_6578(GXTexObj* obj, u16* image, s32 width, s32 height) {
 }
 
 // .text:0x11B8 size:0x528
-// Only commutative operands are swapped: ny * 0.5f + 0.5f and the angle's
-// products put the constant first here, the variable first in the target.
 void fn_1_6050(u16* image, s32 width, s32 height, f32 scale) {
     f32 a;
     s32 size;
@@ -1070,10 +1068,10 @@ void fn_1_6050(u16* image, s32 width, s32 height, f32 scale) {
     memset(image, 0, size);
     for (y = 0; y < height; y++) {
         ny = 2.0f * ((f32)y / height - 0.5f);
-        ty = ny * 0.5f + 0.5f;
+        ty = ny / 2.0f + 0.5f;
         for (x = 0; x < width; x++) {
             nx = 2.0f * ((f32)x / width - 0.5f);
-            tx = nx * 0.5f + 0.5f;
+            tx = nx / 2.0f + 0.5f;
             if (y == height / 2) {
                 z2 = 1.0f - nx * nx;
             } else {
@@ -1093,7 +1091,8 @@ void fn_1_6050(u16* image, s32 width, s32 height, f32 scale) {
                 PSVECCrossProduct(&lbl_1_data_A3C, &dir, &axis);
                 if (PSVECMag(&axis)) {
                     PSVECNormalize(&axis, &axis);
-                    angle = (f32)acos(PSVECDotProduct(&lbl_1_data_A3C, &dir)) * scale * 0.5f;
+                    angle = acos(PSVECDotProduct(&lbl_1_data_A3C, &dir));
+                    angle = angle * scale / 2.0f;
                     s = sin(angle);
                     q.w = cos(angle);
                     q.x = axis.x * s;
@@ -1177,10 +1176,10 @@ void fn_1_5AC0(u16* image, s32 width, s32 height, f32 scale) {
     memset(image, 0, size);
     for (y = 0; y < height; y++) {
         ny = 2.0f * ((f32)y / height - 0.5f);
-        ty = ny * 0.5f + 0.5f;
+        ty = ny / 2.0f + 0.5f;
         for (x = 0; x < width; x++) {
             nx = 2.0f * ((f32)x / width - 0.5f);
-            tx = nx * 0.5f + 0.5f;
+            tx = nx / 2.0f + 0.5f;
             inside = (ny > 0.2f) & (ny < 0.8f) & (nx > 0.2f) & (nx < 0.8f);
             if (y == height / 2) {
                 z2 = 1.0f - nx * nx;
@@ -1201,7 +1200,8 @@ void fn_1_5AC0(u16* image, s32 width, s32 height, f32 scale) {
                 PSVECCrossProduct(&lbl_1_data_A48[0], &dir, &axis);
                 if (PSVECMag(&axis)) {
                     PSVECNormalize(&axis, &axis);
-                    angle = (f32)acos(PSVECDotProduct(&lbl_1_data_A48[0], &dir)) * scale * 0.5f;
+                    angle = acos(PSVECDotProduct(&lbl_1_data_A48[0], &dir));
+                    angle = angle * scale / 2.0f;
                     s = sin(angle);
                     q.w = cos(angle);
                     q.x = axis.x * s;
