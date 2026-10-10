@@ -4676,9 +4676,6 @@ void fn_2_5135C(MenuItem09B8* item, s32 k) {
 }
 
 // .text:0x000512C0 size:0x9C
-// 97.44%: the target has one more dead `b` after the switch dispatch; case
-// orders, statements in case 4, a default, goto and for-increment loops and the
-// permuter did not reproduce it.
 void fn_2_512C0(s32 idx) {
     u16* p = lbl_2_bss_1A824C->_1954AC[idx];
     u16 c;
@@ -4689,7 +4686,10 @@ void fn_2_512C0(s32 idx) {
             switch (c & 0x3FFF) {
             case 0:
                 return;
-            case 4:
+            case 1:
+            case 2:
+            case 3:
+            case 5:
                 break;
             }
             lbl_2_bss_1A824C->_197294[idx]++;
