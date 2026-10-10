@@ -732,9 +732,7 @@ void fn_3_144CB8(void) {
     Unk37A8Fielder* fielder;
     InputStruct* input;
     s8 list[4];
-    s8* p;
-    s8* q;
-    s8* r;
+    int k;
     s8 tmp;
     s8 roll;
     int coin;
@@ -747,8 +745,8 @@ void fn_3_144CB8(void) {
         if (g_Minigame.minigameFielderIndex[player] < 0) {
             continue;
         }
-        input = &g_Controls[g_Minigame.minigameControlStruct.characterIndex[player]];
         fielder = &g_Fielders[g_Minigame.minigameFielderIndex[player]];
+        input = &g_Controls[g_Minigame.minigameControlStruct.characterIndex[player]];
         if (g_Minigame.minigameControlStruct.battingHandedness[player] != 0) {
             input = &g_Minigame._1D7C[g_Minigame.minigameControlStruct.characterIndex[player]];
         }
@@ -819,16 +817,16 @@ void fn_3_144CB8(void) {
                 fielder->_110 = lbl_3_data_21BC4[MG._1BE8[coin]][1].y;
                 fielder->_114 = lbl_3_data_21BC4[MG._1BE8[coin]][1].z;
             } else {
-                p = list;
-                for (i = 0; i < 4; i++) {
-                    if (i != player) {
-                        *p++ = i;
+                for (k = 0, j = 0; k < 4; k++) {
+                    if (k != player) {
+                        list[j] = k;
+                        j++;
                     }
                 }
                 for (i = 0; i < 2; i++) {
                     for (j = i + 1; j < 3; j++) {
-                        if (g_Minigame.miniGameCurrentPoints[list[i]] < g_Minigame.miniGameCurrentPoints[list[j]]) {
-                            tmp = list[i];
+                        tmp = list[i];
+                        if (g_Minigame.miniGameCurrentPoints[tmp] < g_Minigame.miniGameCurrentPoints[list[j]]) {
                             list[i] = list[j];
                             list[j] = tmp;
                         }
