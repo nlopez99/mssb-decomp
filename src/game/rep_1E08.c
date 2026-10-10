@@ -2966,53 +2966,14 @@ BOOL fn_3_BA7F4(void* arg) {
     UnkPanelList1E08* list = arg;
     Vec up = { 0.0f, 1.0f, 0.0f };
     Vec dir;
-    UnkPanelSort1E08* sort;
     UnkPanel1E08* panel;
-    UnkPanel1E08* head;
-    s32 count;
-    UnkPanelSort1E08* entry;
     f32 angle;
     f32 delta;
     f64 ax;
 
-    GXSetZMode(GX_TRUE, GX_ALWAYS, GX_TRUE);
-    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
-    GXClearVtxDesc();
-    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
-    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
-    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
-    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
-    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
-    GXSetNumChans(1);
-    GXSetNumTexGens(0);
-    GXSetNumTevStages(1);
-    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_RASC);
-    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_RASA);
-    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
-    GXSetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
-    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
-    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
-    count = list->count;
-    panel = list->head;
-    sort = _OSAllocFromHeap(0x20, count * sizeof(UnkPanelSort1E08));
-    entry = sort;
-    while (panel != NULL) {
-        entry->panel = panel;
-        entry->depth = panel->pos.z;
-        entry++;
-        panel = panel->next;
-    }
-    fn_800246D4(fn_3_BA174, sort, sort, sizeof(UnkPanelSort1E08), count);
-    head = sort[0].panel;
-    entry = sort;
-    while (--count != 0) {
-        entry->panel->next = entry[1].panel;
-        entry++;
-    }
-    entry->panel->next = NULL;
-    fn_800ACFB0(sort);
-    list->head = head;
-    panel = head;
+    fn_3_BA3EC();
+    panel = fn_3_BA1A0(list->head, list->count);
+    list->head = panel;
     do {
         if (panel->_48 <= 0) {
             fn_3_BA538(panel);
@@ -3045,27 +3006,7 @@ BOOL fn_3_BA7F4(void* arg) {
         }
         panel = panel->next;
     } while (panel != NULL);
-    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
-    GXClearVtxDesc();
-    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
-    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
-    GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
-    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
-    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
-    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
-    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
-    GXSetNumChans(1);
-    GXSetNumTexGens(1);
-    GXSetNumTevStages(1);
-    GXSetCullMode(GX_CULL_NONE);
-    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_RASC, GX_CC_TEXC, GX_CC_ZERO);
-    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_RASA, GX_CA_TEXA, GX_CA_ZERO);
-    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
-    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
-    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
-    GXLoadPosMtxImm(fn_80052768_getCamera(0)->view, GX_PNMTX0);
-    GXSetCurrentMtx(GX_PNMTX0);
-    GXSetProjection(fn_80052768_getCamera(0)->proj, GX_PERSPECTIVE);
+    fn_3_BA268();
     return FALSE;
 }
 
@@ -3114,25 +3055,89 @@ void fn_3_BA538(UnkPanel1E08* panel) {
 
 // .text:0x000BA3EC size:0x14C mapped:0x806F9480
 void fn_3_BA3EC(void) {
-    return;
+    GXSetZMode(GX_TRUE, GX_ALWAYS, GX_TRUE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetNumChans(1);
+    GXSetNumTexGens(0);
+    GXSetNumTevStages(1);
+    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_RASC);
+    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_RASA);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+    GXSetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
+    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
 }
 
 // .text:0x000BA268 size:0x184 mapped:0x806F92FC
 void fn_3_BA268(void) {
-    return;
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetNumChans(1);
+    GXSetNumTexGens(1);
+    GXSetNumTevStages(1);
+    GXSetCullMode(GX_CULL_NONE);
+    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_RASC, GX_CC_TEXC, GX_CC_ZERO);
+    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_RASA, GX_CA_TEXA, GX_CA_ZERO);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    GXLoadPosMtxImm(fn_80052768_getCamera(0)->view, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    GXSetProjection(fn_80052768_getCamera(0)->proj, GX_PERSPECTIVE);
 }
 
 // .text:0x000BA1A0 size:0xC8 mapped:0x806F9234
-void fn_3_BA1A0(void) {
-    return;
+UnkPanel1E08* fn_3_BA1A0(UnkPanel1E08* head, s32 count) {
+    UnkPanelSort1E08* sort;
+    UnkPanelSort1E08* entry;
+    UnkPanel1E08* panel;
+
+    sort = _OSAllocFromHeap(0x20, count * sizeof(UnkPanelSort1E08));
+    entry = sort;
+    panel = head;
+    while (panel != NULL) {
+        entry->panel = panel;
+        entry->depth = panel->pos.z;
+        entry++;
+        panel = panel->next;
+    }
+    fn_800246D4(fn_3_BA174, sort, sort, sizeof(UnkPanelSort1E08), count);
+    head = sort[0].panel;
+    entry = sort;
+    while (--count != 0) {
+        entry->panel->next = entry[1].panel;
+        entry++;
+    }
+    entry->panel->next = NULL;
+    fn_800ACFB0(sort);
+    return head;
 }
 
 // .text:0x000BA174 size:0x2C mapped:0x806F9208
 int fn_3_BA174(const void* a, const void* b) {
+    if (((UnkPanelSort1E08*)a)->depth < ((UnkPanelSort1E08*)b)->depth) {
+        return 1;
+    }
+    if (((UnkPanelSort1E08*)a)->depth > ((UnkPanelSort1E08*)b)->depth) {
+        return -1;
+    }
     return 0;
 }
 
 // .text:0x000BA150 size:0x24 mapped:0x806F91E4
 void fn_3_BA150(void) {
-    return;
+    pitchingMachinePitching(0x19);
 }

@@ -14,7 +14,7 @@ struct UnkEffect21F8;
 
 void fn_3_BA150(void);
 int fn_3_BA174(const void* a, const void* b);
-void fn_3_BA1A0(void);
+struct UnkPanel1E08* fn_3_BA1A0(struct UnkPanel1E08* panel, s32 count);
 void fn_3_BA268(void);
 void fn_3_BA3EC(void);
 void fn_3_BA538(struct UnkPanel1E08* panel);
