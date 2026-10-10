@@ -58,10 +58,48 @@ extern struct {
     /* 0x24 */ s32 _24[11];
 } lbl_1_common_bss_49A78;
 
+// A MusyX listener at 0x00 and emitter at 0x90, with the vectors passed for them
 extern struct {
-    /* 0x00 */ u8 _00[0xE0];
-    /* 0x E0 */ u8 _E0;
+    /* 0x00 */ u8 _00[0xC];
+    /* 0x0C */ Vec pos;
+    /* 0x18 */ u8 _18[0x1C - 0x18];
+    /* 0x1C */ Vec dir;
+    /* 0x28 */ Vec heading;
+    /* 0x34 */ u8 _34[0x40 - 0x34];
+    /* 0x40 */ Vec up;
+    /* 0x4C */ u8 _4C[0x88 - 0x4C];
+    /* 0x88 */ f32 _88;
+    /* 0x8C */ u8 _8C[0x90 - 0x8C];
+    /* 0x90 */ u8 _90[0xA0 - 0x90];
+    /* 0xA0 */ Vec emitterPos;
+    /* 0xAC */ Vec emitterDir;
+    /* 0xB8 */ u8 _B8[0xBC - 0xB8];
+    /* 0xBC */ f32 _BC;
+    /* 0xC0 */ u8 _C0[0xE0 - 0xC0];
+    /* 0xE0 */ u8 _E0;
 } lbl_1_common_bss_49994;
+
+extern struct {
+    /* 0x00 */ f32 maxDis;
+    /* 0x04 */ f32 comp;
+    /* 0x08 */ f32 maxVol;
+    /* 0x0C */ f32 minVol;
+    /* 0x10 */ u16 fxid;
+} lbl_1_common_bss_49980;
+
+extern struct {
+    /* 0x00 */ f32 front;
+    /* 0x04 */ f32 back;
+    /* 0x08 */ f32 speed;
+    /* 0x0C */ u8 vol;
+} lbl_1_common_bss_49970;
+
+extern s32 sndAddEmitter(void* em, Vec* pos, Vec* dir, f32 maxDis, f32 comp, u32 flags, u16 fxid, u8 maxVol, u8 minVol, void* room);
+extern s32 sndAddListener(void* li, Vec* pos, Vec* dir, Vec* heading, Vec* up, f32 front, f32 back, f32 speed, f32 volPosOff, u32 flags, u8 vol, void* room);
+extern s32 sndUpdateEmitter(void* em, Vec* pos, Vec* dir, u8 maxVol, void* room);
+extern s32 sndUpdateListener(void* li, Vec* pos, Vec* dir, Vec* heading, Vec* up, u8 vol, void* room);
+extern s32 sndRemoveEmitter(void* em);
+extern s32 sndRemoveListener(void* li);
 
 extern void* ARAMTransfer(AramEntry02A8* entry, s32 arg1, s32 arg2, u32 aram);
 extern u8 fn_800211F0(void);
@@ -726,6 +764,289 @@ void fn_1_B4A4(void) {
 // Loads a sound group into its slot of the bank table; the slot is computed by the caller
 static inline void LoadGroup02A8(s32 group, s32 slot) {
     fn_80021518(group, lbl_800EF808.groups[slot]);
+}
+
+// .text:0x0000A95C size:0xB48
+// The listener setup schedules its constants' addresses in another order (the
+// target forms 1.0f's second), n takes r29 for r31, and the copy loops read the
+// selectors into r0 where the target uses r4/r5.
+void fn_1_A95C(void) {
+    u16 hold = lbl_803C77B8[0]._00;
+    u16 trg = lbl_803C77B8[0]._02;
+    u16 rep = lbl_803C77B8[0]._04;
+    s8 n;
+    u16 fx;
+    s32 i;
+
+    if (trg & 0x100) {
+        fx = lbl_1_data_188C[lbl_1_bss_2FEA];
+        if (lbl_1_common_bss_49994._E0 != 0) {
+            sndRemoveListener(&lbl_1_common_bss_49994);
+            sndRemoveEmitter(lbl_1_common_bss_49994._90);
+        }
+        lbl_1_common_bss_49980.fxid = fx;
+        lbl_1_common_bss_49980.maxVol = 127.0f;
+        lbl_1_common_bss_49980.minVol = 0.0f;
+        lbl_1_common_bss_49980.comp = 0.0f;
+        lbl_1_common_bss_49980.maxDis = 100.0f;
+        sndAddEmitter(lbl_1_common_bss_49994._90, &lbl_1_common_bss_49994.emitterPos, &lbl_1_common_bss_49994.emitterDir, lbl_1_common_bss_49980.maxDis, lbl_1_common_bss_49980.comp, 1, lbl_1_common_bss_49980.fxid, lbl_1_common_bss_49980.maxVol, lbl_1_common_bss_49980.minVol, NULL);
+        lbl_1_common_bss_49970.front = 100.0f;
+        lbl_1_common_bss_49970.back = 10.0f;
+        lbl_1_common_bss_49970.vol = 0x7F;
+        lbl_1_common_bss_49970.speed = 1.0f;
+        lbl_1_common_bss_49994.heading.x = 0.0f;
+        lbl_1_common_bss_49994.heading.y = 0.0f;
+        lbl_1_common_bss_49994.heading.z = -1.0f;
+        lbl_1_common_bss_49994.up.x = 0.0f;
+        lbl_1_common_bss_49994.up.y = 1.0f;
+        lbl_1_common_bss_49994.up.z = 0.0f;
+        sndAddListener(&lbl_1_common_bss_49994, &lbl_1_common_bss_49994.pos, &lbl_1_common_bss_49994.dir, &lbl_1_common_bss_49994.heading, &lbl_1_common_bss_49994.up, lbl_1_common_bss_49970.front, lbl_1_common_bss_49970.back, lbl_1_common_bss_49970.speed, 0.0f, 0, lbl_1_common_bss_49970.vol, NULL);
+        lbl_1_common_bss_49994._E0 = 1;
+    } else if (trg & 0x1200) {
+        lbl_1_common_bss_49994._E0 = 0;
+        for (n = (s8)lbl_800EF808._390 - 1; n > 0; n--) {
+            if (!fn_800214D0()) {
+                break;
+            }
+        }
+        ((Task02A8*)lbl_803CC1B8)->_00 = fn_1_A348;
+    } else if (hold & 0x800) {
+        if (rep & 1) {
+            switch ((s8)lbl_1_bss_2FEC) {
+            case 0:
+                lbl_1_common_bss_49994.pos.x -= 0.1;
+                break;
+            case 1:
+                lbl_1_common_bss_49994.pos.y -= 0.1;
+                break;
+            case 2:
+                lbl_1_common_bss_49994.pos.z -= 0.1;
+                break;
+            case 3:
+                lbl_1_common_bss_49994.dir.y -= 0.1;
+                break;
+            case 4:
+                lbl_1_common_bss_49994.dir.y -= 0.1;
+                break;
+            case 5:
+                lbl_1_common_bss_49994.dir.z -= 0.1;
+                break;
+            case 6:
+                lbl_1_common_bss_49994.heading.x -= 0.1;
+                break;
+            case 7:
+                lbl_1_common_bss_49994.heading.y -= 0.1;
+                break;
+            case 8:
+                lbl_1_common_bss_49994.heading.z -= 0.1;
+                break;
+            case 9:
+                lbl_1_common_bss_49994.up.x -= 0.1;
+                break;
+            case 10:
+                lbl_1_common_bss_49994.up.y -= 0.1;
+                break;
+            case 11:
+                lbl_1_common_bss_49994.up.z -= 0.1;
+                break;
+            case 12:
+                lbl_1_common_bss_49994._88 -= 10.0;
+                break;
+            }
+        } else if (rep & 2) {
+            switch ((s8)lbl_1_bss_2FEC) {
+            case 0:
+                lbl_1_common_bss_49994.pos.x += 0.1;
+                break;
+            case 1:
+                lbl_1_common_bss_49994.pos.y += 0.1;
+                break;
+            case 2:
+                lbl_1_common_bss_49994.pos.z += 0.1;
+                break;
+            case 3:
+                lbl_1_common_bss_49994.dir.y += 0.1;
+                break;
+            case 4:
+                lbl_1_common_bss_49994.dir.y += 0.1;
+                break;
+            case 5:
+                lbl_1_common_bss_49994.dir.z += 0.1;
+                break;
+            case 6:
+                lbl_1_common_bss_49994.heading.x += 0.1;
+                break;
+            case 7:
+                lbl_1_common_bss_49994.heading.y += 0.1;
+                break;
+            case 8:
+                lbl_1_common_bss_49994.heading.z += 0.1;
+                break;
+            case 9:
+                lbl_1_common_bss_49994.up.x += 0.1;
+                break;
+            case 10:
+                lbl_1_common_bss_49994.up.y += 0.1;
+                break;
+            case 11:
+                lbl_1_common_bss_49994.up.z += 0.1;
+                break;
+            case 12:
+                lbl_1_common_bss_49994._88 += 10.0;
+                break;
+            }
+        } else if (rep & 8) {
+            lbl_1_bss_2FEC--;
+            if ((s8)lbl_1_bss_2FEC < 0) {
+                lbl_1_bss_2FEC = 12;
+            }
+        } else if (rep & 4) {
+            lbl_1_bss_2FEC++;
+            if ((s8)lbl_1_bss_2FEC == 13) {
+                lbl_1_bss_2FEC = 0;
+            }
+        }
+    } else if (hold & 0x400) {
+        if (rep & 1) {
+            switch ((s8)lbl_1_bss_2FED) {
+            case 0:
+                lbl_1_common_bss_49994.emitterPos.x -= 0.1;
+                break;
+            case 1:
+                lbl_1_common_bss_49994.emitterPos.y -= 0.1;
+                break;
+            case 2:
+                lbl_1_common_bss_49994.emitterPos.z -= 0.1;
+                break;
+            case 3:
+                lbl_1_common_bss_49994.emitterDir.y -= 0.1;
+                break;
+            case 4:
+                lbl_1_common_bss_49994.emitterDir.y -= 0.1;
+                break;
+            case 5:
+                lbl_1_common_bss_49994.emitterDir.z -= 0.1;
+                break;
+            case 6:
+                lbl_1_common_bss_49994._BC -= 10.0;
+                break;
+            }
+        } else if (rep & 2) {
+            switch ((s8)lbl_1_bss_2FED) {
+            case 0:
+                lbl_1_common_bss_49994.emitterPos.x += 0.1;
+                break;
+            case 1:
+                lbl_1_common_bss_49994.emitterPos.y += 0.1;
+                break;
+            case 2:
+                lbl_1_common_bss_49994.emitterPos.z += 0.1;
+                break;
+            case 3:
+                lbl_1_common_bss_49994.emitterDir.y += 0.1;
+                break;
+            case 4:
+                lbl_1_common_bss_49994.emitterDir.y += 0.1;
+                break;
+            case 5:
+                lbl_1_common_bss_49994.emitterDir.z += 0.1;
+                break;
+            case 6:
+                lbl_1_common_bss_49994._BC += 10.0;
+                break;
+            }
+        } else if (rep & 8) {
+            lbl_1_bss_2FED--;
+            if ((s8)lbl_1_bss_2FED < 0) {
+                lbl_1_bss_2FED = 6;
+            }
+        } else if (rep & 4) {
+            lbl_1_bss_2FED++;
+            if ((s8)lbl_1_bss_2FED == 7) {
+                lbl_1_bss_2FED = 0;
+            }
+        }
+    } else if (rep & 1) {
+        if (--lbl_1_bss_2FEA < 0) {
+            lbl_1_bss_2FEA = 1;
+        }
+    } else if (rep & 2) {
+        if (++lbl_1_bss_2FEA > 2) {
+            lbl_1_bss_2FEA = 0;
+        }
+    }
+    if (lbl_1_common_bss_49994._E0 != 0) {
+        sndUpdateListener(&lbl_1_common_bss_49994, &lbl_1_common_bss_49994.pos, &lbl_1_common_bss_49994.dir, &lbl_1_common_bss_49994.heading, &lbl_1_common_bss_49994.up, 0x80, NULL);
+        sndUpdateEmitter(lbl_1_common_bss_49994._90, &lbl_1_common_bss_49994.emitterPos, &lbl_1_common_bss_49994.emitterDir, 0x80, NULL);
+    }
+    for (i = 0; i < 13; i++) {
+        switch ((s8)lbl_1_bss_2FEC) {
+        case 0:
+            lbl_1_bss_300C[0] = lbl_1_common_bss_49994.pos.x;
+            break;
+        case 1:
+            lbl_1_bss_300C[1] = lbl_1_common_bss_49994.pos.y;
+            break;
+        case 2:
+            lbl_1_bss_300C[2] = lbl_1_common_bss_49994.pos.z;
+            break;
+        case 3:
+            lbl_1_bss_300C[3] = lbl_1_common_bss_49994.dir.y;
+            break;
+        case 4:
+            lbl_1_bss_300C[4] = lbl_1_common_bss_49994.dir.y;
+            break;
+        case 5:
+            lbl_1_bss_300C[5] = lbl_1_common_bss_49994.dir.z;
+            break;
+        case 6:
+            lbl_1_bss_300C[6] = lbl_1_common_bss_49994.heading.x;
+            break;
+        case 7:
+            lbl_1_bss_300C[7] = lbl_1_common_bss_49994.heading.y;
+            break;
+        case 8:
+            lbl_1_bss_300C[8] = lbl_1_common_bss_49994.heading.z;
+            break;
+        case 9:
+            lbl_1_bss_300C[9] = lbl_1_common_bss_49994.up.x;
+            break;
+        case 10:
+            lbl_1_bss_300C[10] = lbl_1_common_bss_49994.up.y;
+            break;
+        case 11:
+            lbl_1_bss_300C[11] = lbl_1_common_bss_49994.up.z;
+            break;
+        case 12:
+            lbl_1_bss_300C[12] = lbl_1_common_bss_49994._88;
+            break;
+        }
+    }
+    for (i = 0; i < 7; i++) {
+        switch ((s8)lbl_1_bss_2FED) {
+        case 0:
+            lbl_1_bss_2FF0[0] = lbl_1_common_bss_49994.emitterPos.x;
+            break;
+        case 1:
+            lbl_1_bss_2FF0[1] = lbl_1_common_bss_49994.emitterPos.y;
+            break;
+        case 2:
+            lbl_1_bss_2FF0[2] = lbl_1_common_bss_49994.emitterPos.z;
+            break;
+        case 3:
+            lbl_1_bss_2FF0[3] = lbl_1_common_bss_49994.emitterDir.y;
+            break;
+        case 4:
+            lbl_1_bss_2FF0[4] = lbl_1_common_bss_49994.emitterDir.y;
+            break;
+        case 5:
+            lbl_1_bss_2FF0[5] = lbl_1_common_bss_49994.emitterDir.z;
+            break;
+        case 6:
+            lbl_1_bss_2FF0[6] = lbl_1_common_bss_49994._BC;
+            break;
+        }
+    }
 }
 
 // .text:0x0000A908 size:0x54
