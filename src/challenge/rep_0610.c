@@ -2422,8 +2422,6 @@ void fn_1_17954(void) {
 }
 
 // .text:0x0001770C size:0x248
-// The data pool base and the bss pool base swap r29/r30; statement orders and
-// the permuter did not fix it; 96.6%
 void fn_1_1770C(void) {
     u8 active;
     lbl_1_data_ABB4[lbl_1_bss_5F71]();
@@ -4691,6 +4689,8 @@ void fn_1_E098(void) {
             UnkAnimKey0610* key;
             u16 pressed;
             u16 held;
+            u8 selRow;
+            u8 selCol;
             u16 color;
             s32 col;
             if (st->_0 >= 0) {
@@ -4702,8 +4702,10 @@ void fn_1_E098(void) {
             }
             pressed = lbl_803C77B8[0]._04;
             held = lbl_803C77B8[0]._00;
+            selRow = lbl_1_bss_30B6;
+            selCol = lbl_1_bss_30B7;
             for (col = 0; col < 4; col++) {
-                if (i != lbl_1_bss_30B6 || col != lbl_1_bss_30B7) {
+                if (i != selRow || col != selCol) {
                     color = 0xFFFF;
                 } else if (held & 0x100) {
                     color = 0xF00F;
@@ -4859,6 +4861,7 @@ void fn_1_D9B8(void) {
     Unk0060Elem* elem;
     UnkAnimRef0610* anim;
     Unk6940* state;
+    Unk8036E548Actor* actor;
     u8 anim45;
     f32 start;
     s16 limit;
@@ -4884,9 +4887,10 @@ void fn_1_D9B8(void) {
             }
         } while ((id = lbl_1_bss_3218[task->_15]._0) < 0);
         state = &lbl_1_bss_6940[lbl_1_bss_5F73];
+        actor = &lbl_8036E548._0C04[lbl_1_bss_5F73];
         lbl_1_bss_6940[lbl_1_bss_5F73]._44 = id;
         state->_45 = lbl_1_bss_3218[task->_15]._2;
-        anim = lbl_8036E548._0C04[lbl_1_bss_5F73]._010[lbl_1_bss_6940[lbl_1_bss_5F73]._44];
+        anim = actor->_010[lbl_1_bss_6940[lbl_1_bss_5F73]._44];
         elem = &lbl_8036E548._0060->_34[lbl_1_bss_5F73];
         anim45 = state->_45;
         elem->_04 = anim;
@@ -5160,8 +5164,8 @@ void fn_1_CDC8(void) {
         return;
     }
     actor = &lbl_8036E548._0C04[lbl_1_bss_5F73];
-    id = actor->_162[25];
-    fn_800B2BA8(lbl_8036E548._0060->_34[lbl_1_bss_5F73]._00, actor->_162[19], NULL, 0);
+    id = lbl_8036E548._0C04[lbl_1_bss_5F73]._162[25];
+    fn_800B2BA8(lbl_8036E548._0060->_34[lbl_1_bss_5F73]._00, lbl_8036E548._0C04[lbl_1_bss_5F73]._162[19], NULL, 0);
     fn_800B2BA8(lbl_8036E548._0060->_34[lbl_1_bss_5F73]._00, id, NULL, 0);
     switch (lbl_1_bss_68FC._40[lbl_1_bss_5F73]) {
     case 0x27:
