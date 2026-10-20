@@ -623,6 +623,8 @@ config.libs = [
         "cflags": cflags_base + ["-O4,p", "-sym on", "-inline deferred"],
         "host": False,
         "objects": [
+            Object(NonMatching, "static/fn_80021188.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(NonMatching, "static/objinit.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/sub.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/anim.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/lookat.c", extra_cflags=["-cpp_exceptions on"]),
