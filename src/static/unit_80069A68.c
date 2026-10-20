@@ -71,11 +71,28 @@ extern SceneSound lbl_800EF808;
 extern SceneMenuState lbl_803716B8;
 extern void* lbl_803CBD30;
 extern GXRenderModeObj* lbl_803CBD34;
-extern GXRenderModeObj lbl_80109250;
-extern GXRenderModeObj lbl_8010928C;
-extern u8 lbl_801092E8[];
-extern u8 lbl_801092F8[];
-extern u8 lbl_80109378[];
+typedef struct SceneCallback {
+    /* 0x0 */ s32 id;
+    /* 0x4 */ void (*func)(void);
+    /* 0x8 */ void* arg;
+} SceneCallback;
+
+static GXRenderModeObj lbl_80109250 = {
+    VI_TVMODE_NTSC_INT, 608, 448, 448, 27, 16, 666, 448, VI_XFBMODE_DF, GX_FALSE, GX_FALSE,
+    { { 6, 6 }, { 6, 6 }, { 6, 6 }, { 6, 6 }, { 6, 6 }, { 6, 6 }, { 6, 6 }, { 6, 6 }, { 6, 6 }, { 6, 6 }, { 6, 6 }, { 6, 6 } },
+    { 8, 8, 10, 12, 10, 8, 8 },
+};
+static GXRenderModeObj lbl_8010928C = {
+    2, 608, 448, 448, 27, 16, 666, 448, VI_XFBMODE_SF, GX_FALSE, GX_FALSE,
+    { { 6, 6 }, { 6, 6 }, { 6, 6 }, { 6, 6 }, { 6, 6 }, { 6, 6 }, { 6, 6 }, { 6, 6 }, { 6, 6 }, { 6, 6 }, { 6, 6 }, { 6, 6 } },
+    { 0, 0, 21, 22, 21, 0, 0 },
+};
+static u32 lbl_801092C8[4] = { 0x0, 0x5233458, 0x12000, 0x5233458 };
+static u32 lbl_801092D8[4] = { 0x40B, 0x40078660, 0x6C7B000, 0x1AF54 };
+static u32 lbl_801092E8[4] = { 0x40B, 0x4006C850, 0x6C96000, 0x2C884 };
+static u32 lbl_801092F8[32] = { 0x1, 0x0, 0x0, 0xFFFFFFFF, 0x21400FF, 0x16000000, 0x0, 0x10000, 0x0, 0x0, 0x0, 0xFFFFFFFF, 0x3140000, 0x16000000, 0x0, 0x10001, 0x2, 0x0, 0x0, 0xFFFFFFFF, 0x3020000, 0x16000000, 0x0, 0x10001, 0x30000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 };
+static u32 lbl_80109378[16] = { 0x3, 0x0, 0x0, 0xFFFFFFFF, 0x30100FF, 0x16000000, 0x0, 0x0, 0x30000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 };
+static SceneCallback lbl_801093B8 = { 0x0000002F, fn_80069A68, 0x00000000 };
 
 extern BOOL fn_80021518(s32 group, void* data);
 extern BOOL fn_80022B68(void);
