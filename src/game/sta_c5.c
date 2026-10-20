@@ -124,7 +124,10 @@ typedef struct StaC5Draw {
     /* 0xC0 */ u8 _C0;
     /* 0xC1 */ s8 _C1;
     /* 0xC2 */ u8 _C2;
-    /* 0xC3 */ s8 _C3;
+    union {
+        /* 0xC3 */ s8 _C3;
+        /* 0xC3 */ u8 _C3u;
+    };
     /* 0xC4 */ s8 _C4;
     /* 0xC5 */ u8 _C5;
     /* 0xC6 */ u8 _C6;
@@ -479,8 +482,8 @@ static inline void spawnDrawEffect(StaC5Draw* draw) {
 }
 
 // .text:0x000F6FDC size:0x1468 mapped:0x80736070
-// 96.70%: saved registers differ in places (the declaration order moves them); the target
-// computes n1 + 2 between the counting loops and stores pitcherModel to _C3 without extsb.
+// 98.06%: the target computes n1 + 2 between the counting loops without clrlwi and keeps
+// pitcherModel in r31 (here on the stack); saved registers differ from there on.
 void fn_3_F6FDC(void** files) {
     s32 n1;
     u8 end;
@@ -488,7 +491,7 @@ void fn_3_F6FDC(void** files) {
     StaC5Prop* prop;
     StaC5Draw* draw;
     s32* indices;
-    s8 pitcherModel;
+    u8 pitcherModel;
     u32 y;
     s32 count;
     u8 fieldModel;
@@ -501,7 +504,6 @@ void fn_3_F6FDC(void** files) {
     s32 n2;
     StaC5Ball* ball;
     StaC5Draw* entry;
-    u8 numActors;
     u8 ballModel;
 
     count = 0;
@@ -524,19 +526,19 @@ void fn_3_F6FDC(void** files) {
             break;
         }
     }
+    numModels = n1 + 2;
     prop2 = lbl_3_data_1B9A4;
     for (; n2 < 5; n2++) {
         if (prop2[n2].type == 6) {
             break;
         }
     }
-    numModels = n1 + 2 + n2;
-    numActors = numModels + 4;
-    lbl_8036E548._6C = ActorObjectInitTable(numActors);
-    lbl_3_common_bss_350E4._6D = numActors;
+    numModels += n2;
+    lbl_8036E548._6C = ActorObjectInitTable((u8)(numModels + 4));
+    lbl_3_common_bss_350E4._6D = numModels + 4;
     j = 0;
-    lbl_3_bss_B219 = 0;
-    for (i = 0; i < (u8)n1; i++, j++) {
+    lbl_3_bss_B219 = i = 0;
+    for (; i < (u8)n1; i++, j++) {
         fn_800BDC88(lbl_8036E548._6C, j, j, files[indices[1]], NULL, 0);
         fn_3_B97DC(&lbl_8036E548._6C->models[j], files[indices[1] + 2]);
     }
@@ -547,7 +549,7 @@ void fn_3_F6FDC(void** files) {
     lbl_8036E548._6C->models[j]._5B = 2;
     fn_800B4AFC(lbl_8036E548._6C->models[j]._00, lbl_8036E548._6C->models[j]._5B & 1);
     ballModel = j + 1;
-    fn_800BDC88(lbl_8036E548._6C, ballModel, ballModel, files[indices[3]], NULL, 0);
+    fn_800BDC88(lbl_8036E548._6C, (u8)(j + 1), (u8)(j + 1), files[indices[3]], NULL, 0);
     j += 2;
     fieldModel = j;
     for (i = 0; i < (u8)n2; i++, j++) {
@@ -561,7 +563,7 @@ void fn_3_F6FDC(void** files) {
     fn_800BDC88(lbl_8036E548._6C, (u8)(j + 3), (u8)(j + 3), files[indices[8]], NULL, 0);
     lbl_3_bss_B154[0] = files[indices[16]];
     lbl_3_bss_B154[1] = files[indices[17]];
-    for (i = 0; i < numActors; i++) {
+    for (i = 0; i < (u8)(numModels + 4); i++) {
         fn_800BD548(&lbl_8036E548._6C->models[i], 4, lbl_3_common_bss_350E4._20, lbl_3_common_bss_350E4._24,
                     lbl_3_common_bss_350E4._28, lbl_3_common_bss_350E4._2C);
     }
@@ -595,7 +597,7 @@ void fn_3_F6FDC(void** files) {
             entry->_9D = 0;
             draw->_74 = &lbl_8036E548._6C->models[i];
             entry->_C2 = idx;
-            entry->_C3 = pitcherModel;
+            entry->_C3u = pitcherModel;
             draw->_78 = files[indices[9]];
             draw->_7C = NULL;
             draw->_80 = fn_3_F1674;
@@ -2216,24 +2218,23 @@ void fn_3_F0184(void) {
 }
 
 // .text:0x000EFB54 size:0x630 mapped:0x8072EBE8
-// 95.88%: the frame is 0x10 larger and every local sits 12 bytes higher than in the
-// target (q2 at 0x8 up to pos at 0x74); the struct copies may need other forms.
 void fn_3_EFB54(StaC5Draw* draw) {
-    Quaternion q2;
-    Quaternion q1;
-    Quaternion q;
-    Vec axis;
-    Vec w;
-    Vec u;
-    Vec right = { 1.0f, 0.0f, 0.0f };
-    Vec off;
     Vec pos = { 0.0f, 0.0f, 0.0f };
+    Vec off;
+    Vec right = { 1.0f, 0.0f, 0.0f };
+    Vec u;
+    Vec w;
+    Vec axis;
+    Quaternion q;
+    Quaternion q1;
+    Quaternion q2;
     StaC5Player* player;
     s32 i;
     s8 side;
     f32 angle;
     f32 depth;
     f32 radius;
+    f32 yaw;
 
     player = lbl_8036E548._2C50[draw->_C1];
     if (player == NULL) {
@@ -2247,9 +2248,9 @@ void fn_3_EFB54(StaC5Draw* draw) {
                 break;
             }
         }
-        if (player == NULL) {
-            return;
-        }
+    }
+    if (player == NULL) {
+        return;
     }
     memset(&pos, 0, sizeof(Vec));
     if (!player->_25A) {
@@ -2283,51 +2284,48 @@ void fn_3_EFB54(StaC5Draw* draw) {
     off.x = -radius * (f32)cos(angle);
     off.y = -depth;
     off.z = -radius * (f32)sin(angle);
-    pos.x += off.x * 0.5f;
-    pos.y += off.y * 0.5f;
-    pos.z += off.z * 0.5f;
+    pos.x += off.x / 2.0f;
+    pos.y += off.y / 2.0f;
+    pos.z += off.z / 2.0f;
     pos.y *= -1.0f;
     off.x *= -1.0f;
     off.y *= -1.0f;
     off.z *= -1.0f;
     draw->_A0 = pos;
-    w = off;
-    u = off;
+    u = w = off;
     w.z = 0.0f;
     u.y = 0.0f;
-    w.x = sqrt(pow(off.z, 2.0) + pow(off.x, 2.0));
+    w.x = sqrt(pow(off.x, 2.0) + pow(off.z, 2.0));
     if (0.0f != radius) {
         PSVECNormalize(&u, &u);
     }
     PSVECNormalize(&w, &w);
-    draw->_AC = 57.29578f * -(f32)acos(PSVECDotProduct(&u, &right));
+    yaw = acos(PSVECDotProduct(&u, &right));
+    draw->_AC = 57.29578f * -yaw;
     if (u.z < 0.0f) {
         draw->_AC = 360.0f - draw->_AC;
     }
-    axis.x = 0.0f;
+    axis.x = axis.z = 0.0f;
     axis.y = 1.0f;
-    axis.z = 0.0f;
     C_QUATRotAxisRad(&q1, &axis, 0.017453292f * draw->_AC);
     draw->_B0 = 57.29578f * (f32)acos(PSVECDotProduct(&w, &right));
     if (w.y < 0.0f) {
         draw->_B0 = 360.0f - draw->_B0;
     }
-    axis.x = 0.0f;
-    axis.y = 0.0f;
+    axis.x = axis.y = 0.0f;
     axis.z = 1.0f;
     C_QUATRotAxisRad(&q2, &axis, 0.017453292f * draw->_B0);
     PSQUATMultiply(&q1, &q2, &q);
     PSQUATNormalize(&q, &q);
-    if (PSQUATDotProduct(&q, &q) == 0.0f) {
-        axis.x = 0.0f;
+    if (!PSQUATDotProduct(&q, &q)) {
+        axis.x = axis.z = 0.0f;
         axis.y = 1.0f;
-        axis.z = 0.0f;
         C_QUATRotAxisRad(&q, &axis, 0.0f);
     }
-    if (player->_25D == 1) {
-        draw->_90_7 = 1;
-    } else {
+    if (player->_25D != 1) {
         draw->_90_7 = 0;
+    } else {
+        draw->_90_7 = 1;
     }
     CTRLSetTranslation(&draw->control, draw->_A0.x, -draw->_A0.y, draw->_A0.z);
     CTRLSetQuat(&draw->control, q.x, q.y, q.z, q.w);
