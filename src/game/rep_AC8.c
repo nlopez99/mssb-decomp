@@ -10550,14 +10550,12 @@ void fn_3_2E41C(void) {
 }
 
 // .text:0x0002DDB4 size:0x668 mapped:0x8066CE48
-// 99.94%: registers only: the target loads the first target's f->_000 into f3 and divides
-// it into f1, this the reverse. The masked index ((p << 1) & 0x1FE) needs the & 0xFF.
+// The masked index ((p << 1) & 0x1FE in the target) needs the & 0xFF.
 void fn_3_2DDB4(void) {
     s32 player = g_Minigame._1922 & 0xFF;
     UnkAC8Fielder* f = &g_Fielders[g_Minigame.minigameRelatedIndex];
     InputStruct* input = &g_Controls[player];
-    f32 z2;
-    f32 x2;
+    VecXZ v;
     f32 dist;
 
     if (g_AiLogic.mgTimer[player] < 0x7FFE) {
@@ -10571,10 +10569,10 @@ void fn_3_2DDB4(void) {
 
             offset = lbl_3_data_1C44[g_Batter.characterClass];
             dist = dolsqrtf2(SQ(f->_000) + SQ(f->_008));
-            x2 = f->_000 / dist;
-            z2 = f->_008 / dist;
-            g_AiLogic.mgTarget[player].x = x2 * offset + f->_000;
-            g_AiLogic.mgTarget[player].z = z2 * offset + f->_008;
+            v.x = f->_000 / dist;
+            v.z = f->_008 / dist;
+            g_AiLogic.mgTarget[player].x = v.x * offset + f->_000;
+            g_AiLogic.mgTarget[player].z = v.z * offset + f->_008;
             g_AiLogic.mgTimer[player] = 0;
             g_AiLogic.mgStep[player] = 1;
         } else if (g_AiLogic.mgStep[player] == 2) {
@@ -10588,9 +10586,9 @@ void fn_3_2DDB4(void) {
         }
     } else if (g_AiLogic.mgMode[player] == 1) {
         if (g_AiLogic.mgStep[player] == 0) {
-            x2 = f->_000 * f->_000;
-            z2 = f->_008 * f->_008;
-            dist = dolsqrtf2(x2 + z2);
+            v.x = f->_000 * f->_000;
+            v.z = f->_008 * f->_008;
+            dist = dolsqrtf2(v.x + v.z);
             if (f->_000 < -15.0f) {
                 g_AiLogic.mgAngle[player] = f->_180 - 0x600 + RandomInt_Game(0x400);
             } else if (f->_000 > 15.0f) {
