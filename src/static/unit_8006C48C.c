@@ -12,12 +12,12 @@ typedef struct MissionChar {
     /* 0x04 */ s8 _04;
     /* 0x05 */ s8 _05;
     /* 0x06 */ s8 _06;
-    /* 0x07 */ u8 _07;
-    /* 0x08 */ struct {
-        /* 0x0 */ s8 _0;
-        /* 0x1 */ s8 flag; // negative once the star is earned
+    /* 0x07 */ u8 _07[0x9 - 0x7];
+    /* 0x09 */ struct {
+        /* 0x0 */ s8 flag; // negative once the star is earned
+        /* 0x1 */ s8 unlocked;
     } stars[10];
-    /* 0x1C */ u8 _1C[0x31 - 0x1C];
+    /* 0x1D */ u8 _1D[0x31 - 0x1D];
     /* 0x31 */ s8 status;
     /* 0x32 */ u8 _32[0x34 - 0x32];
 } MissionChar; // size: 0x34
@@ -37,8 +37,17 @@ typedef struct MissionTracker {
     /* 0x444D */ u8 _444D[54];
 } MissionTracker;
 
+typedef struct StarReq {
+    /* 0x0 */ s16 _0;
+    /* 0x2 */ s16 type;
+    /* 0x4 */ s16 count;
+    /* 0x6 */ s16 level;
+    /* 0x8 */ s16 _8;
+} StarReq; // size: 0xA
+
 typedef struct MissionInfo {
-    /* 0x0 */ u8 _0[0x3];
+    /* 0x0 */ u8 _0[0x2];
+    /* 0x2 */ u8 table;
     /* 0x3 */ u8 _3;
     /* 0x4 */ u8 _4[0x6 - 0x4];
 } MissionInfo; // size: 0x6
@@ -60,6 +69,7 @@ typedef struct SoundSlot {
 extern MissionTracker starMissionCompletionTracker;
 extern MissionInfo lbl_800E8558[];
 extern s16 lbl_8010B444[][11];
+extern StarReq lbl_8010A768[][10];
 extern f32 lbl_8010B4B4[][11];
 extern f32 lbl_8010B590[][7];
 extern BigMenuState lbl_803297E0;
@@ -148,24 +158,29 @@ s16 determineIfMissionDescriptionIsShown(s32 index) {
     return lbl_8010B444[ch->_05][count];
 }
 
-// .text:0x8006CBE4 size:0xC0
-// The target starts i as a copy of count (mr r30,r31) where this builds li r30,0
-s16 challengeRelated(s32 index) {
+static inline s32 countEarnedStars(s32 index) {
     s32 count;
     s32 i;
-    MissionChar* ch = &starMissionCompletionTracker.chars[index];
 
     if (lbl_800E8558[index]._3 == 0) {
         count = 0;
     } else {
         count = 0;
-        for (i = count; i < 10; i++) {
+        for (i = 0; i < 10; i++) {
             if (challengeStarRelatedInd(index, i) != 0) {
                 count++;
             }
         }
     }
-    return lbl_8010B444[ch->_05][count];
+    return count;
+}
+
+// .text:0x8006CBE4 size:0xC0
+// The target starts countEarnedStars' i as a copy of count (mr r30,r31) where this builds li r30,0
+s16 challengeRelated(s32 index) {
+    MissionChar* ch = &starMissionCompletionTracker.chars[index];
+
+    return lbl_8010B444[ch->_05][countEarnedStars(index)];
 }
 
 // .text:0x8006CAC8 size:0x11C
@@ -257,6 +272,36 @@ BOOL fn_8006C5CC(void) {
 }
 
 // .text:0x8006C48C size:0x140
+// Registers only: the saved registers r18-r27 are assigned in another order
 void challengeDrawStarsOnMissionMenu(void) {
+    s32 k;
+    s32 i;
+    s32 count;
+    s32 type;
+    s16 need;
+    s16 minLevel;
+    u8 level = starMissionCompletionTracker._4415;
+
+    for (i = 0; i < 54; i++) {
+        if (lbl_800E8558[i]._3 == 1 && starMissionCompletionTracker.chars[i].status == 1) {
+            for (k = 0; k < 10; k++) {
+                type = lbl_8010A768[lbl_800E8558[i].table][k].type;
+                need = lbl_8010A768[lbl_800E8558[i].table][k].count;
+                minLevel = lbl_8010A768[lbl_800E8558[i].table][k].level;
+                if (type == 0) {
+                    starMissionCompletionTracker.chars[i].stars[k].unlocked = 1;
+                }
+                if (challengeStarRelatedInd(i, k) != 0) {
+                    starMissionCompletionTracker.chars[i].stars[k].unlocked = 1;
+                }
+                if (type == 1) {
+                    count = countEarnedStars(i);
+                    if (count >= need && level >= minLevel) {
+                        starMissionCompletionTracker.chars[i].stars[k].unlocked = 1;
+                    }
+                }
+            }
+        }
+    }
 }
 
