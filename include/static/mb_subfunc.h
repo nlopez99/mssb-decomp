@@ -19,7 +19,7 @@ void fn_800649BC(void);
 void unsure_FillRosterPositions(void);
 void characterSelectScreen(void);
 void fn_80066EAC(void);
-void fn_800670A0(void);
+void fn_800670A0(u8 team);
 void fn_800671FC(void);
 void fn_80067264(void);
 void fn_800675C4(void);
@@ -36,6 +36,6 @@ void fn_8006877C(u8 index);
 void fn_80068838(void);
 s32 fn_800697B0(void);
 void fn_80069854(void);
-void fn_800698F8(void);
+s32 fn_800698F8(s32 charId);
 
 #endif // !__STATIC_MB_SUBFUNC_H_

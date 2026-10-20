@@ -1,4 +1,5 @@
 #include "static/mb_subfunc.h"
+#include "Dolphin/os.h"
 #include "static/UnknownHomes_Static.h"
 #include "string.h"
 
@@ -9,8 +10,12 @@ typedef struct MbState {
     /* 0x46F8 */ u8 ports[2];
     /* 0x46FA */ u8 _46FA[0x4709 - 0x46FA];
     /* 0x4709 */ s8 _4709[2];
-    /* 0x470B */ u8 _470B[0x4757 - 0x470B];
-    /* 0x4757 */ u8 _4757[0x48C0 - 0x4757];
+    /* 0x470B */ u8 _470B[0x470F - 0x470B];
+    /* 0x470F */ s8 _470F[2];
+    /* 0x4711 */ u8 _4711[0x4757 - 0x4711];
+    /* 0x4757 */ u8 _4757[0x48AE - 0x4757];
+    /* 0x48AE */ u8 _48AE;
+    /* 0x48AF */ u8 _48AF[0x48C0 - 0x48AF];
 } MbState; // size: 0x48C0
 
 typedef struct MbGameOptions {
@@ -44,7 +49,18 @@ typedef struct MbTrack {
     /* 0x1C */ u8 _1C;
 } MbTrack; // size: 0x20
 
+typedef struct MbTeams {
+    /* 0x00 */ u8 _00[0x2];
+    /* 0x02 */ s8 _02[2][9];
+    /* 0x14 */ u8 _14[0x26 - 0x14];
+    /* 0x26 */ u8 _26[2][9];
+    /* 0x38 */ u8 _38[0x5C - 0x38];
+} MbTeams; // size: 0x5C
+
 extern MbState lbl_8034E9A0;
+extern MbTeams lbl_803C6724;
+extern u8 lbl_80108DB8[];
+extern u8 lbl_80108DDC[];
 extern MbRosterEntry inMemRoster[2][9];
 extern MbTrack lbl_802E4BC0[9];
 extern MbGameOptions gameInitOptions;
@@ -120,7 +136,73 @@ u8 lbl_80108EC4[12] = { 0, 4, 10, 2, 6, 9, 1, 5, 11, 3, 17, 19 };
 u8 lbl_803CB8D0[8] = { 3, 2, 1 };
 
 // .text:0x800698F8 size:0x170
-void fn_800698F8(void) {
+s32 fn_800698F8(s32 charId) {
+    s32 i;
+
+    for (i = 0; i < 32; i++) {
+        if (lbl_80108DB8[i] == charId) {
+            if (i == 17 && lbl_8034E9A0._48AE != 0) {
+                i = 32;
+            }
+            lbl_8034E9A0._48AE = 0;
+            return i;
+        }
+    }
+    if (i == 32) {
+        for (i = 0; i < 22; i++) {
+            if (lbl_80108DDC[i] == charId) {
+                switch (i) {
+                case 0:
+                case 1:
+                    charId = 0x15;
+                    break;
+                case 2:
+                case 3:
+                    charId = 0x16;
+                    break;
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                    charId = 0xD;
+                    break;
+                case 8:
+                case 9:
+                case 10:
+                    charId = 0x19;
+                    break;
+                case 11:
+                    charId = 0xC;
+                    break;
+                case 12:
+                    charId = 0x14;
+                    break;
+                case 13:
+                case 14:
+                case 15:
+                case 16:
+                    charId = 0x10;
+                    break;
+                case 17:
+                case 18:
+                case 19:
+                    charId = 0x1F;
+                    break;
+                case 20:
+                case 21:
+                    charId = 0x17;
+                    break;
+                }
+                lbl_8034E9A0._48AE = 0;
+                return charId;
+            }
+        }
+        if (i == 22) {
+            OSPanic("mb_subfunc.c", 149, "The character doesn't exist");
+        }
+    }
+    OSPanic("mb_subfunc.c", 153, "//OZ \x96\xdf\x82\xe8\x92l\x82\xaa\x82\xa0\x82\xe8\x82\xdc\x82\xb9\x82\xf1\n");
+    return 0;
 }
 
 // .text:0x80069854 size:0xA4
@@ -329,7 +411,34 @@ void fn_800671FC(void) {
 }
 
 // .text:0x800670A0 size:0x15C
-void fn_800670A0(void) {
+void fn_800670A0(u8 team) {
+    s32 i;
+    s32 sum = 0;
+    s32 avg = 0;
+    s32 count = 0;
+    s8 rank = 0;
+
+    for (i = 0; i < 9; i++) {
+        if (lbl_803C6724._26[team][i] != 0 && lbl_803C6724._02[team][i] != lbl_8034E9A0._46E0[team]) {
+            sum += lbl_803C6724._26[team][i];
+            count++;
+        }
+    }
+    if (count != 0) {
+        avg = sum / count;
+    }
+    if (avg >= 70) {
+        rank = 5;
+    } else if (avg <= 69 && avg >= 55) {
+        rank = 4;
+    } else if (avg <= 54 && avg >= 35) {
+        rank = 3;
+    } else if (avg <= 34 && avg >= 15) {
+        rank = 2;
+    } else if (avg <= 14 && avg > 0) {
+        rank = 1;
+    }
+    lbl_8034E9A0._470F[team] = rank;
 }
 
 // .text:0x80066EAC size:0x1F4
