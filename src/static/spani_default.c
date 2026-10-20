@@ -468,12 +468,11 @@ void fn_80035CA4(s32 id) {
     s32 i = fn_80035DD4(id);
 
     if (i != -1) {
-        SabEntry* e = &lbl_803C4BE0[i];
-        e->_30 = NULL;
-        e->_34 = NULL;
         lbl_8023D6C0[i] = -1;
-        e->_38 = NULL;
-        PSMTXIdentity(e->mtx);
+        lbl_803C4BE0[i]._30 = NULL;
+        lbl_803C4BE0[i]._34 = NULL;
+        lbl_803C4BE0[i]._38 = NULL;
+        PSMTXIdentity(lbl_803C4BE0[i].mtx);
     }
 }
 
@@ -496,7 +495,7 @@ void fn_80035A00(void) {
     s32 i;
 
     for (i = 0; i < 25; i++) {
-        if (i > 1) {
+        if (i > 1U) {
             fn_80035CA4(i);
         }
     }
@@ -590,14 +589,14 @@ void fn_800356B8(void) {
 // .text:0x80035168 size:0x550 mapped:0x80035168
 void fn_80035168(void) {
     Mtx* depths = lbl_800F78E0;
+    SpaniObj* o;
+    s32 i;
     MtxPtr depth;
+    u32 color;
     u32 out;
     Mtx m;
     Mtx tmp;
-    SpaniObj* o;
-    s32 i;
     s32 j;
-    u32 color;
     SabFile* sab;
     SabPart* p;
     u8 k;
