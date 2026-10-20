@@ -79,7 +79,10 @@ static inline SpaniObj* getSpaniObj(SpaniTask* task, s32 id) {
 extern s32 fn_80042DA8(void* task, s32 index, s32 value);
 
 typedef struct MenuScreen {
-    /* 0x00 */ u8 _00[0x8];
+    /* 0x00 */ u16 _00;
+    /* 0x02 */ u16 _02;
+    /* 0x04 */ u16 _04;
+    /* 0x06 */ u16 _06;
     /* 0x08 */ u16 _08;
     /* 0x0A */ u16 _0A;
     /* 0x0C */ u16 _0C;
@@ -88,7 +91,13 @@ typedef struct MenuScreen {
 
 extern struct {
     /* 0x00 */ u8 _00;
-    /* 0x01 */ u8 _01[0x8 - 0x1];
+    /* 0x01 */ u8 _01;
+    /* 0x02 */ u8 _02;
+    /* 0x03 */ u8 _03;
+    /* 0x04 */ u8 _04;
+    /* 0x05 */ u8 _05;
+    /* 0x06 */ u8 _06;
+    /* 0x07 */ u8 _07;
     /* 0x08 */ u8 _08;
     /* 0x09 */ u8 _09;
     /* 0x0A */ s8 _0A[10];
@@ -96,13 +105,61 @@ extern struct {
     /* 0x15 */ u8 _15;
     /* 0x16 */ u8 _16[10];
     /* 0x20 */ u8 _20;
-    /* 0x21 */ u8 _21[0x23 - 0x21];
+    /* 0x21 */ u8 _21;
+    /* 0x22 */ u8 _22;
     /* 0x23 */ u8 _23;
+    /* 0x24 */ u8 _24;
+    /* 0x25 */ u8 _25;
+    /* 0x26 */ u8 _26;
+    /* 0x27 */ u8 _27;
 } lbl_8034E978;
 
 extern s32 fn_8000FA9C(s32 id);
+extern s32 fn_8000F988(SpaniTask* task, s32 i, u16 arg2, s32 font, s32 str, BOOL flag);
+extern void fn_8000FE08(s32 id, s32 arg1, s32 arg2);
+extern void fn_8000FEE8(s32 id);
+extern void fn_8000F8F4(SpaniTask* task);
+extern SpaniTask* lbl_803CC1B8;
+extern struct SpaniDesc lbl_800FEB30;
+
+extern struct {
+    /* 0x00 */ u8 _00[0x15];
+    /* 0x15 */ u8 _15;
+} lbl_803C5EE0;
 
 extern MenuScreen lbl_800FEF70[];
+
+static inline BOOL isLockState(s32 lock, s32 state) {
+    return lock == state ? TRUE : FALSE;
+}
+
+static inline BOOL isAnimDone(void* task, s32 id, s32 frame) {
+    return fn_80042DA8(task, id, frame) != 0;
+}
+
+static inline u8 stopAtEnd(SpaniTask* task, s32 id, s32 frame) {
+    if ((s32)(getSpaniObj(task, id)->_5C >> 16) >= frame) {
+        getSpaniObj(task, id)->_68 = 0;
+        return TRUE;
+    }
+    return FALSE;
+}
+
+static inline u8 stopAtStart(SpaniTask* task, s32 id) {
+    if ((s32)(getSpaniObj(task, id)->_5C >> 16) <= 0) {
+        getSpaniObj(task, id)->_68 = 0;
+        return TRUE;
+    }
+    return FALSE;
+}
+
+static inline BOOL isStopAtEnd(SpaniTask* task, s32 id, s32 frame) {
+    return stopAtEnd(task, id, frame) != 0;
+}
+
+static inline BOOL isStopAtStart(SpaniTask* task, s32 id) {
+    return stopAtStart(task, id) != 0;
+}
 
 static inline SpaniObj* getTeamObj(SpaniTask* task, s32 offset, s32 id) {
     return lbl_80371C30[task->_14 + id + offset].obj;
@@ -136,7 +193,161 @@ void fn_80056120(void) {
 }
 
 // .text:0x800559EC size:0x734
+// 98.07%: in the counting blocks the target sets count after the call's arguments
+// and computes each result straight into done; the base copies it (mr).
 void fn_800559EC(void) {
+    s32 count;
+    s32 done;
+    s32 port;
+    SpaniTask* task = lbl_803CC1B8;
+    s8 a;
+    s8 b;
+
+    for (port = 0; port < 2; port++) {
+        switch (lbl_803C66B0.step[port]) {
+        case 41:
+            fn_80055798(task, port);
+            if (lbl_803C66B0.rows[8].port[port] == 1) {
+                done = 0;
+                count = 0;
+                if (lbl_803C5F04._36 == 0) {
+                    if (lbl_803C5F04._3B[1] == 1) {
+                        count = 1;
+                        done = isAnimDone(task, 0x1A, 5);
+                    } else {
+                        count = 1;
+                        done = isAnimDone(task, 0x1A, 0x19);
+                    }
+                    if (g_d_GameSettings._06 != 2 && g_d_GameSettings.GameModeSelected == 5) {
+                        count++;
+                        done += isAnimDone(task, 0x57, 0x14);
+                    }
+                }
+                done += isAnimDone(task, 0x1B, 0x21);
+                done += isAnimDone(task, 0x58, 10);
+                if (done == count + 2) {
+                    fn_80062674(port);
+                    lbl_803C66B0.rows[8].port[port] = 2;
+                }
+            }
+            break;
+        case 42:
+            if (lbl_803C66B0.rows[8].port[port] == 0) {
+                if (lbl_803C5F04._36 == 0) {
+                    getSpaniObj(task, 0)->_68 = 4;
+                    if (lbl_803C5F04._3B[1] == 1) {
+                        getSpaniObj(task, 0x1A)->_68 = 4;
+                    } else {
+                        getSpaniObj(task, 0x1A)->_68 = 1;
+                    }
+                } else {
+                    getSpaniObj(task, 0x26)->_68 = 4;
+                }
+                getSpaniObj(task, 6)->_68 = 4;
+                getSpaniObj(task, 0x1B)->_68 = 4;
+                getSpaniObj(task, 0x17)->_68 = 4;
+                getSpaniObj(task, 0x1C)->_68 = 4;
+                if (g_d_GameSettings._06 != 2 && g_d_GameSettings.GameModeSelected == 5) {
+                    getSpaniObj(task, 0x57)->_5C = 0x14 << 16;
+                    getSpaniObj(task, 0x57)->_68 = 1;
+                }
+                fn_800626EC(port);
+                lbl_803C66B0.rows[8].port[port] = 1;
+            }
+            if (lbl_803C66B0.rows[8].port[port] == 1) {
+                done = 0;
+                count = 0;
+                if (lbl_803C5F04._36 == 0) {
+                    if (lbl_803C5F04._3B[1] == 1) {
+                        count = 1;
+                        done = isAnimDone(task, 0x1A, 0);
+                    } else {
+                        count = 1;
+                        done = isAnimDone(task, 0x1A, 0x1E);
+                    }
+                }
+                count++;
+                done += isAnimDone(task, 0x1B, 0);
+                if (g_d_GameSettings._06 != 2 && g_d_GameSettings.GameModeSelected == 5) {
+                    count++;
+                    done += isAnimDone(task, 0x57, 0x1E);
+                }
+                if (done == count) {
+                    lbl_803C5EE0._15 = 1;
+                    fn_80062674(port);
+                    lbl_803C66B0.rows[8].port[port] = 2;
+                }
+            }
+            break;
+        case 43:
+            fn_80055374(task, port);
+            if (lbl_803C66B0.rows[8].port[port] == 1 && isAnimDone(task, 0x58, 0x14) == TRUE) {
+                fn_80062674(port);
+                lbl_803C66B0.rows[8].port[port] = 2;
+            }
+            break;
+        case 44:
+            if (lbl_803C66B0.rows[8].port[0] == 0) {
+                a = lbl_803C5F04._65[0];
+                b = lbl_803C5F04._65[1];
+                lbl_803C5F04._69[1] = 0;
+                lbl_803C5F04._65[1] = 0;
+                lbl_803C5F04._69[0] = 0;
+                lbl_803C5F04._65[0] = 0;
+                getSpaniObj(task, 0x26)->_68 = 4;
+                getSpaniObj(task, 0x29)->_68 = 4;
+                getSpaniObj(task, 0x2A)->_68 = 4;
+                getSpaniObj(task, 0xB)->_54 |= 2;
+                getSpaniObj(task, 0xB)->_68 = 1;
+                lbl_80371C30[task->_14 + 0x2B + a].obj->_5C = 10 << 16;
+                lbl_80371C30[task->_14 + 0x2B + a].obj->_68 = 4;
+                lbl_80371C30[task->_14 + 0x3F + a * 2].obj->_68 = 4;
+                if (g_d_GameSettings._10 == 1) {
+                    lbl_80371C30[task->_14 + 0x2F + b].obj->_5C = 10 << 16;
+                    lbl_80371C30[task->_14 + 0x2F + b].obj->_68 = 4;
+                    lbl_80371C30[task->_14 + 0x40 + b * 2].obj->_68 = 4;
+                }
+                getSpaniObj(task, 0)->_68 = 1;
+                getSpaniObj(task, 0x58)->_68 = 4;
+                fn_800626EC(0);
+                lbl_803C66B0.rows[8].port[0] = 1;
+            }
+            if (lbl_803C66B0.rows[8].port[0] == 1 && isAnimDone(task, 0x58, 10) == TRUE) {
+                fn_80062674(0);
+                lbl_803C66B0.rows[8].port[0] = 2;
+            }
+            break;
+        case 48:
+            fn_80054B00(task, port);
+            fn_80054910(task, port);
+            break;
+        case 49:
+            if (lbl_803C66B0.rows[8].port[port] == 0) {
+                getSpaniObj(task, 0)->_68 = 4;
+                getSpaniObj(task, 6)->_68 = 4;
+                getSpaniObj(task, 0xB)->_5C = 10 << 16;
+                getSpaniObj(task, 0xB)->_68 = 4;
+                getSpaniObj(task, 0x1B)->_68 = 1;
+                if (lbl_803C5F04._36 == 0) {
+                    getSpaniObj(task, 0x58)->_68 = 4;
+                } else {
+                    getSpaniObj(task, 0x58)->_68 = 1;
+                }
+                fn_800626EC(port);
+                lbl_803C66B0.rows[8].port[port] = 1;
+            }
+            if (lbl_803C66B0.rows[8].port[port] == 1 && g_d_GameSettings.GameModeSelected != 0) {
+                fn_80062674(port);
+                lbl_803C66B0.rows[8].port[port] = 2;
+            }
+            break;
+        }
+    }
+    if (lbl_803C5EE0._15 != 0) {
+        lbl_803C5EE0._15 = 0;
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+    }
 }
 
 // .text:0x80055798 size:0x254
@@ -314,14 +525,6 @@ void fn_80054B00(SpaniTask* task, s32 port) {
     }
 }
 
-static inline BOOL isLockState(s32 lock, s32 state) {
-    return lock == state ? TRUE : FALSE;
-}
-
-static inline BOOL isAnimDone(void* task, s32 id, s32 frame) {
-    return fn_80042DA8(task, id, frame) != 0;
-}
-
 // .text:0x80054910 size:0x1F0
 // 91.77%: the target branches around a one-case test of cur, sets waited after
 // the call's arguments and copies each result into done (mr r7).
@@ -458,11 +661,168 @@ void fn_800542C4(u8 row, u8 cur, SpaniTask* task) {
 }
 
 // .text:0x80053FE8 size:0x2DC
+// 99.13%: the target sets the four zero flags and starts the fill loop's counter
+// from one li r0,0; the base loads 0 twice.
 void fn_80053FE8(void) {
+    SpaniTask* task = lbl_803CC1B8;
+    s32 i;
+    s32 j;
+
+    lbl_8034E978._25 = 0;
+    lbl_8034E978._24 = 0;
+    lbl_8034E978._05 = 0;
+    lbl_8034E978._04 = 0;
+    for (j = 0; j < 10; j++) {
+        lbl_8034E978._0A[j] = -1;
+    }
+    fn_80034E20(task, &lbl_800FEB30);
+    getSpaniObj(task, 6)->_5C = (lbl_8034E978._03 + lbl_800FEF70[lbl_8034E978._00]._00) << 16;
+    getSpaniObj(task, 5)->_5C = lbl_800FEF70[lbl_8034E978._00]._06 << 16;
+    fn_800363D8(task, 5, 1, 0xEF, lbl_800FEF70[lbl_8034E978._00]._02);
+    getSpaniObj(task, 4)->_5C = lbl_800FEF70[lbl_8034E978._00]._04 << 16;
+    getSpaniObj(task, 3)->_5C = lbl_800FEF70[lbl_8034E978._00]._06 << 16;
+    lbl_8034E978._27 = 1;
+    getSpaniObj(task, 7)->_5C = lbl_8034E978._08 << 16;
+    getSpaniObj(task, 8)->_5C = lbl_8034E978._09 << 16;
+    if (lbl_800FEF70[lbl_8034E978._00]._0A != 0xFFFF) {
+        lbl_8034E978._14 = lbl_800FEF70[lbl_8034E978._00]._0C - lbl_800FEF70[lbl_8034E978._00]._0A;
+        for (i = 0; i < 10; i++) {
+            if (i < lbl_8034E978._14) {
+                lbl_8034E978._0A[i] = fn_8000F988(task, i + 0x16, 0, 0, i + lbl_800FEF70[lbl_8034E978._00]._0A, 0);
+            } else {
+                lbl_8034E978._0A[i] = fn_8000F988(task, i + 0x16, 0, 0, lbl_800FEF70[lbl_8034E978._00]._0A, 0);
+            }
+        }
+    } else {
+        getSpaniObj(task, 9)->_54 &= ~2;
+    }
+    lbl_8034E978._26 = 0;
+    lbl_803CC1B8->func = fn_80053810;
 }
 
 // .text:0x80053810 size:0x7D8
 void fn_80053810(void) {
+    SpaniTask* task = lbl_803CC1B8;
+    s32 i;
+    s32 done;
+
+    if (lbl_8034E978._26 != 0 ? TRUE : FALSE) {
+        lbl_8034E978._26 = 0;
+    } else {
+        switch (lbl_8034E978._06) {
+        case 0:
+            if (lbl_8034E978._04 == 0) {
+                lbl_8034E978._04 = 1;
+                getSpaniObj(task, 0)->_5C = 0;
+            }
+            if (lbl_8034E978._05 != 0) {
+                getSpaniObj(task, 0)->_68 = 1;
+                getSpaniObj(task, 9)->_68 = 4;
+                lbl_8034E978._05 = 0;
+                lbl_8034E978._24 = 1;
+            }
+            if (lbl_8034E978._24 == 0) {
+                stopAtEnd(task, 0, 0x14);
+            } else if (lbl_8034E978._24 != 0) {
+                if (isStopAtEnd(task, 0, 0x28) + isStopAtStart(task, 9) == 2) {
+                    lbl_8034E978._24 = 0;
+                    lbl_8034E978._04 = 0;
+                    lbl_8034E978._25 = 1;
+                }
+            }
+            if (lbl_8034E978._01 != lbl_8034E978._00 || lbl_8034E978._02 != lbl_8034E978._03) {
+                getSpaniObj(task, 6)->_5C = (lbl_8034E978._03 + lbl_800FEF70[lbl_8034E978._00]._00) << 16;
+                fn_800363D8(task, 5, 1, 0xEF, lbl_800FEF70[lbl_8034E978._00]._02);
+                getSpaniObj(task, 5)->_5C = lbl_800FEF70[lbl_8034E978._00]._06 << 16;
+                getSpaniObj(task, 6)->_5C = lbl_800FEF70[lbl_8034E978._00]._04 << 16;
+                getSpaniObj(task, 1)->_5C = 0;
+                getSpaniObj(task, 2)->_5C = 10 << 16;
+                getSpaniObj(task, 1)->_68 = 1;
+                getSpaniObj(task, 2)->_68 = 4;
+                getSpaniObj(task, 7)->_5C = lbl_8034E978._08 << 16;
+                if (lbl_8034E978._27 != 0) {
+                    getSpaniObj(task, 8)->_5C = lbl_8034E978._08 << 16;
+                    lbl_8034E978._27 = 0;
+                } else {
+                    getSpaniObj(task, 8)->_5C = lbl_8034E978._09 << 16;
+                }
+                lbl_8034E978._14 = lbl_800FEF70[lbl_8034E978._00]._0C - lbl_800FEF70[lbl_8034E978._00]._0A;
+                if (lbl_8034E978._14 == 0) {
+                    getSpaniObj(task, 9)->_54 &= ~2;
+                }
+                for (i = 0; i < 10; i++) {
+                    if (i < lbl_8034E978._14) {
+                        lbl_80371C30[task->_14 + 0x16 + i].obj->_54 |= 2;
+                        if (lbl_8034E978._0A[i] != -1) {
+                            fn_8000FE08(lbl_8034E978._0A[i], 0, i + lbl_800FEF70[lbl_8034E978._00]._0A);
+                        } else {
+                            lbl_8034E978._0A[i] = fn_8000F988(task, i + 0x16, 0, 0, i + lbl_800FEF70[lbl_8034E978._00]._0A, 0);
+                        }
+                    } else {
+                        lbl_80371C30[task->_14 + 0x16 + i].obj->_54 &= ~2;
+                    }
+                    if (i == 0) {
+                        lbl_80371C30[task->_14 + 10 + i].obj->_54 |= 2;
+                    }
+                    lbl_80371C30[task->_14 + 10 + i].obj->_5C = 0;
+                    lbl_80371C30[task->_14 + 10 + i].obj->_68 = 0;
+                    if (i != 0) {
+                        lbl_80371C30[task->_14 + 10 + i].obj->_5C = 0;
+                        lbl_80371C30[task->_14 + 10 + i].obj->_54 &= ~2;
+                        lbl_80371C30[task->_14 + 0x16 + i].obj->_5C = 0;
+                        lbl_80371C30[task->_14 + 0x16 + i].obj->_54 &= ~2;
+                    }
+                }
+                lbl_8034E978._20 = 0;
+                lbl_8034E978._23 = 0;
+            }
+            fn_800531D0(task);
+            break;
+        case 1:
+            if (lbl_8034E978._07 == 0) {
+                getSpaniObj(task, 0)->_68 = 4;
+                getSpaniObj(task, 3)->_54 &= ~2;
+                lbl_8034E978._07 = 1;
+            } else {
+                done = isStopAtStart(task, 0);
+                if (done == 1) {
+                    lbl_8034E978._07 = 0;
+                    lbl_8034E978._06 = 0;
+                }
+            }
+            break;
+        case 2:
+            if (lbl_8034E978._07 == 0) {
+                getSpaniObj(task, 0)->_68 = 1;
+                getSpaniObj(task, 3)->_54 |= 2;
+                lbl_8034E978._07 = 1;
+            } else {
+                done = isStopAtEnd(task, 0, 0x14);
+                if (done == 1) {
+                    lbl_8034E978._07 = 0;
+                    lbl_8034E978._06 = 0;
+                }
+            }
+            break;
+        }
+        lbl_8034E978._01 = lbl_8034E978._00;
+        lbl_8034E978._02 = lbl_8034E978._03;
+        if (lbl_8034E978._25 == 0) {
+            return;
+        }
+    }
+    lbl_8034E978._01 = 0;
+    lbl_8034E978._00 = 0;
+    lbl_8034E978._20 = 0;
+    lbl_8034E978._21 = 0;
+    lbl_8034E978._22 = 0;
+    lbl_8034E978._03 = 0;
+    for (i = 0; i < 10; i++) {
+        fn_8000FEE8(lbl_8034E978._0A[i]);
+    }
+    fn_8000F8F4(task);
+    fn_80034CEC(task);
+    fn_800B0A14_removeQueue();
 }
 
 // .text:0x800531D0 size:0x640
