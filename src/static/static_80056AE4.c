@@ -956,7 +956,99 @@ void fn_80059458(SpaniTask* task, u8 team, s32 mask) {
 }
 
 // .text:0x80058E0C size:0x64C
-void fn_80058E0C(void) {
+void fn_80058E0C(SpaniTask* task, u8 team) {
+    u8 pushPull;
+    u8 highLow;
+    s16 charID;
+    s32 kind;
+    s32 fielding;
+    CharacterStats* player;
+    u8 stance;
+    s32 frame;
+
+    if (lbl_803297E0._CF63[team] == 0) {
+        player = &inMemRoster[team][lbl_803297E0._CF46[team] - 1];
+        charID = player->stats.CharID;
+        fielding = player->stats.FieldingStats;
+        pushPull = player->stats.HitTrajectoryPushPull;
+        frame = charID << 16;
+        highLow = player->stats.HitTrajectoryHighLow;
+        stance = player->stats.BattingStance;
+        getTeamObj(task, team, 0x19A)->_68 = 1;
+        getTeamObj(task, team, 0x1B0)->_5C = frame;
+        kind = fn_80064918(charID);
+        getTeamObj(task, team, 0x1B2)->_5C = kind << 16;
+        getTeamObj(task, team, 0x1AC)->_5C = 0;
+        getTeamObj(task, team, 0x1C4)->_5C = frame;
+        fn_80059458(task, team, fielding);
+        getTeamObj(task, team, 0x1B8)->_5C = 0;
+        getTeamObj(task, team, 0x1BA)->_5C = 1 << 16;
+        getTeamObj(task, team, 0x1BC)->_5C = 2 << 16;
+        getTeamObj(task, team, 0x1BE)->_5C = 3 << 16;
+        getTeamObj(task, team, 0x1C0)->_5C = 4 << 16;
+        getTeamObj(task, team, 0x1C2)->_5C = 5 << 16;
+        getTeamObj(task, team, 0x1A0)->_5C = 0;
+        getTeamObj(task, team, 0x1A2)->_5C = 0;
+        getTeamObj(task, team, 0x1A4)->_5C = 0;
+        getTeamObj(task, team, 0x1A6)->_5C = 0;
+        getTeamObj(task, team, 0x1A8)->_5C = 0;
+        getTeamObj(task, team, 0x1AA)->_5C = 0;
+        switch (pushPull) {
+        case 0:
+            getTeamObj(task, team, 0x1A0)->_68 = 1;
+            getTeamObj(task, team, 0x1A2)->_68 = 0;
+            getTeamObj(task, team, 0x1A4)->_68 = 0;
+            break;
+        case 1:
+            if (stance == 0) {
+                getTeamObj(task, team, 0x1A0)->_68 = 0;
+                getTeamObj(task, team, 0x1A2)->_68 = 1;
+                getTeamObj(task, team, 0x1A4)->_68 = 0;
+            } else {
+                getTeamObj(task, team, 0x1A0)->_68 = 0;
+                getTeamObj(task, team, 0x1A2)->_68 = 0;
+                getTeamObj(task, team, 0x1A4)->_68 = 1;
+            }
+            break;
+        case 2:
+            if (stance == 0) {
+                getTeamObj(task, team, 0x1A0)->_68 = 0;
+                getTeamObj(task, team, 0x1A2)->_68 = 0;
+                getTeamObj(task, team, 0x1A4)->_68 = 1;
+            } else {
+                getTeamObj(task, team, 0x1A0)->_68 = 0;
+                getTeamObj(task, team, 0x1A2)->_68 = 1;
+                getTeamObj(task, team, 0x1A4)->_68 = 0;
+            }
+            break;
+        }
+        switch (highLow) {
+        case 0:
+            getTeamObj(task, team, 0x1A6)->_68 = 1;
+            getTeamObj(task, team, 0x1A8)->_68 = 0;
+            getTeamObj(task, team, 0x1AA)->_68 = 0;
+            break;
+        case 1:
+            getTeamObj(task, team, 0x1A6)->_68 = 0;
+            getTeamObj(task, team, 0x1A8)->_68 = 1;
+            getTeamObj(task, team, 0x1AA)->_68 = 0;
+            break;
+        case 2:
+            getTeamObj(task, team, 0x1A6)->_68 = 0;
+            getTeamObj(task, team, 0x1A8)->_68 = 0;
+            getTeamObj(task, team, 0x1AA)->_68 = 1;
+            break;
+        }
+        getTeamObj(task, team, 0x1C6)->_54 |= 2;
+        getTeamObj(task, team, 0x1C6)->_68 = 1;
+        getTeamObj(task, team, 0x19C)->_68 = 1;
+        getTeamObj(task, team, 0x1AC)->_5C = 0;
+        getTeamObj(task, team, 0x1AC)->_68 = 1;
+        getTeamObj(task, team, 0x1D0)->_54 &= ~2;
+        getTeamObj(task, team, 0x1D0)->_68 = 0;
+        getTeamObj(task, team, 0x1C8)->_68 = 4;
+        lbl_803297E0._CF63[team] = 1;
+    }
 }
 
 // .text:0x80058B20 size:0x2EC
