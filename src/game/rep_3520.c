@@ -522,8 +522,6 @@ void fn_3_13ADC0(Vec* out, Vec* v, Vec* n) {
 }
 
 // .text:0x0013ACB4 size:0x10C mapped:0x80779D48
-// 91.2%: the second reflection loads _70C and _714 before the first one stores, and
-// the FPRs differ throughout.
 void fn_3_13ACB4(Unk3520Line* line) {
     Vec n;
     Vec d;
@@ -540,12 +538,12 @@ void fn_3_13ACB4(Unk3520Line* line) {
         n.z *= -1.0f;
     }
     fn_3_13ADC0(&r, &d, &n);
-    n.x *= -1.0f;
-    n.z *= -1.0f;
     g_Minigame._6F4 = line->pos.x + r.x;
     g_Minigame._6FC = line->pos.z + r.z;
     d.x = line->pos.x - g_Minigame._70C;
     d.z = line->pos.z - g_Minigame._714;
+    n.x *= -1.0f;
+    n.z *= -1.0f;
     fn_3_13ADC0(&r, &d, &n);
     g_Minigame._70C = line->pos.x + r.x;
     g_Minigame._714 = line->pos.z + r.z;
@@ -1779,8 +1777,6 @@ void fn_3_13688C(Unk3520Box* box) {
 }
 
 // .text:0x00136220 size:0x66C mapped:0x807752B4
-// 99.4%: the collision-type test merges 2 and 3 into one range where the target tests
-// each; some FPRs differ in the stun branches.
 void fn_3_136220(void) {
     Unk3520Fielder* fielder;
     int i;
@@ -1789,7 +1785,6 @@ void fn_3_136220(void) {
     f32 xx;
     f32 zz;
     f32 len;
-    f32 scale;
     f32 dx;
     f32 dz;
     f32 dist;
@@ -1805,9 +1800,8 @@ void fn_3_136220(void) {
                 xx = g_Minigame._1CB8[i].x * g_Minigame._1CB8[i].x;
                 zz = g_Minigame._1CB8[i].z * g_Minigame._1CB8[i].z;
                 len = dolsqrtf2(xx + zz);
-                scale = lbl_3_data_21B18[0] / len;
-                g_Minigame._1CB8[i].x *= scale;
-                g_Minigame._1CB8[i].z *= scale;
+                g_Minigame._1CB8[i].x *= lbl_3_data_21B18[0] / len;
+                g_Minigame._1CB8[i].z *= lbl_3_data_21B18[0] / len;
                 g_Minigame._1CB8[i].y = 0.0f;
                 g_Minigame._1D5A[i] = 0;
                 g_Minigame.starDashStunType[i] = 2;
@@ -1821,9 +1815,7 @@ void fn_3_136220(void) {
                 fn_3_6C854(g_Minigame.minigameControlStruct.characterIndex[i], 2);
             } else if (g_Minigame.starDashStunType[i] == 2) {
                 g_Minigame._1D5A[i]++;
-                zz = g_Minigame._1CB8[i].z * g_Minigame._1CB8[i].z;
-                xx = g_Minigame._1CB8[i].x * g_Minigame._1CB8[i].x;
-                len = dolsqrtf2(xx + zz);
+                len = dolsqrtf2(g_Minigame._1CB8[i].x * g_Minigame._1CB8[i].x + g_Minigame._1CB8[i].z * g_Minigame._1CB8[i].z);
                 if (len > 0.0f) {
                     seg.src.x = fielder->pos.x;
                     seg.src.y = -1.0f;
@@ -1862,8 +1854,7 @@ void fn_3_136220(void) {
         seg.dst.x = fielder->pos.x;
         seg.dst.y = 1.0f;
         seg.dst.z = fielder->pos.z;
-        type = checkCollision(&seg, &col, 0, FALSE) & 0x7F;
-        if (type == 2 || type == 3 || type == 7 || type == 8 || type == 5) {
+        if ((type = checkCollision(&seg, &col, 0, FALSE) & 0x7F) == 2 || type == 3 || type == 7 || type == 8 || type == 5) {
             dx = lbl_3_data_4444[8] - fielder->pos.x;
             dz = lbl_3_data_4444[8] - fielder->pos.z;
             dist = dolsqrtf2(dx * dx + dz * dz);
