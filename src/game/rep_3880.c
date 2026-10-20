@@ -2104,6 +2104,8 @@ void fn_3_14E920(s8 index) {
 }
 
 // .text:0x0014E894 size:0x8C mapped:0x8078D928
+// 94.29%: the target copies the counter's initial 0 (`mr r31,r30`) for the inlined store of
+// p->_4A, where the base loads it with its own `li`; only an array counter matched.
 void fn_3_14E894(void) {
     u32 i;
 
