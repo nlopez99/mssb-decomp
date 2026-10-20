@@ -1,4 +1,5 @@
 #include "static/static_8001FE00.h"
+#include "static/spani_default.h"
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/mtx.h"
 #include "Dolphin/os.h"
@@ -80,9 +81,6 @@ extern struct {
     /* 0x715 */ s8 _715;
 } lbl_803C6CF8;
 
-// static/spani_default.h declares fn_80035838 returning u8, which its definition needs;
-// this caller uses the result unmasked, as from an s32
-s32 fn_80035838(void* entry, u8 id);
 void fn_80034CEC(struct SpaniTask* task);
 void fn_80034E20(struct SpaniTask* task, struct SpaniDesc* desc);
 void* fn_800B0A5C_insertQueue(void (*callback)(void), u16 priority);

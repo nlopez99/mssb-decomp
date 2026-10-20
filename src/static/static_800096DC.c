@@ -1,4 +1,5 @@
 #include "static/static_800096DC.h"
+#include "static/spani_default.h"
 #include "static/static_80008E00.h"
 #include "static/static_8000F150.h"
 #include "static/UnknownHomes_Static.h"
@@ -125,8 +126,6 @@ extern void resetAllDrawingStructs(void);
 extern BOOL fn_800A8518(s32 arg0);
 extern void fn_800A88C0(void);
 extern void fn_800A8B78(void);
-// spani_default.h declares it returning u8; this caller tests the whole register.
-extern s32 fn_80035838(void* entry, u8 id);
 
 static AramEntry lbl_800E8AA8[3] = {
     { 0x0000040B, 0x401027E4, 0x00000800, 0x0005A818 },

@@ -1,4 +1,5 @@
 #include "static/static_8004A1BC.h"
+#include "static/spani_default.h"
 #include "static/static_80048EB8.h"
 #include "musyx/musyx.h"
 #include "static/UnknownHomes_Static.h"
@@ -101,8 +102,6 @@ extern struct {
     /* 0x5E */ u8 _5E;
 } lbl_803C66B0;
 
-// spani_default.h declares it returning u8; this caller tests the full word
-extern BOOL fn_80035838(void* entry, u8 id);
 extern void* fn_800B0A5C_insertQueue(void (*callback)(void), s32 priority);
 extern void fn_800B0A14_removeQueue(void);
 extern void changeScene(s32 arg0, s32 arg1);

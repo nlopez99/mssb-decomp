@@ -1,4 +1,5 @@
 #include "static/static_80069A68.h"
+#include "static/spani_default.h"
 #include "static/UnknownHomes_Static.h"
 #include "string.h"
 #include "Dolphin/gx.h"
@@ -154,18 +155,12 @@ extern BOOL fn_80021518(s32 group, void* data);
 extern void fn_8002149C(s32 arg0);
 extern void fn_800214D0(void);
 extern void fn_800215F8(SceneCallback* callback);
-extern void fn_80035CA4(s32 id);
 extern void fn_800ACF14(void* ptr);
 extern void* fn_800ACF34(u32 align, u32 size);
 extern s32 ARAMTransfer(void* src, void* dst, s32 arg2, s32 arg3);
-extern void fn_80035750(void* sab, void* tex, s16 id);
 extern void convertTextureHeader(void* tex);
 extern BOOL fn_80022B68(void);
 extern void changeScene(u8 scene, s16 arg1);
-// static/spani_default.h declares fn_80035838 returning u8; its callers here test the full register
-extern s32 fn_80035838(void* entry, u8 id);
-extern void fn_80034CEC(void* task);
-extern void fn_80034E20(void* task, void* desc);
 extern void fn_800B0A14_removeQueue(void);
 extern void* fn_800B0A5C_insertQueue(void (*func)(void), u16 priority);
 
@@ -389,7 +384,7 @@ void fn_8006B668(void) {
     switch (task->state) {
     case 0:
         if (task->_10 != 0) {
-            fn_80034E20(fn_800B0A5C_insertQueue(fn_8006B230, lbl_803CC1B8->priority), lbl_801092F8);
+            fn_80034E20(fn_800B0A5C_insertQueue(fn_8006B230, lbl_803CC1B8->priority), (struct SpaniDesc*)lbl_801092F8);
             changeScene(3, 0);
             task->_38 = 0;
             task->_36 = 1;
@@ -482,7 +477,7 @@ void fn_8006B230(void) {
             }
         }
         if ((lbl_80371C30[task->_14].obj->_5C >> 16) == 20) {
-            fn_80034CEC(task);
+            fn_80034CEC((struct SpaniTask*)task);
             switch (parent->state) {
             case 4:
                 fn_800214D0();
@@ -885,7 +880,7 @@ void fn_80069BDC(TexBank* bank, s32 index, f32 alpha, s32 index2, f32 alpha2) {
 s32 fn_80069B68(void) {
     if (fn_80035838(lbl_801092E8, 0x16) != 0) {
         lbl_803CBD30 = fn_800B0A5C_insertQueue(fn_80069B08, lbl_803CC1B8->priority);
-        fn_80034E20(lbl_803CBD30, lbl_80109378);
+        fn_80034E20(lbl_803CBD30, (struct SpaniDesc*)lbl_80109378);
         lbl_80366158._2A = 0;
         return 1;
     }

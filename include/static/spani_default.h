@@ -19,7 +19,7 @@ void fn_80035168(void);
 
 void fn_80035750(struct SabFile* sab, void* tex, s16 id);
 void fn_800356B8(void);
-u8 fn_80035838(void* entry, u8 id);
+BOOL fn_80035838(void* entry, u8 id);
 void fn_80035A00(void);
 void fn_80035B50(s32 id);
 void fn_80035CA4(s32 id);
