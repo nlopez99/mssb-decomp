@@ -1,6 +1,7 @@
 #include "static/model.h"
 #include "static/UnknownHomes_Static.h"
 #include "string.h"
+#include "Dolphin/os.h"
 #include "C3/control.h"
 #include "C3/geoPalette.h"
 #include "C3/anim.h"
@@ -152,7 +153,8 @@ typedef struct AnimState {
     /* 0x002C */ void* file;
     /* 0x0030 */ u8 _0030[0x58 - 0x30];
     /* 0x0058 */ s8 current;
-    /* 0x0059 */ u8 _0059[0x5C - 0x59];
+    /* 0x0059 */ u8 _59;
+    /* 0x005A */ u8 _005A[0x5C - 0x5A];
 } AnimState; // size: 0x5C
 
 typedef struct ModelSub2C {
@@ -164,13 +166,12 @@ typedef struct ModelSub2C {
 } ModelSub2C; // size: 0x64
 
 typedef struct ModelPose {
-    /* 0x0000 */ u8 _0000[0x4 - 0x0];
-    /* 0x0004 */ AnimState state;
-    /* 0x0060 */ u8 _60;
-    /* 0x0061 */ u8 _0061[0x68 - 0x61];
-    /* 0x0068 */ AnimState state2;
-    /* 0x00C4 */ u8 _C4;
-    /* 0x00C5 */ u8 _00C5[0xD0 - 0xC5];
+    /* 0x0000 */ ModelSub2C parts[2];
+    /* 0x00C8 */ void* tex;
+    /* 0x00CC */ u8 _CC;
+    /* 0x00CD */ u8 _CD;
+    /* 0x00CE */ u8 _CE;
+    /* 0x00CF */ s8 _CF;
     /* 0x00D0 */ s8 _D0;
     /* 0x00D1 */ s8 _D1;
     /* 0x00D2 */ u8 _00D2[0xD4 - 0xD2];
@@ -268,6 +269,11 @@ typedef struct ModelTable {
     /* 0x0034 */ ModelSlot slots[1];
 } ModelTable; // size: 0xC4
 
+typedef struct ModelBufRow {
+    /* 0x0000 */ u8 _0000[0x10 - 0x0];
+    /* 0x0010 */ void* buf;
+} ModelBufRow; // size: 0x14
+
 typedef struct ModelWork {
     /* 0x0000 */ u8 _0000[0x60 - 0x0];
     /* 0x0060 */ ModelTable* _0060;
@@ -286,48 +292,67 @@ typedef struct ModelWork {
     /* 0x2C8C */ u8* _2C8C;
     /* 0x2C90 */ u8 _2C90[0x2CA4 - 0x2C90];
     /* 0x2CA4 */ u32 bufSize;
-    /* 0x2CA8 */ u8 _2CA8[0x2CB0 - 0x2CA8];
-    /* 0x2CB0 */ void* _2CB0[4];
-    /* 0x2CC0 */ u8 _2CC0[0x2CE4 - 0x2CC0];
-    /* 0x2CE4 */ void* _2CE4;
-    /* 0x2CE8 */ void* _2CE8;
-    /* 0x2CEC */ u8 _2CEC[0x2CFC - 0x2CEC];
-    /* 0x2CFC */ void* _2CFC;
-    /* 0x2D00 */ u8 _2D00[0x2D10 - 0x2D00];
-    /* 0x2D10 */ void* _2D10;
-    /* 0x2D14 */ u8 _2D14[0x2D24 - 0x2D14];
-    /* 0x2D24 */ void* _2D24;
-    /* 0x2D28 */ u8 _2D28[0x2D38 - 0x2D28];
-    /* 0x2D38 */ void* _2D38;
-    /* 0x2D3C */ void* _2D3C;
-    /* 0x2D40 */ u8 _2D40[0x2D44 - 0x2D40];
-    /* 0x2D44 */ s16 _2D44;
-    /* 0x2D46 */ u8 _2D46;
-    /* 0x2D47 */ u8 _2D47[0x2D48 - 0x2D47];
-    /* 0x2D48 */ void* _2D48;
-    /* 0x2D4C */ u8 _2D4C[0x2D50 - 0x2D4C];
-    /* 0x2D50 */ s16 _2D50;
-    /* 0x2D52 */ u8 _2D52;
-    /* 0x2D53 */ u8 _2D53[0x2D54 - 0x2D53];
-    /* 0x2D54 */ void* _2D54;
-    /* 0x2D58 */ u8 _2D58[0x2D5C - 0x2D58];
-    /* 0x2D5C */ s16 _2D5C;
-    /* 0x2D5E */ u8 _2D5E;
-    /* 0x2D5F */ u8 _2D5F[0x2D64 - 0x2D5F];
-    /* 0x2D64 */ u32 _2D64;
-    /* 0x2D68 */ s16 _2D68;
-    /* 0x2D6A */ s8 _2D6A[13];
-    /* 0x2D77 */ s8 _2D77;
-    /* 0x2D78 */ u8 _2D78[0x2D79 - 0x2D78];
-    /* 0x2D79 */ s8 _2D79;
-    /* 0x2D7A */ u8 _2D7A[0x2D89 - 0x2D7A];
-    /* 0x2D89 */ s8 _2D89[4];
-    /* 0x2D8D */ u8 _2D8D;
-    /* 0x2D8E */ u8 _2D8E[0x2D90 - 0x2D8E];
-    /* 0x2D90 */ ModelEntry28* _2D90;
-    /* 0x2D94 */ ModelEntry28* _2D94;
-    /* 0x2D98 */ void* _2D98;
-    /* 0x2D9C */ s32* _2D9C;
+    /* 0x2CA8 */ u8 _2CA8[0x2CAC - 0x2CA8];
+    union {
+        /* 0x2CAC */ void* bufs[16];
+        struct {
+            /* 0x2CAC */ void* _2CAC;
+            /* 0x2CB0 */ void* _2CB0[4];
+            /* 0x2CC0 */ u8 _2CC0[0x2CE4 - 0x2CC0];
+            /* 0x2CE4 */ void* _2CE4;
+            /* 0x2CE8 */ void* _2CE8;
+        };
+    };
+    union {
+        /* 0x2CEC */ ModelBufRow rows[9];
+        struct {
+            /* 0x2CEC */ u8 _2CEC[0x2CFC - 0x2CEC];
+            /* 0x2CFC */ void* _2CFC;
+            /* 0x2D00 */ u8 _2D00[0x2D10 - 0x2D00];
+            /* 0x2D10 */ void* _2D10;
+            /* 0x2D14 */ u8 _2D14[0x2D24 - 0x2D14];
+            /* 0x2D24 */ void* _2D24;
+            /* 0x2D28 */ u8 _2D28[0x2D38 - 0x2D28];
+            /* 0x2D38 */ void* _2D38;
+            /* 0x2D3C */ void* _2D3C;
+            /* 0x2D40 */ u8 _2D40[0x2D44 - 0x2D40];
+            /* 0x2D44 */ s16 _2D44;
+            /* 0x2D46 */ u8 _2D46;
+            /* 0x2D47 */ u8 _2D47[0x2D48 - 0x2D47];
+            /* 0x2D48 */ void* _2D48;
+            /* 0x2D4C */ u8 _2D4C[0x2D50 - 0x2D4C];
+            /* 0x2D50 */ s16 _2D50;
+            /* 0x2D52 */ u8 _2D52;
+            /* 0x2D53 */ u8 _2D53[0x2D54 - 0x2D53];
+            /* 0x2D54 */ void* _2D54;
+            /* 0x2D58 */ u8 _2D58[0x2D5C - 0x2D58];
+            /* 0x2D5C */ s16 _2D5C;
+            /* 0x2D5E */ u8 _2D5E;
+            /* 0x2D5F */ u8 _2D5F[0x2D64 - 0x2D5F];
+            /* 0x2D64 */ u32 _2D64;
+            /* 0x2D68 */ s16 _2D68;
+            /* 0x2D6A */ s8 _2D6A[13];
+            /* 0x2D77 */ u8 _2D77;
+            /* 0x2D78 */ u8 _2D78;
+            /* 0x2D79 */ u8 _2D79;
+            union {
+                struct {
+                    /* 0x2D7A */ u8 _2D7A[0x2D89 - 0x2D7A];
+                    /* 0x2D89 */ s8 _2D89[4];
+                };
+                struct {
+                    /* 0x2D7A */ u8 _2D7A_[0x2D7F - 0x2D7A];
+                    /* 0x2D7F */ u8 _2D7F[13];
+                };
+            };
+            /* 0x2D8D */ u8 _2D8D;
+            /* 0x2D8E */ u8 _2D8E[0x2D90 - 0x2D8E];
+            /* 0x2D90 */ ModelEntry28* _2D90;
+            /* 0x2D94 */ ModelEntry28* _2D94;
+            /* 0x2D98 */ void* _2D98;
+            /* 0x2D9C */ s32* _2D9C;
+        };
+    };
     /* 0x2DA0 */ void* _2DA0[3];
     /* 0x2DAC */ u8 _2DAC[0x3074 - 0x2DAC];
     /* 0x3074 */ void (*_3074)(MtxPtr);
@@ -360,6 +385,20 @@ extern u8 lbl_803CBBC0;
 extern ModelActor* lbl_803CBC18;
 void fn_800B9AA8(void*);
 extern s32 lbl_803CBBF0;
+extern u8 lbl_803CBBFB;
+extern u8 lbl_803CBBFC;
+extern u8 lbl_803CBBFD;
+extern void* lbl_803CBC00;
+extern u8 lbl_803CBC0C;
+extern ModelSub2C* lbl_803CBC1C;
+extern ModelPose* lbl_803CBC20;
+extern u8 lbl_803CBBFA;
+extern u8 lbl_803CBBF9;
+extern s32 lbl_803CBC28;
+extern u8 lbl_803CBC34[8];
+extern ModelSub2C* lbl_803CBC10;
+extern u8 lbl_803CBC14;
+extern u8 lbl_803CBC15;
 extern ModelLoadReq* lbl_803CC1B8;
 extern ModelSub2C lbl_80118220[13];
 extern LightPos lbl_80367318[4];
@@ -1133,9 +1172,9 @@ void fn_8001D180(int idx, int part, BOOL restore) {
         } else if (lbl_800EEAAC[actor->_252] >= 0 && (pose = actor->_30) != NULL) {
             bone = model->bones[joint];
             if (part & 1) {
-                src = lbl_8036E548._013C->slots[pose->_C4].node;
+                src = lbl_8036E548._013C->slots[pose->parts[1]._60].node;
             } else {
-                src = lbl_8036E548._013C->slots[pose->_60].node;
+                src = lbl_8036E548._013C->slots[pose->parts[0]._60].node;
             }
             if (src == NULL) {
                 return;
@@ -1992,8 +2031,107 @@ void fn_80016B60(void) {
 void fn_80016710(void) {
 }
 
+static inline BOOL loadUmpireAnim(int idx) {
+    ModelActor* actor = &lbl_8036E548.actorData[idx];
+
+    if (lbl_8036E548._2D8D == 0) {
+        lbl_8036E548._2D8D = 1;
+        lbl_8036E548._2D7F[idx] = actor->_252;
+        actor->anims[5] = lbl_8036E548.bufs[4];
+        ARAMTransfer(&lbl_803CB790[actor->_252 * 19 + 17], actor->anims[5], 0, 0);
+    } else if ((s32)lbl_803C6CF8._715 == 1) {
+        ANIMGet(actor->anims[5]);
+        return TRUE;
+    }
+    return FALSE;
+}
+
+static inline BOOL loadPlayerAnim(int idx) {
+    ModelActor* actor = &lbl_8036E548.actorData[idx];
+
+    if (lbl_8036E548._2D8D == 0) {
+        lbl_8036E548._2D8D = 1;
+        lbl_8036E548._2D7F[idx] = actor->_252;
+        if (g_d_GameSettings.GameModeSelected == 2) {
+            actor->anims[5] = lbl_8036E548.bufs[0];
+            fn_80021BBC(actor->_252, actor->anims[5]);
+        } else if (idx >= 9) {
+            actor->anims[5] = lbl_8036E548.bufs[0];
+            ARAMTransfer(&lbl_803CB790[actor->_252 * 19 + 16], actor->anims[5], 0, 0);
+        } else {
+            actor->anims[5] = lbl_8036E548.rows[idx].buf;
+            fn_80021BBC(actor->_252, actor->anims[5]);
+        }
+    } else if ((s32)lbl_803C6CF8._715 == 1) {
+        ANIMGet(actor->anims[5]);
+        return TRUE;
+    }
+    return FALSE;
+}
+
+static inline u8 loadFaceAnim(u8 charId, int idx) {
+    s16 id = lbl_800EEB18[charId];
+
+    if (id == -1 || ((void**)lbl_8036E548.actorData[idx]._08)[4] == NULL) {
+        lbl_8036E548.actorData[idx]._2C = NULL;
+        return TRUE;
+    }
+    if (lbl_803CBBFA == 0) {
+        fn_80021ADC(id, lbl_80118220[0].files);
+        lbl_803CBBFA = 1;
+    }
+    if ((s32)lbl_803C6CF8._715 == 1) {
+        lbl_80118220[0]._60 = charId;
+        lbl_80118220[0]._61 = idx;
+        lbl_80118220[0].state.hdr = lbl_80118220[0].files;
+        fn_80025FFC(((void**)lbl_8036E548.actorData[idx]._08)[4], &lbl_80118220[0].state);
+        lbl_803CBBFA = 0;
+        lbl_8036E548.actorData[idx]._2C = &lbl_80118220[0];
+        return TRUE;
+    }
+    return FALSE;
+}
+
 // .text:0x80016344 size:0x3CC
-void fn_80016344(void) {
+BOOL fn_80016344(int charId, int idx, u8 flag, int player) {
+    if (lbl_8036E548._2D77 == 6) {
+        return TRUE;
+    }
+    if (lbl_8036E548._2D77 == 1) {
+        return FALSE;
+    }
+    if (lbl_8036E548._2D77 == 2) {
+        lbl_8036E548.actors[idx] = &lbl_8036E548.actorData[idx];
+        lbl_8036E548.actors[idx]->_25A = flag;
+        lbl_8036E548.actors[idx]->_25B = flag;
+        lbl_8036E548._2D8D = 0;
+        lbl_8036E548._2D77 = 3;
+    }
+    if (lbl_8036E548._2D77 == 3) {
+        if (idx == 12) {
+            if (!loadUmpireAnim(idx)) {
+                return FALSE;
+            }
+        } else if (!loadPlayerAnim(idx)) {
+            return FALSE;
+        }
+        lbl_8036E548._2D77 = 4;
+    }
+    if (lbl_8036E548._2D77 == 4) {
+        if (!loadFaceAnim(charId, idx)) {
+            return FALSE;
+        }
+        lbl_8036E548._2D77 = 5;
+    }
+    if (lbl_8036E548._2D77 == 5) {
+        if (!fn_80013680(&lbl_8036E548.actorData[idx])) {
+            return FALSE;
+        }
+        lbl_8036E548._2D77 = 0;
+        return TRUE;
+    }
+    fn_80017098(0, player, 1, idx, 1, charId);
+    return FALSE;
 }
 
 // .text:0x8001594C size:0x9F8
@@ -2004,8 +2142,129 @@ void fn_8001594C(void) {
 void fn_80015468(void) {
 }
 
+static inline u8 loadFaceAnimAt(ModelActor* actor, u8 charId, int idx, int n) {
+    s16 id;
+    ModelSub2C* sub;
+
+    lbl_80118220[n].state._59 = 0;
+    id = lbl_800EEB18[charId];
+    if (id == -1 || ((void**)actor->_08)[4] == NULL) {
+        actor->_2C = NULL;
+        return TRUE;
+    }
+    if (lbl_803CBBFA == 0) {
+        fn_80021ADC(id, lbl_80118220[n].files);
+        lbl_803CBBFA = 1;
+    }
+    if ((s32)lbl_803C6CF8._715 == 1) {
+        sub = &lbl_80118220[n];
+        sub->_60 = charId;
+        sub->_61 = idx;
+        sub->state.hdr = sub->files;
+        fn_80025FFC(((void**)actor->_08)[4], &sub->state);
+        actor->_2C = sub;
+        lbl_803CBBFA = 0;
+        return TRUE;
+    }
+    return FALSE;
+}
+
+static inline u8 findFaceAnim(ModelActor* actor, int idx) {
+    u8 charId = actor->_252;
+    ModelSub2C* sub;
+    int i;
+
+    if (lbl_803CBBF9 == 0) {
+        for (i = 0; lbl_80118220[i]._61 != -2; i++) {
+            if (charId == (s8)lbl_80118220[i]._60 && lbl_80118220[i]._61 == -1) {
+                sub = &lbl_80118220[i];
+                actor->_2C = sub;
+                sub->_60 = charId;
+                sub->_61 = idx;
+                sub->state.file = ((void**)actor->_08)[4];
+                return TRUE;
+            }
+        }
+        lbl_803CBBF9 = 1;
+        for (i = 0; lbl_80118220[i]._61 != -2; i++) {
+            if (lbl_80118220[i]._61 == -1) {
+                break;
+            }
+        }
+        lbl_803CBC28 = i;
+    }
+    if (loadFaceAnimAt(actor, charId, idx, lbl_803CBC28)) {
+        lbl_803CBBF9 = 0;
+        return TRUE;
+    }
+    return FALSE;
+}
+
 // .text:0x8001500C size:0x45C
-void fn_8001500C(void) {
+u8 fn_8001500C(int team, int player, int idx) {
+    if (lbl_8036E548._2D77 == 1) {
+        return FALSE;
+    }
+    if (lbl_8036E548._2D77 == 2) {
+        lbl_8036E548.actors[idx] = &lbl_8036E548.actorData[lbl_8036E548._2D79];
+        lbl_8036E548._2D8D = 0;
+        lbl_8036E548._2D77 = 3;
+    }
+    if (lbl_8036E548._2D77 == 3) {
+        if (fn_80017340(lbl_8036E548._2D79)) {
+            if (lbl_8036E548._2D78 != 0 && lbl_8036E548.actors[idx]->_2C != NULL) {
+                if (lbl_8036E548.actors[idx]->_30 == NULL) {
+                    lbl_8036E548._2D77 = 5;
+                    return FALSE;
+                }
+                lbl_8036E548._2D77 = 0;
+                return TRUE;
+            }
+            if (lbl_803CBC34[3] != 0) {
+                lbl_8036E548._2D77 = 4;
+            } else if (lbl_803CBC34[4] != 0 && idx == 9) {
+                lbl_8036E548._2D77 = 4;
+            } else {
+                lbl_8036E548._2D77 = 5;
+            }
+        } else {
+            return FALSE;
+        }
+    }
+    if (lbl_8036E548._2D77 == 4) {
+        if (findFaceAnim(lbl_8036E548.actors[idx], idx)) {
+            if (lbl_8036E548._2D78 != 0 && lbl_8036E548.actors[idx]->_30 != NULL) {
+                lbl_8036E548._2D77 = 0;
+                return TRUE;
+            }
+            lbl_8036E548._2D77 = 5;
+        } else {
+            return FALSE;
+        }
+    }
+    if (lbl_8036E548._2D77 == 5) {
+        if (fn_80013680(lbl_8036E548.actors[idx])) {
+            lbl_8036E548._2D77 = 0;
+            return TRUE;
+        }
+        return FALSE;
+    }
+    if (idx == 9) {
+        lbl_8036E548._2D78 = fn_80017098(team, player, 1, idx, 1, -1);
+    } else {
+        lbl_8036E548._2D78 = fn_80017098(team, player, 1, idx, 0, -1);
+    }
+    if (lbl_8036E548._2D78 != 0) {
+        if (idx == 9) {
+            lbl_8036E548._2D77 = 2;
+            return FALSE;
+        }
+        if (lbl_8036E548.actors[idx]->_30 == NULL) {
+            lbl_8036E548._2D77 = 5;
+            return FALSE;
+        }
+    }
+    return lbl_8036E548._2D78;
 }
 
 // .text:0x80014F40 size:0xCC
@@ -2115,8 +2374,208 @@ void fn_800145F8(void) {
 void fn_80014204(void) {
 }
 
+static inline void restorePartDispObj(int idx, int part) {
+    ModelActor* actor = lbl_8036E548.actors[idx];
+    ModelPose* pose;
+    ModelNode** p;
+    ModelNode* model;
+    ModelNode* bone;
+    ModelNode* src;
+    int joint;
+    int n;
+    int k;
+
+    if (actor != NULL) {
+        joint = actor->joints[lbl_803CB7B4[part]];
+    } else {
+        joint = 0xFFFF;
+    }
+    if (joint == 0xFFFF) {
+        return;
+    }
+    k = 0;
+    do {
+        model = actor->models[k];
+        if (lbl_800EEAAC[actor->_252] >= 0 && (pose = actor->_30) != NULL) {
+            bone = model->bones[joint];
+            if (part & 1) {
+                src = lbl_8036E548._013C->slots[pose->parts[1]._60].node;
+            } else {
+                src = lbl_8036E548._013C->slots[pose->parts[0]._60].node;
+            }
+            if (src == NULL) {
+                return;
+            }
+            n = src->numBones;
+            p = &src->bones[n];
+            do {
+                p--;
+                n--;
+                if ((*p)->dispObj != NULL) {
+                    bone->dispObj = (*p)->dispObj;
+                    return;
+                }
+            } while (n != 0);
+            return;
+        }
+    } while (k-- != 0);
+}
+
+static inline void relocateFiles(ModelSub2C* sub) {
+    if (sub->files[0] != NULL) {
+        sub->files[0] = (u8*)sub->files + (u32)sub->files[0];
+    }
+    if (sub->files[1] != NULL) {
+        sub->files[1] = (u8*)sub->files + (u32)sub->files[1];
+    }
+    if (sub->files[2] != NULL) {
+        sub->files[2] = (u8*)sub->files + (u32)sub->files[2];
+    }
+    if (sub->files[3] != NULL) {
+        sub->files[3] = (u8*)sub->files + (u32)sub->files[3];
+    }
+}
+
+static inline u8 loadPosePart(ModelPose* pose, int part, BOOL first, BOOL has, void* tex) {
+    ModelSub2C* sub;
+    int type;
+    u8 same = first == has;
+
+    if (lbl_803CBC0C == 0 && (s32)lbl_803C6CF8._715 == 1) {
+        if (first && pose->_CD != (u8)(part == 0)) {
+            type = part + 2;
+        } else if (same) {
+            type = part + 4;
+        } else {
+            type = part;
+        }
+        lbl_803CBC1C = &pose->parts[part];
+        lbl_803CBC0C = 1;
+        fn_80021CA4(pose->_CF, type, lbl_803CBC1C->files);
+    }
+    if (lbl_803716B8._1E8 == 0) {
+        sub = lbl_803CBC1C;
+        lbl_803CBC0C = 0;
+        relocateFiles(sub);
+        fn_800126EC(sub, tex, lbl_803CB7C4);
+        lbl_803CBC1C = NULL;
+        return TRUE;
+    }
+    return FALSE;
+}
+
 // .text:0x80013680 size:0xB84
-void fn_80013680(void) {
+u8 fn_80013680(ModelActor* actor) {
+    int team = actor->_252;
+    int idx = actor->_254;
+    void* tex;
+    ModelPose* pose;
+    u8 i;
+    u8 j;
+    u8 k;
+    BOOL first;
+    BOOL has;
+    int flag;
+
+    if (lbl_803CBBFB == 0) {
+        lbl_803CBBFB = 1;
+        tex = lbl_803CBC00 = *(void**)actor->_08;
+        for (i = 0; i < 13; i++) {
+            if (lbl_8036E548.poses[i]._CF == team && lbl_8036E548.poses[i]._CD == actor->_25A &&
+                lbl_8036E548.poses[i]._CE == actor->_25B && lbl_8036E548.poses[i]._D0 == -1 &&
+                lbl_8036E548.poses[i].tex == tex &&
+                ((actor->_254 < 9 && lbl_8036E548.poses[i]._D1 < 9) ||
+                 (actor->_254 >= 9 && lbl_8036E548.poses[i]._D1 >= 9))) {
+                lbl_8036E548.poses[i]._D0 = idx;
+                actor->_30 = &lbl_8036E548.poses[i];
+                actor->_30->_CC = 1;
+                restorePartDispObj(actor->_254, 0);
+                restorePartDispObj(actor->_254, 1);
+                lbl_803CBBFD = 0;
+                lbl_803CBBFC = 0;
+                lbl_803CBBFB = 0;
+                lbl_803CBC00 = NULL;
+                return TRUE;
+            }
+        }
+        if (lbl_803CBBFC == 0 && lbl_803CBBFD == 0) {
+            for (i = 0; i < 13; i++) {
+                if (lbl_8036E548.poses[i]._D0 == actor->_254 && lbl_8036E548.poses[i]._D0 < 9) {
+                    lbl_8036E548.poses[i]._D0 = -1;
+                    break;
+                }
+            }
+            for (i = 0; i < 13; i++) {
+                if (lbl_8036E548.poses[i]._D0 == -1) {
+                    lbl_803CBC20 = &lbl_8036E548.poses[i];
+                    lbl_8036E548.poses[i].tex = tex;
+                    lbl_8036E548.poses[i]._CF = team;
+                    lbl_8036E548.poses[i]._D1 = lbl_8036E548.poses[i]._D0;
+                    lbl_8036E548.poses[i]._D0 = idx;
+                    lbl_8036E548.poses[i]._CD = actor->_25A;
+                    lbl_8036E548.poses[i]._CE = actor->_25B;
+                    break;
+                }
+            }
+            if (i == 13) {
+                for (j = 0; j < 13; j++) {
+                    pose = &lbl_8036E548.poses[j];
+                    lbl_803CBC20 = pose;
+                    for (k = 0; k < 13; k++) {
+                        if (lbl_8036E548.actors[k] != NULL && pose->_CF == lbl_8036E548.actors[k]->_252) {
+                            break;
+                        }
+                    }
+                    if (k == 13) {
+                        pose->tex = lbl_803CBC00;
+                        lbl_8036E548.poses[j]._CF = team;
+                        lbl_8036E548.poses[j]._D1 = lbl_8036E548.poses[j]._D0;
+                        lbl_8036E548.poses[j]._D0 = idx;
+                        lbl_8036E548.poses[j]._CD = actor->_25A;
+                        lbl_8036E548.poses[j]._CE = actor->_25B;
+                        break;
+                    }
+                }
+            }
+        }
+        lbl_803CBC20->parts[1].state._59 = 0;
+        lbl_803CBC20->parts[0].state._59 = 0;
+    }
+    if (lbl_803CBBFB != 0) {
+        if (idx < 9) {
+            flag = actor->_25A;
+        } else {
+            flag = actor->_25B;
+        }
+        has = flag != 0;
+        first = idx < 9;
+        for (;;) {
+            if (lbl_803CBBFC == 0) {
+                if (!loadPosePart(lbl_803CBC20, 1, first, has, lbl_803CBC00)) {
+                    break;
+                }
+                lbl_803CBBFC = 1;
+            } else {
+                if (lbl_803CBBFD == 0 && loadPosePart(lbl_803CBC20, 0, first, has, lbl_803CBC00)) {
+                    lbl_803CBBFD = 1;
+                }
+                break;
+            }
+        }
+        if (lbl_803CBBFC != 0 && lbl_803CBBFD != 0) {
+            actor->_30 = lbl_803CBC20;
+            restorePartDispObj(actor->_254, 0);
+            restorePartDispObj(actor->_254, 1);
+            actor->_30->_CC = 1;
+            lbl_803CBC20 = NULL;
+            lbl_803CBBFB = 0;
+            lbl_803CBBFD = 0;
+            lbl_803CBBFC = 0;
+            lbl_803CBC00 = NULL;
+            return TRUE;
+        }
+    }
+    return FALSE;
 }
 
 // .text:0x80012B90 size:0xAF0
@@ -2124,7 +2583,43 @@ void fn_80012B90(void) {
 }
 
 // .text:0x800127F8 size:0x398
-void LoadModel(void) {
+u8 LoadModel(ModelActor* actor) {
+    ModelPose* pose;
+    ModelSub2C* sub;
+    void* tex;
+
+    if (actor == NULL) {
+        OSPanic("model.c", 8934, " Character Data None \n");
+        return FALSE;
+    }
+    pose = actor->_30;
+    if (pose == NULL) {
+        OSPanic("model.c", 8938, " Character Parts Data None \n");
+        return FALSE;
+    }
+    if (lbl_803CBC14 == 0 && (s32)lbl_803C6CF8._715 == 1) {
+        if (pose->_CD != 0) {
+            lbl_803CBC10 = &pose->parts[1];
+            fn_80021CA4(actor->_30->_CF, 5, lbl_803CBC10->files);
+            lbl_803CBC15 = 1;
+        } else {
+            lbl_803CBC10 = &pose->parts[0];
+            fn_80021CA4(actor->_30->_CF, 0, lbl_803CBC10->files);
+            lbl_803CBC15 = 0;
+        }
+        lbl_803CBC14 = 1;
+    }
+    if (lbl_803716B8._1E8 == 0) {
+        sub = lbl_803CBC10;
+        tex = actor->_30->tex;
+        relocateFiles(sub);
+        fn_800126EC(sub, tex, lbl_803CB7C4);
+        restorePartDispObj(actor->_254, lbl_803CBC15);
+        lbl_803CBC14 = 0;
+        lbl_803CBC10 = NULL;
+        return TRUE;
+    }
+    return FALSE;
 }
 
 // .text:0x800126EC size:0x10C
@@ -2170,8 +2665,8 @@ void fn_80011BE4(s32 idx) {
         if (pose != NULL) {
             pose->_D1 = pose->_D0;
             pose->_D0 = -1;
-            pose->state.current = -2;
-            pose->state2.current = -2;
+            pose->parts[0].state.current = -2;
+            pose->parts[1].state.current = -2;
             lbl_8036E548.actors[idx]->_30 = NULL;
         }
         lbl_8036E548.actors[idx]->_25C = 0;
@@ -2200,8 +2695,8 @@ void fn_80011B64(s32 idx) {
         if (pose != NULL) {
             pose->_D1 = pose->_D0;
             pose->_D0 = -1;
-            pose->state.current = -2;
-            pose->state2.current = -2;
+            pose->parts[0].state.current = -2;
+            pose->parts[1].state.current = -2;
             lbl_8036E548.actors[idx]->_30 = NULL;
         }
     }
@@ -2230,8 +2725,8 @@ void fn_80011A60(void) {
             if (pose != NULL && lbl_8036E548.actors[idx]->_254 == idx) {
                 pose->_D1 = pose->_D0;
                 pose->_D0 = -1;
-                pose->state.current = -2;
-                pose->state2.current = -2;
+                pose->parts[0].state.current = -2;
+                pose->parts[1].state.current = -2;
                 lbl_8036E548.actors[idx]->_30 = NULL;
             }
         }
@@ -2269,8 +2764,8 @@ void fn_8001196C(void) {
             if (pose != NULL && lbl_8036E548.actors[i]->_254 == i) {
                 pose->_D1 = pose->_D0;
                 pose->_D0 = -1;
-                pose->state.current = -2;
-                pose->state2.current = -2;
+                pose->parts[0].state.current = -2;
+                pose->parts[1].state.current = -2;
                 lbl_8036E548.actors[i]->_30 = NULL;
             }
         }
