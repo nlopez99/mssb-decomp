@@ -1089,8 +1089,6 @@ void fn_3_143FAC(int idx) {
 }
 
 // .text:0x001439EC size:0x5C0 mapped:0x80782A80
-// 98.75%: registers only; the inlined fn_3_1430D0 copies keep their piranha index,
-// piranha and table bases one saved register higher than the target.
 void fn_3_1439EC(s32 idx) {
     Unk37A8Entry* entry;
     s32 i;
@@ -1279,7 +1277,7 @@ void fn_3_143358(int idx) {
 }
 
 // .text:0x001430D0 size:0x288 mapped:0x80782164
-void fn_3_1430D0(s32 arg0, s32 player) {
+void fn_3_1430D0(s32 arg0, int player) {
     Unk37A8Piranha* piranha;
     Unk37A8Fielder* fielder;
     int i;

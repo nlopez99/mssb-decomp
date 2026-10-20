@@ -18,7 +18,7 @@ u8 fn_3_1428F0(s8 player, u8 force);
 void fn_3_142C18(void);
 void fn_3_142CA8(void);
 void fn_3_142DB4(int idx);
-void fn_3_1430D0(s32 arg0, s32 player);
+void fn_3_1430D0(s32 arg0, int player);
 void fn_3_143358(int idx);
 void fn_3_143714(void);
 s32 fn_3_143770(struct UnkMgEntry3310* entry);
