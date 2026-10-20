@@ -1922,11 +1922,8 @@ remove:
 }
 
 // .text:0x00129A18 size:0x270 mapped:0x80768AAC
-// 99.94%: the target forms lbl_3_data_21268's address (lis) before lbl_3_data_A8B8's. A
-// `u8* modes = lbl_3_data_21268` local (permuter) fixes that but swaps two loop increments (99.87%).
 void fn_3_129A18(void) {
     UnkTask3448* task = lbl_803CC1B8;
-    u16* p;
     int i;
     int n;
 
@@ -1936,7 +1933,6 @@ void fn_3_129A18(void) {
     if (g_Minigame._19E1 >= 5) {
         task->_1C = g_Minigame._19E1 - 4;
     }
-    p = lbl_3_data_A8B8;
     for (i = 0, n = 0; i < 7; i++) {
         lbl_80371C30[task->_14 + 14 + i]._00->_64 = lbl_3_data_A9E8[lbl_3_data_21268[i]];
         if (g_d_GameSettings._12 < 1 && lbl_3_data_21268[i] == 6) {
@@ -1949,7 +1945,7 @@ void fn_3_129A18(void) {
         } else if (n >= 5) {
             lbl_80371C30[task->_14 + i]._00->_5C = lbl_3_data_A8B8[6] << 16;
         } else {
-            lbl_80371C30[task->_14 + i]._00->_5C = *++p << 16;
+            lbl_80371C30[task->_14 + i]._00->_5C = lbl_3_data_A8B8[n + 1] << 16;
             n++;
         }
     }
@@ -2279,8 +2275,6 @@ remove:
 }
 
 // .text:0x00127B68 size:0xED0 mapped:0x80766BFC
-// 99.91%: before the last loop the target forms lbl_80371C30's address after the three
-// division constants, the base before them (same registers).
 void fn_3_127B68(void) {
     UnkTask3448* task = lbl_803CC1B8;
     UnkTask3448* self = lbl_803CC1B8;
@@ -2434,7 +2428,8 @@ void fn_3_127B68(void) {
     case 6:
         break;
     }
-    for (i = 0; i < 8; i++) {
+    i = 0;
+    do {
         if (getFrame(task, 3) >= lbl_3_data_22B18[i]) {
             if (lbl_80371C30[task->_14 + 3]._00->_5C >> 16 == lbl_3_data_22B18[i]) {
                 fn_3_90064(lbl_3_data_81FC[0x2F]);
@@ -2464,7 +2459,7 @@ void fn_3_127B68(void) {
         fn_800363D8(task, i + 0x14, 3, 0x74, (n % 1000) / 100);
         fn_800363D8(task, i + 0x14, 2, 0x74, (n % 100) / 10);
         fn_800363D8(task, i + 0x14, 1, 0x74, n % 10);
-    }
+    } while (++i < 8);
 }
 
 // .text:0x001274B4 size:0x6B4 mapped:0x80766548
