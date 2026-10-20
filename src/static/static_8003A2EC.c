@@ -621,7 +621,7 @@ extern void fn_800AC508(const char* name, void* icon, s32 iconSize, void* banner
 extern void fn_800AAEE4(CardRequest* req, MenuSlot* slot, s32 arg2, s32 arg3);
 extern void fn_800AA34C(u8 chan, u8 arg1, const char* name, MenuSlot* slot, s32 arg4, s32 arg5, u8 arg6);
 extern void fn_800ACCD4(void);
-extern void fn_8004A34C(void* card, u8 arg1, s32 arg2, s32 arg3, s32 arg4);
+extern s32 fn_8004A34C(void* window, u8 arg1, s32 msg, u8 arg3, u8 arg4);
 extern void fn_800A9E34(u8 chan, u8 arg1, s32 arg2, s32 arg3);
 extern void fn_800AA930(CardRequest* req, MenuSlot* slot, s32 arg2, s32 arg3);
 extern void fn_800B0A14_removeQueue(void);

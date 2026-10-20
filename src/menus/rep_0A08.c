@@ -189,7 +189,7 @@ extern struct {
     /* 0x00 */ u8 _00[0x98];
     /* 0x98 */ void* _98;
 } lbl_800EF808;
-extern void fn_8004A34C(void* arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+extern s32 fn_8004A34C(void* window, u8 arg1, u8 msg, u8 arg3, u8 arg4);
 extern s32 fn_8004CA6C(u16 buttons);
 extern void fn_8004CC2C(void);
 extern void fn_8003BF54(int, int, int, int, int, int, int, u8, int);
