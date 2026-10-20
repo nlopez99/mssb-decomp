@@ -177,7 +177,9 @@ typedef struct ModelPose {
 
 typedef struct ModelActor {
     /* 0x0000 */ ModelNode* models[1];
-    /* 0x0004 */ u8 _0004[0x10 - 0x4];
+    /* 0x0004 */ u8 _0004[0x8 - 0x4];
+    /* 0x0008 */ u8* _08;
+    /* 0x000C */ u8* _0C;
     /* 0x0010 */ void* anims[7];
     /* 0x002C */ ModelSub2C* _2C;
     /* 0x0030 */ ModelPose* _30;
@@ -280,7 +282,8 @@ typedef struct ModelWork {
     /* 0x2C50 */ ModelActor* actors[13];
     /* 0x2C84 */ void* _2C84;
     /* 0x2C88 */ void* _2C88;
-    /* 0x2C8C */ u8 _2C8C[0x2CA4 - 0x2C8C];
+    /* 0x2C8C */ u8* _2C8C;
+    /* 0x2C90 */ u8 _2C90[0x2CA4 - 0x2C90];
     /* 0x2CA4 */ u32 bufSize;
     /* 0x2CA8 */ u8 _2CA8[0x2CB0 - 0x2CA8];
     /* 0x2CB0 */ void* _2CB0[4];
@@ -309,7 +312,8 @@ typedef struct ModelWork {
     /* 0x2D58 */ u8 _2D58[0x2D5C - 0x2D58];
     /* 0x2D5C */ s16 _2D5C;
     /* 0x2D5E */ u8 _2D5E;
-    /* 0x2D5F */ u8 _2D5F[0x2D68 - 0x2D5F];
+    /* 0x2D5F */ u8 _2D5F[0x2D64 - 0x2D5F];
+    /* 0x2D64 */ u32 _2D64;
     /* 0x2D68 */ s16 _2D68;
     /* 0x2D6A */ s8 _2D6A[13];
     /* 0x2D77 */ s8 _2D77;
@@ -1692,7 +1696,56 @@ void fn_80018270(void) {
 }
 
 // .text:0x80018024 size:0x24C
+// 71.27%: the target keeps both a byte offset (i * 0x130) and an entry index (i * 19 + 1)
+// for the size scan and reloads lbl_803CB790 each pass; the allocation tail is untested.
 void fn_80018024(void) {
+    u32 maxA = 0;
+    u32 maxB = 0;
+    u32 size;
+    u32 sizeA;
+    u32 sizeB;
+    u8* p;
+    s32 i;
+
+    for (i = 0; i < 54; i++) {
+        size = lbl_803CB790[i * 19].size & 0x0FFFFFFF;
+        if (maxA < size) {
+            maxA = size;
+        }
+        size = lbl_803CB790[i * 19 + 1].size & 0x0FFFFFFF;
+        if (maxB < size) {
+            maxB = size;
+        }
+    }
+    sizeA = (maxA + 31) & ~31;
+    lbl_8036E548._2D64 = sizeA;
+    sizeB = (maxB + 31) & ~31;
+    if (g_d_GameSettings.GameModeSelected == 6) {
+        lbl_8036E548._2C8C = _OSAllocFromHeap(32, (sizeA + sizeB) * 4);
+    } else {
+        lbl_8036E548._2C8C = _OSAllocFromHeap(32, sizeA * 4);
+    }
+    if (g_d_GameSettings.GameModeSelected == 6) {
+        p = lbl_8036E548._2C8C;
+        for (i = 0; i < 4; i++) {
+            lbl_8036E548.actorData[i]._08 = p;
+            p += sizeA;
+            lbl_8036E548.actorData[i]._2C = NULL;
+            lbl_8036E548.actorData[i]._30 = NULL;
+            lbl_8036E548.actorData[i]._0C = p;
+            p += sizeB;
+            lbl_8036E548.actorData[i + 4]._2C = NULL;
+            lbl_8036E548.actorData[i + 4]._30 = NULL;
+        }
+    } else {
+        p = lbl_8036E548._2C8C;
+        for (i = 0; i < 4; i++) {
+            lbl_8036E548.actorData[i]._08 = p;
+            p += sizeA;
+            lbl_8036E548.actorData[i]._2C = NULL;
+            lbl_8036E548.actorData[i]._30 = NULL;
+        }
+    }
 }
 
 // .text:0x80017DBC size:0x268
