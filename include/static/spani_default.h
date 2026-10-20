@@ -15,6 +15,7 @@ s32 fn_80034BCC(struct SpaniHook* hook);
 void fn_80034CEC(struct SpaniTask* task);
 void fn_80034E20(struct SpaniTask* task, struct SpaniDesc* desc);
 struct SpaniObj* fn_80034F50(struct SpaniDesc* desc);
+void fn_80035168(void);
 
 void fn_80035750(struct SabFile* sab, void* tex, s16 id);
 void fn_800356B8(void);

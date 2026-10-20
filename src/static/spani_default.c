@@ -16,7 +16,7 @@ typedef struct SpaniObj {
     /* 0x04 */ struct SpaniObj* next;
     /* 0x08 */ struct SpaniObj* child;
     /* 0x0C */ Mtx mtx;
-    /* 0x3C */ u8 _3C[0x48 - 0x3C];
+    /* 0x3C */ Vec _3C;
     /* 0x48 */ Vec _48;
     /* 0x54 */ u32 _54;
     /* 0x58 */ SpaniColor color;
@@ -26,12 +26,16 @@ typedef struct SpaniObj {
     /* 0x66 */ u8 _66; // index into lbl_803C4BE0
     /* 0x67 */ u8 _67;
     /* 0x68 */ u8 _68;
-    /* 0x69 */ u8 _69[0x6C - 0x69];
+    /* 0x69 */ u8 _69;
+    /* 0x6A */ u8 _6A[0x6C - 0x6A];
     /* 0x6C */ f32 _6C;
     /* 0x70 */ u8 _70;
     /* 0x71 */ u8 _71;
     /* 0x72 */ s16 _72;
-    /* 0x74 */ SpaniColor _74;
+    union {
+        /* 0x74 */ SpaniColor _74;
+        /* 0x74 */ u32 _74_rgba;
+    };
     /* 0x78 */ Mtx _78;
     /* 0xA8 */ u8 _A8;
     /* 0xA9 */ u8 _A9[0xAC - 0xA9];
@@ -118,7 +122,9 @@ typedef struct SabTable {
 } SabTable;
 
 typedef struct SabFile {
-    /* 0x00 */ u8 _00[0x8];
+    /* 0x00 */ u16 width;
+    /* 0x02 */ u16 height;
+    /* 0x04 */ u8 _04[0x8 - 0x4];
     /* 0x08 */ SabTable* table;
 } SabFile;
 
@@ -149,6 +155,15 @@ extern u8 lbl_803CBBE4;
 extern void fn_800B2854(void* buf, u32 size, Mtx44 proj, s32 arg3, s32 count, s32* kinds, s32 arg6);
 extern void fn_800B27A4(s32 arg0);
 extern void fn_800B0D38(s32 arg0, s32 arg1);
+extern void fn_8000A094(s32 (*callback)(SpaniHook* hook));
+extern void fn_8000F534(SpaniObj* obj, s32 arg1);
+extern u8 fn_8000D838(u32* frame, SabFile* sab, u16 anim, Mtx m, s32 arg4, u32 color, u32* out, void* tex);
+extern camera_803c639c_s* fn_80052734(s32 idx);
+extern void fn_800B216C(s32 arg0, s32 arg1, s32 arg2);
+extern void fn_800B21A8(u8 arg0);
+extern void fn_800B24D4(u8 arg0);
+extern void fn_800B27DC(Mtx44 m, s32 arg1);
+extern void DrawTextOnCondition(u8 arg0);
 extern void* ARAMTransfer(void* entry, int arg1, int arg2, u32 aram);
 
 Mtx lbl_800F78E0[4] = {
@@ -570,6 +585,154 @@ void fn_800356B8(void) {
     }
     fn_80011140();
     lbl_803C5F74[0] = 0;
+}
+
+// .text:0x80035168 size:0x550 mapped:0x80035168
+void fn_80035168(void) {
+    Mtx* depths = lbl_800F78E0;
+    MtxPtr depth;
+    u32 out;
+    Mtx m;
+    Mtx tmp;
+    SpaniObj* o;
+    s32 i;
+    s32 j;
+    u32 color;
+    SabFile* sab;
+    SabPart* p;
+    u8 k;
+
+    if (lbl_803C77B8[0]._00 & 0x1000) {
+        if (lbl_803C77B8[3]._04 & 1) {
+            if (lbl_803CB814 > lbl_803CBC98) {
+                lbl_803CB814--;
+            }
+        } else if ((lbl_803C77B8[3]._04 & 2) && lbl_803CB814 < 0x360) {
+            lbl_803CB814++;
+        }
+        if (lbl_803C77B8[3]._04 & 4) {
+            if (lbl_803CBC98 > 0) {
+                lbl_803CBC98--;
+            }
+        } else if ((lbl_803C77B8[3]._04 & 8) && lbl_803CBC98 < lbl_803CB814) {
+            lbl_803CBC98++;
+        }
+    }
+    fn_8000A094(fn_80034BCC);
+    for (i = lbl_803CBC98, o = &lbl_8039C3E0[i]; i < lbl_803CB814; i++, o++) {
+        if (o->_54 == 0) {
+            continue;
+        }
+        if (!(o->_54 & 2)) {
+            if (o->_54 & 4) {
+                fn_8000F534(o, 0);
+            }
+            continue;
+        }
+        if (o->parent != NULL && o->_A8 == 0) {
+            if (o->_54 & 4) {
+                fn_8000F534(o, 0);
+            }
+            continue;
+        }
+        fn_800B24D4(o->_67);
+        if (o->_70 != 0) {
+            fn_800B27DC(lbl_801F8640, 0);
+            depth = depths[0];
+            fn_800B21A8(o->_71);
+        } else {
+            fn_800B27DC(lbl_801F8680, 0);
+            if (o->_67 == 0x15) {
+                depth = depths[3];
+                lbl_803CBBE0 = 256.5f;
+                fn_800B216C(1, 3, 0);
+            } else {
+                if (o->_67 >= 0xF && o->_67 <= 0x16) {
+                    depth = depths[1];
+                    lbl_803CBBE0 = 511.0f;
+                } else {
+                    depth = depths[2];
+                    lbl_803CBBE0 = 2.0f;
+                }
+                fn_800B21A8(o->_71);
+            }
+        }
+        o->_3C.x = o->_48.x;
+        o->_3C.y = o->_48.y;
+        o->_3C.z = o->_48.z;
+        if (o->_70 != 0) {
+            PSMTXScale(o->mtx, -o->_6C, o->_6C, 1.0f);
+            PSMTXInverse(fn_80052734(0)->view, tmp);
+            tmp[2][3] = 0.0f;
+            tmp[1][3] = 0.0f;
+            tmp[0][3] = 0.0f;
+            PSMTXConcat(tmp, o->mtx, o->mtx);
+            PSMTXTrans(tmp, o->_3C.x, o->_3C.y, o->_3C.z);
+            PSMTXConcat(tmp, o->mtx, o->mtx);
+            PSMTXConcat(fn_80052734(0)->view, o->mtx, o->mtx);
+            o->_74 = o->color;
+        } else {
+            if (o->parent == NULL) {
+                o->_3C.x -= (f32)(lbl_803C4BE0[o->_66]._38->width >> 1);
+                o->_3C.y -= (f32)(lbl_803C4BE0[o->_66]._38->height >> 1);
+                o->_74 = o->color;
+                PSMTXIdentity(o->_78);
+            }
+            o->_3C.z = 0.0f;
+            PSMTXTrans(o->mtx, o->_3C.x, o->_3C.y, 0.0f);
+            PSMTXConcat(o->_78, o->mtx, o->mtx);
+        }
+        color = o->_74_rgba;
+        lbl_803CBBE4 = o->_70;
+        for (j = 0; j < 10; j++) {
+            if (o->_AC[j] != 0xFFFF) {
+                sab = lbl_803C4BE0[o->_66]._38;
+                p = (SabPart*)((u32*)((u32*)sab->table)[o->_64 + 2])[j + 2];
+                fn_8000CC4C(sab, p, &o->_AC[j], (u32)&((SabInfo*)((u8*)p + 4))->_06 - (u32)((u8*)p + 4), 2);
+            }
+        }
+        if (o->parent == NULL) {
+            PSMTXConcat(depth, o->mtx, m);
+        } else {
+            PSMTXCopy(o->mtx, m);
+        }
+        lbl_803CBC9C = o;
+        if (!(o->_54 & 4)) {
+            o->_69 = fn_8000D838(&o->_5C, lbl_803C4BE0[o->_66]._38, o->_64, m, 0, color, &out, lbl_803C4BE0[o->_66]._34);
+        }
+        o->_A8 = 0;
+        if (o->_68 == 1) {
+            switch (o->_69) {
+            case 0:
+                o->_5C += o->_60;
+                break;
+            case 1:
+                o->_5C = 0;
+                break;
+            case 2:
+            case 3:
+                break;
+            default:
+                o->_5C += o->_60;
+                break;
+            }
+        } else if (o->_68 == 4) {
+            if (o->_5C > o->_60) {
+                o->_5C -= o->_60;
+            } else {
+                o->_5C = 0;
+            }
+        }
+        if (o->_54 & 4) {
+            fn_8000F534(o, 1);
+        }
+    }
+    for (k = 1; k < 9; k++) {
+        fn_800B24D4(k);
+        fn_800B21A8(0);
+        DrawTextOnCondition(k);
+    }
+    fn_800B24D4(2);
 }
 
 // .text:0x80034F50 size:0x218 mapped:0x80034F50
