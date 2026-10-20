@@ -4,6 +4,7 @@
 #include "Dolphin/mtx.h"
 #include "static/UnknownHomes_Static.h"
 #include "string.h"
+#include "math.h"
 
 typedef struct Particle {
     /* 0x00 */ struct Particle* next;
@@ -12,7 +13,8 @@ typedef struct Particle {
     /* 0x20 */ s32 _20;
     /* 0x24 */ u8 _24[0x26];
     /* 0x4A */ s16 _4A;
-} Particle;
+    /* 0x4C */ u8 _4C[0x14];
+} Particle; // size: 0x60
 
 typedef struct Emitter {
     /* 0x00 */ struct Emitter* prev;
@@ -30,7 +32,8 @@ typedef struct Emitter {
     /* 0x30 */ Vec _30;
     /* 0x3C */ u8 _3C[0x4];
     /* 0x40 */ u16 _40;
-} Emitter;
+    /* 0x42 */ u8 _42[0x1E];
+} Emitter; // size: 0x60
 
 typedef struct EmitterList {
     /* 0x0 */ Emitter* prev;
@@ -43,14 +46,82 @@ typedef struct UnkParticleState {
 } UnkParticleState;
 
 extern Particle* lbl_803CBC74;
+extern u8 lbl_803CBC78;
+extern s32 lbl_803CBC7C;
 extern Emitter* lbl_803CBC80;
 extern EmitterList lbl_803CBC84;
-extern f32 lbl_8017ED68[];
-extern Mtx lbl_8017FF78;
-extern Mtx lbl_8017FFE0;
 extern UnkParticleState lbl_80366158;
 
+// .bss, from the highest address down
+static Emitter lbl_801F8040[16];
+static Particle lbl_80180040[0x1400];
+static Vec lbl_80180010[4];
+static Mtx lbl_8017FFE0;
+static u8 lbl_8017FFD8[8];
+static Mtx lbl_8017FFA8;
+static Mtx lbl_8017FF78;
+static u8 lbl_8017FD6C[0x20C];
+static f32 lbl_8017ED68[0x401];
+static u8 lbl_8017EC00[0x168];
+
+static inline void initParticles(void)
+{
+    s32 i;
+    memset(lbl_80180040, 0, sizeof(lbl_80180040));
+    for (i = 0; i < 0x13FF; i++) {
+        lbl_80180040[i].next = &lbl_80180040[i + 1];
+    }
+    lbl_803CBC74 = lbl_80180040;
+}
+
+static inline void initCosTable(void)
+{
+    s32 i;
+    for (i = 0; i < 0x401; i++) {
+        lbl_8017ED68[i] = cos(3.141592654 * i / 1025.0);
+    }
+}
+
 // .text:0x800348C8 size:0x304
+void minigamesSetSomePointers2(void)
+{
+    s32 i;
+
+    memset(lbl_80180040, 0, sizeof(lbl_80180040));
+    for (i = 0; i < 0x13FF; i++) {
+        lbl_80180040[i].next = &lbl_80180040[i + 1];
+    }
+    lbl_803CBC74 = lbl_80180040;
+    lbl_803CBC78 = 0;
+    lbl_803CBC84.prev = NULL;
+    lbl_803CBC84.next = NULL;
+    memset(lbl_801F8040, 0, sizeof(lbl_801F8040));
+    for (i = 0; i < 15; i++) {
+        lbl_801F8040[i].next = &lbl_801F8040[i + 1];
+    }
+    lbl_803CBC80 = lbl_801F8040;
+    initCosTable();
+    lbl_803CBC7C = 0;
+}
+
+// .text:0x80034220 size:0x30C
+void minigamesSetSomePointers(void)
+{
+    s32 i;
+
+    lbl_803CBC78 = 1;
+    initParticles();
+    lbl_803CBC78 = 0;
+    lbl_803CBC84.prev = NULL;
+    lbl_803CBC84.next = NULL;
+    memset(lbl_801F8040, 0, sizeof(lbl_801F8040));
+    for (i = 0; i < 15; i++) {
+        lbl_801F8040[i].next = &lbl_801F8040[i + 1];
+    }
+    lbl_803CBC80 = lbl_801F8040;
+    initCosTable();
+    lbl_803CBC7C = 0;
+}
 
 // .text:0x80034120 size:0x2C
 void fn_80034120(Mtx m)

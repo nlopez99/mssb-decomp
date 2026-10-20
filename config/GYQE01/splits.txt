@@ -41,6 +41,7 @@ static/particle.c:
 	extabindex  start:0x8000750C end:0x800077C4
 	.text       start:0x800263FC end:0x80034BCC
 	.rodata     start:0x800E6778 end:0x800E68A8
+	.bss        start:0x8017EC00 end:0x801F8640
 	.sdata2     start:0x803CC5F0 end:0x803CC6E8
 
 Dolphin/base/PPCArch.c:
