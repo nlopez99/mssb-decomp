@@ -29,6 +29,20 @@ static/anim.c:
 	.text       start:0x80024D2C end:0x80026130
 	.sdata2     start:0x803CC5A8 end:0x803CC5D8
 
+static/lookat.c:
+	extab       start:0x80005BC0 end:0x80005BC8
+	extabindex  start:0x80007500 end:0x8000750C
+	.text       start:0x80026134 end:0x800263FC
+	.rodata     start:0x800E6768 end:0x800E6778
+	.sdata2     start:0x803CC5D8 end:0x803CC5F0
+
+static/particle.c:
+	extab       start:0x80005BC8 end:0x80005D98
+	extabindex  start:0x8000750C end:0x800077C4
+	.text       start:0x800263FC end:0x80034BCC
+	.rodata     start:0x800E6778 end:0x800E68A8
+	.sdata2     start:0x803CC5F0 end:0x803CC6E8
+
 Dolphin/base/PPCArch.c:
 	.text       start:0x8006D024 end:0x8006D138
 
