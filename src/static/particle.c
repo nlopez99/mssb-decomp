@@ -986,9 +986,9 @@ void fn_80031CA4(Vec* pos, EffectParams* params)
 }
 
 // .text:0x80030D88 size:0x2AC
-// 98.80%: the target copies params to r7 before arg1 to r5 at entry; this copies them
+// 98.80%: the target copies params to r7 before dir to r5 at entry; this copies them
 // the other way round. The rest matches.
-void fn_80030D88(Vec* pos, s32 arg1, EffectParams* params, s32 id)
+void fn_80030D88(Vec* pos, Vec* dir, EffectParams* params, s32 id)
 {
     if (params->count > 0) {
         Emitter* e = fn_800339F0(NULL, id);
@@ -998,7 +998,7 @@ void fn_80030D88(Vec* pos, s32 arg1, EffectParams* params, s32 id)
             Emitter* added = fn_800337CC((Emitter*)tmp, params->count, TRUE);
             if (added != NULL) {
                 Particle* p;
-                fn_80030720(added, pos, arg1, params);
+                fn_80030720(added, pos, dir, params);
                 p = e->particles;
                 while (p->next != NULL) {
                     p = p->next;
@@ -1010,7 +1010,7 @@ void fn_80030D88(Vec* pos, s32 arg1, EffectParams* params, s32 id)
             e = fn_80033A24(fn_80031034, 0x11, 0, params->count, TRUE, id);
             if (e != NULL) {
                 e->state = 0;
-                fn_80030720(e, pos, arg1, params);
+                fn_80030720(e, pos, dir, params);
             }
         }
     }
