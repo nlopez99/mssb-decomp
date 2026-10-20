@@ -36,7 +36,7 @@ void fn_800126EC(struct ModelSub2C* sub, void* tex, u8* idx);
 u8 LoadModel(struct ModelActor* actor);
 void fn_80012B90(void);
 u8 fn_80013680(struct ModelActor* actor);
-void fn_80014204(void);
+void fn_80014204(s32 count);
 void fn_800145F8(void);
 void fn_80014990(s32 idx, void* file, void* hdr);
 BOOL fn_80014A18(int team);

@@ -398,6 +398,7 @@ extern u8 lbl_803CBBF9;
 extern s32 lbl_803CBC28;
 extern u8 lbl_803CBC34[8];
 extern u8 lbl_803CBBF8;
+extern void* lbl_803CBC24;
 extern u8 lbl_803CBC2C;
 extern s8 lbl_80354720[2][9][4];
 extern ModelSub2C* lbl_803CBC10;
@@ -461,13 +462,13 @@ void fn_800B2C44(ModelNode* node, u16 joint, Vec* out);
 
 extern AramEntry lbl_800F1D78[];
 extern u8 lbl_800F71D8[];
-extern u8 lbl_800F5D98[];
+extern AramEntry lbl_800F5D98[];
 
 AramEntry* lbl_803CB790 = lbl_800F1D78;
 u8* lbl_803CB794 = lbl_800F71D8;
 JointPair lbl_803CB798[2] = { { 0x4A, 0x4B }, { 0xFFFF, 0 } };
 JointPair lbl_803CB7A0[2] = { { 0x2F, 0x34 }, { 0xFFFF, 0 } };
-u8* lbl_803CB7A8 = lbl_800F5D98;
+AramEntry* lbl_803CB7A8 = lbl_800F5D98;
 void (*lbl_803CB7AC[2])(MtxPtr view, s32, u32) = { 0 };
 u8 lbl_803CB7B4[8] = { 0x13, 0x19, 0x14, 0x1A, 0x4A, 0x4B, 0x3C, 0x3D };
 f32 lbl_803CB7BC = 2.0f;
@@ -2714,7 +2715,41 @@ void fn_800145F8(void) {
 }
 
 // .text:0x80014204 size:0x3F4
-void fn_80014204(void) {
+void fn_80014204(s32 count) {
+    s32 max = 0;
+    s32 size;
+    s32 i;
+    int j;
+    int k;
+
+    for (i = 0, j = 0; i < 54; i++) {
+        if (lbl_800EEAAC[i] >= 0) {
+            for (k = 0; k < 6; k++) {
+                size = lbl_803CB7A8[j * 6 + k].size & 0x0FFFFFFF;
+                if (max < size) {
+                    max = size;
+                }
+            }
+            j++;
+        }
+    }
+    size = (max + 31) & ~31;
+    lbl_803CBC24 = _OSAllocFromHeap(32, count * (size * 6));
+    for (i = 0; i < count * 3; i++) {
+        lbl_8036E548.poses[i].parts[0].files = (void**)((u8*)lbl_803CBC24 + size * (i * 2));
+        lbl_8036E548.poses[i].parts[1].files = (void**)((u8*)lbl_803CBC24 + size * (i * 2 + 1));
+    }
+    for (i = 0; i < count * 3; i++) {
+        lbl_8036E548.poses[i]._D0 = -1;
+        lbl_8036E548.poses[i]._D1 = -1;
+        lbl_8036E548.poses[i]._CF = -1;
+        lbl_8036E548.poses[i]._CE = 0xFF;
+        lbl_8036E548.poses[i]._CD = 0xFF;
+        lbl_8036E548.poses[i].tex = NULL;
+        lbl_8036E548.poses[i]._CC = 0;
+        lbl_8036E548.poses[i].parts[0]._60 = i * 2;
+        lbl_8036E548.poses[i].parts[1]._60 = i * 2 + 1;
+    }
 }
 
 static inline void restorePartDispObj(int idx, int part) {
