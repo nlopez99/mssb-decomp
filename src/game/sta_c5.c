@@ -482,7 +482,7 @@ static inline void spawnDrawEffect(StaC5Draw* draw) {
 }
 
 // .text:0x000F6FDC size:0x1468 mapped:0x80736070
-// 98.41%: the target computes n1 + 2 between the counting loops without clrlwi, keeps
+// 98.44%: the target loads (u8)n1 for the first loop before the lbl_8036E548 base, keeps
 // pitcherModel in r31 (here on the stack) and stores models[j]._5B with stbx.
 void fn_3_F6FDC(void** files) {
     s32 n1;
@@ -502,6 +502,7 @@ void fn_3_F6FDC(void** files) {
     u8 idx;
     u8 numModels;
     s32 n2;
+    s32 total;
     StaC5Ball* ball;
     StaC5Draw* entry;
     u8 ballModel;
@@ -527,14 +528,14 @@ void fn_3_F6FDC(void** files) {
             break;
         }
     }
-    numModels = n1 + 2;
+    total = n1 + 2;
     prop2 = lbl_3_data_1B9A4;
     for (; n2 < 5; n2++) {
         if (prop2[n2].type == 6) {
             break;
         }
     }
-    numModels += n2;
+    numModels = total + n2;
     lbl_8036E548._6C = ActorObjectInitTable((u8)(numModels + 4));
     lbl_3_common_bss_350E4._6D = numModels + 4;
     j = 0;
