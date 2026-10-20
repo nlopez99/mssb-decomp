@@ -158,8 +158,9 @@ void fn_800633AC(Control* ctrl, Mtx m, s32 flip) {
             rot[1][1] = t * s + t2 * c;
             rot[0][1] = t * c - t2 * s;
             t = rot[0][2];
+            t2 = rot[1][2];
             rot[0][2] = t * c - m[1][2] * s;
-            rot[1][2] = t * s + rot[1][2] * c;
+            rot[1][2] = t * s + t2 * c;
         }
     }
     if (ctrl->type & CTRL_SCALE) {
@@ -275,8 +276,9 @@ void fn_80063028(Control* ctrl, Mtx m, s32 flip) {
             rot[1][1] = t * s + t2 * c;
             rot[0][1] = t * c - t2 * s;
             t = rot[0][2];
+            t2 = rot[1][2];
             rot[0][2] = t * c - m[1][2] * s;
-            rot[1][2] = t * s + rot[1][2] * c;
+            rot[1][2] = t * s + t2 * c;
         }
     }
     if (ctrl->type & CTRL_SCALE) {
