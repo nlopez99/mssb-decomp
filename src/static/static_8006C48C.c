@@ -141,7 +141,7 @@ s32 fn_8006CDC0(s32 index) {
 }
 
 // .text:0x8006CCA4 size:0x11C
-s16 determineIfMissionDescriptionIsShown(s32 index) {
+s32 determineIfMissionDescriptionIsShown(s32 index) {
     MissionChar* ch = &starMissionCompletionTracker.chars[index];
     s32 count;
     s32 i;
@@ -178,7 +178,7 @@ static inline s32 countEarnedStars(s32 index) {
 
 // .text:0x8006CBE4 size:0xC0
 // The target starts countEarnedStars' i as a copy of count (mr r30,r31) where this builds li r30,0
-s16 challengeRelated(s32 index) {
+s32 challengeRelated(s32 index) {
     MissionChar* ch = &starMissionCompletionTracker.chars[index];
 
     return lbl_8010B444[ch->_05][countEarnedStars(index)];
