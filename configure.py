@@ -632,6 +632,8 @@ config.libs = [
             Object(NonMatching, "static/unit_80063028.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/unit_800638CC.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/mb_subfunc.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(NonMatching, "static/unit_80069A68.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(NonMatching, "static/unit_8006C100.c", extra_cflags=["-cpp_exceptions on"]),
         ],
     },
     {
