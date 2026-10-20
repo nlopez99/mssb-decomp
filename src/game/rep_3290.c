@@ -21,6 +21,7 @@
 #include "game/sta_c4.h"
 #include "game/rep_3D50.h"
 #include "static/sub.h"
+#include "static/static_8001FE00.h"
 
 typedef struct {
     /* 0x000 */ VecXYZ _000;
@@ -75,7 +76,6 @@ extern f32 lbl_3_data_219B8[19];
 
 extern void fn_8004C108(VecXYZ* pos, int arg1);
 extern void Set_803cb848(int);
-extern void changeScene(u8, s16);
 extern int fn_3_6C938(int, int);
 extern void minigamesSetSomePointers(void);
 extern void minigamesGXStuff(void);

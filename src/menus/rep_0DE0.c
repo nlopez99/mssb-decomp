@@ -8,6 +8,7 @@
 #include "Dolphin/vec.h"
 #include "string.h"
 #include "menus/rep_08E8.h"
+#include "static/static_80021188.h"
 
 typedef struct LITObj {
     /* 0x00 */ u8 _00[0xC0];
@@ -143,7 +144,6 @@ extern void fn_80011640(Mtx src, Mtx dst);
 extern void makeLookAtMatrix(Mtx m, const Vec* camPos, const Vec* camUp, const Vec* target);
 extern void fn_800BDC88(ModelTable0DE0* table, u16 first, u16 last, void* model, void* anim, s32 arg5);
 extern void fn_800BD548(Model0DE0* model, s32 count, ...);
-extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern ModelTable0DE0* ActorObjectInitTable(u16 count);
 
 // Each scene's objects: { file index, frame row, animated }

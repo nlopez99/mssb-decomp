@@ -28,6 +28,7 @@
 #include "game/rep_3D50.h"
 #include "game/rep_3DA8.h"
 #include "static/sub.h"
+#include "static/objinit.h"
 
 typedef struct {
     /* 0x00 */ u32 _00[4];
@@ -178,7 +179,6 @@ extern u8 lbl_3_data_18944[8];
 extern u8 lbl_3_data_1894C[6][7];
 extern u8 lbl_3_data_18978[8];
 
-extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void* ARAMTransfer(AramEntry31A0* entry, int arg1, int arg2, u32 aram);
 extern void fn_8001CA40(int arg);
 extern void fn_80011BE4(int arg);

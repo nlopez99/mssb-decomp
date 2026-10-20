@@ -11,6 +11,9 @@
 #include "menus/rep_0840.h"
 #include "menus/rep_07F0.h"
 #include "menus/rep_0A58.h"
+#include "static/static_8001FE00.h"
+#include "static/static_8000F150.h"
+#include "static/static_8004AC00.h"
 
 typedef struct MenuTask0730 {
     /* 0x00 */ void (*_00)(void);
@@ -279,8 +282,6 @@ extern u8 lbl_803CB8F0[8];
 extern u8 lbl_2_bss_1034C[];
 
 extern void* fn_800B0A5C_insertQueue(void (*)(void), s32);
-extern void changeScene(u8, s16);
-extern void fn_8000F4B8(s32, s32, s32, s32);
 extern void fn_8001F228(void);
 extern void fn_800216F8(u8 group, int (*callback)(void));
 extern int fn_800627F8(void);
@@ -289,7 +290,6 @@ extern void fn_8006C488(void);
 extern void fn_800B0A14_removeQueue(void);
 extern void* ARAMTransfer(void* entry, s32 arg1, s32 arg2, u32 aram);
 extern void convertTextureHeader(void* tex);
-extern void fn_8004B1B8(void* tex);
 extern void fn_80068720(s32);
 extern void fn_80021410(void);
 extern void fn_800ACFB0(void* data);
@@ -788,7 +788,7 @@ void fn_2_1B1BC(void) {
         }
         convertTextureHeader(tex);
         lbl_2_data_4BA0._0->_4 = (void*)lbl_2_data_4BA0._0->_8[0];
-        fn_8004B1B8(lbl_2_data_4BA0._0->_4);
+        fn_8004B1B8((s32)lbl_2_data_4BA0._0->_4);
         task->_28 = 3;
         break;
     case 3:

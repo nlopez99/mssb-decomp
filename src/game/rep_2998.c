@@ -17,6 +17,7 @@
 #include "game/rep_AC8.h"
 #include "math.h"
 #include "string.h"
+#include "static/static_80021188.h"
 
 typedef struct {
     /* 0x00 */ u8 _00[0x34];
@@ -93,7 +94,6 @@ extern u16 lbl_3_data_81DC[16];
 extern u8 lbl_3_data_8404[6][15][2];
 extern u8 lbl_3_data_84B8[30][2];
 
-extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern Rep2998ModelTable* ActorObjectInitTable(u16 count);
 extern void fn_800BDC88(Rep2998ModelTable* table, u16 first, u16 last, void* model, void* anim, void* arg5);
 extern void fn_800BD548(StadiumModel1D58* model, s32 count, ...);

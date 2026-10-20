@@ -11,6 +11,7 @@
 #include "string.h"
 #include "menus/rep_08E8.h"
 #include "menus/rep_0F60.h"
+#include "static/static_8001FE00.h"
 
 // The menu types match rep_0788.c's; kept as this unit's own copy for now
 typedef struct MenuEntry0AB0 {
@@ -244,7 +245,6 @@ extern struct {
 extern void* fn_800B0A5C_insertQueue(void (*)(void), s32);
 extern void fn_800B0A14_removeQueue(void);
 extern void fn_800363D8(MenuTask0AB0* task, s32, s32, s32, s32);
-extern void changeScene(u8, s16);
 extern void fn_8001F228(void);
 extern s32 fn_80035838(AramEntry0AB0* entry, s32 count);
 extern void fn_80035B50(s32);

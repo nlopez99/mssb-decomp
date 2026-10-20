@@ -7,6 +7,7 @@
 #include "stdarg.h"
 #include "C3/control.h"
 #include "challenge/rep_00B0.h"
+#include "static/objinit.h"
 
 extern void fn_80048C1C(void);
 extern void fn_80048C28(void);
@@ -24,7 +25,6 @@ extern void fn_800BD190(void* geo, void* tex);
 extern void convertTextureHeader(void* tex);
 extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);
 extern void fn_800AD038(void* arg0);
-extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_800B472C(void* arg0);
 extern void fn_800A7D4C(s32 arg0, void* arg1);
 extern void* ARAMTransfer(void* entry, s32 arg1, s32 arg2, u32 aram);

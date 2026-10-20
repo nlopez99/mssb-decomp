@@ -4,7 +4,8 @@
 # Brings a worker's branch into the integration branch it started from:
 #   1. rebases the branch onto the integration branch if that has moved, and
 #      stops on a conflict;
-#   2. checks the worker's worktree: nothing uncommitted, check_symbols.py,
+#   2. checks the worker's worktree: nothing uncommitted, CI's whitespace
+#      check on its commits, check_symbols.py,
 #      check_prototypes.py, check_notes.py (two workers can add the same
 #      lesson, and the notes' union merge keeps both) and regress.py against
 #      the integration branch; it
@@ -95,6 +96,10 @@ def check(branch: str, checkout: str, into: str) -> bool:
         ok = False
     files = regress.git("diff", "--name-only", f"{fork}..HEAD", cwd=checkout).split()
     print(f"files changed: {' '.join(files) or 'none'}")
+    whitespace = subprocess.run(["git", "diff", "--check", f"{fork}..HEAD"], cwd=checkout, capture_output=True, text=True)
+    if whitespace.returncode != 0:
+        print(f"FAILED: whitespace (CI's git diff --check)\n{whitespace.stdout}")
+        ok = False
 
     for script, args in (("check_symbols.py", ()), ("check_prototypes.py", ()), ("check_notes.py", ())):
         code, output = run_tool(checkout, script, *args)

@@ -14,6 +14,7 @@
 #include "C3/control.h"
 #include "Dolphin/gx.h"
 #include "string.h"
+#include "static/static_80021188.h"
 
 typedef struct {
     /* 0x00 */ u8 _00[0x20];
@@ -214,13 +215,11 @@ extern void fn_80034CEC(UnkTask3310* task);
 extern void fn_80034E20(UnkTask3310* task, void* desc);
 extern void fn_800B0A14_removeQueue(void);
 extern void fn_80062C24(Vec* pos);
-extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern UnkActorTable3310* ActorObjectInitTable(u16 count);
 extern void fn_80025C58(void* anim, UnkActor3310* actor);
 extern void fn_80011B64(s32 i);
 extern void fn_800B4CDC(UnkModelSet3310* model);
 extern void fn_800B4278(UnkModelSet3310* model);
-extern void fn_800ACFB0(void* data);
 extern void fn_800B993C(void);
 extern s32 fn_8005268C(void);
 extern void fn_80033B58(void* texture, s32 index, s32, s32);

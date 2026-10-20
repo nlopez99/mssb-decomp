@@ -1,6 +1,7 @@
 #include "header_rep_data.h"
 #include "menus/rep_0F10.h"
 #include "string.h"
+#include "static/static_8001FE00.h"
 
 extern struct {
     /* 0x00 */ u16 _00;
@@ -107,7 +108,6 @@ extern struct {
 } lbl_80354768;
 
 extern void fn_80034E20(MenuTask0F10* task, void* desc);
-extern void changeScene(u8, s16);
 extern void fn_80034CEC(MenuTask0F10* task);
 extern void fn_800B0A14_removeQueue(void);
 

@@ -22,6 +22,7 @@
 #include "string.h"
 #include "game/rep_3D50.h"
 #include "static/sub.h"
+#include "static/static_8001FE00.h"
 
 extern struct {
     /* 0x00 */ s32 _00;
@@ -76,7 +77,6 @@ typedef struct UnkBarrelCell34B0 {
     /* 0x1 */ u8 colour;
 } UnkBarrelCell34B0; // size: 0x2
 
-extern void changeScene(u8, s16);
 extern int fn_3_6C938(int, int);
 extern void fn_8004C108(VecXYZ* pos, int arg1);
 

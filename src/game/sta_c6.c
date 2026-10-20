@@ -12,6 +12,7 @@
 #include "Dolphin/rand.h"
 #include "musyx/musyx.h"
 #include "string.h"
+#include "static/static_80021188.h"
 
 typedef struct {
     /* 0x00 */ void* _00;
@@ -283,7 +284,6 @@ static f32 lbl_3_data_19710[7] = { -60.0f, -40.0f, -20.0f, 0.0f, 20.0f, 40.0f, 6
 static u32 lbl_3_data_1972C[16] = { 10, 9, 11, 2, 3, 4, 5, 6, 10, 9, 11, 2, 3, 4, 5, 6 };
 u8 lbl_3_data_1976C = 1;
 
-extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern StaC6ModelTable* ActorObjectInitTable(u16 count);
 extern void fn_800BDC88(StaC6ModelTable* table, u16 first, u16 last, void* model, void* anim, s32 arg5);
 extern void fn_800BD478(StaC6Model* model, void* file);

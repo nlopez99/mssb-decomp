@@ -24,6 +24,7 @@
 #include "game/rep_E08.h"
 #include "game/rep_1330.h"
 #include "game/rep_2940.h"
+#include "static/mb_subfunc.h"
 
 typedef struct AramEntryD18 {
     /* 0x0 */ u32 _0[4];
@@ -152,7 +153,6 @@ extern void fn_3_6D4A0(void);
 extern u8 calledWhenStartingMatch(void);
 extern int fn_80020218(void);
 extern int fn_80020278(u8 arg);
-extern s32 fn_800698F8(s32 charID);
 extern int fn_80069B68(void);
 
 extern struct {

@@ -6,6 +6,7 @@
 #include "game/rep_720.h"
 #include "Dolphin/os.h"
 #include "game/rep_1CB8.h"
+#include "static/mb_subfunc.h"
 
 // The sound bank table: group data pointers, indexed by sound group
 extern struct {
@@ -82,7 +83,6 @@ extern unsigned long sndUpdateListener(SND_LISTENER* li, SND_FVECTOR* pos, SND_F
 extern unsigned long sndAddListener(SND_LISTENER* li, SND_FVECTOR* pos, SND_FVECTOR* dir, SND_FVECTOR* heading,
                                     SND_FVECTOR* up, f32 front_sur, f32 back_sur, f32 soundSpeed, unsigned long flags,
                                     unsigned char vol, SND_ROOM* room);
-extern s32 fn_800698F8(s32 charID);
 extern bool32 sndSeqGetValid(s32 seqID);
 extern bool32 sndSeqLoop(s32 seqID, bool32 on);
 extern void fn_800216F8(u8 group, int (*callback)(void));

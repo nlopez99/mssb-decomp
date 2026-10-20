@@ -10,6 +10,7 @@
 #include "string.h"
 #include "menus/rep_08E8.h"
 #include "menus/rep_0F60.h"
+#include "static/static_8001FE00.h"
 
 typedef struct MenuTask0A58 {
     /* 0x00 */ u8 _00[0xC];
@@ -207,7 +208,6 @@ extern int fn_800627C4(void);
 extern void fn_80036134(MenuTask0A58* task, s32, s32, s32);
 extern void fn_8000FE54(void);
 extern void fn_8000F4B8(s32, s32, s32, s32);
-extern void changeScene(u8, s16);
 extern void fn_80062948(void);
 extern void fn_8006295C(void);
 extern u16 fn_8000F988(MenuTask0A58* task, s32, u16, s32, s32, s32);

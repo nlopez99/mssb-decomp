@@ -12,6 +12,7 @@
 #include "string.h"
 #include "menus/rep_08E8.h"
 #include "menus/rep_0898.h"
+#include "static/static_8001FE00.h"
 
 typedef struct MenuTask0840 {
     /* 0x00 */ u8 _00[0xC];
@@ -230,7 +231,6 @@ extern void* ARAMTransfer(AramEntry0840* entry, int arg1, int arg2, u32 aram);
 extern void fn_800111B4(void* arg);
 extern s32 fn_80062890(s32 id);
 extern void fn_80053FE8(void);
-extern void changeScene(u8, s16);
 extern u8 fn_80068514(s32, s32);
 extern u8 fn_8006862C(s32, s32);
 extern void fn_8006C6C4(void);

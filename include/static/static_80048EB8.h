@@ -1,0 +1,15 @@
+#ifndef __STATIC_STATIC_80048EB8_H_
+#define __STATIC_STATIC_80048EB8_H_
+
+#include "mssbTypes.h"
+
+void startGameRelated(void);
+void fn_80049220(u8 team);
+void fn_800494CC(u8 team);
+void possiblyTransferDataBetweenDifferentRels(void);
+void fn_80049C80(void);
+void fn_80049D3C(void);
+void fn_80049D8C(u8 dir, u8 team);
+void fn_8004A0FC(void);
+
+#endif // !__STATIC_STATIC_80048EB8_H_

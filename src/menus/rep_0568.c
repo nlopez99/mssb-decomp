@@ -9,6 +9,7 @@
 #include "Dolphin/gx.h"
 #include "Dolphin/mtx.h"
 #include "string.h"
+#include "static/static_8001FE00.h"
 
 typedef struct Node0568 {
     /* 0x000 */ u16 _000;
@@ -376,7 +377,7 @@ extern void fn_80025DDC(void* anim);
 extern void fn_80014990(s32 index, void* arg1, void* arg2);
 extern void fn_80025C58(void* anim, ActorRef0568* ref);
 extern void fn_800638B4(Player0568* player, ActorRef0568* ref);
-extern void fn_8004B7B4(Player0568* player, ActorRef0568* ref);
+extern s32 fn_8004B7B4(Player0568* player, ActorRef0568* ref);
 extern void fn_80023B04(s32);
 extern void fn_80014204(s32);
 extern void* fn_80023AA4(void);
@@ -385,7 +386,6 @@ extern ActorRef0568* fn_800111D8(Player0568* player);
 extern void fn_800B2B54(void* actor, u16 id, s32 mode);
 extern void fn_80025EEC(void* state, s32, s32);
 extern void fn_2_11A0(s32 arg0);
-extern void changeScene(u8, s16);
 extern void fn_800625A4(s32 index, s32 value);
 extern void fn_8003BF54(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void* _OSAllocFromHeap(u32 align, u32 size);

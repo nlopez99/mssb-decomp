@@ -24,6 +24,10 @@
 #include "Dolphin/rand.h"
 #include "musyx/musyx.h"
 #include "game/rep_3D50.h"
+#include "static/objinit.h"
+#include "static/static_8001FE00.h"
+#include "static/sub.h"
+#include "static/static_80021188.h"
 
 // A wall the bounce reflects off
 typedef struct Unk3520Line {
@@ -90,7 +94,6 @@ extern struct {
     /* 0x28 */ u8 _28;
 } lbl_80366158;
 
-extern s32 fn_800247E4(s32, s32, s32, s32);
 extern struct {
     /* 0x00 */ u8 _00[0x40];
     /* 0x40 */ s16 _40;
@@ -101,12 +104,8 @@ extern void minigamesSetSomePointers(void);
 extern void minigamesGXStuff(void);
 extern void minigamesSetSomePointers2(void);
 extern void fn_800528B4(void);
-extern void fn_800246D4(int (*compare)(const void*, const void*), void* src, void* dst, int size, int count);
 extern void fn_800115C8(s8);
 extern void fn_80011578(void);
-extern void changeScene(u8, s16);
-extern void* _OSAllocFromHeap(u32 align, u32 size);
-extern void fn_800ACFB0(void* data);
 extern u8 lbl_803CBBC0;
 extern u16 lbl_3_data_81FC[0x39];
 

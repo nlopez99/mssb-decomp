@@ -189,6 +189,7 @@ def main() -> int:
     parser.add_argument("--first", action="store_true", help="stop at the first variant that matches")
     parser.add_argument("--top", type=int, default=10, help="variants to list and write out (default 10)")
     parser.add_argument("--header", action="append", default=[], help="header copy passed to every run")
+    parser.add_argument("--unit", help="the function's unit, for a name several units share (main)")
     parser.add_argument("--dry-run", action="store_true", help="count the variants and write the first; compile nothing")
     args = parser.parse_args()
     sys.stdout.reconfigure(line_buffering=True)
@@ -225,7 +226,7 @@ def main() -> int:
             raise UsageError(f"{total} variants is over --limit {args.limit}; use --sample N or fewer markers")
         else:
             choices = list(itertools.product(*[range(c) for c in counts]))
-        unit = find_unit(args.function)
+        unit = args.unit or find_unit(args.function)
         base = run_match(unit, os.path.join(root_dir, json_source(unit)), args.header)
     except UsageError as e:
         print(f"variants: {e}", file=sys.stderr)

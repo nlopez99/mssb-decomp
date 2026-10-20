@@ -3,8 +3,8 @@
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/gx.h"
 #include "musyx/musyx.h"
+#include "static/static_8001FE00.h"
 
-extern void changeScene(u8, s16);
 extern void fn_2_19F2C(void);
 extern void fn_2_11A0(s32 arg0);
 

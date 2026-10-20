@@ -14,6 +14,7 @@
 #include "musyx/musyx.h"
 #include "string.h"
 #include "game/rep_12D0.h"
+#include "static/static_8001FE00.h"
 
 typedef struct {
     /* 0x0 */ s16 controlStickAngle;
@@ -74,7 +75,6 @@ extern struct {
 extern int fn_3_6C938(int, int);
 static inline BOOL fn_3_7C194(void);
 void fn_8001B2D0(void);
-void changeScene(u8, s16);
 void fn_80052798(s32);
 void fn_8001B224(void);
 

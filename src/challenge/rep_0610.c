@@ -337,7 +337,7 @@ extern void fn_80031CA4(Vec* pos, UnkBurst0610* glow);
 extern void fn_80030D88(Vec* pos, Vec* dir, UnkBurst0610* burst, s32 n);
 extern void* ARAMTransfer(void* entry, int arg1, int arg2, u32 aram);
 extern void convertTextureHeader(void* tex);
-extern void fn_8004B1B8(void* file);
+extern void fn_8004B1B8(s32 v);
 extern void ANIMGet(void* bank);
 extern void* ActorObjectInitTable(u16 count);
 extern void fn_800BDC88(void* table, u16 first, u16 last, void* model, void* anim, s32 arg5);
@@ -351,7 +351,7 @@ extern void fn_80025C58(void* anim, Unk0060Elem* elem);
 extern void fn_80025DDC(void* anim);
 extern void fn_80025EEC(void* pose, s32 arg1, s32 arg2);
 extern void fn_80025FFC(void* anim, void* pose, void* file);
-extern UnkTask0610* fn_8004B7B4(Unk8036E548Actor* actor, Unk0060Elem* elem, Unk0060* model);
+extern s32 fn_8004B7B4(Unk8036E548Actor* actor, Unk0060Elem* elem);
 extern UnkTask0610* fn_80052634(Unk8036E548Actor* actor, Unk0060Elem* elem, Unk0060* model);
 extern UnkTask0610* fn_80062ED4(Unk8036E548Actor* actor, Unk0060Elem* elem, Unk0060* model);
 extern void fn_80063010(Unk8036E548Actor* actor, Unk0060Elem* elem);
@@ -2538,7 +2538,7 @@ void fn_1_16978(void) {
         break;
     case 1:
         if (fn_1_106A4() != NULL) {
-            fn_8004B1B8(fn_1_106A4());
+            fn_8004B1B8((s32)fn_1_106A4());
             lbl_803CC1B8->_10++;
         }
         break;
@@ -3732,8 +3732,7 @@ void fn_1_135C0(void) {
                                      lbl_8036E548._0060);
         break;
     case 19:
-        lbl_1_bss_60E8 = fn_8004B7B4(actor, &lbl_8036E548._0060->_34[(s8)actor->_255[0]],
-                                     lbl_8036E548._0060);
+        lbl_1_bss_60E8 = (UnkTask0610*)fn_8004B7B4(actor, &lbl_8036E548._0060->_34[(s8)actor->_255[0]]);
         break;
     case 20:
     case 43:

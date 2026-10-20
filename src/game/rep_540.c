@@ -15,6 +15,7 @@
 #include "game/sta_c6.h"
 #include "game/rep_AC8.h"
 #include "game/m_sound.h"
+#include "static/static_800638CC.h"
 
 extern struct {
     /* 0x00 */ s16 _00;
@@ -88,7 +89,6 @@ extern struct {
 } lbl_3_common_bss_37400;
 
 void fn_3_B7F18(Vec* out, Vec* a, Vec* b);
-void fn_80064344(Vec* pos, Vec* vel);
 
 // .text:0x0001014C size:0x17C mapped:0x8064F1E0
 void ballPhysica(void) {

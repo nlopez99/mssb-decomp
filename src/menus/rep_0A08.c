@@ -6,6 +6,9 @@
 #include "menus/rep_08E8.h"
 #include "menus/rep_0C50.h"
 #include "menus/rep_0F10.h"
+#include "static/static_8001FE00.h"
+#include "static/static_8004C9FC.h"
+#include "static/mb_subfunc.h"
 
 typedef struct MenuSaveSlot0A08 {
     /* 0x0000 */ u8 _0000[0xAF8];
@@ -168,7 +171,6 @@ typedef struct MenuTask0A08 {
 } MenuTask0A08;
 
 extern void* fn_800B0A5C_insertQueue(void (*)(void), s32);
-extern void fn_800678CC(s32 team);
 extern void fn_80041150(s32 arg0, u8 arg1);
 extern void fn_80062A74(void);
 extern void fn_800AD054(s32 arg0, s32 arg1);
@@ -189,8 +191,7 @@ extern struct {
     /* 0x00 */ u8 _00[0x98];
     /* 0x98 */ void* _98;
 } lbl_800EF808;
-extern void fn_8004A34C(void* arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-extern s32 fn_8004CA6C(u16 buttons);
+extern s32 fn_8004A34C(void* window, u8 arg1, u8 msg, u8 arg3, u8 arg4);
 extern void fn_8004CC2C(void);
 extern void fn_8003BF54(int, int, int, int, int, int, int, u8, int);
 extern void* lbl_803CC1B8;
@@ -224,7 +225,6 @@ typedef struct AramEntry0A08 {
 extern int fn_80035838(AramEntry0A08* entry, int count);
 extern void fn_80035B50(int arg);
 extern void fn_80042D38(s32 arg);
-extern void changeScene(u8, s16);
 
 // Debug menu tables nothing here reads; rep_0F10 has the same copy and uses it.
 char lbl_2_data_1F4D8[4][32] = { "BAT FIRST", "BAT LAST", "FL", "PC" };

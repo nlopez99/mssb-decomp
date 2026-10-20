@@ -5,6 +5,7 @@
 #include "musyx/musyx.h"
 #include "menus/rep_0318.h"
 #include "menus/rep_0568.h"
+#include "static/static_8001FE00.h"
 
 typedef struct UnkTask0C50 {
     /* 0x00 */ void (*_00)(void);
@@ -246,7 +247,6 @@ extern void fn_8004E2EC(void);
 extern void fn_8004F964(void);
 extern void fn_80053FE8(void);
 extern void fn_80051D00(void);
-extern void changeScene(u8, s16);
 extern s8 translateStarPitchHitIndex(u8 index);
 extern s16 translateStarPitch(u8 index);
 extern s16 translateStarSwing(u8 index);

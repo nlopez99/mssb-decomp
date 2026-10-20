@@ -14,6 +14,93 @@ Sections:
 	.sdata2     type:rodata align:4
 	.sbss2      type:bss align:32
 
+static/static_80008E00.c:
+	extab       start:0x80005600 end:0x80005630
+	extabindex  start:0x80006C60 end:0x80006CA8
+	.text       start:0x80008E00 end:0x800096DC
+
+static/static_800096DC.c:
+	extab       start:0x80005630 end:0x80005640
+	extabindex  start:0x80006CA8 end:0x80006CC0
+	.text       start:0x800096DC end:0x80009E94
+	.data       start:0x800E8AA8 end:0x800E8F44
+
+static/static_80009E94.c:
+	.text       start:0x80009E94 end:0x8000A0AC
+	.sdata2     start:0x803CC400 end:0x803CC420
+
+static/static_8000A0AC.c:
+	extab       start:0x80005640 end:0x80005660
+	extabindex  start:0x80006CC0 end:0x80006CF0
+	.text       start:0x8000A0AC end:0x8000BA3C
+	.sdata2     start:0x803CC420 end:0x803CC458
+
+static/static_8000BA3C.c:
+	extab       start:0x80005660 end:0x800056D8
+	extabindex  start:0x80006CF0 end:0x80006DA4
+	.text       start:0x8000BA3C end:0x8000F150
+	.rodata     start:0x800E65D0 end:0x800E6600
+	.sdata2     start:0x803CC458 end:0x803CC490
+
+static/static_8000F150.c:
+	extab       start:0x800056D8 end:0x80005730
+	extabindex  start:0x80006DA4 end:0x80006E28
+	.text       start:0x8000F150 end:0x800111D8
+	.sdata2     start:0x803CC490 end:0x803CC4B8
+
+static/model.c:
+	extab       start:0x80005730 end:0x800059D0
+	extabindex  start:0x80006E28 end:0x80007218
+	.text       start:0x800111D8 end:0x8001FE00
+	.rodata     start:0x800E6600 end:0x800E6698
+	.data       start:0x800EE800 end:0x800EEFD0
+	.bss        start:0x80118220 end:0x80118740
+	.sdata      start:0x803CB790 end:0x803CB7C8
+	.sbss       start:0x803CBBF0 end:0x803CBC40
+	.sdata2     start:0x803CC4B8 end:0x803CC530
+
+static/static_8001FE00.c:
+	extab       start:0x800059D0 end:0x80005A28
+	extabindex  start:0x80007218 end:0x8000729C
+	.text       start:0x8001FE00 end:0x80021188
+	.data       start:0x800EEFD0 end:0x800EF508
+	.sdata      start:0x803CB7C8 end:0x803CB7D8
+	.sdata2     start:0x803CC530 end:0x803CC548
+
+static/static_80021188.c:
+	extab       start:0x80005A28 end:0x80005AB0
+	extabindex  start:0x8000729C end:0x80007368
+	.text       start:0x80021188 end:0x80021AC8
+	.data       start:0x800EF508 end:0x800EFBE8
+	.bss        start:0x80118740 end:0x8017E320
+	.sdata      start:0x803CB7D8 end:0x803CB7E0
+	.sbss       start:0x803CBC40 end:0x803CBC48
+	.sdata2     start:0x803CC548 end:0x803CC560
+
+static/static_80021AC8.c:
+	extab       start:0x80005AB0 end:0x80005B08
+	extabindex  start:0x80007368 end:0x800073EC
+	.text       start:0x80021AC8 end:0x80022DAC
+	.data       start:0x800EFBE8 end:0x800F7478
+	.bss        start:0x8017E320 end:0x8017EB40
+	.sdata      start:0x803CB7E0 end:0x803CB7E8
+
+static/objinit.c:
+	extab       start:0x80005B08 end:0x80005B48
+	extabindex  start:0x800073EC end:0x8000744C
+	.text       start:0x80022DAC end:0x80023B90
+	.rodata     start:0x800E6698 end:0x800E6708
+	.bss        start:0x8017EB40 end:0x8017EC00
+	.sbss       start:0x803CBC58 end:0x803CBC60
+	.sdata2     start:0x803CC560 end:0x803CC568
+
+static/static_80023B90.c:
+	extab       start:0x80005B48 end:0x80005B50
+	extabindex  start:0x8000744C end:0x80007458
+	.text       start:0x80023B90 end:0x80023CF4
+	.rodata     start:0x800E6708 end:0x800E6720
+	.sdata2     start:0x803CC568 end:0x803CC580
+
 static/sub.c:
 	extab       start:0x80005B50 end:0x80005BA0
 	extabindex  start:0x80007458 end:0x800074D0
@@ -63,6 +150,198 @@ static/physics.c:
 	.sdata      start:0x803CB818 end:0x803CB828
 	.sbss       start:0x803CBCA0 end:0x803CBCA8
 	.sdata2     start:0x803CC720 end:0x803CC7A0
+
+static/uitexture.c:
+	extab       start:0x80005EE8 end:0x80005F18
+	extabindex  start:0x800079BC end:0x80007A04
+	.text       start:0x80039AA8 end:0x8003A2EC
+	.data       start:0x800F7A40 end:0x800F7B00
+	.bss        start:0x8023DD80 end:0x802D3D80
+	.sdata2     start:0x803CC7A0 end:0x803CC7D0
+
+static/static_8003A2EC.c:
+	extab       start:0x80005F18 end:0x80005FD0
+	extabindex  start:0x80007A04 end:0x80007B18
+	.text       start:0x8003A2EC end:0x8004157C
+	.rodata     start:0x800E6910 end:0x800E6920
+	.data       start:0x800F7B00 end:0x800FB3F8
+	.bss        start:0x802D3D80 end:0x802E4B00
+	.sdata      start:0x803CB828 end:0x803CB838
+	.sbss       start:0x803CBCA8 end:0x803CBCC0
+	.sdata2     start:0x803CC7D0 end:0x803CC7E8
+
+static/static_8004157C.c:
+	extab       start:0x80005FD0 end:0x80005FE0
+	extabindex  start:0x80007B18 end:0x80007B30
+	.text       start:0x8004157C end:0x80042598
+	.sbss       start:0x803CBCC0 end:0x803CBCC8
+	.sdata2     start:0x803CC7E8 end:0x803CC7F8
+
+static/orderchange.c:
+	extab       start:0x80005FE0 end:0x80006050
+	extabindex  start:0x80007B30 end:0x80007BD8
+	.text       start:0x80042598 end:0x80048C14
+	.rodata     start:0x800E6920 end:0x800E6950
+	.data       start:0x800FB3F8 end:0x800FB4C8
+	.bss        start:0x802E4B00 end:0x802E4B28
+	.sbss       start:0x803CBCC8 end:0x803CBCE8
+
+static/static_80048C14.c:
+	extab       start:0x80006050 end:0x80006068
+	extabindex  start:0x80007BD8 end:0x80007BFC
+	.text       start:0x80048C14 end:0x80048EB8
+	.data       start:0x800FB4C8 end:0x800FB5B0
+	.bss        start:0x802E4B28 end:0x802E4BB0
+	.sdata      start:0x803CB838 end:0x803CB848
+	.sbss       start:0x803CBCE8 end:0x803CBCF0
+
+static/static_80048EB8.c:
+	extab       start:0x80006068 end:0x80006090
+	extabindex  start:0x80007BFC end:0x80007C38
+	.text       start:0x80048EB8 end:0x8004A1BC
+	.rodata     start:0x800E6950 end:0x800E6970
+	.sbss       start:0x803CBCF0 end:0x803CBCF8
+
+static/static_8004A1BC.c:
+	extab       start:0x80006090 end:0x800060C0
+	extabindex  start:0x80007C38 end:0x80007C80
+	.text       start:0x8004A1BC end:0x8004ABD8
+	.data       start:0x800FB5B0 end:0x800FB798
+
+static/static_8004AC00.c:
+	extab       start:0x800060C0 end:0x800060F0
+	extabindex  start:0x80007C80 end:0x80007CC8
+	.text       start:0x8004AC00 end:0x8004B284
+	.data       start:0x800FB798 end:0x800FBF10
+	.sdata      start:0x803CB848 end:0x803CB860
+	.sbss       start:0x803CBCF8 end:0x803CBD10
+	.sdata2     start:0x803CC7F8 end:0x803CC818
+
+static/static_8004B284.c:
+	extab       start:0x800060F0 end:0x800060F8
+	extabindex  start:0x80007CC8 end:0x80007CD4
+	.text       start:0x8004B284 end:0x8004B6EC
+	.data       start:0x800FBF10 end:0x800FC388
+	.sdata2     start:0x803CC818 end:0x803CC828
+
+static/static_8004B6EC.c:
+	extab       start:0x800060F8 end:0x80006128
+	extabindex  start:0x80007CD4 end:0x80007D1C
+	.text       start:0x8004B6EC end:0x8004C094
+	.data       start:0x800FC388 end:0x800FC720
+	.sdata2     start:0x803CC828 end:0x803CC840
+
+static/static_8004C094.c:
+	extab       start:0x80006128 end:0x80006148
+	extabindex  start:0x80007D1C end:0x80007D4C
+	.text       start:0x8004C094 end:0x8004C5F8
+	.data       start:0x800FC720 end:0x800FC890
+	.sdata      start:0x803CB860 end:0x803CB870
+	.sdata2     start:0x803CC840 end:0x803CC850
+
+static/static_8004C5F8.c:
+	extab       start:0x80006148 end:0x80006150
+	extabindex  start:0x80007D4C end:0x80007D58
+	.text       start:0x8004C5F8 end:0x8004C9FC
+	.data       start:0x800FC890 end:0x800FCA60
+	.sdata2     start:0x803CC850 end:0x803CC860
+
+static/static_8004C9FC.c:
+	extab       start:0x80006150 end:0x800061E0
+	extabindex  start:0x80007D58 end:0x80007E30
+	.text       start:0x8004C9FC end:0x800521B0
+	.data       start:0x800FCA60 end:0x800FEB08
+	.sdata      start:0x803CB870 end:0x803CB880
+
+static/static_800521B0.c:
+	extab       start:0x800061E0 end:0x800061F8
+	extabindex  start:0x80007E30 end:0x80007E54
+	.text       start:0x800521B0 end:0x8005268C
+	.data       start:0x800FEB08 end:0x800FEB30
+	.sdata2     start:0x803CC860 end:0x803CC870
+
+static/static_8005268C.c:
+	extab       start:0x800061F8 end:0x80006228
+	extabindex  start:0x80007E54 end:0x80007E9C
+	.text       start:0x8005268C end:0x800531D0
+	.sdata      start:0x803CB880 end:0x803CB888
+	.sdata2     start:0x803CC870 end:0x803CC8D0
+
+static/static_800531D0.c:
+	extab       start:0x80006228 end:0x80006280
+	extabindex  start:0x80007E9C end:0x80007F20
+	.text       start:0x800531D0 end:0x80056AE4
+	.data       start:0x800FEB30 end:0x801000A8
+
+static/static_80056AE4.c:
+	extab       start:0x80006280 end:0x80006390
+	extabindex  start:0x80007F20 end:0x800080B8
+	.text       start:0x80056AE4 end:0x80062578
+	.data       start:0x801000A8 end:0x80108B18
+
+static/static_80062578.c:
+	extab       start:0x80006390 end:0x800063E8
+	extabindex  start:0x800080B8 end:0x8000813C
+	.text       start:0x80062578 end:0x80062BE4
+	.rodata     start:0x800E6970 end:0x800E69B8
+	.data       start:0x80108B18 end:0x80108B90
+	.sdata      start:0x803CB888 end:0x803CB890
+
+static/static_80062BE4.c:
+	extab       start:0x800063E8 end:0x80006418
+	extabindex  start:0x8000813C end:0x80008184
+	.text       start:0x80062BE4 end:0x80063028
+	.data       start:0x80108B90 end:0x80108D30
+	.sdata2     start:0x803CC8D0 end:0x803CC8D8
+
+static/static_80063028.c:
+	extab       start:0x80006418 end:0x80006438
+	extabindex  start:0x80008184 end:0x800081B4
+	.text       start:0x80063028 end:0x800638CC
+	.sdata      start:0x803CB890 end:0x803CB898
+	.sdata2     start:0x803CC8D8 end:0x803CC8F0
+
+static/static_800638CC.c:
+	extab       start:0x80006438 end:0x80006460
+	extabindex  start:0x800081B4 end:0x800081F0
+	.text       start:0x800638CC end:0x80064534
+	.data       start:0x80108D30 end:0x80108DB8
+	.bss        start:0x802E4BC0 end:0x802E4CE8
+	.sdata      start:0x803CB898 end:0x803CB8D0
+	.sdata2     start:0x803CC8F0 end:0x803CC8F8
+
+static/mb_subfunc.c:
+	extab       start:0x80006460 end:0x800064F8
+	extabindex  start:0x800081F0 end:0x800082D4
+	.text       start:0x80064534 end:0x80069A68
+	.rodata     start:0x800E69B8 end:0x800E6A00
+	.data       start:0x80108DB8 end:0x80109250
+	.bss        start:0x802E4CE8 end:0x802E5200
+	.sdata      start:0x803CB8D0 end:0x803CB8D8
+	.sbss       start:0x803CBD18 end:0x803CBD30
+
+static/static_80069A68.c:
+	extab       start:0x800064F8 end:0x80006588
+	extabindex  start:0x800082D4 end:0x800083AC
+	.text       start:0x80069A68 end:0x8006C100
+	.data       start:0x80109250 end:0x801093E8
+	.sdata      start:0x803CB8D8 end:0x803CB8E0
+	.sbss       start:0x803CBD30 end:0x803CBD38
+	.sdata2     start:0x803CC8F8 end:0x803CC938
+
+static/static_8006C100.c:
+	extab       start:0x80006588 end:0x800065B0
+	extabindex  start:0x800083AC end:0x800083E8
+	.text       start:0x8006C100 end:0x8006C48C
+	.sdata      start:0x803CB8E0 end:0x803CB8F0
+	.sbss       start:0x803CBD38 end:0x803CBD40
+	.sdata2     start:0x803CC938 end:0x803CC940
+
+static/static_8006C48C.c:
+	extab       start:0x800065B0 end:0x800065D8
+	extabindex  start:0x800083E8 end:0x80008424
+	.text       start:0x8006C48C end:0x8006D024
+	.sdata      start:0x803CB8F0 end:0x803CB8F8
 
 Dolphin/base/PPCArch.c:
 	.text       start:0x8006D024 end:0x8006D138

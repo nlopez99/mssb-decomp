@@ -3,6 +3,7 @@
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/pad.h"
 #include "string.h"
+#include "static/objinit.h"
 
 typedef struct Task7BA0Parent {
     /* 0x00 */ u8 _00[0x10];
@@ -40,7 +41,6 @@ extern struct {
     /* 0x08 */ void* _08;
 } lbl_80366158;
 
-extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_800AD038(void* arg0);
 extern void fn_800AD070(void);
 extern void fn_800AD500(void* arg0, void* arg1);

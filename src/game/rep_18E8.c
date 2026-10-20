@@ -12,6 +12,7 @@
 #include "game/rep_AC8.h"
 #include "game/m_sound.h"
 #include "static/sub.h"
+#include "static/static_8004AC00.h"
 
 typedef struct {
     /* 0x000 */ f32 _000;
@@ -171,9 +172,7 @@ extern struct {
 
 extern s32 fn_3_6D658(s32 team, s32 thrower, s32 receiver);
 
-extern void fn_8004AE18(s32 fielder);
 
-extern void fn_8004AFA8(s32 fielder);
 
 // .bss statics, in reverse address order: MWCC lays them out last declared first
 static u8 lbl_3_bss_1868[0x98];

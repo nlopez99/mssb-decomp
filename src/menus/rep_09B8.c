@@ -4,8 +4,8 @@
 #include "static/UnknownHomes_Static.h"
 #include "musyx/musyx.h"
 #include "string.h"
+#include "static/objinit.h"
 
-extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_800ACFB0(void* data);
 extern void fn_2_380B0(void);
 extern void fn_2_381A8(void);

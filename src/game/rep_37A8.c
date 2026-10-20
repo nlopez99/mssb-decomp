@@ -18,6 +18,7 @@
 #include "game/rep_3D50.h"
 #include "static/particle.h"
 #include "static/sub.h"
+#include "static/static_8001FE00.h"
 
 // g_Minigame as this minigame lays it out (UnknownHomes_Game.h)
 #define MG g_Minigame.piranhaPanic
@@ -85,7 +86,6 @@ extern struct {
 
 extern void fn_800B993C(void);
 extern void fn_800B9948(void* callback);
-extern void changeScene(u8, s16);
 extern u8 lbl_800EFBA4[0x10];
 extern s16 lbl_3_data_7F10[54];
 extern Vec lbl_3_data_21B94[4];

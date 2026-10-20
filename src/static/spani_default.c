@@ -522,8 +522,8 @@ static inline s8 findFreeSab(void) {
 }
 
 // .text:0x80035838 size:0x1C8 mapped:0x80035838
-u8 fn_80035838(void* entry, u8 id) {
-    s32 done = FALSE;
+BOOL fn_80035838(void* entry, u8 id) {
+    u8 done = FALSE;
     u32* file;
     s32 i;
 

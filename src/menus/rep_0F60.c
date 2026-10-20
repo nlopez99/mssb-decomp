@@ -8,6 +8,7 @@
 #include "Dolphin/vec.h"
 #include "string.h"
 #include "menus/rep_08E8.h"
+#include "static/static_80021188.h"
 
 typedef struct Model0F60 {
     /* 0x00 */ struct ActorObj0F60* _00;
@@ -280,7 +281,6 @@ extern struct {
 extern Save0F60* lbl_2_bss_1A824C;
 extern Mtx lbl_2_bss_1A81D4;
 
-extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern ModelTable0F60* ActorObjectInitTable(u16 count);
 extern void fn_800BDC88(ModelTable0F60* table, u16 first, u16 last, void* model, void* anim, s32 arg5);
 extern void fn_800BD548(Model0F60* model, s32 count, ...);
@@ -315,7 +315,7 @@ extern void fn_800B2C08(ActorObj0F60* actor, u16 id);
 extern void fn_8001FC4C(Player0F60* player);
 extern void fn_800638B4(Player0F60* player, ActorRef0F60* ref);
 extern void fn_80063010(Player0F60* player, ActorRef0F60* ref);
-extern void fn_8004B7B4(Player0F60* player, ActorRef0F60* ref);
+extern s32 fn_8004B7B4(Player0F60* player, ActorRef0F60* ref);
 extern void fn_800637BC(Player0F60* player, ActorRef0F60* ref);
 extern void fn_8004BD6C(Player0F60* player, ActorRef0F60* ref);
 extern void fn_800637D4(Player0F60* player, ActorRef0F60* ref);

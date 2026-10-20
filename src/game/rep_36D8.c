@@ -22,6 +22,8 @@
 #include "string.h"
 #include "game/rep_3D50.h"
 #include "static/sub.h"
+#include "static/static_8001FE00.h"
+#include "static/static_8004C094.h"
 
 // The chain chomp, at g_Minigame._CB0
 typedef struct Unk36D8Chomp {
@@ -81,11 +83,9 @@ extern s8 lbl_3_data_21974[4][2];
 extern s8 lbl_3_data_2197C[4];
 extern s8 lbl_3_data_21980[4];
 
-extern void changeScene(u8, s16);
 extern void fn_800528B4(void);
 extern void fn_800115C8(u8);
 extern void fn_80011578(void);
-extern void fn_8004C094(Vec*);
 extern void minigamesSetSomePointers(void);
 extern void minigamesGXStuff(void);
 extern void minigamesSetSomePointers2(void);
