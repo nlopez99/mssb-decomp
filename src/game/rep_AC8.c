@@ -2742,9 +2742,9 @@ s32 fn_3_5164C(s32 fielder, struct _VecXYZ* out) {
 }
 
 // .text:0x00051220 size:0x42C mapped:0x806902B4
-// 96.70%: in the speed-ratio update the target loads the int-to-float constant through an
-// `addi` and lbl_3_data_4B98 before 1.0f; the operands of the `fmadds` follow from that.
 void fn_3_51220(void) {
+    f32 ratio;
+
     if (g_FieldingLogic._070->_1A != 0) {
         if (g_FieldingLogic._070->_0C < 0x7FFE) {
             g_FieldingLogic._070->_0C++;
@@ -2796,7 +2796,8 @@ void fn_3_51220(void) {
             g_FieldingLogic._070->_18 = lbl_3_data_4B9C[5];
             return;
         }
-        g_FieldingLogic._070->_08 = (f32)g_FieldingLogic._070->_10 / lbl_3_data_4B9C[1] * lbl_3_data_4B98 + 1.0f;
+        ratio = (f32)g_FieldingLogic._070->_10 / lbl_3_data_4B9C[1];
+        g_FieldingLogic._070->_08 = ratio * lbl_3_data_4B98 + 1.0f;
         return;
     }
     if (g_FieldingLogic._070->_0C >= 0) {
@@ -3390,17 +3391,17 @@ void fn_3_4EFC8(int fielder, BOOL flag) {
 }
 
 // .text:0x0004EBC4 size:0x404 mapped:0x8068DC58
-// 99.10%: the target tests the frame count with `extsh.` and then copies it with an extra
-// `mr r6,r31`, one instruction this lacks.
+// 99.72%: before the waiting search the target zeroes waiting and copies it into j
+// (`mr r8,r7`), as in fn_3_41D78; every form of the two zeroings tried gives a second `li`.
 void fn_3_4EBC4(void) {
     s32 frames;
     s32 best = -1;
     s16 bestFrames = 9999;
     s16 nextFrames = 9999;
+    BOOL waiting;
     BOOL high = FALSE;
     s32 i;
     s32 j;
-    BOOL waiting;
 
     if (g_FieldingLogic._0C4 >= 0) {
         g_Ball.fielderAboutToGetBall_hasBall = -1;
@@ -3426,7 +3427,7 @@ void fn_3_4EBC4(void) {
             }
             if (i < 6 || !high) {
                 frames = g_Fielders[i]._17E;
-                if (frames >= 0) {
+                if ((s16)g_Fielders[i]._17E >= 0) {
                     if (g_Fielders[i]._19C != 0) {
                         frames = g_Fielders[i]._17E + 60;
                     } else if (g_Fielders[i]._1ED) {
