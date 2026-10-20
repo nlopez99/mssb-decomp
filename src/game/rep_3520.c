@@ -612,8 +612,8 @@ void fn_3_13A724(void) {
 }
 
 // .text:0x0013A0AC size:0x678 mapped:0x80779140
-// 94.0%: the inlined fn_3_13ACB4 and fn_3_13A724 schedule their loads and stores
-// differently, and the setup computes the ratio in another order.
+// 94.1%: in the inlined fn_3_13ACB4 the target stores _6E8 after the normal test and
+// keeps col.position.x in f10 where the base reloads it; FPRs and the ratio setup differ.
 void fn_3_13A0AC(void) {
     VecSrcDst seg;
     CollisionStruct col;
