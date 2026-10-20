@@ -98,7 +98,7 @@ void fn_8000CC4C(void);
 u32 fn_8000CEF0(AnimFile* file, s32 idx, u32 frame, s32 skip, u32* dst);
 void fn_8000D164(void);
 void fn_8000D838(void);
-void fn_8000D8A4(void);
+void fn_8000D8A4(SpriteShape* shape, Mtx mtx, ShapeStyle* style);
 void fn_8000DC9C(SpriteShape* shape, Mtx mtx, ShapeStyle* style);
 void fn_8000E030(SpriteShape* shape, Mtx mtx, ShapeStyle* style);
 void fn_8000E2D4(void);
