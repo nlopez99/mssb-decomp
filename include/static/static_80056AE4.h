@@ -4,7 +4,7 @@
 #include "mssbTypes.h"
 
 void drawStarProgressionMenu(void);
-void someChallengeStarFunction(void);
+void someChallengeStarFunction(struct SpaniTask* task);
 void someChallengeStarFunction2(void);
 void challengeCheckStarsMenuLoading(void);
 void starMenu(void);
@@ -14,7 +14,7 @@ void fn_80058394(struct SpaniTask* task);
 void fn_80058644(void);
 void fn_80058B20(struct SpaniTask* task, u8 team);
 void fn_80058E0C(void);
-void fn_80059458(void);
+void fn_80059458(struct SpaniTask* task, u8 team, s32 mask);
 void fn_800596D4(void);
 void starMissionRelated1(void);
 void fn_8005A350(void);

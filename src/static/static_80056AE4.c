@@ -5,6 +5,8 @@
 #include "static/static_80021188.h"
 #include "static/static_800531D0.h"
 #include "static/mb_subfunc.h"
+#include "static/sub.h"
+#include "string.h"
 
 typedef struct SpaniColor {
     /* 0x0 */ u8 r;
@@ -78,7 +80,18 @@ extern struct {
     /* 0x0CF63 */ u8 _CF63[2];
     /* 0x0CF65 */ u8 _CF65[0xCF70 - 0xCF65];
     /* 0x0CF70 */ u8 _CF70;
-    /* 0x0CF71 */ u8 _CF71[0xCFA2 - 0xCF71];
+    /* 0x0CF71 */ u8 _CF71[0xCF7C - 0xCF71];
+    /* 0x0CF7C */ u8 _CF7C;
+    /* 0x0CF7D */ u8 _CF7D[0xCF92 - 0xCF7D];
+    /* 0x0CF92 */ u8 _CF92;
+    /* 0x0CF93 */ u8 _CF93;
+    /* 0x0CF94 */ u8 _CF94[0xCF98 - 0xCF94];
+    /* 0x0CF98 */ s8 _CF98;
+    /* 0x0CF99 */ u8 _CF99;
+    /* 0x0CF9A */ u8 _CF9A;
+    /* 0x0CF9B */ u8 _CF9B;
+    /* 0x0CF9C */ s16 _CF9C;
+    /* 0x0CF9E */ u8 _CF9E[0xCFA2 - 0xCF9E];
     /* 0x0CFA2 */ u8 _CFA2[1];
 } lbl_803297E0;
 
@@ -100,6 +113,26 @@ extern struct {
     /* 0x0000 */ RosterEntry chars[6][9];
 } lbl_8034E9A0;
 
+typedef struct MissionText {
+    /* 0x0 */ s16 _0;
+    /* 0x2 */ s16 _2;
+    /* 0x4 */ s16 _4;
+    /* 0x6 */ s16 _6;
+    /* 0x8 */ s16 _8;
+} MissionText; // size: 0xA
+
+typedef struct CaptainInfo {
+    /* 0x0 */ u8 _0[2];
+    /* 0x2 */ u8 set;
+    /* 0x3 */ u8 _3[3];
+} CaptainInfo; // size: 0x6
+
+extern CaptainInfo lbl_800E8558[];
+extern MissionText lbl_8010A768[][10];
+
+extern s32 fn_80042DA8(void* task, s32 index, s32 value);
+extern void fn_8000FE08(s32 id, s32 arg1, s32 arg2);
+
 extern MenuScreen lbl_800FEF70[];
 extern SpaniSlot lbl_80371C30[];
 extern SpaniTask* lbl_803CC1B8;
@@ -107,12 +140,16 @@ extern struct SpaniDesc lbl_80108048[];
 
 extern void fn_8006CF6C(void);
 
+static inline BOOL isAnimDone(void* task, s32 id, s32 frame) {
+    return fn_80042DA8(task, id, frame) != 0;
+}
+
 static inline SpaniObj* getSpaniObj(SpaniTask* task, s32 id) {
     return lbl_80371C30[task->_14 + id].obj;
 }
 
-static inline SpaniObj* getTeamObj(SpaniTask* task, s32 team, s32 id) {
-    return lbl_80371C30[task->_14 + id + team].obj;
+static inline SpaniObj* getTeamObj(SpaniTask* task, s32 offset, s32 id) {
+    return lbl_80371C30[task->_14 + id + offset].obj;
 }
 
 static inline void setScreen(s16 id) {
@@ -244,7 +281,74 @@ void fn_800596D4(void) {
 }
 
 // .text:0x80059458 size:0x27C
-void fn_80059458(void) {
+void fn_80059458(SpaniTask* task, u8 team, s32 mask) {
+    s32 i;
+    s32 out[2];
+    s32 n;
+    memset(out, -1, 2);
+    for (i = 0, n = 0; i < 14; i++) {
+        if (mask & (1 << i)) {
+            switch (i) {
+            case 0:
+                i++;
+                break;
+            case 1:
+                out[n++] = 1;
+                break;
+            case 2:
+                out[n++] = 2;
+                break;
+            case 3:
+                out[n++] = 3;
+                break;
+            case 4:
+                out[n++] = 4;
+                break;
+            case 5:
+                out[n++] = 5;
+                break;
+            case 6:
+                out[n++] = 6;
+                break;
+            case 7:
+                out[n++] = 7;
+                break;
+            case 8:
+                out[n++] = 8;
+                break;
+            case 9:
+                out[n++] = 9;
+                break;
+            case 10:
+                out[n++] = 10;
+                break;
+            case 11:
+                out[n++] = 11;
+                break;
+            case 12:
+                out[n++] = 12;
+                break;
+            default:
+                out[n++] = 13;
+                break;
+            }
+        }
+    }
+    out[0]--;
+    out[1]--;
+    if (out[0] < 0) {
+        out[0] = 12;
+    }
+    if (out[1] < 0) {
+        out[1] = 12;
+    }
+    if (g_d_GameSettings._06 != 2) {
+        getTeamObj(task, team, 0x1B4)->_5C = out[0] << 16;
+        getTeamObj(task, team, 0x1B6)->_5C = out[1] << 16;
+    } else {
+        lbl_80371C30[task->_14 + 0x125].obj->_5C = out[0] << 16;
+        lbl_80371C30[task->_14 + 0x126].obj->_5C = out[1] << 16;
+    }
 }
 
 // .text:0x80058E0C size:0x64C
@@ -373,14 +477,13 @@ void fn_80057CAC(void) {
 }
 
 // .text:0x80057C08 size:0xA4
-// 99.76%: the slot index adds task->_14 and i in the other register order.
 void starMenu(void) {
     SpaniTask* task;
     s32 i;
 
     fn_80034E20(task = lbl_803CC1B8, lbl_80108048);
     for (i = 0; i < 9; i++) {
-        getSpaniObj(task, i + 12)->_5C = i << 16;
+        getTeamObj(task, i, 12)->_5C = i << 16;
         fn_800363D8(task, i + 0x15, 1, 0x83, inMemRoster[0][i].stats.CharID);
     }
     lbl_803CC1B8->func = challengeCheckStarsMenuLoading;
@@ -395,7 +498,48 @@ void someChallengeStarFunction2(void) {
 }
 
 // .text:0x80056F70 size:0x350
-void someChallengeStarFunction(void) {
+// 99.62%: registers only where the mission index meets task->_14 and in the
+// mission tracker lookup.
+void someChallengeStarFunction(SpaniTask* task) {
+    s16 set;
+    s32 i;
+    s16 text;
+
+    if (lbl_803297E0._CF93 == 0) {
+        set = lbl_800E8558[lbl_803297E0._CF9C].set;
+        getSpaniObj(task, 1)->_68 = 4;
+        getSpaniObj(task, 0)->_68 = 4;
+        for (i = 0; i < lbl_803297E0._CF9A; i++) {
+            getTeamObj(task, i, 0x31)->_54 &= ~2;
+            getTeamObj(task, i, 0x45)->_5C = 0;
+            getTeamObj(task, i, 0x45)->_54 &= ~2;
+        }
+        getSpaniObj(task, 0x23)->_54 &= ~2;
+        if (challengeStarRelatedInd(lbl_803297E0._CF9C, lbl_803297E0._CF98)) {
+            getSpaniObj(task, 0x23)->_54 |= 2;
+            getSpaniObj(task, 0x23)->_5C = 0;
+            getSpaniObj(task, 0x23)->_68 = 1;
+            getSpaniObj(task, lbl_803297E0._CF98 + 0x31)->_54 |= 2;
+            getSpaniObj(task, lbl_803297E0._CF98 + 0x31)->_5C = 0;
+            getSpaniObj(task, lbl_803297E0._CF98 + 0x31)->_68 = 1;
+            getSpaniObj(task, lbl_803297E0._CF98 + 0x45)->_5C = 0x10000;
+        }
+        if (*(s8*)&starMissionCompletionTracker.characters[lbl_803297E0._CF9C].inGameMissionTracker[lbl_803297E0._CF98].shownOnPauseMenu != 0) {
+            text = lbl_8010A768[set][lbl_803297E0._CF98]._0;
+        } else if (challengeStarRelatedInd(lbl_803297E0._CF9C, lbl_803297E0._CF98)) {
+            text = lbl_8010A768[set][lbl_803297E0._CF98]._0;
+        } else if (lbl_8010A768[set][lbl_803297E0._CF98]._6 <= starMissionCompletionTracker._4415) {
+            text = 0x1C5;
+        } else {
+            text = 0x1C6;
+        }
+        fn_8000FE08(lbl_803297E0._CF7C, 0, text);
+        lbl_803297E0._CF93 = 1;
+    }
+    if (lbl_803297E0._CF93 && isAnimDone(task, 1, 10) == TRUE) {
+        lbl_803297E0._CF93 = 0;
+        lbl_803297E0._CF92 = 0;
+    }
 }
 
 // .text:0x80056AE4 size:0x48C
