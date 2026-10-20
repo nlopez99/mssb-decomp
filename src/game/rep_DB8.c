@@ -25,6 +25,8 @@
 #include "game/rep_1838.h"
 #include "game/rep_3DA8.h"
 #include "game/rep_1B20.h"
+#include "game/rep_1330.h"
+#include "game/rep_17E0.h"
 
 extern struct {
     /* 0x00 */ u8 _00[0x96];
@@ -146,26 +148,11 @@ extern void fn_3_6B870(void);
 extern void starMissionRelated2(void);
 extern void changeScene(u8, s16);
 extern void fn_800A7568(void);
-extern void fn_3_16598C(void);
-extern void fn_3_7B130(void);
-extern void fn_3_7AFE4(void);
-extern void fn_3_1E178(void);
-extern void fn_3_1E154(void);
-extern void fn_3_7CE90(void);
 extern void fn_8006C9D8(void);
-extern void fn_3_1E328(void);
-extern void fn_3_7B308(void);
-extern void fn_3_9DBE4(void);
-extern void fn_3_7D780(void);
 extern void initializeUnknown(void);
 extern int fn_3_6C938(int, int);
 extern void fn_800203E0(int, s8);
 extern int fn_3_6BD6C(void);
-extern void fn_3_7AF68(void);
-extern void fn_3_9DB5C(void);
-extern void fn_3_7BC20(void);
-extern void fn_3_79ACC(void);
-extern void fn_3_9D6A4(void);
 extern BOOL fn_80014F40(s16 id);
 extern BOOL fn_80014D4C(s16 id);
 extern BOOL fn_80014E50(s16 id);
@@ -193,8 +180,6 @@ extern struct {
 } lbl_3_common_bss_1323C;
 extern void fn_3_1DD48(void);
 extern void fn_3_1DC30(void);
-extern void fn_3_79EF4(void);
-extern void fn_3_1637EC(void);
 extern int fn_80035838(void*, int);
 extern int fn_3_6B5D8(void);
 extern void fn_8004CC4C(int, int, int, int, int);

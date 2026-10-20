@@ -871,6 +871,21 @@ static inline BOOL isAnimDone(UnkSprite3448* sprite) {
     return sprite->_69 == 2 ? TRUE : FALSE;
 }
 
+// The same helper as rep_2BF8.c's.
+static inline SND_VOICEID playStadiumSound(int id) {
+    int stadium = g_d_GameSettings.StadiumID;
+    SND_VOICEID voice = sndFXStartEx(lbl_3_data_81DC[stadium] + id,
+                                     g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD
+                                         ? lbl_3_data_84B8[id * 2]
+                                         : lbl_3_data_8404[stadium][id * 2],
+                                     0x3F, 0);
+
+    sndFXCtrl(voice, 0x5B,
+              g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD ? lbl_3_data_84B8[id * 2 + 1]
+                                                                      : lbl_3_data_8404[stadium][id * 2 + 1]);
+    return voice;
+}
+
 // .text:0x0012D1F4 size:0x960 mapped:0x8076C288
 void fn_3_12D1F4(void) {
     if (g_GameLogic.gameStatus == GAME_STATUS_MINIGAME_SELECT || g_GameLogic.gameStatus == GAME_STATUS_TOY_STADIUM_LOAD ||
@@ -1922,11 +1937,8 @@ remove:
 }
 
 // .text:0x00129A18 size:0x270 mapped:0x80768AAC
-// 99.94%: the target forms lbl_3_data_21268's address (lis) before lbl_3_data_A8B8's. A
-// `u8* modes = lbl_3_data_21268` local (permuter) fixes that but swaps two loop increments (99.87%).
 void fn_3_129A18(void) {
     UnkTask3448* task = lbl_803CC1B8;
-    u16* p;
     int i;
     int n;
 
@@ -1936,7 +1948,6 @@ void fn_3_129A18(void) {
     if (g_Minigame._19E1 >= 5) {
         task->_1C = g_Minigame._19E1 - 4;
     }
-    p = lbl_3_data_A8B8;
     for (i = 0, n = 0; i < 7; i++) {
         lbl_80371C30[task->_14 + 14 + i]._00->_64 = lbl_3_data_A9E8[lbl_3_data_21268[i]];
         if (g_d_GameSettings._12 < 1 && lbl_3_data_21268[i] == 6) {
@@ -1949,7 +1960,7 @@ void fn_3_129A18(void) {
         } else if (n >= 5) {
             lbl_80371C30[task->_14 + i]._00->_5C = lbl_3_data_A8B8[6] << 16;
         } else {
-            lbl_80371C30[task->_14 + i]._00->_5C = *++p << 16;
+            lbl_80371C30[task->_14 + i]._00->_5C = lbl_3_data_A8B8[n + 1] << 16;
             n++;
         }
     }
@@ -2106,8 +2117,8 @@ void fn_3_129370(void) {
 }
 
 // .text:0x00128C18 size:0x758 mapped:0x80767CAC
-// 98.70%: before the minigame loop the target zeroes i once and copies it to j and the
-// table offset (li r27,0; mr r26,r27; mr r28,r27), the base loads 0 into each.
+// The flag of the first block reuses i and its loop j, as the later loops use them: with a
+// flag and counter of their own, the minigame loop's zeroes come out in other registers.
 void fn_3_128C18(void) {
     VecXYZ pos;
     int x;
@@ -2115,8 +2126,6 @@ void fn_3_128C18(void) {
     s32 i;
     s32 j;
     UnkTask3448* task = lbl_803CC1B8;
-    s32 k;
-    BOOL found;
     u8 c;
 
     if (lbl_3_common_bss_32724._96 != 0) {
@@ -2143,17 +2152,17 @@ void fn_3_128C18(void) {
     }
     lbl_3_common_bss_32724._B8 = 0;
     if (g_GameLogic.gameStatus == 0x27 && g_Minigame._1A3D == 1) {
-        found = FALSE;
-        for (k = 0; k < 4; k++) {
-            if (g_Minigame._1E08[k][0] == g_Minigame._1908 && g_Minigame._1E08[k][1] == 0) {
-                found = TRUE;
+        i = FALSE;
+        for (j = 0; j < 4; j++) {
+            if (g_Minigame._1E08[j][0] == g_Minigame._1908 && g_Minigame._1E08[j][1] == 0) {
+                i = TRUE;
                 break;
             }
         }
         if (g_Minigame._1E08[0][1] == 0 && g_Minigame._1E08[1][1] == 0 && g_Minigame._1E08[2][1] == 0 &&
             g_Minigame._1E08[3][1] == 0) {
             lbl_80371C30[task->_14]._00->_64 = lbl_3_data_AA98[2];
-        } else if (found) {
+        } else if (i) {
             lbl_80371C30[task->_14]._00->_64 = lbl_3_data_AA98[8];
         } else {
             lbl_80371C30[task->_14]._00->_64 = lbl_3_data_AA98[10];
@@ -2190,8 +2199,9 @@ void fn_3_128C18(void) {
             lbl_80371C30[task->_14]._00->_4C = 0.0f;
             return;
         }
-        j = 0;
-        for (i = j; i < 4; i++) {
+        i = 0;
+        j = i;
+        for (; i < 4; i++) {
             if (g_Minigame.minigameControlStruct._1C[i] == 1) {
                 getAnimRelatedCoordinates(g_Minigame.minigameControlStruct.characterIndex[i], 9, &pos);
                 c = g_Minigame.minigameControlStruct._4[i];
@@ -2279,8 +2289,6 @@ remove:
 }
 
 // .text:0x00127B68 size:0xED0 mapped:0x80766BFC
-// 99.91%: before the last loop the target forms lbl_80371C30's address after the three
-// division constants, the base before them (same registers).
 void fn_3_127B68(void) {
     UnkTask3448* task = lbl_803CC1B8;
     UnkTask3448* self = lbl_803CC1B8;
@@ -2434,7 +2442,8 @@ void fn_3_127B68(void) {
     case 6:
         break;
     }
-    for (i = 0; i < 8; i++) {
+    i = 0;
+    do {
         if (getFrame(task, 3) >= lbl_3_data_22B18[i]) {
             if (lbl_80371C30[task->_14 + 3]._00->_5C >> 16 == lbl_3_data_22B18[i]) {
                 fn_3_90064(lbl_3_data_81FC[0x2F]);
@@ -2464,20 +2473,16 @@ void fn_3_127B68(void) {
         fn_800363D8(task, i + 0x14, 3, 0x74, (n % 1000) / 100);
         fn_800363D8(task, i + 0x14, 2, 0x74, (n % 100) / 10);
         fn_800363D8(task, i + 0x14, 1, 0x74, n % 10);
-    }
+    } while (++i < 8);
 }
 
 // .text:0x001274B4 size:0x6B4 mapped:0x80766548
-// 99.95%: the target keeps the stadium in r22, the base in r18 (declaration orders and the
-// stadium's type do not change it).
 void fn_3_1274B4(void) {
     UnkTask3448* task = lbl_803CC1B8;
     UnkRecord3448* rec;
     s16 n;
     u32 i;
     s16 score;
-    s32 stadium;
-    SND_VOICEID voice;
 
     if (lbl_3_common_bss_32724._96 != 0) {
         fn_80034CEC(task);
@@ -2555,14 +2560,7 @@ void fn_3_1274B4(void) {
                 if (g_Minigame.GameMode_MiniGame != MINI_GAME_ID_NONE) {
                     fn_3_90064(lbl_3_data_81FC[0x2F]);
                 } else {
-                    stadium = g_d_GameSettings.StadiumID;
-                    voice = sndFXStartEx(lbl_3_data_81DC[stadium] + 0x1D,
-                                         g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD ? lbl_3_data_84B8[0x3A]
-                                                                                                 : lbl_3_data_8404[stadium][0x3A],
-                                         0x3F, 0);
-                    sndFXCtrl(voice, 0x5B,
-                              g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD ? lbl_3_data_84B8[0x3B]
-                                                                                      : lbl_3_data_8404[stadium][0x3B]);
+                    playStadiumSound(0x1D);
                 }
             }
         }

@@ -15,10 +15,10 @@
 #include "game/rep_CC8.h"
 #include "game/rep_1188.h"
 #include "game/rep_1B70.h"
+#include "game/rep_868.h"
 
 extern void fn_3_1DD48(void);
 extern void changeScene(u8, s16);
-extern void fn_3_1E154(void);
 extern int fn_3_6BA64(void);
 extern u8 lbl_3_data_FAF4[4][4];
 extern u8 lbl_3_data_FC08[4][4];

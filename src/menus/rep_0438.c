@@ -5,6 +5,7 @@
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/os.h"
 #include "string.h"
+#include "menus/rep_0C50.h"
 
 extern struct {
     /* 0x00 */ u8 _00;
@@ -320,8 +321,6 @@ extern void fn_8004E5B4(s32 arg0, s32 arg1, s32 arg2);
 extern void fn_800625A4(s32 index, s32 value);
 extern void* fn_800B0A5C_insertQueue(void (*callback)(void), s32 priority);
 extern void fn_2_82E58(void);
-extern void fn_2_73758(void);
-extern void fn_2_738C8(void);
 extern void fn_2_19F2C(void);
 extern void fn_2_11A0(s32 arg0);
 extern void changeScene(u8, s16);

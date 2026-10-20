@@ -22,6 +22,8 @@
 #include "game/rep_720.h"
 #include "game/rep_DB8.h"
 #include "game/rep_E08.h"
+#include "game/rep_1330.h"
+#include "game/rep_2940.h"
 
 typedef struct AramEntryD18 {
     /* 0x0 */ u32 _0[4];
@@ -143,9 +145,6 @@ extern int fn_80035838(AramEntryD18* entry, int count);
 extern void fn_8001E474(void);
 extern void fn_8001F228(void);
 extern void* fn_800B0A5C_insertQueue(void (*)(void), s32);
-extern void fn_3_7D458(void);
-extern void fn_3_E19E8(void);
-extern void fn_3_1663AC(void);
 extern void fn_8003BF54(u8, int, int, int, int, int, int, int, int);
 extern int fn_8004CA6C(u16 buttons);
 extern void fn_8004CC2C(void);

@@ -17,7 +17,10 @@
 #include "musyx/musyx.h"
 #include "game/rep_3D50.h"
 
-// g_Minigame's three entries in this minigame
+// g_Minigame as this minigame lays it out (UnknownHomes_Game.h)
+#define MG g_Minigame.piranhaPanic
+
+// rep_3310 passes its own entries' type to fn_3_143770, with the layout of Unk37A8Entry
 typedef struct UnkMgEntry3310 {
     /* 0x00 */ Vec pos;
     /* 0x0C */ Vec rot;
@@ -41,60 +44,6 @@ typedef struct UnkMgEntry3310 {
     /* 0x35 */ s8 _35;
     /* 0x36 */ u8 _36[0x38 - 0x36];
 } UnkMgEntry3310; // size: 0x38
-
-// A piranha, 40 of them at g_Minigame._A8
-typedef struct Unk37A8Piranha {
-    /* 0x00 */ Vec pos;
-    /* 0x0C */ Vec vel;
-    /* 0x18 */ f32 _18;
-    /* 0x1C */ s32 _1C;
-    /* 0x20 */ s16 _20;
-    /* 0x22 */ s16 _22;
-    /* 0x24 */ u8 _24[0x26 - 0x24];
-    /* 0x26 */ u8 active;
-    /* 0x27 */ u8 _27;
-} Unk37A8Piranha; // size: 0x28
-
-// A CPU player's state, one per player at g_Minigame._1DCC
-typedef struct Unk37A8Cpu {
-    /* 0x0 */ s16 _0;
-    /* 0x2 */ s8 _2;
-    /* 0x3 */ s8 _3;
-} Unk37A8Cpu; // size: 0x4
-
-// This minigame's view of g_Minigame
-typedef struct Unk37A8Minigame {
-    /* 0x0000 */ UnkMgEntry3310 _0000[3];
-    /* 0x00A8 */ Unk37A8Piranha _00A8[40];
-    /* 0x06E8 */ u8 _06E8[0x17C8 - 0x6E8];
-    /* 0x17C8 */ s16 _17C8[50];
-    /* 0x182C */ u8 _182C[0x193A - 0x182C];
-    /* 0x193A */ u8 _193A[100];
-    /* 0x199E */ u8 _199E[0x1B34 - 0x199E];
-    /* 0x1B34 */ s16 _1B34[4];
-    /* 0x1B3C */ s16 _1B3C[4];
-    /* 0x1B44 */ s16 _1B44[4];
-    /* 0x1B4C */ u8 _1B4C[0x1B50 - 0x1B4C];
-    /* 0x1B50 */ s16 _1B50[4];
-    /* 0x1B58 */ u8 _1B58[4][10];
-    /* 0x1B80 */ u8 _1B80[4];
-    /* 0x1B84 */ u8 _1B84[50];
-    /* 0x1BB6 */ s8 _1BB6[50];
-    /* 0x1BE8 */ s8 _1BE8[50];
-    /* 0x1C1A */ u8 _1C1A[50];
-    /* 0x1C4C */ u8 _1C4C[50];
-    /* 0x1C7E */ s8 _1C7E[4][3];
-    /* 0x1C8A */ u8 _1C8A[4];
-    /* 0x1C8E */ u8 _1C8E[0x1C9A - 0x1C8E];
-    /* 0x1C9A */ u8 _1C9A[4];
-    /* 0x1C9E */ u8 _1C9E[4];
-    /* 0x1CA2 */ u8 _1CA2[0x1CA9 - 0x1CA2];
-    /* 0x1CA9 */ u8 _1CA9[4];
-    /* 0x1CAD */ u8 _1CAD[0x1DCC - 0x1CAD];
-    /* 0x1DCC */ Unk37A8Cpu _1DCC[4];
-} Unk37A8Minigame;
-
-#define MG (*(Unk37A8Minigame*)&g_Minigame)
 
 typedef struct Unk37A8Fielder {
     /* 0x000 */ Vec pos;
@@ -230,7 +179,7 @@ void fn_3_1471C0(void) {
 }
 
 // .text:0x00146A90 size:0x730 mapped:0x80785B24
-// 85.24%: the fielder setup stores and the 100-coin loop use other registers and bases,
+// 94.10%: the fielder setup stores and the 100-coin loop use other registers and bases,
 // as in rep_3520's fn_3_13BCB8.
 void fn_3_146A90(void) {
     Unk37A8Fielder* fielder;
@@ -390,11 +339,9 @@ void fn_3_146928(void) {
 }
 
 // .text:0x00146408 size:0x520 mapped:0x8078549C
-// 98.08%: the target keeps the coin loop's &g_Minigame in r26 through the piranha loop
+// 98.08%: the target keeps the coin loop's &g_Minigame in r26 through the inlined piranha loop
 // (mr r28,r26) for the points loop; this reloads it (see registers.md, "Unsolved").
 void fn_3_146408(void) {
-    int i;
-
     if (fn_3_108854() != 0) {
         return;
     }
@@ -409,11 +356,7 @@ void fn_3_146408(void) {
     }
     fn_3_145EB8();
     fn_3_14443C();
-    for (i = 0; i < 40; i++) {
-        if (MG._00A8[i].active) {
-            fn_3_143358(i);
-        }
-    }
+    fn_3_143714();
     fn_3_142284();
     fn_3_144CB8();
     fn_3_142CA8();
@@ -485,9 +428,6 @@ void fn_3_145EB8(void) {
 }
 
 // .text:0x00145B98 size:0x320 mapped:0x80784C2C
-// 99.88%: registers only; g_Minigame and its stride-1 copy swap r26 and r28. The permuter
-// matched it with `mg = &g_Minigame;` (MiniGameStruct*) atop the team loop and
-// `((Unk37A8Minigame*)mg)->_1CA9[i]`; without that cast it scores 98.22%.
 void fn_3_145B98(void) {
     s32 list[4];
     int team;
@@ -572,13 +512,11 @@ void fn_3_145AD0(int player) {
 }
 
 // .text:0x001453BC size:0x714 mapped:0x80784450
-// 87.25%: registers and scheduling; the target reads the timer with lhau and keeps
-// other pointers in saved registers.
+// 91.08%: registers and scheduling; coin sits in r25 where this has r27, and the
+// thrower's block loads the fielder index before its stores.
 void fn_3_1453BC(int coin) {
-    UnkMgEntry3310* entry;
+    Unk37A8Entry* entry;
     Unk37A8Fielder* fielder;
-    s16* timer;
-    u8* state;
     VecXYZ pos;
     Vec dir;
     f32 dx;
@@ -587,31 +525,29 @@ void fn_3_1453BC(int coin) {
     s16 points;
     s16 left;
     int team;
-    int player;
+    s8 player;
     int target;
     int i;
 
     team = MG._1BB6[coin];
-    timer = &g_Minigame.wallBall_coinsVisibleFrameCounter[coin];
     if (g_Minigame.wallBall_coinsVisibleFrameCounter[coin] < 0x7FFE) {
-        (*timer)++;
+        g_Minigame.wallBall_coinsVisibleFrameCounter[coin]++;
     } else {
-        *timer = 0x7FFF;
+        g_Minigame.wallBall_coinsVisibleFrameCounter[coin] = 0x7FFF;
     }
-    state = &g_Minigame.wallBall_coinsVisibleInd[coin];
     if (g_Minigame.wallBall_coinsVisibleInd[coin] == 6) {
         g_Minigame.wallBall_coinVelocity[coin].y += lbl_3_data_21E24[11];
         if (MG._1B84[coin] != 5) {
             g_Minigame.wallBall_coinVelocity[coin].x *= lbl_3_data_21E24[12];
             g_Minigame.wallBall_coinVelocity[coin].z *= lbl_3_data_21E24[12];
-        } else if (*timer >= lbl_3_data_21E68[23]) {
+        } else if (g_Minigame.wallBall_coinsVisibleFrameCounter[coin] >= lbl_3_data_21E68[23]) {
             player = -1 - MG._1BE8[coin];
             fn_3_147CFC((Vec*)&g_Minigame.wallBall_coinCoordinates[coin]);
             fn_3_90064(0x309);
             fn_3_154238(coin);
             if (g_Minigame._1CA5[player] == 0 && MG._1C9A[player] == 0) {
                 MG._1C9A[player] = 1;
-                (&g_Minigame._1B3C)[player] = lbl_3_data_21E68[14];
+                MG._1B3C[player] = lbl_3_data_21E68[14];
                 MG._1B50[player] = 0;
                 fielder = &g_Fielders[g_Minigame.minigameFielderIndex[player]];
                 dir.x = 0.0f;
@@ -629,8 +565,8 @@ void fn_3_1453BC(int coin) {
                     g_Minigame._1CB1[player] = 0xFF;
                 }
             }
-            *state = 0;
-            *timer = 0;
+            g_Minigame.wallBall_coinsVisibleInd[coin] = 0;
+            g_Minigame.wallBall_coinsVisibleFrameCounter[coin] = 0;
             return;
         }
     }
@@ -638,8 +574,8 @@ void fn_3_1453BC(int coin) {
     g_Minigame.wallBall_coinCoordinates[coin].y += g_Minigame.wallBall_coinVelocity[coin].y;
     g_Minigame.wallBall_coinCoordinates[coin].z += g_Minigame.wallBall_coinVelocity[coin].z;
     if (g_Minigame.wallBall_coinCoordinates[coin].y < 0.0f) {
-        *state = 0;
-        *timer = 0;
+        g_Minigame.wallBall_coinsVisibleInd[coin] = 0;
+        g_Minigame.wallBall_coinsVisibleFrameCounter[coin] = 0;
         if (MG._1B84[coin] == 5) {
             fn_3_154238(coin);
         }
@@ -717,14 +653,14 @@ void fn_3_1453BC(int coin) {
                 }
                 MG._1B50[team] = 0;
             }
-            *state = 0;
-            *timer = 0;
+            g_Minigame.wallBall_coinsVisibleInd[coin] = 0;
+            g_Minigame.wallBall_coinsVisibleFrameCounter[coin] = 0;
             return;
         }
     }
-    if (*timer > lbl_3_data_21E68[0]) {
-        *state = 0;
-        *timer = 0;
+    if (g_Minigame.wallBall_coinsVisibleFrameCounter[coin] > lbl_3_data_21E68[0]) {
+        g_Minigame.wallBall_coinsVisibleInd[coin] = 0;
+        g_Minigame.wallBall_coinsVisibleFrameCounter[coin] = 0;
         if (MG._1B84[coin] == 5) {
             fn_3_154238(coin);
         }
@@ -732,7 +668,7 @@ void fn_3_1453BC(int coin) {
 }
 
 // .text:0x00144CB8 size:0x704 mapped:0x80783D4C
-// 97.69%: registers and scheduling only; the list sort's pointers and counters and the
+// 97.76%: registers and scheduling only; the list sort's pointers and counters and the
 // sign/1.5 block after rand() use other volatile registers.
 void fn_3_144CB8(void) {
     Unk37A8Fielder* fielder;
@@ -741,11 +677,11 @@ void fn_3_144CB8(void) {
     int k;
     s8 tmp;
     s8 roll;
+    int i;
+    int j;
     int coin;
     int left;
     int player;
-    int i;
-    int j;
 
     for (player = 0; player < 4; player++) {
         if (g_Minigame.minigameFielderIndex[player] < 0) {
@@ -831,8 +767,8 @@ void fn_3_144CB8(void) {
                 }
                 for (i = 0; i < 2; i++) {
                     for (j = i + 1; j < 3; j++) {
-                        tmp = list[i];
-                        if (g_Minigame.miniGameCurrentPoints[tmp] < g_Minigame.miniGameCurrentPoints[list[j]]) {
+                        if (g_Minigame.miniGameCurrentPoints[list[i]] < g_Minigame.miniGameCurrentPoints[list[j]]) {
+                            tmp = list[i];
                             list[i] = list[j];
                             list[j] = tmp;
                         }
@@ -867,8 +803,6 @@ void fn_3_144CB8(void) {
 }
 
 // .text:0x00144ADC size:0x1DC mapped:0x80783B70
-// 98.91%: the target reloads _1B44[player] for the increment after comparing it (its copy
-// inlined into fn_3_144CB8 does not).
 void fn_3_144ADC(int player) {
     Unk37A8Fielder* fielder;
     InputStruct* input;
@@ -911,18 +845,15 @@ void fn_3_144ADC(int player) {
 }
 
 // .text:0x0014471C size:0x3C0 mapped:0x807837B0
-// 85.68%: the target reads _193A[coin] with lbzu and re-forms g_Minigame + coin for
-// _1B84, saving a register; the FPRs of the speed path differ.
 void fn_3_14471C(int player) {
     Unk37A8Fielder* fielder;
     VecXYZ d;
-    f32 xx;
-    f32 zz;
     f32 dist;
     f32 scale;
     s32 frames;
+    f32 steps;
     int port;
-    u8 coin;
+    int coin;
 
     fielder = &g_Fielders[g_Minigame.minigameFielderIndex[player]];
     port = g_Minigame.minigameControlStruct.characterIndex[player];
@@ -942,9 +873,7 @@ void fn_3_14471C(int player) {
     d.z = fielder->_114 - g_Minigame.wallBall_coinCoordinates[coin].z;
     if (MG._193A[coin] == 4) {
         if (MG._1B84[coin] != 5) {
-            xx = d.x * d.x;
-            zz = d.z * d.z;
-            dist = dolsqrtf2(xx + zz);
+            dist = dolsqrtf2(d.x * d.x + d.z * d.z);
             if (player == 0 || player == 3) {
                 scale = lbl_3_data_21E24[8] / dist;
             } else {
@@ -957,14 +886,14 @@ void fn_3_14471C(int player) {
             frames = lbl_3_data_21E68[23] + 10;
             g_Minigame.wallBall_coinVelocity[coin].x = (fielder->_10C - g_Minigame.wallBall_coinCoordinates[coin].x) / frames;
             g_Minigame.wallBall_coinVelocity[coin].z = (fielder->_114 - g_Minigame.wallBall_coinCoordinates[coin].z) / frames;
-            g_Minigame.wallBall_coinVelocity[coin].y = -lbl_3_data_21E24[11] * frames * 0.5f;
+            g_Minigame.wallBall_coinVelocity[coin].y = -lbl_3_data_21E24[11] * frames / 2.0f;
         }
         MG._193A[coin] = 6;
     } else {
-        frames = LERPToNewRange_Float(fielder->_1CE, 0, 100, lbl_3_data_21E1C[0], lbl_3_data_21E1C[1]);
-        g_Minigame.wallBall_coinVelocity[coin].x = d.x / frames;
-        g_Minigame.wallBall_coinVelocity[coin].y = d.y / frames;
-        g_Minigame.wallBall_coinVelocity[coin].z = d.z / frames;
+        steps = LERPToNewRange_Float(fielder->_1CE, 0, 100, lbl_3_data_21E1C[0], lbl_3_data_21E1C[1]);
+        g_Minigame.wallBall_coinVelocity[coin].x = d.x / steps;
+        g_Minigame.wallBall_coinVelocity[coin].y = d.y / steps;
+        g_Minigame.wallBall_coinVelocity[coin].z = d.z / steps;
         MG._193A[coin] = 5;
     }
     MG._17C8[coin] = 0;
@@ -974,8 +903,6 @@ void fn_3_14471C(int player) {
 }
 
 // .text:0x0014443C size:0x2E0 mapped:0x807834D0
-// 99.53%: FPRs only; the target loads lbl_3_data_21D1C[_2B * 2 + 1] before [_2B * 2] in the
-// first interpolation, and the second one's FPRs differ.
 void fn_3_14443C(void) {
     f32 d;
     int i;
@@ -1021,9 +948,8 @@ void fn_3_14443C(void) {
             }
             fn_3_1439EC(i);
         } else if (MG._0000[i]._2A == 3) {
-            MG._0000[i].pos.y = (lbl_3_data_21D1C[MG._0000[i]._2B * 2] - lbl_3_data_21D1C[MG._0000[i]._2B * 2 + 1]) *
-                                    ((f32)MG._0000[i]._1A / (f32)lbl_3_data_21E68[6]) +
-                                lbl_3_data_21D1C[MG._0000[i]._2B * 2];
+            d = lbl_3_data_21D1C[MG._0000[i]._2B * 2] - lbl_3_data_21D1C[MG._0000[i]._2B * 2 + 1];
+            MG._0000[i].pos.y = d * ((f32)MG._0000[i]._1A / (f32)lbl_3_data_21E68[6]) + lbl_3_data_21D1C[MG._0000[i]._2B * 2];
             if (MG._0000[i]._1A >= lbl_3_data_21E68[6]) {
                 MG._0000[i]._2A = 0;
                 MG._0000[i]._1A = 0;
@@ -1049,7 +975,7 @@ void fn_3_14423C(void) {
     u32 start;
     u32 end;
     int i;
-    UnkMgEntry3310* entry;
+    Unk37A8Entry* entry;
 
     if (g_Minigame.turnOverStatus != 0) {
         return;
@@ -1105,23 +1031,18 @@ void fn_3_14423C(void) {
 }
 
 // .text:0x0014402C size:0x210 mapped:0x807830C0
-// 74.65%: the target keeps idx * 0x38 in r30 and re-adds g_Minigame after each call,
-// where this keeps the entry address; the candidate list registers differ too.
 void fn_3_14402C(int idx) {
-    s16* timer;
     s32 candidates[4];
     int n;
     int i;
 
     if (g_Minigame.turnOverStatus == 0) {
-        timer = &MG._0000[idx]._1C;
-        if (*timer < 0) {
-            *timer = RandomInt_Game_Range(lbl_3_data_21DC4[0], lbl_3_data_21DC4[1]);
+        if (MG._0000[idx]._1C < 0) {
+            MG._0000[idx]._1C = RandomInt_Game_Range(lbl_3_data_21DC4[0], lbl_3_data_21DC4[1]);
         } else if (g_Minigame._1CA3 == 0 && g_Minigame._1CA2 == 0) {
-            (*timer)--;
-            if (*timer == 0) {
-                n = 0;
-                for (i = 0; i < 4; i++) {
+            MG._0000[idx]._1C--;
+            if (MG._0000[idx]._1C == 0) {
+                for (i = 0, n = 0; i < 4; i++) {
                     if (MG._1CA9[i] == 0) {
                         candidates[n] = i;
                         n++;
@@ -1130,7 +1051,7 @@ void fn_3_14402C(int idx) {
                 MG._0000[idx]._2C = candidates[random_fn_3_9EE24(n)];
                 MG._1CA9[MG._0000[idx]._2C] = 1;
                 MG._0000[idx]._2D = lbl_3_data_21E10[MG._0000[idx]._2C];
-                *timer = lbl_3_data_21E68[5];
+                MG._0000[idx]._1C = lbl_3_data_21E68[5];
                 MG._0000[idx]._18 = 0;
                 MG._0000[idx]._1A = 0;
                 MG._0000[idx]._1E = 0;
@@ -1164,10 +1085,8 @@ void fn_3_143FAC(int idx) {
 }
 
 // .text:0x001439EC size:0x5C0 mapped:0x80782A80
-// 94.66%: registers only; the target copies idx to r23 on entry and the inlined
-// fn_3_1430D0 copies use other saved registers.
-void fn_3_1439EC(int idx) {
-    UnkMgEntry3310* entry;
+void fn_3_1439EC(s32 idx) {
+    Unk37A8Entry* entry;
     s32 i;
 
     entry = &MG._0000[idx];
@@ -1354,7 +1273,7 @@ void fn_3_143358(int idx) {
 }
 
 // .text:0x001430D0 size:0x288 mapped:0x80782164
-void fn_3_1430D0(s32 arg0, s32 player) {
+void fn_3_1430D0(s32 arg0, int player) {
     Unk37A8Piranha* piranha;
     Unk37A8Fielder* fielder;
     int i;
@@ -1387,7 +1306,7 @@ void fn_3_1430D0(s32 arg0, s32 player) {
 
 // .text:0x00142DB4 size:0x31C mapped:0x80781E48
 void fn_3_142DB4(int idx) {
-    UnkMgEntry3310* entry;
+    Unk37A8Entry* entry;
     Unk37A8Piranha* piranha;
     Unk37A8Fielder* fielder;
     int i;
@@ -1461,36 +1380,36 @@ void fn_3_142C18(void) {
 }
 
 // .text:0x001428F0 size:0x328 mapped:0x80781984
-// 95.28%: the target reads cpu->_0 and cpu->_3 off g_Minigame + player * 4 before forming
-// cpu, and allocates the counters and flags in other saved registers.
+// 98.19%: the target reads cpu->_0 and cpu->_3 off g_Minigame + player * 4 before forming
+// cpu, and allocates kind, count and found in other saved registers.
 u8 fn_3_1428F0(s8 player, u8 force) {
     Unk37A8Cpu* cpu;
-    s8 port;
     u8 strength;
-    s8 target;
-    s8 coin;
+    s8 port;
     s8 ready;
-    s8 count;
+    s8 coin;
+    s8 target;
     s8 i;
-    u8 kind;
     u8 found;
-    UnkMgEntry3310* entry;
+    s8 count;
+    u8 kind;
 
+    cpu = &MG._1DCC[player];
     ready = -1;
     found = FALSE;
     count = 0;
-    target = MG._1DCC[player]._3;
+    target = cpu->_3;
     port = g_Minigame.minigameControlStruct.characterIndex[player];
     strength = g_Minigame.minigameControlStruct.aIStrength[player];
     if (MG._1DCC[player]._0 >= 0) {
         cpu->_0--;
     }
-    cpu = &MG._1DCC[player];
     coin = MG._1C7E[player][0];
     if (coin < 0) {
         return FALSE;
     }
-    for (i = 0; i < 3; i++) {
+    i = 0;
+    do {
         if (MG._0000[i]._2A == 2) {
             count++;
             if (MG._0000[target]._2C == 4) {
@@ -1498,7 +1417,8 @@ u8 fn_3_1428F0(s8 player, u8 force) {
                 break;
             }
         }
-    }
+        i++;
+    } while (i < 3);
     if (ready < 0 && cpu->_0 >= 0 && !force) {
         return FALSE;
     }
@@ -1511,19 +1431,20 @@ u8 fn_3_1428F0(s8 player, u8 force) {
             found = TRUE;
         }
         if (!found) {
-            entry = &MG._0000[target];
-            if (entry->_2A == 2 && (kind == entry->_2C || kind == 5 || entry->_2C == 4)) {
+            if (MG._0000[target]._2A == 2 && (kind == MG._0000[target]._2C || kind == 5 || MG._0000[target]._2C == 4)) {
                 found = TRUE;
             }
         }
         if (!found) {
-            for (i = 0; i < 3; i++) {
+            i = 0;
+            do {
                 if (MG._0000[i]._2A == 2 && (kind == MG._0000[i]._2C || kind == 5 || MG._0000[i]._2C == 4)) {
                     target = i;
                     found = TRUE;
                     break;
                 }
-            }
+                i++;
+            } while (i < 3);
         }
     }
     if (found) {
@@ -1551,22 +1472,18 @@ u8 fn_3_1428F0(s8 player, u8 force) {
 }
 
 // .text:0x00142570 size:0x380 mapped:0x80781604
-// 98.24%: registers only; the fielder and piranha pointers and the dx/dz FPRs swap.
 s32 fn_3_142570(s8 player) {
+    s32 best;
     Unk37A8Fielder* fielder;
+    u8 found;
     Unk37A8Piranha* piranha;
+    s32 t;
+    s8 i;
     f32 speed;
-    f32 vx2;
-    f32 vz2;
     f32 dx;
     f32 dz;
     f32 reach;
     f32 dist;
-    s32 best;
-    s32 t;
-    s16 limit;
-    u8 found;
-    s8 i;
 
     fielder = &g_Fielders[g_Minigame.minigameFielderIndex[player]];
     reach = lbl_3_data_21E24[2] + lbl_3_data_47BC[fielder->_1C9];
@@ -1576,17 +1493,15 @@ s32 fn_3_142570(s8 player) {
     do {
         piranha = &MG._00A8[i];
         if (piranha->active != 0) {
-            dz = fielder->pos.z - piranha->pos.z;
             dx = fielder->pos.x - piranha->pos.x;
+            dz = fielder->pos.z - piranha->pos.z;
             dist = dolsqrtf2(dx * dx + dz * dz);
             if (dist < reach) {
                 return 0;
             }
             dx /= dist;
             dz /= dist;
-            vx2 = piranha->vel.x * piranha->vel.x;
-            vz2 = piranha->vel.z * piranha->vel.z;
-            speed = dolsqrtf2(vx2 + vz2);
+            speed = dolsqrtf2(piranha->vel.x * piranha->vel.x + piranha->vel.z * piranha->vel.z);
             if (dx * (piranha->vel.x / speed) + dz * (piranha->vel.z / speed) >= 0.9994f) {
                 t = (dist - reach) / speed;
                 if (t < best) {
@@ -1596,11 +1511,10 @@ s32 fn_3_142570(s8 player) {
             }
         }
     } while (++i < 40);
-    limit = lbl_3_data_21E68[23];
     i = 0;
     do {
         if (MG._193A[i] == 6 && MG._1B84[i] == 5 && player == -1 - MG._1BE8[i]) {
-            t = limit - MG._17C8[i];
+            t = lbl_3_data_21E68[23] - MG._17C8[i];
             if (t >= 0) {
                 if (t < best) {
                     best = t;
@@ -1616,11 +1530,8 @@ s32 fn_3_142570(s8 player) {
 }
 
 // .text:0x00142284 size:0x2EC mapped:0x80781318
-// 99.21%: registers only; g_Minigame, eta and cpu sit in r29, r28 and r30 where the
-// target has r30, r29 and r28.
 void fn_3_142284(void) {
     Unk37A8Cpu* cpus = MG._1DCC;
-    Unk37A8Cpu* cpu;
     s32 eta[4];
     s8 port;
     u8 strength;
@@ -1628,7 +1539,6 @@ void fn_3_142284(void) {
 
     i = 0;
     do {
-        cpu = &cpus[i];
         port = g_Minigame.minigameControlStruct.characterIndex[i];
         if (port >= 0 && port < 4) {
             eta[i] = fn_3_142570(i);
@@ -1637,68 +1547,68 @@ void fn_3_142284(void) {
             }
             memset(&g_Minigame._1D7C[port], 0, sizeof(InputStruct));
             strength = g_Minigame.minigameControlStruct.aIStrength[i];
-            switch (cpu->_2) {
+            switch (cpus[i]._2) {
             case 0:
                 if (eta[i] >= 0) {
                     switch (RandomIndexFromWeights(lbl_3_data_21E9C[strength], 4)) {
                     case 0:
                         if (eta[i] > LERPToNewRange_Float(MG._1B50[i], 0, lbl_3_data_21E68[19], lbl_3_data_21E68[2], lbl_3_data_21E68[3]) + 3) {
                             if (fn_3_1428F0(i, FALSE)) {
-                                cpu->_2 = 1;
+                                cpus[i]._2 = 1;
                             }
                         } else {
                             g_Minigame._1D7C[port].newButtonInput |= 4;
                             g_Minigame._1D7C[port].buttonInput |= 4;
-                            cpu->_2 = 2;
+                            cpus[i]._2 = 2;
                         }
                         break;
                     case 1:
                         if (eta[i] > lbl_3_data_21E68[2] + 3) {
                             if (fn_3_1428F0(i, FALSE)) {
-                                cpu->_2 = 1;
+                                cpus[i]._2 = 1;
                             }
                         } else {
                             g_Minigame._1D7C[port].newButtonInput |= 4;
                             g_Minigame._1D7C[port].buttonInput |= 4;
-                            cpu->_2 = 2;
+                            cpus[i]._2 = 2;
                         }
                         break;
                     case 2:
                         g_Minigame._1D7C[port].newButtonInput |= 4;
                         g_Minigame._1D7C[port].buttonInput |= 4;
-                        cpu->_2 = 2;
+                        cpus[i]._2 = 2;
                         break;
                     case 3:
                         if (fn_3_1428F0(i, TRUE)) {
-                            cpu->_2 = 1;
+                            cpus[i]._2 = 1;
                         }
                         break;
                     }
                 } else if (fn_3_1428F0(i, FALSE)) {
-                    cpu->_2 = 1;
+                    cpus[i]._2 = 1;
                 }
                 break;
             case 1:
                 if (g_Minigame._1C92[i] < 0) {
-                    cpu->_2 = 0;
+                    cpus[i]._2 = 0;
                 }
                 break;
             case 2:
                 g_Minigame._1D7C[port].buttonInput |= 4;
                 if (g_Minigame._1CA5[i] != 1) {
-                    cpu->_2 = 3;
+                    cpus[i]._2 = 3;
                 }
                 break;
             case 3:
                 if (eta[i] >= 0) {
                     g_Minigame._1D7C[port].buttonInput |= 4;
                 } else {
-                    cpu->_2 = 4;
+                    cpus[i]._2 = 4;
                 }
                 break;
             case 4:
                 if (g_Minigame._1CA5[i] != 3) {
-                    cpu->_2 = 0;
+                    cpus[i]._2 = 0;
                 }
                 break;
             }
@@ -1714,8 +1624,8 @@ void fn_3_14225C(void) {
 }
 
 // .text:0x00142088 size:0x1D4 mapped:0x8078111C
-// 89.51%: the inlined fn_3_142030 factors (y / 4) * 16 + (x / 4) * 16 into one shift,
-// where the target hoists (y / 4) * 16 out of the inner loop.
+// 96.28%: registers only; the loop counters and the inlined fn_3_142030's temporaries
+// sit in other volatile registers.
 void fn_3_142088(void) {
     u32 y;
     u32 x;
@@ -1741,7 +1651,7 @@ void fn_3_142088(void) {
 }
 
 // .text:0x00142030 size:0x58 mapped:0x807810C4
-s32 fn_3_142030(s32 x, s32 y, s32 width) {
+s32 fn_3_142030(int x, int y, s32 width) {
     return (y / 4) * 4 * width + (x / 4) * 4 * 4 + (y % 4) * 4 + x % 4;
 }
 

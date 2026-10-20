@@ -5,6 +5,7 @@
 #include "static/UnknownHomes_Static.h"
 #include "musyx/musyx.h"
 #include "string.h"
+#include "menus/rep_0C50.h"
 
 extern void fn_800625A4(s32 port, s32 arg1);
 extern void fn_800506E8(s32 port, s32 charID, s32 arg2);
@@ -25,7 +26,6 @@ extern void fn_800684A4(void);
 extern void fn_800671FC(void);
 extern void fn_800649BC(void);
 extern void fn_80069854(void);
-extern void fn_2_72630(void);
 extern s32 fn_80062578(void);
 extern s32 fn_80050F78(s32 arg0);
 extern void fn_2_19F2C(void);
@@ -49,7 +49,6 @@ extern s32 fn_800697B0(void);
 extern void fn_8006496C(void);
 extern void fn_2_82E58(void);
 extern void fn_80050FE8(int arg0, int arg1, int arg2, int arg3, int arg4, int arg5);
-extern void fn_2_7265C(void);
 extern void fn_800628D4(int charID);
 
 // One character's stats, as in inMemRoster and at the start of lbl_8034E9A0

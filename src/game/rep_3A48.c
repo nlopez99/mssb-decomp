@@ -5,6 +5,7 @@
 #include "game/rep_1668.h"
 #include "game/rep_16B8.h"
 #include "game/rep_1770.h"
+#include "game/rep_3448.h"
 
 typedef struct UnkTask3A48 {
     /* 0x00 */ void (*_00)(void);
@@ -153,9 +154,6 @@ extern void fn_80034E20(UnkTask3A48* task, UnkSpriteDesc3A48* desc);
 extern void fn_800363D8(UnkTask3A48* task, s32, s32, s32, s32);
 extern void fn_800B0A14_removeQueue(void);
 extern UnkTask3A48* fn_800B0A5C_insertQueue(void (*)(void), s32);
-// Between rep_3448's and rep_34B0's .text ranges
-extern void fn_3_12BFE8(void);
-extern void fn_3_12C3F0(void);
 
 static inline UnkSprite3A48* getSprite(UnkTask3A48* task, s32 i) {
     s32 idx = task->_14 + i;
