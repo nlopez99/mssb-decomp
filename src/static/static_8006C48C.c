@@ -335,4 +335,3 @@ void challengeDrawStarsOnMissionMenu(void) {
         }
     }
 }
-

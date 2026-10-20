@@ -307,4 +307,3 @@ void fn_80063028(Control* ctrl, Mtx m, s32 flip) {
     PSMTXConcat(trans, result, result);
     PSMTXCopy(result, m);
 }
-

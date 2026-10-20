@@ -134,4 +134,3 @@ u8 fn_8006C100(s16 value) {
     } while (++i < 7);
     return 6;
 }
-

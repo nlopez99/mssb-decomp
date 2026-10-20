@@ -916,4 +916,3 @@ void fn_80069A98(void) {
 void fn_80069A68(void) {
     fn_80021518(0x35, lbl_800EF808._C0);
 }
-

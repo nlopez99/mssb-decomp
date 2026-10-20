@@ -2289,4 +2289,3 @@ void* fn_80021ADC(s32 index, void* dst) {
 void fn_80021AC8(void) {
     lbl_803716B8._55C = 0;
 }
-
