@@ -125,6 +125,8 @@ void fn_80011140(void) {
     lbl_80366B18.mask = 0;
 }
 
+// Differs: the loop counter and the state pointer swap r30/r31; a state pointer local,
+// a second counter and declaration orders did not fix it.
 // .text:0x80011000 size:0x140
 void fn_80011000(void) {
     s32 i;
@@ -319,6 +321,8 @@ s32 fn_8000F988(TextModelSet* set, s32 i, s16 arg2, s32 font, s32 str, BOOL flag
     return -1;
 }
 
+// Differs: one add's operand order (first + i, register r8/r9); writing first + i in
+// the first lookup lets MWCC reuse it in the inner loop, which the target reloads.
 // .text:0x8000F8F4 size:0x94
 void fn_8000F8F4(TextModelSet* set) {
     s32 first;

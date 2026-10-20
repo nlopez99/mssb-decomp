@@ -12,6 +12,8 @@ void* fn_8000A094(void* callback) {
     return old;
 }
 
+// Differs: FPR allocation only (the target keeps 3.0f in f8 and t*t*t in f12); constant
+// order and every operand order of the sums were tried.
 // .text:0x8000A00C size:0x88
 void BezierInterpolate(InterpPoint* out, InterpPoint* p0, InterpPoint* p1, InterpPoint* p2, InterpPoint* p3, f32 t) {
     f32 t2 = t * t;

@@ -45,6 +45,8 @@ static inline void setVertexPos(SpriteVertex* v, f32* p) {
     v->z = p[2];
 }
 
+// Differs: quad stays in r31 in the target and the eight offset loads are scheduled first;
+// pts as an array, four Vec locals and loops all keep quad in r28.
 // .text:0x8000EF1C size:0x234
 void AddVec2iToQuad(f32* quad, Mtx mtx, s32* offset) {
     Mtx m;
@@ -306,6 +308,8 @@ void fn_8000E030(SpriteShape* shape, Mtx mtx, ShapeStyle* style) {
     fn_800B12DC(verts, count);
 }
 
+// Draft: the target computes the ring addresses for the closing copy late and keeps
+// the final vertex loop rolled; this build hoists the addresses and unrolls it by two.
 // .text:0x8000DC9C size:0x394
 void fn_8000DC9C(SpriteShape* shape, Mtx mtx, ShapeStyle* style) {
     Vec out;
@@ -436,6 +440,8 @@ void fn_8000D838(void) {
 void fn_8000D164(void) {
 }
 
+// Differs: four fewer saved registers in the target (stw r28-r31, not stmw r27) and the
+// case 2/3 copy loops, whose pointers the target steps down from the end.
 // .text:0x8000CEF0 size:0x274
 BOOL fn_8000CEF0(AnimFile* file, s32 idx, u32 frame, s32 skip, u32* dst) {
     AnimTrack* track = ((AnimTrack**)file->tracks)[idx + 2];
