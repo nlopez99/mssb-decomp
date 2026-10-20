@@ -2862,9 +2862,9 @@ int fn_3_81EAC(int runner) {
 }
 
 // .text:0x00081BC8 size:0x2E4 mapped:0x806C0C5C
-// 95.27%: in the first overrun stage the target schedules the int-to-float constant ahead of lbl_3_data_4B44
 int fn_3_81BC8(int runner) {
     InMemRunnerType* r = &g_Runners[runner];
+    f32 sum;
 
     if (r->runningDirectionDesired == 1) {
         r->nextDirectionBeingProcessed = 1;
@@ -2876,8 +2876,9 @@ int fn_3_81BC8(int runner) {
         r->overrunBaseFrames_countUp = 0;
         r->overrunBaseFrames_countDown = lbl_3_data_4B48[0];
         r->runningDirectionCode = 5;
-        r->overrun1B_someDistConst_proportionPerFrame =
-            lbl_3_data_4B44 / ((r->overrunBaseFrames_countDown + 1) * (r->overrunBaseFrames_countDown / 2));
+        sum = (r->overrunBaseFrames_countDown + 1) * (r->overrunBaseFrames_countDown / 2);
+        sum = lbl_3_data_4B44 / sum;
+        r->overrun1B_someDistConst_proportionPerFrame = sum;
     }
     if (r->overrunBaseStage == 2) {
         r->overrunBaseFrames_countUp++;
@@ -3120,8 +3121,8 @@ void fn_3_810C4(int runner, int base) {
 }
 
 // .text:0x00080028 size:0x109C mapped:0x806BF0BC
-// 97.60%: the overrun and action steps schedule the target point's loads later (the overrun
-// step also forms the int-to-float constant's address with addi), and some FPR pairs are swapped.
+// 98.42%: the overrun and action steps schedule the target point's loads and the int-to-float
+// stack slots in another order, and some FPR pairs are swapped.
 void fn_3_80028(int runner) {
     InMemRunnerType* r = &g_Runners[runner];
     VecXYZ p;
@@ -3157,8 +3158,8 @@ void fn_3_80028(int runner) {
                 r->position.z = ((VecXZ*)&out)->z;
             } else if (r->overRun1BStage == 3) {
                 fn_3_7FFD0(&p, 1, 2, r->slidingAdjustment_backwards);
-                out.x = (p.x - r->position.x) / r->overrunBaseFrames_countDown;
                 out.y = (p.y - r->position.y) / r->overrunBaseFrames_countDown;
+                out.x = (p.x - r->position.x) / r->overrunBaseFrames_countDown;
                 out.z = (p.z - r->position.z) / r->overrunBaseFrames_countDown;
                 r->position.x += out.x;
                 r->position.y += out.y;
