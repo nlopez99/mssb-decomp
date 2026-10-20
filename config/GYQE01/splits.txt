@@ -107,6 +107,12 @@ static/unit_8006C100.c:
 	.sbss       start:0x803CBD38 end:0x803CBD40
 	.sdata2     start:0x803CC938 end:0x803CC940
 
+static/unit_8006C48C.c:
+	extab       start:0x800065B0 end:0x800065D8
+	extabindex  start:0x800083E8 end:0x80008424
+	.text       start:0x8006C48C end:0x8006D024
+	.sdata      start:0x803CB8F0 end:0x803CB8F8
+
 Dolphin/base/PPCArch.c:
 	.text       start:0x8006D024 end:0x8006D138
 
