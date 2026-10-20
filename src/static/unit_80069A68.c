@@ -5,6 +5,7 @@
 #include "Dolphin/mtx.h"
 #include "static/sub.h"
 #include "Dolphin/vi.h"
+#include "musyx/musyx.h"
 
 typedef struct TexBank {
     /* 0x00 */ u32 _00;
@@ -24,7 +25,8 @@ typedef struct FadeParams {
 
 typedef struct SceneTask {
     /* 0x00 */ void (*func)(void);
-    /* 0x04 */ u8 _04[0x10 - 0x4];
+    /* 0x04 */ u8 _04[0xC - 0x4];
+    /* 0x0C */ struct SceneTask* parent;
     /* 0x10 */ s16 _10;
     /* 0x12 */ u16 priority;
     union {
@@ -36,19 +38,22 @@ typedef struct SceneTask {
     /* 0x20 */ void* _20;
     /* 0x24 */ void* _24;
     /* 0x28 */ u32* sabFile;
-    /* 0x2C */ u8 _2C[0x34 - 0x2C];
+    /* 0x2C */ u8 _2C[0x30 - 0x2C];
+    /* 0x30 */ SND_VOICEID voice;
     /* 0x34 */ s16 state;
     /* 0x36 */ u16 _36;
     /* 0x38 */ u8 _38;
     /* 0x39 */ u8 _39;
     /* 0x3A */ u8 _3A;
     /* 0x3B */ u8 _3B;
+    /* 0x3C */ s8 _3C;
 } SceneTask;
 
 typedef struct SceneGlobals {
     /* 0x00 */ u8 _00[0x20];
     /* 0x20 */ u8 _20;
-    /* 0x21 */ u8 _21[0x28 - 0x21];
+    /* 0x21 */ u8 _21[0x27 - 0x21];
+    /* 0x27 */ u8 _27;
     /* 0x28 */ u8 _28;
     /* 0x29 */ u8 _29;
     /* 0x2A */ u8 _2A;
@@ -58,7 +63,9 @@ typedef struct SceneObj {
     /* 0x00 */ u8 _00[0x54];
     /* 0x54 */ u32 flags;
     /* 0x58 */ u8 _58[0x5C - 0x58];
-    /* 0x5C */ s32 _5C;
+    /* 0x5C */ u32 _5C;
+    /* 0x60 */ u8 _60[0x68 - 0x60];
+    /* 0x68 */ u8 _68;
 } SceneObj;
 
 typedef struct SceneObjSlot {
@@ -98,6 +105,8 @@ extern SceneFlags lbl_8037169C;
 extern SceneAram lbl_803C6CF8;
 extern GXColor lbl_803CB8DC;
 extern u8 lbl_803CBBC0;
+extern s32 lbl_803CB8D8;
+extern u8 lbl_800EFBA4[];
 extern void* lbl_803CBD30;
 extern GXRenderModeObj* lbl_803CBD34;
 typedef struct SceneCallback {
@@ -142,7 +151,11 @@ extern void fn_800ADBFC(void);
 extern void fn_800ADC40(void* arg0, u32 arg1);
 extern void fn_800A7D4C(s32 layer, FadeParams* params);
 extern BOOL fn_80021518(s32 group, void* data);
+extern void fn_8002149C(s32 arg0);
+extern void fn_800214D0(void);
 extern void fn_800215F8(SceneCallback* callback);
+extern void fn_80035CA4(s32 id);
+extern void fn_800ACF14(void* ptr);
 extern void* fn_800ACF34(u32 align, u32 size);
 extern s32 ARAMTransfer(void* src, void* dst, s32 arg2, s32 arg3);
 extern void fn_80035750(void* sab, void* tex, s16 id);
@@ -401,6 +414,104 @@ void fn_8006B668(void) {
 
 // .text:0x8006B230 size:0x438
 void fn_8006B230(void) {
+    SceneTask* task = lbl_803CC1B8;
+    SceneTask* parent = task->parent;
+    s32 i;
+
+    switch (parent->state) {
+    case 1:
+        if (parent->_36 != 0) {
+            parent->_36 = 0;
+            changeScene(1, 6);
+            lbl_80371C30[task->_14].obj->flags |= 2;
+            lbl_80371C30[task->_14 + 1].obj->_5C = 0;
+            lbl_80371C30[task->_14 + 2].obj->_5C = 0;
+            lbl_80371C30[task->_14 + 1].obj->flags |= 2;
+            lbl_80371C30[task->_14 + 2].obj->flags |= 2;
+            lbl_80371C30[task->_14 + 1].obj->_68 = 0;
+            lbl_80371C30[task->_14 + 2].obj->_68 = 0;
+        } else if (lbl_8037169C._12 != 0) {
+            lbl_80371C30[task->_14 + 1].obj->_68 = 1;
+            lbl_80371C30[task->_14 + 2].obj->_68 = 1;
+            parent->_3C = 8;
+            parent->voice = sndFXStartEx(0x318, 110, 0xFF, 0);
+            parent->_36 = 300;
+            parent->state++;
+        }
+        break;
+    case 2:
+        if ((lbl_80371C30[task->_14 + 2].obj->_5C >> 16) == 100) {
+            parent->state++;
+        }
+        break;
+    case 3:
+        if (lbl_803C77B8[0]._02 & 0x1100) {
+            for (i = 0; i < 4; i++) {
+                if (lbl_803C77B8[i]._02 & 0x1100) {
+                    lbl_80366158._27 = i;
+                    break;
+                }
+            }
+            parent->state = 4;
+            sndFXStartEx(0x1B8, lbl_800EFBA4[1], 0x3F, 0);
+        } else if (sndFXCheck(parent->voice) == SND_ID_ERROR) {
+            if (lbl_803CB8D8 != 0) {
+                parent->state = 6;
+            } else {
+                parent->state = 5;
+            }
+            lbl_803CB8D8 ^= 1;
+        }
+        if (parent->state != 3) {
+            lbl_80371C30[task->_14 + 1].obj->_68 = 0;
+            lbl_80371C30[task->_14 + 2].obj->_68 = 0;
+            lbl_80371C30[task->_14].obj->_5C = 0;
+            lbl_80371C30[task->_14].obj->_68 = 1;
+        }
+        break;
+    case 4:
+    case 5:
+    case 6:
+        if (sndFXCheck(parent->voice) != SND_ID_ERROR) {
+            if (parent->_3C > 0 && sndFXCtrl(parent->voice, 7, --parent->_3C * 110 / 8) != 0) {
+                break;
+            }
+            if (parent->_3C >= 0) {
+                parent->_3C = -1;
+                sndFXKeyOff(parent->voice);
+            }
+        }
+        if ((lbl_80371C30[task->_14].obj->_5C >> 16) == 20) {
+            fn_80034CEC(task);
+            switch (parent->state) {
+            case 4:
+                fn_800214D0();
+                fn_8002149C(0x2F);
+                fn_800ACF14(parent->texFile);
+                fn_80035CA4(0x16);
+                fn_800ACF14(parent->sabFile);
+                fn_800ACF14(parent->fades);
+                parent->_3B = 2;
+                break;
+            case 5:
+                parent->_3B = 1;
+                break;
+            case 6:
+                fn_800214D0();
+                fn_8002149C(0x2F);
+                fn_800214D0();
+                fn_8002149C(0x25);
+                fn_800ACF14(parent->texFile);
+                fn_80035CA4(0x16);
+                fn_800ACF14(parent->sabFile);
+                fn_800ACF14(parent->fades);
+                parent->_3B = 3;
+                break;
+            }
+            fn_800B0A14_removeQueue();
+        }
+        break;
+    }
 }
 
 // .text:0x8006AF9C size:0x294
