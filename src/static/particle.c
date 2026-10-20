@@ -254,17 +254,22 @@ typedef struct PuffParticle {
     /* 0x04 */ Vec pos;
     /* 0x10 */ Vec vel;
     /* 0x1C */ Vec accel;
-    /* 0x28 */ f32 _28;
-    /* 0x2C */ f32 _2C;
+    /* 0x28 */ f32 phase;
+    /* 0x2C */ f32 spin;
     /* 0x30 */ f32 size;
-    /* 0x34 */ s32 _34;
+    union {
+        /* 0x34 */ s32 _34;
+        /* 0x34 */ u8 color[4];
+    };
     /* 0x38 */ s16 delay;
     /* 0x3A */ s16 life;
     /* 0x3C */ u8 tex;
-    /* 0x3D */ u8 _3D;
-    /* 0x3E */ u8 _3E;
-    /* 0x3F */ u8 _3F;
-    /* 0x40 */ u8 color[4];
+    /* 0x3D */ s8 fadeIn;
+    /* 0x3E */ s8 fadeOut;
+    /* 0x3F */ u8 fadeAge;
+    /* 0x40 */ u8 maxAlpha;
+    /* 0x41 */ u8 additive;
+    /* 0x42 */ u8 depthTest;
 } PuffParticle;
 
 // What fn_80026998's callers pass
@@ -2451,14 +2456,14 @@ void fn_800297F0(Emitter* e, Vec* pos, Vec* dir, PuffParams* params)
         p->accel.x = 0.0f;
         p->accel.z = 0.0f;
         p->accel.y = gravity;
-        p->_28 = p->_2C = spin + (spinRange * rand()) / 32767.0f;
+        p->phase = p->spin = spin + (spinRange * rand()) / 32767.0f;
         p->_34 = params->_30;
-        p->color[0] = alpha;
-        p->_3D = params->_34;
-        p->_3E = params->_38;
-        p->_3F = fade;
-        p->color[1] = params->_3C;
-        p->color[2] = params->_50;
+        p->maxAlpha = alpha;
+        p->fadeIn = params->_34;
+        p->fadeOut = params->_38;
+        p->fadeAge = fade;
+        p->additive = params->_3C;
+        p->depthTest = params->_50;
         p = (PuffParticle*)p->next;
     } while (p != NULL);
 }
@@ -2487,6 +2492,147 @@ void fn_8002955C(Vec* pos, Vec* dir, PuffParams* params)
             fn_800297F0(e, pos, dir, params);
         }
     }
+}
+
+// .text:0x80028F48 size:0x614
+// 99.77%: registers only: the target keeps half in f30 and gives the two table lookups
+// other scratch registers (r0, r6), the residue fn_800332B8's yaw lookups show too.
+BOOL fn_80028F48(void* arg)
+{
+    Emitter* e = arg;
+    Particle* prev;
+    Particle* dead;
+    Particle* tail;
+    PuffParticle* p = (PuffParticle*)e->particles;
+    s32 lastBlend = -1;
+    s32 lastDepth = -1;
+    s32 lastTex = -1;
+    Mtx m = { { 1.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 0.0f } };
+    GXTexObj texObj;
+    Vec v;
+    GXTlutObj tlutObj;
+    TexFile* file;
+    s32 index;
+    TextureDesc* tex;
+    s32 a;
+    s32 ang;
+    s32 i;
+    f32 half;
+    f32 c;
+    f32 s;
+
+    GXLoadPosMtxImm(m, GX_PNMTX0);
+    GXSetZMode(GX_TRUE, GX_ALWAYS, GX_TRUE);
+    prev = (Particle*)&e->particles;
+    tail = NULL;
+    dead = NULL;
+    do {
+        if (p->delay != 0) {
+            p->delay -= (lbl_80366158._28 == 0);
+        } else if (p->life > 0) {
+            index = p->tex;
+            if (index != lastTex) {
+                file = (TexFile*)e->_10;
+                lastTex = index;
+                if (file == NULL) {
+                    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+                } else {
+                    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP1, GX_COLOR0A0);
+                    tex = &file->tex[file->tex[index]._1C];
+                    if (tex->tlut != NULL) {
+                        GXInitTexObjCI(&texObj, tex->image, tex->width, tex->height, tex->format, GX_CLAMP, GX_CLAMP, GX_FALSE, GX_TLUT0);
+                        GXInitTlutObj(&tlutObj, tex->tlut, tex->tlutFormat, tex->tlutCount);
+                        GXLoadTlut(&tlutObj, GX_TLUT0);
+                    } else {
+                        GXInitTexObj(&texObj, tex->image, tex->width, tex->height, tex->format, GX_CLAMP, GX_CLAMP, GX_FALSE);
+                    }
+                    GXInitTexObjLOD(&texObj, GX_LINEAR, GX_LINEAR, tex->minLOD, tex->maxLOD, tex->lodBias, GX_FALSE, GX_FALSE, GX_ANISO_1);
+                    GXLoadTexObj(&texObj, GX_TEXMAP1);
+                }
+            }
+            if (p->additive != lastBlend) {
+                lastBlend = p->additive;
+                if (p->additive != 0) {
+                    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_ONE, GX_LO_CLEAR);
+                } else {
+                    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+                }
+            }
+            if (p->depthTest != lastDepth) {
+                lastDepth = p->depthTest;
+                if (p->depthTest != 0) {
+                    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+                } else {
+                    GXSetZMode(GX_TRUE, GX_ALWAYS, GX_FALSE);
+                }
+            }
+            if (lbl_80366158._28 == 0) {
+                PSVECAdd(&p->vel, &p->accel, &p->vel);
+                PSVECAdd(&p->pos, &p->vel, &p->pos);
+                if (p->pos.y >= -p->size) {
+                    p->pos.y = -p->size;
+                    p->vel.y = -0.5f * p->vel.y;
+                }
+                p->phase += p->spin;
+                if (p->phase > 2048.0f) {
+                    p->phase -= 2048.0f;
+                }
+                if (p->life < p->fadeAge) {
+                    a = p->color[3] - p->fadeOut;
+                    a = a < 0 ? 0 : a;
+                    p->color[3] = a;
+                } else if (p->fadeIn != 0 && p->color[3] < p->maxAlpha) {
+                    a = p->color[3] + p->fadeIn;
+                    if (a > p->maxAlpha) {
+                        a = p->maxAlpha;
+                    }
+                    p->color[3] = a;
+                }
+            }
+            PSMTXMultVec(lbl_8017FFE0, &p->pos, &v);
+            half = p->size / 2;
+            ang = 2048.0f * p->phase;
+            i = __abs(ang) & 0x7FF;
+            if (i >= 0x401) {
+                i = 0x800 - i;
+            }
+            c = half * lbl_8017ED68[i];
+            s = half * fn_800335EC(ang);
+            GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+            GXPosition3f32(v.x + c, v.y + s, v.z);
+            GXColor1u32(p->_34);
+            GXTexCoord2f32(0.0f, 0.0f);
+            GXPosition3f32(v.x + s, v.y - c, v.z);
+            GXColor1u32(p->_34);
+            GXTexCoord2f32(0.0f, 1.0f);
+            GXPosition3f32(v.x - c, v.y - s, v.z);
+            GXColor1u32(p->_34);
+            GXTexCoord2f32(1.0f, 1.0f);
+            GXPosition3f32(v.x - s, v.y + c, v.z);
+            GXColor1u32(p->_34);
+            GXTexCoord2f32(1.0f, 0.0f);
+            p->life -= (lbl_80366158._28 == 0);
+        }
+        if (p->life == 0) {
+            prev->next = p->next;
+            if (tail != NULL) {
+                tail->next = (Particle*)p;
+            } else {
+                dead = (Particle*)p;
+            }
+            tail = (Particle*)p;
+            p->next = NULL;
+            e->count--;
+        } else {
+            prev = (Particle*)p;
+        }
+        p = (PuffParticle*)prev->next;
+    } while (p != NULL);
+    if (dead != NULL) {
+        fn_80033794(dead);
+    }
+    GXLoadPosMtxImm(lbl_8017FFE0, GX_PNMTX0);
+    return e->count == 0;
 }
 
 // .text:0x8002852C size:0xFC
