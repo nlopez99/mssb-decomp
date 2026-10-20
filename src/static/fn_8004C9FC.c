@@ -20,7 +20,7 @@ typedef struct VoiceState {
     /* 0x12 */ s16 _12;
     /* 0x14 */ s16 _14;
     /* 0x16 */ u16 _16;
-    /* 0x18 */ s16 _18;
+    /* 0x18 */ u16 _18;
     /* 0x1A */ s8 _1A;
     /* 0x1B */ u8 _1B;
     /* 0x1C */ u8 _1C;
@@ -109,6 +109,22 @@ extern struct {
 } lbl_80371C30[];
 extern CrowdTask* lbl_803CC1B8;
 extern void fn_800B0A14_removeQueue(void);
+extern s32 fn_8000F988(CrowdTask* task, s32 kind, u16 anim, s32 voice, u16 arg4, s32 arg5);
+extern void fn_8000FD78(u16 id, s16 a, s16 b, s16 c, s16 d);
+extern void fn_8000FD54(u16 id, s16 a, s16 b, s16 c, s16 d);
+extern void fn_8000FEE8(u16 id);
+extern void fn_8000F8F4(CrowdTask* task);
+extern void fn_80034CEC(CrowdTask* task);
+extern struct {
+    /* 0x00 */ u8 _00[0x2F];
+    /* 0x2F */ u8 _2F;
+    /* 0x30 */ u8 _30;
+    /* 0x31 */ u8 _31[0x38 - 0x31];
+} lbl_80366B18[];
+extern struct {
+    /* 0x00 */ u8 _00[0x20];
+    /* 0x20 */ u8 _20;
+} lbl_80366158;
 extern void fn_80034E20(CrowdTask* task, CrowdDesc* desc);
 extern void fn_800363D8(CrowdTask* task, s32 id, u32 part, u16 kind, s32 value);
 extern void fn_8000FE08(s32 id, s32 arg1, s32 arg2);
@@ -1363,7 +1379,116 @@ void fn_8004D0F0(void) {
 }
 
 // .text:0x8004CCC0 size:0x430
+// 98.36%: state 0 schedules the lbl_80366B18 stores and the reload of
+// lbl_803C5F74's base in another order (lis/addi pairs swapped, the id in r6).
 void fn_8004CCC0(void) {
+    CrowdTask* task = lbl_803CC1B8;
+    CrowdObj* obj;
+    u32 frame;
+    s32 done;
+    u16 id;
+
+    if (lbl_803C5F74._03 == 0) {
+        lbl_803C5F74._03 = 1;
+        if (lbl_803C5F74._1A >= 0) {
+            id = fn_8000F988(task, 8, lbl_800FEAAC[lbl_803C5F74._01][2], lbl_803C5F74._1A, lbl_803C5F74._18, 0);
+            lbl_80366B18[id]._2F = 1;
+            lbl_803C5F74._16 = id;
+            lbl_80366B18[id]._30 = 1;
+            if (lbl_803C5F74._1B != 0) {
+                fn_8000FD78(id, lbl_803C5F74._06, lbl_803C5F74._08, lbl_803C5F74._0A, lbl_803C5F74._0C);
+            }
+            if (lbl_803C5F74._1C != 0) {
+                fn_8000FD54(lbl_803C5F74._16, lbl_803C5F74._0E, lbl_803C5F74._10, lbl_803C5F74._12, lbl_803C5F74._14);
+            }
+        }
+    } else if (lbl_803C5F74._03 == 1) {
+        done = 0;
+        if (lbl_803C5F74._01 == 7 || lbl_803C5F74._01 == 8 || lbl_803C5F74._01 == 10) {
+            if ((s32)(lbl_80371C30[task->_14 + 1].obj->_5C >> 16) >= 3) {
+                done |= 1;
+            }
+        } else {
+            obj = lbl_80371C30[task->_14 + 3].obj;
+            frame = obj->_5C >> 16;
+            if (lbl_803C5F74._02 == 0) {
+                if ((s32)frame >= 5) {
+                    done |= 1;
+                    obj->_68 = 0;
+                }
+            } else if ((s32)frame <= 10) {
+                done |= 1;
+                obj->_68 = 0;
+            }
+        }
+        if (done == 1) {
+            lbl_803C5F74._03 = 2;
+        }
+    } else if (lbl_803C5F74._03 == 2) {
+        if (lbl_803C5F74._01 != 7 && lbl_803C5F74._01 != 8 && lbl_803C5F74._01 != 10) {
+            obj = lbl_80371C30[task->_14 + 3].obj;
+            frame = obj->_5C >> 16;
+            if (lbl_803C5F74._02 == 0) {
+                if ((s32)frame <= 5) {
+                    obj->_68 = 0;
+                } else {
+                    obj->_68 = 4;
+                }
+            } else if ((s32)frame >= 10) {
+                obj->_68 = 0;
+            } else {
+                obj->_68 = 1;
+            }
+        }
+    } else if (lbl_803C5F74._03 == 3) {
+        if (lbl_803C5F74._04 != 0) {
+            lbl_80371C30[task->_14].obj->_68 = 4;
+        }
+        lbl_80371C30[task->_14 + 1].obj->_68 = 4;
+        if (lbl_803C5F74._01 == 7 || lbl_803C5F74._01 == 8 || lbl_803C5F74._01 == 10 || lbl_803C5F74._01 == 9) {
+            done = 0;
+            if ((s32)(lbl_80371C30[task->_14 + 1].obj->_5C >> 16) <= 0) {
+                done |= 1;
+            }
+        } else {
+            done = 0;
+            obj = lbl_80371C30[task->_14 + 3].obj;
+            frame = obj->_5C >> 16;
+            if (lbl_803C5F74._02 == 0) {
+                obj->_68 = 4;
+                if ((s32)frame <= 0) {
+                    done |= 1;
+                }
+            } else {
+                obj->_68 = 1;
+                if ((s32)frame >= 15) {
+                    done |= 1;
+                }
+            }
+        }
+        if (done == 1) {
+            goto finish;
+        }
+    } else if (lbl_803C5F74._03 == 4) {
+        goto finish;
+    }
+    if (lbl_803C5F74._1D != 0) {
+        lbl_80371C30[task->_14 + 6].obj->_54 |= 2;
+        lbl_80371C30[task->_14 + 6].obj->_68 = 1;
+    } else {
+        lbl_80371C30[task->_14 + 6].obj->_54 &= ~2;
+    }
+    return;
+finish:
+    if (lbl_803C5F74._1A >= 0) {
+        fn_8000FEE8(lbl_803C5F74._16);
+        fn_8000F8F4(task);
+    }
+    lbl_803C5F74._03 = 4;
+    lbl_803C5F74._00 = 0;
+    fn_80034CEC(task);
+    fn_800B0A14_removeQueue();
+    lbl_80366158._20 = 1;
 }
 
 // .text:0x8004CC4C size:0x74
