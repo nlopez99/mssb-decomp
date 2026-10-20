@@ -982,15 +982,17 @@ void fn_80066EAC(u8 team) {
     s8 tmp;
     u8 chem;
     MbRosterEntry* entry;
+    s16 id;
 
     for (i = 0; i < 9; i++) {
         entry = &inMemRoster[team][i];
         for (j = 0; j < 9; j++) {
-            chem = entry->chemistry[inMemRoster[team][j].charId];
+            id = inMemRoster[team][j].charId;
+            chem = entry->chemistry[id];
             if (chem < 90 || chem == 100) {
                 list[j] = -1;
             } else {
-                list[j] = inMemRoster[team][j].charId;
+                list[j] = id;
             }
         }
         for (j = 0; j < 9; j++) {
