@@ -179,7 +179,7 @@ void fn_3_1471C0(void) {
 }
 
 // .text:0x00146A90 size:0x730 mapped:0x80785B24
-// 86.95%: the fielder setup stores and the 100-coin loop use other registers and bases,
+// 94.10%: the fielder setup stores and the 100-coin loop use other registers and bases,
 // as in rep_3520's fn_3_13BCB8.
 void fn_3_146A90(void) {
     Unk37A8Fielder* fielder;
@@ -1628,8 +1628,8 @@ void fn_3_14225C(void) {
 }
 
 // .text:0x00142088 size:0x1D4 mapped:0x8078111C
-// 89.51%: the inlined fn_3_142030 factors (y / 4) * 16 + (x / 4) * 16 into one shift,
-// where the target hoists (y / 4) * 16 out of the inner loop.
+// 96.28%: registers only; the loop counters and the inlined fn_3_142030's temporaries
+// sit in other volatile registers.
 void fn_3_142088(void) {
     u32 y;
     u32 x;
@@ -1655,7 +1655,7 @@ void fn_3_142088(void) {
 }
 
 // .text:0x00142030 size:0x58 mapped:0x807810C4
-s32 fn_3_142030(s32 x, s32 y, s32 width) {
+s32 fn_3_142030(int x, int y, s32 width) {
     return (y / 4) * 4 * width + (x / 4) * 4 * 4 + (y % 4) * 4 + x % 4;
 }
 
