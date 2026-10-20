@@ -11823,8 +11823,8 @@ laser_catch:
 }
 
 // .text:0x00028224 size:0xA84 mapped:0x806672B8
-// 96.91%: first draft; registers differ (the target reloads f->_19A, the base
-// keeps it in r29) and the two backward searches are not yet in the target's form.
+// 98.80%: registers only, from the first wall line's distance on (dx and dz one FPR
+// higher in the target), and the backward searches' counter in r24 against r25.
 s32 fn_3_28224(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     f32 reach = f->_0F4;
@@ -11839,13 +11839,14 @@ s32 fn_3_28224(s32 fielder) {
     f32 limit;
     f32 nx;
     f32 nz;
+    s32 angle;
 
     if ((f->_038 == 0.0f && f->_03C == 0.0f) || f->_19A < 0) {
         return 0;
     }
+    limit = g_Ball.wallAndBallIntersectionDistFromHome - lbl_3_data_4930[10];
     for (i = lbl_3_data_49DC[2] - 1; i < lbl_3_data_49DC[1]; i++) {
-        if (g_Ball.physicsSubstruct.futureCoordsAndDist[i].dist >
-            g_Ball.wallAndBallIntersectionDistFromHome - lbl_3_data_4930[10]) {
+        if (g_Ball.physicsSubstruct.futureCoordsAndDist[i].dist > limit) {
             break;
         }
     }
@@ -11855,74 +11856,76 @@ s32 fn_3_28224(s32 fielder) {
     if (g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y < lbl_3_data_4930[8] + reach) {
         return 0;
     }
-    if (i < lbl_3_data_49DC[1] &&
-        fn_3_9FCF8((s16)fn_3_9FB8C(g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x - f->_000,
-                              g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z - f->_008),
-                   f->_19A) <= 0x300) {
-        f->_128 = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x;
-        f->_130 = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z;
-        f->_12C = lbl_3_data_4930[5];
-        if (!(dolsqrtf2(SQ(f->_000 - f->_128) + SQ(f->_008 - f->_130)) > lbl_3_data_4930[4])) {
-            line.src.x = f->_000;
-            line.src.z = f->_008;
-            line.dst.y = -lbl_3_data_4930[5];
-            line.src.y = -lbl_3_data_4930[5];
-            dx = f->_128 - f->_000;
-            dz = f->_130 - f->_008;
-            dist = dolsqrtf2(dx * dx + dz * dz);
-            line.dst.x = dx / dist * lbl_3_data_4930[4] + f->_000;
-            line.dst.z = dz / dist * lbl_3_data_4930[4] + f->_008;
-            if ((checkCollision(&line, &hit, 0, FALSE) & 0x7F) != 2) {
-                return 0;
-            }
-            limit = g_Ball.physicsSubstruct.futureCoordsAndDist[i].dist - lbl_3_data_4930[12];
-            j = i;
-            for (n = 0; n < 10; n++) {
-                if (limit < g_Ball.physicsSubstruct.futureCoordsAndDist[j].dist) {
-                    break;
+    if (i < lbl_3_data_49DC[1]) {
+        angle = fn_3_9FB8C(g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x - f->_000,
+                           g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z - f->_008);
+        if (fn_3_9FCF8(angle, f->_19A) <= 0x300) {
+            f->_128 = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x;
+            f->_130 = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z;
+            f->_12C = lbl_3_data_4930[5];
+            if (!(dolsqrtf2(SQ(f->_000 - f->_128) + SQ(f->_008 - f->_130)) > lbl_3_data_4930[4])) {
+                line.src.x = f->_000;
+                line.src.z = f->_008;
+                line.dst.y = -lbl_3_data_4930[5];
+                line.src.y = -lbl_3_data_4930[5];
+                dx = f->_128 - f->_000;
+                dz = f->_130 - f->_008;
+                dist = dolsqrtf2(dx * dx + dz * dz);
+                line.dst.x = dx / dist * lbl_3_data_4930[4] + f->_000;
+                line.dst.z = dz / dist * lbl_3_data_4930[4] + f->_008;
+                if ((checkCollision(&line, &hit, 0, FALSE) & 0x7F) != 2) {
+                    return 0;
                 }
-                j--;
-            }
-            limit = reach + lbl_3_data_4930[9];
-            i = j;
-            for (n = 0; n < 5; n++) {
-                if (i < lbl_3_data_49DC[2]) {
-                    break;
+                limit = g_Ball.physicsSubstruct.futureCoordsAndDist[i].dist - lbl_3_data_4930[12];
+                j = i;
+                for (n = 0; n < 10; n++) {
+                    if (limit < g_Ball.physicsSubstruct.futureCoordsAndDist[j].dist) {
+                        break;
+                    }
+                    j--;
                 }
-                if (g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y > limit && n != 0) {
-                    i++;
-                    break;
+                limit = reach + lbl_3_data_4930[9];
+                i = j;
+                for (n = 0; n < 5; n++) {
+                    if (i < lbl_3_data_49DC[2]) {
+                        break;
+                    }
+                    if (g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y > limit && n != 0) {
+                        i++;
+                        break;
+                    }
+                    i--;
                 }
-                i--;
+                f->_24C = i;
+                f->_134 = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x;
+                f->_138 = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y - 2.0f;
+                f->_13C = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z;
+                f->_134 += g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x /
+                           g_Ball.physicsSubstruct.futureCoordsAndDist[i].dist * lbl_3_data_4930[12];
+                f->_13C += g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z /
+                           g_Ball.physicsSubstruct.futureCoordsAndDist[i].dist * lbl_3_data_4930[12];
+                f->_140 = game_atan2(f->_128 - f->_000, f->_130 - f->_008);
+                f->_144 = game_atan2(-f->_128, -f->_130);
+                f->_148 = 0.0f;
+                if (g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y > lbl_3_data_4930[9] + f->_0F4) {
+                    f->_138 = lbl_3_data_4930[9];
+                    fn_3_2C238(fielder, 4, i, 1, 0);
+                } else {
+                    f->_138 = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y - f->_0F4;
+                    fn_3_2C238(fielder, 4, i, 0, 0);
+                }
+                f->_25C = lbl_3_data_49DC[3];
+                fn_3_1AE44(2, 0, g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x,
+                           g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y,
+                           g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z);
+                return 1;
             }
-            f->_134 = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x;
-            f->_138 = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y - 2.0f;
-            f->_13C = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z;
-            f->_134 += g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x /
-                       g_Ball.physicsSubstruct.futureCoordsAndDist[i].dist * lbl_3_data_4930[12];
-            f->_13C += g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z /
-                       g_Ball.physicsSubstruct.futureCoordsAndDist[i].dist * lbl_3_data_4930[12];
-            f->_140 = game_atan2(f->_128 - f->_000, f->_130 - f->_008);
-            f->_144 = game_atan2(-f->_128, -f->_130);
-            f->_148 = 0.0f;
-            if (g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y > lbl_3_data_4930[9] + f->_0F4) {
-                f->_138 = lbl_3_data_4930[9];
-                fn_3_2C238(fielder, 4, i, 1, 0);
-            } else {
-                f->_138 = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y - f->_0F4;
-                fn_3_2C238(fielder, 4, i, 0, 0);
-            }
-            f->_25C = lbl_3_data_49DC[3];
-            fn_3_1AE44(2, 0, g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x,
-                       g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y,
-                       g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z);
-            return 1;
         }
     }
     line.src.x = f->_000;
-    line.src.z = f->_008;
     line.dst.y = -lbl_3_data_4930[5];
     line.src.y = -lbl_3_data_4930[5];
+    line.src.z = f->_008;
     line.dst.x = f->_038 * lbl_3_data_4930[4] + f->_000;
     line.dst.z = f->_03C * lbl_3_data_4930[4] + f->_008;
     if ((checkCollision(&line, &hit, 0, FALSE) & 0x7F) != 2) {
