@@ -115,9 +115,12 @@ typedef struct TextureEntry {
 } TextureEntry;
 
 extern struct {
-    /* 0x00 */ u8 _00[0x45];
+    /* 0x00 */ u8 _00[0x3F];
+    /* 0x3F */ u8 _3F;
+    /* 0x40 */ u8 _40[0x45 - 0x40];
     /* 0x45 */ u8 _45;
-    /* 0x46 */ u8 _46[0x54 - 0x46];
+    /* 0x46 */ u8 _46;
+    /* 0x47 */ u8 _47[0x54 - 0x47];
     /* 0x54 */ u32 badBlocks;
 } lbl_803C50E8;
 
@@ -155,6 +158,7 @@ extern struct {
 
 extern void fn_8000FE54(MenuTask* task);
 extern void fn_800ACCE8(void);
+extern void fn_800AA34C(u8 chan, u8 arg1, const char* name, MenuSlot* slot, s32 arg4, s32 arg5, u8 arg6);
 extern void fn_800ACCD4(void);
 extern void fn_8004A34C(void* card, u8 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern u16 fn_8004157C(void);
@@ -203,6 +207,8 @@ extern union {
     } s;
 } starMissionCompletionTracker;
 extern void fn_8002128C(u8 arg0);
+
+const char lbl_800E6910[] = "MarioBaseball";
 
 MenuSlot lbl_802D4AE0[4];
 DecalSystem lbl_802D3D80;
@@ -424,7 +430,7 @@ void fn_80040C14(void) {
         req._0D = task->_18;
         req.buf = &lbl_802D4B00;
         req.size = sizeof(lbl_802D4B00);
-        req.name = "MarioBaseball";
+        req.name = lbl_800E6910;
         req._0E = 0;
         req.verify = fn_80041074;
         req.mask = SaveBlockMask(task->_1B, task->_20);
@@ -476,7 +482,270 @@ void fn_80040C14(void) {
 }
 
 // .text:0x8004053C size:0x6D8
-void fn_8004053C(void) {}
+// 98.71%: the target truncates the two message ternaries to u8 (clrlwi) and loads the
+// name before the slot in case 5's call
+void fn_8004053C(void) {
+    s32 msg = 0;
+    MenuTask* task = lbl_803CC1B8;
+    MenuTask* child;
+    MenuTask* parent;
+    MenuSlot* slot;
+    u8 a15;
+    u8 a16;
+    u8 a17;
+    u8 a18;
+    u8 a1A;
+
+    switch (CardResultCode(lbl_803C7838.chan[task->_17].result)) {
+    case 4:
+    case 17:
+        task->_1E = 1;
+        break;
+    case 0:
+        task->_1D = 1;
+        break;
+    }
+    switch (task->_14) {
+    case 0:
+        task->_1D = 0;
+        fn_8004A34C(&lbl_803C50E8, task->_15, 0, 0, 0);
+        fn_800415A0(100);
+        task->_14++;
+        return;
+    case 1:
+        if (fn_8004157C() == 0) {
+            task->_14++;
+            return;
+        }
+        break;
+    case 2:
+        if (task->_1D) {
+            task->_14 = 3;
+            return;
+        }
+        task->_14 = 5;
+        return;
+    case 3:
+        task->_1D = 0;
+        task->_1E = 0;
+        task->_14++;
+        return;
+    case 4:
+        if (task->_1E) {
+            task->_14 = 14;
+            task->_1C = 7;
+            return;
+        }
+        task->_14 = 14;
+        task->_1C = 9;
+        return;
+    case 5:
+        task->_1D = 0;
+        fn_800AA34C(task->_17, task->_18, lbl_800E6910, &lbl_802D4AE0[task->_17], lbl_802D4AE0[task->_17]._0,
+                    lbl_802D4AE0[task->_17]._4, task->_1A == 0);
+        task->_14++;
+        return;
+    case 6:
+        if (lbl_803CC1B8->_10 != 0) {
+            if (task->_1D) {
+                task->_14 = 3;
+                return;
+            }
+            switch (lbl_803C7838.status) {
+            case 0:
+                task->_14 = 3;
+                return;
+            case 16:
+                task->_14 = 7;
+                return;
+            case 1:
+                if (task->_1A) {
+                    task->_14 = 7;
+                    return;
+                }
+                task->_14 = 10;
+                return;
+            case 2:
+                if (task->_1A) {
+                    task->_14 = 7;
+                    return;
+                }
+                task->_14 = 9;
+                return;
+            case 3:
+            case 4:
+            case 7:
+                task->_14 = 7;
+                return;
+            case 8:
+                task->_14 = 14;
+                task->_1C = 6;
+                return;
+            case 17:
+                task->_14 = 14;
+                task->_1C = 1;
+                return;
+            }
+        }
+        break;
+    case 7:
+        switch (lbl_803C7838.status) {
+        case 1:
+            msg = task->_1A == 0 ? 6 : 21;
+            break;
+        case 2:
+            msg = task->_1A == 0 ? 5 : 20;
+            break;
+        case 3:
+            msg = 66;
+            break;
+        case 4:
+            msg = 65;
+            break;
+        case 7:
+            msg = 67;
+            break;
+        case 16:
+            if (task->_21 == 3) {
+                msg = 49;
+            } else if (task->_21 == 2) {
+                msg = 42;
+            } else if (task->_1A == 2) {
+                msg = 32;
+            } else {
+                msg = 19;
+            }
+            break;
+        }
+        fn_8004A34C(&lbl_803C50E8, task->_15, msg, 0, 0);
+        fn_800415A0(100);
+        task->_14++;
+        return;
+    case 8:
+        if (fn_8004157C() == 0) {
+            if (task->_1D) {
+                lbl_803C50E8._46 = 1;
+                task->_14 = 3;
+                return;
+            }
+            if (lbl_803C50E8._3F == 5 || lbl_803C50E8._3F == 6) {
+                switch (lbl_803C50E8._45) {
+                case 1:
+                case 2:
+                    task->_14 = 12;
+                    return;
+                case 3:
+                case 4:
+                    task->_14 = 14;
+                    task->_1C = 10;
+                    return;
+                }
+            } else {
+                switch (lbl_803C50E8._45) {
+                case 1:
+                case 2:
+                    task->_14 = 0;
+                    return;
+                case 3:
+                case 4:
+                    task->_14 = 14;
+                    if (task->_1A == 0) {
+                        task->_1C = 10;
+                        return;
+                    }
+                    task->_1C = 11;
+                    return;
+                }
+            }
+        }
+        break;
+    case 9:
+        if (task->_1D) {
+            task->_14 = 3;
+            return;
+        }
+        fn_8004A34C(&lbl_803C50E8, task->_15, 5, 1, 0);
+        task->_14 = 11;
+        return;
+    case 10:
+        if (task->_1D) {
+            task->_14 = 3;
+            return;
+        }
+        fn_8004A34C(&lbl_803C50E8, task->_15, 6, 1, 0);
+        task->_14 = 11;
+        return;
+    case 11:
+        if (task->_1D) {
+            lbl_803C50E8._46 = 1;
+            task->_14 = 3;
+            return;
+        }
+        switch (lbl_803C50E8._45) {
+        case 1:
+        case 2:
+            task->_14 = 12;
+            return;
+        case 3:
+        case 4:
+            task->_14 = 14;
+            task->_1C = 10;
+            return;
+        }
+        break;
+    case 12:
+        a1A = task->_1A;
+        a18 = task->_18;
+        a17 = task->_17;
+        a16 = task->_16;
+        a15 = task->_15;
+        child = fn_800B0A5C_insertQueue(fn_8003BB90, 0x8000);
+        child->_14 = 0;
+        child->_15 = a15;
+        child->_16 = a16;
+        child->_17 = a17;
+        child->_18 = a18;
+        child->_1A = a1A;
+        child->_1D = 0;
+        lbl_803CC1B8->_10 = 0;
+        task->_14++;
+        return;
+    case 13:
+        switch (lbl_803CC1B8->_10) {
+        case 1:
+            task->_14 = 14;
+            task->_1C = 13;
+            return;
+        case 2:
+            task->_14 = 14;
+            task->_1C = 10;
+            return;
+        case 8:
+            task->_14 = 14;
+            task->_1C = 7;
+            return;
+        case 5:
+            task->_14 = 14;
+            task->_1C = 10;
+            return;
+        case 9:
+            task->_14 = 14;
+            task->_1C = 10;
+            return;
+        case 7:
+            task->_14 = 0;
+            task->_1C = 7;
+            return;
+        }
+        break;
+    case 14:
+        parent = lbl_803CC1B8->parent;
+        parent->_10 = task->_1C;
+        fn_8000FE54(parent);
+        fn_800B0A14_removeQueue();
+        break;
+    }
+}
 
 // .text:0x8003F2B8 size:0x1284
 void fn_8003F2B8(void) {}
