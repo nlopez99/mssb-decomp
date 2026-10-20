@@ -9,9 +9,16 @@ struct Emitter;
 struct Particle;
 struct ZSortEntry;
 struct TexFile;
+struct EffectParams;
 
+BOOL fn_80026E58(void* e);
+void fn_80027300(struct Emitter* e, Vec* pos, Vec* dir, struct EffectParams* params, f32 scale);
+void fn_80027674(Vec* pos, Vec* dir, struct EffectParams* params, f32 scale, u8 id);
 void fn_80027918(u8 id, f32 v);
 void fn_8002852C(void);
+BOOL fn_80028F48(void* e);
+void fn_8002955C(Vec* pos, s32 arg1, struct EffectParams* params);
+void fn_800297F0(struct Emitter* e, Vec* pos, s32 arg1, struct EffectParams* params);
 void fn_8002CDD0(Vec* pos);
 void fn_8002DC68(Vec* pos);
 BOOL fn_8002F1AC(Vec* pos, s32 key);

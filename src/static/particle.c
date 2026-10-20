@@ -42,6 +42,13 @@ typedef struct TexFile {
     /* 0x4 */ TextureDesc tex[1];
 } TexFile;
 
+typedef struct EffectParams {
+    /* 0x00 */ s32 _00;
+    /* 0x04 */ s32 _04;
+    /* 0x08 */ s32 count;
+    /* 0x0C */ s32 _0C[13];
+} EffectParams; // size: 0x40
+
 typedef struct ZSortEntry {
     /* 0x0 */ Particle* p;
     /* 0x4 */ f32 z;
@@ -563,6 +570,32 @@ void fn_8002CDD0(Vec* pos)
     }
 }
 
+// .text:0x8002955C size:0x294
+void fn_8002955C(Vec* pos, s32 arg1, EffectParams* params)
+{
+    Emitter* e = fn_800339F0(NULL, 12);
+
+    if (e != NULL) {
+        u8 tmp[sizeof(Emitter)];
+        Emitter* added = fn_800337CC((Emitter*)tmp, params->count, TRUE);
+        if (added != NULL) {
+            Particle* p;
+            fn_800297F0(added, pos, arg1, params);
+            p = e->particles;
+            while (p->next != NULL) {
+                p = p->next;
+            }
+            p->next = added->particles;
+            e->count += added->count;
+        }
+    } else {
+        e = fn_80033A24(fn_80028F48, 0x80, 0, params->count, TRUE, 12);
+        if (e != NULL) {
+            fn_800297F0(e, pos, arg1, params);
+        }
+    }
+}
+
 // .text:0x8002852C size:0xFC
 void fn_8002852C(void)
 {
@@ -597,5 +630,31 @@ void fn_80027918(u8 id, f32 v)
     Emitter* e = NULL;
     while ((e = fn_800339F0(e, id)) != NULL) {
         e->_18.y = v;
+    }
+}
+
+// .text:0x80027674 size:0x2A4
+void fn_80027674(Vec* pos, Vec* dir, EffectParams* params, f32 scale, u8 id)
+{
+    Emitter* e = fn_800339F0(NULL, id);
+
+    if (e != NULL) {
+        u8 tmp[sizeof(Emitter)];
+        Emitter* added = fn_800337CC((Emitter*)tmp, params->count, TRUE);
+        if (added != NULL) {
+            Particle* p;
+            fn_80027300(added, pos, dir, params, scale);
+            p = e->particles;
+            while (p != NULL && p->next != NULL) {
+                p = p->next;
+            }
+            p->next = added->particles;
+            e->count += added->count;
+        }
+    } else {
+        e = fn_80033A24(fn_80026E58, 0x80, 1, params->count, TRUE, id);
+        if (e != NULL) {
+            fn_80027300(e, pos, dir, params, scale);
+        }
     }
 }
