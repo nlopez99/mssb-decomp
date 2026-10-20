@@ -1,5 +1,6 @@
 #include "static/static_8003A2EC.h"
 #include "static/uitexture.h"
+#include "static/static_8004157C.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/os.h"
 #include "static/UnknownHomes_Static.h"
@@ -619,8 +620,6 @@ extern void fn_800AAEE4(CardRequest* req, MenuSlot* slot, s32 arg2, s32 arg3);
 extern void fn_800AA34C(u8 chan, u8 arg1, const char* name, MenuSlot* slot, s32 arg4, s32 arg5, u8 arg6);
 extern void fn_800ACCD4(void);
 extern void fn_8004A34C(void* card, u8 arg1, s32 arg2, s32 arg3, s32 arg4);
-extern u16 fn_8004157C(void);
-extern void fn_800415A0(u16 value);
 extern void fn_800A9E34(u8 chan, u8 arg1, s32 arg2, s32 arg3);
 extern void fn_800AA930(CardRequest* req, MenuSlot* slot, s32 arg2, s32 arg3);
 extern void fn_800B0A14_removeQueue(void);
@@ -858,7 +857,7 @@ static inline u32 BadSizeMask(SaveFile* save, s32 mask) {
         bit = 1 << i;
         if (mask & bit) {
             if (i == 0) {
-                if (save->headerSize != sizeof(SaveHeader) + 4) {
+                if (save->headerSize != 4 + sizeof(SaveHeader)) {
                     bad = bit;
                 }
             } else if (save->blocks[i - 1].size != sizeof(SaveBlock)) {
