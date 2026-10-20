@@ -1114,7 +1114,7 @@ int fn_3_10698C(void** list) {
     return count;
 }
 
-static inline void fn_3_getAnimPos(s32 id, Vec* pos) {
+static inline void getAnimPosition(s32 id, Vec* pos) {
     memset(pos, 0, sizeof(Vec));
     if (!getAnimRelatedCoordinates(id, lbl_3_common_bss_DE94._0000->_0938, (VecXYZ*)pos)) {
         memset(pos, 0, sizeof(Vec));
@@ -1141,7 +1141,7 @@ void fn_3_106270(Vec* out) {
                     lbl_3_common_bss_DE94._0000->_0938 = lbl_3_data_3B4C[g_Fielders[id]._17A];
                     lbl_3_common_bss_DE94._0000->_0950 = 0;
                 }
-                fn_3_getAnimPos(id, &pos);
+                getAnimPosition(id, &pos);
                 if (lbl_3_common_bss_DE94._0000->_09B7 == 0) {
                     if (lbl_3_common_bss_DE94._0000->_0938 != lbl_3_common_bss_DE94._0000->_093C ||
                         lbl_3_common_bss_DE94._0000->_0948 != lbl_3_common_bss_DE94._0000->_0946 ||
@@ -1184,7 +1184,7 @@ void fn_3_106270(Vec* out) {
                     lbl_3_common_bss_DE94._0000->_0938 = lbl_3_data_3B4C[runner->charID];
                     lbl_3_common_bss_DE94._0000->_0950 = 0;
                 }
-                fn_3_getAnimPos(id, &pos);
+                getAnimPosition(id, &pos);
                 pos.x -= runner->position.x;
                 pos.y -= runner->position.y;
                 pos.z -= runner->position.z;
@@ -2492,7 +2492,7 @@ BOOL fn_3_100018(void) {
 }
 
 // The captain searches compile to the target's register copies only as inlined calls.
-static inline s32 fn_3_findCaptain(GameControlsStruct* logic, GameInitVariables* settings) {
+static inline s32 findCaptainIndex(GameControlsStruct* logic, GameInitVariables* settings) {
     s32 i;
     s32 found = 0;
 
@@ -2504,7 +2504,7 @@ static inline s32 fn_3_findCaptain(GameControlsStruct* logic, GameInitVariables*
     return found;
 }
 
-static inline s32 fn_3_findCaptainKind(GameControlsStruct* logic, GameInitVariables* settings) {
+static inline s32 findCaptainKind(GameControlsStruct* logic, GameInitVariables* settings) {
     s32 i;
     s32 kind = 0;
 
@@ -3171,7 +3171,7 @@ BOOL fn_3_FDB30(void) {
             }
             continue;
         case 0x49:
-            found = fn_3_findCaptain(logic, settings);
+            found = findCaptainIndex(logic, settings);
             lbl_3_common_bss_DE94._0000->_09AA = 0;
             lbl_3_common_bss_DE94._0000->_09B5 = 0;
             lbl_3_common_bss_DE94._0000->_0946 = found;
@@ -3224,7 +3224,7 @@ BOOL fn_3_FDB30(void) {
             continue;
         case 0x55:
         case 0x56:
-            kind = fn_3_findCaptainKind(logic, settings);
+            kind = findCaptainKind(logic, settings);
             switch (kind) {
             case 0:
                 arg = 0;
@@ -3258,12 +3258,12 @@ BOOL fn_3_FDB30(void) {
             cam->_0000 += 1;
             continue;
         case 0x58:
-            found = fn_3_findCaptain(logic, settings);
+            found = findCaptainIndex(logic, settings);
             fn_80011358(found, level);
             cam->_0000 += 1;
             continue;
         case 0x59:
-            found = fn_3_findCaptain(logic, settings);
+            found = findCaptainIndex(logic, settings);
             fn_80011358(found, 4);
             cam->_0000 += 1;
             continue;
@@ -3555,11 +3555,15 @@ void fn_3_FCF24(void) {
     cam->_003C = total;
 }
 
-// 98.28%: registers only, the same rotation as fn_3_FCE38 (camera r5, key offset r6,
-// key count r7 in the target); loop forms and a late camera load change nothing.
+// fn_3_FCEB0 matches only with the camera taken through an inlined call (found by the
+// permuter as an identity function); fn_3_FCE38 does not change with it.
+static inline lbl_3_common_bss_DE94_s2* getCameraPath(void) {
+    return lbl_3_common_bss_DE94._0000;
+}
+
 // .text:0x000FCEB0 size:0x74 mapped:0x8073BF44
 int fn_3_FCEB0(f32 time) {
-    lbl_3_common_bss_DE94_s2* cam = lbl_3_common_bss_DE94._0000;
+    lbl_3_common_bss_DE94_s2* cam = getCameraPath();
     int i = 0;
 
     if (time < 0.0) {
