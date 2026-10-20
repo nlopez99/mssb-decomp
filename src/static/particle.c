@@ -1432,8 +1432,6 @@ void fn_80030470(Vec* pos, Vec* dir, Vec* back, EffectParams* params, s32 id)
 }
 
 // .text:0x8002FDB8 size:0x6B8
-// 99.86%: registers only, in the block that brings both points to one depth: the target
-// loads a.z and n.z into f4 and f3 and keeps the ratio in f2 in both branches.
 void fn_8002FDB8(Emitter* e, Vec* pos, Vec* dir, Vec* back, EffectParams* params)
 {
     SwirlParticle* p;
@@ -1449,7 +1447,6 @@ void fn_8002FDB8(Emitter* e, Vec* pos, Vec* dir, Vec* back, EffectParams* params
     f32 mag;
     f32 tilt;
     f32 yaw;
-    f32 r;
 
     e->_10 = params->_00;
     PSVECNormalize(dir, &n);
@@ -1483,17 +1480,15 @@ void fn_8002FDB8(Emitter* e, Vec* pos, Vec* dir, Vec* back, EffectParams* params
         PSVECAdd(pos, &n, &n);
         PSMTXMultVec(lbl_8017FFE0, pos, &a);
         PSMTXMultVec(lbl_8017FFE0, &n, &n);
-        if (n.z != a.z) {
+        if (a.z != n.z) {
             if (n.z != 0.0f) {
-                r = a.z / n.z;
+                n.x *= a.z / n.z;
+                n.y *= a.z / n.z;
                 n.z = a.z;
-                n.x *= r;
-                n.y *= r;
             } else {
-                r = n.z / a.z;
+                a.x *= n.z / a.z;
+                a.y *= n.z / a.z;
                 a.z = n.z;
-                a.x *= r;
-                a.y *= r;
             }
         }
         PSVECSubtract(&a, &n, &n);
