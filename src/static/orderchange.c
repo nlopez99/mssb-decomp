@@ -1676,11 +1676,8 @@ s32 randRange_FUN_80042bf0(s32 min, s32 max) {
 }
 
 // .text:0x800426DC size:0x514
-// Registers in the bonus block: the target keeps lbl_800E86F0 in r26 and &bars[0] in r5,
-// one more register live than this build
 void transferStatsToInMemRoster(u8 team) {
     s32 slot;
-    RosterEntry* dst;
     u8 t;
     u8 p;
 
@@ -1702,22 +1699,21 @@ void transferStatsToInMemRoster(u8 team) {
         lbl_8034E9A0.s._489B[0][slot] = 1;
     }
     if (lbl_8034E9A0.s._489B[team][slot] != 0) {
-        dst = &inMemRoster[team][slot];
-        dst->_28[0] += lbl_800E86F0[0];
-        dst->_28[1] += lbl_800E86F0[1];
-        dst->_2A[0] += lbl_800E86F0[2];
-        dst->_2A[1] += lbl_800E86F0[3];
-        dst->_2F += lbl_800E86F0[5];
-        dst->_30 += lbl_800E86F0[6];
-        dst->_2C += lbl_800E86F0[4];
-        dst->_00[0] += lbl_800E86F0[7];
-        dst->_00[1] += lbl_800E86F0[8];
-        dst->_00[2] += lbl_800E86F0[9];
-        dst->_00[3] += lbl_800E86F0[10];
-        dst->_00[4] += lbl_800E86F0[11];
-        dst->bars[0] += 2;
-        if (dst->bars[0] > 10) {
-            dst->bars[0] = 10;
+        inMemRoster[team][slot]._28[0] += lbl_800E86F0[0];
+        inMemRoster[team][slot]._28[1] += lbl_800E86F0[1];
+        inMemRoster[team][slot]._2A[0] += lbl_800E86F0[2];
+        inMemRoster[team][slot]._2A[1] += lbl_800E86F0[3];
+        inMemRoster[team][slot]._2F += lbl_800E86F0[5];
+        inMemRoster[team][slot]._30 += lbl_800E86F0[6];
+        inMemRoster[team][slot]._2C += lbl_800E86F0[4];
+        inMemRoster[team][slot]._00[0] += lbl_800E86F0[7];
+        inMemRoster[team][slot]._00[1] += lbl_800E86F0[8];
+        inMemRoster[team][slot]._00[2] += lbl_800E86F0[9];
+        inMemRoster[team][slot]._00[3] += lbl_800E86F0[10];
+        inMemRoster[team][slot]._00[4] += lbl_800E86F0[11];
+        inMemRoster[team][slot].bars[0] += 2;
+        if (inMemRoster[team][slot].bars[0] > 10) {
+            inMemRoster[team][slot].bars[0] = 10;
         }
         inMemRoster[team][slot].bars[1] += 2;
         if (inMemRoster[team][slot].bars[1] > 10) {
