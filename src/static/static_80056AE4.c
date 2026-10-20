@@ -120,8 +120,11 @@ typedef struct RosterEntry {
 
 extern struct {
     /* 0x0000 */ RosterEntry chars[6][9];
-    /* 0x21C0 */ u8 _21C0[0x47F9 - 0x21C0];
+    /* 0x21C0 */ u8 _21C0[0x470D - 0x21C0];
+    /* 0x470D */ u8 _470D[2];
+    /* 0x470F */ u8 _470F[0x47F9 - 0x470F];
     /* 0x47F9 */ s8 _47F9[2][9][9];
+    /* 0x489B */ u8 _489B[2][9];
 } lbl_8034E9A0;
 
 typedef struct MissionText {
@@ -564,7 +567,40 @@ void fn_8005C5C4(SpaniTask* task, s32 team) {
 }
 
 // .text:0x8005C2B0 size:0x314
-void fn_8005C2B0(void) {
+void fn_8005C2B0(SpaniTask* task) {
+    s32 team;
+    s32 i;
+    u8 flag;
+
+    for (team = 0; team < 2; team++) {
+        for (i = 0; i < 9; i++) {
+            fn_800363D8(task, i + 0x40 + team * 9, 1, 0x83, inMemRoster[team][i].stats.CharID);
+            getGridObj(task, i, team * 9, 0x2E)->_5C = i << 16;
+            getGridObj(task, i, team * 9, 0xD0)->_5C = inMemRoster[team][i].stats.CharacterClass << 16;
+            getGridObj(task, i, team * 9, 0xAC)->_5C = (inMemRoster[team][i].stats.BattingStance + inMemRoster[team][i].stats.FieldingArm * 2) << 16;
+            if (g_d_GameSettings.GameModeSelected == 5) {
+                flag = starMissionCompletionTracker._43D6[inMemRoster[team][i].stats.CharID];
+            } else {
+                flag = lbl_8034E9A0._489B[team][i];
+            }
+            if (flag != 0) {
+                getGridObj(task, i, team * 9, 0x76)->_68 = 1;
+                getGridObj(task, i, team * 9, 0x88)->_54 |= 2;
+                getGridObj(task, i, team * 9, 0x88)->_5C = 0;
+                getGridObj(task, i, team * 9, 0x88)->_68 = 1;
+            } else if (lbl_80361B20._00[0][inMemRoster[team][i].stats.CharID] != 0) {
+                getGridObj(task, i, team * 9, 0x76)->_68 = 1;
+                getGridObj(task, i, team * 9, 0x88)->_54 |= 2;
+                getGridObj(task, i, team * 9, 0x88)->_5C = 0;
+                getGridObj(task, i, team * 9, 0x88)->_68 = 0;
+            } else {
+                getGridObj(task, i, team * 9, 0x88)->_54 &= ~2;
+            }
+            getGridObj(task, i, team * 9, 0x64)->_54 &= ~2;
+        }
+        getTeamObj(task, team, 8)->_5C = lbl_8034E9A0._470D[team] << 16;
+        getTeamObj(task, team, 0xC)->_5C = lbl_8034E9A0._470D[team] << 16;
+    }
 }
 
 // .text:0x8005BF40 size:0x370

@@ -23,7 +23,7 @@ void fn_8005B298(void);
 void fn_8005B760(void);
 void fn_8005BB5C(void);
 void fn_8005BF40(void);
-void fn_8005C2B0(void);
+void fn_8005C2B0(struct SpaniTask* task);
 void fn_8005C5C4(struct SpaniTask* task, s32 team);
 void fn_8005C830(struct SpaniTask* task, s32 team, s32 row);
 void fn_8005CCE4(struct SpaniTask* task, s32 team);
