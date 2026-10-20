@@ -64,6 +64,24 @@ static/physics.c:
 	.sbss       start:0x803CBCA0 end:0x803CBCA8
 	.sdata2     start:0x803CC720 end:0x803CC7A0
 
+static/unit_80063028.c:
+	extab       start:0x80006418 end:0x80006438
+	extabindex  start:0x80008184 end:0x800081B4
+	.text       start:0x80063028 end:0x800638CC
+	.sdata      start:0x803CB890 end:0x803CB898
+	.sdata2     start:0x803CC8D8 end:0x803CC8F0
+
+static/mb_subfunc.c:
+	extab       start:0x80006438 end:0x800064F8
+	extabindex  start:0x800081B4 end:0x800082D4
+	.text       start:0x800638CC end:0x80069A68
+	.rodata     start:0x800E69B8 end:0x800E6A00
+	.data       start:0x80108D30 end:0x80109250
+	.bss        start:0x802E4BC0 end:0x802E5200
+	.sdata      start:0x803CB898 end:0x803CB8D8
+	.sbss       start:0x803CBD18 end:0x803CBD30
+	.sdata2     start:0x803CC8F0 end:0x803CC8F8
+
 Dolphin/base/PPCArch.c:
 	.text       start:0x8006D024 end:0x8006D138
 
