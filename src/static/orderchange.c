@@ -461,11 +461,8 @@ void fn_800486E0(s32 priority, s8 team, u8 player) {
 }
 
 // .text:0x80047FE4 size:0x6FC
-// The target reads the held buttons by index (lhzx) and the rest through src, as in
-// challengeStarMenu
 void pauseMenuSelection(void) {
     PadButtons pad;
-    PadButtons* src;
     s32 i;
     u8 kind;
 
@@ -489,10 +486,9 @@ void pauseMenuSelection(void) {
     case 4:
         memset(&pad, 0, sizeof(pad));
         if (lbl_803C66B0._5D == 0) {
-            src = &lbl_803297E0.pads[lbl_8034E9A0.s.port[0]];
             pad.held = lbl_803297E0.pads[lbl_8034E9A0.s.port[0]].held;
-            pad.pressed = src->pressed;
-            pad.repeat = src->repeat;
+            pad.pressed = lbl_803297E0.pads[lbl_8034E9A0.s.port[0]].pressed;
+            pad.repeat = lbl_803297E0.pads[lbl_8034E9A0.s.port[0]].repeat;
             if (pad.pressed & 0x200) {
                 lbl_803297E0.s.pause._45 = 3;
                 sndFXStartEx(0x1B9, lbl_800EFBA4[2], 0x3F, 0);
@@ -1261,11 +1257,8 @@ void starMenuCursor(void) {
 }
 
 // .text:0x80042DE8 size:0x5A4
-// The target reads the held buttons by index (lhzx) and the rest through src; this build
-// reads all three through src
 void challengeStarMenu(void) {
     PadButtons pad;
-    PadButtons* src;
     u8 single = FALSE;
     s32 kind;
 
@@ -1274,9 +1267,8 @@ void challengeStarMenu(void) {
         return;
     }
     pad.held = lbl_803297E0.pads[lbl_8034E9A0.s.port[0]].held;
-    src = &lbl_803297E0.pads[lbl_8034E9A0.s.port[0]];
-    pad.pressed = src->pressed;
-    pad.repeat = src->repeat;
+    pad.pressed = lbl_803297E0.pads[lbl_8034E9A0.s.port[0]].pressed;
+    pad.repeat = lbl_803297E0.pads[lbl_8034E9A0.s.port[0]].repeat;
     kind = (u8)starMissionCompletionTracker.chars[lbl_803297E0.s.pause._64].kind;
     if (kind == 3) {
         single = TRUE;
