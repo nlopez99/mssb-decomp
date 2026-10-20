@@ -509,11 +509,14 @@ void fn_800494CC(u8 team) {
 }
 
 // .text:0x80049220 size:0x2AC
-// fn_80049220 zeroes its stack copy of the buttons before filling it, and keeps the stores;
-// this copy through GetPad stores them once, so the registers and stack differ
+// fn_80049220 fills its stack copy of the buttons in place; returning it from GetPad adds a
+// copy of the temporary (lwz/stw at 16(r1)) and shifts the registers
 static inline PadButtons GetPad(s32 port) {
     PadButtons pad;
 
+    pad.held = 0;
+    pad.pressed = 0;
+    pad.repeat = 0;
     pad.held = lbl_8034E9A0.pads[port].held;
     pad.pressed = lbl_8034E9A0.pads[port].pressed;
     pad.repeat = lbl_8034E9A0.pads[port].repeat;
