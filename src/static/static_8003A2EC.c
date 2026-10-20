@@ -866,7 +866,7 @@ static inline u32 BadSizeMask(SaveFile* save, s32 mask) {
                 if (save->headerSize != 4 + sizeof(SaveHeader)) {
                     bad |= bit;
                 }
-            } else if (*(u16*)((u8*)save + (i - 1) * sizeof(SaveBlock) + 0x5FA) != sizeof(SaveBlock)) {
+            } else if (*(u16*)((u8*)save + 0x5FA + (i - 1) * sizeof(SaveBlock)) != sizeof(SaveBlock)) {
                 bad |= bit;
             }
         }
