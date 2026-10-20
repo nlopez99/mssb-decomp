@@ -231,7 +231,16 @@ BOOL fn_8006C79C(s32 index) {
 }
 
 // .text:0x8006C6C4 size:0xD8
-void fn_8006C6C4(void) {
+s32 fn_8006C6C4(void) {
+    s32 count = 0;
+    s32 i;
+
+    for (i = 0; i < 54; i++) {
+        if (starMissionCompletionTracker.chars[i].status == 1) {
+            count++;
+        }
+    }
+    return count;
 }
 
 // .text:0x8006C5CC size:0xF8
