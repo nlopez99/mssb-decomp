@@ -443,7 +443,7 @@ void fn_8000D164(void) {
 // Differs: four fewer saved registers in the target (stw r28-r31, not stmw r27) and the
 // case 2/3 copy loops, whose pointers the target steps down from the end.
 // .text:0x8000CEF0 size:0x274
-BOOL fn_8000CEF0(AnimFile* file, s32 idx, u32 frame, s32 skip, u32* dst) {
+u32 fn_8000CEF0(AnimFile* file, s32 idx, u32 frame, s32 skip, u32* dst) {
     AnimTrack* track = ((AnimTrack**)file->tracks)[idx + 2];
     AnimFrame* f;
     u32* p;

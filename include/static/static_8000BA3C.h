@@ -95,7 +95,7 @@ typedef struct SpriteVerts {
 void fn_8000BA3C(void);
 void fn_8000C194(void);
 void fn_8000CC4C(void);
-BOOL fn_8000CEF0(AnimFile* file, s32 idx, u32 frame, s32 skip, u32* dst);
+u32 fn_8000CEF0(AnimFile* file, s32 idx, u32 frame, s32 skip, u32* dst);
 void fn_8000D164(void);
 void fn_8000D838(void);
 void fn_8000D8A4(void);

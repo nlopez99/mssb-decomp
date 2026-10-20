@@ -6,10 +6,11 @@ typedef struct TextBox {
     /* 0x00 */ void* _00;
     /* 0x04 */ s32 _04;
     /* 0x08 */ s32 _08;
-    /* 0x0C */ u8 _0C[0x10 - 0xC];
-    /* 0x10 */ s16 _10;
-    /* 0x12 */ s16 _12;
-    /* 0x14 */ u8 _14[0x18 - 0x14];
+    /* 0x0C */ s32 _0C;
+    /* 0x10 */ u16 _10;
+    /* 0x12 */ u16 _12;
+    /* 0x14 */ s16 _14;
+    /* 0x16 */ s16 _16;
     /* 0x18 */ s16 _18[4];
     /* 0x20 */ s16 _20[4];
     /* 0x28 */ s16 _28;
@@ -32,7 +33,7 @@ typedef struct TextBox {
 typedef struct TextSlot {
     /* 0x0 */ struct TextModel* model;
     /* 0x4 */ u16 box;
-    /* 0x6 */ s16 _06;
+    /* 0x6 */ u16 _06;
 } TextSlot; // size: 0x8
 
 typedef struct FontInfo {
@@ -80,7 +81,10 @@ typedef struct TextModel {
     /* 0x04 */ u8 _04[0xC - 0x4];
     /* 0x0C */ u8 _0C[0x54 - 0xC];
     /* 0x54 */ s32 flags;
-    /* 0x58 */ u8 _58[0x67 - 0x58];
+    /* 0x58 */ s32 _58;
+    /* 0x5C */ u8 _5C[0x64 - 0x5C];
+    /* 0x64 */ u16 _64;
+    /* 0x66 */ u8 _66;
     /* 0x67 */ u8 _67;
 } TextModel;
 
@@ -102,6 +106,29 @@ extern u8 lbl_800E9920[];
 extern void* lbl_803CBBE8;
 
 extern void convertTextureHeader(void* tex);
+
+typedef struct AnimValues {
+    /* 0x00 */ u8 _00[0x6];
+    /* 0x06 */ u16 _06;
+    /* 0x08 */ u8 _08[0xC - 0x8];
+    /* 0x0C */ s16 _0C;
+    /* 0x0E */ u8 _0E[0x14 - 0xE];
+    /* 0x14 */ s16 x;
+    /* 0x16 */ s16 y;
+    /* 0x18 */ u8 _18[0x1C - 0x18];
+    /* 0x1C */ s32 color;
+    /* 0x20 */ u8 _20[0x50 - 0x20];
+} AnimValues; // size: 0x50
+
+typedef struct TextAnim {
+    /* 0x00 */ u8 _00[0x38];
+    /* 0x38 */ AnimFile* file;
+} TextAnim; // size: 0x3C
+
+extern TextAnim lbl_803C4BE0[];
+
+extern s32 byteWiseMultiply(s32 a, s32 b);
+extern s32 multBottomBits_asFloat(s32 a, s32 b);
 
 // .text:0x800111B4 size:0x24
 void fn_800111B4(RelocTable* table) {
@@ -297,7 +324,7 @@ void fn_8000FA9C(void) {
 }
 
 // .text:0x8000F988 size:0x114
-s32 fn_8000F988(TextModelSet* set, s32 i, s16 arg2, s32 font, s32 str, BOOL flag) {
+s32 fn_8000F988(TextModelSet* set, s32 i, u16 arg2, s32 font, s32 str, BOOL flag) {
     TextModel* model = lbl_80371C30[set->first + i].model;
     s32 j;
 
@@ -344,8 +371,84 @@ void fn_8000F8F4(TextModelSet* set) {
     }
 }
 
+// Differs: the target keeps &anim->file (lwzu) in r31 and frame in r30, and computes each
+// box address with the operands of the add swapped; declaration orders reached 99.16%.
 // .text:0x8000F534 size:0x3C0
-void fn_8000F534(void) {
+void fn_8000F534(TextModel* model, BOOL active) {
+    AnimValues cur;
+    AnimValues next;
+    TextBox* box;
+    TextAnim* anim;
+    TextSlot* slot;
+    BOOL flag = FALSE;
+    u16 frame;
+    s16 x;
+    s16 y;
+    s32 i;
+    s32 v;
+    s32 color;
+
+    for (i = 0; i < 30; i++) {
+        if (model == lbl_80366B18.slots[i].model) {
+            break;
+        }
+    }
+    if (i >= 30) {
+        return;
+    }
+    slot = &lbl_80366B18.slots[i];
+    if (!active) {
+        lbl_80366B18.boxes[slot->box].state = 1;
+        return;
+    }
+    lbl_80366B18.boxes[slot->box].state = 2;
+    frame = model->_64;
+    anim = &lbl_803C4BE0[model->_66];
+    fn_8000CEF0(anim->file, frame, 0, slot->_06, (u32*)&cur);
+    x = cur.x;
+    y = cur.y;
+    if (model->flags & 8) {
+        color = byteWiseMultiply(cur.color, model->_58);
+    } else {
+        color = multBottomBits_asFloat(cur.color, model->_58);
+    }
+    lbl_80366B18.boxes[slot->box]._08 = color;
+    v = (cur._0C << 8) / 1024;
+    if (v == 16) {
+        flag = TRUE;
+        lbl_80366B18.boxes[slot->box]._2C = 2;
+    } else if (v == 18) {
+        lbl_80366B18.boxes[slot->box]._2C = 1;
+    } else if (v == 22) {
+        lbl_80366B18.boxes[slot->box]._2C = 0;
+    } else {
+        fn_8000CEF0(anim->file, cur._06, 0, 0, (u32*)&next);
+        v = (next._0C << 8) / 1024;
+        if (v < 17) {
+            flag = TRUE;
+            lbl_80366B18.boxes[slot->box]._2C = 2;
+        } else if (v < 20) {
+            lbl_80366B18.boxes[slot->box]._2C = 1;
+        } else {
+            lbl_80366B18.boxes[slot->box]._2C = 0;
+        }
+    }
+    if (flag) {
+        box = &lbl_80366B18.boxes[slot->box];
+        box->_10 = x;
+        box->_12 = y;
+    } else {
+        box = &lbl_80366B18.boxes[slot->box];
+        box->_10 = x;
+        box->_12 = y;
+    }
+    if (fn_8000CEF0(anim->file, frame, 1, slot->_06, (u32*)&cur)) {
+        lbl_80366B18.boxes[slot->box]._0C = multBottomBits_asFloat(cur.color, model->_58);
+        lbl_80366B18.boxes[slot->box]._14 = cur.x - lbl_80366B18.boxes[slot->box]._10;
+        lbl_80366B18.boxes[slot->box]._16 = cur.y - lbl_80366B18.boxes[slot->box]._12;
+    } else {
+        lbl_80366B18.boxes[slot->box]._0C = 0;
+    }
 }
 
 // .text:0x8000F4B8 size:0x7C
