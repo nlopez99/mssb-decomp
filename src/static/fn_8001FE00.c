@@ -8,7 +8,7 @@
 typedef struct SceneSprite {
     /* 0x00 */ u8 _00[0x54];
     /* 0x54 */ u32 flags;
-    /* 0x58 */ u8 _58[0x5C - 0x58];
+    /* 0x58 */ u32 color;
     /* 0x5C */ u32 _5C;
     /* 0x60 */ u8 _60[0x68 - 0x60];
     /* 0x68 */ u8 _68;
@@ -27,7 +27,7 @@ typedef struct SceneTask {
     /* 0x16 */ u8 _16[2];
     /* 0x18 */ s16 _18;
     /* 0x1A */ s16 _1A;
-    /* 0x1C */ s16 _1C;
+    /* 0x1C */ u16 _1C;
     /* 0x1E */ s16 _1E;
 } SceneTask;
 
@@ -37,7 +37,7 @@ typedef struct SceneState {
     /* 0x04 */ void* image;
     /* 0x08 */ u8 _08[0xC - 0x8];
     /* 0x0C */ s16 _0C;
-    /* 0x0E */ s16 _0E;
+    /* 0x0E */ u16 _0E;
     /* 0x10 */ u8 scene;
     /* 0x11 */ u8 next;
     /* 0x12 */ u8 _12;
@@ -46,7 +46,7 @@ typedef struct SceneState {
     /* 0x15 */ u8 _15;
     /* 0x16 */ u8 _16;
     /* 0x17 */ u8 _17;
-    /* 0x18 */ s8 _18;
+    /* 0x18 */ u8 _18;
     /* 0x19 */ u8 step;
     /* 0x1A */ u8 _1A;
     /* 0x1B */ u8 _1B;
@@ -80,6 +80,19 @@ void fn_800B0A14_removeQueue(void);
 void fn_800ACF14(void* data);
 void* fn_800ACF34(u32 align, u32 size);
 void convertTextureHeader(void* tex);
+void fn_8000FE08(s32 id, s32 arg1, s32 arg2);
+void fn_800B2160(s32 mode);
+
+typedef struct SceneVtx {
+    /* 0x00 */ Vec pos;
+    /* 0x0C */ u32 color;
+    /* 0x10 */ s16 s;
+    /* 0x12 */ s16 t;
+} SceneVtx; // size: 0x14
+
+void DrawSprite_TexObj(SceneVtx* vtx, void* tex, s32 arg2);
+extern f32 lbl_803CBBDC;
+extern f32 lbl_803CBBE0;
 
 s16 lbl_803CB7C8[2] = { 0x15, 0x9 };
 u8 lbl_803CB7CC[7] = { 0, 1, 2, 3, 4, 5, 6 };
@@ -289,6 +302,88 @@ s16 calledWhenStartingMatch(void) {
     return 0;
 }
 
+// Differs: the target adds 0.0f + 640.0f and 0.0f + 256.0f at run time (the build folds them),
+// and float registers of the vertex copies shift by one.
 // .text:0x8001FE00 size:0x248
-void fn_8001FE00(void) {
+void fn_8001FE00(SceneTask* task) {
+    SceneVtx vtx[4];
+    struct {
+        Vec pos;
+        f32 w;
+    } quad[4];
+    Mtx trans;
+    Mtx m;
+    f32 x;
+    f32 y;
+    f32 scale;
+    f32 z;
+    s32 alpha;
+    u32 color;
+    SceneSprite* sprite;
+
+    if (lbl_8037169C.step < 2) {
+        return;
+    }
+    if (lbl_8037169C.scene == 13) {
+        lbl_8037169C._1A = lbl_8037169C._0E;
+    } else {
+        alpha = lbl_8037169C._1A + 16;
+        if (alpha > 255) {
+            alpha = 255;
+        }
+        lbl_8037169C._1A = alpha;
+    }
+    sprite = lbl_80371C30[task->slot + 4].sprite;
+    sprite->color = (sprite->color & 0xFFFFFF00) | lbl_8037169C._1A;
+    fn_8000FE08(task->_1C, 0, lbl_8037169C._18 + 0x92);
+    fn_800B2160(1);
+    PSMTXTrans(trans, -320.0f, -224.0f, 0.0f);
+    scale = lbl_803CBBE0 / lbl_803CBBDC;
+    x = 0.0f;
+    y = 0.0f;
+    quad[0].pos.x = x;
+    quad[0].pos.y = y;
+    quad[0].pos.z = 0.0f;
+    quad[1].pos.x = x + 640.0f;
+    quad[1].pos.y = y;
+    quad[1].pos.z = 0.0f;
+    quad[2].pos.x = x;
+    quad[2].pos.y = y + 256.0f;
+    quad[2].pos.z = 0.0f;
+    quad[3].pos.x = x + 640.0f;
+    quad[3].pos.y = y + 256.0f;
+    quad[3].pos.z = 0.0f;
+    PSMTXScale(m, scale, scale, 1.0f);
+    PSMTXConcat(m, trans, m);
+    PSMTXMultVec(m, &quad[0].pos, &quad[0].pos);
+    PSMTXMultVec(m, &quad[1].pos, &quad[1].pos);
+    PSMTXMultVec(m, &quad[2].pos, &quad[2].pos);
+    PSMTXMultVec(m, &quad[3].pos, &quad[3].pos);
+    z = -lbl_803CBBE0;
+    color = lbl_8037169C._1A - 0x100;
+    vtx[0].pos.x = quad[0].pos.x;
+    vtx[0].pos.y = quad[0].pos.y;
+    vtx[0].pos.z = z;
+    vtx[0].color = color;
+    vtx[1].pos.x = quad[2].pos.x;
+    vtx[1].pos.y = quad[2].pos.y;
+    vtx[1].pos.z = z;
+    vtx[1].color = color;
+    vtx[2].pos.x = quad[3].pos.x;
+    vtx[2].pos.y = quad[3].pos.y;
+    vtx[2].pos.z = z;
+    vtx[2].color = color;
+    vtx[3].pos.x = quad[1].pos.x;
+    vtx[3].pos.y = quad[1].pos.y;
+    vtx[3].pos.z = z;
+    vtx[3].color = color;
+    vtx[0].s = 0;
+    vtx[0].t = 0;
+    vtx[1].s = 0;
+    vtx[1].t = 0x400;
+    vtx[2].s = 0x400;
+    vtx[2].t = 0x400;
+    vtx[3].s = 0x400;
+    vtx[3].t = 0;
+    DrawSprite_TexObj(vtx, lbl_8037169C.image, 0);
 }

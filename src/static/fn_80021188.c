@@ -100,6 +100,8 @@ void fn_80021AA0(void) {
     fn_800ACD44();
 }
 
+// Differs: scheduling of the SND@ header stores and the two initSound constants, which the
+// target shares with the stb of the same bytes.
 // .text:0x800219B4 size:0xEC
 void f_initSound(void) {
     *(u32*)lbl_80158740 = 0xABF16D9C;
@@ -172,6 +174,8 @@ void fn_800216F8(u8 group, void* callback) {
     lbl_803CC1B8->state = 0;
 }
 
+// Differs: the target forms the entry with lwzu from base+index and passes *entry to the
+// callback; written either way the build computes &groups[i] separately.
 // .text:0x80021650 size:0xA8
 void fn_80021650(s32 arg0, SoundGroupData* data, SoundLoadTask* task) {
     SoundGroupData** entry;

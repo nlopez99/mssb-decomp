@@ -240,6 +240,8 @@ void* fn_80023AA4(void) {
     return ActorObjectInitTable(28);
 }
 
+// Differs: the target reloads lbl_8017EBB0 and the slot index for the second lookup and keeps
+// slot in r27; the build keeps base and index in r30/r31 (c.f. fn_800238E0, which matches).
 // .text:0x8002399C size:0x108
 void fn_8002399C(ObjInst* inst, u16 slot, s16 id, ObjLayout* layout, void* anim, void* skin) {
     memset(lbl_8017EBB0[slot], 0, lbl_803CBC5C);
@@ -318,6 +320,8 @@ void BuildBoneSkinOrientationMatrix(ObjBone* bone, MtxPtr parent) {
     }
 }
 
+// Differs: registers only (the size sums in r25-r29 swapped) and the order of the skin and
+// cursor stores in GetDisplayObj; the frame matches with the local ObjActor.
 // .text:0x800232E0 size:0x32C
 ObjActor* f_InitActorWithLayout(ObjLayout* layout, u8* mem) {
     ObjActor* actor;

@@ -3,7 +3,7 @@
 
 #include "mssbTypes.h"
 
-void fn_8001FE00(void);
+void fn_8001FE00(struct SceneTask* task);
 s16 calledWhenStartingMatch(void);
 BOOL fn_80020218(void);
 void fn_8002024C(void);

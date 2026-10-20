@@ -2133,6 +2133,8 @@ void fn_800229CC(void) {
     fn_800A6304();
 }
 
+// Differs: the target walks the file table with two pointers and a byte offset per inner
+// loop (the loop over four tables unrolled by two); registers and loop setup differ.
 // .text:0x800227E4 size:0x1E8
 void fn_800227E4(void) {
     s32 i;
@@ -2155,6 +2157,7 @@ void fn_800227E4(void) {
     AramPush(&lbl_800F1D68, (void*)lbl_803716B8.aramBase, 2, 0, (AramCallback)fn_800227A0, NULL);
 }
 
+// Differs: registers only, the zero for _1E9 in r0 against r5.
 // .text:0x800227A0 size:0x44
 void fn_800227A0(void) {
     lbl_803716B8._1E9 = 0;
