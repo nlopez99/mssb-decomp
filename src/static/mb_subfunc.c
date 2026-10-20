@@ -343,19 +343,14 @@ void fn_80068838(void) {
     u8 color;
     s16 id;
     u8 r;
-    u8 found;
     MbRosterEntry* src;
     MbRosterEntry* dst;
-    s8 list[10];
-    u8 chem;
-    u8* row;
 
     n = 0;
     memset(pool, -1, sizeof(pool));
     for (i = 0; i < 54; i++) {
         if ((s32)starMissionCompletionTracker.chars[i].state == 2) {
-            found = fn_80067B40(0, i, 1);
-            if (found) {
+            if (fn_80067B40(0, i, 1)) {
                 for (j = 0; j < 9; j++) {
                     if (i == lbl_80108EDC[j][0]) {
                         break;
@@ -509,11 +504,11 @@ void fn_80068838(void) {
                 dst->_74[19] = src->_74[19];
                 dst->_74[20] = src->_74[20];
                 if (team == 0) {
-                    lbl_80354720[0][i]._0 = i;
-                    lbl_80354720[0][i]._1 = starMissionCompletionTracker.slots[i]._2;
-                    lbl_80354720[0][i]._2 = starMissionCompletionTracker.slots[i]._3;
-                    inMemRoster[0][i]._26 = starMissionCompletionTracker.slots[i]._4 / 2;
-                    inMemRoster[0][i]._27 = starMissionCompletionTracker.slots[i]._4 % 2;
+                    lbl_80354720[team][i]._0 = i;
+                    lbl_80354720[team][i]._1 = starMissionCompletionTracker.slots[i]._2;
+                    lbl_80354720[team][i]._2 = starMissionCompletionTracker.slots[i]._3;
+                    inMemRoster[team][i]._26 = starMissionCompletionTracker.slots[i]._4 / 2;
+                    inMemRoster[team][i]._27 = starMissionCompletionTracker.slots[i]._4 % 2;
                 }
                 lbl_803C6724._02[team][i] = id;
             }
@@ -525,27 +520,7 @@ void fn_80068838(void) {
         fn_80067C48(0);
         fn_80067C48(1);
     }
-    for (i = 0; i < 9; i++) {
-        row = inMemRoster[0][i].chemistry;
-        for (j = 0; j < 9; j++) {
-            chem = row[inMemRoster[0][j].charId];
-            if (chem < 90 || chem == 100) {
-                list[j] = -1;
-            } else {
-                list[j] = inMemRoster[0][j].charId;
-            }
-        }
-        for (j = 0; j < 9; j++) {
-            for (k = 0; k < 10; k++) {
-                if (list[j] > list[k]) {
-                    s8 tmp = list[j];
-                    list[j] = list[k];
-                    list[k] = tmp;
-                }
-            }
-        }
-        memcpy(lbl_8034E9A0._47F9[0][i], list, 9);
-    }
+    fn_80066EAC(0);
     fn_80069854();
     fn_8006496C();
     fn_80069854();
@@ -749,7 +724,7 @@ void fn_80067C48(u8 team) {
 }
 
 // .text:0x80067B40 size:0x108
-s32 fn_80067B40(s32 arg0, u8 id, u8 value) {
+u8 fn_80067B40(s32 arg0, u8 id, u8 value) {
     s32 i;
     s32 j;
     s32 k;
@@ -1006,10 +981,12 @@ void fn_80066EAC(u8 team) {
     s32 k;
     s8 tmp;
     u8 chem;
+    MbRosterEntry* entry;
 
     for (i = 0; i < 9; i++) {
+        entry = &inMemRoster[team][i];
         for (j = 0; j < 9; j++) {
-            chem = inMemRoster[team][i].chemistry[inMemRoster[team][j].charId];
+            chem = entry->chemistry[inMemRoster[team][j].charId];
             if (chem < 90 || chem == 100) {
                 list[j] = -1;
             } else {
@@ -1054,14 +1031,10 @@ void characterSelectScreen(u8 team) {
     s8 captains[9];
     s8 others[9];
     u8 oldPos[9];
-    s8 list[10];
     s16 ids[9];
     s32 i;
     s32 j;
     s32 k;
-    s32 a;
-    s32 b;
-    s32 c;
     u8 n;
     u8 isCaptain;
     u8* pos;
@@ -1070,16 +1043,14 @@ void characterSelectScreen(u8 team) {
     s32 id;
     s32 rj;
     s8 tmp;
-    u8 chem;
-    u8* row;
     MbRosterEntry* src;
     MbRosterEntry* dst;
 
     for (i = 0; i < 9; i++) {
         others[i] = -1;
-        ids[i] = inMemRoster[team][i].charId;
         captains[i] = -1;
         fielders[i] = -1;
+        ids[i] = inMemRoster[team][i].charId;
         oldPos[i] = lbl_803C6724._14[team][i];
     }
     fielders[lbl_80109054[0][inMemRoster[team][0].attribute][0]] = inMemRoster[team][0].charId;
@@ -1235,27 +1206,7 @@ void characterSelectScreen(u8 team) {
         dst->_74[18] = src->_74[18];
         dst->_74[19] = src->_74[19];
         dst->_74[20] = src->_74[20];
-        for (a = 0; a < 9; a++) {
-            row = inMemRoster[team][a].chemistry;
-            for (b = 0; b < 9; b++) {
-                chem = row[inMemRoster[team][b].charId];
-                if (chem < 90 || chem == 100) {
-                    list[b] = -1;
-                } else {
-                    list[b] = inMemRoster[team][b].charId;
-                }
-            }
-            for (b = 0; b < 9; b++) {
-                for (c = 0; c < 10; c++) {
-                    if (list[b] > list[c]) {
-                        tmp = list[b];
-                        list[b] = list[c];
-                        list[c] = tmp;
-                    }
-                }
-            }
-            memcpy(lbl_8034E9A0._47F9[team][a], list, 9);
-        }
+        fn_80066EAC(team);
         lbl_80354720[team][i]._0 = i;
         lbl_80354720[team][i]._1 = i;
         for (k = 0; k < 9; k++) {

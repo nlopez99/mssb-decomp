@@ -20,7 +20,7 @@ u8 fn_80067264(s32 team, s32 captain);
 u8 fn_800675C4(s32 team, s32 captain);
 void fn_800678CC(s32 team);
 s16 fn_80067AC8(s16 id, s8 slot);
-s32 fn_80067B40(s32 arg0, u8 id, u8 value);
+u8 fn_80067B40(s32 arg0, u8 id, u8 value);
 void fn_80067C48(u8 team);
 void fn_80067F70(u8 team);
 void fn_800684A4(void);
