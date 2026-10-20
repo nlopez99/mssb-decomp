@@ -19,12 +19,12 @@ typedef struct Particle {
 typedef struct Emitter {
     /* 0x00 */ struct Emitter* prev;
     /* 0x04 */ struct Emitter* next;
-    /* 0x08 */ u32 active;
+    /* 0x08 */ BOOL (*update)(void* e);
     /* 0x0C */ Particle* particles;
     /* 0x10 */ u8 _10[0x4];
     /* 0x14 */ u16 _14_hi : 4;
     /* 0x14 */ u16 count : 12;
-    /* 0x16 */ u8 _16;
+    /* 0x16 */ u8 priority;
     /* 0x17 */ u8 _17_hi : 1;
     /* 0x17 */ u8 id : 7;
     /* 0x18 */ Vec _18;
@@ -34,6 +34,11 @@ typedef struct Emitter {
     /* 0x40 */ u16 _40;
     /* 0x42 */ u8 _42[0x1E];
 } Emitter; // size: 0x60
+
+typedef struct ZSortEntry {
+    /* 0x0 */ Particle* p;
+    /* 0x4 */ f32 z;
+} ZSortEntry; // size: 0x8
 
 typedef struct EmitterList {
     /* 0x0 */ Emitter* prev;
@@ -53,6 +58,54 @@ extern EmitterList lbl_803CBC84;
 extern UnkParticleState lbl_80366158;
 
 extern void fn_800118AC(Mtx src, Mtx dst);
+typedef struct LightData {
+    /* 0x0 */ u8 _00[6];
+    /* 0x6 */ u8 r;
+    /* 0x7 */ u8 g;
+    /* 0x8 */ u8 b;
+    /* 0x9 */ u8 _09;
+} LightData; // size: 0xA
+
+typedef struct StadiumLights {
+    /* 0x00 */ LightData lights[4];
+    /* 0x28 */ GXColor ambient;
+} StadiumLights; // size: 0x2C
+
+typedef struct LightFlashTask {
+    /* 0x00 */ u8 _00[0x14];
+    /* 0x14 */ LightData light;
+    /* 0x1E */ u8 r;
+    /* 0x1F */ u8 g;
+    /* 0x20 */ u8 b;
+    /* 0x21 */ u8 _21;
+    /* 0x22 */ u8 _22;
+    /* 0x23 */ u8 timer;
+    /* 0x24 */ u8 duration;
+} LightFlashTask;
+
+extern struct {
+    /* 0x00 */ f32 _00;
+    /* 0x04 */ u8 _04[0x14 - 0x04];
+    /* 0x14 */ u16 _14;
+    /* 0x16 */ u8 _16;
+    /* 0x17 */ u8 _17;
+    /* 0x18 */ u8 _18;
+    /* 0x19 */ u8 _19;
+    /* 0x1A */ u8 _1A;
+    /* 0x1B */ u8 _1B;
+    /* 0x1C */ u8 _1C;
+    /* 0x1D */ u8 _1D;
+} lbl_803C5090;
+
+extern LightFlashTask* lbl_803CC1B8;
+extern StadiumLights lbl_800F7478[14];
+extern u8 lbl_80367318[];
+extern s32 lbl_803CBC70;
+extern void fn_80023B90(LightData* data, void* light);
+extern void fn_800B0A14_removeQueue(void);
+extern void* _OSAllocFromHeap(u32 align, u32 size);
+extern void fn_800ACFB0(void* data);
+extern void fn_800C07BC(void* base, void* work, s32 count, s32 size, s32 (*compare)(ZSortEntry*, ZSortEntry*));
 
 // .bss, from the highest address down
 static Emitter lbl_801F8040[16];
@@ -196,6 +249,36 @@ void fn_80033F64(f32 w, f32 h, f32 angle)
     }
 }
 
+// .text:0x80033A24 size:0x134
+Emitter* fn_80033A24(BOOL (*update)(void*), u8 priority, s32 kind, s32 n, BOOL all, u8 id)
+{
+    Emitter* e = fn_800337CC(lbl_803CBC80, n, all);
+    Emitter* prev;
+
+    if (e == NULL) {
+        return NULL;
+    }
+    prev = (Emitter*)&lbl_803CBC84;
+    lbl_803CBC80 = lbl_803CBC80->next;
+    e->update = update;
+    e->priority = priority;
+    e->id = id;
+    e->_17_hi = 1;
+    e->_14_hi = kind;
+    e->next = NULL;
+    e->prev = NULL;
+    while (prev->next != NULL && prev->next->priority < e->priority) {
+        prev = prev->next;
+    }
+    e->next = prev->next;
+    if (e->next != NULL) {
+        e->next->prev = e;
+    }
+    e->prev = prev;
+    prev->next = e;
+    return e;
+}
+
 // .text:0x800339F0 size:0x34
 Emitter* fn_800339F0(Emitter* e, u8 id)
 {
@@ -213,7 +296,7 @@ Emitter* fn_800339F0(Emitter* e, u8 id)
 // .text:0x80033964 size:0x8C
 void fn_80033964(Emitter* e)
 {
-    if (e->active == 0) {
+    if (e->update == NULL) {
         return;
     }
     if (e->prev != NULL) {
@@ -222,7 +305,7 @@ void fn_80033964(Emitter* e)
     if (e->next != NULL) {
         e->next->prev = e->prev;
     }
-    e->active = 0;
+    e->update = NULL;
     fn_80033794(e->particles);
     e->prev = NULL;
     e->next = lbl_803CBC80;
@@ -319,15 +402,54 @@ f32 fn_800335BC(s32 angle)
 }
 
 // .text:0x80032038 size:0x2C
-s32 fn_80032038(Particle* a, Particle* b)
+s32 fn_80032038(ZSortEntry* a, ZSortEntry* b)
 {
-    if (a->pos.x > b->pos.x) {
+    if (a->z > b->z) {
         return 1;
     }
-    if (a->pos.x < b->pos.x) {
+    if (a->z < b->z) {
         return -1;
     }
     return 0;
+}
+
+// .text:0x80031F34 size:0x104
+Particle* fn_80031F34(Particle* list, s32 n)
+{
+    s32 i = 0;
+    s32 count = n;
+    ZSortEntry* entries;
+    ZSortEntry* ent;
+    Particle* p;
+    Vec v;
+    Particle* head;
+    ZSortEntry* e2;
+
+    if (n != 0) {
+        entries = _OSAllocFromHeap(32, n * (2 * sizeof(ZSortEntry)));
+        ent = entries;
+        for (p = list; p != NULL; p = p->next) {
+            if (i >= n) {
+                OSReport("zsort particle err.\n");
+                break;
+            }
+            ent->p = p;
+            PSMTXMultVec(lbl_8017FFE0, &p->pos, &v);
+            i++;
+            ent->z = v.z;
+            ent++;
+        }
+        fn_800C07BC(entries, entries + n, n, sizeof(ZSortEntry), fn_80032038);
+        head = entries[0].p;
+        e2 = entries;
+        while (--count != 0) {
+            e2->p->next = e2[1].p;
+            e2++;
+        }
+        e2->p->next = NULL;
+        fn_800ACFB0(entries);
+    }
+    return head;
 }
 
 // .text:0x8002F1AC size:0xAC
@@ -368,6 +490,32 @@ void fn_8002CDD0(Vec* pos)
         e->_24.z = pos->z;
         PSVECSubtract(&e->_24, &e->_18, &e->_30);
     }
+}
+
+// .text:0x8002852C size:0xFC
+void fn_8002852C(void)
+{
+    LightFlashTask* task = lbl_803CC1B8;
+
+    if (--task->timer == 0) {
+        lbl_803CBC70 = 0;
+        fn_80023B90(lbl_800F7478[g_d_GameSettings._54].lights, lbl_80367318);
+        fn_800B0A14_removeQueue();
+        return;
+    }
+    task->light.r = task->r;
+    task->light.g = task->g;
+    task->light.b = task->b;
+    fn_80023B90(&task->light, lbl_80367318);
+    lbl_803C5090._1D = 9;
+    lbl_803C5090._00 = 1.0f;
+    lbl_803C5090._14 = 448;
+    lbl_803C5090._19 = task->_22;
+    lbl_803C5090._18 = 1;
+    lbl_803C5090._1A = task->r;
+    lbl_803C5090._1B = task->g;
+    lbl_803C5090._1C = task->b;
+    lbl_803C5090._17 = task->_21 * task->timer / task->duration;
 }
 
 // .text:0x80027918 size:0x50
