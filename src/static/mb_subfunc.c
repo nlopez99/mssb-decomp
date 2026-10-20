@@ -94,6 +94,14 @@ extern u8 lbl_800E869C[32];
 
 extern void fn_8006C398(MbStatSlot* slot);
 
+typedef struct MbSlot {
+    /* 0x0 */ u8 _0;
+    /* 0x1 */ u8 _1;
+    /* 0x2 */ u8 _2;
+    /* 0x3 */ u8 _3;
+} MbSlot; // size: 0x4
+
+extern MbSlot lbl_80354720[2][9];
 extern MbState lbl_8034E9A0;
 extern MbTeams lbl_803C6724;
 extern u8 lbl_80108DB8[];
@@ -371,7 +379,72 @@ void fn_800684A4(void) {
 }
 
 // .text:0x80067F70 size:0x534
-void fn_80067F70(void) {
+void fn_80067F70(u8 team) {
+    s32 n;
+    s8 pool[54];
+    s32 cap;
+    s32 i;
+    s32 j;
+    s32 k;
+    s8 pick;
+    s8 idx;
+    s16 v;
+
+    cap = lbl_8034E9A0._46E0[team];
+    lbl_803C6724._02[team][0] = cap;
+    fn_80067C48(team);
+    memset(pool, -1, sizeof(pool));
+    for (i = 0; i < 54; i++) {
+        if (lbl_8034E9A0._4757[lbl_8034E9A0._478D[team][i]] == 0) {
+            pool[i] = lbl_8034E9A0._478D[team][i];
+        }
+    }
+    for (n = 1; n < 9; n++) {
+        for (i = 0; i < 54; i++) {
+            for (j = i; j < 54; j++) {
+                if (pool[i] == -1 && pool[j] != -1) {
+                    s8 tmp = pool[i];
+                    pool[i] = pool[j];
+                    pool[j] = tmp;
+                    break;
+                }
+            }
+        }
+        do {
+            idx = randRange_FUN_80042bf0(0, 19);
+            pick = pool[idx];
+        } while (pick == -1);
+        pool[idx] = -1;
+        lbl_8034E9A0._4757[pick] = 1;
+        fn_80067B40(0, pick, 1);
+        for (i = 0; i < 9; i++) {
+            for (j = 0; j < 5; j++) {
+                if (pick == lbl_80108EDC[i][j]) {
+                    pick = lbl_80108EDC[i][0];
+                    for (k = 0; k < 5; k++) {
+                        v = lbl_80108EDC[i][k];
+                        if (v != -1) {
+                            for (j = 0; j < 54; j++) {
+                                if (pool[j] == v) {
+                                    pool[j] = -1;
+                                }
+                            }
+                        }
+                    }
+                    goto found;
+                }
+            }
+        }
+    found:
+        lbl_803C6724._02[team][n] = pick;
+        lbl_803C6724._26[team][n] = lbl_8034E9A0.chars[pick / 9][pick % 9].chemistry[cap];
+    }
+    for (i = 0; i < 9; i++) {
+        lbl_80354720[team][i]._2 = i;
+        lbl_80354720[team][i]._1 = i;
+        lbl_80354720[team][i]._0 = i;
+    }
+    fn_800670A0(team);
 }
 
 // .text:0x80067C48 size:0x328

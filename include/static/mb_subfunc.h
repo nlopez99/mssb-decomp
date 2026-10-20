@@ -27,7 +27,7 @@ void fn_800678CC(void);
 s16 fn_80067AC8(s16 id, s8 slot);
 s32 fn_80067B40(s32 arg0, u8 id, u8 value);
 void fn_80067C48(u8 team);
-void fn_80067F70(void);
+void fn_80067F70(u8 team);
 void fn_800684A4(void);
 s32 fn_80068514(u32 frames, u8 target);
 s32 fn_8006862C(u32 frames, u8 target);
