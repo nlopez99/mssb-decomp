@@ -2416,6 +2416,16 @@ static u8 lbl_1_bss_3078;
 static s32 lbl_1_bss_3074;
 static u8 lbl_1_bss_3070;
 
+static inline void setElemAnim(Unk0060Elem* elem, UnkAnimRef0610* anim, u16 frame) {
+    elem->_04 = anim;
+    elem->_0E = frame;
+    elem->_5C = 0.0f;
+    elem->_58 = 1;
+    elem->_59 = anim != NULL;
+    elem->_5A = anim != NULL;
+    elem->_60 = 0.0f;
+}
+
 // .text:0x00017D90 size:0x16C
 void fn_1_17D90(void) {
     fn_800AD038(lbl_80366158._08);
@@ -3571,7 +3581,8 @@ void fn_1_14710(Unk8036E548Actor* arg0) {
 
 // .text:0x000135C0 size:0x1150
 // Registers differ throughout (the target keeps the bss base in r29 and actor in
-// r31), and the four-entry pose loop is scheduled differently
+// r31); the 16-entry relocation loop reuses i's 0 as its offset in the target,
+// and the four-entry pose loop is scheduled differently
 void fn_1_135C0(void) {
     s32 i;
     s32 j;
@@ -3583,11 +3594,8 @@ void fn_1_135C0(void) {
     void* layout;
     void* geo;
     void* skn;
-    void* model;
     UnkAnimRef0610* anim;
     Unk0060Elem* elem;
-    u32 flag;
-    u8 frame;
 
     fn_80023B04(13);
     lbl_8036E548._0060 = ActorObjectInitTable(1);
@@ -3660,17 +3668,7 @@ void fn_1_135C0(void) {
         }
     }
     fn_8002399C(lbl_8036E548._0060->_34, 0, 0, layout, anim, skn);
-    model = lbl_8036E548._0C04[lbl_1_bss_5F73]._010[lbl_1_bss_6940[lbl_1_bss_5F73]._44];
-    frame = lbl_1_bss_6940[lbl_1_bss_5F73]._45;
-    elem = &lbl_8036E548._0060->_34[lbl_1_bss_5F73];
-    elem->_04 = model;
-    elem->_0E = frame;
-    flag = model != NULL;
-    elem->_5C = 0.0f;
-    elem->_58 = 1;
-    elem->_59 = flag;
-    elem->_5A = flag;
-    elem->_60 = 0.0f;
+    setElemAnim(&lbl_8036E548._0060->_34[lbl_1_bss_5F73], lbl_8036E548._0C04[lbl_1_bss_5F73]._010[lbl_1_bss_6940[lbl_1_bss_5F73]._44], lbl_1_bss_6940[lbl_1_bss_5F73]._45);
     lbl_1_bss_67CC[0] = lbl_8036E548._0C04[0]._008->_10;
     if (lbl_1_bss_67CC[0] != NULL && lbl_1_bss_6940[lbl_1_bss_5F73]._46 == 0) {
         fn_80025DDC(lbl_1_bss_67CC[0]);
@@ -5216,16 +5214,6 @@ void fn_1_E8D4(void) {
     }
 }
 
-static inline void setElemAnim(Unk0060Elem* elem, UnkAnimRef0610* anim, u16 frame) {
-    elem->_04 = anim;
-    elem->_0E = frame;
-    elem->_5C = 0.0f;
-    elem->_58 = 1;
-    elem->_59 = anim != NULL;
-    elem->_5A = anim != NULL;
-    elem->_60 = 0.0f;
-}
-
 // .text:0x0000E098 size:0x83C
 // Registers only: case 10's task pointer and timer counter, and the column
 // loop's pad and pointer registers
@@ -5264,18 +5252,19 @@ void fn_1_E098(void) {
         case 10:
             if (i == lbl_1_bss_30B6 && (lbl_803C77B8[0]._02 & 0x100)) {
                 UnkTaskState0610* task = (UnkTaskState0610*)lbl_803CC1B8;
+                s32 k;
                 task->_00 = fn_1_DE1C;
                 task->_15 = 0;
                 lbl_1_bss_6940[lbl_1_bss_5F73]._44 = lbl_1_bss_3218[task->_15]._0;
                 lbl_1_bss_6940[lbl_1_bss_5F73]._45 = lbl_1_bss_3218[task->_15]._2;
                 setElemAnim(&lbl_8036E548._0060->_34[lbl_1_bss_5F73], lbl_8036E548._0C04[lbl_1_bss_5F73]._010[lbl_1_bss_6940[lbl_1_bss_5F73]._44], lbl_1_bss_6940[lbl_1_bss_5F73]._45);
-                j = 5;
-                while (j--) {
-                    if (lbl_1_bss_3258[task->_15][j]._08 != 0) {
-                        lbl_1_bss_67B8[j] = &lbl_1_bss_3258[task->_15][i];
-                        lbl_1_bss_67B8[j]->_00 = 0.0f;
+                k = 5;
+                while (k--) {
+                    if (lbl_1_bss_3258[task->_15][k]._08 != 0) {
+                        lbl_1_bss_67B8[k] = &lbl_1_bss_3258[task->_15][i];
+                        lbl_1_bss_67B8[k]->_00 = 0.0f;
                     } else {
-                        lbl_1_bss_67B8[j] = NULL;
+                        lbl_1_bss_67B8[k] = NULL;
                     }
                 }
                 fn_1_D300(&lbl_8036E548._0C04[lbl_1_bss_5F73]);
