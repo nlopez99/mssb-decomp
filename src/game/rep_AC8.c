@@ -12511,8 +12511,8 @@ void fn_3_261E8(s32 fielder) {
 }
 
 // .text:0x00025C40 size:0x5A8 mapped:0x80664CD4
-// 99.75%: registers only; the second branch's dx and dz take each other's float registers,
-// as do the catch lerp's differences.
+// 99.86%: registers only; in the catch lerp the target keeps pos.x in f5 and pos.y in f6
+// (here f4 and f5). Declaration orders and lerp forms tried do not move them.
 void fn_3_25C40(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     s32 ch = fielder;
@@ -12537,8 +12537,8 @@ void fn_3_25C40(s32 fielder) {
             if (f->_24C > lbl_3_data_49DC[26]) {
                 return;
             }
-            dz = f->_224 - f->_008;
             dx = f->_21C - f->_000;
+            dz = f->_224 - f->_008;
             scale = 0.01f * lbl_3_data_79B4.sizes[f->_17A][4] / dolsqrtf2(dx * dx + dz * dz);
             ox = dx * scale;
             oz = dz * scale;
