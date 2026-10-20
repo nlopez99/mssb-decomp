@@ -18,7 +18,10 @@ typedef struct Particle {
     /* 0x24 */ u8 _24[0x14];
     /* 0x38 */ f32 _38;
     /* 0x3C */ f32 _3C;
-    /* 0x40 */ s32 _40;
+    union {
+        /* 0x40 */ s32 _40;
+        /* 0x40 */ u8 color[4];
+    };
     /* 0x44 */ u8 _44[0x4];
     /* 0x48 */ s16 _48;
     /* 0x4A */ s16 _4A;
@@ -533,6 +536,37 @@ void fn_800330CC(s32 n, u32 arg1, Vec* start, Vec* end, f32 arg4, s32 arg5, s32 
         e->_3C = -0.0001f;
         e->_40 = arg1;
         e->_44 = arg7;
+    }
+}
+
+// .text:0x80032284 size:0x268
+void fn_80032284(Vec* pos)
+{
+    FlareParams params;
+    Emitter* e;
+    Particle* p;
+
+    memcpy(&params, &lbl_800F787C, sizeof(FlareParams));
+    params._00 = lbl_803CBD0C;
+    params._10 = 255;
+    params._08 = 500000;
+    params._0C = 700000;
+    params._14 = 32;
+    e = fn_80033A24(fn_8002E3DC, 0x80, 0, 1, TRUE, 7);
+    if (e != NULL) {
+        e->_10 = params._00;
+        p = e->particles;
+        p->pos.x = pos->x;
+        p->pos.y = pos->y;
+        p->pos.z = pos->z;
+        p->_40 = -0x100;
+        p->color[3] = params._10;
+        p->_18 = params._10;
+        p->_1C = p->_4A = params._14;
+        p->_20 = params._14 / 2;
+        p->_38 = p->_3C = p->_10 = params._08 / 100000.0f;
+        p->_14 = params._0C / 100000.0f;
+        p->_4D = params._04;
     }
 }
 

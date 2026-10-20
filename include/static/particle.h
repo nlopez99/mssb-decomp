@@ -29,6 +29,7 @@ void fn_8002FDB8(struct Emitter* e, Vec* pos, Vec* dir, Vec* back, struct Effect
 void fn_80030470(Vec* pos, Vec* dir, Vec* back, struct EffectParams* params, s32 id);
 void fn_80030720(struct Emitter* e, Vec* pos, s32 arg1, struct EffectParams* params);
 void fn_80030D88(Vec* pos, s32 arg1, struct EffectParams* params, s32 id);
+BOOL fn_8002E3DC(void* e);
 BOOL fn_8002E828(void* e);
 BOOL fn_80031034(void* e);
 void fn_800317C4(struct Emitter* e, Vec* pos, struct EffectParams* params);
@@ -36,6 +37,7 @@ void fn_80031CA4(Vec* pos, struct EffectParams* params);
 struct Particle* fn_80031F34(struct Particle* list, s32 n);
 s32 fn_80032038(struct ZSortEntry* a, struct ZSortEntry* b);
 void fn_80032064(Vec* pos, Vec* dir);
+void fn_80032284(Vec* pos);
 BOOL fn_800328E0(void* e);
 void fn_800330CC(s32 n, u32 arg1, Vec* start, Vec* end, f32 arg4, s32 arg5, s32 arg6, f32 arg7);
 f32 fn_800335BC(s32 angle);
