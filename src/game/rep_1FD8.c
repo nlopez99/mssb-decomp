@@ -754,7 +754,6 @@ void fn_3_C805C(u32* n, s32* count) {
 }
 
 // .text:0x000C7A0C size:0x650 mapped:0x80706AA0
-// 99.22%: only the inlined fn_3_C77AC differs, in the FPRs of its hoisted constants.
 void fn_3_C7A0C(Rep1FD8Draw* draw) {
     Vec pos;
     Rep1FD8Spawner* spawner;
@@ -851,6 +850,7 @@ void fn_3_C77AC(Rep1FD8Spawner* spawner, Rep1FD8Draw* draw) {
     Rep1FD8Particle* p = spawner->particles;
     u32 i;
     f32 rad;
+    f32 deg;
 
     spawner->target = &draw->_9C;
     spawner->owner = draw;
@@ -859,7 +859,9 @@ void fn_3_C77AC(Rep1FD8Spawner* spawner, Rep1FD8Draw* draw) {
     for (i = 0; p != NULL; i++, p = p->next) {
         p->_38 = p->_3C = 0.0f;
         p->grow = 8.0f - rand() % 3;
-        rad = 3.1415927f * (lbl_3_data_17514[draw->_A8].rotY + i * 30) / 180.0f;
+        deg = i * 30;
+        rad = deg + lbl_3_data_17514[draw->_A8].rotY;
+        rad = 3.1415927f * rad / 180.0f;
         p->vel.x = 0.35f * cos(rad);
         p->vel.y = -(rand() % 3);
         p->vel.z = 0.35f * sin(rad);
@@ -1006,8 +1008,6 @@ void fn_3_C71CC(u32* n, s32* idx) {
 }
 
 // .text:0x000C63D0 size:0xDFC mapped:0x80705464
-// 99.77%: the target tests checkCollision's result unsigned (cmplwi), and the inlined
-// fn_3_C48D0 and fn_3_C444C allocate their FPRs as in fn_3_C597C.
 void fn_3_C63D0(Rep1FD8Draw* draw) {
     Vec pos;
     Vec up = { 0.0f, 1.0f, 0.0f };
@@ -1017,6 +1017,7 @@ void fn_3_C63D0(Rep1FD8Draw* draw) {
     CollisionStruct col;
     Quaternion q;
     Rep1FD8Spawner* spawner;
+    u32 type;
     f32 angle;
     f32 speed;
     u32 i;
@@ -1079,8 +1080,11 @@ void fn_3_C63D0(Rep1FD8Draw* draw) {
         PSVECCrossProduct(&dir, &up, &axis);
         C_QUATRotAxisRad(&q, &axis, acos(PSVECDotProduct(&dir, &up)));
         CTRLSetQuat(&draw->control, q.x, q.y, q.z, q.w);
-        if (draw->vel.y < 0.0f && checkCollision(&seg, &col, 0, 0) != 0) {
-            hit = 1;
+        if (draw->vel.y < 0.0f) {
+            type = checkCollision(&seg, &col, 0, 0);
+            if (type != 0) {
+                hit = 1;
+            }
         }
         if (fn_3_C625C(draw)) {
             hit = 2;
@@ -1147,8 +1151,6 @@ u8 fn_3_C625C(Rep1FD8Draw* draw) {
 }
 
 // .text:0x000C5DDC size:0x480 mapped:0x80704E70
-// 99.77%: as in fn_3_C597C, the inlined fn_3_C48D0 allocates the position and angles in
-// other FPRs (target y, z, theta, phi in f24..f21, base f22, f21, f23, f24).
 void fn_3_C5DDC(void) {
     Rep1FD8Draw* draw;
     Rep1FD8Spawner* spawner;
@@ -1197,8 +1199,6 @@ u8 fn_3_C5CE0(Rep1FD8Draw* draw) {
 }
 
 // .text:0x000C597C size:0x364 mapped:0x80704A10
-// 99.70%: the inlined fn_3_C444C allocates its position and angles in other FPRs
-// (target x..phi in f25..f21 and speed in f26, base the reverse order).
 void fn_3_C597C(s32 idx) {
     Rep1FD8Draw* draw = &lbl_3_common_bss_350E4.draws[idx];
     Rep1FD8Spawner* spawner;
@@ -1386,8 +1386,10 @@ void fn_3_C48D0(Rep1FD8Spawner* spawner, Vec pos) {
         p->pos.x = pos.x;
         p->pos.y = pos.y;
         p->pos.z = pos.z;
-        theta = 3.1415927f * (rand() % 181) / 180.0f;
-        phi = 3.1415927f * (rand() % 360) / 180.0f;
+        theta = rand() % 181;
+        theta = 3.1415927f * theta / 180.0f;
+        phi = rand() % 360;
+        phi = 3.1415927f * phi / 180.0f;
         speed = 0.5f - (rand() % 3) / 10.0f;
         p->vel.x = speed * cos(theta) * cos(phi);
         p->vel.y = -speed * sin(theta);
@@ -1444,19 +1446,22 @@ BOOL fn_3_C4724(Rep1FD8Spawner* spawner) {
 void fn_3_C444C(Rep1FD8Spawner* spawner, Rep1FD8Draw* draw) {
     Rep1FD8Particle* p = spawner->particles;
     u32 i;
-    f32 x = draw->_9C.x;
-    f32 y = draw->_9C.y;
-    f32 z = draw->_9C.z;
+    Vec pos;
     f32 theta;
     f32 phi;
     f32 speed;
 
+    pos.x = draw->_9C.x;
+    pos.y = draw->_9C.y;
+    pos.z = draw->_9C.z;
     for (i = 0; p != NULL; p = p->next) {
-        p->pos.x = x;
-        p->pos.y = y;
-        p->pos.z = z;
-        theta = 3.1415927f * (rand() % 360) / 180.0f;
-        phi = 3.1415927f * (rand() % 360) / 180.0f;
+        p->pos.x = pos.x;
+        p->pos.y = pos.y;
+        p->pos.z = pos.z;
+        theta = rand() % 360;
+        theta = 3.1415927f * theta / 180.0f;
+        phi = rand() % 360;
+        phi = 3.1415927f * phi / 180.0f;
         speed = 0.5f - (rand() % 3) / 10.0f;
         p->vel.x = speed * cos(theta) * cos(phi);
         p->vel.y = -speed * sin(theta);
