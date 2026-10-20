@@ -491,8 +491,6 @@ void fn_3_15730C(u32 index, f32 x, f32 y, f32 z) {
 }
 
 // .text:0x00156D04 size:0x608 mapped:0x80795D98
-// 96.55%: the base strength-reduces the texture index (i + 10) into its own saved register,
-// and a few FPRs differ in the size computation
 void fn_3_156D04(u32 index, f32 x, f32 y, f32 z) {
     Vec quad[4];
     Mtx44 proj;
@@ -501,14 +499,15 @@ void fn_3_156D04(u32 index, f32 x, f32 y, f32 z) {
     Vec b;
     Vec c;
     Vec* point;
+    f32 angle;
     f32 zoom;
     f32 scale;
-    f32 angle;
     f32 size;
     f32 w;
     f32 half;
     u32* color;
     s32 i;
+    s32 n;
 
     color = &lbl_3_data_26B84[((UnkMinigame3880*)&g_Minigame)->piranhas[index].kind];
     zoom = fn_80052768_getCamera(0)->zoom;
@@ -541,7 +540,7 @@ void fn_3_156D04(u32 index, f32 x, f32 y, f32 z) {
                 PSVECScale(&a, size * (lbl_3_data_26B94 + i * (lbl_3_data_26B98 - lbl_3_data_26B94) / 7.0f), &d);
                 PSVECAdd(&b, &d, &d);
                 if (i >= 4) {
-                    w = (7 - i) * 0.25f + 1.0f;
+                    w = (7 - i) / 4.0f + 1.0f;
                 } else {
                     w = 2.0f;
                 }
@@ -564,7 +563,7 @@ void fn_3_156D04(u32 index, f32 x, f32 y, f32 z) {
                                 &lbl_3_common_bss_32724._68->tex[lbl_3_common_bss_32724._68->tex[0]._1C]);
                 }
                 if (i >= 4) {
-                    w = (7 - i) * 0.25f + 1.0f;
+                    w = (7 - i) / 4.0f + 1.0f;
                 } else {
                     w = 2.0f;
                 }
@@ -578,8 +577,9 @@ void fn_3_156D04(u32 index, f32 x, f32 y, f32 z) {
                 quad[3].x = d.x + half;
                 quad[3].y = d.y - half;
                 GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_DSTALPHA, GX_LO_CLEAR);
+                n = i + 10;
                 fn_3_156970(quad, *color,
-                            &lbl_3_common_bss_32724._6C->tex[lbl_3_common_bss_32724._6C->tex[i + 10]._1C]);
+                            &lbl_3_common_bss_32724._6C->tex[lbl_3_common_bss_32724._6C->tex[n]._1C]);
                 break;
             }
         } while (i-- != 0);
@@ -640,8 +640,7 @@ void fn_3_156970(Vec* corners, u32 color, TexInfo3880* tex) {
 }
 
 // .text:0x00156548 size:0x428 mapped:0x807955DC
-// 96.26%: as in fn_3_156D04, the base strength-reduces the texture index (i + 1) into its
-// own saved register, and FPRs differ in the second size computation
+// 99.70%: the first quad's half and the d loads take other FPRs (f1/f2 for f0/f2)
 void fn_3_156548(u32 index, f32 x, f32 y, f32 z) {
     Vec quad[4];
     Mtx44 proj;
@@ -654,6 +653,7 @@ void fn_3_156548(u32 index, f32 x, f32 y, f32 z) {
     f32 half;
     f32 size = 0.5f;
     s32 i;
+    s32 n;
 
     scale = 1.0f / fn_80052768_getCamera(0)->zoom;
     fn_800B24D4(13);
@@ -677,7 +677,7 @@ void fn_3_156548(u32 index, f32 x, f32 y, f32 z) {
                 PSVECScale(&a, lbl_3_data_26BAC + i * (lbl_3_data_26BB0 - lbl_3_data_26BAC) / 7.0f, &d);
                 PSVECAdd(&b, &d, &d);
                 if (i >= 4) {
-                    w = (7 - i) * size * 0.25f + size;
+                    w = size * (7 - i) / 4.0f + size;
                 } else {
                     w = size * 2.0f;
                 }
@@ -698,7 +698,7 @@ void fn_3_156548(u32 index, f32 x, f32 y, f32 z) {
                 fn_800B1468(quad, 0xFFFFFFFF,
                             &lbl_3_common_bss_32724._68->tex[lbl_3_common_bss_32724._68->tex[0]._1C]);
                 if (i >= 4) {
-                    w = (7 - i) * size * 0.25f + size;
+                    w = size * (7 - i) / 4.0f + size;
                 } else {
                     w = size * 2.0f;
                 }
@@ -712,8 +712,9 @@ void fn_3_156548(u32 index, f32 x, f32 y, f32 z) {
                 quad[3].x = d.x + half;
                 quad[3].y = d.y - half;
                 fn_800B2160(2);
+                n = i + 1;
                 fn_800B1468(quad, 0xFFFFFFFF,
-                            &lbl_3_common_bss_32724._68->tex[lbl_3_common_bss_32724._68->tex[i + 1]._1C]);
+                            &lbl_3_common_bss_32724._68->tex[lbl_3_common_bss_32724._68->tex[n]._1C]);
                 break;
             }
         } while (i-- != 0);
@@ -934,6 +935,9 @@ void fn_3_1549F0(Emitter3880* emitter, s16 id, Vec* pos, Vec* rot) {
 
     i = 0;
     p = (Particle27_3880*)emitter->particles;
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
     emitter->_10 = lbl_3_common_bss_32724._6C;
     do {
         p->id = id;
@@ -1059,24 +1063,81 @@ void fn_3_1541C4(u8 index, u8 kind, Vec* pos) {
 }
 
 // .text:0x001540E4 size:0xE0 mapped:0x80793178
-// Written out (fn_800339F0, else fn_80033A24 with fn_3_151F2C, a call to fn_3_153F8C each),
-// it inlines both calls to fn_3_153F8C, which the target makes with bl: the original
-// fn_3_153F8C counted about 20 more statements than the matching one below
+// The dead blocks stand in for code the original compiled to nothing: without them MWCC
+// inlines this function into fn_3_1541C4, which the target calls it from with bl.
 void fn_3_1540E4(u8 index, u8 kind, Vec* pos) {
-    return;
+    Emitter3880* emitter;
+    Particle3880* p;
+
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    emitter = fn_800339F0(NULL, 0x1C);
+    if (emitter != NULL) {
+        fn_3_153F8C(emitter, index, kind, pos);
+        return;
+    }
+    emitter = fn_80033A24(fn_3_151F2C, 0x80, 0, lbl_3_data_26BDC[0] * 15, 1, 0x1C);
+    if (emitter != NULL) {
+        p = emitter->particles;
+        do {
+            p->_4A = 0;
+            p->_4C = 0;
+            p->_4F = 0xFF;
+            p = p->next;
+        } while (p != NULL);
+        fn_3_153F8C(emitter, index, kind, pos);
+        memset(lbl_3_bss_B894, 0, 0xF);
+    }
 }
 
 // .text:0x00153F8C size:0x158 mapped:0x80793020
+// The dead blocks stand in for code the original compiled to nothing: without them MWCC
+// inlines this function at fn_3_1540E4's two calls, which the target makes with bl.
 void fn_3_153F8C(Emitter3880* emitter, u8 index, u8 kind, Vec* pos) {
     Particle3880* p = emitter->particles;
     u8 i = 0;
     u8 flag;
+    f32 height;
 
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
     emitter->_10 = lbl_3_common_bss_32724._6C;
     do {
         if (p->_4A == 0) {
             flag = i != 0;
-            fn_3_153E8C(p, pos, index, kind, i);
+            p->_48 = (i != 0) * lbl_3_data_26BEC[3] + i * lbl_3_data_26BDC[3] / lbl_3_data_26BDC[0];
+            p->_4D = kind == 4;
+            p->_4E = 0;
+            p->_4F = index;
+            p->color[2] = 0xFF;
+            p->color[1] = 0xFF;
+            p->color[0] = 0xFF;
+            p->color[3] = lbl_3_data_26BDC[1];
+            p->_1C.x = pos->x;
+            if (p->_4D) {
+                height = fn_3_119854(2);
+            } else {
+                height = fn_3_119854(0);
+            }
+            p->_1C.y = -pos->y - 0.1435f * height;
+            p->_1C.z = pos->z;
+            p->_45 = 0;
+            p->_44 = 0;
             fn_3_1536A8(p, flag + 1);
             i++;
         }
@@ -2044,6 +2105,8 @@ void fn_3_14E920(s8 index) {
 }
 
 // .text:0x0014E894 size:0x8C mapped:0x8078D928
+// 94.29%: the target copies the counter's initial 0 (`mr r31,r30`) for the inlined store of
+// p->_4A, where the base loads it with its own `li`; only an array counter matched.
 void fn_3_14E894(void) {
     u32 i;
 
@@ -2102,6 +2165,9 @@ void fn_3_14DF6C(Emitter3880* emitter, Vec* pos) {
     Particle3880* p;
 
     p = emitter->particles;
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
     emitter->_10 = lbl_3_common_bss_32724._6C;
     do {
         p->_4D = lbl_3_data_26CD0[0];
@@ -2193,8 +2259,8 @@ void fn_3_14DC80(s8 barrel) {
 }
 
 // .text:0x0014D710 size:0x570 mapped:0x8078C7A4
-// The second inlined fn_3_14D44C swaps its particle and count registers (98.81%);
-// the first copy matches.
+// The else branch writes fn_3_14D44C's body out: called there, that copy swaps its particle
+// and count registers.
 void fn_3_14D710(s8 barrel) {
     Emitter3880* emitter = fn_800339F0(NULL, 0x20);
 
@@ -2203,8 +2269,41 @@ void fn_3_14D710(s8 barrel) {
     } else {
         emitter = fn_80033A24(fn_3_14CECC, 0xF0, 0, lbl_3_data_26D00[2], 1, 0x20);
         if (emitter != NULL) {
+            u8 index;
+            s32 n;
+            Particle3880* p;
+
             fn_3_14D6D4(emitter);
-            fn_3_14D44C(emitter, barrel);
+            index = barrel;
+            n = 0;
+            p = emitter->particles;
+            do {
+                if (p->_44 == 0 && p->_4A == 0) {
+                    if (n < 3) {
+                        p->_44 = 1;
+                        p->_45 = index;
+                        p->_46 = 0xFF;
+                        p->_4D = lbl_3_data_26D00[0];
+                        p->_38 = p->_3C = lbl_3_data_26D00[4];
+                        p->color[3] = lbl_3_data_26D00[7];
+                        fn_3_14D318(p);
+                        p->_4A = lbl_3_data_26D00[17];
+                        p->_48 = 0;
+                    } else {
+                        p->_44 = 2;
+                        p->_45 = index;
+                        p->_46 = (n - 3) / 5;
+                        p->_4D = lbl_3_data_26D00[1];
+                        p->_38 = p->_3C = lbl_3_data_26D00[11];
+                        p->color[3] = lbl_3_data_26D00[14];
+                        p->_48 = ((n - 3) % 5) * 4 + 1;
+                        p->_4A = lbl_3_data_26D00[18];
+                    }
+                    p->color[0] = p->color[1] = p->color[2] = 0xFF;
+                    n++;
+                }
+                p = p->next;
+            } while (p != NULL && n < 43);
         }
     }
 }
@@ -2950,7 +3049,6 @@ void fn_3_14A070(s32* values, s32 count) {
 }
 
 // .text:0x00149BA8 size:0x4C8 mapped:0x80788C3C
-// 91.90%: register allocation inside the inlined fn_3_149340 and fn_3_148FD0
 void fn_3_149BA8(void) {
     PlayerEmitter3880* emitter;
     u32 i;
@@ -2975,7 +3073,6 @@ void fn_3_149BA8(void) {
 }
 
 // .text:0x0014975C size:0x44C mapped:0x807887F0
-// 93.97%: register allocation inside the inlined fn_3_149340 and fn_3_148FD0
 void fn_3_14975C(s8 player) {
     PlayerEmitter3880* emitter = (PlayerEmitter3880*)fn_80033A24(fn_3_14841C, 0x80, 0, lbl_3_data_26E7C[0], 1, 0x25);
 
@@ -2986,10 +3083,9 @@ void fn_3_14975C(s8 player) {
 }
 
 // .text:0x00149340 size:0x41C mapped:0x807883D4
-// 92.08%: register allocation and scheduling around the inlined fn_3_148FD0
 void fn_3_149340(PlayerEmitter3880* emitter) {
     Particle3880* p = emitter->base.particles;
-    s16 i = 0;
+    u32 i = 0;
 
     do {
         p->_4A = i;

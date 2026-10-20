@@ -1603,7 +1603,88 @@ typedef enum _WALL_BALL_GAME_STATE {
     WALL_BALL_GAME_STATE_PITCH_OR_WAITING_FOR_PITCH = 2
 } WALL_BALL_GAME_STATE;
 
+// g_Minigame's three entries in this minigame
+typedef struct Unk37A8Entry {
+    /* 0x00 */ Vec pos;
+    /* 0x0C */ Vec rot;
+    /* 0x18 */ s16 _18;
+    /* 0x1A */ s16 _1A;
+    /* 0x1C */ s16 _1C;
+    /* 0x1E */ s16 _1E;
+    /* 0x20 */ s16 _20;
+    /* 0x22 */ s16 _22;
+    /* 0x24 */ s16 _24;
+    /* 0x26 */ s16 _26;
+    /* 0x28 */ s16 _28;
+    /* 0x2A */ u8 _2A;
+    /* 0x2B */ u8 _2B;
+    /* 0x2C */ u8 _2C;
+    /* 0x2D */ u8 _2D;
+    /* 0x2E */ u8 _2E;
+    /* 0x2F */ s8 _2F[4];
+    /* 0x33 */ u8 _33;
+    /* 0x34 */ s8 _34;
+    /* 0x35 */ s8 _35;
+    /* 0x36 */ u8 _36[0x38 - 0x36];
+} Unk37A8Entry; // size: 0x38
+
+// A piranha, 40 of them at g_Minigame._A8
+typedef struct Unk37A8Piranha {
+    /* 0x00 */ Vec pos;
+    /* 0x0C */ Vec vel;
+    /* 0x18 */ f32 _18;
+    /* 0x1C */ s32 _1C;
+    /* 0x20 */ s16 _20;
+    /* 0x22 */ s16 _22;
+    /* 0x24 */ u8 _24[0x26 - 0x24];
+    /* 0x26 */ u8 active;
+    /* 0x27 */ u8 _27;
+} Unk37A8Piranha; // size: 0x28
+
+// A CPU player's state, one per player at g_Minigame._1DCC
+typedef struct Unk37A8Cpu {
+    /* 0x0 */ s16 _0;
+    /* 0x2 */ s8 _2;
+    /* 0x3 */ s8 _3;
+} Unk37A8Cpu; // size: 0x4
+
+// Piranha Panic (rep_37A8)'s layout of MiniGameStruct, a union member over its fields
+typedef struct Unk37A8Minigame {
+    /* 0x0000 */ Unk37A8Entry _0000[3];
+    /* 0x00A8 */ Unk37A8Piranha _00A8[40];
+    /* 0x06E8 */ u8 _06E8[0x17C8 - 0x6E8];
+    /* 0x17C8 */ s16 _17C8[50];
+    /* 0x182C */ u8 _182C[0x193A - 0x182C];
+    /* 0x193A */ u8 _193A[100];
+    /* 0x199E */ u8 _199E[0x1B34 - 0x199E];
+    /* 0x1B34 */ s16 _1B34[4];
+    /* 0x1B3C */ s16 _1B3C[4];
+    /* 0x1B44 */ s16 _1B44[4];
+    /* 0x1B4C */ u8 _1B4C[0x1B50 - 0x1B4C];
+    /* 0x1B50 */ s16 _1B50[4];
+    /* 0x1B58 */ u8 _1B58[4][10];
+    /* 0x1B80 */ u8 _1B80[4];
+    /* 0x1B84 */ u8 _1B84[50];
+    /* 0x1BB6 */ s8 _1BB6[50];
+    /* 0x1BE8 */ s8 _1BE8[50];
+    /* 0x1C1A */ u8 _1C1A[50];
+    /* 0x1C4C */ u8 _1C4C[50];
+    /* 0x1C7E */ s8 _1C7E[4][3];
+    /* 0x1C8A */ u8 _1C8A[4];
+    /* 0x1C8E */ u8 _1C8E[0x1C9A - 0x1C8E];
+    /* 0x1C9A */ u8 _1C9A[4];
+    /* 0x1C9E */ u8 _1C9E[4];
+    /* 0x1CA2 */ u8 _1CA2[0x1CA9 - 0x1CA2];
+    /* 0x1CA9 */ u8 _1CA9[4];
+    /* 0x1CAD */ u8 _1CAD[0x1DCC - 0x1CAD];
+    /* 0x1DCC */ Unk37A8Cpu _1DCC[4];
+} Unk37A8Minigame;
+
 typedef struct _MiniGameStruct {
+    // The fields below form one struct in a union with Piranha Panic's layout; they keep
+    // their indentation so that edits to them stay small
+    union {
+        struct {
     /*0x000*/ u8 _0;
     /*0x001*/ u8 _1;
     /*0x002*/ u8 _2;
@@ -2179,6 +2260,9 @@ typedef struct _MiniGameStruct {
     /*0x1E26*/ u8 _1E26[4];
     /*0x1E2A*/ u8 _1E2A;
     /*0x1E2B*/ u8 _1E2B;
+        };
+        /*0x0000*/ Unk37A8Minigame piranhaPanic;
+    };
 } MiniGameStruct; // size: 0x1E2C
 
 extern MiniGameStruct g_Minigame;

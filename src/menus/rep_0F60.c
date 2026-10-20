@@ -322,7 +322,6 @@ extern void fn_800637D4(Player0F60* player, ActorRef0F60* ref);
 extern void fn_80052634(Player0F60* player, ActorRef0F60* ref);
 extern void fn_80062ED4(Player0F60* player, ActorRef0F60* ref);
 extern void fn_800B0A14_removeQueue(void);
-extern void fn_2_93C64(void);
 
 AramEntry0F60 lbl_2_data_2F990[13] = {
     { 0x0000040B, 0x4005A338, 0x19233000, 0x0003A448 },

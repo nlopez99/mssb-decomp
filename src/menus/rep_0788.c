@@ -11,6 +11,9 @@
 #include "string.h"
 #include "menus/rep_08E8.h"
 #include "menus/rep_0898.h"
+#include "menus/rep_0840.h"
+#include "menus/rep_0730.h"
+#include "menus/rep_0F60.h"
 
 typedef struct MenuEntry0788 {
     /* 0x0 */ void (*fn)(struct MenuTask0788* task, struct MenuItem0788* item);
@@ -496,8 +499,6 @@ extern BOOL fn_8006C79C(s32 index);
 extern BOOL fn_8006CDC0(s32 index);
 extern BOOL determineIfMissionDescriptionIsShown(s32 index);
 
-extern void fn_2_3F66C(void);
-extern void fn_2_3FA14(void);
 extern void fn_2_11A0(s32 arg0);
 extern void fn_2_11D8(void);
 extern void fn_2_1C41C(void);
@@ -514,16 +515,6 @@ extern void fn_8006877C(s32);
 extern void fn_80068838(void);
 extern u8 fn_80062794(s32);
 extern void fn_2_54474(void);
-extern void fn_2_1B1BC(void);
-extern void fn_2_1B314(void);
-extern void fn_2_1B7B4(void);
-extern void fn_2_399C0(void);
-extern void fn_2_3AF08(void);
-extern void fn_2_3D5C4(void);
-extern void fn_2_3D878(void);
-extern void fn_2_3DAB8(void);
-extern void fn_2_3DC60(void);
-extern void fn_2_3DDC4(void);
 extern struct {
     /* 0x00 */ u8 _00[0x30];
     /* 0x30 */ u16 _30;
@@ -544,16 +535,6 @@ extern u8 lbl_80361B20[0x130];
 extern u8 lbl_2_data_3CE0[8];
 extern s16 lbl_2_data_38CC[10];
 extern s16 lbl_2_data_2E6C[10];
-extern void fn_2_68E68(void);
-extern void fn_2_6ACF4(void);
-extern void fn_2_6AE08(void);
-extern void fn_2_71F60(void);
-extern void fn_2_8AEE0(void);
-extern void fn_2_8FD14(void);
-extern void fn_2_904A8(void);
-extern void fn_2_90538(void);
-extern void fn_2_9257C(void);
-extern void fn_2_93C64(void);
 
 // rep_0A58
 extern s16 fn_2_53AA4(MenuItem0788* item);

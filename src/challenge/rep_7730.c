@@ -909,6 +909,31 @@ void fn_1_25F98(void) {
     }
 }
 
+// The target's copies inlined in fn_1_25064 and fn_1_25C68 load 0.015625f for the last
+// argument directly, while fn_1_24A8C reaches it through its address; no single body
+// compiled to both (about 100 forms tried), so the callers inline this second helper.
+static inline void fn_1_24A8C_copy(void) {
+    ChainTask7730* task = lbl_803CC1B8;
+    f32 dt;
+
+    fn_80038E2C(&lbl_1_bss_45868);
+    lbl_1_bss_45868._0000._00 = task->_1A;
+    lbl_1_bss_45868._0000._04 = task->_14;
+    lbl_1_bss_45868._0000._08 = task->_18 / 64.0f;
+    lbl_1_bss_45868._0000._0C = task->_1C / 64.0f;
+    lbl_1_bss_45868._0000._10 = task->_1E / 64.0f;
+    lbl_1_bss_45868._0000._14 = task->_20 / 10000.0f;
+    lbl_1_bss_45868._0000._20 = task->_2A;
+    dt = 1.0f / lbl_1_bss_45868._0000._20;
+    lbl_1_bss_45868._0000._18 = dt;
+    lbl_1_bss_45868._0000._1C = dt * dt;
+    lbl_1_bss_45868._0000._24 = 1.0f / (2.0f * dt);
+    if (lbl_803C77B8[0]._00 & 0x40) {
+        lbl_1_bss_45868._0000._20 = 1;
+    }
+    fn_80038CD0(task->_2B, &lbl_1_bss_45868, lbl_1_bss_43F68, 10.0f, task->_24 / 64.0f);
+}
+
 // .text:0x00025C68 size:0x330
 void fn_1_25C68(void) {
     ChainTask7730* task = lbl_803CC1B8;
@@ -930,7 +955,7 @@ void fn_1_25C68(void) {
     task->_14 = 0.5f;
     task->_26 = 100;
     task->_28 = 10;
-    fn_1_24A8C();
+    fn_1_24A8C_copy();
     ((ChainTask7730*)lbl_803CC1B8)->_00 = fn_1_25064;
     task->_2C = 0;
 }
@@ -956,10 +981,10 @@ void fn_1_25064(void) {
             if (i == task->_2C) {
                 if (lbl_803C77B8[0]._04 & 1) {
                     task->_2B--;
-                    fn_1_24A8C();
+                    fn_1_24A8C_copy();
                 } else if (lbl_803C77B8[0]._04 & 2) {
                     task->_2B++;
-                    fn_1_24A8C();
+                    fn_1_24A8C_copy();
                 }
             }
             break;
@@ -1069,7 +1094,7 @@ void fn_1_25064(void) {
             task->_2C = 0;
         }
     } else if (lbl_803C77B8[0]._02 & 0x100) {
-        fn_1_24A8C();
+        fn_1_24A8C_copy();
     } else if (lbl_803C77B8[0]._02 & 0x200) {
         color = 0x11775500;
         GXSetCopyClear(*(GXColor*)&color, 0xFFFFFF);
@@ -1166,9 +1191,8 @@ void fn_1_24C4C(PhysNode7730* nodes, s32 count, Vec* external, f32 k, f32 dampin
 }
 
 // .text:0x00024A8C size:0x1C0
-// 92.90%: the final call's argument setup is scheduled differently (the target converts
-// task->_24 after loading 0.015625f and the pool addresses). Writing it `/ 64.0f` matches the
-// inlined copies in fn_1_25064 and fn_1_25C68 but drops this function to 89.78%.
+// 92.90%: the final call's argument setup is scheduled differently (the target forms the
+// bss addresses before loading 0.015625f through its address); `/ 64.0f` scores 89.78%.
 void fn_1_24A8C(void) {
     ChainTask7730* task = lbl_803CC1B8;
     f32 dt;
@@ -1297,9 +1321,11 @@ void fn_1_24410(void) {
     ((WaveTask7730*)lbl_803CC1B8)->_00 = fn_1_23B54;
 }
 
+
 // .text:0x00023B54 size:0x8BC
-// 98.05%: registers differ in the inlined fn_1_22F4C (index offsets) and in the height
-// loop (16.0f and the conversion constant swap f1/f2).
+// 99.50%: in the height loop 16.0f and the conversion constant swap f1/f2, max and min
+// swap f30/f31, and n and lbl_1_bss_76E0's address swap r8/r9 (assigning min first fixes
+// the FPRs but puts 100.0f before -100.0f in .rodata).
 void fn_1_23B54(void) {
     WaveTask7730* task = lbl_803CC1B8;
     s32 i;
@@ -1440,8 +1466,8 @@ void fn_1_23B54(void) {
             max = -100.0f;
             min = 100.0f;
             for (i = 0; i < task->_28; i++) {
-                p = lbl_1_bss_F6E0[i];
                 for (j = 0; j < task->_29; j++) {
+                    p = &lbl_1_bss_F6E0[i][j];
                     x = p->x;
                     y = p->y;
                     idx = task->_2C;
@@ -1475,7 +1501,6 @@ void fn_1_23B54(void) {
                     } else if (p->z > max) {
                         max = p->z;
                     }
-                    p++;
                 }
             }
         } else {
@@ -1713,6 +1738,7 @@ s32 fn_1_23098(Mtx44 proj, Mtx view, s32 rows, s32 cols, f32 near, f32 far) {
 void fn_1_22F4C(s32 rows, s32 cols, f32* out, f32* cur, f32* prev) {
     s32 y;
     s32 x;
+    s32 i;
     f64 c;
     f32 a;
     f32 b;
@@ -1723,11 +1749,12 @@ void fn_1_22F4C(s32 rows, s32 cols, f32* out, f32* cur, f32* prev) {
     b = 2.0 - 4.0 * c;
     for (y = 0; y < rows; y++) {
         for (x = 0; x < cols; x++) {
-            out[y * cols + x] = b * cur[y * cols + x] +
+            i = y * cols + x;
+            out[i] = b * cur[i] +
                      a * (cur[x + cols * ((y + rows - 1) % rows)] + cur[x + cols * ((y + 1) % rows)] +
                           cur[(x + cols - 1) % cols + y * cols] + cur[(x + 1) % cols + y * cols]) -
-                     prev[y * cols + x];
-            out[y * cols + x] *= lbl_1_data_104C4;
+                     prev[i];
+            out[i] *= lbl_1_data_104C4;
         }
     }
 }
@@ -1747,13 +1774,9 @@ void fn_1_22DF4(RopeParams7730* params) {
 }
 
 // .text:0x00022874 size:0x580
-// 99.77%: only volatile registers in the setup of the three step products differ.
 s32 fn_1_22874(RopeParams7730* params) {
     RopeParams7730* task = lbl_803CC1B8;
     s32 step;
-    f32 coarse;
-    f32 medium;
-    f32 fine;
     s32 i;
     u8 count;
 
@@ -1764,9 +1787,6 @@ s32 fn_1_22874(RopeParams7730* params) {
     } else {
         step = 10;
     }
-    coarse = 0.001f * step;
-    medium = 0.01f * step;
-    fine = 0.0001f * step;
     for (i = 0; i < 14; i++) {
         switch (i) {
         case 0:
@@ -1797,54 +1817,54 @@ s32 fn_1_22874(RopeParams7730* params) {
         case 2:
             if (i == task->_25) {
                 if (lbl_803C77B8[0]._04 & 1) {
-                    lbl_1_bss_6FB8._00 -= coarse;
+                    lbl_1_bss_6FB8._00 -= 0.001f * step;
                 } else if (lbl_803C77B8[0]._04 & 2) {
-                    lbl_1_bss_6FB8._00 += coarse;
+                    lbl_1_bss_6FB8._00 += 0.001f * step;
                 }
             }
             break;
         case 3:
             if (i == task->_25) {
                 if (lbl_803C77B8[0]._04 & 1) {
-                    task->_18 -= medium;
+                    task->_18 -= 0.01f * step;
                 } else if (lbl_803C77B8[0]._04 & 2) {
-                    task->_18 += medium;
+                    task->_18 += 0.01f * step;
                 }
             }
             break;
         case 4:
             if (i == task->_25) {
                 if (lbl_803C77B8[0]._04 & 1) {
-                    lbl_1_bss_6FB8._08 -= medium;
+                    lbl_1_bss_6FB8._08 -= 0.01f * step;
                 } else if (lbl_803C77B8[0]._04 & 2) {
-                    lbl_1_bss_6FB8._08 += medium;
+                    lbl_1_bss_6FB8._08 += 0.01f * step;
                 }
             }
             break;
         case 5:
             if (i == task->_25) {
                 if (lbl_803C77B8[0]._04 & 1) {
-                    lbl_1_bss_6FB8._0C -= medium;
+                    lbl_1_bss_6FB8._0C -= 0.01f * step;
                 } else if (lbl_803C77B8[0]._04 & 2) {
-                    lbl_1_bss_6FB8._0C += medium;
+                    lbl_1_bss_6FB8._0C += 0.01f * step;
                 }
             }
             break;
         case 6:
             if (i == task->_25) {
                 if (lbl_803C77B8[0]._04 & 1) {
-                    lbl_1_bss_6FB8._10 -= medium;
+                    lbl_1_bss_6FB8._10 -= 0.01f * step;
                 } else if (lbl_803C77B8[0]._04 & 2) {
-                    lbl_1_bss_6FB8._10 += medium;
+                    lbl_1_bss_6FB8._10 += 0.01f * step;
                 }
             }
             break;
         case 7:
             if (i == task->_25) {
                 if (lbl_803C77B8[0]._04 & 1) {
-                    lbl_1_bss_6FB8._14 -= fine;
+                    lbl_1_bss_6FB8._14 -= 0.0001f * step;
                 } else if (lbl_803C77B8[0]._04 & 2) {
-                    lbl_1_bss_6FB8._14 += fine;
+                    lbl_1_bss_6FB8._14 += 0.0001f * step;
                 }
             }
             break;
@@ -2516,52 +2536,56 @@ void fn_1_1F900(GameTask7730* task) {
     }
 }
 
+// The target's copy inlined in fn_1_1F618 reads ids[i] again after GXLoadTexObj, which no
+// body that keeps fn_1_20640's id across that call can compile to, so the original had a
+// second helper.
+static inline void fn_1_20640_copy(GameTask7730* task, u32* ids) {
+    s32 i;
+    u32 tlut;
+
+    GXSetNumTevStages(task->_22);
+    GXSetNumTexGens(task->_22);
+    for (i = 0; i < task->_22; i++) {
+        GXSetTexCoordGen2(i, GX_TG_MTX2X4, GX_TG_TEX0, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
+        if (i != 0) {
+            GXSetTevColorIn(i, GX_CC_CPREV, GX_CC_TEXC, GX_CC_RASA, GX_CC_ZERO);
+            GXSetTevColorOp(i, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+            GXSetTevAlphaIn(i, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_APREV);
+            GXSetTevAlphaOp(i, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+        } else {
+            GXSetTevColorIn(i, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_TEXC);
+            GXSetTevColorOp(i, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+            GXSetTevAlphaIn(i, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_RASA);
+            GXSetTevAlphaOp(i, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+        }
+        tlut = ids[i] & 0x7FFFFFFF;
+        GXLoadTexObj(&lbl_1_bss_6EA4[ids[i]], i);
+        if (ids[i] & 0x80000000) {
+            GXLoadTlut(&lbl_1_bss_6E44[tlut], i);
+        }
+    }
+}
+
 // .text:0x0001F618 size:0x2E8
-// 97.62%: same instructions, callee-saved registers assigned in another order (task in
-// r26, the count in r27 in the target).
 void fn_1_1F618(GameTask7730* task) {
     s32 i;
     u32 ids[1];
-    f32 z;
-    s32 j;
-    u32 tlut;
 
     i = task->_1C;
     while (i-- != 0) {
         ids[0] = i % 4;
-        GXSetNumTevStages(task->_22);
-        GXSetNumTexGens(task->_22);
-        for (j = 0; j < task->_22; j++) {
-            GXSetTexCoordGen2(j, GX_TG_MTX2X4, GX_TG_TEX0, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
-            if (j != 0) {
-                GXSetTevColorIn(j, GX_CC_CPREV, GX_CC_TEXC, GX_CC_RASA, GX_CC_ZERO);
-                GXSetTevColorOp(j, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
-                GXSetTevAlphaIn(j, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_APREV);
-                GXSetTevAlphaOp(j, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
-            } else {
-                GXSetTevColorIn(j, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_TEXC);
-                GXSetTevColorOp(j, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
-                GXSetTevAlphaIn(j, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_RASA);
-                GXSetTevAlphaOp(j, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
-            }
-            tlut = ids[j] & 0x7FFFFFFF;
-            GXLoadTexObj(&lbl_1_bss_6EA4[ids[j]], j);
-            if (ids[j] & 0x80000000) {
-                GXLoadTlut(&lbl_1_bss_6E44[tlut], j);
-            }
-        }
+        fn_1_20640_copy(task, ids);
         GXBegin(GX_QUADS, GX_VTXFMT0, 4);
-        z = 0.5f - 0.0001f * i;
-        GXPosition3f32(0.0f, 0.0f, z);
+        GXPosition3f32(0.0f, 0.0f, 0.5f - 0.0001f * i);
         GXColor1u32(0xFFFFFF80);
         GXTexCoord2s16(0, 0);
-        GXPosition3f32(0.0f, 448.0f, z);
+        GXPosition3f32(0.0f, 448.0f, 0.5f - 0.0001f * i);
         GXColor1u32(0xFFFFFF80);
         GXTexCoord2s16(0, 0x100);
-        GXPosition3f32(640.0f, 448.0f, z);
+        GXPosition3f32(640.0f, 448.0f, 0.5f - 0.0001f * i);
         GXColor1u32(0xFFFFFF80);
         GXTexCoord2s16(0x100, 0x100);
-        GXPosition3f32(640.0f, 0.0f, z);
+        GXPosition3f32(640.0f, 0.0f, 0.5f - 0.0001f * i);
         GXColor1u32(0xFFFFFF80);
         GXTexCoord2s16(0x100, 0);
     }

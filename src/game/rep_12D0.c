@@ -5,6 +5,7 @@
 #include "game/rep_18E8.h"
 #include "game/rep_3DA8.h"
 #include "game/rep_1838.h"
+#include "game/rep_1770.h"
 
 extern struct {
     /* 0x00 */ u8 _00[0x12];
@@ -162,7 +163,6 @@ extern struct {
 
 extern int fn_3_6C938(int, int);
 extern int fn_3_6D564(int team, int rosterID, int arg);
-extern void fn_3_9C794(void);
 
 extern s8 lbl_3_common_bss_32888[2][100];
 

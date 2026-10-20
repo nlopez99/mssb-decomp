@@ -178,17 +178,18 @@ void fn_3_1663AC(void) {
 }
 
 // .text:0x00165D24 size:0x688 mapped:0x807A4DB8
-// MWCC inlines fn_3_1659A0 at all twelve calls here, which the target makes with bl; eight
-// dead statements in fn_3_1659A0 stop that (88.74% then), so it was larger by MWCC's measure.
+// 99.99%: the target tests the empty cases with `cmpwi r0,6; bge` (cases 6 and 7, which
+// MWCC drops here when both are listed); `case 6:` alone gives `beq`.
 BOOL fn_3_165D24(void) {
+    GameControlsStruct* logic = &g_GameLogic;
+    InMemBatterType* batter = &g_Batter;
     StarMissionCompletionTracker* tracker = &starMissionCompletionTracker;
     UnkBss37400* bss = &lbl_3_common_bss_37400;
     InMemRunnerType* runners = g_Runners;
     InMemPitcherType* pitcher = &g_Pitcher;
-    InMemBatterType* batter = &g_Batter;
     u8 mission = tracker->_441C;
     u8 level = tracker->_4415;
-    s16 id = 0;
+    s32 id = 0;
     ChallengeTrackingStruct* c;
 
     bss->_47 = 0;
@@ -200,9 +201,11 @@ BOOL fn_3_165D24(void) {
             return FALSE;
         }
         switch (bss->_46) {
+            case 6:
+                break;
             case 8:
                 if (lbl_3_common_bss_32A94._61 >= 4 ||
-                    g_Scores._04[g_GameLogic.homeTeamBattingInd_fieldingTeam][g_Scores._00] != 0) {
+                    g_Scores._04[logic->homeTeamBattingInd_fieldingTeam][g_Scores._00] != 0) {
                     bss->_46 = 0;
                     bss->_48 = 0;
                 }
@@ -229,36 +232,40 @@ BOOL fn_3_165D24(void) {
         if (fn_3_1659A0(12)) {
             bss->_46 = 12;
         }
-    } else if (g_GameLogic.teamBatting == g_d_GameSettings.humanTeamNumber) {
-        if (g_RunningLogic._10 >= 2 && batter->rosterID == g_GameLogic.Team_CaptainRosterLoc[g_GameLogic.teamBatting] &&
-            pitcher->rosterID == g_GameLogic.Team_CaptainRosterLoc[g_GameLogic.teamFielding]) {
-            if (fn_3_1659A0(3)) {
-                bss->_46 = 3;
+    } else if (logic->teamBatting == g_d_GameSettings.humanTeamNumber) {
+        if (g_RunningLogic._10 >= 2) {
+            if (batter->rosterID == g_GameLogic.Team_CaptainRosterLoc[g_GameLogic.teamBatting] &&
+                pitcher->rosterID == g_GameLogic.Team_CaptainRosterLoc[logic->teamFielding]) {
+                if (fn_3_1659A0(3)) {
+                    bss->_46 = 3;
+                }
+                goto done;
             }
-        } else if (g_RunningLogic._10 >= 2 &&
-                   g_Scores._04[g_GameLogic.homeTeamBattingInd_fieldingTeam][0] <
-                       g_Scores._04[g_GameLogic.awayTeamBattingInd_battingTeam][0] &&
-                   g_Scores._A6 <= 3) {
-            if (fn_3_1659A0(4)) {
-                bss->_46 = 4;
+            if (g_Scores._04[g_GameLogic.homeTeamBattingInd_fieldingTeam][0] <
+                    g_Scores._04[g_GameLogic.awayTeamBattingInd_battingTeam][0] &&
+                g_Scores._A6 <= 3) {
+                if (fn_3_1659A0(4)) {
+                    bss->_46 = 4;
+                }
+                goto done;
             }
-        } else if ((g_RunningLogic._00 & 0x1000) && g_Strikes.outs <= 1) {
-            switch (g_Batter.characterClass) {
-                case 0:
-                case 1:
-                    if (fn_3_1659A0(9)) {
-                        bss->_46 = 9;
-                    }
-                    break;
-                case 2:
-                case 3:
-                    if (fn_3_1659A0(10)) {
-                        bss->_46 = 10;
-                    }
-                    break;
+        }
+        if ((g_RunningLogic._00 & 0x1000) && g_Strikes.outs <= 1) {
+            if (g_Batter.characterClass == 0 || g_Batter.characterClass == 1) {
+                if (fn_3_1659A0(9)) {
+                    bss->_46 = 9;
+                }
+                goto done;
             }
-        } else if (g_RunningLogic._00 == 0x11 &&
-                   inMemRoster[g_GameLogic.teamBatting][runners[1].rosterID].stats.CharacterClass == 2) {
+            if (g_Batter.characterClass == 2 || g_Batter.characterClass == 3) {
+                if (fn_3_1659A0(10)) {
+                    bss->_46 = 10;
+                }
+                goto done;
+            }
+        }
+        if (g_RunningLogic._00 == 0x11 &&
+            inMemRoster[g_GameLogic.teamBatting][runners[1].rosterID].stats.CharacterClass == 2) {
             if (fn_3_1659A0(11)) {
                 bss->_46 = 11;
             }
@@ -272,7 +279,7 @@ BOOL fn_3_165D24(void) {
                 }
             }
         }
-    } else if (g_GameLogic.teamBatting != g_d_GameSettings.humanTeamNumber) {
+    } else if ((logic->teamBatting == g_d_GameSettings.humanTeamNumber) ^ 1) {
         if (g_RunningLogic._10 >= 3 && g_Scores._04[g_Scores._AD][g_Scores._00] == 0) {
             if (fn_3_1659A0(5)) {
                 bss->_46 = 5;
@@ -300,6 +307,7 @@ BOOL fn_3_165D24(void) {
             }
         }
     }
+done:
     switch (bss->_46) {
         case 9:
             bss->_44 = runners[3].rosterID;
@@ -330,6 +338,8 @@ BOOL fn_3_165D24(void) {
 }
 
 // .text:0x001659A0 size:0x384 mapped:0x807A4A34
+// The dead blocks stand in for code the original compiled to nothing: without them MWCC
+// inlines this function at fn_3_165D24's twelve calls, which the target makes with bl.
 BOOL fn_3_1659A0(s32 type) {
     StarMissionCompletionTracker* tracker = &starMissionCompletionTracker;
     UnkBss37400* bss = &lbl_3_common_bss_37400;
@@ -339,25 +349,33 @@ BOOL fn_3_1659A0(s32 type) {
     s32 r;
     s32 chance;
 
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
     kind = bss->_46;
     if (kind == 2 || kind == 1) {
         found = fn_3_163A7C();
     } else {
         found = fn_3_163BD4();
     }
-    if (!found) {
+    if (found == FALSE) {
         return FALSE;
-    }
-    r = rand() % 100;
-    if (bss->_4A == 0) {
-        chance = (s8)lbl_80109420[type]._0[level];
     } else {
-        chance = (s8)lbl_80109420[type]._0[level + 4];
+        r = rand() % 100;
+        if (bss->_4A == 0) {
+            chance = (s8)lbl_80109420[type]._0[level];
+        } else {
+            chance = (s8)lbl_80109420[type]._0[level + 4];
+        }
+        if (r <= chance) {
+            return TRUE;
+        } else {
+            return FALSE;
+        }
     }
-    if (r <= chance) {
-        return TRUE;
-    }
-    return FALSE;
 }
 
 // .text:0x0016598C size:0x14 mapped:0x807A4A20

@@ -22,6 +22,8 @@
 #include "game/rep_720.h"
 #include "game/rep_DB8.h"
 #include "game/rep_E08.h"
+#include "game/rep_1330.h"
+#include "game/rep_2940.h"
 
 typedef struct AramEntryD18 {
     /* 0x0 */ u32 _0[4];
@@ -143,9 +145,6 @@ extern int fn_80035838(AramEntryD18* entry, int count);
 extern void fn_8001E474(void);
 extern void fn_8001F228(void);
 extern void* fn_800B0A5C_insertQueue(void (*)(void), s32);
-extern void fn_3_7D458(void);
-extern void fn_3_E19E8(void);
-extern void fn_3_1663AC(void);
 extern void fn_8003BF54(u8, int, int, int, int, int, int, int, int);
 extern int fn_8004CA6C(u16 buttons);
 extern void fn_8004CC2C(void);
@@ -339,17 +338,9 @@ void fn_3_5B0C4(void) {
     lbl_3_data_228._04++;
 }
 
-// Registers differ from the setup through the stores (97.17%); the instructions and their
-// order match. Declaration, type and statement orders and a loop over the logos did not help.
 // .text:0x0005AE9C size:0x228 mapped:0x80699F30
 void fn_3_5AE9C(void) {
-    int logo[2];
-    u8 side;
-
     changeScene(4, 0);
-    side = g_d_GameSettings.home_AwaySetting;
-    logo[0] = lbl_8034E9A0._470D[side];
-    logo[1] = lbl_8034E9A0._470D[side ^ 1];
     g_GameLogic.framesOfExitingToMenu = 0;
     g_UnkSimulation_31AC0._4 = 0;
     g_UnkSimulation_31AC0._9 = 0;
@@ -370,12 +361,12 @@ void fn_3_5AE9C(void) {
     lbl_8036E548._2D5C = -1;
     g_GameLogic.teams[0] = g_d_GameSettings.PlayerPorts[0];
     g_GameLogic.teams[1] = g_d_GameSettings.PlayerPorts[1] % 4;
-    g_GameLogic.logo[0].ID = logo[0];
-    g_GameLogic.logo[1].ID = logo[1];
-    g_GameLogic.logo[0].variationID = logo[0] % 4;
-    g_GameLogic.logo[1].variationID = logo[1] % 4;
-    g_GameLogic.logo[0].captain = logo[0] / 4;
-    g_GameLogic.logo[1].captain = logo[1] / 4;
+    g_GameLogic.logo[0].ID = lbl_8034E9A0._470D[g_d_GameSettings.home_AwaySetting];
+    g_GameLogic.logo[1].ID = lbl_8034E9A0._470D[g_d_GameSettings.home_AwaySetting ^ 1];
+    g_GameLogic.logo[0].variationID = g_GameLogic.logo[0].ID % 4;
+    g_GameLogic.logo[1].variationID = g_GameLogic.logo[1].ID % 4;
+    g_GameLogic.logo[0].captain = g_GameLogic.logo[0].ID / 4;
+    g_GameLogic.logo[1].captain = g_GameLogic.logo[1].ID / 4;
     g_Scores._C7 = gameInitOptions.runsNeededForMercy;
     if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD || g_d_GameSettings.GameModeSelected == GAME_TYPE_MINIGAMES) {
         g_d_GameSettings.minigamesEnabled = 1;

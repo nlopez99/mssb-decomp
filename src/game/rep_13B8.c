@@ -1483,7 +1483,7 @@ int fn_3_86118(void) {
 
 // .text:0x0008604C size:0xCC mapped:0x806C50E0
 int fn_3_8604C(int* fielderOut) {
-    int i;
+    s32 i;
     int best = 9999;
 
     for (i = 0; i < 9; i++) {
@@ -1571,8 +1571,6 @@ void fn_3_85EF4(int runner, int direction) {
 }
 
 // .text:0x00085CB0 size:0x244 mapped:0x806C4D44
-// 60.54%: the target keeps fn_3_85C44's direction tests after inlining it with direction 1;
-// this build folds them away, which also shrinks the frame.
 void fn_3_85CB0(void) {
     int i;
 
@@ -1607,7 +1605,7 @@ void fn_3_85CB0(void) {
 }
 
 // .text:0x00085C44 size:0x6C mapped:0x806C4CD8
-void fn_3_85C44(int runner, int direction) {
+void fn_3_85C44(int runner, s32 direction) {
     InMemRunnerType* r = &g_Runners[runner];
 
     if (r->baseRoundingState != 1 || r->overRun1BStage < 2 || direction == 1) {
@@ -2108,11 +2106,11 @@ int fn_3_846C8(int runner) {
 }
 
 // .text:0x000842E4 size:0x3E4 mapped:0x806C3378
-// 99.14%: register allocation only; the target gives the call arguments' saved pointers r26-r28
-// and r, next and current r25, r30 and r29
+// 99.96%: only the last return's frames + 20 differs, computed into r0 here where the target
+// adds in place in r3
 int fn_3_842E4(int runner) {
-    InMemRunnerType* r = &g_Runners[runner];
     int next;
+    InMemRunnerType* r = &g_Runners[runner];
     int current;
     int throwFrames;
     int frames;
@@ -2139,7 +2137,7 @@ int fn_3_842E4(int runner) {
     if (r->baseStandingOn == g_FieldingLogic._0C4) {
         return -(g_FieldingLogic._0C4 == current);
     }
-    if (r->runningDirectionCode == 1 && g_FieldingLogic._0C4 == next) {
+    if (r->runningDirectionCode == 1 && g_FieldingLogic._0C4 == r->nextBase) {
         if (r->percentTowardsNextBase >= 0.4f) {
             throwFrames += 30;
             if (r->currentBase == 3) {
@@ -2155,7 +2153,7 @@ int fn_3_842E4(int runner) {
         }
         return -1;
     }
-    if (r->runningDirectionCode == 3 && g_FieldingLogic._0C4 == current) {
+    if (r->runningDirectionCode == 3 && g_FieldingLogic._0C4 == r->currentBase) {
         if (r->percentTowardsNextBase <= 0.4f) {
             throwFrames += 15;
         }
@@ -2864,9 +2862,9 @@ int fn_3_81EAC(int runner) {
 }
 
 // .text:0x00081BC8 size:0x2E4 mapped:0x806C0C5C
-// 95.27%: in the first overrun stage the target schedules the int-to-float constant ahead of lbl_3_data_4B44
 int fn_3_81BC8(int runner) {
     InMemRunnerType* r = &g_Runners[runner];
+    f32 sum;
 
     if (r->runningDirectionDesired == 1) {
         r->nextDirectionBeingProcessed = 1;
@@ -2878,8 +2876,9 @@ int fn_3_81BC8(int runner) {
         r->overrunBaseFrames_countUp = 0;
         r->overrunBaseFrames_countDown = lbl_3_data_4B48[0];
         r->runningDirectionCode = 5;
-        r->overrun1B_someDistConst_proportionPerFrame =
-            lbl_3_data_4B44 / ((r->overrunBaseFrames_countDown + 1) * (r->overrunBaseFrames_countDown / 2));
+        sum = (r->overrunBaseFrames_countDown + 1) * (r->overrunBaseFrames_countDown / 2);
+        sum = lbl_3_data_4B44 / sum;
+        r->overrun1B_someDistConst_proportionPerFrame = sum;
     }
     if (r->overrunBaseStage == 2) {
         r->overrunBaseFrames_countUp++;
@@ -3122,8 +3121,8 @@ void fn_3_810C4(int runner, int base) {
 }
 
 // .text:0x00080028 size:0x109C mapped:0x806BF0BC
-// 97.54%: the overrun and action steps schedule the target point's loads later, the dugout
-// velocity takes the speed as the second fmuls operand, and some FPR pairs are swapped.
+// 98.42%: the overrun and action steps schedule the target point's loads and the int-to-float
+// stack slots in another order, and some FPR pairs are swapped.
 void fn_3_80028(int runner) {
     InMemRunnerType* r = &g_Runners[runner];
     VecXYZ p;
@@ -3159,8 +3158,8 @@ void fn_3_80028(int runner) {
                 r->position.z = ((VecXZ*)&out)->z;
             } else if (r->overRun1BStage == 3) {
                 fn_3_7FFD0(&p, 1, 2, r->slidingAdjustment_backwards);
-                out.x = (p.x - r->position.x) / r->overrunBaseFrames_countDown;
                 out.y = (p.y - r->position.y) / r->overrunBaseFrames_countDown;
+                out.x = (p.x - r->position.x) / r->overrunBaseFrames_countDown;
                 out.z = (p.z - r->position.z) / r->overrunBaseFrames_countDown;
                 r->position.x += out.x;
                 r->position.y += out.y;
@@ -3192,8 +3191,8 @@ void fn_3_80028(int runner) {
                     dx = r->nextBaseCoordinates.x - r->position.x;
                     dz = r->nextBaseCoordinates.z - r->position.z;
                     dist = dolsqrtf2(dx * dx + dz * dz);
-                    r->velocity.x = (dx / dist) * lbl_3_data_4B50;
-                    r->velocity.z = (dz / dist) * lbl_3_data_4B50;
+                    r->velocity.x = scaleValue(dx / dist, lbl_3_data_4B50);
+                    r->velocity.z = scaleValue(dz / dist, lbl_3_data_4B50);
                     r->velocity.y = 0.0f;
                     r->runningToDugoutFrameCounter = 0;
                     r->framesToReachDugout = (s16)(dist / lbl_3_data_4B50) + 1;
@@ -3249,8 +3248,8 @@ void fn_3_80028(int runner) {
                         dx = r->nextBaseCoordinates.x - r->position.x;
                         dz = r->nextBaseCoordinates.z - r->position.z;
                         dist = dolsqrtf2(dx * dx + dz * dz);
-                        r->velocity.x = (dx / dist) * lbl_3_data_4B50;
-                        r->velocity.z = (dz / dist) * lbl_3_data_4B50;
+                        r->velocity.x = scaleValue(dx / dist, lbl_3_data_4B50);
+                        r->velocity.z = scaleValue(dz / dist, lbl_3_data_4B50);
                         r->velocity.y = 0.0f;
                         r->runningToDugoutFrameCounter = 0;
                         r->framesToReachDugout = (s16)(dist / lbl_3_data_4B50) + 1;
@@ -3279,8 +3278,8 @@ void fn_3_80028(int runner) {
                     dx = r->nextBaseCoordinates.x - r->position.x;
                     dz = r->nextBaseCoordinates.z - r->position.z;
                     dist = dolsqrtf2(dx * dx + dz * dz);
-                    r->velocity.x = (dx / dist) * lbl_3_data_4B50;
-                    r->velocity.z = (dz / dist) * lbl_3_data_4B50;
+                    r->velocity.x = scaleValue(dx / dist, lbl_3_data_4B50);
+                    r->velocity.z = scaleValue(dz / dist, lbl_3_data_4B50);
                     r->velocity.y = 0.0f;
                     r->runningToDugoutFrameCounter = 0;
                     r->framesToReachDugout = (s16)(dist / lbl_3_data_4B50) + 1;
@@ -3591,8 +3590,12 @@ void fn_3_7F9C4(int runner) {
     }
 }
 
+static inline Unk13B8Fielder* fielderAt(u8 base) {
+    return &g_Fielders[g_FieldingLogic._0D0[base]];
+}
+
 // .text:0x0007F494 size:0x530 mapped:0x806BE528
-// 99.85%: only g_FieldingLogic's and g_Fielders' addresses for the body-check fielder swap r3 and r4
+// 99.91%: only the body-check fielder's address and the probability row's offset swap r6 and r9
 int fn_3_7F494(int runner) {
     InMemRunnerType* r = &g_Runners[runner];
     int bodyCheck = 0;
@@ -3664,10 +3667,10 @@ int fn_3_7F494(int runner) {
                 ((g_Ball.fielderWBallIndex >= 0 && g_Ball.fielderWBallIndex == g_FieldingLogic._0D0[base] &&
                   g_Ball.timeSinceBallPickedUp <= 9) ||
                  (g_FieldingLogic._0C4 == base && g_Ball.framesUntilThrowReachesDest < 15))) {
-                u8 chance = bodyCheckProbabiliities[r->weight][g_Fielders[g_FieldingLogic._0D0[base]]._1C9];
+                u8 chance = bodyCheckProbabiliities[r->weight][fielderAt(base)->_1C9];
 
-                g_Fielders[g_FieldingLogic._0D0[base]]._211 = 1;
-                g_Fielders[g_FieldingLogic._0D0[base]]._214 = r->baseRunningTowards;
+                fielderAt(base)->_211 = 1;
+                fielderAt(base)->_214 = r->baseRunningTowards;
                 if (RandomInt_Game(100) < chance) {
                     r->actionCode = 2;
                     if (g_d_GameSettings.exhibitionMatchInd == 0 && lbl_3_common_bss_37400._40 == g_GameLogic.teamBatting) {
@@ -3902,8 +3905,8 @@ void fn_3_7EA68(void) {
 }
 
 // .text:0x0007E2BC size:0x7AC mapped:0x806BD350
-// 99.46%: registers differ in the stick-held branch (base and i swapped) and the third loop's
-// handled counter starts as li 0 here where the target copies it from i with mr
+// 99.62%: the third loop's handled counter starts as li 0 here where the target copies it
+// from i with mr
 void fn_3_7E2BC(void) {
     InputStruct* input = &g_Controls[g_GameLogic.teams[g_GameLogic.teamBatting]];
     int i;
@@ -3989,6 +3992,7 @@ void fn_3_7E2BC(void) {
         }
     } else if (buttons & 0x800) {
         int base = -1;
+        int j;
         int waited;
 
         if (input->controlStickAngle >= 0xA00 && input->controlStickAngle < 0xE00) {
@@ -4001,9 +4005,8 @@ void fn_3_7E2BC(void) {
         if (base < 0) {
             return;
         }
-        waited = 0;
-        for (i = 3; i >= 0; i--) {
-            InMemRunnerType* r = &g_Runners[i];
+        for (j = 3, waited = 0; j >= 0; j--) {
+            InMemRunnerType* r = &g_Runners[j];
             if (r->runnerOnFieldOrOutOrScored != 1 || r->nextBase != base) {
                 continue;
             }
@@ -4020,7 +4023,7 @@ void fn_3_7E2BC(void) {
             }
             if (r->runningDirectionCode == 1) {
                 if (r->nextDirectionBeingProcessed == 2 || r->nextDirectionBeingProcessed == 3) {
-                    fn_3_7FEA8(i, 1);
+                    fn_3_7FEA8(j, 1);
                     return;
                 }
                 if (waited != 0) {
@@ -4029,19 +4032,19 @@ void fn_3_7E2BC(void) {
                 waited++;
             } else if (r->runningDirectionCode == 3) {
                 if (r->nextDirectionBeingProcessed == 2 || r->nextDirectionBeingProcessed == 1) {
-                    fn_3_7FEA8(i, 1);
+                    fn_3_7FEA8(j, 1);
                     return;
                 }
                 if (input->newButtonInput & 0x800) {
-                    fn_3_7FEA8(i, 2);
+                    fn_3_7FEA8(j, 2);
                 }
                 return;
             } else if (r->runningDirectionCode == 5 && (buttons & 0x800)) {
-                fn_3_7FEA8(i, 1);
+                fn_3_7FEA8(j, 1);
                 return;
             } else {
                 if (input->newButtonInput & 0x800) {
-                    fn_3_7FEA8(i, 1);
+                    fn_3_7FEA8(j, 1);
                 }
                 return;
             }

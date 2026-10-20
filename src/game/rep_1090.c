@@ -2,6 +2,7 @@
 #include "header_rep_data.h"
 #include "game/UnknownHomes_Game.h"
 #include "game/rep_F80.h"
+#include "game/rep_2940.h"
 
 typedef struct {
     /* 0x000 */ u8 _000[0x34];
@@ -49,7 +50,6 @@ extern int fn_8004ACDC(int arg0);
 extern void fn_3_6A250(void);
 extern void fn_3_6A254(void);
 extern void fn_3_6A25C(void);
-extern void fn_3_E07DC(void);
 
 // .text:0x0006C4D0 size:0x384 mapped:0x806AB564
 void fn_3_6C4D0(void) {

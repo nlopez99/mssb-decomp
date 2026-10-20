@@ -5,6 +5,7 @@
 #include "static/UnknownHomes_Static.h"
 #include "musyx/musyx.h"
 #include "string.h"
+#include "menus/rep_0C50.h"
 
 extern void fn_800625A4(s32 port, s32 arg1);
 extern void fn_800506E8(s32 port, s32 charID, s32 arg2);
@@ -25,7 +26,6 @@ extern void fn_800684A4(void);
 extern void fn_800671FC(void);
 extern void fn_800649BC(void);
 extern void fn_80069854(void);
-extern void fn_2_72630(void);
 extern s32 fn_80062578(void);
 extern s32 fn_80050F78(s32 arg0);
 extern void fn_2_19F2C(void);
@@ -49,7 +49,6 @@ extern s32 fn_800697B0(void);
 extern void fn_8006496C(void);
 extern void fn_2_82E58(void);
 extern void fn_80050FE8(int arg0, int arg1, int arg2, int arg3, int arg4, int arg5);
-extern void fn_2_7265C(void);
 extern void fn_800628D4(int charID);
 
 // One character's stats, as in inMemRoster and at the start of lbl_8034E9A0
@@ -250,8 +249,7 @@ extern struct {
     /* 0x00 */ u8 _00;
     /* 0x01 */ u8 _01[6];
     /* 0x07 */ u8 _07[0x55 - 0x7];
-    /* 0x55 */ u8 _55;
-    /* 0x56 */ u8 _56;
+    /* 0x55 */ u8 _55[2];
     /* 0x57 */ u8 _57[0x59 - 0x57];
     /* 0x59 */ u8 _59[2];
     /* 0x5B */ u8 _5B[0x5D - 0x5B];
@@ -378,8 +376,6 @@ static u8 lbl_2_bss_3A8[56];
 static u8 lbl_2_bss_3A0;
 
 // .text:0x000110B0 size:0x244
-// Inlines fn_2_323C, which the target calls; it pairs once fn_2_323C counts
-// about four more statements (four dead-store blocks there match it).
 void fn_2_110B0(void) {
     switch (lbl_803CBBCC->_4) {
     case 0:
@@ -945,10 +941,9 @@ void fn_2_F200(u8 port) {
 }
 
 // .text:0x0000ED94 size:0x46C
-// 99.2%: the target forms &lbl_2_bss_F410._20[port] from the unextended port
-// (rlwinm) instead of reusing port * 4 from lbl_2_bss_F468._00[port].
 s32 fn_2_ED94(u8 port, u16 held, u16 trg, u16 rep) {
     s8 team;
+    int pad;
 
     if (lbl_2_bss_F468._41[port] == 0) {
         if ((held & 8) || (held & 4) || (held & 1) || (held & 2)) {
@@ -979,7 +974,8 @@ s32 fn_2_ED94(u8 port, u16 held, u16 trg, u16 rep) {
         fn_800625A4(port, 0xD);
         return 1;
     } else if (lbl_2_bss_F468._00[port] != 9) {
-        lbl_2_bss_F468._20[port] = lbl_2_bss_F410._20[port];
+        pad = port;
+        lbl_2_bss_F468._20[port] = lbl_2_bss_F410._20[pad];
         if (lbl_2_bss_F468._45[port] != 0) {
             if (lbl_2_bss_F468._47[port] == 0 && (held & 2)) {
                 lbl_2_bss_F468._47[port] = 1;
@@ -993,17 +989,17 @@ s32 fn_2_ED94(u8 port, u16 held, u16 trg, u16 rep) {
             if (g_d_GameSettings._10 == 0 && port != 0) {
                 team = lbl_8034E9A0._46F8[0] == 0;
                 lbl_803C6028._74[team] = 1;
-                lbl_2_bss_F410._20[port] = fn_80050760(team, 0, 0, 0, 0);
+                lbl_2_bss_F410._20[pad] = fn_80050760(team, 0, 0, 0, 0);
             } else {
-                lbl_2_bss_F410._20[port] = fn_80050760(lbl_8034E9A0._46FC[lbl_8034E9A0._46F8[port]] == 0 ? lbl_8034E9A0._46F8[port] : lbl_8034E9A0._46F8[0] == 0, 0, 0, 0, 0);
+                lbl_2_bss_F410._20[pad] = fn_80050760(lbl_8034E9A0._46FC[lbl_8034E9A0._46F8[port]] == 0 ? lbl_8034E9A0._46F8[port] : lbl_8034E9A0._46F8[0] == 0, 0, 0, 0, 0);
             }
         } else {
             if (g_d_GameSettings._10 == 0 && port != 0) {
                 team = lbl_8034E9A0._46F8[0] == 0;
                 lbl_803C6028._74[team] = 1;
-                lbl_2_bss_F410._20[port] = fn_80050760(team, held, trg, rep, 0);
+                lbl_2_bss_F410._20[pad] = fn_80050760(team, held, trg, rep, 0);
             } else {
-                lbl_2_bss_F410._20[port] = fn_80050760(lbl_8034E9A0._46FC[lbl_8034E9A0._46F8[port]] == 0 ? lbl_8034E9A0._46F8[port] : lbl_8034E9A0._46F8[0] == 0, held, trg, rep, 0);
+                lbl_2_bss_F410._20[pad] = fn_80050760(lbl_8034E9A0._46FC[lbl_8034E9A0._46F8[port]] == 0 ? lbl_8034E9A0._46F8[port] : lbl_8034E9A0._46F8[0] == 0, held, trg, rep, 0);
             }
         }
     }
@@ -1225,13 +1221,22 @@ done:
     }
 }
 
+static inline s32 isRosterLocked(void) {
+    s32 locked = 0;
+
+    if (g_d_GameSettings.GameModeSelected == 5 && lbl_2_bss_F468._3F[0] != 0) {
+        locked = 1;
+    }
+    return locked != 0;
+}
+
 // .text:0x0000CE44 size:0x1168
-// 93.5% draft: the target forms lbl_2_bss_F468._00[port] as base plus port*4
-// (lwzx), materializes the lock flag with neg/or/srwi, and allocates otherwise.
+// 96.7%: registers, and the target keeps &lbl_2_bss_F468._08[port] in one register
+// from its first store to the last loop and clears _26 with i and 0 in separate registers.
 void fn_2_CE44(s32 port) {
     s32 used = 0;
+    int pad = port;
     s8 freeCount = 0;
-    s32 locked = 0;
     s32 cap;
     s32 i;
     s32 c;
@@ -1240,10 +1245,7 @@ void fn_2_CE44(s32 port) {
     s8 slot;
     s8 id;
 
-    if (g_d_GameSettings.GameModeSelected == 5 && lbl_2_bss_F468._3F[0] != 0) {
-        locked = 1;
-    }
-    if (locked != 0) {
+    if (isRosterLocked() & 1) {
         sndFXStartEx(0x1BA, lbl_800EFBA4[3], 0x3F, 0);
         return;
     }
@@ -1269,7 +1271,7 @@ void fn_2_CE44(s32 port) {
             return;
         }
     }
-    lbl_2_bss_F468._08[port] = lbl_2_bss_F468._00[port];
+    lbl_2_bss_F468._08[pad] = lbl_2_bss_F468._00[port];
     if (used == 0) {
         lbl_2_bss_F468._37[port] = 0;
         if (lbl_2_bss_F468._00[port] == 9) {
@@ -1292,7 +1294,7 @@ void fn_2_CE44(s32 port) {
         if (lbl_2_bss_F468._00[port] != 9 && lbl_2_bss_F468._00[port] != 10 && used != 0) {
             fn_2_4970(port, cap);
         } else if (lbl_2_bss_F468._00[port] == 9) {
-            lbl_2_bss_F468._08[port] = lbl_2_bss_F468._00[port];
+            lbl_2_bss_F468._08[pad] = lbl_2_bss_F468._00[port];
             lbl_2_bss_F468._00[port]--;
             if (cap == lbl_803C6724._02[port][8]) {
                 lbl_2_bss_F468._00[port]--;
@@ -1309,8 +1311,10 @@ void fn_2_CE44(s32 port) {
                 lbl_2_bss_F468._00[0] = 9;
                 fn_800625A4(0, 18);
             } else if (used == 0 && lbl_803C5EA4._0E == 0) {
-                if (lbl_803C66B0._55 != 0 || lbl_803C66B0._56 != 0) {
-                    return;
+                for (t = 0; t < 2; t++) {
+                    if (lbl_803C66B0._55[t] != 0) {
+                        return;
+                    }
                 }
                 for (t = 0; t < 2; t++) {
                     for (i = 0; i < 9; i++) {
@@ -1319,7 +1323,7 @@ void fn_2_CE44(s32 port) {
                 }
                 fn_2_EC54(port);
             } else {
-                lbl_2_bss_F468._08[port] = lbl_2_bss_F468._00[port];
+                lbl_2_bss_F468._08[pad] = lbl_2_bss_F468._00[port];
                 lbl_2_bss_F468._00[port] = 8;
                 if (cap == lbl_803C6724._02[port][8]) {
                     lbl_2_bss_F468._00[port]--;
@@ -1336,8 +1340,10 @@ void fn_2_CE44(s32 port) {
             lbl_2_bss_F468._00[0] = 9;
             fn_800625A4(0, 18);
         } else if (used == 0) {
-            if (lbl_803C66B0._55 != 0 || lbl_803C66B0._56 != 0) {
-                return;
+            for (t = 0; t < 2; t++) {
+                if (lbl_803C66B0._55[t] != 0) {
+                    return;
+                }
             }
             for (t = 0; t < 2; t++) {
                 for (i = 0; i < 9; i++) {
@@ -1349,8 +1355,10 @@ void fn_2_CE44(s32 port) {
     } else if (g_d_GameSettings._10 == 1) {
         if (lbl_2_bss_F468._00[port] != 9 && lbl_2_bss_F468._00[port] != 10) {
             if (used == 0) {
-                if (lbl_803C66B0._55 != 0 || lbl_803C66B0._56 != 0) {
-                    return;
+                for (t = 0; t < 2; t++) {
+                    if (lbl_803C66B0._55[t] != 0) {
+                        return;
+                    }
                 }
                 lbl_2_bss_F468._45[1] = 0;
                 lbl_2_bss_F468._45[0] = 0;
@@ -1372,7 +1380,7 @@ void fn_2_CE44(s32 port) {
                 sndFXStartEx(0x1BA, lbl_800EFBA4[3], 0x3F, 0);
                 return;
             }
-            lbl_2_bss_F468._08[port] = lbl_2_bss_F468._00[port];
+            lbl_2_bss_F468._08[pad] = lbl_2_bss_F468._00[port];
             lbl_2_bss_F468._00[port]--;
             if (lbl_2_bss_F468._00[port] < 0) {
                 lbl_2_bss_F468._00[port] = 8;
@@ -1384,7 +1392,7 @@ void fn_2_CE44(s32 port) {
                 }
             }
             for (i = 0; i < 9; i++) {
-                if (lbl_803C6724._14[port][i] == lbl_2_bss_F468._08[port]) {
+                if (lbl_803C6724._14[port][i] == lbl_2_bss_F468._08[pad]) {
                     slot = i;
                 }
             }
@@ -1401,63 +1409,67 @@ void fn_2_CE44(s32 port) {
                 lbl_2_bss_F468._37[port] = 0;
             }
             fn_800625A4(port, 16);
-        } else if (lbl_2_bss_100B8._2E[port] != 0) {
-            lbl_2_bss_100B8._2E[port] = 0;
-            fn_800625A4(port, 18);
-            fn_2_1C34(0x200);
-            return;
-        } else if (used != 0) {
-            lbl_2_bss_F468._08[port] = lbl_2_bss_F468._00[port];
-            lbl_2_bss_F468._00[port] = 8;
-            if (cap == lbl_803C6724._02[port][8]) {
-                lbl_2_bss_F468._00[port]--;
-            }
-            fn_800625A4(port, 21);
-            fn_2_1C34(0x200);
-            return;
-        } else {
-            if (lbl_803C66B0._55 != 0 || lbl_803C66B0._56 != 0) {
+        } else if (lbl_2_bss_F468._00[port] == 9 || lbl_2_bss_F468._00[port] == 10) {
+            if (lbl_2_bss_100B8._2E[port] != 0) {
+                lbl_2_bss_100B8._2E[port] = 0;
+                fn_800625A4(port, 18);
+                fn_2_1C34(0x200);
                 return;
-            }
-            for (t = 0; t < 2; t++) {
-                for (i = 0; i < 9; i++) {
-                    lbl_803C6724._26[t][i] = 0;
+            } else if (used != 0) {
+                lbl_2_bss_F468._08[pad] = lbl_2_bss_F468._00[port];
+                lbl_2_bss_F468._00[port] = 8;
+                if (cap == lbl_803C6724._02[port][8]) {
+                    lbl_2_bss_F468._00[port]--;
                 }
-            }
-            lbl_2_bss_F468._45[1] = 0;
-            lbl_2_bss_F468._45[0] = 0;
-            lbl_2_bss_F468._00[1] = 0;
-            lbl_2_bss_F468._00[0] = 0;
-            lbl_2_bss_F468._5F[1] = 0;
-            lbl_2_bss_F468._5F[0] = 0;
-            for (t = 0; t < 2; t++) {
-                for (i = 1; i < 9; i++) {
-                    lbl_8034E9A0._4757[lbl_803C6724._02[t][i]] = 0;
-                    fn_800506E8(lbl_8034E9A0._46F8[t], lbl_803C6724._02[t][i], 0);
-                    fn_80067B40(t, lbl_803C6724._02[t][i], 0);
-                    lbl_803C6724._02[t][i] = -1;
-                    lbl_803C6724._4A[t][i] = 0;
-                    lbl_803C6724._26[t][i] = 0;
-                }
-                lbl_2_bss_F468._37[t] = 0;
-                if (lbl_2_bss_F468._00[t] == 9) {
-                    lbl_2_bss_F468._00[t] = 0;
-                    switch (t) {
-                    case 0:
-                        if (lbl_803C6724._02[0][0] == lbl_8034E9A0._46E0[0]) {
-                            lbl_2_bss_F468._00[0] = 1;
-                        }
-                        break;
-                    case 1:
-                        if (lbl_803C6724._02[1][0] == lbl_8034E9A0._46E0[1]) {
-                            lbl_2_bss_F468._00[1] = 11;
-                        }
-                        break;
+                fn_800625A4(port, 21);
+                fn_2_1C34(0x200);
+                return;
+            } else {
+                for (t = 0; t < 2; t++) {
+                    if (lbl_803C66B0._55[t] != 0) {
+                        return;
                     }
                 }
-                lbl_2_bss_F468._3D[t] = 0;
+                for (t = 0; t < 2; t++) {
+                    for (i = 0; i < 9; i++) {
+                        lbl_803C6724._26[t][i] = 0;
+                    }
+                }
+                lbl_2_bss_F468._45[1] = 0;
+                lbl_2_bss_F468._45[0] = 0;
+                lbl_2_bss_F468._00[1] = 0;
+                lbl_2_bss_F468._00[0] = 0;
+                lbl_2_bss_F468._5F[1] = 0;
+                lbl_2_bss_F468._5F[0] = 0;
+                for (t = 0; t < 2; t++) {
+                    for (i = 1; i < 9; i++) {
+                        lbl_8034E9A0._4757[lbl_803C6724._02[t][i]] = 0;
+                        fn_800506E8(lbl_8034E9A0._46F8[t], lbl_803C6724._02[t][i], 0);
+                        fn_80067B40(t, lbl_803C6724._02[t][i], 0);
+                        lbl_803C6724._02[t][i] = -1;
+                        lbl_803C6724._4A[t][i] = 0;
+                        lbl_803C6724._26[t][i] = 0;
+                    }
+                    lbl_2_bss_F468._37[t] = 0;
+                    if (lbl_2_bss_F468._00[t] == 9) {
+                        lbl_2_bss_F468._00[t] = 0;
+                        switch (t) {
+                        case 0:
+                            if (lbl_803C6724._02[0][0] == lbl_8034E9A0._46E0[0]) {
+                                lbl_2_bss_F468._00[0] = 1;
+                            }
+                            break;
+                        case 1:
+                            if (lbl_803C6724._02[1][0] == lbl_8034E9A0._46E0[1]) {
+                                lbl_2_bss_F468._00[1] = 11;
+                            }
+                            break;
+                        }
+                    }
+                    lbl_2_bss_F468._3D[t] = 0;
+                }
+                fn_2_EC54(port);
             }
-            fn_2_EC54(port);
         }
     }
 end:
@@ -1813,8 +1825,8 @@ void fn_2_B324(void) {
 }
 
 // .text:0x0000AEE8 size:0x43C
-// 99.9%: the target keeps cap in r29 apart from the remainder in r26; the
-// permuter matched it only with a redundant copy (`id = ...; cap = id;`).
+// 99.9%: the target keeps cap in r29 (later j's register) apart from the remainder
+// in r26; the permuter matched it only with a redundant copy (`id = ...; cap = id;`).
 void fn_2_AEE8(void) {
     u8 order[2][54];
     u8 value[54];
@@ -2214,17 +2226,17 @@ void fn_2_9ACC(u16 team) {
 }
 
 // .text:0x000095D8 size:0x4F4
-// 92.6%: the target keeps g_d_GameSettings's address from the first loop for
+// 95.0%: the target keeps g_d_GameSettings's address from the first loop for
 // the second instead of forming it again, so its first loop uses r25-r31.
 void fn_2_95D8(void) {
-    u32 color[2];
-    s8 slots[2][9];
-    s8 chars[54];
-    s32 t;
-    s32 i;
     s32 j;
-    s32 cursor;
     s32 cap;
+    u32 color[2];
+    s8 chars[54];
+    s32 i;
+    s32 cursor;
+    s8 slots[2][9];
+    s32 t;
     s32 y;
 
     if (lbl_803CBBCC->_4 < 4) {
@@ -2611,7 +2623,7 @@ void fn_2_893C(void) {}
 void fn_2_87A8(void) {
     s32 prev = lbl_2_bss_F410._4C;
 
-    if (lbl_803C66B0._55 != 0 || lbl_803C66B0._56 != 0) {
+    if (lbl_803C66B0._55[0] != 0 || lbl_803C66B0._55[1] != 0) {
         return;
     }
     {
@@ -3206,14 +3218,14 @@ void fn_2_61A0(void) {
     }
     if (lbl_2_bss_F468._2E == 0) {
         if (fn_80050F78(0) == 0) {
-            lbl_803C66B0._56 = 1;
-            lbl_803C66B0._55 = 1;
+            lbl_803C66B0._55[1] = 1;
+            lbl_803C66B0._55[0] = 1;
             return;
         }
     } else {
         if (fn_80050F78(2) == 0) {
-            lbl_803C66B0._56 = 1;
-            lbl_803C66B0._55 = 1;
+            lbl_803C66B0._55[1] = 1;
+            lbl_803C66B0._55[0] = 1;
             return;
         }
     }
@@ -3221,8 +3233,8 @@ void fn_2_61A0(void) {
         lbl_2_bss_F468._36--;
         return;
     }
-    lbl_803C66B0._56 = 0;
-    lbl_803C66B0._55 = 0;
+    lbl_803C66B0._55[1] = 0;
+    lbl_803C66B0._55[0] = 0;
     if (lbl_2_bss_F468._2E == 0) {
         if (lbl_803297E0._CF5F != 0) {
             fn_2_19F2C();
@@ -4177,6 +4189,8 @@ s32 fn_2_33BC(void) {
 }
 
 // .text:0x0000323C size:0x180
+// The dead stores in case 4 stand in for code the original compiled to nothing;
+// without them MWCC inlines this function into fn_2_110B0, where the target calls it.
 void fn_2_323C(void) {
     s32 result;
 
@@ -4212,6 +4226,9 @@ void fn_2_323C(void) {
             lbl_803CBD24._4 = 0;
             lbl_803297E0._CF5F = 0;
             lbl_803CBBCC->_4 = 2;
+            { int d; d = 1; }
+            { int d; d = 1; }
+            { int d; d = 1; }
             break;
         }
         break;
@@ -4224,14 +4241,9 @@ void fn_2_3204(void) {
 }
 
 // .text:0x00002FC0 size:0x244
-// 96.8%: registers in the fn_2_348C loop. Calling fn_2_348C() there matches this
-// function, but then fn_2_3204 and fn_2_323C inline it; the target calls it.
-// Five dead stores after the call keep it out of both (MWCC's inline size limit).
+// The dead stores after fn_2_348C() stand in for code the original compiled to nothing;
+// without them MWCC inlines this function into fn_2_3204 and fn_2_323C, where the target calls it.
 void fn_2_2FC0(u8 arg0, s32 arg1, s32 arg2) {
-    s32 i;
-    s32 j;
-    s32 locked;
-
     switch (arg0) {
     case 9:
         fn_800684A4();
@@ -4242,15 +4254,12 @@ void fn_2_2FC0(u8 arg0, s32 arg1, s32 arg2) {
         memset(lbl_8034E9A0._4757, 0, sizeof(lbl_8034E9A0._4757));
         lbl_8034E9A0._4757[lbl_8034E9A0._46E0[0]] = 1;
         lbl_8034E9A0._4757[lbl_8034E9A0._46E0[1]] = 1;
-        for (i = 0; i < 6; i++) {
-            locked = g_d_GameSettings._1A[i] == 0;
-            for (j = 0; j < 54; j++) {
-                if (lbl_803CB748[i] == lbl_800E8558[j]._2) {
-                    lbl_8034E9A0._4757[j] = locked;
-                }
-            }
-            lbl_803CB748[i] = lbl_803CB748[i];
-        }
+        fn_2_348C();
+        { int d; d = 1; }
+        { int d; d = 1; }
+        { int d; d = 1; }
+        { int d; d = 1; }
+        { int d; d = 1; }
         fn_80067F70(0);
         fn_80067F70(1);
         fn_2_8940();

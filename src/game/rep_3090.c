@@ -10,6 +10,7 @@
 #include "game/rep_9B0.h"
 #include "game/rep_A00.h"
 #include "game/rep_1E08.h"
+#include "game/rep_12D0.h"
 
 // Same layout as rep_A00.c's cue table entries, which read lbl_3_data_1E434 and lbl_3_data_1F090
 typedef struct {
@@ -219,8 +220,6 @@ extern s32 lbl_3_data_3A40[];
 extern s32 lbl_3_data_3B1C[];
 extern s32 lbl_3_data_3B34[];
 
-extern void fn_3_7BBF8(void);
-extern void fn_3_7BC0C(void);
 extern void fn_80011358(int, u8);
 extern void fn_8001CA40(int arg);
 extern void fn_80052798(s32);

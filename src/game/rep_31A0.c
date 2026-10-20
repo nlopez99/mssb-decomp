@@ -24,6 +24,9 @@
 #include "game/rep_3090.h"
 #include "string.h"
 #include "musyx/musyx.h"
+#include "game/rep_3290.h"
+#include "game/rep_3D50.h"
+#include "game/rep_3DA8.h"
 
 typedef struct {
     /* 0x00 */ u32 _00[4];
@@ -180,8 +183,6 @@ extern void fn_8001CA40(int arg);
 extern void fn_80011BE4(int arg);
 extern void fn_80018B38(void);
 extern void fn_80035B50(int arg);
-extern void fn_3_1160B8(void);
-extern void fn_3_1160BC(void);
 extern void fn_3_1471C4(void);
 extern void fn_3_1471C0(void);
 extern void changeScene(u8, s16);
@@ -192,8 +193,6 @@ extern void fn_80062A94(void);
 extern void fn_800189E4(void);
 extern int fn_80035838(AramEntry31A0* entry, int arg1);
 extern int fn_3_6C938(int, int);
-extern void fn_3_161078(void);
-extern void fn_3_1658F0(void);
 extern void possiblyTransitionBlackScreen(void);
 extern void fn_8004CC18(void);
 extern void fn_8004FDA0(int charID);

@@ -328,7 +328,38 @@ void fn_3_11D2C8(s32 model, s32 first, s32 count, void* anim, s32 arg4) {
 
 // .text:0x0011D1B0 size:0x118 mapped:0x8075C244
 void fn_3_11D1B0(void) {
-    return;
+    s32 i;
+
+    switch (g_Minigame.GameMode_MiniGame) {
+    case MINI_GAME_ID_BOBOMB_DERBY:
+        fn_3_11CD00();
+        break;
+    case MINI_GAME_ID_WALLBALL:
+        fn_3_11C5F8();
+        break;
+    case MINI_GAME_ID_BARREL_BATTER:
+        fn_3_11C2CC();
+        break;
+    case MINI_GAME_ID_CHAINCHOMP_SPRINT:
+        fn_3_11C02C();
+        break;
+    case MINI_GAME_ID_STAR_DASH:
+        fn_3_11BBA4();
+        break;
+    case MINI_GAME_ID_PIRANHA_PANIC:
+        fn_3_11B75C();
+        break;
+    }
+    for (i = 0; i < lbl_8036E548._3078; i++) {
+        lbl_8036E548._2D94[i]._04.x = 0.0f;
+        lbl_8036E548._2D94[i]._04.y = 0.0f;
+        lbl_8036E548._2D94[i]._04.z = 0.0f;
+        lbl_8036E548._2D94[i]._10.x = 0.0f;
+        lbl_8036E548._2D94[i]._10.y = 0.0f;
+        lbl_8036E548._2D94[i]._10.z = 0.0f;
+        lbl_8036E548._2D94[i]._26 = 0;
+        lbl_8036E548._2D94[i]._00 = NULL;
+    }
 }
 
 // .text:0x0011CF84 size:0x22C mapped:0x8075C018
@@ -379,7 +410,33 @@ void fn_3_11CF04(void) {
 }
 
 // .text:0x0011CD00 size:0x204 mapped:0x8075BD94
+// The dead stores stand in for code the original compiled to nothing: without them MWCC
+// inlines this function into fn_3_11D1B0, which the target calls it from with bl.
 void fn_3_11CD00(void) {
+    int d;
+
+    d = 0;
+    d = 1;
+    d = 2;
+    d = 3;
+    d = 4;
+    d = 5;
+    d = 6;
+    d = 7;
+    d = 8;
+    d = 9;
+    d = 10;
+    d = 11;
+    d = 12;
+    d = 13;
+    d = 14;
+    d = 15;
+    d = 16;
+    d = 17;
+    d = 18;
+    d = 19;
+    d = 20;
+    d = 21;
     lbl_8036E548._3078 = 3;
     lbl_8036E548._2D94 = _OSAllocFromHeap(0x20, lbl_8036E548._3078 * 0x28);
     lbl_8036E548._0068 = ActorObjectInitTable(lbl_8036E548._3078);
@@ -429,7 +486,13 @@ void fn_3_11C2CC(void) {
 }
 
 // .text:0x0011C02C size:0x2A0 mapped:0x8075B0C0
+// The dead stores stand in for code the original compiled to nothing: without them MWCC
+// inlines this function into fn_3_11D1B0, which the target calls it from with bl.
 void fn_3_11C02C(void) {
+    int d;
+
+    d = 0;
+    d = 1;
     lbl_8036E548._3078 = 0xA7;
     lbl_8036E548._2D94 = _OSAllocFromHeap(0x20, lbl_8036E548._3078 * 0x28);
     lbl_8036E548._0068 = ActorObjectInitTable(lbl_8036E548._3078);
@@ -588,8 +651,8 @@ void fn_3_11A92C(UnkObj3310* obj, s32 id) {
 }
 
 // .text:0x0011A408 size:0x524 mapped:0x8075949C
-// 98.84%: the setAnim block of the note-block case and the frame threshold
-// (srwi against srawi) differ, and the branches after them shift by one instruction.
+// 99.03%: registers in the setAnim block of the note-block case differ, and the target
+// computes id * 0x90 again for the texture scroll where the base keeps it in r24.
 void fn_3_11A408(void) {
     UnkObj3310* obj;
     UnkObj3310* shadow;
@@ -646,7 +709,7 @@ void fn_3_11A408(void) {
         } else if (g_Minigame.wallBallWalls[i]._28 == 5) {
             id = i + 0xFC + (wall->coinGenerationCategory == 2) * 7;
             frame = fn_3_11A350(id);
-            if (frame < (lbl_3_data_22634[wall->coinGenerationCategory] >> 1) && frame % 2 == 0) {
+            if (frame < lbl_3_data_22634[wall->coinGenerationCategory] / 2 && frame % 2 == 0) {
                 model = lbl_8036E548._0068->_34[id]._00;
                 for (j = 0; j < model->_06; j++) {
                     scroll = model->_18[j]->_E8;
@@ -823,24 +886,32 @@ void fn_3_119F6C(void) {
 }
 
 // .text:0x00119EE0 size:0x8C mapped:0x80758F74
-// 82.09%: the target loads the model with `addi r0,table,0x34; lwzx r3,i*0x90,r0`; the spellings
-// tried give `lwz 0x34(table + i*0x90)` or add 0x34 to the index instead.
+// 87.63%: the target indexes barrels from &g_Minigame (2193(r4), then 0(r6) for the third
+// read) and swaps the actor array and index registers in the lwzx.
 void fn_3_119EE0(s32 i) {
-    UnkAnimCtrl3310* ctrl = lbl_8036E548._0068->_34[i]._00->_18[0]->_14->_08;
+    UnkActor3310* actor = lbl_8036E548._0068->_34;
+    UnkAnimCtrl3310* ctrl;
+    BB_barrelStruct* barrel = g_Minigame.barrels;
 
-    ctrl->_0C->_20 = lbl_3_data_22638[g_Minigame.barrels[i].barrelColour] * 3;
-    ctrl->_0C->_40 = lbl_3_data_22638[g_Minigame.barrels[i].barrelColour] * 3 + 1;
-    ctrl->_0C->_60 = lbl_3_data_22638[g_Minigame.barrels[i].barrelColour] * 3 + 2;
+    actor += i;
+    barrel += i;
+    ctrl = actor->_00->_18[0]->_14->_08;
+    ctrl->_0C->_20 = lbl_3_data_22638[barrel->barrelColour] * 3;
+    ctrl->_0C->_40 = lbl_3_data_22638[barrel->barrelColour] * 3 + 1;
+    ctrl->_0C->_60 = lbl_3_data_22638[barrel->barrelColour] * 3 + 2;
 }
 
 // .text:0x00119E30 size:0xB0 mapped:0x80758EC4
-// 92.61%: the target loads the model with `addi r0,table,0x34; lwzx r3,i*0x90,r0`; the spellings
-// tried give `lwz 0x34(table + i*0x90)` or add 0x34 to the index instead.
+// 99.77%: the target puts i * 0x90 in r3 and the actor array in r0 for the lwzx; the base
+// swaps them.
 void fn_3_119E30(s32 i) {
+    UnkActor3310* actor;
     UnkAnimCtrl3310* ctrl;
 
     if (g_Minigame.barrels[g_Minigame.bB_bombBarrelID].animationCounter % lbl_3_data_2263E == 0) {
-        ctrl = lbl_8036E548._0068->_34[i]._00->_18[0]->_14->_08;
+        actor = lbl_8036E548._0068->_34;
+        actor += i;
+        ctrl = actor->_00->_18[0]->_14->_08;
         ctrl->_0C->_20 = !lbl_3_data_2263C[ctrl->_0C->_20];
         ctrl->_0C->_40 = !lbl_3_data_2263C[ctrl->_0C->_40];
         ctrl->_0C->_60 = !lbl_3_data_2263C[ctrl->_0C->_60];
@@ -1060,10 +1131,12 @@ void fn_3_1194FC(void) {
 }
 
 // .text:0x001194AC size:0x50 mapped:0x80758540
-// 68.00%: the target loads the model with `addi r0,table,0x34; lwzx r3,i*0x90,r0`; the spellings
-// tried give `lwz 0x34(table + i*0x90)` or add 0x34 to the index instead.
+// 96.50%: registers differ; the target's lwzx takes i * 0x90 first and the actor array second.
 void fn_3_1194AC(s32 i) {
-    lbl_8036E548._0068->_34[i]._00->_18[0]->_14->_08->_0C->_20 = lbl_3_data_2265C[MG._1AFF[i]];
+    UnkActor3310* actor = lbl_8036E548._0068->_34;
+
+    actor += i;
+    actor->_00->_18[0]->_14->_08->_0C->_20 = lbl_3_data_2265C[MG._1AFF[i]];
 }
 
 // .text:0x00119468 size:0x44 mapped:0x807584FC
@@ -1074,9 +1147,11 @@ void fn_3_119468(s32 i) {
     }
 }
 
+static inline f32 lerp3310(f32 a, f32 b, f32 t) {
+    return (1.0f - t) * a + b * t;
+}
+
 // .text:0x001192B8 size:0x1B0 mapped:0x8075834C
-// 91.03%: the int-to-float conversions of _1A and lbl_3_data_21E68[6] and the loads
-// of the two scale rows are scheduled in another order.
 void fn_3_1192B8(void) {
     UnkObj3310* obj;
     s32 i;
@@ -1097,7 +1172,7 @@ void fn_3_1192B8(void) {
                 fn_8001D0D0(id, lbl_3_data_22678[0][MG._0000[i]._2B]);
             } else {
                 t = (f32)MG._0000[i]._1A / (f32)lbl_3_data_21E68[6];
-                scale = (1.0f - t) * lbl_3_data_22678[0][MG._0000[i]._2B] + lbl_3_data_22678[1][MG._0000[i]._2B] * t;
+                scale = lerp3310(lbl_3_data_22678[0][MG._0000[i]._2B], lbl_3_data_22678[1][MG._0000[i]._2B], t);
                 fn_8001D0D0(id, scale);
             }
             if (MG._0000[i]._2B == 0) {
@@ -1117,11 +1192,11 @@ void fn_3_1192B8(void) {
 }
 
 // .text:0x00118B18 size:0x7A0 mapped:0x80757BAC
-// 92.53%: the target saves r27-r31 and keeps i * 0x38 in r29 to address the entry again
-// for the final rot stores; the base reuses the entry pointer, so one register fewer.
+// The final rot stores go through piranhaPanic, not the entry: the target addresses the
+// entry again from i * 0x38 there, which a second spelling of the same address gives.
 void fn_3_118B18(s32 i) {
     UnkMgEntry3310* entry = &MG._0000[i];
-    s16 frame;
+    s32 frame;
 
     entry->_28++;
     if (entry->_2A == 1) {
@@ -1160,19 +1235,19 @@ void fn_3_118B18(s32 i) {
         }
         if (entry->_33 == 3 && entry->_28 == lbl_3_data_226B8[1] - lbl_3_data_226AC[3]) {
             fn_3_1189C8(i, 0, 0, 6, 1);
-            MG._0000[i].rot.z = 0.0f;
-            MG._0000[i].rot.x = 0.0f;
-            MG._0000[i].rot.y = lbl_3_data_22688[i];
+            g_Minigame.piranhaPanic._0000[i].rot.z = 0.0f;
+            g_Minigame.piranhaPanic._0000[i].rot.x = 0.0f;
+            g_Minigame.piranhaPanic._0000[i].rot.y = lbl_3_data_22688[i];
         }
     }
 }
 
 // .text:0x001189C8 size:0x150 mapped:0x80757A5C
 void fn_3_1189C8(s32 i, s32 anim, s32 frame, s32 duration, u8 loop) {
+    void* data;
     UnkMgEntry3310* entry = &MG._0000[i];
     UnkActor3310* actor = &lbl_8036E548._0068->_34[i + 0x82];
     f32 rate = 0.0f;
-    void* data;
 
     if (duration != 0) {
         rate = 1.0f / duration;
@@ -1199,10 +1274,12 @@ void fn_3_1189C8(s32 i, s32 anim, s32 frame, s32 duration, u8 loop) {
 }
 
 // .text:0x0011897C size:0x4C mapped:0x80757A10
-// 65.74%: the target loads the model with `addi r0,table,0x34; lwzx r3,i*0x90,r0`; the spellings
-// tried give `lwz 0x34(table + i*0x90)` or add 0x34 to the index instead.
+// 95.79%: registers differ; the target's lwzx takes i * 0x90 first and the actor array second.
 void fn_3_11897C(s32 i) {
-    lbl_8036E548._0068->_34[i]._00->_14->_08->_0C->_20 = lbl_3_data_22670[MG._0000[i - 0x82]._2C];
+    UnkActor3310* actor = lbl_8036E548._0068->_34;
+
+    actor += i;
+    actor->_00->_14->_08->_0C->_20 = lbl_3_data_22670[MG._0000[i - 0x82]._2C];
 }
 
 // .text:0x0011887C size:0x100 mapped:0x80757910
@@ -1233,16 +1310,19 @@ void fn_3_11887C(void) {
 }
 
 // .text:0x0011881C size:0x60 mapped:0x807578B0
-// 69.96%: the target loads the model with `addi r0,table,0x34; lwzx r3,i*0x90,r0`; the spellings
-// tried give `lwz 0x34(table + i*0x90)` or add 0x34 to the index instead.
+// 99.58%: the target puts i * 0x90 in r3 and the actor array in r0 for the lwzx; the base
+// swaps them.
 void fn_3_11881C(s32 i) {
-    u8 v;
+    UnkActor3310* actor;
+    u16 v;
     if (i - 0xE9 < 4) {
         v = lbl_3_data_226BC[i - 0xE9];
     } else {
         v = lbl_3_data_226BC[4];
     }
-    lbl_8036E548._0068->_34[i]._00->_18[0]->_14->_08->_0C->_20 = v;
+    actor = lbl_8036E548._0068->_34;
+    actor += i;
+    actor->_00->_18[0]->_14->_08->_0C->_20 = v;
 }
 
 // .text:0x0011874C size:0xD0 mapped:0x807577E0
@@ -1531,7 +1611,8 @@ void fn_3_1179EC(void) {
 }
 
 // .text:0x00117588 size:0x464 mapped:0x8075661C
-// 97.60%: the quad corners and the scale terms are computed in another order and FPRs differ.
+// 98.54%: FPRs of the quad corners and the half sizes differ, and the target counts the
+// last loop in r6 with its offset set by li where the base copies it with mr.
 void fn_3_117588(s32 i) {
     GXColor color;
     f32 uv[4][2] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
@@ -1565,12 +1646,12 @@ void fn_3_117588(s32 i) {
     GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
     GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
 
-    hx = 2.8f * scale * 0.5f;
     hz = 2.5f * scale * 0.5f;
-    quad[0].x = quad[3].x = -hx + obj->_04.x;
-    quad[1].x = quad[2].x = hx + obj->_04.x;
+    hx = 2.8f * scale * 0.5f;
     quad[2].z = quad[3].z = -hz + obj->_04.z;
     quad[0].z = quad[1].z = hz + obj->_04.z;
+    quad[0].x = quad[3].x = -hx + obj->_04.x;
+    quad[1].x = quad[2].x = hx + obj->_04.x;
     quad[0].y = quad[1].y = quad[2].y = quad[3].y = -0.060000002f;
     color.r = color.g = color.b = 0;
     color.a = 155;
@@ -1584,8 +1665,8 @@ void fn_3_117588(s32 i) {
         GXColor1u32(*(u32*)&color);
         GXTexCoord2f32(uv[j][0], uv[j][1]);
     }
-    state = marker->active;
     model = lbl_8036E548._0068->_34[i]._00;
+    state = marker->active;
     if (state == 1 || state == 5) {
         frame = 0;
     } else {

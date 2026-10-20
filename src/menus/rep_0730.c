@@ -8,6 +8,9 @@
 #include "Dolphin/gx.h"
 #include "Dolphin/vec.h"
 #include "string.h"
+#include "menus/rep_0840.h"
+#include "menus/rep_07F0.h"
+#include "menus/rep_0A58.h"
 
 typedef struct MenuTask0730 {
     /* 0x00 */ void (*_00)(void);
@@ -301,16 +304,9 @@ extern struct {
     /* 0x7A8 */ void* _7A8;
 } lbl_80366B18;
 
-extern void fn_2_409CC(void);
-extern void fn_2_37460(void);
-extern void fn_2_379D0(void);
 extern void fn_2_37D98(void);
 extern void fn_2_40A9C(void);
-extern void fn_2_54474(void);
 extern void fn_2_8ACB0(s32, s32);
-extern void fn_2_8AEE0(void);
-extern void fn_2_8E478(void);
-extern void fn_2_8EA80(void);
 
 // .data:0x00004B90 size:0x10
 u32 lbl_2_data_4B90[4] = { 0x0000040B, 0x40046100, 0x0E641000, 0x00024B48 };

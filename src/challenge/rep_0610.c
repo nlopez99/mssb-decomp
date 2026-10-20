@@ -345,7 +345,7 @@ extern void LoadActorLayout(void* layout);
 extern void convertGeometryAndSknHeader(void* geo, void* skn);
 extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);
 extern void fn_800BD190(void* geo, void* tex);
-extern void fn_80023B04(s32 count, void* work);
+extern void fn_80023B04(s32 count);
 extern void fn_8002399C(Unk0060Elem* elem, s32 arg1, s32 arg2, void* layout, void* anim, void* skn);
 extern void fn_80025C58(void* anim, Unk0060Elem* elem);
 extern void fn_80025DDC(void* anim);
@@ -2516,18 +2516,18 @@ void fn_1_176EC(void) {
 // Registers differ in case 4 (lbl_1_bss_3074 and the slot product swap r7/r8)
 // and in case 26's slot loop (counter, source and destination pointers)
 void fn_1_16978(void) {
+    s16 frame;
     s32 i;
+    u8 idx;
     UnkSlot0610* src;
+    s16 animId;
+    UnkSlotSet0610* set;
+    void* tex;
     UnkSlotState0610* dst;
     UnkAnimRef0610* anim;
-    UnkSlotSet0610* set;
-    s16 animId;
-    s16 frame;
-    u8 idx;
     u32* table;
     void* geo;
     void* layout;
-    void* tex;
 
     switch (lbl_803CC1B8->_10) {
     case 0:
@@ -2926,6 +2926,21 @@ void fn_1_1644C(void) {
     } else {
         elem->_68 = actor->_072;
     }
+    /* These dead stores stand in for code the original compiled to nothing; MWCC
+       counts them toward its inline limit, and with 13 or more this stays a call */
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
     fn_1_ECF8(lbl_1_bss_5F73, lbl_1_bss_6940[lbl_1_bss_5F73]._44, lbl_1_bss_5F69);
     for (i = 0; i < 4; i++) {
         if (lbl_1_bss_67B8[i] != NULL) {
@@ -3061,7 +3076,8 @@ void fn_1_15CE0(void) {
 }
 
 // .text:0x00015760 size:0x580
-// fn_1_1644C is inlined here twice where the target calls it (see fn_1_1540C)
+// Registers only: the target stores 0 from i's r30 (0x1C) wherever it stores a
+// constant 0 before the loop, where this loads li r0,0 each time
 void fn_1_15760(void) {
     s32 i = 0;
     lbl_1_bss_5F73 = 0;
@@ -3077,7 +3093,7 @@ void fn_1_15760(void) {
         } else if (lbl_803C77B8[0]._04 & 1) {
             switch (lbl_1_bss_307C) {
             case 0: {
-                u8 prev = lbl_1_bss_6940[lbl_1_bss_5F73]._44;
+                s32 prev = lbl_1_bss_6940[lbl_1_bss_5F73]._44;
                 u8 slot = prev;
                 do {
                     if (slot == 0) {
@@ -3094,12 +3110,12 @@ void fn_1_15760(void) {
                 break;
             }
             case 1: {
-                u8 prev = lbl_1_bss_6940[lbl_1_bss_5F73]._45;
-                if (prev != 0) {
+                s32 count = lbl_8036E548._0C04[lbl_1_bss_5F73]._010[lbl_1_bss_6940[lbl_1_bss_5F73]._44]->_A;
+                s32 prev = lbl_1_bss_6940[lbl_1_bss_5F73]._45;
+                if (lbl_1_bss_6940[lbl_1_bss_5F73]._45 != 0) {
                     lbl_1_bss_6940[lbl_1_bss_5F73]._45 = prev - 1;
                 } else {
-                    lbl_1_bss_6940[lbl_1_bss_5F73]._45 =
-                        lbl_8036E548._0C04[lbl_1_bss_5F73]._010[lbl_1_bss_6940[lbl_1_bss_5F73]._44]->_A - 1;
+                    lbl_1_bss_6940[lbl_1_bss_5F73]._45 = count - 1;
                 }
                 if (prev != lbl_1_bss_6940[lbl_1_bss_5F73]._45) {
                     lbl_1_bss_5F5C = 1;
@@ -3117,20 +3133,21 @@ void fn_1_15760(void) {
             case 4:
                 lbl_1_bss_3081 ^= 1;
                 break;
-            case 5:
-                fn_1_D6B4();
-                break;
             case 6:
                 if (lbl_1_bss_5F68 ^= 1) {
-                    lbl_8036E548._0060->_34[0]._5C = 0.0f;
-                    lbl_8036E548._0060->_34[0]._59 = 1;
+                    Unk0060Elem* elem = lbl_8036E548._0060->_34;
+                    elem->_5C = 0.0f;
+                    elem->_59 = 1;
                 }
+                break;
+            case 5:
+                fn_1_D6B4();
                 break;
             }
         } else if (lbl_803C77B8[0]._04 & 2) {
             switch (lbl_1_bss_307C) {
             case 0: {
-                u8 prev = lbl_1_bss_6940[lbl_1_bss_5F73]._44;
+                s32 prev = lbl_1_bss_6940[lbl_1_bss_5F73]._44;
                 u8 slot = prev;
                 do {
                     if (++slot == 7) {
@@ -3145,7 +3162,7 @@ void fn_1_15760(void) {
                 break;
             }
             case 1: {
-                u8 prev = lbl_1_bss_6940[lbl_1_bss_5F73]._45;
+                s32 prev = lbl_1_bss_6940[lbl_1_bss_5F73]._45;
                 if (++lbl_1_bss_6940[lbl_1_bss_5F73]._45 ==
                     lbl_8036E548._0C04[lbl_1_bss_5F73]._010[lbl_1_bss_6940[lbl_1_bss_5F73]._44]->_A) {
                     lbl_1_bss_6940[lbl_1_bss_5F73]._45 = 0;
@@ -3164,19 +3181,20 @@ void fn_1_15760(void) {
             case 4:
                 lbl_1_bss_3081 ^= 1;
                 break;
-            case 5:
-                fn_1_D688();
-                break;
             case 6:
                 if (lbl_1_bss_5F68 ^= 1) {
-                    lbl_8036E548._0060->_34[0]._5C = 0.0f;
-                    lbl_8036E548._0060->_34[0]._59 = 1;
-                    for (i = 0; i < 5; i++) {
+                    Unk0060Elem* elem = lbl_8036E548._0060->_34;
+                    elem->_5C = 0.0f;
+                    elem->_59 = 1;
+                    for (; i < 5; i++) {
                         if (lbl_1_bss_67B8[i] != NULL) {
                             fn_1_26B7C(lbl_1_bss_67B8[i]);
                         }
                     }
                 }
+                break;
+            case 5:
+                fn_1_D688();
                 break;
             }
         } else if (lbl_803C77B8[0]._04 & 0x1000) {
@@ -3230,8 +3248,6 @@ void fn_1_15760(void) {
 }
 
 // .text:0x0001540C size:0x354
-// Matches once fn_1_1644C stays a call (checked by padding fn_1_1644C with dead
-// statements in a scratch copy); MWCC inlines fn_1_1644C as written
 void fn_1_1540C(void) {
     char text[0x18];
     s32 top;
@@ -3555,15 +3571,15 @@ void fn_1_14710(Unk8036E548Actor* arg0) {
 }
 
 // .text:0x000135C0 size:0x1150
-// Draft: registers differ throughout (the target keeps &lbl_8036E548 in r22 from
-// the top), and the four-entry pose loop is scheduled differently
+// Registers differ throughout (the target keeps the bss base in r29 and actor in
+// r31), and the four-entry pose loop is scheduled differently
 void fn_1_135C0(void) {
     s32 i;
     s32 j;
     Unk8036E548Actor* actor;
     struct UnkActorFiles0610* file;
     s32 count;
-    u16 id;
+    s32 id;
     void* tex;
     void* layout;
     void* geo;
@@ -3574,7 +3590,7 @@ void fn_1_135C0(void) {
     u32 flag;
     u8 frame;
 
-    fn_80023B04(13, &lbl_1_bss_3070);
+    fn_80023B04(13);
     lbl_8036E548._0060 = ActorObjectInitTable(1);
     lbl_1_bss_5F80[0] = ActorObjectInitTable(1);
     lbl_1_bss_5F7C[0] = ActorObjectInitTable(5);
@@ -3686,11 +3702,10 @@ void fn_1_135C0(void) {
         lbl_1_bss_67B8[0] = NULL;
     }
     count = lbl_8036E548._0060->_34[0]._00->_06;
-    memset(lbl_8036E548._0C04[0]._162, 0xFF, sizeof(lbl_8036E548._0C04[0]._162));
+    memset(actor->_162, 0xFF, sizeof(actor->_162));
     for (i = 0; i < count; i++) {
-        id = lbl_8036E548._0060->_34[0]._00->_18[i]->_00;
-        if (id != 0xFFFF) {
-            lbl_8036E548._0C04[0]._162[id] = i;
+        if (lbl_8036E548._0060->_34[0]._00->_18[i]->_00 != 0xFFFF) {
+            lbl_8036E548._0C04[0]._162[lbl_8036E548._0060->_34[0]._00->_18[i]->_00] = i;
         }
     }
     fn_800BD548(lbl_8036E548._0060->_34, 3, lbl_8036E548._00AC[0], lbl_8036E548._00AC[1], lbl_8036E548._00AC[2],
@@ -3702,28 +3717,29 @@ void fn_1_135C0(void) {
     lbl_8036E548._0060->_34[0]._54 = 0.5f;
     lbl_8036E548._0060->_34[0]._5A = 1;
     elem = lbl_8036E548._0060->_34;
-    id = lbl_8036E548._0C04[0]._162[3];
+    id = actor->_162[3];
     if (id != 0xFFFF) {
         fn_800B2BA8(lbl_8036E548._0060->_34[0]._00, id, NULL, 0);
-        elem->_00->_18[id]->_136 = 1;
+        elem->_00->_18[(u16)id]->_136 = 1;
     }
-    id = lbl_8036E548._0C04[0]._162[2];
+    id = actor->_162[2];
     if (id != 0xFFFF) {
         fn_800B2BA8(elem->_00, id, NULL, 0);
-        elem->_00->_18[id]->_136 = 1;
+        elem->_00->_18[(u16)id]->_136 = 1;
     }
-    id = lbl_8036E548._0C04[0]._162[1];
+    id = actor->_162[1];
     if (id != 0xFFFF) {
         fn_800B2BA8(elem->_00, id, NULL, 0);
-        elem->_00->_18[id]->_136 = 1;
+        elem->_00->_18[(u16)id]->_136 = 1;
     }
-    if (lbl_8036E548._0C04[0]._162[36] != 0xFFFF) {
-        fn_800B2BA8(elem->_00, lbl_8036E548._0C04[0]._162[36], NULL, 0);
-    }
-    id = lbl_8036E548._0C04[0]._162[46];
+    id = actor->_162[36];
     if (id != 0xFFFF) {
         fn_800B2BA8(elem->_00, id, NULL, 0);
-        elem->_00->_18[id]->_136 = 1;
+    }
+    id = actor->_162[46];
+    if (id != 0xFFFF) {
+        fn_800B2BA8(elem->_00, id, NULL, 0);
+        elem->_00->_18[(u16)id]->_136 = 1;
     }
     fn_800B2C08(lbl_8036E548._0060->_34[0]._00, 4);
     fn_8001FC4C(lbl_8036E548._2C50[0]);
@@ -3738,12 +3754,12 @@ void fn_1_135C0(void) {
     lbl_8036E548._0C04[0]._277 = 0xFF;
     lbl_8036E548._0060->_34[0]._08 = fn_1_14888;
     if (lbl_1_bss_60A4[lbl_1_bss_68FC._40[j]] != 0) {
-        fn_800B2B74(lbl_8036E548._0060->_34[0]._00, lbl_8036E548._0C04[0]._162[19]);
-        fn_800B2B74(lbl_8036E548._0060->_34[0]._00, lbl_8036E548._0C04[0]._162[25]);
+        fn_800B2B74(lbl_8036E548._0060->_34[0]._00, actor->_162[19]);
+        fn_800B2B74(lbl_8036E548._0060->_34[0]._00, actor->_162[25]);
         fn_1_ECF8(lbl_1_bss_5F73, 0, 0);
-        fn_800B2B74(lbl_8036E548._0060->_34[0]._00, lbl_8036E548._0C04[0]._162[36]);
+        fn_800B2B74(lbl_8036E548._0060->_34[0]._00, actor->_162[36]);
     }
-    switch (lbl_8036E548._0C04[0]._252) {
+    switch (actor->_252) {
     case 33:
     case 34:
     case 35:
@@ -3751,25 +3767,25 @@ void fn_1_135C0(void) {
         fn_80063010(actor, elem);
         break;
     case 2:
-        lbl_1_bss_60E8 = fn_800638B4(actor, &lbl_8036E548._0060->_34[(s8)lbl_8036E548._0C04[0]._255[0]],
+        lbl_1_bss_60E8 = fn_800638B4(actor, &lbl_8036E548._0060->_34[(s8)actor->_255[0]],
                                      lbl_8036E548._0060);
         break;
     case 19:
-        lbl_1_bss_60E8 = fn_8004B7B4(actor, &lbl_8036E548._0060->_34[(s8)lbl_8036E548._0C04[0]._255[0]],
+        lbl_1_bss_60E8 = fn_8004B7B4(actor, &lbl_8036E548._0060->_34[(s8)actor->_255[0]],
                                      lbl_8036E548._0060);
         break;
     case 20:
     case 43:
-        lbl_1_bss_60E8 = fn_800637BC(actor, &lbl_8036E548._0060->_34[(s8)lbl_8036E548._0C04[0]._255[0]],
+        lbl_1_bss_60E8 = fn_800637BC(actor, &lbl_8036E548._0060->_34[(s8)actor->_255[0]],
                                      lbl_8036E548._0060);
         break;
     case 38:
-        lbl_8036E548._0060->_34[(s8)lbl_8036E548._0C04[0]._255[0]]._00->_99 = 1;
+        lbl_8036E548._0060->_34[(s8)actor->_255[0]]._00->_99 = 1;
         fn_1_D13C();
         fn_1_D300(actor);
         break;
     case 41:
-        lbl_1_bss_60E8 = fn_800637D4(actor, &lbl_8036E548._0060->_34[(s8)lbl_8036E548._0C04[0]._255[0]],
+        lbl_1_bss_60E8 = fn_800637D4(actor, &lbl_8036E548._0060->_34[(s8)actor->_255[0]],
                                      lbl_8036E548._0060);
     case 18:
     case 40:
@@ -3778,7 +3794,7 @@ void fn_1_135C0(void) {
         break;
     case 14:
     case 37:
-        lbl_1_bss_60E8 = fn_80052634(actor, &lbl_8036E548._0060->_34[(s8)lbl_8036E548._0C04[0]._255[0]],
+        lbl_1_bss_60E8 = fn_80052634(actor, &lbl_8036E548._0060->_34[(s8)actor->_255[0]],
                                      lbl_8036E548._0060);
         break;
     case 16:
@@ -3786,7 +3802,7 @@ void fn_1_135C0(void) {
     case 45:
     case 46:
     case 47:
-        lbl_1_bss_60E8 = fn_80062ED4(actor, &lbl_8036E548._0060->_34[(s8)lbl_8036E548._0C04[0]._255[0]],
+        lbl_1_bss_60E8 = fn_80062ED4(actor, &lbl_8036E548._0060->_34[(s8)actor->_255[0]],
                                      lbl_8036E548._0060);
         break;
     default:
@@ -3900,8 +3916,8 @@ void fn_1_12F18(UnkCamera0610* arg0) {
 }
 
 // .text:0x000129D0 size:0x548
-// The target keeps 0.0f and 57.295776f in f31/f30 across the CTRL calls and
-// tests the BOOL from fn_1_D660 (cmpwi) where this tests the byte (cmplwi)
+// The target keeps 0.0f and 57.295776f in f31/f30 across the CTRL calls (0.0f
+// until the speed test) and saved registers differ by two (r26 against r24)
 void fn_1_129D0(void) {
     Unk8036E548Actor* actor;
     Unk0060* model;
@@ -3920,13 +3936,13 @@ void fn_1_129D0(void) {
         speed = model->_34[0]._54 = lbl_1_data_ABA4;
         model->_34[0]._5A = 1;
         if (lbl_1_bss_67B8[0] != NULL) {
-            lbl_1_bss_67B8[0]->_04 = lbl_1_data_ABA4;
+            lbl_1_bss_67B8[0]->_04 = speed;
         }
     } else {
         speed = model->_34[0]._54 = lbl_1_bss_5F64;
         model->_34[0]._5A = 1;
         if (lbl_1_bss_67B8[0] != NULL) {
-            lbl_1_bss_67B8[0]->_04 = lbl_1_bss_5F64;
+            lbl_1_bss_67B8[0]->_04 = speed;
         }
     }
     if (speed != 0.0f) {
@@ -4428,14 +4444,13 @@ void fn_1_10AA4(Unk10AA4* arg0, f32 arg1) {
 }
 
 // .text:0x000107B8 size:0x2EC
-// Inlines fn_1_D300 and inherits its difference; registers differ at the top
 void fn_1_107B8(void) {
     u8 slot = lbl_1_bss_6940[lbl_1_bss_5F73]._44;
     u8 anim;
     UnkAnimRef0610* ref;
     Unk0060Elem* elem;
     lbl_8036E548._0C04[lbl_1_bss_5F73]._278 = slot == 0;
-    switch (slot) {
+    switch (lbl_1_bss_6940[lbl_1_bss_5F73]._44) {
     case 0:
         lbl_8036E548._0C04[lbl_1_bss_5F73]._254 = 9;
         break;
@@ -4455,8 +4470,8 @@ void fn_1_107B8(void) {
         lbl_8036E548._0C04[lbl_1_bss_5F73]._254 = 9;
         break;
     }
+    lbl_8036E548._0C04[lbl_1_bss_5F73]._062 = lbl_1_data_A938[slot] + lbl_1_bss_6940[lbl_1_bss_5F73]._45;
     anim = lbl_1_bss_6940[lbl_1_bss_5F73]._45;
-    lbl_8036E548._0C04[lbl_1_bss_5F73]._062 = lbl_1_data_A938[slot] + anim;
     ref = lbl_8036E548._0C04[lbl_1_bss_5F73]._010[slot];
     elem = &lbl_8036E548._0060->_34[lbl_1_bss_5F73];
     elem->_04 = ref;
@@ -5117,13 +5132,14 @@ void fn_1_ECF8(s32 idx, s32 slot, s32 flag) {
 }
 
 // .text:0x0000EA20 size:0x2D8
-// Case 0's loop differs: the target tests the count through a value loaded
-// before the loop but reloads the animation pointer in the body; 86%
+// Registers only in case 0 (the loop's index and offsets), and the target forms
+// 0.0f's address with addi before loading it
 void fn_1_EA20(void) {
     switch (lbl_1_bss_30B0) {
     case 0: {
         Unk0060Elem* elem = &lbl_8036E548._0060->_34[lbl_1_bss_5F73];
         s32 i;
+        UnkAnimRef0610** slot;
         UnkAnimRef0610* ref;
         s32 anim;
         lbl_1_bss_5F68 = 1;
@@ -5132,11 +5148,12 @@ void fn_1_EA20(void) {
         elem->_59 = 1;
         lbl_1_bss_30B0 = 1;
         lbl_1_bss_5F58 = 0;
-        ref = lbl_8036E548._0C04[lbl_1_bss_5F73]._010[lbl_1_bss_6940[lbl_1_bss_5F73]._44];
+        slot = &lbl_8036E548._0C04[lbl_1_bss_5F73]._010[lbl_1_bss_6940[lbl_1_bss_5F73]._44];
+        ref = *slot;
         anim = lbl_1_bss_6940[lbl_1_bss_5F73]._45;
         for (i = 0; i < ref->_4[anim]._8; i++) {
-            if (lbl_1_bss_5F58 < ref->_4[anim]._4[i]._0) {
-                lbl_1_bss_5F58 = ref->_4[anim]._4[i]._0;
+            if (lbl_1_bss_5F58 < (*slot)->_4[anim]._4[i]._0) {
+                lbl_1_bss_5F58 = (*slot)->_4[anim]._4[i]._0;
             }
         }
         break;
@@ -5238,12 +5255,12 @@ void fn_1_E098(void) {
             break;
         case 10:
             if (i == lbl_1_bss_30B6 && (lbl_803C77B8[0]._02 & 0x100)) {
-                UnkTaskState0610* task = (UnkTaskState0610*)lbl_803CC1B8;
-                u8* frame;
-                u8* animId;
-                u8 anim45;
                 Unk0060Elem* elem;
                 UnkAnimRef0610* anim;
+                u8* frame;
+                u8* animId;
+                UnkTaskState0610* task = (UnkTaskState0610*)lbl_803CC1B8;
+                u8 anim45;
                 task->_00 = fn_1_DE1C;
                 task->_15 = 0;
                 animId = &lbl_1_bss_6940[lbl_1_bss_5F73]._44;
@@ -5272,17 +5289,17 @@ void fn_1_E098(void) {
             }
             break;
         default: {
+            u8 selRow;
+            s16* limit;
+            s16* loop;
+            u16 held;
+            u16 color;
+            s16* frame;
+            s32 col;
             UnkAnimRef0610* ref;
             UnkAnimKey0610* key;
             u16 pressed;
-            u16 held;
-            u8 selRow;
-            s16* limit;
-            s16* frame;
-            s16* loop;
             u8 selCol;
-            u16 color;
-            s32 col;
             if (st->_0 >= 0) {
                 ref = lbl_8036E548._0C04[lbl_1_bss_5F73]._010[st->_0];
                 key = &ref->_4[st->_2];
@@ -5447,7 +5464,8 @@ void fn_1_DE1C(void) {
 }
 
 // .text:0x0000D9B8 size:0x464
-// Registers only: the target keeps lbl_1_bss_5F73 in r29 and elem in r12
+// Registers only: the target keeps lbl_1_bss_5F73 in r29 and elem in r12, and
+// indexes the slot's state with lbzx
 void fn_1_D9B8(void) {
     UnkTaskState0610* task;
     UnkList0610* list;
@@ -5483,7 +5501,7 @@ void fn_1_D9B8(void) {
         actor = &lbl_8036E548._0C04[lbl_1_bss_5F73];
         lbl_1_bss_6940[lbl_1_bss_5F73]._44 = id;
         state->_45 = lbl_1_bss_3218[task->_15]._2;
-        anim = actor->_010[lbl_1_bss_6940[lbl_1_bss_5F73]._44];
+        anim = actor->_010[state->_44];
         elem = &lbl_8036E548._0060->_34[lbl_1_bss_5F73];
         anim45 = state->_45;
         elem->_04 = anim;
@@ -5610,7 +5628,7 @@ void fn_1_D67C(u8 arg0) {
 
 // .text:0x0000D660 size:0x1C
 BOOL fn_1_D660(void) {
-    return lbl_1_bss_3215 != 0;
+    return (BOOL)(lbl_1_bss_3215 != 0);
 }
 
 // .text:0x0000D650 size:0x10
@@ -5776,13 +5794,13 @@ void fn_1_CDC8(void) {
         pair = 2;
         break;
     }
-    lists[0] = &lbl_1_bss_5F7C[0]->_34[1]._00;
-    actor->_25A = (lbl_1_bss_6940[lbl_1_bss_5F73]._44 < 2) == (lbl_1_bss_5F69 == 0);
     timers[lbl_1_bss_5F69] = lbl_1_bss_67B8[2];
     timers[!lbl_1_bss_5F69] = lbl_1_bss_67B8[1];
-    ids[0] = lbl_8036E548._0C04[lbl_1_bss_5F73]._162[lbl_1_data_F4E8[pair]._2];
-    ids[1] = lbl_8036E548._0C04[lbl_1_bss_5F73]._162[lbl_1_data_F4E8[pair]._0];
+    actor->_25A = (lbl_1_bss_6940[lbl_1_bss_5F73]._44 < 2) == (lbl_1_bss_5F69 == 0);
+    ids[1] = actor->_162[lbl_1_data_F4E8[pair]._0];
     lists[1] = &lbl_1_bss_5F7C[0]->_34[0]._00;
+    ids[0] = lbl_8036E548._0C04[lbl_1_bss_5F73]._162[lbl_1_data_F4E8[pair]._2];
+    lists[0] = &lbl_1_bss_5F7C[0]->_34[1]._00;
     i = 0;
     switch (lbl_1_bss_6940[lbl_1_bss_5F73]._44) {
     case 0:
@@ -5861,13 +5879,11 @@ void fn_1_CC24(void) {
 }
 
 // .text:0x0000CB9C size:0x88
-// Only the first PSMTXCopy's address registers differ (r3/r4/r5 rotated);
-// local pointers, index casts and the permuter did not fix it
 void fn_1_CB9C(s32 arg0) {
     if (arg0 != 0) {
         lbl_1_bss_30BC = 0;
     } else {
-        PSMTXCopy(lbl_1_data_F4F8[lbl_803CBBC0]._08, lbl_1_bss_30C0._058);
+        PSMTXCopy(lbl_1_bss_30C0._058, lbl_1_data_F4F8[lbl_803CBBC0]._08);
         fn_800A7D4C(8, &lbl_1_data_F4F8[lbl_803CBBC0]);
     }
 }

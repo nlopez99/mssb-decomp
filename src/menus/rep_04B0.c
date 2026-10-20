@@ -9,6 +9,7 @@
 #include "Dolphin/mtx.h"
 #include "Dolphin/vec.h"
 #include "musyx/musyx.h"
+#include "menus/rep_0438.h"
 
 typedef struct Pad04B0 {
     /* 0x0 */ u16 _0;
@@ -180,9 +181,7 @@ extern void AnimateCharacter(int actor, int anim, u8, u8, u8, s16, u8, int);
 extern void QueueCharacterAnimation(int actor, int anim, u8, u8, s16, u8, int);
 extern void LITXForm(LITObj* light, Mtx view);
 extern s32 fn_2_14F8(s32 min, s32 max);
-extern void fn_2_12238(void);
 extern void fn_800625A4(s32 port, s32 arg1);
-extern void fn_2_1A88(void);
 extern void fn_8004E504(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern void fn_8004E5B4(s32 arg0, s32 arg1, s32 arg2);
 extern void fn_8004D4F0(s32 arg0, s32 arg1, s32 arg2);

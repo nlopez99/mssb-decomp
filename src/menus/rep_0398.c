@@ -5,6 +5,8 @@
 #include "menus/rep_04B0.h"
 #include "static/UnknownHomes_Static.h"
 #include "musyx/musyx.h"
+#include "menus/rep_0010.h"
+#include "menus/rep_0CA0.h"
 
 extern struct {
     /* 0x0000 */ u8 _0000[0x46F8];
@@ -114,10 +116,7 @@ extern u8 lbl_800EFBA4[0x10];
 
 extern void fn_800625A4(s32 port, s32 arg1);
 extern s32 fn_2_14F8(s32 min, s32 max);
-extern void fn_2_2DC(void);
-extern void fn_2_328(void);
 extern void fn_2_11A0(s32 arg0);
-extern void fn_2_836A4(void);
 extern void fn_2_85108(void);
 extern void* fn_800B0A5C_insertQueue(void (*)(void), s32);
 extern void changeScene(u8, s16);
@@ -428,8 +427,9 @@ void fn_2_11698(void) {
 }
 
 // .text:0x00011340 size:0x358
-// 98.90%: the target loads the wraparound 0 into r6 before the button tests (`mr r4,r6`);
-// the rest matches.
+// 99.84%: the target copies the wraparound 0 into the stepped value (`bne; mr r4,r6`)
+// where this copies the stepped value into `next` (`beq; mr r6,r4`), and forms the
+// button words' address in r5 (r3 here).
 void fn_2_11340(u8 port) {
     s32 prev;
     s32 i;
@@ -437,6 +437,7 @@ void fn_2_11340(u8 port) {
     u16 held;
     u16 pressed;
     s32 r;
+    s32 next;
 
     found = 0;
     if (lbl_803CBCD8._0 != 0) {
@@ -469,6 +470,7 @@ void fn_2_11340(u8 port) {
     } else if (port != 0) {
         return;
     }
+    next = 0;
     pressed = lbl_8034E9A0._472E[port][0];
     held = lbl_8034E9A0._472E[port][1];
     if (held & 1) {
@@ -484,10 +486,10 @@ void fn_2_11340(u8 port) {
     } else if (held & 2) {
         if (lbl_803C66B0._5D != 0x24) {
             r = lbl_2_bss_F410._44;
-            if (++r == 6) {
-                r = 0;
+            if (++r != 6) {
+                next = r;
             }
-            lbl_2_bss_F410._44 = r;
+            lbl_2_bss_F410._44 = next;
             fn_800625A4(0, 0x28);
             fn_2_1C34(2);
         }

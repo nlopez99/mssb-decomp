@@ -10,6 +10,7 @@
 #include "Dolphin/vec.h"
 #include "string.h"
 #include "menus/rep_08E8.h"
+#include "menus/rep_0F60.h"
 
 // The menu types match rep_0788.c's; kept as this unit's own copy for now
 typedef struct MenuEntry0AB0 {
@@ -310,20 +311,10 @@ extern s8 lbl_2_bss_33FBF5;
 
 // rep_0788
 
-extern void fn_2_8AEE0(void);
-extern void fn_2_8DFB0(void);
-extern void fn_2_8E6A4(void);
-extern void fn_2_68E68(void);
 extern void fn_2_11A0(s32);
 extern void fn_2_54474(void);
-extern void fn_2_6ACF4(void);
-extern void fn_2_71F60(void);
-extern void fn_2_904A8(void);
-extern void fn_2_9257C(void);
 extern void fn_8000F4B8(s32, s32, s32, s32);
 extern s32 lbl_2_data_35A0[];
-extern void fn_2_8FD14(void);
-extern void fn_2_93C64(void);
 
 // rep_0A58
 extern s16 fn_2_53BC8(MenuItem0AB0* item);

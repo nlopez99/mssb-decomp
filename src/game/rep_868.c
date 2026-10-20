@@ -88,7 +88,8 @@ void fn_3_1E154(void) {
 
 // .text:0x0001DEB8 size:0x29C mapped:0x8065CF4C
 // Differs only in `count = 1`: the target copies the 1 stored to `_48` (`mr r4,r6`), this
-// loads it again (`li r4,1`).
+// loads it again (`li r4,1`). Copying it from another local or from `g_AiLogic._48`, a
+// pointer to g_AiLogic, `++`/`+= 1`, u8/int types and ternaries all still give the `li`.
 void fn_3_1DEB8(void) {
     s32 count = 0;
     s32 fielding;

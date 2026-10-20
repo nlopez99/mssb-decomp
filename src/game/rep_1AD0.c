@@ -16,6 +16,7 @@
 #include "game/rep_1838.h"
 #include "game/rep_1188.h"
 #include "game/rep_1B70.h"
+#include "game/rep_868.h"
 
 typedef struct Fielder1AD0 {
     /* 0x000 */ Vec _000;
@@ -64,7 +65,6 @@ extern struct {
 extern void fn_3_1DD48(void);
 extern int fn_3_6BA64(void);
 extern void fn_80011BE4(int arg);
-extern void fn_3_1E154(void);
 extern void changeScene(u8, s16);
 
 // .text:0x000B1C14 size:0x9C mapped:0x806F0CA8

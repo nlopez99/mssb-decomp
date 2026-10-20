@@ -264,11 +264,12 @@ void fn_3_13C464(void) {
 }
 
 // .text:0x0013BCB8 size:0x7AC mapped:0x8077AD4C
-// 93.8%: the fielder setup reads its table and stores in another order, and several
-// loops start from fresh g_Minigame bases instead of copies.
+// 98.1%: the fielder loop keeps a dead copy of its walker, and the pieces loop starts
+// from a fresh g_Minigame base where the target copies r25 (MG.pieces has no member).
 void fn_3_13BCB8(void) {
-    s32 i;
     int n;
+    Unk3520Fielder* fielder;
+    s32 i;
     int j;
     u8 strength;
     int r;
@@ -309,20 +310,20 @@ void fn_3_13BCB8(void) {
             g_Minigame._17C4 = lbl_3_data_21984[4] * 60;
         }
         fn_3_58870();
-        n = 0;
-        for (i = 0; i < 4; i++) {
+        for (i = 0, n = 0; i < 4; i++) {
             if (g_Minigame.minigameControlStruct.characterIndex[i] >= 0) {
                 g_Minigame.minigameControlStruct._28[n] = i;
                 g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]] = n + 2;
                 fn_3_6E24C(i, g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]]);
+                                fielder = &g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]]];
                 g_Minigame.starDashStunType[i] = 0;
-                g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]]]._20D = i;
-                g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]]].pos.x = lbl_3_data_2198C[n][0];
-                g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]]].pos.z = lbl_3_data_2198C[n][1];
-                g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]]].pos.y = 0.0f;
-                g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]]]._00C = 0.0f;
-                g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]]]._1D2 = 0;
-                g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]]]._048 = -1.5707964f;
+                fielder->_20D = i;
+                fielder->pos.x = lbl_3_data_2198C[n][0];
+                fielder->pos.z = lbl_3_data_2198C[n][1];
+                fielder->pos.y = 0.0f;
+                fielder->_00C = 0.0f;
+                fielder->_1D2 = 0;
+                fielder->_048 = -1.5707964f;
                 n++;
             }
         }
@@ -356,17 +357,17 @@ void fn_3_13BCB8(void) {
             lbl_3_bss_B780 = 4;
         }
         for (i = 0; i < 4; i++) {
-            memset(&MG.objs[i]._0, 0, sizeof(Vec));
-            memset(&MG.objs[i]._C, 0, sizeof(Vec));
-            memset(&MG.objs[i]._18, 0, sizeof(Vec));
-            memset(&MG.objs[i]._24, 0, sizeof(Vec));
-            MG.objs[i]._3D = 0;
+            memset(&g_Minigame.starDashObjs[i]._0, 0, sizeof(Vec));
+            memset(&g_Minigame.starDashObjs[i]._C, 0, sizeof(Vec));
+            memset(&g_Minigame.starDashObjs[i]._18, 0, sizeof(Vec));
+            memset(&g_Minigame.starDashObjs[i]._24, 0, sizeof(Vec));
+            g_Minigame.starDashObjs[i]._3D = 0;
         }
         for (j = 0; j < lbl_3_bss_B780; j++) {
             r = random_fn_3_9EE24((lbl_3_data_21A90[g_Minigame.soloMinigameDifficulty][0][1] - lbl_3_data_21A90[g_Minigame.soloMinigameDifficulty][0][0]) * 60);
-            MG.objs[j]._38 = lbl_3_data_21A90[g_Minigame.soloMinigameDifficulty][0][0] * 60 + r;
-            MG.objs[j]._30 = 360 / lbl_3_bss_B780 * j;
-            MG.objs[j]._34 = MG.objs[j]._30 + 360 / lbl_3_data_21A88[lbl_3_bss_B781];
+            g_Minigame.starDashObjs[j]._38 = lbl_3_data_21A90[g_Minigame.soloMinigameDifficulty][0][0] * 60 + r;
+            g_Minigame.starDashObjs[j]._30 = 360 / lbl_3_bss_B780 * j;
+            g_Minigame.starDashObjs[j]._34 = g_Minigame.starDashObjs[j]._30 + 360 / lbl_3_data_21A88[lbl_3_bss_B781];
         }
         g_Minigame._1D78[0] = 0;
         g_Minigame._1D78[1] = 0;
@@ -522,8 +523,6 @@ void fn_3_13ADC0(Vec* out, Vec* v, Vec* n) {
 }
 
 // .text:0x0013ACB4 size:0x10C mapped:0x80779D48
-// 91.2%: the second reflection loads _70C and _714 before the first one stores, and
-// the FPRs differ throughout.
 void fn_3_13ACB4(Unk3520Line* line) {
     Vec n;
     Vec d;
@@ -540,12 +539,12 @@ void fn_3_13ACB4(Unk3520Line* line) {
         n.z *= -1.0f;
     }
     fn_3_13ADC0(&r, &d, &n);
-    n.x *= -1.0f;
-    n.z *= -1.0f;
     g_Minigame._6F4 = line->pos.x + r.x;
     g_Minigame._6FC = line->pos.z + r.z;
     d.x = line->pos.x - g_Minigame._70C;
     d.z = line->pos.z - g_Minigame._714;
+    n.x *= -1.0f;
+    n.z *= -1.0f;
     fn_3_13ADC0(&r, &d, &n);
     g_Minigame._70C = line->pos.x + r.x;
     g_Minigame._714 = line->pos.z + r.z;
@@ -613,8 +612,8 @@ void fn_3_13A724(void) {
 }
 
 // .text:0x0013A0AC size:0x678 mapped:0x80779140
-// 94.0%: the inlined fn_3_13ACB4 and fn_3_13A724 schedule their loads and stores
-// differently, and the setup computes the ratio in another order.
+// 94.1%: in the inlined fn_3_13ACB4 the target stores _6E8 after the normal test and
+// keeps col.position.x in f10 where the base reloads it; FPRs and the ratio setup differ.
 void fn_3_13A0AC(void) {
     VecSrcDst seg;
     CollisionStruct col;
@@ -720,15 +719,15 @@ void fn_3_139F84(void) {
 }
 
 // .text:0x00139CA0 size:0x2E4 mapped:0x80778D34
-// 96.2%: the target keeps count * 4 in its own register (r18) for bag->coins.
 void fn_3_139CA0(void) {
     Unk3520Bag* bag = NULL;
+    int i;
     u8 filling = FALSE;
     int count;
+    int left;
     int angle;
     f32 speed;
     f32 scale;
-    int i;
 
     if (g_Minigame.turnOverStatus != 0) {
         return;
@@ -739,7 +738,7 @@ void fn_3_139CA0(void) {
     count = lbl_3_data_21A04[2];
     if (g_Minigame._1D54 % lbl_3_data_21A04[6] == 0 && 100 - g_Minigame._1D6C >= 10 && MG.bag.active == 0) {
         bag = &MG.bag;
-        MG.bag.active = TRUE;
+        bag->active = TRUE;
         count = 10;
         filling = TRUE;
     }
@@ -781,7 +780,8 @@ void fn_3_139CA0(void) {
             g_Minigame.wallBall_coinsVisibleFrameCounter[i] = 0;
             g_Minigame._1D6C++;
             g_Minigame._1D54++;
-            if (--count <= 0) {
+            left = --count;
+            if (left <= 0) {
                 fn_3_90064(0x2E8);
                 break;
             }
@@ -791,8 +791,8 @@ void fn_3_139CA0(void) {
 }
 
 // .text:0x00139808 size:0x498 mapped:0x8077889C
-// 94.6%: the inlined reflections load -1.0f through addi and schedule the y loads
-// differently.
+// 99.2%: the target addresses vel from the loop's walker (4480(r25)); a vel local takes
+// its own register (r21) but gives the reflections the target's schedule.
 void fn_3_139808(void) {
     int i;
     int j;
@@ -801,12 +801,12 @@ void fn_3_139808(void) {
     CollisionStruct col;
     u32 type;
     f32 best;
-    f32 radius;
     f32 reach;
     f32 dx;
     f32 dz;
     f32 dist;
     Unk3520Fielder* fielder;
+    Vec* vel;
 
     for (i = 0; i < 100; i++) {
         if (g_Minigame.wallBall_coinsVisibleInd[i] != 1) {
@@ -818,6 +818,7 @@ void fn_3_139808(void) {
             g_Minigame._1D6C--;
             continue;
         }
+        vel = (Vec*)&g_Minigame.wallBall_coinVelocity[i];
         seg.src.x = g_Minigame.wallBall_coinCoordinates[i].x;
         seg.src.y = -g_Minigame.wallBall_coinCoordinates[i].y;
         seg.src.z = g_Minigame.wallBall_coinCoordinates[i].z;
@@ -836,8 +837,8 @@ void fn_3_139808(void) {
         seg.dst.z = g_Minigame.wallBall_coinCoordinates[i].z;
         type = checkCollision(&seg, &col, 0, FALSE);
         if (type == 5) {
-            col.normal.y *= -1.0f;
-            fn_3_13ADC0((Vec*)&g_Minigame.wallBall_coinVelocity[i], (Vec*)&g_Minigame.wallBall_coinVelocity[i], &col.normal);
+                        col.normal.y *= -1.0f;
+            fn_3_13ADC0(vel, vel, &col.normal);
             g_Minigame.wallBall_coinCoordinates[i].x = col.position.x;
             g_Minigame.wallBall_coinCoordinates[i].y = -col.position.y;
             g_Minigame.wallBall_coinCoordinates[i].z = col.position.z;
@@ -855,8 +856,8 @@ void fn_3_139808(void) {
             seg.dst.z = g_Minigame.wallBall_coinCoordinates[i].z;
             type = checkCollision(&seg, &col, 0, FALSE);
             if (type == 5) {
-                col.normal.y *= -1.0f;
-                fn_3_13ADC0((Vec*)&g_Minigame.wallBall_coinVelocity[i], (Vec*)&g_Minigame.wallBall_coinVelocity[i], &col.normal);
+                                col.normal.y *= -1.0f;
+                fn_3_13ADC0(vel, vel, &col.normal);
                 g_Minigame.wallBall_coinCoordinates[i].x = col.position.x;
                 g_Minigame.wallBall_coinCoordinates[i].y = -col.position.y;
                 g_Minigame.wallBall_coinCoordinates[i].z = col.position.z;
@@ -866,7 +867,6 @@ void fn_3_139808(void) {
             continue;
         }
         best = 99999.9f;
-        radius = lbl_3_data_219B8[15];
         for (j = 0, who = -1; j < 4; j++) {
             if (g_Minigame.minigameFielderIndex[j] < 0) {
                 continue;
@@ -881,7 +881,7 @@ void fn_3_139808(void) {
             if (fielder->_16C + fielder->_00C < g_Minigame.wallBall_coinCoordinates[i].y) {
                 continue;
             }
-            reach = radius + lbl_3_data_47BC[fielder->_1C9];
+            reach = lbl_3_data_219B8[15] + lbl_3_data_47BC[fielder->_1C9];
             dz = fielder->pos.z - g_Minigame.wallBall_coinCoordinates[i].z;
             dx = fielder->pos.x - g_Minigame.wallBall_coinCoordinates[i].x;
             reach *= reach;
@@ -936,7 +936,6 @@ void fn_3_139700(void) {
 }
 
 // .text:0x001391C0 size:0x540 mapped:0x80778254
-// 98.5%: registers only; bag sits in r28 where the target has r31, and the rest shift.
 void fn_3_1391C0(void) {
     Unk3520Bag* bag = &MG.bag;
     VecSrcDst seg;
@@ -944,12 +943,12 @@ void fn_3_1391C0(void) {
     u32 type;
     int i;
     int who;
+    int spread;
     int angle;
     s32 coin;
-    f32 best;
-    f32 radius;
     f32 reach;
     f32 dx;
+    f32 best;
     f32 dz;
     f32 dist;
     f32 speed;
@@ -1001,8 +1000,8 @@ void fn_3_1391C0(void) {
             g_Minigame.wallBall_coinCoordinates[coin].y = bag->pos.y;
             g_Minigame.wallBall_coinCoordinates[coin].z = bag->pos.z;
             angle = random_fn_3_9EE24(0x1000);
-            getComponentsFromSAng(angle + (random_fn_3_9EE24(lbl_3_data_21A04[4] * 2) - lbl_3_data_21A04[4]),
-                                  &g_Minigame.wallBall_coinVelocity[coin].x, &g_Minigame.wallBall_coinVelocity[coin].z);
+            spread = random_fn_3_9EE24(lbl_3_data_21A04[4] * 2) - lbl_3_data_21A04[4];
+            getComponentsFromSAng(angle + spread, &g_Minigame.wallBall_coinVelocity[coin].x, &g_Minigame.wallBall_coinVelocity[coin].z);
             scale = RandomF32_Game_Range(-lbl_3_data_219B8[9], lbl_3_data_219B8[10]);
             g_Minigame.wallBall_coinVelocity[coin].x *= scale;
             g_Minigame.wallBall_coinVelocity[coin].z *= scale;
@@ -1014,7 +1013,6 @@ void fn_3_1391C0(void) {
         return;
     }
     best = 99999.9f;
-    radius = lbl_3_data_219B8[15];
     for (i = 0, who = -1; i < 4; i++) {
         if (g_Minigame.minigameFielderIndex[i] < 0) {
             continue;
@@ -1029,7 +1027,7 @@ void fn_3_1391C0(void) {
         if (fielder->_16C + fielder->_00C < bag->pos.y) {
             continue;
         }
-        reach = radius + lbl_3_data_47BC[fielder->_1C9];
+        reach = lbl_3_data_219B8[15] + lbl_3_data_47BC[fielder->_1C9];
         dz = fielder->pos.z - bag->pos.z;
         dx = fielder->pos.x - bag->pos.x;
         reach *= reach;
@@ -1057,14 +1055,12 @@ void fn_3_1391C0(void) {
             g_Minigame.wallBall_coinsVisibleFrameCounter[coin] = 0;
         }
         fn_3_90064(0x30A);
-        bag->active = FALSE;
         lbl_3_common_bss_34C58._30 = lbl_3_data_88DC[1];
+        bag->active = FALSE;
     }
 }
 
 // .text:0x00138AA4 size:0x71C mapped:0x80777B38
-// 97.8%: g_Minigame, the .bss base and the object walker sit in other saved registers,
-// and the inlined fn_3_137224 loop builds its bases anew.
 void fn_3_138AA4(void) {
     u32 i;
 
@@ -1075,31 +1071,32 @@ void fn_3_138AA4(void) {
         if (i >= 4) {
             break;
         }
-        switch (MG.objs[i]._3D) {
+        switch (g_Minigame.starDashObjs[i]._3D) {
         case 0:
-            fn_3_138448(&MG.objs[i]);
+            fn_3_138448(&g_Minigame.starDashObjs[i]);
             break;
         case 1:
-            fn_3_1382E0(&MG.objs[i]);
+            fn_3_1382E0(&g_Minigame.starDashObjs[i]);
             break;
         case 2:
-            fn_3_13802C(&MG.objs[i]);
+            fn_3_13802C(&g_Minigame.starDashObjs[i]);
             break;
         case 3:
-            fn_3_137F14(&MG.objs[i]);
+            fn_3_137F14(&g_Minigame.starDashObjs[i]);
             break;
         case 4:
-            fn_3_137DE4(&MG.objs[i]);
+            fn_3_137DE4(&g_Minigame.starDashObjs[i]);
             break;
         case 5:
-            fn_3_137CF8(&MG.objs[i]);
+            fn_3_137CF8(&g_Minigame.starDashObjs[i]);
             break;
         }
     }
 }
 
 // .text:0x001384B4 size:0x5F0 mapped:0x80777548
-// 99.45%: FPRs differ (the sums, deviations and center.x).
+// 99.53%: sumZ, varX and center.x take f27, f29 and f26 in the target; no order of the
+// float declarations or of the sums' initializations moves them.
 void fn_3_1384B4(Unk3520Obj* obj) {
     s32 coins[100];
     Vec center = { 0.0f, 0.0f, 20.0f };
@@ -1109,6 +1106,7 @@ void fn_3_1384B4(Unk3520Obj* obj) {
     Vec forward = { 1.0f, 0.0f, 0.0f };
     u32 n;
     u32 i;
+    f32 px;
     f32 varX;
     f32 sdZ;
     f32 varZ;
@@ -1120,7 +1118,6 @@ void fn_3_1384B4(Unk3520Obj* obj) {
     f32 c;
     f32 s;
     f32 dot;
-    f32 px;
     f32 pz;
     f32 ex;
     f32 ez;
@@ -1399,8 +1396,6 @@ u8 fn_3_137B10(Unk3520Obj* obj) {
 }
 
 // .text:0x001379A0 size:0x170 mapped:0x80776A34
-// 90.7%: the unrolled fielder search walks other registers and offsets, and the
-// object loop strength-reduces differently.
 u8 fn_3_1379A0(int fielderIdx) {
     Unk3520Fielder* fielder = &g_Fielders[fielderIdx];
     u32 player;
@@ -1410,8 +1405,8 @@ u8 fn_3_1379A0(int fielderIdx) {
     f32 range;
     f32 dx;
     f32 dz;
-    f64 ax;
-    f64 az;
+    f32 px;
+    f32 pz;
 
     for (player = 0; player < 4; player++) {
         if (g_Minigame.minigameFielderIndex[player] == fielderIdx) {
@@ -1422,19 +1417,23 @@ u8 fn_3_1379A0(int fielderIdx) {
         return FALSE;
     }
     for (i = 0; i < lbl_3_bss_B780; i++) {
-        obj = &MG.objs[i];
+        obj = &g_Minigame.starDashObjs[i];
         if (obj->_3D != 3 && obj->_3D != 5) {
             continue;
         }
         top = fielder->_15C + (fielder->_00C + fielder->pos.y);
-        range = top < obj->_0.y ? fielder->_16C : 12.0f;
+        if (top < obj->_0.y) {
+            range = fielder->_16C;
+        } else {
+            range = 12.0f;
+        }
         if (range < fabs(top - obj->_0.y)) {
             continue;
         }
-        ax = fabs(obj->_0.x - (fielder->pos.x + fielder->_030));
-        az = fabs(obj->_0.z - (fielder->pos.z + fielder->_034));
-        dx = ax;
-        dz = az;
+        px = fielder->pos.x + fielder->_030;
+        pz = fielder->pos.z + fielder->_034;
+        dx = fabs(obj->_0.x - px);
+        dz = fabs(obj->_0.z - pz);
         if (dx < 3.5f && dz < 3.125f) {
             return TRUE;
         }
@@ -1443,18 +1442,18 @@ u8 fn_3_1379A0(int fielderIdx) {
 }
 
 // .text:0x001373E0 size:0x5C0 mapped:0x80776474
-// 93.1%: the half-size constants are loaded through addi where the target loads them
-// directly, and the plane intersection schedules its stores differently.
+// 97.2%: registers only; seg's copy and the loop's obj walker swap r28 to r30, and
+// the FPRs of the height test and the PSVECMag compares differ.
 u8 fn_3_1373E0(VecSrcDst* seg, Vec* vel, VecSrcDst* out, f32 radius) {
     f32 planes[4][3] = { { -1.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, { 0.0f, -1.0f, 0.0f } };
-    Vec hit;
     Vec d1;
     Vec d3;
     Vec n1;
+    Vec hit;
     Vec d2;
-    f32 height = 2.0f * radius;
-    f32 halfX = 3.5f + radius;
-    f32 halfZ = 3.125f + radius;
+    f32 height;
+    f32 halfX;
+    f32 halfZ;
     f32* plane;
     f32 limit;
     f32 t;
@@ -1466,6 +1465,9 @@ u8 fn_3_1373E0(VecSrcDst* seg, Vec* vel, VecSrcDst* out, f32 radius) {
 
     for (i = 0; i < lbl_3_bss_B780; i++) {
         obj = &MG.objs[i];
+        height = 2.0f * radius;
+        halfX = 3.5f + radius;
+        halfZ = 3.125f + radius;
         outside = TRUE;
         if (!(obj->_3D > 1 || obj->_3D == 4)) {
             continue;
@@ -1779,8 +1781,6 @@ void fn_3_13688C(Unk3520Box* box) {
 }
 
 // .text:0x00136220 size:0x66C mapped:0x807752B4
-// 99.4%: the collision-type test merges 2 and 3 into one range where the target tests
-// each; some FPRs differ in the stun branches.
 void fn_3_136220(void) {
     Unk3520Fielder* fielder;
     int i;
@@ -1789,7 +1789,6 @@ void fn_3_136220(void) {
     f32 xx;
     f32 zz;
     f32 len;
-    f32 scale;
     f32 dx;
     f32 dz;
     f32 dist;
@@ -1805,9 +1804,8 @@ void fn_3_136220(void) {
                 xx = g_Minigame._1CB8[i].x * g_Minigame._1CB8[i].x;
                 zz = g_Minigame._1CB8[i].z * g_Minigame._1CB8[i].z;
                 len = dolsqrtf2(xx + zz);
-                scale = lbl_3_data_21B18[0] / len;
-                g_Minigame._1CB8[i].x *= scale;
-                g_Minigame._1CB8[i].z *= scale;
+                g_Minigame._1CB8[i].x *= lbl_3_data_21B18[0] / len;
+                g_Minigame._1CB8[i].z *= lbl_3_data_21B18[0] / len;
                 g_Minigame._1CB8[i].y = 0.0f;
                 g_Minigame._1D5A[i] = 0;
                 g_Minigame.starDashStunType[i] = 2;
@@ -1821,9 +1819,7 @@ void fn_3_136220(void) {
                 fn_3_6C854(g_Minigame.minigameControlStruct.characterIndex[i], 2);
             } else if (g_Minigame.starDashStunType[i] == 2) {
                 g_Minigame._1D5A[i]++;
-                zz = g_Minigame._1CB8[i].z * g_Minigame._1CB8[i].z;
-                xx = g_Minigame._1CB8[i].x * g_Minigame._1CB8[i].x;
-                len = dolsqrtf2(xx + zz);
+                len = dolsqrtf2(g_Minigame._1CB8[i].x * g_Minigame._1CB8[i].x + g_Minigame._1CB8[i].z * g_Minigame._1CB8[i].z);
                 if (len > 0.0f) {
                     seg.src.x = fielder->pos.x;
                     seg.src.y = -1.0f;
@@ -1862,8 +1858,7 @@ void fn_3_136220(void) {
         seg.dst.x = fielder->pos.x;
         seg.dst.y = 1.0f;
         seg.dst.z = fielder->pos.z;
-        type = checkCollision(&seg, &col, 0, FALSE) & 0x7F;
-        if (type == 2 || type == 3 || type == 7 || type == 8 || type == 5) {
+        if ((type = checkCollision(&seg, &col, 0, FALSE) & 0x7F) == 2 || type == 3 || type == 7 || type == 8 || type == 5) {
             dx = lbl_3_data_4444[8] - fielder->pos.x;
             dz = lbl_3_data_4444[8] - fielder->pos.z;
             dist = dolsqrtf2(dx * dx + dz * dz);
@@ -2025,13 +2020,12 @@ void fn_3_135C18(void) {
 }
 
 // .text:0x00135A64 size:0x1B4 mapped:0x80774AF8
-// 98.1%: registers only; the base of g_Minigame and its walkers take r25 to r27 in
-// another order.
 void fn_3_135A64(void) {
-    int i;
     Unk3520Fielder* fielder;
+    int i;
     int j;
     int angle;
+    int diff;
     f32 dist;
 
     if (g_Minigame.turnOverStatus == 0 && !(g_Minigame._1D48 < 0.3f)) {
@@ -2051,7 +2045,8 @@ void fn_3_135A64(void) {
             }
             angle = fn_3_9FB8C(fielder->pos.x - lbl_3_data_219AC.x, fielder->pos.z - lbl_3_data_219AC.z);
             for (j = 0; j < 4; j++) {
-                if (fn_3_9FCF8(angle, g_Minigame._1D64[j]) > 0x200) {
+                diff = fn_3_9FCF8(angle, g_Minigame._1D64[j]);
+                if (diff > 0x200) {
                     continue;
                 }
                 dist = fn_3_9EFD0(&g_Minigame.starDashSpokes[j][0], &g_Minigame.starDashSpokes[j][1], (VecXYZ*)&fielder->pos, NULL);

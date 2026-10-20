@@ -11,6 +11,7 @@
 #include "musyx/musyx.h"
 #include "string.h"
 #include "menus/rep_08E8.h"
+#include "menus/rep_0898.h"
 
 typedef struct MenuTask0840 {
     /* 0x00 */ u8 _00[0xC];
@@ -229,8 +230,6 @@ extern void fn_8006877C(s32);
 extern void fn_2_1C41C(void);
 extern void fn_2_1C490(void);
 extern void fn_2_38538(void);
-extern void fn_2_42490(void);
-extern void fn_2_42638(void);
 
 AramEntry0840 lbl_2_data_12298 = { { 0x00000000, 0x000150CE, 0x08E98800, 0x000150D0 } };
 s16 lbl_2_data_122A8[4][2] = { { 3, 0 }, { 2, 1 }, { 3, 1 }, { 4, 1 } };

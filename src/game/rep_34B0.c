@@ -369,17 +369,15 @@ void fn_3_131114(void) {
 }
 
 // Not in the target as a function: the value parameter gives the target's `mr r3,r4`, as in
-// rep_31F0.c.
+// rep_31F0.c. The (int) index lets fn_3_130C6C share this &g_Minigame with its barrel walk.
 static inline void setCpuInputFlags(u8 value) {
     s8 i = 0;
     do {
-        g_Minigame._1DBC[i] = value;
+        g_Minigame._1DBC[(int)i] = value;
     } while (++i < 4);
 }
 
 // .text:0x00130C6C size:0x4A8 mapped:0x8076FD00
-// 98.14%: the target keeps setCpuInputFlags' &g_Minigame in r25 and walks the barrels from it,
-// with a separate r31 for the rosterID base; here the walk starts from that base.
 void fn_3_130C6C(void) {
     if (g_Minigame.turnOverStatus == 0) {
         if (fn_3_108854()) {
@@ -664,8 +662,8 @@ void fn_3_12F624(void) {
 }
 
 // .text:0x0012F424 size:0x200 mapped:0x8076E4B8
-// 94.65%: the target computes idx % 3 again for the second test, where this reuses the first
-// result (one register more through the first block). A cast, (int)idx % 3, matches.
+// The target computes idx % 3 again for the second test; without the (s32) conversion MWCC
+// reuses the first test's result.
 void fn_3_12F424(int idx, int delay, BOOL all) {
     int colour = g_Minigame.barrels[idx].barrelColour;
     int n;
@@ -679,7 +677,7 @@ void fn_3_12F424(int idx, int delay, BOOL all) {
             g_Minigame.barrels[n].delayUntilBlownUp = delay;
         }
     }
-    if (idx % 3 != 0) {
+    if ((s32)idx % 3 != 0) {
         n = idx - 1;
         if (g_Minigame.barrels[n].barrelState == 2 && n != g_Minigame.bB_bombBarrelID &&
             (g_Minigame.barrels[n].barrelColour == colour || all)) {

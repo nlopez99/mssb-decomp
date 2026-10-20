@@ -408,6 +408,66 @@ static s16 lbl_3_bss_16C;
 static s16 lbl_3_bss_CC[4][20];
 static s16 lbl_3_bss_C8[2];
 
+// Frames the fielder needs to run to (x, z); written out in fn_3_52560, inlined in fn_3_26A74
+static inline s32 framesToReach(UnkAC8Fielder* f, f32 x, f32 z) {
+    f32 dist;
+    f32 speed;
+    s32 extra;
+
+    if (x == f->_000 && z == f->_008) {
+        return 1;
+    }
+    dist = dolsqrtf2(SQ(x - f->_000) + SQ(z - f->_008));
+    extra = f->_1D1 / 2;
+    if (f->_058 == 0.0f) {
+        speed = 1.0f;
+    } else {
+        speed = f->_058;
+    }
+    return extra + (s32)(dist / speed);
+}
+
+// fn_3_555AC's body on a fielder pointer, inlined in fn_3_55EEC
+static inline void setBaseZone(UnkAC8Fielder* f) {
+    f32 lo;
+    f32 hi;
+
+    f->_1DE = 0;
+    if (f->_008 > 45.0f) {
+        return;
+    }
+    if (f->_008 < -5.0f) {
+        return;
+    }
+    if (f->_000 > 25.0f) {
+        return;
+    }
+    if (f->_000 < -25.0f) {
+        return;
+    }
+    if (f->_008 > lbl_3_data_4444[1].z) {
+        lo = lbl_3_data_4444[2].z - 2.0f;
+        hi = 4.0f + lbl_3_data_4444[2].z;
+        if (f->_000 > 0.0f) {
+            if (f->_008 > -f->_000 + lo && f->_008 < -f->_000 + hi) {
+                f->_1DE = 2;
+            }
+        } else if (f->_008 > f->_000 + lo && f->_008 < f->_000 + hi) {
+            f->_1DE = 3;
+        }
+    } else {
+        lo = lbl_3_data_4444[0].z - 4.0f;
+        hi = 2.0f + lbl_3_data_4444[0].z;
+        if (f->_000 > 0.0f) {
+            if (f->_008 > f->_000 + lo && f->_008 < f->_000 + hi) {
+                f->_1DE = 1;
+            }
+        } else if (f->_008 > -f->_000 + lo && f->_008 < -f->_000 + hi) {
+            f->_1DE = 4;
+        }
+    }
+}
+
 // .text:0x000598D0 size:0x48 mapped:0x80698964
 void fn_3_598D0(void) {
     fn_3_58688();
@@ -1125,8 +1185,6 @@ reset:
 }
 
 // .text:0x00057144 size:0x344 mapped:0x806961D8
-// 99.50%: the target calls the empty fn_3_49F3C after fn_3_4BA0C; here the call is
-// inlined away, and dead statements in fn_3_49F3C do not keep it.
 void fn_3_57144(void) {
     UnkAC8Fielder* f;
     s32 i;
@@ -1193,8 +1251,6 @@ void fn_3_57144(void) {
 }
 
 // .text:0x00055EEC size:0x1258 mapped:0x80694F80
-// 99.68%: registers only, in the inlined fn_3_51DF0 (zone) and in the written-out
-// copy of fn_3_555AC, whose negated x the target keeps in x's own register.
 void fn_3_55EEC(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     s32 frames;
@@ -1306,30 +1362,7 @@ void fn_3_55EEC(s32 fielder) {
         if (g_Ball.fielderWBallIndex == fielder) {
             fn_3_55710(fielder);
         }
-        f->_1DE = 0;
-        if (!(f->_008 > 45.0f) && !(f->_008 < -5.0f) && !(f->_000 > 25.0f) && !(f->_000 < -25.0f)) {
-            if (f->_008 > lbl_3_data_4444[1].z) {
-                lo = lbl_3_data_4444[2].z - 2.0f;
-                hi = 4.0f + lbl_3_data_4444[2].z;
-                if (f->_000 > 0.0f) {
-                    if (f->_008 > -f->_000 + lo && f->_008 < -f->_000 + hi) {
-                        f->_1DE = 2;
-                    }
-                } else if (f->_008 > f->_000 + lo && f->_008 < f->_000 + hi) {
-                    f->_1DE = 3;
-                }
-            } else {
-                lo = lbl_3_data_4444[0].z - 4.0f;
-                hi = 2.0f + lbl_3_data_4444[0].z;
-                if (f->_000 > 0.0f) {
-                    if (f->_008 > f->_000 + lo && f->_008 < f->_000 + hi) {
-                        f->_1DE = 1;
-                    }
-                } else if (f->_008 > -f->_000 + lo && f->_008 < -f->_000 + hi) {
-                    f->_1DE = 4;
-                }
-            }
-        }
+        setBaseZone(f);
     }
     if (f->_252) {
         fn_3_27860(fielder);
@@ -2450,12 +2483,8 @@ clamp:
 }
 
 // .text:0x00052560 size:0x17C mapped:0x806915F4
-int fn_3_52560(int fielder, f32 x, f32 z) {
+int fn_3_52560(s32 fielder, f32 x, f32 z) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
-    f32 dz;
-    f32 dx;
-    f32 dx2;
-    f32 dz2;
     f32 dist;
     f32 speed;
     s32 extra;
@@ -2463,11 +2492,7 @@ int fn_3_52560(int fielder, f32 x, f32 z) {
     if (x == f->_000 && z == f->_008) {
         return 1;
     }
-    dx = x - f->_000;
-    dz = z - f->_008;
-    dx2 = dx * dx;
-    dz2 = dz * dz;
-    dist = dolsqrtf2(dx2 + dz2);
+    dist = dolsqrtf2(SQ(x - f->_000) + SQ(z - f->_008));
     extra = f->_1D1 / 2;
     if (f->_058 == 0.0f) {
         speed = 1.0f;
@@ -2554,12 +2579,10 @@ u8 fn_3_51DF0(f32 x, f32 z) {
     if (x - z + 40.0f > 0.0f && -x - z + 40.0f > 0.0f) {
         return 0;
     }
-    xx = x * x;
-    if (dolsqrtf2(z * z + xx) < 38.8f) {
+    if (dolsqrtf2(SQ(z) + SQ(x)) < 38.8f) {
         return 1;
     }
-    dz = z - 18.4f;
-    dist = dolsqrtf2(dz * dz + xx);
+    dist = dolsqrtf2(SQ(z - 18.4f) + SQ(x));
     if (dist < 28.0f) {
         return 1;
     }
@@ -2719,9 +2742,9 @@ s32 fn_3_5164C(s32 fielder, struct _VecXYZ* out) {
 }
 
 // .text:0x00051220 size:0x42C mapped:0x806902B4
-// 96.70%: in the speed-ratio update the target loads the int-to-float constant through an
-// `addi` and lbl_3_data_4B98 before 1.0f; the operands of the `fmadds` follow from that.
 void fn_3_51220(void) {
+    f32 ratio;
+
     if (g_FieldingLogic._070->_1A != 0) {
         if (g_FieldingLogic._070->_0C < 0x7FFE) {
             g_FieldingLogic._070->_0C++;
@@ -2773,7 +2796,8 @@ void fn_3_51220(void) {
             g_FieldingLogic._070->_18 = lbl_3_data_4B9C[5];
             return;
         }
-        g_FieldingLogic._070->_08 = (f32)g_FieldingLogic._070->_10 / lbl_3_data_4B9C[1] * lbl_3_data_4B98 + 1.0f;
+        ratio = (f32)g_FieldingLogic._070->_10 / lbl_3_data_4B9C[1];
+        g_FieldingLogic._070->_08 = ratio * lbl_3_data_4B98 + 1.0f;
         return;
     }
     if (g_FieldingLogic._070->_0C >= 0) {
@@ -2985,9 +3009,8 @@ s32 fn_3_50898(s32 fielder, f32* x, f32* z) {
 }
 
 // .text:0x0004FB34 size:0xD64 mapped:0x8068EBC8
-// 99.55%: registers only; the target keeps margin, step and close in other saved
-// registers, and the inlined fn_3_52560 swaps dx and dz as in fn_3_4EFC8.
-void fn_3_4FB34(int fielder) {
+// 99.71%: registers only; the target keeps margin, step and close in other saved registers.
+void fn_3_4FB34(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     s32 i;
     s32 start;
@@ -3003,14 +3026,8 @@ void fn_3_4FB34(int fielder) {
     s32 step = 5;
     s32 zone;
     s32 arrive;
-    s32 extra;
     f32 x;
     f32 z;
-    f32 dx;
-    f32 dz;
-    f32 dx2;
-    f32 dz2;
-    f32 speed;
     f32 dist;
     f32 bestY = 99.0f;
     f32 maxY = 4.5f;
@@ -3140,8 +3157,7 @@ void fn_3_4FB34(int fielder) {
         f->_1DB = 1;
     }
     if (fielder <= 5 && (f->_1DD == 1 || f->_1DD == 2)) {
-        z = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z;
-        zone = fn_3_51DF0(g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x, z);
+        zone = fn_3_51DF0(g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x, g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z);
         if (f->_1DD == 2) {
             if (zone >= 2) {
                 f->_1DD = 4;
@@ -3177,9 +3193,8 @@ void fn_3_4FB34(int fielder) {
 }
 
 // .text:0x0004F504 size:0x630 mapped:0x8068E598
-// 99.89%: as in fn_3_4EFC8, the inlined fn_3_52560 takes dx and dz in each other's float
-// registers, and the last test's two sums compare in swapped registers.
-void fn_3_4F504(int fielder) {
+// 99.96%: as in fn_3_4EFC8, the last test's two sums compare in swapped registers.
+void fn_3_4F504(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     s32 i;
     s32 start;
@@ -3277,24 +3292,19 @@ void fn_3_4F504(int fielder) {
 }
 
 // .text:0x0004EFC8 size:0x53C mapped:0x8068E05C
-// 99.87%: registers only; the inlined fn_3_52560 takes dx and dz in each other's float
-// registers (as in fn_3_43038), and the last test's two sums swap r0 and r3.
-void fn_3_4EFC8(int fielder, BOOL flag) {
+// 99.96%: the last test's two sums swap r0 and r3 (cmpw r0,r3; ble in the target). Writing
+// the test as _0E + 30 > arrive + 60 gives the target's branch, with the sums still swapped.
+void fn_3_4EFC8(s32 fielder, BOOL flag) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     s32 i;
     s32 start;
     s32 frames;
     s32 catchFrame;
     s32 arrive;
-    s32 half;
     s32 bestIdx = 0;
     s32 found = 0;
     s32 close = 0;
     s32 result = 0;
-    f32 speed;
-    f32 dist;
-    f32 dz;
-    f32 dx;
     f32 z;
     f32 x;
     f32 y;
@@ -3381,17 +3391,17 @@ void fn_3_4EFC8(int fielder, BOOL flag) {
 }
 
 // .text:0x0004EBC4 size:0x404 mapped:0x8068DC58
-// 99.10%: the target tests the frame count with `extsh.` and then copies it with an extra
-// `mr r6,r31`, one instruction this lacks.
+// 99.72%: before the waiting search the target zeroes waiting and copies it into j
+// (`mr r8,r7`), as in fn_3_41D78; every form of the two zeroings tried gives a second `li`.
 void fn_3_4EBC4(void) {
     s32 frames;
     s32 best = -1;
     s16 bestFrames = 9999;
     s16 nextFrames = 9999;
+    BOOL waiting;
     BOOL high = FALSE;
     s32 i;
     s32 j;
-    BOOL waiting;
 
     if (g_FieldingLogic._0C4 >= 0) {
         g_Ball.fielderAboutToGetBall_hasBall = -1;
@@ -3417,7 +3427,7 @@ void fn_3_4EBC4(void) {
             }
             if (i < 6 || !high) {
                 frames = g_Fielders[i]._17E;
-                if (frames >= 0) {
+                if ((s16)g_Fielders[i]._17E >= 0) {
                     if (g_Fielders[i]._19C != 0) {
                         frames = g_Fielders[i]._17E + 60;
                     } else if (g_Fielders[i]._1ED) {
@@ -3740,8 +3750,9 @@ BOOL fn_3_4DB84(s32 fielder) {
 }
 
 // .text:0x0004D20C size:0x978 mapped:0x8068C2A0
-// 97.22%: the target branches over a separate `b` for the early return of the pitcher, and
-// both inlined fn_3_52F4C copies keep dx and dz in the other saved FPRs.
+// 97.45%: the target branches over a separate `b` for the early return of the pitcher (goto,
+// else and nested forms give one `beq`), and both inlined fn_3_52F4C copies keep dx and dz in
+// the other saved FPRs.
 void fn_3_4D20C(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     s32 base;
@@ -3763,8 +3774,8 @@ void fn_3_4D20C(s32 fielder) {
             }
             if (f->_1D7 == 1) {
                 if (f->_216) {
-                    dz = f->_01C - f->_008;
                     dx = f->_014 - f->_000;
+                    dz = f->_01C - f->_008;
                     dist = dolsqrtf2(dx * dx + dz * dz);
                     if (dist < f->_058) {
                         step = dist;
@@ -3790,14 +3801,16 @@ void fn_3_4D20C(s32 fielder) {
                                 if (dx > 15.0f) {
                                     dx = 15.0f;
                                 }
-                                z = lbl_3_data_4444[1].z - dx / 3.0f;
+                                dx /= 3.0f;
+                                z = lbl_3_data_4444[1].z - dx;
                             } else if (g_Fielders[0]._18C == 3) {
                                 x = lbl_3_data_4444[3].x;
                                 dx = g_Fielders[0]._000 - x;
                                 if (dx > 15.0f) {
                                     dx = 15.0f;
                                 }
-                                z = lbl_3_data_4444[3].z - dx / 3.0f;
+                                dx /= 3.0f;
+                                z = lbl_3_data_4444[3].z - dx;
                             } else {
                                 x = lbl_3_data_4444[g_Fielders[0]._18C].x;
                                 z = lbl_3_data_4444[g_Fielders[0]._18C].z;
@@ -4306,9 +4319,9 @@ void fn_3_4A9AC(s32 fielder) {
 }
 
 // .text:0x0004A408 size:0x5A4 mapped:0x8068949C
-// 98.64%: the inlined fn_3_5985C recomputes the fielder pointer and fn_3_52560 swaps dx and
-// dz; with fielder, fn_3_52560 and fn_3_4EFC8 all s32 this reaches 99.83% (see fn_3_3EB6C).
-void fn_3_4A408(int fielder, f32* x, f32* z) {
+// 98.81%: matches with fn_3_52560, fn_3_4EFC8, fn_3_4F504, fn_3_4FB34 and this taking s32;
+// rep_13B8's fn_3_8604C then needs an s32 counter (escalated).
+void fn_3_4A408(s32 fielder, f32* x, f32* z) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     s32 frame;
     f32 ahead;
@@ -4447,8 +4460,16 @@ void fn_3_49F40(s32 fielder, s32 kind) {
 }
 
 // .text:0x00049F3C size:0x4 mapped:0x80688FD0
+// The 30 dead stores stand in for code the original compiled to nothing: with fewer,
+// MWCC inlines this empty function into fn_3_57144, where the target calls it.
 void fn_3_49F3C(void) {
-    return;
+    int d;
+
+    d = 0; d = 1; d = 2; d = 3; d = 4; d = 5;
+    d = 6; d = 7; d = 8; d = 9; d = 10; d = 11;
+    d = 12; d = 13; d = 14; d = 15; d = 16; d = 17;
+    d = 18; d = 19; d = 20; d = 21; d = 22; d = 23;
+    d = 24; d = 25; d = 26; d = 27; d = 28; d = 29;
 }
 
 // .text:0x00049EA8 size:0x94 mapped:0x80688F3C
@@ -4551,24 +4572,25 @@ void fn_3_499C4(s32 fielder, struct _VecXYZ* out) {
 }
 
 // .text:0x000494F4 size:0x4D0 mapped:0x80688588
-// 99.35%: registers only; in the plant branch the target keeps dz, dx and the distance in
-// f8, f4 and f7 where this uses other float registers.
 void fn_3_494F4(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
 
     if (g_Ball.pauseBallMovementWhenInPlant) {
-        f32 dz = g_Ball.AtBat_Contact_BallPos.z - f->_008;
-        f32 dx = g_Ball.AtBat_Contact_BallPos.x - f->_000;
-        f32 dist = dolsqrtf2(dx * dx + dz * dz);
+        f32 dz;
+        f32 dx;
+        f32 dist;
         f32 reach;
+        dx = g_Ball.AtBat_Contact_BallPos.x - f->_000;
+        dz = g_Ball.AtBat_Contact_BallPos.z - f->_008;
+        dist = dolsqrtf2(dx * dx + dz * dz);
 
         if (dist < lbl_3_data_4930[37]) {
             goto stop;
         }
         reach = lbl_3_data_4930[36] - 1.0f;
-        dx /= dist;
-        dz /= dist;
-        fn_3_52F4C(fielder, reach * dx + f->_000, reach * dz + f->_008);
+        dx = reach * (dx / dist) + f->_000;
+        dz = reach * (dz / dist) + f->_008;
+        fn_3_52F4C(fielder, dx, dz);
     }
     if (g_Ball.hitWallInd) {
         if (f->_074 < lbl_3_data_4930[1]) {
@@ -5496,22 +5518,14 @@ done:
 }
 
 // .text:0x000433E0 size:0x13E4 mapped:0x80682474
-// 99.93%: the last root's stack slot and the dx/dz registers of the final frame count
-// differ; an s32 inline copy of fn_3_52560 there reaches 99.97% (see fn_3_34A40).
+// 99.99%: only stack slots differ: the target gives the final framesToReach copy's sqrt
+// temporary offset 16, before the inlined fn_3_52F4C copies of the _1DC == 4 and 5 cases.
 void fn_3_433E0(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     f32 x;
     f32 z;
-    f32 dx;
-    f32 dz;
     f32 dist;
     f32 d;
-    f32 tx;
-    f32 tz;
-    f32 dx2;
-    f32 dz2;
-    f32 speed;
-    s32 extra;
     s32 frames;
 
     if (g_Ball.ballBounceState == 3) {
@@ -5620,23 +5634,8 @@ void fn_3_433E0(s32 fielder) {
         f->_17E = f->_068 / f->_050;
     }
     if ((f->_1DC == 1 || f->_1DC == 2 || f->_1DC == 3) && g_Ball.AtBat_ContactResult == 0) {
-        tx = g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x;
-        tz = g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z;
-        if (tx == f->_000 && tz == f->_008) {
-            frames = 1;
-        } else {
-            dx = tx - f->_000;
-            dz = tz - f->_008;
-            dx2 = dx * dx;
-            dz2 = dz * dz;
-            dist = dolsqrtf2(dx2 + dz2);
-            extra = f->_1D1 / 2;
-            speed = f->_058;
-            if (speed == 0.0f) {
-                speed = 1.0f;
-            }
-            frames = extra + (s32)(dist / speed);
-        }
+        frames = framesToReach(f, g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x,
+                               g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z);
         if (g_Ball.framesUntilBallHitsGround > frames) {
             f->_1DC = 0;
             f->_184 = g_Ball.framesUntilBallHitsGround - 2;
@@ -5645,7 +5644,6 @@ void fn_3_433E0(s32 fielder) {
 }
 
 // .text:0x00043038 size:0x3A8 mapped:0x806820CC
-// 99.87%: the inlined fn_3_52560 takes dx and dz in each other's float registers.
 void fn_3_43038(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     s32 frames = 0;
@@ -6325,13 +6323,12 @@ void fn_3_3F034(void) {
 }
 
 // .text:0x0003EB6C size:0x4C8 mapped:0x8067DC00
-// 97.61%: registers only. With fn_3_4EFC8 and fn_3_52560 taking s32 rather than int this
-// reaches 99.69%, but rep_13B8's callers of fn_3_52560 need int; the inlined fn_3_52560 also
-// takes dx and dz in each other's float registers (as in fn_3_43038).
+// 97.71%: registers only. With fn_3_52560 and its callers taking s32 (see fn_3_4A408) this
+// drops to 97.43%.
 void fn_3_3EB6C(void) {
     UnkAC8Fielder* f;
     s32 i;
-    int best;
+    s32 best;
     s32 bestFrames = 9999;
     s32 frames;
     s32 total;
@@ -6366,7 +6363,7 @@ void fn_3_3EB6C(void) {
 }
 
 // .text:0x0003E690 size:0x4DC mapped:0x8067D724
-// 95.95%: registers only; 99.69% with fn_3_4EFC8 and fn_3_52560 taking s32, as in fn_3_3EB6C.
+// 96.04%: registers only; 99.79% with fn_3_52560 and its callers taking s32 (see fn_3_4A408).
 void fn_3_3E690(void) {
     UnkAC8Fielder* f;
     s32 i;
@@ -8820,8 +8817,7 @@ void fn_3_35D28(s32 fielder) {
 }
 
 // .text:0x00034A40 size:0x12E8 mapped:0x80673AD4
-// 99.20%: the frame counts' roots take stack slots in another order; as calls of an
-// s32 fn_3_52560 they match the target's slots (99.29%), see fn_3_433E0.
+// 99.96%: registers only, in the __abs of the last angle difference (r3 and r0 swapped).
 void fn_3_34A40(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     s32 i;
@@ -8830,12 +8826,6 @@ void fn_3_34A40(s32 fielder) {
     f32 scale;
     f32 x;
     f32 z;
-    f32 dx;
-    f32 dz;
-    f32 dx2;
-    f32 dz2;
-    f32 speed;
-    s32 extra;
     s32 frames;
 
     if (g_Ball.fielderWBallIndex >= 0 && g_Ball.fielderWBallIndex != fielder) {
@@ -8862,16 +8852,18 @@ void fn_3_34A40(s32 fielder) {
                     if (f->_070 < 15.0f) {
                         fn_3_52F4C(fielder, f->_000, f->_008);
                     } else {
-                        fn_3_52F4C(fielder, 15.0f * (f->_000 / f->_070), 15.0f * (f->_008 / f->_070));
+                        x = 15.0f * (f->_000 / f->_070);
+                        z = 15.0f * (f->_008 / f->_070);
+                        fn_3_52F4C(fielder, x, z);
                     }
                 } else {
-                    fn_3_52F4C(fielder,
-                               15.0f * (g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x /
-                                        g_Ball.physicsSubstruct.hitLandingSpotDistFromHome) +
-                                   g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x,
-                               15.0f * (g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z /
-                                        g_Ball.physicsSubstruct.hitLandingSpotDistFromHome) +
-                                   g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z);
+                    x = 15.0f * (g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x /
+                                 g_Ball.physicsSubstruct.hitLandingSpotDistFromHome) +
+                        g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x;
+                    z = 15.0f * (g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z /
+                                 g_Ball.physicsSubstruct.hitLandingSpotDistFromHome) +
+                        g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z;
+                    fn_3_52F4C(fielder, x, z);
                 }
             } else {
                 fn_3_52F4C(fielder, g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x,
@@ -8881,51 +8873,22 @@ void fn_3_34A40(s32 fielder) {
                 f->_1D6 = 8;
             }
         } else if (g_Ball.AtBat_ContactResult == 0) {
-            x = g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x;
-            z = g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z;
-            if (x == f->_000 && z == f->_008) {
-                frames = 1;
-            } else {
-                dx = x - f->_000;
-                dz = z - f->_008;
-                dx2 = dx * dx;
-                dz2 = dz * dz;
-                dist = dolsqrtf2(dx2 + dz2);
-                extra = f->_1D1 / 2;
-                speed = f->_058;
-                if (speed == 0.0f) {
-                    speed = 1.0f;
-                }
-                frames = extra + (s32)(dist / speed);
-            }
+            frames = framesToReach(f, g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x,
+                                   g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z);
             if (g_Ball.framesUntilBallHitsGround - frames > 10) {
                 fn_3_52F4C(fielder, g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x,
                            g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z);
             } else {
                 for (k = 10; k <= 60; k += 10) {
-                    i = g_Ball.framesUntilBallHitsGround + k;
                     if (k == 60) {
+                        i = g_Ball.framesUntilBallHitsGround + k;
                         fn_3_52F4C(fielder, g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x,
                                    g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z);
                         break;
                     }
-                    x = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x;
-                    z = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z;
-                    if (x == f->_000 && z == f->_008) {
-                        frames = 1;
-                    } else {
-                        dx = x - f->_000;
-                        dz = z - f->_008;
-                        dx2 = dx * dx;
-                        dz2 = dz * dz;
-                        dist = dolsqrtf2(dx2 + dz2);
-                        extra = f->_1D1 / 2;
-                        speed = f->_058;
-                        if (speed == 0.0f) {
-                            speed = 1.0f;
-                        }
-                        frames = extra + (s32)(dist / speed);
-                    }
+                    i = g_Ball.framesUntilBallHitsGround + k;
+                    frames = framesToReach(f, g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x,
+                                           g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z);
                     if (i - frames > 5) {
                         fn_3_52F4C(fielder, g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x,
                                    g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z);
@@ -10591,14 +10554,12 @@ void fn_3_2E41C(void) {
 }
 
 // .text:0x0002DDB4 size:0x668 mapped:0x8066CE48
-// 99.45%: the target masks the player index when scaling it ((p << 1) & 0x1FE, (p << 4) &
-// 0xFF0), and loads the first target's x and z into f1 and f0 the other way round.
+// The masked index ((p << 1) & 0x1FE in the target) needs the & 0xFF.
 void fn_3_2DDB4(void) {
-    u8 player = g_Minigame._1922;
+    s32 player = g_Minigame._1922 & 0xFF;
     UnkAC8Fielder* f = &g_Fielders[g_Minigame.minigameRelatedIndex];
     InputStruct* input = &g_Controls[player];
-    f32 x2;
-    f32 z2;
+    VecXZ v;
     f32 dist;
 
     if (g_AiLogic.mgTimer[player] < 0x7FFE) {
@@ -10610,12 +10571,12 @@ void fn_3_2DDB4(void) {
         if (g_AiLogic.mgStep[player] == 0) {
             f32 offset;
 
-            x2 = f->_000 * f->_000;
-            z2 = f->_008 * f->_008;
             offset = lbl_3_data_1C44[g_Batter.characterClass];
-            dist = dolsqrtf2(x2 + z2);
-            g_AiLogic.mgTarget[player].x = f->_000 / dist * offset + f->_000;
-            g_AiLogic.mgTarget[player].z = f->_008 / dist * offset + f->_008;
+            dist = dolsqrtf2(SQ(f->_000) + SQ(f->_008));
+            v.x = f->_000 / dist;
+            v.z = f->_008 / dist;
+            g_AiLogic.mgTarget[player].x = v.x * offset + f->_000;
+            g_AiLogic.mgTarget[player].z = v.z * offset + f->_008;
             g_AiLogic.mgTimer[player] = 0;
             g_AiLogic.mgStep[player] = 1;
         } else if (g_AiLogic.mgStep[player] == 2) {
@@ -10629,9 +10590,9 @@ void fn_3_2DDB4(void) {
         }
     } else if (g_AiLogic.mgMode[player] == 1) {
         if (g_AiLogic.mgStep[player] == 0) {
-            x2 = f->_000 * f->_000;
-            z2 = f->_008 * f->_008;
-            dist = dolsqrtf2(x2 + z2);
+            v.x = f->_000 * f->_000;
+            v.z = f->_008 * f->_008;
+            dist = dolsqrtf2(v.x + v.z);
             if (f->_000 < -15.0f) {
                 g_AiLogic.mgAngle[player] = f->_180 - 0x600 + RandomInt_Game(0x400);
             } else if (f->_000 > 15.0f) {
@@ -12202,22 +12163,11 @@ static inline void creditCatch(s32 fielder) {
     }
 }
 
-// 99.96%: registers only; the target loads f->_118 into f1 and f->_000 into f3 for the
-// distance to the fielder's start spot, this swaps them.
 void fn_3_26A74(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     InMemRunnerType* r;
     s32 i;
     s32 frames;
-    s32 extra;
-    f32 z;
-    f32 x;
-    f32 dz;
-    f32 dx;
-    f32 dx2;
-    f32 dz2;
-    f32 dist;
-    f32 speed;
 
     if (g_Ball.ballState == 1) {
         if (g_d_GameSettings.GameModeSelected != GAME_TYPE_TOY_FIELD && fielder != g_FieldingLogic._0B0) {
@@ -12308,23 +12258,7 @@ void fn_3_26A74(s32 fielder) {
         g_FieldingLogic._115 = f->_259;
     }
     if (g_Ball.numberOfThrowsDuringPlay == 0) {
-        x = f->_118;
-        z = f->_11C;
-        if (x == f->_000 && z == f->_008) {
-            frames = 1;
-        } else {
-            dx = x - f->_000;
-            dz = z - f->_008;
-            dx2 = dx * dx;
-            dz2 = dz * dz;
-            dist = dolsqrtf2(dx2 + dz2);
-            extra = f->_1D1 / 2;
-            speed = f->_058;
-            if (speed == 0.0f) {
-                speed = 1.0f;
-            }
-            frames = extra + (s32)(dist / speed);
-        }
+        frames = framesToReach(f, f->_118, f->_11C);
         if (g_Ball.framesSinceHit - frames < lbl_3_data_49DC[38]) {
             g_FieldingLogic._133 = 1;
         }

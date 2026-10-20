@@ -7,6 +7,8 @@
 #include "game/rep_1668.h"
 #include "game/rep_1720.h"
 #include "game/rep_3BD8.h"
+#include "game/rep_2BF8.h"
+#include "game/rep_1770.h"
 
 typedef struct UnkTask1770 {
     /* 0x00 */ void (*_00)(void);
@@ -248,9 +250,6 @@ extern void fn_80034CEC(UnkTask1770* task);
 extern void fn_80034E20(UnkTask1770* task, UnkSpriteDesc1770* desc);
 extern void fn_8003649C(UnkTask1770* task, s32, s32, s32, s32);
 extern void fn_800B0A14_removeQueue(void);
-extern void fn_3_ED0F4(void);
-extern void fn_3_ED574(void);
-extern void fn_3_9C578(void);
 extern void fn_8004CC4C(int arg0, int arg1, int arg2, int arg3, int arg4);
 extern void fn_8004D0F0(void);
 extern void fn_80035CA4(s32 id);

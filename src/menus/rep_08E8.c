@@ -12,6 +12,7 @@
 #include "string.h"
 #include "menus/rep_09B8.h"
 #include "menus/rep_0B08.h"
+#include "menus/rep_1028.h"
 
 typedef struct MenuTask08E8 {
     /* 0x00 */ u8 _00[0xC];
@@ -509,11 +510,6 @@ extern s32 fn_80062890(s32 id);
 extern s32 fn_8006C5CC(void);
 extern s32 fn_8006C6C4(void);
 extern void fn_80024FA4(MenuActorRef08E8* model, u32 animId, MenuAnimState08E8* anim, s32 arg3);
-
-// rep_0B08
-
-// rep_1028
-extern void fn_2_9007C(void);
 
 // rep_10C0
 extern void fn_2_93BF8(MenuCamera08E8* camera);
