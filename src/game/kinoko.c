@@ -171,11 +171,14 @@ void fn_3_16B488(Vec* pos, s8 id) {
 }
 
 // .text:0x0016A07C size:0x140C mapped:0x807A9110
-// 99.81%: in the trail-shift loop the target gives i, the destination pointer and the
-// source pointer r19, r20 and r21; this build gives them r21, r19 and r20.
+// 99.93%: the walking dst pointer put the shift loop's registers right (indexed forms swap i).
+// The pos pointer of the inlined fn_3_16B488 for rows 1-5 is r20 in the target, r19 here;
+// declaration orders, block scopes and source-index locals did not move it.
 void fn_3_16A07C(void) {
-    u32 count;
     u32 i;
+    RibbonEffect* dst;
+    RibbonEffect* src;
+    u32 count;
     u8 alpha;
 
     if (g_d_GameSettings._55 != 0 || g_Minigame._1A40 != 0) {
@@ -190,20 +193,22 @@ void fn_3_16A07C(void) {
     }
     if (lbl_80366158._28 == 0) {
         lbl_3_data_28928._19D4++;
-        for (i = 24; i != 0; i--) {
+        dst = &lbl_3_data_28928.ribbons[0][24];
+        for (i = 24; i != 0; i--, dst--) {
             alpha = (24 - i) * 8;
-            memcpy(&lbl_3_data_28928.ribbons[0][i], &lbl_3_data_28928.ribbons[0][i - 1], sizeof(RibbonEffect));
-            lbl_3_data_28928.ribbons[0][i].color[3] = alpha;
-            memcpy(&lbl_3_data_28928.ribbons[1][i], &lbl_3_data_28928.ribbons[1][i - 1], sizeof(RibbonEffect));
-            lbl_3_data_28928.ribbons[1][i].color[3] = alpha;
-            memcpy(&lbl_3_data_28928.ribbons[2][i], &lbl_3_data_28928.ribbons[2][i - 1], sizeof(RibbonEffect));
-            lbl_3_data_28928.ribbons[2][i].color[3] = alpha;
-            memcpy(&lbl_3_data_28928.ribbons[3][i], &lbl_3_data_28928.ribbons[3][i - 1], sizeof(RibbonEffect));
-            lbl_3_data_28928.ribbons[3][i].color[3] = alpha;
-            memcpy(&lbl_3_data_28928.ribbons[4][i], &lbl_3_data_28928.ribbons[4][i - 1], sizeof(RibbonEffect));
-            lbl_3_data_28928.ribbons[4][i].color[3] = alpha;
-            memcpy(&lbl_3_data_28928.ribbons[5][i], &lbl_3_data_28928.ribbons[5][i - 1], sizeof(RibbonEffect));
-            lbl_3_data_28928.ribbons[5][i].color[3] = alpha;
+            src = &lbl_3_data_28928.ribbons[0][i - 1];
+            memcpy(&dst[0], &src[0], sizeof(RibbonEffect));
+            dst[0].color[3] = alpha;
+            memcpy(&dst[25], &src[25], sizeof(RibbonEffect));
+            dst[25].color[3] = alpha;
+            memcpy(&dst[50], &src[50], sizeof(RibbonEffect));
+            dst[50].color[3] = alpha;
+            memcpy(&dst[75], &src[75], sizeof(RibbonEffect));
+            dst[75].color[3] = alpha;
+            memcpy(&dst[100], &src[100], sizeof(RibbonEffect));
+            dst[100].color[3] = alpha;
+            memcpy(&dst[125], &src[125], sizeof(RibbonEffect));
+            dst[125].color[3] = alpha;
         }
         if (lbl_3_data_28928._19D4 % 5 == 0) {
             if (++lbl_3_data_28928.ribbons[0][0].colorFrom >= 6) {
