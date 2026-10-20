@@ -417,11 +417,7 @@ u8 fn_3_E8AC8(void) {
 }
 
 // .text:0x000E7B20 size:0xFA8 mapped:0x80726BB4
-// 99.98%: the third loop's counter i and draw index k are in swapped registers (r17/r18).
-// The target keeps four counters there, so j and k are their own variables.
 u8 fn_3_E7B20(void** files, s32* indices) {
-    u32 k;
-    u32 j;
     u32 i;
     StaC6Draw* draw;
     StaC6Draw* entry;
@@ -540,27 +536,35 @@ u8 fn_3_E7B20(void** files, s32* indices) {
         n++;
     }
 
-    for (k = n, j = 16, i = 0; j < 23; j++, i++, k++) {
-        entry->_C0 = k;
-        entry->type = j;
-        entry->_9C = &lbl_8036E548._6C->models[25];
-        draw->_74 = &lbl_8036E548._6C->models[i + 16];
-        draw->_78 = NULL;
-        draw->_90_7 = 1;
-        draw->_90_6 = 1;
-        draw->control.type = 0;
-        CTRLSetTranslation(&draw->control, lbl_3_data_196BC[entry->type - 16].x, lbl_3_data_196BC[entry->type - 16].y,
-                           lbl_3_data_196BC[entry->type - 16].z);
-        CTRLSetRotation(&draw->control, 0.0f, lbl_3_data_19710[entry->type - 16], 0.0f);
-        draw->_90_5 = 1;
-        draw->_92 = 0xFF;
-        draw->_8C = NULL;
-        draw->_94 = 0;
-        draw->_96 = -1;
-        draw->_98 = 1;
-        fn_3_E7A2C(entry);
-        entry = ++draw;
-        n++;
+    // Declared in this block: at function scope i and k swap registers.
+    {
+        u32 i;
+        u32 k;
+        u32 j;
+
+        for (k = n, j = 16, i = 0; j < 23; j++, k++, i++) {
+            entry->_C0 = k;
+            entry->type = j;
+            entry->_9C = &lbl_8036E548._6C->models[25];
+            draw->_74 = &lbl_8036E548._6C->models[i + 16];
+            draw->_78 = NULL;
+            draw->_90_7 = 1;
+            draw->_90_6 = 1;
+            draw->control.type = 0;
+            CTRLSetTranslation(&draw->control, lbl_3_data_196BC[entry->type - 16].x, lbl_3_data_196BC[entry->type - 16].y,
+                               lbl_3_data_196BC[entry->type - 16].z);
+            CTRLSetRotation(&draw->control, 0.0f, lbl_3_data_19710[entry->type - 16], 0.0f);
+            draw->_90_5 = 1;
+            draw->_92 = 0xFF;
+            draw->_8C = NULL;
+            draw->_94 = 0;
+            draw->_96 = -1;
+            draw->_98 = 1;
+            fn_3_E7A2C(entry);
+            entry = ++draw;
+            n++;
+        }
+
     }
 
     draw[0]._C0 = n;
