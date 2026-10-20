@@ -1147,9 +1147,11 @@ void fn_3_119468(s32 i) {
     }
 }
 
+static inline f32 lerp3310(f32 a, f32 b, f32 t) {
+    return (1.0f - t) * a + b * t;
+}
+
 // .text:0x001192B8 size:0x1B0 mapped:0x8075834C
-// 91.03%: the int-to-float conversions of _1A and lbl_3_data_21E68[6] and the loads
-// of the two scale rows are scheduled in another order.
 void fn_3_1192B8(void) {
     UnkObj3310* obj;
     s32 i;
@@ -1170,7 +1172,7 @@ void fn_3_1192B8(void) {
                 fn_8001D0D0(id, lbl_3_data_22678[0][MG._0000[i]._2B]);
             } else {
                 t = (f32)MG._0000[i]._1A / (f32)lbl_3_data_21E68[6];
-                scale = (1.0f - t) * lbl_3_data_22678[0][MG._0000[i]._2B] + lbl_3_data_22678[1][MG._0000[i]._2B] * t;
+                scale = lerp3310(lbl_3_data_22678[0][MG._0000[i]._2B], lbl_3_data_22678[1][MG._0000[i]._2B], t);
                 fn_8001D0D0(id, scale);
             }
             if (MG._0000[i]._2B == 0) {
