@@ -129,9 +129,9 @@ void fn_3_1160B8(void) {}
 static inline void setFielderPlayer(int fielder, u8 player) { g_Fielders[fielder]._20D = player; }
 
 // .text:0x00115C24 size:0x494 mapped:0x80754CB8
-// 98.99%: only registers differ in the fielder loop (n in r8 where the target has r11) and
-// the g_Fielders and g_Minigame lis come in the other order; the int fielder through
-// setFielderPlayer's int parameter removed the clrlwi without hoisting the addresses.
+// 99.20%: only registers differ in the fielder loop (n in r9, fielder in r6 where the target
+// has r11, r9) and the g_Fielders and g_Minigame lis come in the other order; the int fielder
+// through setFielderPlayer's int parameter removed the clrlwi without hoisting the addresses.
 void fn_3_115C24(void) {
     int n;
     int fielder;
@@ -176,7 +176,8 @@ void fn_3_115C24(void) {
         for (i = 0, n = 0; i < 4; i++) {
             if (g_Minigame.minigameControlStruct.characterIndex[i] >= 0) {
                 g_Minigame.minigameControlStruct._28[n] = i;
-                fielder = n + 2;
+                fielder = n;
+                fielder += 2;
                 g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]] = fielder;
                 g_Minigame.minigameControlStruct._14[n] = i;
                 n++;
