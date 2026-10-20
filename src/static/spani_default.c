@@ -138,6 +138,17 @@ extern struct {
     /* 0x000 */ u8 _000[0x715];
     /* 0x715 */ s8 _715;
 } lbl_803C6CF8;
+extern struct {
+    /* 0x00 */ u8 _00[0x84];
+    /* 0x84 */ s32 _84;
+    /* 0x88 */ s32 _88;
+} lbl_80366188;
+extern f32 lbl_803CBBDC;
+extern f32 lbl_803CBBE0;
+extern u8 lbl_803CBBE4;
+extern void fn_800B2854(void* buf, u32 size, Mtx44 proj, s32 arg3, s32 count, s32* kinds, s32 arg6);
+extern void fn_800B27A4(s32 arg0);
+extern void fn_800B0D38(s32 arg0, s32 arg1);
 extern void* ARAMTransfer(void* entry, int arg1, int arg2, u32 aram);
 
 Mtx lbl_800F78E0[4] = {
@@ -160,6 +171,49 @@ s16 lbl_8023D6C0[0x360];
 u8 lbl_801F86C0[0x45000];
 Mtx44 lbl_801F8680;
 Mtx44 lbl_801F8640;
+
+// .text:0x80036A3C size:0x24C mapped:0x80036A3C
+void fn_80036A3C(void) {
+    s32 kinds[23];
+    s32 i;
+
+    C_MTXFrustum(lbl_801F8680, -0.175f, 0.175f, -0.25f, 0.25f, 1.0f, 512.0f);
+    for (i = 0; i < 23; i++) {
+        switch (i) {
+        case 12:
+            kinds[i] = 9;
+            break;
+        case 11:
+            kinds[i] = 10;
+            break;
+        case 10:
+        case 13:
+        case 14:
+            kinds[i] = 11;
+            break;
+        case 0:
+            kinds[i] = 13;
+            break;
+        default:
+            kinds[i] = 12;
+            break;
+        }
+    }
+    fn_800B2854(lbl_801F86C0, sizeof(lbl_801F86C0), lbl_801F8680, 0, 23, kinds, 0);
+    fn_800B27A4(10);
+    for (i = 13; i < 23; i++) {
+        fn_800B0D38(i, 2);
+    }
+    for (i = 0; i < 0x360; i++) {
+        lbl_8023D6C0[i] = -1;
+    }
+    lbl_803CBBE4 = 0;
+    lbl_803CBBE0 = 2.0f;
+    lbl_803CBBDC = 1280.0f;
+    memset(lbl_8039C3E0, 0, sizeof(lbl_8039C3E0));
+    lbl_80366188._84 = 0;
+    lbl_80366188._88 = 0;
+}
 
 // .text:0x800369DC size:0x60 mapped:0x800369DC
 void fn_800369DC(f32 zoom) {

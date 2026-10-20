@@ -36,5 +36,6 @@ void fn_8003656C(struct SpaniTask* task, s32 id, s32 part, u16 kind, s32 value);
 void fn_8003664C(s32 id, s32 index, s16 value, u32 sel);
 u16 fn_80036824(s32 id, s32 anim, u16 frame);
 void fn_800369DC(f32 zoom);
+void fn_80036A3C(void);
 
 #endif // !__STATIC_SPANI_DEFAULT_H_
