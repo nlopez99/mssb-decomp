@@ -633,6 +633,8 @@ config.libs = [
             Object(NonMatching, "static/fn_8004B284.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/fn_8004B6EC.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/fn_8004C094.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(NonMatching, "static/fn_8004C5F8.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(NonMatching, "static/fn_8004C9FC.c", extra_cflags=["-cpp_exceptions on"]),
         ],
     },
     {

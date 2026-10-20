@@ -35,7 +35,6 @@ void fn_8004B208(void* actor, s32 action, s32 b, f32 t);
 void fn_8004B270(void);
 
 // Handlers in units not set up yet
-void fn_8004C5F8(void* actor, s32 a, s32 b, f32 t);
 void fn_80062C60(void* actor, s32 a, s32 b, f32 t);
 void fn_80062E6C(void* actor, s32 a, s32 b, f32 t);
 void fn_8006C3F8(void* actor, s32 a, s32 b, f32 t);

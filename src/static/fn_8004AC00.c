@@ -2,6 +2,7 @@
 #include "static/fn_8004B284.h"
 #include "static/fn_8004B6EC.h"
 #include "static/fn_8004C094.h"
+#include "static/fn_8004C5F8.h"
 #include "static/particle.h"
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/mtx.h"
