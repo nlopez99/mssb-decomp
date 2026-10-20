@@ -9,7 +9,8 @@ typedef struct MbState {
     /* 0x46F8 */ u8 ports[2];
     /* 0x46FA */ u8 _46FA[0x4709 - 0x46FA];
     /* 0x4709 */ s8 _4709[2];
-    /* 0x470B */ u8 _470B[0x48C0 - 0x470B];
+    /* 0x470B */ u8 _470B[0x4757 - 0x470B];
+    /* 0x4757 */ u8 _4757[0x48C0 - 0x4757];
 } MbState; // size: 0x48C0
 
 typedef struct MbGameOptions {
@@ -71,10 +72,45 @@ typedef struct MbAram {
 extern MbLoader lbl_80366B18;
 extern MbAram lbl_803C6CF8;
 
+// fn_8002B7F8's parameter block (static/particle.c names its fields differently)
+typedef struct MbSpark {
+    /* 0x00 */ s32 _00;
+    /* 0x04 */ s32 glowTex;
+    /* 0x08 */ s32 glowCount;
+    /* 0x0C */ s32 glowLife;
+    /* 0x10 */ s32 glowSwitch;
+    /* 0x14 */ f32 glowH[3];
+    /* 0x20 */ f32 glowW[3];
+    /* 0x2C */ s32 glowAlpha[3];
+    /* 0x38 */ f32 radius;
+    /* 0x3C */ f32 angle;
+    /* 0x40 */ f32 arc;
+    /* 0x44 */ s32 sparkTex;
+    /* 0x48 */ s32 sparkCount;
+    /* 0x4C */ s32 sparkLife;
+    /* 0x50 */ s32 sparkSwitch;
+    /* 0x54 */ f32 size[3];
+    /* 0x60 */ s32 alpha[3];
+    /* 0x6C */ s32 _6C;
+} MbSpark; // size: 0x70
+
+extern MbSpark lbl_80108D48;
+extern s32 lbl_803CBD0C;
+
+extern void fn_8002B7F8(Vec* pos, MbSpark* params, u8 glow);
 extern s32 randRange_FUN_80042bf0(s32 min, s32 max);
 extern s32 ARAMTransfer(void* src, s32 arg1, s32 arg2, s32 arg3);
 extern void fn_800111B4(s32 handle);
-extern void fn_800A8878(u8 arg0, u8 arg1);
+extern u32 fn_800A8864(void);
+extern void fn_800A8878(u8 left, u8 right);
+extern u8 lbl_803CBD18;
+extern u8 lbl_803CBD19;
+extern s16 lbl_803CBD1A;
+extern u8 lbl_803CBD1C;
+extern u8 lbl_803CBD1D;
+extern u8 lbl_803CBD1E;
+extern u8 lbl_803CBD1F;
+extern u8 lbl_803CBD20;
 extern void fn_800A8AB0(s32 arg0);
 extern void fn_800A8E30(void* arg0, void* arg1, s32 arg2, s32 arg3);
 extern void fn_800A86B4(s32 arg0);
@@ -147,11 +183,60 @@ void fn_80068720(u8 index) {
 }
 
 // .text:0x8006862C size:0xF4
-void fn_8006862C(void) {
+s32 fn_8006862C(u32 frames, u8 target) {
+    u8 vol = fn_800A8864() >> 8;
+
+    if (lbl_803CBD18 == 0) {
+        lbl_803CBD20 = vol / (frames / 60);
+        if (lbl_803CBD20 > 60) {
+            lbl_803CBD20 = 60;
+        }
+        lbl_803CBD18 = 1;
+    }
+    if (lbl_803CBD19 % (60 / lbl_803CBD20) == 0) {
+        vol--;
+        lbl_803CBD19 = 0;
+    }
+    if (vol <= target || frames == 1) {
+        lbl_803CBD19 = 0;
+        lbl_803CBD1A = 0;
+        lbl_803CBD20 = 0;
+        lbl_803CBD18 = 0;
+        return 0;
+    }
+    fn_800A8878(vol, vol);
+    lbl_803CBD19++;
+    return 1;
 }
 
 // .text:0x80068514 size:0x118
-void fn_80068514(void) {
+s32 fn_80068514(u32 frames, u8 target) {
+    lbl_803CBD1F = fn_800A8864() >> 8;
+    if (lbl_803CBD1F >= target) {
+        lbl_803CBD1F = target;
+        return 0;
+    }
+    if (lbl_803CBD1C == 0) {
+        lbl_803CBD1E = target / (frames / 60);
+        if (lbl_803CBD1E > 60) {
+            lbl_803CBD1E = 60;
+        }
+        lbl_803CBD1C = 1;
+    }
+    if (lbl_803CBD1D % (60 / lbl_803CBD1E) == 0) {
+        lbl_803CBD1D = 0;
+        lbl_803CBD1F++;
+    }
+    if (lbl_803CBD1F >= target) {
+        lbl_803CBD1D = 0;
+        lbl_803CBD1E = 0;
+        lbl_803CBD1C = 0;
+        fn_800A8878(target, target);
+        return 0;
+    }
+    fn_800A8878(lbl_803CBD1F, lbl_803CBD1F);
+    lbl_803CBD1D++;
+    return 1;
 }
 
 // .text:0x800684A4 size:0x70
@@ -173,7 +258,27 @@ void fn_80067C48(void) {
 }
 
 // .text:0x80067B40 size:0x108
-void fn_80067B40(void) {
+s32 fn_80067B40(s32 arg0, u8 id, u8 value) {
+    s32 i;
+    s32 j;
+    s32 k;
+
+    if (id == -1) {
+        return 0;
+    }
+    for (i = 0; i < 9; i++) {
+        for (j = 0; j < 5; j++) {
+            if (id == lbl_80108EDC[i][j]) {
+                for (k = 0; k < 5; k++) {
+                    if (lbl_80108EDC[i][k] != -1 && value != 2) {
+                        lbl_8034E9A0._4757[lbl_80108EDC[i][k]] = value;
+                    }
+                }
+                return 1;
+            }
+        }
+    }
+    return 0;
 }
 
 // .text:0x80067AC8 size:0x78
@@ -422,11 +527,42 @@ void fn_80064534(void) {
 }
 
 // .text:0x80064430 size:0x104
-void fn_80064430(void) {
+void fn_80064430(Vec* pos, u8 glow, f32 size, f32 spread) {
+    MbSpark params;
+
+    memcpy(&params, &lbl_80108D48, sizeof(MbSpark));
+    params._00 = lbl_803CBD0C;
+    params.glowH[0] *= spread;
+    params.glowH[1] *= spread;
+    params.glowH[2] *= spread;
+    params.glowW[0] *= spread;
+    params.glowW[1] *= spread;
+    params.glowW[2] *= spread;
+    params.radius *= spread;
+    params.size[0] *= size;
+    params.size[1] *= size;
+    params.size[2] *= size;
+    fn_8002B7F8(pos, &params, glow);
 }
 
 // .text:0x80064344 size:0xEC
-void fn_80064344(void) {
+void fn_80064344(Vec* pos, Vec* vel) {
+    MbSpark params;
+    f32 scale = 3.0f * PSVECMag(vel);
+
+    memcpy(&params, &lbl_80108D48, sizeof(MbSpark));
+    params._00 = lbl_803CBD0C;
+    params.glowH[0] *= scale;
+    params.glowH[1] *= scale;
+    params.glowH[2] *= scale;
+    params.glowW[0] *= scale;
+    params.glowW[1] *= scale;
+    params.glowW[2] *= scale;
+    params.radius *= scale;
+    params.size[0] *= scale;
+    params.size[1] *= scale;
+    params.size[2] *= scale;
+    fn_8002B7F8(pos, &params, 1);
 }
 
 // .text:0x800639BC size:0x988
