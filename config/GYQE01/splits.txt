@@ -106,6 +106,81 @@ static/physics.c:
 	.sbss       start:0x803CBCA0 end:0x803CBCA8
 	.sdata2     start:0x803CC720 end:0x803CC7A0
 
+static/uitexture.c:
+	extab       start:0x80005EE8 end:0x80005F18
+	extabindex  start:0x800079BC end:0x80007A04
+	.text       start:0x80039AA8 end:0x8003A2EC
+	.data       start:0x800F7A40 end:0x800F7B00
+	.bss        start:0x8023DD80 end:0x802D3D80
+	.sdata2     start:0x803CC7A0 end:0x803CC7D0
+
+static/static_8003A2EC.c:
+	extab       start:0x80005F18 end:0x80005FD0
+	extabindex  start:0x80007A04 end:0x80007B18
+	.text       start:0x8003A2EC end:0x8004157C
+	.rodata     start:0x800E6910 end:0x800E6920
+	.data       start:0x800F7B00 end:0x800FB3F8
+	.bss        start:0x802D3D80 end:0x802E4B00
+	.sdata      start:0x803CB828 end:0x803CB838
+	.sbss       start:0x803CBCA8 end:0x803CBCC0
+	.sdata2     start:0x803CC7D0 end:0x803CC7E8
+
+static/static_8004157C.c:
+	extab       start:0x80005FD0 end:0x80005FE0
+	extabindex  start:0x80007B18 end:0x80007B30
+	.text       start:0x8004157C end:0x80042598
+	.sbss       start:0x803CBCC0 end:0x803CBCC8
+	.sdata2     start:0x803CC7E8 end:0x803CC7F8
+
+static/static_80063028.c:
+	extab       start:0x80006418 end:0x80006438
+	extabindex  start:0x80008184 end:0x800081B4
+	.text       start:0x80063028 end:0x800638CC
+	.sdata      start:0x803CB890 end:0x803CB898
+	.sdata2     start:0x803CC8D8 end:0x803CC8F0
+
+static/static_800638CC.c:
+	extab       start:0x80006438 end:0x80006460
+	extabindex  start:0x800081B4 end:0x800081F0
+	.text       start:0x800638CC end:0x80064534
+	.data       start:0x80108D30 end:0x80108DB8
+	.bss        start:0x802E4BC0 end:0x802E4CE8
+	.sdata      start:0x803CB898 end:0x803CB8D0
+	.sdata2     start:0x803CC8F0 end:0x803CC8F8
+
+static/mb_subfunc.c:
+	extab       start:0x80006460 end:0x800064F8
+	extabindex  start:0x800081F0 end:0x800082D4
+	.text       start:0x80064534 end:0x80069A68
+	.rodata     start:0x800E69B8 end:0x800E6A00
+	.data       start:0x80108DB8 end:0x80109250
+	.bss        start:0x802E4CE8 end:0x802E5200
+	.sdata      start:0x803CB8D0 end:0x803CB8D8
+	.sbss       start:0x803CBD18 end:0x803CBD30
+
+static/static_80069A68.c:
+	extab       start:0x800064F8 end:0x80006588
+	extabindex  start:0x800082D4 end:0x800083AC
+	.text       start:0x80069A68 end:0x8006C100
+	.data       start:0x80109250 end:0x801093E8
+	.sdata      start:0x803CB8D8 end:0x803CB8E0
+	.sbss       start:0x803CBD30 end:0x803CBD38
+	.sdata2     start:0x803CC8F8 end:0x803CC938
+
+static/static_8006C100.c:
+	extab       start:0x80006588 end:0x800065B0
+	extabindex  start:0x800083AC end:0x800083E8
+	.text       start:0x8006C100 end:0x8006C48C
+	.sdata      start:0x803CB8E0 end:0x803CB8F0
+	.sbss       start:0x803CBD38 end:0x803CBD40
+	.sdata2     start:0x803CC938 end:0x803CC940
+
+static/static_8006C48C.c:
+	extab       start:0x800065B0 end:0x800065D8
+	extabindex  start:0x800083E8 end:0x80008424
+	.text       start:0x8006C48C end:0x8006D024
+	.sdata      start:0x803CB8F0 end:0x803CB8F8
+
 Dolphin/base/PPCArch.c:
 	.text       start:0x8006D024 end:0x8006D138
 
