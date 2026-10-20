@@ -397,12 +397,12 @@ void possiblyTransferDataBetweenDifferentRels(void) {
 }
 
 // .text:0x800494CC size:0x3AC
-// Registers only: the target keeps team in r7 and found in r8, one above these
+// Registers only: the target keeps team, the port pointer and the port one register higher
 void fn_800494CC(u8 team) {
-    s8* portp;
     s32 i;
-    u8 found = FALSE;
+    s8* portp;
     s8 port;
+    u8 found = FALSE;
     u16 pressed;
     s32 row;
     s32 count;
