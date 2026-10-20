@@ -1,10 +1,9 @@
 #include "static/fn_80021188.h"
+#include "static/fn_80021AC8.h"
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/os.h"
 #include "string.h"
 #include "musyx/musyx.h"
-
-#define ALIGN32(x) (((x) + 0x1F) & ~0x1F)
 
 // A sound group file once loaded: offsets that fn_80021980 turns into pointers
 typedef struct SoundGroupData {
@@ -35,14 +34,6 @@ typedef struct SoundBank {
     /* 0x39B */ u8 _39B;
 } SoundBank; // size: 0x39C
 
-// An ARAM file table entry
-typedef struct SoundFile {
-    /* 0x00 */ u32 _00;
-    /* 0x04 */ u32 size;
-    /* 0x08 */ u32 aram;
-    /* 0x0C */ u32 _0C;
-} SoundFile;
-
 typedef struct SoundTaskState {
     /* 0x00 */ u8 _00[0x10];
     /* 0x10 */ s16 state;
@@ -56,19 +47,17 @@ typedef struct SoundLoadTask {
 } SoundLoadTask;
 
 typedef struct SoundTask {
-    /* 0x00 */ u8 _00[0x10];
+    /* 0x00 */ u8 _00[0xC];
+    /* 0x0C */ SoundTaskState* owner;
     /* 0x10 */ s16 state;
     /* 0x12 */ u8 _12[2];
-    /* 0x14 */ void* callback;
-    /* 0x18 */ u8 _18;
+    /* 0x14 */ BOOL (*callback)(u8* arg);
+    /* 0x18 */ u8 step;
     /* 0x19 */ u8 group;
+    /* 0x1A */ u8 arg;
 } SoundTask;
 
 extern SoundFile lbl_800EF508[0x30];
-extern SoundFile lbl_800EFBE8[0x15];
-extern SoundFile lbl_800EFD38[0x203];
-extern SoundFile lbl_800F1D78[0x402];
-extern SoundFile lbl_800F71D8[0x2A];
 extern SoundBank lbl_800EF808;
 extern u8 lbl_800EFBB4[0xC];
 extern struct {
@@ -80,67 +69,16 @@ extern struct {
     /* 0x23 */ u8 _23;
     /* 0x24 */ u8 _24;
 } gameInitOptions;
-typedef void (*AramCallback)(void* file, void* dst, void* user);
 
-typedef struct AramRequest {
-    /* 0x00 */ void* file;
-    /* 0x04 */ void* dst;
-    /* 0x08 */ s32 _08;
-    /* 0x0C */ s32 _0C;
-    /* 0x10 */ AramCallback callback;
-    /* 0x14 */ void* user;
-} AramRequest; // size: 0x18
-
-// The queue of ARAM transfers, also used by the model loader
-typedef struct AramQueue {
-    /* 0x000 */ AramRequest current;
-    /* 0x018 */ AramRequest queue[18];
-    /* 0x1C8 */ s8 head;
-    /* 0x1C9 */ s8 tail;
-    /* 0x1CA */ s8 busy;
-    /* 0x1CC */ void* _1CC;
-    /* 0x1D0 */ void* _1D0;
-    /* 0x1D4 */ u8 _1D4[0x1D8 - 0x1D4];
-    /* 0x1D8 */ s32* _1D8;
-    /* 0x1DC */ s32* _1DC;
-    /* 0x1E0 */ s32* _1E0;
-    /* 0x1E4 */ s32* _1E4;
-    /* 0x1E8 */ u8 _1E8;
-    /* 0x1E9 */ u8 _1E9;
-    /* 0x1EA */ u8 _1EA;
-    /* 0x1EB */ u8 _1EB[0x55C - 0x1EB];
-    /* 0x55C */ u32 _55C;
-} AramQueue;
-
-extern AramQueue lbl_803716B8;
+extern SoundTaskState* lbl_803CC1B8;
 extern struct {
     /* 0x000 */ u8 _000[0x715];
     /* 0x715 */ s8 _715;
 } lbl_803C6CF8;
-
-static inline SoundFile* SoundFileAt(s32 id) {
-    return &lbl_800EFD38[id];
-}
-
-static inline BOOL AramPush(void* file, void* dst, s32 arg2, s32 arg3, AramCallback callback, void* user) {
-    s8 next = (lbl_803716B8.head + 1) % 18;
-    AramRequest* req;
-
-    if (next == lbl_803716B8.tail || (dst == NULL && callback == NULL)) {
-        return FALSE;
-    }
-    lbl_803716B8.busy = 1;
-    req = &lbl_803716B8.queue[lbl_803716B8.head];
-    req->file = file;
-    req->dst = dst;
-    req->_08 = arg2;
-    req->_0C = arg3;
-    req->callback = callback;
-    req->user = user;
-    lbl_803716B8.head = next;
-    return TRUE;
-}
-extern SoundTaskState* lbl_803CC1B8;
+extern struct {
+    /* 0x000 */ u8 _000[0x366];
+    /* 0x366 */ u8 _366;
+} gDataDecompressorValues;
 extern u8 lbl_80118740[0x40000];
 extern u8 lbl_80158740[0x4000];
 extern u8 lbl_8015C740[0x21BE0];
@@ -148,208 +86,6 @@ extern u8 lbl_8015C740[0x21BE0];
 u8* lbl_803CBC40;
 
 SND_HOOKS lbl_803CB7D8 = { fn_800213F8, fn_800213F4 };
-
-// .text:0x80022D58 size:0x54
-void fn_80022D58(void) {
-    lbl_803716B8.tail = 0;
-    lbl_803716B8.head = 0;
-    memset(&lbl_803716B8.current, 0, sizeof(AramRequest));
-    memset(lbl_803716B8.queue, 0, sizeof(lbl_803716B8.queue));
-}
-
-// .text:0x80022CB4 size:0xA4
-BOOL fn_80022CB4(void* file, void* dst, s32 arg2, s32 arg3, AramCallback callback, void* user) {
-    s8 next = (lbl_803716B8.head + 1) % 18;
-    AramRequest* req;
-    // dead stores stand for code the original compiled to nothing: fn_800215F8 calls this, while AramPush is inlined
-    {
-        s32 d;
-        d = 0;
-        d = 1;
-        d = 2;
-        d = 3;
-        d = 4;
-        d = 5;
-        d = 6;
-        d = 7;
-        d = 8;
-        d = 9;
-        d = 10;
-        d = 11;
-        d = 12;
-        d = 13;
-        d = 14;
-        d = 15;
-    }
-
-    if (next == lbl_803716B8.tail || (dst == NULL && callback == NULL)) {
-        return FALSE;
-    }
-    lbl_803716B8.busy = 1;
-    req = &lbl_803716B8.queue[lbl_803716B8.head];
-    req->file = file;
-    req->dst = dst;
-    req->_08 = arg2;
-    req->_0C = arg3;
-    req->callback = callback;
-    req->user = user;
-    lbl_803716B8.head = next;
-    return TRUE;
-}
-
-// .text:0x80022B68 size:0x14C
-BOOL fn_80022B68(void) {
-    AramRequest* req;
-
-    if (lbl_803716B8.busy == 0) {
-        return TRUE;
-    }
-    if (lbl_803C6CF8._715 != 1) {
-        return FALSE;
-    }
-    if (lbl_803716B8.current.callback != NULL) {
-        lbl_803716B8.current.callback(lbl_803716B8.current.file, lbl_803716B8.current.dst, lbl_803716B8.current.user);
-    }
-    if (lbl_803716B8.tail != lbl_803716B8.head) {
-        req = &lbl_803716B8.queue[lbl_803716B8.tail];
-        req->dst = ARAMTransfer(req->file, req->dst, req->_08, req->_0C);
-        lbl_803716B8.current = *req;
-        lbl_803716B8.tail = (lbl_803716B8.tail + 1) % 18;
-    } else {
-        lbl_803716B8.current.callback = NULL;
-        lbl_803716B8.busy = 0;
-        return TRUE;
-    }
-    return FALSE;
-}
-
-// .text:0x80022B14 size:0x54
-void fn_80022B14(void) {
-    if (lbl_803C6CF8._715 == 1) {
-        if (lbl_803716B8._1D0 != NULL) {
-            lbl_803716B8._1CC = lbl_803716B8._1D0;
-            lbl_803716B8._1D0 = NULL;
-        }
-        fn_800B0A14_removeQueue();
-    }
-}
-
-// .text:0x80022A24 size:0xF0
-BOOL fn_80022A24(s32 stadium, s32 part) {
-    if (lbl_803716B8._1D0 != NULL) {
-        fn_800A7568();
-    } else {
-        if (lbl_803C6CF8._715 != 1) {
-            return FALSE;
-        }
-        if (lbl_803716B8._1CC != NULL) {
-            lbl_803716B8._1D0 = lbl_803716B8._1CC;
-        } else {
-            lbl_803716B8._1D0 = fn_800A6354(0xED440);
-        }
-    }
-    lbl_803716B8._1CC = NULL;
-    ARAMTransfer(&lbl_800EFBE8[stadium * 3 + part], lbl_803716B8._1D0, 2, 0);
-    fn_800B0A5C_insertQueue(fn_80022B14, lbl_803CC1B8->priority + 1);
-    return TRUE;
-}
-
-// .text:0x800229CC size:0x58
-void fn_800229CC(void) {
-    if (lbl_803716B8._1D0 != NULL) {
-        fn_800A7568();
-    } else if (lbl_803716B8._1CC != NULL) {
-        lbl_803716B8._1CC = NULL;
-    } else {
-        return;
-    }
-    fn_800A6304();
-}
-
-// .text:0x800227E4 size:0x1E8
-void fn_800227E4(void) {
-}
-
-// .text:0x800227A0 size:0x44
-void fn_800227A0(void) {
-    lbl_803716B8._1E9 = 0;
-    lbl_803716B8._1EA |= 1;
-    lbl_803716B8._1EA |= 2;
-    lbl_803716B8._1EA |= 4;
-    lbl_803716B8._1EA |= 8;
-}
-
-// .text:0x80022634 size:0x16C
-void fn_80022634(void) {
-    if (fn_80022B68() && lbl_803716B8._1E8 == 0) {
-        fn_800B0A14_removeQueue();
-    }
-}
-
-// .text:0x80022620 size:0x14
-void fn_80022620(void) {
-    lbl_803716B8._1E8 = 0;
-}
-
-// .text:0x8002254C size:0xD4
-void fn_8002254C(void* file, u8* data, s32 index) {
-    data += *(s32*)data;
-    AramPush(&lbl_800EFD38[index], data, 3, lbl_803716B8._1D8[index], (AramCallback)fn_80022620, NULL);
-}
-
-// .text:0x8002244C size:0x100
-void fn_8002244C(void* file, u8* data, s32 id) {
-    u32 size = ALIGN32(SoundFileAt((id >> 16) + 54)->size & 0x0FFFFFFF);
-
-    *(u32*)(data + 0xC) = size;
-    data += size;
-    AramPush(SoundFileAt((u16)id + 54), data, 3, lbl_803716B8._1DC[(u16)id], (AramCallback)fn_80022620, NULL);
-}
-
-// .text:0x8002204C size:0x400
-void fn_8002204C(void) {
-}
-
-// .text:0x80021CA4 size:0x3A8
-void fn_80021CA4(void) {
-}
-
-// .text:0x80021BBC size:0xE8
-void* fn_80021BBC(s32 index, void* dst) {
-    if (index < 0 || index >= 54) {
-        return NULL;
-    }
-    if (dst == NULL) {
-        dst = _OSAllocFromHeap(0x20, SoundFileAt(index + 432)->size & 0x0FFFFFFF);
-    }
-    if (lbl_803716B8._1EA & 2) {
-        ARAMTransfer(SoundFileAt(index + 432), dst, 3, lbl_803716B8._1E0[index]);
-    } else {
-        ARAMTransfer(&lbl_800F1D78[index * 19 + 15], dst, 0, 0);
-    }
-    return dst;
-}
-
-// .text:0x80021ADC size:0xE0
-void* fn_80021ADC(s32 index, void* dst) {
-    if (index < 0 || index >= 29) {
-        return NULL;
-    }
-    if (dst == NULL) {
-        dst = _OSAllocFromHeap(0x20, SoundFileAt(index + 486)->size & 0x0FFFFFFF);
-    }
-    if (lbl_803716B8._1EA & 8) {
-        ARAMTransfer(SoundFileAt(index + 486), dst, 3, lbl_803716B8._1E4[index]);
-    } else {
-        ARAMTransfer(&lbl_800F71D8[index], dst, 0, 0);
-    }
-    return dst;
-}
-
-// .text:0x80021AC8 size:0x14
-void fn_80021AC8(void) {
-    lbl_803716B8._55C = 0;
-}
 
 // .text:0x80021AC4 size:0x4
 void fn_80021AC4(void) {
@@ -394,13 +130,43 @@ void fn_80021954(SoundGroupData** group) {
 
 // .text:0x80021758 size:0x1FC
 void fn_80021758(void) {
+    SoundTask* task = (SoundTask*)lbl_803CC1B8;
+
+    switch (task->step) {
+    case 0:
+        if (task->group == 1) {
+            if (lbl_800EF808._399 != 0) {
+                lbl_800EF808.groups[task->group] = ARAMTransfer(&lbl_800EF508[task->group], NULL, 3, 0xB44000);
+            } else {
+                lbl_800EF808.groups[task->group] = ARAMTransfer(&lbl_800EF508[task->group], NULL, 1, 0);
+            }
+        } else {
+            lbl_800EF808.groups[task->group] = ARAMTransfer(&lbl_800EF508[task->group], NULL, 1, 0);
+        }
+        task->step = 1;
+        break;
+    case 1:
+        if (lbl_803C6CF8._715 != 1 || gDataDecompressorValues._366 != 0) {
+            break;
+        }
+        fn_80021980(lbl_800EF808.groups[task->group]);
+        task->step = 2;
+        task->arg = 0;
+    case 2:
+        if (task->callback(&task->arg) == 0) {
+            fn_80021954(&lbl_800EF808.groups[task->group]);
+            task->owner->state = 1;
+            fn_800B0A14_removeQueue();
+        }
+        break;
+    }
 }
 
 // .text:0x800216F8 size:0x60
 void fn_800216F8(u8 group, void* callback) {
     SoundTask* task = fn_800B0A5C_insertQueue(fn_80021758, 1);
 
-    task->_18 = 0;
+    task->step = 0;
     task->group = group;
     task->callback = callback;
     lbl_803CC1B8->state = 0;

@@ -624,6 +624,7 @@ config.libs = [
         "host": False,
         "objects": [
             Object(NonMatching, "static/fn_80021188.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(NonMatching, "static/fn_80021AC8.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/objinit.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/fn_80023B90.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/sub.c", extra_cflags=["-cpp_exceptions on"]),
