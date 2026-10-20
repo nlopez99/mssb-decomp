@@ -1038,6 +1038,7 @@ void characterSelectScreen(u8 team) {
     s32 j;
     s32 k;
     u8 n;
+    u8 n2;
     u8 isCaptain;
     u8* pos;
     u8 r;
@@ -1105,7 +1106,7 @@ void characterSelectScreen(u8 team) {
             }
         }
     }
-    n = 0;
+    n2 = 0;
     for (i = 1; i < 9; i++) {
         isCaptain = 0;
         for (k = 0; k < 12; k++) {
@@ -1114,7 +1115,7 @@ void characterSelectScreen(u8 team) {
             }
         }
         if (isCaptain == 0) {
-            others[n++] = inMemRoster[team][i].charId;
+            others[n2++] = inMemRoster[team][i].charId;
         }
     }
     for (i = 0; i < 8; i++) {
@@ -1239,6 +1240,8 @@ void unsure_FillRosterPositions(u8 team) {
     s32 id;
     s8 tmp;
     u8 attr;
+    u8 row;
+    u8 col;
     u8 bat;
     u8 r;
     u8 ok = 0;
@@ -1264,7 +1267,9 @@ void unsure_FillRosterPositions(u8 team) {
     }
     if (captains[0] != -1) {
         if (captains[1] == -1) {
-            attr = lbl_8034E9A0.chars[(u8)(captains[0] / 9)][(u8)(captains[0] % 9)].attribute;
+            row = captains[0] / 9;
+            col = captains[0] % 9;
+            attr = lbl_8034E9A0.chars[row][col].attribute;
             for (i = 0; i < 5; i++) {
                 bat = lbl_80109054[1][attr][i];
                 for (m = 0; m < 9; m++) {
@@ -1325,9 +1330,8 @@ void unsure_FillRosterPositions(u8 team) {
                         }
                     }
                     if (ri > rj) {
-                        tmp = captains[j];
                         captains[j] = captains[i];
-                        captains[i] = tmp;
+                        captains[i] = id;
                     }
                 }
             }
@@ -1335,7 +1339,9 @@ void unsure_FillRosterPositions(u8 team) {
                 if (captains[i] == -1) {
                     break;
                 }
-                attr = lbl_8034E9A0.chars[(u8)(captains[i] / 9)][(u8)(captains[i] % 9)].attribute;
+                row = captains[i] / 9;
+            col = captains[i] % 9;
+            attr = lbl_8034E9A0.chars[row][col].attribute;
                 for (k = 0; k < 5; k++) {
                     bat = lbl_80109054[1][attr][k];
                     for (m = 0; m < 9; m++) {
@@ -1411,9 +1417,8 @@ void unsure_FillRosterPositions(u8 team) {
                 }
             }
             if (ri > rj) {
-                tmp = others[j];
                 others[j] = others[i];
-                others[i] = tmp;
+                others[i] = id;
             }
         }
     }
