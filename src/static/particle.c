@@ -364,7 +364,10 @@ typedef struct TrailParticle {
     /* 0x24 */ s32 _24;
     /* 0x28 */ s32 _28;
     /* 0x2C */ u8 _2C[0x40 - 0x2C];
-    /* 0x40 */ u8 color[4];
+    union {
+        /* 0x40 */ u32 rgba;
+        /* 0x40 */ u8 color[4];
+    };
     /* 0x44 */ u8 _44[0x48 - 0x44];
     /* 0x48 */ s16 _48;
     /* 0x4A */ s16 _4A;
@@ -1624,6 +1627,110 @@ BOOL fn_8002F1AC(Vec* pos, s32 key)
         }
     }
     return FALSE;
+}
+
+// .text:0x8002ECA0 size:0x50C
+BOOL fn_8002ECA0(void* arg)
+{
+    Emitter* e = arg;
+    TrailParticle* p = (TrailParticle*)e->particles;
+    s32 alive = 0;
+    Particle* dead;
+    Particle* tail;
+    Particle* prev = (Particle*)&e->particles;
+    GXTexObj texObj;
+    Vec d;
+    GXTlutObj tlutObj;
+    TexFile* file;
+    s32 index;
+    TextureDesc* tex;
+    GXPrimitive prim;
+    s32 alpha;
+
+    tail = NULL;
+    dead = NULL;
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+    do {
+        PSVECSubtract(&p->pos, &p->start, &d);
+        file = (TexFile*)e->_10;
+        index = p->_4D;
+        if (file == NULL) {
+            GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+        } else {
+            GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP1, GX_COLOR0A0);
+            tex = &file->tex[file->tex[index]._1C];
+            if (tex->tlut != NULL) {
+                GXInitTexObjCI(&texObj, tex->image, tex->width, tex->height, tex->format, GX_CLAMP, GX_CLAMP, GX_FALSE, GX_TLUT0);
+                GXInitTlutObj(&tlutObj, tex->tlut, tex->tlutFormat, tex->tlutCount);
+                GXLoadTlut(&tlutObj, GX_TLUT0);
+            } else {
+                GXInitTexObj(&texObj, tex->image, tex->width, tex->height, tex->format, GX_CLAMP, GX_CLAMP, GX_FALSE);
+            }
+            GXInitTexObjLOD(&texObj, GX_LINEAR, GX_LINEAR, tex->minLOD, tex->maxLOD, tex->lodBias, GX_FALSE, GX_FALSE, GX_ANISO_1);
+            GXLoadTexObj(&texObj, GX_TEXMAP1);
+        }
+        if (PSVECMag(&d)) {
+            PSVECNormalize(&d, &d);
+            PSVECScale(&d, p->_1C / 2, &d);
+            prim = GX_TRIANGLESTRIP;
+        } else {
+            d.x = 0.0f;
+            prim = GX_QUADS;
+            d.y = 0.0f;
+            d.z = -p->_1C / 2;
+        }
+        alpha = p->_24 * p->_4A / p->_28;
+        if (alpha > p->_24) {
+            alpha = p->_24;
+        }
+        p->color[3] = alpha;
+        GXBegin(prim, GX_VTXFMT0, 8);
+        GXPosition3f32(p->pos.x + d.x - d.z, p->pos.y, p->pos.z + d.z + d.x);
+        GXColor1u32(p->rgba);
+        GXTexCoord2f32(0.0f, 0.0f);
+        GXPosition3f32(p->pos.x + d.x + d.z, p->pos.y, p->pos.z + d.z - d.x);
+        GXColor1u32(p->rgba);
+        GXTexCoord2f32(1.0f, 0.0f);
+        GXPosition3f32(p->pos.x - d.z, p->pos.y, p->pos.z + d.x);
+        GXColor1u32(p->rgba);
+        GXTexCoord2f32(0.0f, 0.25f);
+        GXPosition3f32(p->pos.x + d.z, p->pos.y, p->pos.z - d.x);
+        GXColor1u32(p->rgba);
+        GXTexCoord2f32(1.0f, 0.25f);
+        GXPosition3f32(p->start.x - d.z, p->start.y, p->start.z + d.x);
+        GXColor1u32(p->rgba);
+        GXTexCoord2f32(0.0f, 0.75f);
+        GXPosition3f32(p->start.x + d.z, p->start.y, p->start.z - d.x);
+        GXColor1u32(p->rgba);
+        GXTexCoord2f32(1.0f, 0.75f);
+        GXPosition3f32(p->start.x - d.x - d.z, p->start.y, p->start.z - d.z + d.x);
+        GXColor1u32(p->rgba);
+        GXTexCoord2f32(0.0f, 1.0f);
+        GXPosition3f32(p->start.x - d.x + d.z, p->start.y, p->start.z - d.z - d.x);
+        GXColor1u32(p->rgba);
+        GXTexCoord2f32(1.0f, 1.0f);
+        p->_4A -= (lbl_80366158._28 == 0);
+        if (p->_4A == 0) {
+            prev->next = p->next;
+            if (tail != NULL) {
+                tail->next = (Particle*)p;
+            } else {
+                dead = (Particle*)p;
+            }
+            tail = (Particle*)p;
+            p->next = NULL;
+            e->count--;
+        } else {
+            prev = (Particle*)p;
+            alive++;
+        }
+        p = (TrailParticle*)prev->next;
+    } while (p != NULL);
+    if (dead != NULL) {
+        fn_80033794(dead);
+    }
+    return alive == 0;
 }
 
 // .text:0x8002E828 size:0x478
