@@ -4568,24 +4568,25 @@ void fn_3_499C4(s32 fielder, struct _VecXYZ* out) {
 }
 
 // .text:0x000494F4 size:0x4D0 mapped:0x80688588
-// 99.35%: registers only; in the plant branch the target keeps dz, dx and the distance in
-// f8, f4 and f7 where this uses other float registers.
 void fn_3_494F4(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
 
     if (g_Ball.pauseBallMovementWhenInPlant) {
-        f32 dz = g_Ball.AtBat_Contact_BallPos.z - f->_008;
-        f32 dx = g_Ball.AtBat_Contact_BallPos.x - f->_000;
-        f32 dist = dolsqrtf2(dx * dx + dz * dz);
+        f32 dz;
+        f32 dx;
+        f32 dist;
         f32 reach;
+        dx = g_Ball.AtBat_Contact_BallPos.x - f->_000;
+        dz = g_Ball.AtBat_Contact_BallPos.z - f->_008;
+        dist = dolsqrtf2(dx * dx + dz * dz);
 
         if (dist < lbl_3_data_4930[37]) {
             goto stop;
         }
         reach = lbl_3_data_4930[36] - 1.0f;
-        dx /= dist;
-        dz /= dist;
-        fn_3_52F4C(fielder, reach * dx + f->_000, reach * dz + f->_008);
+        dx = reach * (dx / dist) + f->_000;
+        dz = reach * (dz / dist) + f->_008;
+        fn_3_52F4C(fielder, dx, dz);
     }
     if (g_Ball.hitWallInd) {
         if (f->_074 < lbl_3_data_4930[1]) {
@@ -10549,14 +10550,14 @@ void fn_3_2E41C(void) {
 }
 
 // .text:0x0002DDB4 size:0x668 mapped:0x8066CE48
-// 99.45%: the target masks the player index when scaling it ((p << 1) & 0x1FE, (p << 4) &
-// 0xFF0), and loads the first target's x and z into f1 and f0 the other way round.
+// 99.94%: registers only: the target loads the first target's f->_000 into f3 and divides
+// it into f1, this the reverse. The masked index ((p << 1) & 0x1FE) needs the & 0xFF.
 void fn_3_2DDB4(void) {
-    u8 player = g_Minigame._1922;
+    s32 player = g_Minigame._1922 & 0xFF;
     UnkAC8Fielder* f = &g_Fielders[g_Minigame.minigameRelatedIndex];
     InputStruct* input = &g_Controls[player];
-    f32 x2;
     f32 z2;
+    f32 x2;
     f32 dist;
 
     if (g_AiLogic.mgTimer[player] < 0x7FFE) {
@@ -10568,12 +10569,12 @@ void fn_3_2DDB4(void) {
         if (g_AiLogic.mgStep[player] == 0) {
             f32 offset;
 
-            x2 = f->_000 * f->_000;
-            z2 = f->_008 * f->_008;
             offset = lbl_3_data_1C44[g_Batter.characterClass];
-            dist = dolsqrtf2(x2 + z2);
-            g_AiLogic.mgTarget[player].x = f->_000 / dist * offset + f->_000;
-            g_AiLogic.mgTarget[player].z = f->_008 / dist * offset + f->_008;
+            dist = dolsqrtf2(SQ(f->_000) + SQ(f->_008));
+            x2 = f->_000 / dist;
+            z2 = f->_008 / dist;
+            g_AiLogic.mgTarget[player].x = x2 * offset + f->_000;
+            g_AiLogic.mgTarget[player].z = z2 * offset + f->_008;
             g_AiLogic.mgTimer[player] = 0;
             g_AiLogic.mgStep[player] = 1;
         } else if (g_AiLogic.mgStep[player] == 2) {
