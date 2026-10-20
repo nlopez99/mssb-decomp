@@ -24,7 +24,7 @@ typedef struct RigidBody {
     /* 0x0B8 */ Mtx invRot;
     /* 0x0E8 */ Vec pos;
     /* 0x0F4 */ Quaternion quat;
-    /* 0x104 */ Vec _104;
+    /* 0x104 */ Vec worldForce;
     /* 0x110 */ Vec force;
     /* 0x11C */ Vec vel;
     /* 0x128 */ Vec localVel;
@@ -32,8 +32,21 @@ typedef struct RigidBody {
     /* 0x140 */ Vec angVel;
     /* 0x14C */ u8 _14C;
     /* 0x14D */ u8 _14D;
-    /* 0x14E */ s8 axis;
-} RigidBody;
+    /* 0x14E */ u8 axis;
+    /* 0x150 */ f32 timeLeft;
+} RigidBody; // size: 0x154
+
+typedef struct PhysEnv {
+    /* 0x00 */ s32 stiffness;
+    /* 0x04 */ s32 damping;
+    /* 0x08 */ s32 _08;
+    /* 0x0C */ s32 maxForce;
+    /* 0x10 */ s32 minForce;
+    /* 0x14 */ s32 restTorque;
+    /* 0x18 */ s32 maxDepth;
+    /* 0x1C */ s32 maxSpin;
+    /* 0x20 */ s32 friction;
+} PhysEnv; // size: 0x24
 
 typedef struct RopeParams {
     /* 0x00 */ f32 _00;
@@ -47,6 +60,17 @@ typedef struct RopeParams {
     /* 0x20 */ s32 steps;
     /* 0x24 */ f32 _24;
 } RopeParams;
+
+typedef struct RopeNode {
+    /* 0x00 */ f32 mass;
+    /* 0x04 */ f32 invMass;
+    /* 0x08 */ f32 ground;
+    /* 0x0C */ Vec pos;
+    /* 0x18 */ Vec prevPos;
+    /* 0x24 */ Vec vel;
+    /* 0x30 */ Vec force;
+    /* 0x3C */ u32 fixed;
+} RopeNode; // size: 0x40
 
 typedef struct PhysActor {
     /* 0x000 */ u8 _000[0x162];
@@ -180,18 +204,176 @@ void fn_80038E2C(RopeParams* params)
 }
 
 // .text:0x80038CD0 size:0x15C
-void fn_80038CD0(void)
+RopeNode* fn_80038CD0(s32 count, RopeParams* params, RopeNode* nodes, f32 height, f32 mass)
 {
+    RopeNode* node;
+    s32 i;
+
+    memset(nodes, 0, count * sizeof(RopeNode));
+    node = nodes;
+    for (i = 0; i < count; i++) {
+        if (i == 0) {
+            node->mass = mass;
+        } else if (i == count - 1) {
+            node->mass = mass;
+        } else {
+            node->mass = 2.0f * mass;
+        }
+        node->ground = height;
+        node->invMass = 1.0f / node->mass;
+        node->pos.x = 0.0f;
+        node->pos.y = (params->_00 * i) + height;
+        node->pos.z = 0.0f;
+        memcpy(&node->prevPos, &node->pos, sizeof(Vec));
+        node->fixed = i == 0;
+        node++;
+    }
+    return nodes;
 }
 
 // .text:0x80038B48 size:0x188
-void fn_80038B48(void)
+void fn_80038B48(RopeParams* params, RopeNode* nodes, s32 count, Vec* force)
 {
+    Vec accel;
+    Vec scaled;
+    Vec step;
+    Vec next;
+    RopeNode* node;
+    s32 j;
+    s32 i;
+    f32 dt2;
+    f32 inv2dt;
+    f32 y;
+    f32 depth;
+
+    PSVECScale(force, params->dt, &scaled);
+    for (i = 0; i < params->steps; i++) {
+        fn_800387B0(params, nodes, count, &scaled);
+        node = nodes;
+        for (j = 0; j < count; j++) {
+            PSVECScale(&node->force, node->invMass, &accel);
+            inv2dt = params->_24;
+            dt2 = params->dt2;
+            PSVECScale(&node->pos, 2.0f, &next);
+            PSVECSubtract(&next, &node->prevPos, &next);
+            PSVECScale(&accel, dt2, &step);
+            PSVECAdd(&next, &step, &next);
+            PSVECSubtract(&next, &node->prevPos, &node->vel);
+            PSVECScale(&node->vel, inv2dt, &node->vel);
+            memcpy(&node->prevPos, &node->pos, sizeof(Vec));
+            memcpy(&node->pos, &next, sizeof(Vec));
+            if (node->fixed == 0) {
+                y = node->pos.y;
+                depth = y - node->ground;
+                if (depth < 0.0f) {
+                    node->pos.y = -((depth * params->_04) - y);
+                    y = node->prevPos.y;
+                    depth = y - node->ground;
+                    node->prevPos.y = -((depth * params->_04) - y);
+                }
+            }
+            node++;
+        }
+    }
 }
 
 // .text:0x800387B0 size:0x398
-void fn_800387B0(void)
+void fn_800387B0(RopeParams* params, RopeNode* nodes, s32 count, Vec* force)
 {
+    Vec rel;
+    Vec dir;
+    Vec drag;
+    RopeNode* node;
+    RopeNode* prev;
+    RopeNode* cur;
+    s32 i;
+    s32 j;
+    f32 len;
+    f32 friction;
+    f32 spring;
+    f32 damp;
+    f32 horiz;
+    f32 speed;
+
+    node = nodes;
+    for (i = 0; i < count; i++) {
+        memset(&node->force, 0, sizeof(Vec));
+        if (node->fixed == 0) {
+            node->force.y = -9.80665f * node->mass;
+        }
+        if (i == count - 1) {
+            PSVECAdd(&node->force, force, &node->force);
+        }
+        node++;
+    }
+
+    j = count;
+    node = &nodes[count];
+    while (node--, --j != 0) {
+        prev = &nodes[j - 1];
+        PSVECSubtract(&node->pos, &prev->pos, &dir);
+        PSVECSubtract(&node->vel, &prev->vel, &rel);
+        len = PSVECMag(&dir);
+        if (len != 0.0f) {
+            spring = params->_08 * (len - params->_00);
+            damp = params->_0C * (PSVECDotProduct(&rel, &dir) / len);
+            PSVECNormalize(&dir, &dir);
+            PSVECScale(&dir, -(spring + damp), &dir);
+            if (node->fixed == 0) {
+                PSVECAdd(&node->force, &dir, &node->force);
+            }
+            PSVECScale(&dir, -1.0f, &dir);
+            if (prev->fixed == 0) {
+                PSVECAdd(&prev->force, &dir, &prev->force);
+            }
+        }
+    }
+
+    cur = nodes;
+    for (i = 0; i < count; i++) {
+        if (cur->fixed == 0) {
+            memcpy(&rel, &cur->vel, sizeof(Vec));
+            memcpy(&dir, &cur->force, sizeof(Vec));
+            PSVECScale(&dir, cur->invMass, &dir);
+            PSVECScale(&dir, params->dt, &dir);
+            PSVECAdd(&rel, &dir, &rel);
+            memset(&drag, 0, sizeof(Vec));
+            speed = PSVECMag(&rel);
+            if (speed) {
+                PSVECScale(&rel, -1.0f, &dir);
+                PSVECNormalize(&dir, &dir);
+                PSVECScale(&dir, params->_14 * (speed * speed), &dir);
+                PSVECAdd(&drag, &dir, &drag);
+            }
+            if (cur->pos.y <= cur->ground) {
+                if (cur->force.y < 0.0f) {
+                    friction = cur->force.y * params->_10;
+                    if (friction < 0.0f) {
+                        friction = -friction;
+                    }
+                    memcpy(&dir, &cur->force, sizeof(Vec));
+                    dir.y = 0.0f;
+                    horiz = PSVECMag(&dir);
+                    rel.y = 0.0f;
+                    speed = PSVECMag(&rel);
+                    if (speed || horiz > friction) {
+                        if (speed) {
+                            PSVECNormalize(&rel, &dir);
+                        } else {
+                            PSVECNormalize(&dir, &dir);
+                        }
+                        PSVECScale(&dir, -friction, &dir);
+                        PSVECAdd(&drag, &dir, &drag);
+                    } else {
+                        PSVECScale(&cur->force, -1.0f, &dir);
+                        PSVECAdd(&drag, &dir, &drag);
+                    }
+                }
+            }
+            PSVECAdd(&cur->force, &drag, &cur->force);
+        }
+        cur++;
+    }
 }
 
 // .text:0x800385F0 size:0x1C0
@@ -302,8 +484,46 @@ MtxPtr fn_800383BC(RigidBody* body)
 }
 
 // .text:0x8003819C size:0x220
-void fn_8003819C(void)
+void fn_8003819C(RigidBody* body)
 {
+    Vec point;
+    Vec f;
+    Vec vel;
+    Vec g;
+    Vec torque;
+    s32 i;
+
+    f.x = 0.0f;
+    f.y = 9.80665f * body->mass;
+    f.z = 0.0f;
+    PSMTXMultVec(body->invRot, &f, &f);
+    PSVECAdd(&body->force, &f, &body->force);
+    for (i = 0; i <= 10; i++) {
+        PSVECScale(&body->arm, i / 10.0f, &point);
+        PSVECAdd(&body->pivot, &point, &point);
+        PSVECCrossProduct(&body->angVel, &point, &vel);
+        PSVECAdd(&vel, &body->localVel, &vel);
+        PSVECScale(&vel, body->_50, &f);
+        if (body->_14D && body->_14C) {
+            g.x = 0.0f;
+            g.y = (-9.80665f * body->mass) / 20.0f;
+            g.z = 0.0f;
+            if (i > 0 && i < 10) {
+                g.y *= 2.0f;
+            }
+            PSMTXMultVec(body->invRot, &g, &g);
+            PSVECAdd(&f, &g, &f);
+        } else if ((body->_14D && i == 0) || (body->_14C && i == 10)) {
+            g.x = 0.0f;
+            g.y = -9.80665f * body->mass;
+            g.z = 0.0f;
+            PSMTXMultVec(body->invRot, &g, &g);
+            PSVECAdd(&f, &g, &f);
+        }
+        PSVECAdd(&body->force, &f, &body->force);
+        PSVECCrossProduct(&point, &f, &torque);
+        PSVECAdd(&body->torque, &torque, &body->torque);
+    }
 }
 
 // .text:0x80037BAC size:0x5F0
@@ -432,11 +652,129 @@ void fn_80037768(RigidBody* body, s32 axis, s32 steps, f32 length, f32 center, f
 }
 
 // .text:0x8003731C size:0x44C
-void fn_8003731C(void)
+s32 fn_8003731C(RigidBody* body, PhysEnv* env)
 {
+    Vec world[2];
+    Vec local[2];
+    Vec vel;
+    Vec f;
+    Vec fr;
+    Vec saved;
+    Vec torque;
+    Vec down;
+    f32 stiffness = env->stiffness / 100000.0f;
+    f32 damping = env->damping / 100000.0f;
+    f32 maxForce = env->maxForce / 100000.0f;
+    f32 minForce = env->minForce / 100000.0f;
+    f32 restTorque = env->restTorque / 100000.0f;
+    f32 maxDepth = env->maxDepth / 100000.0f;
+    f32 friction = env->friction / 100000.0f;
+    f32 mag;
+    s32 i;
+
+    memcpy(&saved, &body->worldForce, sizeof(Vec));
+    memset(&body->worldForce, 0, sizeof(Vec));
+    memset(&body->force, 0, sizeof(Vec));
+    memset(&body->torque, 0, sizeof(Vec));
+    down.x = down.z = 0.0f;
+    down.y = -body->radius;
+    PSMTXMultVec(body->invRot, &down, &down);
+    PSVECScale(&body->vel, -body->_50, &f);
+    PSVECAdd(&body->worldForce, &f, &body->worldForce);
+    PSVECScale(&body->angVel, -body->_50, &torque);
+    (&torque.x)[body->axis] = 0.0f;
+    PSVECAdd(&body->torque, &torque, &body->torque);
+    for (i = 2; i-- != 0;) {
+        PSVECAdd(i == 1 ? &body->pivot : &body->tip, &down, &local[i]);
+        PSMTXMultVec(body->world, &local[i], &world[i]);
+        memset(&f, 0, sizeof(Vec));
+        f.y = -world[i].y;
+        if (f.y >= 0.0f) {
+            if (maxDepth && f.y > maxDepth) {
+                f.y = maxDepth;
+            }
+            PSVECCrossProduct(&local[i], &body->angVel, &vel);
+            PSMTXMultVec(body->rot, &vel, &vel);
+            PSVECAdd(&body->vel, &vel, &vel);
+            f.y = (stiffness * f.y) + (damping * -vel.y);
+            mag = fabs(f.y);
+            if (maxForce && mag > maxForce) {
+                f.y = maxForce * (f.y / mag);
+            } else if (mag < minForce) {
+                continue;
+            }
+            if (friction) {
+                fr.y = 0.0f;
+                fr.x = -vel.x;
+                fr.z = -vel.z;
+                PSVECScale(&fr, friction, &fr);
+                f.x += fr.x;
+                f.z += fr.z;
+            }
+            PSVECAdd(&body->worldForce, &f, &body->worldForce);
+            PSMTXMultVec(body->invRot, &f, &f);
+            PSVECCrossProduct(&local[i], &f, &torque);
+            PSVECAdd(&body->torque, &torque, &body->torque);
+        }
+    }
+    f.x = 0.0f;
+    f.y = -9.80665f * body->mass;
+    f.z = 0.0f;
+    PSVECAdd(&body->worldForce, &f, &body->worldForce);
+    if (PSVECMag(&body->torque) < restTorque) {
+        memset(&body->torque, 0, sizeof(Vec));
+    }
+    return 0;
 }
 
 // .text:0x80037054 size:0x2C8
-void fn_80037054(void)
+s32 fn_80037054(RigidBody* body, PhysEnv* env)
 {
+    RigidBody b;
+    Vec dv;
+    Vec dp;
+    Vec w;
+    Quaternion q;
+    f32 maxSpin;
+    f32 t = 1.0f / 60.0f;
+    f32 mag;
+
+    body->timeLeft = body->dt;
+    memcpy(&b, body, sizeof(RigidBody));
+    do {
+        fn_8003731C(&b, env);
+        PSVECScale(&b.worldForce, b.invMass * b.timeLeft, &dp);
+        PSVECAdd(&b.vel, &dp, &b.vel);
+        PSVECScale(&b.vel, b.timeLeft, &dv);
+        PSVECAdd(&b.pos, &dv, &b.pos);
+        maxSpin = env->maxSpin / 100000.0f;
+        w.x = b.inertia.x * b.angVel.x;
+        w.y = b.inertia.y * b.angVel.y;
+        w.z = b.inertia.z * b.angVel.z;
+        PSVECCrossProduct(&b.angVel, &w, &w);
+        PSVECSubtract(&b.torque, &w, &w);
+        w.x *= b.invInertia.x;
+        w.y *= b.invInertia.y;
+        w.z *= b.invInertia.z;
+        PSVECScale(&w, b.timeLeft, &w);
+        PSVECAdd(&b.angVel, &w, &b.angVel);
+        if (maxSpin) {
+            mag = PSVECMag(&b.angVel);
+            if (mag > maxSpin) {
+                PSVECScale(&b.angVel, maxSpin / mag, &b.angVel);
+            }
+        }
+        memcpy(&q, &b.angVel, sizeof(Vec));
+        q.w = 0.0f;
+        PSQUATMultiply(&b.quat, &q, &q);
+        PSQUATScale(&q, 0.5f * b.timeLeft, &q);
+        PSQUATAdd(&b.quat, &q, &b.quat);
+        PSMTXQuat(b.rot, &b.quat);
+        PSMTXInverse(b.rot, b.invRot);
+        PSMTXTransApply(b.rot, b.world, b.pos.x, b.pos.y, b.pos.z);
+        PSMTXMultVec(b.invRot, &b.vel, &b.localVel);
+        t -= b.timeLeft;
+    } while (t > 0.0f);
+    memcpy(body, &b, sizeof(RigidBody));
+    return 0;
 }
