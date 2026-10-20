@@ -3750,8 +3750,9 @@ BOOL fn_3_4DB84(s32 fielder) {
 }
 
 // .text:0x0004D20C size:0x978 mapped:0x8068C2A0
-// 97.22%: the target branches over a separate `b` for the early return of the pitcher, and
-// both inlined fn_3_52F4C copies keep dx and dz in the other saved FPRs.
+// 97.45%: the target branches over a separate `b` for the early return of the pitcher (goto,
+// else and nested forms give one `beq`), and both inlined fn_3_52F4C copies keep dx and dz in
+// the other saved FPRs.
 void fn_3_4D20C(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     s32 base;
@@ -3773,8 +3774,8 @@ void fn_3_4D20C(s32 fielder) {
             }
             if (f->_1D7 == 1) {
                 if (f->_216) {
-                    dz = f->_01C - f->_008;
                     dx = f->_014 - f->_000;
+                    dz = f->_01C - f->_008;
                     dist = dolsqrtf2(dx * dx + dz * dz);
                     if (dist < f->_058) {
                         step = dist;
@@ -3800,14 +3801,16 @@ void fn_3_4D20C(s32 fielder) {
                                 if (dx > 15.0f) {
                                     dx = 15.0f;
                                 }
-                                z = lbl_3_data_4444[1].z - dx / 3.0f;
+                                dx /= 3.0f;
+                                z = lbl_3_data_4444[1].z - dx;
                             } else if (g_Fielders[0]._18C == 3) {
                                 x = lbl_3_data_4444[3].x;
                                 dx = g_Fielders[0]._000 - x;
                                 if (dx > 15.0f) {
                                     dx = 15.0f;
                                 }
-                                z = lbl_3_data_4444[3].z - dx / 3.0f;
+                                dx /= 3.0f;
+                                z = lbl_3_data_4444[3].z - dx;
                             } else {
                                 x = lbl_3_data_4444[g_Fielders[0]._18C].x;
                                 z = lbl_3_data_4444[g_Fielders[0]._18C].z;
