@@ -4,7 +4,7 @@
 #include "mssbTypes.h"
 
 s32 fn_80042598(u8 team, s32 charId);
-void transferStatsToInMemRoster(void);
+void transferStatsToInMemRoster(s32 arg0);
 s32 randRange_FUN_80042bf0(s32 min, s32 max);
 void sndFXRelated(u16 id);
 void fn_80042D38(u16 scene);

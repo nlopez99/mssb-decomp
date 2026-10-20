@@ -635,6 +635,7 @@ config.libs = [
             Object(NonMatching, "static/orderchange.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/static_80048C14.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/static_80048EB8.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(NonMatching, "static/static_8004A1BC.c", extra_cflags=["-cpp_exceptions on"]),
         ],
     },
     {

@@ -217,7 +217,7 @@ s32 randRange_FUN_80042bf0(s32 min, s32 max) {
 }
 
 // .text:0x800426DC size:0x514
-void transferStatsToInMemRoster(void) {
+void transferStatsToInMemRoster(s32 arg0) {
 }
 
 // .text:0x80042598 size:0x144
