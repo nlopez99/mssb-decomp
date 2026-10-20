@@ -2020,13 +2020,12 @@ void fn_3_135C18(void) {
 }
 
 // .text:0x00135A64 size:0x1B4 mapped:0x80774AF8
-// 98.1%: registers only; the base of g_Minigame and its walkers take r25 to r27 in
-// another order.
 void fn_3_135A64(void) {
-    int i;
     Unk3520Fielder* fielder;
+    int i;
     int j;
     int angle;
+    int diff;
     f32 dist;
 
     if (g_Minigame.turnOverStatus == 0 && !(g_Minigame._1D48 < 0.3f)) {
@@ -2046,7 +2045,8 @@ void fn_3_135A64(void) {
             }
             angle = fn_3_9FB8C(fielder->pos.x - lbl_3_data_219AC.x, fielder->pos.z - lbl_3_data_219AC.z);
             for (j = 0; j < 4; j++) {
-                if (fn_3_9FCF8(angle, g_Minigame._1D64[j]) > 0x200) {
+                diff = fn_3_9FCF8(angle, g_Minigame._1D64[j]);
+                if (diff > 0x200) {
                     continue;
                 }
                 dist = fn_3_9EFD0(&g_Minigame.starDashSpokes[j][0], &g_Minigame.starDashSpokes[j][1], (VecXYZ*)&fielder->pos, NULL);
