@@ -88,7 +88,12 @@ extern struct {
     /* 0x0CF63 */ u8 _CF63[2];
     /* 0x0CF65 */ u8 _CF65[0xCF70 - 0xCF65];
     /* 0x0CF70 */ u8 _CF70;
-    /* 0x0CF71 */ u8 _CF71[0xCF7C - 0xCF71];
+    /* 0x0CF71 */ u8 _CF71[0xCF73 - 0xCF71];
+    /* 0x0CF73 */ u8 _CF73;
+    /* 0x0CF74 */ u8 _CF74;
+    /* 0x0CF75 */ s8 _CF75;
+    /* 0x0CF76 */ s8 _CF76;
+    /* 0x0CF77 */ u8 _CF77[0xCF7C - 0xCF77];
     /* 0x0CF7C */ u8 _CF7C;
     /* 0x0CF7D */ u8 _CF7D[0xCF92 - 0xCF7D];
     /* 0x0CF92 */ u8 _CF92;
@@ -814,7 +819,68 @@ void starMissionRelated1(void) {
 }
 
 // .text:0x800596D4 size:0x464
-void fn_800596D4(void) {
+// 82.48%: first draft; the 0x10000 constant and the slot base (0x1DD or
+// 0x173) are scheduled differently, and registers differ throughout.
+void fn_800596D4(SpaniTask* task) {
+    s32 base;
+    u8 set;
+    s16 text;
+
+    if (lbl_803297E0._CF73 == 0) {
+        if (challengeStarRelatedInd(lbl_803297E0._CF9C, lbl_803297E0._CF75)) {
+            base = 0x1DD;
+            getSpaniObj(task, 0x1D9)->_54 |= 2;
+            getSpaniObj(task, 0x1D9)->_5C = 0;
+            getSpaniObj(task, 0x1D9)->_68 = 1;
+            getSpaniObj(task, lbl_803297E0._CF75 + 0x1E7)->_54 |= 2;
+            getSpaniObj(task, lbl_803297E0._CF75 + 0x1E7)->_5C = 0;
+            getSpaniObj(task, lbl_803297E0._CF75 + 0x1E7)->_68 = 1;
+            if (g_d_GameSettings._06 == 2) {
+                base = 0x173;
+            }
+            getSpaniObj(task, base + lbl_803297E0._CF75)->_5C = 0x10000;
+        } else {
+            base = 0x1DD;
+            getSpaniObj(task, 0x1D9)->_54 &= ~2;
+            getSpaniObj(task, lbl_803297E0._CF75 + 0x1E7)->_54 &= ~2;
+            if (g_d_GameSettings._06 == 2) {
+                base = 0x173;
+            }
+            getSpaniObj(task, base + lbl_803297E0._CF75)->_5C = 0;
+        }
+        getSpaniObj(task, lbl_803297E0._CF75 + 0x1FB)->_54 |= 2;
+        getSpaniObj(task, lbl_803297E0._CF75 + 0x1FB)->_68 = 1;
+        if (challengeStarRelatedInd(lbl_803297E0._CF9C, lbl_803297E0._CF76)) {
+            base = 0x1DD;
+            getSpaniObj(task, lbl_803297E0._CF76 + 0x1E7)->_54 &= ~2;
+            if (g_d_GameSettings._06 == 2) {
+                base = 0x173;
+            }
+            getSpaniObj(task, base + lbl_803297E0._CF76)->_5C = 0;
+        } else {
+            base = 0x1DD;
+            if (g_d_GameSettings._06 == 2) {
+                base = 0x173;
+            }
+            getSpaniObj(task, base + lbl_803297E0._CF76)->_5C = 0;
+        }
+        getSpaniObj(task, lbl_803297E0._CF76 + 0x1FB)->_54 &= ~2;
+        getSpaniObj(task, lbl_803297E0._CF76 + 0x1FB)->_68 = 1;
+        set = lbl_800E8558[lbl_803297E0._CF9C].set;
+        if (*(s8*)&starMissionCompletionTracker.characters[lbl_803297E0._CF9C].inGameMissionTracker[lbl_803297E0._CF75].shownOnPauseMenu != 0) {
+            text = lbl_8010A768[set][lbl_803297E0._CF75]._0;
+        } else if (lbl_8010A768[set][lbl_803297E0._CF75]._6 <= starMissionCompletionTracker._4415) {
+            text = 0x1C5;
+        } else {
+            text = 0x1C6;
+        }
+        fn_8000FE08(lbl_803297E0._CF7C, 0, text);
+        lbl_803297E0._CF73 = 1;
+    }
+    if (lbl_803297E0._CF73 != 0) {
+        lbl_803297E0._CF74 = 0;
+        lbl_803297E0._CF73 = 0;
+    }
 }
 
 // .text:0x80059458 size:0x27C

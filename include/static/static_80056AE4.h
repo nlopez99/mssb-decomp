@@ -15,7 +15,7 @@ void fn_80058644(void);
 void fn_80058B20(struct SpaniTask* task, u8 team);
 void fn_80058E0C(void);
 void fn_80059458(struct SpaniTask* task, u8 team, s32 mask);
-void fn_800596D4(void);
+void fn_800596D4(struct SpaniTask* task);
 void starMissionRelated1(void);
 void fn_8005A350(void);
 void fn_8005AF68(struct SpaniTask* task);
