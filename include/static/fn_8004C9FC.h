@@ -15,7 +15,7 @@ void fn_8004CCC0(void);
 void fn_8004D0F0(void);
 void fn_8004D460(s32 search, s32 kind);
 void fn_8004D4F0(s8 v, s32 kind, s32 on);
-void fn_8004D57C(void);
+s16 fn_8004D57C(s32 player, s32 trig, u16 rep);
 s32 fn_8004D93C(s32 mode);
 void fn_8004D990(s8 v, s32 mode, u8 sel);
 void fn_8004DB90(void);
