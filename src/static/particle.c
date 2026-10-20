@@ -53,7 +53,10 @@ typedef struct Emitter {
         } glow;
     };
     /* 0x24 */ Vec _24;
-    /* 0x30 */ Vec _30;
+    union {
+        /* 0x30 */ Vec _30;
+        /* 0x30 */ s32 fadeAge;
+    };
     /* 0x3C */ u8 _3C[0x4];
     /* 0x40 */ u16 _40;
     /* 0x42 */ u8 _42[0x1E];
@@ -118,7 +121,8 @@ typedef struct SparkParticle {
     /* 0x38 */ f32 w;
     /* 0x3C */ f32 h;
     /* 0x40 */ u8 color[4];
-    /* 0x44 */ u8 _44[0x4A - 0x44];
+    /* 0x44 */ u8 _44[0x48 - 0x44];
+    /* 0x48 */ s16 delay;
     /* 0x4A */ s16 remaining;
     /* 0x4C */ u8 _4C;
     /* 0x4D */ u8 tex;
@@ -141,9 +145,95 @@ typedef struct GlowParticle {
     /* 0x38 */ f32 w;
     /* 0x3C */ f32 h;
     /* 0x40 */ u8 color[4];
-    /* 0x44 */ u8 _44[0x4A - 0x44];
+    /* 0x44 */ u8 _44[0x48 - 0x44];
+    /* 0x48 */ s16 delay;
     /* 0x4A */ s16 remaining;
+    /* 0x4C */ u8 _4C;
+    /* 0x4D */ u8 tex;
+    /* 0x4E */ u8 texCoord;
 } GlowParticle;
+
+// The particles fn_8002D82C moves and draws
+typedef struct DriftParticle {
+    /* 0x00 */ Particle* next;
+    /* 0x04 */ f32 pos[3];
+    /* 0x10 */ f32 vel[3];
+    /* 0x1C */ f32 accel[3];
+    /* 0x28 */ f32 force[3];
+    /* 0x34 */ f32 mass;
+    /* 0x38 */ f32 w;
+    /* 0x3C */ f32 h;
+    union {
+        /* 0x40 */ u32 rgba;
+        /* 0x40 */ u8 color[4];
+    };
+    /* 0x44 */ s8 dcolor[4];
+    /* 0x48 */ s16 delay;
+    /* 0x4A */ s16 remaining;
+    /* 0x4C */ u8 _4C;
+    /* 0x4D */ u8 tex;
+    /* 0x4E */ u8 _4E;
+    /* 0x4F */ u8 texCoords;
+} DriftParticle;
+
+// What fn_80026998's callers pass
+typedef struct SmokeParams {
+    /* 0x00 */ s32 _00;
+    /* 0x04 */ s32 tex;
+    /* 0x08 */ s32 count;
+    /* 0x0C */ s32 life;
+    /* 0x10 */ Vec vel;
+    /* 0x1C */ f32 velScale;
+    /* 0x20 */ Vec accel;
+    /* 0x2C */ f32 accelScale;
+    /* 0x30 */ f32 size[2];
+    /* 0x38 */ s32 alpha[2];
+    /* 0x40 */ Vec pos;
+    /* 0x4C */ u8 r;
+    /* 0x4D */ u8 g;
+    /* 0x4E */ u8 b;
+} SmokeParams; // size: 0x50
+
+// The particles fn_80026998 starts
+typedef struct SmokeParticle {
+    /* 0x00 */ Particle* next;
+    /* 0x04 */ Vec pos;
+    /* 0x10 */ Vec vel;
+    /* 0x1C */ Vec accel;
+    /* 0x28 */ u8 _28[0x38 - 0x28];
+    /* 0x38 */ f32 w;
+    /* 0x3C */ f32 h;
+    /* 0x40 */ u8 color[4];
+    /* 0x44 */ u8 _44[0x48 - 0x44];
+    /* 0x48 */ s16 delay;
+    /* 0x4A */ s16 remaining;
+    /* 0x4C */ u8 _4C;
+    /* 0x4D */ u8 tex;
+    /* 0x4E */ u8 _4E[0x50 - 0x4E];
+    /* 0x50 */ f32 grow;
+    /* 0x54 */ s32 fade;
+} SmokeParticle;
+
+// What fn_8002B7F8's callers pass: the glow ring first, then the sparks
+typedef struct SparkParams {
+    /* 0x00 */ s32 _00;
+    /* 0x04 */ s32 glowTex;
+    /* 0x08 */ s32 glowCount;
+    /* 0x0C */ s32 glowLife;
+    /* 0x10 */ s32 glowSwitch;
+    /* 0x14 */ f32 glowH[3];
+    /* 0x20 */ f32 glowW[3];
+    /* 0x2C */ s32 glowAlpha[3];
+    /* 0x38 */ f32 radius;
+    /* 0x3C */ f32 angle;
+    /* 0x40 */ f32 arc;
+    /* 0x44 */ s32 sparkTex;
+    /* 0x48 */ s32 sparkCount;
+    /* 0x4C */ s32 sparkLife;
+    /* 0x50 */ s32 sparkSwitch;
+    /* 0x54 */ f32 size[3];
+    /* 0x60 */ s32 alpha[3];
+} SparkParams; // size: 0x6C
 
 // The emitters and particles fn_80027300 sets up
 typedef struct BurstEmitter {
@@ -261,6 +351,7 @@ extern struct {
 } lbl_8036E548;
 extern BOOL getAnimRelatedCoordinates(int player, int joint, Vec* out);
 extern FlareParams lbl_800F787C;
+extern f32 lbl_800F78C0[4][2];
 extern void fn_80023B90(LightData* data, void* light);
 extern void fn_800B0A14_removeQueue(void);
 extern void* _OSAllocFromHeap(u32 align, u32 size);
@@ -319,6 +410,34 @@ static inline void initTrail(Emitter* e, Vec* pos, s32 id, FlareParams* params)
     p->_28 = p->_4A = params->_10;
     p->_4C = 1;
     p->_4D = params->_04;
+}
+
+static inline void initSmoke(Emitter* e, SmokeParams* params)
+{
+    SmokeParticle* p;
+
+    e->_10 = params->_00;
+    p = (SmokeParticle*)e->particles;
+    do {
+        p->tex = params->tex;
+        p->remaining = params->life;
+        p->delay = 0;
+        p->vel.x = params->vel.x * params->velScale;
+        p->vel.y = params->vel.y * params->velScale;
+        p->vel.z = params->vel.z * params->velScale;
+        p->accel.x = params->accel.x * params->accelScale;
+        p->accel.y = params->accel.y * params->accelScale;
+        p->accel.z = params->accel.z * params->accelScale;
+        p->w = p->h = params->size[0];
+        p->color[0] = params->r;
+        p->color[1] = params->g;
+        p->color[2] = params->b;
+        p->color[3] = params->alpha[0];
+        memcpy(&p->pos, &params->pos, sizeof(Vec));
+        p->grow = (params->size[1] - params->size[0]) / params->life;
+        p->fade = (params->alpha[1] - params->alpha[0]) / params->life;
+        p = (SmokeParticle*)p->next;
+    } while (p != NULL);
 }
 
 // .text:0x800348C8 size:0x304
@@ -1220,6 +1339,98 @@ void fn_8002DC68(Vec* pos)
     }
 }
 
+// .text:0x8002D82C size:0x43C
+// 99.67%: registers only, in the colour and physics loop: the target sets the float
+// pointer (r5) before the index (r4); statement and type variants did not change it.
+BOOL fn_8002D82C(void* arg)
+{
+    Emitter* e = arg;
+    DriftParticle* p = (DriftParticle*)e->particles;
+    s32 alive = 0;
+    f32 (*uv)[2] = lbl_800F78C0;
+    TexFile* file = (TexFile*)e->_10;
+    s32 index = p->tex;
+    GXTexObj texObj;
+    Vec v;
+    GXTlutObj tlutObj;
+    TextureDesc* tex;
+    Mtx m;
+    s32 i;
+    s32 c;
+
+    if (file == NULL) {
+        GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    } else {
+        GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP1, GX_COLOR0A0);
+        tex = &file->tex[file->tex[index]._1C];
+        if (tex->tlut != NULL) {
+            GXInitTexObjCI(&texObj, tex->image, tex->width, tex->height, tex->format, GX_CLAMP, GX_CLAMP, GX_FALSE, GX_TLUT0);
+            GXInitTlutObj(&tlutObj, tex->tlut, tex->tlutFormat, tex->tlutCount);
+            GXLoadTlut(&tlutObj, GX_TLUT0);
+        } else {
+            GXInitTexObj(&texObj, tex->image, tex->width, tex->height, tex->format, GX_CLAMP, GX_CLAMP, GX_FALSE);
+        }
+        GXInitTexObjLOD(&texObj, GX_LINEAR, GX_LINEAR, tex->minLOD, tex->maxLOD, tex->lodBias, GX_FALSE, GX_FALSE, GX_ANISO_1);
+        GXLoadTexObj(&texObj, GX_TEXMAP1);
+    }
+    PSMTXIdentity(m);
+    GXLoadPosMtxImm(m, GX_PNMTX0);
+    GXSetCullMode(GX_CULL_NONE);
+    GXSetZMode(GX_TRUE, GX_ALWAYS, GX_FALSE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_ONE, GX_LO_CLEAR);
+    do {
+        if (p->remaining != 0) {
+            alive++;
+            if (p->delay != 0) {
+                p->delay -= (lbl_80366158._28 == 0);
+            } else {
+                PSMTXMultVec(lbl_8017FFE0, (Vec*)p->pos, &v);
+                GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+                GXPosition3f32(v.x - p->w, v.y - p->h, v.z);
+                GXColor1u32(p->rgba);
+                GXTexCoord2f32(uv[p->texCoords & 3][0], uv[p->texCoords & 3][1]);
+                GXPosition3f32(v.x + p->h, v.y - p->w, v.z);
+                GXColor1u32(p->rgba);
+                GXTexCoord2f32(uv[(p->texCoords >> 2) & 3][0], uv[(p->texCoords >> 2) & 3][1]);
+                GXPosition3f32(v.x + p->w, v.y + p->h, v.z);
+                GXColor1u32(p->rgba);
+                GXTexCoord2f32(uv[(p->texCoords >> 4) & 3][0], uv[(p->texCoords >> 4) & 3][1]);
+                GXPosition3f32(v.x - p->h, v.y + p->w, v.z);
+                GXColor1u32(p->rgba);
+                GXTexCoord2f32(uv[(p->texCoords >> 6) & 3][0], uv[(p->texCoords >> 6) & 3][1]);
+                if (lbl_80366158._28 == 0) {
+                    p->remaining--;
+                    for (i = 0; i < 3; i++) {
+                        c = p->color[i] + p->dcolor[i];
+                        if (c < 0) {
+                            c = 0;
+                        } else if (c > 255) {
+                            c = 255;
+                        }
+                        p->color[i] = c;
+                        p->accel[i] = p->force[i] / p->mass;
+                        p->vel[i] += p->accel[i];
+                        p->pos[i] += p->vel[i];
+                    }
+                    c = p->color[i] + p->dcolor[i];
+                    if (c < 0) {
+                        c = 0;
+                    } else if (c > 255) {
+                        c = 255;
+                    }
+                    p->color[i] = c;
+                    if (p->remaining <= e->fadeAge && (u8)p->dcolor[3] == 0) {
+                        p->dcolor[3] = -0x100 / p->remaining;
+                    }
+                }
+            }
+        }
+        p = (DriftParticle*)p->next;
+    } while (p != NULL);
+    GXLoadPosMtxImm(lbl_8017FFE0, GX_PNMTX0);
+    return alive == 0;
+}
+
 // .text:0x8002CDD0 size:0x7C
 void fn_8002CDD0(Vec* pos)
 {
@@ -1256,6 +1467,135 @@ void fn_8002C2D0(Vec* pos, Vec* dir, EffectParams* params)
             e->state = 0;
             fn_8002BC84(e, pos, dir, params);
         }
+    }
+}
+
+// .text:0x8002B7F8 size:0x48C
+// 99.60%: registers only; the target leaves the first fn_800337CC result in r4 and copies it
+// to r30 after the glow test, where this build allocates it to r30 directly.
+void fn_8002B7F8(Vec* pos, SparkParams* params, u8 glow)
+{
+    u8 tmp[sizeof(Emitter)];
+    u8 tmp2[sizeof(Emitter)];
+    Emitter* e;
+
+    if (g_d_GameSettings._55 != 0) {
+        return;
+    }
+    e = fn_800339F0(NULL, 14);
+    if (e != NULL) {
+        Emitter* added = fn_800337CC((Emitter*)tmp, params->sparkCount, TRUE);
+        if (added != NULL) {
+            Particle* p;
+            if (glow && params->glowCount != 0) {
+                Emitter* g = fn_800337CC((Emitter*)tmp2, params->glowCount, TRUE);
+                if (g == NULL) {
+                    added->glow.list = NULL;
+                    added->glow.count = 0;
+                } else {
+                    added->glow.list = g->particles;
+                    added->glow.count = g->count;
+                }
+            } else {
+                added->glow.list = NULL;
+                added->glow.count = 0;
+            }
+            fn_8002B400(added, params, pos);
+            p = e->particles;
+            while (p->next != NULL) {
+                p = p->next;
+            }
+            p->next = added->particles;
+            e->count += params->sparkCount;
+            p = e->glow.list;
+            if (p != NULL) {
+                while (p->next != NULL) {
+                    p = p->next;
+                }
+                p->next = added->glow.list;
+            } else {
+                e->glow.list = added->glow.list;
+            }
+            e->glow.count += added->glow.count;
+        }
+    } else {
+        e = fn_80033A24((BOOL (*)(void*))fn_8002B014, 0x80, 0, params->sparkCount, TRUE, 14);
+        if (e != NULL) {
+            e->_10 = params->_00;
+            if (glow) {
+                Emitter* g = fn_800337CC((Emitter*)tmp, params->glowCount, TRUE);
+                if (g == NULL) {
+                    return;
+                }
+                e->glow.list = g->particles;
+                e->glow.count = params->glowCount;
+            } else {
+                e->glow.list = NULL;
+                e->glow.count = 0;
+            }
+            fn_8002B400(e, params, pos);
+        }
+    }
+}
+
+// .text:0x8002B400 size:0x3F8
+// 98.46%: registers only, in the spark loop's scratch registers (an extra li for the 2
+// stored to _4C shifts them by one); declaration orders and forms of the zero tried.
+void fn_8002B400(Emitter* e, SparkParams* params, Vec* pos)
+{
+    SparkParticle* p = (SparkParticle*)e->particles;
+    s16 delay;
+    GlowParticle* q;
+    s32 i = 0;
+
+    do {
+        p->texCoord = delay = 0;
+        p->remaining = params->sparkLife;
+        p->tex = params->sparkTex;
+        p->w = p->h = params->size[0];
+        p->color[2] = 0xFF;
+        p->color[1] = 0xFF;
+        p->color[0] = 0xFF;
+        p->color[3] = params->alpha[0];
+        p->_4C = 2;
+        p->pos.x = pos->x;
+        p->pos.y = -0.1 + -pos->y;
+        p->pos.z = pos->z;
+        p->switchAge = params->sparkSwitch;
+        p->life = params->sparkLife;
+        p->growA = (params->size[1] - params->size[0]) / p->switchAge;
+        p->fadeA = (params->alpha[1] - params->alpha[0]) / p->switchAge;
+        p->growB = (params->size[2] - params->size[1]) / (p->life - p->switchAge);
+        p->fadeB = (params->alpha[2] - params->alpha[1]) / (p->life - p->switchAge);
+        p->delay = delay;
+        p = (SparkParticle*)p->next;
+    } while (p != NULL);
+
+    for (q = (GlowParticle*)e->glow.list; q != NULL; q = (GlowParticle*)q->next) {
+        q->texCoord = 0;
+        q->remaining = params->glowLife;
+        q->tex = params->glowTex;
+        q->w = params->glowW[0];
+        q->h = params->glowH[0];
+        q->color[2] = 0xFF;
+        q->color[1] = 0xFF;
+        q->color[0] = 0xFF;
+        q->color[3] = params->glowAlpha[0];
+        q->_4C = 1;
+        q->pos.x = params->radius * (f32)cos(0.017453292f * params->angle + i * (0.017453292f * (params->arc / params->glowCount))) + pos->x;
+        q->pos.y = -0.1 + (-pos->y - q->h * 0.5f);
+        q->pos.z = params->radius * (f32)sin(0.017453292f * params->angle + i * (0.017453292f * (params->arc / params->glowCount))) + pos->z;
+        i++;
+        q->switchAge = params->glowSwitch;
+        q->life = params->glowLife;
+        q->growHA = (params->glowH[1] - params->glowH[0]) / q->switchAge;
+        q->growWA = (params->glowW[1] - params->glowW[0]) / q->switchAge;
+        q->fadeA = (params->glowAlpha[1] - params->glowAlpha[0]) / q->switchAge;
+        q->growHB = (params->glowH[2] - params->glowH[1]) / (q->life - q->switchAge);
+        q->growWB = (params->glowW[2] - params->glowW[1]) / (q->life - q->switchAge);
+        q->fadeB = (params->glowAlpha[2] - params->glowAlpha[1]) / (q->life - q->switchAge);
+        q->delay = delay;
+        delay += 2;
     }
 }
 
@@ -1576,4 +1916,105 @@ void fn_80027300(Emitter* e, Vec* pos, Vec* dir, EffectParams* params, f32 scale
         p->_1C = params->_0C[12];
         p = p->next;
     } while (p != NULL);
+}
+
+// .text:0x80026998 size:0x4C0
+void fn_80026998(SmokeParams* params)
+{
+    Emitter* e;
+
+    if (params == NULL) {
+        return;
+    }
+    e = fn_800339F0(NULL, 15);
+    if (e != NULL) {
+        u8 tmp[sizeof(Emitter)];
+        Emitter* added = fn_800337CC((Emitter*)tmp, params->count, TRUE);
+        if (added != NULL) {
+            Particle* p;
+            initSmoke(added, params);
+            p = e->particles;
+            if (p != NULL) {
+                while (p->next != NULL) {
+                    p = p->next;
+                }
+                p->next = added->particles;
+            } else {
+                e->particles = added->particles;
+            }
+            e->count += added->count;
+        }
+    } else {
+        e = fn_80033A24(fn_800263FC, 0x80, 0, params->count, TRUE, 15);
+        if (e != NULL) {
+            initSmoke(e, params);
+        }
+    }
+}
+
+// .text:0x800263FC size:0x59C
+// 97.60%: registers differ through the inlined fn_80031F34 (see its comment): the target
+// keeps its list walk, the sorted head and p all in r28.
+BOOL fn_800263FC(void* arg)
+{
+    Emitter* e = arg;
+    s32 alive = 0;
+    s32 alpha;
+    SmokeParticle* p;
+    Particle* prev;
+    Particle* tail;
+    Particle* dead;
+
+    p = (SmokeParticle*)(e->particles = fn_80031F34(e->particles, e->count));
+    prev = (Particle*)&e->particles;
+    tail = NULL;
+    dead = NULL;
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_DSTALPHA, GX_LO_CLEAR);
+    do {
+        if (p->remaining != 0) {
+            fn_8003403C(p->w, p->h);
+            fn_80033CC8((Particle*)p, (TexFile*)e->_10);
+            p->w += p->grow;
+            p->h = p->w;
+            alpha = p->color[3] + p->fade;
+            if (alpha > 255) {
+                alpha = 255;
+            } else if (alpha < 0) {
+                alpha = 0;
+            }
+            p->color[3] = alpha;
+            p->pos.x += p->vel.x;
+            p->pos.y -= p->vel.y;
+            p->pos.z += p->vel.z;
+            p->vel.x += p->accel.x;
+            p->vel.y += p->accel.y;
+            p->vel.z += p->accel.z;
+            p->remaining--;
+            if (p->remaining == 0) {
+                prev->next = p->next;
+                if (tail != NULL) {
+                    tail->next = (Particle*)p;
+                } else {
+                    dead = (Particle*)p;
+                }
+                tail = (Particle*)p;
+                p->next = NULL;
+                e->count--;
+            } else {
+                prev = (Particle*)p;
+                alive++;
+            }
+        }
+        p = (SmokeParticle*)prev->next;
+    } while (p != NULL);
+    if (dead != NULL) {
+        Particle* q;
+        for (q = dead; q != NULL; q = q->next) {
+            q->_4C = 0;
+            q->_48 = 0;
+        }
+        fn_80033794(dead);
+    }
+    return alive == 0;
 }
