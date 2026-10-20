@@ -27,7 +27,8 @@ typedef struct DecalSystem {
     /* 0xCC0 */ u8 texMode[13];
     /* 0xCD0 */ f32 halfSize[13][2];
     /* 0xD38 */ u8 enabled;
-} DecalSystem;
+    /* 0xD39 */ u8 _D39[0xD40 - 0xD39];
+} DecalSystem; // size: 0xD40
 
 typedef struct VtxArray {
     /* 0x00 */ void* data;
@@ -120,7 +121,8 @@ typedef struct SaveFile {
     /* 0x046 */ u16 headerSize;
     /* 0x048 */ SaveHeader header;
     /* 0x5F8 */ SaveBlock blocks[3];
-} SaveFile;
+    /* 0xD51C */ u8 _D51C[0x10000 - 0xD51C];
+} SaveFile; // size: 0x10000
 
 // The game's copy of the saved data
 typedef struct SaveData {
@@ -630,7 +632,6 @@ extern s32 lbl_803CBC50;
 extern u8 lbl_8023DD80[];
 extern ScreenEffect lbl_803C5090;
 
-extern SaveFile lbl_802D4B00;
 extern SaveData lbl_80354768;
 extern u8 lbl_80361B20[0xF7];
 extern u8 lbl_803616CC[0x454];
@@ -669,18 +670,21 @@ extern void fn_8002128C(u8 arg0);
 
 const char lbl_800E6910[] = "MarioBaseball";
 
+SaveFile lbl_802D4B00;
 MenuSlot lbl_802D4AE0[4];
+u8 lbl_802D4AC0[0x20];
 DecalSystem lbl_802D3D80;
 
 DecalColor lbl_803CB828 = { 0 };
 f32 lbl_803CB82C = -0.001f;
+u16 lbl_803CB830[4] = { '$', '$', '$', 0 };
 
-void (*lbl_803CBCA8)(void);
-u8 lbl_803CBCAC;
-s32 lbl_803CBCB0;
-u8 lbl_803CBCB4;
-s32 lbl_803CBCB8;
 s32 lbl_803CBCBC;
+s32 lbl_803CBCB8;
+u8 lbl_803CBCB4;
+s32 lbl_803CBCB0;
+u8 lbl_803CBCAC;
+void (*lbl_803CBCA8)(void);
 
 // .text:0x8004153C size:0x40
 void fn_8004153C(void) {
@@ -858,7 +862,7 @@ static inline u32 BadSizeMask(SaveFile* save, s32 mask) {
         if (mask & bit) {
             if (i == 0) {
                 if (save->headerSize != 4 + sizeof(SaveHeader)) {
-                    bad = bit;
+                    bad |= bit;
                 }
             } else if (*(u16*)((u8*)save + (i - 1) * sizeof(SaveBlock) + 0x5FA) != sizeof(SaveBlock)) {
                 bad |= bit;
@@ -868,8 +872,8 @@ static inline u32 BadSizeMask(SaveFile* save, s32 mask) {
     return bad;
 }
 
-// 97.22%: registers in the block mask and size check, and the request's stores are scheduled
-// differently; the size check reads each block's size at a byte offset (li; mulli in the target)
+// 99.01%: registers only, in the block mask and size check; the size check reads each block's
+// size at a byte offset, which keeps the target's li/mulli per unrolled copy
 void fn_80040C14(void) {
     MenuTask* task = lbl_803CC1B8;
     CardRequest req;
@@ -1700,8 +1704,7 @@ void fn_8003BB90(void) {
 }
 
 // .text:0x8003B5B0 size:0x5E0
-// 97.23%: as in fn_8004053C, the target loads the name before the slot for fn_800AB474,
-// and schedules the request's stores differently
+// 99.10%: as in fn_8004053C, the target loads the name before the slot for fn_800AB474
 void fn_8003B5B0(void) {
     MenuTask* task = lbl_803CC1B8;
     CardRequest req;
