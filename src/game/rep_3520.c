@@ -2426,9 +2426,8 @@ static inline s16 Unk3520_CircleAngle(s32 i, int offset) {
 }
 
 // .text:0x0013334C size:0x1170 mapped:0x807723E0
-// 98.78%: the player loop swaps the registers of quadrant and the input base (r16/r20) and
-// of the x, z and dx, dz pairs (f28-f31), and computes &_1D7C[character] once where the
-// target computes it again after the memset.
+// 98.92%: &_1D7C[character] is computed once for the memset and input, where the target
+// computes it again after the memset; the coin loop's two walkers swap r6 and r7.
 void fn_3_13334C(void) {
     Unk3520Ai* ai = &MG.ai;
     Unk3520Coin* coins;
@@ -2439,10 +2438,12 @@ void fn_3_13334C(void) {
     int starQuadrant;
     int bagQuadrant;
     int boxQuadrant;
-    u32 quadrant;
+    int quadrant;
     f32 tx;
     f32 tz;
     u32 target;
+    f32 px;
+    f32 pz;
     f32 x;
     f32 z;
     f32 dx;
@@ -2501,12 +2502,12 @@ void fn_3_13334C(void) {
         input = &g_Minigame._1D7C[character];
         strength = g_Minigame.minigameControlStruct.aIStrength[i];
         fielder = &g_Fielders[g_Minigame.minigameFielderIndex[i]];
-        fn_3_135600(&x, &z, fielder->pos.x, fielder->pos.z);
-        quadrant = fn_3_13564C(x, z);
+        fn_3_135600(&px, &pz, fielder->pos.x, fielder->pos.z);
+        quadrant = fn_3_13564C(px, pz);
         switch (ai->cpu[i]._6) {
         case 0:
             if (lbl_803CBBC0 != 0 && g_FieldingLogic._000[i]._08 <= lbl_3_data_21B28[strength] &&
-                (g_Minigame._1D72 == 0 || i == g_Minigame._1D6D || fn_3_135520(x, z, 5.0f) == 0)) {
+                (g_Minigame._1D72 == 0 || i == g_Minigame._1D6D || fn_3_135520(px, pz, 5.0f) == 0)) {
                 g_Minigame._1D7C[character].buttonInput = g_Minigame._1D7C[character].newButtonInput |= 0x200;
             }
             target = 4;
@@ -2605,7 +2606,7 @@ void fn_3_13334C(void) {
                 }
             }
             if (g_Minigame._1D72 != 0 && i != g_Minigame._1D6D) {
-                if (fn_3_135520(x, z, 0.20943952f * dolsqrtf2(x * x + z * z) + ai->cpu[i]._0) == 1) {
+                if (fn_3_135520(px, pz, 0.20943952f * dolsqrtf2(px * px + pz * pz) + ai->cpu[i]._0) == 1) {
                     ai->cpu[i]._0 = RandomInt_Game(100) < lbl_3_data_21B88[strength] ? 3.0f : 1.5f;
                     input->controlStickAngle = Unk3520_CircleAngle(i, 0);
                     ai->cpu[i]._6 = 1;
