@@ -280,7 +280,7 @@ typedef struct ModelWork {
     /* 0x0140 */ ModelPose poses[13];
     /* 0x0C04 */ ModelActor actorData[13];
     /* 0x2C50 */ ModelActor* actors[13];
-    /* 0x2C84 */ void* _2C84;
+    /* 0x2C84 */ void** files;
     /* 0x2C88 */ void* _2C88;
     /* 0x2C8C */ u8* _2C8C;
     /* 0x2C90 */ u8 _2C90[0x2CA4 - 0x2C90];
@@ -344,7 +344,9 @@ typedef struct ModelWork {
     /* 0x3088 */ u8 _3088;
     /* 0x3089 */ u8 _3089[0x308C - 0x3089];
     /* 0x308C */ void (*_308C)(void);
-    /* 0x3090 */ u8 _3090[0x3154 - 0x3090];
+    /* 0x3090 */ u8 _3090[0x309C - 0x3090];
+    /* 0x309C */ AnimState anim0;
+    /* 0x30F8 */ AnimState anim1;
 } ModelWork; // size: 0x3154
 
 // STRUCTS END
@@ -584,7 +586,81 @@ void fn_8001FC4C(ModelActor* actor) {
 }
 
 // .text:0x8001F8A4 size:0x3A8
+// 79.92%: first draft from m2c; saved registers differ throughout and the slot setup
+// in the type >= 16 branch is scheduled differently. Not yet tuned.
 void fn_8001F8A4(void) {
+    u8* type;
+    void* geo;
+    void* tex;
+    int i;
+    u16 k;
+    void* layout;
+    ModelSlot* slot;
+
+    for (i = 0; i < 24; i++) {
+        layout = lbl_8036E548.files[i * 3 + 0];
+        geo = lbl_8036E548.files[i * 3 + 1];
+        tex = lbl_8036E548.files[i * 3 + 2];
+        LoadActorLayout(layout);
+        convertGeometryAndSknHeader(geo, NULL);
+        haveActLayoutPointToGeoHeader(layout, geo);
+        if (i == 11) {
+            tex = lbl_8036E548.files[32];
+        } else {
+            convertTextureHeader(tex);
+        }
+        fn_800BD190(geo, tex);
+    }
+    ANIMGet(lbl_8036E548.files[72]);
+    fn_80025DDC(lbl_8036E548.files[76]);
+    lbl_8036E548.anim0.hdr = lbl_8036E548.files[77];
+    fn_80025FFC(lbl_8036E548.files[76], &lbl_8036E548.anim0);
+    fn_80025EEC(&lbl_8036E548.anim0, 0, 0);
+    fn_80025DDC(lbl_8036E548.files[78]);
+    lbl_8036E548.anim1.hdr = lbl_8036E548.files[79];
+    fn_80025FFC(lbl_8036E548.files[78], &lbl_8036E548.anim1);
+    fn_80025EEC(&lbl_8036E548.anim1, 0, 0);
+    lbl_8036E548._0064 = ActorObjectInitTable(25);
+    type = lbl_800EEA58;
+    for (k = 0; k < 25; k++) {
+        if (*type < 16) {
+            fn_800BDC88(lbl_8036E548._0064, k, k, lbl_8036E548.files[*type * 3], 0, 0);
+        } else {
+            fn_800BDC88(lbl_8036E548._0064, k, k, lbl_8036E548.files[*type * 3], (s32)lbl_8036E548.files[72], 0);
+            slot = &lbl_8036E548._0064->slots[k];
+            slot->seqNum = 0;
+            slot->time = 0.0f;
+            slot->_58 = 1;
+            slot->_59 = slot->_5A = slot->anim != NULL;
+            slot->_60 = 0.0f;
+            ACTSetAnimation((Actor*)slot->node, slot->anim, NULL, slot->seqNum, 0.0f, slot->_60);
+            fn_800B4AFC(slot->node, 0);
+        }
+        if (*type == 0 || *type == 4 || (u8)(*type - 7) <= 3 || (u8)(*type - 12) <= 6 || *type == 19) {
+            fn_800BD548(&lbl_8036E548._0064->slots[k], 4, lbl_8036E548.lights[0], lbl_8036E548.lights[1], lbl_8036E548.lights[2], lbl_8036E548.lights[3]);
+        } else {
+            fn_800BD548(&lbl_8036E548._0064->slots[k], 0);
+        }
+        CTRLSetTranslation(&lbl_8036E548._0064->slots[k].ctrl, 0.0f, 0.0f, 0.0f);
+        CTRLSetRotation(&lbl_8036E548._0064->slots[k].ctrl, 0.0f, 0.0f, 0.0f);
+        if (k == 5) {
+            fn_80025C58(lbl_8036E548.anim0.file, (struct Model*)&lbl_8036E548._0064->slots[k]);
+        } else if (k == 6) {
+            fn_80025C58(lbl_8036E548.anim1.file, (struct Model*)&lbl_8036E548._0064->slots[k]);
+        }
+        type++;
+    }
+    lbl_8036E548._2D90 = _OSAllocFromHeap(32, 25 * sizeof(ModelEntry28));
+    for (i = 0; i < 25; i++) {
+        lbl_8036E548._2D90[i]._04 = 0.0f;
+        lbl_8036E548._2D90[i]._08 = 0.0f;
+        lbl_8036E548._2D90[i]._0C = 0.0f;
+        lbl_8036E548._2D90[i]._10 = 0.0f;
+        lbl_8036E548._2D90[i]._14 = 0.0f;
+        lbl_8036E548._2D90[i]._18 = 0.0f;
+        lbl_8036E548._2D90[i]._26 = 0;
+        lbl_8036E548._2D90[i].cb = NULL;
+    }
 }
 
 // .text:0x8001F5E8 size:0x2BC
@@ -1673,9 +1749,9 @@ void fn_800188C0(void) {
     switch (req->_14) {
     case 0:
         if (g_d_GameSettings.GameModeSelected == 6) {
-            lbl_8036E548._2C84 = ARAMTransfer(&lbl_800EE910[1], 0, 0, 0);
+            lbl_8036E548.files = ARAMTransfer(&lbl_800EE910[1], 0, 0, 0);
         } else {
-            lbl_8036E548._2C84 = ARAMTransfer(&lbl_800EE910[0], 0, 0, 0);
+            lbl_8036E548.files = ARAMTransfer(&lbl_800EE910[0], 0, 0, 0);
         }
         req->_14++;
         break;
