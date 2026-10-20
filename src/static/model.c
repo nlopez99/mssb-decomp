@@ -1,8 +1,159 @@
 #include "static/model.h"
 #include "static/UnknownHomes_Static.h"
+#include "string.h"
+#include "C3/control.h"
+#include "static/static_80021188.h"
+#include "static/static_8003A2EC.h"
+#include "static/anim.h"
+
+// STRUCTS BEGIN
+typedef struct ModelLink {
+    /* 0x0000 */ u8 _0000[0x70 - 0x0];
+    /* 0x0070 */ void* _70;
+} ModelLink; // size: 0x74
+
+typedef struct ModelTaskSub {
+    /* 0x0000 */ u8 _0000[0x10 - 0x0];
+    /* 0x0010 */ s16 _10;
+    /* 0x0012 */ u8 _0012[0x14 - 0x12];
+} ModelTaskSub; // size: 0x14
+
+typedef struct ModelTask {
+    /* 0x0000 */ u8 _0000[0xC - 0x0];
+    /* 0x000C */ ModelTaskSub* _0C;
+    /* 0x0010 */ u8 _0010[0x14 - 0x10];
+    /* 0x0014 */ s8 _14;
+    /* 0x0015 */ u8 _0015[0x18 - 0x15];
+} ModelTask; // size: 0x18
+
+typedef struct ModelLoadReq {
+    /* 0x0000 */ u8 _0000[0x14 - 0x0];
+    /* 0x0014 */ u8 _14;
+    /* 0x0015 */ u8 _15;
+    /* 0x0016 */ u8 _16;
+    /* 0x0017 */ u8 _0017[0x19 - 0x17];
+    /* 0x0019 */ u8 _19;
+    /* 0x001A */ u8 _1A;
+    /* 0x001B */ u8 _1B;
+    /* 0x001C */ u8 _1C;
+    /* 0x001D */ u8 _1D;
+    /* 0x001E */ u8 _001E[0x20 - 0x1E];
+} ModelLoadReq; // size: 0x20
+
+typedef struct ModelObj {
+    /* 0x0000 */ u8 _0000[0x44 - 0x0];
+    /* 0x0044 */ Control ctrl;
+    /* 0x0088 */ u8 _0088[0x90 - 0x88];
+} ModelObj; // size: 0x90
+
+typedef struct AnimState {
+    /* 0x0000 */ void* hdr;
+    /* 0x0004 */ u8 _0004[0x2C - 0x4];
+    /* 0x002C */ void* file;
+    /* 0x0030 */ u8 _0030[0x58 - 0x30];
+    /* 0x0058 */ s8 current;
+    /* 0x0059 */ u8 _0059[0x5C - 0x59];
+} AnimState; // size: 0x5C
+
+typedef struct ModelSub2C {
+    /* 0x0000 */ u8 _0000[0x4 - 0x0];
+    /* 0x0004 */ AnimState state;
+    /* 0x0060 */ s8 _60;
+    /* 0x0061 */ s8 _61;
+    /* 0x0062 */ u8 _0062[0x64 - 0x62];
+} ModelSub2C; // size: 0x64
+
+typedef struct ModelPose {
+    /* 0x0000 */ u8 _0000[0x4 - 0x0];
+    /* 0x0004 */ AnimState state;
+    /* 0x0060 */ u8 _0060[0x68 - 0x60];
+    /* 0x0068 */ AnimState state2;
+    /* 0x00C4 */ u8 _00C4[0xD0 - 0xC4];
+    /* 0x00D0 */ s8 _D0;
+    /* 0x00D1 */ s8 _D1;
+    /* 0x00D2 */ u8 _00D2[0xD4 - 0xD2];
+} ModelPose; // size: 0xD4
+
+typedef struct ModelActor {
+    /* 0x0000 */ u8 _0000[0x2C - 0x0];
+    /* 0x002C */ ModelSub2C* _2C;
+    /* 0x0030 */ ModelPose* _30;
+    /* 0x0034 */ u8 _0034[0x5C - 0x34];
+    /* 0x005C */ s32 _5C;
+    /* 0x0060 */ s16 _60;
+    /* 0x0062 */ s16 _62;
+    /* 0x0064 */ s16 _64;
+    /* 0x0066 */ s16 _66;
+    /* 0x0068 */ s16 _68;
+    /* 0x006A */ s16 _6A;
+    /* 0x006C */ u8 _006C[0x6E - 0x6C];
+    /* 0x006E */ s16 _6E;
+    /* 0x0070 */ u8 _0070[0x72 - 0x70];
+    /* 0x0072 */ u16 _72[120];
+    /* 0x0162 */ u8 _0162[0x252 - 0x162];
+    /* 0x0252 */ s8 _252;
+    /* 0x0253 */ u8 _0253[0x254 - 0x253];
+    /* 0x0254 */ u8 _254;
+    /* 0x0255 */ s8 _255;
+    /* 0x0256 */ u8 _0256[0x25E - 0x256];
+    /* 0x025E */ s8 _25E;
+    /* 0x025F */ s8 _25F;
+    /* 0x0260 */ u8 _0260[0x261 - 0x260];
+    /* 0x0261 */ s8 _261;
+    /* 0x0262 */ s8 _262;
+    /* 0x0263 */ u8 _0263[0x264 - 0x263];
+    /* 0x0264 */ s8 _264;
+    /* 0x0265 */ u8 _0265[0x267 - 0x265];
+    /* 0x0267 */ s8 _267;
+    /* 0x0268 */ s8 _268;
+    /* 0x0269 */ s8 _269;
+    /* 0x026A */ s8 _26A;
+    /* 0x026B */ s8 _26B;
+    /* 0x026C */ u8 _026C[0x26E - 0x26C];
+    /* 0x026E */ s8 _26E;
+    /* 0x026F */ s8 _26F;
+    /* 0x0270 */ u8 _0270[0x27C - 0x270];
+} ModelActor; // size: 0x27C
+
+typedef struct ModelWork {
+    /* 0x0000 */ u8 _0000[0x60 - 0x0];
+    /* 0x0060 */ ModelObj* _0060;
+    /* 0x0064 */ ModelObj* _0064;
+    /* 0x0068 */ ModelObj* _0068;
+    /* 0x006C */ u8 _006C[0x140 - 0x6C];
+    /* 0x0140 */ ModelPose poses[13];
+    /* 0x0C04 */ ModelActor actorData[13];
+    /* 0x2C50 */ ModelActor* actors[13];
+    /* 0x2C84 */ u8 _2C84[0x2C88 - 0x2C84];
+    /* 0x2C88 */ void* _2C88;
+    /* 0x2C8C */ u8 _2C8C[0x2D68 - 0x2C8C];
+    /* 0x2D68 */ s16 _2D68;
+    /* 0x2D6A */ u8 _2D6A[0x2D77 - 0x2D6A];
+    /* 0x2D77 */ s8 _2D77;
+    /* 0x2D78 */ u8 _2D78[0x3082 - 0x2D78];
+    /* 0x3082 */ s8 _3082;
+    /* 0x3083 */ u8 _3083[0x308C - 0x3083];
+    /* 0x308C */ void (*_308C)(void);
+    /* 0x3090 */ u8 _3090[0x3154 - 0x3090];
+} ModelWork; // size: 0x3154
+
+// STRUCTS END
+
+extern ModelWork lbl_8036E548;
+extern u8 lbl_8036C4FC[0x204C];
+extern u8 lbl_803CBBC0;
+extern s32 lbl_803CBC18;
+extern void (*lbl_803CB7AC[2])(MtxPtr view, s32, u32);
+void fn_800B9AA8(void*);
+extern s32 lbl_803CBBF0;
+extern ModelLoadReq* lbl_803CC1B8;
+extern ModelSub2C lbl_80118220[13];
 
 // .text:0x8001FDD4 size:0x2C
-void fn_8001FDD4(void) {
+void fn_8001FDD4(ModelLink* arg0) {
+    if (arg0->_70 != NULL) {
+        fn_800B9AA8(arg0->_70);
+    }
 }
 
 // .text:0x8001FC4C size:0x188
@@ -39,10 +190,13 @@ void fn_8001E488(void) {
 
 // .text:0x8001E474 size:0x14
 void fn_8001E474(void) {
+    lbl_803CB7AC[0] = NULL;
+    lbl_803CB7AC[1] = NULL;
 }
 
 // .text:0x8001E460 size:0x14
-void fn_8001E460(void) {
+void fn_8001E460(void (*draw)(MtxPtr view, s32, u32)) {
+    lbl_803CB7AC[lbl_803CBBC0] = draw;
 }
 
 // .text:0x8001E0D8 size:0x388
@@ -70,15 +224,18 @@ void fn_8001D180(void) {
 }
 
 // .text:0x8001D148 size:0x38
-void fn_8001D148(void) {
+void fn_8001D148(s32 idx, f32 x, f32 y, f32 z) {
+    CTRLSetScale(&lbl_8036E548._0064[idx].ctrl, x, y, z);
 }
 
 // .text:0x8001D110 size:0x38
-void fn_8001D110(void) {
+void fn_8001D110(s32 idx, f32 x, f32 y, f32 z) {
+    CTRLSetScale(&lbl_8036E548._0068[idx].ctrl, x, y, z);
 }
 
 // .text:0x8001D0D0 size:0x40
-void fn_8001D0D0(void) {
+void fn_8001D0D0(s32 idx, f32 scale) {
+    CTRLSetScale(&lbl_8036E548._0068[idx].ctrl, scale, scale, scale);
 }
 
 // .text:0x8001D074 size:0x5C
@@ -119,6 +276,24 @@ void fn_8001C588(void) {
 
 // .text:0x8001C528 size:0x60
 void fn_8001C528(void) {
+    int i;
+
+    for (i = 0; i < 13; i++) {
+        lbl_8036E548.actorData[i]._60 = -1;
+        lbl_8036E548.actorData[i]._62 = -1;
+        lbl_8036E548.actorData[i]._64 = -1;
+        lbl_8036E548.actorData[i]._66 = -1;
+        lbl_8036E548.actorData[i]._68 = 0;
+        lbl_8036E548.actorData[i]._6A = 0;
+        lbl_8036E548.actorData[i]._25E = 1;
+        lbl_8036E548.actorData[i]._25F = 0;
+        lbl_8036E548.actorData[i]._262 = 0;
+        lbl_8036E548.actorData[i]._268 = 0;
+        lbl_8036E548.actorData[i]._269 = 0;
+        lbl_8036E548.actorData[i]._26A = 0;
+        lbl_8036E548.actorData[i]._26B = 0;
+        lbl_8036E548.actorData[i]._26F = 0;
+    }
 }
 
 // .text:0x8001C234 size:0x2F4
@@ -138,7 +313,23 @@ void AnimateCharacter(void) {
 }
 
 // .text:0x8001B918 size:0x78
-void QueueCharacterAnimation(void) {
+void QueueCharacterAnimation(s32 idx, int anim, int a, int b, int c, int d, int e) {
+    ModelActor* actor = lbl_8036E548.actors[idx];
+
+    actor->_66 = anim;
+    actor->_6E = c;
+    actor->_261 = a;
+    actor->_264 = b;
+    actor->_267 = d;
+    actor->_26E = 0;
+    if (e == -1) {
+        actor->_26B = 5;
+    } else {
+        actor->_26B = e;
+    }
+    if ((anim >= 0x3F && anim < 0x4B) || (anim >= 0x4B && anim < 0x69)) {
+        lbl_8036E548.actors[idx]->_26E = 1;
+    }
 }
 
 // .text:0x8001B80C size:0x10C
@@ -167,6 +358,7 @@ void fn_8001B308(void) {
 
 // .text:0x8001B2D0 size:0x38
 void fn_8001B2D0(void) {
+    memcpy(lbl_8036C4FC, lbl_8036E548.actorData, sizeof(lbl_8036E548.actorData));
 }
 
 // .text:0x8001B224 size:0xAC
@@ -174,11 +366,13 @@ void fn_8001B224(void) {
 }
 
 // .text:0x8001B214 size:0x10
-void fn_8001B214(void) {
+void fn_8001B214(void (*callback)(void)) {
+    lbl_8036E548._308C = callback;
 }
 
 // .text:0x8001B200 size:0x14
 void fn_8001B200(void) {
+    lbl_8036E548._308C = NULL;
 }
 
 // .text:0x8001AF98 size:0x268
@@ -191,10 +385,18 @@ void fn_8001AB10(void) {
 
 // .text:0x8001AAF0 size:0x20
 void fn_8001AAF0(void) {
+    fn_8003AC90();
 }
 
 // .text:0x8001AAA4 size:0x4C
 void fn_8001AAA4(void) {
+    ModelTask* task;
+
+    task = fn_800B0A5C_insertQueue(challengeMapRelated, 0);
+    task->_14 = 0;
+    task->_0C->_10 = 0;
+    lbl_8036E548._3082 = 0;
+    lbl_803CBBF0 = 0;
 }
 
 // .text:0x8001A6B0 size:0x3F4
@@ -231,6 +433,8 @@ void fn_80018B74(void) {
 
 // .text:0x80018B38 size:0x3C
 void fn_80018B38(void) {
+    fn_800ACFB0(lbl_8036E548._2C88);
+    lbl_8036E548._2D68 = -1;
 }
 
 // .text:0x800189E4 size:0x154
@@ -239,6 +443,7 @@ void fn_800189E4(void) {
 
 // .text:0x800189B8 size:0x2C
 void fn_800189B8(void) {
+    fn_800ACFB0(lbl_8036E548._2C88);
 }
 
 // .text:0x800188C0 size:0xF8
@@ -267,10 +472,17 @@ void fn_80017814(void) {
 
 // .text:0x800177B4 size:0x60
 void fn_800177B4(void) {
+    ModelLoadReq* req = lbl_803CC1B8;
+
+    if (fn_8001758C(&req->_14, req->_1C, req->_16, req->_19, req->_1A, req->_1B, req->_15, req->_1D) != 0) {
+        lbl_8036E548._2D77 = 2;
+        fn_800B0A14_removeQueue();
+    }
 }
 
 // .text:0x8001758C size:0x228
-void fn_8001758C(void) {
+s32 fn_8001758C(u8* arg0, s32 idx, u8 arg2, u8 arg3, u8 arg4, s8 arg5, u8 arg6, u8 arg7) {
+    return 0;
 }
 
 // .text:0x80017340 size:0x24C
@@ -326,7 +538,23 @@ void fn_80014A18(void) {
 }
 
 // .text:0x80014990 size:0x88
-void fn_80014990(void) {
+void fn_80014990(s32 idx, void* file, void* hdr) {
+    ModelActor* actor;
+    ModelSub2C* sub;
+
+    if (idx >= 0 && idx < 13) {
+        actor = lbl_8036E548.actors[idx];
+        if (actor == NULL) {
+            return;
+        }
+        sub = &lbl_80118220[idx];
+        actor->_2C = sub;
+        sub->_60 = actor->_252;
+        sub->_61 = actor->_254;
+        sub->state.hdr = hdr;
+        sub->state.file = file;
+        fn_80025FFC(file, &sub->state);
+    }
 }
 
 // .text:0x800145F8 size:0x398
@@ -362,7 +590,26 @@ void fn_80011BE4(void) {
 }
 
 // .text:0x80011B64 size:0x80
-void fn_80011B64(void) {
+void fn_80011B64(s32 idx) {
+    ModelSub2C* sub;
+    ModelPose* pose;
+
+    if (lbl_8036E548.actors[idx] != NULL) {
+        sub = lbl_8036E548.actors[idx]->_2C;
+        if (sub != NULL) {
+            sub->_61 = -1;
+            sub->state.current = -2;
+            lbl_8036E548.actors[idx]->_2C = NULL;
+        }
+        pose = lbl_8036E548.actors[idx]->_30;
+        if (pose != NULL) {
+            pose->_D1 = pose->_D0;
+            pose->_D0 = -1;
+            pose->state.current = -2;
+            pose->state2.current = -2;
+            lbl_8036E548.actors[idx]->_30 = NULL;
+        }
+    }
 }
 
 // .text:0x80011A60 size:0x104
@@ -390,17 +637,40 @@ void fn_80011640(void) {
 }
 
 // .text:0x80011604 size:0x3C
-void fn_80011604(void) {
+void fn_80011604(s8 idx, s32 value) {
+    ModelActor* actor;
+
+    if (idx < 0 || idx >= 13) {
+        return;
+    }
+    actor = lbl_8036E548.actors[idx];
+    if (actor != NULL) {
+        actor->_5C = value;
+    }
 }
 
 // .text:0x800115C8 size:0x3C
-void fn_800115C8(void) {
+void fn_800115C8(s8 idx) {
+    ModelActor* actor;
+
+    if (idx >= 0 && idx < 13) {
+        actor = lbl_8036E548.actors[idx];
+        if (actor != NULL) {
+            actor->_5C = 0;
+        }
+    }
 }
 
 // .text:0x80011578 size:0x50
 void fn_80011578(void) {
+    int i;
+
+    for (i = 0; i < 13; i++) {
+        fn_800115C8(i);
+    }
 }
 
 // .text:0x80011570 size:0x8
-void fn_80011570(void) {
+s32 fn_80011570(void) {
+    return lbl_803CBC18;
 }

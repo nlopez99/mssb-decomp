@@ -2,20 +2,25 @@
 #define __STATIC_MODEL_H_
 
 #include "mssbTypes.h"
+#include "Dolphin/mtx.h"
+
+struct ModelActor;
+struct ModelLink;
+struct ModelSub2C;
 
 struct _VecXYZ;
 
-void fn_80011570(void);
+s32 fn_80011570(void);
 void fn_80011578(void);
-void fn_800115C8(void);
-void fn_80011604(void);
+void fn_800115C8(s8 idx);
+void fn_80011604(s8 idx, s32 value);
 void fn_80011640(void);
 void fn_800116DC(void);
 void fn_800117CC(void);
 void fn_800118AC(void);
 void fn_8001196C(void);
 void fn_80011A60(void);
-void fn_80011B64(void);
+void fn_80011B64(s32 idx);
 void fn_80011BE4(void);
 void fn_80011CA8(void);
 void fn_800126EC(void);
@@ -24,7 +29,7 @@ void fn_80012B90(void);
 void fn_80013680(void);
 void fn_80014204(void);
 void fn_800145F8(void);
-void fn_80014990(void);
+void fn_80014990(s32 idx, void* file, void* hdr);
 void fn_80014A18(void);
 void fn_80014D4C(void);
 void fn_80014E50(void);
@@ -38,7 +43,7 @@ void fn_80016B60(void);
 void fn_80016F7C(void);
 void fn_80017098(void);
 void fn_80017340(void);
-void fn_8001758C(void);
+s32 fn_8001758C(u8* arg0, s32 idx, u8 arg2, u8 arg3, u8 arg4, s8 arg5, u8 arg6, u8 arg7);
 void fn_800177B4(void);
 void fn_80017814(void);
 void fn_80017D28(void);
@@ -62,7 +67,7 @@ void fn_8001AAF0(void);
 void fn_8001AB10(void);
 void fn_8001AF98(void);
 void fn_8001B200(void);
-void fn_8001B214(void);
+void fn_8001B214(void (*callback)(void));
 void fn_8001B224(void);
 void fn_8001B2D0(void);
 void fn_8001B308(void);
@@ -71,7 +76,7 @@ void fn_8001B4D8(void);
 void fn_8001B5EC(void);
 void fn_8001B728(void);
 BOOL getAnimRelatedCoordinates(int, int, struct _VecXYZ*);
-void QueueCharacterAnimation(void);
+void QueueCharacterAnimation(s32 idx, int anim, int a, int b, int c, int d, int e);
 void AnimateCharacter(void);
 void fn_8001BA44(void);
 void fn_8001BE50(void);
@@ -86,16 +91,16 @@ void fn_8001CBD4(void);
 void fn_8001CCC8(void);
 void fn_8001CE74(void);
 void fn_8001D074(void);
-void fn_8001D0D0(void);
-void fn_8001D110(void);
-void fn_8001D148(void);
+void fn_8001D0D0(s32 idx, f32 scale);
+void fn_8001D110(s32 idx, f32 x, f32 y, f32 z);
+void fn_8001D148(s32 idx, f32 x, f32 y, f32 z);
 void fn_8001D180(void);
 void fn_8001D2D4(void);
 void fn_8001DB74(void);
 void fn_8001DD58(void);
 void fn_8001DEA4(void);
 void fn_8001E0D8(void);
-void fn_8001E460(void);
+void fn_8001E460(void (*draw)(MtxPtr view, s32, u32));
 void fn_8001E474(void);
 void fn_8001E488(void);
 void fn_8001E784(void);
@@ -105,6 +110,6 @@ void challengeMapMaybe(void);
 void fn_8001F5E8(void);
 void fn_8001F8A4(void);
 void fn_8001FC4C(void);
-void fn_8001FDD4(void);
+void fn_8001FDD4(struct ModelLink* arg0);
 
 #endif // !__STATIC_MODEL_H_
