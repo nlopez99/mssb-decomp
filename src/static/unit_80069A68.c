@@ -6,6 +6,22 @@
 #include "static/sub.h"
 #include "Dolphin/vi.h"
 
+typedef struct TexBank {
+    /* 0x00 */ u32 _00;
+    /* 0x04 */ TextureDesc tex[1];
+} TexBank;
+
+typedef struct FadeParams {
+    /* 0x00 */ s32 _00;
+    /* 0x04 */ void (*draw)(struct FadeParams* params);
+    /* 0x08 */ s32 mode;
+    /* 0x0C */ TexBank* bank;
+    /* 0x10 */ s32 index;
+    /* 0x14 */ s32 index2;
+    /* 0x18 */ f32 alpha;
+    /* 0x1C */ f32 alpha2;
+} FadeParams;
+
 typedef struct SceneTask {
     /* 0x00 */ void (*func)(void);
     /* 0x04 */ u8 _04[0x10 - 0x4];
@@ -15,7 +31,7 @@ typedef struct SceneTask {
         /* 0x14 */ u16 _14;
         /* 0x14 */ u32* texFile;
     };
-    /* 0x18 */ void* _18;
+    /* 0x18 */ struct FadeParams* fades;
     /* 0x1C */ u8 _1C[0x28 - 0x1C];
     /* 0x28 */ u32* sabFile;
     /* 0x2C */ u8 _2C[0x34 - 0x2C];
@@ -28,7 +44,9 @@ typedef struct SceneTask {
 } SceneTask;
 
 typedef struct SceneGlobals {
-    /* 0x00 */ u8 _00[0x28];
+    /* 0x00 */ u8 _00[0x20];
+    /* 0x20 */ u8 _20;
+    /* 0x21 */ u8 _21[0x28 - 0x21];
     /* 0x28 */ u8 _28;
     /* 0x29 */ u8 _29;
     /* 0x2A */ u8 _2A;
@@ -67,20 +85,7 @@ typedef struct SceneAram {
     /* 0x715 */ u8 _715;
 } SceneAram;
 
-typedef struct TexBank {
-    /* 0x00 */ u32 _00;
-    /* 0x04 */ TextureDesc tex[1];
-} TexBank;
 
-typedef struct FadeParams {
-    /* 0x00 */ u8 _00[0x8];
-    /* 0x08 */ s32 mode;
-    /* 0x0C */ TexBank* bank;
-    /* 0x10 */ s32 index;
-    /* 0x14 */ s32 index2;
-    /* 0x18 */ f32 alpha;
-    /* 0x1C */ f32 alpha2;
-} FadeParams;
 
 extern SceneTask* lbl_803CC1B8;
 extern SceneGlobals lbl_80366158;
@@ -90,6 +95,7 @@ extern SceneMenuState lbl_803716B8;
 extern SceneFlags lbl_8037169C;
 extern SceneAram lbl_803C6CF8;
 extern GXColor lbl_803CB8DC;
+extern u8 lbl_803CBBC0;
 extern void* lbl_803CBD30;
 extern GXRenderModeObj* lbl_803CBD34;
 typedef struct SceneCallback {
@@ -116,6 +122,8 @@ static u32 lbl_80109378[16] = { 0x3, 0x0, 0x0, 0xFFFFFFFF, 0x30100FF, 0x16000000
 static SceneCallback lbl_801093B8 = { 0x0000002F, fn_80069A68, 0x00000000 };
 
 extern void fn_80008E00(void (*func)(s32));
+extern void fn_8000900C(void);
+extern void fn_800A7D4C(s32 layer, FadeParams* params);
 extern BOOL fn_80021518(s32 group, void* data);
 extern void fn_800215F8(SceneCallback* callback);
 extern void* fn_800ACF34(u32 align, u32 size);
@@ -163,7 +171,7 @@ void fn_8006BE00(void) {
         }
         GXSetCopyClear(lbl_803CB8DC, 0xFFFFFF);
         task->_36 = 0;
-        task->_18 = fn_800ACF34(0x20, 0x40);
+        task->fades = fn_800ACF34(0x20, 0x40);
         task->sabFile = fn_800ACF34(0x20, lbl_801092E8[1] & 0x0FFFFFFF);
         ARAMTransfer(lbl_801092E8, task->sabFile, 0, 0);
         task->state++;
@@ -209,6 +217,51 @@ void fn_8006BE00(void) {
 
 // .text:0x8006BB60 size:0x2A0
 void fn_8006BB60(void) {
+    SceneTask* task = lbl_803CC1B8;
+
+    fn_80022B68();
+    switch (task->state) {
+    case 0:
+        if (++task->_38 == 30) {
+            task->_36 = 90;
+            task->state++;
+        }
+        break;
+    case 1:
+        if (task->_36-- == 0) {
+            fn_8000900C();
+            lbl_80366158._20 = 1;
+            task->_36 = 3480;
+            task->state++;
+        }
+        break;
+    case 2:
+    case 3:
+        if (task->state == 2 && ++task->_39 == 30) {
+            task->state = 3;
+        } else if (task->state == 3 && --task->_39 == 0) {
+            task->state = 2;
+        }
+        if (--task->_36 == 0 || lbl_803C77B8[0]._00 != 0) {
+            task->state = 4;
+        }
+        break;
+    case 4:
+        if (--task->_38 == 0) {
+            task->state = 0;
+            lbl_803CC1B8->func = fn_8006B78C;
+        }
+        break;
+    }
+    task->fades[lbl_803CBBC0].mode = 0;
+    task->fades[lbl_803CBBC0].bank = (TexBank*)task->texFile[0];
+    task->fades[lbl_803CBBC0].index = 6;
+    task->fades[lbl_803CBBC0].alpha = task->_38 / 30.0f;
+    task->fades[lbl_803CBBC0].index2 = 7;
+    task->fades[lbl_803CBBC0].alpha2 = task->_39 / 30.0f * task->_38 / 30.0f;
+    task->fades[lbl_803CBBC0]._00 = 0;
+    task->fades[lbl_803CBBC0].draw = fn_8006AC24;
+    fn_800A7D4C(0, &task->fades[lbl_803CBBC0]);
 }
 
 // .text:0x8006B78C size:0x3D4
