@@ -2256,8 +2256,8 @@ void fn_3_14DC80(s8 barrel) {
 }
 
 // .text:0x0014D710 size:0x570 mapped:0x8078C7A4
-// The second inlined fn_3_14D44C swaps its particle and count registers (98.81%);
-// the first copy matches.
+// The else branch writes fn_3_14D44C's body out: called there, that copy swaps its particle
+// and count registers.
 void fn_3_14D710(s8 barrel) {
     Emitter3880* emitter = fn_800339F0(NULL, 0x20);
 
@@ -2266,8 +2266,41 @@ void fn_3_14D710(s8 barrel) {
     } else {
         emitter = fn_80033A24(fn_3_14CECC, 0xF0, 0, lbl_3_data_26D00[2], 1, 0x20);
         if (emitter != NULL) {
+            u8 index;
+            s32 n;
+            Particle3880* p;
+
             fn_3_14D6D4(emitter);
-            fn_3_14D44C(emitter, barrel);
+            index = barrel;
+            n = 0;
+            p = emitter->particles;
+            do {
+                if (p->_44 == 0 && p->_4A == 0) {
+                    if (n < 3) {
+                        p->_44 = 1;
+                        p->_45 = index;
+                        p->_46 = 0xFF;
+                        p->_4D = lbl_3_data_26D00[0];
+                        p->_38 = p->_3C = lbl_3_data_26D00[4];
+                        p->color[3] = lbl_3_data_26D00[7];
+                        fn_3_14D318(p);
+                        p->_4A = lbl_3_data_26D00[17];
+                        p->_48 = 0;
+                    } else {
+                        p->_44 = 2;
+                        p->_45 = index;
+                        p->_46 = (n - 3) / 5;
+                        p->_4D = lbl_3_data_26D00[1];
+                        p->_38 = p->_3C = lbl_3_data_26D00[11];
+                        p->color[3] = lbl_3_data_26D00[14];
+                        p->_48 = ((n - 3) % 5) * 4 + 1;
+                        p->_4A = lbl_3_data_26D00[18];
+                    }
+                    p->color[0] = p->color[1] = p->color[2] = 0xFF;
+                    n++;
+                }
+                p = p->next;
+            } while (p != NULL && n < 43);
         }
     }
 }
