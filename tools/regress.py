@@ -193,51 +193,76 @@ def main() -> int:
     base_dir = ensure_base_build(base_sha)
     before, after = report(base_dir), report(root_dir)
 
+    # Functions are keyed by name (by unit and name for names several units
+    # share), so a function that moved to another unit is compared with itself
+    def shared_names(units: Dict[str, Any]) -> set:
+        seen, shared = set(), set()
+        for unit in units.values():
+            for f in unit.get("functions", []):
+                (shared if f["name"] in seen else seen).add(f["name"])
+        return shared
+
+    shared = shared_names(before) | shared_names(after)
+
+    def key(unit: str, fn: str) -> str:
+        return f"{unit}:{fn}" if fn in shared else fn
+
     # objdiff scores, per function
-    def scores(units: Dict[str, Any]) -> Dict[Tuple[str, str], float]:
-        return {(u, f["name"]): f.get("fuzzy_match_percent", 0.0) for u, unit in units.items()
+    def scores(units: Dict[str, Any]) -> Dict[str, Tuple[str, float]]:
+        return {key(u, f["name"]): (u, f.get("fuzzy_match_percent", 0.0)) for u, unit in units.items()
                 for f in unit.get("functions", [])}
 
     old, new = scores(before), scores(after)
     keys = sorted(set(old) | set(new))
-    dropped = [(k, old.get(k), new.get(k)) for k in keys if k in old and k in new and new[k] < old[k]]
-    raised = [(k, old.get(k), new.get(k)) for k in keys if k in old and k in new and new[k] > old[k]]
+    dropped = [(k, old[k][1], new[k][1]) for k in keys if k in old and k in new and new[k][1] < old[k][1]]
+    raised = [(k, old[k][1], new[k][1]) for k in keys if k in old and k in new and new[k][1] > old[k][1]]
     vanished = [k for k in keys if k in old and k not in new]
     appeared = [k for k in keys if k not in old and k in new]
     print(f"objdiff scores: {len(raised)} improved, {len(dropped)} dropped ({len(new)} functions)")
-    for (unit, fn), b, a in dropped:
-        print(f"  DROPPED  {fn} ({unit}) {b:.2f}% -> {a:.2f}%")
-    for (unit, fn), b, a in raised:
-        print(f"  improved {fn} ({unit}) {b:.2f}% -> {a:.2f}%")
-    for unit, fn in vanished:
-        print(f"  gone     {fn} ({unit}): in the base report but not this one (splits changed?)")
-    for unit, fn in appeared:
-        print(f"  new      {fn} ({unit})")
+    for k, b, a in dropped:
+        print(f"  DROPPED  {k} ({new[k][0]}) {b:.2f}% -> {a:.2f}%")
+    for k, b, a in raised:
+        print(f"  improved {k} ({new[k][0]}) {b:.2f}% -> {a:.2f}%")
+    for k in vanished:
+        print(f"  gone     {k} ({old[k][0]}): in the base report but not this one (splits changed?)")
+    for k in appeared:
+        print(f"  new      {k} ({new[k][0]})")
 
     # Strict matches, only in units whose objects changed
     old_units, new_units = load_units(base_dir), load_units(root_dir)
-    lost, gained, checked = [], [], 0
-    for name in sorted(set(before) & set(after)):
+
+    def changed(name: str) -> bool:
         o, n = old_units.get(name), new_units.get(name)
-        if not o or not n or "base_path" not in n:
+        if not o or not n:
+            return True
+        return not all(file_hash(os.path.join(base_dir, o[path])) == file_hash(os.path.join(root_dir, n[path]))
+                       for path in ("target_path", "base_path") if path in o and path in n)
+
+    was: Dict[str, Tuple[str, str]] = {}
+    now: Dict[str, Tuple[str, str]] = {}
+    checked = 0
+    for name in sorted(set(before) | set(after)):
+        if not changed(name):
             continue
-        same = all(file_hash(os.path.join(base_dir, o[key])) == file_hash(os.path.join(root_dir, n[key]))
-                   for key in ("target_path", "base_path") if key in o and key in n)
-        if same:
-            continue
-        checked += 1
-        was = strict_statuses(base_dir, o, before[name]) if "base_path" in o else {}
-        now = strict_statuses(root_dir, n, after[name])
-        for fn, status in now.items():
-            if was.get(fn) == "match" and status != "match":
-                lost.append((name, fn, status))
-            elif status == "match" and was.get(fn) != "match":
-                gained.append((name, fn, was.get(fn, "missing")))
+        o, n = old_units.get(name), new_units.get(name)
+        if name in before and o and "base_path" in o:
+            for fn, status in strict_statuses(base_dir, o, before[name]).items():
+                was[key(name, fn)] = (name, status)
+        if name in after and n and "base_path" in n:
+            checked += 1
+            for fn, status in strict_statuses(root_dir, n, after[name]).items():
+                now[key(name, fn)] = (name, status)
+    # A function absent from the new report altogether was merged away by a
+    # symbols change; the scores section lists it as gone
+    lost = [(was[k][0], k, now.get(k, (None, "missing"))[1]) for k in sorted(was)
+            if was[k][1] == "match" and k in new and now.get(k, (None, ""))[1] != "match"]
+    gained = [(now[k][0], k, was.get(k, (None, "missing"))[1]) for k in sorted(now)
+              if now[k][1] == "match" and was.get(k, (None, ""))[1] != "match"]
     print(f"strict matches: {len(gained)} gained, {len(lost)} lost ({checked} changed units checked)")
     for unit, fn, status in lost:
         print(f"  LOST     {fn} ({unit}): now {status}")
-    for unit, fn, was in gained:
-        print(f"  gained   {fn} ({unit}): was {was}")
+    for unit, fn, status in gained:
+        print(f"  gained   {fn} ({unit}): was {status}")
 
     if dropped or lost:
         print("regress: FAILED")

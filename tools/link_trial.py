@@ -54,7 +54,8 @@ def candidates(units: List[dict], text: str) -> List[dict]:
 
 def entry_for(unit: dict, status: str) -> str:
     source = unit.get("metadata", {}).get("source_path", "")
-    return f'Object({status}, "{source[len("src/"):]}")'
+    # No closing parenthesis: an entry may go on with extra_cflags
+    return f'Object({status}, "{source[len("src/"):]}"'
 
 
 def main() -> int:
