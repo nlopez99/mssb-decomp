@@ -4,6 +4,8 @@
 #include "string.h"
 #include "musyx/musyx.h"
 
+#define ALIGN32(x) (((x) + 0x1F) & ~0x1F)
+
 // A sound group file once loaded: offsets that fn_80021980 turns into pointers
 typedef struct SoundGroupData {
     /* 0x00 */ void* proj;
@@ -44,6 +46,7 @@ typedef struct SoundFile {
 typedef struct SoundTaskState {
     /* 0x00 */ u8 _00[0x10];
     /* 0x10 */ s16 state;
+    /* 0x12 */ u16 priority;
 } SoundTaskState;
 
 typedef struct SoundLoadTask {
@@ -62,6 +65,10 @@ typedef struct SoundTask {
 } SoundTask;
 
 extern SoundFile lbl_800EF508[0x30];
+extern SoundFile lbl_800EFBE8[0x15];
+extern SoundFile lbl_800EFD38[0x203];
+extern SoundFile lbl_800F1D78[0x402];
+extern SoundFile lbl_800F71D8[0x2A];
 extern SoundBank lbl_800EF808;
 extern u8 lbl_800EFBB4[0xC];
 extern struct {
@@ -93,7 +100,11 @@ typedef struct AramQueue {
     /* 0x1CA */ s8 busy;
     /* 0x1CC */ void* _1CC;
     /* 0x1D0 */ void* _1D0;
-    /* 0x1D4 */ u8 _1D4[0x1E8 - 0x1D4];
+    /* 0x1D4 */ u8 _1D4[0x1D8 - 0x1D4];
+    /* 0x1D8 */ s32* _1D8;
+    /* 0x1DC */ s32* _1DC;
+    /* 0x1E0 */ s32* _1E0;
+    /* 0x1E4 */ s32* _1E4;
     /* 0x1E8 */ u8 _1E8;
     /* 0x1E9 */ u8 _1E9;
     /* 0x1EA */ u8 _1EA;
@@ -106,6 +117,29 @@ extern struct {
     /* 0x000 */ u8 _000[0x715];
     /* 0x715 */ s8 _715;
 } lbl_803C6CF8;
+
+static inline SoundFile* SoundFileAt(s32 id) {
+    return &lbl_800EFD38[id];
+}
+
+static inline BOOL AramPush(void* file, void* dst, s32 arg2, s32 arg3, AramCallback callback, void* user) {
+    s8 next = (lbl_803716B8.head + 1) % 18;
+    AramRequest* req;
+
+    if (next == lbl_803716B8.tail || (dst == NULL && callback == NULL)) {
+        return FALSE;
+    }
+    lbl_803716B8.busy = 1;
+    req = &lbl_803716B8.queue[lbl_803716B8.head];
+    req->file = file;
+    req->dst = dst;
+    req->_08 = arg2;
+    req->_0C = arg3;
+    req->callback = callback;
+    req->user = user;
+    lbl_803716B8.head = next;
+    return TRUE;
+}
 extern SoundTaskState* lbl_803CC1B8;
 extern u8 lbl_80118740[0x40000];
 extern u8 lbl_80158740[0x4000];
@@ -127,6 +161,26 @@ void fn_80022D58(void) {
 BOOL fn_80022CB4(void* file, void* dst, s32 arg2, s32 arg3, AramCallback callback, void* user) {
     s8 next = (lbl_803716B8.head + 1) % 18;
     AramRequest* req;
+    // dead stores stand for code the original compiled to nothing: fn_800215F8 calls this, while AramPush is inlined
+    {
+        s32 d;
+        d = 0;
+        d = 1;
+        d = 2;
+        d = 3;
+        d = 4;
+        d = 5;
+        d = 6;
+        d = 7;
+        d = 8;
+        d = 9;
+        d = 10;
+        d = 11;
+        d = 12;
+        d = 13;
+        d = 14;
+        d = 15;
+    }
 
     if (next == lbl_803716B8.tail || (dst == NULL && callback == NULL)) {
         return FALSE;
@@ -144,7 +198,29 @@ BOOL fn_80022CB4(void* file, void* dst, s32 arg2, s32 arg3, AramCallback callbac
 }
 
 // .text:0x80022B68 size:0x14C
-void fn_80022B68(void) {
+BOOL fn_80022B68(void) {
+    AramRequest* req;
+
+    if (lbl_803716B8.busy == 0) {
+        return TRUE;
+    }
+    if (lbl_803C6CF8._715 != 1) {
+        return FALSE;
+    }
+    if (lbl_803716B8.current.callback != NULL) {
+        lbl_803716B8.current.callback(lbl_803716B8.current.file, lbl_803716B8.current.dst, lbl_803716B8.current.user);
+    }
+    if (lbl_803716B8.tail != lbl_803716B8.head) {
+        req = &lbl_803716B8.queue[lbl_803716B8.tail];
+        req->dst = ARAMTransfer(req->file, req->dst, req->_08, req->_0C);
+        lbl_803716B8.current = *req;
+        lbl_803716B8.tail = (lbl_803716B8.tail + 1) % 18;
+    } else {
+        lbl_803716B8.current.callback = NULL;
+        lbl_803716B8.busy = 0;
+        return TRUE;
+    }
+    return FALSE;
 }
 
 // .text:0x80022B14 size:0x54
@@ -159,7 +235,23 @@ void fn_80022B14(void) {
 }
 
 // .text:0x80022A24 size:0xF0
-void fn_80022A24(void) {
+BOOL fn_80022A24(s32 stadium, s32 part) {
+    if (lbl_803716B8._1D0 != NULL) {
+        fn_800A7568();
+    } else {
+        if (lbl_803C6CF8._715 != 1) {
+            return FALSE;
+        }
+        if (lbl_803716B8._1CC != NULL) {
+            lbl_803716B8._1D0 = lbl_803716B8._1CC;
+        } else {
+            lbl_803716B8._1D0 = fn_800A6354(0xED440);
+        }
+    }
+    lbl_803716B8._1CC = NULL;
+    ARAMTransfer(&lbl_800EFBE8[stadium * 3 + part], lbl_803716B8._1D0, 2, 0);
+    fn_800B0A5C_insertQueue(fn_80022B14, lbl_803CC1B8->priority + 1);
+    return TRUE;
 }
 
 // .text:0x800229CC size:0x58
@@ -188,33 +280,8 @@ void fn_800227A0(void) {
 }
 
 // .text:0x80022634 size:0x16C
-static inline BOOL AramStep(void) {
-    AramRequest* req;
-
-    if (lbl_803716B8.busy == 0) {
-        return TRUE;
-    }
-    if (lbl_803C6CF8._715 != 1) {
-        return FALSE;
-    }
-    if (lbl_803716B8.current.callback != NULL) {
-        lbl_803716B8.current.callback(lbl_803716B8.current.file, lbl_803716B8.current.dst, lbl_803716B8.current.user);
-    }
-    if (lbl_803716B8.tail != lbl_803716B8.head) {
-        req = &lbl_803716B8.queue[lbl_803716B8.tail];
-        req->dst = ARAMTransfer(req->file, req->dst, req->_08, req->_0C);
-        lbl_803716B8.current = *req;
-        lbl_803716B8.tail = (lbl_803716B8.tail + 1) % 18;
-    } else {
-        lbl_803716B8.current.callback = NULL;
-        lbl_803716B8.busy = 0;
-        return TRUE;
-    }
-    return FALSE;
-}
-
 void fn_80022634(void) {
-    if (AramStep() && lbl_803716B8._1E8 == 0) {
+    if (fn_80022B68() && lbl_803716B8._1E8 == 0) {
         fn_800B0A14_removeQueue();
     }
 }
@@ -225,11 +292,18 @@ void fn_80022620(void) {
 }
 
 // .text:0x8002254C size:0xD4
-void fn_8002254C(void) {
+void fn_8002254C(void* file, u8* data, s32 index) {
+    data += *(s32*)data;
+    AramPush(&lbl_800EFD38[index], data, 3, lbl_803716B8._1D8[index], (AramCallback)fn_80022620, NULL);
 }
 
 // .text:0x8002244C size:0x100
-void fn_8002244C(void) {
+void fn_8002244C(void* file, u8* data, s32 id) {
+    u32 size = ALIGN32(SoundFileAt((id >> 16) + 54)->size & 0x0FFFFFFF);
+
+    *(u32*)(data + 0xC) = size;
+    data += size;
+    AramPush(SoundFileAt((u16)id + 54), data, 3, lbl_803716B8._1DC[(u16)id], (AramCallback)fn_80022620, NULL);
 }
 
 // .text:0x8002204C size:0x400
@@ -241,11 +315,35 @@ void fn_80021CA4(void) {
 }
 
 // .text:0x80021BBC size:0xE8
-void fn_80021BBC(void) {
+void* fn_80021BBC(s32 index, void* dst) {
+    if (index < 0 || index >= 54) {
+        return NULL;
+    }
+    if (dst == NULL) {
+        dst = _OSAllocFromHeap(0x20, SoundFileAt(index + 432)->size & 0x0FFFFFFF);
+    }
+    if (lbl_803716B8._1EA & 2) {
+        ARAMTransfer(SoundFileAt(index + 432), dst, 3, lbl_803716B8._1E0[index]);
+    } else {
+        ARAMTransfer(&lbl_800F1D78[index * 19 + 15], dst, 0, 0);
+    }
+    return dst;
 }
 
 // .text:0x80021ADC size:0xE0
-void fn_80021ADC(void) {
+void* fn_80021ADC(s32 index, void* dst) {
+    if (index < 0 || index >= 29) {
+        return NULL;
+    }
+    if (dst == NULL) {
+        dst = _OSAllocFromHeap(0x20, SoundFileAt(index + 486)->size & 0x0FFFFFFF);
+    }
+    if (lbl_803716B8._1EA & 8) {
+        ARAMTransfer(SoundFileAt(index + 486), dst, 3, lbl_803716B8._1E4[index]);
+    } else {
+        ARAMTransfer(&lbl_800F71D8[index], dst, 0, 0);
+    }
+    return dst;
 }
 
 // .text:0x80021AC8 size:0x14
@@ -310,11 +408,12 @@ void fn_800216F8(u8 group, void* callback) {
 
 // .text:0x80021650 size:0xA8
 void fn_80021650(s32 arg0, SoundGroupData* data, SoundLoadTask* task) {
-    SoundGroupData** entry = &lbl_800EF808.groups[task->group];
+    SoundGroupData** entry;
 
+    entry = &lbl_800EF808.groups[task->group];
     *entry = data;
-    fn_80021980(*entry);
-    task->onLoad(task, *entry);
+    fn_80021980(data);
+    task->onLoad(task, data);
     fn_80021954(entry);
     task->owner->state = 1;
 }
@@ -332,7 +431,7 @@ s32 fn_8002158C(void) {
 }
 
 // .text:0x80021518 size:0x74
-BOOL fn_80021518(u8 group, SoundGroupData* data) {
+BOOL fn_80021518(u16 group, SoundGroupData* data) {
     if (sndPushGroup(data->proj, group, data->samples, data->sdir, data->pool) == 0) {
         return FALSE;
     }
