@@ -32,7 +32,7 @@ void fn_8005E9D8(struct SpaniTask* task, s32 team);
 void fn_8005EC88(struct SpaniTask* task, s32 team);
 void fn_8005F068(void);
 void fn_8005F734(struct SpaniTask* task, s32 team);
-void fn_8005F9D0(void);
+void fn_8005F9D0(struct SpaniTask* task, s32 team);
 void fn_8005FCA0(struct SpaniTask* task, s32 team);
 void fn_80060184(void);
 void fn_80061B9C(void);

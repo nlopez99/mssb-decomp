@@ -82,7 +82,9 @@ extern struct {
     /* 0x0CF48 */ s8 _CF48[2];
     /* 0x0CF4A */ u8 _CF4A[0xCF52 - 0xCF4A];
     /* 0x0CF52 */ u8 _CF52[2];
-    /* 0x0CF54 */ u8 _CF54[0xCF63 - 0xCF54];
+    /* 0x0CF54 */ u8 _CF54[0xCF5B - 0xCF54];
+    /* 0x0CF5B */ u8 _CF5B[2];
+    /* 0x0CF5D */ u8 _CF5D[0xCF63 - 0xCF5D];
     /* 0x0CF63 */ u8 _CF63[2];
     /* 0x0CF65 */ u8 _CF65[0xCF70 - 0xCF65];
     /* 0x0CF70 */ u8 _CF70;
@@ -293,7 +295,54 @@ void fn_8005FCA0(SpaniTask* task, s32 team) {
 }
 
 // .text:0x8005F9D0 size:0x2D0
-void fn_8005F9D0(void) {
+// 97.39%: the target compares the count with 5 held in r27 (set just before
+// each branch's last call) and branches around the second flag test.
+void fn_8005F9D0(SpaniTask* task, s32 team) {
+    s32 done;
+
+    if (isLockState(lbl_803C66B0.rows[9].port[team], 1)) {
+        done = isAnimDone(task, team + 4, 20);
+        if (g_d_GameSettings.GameModeSelected != 5) {
+            if (g_d_GameSettings._10 == 0 && team != 0) {
+                done += isAnimDone(task, team, 30);
+                done += isAnimDone(task, team + 10, 10);
+                done += isAnimDone(task, team + 0x12, 20);
+                done += isAnimDone(task, team + 0x14, 10);
+            } else {
+                done += isAnimDone(task, team, 20);
+                done += isAnimDone(task, team + 10, 10);
+                done += isAnimDone(task, team + 0x12, 10);
+                done += isAnimDone(task, team + 0x14, 10);
+            }
+        } else {
+            done += isAnimDone(task, team, 20);
+            done += isAnimDone(task, team + 10, 10);
+            done += isAnimDone(task, 0x12, 10);
+            done += isAnimDone(task, 0x14, 10);
+        }
+        if (done == 5) {
+            if (g_d_GameSettings._10 == 0) {
+                lbl_803297E0._CF5B[team] = 1;
+                if (lbl_803297E0._CF5B[0] != 0) {
+                    if (lbl_803297E0._CF5B[1] == 0) {
+                        return;
+                    }
+                    lbl_803297E0._CF5B[1] = 0;
+                    lbl_803297E0._CF5B[0] = 0;
+                    fn_80062674(0);
+                    fn_80062674(1);
+                    lbl_803C66B0.rows[9].port[0] = 2;
+                    lbl_803C66B0.rows[9].port[1] = 2;
+                    if (g_d_GameSettings.GameModeSelected == 5) {
+                        fn_800625A4(0, 0x45);
+                    }
+                }
+            } else {
+                fn_80062674(team);
+                lbl_803C66B0.rows[9].port[team] = 2;
+            }
+        }
+    }
 }
 
 // .text:0x8005F734 size:0x29C
