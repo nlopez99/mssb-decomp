@@ -51,7 +51,7 @@ typedef struct SpaniSlot {
 
 typedef struct SabEntry {
     /* 0x00 */ Mtx mtx;
-    /* 0x30 */ struct SabFile* _30;
+    /* 0x30 */ void* _30; // the loaded file: a SAB file, or two offsets to the texture and SAB parts
     /* 0x34 */ void* _34;
     /* 0x38 */ struct SabFile* _38;
 } SabEntry; // size: 0x3C
@@ -134,6 +134,11 @@ extern SpaniSlot lbl_80371C30[];
 extern SpaniObj lbl_8039C3E0[0x360];
 extern SabEntry lbl_803C4BE0[20];
 extern u8 lbl_803C5F74[0xB4];
+extern struct {
+    /* 0x000 */ u8 _000[0x715];
+    /* 0x715 */ s8 _715;
+} lbl_803C6CF8;
+extern void* ARAMTransfer(void* entry, int arg1, int arg2, u32 aram);
 
 Mtx lbl_800F78E0[4] = {
     { { 1.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 0.0f } },
@@ -143,6 +148,10 @@ Mtx lbl_800F78E0[4] = {
 };
 
 SpaniObj* lbl_803CBC9C;
+s32 lbl_803CBC98;
+void* lbl_803CBC94;
+u8 lbl_803CBC91;
+u8 lbl_803CBC90;
 
 s32 lbl_803CB810 = -1;
 s32 lbl_803CB814 = 0x360;
@@ -425,14 +434,55 @@ void fn_80035A00(void) {
 }
 
 static inline s8 findFreeSab(void) {
-    u8 i;
+    u8 i = 0;
 
-    for (i = 0; i < 20; i++) {
+    do {
         if (lbl_803C4BE0[i]._30 == NULL) {
             return i;
         }
-    }
+    } while (++i < 20);
     return -1;
+}
+
+// .text:0x80035838 size:0x1C8 mapped:0x80035838
+u8 fn_80035838(void* entry, u8 id) {
+    s32 done = FALSE;
+    u32* file;
+    s32 i;
+
+    if (lbl_803CBC90 == 2) {
+        lbl_803CBC90 = 0;
+        lbl_803CBC94 = NULL;
+        lbl_803CB810 = -1;
+    }
+    switch (lbl_803CBC90) {
+    case 0:
+        lbl_803CBC91 = findFreeSab();
+        if (lbl_803CBC91 == -1) {
+            OSReport(" SabNo = %d not to add  \n", lbl_803CBC91);
+            OSPanic("spani_default.c", 1114, "gasSpani No Empty \n");
+        }
+        lbl_8023D6C0[lbl_803CBC91] = id;
+        file = ARAMTransfer(entry, 0, 0, 0);
+        lbl_803C4BE0[lbl_803CBC91]._30 = file;
+        lbl_803CBC94 = entry;
+        lbl_803CB810 = id;
+        lbl_803CBC90++;
+        break;
+    case 1:
+        if (lbl_803C6CF8._715 == 1) {
+            i = lbl_803CBC91;
+            file = lbl_803C4BE0[i]._30;
+            lbl_803C4BE0[i]._34 = (u8*)file + file[0];
+            lbl_803C4BE0[i]._38 = (SabFile*)((u8*)file + file[1]);
+            convertTextureHeader(lbl_803C4BE0[i]._34);
+            fn_8000B9C8(lbl_803C4BE0[i]._38);
+            done = TRUE;
+            lbl_803CBC90++;
+        }
+        break;
+    }
+    return done;
 }
 
 // .text:0x80035750 size:0xE8 mapped:0x80035750
@@ -443,10 +493,10 @@ void fn_80035750(SabFile* sab, void* tex, s16 id) {
         OSReport(" SabNo = %d not to add  \n", i);
         OSPanic("spani_default.c", 1180, "gasSpani No Empty \n");
     }
+    lbl_8023D6C0[i] = id;
     lbl_803C4BE0[i]._30 = sab;
     lbl_803C4BE0[i]._34 = tex;
     lbl_803C4BE0[i]._38 = sab;
-    lbl_8023D6C0[i] = id;
     convertTextureHeader(lbl_803C4BE0[i]._34);
     fn_8000B9C8(lbl_803C4BE0[i]._38);
 }
