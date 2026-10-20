@@ -44,7 +44,7 @@ int fn_3_85074(int runner, int risk);
 void fn_3_85744(int runner);
 int fn_3_85840(int runner, int count, int* decisions);
 int fn_3_85A70(int runner);
-void fn_3_85C44(int runner, int direction);
+void fn_3_85C44(int runner, s32 direction);
 void fn_3_85CB0(void);
 void fn_3_85EF4(int runner, int direction);
 int fn_3_8604C(int* fielderOut);

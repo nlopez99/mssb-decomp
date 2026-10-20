@@ -1571,8 +1571,6 @@ void fn_3_85EF4(int runner, int direction) {
 }
 
 // .text:0x00085CB0 size:0x244 mapped:0x806C4D44
-// 60.54%: the target keeps fn_3_85C44's direction tests after inlining it with direction 1;
-// this build folds them away, which also shrinks the frame.
 void fn_3_85CB0(void) {
     int i;
 
@@ -1607,7 +1605,7 @@ void fn_3_85CB0(void) {
 }
 
 // .text:0x00085C44 size:0x6C mapped:0x806C4CD8
-void fn_3_85C44(int runner, int direction) {
+void fn_3_85C44(int runner, s32 direction) {
     InMemRunnerType* r = &g_Runners[runner];
 
     if (r->baseRoundingState != 1 || r->overRun1BStage < 2 || direction == 1) {
@@ -2108,11 +2106,11 @@ int fn_3_846C8(int runner) {
 }
 
 // .text:0x000842E4 size:0x3E4 mapped:0x806C3378
-// 99.14%: register allocation only; the target gives the call arguments' saved pointers r26-r28
-// and r, next and current r25, r30 and r29
+// 99.96%: only the last return's frames + 20 differs, computed into r0 here where the target
+// adds in place in r3
 int fn_3_842E4(int runner) {
-    InMemRunnerType* r = &g_Runners[runner];
     int next;
+    InMemRunnerType* r = &g_Runners[runner];
     int current;
     int throwFrames;
     int frames;
@@ -2139,7 +2137,7 @@ int fn_3_842E4(int runner) {
     if (r->baseStandingOn == g_FieldingLogic._0C4) {
         return -(g_FieldingLogic._0C4 == current);
     }
-    if (r->runningDirectionCode == 1 && g_FieldingLogic._0C4 == next) {
+    if (r->runningDirectionCode == 1 && g_FieldingLogic._0C4 == r->nextBase) {
         if (r->percentTowardsNextBase >= 0.4f) {
             throwFrames += 30;
             if (r->currentBase == 3) {
@@ -2155,7 +2153,7 @@ int fn_3_842E4(int runner) {
         }
         return -1;
     }
-    if (r->runningDirectionCode == 3 && g_FieldingLogic._0C4 == current) {
+    if (r->runningDirectionCode == 3 && g_FieldingLogic._0C4 == r->currentBase) {
         if (r->percentTowardsNextBase <= 0.4f) {
             throwFrames += 15;
         }
@@ -3122,7 +3120,7 @@ void fn_3_810C4(int runner, int base) {
 }
 
 // .text:0x00080028 size:0x109C mapped:0x806BF0BC
-// 97.54%: the overrun and action steps schedule the target point's loads later, the dugout
+// 97.62%: the overrun and action steps schedule the target point's loads later, the dugout
 // velocity takes the speed as the second fmuls operand, and some FPR pairs are swapped.
 void fn_3_80028(int runner) {
     InMemRunnerType* r = &g_Runners[runner];
@@ -3159,9 +3157,12 @@ void fn_3_80028(int runner) {
                 r->position.z = ((VecXZ*)&out)->z;
             } else if (r->overRun1BStage == 3) {
                 fn_3_7FFD0(&p, 1, 2, r->slidingAdjustment_backwards);
-                out.x = (p.x - r->position.x) / r->overrunBaseFrames_countDown;
-                out.y = (p.y - r->position.y) / r->overrunBaseFrames_countDown;
-                out.z = (p.z - r->position.z) / r->overrunBaseFrames_countDown;
+                out.x = p.x - r->position.x;
+                out.y = p.y - r->position.y;
+                out.z = p.z - r->position.z;
+                out.x /= r->overrunBaseFrames_countDown;
+                out.y /= r->overrunBaseFrames_countDown;
+                out.z /= r->overrunBaseFrames_countDown;
                 r->position.x += out.x;
                 r->position.y += out.y;
                 r->position.z += out.z;
@@ -3902,7 +3903,7 @@ void fn_3_7EA68(void) {
 }
 
 // .text:0x0007E2BC size:0x7AC mapped:0x806BD350
-// 99.46%: registers differ in the stick-held branch (base and i swapped) and the third loop's
+// 99.48%: registers differ in the stick-held branch (base and i swapped) and the third loop's
 // handled counter starts as li 0 here where the target copies it from i with mr
 void fn_3_7E2BC(void) {
     InputStruct* input = &g_Controls[g_GameLogic.teams[g_GameLogic.teamBatting]];
@@ -4001,8 +4002,7 @@ void fn_3_7E2BC(void) {
         if (base < 0) {
             return;
         }
-        waited = 0;
-        for (i = 3; i >= 0; i--) {
+        for (i = 3, waited = 0; i >= 0; i--) {
             InMemRunnerType* r = &g_Runners[i];
             if (r->runnerOnFieldOrOutOrScored != 1 || r->nextBase != base) {
                 continue;
