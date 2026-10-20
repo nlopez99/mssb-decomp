@@ -64,6 +64,31 @@ static/physics.c:
 	.sbss       start:0x803CBCA0 end:0x803CBCA8
 	.sdata2     start:0x803CC720 end:0x803CC7A0
 
+static/uitexture.c:
+	extab       start:0x80005EE8 end:0x80005F18
+	extabindex  start:0x800079BC end:0x80007A04
+	.text       start:0x80039AA8 end:0x8003A2EC
+	.data       start:0x800F7A40 end:0x800F7B00
+	.bss        start:0x8023DD80 end:0x802D3D80
+	.sdata2     start:0x803CC7A0 end:0x803CC7D0
+
+static/static_8003A2EC.c:
+	extab       start:0x80005F18 end:0x80005FD0
+	extabindex  start:0x80007A04 end:0x80007B18
+	.text       start:0x8003A2EC end:0x8004157C
+	.rodata     start:0x800E6910 end:0x800E6920
+	.data       start:0x800F7B00 end:0x800FB3F8
+	.bss        start:0x802D3D80 end:0x802E4B00
+	.sdata      start:0x803CB828 end:0x803CB838
+	.sbss       start:0x803CBCA8 end:0x803CBCC0
+	.sdata2     start:0x803CC7D0 end:0x803CC7E8
+
+static/static_8004157C.c:
+	extab       start:0x80005FD0 end:0x80005FE0
+	extabindex  start:0x80007B18 end:0x80007B30
+	.text       start:0x8004157C end:0x80042598
+	.sbss       start:0x803CBCC0 end:0x803CBCC8
+	.sdata2     start:0x803CC7E8 end:0x803CC7F8
 static/unit_80063028.c:
 	extab       start:0x80006418 end:0x80006438
 	extabindex  start:0x80008184 end:0x800081B4
