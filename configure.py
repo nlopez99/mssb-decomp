@@ -629,6 +629,7 @@ config.libs = [
             Object(NonMatching, "static/particle.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/spani_default.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/physics.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(NonMatching, "static/uitexture.c", extra_cflags=["-cpp_exceptions on"]),
         ],
     },
     {

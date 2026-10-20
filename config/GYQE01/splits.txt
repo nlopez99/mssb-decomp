@@ -64,6 +64,13 @@ static/physics.c:
 	.sbss       start:0x803CBCA0 end:0x803CBCA8
 	.sdata2     start:0x803CC720 end:0x803CC7A0
 
+static/uitexture.c:
+	extab       start:0x80005EE8 end:0x80005F18
+	extabindex  start:0x800079BC end:0x80007A04
+	.text       start:0x80039AA8 end:0x8003A2EC
+	.data       start:0x800F7A40 end:0x800F7AB0
+	.sdata2     start:0x803CC7A0 end:0x803CC7D0
+
 Dolphin/base/PPCArch.c:
 	.text       start:0x8006D024 end:0x8006D138
 
