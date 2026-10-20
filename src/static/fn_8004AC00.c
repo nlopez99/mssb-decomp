@@ -41,7 +41,6 @@ extern struct {
     /* 0x28 */ u8 _28;
 } lbl_80366158;
 
-extern u8 lbl_800FC0FC[][3];
 
 extern BOOL getAnimRelatedCoordinates(int, int, Vec*);
 

@@ -1,5 +1,6 @@
 #include "static/fn_8004C094.h"
 #include "static/fn_8004AC00.h"
+#include "static/fn_8004B284.h"
 #include "static/particle.h"
 #include "static/UnknownHomes_Static.h"
 #include "string.h"
@@ -50,7 +51,6 @@ EffectBurst lbl_800FC720 = {
 EffectParams* lbl_803CB860 = &lbl_800FC720.base;
 u8 lbl_803CB864[2][3] = { { 255, 255, 255 }, { 255, 182, 100 } };
 
-extern u8 lbl_800FC0FC[][3];
 extern BOOL fn_8001B728(s32 idx, s32 kind, Vec* pos);
 
 // .text:0x8004C510 size:0xE8
