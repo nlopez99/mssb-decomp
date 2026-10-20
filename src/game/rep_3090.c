@@ -1114,12 +1114,18 @@ int fn_3_10698C(void** list) {
     return count;
 }
 
-// 99.57%: the target tests the id with `extsh.` once (cmpwi here) and swaps r4/r5/r6 in the
-// fielder branch's angle lookup; with an s16 id (99.34%) the runner branch's registers differ.
+static inline void fn_3_getAnimPos(s32 id, Vec* pos) {
+    memset(pos, 0, sizeof(Vec));
+    if (!getAnimRelatedCoordinates(id, lbl_3_common_bss_DE94._0000->_0938, (VecXYZ*)pos)) {
+        memset(pos, 0, sizeof(Vec));
+        getAnimRelatedCoordinates(id, 4, (VecXYZ*)pos);
+    }
+}
+
 // .text:0x00106270 size:0x71C mapped:0x80745304
 void fn_3_106270(Vec* out) {
     g_Stats_s* stats = &g_Stats;
-    int id = lbl_3_common_bss_DE94._0000->_0946;
+    s16 id = lbl_3_common_bss_DE94._0000->_0946;
     Vec pos;
     InMemRunnerType* runner;
 
@@ -1135,11 +1141,7 @@ void fn_3_106270(Vec* out) {
                     lbl_3_common_bss_DE94._0000->_0938 = lbl_3_data_3B4C[g_Fielders[id]._17A];
                     lbl_3_common_bss_DE94._0000->_0950 = 0;
                 }
-                memset(&pos, 0, sizeof(Vec));
-                if (!getAnimRelatedCoordinates(id, lbl_3_common_bss_DE94._0000->_0938, (VecXYZ*)&pos)) {
-                    memset(&pos, 0, sizeof(Vec));
-                    getAnimRelatedCoordinates(id, 4, (VecXYZ*)&pos);
-                }
+                fn_3_getAnimPos(id, &pos);
                 if (lbl_3_common_bss_DE94._0000->_09B7 == 0) {
                     if (lbl_3_common_bss_DE94._0000->_0938 != lbl_3_common_bss_DE94._0000->_093C ||
                         lbl_3_common_bss_DE94._0000->_0948 != lbl_3_common_bss_DE94._0000->_0946 ||
@@ -1161,8 +1163,8 @@ void fn_3_106270(Vec* out) {
                 }
                 if (stats->replayInd != 0 && stats->_3C == 7) {
                     out->y = -1.0f * out->y + g_Fielders[id]._00C + lbl_3_data_1DB00[lbl_3_common_bss_DE94._0000->_094C].y;
-                    out->x += lbl_3_data_1DB00[lbl_3_common_bss_DE94._0000->_094C].x;
-                    out->z += lbl_3_data_1DB00[lbl_3_common_bss_DE94._0000->_094C].z;
+                    out->x = out->x + lbl_3_data_1DB00[lbl_3_common_bss_DE94._0000->_094C].x;
+                    out->z = out->z + lbl_3_data_1DB00[lbl_3_common_bss_DE94._0000->_094C].z;
                 } else {
                     out->y = -1.0f * pos.y + g_Fielders[id]._00C + lbl_3_data_1DB00[lbl_3_common_bss_DE94._0000->_094C].y;
                     out->x = pos.x + lbl_3_data_1DB00[lbl_3_common_bss_DE94._0000->_094C].x;
@@ -1182,11 +1184,7 @@ void fn_3_106270(Vec* out) {
                     lbl_3_common_bss_DE94._0000->_0938 = lbl_3_data_3B4C[runner->charID];
                     lbl_3_common_bss_DE94._0000->_0950 = 0;
                 }
-                memset(&pos, 0, sizeof(Vec));
-                if (!getAnimRelatedCoordinates(id, lbl_3_common_bss_DE94._0000->_0938, (VecXYZ*)&pos)) {
-                    memset(&pos, 0, sizeof(Vec));
-                    getAnimRelatedCoordinates(id, 4, (VecXYZ*)&pos);
-                }
+                fn_3_getAnimPos(id, &pos);
                 pos.x -= runner->position.x;
                 pos.y -= runner->position.y;
                 pos.z -= runner->position.z;
