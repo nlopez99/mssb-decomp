@@ -24,9 +24,15 @@ typedef struct LightPos {
     /* 0x0E */ u8 b;
 } LightPos;
 
+typedef struct _VecXYZ {
+    f32 x, y, z;
+} VecXYZ;
+
 // STRUCTS BEGIN
 typedef struct ModelNode {
-    /* 0x0000 */ u8 _0000[0x98 - 0x0];
+    /* 0x0000 */ u8 _0000[0x80 - 0x0];
+    /* 0x0080 */ u16 joint;
+    /* 0x0082 */ u8 _0082[0x98 - 0x82];
     /* 0x0098 */ u8 flags;
     /* 0x0099 */ u8 _0099[0x9C - 0x99];
 } ModelNode; // size: 0x9C
@@ -121,7 +127,8 @@ typedef struct ModelActor {
     /* 0x0000 */ u8 _0000[0x2C - 0x0];
     /* 0x002C */ ModelSub2C* _2C;
     /* 0x0030 */ ModelPose* _30;
-    /* 0x0034 */ u8 _0034[0x5C - 0x34];
+    /* 0x0034 */ Vec pos;
+    /* 0x0040 */ u8 _0040[0x5C - 0x40];
     /* 0x005C */ s32 _5C;
     /* 0x0060 */ s16 _60;
     /* 0x0062 */ s16 _62;
@@ -133,7 +140,7 @@ typedef struct ModelActor {
     /* 0x006E */ s16 _6E;
     /* 0x0070 */ u8 _0070[0x72 - 0x70];
     /* 0x0072 */ u16 _72[120];
-    /* 0x0162 */ u8 _0162[0x252 - 0x162];
+    /* 0x0162 */ u16 joints[120];
     /* 0x0252 */ s8 _252;
     /* 0x0253 */ u8 _0253[0x254 - 0x253];
     /* 0x0254 */ s8 _254;
@@ -151,7 +158,7 @@ typedef struct ModelActor {
     /* 0x0265 */ u8 _0265[0x266 - 0x265];
     /* 0x0266 */ s8 _266;
     /* 0x0267 */ s8 _267;
-    /* 0x0268 */ s8 _268;
+    /* 0x0268 */ u8 _268;
     /* 0x0269 */ s8 _269;
     /* 0x026A */ s8 _26A;
     /* 0x026B */ s8 _26B;
@@ -164,7 +171,9 @@ typedef struct ModelActor {
 
 typedef struct ModelSlot {
     /* 0x0000 */ ModelNode* node;
-    /* 0x0004 */ u8 _0004[0x68 - 0x4];
+    /* 0x0004 */ u8 _0004[0x64 - 0x4];
+    /* 0x0064 */ u16 _64;
+    /* 0x0066 */ u16 _66;
     /* 0x0068 */ u16* _68;
     /* 0x006C */ u8 _6C;
     /* 0x006D */ u8 _006D[0x90 - 0x6D];
@@ -239,6 +248,26 @@ extern struct {
 } lbl_803716B8;
 void fn_800BEBCC(s32 id, Vec* dir);
 void fn_800B2D5C(ModelNode* node);
+void fn_800B2C10(ModelNode* node, u16 joint, Vec* out);
+void fn_800B2C44(ModelNode* node, u16 joint, Vec* out);
+
+static inline int getActorJoint(ModelActor* actor, int i) {
+    if (actor != NULL) {
+        return actor->joints[i];
+    }
+    return 0xFFFF;
+}
+
+static inline Vec setSlotJoints(u16 slot, u16 a, u16 b) {
+    Vec v;
+    ModelTable* table = lbl_8036E548._0060;
+    ModelNode* node = table->slots[slot].node;
+
+    fn_800B2C44(node, node->joint, &v);
+    table->slots[slot]._64 = a;
+    table->slots[slot]._66 = b;
+    return v;
+}
 
 // .text:0x8001FDD4 size:0x2C
 void fn_8001FDD4(ModelLink* arg0) {
@@ -486,19 +515,83 @@ void QueueCharacterAnimation(s32 idx, int anim, int a, int b, int c, int d, int 
 }
 
 // .text:0x8001B80C size:0x10C
-BOOL getAnimRelatedCoordinates(int, int, struct _VecXYZ*) {
+BOOL getAnimRelatedCoordinates(int idx, int joint, VecXYZ* out) {
+    Vec v;
+    ModelActor* actor = lbl_8036E548.actors[idx];
+    ModelSlot* slot;
+    int j;
+
+    if (actor == NULL) {
+        return FALSE;
+    }
+    j = getActorJoint(actor, joint);
+    if (j == 0xFFFF) {
+        out->x = 0.0f;
+        out->y = 0.0f;
+        out->z = 0.0f;
+        return FALSE;
+    }
+    slot = &lbl_8036E548._0060->slots[actor->_255];
+    fn_800B2C44(slot->node, j, &v);
+    out->x = v.x;
+    out->y = v.y;
+    out->z = v.z;
+    out->x = out->x + actor->pos.x;
+    out->y = out->y + actor->pos.y;
+    out->z = out->z + actor->pos.z;
+    return TRUE;
 }
 
 // .text:0x8001B728 size:0xE4
-void fn_8001B728(void) {
+BOOL fn_8001B728(int idx, int joint, Vec* out) {
+    ModelActor* actor = lbl_8036E548.actors[idx];
+    ModelSlot* slot;
+    int j;
+
+    if (actor == NULL) {
+        return FALSE;
+    }
+    j = getActorJoint(actor, joint);
+    if (j == 0xFFFF) {
+        return FALSE;
+    }
+    slot = &lbl_8036E548._0060->slots[actor->_255];
+    fn_800B2C10(slot->node, j, out);
+    out->x = out->x + actor->pos.x;
+    out->y = out->y + actor->pos.y;
+    out->z = out->z + actor->pos.z;
+    return TRUE;
 }
 
 // .text:0x8001B5EC size:0x13C
-void fn_8001B5EC(void) {
+void fn_8001B5EC(int idx, BOOL alt) {
+    ModelActor* actor = lbl_8036E548.actors[idx];
+
+    if (actor != NULL) {
+        int slot = actor->_255;
+        if (!alt) {
+            setSlotJoints(slot, getActorJoint(actor, 0), getActorJoint(actor, 4));
+        } else {
+            setSlotJoints(slot, getActorJoint(actor, 0), getActorJoint(actor, 0));
+        }
+    }
 }
 
 // .text:0x8001B4D8 size:0x114
-void fn_8001B4D8(void) {
+void fn_8001B4D8(int idx, BOOL apply) {
+    ModelActor* actor = lbl_8036E548.actors[idx];
+    Vec d;
+
+    if (actor != NULL) {
+        int slot = actor->_255;
+        if (apply && actor->_268 == 0) {
+            d = setSlotJoints(slot, getActorJoint(actor, 0), getActorJoint(actor, 0));
+            actor->pos.x = actor->pos.x + d.x;
+            actor->pos.y = actor->pos.y + d.y;
+            actor->pos.z = actor->pos.z + d.z;
+            actor->_268 = 1;
+        }
+    }
 }
 
 // .text:0x8001B35C size:0x17C
