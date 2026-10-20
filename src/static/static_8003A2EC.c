@@ -33,20 +33,18 @@ typedef struct DecalColor {
     /* 0x2 */ u8 b;
 } DecalColor; // size: 0x3
 
-typedef struct QueueTask {
-    /* 0x00 */ u8 _00[0x10];
-    /* 0x10 */ u16 _10;
-} QueueTask;
-
 typedef struct SaveBlock {
     /* 0x0 */ u16 sum;
-    /* 0x2 */ u8 _2[2];
+    /* 0x2 */ u16 size;
     /* 0x4 */ u8 data[0x4508];
 } SaveBlock; // size: 0x450C
 
 // The task fn_8003C00C runs
 typedef struct MenuTask {
-    /* 0x00 */ u8 _00[0x14];
+    /* 0x00 */ u8 _00[0xC];
+    /* 0x0C */ struct MenuTask* parent;
+    /* 0x10 */ s16 _10;
+    /* 0x12 */ u8 _12[2];
     /* 0x14 */ u8 _14;
     /* 0x15 */ u8 _15;
     /* 0x16 */ u8 _16;
@@ -85,7 +83,7 @@ typedef struct SaveHeader {
 typedef struct SaveFile {
     /* 0x000 */ u8 _00[0x44];
     /* 0x044 */ u16 headerSum;
-    /* 0x046 */ u8 _46[2];
+    /* 0x046 */ u16 headerSize;
     /* 0x048 */ SaveHeader header;
     /* 0x5F8 */ SaveBlock blocks[3];
 } SaveFile;
@@ -126,7 +124,35 @@ extern GXTlutObj lbl_803C50DC;
 extern u16 lbl_800F7AC0[16];
 extern TextureDesc lbl_800F7AE0;
 
-extern QueueTask* lbl_803CC1B8;
+extern MenuTask* lbl_803CC1B8;
+
+typedef struct CardRequest {
+    /* 0x00 */ const char* name;
+    /* 0x04 */ void* buf;
+    /* 0x08 */ s32 size;
+    /* 0x0C */ u8 chan;
+    /* 0x0D */ u8 _0D;
+    /* 0x0E */ s8 _0E;
+    /* 0x10 */ s32 (*verify)(SaveFile* save, s32 arg1, s32 mask);
+    /* 0x14 */ s32 mask;
+    /* 0x18 */ s32 _18;
+} CardRequest;
+
+typedef struct CardChannel {
+    /* 0x00 */ u8 _00[8];
+    /* 0x08 */ s32 result;
+    /* 0x0C */ u8 _0C[0x28 - 0x0C];
+} CardChannel; // size: 0x28
+
+extern struct {
+    /* 0x00 */ CardChannel chan[2];
+    /* 0x50 */ u8 _50[4];
+    /* 0x54 */ u8 status;
+} lbl_803C7838;
+
+extern void fn_8000FE54(MenuTask* task);
+extern void fn_800AA930(CardRequest* req, MenuSlot* slot, s32 arg2, s32 arg3);
+extern void fn_800B0A14_removeQueue(void);
 extern s32 lbl_803CBC48;
 extern s32 lbl_803CBC4C;
 extern s32 lbl_803CBC50;
@@ -318,7 +344,127 @@ s32 fn_80040FE0(SaveFile* save) {
 }
 
 // .text:0x80040C14 size:0x3CC
-void fn_80040C14(void) {}
+static inline s32 CardResultCode(s32 result) {
+    switch (result) {
+    case 0:
+        return 0x11;
+    case -1:
+        return 0xF;
+    case -3:
+        return 0;
+    case -2:
+        return 4;
+    default:
+        return -1;
+    }
+}
+
+static inline s32 SaveBlockMask(u32 flags, s32 block) {
+    s32 mask = 0;
+
+    if ((flags & 7) == 7) {
+        mask = 0xF;
+    } else if (flags & 2) {
+        if (block == 3) {
+            mask |= 3;
+        } else {
+            mask = 1 << (block + 1);
+        }
+    }
+    return mask;
+}
+
+static inline u32 BadSizeMask(SaveFile* save, s32 mask) {
+    u32 bad = 0;
+    s32 i;
+    u32 bit;
+
+    for (i = 0; i < 4; i++) {
+        bit = 1 << i;
+        if (mask & bit) {
+            if (i == 0) {
+                if (save->headerSize != sizeof(SaveHeader) + 4) {
+                    bad = bit;
+                }
+            } else if (save->blocks[i - 1].size != sizeof(SaveBlock)) {
+                bad |= bit;
+            }
+        }
+    }
+    return bad;
+}
+
+// 90.58%: the target's unrolled size check multiplies each block index by 0x450C (li; mulli),
+// where this one steps a pointer; the request's stores are scheduled differently
+void fn_80040C14(void) {
+    MenuTask* task = lbl_803CC1B8;
+    CardRequest req;
+    MenuSlot* slot;
+    MenuTask* parent;
+
+    switch (CardResultCode(lbl_803C7838.chan[task->_17].result)) {
+    case 0:
+    case 4:
+        task->_1D = 1;
+        break;
+    }
+    switch (task->_14) {
+    case 0:
+        task->_1D = 0;
+        req.chan = task->_17;
+        req._0D = task->_18;
+        req.buf = &lbl_802D4B00;
+        req.size = sizeof(lbl_802D4B00);
+        req.name = "MarioBaseball";
+        req._0E = 0;
+        req.verify = fn_80041074;
+        req.mask = SaveBlockMask(task->_1B, task->_20);
+        req._18 = 1;
+        slot = &lbl_802D4AE0[task->_17];
+        fn_800AA930(&req, slot, slot->_0, slot->_4);
+        task->_14++;
+        return;
+    case 1:
+        if (lbl_803CC1B8->_10 != 0) {
+            if (task->_1D) {
+                task->_1C = 9;
+            } else {
+                switch (lbl_803C7838.status) {
+                case 17:
+                    if (BadSizeMask(&lbl_802D4B00, SaveBlockMask(task->_1B, task->_20)) == 0) {
+                        task->_1C = 1;
+                    } else {
+                        task->_1C = 4;
+                    }
+                    break;
+                case 0:
+                    task->_1C = 9;
+                    break;
+                case 16:
+                    task->_1C = 8;
+                    break;
+                case 11:
+                    task->_1C = 4;
+                    break;
+                case 3:
+                    task->_1C = 5;
+                    break;
+                default:
+                    task->_1C = 2;
+                    break;
+                }
+            }
+            task->_14 = 2;
+        }
+        return;
+    case 2:
+        parent = lbl_803CC1B8->parent;
+        parent->_10 = task->_1C;
+        fn_8000FE54(parent);
+        fn_800B0A14_removeQueue();
+        break;
+    }
+}
 
 // .text:0x8004053C size:0x6D8
 void fn_8004053C(void) {}
