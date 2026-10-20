@@ -113,7 +113,8 @@ typedef struct PauseMenu {
     /* 0x0C */ u8 _0C[2];
     /* 0x0E */ s8 slot[2];
     /* 0x10 */ s8 prevSlot[2];
-    /* 0x12 */ u8 _12[4];
+    /* 0x12 */ u8 _12[2];
+    /* 0x14 */ u8 _14[2];
     /* 0x16 */ u8 _16[2];
     /* 0x18 */ u8 _18[2];
     /* 0x1A */ u8 _1A[2];
@@ -638,7 +639,7 @@ void fn_80047CE0(void) {
     lbl_803297E0.s.pause._08[1] = lbl_803297E0.s.pause._08[0] = 0;
     lbl_803297E0.s.pause._0B = 0;
     lbl_803297E0.s.pause.slot[0] = lbl_803297E0.s.pause.slot[1] = lbl_803297E0.s.pause.prevSlot[0] = lbl_803297E0.s.pause.prevSlot[1] = 0;
-    lbl_803297E0.s.pause._12[0] = lbl_803297E0.s.pause._12[1] = lbl_803297E0.s.pause._12[2] = lbl_803297E0.s.pause._12[3] = 0;
+    lbl_803297E0.s.pause._12[0] = lbl_803297E0.s.pause._12[1] = lbl_803297E0.s.pause._14[0] = lbl_803297E0.s.pause._14[1] = 0;
     lbl_803297E0.s.pause._1A[0] = lbl_803297E0.s.pause._1A[1] = lbl_803297E0.s.pause._1C[0] = lbl_803297E0.s.pause._1C[1] = 0;
     lbl_803297E0.s.pause._16[0] = lbl_803297E0.s.pause._16[1] = 0;
     lbl_803297E0.s.pause._1E[0] = lbl_803297E0.s.pause._1E[1] = 0;
@@ -699,7 +700,7 @@ u8 fn_800471F4(u8 mode, u8 player) {
 }
 
 // .text:0x8004617C size:0x1078
-// Waits on fn_80043880 and fn_800471F4, still stubs inlined here
+// Waits on fn_800471F4, still a stub inlined here
 void fn_8004617C(s32 team) {
     PadButtons pad;
     s32 player;
@@ -1163,6 +1164,105 @@ void fn_80044C98(u8 dir, u8 player) {
 
 // .text:0x80043880 size:0x1418
 void fn_80043880(u8 dir, u8 player) {
+    if (lbl_803297E0.s.pause.slot[player] != 0 && (g_d_GameSettings._06 != 2 || lbl_803297E0.s.pause._1A[player] == 1) &&
+        (lbl_803297E0.s.pause._1A[player] == 1 || g_d_GameSettings._06 == 2)) {
+        lbl_803297E0.s.pause._14[player] = lbl_803297E0.s.pause._12[player];
+        if (dir == 0) {
+            if (lbl_803297E0.s.pause.slot[player] != 0 && lbl_803297E0.s.pause._1A[player] == 1) {
+                lbl_803297E0.s.pause.prevSlot[player] = lbl_803297E0.s.pause.slot[player];
+                switch (lbl_80354720[player][lbl_803297E0.s.pause.slot[player] - 1].charId) {
+                case 0:
+                    lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 4);
+                    break;
+                case 1:
+                    lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 4);
+                    break;
+                case 2:
+                    lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 3);
+                    break;
+                case 3:
+                    lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 5);
+                    break;
+                case 7:
+                    lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 6);
+                    break;
+                case 8:
+                    lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 7);
+                    break;
+                case 4:
+                    lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 2);
+                    break;
+                case 5:
+                    lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 4);
+                    break;
+                case 6:
+                    lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 8);
+                    break;
+                }
+                if (lbl_803297E0.s.pause.prevSlot[player] != lbl_803297E0.s.pause.slot[player]) {
+                    fn_800625A4(player, 0x3B);
+                }
+            }
+        } else if (lbl_803297E0.s.pause.slot[player] == 0) {
+            if (g_d_GameSettings._06 != 2) {
+                lbl_803297E0.s.pause._12[player]++;
+                if (lbl_803297E0.s.pause._1A[player] > 1) {
+                    lbl_803297E0.s.pause._1A[player] = 1;
+                }
+                switch (lbl_803297E0.s.pause._1A[player]) {
+                case 0:
+                    lbl_803297E0.s.pause._1A[player] = 0;
+                    break;
+                case 1:
+                    lbl_803297E0.s.pause._1A[player] = 1;
+                    break;
+                }
+                fn_800625A4(player, 0x3C);
+            } else {
+                sndFXStartEx(0x1BA, lbl_800EFBA4[3], 0x3F, 0);
+                return;
+            }
+        } else if (lbl_803297E0.s.pause.slot[player] != 0 && lbl_803297E0.s.pause._1A[player] == 1) {
+            lbl_803297E0.s.pause.prevSlot[player] = lbl_803297E0.s.pause.slot[player];
+            switch (lbl_80354720[player][lbl_803297E0.s.pause.slot[player] - 1].charId) {
+            case 0:
+                lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 2);
+                break;
+            case 1:
+                lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 2);
+                break;
+            case 4:
+                lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 5);
+                break;
+            case 5:
+                lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 3);
+                break;
+            case 6:
+                lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 7);
+                break;
+            case 7:
+                lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 8);
+                break;
+            case 8:
+                lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 6);
+                break;
+            case 2:
+                lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 4);
+                break;
+            case 3:
+                lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 2);
+                break;
+            }
+            if (lbl_803297E0.s.pause.prevSlot[player] != lbl_803297E0.s.pause.slot[player]) {
+                fn_800625A4(player, 0x3B);
+            }
+        }
+        if (dir == 0) {
+            sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+        } else {
+            sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+        }
+    }
 }
 
 // .text:0x8004338C size:0x4F4
