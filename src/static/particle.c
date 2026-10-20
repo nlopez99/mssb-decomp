@@ -978,8 +978,9 @@ void fn_80030470(Vec* pos, Vec* dir, Vec* back, EffectParams* params, s32 id)
 }
 
 // .text:0x8002F9FC size:0x3BC
-BOOL fn_8002F9FC(Emitter* e)
+BOOL fn_8002F9FC(void* arg)
 {
+    Emitter* e = arg;
     Particle* p = e->particles;
 
     GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
@@ -995,6 +996,60 @@ BOOL fn_8002F9FC(Emitter* e)
     } while (p != NULL);
     GXSetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
     return TRUE;
+}
+
+// .text:0x8002F5F4 size:0x408
+// 85.50%: first draft; the target keeps params in r28 and schedules the float setup
+// differently, and the per-particle stores differ. Not yet compared in detail.
+void fn_8002F5F4(Vec* pos, Vec* dir, EffectParams* params)
+{
+    f32 scale = params->_0C[3] / 100000.0f;
+    f32 start = (-params->_0C[4] * scale) / (params->count - 1);
+    f32 range = (start + scale) - start;
+    Emitter* e = fn_80033A24(fn_8002F9FC, 0x80, 0, params->count * 2, TRUE, 8);
+
+    if (e != NULL) {
+        s32 i = 0;
+        Particle* p;
+        Particle* q;
+        Vec v;
+        f32 size;
+        s32 c;
+
+        e->_10 = params->_00;
+        p = e->particles;
+        do {
+            PSVECScale(dir, start + (i * range) / (params->count - 1), &v);
+            PSVECAdd(pos, &v, &v);
+            p->pos.x = v.x;
+            p->pos.y = v.y;
+            p->pos.z = v.z;
+            if (i >= params->count - params->_0C[0]) {
+                size = params->_0C[2] / 100000.0f +
+                       ((params->_0C[1] / 100000.0f - params->_0C[2] / 100000.0f) * (params->count - i - 1)) / params->_0C[0];
+            } else {
+                size = params->_0C[1] / 100000.0f;
+            }
+            p->_38 = p->_3C = size;
+            c = params->_0C[5];
+            p->_40 = (c << 24) | (c << 16) | (c << 8) | 0xFF;
+            p->_4D = params->_04;
+            p->_4E = 0;
+            p->_4F = 1;
+            q = p->next;
+            q->pos.x = v.x;
+            q->pos.y = v.y;
+            q->pos.z = v.z;
+            q->_38 = q->_3C = size;
+            c = params->_0C[5];
+            q->_40 = (c << 24) | (c << 16) | (c << 8) | 0xFF;
+            q->_4D = params->_0C[6 + i];
+            q->_4E = 0;
+            q->_4F = 0;
+            p = q->next;
+            i++;
+        } while (p != NULL);
+    }
 }
 
 // .text:0x8002F258 size:0x39C
@@ -1456,4 +1511,3 @@ void fn_80027300(Emitter* e, Vec* pos, Vec* dir, EffectParams* params, f32 scale
         p = p->next;
     } while (p != NULL);
 }
-
