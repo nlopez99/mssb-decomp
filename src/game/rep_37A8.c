@@ -512,13 +512,11 @@ void fn_3_145AD0(int player) {
 }
 
 // .text:0x001453BC size:0x714 mapped:0x80784450
-// 90.15%: registers and scheduling; the target reads the timer with lhau and keeps
-// other pointers in saved registers.
+// 91.08%: registers and scheduling; coin sits in r25 where this has r27, and the
+// thrower's block loads the fielder index before its stores.
 void fn_3_1453BC(int coin) {
     Unk37A8Entry* entry;
     Unk37A8Fielder* fielder;
-    s16* timer;
-    u8* state;
     VecXYZ pos;
     Vec dir;
     f32 dx;
@@ -532,19 +530,17 @@ void fn_3_1453BC(int coin) {
     int i;
 
     team = MG._1BB6[coin];
-    timer = &g_Minigame.wallBall_coinsVisibleFrameCounter[coin];
     if (g_Minigame.wallBall_coinsVisibleFrameCounter[coin] < 0x7FFE) {
-        (*timer)++;
+        g_Minigame.wallBall_coinsVisibleFrameCounter[coin]++;
     } else {
-        *timer = 0x7FFF;
+        g_Minigame.wallBall_coinsVisibleFrameCounter[coin] = 0x7FFF;
     }
-    state = &g_Minigame.wallBall_coinsVisibleInd[coin];
     if (g_Minigame.wallBall_coinsVisibleInd[coin] == 6) {
         g_Minigame.wallBall_coinVelocity[coin].y += lbl_3_data_21E24[11];
         if (MG._1B84[coin] != 5) {
             g_Minigame.wallBall_coinVelocity[coin].x *= lbl_3_data_21E24[12];
             g_Minigame.wallBall_coinVelocity[coin].z *= lbl_3_data_21E24[12];
-        } else if (*timer >= lbl_3_data_21E68[23]) {
+        } else if (g_Minigame.wallBall_coinsVisibleFrameCounter[coin] >= lbl_3_data_21E68[23]) {
             player = -1 - MG._1BE8[coin];
             fn_3_147CFC((Vec*)&g_Minigame.wallBall_coinCoordinates[coin]);
             fn_3_90064(0x309);
@@ -569,8 +565,8 @@ void fn_3_1453BC(int coin) {
                     g_Minigame._1CB1[player] = 0xFF;
                 }
             }
-            *state = 0;
-            *timer = 0;
+            g_Minigame.wallBall_coinsVisibleInd[coin] = 0;
+            g_Minigame.wallBall_coinsVisibleFrameCounter[coin] = 0;
             return;
         }
     }
@@ -578,8 +574,8 @@ void fn_3_1453BC(int coin) {
     g_Minigame.wallBall_coinCoordinates[coin].y += g_Minigame.wallBall_coinVelocity[coin].y;
     g_Minigame.wallBall_coinCoordinates[coin].z += g_Minigame.wallBall_coinVelocity[coin].z;
     if (g_Minigame.wallBall_coinCoordinates[coin].y < 0.0f) {
-        *state = 0;
-        *timer = 0;
+        g_Minigame.wallBall_coinsVisibleInd[coin] = 0;
+        g_Minigame.wallBall_coinsVisibleFrameCounter[coin] = 0;
         if (MG._1B84[coin] == 5) {
             fn_3_154238(coin);
         }
@@ -657,14 +653,14 @@ void fn_3_1453BC(int coin) {
                 }
                 MG._1B50[team] = 0;
             }
-            *state = 0;
-            *timer = 0;
+            g_Minigame.wallBall_coinsVisibleInd[coin] = 0;
+            g_Minigame.wallBall_coinsVisibleFrameCounter[coin] = 0;
             return;
         }
     }
-    if (*timer > lbl_3_data_21E68[0]) {
-        *state = 0;
-        *timer = 0;
+    if (g_Minigame.wallBall_coinsVisibleFrameCounter[coin] > lbl_3_data_21E68[0]) {
+        g_Minigame.wallBall_coinsVisibleInd[coin] = 0;
+        g_Minigame.wallBall_coinsVisibleFrameCounter[coin] = 0;
         if (MG._1B84[coin] == 5) {
             fn_3_154238(coin);
         }
