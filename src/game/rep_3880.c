@@ -491,8 +491,6 @@ void fn_3_15730C(u32 index, f32 x, f32 y, f32 z) {
 }
 
 // .text:0x00156D04 size:0x608 mapped:0x80795D98
-// 98.17%: scale and z swap saved FPRs, and the constants of the w computations load into
-// other registers
 void fn_3_156D04(u32 index, f32 x, f32 y, f32 z) {
     Vec quad[4];
     Mtx44 proj;
@@ -501,9 +499,9 @@ void fn_3_156D04(u32 index, f32 x, f32 y, f32 z) {
     Vec b;
     Vec c;
     Vec* point;
+    f32 angle;
     f32 zoom;
     f32 scale;
-    f32 angle;
     f32 size;
     f32 w;
     f32 half;
@@ -542,7 +540,7 @@ void fn_3_156D04(u32 index, f32 x, f32 y, f32 z) {
                 PSVECScale(&a, size * (lbl_3_data_26B94 + i * (lbl_3_data_26B98 - lbl_3_data_26B94) / 7.0f), &d);
                 PSVECAdd(&b, &d, &d);
                 if (i >= 4) {
-                    w = (7 - i) * 0.25f + 1.0f;
+                    w = (7 - i) / 4.0f + 1.0f;
                 } else {
                     w = 2.0f;
                 }
@@ -565,7 +563,7 @@ void fn_3_156D04(u32 index, f32 x, f32 y, f32 z) {
                                 &lbl_3_common_bss_32724._68->tex[lbl_3_common_bss_32724._68->tex[0]._1C]);
                 }
                 if (i >= 4) {
-                    w = (7 - i) * 0.25f + 1.0f;
+                    w = (7 - i) / 4.0f + 1.0f;
                 } else {
                     w = 2.0f;
                 }
@@ -642,8 +640,7 @@ void fn_3_156970(Vec* corners, u32 color, TexInfo3880* tex) {
 }
 
 // .text:0x00156548 size:0x428 mapped:0x807955DC
-// 99.66%: in the first w computation the base loads 0.25f before 0.5f, and the second one
-// allocates its FPRs differently
+// 99.70%: the first quad's half and the d loads take other FPRs (f1/f2 for f0/f2)
 void fn_3_156548(u32 index, f32 x, f32 y, f32 z) {
     Vec quad[4];
     Mtx44 proj;
@@ -680,7 +677,7 @@ void fn_3_156548(u32 index, f32 x, f32 y, f32 z) {
                 PSVECScale(&a, lbl_3_data_26BAC + i * (lbl_3_data_26BB0 - lbl_3_data_26BAC) / 7.0f, &d);
                 PSVECAdd(&b, &d, &d);
                 if (i >= 4) {
-                    w = (7 - i) * 0.25f * size + size;
+                    w = size * (7 - i) / 4.0f + size;
                 } else {
                     w = size * 2.0f;
                 }
@@ -701,7 +698,7 @@ void fn_3_156548(u32 index, f32 x, f32 y, f32 z) {
                 fn_800B1468(quad, 0xFFFFFFFF,
                             &lbl_3_common_bss_32724._68->tex[lbl_3_common_bss_32724._68->tex[0]._1C]);
                 if (i >= 4) {
-                    w = (7 - i) * 0.25f * size + size;
+                    w = size * (7 - i) / 4.0f + size;
                 } else {
                     w = size * 2.0f;
                 }
