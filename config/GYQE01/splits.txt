@@ -89,6 +89,32 @@ static/static_8004157C.c:
 	.sbss       start:0x803CBCC0 end:0x803CBCC8
 	.sdata2     start:0x803CC7E8 end:0x803CC7F8
 
+static/orderchange.c:
+	extab       start:0x80005FE0 end:0x80006050
+	extabindex  start:0x80007B30 end:0x80007BD8
+	.text       start:0x80042598 end:0x80048C14
+	.rodata     start:0x800E6920 end:0x800E6950
+	.data       start:0x800FB3F8 end:0x800FB4C8
+	.bss        start:0x802E4B00 end:0x802E4B28
+	.sbss       start:0x803CBCC8 end:0x803CBCE8
+
+static/static_80048C14.c:
+	extab       start:0x80006050 end:0x80006068
+	extabindex  start:0x80007BD8 end:0x80007BFC
+	.text       start:0x80048C14 end:0x80048EB8
+	.data       start:0x800FB4C8 end:0x800FB5B0
+	.bss        start:0x802E4B28 end:0x802E4BB0
+	.sdata      start:0x803CB838 end:0x803CB848
+	.sbss       start:0x803CBCE8 end:0x803CBCF0
+
+static/static_80048EB8.c:
+	extab       start:0x80006068 end:0x800060C0
+	extabindex  start:0x80007BFC end:0x80007C80
+	.text       start:0x80048EB8 end:0x8004ABD8
+	.rodata     start:0x800E6950 end:0x800E6970
+	.data       start:0x800FB5B0 end:0x800FB798
+	.sbss       start:0x803CBCF0 end:0x803CBCF8
+
 Dolphin/base/PPCArch.c:
 	.text       start:0x8006D024 end:0x8006D138
 

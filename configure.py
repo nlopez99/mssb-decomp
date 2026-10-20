@@ -632,6 +632,9 @@ config.libs = [
             Object(NonMatching, "static/uitexture.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/static_8003A2EC.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/static_8004157C.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(NonMatching, "static/orderchange.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(NonMatching, "static/static_80048C14.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(NonMatching, "static/static_80048EB8.c", extra_cflags=["-cpp_exceptions on"]),
         ],
     },
     {
