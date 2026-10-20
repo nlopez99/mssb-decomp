@@ -14,6 +14,40 @@ Sections:
 	.sdata2     type:rodata align:4
 	.sbss2      type:bss align:32
 
+static/static_80008E00.c:
+	extab       start:0x80005600 end:0x80005630
+	extabindex  start:0x80006C60 end:0x80006CA8
+	.text       start:0x80008E00 end:0x800096DC
+
+static/static_800096DC.c:
+	extab       start:0x80005630 end:0x80005640
+	extabindex  start:0x80006CA8 end:0x80006CC0
+	.text       start:0x800096DC end:0x80009E94
+	.data       start:0x800E8AA8 end:0x800E8F44
+
+static/static_80009E94.c:
+	.text       start:0x80009E94 end:0x8000A0AC
+	.sdata2     start:0x803CC400 end:0x803CC420
+
+static/static_8000A0AC.c:
+	extab       start:0x80005640 end:0x80005660
+	extabindex  start:0x80006CC0 end:0x80006CF0
+	.text       start:0x8000A0AC end:0x8000BA3C
+	.sdata2     start:0x803CC420 end:0x803CC458
+
+static/static_8000BA3C.c:
+	extab       start:0x80005660 end:0x800056D8
+	extabindex  start:0x80006CF0 end:0x80006DA4
+	.text       start:0x8000BA3C end:0x8000F150
+	.rodata     start:0x800E65D0 end:0x800E6600
+	.sdata2     start:0x803CC458 end:0x803CC490
+
+static/static_8000F150.c:
+	extab       start:0x800056D8 end:0x80005730
+	extabindex  start:0x80006DA4 end:0x80006E28
+	.text       start:0x8000F150 end:0x800111D8
+	.sdata2     start:0x803CC490 end:0x803CC4B8
+
 static/model.c:
 	extab       start:0x80005730 end:0x800059D0
 	extabindex  start:0x80006E28 end:0x80007218
@@ -142,6 +176,37 @@ static/static_8004157C.c:
 	.text       start:0x8004157C end:0x80042598
 	.sbss       start:0x803CBCC0 end:0x803CBCC8
 	.sdata2     start:0x803CC7E8 end:0x803CC7F8
+
+static/orderchange.c:
+	extab       start:0x80005FE0 end:0x80006050
+	extabindex  start:0x80007B30 end:0x80007BD8
+	.text       start:0x80042598 end:0x80048C14
+	.rodata     start:0x800E6920 end:0x800E6950
+	.data       start:0x800FB3F8 end:0x800FB4C8
+	.bss        start:0x802E4B00 end:0x802E4B28
+	.sbss       start:0x803CBCC8 end:0x803CBCE8
+
+static/static_80048C14.c:
+	extab       start:0x80006050 end:0x80006068
+	extabindex  start:0x80007BD8 end:0x80007BFC
+	.text       start:0x80048C14 end:0x80048EB8
+	.data       start:0x800FB4C8 end:0x800FB5B0
+	.bss        start:0x802E4B28 end:0x802E4BB0
+	.sdata      start:0x803CB838 end:0x803CB848
+	.sbss       start:0x803CBCE8 end:0x803CBCF0
+
+static/static_80048EB8.c:
+	extab       start:0x80006068 end:0x80006090
+	extabindex  start:0x80007BFC end:0x80007C38
+	.text       start:0x80048EB8 end:0x8004A1BC
+	.rodata     start:0x800E6950 end:0x800E6970
+	.sbss       start:0x803CBCF0 end:0x803CBCF8
+
+static/static_8004A1BC.c:
+	extab       start:0x80006090 end:0x800060C0
+	extabindex  start:0x80007C38 end:0x80007C80
+	.text       start:0x8004A1BC end:0x8004ABD8
+	.data       start:0x800FB5B0 end:0x800FB798
 
 static/static_8004AC00.c:
 	extab       start:0x800060C0 end:0x800060F0
