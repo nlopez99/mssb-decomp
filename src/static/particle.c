@@ -410,6 +410,7 @@ extern StadiumLights lbl_800F7478[14];
 extern u8 lbl_80367318[];
 extern s32 lbl_803CBC70;
 extern s32 lbl_803CB800;
+extern f32 lbl_803CB804;
 extern s32 lbl_803CBD0C;
 extern s32 fn_8005268C(void);
 extern MtxPtr fn_80052734(s32 index);
@@ -922,9 +923,9 @@ f32 fn_800335BC(s32 angle)
 }
 
 // .text:0x800332B8 size:0x304
-// 97.41%: registers in the last table lookup differ (the target negates pitch in place) and
-// two fcmpu against 0.0f have their operands swapped. With every lookup a call of
-// fn_800335BC/fn_800335EC it is small enough to be inlined into fn_800297F0 and fn_80027300.
+// 98.06%: the last table lookup negates a copy of pitch (the target negates it in place),
+// and the target keeps angle on the stack. With every lookup a call of fn_800335BC or
+// fn_800335EC it is small enough to be inlined into fn_800297F0 and fn_80027300.
 void fn_800332B8(Vec* dirIn, Vec* out, f32 yawMin, f32 yawMax, f32 pitchMin, f32 pitchMax)
 {
     Mtx m;
@@ -949,12 +950,12 @@ void fn_800332B8(Vec* dirIn, Vec* out, f32 yawMin, f32 yawMax, f32 pitchMin, f32
         yaw = base;
     }
     out->x = fn_800335BC(yaw);
-        i = __abs(yaw + 0x600) & 0x7FF;
+    i = __abs(yaw + 0x600) & 0x7FF;
     if (i >= 0x401) {
         i = 0x800 - i;
     }
     out->y = lbl_8017ED68[i];
-        pitch = 2048.0f * (pitchMin / 360.0f) + 0.5f;
+    pitch = 2048.0f * (pitchMin / 360.0f) + 0.5f;
     if (pitchMax != pitchMin) {
         pitch += rand() % (s32)(2048.0f * ((pitchMax - pitchMin) / 360.0f) + 0.5f);
     }
@@ -963,16 +964,17 @@ void fn_800332B8(Vec* dirIn, Vec* out, f32 yawMin, f32 yawMax, f32 pitchMin, f32
         i = 0x800 - i;
     }
     out->z = out->x * lbl_8017ED68[i];
-        out->x *= fn_800335BC(pitch);
-    if (dirIn != NULL && PSVECMag(dirIn) != 0.0f) {
+    out->x *= fn_800335BC(pitch);
+    if (dirIn != NULL && PSVECMag(dirIn)) {
         angle = acos(PSVECDotProduct(&up, dirIn));
         PSVECCrossProduct(&up, dirIn, &axis);
-        if (PSVECMag(&axis) != 0.0f) {
+        if (PSVECMag(&axis)) {
             C_QUATRotAxisRad(&q, &axis, angle);
             PSMTXQuat(m, &q);
             PSMTXMultVec(m, out, out);
+        } else {
+            PSVECScale(out, PSVECMag(dirIn), out);
         }
-        PSVECScale(out, PSVECMag(dirIn), out);
     }
 }
 
@@ -1376,6 +1378,107 @@ void fn_80030470(Vec* pos, Vec* dir, Vec* back, EffectParams* params, s32 id)
             e->state = 0;
             fn_8002FDB8(e, pos, dir, back, params);
         }
+    }
+}
+
+// .text:0x8002FDB8 size:0x6B8
+// 99.86%: registers only, in the block that brings both points to one depth: the target
+// loads a.z and n.z into f4 and f3 and keeps the ratio in f2 in both branches.
+void fn_8002FDB8(Emitter* e, Vec* pos, Vec* dir, Vec* back, EffectParams* params)
+{
+    SwirlParticle* p;
+    Mtx rot;
+    Mtx m;
+    Vec a;
+    Vec n;
+    Vec axis;
+    Vec up = { 0.0f, -1.0f, 0.0f };
+    Quaternion q;
+    s32 i;
+    f32 k;
+    f32 mag;
+    f32 tilt;
+    f32 yaw;
+    f32 r;
+
+    e->_10 = params->_00;
+    PSVECNormalize(dir, &n);
+    PSVECCrossProduct(&up, &n, &axis);
+    mag = PSVECMag(&axis);
+    p = (SwirlParticle*)e->particles;
+    for (i = 0; i < e->count; i++) {
+        if (i & 1) {
+            yaw = -tilt;
+        } else {
+            if (mag == 0.0f) {
+                PSMTXIdentity(m);
+            } else {
+                f32 half;
+                tilt = 6.2831855f * (params->_0C[11] / 100000.0f) / 360.0f;
+                half = (6.2831855f * (params->_0C[12] / 100000.0f) / 360.0f - tilt) / 2;
+                C_QUATRotAxisRad(&q, &axis, -(half * (8 - rand() % 16) / 8.0f + (tilt + half)));
+                PSMTXQuat(m, &q);
+            }
+            yaw = 6.2831855f * (params->_0C[10] / 100000.0f) / 360.0f * (8 - rand() % 16) / 8.0f;
+        }
+        PSMTXRotRad(rot, 'Y', yaw);
+        PSMTXConcat(rot, m, rot);
+        PSMTXMultVec(rot, dir, &n);
+        p->pos.x = pos->x;
+        p->pos.y = pos->y;
+        p->pos.z = pos->z;
+        p->vel.x = back->x * params->_0C[1];
+        p->vel.y = back->y * params->_0C[1];
+        p->vel.z = back->z * params->_0C[1];
+        PSVECAdd(pos, &n, &n);
+        PSMTXMultVec(lbl_8017FFE0, pos, &a);
+        PSMTXMultVec(lbl_8017FFE0, &n, &n);
+        if (n.z != a.z) {
+            if (n.z != 0.0f) {
+                r = a.z / n.z;
+                n.z = a.z;
+                n.x *= r;
+                n.y *= r;
+            } else {
+                r = n.z / a.z;
+                a.z = n.z;
+                a.x *= r;
+                a.y *= r;
+            }
+        }
+        PSVECSubtract(&a, &n, &n);
+        if (PSVECMag(&n)) {
+            PSVECNormalize(&n, &n);
+        } else {
+            n.x = 0.0f;
+            n.y = 1.0f;
+            n.z = 0.0f;
+        }
+        a.x = -n.y;
+        a.y = n.x;
+        a.z = n.z;
+        PSVECAdd(&n, &a, &n);
+        tilt = 6.2831855f * (params->_0C[9] / 100000.0f) / 360.0f * (8 - rand() % 16) / 8.0f;
+        PSMTXRotRad(rot, 'Y', tilt);
+        PSMTXMultVec(rot, &n, &n);
+        p->_38 = n.x;
+        p->_3C = n.y;
+        p->_1C = 0.01f * (8 - rand() % 16) + params->_0C[0] / 100000.0f;
+        p->_20 = params->_0C[5] / 100000.0f;
+        p->_24 = params->_0C[6] / 100000.0f;
+        p->_2C = params->_0C[3] - params->_0C[4];
+        k = lbl_803CB804;
+        p->_28 = params->_0C[2] / 100000.0f * (1.0f - 0.01f * k + 0.02 * k * (rand() % 256) / 256.0);
+        p->rgba = params->_40;
+        p->_30 = params->_0C[8];
+        p->_34 = params->_48 / 100000.0f;
+        p->_44 = params->_4C;
+        p->delay = p->remaining = params->_0C[3];
+        p->_4C = 1;
+        p->_4E = 0;
+        p->tex = params->_04;
+        p->_4F = params->_0C[7];
+        p = (SwirlParticle*)p->next;
     }
 }
 
