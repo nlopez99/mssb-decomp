@@ -348,8 +348,6 @@ s32 fn_8000F988(TextModelSet* set, s32 i, u16 arg2, s32 font, s32 str, BOOL flag
     return -1;
 }
 
-// Differs: one add's operand order (first + i, register r8/r9); writing first + i in
-// the first lookup lets MWCC reuse it in the inner loop, which the target reloads.
 // .text:0x8000F8F4 size:0x94
 void fn_8000F8F4(TextModelSet* set) {
     s32 first;
@@ -359,10 +357,10 @@ void fn_8000F8F4(TextModelSet* set) {
 
     first = set->first;
     for (i = 0; i < set->count; i++) {
-        model = lbl_80371C30[i + first].model;
+        model = lbl_80371C30[first + i].model;
         if (model != NULL && (model->flags & 4)) {
             for (j = 0; j < 30; j++) {
-                if (lbl_80366B18.slots[j].model == lbl_80371C30[i + first].model) {
+                if (lbl_80366B18.slots[j].model == lbl_80371C30[first + i].model) {
                     lbl_80366B18.slots[j].model = NULL;
                     break;
                 }
