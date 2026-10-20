@@ -918,8 +918,6 @@ void fn_3_14471C(int player) {
 }
 
 // .text:0x0014443C size:0x2E0 mapped:0x807834D0
-// 99.53%: FPRs only; the target loads lbl_3_data_21D1C[_2B * 2 + 1] before [_2B * 2] in the
-// first interpolation, and the second one's FPRs differ.
 void fn_3_14443C(void) {
     f32 d;
     int i;
@@ -965,9 +963,8 @@ void fn_3_14443C(void) {
             }
             fn_3_1439EC(i);
         } else if (MG._0000[i]._2A == 3) {
-            MG._0000[i].pos.y = (lbl_3_data_21D1C[MG._0000[i]._2B * 2] - lbl_3_data_21D1C[MG._0000[i]._2B * 2 + 1]) *
-                                    ((f32)MG._0000[i]._1A / (f32)lbl_3_data_21E68[6]) +
-                                lbl_3_data_21D1C[MG._0000[i]._2B * 2];
+            d = lbl_3_data_21D1C[MG._0000[i]._2B * 2] - lbl_3_data_21D1C[MG._0000[i]._2B * 2 + 1];
+            MG._0000[i].pos.y = d * ((f32)MG._0000[i]._1A / (f32)lbl_3_data_21E68[6]) + lbl_3_data_21D1C[MG._0000[i]._2B * 2];
             if (MG._0000[i]._1A >= lbl_3_data_21E68[6]) {
                 MG._0000[i]._2A = 0;
                 MG._0000[i]._1A = 0;
@@ -1049,23 +1046,18 @@ void fn_3_14423C(void) {
 }
 
 // .text:0x0014402C size:0x210 mapped:0x807830C0
-// 97.58%: the target keeps idx * 0x38 in r30 and re-adds g_Minigame after each call,
-// where this keeps the entry address; the candidate list registers differ too.
 void fn_3_14402C(int idx) {
-    s16* timer;
     s32 candidates[4];
     int n;
     int i;
 
     if (g_Minigame.turnOverStatus == 0) {
-        timer = &MG._0000[idx]._1C;
-        if (*timer < 0) {
-            *timer = RandomInt_Game_Range(lbl_3_data_21DC4[0], lbl_3_data_21DC4[1]);
+        if (MG._0000[idx]._1C < 0) {
+            MG._0000[idx]._1C = RandomInt_Game_Range(lbl_3_data_21DC4[0], lbl_3_data_21DC4[1]);
         } else if (g_Minigame._1CA3 == 0 && g_Minigame._1CA2 == 0) {
-            (*timer)--;
-            if (*timer == 0) {
-                n = 0;
-                for (i = 0; i < 4; i++) {
+            MG._0000[idx]._1C--;
+            if (MG._0000[idx]._1C == 0) {
+                for (i = 0, n = 0; i < 4; i++) {
                     if (MG._1CA9[i] == 0) {
                         candidates[n] = i;
                         n++;
@@ -1074,7 +1066,7 @@ void fn_3_14402C(int idx) {
                 MG._0000[idx]._2C = candidates[random_fn_3_9EE24(n)];
                 MG._1CA9[MG._0000[idx]._2C] = 1;
                 MG._0000[idx]._2D = lbl_3_data_21E10[MG._0000[idx]._2C];
-                *timer = lbl_3_data_21E68[5];
+                MG._0000[idx]._1C = lbl_3_data_21E68[5];
                 MG._0000[idx]._18 = 0;
                 MG._0000[idx]._1A = 0;
                 MG._0000[idx]._1E = 0;
