@@ -9,6 +9,18 @@
 extern void fn_800ACF14(void* data);
 extern void* fn_800ACF34(u32 align, u32 size);
 
+extern OSThread* GXGetCurrentGXThread(void);
+
+// 4x4 white RGB5A3 texture, the default for SetDisplayStateTexture
+u16 lbl_800F76E0[16] ATTRIBUTE_ALIGN(32) = {
+    0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+    0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+};
+
+TextureDesc lbl_800F7700 = {
+    lbl_800F76E0, NULL, 4, 4, GX_CLAMP, GX_CLAMP, GX_LINEAR, GX_LINEAR, 0.0f, 0, 0, 0, GX_TF_RGB5A3,
+};
+
 typedef struct {
     /* 0x0 */ s8 status; // -1 once completed, -2 when unlocked
     /* 0x1 */ u8 shown;
@@ -200,6 +212,56 @@ void fn_800245EC(camera_803c639c_s* camera, Mtx view, Vec* points, f32* out, s32
     }
 }
 
+// .text:0x80024404 size:0x1E8
+void SetDisplayStateTexture(TextureDesc* tex, GXTexMapID map, u32 tlutName)
+{
+    GXTexObj texObj;
+    GXTlutObj tlutObj;
+    GXTexWrapMode wrapS;
+    GXTexWrapMode wrapT;
+
+    if (OSGetCurrentThread() != GXGetCurrentGXThread()) {
+        OSPanic("sub.c", 574, "gOz_GXSetTexture was called in thread that is not current GX thread.\n");
+    }
+    if (tex == NULL) {
+        tex = &lbl_800F7700;
+    }
+    // A repeating wrap mode needs a power-of-two size: count the size's set bits
+    wrapS = tex->wrapS;
+    if (wrapS != GX_CLAMP) {
+        u32 n = 0;
+        u16 w = tex->width;
+        while (w != 0) {
+            n += w & 1;
+            w >>= 1;
+        }
+        if (n > 1) {
+            wrapS = GX_CLAMP;
+        }
+    }
+    wrapT = tex->wrapT;
+    if (wrapT != GX_CLAMP) {
+        u16 h = tex->height;
+        u32 n = 0;
+        while (h != 0) {
+            n += h & 1;
+            h >>= 1;
+        }
+        if (n > 1) {
+            wrapT = GX_CLAMP;
+        }
+    }
+    if (tex->tlut != NULL) {
+        GXInitTexObjCI(&texObj, tex->image, tex->width, tex->height, tex->format, wrapS, wrapT, tex->minLOD != tex->maxLOD, tlutName);
+        GXInitTlutObj(&tlutObj, tex->tlut, tex->tlutFormat, tex->tlutCount);
+        GXLoadTlut(&tlutObj, tlutName);
+    } else {
+        GXInitTexObj(&texObj, tex->image, tex->width, tex->height, tex->format, wrapS, wrapT, tex->minLOD != tex->maxLOD);
+    }
+    GXInitTexObjLOD(&texObj, tex->minFilter, tex->magFilter, tex->minLOD, tex->maxLOD, tex->lodBias, GX_FALSE, GX_FALSE, GX_ANISO_1);
+    GXLoadTexObj(&texObj, map);
+}
+
 // .text:0x80024390 size:0x74
 void fn_80024390(camera_803c639c_s* camera, f32* p, s32 type)
 {
@@ -212,4 +274,44 @@ void fn_80024390(camera_803c639c_s* camera, f32* p, s32 type)
     p[4] = camera->proj[1][col];
     p[5] = camera->proj[2][2];
     p[6] = camera->proj[2][3];
+}
+
+// .text:0x80024184 size:0x20C
+void gOz_GXSetTexture(GXTevMode mode, s32 frac, s32 useNormal)
+{
+    if (OSGetCurrentThread() != GXGetCurrentGXThread()) {
+        OSPanic("sub.c", 674, "gOz_GXSetTexture was called in thread that is not current GX thread.\n");
+    }
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+    if (useNormal) {
+        GXSetVtxDesc(GX_VA_NRM, GX_DIRECT);
+        GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_NRM, GX_NRM_NBT, GX_F32, 0);
+    }
+    switch (mode) {
+    case GX_MODULATE:
+    case GX_PASSCLR:
+        GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+        GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+        if (mode == GX_PASSCLR) {
+            break;
+        }
+    case GX_REPLACE:
+        GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+        if (frac < 0) {
+            GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
+        } else {
+            GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U16, frac);
+        }
+        break;
+    }
+    GXSetTevOrder(GX_TEVSTAGE0, mode == GX_PASSCLR ? GX_TEXCOORD_NULL : GX_TEXCOORD0, mode == GX_PASSCLR ? GX_TEXMAP_NULL : GX_TEXMAP0,
+                  mode == GX_REPLACE ? GX_COLOR_NULL : GX_COLOR0A0);
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2X4, GX_TG_TEX0, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
+    GXSetNumChans(mode != GX_REPLACE);
+    GXSetNumTexGens(mode != GX_PASSCLR);
+    GXSetNumTevStages(1);
+    GXSetTevOp(GX_TEVSTAGE0, mode);
 }
