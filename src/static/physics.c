@@ -126,12 +126,11 @@ extern BOOL getAnimRelatedCoordinates(int, int, Vec*);
 
 typedef struct PhysState {
     /* 0x00 */ Mtx mtx;
-    /* 0x30 */ Vec _30;
-    /* 0x3C */ Vec _3C;
-    /* 0x48 */ Vec _48;
-    /* 0x54 */ Vec _54;
-    /* 0x60 */ Vec _60;
-    /* 0x6C */ Vec _6C;
+    /* 0x30 */ Vec angVel;
+    /* 0x3C */ Vec vel;
+    /* 0x48 */ Vec offset;
+    /* 0x54 */ Vec pts[2];
+    /* 0x6C */ Vec inertia;
     /* 0x78 */ s32 state;
     /* 0x7C */ s32 _7C;
     /* 0x80 */ s32 _80;
@@ -144,8 +143,7 @@ static PhysState lbl_800F79B8 = {
     { 0.0f, 0.0f, 0.0f },
     { 0.0f, 0.0f, 0.0f },
     { 0.0f, -0.89597f, 0.0f },
-    { 0.0f, -0.89597f, 0.0f },
-    { 0.0f, 0.89597f, 0.0f },
+    { { 0.0f, -0.89597f, 0.0f }, { 0.0f, 0.89597f, 0.0f } },
     { 0.23933218f, 0.02711064f, 0.23933218f },
     0,
     25,
@@ -174,18 +172,263 @@ void fn_80039A4C(void)
 }
 
 // .text:0x80039310 size:0x73C
-void fn_80039310(void)
+// The target saves one more FPR (f24) and has a 0x10 larger frame, so the stack
+// slots and float registers differ; first draft, not tuned.
+void fn_80039310(PhysState* st, f32 floor, f32 restEnergy)
 {
+    Mtx m3;
+    Mtx m2;
+    Mtx m;
+    Quaternion q1;
+    Vec v;
+    Vec sum;
+    Vec w;
+    Vec k;
+    Vec impulse;
+    Quaternion q;
+    Vec dir;
+    Vec b;
+    Vec a;
+    Vec* pt;
+    f32 invX;
+    f32 invY;
+    f32 invZ;
+    f32 dt;
+    f32 half;
+    f32 mag;
+    f32 energy;
+    s32 i;
+
+    invX = 1.0f / st->inertia.x;
+    invY = 1.0f / st->inertia.y;
+    invZ = 1.0f / st->inertia.z;
+    dt = (1.0f / 60.0f) * lbl_803CB81C;
+    mag = PSVECMag(&st->angVel);
+    if (mag >= 50.0f) {
+        PSVECScale(&st->angVel, 50.0f / mag, &st->angVel);
+    }
+    half = 0.5f * dt;
+    PSVECScale(&st->vel, half, &v);
+    PSMTXTransApply(st->mtx, st->mtx, v.x, v.y, v.z);
+    PSVECScale(&st->vel, 0.5f * -dt, &v);
+    PSVECAdd(&st->vel, &v, &st->vel);
+    st->vel.y = (20.0f * dt) + st->vel.y;
+    PSVECScale(&st->vel, half, &v);
+    PSMTXTransApply(st->mtx, st->mtx, v.x, v.y, v.z);
+    memcpy(&w, &st->angVel, sizeof(Vec));
+    memset(&sum, 0, sizeof(Vec));
+    k.x = invX * (st->inertia.y - st->inertia.z);
+    k.y = invY * (st->inertia.z - st->inertia.x);
+    k.z = invZ * (st->inertia.x - st->inertia.y);
+    PSVECScale(&k, dt, &k);
+    i = 0;
+    do {
+        v.y = k.y * ((w.z * w.x) - (0.2f * w.y));
+        v.x = k.x * ((w.y * w.z) - (0.2f * w.x));
+        v.z = k.z * ((w.x * w.y) - (0.2f * w.z));
+        if (i == 1 || i == 2) {
+            PSVECScale(&v, 2.0f, &v);
+        }
+        PSVECAdd(&sum, &v, &sum);
+        PSVECScale(&v, 0.5f, &w);
+        i++;
+    } while (i < 4);
+    PSVECScale(&sum, 1.0f / 6.0f, &v);
+    PSVECAdd(&st->angVel, &v, &st->angVel);
+    mag = PSVECMag(&st->angVel);
+    if (mag > 0.0001f) {
+        half = 0.5f * (-mag * dt);
+        sum.x = sin(half);
+        sum.y = cos(half);
+        PSVECScale(&st->angVel, (1.0f / mag) * sum.x, (Vec*)&q1);
+        q1.w = sum.y;
+    } else {
+        q1.w = 1.0f;
+        q1.z = 0.0f;
+        q1.y = 0.0f;
+        q1.x = 0.0f;
+    }
+    PSMTXQuat(m3, &q1);
+    PSMTXConcat(st->mtx, m3, st->mtx);
+    i = 0;
+    pt = st->pts;
+    do {
+        PSMTXMultVec(st->mtx, pt, &v);
+        if (v.y > floor) {
+            PSMTXCopy(st->mtx, m2);
+            m2[2][3] = 0.0f;
+            m2[1][3] = 0.0f;
+            m2[0][3] = 0.0f;
+            PSVECCrossProduct(&st->angVel, pt, &v);
+            PSMTXMultVec(m2, &v, &v);
+            PSVECAdd(&st->vel, &v, &v);
+            impulse.x = v.x;
+            impulse.y = 1.3f * -v.y;
+            impulse.z = v.z;
+            sum.x = 0.0f;
+            sum.y = -1.0f;
+            sum.z = 0.0f;
+            PSMTXMultVec(m2, pt, &w);
+            PSMTXScale(m2, invX, invY, invZ);
+            PSMTXConcat(st->mtx, m2, m2);
+            PSMTXTranspose(st->mtx, m3);
+            PSMTXConcat(m2, m3, m2);
+            PSVECCrossProduct(&w, &sum, &v);
+            PSMTXMultVec(m2, &v, &v);
+            PSVECCrossProduct(&v, &w, &v);
+            impulse.y = impulse.y / (0.2962963f + PSVECDotProduct(&v, &sum));
+            impulse.x *= -0.1f;
+            impulse.z *= -0.1f;
+            st->vel.y = st->vel.y + (impulse.y / 3.375f);
+            st->vel.x = st->vel.x + impulse.x;
+            st->vel.z = st->vel.z + impulse.z;
+            PSMTXTranspose(st->mtx, m3);
+            m3[2][3] = 0.0f;
+            m3[1][3] = 0.0f;
+            m3[0][3] = 0.0f;
+            PSMTXMultVec(m3, &impulse, &v);
+            PSVECCrossProduct(pt, &v, &v);
+            sum.x = st->angVel.x * st->inertia.x;
+            sum.y = st->angVel.y * st->inertia.y;
+            sum.z = st->angVel.z * st->inertia.z;
+            PSVECAdd(&sum, &v, &v);
+            st->angVel.x = v.x * invX;
+            st->angVel.y = v.y * invY;
+            st->angVel.z = v.z * invZ;
+            st->mtx[1][3] -= v.y - floor;
+            lbl_803CBCA1 = 1;
+        }
+        i++;
+        pt++;
+    } while (i < 2);
+    energy = (0.5f * ((st->vel.z * st->vel.z) + ((st->vel.x * st->vel.x) + (st->vel.y * st->vel.y))))
+           + (0.5f * ((st->angVel.z * (st->inertia.z * st->angVel.z)) + ((st->angVel.x * (st->inertia.x * st->angVel.x)) + (st->angVel.y * (st->inertia.y * st->angVel.y)))));
+    if (st->mtx[1][3] > 0.0f) {
+        energy = (st->mtx[1][3] * 20.0f) + energy;
+    } else {
+        energy = -((st->mtx[1][3] * 20.0f) - energy);
+    }
+    if (energy <= restEnergy) {
+        st->mtx[1][3] = floor;
+        st->vel.z = 0.0f;
+        st->vel.y = 0.0f;
+        st->vel.x = 0.0f;
+        st->angVel.z = 0.0f;
+        st->angVel.y = 0.0f;
+        st->angVel.x = 0.0f;
+        PSMTXMultVec(st->mtx, &st->pts[0], &a);
+        PSMTXMultVec(st->mtx, &st->pts[1], &b);
+        PSVECSubtract(&a, &b, &a);
+        half = 0.5f * (f32)sin(a.y / PSVECMag(&a));
+        mag = sin(half);
+        energy = cos(half);
+        dir.x = 0.0f;
+        dir.y = -1.0f;
+        dir.z = 0.0f;
+        PSVECCrossProduct(&dir, &a, &a);
+        PSVECScale(&a, mag / PSVECMag(&a), (Vec*)&q);
+        q.w = energy;
+        PSMTXQuat(m, &q);
+        PSMTXConcat(m, st->mtx, m);
+        PSMTXCopy(m, st->mtx);
+    }
 }
 
 // .text:0x80038F08 size:0x408
-void fn_80038F08(void)
+// The target reaches lbl_800F79B8 from lbl_800F79A0's base and has a 0x10 larger
+// frame and one more saved GPR; this build loads lbl_800F79B8 directly.
+void fn_80038F08(PhysActor* actor, PhysModel* model, u8 index)
 {
+    Mtx rate;
+    Mtx m;
+    Vec p;
+    Vec prev;
+    PhysState* st = &lbl_800F79B8;
+    PhysBone* bone;
+    PhysBone* child;
+    f32 dt = (1.0f / 60.0f) * lbl_803CB81C;
+    s32 r;
+
+    bone = model->bones[actor->bones[st->_7C + index]];
+    if (st->state < 0) {
+        return;
+    }
+    if (st->state == 0) {
+        PSMTXCopy(bone->mtx, st->mtx);
+        PSMTXMultVec(bone->mtx, &st->offset, &p);
+        st->mtx[0][3] = p.x;
+        st->mtx[1][3] = p.y;
+        st->mtx[2][3] = p.z;
+        child = model->bones[actor->bones[st->_80]];
+        PSMTXCopy(st->mtx, child->mtx);
+        PSVECScale(&st->offset, -1.0f, &p);
+        PSMTXMultVec(st->mtx, &p, &p);
+        child->mtx[0][3] = p.x;
+        child->mtx[1][3] = p.y;
+        child->mtx[2][3] = p.z;
+        st->state++;
+    } else if (st->state == 1) {
+        PSMTXMultVec(bone->mtx, &st->offset, &p);
+        prev.x = st->mtx[0][3];
+        prev.y = st->mtx[1][3];
+        prev.z = st->mtx[2][3];
+        PSVECSubtract(&p, &prev, &st->vel);
+        if (lbl_803CBCA0) {
+            memcpy(&st->vel, &lbl_800F79A0[1], sizeof(Vec));
+        } else {
+            PSVECAdd(&st->vel, &lbl_800F79A0[0], &st->vel);
+        }
+        PSVECScale(&st->vel, lbl_803CB824, &st->vel);
+        PSVECScale(&st->vel, 1.0f / dt, &st->vel);
+        for (r = 0; r < 3; r++) {
+            rate[r][0] = (bone->mtx[r][0] - st->mtx[r][0]) / dt;
+            rate[r][1] = (bone->mtx[r][1] - st->mtx[r][1]) / dt;
+            rate[r][2] = (bone->mtx[r][2] - st->mtx[r][2]) / dt;
+        }
+        rate[2][3] = 0.0f;
+        rate[1][3] = 0.0f;
+        rate[0][3] = 0.0f;
+        PSMTXTranspose(bone->mtx, m);
+        PSMTXConcat(rate, m, rate);
+        st->angVel.x = rate[2][1];
+        st->angVel.y = rate[0][2];
+        st->angVel.z = rate[1][0];
+        PSMTXMultVec(m, &st->angVel, &st->angVel);
+        PSMTXCopy(bone->mtx, st->mtx);
+        st->mtx[0][3] = p.x;
+        st->mtx[1][3] = p.y;
+        st->mtx[2][3] = p.z;
+        PSVECScale(&st->angVel, 0.5f * lbl_803CB824, &st->angVel);
+        child = model->bones[actor->bones[st->_80]];
+        PSMTXCopy(st->mtx, child->mtx);
+        PSVECScale(&st->offset, -1.0f, &p);
+        PSMTXMultVec(st->mtx, &p, &p);
+        child->mtx[0][3] = p.x;
+        child->mtx[1][3] = p.y;
+        child->mtx[2][3] = p.z;
+        st->state++;
+    } else {
+        PSMTXTrans(m, lbl_8036E548._C38.x, lbl_8036E548._C38.y, lbl_8036E548._C38.z);
+        PSMTXInverse(m, m);
+        fn_80039310(st, -0.12675f, 1.8f);
+        child = model->bones[actor->bones[st->_80]];
+        PSMTXCopy(st->mtx, child->mtx);
+        PSVECScale(&st->offset, -1.0f, &p);
+        PSMTXMultVec(st->mtx, &p, &p);
+        child->mtx[0][3] = p.x;
+        child->mtx[1][3] = p.y;
+        child->mtx[2][3] = p.z;
+        st->state += st->state == 2;
+    }
 }
 
 // .text:0x80038EC4 size:0x44
-void fn_80038EC4(void)
+void fn_80038EC4(PhysActor* actor, PhysModel** ref, s32 index)
 {
+    if (lbl_800F79B8.state < 0) {
+        lbl_800F79B8.state = 0;
+    }
+    fn_80038F08(actor, *ref, index);
 }
 
 // .text:0x80038E2C size:0x98
@@ -278,6 +521,8 @@ void fn_80038B48(RopeParams* params, RopeNode* nodes, s32 count, Vec* force)
 }
 
 // .text:0x800387B0 size:0x398
+// Registers only: the spring loop swaps node and prev (r28/r29); declaration orders
+// and loop forms tried.
 void fn_800387B0(RopeParams* params, RopeNode* nodes, s32 count, Vec* force)
 {
     Vec rel;
@@ -527,8 +772,132 @@ void fn_8003819C(RigidBody* body)
 }
 
 // .text:0x80037BAC size:0x5F0
-void fn_80037BAC(void)
+// The target keeps &tipW in r31 (six saved GPRs, frame 0x230); this build keeps
+// five and re-forms &tipW each time, so every later register differs.
+s32 fn_80037BAC(RigidBody* body)
 {
+    RigidBody b;
+    Vec tipW;
+    Vec pivotW;
+    Vec v;
+    Vec up;
+    Vec lv;
+    Vec av;
+    Vec t;
+    Quaternion q;
+    Vec* pts[2];
+    s32 contact[2];
+    RigidBody* p = &b;
+    f32 remaining;
+    f32 denom;
+    s32 i;
+
+    remaining = body->dt;
+    memcpy(p, body, sizeof(RigidBody) - sizeof(f32));
+    pts[0] = &p->pivot;
+    pts[1] = &p->tip;
+    PSMTXMultVec(p->world, &p->pivot, &pivotW);
+    PSMTXMultVec(p->world, &p->tip, &tipW);
+    p->timeLeft = p->dt;
+    do {
+        PSMTXMultVec(p->invRot, &p->vel, &p->localVel);
+        fn_8003819C(p);
+        PSVECScale(&p->force, p->invMass * p->timeLeft, &v);
+        PSMTXMultVec(p->rot, &v, &v);
+        PSVECAdd(&p->vel, &v, &p->vel);
+        PSVECScale(&p->vel, p->timeLeft, &v);
+        PSVECAdd(&p->pos, &v, &p->pos);
+        v.x = p->inertia.x * p->angVel.x;
+        v.y = p->inertia.y * p->angVel.y;
+        v.z = p->inertia.z * p->angVel.z;
+        PSVECCrossProduct(&p->angVel, &v, &v);
+        PSVECSubtract(&p->torque, &v, &v);
+        PSVECScale(&v, p->timeLeft, &v);
+        p->angVel.x += v.x * p->invInertia.x;
+        p->angVel.y += v.y * p->invInertia.y;
+        p->angVel.z += v.z * p->invInertia.z;
+        PSVECScale(&p->angVel, p->timeLeft, (Vec*)&q);
+        q.w = 0.0f;
+        PSQUATMultiply(&p->quat, &q, &q);
+        PSQUATScale(&q, 0.5f * p->timeLeft, &q);
+        PSQUATAdd(&p->quat, &q, &q);
+        if (q.x || q.y || q.z || q.w) {
+            PSQUATNormalize(&q, &p->quat);
+        } else {
+            memcpy(&p->quat, &q, sizeof(Quaternion));
+        }
+        p->torque.z = 0.0f;
+        p->torque.y = 0.0f;
+        p->torque.x = 0.0f;
+        p->force.z = 0.0f;
+        p->force.y = 0.0f;
+        p->force.x = 0.0f;
+        PSMTXQuat(p->rot, &p->quat);
+        PSMTXInverse(p->rot, p->invRot);
+        PSMTXTransApply(p->rot, p->world, p->pos.x, p->pos.y, p->pos.z);
+        PSMTXMultVec(p->world, &p->pivot, &pivotW);
+        PSMTXMultVec(p->world, &p->tip, &tipW);
+        contact[0] = pivotW.y < -p->radius ? 0 : pivotW.y > p->radius ? -1 : 1;
+        contact[1] = tipW.y < -p->radius ? 0 : tipW.y > p->radius ? -1 : 1;
+        if (contact[0] == 0) {
+            p->_14D = 0;
+        } else if (p->_14D) {
+            contact[0] = 0;
+        }
+        if (contact[1] == 0) {
+            p->_14C = 0;
+        } else if (p->_14C) {
+            contact[1] = 0;
+        }
+        if (contact[0] != -1 && contact[1] != -1) {
+            PSMTXMultVec(p->invRot, &p->vel, &p->localVel);
+            memcpy(&lv, &p->localVel, sizeof(Vec));
+            memcpy(&av, &p->angVel, sizeof(Vec));
+            up.x = 0.0f;
+            up.y = 1.0f;
+            up.z = 0.0f;
+            PSMTXMultVec(p->invRot, &up, &up);
+            i = 1;
+            do {
+                if (contact[i] != 0) {
+                    PSVECCrossProduct(&av, pts[i], &v);
+                    PSVECAdd(&lv, &v, &v);
+                    PSMTXMultVec(p->rot, &v, &t);
+                    if (t.y > 0.0f) {
+                        PSVECCrossProduct(pts[i], &up, &t);
+                        t.x *= p->invInertia.x;
+                        t.y *= p->invInertia.y;
+                        t.z *= p->invInertia.z;
+                        PSVECCrossProduct(&t, pts[i], &t);
+                        denom = p->invMass + PSVECDotProduct(&up, &t);
+                        PSVECScale(&up, ((1.0f + p->_54) * -PSVECDotProduct(&v, &up)) / denom, &v);
+                        PSVECScale(&v, p->invMass, &t);
+                        PSVECAdd(&p->localVel, &t, &p->localVel);
+                        PSVECCrossProduct(pts[i], &v, &v);
+                        v.x *= p->invInertia.x;
+                        v.y *= p->invInertia.y;
+                        v.z *= p->invInertia.z;
+                        PSVECAdd(&p->angVel, &v, &p->angVel);
+                    }
+                    if (i != 0) {
+                        p->_14C = 1;
+                    } else {
+                        p->_14D = 1;
+                    }
+                }
+            } while (i-- != 0);
+            PSMTXMultVec(p->rot, &p->localVel, &p->vel);
+            remaining -= p->timeLeft;
+            if (p->timeLeft < remaining) {
+                p->timeLeft = remaining;
+            }
+            memcpy(body, p, sizeof(RigidBody) - sizeof(f32));
+        } else {
+            memcpy(p, body, sizeof(RigidBody) - sizeof(f32));
+            p->timeLeft *= 0.5f;
+        }
+    } while (remaining > 0.0f);
+    return 0;
 }
 
 // .text:0x80037B18 size:0x94
