@@ -71,7 +71,10 @@ typedef struct FlareParams {
     /* 0x0C */ s32 _0C;
     /* 0x10 */ s32 _10;
     /* 0x14 */ s32 _14;
-    /* 0x18 */ s32 _18[11];
+    /* 0x18 */ s32 _18[8];
+    /* 0x38 */ s32 r;
+    /* 0x3C */ s32 g;
+    /* 0x40 */ s32 b;
 } FlareParams; // size: 0x44
 
 typedef struct ZSortEntry {
@@ -156,6 +159,11 @@ extern StadiumLights lbl_800F7478[14];
 extern u8 lbl_80367318[];
 extern s32 lbl_803CBC70;
 extern s32 lbl_803CBD0C;
+extern struct {
+    /* 0x0000 */ u8 _0000[0x2C50];
+    /* 0x2C50 */ void* _2C50[13];
+} lbl_8036E548;
+extern BOOL getAnimRelatedCoordinates(int player, int joint, Vec* out);
 extern FlareParams lbl_800F787C;
 extern void fn_80023B90(LightData* data, void* light);
 extern void fn_800B0A14_removeQueue(void);
@@ -536,6 +544,60 @@ void fn_800330CC(s32 n, u32 arg1, Vec* start, Vec* end, f32 arg4, s32 arg5, s32 
         e->_3C = -0.0001f;
         e->_40 = arg1;
         e->_44 = arg7;
+    }
+}
+
+// .text:0x800324EC size:0x3F4
+// 99.57%: the target tests the first player's pointer with bne over a b to the end; this
+// branches with beq. Only branch targets differ after it.
+void fn_800324EC(u16 joint, s32 player, s32 other, Vec* dir)
+{
+    Vec pos;
+    Vec v;
+    u32 colors[32];
+    FlareParams* params;
+    Emitter* e;
+    Particle* p;
+    u32 i;
+
+    if (player >= 0 && player < 13) {
+        if (lbl_8036E548._2C50[player] == NULL) {
+            return;
+        }
+        getAnimRelatedCoordinates(player, joint, &pos);
+        if (other >= 0 && other < 13 && lbl_8036E548._2C50[other] != NULL) {
+            getAnimRelatedCoordinates(other, joint, &v);
+            PSVECSubtract(&v, &pos, &v);
+            PSVECScale(&v, 0.5f, &v);
+            PSVECAdd(&pos, &v, &pos);
+        }
+        v.x = lbl_8017FFE0[0][3];
+        v.y = lbl_8017FFE0[1][3];
+        v.z = lbl_8017FFE0[2][3];
+        colors[0] = (lbl_800F787C.r << 24) | (lbl_800F787C.g << 16) | (lbl_800F787C.b << 8) | 0xFF;
+        for (i = 1; i < 32; i++) {
+            colors[i] = colors[0];
+        }
+        params = &lbl_800F787C;
+        params->_00 = lbl_803CBD0C;
+        e = fn_80033A24(fn_8002E828, 0x80, 0, 1, TRUE, 6);
+        if (e != NULL) {
+            e->_10 = params->_00;
+            p = e->particles;
+            p->pos.x = pos.x;
+            p->pos.y = pos.y;
+            p->pos.z = pos.z;
+            p->_40 = -0x100;
+            p->_18 = params->_10;
+            p->_1C = p->_4A = params->_14;
+            p->_20 = params->_14 / 2;
+            p->_38 = p->_3C = p->_10 = params->_08 / 100000.0f;
+            p->_14 = params->_0C / 100000.0f;
+            p->_4D = params->_04;
+        }
+        if (dir != NULL) {
+            fn_8002A1CC(&pos, dir);
+        }
     }
 }
 

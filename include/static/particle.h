@@ -38,6 +38,7 @@ struct Particle* fn_80031F34(struct Particle* list, s32 n);
 s32 fn_80032038(struct ZSortEntry* a, struct ZSortEntry* b);
 void fn_80032064(Vec* pos, Vec* dir);
 void fn_80032284(Vec* pos);
+void fn_800324EC(u16 joint, s32 player, s32 other, Vec* dir);
 BOOL fn_800328E0(void* e);
 void fn_800330CC(s32 n, u32 arg1, Vec* start, Vec* end, f32 arg4, s32 arg5, s32 arg6, f32 arg7);
 f32 fn_800335BC(s32 angle);
