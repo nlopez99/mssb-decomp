@@ -1353,7 +1353,7 @@ void fn_8004D0F0(void) {
     if (lbl_803C5F74._1D != 0) {
         sndFXStartEx(0x1C2, lbl_800EFBA4[11], 0x3F, 0);
     } else {
-        if (lbl_803C5F74._01 == 0 || (u8)(lbl_803C5F74._01 - 1) <= 4 || lbl_803C5F74._01 == 6) {
+        if (lbl_803C5F74._01 == 0 || lbl_803C5F74._01 == 1 || lbl_803C5F74._01 == 2 || lbl_803C5F74._01 == 3 || lbl_803C5F74._01 == 4 || lbl_803C5F74._01 == 5 || lbl_803C5F74._01 == 6) {
             sndFXStartEx(0x1BF, lbl_800EFBA4[8], 0x3F, 0);
         }
     }
