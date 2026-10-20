@@ -658,7 +658,43 @@ void fn_8005B298(void) {
 }
 
 // .text:0x8005AF68 size:0x330
-void fn_8005AF68(void) {
+void fn_8005AF68(SpaniTask* task) {
+    s32 slot;
+    s32 i;
+    s8 team = lbl_803297E0._CF3B;
+    u8 flag;
+    for (i = 0; i < 9; i++) {
+        if (lbl_803297E0._CFA2[team] != 2) {
+            slot = lbl_80354720[team][i]._2;
+            fn_800363D8(task, slot + 0x23, 1, 0x83, inMemRoster[team][i].stats.CharID);
+            getTeamObj(task, i, 0x11)->_54 &= ~2;
+            if (g_d_GameSettings.GameModeSelected == 5) {
+                flag = starMissionCompletionTracker._43D6[inMemRoster[team][i].stats.CharID];
+            } else {
+                flag = lbl_8034E9A0._489B[team][i];
+            }
+            if (flag != 0 && (team != 1 || g_d_GameSettings.GameModeSelected != 5)) {
+                getTeamObj(task, slot, 0x3E)->_68 = 1;
+                getTeamObj(task, slot, 0x47)->_54 |= 2;
+                getTeamObj(task, slot, 0x47)->_5C = 0;
+                getTeamObj(task, slot, 0x47)->_68 = 1;
+            } else if (lbl_80361B20._00[0][inMemRoster[team][i].stats.CharID] != 0 && g_d_GameSettings.GameModeSelected != 5) {
+                getTeamObj(task, slot, 0x3E)->_68 = 1;
+                getTeamObj(task, slot, 0x47)->_54 |= 2;
+                getTeamObj(task, slot, 0x47)->_5C = 0;
+                getTeamObj(task, slot, 0x47)->_68 = 0;
+            } else {
+                getTeamObj(task, slot, 0x3E)->_54 &= ~2;
+                getTeamObj(task, slot, 0x47)->_54 &= ~2;
+            }
+            getTeamObj(task, i, 0x35)->_54 &= ~2;
+            if (g_d_GameSettings._10 == 0 && team != 0) {
+                getTeamObj(task, i, 0x1A)->_64 = (u8)(lbl_8034E9A0.ports[0] == 0) + 30;
+            } else {
+                getTeamObj(task, i, 0x1A)->_64 = lbl_8034E9A0.ports[team] + 30;
+            }
+        }
+    }
 }
 
 // .text:0x8005A350 size:0xC18
