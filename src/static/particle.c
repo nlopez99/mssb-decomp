@@ -1808,9 +1808,33 @@ void fn_8002DC68(Vec* pos)
     }
 }
 
+static inline void stepDrift(DriftParticle* p)
+{
+    s32 i;
+    s32 c;
+
+    for (i = 0; i < 3; i++) {
+        c = p->color[i] + p->dcolor[i];
+        if (c < 0) {
+            c = 0;
+        } else if (c > 255) {
+            c = 255;
+        }
+        p->color[i] = c;
+        p->accel[i] = p->force[i] / p->mass;
+        p->vel[i] += p->accel[i];
+        p->pos[i] += p->vel[i];
+    }
+    c = p->color[i] + p->dcolor[i];
+    if (c < 0) {
+        c = 0;
+    } else if (c > 255) {
+        c = 255;
+    }
+    p->color[i] = c;
+}
+
 // .text:0x8002D82C size:0x43C
-// 99.67%: registers only, in the colour and physics loop: the target sets the float
-// pointer (r5) before the index (r4); statement and type variants did not change it.
 BOOL fn_8002D82C(void* arg)
 {
     Emitter* e = arg;
@@ -1824,8 +1848,6 @@ BOOL fn_8002D82C(void* arg)
     GXTlutObj tlutObj;
     TextureDesc* tex;
     Mtx m;
-    s32 i;
-    s32 c;
 
     if (file == NULL) {
         GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
@@ -1869,25 +1891,7 @@ BOOL fn_8002D82C(void* arg)
                 GXTexCoord2f32(uv[(p->texCoords >> 6) & 3][0], uv[(p->texCoords >> 6) & 3][1]);
                 if (lbl_80366158._28 == 0) {
                     p->remaining--;
-                    for (i = 0; i < 3; i++) {
-                        c = p->color[i] + p->dcolor[i];
-                        if (c < 0) {
-                            c = 0;
-                        } else if (c > 255) {
-                            c = 255;
-                        }
-                        p->color[i] = c;
-                        p->accel[i] = p->force[i] / p->mass;
-                        p->vel[i] += p->accel[i];
-                        p->pos[i] += p->vel[i];
-                    }
-                    c = p->color[i] + p->dcolor[i];
-                    if (c < 0) {
-                        c = 0;
-                    } else if (c > 255) {
-                        c = 255;
-                    }
-                    p->color[i] = c;
+                    stepDrift(p);
                     if (p->remaining <= e->fadeAge && (u8)p->dcolor[3] == 0) {
                         p->dcolor[3] = -0x100 / p->remaining;
                     }
@@ -2583,8 +2587,8 @@ void fn_8002955C(Vec* pos, Vec* dir, PuffParams* params)
 }
 
 // .text:0x80028F48 size:0x614
-// 99.77%: registers only: the target keeps half in f30 and gives the two table lookups
-// other scratch registers (r0, r6), the residue fn_800332B8's yaw lookups show too.
+// 99.81%: registers only: the target gives the two table lookups other scratch registers
+// (r0, r6), the residue fn_800332B8's yaw lookups show too.
 BOOL fn_80028F48(void* arg)
 {
     Emitter* e = arg;
@@ -2605,7 +2609,6 @@ BOOL fn_80028F48(void* arg)
     s32 a;
     s32 ang;
     s32 i;
-    f32 half;
     f32 c;
     f32 s;
 
@@ -2678,14 +2681,14 @@ BOOL fn_80028F48(void* arg)
                 }
             }
             PSMTXMultVec(lbl_8017FFE0, &p->pos, &v);
-            half = p->size / 2;
+            s = p->size / 2;
             ang = 2048.0f * p->phase;
             i = __abs(ang) & 0x7FF;
             if (i >= 0x401) {
                 i = 0x800 - i;
             }
-            c = half * lbl_8017ED68[i];
-            s = half * fn_800335EC(ang);
+            c = s * lbl_8017ED68[i];
+            s *= fn_800335EC(ang);
             GXBegin(GX_QUADS, GX_VTXFMT0, 4);
             GXPosition3f32(v.x + c, v.y + s, v.z);
             GXColor1u32(p->_34);
