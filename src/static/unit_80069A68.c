@@ -125,6 +125,7 @@ static SceneCallback lbl_801093B8 = { 0x0000002F, fn_80069A68, 0x00000000 };
 
 extern void fn_80008E00(void (*func)(s32));
 extern void fn_8000900C(void);
+extern void fn_800A7F10(s32 arg0);
 extern void fn_80009018(void* arg0);
 extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_800ACFB0(void* ptr);
@@ -282,6 +283,87 @@ void fn_8006BB60(void) {
 
 // .text:0x8006B78C size:0x3D4
 void fn_8006B78C(void) {
+    s32 busy = 1;
+    SceneTask* task = lbl_803CC1B8;
+    s16 state = task->state;
+
+    switch (state) {
+    case 0:
+        fn_8000900C();
+        lbl_80366158._20 = 1;
+    case 3:
+    case 6:
+        if (++task->_38 == 30) {
+            task->_36 = 60;
+            task->state++;
+        }
+        break;
+    case 1:
+    case 4:
+    case 7:
+        if (task->_36 != 0) {
+            task->_36--;
+        } else {
+            task->state++;
+        }
+        break;
+    case 8:
+        busy = 0;
+    case 2:
+    case 5:
+        if (task->_38 != 0) {
+            busy = 1;
+            task->_38--;
+        } else if (state != 8 || (s32)lbl_803C6CF8._715 == 1) {
+            task->state++;
+        }
+        break;
+    }
+    if (busy != 0) {
+        fn_80022B68();
+    }
+    if (task->state == 9) {
+        task->_36 = 0;
+        task->state = 0;
+        fn_80008E00(fn_800A7F10);
+        lbl_803CC1B8->func = fn_8006AF9C;
+        return;
+    }
+    switch (task->state) {
+    case 6:
+    case 7:
+    case 8:
+        task->fades[lbl_803CBBC0].mode = 3;
+        task->fades[lbl_803CBBC0].bank = (TexBank*)task->texFile[0];
+        task->fades[lbl_803CBBC0].index = 0;
+        task->fades[lbl_803CBBC0].alpha = task->_38 / 30.0f;
+        task->fades[lbl_803CBBC0]._00 = 0;
+        task->fades[lbl_803CBBC0].draw = fn_8006AC24;
+        fn_800A7D4C(0, &task->fades[lbl_803CBBC0]);
+        break;
+    case 3:
+    case 4:
+    case 5:
+        task->fades[lbl_803CBBC0].mode = 2;
+        task->fades[lbl_803CBBC0].bank = (TexBank*)task->texFile[0];
+        task->fades[lbl_803CBBC0].index = 2;
+        task->fades[lbl_803CBBC0].alpha = task->_38 / 30.0f;
+        task->fades[lbl_803CBBC0]._00 = 0;
+        task->fades[lbl_803CBBC0].draw = fn_8006AC24;
+        fn_800A7D4C(0, &task->fades[lbl_803CBBC0]);
+        break;
+    case 0:
+    case 1:
+    case 2:
+        task->fades[lbl_803CBBC0].mode = 1;
+        task->fades[lbl_803CBBC0].bank = (TexBank*)task->texFile[0];
+        task->fades[lbl_803CBBC0].index = 1;
+        task->fades[lbl_803CBBC0].alpha = task->_38 / 30.0f;
+        task->fades[lbl_803CBBC0]._00 = 0;
+        task->fades[lbl_803CBBC0].draw = fn_8006AC24;
+        fn_800A7D4C(0, &task->fades[lbl_803CBBC0]);
+        break;
+    }
 }
 
 // .text:0x8006B668 size:0x124
