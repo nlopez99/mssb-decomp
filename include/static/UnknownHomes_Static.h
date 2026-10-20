@@ -5,7 +5,7 @@
 #include "Dolphin/mtx.h"
 
 typedef struct _GameInitVariables {
-    /*0x00*/ int _00;
+    /*0x00*/ u32 _00; // bit per scene choice in calledWhenStartingMatch
     /*0x04*/ u16 FrameCountWhileNotAtMainMenu;
     /*0x06*/ u8 _06; // 1 Menu,2 InGame/Minigame/Practice/etc
     /*0x07*/ E(u8, GAME_TYPE) GameModeSelected;

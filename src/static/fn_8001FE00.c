@@ -2,6 +2,7 @@
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/mtx.h"
 #include "Dolphin/os.h"
+#include "Dolphin/rand.h"
 #include "static/fn_80021AC8.h"
 
 typedef struct SceneSprite {
@@ -51,6 +52,13 @@ typedef struct SceneState {
     /* 0x1B */ u8 _1B;
 } SceneState;
 
+typedef struct SceneChoice {
+    /* 0x0 */ s8 stadium;
+    /* 0x1 */ s8 weight;
+    /* 0x2 */ s8 weightSeen;
+} SceneChoice;
+
+extern SceneChoice lbl_800E86BC[17];
 extern SceneState lbl_8037169C;
 extern SceneSlot lbl_80371C30[];
 extern SceneTask* lbl_803CC1B8;
@@ -201,7 +209,26 @@ BOOL fn_80020388(void) {
 }
 
 // .text:0x80020278 size:0x110
-void fn_80020278(void) {
+BOOL fn_80020278(s32 id) {
+    SoundFile* file;
+
+    if (lbl_8037169C.step == 0) {
+        file = SceneFileAt(id + 45);
+        lbl_8037169C.tex = fn_800ACF34(0x20, file->size & 0x0FFFFFFF);
+        ARAMTransfer(file, lbl_8037169C.tex, 1, 0);
+        lbl_8037169C._18 = id;
+        lbl_8037169C._1A = 0;
+        lbl_8037169C.step++;
+    } else if (lbl_8037169C.step == 1) {
+        if (lbl_803C6CF8._715 != 1) {
+            return FALSE;
+        }
+        convertTextureHeader(lbl_8037169C.tex);
+        lbl_8037169C.image = (u8*)lbl_8037169C.tex + (*(u16*)((u8*)lbl_8037169C.tex + 0x20) << 5) + 4;
+        lbl_8037169C.step = 2;
+        return TRUE;
+    }
+    return FALSE;
 }
 
 // .text:0x8002024C size:0x2C
@@ -218,7 +245,48 @@ BOOL fn_80020218(void) {
 }
 
 // .text:0x80020048 size:0x1D0
-void calledWhenStartingMatch(void) {
+s16 calledWhenStartingMatch(void) {
+    struct {
+        s16 weight;
+        s16 id;
+    } list[10];
+    s32 i;
+    s32 n;
+    s32 total;
+    s32 r;
+
+    if (g_d_GameSettings._00 == 0) {
+        g_d_GameSettings._00 |= 1;
+        return 0;
+    }
+    for (i = 0; i < 10; i++) {
+        list[i].weight = 0;
+        list[i].id = -1;
+    }
+    i = 0;
+    n = 0;
+    total = 0;
+    for (; i < 17; i++) {
+        if ((lbl_800E86BC[i].stadium < 0 || g_d_GameSettings.StadiumID == lbl_800E86BC[i].stadium) && lbl_8037169C._1B != i) {
+            if (g_d_GameSettings._00 & (1 << i)) {
+                list[n].weight = lbl_800E86BC[i].weightSeen;
+            } else {
+                list[n].weight = lbl_800E86BC[i].weight;
+            }
+            total += list[n].weight;
+            list[n].id = i;
+            n++;
+        }
+    }
+    r = rand() % total;
+    for (i = 0; i < n; i++) {
+        r -= list[i].weight;
+        if (r < 0) {
+            g_d_GameSettings._00 |= 1 << list[i].id;
+            return list[i].id;
+        }
+    }
+    return 0;
 }
 
 // .text:0x8001FE00 size:0x248
