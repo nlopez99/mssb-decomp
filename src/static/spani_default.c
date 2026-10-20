@@ -386,10 +386,14 @@ s32 fn_80036214(SpaniTask* task, s32 id, s32 arg2, s32 arg3) {
 void fn_80036134(SpaniTask* task, s32 id, s32 arg2, s32 id2) {
     SabInfo info;
     SpaniObj* obj = lbl_80371C30[task->_14 + id].obj;
+    f32 x;
+    f32 y;
 
     fn_8000CEF0(lbl_803C4BE0[obj->_66]._38, obj->_64, arg2, obj->_5C >> 16, &info);
-    lbl_80371C30[task->_14 + id2].obj->_48.x = info.x;
-    lbl_80371C30[task->_14 + id2].obj->_48.y = info.y;
+    x = info.x;
+    y = info.y;
+    lbl_80371C30[task->_14 + id2].obj->_48.x = x;
+    lbl_80371C30[task->_14 + id2].obj->_48.y = y;
 }
 
 // .text:0x80035F20 size:0x214 mapped:0x80035F20
