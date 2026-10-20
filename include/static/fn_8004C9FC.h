@@ -30,7 +30,7 @@ void fn_8004F964(void);
 s32 fn_8004FD64(s32 i);
 void fn_8004FDA0(s32 id);
 s32 fn_8004FDE8(s32 from, s32 to);
-void fn_80050138(void);
+void fn_80050138(s32 search, s32 a, s32 b, s32 c, s32 d, s32 force);
 void fn_800506E8(s8 v, s32 kind, s32 on);
 void fn_80050760(void);
 s32 fn_80050F78(s32 mode);
