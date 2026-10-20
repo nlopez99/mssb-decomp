@@ -5,7 +5,7 @@
 
 void drawStarProgressionMenu(void);
 void someChallengeStarFunction(struct SpaniTask* task);
-void someChallengeStarFunction2(void);
+void someChallengeStarFunction2(struct SpaniTask* task);
 void challengeCheckStarsMenuLoading(void);
 void starMenu(void);
 void fn_80057CAC(void);

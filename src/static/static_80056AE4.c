@@ -85,7 +85,8 @@ extern struct {
     /* 0x0CF7D */ u8 _CF7D[0xCF92 - 0xCF7D];
     /* 0x0CF92 */ u8 _CF92;
     /* 0x0CF93 */ u8 _CF93;
-    /* 0x0CF94 */ u8 _CF94[0xCF98 - 0xCF94];
+    /* 0x0CF94 */ u8 _CF94[0xCF97 - 0xCF94];
+    /* 0x0CF97 */ s8 _CF97;
     /* 0x0CF98 */ s8 _CF98;
     /* 0x0CF99 */ u8 _CF99;
     /* 0x0CF9A */ u8 _CF9A;
@@ -494,7 +495,51 @@ void challengeCheckStarsMenuLoading(void) {
 }
 
 // .text:0x800572C0 size:0x430
-void someChallengeStarFunction2(void) {
+void someChallengeStarFunction2(SpaniTask* task) {
+    u8 set;
+    s16 text;
+
+    if (lbl_803297E0._CF93 == 0) {
+        set = lbl_800E8558[lbl_803297E0._CF9C].set;
+        if (challengeStarRelatedInd(lbl_803297E0._CF9C, lbl_803297E0._CF98)) {
+            getSpaniObj(task, 0x23)->_54 |= 2;
+            getSpaniObj(task, 0x23)->_5C = 0;
+            getSpaniObj(task, 0x23)->_68 = 1;
+            getSpaniObj(task, lbl_803297E0._CF98 + 0x31)->_54 |= 2;
+            getSpaniObj(task, lbl_803297E0._CF98 + 0x31)->_5C = 0;
+            getSpaniObj(task, lbl_803297E0._CF98 + 0x31)->_68 = 1;
+            getSpaniObj(task, lbl_803297E0._CF98 + 0x45)->_5C = 0x10000;
+        } else {
+            getSpaniObj(task, 0x23)->_54 &= ~2;
+            getSpaniObj(task, lbl_803297E0._CF98 + 0x31)->_54 &= ~2;
+            getSpaniObj(task, lbl_803297E0._CF98 + 0x45)->_5C = 0;
+        }
+        getSpaniObj(task, lbl_803297E0._CF98 + 0x45)->_54 |= 2;
+        getSpaniObj(task, lbl_803297E0._CF98 + 0x45)->_68 = 1;
+        if (challengeStarRelatedInd(lbl_803297E0._CF9C, lbl_803297E0._CF97)) {
+            getSpaniObj(task, lbl_803297E0._CF97 + 0x31)->_54 &= ~2;
+            getSpaniObj(task, lbl_803297E0._CF97 + 0x27)->_5C = 0;
+        } else {
+            getSpaniObj(task, lbl_803297E0._CF97 + 0x27)->_5C = 0;
+        }
+        getSpaniObj(task, lbl_803297E0._CF97 + 0x45)->_54 &= ~2;
+        getSpaniObj(task, lbl_803297E0._CF97 + 0x45)->_68 = 1;
+        if (*(s8*)&starMissionCompletionTracker.characters[lbl_803297E0._CF9C].inGameMissionTracker[lbl_803297E0._CF98].shownOnPauseMenu != 0) {
+            text = lbl_8010A768[set][lbl_803297E0._CF98]._0;
+        } else if (challengeStarRelatedInd(lbl_803297E0._CF9C, lbl_803297E0._CF98)) {
+            text = lbl_8010A768[set][lbl_803297E0._CF98]._0;
+        } else if (lbl_8010A768[set][lbl_803297E0._CF98]._6 <= starMissionCompletionTracker._4415) {
+            text = 0x1C5;
+        } else {
+            text = 0x1C6;
+        }
+        fn_8000FE08(lbl_803297E0._CF7C, 0, text);
+        lbl_803297E0._CF93 = 1;
+    }
+    if (lbl_803297E0._CF93 != 0) {
+        lbl_803297E0._CF93 = 0;
+        lbl_803297E0._CF92 = 0;
+    }
 }
 
 // .text:0x80056F70 size:0x350
