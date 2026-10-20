@@ -1221,50 +1221,6 @@ void characterSelectScreen(u8 team) {
     }
 }
 
-static inline void placeBatter(s8* order, u8 team, s8 id) {
-    s32 k;
-    s32 m;
-    u8 r;
-    u8 ok;
-    u8* pos = lbl_80109054[1][lbl_8034E9A0.chars[(u8)(id / 9)][(u8)(id % 9)].attribute];
-
-    for (k = 0; k < 5; k++, pos++) {
-        for (m = 0; m < 9; m++) {
-            if (order[m] == *pos) {
-                break;
-            }
-        }
-        if (m == 9) {
-            for (m = 0; m < 9; m++) {
-                if (id == lbl_803C6724._02[team][m] && order[m] == -1) {
-                    order[m] = *pos;
-                    return;
-                }
-            }
-        }
-    }
-    if (k == 5) {
-        do {
-            r = randRange_FUN_80042bf0(0, 8);
-            for (m = 0; m < 9; m++) {
-                if (order[m] == r) {
-                    ok = 0;
-                    break;
-                }
-            }
-            if (m == 9) {
-                ok = 1;
-            }
-        } while (ok == 0);
-        for (m = 0; m < 9; m++) {
-            if (id == lbl_803C6724._02[team][m]) {
-                order[m] = r;
-                return;
-            }
-        }
-    }
-}
-
 // .text:0x80064A04 size:0x13E8
 void unsure_FillRosterPositions(u8 team) {
     s8 order[9];
@@ -1275,15 +1231,17 @@ void unsure_FillRosterPositions(u8 team) {
     s32 k;
     s32 m;
     u8 n;
+    u8 n2;
     u8 isCaptain;
     s32 cap;
     s32 ri;
     s32 rj;
     s32 id;
     s8 tmp;
-    u8* pos;
+    u8 attr;
+    u8 bat;
     u8 r;
-    u8 ok;
+    u8 ok = 0;
 
     for (i = 0; i < 9; i++) {
         others[i] = -1;
@@ -1306,7 +1264,43 @@ void unsure_FillRosterPositions(u8 team) {
     }
     if (captains[0] != -1) {
         if (captains[1] == -1) {
-            placeBatter(order, team, captains[0]);
+            attr = lbl_8034E9A0.chars[(u8)(captains[0] / 9)][(u8)(captains[0] % 9)].attribute;
+            for (i = 0; i < 5; i++) {
+                bat = lbl_80109054[1][attr][i];
+                for (m = 0; m < 9; m++) {
+                    if (order[m] == bat) {
+                        break;
+                    }
+                }
+                if (m == 9) {
+                    for (m = 0; m < 9; m++) {
+                        if (captains[0] == lbl_803C6724._02[team][m] && order[m] == -1) {
+                            order[m] = bat;
+                            goto next_captain;
+                        }
+                    }
+                }
+            }
+            if (i == 5) {
+                do {
+                    r = randRange_FUN_80042bf0(0, 8);
+                    for (m = 0; m < 9; m++) {
+                        if (order[m] == r) {
+                            ok = 0;
+                            break;
+                        }
+                    }
+                    if (m == 9) {
+                        ok = 1;
+                    }
+                } while (ok == 0);
+                for (m = 0; m < 9; m++) {
+                    if (captains[0] == lbl_803C6724._02[team][m]) {
+                        order[m] = r;
+                        goto next_captain;
+                    }
+                }
+            }
         } else {
             for (i = 0; i < 8; i++) {
                 if (captains[i] == -1) {
@@ -1341,11 +1335,48 @@ void unsure_FillRosterPositions(u8 team) {
                 if (captains[i] == -1) {
                     break;
                 }
-                placeBatter(order, team, captains[i]);
+                attr = lbl_8034E9A0.chars[(u8)(captains[i] / 9)][(u8)(captains[i] % 9)].attribute;
+                for (k = 0; k < 5; k++) {
+                    bat = lbl_80109054[1][attr][k];
+                    for (m = 0; m < 9; m++) {
+                        if (order[m] == bat) {
+                            break;
+                        }
+                    }
+                    if (m == 9) {
+                        for (m = 0; m < 9; m++) {
+                            if (captains[i] == lbl_803C6724._02[team][m] && order[m] == -1) {
+                                order[m] = bat;
+                                goto next_captain;
+                            }
+                        }
+                    }
+                }
+                if (k == 5) {
+                    do {
+                        r = randRange_FUN_80042bf0(0, 8);
+                        for (m = 0; m < 9; m++) {
+                            if (order[m] == r) {
+                                ok = 0;
+                                break;
+                            }
+                        }
+                        if (m == 9) {
+                            ok = 1;
+                        }
+                    } while (ok == 0);
+                    for (m = 0; m < 9; m++) {
+                        if (captains[i] == lbl_803C6724._02[team][m]) {
+                            order[m] = r;
+                            break;
+                        }
+                    }
+                }
+            next_captain:;
             }
         }
     }
-    n = 0;
+    n2 = 0;
     for (i = 0; i < 9; i++) {
         isCaptain = 0;
         for (k = 0; k < 12; k++) {
@@ -1354,7 +1385,7 @@ void unsure_FillRosterPositions(u8 team) {
             }
         }
         if (isCaptain == 0) {
-            others[n++] = lbl_803C6724._02[team][i];
+            others[n2++] = lbl_803C6724._02[team][i];
         }
     }
     for (i = 0; i < 8; i++) {
@@ -1390,17 +1421,18 @@ void unsure_FillRosterPositions(u8 team) {
         if (others[i] == -1) {
             break;
         }
-        pos = lbl_80109054[1][lbl_8034E9A0.chars[others[i] / 9][others[i] % 9].attribute];
-        for (k = 0; k < 5; k++, pos++) {
+        attr = lbl_8034E9A0.chars[others[i] / 9][others[i] % 9].attribute;
+        for (k = 0; k < 5; k++) {
+                    bat = lbl_80109054[1][attr][k];
             for (m = 0; m < 9; m++) {
-                if (order[m] == *pos) {
+                if (order[m] == bat) {
                     break;
                 }
             }
             if (m == 9) {
                 for (m = 0; m < 9; m++) {
                     if (others[i] == lbl_803C6724._02[team][m] && order[m] == -1) {
-                        order[m] = *pos;
+                        order[m] = bat;
                         goto next;
                     }
                 }
