@@ -10,12 +10,21 @@
 typedef struct Particle {
     /* 0x00 */ struct Particle* next;
     /* 0x04 */ Vec pos;
-    /* 0x10 */ u8 _10[0x10];
+    /* 0x10 */ f32 _10;
+    /* 0x14 */ f32 _14;
+    /* 0x18 */ s32 _18;
+    /* 0x1C */ s32 _1C;
     /* 0x20 */ s32 _20;
-    /* 0x24 */ u8 _24[0x24];
+    /* 0x24 */ u8 _24[0x14];
+    /* 0x38 */ f32 _38;
+    /* 0x3C */ f32 _3C;
+    /* 0x40 */ s32 _40;
+    /* 0x44 */ u8 _44[0x4];
     /* 0x48 */ s16 _48;
     /* 0x4A */ s16 _4A;
-    /* 0x4C */ u8 _4C[0x14];
+    /* 0x4C */ u8 _4C;
+    /* 0x4D */ u8 _4D;
+    /* 0x4E */ u8 _4E[0x12];
 } Particle; // size: 0x60
 
 typedef struct Emitter {
@@ -23,7 +32,7 @@ typedef struct Emitter {
     /* 0x04 */ struct Emitter* next;
     /* 0x08 */ BOOL (*update)(void* e);
     /* 0x0C */ Particle* particles;
-    /* 0x10 */ u8 _10[0x4];
+    /* 0x10 */ s32 _10;
     /* 0x14 */ u16 _14_hi : 4;
     /* 0x14 */ u16 count : 12;
     /* 0x16 */ u8 priority;
@@ -52,10 +61,35 @@ typedef struct EffectParams {
     /* 0x0C */ s32 _0C[13];
 } EffectParams; // size: 0x40
 
+typedef struct FlareParams {
+    /* 0x00 */ s32 _00;
+    /* 0x04 */ s32 _04;
+    /* 0x08 */ s32 _08;
+    /* 0x0C */ s32 _0C;
+    /* 0x10 */ s32 _10;
+    /* 0x14 */ s32 _14;
+    /* 0x18 */ s32 _18[11];
+} FlareParams; // size: 0x44
+
 typedef struct ZSortEntry {
     /* 0x0 */ Particle* p;
     /* 0x4 */ f32 z;
 } ZSortEntry; // size: 0x8
+
+// The fields fn_800330CC's emitters add after the common header
+typedef struct ArcEmitter {
+    /* 0x00 */ u8 _00[0x10];
+    /* 0x10 */ s32 _10;
+    /* 0x14 */ u8 _14[0x4];
+    /* 0x18 */ Vec start;
+    /* 0x24 */ Vec end;
+    /* 0x30 */ f32 _30;
+    /* 0x34 */ s32 _34;
+    /* 0x38 */ f32 _38;
+    /* 0x3C */ f32 _3C;
+    /* 0x40 */ u32 _40;
+    /* 0x44 */ f32 _44;
+} ArcEmitter;
 
 typedef struct EmitterList {
     /* 0x0 */ Emitter* prev;
@@ -118,6 +152,8 @@ extern LightFlashTask* lbl_803CC1B8;
 extern StadiumLights lbl_800F7478[14];
 extern u8 lbl_80367318[];
 extern s32 lbl_803CBC70;
+extern s32 lbl_803CBD0C;
+extern FlareParams lbl_800F787C;
 extern void fn_80023B90(LightData* data, void* light);
 extern void fn_800B0A14_removeQueue(void);
 extern void* _OSAllocFromHeap(u32 align, u32 size);
@@ -480,6 +516,50 @@ f32 fn_800335BC(s32 angle)
         i = 0x800 - i;
     }
     return lbl_8017ED68[i];
+}
+
+// .text:0x800330CC size:0x1EC
+void fn_800330CC(s32 n, u32 arg1, Vec* start, Vec* end, f32 arg4, s32 arg5, s32 arg6, f32 arg7)
+{
+    ArcEmitter* e = (ArcEmitter*)fn_80033A24(fn_800328E0, 0x80, 0, n, TRUE, 1);
+
+    if (e != NULL) {
+        e->_10 = arg6;
+        memcpy(&e->start, start, sizeof(Vec));
+        memcpy(&e->end, end, sizeof(Vec));
+        e->_30 = arg4;
+        e->_34 = arg5;
+        e->_38 = -0.4f;
+        e->_3C = -0.0001f;
+        e->_40 = arg1;
+        e->_44 = arg7;
+    }
+}
+
+// .text:0x80032064 size:0x220
+void fn_80032064(Vec* pos, Vec* dir)
+{
+    FlareParams* params = &lbl_800F787C;
+    Emitter* e;
+    Particle* p;
+
+    params->_00 = lbl_803CBD0C;
+    e = fn_80033A24(fn_8002E828, 0x80, 0, 1, TRUE, 6);
+    if (e != NULL) {
+        e->_10 = params->_00;
+        p = e->particles;
+        p->pos.x = pos->x;
+        p->pos.y = pos->y;
+        p->pos.z = pos->z;
+        p->_40 = -0x100;
+        p->_18 = params->_10;
+        p->_1C = p->_4A = params->_14;
+        p->_20 = params->_14 / 2;
+        p->_38 = p->_3C = p->_10 = params->_08 / 100000.0f;
+        p->_14 = params->_0C / 100000.0f;
+        p->_4D = params->_04;
+    }
+    fn_8002A1CC(pos, dir);
 }
 
 // .text:0x80032038 size:0x2C
