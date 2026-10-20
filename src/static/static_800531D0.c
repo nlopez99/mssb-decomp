@@ -81,7 +81,9 @@ extern s32 fn_80042DA8(void* task, s32 index, s32 value);
 typedef struct MenuScreen {
     /* 0x00 */ u8 _00[0x8];
     /* 0x08 */ u16 _08;
-    /* 0x0A */ u8 _0A[0x10 - 0xA];
+    /* 0x0A */ u16 _0A;
+    /* 0x0C */ u16 _0C;
+    /* 0x0E */ u16 _0E;
 } MenuScreen; // size: 0x10
 
 extern struct {
@@ -89,7 +91,16 @@ extern struct {
     /* 0x01 */ u8 _01[0x8 - 0x1];
     /* 0x08 */ u8 _08;
     /* 0x09 */ u8 _09;
+    /* 0x0A */ s8 _0A[10];
+    /* 0x14 */ u8 _14;
+    /* 0x15 */ u8 _15;
+    /* 0x16 */ u8 _16[10];
+    /* 0x20 */ u8 _20;
+    /* 0x21 */ u8 _21[0x23 - 0x21];
+    /* 0x23 */ u8 _23;
 } lbl_8034E978;
+
+extern s32 fn_8000FA9C(s32 id);
 
 extern MenuScreen lbl_800FEF70[];
 
@@ -165,12 +176,35 @@ void fn_80055798(SpaniTask* task, s32 port) {
     }
 }
 
+static inline void animRowSelection(SpaniTask* task, u8 row, s8 sel) {
+    switch (row) {
+    case 1:
+        lbl_80371C30[task->_14 + 0xC + sel].obj->_64 = 0x107;
+        lbl_80371C30[task->_14 + 0xC + sel].obj->_5C = 10 << 16;
+        lbl_80371C30[task->_14 + 0xC + sel].obj->_68 = 4;
+        break;
+    case 2:
+        lbl_80371C30[task->_14 + 0xE + (sel ^ 1)].obj->_64 = 0x107;
+        lbl_80371C30[task->_14 + 0xE + (sel ^ 1)].obj->_5C = 10 << 16;
+        lbl_80371C30[task->_14 + 0xE + (sel ^ 1)].obj->_68 = 4;
+        break;
+    case 3:
+        lbl_80371C30[task->_14 + 0x10 + sel].obj->_64 = 0x109;
+        lbl_80371C30[task->_14 + 0x10 + sel].obj->_5C = 10 << 16;
+        lbl_80371C30[task->_14 + 0x10 + sel].obj->_68 = 4;
+        break;
+    case 4:
+        lbl_80371C30[task->_14 + 0x15 + (sel ^ 1)].obj->_64 = 0x107;
+        lbl_80371C30[task->_14 + 0x15 + (sel ^ 1)].obj->_5C = 10 << 16;
+        lbl_80371C30[task->_14 + 0x15 + (sel ^ 1)].obj->_68 = 4;
+        break;
+    }
+}
+
 // .text:0x80055374 size:0x424
-// 97.26%: registers only, from the reload of the pad's next selection on.
 void fn_80055374(SpaniTask* task, s32 port) {
     s8 id;
-    u8 next;
-    u8 sel;
+    s8 next;
     s32 i;
 
     if (isLockState(lbl_803C66B0.rows[8].port[port], 0)) {
@@ -184,37 +218,15 @@ void fn_80055374(SpaniTask* task, s32 port) {
         lbl_80371C30[task->_14 + 0x2A].obj->_68 = 1;
         next = lbl_803C5F04._69[port];
         lbl_803C5F04._69[port] = 0;
-        getTeamObj(task, (s8)next, 1)->_5C = 0;
+        getTeamObj(task, next, 1)->_5C = 0;
         getTeamObj(task, next, 1)->_68 = 0;
-        sel = lbl_803C5F04._3B[next];
-        switch (next) {
-        case 1:
-            getTeamObj(task, (s8)sel, 0xC)->_64 = 0x107;
-            getTeamObj(task, (s8)sel, 0xC)->_5C = 10 << 16;
-            getTeamObj(task, (s8)sel, 0xC)->_68 = 4;
-            break;
-        case 2:
-            getTeamObj(task, (s8)sel ^ 1, 0xE)->_64 = 0x107;
-            getTeamObj(task, (s8)sel ^ 1, 0xE)->_5C = 10 << 16;
-            getTeamObj(task, (s8)sel ^ 1, 0xE)->_68 = 4;
-            break;
-        case 3:
-            getTeamObj(task, (s8)sel, 0x10)->_64 = 0x109;
-            getTeamObj(task, (s8)sel, 0x10)->_5C = 10 << 16;
-            getTeamObj(task, (s8)sel, 0x10)->_68 = 4;
-            break;
-        case 4:
-            getTeamObj(task, (s8)sel ^ 1, 0x15)->_64 = 0x107;
-            getTeamObj(task, (s8)sel ^ 1, 0x15)->_5C = 10 << 16;
-            getTeamObj(task, (s8)sel ^ 1, 0x15)->_68 = 4;
-            break;
-        }
+        animRowSelection(task, next, lbl_803C5F04._3B[(u8)next]);
         getSpaniObj(task, 0)->_5C = 10 << 16;
         getSpaniObj(task, 0)->_68 = 4;
         for (i = 0; i < 2; i++) {
             if (g_d_GameSettings._10 != 0 || i == 0) {
-                getTeamObj(task, lbl_803C5F04._65[i], i * 4 + 0x2B)->_68 = 1;
-                getTeamObj(task, lbl_803C5F04._65[i] * 2, i + 0x3F)->_68 = 1;
+                lbl_80371C30[task->_14 + 0x2B + lbl_803C5F04._65[i] + i * 4].obj->_68 = 1;
+                lbl_80371C30[task->_14 + 0x3F + lbl_803C5F04._65[i] * 2 + i].obj->_68 = 1;
             }
         }
         lbl_80371C30[task->_14 + 0xB].obj->_54 &= ~2;
@@ -225,7 +237,81 @@ void fn_80055374(SpaniTask* task, s32 port) {
 }
 
 // .text:0x80054B00 size:0x874
-void fn_80054B00(void) {
+void fn_80054B00(SpaniTask* task, s32 port) {
+    s8 cur;
+    s8 next;
+    s8 a;
+    s8 b;
+
+    if (isLockState(lbl_803C66B0.rows[8].port[port], 0)) {
+        cur = lbl_803C5F04._65[port];
+        next = lbl_803C5F04._69[port];
+        if (cur != 0) {
+            if (lbl_803C5F04._36 == 0) {
+                a = lbl_803C5F04._3B[cur];
+                b = lbl_803C5F04._40[next];
+            } else {
+                a = lbl_803C5F04._45[port][cur];
+                b = lbl_803C5F04._55[port][next];
+            }
+        } else if (lbl_803C5F04._36 == 1) {
+            a = lbl_803C5F04._45[port][cur];
+            b = lbl_803C5F04._55[port][next];
+        }
+        if (cur != next) {
+            if (lbl_803C5F04._36 == 0) {
+                if (cur == 0) {
+                    getTeamObj(task, next, 1)->_5C = 0;
+                    getTeamObj(task, next, 1)->_68 = 0;
+                    getSpaniObj(task, 0xB)->_5C = 0;
+                    getSpaniObj(task, 0xB)->_68 = 1;
+                    animRowSelection(task, next, lbl_803C5F04._3B[(u8)next]);
+                } else if (next == 0) {
+                    getTeamObj(task, cur, 1)->_68 = 1;
+                    getSpaniObj(task, 0xB)->_5C = 10 << 16;
+                    getSpaniObj(task, 0xB)->_68 = 4;
+                } else if (next != 0) {
+                    getTeamObj(task, cur, 1)->_68 = 1;
+                    getTeamObj(task, next, 1)->_5C = 0;
+                    getTeamObj(task, next, 1)->_68 = 0;
+                    animRowSelection(task, next, lbl_803C5F04._3B[(u8)next]);
+                }
+            } else {
+                if (port == 0) {
+                    getSpaniObj(task, 0xB)->_5C = 0;
+                    getSpaniObj(task, 0xB)->_68 = 0;
+                }
+                lbl_80371C30[task->_14 + 0x2B + cur + port * 4].obj->_68 = 1;
+                lbl_80371C30[task->_14 + 0x3F + cur * 2 + port].obj->_68 = 1;
+                lbl_80371C30[task->_14 + 0x2B + next + port * 4].obj->_5C = 0;
+                lbl_80371C30[task->_14 + 0x2B + next + port * 4].obj->_68 = 0;
+                lbl_80371C30[task->_14 + 0x3F + next * 2 + port].obj->_68 = 4;
+            }
+            if (lbl_803C5F04._36 == 0) {
+                fn_800542C4(cur, next, task);
+            }
+        } else if (next == cur && a != b) {
+            if (lbl_803C5F04._36 == 0 && cur != 0) {
+                fn_800542C4(cur, next, task);
+            } else if (lbl_803C5F04._36 == 1) {
+                if (lbl_803C5F04._37[port] == 0) {
+                    lbl_80371C30[task->_14 + 0x33 + cur + port * 4].obj->_68 = 4;
+                    lbl_80371C30[task->_14 + 0x47 + cur * 4 + port].obj->_54 &= ~2;
+                    lbl_80371C30[task->_14 + 0x49 + cur * 4 + port].obj->_54 |= 2;
+                    lbl_80371C30[task->_14 + 0x47 + cur * 4 + port].obj->_68 = 0;
+                    lbl_80371C30[task->_14 + 0x49 + cur * 4 + port].obj->_68 = 1;
+                } else {
+                    lbl_80371C30[task->_14 + 0x33 + cur + port * 4].obj->_68 = 1;
+                    lbl_80371C30[task->_14 + 0x47 + cur * 4 + port].obj->_54 |= 2;
+                    lbl_80371C30[task->_14 + 0x49 + cur * 4 + port].obj->_54 &= ~2;
+                    lbl_80371C30[task->_14 + 0x47 + cur * 4 + port].obj->_68 = 1;
+                    lbl_80371C30[task->_14 + 0x49 + cur * 4 + port].obj->_68 = 0;
+                }
+            }
+        }
+        fn_800626EC(port);
+        lbl_803C66B0.rows[8].port[port] = 1;
+    }
 }
 
 static inline BOOL isLockState(s32 lock, s32 state) {
@@ -290,7 +376,85 @@ void fn_80054910(void* task, s32 port) {
 }
 
 // .text:0x800542C4 size:0x64C
-void fn_800542C4(void) {
+void fn_800542C4(u8 row, u8 cur, SpaniTask* task) {
+    s32 i;
+    s8 sel = lbl_803C5F04._3B[row];
+    s8 sel2 = lbl_803C5F04._40[row];
+
+    switch (row) {
+    case 1:
+        for (i = 0; i < 2; i++) {
+            lbl_80371C30[task->_14 + 0xC + i].obj->_64 = 0x106;
+            if (i == sel) {
+                lbl_80371C30[task->_14 + 0xC + i].obj->_68 = 1;
+            } else if (row == cur) {
+                lbl_80371C30[task->_14 + 0xC + i].obj->_5C = 10 << 16;
+                lbl_80371C30[task->_14 + 0xC + i].obj->_68 = 4;
+            }
+            if (row == cur) {
+                if (sel != 0) {
+                    getSpaniObj(task, 0x1A)->_5C = 0x19 << 16;
+                    getSpaniObj(task, 0x1A)->_68 = 4;
+                } else {
+                    getSpaniObj(task, 0x1A)->_5C = 5 << 16;
+                    getSpaniObj(task, 0x1A)->_68 = 1;
+                }
+            }
+        }
+        break;
+    case 2:
+        for (i = 0; i < 2; i++) {
+            lbl_80371C30[task->_14 + 0xE + i].obj->_64 = 0x106;
+            if ((i == sel) ^ 1) {
+                lbl_80371C30[task->_14 + 0xE + i].obj->_68 = 1;
+            } else if (row == cur) {
+                lbl_80371C30[task->_14 + 0xE + i].obj->_5C = 10 << 16;
+                lbl_80371C30[task->_14 + 0xE + i].obj->_68 = 4;
+            }
+        }
+        getSpaniObj(task, 0x20)->_5C = 0;
+        getSpaniObj(task, 0x23)->_5C = 10 << 16;
+        fn_800363D8(task, 0x20, 1, 0xF9, lbl_803C5F04._3B[2] ^ 1);
+        fn_800363D8(task, 0x23, 1, 0xF9, lbl_803C5F04._40[2] ^ 1);
+        getSpaniObj(task, 0x20)->_68 = 1;
+        getSpaniObj(task, 0x23)->_68 = 4;
+        break;
+    case 3:
+        for (i = 0; i < 5; i++) {
+            if (i == sel) {
+                lbl_80371C30[task->_14 + 0x10 + i].obj->_64 = 0x108;
+                lbl_80371C30[task->_14 + 0x10 + i].obj->_68 = 1;
+            } else if (i == sel2 && row == cur) {
+                lbl_80371C30[task->_14 + 0x10 + i].obj->_64 = 0x108;
+                lbl_80371C30[task->_14 + 0x10 + i].obj->_5C = 10 << 16;
+                lbl_80371C30[task->_14 + 0x10 + i].obj->_68 = 4;
+            }
+        }
+        getSpaniObj(task, 0x21)->_5C = 0;
+        getSpaniObj(task, 0x24)->_5C = 10 << 16;
+        fn_800363D8(task, 0x21, 1, 0xF9, lbl_803C5F04._3B[3] + 2);
+        fn_800363D8(task, 0x24, 1, 0xF9, lbl_803C5F04._40[3] + 2);
+        getSpaniObj(task, 0x21)->_68 = 1;
+        getSpaniObj(task, 0x24)->_68 = 4;
+        break;
+    case 4:
+        for (i = 0; i < 2; i++) {
+            lbl_80371C30[task->_14 + 0x15 + i].obj->_64 = 0x106;
+            if ((i == sel) ^ 1) {
+                lbl_80371C30[task->_14 + 0x15 + i].obj->_68 = 1;
+            } else if (row == cur) {
+                lbl_80371C30[task->_14 + 0x15 + i].obj->_5C = 10 << 16;
+                lbl_80371C30[task->_14 + 0x15 + i].obj->_68 = 4;
+            }
+        }
+        getSpaniObj(task, 0x22)->_5C = 0;
+        getSpaniObj(task, 0x25)->_5C = 10 << 16;
+        fn_800363D8(task, 0x22, 1, 0xF9, lbl_803C5F04._3B[4] ^ 1);
+        fn_800363D8(task, 0x25, 1, 0xF9, lbl_803C5F04._40[4] ^ 1);
+        getSpaniObj(task, 0x22)->_68 = 1;
+        getSpaniObj(task, 0x25)->_68 = 4;
+        break;
+    }
 }
 
 // .text:0x80053FE8 size:0x2DC
@@ -302,5 +466,79 @@ void fn_80053810(void) {
 }
 
 // .text:0x800531D0 size:0x640
-void fn_800531D0(void) {
+void fn_800531D0(SpaniTask* task) {
+    s32 i;
+    s32 len;
+
+    if (lbl_800FEF70[lbl_8034E978._00]._0A != 0xFFFF) {
+        if (lbl_8034E978._20 == 0) {
+            for (i = 0; i < lbl_8034E978._14; i++) {
+                getTeamObj(task, i, 0x16)->_54 |= 2;
+            }
+            getSpaniObj(task, 9)->_54 |= 2;
+            if ((getSpaniObj(task, 9)->_5C >> 16) == 0xF) {
+                if (lbl_8034E978._23 == 0) {
+                    len = fn_8000FA9C(lbl_8034E978._0A[0]);
+                    for (i = 0; i < 10; i++) {
+                        lbl_8034E978._16[i] = 0xFF;
+                    }
+                    lbl_8034E978._15 = 0;
+                    getSpaniObj(task, 10)->_5C = len << 16;
+                    getSpaniObj(task, 10)->_68 = 0;
+                    getSpaniObj(task, 0x15)->_5C = 0;
+                    getSpaniObj(task, 0x15)->_54 |= 2;
+                    if (lbl_800FEF70[lbl_8034E978._00]._0E != 0) {
+                        getSpaniObj(task, 0x15)->_68 = 1;
+                        lbl_8034E978._23 = 1;
+                    } else {
+                        getSpaniObj(task, 0x15)->_68 = 0;
+                    }
+                }
+                if ((getSpaniObj(task, 0x15)->_5C >> 16) > 0xF && lbl_8034E978._23 != 0) {
+                    lbl_8034E978._20 = 1;
+                    lbl_8034E978._23 = 0;
+                }
+            }
+        } else if (lbl_8034E978._20 == 1) {
+            if ((getSpaniObj(task, 0x15)->_5C >> 16) == 0x73) {
+                lbl_8034E978._20 = 2;
+                getSpaniObj(task, 10)->_68 = 1;
+            }
+        } else if (lbl_8034E978._20 == 2) {
+            fn_8000FA9C(lbl_8034E978._0A[lbl_8034E978._15]);
+            len = fn_8000FA9C(lbl_8034E978._0A[lbl_8034E978._15]);
+            if ((lbl_80371C30[task->_14 + 10 + lbl_8034E978._15].obj->_5C >> 16) > len) {
+                lbl_8034E978._16[lbl_8034E978._15] = lbl_8034E978._15;
+                lbl_8034E978._15++;
+                if (lbl_8034E978._15 == lbl_8034E978._14) {
+                    lbl_8034E978._15 = 0;
+                }
+                lbl_80371C30[task->_14 + 10 + lbl_8034E978._15].obj->_54 |= 2;
+                lbl_80371C30[task->_14 + 10 + lbl_8034E978._15].obj->_5C = 0;
+                lbl_80371C30[task->_14 + 10 + lbl_8034E978._15].obj->_68 = 1;
+            }
+            for (i = 0; i < 10; i++) {
+                if (lbl_8034E978._16[i] != 0xFF) {
+                    SpaniObj* obj = lbl_80371C30[task->_14 + 10 + lbl_8034E978._16[i]].obj;
+                    if ((obj->_5C >> 16) == 0x500) {
+                        obj->_5C = 0;
+                        lbl_80371C30[task->_14 + 10 + lbl_8034E978._16[i]].obj->_68 = 0;
+                        lbl_80371C30[task->_14 + 10 + lbl_8034E978._16[i]].obj->_54 &= ~2;
+                    }
+                }
+            }
+        }
+    } else if (lbl_8034E978._20 != 0) {
+        s32 j;
+
+        for (j = 0; j < 10; j++) {
+            lbl_80371C30[task->_14 + 0x16 + j].obj->_54 &= ~2;
+            lbl_80371C30[task->_14 + 10 + j].obj->_5C = 0;
+            lbl_80371C30[task->_14 + 10 + j].obj->_68 = 0;
+        }
+        getSpaniObj(task, 9)->_54 &= ~2;
+        getSpaniObj(task, 0x15)->_5C = 0;
+        getSpaniObj(task, 0x15)->_68 = 0;
+        lbl_8034E978._20 = 0;
+    }
 }
