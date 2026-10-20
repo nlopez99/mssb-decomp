@@ -98,6 +98,27 @@ typedef struct ArcEmitter {
     /* 0x44 */ f32 _44;
 } ArcEmitter;
 
+// The particles fn_8002AC68 draws
+typedef struct SparkParticle {
+    /* 0x00 */ Particle* next;
+    /* 0x04 */ Vec pos;
+    /* 0x10 */ f32 growA;
+    /* 0x14 */ f32 growB;
+    /* 0x18 */ s16 fadeA;
+    /* 0x1A */ s16 fadeB;
+    /* 0x1C */ s16 switchAge;
+    /* 0x1E */ s16 life;
+    /* 0x20 */ u8 _20[0x38 - 0x20];
+    /* 0x38 */ f32 w;
+    /* 0x3C */ f32 h;
+    /* 0x40 */ u8 color[4];
+    /* 0x44 */ u8 _44[0x4A - 0x44];
+    /* 0x4A */ s16 remaining;
+    /* 0x4C */ u8 _4C;
+    /* 0x4D */ u8 tex;
+    /* 0x4E */ u8 texCoord;
+} SparkParticle;
+
 typedef struct EmitterList {
     /* 0x0 */ Emitter* prev;
     /* 0x4 */ Emitter* next;
@@ -876,6 +897,55 @@ void fn_8002C2D0(Vec* pos, Vec* dir, EffectParams* params)
             fn_8002BC84(e, pos, dir, params);
         }
     }
+}
+
+// .text:0x8002AC68 size:0x3AC
+// 99.49%: the target keeps the texture file in r30 and the texture index in r29 through the
+// inlined fn_80033B58; this swaps them. Locals for either did not move it.
+u8 fn_8002AC68(Emitter* e, SparkParticle* p)
+{
+    Vec quad[4];
+    s32 i;
+    s32 alpha;
+
+    quad[0].x = -p->w / 2;
+    quad[0].z = p->h / 2;
+    quad[1].x = p->w / 2;
+    quad[1].z = p->h / 2;
+    quad[2].x = p->w / 2;
+    quad[2].z = -p->h / 2;
+    quad[3].x = -p->w / 2;
+    quad[3].z = -p->h / 2;
+    quad[0].y = quad[1].y = quad[2].y = quad[3].y = 0.0f;
+    fn_80033B58((TexFile*)e->_10, p->tex, GX_CLAMP, GX_CLAMP);
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_DSTALPHA, GX_LO_CLEAR);
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    for (i = 0; i < 4; i++) {
+        GXPosition3f32(p->pos.x + quad[i].x, p->pos.y + quad[i].y, p->pos.z + quad[i].z);
+        GXColor1u32(*(u32*)p->color);
+        GXTexCoord2f32(lbl_800F7860[p->texCoord + i][0], lbl_800F7860[p->texCoord + i][1]);
+    }
+    GXEnd();
+    alpha = p->color[3];
+    if (p->life - p->remaining < p->switchAge) {
+        p->w += p->growA;
+        p->h = p->w;
+        alpha += p->fadeA;
+    } else {
+        p->w += p->growB;
+        p->h = p->w;
+        alpha += p->fadeB;
+    }
+    if (alpha < 0) {
+        alpha = 0;
+    }
+    if (alpha > 255) {
+        alpha = 255;
+    }
+    p->color[3] = alpha;
+    p->remaining--;
+    return p->remaining == 0;
 }
 
 // .text:0x8002955C size:0x294
