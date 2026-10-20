@@ -5,8 +5,51 @@
 #include "static/static_80021188.h"
 #include "static/static_8003A2EC.h"
 #include "static/anim.h"
+#include "static/static_80021AC8.h"
+#include "static/static_80023B90.h"
+
+typedef struct LightDesc {
+    /* 0x0 */ u16 height;
+    /* 0x2 */ u16 pitch;
+    /* 0x4 */ u16 yaw;
+    /* 0x6 */ u8 r;
+    /* 0x7 */ u8 g;
+    /* 0x8 */ u8 b;
+} LightDesc;
+
+typedef struct LightPos {
+    /* 0x00 */ Vec pos;
+    /* 0x0C */ u8 r;
+    /* 0x0D */ u8 g;
+    /* 0x0E */ u8 b;
+} LightPos;
 
 // STRUCTS BEGIN
+typedef struct ModelNode {
+    /* 0x0000 */ u8 _0000[0x98 - 0x0];
+    /* 0x0098 */ u8 flags;
+    /* 0x0099 */ u8 _0099[0x9C - 0x99];
+} ModelNode; // size: 0x9C
+
+typedef struct LightSet {
+    /* 0x0000 */ LightDesc lights[4];
+    /* 0x0028 */ u8 _0028[0x2C - 0x28];
+} LightSet; // size: 0x2C
+
+typedef struct ModelJoint {
+    /* 0x0000 */ u8 _0000[0xEC - 0x0];
+    /* 0x00EC */ MtxPtr mtx;
+} ModelJoint; // size: 0xF0
+
+typedef struct ModelData {
+    /* 0x0000 */ u8 _0000[0x18 - 0x0];
+    /* 0x0018 */ ModelJoint** joints;
+} ModelData; // size: 0x1C
+
+typedef struct ModelHandle {
+    /* 0x0000 */ ModelData* data;
+} ModelHandle; // size: 0x4
+
 typedef struct ModelLink {
     /* 0x0000 */ u8 _0000[0x70 - 0x0];
     /* 0x0070 */ void* _70;
@@ -86,38 +129,56 @@ typedef struct ModelActor {
     /* 0x0066 */ s16 _66;
     /* 0x0068 */ s16 _68;
     /* 0x006A */ s16 _6A;
-    /* 0x006C */ u8 _006C[0x6E - 0x6C];
+    /* 0x006C */ s16 _6C;
     /* 0x006E */ s16 _6E;
     /* 0x0070 */ u8 _0070[0x72 - 0x70];
     /* 0x0072 */ u16 _72[120];
     /* 0x0162 */ u8 _0162[0x252 - 0x162];
     /* 0x0252 */ s8 _252;
     /* 0x0253 */ u8 _0253[0x254 - 0x253];
-    /* 0x0254 */ u8 _254;
+    /* 0x0254 */ s8 _254;
     /* 0x0255 */ s8 _255;
-    /* 0x0256 */ u8 _0256[0x25E - 0x256];
+    /* 0x0256 */ u8 _0256[0x25C - 0x256];
+    /* 0x025C */ s8 _25C;
+    /* 0x025D */ u8 _025D[0x25E - 0x25D];
     /* 0x025E */ s8 _25E;
     /* 0x025F */ s8 _25F;
-    /* 0x0260 */ u8 _0260[0x261 - 0x260];
+    /* 0x0260 */ s8 _260;
     /* 0x0261 */ s8 _261;
     /* 0x0262 */ s8 _262;
-    /* 0x0263 */ u8 _0263[0x264 - 0x263];
+    /* 0x0263 */ s8 _263;
     /* 0x0264 */ s8 _264;
-    /* 0x0265 */ u8 _0265[0x267 - 0x265];
+    /* 0x0265 */ u8 _0265[0x266 - 0x265];
+    /* 0x0266 */ s8 _266;
     /* 0x0267 */ s8 _267;
     /* 0x0268 */ s8 _268;
     /* 0x0269 */ s8 _269;
     /* 0x026A */ s8 _26A;
     /* 0x026B */ s8 _26B;
-    /* 0x026C */ u8 _026C[0x26E - 0x26C];
+    /* 0x026C */ u8 _026C[0x26D - 0x26C];
+    /* 0x026D */ s8 _26D;
     /* 0x026E */ s8 _26E;
     /* 0x026F */ s8 _26F;
     /* 0x0270 */ u8 _0270[0x27C - 0x270];
 } ModelActor; // size: 0x27C
 
+typedef struct ModelSlot {
+    /* 0x0000 */ ModelNode* node;
+    /* 0x0004 */ u8 _0004[0x68 - 0x4];
+    /* 0x0068 */ u16* _68;
+    /* 0x006C */ u8 _6C;
+    /* 0x006D */ u8 _006D[0x90 - 0x6D];
+} ModelSlot; // size: 0x90
+
+typedef struct ModelTable {
+    /* 0x0000 */ u16 count;
+    /* 0x0002 */ u8 _0002[0x34 - 0x2];
+    /* 0x0034 */ ModelSlot slots[1];
+} ModelTable; // size: 0xC4
+
 typedef struct ModelWork {
     /* 0x0000 */ u8 _0000[0x60 - 0x0];
-    /* 0x0060 */ ModelObj* _0060;
+    /* 0x0060 */ ModelTable* _0060;
     /* 0x0064 */ ModelObj* _0064;
     /* 0x0068 */ ModelObj* _0068;
     /* 0x006C */ u8 _006C[0x140 - 0x6C];
@@ -126,11 +187,28 @@ typedef struct ModelWork {
     /* 0x2C50 */ ModelActor* actors[13];
     /* 0x2C84 */ u8 _2C84[0x2C88 - 0x2C84];
     /* 0x2C88 */ void* _2C88;
-    /* 0x2C8C */ u8 _2C8C[0x2D68 - 0x2C8C];
+    /* 0x2C8C */ u8 _2C8C[0x2D3C - 0x2C8C];
+    /* 0x2D3C */ void* _2D3C;
+    /* 0x2D40 */ u8 _2D40[0x2D44 - 0x2D40];
+    /* 0x2D44 */ s16 _2D44;
+    /* 0x2D46 */ u8 _2D46;
+    /* 0x2D47 */ u8 _2D47[0x2D48 - 0x2D47];
+    /* 0x2D48 */ void* _2D48;
+    /* 0x2D4C */ u8 _2D4C[0x2D50 - 0x2D4C];
+    /* 0x2D50 */ s16 _2D50;
+    /* 0x2D52 */ u8 _2D52;
+    /* 0x2D53 */ u8 _2D53[0x2D54 - 0x2D53];
+    /* 0x2D54 */ void* _2D54;
+    /* 0x2D58 */ u8 _2D58[0x2D5C - 0x2D58];
+    /* 0x2D5C */ s16 _2D5C;
+    /* 0x2D5E */ u8 _2D5E;
+    /* 0x2D5F */ u8 _2D5F[0x2D68 - 0x2D5F];
     /* 0x2D68 */ s16 _2D68;
-    /* 0x2D6A */ u8 _2D6A[0x2D77 - 0x2D6A];
+    /* 0x2D6A */ s8 _2D6A[13];
     /* 0x2D77 */ s8 _2D77;
-    /* 0x2D78 */ u8 _2D78[0x3082 - 0x2D78];
+    /* 0x2D78 */ u8 _2D78[0x307A - 0x2D78];
+    /* 0x307A */ u8 _307A;
+    /* 0x307B */ u8 _307B[0x3082 - 0x307B];
     /* 0x3082 */ s8 _3082;
     /* 0x3083 */ u8 _3083[0x308C - 0x3083];
     /* 0x308C */ void (*_308C)(void);
@@ -148,6 +226,19 @@ void fn_800B9AA8(void*);
 extern s32 lbl_803CBBF0;
 extern ModelLoadReq* lbl_803CC1B8;
 extern ModelSub2C lbl_80118220[13];
+extern LightPos lbl_80367318[4];
+extern LightSet lbl_800F7478[];
+extern struct {
+    /* 0x000 */ u8 _000[0x715];
+    /* 0x715 */ u8 _715;
+} lbl_803C6CF8;
+extern u8 (*lbl_803CB790)[0x10];
+extern struct {
+    /* 0x000 */ u8 _000[0x1E8];
+    /* 0x1E8 */ u8 _1E8;
+} lbl_803716B8;
+void fn_800BEBCC(s32 id, Vec* dir);
+void fn_800B2D5C(ModelNode* node);
 
 // .text:0x8001FDD4 size:0x2C
 void fn_8001FDD4(ModelLink* arg0) {
@@ -178,6 +269,21 @@ void fn_8001F228(void) {
 
 // .text:0x8001F16C size:0xBC
 void fn_8001F16C(void) {
+    ModelTable* table;
+    ModelSlot* slot;
+    int i;
+
+    if (lbl_8036E548._307A != 0 && lbl_8036E548._307A != 3) {
+        table = lbl_8036E548._0060;
+        for (i = 0; i < table->count; i++) {
+            if (lbl_8036E548.actors[i] != NULL) {
+                slot = &lbl_8036E548._0060->slots[lbl_8036E548.actors[i]->_255];
+                if (slot->node != NULL && slot->_6C != 0) {
+                    fn_800B2D5C(slot->node);
+                }
+            }
+        }
+    }
 }
 
 // .text:0x8001E784 size:0x9E8
@@ -254,12 +360,32 @@ void fn_8001CCC8(void) {
 void fn_8001CBD4(void) {
 }
 
+static inline void updateLightDir(void) {
+    Vec pos;
+    Vec dir;
+
+    pos.x = lbl_80367318[0].pos.x;
+    pos.y = lbl_80367318[0].pos.y;
+    pos.z = lbl_80367318[0].pos.z;
+    PSVECNormalize(&pos, &pos);
+    dir = pos;
+    fn_800BEBCC(0, &dir);
+}
+
 // .text:0x8001CB10 size:0xC4
-void fn_8001CB10(void) {
+void fn_8001CB10(LightDesc* desc, s32 count) {
+    int i;
+
+    for (i = 0; i < count; i++) {
+        fn_80023B90(&desc[i], &lbl_80367318[i]);
+    }
+    updateLightDir();
 }
 
 // .text:0x8001CA40 size:0xD0
-void fn_8001CA40(void) {
+void fn_8001CA40(u8 set) {
+    g_d_GameSettings._54 = set;
+    fn_8001CB10(lbl_800F7478[set].lights, 4);
 }
 
 // .text:0x8001C920 size:0x120
@@ -309,7 +435,34 @@ void fn_8001BA44(void) {
 }
 
 // .text:0x8001B990 size:0xB4
-void AnimateCharacter(void) {
+void AnimateCharacter(s32 idx, int anim, int a, u8 mode, int b, int c, int d, int e) {
+    ModelActor* actor = lbl_8036E548.actors[idx];
+
+    if (actor == NULL) {
+        return;
+    }
+    if (mode == 1 && actor->_62 == anim) {
+        return;
+    }
+    if (mode == 3) {
+        mode = 1;
+    }
+    actor->_64 = anim;
+    actor->_6C = c;
+    actor->_260 = a;
+    actor->_25E = mode;
+    actor->_263 = b;
+    actor->_266 = d;
+    actor->_26D = 0;
+    if (e == -1) {
+        actor->_26A = 5;
+    } else {
+        actor->_26A = e;
+    }
+    actor->_66 = -1;
+    if ((anim >= 0x3F && anim < 0x4B) || (anim >= 0x4B && anim < 0x69)) {
+        lbl_8036E548.actors[idx]->_26D = 1;
+    }
 }
 
 // .text:0x8001B918 size:0x78
@@ -522,15 +675,77 @@ void fn_8001500C(void) {
 }
 
 // .text:0x80014F40 size:0xCC
-void fn_80014F40(void) {
+BOOL fn_80014F40(int id) {
+    if (id < 0) {
+        return TRUE;
+    }
+    if (lbl_8036E548._2D46 <= 1) {
+        int idx = id * 19 + 1;
+        if ((s8)lbl_803C6CF8._715 != 1) {
+            lbl_8036E548._2D46 = 1;
+            return FALSE;
+        }
+        ARAMTransfer(lbl_803CB790[idx], lbl_8036E548._2D3C, 0, 0);
+        lbl_8036E548._2D46 = 2;
+    } else if ((s32)lbl_803C6CF8._715 == 1) {
+        lbl_8036E548._2D44 = id;
+        lbl_8036E548._2D46 = 0;
+        return TRUE;
+    }
+    return FALSE;
 }
 
 // .text:0x80014E50 size:0xF0
-void fn_80014E50(void) {
+BOOL fn_80014E50(int id) {
+    if (id < 0) {
+        return TRUE;
+    }
+    if (lbl_8036E548._2D5E <= 1) {
+        int idx = id * 19;
+        if ((s32)lbl_803C6CF8._715 != 1) {
+            lbl_8036E548._2D5E = 1;
+            return FALSE;
+        }
+        if (fn_8002204C(id, lbl_8036E548._2D54) == NULL) {
+            ARAMTransfer(lbl_803CB790[idx], lbl_8036E548._2D54, 0, 0);
+        }
+        lbl_8036E548._2D5E = 2;
+    } else if (lbl_803716B8._1E8 == 0 && (s32)lbl_803C6CF8._715 == 1) {
+        lbl_8036E548._2D5C = id;
+        lbl_8036E548._2D5E = 0;
+        return TRUE;
+    }
+    return FALSE;
 }
 
 // .text:0x80014D4C size:0x104
-void fn_80014D4C(void) {
+BOOL fn_80014D4C(int id) {
+    int idx;
+
+    if (id < 0) {
+        return TRUE;
+    }
+    if (lbl_8036E548._2D50 == id) {
+        return TRUE;
+    }
+    if (lbl_8036E548._2D52 <= 1) {
+        if (g_d_GameSettings.GameModeSelected == 2) {
+            idx = id * 19 + 10;
+        } else {
+            idx = id * 19 + 2;
+        }
+        if ((s32)lbl_803C6CF8._715 != 1) {
+            lbl_8036E548._2D52 = 1;
+            return FALSE;
+        }
+        ARAMTransfer(lbl_803CB790[idx], lbl_8036E548._2D48, 0, 0);
+        lbl_8036E548._2D52 = 2;
+    } else if ((s32)lbl_803C6CF8._715 == 1) {
+        lbl_8036E548._2D50 = id;
+        lbl_8036E548._2D52 = 0;
+        return TRUE;
+    }
+    return FALSE;
 }
 
 // .text:0x80014A18 size:0x334
@@ -586,7 +801,34 @@ void fn_80011CA8(void) {
 }
 
 // .text:0x80011BE4 size:0xC4
-void fn_80011BE4(void) {
+void fn_80011BE4(s32 idx) {
+    ModelSub2C* sub;
+    ModelPose* pose;
+    int i;
+
+    if (lbl_8036E548.actors[idx] != NULL) {
+        sub = lbl_8036E548.actors[idx]->_2C;
+        if (sub != NULL) {
+            sub->_61 = -1;
+            sub->state.current = -2;
+            lbl_8036E548.actors[idx]->_2C = NULL;
+        }
+        pose = lbl_8036E548.actors[idx]->_30;
+        if (pose != NULL) {
+            pose->_D1 = pose->_D0;
+            pose->_D0 = -1;
+            pose->state.current = -2;
+            pose->state2.current = -2;
+            lbl_8036E548.actors[idx]->_30 = NULL;
+        }
+        lbl_8036E548.actors[idx]->_25C = 0;
+    }
+    lbl_8036E548.actors[idx] = NULL;
+    for (i = 0; i < 13; i++) {
+        if (lbl_8036E548._2D6A[i] == idx) {
+            lbl_8036E548._2D6A[i] = -1;
+        }
+    }
 }
 
 // .text:0x80011B64 size:0x80
@@ -614,26 +856,131 @@ void fn_80011B64(s32 idx) {
 
 // .text:0x80011A60 size:0x104
 void fn_80011A60(void) {
+    ModelSub2C* sub;
+    ModelPose* pose;
+    int i;
+    int j;
+    int idx;
+
+    for (i = 0; i < 4; i++) {
+        idx = i + 9;
+        if (lbl_8036E548.actors[idx] != NULL) {
+            sub = lbl_8036E548.actors[idx]->_2C;
+            if (sub != NULL && lbl_8036E548.actors[idx]->_254 == idx) {
+                sub->_61 = -1;
+                sub->state.current = -2;
+                lbl_8036E548.actors[idx]->_2C = NULL;
+            }
+        }
+        if (lbl_8036E548.actors[idx] != NULL) {
+            pose = lbl_8036E548.actors[idx]->_30;
+            if (pose != NULL && lbl_8036E548.actors[idx]->_254 == idx) {
+                pose->_D1 = pose->_D0;
+                pose->_D0 = -1;
+                pose->state.current = -2;
+                pose->state2.current = -2;
+                lbl_8036E548.actors[idx]->_30 = NULL;
+            }
+        }
+        if (lbl_8036E548.actors[idx] != NULL) {
+            lbl_8036E548.actors[idx]->_25C = 0;
+            lbl_8036E548.actors[idx] = NULL;
+        }
+        for (j = 0; j < 13; j++) {
+            if (lbl_8036E548._2D6A[j] == idx) {
+                lbl_8036E548._2D6A[j] = -1;
+            }
+        }
+    }
 }
 
 // .text:0x8001196C size:0xF4
 void fn_8001196C(void) {
+    ModelSub2C* sub;
+    ModelPose* pose;
+    int i;
+    int j;
+
+    for (i = 0; i < 9; i++) {
+        if (lbl_8036E548.actors[i] != NULL) {
+            sub = lbl_8036E548.actors[i]->_2C;
+            if (sub != NULL && lbl_8036E548.actors[i]->_254 == i) {
+                sub->_61 = -1;
+                sub->state.current = -2;
+                lbl_8036E548.actors[i]->_2C = NULL;
+            }
+        }
+        if (lbl_8036E548.actors[i] != NULL) {
+            pose = lbl_8036E548.actors[i]->_30;
+            if (pose != NULL && lbl_8036E548.actors[i]->_254 == i) {
+                pose->_D1 = pose->_D0;
+                pose->_D0 = -1;
+                pose->state.current = -2;
+                pose->state2.current = -2;
+                lbl_8036E548.actors[i]->_30 = NULL;
+            }
+        }
+        lbl_8036E548.actors[i]->_25C = 0;
+        lbl_8036E548.actors[i] = NULL;
+        for (j = 0; j < 13; j++) {
+            if (lbl_8036E548._2D6A[j] == i) {
+                lbl_8036E548._2D6A[j] = -1;
+            }
+        }
+    }
 }
 
 // .text:0x800118AC size:0xC0
-void fn_800118AC(void) {
+MtxPtr fn_800118AC(Mtx src, Mtx dst) {
+    Mtx scale = { { 1.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0714285f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 0.0f } };
+
+    PSMTXConcat(scale, src, dst);
+    dst[0][3] = 0.0f;
+    dst[1][3] = 0.0f;
+    dst[2][3] = 0.0f;
+    PSMTXInverse(dst, dst);
+    return dst;
 }
 
 // .text:0x800117CC size:0xE0
-void fn_800117CC(void) {
+void fn_800117CC(Mtx pos, Mtx src, Mtx dst) {
+    Mtx m;
+    Mtx scale = { { 1.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0714285f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 0.0f } };
+
+    PSMTXConcat(scale, src, m);
+    m[0][3] = 0.0f;
+    m[1][3] = 0.0f;
+    m[2][3] = 0.0f;
+    PSMTXInverse(m, m);
+    m[0][3] = pos[0][3];
+    m[1][3] = pos[1][3];
+    m[2][3] = pos[2][3];
+    PSMTXCopy(m, dst);
 }
 
 // .text:0x800116DC size:0xF0
-void fn_800116DC(void) {
+void fn_800116DC(ModelHandle* model, Mtx src, u16 joint) {
+    Mtx m;
+    Mtx scale = { { 1.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0714285f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 0.0f } };
+    MtxPtr dst;
+
+    PSMTXConcat(scale, src, m);
+    m[0][3] = 0.0f;
+    m[1][3] = 0.0f;
+    m[2][3] = 0.0f;
+    PSMTXInverse(m, m);
+    dst = model->data->joints[joint]->mtx;
+    m[0][3] = dst[0][3];
+    m[1][3] = dst[1][3];
+    m[2][3] = dst[2][3];
+    PSMTXCopy(m, dst);
 }
 
 // .text:0x80011640 size:0x9C
-void fn_80011640(void) {
+void fn_80011640(Mtx src, Mtx dst) {
+    Mtx scale = { { 1.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 0.93333334f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 0.0f } };
+
+    PSMTXConcat(scale, src, dst);
 }
 
 // .text:0x80011604 size:0x3C
