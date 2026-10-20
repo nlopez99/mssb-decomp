@@ -796,9 +796,10 @@ u8 fn_800471F4(u8 mode, u8 player) {
 }
 
 // .text:0x8004617C size:0x1078
-// Waits on fn_800471F4, still a stub inlined here
+// The masking by 0x200 keeps the repeat buttons in r4 in the target and reloads held first
 void fn_8004617C(s32 team) {
     PadButtons pad;
+    s32 i;
     s32 player;
     u8 locked;
     s8 slot;
@@ -1059,16 +1060,14 @@ void fn_8004617C(s32 team) {
             } else {
                 lbl_803297E0.s.pause._06[player] = 0xFF;
             }
-        } else {
-            slot = lbl_803297E0.s.pause.slot[player];
-            if (slot != 0) {
-                lbl_803297E0.s.pause.prevSlot[player] = slot;
+        } else if (lbl_803297E0.s.pause.slot[player] == 0) {
+            if (lbl_803297E0.s.pause._04[player] != 0) {
+                lbl_803297E0.s.pause._04[player] = 0;
+                fn_800625A4(player, 0x3B);
+            } else if (lbl_803297E0.s.pause.slot[player] != 0) {
+                lbl_803297E0.s.pause._14[player] = lbl_803297E0.s.pause._12[player];
                 lbl_803297E0.s.pause.slot[player] = 0;
-                fn_800625A4(player, 0x3E);
-            } else if (lbl_803297E0.s.pause._08[0] != 0) {
-                lbl_803297E0.s.pause._08[0] = 0;
-                lbl_803297E0.s.pause.slot[player] = 0;
-                lbl_803297E0.s.pause._16[player] = 0;
+                fn_800625A4(player, 0x3C);
             } else if (g_d_GameSettings._10 == 0 && lbl_803297E0.s.pause._0B != 0) {
                 lbl_803297E0.s.pause._16[0] = 0;
                 lbl_803297E0.s.pause._12[lbl_803297E0.s.pause._0B] = 0;
@@ -1083,10 +1082,10 @@ void fn_8004617C(s32 team) {
                 lbl_803297E0.s.pause._16[player] = 0;
                 lbl_803297E0.s.pause._18[player] = 0;
             } else {
-                lbl_803297E0.s.pause._12[0] = 0;
-                lbl_803297E0.s.pause.slot[0] = 0;
-                lbl_803297E0.s.pause._12[1] = 0;
-                lbl_803297E0.s.pause.slot[1] = 0;
+                for (i = 0; i < 2; i++) {
+                    lbl_803297E0.s.pause._12[i] = 0;
+                    lbl_803297E0.s.pause.slot[i] = 0;
+                }
                 lbl_803297E0.s.pause._0B = 0;
                 if (g_d_GameSettings._06 != 2) {
                     fn_800625A4(0, 0x3A);
@@ -1097,6 +1096,21 @@ void fn_8004617C(s32 team) {
                     lbl_803297E0.s.pause.state = 14;
                 }
             }
+        } else if (lbl_803297E0.s.pause.slot[player] != 0) {
+            lbl_803297E0.s.pause.prevSlot[player] = lbl_803297E0.s.pause.slot[player];
+            lbl_803297E0.s.pause.slot[player] = 0;
+            fn_800625A4(player, 0x3E);
+        } else if (lbl_803297E0.s.pause._08[0] != 0) {
+            lbl_803297E0.s.pause._08[0] = 0;
+            lbl_803297E0.s.pause.slot[player] = 0;
+            lbl_803297E0.s.pause._16[player] = 0;
+        } else if (g_d_GameSettings._06 == 2) {
+            lbl_803297E0.s.pause.state = 10;
+            fn_800625A4(0, 0x33);
+        } else {
+            lbl_803297E0.s.pause._16[player] = 0;
+            lbl_803297E0.s.pause.state = 12;
+            fn_800625A4(player, 0x33);
         }
         sndFXStartEx(0x1B9, lbl_800EFBA4[2], 0x3F, 0);
     }
