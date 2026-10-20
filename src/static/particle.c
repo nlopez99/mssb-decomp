@@ -145,6 +145,31 @@ typedef struct GlowParticle {
     /* 0x4A */ s16 remaining;
 } GlowParticle;
 
+// The emitters and particles fn_80027300 sets up
+typedef struct BurstEmitter {
+    /* 0x00 */ u8 _00[0x10];
+    /* 0x10 */ s32 _10;
+    /* 0x14 */ u8 _14[0x4];
+    /* 0x18 */ Vec* dir;
+    /* 0x1C */ f32 _1C;
+    /* 0x20 */ s16 _20;
+} BurstEmitter;
+
+typedef struct BurstParticle {
+    /* 0x00 */ struct BurstParticle* next;
+    /* 0x04 */ Vec pos;
+    /* 0x10 */ f32 _10;
+    /* 0x14 */ f32 _14;
+    /* 0x18 */ f32 _18;
+    /* 0x1C */ s32 _1C;
+    /* 0x20 */ s16 _20;
+    /* 0x22 */ s16 _22;
+    /* 0x24 */ s16 _24;
+    /* 0x26 */ s16 _26;
+    /* 0x28 */ s16 _28;
+    /* 0x2A */ s8 _2A;
+} BurstParticle;
+
 typedef struct EmitterList {
     /* 0x0 */ Emitter* prev;
     /* 0x4 */ Emitter* next;
@@ -1254,4 +1279,63 @@ void fn_80027674(Vec* pos, Vec* dir, EffectParams* params, f32 scale, u8 id)
             fn_80027300(e, pos, dir, params, scale);
         }
     }
+}
+
+// .text:0x80027300 size:0x374
+// 27.88%: first draft; the base's frame is 0x40 bytes larger and the loop body differs.
+// Not yet compared in detail.
+void fn_80027300(Emitter* e, Vec* pos, Vec* dir, EffectParams* params, f32 scale)
+{
+    BurstEmitter* be = (BurstEmitter*)e;
+    BurstParticle* p;
+    f32 step;
+    f32 yaw;
+    f32 pitch;
+    f32 speed;
+    f32 speedRange;
+    f32 size;
+    f32 sizeRange;
+    f32 grow;
+    s32 lifeRange;
+    s32 fadeRange;
+
+    be->_10 = params->_00;
+    be->_1C = 1.0f;
+    be->_20 = params->_04;
+    be->dir = dir;
+    p = (BurstParticle*)e->particles;
+    pitch = -180.0f;
+    speed = params->_0C[5] / 100000.0f;
+    yaw = -180.0f;
+    lifeRange = params->_0C[2] - params->_0C[1];
+    fadeRange = params->_0C[4] - params->_0C[3];
+    size = params->_0C[7] / 100000.0f;
+    step = 360.0f / (s32)sqrt(params->count);
+    grow = params->_0C[0] / 100000.0f;
+    speedRange = params->_0C[6] / 100000.0f - speed;
+    sizeRange = params->_0C[8] / 100000.0f - size;
+    do {
+        fn_800332B8(NULL, &p->pos, yaw, yaw + step, pitch, pitch + step);
+        yaw += step;
+        if (yaw >= 180.0f) {
+            pitch += step;
+            yaw -= 360.0f;
+            if (pitch >= 180.0f) {
+                pitch -= 360.0f;
+            }
+        }
+        PSVECScale(&p->pos, scale, &p->pos);
+        PSVECAdd(pos, &p->pos, &p->pos);
+        p->_10 = speed + (speedRange * (f32)rand()) / 32767.0f;
+        p->_14 = size + (sizeRange * (f32)rand()) / 32767.0f;
+        p->_18 = grow;
+        p->_1C = params->_0C[12];
+        p->_22 = p->_20 = params->_0C[1] + (lifeRange * rand()) / 32767;
+        p->_24 = params->_0C[3] + (fadeRange * rand()) / 32767;
+        p->_2A = params->_0C[9];
+        p->_26 = params->_0C[10];
+        p->_28 = params->_0C[11];
+        p->_1C = params->_0C[12];
+        p = p->next;
+    } while (p != NULL);
 }
