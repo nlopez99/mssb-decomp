@@ -772,9 +772,9 @@ u8 fn_800471F4(u8 mode, u8 player) {
                     lbl_80354720[player][lbl_803CBCCC[player]].charId = lbl_80354720[player][i].charId;
                     memcpy(lbl_8034E9A0.s._47F9[player][lbl_803CBCCC[player]], lbl_8034E9A0.s._47F9[player][i], 9);
                     CopyRoster(&inMemRoster[player][i], &lbl_803C5144[player]);
+                    lbl_80354720[player][i].charId = lbl_803CBCD0[player][2];
                     tmp = lbl_802E4B14[player][i];
                     lbl_802E4B14[player][i] = lbl_802E4B14[player][lbl_803CBCCC[player]];
-                    lbl_80354720[player][i].charId = lbl_803CBCD0[player][2];
                     lbl_802E4B14[player][lbl_803CBCCC[player]] = tmp;
                     memcpy(lbl_8034E9A0.s._47F9[player][i], lbl_802E4B14[player], 9);
                     tmp = lbl_802E4B00[player][i];
