@@ -590,7 +590,7 @@ static inline BOOL isSpriteDone(StaC2Task* task, s32 i) {
 }
 
 // .text:0x000D67CC size:0x2244 mapped:0x80715860
-// 97.84%: registers differ throughout; the target does not strength-reduce &models[i] in the
+// 97.96%: registers differ throughout; the target does not strength-reduce &models[i] in the
 // first draw loop and the anim loop, and keeps a copy of entry for the inlined fn_3_D1004 in the
 // swing loop (one more spill at 316(r1)).
 void fn_3_D67CC(void** files) {
@@ -735,7 +735,8 @@ void fn_3_D67CC(void** files) {
         for (i = 0; i < n0; i++) {
             fn_80025C58(files[indices[i + 15]], &lbl_8036E548._6C->models[i]);
         }
-        for (i = 0, anim = lbl_3_bss_A764; i < n0; i++, anim++) {
+        for (i = 0; i < n0; i++) {
+            anim = &lbl_3_bss_A764[i];
             if (i == 0) {
                 anim->file = files[indices[17]];
                 fn_80025FFC(files[indices[15]], anim);
@@ -751,7 +752,8 @@ void fn_3_D67CC(void** files) {
         for (i = 0; i < n4; i++) {
             fn_80025C58(files[indices[i + 18]], &lbl_8036E548._6C->models[lightModel + i]);
         }
-        for (i = 0, anim = lbl_3_bss_A3CC; i < n4; i++, anim++) {
+        for (i = 0; i < n4; i++) {
+            anim = &lbl_3_bss_A3CC[i];
             if (i == 0) {
                 anim->file = files[indices[19]];
                 fn_80025FFC(files[indices[18]], anim);
@@ -770,7 +772,8 @@ void fn_3_D67CC(void** files) {
         for (i = 0; i < n3; i++) {
             fn_80025C58(files[indices[i + 20]], &lbl_8036E548._6C->models[bushModel + i]);
         }
-        for (i = 0, anim = lbl_3_bss_A034; i < n3; i++, anim++) {
+        for (i = 0; i < n3; i++) {
+            anim = &lbl_3_bss_A034[i];
             if (i == 0) {
                 anim->file = files[indices[23]];
                 fn_80025FFC(files[indices[20]], anim);
@@ -795,7 +798,6 @@ void fn_3_D67CC(void** files) {
     draw = lbl_3_common_bss_350E4._00;
     entry = draw;
     lbl_3_bss_A02C = 0;
-    anim = lbl_3_bss_A764;
     mdl = 0;
     for (i = 0; i < 2; i++, place34++) {
         if (place34->type == 13) {
@@ -822,7 +824,7 @@ void fn_3_D67CC(void** files) {
         entry->_9C = i;
         draw->_92 = 0xFF;
         draw->_84 = fn_3_D1AC4;
-        draw->_8C = anim;
+        draw->_8C = &lbl_3_bss_A764[i];
         draw->_94 = 0;
         draw->_96 = -1;
         draw->_98 = 1;
@@ -835,7 +837,6 @@ void fn_3_D67CC(void** files) {
         count++;
         mdl++;
         entry = ++draw;
-        anim++;
         lbl_3_bss_A02D++;
     }
 
@@ -1087,7 +1088,6 @@ void fn_3_D67CC(void** files) {
     }
 
     end = FALSE;
-    anim = lbl_3_bss_A3CC;
     for (i = 0; i < 10; i++, light++) {
         if (light->type == 13) {
             end = TRUE;
@@ -1109,7 +1109,7 @@ void fn_3_D67CC(void** files) {
         CTRLSetTranslation(&draw->control, light->pos.x, light->pos.y, light->pos.z);
         draw->_90_5 = 1;
         draw->_92 = 0xFF;
-        draw->_8C = anim++;
+        draw->_8C = &lbl_3_bss_A3CC[i];
         draw->_84 = fn_3_CED38;
         draw->_94 = 0;
         draw->_96 = -1;
@@ -1132,7 +1132,7 @@ void fn_3_D6514(void) {
     u32 n;
     s32 size;
 
-    size = (lbl_3_common_bss_350E4._30 * sizeof(u16)) + (lbl_3_common_bss_350E4._30 * sizeof(u32)) + (lbl_3_common_bss_350E4._30 * sizeof(s32)) + (lbl_3_common_bss_350E4._30 * sizeof(Vec) * 2);
+    size = (lbl_3_common_bss_350E4._30 * sizeof(u16)) + (lbl_3_common_bss_350E4._30 * sizeof(u32)) + (lbl_3_common_bss_350E4._30 * sizeof(s32)) + ((lbl_3_common_bss_350E4._30 * sizeof(Vec)) * 2);
     if (lbl_3_common_bss_350E4._48 == NULL) {
         lbl_3_common_bss_350E4._48 = _OSAllocFromHeap(4, size);
         lbl_3_common_bss_350E4._3C = (u32*)(lbl_3_common_bss_350E4._48 + lbl_3_common_bss_350E4._30 * 2);
@@ -3291,21 +3291,22 @@ void fn_3_CD958(void) {
 }
 
 // .text:0x000CCC24 size:0xD34 mapped:0x8070BCB8
-// 98.37%: the target keeps the place pointer in r28 from the first instruction (one more
-// saved register, 112-byte frame); here it is rebuilt before its loop, shifting registers.
+// 98.70%: the target keeps the place pointer in r28 from the first instruction (one more
+// saved register, 112-byte frame); here it is rebuilt before its loop. Scanning with place[n]
+// and dropping the reload gives the frame but a copy into r26 (97.95% at best).
 void fn_3_CCC24(void** files, s32* indices) {
     StaC2Draw* draw;
     StaC2Draw* first;
-    StaC2Draw* head;
     StaC2Place20* place;
-    u32 n;
     u32 total;
+    u32 n;
     u32 i;
     u32 j;
-    u32 springModel;
+    StaC2Draw* head;
     u32 placeModel;
     u32 count;
     u8 end = FALSE;
+    u32 springModel;
     u32 k;
 
     place = lbl_3_data_185D0;
@@ -3351,8 +3352,7 @@ void fn_3_CCC24(void** files, s32* indices) {
     lbl_3_common_bss_350E4._30 = 67;
     lbl_3_common_bss_350E4._00 = _OSAllocFromHeap(32, 67 * sizeof(StaC2Draw));
     lbl_3_common_bss_350E4._04 = _OSAllocFromHeap(32, 67 * sizeof(StaC2Draw));
-    first = lbl_3_common_bss_350E4._00;
-    memset(first, 0, 10452);
+    memset(first = lbl_3_common_bss_350E4._00, 0, 10452);
     lbl_3_bss_A02C = 0;
     first->springs = lbl_3_bss_A8D0;
     first->_74 = &lbl_8036E548._6C->models[0];
