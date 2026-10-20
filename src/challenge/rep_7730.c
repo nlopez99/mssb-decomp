@@ -1323,8 +1323,9 @@ void fn_1_24410(void) {
 
 
 // .text:0x00023B54 size:0x8BC
-// 99.52%: in the height loop 16.0f and the conversion constant swap f1/f2, and n and
-// lbl_1_bss_76E0's address swap r8/r9.
+// 99.50%: in the height loop 16.0f and the conversion constant swap f1/f2, max and min
+// swap f30/f31, and n and lbl_1_bss_76E0's address swap r8/r9 (assigning min first fixes
+// the FPRs but puts 100.0f before -100.0f in .rodata).
 void fn_1_23B54(void) {
     WaveTask7730* task = lbl_803CC1B8;
     s32 i;
@@ -1462,8 +1463,8 @@ void fn_1_23B54(void) {
             frame = task->_2C++;
             fn_1_22F4C(32, 128, lbl_1_bss_76E0[1 - (frame & 1)], lbl_1_bss_76E0[frame & 1],
                        lbl_1_bss_76E0[1 - (frame & 1)]);
-            min = 100.0f;
             max = -100.0f;
+            min = 100.0f;
             for (i = 0; i < task->_28; i++) {
                 for (j = 0; j < task->_29; j++) {
                     p = &lbl_1_bss_F6E0[i][j];
