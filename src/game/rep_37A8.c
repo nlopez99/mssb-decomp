@@ -518,7 +518,7 @@ void fn_3_145AD0(int player) {
 }
 
 // .text:0x001453BC size:0x714 mapped:0x80784450
-// 89.08%: registers and scheduling; the target reads the timer with lhau and keeps
+// 90.15%: registers and scheduling; the target reads the timer with lhau and keeps
 // other pointers in saved registers.
 void fn_3_1453BC(int coin) {
     Unk37A8Entry* entry;
@@ -533,7 +533,7 @@ void fn_3_1453BC(int coin) {
     s16 points;
     s16 left;
     int team;
-    int player;
+    s8 player;
     int target;
     int i;
 
@@ -557,7 +557,7 @@ void fn_3_1453BC(int coin) {
             fn_3_154238(coin);
             if (g_Minigame._1CA5[player] == 0 && MG._1C9A[player] == 0) {
                 MG._1C9A[player] = 1;
-                (&g_Minigame._1B3C)[player] = lbl_3_data_21E68[14];
+                MG._1B3C[player] = lbl_3_data_21E68[14];
                 MG._1B50[player] = 0;
                 fielder = &g_Fielders[g_Minigame.minigameFielderIndex[player]];
                 dir.x = 0.0f;
@@ -1489,22 +1489,18 @@ u8 fn_3_1428F0(s8 player, u8 force) {
 }
 
 // .text:0x00142570 size:0x380 mapped:0x80781604
-// 98.24%: registers only; the fielder and piranha pointers and the dx/dz FPRs swap.
 s32 fn_3_142570(s8 player) {
+    s32 best;
     Unk37A8Fielder* fielder;
+    u8 found;
     Unk37A8Piranha* piranha;
+    s32 t;
+    s8 i;
     f32 speed;
-    f32 vx2;
-    f32 vz2;
     f32 dx;
     f32 dz;
     f32 reach;
     f32 dist;
-    s32 best;
-    s32 t;
-    s16 limit;
-    u8 found;
-    s8 i;
 
     fielder = &g_Fielders[g_Minigame.minigameFielderIndex[player]];
     reach = lbl_3_data_21E24[2] + lbl_3_data_47BC[fielder->_1C9];
@@ -1514,17 +1510,15 @@ s32 fn_3_142570(s8 player) {
     do {
         piranha = &MG._00A8[i];
         if (piranha->active != 0) {
-            dz = fielder->pos.z - piranha->pos.z;
             dx = fielder->pos.x - piranha->pos.x;
+            dz = fielder->pos.z - piranha->pos.z;
             dist = dolsqrtf2(dx * dx + dz * dz);
             if (dist < reach) {
                 return 0;
             }
             dx /= dist;
             dz /= dist;
-            vx2 = piranha->vel.x * piranha->vel.x;
-            vz2 = piranha->vel.z * piranha->vel.z;
-            speed = dolsqrtf2(vx2 + vz2);
+            speed = dolsqrtf2(piranha->vel.x * piranha->vel.x + piranha->vel.z * piranha->vel.z);
             if (dx * (piranha->vel.x / speed) + dz * (piranha->vel.z / speed) >= 0.9994f) {
                 t = (dist - reach) / speed;
                 if (t < best) {
@@ -1534,11 +1528,10 @@ s32 fn_3_142570(s8 player) {
             }
         }
     } while (++i < 40);
-    limit = lbl_3_data_21E68[23];
     i = 0;
     do {
         if (MG._193A[i] == 6 && MG._1B84[i] == 5 && player == -1 - MG._1BE8[i]) {
-            t = limit - MG._17C8[i];
+            t = lbl_3_data_21E68[23] - MG._17C8[i];
             if (t >= 0) {
                 if (t < best) {
                     best = t;
