@@ -3392,17 +3392,13 @@ void fn_3_4EFC8(s32 fielder, BOOL flag) {
 }
 
 // .text:0x0004EBC4 size:0x404 mapped:0x8068DC58
-// 99.72%: before the waiting search the target zeroes waiting and copies it into j
-// (`mr r8,r7`), as in fn_3_41D78; every form of the two zeroings tried gives a second `li`.
 void fn_3_4EBC4(void) {
     s32 frames;
     s32 best = -1;
     s16 bestFrames = 9999;
     s16 nextFrames = 9999;
-    BOOL waiting;
     BOOL high = FALSE;
     s32 i;
-    s32 j;
 
     if (g_FieldingLogic._0C4 >= 0) {
         g_Ball.fielderAboutToGetBall_hasBall = -1;
@@ -3470,22 +3466,22 @@ void fn_3_4EBC4(void) {
                 g_Ball.fielderAboutToGetBall_hasBall = best;
             }
             if (g_Fielders[best]._1DC == 2 && bestFrames < 30) {
-                waiting = FALSE;
-                for (j = 0; j < 9; j++) {
-                    if (g_FieldingLogic._0F8[j] == 1) {
-                        if (g_Fielders[j]._1DD == 0) {
-                            waiting = TRUE;
+                high = FALSE;
+                for (i = 0; i < 9; i++) {
+                    if (g_FieldingLogic._0F8[i] == 1) {
+                        if (g_Fielders[i]._1DD == 0) {
+                            high = TRUE;
                             break;
-                        } else if (g_Fielders[j]._1DB == 0) {
-                            waiting = TRUE;
+                        } else if (g_Fielders[i]._1DB == 0) {
+                            high = TRUE;
                             break;
-                        } else if (g_Fielders[j]._1DC == 0 || g_Fielders[j]._1DC == 1) {
-                            waiting = TRUE;
+                        } else if (g_Fielders[i]._1DC == 0 || g_Fielders[i]._1DC == 1) {
+                            high = TRUE;
                             break;
                         }
                     }
                 }
-                if (!waiting) {
+                if (!high) {
                     g_Ball.fielderAboutToGetBall_hasBall = best;
                 }
             }
@@ -5830,13 +5826,9 @@ void fn_3_4207C(s32 fielder) {
 }
 
 // .text:0x00041D78 size:0x304 mapped:0x80680E0C
-// 99.04%: before the second search the target sets busy to 0 and copies it into j
-// (`mr r6,r5`); here j gets its own `li`.
 void fn_3_41D78(void) {
-    BOOL thrown = FALSE;
-    BOOL busy;
+    BOOL found = FALSE;
     s32 i;
-    s32 j;
 
     if (g_Ball.deadBallReason == 0 && g_Ball.AtBat_ContactResult != -1 && g_Ball.ballState != 1 && g_FieldingLogic._13F == 0) {
         if (g_Ball.ballState != 2 ||
@@ -5845,22 +5837,22 @@ void fn_3_41D78(void) {
                        SQ(g_Ball.throwStartingLocation.z - g_Ball.AtBat_Contact_BallPos.z)) > 5.0f + g_Ball.throwDistance)) {
             for (i = 0; i < 9; i++) {
                 if (g_FieldingLogic._0F8[i] == 1 || g_FieldingLogic._0F8[i] == 7) {
-                    thrown = TRUE;
+                    found = TRUE;
                     break;
                 }
             }
-            if (!thrown) {
+            if (!found) {
                 fn_3_4197C(FALSE);
                 return;
             }
-            busy = FALSE;
-            for (j = 0; j < 9; j++) {
-                if (g_Fielders[j]._1D3 == 2 || g_Fielders[j]._1D3 == 3 || g_Fielders[j]._1D3 == 4 || g_Fielders[j]._1D3 == 18) {
-                    busy = TRUE;
+            found = FALSE;
+            for (i = 0; i < 9; i++) {
+                if (g_Fielders[i]._1D3 == 2 || g_Fielders[i]._1D3 == 3 || g_Fielders[i]._1D3 == 4 || g_Fielders[i]._1D3 == 18) {
+                    found = TRUE;
                     break;
                 }
             }
-            if (!busy) {
+            if (!found) {
                 fn_3_4197C(FALSE);
             }
         }
@@ -8450,8 +8442,6 @@ nearest:
 }
 
 // .text:0x00036678 size:0xA9C mapped:0x8067570C
-// 99.97%: registers only; in the swap the target copies a into r4 and the extended angA
-// into r0, this the reverse.
 s32 fn_3_36678(s32 a, s32 b, s32 mode, f32 x, f32 z) {
     s16 angA;
     s16 angB;
@@ -8558,8 +8548,8 @@ s32 fn_3_36678(s32 a, s32 b, s32 mode, f32 x, f32 z) {
 compare:
     if (distB < distA) {
         f32 tf = distA;
-        s32 ti = a;
         s32 ta = angA;
+        s32 ti = a;
 
         distA = distB;
         a = b;
@@ -8650,13 +8640,13 @@ s32 fn_3_365D0(s32 a, s32 b, s32 c, f32 x, f32 z) {
 }
 
 // .text:0x000361D8 size:0x3F8 mapped:0x8067526C
-// 93.66%: registers only; the target zeroes one index and copies it into the other two
+// 94.04%: registers only; the target zeroes one index and copies it into the other two
 // (mr), and allocates the loop's saved registers in another order.
 s32 fn_3_361D8(f32 x, f32 z) {
-    s32 i;
-    s32 idx0;
-    s32 idx1;
     s32 idx2;
+    s32 idx1;
+    s32 idx0;
+    s32 i;
     s32 idx3;
     f32 d0;
     f32 d1;
