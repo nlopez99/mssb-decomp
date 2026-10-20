@@ -7,12 +7,12 @@
 void challengeDrawStarsOnMissionMenu(void);
 void fn_8006C5CC(void);
 void fn_8006C6C4(void);
-void fn_8006C79C(void);
+BOOL fn_8006C79C(s32 index);
 void starMissionRelated2(void);
 void fn_8006C9D8(void);
-void fn_8006CA9C(void);
+f32 fn_8006CA9C(void);
 void starMissionMenu(void);
-void challengeRelated(void);
+s16 challengeRelated(s32 index);
 void determineIfMissionDescriptionIsShown(void);
 void fn_8006CDC0(void);
 void fn_8006CEBC(void);
