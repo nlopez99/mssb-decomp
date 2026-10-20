@@ -15,9 +15,15 @@ Sections:
 	.sbss2      type:bss align:32
 
 static/static_80008E00.c:
-	extab       start:0x80005600 end:0x80005640
-	extabindex  start:0x80006C60 end:0x80006CC0
-	.text       start:0x80008E00 end:0x80009E94
+	extab       start:0x80005600 end:0x80005630
+	extabindex  start:0x80006C60 end:0x80006CA8
+	.text       start:0x80008E00 end:0x800096DC
+
+static/static_800096DC.c:
+	extab       start:0x80005630 end:0x80005640
+	extabindex  start:0x80006CA8 end:0x80006CC0
+	.text       start:0x800096DC end:0x80009E94
+	.data       start:0x800E8AA8 end:0x800E8F44
 
 static/static_80009E94.c:
 	.text       start:0x80009E94 end:0x8000A0AC

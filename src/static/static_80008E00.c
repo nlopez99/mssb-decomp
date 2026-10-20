@@ -15,7 +15,11 @@
 #include "Dolphin/rand.h"
 
 extern struct {
-    /* 0x000 */ u8 _000[0x722];
+    /* 0x000 */ u8 _000[0x715];
+    /* 0x715 */ s8 _715;
+    /* 0x716 */ u8 _716[0x718 - 0x716];
+    /* 0x718 */ s32 _718;
+    /* 0x71C */ u8 _71C[0x722 - 0x71C];
     /* 0x722 */ s8 _722;
 } lbl_803C6CF8;
 
@@ -37,30 +41,24 @@ typedef struct FileIdPair {
     /* 0x04 */ s32 _04;
 } FileIdPair;
 
-typedef struct FileEntry {
-    /* 0x00 */ char* path;
-    /* 0x04 */ s32 _04[3];
-} FileEntry;
-
-typedef struct MainTask {
-    /* 0x00 */ void (*func)(void);
-    /* 0x04 */ u8 _04[0x18 - 0x4];
-    /* 0x18 */ u16 _18;
-} MainTask;
-
 extern struct {
     /* 0x00 */ FileIdPair files;
-    /* 0x08 */ u8 _08[0xC - 0x8];
+    /* 0x08 */ u32 _08;
     /* 0x0C */ u32 resetCode;
-    /* 0x10 */ u8 _10[0x1D - 0x10];
+    /* 0x10 */ u8 _10[0x1C - 0x10];
+    /* 0x1C */ u8 _1C;
     /* 0x1D */ u8 _1D;
     /* 0x1E */ u8 _1E[0x20 - 0x1E];
     /* 0x20 */ u8 _20;
     /* 0x21 */ u8 _21;
     /* 0x22 */ u8 _22;
     /* 0x23 */ u8 _23;
-    /* 0x24 */ u8 _24[0x28 - 0x24];
+    /* 0x24 */ u8 _24;
+    /* 0x25 */ u8 _25;
+    /* 0x26 */ u8 _26;
+    /* 0x27 */ u8 _27;
     /* 0x28 */ u8 _28;
+    /* 0x29 */ u8 _29;
 } lbl_80366158;
 
 extern struct {
@@ -71,22 +69,6 @@ extern struct {
     /* 0x394 */ u8 _394[0x396 - 0x394];
     /* 0x396 */ volatile u8 _396;
 } lbl_803C7420;
-
-extern struct {
-    /* 0x00 */ u8 _00[0x5];
-    /* 0x05 */ u8 _05;
-    /* 0x06 */ u8 _06[0x10 - 0x6];
-} lbl_80110080;
-
-extern MainTask* lbl_803CC1B8;
-extern s32 lbl_803CBBD0;
-extern s32 lbl_803CBBD4;
-extern FileEntry lbl_800E8EE8;
-extern FileEntry lbl_800E8EF8;
-extern char lbl_800E6568[];
-extern char lbl_800E6578[];
-
-extern s32 ConvertPathToEntryNum(FileEntry* entry);
 
 typedef struct MainSave {
     /* 0x000 */ u8 _000[0x1B9];
@@ -176,27 +158,6 @@ static inline BOOL checkReset(u8 ready) {
         return TRUE;
     }
     return FALSE;
-}
-
-// .text:0x800097A0 size:0x6F4
-void fn_800097A0(void) {
-}
-
-// .text:0x800096DC size:0xC4
-void PrepFilesToBeLoaded(void) {
-    MainTask* task;
-
-    lbl_80366158.files._00 = lbl_803C7420.files._00;
-    task = lbl_803CC1B8;
-    lbl_80366158.files._04 = lbl_803C7420.files._04;
-    lbl_803CBBD4 = ConvertPathToEntryNum(&lbl_800E8EE8);
-    lbl_803CBBD0 = ConvertPathToEntryNum(&lbl_800E8EF8);
-    task->_18 = 0;
-    lbl_803CC1B8->func = fn_800097A0;
-    OSReport(lbl_800E6568, lbl_803CBBD4);
-    OSReport(lbl_800E6578, lbl_803CBBD0);
-    lbl_80110080._05 = 4;
-    lbl_80366158._1D = 1;
 }
 
 // .text:0x80009180 size:0x55C

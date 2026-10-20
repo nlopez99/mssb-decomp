@@ -13,7 +13,5 @@ void fn_80009094(void);
 void fn_800090B4(void);
 void fn_80009144(void);
 void main(void);
-void PrepFilesToBeLoaded(void);
-void fn_800097A0(void);
 
 #endif // !__STATIC_STATIC_80008E00_H_
