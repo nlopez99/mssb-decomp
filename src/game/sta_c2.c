@@ -590,13 +590,13 @@ static inline BOOL isSpriteDone(StaC2Task* task, s32 i) {
 }
 
 // .text:0x000D67CC size:0x2244 mapped:0x80715860
-// 97.96%: registers differ throughout; the target does not strength-reduce &models[i] in the
+// 98.19%: registers differ throughout; the target does not strength-reduce &models[i] in the
 // first draw loop and the anim loop, and keeps a copy of entry for the inlined fn_3_D1004 in the
 // swing loop (one more spill at 316(r1)).
 void fn_3_D67CC(void** files) {
     Mtx m;
     Vec offset;
-    StaC2Draw* entry;
+    u32 mdl;
     StaC2Draw* draw;
     StaC2Draw* host;
     StaC2Swing* swing;
@@ -626,7 +626,7 @@ void fn_3_D67CC(void** files) {
     u32 placeModel;
     u32 bushModel;
     u32 lightModel;
-    u32 mdl;
+    StaC2Draw* entry;
     StaC2Draw* sp;
     f32 rot;
     u8 end;
