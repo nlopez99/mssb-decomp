@@ -4444,14 +4444,13 @@ void fn_1_10AA4(Unk10AA4* arg0, f32 arg1) {
 }
 
 // .text:0x000107B8 size:0x2EC
-// Inlines fn_1_D300 and inherits its difference; registers differ at the top
 void fn_1_107B8(void) {
     u8 slot = lbl_1_bss_6940[lbl_1_bss_5F73]._44;
     u8 anim;
     UnkAnimRef0610* ref;
     Unk0060Elem* elem;
     lbl_8036E548._0C04[lbl_1_bss_5F73]._278 = slot == 0;
-    switch (slot) {
+    switch (lbl_1_bss_6940[lbl_1_bss_5F73]._44) {
     case 0:
         lbl_8036E548._0C04[lbl_1_bss_5F73]._254 = 9;
         break;
@@ -4471,8 +4470,8 @@ void fn_1_107B8(void) {
         lbl_8036E548._0C04[lbl_1_bss_5F73]._254 = 9;
         break;
     }
+    lbl_8036E548._0C04[lbl_1_bss_5F73]._062 = lbl_1_data_A938[slot] + lbl_1_bss_6940[lbl_1_bss_5F73]._45;
     anim = lbl_1_bss_6940[lbl_1_bss_5F73]._45;
-    lbl_8036E548._0C04[lbl_1_bss_5F73]._062 = lbl_1_data_A938[slot] + anim;
     ref = lbl_8036E548._0C04[lbl_1_bss_5F73]._010[slot];
     elem = &lbl_8036E548._0060->_34[lbl_1_bss_5F73];
     elem->_04 = ref;
