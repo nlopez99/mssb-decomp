@@ -5,18 +5,36 @@
 #include "string.h"
 
 typedef struct MbRosterEntry {
-    /* 0x00 */ u8 _00[0x24];
+    /* 0x00 */ u8 _00[0x1E];
+    /* 0x1E */ u8 _1E[2];
+    /* 0x20 */ s32 _20;
     /* 0x24 */ s16 charId;
-    /* 0x26 */ u8 _26[0x31 - 0x26];
+    /* 0x26 */ u8 _26;
+    /* 0x27 */ u8 _27;
+    /* 0x28 */ u8 _28[2];
+    /* 0x2A */ u8 _2A[2];
+    /* 0x2C */ u8 _2C;
+    /* 0x2D */ u8 _2D;
+    /* 0x2E */ u8 _2E;
+    /* 0x2F */ u8 _2F;
+    /* 0x30 */ u8 _30;
     /* 0x31 */ u8 attribute;
-    /* 0x32 */ u8 _32[0x3B - 0x32];
+    /* 0x32 */ u8 _32;
+    /* 0x33 */ u8 _33;
+    /* 0x34 */ u8 _34;
+    /* 0x35 */ u8 _35[2];
+    /* 0x37 */ u8 _37[4];
     /* 0x3B */ u8 chemistry[0x36];
-    /* 0x71 */ u8 _71[0xA0 - 0x71];
+    /* 0x71 */ u8 _71;
+    /* 0x72 */ u8 _72[2];
+    /* 0x74 */ u16 _74[21];
+    /* 0x9E */ u8 _9E[2];
 } MbRosterEntry; // size: 0xA0
 
 typedef struct MbState {
     /* 0x0000 */ MbRosterEntry chars[2][9];
-    /* 0x0B40 */ u8 _0B40[0x46E0 - 0xB40];
+    /* 0x0B40 */ u8 _0B40[0x4380 - 0xB40];
+    /* 0x4380 */ u8 _4380[12][0x48];
     /* 0x46E0 */ s32 _46E0[2];
     /* 0x46E8 */ u8 _46E8[0x46F8 - 0x46E8];
     /* 0x46F8 */ u8 ports[2];
@@ -55,7 +73,7 @@ typedef struct MbStadiumState {
 typedef struct MbTeams {
     /* 0x00 */ u8 _00[0x2];
     /* 0x02 */ s8 _02[2][9];
-    /* 0x14 */ u8 _14[0x26 - 0x14];
+    /* 0x14 */ u8 _14[2][9];
     /* 0x26 */ u8 _26[2][9];
     /* 0x38 */ u8 _38[0x5C - 0x38];
 } MbTeams; // size: 0x5C
@@ -89,11 +107,30 @@ typedef struct MbSlot {
 
 extern MbSlot lbl_80354720[2][9];
 
+typedef struct MbMissionChar {
+    /* 0x00 */ u8 _00[0x31];
+    /* 0x31 */ u8 state;
+    /* 0x32 */ u8 _32[2];
+} MbMissionChar; // size: 0x34
+
+typedef struct MbMissionSlot {
+    /* 0x0 */ s16 charId;
+    /* 0x2 */ u8 _2;
+    /* 0x3 */ u8 _3;
+    /* 0x4 */ u8 _4;
+    /* 0x5 */ u8 _5;
+} MbMissionSlot; // size: 0x6
+
 typedef struct MbMissions {
-    /* 0x0000 */ u8 _0000[0x441D];
+    /* 0x0000 */ MbMissionChar chars[54];
+    /* 0x0AF8 */ u8 _0AF8[0x40B8 - 0xAF8];
+    /* 0x40B8 */ MbMissionSlot slots[9];
+    /* 0x40EE */ u8 _40EE[0x441D - 0x40EE];
     /* 0x441D */ u8 _441D;
     /* 0x441E */ u8 _441E;
     /* 0x441F */ s8 _441F;
+    /* 0x4420 */ u8 _4420[0x4445 - 0x4420];
+    /* 0x4445 */ u8 _4445;
 } MbMissions;
 
 extern MbMissions starMissionCompletionTracker;
@@ -176,7 +213,20 @@ u8 lbl_80108FF8[50] = { 0x15, 0x16, 0x17, 0xFF, 0xFF, 0x18, 0x19, 0x1A, 0xFF, 0x
 u8 lbl_8010902C[12] = { 0x00, 0x00, 0x03, 0x00, 0x02, 0x00, 0x01, 0x03, 0x01, 0x02, 0x01, 0x01 };
 u8 lbl_80109038[9] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x0A, 0x0B, 0x11 };
 u32 lbl_80109044[4] = { 0x0, 0xB4, 0x8E98000, 0xB4 };
-u8 lbl_80109054[40] = { 0x02, 0x05, 0x04, 0x03, 0x08, 0x03, 0x04, 0x05, 0x02, 0x06, 0x00, 0x01, 0x08, 0x06, 0x07, 0x01, 0x02, 0x00, 0x07, 0x04, 0x04, 0x03, 0x01, 0x02, 0x05, 0x01, 0x02, 0x04, 0x06, 0x08, 0x07, 0x06, 0x08, 0x05, 0x03, 0x03, 0x05, 0x07, 0x04, 0x06 };
+u8 lbl_80109054[2][4][5] = {
+    {
+        { 0x02, 0x05, 0x04, 0x03, 0x08 },
+        { 0x03, 0x04, 0x05, 0x02, 0x06 },
+        { 0x00, 0x01, 0x08, 0x06, 0x07 },
+        { 0x01, 0x02, 0x00, 0x07, 0x04 },
+    },
+    {
+        { 0x04, 0x03, 0x01, 0x02, 0x05 },
+        { 0x01, 0x02, 0x04, 0x06, 0x08 },
+        { 0x07, 0x06, 0x08, 0x05, 0x03 },
+        { 0x03, 0x05, 0x07, 0x04, 0x06 },
+    },
+};
 
 u8 lbl_803CB8D0[8] = { 3, 2, 1 };
 
@@ -284,6 +334,223 @@ s32 fn_800697B0(void) {
 
 // .text:0x80068838 size:0xF78
 void fn_80068838(void) {
+    s8 pool[54];
+    u8 n;
+    s32 i;
+    s32 j;
+    s32 k;
+    s32 team;
+    u8 color;
+    s16 id;
+    u8 r;
+    u8 found;
+    MbRosterEntry* src;
+    MbRosterEntry* dst;
+    s8 list[10];
+    u8 chem;
+    u8* row;
+
+    n = 0;
+    memset(pool, -1, sizeof(pool));
+    for (i = 0; i < 54; i++) {
+        if ((s32)starMissionCompletionTracker.chars[i].state == 2) {
+            found = fn_80067B40(0, i, 1);
+            if (found) {
+                for (j = 0; j < 9; j++) {
+                    if (i == lbl_80108EDC[j][0]) {
+                        break;
+                    }
+                }
+                if (j == 9) {
+                    continue;
+                }
+            }
+            pool[n++] = i;
+        }
+    }
+    lbl_8034E9A0._46E0[1] = 0x13;
+    if (starMissionCompletionTracker._4445 != 0) {
+        for (i = 0; i < 12; i++) {
+            if (starMissionCompletionTracker._441D == lbl_80108EC4[i]) {
+                color = i;
+                break;
+            }
+        }
+        for (team = 0; team < 2; team++) {
+            for (i = 0; i < 9; i++) {
+                if (team == 0) {
+                    id = lbl_8034E9A0._4380[color][i];
+                } else {
+                    id = lbl_8034E9A0._4380[11][i];
+                }
+                src = &lbl_8034E9A0.chars[(u8)(id / 9)][(u8)(id % 9)];
+                dst = &inMemRoster[team][i];
+                memcpy(dst->_00, src->_00, sizeof(src->_00));
+                dst->charId = src->charId;
+                dst->_26 = src->_26;
+                dst->_27 = src->_27;
+                memcpy(dst->_28, src->_28, sizeof(src->_28));
+                memcpy(dst->_2A, src->_2A, sizeof(src->_2A));
+                dst->_2C = src->_2C;
+                dst->_2D = src->_2D;
+                dst->_2E = src->_2E;
+                dst->_2F = src->_2F;
+                dst->_30 = src->_30;
+                dst->attribute = src->attribute;
+                dst->_32 = src->_32;
+                dst->_33 = src->_33;
+                dst->_34 = src->_34;
+                memcpy(dst->_35, src->_35, sizeof(src->_35));
+                dst->_20 = src->_20;
+                memcpy(dst->_37, src->_37, sizeof(src->_37));
+                memcpy(dst->chemistry, src->chemistry, sizeof(src->chemistry));
+                dst->_71 = src->_71;
+                dst->_74[0] = src->_74[0];
+                dst->_74[1] = src->_74[1];
+                dst->_74[2] = src->_74[2];
+                dst->_74[3] = src->_74[3];
+                dst->_74[4] = src->_74[4];
+                dst->_74[5] = src->_74[5];
+                dst->_74[6] = src->_74[6];
+                dst->_74[7] = src->_74[7];
+                dst->_74[8] = src->_74[8];
+                dst->_74[9] = src->_74[9];
+                dst->_74[10] = src->_74[10];
+                dst->_74[11] = src->_74[11];
+                dst->_74[12] = src->_74[12];
+                dst->_74[13] = src->_74[13];
+                dst->_74[14] = src->_74[14];
+                dst->_74[15] = src->_74[15];
+                dst->_74[16] = src->_74[16];
+                dst->_74[17] = src->_74[17];
+                dst->_74[18] = src->_74[18];
+                dst->_74[19] = src->_74[19];
+                dst->_74[20] = src->_74[20];
+                lbl_803C6724._02[team][i] = id;
+            }
+        }
+        fn_80067C48(0);
+        fn_80067C48(1);
+        unsure_FillRosterPositions(1);
+        characterSelectScreen(1);
+        for (i = 0; i < 9; i++) {
+            starMissionCompletionTracker.slots[i].charId = inMemRoster[0][i].charId;
+            starMissionCompletionTracker.slots[i]._2 = lbl_80354720[0][i]._1;
+            starMissionCompletionTracker.slots[i]._3 = lbl_80354720[0][i]._2;
+            starMissionCompletionTracker.slots[i]._4 = inMemRoster[0][i]._27 + inMemRoster[0][i]._26 * 2;
+        }
+    } else {
+        for (team = 0; team < 2; team++) {
+            for (i = 0; i < 9; i++) {
+                if (team == 0) {
+                    id = starMissionCompletionTracker.slots[i].charId;
+                } else {
+                    id = lbl_8034E9A0._4380[11][i];
+                    if (id != 0x13 && n != 0) {
+                        do {
+                            r = randRange_FUN_80042bf0(0, n - 1);
+                            id = pool[r];
+                        } while (id == -1);
+                        pool[r] = -1;
+                        lbl_8034E9A0._4757[id] = 1;
+                        for (j = 0; j < n - 1; j++) {
+                            for (k = j + 1; k < n; k++) {
+                                if (pool[j] == -1) {
+                                    s8 tmp = pool[j];
+                                    pool[j] = pool[k];
+                                    pool[k] = tmp;
+                                }
+                            }
+                        }
+                        n--;
+                    }
+                }
+                src = &lbl_8034E9A0.chars[(u8)(id / 9)][(u8)(id % 9)];
+                dst = &inMemRoster[team][i];
+                memcpy(dst->_00, src->_00, sizeof(src->_00));
+                dst->charId = src->charId;
+                dst->_26 = src->_26;
+                dst->_27 = src->_27;
+                memcpy(dst->_28, src->_28, sizeof(src->_28));
+                memcpy(dst->_2A, src->_2A, sizeof(src->_2A));
+                dst->_2C = src->_2C;
+                dst->_2D = src->_2D;
+                dst->_2E = src->_2E;
+                dst->_2F = src->_2F;
+                dst->_30 = src->_30;
+                dst->attribute = src->attribute;
+                dst->_32 = src->_32;
+                dst->_33 = src->_33;
+                dst->_34 = src->_34;
+                memcpy(dst->_35, src->_35, sizeof(src->_35));
+                dst->_20 = src->_20;
+                memcpy(dst->_37, src->_37, sizeof(src->_37));
+                memcpy(dst->chemistry, src->chemistry, sizeof(src->chemistry));
+                dst->_71 = src->_71;
+                dst->_74[0] = src->_74[0];
+                dst->_74[1] = src->_74[1];
+                dst->_74[2] = src->_74[2];
+                dst->_74[3] = src->_74[3];
+                dst->_74[4] = src->_74[4];
+                dst->_74[5] = src->_74[5];
+                dst->_74[6] = src->_74[6];
+                dst->_74[7] = src->_74[7];
+                dst->_74[8] = src->_74[8];
+                dst->_74[9] = src->_74[9];
+                dst->_74[10] = src->_74[10];
+                dst->_74[11] = src->_74[11];
+                dst->_74[12] = src->_74[12];
+                dst->_74[13] = src->_74[13];
+                dst->_74[14] = src->_74[14];
+                dst->_74[15] = src->_74[15];
+                dst->_74[16] = src->_74[16];
+                dst->_74[17] = src->_74[17];
+                dst->_74[18] = src->_74[18];
+                dst->_74[19] = src->_74[19];
+                dst->_74[20] = src->_74[20];
+                if (team == 0) {
+                    lbl_80354720[0][i]._0 = i;
+                    lbl_80354720[0][i]._1 = starMissionCompletionTracker.slots[i]._2;
+                    lbl_80354720[0][i]._2 = starMissionCompletionTracker.slots[i]._3;
+                    inMemRoster[0][i]._26 = starMissionCompletionTracker.slots[i]._4 / 2;
+                    inMemRoster[0][i]._27 = starMissionCompletionTracker.slots[i]._4 % 2;
+                }
+                lbl_803C6724._02[team][i] = id;
+            }
+            if (team != 0) {
+                unsure_FillRosterPositions(1);
+                characterSelectScreen(1);
+            }
+        }
+        fn_80067C48(0);
+        fn_80067C48(1);
+    }
+    for (i = 0; i < 9; i++) {
+        row = inMemRoster[0][i].chemistry;
+        for (j = 0; j < 9; j++) {
+            chem = row[inMemRoster[0][j].charId];
+            if (chem < 90 || chem == 100) {
+                list[j] = -1;
+            } else {
+                list[j] = inMemRoster[0][j].charId;
+            }
+        }
+        for (j = 0; j < 9; j++) {
+            for (k = 0; k < 10; k++) {
+                if (list[j] > list[k]) {
+                    s8 tmp = list[j];
+                    list[j] = list[k];
+                    list[k] = tmp;
+                }
+            }
+        }
+        memcpy(lbl_8034E9A0._47F9[0][i], list, 9);
+    }
+    fn_80069854();
+    fn_8006496C();
+    fn_80069854();
+    fn_800678CC(0);
+    fn_800678CC(1);
 }
 
 // .text:0x8006877C size:0xBC
@@ -762,12 +1029,454 @@ void fn_80066EAC(u8 team) {
     }
 }
 
+static inline void placeFielder(s8* fielders, s8 id) {
+    s32 k;
+    u8 r;
+    u8* pos = lbl_80109054[0][lbl_8034E9A0.chars[(u8)(id / 9)][(u8)(id % 9)].attribute];
+
+    for (k = 0; k < 5; k++, pos++) {
+        if (fielders[*pos] == -1) {
+            fielders[*pos] = id;
+            break;
+        }
+    }
+    if (k == 5) {
+        do {
+            r = randRange_FUN_80042bf0(0, 8);
+        } while (fielders[r] != -1);
+        fielders[r] = id;
+    }
+}
+
 // .text:0x80065DEC size:0x10C0
-void characterSelectScreen(void) {
+void characterSelectScreen(u8 team) {
+    s8 fielders[9];
+    s8 captains[9];
+    s8 others[9];
+    u8 oldPos[9];
+    s8 list[10];
+    s16 ids[9];
+    s32 i;
+    s32 j;
+    s32 k;
+    s32 a;
+    s32 b;
+    s32 c;
+    u8 n;
+    u8 isCaptain;
+    u8* pos;
+    u8 r;
+    s32 ri;
+    s32 id;
+    s32 rj;
+    s8 tmp;
+    u8 chem;
+    u8* row;
+    MbRosterEntry* src;
+    MbRosterEntry* dst;
+
+    for (i = 0; i < 9; i++) {
+        others[i] = -1;
+        ids[i] = inMemRoster[team][i].charId;
+        captains[i] = -1;
+        fielders[i] = -1;
+        oldPos[i] = lbl_803C6724._14[team][i];
+    }
+    fielders[lbl_80109054[0][inMemRoster[team][0].attribute][0]] = inMemRoster[team][0].charId;
+    n = 0;
+    for (i = 1; i < 9; i++) {
+        for (k = 0; k < 12; k++) {
+            if (lbl_80108EC4[k] == inMemRoster[team][i].charId) {
+                captains[n++] = inMemRoster[team][i].charId;
+            }
+        }
+    }
+    if (captains[0] != -1) {
+        if (captains[1] == -1) {
+            placeFielder(fielders, captains[0]);
+        } else {
+            for (i = 0; i < 8; i++) {
+                if (captains[i] == -1) {
+                    break;
+                }
+                id = inMemRoster[team][captains[i]].charId;
+                for (k = 0; k < 54; k++) {
+                    if (lbl_8034E9A0._478D[team][k] == id) {
+                        ri = k;
+                        break;
+                    }
+                }
+                for (j = i + 1; j < 9; j++) {
+                    if (captains[j] == -1) {
+                        break;
+                    }
+                    id = captains[j];
+                    for (k = 0; k < 54; k++) {
+                        if (lbl_8034E9A0._478D[team][k] == id) {
+                            rj = k;
+                            break;
+                        }
+                    }
+                    if (ri > rj) {
+                        tmp = captains[j];
+                        captains[j] = captains[i];
+                        captains[i] = tmp;
+                    }
+                }
+            }
+            for (i = 0; i < 9; i++) {
+                if (captains[i] == -1) {
+                    break;
+                }
+                placeFielder(fielders, captains[i]);
+            }
+        }
+    }
+    n = 0;
+    for (i = 1; i < 9; i++) {
+        isCaptain = 0;
+        for (k = 0; k < 12; k++) {
+            if (lbl_80108EC4[k] == inMemRoster[team][i].charId) {
+                isCaptain = 1;
+            }
+        }
+        if (isCaptain == 0) {
+            others[n++] = inMemRoster[team][i].charId;
+        }
+    }
+    for (i = 0; i < 8; i++) {
+        if (others[i] == -1) {
+            break;
+        }
+        id = others[i];
+        for (k = 0; k < 54; k++) {
+            if (lbl_8034E9A0._478D[team][k] == id) {
+                ri = k;
+                break;
+            }
+        }
+        for (j = i + 1; j < 9; j++) {
+            if (others[j] == -1) {
+                break;
+            }
+            id = others[j];
+            for (k = 0; k < 54; k++) {
+                if (lbl_8034E9A0._478D[team][k] == id) {
+                    rj = k;
+                    break;
+                }
+            }
+            if (ri > rj) {
+                tmp = others[j];
+                others[j] = others[i];
+                others[i] = tmp;
+            }
+        }
+    }
+    for (i = 0; i < 9; i++) {
+        if (others[i] == -1) {
+            break;
+        }
+        pos = lbl_80109054[0][lbl_8034E9A0.chars[others[i] / 9][others[i] % 9].attribute];
+        for (k = 0; k < 5; k++, pos++) {
+            if (fielders[*pos] == -1) {
+                fielders[*pos] = others[i];
+                break;
+            }
+        }
+        if (k == 5) {
+            do {
+                r = randRange_FUN_80042bf0(0, 8);
+            } while (fielders[r] != -1);
+            fielders[r] = others[i];
+        }
+    }
+    for (i = 0; i < 9; i++) {
+        src = &lbl_8034E9A0.chars[fielders[i] / 9][fielders[i] % 9];
+        dst = &inMemRoster[team][i];
+        memcpy(dst->_00, src->_00, sizeof(src->_00));
+        dst->charId = src->charId;
+        dst->_26 = src->_26;
+        dst->_27 = src->_27;
+        memcpy(dst->_28, src->_28, sizeof(src->_28));
+        memcpy(dst->_2A, src->_2A, sizeof(src->_2A));
+        dst->_2C = src->_2C;
+        dst->_2D = src->_2D;
+        dst->_2E = src->_2E;
+        dst->_2F = src->_2F;
+        dst->_30 = src->_30;
+        dst->attribute = src->attribute;
+        dst->_32 = src->_32;
+        dst->_33 = src->_33;
+        dst->_34 = src->_34;
+        memcpy(dst->_35, src->_35, sizeof(src->_35));
+        dst->_20 = src->_20;
+        memcpy(dst->_37, src->_37, sizeof(src->_37));
+        memcpy(dst->chemistry, src->chemistry, sizeof(src->chemistry));
+        dst->_71 = src->_71;
+        dst->_74[0] = src->_74[0];
+        dst->_74[1] = src->_74[1];
+        dst->_74[2] = src->_74[2];
+        dst->_74[3] = src->_74[3];
+        dst->_74[4] = src->_74[4];
+        dst->_74[5] = src->_74[5];
+        dst->_74[6] = src->_74[6];
+        dst->_74[7] = src->_74[7];
+        dst->_74[8] = src->_74[8];
+        dst->_74[9] = src->_74[9];
+        dst->_74[10] = src->_74[10];
+        dst->_74[11] = src->_74[11];
+        dst->_74[12] = src->_74[12];
+        dst->_74[13] = src->_74[13];
+        dst->_74[14] = src->_74[14];
+        dst->_74[15] = src->_74[15];
+        dst->_74[16] = src->_74[16];
+        dst->_74[17] = src->_74[17];
+        dst->_74[18] = src->_74[18];
+        dst->_74[19] = src->_74[19];
+        dst->_74[20] = src->_74[20];
+        for (a = 0; a < 9; a++) {
+            row = inMemRoster[team][a].chemistry;
+            for (b = 0; b < 9; b++) {
+                chem = row[inMemRoster[team][b].charId];
+                if (chem < 90 || chem == 100) {
+                    list[b] = -1;
+                } else {
+                    list[b] = inMemRoster[team][b].charId;
+                }
+            }
+            for (b = 0; b < 9; b++) {
+                for (c = 0; c < 10; c++) {
+                    if (list[b] > list[c]) {
+                        tmp = list[b];
+                        list[b] = list[c];
+                        list[c] = tmp;
+                    }
+                }
+            }
+            memcpy(lbl_8034E9A0._47F9[team][a], list, 9);
+        }
+        lbl_80354720[team][i]._0 = i;
+        lbl_80354720[team][i]._1 = i;
+        for (k = 0; k < 9; k++) {
+            if (fielders[i] == ids[k] && ids[k] != -1) {
+                ids[k] = -1;
+                break;
+            }
+        }
+        lbl_80354720[team][i]._2 = oldPos[k];
+    }
+}
+
+static inline void placeBatter(s8* order, u8 team, s8 id) {
+    s32 k;
+    s32 m;
+    u8 r;
+    u8 ok;
+    u8* pos = lbl_80109054[1][lbl_8034E9A0.chars[(u8)(id / 9)][(u8)(id % 9)].attribute];
+
+    for (k = 0; k < 5; k++, pos++) {
+        for (m = 0; m < 9; m++) {
+            if (order[m] == *pos) {
+                break;
+            }
+        }
+        if (m == 9) {
+            for (m = 0; m < 9; m++) {
+                if (id == lbl_803C6724._02[team][m] && order[m] == -1) {
+                    order[m] = *pos;
+                    return;
+                }
+            }
+        }
+    }
+    if (k == 5) {
+        do {
+            r = randRange_FUN_80042bf0(0, 8);
+            for (m = 0; m < 9; m++) {
+                if (order[m] == r) {
+                    ok = 0;
+                    break;
+                }
+            }
+            if (m == 9) {
+                ok = 1;
+            }
+        } while (ok == 0);
+        for (m = 0; m < 9; m++) {
+            if (id == lbl_803C6724._02[team][m]) {
+                order[m] = r;
+                return;
+            }
+        }
+    }
 }
 
 // .text:0x80064A04 size:0x13E8
-void unsure_FillRosterPositions(void) {
+void unsure_FillRosterPositions(u8 team) {
+    s8 order[9];
+    s8 captains[9];
+    s8 others[9];
+    s32 i;
+    s32 j;
+    s32 k;
+    s32 m;
+    u8 n;
+    u8 isCaptain;
+    s32 cap;
+    s32 ri;
+    s32 rj;
+    s32 id;
+    s8 tmp;
+    u8* pos;
+    u8 r;
+    u8 ok;
+
+    for (i = 0; i < 9; i++) {
+        others[i] = -1;
+        captains[i] = -1;
+        order[i] = -1;
+    }
+    cap = lbl_8034E9A0._46E0[team];
+    for (i = 0; i < 9; i++) {
+        if (lbl_803C6724._02[team][i] == cap) {
+            order[i] = 0;
+        }
+    }
+    n = 0;
+    for (i = 0; i < 9; i++) {
+        for (k = 0; k < 12; k++) {
+            if (lbl_803C6724._02[team][i] == lbl_80108EC4[k] && cap != lbl_803C6724._02[team][i]) {
+                captains[n++] = lbl_803C6724._02[team][i];
+            }
+        }
+    }
+    if (captains[0] != -1) {
+        if (captains[1] == -1) {
+            placeBatter(order, team, captains[0]);
+        } else {
+            for (i = 0; i < 8; i++) {
+                if (captains[i] == -1) {
+                    break;
+                }
+                id = lbl_803C6724._02[team][i];
+                for (k = 0; k < 54; k++) {
+                    if (lbl_8034E9A0._478D[team][k] == id) {
+                        ri = k;
+                        break;
+                    }
+                }
+                for (j = i + 1; j < 9; j++) {
+                    if (captains[j] == -1) {
+                        break;
+                    }
+                    id = captains[j];
+                    for (k = 0; k < 54; k++) {
+                        if (lbl_8034E9A0._478D[team][k] == id) {
+                            rj = k;
+                            break;
+                        }
+                    }
+                    if (ri > rj) {
+                        tmp = captains[j];
+                        captains[j] = captains[i];
+                        captains[i] = tmp;
+                    }
+                }
+            }
+            for (i = 0; i < 9; i++) {
+                if (captains[i] == -1) {
+                    break;
+                }
+                placeBatter(order, team, captains[i]);
+            }
+        }
+    }
+    n = 0;
+    for (i = 0; i < 9; i++) {
+        isCaptain = 0;
+        for (k = 0; k < 12; k++) {
+            if (lbl_803C6724._02[team][i] == lbl_80108EC4[k]) {
+                isCaptain = 1;
+            }
+        }
+        if (isCaptain == 0) {
+            others[n++] = lbl_803C6724._02[team][i];
+        }
+    }
+    for (i = 0; i < 8; i++) {
+        if (others[i] == -1) {
+            break;
+        }
+        id = others[i];
+        for (k = 0; k < 54; k++) {
+            if (lbl_8034E9A0._478D[team][k] == id) {
+                ri = k;
+                break;
+            }
+        }
+        for (j = i + 1; j < 9; j++) {
+            if (others[j] == -1) {
+                break;
+            }
+            id = others[j];
+            for (k = 0; k < 54; k++) {
+                if (lbl_8034E9A0._478D[team][k] == id) {
+                    rj = k;
+                    break;
+                }
+            }
+            if (ri > rj) {
+                tmp = others[j];
+                others[j] = others[i];
+                others[i] = tmp;
+            }
+        }
+    }
+    for (i = 0; i < 9; i++) {
+        if (others[i] == -1) {
+            break;
+        }
+        pos = lbl_80109054[1][lbl_8034E9A0.chars[others[i] / 9][others[i] % 9].attribute];
+        for (k = 0; k < 5; k++, pos++) {
+            for (m = 0; m < 9; m++) {
+                if (order[m] == *pos) {
+                    break;
+                }
+            }
+            if (m == 9) {
+                for (m = 0; m < 9; m++) {
+                    if (others[i] == lbl_803C6724._02[team][m] && order[m] == -1) {
+                        order[m] = *pos;
+                        goto next;
+                    }
+                }
+            }
+        }
+        if (k != 5) {
+            continue;
+        }
+        do {
+            r = randRange_FUN_80042bf0(0, 8);
+            ok = 1;
+            for (m = 0; m < 9; m++) {
+                if (order[m] == r) {
+                    ok = 0;
+                    break;
+                }
+            }
+        } while (ok == 0);
+        for (m = 0; m < 9; m++) {
+            if (others[i] == lbl_803C6724._02[team][m] && order[m] == -1) {
+                order[m] = r;
+                break;
+            }
+        }
+    next:;
+    }
+    for (i = 0; i < 9; i++) {
+        lbl_803C6724._14[team][i] = order[i];
+    }
 }
 
 // .text:0x800649BC size:0x48
