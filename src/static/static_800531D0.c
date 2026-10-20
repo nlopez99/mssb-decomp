@@ -93,6 +93,10 @@ extern struct {
 
 extern MenuScreen lbl_800FEF70[];
 
+static inline SpaniObj* getTeamObj(SpaniTask* task, s32 offset, s32 id) {
+    return lbl_80371C30[task->_14 + id + offset].obj;
+}
+
 static inline void setScreen(s16 id) {
     lbl_8034E978._00 = id;
     lbl_8034E978._09 = lbl_8034E978._08;
@@ -162,7 +166,62 @@ void fn_80055798(SpaniTask* task, s32 port) {
 }
 
 // .text:0x80055374 size:0x424
-void fn_80055374(void) {
+// 97.26%: registers only, from the reload of the pad's next selection on.
+void fn_80055374(SpaniTask* task, s32 port) {
+    s8 id;
+    u8 next;
+    u8 sel;
+    s32 i;
+
+    if (isLockState(lbl_803C66B0.rows[8].port[port], 0)) {
+        id = 0x15;
+        if (g_d_GameSettings.GameModeSelected != 5) {
+            id = 7;
+        }
+        setScreen(id);
+        lbl_80371C30[task->_14 + 0x26].obj->_68 = 1;
+        lbl_80371C30[task->_14 + 0x29].obj->_68 = 1;
+        lbl_80371C30[task->_14 + 0x2A].obj->_68 = 1;
+        next = lbl_803C5F04._69[port];
+        lbl_803C5F04._69[port] = 0;
+        getTeamObj(task, (s8)next, 1)->_5C = 0;
+        getTeamObj(task, next, 1)->_68 = 0;
+        sel = lbl_803C5F04._3B[next];
+        switch (next) {
+        case 1:
+            getTeamObj(task, (s8)sel, 0xC)->_64 = 0x107;
+            getTeamObj(task, (s8)sel, 0xC)->_5C = 10 << 16;
+            getTeamObj(task, (s8)sel, 0xC)->_68 = 4;
+            break;
+        case 2:
+            getTeamObj(task, (s8)sel ^ 1, 0xE)->_64 = 0x107;
+            getTeamObj(task, (s8)sel ^ 1, 0xE)->_5C = 10 << 16;
+            getTeamObj(task, (s8)sel ^ 1, 0xE)->_68 = 4;
+            break;
+        case 3:
+            getTeamObj(task, (s8)sel, 0x10)->_64 = 0x109;
+            getTeamObj(task, (s8)sel, 0x10)->_5C = 10 << 16;
+            getTeamObj(task, (s8)sel, 0x10)->_68 = 4;
+            break;
+        case 4:
+            getTeamObj(task, (s8)sel ^ 1, 0x15)->_64 = 0x107;
+            getTeamObj(task, (s8)sel ^ 1, 0x15)->_5C = 10 << 16;
+            getTeamObj(task, (s8)sel ^ 1, 0x15)->_68 = 4;
+            break;
+        }
+        getSpaniObj(task, 0)->_5C = 10 << 16;
+        getSpaniObj(task, 0)->_68 = 4;
+        for (i = 0; i < 2; i++) {
+            if (g_d_GameSettings._10 != 0 || i == 0) {
+                getTeamObj(task, lbl_803C5F04._65[i], i * 4 + 0x2B)->_68 = 1;
+                getTeamObj(task, lbl_803C5F04._65[i] * 2, i + 0x3F)->_68 = 1;
+            }
+        }
+        lbl_80371C30[task->_14 + 0xB].obj->_54 &= ~2;
+        lbl_80371C30[task->_14 + 0x58].obj->_68 = 1;
+        fn_800626EC(port);
+        lbl_803C66B0.rows[8].port[port] = 1;
+    }
 }
 
 // .text:0x80054B00 size:0x874

@@ -229,7 +229,65 @@ void fn_80060184(void) {
 }
 
 // .text:0x8005FCA0 size:0x4E4
-void fn_8005FCA0(void) {
+void fn_8005FCA0(SpaniTask* task, s32 team) {
+    if (isLockState(lbl_803C66B0.rows[9].port[team], 0)) {
+        getTeamObj(task, team, 4)->_5C = 0;
+        getTeamObj(task, team, 4)->_68 = 1;
+        getTeamObj(task, team, 6)->_5C = 14 << 16;
+        getTeamObj(task, team, 6)->_68 = 1;
+        if (g_d_GameSettings.GameModeSelected != 5) {
+            if (g_d_GameSettings._10 == 0 && team != 0) {
+                getSpaniObj(task, team)->_5C = 0;
+                getSpaniObj(task, team)->_68 = 1;
+                getTeamObj(task, team, 2)->_5C = 0;
+                getTeamObj(task, team, 2)->_68 = 1;
+                getTeamObj(task, team, 0x12)->_5C = 30 << 16;
+                getTeamObj(task, team, 0x12)->_68 = 4;
+                getTeamObj(task, team, 0x14)->_5C = 0;
+                getTeamObj(task, team, 0x14)->_68 = 1;
+                getTeamObj(task, team, 0x18)->_5C = 0;
+                getTeamObj(task, team, 0x18)->_68 = 0;
+                getTeamObj(task, team, 0xA)->_54 |= 2;
+                getTeamObj(task, team, 0xA)->_5C = 0;
+                getTeamObj(task, team, 0xA)->_68 = 1;
+            } else {
+                getSpaniObj(task, team)->_5C = 0;
+                getSpaniObj(task, team)->_68 = 1;
+                getTeamObj(task, team, 2)->_5C = 0;
+                getTeamObj(task, team, 2)->_68 = 1;
+                getTeamObj(task, team, 0xA)->_54 |= 2;
+                getTeamObj(task, team, 0xA)->_5C = 0;
+                getTeamObj(task, team, 0xA)->_68 = 1;
+                getTeamObj(task, team, 2)->_5C = 0;
+                getTeamObj(task, team, 2)->_68 = 1;
+                getTeamObj(task, team, 0x12)->_5C = 0;
+                getTeamObj(task, team, 0x12)->_68 = 1;
+                getTeamObj(task, team, 0x14)->_5C = 0;
+                getTeamObj(task, team, 0x14)->_68 = 1;
+            }
+        } else {
+            getSpaniObj(task, team)->_5C = 0;
+            getSpaniObj(task, team)->_68 = 1;
+            getTeamObj(task, team, 0xA)->_54 |= 2;
+            getTeamObj(task, team, 0xA)->_5C = 0;
+            getTeamObj(task, team, 0xA)->_68 = 1;
+            getSpaniObj(task, 0x12)->_5C = 0;
+            getSpaniObj(task, 0x12)->_68 = 1;
+            getSpaniObj(task, 0x14)->_5C = 0;
+            getSpaniObj(task, 0x14)->_68 = 1;
+            getSpaniObj(task, 2)->_5C = 0;
+            getSpaniObj(task, 2)->_68 = 1;
+            getSpaniObj(task, 3)->_5C = 0;
+            getSpaniObj(task, 3)->_68 = 1;
+            if (lbl_803297E0._CF70 == 0) {
+                getSpaniObj(task, 0x1D2)->_54 |= 2;
+                getSpaniObj(task, 0x1D2)->_5C = 10 << 16;
+                getSpaniObj(task, 0x1D2)->_68 = 1;
+            }
+        }
+        fn_800626EC(team);
+        lbl_803C66B0.rows[9].port[team] = 1;
+    }
 }
 
 // .text:0x8005F9D0 size:0x2D0
@@ -237,7 +295,35 @@ void fn_8005F9D0(void) {
 }
 
 // .text:0x8005F734 size:0x29C
-void fn_8005F734(void) {
+void fn_8005F734(SpaniTask* task, s32 team) {
+    if (isLockState(lbl_803C66B0.rows[9].port[team], 0)) {
+        getSpaniObj(task, team)->_64 = 0x49;
+        getSpaniObj(task, team)->_5C = 50 << 16;
+        getSpaniObj(task, team)->_68 = 4;
+        getTeamObj(task, team, 2)->_64 = 0x52;
+        getTeamObj(task, team, 2)->_5C = 0;
+        getTeamObj(task, team, 2)->_68 = 1;
+        getTeamObj(task, team, 4)->_5C = 0;
+        getTeamObj(task, team, 4)->_68 = 1;
+        getTeamObj(task, team, 6)->_5C = 14 << 16;
+        getTeamObj(task, team, 6)->_68 = 1;
+        getTeamObj(task, team, 0xA)->_54 |= 2;
+        getTeamObj(task, team, 0xA)->_5C = 0;
+        getTeamObj(task, team, 0xA)->_68 = 1;
+        getTeamObj(task, team, 0x14)->_5C = 0;
+        getTeamObj(task, team, 0x14)->_68 = 1;
+        if (g_d_GameSettings._10 == 0 && team == 0) {
+            getTeamObj(task, team, 0x12)->_5C = 30 << 16;
+            getTeamObj(task, team, 0x12)->_68 = 4;
+            getTeamObj(task, team, 0x18)->_5C = 0;
+            getTeamObj(task, team, 0x18)->_68 = 0;
+        } else {
+            getTeamObj(task, team, 0x12)->_5C = 0;
+            getTeamObj(task, team, 0x12)->_68 = 1;
+        }
+        fn_800626EC(team);
+        lbl_803C66B0.rows[9].port[team] = 1;
+    }
 }
 
 // .text:0x8005F068 size:0x6CC
