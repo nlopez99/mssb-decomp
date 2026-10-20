@@ -5133,13 +5133,14 @@ void fn_1_ECF8(s32 idx, s32 slot, s32 flag) {
 }
 
 // .text:0x0000EA20 size:0x2D8
-// Case 0's loop differs: the target tests the count through a value loaded
-// before the loop but reloads the animation pointer in the body; 86%
+// Registers only in case 0 (the loop's index and offsets), and the target forms
+// 0.0f's address with addi before loading it
 void fn_1_EA20(void) {
     switch (lbl_1_bss_30B0) {
     case 0: {
         Unk0060Elem* elem = &lbl_8036E548._0060->_34[lbl_1_bss_5F73];
         s32 i;
+        UnkAnimRef0610** slot;
         UnkAnimRef0610* ref;
         s32 anim;
         lbl_1_bss_5F68 = 1;
@@ -5148,11 +5149,12 @@ void fn_1_EA20(void) {
         elem->_59 = 1;
         lbl_1_bss_30B0 = 1;
         lbl_1_bss_5F58 = 0;
-        ref = lbl_8036E548._0C04[lbl_1_bss_5F73]._010[lbl_1_bss_6940[lbl_1_bss_5F73]._44];
+        slot = &lbl_8036E548._0C04[lbl_1_bss_5F73]._010[lbl_1_bss_6940[lbl_1_bss_5F73]._44];
+        ref = *slot;
         anim = lbl_1_bss_6940[lbl_1_bss_5F73]._45;
         for (i = 0; i < ref->_4[anim]._8; i++) {
-            if (lbl_1_bss_5F58 < ref->_4[anim]._4[i]._0) {
-                lbl_1_bss_5F58 = ref->_4[anim]._4[i]._0;
+            if (lbl_1_bss_5F58 < (*slot)->_4[anim]._4[i]._0) {
+                lbl_1_bss_5F58 = (*slot)->_4[anim]._4[i]._0;
             }
         }
         break;
