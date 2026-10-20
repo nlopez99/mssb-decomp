@@ -155,7 +155,7 @@ s16 lbl_80108EDC[9][5] = {
     { 0x30, 0x31, 0x32, 0x33, -1 },
     { 0x1B, 0x34, 0x35, -1, -1 },
 };
-static s16 lbl_80108F38[12][2][4] = {
+static u16 lbl_80108F38[12][2][4] = {
     { { 0x1, 0x12, 0x15, 0x18 }, { 0x4, 0x6, 0x9, 0x2 } },
     { { 0x5, 0x3, 0xB, 0x8 }, { 0x9, 0xD, 0xE, 0x25 } },
     { { 0x5, 0xD, 0xF, 0x1C }, { 0x0, 0x7, 0x9, 0x13 } },
@@ -527,8 +527,85 @@ s16 fn_80067AC8(s16 id, s8 slot) {
 void fn_800678CC(void) {
 }
 
+static inline s32 findFamily(s32 id) {
+    s32 row;
+    s32 c;
+
+    for (row = 0; row < 9; row++) {
+        for (c = 0; c < 5; c++) {
+            if (id == lbl_80108EDC[row][c]) {
+                return row;
+            }
+        }
+    }
+    return -1;
+}
+
 // .text:0x800675C4 size:0x308
-void fn_800675C4(void) {
+u8 fn_800675C4(s32 team, s32 captain) {
+    s32 found[4];
+    s32 color;
+    s32 count;
+    s32 n;
+    s32 k;
+    s32 i;
+    s32 row;
+    s32 c;
+    u16 id;
+
+    color = -1;
+    found[0] = 0;
+    found[1] = 0;
+    found[2] = 0;
+    found[3] = 0;
+    count = 0;
+    for (i = 0; i < 12; i++) {
+        if (captain == lbl_80108ED0[i]) {
+            color = i;
+            break;
+        }
+    }
+    for (n = 0; n < 2; n++) {
+        for (k = 0; k < 4; k++) {
+            id = lbl_80108F38[color][n][k];
+            for (i = 0; i < 9; i++) {
+                if (lbl_803C6724._02[team][i] == id) {
+                    found[k] = 1;
+                    count++;
+                }
+            }
+            lbl_80108F38[color][n][k] = id;
+        }
+        if (count == 4) {
+            return n + 1;
+        }
+        for (k = 0; k < 4; k++) {
+            if (found[k] != 1) {
+                row = findFamily(lbl_80108F38[color][n][k]);
+                if (row != -1) {
+                    for (c = 1; c < 5; c++) {
+                        for (i = 0; i < 9; i++) {
+                            if (lbl_803C6724._02[team][i] == lbl_80108EDC[row][c]) {
+                                count++;
+                                found[k] = 1;
+                                if (count == 4) {
+                                    return n + 1;
+                                }
+                                goto next;
+                            }
+                        }
+                    }
+                }
+            }
+        next:;
+        }
+        found[0] = 0;
+        found[1] = 0;
+        found[2] = 0;
+        found[3] = 0;
+        count = 0;
+    }
+    return 0;
 }
 
 // .text:0x80067264 size:0x360
