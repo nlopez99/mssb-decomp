@@ -1,4 +1,5 @@
 #include "static/particle.h"
+#include "static/sub.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/os.h"
 #include "Dolphin/mtx.h"
@@ -11,7 +12,8 @@ typedef struct Particle {
     /* 0x04 */ Vec pos;
     /* 0x10 */ u8 _10[0x10];
     /* 0x20 */ s32 _20;
-    /* 0x24 */ u8 _24[0x26];
+    /* 0x24 */ u8 _24[0x24];
+    /* 0x48 */ s16 _48;
     /* 0x4A */ s16 _4A;
     /* 0x4C */ u8 _4C[0x14];
 } Particle; // size: 0x60
@@ -34,6 +36,11 @@ typedef struct Emitter {
     /* 0x40 */ u16 _40;
     /* 0x42 */ u8 _42[0x1E];
 } Emitter; // size: 0x60
+
+typedef struct TexFile {
+    /* 0x0 */ u32 count;
+    /* 0x4 */ TextureDesc tex[1];
+} TexFile;
 
 typedef struct ZSortEntry {
     /* 0x0 */ Particle* p;
@@ -249,6 +256,30 @@ void fn_80033F64(f32 w, f32 h, f32 angle)
     }
 }
 
+// .text:0x80033B58 size:0x170
+void fn_80033B58(TexFile* file, s32 index, GXTexWrapMode wrapS, GXTexWrapMode wrapT)
+{
+    GXTexObj texObj;
+    GXTlutObj tlutObj;
+    TextureDesc* tex;
+
+    if (file == NULL) {
+        GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+        return;
+    }
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP1, GX_COLOR0A0);
+    tex = &file->tex[file->tex[index]._1C];
+    if (tex->tlut != NULL) {
+        GXInitTexObjCI(&texObj, tex->image, tex->width, tex->height, tex->format, wrapS, wrapT, GX_FALSE, GX_TLUT0);
+        GXInitTlutObj(&tlutObj, tex->tlut, tex->tlutFormat, tex->tlutCount);
+        GXLoadTlut(&tlutObj, GX_TLUT0);
+    } else {
+        GXInitTexObj(&texObj, tex->image, tex->width, tex->height, tex->format, wrapS, wrapT, GX_FALSE);
+    }
+    GXInitTexObjLOD(&texObj, GX_LINEAR, GX_LINEAR, tex->minLOD, tex->maxLOD, tex->lodBias, GX_FALSE, GX_FALSE, GX_ANISO_1);
+    GXLoadTexObj(&texObj, GX_TEXMAP1);
+}
+
 // .text:0x80033A24 size:0x134
 Emitter* fn_80033A24(BOOL (*update)(void*), u8 priority, s32 kind, s32 n, BOOL all, u8 id)
 {
@@ -378,6 +409,46 @@ void fn_80033794(Particle* list)
     if (p != NULL) {
         p->next = lbl_803CBC74;
         lbl_803CBC74 = list;
+    }
+}
+
+// .text:0x80033620 size:0x174
+void fn_80033620(Emitter* e)
+{
+    Particle* p;
+    Particle* q;
+    Particle* best;
+    u32 i = 0;
+    f32 bestZ;
+    Vec v;
+    Vec w;
+    Particle tmp;
+
+    for (p = e->particles; p != NULL && e->count > i; p = p->next, i++) {
+        q = p->next;
+        if (p->_48 <= 0 && p->_4A != 0) {
+            PSMTXMultVec(lbl_8017FFE0, &p->pos, &v);
+            bestZ = v.z;
+            best = NULL;
+            for (; q != NULL; q = q->next) {
+                if (q->_48 <= 0 && q->_4A != 0) {
+                    PSMTXMultVec(lbl_8017FFE0, &q->pos, &w);
+                    if (bestZ > w.z) {
+                        best = q;
+                        bestZ = w.z;
+                    }
+                }
+            }
+            if (best != NULL) {
+                Particle* pNext = p->next;
+                Particle* bestNext = best->next;
+                tmp = *p;
+                *p = *best;
+                *best = tmp;
+                p->next = pNext;
+                best->next = bestNext;
+            }
+        }
     }
 }
 

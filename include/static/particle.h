@@ -3,10 +3,12 @@
 
 #include "mssbTypes.h"
 #include "Dolphin/mtx.h"
+#include "Dolphin/gx.h"
 
 struct Emitter;
 struct Particle;
 struct ZSortEntry;
+struct TexFile;
 
 void fn_80027918(u8 id, f32 v);
 void fn_8002852C(void);
@@ -17,6 +19,7 @@ struct Particle* fn_80031F34(struct Particle* list, s32 n);
 s32 fn_80032038(struct ZSortEntry* a, struct ZSortEntry* b);
 f32 fn_800335BC(s32 angle);
 f32 fn_800335EC(s32 angle);
+void fn_80033620(struct Emitter* e);
 void fn_80033794(struct Particle* list);
 struct Emitter* fn_800337CC(struct Emitter* e, s32 n, BOOL all);
 void pitchingMachinePitching(u8 id);
@@ -24,6 +27,7 @@ BOOL fn_80033928(u8 id);
 void fn_80033964(struct Emitter* e);
 struct Emitter* fn_800339F0(struct Emitter* e, u8 id);
 struct Emitter* fn_80033A24(BOOL (*update)(void*), u8 priority, s32 kind, s32 n, BOOL all, u8 id);
+void fn_80033B58(struct TexFile* file, s32 index, GXTexWrapMode wrapS, GXTexWrapMode wrapT);
 void fn_80033F64(f32 w, f32 h, f32 angle);
 void fn_8003403C(f32 w, f32 h);
 void fn_800340F4(Mtx m);

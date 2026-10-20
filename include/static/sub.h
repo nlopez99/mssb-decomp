@@ -21,7 +21,9 @@ typedef struct TextureDesc {
     /* 0x17 */ u8 format;
     /* 0x18 */ u16 tlutCount;
     /* 0x1A */ u8 tlutFormat;
-    /* 0x1B */ u8 _1B[0x20 - 0x1B];
+    /* 0x1B */ u8 _1B;
+    /* 0x1C */ u16 _1C; // in a texture file, the index of the entry that holds this one's header
+    /* 0x1E */ u8 _1E[0x20 - 0x1E];
 } TextureDesc; // size: 0x20
 
 // A ring of the last positions pushed, read back from the newest or the oldest
