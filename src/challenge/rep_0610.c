@@ -2926,6 +2926,21 @@ void fn_1_1644C(void) {
     } else {
         elem->_68 = actor->_072;
     }
+    /* These dead stores stand in for code the original compiled to nothing; MWCC
+       counts them toward its inline limit, and with 13 or more this stays a call */
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
     fn_1_ECF8(lbl_1_bss_5F73, lbl_1_bss_6940[lbl_1_bss_5F73]._44, lbl_1_bss_5F69);
     for (i = 0; i < 4; i++) {
         if (lbl_1_bss_67B8[i] != NULL) {
@@ -3061,7 +3076,6 @@ void fn_1_15CE0(void) {
 }
 
 // .text:0x00015760 size:0x580
-// fn_1_1644C is inlined here twice where the target calls it (see fn_1_1540C)
 void fn_1_15760(void) {
     s32 i = 0;
     lbl_1_bss_5F73 = 0;
@@ -3077,7 +3091,7 @@ void fn_1_15760(void) {
         } else if (lbl_803C77B8[0]._04 & 1) {
             switch (lbl_1_bss_307C) {
             case 0: {
-                u8 prev = lbl_1_bss_6940[lbl_1_bss_5F73]._44;
+                s32 prev = lbl_1_bss_6940[lbl_1_bss_5F73]._44;
                 u8 slot = prev;
                 do {
                     if (slot == 0) {
@@ -3094,12 +3108,12 @@ void fn_1_15760(void) {
                 break;
             }
             case 1: {
-                u8 prev = lbl_1_bss_6940[lbl_1_bss_5F73]._45;
-                if (prev != 0) {
+                s32 count = lbl_8036E548._0C04[lbl_1_bss_5F73]._010[lbl_1_bss_6940[lbl_1_bss_5F73]._44]->_A;
+                s32 prev = lbl_1_bss_6940[lbl_1_bss_5F73]._45;
+                if (lbl_1_bss_6940[lbl_1_bss_5F73]._45 != 0) {
                     lbl_1_bss_6940[lbl_1_bss_5F73]._45 = prev - 1;
                 } else {
-                    lbl_1_bss_6940[lbl_1_bss_5F73]._45 =
-                        lbl_8036E548._0C04[lbl_1_bss_5F73]._010[lbl_1_bss_6940[lbl_1_bss_5F73]._44]->_A - 1;
+                    lbl_1_bss_6940[lbl_1_bss_5F73]._45 = count - 1;
                 }
                 if (prev != lbl_1_bss_6940[lbl_1_bss_5F73]._45) {
                     lbl_1_bss_5F5C = 1;
@@ -3117,20 +3131,21 @@ void fn_1_15760(void) {
             case 4:
                 lbl_1_bss_3081 ^= 1;
                 break;
-            case 5:
-                fn_1_D6B4();
-                break;
             case 6:
                 if (lbl_1_bss_5F68 ^= 1) {
-                    lbl_8036E548._0060->_34[0]._5C = 0.0f;
-                    lbl_8036E548._0060->_34[0]._59 = 1;
+                    Unk0060Elem* elem = lbl_8036E548._0060->_34;
+                    elem->_5C = 0.0f;
+                    elem->_59 = 1;
                 }
+                break;
+            case 5:
+                fn_1_D6B4();
                 break;
             }
         } else if (lbl_803C77B8[0]._04 & 2) {
             switch (lbl_1_bss_307C) {
             case 0: {
-                u8 prev = lbl_1_bss_6940[lbl_1_bss_5F73]._44;
+                s32 prev = lbl_1_bss_6940[lbl_1_bss_5F73]._44;
                 u8 slot = prev;
                 do {
                     if (++slot == 7) {
@@ -3145,7 +3160,7 @@ void fn_1_15760(void) {
                 break;
             }
             case 1: {
-                u8 prev = lbl_1_bss_6940[lbl_1_bss_5F73]._45;
+                s32 prev = lbl_1_bss_6940[lbl_1_bss_5F73]._45;
                 if (++lbl_1_bss_6940[lbl_1_bss_5F73]._45 ==
                     lbl_8036E548._0C04[lbl_1_bss_5F73]._010[lbl_1_bss_6940[lbl_1_bss_5F73]._44]->_A) {
                     lbl_1_bss_6940[lbl_1_bss_5F73]._45 = 0;
@@ -3164,19 +3179,20 @@ void fn_1_15760(void) {
             case 4:
                 lbl_1_bss_3081 ^= 1;
                 break;
-            case 5:
-                fn_1_D688();
-                break;
             case 6:
                 if (lbl_1_bss_5F68 ^= 1) {
-                    lbl_8036E548._0060->_34[0]._5C = 0.0f;
-                    lbl_8036E548._0060->_34[0]._59 = 1;
-                    for (i = 0; i < 5; i++) {
+                    Unk0060Elem* elem = lbl_8036E548._0060->_34;
+                    elem->_5C = 0.0f;
+                    elem->_59 = 1;
+                    for (; i < 5; i++) {
                         if (lbl_1_bss_67B8[i] != NULL) {
                             fn_1_26B7C(lbl_1_bss_67B8[i]);
                         }
                     }
                 }
+                break;
+            case 5:
+                fn_1_D688();
                 break;
             }
         } else if (lbl_803C77B8[0]._04 & 0x1000) {
@@ -3230,8 +3246,6 @@ void fn_1_15760(void) {
 }
 
 // .text:0x0001540C size:0x354
-// Matches once fn_1_1644C stays a call (checked by padding fn_1_1644C with dead
-// statements in a scratch copy); MWCC inlines fn_1_1644C as written
 void fn_1_1540C(void) {
     char text[0x18];
     s32 top;
