@@ -10,13 +10,13 @@ void fn_8003A37C(MtxPtr mtx, GXTevStageID* stage, GXTexCoordID* coord, GXTexMapI
 void fn_8003A4C8(void);
 s32 fn_8003A538(void);
 void fn_8003A540(s32 value);
-void fn_8003A548(s32 value);
+void fn_8003A548(void (*value)(void));
 void fn_8003A550(s32 tex, Vec* pos, Vec* dir, u8 arg3);
 void fn_8003A688(s32 i, f32 width, f32 height);
 void fn_8003A6B0(s32 i, struct TextureDesc* tex, f32 width, f32 height);
 void fn_8003A848(u8 r, u8 g, u8 b);
 void fn_8003A85C(u8 enabled);
-void fn_8003A8A0(void);
+void fn_8003A8A0(struct Model* model, MtxPtr view);
 void fn_8003AC90(void);
 void fn_8003AD84(struct TextureEntry* entry);
 u8 fn_8003AE54(void);

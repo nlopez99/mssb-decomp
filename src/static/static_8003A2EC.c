@@ -27,6 +27,38 @@ typedef struct DecalSystem {
     /* 0xD38 */ u8 enabled;
 } DecalSystem;
 
+typedef struct VtxArray {
+    /* 0x00 */ void* data;
+    /* 0x04 */ u8 _04[2];
+    /* 0x06 */ u8 fmt; // component type in the high nibble, fraction bits in the low one
+    /* 0x07 */ u8 stride;
+    /* 0x08 */ u8 _08[4];
+    /* 0x0C */ struct TextureEntry* textures;
+} VtxArray; // size: 0x10
+
+typedef struct DrawCmd {
+    /* 0x00 */ u8 kind;
+    /* 0x04 */ u32 flags;
+    /* 0x08 */ void* dl;
+    /* 0x0C */ u32 size;
+} DrawCmd; // size: 0x10
+
+typedef struct DrawList {
+    /* 0x00 */ u8 _00[4];
+    /* 0x04 */ DrawCmd* cmds;
+    /* 0x08 */ u16 count;
+} DrawList;
+
+typedef struct Model {
+    /* 0x00 */ VtxArray* pos;
+    /* 0x04 */ u8 _04[4];
+    /* 0x08 */ VtxArray* texCoords;
+    /* 0x0C */ u8 _0C[4];
+    /* 0x10 */ DrawList* list;
+    /* 0x14 */ u8 numTexCoords;
+    /* 0x18 */ Mtx mtx;
+} Model;
+
 typedef struct DecalColor {
     /* 0x0 */ u8 r;
     /* 0x1 */ u8 g;
@@ -111,7 +143,7 @@ extern void* fn_800B0A5C_insertQueue(void (*callback)(void), s32 priority);
 // A texture file entry: its header word, then the texture
 typedef struct TextureEntry {
     /* 0x00 */ u32 _00;
-    /* 0x04 */ TextureDesc desc;
+    /* 0x04 */ TextureDesc desc[1];
 } TextureEntry;
 
 extern struct {
@@ -219,7 +251,7 @@ DecalSystem lbl_802D3D80;
 DecalColor lbl_803CB828 = { 0 };
 f32 lbl_803CB82C = -0.001f;
 
-s32 lbl_803CBCA8;
+void (*lbl_803CBCA8)(void);
 u8 lbl_803CBCAC;
 s32 lbl_803CBCB0;
 u8 lbl_803CBCB4;
@@ -1518,11 +1550,11 @@ u8 fn_8003AE54(void) {
 
 // .text:0x8003AD84 size:0xD0
 void fn_8003AD84(TextureEntry* entry) {
-    GXInitTexObjCI(&lbl_803C50B0, entry->desc.image, entry->desc.width, entry->desc.height, GX_TF_C4,
-                   (GXTexWrapMode)entry->desc.wrapS, (GXTexWrapMode)entry->desc.wrapT, GX_FALSE, GX_TLUT0);
+    GXInitTexObjCI(&lbl_803C50B0, entry->desc[0].image, entry->desc[0].width, entry->desc[0].height, GX_TF_C4,
+                   (GXTexWrapMode)entry->desc[0].wrapS, (GXTexWrapMode)entry->desc[0].wrapT, GX_FALSE, GX_TLUT0);
     GXInitTlutObj(&lbl_803C50DC, lbl_800F7AC0, GX_TL_IA8, 16);
-    GXInitTexObjLOD(&lbl_803C50B0, (GXTexFilter)entry->desc.minFilter, (GXTexFilter)entry->desc.magFilter,
-                    entry->desc.minLOD, entry->desc.maxLOD, entry->desc.lodBias, GX_FALSE, GX_FALSE, GX_ANISO_1);
+    GXInitTexObjLOD(&lbl_803C50B0, (GXTexFilter)entry->desc[0].minFilter, (GXTexFilter)entry->desc[0].magFilter,
+                    entry->desc[0].minLOD, entry->desc[0].maxLOD, entry->desc[0].lodBias, GX_FALSE, GX_FALSE, GX_ANISO_1);
     lbl_803CBCAC = 1;
 }
 
@@ -1546,7 +1578,92 @@ void fn_8003AC90(void) {
 }
 
 // .text:0x8003A8A0 size:0x3F0
-void fn_8003A8A0(void) {}
+static inline s32 CompSize(u8 type) {
+    switch (type) {
+    case 0:
+    case 1:
+        return 1;
+    case 2:
+    case 3:
+        return 2;
+    case 4:
+        return 4;
+    default:
+        return 0;
+    }
+}
+
+// 76.49%: the target unrolls the vertex descriptor loop six times (ctr 2 plus one more);
+// no loop form tried here gets MWCC to unroll it
+void fn_8003A8A0(Model* model, MtxPtr view) {
+    Mtx mtx;
+    GXVtxDescList list[27];
+    s32 i;
+    DrawCmd* cmd;
+    s32 n;
+    u32 type;
+    s32 i2;
+    TextureEntry* textures;
+    u32 map;
+
+    PSMTXConcat(view, model->mtx, mtx);
+    GXLoadPosMtxImm(mtx, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    GXSetArray(GX_VA_POS, model->pos->data, model->pos->stride * CompSize(model->pos->fmt >> 4));
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, (GXCompType)(model->pos->fmt >> 4), model->pos->fmt & 0xF);
+    if (model->texCoords != NULL) {
+        for (i = 0; i < model->numTexCoords; i++) {
+            GXSetArray(GX_VA_TEX0 + i, model->texCoords[i].data,
+                       model->texCoords[i].stride * CompSize(model->texCoords[i].fmt >> 4));
+            GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0 + i, GX_TEX_ST, (GXCompType)(model->texCoords[i].fmt >> 4),
+                            model->texCoords[i].fmt & 0xF);
+            GXSetTexCoordGen2(i, GX_TG_MTX2X4, GX_TG_TEX0 + i, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
+        }
+        GXSetNumTexGens(model->numTexCoords);
+    } else {
+        GXSetNumTexGens(0);
+    }
+    cmd = model->list->cmds;
+    for (i = 0; i < model->list->count; i++, cmd++) {
+        switch (cmd->kind) {
+        case 1:
+            map = (cmd->flags >> 13) & 7;
+            textures = model->texCoords[map].textures;
+            SetDisplayStateTexture(&textures->desc[textures->desc[cmd->flags & 0x1FFF]._1C], map, map);
+            break;
+        case 2:
+            GXClearVtxDesc();
+            n = 0;
+            type = cmd->flags & 3;
+            if (type != 0) {
+                list[0].mAttr = GX_VA_PNMTXIDX;
+                list[0].mType = type;
+                n = 1;
+            }
+            for (i2 = 1; i2 < 14; i2++) {
+                type = (cmd->flags >> (i2 * 2)) & 3;
+                if (type != 0) {
+                    list[n].mAttr = i2 + 8;
+                    list[n].mType = type;
+                    n++;
+                }
+            }
+            list[n].mAttr = GX_VA_NULL;
+            GXSetVtxDescv(list);
+            break;
+        case 3:
+            if (lbl_803CBCA8 != NULL) {
+                lbl_803CBCA8();
+            }
+            break;
+        case 4:
+            break;
+        }
+        if (cmd->dl != NULL) {
+            GXCallDisplayList(cmd->dl, cmd->size);
+        }
+    }
+}
 
 // .text:0x8003A85C size:0x44
 void fn_8003A85C(u8 enabled) {
@@ -1614,7 +1731,7 @@ void fn_8003A550(s32 tex, Vec* pos, Vec* dir, u8 arg3) {
 }
 
 // .text:0x8003A548 size:0x8
-void fn_8003A548(s32 value) {
+void fn_8003A548(void (*value)(void)) {
     lbl_803CBCA8 = value;
 }
 
