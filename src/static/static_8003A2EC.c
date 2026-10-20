@@ -141,7 +141,8 @@ typedef struct CardRequest {
 } CardRequest;
 
 typedef struct CardChannel {
-    /* 0x00 */ u8 _00[8];
+    /* 0x00 */ s32 _00;
+    /* 0x04 */ s32 _04;
     /* 0x08 */ s32 result;
     /* 0x0C */ u8 _0C[0x28 - 0x0C];
 } CardChannel; // size: 0x28
@@ -153,6 +154,8 @@ extern struct {
 } lbl_803C7838;
 
 extern void fn_8000FE54(MenuTask* task);
+extern void fn_800ACCE8(void);
+extern void fn_800ACCD4(void);
 extern void fn_8004A34C(void* card, u8 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern u16 fn_8004157C(void);
 extern void fn_800415A0(u16 value);
@@ -661,7 +664,241 @@ void fn_8003BB90(void) {
 void fn_8003B5B0(void) {}
 
 // .text:0x8003AECC size:0x6E4
-void fn_8003AECC(void) {}
+// 99.33%: registers only, in the three copies of a card channel's two words into its slot
+void fn_8003AECC(void) {
+    MenuTask* task = lbl_803CC1B8;
+    MenuTask* child;
+    MenuTask* parent;
+    MenuSlot* slot;
+    CardChannel* chan;
+    u8 a15;
+    u8 a16;
+    u8 a17;
+    u8 a1A;
+    u8 a1B;
+    u8 a21;
+
+    switch (CardResultCode(lbl_803C7838.chan[task->_17].result)) {
+    case 4:
+    case 17:
+        task->_1E = 1;
+        break;
+    case 0:
+        task->_1D = 1;
+        break;
+    }
+    switch (task->_14) {
+    case 0:
+        fn_800ACCE8();
+        task->_14 = 1;
+        return;
+    case 1:
+        task->_1D = 0;
+        a21 = task->_21;
+        a1B = task->_1B;
+        a1A = task->_1A;
+        a17 = task->_17;
+        a16 = task->_16;
+        a15 = task->_15;
+        child = fn_800B0A5C_insertQueue(fn_8004053C, 0x8000);
+        child->_14 = 0;
+        child->_15 = a15;
+        child->_16 = a16;
+        child->_17 = a17;
+        child->_18 = 1;
+        child->_1A = a1A;
+        child->_1B = a1B;
+        child->_1D = 0;
+        child->_21 = a21;
+        lbl_803CC1B8->_10 = 0;
+        task->_14++;
+        return;
+    case 2:
+        if (lbl_803CC1B8->_10 != 0) {
+            task->_1D = 0;
+            switch (lbl_803CC1B8->_10) {
+            case 1:
+                chan = &lbl_803C7838.chan[task->_17];
+                slot = &lbl_802D4AE0[task->_17];
+                slot->_4 = chan->_04;
+                slot->_0 = chan->_00;
+                fn_8004A34C(&lbl_803C50E8, task->_15, 30, 0, 0);
+                task->_14 = 8;
+                return;
+            case 6:
+                chan = &lbl_803C7838.chan[task->_17];
+                slot = &lbl_802D4AE0[task->_17];
+                slot->_4 = chan->_04;
+                slot->_0 = chan->_00;
+                task->_14 = 5;
+                return;
+            case 10:
+                task->_14 = 13;
+                task->_1C = 12;
+                slot = &lbl_802D4AE0[task->_17];
+                slot->_4 = 0;
+                slot->_0 = 0;
+                return;
+            case 7:
+                task->_14 = 13;
+                task->_1C = 12;
+                chan = &lbl_803C7838.chan[task->_17];
+                slot = &lbl_802D4AE0[task->_17];
+                slot->_4 = chan->_04;
+                slot->_0 = chan->_00;
+                return;
+            case 9:
+                slot = &lbl_802D4AE0[task->_17];
+                slot->_4 = 0;
+                slot->_0 = 0;
+                task->_14 = 3;
+                return;
+            }
+        }
+        break;
+    case 3:
+        fn_8004A34C(&lbl_803C50E8, task->_15, 1, 0, 0);
+        fn_800415A0(70);
+        task->_1D = 0;
+        task->_1E = 0;
+        slot = &lbl_802D4AE0[task->_17];
+        slot->_4 = 0;
+        slot->_0 = 0;
+        task->_14++;
+        return;
+    case 4:
+        if (task->_1E) {
+            if (lbl_803CC1B8->_10 != 0) {
+                task->_14 = 13;
+                task->_1C = 2;
+                return;
+            }
+        } else if (lbl_803CC1B8->_10 != 0) {
+            task->_14 = 13;
+            task->_1C = 2;
+            return;
+        }
+        break;
+    case 5:
+        if (task->_1D) {
+            task->_14 = 3;
+            return;
+        }
+        fn_8004A34C(&lbl_803C50E8, task->_15, 16, 0, 0);
+        fn_800415A0(180);
+        task->_14++;
+        return;
+    case 6:
+        if (fn_8004157C() == 0) {
+            child = fn_800B0A5C_insertQueue(fn_80040C14, 0x8000);
+            child->_14 = 0;
+            child->_15 = task->_15;
+            child->_16 = task->_16;
+            child->_17 = task->_17;
+            child->_18 = task->_18;
+            child->_1A = task->_1A;
+            child->_1D = 0;
+            child->_20 = task->_20;
+            child->_1B = task->_1B;
+            lbl_803CC1B8->_10 = 0;
+            task->_14++;
+            return;
+        }
+        break;
+    case 7:
+        switch (lbl_803CC1B8->_10) {
+        case 1:
+            fn_80041150(task->_1B, task->_20);
+            task->_1C = 1;
+            task->_14 = 12;
+            return;
+        case 9:
+            fn_8004A34C(&lbl_803C50E8, task->_15, 33, 0, 0);
+            fn_800415A0(70);
+            task->_1D = 1;
+            task->_14 = 8;
+            slot = &lbl_802D4AE0[task->_17];
+            slot->_4 = 0;
+            slot->_0 = 0;
+            return;
+        case 2:
+        case 8:
+            fn_8004A34C(&lbl_803C50E8, task->_15, 33, 0, 0);
+            fn_800415A0(70);
+            task->_14 = 8;
+            slot = &lbl_802D4AE0[task->_17];
+            slot->_4 = 0;
+            slot->_0 = 0;
+            return;
+        case 4:
+            fn_8004A34C(&lbl_803C50E8, task->_15, 37, 0, 0);
+            fn_800415A0(70);
+            task->_14 = 8;
+            return;
+        }
+        break;
+    case 8:
+        if (fn_8004157C() == 0) {
+            task->_1E = 0;
+            task->_14++;
+            return;
+        }
+        break;
+    case 9:
+        if (task->_1D) {
+            if (task->_1E) {
+                if (lbl_803CC1B8->_10 != 0) {
+                    task->_14 = 1;
+                    slot = &lbl_802D4AE0[task->_17];
+                    slot->_4 = 0;
+                    slot->_0 = 0;
+                    return;
+                }
+            } else if (lbl_803CC1B8->_10 != 0) {
+                task->_14 = 13;
+                task->_1C = 12;
+                return;
+            }
+        } else {
+            task->_14 = 13;
+            task->_1C = 12;
+            return;
+        }
+        break;
+    case 10:
+        task->_1E = 0;
+        task->_14 = 11;
+    case 11:
+        if (task->_1D) {
+            if (task->_1E) {
+                if (lbl_803CC1B8->_10 != 0) {
+                    task->_14 = 13;
+                    return;
+                }
+            } else if (lbl_803CC1B8->_10 != 0) {
+                task->_14 = 13;
+                return;
+            }
+        } else if (lbl_803CC1B8->_10 != 0) {
+            task->_14 = 13;
+            return;
+        }
+        break;
+    case 12:
+        task->_14 = 13;
+        return;
+    case 13:
+        fn_800ACCD4();
+        task->_14++;
+        return;
+    case 14:
+        parent = lbl_803CC1B8->parent;
+        parent->_10 = task->_1C;
+        fn_8000FE54(parent);
+        fn_800B0A14_removeQueue();
+        break;
+    }
+}
 
 // .text:0x8003AE70 size:0x5C
 u8 fn_8003AE70(s32 kind) {
