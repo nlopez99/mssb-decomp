@@ -6321,6 +6321,37 @@ void fn_3_3F034(void) {
     }
 }
 
+static inline void assignCutoffs(void) {
+    s32 i;
+    s32 j;
+    s32 best;
+    f32 bestDist;
+
+    for (j = 0; j < 9; j++) {
+        g_Fielders[j]._18C = -1;
+        g_Fielders[j]._1D7 = 0;
+    }
+    for (i = 0; i < 4; i++) {
+        g_FieldingLogic._0D0[i] = -1;
+        g_FieldingLogic._101[i] = 0;
+    }
+    g_FieldingLogic._0D8 = -1;
+    g_FieldingLogic.playerAtMoundCutoffLocation = 0;
+    for (i = 0; i < 4; i++) {
+        bestDist = 9999.9f;
+        for (j = 0; j < 6; j++) {
+            if (g_FieldingLogic._0F8[j] == 0 && g_Fielders[j]._0A8[i] < bestDist) {
+                bestDist = g_Fielders[j]._0A8[i];
+                best = j;
+            }
+        }
+        g_Fielders[best]._18C = i;
+        g_Fielders[best]._1D7 = 1;
+        fn_3_5985C(best, 1);
+        g_FieldingLogic._0D0[i] = best;
+    }
+}
+
 // .text:0x0003EB6C size:0x4C8 mapped:0x8067DC00
 // 97.71%: registers only. With fn_3_52560 and its callers taking s32 (see fn_3_4A408) this
 // drops to 97.43%.
@@ -6357,7 +6388,7 @@ void fn_3_3EB6C(void) {
     fn_3_5985C(best, 3);
     fn_3_4EFC8(best, FALSE);
     g_Fielders[best]._1DC = 0;
-    fn_3_3E468();
+    assignCutoffs();
     g_FieldingLogic._0BE = -1;
 }
 
@@ -6401,19 +6432,22 @@ void fn_3_3E690(void) {
     fn_3_5985C(best, 3);
     fn_3_4EFC8(best, FALSE);
     g_Fielders[best]._1DC = 4;
-    fn_3_3E468();
+    assignCutoffs();
     g_FieldingLogic._0BE = -1;
 }
 
-static inline void assignCutoffs(void) {
+// .text:0x0003E468 size:0x228 mapped:0x8067D4FC
+// The callers above inline this body through assignCutoffs, a copy of it: MWCC does not
+// inline this function into callers placed before it in the file.
+void fn_3_3E468(void) {
     s32 i;
     s32 j;
     s32 best;
     f32 bestDist;
 
-    for (i = 0; i < 9; i++) {
-        g_Fielders[i]._18C = -1;
-        g_Fielders[i]._1D7 = 0;
+    for (j = 0; j < 9; j++) {
+        g_Fielders[j]._18C = -1;
+        g_Fielders[j]._1D7 = 0;
     }
     for (i = 0; i < 4; i++) {
         g_FieldingLogic._0D0[i] = -1;
@@ -6434,14 +6468,6 @@ static inline void assignCutoffs(void) {
         fn_3_5985C(best, 1);
         g_FieldingLogic._0D0[i] = best;
     }
-}
-
-// .text:0x0003E468 size:0x228 mapped:0x8067D4FC
-// 92.34%: the target keeps the last loop's counter in r31 (with a stack frame), apart from
-// the zero the earlier stores use; here both share one register. The body is an inline
-// helper so that fn_3_3EB6C inlines it as the target does.
-void fn_3_3E468(void) {
-    assignCutoffs();
 }
 
 // .text:0x0003E34C size:0x11C mapped:0x8067D3E0
