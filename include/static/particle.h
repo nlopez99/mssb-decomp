@@ -11,6 +11,7 @@ struct ZSortEntry;
 struct TexFile;
 struct EffectParams;
 struct SparkParticle;
+struct GlowParticle;
 
 BOOL fn_80026E58(void* e);
 void fn_80027300(struct Emitter* e, Vec* pos, Vec* dir, struct EffectParams* params, f32 scale);
@@ -22,6 +23,7 @@ void fn_8002955C(Vec* pos, s32 arg1, struct EffectParams* params);
 void fn_800297F0(struct Emitter* e, Vec* pos, s32 arg1, struct EffectParams* params);
 void fn_8002BC84(struct Emitter* e, Vec* pos, Vec* dir, struct EffectParams* params);
 void fn_8002A1CC(Vec* pos, Vec* dir);
+u8 fn_8002A85C(struct Emitter* e, struct GlowParticle* p);
 u8 fn_8002AC68(struct Emitter* e, struct SparkParticle* p);
 void fn_8002C2D0(Vec* pos, Vec* dir, struct EffectParams* params);
 void fn_8002CDD0(Vec* pos);

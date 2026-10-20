@@ -119,6 +119,26 @@ typedef struct SparkParticle {
     /* 0x4E */ u8 texCoord;
 } SparkParticle;
 
+// The particles fn_8002A85C draws
+typedef struct GlowParticle {
+    /* 0x00 */ Particle* next;
+    /* 0x04 */ Vec pos;
+    /* 0x10 */ f32 growHA;
+    /* 0x14 */ f32 growHB;
+    /* 0x18 */ f32 growWA;
+    /* 0x1C */ f32 growWB;
+    /* 0x20 */ s16 fadeA;
+    /* 0x22 */ s16 fadeB;
+    /* 0x24 */ s16 switchAge;
+    /* 0x26 */ s16 life;
+    /* 0x28 */ u8 _28[0x38 - 0x28];
+    /* 0x38 */ f32 w;
+    /* 0x3C */ f32 h;
+    /* 0x40 */ u8 color[4];
+    /* 0x44 */ u8 _44[0x4A - 0x44];
+    /* 0x4A */ s16 remaining;
+} GlowParticle;
+
 typedef struct EmitterList {
     /* 0x0 */ Emitter* prev;
     /* 0x4 */ Emitter* next;
@@ -936,6 +956,38 @@ u8 fn_8002AC68(Emitter* e, SparkParticle* p)
         p->w += p->growB;
         p->h = p->w;
         alpha += p->fadeB;
+    }
+    if (alpha < 0) {
+        alpha = 0;
+    }
+    if (alpha > 255) {
+        alpha = 255;
+    }
+    p->color[3] = alpha;
+    p->remaining--;
+    return p->remaining == 0;
+}
+
+// .text:0x8002A85C size:0x40C
+u8 fn_8002A85C(Emitter* e, GlowParticle* p)
+{
+    s32 alpha;
+
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_DSTALPHA, GX_LO_CLEAR);
+    fn_8003403C(p->w, p->h);
+    fn_80033CC8((Particle*)p, (TexFile*)e->_10);
+    alpha = p->color[3];
+    if (p->life - p->remaining < p->switchAge) {
+        p->w += p->growWA;
+        p->h += p->growHA;
+        alpha += p->fadeA;
+        p->pos.y -= p->growHA / 2;
+    } else {
+        p->w += p->growWB;
+        p->h += p->growHB;
+        alpha += p->fadeB;
+        p->pos.y -= p->growHB / 2;
     }
     if (alpha < 0) {
         alpha = 0;
