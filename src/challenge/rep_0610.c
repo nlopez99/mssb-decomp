@@ -5045,8 +5045,9 @@ void fn_1_F040(void) {
 }
 
 // .text:0x0000ECF8 size:0x348
-// Inlines fn_1_D300 (see there); registers and the search loops' scheduling
-// differ
+// Inlines fn_1_D300. The calls' _0060->_34[idx]._00 loads as add+lwz 52, the
+// target's addi+lwzx; *(UnkList0610**)&...->_34[idx] (or a no-op Unk0060* cast)
+// plus idA/idB below `second` matches, so the original's element type differs
 void fn_1_ECF8(s32 idx, s32 slot, s32 flag) {
     u16 idA;
     u16 idB;
@@ -5685,8 +5686,9 @@ void fn_1_D13C(void) {
 }
 
 // .text:0x0000CDC8 size:0x374
-// _0060->_34[idx]._00 loads as add+lwz 52 where the target forms idx*144+52 and
-// uses lwzx (fn_1_D13C gets it right); the setup block is scheduled differently
+// _0060->_34[idx]._00 loads as add+lwz 52 where the target uses addi+lwzx, as in
+// fn_1_ECF8 (*(UnkList0610**)&...->_34[idx] gives it: 89.46%); the setup block
+// is scheduled differently
 void fn_1_CDC8(void) {
     UnkList0610** lists[2];
     UnkTimer0610* timers[2];
