@@ -3557,14 +3557,9 @@ void fn_3_FCF24(void) {
     cam->_003C = total;
 }
 
-// .text:0x000FCF20 size:0x4 mapped:0x8073BFB4
-void fn_3_FCF20(void) {
-    return;
-}
-
 // 94.64%: registers only, the same rotation as fn_3_FCE38 (camera r5, key offset r6,
 // key count r7 in the target).
-// .text:0x000FCEB0 size:0x70 mapped:0x8073BF44
+// .text:0x000FCEB0 size:0x74 mapped:0x8073BF44
 int fn_3_FCEB0(f32 time) {
     lbl_3_common_bss_DE94_s2* cam = lbl_3_common_bss_DE94._0000;
     int i = 0;
@@ -3581,14 +3576,9 @@ int fn_3_FCEB0(f32 time) {
     return i;
 }
 
-// .text:0x000FCEAC size:0x4 mapped:0x8073BF40
-void fn_3_FCEAC(void) {
-    return;
-}
-
-// 94.48%: registers only; the target keeps the camera in r5, the key offset in r6 and
-// the key count in r7, and this build ends with an unreachable blr the target lacks.
-// .text:0x000FCE38 size:0x74 mapped:0x8073BECC
+// registers only; the target keeps the camera in r5, the key offset in r6 and the key
+// count in r7.
+// .text:0x000FCE38 size:0x78 mapped:0x8073BECC
 int fn_3_FCE38(int i, f32 time) {
     lbl_3_common_bss_DE94_s2* cam = lbl_3_common_bss_DE94._0000;
     int count = cam->_003C;

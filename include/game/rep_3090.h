@@ -16,9 +16,7 @@ Vec fn_3_FC2FC(Vec pos, Vec anchor, Vec target, f32 scale, f32 stiffness, f32 da
 void fn_3_FC448(void);
 void fn_3_FC938(void);
 int fn_3_FCE38(int i, f32 time);
-void fn_3_FCEAC(void);
 int fn_3_FCEB0(f32 time);
-void fn_3_FCF20(void);
 void fn_3_FCF24(void);
 void fn_3_FD408(u32 idx, Vec* pos, f32* angles);
 void fn_3_FD4DC(void);
