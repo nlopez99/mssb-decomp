@@ -9,6 +9,7 @@ struct AnimState;
 struct Model;
 
 u32 fn_80024D2C(struct AnimSub* anim);
+void fn_80024FA4(struct Model* model, struct AnimFile* file, struct AnimSub* anim, int clipOverride);
 void fn_80025C58(struct AnimFile* file, struct Model* model);
 int fn_80024DB0(struct AnimSub* anim);
 void fn_80025DDC(struct AnimFile* file);
