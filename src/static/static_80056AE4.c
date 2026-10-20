@@ -700,7 +700,68 @@ void fn_8005B760(void) {
 }
 
 // .text:0x8005B298 size:0x4C8
-void fn_8005B298(void) {
+// 98.76%: registers only; the base keeps one more roster pointer live, so
+// every saved register is one higher.
+void fn_8005B298(SpaniTask* task) {
+    u8 flag;
+    ChallengeTrackingStruct* scout;
+    s8 flags;
+    s32 unseen;
+    s32 i;
+    s32 j;
+    s8 team = lbl_803297E0._CF3B;
+
+    for (i = 0; i < 9; i++) {
+        getTeamObj(task, i, 0x5A)->_5C = i << 16;
+        getTeamObj(task, i, 0x6C)->_54 &= ~2;
+        if (lbl_803297E0._CFA2[team] == 0) {
+            fn_800363D8(task, i + 0x63, 1, 0x83, inMemRoster[team][i].stats.CharID);
+            getTeamObj(task, i, 0xAB)->_5C = inMemRoster[team][i].stats.CharacterClass << 16;
+            getTeamObj(task, i, 0x99)->_5C = (inMemRoster[team][i].stats.BattingStance + inMemRoster[team][i].stats.FieldingArm * 2) << 16;
+            getTeamObj(task, i, 0x134)->_54 &= ~2;
+        } else {
+            fn_800363D8(task, i + 0x63, 1, 0x83, inMemRoster[1][i].stats.CharID);
+            scout = &starMissionCompletionTracker.characters[inMemRoster[1][i].stats.CharID];
+            flags = ((s8*)scout->scoutFlagPointer)[starMissionCompletionTracker._4415 * 6 + starMissionCompletionTracker._441C + 4];
+            unseen = flags - scout->scoutFlagsAchieved;
+            for (j = 0; j < 5; j++) {
+                if (j < flags && unseen > j) {
+                    getGridObj(task, j, i * 5, 0x13D)->_5C = 0;
+                } else if (j < flags) {
+                    getGridObj(task, j, i * 5, 0x13D)->_68 = 1;
+                    if (g_d_GameSettings._06 == 2) {
+                        sndFXStartEx(0x1B1, 0x7F, 0x3F, 0);
+                    } else {
+                        sndFXStartEx(0x1E6, 0x7F, 0x3F, 0);
+                    }
+                } else {
+                    getGridObj(task, j, i * 5, 0x13D)->_54 &= ~2;
+                }
+            }
+            getTeamObj(task, i, 0xAB)->_54 &= ~2;
+            getTeamObj(task, i, 0x99)->_54 &= ~2;
+        }
+        if (g_d_GameSettings.GameModeSelected == 5) {
+            flag = starMissionCompletionTracker._43D6[inMemRoster[team][i].stats.CharID];
+        } else {
+            flag = lbl_8034E9A0._489B[team][i];
+        }
+        if (flag != 0 && (team != 1 || g_d_GameSettings.GameModeSelected != 5)) {
+            getTeamObj(task, i, 0x7E)->_68 = 1;
+            getTeamObj(task, i, 0x87)->_54 |= 2;
+            getTeamObj(task, i, 0x87)->_5C = 0;
+            getTeamObj(task, i, 0x87)->_68 = 1;
+        } else if (lbl_80361B20._00[0][inMemRoster[team][i].stats.CharID] != 0 && g_d_GameSettings.GameModeSelected != 5) {
+            getTeamObj(task, i, 0x7E)->_68 = 1;
+            getTeamObj(task, i, 0x87)->_54 |= 2;
+            getTeamObj(task, i, 0x87)->_5C = 0;
+            getTeamObj(task, i, 0x87)->_68 = 0;
+        } else {
+            getTeamObj(task, i, 0x7E)->_54 &= ~2;
+            getTeamObj(task, i, 0x87)->_54 &= ~2;
+        }
+        getTeamObj(task, i, 0x75)->_54 &= ~2;
+    }
 }
 
 // .text:0x8005AF68 size:0x330

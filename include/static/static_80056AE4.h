@@ -19,7 +19,7 @@ void fn_800596D4(void);
 void starMissionRelated1(void);
 void fn_8005A350(void);
 void fn_8005AF68(struct SpaniTask* task);
-void fn_8005B298(void);
+void fn_8005B298(struct SpaniTask* task);
 void fn_8005B760(void);
 void fn_8005BB5C(struct SpaniTask* task);
 void fn_8005BF40(struct SpaniTask* task);
