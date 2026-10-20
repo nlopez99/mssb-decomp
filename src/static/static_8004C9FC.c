@@ -1432,7 +1432,7 @@ finish:
 }
 
 // .text:0x8004CC4C size:0x74
-void fn_8004CC4C(s32 a, s32 b, s32 c, s32 d, s16 e) {
+void fn_8004CC4C(s32 a, s32 b, s32 c, s32 d, u16 e) {
     VoiceState* v = &lbl_803C5F74;
 
     if (v->_00 != 0) {

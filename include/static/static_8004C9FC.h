@@ -10,7 +10,7 @@ void fn_8004CA48(s16 a, s16 b, s16 c, s16 d);
 s32 fn_8004CA6C(u16 buttons);
 void fn_8004CC18(void);
 void fn_8004CC2C(void);
-void fn_8004CC4C(s32 a, s32 b, s32 c, s32 d, s16 e);
+void fn_8004CC4C(s32 a, s32 b, s32 c, s32 d, u16 e);
 void fn_8004CCC0(void);
 void fn_8004D0F0(void);
 void fn_8004D460(s32 search, s32 kind);

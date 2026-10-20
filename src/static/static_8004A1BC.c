@@ -1,6 +1,7 @@
 #include "static/static_8004A1BC.h"
 #include "static/spani_default.h"
 #include "static/static_80048EB8.h"
+#include "static/static_8004C9FC.h"
 #include "musyx/musyx.h"
 #include "static/UnknownHomes_Static.h"
 
@@ -383,7 +384,7 @@ void fn_8004A5B8(void) {
 }
 
 // .text:0x8004A34C size:0x26C
-s32 fn_8004A34C(MsgWindow* window, u8 arg1, u8 msg, u8 arg3, s32 arg4) {
+s32 fn_8004A34C(MsgWindow* window, u8 arg1, u8 msg, u8 arg3, u8 arg4) {
     MsgTask* task = NULL;
 
     window->msg = msg;
