@@ -5135,9 +5135,6 @@ BOOL fn_3_46688(f32* x, f32* z) {
 }
 
 // .text:0x00045E98 size:0x7F0 mapped:0x80684F2C
-// 86.96%: the target unrolls the first loop three times and returns straight from its test;
-// with the return this source unrolls it twice. Without the return it scored 92.12% but
-// would not stop when a fielder still covers the cutoff.
 void fn_3_45E98(void) {
     UnkAC8Fielder* f;
     UnkAC8Fielder* lead;
@@ -5150,6 +5147,8 @@ void fn_3_45E98(void) {
     f32 dist;
     f32 dx;
     f32 dz;
+    f32 tx;
+    f32 tz;
 
     if (g_FieldingLogic._0C0 != 0) {
         g_FieldingLogic._0C0--;
@@ -5167,12 +5166,11 @@ void fn_3_45E98(void) {
         for (i = 0; i < 6; i++) {
             f = &g_Fielders[i];
             if (f->_18C == 6) {
-                if (f->_1D3 == 2 || f->_1D3 == 15 || f->_1D3 == 16 || f->_1D3 == 21 || f->_1D3 == 22 ||
-                    f->_1D3 == 23 || f->_1D3 == 12 || f->_1D3 == 0) {
-                    f->_18C = -1;
-                    continue;
+                if (!(f->_1D3 == 2 || f->_1D3 == 15 || f->_1D3 == 16 || f->_1D3 == 21 || f->_1D3 == 22 ||
+                      f->_1D3 == 23 || f->_1D3 == 12 || f->_1D3 == 0)) {
+                    return;
                 }
-                return;
+                f->_18C = -1;
             }
         }
         if (g_Ball.ballZoneAwayFromHome >= 3) {
@@ -5220,12 +5218,16 @@ void fn_3_45E98(void) {
                 }
             }
             if (count > 0) {
+                tx = 40.0f * g_Ball.AtBat_Contact_BallPos.x / g_Ball.ballDistanceFromHome;
+                tz = 40.0f * g_Ball.AtBat_Contact_BallPos.z / g_Ball.ballDistanceFromHome;
                 best = cand[0];
                 for (i = 0; i < 3; i++) {
                     if (cand[i] >= 0) {
-                        dx = g_Fielders[cand[i]]._000 - 40.0f * g_Ball.AtBat_Contact_BallPos.x / g_Ball.ballDistanceFromHome;
-                        dz = g_Fielders[cand[i]]._008 - 40.0f * g_Ball.AtBat_Contact_BallPos.z / g_Ball.ballDistanceFromHome;
-                        dist = dolsqrtf2(dx * dx + dz * dz);
+                        dx = g_Fielders[cand[i]]._000 - tx;
+                        dz = g_Fielders[cand[i]]._008 - tz;
+                        dx *= dx;
+                        dz *= dz;
+                        dist = dolsqrtf2(dx + dz);
                         if (i == 0) {
                             bestDist = dist;
                         } else if (dist < bestDist) {
@@ -5240,13 +5242,17 @@ void fn_3_45E98(void) {
         }
     } else if (g_FieldingLogic._146 == 0) {
         lead = &g_Fielders[g_FieldingLogic._0BE];
+        tx = lead->_014;
+        tz = lead->_01C;
         for (i = 2; i < 6; i++) {
             if (g_FieldingLogic._0BE != i &&
                 (g_FieldingLogic._0F8[i] == 0 || g_FieldingLogic._0F8[i] == 8 || g_FieldingLogic._0F8[i] == 9) &&
                 g_Fielders[i]._1ED == 0) {
-                dx = lead->_014 - g_Fielders[i]._000;
-                dz = lead->_01C - g_Fielders[i]._008;
-                if (dolsqrtf2(dx * dx + dz * dz) < g_Fielders[g_FieldingLogic._0BE]._068) {
+                dx = tx - g_Fielders[i]._000;
+                dz = tz - g_Fielders[i]._008;
+                dx *= dx;
+                dz *= dz;
+                if (dolsqrtf2(dx + dz) < g_Fielders[g_FieldingLogic._0BE]._068) {
                     fn_3_5985C(i, 11);
                     g_FieldingLogic._146 = lbl_3_data_49DC[43];
                     return;
