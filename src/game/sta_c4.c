@@ -462,7 +462,8 @@ void fn_3_FBBA0(StaC4Tex* tex) {
 }
 
 // .text:0x000FB3D8 size:0x7C8 mapped:0x8073A46C
-// 99.57%: only the bounds loop differs, minX/minY and maxX/maxY in swapped float registers
+// 99.57%: only the bounds loop differs, minX/minY and maxX/maxY in swapped float registers.
+// Initializer forms, width/height order, struct or array bounds and declaration orders do nothing.
 void fn_3_FB3D8(StaC4View* view) {
     f32 center[21][2];
     Vec diff;
@@ -583,7 +584,8 @@ void fn_3_FB3D8(StaC4View* view) {
 
 // .text:0x000FA58C size:0xE4C mapped:0x80739620
 // 99.69%: registers only; slot and the main loop's i swap saved registers, and the
-// tile loops' counter, row pointer and offset are rotated
+// tile loops' counter, row pointer and offset are rotated. Block scopes, an index for slot,
+// slot's init position, loop-counter names and slot/i declaration positions do nothing.
 void fn_3_FA58C(void** files) {
     StaC4Swaps* swaps;
     StaC4Tiles* tiles;
@@ -946,16 +948,52 @@ static inline void startAnim(StaC4Model* model) {
 }
 
 // .text:0x000F9E78 size:0x548 mapped:0x80738F0C
-// 98.95%: registers only; the target keeps idx in r31 and every other saved value one lower
+// 99.10%: registers only; the target keeps idx in r31 and every other saved value one lower.
+// fn_3_F99F0's sound code is written out here: inlined, it pins fn_3_F9164's declaration order
+// (98.95%). Block scopes, an int idx through the callback table and draw's init forms do nothing.
 void fn_3_F9E78(s32 idx, void* arg1, StaC4Hit* hit) {
-    Vec pos;
+    s32 sound;
+    SND_VOICEID voice;
+    u8 vol;
+    s32 slot;
     StaC4Draw* draw = &lbl_3_common_bss_350E4._00[idx];
+    Vec pos;
     StaC4Draw* entry;
-    StaC4ShakeTask* shake;
     StaC4FlashTask* flash;
     s32 i;
+    u32 stadium;
 
-    fn_3_F99F0(idx, arg1, hit);
+    switch (draw->_A2) {
+    case 0:
+        sound = 2;
+        slot = g_Ball.inAirOrBefore2ndBounceOrLowBallEnergy;
+        break;
+    case 1:
+        sound = 1;
+        slot = g_Ball.inAirOrBefore2ndBounceOrLowBallEnergy + 2;
+        break;
+    case 2:
+        sound = 0;
+        slot = g_Ball.inAirOrBefore2ndBounceOrLowBallEnergy + 4;
+        break;
+    }
+    stadium = g_d_GameSettings.StadiumID;
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+        vol = lbl_3_data_84B8[sound][0];
+    } else {
+        vol = lbl_3_data_8404[stadium][sound][0];
+    }
+    voice = sndFXStartEx(lbl_3_data_81DC[stadium] + sound, vol, 63, 0);
+    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD) {
+        vol = lbl_3_data_84B8[sound][1];
+    } else {
+        vol = lbl_3_data_8404[stadium][sound][1];
+    }
+    sndFXCtrl(voice, 91, vol);
+    lbl_3_bss_B620[slot] = 1;
+    lbl_3_bss_B5D8[slot].x = g_Ball.AtBat_Contact_BallPos.x;
+    lbl_3_bss_B5D8[slot].y = -g_Ball.AtBat_Contact_BallPos.y;
+    lbl_3_bss_B5D8[slot].z = g_Ball.AtBat_Contact_BallPos.z;
     if (draw->_A2 == 0) {
         for (i = 0; i < 9; i++) {
             if (lbl_3_bss_B630[i] == 0xFF) {
