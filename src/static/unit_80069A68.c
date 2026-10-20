@@ -2,6 +2,7 @@
 #include "static/UnknownHomes_Static.h"
 #include "string.h"
 #include "Dolphin/gx.h"
+#include "Dolphin/mtx.h"
 #include "static/sub.h"
 #include "Dolphin/vi.h"
 
@@ -52,6 +53,16 @@ typedef struct TexBank {
     /* 0x00 */ u32 _00;
     /* 0x04 */ TextureDesc tex[1];
 } TexBank;
+
+typedef struct FadeParams {
+    /* 0x00 */ u8 _00[0x8];
+    /* 0x08 */ s32 mode;
+    /* 0x0C */ TexBank* bank;
+    /* 0x10 */ s32 index;
+    /* 0x14 */ s32 index2;
+    /* 0x18 */ f32 alpha;
+    /* 0x1C */ f32 alpha2;
+} FadeParams;
 
 extern SceneTask* lbl_803CC1B8;
 extern SceneGlobals lbl_80366158;
@@ -158,7 +169,78 @@ void fn_8006AF6C(void) {
 }
 
 // .text:0x8006AC24 size:0x348
-void fn_8006AC24(void) {
+void fn_8006AC24(FadeParams* params) {
+    switch (params->mode) {
+    case 0: {
+        Mtx mv;
+        Mtx44 proj;
+
+        PSMTXIdentity(mv);
+        C_MTXOrtho(proj, -23.0f, 448.0f, 0.0f, 608.0f, -100.0f, 100.0f);
+        GXSetProjection(proj, GX_ORTHOGRAPHIC);
+        GXLoadPosMtxImm(mv, GX_PNMTX0);
+        GXSetCurrentMtx(GX_PNMTX0);
+        fn_80069BDC(params->bank, params->index, params->alpha, params->index2, params->alpha2);
+        break;
+    }
+    case 1: {
+        Mtx mv;
+        Mtx44 proj;
+
+        PSMTXIdentity(mv);
+        C_MTXOrtho(proj, -23.0f, 448.0f, 0.0f, 608.0f, -100.0f, 100.0f);
+        GXSetProjection(proj, GX_ORTHOGRAPHIC);
+        GXLoadPosMtxImm(mv, GX_PNMTX0);
+        GXSetCurrentMtx(GX_PNMTX0);
+        fn_8006A824(params->bank, params->index, params->alpha);
+        break;
+    }
+    case 2: {
+        Mtx mv;
+        Mtx44 proj;
+
+        PSMTXIdentity(mv);
+        C_MTXOrtho(proj, 0.0f, 448.0f, 0.0f, 608.0f, -100.0f, 100.0f);
+        GXSetProjection(proj, GX_ORTHOGRAPHIC);
+        GXLoadPosMtxImm(mv, GX_PNMTX0);
+        GXSetCurrentMtx(GX_PNMTX0);
+        fn_8006A500(params->bank, params->index, params->alpha);
+        break;
+    }
+    case 3: {
+        Mtx mv;
+        Mtx44 proj;
+
+        PSMTXIdentity(mv);
+        C_MTXOrtho(proj, 0.0f, 448.0f, 0.0f, 608.0f, -100.0f, 100.0f);
+        GXSetProjection(proj, GX_ORTHOGRAPHIC);
+        GXLoadPosMtxImm(mv, GX_PNMTX0);
+        GXSetCurrentMtx(GX_PNMTX0);
+        fn_8006A194(params->bank, params->index, params->alpha);
+        break;
+    }
+    case 4: {
+        Mtx mv;
+        Mtx44 proj;
+
+        PSMTXIdentity(mv);
+        C_MTXOrtho(proj, 0.0f, 448.0f, 0.0f, 640.0f, 0.0f, 1.0f);
+        GXSetProjection(proj, GX_ORTHOGRAPHIC);
+        GXLoadPosMtxImm(mv, GX_PNMTX0);
+        GXSetCurrentMtx(GX_PNMTX0);
+        gOz_GXSetTexture(GX_PASSCLR, 0, 0);
+        GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+        GXPosition3f32(0.0f, 0.0f, -0.5f);
+        GXColor4u8(0, 0, 0, 255.0f * params->alpha / 30.0f);
+        GXPosition3f32(640.0f, 0.0f, -0.5f);
+        GXColor4u8(0, 0, 0, 255.0f * params->alpha / 30.0f);
+        GXPosition3f32(640.0f, 448.0f, -0.5f);
+        GXColor4u8(0, 0, 0, 255.0f * params->alpha / 30.0f);
+        GXPosition3f32(0.0f, 448.0f, -0.5f);
+        GXColor4u8(0, 0, 0, 255.0f * params->alpha / 30.0f);
+        break;
+    }
+    }
 }
 
 // .text:0x8006A824 size:0x400
@@ -304,7 +386,7 @@ void fn_8006A194(TexBank* bank, s32 index, f32 alpha) {
 }
 
 // .text:0x80069BDC size:0x5B8
-void fn_80069BDC(TexBank* bank, s32 index, s32 index2, f32 alpha, f32 alpha2) {
+void fn_80069BDC(TexBank* bank, s32 index, f32 alpha, s32 index2, f32 alpha2) {
     f32 c;
 
     GXSetDispCopySrc(0, 0, lbl_80109250.fbWidth, lbl_80109250.efbHeight);
