@@ -1680,6 +1680,70 @@ typedef struct Unk37A8Minigame {
     /* 0x1DCC */ Unk37A8Cpu _1DCC[4];
 } Unk37A8Minigame;
 
+
+// A spoke's end points, one per player at g_Minigame._1CE8
+typedef struct Unk3520Spoke {
+    /* 0x00 */ VecXYZ start;
+    /* 0x0C */ VecXYZ end;
+} Unk3520Spoke; // size: 0x18
+
+// The pieces along the spokes, at g_Minigame._A8
+typedef struct Unk3520Piece {
+    /* 0x00 */ Vec pos;
+    /* 0x0C */ u8 _0C[0x22 - 0xC];
+    /* 0x22 */ s16 _22;
+    /* 0x24 */ u8 _24[2];
+    /* 0x26 */ u8 _26;
+    /* 0x27 */ u8 _27;
+} Unk3520Piece; // size: 0x28
+
+// The bonus box, at g_Minigame._CB0
+typedef struct Unk3520Box {
+    /* 0x00 */ Vec pos;
+    /* 0x0C */ Vec vel;
+    /* 0x18 */ u8 _18[0x1C - 0x18];
+    /* 0x1C */ s16 _1C;
+    /* 0x1E */ u8 _1E;
+} Unk3520Box; // size: 0x20
+
+// The coin bag, at g_Minigame._B6C
+typedef struct Unk3520Bag {
+    /* 0x00 */ Vec pos;
+    /* 0x0C */ Vec vel;
+    /* 0x18 */ s32 coins[10];
+    /* 0x40 */ u8 active;
+    /* 0x41 */ u8 _41[3];
+} Unk3520Bag; // size: 0x44
+
+// One per player, at g_Minigame._1DCC
+typedef struct Unk3520Cpu {
+    /* 0x0 */ f32 _0;
+    /* 0x4 */ s16 _4;
+    /* 0x6 */ u8 _6;
+    /* 0x7 */ s8 _7;
+} Unk3520Cpu; // size: 0x8
+
+// The CPU players' state, at g_Minigame._1DCC
+typedef struct Unk3520Ai {
+    /* 0x00 */ Unk3520Cpu cpu[4];
+    /* 0x20 */ f32 sin;
+    /* 0x24 */ f32 cos;
+} Unk3520Ai;
+
+// Star Dash (rep_3520)'s layout of MiniGameStruct, a union member over its fields
+typedef struct Unk3520Minigame {
+    /* 0x0000 */ u8 _0000[0xA8];
+    /* 0x00A8 */ Unk3520Piece pieces[40];
+    /* 0x06E8 */ u8 _06E8[0xB6C - 0x6E8];
+    /* 0x0B6C */ Unk3520Bag bag;
+    /* 0x0BB0 */ Unk3520Obj objs[4];
+    /* 0x0CB0 */ Unk3520Box box;
+    /* 0x0CD0 */ u8 _0CD0[0x1CE8 - 0xCD0];
+    /* 0x1CE8 */ Unk3520Spoke spokes[4];
+    /* 0x1D48 */ u8 _1D48[0x1DCC - 0x1D48];
+    /* 0x1DCC */ Unk3520Ai ai;
+} Unk3520Minigame;
+
 typedef struct _MiniGameStruct {
     // The fields below form one struct in a union with Piranha Panic's layout; they keep
     // their indentation so that edits to them stay small
@@ -2262,6 +2326,7 @@ typedef struct _MiniGameStruct {
     /*0x1E2B*/ u8 _1E2B;
         };
         /*0x0000*/ Unk37A8Minigame piranhaPanic;
+        /*0x0000*/ Unk3520Minigame starDash;
     };
 } MiniGameStruct; // size: 0x1E2C
 
