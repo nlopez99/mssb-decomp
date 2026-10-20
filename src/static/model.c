@@ -72,9 +72,12 @@ typedef struct ModelEntry28 {
 } ModelEntry28; // size: 0x28
 
 typedef struct ModelNode {
-    /* 0x0000 */ u8 _0000[0x14 - 0x0];
+    /* 0x0000 */ u8 _0000[0x6 - 0x0];
+    /* 0x0006 */ u16 numBones;
+    /* 0x0008 */ u8 _0008[0x14 - 0x8];
     /* 0x0014 */ struct DODisplayObj* dispObj;
-    /* 0x0018 */ u8 _0018[0x64 - 0x18];
+    /* 0x0018 */ struct ModelNode** bones;
+    /* 0x001C */ u8 _001C[0x64 - 0x1C];
     /* 0x0064 */ MtxPtr skinMtx;
     /* 0x0068 */ MtxPtr skinInvMtx;
     /* 0x006C */ u8 _006C[0x74 - 0x6C];
@@ -162,16 +165,19 @@ typedef struct ModelSub2C {
 typedef struct ModelPose {
     /* 0x0000 */ u8 _0000[0x4 - 0x0];
     /* 0x0004 */ AnimState state;
-    /* 0x0060 */ u8 _0060[0x68 - 0x60];
+    /* 0x0060 */ u8 _60;
+    /* 0x0061 */ u8 _0061[0x68 - 0x61];
     /* 0x0068 */ AnimState state2;
-    /* 0x00C4 */ u8 _00C4[0xD0 - 0xC4];
+    /* 0x00C4 */ u8 _C4;
+    /* 0x00C5 */ u8 _00C5[0xD0 - 0xC5];
     /* 0x00D0 */ s8 _D0;
     /* 0x00D1 */ s8 _D1;
     /* 0x00D2 */ u8 _00D2[0xD4 - 0xD2];
 } ModelPose; // size: 0xD4
 
 typedef struct ModelActor {
-    /* 0x0000 */ u8 _0000[0x10 - 0x0];
+    /* 0x0000 */ ModelNode* models[1];
+    /* 0x0004 */ u8 _0004[0x10 - 0x4];
     /* 0x0010 */ void* anims[7];
     /* 0x002C */ ModelSub2C* _2C;
     /* 0x0030 */ ModelPose* _30;
@@ -578,6 +584,8 @@ void fn_8001F8A4(void) {
 }
 
 // .text:0x8001F5E8 size:0x2BC
+// 64.90%: the target reloads _2DA0[0..2] after storing them and keeps 30 in r31 for
+// ActorObjectInitTable and the allocation; this build forwards the stored values.
 void fn_8001F5E8(void) {
     void* layout;
     void* geo;
@@ -1005,7 +1013,60 @@ void fn_8001D2D4(void) {
 }
 
 // .text:0x8001D180 size:0x154
-void fn_8001D180(void) {
+// 95.35%: the target keeps a second copy of actor (mr r9,r6) for the loop body; this build
+// uses one register, so the loop registers differ.
+void fn_8001D180(int idx, int part, BOOL restore) {
+    ModelActor* actor = lbl_8036E548.actors[idx];
+    ModelPose* pose;
+    ModelNode** p;
+    ModelNode* model;
+    ModelNode* bone;
+    ModelNode* src;
+    int joint;
+    u16 n;
+    int k;
+
+    if (actor != NULL) {
+        joint = actor->joints[lbl_803CB7B4[part]];
+    } else {
+        joint = 0xFFFF;
+    }
+    if (joint == 0xFFFF) {
+        return;
+    }
+    k = 0;
+    do {
+        model = actor->models[k];
+        if (!restore) {
+            if (model != NULL) {
+                bone = model->bones[joint];
+                if (bone != NULL) {
+                    bone->dispObj = NULL;
+                }
+            }
+        } else if (lbl_800EEAAC[actor->_252] >= 0 && (pose = actor->_30) != NULL) {
+            bone = model->bones[joint];
+            if (part & 1) {
+                src = lbl_8036E548._013C->slots[pose->_C4].node;
+            } else {
+                src = lbl_8036E548._013C->slots[pose->_60].node;
+            }
+            if (src == NULL) {
+                return;
+            }
+            n = src->numBones;
+            p = &src->bones[n];
+            do {
+                p--;
+                n--;
+                if ((*p)->dispObj != NULL) {
+                    bone->dispObj = (*p)->dispObj;
+                    return;
+                }
+            } while (n != 0);
+            return;
+        }
+    } while (k-- != 0);
 }
 
 // .text:0x8001D148 size:0x38

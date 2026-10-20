@@ -99,7 +99,7 @@ void fn_8001D074(s32 idx, BOOL on);
 void fn_8001D0D0(s32 idx, f32 scale);
 void fn_8001D110(s32 idx, f32 x, f32 y, f32 z);
 void fn_8001D148(s32 idx, f32 x, f32 y, f32 z);
-void fn_8001D180(void);
+void fn_8001D180(int idx, int part, BOOL restore);
 void fn_8001D2D4(void);
 void fn_8001DB74(struct ModelTable* table);
 void fn_8001DD58(struct ModelNode* node, int lod, MtxPtr camera, u8 numLights, ...);
