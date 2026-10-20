@@ -32,7 +32,9 @@ typedef struct SceneTask {
         /* 0x14 */ u32* texFile;
     };
     /* 0x18 */ struct FadeParams* fades;
-    /* 0x1C */ u8 _1C[0x28 - 0x1C];
+    /* 0x1C */ void* _1C;
+    /* 0x20 */ void* _20;
+    /* 0x24 */ void* _24;
     /* 0x28 */ u32* sabFile;
     /* 0x2C */ u8 _2C[0x34 - 0x2C];
     /* 0x34 */ s16 state;
@@ -123,6 +125,20 @@ static SceneCallback lbl_801093B8 = { 0x0000002F, fn_80069A68, 0x00000000 };
 
 extern void fn_80008E00(void (*func)(s32));
 extern void fn_8000900C(void);
+extern void fn_80009018(void* arg0);
+extern void* _OSAllocFromHeap(u32 align, u32 size);
+extern void fn_800ACFB0(void* ptr);
+extern void fn_800AD070(void);
+extern void fn_800AD500(void* arg0, void* arg1);
+extern u32 fn_800AD6BC(void* arg0);
+extern s32 fn_800AD780(void* arg0);
+extern void fn_800AD830(void* arg0);
+extern void fn_800AD95C(void* arg0, s32 arg1);
+extern void fn_800AD9F4(void* arg0);
+extern s32 fn_800ADAFC(void);
+extern s32 fn_800ADB04(void* arg0, void* arg1, s32 arg2, s32 arg3);
+extern void fn_800ADBFC(void);
+extern void fn_800ADC40(void* arg0, u32 arg1);
 extern void fn_800A7D4C(s32 layer, FadeParams* params);
 extern BOOL fn_80021518(s32 group, void* data);
 extern void fn_800215F8(SceneCallback* callback);
@@ -307,6 +323,70 @@ void fn_8006B230(void) {
 
 // .text:0x8006AF9C size:0x294
 void fn_8006AF9C(void) {
+    SceneTask* task = lbl_803CC1B8;
+
+    switch (task->state) {
+    case 0:
+        task->_38 = 0;
+        task->_36 = 0;
+        task->_1C = _OSAllocFromHeap(0x20, 0x1C0);
+        memset(task->_1C, 0, 0x1C0);
+        task->_20 = _OSAllocFromHeap(0x20, 0x400000);
+        fn_800ADC40(task->_20, 0x400000);
+        task->state++;
+        break;
+    case 1:
+        if (fn_800ADB04(lbl_801092C8, task->_1C, 0, 0) != 0) {
+            fn_80009018(task->_1C);
+            task->state++;
+        }
+        break;
+    case 2:
+        if (fn_800ADAFC() != 0) {
+            u32 size = fn_800AD6BC(task->_1C);
+
+            task->_24 = _OSAllocFromHeap(0x20, size);
+            fn_800AD500(task->_1C, task->_24);
+            fn_800AD95C(task->_1C, 1);
+            task->state++;
+        }
+        break;
+    case 3:
+        if (lbl_803C77B8[0]._04 & 0x1000) {
+            task->state = 5;
+            break;
+        }
+    case 4:
+        if (fn_800AD780(task->_1C) != 0) {
+            fn_80009018(NULL);
+            fn_800AD9F4(task->_1C);
+            fn_800ADBFC();
+            fn_800ACFB0(task->_24);
+            fn_800ACFB0(task->_20);
+            fn_800ACFB0(task->_1C);
+            task->state = 0;
+            lbl_803CC1B8->_3B = 0;
+            lbl_803CC1B8->func = fn_8006B668;
+            return;
+        }
+        break;
+    case 5:
+        if (++task->_38 == 30) {
+            fn_800AD830(task->_1C);
+            task->state = 4;
+        }
+        break;
+    }
+    if (task->state >= 3) {
+        fn_800AD070();
+    }
+    if (task->_38 != 0) {
+        task->fades[lbl_803CBBC0].mode = 4;
+        task->fades[lbl_803CBBC0].alpha = task->_38;
+        task->fades[lbl_803CBBC0]._00 = 0;
+        task->fades[lbl_803CBBC0].draw = fn_8006AC24;
+        fn_800A7D4C(14, &task->fades[lbl_803CBBC0]);
+    }
 }
 
 // .text:0x8006AF6C size:0x30
