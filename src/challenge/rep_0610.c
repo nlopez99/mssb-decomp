@@ -345,7 +345,7 @@ extern void LoadActorLayout(void* layout);
 extern void convertGeometryAndSknHeader(void* geo, void* skn);
 extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);
 extern void fn_800BD190(void* geo, void* tex);
-extern void fn_80023B04(s32 count, void* work);
+extern void fn_80023B04(s32 count);
 extern void fn_8002399C(Unk0060Elem* elem, s32 arg1, s32 arg2, void* layout, void* anim, void* skn);
 extern void fn_80025C58(void* anim, Unk0060Elem* elem);
 extern void fn_80025DDC(void* anim);
@@ -3571,8 +3571,8 @@ void fn_1_14710(Unk8036E548Actor* arg0) {
 }
 
 // .text:0x000135C0 size:0x1150
-// Draft: registers differ throughout (the target keeps &lbl_8036E548 in r22 from
-// the top), and the four-entry pose loop is scheduled differently
+// Registers differ throughout (the target keeps the bss base in r29 and actor in
+// r31), and the four-entry pose loop is scheduled differently
 void fn_1_135C0(void) {
     s32 i;
     s32 j;
@@ -3590,7 +3590,7 @@ void fn_1_135C0(void) {
     u32 flag;
     u8 frame;
 
-    fn_80023B04(13, &lbl_1_bss_3070);
+    fn_80023B04(13);
     lbl_8036E548._0060 = ActorObjectInitTable(1);
     lbl_1_bss_5F80[0] = ActorObjectInitTable(1);
     lbl_1_bss_5F7C[0] = ActorObjectInitTable(5);
@@ -3704,9 +3704,8 @@ void fn_1_135C0(void) {
     count = lbl_8036E548._0060->_34[0]._00->_06;
     memset(actor->_162, 0xFF, sizeof(actor->_162));
     for (i = 0; i < count; i++) {
-        id = lbl_8036E548._0060->_34[0]._00->_18[i]->_00;
-        if (id != 0xFFFF) {
-            actor->_162[id] = i;
+        if (lbl_8036E548._0060->_34[0]._00->_18[i]->_00 != 0xFFFF) {
+            lbl_8036E548._0C04[0]._162[lbl_8036E548._0060->_34[0]._00->_18[i]->_00] = i;
         }
     }
     fn_800BD548(lbl_8036E548._0060->_34, 3, lbl_8036E548._00AC[0], lbl_8036E548._00AC[1], lbl_8036E548._00AC[2],
