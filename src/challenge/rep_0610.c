@@ -5794,13 +5794,13 @@ void fn_1_CDC8(void) {
         pair = 2;
         break;
     }
-    lists[0] = &lbl_1_bss_5F7C[0]->_34[1]._00;
-    actor->_25A = (lbl_1_bss_6940[lbl_1_bss_5F73]._44 < 2) == (lbl_1_bss_5F69 == 0);
     timers[lbl_1_bss_5F69] = lbl_1_bss_67B8[2];
     timers[!lbl_1_bss_5F69] = lbl_1_bss_67B8[1];
-    ids[0] = lbl_8036E548._0C04[lbl_1_bss_5F73]._162[lbl_1_data_F4E8[pair]._2];
-    ids[1] = lbl_8036E548._0C04[lbl_1_bss_5F73]._162[lbl_1_data_F4E8[pair]._0];
+    actor->_25A = (lbl_1_bss_6940[lbl_1_bss_5F73]._44 < 2) == (lbl_1_bss_5F69 == 0);
+    ids[1] = actor->_162[lbl_1_data_F4E8[pair]._0];
     lists[1] = &lbl_1_bss_5F7C[0]->_34[0]._00;
+    ids[0] = lbl_8036E548._0C04[lbl_1_bss_5F73]._162[lbl_1_data_F4E8[pair]._2];
+    lists[0] = &lbl_1_bss_5F7C[0]->_34[1]._00;
     i = 0;
     switch (lbl_1_bss_6940[lbl_1_bss_5F73]._44) {
     case 0:
