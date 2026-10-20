@@ -132,7 +132,7 @@ static/static_8004157C.c:
 	.sbss       start:0x803CBCC0 end:0x803CBCC8
 	.sdata2     start:0x803CC7E8 end:0x803CC7F8
 
-static/fn_8004AC00.c:
+static/static_8004AC00.c:
 	extab       start:0x800060C0 end:0x800060F0
 	extabindex  start:0x80007C80 end:0x80007CC8
 	.text       start:0x8004AC00 end:0x8004B284
@@ -141,21 +141,21 @@ static/fn_8004AC00.c:
 	.sbss       start:0x803CBCF8 end:0x803CBD10
 	.sdata2     start:0x803CC7F8 end:0x803CC818
 
-static/fn_8004B284.c:
+static/static_8004B284.c:
 	extab       start:0x800060F0 end:0x800060F8
 	extabindex  start:0x80007CC8 end:0x80007CD4
 	.text       start:0x8004B284 end:0x8004B6EC
 	.data       start:0x800FBF10 end:0x800FC388
 	.sdata2     start:0x803CC818 end:0x803CC828
 
-static/fn_8004B6EC.c:
+static/static_8004B6EC.c:
 	extab       start:0x800060F8 end:0x80006128
 	extabindex  start:0x80007CD4 end:0x80007D1C
 	.text       start:0x8004B6EC end:0x8004C094
 	.data       start:0x800FC388 end:0x800FC720
 	.sdata2     start:0x803CC828 end:0x803CC840
 
-static/fn_8004C094.c:
+static/static_8004C094.c:
 	extab       start:0x80006128 end:0x80006148
 	extabindex  start:0x80007D1C end:0x80007D4C
 	.text       start:0x8004C094 end:0x8004C5F8
@@ -163,19 +163,20 @@ static/fn_8004C094.c:
 	.sdata      start:0x803CB860 end:0x803CB870
 	.sdata2     start:0x803CC840 end:0x803CC850
 
-static/fn_8004C5F8.c:
+static/static_8004C5F8.c:
 	extab       start:0x80006148 end:0x80006150
 	extabindex  start:0x80007D4C end:0x80007D58
 	.text       start:0x8004C5F8 end:0x8004C9FC
 	.data       start:0x800FC890 end:0x800FCA60
 	.sdata2     start:0x803CC850 end:0x803CC860
 
-static/fn_8004C9FC.c:
+static/static_8004C9FC.c:
 	extab       start:0x80006150 end:0x800061E0
 	extabindex  start:0x80007D58 end:0x80007E30
 	.text       start:0x8004C9FC end:0x800521B0
 	.data       start:0x800FCA60 end:0x800FEB08
 	.sdata      start:0x803CB870 end:0x803CB880
+
 static/static_80063028.c:
 	extab       start:0x80006418 end:0x80006438
 	extabindex  start:0x80008184 end:0x800081B4

@@ -1,5 +1,5 @@
-#ifndef __STATIC_FN_8004C094_H_
-#define __STATIC_FN_8004C094_H_
+#ifndef __STATIC_STATIC_8004C094_H_
+#define __STATIC_STATIC_8004C094_H_
 
 #include "mssbTypes.h"
 #include "Dolphin/mtx.h"

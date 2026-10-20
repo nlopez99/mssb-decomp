@@ -1,4 +1,4 @@
-#include "static/fn_8004C9FC.h"
+#include "static/static_8004C9FC.h"
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/rand.h"
 

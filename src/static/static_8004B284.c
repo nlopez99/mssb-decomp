@@ -1,5 +1,5 @@
-#include "static/fn_8004B284.h"
-#include "static/fn_8004AC00.h"
+#include "static/static_8004B284.h"
+#include "static/static_8004AC00.h"
 #include "static/particle.h"
 #include "static/UnknownHomes_Static.h"
 #include "string.h"

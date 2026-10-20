@@ -1,6 +1,6 @@
-#include "static/fn_8004B6EC.h"
+#include "static/static_8004B6EC.h"
 #include "static/anim.h"
-#include "static/fn_8004AC00.h"
+#include "static/static_8004AC00.h"
 #include "static/particle.h"
 #include "Dolphin/mtx.h"
 #include "C3/control.h"

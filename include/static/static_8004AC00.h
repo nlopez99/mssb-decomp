@@ -1,5 +1,5 @@
-#ifndef __STATIC_FN_8004AC00_H_
-#define __STATIC_FN_8004AC00_H_
+#ifndef __STATIC_STATIC_8004AC00_H_
+#define __STATIC_STATIC_8004AC00_H_
 
 #include "mssbTypes.h"
 
