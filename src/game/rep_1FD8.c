@@ -422,7 +422,7 @@ static u8 lbl_3_bss_9D81;
 static u8 lbl_3_bss_9D80;
 
 // .text:0x000C8650 size:0xD2C mapped:0x807076E4
-// 95.25%: registers differ throughout; the target also keeps j + 1 in a saved register
+// 95.27%: registers differ throughout; the target also keeps j + 1 in a saved register
 // and spills &g_d_GameSettings to 8(r1) for the final GameModeSelected test.
 void fn_3_C8650(void** files) {
     Rep1FD8Draw* draw;
@@ -654,7 +654,7 @@ void fn_3_C8650(void** files) {
             lbl_3_bss_9DE1++;
         }
     }
-    if (count < lbl_3_common_bss_350E4._30) {
+    if (lbl_3_common_bss_350E4._30 > count) {
         for (l = count; l < lbl_3_common_bss_350E4._30; l++, draw++) {
             draw->_A9 = 0;
             draw->_74 = NULL;
