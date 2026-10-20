@@ -106,11 +106,8 @@ menus/rep_07F0.c:
 	.data       start:0x00012170 end:0x00012298
 	.bss        start:0x000015A0 end:0x000015B8
 
-menus/tasks_37D98.c:
-	.text       start:0x00037D98 end:0x000399C0
-
 menus/rep_0840.c:
-	.text       start:0x000399C0 end:0x00040A9C
+	.text       start:0x00037D98 end:0x00040A9C
 	.rodata     start:0x00000840 end:0x00000898
 	.data       start:0x00012298 end:0x000124A8
 
