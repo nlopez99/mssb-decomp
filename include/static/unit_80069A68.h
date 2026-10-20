@@ -9,7 +9,7 @@ void fn_80069A98(void);
 void fn_80069AD4(void);
 void fn_80069B08(void);
 s32 fn_80069B68(void);
-void fn_80069BDC(void);
+void fn_80069BDC(struct TexBank* bank, s32 index, s32 index2, f32 alpha, f32 alpha2);
 void fn_8006A194(struct TexBank* bank, s32 index, f32 alpha);
 void fn_8006A500(struct TexBank* bank, s32 index, f32 alpha);
 void fn_8006A824(void);

@@ -253,7 +253,78 @@ void fn_8006A194(TexBank* bank, s32 index, f32 alpha) {
 }
 
 // .text:0x80069BDC size:0x5B8
-void fn_80069BDC(void) {
+void fn_80069BDC(TexBank* bank, s32 index, s32 index2, f32 alpha, f32 alpha2) {
+    f32 c;
+
+    GXSetDispCopySrc(0, 0, lbl_80109250.fbWidth, lbl_80109250.efbHeight);
+    GXSetDispCopyDst(lbl_80109250.fbWidth, lbl_80109250.efbHeight);
+    GXSetDispCopyYScale((f32)lbl_80109250.xfbHeight / (f32)lbl_80109250.efbHeight);
+    GXSetScissor(0, 0, 608, 448);
+    GXSetViewport(0.0f, 0.0f, 608.0f, 448.0f, -1.0f, 1.0f);
+    SetDisplayStateTexture(&bank->tex[index], GX_TEXMAP0, 0);
+    SetDisplayStateTexture(&bank->tex[index2], GX_TEXMAP1, 1);
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_U16, 0);
+    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    GXSetVtxDesc(GX_VA_CLR1, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR1, GX_CLR_RGBA, GX_RGBA8, 0);
+    GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U8, 0);
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetChanCtrl(GX_COLOR1A1, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetNumChans(2);
+    GXSetTexCoordGen2(GX_TEXCOORD0, GX_MTX2x4, GX_TG_TEX0, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
+    GXSetNumTexGens(1);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+    GXSetTevOrder(GX_TEVSTAGE1, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR1A1);
+    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_RASC);
+    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVREG0);
+    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_RASA);
+    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVREG0);
+    GXSetTevColorIn(GX_TEVSTAGE1, GX_CC_C0, GX_CC_RASC, GX_CC_TEXC, GX_CC_ZERO);
+    GXSetTevColorOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    GXSetTevAlphaIn(GX_TEVSTAGE1, GX_CA_TEXA, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO);
+    GXSetTevAlphaOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    GXSetNumTevStages(2);
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    c = 255.0f * alpha;
+    GXPosition3s16(0, 0, 0);
+    GXColor1u32(0);
+    GXColor4u8(c, c, c, 255);
+    GXTexCoord2u8(0, 0);
+    GXPosition3s16(608, 0, 0);
+    GXColor1u32(0);
+    GXColor4u8(c, c, c, 255);
+    GXTexCoord2u8(1, 0);
+    GXPosition3s16(608, 448, 0);
+    GXColor1u32(0);
+    GXColor4u8(c, c, c, 255);
+    GXTexCoord2u8(1, 1);
+    GXPosition3s16(0, 448, 0);
+    GXColor1u32(0);
+    GXColor4u8(c, c, c, 255);
+    GXTexCoord2u8(0, 1);
+    GXSetTevOrder(GX_TEVSTAGE1, GX_TEXCOORD0, GX_TEXMAP1, GX_COLOR1A1);
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    c = 255.0f * alpha2;
+    GXPosition3s16(0, 359, 0);
+    GXColor1u32(0);
+    GXColor4u8(c, c, c, 255);
+    GXTexCoord2u8(0, 0);
+    GXPosition3s16(608, 359, 0);
+    GXColor1u32(0);
+    GXColor4u8(c, c, c, 255);
+    GXTexCoord2u8(1, 0);
+    GXPosition3s16(608, 407, 0);
+    GXColor1u32(0);
+    GXColor4u8(c, c, c, 255);
+    GXTexCoord2u8(1, 1);
+    GXPosition3s16(0, 407, 0);
+    GXColor1u32(0);
+    GXColor4u8(c, c, c, 255);
+    GXTexCoord2u8(0, 1);
 }
 
 // .text:0x80069B68 size:0x74
