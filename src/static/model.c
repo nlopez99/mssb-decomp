@@ -33,6 +33,11 @@ typedef struct _VecXYZ {
 } VecXYZ;
 
 // STRUCTS BEGIN
+typedef struct ModelCallback28 {
+    /* 0x0000 */ void (*cb)(void);
+    /* 0x0004 */ u8 _0004[0x28 - 0x4];
+} ModelCallback28; // size: 0x28
+
 typedef struct RosterEntry {
     /* 0x0000 */ u8 _0000[0x24 - 0x0];
     /* 0x0024 */ s16 _24;
@@ -142,12 +147,6 @@ typedef struct ModelLoadReq {
     /* 0x001E */ u8 _001E[0x20 - 0x1E];
 } ModelLoadReq; // size: 0x20
 
-typedef struct ModelObj {
-    /* 0x0000 */ u8 _0000[0x44 - 0x0];
-    /* 0x0044 */ Control ctrl;
-    /* 0x0088 */ u8 _0088[0x90 - 0x88];
-} ModelObj; // size: 0x90
-
 typedef struct AnimState {
     /* 0x0000 */ void* hdr;
     /* 0x0004 */ u8 _0004[0x2C - 0x4];
@@ -230,7 +229,8 @@ typedef struct ModelActor {
     /* 0x0270 */ u8 _0270[0x273 - 0x270];
     /* 0x0273 */ s8 _273;
     /* 0x0274 */ s8 _274;
-    /* 0x0275 */ u8 _0275[0x278 - 0x275];
+    /* 0x0275 */ u8 _0275[0x277 - 0x275];
+    /* 0x0277 */ u8 _277;
     /* 0x0278 */ s8 _278;
     /* 0x0279 */ u8 _0279[0x27C - 0x279];
 } ModelActor; // size: 0x27C
@@ -241,7 +241,7 @@ typedef struct ModelSlot {
     /* 0x0008 */ void (*callback)(struct ModelSlot*);
     /* 0x000C */ u8 _000C[0xE - 0xC];
     /* 0x000E */ u16 seqNum;
-    /* 0x0010 */ u8 _0010[0x54 - 0x10];
+    /* 0x0010 */ Control ctrl;
     /* 0x0054 */ f32 speed;
     /* 0x0058 */ u8 _58;
     /* 0x0059 */ u8 _59;
@@ -267,8 +267,8 @@ typedef struct ModelTable {
 typedef struct ModelWork {
     /* 0x0000 */ u8 _0000[0x60 - 0x0];
     /* 0x0060 */ ModelTable* _0060;
-    /* 0x0064 */ ModelObj* _0064;
-    /* 0x0068 */ ModelObj* _0068;
+    /* 0x0064 */ ModelTable* _0064;
+    /* 0x0068 */ ModelTable* _0068;
     /* 0x006C */ ModelTable* _006C;
     /* 0x0070 */ u8 _0070[0xAC - 0x70];
     /* 0x00AC */ LITObj* lights[4];
@@ -319,14 +319,22 @@ typedef struct ModelWork {
     /* 0x2D8D */ u8 _2D8D;
     /* 0x2D8E */ u8 _2D8E[0x2D90 - 0x2D8E];
     /* 0x2D90 */ ModelEntry28* _2D90;
-    /* 0x2D94 */ u8 _2D94[0x3078 - 0x2D94];
-    /* 0x3078 */ s16 _3078;
+    /* 0x2D94 */ ModelCallback28* _2D94;
+    /* 0x2D98 */ u8 _2D98[0x3074 - 0x2D98];
+    /* 0x3074 */ void (*_3074)(MtxPtr);
+    /* 0x3078 */ u16 _3078;
     /* 0x307A */ u8 _307A;
-    /* 0x307B */ u8 _307B[0x3082 - 0x307B];
+    /* 0x307B */ u8 _307B[0x307C - 0x307B];
+    /* 0x307C */ u8 _307C;
+    /* 0x307D */ u8 _307D[0x307E - 0x307D];
+    /* 0x307E */ u8 _307E;
+    /* 0x307F */ u8 _307F[0x3082 - 0x307F];
     /* 0x3082 */ s8 _3082;
     /* 0x3083 */ u8 _3083[0x3085 - 0x3083];
     /* 0x3085 */ u8 _3085;
-    /* 0x3086 */ u8 _3086[0x308C - 0x3086];
+    /* 0x3086 */ u8 _3086[0x3088 - 0x3086];
+    /* 0x3088 */ u8 _3088;
+    /* 0x3089 */ u8 _3089[0x308C - 0x3089];
     /* 0x308C */ void (*_308C)(void);
     /* 0x3090 */ u8 _3090[0x3154 - 0x3090];
 } ModelWork; // size: 0x3154
@@ -338,7 +346,7 @@ extern RosterEntry inMemRoster[2][9];
 extern u8 lbl_803CBC3C[4];
 extern u8 lbl_8036C4FC[0x204C];
 extern u8 lbl_803CBBC0;
-extern s32 lbl_803CBC18;
+extern ModelActor* lbl_803CBC18;
 void fn_800B9AA8(void*);
 extern s32 lbl_803CBBF0;
 extern ModelLoadReq* lbl_803CC1B8;
@@ -360,6 +368,17 @@ void LITInitAttn(LITObj* light, f32 a0, f32 a1, f32 a2, f32 k0, f32 k1, f32 k2);
 void LITInitPos(LITObj* light, f32 x, f32 y, f32 z);
 void LITInitColor(LITObj* light, GXColor color);
 void fn_800BD2DC(void);
+void GXSetCurrentGXThread(void);
+void LITInitDir(LITObj* light, f32 nx, f32 ny, f32 nz);
+void LITXForm(LITObj* light, Mtx view);
+void fn_80052694(s32 idx);
+s32 fn_8005268C(void);
+void fn_8003414C(Mtx m);
+void minigamesGXStuff(void);
+void fn_800BD670(ModelTable* table, MtxPtr view);
+void fn_800BDA94(ModelSlot* slot, MtxPtr view);
+void fn_800B9948(s32 arg0);
+void fn_800B993C(void);
 void LoadActorLayout(void* layout);
 void convertGeometryAndSknHeader(void* geo, void* skn);
 void haveActLayoutPointToGeoHeader(void* layout, void* geo);
@@ -627,8 +646,117 @@ void fn_8001F16C(void) {
     }
 }
 
+static inline void drawSceneCallback(s32 cam, s32 pass) {
+    if (lbl_803CB7AC[!lbl_803CBBC0] != NULL) {
+        lbl_803CB7AC[!lbl_803CBBC0](fn_80052734(cam)->view, pass, 1);
+    }
+}
+
+static inline void drawSceneCallbackLast(s32 cam) {
+    if (lbl_803CB7AC[!lbl_803CBBC0] != NULL) {
+        lbl_803CB7AC[!lbl_803CBBC0](fn_80052734(cam)->view, 1, 1);
+        lbl_803CB7AC[!lbl_803CBBC0] = NULL;
+    }
+}
+
+static inline void drawExtraModels(void) {
+    ModelSlot* slot;
+    u16 i;
+
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
+    GXSetCullMode(GX_CULL_BACK);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+    for (i = 0; i < lbl_8036E548._0068->count; i++) {
+        slot = &lbl_8036E548._0068->slots[i];
+        if (slot->node != NULL && slot->_6C != 0) {
+            if (lbl_8036E548._2D94[i].cb != NULL) {
+                lbl_8036E548._2D94[i].cb();
+            }
+            fn_800BDA94(slot, fn_80052734(0)->view);
+        }
+    }
+}
+
+static inline void drawMinigameOverlay(void) {
+    fn_8003414C(fn_80052734(fn_8005268C())->view);
+    minigamesGXStuff();
+}
+
 // .text:0x8001E784 size:0x9E8
 void fn_8001E784(void) {
+    Vec dir;
+    LightPos* light;
+    s32 i;
+    int j;
+
+    GXSetCurrentGXThread();
+    if (lbl_8036E548._307A != 0) {
+        light = lbl_80367318;
+        if (lbl_8036E548._3085 != 0) {
+            fn_800BD2CC(lbl_800F7478[g_d_GameSettings._54].ambient.a != 0, lbl_800F7478[g_d_GameSettings._54].ambient);
+            for (j = 0; j < 4; j++) {
+                LITInitAttn(lbl_8036E548.lights[j], 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+                LITInitPos(lbl_8036E548.lights[j], light->pos.x, light->pos.y, light->pos.z);
+                LITInitColor(lbl_8036E548.lights[j], light->color);
+                dir.x = light->pos.x;
+                dir.y = light->pos.y;
+                dir.z = light->pos.z;
+                PSVECNormalize(&dir, &dir);
+                LITInitDir(lbl_8036E548.lights[j], dir.x, dir.y, dir.z);
+                LITXForm(lbl_8036E548.lights[j], fn_80052734(0)->view);
+                light++;
+            }
+        }
+        i = fn_800527BC() - 1;
+        do {
+            fn_80052694(i);
+            if (lbl_8036E548._307A == 3) {
+                drawSceneCallback(i, 0);
+                drawSceneCallbackLast(i);
+                if (lbl_8036E548._3078 != 0) {
+                    drawExtraModels();
+                }
+                if (lbl_8036E548._307E != 0) {
+                    drawMinigameOverlay();
+                }
+            } else if (lbl_8036E548._307A == 5) {
+                fn_8001E488();
+            } else if (lbl_8036E548._307A == 2) {
+                GXSetZCompLoc(GX_FALSE);
+                fn_8001E0D8(lbl_8036E548._0060, i, fn_80052734(i)->view);
+            } else if (lbl_8036E548._307A == 4) {
+                fn_8001E0D8(lbl_8036E548._0060, i, fn_80052734(i)->view);
+                if (lbl_8036E548._3078 != 0) {
+                    drawExtraModels();
+                }
+                drawMinigameOverlay();
+            } else if (lbl_8036E548._307A != 0) {
+                drawSceneCallback(i, 0);
+                if (lbl_8036E548._307C != 0) {
+                    fn_8001E0D8(lbl_8036E548._0060, i, fn_80052734(i)->view);
+                    fn_800BD670(lbl_8036E548._0064, fn_80052734(i)->view);
+                    if (lbl_8036E548._3078 != 0) {
+                        drawExtraModels();
+                    }
+                    if (lbl_8036E548._3074 != NULL) {
+                        lbl_8036E548._3074(fn_80052734(i)->view);
+                        lbl_8036E548._3074 = NULL;
+                    }
+                }
+                drawSceneCallbackLast(i);
+                if (lbl_8036E548._307E != 0) {
+                    drawMinigameOverlay();
+                }
+            }
+        } while (i-- != 0);
+        GXSetScissor(0, 0, 640, 448);
+    } else {
+        if (lbl_8036E548._3088 != 0 && lbl_8036E548._307E != 0) {
+            drawSceneCallback(0, 0);
+            drawSceneCallbackLast(0);
+        }
+        drawMinigameOverlay();
+    }
 }
 
 // .text:0x8001E488 size:0x2FC
@@ -670,7 +798,45 @@ void fn_8001E460(void (*draw)(MtxPtr view, s32, u32)) {
 }
 
 // .text:0x8001E0D8 size:0x388
-void fn_8001E0D8(void) {
+void fn_8001E0D8(ModelTable* table, int lod, MtxPtr camera) {
+    Mtx m;
+    GXColor ambient;
+    ModelActor* actor;
+    ModelSlot* slot;
+    u16 i;
+    u8 alpha;
+
+    alpha = 0xFF;
+    ambient = lbl_800F7478[g_d_GameSettings._54].ambient;
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
+    GXSetCullMode(GX_CULL_BACK);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+    for (i = 0; i < table->count; i++) {
+        actor = lbl_8036E548.actors[i];
+        if (actor != NULL && actor->_25D != 2) {
+            slot = &lbl_8036E548._0060->slots[actor->_255];
+            if (slot->node != NULL && slot->_6C != 0) {
+                if (alpha != actor->_277) {
+                    alpha = actor->_277;
+                    if (255 - alpha != 0) {
+                        ambient.a = alpha;
+                        if (alpha == 0) {
+                            continue;
+                        }
+                        fn_800BD2CC(1, ambient);
+                    } else {
+                        fn_800BD2CC(1, lbl_800F7478[g_d_GameSettings._54].ambient);
+                    }
+                }
+                PSMTXTrans(m, actor->pos.x, actor->pos.y, actor->pos.z);
+                PSMTXConcat(camera, m, m);
+                fn_800B9948(actor->_5C);
+                lbl_803CBC18 = actor;
+                fn_8001DEA4(slot, lod, m);
+            }
+        }
+    }
+    fn_800B993C();
 }
 
 // .text:0x8001DEA4 size:0x234
@@ -802,17 +968,17 @@ void fn_8001D180(void) {
 
 // .text:0x8001D148 size:0x38
 void fn_8001D148(s32 idx, f32 x, f32 y, f32 z) {
-    CTRLSetScale(&lbl_8036E548._0064[idx].ctrl, x, y, z);
+    CTRLSetScale(&lbl_8036E548._0064->slots[idx].ctrl, x, y, z);
 }
 
 // .text:0x8001D110 size:0x38
 void fn_8001D110(s32 idx, f32 x, f32 y, f32 z) {
-    CTRLSetScale(&lbl_8036E548._0068[idx].ctrl, x, y, z);
+    CTRLSetScale(&lbl_8036E548._0068->slots[idx].ctrl, x, y, z);
 }
 
 // .text:0x8001D0D0 size:0x40
 void fn_8001D0D0(s32 idx, f32 scale) {
-    CTRLSetScale(&lbl_8036E548._0068[idx].ctrl, scale, scale, scale);
+    CTRLSetScale(&lbl_8036E548._0068->slots[idx].ctrl, scale, scale, scale);
 }
 
 // .text:0x8001D074 size:0x5C
@@ -1854,6 +2020,6 @@ void fn_80011578(void) {
 }
 
 // .text:0x80011570 size:0x8
-s32 fn_80011570(void) {
+ModelActor* fn_80011570(void) {
     return lbl_803CBC18;
 }

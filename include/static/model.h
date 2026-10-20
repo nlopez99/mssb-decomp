@@ -15,7 +15,7 @@ struct ModelSub2C;
 
 struct _VecXYZ;
 
-s32 fn_80011570(void);
+struct ModelActor* fn_80011570(void);
 void fn_80011578(void);
 void fn_800115C8(s8 idx);
 void fn_80011604(s8 idx, s32 value);
@@ -104,7 +104,7 @@ void fn_8001D2D4(void);
 void fn_8001DB74(struct ModelTable* table);
 void fn_8001DD58(struct ModelNode* node, int lod, MtxPtr camera, u8 numLights, ...);
 void fn_8001DEA4(struct ModelSlot* slot, int lod, MtxPtr camera);
-void fn_8001E0D8(void);
+void fn_8001E0D8(struct ModelTable* table, int lod, MtxPtr camera);
 void fn_8001E460(void (*draw)(MtxPtr view, s32, u32));
 void fn_8001E474(void);
 void fn_8001E488(void);
