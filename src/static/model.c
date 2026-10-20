@@ -33,11 +33,6 @@ typedef struct _VecXYZ {
 } VecXYZ;
 
 // STRUCTS BEGIN
-typedef struct ModelCallback28 {
-    /* 0x0000 */ void (*cb)(void);
-    /* 0x0004 */ u8 _0004[0x28 - 0x4];
-} ModelCallback28; // size: 0x28
-
 typedef struct RosterEntry {
     /* 0x0000 */ u8 _0000[0x24 - 0x0];
     /* 0x0024 */ s16 _24;
@@ -64,7 +59,7 @@ typedef struct JointPair {
 } JointPair; // size: 0x4
 
 typedef struct ModelEntry28 {
-    /* 0x0000 */ u8 _0000[0x4 - 0x0];
+    /* 0x0000 */ void (*cb)(void);
     /* 0x0004 */ f32 _04;
     /* 0x0008 */ f32 _08;
     /* 0x000C */ f32 _0C;
@@ -277,7 +272,7 @@ typedef struct ModelWork {
     /* 0x0140 */ ModelPose poses[13];
     /* 0x0C04 */ ModelActor actorData[13];
     /* 0x2C50 */ ModelActor* actors[13];
-    /* 0x2C84 */ u8 _2C84[0x2C88 - 0x2C84];
+    /* 0x2C84 */ void* _2C84;
     /* 0x2C88 */ void* _2C88;
     /* 0x2C8C */ u8 _2C8C[0x2CA4 - 0x2C8C];
     /* 0x2CA4 */ u32 bufSize;
@@ -319,12 +314,15 @@ typedef struct ModelWork {
     /* 0x2D8D */ u8 _2D8D;
     /* 0x2D8E */ u8 _2D8E[0x2D90 - 0x2D8E];
     /* 0x2D90 */ ModelEntry28* _2D90;
-    /* 0x2D94 */ ModelCallback28* _2D94;
-    /* 0x2D98 */ u8 _2D98[0x3074 - 0x2D98];
+    /* 0x2D94 */ ModelEntry28* _2D94;
+    /* 0x2D98 */ void* _2D98;
+    /* 0x2D9C */ s32* _2D9C;
+    /* 0x2DA0 */ void* _2DA0[3];
+    /* 0x2DAC */ u8 _2DAC[0x3074 - 0x2DAC];
     /* 0x3074 */ void (*_3074)(MtxPtr);
     /* 0x3078 */ u16 _3078;
     /* 0x307A */ u8 _307A;
-    /* 0x307B */ u8 _307B[0x307C - 0x307B];
+    /* 0x307B */ u8 _307B;
     /* 0x307C */ u8 _307C;
     /* 0x307D */ u8 _307D[0x307E - 0x307D];
     /* 0x307E */ u8 _307E;
@@ -368,6 +366,9 @@ void LITInitAttn(LITObj* light, f32 a0, f32 a1, f32 a2, f32 k0, f32 k1, f32 k2);
 void LITInitPos(LITObj* light, f32 x, f32 y, f32 z);
 void LITInitColor(LITObj* light, GXColor color);
 void fn_800BD2DC(void);
+ModelTable* ActorObjectInitTable(s32 count);
+void fn_800BDC88(ModelTable* table, u16 slot, u16 id, void* layout, s32 arg4, s32 arg5);
+void convertTextureHeader(void* tex);
 void GXSetCurrentGXThread(void);
 void LITInitDir(LITObj* light, f32 nx, f32 ny, f32 nz);
 void LITXForm(LITObj* light, Mtx view);
@@ -382,7 +383,7 @@ void fn_800B993C(void);
 void LoadActorLayout(void* layout);
 void convertGeometryAndSknHeader(void* geo, void* skn);
 void haveActLayoutPointToGeoHeader(void* layout, void* geo);
-void fn_800BD190(void* geo, s32 arg1);
+void fn_800BD190(void* geo, void* tex);
 void fn_800238E0(ModelTable* group, u16 slot, s16 id, void* layout);
 void fn_800B4CA0(ModelNode* node, f32 time);
 void fn_800B4C04(ModelNode* node, f32 speed);
@@ -433,8 +434,9 @@ static u8 lbl_800EE800[0x110] = {
     0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
     0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
 };
-u32 lbl_800EE910[8] = {
-    0x0000040B, 0x40093FF8, 0x0E581000, 0x0005F484, 0x0000040B, 0x40095BB8, 0x0E5E0800, 0x0006053C,
+AramEntry lbl_800EE910[2] = {
+    { 0x0000040B, 0x40093FF8, 0x0E581000, 0x0005F484 },
+    { 0x0000040B, 0x40095BB8, 0x0E5E0800, 0x0006053C },
 };
 u32 lbl_800EE930[4] = {
     0x0000040B, 0x40001640, 0x08EB4800, 0x00000C38,
@@ -577,6 +579,43 @@ void fn_8001F8A4(void) {
 
 // .text:0x8001F5E8 size:0x2BC
 void fn_8001F5E8(void) {
+    void* layout;
+    void* geo;
+    void* tex;
+    s32 count = 30;
+    u16 i;
+    s32 j;
+
+    lbl_8036E548._3078 = 30;
+    for (i = 0; i < 3; i++) {
+        lbl_8036E548._2DA0[i] = (u8*)lbl_8036E548._2D9C + lbl_8036E548._2D9C[i];
+    }
+    layout = lbl_8036E548._2DA0[0];
+    geo = lbl_8036E548._2DA0[1];
+    tex = lbl_8036E548._2DA0[2];
+    LoadActorLayout(layout);
+    convertGeometryAndSknHeader(geo, NULL);
+    haveActLayoutPointToGeoHeader(layout, geo);
+    convertTextureHeader(tex);
+    fn_800BD190(geo, tex);
+    lbl_8036E548._0068 = ActorObjectInitTable(count);
+    for (i = 0; i < 30; i++) {
+        fn_800BDC88(lbl_8036E548._0068, i, i, lbl_8036E548._2DA0[0], 0, 0);
+        fn_800BD548(&lbl_8036E548._0068->slots[i], 4, lbl_8036E548.lights[0], lbl_8036E548.lights[1], lbl_8036E548.lights[2], lbl_8036E548.lights[3]);
+        CTRLSetTranslation(&lbl_8036E548._0068->slots[i].ctrl, 0.0f, 0.0f, 0.0f);
+        CTRLSetRotation(&lbl_8036E548._0068->slots[i].ctrl, 0.0f, 0.0f, 0.0f);
+    }
+    lbl_8036E548._2D94 = _OSAllocFromHeap(32, count * sizeof(ModelEntry28));
+    for (j = 0; j < count; j++) {
+        lbl_8036E548._2D94[j]._04 = 0.0f;
+        lbl_8036E548._2D94[j]._08 = 0.0f;
+        lbl_8036E548._2D94[j]._0C = 0.0f;
+        lbl_8036E548._2D94[j]._10 = 0.0f;
+        lbl_8036E548._2D94[j]._14 = 0.0f;
+        lbl_8036E548._2D94[j]._18 = 0.0f;
+        lbl_8036E548._2D94[j]._26 = 0;
+        lbl_8036E548._2D94[j].cb = NULL;
+    }
 }
 
 // .text:0x8001F4C0 size:0x128
@@ -1059,6 +1098,14 @@ void fn_8001CCC8(void) {
 
 // .text:0x8001CBD4 size:0xF4
 void fn_8001CBD4(void) {
+    int id;
+
+    if (g_d_GameSettings.GameModeSelected == 7) {
+        id = g_d_GameSettings.StadiumID + 7;
+    } else {
+        id = g_d_GameSettings.StadiumID;
+    }
+    fn_8001CA40(id);
 }
 
 static inline void updateLightDir(void) {
@@ -1312,7 +1359,64 @@ void fn_8001B4D8(int idx, BOOL apply) {
 }
 
 // .text:0x8001B35C size:0x17C
-void fn_8001B35C(void) {
+int fn_8001B35C(int idx, int side) {
+    Vec v;
+    ModelActor* actor = lbl_8036E548.actors[idx];
+    ModelSlot* slot;
+    int jointIdx = 1;
+    int steps = 0;
+    int j;
+    f32 y;
+    f32 d;
+    f32 t;
+
+    if (actor == NULL) {
+        return 0;
+    }
+    switch (side) {
+    case 1:
+        jointIdx = 2;
+        break;
+    case 0:
+        jointIdx = 3;
+        break;
+    case 2:
+        jointIdx = 1;
+        break;
+    }
+    if (actor != NULL) {
+        j = getActorJoint(actor, jointIdx);
+        if (j == 0xFFFF) {
+            y = 0.0f;
+        } else {
+            slot = &lbl_8036E548._0060->slots[actor->_255];
+            fn_800B2C44(slot->node, j, &v);
+            y = v.y;
+            y += actor->pos.y;
+        }
+    }
+    d = y - actor->pos.y;
+    if (d < 0.0f && d >= -30.0f) {
+        steps = 1;
+        t = -0.5f;
+        while (1) {
+            if (d > t) {
+                break;
+            }
+            t -= 0.5f;
+            steps++;
+        }
+    } else if (d >= 0.5f && d < 30.0f) {
+        t = 0.5f;
+        while (1) {
+            if (d < t) {
+                break;
+            }
+            t += 0.5f;
+            steps--;
+        }
+    }
+    return steps;
 }
 
 // .text:0x8001B308 size:0x54
@@ -1499,6 +1603,27 @@ void fn_800189B8(void) {
 
 // .text:0x800188C0 size:0xF8
 void fn_800188C0(void) {
+    ModelLoadReq* req = lbl_803CC1B8;
+
+    switch (req->_14) {
+    case 0:
+        if (g_d_GameSettings.GameModeSelected == 6) {
+            lbl_8036E548._2C84 = ARAMTransfer(&lbl_800EE910[1], 0, 0, 0);
+        } else {
+            lbl_8036E548._2C84 = ARAMTransfer(&lbl_800EE910[0], 0, 0, 0);
+        }
+        req->_14++;
+        break;
+    case 1:
+        if ((s32)lbl_803C6CF8._715 == 1) {
+            req->_14++;
+        }
+        break;
+    case 2:
+        lbl_8036E548._307B = 0;
+        fn_800B0A14_removeQueue();
+        break;
+    }
 }
 
 // .text:0x80018270 size:0x650
@@ -1807,7 +1932,7 @@ void LoadModel(void) {
 }
 
 // .text:0x800126EC size:0x10C
-void fn_800126EC(ModelSub2C* sub, s32 arg1, u8* idx) {
+void fn_800126EC(ModelSub2C* sub, void* tex, u8* idx) {
     void* layout;
     void* geo;
     ModelSlot* slot;
@@ -1818,7 +1943,7 @@ void fn_800126EC(ModelSub2C* sub, s32 arg1, u8* idx) {
     LoadActorLayout(layout);
     convertGeometryAndSknHeader(geo, NULL);
     haveActLayoutPointToGeoHeader(layout, geo);
-    fn_800BD190(geo, arg1);
+    fn_800BD190(geo, tex);
     fn_800238E0(lbl_8036E548._013C, sub->_60, sub->_60, layout);
     if (sub->files[2] != NULL) {
         fn_80025DDC(sub->files[idx[2]]);
