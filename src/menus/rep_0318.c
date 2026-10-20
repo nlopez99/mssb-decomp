@@ -943,10 +943,9 @@ void fn_2_F200(u8 port) {
 }
 
 // .text:0x0000ED94 size:0x46C
-// 99.2%: the target forms &lbl_2_bss_F410._20[port] from the unextended port
-// (rlwinm) instead of reusing port * 4 from lbl_2_bss_F468._00[port].
 s32 fn_2_ED94(u8 port, u16 held, u16 trg, u16 rep) {
     s8 team;
+    int pad;
 
     if (lbl_2_bss_F468._41[port] == 0) {
         if ((held & 8) || (held & 4) || (held & 1) || (held & 2)) {
@@ -977,7 +976,8 @@ s32 fn_2_ED94(u8 port, u16 held, u16 trg, u16 rep) {
         fn_800625A4(port, 0xD);
         return 1;
     } else if (lbl_2_bss_F468._00[port] != 9) {
-        lbl_2_bss_F468._20[port] = lbl_2_bss_F410._20[port];
+        pad = port;
+        lbl_2_bss_F468._20[port] = lbl_2_bss_F410._20[pad];
         if (lbl_2_bss_F468._45[port] != 0) {
             if (lbl_2_bss_F468._47[port] == 0 && (held & 2)) {
                 lbl_2_bss_F468._47[port] = 1;
@@ -991,17 +991,17 @@ s32 fn_2_ED94(u8 port, u16 held, u16 trg, u16 rep) {
             if (g_d_GameSettings._10 == 0 && port != 0) {
                 team = lbl_8034E9A0._46F8[0] == 0;
                 lbl_803C6028._74[team] = 1;
-                lbl_2_bss_F410._20[port] = fn_80050760(team, 0, 0, 0, 0);
+                lbl_2_bss_F410._20[pad] = fn_80050760(team, 0, 0, 0, 0);
             } else {
-                lbl_2_bss_F410._20[port] = fn_80050760(lbl_8034E9A0._46FC[lbl_8034E9A0._46F8[port]] == 0 ? lbl_8034E9A0._46F8[port] : lbl_8034E9A0._46F8[0] == 0, 0, 0, 0, 0);
+                lbl_2_bss_F410._20[pad] = fn_80050760(lbl_8034E9A0._46FC[lbl_8034E9A0._46F8[port]] == 0 ? lbl_8034E9A0._46F8[port] : lbl_8034E9A0._46F8[0] == 0, 0, 0, 0, 0);
             }
         } else {
             if (g_d_GameSettings._10 == 0 && port != 0) {
                 team = lbl_8034E9A0._46F8[0] == 0;
                 lbl_803C6028._74[team] = 1;
-                lbl_2_bss_F410._20[port] = fn_80050760(team, held, trg, rep, 0);
+                lbl_2_bss_F410._20[pad] = fn_80050760(team, held, trg, rep, 0);
             } else {
-                lbl_2_bss_F410._20[port] = fn_80050760(lbl_8034E9A0._46FC[lbl_8034E9A0._46F8[port]] == 0 ? lbl_8034E9A0._46F8[port] : lbl_8034E9A0._46F8[0] == 0, held, trg, rep, 0);
+                lbl_2_bss_F410._20[pad] = fn_80050760(lbl_8034E9A0._46FC[lbl_8034E9A0._46F8[port]] == 0 ? lbl_8034E9A0._46F8[port] : lbl_8034E9A0._46F8[0] == 0, held, trg, rep, 0);
             }
         }
     }
@@ -1223,13 +1223,21 @@ done:
     }
 }
 
+static inline s32 isRosterLocked(void) {
+    s32 locked = 0;
+
+    if (g_d_GameSettings.GameModeSelected == 5 && lbl_2_bss_F468._3F[0] != 0) {
+        locked = 1;
+    }
+    return locked != 0;
+}
+
 // .text:0x0000CE44 size:0x1168
-// 93.5% draft: the target forms lbl_2_bss_F468._00[port] as base plus port*4
-// (lwzx), materializes the lock flag with neg/or/srwi, and allocates otherwise.
+// 94.0% draft: the target forms lbl_2_bss_F468._00[port] as base plus port*4
+// (lwzx), returns through bne where this has beq; b, and allocates otherwise.
 void fn_2_CE44(s32 port) {
     s32 used = 0;
     s8 freeCount = 0;
-    s32 locked = 0;
     s32 cap;
     s32 i;
     s32 c;
@@ -1238,10 +1246,7 @@ void fn_2_CE44(s32 port) {
     s8 slot;
     s8 id;
 
-    if (g_d_GameSettings.GameModeSelected == 5 && lbl_2_bss_F468._3F[0] != 0) {
-        locked = 1;
-    }
-    if (locked != 0) {
+    if (isRosterLocked() & 1) {
         sndFXStartEx(0x1BA, lbl_800EFBA4[3], 0x3F, 0);
         return;
     }
