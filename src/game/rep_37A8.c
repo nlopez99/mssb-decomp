@@ -855,16 +855,13 @@ void fn_3_144ADC(int player) {
 }
 
 // .text:0x0014471C size:0x3C0 mapped:0x807837B0
-// 88.40%: the frames path schedules its int-to-float conversions and the 21E24[11]
-// load differently, and the speed path's FPRs differ.
 void fn_3_14471C(int player) {
     Unk37A8Fielder* fielder;
     VecXYZ d;
-    f32 xx;
-    f32 zz;
     f32 dist;
     f32 scale;
     s32 frames;
+    f32 steps;
     int port;
     int coin;
 
@@ -886,9 +883,7 @@ void fn_3_14471C(int player) {
     d.z = fielder->_114 - g_Minigame.wallBall_coinCoordinates[coin].z;
     if (MG._193A[coin] == 4) {
         if (MG._1B84[coin] != 5) {
-            xx = d.x * d.x;
-            zz = d.z * d.z;
-            dist = dolsqrtf2(xx + zz);
+            dist = dolsqrtf2(d.x * d.x + d.z * d.z);
             if (player == 0 || player == 3) {
                 scale = lbl_3_data_21E24[8] / dist;
             } else {
@@ -901,14 +896,14 @@ void fn_3_14471C(int player) {
             frames = lbl_3_data_21E68[23] + 10;
             g_Minigame.wallBall_coinVelocity[coin].x = (fielder->_10C - g_Minigame.wallBall_coinCoordinates[coin].x) / frames;
             g_Minigame.wallBall_coinVelocity[coin].z = (fielder->_114 - g_Minigame.wallBall_coinCoordinates[coin].z) / frames;
-            g_Minigame.wallBall_coinVelocity[coin].y = -lbl_3_data_21E24[11] * frames * 0.5f;
+            g_Minigame.wallBall_coinVelocity[coin].y = -lbl_3_data_21E24[11] * frames / 2.0f;
         }
         MG._193A[coin] = 6;
     } else {
-        frames = LERPToNewRange_Float(fielder->_1CE, 0, 100, lbl_3_data_21E1C[0], lbl_3_data_21E1C[1]);
-        g_Minigame.wallBall_coinVelocity[coin].x = d.x / frames;
-        g_Minigame.wallBall_coinVelocity[coin].y = d.y / frames;
-        g_Minigame.wallBall_coinVelocity[coin].z = d.z / frames;
+        steps = LERPToNewRange_Float(fielder->_1CE, 0, 100, lbl_3_data_21E1C[0], lbl_3_data_21E1C[1]);
+        g_Minigame.wallBall_coinVelocity[coin].x = d.x / steps;
+        g_Minigame.wallBall_coinVelocity[coin].y = d.y / steps;
+        g_Minigame.wallBall_coinVelocity[coin].z = d.z / steps;
         MG._193A[coin] = 5;
     }
     MG._17C8[coin] = 0;
