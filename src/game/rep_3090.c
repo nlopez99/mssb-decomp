@@ -3555,8 +3555,8 @@ void fn_3_FCF24(void) {
     cam->_003C = total;
 }
 
-// 94.64%: registers only, the same rotation as fn_3_FCE38 (camera r5, key offset r6,
-// key count r7 in the target).
+// 98.28%: registers only, the same rotation as fn_3_FCE38 (camera r5, key offset r6,
+// key count r7 in the target); loop forms and a late camera load change nothing.
 // .text:0x000FCEB0 size:0x74 mapped:0x8073BF44
 int fn_3_FCEB0(f32 time) {
     lbl_3_common_bss_DE94_s2* cam = lbl_3_common_bss_DE94._0000;
@@ -3574,8 +3574,8 @@ int fn_3_FCEB0(f32 time) {
     return i;
 }
 
-// registers only; the target keeps the camera in r5, the key offset in r6 and the key
-// count in r7.
+// 98.00%: registers only; the target keeps the camera in r5, the key offset in r6 and the
+// key count in r7. A permuter session found nothing.
 // .text:0x000FCE38 size:0x78 mapped:0x8073BECC
 int fn_3_FCE38(int i, f32 time) {
     lbl_3_common_bss_DE94_s2* cam = lbl_3_common_bss_DE94._0000;
