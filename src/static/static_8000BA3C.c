@@ -308,8 +308,8 @@ void fn_8000E030(SpriteShape* shape, Mtx mtx, ShapeStyle* style) {
     fn_800B12DC(verts, count);
 }
 
-// Differs: the target computes the ring addresses for the closing copy late and runs the
-// vertex loop on ctr; with a u32 counter this build unrolls it, with u16 it compares.
+// Differs: saved-register numbers, a copy of the segment count (mr) the target loads in
+// place, and the vertex loop, which compares a u16 counter where the target uses ctr.
 // .text:0x8000DC9C size:0x394
 void fn_8000DC9C(SpriteShape* shape, Mtx mtx, ShapeStyle* style) {
     Vec out;
@@ -319,16 +319,17 @@ void fn_8000DC9C(SpriteShape* shape, Mtx mtx, ShapeStyle* style) {
     Vec ringB[257];
     Vec ringA[257];
     Mtx m;
-    u32 colorA;
     u32 colorB;
-    s32 i;
-    s32 n;
+    u32 colorA;
     s32 step;
+    s32 n;
     s16 angle;
-    Vec* pa;
     Vec* pb;
+    s32 i;
+    Vec* pa;
     SpriteVertex* v;
     u16 j;
+    s32 k;
     u32 count;
     f32 s;
     f32 c;
@@ -397,12 +398,13 @@ void fn_8000DC9C(SpriteShape* shape, Mtx mtx, ShapeStyle* style) {
         pb++;
     } while (--n != 0);
     if (!shape->_25_b7) {
-        ringA[style->_34].x = ringA[0].x;
-        ringB[style->_34].x = ringB[0].x;
-        ringA[style->_34].y = ringA[0].y;
-        ringB[style->_34].y = ringB[0].y;
-        ringA[style->_34].z = ringA[0].z;
-        ringB[style->_34].z = ringB[0].z;
+        k = style->_34;
+        ringA[k].x = ringA[0].x;
+        ringB[k].x = ringB[0].x;
+        ringA[k].y = ringA[0].y;
+        ringB[k].y = ringB[0].y;
+        ringA[k].z = ringA[0].z;
+        ringB[k].z = ringB[0].z;
     }
     if (shape->_25_b7) {
         count = (style->_36 + 1) * 2;
@@ -428,8 +430,8 @@ void fn_8000DC9C(SpriteShape* shape, Mtx mtx, ShapeStyle* style) {
     DrawNullSprite(verts, count);
 }
 
-// Draft from fn_8000DC9C, with its differences: the ring addresses for the closing copy
-// are hoisted to saved registers and the vertex loop is unrolled by two.
+// Differs like fn_8000DC9C, from which it was written: saved-register numbers, the
+// segment count's copy and the u16 vertex loop counter where the target uses ctr.
 // .text:0x8000D8A4 size:0x3F8
 void fn_8000D8A4(SpriteShape* shape, Mtx mtx, ShapeStyle* style) {
     Vec out;
@@ -438,16 +440,17 @@ void fn_8000D8A4(SpriteShape* shape, Mtx mtx, ShapeStyle* style) {
     SpriteVertex verts[516];
     Vec ringB[257];
     Vec ringA[257];
-    u32 colorA;
     u32 colorB;
-    s32 i;
-    s32 n;
+    u32 colorA;
     s32 step;
+    s32 n;
     s16 angle;
-    Vec* pa;
     Vec* pb;
+    s32 i;
+    Vec* pa;
     SpriteVertex* v;
-    u32 j;
+    u16 j;
+    s32 k;
     u32 count;
     f32 s;
     f32 c;
@@ -517,12 +520,13 @@ void fn_8000D8A4(SpriteShape* shape, Mtx mtx, ShapeStyle* style) {
         pb++;
     } while (--n != 0);
     if (!shape->_29_b7) {
-        ringA[style->_34].x = ringA[0].x;
-        ringB[style->_34].x = ringB[0].x;
-        ringA[style->_34].y = ringA[0].y;
-        ringB[style->_34].y = ringB[0].y;
-        ringA[style->_34].z = ringA[0].z;
-        ringB[style->_34].z = ringB[0].z;
+        k = style->_34;
+        ringA[k].x = ringA[0].x;
+        ringB[k].x = ringB[0].x;
+        ringA[k].y = ringA[0].y;
+        ringB[k].y = ringB[0].y;
+        ringA[k].z = ringA[0].z;
+        ringB[k].z = ringB[0].z;
     }
     if (shape->_29_b7) {
         count = (style->_36 + 1) * 2;
