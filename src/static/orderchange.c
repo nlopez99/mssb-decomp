@@ -796,7 +796,6 @@ u8 fn_800471F4(u8 mode, u8 player) {
 }
 
 // .text:0x8004617C size:0x1078
-// The masking by 0x200 keeps the repeat buttons in r4 in the target and reloads held first
 void fn_8004617C(s32 team) {
     PadButtons pad;
     s32 i;
@@ -832,9 +831,9 @@ void fn_8004617C(s32 team) {
     pad.repeat = lbl_803297E0.s.pause.team == -1 ? lbl_8034E9A0.s.pads[team].repeat : lbl_803297E0.pads[team].repeat;
     locked = lbl_803297E0.s.pause._16[player];
     if (locked != 0) {
-        pad.repeat &= 0x200;
         pad.held &= 0x200;
         pad.pressed &= 0x200;
+        pad.repeat &= 0x200;
     }
     if (pad.pressed & 0x10) {
         if (lbl_803297E0.s.pause._29[player] != 0) {
