@@ -2117,8 +2117,8 @@ void fn_3_129370(void) {
 }
 
 // .text:0x00128C18 size:0x758 mapped:0x80767CAC
-// 98.70%: before the minigame loop the target zeroes i once and copies it to j and the
-// table offset (li r27,0; mr r26,r27; mr r28,r27), the base loads 0 into each.
+// The flag of the first block reuses i and its loop j, as the later loops use them: with a
+// flag and counter of their own, the minigame loop's zeroes come out in other registers.
 void fn_3_128C18(void) {
     VecXYZ pos;
     int x;
@@ -2126,8 +2126,6 @@ void fn_3_128C18(void) {
     s32 i;
     s32 j;
     UnkTask3448* task = lbl_803CC1B8;
-    s32 k;
-    BOOL found;
     u8 c;
 
     if (lbl_3_common_bss_32724._96 != 0) {
@@ -2154,17 +2152,17 @@ void fn_3_128C18(void) {
     }
     lbl_3_common_bss_32724._B8 = 0;
     if (g_GameLogic.gameStatus == 0x27 && g_Minigame._1A3D == 1) {
-        found = FALSE;
-        for (k = 0; k < 4; k++) {
-            if (g_Minigame._1E08[k][0] == g_Minigame._1908 && g_Minigame._1E08[k][1] == 0) {
-                found = TRUE;
+        i = FALSE;
+        for (j = 0; j < 4; j++) {
+            if (g_Minigame._1E08[j][0] == g_Minigame._1908 && g_Minigame._1E08[j][1] == 0) {
+                i = TRUE;
                 break;
             }
         }
         if (g_Minigame._1E08[0][1] == 0 && g_Minigame._1E08[1][1] == 0 && g_Minigame._1E08[2][1] == 0 &&
             g_Minigame._1E08[3][1] == 0) {
             lbl_80371C30[task->_14]._00->_64 = lbl_3_data_AA98[2];
-        } else if (found) {
+        } else if (i) {
             lbl_80371C30[task->_14]._00->_64 = lbl_3_data_AA98[8];
         } else {
             lbl_80371C30[task->_14]._00->_64 = lbl_3_data_AA98[10];
@@ -2201,8 +2199,9 @@ void fn_3_128C18(void) {
             lbl_80371C30[task->_14]._00->_4C = 0.0f;
             return;
         }
-        j = 0;
-        for (i = j; i < 4; i++) {
+        i = 0;
+        j = i;
+        for (; i < 4; i++) {
             if (g_Minigame.minigameControlStruct._1C[i] == 1) {
                 getAnimRelatedCoordinates(g_Minigame.minigameControlStruct.characterIndex[i], 9, &pos);
                 c = g_Minigame.minigameControlStruct._4[i];
