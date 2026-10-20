@@ -422,8 +422,8 @@ static u8 lbl_3_bss_9D81;
 static u8 lbl_3_bss_9D80;
 
 // .text:0x000C8650 size:0xD2C mapped:0x807076E4
-// 94.59%: registers differ throughout, and the target spills &g_d_GameSettings to 8(r1) for
-// the final GameModeSelected test and sets the first loop's end flag before draws[1] is set up.
+// 95.25%: registers differ throughout; the target also keeps j + 1 in a saved register
+// and spills &g_d_GameSettings to 8(r1) for the final GameModeSelected test.
 void fn_3_C8650(void** files) {
     Rep1FD8Draw* draw;
     Rep1FD8Prop* prop;
@@ -433,7 +433,6 @@ void fn_3_C8650(void** files) {
     u32 total;
     u32 i;
     u32 j;
-    u32 k;
     s32 l;
     s32 m;
     s32 count;
@@ -454,12 +453,11 @@ void fn_3_C8650(void** files) {
     fn_800BDC88(lbl_8036E548._6C, 0, 0, files[indices[1]], NULL, 0);
     fn_800BDC88(lbl_8036E548._6C, 1, 1, files[indices[2]], NULL, 0);
     fn_800BDC88(lbl_8036E548._6C, 2, 2, files[indices[3]], NULL, 0);
-    for (i = 0, j = 3; i < n; i++, j++) {
+    for (j = 3, i = 0; i < n; j++, i++) {
         fn_800BDC88(lbl_8036E548._6C, j, j, files[indices[4]], NULL, 0);
     }
     fn_800BDC88(lbl_8036E548._6C, j, j, files[indices[5]], NULL, 0);
-    k = j + 1;
-    fn_800BDC88(lbl_8036E548._6C, k, k, files[indices[6]], NULL, 0);
+    fn_800BDC88(lbl_8036E548._6C, j + 1, j + 1, files[indices[6]], NULL, 0);
     for (i = 0; i < total; i++) {
         fn_800BD548(&lbl_8036E548._6C->models[i], 4, lbl_3_common_bss_350E4._20, lbl_3_common_bss_350E4._24,
                     lbl_3_common_bss_350E4._28, lbl_3_common_bss_350E4._2C);
@@ -504,6 +502,7 @@ void fn_3_C8650(void** files) {
     draw->_96 = -1;
     draw->_98 = 0;
     draw++;
+    end = FALSE;
     draw->_A9 = 1;
     draw->_74 = &lbl_8036E548._6C->models[1];
     draw->_78 = NULL;
@@ -525,7 +524,6 @@ void fn_3_C8650(void** files) {
     count = 2;
 
     if (g_d_GameSettings.GameModeSelected != 7) {
-        end = FALSE;
         lbl_3_bss_9DE5 = 0;
         lbl_3_bss_9DE4 = count;
         for (l = 0, prop = lbl_3_data_17514; l < 10; l++, prop++) {
@@ -634,7 +632,7 @@ void fn_3_C8650(void** files) {
                 draw->_74 = &lbl_8036E548._6C->models[j];
                 draw->_78 = files[indices[8]];
             } else {
-                draw->_74 = &lbl_8036E548._6C->models[k];
+                draw->_74 = &lbl_8036E548._6C->models[j + 1];
                 draw->_78 = files[indices[9]];
             }
             draw->_7C = NULL;
@@ -1793,8 +1791,8 @@ void fn_3_C2C80(Rep1FD8Particle* p, Rep1FD8Spawner* spawner) {
 }
 
 // .text:0x000C2AA0 size:0x1E0 mapped:0x80701B34
-// 93.77%, as sta_c2's identical fn_3_CD968: the target loads pos->x before pos->y for the
-// corners and computes them in other FPRs.
+// 94.20%: width and height are saved in f29 and f31 in the target, f31 and f29 here, so
+// the corners' FPRs differ (sta_c2's identical fn_3_CD968 differs the same way).
 u8 fn_3_C2AA0(Vec* pos, f32 width, f32 height) {
     Vec out;
     Vec corners[4];
@@ -1806,16 +1804,20 @@ u8 fn_3_C2AA0(Vec* pos, f32 width, f32 height) {
     f32 right;
     f32 bottom;
     f32 top;
+    f32 x;
+    f32 y;
 
     camera = fn_80052734(fn_8005268C());
     PSMTXMultVec(camera->view, pos, pos);
     if (pos->z > -1.0f || pos->z < -512.0f) {
         return FALSE;
     }
-    bottom = pos->y - height * 0.5f;
-    right = pos->x + width * 0.5f;
-    left = pos->x - width * 0.5f;
-    top = pos->y + height * 0.5f;
+    x = pos->x;
+    y = pos->y;
+    bottom = y - height / 2.0f;
+    right = x + width / 2.0f;
+    left = x - width / 2.0f;
+    top = y + height / 2.0f;
     corners[0].z = corners[1].z = corners[2].z = corners[3].z = pos->z;
     corners[0].x = corners[3].x = left;
     corners[1].x = corners[2].x = right;
@@ -1993,8 +1995,8 @@ void fn_3_C2244(void) {
 }
 
 // .text:0x000C1C18 size:0x62C mapped:0x80700CAC
-// 95.95%: register allocation differs from the second quad loop on (target: size reuses
-// f26, dx/dy in f28/f27, color in r27 and i in r25; base one register off each).
+// 96.30%: halfWidth and height swap f25/f26, the second color takes r25 (target r27, i in
+// r25), and the code between the two quads is scheduled differently.
 void fn_3_C1C18(Rep1FD8CameraSlot* slot) {
     Vec pos;
     Mtx m = {
@@ -2002,14 +2004,14 @@ void fn_3_C1C18(Rep1FD8CameraSlot* slot) {
         { 0.0f, 1.0f, 0.0f, 0.0f },
         { 0.0f, 0.0f, 1.0f, 0.0f },
     };
-    Rep1FD8CameraTask* task = slot->task;
-    s32 i;
-    u32 color;
-    f32 halfWidth;
-    f32 height;
-    f32 size;
     f32 dx;
     f32 dy;
+    u32 color;
+    Rep1FD8CameraTask* task = slot->task;
+    f32 height;
+    s32 i;
+    f32 halfWidth;
+    f32 size;
 
     GXClearVtxDesc();
     GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
@@ -2071,8 +2073,8 @@ void fn_3_C1C18(Rep1FD8CameraSlot* slot) {
         GXColor1u32(color);
         GXTexCoord2u16(1, 0);
         GXEnd();
-        pos.x += (dx - dy) * 0.5f;
-        pos.y += (dx + dy) * 0.5f;
+        pos.x += (dx - dy) / 2.0f;
+        pos.y += (dx + dy) / 2.0f;
     }
     task->_29 -= task->_29 != 0;
     i = task->_2A - (task->_29 == 0) * 42;
