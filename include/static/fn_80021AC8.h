@@ -16,8 +16,8 @@ typedef struct SoundFile {
 void fn_80021AC8(void);
 void* fn_80021ADC(s32 index, void* dst);
 void* fn_80021BBC(s32 index, void* dst);
-void fn_80021CA4(void);
-void fn_8002204C(void);
+void* fn_80021CA4(s32 player, s32 part, void* dst);
+void* fn_8002204C(s32 player, void* dst);
 void fn_8002244C(void* file, u8* data, s32 id);
 void fn_8002254C(void* file, u8* data, s32 index);
 void fn_80022620(void);
