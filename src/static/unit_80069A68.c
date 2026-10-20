@@ -1,7 +1,8 @@
 #include "static/unit_80069A68.h"
 #include "static/UnknownHomes_Static.h"
 #include "string.h"
-#include "Dolphin/GX/GXTypes.h"
+#include "Dolphin/gx.h"
+#include "static/sub.h"
 #include "Dolphin/vi.h"
 
 typedef struct SceneTask {
@@ -46,6 +47,11 @@ typedef struct SceneMenuState {
     /* 0x000 */ u8 _000[0x1E9];
     /* 0x1E9 */ u8 _1E9;
 } SceneMenuState;
+
+typedef struct TexBank {
+    /* 0x00 */ u32 _00;
+    /* 0x04 */ TextureDesc tex[1];
+} TexBank;
 
 extern SceneTask* lbl_803CC1B8;
 extern SceneGlobals lbl_80366158;
@@ -160,7 +166,47 @@ void fn_8006A824(void) {
 }
 
 // .text:0x8006A500 size:0x324
-void fn_8006A500(void) {
+void fn_8006A500(TexBank* bank, s32 index, f32 alpha) {
+    u32 halfW;
+    u32 halfH;
+    f32 c;
+
+    GXSetDispCopySrc(0, 0, lbl_80109250.fbWidth, lbl_80109250.efbHeight);
+    GXSetDispCopyDst(lbl_80109250.fbWidth, lbl_80109250.efbHeight);
+    GXSetDispCopyYScale((f32)lbl_80109250.xfbHeight / (f32)lbl_80109250.efbHeight);
+    GXSetScissor(0, 0, 608, 448);
+    GXSetViewport(0.0f, 0.0f, 608.0f, 448.0f, -1.0f, 1.0f);
+    SetDisplayStateTexture(&bank->tex[index], GX_TEXMAP0, 0);
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_U16, 0);
+    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U8, 0);
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetNumChans(1);
+    GXSetTexCoordGen2(GX_TEXCOORD0, GX_MTX2x4, GX_TG_TEX0, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
+    GXSetNumTexGens(1);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    GXSetTevOp(GX_TEVSTAGE0, GX_MODULATE);
+    GXSetNumTevStages(1);
+    halfW = bank->tex[index].width / 2u;
+    halfH = bank->tex[index].height / 2u;
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    c = 255.0f * alpha;
+    GXPosition3s16(304 - halfW, 224 - halfH, 0);
+    GXColor4u8(c, c, c, 255);
+    GXTexCoord2u8(0, 0);
+    GXPosition3s16(halfW + 304, 224 - halfH, 0);
+    GXColor4u8(c, c, c, 255);
+    GXTexCoord2u8(1, 0);
+    GXPosition3s16(halfW + 304, halfH + 224, 0);
+    GXColor4u8(c, c, c, 255);
+    GXTexCoord2u8(1, 1);
+    GXPosition3s16(304 - halfW, halfH + 224, 0);
+    GXColor4u8(c, c, c, 255);
+    GXTexCoord2u8(0, 1);
 }
 
 // .text:0x8006A194 size:0x36C

@@ -11,7 +11,7 @@ void fn_80069B08(void);
 s32 fn_80069B68(void);
 void fn_80069BDC(void);
 void fn_8006A194(void);
-void fn_8006A500(void);
+void fn_8006A500(struct TexBank* bank, s32 index, f32 alpha);
 void fn_8006A824(void);
 void fn_8006AC24(void);
 void fn_8006AF6C(void);
