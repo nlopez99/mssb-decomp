@@ -1738,7 +1738,9 @@ typedef struct Unk3520Minigame {
     /* 0x0B6C */ Unk3520Bag bag;
     /* 0x0BB0 */ Unk3520Obj objs[4];
     /* 0x0CB0 */ Unk3520Box box;
-    /* 0x0CD0 */ u8 _0CD0[0x1CE8 - 0xCD0];
+    /* 0x0CD0 */ Vec coinPos[100];
+    /* 0x1180 */ Vec coinVel[100];
+    /* 0x1630 */ u8 _1630[0x1CE8 - 0x1630];
     /* 0x1CE8 */ Unk3520Spoke spokes[4];
     /* 0x1D48 */ u8 _1D48[0x1DCC - 0x1D48];
     /* 0x1DCC */ Unk3520Ai ai;

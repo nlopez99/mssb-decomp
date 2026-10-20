@@ -726,8 +726,6 @@ void fn_3_139CA0(void) {
 }
 
 // .text:0x00139808 size:0x498 mapped:0x8077889C
-// 99.2%: the target addresses vel from the loop's walker (4480(r25)); a vel local takes
-// its own register (r21) but gives the reflections the target's schedule.
 void fn_3_139808(void) {
     int i;
     int j;
@@ -741,7 +739,6 @@ void fn_3_139808(void) {
     f32 dz;
     f32 dist;
     Unk3520Fielder* fielder;
-    Vec* vel;
 
     for (i = 0; i < 100; i++) {
         if (g_Minigame.wallBall_coinsVisibleInd[i] != 1) {
@@ -753,7 +750,6 @@ void fn_3_139808(void) {
             g_Minigame._1D6C--;
             continue;
         }
-        vel = (Vec*)&g_Minigame.wallBall_coinVelocity[i];
         seg.src.x = g_Minigame.wallBall_coinCoordinates[i].x;
         seg.src.y = -g_Minigame.wallBall_coinCoordinates[i].y;
         seg.src.z = g_Minigame.wallBall_coinCoordinates[i].z;
@@ -772,8 +768,8 @@ void fn_3_139808(void) {
         seg.dst.z = g_Minigame.wallBall_coinCoordinates[i].z;
         type = checkCollision(&seg, &col, 0, FALSE);
         if (type == 5) {
-                        col.normal.y *= -1.0f;
-            fn_3_13ADC0(vel, vel, &col.normal);
+            col.normal.y *= -1.0f;
+            fn_3_13ADC0(&MG.coinVel[i], &MG.coinVel[i], &col.normal);
             g_Minigame.wallBall_coinCoordinates[i].x = col.position.x;
             g_Minigame.wallBall_coinCoordinates[i].y = -col.position.y;
             g_Minigame.wallBall_coinCoordinates[i].z = col.position.z;
@@ -781,7 +777,7 @@ void fn_3_139808(void) {
         seg.dst.x = g_Minigame.wallBall_coinCoordinates[i].x;
         seg.dst.y = -g_Minigame.wallBall_coinCoordinates[i].y;
         seg.dst.z = g_Minigame.wallBall_coinCoordinates[i].z;
-        if (fn_3_1373E0(&seg, (Vec*)&g_Minigame.wallBall_coinVelocity[i], (VecSrcDst*)&col, lbl_3_data_219B8[15])) {
+        if (fn_3_1373E0(&seg, &MG.coinVel[i], (VecSrcDst*)&col, lbl_3_data_219B8[15])) {
             g_Minigame.wallBall_coinCoordinates[i].x = col.position.x;
             g_Minigame.wallBall_coinCoordinates[i].y = col.position.y;
             g_Minigame.wallBall_coinCoordinates[i].z = col.position.z;
@@ -791,8 +787,8 @@ void fn_3_139808(void) {
             seg.dst.z = g_Minigame.wallBall_coinCoordinates[i].z;
             type = checkCollision(&seg, &col, 0, FALSE);
             if (type == 5) {
-                                col.normal.y *= -1.0f;
-                fn_3_13ADC0(vel, vel, &col.normal);
+                col.normal.y *= -1.0f;
+                fn_3_13ADC0(&MG.coinVel[i], &MG.coinVel[i], &col.normal);
                 g_Minigame.wallBall_coinCoordinates[i].x = col.position.x;
                 g_Minigame.wallBall_coinCoordinates[i].y = -col.position.y;
                 g_Minigame.wallBall_coinCoordinates[i].z = col.position.z;
@@ -817,8 +813,8 @@ void fn_3_139808(void) {
                 continue;
             }
             reach = lbl_3_data_219B8[15] + lbl_3_data_47BC[fielder->_1C9];
-            dz = fielder->pos.z - g_Minigame.wallBall_coinCoordinates[i].z;
             dx = fielder->pos.x - g_Minigame.wallBall_coinCoordinates[i].x;
+            dz = fielder->pos.z - g_Minigame.wallBall_coinCoordinates[i].z;
             reach *= reach;
             dist = dx * dx + dz * dz;
             if (dist < reach && dist < best) {
@@ -2423,15 +2419,16 @@ BOOL fn_3_1344BC(u32 a, u32 b) {
 }
 
 // The angle around the center from player i's fielder, turned by offset
-static inline s16 Unk3520_CircleAngle(int i, int offset) {
+static inline s16 Unk3520_CircleAngle(s32 i, int offset) {
     return fn_3_9FE6C_normalizeAngle(
         radToShortAngle(atan2(-(g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.x - lbl_3_data_21A48.x),
                               g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.z - lbl_3_data_21A48.z)) + offset);
 }
 
 // .text:0x0013334C size:0x1170 mapped:0x807723E0
-// 97.8%: the g_Minigame base the walkers copy is spilled to the stack where the target
-// keeps it in r14, and the registers of the player loop follow.
+// 98.78%: the player loop swaps the registers of quadrant and the input base (r16/r20) and
+// of the x, z and dx, dz pairs (f28-f31), and computes &_1D7C[character] once where the
+// target computes it again after the memset.
 void fn_3_13334C(void) {
     Unk3520Ai* ai = &MG.ai;
     Unk3520Coin* coins;
@@ -2442,10 +2439,10 @@ void fn_3_13334C(void) {
     int starQuadrant;
     int bagQuadrant;
     int boxQuadrant;
-    u32 target;
     u32 quadrant;
     f32 tx;
     f32 tz;
+    u32 target;
     f32 x;
     f32 z;
     f32 dx;
@@ -2522,8 +2519,8 @@ void fn_3_13334C(void) {
                 target = starQuadrant;
             }
             if (target == 4 && MG.bag.active != 0) {
-                dz = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.z - MG.bag.pos.z;
                 dx = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.x - MG.bag.pos.x;
+                dz = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.z - MG.bag.pos.z;
                 if (dx * dx + dz * dz <= lbl_3_data_21B78[strength] * lbl_3_data_21B78[strength]) {
                     j = 0;
                     do {
@@ -2539,8 +2536,8 @@ void fn_3_13334C(void) {
                 }
             }
             if (target == 4 && MG.box._1E == 1) {
-                dz = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.z - MG.box.pos.z;
                 dx = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.x - MG.box.pos.x;
+                dz = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.z - MG.box.pos.z;
                 if (dx * dx + dz * dz <= lbl_3_data_21B68[strength] * lbl_3_data_21B68[strength]) {
                     j = 0;
                     do {
@@ -2573,8 +2570,8 @@ void fn_3_13334C(void) {
                     strength);
             }
             if (g_Minigame._1D6D >= 0 && i != g_Minigame._1D6D) {
-                dz = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.z - g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame._1D6D]].pos.z;
                 dx = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.x - g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame._1D6D]].pos.x;
+                dz = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.z - g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame._1D6D]].pos.z;
                 if (dx * dx + dz * dz <= lbl_3_data_21B38[strength] * lbl_3_data_21B38[strength]) {
                     offset = fn_3_1344BC(g_Minigame._1D6D, i) ? 0 : 0x800;
                     away = radToShortAngle(atan2(dz, dx));
@@ -2586,8 +2583,8 @@ void fn_3_13334C(void) {
                 j = 0;
                 do {
                     if (g_Minigame.starDashObjs[j]._3D >= 1 && g_Minigame.starDashObjs[j]._3D <= 3) {
-                        dz = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.z - g_Minigame.starDashObjs[j]._0.z;
                         dx = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.x - g_Minigame.starDashObjs[j]._0.x;
+                        dz = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.z - g_Minigame.starDashObjs[j]._0.z;
                         if (dx * dx + dz * dz <= lbl_3_data_21B48[strength] * lbl_3_data_21B48[strength]) {
                             away = radToShortAngle(atan2(dz, dx));
                             input->controlStickAngle = fn_3_1345AC(input->controlStickAngle,
@@ -2598,8 +2595,8 @@ void fn_3_13334C(void) {
                 } while (++j < lbl_3_data_21A88[g_Minigame.soloMinigameDifficulty]);
             }
             if (MG.box._1E == 2) {
-                dz = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.z - MG.box.pos.z;
                 dx = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.x - MG.box.pos.x;
+                dz = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.z - MG.box.pos.z;
                 if (dx * dx + dz * dz <= lbl_3_data_21B58[strength] * lbl_3_data_21B58[strength]) {
                     away = radToShortAngle(atan2(dz, dx));
                     input->controlStickAngle = fn_3_1345AC(input->controlStickAngle,
