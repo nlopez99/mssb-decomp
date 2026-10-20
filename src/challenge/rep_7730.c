@@ -2517,51 +2517,27 @@ void fn_1_1F900(GameTask7730* task) {
 }
 
 // .text:0x0001F618 size:0x2E8
-// 97.62%: same instructions, callee-saved registers assigned in another order (task in
-// r26, the count in r27 in the target).
+// 99.29%: in the inlined fn_1_20640 the target reloads ids[i] after GXLoadTexObj where the
+// build keeps it in r20; reading ids[i] three times there matches this but drops fn_1_20640.
 void fn_1_1F618(GameTask7730* task) {
     s32 i;
     u32 ids[1];
-    f32 z;
-    s32 j;
-    u32 tlut;
 
     i = task->_1C;
     while (i-- != 0) {
         ids[0] = i % 4;
-        GXSetNumTevStages(task->_22);
-        GXSetNumTexGens(task->_22);
-        for (j = 0; j < task->_22; j++) {
-            GXSetTexCoordGen2(j, GX_TG_MTX2X4, GX_TG_TEX0, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
-            if (j != 0) {
-                GXSetTevColorIn(j, GX_CC_CPREV, GX_CC_TEXC, GX_CC_RASA, GX_CC_ZERO);
-                GXSetTevColorOp(j, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
-                GXSetTevAlphaIn(j, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_APREV);
-                GXSetTevAlphaOp(j, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
-            } else {
-                GXSetTevColorIn(j, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_TEXC);
-                GXSetTevColorOp(j, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
-                GXSetTevAlphaIn(j, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_RASA);
-                GXSetTevAlphaOp(j, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
-            }
-            tlut = ids[j] & 0x7FFFFFFF;
-            GXLoadTexObj(&lbl_1_bss_6EA4[ids[j]], j);
-            if (ids[j] & 0x80000000) {
-                GXLoadTlut(&lbl_1_bss_6E44[tlut], j);
-            }
-        }
+        fn_1_20640(task, ids);
         GXBegin(GX_QUADS, GX_VTXFMT0, 4);
-        z = 0.5f - 0.0001f * i;
-        GXPosition3f32(0.0f, 0.0f, z);
+        GXPosition3f32(0.0f, 0.0f, 0.5f - 0.0001f * i);
         GXColor1u32(0xFFFFFF80);
         GXTexCoord2s16(0, 0);
-        GXPosition3f32(0.0f, 448.0f, z);
+        GXPosition3f32(0.0f, 448.0f, 0.5f - 0.0001f * i);
         GXColor1u32(0xFFFFFF80);
         GXTexCoord2s16(0, 0x100);
-        GXPosition3f32(640.0f, 448.0f, z);
+        GXPosition3f32(640.0f, 448.0f, 0.5f - 0.0001f * i);
         GXColor1u32(0xFFFFFF80);
         GXTexCoord2s16(0x100, 0x100);
-        GXPosition3f32(640.0f, 0.0f, z);
+        GXPosition3f32(640.0f, 0.0f, 0.5f - 0.0001f * i);
         GXColor1u32(0xFFFFFF80);
         GXTexCoord2s16(0x100, 0);
     }
