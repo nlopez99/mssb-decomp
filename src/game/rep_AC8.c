@@ -6126,15 +6126,15 @@ void fn_3_402A8(void) {
 }
 
 // .text:0x0003FCF0 size:0x5B8 mapped:0x8067ED84
-// 92.16%: registers only; the target keeps angle in r5 and the four fielder angles one
-// register lower throughout.
+// 93.52%: in the __abs test the target reloads g_Fielders[3] and [5]._182 after the inlined
+// fn_3_5985C stores; reading them there gives that block but shifts registers elsewhere (93.00%).
 void fn_3_3FCF0(BOOL useLanding) {
-    s32 angle = g_Ball.Hit_HorizontalAngle;
     s32 third;
-    s16 a2;
     s16 a3;
     s16 a4;
     s16 a5;
+    s32 angle = g_Ball.Hit_HorizontalAngle;
+    s16 a2;
 
     if (useLanding) {
         angle = fn_3_9FB8C(g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x,
@@ -11545,8 +11545,6 @@ BOOL fn_3_2A164(s32 fielder) {
 }
 
 // .text:0x00028CA8 size:0x14BC mapped:0x80667D3C
-// 53.51%: first draft, written so that fn_3_2A288 stops inlining it; the shared
-// tail blocks (search, catch, dive) are laid out in another order than the target's.
 s32 fn_3_28CA8(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     s32 frame = -1;
@@ -11555,11 +11553,9 @@ s32 fn_3_28CA8(s32 fielder) {
     s32 stat8;
     s32 stat9;
     s32 laser;
-    s32 best;
     s32 i;
+    s32 best;
     s32 n;
-    s16 angle;
-    s16 turn;
     f32 dx;
     f32 dz;
     f32 dist;
@@ -11567,6 +11563,7 @@ s32 fn_3_28CA8(s32 fielder) {
     f32 outX;
     f32 outZ;
     f32 reach;
+    f32 catchDist;
     VecXYZ mid;
 
     if (g_d_GameSettings.minigamesEnabled) {
@@ -11596,32 +11593,42 @@ s32 fn_3_28CA8(s32 fielder) {
         if (fielder == g_FieldingLogic._070->_14) {
             reach *= g_FieldingLogic._070->_08;
         }
+        catchDist = reach * lbl_3_data_490C[dive][0] + f->_104;
         if (dist - reach <= 0.0f) {
-            if (frame <= lbl_3_data_49DC[14] && !(dist / frame < 0.07f)) {
+            if (frame <= lbl_3_data_49DC[14]) {
+                if (dist / frame < 0.07f) {
+                    goto check_owner;
+                }
                 goto laser_catch;
             }
             goto check_owner;
         }
-        if (dist < reach * lbl_3_data_490C[dive][0] + f->_104) {
+        if (dist < catchDist) {
             goto catch_at;
         }
-        if (dist < reach + f->_104 + lbl_3_data_490C[dive][1] && dist - reach > 0.0f &&
-            !(g_Ball.AtBat_Contact_BallPos.y < 5.0f)) {
+        if (dist < reach + f->_104 + lbl_3_data_490C[dive][1] && dist - reach > 0.0f) {
+            if (g_Ball.AtBat_Contact_BallPos.y < 5.0f) {
+                goto check_owner;
+            }
             goto dive_at;
         }
         goto check_owner;
     }
     if (fn_3_9FCF8(g_Ball.ballAngleFromHome, f->_180) <= 0x100 && !(15.0f + f->_070 < g_Ball.ballDistanceFromHome)) {
         if (g_Ball.ballVelocity > 0.25f) {
-            i = fn_3_BBBC(&mid, lbl_3_data_4924[dive][0] + 15, 2, f->_000, f->_008);
-            if (i < 0) {
+            s32 start = fn_3_BBBC(&mid, lbl_3_data_4924[dive][0] + 15, 2, f->_000, f->_008);
+
+            if (start < 0) {
                 goto check_owner;
             }
             best = -1;
-            if (i < 3) {
-                i = 3;
+            if (start < 3) {
+                start = 3;
             }
-            for (n = 0; i <= lbl_3_data_4924[dive][0]; i += 2) {
+            for (i = start, n = 0; n < 30; n += 2) {
+                if (i > lbl_3_data_4924[dive][0]) {
+                    break;
+                }
                 if (!(g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y > f->_108)) {
                     if (5.0f + f->_070 < g_Ball.physicsSubstruct.futureCoordsAndDist[i].dist && f->_07C < 3.0f) {
                         break;
@@ -11633,11 +11640,12 @@ s32 fn_3_28CA8(s32 fielder) {
                     if (fielder == g_FieldingLogic._070->_14) {
                         reach *= g_FieldingLogic._070->_08;
                     }
+                    catchDist = reach * lbl_3_data_490C[dive][0] + f->_104;
                     if (dist - reach <= 0.0f) {
                         frame = i;
                         goto search;
                     }
-                    if (dist < reach * lbl_3_data_490C[dive][0] + f->_104) {
+                    if (dist < catchDist) {
                         frame = i;
                         goto catch_at;
                     }
@@ -11645,10 +11653,7 @@ s32 fn_3_28CA8(s32 fielder) {
                         best = i;
                     }
                 }
-                n += 2;
-                if (n >= 30) {
-                    break;
-                }
+                i += 2;
             }
             if (best >= 0) {
                 frame = best;
@@ -11665,11 +11670,12 @@ s32 fn_3_28CA8(s32 fielder) {
                 if (fielder == g_FieldingLogic._070->_14) {
                     reach *= g_FieldingLogic._070->_08;
                 }
+                catchDist = reach * lbl_3_data_490C[dive][0] + f->_104;
                 if (dist - reach <= 0.0f) {
                     frame = i;
                     goto search;
                 }
-                if (dist < reach * lbl_3_data_490C[dive][0] + f->_104) {
+                if (dist < catchDist) {
                     frame = i;
                     goto catch_at;
                 }
@@ -11677,52 +11683,6 @@ s32 fn_3_28CA8(s32 fielder) {
         }
     }
     goto check_owner;
-
-search:
-    if (frame > lbl_3_data_49DC[14]) {
-        return 0;
-    }
-    for (; frame > lbl_3_data_49DC[15]; frame -= 2) {
-        if (!fn_3_B7CDC(g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.x,
-                        g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.z) &&
-            !(g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.y > f->_0F4)) {
-            dx = g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.x - f->_000;
-            dz = g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.z - f->_008;
-            dist = dolsqrtf2(dx * dx + dz * dz);
-            fn_3_522E0(fielder, frame, dx, dz, &outX, &outZ, &reach);
-            if (fielder == g_FieldingLogic._070->_14) {
-                reach *= g_FieldingLogic._070->_08;
-            }
-            if (!(dist / frame < 0.07f)) {
-                goto laser_catch;
-            }
-        }
-    }
-    return 0;
-
-laser_catch:
-    fn_3_2C238(fielder, 7, frame, 0, 0);
-    f->_234 = g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.x;
-    f->_238 = g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.y;
-    f->_23C = g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.z;
-    dz = f->_23C - f->_008;
-    dx = f->_234 - f->_000;
-    dist = dolsqrtf2(dx * dx + dz * dz);
-    reach = dist - lbl_3_data_47D0[f->_1CA]._10;
-    scale = reach / dist;
-    f->_21C = dx * scale + f->_000;
-    f->_224 = dz * scale + f->_008;
-    f->_261 = 0;
-    angle = fn_3_9FB8C(g_Ball.AtBat_Contact_BallPos.x - f->_000, g_Ball.AtBat_Contact_BallPos.z - f->_008);
-    turn = fn_3_9FCA4(angle, fn_3_9FB8C(f->_21C - f->_000, f->_224 - f->_008));
-    if (turn < -0x500 || turn > 0x500) {
-        f->_261 = 3;
-    } else if (turn < -0x200) {
-        f->_261 = 1;
-    } else if (turn > 0x200) {
-        f->_261 = 2;
-    }
-    return 1;
 
 catch_at:
     if (f->_1C5 && g_Ball.physicsSubstruct.futureCoordsAndDist[frame].dist < f->_070) {
@@ -11821,6 +11781,44 @@ dive_at:
     if (stat9) {
         f->_265 = 1;
     }
+    return 1;
+
+search:
+    if (frame > lbl_3_data_49DC[14]) {
+        return 0;
+    }
+    for (i = frame; i > lbl_3_data_49DC[15]; i -= 2) {
+        if (!fn_3_B7CDC(g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x,
+                        g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z) &&
+            !(g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y > f->_0F4)) {
+            dx = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x - f->_000;
+            dz = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z - f->_008;
+            dist = dolsqrtf2(dx * dx + dz * dz);
+            fn_3_522E0(fielder, i, dx, dz, &outX, &outZ, &reach);
+            if (fielder == g_FieldingLogic._070->_14) {
+                reach *= g_FieldingLogic._070->_08;
+            }
+            if (!(dist / i < 0.07f)) {
+                frame = i;
+                goto laser_catch;
+            }
+        }
+    }
+    return 0;
+
+laser_catch:
+    fn_3_2C238(fielder, 7, frame, 0, 0);
+    f->_234 = g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.x;
+    f->_238 = g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.y;
+    f->_23C = g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.z;
+    dx = f->_234 - f->_000;
+    dz = f->_23C - f->_008;
+    dist = dolsqrtf2(dx * dx + dz * dz);
+    reach = dist - lbl_3_data_47D0[f->_1CA]._10;
+    scale = reach / dist;
+    f->_21C = dx * scale + f->_000;
+    f->_224 = dz * scale + f->_008;
+    fn_3_2B5C0(fielder);
     return 1;
 }
 
