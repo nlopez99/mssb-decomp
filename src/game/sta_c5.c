@@ -854,8 +854,9 @@ void fn_3_F6C60(void) {
 }
 
 // .text:0x000F6A94 size:0x1CC mapped:0x80735B28
-// 97.13%: volatile registers differ (B21D/B21E addresses and the start*4 pointer);
-// the target forms the B21E address before reading _3C[*n - 1].
+// 97.13%: volatile registers differ (B21D/B21E addresses and the start*4 pointer). The
+// target loads _40[*n - 1] before _3C[*n - 1]; swapping the sum fixes that order (95.65%,
+// fn_3_F6C60 99.54%) but forms the B21E address after the loads.
 void fn_3_F6A94(s32* n) {
     Mtx m;
     Control control;
@@ -1212,8 +1213,9 @@ void fn_3_F56CC(StaC5Ball* obj) {
 }
 
 // .text:0x000F4FBC size:0x710 mapped:0x80734050
-// 99.60%: obj takes r29 where the target has r30, which it later reuses for
-// g_d_GameSettings in the sound helper; declaration orders tried change nothing.
+// 99.60%: obj takes r29 where the target has r30, which it later reuses for g_d_GameSettings
+// in the sound helper. A second pointer copied from obj mid-case 1 and used for _C4 and _A0
+// (permuter) reaches 99.85%, so the original may have reached obj through two names.
 void fn_3_F4FBC(StaC5Ball* obj) {
     Vec dir;
     Vec unit;
@@ -1621,7 +1623,8 @@ void fn_3_F2FFC(StaC5Draw* draw, f32 x, f32 z) {
 
 // .text:0x000F2938 size:0x6C4 mapped:0x807319CC
 // 99.86%: in the inlined fn_3_F2724 the sine and cosine land in f29/f30 the other way
-// round; reordering fn_3_F2724's locals fixes one copy or the other, never both.
+// round. Its body written in place here (locals m01, m10, m00 first) fixes them at 99.94%
+// but swaps angle's f29/f30; declaration orders on both sides change nothing more.
 void fn_3_F2938(StaC5Draw* draw) {
     Vec pos;
     Vec dir;
@@ -2068,7 +2071,8 @@ static inline void turnTowardHome(StaC5Draw* draw) {
 
 // .text:0x000F082C size:0x778 mapped:0x8072F8C0
 // 99.97%: the heading angle's negation goes to f30 before the multiply, where the
-// target negates into f1 and writes only the product to f30.
+// target negates into f1 and writes only the product to f30. K * -x, a local for _AC,
+// a degToRad helper and a helper taking the angle all give the constant's FPR swapped.
 void fn_3_F082C(StaC5Draw* draw) {
     Vec next;
     StaC5Fielder* fielder;
