@@ -1323,8 +1323,8 @@ void fn_1_24410(void) {
 
 
 // .text:0x00023B54 size:0x8BC
-// 98.43%: in the height loop 16.0f and the conversion constant swap f1/f2, and n and
-// lbl_1_bss_76E0's address swap r8/r9.
+// 99.50%: in the height loop 16.0f and the conversion constant swap f1/f2, max and min
+// swap f30/f31, and n and lbl_1_bss_76E0's address swap r8/r9.
 void fn_1_23B54(void) {
     WaveTask7730* task = lbl_803CC1B8;
     s32 i;
@@ -1465,8 +1465,8 @@ void fn_1_23B54(void) {
             max = -100.0f;
             min = 100.0f;
             for (i = 0; i < task->_28; i++) {
-                p = lbl_1_bss_F6E0[i];
                 for (j = 0; j < task->_29; j++) {
+                    p = &lbl_1_bss_F6E0[i][j];
                     x = p->x;
                     y = p->y;
                     idx = task->_2C;
@@ -1500,7 +1500,6 @@ void fn_1_23B54(void) {
                     } else if (p->z > max) {
                         max = p->z;
                     }
-                    p++;
                 }
             }
         } else {
@@ -1774,15 +1773,9 @@ void fn_1_22DF4(RopeParams7730* params) {
 }
 
 // .text:0x00022874 size:0x580
-// 99.91%: the addresses of 0.001f and 0.0001f go to r11 and r7 where the target has r7
-// and r4.
 s32 fn_1_22874(RopeParams7730* params) {
     RopeParams7730* task = lbl_803CC1B8;
-    lbl_803C77B8_s* pad;
     s32 step;
-    f32 coarse;
-    f32 medium;
-    f32 fine;
     s32 i;
     u8 count;
 
@@ -1793,17 +1786,13 @@ s32 fn_1_22874(RopeParams7730* params) {
     } else {
         step = 10;
     }
-    pad = lbl_803C77B8;
-    coarse = 0.001f * step;
-    medium = 0.01f * step;
-    fine = 0.0001f * step;
     for (i = 0; i < 14; i++) {
         switch (i) {
         case 0:
             if (i == task->_25) {
-                if (pad->_04 & 1) {
+                if (lbl_803C77B8[0]._04 & 1) {
                     task->_20--;
-                } else if (pad->_04 & 2) {
+                } else if (lbl_803C77B8[0]._04 & 2) {
                     task->_20++;
                 }
                 if (task->_20 == 0) {
@@ -1814,9 +1803,9 @@ s32 fn_1_22874(RopeParams7730* params) {
         case 1:
             count = task->_21;
             if (i == task->_25) {
-                if (pad->_04 & 1) {
+                if (lbl_803C77B8[0]._04 & 1) {
                     task->_21--;
-                } else if (pad->_04 & 2) {
+                } else if (lbl_803C77B8[0]._04 & 2) {
                     task->_21++;
                 }
                 if (task->_21 < 2) {
@@ -1826,112 +1815,112 @@ s32 fn_1_22874(RopeParams7730* params) {
             break;
         case 2:
             if (i == task->_25) {
-                if (pad->_04 & 1) {
-                    lbl_1_bss_6FB8._00 -= coarse;
-                } else if (pad->_04 & 2) {
-                    lbl_1_bss_6FB8._00 += coarse;
+                if (lbl_803C77B8[0]._04 & 1) {
+                    lbl_1_bss_6FB8._00 -= 0.001f * step;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    lbl_1_bss_6FB8._00 += 0.001f * step;
                 }
             }
             break;
         case 3:
             if (i == task->_25) {
-                if (pad->_04 & 1) {
-                    task->_18 -= medium;
-                } else if (pad->_04 & 2) {
-                    task->_18 += medium;
+                if (lbl_803C77B8[0]._04 & 1) {
+                    task->_18 -= 0.01f * step;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    task->_18 += 0.01f * step;
                 }
             }
             break;
         case 4:
             if (i == task->_25) {
-                if (pad->_04 & 1) {
-                    lbl_1_bss_6FB8._08 -= medium;
-                } else if (pad->_04 & 2) {
-                    lbl_1_bss_6FB8._08 += medium;
+                if (lbl_803C77B8[0]._04 & 1) {
+                    lbl_1_bss_6FB8._08 -= 0.01f * step;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    lbl_1_bss_6FB8._08 += 0.01f * step;
                 }
             }
             break;
         case 5:
             if (i == task->_25) {
-                if (pad->_04 & 1) {
-                    lbl_1_bss_6FB8._0C -= medium;
-                } else if (pad->_04 & 2) {
-                    lbl_1_bss_6FB8._0C += medium;
+                if (lbl_803C77B8[0]._04 & 1) {
+                    lbl_1_bss_6FB8._0C -= 0.01f * step;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    lbl_1_bss_6FB8._0C += 0.01f * step;
                 }
             }
             break;
         case 6:
             if (i == task->_25) {
-                if (pad->_04 & 1) {
-                    lbl_1_bss_6FB8._10 -= medium;
-                } else if (pad->_04 & 2) {
-                    lbl_1_bss_6FB8._10 += medium;
+                if (lbl_803C77B8[0]._04 & 1) {
+                    lbl_1_bss_6FB8._10 -= 0.01f * step;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    lbl_1_bss_6FB8._10 += 0.01f * step;
                 }
             }
             break;
         case 7:
             if (i == task->_25) {
-                if (pad->_04 & 1) {
-                    lbl_1_bss_6FB8._14 -= fine;
-                } else if (pad->_04 & 2) {
-                    lbl_1_bss_6FB8._14 += fine;
+                if (lbl_803C77B8[0]._04 & 1) {
+                    lbl_1_bss_6FB8._14 -= 0.0001f * step;
+                } else if (lbl_803C77B8[0]._04 & 2) {
+                    lbl_1_bss_6FB8._14 += 0.0001f * step;
                 }
             }
             break;
         case 8:
             if (i == task->_25) {
-                if (pad->_04 & 1) {
+                if (lbl_803C77B8[0]._04 & 1) {
                     task->_1C -= step;
-                } else if (pad->_04 & 2) {
+                } else if (lbl_803C77B8[0]._04 & 2) {
                     task->_1C += step;
                 }
             }
             break;
         case 9:
-            if (i == task->_25 && (pad->_04 & 3)) {
+            if (i == task->_25 && (lbl_803C77B8[0]._04 & 3)) {
                 task->_22 = !task->_22;
             }
             break;
         case 10:
-            if (i == task->_25 && (pad->_04 & 3)) {
+            if (i == task->_25 && (lbl_803C77B8[0]._04 & 3)) {
                 task->_23 = !task->_23;
             }
             break;
         case 11:
             if (i == task->_25) {
-                if (pad->_04 & 1) {
+                if (lbl_803C77B8[0]._04 & 1) {
                     lbl_1_data_104D0[0] -= 0.125;
-                } else if (pad->_04 & 2) {
+                } else if (lbl_803C77B8[0]._04 & 2) {
                     lbl_1_data_104D0[0] += 0.125;
                 }
             }
             break;
         case 12:
             if (i == task->_25) {
-                if (pad->_04 & 1) {
+                if (lbl_803C77B8[0]._04 & 1) {
                     lbl_1_data_104D0[1] -= 0.125;
-                } else if (pad->_04 & 2) {
+                } else if (lbl_803C77B8[0]._04 & 2) {
                     lbl_1_data_104D0[1] += 0.125;
                 }
             }
             break;
         case 13:
             if (i == task->_25) {
-                if (pad->_04 & 1) {
+                if (lbl_803C77B8[0]._04 & 1) {
                     lbl_1_data_104D0[2] -= 0.125;
-                } else if (pad->_04 & 2) {
+                } else if (lbl_803C77B8[0]._04 & 2) {
                     lbl_1_data_104D0[2] += 0.125;
                 }
             }
             break;
         }
     }
-    if (pad->_04 & 8) {
+    if (lbl_803C77B8[0]._04 & 8) {
         if (task->_25 == 0) {
             task->_25 = 14;
         }
         task->_25--;
-    } else if (pad->_04 & 4) {
+    } else if (lbl_803C77B8[0]._04 & 4) {
         task->_25++;
         if (task->_25 == 14) {
             task->_25 = 0;
