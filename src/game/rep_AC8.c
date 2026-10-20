@@ -10754,8 +10754,6 @@ s32 fn_3_2D080(s32 fielder) {
     s32 frames;
     f32 x;
     f32 z;
-    f32 dx;
-    f32 dz;
     f32 dist;
     f32 speed;
 
@@ -10775,11 +10773,7 @@ s32 fn_3_2D080(s32 fielder) {
         if (x == f->_000 && z == f->_008) {
             frames = 1;
         } else {
-            dx = x - f->_000;
-            dz = z - f->_008;
-            dist = dx * dx;
-            dz *= dz;
-            dist = dolsqrtf2(dist + dz);
+            dist = dolsqrtf2(SQ(x - f->_000) + SQ(z - f->_008));
             speed = f->_058;
             if (speed == 0.0f) {
                 speed = 1.0f;
@@ -11981,8 +11975,6 @@ BOOL fn_3_27FF4(s32 fielder) {
 }
 
 // .text:0x00027D68 size:0x28C mapped:0x80666DFC
-// Registers only: the distance temporaries and loop bounds take other
-// float registers than the target's.
 BOOL fn_3_27D68(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     s32 i;
@@ -11990,18 +11982,15 @@ BOOL fn_3_27D68(s32 fielder) {
     f32 dz;
     f32 dist;
     f32 h = f->_148;
-    f32 top = 1.0f + (f->_0F4 + h);
     f32 bottom = f->_0FC + h;
+    f32 top = 1.0f + (f->_0F4 + h);
 
     for (i = 1; i < 11; i++) {
         if (g_Ball.physicsSubstruct.futureCoordsAndDist[i].dist < f->_070 &&
             g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y > bottom &&
             g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.y < top) {
-            dx = f->_000 - g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x;
-            dz = f->_008 - g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z;
-            dist = dx * dx;
-            dz *= dz;
-            dist = dolsqrtf2(dist + dz);
+            dist = dolsqrtf2(SQ(f->_000 - g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x) +
+                             SQ(f->_008 - g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z));
             if (dist < f->_0E8) {
                 goto found;
             }
