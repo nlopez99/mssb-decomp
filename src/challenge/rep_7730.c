@@ -909,6 +909,31 @@ void fn_1_25F98(void) {
     }
 }
 
+// The target's copies inlined in fn_1_25064 and fn_1_25C68 load 0.015625f for the last
+// argument directly, while fn_1_24A8C reaches it through its address; no single body
+// compiled to both (about 100 forms tried), so the callers inline this second helper.
+static inline void fn_1_24A8C_copy(void) {
+    ChainTask7730* task = lbl_803CC1B8;
+    f32 dt;
+
+    fn_80038E2C(&lbl_1_bss_45868);
+    lbl_1_bss_45868._0000._00 = task->_1A;
+    lbl_1_bss_45868._0000._04 = task->_14;
+    lbl_1_bss_45868._0000._08 = task->_18 / 64.0f;
+    lbl_1_bss_45868._0000._0C = task->_1C / 64.0f;
+    lbl_1_bss_45868._0000._10 = task->_1E / 64.0f;
+    lbl_1_bss_45868._0000._14 = task->_20 / 10000.0f;
+    lbl_1_bss_45868._0000._20 = task->_2A;
+    dt = 1.0f / lbl_1_bss_45868._0000._20;
+    lbl_1_bss_45868._0000._18 = dt;
+    lbl_1_bss_45868._0000._1C = dt * dt;
+    lbl_1_bss_45868._0000._24 = 1.0f / (2.0f * dt);
+    if (lbl_803C77B8[0]._00 & 0x40) {
+        lbl_1_bss_45868._0000._20 = 1;
+    }
+    fn_80038CD0(task->_2B, &lbl_1_bss_45868, lbl_1_bss_43F68, 10.0f, task->_24 / 64.0f);
+}
+
 // .text:0x00025C68 size:0x330
 void fn_1_25C68(void) {
     ChainTask7730* task = lbl_803CC1B8;
@@ -930,7 +955,7 @@ void fn_1_25C68(void) {
     task->_14 = 0.5f;
     task->_26 = 100;
     task->_28 = 10;
-    fn_1_24A8C();
+    fn_1_24A8C_copy();
     ((ChainTask7730*)lbl_803CC1B8)->_00 = fn_1_25064;
     task->_2C = 0;
 }
@@ -956,10 +981,10 @@ void fn_1_25064(void) {
             if (i == task->_2C) {
                 if (lbl_803C77B8[0]._04 & 1) {
                     task->_2B--;
-                    fn_1_24A8C();
+                    fn_1_24A8C_copy();
                 } else if (lbl_803C77B8[0]._04 & 2) {
                     task->_2B++;
-                    fn_1_24A8C();
+                    fn_1_24A8C_copy();
                 }
             }
             break;
@@ -1069,7 +1094,7 @@ void fn_1_25064(void) {
             task->_2C = 0;
         }
     } else if (lbl_803C77B8[0]._02 & 0x100) {
-        fn_1_24A8C();
+        fn_1_24A8C_copy();
     } else if (lbl_803C77B8[0]._02 & 0x200) {
         color = 0x11775500;
         GXSetCopyClear(*(GXColor*)&color, 0xFFFFFF);
@@ -1166,9 +1191,8 @@ void fn_1_24C4C(PhysNode7730* nodes, s32 count, Vec* external, f32 k, f32 dampin
 }
 
 // .text:0x00024A8C size:0x1C0
-// 92.90%: the final call's argument setup is scheduled differently (the target converts
-// task->_24 after loading 0.015625f and the pool addresses). Writing it `/ 64.0f` matches the
-// inlined copies in fn_1_25064 and fn_1_25C68 but drops this function to 89.78%.
+// 92.90%: the final call's argument setup is scheduled differently (the target forms the
+// bss addresses before loading 0.015625f through its address); `/ 64.0f` scores 89.78%.
 void fn_1_24A8C(void) {
     ChainTask7730* task = lbl_803CC1B8;
     f32 dt;
@@ -2516,9 +2540,37 @@ void fn_1_1F900(GameTask7730* task) {
     }
 }
 
+// The target's copy inlined in fn_1_1F618 reads ids[i] again after GXLoadTexObj, which no
+// body that keeps fn_1_20640's id across that call can compile to, so the original had a
+// second helper.
+static inline void fn_1_20640_copy(GameTask7730* task, u32* ids) {
+    s32 i;
+    u32 tlut;
+
+    GXSetNumTevStages(task->_22);
+    GXSetNumTexGens(task->_22);
+    for (i = 0; i < task->_22; i++) {
+        GXSetTexCoordGen2(i, GX_TG_MTX2X4, GX_TG_TEX0, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
+        if (i != 0) {
+            GXSetTevColorIn(i, GX_CC_CPREV, GX_CC_TEXC, GX_CC_RASA, GX_CC_ZERO);
+            GXSetTevColorOp(i, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+            GXSetTevAlphaIn(i, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_APREV);
+            GXSetTevAlphaOp(i, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+        } else {
+            GXSetTevColorIn(i, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_TEXC);
+            GXSetTevColorOp(i, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+            GXSetTevAlphaIn(i, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_RASA);
+            GXSetTevAlphaOp(i, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+        }
+        tlut = ids[i] & 0x7FFFFFFF;
+        GXLoadTexObj(&lbl_1_bss_6EA4[ids[i]], i);
+        if (ids[i] & 0x80000000) {
+            GXLoadTlut(&lbl_1_bss_6E44[tlut], i);
+        }
+    }
+}
+
 // .text:0x0001F618 size:0x2E8
-// 99.29%: in the inlined fn_1_20640 the target reloads ids[i] after GXLoadTexObj where the
-// build keeps it in r20; reading ids[i] three times there matches this but drops fn_1_20640.
 void fn_1_1F618(GameTask7730* task) {
     s32 i;
     u32 ids[1];
@@ -2526,7 +2578,7 @@ void fn_1_1F618(GameTask7730* task) {
     i = task->_1C;
     while (i-- != 0) {
         ids[0] = i % 4;
-        fn_1_20640(task, ids);
+        fn_1_20640_copy(task, ids);
         GXBegin(GX_QUADS, GX_VTXFMT0, 4);
         GXPosition3f32(0.0f, 0.0f, 0.5f - 0.0001f * i);
         GXColor1u32(0xFFFFFF80);
