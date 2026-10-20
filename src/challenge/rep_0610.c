@@ -5877,13 +5877,11 @@ void fn_1_CC24(void) {
 }
 
 // .text:0x0000CB9C size:0x88
-// Only the first PSMTXCopy's address registers differ (r3/r4/r5 rotated);
-// local pointers, index casts and the permuter did not fix it
 void fn_1_CB9C(s32 arg0) {
     if (arg0 != 0) {
         lbl_1_bss_30BC = 0;
     } else {
-        PSMTXCopy(lbl_1_data_F4F8[lbl_803CBBC0]._08, lbl_1_bss_30C0._058);
+        PSMTXCopy(lbl_1_bss_30C0._058, lbl_1_data_F4F8[lbl_803CBBC0]._08);
         fn_800A7D4C(8, &lbl_1_data_F4F8[lbl_803CBBC0]);
     }
 }
