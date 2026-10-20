@@ -52,12 +52,13 @@ extern Emitter* lbl_803CBC80;
 extern EmitterList lbl_803CBC84;
 extern UnkParticleState lbl_80366158;
 
+extern void fn_800118AC(Mtx src, Mtx dst);
+
 // .bss, from the highest address down
 static Emitter lbl_801F8040[16];
 static Particle lbl_80180040[0x1400];
 static Vec lbl_80180010[4];
-static Mtx lbl_8017FFE0;
-static u8 lbl_8017FFD8[8];
+static Mtx lbl_8017FFE0 ATTRIBUTE_ALIGN(32);
 static Mtx lbl_8017FFA8;
 static Mtx lbl_8017FF78;
 static u8 lbl_8017FD6C[0x20C];
@@ -123,6 +124,18 @@ void minigamesSetSomePointers(void)
     lbl_803CBC7C = 0;
 }
 
+// .text:0x8003414C size:0xD4
+void fn_8003414C(Mtx m)
+{
+    PSMTXCopy(m, lbl_8017FFE0);
+    fn_800118AC(m, lbl_8017FFA8);
+    PSMTXCopy(lbl_8017FFA8, lbl_8017FF78);
+    lbl_8017FF78[2][3] = 0.0f;
+    lbl_8017FF78[1][3] = 0.0f;
+    lbl_8017FF78[0][3] = 0.0f;
+    fn_8003403C(1.0f, 1.0f);
+}
+
 // .text:0x80034120 size:0x2C
 void fn_80034120(Mtx m)
 {
@@ -133,6 +146,54 @@ void fn_80034120(Mtx m)
 void fn_800340F4(Mtx m)
 {
     PSMTXCopy(lbl_8017FF78, m);
+}
+
+// .text:0x8003403C size:0xB8
+void fn_8003403C(f32 w, f32 h)
+{
+    s32 i;
+
+    lbl_80180010[0].x = 0.5f * -w;
+    lbl_80180010[0].y = 0.5f * -h;
+    lbl_80180010[0].z = 0.0f;
+    lbl_80180010[1].x = 0.5f * w;
+    lbl_80180010[1].y = 0.5f * -h;
+    lbl_80180010[1].z = 0.0f;
+    lbl_80180010[2].x = 0.5f * w;
+    lbl_80180010[2].y = 0.5f * h;
+    lbl_80180010[2].z = 0.0f;
+    lbl_80180010[3].x = 0.5f * -w;
+    lbl_80180010[3].y = 0.5f * h;
+    lbl_80180010[3].z = 0.0f;
+    for (i = 0; i < 4; i++) {
+        PSMTXMultVec(lbl_8017FF78, &lbl_80180010[i], &lbl_80180010[i]);
+    }
+}
+
+// .text:0x80033F64 size:0xD8
+void fn_80033F64(f32 w, f32 h, f32 angle)
+{
+    Mtx m;
+    Mtx rot;
+    s32 i;
+
+    lbl_80180010[0].x = 0.5f * -w;
+    lbl_80180010[0].y = 0.5f * -h;
+    lbl_80180010[0].z = 0.0f;
+    lbl_80180010[1].x = 0.5f * w;
+    lbl_80180010[1].y = 0.5f * -h;
+    lbl_80180010[1].z = 0.0f;
+    lbl_80180010[2].x = 0.5f * w;
+    lbl_80180010[2].y = 0.5f * h;
+    lbl_80180010[2].z = 0.0f;
+    lbl_80180010[3].x = 0.5f * -w;
+    lbl_80180010[3].y = 0.5f * h;
+    lbl_80180010[3].z = 0.0f;
+    PSMTXRotRad(rot, 'z', 0.017453292f * angle);
+    PSMTXConcat(lbl_8017FF78, rot, m);
+    for (i = 0; i < 4; i++) {
+        PSMTXMultVec(m, &lbl_80180010[i], &lbl_80180010[i]);
+    }
 }
 
 // .text:0x800339F0 size:0x34
@@ -200,27 +261,26 @@ Emitter* fn_800337CC(Emitter* e, s32 n, BOOL all)
     Particle* p = lbl_803CBC74;
     Particle* last = NULL;
 
-    if (e == NULL) {
-        return e;
-    }
-    while (p != NULL && n != 0) {
-        last = p;
-        p = p->next;
-        count++;
-        n--;
-    }
-    if (all && n != 0) {
-        return NULL;
-    }
-    e->count = count;
-    if (count != 0) {
-        e->particles = lbl_803CBC74;
-        lbl_803CBC74 = p;
-        if (last != NULL) {
-            last->next = NULL;
+    if (e != NULL) {
+        while (p != NULL && n != 0) {
+            last = p;
+            p = p->next;
+            count++;
+            n--;
         }
-    } else {
-        e->particles = NULL;
+        if (all && n != 0) {
+            return NULL;
+        }
+        e->count = count;
+        if (count != 0) {
+            e->particles = lbl_803CBC74;
+            lbl_803CBC74 = p;
+            if (last != NULL) {
+                last->next = NULL;
+            }
+        } else {
+            e->particles = NULL;
+        }
     }
     return e;
 }
@@ -311,6 +371,8 @@ void fn_8002CDD0(Vec* pos)
 }
 
 // .text:0x80027918 size:0x50
+// 99.75%: the target stores through the register the inlined fn_800339F0 returns in (r3);
+// this stores through its copy (r4). Loop forms and fn_800339F0 variants did not move it.
 void fn_80027918(u8 id, f32 v)
 {
     Emitter* e = NULL;

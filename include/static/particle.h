@@ -20,8 +20,11 @@ void pitchingMachinePitching(u8 id);
 BOOL fn_80033928(u8 id);
 void fn_80033964(struct Emitter* e);
 struct Emitter* fn_800339F0(struct Emitter* e, u8 id);
+void fn_80033F64(f32 w, f32 h, f32 angle);
+void fn_8003403C(f32 w, f32 h);
 void fn_800340F4(Mtx m);
 void fn_80034120(Mtx m);
+void fn_8003414C(Mtx m);
 void minigamesSetSomePointers(void);
 void minigamesSetSomePointers2(void);
 

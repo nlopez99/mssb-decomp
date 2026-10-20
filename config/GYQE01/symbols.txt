@@ -4556,7 +4556,6 @@ lbl_8017ED68 = .bss:0x8017ED68; // type:object size:0x1004 scope:local align:4 d
 lbl_8017FD6C = .bss:0x8017FD6C; // type:object size:0x20C scope:local
 lbl_8017FF78 = .bss:0x8017FF78; // type:object size:0x30 scope:local
 lbl_8017FFA8 = .bss:0x8017FFA8; // type:object size:0x30 scope:local
-lbl_8017FFD8 = .bss:0x8017FFD8; // type:object size:0x8 scope:local
 lbl_8017FFE0 = .bss:0x8017FFE0; // type:object size:0x30 scope:local
 lbl_80180010 = .bss:0x80180010; // type:object size:0x30 scope:local align:4 data:float
 lbl_80180040 = .bss:0x80180040; // type:object size:0x78000 scope:local data:4byte
