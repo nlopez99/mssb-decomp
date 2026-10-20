@@ -37,6 +37,7 @@ extern SpriteBuffer lbl_80366188;
 extern struct TexImage* lbl_803CBBD8;
 
 extern void fn_800B12DC(SpriteVertex* verts, s32 count);
+extern void DrawNullSprite(SpriteVertex* verts, u32 count);
 
 static inline void setVertexPos(SpriteVertex* v, f32* p) {
     v->x = p[0];
@@ -306,7 +307,121 @@ void fn_8000E030(SpriteShape* shape, Mtx mtx, ShapeStyle* style) {
 }
 
 // .text:0x8000DC9C size:0x394
-void fn_8000DC9C(void) {
+void fn_8000DC9C(SpriteShape* shape, Mtx mtx, ShapeStyle* style) {
+    Vec out;
+    Vec pt;
+    f32 radius[2];
+    SpriteVertex verts[516];
+    Vec ringB[257];
+    Vec ringA[257];
+    Mtx m;
+    u32 colorA;
+    u32 colorB;
+    s32 i;
+    s32 n;
+    s32 step;
+    s16 angle;
+    Vec* pa;
+    Vec* pb;
+    SpriteVertex* v;
+    u32 j;
+    u32 count;
+    f32 s;
+    f32 c;
+    f32 a;
+
+    if (shape->_25_b7 && style->_36 == 0) {
+        return;
+    }
+    PSMTXCopy(mtx, m);
+    if (style->_30 > 128.0f) {
+        radius[1] = 128.0f;
+        colorB = style->_24;
+        radius[0] = style->_30;
+        colorA = style->_20;
+    } else {
+        radius[0] = 128.0f;
+        colorA = style->_24;
+        radius[1] = style->_30;
+        colorB = style->_20;
+    }
+    for (i = 0; i < 2; i++) {
+        pt.x = 128.0f + radius[i];
+        pt.y = 128.0f;
+        pt.z = 0.0f;
+        PSMTXMultVec(m, &pt, &out);
+        if (i != 0) {
+            ringA[0].x = out.x;
+            ringA[0].y = out.y;
+            ringA[0].z = out.z;
+        } else {
+            ringB[0].x = out.x;
+            ringB[0].y = out.y;
+            ringB[0].z = out.z;
+        }
+    }
+    if (style->_36 != 0) {
+        n = style->_36;
+    } else {
+        n = style->_34 - 1;
+    }
+    step = 0x10000 / style->_34;
+    angle = 0;
+    pa = &ringA[1];
+    pb = &ringB[1];
+    do {
+        angle -= step;
+        a = 0.0000958738f * angle;
+        s = sin(a);
+        c = cos(a);
+        for (i = 0; i < 2; i++) {
+            pt.x = c * radius[i] + 128.0f;
+            pt.y = s * radius[i] + 128.0f;
+            pt.z = 0.0f;
+            PSMTXMultVec(m, &pt, &out);
+            if (i != 0) {
+                pa->x = out.x;
+                pa->y = out.y;
+                pa->z = out.z;
+            } else {
+                pb->x = out.x;
+                pb->y = out.y;
+                pb->z = out.z;
+            }
+        }
+        pa++;
+        pb++;
+    } while (--n != 0);
+    if (!shape->_25_b7) {
+        ringA[style->_34].x = ringA[0].x;
+        ringB[style->_34].x = ringB[0].x;
+        ringA[style->_34].y = ringA[0].y;
+        ringB[style->_34].y = ringB[0].y;
+        ringA[style->_34].z = ringA[0].z;
+        ringB[style->_34].z = ringB[0].z;
+    }
+    if (shape->_25_b7) {
+        count = (style->_36 + 1) * 2;
+    } else {
+        count = (style->_34 + 1) * 2;
+    }
+    pa = ringA;
+    pb = ringB;
+    v = verts;
+    for (j = 0; j < count; j += 2) {
+        v[0].x = pb->x;
+        v[1].x = pa->x;
+        v[0].y = pb->y;
+        v[1].y = pa->y;
+        v[0].z = pb->z;
+        v[1].z = pa->z;
+        v[0].color = colorA;
+        v[1].color = colorB;
+        pa++;
+        pb++;
+        v += 2;
+    }
+    DrawNullSprite(verts, count);
 }
 
 // .text:0x8000D8A4 size:0x3F8

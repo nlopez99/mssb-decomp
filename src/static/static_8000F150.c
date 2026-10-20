@@ -155,10 +155,10 @@ void fn_80010FA0(void) {
 
     info = &hdr->info;
     lbl_80366B18.info = info;
-    lbl_80366B18._7EC = hdr->info._04;
-    lbl_80366B18._7F0 = hdr->info._08;
-    lbl_80366B18._7F8 = hdr->info._18;
-    lbl_80366B18._7F4 = hdr->info._14;
+    lbl_80366B18._7EC = ((FontHeader*)lbl_80366B18.fonts[0])->info._04;
+    lbl_80366B18._7F0 = ((FontHeader*)lbl_80366B18.fonts[0])->info._08;
+    lbl_80366B18._7F8 = ((FontHeader*)lbl_80366B18.fonts[0])->info._18;
+    lbl_80366B18._7F4 = ((FontHeader*)lbl_80366B18.fonts[0])->info._14;
     src = info->_1C;
     for (i = 0;; i++) {
         c = src[i];
