@@ -12,7 +12,6 @@ void fn_800238E0(struct ObjGroup* group, u16 slot, s16 id, struct ObjLayout* lay
 void fn_8002399C(struct ObjInst* inst, u16 slot, s16 id, struct ObjLayout* layout, void* anim, void* skin);
 void* fn_80023AA4(void);
 void fn_80023B04(s32 count);
-void fn_80023B90(struct LightDesc* desc, struct LightPos* light);
 
 // Defined in units not yet split
 void* _OSAllocFromHeap(u32 align, u32 size);

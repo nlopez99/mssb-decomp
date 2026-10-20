@@ -179,37 +179,27 @@ typedef struct ObjGroup {
     /* 0x34 */ ObjInst insts[1];
 } ObjGroup;
 
-typedef struct LightDesc {
-    /* 0x0 */ u16 height;
-    /* 0x2 */ u16 pitch;
-    /* 0x4 */ u16 yaw;
-    /* 0x6 */ u8 r;
-    /* 0x7 */ u8 g;
-    /* 0x8 */ u8 b;
-} LightDesc;
-
-typedef struct LightPos {
-    /* 0x00 */ Vec pos;
-    /* 0x0C */ u8 r;
-    /* 0x0D */ u8 g;
-    /* 0x0E */ u8 b;
-} LightPos;
-
 static inline void* ObjAlloc(u8** mem, u32 size) {
     void* p = *mem;
     *mem += size;
     return p;
 }
 
-static inline void GetDisplayObj(ObjDisplay** obj, ObjPalette* pal, u16 id, u8** mem) {
+static inline u8* GetDisplayObj(ObjDisplay** obj, ObjPalette* pal, u16 id, u8* mem) {
+    u8** heap = &mem;
+    u8* result;
+    ObjDisplayLayout* layout;
+
     if (id >= pal->numDescriptors) {
         OSReport("Display object id %d is greater than number of objects %d", id, pal->numDescriptors);
         *obj = NULL;
+        result = mem;
     } else {
-        *obj = (ObjDisplay*)*mem;
-        *mem += sizeof(ObjDisplay);
-        *mem = fn_80023078(*obj, pal->descriptorArray[id].layout, *mem);
+        layout = pal->descriptorArray[id].layout;
+        *obj = ObjAlloc(heap, sizeof(ObjDisplay));
+        result = *heap = fn_80023078(*obj, layout, *heap);
     }
+    return result;
 }
 
 extern struct {
@@ -222,27 +212,6 @@ void* lbl_8017EB40[28];
 u32 lbl_803CBC5C;
 u32 lbl_803CBC58;
 
-
-// .text:0x80023B90 size:0x164
-void fn_80023B90(LightDesc* desc, LightPos* light) {
-    Vec side = { 1.0f, 0.0f, 0.0f };
-    Vec up = { 0.0f, 1.0f, 0.0f };
-    Mtx m;
-    Mtx rot;
-
-    PSMTXRotAxisRad(rot, &side, 3.1415925f * desc->pitch / 2048.0f);
-    PSMTXConcat(m, rot, m);
-    PSMTXRotAxisRad(m, &up, 3.1415925f * (desc->yaw + 0x800) / 2048.0f);
-    PSMTXConcat(m, rot, m);
-    up.y = desc->height;
-    PSMTXMultVec(m, &up, &up);
-    light->pos.x = up.x;
-    light->pos.y = up.y;
-    light->pos.z = up.z;
-    light->r = desc->r;
-    light->g = desc->g;
-    light->b = desc->b;
-}
 
 // .text:0x80023B04 size:0x8C
 void fn_80023B04(s32 count) {
@@ -351,15 +320,19 @@ void BuildBoneSkinOrientationMatrix(ObjBone* bone, MtxPtr parent) {
 
 // .text:0x800232E0 size:0x32C
 ObjActor* f_InitActorWithLayout(ObjLayout* layout, u8* mem) {
-    u16 boneCount;
+    ObjActor* actor;
+    u32 boneArraySize;
+    u32 forwardSize;
     u32 skinSize;
     u32 invTransposeSize;
     u32 orientSize;
-    u32 boneArraySize;
-    u32 forwardSize;
-    ObjActor* actor;
-    ObjDisplay* skin;
+    u16 boneCount;
+    u32 size;
+    u8* bones;
+    ObjActor header;
     Mtx m;
+    // the skin pointer lives in a whole local actor, as the original's frame shows
+    ObjDisplay** skin = &header.skinObject;
 
     skinSize = 0;
     invTransposeSize = 0;
@@ -368,18 +341,20 @@ ObjActor* f_InitActorWithLayout(ObjLayout* layout, u8* mem) {
     boneArraySize = ALIGN32(layout->totalBones * sizeof(ObjBone*));
     forwardSize = ALIGN32(layout->totalBones * sizeof(Mtx));
     if (layout->skinFileID != 0xFFFF) {
-        GetDisplayObj(&skin, layout->pal, layout->skinFileID, &mem);
-        skinSize = invTransposeSize = ALIGN32(layout->totalBones * sizeof(Mtx));
-        if (skin->lightingData != NULL) {
-            orientSize = invTransposeSize;
+        mem = GetDisplayObj(skin, layout->pal, layout->skinFileID, mem);
+        size = ALIGN32(layout->totalBones * sizeof(Mtx));
+        skinSize = size;
+        invTransposeSize = size;
+        if ((*skin)->lightingData != NULL) {
+            orientSize = size;
         }
     }
     actor = (ObjActor*)mem;
+    mem += ALIGN32(boneArraySize + forwardSize + skinSize + invTransposeSize + orientSize + ALIGN32(layout->totalBones * sizeof(ObjBone)) + sizeof(ObjActor));
     actor->boneArray = (ObjBone**)(actor + 1);
     actor->forwardMtxArray = (MtxPtr)((u8*)actor->boneArray + boneArraySize);
-    actor->skinObject = skin;
+    actor->skinObject = *skin;
     actor->skHeader = NULL;
-    mem = (u8*)actor + ALIGN32(sizeof(ObjActor) + boneArraySize + forwardSize + skinSize + invTransposeSize + orientSize + ALIGN32(layout->totalBones * sizeof(ObjBone)));
     PSMTXIdentity(m);
     actor->actorID = layout->actorID;
     actor->layout = layout;
@@ -404,8 +379,9 @@ ObjActor* f_InitActorWithLayout(ObjLayout* layout, u8* mem) {
             for (i = 0; i < pal->numDescriptors; i++, desc++) {
                 PositionData* p = desc->layout->positionData;
                 if (p->compCount == 6) {
-                    pos->positionArray = p->positionArray;
-                    actor->skinObject->lightingData->normalArray = p->positionArray + diff;
+                    char* array = p->positionArray;
+                    pos->positionArray = array;
+                    actor->skinObject->lightingData->normalArray = array + diff;
                     break;
                 }
             }
@@ -421,10 +397,10 @@ ObjActor* f_InitActorWithLayout(ObjLayout* layout, u8* mem) {
         actor->orientationInvMtxArray = NULL;
         actor->skinInvTransposeMtxArray = NULL;
     }
+    bones = (u8*)actor->forwardMtxArray + (forwardSize + skinSize + invTransposeSize + orientSize);
     actor->worldControl.type = 0;
     if (layout->hierarchy.Root != NULL) {
-        f_InitBone(NULL, (ObjLayoutBone*)layout->hierarchy.Root, actor, &boneCount,
-                   (u8*)actor->forwardMtxArray + forwardSize + skinSize + invTransposeSize + orientSize, mem);
+        f_InitBone(NULL, (ObjLayoutBone*)layout->hierarchy.Root, actor, &boneCount, bones, mem);
     }
     if (boneCount != actor->totalBones) {
         OSPanic("objinit.c", 521, "Incorrect number of bones in actor");
@@ -447,24 +423,27 @@ ObjActor* f_InitActorWithLayout(ObjLayout* layout, u8* mem) {
 
 // .text:0x80023078 size:0x268
 u8* fn_80023078(ObjDisplay* obj, ObjDisplayLayout* layout, u8* mem) {
+    u8** heap = &mem;
     u16 i;
+    u32 n;
 
     if (layout->positionData != NULL) {
-        obj->positionData = ObjAlloc(&mem, 0x20);
+        obj->positionData = ObjAlloc(heap, 0x20);
         *obj->positionData = *layout->positionData;
     } else {
         obj->positionData = NULL;
     }
     if (layout->colorData != NULL) {
-        obj->colorData = ObjAlloc(&mem, 0x20);
+        obj->colorData = ObjAlloc(heap, 0x20);
         *obj->colorData = *layout->colorData;
     } else {
         obj->colorData = NULL;
     }
     if (layout->textureData != NULL && layout->numTextureChannels != 0) {
-        obj->textureData = (TextureData*)mem;
-        obj->numTextureChannels = layout->numTextureChannels;
-        mem += ALIGN32(layout->numTextureChannels * sizeof(TextureData));
+        obj->textureData = (TextureData*)*heap;
+        n = layout->numTextureChannels;
+        obj->numTextureChannels = n;
+        *heap += ALIGN32(n * sizeof(TextureData));
         for (i = 0; i < layout->numTextureChannels; i++) {
             obj->textureData[i] = layout->textureData[i];
         }
@@ -473,13 +452,13 @@ u8* fn_80023078(ObjDisplay* obj, ObjDisplayLayout* layout, u8* mem) {
         obj->numTextureChannels = 0;
     }
     if (layout->lightingData != NULL) {
-        obj->lightingData = ObjAlloc(&mem, 0x20);
+        obj->lightingData = ObjAlloc(heap, 0x20);
         *obj->lightingData = *layout->lightingData;
     } else {
         obj->lightingData = NULL;
     }
     if (layout->displayData != NULL) {
-        obj->displayData = ObjAlloc(&mem, 0x20);
+        obj->displayData = ObjAlloc(heap, 0x20);
         *obj->displayData = *layout->displayData;
     } else {
         obj->displayData = NULL;
@@ -516,7 +495,7 @@ u8* f_InitBone(ObjBone* parent, ObjLayoutBone* lbone, ObjActor* actor, u16* coun
         }
         bone->dispObj = NULL;
         if (lbone->geoFileID != 0xFFFF) {
-            GetDisplayObj(&bone->dispObj, actor->pal, lbone->geoFileID, &mem);
+            mem = GetDisplayObj(&bone->dispObj, actor->pal, lbone->geoFileID, mem);
         }
         bone->_18 = bone->dispObj;
         bone->anim = NULL;

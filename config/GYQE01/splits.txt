@@ -25,13 +25,20 @@ static/fn_80021188.c:
 	.sdata2     start:0x803CC548 end:0x803CC560
 
 static/objinit.c:
-	extab       start:0x80005B08 end:0x80005B50
-	extabindex  start:0x800073EC end:0x80007458
-	.text       start:0x80022DAC end:0x80023CF4
-	.rodata     start:0x800E6698 end:0x800E6720
+	extab       start:0x80005B08 end:0x80005B48
+	extabindex  start:0x800073EC end:0x8000744C
+	.text       start:0x80022DAC end:0x80023B90
+	.rodata     start:0x800E6698 end:0x800E6708
 	.bss        start:0x8017EB40 end:0x8017EC00
 	.sbss       start:0x803CBC58 end:0x803CBC60
-	.sdata2     start:0x803CC560 end:0x803CC580
+	.sdata2     start:0x803CC560 end:0x803CC568
+
+static/fn_80023B90.c:
+	extab       start:0x80005B48 end:0x80005B50
+	extabindex  start:0x8000744C end:0x80007458
+	.text       start:0x80023B90 end:0x80023CF4
+	.rodata     start:0x800E6708 end:0x800E6720
+	.sdata2     start:0x803CC568 end:0x803CC580
 
 static/sub.c:
 	extab       start:0x80005B50 end:0x80005BA0
