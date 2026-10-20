@@ -1346,8 +1346,8 @@ void unsure_FillRosterPositions(u8 team) {
                     break;
                 }
                 row = captains[i] / 9;
-            col = captains[i] % 9;
-            attr = lbl_8034E9A0.chars[row][col].attribute;
+                col = captains[i] % 9;
+                attr = lbl_8034E9A0.chars[row][col].attribute;
                 for (k = 0; k < 5; k++) {
                     bat = lbl_80109054[1][attr][k];
                     for (m = 0; m < 9; m++) {
