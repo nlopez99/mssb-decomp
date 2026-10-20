@@ -72,6 +72,7 @@ u8 lbl_803CB888 = 0x69;
 u8 lbl_803CB889 = 0x7D;
 
 // .text:0x80062A94 size:0x150
+// 98.87%: registers only in the fade step (the state pointer in r6, not r5).
 void fn_80062A94(void) {
     if (lbl_800EF808._398 != 0) {
         if (lbl_803C6714.playing == 0) {
@@ -232,6 +233,8 @@ void fn_80062674(s32 port) {
 }
 
 // .text:0x800625A4 size:0xD0
+// 96.15%: the target clears the rows with the register that holds the loop
+// counter's 0 and allocates the pad index one register higher.
 void fn_800625A4(s32 port, s32 step) {
     s32 i;
     s32 idx = g_d_GameSettings._10 == 0 ? 0 : port;

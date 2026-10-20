@@ -218,6 +218,7 @@ void fn_80057CAC(void) {
 }
 
 // .text:0x80057C08 size:0xA4
+// 99.76%: the slot index adds task->_14 and i in the other register order.
 void starMenu(void) {
     SpaniTask* task;
     s32 i;
