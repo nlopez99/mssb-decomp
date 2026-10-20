@@ -250,7 +250,7 @@ extern void fn_80024FA4(Unk0060Elem* model, void* anim, UnkTimer0610* timer, s32
 extern void fn_8003414C(Mtx m);
 extern void fn_80038EC4(Unk8036E548Actor* actor, Unk0060Elem* model, s32 arg2);
 extern void fn_800BD8C4(Unk0060* model, Mtx m);
-extern void fn_800330CC(s32 arg0, u32 arg1, Vec* arg2, Vec* arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7);
+extern void fn_800330CC(s32 arg0, u32 arg1, Vec* arg2, Vec* arg3, f32 arg4, s32 arg5, s32 arg6, f32 arg7);
 extern u32 fn_80024D2C(UnkTimer0610* timer);
 
 extern struct {
@@ -2513,8 +2513,8 @@ void fn_1_176EC(void) {
 }
 
 // .text:0x00016978 size:0xD74
-// Registers differ in case 4 (lbl_1_bss_3074 and the slot product swap r7/r8)
-// and in case 26's slot loop (counter, source and destination pointers)
+// Registers differ only in case 26's slot loop (counter, source and
+// destination pointers)
 void fn_1_16978(void) {
     s16 frame;
     s32 i;
@@ -2553,9 +2553,8 @@ void fn_1_16978(void) {
         }
         break;
     case 4:
-        lbl_8036E548._0C04[lbl_1_bss_5F73]._008 = ARAMTransfer(
-            &lbl_1_data_2398[lbl_1_bss_3074 + lbl_1_bss_68FC._40[lbl_1_bss_5F73] * 19 + lbl_1_bss_6940[lbl_1_bss_5F73]._46],
-            0, 0, 0);
+        i = lbl_1_bss_68FC._40[lbl_1_bss_5F73] * 19 + lbl_1_bss_6940[lbl_1_bss_5F73]._46;
+        lbl_8036E548._0C04[lbl_1_bss_5F73]._008 = ARAMTransfer(&lbl_1_data_2398[lbl_1_bss_3074 + i], 0, 0, 0);
         lbl_803CC1B8->_10++;
         break;
     case 5:
@@ -4584,7 +4583,6 @@ void fn_1_10458(void) {
 }
 
 // .text:0x00010044 size:0x414
-// Only fn_800330CC's argument setup differs: the target loads r8 (0) before r7
 void fn_1_10044(void) {
     Mtx rotX;
     Mtx rotY;
@@ -4664,8 +4662,8 @@ void fn_1_10044(void) {
             PSMTXRotRad(rotY, 'y', MTXDegToRad(360.0 * lbl_1_data_AE12 / 4096.0));
             PSMTXConcat(rotY, rotX, rotX);
             PSMTXMultVec(rotX, &lbl_1_data_AE14, &lbl_1_data_AE14);
-            fn_800330CC(lbl_1_data_ADF4, lbl_1_data_ADF0, &lbl_1_data_AE04, &lbl_1_data_AE14, lbl_1_data_ADFC, 0,
-                        lbl_1_data_ADF8, lbl_1_data_AE00);
+            fn_800330CC(lbl_1_data_ADF4, lbl_1_data_ADF0, &lbl_1_data_AE04, &lbl_1_data_AE14, lbl_1_data_ADF8,
+                        lbl_1_data_ADFC, 0, lbl_1_data_AE00);
         }
     } else if (lbl_803C77B8[0]._04 & 0x200) {
         lbl_1_bss_307C = 0;
@@ -5218,9 +5216,19 @@ void fn_1_E8D4(void) {
     }
 }
 
+static inline void setElemAnim(Unk0060Elem* elem, UnkAnimRef0610* anim, u16 frame) {
+    elem->_04 = anim;
+    elem->_0E = frame;
+    elem->_5C = 0.0f;
+    elem->_58 = 1;
+    elem->_59 = anim != NULL;
+    elem->_5A = anim != NULL;
+    elem->_60 = 0.0f;
+}
+
 // .text:0x0000E098 size:0x83C
-// Registers only: case 10 and the column loop use one register fewer than the
-// target (r21)
+// Registers only: case 10's task pointer and timer counter, and the column
+// loop's pad and pointer registers
 void fn_1_E098(void) {
     UnkSlotState0610* st = lbl_1_bss_3218;
     s32 i;
@@ -5255,27 +5263,12 @@ void fn_1_E098(void) {
             break;
         case 10:
             if (i == lbl_1_bss_30B6 && (lbl_803C77B8[0]._02 & 0x100)) {
-                Unk0060Elem* elem;
-                UnkAnimRef0610* anim;
-                u8* frame;
-                u8* animId;
                 UnkTaskState0610* task = (UnkTaskState0610*)lbl_803CC1B8;
-                u8 anim45;
                 task->_00 = fn_1_DE1C;
                 task->_15 = 0;
-                animId = &lbl_1_bss_6940[lbl_1_bss_5F73]._44;
-                frame = &lbl_1_bss_6940[lbl_1_bss_5F73]._45;
-                *animId = lbl_1_bss_3218[task->_15]._0;
-                *frame = lbl_1_bss_3218[task->_15]._2;
-                anim = lbl_8036E548._0C04[lbl_1_bss_5F73]._010[*animId];
-                elem = &lbl_8036E548._0060->_34[lbl_1_bss_5F73];
-                anim45 = *frame;
-                elem->_04 = anim;
-                elem->_0E = anim45;
-                elem->_5C = 0.0f;
-                elem->_58 = 1;
-                elem->_5A = elem->_59 = anim != NULL;
-                elem->_60 = 0.0f;
+                lbl_1_bss_6940[lbl_1_bss_5F73]._44 = lbl_1_bss_3218[task->_15]._0;
+                lbl_1_bss_6940[lbl_1_bss_5F73]._45 = lbl_1_bss_3218[task->_15]._2;
+                setElemAnim(&lbl_8036E548._0060->_34[lbl_1_bss_5F73], lbl_8036E548._0C04[lbl_1_bss_5F73]._010[lbl_1_bss_6940[lbl_1_bss_5F73]._44], lbl_1_bss_6940[lbl_1_bss_5F73]._45);
                 j = 5;
                 while (j--) {
                     if (lbl_1_bss_3258[task->_15][j]._08 != 0) {
@@ -5464,16 +5457,9 @@ void fn_1_DE1C(void) {
 }
 
 // .text:0x0000D9B8 size:0x464
-// Registers only: the target keeps lbl_1_bss_5F73 in r29 and elem in r12, and
-// indexes the slot's state with lbzx
 void fn_1_D9B8(void) {
     UnkTaskState0610* task;
     UnkList0610* list;
-    Unk0060Elem* elem;
-    UnkAnimRef0610* anim;
-    Unk6940* state;
-    Unk8036E548Actor* actor;
-    u8 anim45;
     f32 start;
     s16 limit;
     s32 id;
@@ -5497,19 +5483,9 @@ void fn_1_D9B8(void) {
                 task->_15 = 0;
             }
         } while ((id = lbl_1_bss_3218[task->_15]._0) < 0);
-        state = &lbl_1_bss_6940[lbl_1_bss_5F73];
-        actor = &lbl_8036E548._0C04[lbl_1_bss_5F73];
         lbl_1_bss_6940[lbl_1_bss_5F73]._44 = id;
-        state->_45 = lbl_1_bss_3218[task->_15]._2;
-        anim = actor->_010[state->_44];
-        elem = &lbl_8036E548._0060->_34[lbl_1_bss_5F73];
-        anim45 = state->_45;
-        elem->_04 = anim;
-        elem->_0E = anim45;
-        elem->_5C = 0.0f;
-        elem->_58 = 1;
-        elem->_5A = elem->_59 = anim != NULL;
-        elem->_60 = 0.0f;
+        lbl_1_bss_6940[lbl_1_bss_5F73]._45 = lbl_1_bss_3218[task->_15]._2;
+        setElemAnim(&lbl_8036E548._0060->_34[lbl_1_bss_5F73], lbl_8036E548._0C04[lbl_1_bss_5F73]._010[lbl_1_bss_6940[lbl_1_bss_5F73]._44], lbl_1_bss_6940[lbl_1_bss_5F73]._45);
         start = lbl_1_bss_67B8[0]->_00;
         i = 5;
         while (i--) {
