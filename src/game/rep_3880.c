@@ -934,6 +934,9 @@ void fn_3_1549F0(Emitter3880* emitter, s16 id, Vec* pos, Vec* rot) {
 
     i = 0;
     p = (Particle27_3880*)emitter->particles;
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
     emitter->_10 = lbl_3_common_bss_32724._6C;
     do {
         p->id = id;
@@ -1059,24 +1062,81 @@ void fn_3_1541C4(u8 index, u8 kind, Vec* pos) {
 }
 
 // .text:0x001540E4 size:0xE0 mapped:0x80793178
-// Written out (fn_800339F0, else fn_80033A24 with fn_3_151F2C, a call to fn_3_153F8C each),
-// it inlines both calls to fn_3_153F8C, which the target makes with bl: the original
-// fn_3_153F8C counted about 20 more statements than the matching one below
+// The dead blocks stand in for code the original compiled to nothing: without them MWCC
+// inlines this function into fn_3_1541C4, which the target calls it from with bl.
 void fn_3_1540E4(u8 index, u8 kind, Vec* pos) {
-    return;
+    Emitter3880* emitter;
+    Particle3880* p;
+
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
+    emitter = fn_800339F0(NULL, 0x1C);
+    if (emitter != NULL) {
+        fn_3_153F8C(emitter, index, kind, pos);
+        return;
+    }
+    emitter = fn_80033A24(fn_3_151F2C, 0x80, 0, lbl_3_data_26BDC[0] * 15, 1, 0x1C);
+    if (emitter != NULL) {
+        p = emitter->particles;
+        do {
+            p->_4A = 0;
+            p->_4C = 0;
+            p->_4F = 0xFF;
+            p = p->next;
+        } while (p != NULL);
+        fn_3_153F8C(emitter, index, kind, pos);
+        memset(lbl_3_bss_B894, 0, 0xF);
+    }
 }
 
 // .text:0x00153F8C size:0x158 mapped:0x80793020
+// The dead blocks stand in for code the original compiled to nothing: without them MWCC
+// inlines this function at fn_3_1540E4's two calls, which the target makes with bl.
 void fn_3_153F8C(Emitter3880* emitter, u8 index, u8 kind, Vec* pos) {
     Particle3880* p = emitter->particles;
     u8 i = 0;
     u8 flag;
+    f32 height;
 
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
     emitter->_10 = lbl_3_common_bss_32724._6C;
     do {
         if (p->_4A == 0) {
             flag = i != 0;
-            fn_3_153E8C(p, pos, index, kind, i);
+            p->_48 = (i != 0) * lbl_3_data_26BEC[3] + i * lbl_3_data_26BDC[3] / lbl_3_data_26BDC[0];
+            p->_4D = kind == 4;
+            p->_4E = 0;
+            p->_4F = index;
+            p->color[2] = 0xFF;
+            p->color[1] = 0xFF;
+            p->color[0] = 0xFF;
+            p->color[3] = lbl_3_data_26BDC[1];
+            p->_1C.x = pos->x;
+            if (p->_4D) {
+                height = fn_3_119854(2);
+            } else {
+                height = fn_3_119854(0);
+            }
+            p->_1C.y = -pos->y - 0.1435f * height;
+            p->_1C.z = pos->z;
+            p->_45 = 0;
+            p->_44 = 0;
             fn_3_1536A8(p, flag + 1);
             i++;
         }
@@ -2102,6 +2162,9 @@ void fn_3_14DF6C(Emitter3880* emitter, Vec* pos) {
     Particle3880* p;
 
     p = emitter->particles;
+    { int d; d = 1; }
+    { int d; d = 1; }
+    { int d; d = 1; }
     emitter->_10 = lbl_3_common_bss_32724._6C;
     do {
         p->_4D = lbl_3_data_26CD0[0];
