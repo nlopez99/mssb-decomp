@@ -141,7 +141,7 @@ extern struct {
     /* 0x2C50 */ Unk3090Model* _2C50[9];
 } lbl_8036E548;
 
-extern struct {
+extern struct Unk3090Fielder {
     /* 0x000 */ Vec _000;
     /* 0x00C */ f32 _00C;
     /* 0x010 */ u8 _010[0x48 - 0x10];
@@ -1446,8 +1446,9 @@ void fn_3_105A10(Vec* out, Vec* from, Vec* to, f32 t) {
     memcpy(out, result, sizeof(Vec));
 }
 
-// 99.75%: registers only in the key search (the walking pointer and stride are r9 and r6
-// in the target, r7 and r10 here).
+// 99.88%: registers only; the target keeps frac in r7 and the key count and next->_00 in r8
+// (swapped here). Every order and type of frac, sec and found gives this; a permuter
+// session found nothing more.
 // .text:0x001054D0 size:0x540 mapped:0x80744564
 void fn_3_1054D0(struct Unk3090Track* track, u32 time, s16 channel) {
     u16 frac = time;
@@ -1456,7 +1457,7 @@ void fn_3_1054D0(struct Unk3090Track* track, u32 time, s16 channel) {
     Unk3090Channel* ch = (Unk3090Channel*)track->_08[channel + 1];
     u8* keys = ch->_0C;
     s32 stride = lbl_3_data_20FC4[ch->_06];
-    Unk3090TrackKey* key = (Unk3090TrackKey*)(keys + (ch->_04 - 1) * stride);
+    Unk3090TrackKey* key = (Unk3090TrackKey*)(keys + (ch->_04 - 1) * lbl_3_data_20FC4[ch->_06]);
     Unk3090TrackKey* next;
 
     if (ch->_04 == 1) {
@@ -3338,13 +3339,12 @@ BOOL fn_3_FDB30(void) {
     }
 }
 
-// 98.91%: registers only in case 1 (task->_1E in r7 and the table bases in r5/r6 in the
-// target, r6 and r4/r5 here).
 // .text:0x000FDA1C size:0x114 mapped:0x8073CAB0
 void fn_3_FDA1C(void) {
     Unk3090Task* task = lbl_803CC1B8;
     Unk3090Model* model;
     Unk3090Queue* queue;
+    struct Unk3090Fielder* fielder;
 
     switch (task->_22) {
     case 0:
@@ -3352,7 +3352,8 @@ void fn_3_FDA1C(void) {
         break;
     case 1:
         model = lbl_8036E548._2C50[task->_1E];
-        if (g_Fielders[task->_1E]._218 == 0) {
+        fielder = &g_Fielders[task->_1E];
+        if (fielder->_218 == 0) {
             if (task->_1E < 9) {
                 task->_1E++;
                 task->_22 = 0;
