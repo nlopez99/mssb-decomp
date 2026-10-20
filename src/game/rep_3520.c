@@ -718,15 +718,15 @@ void fn_3_139F84(void) {
 }
 
 // .text:0x00139CA0 size:0x2E4 mapped:0x80778D34
-// 96.2%: the target keeps count * 4 in its own register (r18) for bag->coins.
 void fn_3_139CA0(void) {
     Unk3520Bag* bag = NULL;
+    int i;
     u8 filling = FALSE;
     int count;
+    int left;
     int angle;
     f32 speed;
     f32 scale;
-    int i;
 
     if (g_Minigame.turnOverStatus != 0) {
         return;
@@ -737,7 +737,7 @@ void fn_3_139CA0(void) {
     count = lbl_3_data_21A04[2];
     if (g_Minigame._1D54 % lbl_3_data_21A04[6] == 0 && 100 - g_Minigame._1D6C >= 10 && MG.bag.active == 0) {
         bag = &MG.bag;
-        MG.bag.active = TRUE;
+        bag->active = TRUE;
         count = 10;
         filling = TRUE;
     }
@@ -779,7 +779,8 @@ void fn_3_139CA0(void) {
             g_Minigame.wallBall_coinsVisibleFrameCounter[i] = 0;
             g_Minigame._1D6C++;
             g_Minigame._1D54++;
-            if (--count <= 0) {
+            left = --count;
+            if (left <= 0) {
                 fn_3_90064(0x2E8);
                 break;
             }
@@ -1445,10 +1446,10 @@ u8 fn_3_1379A0(int fielderIdx) {
 // directly, and the plane intersection schedules its stores differently.
 u8 fn_3_1373E0(VecSrcDst* seg, Vec* vel, VecSrcDst* out, f32 radius) {
     f32 planes[4][3] = { { -1.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, { 0.0f, -1.0f, 0.0f } };
-    Vec hit;
     Vec d1;
     Vec d3;
     Vec n1;
+    Vec hit;
     Vec d2;
     f32 height = 2.0f * radius;
     f32 halfX = 3.5f + radius;
