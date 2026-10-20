@@ -2,21 +2,88 @@
 #define __STATIC_STATIC_8000BA3C_H_
 
 #include "mssbTypes.h"
+#include "Dolphin/mtx.h"
+
+typedef struct SpriteDesc {
+    /* 0x00 */ u8 _00_b7 : 4;
+    /* 0x00 */ u8 type : 4;
+    /* 0x01 */ u8 flipX : 1;
+    /* 0x01 */ u8 flipY : 1;
+    /* 0x01 */ u8 _b5 : 1;
+    /* 0x01 */ u8 _b4 : 1;
+    /* 0x01 */ u8 _b3 : 4;
+    /* 0x02 */ u16 index;
+} SpriteDesc;
+
+typedef struct AnimFrame {
+    /* 0x0 */ u16 count;
+    /* 0x2 */ u16 size;
+} AnimFrame;
+
+typedef struct AnimTrack {
+    /* 0x0 */ u32 count;
+    /* 0x4 */ u32 _04;
+    /* 0x8 */ AnimFrame* frames[1];
+} AnimTrack;
+
+typedef struct AnimTrackList {
+    /* 0x0 */ u32 count;
+    /* 0x4 */ u32 _04;
+    /* 0x8 */ AnimTrack* tracks[1];
+} AnimTrackList;
+
+typedef struct AnimFile {
+    /* 0x00 */ u8 _00[0x5];
+    /* 0x05 */ u8 _05;
+    /* 0x06 */ u16 _06;
+    /* 0x08 */ AnimTrackList* tracks;
+    /* 0x0C */ void* _0C;
+} AnimFile;
+
+typedef struct TexEntry {
+    /* 0x00 */ u16 _00;
+    /* 0x02 */ u8 _02[0x20 - 0x2];
+} TexEntry; // size: 0x20
+
+typedef struct TexFile {
+    /* 0x00 */ u8 _00[0x20];
+    /* 0x20 */ TexEntry entries[1];
+} TexFile;
+
+typedef struct TexImage {
+    /* 0x00 */ u8 _00[0x8];
+    /* 0x08 */ u16 height;
+    /* 0x0A */ u16 width;
+} TexImage;
+
+typedef struct SpriteRect {
+    /* 0x00 */ u8 _00[0x6];
+    /* 0x06 */ u16 index;
+    /* 0x08 */ u8 flipX : 1;
+    /* 0x08 */ u8 flipY : 1;
+    /* 0x08 */ u8 _b5 : 1;
+    /* 0x08 */ u8 _b4 : 5;
+} SpriteRect;
+
+typedef struct SpriteVerts {
+    /* 0x00 */ s32 offsets[8];
+    /* 0x20 */ u32 colors[4];
+} SpriteVerts;
 
 void fn_8000BA3C(void);
 void fn_8000C194(void);
 void fn_8000CC4C(void);
-void fn_8000CEF0(void);
+BOOL fn_8000CEF0(AnimFile* file, s32 idx, u32 frame, s32 skip, u32* dst);
 void fn_8000D164(void);
 void fn_8000D838(void);
 void fn_8000D8A4(void);
 void fn_8000DC9C(void);
 void fn_8000E030(void);
 void fn_8000E2D4(void);
-void fn_8000E764(void);
-void fn_8000E7BC(void);
-void SetSpriteRect(void);
-void fn_8000EC0C(void);
-void AddVec2iToQuad(void);
+void fn_8000E764(f32 angle, f32* out);
+void fn_8000E7BC(SpriteDesc* spr, Mtx mtx, SpriteVerts* verts, s32 arg3);
+void SetSpriteRect(SpriteRect* spr, TexFile* tex, Mtx mtx, SpriteVerts* verts, s32 arg4);
+void fn_8000EC0C(SpriteDesc* spr, TexFile* tex, Mtx mtx, SpriteVerts* verts, s32 arg4);
+void AddVec2iToQuad(f32* quad, Mtx mtx, s32* offset);
 
 #endif // !__STATIC_STATIC_8000BA3C_H_

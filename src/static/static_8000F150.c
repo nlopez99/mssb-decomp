@@ -1,5 +1,6 @@
 #include "static/static_8000F150.h"
 #include "static/UnknownHomes_Static.h"
+#include "static/static_8000BA3C.h"
 
 typedef struct TextBox {
     /* 0x00 */ void* _00;
@@ -58,8 +59,8 @@ typedef struct TextState {
     /* 0x000 */ TextBox boxes[30];
     /* 0x690 */ TextSlot slots[30];
     /* 0x780 */ u32* _780;
-    /* 0x784 */ void* _784[4];
-    /* 0x794 */ u8* _794;
+    /* 0x784 */ struct TexFile* textures[4];
+    /* 0x794 */ struct TexFile* icons;
     /* 0x798 */ struct TextTable* fonts[7];
     /* 0x7B4 */ FontInfo* info;
     /* 0x7B8 */ void* _7B8[4];
@@ -126,6 +127,22 @@ void fn_80011140(void) {
 
 // .text:0x80011000 size:0x140
 void fn_80011000(void) {
+    s32 i;
+
+    lbl_80366B18.textures[0] = (TexFile*)((u8*)lbl_80366B18._780 + lbl_80366B18._780[0]);
+    lbl_80366B18.textures[1] = (TexFile*)((u8*)lbl_80366B18._780 + lbl_80366B18._780[1]);
+    lbl_80366B18.textures[2] = (TexFile*)((u8*)lbl_80366B18._780 + lbl_80366B18._780[2]);
+    lbl_80366B18.textures[3] = (TexFile*)((u8*)lbl_80366B18._780 + lbl_80366B18._780[3]);
+    for (i = 0; i < 4; i++) {
+        convertTextureHeader(lbl_80366B18.textures[i]);
+        lbl_80366B18._7B8[i] = (u8*)lbl_80366B18.textures[i] + lbl_80366B18.textures[i]->entries[0]._00 * 32 + 4;
+    }
+    convertTextureHeader(lbl_80366B18.icons);
+    for (i = 0; i < 9; i++) {
+        lbl_80366B18._7C8[i] = (u8*)lbl_80366B18.icons + lbl_80366B18.icons->entries[i]._00 * 32 + 4;
+    }
+    lbl_80366B18._7FC = 1;
+    lbl_80366B18._7FD = 1;
 }
 
 // .text:0x80010FA0 size:0x60
