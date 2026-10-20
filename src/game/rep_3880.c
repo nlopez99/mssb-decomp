@@ -3046,7 +3046,6 @@ void fn_3_14A070(s32* values, s32 count) {
 }
 
 // .text:0x00149BA8 size:0x4C8 mapped:0x80788C3C
-// 91.90%: register allocation inside the inlined fn_3_149340 and fn_3_148FD0
 void fn_3_149BA8(void) {
     PlayerEmitter3880* emitter;
     u32 i;
@@ -3071,7 +3070,6 @@ void fn_3_149BA8(void) {
 }
 
 // .text:0x0014975C size:0x44C mapped:0x807887F0
-// 93.97%: register allocation inside the inlined fn_3_149340 and fn_3_148FD0
 void fn_3_14975C(s8 player) {
     PlayerEmitter3880* emitter = (PlayerEmitter3880*)fn_80033A24(fn_3_14841C, 0x80, 0, lbl_3_data_26E7C[0], 1, 0x25);
 
@@ -3082,10 +3080,9 @@ void fn_3_14975C(s8 player) {
 }
 
 // .text:0x00149340 size:0x41C mapped:0x807883D4
-// 92.08%: register allocation and scheduling around the inlined fn_3_148FD0
 void fn_3_149340(PlayerEmitter3880* emitter) {
     Particle3880* p = emitter->base.particles;
-    s16 i = 0;
+    u32 i = 0;
 
     do {
         p->_4A = i;
