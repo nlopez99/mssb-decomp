@@ -53,7 +53,7 @@ void fn_3_105BD8(struct Unk3090View* view);
 u32 fn_3_105C28(struct Unk3090Track* track, u32 time);
 void fn_3_105C84(struct Unk3090Track* track);
 void fn_3_105CDC(void);
-void fn_3_105E00(int x, int y, int w, int h);
+void fn_3_105E00(s16 x, s16 y, s16 w, s16 h);
 void fn_3_106014(f32 x, f32 y, f32 z);
 void fn_3_1060D8(void);
 BOOL fn_3_10617C(int player, int bone, Vec* out);

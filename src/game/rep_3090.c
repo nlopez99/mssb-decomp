@@ -1278,12 +1278,12 @@ void fn_3_106014(f32 x, f32 y, f32 z) {
     }
 }
 
-// 98.12%: registers only in the vertex writes (FIFO base r7, colour bytes r6/r5/r4 and the
-// sums x + w, y + h in r3/r0 in the target).
 // .text:0x00105E00 size:0x214 mapped:0x80744E94
-void fn_3_105E00(int x, int y, int w, int h) {
+void fn_3_105E00(s16 x, s16 y, s16 w, s16 h) {
     Mtx44 proj;
     Mtx mtx;
+    s16 right = x + w;
+    s16 bottom = y + h;
 
     C_MTXOrtho(proj, 0.0f, 448.0f, 0.0f, 640.0f, 0.0f, -100.0f);
     GXSetProjection(proj, GX_ORTHOGRAPHIC);
@@ -1308,18 +1308,15 @@ void fn_3_105E00(int x, int y, int w, int h) {
     GXBegin(GX_QUADS, GX_VTXFMT0, 4);
     GXPosition2s16(x, y);
     GXColor4u8(0, 255, 0, 200);
-    GXPosition2s16(x + w, y);
+    GXPosition2s16(right, y);
     GXColor4u8(0, 255, 0, 200);
-    GXPosition2s16(x + w, y + h);
+    GXPosition2s16(right, bottom);
     GXColor4u8(0, 255, 0, 200);
-    GXPosition2s16(x, y + h);
+    GXPosition2s16(x, bottom);
     GXColor4u8(0, 255, 0, 200);
     GXEnd();
 }
 
-// 94.52%: the second division's mulhw and its addi 400 come one slot later in the target.
-// With fn_3_105E00 taking s16 parameters (and no casts here) this matches, but fn_3_105E00
-// then sign-extends before its sums and drops to 94.70%.
 // .text:0x00105CDC size:0x124 mapped:0x80744D70
 void fn_3_105CDC(void) {
     Vec* points = lbl_3_common_bss_DE94._0000->_0098;
@@ -1336,7 +1333,7 @@ void fn_3_105CDC(void) {
             if (i == 5) {
                 i = 5;
             }
-            fn_3_105E00((s16)(x / 50 + 150), (s16)(-z / 50 + 400), 2, 2);
+            fn_3_105E00(x / 50 + 150, -z / 50 + 400, 2, 2);
         }
     }
 }
