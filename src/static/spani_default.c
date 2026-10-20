@@ -597,9 +597,9 @@ void fn_800356B8(void) {
     lbl_803C5F74[0] = 0;
 }
 
-// Differs: `width >> 1` and `height >> 1` give srawi where the target has srwi (still a signed
-// conversion), the lbl_800F78E0 base sits in r31 with `addi r24,r31,0`, and the
-// sab/part registers in the _AC loop.
+// Differs: `width >> 1` gives srawi where the target has srwi and a signed conversion
+// (`(s32)(width / 2U)` gives that, 98.02%), the lbl_800F78E0 base sits in r31 with
+// `addi r24,r31,0`, and the sab/part registers in the _AC loop.
 // .text:0x80035168 size:0x550 mapped:0x80035168
 void fn_80035168(void) {
     Mtx* depths = lbl_800F78E0;
