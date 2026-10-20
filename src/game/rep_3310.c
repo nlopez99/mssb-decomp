@@ -1192,11 +1192,11 @@ void fn_3_1192B8(void) {
 }
 
 // .text:0x00118B18 size:0x7A0 mapped:0x80757BAC
-// 92.53%: the target saves r27-r31 and keeps i * 0x38 in r29 to address the entry again
-// for the final rot stores; the base reuses the entry pointer, so one register fewer.
+// The final rot stores go through piranhaPanic, not the entry: the target addresses the
+// entry again from i * 0x38 there, which a second spelling of the same address gives.
 void fn_3_118B18(s32 i) {
     UnkMgEntry3310* entry = &MG._0000[i];
-    s16 frame;
+    s32 frame;
 
     entry->_28++;
     if (entry->_2A == 1) {
@@ -1235,19 +1235,19 @@ void fn_3_118B18(s32 i) {
         }
         if (entry->_33 == 3 && entry->_28 == lbl_3_data_226B8[1] - lbl_3_data_226AC[3]) {
             fn_3_1189C8(i, 0, 0, 6, 1);
-            MG._0000[i].rot.z = 0.0f;
-            MG._0000[i].rot.x = 0.0f;
-            MG._0000[i].rot.y = lbl_3_data_22688[i];
+            g_Minigame.piranhaPanic._0000[i].rot.z = 0.0f;
+            g_Minigame.piranhaPanic._0000[i].rot.x = 0.0f;
+            g_Minigame.piranhaPanic._0000[i].rot.y = lbl_3_data_22688[i];
         }
     }
 }
 
 // .text:0x001189C8 size:0x150 mapped:0x80757A5C
 void fn_3_1189C8(s32 i, s32 anim, s32 frame, s32 duration, u8 loop) {
+    void* data;
     UnkMgEntry3310* entry = &MG._0000[i];
     UnkActor3310* actor = &lbl_8036E548._0068->_34[i + 0x82];
     f32 rate = 0.0f;
-    void* data;
 
     if (duration != 0) {
         rate = 1.0f / duration;
