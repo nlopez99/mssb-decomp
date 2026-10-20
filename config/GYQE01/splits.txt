@@ -69,6 +69,7 @@ static/uitexture.c:
 	extabindex  start:0x800079BC end:0x80007A04
 	.text       start:0x80039AA8 end:0x8003A2EC
 	.data       start:0x800F7A40 end:0x800F7B00
+	.bss        start:0x8023DD80 end:0x802D3D80
 	.sdata2     start:0x803CC7A0 end:0x803CC7D0
 
 static/static_8003A2EC.c:

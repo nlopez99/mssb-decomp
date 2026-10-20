@@ -5,6 +5,9 @@ mw_comment_version: 8
 
 symbols: config/GYQE01/symbols.txt
 splits: config/GYQE01/splits.txt
+block_relocations:
+# Image data in static_8003A2EC's lbl_800F7B40 that looks like a pointer
+- source: 0x800F940C
 
 modules:
 - object: orig/GYQE01/files/game.rel

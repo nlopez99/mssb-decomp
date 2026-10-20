@@ -625,11 +625,11 @@ config.libs = [
         "objects": [
             Object(NonMatching, "static/sub.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/anim.c", extra_cflags=["-cpp_exceptions on"]),
-            Object(NonMatching, "static/lookat.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(Matching, "static/lookat.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/particle.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/spani_default.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/physics.c", extra_cflags=["-cpp_exceptions on"]),
-            Object(NonMatching, "static/uitexture.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(Matching, "static/uitexture.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/static_8003A2EC.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/static_8004157C.c", extra_cflags=["-cpp_exceptions on"]),
         ],
