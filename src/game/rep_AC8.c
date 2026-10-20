@@ -287,15 +287,15 @@ extern struct {
     };
 } lbl_8036E548;
 
-// rep_1838.h declares fn_3_9FB8C as returning s16 and fn_3_9FCF8 as taking s16s: callers here
-// sign-extend fn_3_9FB8C's result and pass fn_3_9FCF8 unextended ints, which it extends itself.
+// rep_1838.h declares fn_3_9FCA4 and getComponentsFromSAng with s16 angles, but callers here
+// sign-extend the s16 results of fn_3_9FB8C before passing them, as for int parameters.
 // Including rep_1838.h would make these two a redeclaration error, so its other functions are
 // declared here too.
 extern s16 radToShortAngle(f32 v);
-extern s32 fn_3_9FB8C(f32 x, f32 y);
-extern s16 fn_3_9FCA4(s16 a, s16 b);
-extern s16 fn_3_9FCF8(s32 a, s32 b);
-extern void getComponentsFromSAng(s16 ang, f32* x, f32* y);
+extern s16 fn_3_9FB8C(f32 x, f32 y);
+extern s16 fn_3_9FCA4(s32 a, s32 b);
+extern s16 fn_3_9FCF8(s16 a, s16 b);
+extern void getComponentsFromSAng(s32 ang, f32* x, f32* y);
 extern bool calculateLineIntersection(VecXZ* out, VecXZ* a, VecXZ* b);
 extern f32 fn_3_9EFD0(VecXYZ* start, VecXYZ* end, VecXYZ* point, VecXYZ* closest);
 extern u8 lbl_800E8558[][6];
@@ -2334,7 +2334,8 @@ void fn_3_526DC(s32 fielder) {
     }
     if (f->_068 > 0.0f) {
         s32 angle = radToShortAngle(f->_064);
-        fn_3_9FCF8(angle, radToShortAngle(f->_0BC[0]));
+        s32 facing = radToShortAngle(f->_0BC[0]);
+        fn_3_9FCF8(angle, facing);
         if (!g_d_GameSettings.minigamesEnabled || f->_1C5 == 0) {
             if (f->_1C5 != 0 && (f->_1D3 == 2 || f->_1D3 == 18) && (f->_1DC == 4 || f->_1DC == 5)) {
                 f->_1E3 = 0;
@@ -2510,7 +2511,7 @@ void fn_3_522E0(s32 fielder, s32 frames, f32 dx, f32 dz, f32* x, f32* z, f32* di
     f32 len;
     f32 nx;
     f32 nz;
-    s32 angle;
+    s16 angle;
     s32 i;
 
     if (dx == 0.0f && dz == 0.0f) {
@@ -2916,7 +2917,7 @@ s32 fn_3_50DD8(s32 fielder, f32* outX, f32* outZ, BOOL update) {
 // .text:0x00050C20 size:0x1B8 mapped:0x8068FCB4
 void fn_3_50C20(s32 fielder, f32* outX, f32* outZ) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
-    s16 angle = fn_3_9FB8C(f->_028 - f->_000, f->_02C - f->_008);
+    s32 angle = fn_3_9FB8C(f->_028 - f->_000, f->_02C - f->_008);
     f32 x;
     f32 z;
 
@@ -2958,7 +2959,7 @@ void fn_3_50C20(s32 fielder, f32* outX, f32* outZ) {
 s32 fn_3_50898(s32 fielder, f32* x, f32* z) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     s32 frame = f->_186 - g_Ball.framesSinceHit + 1;
-    s16 angle = fn_3_9FB8C(g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.x,
+    s32 angle = fn_3_9FB8C(g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.x,
                            g_Ball.physicsSubstruct.futureCoordsAndDist[frame].pos.z);
     s32 i;
 
@@ -3503,7 +3504,7 @@ void fn_3_4E638(void) {
     f32 traveled;
     f32 throwLen;
     f32 ballLen;
-    s16 throwAngle;
+    s32 throwAngle;
     s32 diff;
 
     if (g_Ball.fielderBeingThrownTo < 0) {
@@ -3601,7 +3602,7 @@ void fn_3_4DC14(s32 fielder) {
     s32 hAngle;
     s32 vAngle;
     s32 spread;
-    s16 angle;
+    s32 angle;
     f32 cz;
     f32 v;
     f32 cx;
@@ -4191,7 +4192,7 @@ void fn_3_4B128(s32 fielder) {
     f32 cz;
     f32 x;
     f32 z;
-    s16 angle;
+    s32 angle;
 
     switch (fn_3_53130(fielder)) {
     case 2:
@@ -6052,7 +6053,7 @@ void fn_3_40C04(void) {
 void fn_3_402A8(void) {
     s32 infield;
     s32 open = 0;
-    s16 angle;
+    s32 angle;
     s32 i;
     f32 dx;
     f32 dz;
@@ -6133,10 +6134,10 @@ void fn_3_402A8(void) {
 }
 
 // .text:0x0003FCF0 size:0x5B8 mapped:0x8067ED84
-// 91.99%: the target compares angle without re-extending it and keeps the four fielder
-// angles one register lower; an s32 angle set from (s16)fn_3_9FB8C(...) scores 92.16%.
+// 92.16%: registers only; the target keeps angle in r5 and the four fielder angles one
+// register lower throughout.
 void fn_3_3FCF0(BOOL useLanding) {
-    s16 angle = g_Ball.Hit_HorizontalAngle;
+    s32 angle = g_Ball.Hit_HorizontalAngle;
     s32 third;
     s16 a2;
     s16 a3;
@@ -8364,8 +8365,8 @@ s32 fn_3_37114(s32 a, s32 b, BOOL wide, f32 x, f32 z) {
     UnkAC8Fielder* fa = &g_Fielders[a];
     UnkAC8Fielder* fb = &g_Fielders[b];
     s32 ball = lbl_3_bss_16C;
-    s16 angA;
-    s16 angB;
+    s32 angA;
+    s32 angB;
     s32 diffA;
     s32 diffB;
     f32 dx;
@@ -8449,12 +8450,11 @@ nearest:
 }
 
 // .text:0x00036678 size:0xA9C mapped:0x8067570C
-// 98.86%: the target keeps radToShortAngle's results unextended and passes them so to
-// fn_3_9FCF8, which needs s16 angles and s16 parameters; the file's s32 prototype then
-// extends them, and the swap and the closing angle gaps extend differently.
+// 99.97%: registers only; in the swap the target copies a into r4 and the extended angA
+// into r0, this the reverse.
 s32 fn_3_36678(s32 a, s32 b, s32 mode, f32 x, f32 z) {
-    s32 angA;
-    s32 angB;
+    s16 angA;
+    s16 angB;
     s16 diff;
     f32 distA;
     f32 distB;
@@ -8472,16 +8472,8 @@ s32 fn_3_36678(s32 a, s32 b, s32 mode, f32 x, f32 z) {
     angA = radToShortAngle(atan2(z - g_Fielders[a]._008, x - g_Fielders[a]._000));
     angB = radToShortAngle(atan2(z - g_Fielders[b]._008, x - g_Fielders[b]._000));
     diff = fn_3_9FCF8(angA, angB);
-    dx = g_Fielders[a]._000 - x;
-    dz = g_Fielders[a]._008 - z;
-    dx2 = dx * dx;
-    dz2 = dz * dz;
-    distA = dolsqrtf2(dx2 + dz2);
-    dx = g_Fielders[b]._000 - x;
-    dz = g_Fielders[b]._008 - z;
-    dx2 = dx * dx;
-    dz2 = dz * dz;
-    distB = dolsqrtf2(dx2 + dz2);
+    distA = dolsqrtf2(SQ(g_Fielders[a]._000 - x) + SQ(g_Fielders[a]._008 - z));
+    distB = dolsqrtf2(SQ(g_Fielders[b]._000 - x) + SQ(g_Fielders[b]._008 - z));
     if (diff <= 0x100) {
         if (distA < distB) {
             return a;
@@ -8567,7 +8559,7 @@ compare:
     if (distB < distA) {
         f32 tf = distA;
         s32 ti = a;
-        s16 ta = angA;
+        s32 ta = angA;
 
         distA = distB;
         a = b;
@@ -8658,8 +8650,8 @@ s32 fn_3_365D0(s32 a, s32 b, s32 c, f32 x, f32 z) {
 }
 
 // .text:0x000361D8 size:0x3F8 mapped:0x8067526C
-// 88.11%: registers differ throughout, and the target extends each angle into r3/r4 at
-// every fn_3_9FCF8 call where this extends each angle once in place.
+// 93.66%: registers only; the target zeroes one index and copies it into the other two
+// (mr), and allocates the loop's saved registers in another order.
 s32 fn_3_361D8(f32 x, f32 z) {
     s32 i;
     s32 idx0;
@@ -8670,10 +8662,10 @@ s32 fn_3_361D8(f32 x, f32 z) {
     f32 d1;
     f32 d2;
     f32 d3;
-    s16 ang0;
-    s16 ang1;
-    s16 ang2;
-    s16 ang3;
+    s32 ang0;
+    s32 ang1;
+    s32 ang2;
+    s32 ang3;
 
     idx0 = idx1 = idx2 = 0;
     d0 = d1 = d2 = d3 = 999.9f;
@@ -8682,7 +8674,7 @@ s32 fn_3_361D8(f32 x, f32 z) {
         f32 dx = g_Fielders[i]._000 - x;
         f32 dz = g_Fielders[i]._008 - z;
         f32 dist = dolsqrtf2(dx * dx + dz * dz);
-        s16 angle = fn_3_9FB8C(dx, dz);
+        s32 angle = fn_3_9FB8C(dx, dz);
 
         if (d0 > dist) {
             d2 = d1;
@@ -9020,7 +9012,7 @@ void fn_3_34450(void) {
 void fn_3_341E8(void) {
     s32 primary;
     s32 secondary;
-    s16 angle;
+    s32 angle;
 
     fn_3_33DD0(&primary, &secondary);
     g_FieldingLogic._0B0 = primary;
@@ -9053,7 +9045,7 @@ void fn_3_341E8(void) {
 void fn_3_33DD0(s32* primary, s32* secondary) {
     UnkAC8Fielder* center = &g_Fielders[7];
     s32 side = 6;
-    s16 angle;
+    s32 angle;
     UnkAC8Fielder* f;
     s32 centerState;
     s32 sideState;
@@ -9321,7 +9313,7 @@ void fn_3_33458(void) {
 // 99.80%: the two angle differences in the last test take each other's registers.
 void fn_3_33088(void) {
     UnkAC8Fielder* center = &g_Fielders[7];
-    s16 angle = fn_3_9FB8C(g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x,
+    s32 angle = fn_3_9FB8C(g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.x,
                            g_Ball.physicsSubstruct.ballLandingSpotOrHeldSpot.z);
     s32 side = 6;
     UnkAC8Fielder* f;
@@ -11226,7 +11218,7 @@ BOOL fn_3_2B694(s32 fielder) {
 // .text:0x0002B5C0 size:0xD4 mapped:0x8066A654
 void fn_3_2B5C0(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
-    s16 ballAngle;
+    s32 ballAngle;
     s16 diff;
 
     f->_261 = 0;
@@ -11413,7 +11405,7 @@ BOOL fn_3_2A69C(s32 fielder) {
     f32 dx;
     f32 dz;
     f32 dist;
-    s16 angle;
+    s32 angle;
     s16 turn;
 
     if (base < 0 || base > 3) {
