@@ -16,6 +16,8 @@
 #include "Dolphin/rand.h"
 #include "musyx/musyx.h"
 #include "game/rep_3D50.h"
+#include "static/particle.h"
+#include "static/sub.h"
 
 // g_Minigame as this minigame lays it out (UnknownHomes_Game.h)
 #define MG g_Minigame.piranhaPanic
@@ -83,7 +85,6 @@ extern struct {
 
 extern void fn_800B993C(void);
 extern void fn_800B9948(void* callback);
-extern void pitchingMachinePitching(u8 id);
 extern void changeScene(u8, s16);
 extern u8 lbl_800EFBA4[0x10];
 extern s16 lbl_3_data_7F10[54];
@@ -121,7 +122,6 @@ extern struct {
     /* 0x00 */ u8 _00[0x40];
     /* 0x40 */ s16 _40;
 } lbl_3_common_bss_37400;
-extern int LERPToNewRange_Float(int value, int inMin, int inMax, int outMin, int outMax);
 extern f32 lbl_3_data_47BC[5];
 extern s8 lbl_3_data_21EC0[4];
 extern s8 lbl_3_data_21E20[3];

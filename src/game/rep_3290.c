@@ -20,6 +20,7 @@
 #include "game/rep_CC8.h"
 #include "game/sta_c4.h"
 #include "game/rep_3D50.h"
+#include "static/sub.h"
 
 typedef struct {
     /* 0x000 */ VecXYZ _000;
@@ -73,7 +74,6 @@ extern s8 lbl_3_data_216B8[4];
 extern f32 lbl_3_data_219B8[19];
 
 extern void fn_8004C108(VecXYZ* pos, int arg1);
-extern void fn_800246D4(int (*compare)(const void*, const void*), void* src, void* dst, int size, int count);
 extern void Set_803cb848(int);
 extern void changeScene(u8, s16);
 extern int fn_3_6C938(int, int);

@@ -11,6 +11,7 @@
 #include "game/rep_540.h"
 #include "game/rep_AC8.h"
 #include "game/m_sound.h"
+#include "static/sub.h"
 
 typedef struct {
     /* 0x000 */ f32 _000;
@@ -169,7 +170,6 @@ extern struct {
 } g_Scores;
 
 extern s32 fn_3_6D658(s32 team, s32 thrower, s32 receiver);
-extern int LERPToNewRange_Float(int value, int inMin, int inMax, int outMin, int outMax);
 
 extern void fn_8004AE18(s32 fielder);
 

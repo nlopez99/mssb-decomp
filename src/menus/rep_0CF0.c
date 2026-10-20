@@ -1,10 +1,10 @@
 #include "menus/rep_0CF0.h"
 #include "header_rep_data.h"
+#include "static/sub.h"
 
 extern void fn_8004A34C(void* arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern void fn_8004C9FC(void);
 extern void fn_8004CA08(s32 arg0);
-extern void fn_80023CF4(s32 arg0);
 extern void fn_2_11A0(s32 arg0);
 
 extern struct {

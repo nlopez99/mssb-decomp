@@ -27,6 +27,7 @@
 #include "game/rep_1D58.h"
 #include "game/rep_EA0.h"
 #include "game/rep_140.h"
+#include "static/sub.h"
 
 typedef struct {
     /* 0x00 */ void (*_00)(void);
@@ -1968,8 +1969,6 @@ extern void fn_80025FFC(void* anim, UnkAnimEntry1E08* entry, void* file);
 extern void fn_80025EEC(UnkAnimEntry1E08* entry, s32, s32);
 extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_800ACFB0(void* data);
-extern void fn_800246D4(int (*compare)(const void*, const void*), void* src, void* dst, int size, int count);
-extern void fn_800245EC(camera_803c639c_s* camera, Mtx view, Vec* points, f32* out, s32 count, s32 arg5);
 extern void fn_80033B58(void* texture, s32 index, s32, s32);
 extern u16 lbl_800F7860[4][2];
 extern void fn_80028628(Vec* pos, Vec* eye, UnkFxParams1E08* params, u16* shape, u32* color, UnkFxShape1E08* arg5, BOOL flag);

@@ -6,6 +6,7 @@
 #include "Dolphin/gx.h"
 #include "Dolphin/GX/GXFifo.h"
 #include "Dolphin/mtx.h"
+#include "static/particle.h"
 
 struct UnkQuad3B70 {
     /* 0x00 */ u32 _00;
@@ -40,7 +41,6 @@ extern void gOz_GXSetTexture(s32, s32, s32);
 extern void SetDisplayStateTexture(void*, s32, s32);
 extern UnkCamera3B70* fn_80052734(s32);
 extern void fn_80024390(UnkCamera3B70* camera, f32* proj, s32);
-extern void fn_800340F4(Mtx m);
 extern void fn_800A7D4C(s32, void*);
 
 static u8 lbl_3_data_271A8[2] = { 0 };

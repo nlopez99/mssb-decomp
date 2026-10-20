@@ -6,6 +6,7 @@
 #include "Dolphin/GX/GXFifo.h"
 #include "Dolphin/os.h"
 #include "string.h"
+#include "static/sub.h"
 
 extern struct {
     u8 _00[0x28];
@@ -16,7 +17,6 @@ extern u8 lbl_803CBBC0;
 
 extern void fn_80011604(s8, void*);
 extern s32 fn_8005268C(void);
-extern s32 fn_800247E4(s32, s32, s32, s32);
 extern BOOL fn_8001B728(s32, s32, Vec*);
 extern void fn_800A7D4C(s32, void*);
 extern void fn_800B0A14_removeQueue(void);

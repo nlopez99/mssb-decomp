@@ -4,6 +4,7 @@
 #include "Dolphin/rand.h"
 #include "static/UnknownHomes_Static.h"
 #include "string.h"
+#include "static/particle.h"
 
 typedef struct {
     /* 0x00 */ s32 _00;
@@ -51,9 +52,7 @@ static Unk3AE8Arc lbl_3_data_27120 = {
       1500000, 2000000, -4500000, 4500000, 400000, 800000, 70000, 80000, -100000, -120000, 25000, 50000, 0, 25000 },
 };
 
-extern void fn_8002CDD0(Vec* pos);
 extern void fn_8002CE4C(Vec* start, Vec* end, Unk3AE8Arc* arc);
-extern void fn_8002DC68(Vec* pos);
 extern void fn_8002DCE4(Vec* start, Vec* end, Unk3AE8Trail* trail);
 
 // .text:0x0015C024 size:0x20C mapped:0x8079B0B8

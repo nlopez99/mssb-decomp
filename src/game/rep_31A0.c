@@ -27,6 +27,7 @@
 #include "game/rep_3290.h"
 #include "game/rep_3D50.h"
 #include "game/rep_3DA8.h"
+#include "static/sub.h"
 
 typedef struct {
     /* 0x00 */ u32 _00[4];
@@ -217,7 +218,6 @@ extern void fn_80011B64(int port);
 extern int fn_80016710(int charID, int port);
 extern void fn_800203E0(int, s8);
 extern s16 fn_8006C13C(struct UnkStats3448* stats);
-extern void fn_800246D4(int (*compare)(const void*, const void*), void* src, void* dst, int size, int count);
 
 u8 lbl_3_data_21268[8] = { 1, 2, 4, 5, 3, 6, 7, 0 };
 u8 lbl_3_data_21270[8] = { 1, 4, 1, 4, 0, 3, 1, 0 };

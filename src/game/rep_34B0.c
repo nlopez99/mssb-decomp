@@ -21,6 +21,7 @@
 #include "musyx/musyx.h"
 #include "string.h"
 #include "game/rep_3D50.h"
+#include "static/sub.h"
 
 extern struct {
     /* 0x00 */ s32 _00;
@@ -76,7 +77,6 @@ typedef struct UnkBarrelCell34B0 {
 } UnkBarrelCell34B0; // size: 0x2
 
 extern void changeScene(u8, s16);
-extern void fn_800246D4(int (*compare)(const void*, const void*), void* src, void* dst, int size, int count);
 extern int fn_3_6C938(int, int);
 extern void fn_8004C108(VecXYZ* pos, int arg1);
 

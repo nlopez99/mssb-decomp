@@ -1,18 +1,7 @@
 #include "game/rep_140.h"
 #include "header_rep_data.h"
 #include "game/UnknownHomes_Game.h"
-
-typedef struct VecRing {
-    /* 0x00 */ Vec* buf;
-    /* 0x04 */ int capacity;
-    /* 0x08 */ int count;
-    /* 0x0C */ int head;
-    /* 0x10 */ int tail;
-    /* 0x14 */ int cur;
-} VecRing;
-
-extern BOOL fn_80023DFC(VecRing* ring, Vec* out);
-extern BOOL fn_80023D98(VecRing* ring, Vec* out);
+#include "static/sub.h"
 
 // .text:0x0000310C size:0x4C8 mapped:0x806421A0
 void fn_3_310C(Vec* out, Vec* points, int count, int outCount) {

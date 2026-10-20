@@ -7,6 +7,7 @@
 #include "Dolphin/gx.h"
 #include "C3/control.h"
 #include "string.h"
+#include "static/lookat.h"
 
 typedef struct LITObj {
     /* 0x00 */ u8 _00[0x40];
@@ -299,7 +300,6 @@ extern void fn_800AD038(void*);
 extern void fn_800A7D4C(s32, void*);
 extern void fn_800324EC(u16, s32, s32, UnkBurst0610*);
 extern void fn_8002955C(Vec* pos, s32 arg1, UnkBurst0610* burst);
-extern void fn_80026134(s32, Vec*);
 extern void fn_80026130(s32, void*, f32);
 extern void fn_800385F0(struct Unk30C0*, f32, f32, f32, f32);
 extern void fn_80037AA0(struct Unk30C0*, s32, void (*)(s32), u16, UnkTimer0610*);

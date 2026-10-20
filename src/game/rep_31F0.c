@@ -23,6 +23,7 @@
 #include "Dolphin/rand.h"
 #include "string.h"
 #include "game/rep_3D50.h"
+#include "static/particle.h"
 
 extern struct {
     /* 0x00 */ s32 _00;
@@ -92,7 +93,6 @@ extern void minigamesGXStuff(void);
 extern void minigamesSetSomePointers2(void);
 extern void Set_803cb848(int);
 extern camera_803c639c_s* fn_80052734(int);
-extern void fn_8003414C(Mtx);
 
 static const Vec lbl_3_rodata_3240 = { 0.0f, -45.0f, 160.0f };
 static u8 lbl_3_bss_B699;
