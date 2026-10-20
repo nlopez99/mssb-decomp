@@ -2400,8 +2400,8 @@ BOOL fn_3_EF7B4(Vec pos, u8 block) {
 }
 
 // .text:0x000EF55C size:0x258 mapped:0x8072E5F0
-// 99.50%: the sidesA walking pointer and sign are in r27/r28 where the target has
-// r28/r27; statement and declaration orders tried change nothing else.
+// 99.79%: in the first loop the sidesA walking pointer and sign are in r28/r27 where the
+// target has r27/r28; declaration orders and for-clause orders tried change nothing else.
 u8 fn_3_EF55C(Vec pos, u8 block) {
     Vec to;
     Vec edge;
@@ -2416,7 +2416,7 @@ u8 fn_3_EF55C(Vec pos, u8 block) {
         return 1;
     }
     corners = lbl_3_data_1B824[block];
-    for (i = 0, sign = -1; i < 2; i++, sign += 2) {
+    for (sign = -1, i = 0; i < 2; i++, sign += 2) {
         to.x = pos.x - corners[sidesA[i][0]][0];
         to.z = pos.z - corners[sidesA[i][0]][1];
         edge.x = corners[sidesA[i][1]][0] - corners[sidesA[i][0]][0];
@@ -2430,7 +2430,7 @@ u8 fn_3_EF55C(Vec pos, u8 block) {
             return 1;
         }
     }
-    for (i = 0, sign = -1; i < 2; i++, sign += 2) {
+    for (i = 0, sign = -1; i < 2; sign += 2, i++) {
         to.x = pos.x - corners[sidesB[i][0]][0];
         to.z = pos.z - corners[sidesB[i][0]][1];
         edge.x = corners[sidesB[i][1]][0] - corners[sidesB[i][0]][0];
@@ -2710,8 +2710,6 @@ void fn_3_EE96C(Vec* pos) {
 }
 
 // .text:0x000EE67C size:0x2F0 mapped:0x8072D710
-// 97.37%: the target's switch also tests an empty case 1 (cmpwi 3, then cmpwi 1), which
-// MWCC drops here, and keeps the shift counter in r3 where this has r7.
 void fn_3_EE67C(StaC5Shape* shape, MtxPtr view) {
     Mtx mv;
     GXVtxDescList desc[27];
@@ -2729,8 +2727,10 @@ void fn_3_EE67C(StaC5Shape* shape, MtxPtr view) {
     GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, shape->_00->format >> 4, shape->_00->format & 0xF);
     GXSetNumTexGens(1);
     entry = shape->_10->entries;
-    for (i = 0; i < shape->_10->count; i++, entry++) {
+    for (i = 0; i < shape->_10->count; entry++, i++) {
         switch (entry->type) {
+        case 1:
+            break;
         case 2:
             GXClearVtxDesc();
             n = 0;
@@ -2739,7 +2739,7 @@ void fn_3_EE67C(StaC5Shape* shape, MtxPtr view) {
                 desc[0].mType = entry->flags & 3;
                 n = 1;
             }
-            for (shift = 2, attr = GX_VA_POS; attr <= GX_VA_TEX7; attr++, shift += 2) {
+            for (attr = GX_VA_POS, shift = 2; attr <= GX_VA_TEX7; attr++, shift += 2) {
                 type = (entry->flags >> shift) & 3;
                 if (type != 0) {
                     desc[n].mAttr = attr;
@@ -2747,7 +2747,7 @@ void fn_3_EE67C(StaC5Shape* shape, MtxPtr view) {
                     n++;
                 }
             }
-            type = (entry->flags >> shift) & 3;
+            type = (entry->flags >> 26) & 3;
             if (type != 0) {
                 desc[n].mAttr = attr;
                 desc[n].mType = type;
@@ -2759,6 +2759,8 @@ void fn_3_EE67C(StaC5Shape* shape, MtxPtr view) {
         case 3:
             GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_REG, GX_SRC_REG, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
             fn_3_EE100(shape, view);
+            break;
+        case 4:
             break;
         }
         if (entry->list != NULL) {
