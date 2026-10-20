@@ -403,7 +403,6 @@ void fn_800494CC(u8 team) {
     s32 i;
     u8 found = FALSE;
     s8 port;
-    u16 repeat;
     u16 pressed;
     s32 row;
     s32 count;
@@ -422,9 +421,8 @@ void fn_800494CC(u8 team) {
     if (!found) {
         return;
     }
-    repeat = lbl_8034E9A0.pads[team].repeat;
     pressed = lbl_8034E9A0.pads[team].pressed;
-    if (repeat & 8 || repeat & 4) {
+    if (lbl_8034E9A0.pads[team].repeat & 8 || lbl_8034E9A0.pads[team].repeat & 4) {
         if (g_d_GameSettings.GameModeSelected == 5) {
             return;
         }
@@ -437,7 +435,7 @@ void fn_800494CC(u8 team) {
         } else {
             count = 2;
         }
-        if (repeat & 8) {
+        if (lbl_8034E9A0.pads[team].repeat & 8) {
             if (--row < 0) {
                 if (lbl_803C5F04._36 == 0) {
                     row = 4;
@@ -447,7 +445,7 @@ void fn_800494CC(u8 team) {
             }
             fn_800625A4(0, 0x30);
             sndFXRelated(8);
-        } else if (repeat & 4) {
+        } else if (lbl_8034E9A0.pads[team].repeat & 4) {
             if (++row == count) {
                 row = 0;
             }
@@ -455,9 +453,9 @@ void fn_800494CC(u8 team) {
             sndFXRelated(4);
         }
         lbl_803C5F04.cursor[0] = row;
-    } else if (repeat & 1) {
+    } else if (lbl_8034E9A0.pads[team].repeat & 1) {
         fn_80049D8C(0, 0);
-    } else if (repeat & 2) {
+    } else if (lbl_8034E9A0.pads[team].repeat & 2) {
         fn_80049D8C(1, 0);
     } else if (pressed & 0x20) {
         if (g_d_GameSettings._06 != 2) {
