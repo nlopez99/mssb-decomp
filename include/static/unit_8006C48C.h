@@ -5,7 +5,7 @@
 #include "Dolphin/mtx.h"
 
 void challengeDrawStarsOnMissionMenu(void);
-void fn_8006C5CC(void);
+BOOL fn_8006C5CC(void);
 void fn_8006C6C4(void);
 BOOL fn_8006C79C(s32 index);
 void starMissionRelated2(void);

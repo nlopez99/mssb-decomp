@@ -235,7 +235,16 @@ void fn_8006C6C4(void) {
 }
 
 // .text:0x8006C5CC size:0xF8
-void fn_8006C5CC(void) {
+BOOL fn_8006C5CC(void) {
+    s32 count = 0;
+    s32 i;
+
+    for (i = 0; i < 54; i++) {
+        if (starMissionCompletionTracker.chars[i].status == 1 && starMissionCompletionTracker.chars[i]._04 != 5) {
+            count++;
+        }
+    }
+    return count >= 28;
 }
 
 // .text:0x8006C48C size:0x140
