@@ -67,6 +67,7 @@ typedef struct SoundSlot {
 } SoundSlot; // size: 0x38
 
 extern MissionTracker starMissionCompletionTracker;
+extern u8 lbl_803CB8F0[6];
 extern MissionInfo lbl_800E8558[];
 extern s16 lbl_8010B444[][11];
 extern StarReq lbl_8010A768[][10];
@@ -235,7 +236,37 @@ void fn_8006C9D8(void) {
 }
 
 // .text:0x8006C7C4 size:0x214
+// The target rereads ch->status on every pass and steps a pointer it never reads by 0x34 per
+// character; this hoists the read. Its status test also reads a pointer left by the last loop
 void starMissionRelated2(void) {
+    s32 found[6];
+    MissionChar* ch = starMissionCompletionTracker.chars;
+    s32 i;
+    s32 j;
+
+    found[0] = 0;
+    found[1] = 0;
+    found[2] = 0;
+    found[3] = 0;
+    found[4] = 0;
+    found[5] = 0;
+    for (i = 0; i < 54; i++) {
+        for (j = 0; j < 6; j++) {
+            if (i == lbl_803CB8F0[j] && ch->status == 1 && starMissionCompletionTracker._441C != j) {
+                found[j] = 1;
+            }
+        }
+    }
+    for (j = 0; j < 6; j++) {
+        if (found[j] != 0 && ch->status == 0) {
+            for (i = 0; i < 54; i++) {
+                ch = &starMissionCompletionTracker.chars[i];
+                if (ch->status == 0 && ch->_04 == j) {
+                    ch->status = 2;
+                }
+            }
+        }
+    }
 }
 
 // .text:0x8006C79C size:0x28
