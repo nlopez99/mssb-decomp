@@ -1,5 +1,6 @@
 #include "static/static_800096DC.h"
 #include "static/static_80008E00.h"
+#include "static/static_8000F150.h"
 #include "static/UnknownHomes_Static.h"
 #include "static/sub.h"
 #include "Dolphin/os.h"
@@ -110,9 +111,6 @@ extern char lbl_800E65A0[];
 extern void fn_800AD054(u32 arg0, u32 arg1, GameInitVariables* settings);
 extern void fn_80021308(void);
 extern void* ARAMTransfer(AramEntry* entry, s32 arg1, s32 arg2, u32 aram);
-extern void fn_80011000(void);
-extern void fn_800111B4(void* arg);
-extern void fn_80010FA0(void);
 extern void fn_800B0C80(void (*func)(void));
 extern void fn_80021064(void);
 extern void fn_800216F8(u8 group, void (*callback)(void));

@@ -1,4 +1,5 @@
 #include "static/static_80008E00.h"
+#include "static/static_8000F150.h"
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/os.h"
 #include "static/spani_default.h"
@@ -86,7 +87,6 @@ extern GXColor lbl_803CD300;
 
 extern void initRenderMode(s32 arg0, s32 arg1, s32 arg2);
 extern void fn_800BEC30(s32 arg0);
-extern void somethingSetTexturePointer(void);
 extern void fn_800A7AD8(void);
 extern void fn_800A76BC(void);
 extern void fn_800A6870(s32 arg0, s32 arg1);
@@ -111,7 +111,6 @@ extern s32 fn_800211BC(BOOL (*func)(void));
 extern u32 fn_800AD490(MainSave* save);
 extern void fn_800AD914(MainSave* save);
 extern void fn_800AD95C(MainSave* save, u8 arg1);
-extern void fn_8000F3E8(s32 arg0);
 extern void RunDrawScripts_with_stack_variables(void);
 extern void fn_800B251C(void);
 extern u8 GetDrawShadows(void);

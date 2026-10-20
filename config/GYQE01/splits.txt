@@ -35,6 +35,19 @@ static/static_8000A0AC.c:
 	.text       start:0x8000A0AC end:0x8000BA3C
 	.sdata2     start:0x803CC420 end:0x803CC458
 
+static/static_8000BA3C.c:
+	extab       start:0x80005660 end:0x800056D8
+	extabindex  start:0x80006CF0 end:0x80006DA4
+	.text       start:0x8000BA3C end:0x8000F150
+	.rodata     start:0x800E65D0 end:0x800E6600
+	.sdata2     start:0x803CC458 end:0x803CC490
+
+static/static_8000F150.c:
+	extab       start:0x800056D8 end:0x80005730
+	extabindex  start:0x80006DA4 end:0x80006E28
+	.text       start:0x8000F150 end:0x800111D8
+	.sdata2     start:0x803CC490 end:0x803CC4B8
+
 static/sub.c:
 	extab       start:0x80005B50 end:0x80005BA0
 	extabindex  start:0x80007458 end:0x800074D0
