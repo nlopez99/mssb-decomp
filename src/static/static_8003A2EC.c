@@ -860,7 +860,7 @@ static inline u32 BadSizeMask(SaveFile* save, s32 mask) {
                 if (save->headerSize != 4 + sizeof(SaveHeader)) {
                     bad = bit;
                 }
-            } else if (save->blocks[i - 1].size != sizeof(SaveBlock)) {
+            } else if (*(u16*)((u8*)save + (i - 1) * sizeof(SaveBlock) + 0x5FA) != sizeof(SaveBlock)) {
                 bad |= bit;
             }
         }
@@ -868,8 +868,8 @@ static inline u32 BadSizeMask(SaveFile* save, s32 mask) {
     return bad;
 }
 
-// 90.58%: the target's unrolled size check multiplies each block index by 0x450C (li; mulli),
-// where this one steps a pointer; the request's stores are scheduled differently
+// 97.22%: registers in the block mask and size check, and the request's stores are scheduled
+// differently; the size check reads each block's size at a byte offset (li; mulli in the target)
 void fn_80040C14(void) {
     MenuTask* task = lbl_803CC1B8;
     CardRequest req;
