@@ -2,16 +2,6 @@
 #include "static/UnknownHomes_Static.h"
 #include "string.h"
 
-// A player's stat block: six ratings, the order they are shown in, and two bonuses
-typedef struct StatBlock {
-    /* 0x00 */ s16 stats[6];
-    /* 0x0C */ u8 order[6];
-    /* 0x12 */ u8 _12;
-    /* 0x13 */ u8 _13;
-    /* 0x14 */ u8 _14;
-    /* 0x15 */ u8 _15;
-} StatBlock; // size: 0x16
-
 typedef struct StatTotals {
     /* 0x00 */ s16 stats[6];
     /* 0x0C */ s16 _0C;

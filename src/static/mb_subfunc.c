@@ -1,4 +1,5 @@
 #include "static/mb_subfunc.h"
+#include "static/static_8006C100.h"
 #include "Dolphin/os.h"
 #include "static/UnknownHomes_Static.h"
 #include "string.h"
@@ -65,17 +66,11 @@ typedef struct MbStatGroup {
     /* 0x6 */ s16 c;
 } MbStatGroup; // size: 0x8
 
-typedef struct MbStatSlot {
-    /* 0x00 */ u8 _00[0x14];
-    /* 0x14 */ u8 _14;
-    /* 0x15 */ u8 _15;
-} MbStatSlot; // size: 0x16
-
 typedef struct MbStats {
     /* 0x000 */ MbStatGroup head[5];
     /* 0x028 */ MbStatGroup rows[6][5];
     /* 0x118 */ MbStatGroup tail[5];
-    /* 0x140 */ MbStatSlot slots[32];
+    /* 0x140 */ StatBlock slots[32];
     /* 0x400 */ u8 _400[0x454 - 0x400];
 } MbStats; // size: 0x454
 
@@ -84,8 +79,6 @@ extern s32 lbl_800E88C4[6][5][3];
 extern s32 lbl_800E8A2C[5][3];
 extern s32 lbl_800E8A68[5][3];
 extern u8 lbl_800E869C[32];
-
-extern void fn_8006C398(MbStatSlot* slot);
 
 typedef struct MbSlot {
     /* 0x0 */ u8 _0;
