@@ -985,7 +985,18 @@ void fn_8001D0D0(s32 idx, f32 scale) {
 }
 
 // .text:0x8001D074 size:0x5C
-void fn_8001D074(void) {
+void fn_8001D074(s32 idx, BOOL on) {
+    ModelActor* actor = lbl_8036E548.actors[idx];
+    ModelNode* node;
+
+    if (actor != NULL) {
+        node = lbl_8036E548._0060->slots[actor->_255].node;
+        if (on) {
+            node->flags |= 4;
+        } else {
+            node->flags &= 0xFB;
+        }
+    }
 }
 
 // .text:0x8001CE74 size:0x200
@@ -1305,7 +1316,18 @@ void fn_8001B35C(void) {
 }
 
 // .text:0x8001B308 size:0x54
-void fn_8001B308(void) {
+void fn_8001B308(s32 idx, BOOL on) {
+    ModelActor* actor = lbl_8036E548.actors[idx];
+    ModelSlot* slot;
+
+    if (actor != NULL) {
+        slot = &lbl_8036E548._0060->slots[actor->_255];
+        if (!on) {
+            slot->_68 = NULL;
+        } else {
+            slot->_68 = actor->_72;
+        }
+    }
 }
 
 // .text:0x8001B2D0 size:0x38
