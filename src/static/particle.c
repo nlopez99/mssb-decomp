@@ -205,6 +205,23 @@ typedef struct SwirlParticle {
     /* 0x4F */ u8 _4F;
 } SwirlParticle;
 
+// What fn_8002A1CC's callers pass
+typedef struct StreakParams {
+    /* 0x00 */ s32 _00;
+    /* 0x04 */ s32 tex;
+    /* 0x08 */ s32 count;
+    /* 0x0C */ s32 undelayed;
+    /* 0x10 */ s32 delay;
+    /* 0x14 */ s32 life[2];
+    /* 0x1C */ s32 speed[2];
+    /* 0x24 */ s32 accel[2];
+    /* 0x2C */ s32 width[2];
+    /* 0x34 */ s32 length[2];
+    /* 0x3C */ s32 widthEnd[2];
+    /* 0x44 */ s32 lengthEnd[2];
+    /* 0x4C */ u32 rgba;
+} StreakParams; // size: 0x50
+
 // The particles fn_80029CC8 draws as streaks toward the emitter's point
 typedef struct StreakParticle {
     /* 0x00 */ Particle* next;
@@ -1078,7 +1095,7 @@ void fn_800324EC(u16 joint, s32 player, s32 other, Vec* dir)
             p->_4D = params->_04;
         }
         if (dir != NULL) {
-            fn_8002A1CC(&pos, dir);
+            fn_8002A1CC(&pos, (StreakParams*)dir);
         }
     }
 }
@@ -1137,7 +1154,7 @@ void fn_80032064(Vec* pos, Vec* dir)
         p->_14 = params->_0C / 100000.0f;
         p->_4D = params->_04;
     }
-    fn_8002A1CC(pos, dir);
+    fn_8002A1CC(pos, (StreakParams*)dir);
 }
 
 // .text:0x80032038 size:0x2C
@@ -2289,6 +2306,82 @@ u8 fn_8002A85C(Emitter* e, GlowParticle* p)
     p->color[3] = alpha;
     p->remaining--;
     return p->remaining == 0;
+}
+
+// .text:0x8002A1CC size:0x690
+// 94.95%: first draft; the head's parameter loads come in another order and the
+// emitter and particle sit one saved register off. Not yet tuned.
+void fn_8002A1CC(Vec* pos, StreakParams* params)
+{
+    Emitter* e = fn_80033A24(fn_80029CC8, 0x80, 0, params->count, TRUE, 11);
+    StreakParticle* p;
+    f32 speed;
+    f32 speedRange;
+    f32 accel;
+    f32 accelRange;
+    f32 width;
+    f32 widthRange;
+    f32 length;
+    f32 lengthRange;
+    f32 widthEnd;
+    f32 widthEndRange;
+    f32 lengthEnd;
+    f32 lengthEndRange;
+    f32 yaw;
+    f32 pitch;
+    f32 step;
+    s32 n;
+    s32 lifeRange;
+
+    if (e != NULL) {
+        e->_10 = params->_00;
+        memcpy(&e->_18, pos, sizeof(Vec));
+        speed = params->speed[0] / 100000.0f;
+        accel = params->accel[0] / 100000.0f;
+        width = params->width[0] / 100000.0f;
+        widthEnd = params->widthEnd[0] / 100000.0f;
+        length = params->length[0] / 100000.0f;
+        speedRange = params->speed[1] / 100000.0f - speed;
+        accelRange = params->accel[1] / 100000.0f - accel;
+        widthRange = params->width[1] / 100000.0f - width;
+        widthEndRange = params->widthEnd[1] / 100000.0f - widthEnd;
+        lengthRange = params->length[1] / 100000.0f - length;
+        n = params->undelayed;
+        lifeRange = params->life[1] - params->life[0];
+        lengthEnd = params->lengthEnd[0] / 100000.0f;
+        lengthEndRange = params->lengthEnd[1] / 100000.0f - lengthEnd;
+        yaw = pitch = -180.0f;
+        p = (StreakParticle*)e->particles;
+        step = 360.0f / (s32)(f32)sqrt(params->undelayed);
+        do {
+            p->tex = params->tex;
+            if (n-- != 0) {
+                p->delay = 0;
+            } else {
+                p->delay = (params->delay * rand()) / 32767;
+            }
+            p->life = p->remaining = params->life[0] + (lifeRange * rand()) / 32767;
+            memcpy(&p->pos, pos, sizeof(Vec));
+            fn_800332B8(NULL, &p->vel, yaw, yaw + step, pitch, pitch + step);
+            yaw += step;
+            if (yaw >= 180.0f) {
+                pitch += step;
+                yaw -= 360.0f;
+                if (pitch >= 180.0f) {
+                    pitch -= 360.0f;
+                }
+            }
+            PSVECScale(&p->vel, accel + (accelRange * rand()) / 32767.0f, &p->accel);
+            PSVECScale(&p->vel, speed + (speedRange * rand()) / 32767.0f, &p->vel);
+            p->width = width + (widthRange * rand()) / 32767.0f;
+            p->length = length + (lengthRange * rand()) / 32767.0f;
+            p->dwidth = widthEnd + (widthEndRange * rand()) / 32767.0f - p->width;
+            p->dlength = lengthEnd + (lengthEndRange * rand()) / 32767.0f - p->length;
+            p->rgba = params->rgba;
+            p->alpha = p->color[3];
+            p = (StreakParticle*)p->next;
+        } while (p != NULL);
+    }
 }
 
 // .text:0x80029CC8 size:0x504
