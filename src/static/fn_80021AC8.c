@@ -2185,16 +2185,18 @@ void fn_8002254C(void* file, u8* data, s32 index) {
 // .text:0x8002244C size:0x100
 void fn_8002244C(void* file, u8* data, s32 id) {
     u32 size = ALIGN32(SoundFileAt((id >> 16) + 54)->size & 0x0FFFFFFF);
+    s32 lo = (u16)id;
 
     *(u32*)(data + 0xC) = size;
     data += size;
-    AramPush(SoundFileAt((u16)id + 54), data, 3, lbl_803716B8._1DC[(u16)id], (AramCallback)fn_80022620, NULL);
+    // the target adds size + data, operands swapped
+    AramPush(&lbl_800EFD38[lo + 54], data, 3, lbl_803716B8._1DC[lo], (AramCallback)fn_80022620, NULL);
 }
 
 // .text:0x8002204C size:0x400
 void* fn_8002204C(s32 player, void* dst) {
-    s8 file;
-    s8 next;
+    s32 file;
+    s32 next;
 
     if (player < 0 || player >= 54) {
         return NULL;
