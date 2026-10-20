@@ -88,6 +88,7 @@ typedef struct RosterEntry {
 } RosterEntry; // size: 0xA0
 
 extern RosterEntry inMemRoster[2][9];
+extern RosterEntry lbl_803C5144[2];
 extern u8 lbl_80361B20[];
 extern s8 lbl_800E86F0[12];
 
@@ -168,6 +169,10 @@ typedef struct PadButtons {
 extern union {
     PadButtons pads[4];
     struct {
+        /* 0x00 */ u8 _00[0x18];
+        /* 0x18 */ u8 swap[2][2];
+    } t;
+    struct {
         /* 0x0000 */ u8 _0000[0xCF38];
         /* 0xCF38 */ PauseMenu pause;
     } s;
@@ -197,7 +202,8 @@ extern union {
     /* 0x4720 */ s32 _4720[2];
     /* 0x4728 */ u8 _4728[0x472C - 0x4728];
     /* 0x472C */ PadButtons pads[4];
-    /* 0x4744 */ u8 _4744[0x489B - 0x4744];
+    /* 0x4744 */ u8 _4744[0x47F9 - 0x4744];
+    /* 0x47F9 */ u8 _47F9[2][9][9];
     /* 0x489B */ u8 _489B[2][9];
     /* 0x48AD */ u8 _48AD;
     /* 0x48AE */ u8 _48AE;
@@ -240,6 +246,7 @@ extern union {
 
 extern s16 lbl_8010B42C[];
 
+u8 lbl_802E4B14[2][9];
 u8 lbl_802E4B00[2][9];
 
 extern void characterSelectScreen(s32 team);
@@ -255,8 +262,10 @@ extern void fn_80062A74(void);
 extern void fn_80021410(void);
 extern void changeScene(s32 arg0, s32 arg1);
 
-u8 lbl_803CBCC8;
+u8 lbl_803CBCD0[2][4];
+u8 lbl_803CBCCC[4];
 u8 lbl_803CBCC9;
+u8 lbl_803CBCC8;
 
 extern struct {
     /* 0x0 */ u8 _0[4];
@@ -695,8 +704,95 @@ void fn_80047CE0(void) {
 }
 
 // .text:0x800471F4 size:0xAEC
+static inline void CopyRoster(RosterEntry* dst, RosterEntry* src) {
+    memcpy(dst->_00, src->_00, sizeof(dst->_00));
+    dst->charId = src->charId;
+    dst->_26 = src->_26;
+    dst->_27 = src->_27;
+    memcpy(dst->_28, src->_28, sizeof(dst->_28));
+    memcpy(dst->_2A, src->_2A, sizeof(dst->_2A));
+    dst->_2C = src->_2C;
+    dst->_2D = src->_2D;
+    dst->_2E = src->_2E;
+    dst->_2F = src->_2F;
+    dst->_30 = src->_30;
+    dst->_31 = src->_31;
+    dst->_32 = src->_32;
+    dst->_33 = src->_33;
+    dst->_34 = src->_34;
+    memcpy(dst->_35, src->_35, sizeof(dst->_35));
+    dst->_20 = src->_20;
+    memcpy(dst->bars, src->bars, sizeof(dst->bars));
+    memcpy(dst->chemistry, src->chemistry, sizeof(dst->chemistry));
+    dst->_71 = src->_71;
+    dst->_74[0] = src->_74[0];
+    dst->_74[1] = src->_74[1];
+    dst->_74[2] = src->_74[2];
+    dst->_74[3] = src->_74[3];
+    dst->_74[4] = src->_74[4];
+    dst->_74[5] = src->_74[5];
+    dst->_74[6] = src->_74[6];
+    dst->_74[7] = src->_74[7];
+    dst->_74[8] = src->_74[8];
+    dst->_74[9] = src->_74[9];
+    dst->_74[10] = src->_74[10];
+    dst->_74[11] = src->_74[11];
+    dst->_74[12] = src->_74[12];
+    dst->_74[13] = src->_74[13];
+    dst->_74[14] = src->_74[14];
+    dst->_74[15] = src->_74[15];
+    dst->_74[16] = src->_74[16];
+    dst->_74[17] = src->_74[17];
+    dst->_74[18] = src->_74[18];
+    dst->_74[19] = src->_74[19];
+    dst->_74[20] = src->_74[20];
+}
+
+// Draft: the target keeps the field addresses of the loops' entries in saved registers and
+// on the stack
 u8 fn_800471F4(u8 mode, u8 player) {
-    return 0;
+    s32 i;
+    u8 tmp;
+
+    if (mode == 0) {
+        for (i = 0; i < 9; i++) {
+            if (i == lbl_803297E0.s.pause.slot[player] - 1) {
+                lbl_803CBCCC[player] = i;
+                CopyRoster(&lbl_803C5144[player], &inMemRoster[player][lbl_803CBCCC[player]]);
+                lbl_803CBCD0[player][2] = lbl_80354720[player][lbl_803CBCCC[player]].charId;
+                memcpy(lbl_802E4B14[player], lbl_8034E9A0.s._47F9[player][lbl_803CBCCC[player]], 9);
+                memcpy(lbl_802E4B00[player], lbl_8034E9A0.s._489B[player], 9);
+            }
+        }
+    } else {
+        for (i = 0; i < 9; i++) {
+            if (i == lbl_803297E0.s.pause.slot[player] - 1) {
+                if (lbl_803297E0.s.pause._1A[player] == 0) {
+                    CopyRoster(&inMemRoster[player][lbl_803CBCCC[player]], &inMemRoster[player][i]);
+                    lbl_80354720[player][lbl_803CBCCC[player]].charId = lbl_80354720[player][i].charId;
+                    memcpy(lbl_8034E9A0.s._47F9[player][lbl_803CBCCC[player]], lbl_8034E9A0.s._47F9[player][i], 9);
+                    CopyRoster(&inMemRoster[player][i], &lbl_803C5144[player]);
+                    tmp = lbl_802E4B14[player][i];
+                    lbl_802E4B14[player][i] = lbl_802E4B14[player][lbl_803CBCCC[player]];
+                    lbl_80354720[player][i].charId = lbl_803CBCD0[player][2];
+                    lbl_802E4B14[player][lbl_803CBCCC[player]] = tmp;
+                    memcpy(lbl_8034E9A0.s._47F9[player][i], lbl_802E4B14[player], 9);
+                    tmp = lbl_802E4B00[player][i];
+                    lbl_802E4B00[player][i] = lbl_802E4B00[player][lbl_803CBCCC[player]];
+                    lbl_802E4B00[player][lbl_803CBCCC[player]] = tmp;
+                    memcpy(lbl_8034E9A0.s._489B[player], lbl_802E4B00[player], 9);
+                    lbl_803297E0.t.swap[player][0] = lbl_803CBCCC[player];
+                    lbl_803297E0.t.swap[player][1] = i;
+                } else {
+                    lbl_803297E0.t.swap[player][0] = lbl_803CBCCC[player];
+                    lbl_80354720[player][lbl_803CBCCC[player]].charId = lbl_80354720[player][i].charId;
+                    lbl_803297E0.t.swap[player][1] = i;
+                    lbl_80354720[player][i].charId = lbl_803CBCD0[player][2];
+                }
+            }
+        }
+    }
+    return lbl_803CBCCC[player];
 }
 
 // .text:0x8004617C size:0x1078
