@@ -64,6 +64,37 @@ static/physics.c:
 	.sbss       start:0x803CBCA0 end:0x803CBCA8
 	.sdata2     start:0x803CC720 end:0x803CC7A0
 
+static/fn_8004AC00.c:
+	extab       start:0x800060C0 end:0x800060F0
+	extabindex  start:0x80007C80 end:0x80007CC8
+	.text       start:0x8004AC00 end:0x8004B284
+	.data       start:0x800FB798 end:0x800FBF10
+	.sdata      start:0x803CB848 end:0x803CB860
+	.sbss       start:0x803CBCF8 end:0x803CBD10
+	.sdata2     start:0x803CC7F8 end:0x803CC818
+
+static/fn_8004B284.c:
+	extab       start:0x800060F0 end:0x800060F8
+	extabindex  start:0x80007CC8 end:0x80007CD4
+	.text       start:0x8004B284 end:0x8004B6EC
+	.data       start:0x800FBF10 end:0x800FC388
+	.sdata2     start:0x803CC818 end:0x803CC828
+
+static/fn_8004B6EC.c:
+	extab       start:0x800060F8 end:0x80006128
+	extabindex  start:0x80007CD4 end:0x80007D1C
+	.text       start:0x8004B6EC end:0x8004C094
+	.data       start:0x800FC388 end:0x800FC720
+	.sdata2     start:0x803CC828 end:0x803CC840
+
+static/fn_8004C094.c:
+	extab       start:0x80006128 end:0x80006148
+	extabindex  start:0x80007D1C end:0x80007D4C
+	.text       start:0x8004C094 end:0x8004C5F8
+	.data       start:0x800FC720 end:0x800FC890
+	.sdata      start:0x803CB860 end:0x803CB870
+	.sdata2     start:0x803CC840 end:0x803CC850
+
 Dolphin/base/PPCArch.c:
 	.text       start:0x8006D024 end:0x8006D138
 
