@@ -10,6 +10,9 @@ extern void fn_800ACF14(void* data);
 extern void* fn_800ACF34(u32 align, u32 size);
 
 extern OSThread* GXGetCurrentGXThread(void);
+extern void fn_800A7E00(void);
+
+s32 lbl_803CBC60;
 
 // 4x4 white RGB5A3 texture, the default for SetDisplayStateTexture
 u16 lbl_800F76E0[16] ATTRIBUTE_ALIGN(32) = {
@@ -314,4 +317,148 @@ void gOz_GXSetTexture(GXTevMode mode, s32 frac, s32 useNormal)
     GXSetNumTexGens(mode != GX_PASSCLR);
     GXSetNumTevStages(1);
     GXSetTevOp(GX_TEVSTAGE0, mode);
+}
+
+// .text:0x80023F0C size:0x278
+// Copies a rectangle of 4-bit, 8-bit or compressed texels between two textures, a tile at a time
+int fn_80023F0C(TextureDesc* src, TextureDesc* dst, int srcX, int srcY, int w, int h, int dstX, int dstY)
+{
+    int srcStride;
+    int dstStride;
+    u8* from;
+    u8* to;
+
+    if (src->format != dst->format) {
+        return 1;
+    }
+    if (src->tlut != NULL) {
+        switch (src->format) {
+        case GX_TF_C4:
+            srcStride = (src->width + 7) / 8;
+            dstStride = (dst->width + 7) / 8;
+            w = (w + 7) / 8 + ((srcX & 7) != 0);
+            srcX /= 8;
+            h = (h + 7) / 8 + ((srcY & 7) != 0);
+            srcY /= 8;
+            dstX /= 8;
+            dstY /= 8;
+            break;
+        case GX_TF_C8:
+            srcStride = (src->width + 7) / 8;
+            dstStride = (dst->width + 7) / 8;
+            w = (w + 7) / 8 + ((srcX & 7) != 0);
+            srcX /= 8;
+            h = (h + 3) / 4 + ((srcY & 3) != 0);
+            srcY /= 4;
+            dstX /= 8;
+            dstY /= 4;
+            break;
+        case GX_TF_C14X2:
+            return 1;
+        }
+    } else {
+        switch (src->format) {
+        case GX_TF_CMPR:
+            srcStride = (src->width + 7) / 8;
+            dstStride = (dst->width + 7) / 8;
+            w = (w + 7) / 8 + ((srcX & 7) != 0);
+            srcX /= 8;
+            h = (h + 7) / 8 + ((srcY & 7) != 0);
+            srcY /= 8;
+            dstX /= 8;
+            dstY /= 8;
+            break;
+        default:
+            return 1;
+        }
+    }
+    from = (u8*)src->image + (srcX + srcStride * srcY) * 32;
+    to = (u8*)dst->image + (dstX + dstStride * dstY) * 32;
+    while (h != 0) {
+        memcpy(to, from, w * 32);
+        from += srcStride * 32;
+        to += dstStride * 32;
+        h--;
+    }
+    return 0;
+}
+
+// .text:0x80023EEC size:0x20
+void fn_80023EEC(VecRing* ring, Vec* buf, int capacity)
+{
+    ring->buf = buf;
+    ring->capacity = capacity;
+    ring->count = 0;
+    ring->head = 0;
+    ring->tail = 0;
+    ring->step = 0;
+}
+
+// .text:0x80023E48 size:0xA4
+void fn_80023E48(VecRing* ring, Vec* v)
+{
+    ring->head = (ring->head + ring->step) % ring->capacity;
+    if (ring->tail == ring->head) {
+        ring->tail = (ring->tail + ring->step) % ring->capacity;
+    }
+    ring->step = 1;
+    ring->buf[ring->head] = *v;
+    ring->count += ring->count < ring->capacity;
+}
+
+// .text:0x80023DFC size:0x4C
+BOOL fn_80023DFC(VecRing* ring, Vec* out)
+{
+    if (ring->count != 0) {
+        ring->cur = ring->head;
+        *out = ring->buf[ring->cur];
+        return TRUE;
+    }
+    return FALSE;
+}
+
+// .text:0x80023D98 size:0x64
+BOOL fn_80023D98(VecRing* ring, Vec* out)
+{
+    if (ring->cur == ring->tail) {
+        return FALSE;
+    }
+    ring->cur = (ring->cur + ring->capacity - 1) % ring->capacity;
+    *out = ring->buf[ring->cur];
+    return TRUE;
+}
+
+// .text:0x80023D4C size:0x4C
+BOOL fn_80023D4C(VecRing* ring, Vec* out)
+{
+    if (ring->count != 0) {
+        ring->cur = ring->tail;
+        *out = ring->buf[ring->cur];
+        return TRUE;
+    }
+    return FALSE;
+}
+
+// .text:0x80023D44 size:0x8
+void fn_80023D44(s32 progressive)
+{
+    lbl_803CBC60 = progressive;
+}
+
+// .text:0x80023D3C size:0x8
+s32 fn_80023D3C(void)
+{
+    return lbl_803CBC60;
+}
+
+// .text:0x80023CF4 size:0x48
+void fn_80023CF4(s32 progressive)
+{
+    if (progressive) {
+        OSSetProgressiveMode(TRUE);
+        fn_800A7E00();
+    } else {
+        OSSetProgressiveMode(FALSE);
+    }
+    lbl_803CBC60 = progressive;
 }

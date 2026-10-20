@@ -24,6 +24,26 @@ typedef struct TextureDesc {
     /* 0x1B */ u8 _1B[0x20 - 0x1B];
 } TextureDesc; // size: 0x20
 
+// A ring of the last positions pushed, read back from the newest or the oldest
+typedef struct VecRing {
+    /* 0x00 */ Vec* buf;
+    /* 0x04 */ int capacity;
+    /* 0x08 */ int count;
+    /* 0x0C */ int head;
+    /* 0x10 */ int tail;
+    /* 0x14 */ int cur;
+    /* 0x18 */ int step; // 0 until the first push
+} VecRing; // size: 0x1C
+
+void fn_80023CF4(s32 progressive);
+s32 fn_80023D3C(void);
+void fn_80023D44(s32 progressive);
+BOOL fn_80023D4C(VecRing* ring, Vec* out);
+BOOL fn_80023D98(VecRing* ring, Vec* out);
+BOOL fn_80023DFC(VecRing* ring, Vec* out);
+void fn_80023E48(VecRing* ring, Vec* v);
+void fn_80023EEC(VecRing* ring, Vec* buf, int capacity);
+int fn_80023F0C(TextureDesc* src, TextureDesc* dst, int srcX, int srcY, int w, int h, int dstX, int dstY);
 void gOz_GXSetTexture(GXTevMode mode, s32 frac, s32 useNormal);
 
 void fn_80024390(camera_803c639c_s* camera, f32* p, s32 type);
