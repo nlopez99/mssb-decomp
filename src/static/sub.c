@@ -98,15 +98,30 @@ int LERPToNewRange_Float(int value, int inMin, int inMax, int outMin, int outMax
 }
 
 // .text:0x800249D8 size:0x128
+// 89.11%: register numbers differ throughout, and the target converts the last
+// byte's factor after the value; the first three convert the factor first.
 int byteWiseMultiply(int value, int factors)
 {
-    return (int)((value & 0xFF) * ((factors & 0xFF) / 255.0f))
-        | ((int)((value & 0xFF) * (((factors >> 8) & 0xFF) / 255.0f)) << 8)
-        | ((int)((value & 0xFF) * (((factors >> 16) & 0xFF) / 255.0f)) << 16)
-        | ((int)((value & 0xFF) * (((u32)factors >> 24) / 255.0f)) << 24);
+    int r;
+    f32 s;
+
+    s = factors & 0xFF;
+    s /= 255.0f;
+    r = (int)((value & 0xFF) * s);
+    s = (factors >> 8) & 0xFF;
+    s /= 255.0f;
+    r |= (int)((value & 0xFF) * s) << 8;
+    s = (factors >> 16) & 0xFF;
+    s /= 255.0f;
+    r |= (int)((value & 0xFF) * s) << 16;
+    s = (factors >> 24) & 0xFF;
+    r |= (int)((value & 0xFF) * (s / 255.0f)) << 24;
+    return r;
 }
 
 // .text:0x80024974 size:0x64
+// 98.56%: the two int-to-float temporaries swap stack slots (factor at 0x8 in the target);
+// every expression form and flag tried keeps the color's at 0x8.
 int multBottomBits_asFloat(int color, int factor)
 {
     f32 scale = (factor & 0xFF) / 255.0f;
@@ -160,6 +175,8 @@ s32 fn_800247E4(s32 x, s32 y, s32 width, s32 bytes)
 }
 
 // .text:0x800246D4 size:0x110
+// 96.03%, registers only: the target keeps count in r21 and reuses it for lo, with the
+// loop counter copied to r29; no declaration order or loop form here does that.
 void fn_800246D4(int (*compare)(const void*, const void*), void* src, void* dst, int size, int count)
 {
     int total = size * count;
