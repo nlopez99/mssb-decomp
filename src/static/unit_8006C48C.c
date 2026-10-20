@@ -4,7 +4,7 @@
 
 typedef struct MissionDesc {
     /* 0x00 */ u8 _00[0x4];
-    /* 0x04 */ s8 stars[1][6];
+    /* 0x04 */ s8 stars[1]; // indexed by [mode * 6 + level]
 } MissionDesc;
 
 typedef struct MissionChar {
@@ -112,21 +112,23 @@ void determineIfMissionDescriptionIsShown(void) {
 }
 
 // .text:0x8006CBE4 size:0xC0
+// The target starts i as a copy of count (mr r30,r31) where this builds li r30,0
 s16 challengeRelated(s32 index) {
     s32 count;
     s32 i;
+    MissionChar* ch = &starMissionCompletionTracker.chars[index];
 
     if (lbl_800E8558[index]._3 == 0) {
         count = 0;
     } else {
         count = 0;
-        for (i = 0; i < 10; i++) {
+        for (i = count; i < 10; i++) {
             if (challengeStarRelatedInd(index, i) != 0) {
                 count++;
             }
         }
     }
-    return lbl_8010B444[starMissionCompletionTracker.chars[index]._05][count];
+    return lbl_8010B444[ch->_05][count];
 }
 
 // .text:0x8006CAC8 size:0x11C
@@ -139,23 +141,26 @@ f32 fn_8006CA9C(void) {
 }
 
 // .text:0x8006C9D8 size:0xC4
+// Registers only: the target keeps tr in r6, i in r10 and level in r8
 void fn_8006C9D8(void) {
     s32 i;
+    MissionTracker* tr = &starMissionCompletionTracker;
+    MissionChar* ch = tr->chars;
+    s32 level = tr->_4415 * 6 + tr->_441C;
     s8 star;
 
-    for (i = 0; i < 54; i++) {
-        if (starMissionCompletionTracker.chars[i].status != 1) {
-            star = starMissionCompletionTracker.chars[i].desc->stars[starMissionCompletionTracker._4415][starMissionCompletionTracker._441C];
-            if (starMissionCompletionTracker.chars[i]._06 == star && star != 0) {
-                if (starMissionCompletionTracker._441F == 19) {
-                    if (starMissionCompletionTracker.chars[i].status == 2) {
-                        starMissionCompletionTracker.chars[i].status = 1;
-                        starMissionCompletionTracker._444D[i] = 1;
+    for (i = 0; i < 54; i++, ch++) {
+        if (ch->status != 1) {
+            star = ch->desc->stars[level];
+            if (ch->_06 == star && star != 0) {
+                if ((s32)tr->_441F == 19) {
+                    if (ch->status == 2) {
+                        ch->status = 1;
+                        tr->_444D[i] = 1;
                     }
-                } else if (starMissionCompletionTracker.chars[i].status != 2 &&
-                           starMissionCompletionTracker.chars[i]._04 == starMissionCompletionTracker._441E) {
-                    starMissionCompletionTracker.chars[i].status = 1;
-                    starMissionCompletionTracker._444D[i] = 1;
+                } else if (ch->status != 2 && ch->_04 == tr->_441E) {
+                    ch->status = 1;
+                    tr->_444D[i] = 1;
                 }
             }
         }
@@ -168,7 +173,9 @@ void starMissionRelated2(void) {
 
 // .text:0x8006C79C size:0x28
 BOOL fn_8006C79C(s32 index) {
-    return starMissionCompletionTracker.chars[index].status == 1;
+    MissionChar* ch = &starMissionCompletionTracker.chars[index];
+
+    return ch->status == 1;
 }
 
 // .text:0x8006C6C4 size:0xD8
