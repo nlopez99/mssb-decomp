@@ -46,6 +46,10 @@ typedef struct Emitter {
     union {
         /* 0x18 */ Vec _18;
         /* 0x18 */ u8 state;
+        struct {
+            /* 0x18 */ struct Particle* list;
+            /* 0x1C */ u16 count;
+        } glow;
     };
     /* 0x24 */ Vec _24;
     /* 0x30 */ Vec _30;
@@ -730,6 +734,8 @@ s32 fn_80032038(ZSortEntry* a, ZSortEntry* b)
 }
 
 // .text:0x80031F34 size:0x104
+// 92.91%: the target keeps n and the countdown copy in separate registers from the start
+// (r25, r26) and has a 0x10-byte larger frame; loop and local variants did not reproduce it.
 Particle* fn_80031F34(Particle* list, s32 n)
 {
     s32 i = 0;
@@ -938,6 +944,96 @@ void fn_8002C2D0(Vec* pos, Vec* dir, EffectParams* params)
             fn_8002BC84(e, pos, dir, params);
         }
     }
+}
+
+// .text:0x8002B014 size:0x3EC
+// 94.55%: registers differ through the inlined fn_80031F34, whose own copy keeps n and its
+// countdown in separate registers (see its comment); the control flow matches.
+BOOL fn_8002B014(Emitter* e)
+{
+    s32 alive = 0;
+    Particle* p;
+    Particle* prev;
+    Particle* tail;
+    Particle* dead;
+
+    if (e->count != 0) {
+        p = e->particles = fn_80031F34(e->particles, e->count);
+        prev = (Particle*)&e->particles;
+        tail = NULL;
+        dead = NULL;
+        do {
+            if (p->_4A != 0) {
+                if (p->_48 <= 0) {
+                    if (fn_8002AC68(e, (SparkParticle*)p)) {
+                        prev->next = p->next;
+                        if (tail != NULL) {
+                            tail->next = p;
+                        } else {
+                            dead = p;
+                        }
+                        tail = p;
+                        p->next = NULL;
+                        e->count--;
+                    } else {
+                        prev = p;
+                        alive++;
+                    }
+                } else {
+                    prev = p;
+                    p->_48--;
+                    alive++;
+                }
+            }
+            p = prev->next;
+        } while (p != NULL);
+        if (dead != NULL) {
+            for (p = dead; p != NULL; p = p->next) {
+                p->_4C = 0;
+                p->_48 = 0;
+            }
+            fn_80033794(dead);
+        }
+    }
+    if (e->glow.count != 0) {
+        p = e->glow.list = fn_80031F34(e->glow.list, e->glow.count);
+        prev = (Particle*)&e->glow.list;
+        tail = NULL;
+        dead = NULL;
+        do {
+            if (p->_4A != 0) {
+                if (p->_48 <= 0) {
+                    if (fn_8002A85C(e, (GlowParticle*)p)) {
+                        prev->next = p->next;
+                        if (tail != NULL) {
+                            tail->next = p;
+                        } else {
+                            dead = p;
+                        }
+                        tail = p;
+                        p->next = NULL;
+                        e->glow.count--;
+                    } else {
+                        prev = p;
+                        alive++;
+                    }
+                } else {
+                    prev = p;
+                    p->_48--;
+                    alive++;
+                }
+            }
+            p = prev->next;
+        } while (p != NULL);
+        if (dead != NULL) {
+            for (p = dead; p != NULL; p = p->next) {
+                p->_4C = 0;
+                p->_48 = 0;
+            }
+            fn_80033794(dead);
+        }
+    }
+    return alive == 0;
 }
 
 // .text:0x8002AC68 size:0x3AC

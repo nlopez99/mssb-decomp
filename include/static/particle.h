@@ -25,6 +25,7 @@ void fn_8002BC84(struct Emitter* e, Vec* pos, Vec* dir, struct EffectParams* par
 void fn_8002A1CC(Vec* pos, Vec* dir);
 u8 fn_8002A85C(struct Emitter* e, struct GlowParticle* p);
 u8 fn_8002AC68(struct Emitter* e, struct SparkParticle* p);
+BOOL fn_8002B014(struct Emitter* e);
 void fn_8002C2D0(Vec* pos, Vec* dir, struct EffectParams* params);
 void fn_8002CDD0(Vec* pos);
 void fn_8002DC68(Vec* pos);
