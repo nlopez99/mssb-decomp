@@ -146,7 +146,27 @@ extern struct {
     /* 0x000 */ u8 _000[0x398];
     /* 0x398 */ u8 _398;
 } lbl_800EF808;
-extern u8 starMissionCompletionTracker[0x4508];
+typedef struct StarEntry {
+    /* 0x0 */ s16 id;
+    /* 0x2 */ u8 _2[4];
+} StarEntry; // size: 0x6
+
+extern union {
+    u8 raw[0x4508];
+    struct {
+        /* 0x0000 */ u8 _0000[0x1606];
+        /* 0x1606 */ s8 _1606;
+        /* 0x1607 */ u8 _1607[0x40B8 - 0x1607];
+        /* 0x40B8 */ StarEntry entries[9];
+        /* 0x40EE */ u8 _40EE[0x43BC - 0x40EE];
+        /* 0x43BC */ s16 _43BC;
+        /* 0x43BE */ u8 _43BE[0x4415 - 0x43BE];
+        /* 0x4415 */ u8 _4415;
+        /* 0x4416 */ u8 _4416[0x441B - 0x4416];
+        /* 0x441B */ u8 _441B;
+        /* 0x441C */ u8 _441C;
+    } s;
+} starMissionCompletionTracker;
 extern void fn_8002128C(u8 arg0);
 
 MenuSlot lbl_802D4AE0[4];
@@ -170,7 +190,45 @@ void fn_8004153C(void) {
 }
 
 // .text:0x80041348 size:0x1F4
-void fn_80041348(void) {}
+s32 fn_80041348(void) {
+    s32 ok = 1;
+    s32 i;
+    s32 j;
+
+    if (starMissionCompletionTracker.s._1606 != 0 && starMissionCompletionTracker.s._441B == 0) {
+        for (i = 0; i < 9; i++) {
+            for (j = 0; j < 9; j++) {
+                if (starMissionCompletionTracker.s.entries[i].id == starMissionCompletionTracker.s.entries[j].id && i != j) {
+                    ok = 0;
+                }
+            }
+        }
+        if (starMissionCompletionTracker.s._4415 >= 4) {
+            ok = 0;
+        }
+        if (starMissionCompletionTracker.s._43BC < 0 || starMissionCompletionTracker.s._43BC > 1000) {
+            ok = 0;
+        }
+    } else {
+        for (i = 0; i < 9; i++) {
+            for (j = 0; j < 9; j++) {
+                if (starMissionCompletionTracker.s.entries[i].id == starMissionCompletionTracker.s.entries[j].id && i != j) {
+                    ok = 0;
+                }
+            }
+        }
+        if (starMissionCompletionTracker.s._4415 >= 4) {
+            ok = 0;
+        }
+        if (starMissionCompletionTracker.s._43BC < 0 || starMissionCompletionTracker.s._43BC > 1000) {
+            ok = 0;
+        }
+        if (starMissionCompletionTracker.s._441C >= 6) {
+            ok = 0;
+        }
+    }
+    return ok;
+}
 
 // .text:0x80041150 size:0x1F8
 void fn_80041150(u8 mask, u8 slot) {
@@ -199,7 +257,7 @@ void fn_80041150(u8 mask, u8 slot) {
         if (slot != 3) {
             dst = lbl_80354768.blocks[slot];
             memcpy(dst, block[slot].data, sizeof(block[slot].data));
-            memcpy(starMissionCompletionTracker, dst, sizeof(starMissionCompletionTracker));
+            memcpy(starMissionCompletionTracker.raw, dst, sizeof(starMissionCompletionTracker.raw));
             return;
         }
         for (i = 0; i < 3; i++) {

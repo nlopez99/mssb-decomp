@@ -36,7 +36,7 @@ void fn_80040C14(void);
 s32 fn_80040FE0(struct SaveFile* save);
 s32 fn_80041074(struct SaveFile* save, s32 arg1, s32 mask);
 void fn_80041150(u8 mask, u8 slot);
-void fn_80041348(void);
+s32 fn_80041348(void);
 void fn_8004153C(void);
 
 #endif // !__STATIC_STATIC_8003A2EC_H_
