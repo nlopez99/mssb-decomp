@@ -120,7 +120,9 @@ typedef struct RosterEntry {
 
 extern struct {
     /* 0x0000 */ RosterEntry chars[6][9];
-    /* 0x21C0 */ u8 _21C0[0x470D - 0x21C0];
+    /* 0x21C0 */ u8 _21C0[0x46F8 - 0x21C0];
+    /* 0x46F8 */ s8 ports[2];
+    /* 0x46FA */ u8 _46FA[0x470D - 0x46FA];
     /* 0x470D */ u8 _470D[2];
     /* 0x470F */ u8 _470F[0x47F9 - 0x470F];
     /* 0x47F9 */ s8 _47F9[2][9][9];
@@ -604,7 +606,43 @@ void fn_8005C2B0(SpaniTask* task) {
 }
 
 // .text:0x8005BF40 size:0x370
-void fn_8005BF40(void) {
+// 98.82%: registers only; the target loads the order slot into the lower
+// register when it meets task->_14 (as the mission index in fn_800572C0).
+void fn_8005BF40(SpaniTask* task) {
+    s32 team;
+    s32 i;
+    u8 flag;
+
+    for (team = 0; team < 2; team++) {
+        for (i = 0; i < 9; i++) {
+            fn_800363D8(task, lbl_80354720[team][i]._2 + 0x10A + team * 9, 1, 0x83, inMemRoster[team][i].stats.CharID);
+            getGridObj(task, i, team * 9, 0xE6)->_54 &= ~2;
+            if (g_d_GameSettings.GameModeSelected == 5) {
+                flag = starMissionCompletionTracker._43D6[inMemRoster[team][i].stats.CharID];
+            } else {
+                flag = lbl_8034E9A0._489B[team][i];
+            }
+            if (flag != 0) {
+                getGridObj(task, lbl_80354720[team][i]._2, team * 9, 0x140)->_68 = 1;
+                getGridObj(task, lbl_80354720[team][i]._2, team * 9, 0x152)->_54 |= 2;
+                getGridObj(task, lbl_80354720[team][i]._2, team * 9, 0x152)->_5C = 0;
+                getGridObj(task, lbl_80354720[team][i]._2, team * 9, 0x152)->_68 = 1;
+            } else if (lbl_80361B20._00[0][inMemRoster[team][i].stats.CharID] != 0) {
+                getGridObj(task, lbl_80354720[team][i]._2, team * 9, 0x140)->_68 = 1;
+                getGridObj(task, lbl_80354720[team][i]._2, team * 9, 0x152)->_54 |= 2;
+                getGridObj(task, lbl_80354720[team][i]._2, team * 9, 0x152)->_5C = 0;
+                getGridObj(task, lbl_80354720[team][i]._2, team * 9, 0x152)->_68 = 0;
+            } else {
+                getGridObj(task, lbl_80354720[team][i]._2, team * 9, 0x152)->_54 &= ~2;
+            }
+            getGridObj(task, i, team * 9, 0x12E)->_54 &= ~2;
+            if (g_d_GameSettings._10 == 0 && team != 0) {
+                getGridObj(task, i, team * 9, 0xF8)->_64 = (s8)(lbl_8034E9A0.ports[0] == 0) + 30;
+            } else {
+                getGridObj(task, i, team * 9, 0xF8)->_64 = lbl_8034E9A0.ports[team] + 30;
+            }
+        }
+    }
 }
 
 // .text:0x8005BB5C size:0x3E4
