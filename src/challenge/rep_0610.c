@@ -3579,7 +3579,7 @@ void fn_1_135C0(void) {
     Unk8036E548Actor* actor;
     struct UnkActorFiles0610* file;
     s32 count;
-    u16 id;
+    s32 id;
     void* tex;
     void* layout;
     void* geo;
@@ -3702,11 +3702,11 @@ void fn_1_135C0(void) {
         lbl_1_bss_67B8[0] = NULL;
     }
     count = lbl_8036E548._0060->_34[0]._00->_06;
-    memset(lbl_8036E548._0C04[0]._162, 0xFF, sizeof(lbl_8036E548._0C04[0]._162));
+    memset(actor->_162, 0xFF, sizeof(actor->_162));
     for (i = 0; i < count; i++) {
         id = lbl_8036E548._0060->_34[0]._00->_18[i]->_00;
         if (id != 0xFFFF) {
-            lbl_8036E548._0C04[0]._162[id] = i;
+            actor->_162[id] = i;
         }
     }
     fn_800BD548(lbl_8036E548._0060->_34, 3, lbl_8036E548._00AC[0], lbl_8036E548._00AC[1], lbl_8036E548._00AC[2],
@@ -3718,28 +3718,29 @@ void fn_1_135C0(void) {
     lbl_8036E548._0060->_34[0]._54 = 0.5f;
     lbl_8036E548._0060->_34[0]._5A = 1;
     elem = lbl_8036E548._0060->_34;
-    id = lbl_8036E548._0C04[0]._162[3];
+    id = actor->_162[3];
     if (id != 0xFFFF) {
         fn_800B2BA8(lbl_8036E548._0060->_34[0]._00, id, NULL, 0);
-        elem->_00->_18[id]->_136 = 1;
+        elem->_00->_18[(u16)id]->_136 = 1;
     }
-    id = lbl_8036E548._0C04[0]._162[2];
+    id = actor->_162[2];
     if (id != 0xFFFF) {
         fn_800B2BA8(elem->_00, id, NULL, 0);
-        elem->_00->_18[id]->_136 = 1;
+        elem->_00->_18[(u16)id]->_136 = 1;
     }
-    id = lbl_8036E548._0C04[0]._162[1];
+    id = actor->_162[1];
     if (id != 0xFFFF) {
         fn_800B2BA8(elem->_00, id, NULL, 0);
-        elem->_00->_18[id]->_136 = 1;
+        elem->_00->_18[(u16)id]->_136 = 1;
     }
-    if (lbl_8036E548._0C04[0]._162[36] != 0xFFFF) {
-        fn_800B2BA8(elem->_00, lbl_8036E548._0C04[0]._162[36], NULL, 0);
-    }
-    id = lbl_8036E548._0C04[0]._162[46];
+    id = actor->_162[36];
     if (id != 0xFFFF) {
         fn_800B2BA8(elem->_00, id, NULL, 0);
-        elem->_00->_18[id]->_136 = 1;
+    }
+    id = actor->_162[46];
+    if (id != 0xFFFF) {
+        fn_800B2BA8(elem->_00, id, NULL, 0);
+        elem->_00->_18[(u16)id]->_136 = 1;
     }
     fn_800B2C08(lbl_8036E548._0060->_34[0]._00, 4);
     fn_8001FC4C(lbl_8036E548._2C50[0]);
@@ -3754,12 +3755,12 @@ void fn_1_135C0(void) {
     lbl_8036E548._0C04[0]._277 = 0xFF;
     lbl_8036E548._0060->_34[0]._08 = fn_1_14888;
     if (lbl_1_bss_60A4[lbl_1_bss_68FC._40[j]] != 0) {
-        fn_800B2B74(lbl_8036E548._0060->_34[0]._00, lbl_8036E548._0C04[0]._162[19]);
-        fn_800B2B74(lbl_8036E548._0060->_34[0]._00, lbl_8036E548._0C04[0]._162[25]);
+        fn_800B2B74(lbl_8036E548._0060->_34[0]._00, actor->_162[19]);
+        fn_800B2B74(lbl_8036E548._0060->_34[0]._00, actor->_162[25]);
         fn_1_ECF8(lbl_1_bss_5F73, 0, 0);
-        fn_800B2B74(lbl_8036E548._0060->_34[0]._00, lbl_8036E548._0C04[0]._162[36]);
+        fn_800B2B74(lbl_8036E548._0060->_34[0]._00, actor->_162[36]);
     }
-    switch (lbl_8036E548._0C04[0]._252) {
+    switch (actor->_252) {
     case 33:
     case 34:
     case 35:
@@ -3767,25 +3768,25 @@ void fn_1_135C0(void) {
         fn_80063010(actor, elem);
         break;
     case 2:
-        lbl_1_bss_60E8 = fn_800638B4(actor, &lbl_8036E548._0060->_34[(s8)lbl_8036E548._0C04[0]._255[0]],
+        lbl_1_bss_60E8 = fn_800638B4(actor, &lbl_8036E548._0060->_34[(s8)actor->_255[0]],
                                      lbl_8036E548._0060);
         break;
     case 19:
-        lbl_1_bss_60E8 = fn_8004B7B4(actor, &lbl_8036E548._0060->_34[(s8)lbl_8036E548._0C04[0]._255[0]],
+        lbl_1_bss_60E8 = fn_8004B7B4(actor, &lbl_8036E548._0060->_34[(s8)actor->_255[0]],
                                      lbl_8036E548._0060);
         break;
     case 20:
     case 43:
-        lbl_1_bss_60E8 = fn_800637BC(actor, &lbl_8036E548._0060->_34[(s8)lbl_8036E548._0C04[0]._255[0]],
+        lbl_1_bss_60E8 = fn_800637BC(actor, &lbl_8036E548._0060->_34[(s8)actor->_255[0]],
                                      lbl_8036E548._0060);
         break;
     case 38:
-        lbl_8036E548._0060->_34[(s8)lbl_8036E548._0C04[0]._255[0]]._00->_99 = 1;
+        lbl_8036E548._0060->_34[(s8)actor->_255[0]]._00->_99 = 1;
         fn_1_D13C();
         fn_1_D300(actor);
         break;
     case 41:
-        lbl_1_bss_60E8 = fn_800637D4(actor, &lbl_8036E548._0060->_34[(s8)lbl_8036E548._0C04[0]._255[0]],
+        lbl_1_bss_60E8 = fn_800637D4(actor, &lbl_8036E548._0060->_34[(s8)actor->_255[0]],
                                      lbl_8036E548._0060);
     case 18:
     case 40:
@@ -3794,7 +3795,7 @@ void fn_1_135C0(void) {
         break;
     case 14:
     case 37:
-        lbl_1_bss_60E8 = fn_80052634(actor, &lbl_8036E548._0060->_34[(s8)lbl_8036E548._0C04[0]._255[0]],
+        lbl_1_bss_60E8 = fn_80052634(actor, &lbl_8036E548._0060->_34[(s8)actor->_255[0]],
                                      lbl_8036E548._0060);
         break;
     case 16:
@@ -3802,7 +3803,7 @@ void fn_1_135C0(void) {
     case 45:
     case 46:
     case 47:
-        lbl_1_bss_60E8 = fn_80062ED4(actor, &lbl_8036E548._0060->_34[(s8)lbl_8036E548._0C04[0]._255[0]],
+        lbl_1_bss_60E8 = fn_80062ED4(actor, &lbl_8036E548._0060->_34[(s8)actor->_255[0]],
                                      lbl_8036E548._0060);
         break;
     default:
