@@ -646,7 +646,53 @@ void fn_8005BF40(SpaniTask* task) {
 }
 
 // .text:0x8005BB5C size:0x3E4
-void fn_8005BB5C(void) {
+// 95.34%: registers from the second team's branch on; the base hoists
+// &inMemRoster[1][i] out of the scout-flag loop.
+void fn_8005BB5C(SpaniTask* task) {
+    s32 team;
+    s32 i;
+    s32 j;
+    u8 flag;
+
+    for (team = 0; team < 2; team++) {
+        for (i = 0; i < 9; i++) {
+            fn_800363D8(task, i + 0x40 + team * 9, 1, 0x83, inMemRoster[team][i].stats.CharID);
+            getGridObj(task, i, team * 9, 0x2E)->_5C = i << 16;
+            if (team == 0) {
+                getTeamObj(task, i, 0xD0)->_5C = inMemRoster[0][i].stats.CharacterClass << 16;
+                getTeamObj(task, i, 0xAC)->_5C = (inMemRoster[0][i].stats.BattingStance + inMemRoster[0][i].stats.FieldingArm * 2) << 16;
+                getTeamObj(task, i, 0x64)->_54 &= ~2;
+                if (g_d_GameSettings.GameModeSelected == 5) {
+                    flag = starMissionCompletionTracker._43D6[inMemRoster[team][i].stats.CharID];
+                } else {
+                    flag = lbl_8034E9A0._489B[team][i];
+                }
+                if (flag != 0 && team == 0) {
+                    getTeamObj(task, i, 0x76)->_68 = 1;
+                    getTeamObj(task, i, 0x88)->_54 |= 2;
+                    getTeamObj(task, i, 0x88)->_5C = 0;
+                    getTeamObj(task, i, 0x88)->_68 = 1;
+                } else {
+                    getTeamObj(task, i, 0x88)->_54 &= ~2;
+                }
+            } else {
+                getGridObj(task, i, team * 9, 0xD0)->_54 &= ~2;
+                getGridObj(task, i, team * 9, 0xAC)->_54 &= ~2;
+                getGridObj(task, i, team * 9, 0x88)->_54 &= ~2;
+                getGridObj(task, i, team * 9, 0x64)->_54 &= ~2;
+                for (j = 0; j < 5; j++) {
+                    if (j < ((s8*)starMissionCompletionTracker.characters[inMemRoster[1][i].stats.CharID].scoutFlagPointer)[starMissionCompletionTracker._4415 * 6 + starMissionCompletionTracker._441C + 4]) {
+                        getGridObj(task, j, i * 5, 0x16D)->_5C = 0;
+                        getGridObj(task, j, i * 5, 0x16D)->_68 = 0;
+                    } else {
+                        getGridObj(task, j, i * 5, 0x16D)->_54 &= ~2;
+                    }
+                }
+            }
+        }
+        getTeamObj(task, team, 8)->_5C = lbl_8034E9A0._470D[team] << 16;
+        getTeamObj(task, team, 0xC)->_5C = lbl_8034E9A0._470D[team] << 16;
+    }
 }
 
 // .text:0x8005B760 size:0x3FC
@@ -663,6 +709,7 @@ void fn_8005AF68(SpaniTask* task) {
     s32 i;
     s8 team = lbl_803297E0._CF3B;
     u8 flag;
+
     for (i = 0; i < 9; i++) {
         if (lbl_803297E0._CFA2[team] != 2) {
             slot = lbl_80354720[team][i]._2;
