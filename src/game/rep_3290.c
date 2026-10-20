@@ -126,13 +126,16 @@ void fn_3_1160BC(void) {
 // .text:0x001160B8 size:0x4 mapped:0x8075514C
 void fn_3_1160B8(void) {}
 
+static inline void setFielderPlayer(int fielder, u8 player) { g_Fielders[fielder]._20D = player; }
+
 // .text:0x00115C24 size:0x494 mapped:0x80754CB8
-// 97.51%: the target indexes g_Fielders with n + 2 as stored (no clrlwi) and without strength
-// reduction; an int fielder strength-reduces, a u8 one truncates.
+// 98.99%: only registers differ in the fielder loop (n in r8 where the target has r11) and
+// the g_Fielders and g_Minigame lis come in the other order; the int fielder through
+// setFielderPlayer's int parameter removed the clrlwi without hoisting the addresses.
 void fn_3_115C24(void) {
-    u8 fielder;
-    s32 i;
     int n;
+    int fielder;
+    s32 i;
     u8 strength;
 
     if (g_GameLogic._125 == 0) {
@@ -170,15 +173,14 @@ void fn_3_115C24(void) {
             }
             g_Scores._AA = lbl_3_data_2166C[4];
         }
-        n = 0;
-        for (i = 0; i < 4; i++) {
+        for (i = 0, n = 0; i < 4; i++) {
             if (g_Minigame.minigameControlStruct.characterIndex[i] >= 0) {
                 g_Minigame.minigameControlStruct._28[n] = i;
                 fielder = n + 2;
                 g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]] = fielder;
                 g_Minigame.minigameControlStruct._14[n] = i;
                 n++;
-                g_Fielders[fielder]._20D = i;
+                setFielderPlayer(fielder, i);
             }
         }
         fn_3_58870();
