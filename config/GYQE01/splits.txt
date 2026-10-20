@@ -14,7 +14,7 @@ Sections:
 	.sdata2     type:rodata align:4
 	.sbss2      type:bss align:32
 
-static/fn_8001FE00.c:
+static/static_8001FE00.c:
 	extab       start:0x800059D0 end:0x80005A28
 	extabindex  start:0x80007218 end:0x8000729C
 	.text       start:0x8001FE00 end:0x80021188
@@ -22,7 +22,7 @@ static/fn_8001FE00.c:
 	.sdata      start:0x803CB7C8 end:0x803CB7D8
 	.sdata2     start:0x803CC530 end:0x803CC548
 
-static/fn_80021188.c:
+static/static_80021188.c:
 	extab       start:0x80005A28 end:0x80005AB0
 	extabindex  start:0x8000729C end:0x80007368
 	.text       start:0x80021188 end:0x80021AC8
@@ -32,7 +32,7 @@ static/fn_80021188.c:
 	.sbss       start:0x803CBC40 end:0x803CBC48
 	.sdata2     start:0x803CC548 end:0x803CC560
 
-static/fn_80021AC8.c:
+static/static_80021AC8.c:
 	extab       start:0x80005AB0 end:0x80005B08
 	extabindex  start:0x80007368 end:0x800073EC
 	.text       start:0x80021AC8 end:0x80022DAC
@@ -49,7 +49,7 @@ static/objinit.c:
 	.sbss       start:0x803CBC58 end:0x803CBC60
 	.sdata2     start:0x803CC560 end:0x803CC568
 
-static/fn_80023B90.c:
+static/static_80023B90.c:
 	extab       start:0x80005B48 end:0x80005B50
 	extabindex  start:0x8000744C end:0x80007458
 	.text       start:0x80023B90 end:0x80023CF4

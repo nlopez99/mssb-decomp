@@ -1,5 +1,5 @@
-#ifndef __STATIC_FN_8001FE00_H_
-#define __STATIC_FN_8001FE00_H_
+#ifndef __STATIC_STATIC_8001FE00_H_
+#define __STATIC_STATIC_8001FE00_H_
 
 #include "mssbTypes.h"
 
@@ -16,4 +16,4 @@ void fn_80020624(void);
 void fn_800206FC(void);
 void fn_80021064(void);
 
-#endif // !__STATIC_FN_8001FE00_H_
+#endif // !__STATIC_STATIC_8001FE00_H_

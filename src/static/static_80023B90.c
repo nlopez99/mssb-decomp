@@ -1,4 +1,4 @@
-#include "static/fn_80023B90.h"
+#include "static/static_80023B90.h"
 #include "Dolphin/mtx.h"
 
 typedef struct LightDesc {

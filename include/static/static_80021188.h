@@ -1,5 +1,5 @@
-#ifndef __STATIC_FN_80021188_H_
-#define __STATIC_FN_80021188_H_
+#ifndef __STATIC_STATIC_80021188_H_
+#define __STATIC_STATIC_80021188_H_
 
 #include "mssbTypes.h"
 #include "musyx/musyx.h"
@@ -44,4 +44,4 @@ unsigned long sndPopGroup(void);
 void sndSetAuxProcessingCallbacks(u8 studio, SND_AUX_CALLBACK auxA, void* userA, u8 midiA, SND_SEQID seqIDA,
                                   SND_AUX_CALLBACK auxB, void* userB, u8 midiB, SND_SEQID seqIDB);
 
-#endif // !__STATIC_FN_80021188_H_
+#endif // !__STATIC_STATIC_80021188_H_

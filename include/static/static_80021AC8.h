@@ -1,5 +1,5 @@
-#ifndef __STATIC_FN_80021AC8_H_
-#define __STATIC_FN_80021AC8_H_
+#ifndef __STATIC_STATIC_80021AC8_H_
+#define __STATIC_STATIC_80021AC8_H_
 
 #include "mssbTypes.h"
 
@@ -38,4 +38,4 @@ void fn_800A6304(void);
 void* fn_800A6354(u32 size);
 s32 fn_800A6418(u32 size);
 
-#endif // !__STATIC_FN_80021AC8_H_
+#endif // !__STATIC_STATIC_80021AC8_H_

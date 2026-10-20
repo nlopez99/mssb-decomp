@@ -1,9 +1,9 @@
-#include "static/fn_8001FE00.h"
+#include "static/static_8001FE00.h"
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/mtx.h"
 #include "Dolphin/os.h"
 #include "Dolphin/rand.h"
-#include "static/fn_80021AC8.h"
+#include "static/static_80021AC8.h"
 
 typedef struct SceneSprite {
     /* 0x00 */ u8 _00[0x54];

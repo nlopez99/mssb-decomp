@@ -1,5 +1,5 @@
-#include "static/fn_80021188.h"
-#include "static/fn_80021AC8.h"
+#include "static/static_80021188.h"
+#include "static/static_80021AC8.h"
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/os.h"
 #include "string.h"
