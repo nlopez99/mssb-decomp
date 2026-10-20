@@ -774,25 +774,27 @@ void fn_80041150(u8 mask, u8 slot) {
 }
 
 // .text:0x80041074 size:0xDC
-// 99.64%: both checksum compares take their operands in the other order (cmplw r0,r3)
 s32 fn_80041074(SaveFile* save, s32 arg1, s32 mask) {
     SaveHeader* header = &save->header;
     u32 bit;
     SaveBlock* block;
     s32 i;
+    u16 sum;
 
     lbl_803C50E8.badBlocks = 0;
     for (i = 0; i < 4; i++) {
         bit = 1 << i;
         if (mask & bit) {
             if (i == 0) {
-                if (save->headerSum != fn_800ABB14(header, sizeof(save->header))) {
+                sum = fn_800ABB14(header, sizeof(save->header));
+                if (sum != save->headerSum) {
                     lbl_803C50E8.badBlocks = bit;
                     break;
                 }
             } else {
                 block = &save->blocks[i - 1];
-                if (block->sum != fn_800ABB14(block->data, sizeof(block->data))) {
+                sum = fn_800ABB14(block->data, sizeof(block->data));
+                if (sum != block->sum) {
                     lbl_803C50E8.badBlocks |= bit;
                 }
             }
@@ -1704,7 +1706,7 @@ void fn_8003BB90(void) {
 }
 
 // .text:0x8003B5B0 size:0x5E0
-// 99.10%: as in fn_8004053C, the target loads the name before the slot for fn_800AB474
+// 99.77%: the target reads the slot's first word through the slot pointer (lwz 0(r5)), not lwzx
 void fn_8003B5B0(void) {
     MenuTask* task = lbl_803CC1B8;
     CardRequest req;
@@ -1727,8 +1729,8 @@ void fn_8003B5B0(void) {
         task->_1D = 0;
         task->_14 = 1;
     case 1:
-        slot = &lbl_802D4AE0[task->_17];
-        fn_800AB474(task->_17, task->_18, lbl_803CBC48, lbl_800E6910, slot->_0, slot->_4, lbl_803CBC48);
+        fn_800AB474(task->_17, task->_18, lbl_803CBC48, lbl_800E6910, lbl_802D4AE0[task->_17]._0,
+                    lbl_802D4AE0[task->_17]._4, lbl_803CBC48);
         task->_14++;
         return;
     case 2:
