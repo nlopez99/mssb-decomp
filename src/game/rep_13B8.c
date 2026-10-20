@@ -3120,8 +3120,8 @@ void fn_3_810C4(int runner, int base) {
 }
 
 // .text:0x00080028 size:0x109C mapped:0x806BF0BC
-// 97.62%: the overrun and action steps schedule the target point's loads later, the dugout
-// velocity takes the speed as the second fmuls operand, and some FPR pairs are swapped.
+// 97.60%: the overrun and action steps schedule the target point's loads later (the overrun
+// step also forms the int-to-float constant's address with addi), and some FPR pairs are swapped.
 void fn_3_80028(int runner) {
     InMemRunnerType* r = &g_Runners[runner];
     VecXYZ p;
@@ -3157,12 +3157,9 @@ void fn_3_80028(int runner) {
                 r->position.z = ((VecXZ*)&out)->z;
             } else if (r->overRun1BStage == 3) {
                 fn_3_7FFD0(&p, 1, 2, r->slidingAdjustment_backwards);
-                out.x = p.x - r->position.x;
-                out.y = p.y - r->position.y;
-                out.z = p.z - r->position.z;
-                out.x /= r->overrunBaseFrames_countDown;
-                out.y /= r->overrunBaseFrames_countDown;
-                out.z /= r->overrunBaseFrames_countDown;
+                out.x = (p.x - r->position.x) / r->overrunBaseFrames_countDown;
+                out.y = (p.y - r->position.y) / r->overrunBaseFrames_countDown;
+                out.z = (p.z - r->position.z) / r->overrunBaseFrames_countDown;
                 r->position.x += out.x;
                 r->position.y += out.y;
                 r->position.z += out.z;
@@ -3193,8 +3190,8 @@ void fn_3_80028(int runner) {
                     dx = r->nextBaseCoordinates.x - r->position.x;
                     dz = r->nextBaseCoordinates.z - r->position.z;
                     dist = dolsqrtf2(dx * dx + dz * dz);
-                    r->velocity.x = (dx / dist) * lbl_3_data_4B50;
-                    r->velocity.z = (dz / dist) * lbl_3_data_4B50;
+                    r->velocity.x = scaleValue(dx / dist, lbl_3_data_4B50);
+                    r->velocity.z = scaleValue(dz / dist, lbl_3_data_4B50);
                     r->velocity.y = 0.0f;
                     r->runningToDugoutFrameCounter = 0;
                     r->framesToReachDugout = (s16)(dist / lbl_3_data_4B50) + 1;
@@ -3250,8 +3247,8 @@ void fn_3_80028(int runner) {
                         dx = r->nextBaseCoordinates.x - r->position.x;
                         dz = r->nextBaseCoordinates.z - r->position.z;
                         dist = dolsqrtf2(dx * dx + dz * dz);
-                        r->velocity.x = (dx / dist) * lbl_3_data_4B50;
-                        r->velocity.z = (dz / dist) * lbl_3_data_4B50;
+                        r->velocity.x = scaleValue(dx / dist, lbl_3_data_4B50);
+                        r->velocity.z = scaleValue(dz / dist, lbl_3_data_4B50);
                         r->velocity.y = 0.0f;
                         r->runningToDugoutFrameCounter = 0;
                         r->framesToReachDugout = (s16)(dist / lbl_3_data_4B50) + 1;
@@ -3280,8 +3277,8 @@ void fn_3_80028(int runner) {
                     dx = r->nextBaseCoordinates.x - r->position.x;
                     dz = r->nextBaseCoordinates.z - r->position.z;
                     dist = dolsqrtf2(dx * dx + dz * dz);
-                    r->velocity.x = (dx / dist) * lbl_3_data_4B50;
-                    r->velocity.z = (dz / dist) * lbl_3_data_4B50;
+                    r->velocity.x = scaleValue(dx / dist, lbl_3_data_4B50);
+                    r->velocity.z = scaleValue(dz / dist, lbl_3_data_4B50);
                     r->velocity.y = 0.0f;
                     r->runningToDugoutFrameCounter = 0;
                     r->framesToReachDugout = (s16)(dist / lbl_3_data_4B50) + 1;
