@@ -1442,8 +1442,8 @@ u8 fn_3_1379A0(int fielderIdx) {
 }
 
 // .text:0x001373E0 size:0x5C0 mapped:0x80776474
-// 93.1%: the half-size constants are loaded through addi where the target loads them
-// directly, and the plane intersection schedules its stores differently.
+// 97.2%: registers only; seg's copy and the loop's obj walker swap r28 to r30, and
+// the FPRs of the height test and the PSVECMag compares differ.
 u8 fn_3_1373E0(VecSrcDst* seg, Vec* vel, VecSrcDst* out, f32 radius) {
     f32 planes[4][3] = { { -1.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, { 0.0f, -1.0f, 0.0f } };
     Vec d1;
@@ -1451,9 +1451,9 @@ u8 fn_3_1373E0(VecSrcDst* seg, Vec* vel, VecSrcDst* out, f32 radius) {
     Vec n1;
     Vec hit;
     Vec d2;
-    f32 height = 2.0f * radius;
-    f32 halfX = 3.5f + radius;
-    f32 halfZ = 3.125f + radius;
+    f32 height;
+    f32 halfX;
+    f32 halfZ;
     f32* plane;
     f32 limit;
     f32 t;
@@ -1465,6 +1465,9 @@ u8 fn_3_1373E0(VecSrcDst* seg, Vec* vel, VecSrcDst* out, f32 radius) {
 
     for (i = 0; i < lbl_3_bss_B780; i++) {
         obj = &MG.objs[i];
+        height = 2.0f * radius;
+        halfX = 3.5f + radius;
+        halfZ = 3.125f + radius;
         outside = TRUE;
         if (!(obj->_3D > 1 || obj->_3D == 4)) {
             continue;
