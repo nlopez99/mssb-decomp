@@ -481,9 +481,13 @@ static inline void spawnDrawEffect(StaC5Draw* draw) {
     }
 }
 
+static inline StaC5Model* getModel(u8 idx) {
+    return &lbl_8036E548._6C->models[idx];
+}
+
 // .text:0x000F6FDC size:0x1468 mapped:0x80736070
-// 98.44%: the target loads (u8)n1 for the first loop before the lbl_8036E548 base, keeps
-// pitcherModel in r31 (here on the stack) and stores models[j]._5B with stbx.
+// 98.70%: the target loads (u8)n1 for the first loop before the lbl_8036E548 base and
+// strength-reduces the props loop's model address (getModel's u8 index here re-extends i).
 void fn_3_F6FDC(void** files) {
     s32 n1;
     u8 end;
@@ -548,7 +552,7 @@ void fn_3_F6FDC(void** files) {
     pitcherModel = j;
     fn_800BDC88(lbl_8036E548._6C, j, j, files[indices[2]], NULL, 0);
     fn_3_B97DC(&lbl_8036E548._6C->models[j], files[indices[2] + 2]);
-    lbl_8036E548._6C->models[j]._5B = 2;
+    getModel(j)->_5B = 2;
     fn_800B4AFC(lbl_8036E548._6C->models[j]._00, lbl_8036E548._6C->models[j]._5B & 1);
     ballModel = j + 1;
     fn_800BDC88(lbl_8036E548._6C, (u8)(j + 1), (u8)(j + 1), files[indices[3]], NULL, 0);
@@ -598,7 +602,7 @@ void fn_3_F6FDC(void** files) {
                 break;
             }
             entry->_9D = 0;
-            draw->_74 = &lbl_8036E548._6C->models[i];
+            draw->_74 = getModel(i);
             entry->_C2 = idx;
             entry->_C3u = pitcherModel;
             draw->_78 = files[indices[9]];
