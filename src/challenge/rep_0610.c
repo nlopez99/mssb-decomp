@@ -5464,7 +5464,8 @@ void fn_1_DE1C(void) {
 }
 
 // .text:0x0000D9B8 size:0x464
-// Registers only: the target keeps lbl_1_bss_5F73 in r29 and elem in r12
+// Registers only: the target keeps lbl_1_bss_5F73 in r29 and elem in r12, and
+// indexes the slot's state with lbzx
 void fn_1_D9B8(void) {
     UnkTaskState0610* task;
     UnkList0610* list;
@@ -5500,7 +5501,7 @@ void fn_1_D9B8(void) {
         actor = &lbl_8036E548._0C04[lbl_1_bss_5F73];
         lbl_1_bss_6940[lbl_1_bss_5F73]._44 = id;
         state->_45 = lbl_1_bss_3218[task->_15]._2;
-        anim = actor->_010[lbl_1_bss_6940[lbl_1_bss_5F73]._44];
+        anim = actor->_010[state->_44];
         elem = &lbl_8036E548._0060->_34[lbl_1_bss_5F73];
         anim45 = state->_45;
         elem->_04 = anim;
