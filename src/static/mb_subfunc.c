@@ -24,9 +24,10 @@ typedef struct MbState {
     /* 0x470B */ u8 _470B[0x470F - 0x470B];
     /* 0x470F */ s8 _470F[2];
     /* 0x4711 */ u8 _4711[0x4757 - 0x4711];
-    /* 0x4757 */ u8 _4757[0x47F9 - 0x4757];
+    /* 0x4757 */ u8 _4757[0x478D - 0x4757];
+    /* 0x478D */ u8 _478D[2][54];
     /* 0x47F9 */ s8 _47F9[2][9][9];
-    /* 0x485B */ u8 _485B[0x48AE - 0x485B];
+    /* 0x489B */ u8 _489B[0x48AE - 0x489B];
     /* 0x48AE */ u8 _48AE;
     /* 0x48AF */ u8 _48AF[0x48C0 - 0x48AF];
 } MbState; // size: 0x48C0
@@ -374,7 +375,39 @@ void fn_80067F70(void) {
 }
 
 // .text:0x80067C48 size:0x328
-void fn_80067C48(void) {
+void fn_80067C48(u8 team) {
+    u8 ids[54];
+    u8 chem[54];
+    s32 i;
+    s32 j;
+    u8 best;
+    u8 t2;
+    u8 t;
+    s32 cap = lbl_8034E9A0._46E0[team];
+    s32 col = cap % 9;
+    s32 row = cap / 9;
+
+    for (i = 0; i < 54; i++) {
+        chem[i] = lbl_8034E9A0.chars[row][col].chemistry[i];
+        ids[i] = i;
+    }
+    for (i = 0; i < 54; i++) {
+        best = chem[i];
+        for (j = i + 1; j < 54; j++) {
+            if (best < chem[j]) {
+                t = chem[i];
+                best = chem[j];
+                t2 = ids[i];
+                chem[i] = chem[j];
+                ids[i] = ids[j];
+                chem[j] = t;
+                ids[j] = t2;
+            }
+        }
+    }
+    for (i = 0; i < 54; i++) {
+        lbl_8034E9A0._478D[team][i] = ids[i];
+    }
 }
 
 // .text:0x80067B40 size:0x108
