@@ -5,6 +5,8 @@
 #include "menus/rep_04B0.h"
 #include "static/UnknownHomes_Static.h"
 #include "musyx/musyx.h"
+#include "menus/rep_0010.h"
+#include "menus/rep_0CA0.h"
 
 extern struct {
     /* 0x0000 */ u8 _0000[0x46F8];
@@ -114,10 +116,7 @@ extern u8 lbl_800EFBA4[0x10];
 
 extern void fn_800625A4(s32 port, s32 arg1);
 extern s32 fn_2_14F8(s32 min, s32 max);
-extern void fn_2_2DC(void);
-extern void fn_2_328(void);
 extern void fn_2_11A0(s32 arg0);
-extern void fn_2_836A4(void);
 extern void fn_2_85108(void);
 extern void* fn_800B0A5C_insertQueue(void (*)(void), s32);
 extern void changeScene(u8, s16);

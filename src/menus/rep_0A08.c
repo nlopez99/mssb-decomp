@@ -4,6 +4,8 @@
 #include "string.h"
 #include "musyx/musyx.h"
 #include "menus/rep_08E8.h"
+#include "menus/rep_0C50.h"
+#include "menus/rep_0F10.h"
 
 typedef struct MenuSaveSlot0A08 {
     /* 0x0000 */ u8 _0000[0xAF8];
@@ -195,9 +197,6 @@ extern void* lbl_803CC1B8;
 extern void fn_800B0A14_removeQueue(void);
 extern u8 lbl_2_bss_33FB4C[0x80];
 extern void fn_80053FE8(void);
-extern void fn_2_82DE8(void);
-extern void fn_2_89F70(void);
-extern void fn_2_8ABFC(void);
 
 #define SET_SCREEN(id)                                                                                                 \
     lbl_8034E978._00 = (id);                                                                                           \

@@ -4,6 +4,8 @@
 #include "musyx/musyx.h"
 #include "Dolphin/pad.h"
 #include "string.h"
+#include "menus/rep_0438.h"
+#include "menus/rep_0C50.h"
 
 typedef struct {
     /* 0x0 */ u16 _0;
@@ -105,7 +107,6 @@ extern u8 lbl_800EFBA4[0x10];
 extern void changeScene(u8, s16);
 extern void fn_800625A4(s32 index, s32 value);
 extern void fn_2_19F2C(void);
-extern void fn_2_12988(void);
 extern void initializeUnknown(void);
 extern void fn_80062764(void* task);
 extern s32 fn_80022B68(void);
@@ -114,7 +115,6 @@ extern void fn_8003F23C(void);
 extern void fn_80062A94(void);
 extern void* fn_800B0A5C_insertQueue(void (*callback)(void), s32 priority);
 extern void fn_2_11A0(s32 arg0);
-extern void fn_2_74D8C(void);
 extern void fn_2_82E58(void);
 extern void fn_80062A74(void);
 extern void fn_80035B50(int arg);

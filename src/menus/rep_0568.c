@@ -356,9 +356,6 @@ typedef struct Obj0568 {
     /* 0x70 */ void* _70;
 } Obj0568;
 
-extern void fn_2_16460(void);
-extern void fn_2_166CC(void);
-extern void fn_2_16724(void);
 extern void* fn_800B0A5C_insertQueue(void (*)(void), s32);
 extern void fn_800B0A14_removeQueue(void);
 extern void convertTextureHeader(void* tex);

@@ -5,6 +5,15 @@
 #include "Dolphin/gx.h"
 #include "Dolphin/pad.h"
 #include "C3/anim.h"
+#include "challenge/rep_0138.h"
+#include "challenge/rep_0250.h"
+#include "challenge/rep_02A8.h"
+#include "challenge/rep_0610.h"
+#include "challenge/rep_74A0.h"
+#include "challenge/rep_7730.h"
+#include "challenge/rep_7A28.h"
+#include "challenge/rep_7BA0.h"
+#include "challenge/rep_7BF0.h"
 
 typedef struct Task0010 {
     /* 0x00 */ void (*_00)(void);
@@ -92,16 +101,6 @@ extern void fn_800A8B78(void* arg0);
 extern void fn_800ACFB0(void* data);
 extern void fn_800B0A14_removeQueue(void);
 extern u8 lbl_800F1D78[][16];
-extern void fn_1_66C4(void);
-extern void fn_1_8B90(void);
-extern void fn_1_A2E4(void);
-extern void fn_1_17D90(void);
-extern void fn_1_1D514(void);
-extern void fn_1_24778(void);
-extern void fn_1_26AF8(void);
-extern void fn_1_28200(void);
-extern void fn_1_2852C(void);
-extern void fn_1_29A9C(void);
 extern void fn_80009144(void);
 
 static s32 lbl_1_data_0[7][4] = {

@@ -215,11 +215,8 @@ extern void Set_803cb848(int);
 extern int fn_3_6C938(int, int);
 extern void changeScene(u8, s16);
 extern void fn_8004CC18(void);
-extern void fn_3_1E328(void);
 extern void fn_800203E0(int, int);
 extern BOOL fn_80016F7C(void);
-extern void fn_3_E1964(void);
-extern void fn_3_1E154(void);
 extern void possiblyTransitionBlackScreen(void);
 extern void* fn_800B0A5C_insertQueue(void (*callback)(void), s32 arg1);
 

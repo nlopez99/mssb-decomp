@@ -194,9 +194,6 @@ extern void fn_800BEA04(Vec pos);
 extern UnkView1D58* fn_800BF068(void);
 extern void fn_800C07BC(void* base, void* tmp, s32 count, s32 size, s32 (*compare)(const void* a, const void* b));
 
-extern void fn_3_C1964(void);
-// Their units' headers still declare these void(void)
-
 u8 lbl_3_data_11168[0x10] = { 0 };
 f32 lbl_3_data_11178[5] = { 18.0f, 90.0f, 162.0f, 234.0f, 306.0f };
 

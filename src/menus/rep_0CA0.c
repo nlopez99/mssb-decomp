@@ -1,5 +1,6 @@
 #include "menus/rep_0CA0.h"
 #include "header_rep_data.h"
+#include "menus/rep_0C50.h"
 
 typedef struct UnkTask0CA0 {
     /* 0x00 */ void (*_00)(void);
@@ -200,7 +201,6 @@ extern void fn_800363D8(UnkTask0CA0* task, s32 id, s32 part, s32 kind, s32 value
 extern void fn_80034CEC(UnkTask0CA0* task);
 extern void fn_800B0A14_removeQueue(void);
 extern void fn_80053FE8(void);
-extern void fn_2_82DE8(void);
 
 static inline BOOL isZero(u8 value) {
     return value == 0 ? TRUE : FALSE;

@@ -9,6 +9,7 @@
 #include "game/rep_1D58.h"
 #include "game/rep_16B8.h"
 #include "game/rep_3A48.h"
+#include "game/rep_E08.h"
 
 typedef struct {
     /* 0x000 */ u8 _000[0x34];
@@ -81,7 +82,6 @@ extern struct {
 } g_Scores;
 extern VecXYZ lbl_3_data_18DD4[4];
 
-extern void fn_3_674E0(void);
 extern void fn_3_6AEE0(void);
 extern void fn_3_6B674(void);
 
