@@ -13,7 +13,9 @@ typedef struct MbState {
     /* 0x470B */ u8 _470B[0x470F - 0x470B];
     /* 0x470F */ s8 _470F[2];
     /* 0x4711 */ u8 _4711[0x4757 - 0x4711];
-    /* 0x4757 */ u8 _4757[0x48AE - 0x4757];
+    /* 0x4757 */ u8 _4757[0x47F9 - 0x4757];
+    /* 0x47F9 */ s8 _47F9[2][9][9];
+    /* 0x485B */ u8 _485B[0x48AE - 0x485B];
     /* 0x48AE */ u8 _48AE;
     /* 0x48AF */ u8 _48AF[0x48C0 - 0x48AF];
 } MbState; // size: 0x48C0
@@ -39,7 +41,9 @@ typedef struct MbStadiumState {
 typedef struct MbRosterEntry {
     /* 0x00 */ u8 _00[0x24];
     /* 0x24 */ s16 charId;
-    /* 0x26 */ u8 _26[0xA0 - 0x26];
+    /* 0x26 */ u8 _26[0x3B - 0x26];
+    /* 0x3B */ u8 chemistry[0x36];
+    /* 0x71 */ u8 _71[0xA0 - 0x71];
 } MbRosterEntry; // size: 0xA0
 
 typedef struct MbTrack {
@@ -442,7 +446,34 @@ void fn_800670A0(u8 team) {
 }
 
 // .text:0x80066EAC size:0x1F4
-void fn_80066EAC(void) {
+void fn_80066EAC(u8 team) {
+    s8 list[10];
+    s32 i;
+    s32 j;
+    s32 k;
+    s8 tmp;
+    u8 chem;
+
+    for (i = 0; i < 9; i++) {
+        for (j = 0; j < 9; j++) {
+            chem = inMemRoster[team][i].chemistry[inMemRoster[team][j].charId];
+            if (chem < 90 || chem == 100) {
+                list[j] = -1;
+            } else {
+                list[j] = inMemRoster[team][j].charId;
+            }
+        }
+        for (j = 0; j < 9; j++) {
+            for (k = 0; k < 10; k++) {
+                if (list[j] > list[k]) {
+                    tmp = list[j];
+                    list[j] = list[k];
+                    list[k] = tmp;
+                }
+            }
+        }
+        memcpy(lbl_8034E9A0._47F9[team][i], list, 9);
+    }
 }
 
 // .text:0x80065DEC size:0x10C0

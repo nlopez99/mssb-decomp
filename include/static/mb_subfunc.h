@@ -18,7 +18,7 @@ void fn_8006496C(void);
 void fn_800649BC(void);
 void unsure_FillRosterPositions(void);
 void characterSelectScreen(void);
-void fn_80066EAC(void);
+void fn_80066EAC(u8 team);
 void fn_800670A0(u8 team);
 void fn_800671FC(void);
 void fn_80067264(void);
