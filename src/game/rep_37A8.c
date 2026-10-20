@@ -17,7 +17,10 @@
 #include "musyx/musyx.h"
 #include "game/rep_3D50.h"
 
-// g_Minigame's three entries in this minigame
+// g_Minigame as this minigame lays it out (UnknownHomes_Game.h)
+#define MG g_Minigame.piranhaPanic
+
+// rep_3310 passes its own entries' type to fn_3_143770, with the layout of Unk37A8Entry
 typedef struct UnkMgEntry3310 {
     /* 0x00 */ Vec pos;
     /* 0x0C */ Vec rot;
@@ -41,60 +44,6 @@ typedef struct UnkMgEntry3310 {
     /* 0x35 */ s8 _35;
     /* 0x36 */ u8 _36[0x38 - 0x36];
 } UnkMgEntry3310; // size: 0x38
-
-// A piranha, 40 of them at g_Minigame._A8
-typedef struct Unk37A8Piranha {
-    /* 0x00 */ Vec pos;
-    /* 0x0C */ Vec vel;
-    /* 0x18 */ f32 _18;
-    /* 0x1C */ s32 _1C;
-    /* 0x20 */ s16 _20;
-    /* 0x22 */ s16 _22;
-    /* 0x24 */ u8 _24[0x26 - 0x24];
-    /* 0x26 */ u8 active;
-    /* 0x27 */ u8 _27;
-} Unk37A8Piranha; // size: 0x28
-
-// A CPU player's state, one per player at g_Minigame._1DCC
-typedef struct Unk37A8Cpu {
-    /* 0x0 */ s16 _0;
-    /* 0x2 */ s8 _2;
-    /* 0x3 */ s8 _3;
-} Unk37A8Cpu; // size: 0x4
-
-// This minigame's view of g_Minigame
-typedef struct Unk37A8Minigame {
-    /* 0x0000 */ UnkMgEntry3310 _0000[3];
-    /* 0x00A8 */ Unk37A8Piranha _00A8[40];
-    /* 0x06E8 */ u8 _06E8[0x17C8 - 0x6E8];
-    /* 0x17C8 */ s16 _17C8[50];
-    /* 0x182C */ u8 _182C[0x193A - 0x182C];
-    /* 0x193A */ u8 _193A[100];
-    /* 0x199E */ u8 _199E[0x1B34 - 0x199E];
-    /* 0x1B34 */ s16 _1B34[4];
-    /* 0x1B3C */ s16 _1B3C[4];
-    /* 0x1B44 */ s16 _1B44[4];
-    /* 0x1B4C */ u8 _1B4C[0x1B50 - 0x1B4C];
-    /* 0x1B50 */ s16 _1B50[4];
-    /* 0x1B58 */ u8 _1B58[4][10];
-    /* 0x1B80 */ u8 _1B80[4];
-    /* 0x1B84 */ u8 _1B84[50];
-    /* 0x1BB6 */ s8 _1BB6[50];
-    /* 0x1BE8 */ s8 _1BE8[50];
-    /* 0x1C1A */ u8 _1C1A[50];
-    /* 0x1C4C */ u8 _1C4C[50];
-    /* 0x1C7E */ s8 _1C7E[4][3];
-    /* 0x1C8A */ u8 _1C8A[4];
-    /* 0x1C8E */ u8 _1C8E[0x1C9A - 0x1C8E];
-    /* 0x1C9A */ u8 _1C9A[4];
-    /* 0x1C9E */ u8 _1C9E[4];
-    /* 0x1CA2 */ u8 _1CA2[0x1CA9 - 0x1CA2];
-    /* 0x1CA9 */ u8 _1CA9[4];
-    /* 0x1CAD */ u8 _1CAD[0x1DCC - 0x1CAD];
-    /* 0x1DCC */ Unk37A8Cpu _1DCC[4];
-} Unk37A8Minigame;
-
-#define MG (*(Unk37A8Minigame*)&g_Minigame)
 
 typedef struct Unk37A8Fielder {
     /* 0x000 */ Vec pos;
@@ -230,7 +179,7 @@ void fn_3_1471C0(void) {
 }
 
 // .text:0x00146A90 size:0x730 mapped:0x80785B24
-// 85.24%: the fielder setup stores and the 100-coin loop use other registers and bases,
+// 86.95%: the fielder setup stores and the 100-coin loop use other registers and bases,
 // as in rep_3520's fn_3_13BCB8.
 void fn_3_146A90(void) {
     Unk37A8Fielder* fielder;
@@ -485,9 +434,6 @@ void fn_3_145EB8(void) {
 }
 
 // .text:0x00145B98 size:0x320 mapped:0x80784C2C
-// 99.88%: registers only; g_Minigame and its stride-1 copy swap r26 and r28. The permuter
-// matched it with `mg = &g_Minigame;` (MiniGameStruct*) atop the team loop and
-// `((Unk37A8Minigame*)mg)->_1CA9[i]`; without that cast it scores 98.22%.
 void fn_3_145B98(void) {
     s32 list[4];
     int team;
@@ -572,10 +518,10 @@ void fn_3_145AD0(int player) {
 }
 
 // .text:0x001453BC size:0x714 mapped:0x80784450
-// 87.25%: registers and scheduling; the target reads the timer with lhau and keeps
+// 89.08%: registers and scheduling; the target reads the timer with lhau and keeps
 // other pointers in saved registers.
 void fn_3_1453BC(int coin) {
-    UnkMgEntry3310* entry;
+    Unk37A8Entry* entry;
     Unk37A8Fielder* fielder;
     s16* timer;
     u8* state;
@@ -867,8 +813,6 @@ void fn_3_144CB8(void) {
 }
 
 // .text:0x00144ADC size:0x1DC mapped:0x80783B70
-// 98.91%: the target reloads _1B44[player] for the increment after comparing it (its copy
-// inlined into fn_3_144CB8 does not).
 void fn_3_144ADC(int player) {
     Unk37A8Fielder* fielder;
     InputStruct* input;
@@ -911,8 +855,8 @@ void fn_3_144ADC(int player) {
 }
 
 // .text:0x0014471C size:0x3C0 mapped:0x807837B0
-// 85.68%: the target reads _193A[coin] with lbzu and re-forms g_Minigame + coin for
-// _1B84, saving a register; the FPRs of the speed path differ.
+// 88.40%: the frames path schedules its int-to-float conversions and the 21E24[11]
+// load differently, and the speed path's FPRs differ.
 void fn_3_14471C(int player) {
     Unk37A8Fielder* fielder;
     VecXYZ d;
@@ -922,7 +866,7 @@ void fn_3_14471C(int player) {
     f32 scale;
     s32 frames;
     int port;
-    u8 coin;
+    int coin;
 
     fielder = &g_Fielders[g_Minigame.minigameFielderIndex[player]];
     port = g_Minigame.minigameControlStruct.characterIndex[player];
@@ -1049,7 +993,7 @@ void fn_3_14423C(void) {
     u32 start;
     u32 end;
     int i;
-    UnkMgEntry3310* entry;
+    Unk37A8Entry* entry;
 
     if (g_Minigame.turnOverStatus != 0) {
         return;
@@ -1105,7 +1049,7 @@ void fn_3_14423C(void) {
 }
 
 // .text:0x0014402C size:0x210 mapped:0x807830C0
-// 74.65%: the target keeps idx * 0x38 in r30 and re-adds g_Minigame after each call,
+// 97.58%: the target keeps idx * 0x38 in r30 and re-adds g_Minigame after each call,
 // where this keeps the entry address; the candidate list registers differ too.
 void fn_3_14402C(int idx) {
     s16* timer;
@@ -1167,7 +1111,7 @@ void fn_3_143FAC(int idx) {
 // 94.66%: registers only; the target copies idx to r23 on entry and the inlined
 // fn_3_1430D0 copies use other saved registers.
 void fn_3_1439EC(int idx) {
-    UnkMgEntry3310* entry;
+    Unk37A8Entry* entry;
     s32 i;
 
     entry = &MG._0000[idx];
@@ -1387,7 +1331,7 @@ void fn_3_1430D0(s32 arg0, s32 player) {
 
 // .text:0x00142DB4 size:0x31C mapped:0x80781E48
 void fn_3_142DB4(int idx) {
-    UnkMgEntry3310* entry;
+    Unk37A8Entry* entry;
     Unk37A8Piranha* piranha;
     Unk37A8Fielder* fielder;
     int i;
@@ -1461,36 +1405,36 @@ void fn_3_142C18(void) {
 }
 
 // .text:0x001428F0 size:0x328 mapped:0x80781984
-// 95.28%: the target reads cpu->_0 and cpu->_3 off g_Minigame + player * 4 before forming
-// cpu, and allocates the counters and flags in other saved registers.
+// 98.19%: the target reads cpu->_0 and cpu->_3 off g_Minigame + player * 4 before forming
+// cpu, and allocates kind, count and found in other saved registers.
 u8 fn_3_1428F0(s8 player, u8 force) {
     Unk37A8Cpu* cpu;
-    s8 port;
     u8 strength;
-    s8 target;
-    s8 coin;
+    s8 port;
     s8 ready;
-    s8 count;
+    s8 coin;
+    s8 target;
     s8 i;
-    u8 kind;
     u8 found;
-    UnkMgEntry3310* entry;
+    s8 count;
+    u8 kind;
 
+    cpu = &MG._1DCC[player];
     ready = -1;
     found = FALSE;
     count = 0;
-    target = MG._1DCC[player]._3;
+    target = cpu->_3;
     port = g_Minigame.minigameControlStruct.characterIndex[player];
     strength = g_Minigame.minigameControlStruct.aIStrength[player];
     if (MG._1DCC[player]._0 >= 0) {
         cpu->_0--;
     }
-    cpu = &MG._1DCC[player];
     coin = MG._1C7E[player][0];
     if (coin < 0) {
         return FALSE;
     }
-    for (i = 0; i < 3; i++) {
+    i = 0;
+    do {
         if (MG._0000[i]._2A == 2) {
             count++;
             if (MG._0000[target]._2C == 4) {
@@ -1498,7 +1442,8 @@ u8 fn_3_1428F0(s8 player, u8 force) {
                 break;
             }
         }
-    }
+        i++;
+    } while (i < 3);
     if (ready < 0 && cpu->_0 >= 0 && !force) {
         return FALSE;
     }
@@ -1511,19 +1456,20 @@ u8 fn_3_1428F0(s8 player, u8 force) {
             found = TRUE;
         }
         if (!found) {
-            entry = &MG._0000[target];
-            if (entry->_2A == 2 && (kind == entry->_2C || kind == 5 || entry->_2C == 4)) {
+            if (MG._0000[target]._2A == 2 && (kind == MG._0000[target]._2C || kind == 5 || MG._0000[target]._2C == 4)) {
                 found = TRUE;
             }
         }
         if (!found) {
-            for (i = 0; i < 3; i++) {
+            i = 0;
+            do {
                 if (MG._0000[i]._2A == 2 && (kind == MG._0000[i]._2C || kind == 5 || MG._0000[i]._2C == 4)) {
                     target = i;
                     found = TRUE;
                     break;
                 }
-            }
+                i++;
+            } while (i < 3);
         }
     }
     if (found) {
