@@ -628,6 +628,7 @@ void fn_8001F228(void) {
 }
 
 // .text:0x8001F16C size:0xBC
+// 99.15%: registers only; the loop counter and the actors[] pointer swap r28/r30.
 void fn_8001F16C(void) {
     ModelTable* table;
     ModelSlot* slot;
@@ -683,6 +684,8 @@ static inline void drawMinigameOverlay(void) {
 }
 
 // .text:0x8001E784 size:0x9E8
+// 98.34%: as fn_8001CE74, the light pointer and GXColor temporaries; drawExtraModels
+// tests the slot through its element base while the call takes &slots[i].
 void fn_8001E784(void) {
     Vec dir;
     LightPos* light;
@@ -986,6 +989,8 @@ void fn_8001D074(void) {
 }
 
 // .text:0x8001CE74 size:0x200
+// 96.59%: the target builds the light pointer straight into r31 (here r6 then mr) and
+// swaps the stack slots of the two GXColor temporaries.
 void fn_8001CE74(void) {
     LightPos* light = lbl_80367318;
     int id;
@@ -1510,6 +1515,8 @@ s32 fn_8001758C(u8* arg0, s32 idx, u8 arg2, u8 arg3, u8 arg4, s8 arg5, u8 arg6, 
 }
 
 // .text:0x80017340 size:0x24C
+// 95.23%: the target recomputes &actors[i + 9] each outer pass where this strength-reduces
+// it, and keeps found[] at sp+8 (here sp+12).
 BOOL fn_80017340(int idx) {
     ModelActor* actor = &lbl_8036E548.actorData[idx];
     int j;
@@ -1737,6 +1744,7 @@ void fn_80014A18(void) {
 }
 
 // .text:0x80014990 size:0x88
+// 96.76%: the NULL-actor return is `bne` over a `b` in the target, one `beq` here.
 void fn_80014990(s32 idx, void* file, void* hdr) {
     ModelActor* actor;
     ModelSub2C* sub;
@@ -1897,6 +1905,7 @@ void fn_80011A60(void) {
 }
 
 // .text:0x8001196C size:0xF4
+// 99.18%: registers only; the base pointer copies and the pose pointer swap r8/r9.
 void fn_8001196C(void) {
     ModelSub2C* sub;
     ModelPose* pose;
