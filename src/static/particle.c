@@ -176,6 +176,44 @@ typedef struct DriftParticle {
     /* 0x4F */ u8 texCoords;
 } DriftParticle;
 
+// What fn_8002955C's callers pass
+typedef struct PuffParams {
+    /* 0x00 */ s32 _00;
+    /* 0x04 */ s32 tex;
+    /* 0x08 */ s32 count;
+    /* 0x0C */ s32 life[2];
+    /* 0x14 */ s32 speed[2];
+    /* 0x1C */ s32 spin[2];
+    /* 0x24 */ s32 size[2];
+    /* 0x2C */ s32 gravity;
+    /* 0x30 */ s32 _30;
+    /* 0x34 */ s32 _34;
+    /* 0x38 */ s32 _38;
+    /* 0x3C */ s32 _3C;
+    /* 0x40 */ s32 pitch[2];
+    /* 0x48 */ s32 yaw[2];
+    /* 0x50 */ s32 _50;
+} PuffParams; // size: 0x54
+
+// The particles fn_800297F0 starts
+typedef struct PuffParticle {
+    /* 0x00 */ Particle* next;
+    /* 0x04 */ Vec pos;
+    /* 0x10 */ Vec vel;
+    /* 0x1C */ Vec accel;
+    /* 0x28 */ f32 _28;
+    /* 0x2C */ f32 _2C;
+    /* 0x30 */ f32 size;
+    /* 0x34 */ s32 _34;
+    /* 0x38 */ s16 delay;
+    /* 0x3A */ s16 life;
+    /* 0x3C */ u8 tex;
+    /* 0x3D */ u8 _3D;
+    /* 0x3E */ u8 _3E;
+    /* 0x3F */ u8 _3F;
+    /* 0x40 */ u8 color[4];
+} PuffParticle;
+
 // What fn_80026998's callers pass
 typedef struct SmokeParams {
     /* 0x00 */ s32 _00;
@@ -251,13 +289,16 @@ typedef struct BurstParticle {
     /* 0x10 */ f32 _10;
     /* 0x14 */ f32 _14;
     /* 0x18 */ f32 _18;
-    /* 0x1C */ s32 _1C;
+    union {
+        /* 0x1C */ s32 _1C;
+        /* 0x1C */ u8 color[4];
+    };
     /* 0x20 */ s16 _20;
     /* 0x22 */ s16 _22;
     /* 0x24 */ s16 _24;
     /* 0x26 */ s16 _26;
     /* 0x28 */ s16 _28;
-    /* 0x2A */ s8 _2A;
+    /* 0x2A */ u8 _2A;
 } BurstParticle;
 
 // The particles fn_8002F258 starts
@@ -851,8 +892,9 @@ f32 fn_800335BC(s32 angle)
 }
 
 // .text:0x800332B8 size:0x304
-// 97.41%: registers in the inlined table lookups differ (the target negates pitch in place),
-// and one fcmpu against 0.0f has its operands swapped.
+// 97.41%: registers in the last table lookup differ (the target negates pitch in place) and
+// two fcmpu against 0.0f have their operands swapped. With every lookup a call of
+// fn_800335BC/fn_800335EC it is small enough to be inlined into fn_800297F0 and fn_80027300.
 void fn_800332B8(Vec* dirIn, Vec* out, f32 yawMin, f32 yawMax, f32 pitchMin, f32 pitchMax)
 {
     Mtx m;
@@ -863,6 +905,7 @@ void fn_800332B8(Vec* dirIn, Vec* out, f32 yawMin, f32 yawMax, f32 pitchMin, f32
     s32 base;
     s32 yaw;
     s32 pitch;
+    s32 i;
     f32 angle;
 
     if (dirIn != NULL) {
@@ -876,13 +919,21 @@ void fn_800332B8(Vec* dirIn, Vec* out, f32 yawMin, f32 yawMax, f32 pitchMin, f32
         yaw = base;
     }
     out->x = fn_800335BC(yaw);
-    out->y = fn_800335EC(yaw);
-    pitch = 2048.0f * (pitchMin / 360.0f) + 0.5f;
+        i = __abs(yaw + 0x600) & 0x7FF;
+    if (i >= 0x401) {
+        i = 0x800 - i;
+    }
+    out->y = lbl_8017ED68[i];
+        pitch = 2048.0f * (pitchMin / 360.0f) + 0.5f;
     if (pitchMax != pitchMin) {
         pitch += rand() % (s32)(2048.0f * ((pitchMax - pitchMin) / 360.0f) + 0.5f);
     }
-    out->z = out->x * fn_800335EC(pitch);
-    out->x *= fn_800335BC(pitch);
+    i = __abs(pitch + 0x600) & 0x7FF;
+    if (i >= 0x401) {
+        i = 0x800 - i;
+    }
+    out->z = out->x * lbl_8017ED68[i];
+        out->x *= fn_800335BC(pitch);
     if (dirIn != NULL && PSVECMag(dirIn) != 0.0f) {
         angle = acos(PSVECDotProduct(&up, dirIn));
         PSVECCrossProduct(&up, dirIn, &axis);
@@ -1770,8 +1821,92 @@ u8 fn_8002A85C(Emitter* e, GlowParticle* p)
     return p->remaining == 0;
 }
 
+// .text:0x800297F0 size:0x4D8
+void fn_800297F0(Emitter* e, Vec* pos, Vec* dir, PuffParams* params)
+{
+    PuffParticle* p;
+    s32 lifeRange;
+    f32 yaw;
+    f32 speed;
+    f32 speedRange;
+    f32 size;
+    f32 sizeRange;
+    f32 spin;
+    f32 spinRange;
+    f32 gravity;
+    f32 yawStep;
+    f32 pitchStep;
+    f32 pitch;
+    f32 step;
+    s32 fade;
+    u8 alpha;
+
+    e->_10 = params->_00;
+    lifeRange = params->life[1] - params->life[0];
+    p = (PuffParticle*)e->particles;
+    speed = params->speed[0] / 100000.0f;
+    speedRange = params->speed[1] / 100000.0f - speed;
+    size = params->size[0] / 100000.0f;
+    sizeRange = params->size[1] / 100000.0f - size;
+    spin = params->spin[0] / 100000.0f / 360.0f;
+    spinRange = params->spin[1] / 100000.0f / 360.0f - spin;
+    gravity = params->gravity / 100000.0f;
+    if (dir != NULL) {
+        yaw = params->yaw[0] / 100000.0f;
+        yawStep = (params->yaw[1] - params->yaw[0]) / 100000.0f;
+        pitch = params->pitch[0] / 100000.0f;
+        pitchStep = (params->pitch[1] - params->pitch[0]) / 100000.0f;
+    } else {
+        step = 360.0f / (s32)(f32)sqrt(params->count);
+        yaw = pitch = -180.0f;
+        pitchStep = step;
+        yawStep = step;
+    }
+    alpha = params->_30;
+    if (params->_38 != 0) {
+        fade = (alpha + params->_38 - 1) / params->_38;
+    } else {
+        fade = 0;
+    }
+    do {
+        p->tex = params->tex;
+        p->delay = 0;
+        p->life = params->life[0] + (lifeRange * rand()) / 32767;
+        p->size = size + (sizeRange * rand()) / 32767.0f;
+        p->pos.x = pos->x;
+        p->pos.y = pos->y - p->size / 2;
+        p->pos.z = pos->z;
+        fn_800332B8(dir, &p->vel, yaw, yaw + yawStep, pitch, pitch + pitchStep);
+        if (dir == NULL) {
+            yaw += yawStep;
+            if (yaw >= 180.0f) {
+                pitch += pitchStep;
+                yaw -= 360.0f;
+                if (pitch >= 180.0f) {
+                    pitch -= 360.0f;
+                }
+            }
+        } else {
+            pitch = -(pitch + pitchStep);
+        }
+        PSVECScale(&p->vel, speed + (speedRange * rand()) / 32767.0f, &p->vel);
+        p->accel.x = 0.0f;
+        p->accel.z = 0.0f;
+        p->accel.y = gravity;
+        p->_28 = p->_2C = spin + (spinRange * rand()) / 32767.0f;
+        p->_34 = params->_30;
+        p->color[0] = alpha;
+        p->_3D = params->_34;
+        p->_3E = params->_38;
+        p->_3F = fade;
+        p->color[1] = params->_3C;
+        p->color[2] = params->_50;
+        p = (PuffParticle*)p->next;
+    } while (p != NULL);
+}
+
 // .text:0x8002955C size:0x294
-void fn_8002955C(Vec* pos, s32 arg1, EffectParams* params)
+void fn_8002955C(Vec* pos, Vec* dir, PuffParams* params)
 {
     Emitter* e = fn_800339F0(NULL, 12);
 
@@ -1780,7 +1915,7 @@ void fn_8002955C(Vec* pos, s32 arg1, EffectParams* params)
         Emitter* added = fn_800337CC((Emitter*)tmp, params->count, TRUE);
         if (added != NULL) {
             Particle* p;
-            fn_800297F0(added, pos, arg1, params);
+            fn_800297F0(added, pos, dir, params);
             p = e->particles;
             while (p->next != NULL) {
                 p = p->next;
@@ -1791,7 +1926,7 @@ void fn_8002955C(Vec* pos, s32 arg1, EffectParams* params)
     } else {
         e = fn_80033A24(fn_80028F48, 0x80, 0, params->count, TRUE, 12);
         if (e != NULL) {
-            fn_800297F0(e, pos, arg1, params);
+            fn_800297F0(e, pos, dir, params);
         }
     }
 }
@@ -1860,20 +1995,18 @@ void fn_80027674(Vec* pos, Vec* dir, EffectParams* params, f32 scale, u8 id)
 }
 
 // .text:0x80027300 size:0x374
-// 27.88%: first draft; the base's frame is 0x40 bytes larger and the loop body differs.
-// Not yet compared in detail.
 void fn_80027300(Emitter* e, Vec* pos, Vec* dir, EffectParams* params, f32 scale)
 {
     BurstEmitter* be = (BurstEmitter*)e;
     BurstParticle* p;
     f32 step;
     f32 yaw;
-    f32 pitch;
+    f32 grow;
     f32 speed;
     f32 speedRange;
     f32 size;
     f32 sizeRange;
-    f32 grow;
+    f32 pitch;
     s32 lifeRange;
     s32 fadeRange;
 
@@ -1882,16 +2015,15 @@ void fn_80027300(Emitter* e, Vec* pos, Vec* dir, EffectParams* params, f32 scale
     be->_20 = params->_04;
     be->dir = dir;
     p = (BurstParticle*)e->particles;
-    pitch = -180.0f;
-    speed = params->_0C[5] / 100000.0f;
-    yaw = -180.0f;
+    step = 360.0f / (s32)(f32)sqrt(params->count);
     lifeRange = params->_0C[2] - params->_0C[1];
     fadeRange = params->_0C[4] - params->_0C[3];
-    size = params->_0C[7] / 100000.0f;
-    step = 360.0f / (s32)sqrt(params->count);
-    grow = params->_0C[0] / 100000.0f;
+    speed = params->_0C[5] / 100000.0f;
     speedRange = params->_0C[6] / 100000.0f - speed;
+    size = params->_0C[7] / 100000.0f;
     sizeRange = params->_0C[8] / 100000.0f - size;
+    grow = params->_0C[0] / 100000.0f;
+    yaw = pitch = -180.0f;
     do {
         fn_800332B8(NULL, &p->pos, yaw, yaw + step, pitch, pitch + step);
         yaw += step;
@@ -1904,8 +2036,8 @@ void fn_80027300(Emitter* e, Vec* pos, Vec* dir, EffectParams* params, f32 scale
         }
         PSVECScale(&p->pos, scale, &p->pos);
         PSVECAdd(pos, &p->pos, &p->pos);
-        p->_10 = speed + (speedRange * (f32)rand()) / 32767.0f;
-        p->_14 = size + (sizeRange * (f32)rand()) / 32767.0f;
+        p->_10 = speed + (speedRange * rand()) / 32767.0f;
+        p->_14 = size + (sizeRange * rand()) / 32767.0f;
         p->_18 = grow;
         p->_1C = params->_0C[12];
         p->_22 = p->_20 = params->_0C[1] + (lifeRange * rand()) / 32767;
@@ -1916,6 +2048,94 @@ void fn_80027300(Emitter* e, Vec* pos, Vec* dir, EffectParams* params, f32 scale
         p->_1C = params->_0C[12];
         p = p->next;
     } while (p != NULL);
+}
+
+// .text:0x80026E58 size:0x4A8
+BOOL fn_80026E58(void* arg)
+{
+    Emitter* e = arg;
+    BurstEmitter* be = arg;
+    BurstParticle* p;
+    s32 done = 0;
+    Mtx m = { { 1.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 0.0f } };
+    GXTexObj texObj;
+    Vec d;
+    Vec c;
+    GXTlutObj tlutObj;
+    TexFile* file;
+    s32 index;
+    TextureDesc* tex;
+    s32 alpha;
+
+    p = (BurstParticle*)e->particles;
+    if (be->_1C > 0.0f) {
+        GXLoadPosMtxImm(m, GX_PNMTX0);
+        GXSetZMode(GX_TRUE, GX_ALWAYS, GX_FALSE);
+        GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_ONE, GX_LO_CLEAR);
+        file = (TexFile*)e->_10;
+        index = be->_20;
+        if (file == NULL) {
+            GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+        } else {
+            GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP1, GX_COLOR0A0);
+            tex = &file->tex[file->tex[index]._1C];
+            if (tex->tlut != NULL) {
+                GXInitTexObjCI(&texObj, tex->image, tex->width, tex->height, tex->format, GX_CLAMP, GX_CLAMP, GX_FALSE, GX_TLUT0);
+                GXInitTlutObj(&tlutObj, tex->tlut, tex->tlutFormat, tex->tlutCount);
+                GXLoadTlut(&tlutObj, GX_TLUT0);
+            } else {
+                GXInitTexObj(&texObj, tex->image, tex->width, tex->height, tex->format, GX_CLAMP, GX_CLAMP, GX_FALSE);
+            }
+            GXInitTexObjLOD(&texObj, GX_LINEAR, GX_LINEAR, tex->minLOD, tex->maxLOD, tex->lodBias, GX_FALSE, GX_FALSE, GX_ANISO_1);
+            GXLoadTexObj(&texObj, GX_TEXMAP1);
+        }
+        c.x = be->dir->x;
+        c.y = be->dir->y;
+        c.z = be->dir->z;
+        do {
+            if (p->_24 > 0) {
+                p->_24 -= (lbl_80366158._28 == 0);
+            } else if (p->_20 > 0) {
+                if (lbl_80366158._28 == 0) {
+                    p->_10 += p->_14;
+                    PSVECSubtract(&p->pos, &c, &d);
+                    PSVECScale(&d, p->_10, &d);
+                    PSVECAdd(&c, &d, &p->pos);
+                }
+                PSMTXMultVec(lbl_8017FFE0, &p->pos, &d);
+                if (p->_20 > p->_22 - p->_26) {
+                    alpha = p->_2A * (p->_22 - p->_20) / p->_26;
+                } else if (p->_28 != 0) {
+                    alpha = p->_2A * p->_20 / p->_28;
+                } else {
+                    alpha = p->_2A;
+                }
+                if (alpha > p->_2A) {
+                    alpha = p->_2A;
+                }
+                p->color[3] = alpha * be->_1C;
+                GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+                GXPosition3f32(d.x - p->_18, d.y - p->_18, d.z);
+                GXColor1u32(p->_1C);
+                GXTexCoord2f32(0.0f, 0.0f);
+                GXPosition3f32(d.x - p->_18, d.y + p->_18, d.z);
+                GXColor1u32(p->_1C);
+                GXTexCoord2f32(0.0f, 1.0f);
+                GXPosition3f32(d.x + p->_18, d.y + p->_18, d.z);
+                GXColor1u32(p->_1C);
+                GXTexCoord2f32(1.0f, 1.0f);
+                GXPosition3f32(d.x + p->_18, d.y - p->_18, d.z);
+                GXColor1u32(p->_1C);
+                GXTexCoord2f32(1.0f, 0.0f);
+                p->_20 -= (lbl_80366158._28 == 0);
+            } else {
+                done++;
+            }
+            p = p->next;
+        } while (p != NULL);
+        GXLoadPosMtxImm(lbl_8017FFE0, GX_PNMTX0);
+    }
+    return done == e->count || be->_1C == 0.0f;
 }
 
 // .text:0x80026998 size:0x4C0
