@@ -1,5 +1,6 @@
 #include "static/fn_8004C9FC.h"
 #include "static/UnknownHomes_Static.h"
+#include "Dolphin/rand.h"
 
 // Character voice and sound-effect sequencing
 
@@ -34,7 +35,8 @@ typedef struct CrowdState {
     /* 0x20 */ s16 _20[4];
     /* 0x28 */ s8 _28[36];
     /* 0x4C */ s8 _4C[36];
-    /* 0x70 */ u8 _70[0x78 - 0x70];
+    /* 0x70 */ u8 _70[0x74 - 0x70];
+    /* 0x74 */ u8 _74[4];
     /* 0x78 */ u8 _78[4];
     /* 0x7C */ u8 _7C;
     /* 0x7D */ u8 _7D;
@@ -46,7 +48,8 @@ typedef struct CrowdState {
     /* 0x8E */ u8 _8E;
     /* 0x8F */ u8 _8F;
     /* 0x90 */ u8 _90;
-    /* 0x91 */ u8 _91[0x94 - 0x91];
+    /* 0x91 */ s8 _91;
+    /* 0x92 */ u8 _92[0x94 - 0x92];
 } CrowdState; // size: 0x94
 
 extern VoiceState lbl_803C5F74;
@@ -57,6 +60,7 @@ extern u8 lbl_800EFBA4[0x10];
 
 extern s32 sndFXStartEx(s32 fid, u8 vol, u8 pan, u8 studio);
 
+extern BOOL fn_80024C04(u8 id);
 extern void fn_8000FE08(s32 id, s32 arg1, s32 arg2);
 
 u8 lbl_800FCA60[5120] = {
@@ -627,7 +631,65 @@ void fn_8005138C(void) {
 }
 
 // .text:0x80050FE8 size:0x3A4
-void fn_80050FE8(void) {
+void fn_80050FE8(s32 a, s32 b, s32 c, s32 d, s32 mode, s32 open) {
+    s32 i;
+
+    lbl_803C6028._91 = open;
+    for (i = 0; i < 36; i++) {
+        lbl_803C6028._4C[i] = 0;
+    }
+    if (open) {
+        for (i = 0; i < 36; i++) {
+            if (lbl_800FDE84[i] != 0xFF && !fn_80024C04(lbl_800FDE84[i])) {
+                lbl_803C6028._4C[i] = 1;
+            }
+        }
+    }
+    for (i = 0; i < 4; i++) {
+        lbl_803C6028._78[i] = 0;
+        lbl_803C6028._18[i] = -1;
+        lbl_803C6028._74[i] = 0;
+        if (mode) {
+            lbl_803C6028._7F[i] = -1;
+        } else {
+            lbl_803C6028._7F[i] = -2;
+        }
+    }
+    for (i = 0; i < 9; i++) {
+        lbl_803C6028._83[i] = 0;
+    }
+    if (a) {
+        lbl_803C6028._18[0] = 0;
+        if (a == 2) {
+            lbl_803C6028._74[0] = 1;
+        }
+    }
+    if (b) {
+        lbl_803C6028._18[1] = 1;
+        if (b == 2) {
+            lbl_803C6028._74[1] = 1;
+        }
+    }
+    if (c) {
+        lbl_803C6028._18[2] = 3;
+        if (c == 2) {
+            lbl_803C6028._74[2] = 1;
+        }
+    }
+    if (d) {
+        lbl_803C6028._18[3] = 4;
+        if (d == 2) {
+            lbl_803C6028._74[3] = 1;
+        }
+    }
+    for (i = 0; i < 4; i++) {
+        if (lbl_803C6028._18[i] >= 0) {
+            lbl_803C6028._20[i] = lbl_800FDE84[lbl_803C6028._18[i]];
+        }
+    }
+    for (i = 0; i < 36; i++) {
+        lbl_803C6028._28[i] = -1;
+    }
 }
 
 // .text:0x80050F78 size:0x70
@@ -675,7 +737,68 @@ void fn_80050138(void) {
 }
 
 // .text:0x8004FDE8 size:0x350
-void fn_8004FDE8(void) {
+s32 fn_8004FDE8(s32 from, s32 to) {
+    s32 cand[8];
+    s32 seat[36];
+    s16* slots = lbl_803C6028._18;
+    s32 i;
+    s32 j;
+    s32 n;
+    s32 cur;
+
+    if (slots[from] != slots[to]) {
+        return -2;
+    }
+    for (i = 0; i < 36; i++) {
+        seat[i] = -1;
+        if (lbl_803C6028._4C[i] != 0) {
+            seat[i] = 0;
+        } else if (lbl_803C6028._28[i] >= 0) {
+            seat[i] = 0;
+        } else if (lbl_800FDE84[i] == 0xFF) {
+            seat[i] = 5;
+        } else {
+            for (j = 0; j < 4; j++) {
+                if (lbl_803C6028._18[j] == i && lbl_803C6028._78[j] != 0) {
+                    seat[i] = j + 1;
+                    break;
+                }
+            }
+        }
+    }
+    cur = slots[from];
+    for (i = 0; i < 8; i++) {
+        cand[i] = -1;
+    }
+    n = 0;
+    if (cur - 13 >= 0 && seat[cur - 13] < 0) {
+        cand[0] = cur - 13;
+        n = 1;
+    }
+    if (cur - 12 >= 0 && seat[cur - 12] < 0) {
+        cand[n++] = cur - 12;
+    }
+    if (cur - 11 >= 0 && seat[cur - 11] < 0) {
+        cand[n++] = cur - 11;
+    }
+    if (cur - 1 >= 0 && seat[cur - 1] < 0) {
+        cand[n++] = cur - 1;
+    }
+    if (cur + 1 < 36 && seat[cur + 1] < 0) {
+        cand[n++] = cur + 1;
+    }
+    if (cur + 11 < 36 && seat[cur + 11] < 0) {
+        cand[n++] = cur + 11;
+    }
+    if (cur + 12 < 36 && seat[cur + 12] < 0) {
+        cand[n++] = cur + 12;
+    }
+    if (cur + 13 < 36 && seat[cur + 13] < 0) {
+        cand[n++] = cur + 13;
+    }
+    cur = cand[rand() % n];
+    slots[to] = cur;
+    return lbl_800FDE84[cur];
 }
 
 // .text:0x8004FDA0 size:0x48
