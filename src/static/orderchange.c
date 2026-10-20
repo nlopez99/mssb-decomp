@@ -1658,10 +1658,10 @@ static inline s32 Rand(void) {
     return lbl_803CB750 >> 16;
 }
 
-// The target multiplies the seed before computing the range; this computes the range first
-// and allocates the modulo's registers differently
+// The target multiplies the seed before it subtracts lo; this build subtracts first
 s32 randRange_FUN_80042bf0(s32 min, s32 max) {
     s32 lo;
+    s32 r;
 
     if (min == max) {
         return min;
@@ -1672,7 +1672,10 @@ s32 randRange_FUN_80042bf0(s32 min, s32 max) {
         lo = max;
         max = min;
     }
-    return Rand() % (max - lo + 1) + lo;
+    r = Rand();
+    max = max - lo + 1;
+    r %= max;
+    return r + lo;
 }
 
 // .text:0x800426DC size:0x514

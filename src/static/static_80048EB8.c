@@ -539,8 +539,7 @@ void fn_80049220(u8 team) {
     }
     pad = GetPad(port);
     if (pad.repeat & 8 || pad.repeat & 4) {
-        lbl_803C5F04.prevCursor[(u8)port] = lbl_803C5F04.cursor[(u8)port];
-        row = lbl_803C5F04.cursor[(u8)port];
+        row = lbl_803C5F04.prevCursor[(u8)port] = lbl_803C5F04.cursor[(u8)port];
         if (lbl_803C5F04._36 == 0) {
             count = 5;
         } else if (g_d_GameSettings.GameModeSelected != 6) {
