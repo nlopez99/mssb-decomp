@@ -21,7 +21,8 @@ typedef struct MbState {
     /* 0x46F8 */ u8 ports[2];
     /* 0x46FA */ u8 _46FA[0x4709 - 0x46FA];
     /* 0x4709 */ s8 _4709[2];
-    /* 0x470B */ u8 _470B[0x470F - 0x470B];
+    /* 0x470B */ u8 _470B[0x470D - 0x470B];
+    /* 0x470D */ s8 _470D[2];
     /* 0x470F */ s8 _470F[2];
     /* 0x4711 */ u8 _4711[0x4757 - 0x4711];
     /* 0x4757 */ u8 _4757[0x478D - 0x4757];
@@ -94,6 +95,15 @@ typedef struct MbSlot {
 } MbSlot; // size: 0x4
 
 extern MbSlot lbl_80354720[2][9];
+
+typedef struct MbMissions {
+    /* 0x0000 */ u8 _0000[0x441D];
+    /* 0x441D */ u8 _441D;
+    /* 0x441E */ u8 _441E;
+    /* 0x441F */ s8 _441F;
+} MbMissions;
+
+extern MbMissions starMissionCompletionTracker;
 extern MbState lbl_8034E9A0;
 extern MbTeams lbl_803C6724;
 extern MbRosterEntry inMemRoster[2][9];
@@ -524,7 +534,38 @@ s16 fn_80067AC8(s16 id, s8 slot) {
 }
 
 // .text:0x800678CC size:0x1FC
-void fn_800678CC(void) {
+void fn_800678CC(s32 team) {
+    s8 color = -1;
+    s32 captain;
+    int i;
+    u8 rank;
+
+    if (g_d_GameSettings.GameModeSelected == 5) {
+        if (team == 0) {
+            captain = lbl_8034E9A0._46E0[team] = starMissionCompletionTracker._441D;
+        } else {
+            captain = lbl_8034E9A0._46E0[team] = starMissionCompletionTracker._441F;
+        }
+    } else {
+        captain = lbl_8034E9A0._46E0[team];
+    }
+    for (i = 0; i < 12; i++) {
+        if (captain == lbl_80108ED0[i]) {
+            color = i;
+            break;
+        }
+    }
+    rank = fn_800675C4(team, captain);
+    if (rank == 0) {
+        rank = fn_80067264(team, captain);
+        if (rank != 0) {
+            lbl_8034E9A0._470D[team] = rank - 1 + color * 4;
+        } else {
+            lbl_8034E9A0._470D[team] = (color + 1) * 4 - 1;
+        }
+    } else {
+        lbl_8034E9A0._470D[team] = rank - 1 + color * 4;
+    }
 }
 
 static inline s32 findFamily(s32 id) {
@@ -609,7 +650,7 @@ u8 fn_800675C4(s32 team, s32 captain) {
 }
 
 // .text:0x80067264 size:0x360
-s32 fn_80067264(s32 team, s32 captain) {
+u8 fn_80067264(s32 team, s32 captain) {
     s32 counts[4];
     s32 attr[2][9];
     s32 i;
