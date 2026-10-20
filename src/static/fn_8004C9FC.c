@@ -1319,8 +1319,8 @@ void fn_8004D0F0(void) {
 }
 
 // .text:0x8004CCC0 size:0x430
-// 98.36%: state 0 schedules the lbl_80366B18 stores and the reload of
-// lbl_803C5F74's base in another order (lis/addi pairs swapped, the id in r6).
+// 99.91%: registers only: in state 0 the target keeps the u16 id in r6 and its
+// 0x38-byte scaled offset in r7; here they are swapped.
 void fn_8004CCC0(void) {
     CrowdTask* task = lbl_803CC1B8;
     CrowdObj* obj;
@@ -1332,8 +1332,8 @@ void fn_8004CCC0(void) {
         lbl_803C5F74._03 = 1;
         if (lbl_803C5F74._1A >= 0) {
             id = fn_8000F988(task, 8, lbl_800FEAAC[lbl_803C5F74._01][2], lbl_803C5F74._1A, lbl_803C5F74._18, 0);
-            lbl_80366B18[id]._2F = 1;
             lbl_803C5F74._16 = id;
+            lbl_80366B18[id]._2F = 1;
             lbl_80366B18[id]._30 = 1;
             if (lbl_803C5F74._1B != 0) {
                 fn_8000FD78(id, lbl_803C5F74._06, lbl_803C5F74._08, lbl_803C5F74._0A, lbl_803C5F74._0C);
