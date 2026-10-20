@@ -972,6 +972,54 @@ BOOL fn_8002F1AC(Vec* pos, s32 key)
     return FALSE;
 }
 
+// .text:0x8002E828 size:0x478
+BOOL fn_8002E828(void* arg)
+{
+    Emitter* e = arg;
+    Particle* p = e->particles;
+    s32 alive = 0;
+
+    GXSetZMode(GX_TRUE, GX_ALWAYS, GX_FALSE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+    do {
+        p->_4A -= (p->_4A > 0) & (lbl_80366158._28 == 0);
+        if (p->_4A > p->_20) {
+            p->color[3] = p->_18 * (p->_1C - p->_4A) / p->_20;
+        } else {
+            p->color[3] = p->_18 * p->_4A / p->_20;
+        }
+        p->_38 = p->_3C = p->_10 + ((p->_14 - p->_10) * (f32)(p->_1C - p->_4A)) / (f32)p->_1C;
+        fn_8003403C(p->_38, p->_3C);
+        fn_80033CC8(p, (TexFile*)e->_10);
+        alive += p->_4A > 0;
+        p = p->next;
+    } while (p != NULL);
+    return alive == 0;
+}
+
+// .text:0x8002E3DC size:0x44C
+BOOL fn_8002E3DC(void* arg)
+{
+    Emitter* e = arg;
+    Particle* p = e->particles;
+    s32 alive = 0;
+
+    GXSetZMode(GX_TRUE, GX_ALWAYS, GX_FALSE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+    do {
+        if (lbl_80366158._28 == 0) {
+            p->_4A -= (p->_4A > 0) & (lbl_80366158._28 == 0);
+            p->color[3] -= p->_18 / p->_1C;
+            p->_38 = p->_3C = (p->_14 - p->_10) * ((f32)(p->_1C - p->_4A) / (f32)p->_1C) + p->_10;
+        }
+        fn_8003403C(p->_38, p->_3C);
+        fn_80033CC8(p, (TexFile*)e->_10);
+        alive += p->_4A > 0;
+        p = p->next;
+    } while (p != NULL);
+    return alive == 0;
+}
+
 // .text:0x8002DC68 size:0x7C
 void fn_8002DC68(Vec* pos)
 {
