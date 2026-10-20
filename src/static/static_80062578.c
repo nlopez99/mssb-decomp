@@ -5,16 +5,6 @@
 #include "musyx/musyx.h"
 #include "Dolphin/os.h"
 
-typedef struct PadLock {
-    /* 0x00 */ struct {
-        u8 _0;
-        u8 port[5];
-    } rows[14];
-    /* 0x54 */ u8 _54;
-    /* 0x55 */ u8 active[8];
-    /* 0x5D */ u8 step[7];
-} PadLock; // size: 0x64
-
 typedef struct LoopSounds {
     /* 0x00 */ SND_VOICEID voice;
     /* 0x04 */ u8 playing;
@@ -41,7 +31,6 @@ extern struct {
 } lbl_8034E9A0;
 
 extern s32 lbl_803C663C[4];
-extern PadLock lbl_803C66B0;
 extern LoopSounds lbl_803C6714;
 extern u16 lbl_80108DF4[];
 extern u16 lbl_80108E38[];

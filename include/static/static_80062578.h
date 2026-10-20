@@ -4,6 +4,19 @@
 #include "mssbTypes.h"
 #include "musyx/musyx.h"
 
+// Per-port pad locks: rows[i].port[p] is the state of lock i for port p
+typedef struct PadLock {
+    /* 0x00 */ struct {
+        u8 _0;
+        u8 port[5];
+    } rows[14];
+    /* 0x54 */ u8 _54;
+    /* 0x55 */ u8 active[8];
+    /* 0x5D */ u8 step[7];
+} PadLock; // size: 0x64
+
+extern PadLock lbl_803C66B0;
+
 BOOL fn_80062578(void);
 void fn_800625A4(s32 port, s32 step);
 void fn_80062674(s32 port);
