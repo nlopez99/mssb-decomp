@@ -27,7 +27,7 @@ void fn_80011A60(void);
 void fn_80011B64(s32 idx);
 void fn_80011BE4(s32 idx);
 void fn_80011CA8(void);
-void fn_800126EC(void);
+void fn_800126EC(struct ModelSub2C* sub, s32 arg1, u8* idx);
 void LoadModel(void);
 void fn_80012B90(void);
 void fn_80013680(void);
