@@ -179,8 +179,6 @@ void fn_3_1471C0(void) {
 }
 
 // .text:0x00146A90 size:0x730 mapped:0x80785B24
-// 94.10%: the fielder setup stores and the 100-coin loop use other registers and bases,
-// as in rep_3520's fn_3_13BCB8.
 void fn_3_146A90(void) {
     Unk37A8Fielder* fielder;
     s32 i;
@@ -190,9 +188,9 @@ void fn_3_146A90(void) {
 
     if (g_GameLogic._125 == 0) {
         fn_3_59A90();
+        g_GameLogic.secondaryGameMode = 7;
         g_Minigame._17C0 = 0;
         g_Minigame.turnOverStatus = 0;
-        g_GameLogic.secondaryGameMode = 7;
         g_Minigame._1A37 = 0;
         for (i = 0; i < 4; i++) {
             g_Minigame.miniGameCurrentPoints[i] = 0;
@@ -227,32 +225,31 @@ void fn_3_146A90(void) {
         }
         fn_3_591AC();
         fn_3_58870();
-        n = 0;
-        for (i = 0; i < 4; i++) {
+        for (i = 0, n = 0; i < 4; i++) {
             if (g_Minigame.minigameControlStruct.characterIndex[i] >= 0) {
                 g_Minigame.minigameControlStruct._28[n] = i;
                 g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]] = n + 2;
                 fn_3_6E24C(i, g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]]);
+                fielder = &g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]]];
+                fielder->_20D = i;
+                fielder->pos.x = lbl_3_data_21B94[n].x;
+                fielder->pos.y = lbl_3_data_21B94[n].y;
+                fielder->pos.z = lbl_3_data_21B94[n].z;
+                fielder->_00C = lbl_3_data_21D2C[1];
+                fielder->_1D2 = 0;
+                fielder->_050 = 0.0f;
+                fielder->_048 = 1.5707964f;
                 MG._1C7E[i][0] = -1;
                 MG._1C7E[i][1] = -1;
                 MG._1C7E[i][2] = -1;
-                fielder = &g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]]];
                 g_Minigame._1C8A[i] = 0;
-                fielder->_20D = i;
-                fielder->pos.x = lbl_3_data_21B94[n].x;
                 MG._1B34[i] = -1;
                 g_Minigame._1C92[i] = -1;
-                fielder->pos.y = lbl_3_data_21B94[n].y;
                 MG._1C9A[i] = 0;
-                fielder->pos.z = lbl_3_data_21B94[n].z;
                 MG._1B50[i] = 0;
-                fielder->_00C = lbl_3_data_21D2C[1];
                 MG._1B80[i] = 0;
-                fielder->_1D2 = 0;
                 g_Minigame._1CA5[i] = 0;
-                fielder->_050 = 0.0f;
                 g_Minigame._1CAD[i] = i;
-                fielder->_048 = 1.5707964f;
                 g_Minigame._1CB1[i] = 0;
                 for (j = 0; j < 10; j++) {
                     MG._1B58[i][j] = 0;
@@ -1645,8 +1642,8 @@ void fn_3_142088(void) {
     }
     GXInitTexObj(&lbl_3_bss_B7C4, lbl_3_bss_B800, 4, 4, GX_TF_RGBA8, GX_REPEAT, GX_REPEAT, GX_FALSE);
     GXInitTexObjLOD(&lbl_3_bss_B7C4, GX_LINEAR, GX_LINEAR, 0.0f, 0.0f, 0.0f, GX_FALSE, GX_FALSE, GX_ANISO_1);
-    lbl_3_bss_B7E4 = 0;
     lbl_3_data_266A4 = -1;
+    lbl_3_bss_B7E4 = 0;
     lbl_3_bss_B7C1 = 0;
 }
 
