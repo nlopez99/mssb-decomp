@@ -3,6 +3,7 @@
 #include "string.h"
 #include "C3/control.h"
 #include "C3/geoPalette.h"
+#include "C3/anim.h"
 #include "Dolphin/gx.h"
 #include "static/static_80021188.h"
 #include "static/static_8003A2EC.h"
@@ -21,10 +22,10 @@ typedef struct LightDesc {
 
 typedef struct LightPos {
     /* 0x00 */ Vec pos;
-    /* 0x0C */ u8 r;
-    /* 0x0D */ u8 g;
-    /* 0x0E */ u8 b;
+    /* 0x0C */ GXColor color;
 } LightPos;
+
+typedef struct LITObj LITObj;
 
 typedef struct _VecXYZ {
     f32 x, y, z;
@@ -70,7 +71,7 @@ typedef struct ModelNode {
 
 typedef struct LightSet {
     /* 0x0000 */ LightDesc lights[4];
-    /* 0x0028 */ u8 _0028[0x2C - 0x28];
+    /* 0x0028 */ GXColor ambient;
 } LightSet; // size: 0x2C
 
 typedef struct ModelJoint {
@@ -155,7 +156,8 @@ typedef struct ModelPose {
 } ModelPose; // size: 0xD4
 
 typedef struct ModelActor {
-    /* 0x0000 */ u8 _0000[0x2C - 0x0];
+    /* 0x0000 */ u8 _0000[0x10 - 0x0];
+    /* 0x0010 */ void* anims[7];
     /* 0x002C */ ModelSub2C* _2C;
     /* 0x0030 */ ModelPose* _30;
     /* 0x0034 */ Vec pos;
@@ -228,13 +230,19 @@ typedef struct ModelWork {
     /* 0x0060 */ ModelTable* _0060;
     /* 0x0064 */ ModelObj* _0064;
     /* 0x0068 */ ModelObj* _0068;
-    /* 0x006C */ u8 _006C[0x140 - 0x6C];
+    /* 0x006C */ ModelTable* _006C;
+    /* 0x0070 */ u8 _0070[0xAC - 0x70];
+    /* 0x00AC */ LITObj* lights[4];
+    /* 0x00BC */ u8 _00BC[0x140 - 0xBC];
     /* 0x0140 */ ModelPose poses[13];
     /* 0x0C04 */ ModelActor actorData[13];
     /* 0x2C50 */ ModelActor* actors[13];
     /* 0x2C84 */ u8 _2C84[0x2C88 - 0x2C84];
     /* 0x2C88 */ void* _2C88;
-    /* 0x2C8C */ u8 _2C8C[0x2D3C - 0x2C8C];
+    /* 0x2C8C */ u8 _2C8C[0x2CE4 - 0x2C8C];
+    /* 0x2CE4 */ void* _2CE4;
+    /* 0x2CE8 */ void* _2CE8;
+    /* 0x2CEC */ u8 _2CEC[0x2D3C - 0x2CEC];
     /* 0x2D3C */ void* _2D3C;
     /* 0x2D40 */ u8 _2D40[0x2D44 - 0x2D40];
     /* 0x2D44 */ s16 _2D44;
@@ -260,7 +268,9 @@ typedef struct ModelWork {
     /* 0x307A */ u8 _307A;
     /* 0x307B */ u8 _307B[0x3082 - 0x307B];
     /* 0x3082 */ s8 _3082;
-    /* 0x3083 */ u8 _3083[0x308C - 0x3083];
+    /* 0x3083 */ u8 _3083[0x3085 - 0x3083];
+    /* 0x3085 */ u8 _3085;
+    /* 0x3086 */ u8 _3086[0x308C - 0x3086];
     /* 0x308C */ void (*_308C)(void);
     /* 0x3090 */ u8 _3090[0x3154 - 0x3090];
 } ModelWork; // size: 0x3154
@@ -268,6 +278,7 @@ typedef struct ModelWork {
 // STRUCTS END
 
 extern ModelWork lbl_8036E548;
+extern u8 lbl_803CBC3C[4];
 extern u8 lbl_8036C4FC[0x204C];
 extern u8 lbl_803CBBC0;
 extern s32 lbl_803CBC18;
@@ -287,6 +298,13 @@ extern struct {
 } lbl_803716B8;
 void fn_800BEBCC(s32 id, Vec* dir);
 void fn_800B2D5C(ModelNode* node);
+void LITAlloc(LITObj** light);
+void LITInitAttn(LITObj* light, f32 a0, f32 a1, f32 a2, f32 k0, f32 k1, f32 k2);
+void LITInitPos(LITObj* light, f32 x, f32 y, f32 z);
+void LITInitColor(LITObj* light, GXColor color);
+void fn_800BD2DC(void);
+void fn_800BD2CC(s32 id, GXColor color);
+void fn_800BD548(ModelSlot* slot, s32 count, ...);
 void fn_800B2C10(ModelNode* node, u16 joint, Vec* out);
 void fn_800B2C44(ModelNode* node, u16 joint, Vec* out);
 
@@ -628,6 +646,27 @@ void fn_8001CE74(void) {
 
 // .text:0x8001CCC8 size:0x1AC
 void fn_8001CCC8(void) {
+    LightPos* lights = lbl_80367318;
+    int id;
+    int i;
+
+    lbl_8036E548._3085 = 4;
+    if (g_d_GameSettings.GameModeSelected == 7) {
+        id = g_d_GameSettings.StadiumID + 7;
+    } else {
+        id = g_d_GameSettings.StadiumID;
+    }
+    fn_8001CA40(id);
+    fn_800BD2DC();
+    if (lbl_800F7478[g_d_GameSettings._54].ambient.a != 0) {
+        fn_800BD2CC(1, lbl_800F7478[g_d_GameSettings._54].ambient);
+    }
+    for (i = 0; i < 4; i++) {
+        LITAlloc(&lbl_8036E548.lights[i]);
+        LITInitAttn(lbl_8036E548.lights[i], 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+        LITInitPos(lbl_8036E548.lights[i], lights[i].pos.x, lights[i].pos.y, lights[i].pos.z);
+        LITInitColor(lbl_8036E548.lights[i], lights[i].color);
+    }
 }
 
 // .text:0x8001CBD4 size:0xF4
@@ -663,7 +702,33 @@ void fn_8001CA40(u8 set) {
 }
 
 // .text:0x8001C920 size:0x120
-void fn_8001C920(void) {
+BOOL fn_8001C920(int id) {
+    int idx;
+
+    if (lbl_803CBC3C[1] == 0) {
+        if ((s32)lbl_803C6CF8._715 != 1) {
+            goto fail;
+        }
+        lbl_803CBC3C[1] = 1;
+    }
+    if (lbl_803CBC3C[1] == 1) {
+        if (g_d_GameSettings.minigamesEnabled || g_d_GameSettings.GameModeSelected == 2) {
+            idx = id * 19 + 18;
+        } else {
+            idx = id * 19 + 5;
+        }
+        ARAMTransfer(lbl_803CB790[idx], lbl_8036E548._2CE4, 0, 0);
+        lbl_803CBC3C[1] = 2;
+    } else if (lbl_803CBC3C[1] == 2 && (s32)lbl_803C6CF8._715 == 1) {
+        ANIMGet(lbl_8036E548._2CE4);
+        if (lbl_8036E548.actors[0]->anims[3] == NULL) {
+            lbl_8036E548.actors[0]->anims[3] = lbl_8036E548._2CE4;
+        }
+        return TRUE;
+    }
+fail:
+    lbl_803CBC3C[0] = 0;
+    return FALSE;
 }
 
 // .text:0x8001C67C size:0x2A4
@@ -671,7 +736,26 @@ int fn_8001C67C_animation(int, int) {
 }
 
 // .text:0x8001C588 size:0xF4
-void fn_8001C588(void) {
+BOOL fn_8001C588(int id) {
+    if (lbl_803CBC3C[3] == 0) {
+        if ((s32)lbl_803C6CF8._715 != 1) {
+            goto fail;
+        }
+        lbl_803CBC3C[3] = 1;
+    }
+    if (lbl_803CBC3C[3] == 1) {
+        ARAMTransfer(lbl_803CB790[id * 19 + 6], lbl_8036E548._2CE8, 0, 0);
+        lbl_803CBC3C[3] = 2;
+    } else if (lbl_803CBC3C[3] == 2 && (s32)lbl_803C6CF8._715 == 1) {
+        ANIMGet(lbl_8036E548._2CE8);
+        if (lbl_8036E548.actors[1]->anims[4] == NULL) {
+            lbl_8036E548.actors[1]->anims[4] = lbl_8036E548._2CE8;
+        }
+        return TRUE;
+    }
+fail:
+    lbl_803CBC3C[0] = 0;
+    return FALSE;
 }
 
 // .text:0x8001C528 size:0x60
@@ -900,6 +984,31 @@ void fn_8001A3FC(void) {
 
 // .text:0x8001A25C size:0x1A0
 void fn_8001A25C(void) {
+    LightPos* lights = lbl_80367318;
+    ModelTask* task;
+    int i;
+
+    task = fn_800B0A5C_insertQueue(fn_80019C00, 0);
+    task->_14 = 0;
+    task->_0C->_10 = 0;
+    for (i = 0; i < 4; i++) {
+        fn_80023B90(&lbl_800F7478[g_d_GameSettings._54].lights[i], &lbl_80367318[i]);
+    }
+    fn_800BD2DC();
+    if (lbl_800F7478[g_d_GameSettings._54].ambient.a != 0) {
+        fn_800BD2CC(1, lbl_800F7478[g_d_GameSettings._54].ambient);
+    }
+    for (i = 0; i < 4; i++) {
+        LITAlloc(&lbl_8036E548.lights[i]);
+        LITInitAttn(lbl_8036E548.lights[i], 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+        LITInitPos(lbl_8036E548.lights[i], lights[i].pos.x, lights[i].pos.y, lights[i].pos.z);
+        LITInitColor(lbl_8036E548.lights[i], lights[i].color);
+    }
+    if (lbl_8036E548._006C != NULL) {
+        for (i = 0; i < lbl_8036E548._006C->count; i++) {
+            fn_800BD548(&lbl_8036E548._006C->slots[i], 4, lbl_8036E548.lights[0], lbl_8036E548.lights[1], lbl_8036E548.lights[2], lbl_8036E548.lights[3]);
+        }
+    }
 }
 
 // .text:0x80019C00 size:0x65C
@@ -908,6 +1017,31 @@ void fn_80019C00(void) {
 
 // .text:0x80019A60 size:0x1A0
 void fn_80019A60(void) {
+    LightPos* lights = lbl_80367318;
+    ModelTask* task;
+    int i;
+
+    task = fn_800B0A5C_insertQueue(fn_800196D8, 0);
+    task->_14 = 0;
+    task->_0C->_10 = 0;
+    for (i = 0; i < 4; i++) {
+        fn_80023B90(&lbl_800F7478[g_d_GameSettings._54].lights[i], &lbl_80367318[i]);
+    }
+    fn_800BD2DC();
+    if (lbl_800F7478[g_d_GameSettings._54].ambient.a != 0) {
+        fn_800BD2CC(1, lbl_800F7478[g_d_GameSettings._54].ambient);
+    }
+    for (i = 0; i < 4; i++) {
+        LITAlloc(&lbl_8036E548.lights[i]);
+        LITInitAttn(lbl_8036E548.lights[i], 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+        LITInitPos(lbl_8036E548.lights[i], lights[i].pos.x, lights[i].pos.y, lights[i].pos.z);
+        LITInitColor(lbl_8036E548.lights[i], lights[i].color);
+    }
+    if (lbl_8036E548._006C != NULL) {
+        for (i = 0; i < lbl_8036E548._006C->count; i++) {
+            fn_800BD548(&lbl_8036E548._006C->slots[i], 4, lbl_8036E548.lights[0], lbl_8036E548.lights[1], lbl_8036E548.lights[2], lbl_8036E548.lights[3]);
+        }
+    }
 }
 
 // .text:0x800196D8 size:0x388
