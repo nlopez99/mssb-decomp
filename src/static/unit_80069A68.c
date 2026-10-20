@@ -11,12 +11,19 @@ typedef struct SceneTask {
     /* 0x04 */ u8 _04[0x10 - 0x4];
     /* 0x10 */ s16 _10;
     /* 0x12 */ u16 priority;
-    /* 0x14 */ u16 _14;
-    /* 0x16 */ u8 _16[0x34 - 0x16];
+    union {
+        /* 0x14 */ u16 _14;
+        /* 0x14 */ u32* texFile;
+    };
+    /* 0x18 */ void* _18;
+    /* 0x1C */ u8 _1C[0x28 - 0x1C];
+    /* 0x28 */ u32* sabFile;
+    /* 0x2C */ u8 _2C[0x34 - 0x2C];
     /* 0x34 */ s16 state;
-    /* 0x36 */ s16 _36;
+    /* 0x36 */ u16 _36;
     /* 0x38 */ u8 _38;
-    /* 0x39 */ u8 _39[0x3B - 0x39];
+    /* 0x39 */ u8 _39;
+    /* 0x3A */ u8 _3A;
     /* 0x3B */ u8 _3B;
 } SceneTask;
 
@@ -49,6 +56,17 @@ typedef struct SceneMenuState {
     /* 0x1E9 */ u8 _1E9;
 } SceneMenuState;
 
+typedef struct SceneFlags {
+    /* 0x00 */ u8 _00[0x12];
+    /* 0x12 */ u8 _12;
+    /* 0x13 */ u8 _13;
+} SceneFlags;
+
+typedef struct SceneAram {
+    /* 0x000 */ u8 _000[0x715];
+    /* 0x715 */ u8 _715;
+} SceneAram;
+
 typedef struct TexBank {
     /* 0x00 */ u32 _00;
     /* 0x04 */ TextureDesc tex[1];
@@ -69,6 +87,9 @@ extern SceneGlobals lbl_80366158;
 extern SceneObjSlot lbl_80371C30[];
 extern SceneSound lbl_800EF808;
 extern SceneMenuState lbl_803716B8;
+extern SceneFlags lbl_8037169C;
+extern SceneAram lbl_803C6CF8;
+extern GXColor lbl_803CB8DC;
 extern void* lbl_803CBD30;
 extern GXRenderModeObj* lbl_803CBD34;
 typedef struct SceneCallback {
@@ -94,7 +115,13 @@ static u32 lbl_801092F8[32] = { 0x1, 0x0, 0x0, 0xFFFFFFFF, 0x21400FF, 0x16000000
 static u32 lbl_80109378[16] = { 0x3, 0x0, 0x0, 0xFFFFFFFF, 0x30100FF, 0x16000000, 0x0, 0x0, 0x30000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 };
 static SceneCallback lbl_801093B8 = { 0x0000002F, fn_80069A68, 0x00000000 };
 
+extern void fn_80008E00(void (*func)(s32));
 extern BOOL fn_80021518(s32 group, void* data);
+extern void fn_800215F8(SceneCallback* callback);
+extern void* fn_800ACF34(u32 align, u32 size);
+extern s32 ARAMTransfer(void* src, void* dst, s32 arg2, s32 arg3);
+extern void fn_80035750(void* sab, void* tex, s16 id);
+extern void convertTextureHeader(void* tex);
 extern BOOL fn_80022B68(void);
 extern void changeScene(u8 scene, s16 arg1);
 // static/spani_default.h declares fn_80035838 returning u8; its callers here test the full register
@@ -127,6 +154,57 @@ void fn_8006C088(s32 alt) {
 
 // .text:0x8006BE00 size:0x288
 void fn_8006BE00(void) {
+    SceneTask* task = lbl_803CC1B8;
+
+    switch (task->state) {
+    case 0:
+        if ((task->_3A = lbl_8037169C._13) != 0) {
+            changeScene(1, 6);
+        }
+        GXSetCopyClear(lbl_803CB8DC, 0xFFFFFF);
+        task->_36 = 0;
+        task->_18 = fn_800ACF34(0x20, 0x40);
+        task->sabFile = fn_800ACF34(0x20, lbl_801092E8[1] & 0x0FFFFFFF);
+        ARAMTransfer(lbl_801092E8, task->sabFile, 0, 0);
+        task->state++;
+    case 1:
+        if ((s32)lbl_803C6CF8._715 == 1) {
+            task->sabFile[0] += (u32)task->sabFile;
+            task->sabFile[1] += (u32)task->sabFile;
+            fn_80035750((void*)task->sabFile[1], (void*)task->sabFile[0], 0x16);
+            task->texFile = fn_800ACF34(0x20, lbl_801092D8[1] & 0x0FFFFFFF);
+            ARAMTransfer(lbl_801092D8, task->texFile, 0, 0);
+            task->state++;
+        }
+        break;
+    case 2:
+        if (task->_36 != 0) {
+            task->_36--;
+        } else if ((task->_3A == 0 || lbl_8037169C._12 != 0) && (s32)lbl_803C6CF8._715 == 1) {
+            if (lbl_80366158._29 == 0 || lbl_80366158._29 == 1) {
+                fn_80008E00(fn_8006C088);
+            }
+            lbl_801093B8.arg = lbl_803CC1B8;
+            fn_800215F8(&lbl_801093B8);
+            task->texFile[0] += (u32)task->texFile;
+            convertTextureHeader((void*)task->texFile[0]);
+            task->state = 0;
+            task->_38 = 0;
+            task->_39 = 0;
+            switch (lbl_80366158._29) {
+            case 0:
+                lbl_803CC1B8->func = fn_8006BB60;
+                break;
+            case 1:
+                lbl_803CC1B8->func = fn_8006B78C;
+                break;
+            case 2:
+                lbl_803CC1B8->func = fn_8006B668;
+                break;
+            }
+        }
+        break;
+    }
 }
 
 // .text:0x8006BB60 size:0x2A0
