@@ -27,7 +27,7 @@ extern void fn_800A7D4C(s32 kind, void* entry);
 extern void fn_800B0A14_removeQueue(void);
 extern void* fn_800B0A5C_insertQueue(void (*callback)(void), s32 priority);
 
-extern u8 lbl_8023DD80[];
+u8 lbl_8023DD80[640 * 480 * 2];
 extern u8 lbl_803CBBC0;
 extern ScreenEffect lbl_803C5090;
 
