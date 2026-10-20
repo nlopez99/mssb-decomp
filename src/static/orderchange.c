@@ -4,6 +4,7 @@
 #include "Dolphin/os.h"
 #include "string.h"
 #include "static/static_8004157C.h"
+#include "static/spani_default.h"
 
 typedef struct Scene {
     /* 0x00 */ u16 _00;
@@ -91,7 +92,8 @@ extern u8 lbl_80361B20[];
 extern s8 lbl_800E86F0[12];
 
 typedef struct OrderSlot {
-    /* 0x00 */ u8 _00[2];
+    /* 0x00 */ u8 _00;
+    /* 0x01 */ u8 _01;
     /* 0x02 */ s8 charId;
     /* 0x03 */ u8 _03;
 } OrderSlot; // size: 0x4
@@ -117,7 +119,12 @@ typedef struct PauseMenu {
     /* 0x1C */ u8 _1C[2];
     /* 0x1E */ u8 _1E[2];
     /* 0x20 */ u8 _20[2];
-    /* 0x22 */ u8 _22[0x3C - 0x22];
+    /* 0x22 */ u8 _22[0x27 - 0x22];
+    /* 0x27 */ u8 _27;
+    /* 0x28 */ u8 _28;
+    /* 0x29 */ u8 _29;
+    /* 0x2A */ u8 _2A;
+    /* 0x2B */ u8 _2B[0x3C - 0x2B];
     /* 0x3C */ u8 _3C;
     /* 0x3D */ s8 starCursor;
     /* 0x3E */ s8 prevStarCursor;
@@ -134,7 +141,8 @@ typedef struct PauseMenu {
     /* 0x62 */ u8 starCount;
     /* 0x63 */ u8 _63;
     /* 0x64 */ s16 _64;
-    /* 0x66 */ u8 _66[0x6A - 0x66];
+    /* 0x66 */ u8 _66[0x69 - 0x66];
+    /* 0x69 */ u8 _69;
     /* 0x6A */ u8 _6A[2];
 } PauseMenu;
 
@@ -153,12 +161,16 @@ extern union {
 } lbl_803297E0;
 
 extern struct {
-    /* 0x00 */ u8 _00[0x55];
+    /* 0x00 */ u8 _00;
+    /* 0x01 */ u8 _01[6];
+    /* 0x07 */ u8 _07[0x55 - 0x07];
     /* 0x55 */ u8 _55;
     /* 0x56 */ u8 _56;
     /* 0x57 */ u8 _57[2];
     /* 0x59 */ u8 _59;
     /* 0x5A */ u8 _5A;
+    /* 0x5B */ u8 _5B[2];
+    /* 0x5D */ u8 _5D;
 } lbl_803C66B0;
 
 extern union {
@@ -174,6 +186,11 @@ extern union {
     /* 0x472C */ PadButtons pads[4];
     /* 0x4744 */ u8 _4744[0x489B - 0x4744];
     /* 0x489B */ u8 _489B[2][9];
+    /* 0x48AD */ u8 _48AD;
+    /* 0x48AE */ u8 _48AE;
+    /* 0x48AF */ u8 _48AF;
+    /* 0x48B0 */ u8 _48B0;
+    /* 0x48B1 */ u8 _48B1;
     } s;
 } lbl_8034E9A0;
 
@@ -184,6 +201,14 @@ extern struct {
     /* 0x38 */ u8 _38;
 } lbl_803C5EA4;
 
+typedef struct StarOrder {
+    /* 0x0 */ s16 charId;
+    /* 0x2 */ u8 _2;
+    /* 0x3 */ u8 _3;
+    /* 0x4 */ u8 _4;
+    /* 0x5 */ u8 _5;
+} StarOrder; // size: 0x6
+
 typedef struct StarChar {
     /* 0x00 */ u8 _00[5];
     /* 0x05 */ s8 kind;
@@ -193,7 +218,9 @@ typedef struct StarChar {
 extern union {
     StarChar chars[1];
     struct {
-        /* 0x0000 */ u8 _0000[0x4445];
+        /* 0x0000 */ u8 _0000[0x40B8];
+        /* 0x40B8 */ StarOrder order[9];
+        /* 0x40EE */ u8 _40EE[0x4445 - 0x40EE];
         /* 0x4445 */ u8 _4445;
     } s;
 } starMissionCompletionTracker;
@@ -205,6 +232,29 @@ u8 lbl_802E4B00[2][9];
 extern void characterSelectScreen(s32 team);
 extern void unsure_FillRosterPositions(s32 team);
 extern void SetMenuNumber(void);
+extern void fn_800B0A14_removeQueue(void);
+extern void fn_8004CC2C(void);
+extern s32 fn_8004CA6C(u16 buttons);
+extern void fn_8004D0F0(void);
+extern void fn_800671FC(void);
+extern void fn_80069854(void);
+extern void fn_80062A74(void);
+extern void fn_80021410(void);
+extern void changeScene(s32 arg0, s32 arg1);
+
+extern u8 lbl_803CBCC9;
+
+extern struct {
+    /* 0x0 */ u8 _0[4];
+    /* 0x4 */ u8 _4;
+} lbl_803CBD24;
+
+extern struct {
+    /* 0x00 */ u8 _00[0x24];
+    /* 0x24 */ u8 _24;
+    /* 0x25 */ u8 _25;
+    /* 0x26 */ u8 _26;
+} lbl_8034E978;
 extern void fn_800625A4(s32 arg0, s32 arg1);
 
 extern void* fn_800B0A5C_insertQueue(void (*callback)(void), s32 priority);
@@ -399,7 +449,170 @@ void fn_800486E0(s32 priority, s8 team, u8 player) {
 }
 
 // .text:0x80047FE4 size:0x6FC
+// Waits on fn_8004617C, whose empty stub is inlined here; with it out of the file this is
+// 99.54%, the held buttons read by index (lhzx) as in challengeStarMenu
 void pauseMenuSelection(void) {
+    PadButtons pad;
+    PadButtons* src;
+    s32 i;
+    u8 kind;
+
+    switch (lbl_803297E0.s.pause.state) {
+    case 0:
+        fn_80047CE0();
+        break;
+    case 1:
+        lbl_803297E0.s.pause._0E[0] = lbl_803297E0.s.pause._0E[1] = 0;
+        lbl_803297E0.s.pause._12[0] = lbl_803297E0.s.pause._12[1] = 0;
+        lbl_803297E0.s.pause.state++;
+        break;
+    case 2:
+        for (i = 0; i < 2; i++) {
+            fn_8004617C(i);
+        }
+        break;
+    case 3:
+        starMenuCursor();
+        break;
+    case 4:
+        memset(&pad, 0, sizeof(pad));
+        if (lbl_803C66B0._5D == 0) {
+            src = &lbl_803297E0.pads[lbl_8034E9A0.s.port[0]];
+            pad.held = lbl_803297E0.pads[lbl_8034E9A0.s.port[0]].held;
+            pad.pressed = src->pressed;
+            pad.repeat = src->repeat;
+            if (pad.pressed & 0x200) {
+                lbl_803297E0.s.pause._45 = 3;
+                sndFXStartEx(0x1B9, lbl_800EFBA4[2], 0x3F, 0);
+                lbl_803297E0.s.pause.state = 10;
+            }
+        }
+        break;
+    case 5:
+        challengeStarMenu();
+        break;
+    case 6:
+        switch (lbl_803CBCC9) {
+        case 0:
+            fn_800B0A5C_insertQueue(fn_8004D0F0, 0x3000);
+            lbl_803CBCC9++;
+            break;
+        case 1:
+            switch (fn_8004CA6C(lbl_8034E9A0.s.pads[lbl_8034E9A0.s.port[lbl_803CBD24._4]].pressed)) {
+            case 0:
+                break;
+            case 1:
+                fn_8004CC2C();
+                break;
+            case 3:
+                characterSelectScreen(0);
+                characterSelectScreen(1);
+                fn_800671FC();
+                lbl_8034E978._26 = 1;
+                changeScene(0xF, 6);
+                lbl_803CBD24._4 = 0;
+                lbl_803CBCC9 = 0;
+                lbl_803297E0.s.pause.state = 10;
+                break;
+            case 2:
+                fn_8004CC2C();
+                break;
+            case 4:
+                lbl_803CBD24._4 = 0;
+                lbl_803CBCC9 = 0;
+                lbl_803297E0.s.pause._27 = 0;
+                lbl_803297E0.s.pause.state = 2;
+                break;
+            }
+            break;
+        }
+        break;
+    case 10:
+        if (lbl_803297E0.s.pause._27 != 0) {
+            lbl_8034E9A0.s._48AD = 1;
+            lbl_803C66B0._00 = 0;
+            memset(lbl_803C66B0._01, 0, sizeof(lbl_803C66B0._01));
+            lbl_803297E0.s.pause._16[0] = lbl_803297E0.s.pause._16[1] = lbl_803297E0.s.pause._18[0] = lbl_803297E0.s.pause._18[1] = 0;
+            fn_80062A74();
+            fn_80021410();
+            fn_80035CA4(0xF);
+            fn_80035CA4(0x12);
+            fn_80035CA4(9);
+            fn_80035CA4(6);
+            lbl_8034E9A0.s._48AF = 1;
+            lbl_8034E9A0.s._48B1 = 1;
+            lbl_803297E0.s.pause._27 = 0;
+            fn_80042D38(4);
+        } else {
+            if (lbl_8034E978._24 != 0) {
+                break;
+            }
+            if (g_d_GameSettings.GameModeSelected == 5) {
+                kind = lbl_803297E0.s.pause._6A[lbl_803297E0.s.pause.player];
+                if (kind != 2 && kind != 3) {
+                    for (i = 0; i < 9; i++) {
+                        starMissionCompletionTracker.s.order[i].charId = inMemRoster[0][i].charId;
+                        starMissionCompletionTracker.s.order[i]._2 = lbl_80354720[0][i]._01;
+                        starMissionCompletionTracker.s.order[i]._3 = lbl_80354720[0][i].charId;
+                        starMissionCompletionTracker.s.order[i]._4 = inMemRoster[0][i]._27 + inMemRoster[0][i]._26 * 2;
+                    }
+                    lbl_803297E0.s.pause._69 = 0;
+                }
+            }
+            if (g_d_GameSettings.GameModeSelected == 5 && g_d_GameSettings._06 == 2 && lbl_803297E0.s.pause._6A[lbl_803297E0.s.pause.player] == 2 &&
+                lbl_803297E0.s.pause._45 != 0) {
+                break;
+            }
+            lbl_803297E0.s.pause._08[0] = 0;
+            lbl_803297E0.s.pause._04[0] = lbl_803297E0.s.pause._04[1] = 0;
+            lbl_803297E0.s.pause._16[0] = lbl_803297E0.s.pause._16[1] = lbl_803297E0.s.pause._18[0] = lbl_803297E0.s.pause._18[1] = 0;
+            fn_80069854();
+            if (g_d_GameSettings._06 != 2 && g_d_GameSettings.GameModeSelected == 5) {
+                fn_80042D38(0xD);
+            } else if (g_d_GameSettings._06 == 2) {
+                if (lbl_803297E0.s.pause._6A[lbl_803297E0.s.pause.player] == 2 ||
+                    lbl_803297E0.s.pause._6A[lbl_803297E0.s.pause.player] == 3 ||
+                    (lbl_803C66B0._55 == 0 && lbl_803C66B0._56 == 0)) {
+                    lbl_803297E0.s.pause._0A = 1;
+                    lbl_803297E0.s.pause._08[0] = 0;
+                } else {
+                    break;
+                }
+            } else {
+                fn_80042D38(0xC);
+            }
+        }
+        kind = lbl_803297E0.s.pause._6A[lbl_803297E0.s.pause.player];
+        if (kind != 2 && kind != 3) {
+            lbl_803297E0.s.pause._0C[1] = 1;
+        }
+        lbl_803297E0.s.pause.state = 0;
+        fn_800B0A14_removeQueue();
+        break;
+    case 12:
+        if (lbl_803C66B0._55 == 0 && lbl_803C66B0._56 == 0) {
+            memset(lbl_8034E9A0.s._489B, 0, sizeof(lbl_8034E9A0.s._489B));
+            lbl_803297E0.s.pause._16[0] = lbl_803297E0.s.pause._16[1] = 0;
+            lbl_803297E0.s.pause._0C[1] = 1;
+            lbl_803297E0.s.pause.state = 13;
+        }
+        break;
+    case 13:
+        lbl_803297E0.s.pause.state = 0;
+        lbl_803297E0.s.pause._29 = lbl_803297E0.s.pause._2A = 0;
+        lbl_803297E0.s.pause._16[0] = lbl_803297E0.s.pause._16[1] = lbl_803297E0.s.pause._18[0] = lbl_803297E0.s.pause._18[1] = 0;
+        lbl_803C5EA4._36 = 1;
+        lbl_803C5EA4._37 = lbl_803C5EA4._38;
+        lbl_803C5EA4._38 = 0;
+        fn_80042D38(10);
+        fn_800B0A14_removeQueue();
+        break;
+    case 14:
+        if (lbl_803C66B0._55 == 0 && lbl_803C66B0._56 == 0) {
+            lbl_803297E0.s.pause.state = 10;
+        }
+        break;
+    }
 }
 
 // .text:0x80047CE0 size:0x304
@@ -477,7 +690,7 @@ void fn_800471F4(void) {
 }
 
 // .text:0x8004617C size:0x1078
-void fn_8004617C(void) {
+void fn_8004617C(s32 team) {
 }
 
 // .text:0x80044C98 size:0x14E4

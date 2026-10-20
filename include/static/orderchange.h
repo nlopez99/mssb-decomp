@@ -14,7 +14,7 @@ void challengeStarMenu(void);
 void starMenuCursor(void);
 void fn_80043880(void);
 void fn_80044C98(void);
-void fn_8004617C(void);
+void fn_8004617C(s32 team);
 void fn_800471F4(void);
 void fn_80047CE0(void);
 void pauseMenuSelection(void);
