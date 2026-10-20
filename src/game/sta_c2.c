@@ -518,7 +518,7 @@ extern void fn_80025FFC(void* anim, StaC2Anim* state);
 extern void fn_80035750(void* arg0, void* arg1, s32 arg2);
 extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_8004C094(Vec* pos);
-extern StaC2Emitter* fn_80033A24(BOOL (*update)(StaC2Emitter*), s32, s32, s32, s32, s32);
+extern StaC2Emitter* fn_80033A24(BOOL (*update)(StaC2Emitter*), u8, s32, s32, s32, u8);
 extern void fn_80033964(StaC2Emitter* emitter);
 extern u8 lbl_3_data_8404[6][15][2];
 extern u8 lbl_3_data_84B8[30][2];

@@ -244,7 +244,7 @@ extern void fn_800B0A5C_insertQueue(void (*func)(void), s32 arg);
 
 extern void fn_80033620(StaC5Emitter* emitter);
 extern void fn_80033964(StaC5Emitter* emitter);
-extern StaC5Emitter* fn_80033A24(BOOL (*update)(StaC5Emitter*), s32, s32, s32, s32, s32);
+extern StaC5Emitter* fn_80033A24(BOOL (*update)(StaC5Emitter*), u8, s32, s32, s32, u8);
 extern void fn_80033F64(f32, f32, f32);
 extern void fn_80033CC8(StaC5Particle* particle, void* arg1);
 

@@ -167,7 +167,7 @@ extern void fn_8001B214(void (*callback)(void));
 extern void fn_8001E460(void (*draw)(MtxPtr view, s32, u32));
 extern void fn_8001E474(void);
 extern void fn_80023B90(LightData1D58* data, Light1D58* light);
-extern void fn_80024DB0(void* anim);
+extern int fn_80024DB0(void* anim);
 extern void fn_80024FA4(StadiumModel1D58* model, u32 arg1, void* anim, s32 arg3);
 extern void fn_8003A548(void (*callback)(void));
 extern void fn_8003A8A0(struct DODisplayObj* obj, MtxPtr view, s32 arg2);

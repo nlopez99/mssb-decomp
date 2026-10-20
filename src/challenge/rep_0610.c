@@ -325,7 +325,7 @@ extern u8 fn_800B3C04(s32 arg0, UnkList0610* actor, Mtx mtx);
 extern void fn_800B2B74(UnkList0610* list, u16 id);
 extern void fn_80052D70(UnkTask0610* task);
 extern void makeLookAtMatrix(Mtx m, const Vec* camPos, const Vec* camUp, const Vec* target);
-extern void fn_8002F1AC(Vec* pos, u32 id);
+extern BOOL fn_8002F1AC(Vec* pos, u32 id);
 extern void fn_8002F258(Vec* pos, u32 id, void* params);
 extern void minigamesSetSomePointers(void);
 extern void fn_800BD2CC(s32 arg0, GXColor color);

@@ -144,7 +144,7 @@ extern struct {
 extern u8 lbl_803CBBC0;
 
 extern u32 fn_80009028(void);
-extern void fn_80023F0C(void* src, StadiumTex* dst, s32 srcX, s32 srcY, s32 w, s32 h, s32 dstX, s32 dstY);
+extern int fn_80023F0C(void* src, StadiumTex* dst, s32 srcX, s32 srcY, s32 w, s32 h, s32 dstX, s32 dstY);
 extern void fn_80035CA4(s32 id);
 extern void fn_8003A2C0(void);
 extern void fn_8003AD84(void* tex);

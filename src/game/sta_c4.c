@@ -318,7 +318,7 @@ extern void fn_800A7D4C(s32, void*);
 extern void fn_80033620(StaC4Emitter* emitter);
 extern void fn_8003403C(f32, f32);
 extern void fn_80033CC8(StaC4Particle* particle, void* arg1);
-extern StaC4Emitter* fn_80033A24(BOOL (*update)(StaC4Emitter*), s32, s32, s32, s32, s32);
+extern StaC4Emitter* fn_80033A24(BOOL (*update)(StaC4Emitter*), u8, s32, s32, s32, u8);
 extern void fn_800528C0(f32 x, f32 y, f32 z, s16* screenX, s16* screenY);
 extern void fn_800B0A14_removeQueue(void);
 extern void* fn_800B0A5C_insertQueue(void (*)(void), u16);

@@ -95,7 +95,7 @@ extern Unk2308Task* lbl_803CC1B8;
 extern u8 lbl_803CBBC0;
 
 extern void ACTSetAnimation(Unk2308Actor* actor, void* animBank, char* sequenceName, u16 seqNum, f32 time, f32 speed);
-extern void fn_80024DB0(Unk2308Anim*);
+extern int fn_80024DB0(Unk2308Anim*);
 extern void fn_80024FA4(Unk2308Model*, u32, Unk2308Anim*, s32);
 extern s32 fn_8005268C(void);
 extern Unk2308Camera* fn_80052734(s32);
