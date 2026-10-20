@@ -427,6 +427,47 @@ static inline s32 framesToReach(UnkAC8Fielder* f, f32 x, f32 z) {
     return extra + (s32)(dist / speed);
 }
 
+// fn_3_555AC's body on a fielder pointer, inlined in fn_3_55EEC
+static inline void setBaseZone(UnkAC8Fielder* f) {
+    f32 lo;
+    f32 hi;
+
+    f->_1DE = 0;
+    if (f->_008 > 45.0f) {
+        return;
+    }
+    if (f->_008 < -5.0f) {
+        return;
+    }
+    if (f->_000 > 25.0f) {
+        return;
+    }
+    if (f->_000 < -25.0f) {
+        return;
+    }
+    if (f->_008 > lbl_3_data_4444[1].z) {
+        lo = lbl_3_data_4444[2].z - 2.0f;
+        hi = 4.0f + lbl_3_data_4444[2].z;
+        if (f->_000 > 0.0f) {
+            if (f->_008 > -f->_000 + lo && f->_008 < -f->_000 + hi) {
+                f->_1DE = 2;
+            }
+        } else if (f->_008 > f->_000 + lo && f->_008 < f->_000 + hi) {
+            f->_1DE = 3;
+        }
+    } else {
+        lo = lbl_3_data_4444[0].z - 4.0f;
+        hi = 2.0f + lbl_3_data_4444[0].z;
+        if (f->_000 > 0.0f) {
+            if (f->_008 > f->_000 + lo && f->_008 < f->_000 + hi) {
+                f->_1DE = 1;
+            }
+        } else if (f->_008 > -f->_000 + lo && f->_008 < -f->_000 + hi) {
+            f->_1DE = 4;
+        }
+    }
+}
+
 // .text:0x000598D0 size:0x48 mapped:0x80698964
 void fn_3_598D0(void) {
     fn_3_58688();
@@ -1210,8 +1251,6 @@ void fn_3_57144(void) {
 }
 
 // .text:0x00055EEC size:0x1258 mapped:0x80694F80
-// 99.68%: registers only, in the inlined fn_3_51DF0 (zone) and in the written-out
-// copy of fn_3_555AC, whose negated x the target keeps in x's own register.
 void fn_3_55EEC(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     s32 frames;
@@ -1323,30 +1362,7 @@ void fn_3_55EEC(s32 fielder) {
         if (g_Ball.fielderWBallIndex == fielder) {
             fn_3_55710(fielder);
         }
-        f->_1DE = 0;
-        if (!(f->_008 > 45.0f) && !(f->_008 < -5.0f) && !(f->_000 > 25.0f) && !(f->_000 < -25.0f)) {
-            if (f->_008 > lbl_3_data_4444[1].z) {
-                lo = lbl_3_data_4444[2].z - 2.0f;
-                hi = 4.0f + lbl_3_data_4444[2].z;
-                if (f->_000 > 0.0f) {
-                    if (f->_008 > -f->_000 + lo && f->_008 < -f->_000 + hi) {
-                        f->_1DE = 2;
-                    }
-                } else if (f->_008 > f->_000 + lo && f->_008 < f->_000 + hi) {
-                    f->_1DE = 3;
-                }
-            } else {
-                lo = lbl_3_data_4444[0].z - 4.0f;
-                hi = 2.0f + lbl_3_data_4444[0].z;
-                if (f->_000 > 0.0f) {
-                    if (f->_008 > f->_000 + lo && f->_008 < f->_000 + hi) {
-                        f->_1DE = 1;
-                    }
-                } else if (f->_008 > -f->_000 + lo && f->_008 < -f->_000 + hi) {
-                    f->_1DE = 4;
-                }
-            }
-        }
+        setBaseZone(f);
     }
     if (f->_252) {
         fn_3_27860(fielder);
@@ -2563,12 +2579,10 @@ u8 fn_3_51DF0(f32 x, f32 z) {
     if (x - z + 40.0f > 0.0f && -x - z + 40.0f > 0.0f) {
         return 0;
     }
-    xx = x * x;
-    if (dolsqrtf2(z * z + xx) < 38.8f) {
+    if (dolsqrtf2(SQ(z) + SQ(x)) < 38.8f) {
         return 1;
     }
-    dz = z - 18.4f;
-    dist = dolsqrtf2(dz * dz + xx);
+    dist = dolsqrtf2(SQ(z - 18.4f) + SQ(x));
     if (dist < 28.0f) {
         return 1;
     }
@@ -2994,7 +3008,7 @@ s32 fn_3_50898(s32 fielder, f32* x, f32* z) {
 }
 
 // .text:0x0004FB34 size:0xD64 mapped:0x8068EBC8
-// 99.65%: registers only; the target keeps margin, step and close in other saved registers.
+// 99.71%: registers only; the target keeps margin, step and close in other saved registers.
 void fn_3_4FB34(int fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     s32 i;
@@ -3142,8 +3156,7 @@ void fn_3_4FB34(int fielder) {
         f->_1DB = 1;
     }
     if (fielder <= 5 && (f->_1DD == 1 || f->_1DD == 2)) {
-        z = g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z;
-        zone = fn_3_51DF0(g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x, z);
+        zone = fn_3_51DF0(g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.x, g_Ball.physicsSubstruct.futureCoordsAndDist[i].pos.z);
         if (f->_1DD == 2) {
             if (zone >= 2) {
                 f->_1DD = 4;
