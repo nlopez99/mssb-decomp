@@ -10866,8 +10866,6 @@ s32 fn_3_2CBE0(s32 player) {
 }
 
 // .text:0x0002C698 size:0x548 mapped:0x8066B72C
-// 96.98%: some early returns branch as nested ifs do in the target (bne +8; b end
-// after the mode == 8 and throw-frame tests); the && chains here merge them.
 void fn_3_2C698(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     s32 player = fielder;
@@ -10896,24 +10894,14 @@ void fn_3_2C698(s32 fielder) {
          g_Practice.practiceLevel == 5)) {
         return;
     }
-    if (!g_Ball.catchAnimationTotalFrames && !g_Ball.deadBallReason && (g_Ball.framesSinceHit >= 20 || fielder != 1) &&
+    if (!(!g_Ball.catchAnimationTotalFrames && !g_Ball.deadBallReason && (g_Ball.framesSinceHit >= 20 || fielder != 1) &&
         !f->_1EE && !f->_1EF && !f->_20F && !f->_207 && (fielder != 0 || f->_1D2 + 5 <= g_Ball.framesSinceHit) &&
-        !g_Ball.groundRuleDoubleInd && g_Ball.ballState != 1 && !f->_210) {
-        if (g_Ball.matchFramesAndBallAngle.framesAfterReceivingThrow != 0) {
-            if (g_Ball.matchFramesAndBallAngle.framesAfterReceivingThrow < 30) {
-                return;
-            }
-            if (f->_19C == 0 && g_Ball.matchFramesAndBallAngle.framesAfterReceivingThrow < 20) {
-                return;
-            }
-        }
-    } else {
+        !g_Ball.groundRuleDoubleInd && g_Ball.ballState != 1 && !f->_210) ||
+        (g_Ball.matchFramesAndBallAngle.framesAfterReceivingThrow != 0 && (g_Ball.matchFramesAndBallAngle.framesAfterReceivingThrow < 30 || (f->_19C == 0 && g_Ball.matchFramesAndBallAngle.framesAfterReceivingThrow < 20)))) {
         return;
     }
-    if (f->_1ED || f->_25A || (f->_211 && f->_212 == 3) || g_Ball.pauseBallMovementWhenInPlant) {
-        return;
-    }
-    if ((g_Ball.collisionCode & 0x7F) == 7 || (g_Ball.collisionCode & 0x7F) == 8) {
+    if (f->_1ED || f->_25A || (f->_211 && f->_212 == 3) || g_Ball.pauseBallMovementWhenInPlant ||
+        (g_Ball.collisionCode & 0x7F) == 7 || (g_Ball.collisionCode & 0x7F) == 8) {
         return;
     }
     f->_258 = 0;
@@ -10932,14 +10920,16 @@ void fn_3_2C698(s32 fielder) {
         return;
     }
     if (!fn_3_2BB04(fielder) && !fn_3_2B694(fielder)) {
-        if (!g_FieldingLogic._08C->_2) {
+        if (g_FieldingLogic._08C->_2) {
+            if (fn_3_2A288(fielder)) {
+                g_FieldingLogic._08C->_4 = 0;
+            } else {
+                return;
+            }
+        } else {
             fn_3_2C2F0(fielder);
             return;
         }
-        if (!fn_3_2A288(fielder)) {
-            return;
-        }
-        g_FieldingLogic._08C->_4 = 0;
     }
     if (!f->_265 && !checkFieldingStat(g_GameLogic.teamFielding, f->_178, 7)) {
         fn_3_26664(fielder);
