@@ -157,8 +157,10 @@ void fn_80062D94(void* actor, s32 a, s32 b, f32 t) {
     s32 i;
 
     if (lbl_80366158._28 != 1) {
+        u16* id;
+
         i = 0;
-        while (lbl_80108BE0[i] != 0xFFFF && getFielderBone(((FxActor*)actor)->_254, lbl_80108BE0[i]) == 0xFFFF) {
+        while (*(id = &lbl_80108BE0[i]) != 0xFFFF && getFielderBone(((FxActor*)actor)->_254, *id) == 0xFFFF) {
             i++;
         }
         if (lbl_80108BE0[i] != 0xFFFF) {

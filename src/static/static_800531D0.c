@@ -1,8 +1,45 @@
 #include "static/static_800531D0.h"
 #include "static/UnknownHomes_Static.h"
+#include "game/UnknownHomes_Game.h"
+#include "static/spani_default.h"
+#include "static/static_80021188.h"
+
+typedef struct MenuScreen {
+    /* 0x00 */ u8 _00[0x8];
+    /* 0x08 */ u16 _08;
+    /* 0x0A */ u8 _0A[0x10 - 0xA];
+} MenuScreen; // size: 0x10
+
+extern struct {
+    /* 0x00 */ u8 _00;
+    /* 0x01 */ u8 _01[0x8 - 0x1];
+    /* 0x08 */ u8 _08;
+    /* 0x09 */ u8 _09;
+} lbl_8034E978;
+
+extern MenuScreen lbl_800FEF70[];
+
+static inline void setScreen(s16 id) {
+    lbl_8034E978._00 = id;
+    lbl_8034E978._09 = lbl_8034E978._08;
+    lbl_8034E978._08 = lbl_800FEF70[id]._08;
+}
 
 // .text:0x800569C8 size:0x11C
 void fn_800569C8(void) {
+    if (g_d_GameSettings._06 == 2) {
+        fn_800B0A5C_insertQueue(fn_80053FE8, 0);
+        if (g_d_GameSettings.GameModeSelected == 5) {
+            setScreen(0x15);
+        } else {
+            setScreen(7);
+        }
+    } else if (g_d_GameSettings.GameModeSelected == 5) {
+        setScreen(0x14);
+    } else {
+        setScreen(6);
+    }
+    fn_800B0A5C_insertQueue(fn_80056120, 0x3000);
 }
 
 // .text:0x80056120 size:0x8A8

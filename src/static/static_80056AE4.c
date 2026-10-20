@@ -1,8 +1,108 @@
 #include "static/static_80056AE4.h"
 #include "static/UnknownHomes_Static.h"
+#include "game/UnknownHomes_Game.h"
+#include "static/spani_default.h"
+#include "static/static_80021188.h"
+#include "static/static_800531D0.h"
+
+typedef struct SpaniObj {
+    /* 0x00 */ u8 _00[0x5C];
+    /* 0x5C */ s32 _5C;
+} SpaniObj;
+
+typedef struct SpaniTask {
+    /* 0x00 */ void (*func)(void);
+    /* 0x04 */ u8 _04[0x14 - 0x4];
+    /* 0x14 */ u16 _14; // first slot in lbl_80371C30
+    /* 0x16 */ u16 _16; // slot count
+} SpaniTask;
+
+typedef struct SpaniSlot {
+    /* 0x0 */ SpaniObj* obj;
+    /* 0x4 */ SpaniTask* task;
+} SpaniSlot; // size: 0x8
+
+typedef struct MenuScreen {
+    /* 0x00 */ u8 _00[0x8];
+    /* 0x08 */ u16 _08;
+    /* 0x0A */ u8 _0A[0x10 - 0xA];
+} MenuScreen; // size: 0x10
+
+extern struct {
+    /* 0x00 */ u8 _00;
+    /* 0x01 */ u8 _01[0x8 - 0x1];
+    /* 0x08 */ u8 _08;
+    /* 0x09 */ u8 _09;
+} lbl_8034E978;
+
+extern struct {
+    /* 0x00000 */ u8 _00000[0xCF3B];
+    /* 0x0CF3B */ u8 _CF3B;
+    /* 0x0CF3C */ u8 _CF3C[0xCF70 - 0xCF3C];
+    /* 0x0CF70 */ u8 _CF70;
+    /* 0x0CF71 */ u8 _CF71[0xCFA2 - 0xCF71];
+    /* 0x0CFA2 */ u8 _CFA2[1];
+} lbl_803297E0;
+
+extern struct {
+    /* 0x00 */ u8 _00[6][9];
+    /* 0x36 */ u8 _36[0xE4 - 0x36];
+    /* 0xE4 */ u8 _E4;
+} lbl_80361B20;
+
+extern MenuScreen lbl_800FEF70[];
+extern SpaniSlot lbl_80371C30[];
+extern SpaniTask* lbl_803CC1B8;
+extern struct SpaniDesc lbl_80108048[];
+
+extern void fn_8006CF6C(void);
+
+static inline SpaniObj* getSpaniObj(SpaniTask* task, s32 id) {
+    return lbl_80371C30[task->_14 + id].obj;
+}
+
+static inline void setScreen(s16 id) {
+    lbl_8034E978._00 = id;
+    lbl_8034E978._09 = lbl_8034E978._08;
+    lbl_8034E978._08 = lbl_800FEF70[id]._08;
+}
 
 // .text:0x8006236C size:0x20C
 void SetMenuNumber(void) {
+    s32 i;
+    u8 found = FALSE;
+    s16 id;
+    u8 mode;
+
+    if (g_d_GameSettings._06 != 2) {
+        if (g_d_GameSettings.GameModeSelected == 5) {
+            id = 0x16;
+        } else {
+            for (i = 0; i < 54; i++) {
+                if (lbl_80361B20._00[0][i]) {
+                    found = TRUE;
+                    break;
+                }
+            }
+            if (found) {
+                id = 4;
+            } else {
+                id = 3;
+            }
+        }
+        setScreen(id);
+    }
+    mode = lbl_803297E0._CFA2[lbl_803297E0._CF3B];
+    if (mode != 2 && mode != 3) {
+        if (g_d_GameSettings.GameModeSelected == 5 && lbl_803297E0._CF70 != 0 && lbl_80361B20._E4 == 0) {
+            fn_800B0A5C_insertQueue(fn_8006CF6C, 0x3000);
+        }
+        fn_800B0A5C_insertQueue(fn_80061B9C, 0x3000);
+    } else if (mode == 2) {
+        fn_800B0A5C_insertQueue(fn_80058050, 0x3000);
+    } else {
+        fn_800B0A5C_insertQueue(starMenu, 0x3000);
+    }
 }
 
 // .text:0x80061B9C size:0x7D0
@@ -119,6 +219,15 @@ void fn_80057CAC(void) {
 
 // .text:0x80057C08 size:0xA4
 void starMenu(void) {
+    SpaniTask* task;
+    s32 i;
+
+    fn_80034E20(task = lbl_803CC1B8, lbl_80108048);
+    for (i = 0; i < 9; i++) {
+        getSpaniObj(task, i + 12)->_5C = i << 16;
+        fn_800363D8(task, i + 0x15, 1, 0x83, inMemRoster[0][i].stats.CharID);
+    }
+    lbl_803CC1B8->func = challengeCheckStarsMenuLoading;
 }
 
 // .text:0x800576F0 size:0x518

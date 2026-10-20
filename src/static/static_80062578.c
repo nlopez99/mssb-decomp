@@ -152,11 +152,11 @@ void fn_80062948(void) {
 // .text:0x800628D4 size:0x74
 s32 fn_800628D4(s32 charID) {
     SND_VOICEID voice;
-    s32 group;
+    SND_FXID fid;
 
     lbl_8034E9A0._48AE = 1;
-    group = fn_800698F8(charID);
-    voice = sndFXStartEx(lbl_80108DF4[group], lbl_80108B18[0], 0x3F, 0);
+    fid = lbl_80108DF4[fn_800698F8(charID)];
+    voice = sndFXStartEx(fid, lbl_80108B18[0], 0x3F, 0);
     sndFXCtrl(voice, 0x5B, 0);
     return voice;
 }
