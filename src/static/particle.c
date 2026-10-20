@@ -2009,7 +2009,8 @@ void fn_8002BC84(Emitter* e, Vec* pos, Vec* dir, EffectParams* params)
 
 // .text:0x8002B7F8 size:0x48C
 // 99.60%: registers only; the target leaves the first fn_800337CC result in r4 and copies it
-// to r30 after the glow test, where this build allocates it to r30 directly.
+// to r30 after the glow test, where this build allocates it to r30 directly. Inline helpers for
+// the block, the glow attach or the call, early returns and Emitter-typed buffers kept it.
 void fn_8002B7F8(Vec* pos, SparkParams* params, u8 glow)
 {
     u8 tmp[sizeof(Emitter)];
@@ -2588,7 +2589,8 @@ void fn_8002955C(Vec* pos, Vec* dir, PuffParams* params)
 
 // .text:0x80028F48 size:0x614
 // 99.81%: registers only: the target gives the two table lookups other scratch registers
-// (r0, r6), the residue fn_800332B8's yaw lookups show too.
+// (r0, r6), the residue fn_800332B8's yaw lookups show too. Helper forms (__abs, param reuse,
+// nested calls) and which lookup is written out did not change it.
 BOOL fn_80028F48(void* arg)
 {
     Emitter* e = arg;
