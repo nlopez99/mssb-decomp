@@ -509,21 +509,19 @@ void fn_3_145AD0(int player) {
 }
 
 // .text:0x001453BC size:0x714 mapped:0x80784450
-// 91.08%: registers and scheduling; coin sits in r25 where this has r27, and the
-// thrower's block loads the fielder index before its stores.
+// 99.92%: the distance test's coordinate z pointer and the target row offset swap r7 and r8,
+// and the target loads the row's x before z; the x-first order of the terms is worse.
 void fn_3_1453BC(int coin) {
-    Unk37A8Entry* entry;
-    Unk37A8Fielder* fielder;
-    VecXYZ pos;
-    Vec dir;
-    f32 dx;
-    f32 dz;
-    f32 dist;
-    s16 points;
-    s16 left;
     int team;
-    s8 player;
+    Unk37A8Entry* entry;
+    s8 points;
     int target;
+    Unk37A8Fielder* fielder;
+    Vec dir;
+    VecXYZ pos;
+    f32 dist;
+    s16 left;
+    s8 player;
     int i;
 
     team = MG._1BB6[coin];
@@ -543,12 +541,11 @@ void fn_3_1453BC(int coin) {
             fn_3_90064(0x309);
             fn_3_154238(coin);
             if (g_Minigame._1CA5[player] == 0 && MG._1C9A[player] == 0) {
+                fielder = &g_Fielders[g_Minigame.minigameFielderIndex[player]];
                 MG._1C9A[player] = 1;
                 MG._1B3C[player] = lbl_3_data_21E68[14];
                 MG._1B50[player] = 0;
-                fielder = &g_Fielders[g_Minigame.minigameFielderIndex[player]];
-                dir.x = 0.0f;
-                dir.y = 0.0f;
+                dir.x = dir.y = 0.0f;
                 dir.z = -1.0f;
                 PSVECNormalize(&dir, &dir);
                 fielder->_038 = dir.x;
@@ -580,18 +577,13 @@ void fn_3_1453BC(int coin) {
     }
     target = MG._1BE8[coin];
     if (target >= 0) {
-        dx = g_Minigame.wallBall_coinCoordinates[coin].x - lbl_3_data_21BC4[target][1].x;
-        dz = g_Minigame.wallBall_coinCoordinates[coin].z - lbl_3_data_21BC4[target][1].z;
-        dist = dolsqrtf2(dx * dx + dz * dz);
+        dist = dolsqrtf2(SQ(g_Minigame.wallBall_coinCoordinates[coin].z - lbl_3_data_21BC4[target][1].z) +
+                         SQ(g_Minigame.wallBall_coinCoordinates[coin].x - lbl_3_data_21BC4[target][1].x));
         entry = &MG._0000[target];
         if (entry->_2A == 2 && dist < lbl_3_data_21E24[1]) {
             if (MG._1B84[coin] == entry->_2C || entry->_2C == 4 || MG._1B84[coin] == 5) {
-                if (MG._1B84[coin] == 5) {
-                    points = lbl_3_data_21E68[24];
-                } else {
-                    points = 1;
-                }
-                pos = g_Minigame.wallBall_coinCoordinates[coin];
+                points = MG._1B84[coin] == 5 ? lbl_3_data_21E68[24] : 1;
+                memcpy(&pos, &g_Minigame.wallBall_coinCoordinates[coin], sizeof(pos));
                 pos.y *= -1.0f;
                 if (MG._1B84[coin] == 5) {
                     fn_3_147CFC((Vec*)&pos);
@@ -604,14 +596,14 @@ void fn_3_1453BC(int coin) {
                 } else {
                     fn_3_90064(0x2DC);
                 }
-                left = entry->_2D - (s8)points;
+                left = entry->_2D - points;
                 if (left <= 0) {
                     entry->_2D = 0;
                 } else {
-                    entry->_2D = left;
+                    entry->_2D -= points;
                 }
                 MG._1B50[team]++;
-                MG._1B58[team][g_Minigame._1B80[team]] = (s8)points * lbl_3_data_21E18[entry->_2B][1];
+                MG._1B58[team][g_Minigame._1B80[team]] = points * lbl_3_data_21E18[entry->_2B][1];
                 g_Minigame._1B80[team]++;
                 entry->_2F[0] = -1;
                 entry->_2F[1] = -1;
@@ -1377,12 +1369,12 @@ void fn_3_142C18(void) {
 }
 
 // .text:0x001428F0 size:0x328 mapped:0x80781984
-// 98.19%: the target reads cpu->_0 and cpu->_3 off g_Minigame + player * 4 before forming
-// cpu, and allocates kind, count and found in other saved registers.
+// 98.42%: the target reads _0 and _3 off g_Minigame + player * 4 and only then turns that
+// register into cpu (addi in place); every valid placement of cpu tried keeps a separate base.
 u8 fn_3_1428F0(s8 player, u8 force) {
     Unk37A8Cpu* cpu;
-    u8 strength;
     s8 port;
+    u8 strength;
     s8 ready;
     s8 coin;
     s8 target;
