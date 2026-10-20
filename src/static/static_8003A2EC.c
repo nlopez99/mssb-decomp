@@ -38,6 +38,12 @@ typedef struct QueueTask {
     /* 0x10 */ u16 _10;
 } QueueTask;
 
+typedef struct SaveBlock {
+    /* 0x0 */ u16 sum;
+    /* 0x2 */ u8 _2[2];
+    /* 0x4 */ u8 data[0x4508];
+} SaveBlock; // size: 0x450C
+
 // The task fn_8003C00C runs
 typedef struct MenuTask {
     /* 0x00 */ u8 _00[0x14];
@@ -57,20 +63,40 @@ typedef struct MenuTask {
     /* 0x21 */ u8 _21;
 } MenuTask;
 
-typedef struct SaveBlock {
-    /* 0x0 */ s16 sum;
-    /* 0x2 */ u8 _2[2];
-    /* 0x4 */ u8 data[0x4508];
-} SaveBlock; // size: 0x450C
+typedef struct SaveHeader {
+    /* 0x000 */ u8 _00[0x36];
+    /* 0x036 */ u8 _36[0x10];
+    /* 0x046 */ u8 _46[3];
+    /* 0x049 */ u8 _49[3];
+    /* 0x04C */ u8 _4C;
+    /* 0x04D */ u8 _4D;
+    /* 0x04E */ u8 _4E;
+    /* 0x04F */ u8 _4F[0xF7];
+    /* 0x146 */ u8 _146[2];
+    /* 0x148 */ u8 _148[0x454];
+    /* 0x59C */ u8 _59C;
+    /* 0x59D */ u8 _59D[6];
+    /* 0x5A3 */ u8 _5A3[6];
+    /* 0x5A9 */ u8 _5A9[3];
+    /* 0x5AC */ int _5AC;
+} SaveHeader; // size: 0x5B0
 
 // The save file, checksummed as a header and three blocks
 typedef struct SaveFile {
     /* 0x000 */ u8 _00[0x44];
-    /* 0x044 */ s16 headerSum;
+    /* 0x044 */ u16 headerSum;
     /* 0x046 */ u8 _46[2];
-    /* 0x048 */ u8 header[0x5B0];
+    /* 0x048 */ SaveHeader header;
     /* 0x5F8 */ SaveBlock blocks[3];
 } SaveFile;
+
+// The game's copy of the saved data
+typedef struct SaveData {
+    /* 0x0000 */ u8 blocks[3][0x4508];
+    /* 0xCF18 */ u8 _CF18[0x36];
+    /* 0xCF4E */ u8 _CF4E[0x10];
+    /* 0xCF5E */ u8 _CF5E[3];
+} SaveData;
 
 typedef struct MenuSlot {
     /* 0x0 */ s32 _0;
@@ -78,11 +104,27 @@ typedef struct MenuSlot {
 } MenuSlot; // size: 0x8
 
 extern u8 GetDrawShadows(void);
-extern void fn_800BD1E8(void (*callback)(void));
+extern void fn_800BD1E8(void (*callback)(MtxPtr, GXTevStageID*, GXTexCoordID*, GXTexMapID*, u8*, u8*));
 extern void fn_800BEB3C(void);
-extern s16 fn_800ABB14(void* data, s32 size);
+extern u16 fn_800ABB14(void* data, s32 size);
 extern s32 fn_800ACC6C(s32 arg0, s32 size, s32 align);
 extern void* fn_800B0A5C_insertQueue(void (*callback)(void), s32 priority);
+
+// A texture file entry: its header word, then the texture
+typedef struct TextureEntry {
+    /* 0x00 */ u32 _00;
+    /* 0x04 */ TextureDesc desc;
+} TextureEntry;
+
+extern struct {
+    /* 0x00 */ u8 _00[0x54];
+    /* 0x54 */ u32 badBlocks;
+} lbl_803C50E8;
+
+extern GXTexObj lbl_803C50B0;
+extern GXTlutObj lbl_803C50DC;
+extern u16 lbl_800F7AC0[16];
+extern TextureDesc lbl_800F7AE0;
 
 extern QueueTask* lbl_803CC1B8;
 extern s32 lbl_803CBC48;
@@ -92,12 +134,20 @@ extern s32 lbl_803CBC50;
 extern u8 lbl_8023DD80[];
 extern ScreenEffect lbl_803C5090;
 
+extern SaveFile lbl_802D4B00;
+extern SaveData lbl_80354768;
+extern u8 lbl_80361B20[0xF7];
+extern u8 lbl_803616CC[0x454];
 extern struct {
-    /* 0x00 */ u8 _00[0x94];
-    /* 0x94 */ u8 _94;
-    /* 0x95 */ u8 _95;
-    /* 0x96 */ u8 _96;
-} lbl_802D4B00;
+    /* 0x00 */ u8 _00[0x1F];
+    /* 0x1F */ u8 _1F;
+} lbl_80366158;
+extern struct {
+    /* 0x000 */ u8 _000[0x398];
+    /* 0x398 */ u8 _398;
+} lbl_800EF808;
+extern u8 starMissionCompletionTracker[0x4508];
+extern void fn_8002128C(u8 arg0);
 
 MenuSlot lbl_802D4AE0[4];
 DecalSystem lbl_802D3D80;
@@ -123,14 +173,78 @@ void fn_8004153C(void) {
 void fn_80041348(void) {}
 
 // .text:0x80041150 size:0x1F8
-void fn_80041150(void) {}
+void fn_80041150(u8 mask, u8 slot) {
+    SaveFile* save = &lbl_802D4B00;
+    SaveBlock* block = save->blocks;
+    u8* src46 = save->header._46;
+    u8* src00 = save->header._00;
+    u8* src36 = save->header._36;
+    u8* dst;
+    s32 i;
+
+    if (mask & 5) {
+        fn_8002128C(save->header._4C);
+        lbl_800EF808._398 = save->header._4D;
+        lbl_80366158._1F = save->header._4E;
+        memcpy(lbl_80361B20, save->header._4F, sizeof(save->header._4F));
+        memcpy(lbl_803616CC, save->header._148, sizeof(save->header._148));
+        g_d_GameSettings._12 = save->header._59C;
+        memcpy(&g_d_GameSettings._13_arr[1], save->header._59D, sizeof(save->header._59D));
+        memcpy(g_d_GameSettings._1A, save->header._5A3, sizeof(save->header._5A3));
+        g_d_GameSettings._00 = save->header._5AC;
+        memcpy(lbl_80354768._CF18, src00, sizeof(lbl_80354768._CF18));
+        memcpy(lbl_80354768._CF4E, src36, sizeof(lbl_80354768._CF4E));
+    }
+    if (mask & 2) {
+        if (slot != 3) {
+            dst = lbl_80354768.blocks[slot];
+            memcpy(dst, block[slot].data, sizeof(block[slot].data));
+            memcpy(starMissionCompletionTracker, dst, sizeof(starMissionCompletionTracker));
+            return;
+        }
+        for (i = 0; i < 3; i++) {
+            memcpy(lbl_80354768.blocks[i], block[i].data, sizeof(block[i].data));
+        }
+        memcpy(lbl_80354768._CF5E, src46, sizeof(lbl_80354768._CF5E));
+        memcpy(lbl_80354768._CF18, src00, sizeof(lbl_80354768._CF18));
+        memcpy(lbl_80354768._CF4E, src36, sizeof(lbl_80354768._CF4E));
+    }
+}
 
 // .text:0x80041074 size:0xDC
-void fn_80041074(void) {}
+// 99.64%: both checksum compares take their operands in the other order (cmplw r0,r3)
+s32 fn_80041074(SaveFile* save, s32 arg1, s32 mask) {
+    SaveHeader* header = &save->header;
+    u32 bit;
+    SaveBlock* block;
+    s32 i;
+
+    lbl_803C50E8.badBlocks = 0;
+    for (i = 0; i < 4; i++) {
+        bit = 1 << i;
+        if (mask & bit) {
+            if (i == 0) {
+                if (save->headerSum != fn_800ABB14(header, sizeof(save->header))) {
+                    lbl_803C50E8.badBlocks = bit;
+                    break;
+                }
+            } else {
+                block = &save->blocks[i - 1];
+                if (block->sum != fn_800ABB14(block->data, sizeof(block->data))) {
+                    lbl_803C50E8.badBlocks |= bit;
+                }
+            }
+        }
+    }
+    if (lbl_803C50E8.badBlocks != 0) {
+        return 0xB;
+    }
+    return 0x11;
+}
 
 // .text:0x80040FE0 size:0x94
 s32 fn_80040FE0(SaveFile* save) {
-    u8* header = save->header;
+    SaveHeader* header = &save->header;
     SaveBlock* block;
     s32 i;
 
@@ -218,13 +332,13 @@ u8 fn_8003AE70(s32 kind) {
 
     switch (kind) {
     case 0:
-        value = lbl_802D4B00._95;
+        value = lbl_802D4B00.header._4D;
         break;
     case 1:
-        value = lbl_802D4B00._94;
+        value = lbl_802D4B00.header._4C;
         break;
     case 2:
-        value = lbl_802D4B00._96;
+        value = lbl_802D4B00.header._4E;
         break;
     }
     return value;
@@ -246,10 +360,33 @@ u8 fn_8003AE54(void) {
 }
 
 // .text:0x8003AD84 size:0xD0
-void fn_8003AD84(void) {}
+void fn_8003AD84(TextureEntry* entry) {
+    GXInitTexObjCI(&lbl_803C50B0, entry->desc.image, entry->desc.width, entry->desc.height, GX_TF_C4,
+                   (GXTexWrapMode)entry->desc.wrapS, (GXTexWrapMode)entry->desc.wrapT, GX_FALSE, GX_TLUT0);
+    GXInitTlutObj(&lbl_803C50DC, lbl_800F7AC0, GX_TL_IA8, 16);
+    GXInitTexObjLOD(&lbl_803C50B0, (GXTexFilter)entry->desc.minFilter, (GXTexFilter)entry->desc.magFilter,
+                    entry->desc.minLOD, entry->desc.maxLOD, entry->desc.lodBias, GX_FALSE, GX_FALSE, GX_ANISO_1);
+    lbl_803CBCAC = 1;
+}
 
 // .text:0x8003AC90 size:0xF4
-void fn_8003AC90(void) {}
+void fn_8003AC90(void) {
+    GXColor color;
+
+    color.a = 0xFF;
+    color.b = lbl_803CBCB4;
+    color.g = lbl_803CBCB4;
+    color.r = lbl_803CBCB4;
+    GXSetChanMatColor(GX_COLOR0A0, color);
+    GXSetNumChans(1);
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_REG, GX_SRC_REG, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetNumTevStages(1);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_RASC, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO);
+    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_RASA, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO);
+    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+}
 
 // .text:0x8003A8A0 size:0x3F0
 void fn_8003A8A0(void) {}
@@ -293,6 +430,7 @@ void fn_8003A688(s32 i, f32 width, f32 height) {
 }
 
 // .text:0x8003A550 size:0x138
+// 98.53%: registers only; tex and the decal's offset and pointer take r27, r28 and r25 for r25, r27, r28
 void fn_8003A550(s32 tex, Vec* pos, Vec* dir, u8 arg3) {
     Vec* ndir;
     u16 head = lbl_802D3D80.head;
@@ -346,7 +484,22 @@ void fn_8003A4C8(void) {
 }
 
 // .text:0x8003A37C size:0x14C
-void fn_8003A37C(void) {}
+void fn_8003A37C(MtxPtr mtx, GXTevStageID* stage, GXTexCoordID* coord, GXTexMapID* map, u8* count, u8* mtxIdx) {
+    lbl_800F7AE0.image = GetUITexture();
+    SetDisplayStateTexture(&lbl_800F7AE0, *map, 0);
+    GXSetTevOrder(*stage, *coord, *map, GX_COLOR0A0);
+    GXSetTevColorIn(*stage, GX_CC_ZERO, GX_CC_TEXC, GX_CC_TEXA, GX_CC_CPREV);
+    GXSetTevColorOp(*stage, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    GXSetTevAlphaIn(*stage, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_APREV);
+    GXSetTevAlphaOp(*stage, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    GXSetTexCoordGen2(*coord, GX_TG_MTX3X4, GX_TG_POS, GX_TEXMTX0 + *mtxIdx * 3, GX_FALSE, GX_PTIDENTITY);
+    GXLoadTexMtxImm(mtx, GX_TEXMTX0 + *mtxIdx * 3, GX_MTX3x4);
+    (*count)++;
+    (*mtxIdx)++;
+    (*stage)++;
+    (*coord)++;
+    (*map)++;
+}
 
 // .text:0x8003A2EC size:0x90
 void fn_8003A2EC(void) {

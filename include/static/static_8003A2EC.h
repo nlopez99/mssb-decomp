@@ -3,9 +3,10 @@
 
 #include "mssbTypes.h"
 #include "Dolphin/mtx.h"
+#include "Dolphin/gx.h"
 
 void fn_8003A2EC(void);
-void fn_8003A37C(void);
+void fn_8003A37C(MtxPtr mtx, GXTevStageID* stage, GXTexCoordID* coord, GXTexMapID* map, u8* count, u8* mtxIdx);
 void fn_8003A4C8(void);
 s32 fn_8003A538(void);
 void fn_8003A540(s32 value);
@@ -17,7 +18,7 @@ void fn_8003A848(u8 r, u8 g, u8 b);
 void fn_8003A85C(u8 enabled);
 void fn_8003A8A0(void);
 void fn_8003AC90(void);
-void fn_8003AD84(void);
+void fn_8003AD84(struct TextureEntry* entry);
 u8 fn_8003AE54(void);
 void fn_8003AE5C(u8 value);
 void fn_8003AE64(void);
@@ -33,8 +34,8 @@ void fn_8003F2B8(void);
 void fn_8004053C(void);
 void fn_80040C14(void);
 s32 fn_80040FE0(struct SaveFile* save);
-void fn_80041074(void);
-void fn_80041150(void);
+s32 fn_80041074(struct SaveFile* save, s32 arg1, s32 mask);
+void fn_80041150(u8 mask, u8 slot);
 void fn_80041348(void);
 void fn_8004153C(void);
 
