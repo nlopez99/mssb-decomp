@@ -853,8 +853,8 @@ void fn_8005B760(SpaniTask* task, s32 team) {
 }
 
 // .text:0x8005B298 size:0x4C8
-// 98.76%: registers only; the base keeps one more roster pointer live, so
-// every saved register is one higher.
+// 99.02%: the base keeps one more roster pointer live, so every saved
+// register is one higher, and the target has one instruction more.
 void fn_8005B298(SpaniTask* task) {
     u8 flag;
     ChallengeTrackingStruct* scout;
@@ -875,7 +875,7 @@ void fn_8005B298(SpaniTask* task) {
         } else {
             fn_800363D8(task, i + 0x63, 1, 0x83, inMemRoster[1][i].stats.CharID);
             scout = &starMissionCompletionTracker.characters[inMemRoster[1][i].stats.CharID];
-            flags = ((s8*)scout->scoutFlagPointer)[starMissionCompletionTracker._4415 * 6 + starMissionCompletionTracker._441C + 4];
+            flags = *((s8*)starMissionCompletionTracker.characters[inMemRoster[1][i].stats.CharID].scoutFlagPointer + starMissionCompletionTracker._4415 * 6 + starMissionCompletionTracker._441C + 4);
             unseen = flags - scout->scoutFlagsAchieved;
             for (j = 0; j < 5; j++) {
                 if (j < flags && unseen > j) {
