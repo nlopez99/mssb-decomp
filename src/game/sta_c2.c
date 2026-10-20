@@ -590,22 +590,25 @@ static inline BOOL isSpriteDone(StaC2Task* task, s32 i) {
 }
 
 // .text:0x000D67CC size:0x2244 mapped:0x80715860
-// 94.60%: a first draft; the frame is 32 bytes smaller than the target's, and the saved
-// registers and spilled locals (counts and model indices at 228-320(r1)) differ throughout.
+// 97.84%: registers differ throughout; the target does not strength-reduce &models[i] in the
+// first draw loop and the anim loop, and keeps a copy of entry for the inlined fn_3_D1004 in the
+// swing loop (one more spill at 316(r1)).
 void fn_3_D67CC(void** files) {
     Mtx m;
     Vec offset;
-    StaC2Draw* draw;
     StaC2Draw* entry;
+    StaC2Draw* draw;
     StaC2Draw* host;
-    StaC2Place34* place34;
     StaC2Swing* swing;
     StaC2Place20* place20;
     StaC2Place* place;
     StaC2Place* light;
+    StaC2Place34* place34;
     StaC2Spring* springs;
     StaC2Anim* anim;
     s32* indices;
+    u32 count;
+    u32 j;
     u32 n0;
     u32 n1;
     u32 n2;
@@ -615,7 +618,6 @@ void fn_3_D67CC(void** files) {
     u32 n0x3;
     u32 i;
     u32 k;
-    u32 j;
     u32 crowdModel;
     u32 springModel;
     u32 swingModel;
@@ -624,7 +626,9 @@ void fn_3_D67CC(void** files) {
     u32 placeModel;
     u32 bushModel;
     u32 lightModel;
-    u32 count;
+    u32 mdl;
+    StaC2Draw* sp;
+    f32 rot;
     u8 end;
 
     lbl_3_common_bss_350E4._18 = fn_3_B939C;
@@ -640,12 +644,12 @@ void fn_3_D67CC(void** files) {
         return;
     }
 
-    j = 0;
-    n0 = 0;
-    n1 = 0;
-    n2 = 0;
     n3 = 0;
     n4 = 0;
+    n2 = 0;
+    n1 = 0;
+    n0 = 0;
+    j = 0;
     place34 = lbl_3_data_182C8;
     for (; n0 < 2; n0++) {
         if (place34[n0].type == 13) {
@@ -792,6 +796,7 @@ void fn_3_D67CC(void** files) {
     entry = draw;
     lbl_3_bss_A02C = 0;
     anim = lbl_3_bss_A764;
+    mdl = 0;
     for (i = 0; i < 2; i++, place34++) {
         if (place34->type == 13) {
             end = TRUE;
@@ -828,6 +833,7 @@ void fn_3_D67CC(void** files) {
         }
         fn_3_D4E00(entry);
         count++;
+        mdl++;
         entry = ++draw;
         anim++;
         lbl_3_bss_A02D++;
@@ -842,8 +848,9 @@ void fn_3_D67CC(void** files) {
         if (end) {
             break;
         }
-        entry->type = 1;
         host = &lbl_3_common_bss_350E4._00[i / 3];
+        rot = -place34->_20;
+        entry->type = 1;
         draw->_74 = &lbl_8036E548._6C->models[crowdModel + i];
         draw->_78 = NULL;
         draw->_7C = fn_3_D1848;
@@ -853,7 +860,7 @@ void fn_3_D67CC(void** files) {
         entry->speed = draw->_74->_54;
         draw->_90_5 = 0;
         draw->control.type = 0;
-        PSMTXRotRad(m, 'Y', 0.017453292f * -place34->_20);
+        PSMTXRotRad(m, 'Y', 0.017453292f * rot);
         offset.x = 4.5f;
         offset.y = 9.0f;
         offset.z = 0.0f;
@@ -868,6 +875,7 @@ void fn_3_D67CC(void** files) {
         draw->_96 = -1;
         draw->_98 = 1;
         count++;
+        mdl++;
         entry->trigger = &host->_CA;
         entry->_9C = i;
         entry->wait = i % 3 * 30;
@@ -876,24 +884,28 @@ void fn_3_D67CC(void** files) {
     }
 
     for (i = 0; i < 14; i++) {
+        sp = entry;
         springs = lbl_3_bss_A9D0;
         if (i / 7 == 0) {
             springs = lbl_3_bss_ABD0;
         }
-        entry->from = &springs[i % 7];
-        entry->to = &springs[i % 7 + 1];
-        entry->type = 2;
+        sp->from = &springs[i % 7];
+        sp->to = &springs[i % 7 + 1];
+        sp->type = 2;
         draw->_74 = &lbl_8036E548._6C->models[springModel];
+        if (mdl != springModel) {
+            mdl++;
+        }
         draw->_78 = NULL;
         draw->_7C = fn_3_D1280;
         draw->_80 = NULL;
         draw->_90_7 = 1;
         draw->_90_6 = 0;
         draw->_90_5 = 1;
-        fn_3_D141C(entry);
-        PSVECAdd(entry->to->_0C, entry->from->_0C, &entry->_A0);
-        PSVECScale(&entry->_A0, 0.5f, &entry->_A0);
-        CTRLSetTranslation(&draw->control, entry->_A0.x, -entry->_A0.y, entry->_A0.z);
+        fn_3_D141C(sp);
+        PSVECAdd(sp->to->_0C, sp->from->_0C, &sp->_A0);
+        PSVECScale(&sp->_A0, 0.5f, &sp->_A0);
+        CTRLSetTranslation(&draw->control, sp->_A0.x, -sp->_A0.y, sp->_A0.z);
         CTRLSetScale(&draw->control, 0.75f, 0.75f, 0.75f);
         draw->_92 = 0xFF;
         draw->_84 = fn_3_D127C;
@@ -902,8 +914,8 @@ void fn_3_D67CC(void** files) {
         draw->_96 = -1;
         draw->_98 = 1;
         count++;
-        entry->_9C = i;
         entry = ++draw;
+        sp->_9C = i;
     }
 
     end = FALSE;
@@ -2140,7 +2152,7 @@ void fn_3_D1F2C(StaC2SpringParams* params, StaC2Spring* springs, s32 count, Vec*
 }
 
 // .text:0x000D1B24 size:0x408 mapped:0x80710BB8
-// 98.90%: callee-saved registers differ (springs, the loop pointer and force).
+// 98.99%: registers only: the target gives springs r31, s r30, count - 1 r27 and force r26.
 void fn_3_D1B24(StaC2SpringParams* params, StaC2Spring* springs, s32 count, Vec* force) {
     Vec v;
     Vec d;
@@ -2150,11 +2162,11 @@ void fn_3_D1B24(StaC2SpringParams* params, StaC2Spring* springs, s32 count, Vec*
     StaC2Spring* b;
     s32 i;
     f32 len;
-    f32 k;
     f32 f;
     f32 damp;
     f32 speed;
     f32 friction;
+    f32 k;
     f32 fmag;
     f32 vmag;
 
@@ -2192,12 +2204,11 @@ void fn_3_D1B24(StaC2SpringParams* params, StaC2Spring* springs, s32 count, Vec*
             PSVECAdd(&b->_30, &d, &b->_30);
         }
     }
-    s = springs;
-    for (i = 0; i < count; s++, i++) {
-        if (!s->_3C) {
-            memcpy(&v, &s->_24, sizeof(Vec));
-            memcpy(&d, &s->_30, sizeof(Vec));
-            PSVECScale(&d, s->_04, &d);
+    for (i = 0; i < count; springs++, i++) {
+        if (!springs->_3C) {
+            memcpy(&v, &springs->_24, sizeof(Vec));
+            memcpy(&d, &springs->_30, sizeof(Vec));
+            PSVECScale(&d, springs->_04, &d);
             PSVECScale(&d, params->dt, &d);
             PSVECAdd(&v, &d, &v);
             memset(&acc, 0, sizeof(Vec));
@@ -2208,12 +2219,12 @@ void fn_3_D1B24(StaC2SpringParams* params, StaC2Spring* springs, s32 count, Vec*
                 PSVECScale(&d, params->_14 * (speed * speed), &d);
                 PSVECAdd(&acc, &d, &acc);
             }
-            if (s->_0C[0].y <= s->_08 && s->_30.y < 0.0f) {
-                friction = s->_30.y * params->_10;
+            if (springs->_0C[0].y <= springs->_08 && springs->_30.y < 0.0f) {
+                friction = springs->_30.y * params->_10;
                 if (friction < 0.0f) {
                     friction = -friction;
                 }
-                memcpy(&d, &s->_30, sizeof(Vec));
+                memcpy(&d, &springs->_30, sizeof(Vec));
                 d.y = 0.0f;
                 fmag = PSVECMag(&d);
                 v.y = 0.0f;
@@ -2227,11 +2238,11 @@ void fn_3_D1B24(StaC2SpringParams* params, StaC2Spring* springs, s32 count, Vec*
                     PSVECScale(&d, -friction, &d);
                     PSVECAdd(&acc, &d, &acc);
                 } else {
-                    PSVECScale(&s->_30, -1.0f, &d);
+                    PSVECScale(&springs->_30, -1.0f, &d);
                     PSVECAdd(&acc, &d, &acc);
                 }
             }
-            PSVECAdd(&s->_30, &acc, &s->_30);
+            PSVECAdd(&springs->_30, &acc, &springs->_30);
         }
     }
 }
