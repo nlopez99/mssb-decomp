@@ -270,7 +270,10 @@ typedef struct ModelTable {
 } ModelTable; // size: 0xC4
 
 typedef struct ModelBufRow {
-    /* 0x0000 */ u8 _0000[0x10 - 0x0];
+    /* 0x0000 */ void* _00;
+    /* 0x0004 */ void* _04;
+    /* 0x0008 */ void* _08;
+    /* 0x000C */ void* _0C;
     /* 0x0010 */ void* buf;
 } ModelBufRow; // size: 0x14
 
@@ -2021,11 +2024,114 @@ BOOL fn_80017098(int team, int player, int arg2, int slot, int arg4, int arg5) {
 }
 
 // .text:0x80016F7C size:0x11C
-void fn_80016F7C(void) {
+BOOL fn_80016F7C(void) {
+    ModelActor* src;
+    ModelActor* dst;
+    int i;
+
+    if (lbl_8036E548._2D8E == 0) {
+        lbl_8036E548._2D8E = 1;
+        lbl_8036E548._2D8D = 0;
+        lbl_8036E548._2D88 = 0;
+    }
+    while (TRUE) {
+        if (fn_80016B60(&lbl_8036E548.actorData[lbl_8036E548._2D88])) {
+            if (g_d_GameSettings.GameModeSelected == 6) {
+                src = &lbl_8036E548.actorData[lbl_8036E548._2D88];
+                dst = &lbl_8036E548.actorData[lbl_8036E548._2D88 + 4];
+                for (i = 0; i < 7; i++) {
+                    dst->anims[i] = src->anims[i];
+                }
+            }
+            if (++lbl_8036E548._2D88 >= 4) {
+                return TRUE;
+            }
+        } else {
+            return FALSE;
+        }
+    }
 }
 
 // .text:0x80016B60 size:0x41C
-void fn_80016B60(void) {
+BOOL fn_80016B60(ModelActor* actor) {
+    int entry;
+
+    if (lbl_8036E548._2D8D == 0) {
+        lbl_8036E548._2D8D = 1;
+    }
+    if (lbl_8036E548._2D8D == 1) {
+        actor->anims[2] = lbl_8036E548.rows[actor->_255]._00;
+        if (g_d_GameSettings.GameModeSelected == 7) {
+            entry = actor->_252 * 19 + 13;
+        } else {
+            entry = actor->_252 * 19 + 4;
+        }
+        ARAMTransfer(&lbl_803CB790[entry], actor->anims[2], 0, 0);
+        lbl_8036E548._2D8D = 2;
+    } else if (lbl_8036E548._2D8D == 2) {
+        if ((s32)lbl_803C6CF8._715 == 1) {
+            ANIMGet(actor->anims[2]);
+            lbl_8036E548._2D8D = 3;
+        }
+    } else if (lbl_8036E548._2D8D == 3) {
+        actor->anims[1] = lbl_8036E548.rows[actor->_255]._04;
+        if (g_d_GameSettings.GameModeSelected == 2) {
+            entry = actor->_252 * 19 + 11;
+        } else if (g_d_GameSettings.GameModeSelected == 6) {
+            entry = actor->_252 * 19 + 14;
+        } else {
+            entry = actor->_252 * 19 + 12;
+        }
+        ARAMTransfer(&lbl_803CB790[entry], actor->anims[1], 0, 0);
+        lbl_8036E548._2D8D = 4;
+    } else if (lbl_8036E548._2D8D == 4) {
+        if ((s32)lbl_803C6CF8._715 == 1) {
+            ANIMGet(actor->anims[1]);
+            lbl_8036E548._2D8D = 5;
+        }
+    } else if (lbl_8036E548._2D8D == 5) {
+        actor->anims[3] = lbl_8036E548.rows[actor->_255]._08;
+        if (g_d_GameSettings.minigamesEnabled != 0 || g_d_GameSettings.GameModeSelected == 2) {
+            entry = actor->_252 * 19 + 18;
+        } else {
+            entry = actor->_252 * 19 + 5;
+        }
+        ARAMTransfer(&lbl_803CB790[entry], actor->anims[3], 0, 0);
+        lbl_8036E548._2D8D = 6;
+    } else if (lbl_8036E548._2D8D == 6) {
+        if ((s32)lbl_803C6CF8._715 == 1) {
+            ANIMGet(actor->anims[3]);
+            actor->anims[0] = lbl_8036E548.rows[0]._0C;
+            lbl_8036E548._2D8D = 9;
+        }
+    } else if (lbl_8036E548._2D8D == 7) {
+        actor->anims[0] = lbl_8036E548.rows[actor->_255]._0C;
+        if (g_d_GameSettings.GameModeSelected == 7) {
+            entry = actor->_252 * 19 + 9;
+        } else if (g_d_GameSettings.GameModeSelected == 2) {
+            entry = actor->_252 * 19 + 10;
+        } else {
+            entry = actor->_252 * 19 + 2;
+        }
+        ARAMTransfer(&lbl_803CB790[entry], actor->anims[0], 0, 0);
+        lbl_8036E548._2D8D = 8;
+    } else if (lbl_8036E548._2D8D == 8) {
+        if ((s32)lbl_803C6CF8._715 == 1) {
+            ANIMGet(actor->anims[0]);
+            lbl_8036E548._2D8D = 9;
+        }
+    } else if (lbl_8036E548._2D8D == 9) {
+        actor->anims[5] = lbl_8036E548.rows[actor->_255].buf;
+        ARAMTransfer(&lbl_803CB790[actor->_252 * 19 + 16], actor->anims[5], 0, 0);
+        lbl_8036E548._2D8D = 10;
+    } else if (lbl_8036E548._2D8D == 10) {
+        if ((s32)lbl_803C6CF8._715 == 1) {
+            ANIMGet(actor->anims[5]);
+            lbl_8036E548._2D8D = 0;
+            return TRUE;
+        }
+    }
+    return FALSE;
 }
 
 // .text:0x80016710 size:0x450
