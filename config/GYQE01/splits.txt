@@ -44,6 +44,17 @@ static/particle.c:
 	.bss        start:0x8017EC00 end:0x801F8640
 	.sdata2     start:0x803CC5F0 end:0x803CC6E8
 
+static/spani_default.c:
+	extab       start:0x80005D98 end:0x80005E40
+	extabindex  start:0x800077C4 end:0x800078C0
+	.text       start:0x80034BCC end:0x80036C88
+	.rodata     start:0x800E68A8 end:0x800E6910
+	.data       start:0x800F78E0 end:0x800F79A0
+	.bss        start:0x801F8640 end:0x8023DD80
+	.sdata      start:0x803CB810 end:0x803CB818
+	.sbss       start:0x803CBC90 end:0x803CBCA0
+	.sdata2     start:0x803CC6E8 end:0x803CC720
+
 Dolphin/base/PPCArch.c:
 	.text       start:0x8006D024 end:0x8006D138
 

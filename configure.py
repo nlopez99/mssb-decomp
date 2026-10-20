@@ -627,6 +627,7 @@ config.libs = [
             Object(NonMatching, "static/anim.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/lookat.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/particle.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(NonMatching, "static/spani_default.c", extra_cflags=["-cpp_exceptions on"]),
         ],
     },
     {
