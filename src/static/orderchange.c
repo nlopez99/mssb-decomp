@@ -111,7 +111,8 @@ typedef struct PauseMenu {
     /* 0x0A */ u8 _0A;
     /* 0x0B */ u8 _0B;
     /* 0x0C */ u8 _0C[2];
-    /* 0x0E */ s8 _0E[4];
+    /* 0x0E */ s8 slot[2];
+    /* 0x10 */ s8 prevSlot[2];
     /* 0x12 */ u8 _12[4];
     /* 0x16 */ u8 _16[2];
     /* 0x18 */ u8 _18[2];
@@ -473,7 +474,7 @@ void pauseMenuSelection(void) {
         fn_80047CE0();
         break;
     case 1:
-        lbl_803297E0.s.pause._0E[0] = lbl_803297E0.s.pause._0E[1] = 0;
+        lbl_803297E0.s.pause.slot[0] = lbl_803297E0.s.pause.slot[1] = 0;
         lbl_803297E0.s.pause._12[0] = lbl_803297E0.s.pause._12[1] = 0;
         lbl_803297E0.s.pause.state++;
         break;
@@ -640,7 +641,7 @@ void fn_80047CE0(void) {
     lbl_803297E0.s.pause._04[0] = lbl_803297E0.s.pause._04[1] = 0;
     lbl_803297E0.s.pause._08[1] = lbl_803297E0.s.pause._08[0] = 0;
     lbl_803297E0.s.pause._0B = 0;
-    lbl_803297E0.s.pause._0E[0] = lbl_803297E0.s.pause._0E[1] = lbl_803297E0.s.pause._0E[2] = lbl_803297E0.s.pause._0E[3] = 0;
+    lbl_803297E0.s.pause.slot[0] = lbl_803297E0.s.pause.slot[1] = lbl_803297E0.s.pause.prevSlot[0] = lbl_803297E0.s.pause.prevSlot[1] = 0;
     lbl_803297E0.s.pause._12[0] = lbl_803297E0.s.pause._12[1] = lbl_803297E0.s.pause._12[2] = lbl_803297E0.s.pause._12[3] = 0;
     lbl_803297E0.s.pause._1A[0] = lbl_803297E0.s.pause._1A[1] = lbl_803297E0.s.pause._1C[0] = lbl_803297E0.s.pause._1C[1] = 0;
     lbl_803297E0.s.pause._16[0] = lbl_803297E0.s.pause._16[1] = 0;
@@ -702,7 +703,7 @@ u8 fn_800471F4(u8 mode, u8 player) {
 }
 
 // .text:0x8004617C size:0x1078
-// Waits on fn_80044C98, fn_80043880 and fn_800471F4, still stubs inlined here
+// Waits on fn_80043880 and fn_800471F4, still stubs inlined here
 void fn_8004617C(s32 team) {
     PadButtons pad;
     s32 player;
@@ -745,7 +746,7 @@ void fn_8004617C(s32 team) {
         if (lbl_803297E0.s.pause._29[player] != 0) {
             lbl_803297E0.s.pause._29[player] = 0;
             sndFXStartEx(0x1B9, lbl_800EFBA4[2], 0x3F, 0);
-        } else if (lbl_803297E0.s.pause._0E[player] != 0) {
+        } else if (lbl_803297E0.s.pause.slot[player] != 0) {
             lbl_803297E0.s.pause._29[player] = 1;
             lbl_803297E0.s.pause._2D[player] = 1;
             lbl_803297E0.s.pause._2F[player] = 0;
@@ -833,7 +834,7 @@ void fn_8004617C(s32 team) {
             sndFXStartEx(0x1B9, lbl_800EFBA4[2], 0x3F, 0);
             return;
         }
-        if (lbl_803297E0.s.pause._0E[player] != 0 && lbl_803297E0.s.pause._6A[player] != 1 && (g_d_GameSettings.GameModeSelected != 5 || lbl_803297E0.s.pause._38 == 0) &&
+        if (lbl_803297E0.s.pause.slot[player] != 0 && lbl_803297E0.s.pause._6A[player] != 1 && (g_d_GameSettings.GameModeSelected != 5 || lbl_803297E0.s.pause._38 == 0) &&
             g_d_GameSettings._06 != 2 && locked == 0) {
             lbl_803297E0.s.pause._20[player] = 1;
         }
@@ -843,11 +844,11 @@ void fn_8004617C(s32 team) {
             sndFXStartEx(0x1B9, lbl_800EFBA4[2], 0x3F, 0);
             return;
         }
-        slot = lbl_803297E0.s.pause._0E[player];
+        slot = lbl_803297E0.s.pause.slot[player];
         if (slot != 0 && g_d_GameSettings._06 != 2) {
             if (g_d_GameSettings.GameModeSelected == 5) {
                 if (lbl_803297E0.s.pause._39 == 0) {
-                    lbl_803297E0.s.pause._40 = inMemRoster[0][lbl_803297E0.s.pause._0E[0] - 1].charId;
+                    lbl_803297E0.s.pause._40 = inMemRoster[0][lbl_803297E0.s.pause.slot[0] - 1].charId;
                     lbl_803297E0.s.pause._39 = 1;
                     lbl_803297E0.s.pause._3A = 1;
                     lbl_803297E0.s.pause.prevStarCursor = 0;
@@ -870,7 +871,7 @@ void fn_8004617C(s32 team) {
         if (locked != 0 || lbl_803C66B0._55 != 0 || lbl_803C66B0._56 != 0) {
             return;
         }
-        if (g_d_GameSettings._06 == 2 && lbl_803297E0.s.pause._0E[player] != 0 && lbl_803297E0.s.pause._6A[player] == 1) {
+        if (g_d_GameSettings._06 == 2 && lbl_803297E0.s.pause.slot[player] != 0 && lbl_803297E0.s.pause._6A[player] == 1) {
             sndFXStartEx(0x1BA, lbl_800EFBA4[3], 0x3F, 0);
             return;
         }
@@ -881,12 +882,12 @@ void fn_8004617C(s32 team) {
             sndFXStartEx(0x1B8, lbl_800EFBA4[1], 0x3F, 0);
             return;
         }
-        slot = lbl_803297E0.s.pause._0E[player];
+        slot = lbl_803297E0.s.pause.slot[player];
         if (slot == 0) {
             if (lbl_803297E0.s.pause._16[0] != 0 && lbl_803297E0.s.pause._16[1] != 0) {
                 lbl_803297E0.s.pause.state = 14;
             }
-            if (lbl_803297E0.s.pause._0E[player] != 0) {
+            if (lbl_803297E0.s.pause.slot[player] != 0) {
                 sndFXStartEx(0x1BA, lbl_800EFBA4[3], 0x3F, 0);
                 return;
             }
@@ -931,13 +932,13 @@ void fn_8004617C(s32 team) {
                 }
             }
         } else if (lbl_803297E0.s.pause._04[player] == 0) {
-            lbl_803297E0.s.pause._0E[2 + player] = slot;
+            lbl_803297E0.s.pause.prevSlot[player] = slot;
             lbl_803297E0.s.pause._06[player] = fn_800471F4(lbl_803297E0.s.pause._04[player], player);
             lbl_803297E0.s.pause._04[player] = 1;
             fn_800625A4(player, 0x3B);
             lbl_803CBCC8 = 1;
         } else {
-            lbl_803297E0.s.pause._0E[2 + player] = slot;
+            lbl_803297E0.s.pause.prevSlot[player] = slot;
             lbl_803297E0.s.pause._06[player] = fn_800471F4(lbl_803297E0.s.pause._04[player], player);
             lbl_803297E0.s.pause._04[player] = 0;
             fn_800625A4(player, 0x3B);
@@ -960,29 +961,29 @@ void fn_8004617C(s32 team) {
         if (lbl_803297E0.s.pause._04[player] != 0) {
             lbl_803297E0.s.pause._16[player] = 0;
             lbl_803297E0.s.pause._04[player] = 0;
-            if (lbl_803297E0.s.pause._0E[player] != lbl_803297E0.s.pause._0E[2 + player]) {
+            if (lbl_803297E0.s.pause.slot[player] != lbl_803297E0.s.pause.prevSlot[player]) {
                 fn_800625A4(player, 0x44);
             } else {
                 lbl_803297E0.s.pause._06[player] = 0xFF;
             }
         } else {
-            slot = lbl_803297E0.s.pause._0E[player];
+            slot = lbl_803297E0.s.pause.slot[player];
             if (slot != 0) {
-                lbl_803297E0.s.pause._0E[2 + player] = slot;
-                lbl_803297E0.s.pause._0E[player] = 0;
+                lbl_803297E0.s.pause.prevSlot[player] = slot;
+                lbl_803297E0.s.pause.slot[player] = 0;
                 fn_800625A4(player, 0x3E);
             } else if (lbl_803297E0.s.pause._08[0] != 0) {
                 lbl_803297E0.s.pause._08[0] = 0;
-                lbl_803297E0.s.pause._0E[player] = 0;
+                lbl_803297E0.s.pause.slot[player] = 0;
                 lbl_803297E0.s.pause._16[player] = 0;
             } else if (g_d_GameSettings._10 == 0 && lbl_803297E0.s.pause._0B != 0) {
                 lbl_803297E0.s.pause._16[0] = 0;
                 lbl_803297E0.s.pause._12[lbl_803297E0.s.pause._0B] = 0;
-                lbl_803297E0.s.pause._0E[lbl_803297E0.s.pause._0B] = 0;
+                lbl_803297E0.s.pause.slot[lbl_803297E0.s.pause._0B] = 0;
                 lbl_803297E0.s.pause._0B = 0;
                 lbl_803297E0.s.pause._08[0] = 0;
                 lbl_803297E0.s.pause._12[lbl_803297E0.s.pause._0B] = 0;
-                lbl_803297E0.s.pause._0E[lbl_803297E0.s.pause._0B] = 0;
+                lbl_803297E0.s.pause.slot[lbl_803297E0.s.pause._0B] = 0;
                 fn_800625A4(player, 0x40);
             } else if (locked != 0) {
                 fn_800625A4(player, 0x42);
@@ -990,9 +991,9 @@ void fn_8004617C(s32 team) {
                 lbl_803297E0.s.pause._18[player] = 0;
             } else {
                 lbl_803297E0.s.pause._12[0] = 0;
-                lbl_803297E0.s.pause._0E[0] = 0;
+                lbl_803297E0.s.pause.slot[0] = 0;
                 lbl_803297E0.s.pause._12[1] = 0;
-                lbl_803297E0.s.pause._0E[1] = 0;
+                lbl_803297E0.s.pause.slot[1] = 0;
                 lbl_803297E0.s.pause._0B = 0;
                 if (g_d_GameSettings._06 != 2) {
                     fn_800625A4(0, 0x3A);
@@ -1008,8 +1009,160 @@ void fn_8004617C(s32 team) {
     }
 }
 
+static inline s8 FindEmptySlot(u8 team) {
+    s32 i;
+
+    for (i = 0; i < 9; i++) {
+        if (lbl_80354720[team][i].charId == 0) {
+            return i + 1;
+        }
+    }
+    OSPanic("orderchange.c", 3433, "//OZ 戻り値がありません\b");
+    return 0;
+}
+
 // .text:0x80044C98 size:0x14E4
 void fn_80044C98(u8 dir, u8 player) {
+    lbl_803297E0.s.pause.prevSlot[player] = lbl_803297E0.s.pause.slot[player];
+    if (dir == 0) {
+        if (lbl_803297E0.s.pause._1A[player] == 0) {
+            lbl_803297E0.s.pause.slot[player]--;
+            if (lbl_803297E0.s.pause._04[player] != 0 && lbl_803297E0.s.pause.slot[player] < 1) {
+                lbl_803297E0.s.pause.slot[player] = 9;
+                fn_800625A4(player, 0x3B);
+                return;
+            }
+            if (lbl_803297E0.s.pause.prevSlot[player] == 0) {
+                lbl_803297E0.s.pause.slot[player] = 9;
+                fn_800625A4(player, 0x3D);
+                return;
+            }
+            if (lbl_803297E0.s.pause.slot[player] == 0) {
+                fn_800625A4(player, 0x3E);
+                return;
+            }
+            fn_800625A4(player, 0x3B);
+            return;
+        }
+        if (lbl_803297E0.s.pause.prevSlot[player] == 0) {
+            lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 1);
+            fn_800625A4(player, 0x3D);
+            return;
+        }
+        switch (lbl_80354720[player][lbl_803297E0.s.pause.slot[player] - 1].charId) {
+            case 0:
+                lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 5);
+                break;
+            case 1:
+                lbl_803297E0.s.pause.slot[player] = FindEmptySlot(player);
+                break;
+            case 2:
+                lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 8);
+                break;
+            case 3:
+                lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 7);
+                break;
+            case 4:
+                lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 6);
+                break;
+            case 5:
+                lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 7);
+                break;
+            case 6:
+                if (lbl_803297E0.s.pause._04[player] != 0) {
+                    lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 4);
+                    fn_800625A4(player, 0x3B);
+                } else {
+                    lbl_803297E0.s.pause.slot[player] = 0;
+                    fn_800625A4(player, 0x3E);
+                }
+                break;
+            case 8:
+                if (lbl_803297E0.s.pause._04[player] != 0) {
+                    lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 2);
+                    fn_800625A4(player, 0x3B);
+                } else {
+                    lbl_803297E0.s.pause.slot[player] = 0;
+                    fn_800625A4(player, 0x3E);
+                }
+                break;
+            case 7:
+                if (lbl_803297E0.s.pause._04[player] != 0) {
+                    lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 1);
+                    fn_800625A4(player, 0x3B);
+                } else {
+                    lbl_803297E0.s.pause.slot[player] = 0;
+                    fn_800625A4(player, 0x3E);
+                }
+                break;
+        }
+        if (lbl_803297E0.s.pause.slot[player] != 0 && lbl_803297E0.s.pause.prevSlot[player] != lbl_803297E0.s.pause.slot[player]) {
+            fn_800625A4(player, 0x3B);
+        }
+    } else {
+        if (lbl_803297E0.s.pause._1A[player] == 0) {
+            lbl_803297E0.s.pause.slot[player]++;
+            if (lbl_803297E0.s.pause._04[player] != 0 && lbl_803297E0.s.pause.slot[player] == 10) {
+                lbl_803297E0.s.pause.slot[player] = 1;
+                fn_800625A4(player, 0x3B);
+                return;
+            }
+            if (lbl_803297E0.s.pause.slot[player] == 10) {
+                lbl_803297E0.s.pause.slot[player] = 0;
+                fn_800625A4(player, 0x3E);
+                return;
+            }
+            if (lbl_803297E0.s.pause.prevSlot[player] == 0) {
+                fn_800625A4(player, 0x3D);
+                return;
+            }
+            fn_800625A4(player, 0x3B);
+            return;
+        }
+        if (lbl_803297E0.s.pause.prevSlot[player] == 0) {
+            lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 7);
+            fn_800625A4(player, 0x3D);
+            return;
+        }
+        switch (lbl_80354720[player][lbl_803297E0.s.pause.slot[player] - 1].charId) {
+            case 0:
+                lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 1);
+                break;
+            case 2:
+                lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 1);
+                break;
+            case 4:
+                lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 1);
+                break;
+            case 3:
+                lbl_803297E0.s.pause.slot[player] = FindEmptySlot(player);
+                break;
+            case 5:
+                lbl_803297E0.s.pause.slot[player] = FindEmptySlot(player);
+                break;
+            case 7:
+                lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 5);
+                break;
+            case 6:
+                lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 4);
+                break;
+            case 8:
+                lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 2);
+                break;
+            case 1:
+                if (lbl_803297E0.s.pause._04[player] != 0) {
+                    lbl_803297E0.s.pause.slot[player] = fn_80042598(player, 7);
+                    fn_800625A4(player, 0x3B);
+                } else {
+                    lbl_803297E0.s.pause.slot[player] = 0;
+                    fn_800625A4(player, 0x3E);
+                }
+                break;
+        }
+        if (lbl_803297E0.s.pause.slot[player] != 0 && lbl_803297E0.s.pause.prevSlot[player] != lbl_803297E0.s.pause.slot[player]) {
+            fn_800625A4(player, 0x3B);
+        }
+    }
 }
 
 // .text:0x80043880 size:0x1418
@@ -1335,7 +1488,7 @@ void transferStatsToInMemRoster(u8 team) {
     if (g_d_GameSettings.GameModeSelected == 5) {
         return;
     }
-    slot = lbl_803297E0.s.pause._0E[team] - 1;
+    slot = lbl_803297E0.s.pause.slot[team] - 1;
     if (lbl_80361B20[inMemRoster[team][slot].charId] == 0) {
         return;
     }
