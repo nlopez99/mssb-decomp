@@ -651,8 +651,8 @@ void fn_3_11A92C(UnkObj3310* obj, s32 id) {
 }
 
 // .text:0x0011A408 size:0x524 mapped:0x8075949C
-// 98.84%: the setAnim block of the note-block case and the frame threshold
-// (srwi against srawi) differ, and the branches after them shift by one instruction.
+// 99.03%: registers in the setAnim block of the note-block case differ, and the target
+// computes id * 0x90 again for the texture scroll where the base keeps it in r24.
 void fn_3_11A408(void) {
     UnkObj3310* obj;
     UnkObj3310* shadow;
@@ -709,7 +709,7 @@ void fn_3_11A408(void) {
         } else if (g_Minigame.wallBallWalls[i]._28 == 5) {
             id = i + 0xFC + (wall->coinGenerationCategory == 2) * 7;
             frame = fn_3_11A350(id);
-            if (frame < (lbl_3_data_22634[wall->coinGenerationCategory] >> 1) && frame % 2 == 0) {
+            if (frame < lbl_3_data_22634[wall->coinGenerationCategory] / 2 && frame % 2 == 0) {
                 model = lbl_8036E548._0068->_34[id]._00;
                 for (j = 0; j < model->_06; j++) {
                     scroll = model->_18[j]->_E8;
@@ -1609,7 +1609,8 @@ void fn_3_1179EC(void) {
 }
 
 // .text:0x00117588 size:0x464 mapped:0x8075661C
-// 97.60%: the quad corners and the scale terms are computed in another order and FPRs differ.
+// 98.54%: FPRs of the quad corners and the half sizes differ, and the target counts the
+// last loop in r6 with its offset set by li where the base copies it with mr.
 void fn_3_117588(s32 i) {
     GXColor color;
     f32 uv[4][2] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
@@ -1643,12 +1644,12 @@ void fn_3_117588(s32 i) {
     GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
     GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
 
-    hx = 2.8f * scale * 0.5f;
     hz = 2.5f * scale * 0.5f;
-    quad[0].x = quad[3].x = -hx + obj->_04.x;
-    quad[1].x = quad[2].x = hx + obj->_04.x;
+    hx = 2.8f * scale * 0.5f;
     quad[2].z = quad[3].z = -hz + obj->_04.z;
     quad[0].z = quad[1].z = hz + obj->_04.z;
+    quad[0].x = quad[3].x = -hx + obj->_04.x;
+    quad[1].x = quad[2].x = hx + obj->_04.x;
     quad[0].y = quad[1].y = quad[2].y = quad[3].y = -0.060000002f;
     color.r = color.g = color.b = 0;
     color.a = 155;
@@ -1662,8 +1663,8 @@ void fn_3_117588(s32 i) {
         GXColor1u32(*(u32*)&color);
         GXTexCoord2f32(uv[j][0], uv[j][1]);
     }
-    state = marker->active;
     model = lbl_8036E548._0068->_34[i]._00;
+    state = marker->active;
     if (state == 1 || state == 5) {
         frame = 0;
     } else {
