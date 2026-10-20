@@ -482,8 +482,8 @@ static inline void spawnDrawEffect(StaC5Draw* draw) {
 }
 
 // .text:0x000F6FDC size:0x1468 mapped:0x80736070
-// 98.06%: the target computes n1 + 2 between the counting loops without clrlwi and keeps
-// pitcherModel in r31 (here on the stack); saved registers differ from there on.
+// 98.41%: the target computes n1 + 2 between the counting loops without clrlwi, keeps
+// pitcherModel in r31 (here on the stack) and stores models[j]._5B with stbx.
 void fn_3_F6FDC(void** files) {
     s32 n1;
     u8 end;
@@ -505,6 +505,7 @@ void fn_3_F6FDC(void** files) {
     StaC5Ball* ball;
     StaC5Draw* entry;
     u8 ballModel;
+    u8 extraModel;
 
     count = 0;
     end = FALSE;
@@ -557,7 +558,8 @@ void fn_3_F6FDC(void** files) {
         fn_3_B98E8((struct StadiumModel1D58*)&lbl_8036E548._6C->models[j]);
     }
     fn_800BDC88(lbl_8036E548._6C, j, j, files[indices[5]], NULL, 0);
-    fn_800BDC88(lbl_8036E548._6C, (u8)(j + 1), (u8)(j + 1), files[indices[6]], NULL, 0);
+    extraModel = j + 1;
+    fn_800BDC88(lbl_8036E548._6C, extraModel, extraModel, files[indices[6]], NULL, 0);
     fn_800BDC88(lbl_8036E548._6C, (u8)(j + 2), (u8)(j + 2), files[indices[7]], NULL, 0);
     lbl_3_bss_B55C = &lbl_8036E548._6C->models[(u8)(j + 2)];
     fn_800BDC88(lbl_8036E548._6C, (u8)(j + 3), (u8)(j + 3), files[indices[8]], NULL, 0);
@@ -568,7 +570,7 @@ void fn_3_F6FDC(void** files) {
                     lbl_3_common_bss_350E4._28, lbl_3_common_bss_350E4._2C);
     }
     fn_80025DDC(files[indices[14]]);
-    fn_80025C58(files[indices[14]], &lbl_8036E548._6C->models[(u8)(j + 1)]);
+    fn_80025C58(files[indices[14]], &lbl_8036E548._6C->models[extraModel]);
     lbl_3_bss_B1BC._00 = files[indices[15]];
     fn_80025FFC(files[indices[14]], &lbl_3_bss_B1BC);
     fn_80025EEC(&lbl_3_bss_B1BC, 0, 0);
@@ -724,7 +726,7 @@ void fn_3_F6FDC(void** files) {
 
     lbl_3_bss_B21A = count + 1;
     draw[1]._9D = 4;
-    draw[1]._74 = &lbl_8036E548._6C->models[(u8)(j + 1)];
+    draw[1]._74 = &lbl_8036E548._6C->models[extraModel];
     draw[1]._78 = NULL;
     draw[1]._7C = NULL;
     draw[1]._80 = NULL;
