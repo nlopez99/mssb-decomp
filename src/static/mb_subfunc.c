@@ -583,6 +583,8 @@ static inline s32 findFamily(s32 id) {
 }
 
 // .text:0x800675C4 size:0x308
+// The target keeps &found in r6 from the start and computes the 0x80108F38 row once;
+// declaration orders change nothing
 u8 fn_800675C4(s32 team, s32 captain) {
     s32 found[4];
     s32 color;
@@ -650,6 +652,8 @@ u8 fn_800675C4(s32 team, s32 captain) {
 }
 
 // .text:0x80067264 size:0x360
+// The first loop interleaves its three lookups in the target and shares one zero register
+// with the counts; this loads all three bytes first
 u8 fn_80067264(s32 team, s32 captain) {
     s32 counts[4];
     s32 attr[2][9];
@@ -733,6 +737,8 @@ void fn_800670A0(u8 team) {
 }
 
 // .text:0x80066EAC size:0x1F4
+// Registers only: the target keeps the row pointer in r31 and the team base in r30 (swapped here);
+// declaration orders and a row pointer local change nothing
 void fn_80066EAC(u8 team) {
     s8 list[10];
     s32 i;

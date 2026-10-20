@@ -72,6 +72,7 @@ s32 fn_80063718(u16* id, FlipBone* bone, MtxPtr m) {
 }
 
 // .text:0x800633AC size:0x36C
+// Registers only, in the z rotation block: the target assigns its temporaries f1-f8 in another order
 void fn_800633AC(Control* ctrl, Mtx m, s32 flip) {
     Mtx rot;
     Mtx scale;
@@ -188,6 +189,7 @@ void fn_800633AC(Control* ctrl, Mtx m, s32 flip) {
 }
 
 // .text:0x80063028 size:0x384
+// Registers only, in the z rotation block: the target assigns its temporaries f1-f8 in another order
 void fn_80063028(Control* ctrl, Mtx m, s32 flip) {
     Mtx trans;
     Mtx rot;
