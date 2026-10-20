@@ -2523,18 +2523,9 @@ void fn_1_176EC(void) {
 }
 
 // .text:0x00016978 size:0xD74
-// Registers differ only in case 26's slot loop (counter, source and
-// destination pointers)
 void fn_1_16978(void) {
-    s16 frame;
     s32 i;
-    u8 idx;
-    UnkSlot0610* src;
-    s16 animId;
-    UnkSlotSet0610* set;
     void* tex;
-    UnkSlotState0610* dst;
-    UnkAnimRef0610* anim;
     u32* table;
     void* geo;
     void* layout;
@@ -2732,35 +2723,8 @@ void fn_1_16978(void) {
         }
         break;
     case 26:
-        idx = lbl_1_bss_5F73;
-        set = lbl_1_data_F4D4._4;
         table = lbl_8036E548._2C84;
-        i = 8;
-        while (i-- != 0) {
-            src = &set->_10[i];
-            dst = &lbl_1_bss_3218[i];
-            if (src->_0 != 0) {
-                animId = src->_2;
-                dst->_0 = animId;
-                frame = src->_4;
-                anim = lbl_8036E548._0C04[idx]._010[animId];
-                dst->_2 = frame;
-                dst->_6 = src->_1;
-                if (src->_6 == -2) {
-                    if (anim != NULL) {
-                        dst->_4 = anim->_4[frame]._4->_0;
-                    } else {
-                        dst->_4 = 0;
-                    }
-                } else {
-                    dst->_4 = src->_6;
-                }
-            } else {
-                dst->_0 = -1;
-                dst->_6 = 0;
-                dst->_4 = 0;
-            }
-        }
+        fn_1_D7A4(0);
         for (i = 0; i < 80; i++) {
             lbl_8036E548._2C84[i] = (u32)table + table[i];
         }
@@ -5516,13 +5480,13 @@ void fn_1_D8A0(void) {
 
 // .text:0x0000D7A4 size:0xFC
 void fn_1_D7A4(s32 arg0) {
+    UnkAnimRef0610* ref;
     UnkSlotSet0610* set = &lbl_1_data_F4D4._4[arg0];
     s32 i = 8;
     while (i--) {
         if (set->_10[i]._0 != 0) {
             s16 id;
             s16 frame;
-            UnkAnimRef0610* ref;
             lbl_1_bss_3218[i]._0 = id = set->_10[i]._2;
             ref = lbl_8036E548._0C04[lbl_1_bss_5F73]._010[id];
             lbl_1_bss_3218[i]._2 = frame = set->_10[i]._4;
