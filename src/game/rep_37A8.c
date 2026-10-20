@@ -665,8 +665,6 @@ void fn_3_1453BC(int coin) {
 }
 
 // .text:0x00144CB8 size:0x704 mapped:0x80783D4C
-// 97.76%: registers and scheduling only; the list sort's pointers and counters and the
-// sign/1.5 block after rand() use other volatile registers.
 void fn_3_144CB8(void) {
     Unk37A8Fielder* fielder;
     InputStruct* input;
@@ -674,6 +672,7 @@ void fn_3_144CB8(void) {
     int k;
     s8 tmp;
     s8 roll;
+    s8 sign;
     int i;
     int j;
     int coin;
@@ -762,12 +761,12 @@ void fn_3_144CB8(void) {
                         j++;
                     }
                 }
-                for (i = 0; i < 2; i++) {
-                    for (j = i + 1; j < 3; j++) {
-                        if (g_Minigame.miniGameCurrentPoints[list[i]] < g_Minigame.miniGameCurrentPoints[list[j]]) {
-                            tmp = list[i];
-                            list[i] = list[j];
-                            list[j] = tmp;
+                for (k = 0; k < 2; k++) {
+                    for (i = k + 1; i < 3; i++) {
+                        if (g_Minigame.miniGameCurrentPoints[list[k]] < g_Minigame.miniGameCurrentPoints[list[i]]) {
+                            tmp = list[k];
+                            list[k] = list[i];
+                            list[i] = tmp;
                         }
                     }
                 }
@@ -779,10 +778,11 @@ void fn_3_144CB8(void) {
                         break;
                     }
                 }
-                fielder->_10C = lbl_3_data_21B94[roll].x + 1.5 * (s8)(__abs(roll - player) / (roll - player));
+                sign = __abs(roll - player) / (roll - player);
+                MG._1BE8[coin] = -1 - roll;
+                fielder->_10C = lbl_3_data_21B94[roll].x + 1.5 * sign;
                 fielder->_110 = 0.0f;
                 fielder->_114 = lbl_3_data_21B94[roll].z;
-                MG._1BE8[coin] = -1 - roll;
             }
             g_Minigame._1C8E[player] = MG._1C7E[player][0];
             MG._193A[coin] = 3;
