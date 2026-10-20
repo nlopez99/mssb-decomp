@@ -1816,8 +1816,8 @@ void fn_2_B324(void) {
 }
 
 // .text:0x0000AEE8 size:0x43C
-// 99.9%: the target keeps cap in r29 apart from the remainder in r26; the
-// permuter matched it only with a redundant copy (`id = ...; cap = id;`).
+// 99.9%: the target keeps cap in r29 (later j's register) apart from the remainder
+// in r26; the permuter matched it only with a redundant copy (`id = ...; cap = id;`).
 void fn_2_AEE8(void) {
     u8 order[2][54];
     u8 value[54];
