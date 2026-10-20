@@ -2516,18 +2516,18 @@ void fn_1_176EC(void) {
 // Registers differ in case 4 (lbl_1_bss_3074 and the slot product swap r7/r8)
 // and in case 26's slot loop (counter, source and destination pointers)
 void fn_1_16978(void) {
+    s16 frame;
     s32 i;
+    u8 idx;
     UnkSlot0610* src;
+    s16 animId;
+    UnkSlotSet0610* set;
+    void* tex;
     UnkSlotState0610* dst;
     UnkAnimRef0610* anim;
-    UnkSlotSet0610* set;
-    s16 animId;
-    s16 frame;
-    u8 idx;
     u32* table;
     void* geo;
     void* layout;
-    void* tex;
 
     switch (lbl_803CC1B8->_10) {
     case 0:
@@ -3914,8 +3914,8 @@ void fn_1_12F18(UnkCamera0610* arg0) {
 }
 
 // .text:0x000129D0 size:0x548
-// The target keeps 0.0f and 57.295776f in f31/f30 across the CTRL calls and
-// tests the BOOL from fn_1_D660 (cmpwi) where this tests the byte (cmplwi)
+// The target keeps 0.0f and 57.295776f in f31/f30 across the CTRL calls (0.0f
+// until the speed test) and saved registers differ by two (r26 against r24)
 void fn_1_129D0(void) {
     Unk8036E548Actor* actor;
     Unk0060* model;
@@ -3934,13 +3934,13 @@ void fn_1_129D0(void) {
         speed = model->_34[0]._54 = lbl_1_data_ABA4;
         model->_34[0]._5A = 1;
         if (lbl_1_bss_67B8[0] != NULL) {
-            lbl_1_bss_67B8[0]->_04 = lbl_1_data_ABA4;
+            lbl_1_bss_67B8[0]->_04 = speed;
         }
     } else {
         speed = model->_34[0]._54 = lbl_1_bss_5F64;
         model->_34[0]._5A = 1;
         if (lbl_1_bss_67B8[0] != NULL) {
-            lbl_1_bss_67B8[0]->_04 = lbl_1_bss_5F64;
+            lbl_1_bss_67B8[0]->_04 = speed;
         }
     }
     if (speed != 0.0f) {
@@ -5624,7 +5624,7 @@ void fn_1_D67C(u8 arg0) {
 
 // .text:0x0000D660 size:0x1C
 BOOL fn_1_D660(void) {
-    return lbl_1_bss_3215 != 0;
+    return (BOOL)(lbl_1_bss_3215 != 0);
 }
 
 // .text:0x0000D650 size:0x10
