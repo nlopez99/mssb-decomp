@@ -376,7 +376,7 @@ extern void fn_80025DDC(void* anim);
 extern void fn_80014990(s32 index, void* arg1, void* arg2);
 extern void fn_80025C58(void* anim, ActorRef0568* ref);
 extern void fn_800638B4(Player0568* player, ActorRef0568* ref);
-extern void fn_8004B7B4(Player0568* player, ActorRef0568* ref);
+extern s32 fn_8004B7B4(Player0568* player, ActorRef0568* ref);
 extern void fn_80023B04(s32);
 extern void fn_80014204(s32);
 extern void* fn_80023AA4(void);

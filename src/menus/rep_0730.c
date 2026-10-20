@@ -289,7 +289,7 @@ extern void fn_8006C488(void);
 extern void fn_800B0A14_removeQueue(void);
 extern void* ARAMTransfer(void* entry, s32 arg1, s32 arg2, u32 aram);
 extern void convertTextureHeader(void* tex);
-extern void fn_8004B1B8(void* tex);
+extern void fn_8004B1B8(s32 v);
 extern void fn_80068720(s32);
 extern void fn_80021410(void);
 extern void fn_800ACFB0(void* data);
@@ -788,7 +788,7 @@ void fn_2_1B1BC(void) {
         }
         convertTextureHeader(tex);
         lbl_2_data_4BA0._0->_4 = (void*)lbl_2_data_4BA0._0->_8[0];
-        fn_8004B1B8(lbl_2_data_4BA0._0->_4);
+        fn_8004B1B8((s32)lbl_2_data_4BA0._0->_4);
         task->_28 = 3;
         break;
     case 3:

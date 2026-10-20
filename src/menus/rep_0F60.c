@@ -315,7 +315,7 @@ extern void fn_800B2C08(ActorObj0F60* actor, u16 id);
 extern void fn_8001FC4C(Player0F60* player);
 extern void fn_800638B4(Player0F60* player, ActorRef0F60* ref);
 extern void fn_80063010(Player0F60* player, ActorRef0F60* ref);
-extern void fn_8004B7B4(Player0F60* player, ActorRef0F60* ref);
+extern s32 fn_8004B7B4(Player0F60* player, ActorRef0F60* ref);
 extern void fn_800637BC(Player0F60* player, ActorRef0F60* ref);
 extern void fn_8004BD6C(Player0F60* player, ActorRef0F60* ref);
 extern void fn_800637D4(Player0F60* player, ActorRef0F60* ref);
