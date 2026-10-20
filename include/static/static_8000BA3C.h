@@ -65,6 +65,24 @@ typedef struct SpriteRect {
     /* 0x08 */ u8 _b4 : 5;
 } SpriteRect;
 
+typedef struct SpriteShape {
+    /* 0x00 */ u8 _00[0x18];
+    /* 0x18 */ s16 _18;
+    /* 0x1A */ s16 _1A;
+    /* 0x1C */ u8 _1C[0x29 - 0x1C];
+    /* 0x29 */ u8 _29_b7 : 1;
+    /* 0x29 */ u8 _29_b0 : 7;
+} SpriteShape;
+
+typedef struct ShapeStyle {
+    /* 0x00 */ u8 _00[0x20];
+    /* 0x20 */ u32 _20;
+    /* 0x24 */ u32 _24;
+    /* 0x28 */ u8 _28[0x34 - 0x28];
+    /* 0x34 */ u16 _34;
+    /* 0x36 */ u8 _36;
+} ShapeStyle;
+
 typedef struct SpriteVerts {
     /* 0x00 */ s32 offsets[8];
     /* 0x20 */ u32 colors[4];
@@ -78,7 +96,7 @@ void fn_8000D164(void);
 void fn_8000D838(void);
 void fn_8000D8A4(void);
 void fn_8000DC9C(void);
-void fn_8000E030(void);
+void fn_8000E030(SpriteShape* shape, Mtx mtx, ShapeStyle* style);
 void fn_8000E2D4(void);
 void fn_8000E764(f32 angle, f32* out);
 void fn_8000E7BC(SpriteDesc* spr, Mtx mtx, SpriteVerts* verts, s32 arg3);

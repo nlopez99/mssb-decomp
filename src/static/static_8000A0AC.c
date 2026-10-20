@@ -80,22 +80,21 @@ void interpolatePointsBezier_Vec2s(InterpPoint* out, BezierVec2s* p0, BezierVec2
 // .text:0x8000A0AC size:0x13C
 void fn_8000A0AC(InterpPoint* out, BezierKey* a, BezierKey* b, f32 t) {
     InterpPoint pts[4];
-    s16* h1;
-    s16* h2;
+    s16* handles[2];
 
     if (a->_04 == 2) {
-        h1 = a->handles;
-        h2 = b->handles;
+        handles[0] = a->handles;
+        handles[1] = b->handles;
     } else {
-        h1 = a->handles;
-        h2 = b->handles;
+        handles[0] = a->handles;
+        handles[1] = b->handles;
     }
     pts[0].x = a->x;
     pts[0].y = a->y;
-    pts[1].x = h1[2];
-    pts[1].y = h1[3];
-    pts[2].x = h2[0];
-    pts[2].y = h2[1];
+    pts[1].x = handles[0][2];
+    pts[1].y = handles[0][3];
+    pts[2].x = handles[1][0];
+    pts[2].y = handles[1][1];
     pts[3].x = b->x;
     pts[3].y = b->y;
     BezierInterpolate(out, &pts[0], &pts[1], &pts[2], &pts[3], t);

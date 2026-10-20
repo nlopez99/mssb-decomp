@@ -189,7 +189,7 @@ void fn_800100A4(void) {
 }
 
 // .text:0x8000FF04 size:0x1A0
-s32 fn_8000FF04(s32 font, s32 str, s16 x, s16 y, u8 group, s32 arg5, u8 arg6) {
+s32 fn_8000FF04(s32 font, s32 str, s16 x, s16 y, s32 group, s32 arg5, u8 arg6) {
     s32 i;
     TextBox* box;
 

@@ -36,6 +36,8 @@ typedef struct SpriteBuffer {
 extern SpriteBuffer lbl_80366188;
 extern struct TexImage* lbl_803CBBD8;
 
+extern void fn_800B12DC(SpriteVertex* verts, s32 count);
+
 static inline void setVertexPos(SpriteVertex* v, f32* p) {
     v->x = p[0];
     v->y = p[1];
@@ -248,7 +250,59 @@ void fn_8000E2D4(void) {
 }
 
 // .text:0x8000E030 size:0x2A4
-void fn_8000E030(void) {
+void fn_8000E030(SpriteShape* shape, Mtx mtx, ShapeStyle* style) {
+    Vec center;
+    Vec pt;
+    SpriteVertex verts[259];
+    SpriteVertex* v;
+    s16 angle;
+    s32 step;
+    s32 n;
+    s32 count;
+    f32 s;
+    f32 a;
+
+    if (shape->_29_b7 && style->_36 == 0) {
+        return;
+    }
+    center.x = 128.0f;
+    center.y = 128.0f;
+    center.z = shape->_1A;
+    PSMTXMultVec(mtx, &center, (Vec*)&verts[0]);
+    verts[0].color = style->_20;
+    pt.x = 128.0f + center.x;
+    pt.y = center.y;
+    pt.z = shape->_18 + shape->_1A;
+    PSMTXMultVec(mtx, &pt, (Vec*)&verts[1]);
+    verts[1].color = style->_24;
+    if (style->_36 != 0) {
+        n = style->_36;
+        count = style->_36 + 2;
+    } else {
+        count = style->_34 + 2;
+        n = style->_34 - 1;
+    }
+    step = 0x10000 / style->_34;
+    angle = 0;
+    v = &verts[2];
+    do {
+        angle -= step;
+        a = 0.0000958738f * angle;
+        s = sin(a);
+        pt.x = 128.0f * (f32)cos(a) + center.x;
+        pt.y = 128.0f * s + center.y;
+        pt.z = shape->_1A;
+        PSMTXMultVec(mtx, &pt, (Vec*)v);
+        v->color = style->_24;
+        v++;
+    } while (--n != 0);
+    if (style->_36 == 0) {
+        verts[style->_34 + 1].x = verts[1].x;
+        verts[style->_34 + 1].y = verts[1].y;
+        verts[style->_34 + 1].z = verts[1].z;
+        verts[style->_34 + 1].color = style->_24;
+    }
+    fn_800B12DC(verts, count);
 }
 
 // .text:0x8000DC9C size:0x394
