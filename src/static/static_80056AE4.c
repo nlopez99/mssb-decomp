@@ -118,6 +118,8 @@ typedef struct RosterEntry {
 
 extern struct {
     /* 0x0000 */ RosterEntry chars[6][9];
+    /* 0x21C0 */ u8 _21C0[0x47F9 - 0x21C0];
+    /* 0x47F9 */ s8 _47F9[2][9][9];
 } lbl_8034E9A0;
 
 typedef struct MissionText {
@@ -331,10 +333,52 @@ void fn_8005F068(void) {
 }
 
 // .text:0x8005EC88 size:0x3E0
-void fn_8005EC88(void) {
+// 86.09%: the target guards the slot-clearing loop (li 0; cmpwi 9; bge) and
+// unrolls it in its own order; the switch bodies match up to registers.
+void fn_8005EC88(SpaniTask* task, s32 team) {
+    s8 cur;
+    s8 slot;
+    s32 i;
+
+    if (isLockState(lbl_803C66B0.rows[9].port[team], 0)) {
+        if (lbl_803297E0._CF46[team] != 0) {
+            cur = lbl_803297E0._CF46[team] - 1;
+            slot = lbl_80354720[team][cur]._2;
+            for (i = 0; i < 9; i++) {
+                getGridObj(task, i, team * 9, 0x64)->_54 &= ~2;
+                getGridObj(task, i, team * 9, 0x12E)->_54 &= ~2;
+            }
+            switch (lbl_803297E0._CF52[team]) {
+            case 0:
+                getGridObj(task, cur, team * 9, 0x40)->_68 = 1;
+                getGridObj(task, cur, team * 9, 0x1C)->_5C = 0;
+                getGridObj(task, cur, team * 9, 0x1C)->_68 = 1;
+                getGridObj(task, cur, team * 9, 0x52)->_5C = 0;
+                getGridObj(task, cur, team * 9, 0x52)->_68 = 1;
+                getGridObj(task, cur, team * 9, 0x64)->_54 |= 2;
+                getGridObj(task, cur, team * 9, 0x64)->_64 = 0x2A;
+                getGridObj(task, cur, team * 9, 0x64)->_68 = 1;
+                fn_8005C830(task, team, cur);
+                break;
+            case 1:
+                getGridObj(task, slot, team * 9, 0x10A)->_68 = 1;
+                getGridObj(task, slot, team * 9, 0xF8)->_68 = 1;
+                getGridObj(task, slot, team * 9, 0x12E)->_54 |= 2;
+                getGridObj(task, slot, team * 9, 0x12E)->_64 = 0x2A;
+                getGridObj(task, slot, team * 9, 0x12E)->_68 = 1;
+                fn_8005C830(task, team, cur);
+                break;
+            }
+        }
+        getTeamObj(task, team, 0x18)->_5C = 10 << 16;
+        getTeamObj(task, team, 0x18)->_68 = 4;
+        fn_800626EC(team);
+        lbl_803C66B0.rows[9].port[team] = 1;
+    }
 }
 
 // .text:0x8005E9D8 size:0x2B0
+// Drafted while fn_8005DE14 and fn_8005CCE4 are still stubs (inlined here).
 void fn_8005E9D8(SpaniTask* task, s32 team) {
     u8 cur;
     s8 slot;
@@ -382,7 +426,55 @@ void fn_8005CCE4(SpaniTask* task, s32 team) {
 }
 
 // .text:0x8005C830 size:0x4B4
-void fn_8005C830(void) {
+// 98.29%: registers only; the target keeps charID in r27 and the counters
+// one register higher.
+void fn_8005C830(SpaniTask* task, s32 team, s32 row) {
+    s32 i;
+    s32 j;
+    s8 charID;
+    for (j = 0; j < 9; j++) {
+        charID = lbl_8034E9A0._47F9[team][row][j];
+        for (i = 0; i < 9; i++) {
+            if (inMemRoster[team][i].stats.CharID == charID) {
+                if (lbl_803297E0._CF52[team] == 0) {
+                    if (g_d_GameSettings._06 != 2) {
+                        getGridObj(task, i, team * 9, 0x52)->_5C = 0;
+                        getGridObj(task, i, team * 9, 0x52)->_68 = 1;
+                        getGridObj(task, i, team * 9, 0x64)->_54 |= 2;
+                        getGridObj(task, i, team * 9, 0x64)->_64 = 0x2B;
+                        getGridObj(task, i, team * 9, 0x64)->_68 = 1;
+                    } else {
+                        getTeamObj(task, lbl_80354720[team][i]._2, 0x35)->_54 |= 2;
+                        getTeamObj(task, lbl_80354720[team][i]._2, 0x35)->_64 = 0x2B;
+                        getTeamObj(task, lbl_80354720[team][i]._2, 0x35)->_5C = 0;
+                        getTeamObj(task, lbl_80354720[team][i]._2, 0x35)->_68 = 1;
+                        getTeamObj(task, i, 0x6C)->_54 |= 2;
+                        getTeamObj(task, i, 0x6C)->_5C = 0;
+                        getTeamObj(task, i, 0x6C)->_68 = 1;
+                        getTeamObj(task, i, 0x75)->_54 |= 2;
+                        getTeamObj(task, i, 0x75)->_64 = 0x2B;
+                        getTeamObj(task, i, 0x75)->_68 = 1;
+                    }
+                } else if (g_d_GameSettings._06 != 2) {
+                    getGridObj(task, lbl_80354720[team][i]._2, team * 9, 0x12E)->_54 |= 2;
+                    getGridObj(task, lbl_80354720[team][i]._2, team * 9, 0x12E)->_64 = 0x2B;
+                    getGridObj(task, lbl_80354720[team][i]._2, team * 9, 0x12E)->_5C = 0;
+                    getGridObj(task, lbl_80354720[team][i]._2, team * 9, 0x12E)->_68 = 1;
+                } else {
+                    getTeamObj(task, lbl_80354720[team][i]._2, 0x35)->_54 |= 2;
+                    getTeamObj(task, lbl_80354720[team][i]._2, 0x35)->_64 = 0x2B;
+                    getTeamObj(task, lbl_80354720[team][i]._2, 0x35)->_5C = 0;
+                    getTeamObj(task, lbl_80354720[team][i]._2, 0x35)->_68 = 1;
+                    getTeamObj(task, i, 0x6C)->_54 |= 2;
+                    getTeamObj(task, i, 0x6C)->_5C = 0;
+                    getTeamObj(task, i, 0x6C)->_68 = 1;
+                    getTeamObj(task, i, 0x75)->_54 |= 2;
+                    getTeamObj(task, i, 0x75)->_64 = 0x2B;
+                    getTeamObj(task, i, 0x75)->_68 = 1;
+                }
+            }
+        }
+    }
 }
 
 // .text:0x8005C5C4 size:0x26C
@@ -459,6 +551,7 @@ void fn_800596D4(void) {
 }
 
 // .text:0x80059458 size:0x27C
+// 97.99%: registers only around the loop counters and the shared 12.
 void fn_80059458(SpaniTask* task, u8 team, s32 mask) {
     s32 i;
     s32 out[2];
@@ -672,6 +765,8 @@ void challengeCheckStarsMenuLoading(void) {
 }
 
 // .text:0x800572C0 size:0x430
+// 98.06%: the target adds task->_14 and the mission index in the other
+// register order.
 void someChallengeStarFunction2(SpaniTask* task) {
     u8 set;
     s16 text;
