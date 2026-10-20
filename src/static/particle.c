@@ -1049,7 +1049,7 @@ void fn_800330CC(s32 n, u32 arg1, Vec* start, Vec* end, f32 arg4, s32 arg5, s32 
 // .text:0x800324EC size:0x3F4
 // 99.57%: the target tests the first player's pointer with bne over a b to the end; this
 // branches with beq. Only branch targets differ after it.
-void fn_800324EC(u16 joint, s32 player, s32 other, Vec* dir)
+void fn_800324EC(u16 joint, s32 player, s32 other, StreakParams* dir)
 {
     Vec pos;
     Vec v;
@@ -1095,7 +1095,7 @@ void fn_800324EC(u16 joint, s32 player, s32 other, Vec* dir)
             p->_4D = params->_04;
         }
         if (dir != NULL) {
-            fn_8002A1CC(&pos, (StreakParams*)dir);
+            fn_8002A1CC(&pos, dir);
         }
     }
 }
@@ -1132,7 +1132,7 @@ void fn_80032284(Vec* pos)
 }
 
 // .text:0x80032064 size:0x220
-void fn_80032064(Vec* pos, Vec* dir)
+void fn_80032064(Vec* pos, StreakParams* dir)
 {
     FlareParams* params = &lbl_800F787C;
     Emitter* e;
@@ -1154,7 +1154,7 @@ void fn_80032064(Vec* pos, Vec* dir)
         p->_14 = params->_0C / 100000.0f;
         p->_4D = params->_04;
     }
-    fn_8002A1CC(pos, (StreakParams*)dir);
+    fn_8002A1CC(pos, dir);
 }
 
 // .text:0x80032038 size:0x2C
