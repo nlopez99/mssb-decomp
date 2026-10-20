@@ -435,6 +435,7 @@ extern u8 lbl_80367318[];
 extern s32 lbl_803CBC70;
 extern s32 lbl_803CB800;
 extern f32 lbl_803CB804;
+extern f32 lbl_803CB80C;
 extern s32 lbl_803CBD0C;
 extern s32 fn_8005268C(void);
 extern MtxPtr fn_80052734(s32 index);
@@ -1812,6 +1813,70 @@ void fn_8002C2D0(Vec* pos, Vec* dir, EffectParams* params)
             fn_8002BC84(e, pos, dir, params);
         }
     }
+}
+
+// .text:0x8002BC84 size:0x64C
+void fn_8002BC84(Emitter* e, Vec* pos, Vec* dir, EffectParams* params)
+{
+    SwirlParticle* p = (SwirlParticle*)e->particles;
+    Vec v[2] = { { 1.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f } };
+    Mtx m;
+    f32 angle;
+    f32 speed;
+    f32 speedRange;
+    f32 w;
+    f32 rot;
+    f32 s;
+    f32 c;
+
+    e->_10 = params->_00;
+    speed = params->_0C[10] / 100000.0f;
+    speedRange = (params->_0C[11] - params->_0C[10]) / 100000.0f;
+    PSVECNormalize(dir, &v[1]);
+    rot = acos(PSVECDotProduct(&v[0], &v[1]));
+    PSVECCrossProduct(&v[0], &v[1], &v[1]);
+    PSMTXRotAxisRad(m, &v[1], rot);
+    angle = 360.0f * rand() / params->count / 32767.0f;
+    w = params->_0C[0] / 100000.0f;
+    do {
+        if (params->count == 1) {
+            memcpy(&p->pos, pos, sizeof(Vec));
+            memcpy(&p->vel, dir, sizeof(Vec));
+            PSVECScale(&p->vel, params->_0C[1] / 100000.0f * (0.95f + 0.1f * rand() / 32767.0f), &p->vel);
+        } else {
+            v[1].x = 0.0f;
+            v[1].y = cos(angle);
+            v[1].z = sin(angle);
+            angle += 360.0f / params->count;
+            PSMTXMultVec(m, &v[1], &v[1]);
+            PSVECScale(&v[1], params->_0C[12] / 100000.0f, &v[1]);
+            PSVECAdd(pos, &v[1], &p->pos);
+            PSVECScale(&v[1], speed + speedRange * rand() / 32767.0f, &p->vel);
+            PSVECScale(dir, params->_0C[1] / 100000.0f * (0.95f + 0.1f * rand() / 32767.0f), &v[1]);
+            PSVECAdd(&p->vel, &v[1], &p->vel);
+        }
+        rot = 3.1415927f * (params->_0C[8] / 100000.0f) / 180.0f * (0x3FFF - rand()) / 32767.0f;
+        s = sin(rot);
+        c = cos(rot);
+        p->_38 = w * (s - c);
+        p->_3C = w * (c + s);
+        p->_1C = 0.01f * (8 - rand() % 16) + params->_0C[0] / 100000.0f;
+        p->_20 = params->_0C[5] / 100000.0f;
+        p->_24 = params->_0C[6] / 100000.0f;
+        p->_2C = params->_0C[3] - params->_0C[4];
+        rot = lbl_803CB80C;
+        p->_28 = params->_0C[2] / 100000.0f * (1.0f - 0.01f * rot + 0.02 * rot * (rand() % 256) / 256.0);
+        p->rgba = params->_0C[9];
+        p->_30 = params->_0C[7];
+        p->_34 = 0.0f;
+        p->_44 = 0;
+        p->delay = p->remaining = params->_0C[3];
+        p->_4C = 1;
+        p->_4E = 0;
+        p->tex = params->_04;
+        p->_4F = 0;
+        p = (SwirlParticle*)p->next;
+    } while (p != NULL);
 }
 
 // .text:0x8002B7F8 size:0x48C
