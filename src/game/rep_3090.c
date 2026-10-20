@@ -1531,9 +1531,6 @@ void fn_3_1054CC(void) {
     return;
 }
 
-// 99.78%: registers only; the key count and seconds take r5 and r4 in the target (swapped
-// here), the key search's pointers r9/r8 (r8/r7 here), and the forward vector rotates f3/f2/f0.
-// Best of every order of the six integer locals.
 // .text:0x00104B3C size:0x990 mapped:0x80743BD0
 void fn_3_104B3C(struct Unk3090Track* track, u32 time, s16 channel, u8 depth, struct Unk3090View* view) {
     Unk3090View child;
@@ -1554,7 +1551,7 @@ void fn_3_104B3C(struct Unk3090Track* track, u32 time, s16 channel, u8 depth, st
     u8* keys = ch->_0C;
     Unk3090TrackKey* key;
     Unk3090TrackKey* next;
-    u32 sec;
+    u16 sec;
     u16 frac;
     s32 stride;
     u32 i;
@@ -1564,8 +1561,8 @@ void fn_3_104B3C(struct Unk3090Track* track, u32 time, s16 channel, u8 depth, st
     if (ch->_00 >= 0 && depth != 0) {
         fn_3_104B3C(track, time, ch->_00, depth - 1, view);
     }
-    stride = lbl_3_data_20FC4[ch->_06];
     sec = time >> 16;
+    stride = lbl_3_data_20FC4[ch->_06];
     frac = time;
     key = (Unk3090TrackKey*)(keys + (ch->_04 - 1) * stride);
     if (ch->_04 != 1 && sec < key->_00) {
@@ -1709,7 +1706,7 @@ void fn_3_104B3C(struct Unk3090Track* track, u32 time, s16 channel, u8 depth, st
         rot[1][0] = axes[1].x;
         rot[1][1] = axes[1].y;
         rot[1][2] = axes[1].z;
-        if (axes[1].x == 0.0f && axes[1].z == 0.0f) {
+        if (rot[1][0] == 0.0f && rot[1][2] == 0.0f) {
             pos.y = 0.0f;
             pos.x = 0.0f;
             pos.z = 1.0f;
@@ -1960,8 +1957,8 @@ void fn_3_103C30(Vec* pos) {
     }
 }
 
-// 99.82%: registers only, in code shared with fn_3_1000D8: the fielder angle sum, the
-// ball-direction atan2 arguments and the dist/delta temporaries of cases 4 to 7.
+// 99.90%: registers only, in code shared with fn_3_1000D8: the fielder angle sum (constant
+// in f0 in the target) and dist in cases 4 to 7 (f4/f3 in the target, f6/f4 here).
 // .text:0x00101CC4 size:0x1F6C mapped:0x80740D58
 void fn_3_101CC4(void) {
     Mtx rot;
@@ -1997,12 +1994,12 @@ void fn_3_101CC4(void) {
             lbl_3_common_bss_DE94._0000->_00D0.y = 0.00001f + angles[1];
             lbl_3_common_bss_DE94._0000->_00D0.z = 0.0f;
             fn_3_103E7C(angles);
-            dx = 100.0f * cosf_kludge(angles[0]) * cosf_kludge(angles[1]);
-            dy = 100.0f * sinf_kludge(angles[1]);
-            dz = 100.0f * sinf_kludge(angles[0]) * cosf_kludge(angles[1]);
-            g_pCamera->_284C.x = g_pCamera->_2858.x + dx;
-            g_pCamera->_284C.y = g_pCamera->_2858.y + dy;
-            g_pCamera->_284C.z = g_pCamera->_2858.z + dz;
+            delta.x = 100.0f * cosf_kludge(angles[0]) * cosf_kludge(angles[1]);
+            delta.y = 100.0f * sinf_kludge(angles[1]);
+            delta.z = 100.0f * sinf_kludge(angles[0]) * cosf_kludge(angles[1]);
+            g_pCamera->_284C.x = g_pCamera->_2858.x + delta.x;
+            g_pCamera->_284C.y = g_pCamera->_2858.y + delta.y;
+            g_pCamera->_284C.z = g_pCamera->_2858.z + delta.z;
             fn_3_1040D8();
             if (g_pCamera->_284C.y < 0.1f) {
                 g_pCamera->_284C.y = 0.1f;
@@ -2061,8 +2058,9 @@ void fn_3_101CC4(void) {
                     offset.z += g_Runners[id - 9].position.z;
                     memcpy(&g_pCamera->_2840, &offset, sizeof(Vec));
                 } else if (id == 13) {
-                    PSMTXRotRad(rot, 'Y', atan2(-(g_Ball.pastCoordinates[0].x - g_Ball.AtBat_Contact_BallPos.x),
-                                                -(g_Ball.pastCoordinates[0].z - g_Ball.AtBat_Contact_BallPos.z)));
+                    dz = g_Ball.pastCoordinates[0].z - g_Ball.AtBat_Contact_BallPos.z;
+                    dx = g_Ball.pastCoordinates[0].x - g_Ball.AtBat_Contact_BallPos.x;
+                    PSMTXRotRad(rot, 'Y', atan2(-dx, -dz));
                     memcpy(&offset, &g_pCamera->_2840, sizeof(Vec));
                     offset.x = g_pCamera->_2840.x - g_Ball.AtBat_Contact_BallPos.x;
                     offset.y = g_pCamera->_2840.y - g_Ball.AtBat_Contact_BallPos.y;
@@ -2232,8 +2230,8 @@ void fn_3_101CC4(void) {
     }
 }
 
-// 99.79%: registers only: the fielder angle sum (1.5707964f + _048), the ball-direction
-// atan2 arguments and the dist/delta temporaries of cases 4 to 7.
+// 99.89%: registers only: the fielder angle sum (constant in f0 in the target) and dist in
+// cases 4 to 7 (f4/f3 in the target, f6/f4 here); a permuter session found nothing.
 // .text:0x001000D8 size:0x1BEC mapped:0x8073F16C
 void fn_3_1000D8(void) {
     Mtx rot;
@@ -2259,12 +2257,12 @@ void fn_3_1000D8(void) {
             angles[0] = fn_3_9FEA8(g_pCamera->_2870);
             angles[1] = fn_3_9FEA8(g_pCamera->_2874);
             fn_3_103E7C(angles);
-            dx = 100.0f * cosf_kludge(angles[0]) * cosf_kludge(angles[1]);
-            dy = 100.0f * sinf_kludge(angles[1]);
-            dz = 100.0f * sinf_kludge(angles[0]) * cosf_kludge(angles[1]);
-            g_pCamera->_284C.x = g_pCamera->_2858.x + dx;
-            g_pCamera->_284C.y = g_pCamera->_2858.y + dy;
-            g_pCamera->_284C.z = g_pCamera->_2858.z + dz;
+            delta.x = 100.0f * cosf_kludge(angles[0]) * cosf_kludge(angles[1]);
+            delta.y = 100.0f * sinf_kludge(angles[1]);
+            delta.z = 100.0f * sinf_kludge(angles[0]) * cosf_kludge(angles[1]);
+            g_pCamera->_284C.x = g_pCamera->_2858.x + delta.x;
+            g_pCamera->_284C.y = g_pCamera->_2858.y + delta.y;
+            g_pCamera->_284C.z = g_pCamera->_2858.z + delta.z;
             fn_3_1040D8();
             break;
         case 2:
@@ -2310,8 +2308,9 @@ void fn_3_1000D8(void) {
                     offset.z += g_Runners[id - 9].position.z;
                     memcpy(&g_pCamera->_2840, &offset, sizeof(Vec));
                 } else if (id == 13) {
-                    PSMTXRotRad(rot, 'Y', atan2(-(g_Ball.pastCoordinates[0].x - g_Ball.AtBat_Contact_BallPos.x),
-                                                -(g_Ball.pastCoordinates[0].z - g_Ball.AtBat_Contact_BallPos.z)));
+                    dz = g_Ball.pastCoordinates[0].z - g_Ball.AtBat_Contact_BallPos.z;
+                    dx = g_Ball.pastCoordinates[0].x - g_Ball.AtBat_Contact_BallPos.x;
+                    PSMTXRotRad(rot, 'Y', atan2(-dx, -dz));
                     memcpy(&offset, &g_pCamera->_2840, sizeof(Vec));
                     offset.x = g_pCamera->_2840.x - g_Ball.AtBat_Contact_BallPos.x;
                     offset.y = g_pCamera->_2840.y - g_Ball.AtBat_Contact_BallPos.y;
@@ -2496,7 +2495,33 @@ BOOL fn_3_100018(void) {
     return lbl_3_common_bss_DE94._0000->_09B6 == 1;
 }
 
-// 99.59%: registers in the captain searches (0x48, 0x49, 0x55, 0x58, 0x59) and 0x2F's modulo.
+// The captain searches compile to the target's register copies only as inlined calls.
+static inline s32 fn_3_findCaptain(GameControlsStruct* logic, GameInitVariables* settings) {
+    s32 i;
+    s32 found = 0;
+
+    for (i = 0; i < 9; i++) {
+        if (logic->Team_CaptainRosterLoc[settings->humanTeamNumber] == lbl_8036E548._2C50[i]->_257) {
+            found = i;
+        }
+    }
+    return found;
+}
+
+static inline s32 fn_3_findCaptainKind(GameControlsStruct* logic, GameInitVariables* settings) {
+    s32 i;
+    s32 kind = 0;
+
+    for (i = 0; i < 9; i++) {
+        if (logic->Team_CaptainRosterLoc[settings->humanTeamNumber] == lbl_8036E548._2C50[i]->_257) {
+            kind = lbl_8036E548._2C50[i]->_252;
+        }
+    }
+    return kind;
+}
+
+// 99.82%: registers in the inlined captain searches (0x49, 0x55, 0x58, 0x59): the target gives
+// the walking pointer the lower register and the index the higher one.
 // .text:0x000FDB30 size:0x24E8 mapped:0x8073CBC4
 BOOL fn_3_FDB30(void) {
     Unk3090Task* task = lbl_803CC1B8;
@@ -2933,8 +2958,8 @@ BOOL fn_3_FDB30(void) {
             cam->_0000 += 1;
             continue;
         case 0x2F:
-            lbl_3_common_bss_DE94._0000->_0940 =
-                lbl_3_data_1D980[cam->_0000[1] + lbl_3_common_bss_DE94._0000->_0934 % cam->_0000[2]][cam->_0000[3]];
+            arg = lbl_3_common_bss_DE94._0000->_0934 % cam->_0000[2];
+            lbl_3_common_bss_DE94._0000->_0940 = lbl_3_data_1D980[cam->_0000[1] + arg][cam->_0000[3]];
             lbl_3_common_bss_DE94._0000->_0118 = 0;
             fn_3_FC938();
             cam->_0000 += 4;
@@ -3140,8 +3165,8 @@ BOOL fn_3_FDB30(void) {
             }
             continue;
         case 0x48:
-            if (logic->Team_CaptainRosterLoc[settings->humanTeamNumber] ==
-                lbl_8036E548._2C50[lbl_3_data_1E434[cam->_0000[1]]._14]->_257) {
+            model = lbl_8036E548._2C50[lbl_3_data_1E434[cam->_0000[1]]._14];
+            if (logic->Team_CaptainRosterLoc[settings->humanTeamNumber] == model->_257) {
                 fn_3_24ADC(cam->_0000[1], FALSE);
                 cam->_0000 += 3;
             } else {
@@ -3150,12 +3175,7 @@ BOOL fn_3_FDB30(void) {
             }
             continue;
         case 0x49:
-            found = 0;
-            for (i = 0; i < 9; i++) {
-                if (logic->Team_CaptainRosterLoc[settings->humanTeamNumber] == lbl_8036E548._2C50[i]->_257) {
-                    found = i;
-                }
-            }
+            found = fn_3_findCaptain(logic, settings);
             lbl_3_common_bss_DE94._0000->_09AA = 0;
             lbl_3_common_bss_DE94._0000->_09B5 = 0;
             lbl_3_common_bss_DE94._0000->_0946 = found;
@@ -3208,12 +3228,7 @@ BOOL fn_3_FDB30(void) {
             continue;
         case 0x55:
         case 0x56:
-            kind = 0;
-            for (i = 0; i < 9; i++) {
-                if (logic->Team_CaptainRosterLoc[settings->humanTeamNumber] == lbl_8036E548._2C50[i]->_257) {
-                    kind = lbl_8036E548._2C50[i]->_252;
-                }
-            }
+            kind = fn_3_findCaptainKind(logic, settings);
             switch (kind) {
             case 0:
                 arg = 0;
@@ -3247,22 +3262,12 @@ BOOL fn_3_FDB30(void) {
             cam->_0000 += 1;
             continue;
         case 0x58:
-            found = 0;
-            for (i = 0; i < 9; i++) {
-                if (logic->Team_CaptainRosterLoc[settings->humanTeamNumber] == lbl_8036E548._2C50[i]->_257) {
-                    found = i;
-                }
-            }
+            found = fn_3_findCaptain(logic, settings);
             fn_80011358(found, level);
             cam->_0000 += 1;
             continue;
         case 0x59:
-            found = 0;
-            for (i = 0; i < 9; i++) {
-                if (logic->Team_CaptainRosterLoc[settings->humanTeamNumber] == lbl_8036E548._2C50[i]->_257) {
-                    found = i;
-                }
-            }
+            found = fn_3_findCaptain(logic, settings);
             fn_80011358(found, 4);
             cam->_0000 += 1;
             continue;
