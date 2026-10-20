@@ -1014,7 +1014,97 @@ void fn_80058B20(SpaniTask* task, u8 team) {
 }
 
 // .text:0x80058644 size:0x4DC
-void fn_80058644(void) {
+// 99.29%: the batter's roster address adds its row and column offsets in the
+// other order (registers only).
+void fn_80058644(SpaniTask* task) {
+    CharacterStats* player;
+    s16 charID;
+    s32 fielding;
+    u8 pushPull;
+    u8 highLow;
+    u8 stance;
+    s32 frame;
+
+    if (lbl_803297E0._CF63[lbl_803297E0._CF3B] == 0) {
+        player = &inMemRoster[lbl_803297E0._CF3B][lbl_803297E0._CF46[lbl_803297E0._CF3B] - 1];
+        charID = player->stats.CharID;
+        fielding = player->stats.FieldingStats;
+        pushPull = player->stats.HitTrajectoryPushPull;
+        frame = charID << 16;
+        highLow = player->stats.HitTrajectoryHighLow;
+        stance = player->stats.BattingStance;
+        lbl_80371C30[task->_14 + 0x123].obj->_5C = frame;
+        lbl_80371C30[task->_14 + 0x124].obj->_5C = fn_80064918(charID) << 16;
+        lbl_80371C30[task->_14 + 0x12D].obj->_5C = frame;
+        fn_80059458(task, lbl_803297E0._CF3B, fielding);
+        lbl_80371C30[task->_14 + 0x127].obj->_5C = 0;
+        lbl_80371C30[task->_14 + 0x128].obj->_5C = 1 << 16;
+        lbl_80371C30[task->_14 + 0x129].obj->_5C = 2 << 16;
+        lbl_80371C30[task->_14 + 0x12A].obj->_5C = 3 << 16;
+        lbl_80371C30[task->_14 + 0x12B].obj->_5C = 4 << 16;
+        lbl_80371C30[task->_14 + 0x12C].obj->_5C = 5 << 16;
+        lbl_80371C30[task->_14 + 0x11B].obj->_5C = 0;
+        lbl_80371C30[task->_14 + 0x11C].obj->_5C = 0;
+        lbl_80371C30[task->_14 + 0x11D].obj->_5C = 0;
+        lbl_80371C30[task->_14 + 0x11E].obj->_5C = 0;
+        lbl_80371C30[task->_14 + 0x11F].obj->_5C = 0;
+        lbl_80371C30[task->_14 + 0x120].obj->_5C = 0;
+        switch (pushPull) {
+        case 0:
+            lbl_80371C30[task->_14 + 0x11B].obj->_68 = 1;
+            lbl_80371C30[task->_14 + 0x11C].obj->_68 = 0;
+            lbl_80371C30[task->_14 + 0x11D].obj->_68 = 0;
+            break;
+        case 1:
+            if (stance == 0) {
+                lbl_80371C30[task->_14 + 0x11B].obj->_68 = 0;
+                lbl_80371C30[task->_14 + 0x11C].obj->_68 = 1;
+                lbl_80371C30[task->_14 + 0x11D].obj->_68 = 0;
+            } else {
+                lbl_80371C30[task->_14 + 0x11B].obj->_68 = 0;
+                lbl_80371C30[task->_14 + 0x11C].obj->_68 = 0;
+                lbl_80371C30[task->_14 + 0x11D].obj->_68 = 1;
+            }
+            break;
+        case 2:
+            if (stance == 0) {
+                lbl_80371C30[task->_14 + 0x11B].obj->_68 = 0;
+                lbl_80371C30[task->_14 + 0x11C].obj->_68 = 0;
+                lbl_80371C30[task->_14 + 0x11D].obj->_68 = 1;
+            } else {
+                lbl_80371C30[task->_14 + 0x11B].obj->_68 = 0;
+                lbl_80371C30[task->_14 + 0x11C].obj->_68 = 1;
+                lbl_80371C30[task->_14 + 0x11D].obj->_68 = 0;
+            }
+            break;
+        }
+        switch (highLow) {
+        case 0:
+            lbl_80371C30[task->_14 + 0x11E].obj->_68 = 1;
+            lbl_80371C30[task->_14 + 0x11F].obj->_68 = 0;
+            lbl_80371C30[task->_14 + 0x120].obj->_68 = 0;
+            break;
+        case 1:
+            lbl_80371C30[task->_14 + 0x11E].obj->_68 = 0;
+            lbl_80371C30[task->_14 + 0x11F].obj->_68 = 1;
+            lbl_80371C30[task->_14 + 0x120].obj->_68 = 0;
+            break;
+        case 2:
+            lbl_80371C30[task->_14 + 0x11E].obj->_68 = 0;
+            lbl_80371C30[task->_14 + 0x11F].obj->_68 = 0;
+            lbl_80371C30[task->_14 + 0x120].obj->_68 = 1;
+            break;
+        }
+        lbl_80371C30[task->_14 + 0x12E].obj->_54 |= 2;
+        lbl_80371C30[task->_14 + 0x12E].obj->_68 = 1;
+        lbl_80371C30[task->_14 + 0x119].obj->_68 = 1;
+        lbl_80371C30[task->_14 + 0x121].obj->_5C = 0;
+        lbl_80371C30[task->_14 + 0x121].obj->_68 = 1;
+        lbl_80371C30[task->_14 + 0x133].obj->_54 &= ~2;
+        lbl_80371C30[task->_14 + 0x133].obj->_68 = 0;
+        lbl_80371C30[task->_14 + 0x12F].obj->_68 = 4;
+        lbl_803297E0._CF63[lbl_803297E0._CF3B] = 1;
+    }
 }
 
 // .text:0x80058394 size:0x2B0
