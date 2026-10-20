@@ -72,7 +72,11 @@ typedef struct EffectParams {
     /* 0x04 */ s32 _04;
     /* 0x08 */ s32 count;
     /* 0x0C */ s32 _0C[13];
-} EffectParams; // size: 0x40
+    /* 0x40 */ s32 _40;
+    /* 0x44 */ s32 _44;
+    /* 0x48 */ s32 _48;
+    /* 0x4C */ s32 _4C;
+} EffectParams; // size: 0x50
 
 typedef struct FlareParams {
     /* 0x00 */ s32 _00;
@@ -175,6 +179,31 @@ typedef struct DriftParticle {
     /* 0x4E */ u8 _4E;
     /* 0x4F */ u8 texCoords;
 } DriftParticle;
+
+// The particles fn_800317C4 starts
+typedef struct SwirlParticle {
+    /* 0x00 */ Particle* next;
+    /* 0x04 */ Vec pos;
+    /* 0x10 */ Vec vel;
+    /* 0x1C */ f32 _1C;
+    /* 0x20 */ f32 _20;
+    /* 0x24 */ f32 _24;
+    /* 0x28 */ f32 _28;
+    /* 0x2C */ s32 _2C;
+    /* 0x30 */ s32 _30;
+    /* 0x34 */ f32 _34;
+    /* 0x38 */ f32 _38;
+    /* 0x3C */ f32 _3C;
+    /* 0x40 */ s32 rgba;
+    /* 0x44 */ u8 _44;
+    /* 0x45 */ u8 _45[0x48 - 0x45];
+    /* 0x48 */ s16 delay;
+    /* 0x4A */ s16 remaining;
+    /* 0x4C */ u8 _4C;
+    /* 0x4D */ u8 tex;
+    /* 0x4E */ u8 _4E;
+    /* 0x4F */ u8 _4F;
+} SwirlParticle;
 
 // What fn_8002955C's callers pass
 typedef struct PuffParams {
@@ -380,6 +409,7 @@ extern LightFlashTask* lbl_803CC1B8;
 extern StadiumLights lbl_800F7478[14];
 extern u8 lbl_80367318[];
 extern s32 lbl_803CBC70;
+extern s32 lbl_803CB800;
 extern s32 lbl_803CBD0C;
 extern s32 fn_8005268C(void);
 extern MtxPtr fn_80052734(s32 index);
@@ -1155,6 +1185,64 @@ void fn_80031CA4(Vec* pos, EffectParams* params)
     }
 }
 
+// .text:0x800317C4 size:0x4E0
+void fn_800317C4(Emitter* e, Vec* pos, EffectParams* params)
+{
+    s32 a;
+    SwirlParticle* p = (SwirlParticle*)e->particles;
+    s32 i;
+    s32 angle;
+    s32 j;
+    s32 k;
+    f32 s;
+    f32 c;
+    f32 v;
+    f32 w;
+    f32 tilt;
+
+    e->_10 = params->_00;
+    for (i = 0, a = 0; i < e->count; a += 0x5000, i++) {
+        angle = (a / e->count + 5) / 10;
+        j = __abs(angle + 0x600) & 0x7FF;
+        if (j >= 0x401) {
+            j = 0x800 - j;
+        }
+        s = lbl_8017ED68[j];
+        c = fn_800335BC(angle);
+        p->pos.x = pos->x;
+        p->pos.y = pos->y;
+        p->pos.z = pos->z;
+        k = lbl_803CB800;
+        v = params->_0C[1] / 100000.0f * (1.0f - 0.01f * k + 0.02 * k * (rand() % 256) / 256.0);
+        p->vel.x = s * v;
+        p->vel.y = 0.0f;
+        p->vel.z = c * v;
+        p->_34 = 0.0f;
+        tilt = 3.1415927f * (params->_0C[9] / 100000.0f) / 180.0f * (0x80 - rand() % 256) / 128.0f + 3.1415927f * (params->_44 / 100000.0f) / 180.0f;
+        s = sin(tilt);
+        c = cos(tilt);
+        w = params->_0C[0] / 100000.0f;
+        p->_38 = w * (s - c);
+        p->_3C = w * (c + s);
+        p->_1C = 0.01f * (8 - rand() % 16) + params->_0C[0] / 100000.0f;
+        p->_20 = params->_0C[5] / 100000.0f;
+        p->_24 = params->_0C[6] / 100000.0f;
+        p->_2C = params->_0C[3] - params->_0C[4];
+        k = lbl_803CB800;
+        p->_28 = params->_0C[2] / 100000.0f * (1.0f - 0.01f * k + 0.02 * k * (rand() % 256) / 256.0);
+        p->rgba = params->_40;
+        p->_30 = params->_0C[8];
+        p->_34 = params->_48 / 100000.0f;
+        p->_44 = params->_4C;
+        p->delay = p->remaining = params->_0C[3];
+        p->_4C = 1;
+        p->_4E = 0;
+        p->tex = params->_04;
+        p->_4F = params->_0C[7];
+        p = (SwirlParticle*)p->next;
+    }
+}
+
 // .text:0x80030D88 size:0x2AC
 // 98.80%: the target copies params to r7 before dir to r5 at entry; this copies them
 // the other way round. The rest matches.
@@ -1183,6 +1271,84 @@ void fn_80030D88(Vec* pos, Vec* dir, EffectParams* params, s32 id)
                 fn_80030720(e, pos, dir, params);
             }
         }
+    }
+}
+
+// .text:0x80030720 size:0x668
+void fn_80030720(Emitter* e, Vec* pos, Vec* dir, EffectParams* params)
+{
+    SwirlParticle* p = (SwirlParticle*)e->particles;
+    Mtx rot;
+    Mtx m;
+    Vec d;
+    Vec n;
+    Vec up = { 0.0f, -1.0f, 0.0f };
+    Vec axis;
+    Quaternion q;
+    s32 i;
+    s32 k;
+    f32 mag;
+    f32 lo;
+    f32 yaw;
+    f32 v;
+    f32 w;
+    f32 s;
+    f32 c;
+    f32 tilt;
+
+    e->_10 = params->_00;
+    PSVECNormalize(dir, &n);
+    PSVECCrossProduct(&up, &n, &axis);
+    mag = PSVECMag(&axis);
+    for (i = 0; i < e->count; i++) {
+        if (i & 1) {
+            yaw = -yaw;
+        } else {
+            if (mag == 0.0f) {
+                PSMTXIdentity(m);
+            } else {
+                f32 half;
+                lo = 6.2831855f * (params->_0C[11] / 100000.0f) / 360.0f;
+                half = (6.2831855f * (params->_0C[12] / 100000.0f) / 360.0f - lo) / 2;
+                C_QUATRotAxisRad(&q, &axis, -(half * (8 - rand() % 16) / 8.0f + (lo + half)));
+                PSMTXQuat(m, &q);
+            }
+            yaw = 6.2831855f * (params->_0C[10] / 100000.0f) / 360.0f * (8 - rand() % 16) / 8.0f;
+        }
+        PSMTXRotRad(rot, 'Y', yaw);
+        PSMTXConcat(rot, m, rot);
+        PSMTXMultVec(rot, &n, &d);
+        p->pos.x = pos->x;
+        p->pos.y = pos->y;
+        p->pos.z = pos->z;
+        k = lbl_803CB800;
+        v = params->_0C[1] / 100000.0f * (1.0f - 0.01f * k + 0.02 * k * (rand() % 256) / 256.0);
+        p->vel.x = d.x * v;
+        p->vel.y = d.y;
+        p->vel.z = d.z * v;
+        p->_34 = 0.0f;
+        tilt = 3.1415927f * (params->_0C[9] / 100000.0f) / 180.0f * (0x80 - rand() % 256) / 128.0f + 3.1415927f * (params->_44 / 100000.0f) / 180.0f;
+        s = sin(tilt);
+        c = cos(tilt);
+        w = params->_0C[0] / 100000.0f;
+        p->_38 = w * (s - c);
+        p->_3C = w * (c + s);
+        p->_1C = 0.01f * (8 - rand() % 16) + params->_0C[0] / 100000.0f;
+        p->_20 = params->_0C[5] / 100000.0f;
+        p->_24 = params->_0C[6] / 100000.0f;
+        p->_2C = params->_0C[3] - params->_0C[4];
+        k = lbl_803CB800;
+        p->_28 = params->_0C[2] / 100000.0f * (1.0f - 0.01f * k + 0.02 * k * (rand() % 256) / 256.0);
+        p->rgba = params->_40;
+        p->_30 = params->_0C[8];
+        p->_34 = params->_48 / 100000.0f;
+        p->_44 = params->_4C;
+        p->delay = p->remaining = params->_0C[3];
+        p->_4C = 1;
+        p->_4E = 0;
+        p->tex = params->_04;
+        p->_4F = params->_0C[7];
+        p = (SwirlParticle*)p->next;
     }
 }
 
