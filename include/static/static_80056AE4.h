@@ -3,7 +3,7 @@
 
 #include "mssbTypes.h"
 
-void drawStarProgressionMenu(void);
+void drawStarProgressionMenu(struct SpaniTask* task);
 void someChallengeStarFunction(struct SpaniTask* task);
 void someChallengeStarFunction2(struct SpaniTask* task);
 void challengeCheckStarsMenuLoading(void);
@@ -20,7 +20,7 @@ void starMissionRelated1(void);
 void fn_8005A350(void);
 void fn_8005AF68(struct SpaniTask* task);
 void fn_8005B298(struct SpaniTask* task);
-void fn_8005B760(void);
+void fn_8005B760(struct SpaniTask* task, s32 team);
 void fn_8005BB5C(struct SpaniTask* task);
 void fn_8005BF40(struct SpaniTask* task);
 void fn_8005C2B0(struct SpaniTask* task);
