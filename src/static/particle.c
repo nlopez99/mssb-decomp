@@ -29,7 +29,10 @@ typedef struct Emitter {
     /* 0x16 */ u8 priority;
     /* 0x17 */ u8 _17_hi : 1;
     /* 0x17 */ u8 id : 7;
-    /* 0x18 */ Vec _18;
+    union {
+        /* 0x18 */ Vec _18;
+        /* 0x18 */ u8 state;
+    };
     /* 0x24 */ Vec _24;
     /* 0x30 */ Vec _30;
     /* 0x3C */ u8 _3C[0x4];
@@ -530,6 +533,91 @@ Particle* fn_80031F34(Particle* list, s32 n)
     return head;
 }
 
+// .text:0x80031CA4 size:0x290
+void fn_80031CA4(Vec* pos, EffectParams* params)
+{
+    Emitter* e = fn_800339F0(NULL, 5);
+
+    if (e != NULL) {
+        u8 tmp[sizeof(Emitter)];
+        Emitter* added = fn_800337CC((Emitter*)tmp, params->count, TRUE);
+        if (added != NULL) {
+            Particle* p;
+            fn_800317C4(added, pos, params);
+            p = e->particles;
+            while (p->next != NULL) {
+                p = p->next;
+            }
+            p->next = added->particles;
+            e->count += added->count;
+        }
+    } else {
+        e = fn_80033A24(fn_80031034, 0x11, 0, params->count, TRUE, 5);
+        if (e != NULL) {
+            e->state = 0;
+            fn_800317C4(e, pos, params);
+        }
+    }
+}
+
+// .text:0x80030D88 size:0x2AC
+// 98.80%: the target copies params to r7 before arg1 to r5 at entry; this copies them
+// the other way round. The rest matches.
+void fn_80030D88(Vec* pos, s32 arg1, EffectParams* params, s32 id)
+{
+    if (params->count > 0) {
+        Emitter* e = fn_800339F0(NULL, id);
+
+        if (e != NULL) {
+            u8 tmp[sizeof(Emitter)];
+            Emitter* added = fn_800337CC((Emitter*)tmp, params->count, TRUE);
+            if (added != NULL) {
+                Particle* p;
+                fn_80030720(added, pos, arg1, params);
+                p = e->particles;
+                while (p->next != NULL) {
+                    p = p->next;
+                }
+                p->next = added->particles;
+                e->count += added->count;
+            }
+        } else {
+            e = fn_80033A24(fn_80031034, 0x11, 0, params->count, TRUE, id);
+            if (e != NULL) {
+                e->state = 0;
+                fn_80030720(e, pos, arg1, params);
+            }
+        }
+    }
+}
+
+// .text:0x80030470 size:0x2B0
+void fn_80030470(Vec* pos, Vec* dir, Vec* back, EffectParams* params, s32 id)
+{
+    Emitter* e = fn_800339F0(NULL, id);
+
+    if (e != NULL) {
+        u8 tmp[sizeof(Emitter)];
+        Emitter* added = fn_800337CC((Emitter*)tmp, params->count, TRUE);
+        if (added != NULL) {
+            Particle* p;
+            fn_8002FDB8(added, pos, dir, back, params);
+            p = e->particles;
+            while (p->next != NULL) {
+                p = p->next;
+            }
+            p->next = added->particles;
+            e->count += added->count;
+        }
+    } else {
+        e = fn_80033A24(fn_80031034, 0x11, 0, params->count, TRUE, id);
+        if (e != NULL) {
+            e->state = 0;
+            fn_8002FDB8(e, pos, dir, back, params);
+        }
+    }
+}
+
 // .text:0x8002F1AC size:0xAC
 BOOL fn_8002F1AC(Vec* pos, s32 key)
 {
@@ -567,6 +655,33 @@ void fn_8002CDD0(Vec* pos)
         e->_24.y = pos->y;
         e->_24.z = pos->z;
         PSVECSubtract(&e->_24, &e->_18, &e->_30);
+    }
+}
+
+// .text:0x8002C2D0 size:0x29C
+void fn_8002C2D0(Vec* pos, Vec* dir, EffectParams* params)
+{
+    Emitter* e = fn_800339F0(NULL, 5);
+
+    if (e != NULL) {
+        u8 tmp[sizeof(Emitter)];
+        Emitter* added = fn_800337CC((Emitter*)tmp, params->count, TRUE);
+        if (added != NULL) {
+            Particle* p;
+            fn_8002BC84(added, pos, dir, params);
+            p = e->particles;
+            while (p->next != NULL) {
+                p = p->next;
+            }
+            p->next = added->particles;
+            e->count += added->count;
+        }
+    } else {
+        e = fn_80033A24(fn_80031034, 0x11, 0, params->count, TRUE, 5);
+        if (e != NULL) {
+            e->state = 0;
+            fn_8002BC84(e, pos, dir, params);
+        }
     }
 }
 
