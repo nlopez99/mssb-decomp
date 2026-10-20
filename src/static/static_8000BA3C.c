@@ -308,8 +308,8 @@ void fn_8000E030(SpriteShape* shape, Mtx mtx, ShapeStyle* style) {
     fn_800B12DC(verts, count);
 }
 
-// Draft: the target computes the ring addresses for the closing copy late and keeps
-// the final vertex loop rolled; this build hoists the addresses and unrolls it by two.
+// Differs: the target computes the ring addresses for the closing copy late and runs the
+// vertex loop on ctr; with a u32 counter this build unrolls it, with u16 it compares.
 // .text:0x8000DC9C size:0x394
 void fn_8000DC9C(SpriteShape* shape, Mtx mtx, ShapeStyle* style) {
     Vec out;
@@ -328,7 +328,7 @@ void fn_8000DC9C(SpriteShape* shape, Mtx mtx, ShapeStyle* style) {
     Vec* pa;
     Vec* pb;
     SpriteVertex* v;
-    u32 j;
+    u16 j;
     u32 count;
     f32 s;
     f32 c;
