@@ -871,6 +871,21 @@ static inline BOOL isAnimDone(UnkSprite3448* sprite) {
     return sprite->_69 == 2 ? TRUE : FALSE;
 }
 
+// The same helper as rep_2BF8.c's.
+static inline SND_VOICEID playStadiumSound(int id) {
+    int stadium = g_d_GameSettings.StadiumID;
+    SND_VOICEID voice = sndFXStartEx(lbl_3_data_81DC[stadium] + id,
+                                     g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD
+                                         ? lbl_3_data_84B8[id * 2]
+                                         : lbl_3_data_8404[stadium][id * 2],
+                                     0x3F, 0);
+
+    sndFXCtrl(voice, 0x5B,
+              g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD ? lbl_3_data_84B8[id * 2 + 1]
+                                                                      : lbl_3_data_8404[stadium][id * 2 + 1]);
+    return voice;
+}
+
 // .text:0x0012D1F4 size:0x960 mapped:0x8076C288
 void fn_3_12D1F4(void) {
     if (g_GameLogic.gameStatus == GAME_STATUS_MINIGAME_SELECT || g_GameLogic.gameStatus == GAME_STATUS_TOY_STADIUM_LOAD ||
@@ -2463,16 +2478,12 @@ void fn_3_127B68(void) {
 }
 
 // .text:0x001274B4 size:0x6B4 mapped:0x80766548
-// 99.95%: the target keeps the stadium in r22, the base in r18 (declaration orders and the
-// stadium's type do not change it).
 void fn_3_1274B4(void) {
     UnkTask3448* task = lbl_803CC1B8;
     UnkRecord3448* rec;
     s16 n;
     u32 i;
     s16 score;
-    s32 stadium;
-    SND_VOICEID voice;
 
     if (lbl_3_common_bss_32724._96 != 0) {
         fn_80034CEC(task);
@@ -2550,14 +2561,7 @@ void fn_3_1274B4(void) {
                 if (g_Minigame.GameMode_MiniGame != MINI_GAME_ID_NONE) {
                     fn_3_90064(lbl_3_data_81FC[0x2F]);
                 } else {
-                    stadium = g_d_GameSettings.StadiumID;
-                    voice = sndFXStartEx(lbl_3_data_81DC[stadium] + 0x1D,
-                                         g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD ? lbl_3_data_84B8[0x3A]
-                                                                                                 : lbl_3_data_8404[stadium][0x3A],
-                                         0x3F, 0);
-                    sndFXCtrl(voice, 0x5B,
-                              g_d_GameSettings.GameModeSelected == GAME_TYPE_TOY_FIELD ? lbl_3_data_84B8[0x3B]
-                                                                                      : lbl_3_data_8404[stadium][0x3B]);
+                    playStadiumSound(0x1D);
                 }
             }
         }
