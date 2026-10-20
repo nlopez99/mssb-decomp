@@ -339,11 +339,9 @@ void fn_3_146928(void) {
 }
 
 // .text:0x00146408 size:0x520 mapped:0x8078549C
-// 98.08%: the target keeps the coin loop's &g_Minigame in r26 through the piranha loop
+// 98.08%: the target keeps the coin loop's &g_Minigame in r26 through the inlined piranha loop
 // (mr r28,r26) for the points loop; this reloads it (see registers.md, "Unsolved").
 void fn_3_146408(void) {
-    int i;
-
     if (fn_3_108854() != 0) {
         return;
     }
@@ -358,11 +356,7 @@ void fn_3_146408(void) {
     }
     fn_3_145EB8();
     fn_3_14443C();
-    for (i = 0; i < 40; i++) {
-        if (MG._00A8[i].active) {
-            fn_3_143358(i);
-        }
-    }
+    fn_3_143714();
     fn_3_142284();
     fn_3_144CB8();
     fn_3_142CA8();
@@ -678,7 +672,7 @@ void fn_3_1453BC(int coin) {
 }
 
 // .text:0x00144CB8 size:0x704 mapped:0x80783D4C
-// 97.69%: registers and scheduling only; the list sort's pointers and counters and the
+// 97.76%: registers and scheduling only; the list sort's pointers and counters and the
 // sign/1.5 block after rand() use other volatile registers.
 void fn_3_144CB8(void) {
     Unk37A8Fielder* fielder;
@@ -687,11 +681,11 @@ void fn_3_144CB8(void) {
     int k;
     s8 tmp;
     s8 roll;
+    int i;
+    int j;
     int coin;
     int left;
     int player;
-    int i;
-    int j;
 
     for (player = 0; player < 4; player++) {
         if (g_Minigame.minigameFielderIndex[player] < 0) {
@@ -777,8 +771,8 @@ void fn_3_144CB8(void) {
                 }
                 for (i = 0; i < 2; i++) {
                     for (j = i + 1; j < 3; j++) {
-                        tmp = list[i];
-                        if (g_Minigame.miniGameCurrentPoints[tmp] < g_Minigame.miniGameCurrentPoints[list[j]]) {
+                        if (g_Minigame.miniGameCurrentPoints[list[i]] < g_Minigame.miniGameCurrentPoints[list[j]]) {
+                            tmp = list[i];
                             list[i] = list[j];
                             list[j] = tmp;
                         }
@@ -1095,9 +1089,9 @@ void fn_3_143FAC(int idx) {
 }
 
 // .text:0x001439EC size:0x5C0 mapped:0x80782A80
-// 94.66%: registers only; the target copies idx to r23 on entry and the inlined
-// fn_3_1430D0 copies use other saved registers.
-void fn_3_1439EC(int idx) {
+// 98.75%: registers only; the inlined fn_3_1430D0 copies keep their piranha index,
+// piranha and table bases one saved register higher than the target.
+void fn_3_1439EC(s32 idx) {
     Unk37A8Entry* entry;
     s32 i;
 
