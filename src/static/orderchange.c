@@ -2,6 +2,7 @@
 #include "static/UnknownHomes_Static.h"
 #include "musyx/musyx.h"
 #include "Dolphin/os.h"
+#include "static/static_8004157C.h"
 
 typedef struct Scene {
     /* 0x00 */ u16 _00;
@@ -47,20 +48,71 @@ typedef struct OrderSlot {
 
 extern OrderSlot lbl_80354720[][9];
 
+// The pause menu's state, inside lbl_803297E0
+typedef struct PauseMenu {
+    /* 0x00 */ u16 state;
+    /* 0x02 */ s8 team;
+    /* 0x03 */ u8 player;
+    /* 0x04 */ u8 _04[2];
+    /* 0x06 */ u8 _06[2];
+    /* 0x08 */ u8 _08[2];
+    /* 0x0A */ u8 _0A;
+    /* 0x0B */ u8 _0B;
+    /* 0x0C */ u8 _0C[2];
+    /* 0x0E */ u8 _0E[4];
+    /* 0x12 */ u8 _12[4];
+    /* 0x16 */ u8 _16[2];
+    /* 0x18 */ u8 _18[2];
+    /* 0x1A */ u8 _1A[2];
+    /* 0x1C */ u8 _1C[2];
+    /* 0x1E */ u8 _1E[2];
+    /* 0x20 */ u8 _20[2];
+    /* 0x22 */ u8 _22[0x45 - 0x22];
+    /* 0x45 */ u8 _45;
+    /* 0x46 */ u8 _46[0x5A - 0x46];
+    /* 0x5A */ u8 _5A;
+    /* 0x5B */ u8 _5B[0x6A - 0x5B];
+    /* 0x6A */ u8 _6A[2];
+} PauseMenu;
+
 extern struct {
     /* 0x0000 */ u8 _0000[0xCF38];
-    /* 0xCF38 */ u16 _CF38;
-    /* 0xCF3A */ s8 _CF3A;
-    /* 0xCF3B */ u8 _CF3B;
-    /* 0xCF3C */ u8 _CF3C[0xCF42 - 0xCF3C];
-    /* 0xCF42 */ u8 _CF42;
+    /* 0xCF38 */ PauseMenu pause;
 } lbl_803297E0;
 
 extern struct {
     /* 0x00 */ u8 _00[0x55];
     /* 0x55 */ u8 _55;
     /* 0x56 */ u8 _56;
+    /* 0x57 */ u8 _57[2];
+    /* 0x59 */ u8 _59;
+    /* 0x5A */ u8 _5A;
 } lbl_803C66B0;
+
+extern struct {
+    /* 0x0000 */ u8 _0000[0x4705];
+    /* 0x4705 */ u8 _4705;
+    /* 0x4706 */ u8 _4706[0x4720 - 0x4706];
+    /* 0x4720 */ s32 _4720;
+    /* 0x4724 */ s32 _4724;
+} lbl_8034E9A0;
+
+extern struct {
+    /* 0x00 */ u8 _00[0x36];
+    /* 0x36 */ u8 _36;
+    /* 0x37 */ u8 _37;
+    /* 0x38 */ u8 _38;
+} lbl_803C5EA4;
+
+extern struct {
+    /* 0x0000 */ u8 _0000[0x4445];
+    /* 0x4445 */ u8 _4445;
+} starMissionCompletionTracker;
+
+extern void characterSelectScreen(s32 team);
+extern void unsure_FillRosterPositions(s32 team);
+extern void SetMenuNumber(void);
+extern void fn_800625A4(s32 arg0, s32 arg1);
 
 extern void* fn_800B0A5C_insertQueue(void (*callback)(void), s32 priority);
 
@@ -97,13 +149,13 @@ void fn_80048764(void) {
 // .text:0x800486E0 size:0x84
 void fn_800486E0(s32 priority, s8 team, u8 player) {
     fn_800B0A5C_insertQueue(pauseMenuSelection, priority);
-    lbl_803297E0._CF38 = 0;
-    lbl_803297E0._CF3A = team;
-    lbl_803297E0._CF42 = 0;
+    lbl_803297E0.pause.state = 0;
+    lbl_803297E0.pause.team = team;
+    lbl_803297E0.pause._0A = 0;
     if (g_d_GameSettings._06 != 2) {
-        lbl_803297E0._CF3B = 0;
+        lbl_803297E0.pause.player = 0;
     } else {
-        lbl_803297E0._CF3B = player;
+        lbl_803297E0.pause.player = player;
     }
 }
 
@@ -113,6 +165,72 @@ void pauseMenuSelection(void) {
 
 // .text:0x80047CE0 size:0x304
 void fn_80047CE0(void) {
+    s32 i;
+    u8 kind;
+
+    lbl_8034E9A0._4720 = 0;
+    lbl_8034E9A0._4724 = 0;
+    for (i = 0; i < 2; i++) {
+        lbl_803297E0.pause._1A[i] = g_d_GameSettings._06 == 2 ? TRUE : FALSE;
+    }
+    lbl_803297E0.pause._06[0] = lbl_803297E0.pause._06[1] = 0xFF;
+    lbl_803297E0.pause._04[0] = lbl_803297E0.pause._04[1] = 0;
+    lbl_803297E0.pause._08[1] = lbl_803297E0.pause._08[0] = 0;
+    lbl_803297E0.pause._0B = 0;
+    lbl_803297E0.pause._0E[0] = lbl_803297E0.pause._0E[1] = lbl_803297E0.pause._0E[2] = lbl_803297E0.pause._0E[3] = 0;
+    lbl_803297E0.pause._12[0] = lbl_803297E0.pause._12[1] = lbl_803297E0.pause._12[2] = lbl_803297E0.pause._12[3] = 0;
+    lbl_803297E0.pause._1A[0] = lbl_803297E0.pause._1A[1] = lbl_803297E0.pause._1C[0] = lbl_803297E0.pause._1C[1] = 0;
+    lbl_803297E0.pause._16[0] = lbl_803297E0.pause._16[1] = 0;
+    lbl_803297E0.pause._1E[0] = lbl_803297E0.pause._1E[1] = 0;
+    lbl_803297E0.pause._20[0] = lbl_803297E0.pause._20[1] = 0;
+    lbl_8034E9A0._4705 = 1;
+    lbl_803C66B0._59 = 0;
+    lbl_803C66B0._5A = 1;
+    if (g_d_GameSettings._06 != 2) {
+        if (g_d_GameSettings.GameModeSelected != 5 && lbl_803CBBCC->_06 == 10) {
+            characterSelectScreen(0);
+            characterSelectScreen(1);
+        } else if (g_d_GameSettings.GameModeSelected == 5 && starMissionCompletionTracker._4445 == 0) {
+            fn_800415A8();
+            unsure_FillRosterPositions(1);
+            characterSelectScreen(1);
+        }
+        lbl_803297E0.pause._6A[1] = 0;
+        lbl_803297E0.pause._6A[lbl_803297E0.pause.player] = 0;
+        lbl_803C5EA4._36 = 1;
+        lbl_803C5EA4._37 = lbl_803C5EA4._38;
+        lbl_803C5EA4._38 = 1;
+    } else if (lbl_803297E0.pause._6A[lbl_803297E0.pause.player] == 0) {
+        lbl_803297E0.pause._1A[0] = lbl_803297E0.pause._1A[1] = 1;
+    } else {
+        lbl_803297E0.pause._1A[0] = lbl_803297E0.pause._1A[1] = 0;
+    }
+    SetMenuNumber();
+    if (g_d_GameSettings._06 != 2 && lbl_803CBBCC->_06 != 10 && g_d_GameSettings._10 == 0 &&
+        g_d_GameSettings.GameModeSelected != 5) {
+        lbl_803297E0.pause._0B = 1;
+        lbl_803297E0.pause._16[0] = 1;
+        fn_800625A4(0, 0x39);
+        fn_800625A4(1, 0x39);
+        lbl_803297E0.pause.state = 1;
+        return;
+    }
+    kind = lbl_803297E0.pause._6A[lbl_803297E0.pause.player];
+    if (kind != 2 && kind != 3) {
+        fn_800625A4(0, 0x38);
+        if (g_d_GameSettings._06 != 2) {
+            fn_800625A4(1, 0x38);
+        } else if (g_d_GameSettings._06 == 2) {
+            fn_800625A4(1, 0x38);
+        }
+        lbl_803297E0.pause.state = 1;
+    } else if (kind == 2) {
+        lbl_803297E0.pause._45 = 1;
+        lbl_803297E0.pause.state = 4;
+    } else {
+        lbl_803297E0.pause._5A = 1;
+        lbl_803297E0.pause.state = 5;
+    }
 }
 
 // .text:0x800471F4 size:0xAEC
