@@ -5613,7 +5613,9 @@ void fn_1_D4BC(void) {
 }
 
 // .text:0x0000D300 size:0x1BC
-// Only the epilogue differs: the target restores r0 before r28-r31
+// Only the epilogue differs: the target restores r0 before r28-r31. The permuter
+// matched it with a no-op `& 0xFFFFFFFFFFFFFFFFu` on the _C4 line's index (same
+// body); store orders do not
 void fn_1_D300(Unk8036E548Actor* arg0) {
     s32 first;
     s32 second;
