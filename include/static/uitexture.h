@@ -31,6 +31,9 @@ typedef struct ScreenEffectSlot {
     /* 0x08 */ ScreenEffect fx;
 } ScreenEffectSlot; // size: 0x28
 
+extern u16 lbl_800F7AC0[16];
+extern TextureDesc lbl_800F7AE0;
+
 void* GetUITexture(void);
 TextureDesc* fn_80039AB4(void);
 void fn_80039AC0(void);

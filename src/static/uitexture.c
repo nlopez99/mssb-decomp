@@ -40,6 +40,17 @@ ScreenEffectSlot lbl_800F7A60[2] = {
     { 0, fn_80039FF8 },
 };
 
+// The IA8 palette of the C4 texture fn_8003AD84 (static_8003A2EC.c) sets up
+u16 lbl_800F7AC0[16] ATTRIBUTE_ALIGN(32) = {
+    0x0000, 0x11FF, 0x22FF, 0x33FF, 0x44FF, 0x55FF, 0xFFFF, 0xFFFF,
+    0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+};
+
+TextureDesc lbl_800F7AE0 = {
+    NULL, NULL, 480, 640, GX_CLAMP, GX_CLAMP, GX_LINEAR, GX_LINEAR, 0.0f, 0, 0, 0, GX_TF_RGB565,
+};
+
+
 // .text:0x8003A2C0 size:0x2C
 void fn_8003A2C0(void) {
     fn_800B0A5C_insertQueue(fn_8003A1D0, 0x6001);
