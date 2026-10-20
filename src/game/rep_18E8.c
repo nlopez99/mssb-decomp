@@ -1181,8 +1181,9 @@ void fn_3_A85C8(f32 dist) {
 }
 
 // .text:0x000A8478 size:0x150 mapped:0x806E750C
-// 99.64%: idx gets r8 where the target uses r6 (and r7 for its scaled index);
-// declaration order and if/ternary forms change nothing.
+// 99.64%: idx gets r8 where the target uses r6 (and r7 for its scaled index); declaration
+// orders, if/ternary/helper forms, int types, field reads for cur, a second pointer and a
+// block-scoped idx change nothing.
 BOOL fn_3_A8478(s32* runnerOut, s32* framesOut) {
     s32 idx;
     InMemRunnerType* r;
