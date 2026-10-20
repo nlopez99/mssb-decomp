@@ -3,8 +3,19 @@
 #include "static/UnknownHomes_Static.h"
 #include "string.h"
 
+typedef struct MbRosterEntry {
+    /* 0x00 */ u8 _00[0x24];
+    /* 0x24 */ s16 charId;
+    /* 0x26 */ u8 _26[0x31 - 0x26];
+    /* 0x31 */ u8 attribute;
+    /* 0x32 */ u8 _32[0x3B - 0x32];
+    /* 0x3B */ u8 chemistry[0x36];
+    /* 0x71 */ u8 _71[0xA0 - 0x71];
+} MbRosterEntry; // size: 0xA0
+
 typedef struct MbState {
-    /* 0x0000 */ u8 _0000[0x46E0];
+    /* 0x0000 */ MbRosterEntry chars[2][9];
+    /* 0x0B40 */ u8 _0B40[0x46E0 - 0xB40];
     /* 0x46E0 */ s32 _46E0[2];
     /* 0x46E8 */ u8 _46E8[0x46F8 - 0x46E8];
     /* 0x46F8 */ u8 ports[2];
@@ -38,13 +49,6 @@ typedef struct MbStadiumState {
     /* 0xF5 */ u8 _F5;
 } MbStadiumState;
 
-typedef struct MbRosterEntry {
-    /* 0x00 */ u8 _00[0x24];
-    /* 0x24 */ s16 charId;
-    /* 0x26 */ u8 _26[0x3B - 0x26];
-    /* 0x3B */ u8 chemistry[0x36];
-    /* 0x71 */ u8 _71[0xA0 - 0x71];
-} MbRosterEntry; // size: 0xA0
 
 typedef struct MbTrack {
     /* 0x00 */ Vec pos;
@@ -92,6 +96,8 @@ extern void fn_8006C398(MbStatSlot* slot);
 extern MbState lbl_8034E9A0;
 extern MbTeams lbl_803C6724;
 extern u8 lbl_80108DB8[];
+extern u8 lbl_80108ED0[12];
+extern u8 lbl_8010902C[12];
 extern u8 lbl_80108DDC[];
 extern MbRosterEntry inMemRoster[2][9];
 extern MbTrack lbl_802E4BC0[9];
@@ -425,7 +431,41 @@ void fn_800675C4(void) {
 }
 
 // .text:0x80067264 size:0x360
-void fn_80067264(void) {
+s32 fn_80067264(s32 team, s32 captain) {
+    s32 counts[4];
+    s32 attr[2][9];
+    s32 i;
+    int j;
+    s32 color;
+
+    counts[0] = 0;
+    counts[1] = 0;
+    counts[2] = 0;
+    counts[3] = 0;
+    for (j = 0; j < 9; j++) {
+        attr[team][j] = 0;
+        attr[team][j] = lbl_8034E9A0.chars[lbl_803C6724._02[team][j] / 9][lbl_803C6724._02[team][j] % 9].attribute;
+    }
+    for (j = 0; j < 12; j++) {
+        if (captain == lbl_80108ED0[j]) {
+            color = lbl_8010902C[j];
+            break;
+        }
+    }
+    for (i = 0; i < 9; i++) {
+        counts[attr[team][i]]++;
+    }
+    for (i = 0; i < 4; i++) {
+        if (counts[color] <= counts[i] && i != color) {
+            return 0;
+        }
+    }
+    for (j = 0; j < 4; j++) {
+        if (counts[j] >= 3 && j == color) {
+            return 3;
+        }
+    }
+    return 0;
 }
 
 // .text:0x800671FC size:0x68

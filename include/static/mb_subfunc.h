@@ -21,7 +21,7 @@ void characterSelectScreen(void);
 void fn_80066EAC(u8 team);
 void fn_800670A0(u8 team);
 void fn_800671FC(void);
-void fn_80067264(void);
+s32 fn_80067264(s32 team, s32 captain);
 void fn_800675C4(void);
 void fn_800678CC(void);
 s16 fn_80067AC8(s16 id, s8 slot);
