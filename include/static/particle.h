@@ -52,6 +52,7 @@ void fn_80033964(struct Emitter* e);
 struct Emitter* fn_800339F0(struct Emitter* e, u8 id);
 struct Emitter* fn_80033A24(BOOL (*update)(void*), u8 priority, s32 kind, s32 n, BOOL all, u8 id);
 void fn_80033B58(struct TexFile* file, s32 index, GXTexWrapMode wrapS, GXTexWrapMode wrapT);
+void fn_80033CC8(struct Particle* p, struct TexFile* file);
 void fn_80033F64(f32 w, f32 h, f32 angle);
 void fn_8003403C(f32 w, f32 h);
 void fn_800340F4(Mtx m);

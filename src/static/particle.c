@@ -27,7 +27,8 @@ typedef struct Particle {
     /* 0x4A */ s16 _4A;
     /* 0x4C */ u8 _4C;
     /* 0x4D */ u8 _4D;
-    /* 0x4E */ u8 _4E[0x12];
+    /* 0x4E */ u8 _4E;
+    /* 0x4F */ u8 _4F[0x11];
 } Particle; // size: 0x60
 
 typedef struct Emitter {
@@ -159,6 +160,7 @@ extern StadiumLights lbl_800F7478[14];
 extern u8 lbl_80367318[];
 extern s32 lbl_803CBC70;
 extern s32 lbl_803CBD0C;
+extern u16 lbl_800F7860[7][2];
 extern struct {
     /* 0x0000 */ u8 _0000[0x2C50];
     /* 0x2C50 */ void* _2C50[13];
@@ -311,6 +313,21 @@ void fn_80033F64(f32 w, f32 h, f32 angle)
     for (i = 0; i < 4; i++) {
         PSMTXMultVec(m, &lbl_80180010[i], &lbl_80180010[i]);
     }
+}
+
+// .text:0x80033CC8 size:0x29C
+void fn_80033CC8(Particle* p, TexFile* file)
+{
+    s32 i;
+
+    fn_80033B58(file, p->_4D, GX_CLAMP, GX_CLAMP);
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    for (i = 0; i < 4; i++) {
+        GXPosition3f32(p->pos.x + lbl_80180010[i].x, p->pos.y + lbl_80180010[i].y, p->pos.z + lbl_80180010[i].z);
+        GXColor1u32(p->_40);
+        GXTexCoord2f32(lbl_800F7860[p->_4E + i][0], lbl_800F7860[p->_4E + i][1]);
+    }
+    GXEnd();
 }
 
 // .text:0x80033B58 size:0x170
