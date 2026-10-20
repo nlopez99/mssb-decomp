@@ -170,6 +170,24 @@ typedef struct BurstParticle {
     /* 0x2A */ s8 _2A;
 } BurstParticle;
 
+// The particles fn_8002F258 starts
+typedef struct TrailParticle {
+    /* 0x00 */ Particle* next;
+    /* 0x04 */ Vec pos;
+    /* 0x10 */ Vec start;
+    /* 0x1C */ f32 _1C;
+    /* 0x20 */ s32 id;
+    /* 0x24 */ s32 _24;
+    /* 0x28 */ s32 _28;
+    /* 0x2C */ u8 _2C[0x40 - 0x2C];
+    /* 0x40 */ u8 color[4];
+    /* 0x44 */ u8 _44[0x48 - 0x44];
+    /* 0x48 */ s16 _48;
+    /* 0x4A */ s16 _4A;
+    /* 0x4C */ u8 _4C;
+    /* 0x4D */ u8 _4D;
+} TrailParticle;
+
 typedef struct EmitterList {
     /* 0x0 */ Emitter* prev;
     /* 0x4 */ Emitter* next;
@@ -272,6 +290,31 @@ static inline void initCosTable(void)
     for (i = 0; i < 0x401; i++) {
         lbl_8017ED68[i] = cos(3.141592654 * i / 1025.0);
     }
+}
+
+static inline void initTrail(Emitter* e, Vec* pos, s32 id, FlareParams* params)
+{
+    TrailParticle* p;
+
+    e->_10 = params->_00;
+    p = (TrailParticle*)e->particles;
+    p->pos.x = pos->x;
+    p->pos.y = pos->y;
+    p->pos.z = pos->z;
+    p->start.x = pos->x;
+    p->start.y = pos->y;
+    p->start.z = pos->z;
+    p->_1C = params->_08 / 100000.0f;
+    p->_24 = params->_0C;
+    p->id = id;
+    p->color[3] = 0xFF;
+    p->color[2] = 0xFF;
+    p->color[1] = 0xFF;
+    p->color[0] = 0xFF;
+    p->_48 = 1;
+    p->_28 = p->_4A = params->_10;
+    p->_4C = 1;
+    p->_4D = params->_04;
 }
 
 // .text:0x800348C8 size:0x304
@@ -954,6 +997,32 @@ BOOL fn_8002F9FC(Emitter* e)
     return TRUE;
 }
 
+// .text:0x8002F258 size:0x39C
+void fn_8002F258(Vec* pos, s32 id, FlareParams* params)
+{
+    Emitter* e = fn_800339F0(NULL, 6);
+
+    if (e != NULL) {
+        u8 tmp[sizeof(Emitter)];
+        Emitter* added = fn_800337CC((Emitter*)tmp, 1, TRUE);
+        if (added != NULL) {
+            Particle* p;
+            initTrail(added, pos, id, params);
+            p = e->particles;
+            while (p->next != NULL) {
+                p = p->next;
+            }
+            p->next = added->particles;
+            e->count++;
+        }
+    } else {
+        e = fn_80033A24(fn_8002ECA0, 0x10, 0, 1, TRUE, 6);
+        if (e != NULL) {
+            initTrail(e, pos, id, params);
+        }
+    }
+}
+
 // .text:0x8002F1AC size:0xAC
 BOOL fn_8002F1AC(Vec* pos, s32 key)
 {
@@ -1387,3 +1456,4 @@ void fn_80027300(Emitter* e, Vec* pos, Vec* dir, EffectParams* params, f32 scale
         p = p->next;
     } while (p != NULL);
 }
+

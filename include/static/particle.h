@@ -12,6 +12,7 @@ struct TexFile;
 struct EffectParams;
 struct SparkParticle;
 struct GlowParticle;
+struct FlareParams;
 
 BOOL fn_80026E58(void* e);
 void fn_80027300(struct Emitter* e, Vec* pos, Vec* dir, struct EffectParams* params, f32 scale);
@@ -30,6 +31,8 @@ void fn_8002C2D0(Vec* pos, Vec* dir, struct EffectParams* params);
 void fn_8002CDD0(Vec* pos);
 void fn_8002DC68(Vec* pos);
 BOOL fn_8002F1AC(Vec* pos, s32 key);
+BOOL fn_8002ECA0(void* e);
+void fn_8002F258(Vec* pos, s32 id, struct FlareParams* params);
 BOOL fn_8002F9FC(struct Emitter* e);
 void fn_8002FDB8(struct Emitter* e, Vec* pos, Vec* dir, Vec* back, struct EffectParams* params);
 void fn_80030470(Vec* pos, Vec* dir, Vec* back, struct EffectParams* params, s32 id);
