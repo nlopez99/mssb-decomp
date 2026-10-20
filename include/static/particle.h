@@ -29,6 +29,7 @@ void fn_8002C2D0(Vec* pos, Vec* dir, struct EffectParams* params);
 void fn_8002CDD0(Vec* pos);
 void fn_8002DC68(Vec* pos);
 BOOL fn_8002F1AC(Vec* pos, s32 key);
+BOOL fn_8002F9FC(struct Emitter* e);
 void fn_8002FDB8(struct Emitter* e, Vec* pos, Vec* dir, Vec* back, struct EffectParams* params);
 void fn_80030470(Vec* pos, Vec* dir, Vec* back, struct EffectParams* params, s32 id);
 void fn_80030720(struct Emitter* e, Vec* pos, s32 arg1, struct EffectParams* params);

@@ -28,7 +28,8 @@ typedef struct Particle {
     /* 0x4C */ u8 _4C;
     /* 0x4D */ u8 _4D;
     /* 0x4E */ u8 _4E;
-    /* 0x4F */ u8 _4F[0x11];
+    /* 0x4F */ u8 _4F;
+    /* 0x50 */ u8 _50[0x10];
 } Particle; // size: 0x60
 
 typedef struct Emitter {
@@ -850,6 +851,26 @@ void fn_80030470(Vec* pos, Vec* dir, Vec* back, EffectParams* params, s32 id)
             fn_8002FDB8(e, pos, dir, back, params);
         }
     }
+}
+
+// .text:0x8002F9FC size:0x3BC
+BOOL fn_8002F9FC(Emitter* e)
+{
+    Particle* p = e->particles;
+
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+    do {
+        fn_8003403C(p->_38, p->_3C);
+        if (p->_4F != 0) {
+            GXSetBlendMode(GX_BM_SUBTRACT, GX_BL_ONE, GX_BL_ONE, GX_LO_CLEAR);
+        } else {
+            GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_ONE, GX_LO_CLEAR);
+        }
+        fn_80033CC8(p, (TexFile*)e->_10);
+        p = p->next;
+    } while (p != NULL);
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
+    return TRUE;
 }
 
 // .text:0x8002F1AC size:0xAC
