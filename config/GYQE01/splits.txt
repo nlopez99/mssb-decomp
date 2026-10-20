@@ -14,6 +14,17 @@ Sections:
 	.sdata2     type:rodata align:4
 	.sbss2      type:bss align:32
 
+static/model.c:
+	extab       start:0x80005748 end:0x800059D0
+	extabindex  start:0x80006E4C end:0x80007218
+	.text       start:0x80011570 end:0x8001FE00
+	.rodata     start:0x800E6600 end:0x800E6698
+	.data       start:0x800EE800 end:0x800EEFD0
+	.bss        start:0x80118220 end:0x80118740
+	.sdata      start:0x803CB790 end:0x803CB7C8
+	.sbss       start:0x803CBBF0 end:0x803CBC40
+	.sdata2     start:0x803CC4B8 end:0x803CC530
+
 static/static_8001FE00.c:
 	extab       start:0x800059D0 end:0x80005A28
 	extabindex  start:0x80007218 end:0x8000729C
