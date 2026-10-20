@@ -59,6 +59,37 @@ extern SpriteRef lbl_80371C30[];
 extern u32 lbl_803CB750;
 extern u8 lbl_800EFBA4[16];
 
+typedef struct RosterEntry {
+    /* 0x00 */ u8 _00[0x1E];
+    /* 0x1E */ u8 _1E[2];
+    /* 0x20 */ s32 _20;
+    /* 0x24 */ s16 charId;
+    /* 0x26 */ u8 _26;
+    /* 0x27 */ u8 _27;
+    /* 0x28 */ u8 _28[2];
+    /* 0x2A */ u8 _2A[2];
+    /* 0x2C */ u8 _2C;
+    /* 0x2D */ u8 _2D;
+    /* 0x2E */ u8 _2E;
+    /* 0x2F */ u8 _2F;
+    /* 0x30 */ u8 _30;
+    /* 0x31 */ u8 _31;
+    /* 0x32 */ u8 _32;
+    /* 0x33 */ u8 _33;
+    /* 0x34 */ u8 _34;
+    /* 0x35 */ u8 _35[2];
+    /* 0x37 */ u8 bars[4];
+    /* 0x3B */ u8 chemistry[0x36];
+    /* 0x71 */ u8 _71;
+    /* 0x72 */ u8 _72[2];
+    /* 0x74 */ u16 _74[21];
+    /* 0x9E */ u8 _9E[2];
+} RosterEntry; // size: 0xA0
+
+extern RosterEntry inMemRoster[2][9];
+extern u8 lbl_80361B20[];
+extern s8 lbl_800E86F0[12];
+
 typedef struct OrderSlot {
     /* 0x00 */ u8 _00[2];
     /* 0x02 */ s8 charId;
@@ -78,7 +109,7 @@ typedef struct PauseMenu {
     /* 0x0A */ u8 _0A;
     /* 0x0B */ u8 _0B;
     /* 0x0C */ u8 _0C[2];
-    /* 0x0E */ u8 _0E[4];
+    /* 0x0E */ s8 _0E[4];
     /* 0x12 */ u8 _12[4];
     /* 0x16 */ u8 _16[2];
     /* 0x18 */ u8 _18[2];
@@ -130,16 +161,20 @@ extern struct {
     /* 0x5A */ u8 _5A;
 } lbl_803C66B0;
 
-extern struct {
+extern union {
+    RosterEntry roster[2][9];
+    struct {
     /* 0x0000 */ u8 _0000[0x46F8];
     /* 0x46F8 */ s8 port[4];
     /* 0x46FC */ u8 _46FC[0x4705 - 0x46FC];
     /* 0x4705 */ u8 _4705;
     /* 0x4706 */ u8 _4706[0x4720 - 0x4706];
-    /* 0x4720 */ s32 _4720;
-    /* 0x4724 */ s32 _4724;
+    /* 0x4720 */ s32 _4720[2];
     /* 0x4728 */ u8 _4728[0x472C - 0x4728];
     /* 0x472C */ PadButtons pads[4];
+    /* 0x4744 */ u8 _4744[0x489B - 0x4744];
+    /* 0x489B */ u8 _489B[2][9];
+    } s;
 } lbl_8034E9A0;
 
 extern struct {
@@ -164,6 +199,8 @@ extern union {
 } starMissionCompletionTracker;
 
 extern s16 lbl_8010B42C[];
+
+u8 lbl_802E4B00[2][9];
 
 extern void characterSelectScreen(s32 team);
 extern void unsure_FillRosterPositions(s32 team);
@@ -370,8 +407,8 @@ void fn_80047CE0(void) {
     s32 i;
     u8 kind;
 
-    lbl_8034E9A0._4720 = 0;
-    lbl_8034E9A0._4724 = 0;
+    lbl_8034E9A0.s._4720[0] = 0;
+    lbl_8034E9A0.s._4720[1] = 0;
     for (i = 0; i < 2; i++) {
         lbl_803297E0.s.pause._1A[i] = g_d_GameSettings._06 == 2 ? TRUE : FALSE;
     }
@@ -385,7 +422,7 @@ void fn_80047CE0(void) {
     lbl_803297E0.s.pause._16[0] = lbl_803297E0.s.pause._16[1] = 0;
     lbl_803297E0.s.pause._1E[0] = lbl_803297E0.s.pause._1E[1] = 0;
     lbl_803297E0.s.pause._20[0] = lbl_803297E0.s.pause._20[1] = 0;
-    lbl_8034E9A0._4705 = 1;
+    lbl_8034E9A0.s._4705 = 1;
     lbl_803C66B0._59 = 0;
     lbl_803C66B0._5A = 1;
     if (g_d_GameSettings._06 != 2) {
@@ -459,9 +496,9 @@ void starMenuCursor(void) {
     s8 kind;
 
     memset(&pad, 0, sizeof(pad));
-    pad.held = g_d_GameSettings._06 == 2 ? lbl_803297E0.pads[lbl_8034E9A0.port[0]].held : lbl_8034E9A0.pads[0].held;
-    pad.pressed = g_d_GameSettings._06 == 2 ? lbl_803297E0.pads[lbl_8034E9A0.port[0]].pressed : lbl_8034E9A0.pads[0].pressed;
-    pad.repeat = g_d_GameSettings._06 == 2 ? lbl_803297E0.pads[lbl_8034E9A0.port[0]].repeat : lbl_8034E9A0.pads[0].repeat;
+    pad.held = g_d_GameSettings._06 == 2 ? lbl_803297E0.pads[lbl_8034E9A0.s.port[0]].held : lbl_8034E9A0.s.pads[0].held;
+    pad.pressed = g_d_GameSettings._06 == 2 ? lbl_803297E0.pads[lbl_8034E9A0.s.port[0]].pressed : lbl_8034E9A0.s.pads[0].pressed;
+    pad.repeat = g_d_GameSettings._06 == 2 ? lbl_803297E0.pads[lbl_8034E9A0.s.port[0]].repeat : lbl_8034E9A0.s.pads[0].repeat;
     kind = starMissionCompletionTracker.chars[lbl_803297E0.s.pause._64].kind;
     count = lbl_8010B42C[kind];
     if (kind == 3) {
@@ -555,8 +592,8 @@ void challengeStarMenu(void) {
     if (lbl_803297E0.s.pause._5A != 0) {
         return;
     }
-    pad.held = lbl_803297E0.pads[lbl_8034E9A0.port[0]].held;
-    src = &lbl_803297E0.pads[lbl_8034E9A0.port[0]];
+    pad.held = lbl_803297E0.pads[lbl_8034E9A0.s.port[0]].held;
+    src = &lbl_803297E0.pads[lbl_8034E9A0.s.port[0]];
     pad.pressed = src->pressed;
     pad.repeat = src->repeat;
     kind = (u8)starMissionCompletionTracker.chars[lbl_803297E0.s.pause._64].kind;
@@ -757,7 +794,111 @@ s32 randRange_FUN_80042bf0(s32 min, s32 max) {
 }
 
 // .text:0x800426DC size:0x514
-void transferStatsToInMemRoster(s32 arg0) {
+// The target reads charId with lhau through the entry pointer and saves r25-r31; this build
+// keeps one register fewer and allocates the rest differently
+void transferStatsToInMemRoster(u8 team) {
+    s32 slot;
+    s16* charId;
+    RosterEntry* dst;
+    RosterEntry* src;
+    u8 t;
+    u8 p;
+
+    if (g_d_GameSettings.GameModeSelected == 5) {
+        return;
+    }
+    slot = lbl_803297E0.s.pause._0E[team] - 1;
+    charId = &inMemRoster[team][slot].charId;
+    if (lbl_80361B20[*charId] == 0) {
+        return;
+    }
+    lbl_8034E9A0.s._4720[team]++;
+    if (lbl_8034E9A0.s._4720[team] == 2) {
+        lbl_8034E9A0.s._4720[team] = 0;
+    }
+    if (g_d_GameSettings.GameModeSelected != 5) {
+        lbl_8034E9A0.s._489B[team][slot] ^= 1;
+        memcpy(lbl_802E4B00[team], lbl_8034E9A0.s._489B[team], 9);
+    } else {
+        lbl_8034E9A0.s._489B[0][slot] = 1;
+    }
+    if (lbl_8034E9A0.s._489B[team][slot] != 0) {
+        dst = &inMemRoster[team][slot];
+        dst->_28[0] += lbl_800E86F0[0];
+        dst->_28[1] += lbl_800E86F0[1];
+        dst->_2A[0] += lbl_800E86F0[2];
+        dst->_2A[1] += lbl_800E86F0[3];
+        dst->_2F += lbl_800E86F0[5];
+        dst->_30 += lbl_800E86F0[6];
+        dst->_2C += lbl_800E86F0[4];
+        dst->_00[0] += lbl_800E86F0[7];
+        dst->_00[1] += lbl_800E86F0[8];
+        dst->_00[2] += lbl_800E86F0[9];
+        dst->_00[3] += lbl_800E86F0[10];
+        dst->_00[4] += lbl_800E86F0[11];
+        dst->bars[0] += 2;
+        if (dst->bars[0] > 10) {
+            dst->bars[0] = 10;
+        }
+        inMemRoster[team][slot].bars[1] += 2;
+        if (inMemRoster[team][slot].bars[1] > 10) {
+            inMemRoster[team][slot].bars[1] = 10;
+        }
+        inMemRoster[team][slot].bars[2] += 2;
+        if (inMemRoster[team][slot].bars[2] > 10) {
+            inMemRoster[team][slot].bars[2] = 10;
+        }
+        inMemRoster[team][slot].bars[3] += 2;
+        if (inMemRoster[team][slot].bars[3] > 10) {
+            inMemRoster[team][slot].bars[3] = 10;
+        }
+    } else {
+        dst = &inMemRoster[team][slot];
+        t = *charId / 9;
+        p = *charId % 9;
+        src = &lbl_8034E9A0.roster[t][p];
+        memcpy(dst->_00, src->_00, sizeof(dst->_00));
+        *charId = lbl_8034E9A0.roster[t][p].charId;
+        inMemRoster[team][slot]._26 = lbl_8034E9A0.roster[t][p]._26;
+        inMemRoster[team][slot]._27 = lbl_8034E9A0.roster[t][p]._27;
+        memcpy(dst->_28, src->_28, sizeof(dst->_28));
+        memcpy(dst->_2A, src->_2A, sizeof(dst->_2A));
+        inMemRoster[team][slot]._2C = lbl_8034E9A0.roster[t][p]._2C;
+        inMemRoster[team][slot]._2D = lbl_8034E9A0.roster[t][p]._2D;
+        inMemRoster[team][slot]._2E = lbl_8034E9A0.roster[t][p]._2E;
+        inMemRoster[team][slot]._2F = lbl_8034E9A0.roster[t][p]._2F;
+        inMemRoster[team][slot]._30 = lbl_8034E9A0.roster[t][p]._30;
+        inMemRoster[team][slot]._31 = lbl_8034E9A0.roster[t][p]._31;
+        inMemRoster[team][slot]._32 = lbl_8034E9A0.roster[t][p]._32;
+        inMemRoster[team][slot]._33 = lbl_8034E9A0.roster[t][p]._33;
+        inMemRoster[team][slot]._34 = lbl_8034E9A0.roster[t][p]._34;
+        memcpy(dst->_35, src->_35, sizeof(dst->_35));
+        inMemRoster[team][slot]._20 = lbl_8034E9A0.roster[t][p]._20;
+        memcpy(dst->bars, src->bars, sizeof(dst->bars));
+        memcpy(dst->chemistry, src->chemistry, sizeof(dst->chemistry));
+        inMemRoster[team][slot]._71 = lbl_8034E9A0.roster[t][p]._71;
+        inMemRoster[team][slot]._74[0] = lbl_8034E9A0.roster[t][p]._74[0];
+        inMemRoster[team][slot]._74[1] = lbl_8034E9A0.roster[t][p]._74[1];
+        inMemRoster[team][slot]._74[2] = lbl_8034E9A0.roster[t][p]._74[2];
+        inMemRoster[team][slot]._74[3] = lbl_8034E9A0.roster[t][p]._74[3];
+        inMemRoster[team][slot]._74[4] = lbl_8034E9A0.roster[t][p]._74[4];
+        inMemRoster[team][slot]._74[5] = lbl_8034E9A0.roster[t][p]._74[5];
+        inMemRoster[team][slot]._74[6] = lbl_8034E9A0.roster[t][p]._74[6];
+        inMemRoster[team][slot]._74[7] = lbl_8034E9A0.roster[t][p]._74[7];
+        inMemRoster[team][slot]._74[8] = lbl_8034E9A0.roster[t][p]._74[8];
+        inMemRoster[team][slot]._74[9] = lbl_8034E9A0.roster[t][p]._74[9];
+        inMemRoster[team][slot]._74[10] = lbl_8034E9A0.roster[t][p]._74[10];
+        inMemRoster[team][slot]._74[11] = lbl_8034E9A0.roster[t][p]._74[11];
+        inMemRoster[team][slot]._74[12] = lbl_8034E9A0.roster[t][p]._74[12];
+        inMemRoster[team][slot]._74[13] = lbl_8034E9A0.roster[t][p]._74[13];
+        inMemRoster[team][slot]._74[14] = lbl_8034E9A0.roster[t][p]._74[14];
+        inMemRoster[team][slot]._74[15] = lbl_8034E9A0.roster[t][p]._74[15];
+        inMemRoster[team][slot]._74[16] = lbl_8034E9A0.roster[t][p]._74[16];
+        inMemRoster[team][slot]._74[17] = lbl_8034E9A0.roster[t][p]._74[17];
+        inMemRoster[team][slot]._74[18] = lbl_8034E9A0.roster[t][p]._74[18];
+        inMemRoster[team][slot]._74[19] = lbl_8034E9A0.roster[t][p]._74[19];
+        inMemRoster[team][slot]._74[20] = lbl_8034E9A0.roster[t][p]._74[20];
+    }
 }
 
 // .text:0x80042598 size:0x144
