@@ -378,8 +378,6 @@ static u8 lbl_2_bss_3A8[56];
 static u8 lbl_2_bss_3A0;
 
 // .text:0x000110B0 size:0x244
-// Inlines fn_2_323C, which the target calls; it pairs once fn_2_323C counts
-// about four more statements (four dead-store blocks there match it).
 void fn_2_110B0(void) {
     switch (lbl_803CBBCC->_4) {
     case 0:
@@ -4177,6 +4175,8 @@ s32 fn_2_33BC(void) {
 }
 
 // .text:0x0000323C size:0x180
+// The dead stores in case 4 stand in for code the original compiled to nothing;
+// without them MWCC inlines this function into fn_2_110B0, where the target calls it.
 void fn_2_323C(void) {
     s32 result;
 
@@ -4212,6 +4212,9 @@ void fn_2_323C(void) {
             lbl_803CBD24._4 = 0;
             lbl_803297E0._CF5F = 0;
             lbl_803CBBCC->_4 = 2;
+            { int d; d = 1; }
+            { int d; d = 1; }
+            { int d; d = 1; }
             break;
         }
         break;
@@ -4224,14 +4227,9 @@ void fn_2_3204(void) {
 }
 
 // .text:0x00002FC0 size:0x244
-// 96.8%: registers in the fn_2_348C loop. Calling fn_2_348C() there matches this
-// function, but then fn_2_3204 and fn_2_323C inline it; the target calls it.
-// Five dead stores after the call keep it out of both (MWCC's inline size limit).
+// The dead stores after fn_2_348C() stand in for code the original compiled to nothing;
+// without them MWCC inlines this function into fn_2_3204 and fn_2_323C, where the target calls it.
 void fn_2_2FC0(u8 arg0, s32 arg1, s32 arg2) {
-    s32 i;
-    s32 j;
-    s32 locked;
-
     switch (arg0) {
     case 9:
         fn_800684A4();
@@ -4242,15 +4240,12 @@ void fn_2_2FC0(u8 arg0, s32 arg1, s32 arg2) {
         memset(lbl_8034E9A0._4757, 0, sizeof(lbl_8034E9A0._4757));
         lbl_8034E9A0._4757[lbl_8034E9A0._46E0[0]] = 1;
         lbl_8034E9A0._4757[lbl_8034E9A0._46E0[1]] = 1;
-        for (i = 0; i < 6; i++) {
-            locked = g_d_GameSettings._1A[i] == 0;
-            for (j = 0; j < 54; j++) {
-                if (lbl_803CB748[i] == lbl_800E8558[j]._2) {
-                    lbl_8034E9A0._4757[j] = locked;
-                }
-            }
-            lbl_803CB748[i] = lbl_803CB748[i];
-        }
+        fn_2_348C();
+        { int d; d = 1; }
+        { int d; d = 1; }
+        { int d; d = 1; }
+        { int d; d = 1; }
+        { int d; d = 1; }
         fn_80067F70(0);
         fn_80067F70(1);
         fn_2_8940();
