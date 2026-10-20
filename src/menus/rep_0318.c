@@ -2227,17 +2227,17 @@ void fn_2_9ACC(u16 team) {
 }
 
 // .text:0x000095D8 size:0x4F4
-// 92.6%: the target keeps g_d_GameSettings's address from the first loop for
+// 95.0%: the target keeps g_d_GameSettings's address from the first loop for
 // the second instead of forming it again, so its first loop uses r25-r31.
 void fn_2_95D8(void) {
-    u32 color[2];
-    s8 slots[2][9];
-    s8 chars[54];
-    s32 t;
-    s32 i;
     s32 j;
-    s32 cursor;
     s32 cap;
+    u32 color[2];
+    s8 chars[54];
+    s32 i;
+    s32 cursor;
+    s8 slots[2][9];
+    s32 t;
     s32 y;
 
     if (lbl_803CBBCC->_4 < 4) {
