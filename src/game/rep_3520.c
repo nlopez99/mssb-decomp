@@ -1062,8 +1062,6 @@ void fn_3_1391C0(void) {
 }
 
 // .text:0x00138AA4 size:0x71C mapped:0x80777B38
-// 97.8%: g_Minigame, the .bss base and the object walker sit in other saved registers,
-// and the inlined fn_3_137224 loop builds its bases anew.
 void fn_3_138AA4(void) {
     u32 i;
 
@@ -1074,31 +1072,32 @@ void fn_3_138AA4(void) {
         if (i >= 4) {
             break;
         }
-        switch (MG.objs[i]._3D) {
+        switch (g_Minigame.starDashObjs[i]._3D) {
         case 0:
-            fn_3_138448(&MG.objs[i]);
+            fn_3_138448(&g_Minigame.starDashObjs[i]);
             break;
         case 1:
-            fn_3_1382E0(&MG.objs[i]);
+            fn_3_1382E0(&g_Minigame.starDashObjs[i]);
             break;
         case 2:
-            fn_3_13802C(&MG.objs[i]);
+            fn_3_13802C(&g_Minigame.starDashObjs[i]);
             break;
         case 3:
-            fn_3_137F14(&MG.objs[i]);
+            fn_3_137F14(&g_Minigame.starDashObjs[i]);
             break;
         case 4:
-            fn_3_137DE4(&MG.objs[i]);
+            fn_3_137DE4(&g_Minigame.starDashObjs[i]);
             break;
         case 5:
-            fn_3_137CF8(&MG.objs[i]);
+            fn_3_137CF8(&g_Minigame.starDashObjs[i]);
             break;
         }
     }
 }
 
 // .text:0x001384B4 size:0x5F0 mapped:0x80777548
-// 99.45%: FPRs differ (the sums, deviations and center.x).
+// 99.53%: sumZ, varX and center.x take f27, f29 and f26 in the target; no order of the
+// float declarations or of the sums' initializations moves them.
 void fn_3_1384B4(Unk3520Obj* obj) {
     s32 coins[100];
     Vec center = { 0.0f, 0.0f, 20.0f };
@@ -1108,6 +1107,7 @@ void fn_3_1384B4(Unk3520Obj* obj) {
     Vec forward = { 1.0f, 0.0f, 0.0f };
     u32 n;
     u32 i;
+    f32 px;
     f32 varX;
     f32 sdZ;
     f32 varZ;
@@ -1119,7 +1119,6 @@ void fn_3_1384B4(Unk3520Obj* obj) {
     f32 c;
     f32 s;
     f32 dot;
-    f32 px;
     f32 pz;
     f32 ex;
     f32 ez;
@@ -1398,8 +1397,6 @@ u8 fn_3_137B10(Unk3520Obj* obj) {
 }
 
 // .text:0x001379A0 size:0x170 mapped:0x80776A34
-// 90.7%: the unrolled fielder search walks other registers and offsets, and the
-// object loop strength-reduces differently.
 u8 fn_3_1379A0(int fielderIdx) {
     Unk3520Fielder* fielder = &g_Fielders[fielderIdx];
     u32 player;
@@ -1409,8 +1406,8 @@ u8 fn_3_1379A0(int fielderIdx) {
     f32 range;
     f32 dx;
     f32 dz;
-    f64 ax;
-    f64 az;
+    f32 px;
+    f32 pz;
 
     for (player = 0; player < 4; player++) {
         if (g_Minigame.minigameFielderIndex[player] == fielderIdx) {
@@ -1421,19 +1418,23 @@ u8 fn_3_1379A0(int fielderIdx) {
         return FALSE;
     }
     for (i = 0; i < lbl_3_bss_B780; i++) {
-        obj = &MG.objs[i];
+        obj = &g_Minigame.starDashObjs[i];
         if (obj->_3D != 3 && obj->_3D != 5) {
             continue;
         }
         top = fielder->_15C + (fielder->_00C + fielder->pos.y);
-        range = top < obj->_0.y ? fielder->_16C : 12.0f;
+        if (top < obj->_0.y) {
+            range = fielder->_16C;
+        } else {
+            range = 12.0f;
+        }
         if (range < fabs(top - obj->_0.y)) {
             continue;
         }
-        ax = fabs(obj->_0.x - (fielder->pos.x + fielder->_030));
-        az = fabs(obj->_0.z - (fielder->pos.z + fielder->_034));
-        dx = ax;
-        dz = az;
+        px = fielder->pos.x + fielder->_030;
+        pz = fielder->pos.z + fielder->_034;
+        dx = fabs(obj->_0.x - px);
+        dz = fabs(obj->_0.z - pz);
         if (dx < 3.5f && dz < 3.125f) {
             return TRUE;
         }
