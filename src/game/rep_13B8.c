@@ -3901,8 +3901,8 @@ void fn_3_7EA68(void) {
 }
 
 // .text:0x0007E2BC size:0x7AC mapped:0x806BD350
-// 99.48%: registers differ in the stick-held branch (base and i swapped) and the third loop's
-// handled counter starts as li 0 here where the target copies it from i with mr
+// 99.62%: the third loop's handled counter starts as li 0 here where the target copies it
+// from i with mr
 void fn_3_7E2BC(void) {
     InputStruct* input = &g_Controls[g_GameLogic.teams[g_GameLogic.teamBatting]];
     int i;
@@ -3988,6 +3988,7 @@ void fn_3_7E2BC(void) {
         }
     } else if (buttons & 0x800) {
         int base = -1;
+        int j;
         int waited;
 
         if (input->controlStickAngle >= 0xA00 && input->controlStickAngle < 0xE00) {
@@ -4000,8 +4001,8 @@ void fn_3_7E2BC(void) {
         if (base < 0) {
             return;
         }
-        for (i = 3, waited = 0; i >= 0; i--) {
-            InMemRunnerType* r = &g_Runners[i];
+        for (j = 3, waited = 0; j >= 0; j--) {
+            InMemRunnerType* r = &g_Runners[j];
             if (r->runnerOnFieldOrOutOrScored != 1 || r->nextBase != base) {
                 continue;
             }
@@ -4018,7 +4019,7 @@ void fn_3_7E2BC(void) {
             }
             if (r->runningDirectionCode == 1) {
                 if (r->nextDirectionBeingProcessed == 2 || r->nextDirectionBeingProcessed == 3) {
-                    fn_3_7FEA8(i, 1);
+                    fn_3_7FEA8(j, 1);
                     return;
                 }
                 if (waited != 0) {
@@ -4027,19 +4028,19 @@ void fn_3_7E2BC(void) {
                 waited++;
             } else if (r->runningDirectionCode == 3) {
                 if (r->nextDirectionBeingProcessed == 2 || r->nextDirectionBeingProcessed == 1) {
-                    fn_3_7FEA8(i, 1);
+                    fn_3_7FEA8(j, 1);
                     return;
                 }
                 if (input->newButtonInput & 0x800) {
-                    fn_3_7FEA8(i, 2);
+                    fn_3_7FEA8(j, 2);
                 }
                 return;
             } else if (r->runningDirectionCode == 5 && (buttons & 0x800)) {
-                fn_3_7FEA8(i, 1);
+                fn_3_7FEA8(j, 1);
                 return;
             } else {
                 if (input->newButtonInput & 0x800) {
-                    fn_3_7FEA8(i, 1);
+                    fn_3_7FEA8(j, 1);
                 }
                 return;
             }
