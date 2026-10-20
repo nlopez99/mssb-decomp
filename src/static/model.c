@@ -33,6 +33,14 @@ typedef struct _VecXYZ {
 } VecXYZ;
 
 // STRUCTS BEGIN
+typedef struct RosterEntry {
+    /* 0x0000 */ u8 _0000[0x24 - 0x0];
+    /* 0x0024 */ s16 _24;
+    /* 0x0026 */ u8 _26;
+    /* 0x0027 */ u8 _27;
+    /* 0x0028 */ u8 _0028[0xA0 - 0x28];
+} RosterEntry; // size: 0xA0
+
 typedef struct AramEntry {
     /* 0x0000 */ u32 _00;
     /* 0x0004 */ u32 size;
@@ -193,7 +201,12 @@ typedef struct ModelActor {
     /* 0x0253 */ u8 _0253[0x254 - 0x253];
     /* 0x0254 */ s8 _254;
     /* 0x0255 */ s8 _255;
-    /* 0x0256 */ u8 _0256[0x25C - 0x256];
+    /* 0x0256 */ u8 _256;
+    /* 0x0257 */ s8 _257;
+    /* 0x0258 */ u8 _258;
+    /* 0x0259 */ u8 _259;
+    /* 0x025A */ u8 _25A;
+    /* 0x025B */ u8 _25B;
     /* 0x025C */ s8 _25C;
     /* 0x025D */ u8 _25D;
     /* 0x025E */ s8 _25E;
@@ -265,7 +278,9 @@ typedef struct ModelWork {
     /* 0x2C88 */ void* _2C88;
     /* 0x2C8C */ u8 _2C8C[0x2CA4 - 0x2C8C];
     /* 0x2CA4 */ u32 bufSize;
-    /* 0x2CA8 */ u8 _2CA8[0x2CE4 - 0x2CA8];
+    /* 0x2CA8 */ u8 _2CA8[0x2CB0 - 0x2CA8];
+    /* 0x2CB0 */ void* _2CB0[4];
+    /* 0x2CC0 */ u8 _2CC0[0x2CE4 - 0x2CC0];
     /* 0x2CE4 */ void* _2CE4;
     /* 0x2CE8 */ void* _2CE8;
     /* 0x2CEC */ u8 _2CEC[0x2CFC - 0x2CEC];
@@ -294,7 +309,12 @@ typedef struct ModelWork {
     /* 0x2D68 */ s16 _2D68;
     /* 0x2D6A */ s8 _2D6A[13];
     /* 0x2D77 */ s8 _2D77;
-    /* 0x2D78 */ u8 _2D78[0x2D90 - 0x2D78];
+    /* 0x2D78 */ u8 _2D78[0x2D79 - 0x2D78];
+    /* 0x2D79 */ s8 _2D79;
+    /* 0x2D7A */ u8 _2D7A[0x2D89 - 0x2D7A];
+    /* 0x2D89 */ s8 _2D89[4];
+    /* 0x2D8D */ u8 _2D8D;
+    /* 0x2D8E */ u8 _2D8E[0x2D90 - 0x2D8E];
     /* 0x2D90 */ ModelEntry28* _2D90;
     /* 0x2D94 */ u8 _2D94[0x3078 - 0x2D94];
     /* 0x3078 */ s16 _3078;
@@ -311,6 +331,7 @@ typedef struct ModelWork {
 // STRUCTS END
 
 extern ModelWork lbl_8036E548;
+extern RosterEntry inMemRoster[2][9];
 extern u8 lbl_803CBC3C[4];
 extern u8 lbl_8036C4FC[0x204C];
 extern u8 lbl_803CBBC0;
@@ -1262,11 +1283,124 @@ s32 fn_8001758C(u8* arg0, s32 idx, u8 arg2, u8 arg3, u8 arg4, s8 arg5, u8 arg6, 
 }
 
 // .text:0x80017340 size:0x24C
-void fn_80017340(void) {
+BOOL fn_80017340(int idx) {
+    ModelActor* actor = &lbl_8036E548.actorData[idx];
+    int j;
+    int i;
+    BOOL found[4];
+    ModelActor* other;
+    int entry;
+    if (lbl_8036E548._2D8D == 0) {
+        found[0] = FALSE;
+        found[1] = FALSE;
+        found[2] = FALSE;
+        found[3] = FALSE;
+        for (i = 9; i < 13; i++) {
+            for (j = 0; j < 4; j++) {
+                other = lbl_8036E548.actors[i];
+                if (other != NULL) {
+                    if (actor->_252 == lbl_8036E548._2D89[j]) {
+                        actor->anims[1] = lbl_8036E548._2CB0[j];
+                        return TRUE;
+                    }
+                    if (other->_252 == lbl_8036E548._2D89[j]) {
+                        found[j] = TRUE;
+                        break;
+                    }
+                }
+            }
+        }
+        for (j = 0; j < 4; j++) {
+            if (!found[j]) {
+                lbl_8036E548._2D89[j] = -1;
+            }
+        }
+        for (j = 0; j < 4; j++) {
+            if (lbl_8036E548._2D89[j] < 0) {
+                break;
+            }
+        }
+        lbl_8036E548._2D89[j] = actor->_252;
+        actor->anims[1] = lbl_8036E548._2CB0[j];
+        if (g_d_GameSettings.GameModeSelected == 2) {
+            entry = actor->_252 * 19 + 11;
+        } else {
+            entry = actor->_252 * 19 + 3;
+        }
+        ARAMTransfer(&lbl_803CB790[entry], actor->anims[1], 0, 0);
+        lbl_8036E548._2D8D = 1;
+    } else if ((s32)lbl_803C6CF8._715 == 1) {
+        ANIMGet(actor->anims[1]);
+        return TRUE;
+    }
+    return FALSE;
 }
 
 // .text:0x80017098 size:0x2A8
-void fn_80017098(void) {
+BOOL fn_80017098(int team, int player, int arg2, int slot, int arg4, int arg5) {
+    ModelLoadReq* req;
+    ModelActor* actor;
+    BOOL same;
+    int i;
+    int j;
+
+    if (arg5 >= 0) {
+        req = fn_800B0A5C_insertQueue(fn_800177B4, 0);
+        i = slot;
+    } else {
+        for (i = 0; i < 13; i++) {
+            same = FALSE;
+            if (lbl_8036E548.actorData[i]._252 == inMemRoster[team][player]._24 && lbl_8036E548.actorData[i]._25A == inMemRoster[team][player]._26 &&
+                lbl_8036E548.actorData[i]._25B == inMemRoster[team][player]._27 && lbl_8036E548.actorData[i]._257 == (s8)player) {
+                same = TRUE;
+            }
+            if (lbl_8036E548.actorData[i]._256 == team && same && lbl_8036E548.actorData[i]._258 == arg2 && lbl_8036E548.actorData[i]._259 == arg4) {
+                lbl_8036E548._2D77 = 0;
+                lbl_8036E548._2D6A[i] = slot;
+                lbl_8036E548._2D79 = i;
+                actor = &lbl_8036E548.actorData[i];
+                lbl_8036E548.actorData[i]._254 = slot;
+                for (j = 0; j < 13; j++) {
+                    if (lbl_8036E548.actors[j] == actor) {
+                        lbl_8036E548.actors[j] = NULL;
+                        break;
+                    }
+                }
+                lbl_8036E548.actors[slot] = actor;
+                return TRUE;
+            }
+        }
+        req = fn_800B0A5C_insertQueue(fn_800177B4, 0);
+        if (slot >= 9) {
+            for (i = 9; i < 13; i++) {
+                if (lbl_8036E548._2D6A[i] < 0) {
+                    break;
+                }
+            }
+        } else {
+            for (i = 0; i < 13; i++) {
+                if (lbl_8036E548._2D6A[i] < 0) {
+                    break;
+                }
+            }
+        }
+    }
+    req->_14 = 0;
+    req->_1C = i;
+    req->_19 = team;
+    req->_1A = player;
+    req->_1B = arg2;
+    req->_15 = slot;
+    req->_1D = arg4;
+    if (arg5 < 0) {
+        req->_16 = inMemRoster[team][player]._24;
+    } else {
+        req->_16 = arg5;
+    }
+    lbl_8036E548._2D6A[i] = slot;
+    lbl_8036E548._2D77 = 1;
+    lbl_8036E548._2D79 = i;
+    return FALSE;
 }
 
 // .text:0x80016F7C size:0x11C
