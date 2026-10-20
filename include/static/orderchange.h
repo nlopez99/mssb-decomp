@@ -20,7 +20,7 @@ void fn_80047CE0(void);
 void pauseMenuSelection(void);
 void fn_800486E0(s32 priority, s8 team, u8 player);
 void fn_80048764(void);
-void fn_80048820(void);
-void fn_80048BEC(struct ScrollList* list);
+s32 fn_80048820(struct DebugMenu* menu, u16 held, u16 pressed, u16 repeat, u8 trigger);
+void fn_80048BEC(struct DebugMenu* menu);
 
 #endif // !__STATIC_ORDERCHANGE_H_

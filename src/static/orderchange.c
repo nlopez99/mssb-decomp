@@ -2,6 +2,7 @@
 #include "static/UnknownHomes_Static.h"
 #include "musyx/musyx.h"
 #include "Dolphin/os.h"
+#include "string.h"
 #include "static/static_8004157C.h"
 
 typedef struct Scene {
@@ -29,11 +30,29 @@ typedef struct SpriteGroup {
     /* 0x14 */ u16 _14;
 } SpriteGroup;
 
-typedef struct ScrollList {
-    /* 0x00 */ s32 _00;
+struct DebugMenu;
+
+typedef struct DebugMenuItem {
+    /* 0x00 */ s32 type;
     /* 0x04 */ s32 _04;
-    /* 0x08 */ s32 _08;
-} ScrollList;
+    /* 0x08 */ s32 min;
+    /* 0x0C */ s32 max;
+    /* 0x10 */ s32 step[3];
+    /* 0x1C */ void* value;
+    /* 0x20 */ u32 mask;
+    /* 0x24 */ s32 _24;
+    /* 0x28 */ s32 (*callback)(struct DebugMenu* menu, u16 buttons);
+} DebugMenuItem; // size: 0x2C
+
+typedef struct DebugMenu {
+    /* 0x00 */ s32 _00;
+    /* 0x04 */ s32 count;
+    /* 0x08 */ s32 rows;
+    /* 0x0C */ s32 top;
+    /* 0x10 */ s32 cursor;
+    /* 0x14 */ s32 wrap;
+    /* 0x18 */ DebugMenuItem* items;
+} DebugMenu;
 
 extern Scene* lbl_803CBBCC;
 extern SpriteRef lbl_80371C30[];
@@ -67,17 +86,39 @@ typedef struct PauseMenu {
     /* 0x1C */ u8 _1C[2];
     /* 0x1E */ u8 _1E[2];
     /* 0x20 */ u8 _20[2];
-    /* 0x22 */ u8 _22[0x45 - 0x22];
+    /* 0x22 */ u8 _22[0x3C - 0x22];
+    /* 0x3C */ u8 _3C;
+    /* 0x3D */ s8 starCursor;
+    /* 0x3E */ s8 prevStarCursor;
+    /* 0x3F */ u8 _3F[0x45 - 0x3F];
     /* 0x45 */ u8 _45;
     /* 0x46 */ u8 _46[0x5A - 0x46];
     /* 0x5A */ u8 _5A;
-    /* 0x5B */ u8 _5B[0x6A - 0x5B];
+    /* 0x5B */ u8 _5B[2];
+    /* 0x5D */ s8 prevRow;
+    /* 0x5E */ s8 row;
+    /* 0x5F */ s8 prevStar;
+    /* 0x60 */ s8 star;
+    /* 0x61 */ u8 inStars;
+    /* 0x62 */ u8 starCount;
+    /* 0x63 */ u8 _63;
+    /* 0x64 */ s16 _64;
+    /* 0x66 */ u8 _66[0x6A - 0x66];
     /* 0x6A */ u8 _6A[2];
 } PauseMenu;
 
-extern struct {
-    /* 0x0000 */ u8 _0000[0xCF38];
-    /* 0xCF38 */ PauseMenu pause;
+typedef struct PadButtons {
+    /* 0x0 */ u16 held;
+    /* 0x2 */ u16 pressed;
+    /* 0x4 */ u16 repeat;
+} PadButtons; // size: 0x6
+
+extern union {
+    PadButtons pads[4];
+    struct {
+        /* 0x0000 */ u8 _0000[0xCF38];
+        /* 0xCF38 */ PauseMenu pause;
+    } s;
 } lbl_803297E0;
 
 extern struct {
@@ -90,11 +131,15 @@ extern struct {
 } lbl_803C66B0;
 
 extern struct {
-    /* 0x0000 */ u8 _0000[0x4705];
+    /* 0x0000 */ u8 _0000[0x46F8];
+    /* 0x46F8 */ s8 port[4];
+    /* 0x46FC */ u8 _46FC[0x4705 - 0x46FC];
     /* 0x4705 */ u8 _4705;
     /* 0x4706 */ u8 _4706[0x4720 - 0x4706];
     /* 0x4720 */ s32 _4720;
     /* 0x4724 */ s32 _4724;
+    /* 0x4728 */ u8 _4728[0x472C - 0x4728];
+    /* 0x472C */ PadButtons pads[4];
 } lbl_8034E9A0;
 
 extern struct {
@@ -104,10 +149,21 @@ extern struct {
     /* 0x38 */ u8 _38;
 } lbl_803C5EA4;
 
-extern struct {
-    /* 0x0000 */ u8 _0000[0x4445];
-    /* 0x4445 */ u8 _4445;
+typedef struct StarChar {
+    /* 0x00 */ u8 _00[5];
+    /* 0x05 */ s8 kind;
+    /* 0x06 */ u8 _06[0x34 - 0x06];
+} StarChar; // size: 0x34
+
+extern union {
+    StarChar chars[1];
+    struct {
+        /* 0x0000 */ u8 _0000[0x4445];
+        /* 0x4445 */ u8 _4445;
+    } s;
 } starMissionCompletionTracker;
+
+extern s16 lbl_8010B42C[];
 
 extern void characterSelectScreen(s32 team);
 extern void unsure_FillRosterPositions(s32 team);
@@ -117,19 +173,165 @@ extern void fn_800625A4(s32 arg0, s32 arg1);
 extern void* fn_800B0A5C_insertQueue(void (*callback)(void), s32 priority);
 
 // .text:0x80048BEC size:0x28
-void fn_80048BEC(ScrollList* list) {
-    s32 n = list->_08;
+void fn_80048BEC(DebugMenu* menu) {
+    s32 n = menu->rows;
     s32 i;
 
-    if (list->_04 < n) {
-        n = list->_04;
+    if (menu->count < n) {
+        n = menu->count;
     }
     for (i = n; i > 0; i--) {
     }
 }
 
 // .text:0x80048820 size:0x3CC
-void fn_80048820(void) {
+// Registers only: in the repeat & 2 block the target keeps item in r11 and step in r10
+s32 fn_80048820(DebugMenu* menu, u16 held, u16 pressed, u16 repeat, u8 trigger) {
+    s32 step;
+    s32 speed;
+    s32 rows;
+    DebugMenuItem* item;
+
+    if (trigger >= 0x91) {
+        speed = 2;
+    } else if (trigger >= 0x50) {
+        speed = 1;
+    } else {
+        speed = 0;
+    }
+    rows = menu->count < menu->rows ? menu->count : menu->rows;
+    if (repeat & 8) {
+        menu->cursor--;
+        if (menu->wrap != 0) {
+            if (menu->cursor < 0) {
+                menu->cursor += menu->count;
+                menu->top = menu->count - rows;
+            }
+            if (menu->cursor < menu->top) {
+                menu->top = menu->cursor;
+            }
+        } else {
+            if (menu->cursor < 0) {
+                menu->cursor = 0;
+            }
+            if (menu->cursor < menu->top) {
+                menu->top = menu->cursor;
+            }
+        }
+    } else if (repeat & 4) {
+        menu->cursor++;
+        if (menu->wrap != 0) {
+            if (menu->cursor >= menu->count) {
+                menu->cursor -= menu->count;
+                menu->top = 0;
+            }
+            while (menu->cursor - menu->top >= rows) {
+                menu->top++;
+            }
+        } else {
+            if (menu->cursor >= menu->count) {
+                menu->cursor = menu->count - 1;
+            }
+            while (menu->cursor - menu->top >= rows) {
+                menu->top++;
+            }
+        }
+    } else if (repeat & 1) {
+        item = &menu->items[menu->cursor];
+        step = -item->step[speed];
+        if (item->value != NULL) {
+            switch (item->type) {
+            case 2:
+                step += *(s8*)item->value;
+                if (step < item->min) {
+                    step = item->min;
+                }
+                *(s8*)item->value = step;
+                break;
+            case 3:
+            case 4:
+            case 5:
+                step += *(u8*)item->value;
+                if (step < item->min) {
+                    step = item->min;
+                }
+                *(u8*)item->value = step;
+                break;
+            case 6:
+            case 7:
+            case 8:
+                break;
+            default:
+                step += *(s32*)item->value;
+                if (step < item->min) {
+                    step = item->min;
+                }
+                *(s32*)item->value = step;
+                break;
+            }
+        }
+    } else if (repeat & 2) {
+        item = &menu->items[menu->cursor];
+        step = item->step[speed];
+        if (item->value != NULL) {
+            switch (item->type) {
+            case 2:
+                step += *(s8*)item->value;
+                if (step > item->max) {
+                    step = item->max;
+                }
+                *(s8*)item->value = step;
+                break;
+            case 3:
+            case 4:
+            case 5:
+                step += *(u8*)item->value;
+                if (step > item->max) {
+                    step = item->max;
+                }
+                *(u8*)item->value = step;
+                break;
+            case 6:
+            case 7:
+            case 8:
+                break;
+            default:
+                step += *(s32*)item->value;
+                if (step > item->max) {
+                    step = item->max;
+                }
+                *(s32*)item->value = step;
+                break;
+            }
+        }
+    }
+    item = &menu->items[menu->cursor];
+    if (item->callback != NULL) {
+        if (item->value != NULL) {
+            if (repeat & item->mask) {
+                return item->callback(menu, repeat);
+            }
+        } else {
+            switch (item->type) {
+            case 6:
+                if (held & item->mask) {
+                    return item->callback(menu, held);
+                }
+                break;
+            case 7:
+                if (pressed & item->mask) {
+                    return item->callback(menu, pressed);
+                }
+                break;
+            case 8:
+                if (repeat & item->mask) {
+                    return item->callback(menu, repeat);
+                }
+                break;
+            }
+        }
+    }
+    return 0;
 }
 
 // .text:0x80048764 size:0xBC
@@ -149,13 +351,13 @@ void fn_80048764(void) {
 // .text:0x800486E0 size:0x84
 void fn_800486E0(s32 priority, s8 team, u8 player) {
     fn_800B0A5C_insertQueue(pauseMenuSelection, priority);
-    lbl_803297E0.pause.state = 0;
-    lbl_803297E0.pause.team = team;
-    lbl_803297E0.pause._0A = 0;
+    lbl_803297E0.s.pause.state = 0;
+    lbl_803297E0.s.pause.team = team;
+    lbl_803297E0.s.pause._0A = 0;
     if (g_d_GameSettings._06 != 2) {
-        lbl_803297E0.pause.player = 0;
+        lbl_803297E0.s.pause.player = 0;
     } else {
-        lbl_803297E0.pause.player = player;
+        lbl_803297E0.s.pause.player = player;
     }
 }
 
@@ -171,18 +373,18 @@ void fn_80047CE0(void) {
     lbl_8034E9A0._4720 = 0;
     lbl_8034E9A0._4724 = 0;
     for (i = 0; i < 2; i++) {
-        lbl_803297E0.pause._1A[i] = g_d_GameSettings._06 == 2 ? TRUE : FALSE;
+        lbl_803297E0.s.pause._1A[i] = g_d_GameSettings._06 == 2 ? TRUE : FALSE;
     }
-    lbl_803297E0.pause._06[0] = lbl_803297E0.pause._06[1] = 0xFF;
-    lbl_803297E0.pause._04[0] = lbl_803297E0.pause._04[1] = 0;
-    lbl_803297E0.pause._08[1] = lbl_803297E0.pause._08[0] = 0;
-    lbl_803297E0.pause._0B = 0;
-    lbl_803297E0.pause._0E[0] = lbl_803297E0.pause._0E[1] = lbl_803297E0.pause._0E[2] = lbl_803297E0.pause._0E[3] = 0;
-    lbl_803297E0.pause._12[0] = lbl_803297E0.pause._12[1] = lbl_803297E0.pause._12[2] = lbl_803297E0.pause._12[3] = 0;
-    lbl_803297E0.pause._1A[0] = lbl_803297E0.pause._1A[1] = lbl_803297E0.pause._1C[0] = lbl_803297E0.pause._1C[1] = 0;
-    lbl_803297E0.pause._16[0] = lbl_803297E0.pause._16[1] = 0;
-    lbl_803297E0.pause._1E[0] = lbl_803297E0.pause._1E[1] = 0;
-    lbl_803297E0.pause._20[0] = lbl_803297E0.pause._20[1] = 0;
+    lbl_803297E0.s.pause._06[0] = lbl_803297E0.s.pause._06[1] = 0xFF;
+    lbl_803297E0.s.pause._04[0] = lbl_803297E0.s.pause._04[1] = 0;
+    lbl_803297E0.s.pause._08[1] = lbl_803297E0.s.pause._08[0] = 0;
+    lbl_803297E0.s.pause._0B = 0;
+    lbl_803297E0.s.pause._0E[0] = lbl_803297E0.s.pause._0E[1] = lbl_803297E0.s.pause._0E[2] = lbl_803297E0.s.pause._0E[3] = 0;
+    lbl_803297E0.s.pause._12[0] = lbl_803297E0.s.pause._12[1] = lbl_803297E0.s.pause._12[2] = lbl_803297E0.s.pause._12[3] = 0;
+    lbl_803297E0.s.pause._1A[0] = lbl_803297E0.s.pause._1A[1] = lbl_803297E0.s.pause._1C[0] = lbl_803297E0.s.pause._1C[1] = 0;
+    lbl_803297E0.s.pause._16[0] = lbl_803297E0.s.pause._16[1] = 0;
+    lbl_803297E0.s.pause._1E[0] = lbl_803297E0.s.pause._1E[1] = 0;
+    lbl_803297E0.s.pause._20[0] = lbl_803297E0.s.pause._20[1] = 0;
     lbl_8034E9A0._4705 = 1;
     lbl_803C66B0._59 = 0;
     lbl_803C66B0._5A = 1;
@@ -190,32 +392,32 @@ void fn_80047CE0(void) {
         if (g_d_GameSettings.GameModeSelected != 5 && lbl_803CBBCC->_06 == 10) {
             characterSelectScreen(0);
             characterSelectScreen(1);
-        } else if (g_d_GameSettings.GameModeSelected == 5 && starMissionCompletionTracker._4445 == 0) {
+        } else if (g_d_GameSettings.GameModeSelected == 5 && starMissionCompletionTracker.s._4445 == 0) {
             fn_800415A8();
             unsure_FillRosterPositions(1);
             characterSelectScreen(1);
         }
-        lbl_803297E0.pause._6A[1] = 0;
-        lbl_803297E0.pause._6A[lbl_803297E0.pause.player] = 0;
+        lbl_803297E0.s.pause._6A[1] = 0;
+        lbl_803297E0.s.pause._6A[lbl_803297E0.s.pause.player] = 0;
         lbl_803C5EA4._36 = 1;
         lbl_803C5EA4._37 = lbl_803C5EA4._38;
         lbl_803C5EA4._38 = 1;
-    } else if (lbl_803297E0.pause._6A[lbl_803297E0.pause.player] == 0) {
-        lbl_803297E0.pause._1A[0] = lbl_803297E0.pause._1A[1] = 1;
+    } else if (lbl_803297E0.s.pause._6A[lbl_803297E0.s.pause.player] == 0) {
+        lbl_803297E0.s.pause._1A[0] = lbl_803297E0.s.pause._1A[1] = 1;
     } else {
-        lbl_803297E0.pause._1A[0] = lbl_803297E0.pause._1A[1] = 0;
+        lbl_803297E0.s.pause._1A[0] = lbl_803297E0.s.pause._1A[1] = 0;
     }
     SetMenuNumber();
     if (g_d_GameSettings._06 != 2 && lbl_803CBBCC->_06 != 10 && g_d_GameSettings._10 == 0 &&
         g_d_GameSettings.GameModeSelected != 5) {
-        lbl_803297E0.pause._0B = 1;
-        lbl_803297E0.pause._16[0] = 1;
+        lbl_803297E0.s.pause._0B = 1;
+        lbl_803297E0.s.pause._16[0] = 1;
         fn_800625A4(0, 0x39);
         fn_800625A4(1, 0x39);
-        lbl_803297E0.pause.state = 1;
+        lbl_803297E0.s.pause.state = 1;
         return;
     }
-    kind = lbl_803297E0.pause._6A[lbl_803297E0.pause.player];
+    kind = lbl_803297E0.s.pause._6A[lbl_803297E0.s.pause.player];
     if (kind != 2 && kind != 3) {
         fn_800625A4(0, 0x38);
         if (g_d_GameSettings._06 != 2) {
@@ -223,13 +425,13 @@ void fn_80047CE0(void) {
         } else if (g_d_GameSettings._06 == 2) {
             fn_800625A4(1, 0x38);
         }
-        lbl_803297E0.pause.state = 1;
+        lbl_803297E0.s.pause.state = 1;
     } else if (kind == 2) {
-        lbl_803297E0.pause._45 = 1;
-        lbl_803297E0.pause.state = 4;
+        lbl_803297E0.s.pause._45 = 1;
+        lbl_803297E0.s.pause.state = 4;
     } else {
-        lbl_803297E0.pause._5A = 1;
-        lbl_803297E0.pause.state = 5;
+        lbl_803297E0.s.pause._5A = 1;
+        lbl_803297E0.s.pause.state = 5;
     }
 }
 
@@ -251,10 +453,230 @@ void fn_80043880(void) {
 
 // .text:0x8004338C size:0x4F4
 void starMenuCursor(void) {
+    PadButtons pad;
+    u8 count;
+    u8 single = FALSE;
+    s8 kind;
+
+    memset(&pad, 0, sizeof(pad));
+    pad.held = g_d_GameSettings._06 == 2 ? lbl_803297E0.pads[lbl_8034E9A0.port[0]].held : lbl_8034E9A0.pads[0].held;
+    pad.pressed = g_d_GameSettings._06 == 2 ? lbl_803297E0.pads[lbl_8034E9A0.port[0]].pressed : lbl_8034E9A0.pads[0].pressed;
+    pad.repeat = g_d_GameSettings._06 == 2 ? lbl_803297E0.pads[lbl_8034E9A0.port[0]].repeat : lbl_8034E9A0.pads[0].repeat;
+    kind = starMissionCompletionTracker.chars[lbl_803297E0.s.pause._64].kind;
+    count = lbl_8010B42C[kind];
+    if (kind == 3) {
+        single = TRUE;
+    }
+    if (pad.repeat & 8) {
+        if (!single) {
+            lbl_803297E0.s.pause.prevStarCursor = lbl_803297E0.s.pause.starCursor;
+            lbl_803297E0.s.pause.starCursor -= count / 2;
+            if (lbl_803297E0.s.pause.starCursor < 0) {
+                lbl_803297E0.s.pause.starCursor += count;
+            }
+            if (lbl_803297E0.s.pause.prevStarCursor != lbl_803297E0.s.pause.starCursor) {
+                lbl_803297E0.s.pause._3C = 2;
+                sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+            }
+        }
+    } else if (pad.repeat & 4) {
+        if (!single) {
+            lbl_803297E0.s.pause.prevStarCursor = lbl_803297E0.s.pause.starCursor;
+            lbl_803297E0.s.pause.starCursor += count / 2;
+            if (lbl_803297E0.s.pause.starCursor >= count) {
+                lbl_803297E0.s.pause.starCursor = lbl_803297E0.s.pause.starCursor - count;
+            }
+            if (lbl_803297E0.s.pause.prevStarCursor != lbl_803297E0.s.pause.starCursor) {
+                lbl_803297E0.s.pause._3C = 2;
+                sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+            }
+        }
+    } else if (pad.repeat & 1) {
+        if (!single) {
+            lbl_803297E0.s.pause.prevStarCursor = lbl_803297E0.s.pause.starCursor;
+            lbl_803297E0.s.pause.starCursor--;
+            if (lbl_803297E0.s.pause.starCursor < 0 && lbl_803297E0.s.pause.starCursor < count / 2) {
+                lbl_803297E0.s.pause.starCursor = count / 2 - 1;
+            } else if (lbl_803297E0.s.pause.starCursor < count / 2 && lbl_803297E0.s.pause.starCursor >= count / 2 - 1) {
+                lbl_803297E0.s.pause.starCursor = count - 1;
+            }
+        } else {
+            lbl_803297E0.s.pause.prevStarCursor = lbl_803297E0.s.pause.starCursor;
+            lbl_803297E0.s.pause.starCursor--;
+            if (lbl_803297E0.s.pause.starCursor < 0) {
+                lbl_803297E0.s.pause.starCursor = count - 1;
+            }
+        }
+        if (lbl_803297E0.s.pause.prevStarCursor != lbl_803297E0.s.pause.starCursor) {
+            lbl_803297E0.s.pause._3C = 2;
+            sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+        }
+    } else if (pad.repeat & 2) {
+        if (!single) {
+            lbl_803297E0.s.pause.prevStarCursor = lbl_803297E0.s.pause.starCursor;
+            lbl_803297E0.s.pause.starCursor++;
+            if (lbl_803297E0.s.pause.starCursor > count / 2 - 1 && lbl_803297E0.s.pause.starCursor <= count / 2) {
+                lbl_803297E0.s.pause.starCursor = 0;
+            } else if (lbl_803297E0.s.pause.starCursor > count - 1 && lbl_803297E0.s.pause.starCursor >= count / 2) {
+                lbl_803297E0.s.pause.starCursor = count / 2;
+            }
+        } else {
+            lbl_803297E0.s.pause.prevStarCursor = lbl_803297E0.s.pause.starCursor;
+            lbl_803297E0.s.pause.starCursor++;
+            if (lbl_803297E0.s.pause.starCursor == count) {
+                lbl_803297E0.s.pause.starCursor = 0;
+            }
+        }
+        if (lbl_803297E0.s.pause.prevStarCursor != lbl_803297E0.s.pause.starCursor) {
+            lbl_803297E0.s.pause._3C = 2;
+            sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+        }
+    } else if (pad.pressed & 0x100 || pad.pressed & 0x200) {
+        lbl_803297E0.s.pause._3C = 3;
+        if (pad.pressed & 0x100) {
+            sndFXStartEx(0x1B8, lbl_800EFBA4[1], 0x3F, 0);
+        } else {
+            sndFXStartEx(0x1B9, lbl_800EFBA4[2], 0x3F, 0);
+        }
+        lbl_803297E0.s.pause.state = 2;
+    }
 }
 
 // .text:0x80042DE8 size:0x5A4
+// The target reads the held buttons by index (lhzx) and the rest through src; this build
+// reads all three through src
 void challengeStarMenu(void) {
+    PadButtons pad;
+    PadButtons* src;
+    u8 single = FALSE;
+    s32 kind;
+
+    memset(&pad, 0, sizeof(pad));
+    if (lbl_803297E0.s.pause._5A != 0) {
+        return;
+    }
+    pad.held = lbl_803297E0.pads[lbl_8034E9A0.port[0]].held;
+    src = &lbl_803297E0.pads[lbl_8034E9A0.port[0]];
+    pad.pressed = src->pressed;
+    pad.repeat = src->repeat;
+    kind = (u8)starMissionCompletionTracker.chars[lbl_803297E0.s.pause._64].kind;
+    if (kind == 3) {
+        single = TRUE;
+    }
+    if (pad.repeat & 8) {
+        if (lbl_803297E0.s.pause.inStars != 0) {
+            if (!single) {
+                lbl_803297E0.s.pause.prevStar = lbl_803297E0.s.pause.star;
+                lbl_803297E0.s.pause.star -= lbl_803297E0.s.pause.starCount / 2;
+                if (lbl_803297E0.s.pause.star < 0) {
+                    lbl_803297E0.s.pause.star += lbl_803297E0.s.pause.starCount;
+                }
+                if (lbl_803297E0.s.pause.prevStar != lbl_803297E0.s.pause.star) {
+                    lbl_803297E0.s.pause._5A = 4;
+                    sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+                }
+            }
+        } else {
+            lbl_803297E0.s.pause.prevRow = lbl_803297E0.s.pause.row;
+            lbl_803297E0.s.pause.row--;
+            if (lbl_803297E0.s.pause.row < 0) {
+                lbl_803297E0.s.pause.row = 8;
+            }
+            if (lbl_803297E0.s.pause.prevRow != lbl_803297E0.s.pause.row) {
+                lbl_803297E0.s.pause._5A = 3;
+                sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+            }
+        }
+    } else if (pad.repeat & 4) {
+        if (lbl_803297E0.s.pause.inStars != 0) {
+            if (!single) {
+                lbl_803297E0.s.pause.prevStar = lbl_803297E0.s.pause.star;
+                lbl_803297E0.s.pause.star += lbl_803297E0.s.pause.starCount / 2;
+                if (lbl_803297E0.s.pause.star >= lbl_803297E0.s.pause.starCount) {
+                    lbl_803297E0.s.pause.star = lbl_803297E0.s.pause.star - lbl_803297E0.s.pause.starCount;
+                }
+                if (lbl_803297E0.s.pause.prevStar != lbl_803297E0.s.pause.star) {
+                    lbl_803297E0.s.pause._5A = 4;
+                    sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+                }
+            }
+        } else {
+            lbl_803297E0.s.pause.prevRow = lbl_803297E0.s.pause.row;
+            lbl_803297E0.s.pause.row++;
+            if (lbl_803297E0.s.pause.row == 9) {
+                lbl_803297E0.s.pause.row = 0;
+            }
+            if (lbl_803297E0.s.pause.prevRow != lbl_803297E0.s.pause.row) {
+                lbl_803297E0.s.pause._5A = 3;
+                sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+            }
+        }
+    } else if (pad.repeat & 1) {
+        if (lbl_803297E0.s.pause.inStars != 0) {
+            if (!single) {
+                lbl_803297E0.s.pause.prevStar = lbl_803297E0.s.pause.star;
+                lbl_803297E0.s.pause.star--;
+                if (lbl_803297E0.s.pause.star < 0 && lbl_803297E0.s.pause.star < lbl_803297E0.s.pause.starCount / 2) {
+                    lbl_803297E0.s.pause.star = lbl_803297E0.s.pause.starCount / 2 - 1;
+                } else if (lbl_803297E0.s.pause.star < lbl_803297E0.s.pause.starCount / 2 && lbl_803297E0.s.pause.star >= lbl_803297E0.s.pause.starCount / 2 - 1) {
+                    lbl_803297E0.s.pause.star = lbl_803297E0.s.pause.starCount - 1;
+                }
+            } else {
+                lbl_803297E0.s.pause.prevStar = lbl_803297E0.s.pause.star;
+                lbl_803297E0.s.pause.star--;
+                if (lbl_803297E0.s.pause.star < 0) {
+                    lbl_803297E0.s.pause.star = lbl_803297E0.s.pause.starCount - 1;
+                }
+            }
+            if (lbl_803297E0.s.pause.prevStar != lbl_803297E0.s.pause.star) {
+                lbl_803297E0.s.pause._5A = 4;
+                sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+            }
+        }
+    } else if (pad.repeat & 2) {
+        if (lbl_803297E0.s.pause.inStars != 0) {
+            if (!single) {
+                lbl_803297E0.s.pause.prevStar = lbl_803297E0.s.pause.star;
+                lbl_803297E0.s.pause.star++;
+                if (lbl_803297E0.s.pause.star > lbl_803297E0.s.pause.starCount / 2 - 1 && lbl_803297E0.s.pause.star <= lbl_803297E0.s.pause.starCount / 2) {
+                    lbl_803297E0.s.pause.star = 0;
+                } else if (lbl_803297E0.s.pause.star > lbl_803297E0.s.pause.starCount - 1 && lbl_803297E0.s.pause.star >= lbl_803297E0.s.pause.starCount / 2) {
+                    lbl_803297E0.s.pause.star = lbl_803297E0.s.pause.starCount / 2;
+                }
+            } else {
+                lbl_803297E0.s.pause.prevStar = lbl_803297E0.s.pause.star;
+                lbl_803297E0.s.pause.star++;
+                if (lbl_803297E0.s.pause.star == lbl_803297E0.s.pause.starCount) {
+                    lbl_803297E0.s.pause.star = 0;
+                }
+            }
+            if (lbl_803297E0.s.pause.prevStar != lbl_803297E0.s.pause.star) {
+                lbl_803297E0.s.pause._5A = 4;
+                sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+            }
+        }
+    } else if (pad.pressed & 0x100) {
+        if (lbl_803297E0.s.pause.inStars == 0) {
+            lbl_803297E0.s.pause.inStars ^= 1;
+            lbl_803297E0.s.pause._5A = 5;
+            sndFXStartEx(0x1B8, lbl_800EFBA4[1], 0x3F, 0);
+        }
+    } else if (pad.pressed & 0x200) {
+        if (lbl_803297E0.s.pause.inStars == 0) {
+            lbl_803297E0.s.pause._5A = 2;
+            lbl_803297E0.s.pause.prevStar = 0;
+            lbl_803297E0.s.pause.star = 0;
+            lbl_803297E0.s.pause.prevRow = 0;
+            lbl_803297E0.s.pause.row = 0;
+            lbl_803297E0.s.pause.state = 10;
+        } else {
+            lbl_803297E0.s.pause.inStars ^= 1;
+            lbl_803297E0.s.pause.prevStar = 0;
+            lbl_803297E0.s.pause.star = 0;
+            lbl_803297E0.s.pause._5A = 6;
+        }
+        sndFXStartEx(0x1B9, lbl_800EFBA4[2], 0x3F, 0);
+    }
 }
 
 // .text:0x80042DA8 size:0x40
