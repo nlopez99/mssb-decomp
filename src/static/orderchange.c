@@ -1676,13 +1676,11 @@ s32 randRange_FUN_80042bf0(s32 min, s32 max) {
 }
 
 // .text:0x800426DC size:0x514
-// The target reads charId with lhau through the entry pointer and saves r25-r31; this build
-// keeps one register fewer and allocates the rest differently
+// Registers in the bonus block: the target keeps lbl_800E86F0 in r26 and &bars[0] in r5,
+// one more register live than this build
 void transferStatsToInMemRoster(u8 team) {
     s32 slot;
-    s16* charId;
     RosterEntry* dst;
-    RosterEntry* src;
     u8 t;
     u8 p;
 
@@ -1734,52 +1732,9 @@ void transferStatsToInMemRoster(u8 team) {
             inMemRoster[team][slot].bars[3] = 10;
         }
     } else {
-        dst = &inMemRoster[team][slot];
-        charId = &inMemRoster[team][slot].charId;
-        t = *charId / 9;
-        p = *charId % 9;
-        src = &lbl_8034E9A0.roster[t][p];
-        memcpy(dst->_00, src->_00, sizeof(dst->_00));
-        *charId = lbl_8034E9A0.roster[t][p].charId;
-        inMemRoster[team][slot]._26 = lbl_8034E9A0.roster[t][p]._26;
-        inMemRoster[team][slot]._27 = lbl_8034E9A0.roster[t][p]._27;
-        memcpy(dst->_28, src->_28, sizeof(dst->_28));
-        memcpy(dst->_2A, src->_2A, sizeof(dst->_2A));
-        inMemRoster[team][slot]._2C = lbl_8034E9A0.roster[t][p]._2C;
-        inMemRoster[team][slot]._2D = lbl_8034E9A0.roster[t][p]._2D;
-        inMemRoster[team][slot]._2E = lbl_8034E9A0.roster[t][p]._2E;
-        inMemRoster[team][slot]._2F = lbl_8034E9A0.roster[t][p]._2F;
-        inMemRoster[team][slot]._30 = lbl_8034E9A0.roster[t][p]._30;
-        inMemRoster[team][slot]._31 = lbl_8034E9A0.roster[t][p]._31;
-        inMemRoster[team][slot]._32 = lbl_8034E9A0.roster[t][p]._32;
-        inMemRoster[team][slot]._33 = lbl_8034E9A0.roster[t][p]._33;
-        inMemRoster[team][slot]._34 = lbl_8034E9A0.roster[t][p]._34;
-        memcpy(dst->_35, src->_35, sizeof(dst->_35));
-        inMemRoster[team][slot]._20 = lbl_8034E9A0.roster[t][p]._20;
-        memcpy(dst->bars, src->bars, sizeof(dst->bars));
-        memcpy(dst->chemistry, src->chemistry, sizeof(dst->chemistry));
-        inMemRoster[team][slot]._71 = lbl_8034E9A0.roster[t][p]._71;
-        inMemRoster[team][slot]._74[0] = lbl_8034E9A0.roster[t][p]._74[0];
-        inMemRoster[team][slot]._74[1] = lbl_8034E9A0.roster[t][p]._74[1];
-        inMemRoster[team][slot]._74[2] = lbl_8034E9A0.roster[t][p]._74[2];
-        inMemRoster[team][slot]._74[3] = lbl_8034E9A0.roster[t][p]._74[3];
-        inMemRoster[team][slot]._74[4] = lbl_8034E9A0.roster[t][p]._74[4];
-        inMemRoster[team][slot]._74[5] = lbl_8034E9A0.roster[t][p]._74[5];
-        inMemRoster[team][slot]._74[6] = lbl_8034E9A0.roster[t][p]._74[6];
-        inMemRoster[team][slot]._74[7] = lbl_8034E9A0.roster[t][p]._74[7];
-        inMemRoster[team][slot]._74[8] = lbl_8034E9A0.roster[t][p]._74[8];
-        inMemRoster[team][slot]._74[9] = lbl_8034E9A0.roster[t][p]._74[9];
-        inMemRoster[team][slot]._74[10] = lbl_8034E9A0.roster[t][p]._74[10];
-        inMemRoster[team][slot]._74[11] = lbl_8034E9A0.roster[t][p]._74[11];
-        inMemRoster[team][slot]._74[12] = lbl_8034E9A0.roster[t][p]._74[12];
-        inMemRoster[team][slot]._74[13] = lbl_8034E9A0.roster[t][p]._74[13];
-        inMemRoster[team][slot]._74[14] = lbl_8034E9A0.roster[t][p]._74[14];
-        inMemRoster[team][slot]._74[15] = lbl_8034E9A0.roster[t][p]._74[15];
-        inMemRoster[team][slot]._74[16] = lbl_8034E9A0.roster[t][p]._74[16];
-        inMemRoster[team][slot]._74[17] = lbl_8034E9A0.roster[t][p]._74[17];
-        inMemRoster[team][slot]._74[18] = lbl_8034E9A0.roster[t][p]._74[18];
-        inMemRoster[team][slot]._74[19] = lbl_8034E9A0.roster[t][p]._74[19];
-        inMemRoster[team][slot]._74[20] = lbl_8034E9A0.roster[t][p]._74[20];
+        t = inMemRoster[team][slot].charId / 9;
+        p = inMemRoster[team][slot].charId % 9;
+        CopyRoster(&inMemRoster[team][slot], &lbl_8034E9A0.roster[t][p]);
     }
 }
 
