@@ -1,13 +1,94 @@
 #include "static/unit_80069A68.h"
 #include "static/UnknownHomes_Static.h"
 #include "string.h"
+#include "Dolphin/GX/GXTypes.h"
+#include "Dolphin/vi.h"
+
+typedef struct SceneTask {
+    /* 0x00 */ void (*func)(void);
+    /* 0x04 */ u8 _04[0x10 - 0x4];
+    /* 0x10 */ s16 _10;
+    /* 0x12 */ u16 priority;
+    /* 0x14 */ u16 _14;
+    /* 0x16 */ u8 _16[0x34 - 0x16];
+    /* 0x34 */ s16 state;
+    /* 0x36 */ s16 _36;
+    /* 0x38 */ u8 _38;
+    /* 0x39 */ u8 _39[0x3B - 0x39];
+    /* 0x3B */ u8 _3B;
+} SceneTask;
+
+typedef struct SceneGlobals {
+    /* 0x00 */ u8 _00[0x28];
+    /* 0x28 */ u8 _28;
+    /* 0x29 */ u8 _29;
+    /* 0x2A */ u8 _2A;
+} SceneGlobals;
+
+typedef struct SceneObj {
+    /* 0x00 */ u8 _00[0x54];
+    /* 0x54 */ u32 flags;
+    /* 0x58 */ u8 _58[0x5C - 0x58];
+    /* 0x5C */ s32 _5C;
+} SceneObj;
+
+typedef struct SceneObjSlot {
+    /* 0x0 */ SceneObj* obj;
+    /* 0x4 */ u32 _4;
+} SceneObjSlot;
+
+typedef struct SceneSound {
+    /* 0x00 */ u8 _00[0xC0];
+    /* 0x0C0 */ void* _C0;
+} SceneSound;
+
+typedef struct SceneMenuState {
+    /* 0x000 */ u8 _000[0x1E9];
+    /* 0x1E9 */ u8 _1E9;
+} SceneMenuState;
+
+extern SceneTask* lbl_803CC1B8;
+extern SceneGlobals lbl_80366158;
+extern SceneObjSlot lbl_80371C30[];
+extern SceneSound lbl_800EF808;
+extern SceneMenuState lbl_803716B8;
+extern void* lbl_803CBD30;
+extern GXRenderModeObj* lbl_803CBD34;
+extern GXRenderModeObj lbl_80109250;
+extern GXRenderModeObj lbl_8010928C;
+extern u8 lbl_801092E8[];
+extern u8 lbl_801092F8[];
+extern u8 lbl_80109378[];
+
+extern BOOL fn_80021518(s32 group, void* data);
+extern BOOL fn_80022B68(void);
+extern void changeScene(u8 scene, s16 arg1);
+// static/spani_default.h declares fn_80035838 returning u8; its callers here test the full register
+extern s32 fn_80035838(void* entry, u8 id);
+extern void fn_80034CEC(void* task);
+extern void fn_80034E20(void* task, void* desc);
+extern void fn_800B0A14_removeQueue(void);
+extern void* fn_800B0A5C_insertQueue(void (*func)(void), u16 priority);
 
 // .text:0x8006C0D0 size:0x30
 void fn_8006C0D0(void) {
+    fn_800B0A5C_insertQueue(fn_8006BE00, lbl_803CC1B8->priority);
 }
 
 // .text:0x8006C088 size:0x48
-void fn_8006C088(void) {
+void fn_8006C088(s32 alt) {
+    GXRenderModeObj* mode;
+
+    if (alt != 0) {
+        mode = &lbl_8010928C;
+    } else {
+        mode = &lbl_80109250;
+    }
+    lbl_803CBD34 = mode;
+    VIConfigure(mode);
+    VIFlush();
+    VIWaitForRetrace();
+    VIWaitForRetrace();
 }
 
 // .text:0x8006BE00 size:0x288
@@ -24,6 +105,35 @@ void fn_8006B78C(void) {
 
 // .text:0x8006B668 size:0x124
 void fn_8006B668(void) {
+    SceneTask* task = lbl_803CC1B8;
+
+    if (lbl_803716B8._1E9 == 0 && task->state != 6) {
+        fn_80022B68();
+    }
+    switch (task->state) {
+    case 0:
+        if (task->_10 != 0) {
+            fn_80034E20(fn_800B0A5C_insertQueue(fn_8006B230, lbl_803CC1B8->priority), lbl_801092F8);
+            changeScene(3, 0);
+            task->_38 = 0;
+            task->_36 = 1;
+            task->state++;
+        }
+        break;
+    case 5:
+        if (lbl_803CC1B8->_3B != 0) {
+            task->state = 0;
+            lbl_803CC1B8->func = fn_8006AF9C;
+        }
+        break;
+    case 4:
+    case 6:
+        if (lbl_803CC1B8->_3B != 0) {
+            task->state = 0;
+            lbl_803CC1B8->func = fn_8006AF6C;
+        }
+        break;
+    }
 }
 
 // .text:0x8006B230 size:0x438
@@ -36,6 +146,9 @@ void fn_8006AF9C(void) {
 
 // .text:0x8006AF6C size:0x30
 void fn_8006AF6C(void) {
+    if (lbl_803CC1B8->_3B == 0) {
+        fn_800B0A14_removeQueue();
+    }
 }
 
 // .text:0x8006AC24 size:0x348
@@ -59,22 +172,43 @@ void fn_80069BDC(void) {
 }
 
 // .text:0x80069B68 size:0x74
-void fn_80069B68(void) {
+s32 fn_80069B68(void) {
+    if (fn_80035838(lbl_801092E8, 0x16) != 0) {
+        lbl_803CBD30 = fn_800B0A5C_insertQueue(fn_80069B08, lbl_803CC1B8->priority);
+        fn_80034E20(lbl_803CBD30, lbl_80109378);
+        lbl_80366158._2A = 0;
+        return 1;
+    }
+    return 0;
 }
 
 // .text:0x80069B08 size:0x60
 void fn_80069B08(void) {
+    SceneTask* task = lbl_803CC1B8;
+
+    if (lbl_80366158._2A != 0) {
+        lbl_80371C30[task->_14].obj->_5C = 0;
+        lbl_80371C30[task->_14].obj->flags |= 2;
+        lbl_803CC1B8->func = fn_80069AD4;
+    }
 }
 
 // .text:0x80069AD4 size:0x34
 void fn_80069AD4(void) {
+    if (lbl_80366158._2A == 2) {
+        fn_800B0A14_removeQueue();
+    }
 }
 
 // .text:0x80069A98 size:0x3C
 void fn_80069A98(void) {
+    fn_80034CEC(lbl_803CBD30);
+    lbl_803CBD30 = NULL;
+    lbl_80366158._2A = 2;
 }
 
 // .text:0x80069A68 size:0x30
 void fn_80069A68(void) {
+    fn_80021518(0x35, lbl_800EF808._C0);
 }
 
