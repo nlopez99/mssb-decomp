@@ -886,24 +886,32 @@ void fn_3_119F6C(void) {
 }
 
 // .text:0x00119EE0 size:0x8C mapped:0x80758F74
-// 82.09%: the target loads the model with `addi r0,table,0x34; lwzx r3,i*0x90,r0`; the spellings
-// tried give `lwz 0x34(table + i*0x90)` or add 0x34 to the index instead.
+// 87.63%: the target indexes barrels from &g_Minigame (2193(r4), then 0(r6) for the third
+// read) and swaps the actor array and index registers in the lwzx.
 void fn_3_119EE0(s32 i) {
-    UnkAnimCtrl3310* ctrl = lbl_8036E548._0068->_34[i]._00->_18[0]->_14->_08;
+    UnkActor3310* actor = lbl_8036E548._0068->_34;
+    UnkAnimCtrl3310* ctrl;
+    BB_barrelStruct* barrel = g_Minigame.barrels;
 
-    ctrl->_0C->_20 = lbl_3_data_22638[g_Minigame.barrels[i].barrelColour] * 3;
-    ctrl->_0C->_40 = lbl_3_data_22638[g_Minigame.barrels[i].barrelColour] * 3 + 1;
-    ctrl->_0C->_60 = lbl_3_data_22638[g_Minigame.barrels[i].barrelColour] * 3 + 2;
+    actor += i;
+    barrel += i;
+    ctrl = actor->_00->_18[0]->_14->_08;
+    ctrl->_0C->_20 = lbl_3_data_22638[barrel->barrelColour] * 3;
+    ctrl->_0C->_40 = lbl_3_data_22638[barrel->barrelColour] * 3 + 1;
+    ctrl->_0C->_60 = lbl_3_data_22638[barrel->barrelColour] * 3 + 2;
 }
 
 // .text:0x00119E30 size:0xB0 mapped:0x80758EC4
-// 92.61%: the target loads the model with `addi r0,table,0x34; lwzx r3,i*0x90,r0`; the spellings
-// tried give `lwz 0x34(table + i*0x90)` or add 0x34 to the index instead.
+// 99.77%: the target puts i * 0x90 in r3 and the actor array in r0 for the lwzx; the base
+// swaps them.
 void fn_3_119E30(s32 i) {
+    UnkActor3310* actor;
     UnkAnimCtrl3310* ctrl;
 
     if (g_Minigame.barrels[g_Minigame.bB_bombBarrelID].animationCounter % lbl_3_data_2263E == 0) {
-        ctrl = lbl_8036E548._0068->_34[i]._00->_18[0]->_14->_08;
+        actor = lbl_8036E548._0068->_34;
+        actor += i;
+        ctrl = actor->_00->_18[0]->_14->_08;
         ctrl->_0C->_20 = !lbl_3_data_2263C[ctrl->_0C->_20];
         ctrl->_0C->_40 = !lbl_3_data_2263C[ctrl->_0C->_40];
         ctrl->_0C->_60 = !lbl_3_data_2263C[ctrl->_0C->_60];
@@ -1123,10 +1131,12 @@ void fn_3_1194FC(void) {
 }
 
 // .text:0x001194AC size:0x50 mapped:0x80758540
-// 68.00%: the target loads the model with `addi r0,table,0x34; lwzx r3,i*0x90,r0`; the spellings
-// tried give `lwz 0x34(table + i*0x90)` or add 0x34 to the index instead.
+// 96.50%: registers differ; the target's lwzx takes i * 0x90 first and the actor array second.
 void fn_3_1194AC(s32 i) {
-    lbl_8036E548._0068->_34[i]._00->_18[0]->_14->_08->_0C->_20 = lbl_3_data_2265C[MG._1AFF[i]];
+    UnkActor3310* actor = lbl_8036E548._0068->_34;
+
+    actor += i;
+    actor->_00->_18[0]->_14->_08->_0C->_20 = lbl_3_data_2265C[MG._1AFF[i]];
 }
 
 // .text:0x00119468 size:0x44 mapped:0x807584FC
@@ -1262,10 +1272,12 @@ void fn_3_1189C8(s32 i, s32 anim, s32 frame, s32 duration, u8 loop) {
 }
 
 // .text:0x0011897C size:0x4C mapped:0x80757A10
-// 65.74%: the target loads the model with `addi r0,table,0x34; lwzx r3,i*0x90,r0`; the spellings
-// tried give `lwz 0x34(table + i*0x90)` or add 0x34 to the index instead.
+// 95.79%: registers differ; the target's lwzx takes i * 0x90 first and the actor array second.
 void fn_3_11897C(s32 i) {
-    lbl_8036E548._0068->_34[i]._00->_14->_08->_0C->_20 = lbl_3_data_22670[MG._0000[i - 0x82]._2C];
+    UnkActor3310* actor = lbl_8036E548._0068->_34;
+
+    actor += i;
+    actor->_00->_14->_08->_0C->_20 = lbl_3_data_22670[MG._0000[i - 0x82]._2C];
 }
 
 // .text:0x0011887C size:0x100 mapped:0x80757910
@@ -1296,16 +1308,19 @@ void fn_3_11887C(void) {
 }
 
 // .text:0x0011881C size:0x60 mapped:0x807578B0
-// 69.96%: the target loads the model with `addi r0,table,0x34; lwzx r3,i*0x90,r0`; the spellings
-// tried give `lwz 0x34(table + i*0x90)` or add 0x34 to the index instead.
+// 99.58%: the target puts i * 0x90 in r3 and the actor array in r0 for the lwzx; the base
+// swaps them.
 void fn_3_11881C(s32 i) {
-    u8 v;
+    UnkActor3310* actor;
+    u16 v;
     if (i - 0xE9 < 4) {
         v = lbl_3_data_226BC[i - 0xE9];
     } else {
         v = lbl_3_data_226BC[4];
     }
-    lbl_8036E548._0068->_34[i]._00->_18[0]->_14->_08->_0C->_20 = v;
+    actor = lbl_8036E548._0068->_34;
+    actor += i;
+    actor->_00->_18[0]->_14->_08->_0C->_20 = v;
 }
 
 // .text:0x0011874C size:0xD0 mapped:0x807577E0
