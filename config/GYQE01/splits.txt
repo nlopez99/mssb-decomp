@@ -22,6 +22,12 @@ static/sub.c:
 	.data       start:0x800F76E0 end:0x800F7720
 	.sdata2     start:0x803CC580 end:0x803CC5A8
 
+static/anim.c:
+	extab       start:0x80005BA0 end:0x80005BC0
+	extabindex  start:0x800074D0 end:0x80007500
+	.text       start:0x80024D2C end:0x80026130
+	.sdata2     start:0x803CC5A8 end:0x803CC5D8
+
 Dolphin/base/PPCArch.c:
 	.text       start:0x8006D024 end:0x8006D138
 
