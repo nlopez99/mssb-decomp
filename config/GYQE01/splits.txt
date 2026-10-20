@@ -89,14 +89,15 @@ static/static_8004157C.c:
 	.text       start:0x8004157C end:0x80042598
 	.sbss       start:0x803CBCC0 end:0x803CBCC8
 	.sdata2     start:0x803CC7E8 end:0x803CC7F8
-static/unit_80063028.c:
+
+static/static_80063028.c:
 	extab       start:0x80006418 end:0x80006438
 	extabindex  start:0x80008184 end:0x800081B4
 	.text       start:0x80063028 end:0x800638CC
 	.sdata      start:0x803CB890 end:0x803CB898
 	.sdata2     start:0x803CC8D8 end:0x803CC8F0
 
-static/unit_800638CC.c:
+static/static_800638CC.c:
 	extab       start:0x80006438 end:0x80006460
 	extabindex  start:0x800081B4 end:0x800081F0
 	.text       start:0x800638CC end:0x80064534
@@ -115,7 +116,7 @@ static/mb_subfunc.c:
 	.sdata      start:0x803CB8D0 end:0x803CB8D8
 	.sbss       start:0x803CBD18 end:0x803CBD30
 
-static/unit_80069A68.c:
+static/static_80069A68.c:
 	extab       start:0x800064F8 end:0x80006588
 	extabindex  start:0x800082D4 end:0x800083AC
 	.text       start:0x80069A68 end:0x8006C100
@@ -124,7 +125,7 @@ static/unit_80069A68.c:
 	.sbss       start:0x803CBD30 end:0x803CBD38
 	.sdata2     start:0x803CC8F8 end:0x803CC938
 
-static/unit_8006C100.c:
+static/static_8006C100.c:
 	extab       start:0x80006588 end:0x800065B0
 	extabindex  start:0x800083AC end:0x800083E8
 	.text       start:0x8006C100 end:0x8006C48C
@@ -132,7 +133,7 @@ static/unit_8006C100.c:
 	.sbss       start:0x803CBD38 end:0x803CBD40
 	.sdata2     start:0x803CC938 end:0x803CC940
 
-static/unit_8006C48C.c:
+static/static_8006C48C.c:
 	extab       start:0x800065B0 end:0x800065D8
 	extabindex  start:0x800083E8 end:0x80008424
 	.text       start:0x8006C48C end:0x8006D024

@@ -1,5 +1,5 @@
-#ifndef __STATIC_UNIT_8006C48C_H_
-#define __STATIC_UNIT_8006C48C_H_
+#ifndef __STATIC_STATIC_8006C48C_H_
+#define __STATIC_STATIC_8006C48C_H_
 
 #include "mssbTypes.h"
 #include "Dolphin/mtx.h"
@@ -18,4 +18,4 @@ s32 fn_8006CDC0(s32 index);
 void fn_8006CEBC(void);
 void fn_8006CF6C(void);
 
-#endif // !__STATIC_UNIT_8006C48C_H_
+#endif // !__STATIC_STATIC_8006C48C_H_

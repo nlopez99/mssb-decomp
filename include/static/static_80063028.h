@@ -1,5 +1,5 @@
-#ifndef __STATIC_UNIT_80063028_H_
-#define __STATIC_UNIT_80063028_H_
+#ifndef __STATIC_STATIC_80063028_H_
+#define __STATIC_STATIC_80063028_H_
 
 #include "mssbTypes.h"
 #include "Dolphin/mtx.h"
@@ -12,4 +12,4 @@ s32 fn_800637D4(void);
 s32 fn_800637DC(u16* id, struct FlipBone* bone, MtxPtr m);
 s32 fn_800638B4(void* arg0, struct FlipOwner** owner);
 
-#endif // !__STATIC_UNIT_80063028_H_
+#endif // !__STATIC_STATIC_80063028_H_

@@ -1,5 +1,5 @@
-#ifndef __STATIC_UNIT_8006C100_H_
-#define __STATIC_UNIT_8006C100_H_
+#ifndef __STATIC_STATIC_8006C100_H_
+#define __STATIC_STATIC_8006C100_H_
 
 #include "mssbTypes.h"
 #include "Dolphin/mtx.h"
@@ -15,4 +15,4 @@ void fn_8006C43C(void (*callback)(void* arg0, void* arg1, void* arg2));
 void fn_8006C444(void* arg0, void* arg1, void* arg2);
 void fn_8006C488(void);
 
-#endif // !__STATIC_UNIT_8006C100_H_
+#endif // !__STATIC_STATIC_8006C100_H_
