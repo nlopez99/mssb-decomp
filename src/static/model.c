@@ -238,7 +238,8 @@ typedef struct ModelActor {
 typedef struct ModelSlot {
     /* 0x0000 */ ModelNode* node;
     /* 0x0004 */ ANIMBank* anim;
-    /* 0x0008 */ u8 _0008[0xE - 0x8];
+    /* 0x0008 */ void (*callback)(struct ModelSlot*);
+    /* 0x000C */ u8 _000C[0xE - 0xC];
     /* 0x000E */ u16 seqNum;
     /* 0x0010 */ u8 _0010[0x54 - 0x10];
     /* 0x0054 */ f32 speed;
@@ -252,7 +253,9 @@ typedef struct ModelSlot {
     /* 0x0066 */ u16 _66;
     /* 0x0068 */ u16* _68;
     /* 0x006C */ u8 _6C;
-    /* 0x006D */ u8 _006D[0x90 - 0x6D];
+    /* 0x006D */ u8 numLights;
+    /* 0x006E */ u8 _006E[0x70 - 0x6E];
+    /* 0x0070 */ LITObj* lights[8];
 } ModelSlot; // size: 0x90
 
 typedef struct ModelTable {
@@ -630,6 +633,29 @@ void fn_8001E784(void) {
 
 // .text:0x8001E488 size:0x2FC
 void fn_8001E488(void) {
+    Mtx44 proj;
+    ModelActor* actor;
+    ModelSlot* slot;
+    f32 x;
+    f32 y;
+    int i;
+
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
+    GXSetCullMode(GX_CULL_BACK);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+    for (i = 0; i < lbl_8036E548._0060->count; i++) {
+        actor = lbl_8036E548.actors[i];
+        if (actor != NULL) {
+            slot = &lbl_8036E548._0060->slots[i];
+            if (slot->node != NULL && slot->_6C != 0) {
+                x = actor->pos.x / 1280.0f;
+                y = actor->pos.y / 1280.0f;
+                C_MTXFrustum(proj, -0.175f + y, 0.175f + y, 0.25f + x, -0.25f + x, 1.0f, 512.0f);
+                GXSetProjection(proj, GX_PERSPECTIVE);
+                fn_8001DEA4(slot, 0, fn_80052734(0)->view);
+            }
+        }
+    }
 }
 
 // .text:0x8001E474 size:0x14
@@ -648,7 +674,42 @@ void fn_8001E0D8(void) {
 }
 
 // .text:0x8001DEA4 size:0x234
-void fn_8001DEA4(void) {
+void fn_8001DEA4(ModelSlot* slot, int lod, MtxPtr camera) {
+    ModelNode* node;
+
+    node = slot->node;
+    if (slot->callback != NULL) {
+        slot->callback(slot);
+    }
+    switch (slot->numLights) {
+    case 0:
+        fn_8001DD58(node, lod, camera, 0);
+        break;
+    case 1:
+        fn_8001DD58(node, lod, camera, 1, slot->lights[0]);
+        break;
+    case 2:
+        fn_8001DD58(node, lod, camera, 2, slot->lights[0], slot->lights[1]);
+        break;
+    case 3:
+        fn_8001DD58(node, lod, camera, 3, slot->lights[0], slot->lights[1], slot->lights[2]);
+        break;
+    case 4:
+        fn_8001DD58(node, lod, camera, 4, slot->lights[0], slot->lights[1], slot->lights[2], slot->lights[3]);
+        break;
+    case 5:
+        fn_8001DD58(node, lod, camera, 5, slot->lights[0], slot->lights[1], slot->lights[2], slot->lights[3], slot->lights[4]);
+        break;
+    case 6:
+        fn_8001DD58(node, lod, camera, 6, slot->lights[0], slot->lights[1], slot->lights[2], slot->lights[3], slot->lights[4], slot->lights[5]);
+        break;
+    case 7:
+        fn_8001DD58(node, lod, camera, 7, slot->lights[0], slot->lights[1], slot->lights[2], slot->lights[3], slot->lights[4], slot->lights[5], slot->lights[6]);
+        break;
+    case 8:
+        fn_8001DD58(node, lod, camera, 8, slot->lights[0], slot->lights[1], slot->lights[2], slot->lights[3], slot->lights[4], slot->lights[5], slot->lights[6], slot->lights[7]);
+        break;
+    }
 }
 
 // .text:0x8001DD58 size:0x14C
