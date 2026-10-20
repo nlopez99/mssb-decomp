@@ -422,8 +422,9 @@ static u8 lbl_3_bss_9D81;
 static u8 lbl_3_bss_9D80;
 
 // .text:0x000C8650 size:0xD2C mapped:0x807076E4
-// 95.27%: registers differ throughout; the target also keeps j + 1 in a saved register
-// and spills &g_d_GameSettings to 8(r1) for the final GameModeSelected test.
+// 95.27%: registers differ throughout; the target keeps j + 1 in r14 up to the third loop and
+// spills &g_d_GameSettings to 8(r1), while a local k = j + 1 here gets spilled instead. The
+// permuter's 96.23% kept n live into the third loop: the target has one more long-lived value.
 void fn_3_C8650(void** files) {
     Rep1FD8Draw* draw;
     Rep1FD8Prop* prop;
@@ -1995,7 +1996,7 @@ void fn_3_C2244(void) {
 }
 
 // .text:0x000C1C18 size:0x62C mapped:0x80700CAC
-// 96.30%: halfWidth and height swap f25/f26, the second color takes r25 (target r27, i in
+// 96.33%: halfWidth and height swap f25/f26, the second color takes r25 (target r27, i in
 // r25), and the code between the two quads is scheduled differently.
 void fn_3_C1C18(Rep1FD8CameraSlot* slot) {
     Vec pos;
@@ -2078,7 +2079,8 @@ void fn_3_C1C18(Rep1FD8CameraSlot* slot) {
     }
     task->_29 -= task->_29 != 0;
     i = task->_2A - (task->_29 == 0) * 42;
-    task->_2A = i * (i > 0);
+    i *= i > 0;
+    task->_2A = i;
 }
 
 // .text:0x000C19C8 size:0x250 mapped:0x80700A5C
