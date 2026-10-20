@@ -333,6 +333,8 @@ s32 fn_800697B0(void) {
 }
 
 // .text:0x80068838 size:0xF78
+// The inlined fn_80066EAC copy: the target hoists the chemistry row (`addi r5,r14,59`) and reloads
+// inMemRoster after it; fn_80066EAC's own form keeps it unhoisted. Registers off from the first loop
 void fn_80068838(void) {
     s8 pool[54];
     u8 n;
@@ -1028,6 +1030,8 @@ static inline void placeFielder(s8* fielders, s8 id) {
 }
 
 // .text:0x80065DEC size:0x10C0
+// The target keeps the raw team in r27 for the inlined fn_80066EAC (fresh clrlwi there), hoists its
+// chemistry row as in fn_80068838, and re-reads others[i] after the randRange call
 void characterSelectScreen(u8 team) {
     s8 fielders[9];
     s8 captains[9];
@@ -1223,6 +1227,8 @@ void characterSelectScreen(u8 team) {
 }
 
 // .text:0x80064A04 size:0x13E8
+// Registers only: in the sorted captains' placement the target swaps the table byte (r10) and the
+// slot counter (r9); declaration orders change nothing
 void unsure_FillRosterPositions(u8 team) {
     s8 order[9];
     s8 captains[9];
