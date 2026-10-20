@@ -4,11 +4,6 @@
 #include "mssbTypes.h"
 #include "Dolphin/mtx.h"
 
-void fn_800638CC(void);
-void fn_80063958(s8 index);
-void fn_800639BC(void);
-void fn_80064344(Vec* pos, Vec* vel);
-void fn_80064430(Vec* pos, u8 glow, f32 size, f32 spread);
 void fn_80064534(void);
 s8 translateStarPitchHitIndex(u8 index);
 s32 translateStarPitch(s32 index);
