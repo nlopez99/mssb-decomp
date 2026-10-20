@@ -2483,7 +2483,7 @@ clamp:
 }
 
 // .text:0x00052560 size:0x17C mapped:0x806915F4
-int fn_3_52560(int fielder, f32 x, f32 z) {
+int fn_3_52560(s32 fielder, f32 x, f32 z) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     f32 dist;
     f32 speed;
@@ -3010,7 +3010,7 @@ s32 fn_3_50898(s32 fielder, f32* x, f32* z) {
 
 // .text:0x0004FB34 size:0xD64 mapped:0x8068EBC8
 // 99.71%: registers only; the target keeps margin, step and close in other saved registers.
-void fn_3_4FB34(int fielder) {
+void fn_3_4FB34(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     s32 i;
     s32 start;
@@ -3194,7 +3194,7 @@ void fn_3_4FB34(int fielder) {
 
 // .text:0x0004F504 size:0x630 mapped:0x8068E598
 // 99.96%: as in fn_3_4EFC8, the last test's two sums compare in swapped registers.
-void fn_3_4F504(int fielder) {
+void fn_3_4F504(s32 fielder) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     s32 i;
     s32 start;
@@ -3294,7 +3294,7 @@ void fn_3_4F504(int fielder) {
 // .text:0x0004EFC8 size:0x53C mapped:0x8068E05C
 // 99.96%: the last test's two sums swap r0 and r3 (cmpw r0,r3; ble in the target). Writing
 // the test as _0E + 30 > arrive + 60 gives the target's branch, with the sums still swapped.
-void fn_3_4EFC8(int fielder, BOOL flag) {
+void fn_3_4EFC8(s32 fielder, BOOL flag) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     s32 i;
     s32 start;
@@ -4321,7 +4321,7 @@ void fn_3_4A9AC(s32 fielder) {
 // .text:0x0004A408 size:0x5A4 mapped:0x8068949C
 // 98.81%: matches with fn_3_52560, fn_3_4EFC8, fn_3_4F504, fn_3_4FB34 and this taking s32;
 // rep_13B8's fn_3_8604C then needs an s32 counter (escalated).
-void fn_3_4A408(int fielder, f32* x, f32* z) {
+void fn_3_4A408(s32 fielder, f32* x, f32* z) {
     UnkAC8Fielder* f = &g_Fielders[fielder];
     s32 frame;
     f32 ahead;
@@ -6328,7 +6328,7 @@ void fn_3_3F034(void) {
 void fn_3_3EB6C(void) {
     UnkAC8Fielder* f;
     s32 i;
-    int best;
+    s32 best;
     s32 bestFrames = 9999;
     s32 frames;
     s32 total;

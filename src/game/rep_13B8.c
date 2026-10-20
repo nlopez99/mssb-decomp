@@ -1483,7 +1483,7 @@ int fn_3_86118(void) {
 
 // .text:0x0008604C size:0xCC mapped:0x806C50E0
 int fn_3_8604C(int* fielderOut) {
-    int i;
+    s32 i;
     int best = 9999;
 
     for (i = 0; i < 9; i++) {
