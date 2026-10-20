@@ -205,6 +205,30 @@ typedef struct SwirlParticle {
     /* 0x4F */ u8 _4F;
 } SwirlParticle;
 
+// The particles fn_80029CC8 draws as streaks toward the emitter's point
+typedef struct StreakParticle {
+    /* 0x00 */ Particle* next;
+    /* 0x04 */ Vec pos;
+    /* 0x10 */ Vec vel;
+    /* 0x1C */ Vec accel;
+    /* 0x28 */ f32 width;
+    /* 0x2C */ f32 length;
+    /* 0x30 */ f32 dwidth;
+    /* 0x34 */ f32 dlength;
+    /* 0x38 */ u8 _38[0x40 - 0x38];
+    union {
+        /* 0x40 */ u32 rgba;
+        /* 0x40 */ u8 color[4];
+    };
+    /* 0x44 */ u8 alpha;
+    /* 0x45 */ u8 _45;
+    /* 0x46 */ s16 life;
+    /* 0x48 */ s16 delay;
+    /* 0x4A */ s16 remaining;
+    /* 0x4C */ u8 _4C;
+    /* 0x4D */ u8 tex;
+} StreakParticle;
+
 // What fn_8002955C's callers pass
 typedef struct PuffParams {
     /* 0x00 */ s32 _00;
@@ -2088,6 +2112,99 @@ u8 fn_8002A85C(Emitter* e, GlowParticle* p)
     p->color[3] = alpha;
     p->remaining--;
     return p->remaining == 0;
+}
+
+// .text:0x80029CC8 size:0x504
+// 97.19%: stack layout and saved registers: the target puts side and dir between quad and
+// texObj and keeps &side and &quad[1..3] in four saved registers (this build: three).
+BOOL fn_80029CC8(void* arg)
+{
+    Emitter* e = arg;
+    Mtx m = { { 1.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 0.0f } };
+    s32 alive;
+    Vec quad[4];
+    Vec side;
+    Vec dir;
+    GXTexObj texObj;
+    Vec target;
+    Vec v;
+    GXTlutObj tlutObj;
+    TexFile* file;
+    StreakParticle* p;
+    s32 index;
+    TextureDesc* tex;
+    s32 t;
+    f32 width;
+
+    alive = e->count;
+    GXLoadPosMtxImm(m, GX_PNMTX0);
+    GXSetZMode(GX_TRUE, GX_ALWAYS, GX_TRUE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_ONE, GX_LO_CLEAR);
+    PSMTXMultVec(lbl_8017FFE0, &e->_18, &target);
+    file = (TexFile*)e->_10;
+    p = (StreakParticle*)e->particles;
+    index = p->tex;
+    if (file == NULL) {
+        GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    } else {
+        GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP1, GX_COLOR0A0);
+        tex = &file->tex[file->tex[index]._1C];
+        if (tex->tlut != NULL) {
+            GXInitTexObjCI(&texObj, tex->image, tex->width, tex->height, tex->format, GX_CLAMP, GX_CLAMP, GX_FALSE, GX_TLUT0);
+            GXInitTlutObj(&tlutObj, tex->tlut, tex->tlutFormat, tex->tlutCount);
+            GXLoadTlut(&tlutObj, GX_TLUT0);
+        } else {
+            GXInitTexObj(&texObj, tex->image, tex->width, tex->height, tex->format, GX_CLAMP, GX_CLAMP, GX_FALSE);
+        }
+        GXInitTexObjLOD(&texObj, GX_LINEAR, GX_LINEAR, tex->minLOD, tex->maxLOD, tex->lodBias, GX_FALSE, GX_FALSE, GX_ANISO_1);
+        GXLoadTexObj(&texObj, GX_TEXMAP1);
+    }
+    for (; p != NULL; p = (StreakParticle*)p->next) {
+        if (p->delay != 0) {
+            p->delay--;
+        } else if (p->remaining != 0) {
+            PSVECAdd(&p->vel, &p->accel, &p->vel);
+            PSVECAdd(&p->pos, &p->vel, &p->pos);
+            p->color[3] = p->alpha * p->remaining / p->life;
+            if (target.z <= -1.0f) {
+                PSMTXMultVec(lbl_8017FFE0, &p->pos, &v);
+                dir.z = v.z;
+                dir.x = target.x * v.z / target.z;
+                dir.y = target.y * v.z / target.z;
+                PSVECSubtract(&v, &dir, &dir);
+                dir.z = 0.0f;
+                side.x = -dir.y;
+                side.y = dir.x;
+                side.z = 0.0f;
+                t = p->life - p->remaining;
+                width = p->width + p->dwidth * t / p->life;
+                PSVECScale(&dir, p->length + p->dlength * t / p->life, &dir);
+                PSVECScale(&side, width / 2, &side);
+                PSVECAdd(&v, &side, &quad[0]);
+                PSVECSubtract(&v, &side, &quad[1]);
+                PSVECSubtract(&quad[1], &dir, &quad[2]);
+                PSVECSubtract(&quad[0], &dir, &quad[3]);
+                GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+                GXPosition3f32(quad[0].x, quad[0].y, quad[0].z);
+                GXColor1u32(p->rgba);
+                GXTexCoord2f32(0.0f, 1.0f);
+                GXPosition3f32(quad[1].x, quad[1].y, quad[1].z);
+                GXColor1u32(p->rgba);
+                GXTexCoord2f32(0.0f, 0.0f);
+                GXPosition3f32(quad[2].x, quad[2].y, quad[2].z);
+                GXColor1u32(p->rgba);
+                GXTexCoord2f32(1.0f, 0.0f);
+                GXPosition3f32(quad[3].x, quad[3].y, quad[3].z);
+                GXColor1u32(p->rgba);
+                GXTexCoord2f32(1.0f, 1.0f);
+            }
+            p->remaining--;
+        } else {
+            alive--;
+        }
+    }
+    GXLoadPosMtxImm(lbl_8017FFE0, GX_PNMTX0);
+    return alive == 0;
 }
 
 // .text:0x800297F0 size:0x4D8

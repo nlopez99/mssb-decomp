@@ -27,6 +27,7 @@ void fn_8002852C(void);
 BOOL fn_80028F48(void* e);
 void fn_8002955C(Vec* pos, Vec* dir, struct PuffParams* params);
 void fn_800297F0(struct Emitter* e, Vec* pos, Vec* dir, struct PuffParams* params);
+BOOL fn_80029CC8(void* e);
 void fn_8002BC84(struct Emitter* e, Vec* pos, Vec* dir, struct EffectParams* params);
 void fn_8002A1CC(Vec* pos, Vec* dir);
 u8 fn_8002A85C(struct Emitter* e, struct GlowParticle* p);
