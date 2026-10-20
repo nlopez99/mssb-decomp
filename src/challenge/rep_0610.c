@@ -3076,6 +3076,8 @@ void fn_1_15CE0(void) {
 }
 
 // .text:0x00015760 size:0x580
+// Registers only: the target stores 0 from i's r30 (0x1C) wherever it stores a
+// constant 0 before the loop, where this loads li r0,0 each time
 void fn_1_15760(void) {
     s32 i = 0;
     lbl_1_bss_5F73 = 0;
@@ -5252,12 +5254,12 @@ void fn_1_E098(void) {
             break;
         case 10:
             if (i == lbl_1_bss_30B6 && (lbl_803C77B8[0]._02 & 0x100)) {
-                UnkTaskState0610* task = (UnkTaskState0610*)lbl_803CC1B8;
-                u8* frame;
-                u8* animId;
-                u8 anim45;
                 Unk0060Elem* elem;
                 UnkAnimRef0610* anim;
+                u8* frame;
+                u8* animId;
+                UnkTaskState0610* task = (UnkTaskState0610*)lbl_803CC1B8;
+                u8 anim45;
                 task->_00 = fn_1_DE1C;
                 task->_15 = 0;
                 animId = &lbl_1_bss_6940[lbl_1_bss_5F73]._44;
@@ -5286,17 +5288,17 @@ void fn_1_E098(void) {
             }
             break;
         default: {
+            u8 selRow;
+            s16* limit;
+            s16* loop;
+            u16 held;
+            u16 color;
+            s16* frame;
+            s32 col;
             UnkAnimRef0610* ref;
             UnkAnimKey0610* key;
             u16 pressed;
-            u16 held;
-            u8 selRow;
-            s16* limit;
-            s16* frame;
-            s16* loop;
             u8 selCol;
-            u16 color;
-            s32 col;
             if (st->_0 >= 0) {
                 ref = lbl_8036E548._0C04[lbl_1_bss_5F73]._010[st->_0];
                 key = &ref->_4[st->_2];
