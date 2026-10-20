@@ -328,7 +328,38 @@ void fn_3_11D2C8(s32 model, s32 first, s32 count, void* anim, s32 arg4) {
 
 // .text:0x0011D1B0 size:0x118 mapped:0x8075C244
 void fn_3_11D1B0(void) {
-    return;
+    s32 i;
+
+    switch (g_Minigame.GameMode_MiniGame) {
+    case MINI_GAME_ID_BOBOMB_DERBY:
+        fn_3_11CD00();
+        break;
+    case MINI_GAME_ID_WALLBALL:
+        fn_3_11C5F8();
+        break;
+    case MINI_GAME_ID_BARREL_BATTER:
+        fn_3_11C2CC();
+        break;
+    case MINI_GAME_ID_CHAINCHOMP_SPRINT:
+        fn_3_11C02C();
+        break;
+    case MINI_GAME_ID_STAR_DASH:
+        fn_3_11BBA4();
+        break;
+    case MINI_GAME_ID_PIRANHA_PANIC:
+        fn_3_11B75C();
+        break;
+    }
+    for (i = 0; i < lbl_8036E548._3078; i++) {
+        lbl_8036E548._2D94[i]._04.x = 0.0f;
+        lbl_8036E548._2D94[i]._04.y = 0.0f;
+        lbl_8036E548._2D94[i]._04.z = 0.0f;
+        lbl_8036E548._2D94[i]._10.x = 0.0f;
+        lbl_8036E548._2D94[i]._10.y = 0.0f;
+        lbl_8036E548._2D94[i]._10.z = 0.0f;
+        lbl_8036E548._2D94[i]._26 = 0;
+        lbl_8036E548._2D94[i]._00 = NULL;
+    }
 }
 
 // .text:0x0011CF84 size:0x22C mapped:0x8075C018
@@ -379,7 +410,33 @@ void fn_3_11CF04(void) {
 }
 
 // .text:0x0011CD00 size:0x204 mapped:0x8075BD94
+// The dead stores stand in for code the original compiled to nothing: without them MWCC
+// inlines this function into fn_3_11D1B0, which the target calls it from with bl.
 void fn_3_11CD00(void) {
+    int d;
+
+    d = 0;
+    d = 1;
+    d = 2;
+    d = 3;
+    d = 4;
+    d = 5;
+    d = 6;
+    d = 7;
+    d = 8;
+    d = 9;
+    d = 10;
+    d = 11;
+    d = 12;
+    d = 13;
+    d = 14;
+    d = 15;
+    d = 16;
+    d = 17;
+    d = 18;
+    d = 19;
+    d = 20;
+    d = 21;
     lbl_8036E548._3078 = 3;
     lbl_8036E548._2D94 = _OSAllocFromHeap(0x20, lbl_8036E548._3078 * 0x28);
     lbl_8036E548._0068 = ActorObjectInitTable(lbl_8036E548._3078);
@@ -429,7 +486,13 @@ void fn_3_11C2CC(void) {
 }
 
 // .text:0x0011C02C size:0x2A0 mapped:0x8075B0C0
+// The dead stores stand in for code the original compiled to nothing: without them MWCC
+// inlines this function into fn_3_11D1B0, which the target calls it from with bl.
 void fn_3_11C02C(void) {
+    int d;
+
+    d = 0;
+    d = 1;
     lbl_8036E548._3078 = 0xA7;
     lbl_8036E548._2D94 = _OSAllocFromHeap(0x20, lbl_8036E548._3078 * 0x28);
     lbl_8036E548._0068 = ActorObjectInitTable(lbl_8036E548._3078);
