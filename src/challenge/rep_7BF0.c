@@ -181,8 +181,9 @@ static Menu7BF0 lbl_1_bss_471BC;
 static Sim7BF0 lbl_1_bss_47068;
 
 // .text:0x1510 size:0x1C0
-// 92.01%: only register numbers differ, in the inlined fn_1_2935C code (the copy of
-// &lbl_1_data_11300 in r9 where the target has r5); a title local fixed fn_1_28C34's copy.
+// 92.01%: only registers differ in the inlined fn_1_2935C code (the pooled &lbl_1_data_11300
+// in r9 where the target has r5); no static inline copy, local, binding or GC 1.3.2-2.7 moves it.
+// A title local fixed fn_1_28C34's copy.
 void fn_1_29A9C(void) {
     char* title = NULL;
 
