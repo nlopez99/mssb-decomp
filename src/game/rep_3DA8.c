@@ -178,8 +178,8 @@ void fn_3_1663AC(void) {
 }
 
 // .text:0x00165D24 size:0x688 mapped:0x807A4DB8
-// The target tests the empty cases with `cmpwi r0,6; bge` (cases 6 and 7, which MWCC drops
-// here when both are listed), and schedules `li r7,1` before the last `lis` of the tail.
+// 99.99%: the target tests the empty cases with `cmpwi r0,6; bge` (cases 6 and 7, which
+// MWCC drops here when both are listed); `case 6:` alone gives `beq`.
 BOOL fn_3_165D24(void) {
     GameControlsStruct* logic = &g_GameLogic;
     InMemBatterType* batter = &g_Batter;
@@ -189,7 +189,7 @@ BOOL fn_3_165D24(void) {
     InMemPitcherType* pitcher = &g_Pitcher;
     u8 mission = tracker->_441C;
     u8 level = tracker->_4415;
-    s16 id = 0;
+    s32 id = 0;
     ChallengeTrackingStruct* c;
 
     bss->_47 = 0;

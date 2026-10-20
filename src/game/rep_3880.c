@@ -491,8 +491,8 @@ void fn_3_15730C(u32 index, f32 x, f32 y, f32 z) {
 }
 
 // .text:0x00156D04 size:0x608 mapped:0x80795D98
-// 96.55%: the base strength-reduces the texture index (i + 10) into its own saved register,
-// and a few FPRs differ in the size computation
+// 98.17%: scale and z swap saved FPRs, and the constants of the w computations load into
+// other registers
 void fn_3_156D04(u32 index, f32 x, f32 y, f32 z) {
     Vec quad[4];
     Mtx44 proj;
@@ -509,6 +509,7 @@ void fn_3_156D04(u32 index, f32 x, f32 y, f32 z) {
     f32 half;
     u32* color;
     s32 i;
+    s32 n;
 
     color = &lbl_3_data_26B84[((UnkMinigame3880*)&g_Minigame)->piranhas[index].kind];
     zoom = fn_80052768_getCamera(0)->zoom;
@@ -578,8 +579,9 @@ void fn_3_156D04(u32 index, f32 x, f32 y, f32 z) {
                 quad[3].x = d.x + half;
                 quad[3].y = d.y - half;
                 GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_DSTALPHA, GX_LO_CLEAR);
+                n = i + 10;
                 fn_3_156970(quad, *color,
-                            &lbl_3_common_bss_32724._6C->tex[lbl_3_common_bss_32724._6C->tex[i + 10]._1C]);
+                            &lbl_3_common_bss_32724._6C->tex[lbl_3_common_bss_32724._6C->tex[n]._1C]);
                 break;
             }
         } while (i-- != 0);
@@ -640,8 +642,8 @@ void fn_3_156970(Vec* corners, u32 color, TexInfo3880* tex) {
 }
 
 // .text:0x00156548 size:0x428 mapped:0x807955DC
-// 96.26%: as in fn_3_156D04, the base strength-reduces the texture index (i + 1) into its
-// own saved register, and FPRs differ in the second size computation
+// 99.66%: in the first w computation the base loads 0.25f before 0.5f, and the second one
+// allocates its FPRs differently
 void fn_3_156548(u32 index, f32 x, f32 y, f32 z) {
     Vec quad[4];
     Mtx44 proj;
@@ -654,6 +656,7 @@ void fn_3_156548(u32 index, f32 x, f32 y, f32 z) {
     f32 half;
     f32 size = 0.5f;
     s32 i;
+    s32 n;
 
     scale = 1.0f / fn_80052768_getCamera(0)->zoom;
     fn_800B24D4(13);
@@ -677,7 +680,7 @@ void fn_3_156548(u32 index, f32 x, f32 y, f32 z) {
                 PSVECScale(&a, lbl_3_data_26BAC + i * (lbl_3_data_26BB0 - lbl_3_data_26BAC) / 7.0f, &d);
                 PSVECAdd(&b, &d, &d);
                 if (i >= 4) {
-                    w = (7 - i) * size * 0.25f + size;
+                    w = (7 - i) * 0.25f * size + size;
                 } else {
                     w = size * 2.0f;
                 }
@@ -698,7 +701,7 @@ void fn_3_156548(u32 index, f32 x, f32 y, f32 z) {
                 fn_800B1468(quad, 0xFFFFFFFF,
                             &lbl_3_common_bss_32724._68->tex[lbl_3_common_bss_32724._68->tex[0]._1C]);
                 if (i >= 4) {
-                    w = (7 - i) * size * 0.25f + size;
+                    w = (7 - i) * 0.25f * size + size;
                 } else {
                     w = size * 2.0f;
                 }
@@ -712,8 +715,9 @@ void fn_3_156548(u32 index, f32 x, f32 y, f32 z) {
                 quad[3].x = d.x + half;
                 quad[3].y = d.y - half;
                 fn_800B2160(2);
+                n = i + 1;
                 fn_800B1468(quad, 0xFFFFFFFF,
-                            &lbl_3_common_bss_32724._68->tex[lbl_3_common_bss_32724._68->tex[i + 1]._1C]);
+                            &lbl_3_common_bss_32724._68->tex[lbl_3_common_bss_32724._68->tex[n]._1C]);
                 break;
             }
         } while (i-- != 0);
