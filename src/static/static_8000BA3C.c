@@ -651,8 +651,117 @@ u32 fn_8000CEF0(AnimFile* file, s32 idx, u32 frame, s32 skip, u32* dst) {
     return TRUE;
 }
 
+// Differs: saved-register numbers throughout, and src + (size + 4) is computed as
+// (size + src) + 4; inlining that sum into its memcpy fixed the order but not the registers.
 // .text:0x8000CC4C size:0x2A4
-void fn_8000CC4C(void) {
+void fn_8000CC4C(AnimFile* file, AnimFrame* f, u8* src, u32 offset, u32 size) {
+    u32* p = (u32*)(f + 1);
+    u8* srcEnd = src + (size + 4);
+    u32 end = offset + size;
+    s32 i;
+    u32 lim;
+    u32 d;
+    u32* vals;
+    u16* ids;
+    s32 j;
+    u32 base;
+    u32 o;
+    u16* ent;
+    u8* dst;
+    u16 eo;
+    u16 elen;
+    u32* next;
+    u32 words;
+    u32 stride;
+
+    for (i = 0; i < f->count; i++) {
+        switch (((u16*)p)[0] & 0x7FFF) {
+        case 0:
+            if (f->size < end && f->size - offset == 0) {
+                break;
+            }
+        case 1:
+            memcpy((u8*)p + offset, src, size);
+            break;
+        case 2:
+            base = offset - 4;
+            ids = (u16*)p;
+            lim = base + size;
+            vals = (u32*)((u8*)p + (((((u16*)p)[2] + 1) * 2) & ~3) + 8);
+            for (j = 0; j < ((u16*)p)[2]; j++) {
+                o = ids[4] * 4;
+                if (o >= lim) {
+                    break;
+                }
+                if (o + 4 > base) {
+                    d = o + 4 - base;
+                    if (d < 4) {
+                        if (d > size) {
+                            d = size;
+                        }
+                        memcpy((u8*)vals + 4 - d, src, d);
+                    } else {
+                        d = lim - o;
+                        if (d < 4) {
+                            memcpy(vals, srcEnd - d, d);
+                        } else {
+                            memcpy(vals, src + o - base, 4);
+                        }
+                    }
+                }
+                ids++;
+                vals++;
+            }
+            break;
+        case 3:
+            base = offset - 4;
+            ent = (u16*)p;
+            lim = base + size;
+            dst = (u8*)p + ((u16*)p)[2] * 4 + 8;
+            for (j = 0; j < ((u16*)p)[2]; j++) {
+                eo = ent[4];
+                elen = ent[5];
+                if (eo >= lim) {
+                    break;
+                }
+                if (eo + elen > base) {
+                    d = base - eo;
+                    if (d < elen) {
+                        o = elen - d;
+                        if (o > size) {
+                            o = size;
+                        }
+                        memcpy(dst + d, src, o);
+                    } else if (lim < eo + elen) {
+                        memcpy(dst, src + (eo - base), lim - eo);
+                    } else {
+                        memcpy(dst, src + (eo - base), elen);
+                    }
+                }
+                dst += elen;
+                ent += 2;
+            }
+            break;
+        }
+        next = p;
+        words = f->size >> 2;
+        stride = file->_05;
+        switch (((u16*)p)[0] & 0x7FFF) {
+        case 0:
+            next = p + words;
+            break;
+        case 1:
+            next = p + stride;
+            break;
+        case 2:
+            next = p + ((u16*)p)[3];
+            break;
+        case 3:
+            next = p + ((u16*)p)[3];
+            break;
+        }
+        p = next;
+    }
 }
 
 // .text:0x8000C194 size:0xAB8
