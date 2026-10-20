@@ -618,6 +618,15 @@ config.libs = [
         extra_cflags=["-str noreadonly"]
     ),
     {
+        "lib": "static",
+        "mw_version": "GC/2.6",
+        "cflags": cflags_base + ["-O4,p", "-sym on", "-inline deferred"],
+        "host": False,
+        "objects": [
+            Object(NonMatching, "static/sub.c", extra_cflags=["-cpp_exceptions on"]),
+        ],
+    },
+    {
         "lib": "unk",
         "mw_version": "GC/2.6",
         "cflags": cflags_base + ["-O4,p", "-sym on"],

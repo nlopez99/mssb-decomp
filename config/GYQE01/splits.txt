@@ -14,6 +14,14 @@ Sections:
 	.sdata2     type:rodata align:4
 	.sbss2      type:bss align:32
 
+static/sub.c:
+	extab       start:0x80005B60 end:0x80005BA0
+	extabindex  start:0x80007470 end:0x800074D0
+	.text       start:0x80024184 end:0x80024C04
+	.rodata     start:0x800E6720 end:0x800E6768
+	.data       start:0x800F76E0 end:0x800F7720
+	.sdata2     start:0x803CC580 end:0x803CC5A8
+
 Dolphin/base/PPCArch.c:
 	.text       start:0x8006D024 end:0x8006D138
 
