@@ -3,6 +3,23 @@
 
 #include "mssbTypes.h"
 
+extern s16 lbl_800FB798[54];
+extern s16 lbl_800FB804[54];
+extern s16 lbl_800FB870[54];
+extern s16 lbl_800FB8DC[54];
+extern s16 lbl_800FB948[54];
+extern s16 lbl_800FB9B4[54];
+extern s16 lbl_800FBA20[54];
+extern s16 lbl_800FBA8C[54];
+extern s16 lbl_800FBAF8[54];
+extern s16 lbl_800FBB64[54];
+extern s16 lbl_800FBBD0[54];
+extern s16 lbl_800FBC3C[54];
+extern s16 lbl_800FBCA8[54];
+extern s16 lbl_800FBD14[54];
+extern s16 lbl_800FBD80[54];
+extern s32 lbl_803CBD0C;
+
 typedef void (*EffectHandler)(void* actor, s32 a, s32 b, f32 t);
 
 void fn_8004AC00(void* actor, s32 a, s32 b, f32 t);

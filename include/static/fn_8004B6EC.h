@@ -3,11 +3,14 @@
 
 #include "mssbTypes.h"
 
-void fn_8004B6EC(void);
-void fn_8004B7B4(void);
-void fn_8004B7F4(void);
-void fn_8004BAEC(void);
-void fn_8004BD6C(void);
+struct EffectPlayer;
+struct EffectActorRef;
+
+void fn_8004B6EC(struct EffectPlayer* player, struct EffectActorRef* ref);
+s32 fn_8004B7B4(struct EffectPlayer* player, struct EffectActorRef* ref);
+void fn_8004B7F4(struct EffectPlayer* player);
+void fn_8004BAEC(struct EffectPlayer* player);
+s32 fn_8004BD6C(struct EffectPlayer* player, struct EffectActorRef* ref);
 void fn_8004BEB0(void* actor, s32 a, s32 b, f32 t);
 
 #endif
