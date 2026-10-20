@@ -3590,8 +3590,12 @@ void fn_3_7F9C4(int runner) {
     }
 }
 
+static inline Unk13B8Fielder* fielderAt(u8 base) {
+    return &g_Fielders[g_FieldingLogic._0D0[base]];
+}
+
 // .text:0x0007F494 size:0x530 mapped:0x806BE528
-// 99.85%: only g_FieldingLogic's and g_Fielders' addresses for the body-check fielder swap r3 and r4
+// 99.91%: only the body-check fielder's address and the probability row's offset swap r6 and r9
 int fn_3_7F494(int runner) {
     InMemRunnerType* r = &g_Runners[runner];
     int bodyCheck = 0;
@@ -3663,10 +3667,10 @@ int fn_3_7F494(int runner) {
                 ((g_Ball.fielderWBallIndex >= 0 && g_Ball.fielderWBallIndex == g_FieldingLogic._0D0[base] &&
                   g_Ball.timeSinceBallPickedUp <= 9) ||
                  (g_FieldingLogic._0C4 == base && g_Ball.framesUntilThrowReachesDest < 15))) {
-                u8 chance = bodyCheckProbabiliities[r->weight][g_Fielders[g_FieldingLogic._0D0[base]]._1C9];
+                u8 chance = bodyCheckProbabiliities[r->weight][fielderAt(base)->_1C9];
 
-                g_Fielders[g_FieldingLogic._0D0[base]]._211 = 1;
-                g_Fielders[g_FieldingLogic._0D0[base]]._214 = r->baseRunningTowards;
+                fielderAt(base)->_211 = 1;
+                fielderAt(base)->_214 = r->baseRunningTowards;
                 if (RandomInt_Game(100) < chance) {
                     r->actionCode = 2;
                     if (g_d_GameSettings.exhibitionMatchInd == 0 && lbl_3_common_bss_37400._40 == g_GameLogic.teamBatting) {
