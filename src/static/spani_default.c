@@ -271,6 +271,7 @@ u16 fn_80036824(s32 id, s32 anim, u16 frame) {
     return 0;
 }
 
+// Differs: registers only (i and index swapped, value in r5 not r30); declaration orders did not help.
 // .text:0x8003664C size:0x1D8 mapped:0x8003664C
 void fn_8003664C(s32 id, s32 index, s16 value, u32 sel) {
     s32 i = fn_80035DD4(id);
@@ -301,6 +302,7 @@ void fn_8003664C(s32 id, s32 index, s16 value, u32 sel) {
     } while (--k != 0);
 }
 
+// Differs: as fn_8003649C, the registers of the two table loads.
 // .text:0x8003656C size:0xE0 mapped:0x8003656C
 void fn_8003656C(SpaniTask* task, s32 id, s32 part, u16 kind, s32 value) {
     SabInfo info;
@@ -320,6 +322,7 @@ void fn_8003656C(SpaniTask* task, s32 id, s32 part, u16 kind, s32 value) {
     fn_8000CC4C(sab, p, &v, (u32)&((SabInfo*)((u8*)p + 4))->_1C - (u32)((u8*)p + 4), 4);
 }
 
+// Differs: `sth v` scheduled after the anim index, and the registers of the two table loads.
 // .text:0x8003649C size:0xD0 mapped:0x8003649C
 void fn_8003649C(SpaniTask* task, s32 id, s32 part, u16 kind, s32 value) {
     SabInfo info;
@@ -382,6 +385,7 @@ s32 fn_80036214(SpaniTask* task, s32 id, s32 arg2, s32 arg3) {
     return info._1C;
 }
 
+// Differs: the conversion temporaries of x and y sit in swapped stack slots.
 // .text:0x80036134 size:0xE0 mapped:0x80036134
 void fn_80036134(SpaniTask* task, s32 id, s32 arg2, s32 id2) {
     SabInfo info;
@@ -396,6 +400,7 @@ void fn_80036134(SpaniTask* task, s32 id, s32 arg2, s32 id2) {
     lbl_80371C30[task->_14 + id2].obj->_48.y = y;
 }
 
+// Differs: registers and the loops' layout; a transcription of the target's pointer walks.
 // .text:0x80035F20 size:0x214 mapped:0x80035F20
 SabInfo* fn_80035F20(s32 id, s32 index, u16 frame, s16 sel) {
     s32 i = fn_80035DD4(id);
@@ -557,6 +562,8 @@ u8 fn_80035838(void* entry, u8 id) {
     return done;
 }
 
+// Differs: only the order of `stw r29,48(r3)` against `slwi` and `addi lbl_8023D6C0@l`; every
+// order of the four stores was tried.
 // .text:0x80035750 size:0xE8 mapped:0x80035750
 void fn_80035750(SabFile* sab, void* tex, s16 id) {
     s32 i = findFreeSab();
@@ -590,6 +597,9 @@ void fn_800356B8(void) {
     lbl_803C5F74[0] = 0;
 }
 
+// Differs: `width >> 1` and `height >> 1` give srawi where the target has srwi (still a signed
+// conversion), the lbl_800F78E0 base sits in r31 with `addi r24,r31,0`, and the
+// sab/part registers in the _AC loop.
 // .text:0x80035168 size:0x550 mapped:0x80035168
 void fn_80035168(void) {
     Mtx* depths = lbl_800F78E0;
@@ -598,8 +608,8 @@ void fn_80035168(void) {
     MtxPtr depth;
     u32 color;
     u32 out;
-    Mtx m;
     Mtx tmp;
+    Mtx m;
     s32 j;
     SabFile* sab;
     SabPart* p;
@@ -788,6 +798,8 @@ SpaniObj* fn_80034F50(SpaniDesc* desc) {
     return NULL;
 }
 
+// Differs: the target's desc loop is tested at the top with a `b` back, computes n + i before the
+// test, and has a frame 0x10 larger with r25 saved.
 // .text:0x80034E20 size:0x130 mapped:0x80034E20
 void fn_80034E20(SpaniTask* task, SpaniDesc* desc) {
     s32 n = 0;
