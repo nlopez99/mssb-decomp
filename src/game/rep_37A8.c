@@ -337,7 +337,8 @@ void fn_3_146928(void) {
 
 // .text:0x00146408 size:0x520 mapped:0x8078549C
 // 98.08%: the target keeps the coin loop's &g_Minigame in r26 through the inlined piranha loop
-// (mr r28,r26) for the points loop; this reloads it (see registers.md, "Unsolved").
+// (mr r28,r26) for the points loop; this reloads it (see registers.md, "Unsolved"). Counter
+// types in fn_3_142CA8 and fn_3_143714 and a permuter session did not change it.
 void fn_3_146408(void) {
     if (fn_3_108854() != 0) {
         return;
