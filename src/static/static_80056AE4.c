@@ -4,6 +4,7 @@
 #include "static/spani_default.h"
 #include "static/static_80021188.h"
 #include "static/static_800531D0.h"
+#include "static/static_80062578.h"
 #include "static/mb_subfunc.h"
 #include "static/sub.h"
 #include "string.h"
@@ -74,9 +75,14 @@ extern struct {
 extern struct {
     /* 0x00000 */ u8 _00000[0xCF3B];
     /* 0x0CF3B */ u8 _CF3B;
-    /* 0x0CF3C */ u8 _CF3C[0xCF46 - 0xCF3C];
+    /* 0x0CF3C */ u8 _CF3C[2];
+    /* 0x0CF3E */ u8 _CF3E[2];
+    /* 0x0CF40 */ u8 _CF40[0xCF46 - 0xCF40];
     /* 0x0CF46 */ s8 _CF46[2];
-    /* 0x0CF48 */ u8 _CF48[0xCF63 - 0xCF48];
+    /* 0x0CF48 */ s8 _CF48[2];
+    /* 0x0CF4A */ u8 _CF4A[0xCF52 - 0xCF4A];
+    /* 0x0CF52 */ u8 _CF52[2];
+    /* 0x0CF54 */ u8 _CF54[0xCF63 - 0xCF54];
     /* 0x0CF63 */ u8 _CF63[2];
     /* 0x0CF65 */ u8 _CF65[0xCF70 - 0xCF65];
     /* 0x0CF70 */ u8 _CF70;
@@ -134,6 +140,15 @@ extern MissionText lbl_8010A768[][10];
 extern s32 fn_80042DA8(void* task, s32 index, s32 value);
 extern void fn_8000FE08(s32 id, s32 arg1, s32 arg2);
 
+typedef struct OrderSlot {
+    /* 0x0 */ u8 _0;
+    /* 0x1 */ u8 _1;
+    /* 0x2 */ s8 _2;
+    /* 0x3 */ u8 _3;
+} OrderSlot; // size: 0x4
+
+extern OrderSlot lbl_80354720[2][9];
+
 extern MenuScreen lbl_800FEF70[];
 extern SpaniSlot lbl_80371C30[];
 extern SpaniTask* lbl_803CC1B8;
@@ -145,12 +160,20 @@ static inline BOOL isAnimDone(void* task, s32 id, s32 frame) {
     return fn_80042DA8(task, id, frame) != 0;
 }
 
+static inline BOOL isLockState(s32 lock, s32 state) {
+    return lock == state ? TRUE : FALSE;
+}
+
 static inline SpaniObj* getSpaniObj(SpaniTask* task, s32 id) {
     return lbl_80371C30[task->_14 + id].obj;
 }
 
 static inline SpaniObj* getTeamObj(SpaniTask* task, s32 offset, s32 id) {
     return lbl_80371C30[task->_14 + id + offset].obj;
+}
+
+static inline SpaniObj* getGridObj(SpaniTask* task, s32 col, s32 row, s32 id) {
+    return lbl_80371C30[task->_14 + id + col + row].obj;
 }
 
 static inline void setScreen(s16 id) {
@@ -226,15 +249,50 @@ void fn_8005EC88(void) {
 }
 
 // .text:0x8005E9D8 size:0x2B0
-void fn_8005E9D8(void) {
+void fn_8005E9D8(SpaniTask* task, s32 team) {
+    u8 cur;
+    s8 slot;
+
+    if (lbl_803297E0._CF46[team] != lbl_803297E0._CF48[team]) {
+        fn_8005DE14(task, team);
+        if (isLockState(lbl_803C66B0.rows[9].port[team], 1)) {
+            fn_80062674(team);
+            lbl_803C66B0.rows[9].port[team] = 2;
+        }
+    } else if (lbl_803297E0._CF3C[team] != 0) {
+        if (isLockState(lbl_803C66B0.rows[9].port[team], 0)) {
+            cur = lbl_803297E0._CF3E[team];
+            slot = lbl_80354720[team][cur]._2;
+            if (lbl_803297E0._CF52[team] == 0) {
+                getGridObj(task, cur, team * 9, 0x1C)->_5C = 0xA0000;
+                getGridObj(task, cur, team * 9, 0x1C)->_68 = 0;
+                getGridObj(task, cur, team * 9, 0x40)->_5C = 0;
+                getGridObj(task, cur, team * 9, 0x40)->_68 = 1;
+            } else if (g_d_GameSettings._06 != 2) {
+                getGridObj(task, slot, team * 9, 0x10A)->_5C = 0;
+                getGridObj(task, slot, team * 9, 0x10A)->_68 = 1;
+                getGridObj(task, slot, team * 9, 0xF8)->_5C = 0;
+                getGridObj(task, slot, team * 9, 0xF8)->_68 = 1;
+            } else {
+                getTeamObj(task, slot, 0x23)->_5C = 0;
+                getTeamObj(task, slot, 0x23)->_68 = 1;
+                getTeamObj(task, slot, 0x1A)->_5C = 0;
+                getTeamObj(task, slot, 0x1A)->_68 = 1;
+            }
+            lbl_803C66B0.step[team] = 0;
+            lbl_803C66B0.rows[9].port[team] = 2;
+        }
+    } else if (lbl_803297E0._CF3C[team] == 0) {
+        fn_8005CCE4(task, team);
+    }
 }
 
 // .text:0x8005DE14 size:0xBC4
-void fn_8005DE14(void) {
+void fn_8005DE14(SpaniTask* task, s32 team) {
 }
 
 // .text:0x8005CCE4 size:0x1130
-void fn_8005CCE4(void) {
+void fn_8005CCE4(SpaniTask* task, s32 team) {
 }
 
 // .text:0x8005C830 size:0x4B4
@@ -242,7 +300,40 @@ void fn_8005C830(void) {
 }
 
 // .text:0x8005C5C4 size:0x26C
-void fn_8005C5C4(void) {
+void fn_8005C5C4(SpaniTask* task, s32 team) {
+    if (isLockState(lbl_803C66B0.rows[9].port[team], 0)) {
+        if (g_d_GameSettings._06 == 2) {
+            getSpaniObj(task, 0)->_5C = 20 << 16;
+            getSpaniObj(task, 0)->_68 = 4;
+        } else if (g_d_GameSettings.GameModeSelected == 5) {
+            getSpaniObj(task, 0)->_5C = 20 << 16;
+            getSpaniObj(task, 1)->_5C = 20 << 16;
+            getSpaniObj(task, 0)->_68 = 4;
+            getSpaniObj(task, 1)->_68 = 4;
+        } else if (g_d_GameSettings._10 == 0) {
+            if (team != 0) {
+                getSpaniObj(task, team)->_5C = 20 << 16;
+                getSpaniObj(task, team)->_68 = 4;
+            } else {
+                getSpaniObj(task, team)->_5C = 30 << 16;
+                getSpaniObj(task, team)->_68 = 1;
+            }
+        } else {
+            if ((getSpaniObj(task, team)->_5C >> 16) == 30) {
+                getSpaniObj(task, team)->_5C = 30 << 16;
+                getSpaniObj(task, team)->_68 = 1;
+            } else {
+                getSpaniObj(task, team)->_5C = 20 << 16;
+                getSpaniObj(task, team)->_68 = 4;
+            }
+        }
+        getTeamObj(task, team, 0x16)->_5C = 10 << 16;
+        getTeamObj(task, team, 0x18)->_68 = 4;
+        getTeamObj(task, team, 0x12)->_5C = 20 << 16;
+        getTeamObj(task, team, 0x12)->_68 = 1;
+        fn_800626EC(team);
+        lbl_803C66B0.rows[9].port[team] = 1;
+    }
 }
 
 // .text:0x8005C2B0 size:0x314
