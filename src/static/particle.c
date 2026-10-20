@@ -2309,27 +2309,27 @@ u8 fn_8002A85C(Emitter* e, GlowParticle* p)
 }
 
 // .text:0x8002A1CC size:0x690
-// 94.95%: first draft; the head's parameter loads come in another order and the
+// 95.07%: first draft; the head's parameter loads come in another order and the
 // emitter and particle sit one saved register off. Not yet tuned.
 void fn_8002A1CC(Vec* pos, StreakParams* params)
 {
     Emitter* e = fn_80033A24(fn_80029CC8, 0x80, 0, params->count, TRUE, 11);
     StreakParticle* p;
+    f32 step;
+    f32 yaw;
     f32 speed;
-    f32 speedRange;
     f32 accel;
-    f32 accelRange;
     f32 width;
     f32 widthRange;
-    f32 length;
-    f32 lengthRange;
     f32 widthEnd;
     f32 widthEndRange;
+    f32 length;
+    f32 lengthRange;
     f32 lengthEnd;
     f32 lengthEndRange;
-    f32 yaw;
     f32 pitch;
-    f32 step;
+    f32 accelRange;
+    f32 speedRange;
     s32 n;
     s32 lifeRange;
 
