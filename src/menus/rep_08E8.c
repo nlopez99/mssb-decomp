@@ -505,7 +505,7 @@ extern void fn_800B4AFC(MenuActor08E8* actor, u8 flag);
 extern void Set_FUN_800b2b6c(MenuActor08E8* actor, void* arg1);
 extern void fn_800BDA24(MenuActorRef08E8* ref);
 extern u8 fn_800B3C04(s32 arg0, MenuActor08E8* actor, Mtx mtx);
-extern void fn_80024DB0(MenuAnimState08E8* anim);
+extern int fn_80024DB0(MenuAnimState08E8* anim);
 extern s32 fn_80062890(s32 id);
 extern s32 fn_8006C5CC(void);
 extern s32 fn_8006C6C4(void);

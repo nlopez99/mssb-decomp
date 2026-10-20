@@ -16,9 +16,7 @@ Vec fn_3_FC2FC(Vec pos, Vec anchor, Vec target, f32 scale, f32 stiffness, f32 da
 void fn_3_FC448(void);
 void fn_3_FC938(void);
 int fn_3_FCE38(int i, f32 time);
-void fn_3_FCEAC(void);
 int fn_3_FCEB0(f32 time);
-void fn_3_FCF20(void);
 void fn_3_FCF24(void);
 void fn_3_FD408(u32 idx, Vec* pos, f32* angles);
 void fn_3_FD4DC(void);
@@ -53,7 +51,7 @@ void fn_3_105BD8(struct Unk3090View* view);
 u32 fn_3_105C28(struct Unk3090Track* track, u32 time);
 void fn_3_105C84(struct Unk3090Track* track);
 void fn_3_105CDC(void);
-void fn_3_105E00(int x, int y, int w, int h);
+void fn_3_105E00(s16 x, s16 y, s16 w, s16 h);
 void fn_3_106014(f32 x, f32 y, f32 z);
 void fn_3_1060D8(void);
 BOOL fn_3_10617C(int player, int bone, Vec* out);

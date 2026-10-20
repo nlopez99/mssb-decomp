@@ -103,7 +103,7 @@ extern UnkTask3F60* lbl_803CC1B8;
 
 extern s32 fn_8005268C(void);
 extern camera_803c639c_s* fn_80052734(s32);
-extern void fn_80024DB0(UnkAnim3F60*);
+extern int fn_80024DB0(UnkAnim3F60*);
 extern void fn_80024FA4(UnkModel3F60*, void*, UnkAnim3F60*, s32);
 extern void fn_800A7D4C(s32, void*);
 extern void fn_800B0A14_removeQueue(void);

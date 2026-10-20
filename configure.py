@@ -618,6 +618,20 @@ config.libs = [
         extra_cflags=["-str noreadonly"]
     ),
     {
+        "lib": "static",
+        "mw_version": "GC/2.6",
+        "cflags": cflags_base + ["-O4,p", "-sym on", "-inline deferred"],
+        "host": False,
+        "objects": [
+            Object(NonMatching, "static/sub.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(NonMatching, "static/anim.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(NonMatching, "static/lookat.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(NonMatching, "static/particle.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(NonMatching, "static/spani_default.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(NonMatching, "static/physics.c", extra_cflags=["-cpp_exceptions on"]),
+        ],
+    },
+    {
         "lib": "unk",
         "mw_version": "GC/2.6",
         "cflags": cflags_base + ["-O4,p", "-sym on"],
@@ -751,7 +765,7 @@ config.libs = [
             Object(Matching, "game/rep_28A8.c"),
             Object(Matching, "game/rep_2940.c"),
             Object(NonMatching, "game/rep_2998.c"),
-            Object(NonMatching, "game/sta_c6.c"),
+            Object(Matching, "game/sta_c6.c"),
             Object(NonMatching, "game/rep_2BF8.c"),
             Object(NonMatching, "game/sta_c5.c"),
             Object(NonMatching, "game/sta_c4.c"),

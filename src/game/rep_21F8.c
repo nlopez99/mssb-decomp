@@ -6,6 +6,7 @@
 #include "Dolphin/gx.h"
 #include "Dolphin/mtx.h"
 #include "game/rep_1E08.h"
+#include "static/particle.h"
 
 typedef struct UnkKey21F8 {
     /* 0x0 */ f32 _0;
@@ -118,8 +119,6 @@ extern struct {
     /* 0x000 */ u8 _000[0x4];
     /* 0x004 */ void* _004[1];
 } lbl_3_common_bss_35154;
-
-extern void fn_80034120(Mtx m);
 
 static u8 lbl_3_bss_9F34;
 static f32 lbl_3_bss_9F30;

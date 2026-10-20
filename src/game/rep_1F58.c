@@ -167,7 +167,7 @@ static Rep1F58Effect lbl_3_data_174A8[2][2] = {
 extern UnkActor1F58* fn_80011570(void);
 extern s32 fn_8005268C(void);
 extern UnkCamera1F58* fn_80052734(s32);
-extern void fn_80024DB0(UnkAnim1F58*);
+extern int fn_80024DB0(UnkAnim1F58*);
 extern void fn_80024FA4(UnkModelRef1F58*, u32, UnkAnim1F58*, s32);
 extern void fn_80027674(VecXYZ*, const VecXYZ*, UnkSlotParams*, f32, u8);
 extern void fn_80027918(u8, f32);

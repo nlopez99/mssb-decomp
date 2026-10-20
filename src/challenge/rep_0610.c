@@ -7,6 +7,7 @@
 #include "Dolphin/gx.h"
 #include "C3/control.h"
 #include "string.h"
+#include "static/lookat.h"
 
 typedef struct LITObj {
     /* 0x00 */ u8 _00[0x40];
@@ -250,7 +251,7 @@ extern void fn_80024FA4(Unk0060Elem* model, void* anim, UnkTimer0610* timer, s32
 extern void fn_8003414C(Mtx m);
 extern void fn_80038EC4(Unk8036E548Actor* actor, Unk0060Elem* model, s32 arg2);
 extern void fn_800BD8C4(Unk0060* model, Mtx m);
-extern void fn_800330CC(s32 arg0, u32 arg1, Vec* arg2, Vec* arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7);
+extern void fn_800330CC(s32 arg0, u32 arg1, Vec* arg2, Vec* arg3, f32 arg4, s32 arg5, s32 arg6, f32 arg7);
 extern u32 fn_80024D2C(UnkTimer0610* timer);
 
 extern struct {
@@ -299,7 +300,6 @@ extern void fn_800AD038(void*);
 extern void fn_800A7D4C(s32, void*);
 extern void fn_800324EC(u16, s32, s32, UnkBurst0610*);
 extern void fn_8002955C(Vec* pos, s32 arg1, UnkBurst0610* burst);
-extern void fn_80026134(s32, Vec*);
 extern void fn_80026130(s32, void*, f32);
 extern void fn_800385F0(struct Unk30C0*, f32, f32, f32, f32);
 extern void fn_80037AA0(struct Unk30C0*, s32, void (*)(s32), u16, UnkTimer0610*);
@@ -325,7 +325,7 @@ extern u8 fn_800B3C04(s32 arg0, UnkList0610* actor, Mtx mtx);
 extern void fn_800B2B74(UnkList0610* list, u16 id);
 extern void fn_80052D70(UnkTask0610* task);
 extern void makeLookAtMatrix(Mtx m, const Vec* camPos, const Vec* camUp, const Vec* target);
-extern void fn_8002F1AC(Vec* pos, u32 id);
+extern BOOL fn_8002F1AC(Vec* pos, u32 id);
 extern void fn_8002F258(Vec* pos, u32 id, void* params);
 extern void minigamesSetSomePointers(void);
 extern void fn_800BD2CC(s32 arg0, GXColor color);
@@ -2416,6 +2416,16 @@ static u8 lbl_1_bss_3078;
 static s32 lbl_1_bss_3074;
 static u8 lbl_1_bss_3070;
 
+static inline void setElemAnim(Unk0060Elem* elem, UnkAnimRef0610* anim, u16 frame) {
+    elem->_04 = anim;
+    elem->_0E = frame;
+    elem->_5C = 0.0f;
+    elem->_58 = 1;
+    elem->_59 = anim != NULL;
+    elem->_5A = anim != NULL;
+    elem->_60 = 0.0f;
+}
+
 // .text:0x00017D90 size:0x16C
 void fn_1_17D90(void) {
     fn_800AD038(lbl_80366158._08);
@@ -2513,18 +2523,9 @@ void fn_1_176EC(void) {
 }
 
 // .text:0x00016978 size:0xD74
-// Registers differ in case 4 (lbl_1_bss_3074 and the slot product swap r7/r8)
-// and in case 26's slot loop (counter, source and destination pointers)
 void fn_1_16978(void) {
-    s16 frame;
     s32 i;
-    u8 idx;
-    UnkSlot0610* src;
-    s16 animId;
-    UnkSlotSet0610* set;
     void* tex;
-    UnkSlotState0610* dst;
-    UnkAnimRef0610* anim;
     u32* table;
     void* geo;
     void* layout;
@@ -2553,9 +2554,8 @@ void fn_1_16978(void) {
         }
         break;
     case 4:
-        lbl_8036E548._0C04[lbl_1_bss_5F73]._008 = ARAMTransfer(
-            &lbl_1_data_2398[lbl_1_bss_3074 + lbl_1_bss_68FC._40[lbl_1_bss_5F73] * 19 + lbl_1_bss_6940[lbl_1_bss_5F73]._46],
-            0, 0, 0);
+        i = lbl_1_bss_68FC._40[lbl_1_bss_5F73] * 19 + lbl_1_bss_6940[lbl_1_bss_5F73]._46;
+        lbl_8036E548._0C04[lbl_1_bss_5F73]._008 = ARAMTransfer(&lbl_1_data_2398[lbl_1_bss_3074 + i], 0, 0, 0);
         lbl_803CC1B8->_10++;
         break;
     case 5:
@@ -2723,35 +2723,8 @@ void fn_1_16978(void) {
         }
         break;
     case 26:
-        idx = lbl_1_bss_5F73;
-        set = lbl_1_data_F4D4._4;
         table = lbl_8036E548._2C84;
-        i = 8;
-        while (i-- != 0) {
-            src = &set->_10[i];
-            dst = &lbl_1_bss_3218[i];
-            if (src->_0 != 0) {
-                animId = src->_2;
-                dst->_0 = animId;
-                frame = src->_4;
-                anim = lbl_8036E548._0C04[idx]._010[animId];
-                dst->_2 = frame;
-                dst->_6 = src->_1;
-                if (src->_6 == -2) {
-                    if (anim != NULL) {
-                        dst->_4 = anim->_4[frame]._4->_0;
-                    } else {
-                        dst->_4 = 0;
-                    }
-                } else {
-                    dst->_4 = src->_6;
-                }
-            } else {
-                dst->_0 = -1;
-                dst->_6 = 0;
-                dst->_4 = 0;
-            }
-        }
+        fn_1_D7A4(0);
         for (i = 0; i < 80; i++) {
             lbl_8036E548._2C84[i] = (u32)table + table[i];
         }
@@ -3572,7 +3545,8 @@ void fn_1_14710(Unk8036E548Actor* arg0) {
 
 // .text:0x000135C0 size:0x1150
 // Registers differ throughout (the target keeps the bss base in r29 and actor in
-// r31), and the four-entry pose loop is scheduled differently
+// r31); the 16-entry relocation loop reuses i's 0 as its offset in the target,
+// and the four-entry pose loop is scheduled differently
 void fn_1_135C0(void) {
     s32 i;
     s32 j;
@@ -3584,11 +3558,8 @@ void fn_1_135C0(void) {
     void* layout;
     void* geo;
     void* skn;
-    void* model;
     UnkAnimRef0610* anim;
     Unk0060Elem* elem;
-    u32 flag;
-    u8 frame;
 
     fn_80023B04(13);
     lbl_8036E548._0060 = ActorObjectInitTable(1);
@@ -3661,17 +3632,7 @@ void fn_1_135C0(void) {
         }
     }
     fn_8002399C(lbl_8036E548._0060->_34, 0, 0, layout, anim, skn);
-    model = lbl_8036E548._0C04[lbl_1_bss_5F73]._010[lbl_1_bss_6940[lbl_1_bss_5F73]._44];
-    frame = lbl_1_bss_6940[lbl_1_bss_5F73]._45;
-    elem = &lbl_8036E548._0060->_34[lbl_1_bss_5F73];
-    elem->_04 = model;
-    elem->_0E = frame;
-    flag = model != NULL;
-    elem->_5C = 0.0f;
-    elem->_58 = 1;
-    elem->_59 = flag;
-    elem->_5A = flag;
-    elem->_60 = 0.0f;
+    setElemAnim(&lbl_8036E548._0060->_34[lbl_1_bss_5F73], lbl_8036E548._0C04[lbl_1_bss_5F73]._010[lbl_1_bss_6940[lbl_1_bss_5F73]._44], lbl_1_bss_6940[lbl_1_bss_5F73]._45);
     lbl_1_bss_67CC[0] = lbl_8036E548._0C04[0]._008->_10;
     if (lbl_1_bss_67CC[0] != NULL && lbl_1_bss_6940[lbl_1_bss_5F73]._46 == 0) {
         fn_80025DDC(lbl_1_bss_67CC[0]);
@@ -4584,7 +4545,6 @@ void fn_1_10458(void) {
 }
 
 // .text:0x00010044 size:0x414
-// Only fn_800330CC's argument setup differs: the target loads r8 (0) before r7
 void fn_1_10044(void) {
     Mtx rotX;
     Mtx rotY;
@@ -4664,8 +4624,8 @@ void fn_1_10044(void) {
             PSMTXRotRad(rotY, 'y', MTXDegToRad(360.0 * lbl_1_data_AE12 / 4096.0));
             PSMTXConcat(rotY, rotX, rotX);
             PSMTXMultVec(rotX, &lbl_1_data_AE14, &lbl_1_data_AE14);
-            fn_800330CC(lbl_1_data_ADF4, lbl_1_data_ADF0, &lbl_1_data_AE04, &lbl_1_data_AE14, lbl_1_data_ADFC, 0,
-                        lbl_1_data_ADF8, lbl_1_data_AE00);
+            fn_800330CC(lbl_1_data_ADF4, lbl_1_data_ADF0, &lbl_1_data_AE04, &lbl_1_data_AE14, lbl_1_data_ADF8,
+                        lbl_1_data_ADFC, 0, lbl_1_data_AE00);
         }
     } else if (lbl_803C77B8[0]._04 & 0x200) {
         lbl_1_bss_307C = 0;
@@ -5085,8 +5045,9 @@ void fn_1_F040(void) {
 }
 
 // .text:0x0000ECF8 size:0x348
-// Inlines fn_1_D300 (see there); registers and the search loops' scheduling
-// differ
+// Inlines fn_1_D300. The calls' _0060->_34[idx]._00 loads as add+lwz 52, the
+// target's addi+lwzx; *(UnkList0610**)&...->_34[idx] (or a no-op Unk0060* cast)
+// plus idA/idB below `second` matches, so the original's element type differs
 void fn_1_ECF8(s32 idx, s32 slot, s32 flag) {
     u16 idA;
     u16 idB;
@@ -5219,8 +5180,8 @@ void fn_1_E8D4(void) {
 }
 
 // .text:0x0000E098 size:0x83C
-// Registers only: case 10 and the column loop use one register fewer than the
-// target (r21)
+// Registers only: case 10's task pointer and timer counter, and the column
+// loop's pad and pointer registers
 void fn_1_E098(void) {
     UnkSlotState0610* st = lbl_1_bss_3218;
     s32 i;
@@ -5255,34 +5216,20 @@ void fn_1_E098(void) {
             break;
         case 10:
             if (i == lbl_1_bss_30B6 && (lbl_803C77B8[0]._02 & 0x100)) {
-                Unk0060Elem* elem;
-                UnkAnimRef0610* anim;
-                u8* frame;
-                u8* animId;
                 UnkTaskState0610* task = (UnkTaskState0610*)lbl_803CC1B8;
-                u8 anim45;
+                s32 k;
                 task->_00 = fn_1_DE1C;
                 task->_15 = 0;
-                animId = &lbl_1_bss_6940[lbl_1_bss_5F73]._44;
-                frame = &lbl_1_bss_6940[lbl_1_bss_5F73]._45;
-                *animId = lbl_1_bss_3218[task->_15]._0;
-                *frame = lbl_1_bss_3218[task->_15]._2;
-                anim = lbl_8036E548._0C04[lbl_1_bss_5F73]._010[*animId];
-                elem = &lbl_8036E548._0060->_34[lbl_1_bss_5F73];
-                anim45 = *frame;
-                elem->_04 = anim;
-                elem->_0E = anim45;
-                elem->_5C = 0.0f;
-                elem->_58 = 1;
-                elem->_5A = elem->_59 = anim != NULL;
-                elem->_60 = 0.0f;
-                j = 5;
-                while (j--) {
-                    if (lbl_1_bss_3258[task->_15][j]._08 != 0) {
-                        lbl_1_bss_67B8[j] = &lbl_1_bss_3258[task->_15][i];
-                        lbl_1_bss_67B8[j]->_00 = 0.0f;
+                lbl_1_bss_6940[lbl_1_bss_5F73]._44 = lbl_1_bss_3218[task->_15]._0;
+                lbl_1_bss_6940[lbl_1_bss_5F73]._45 = lbl_1_bss_3218[task->_15]._2;
+                setElemAnim(&lbl_8036E548._0060->_34[lbl_1_bss_5F73], lbl_8036E548._0C04[lbl_1_bss_5F73]._010[lbl_1_bss_6940[lbl_1_bss_5F73]._44], lbl_1_bss_6940[lbl_1_bss_5F73]._45);
+                k = 5;
+                while (k--) {
+                    if (lbl_1_bss_3258[task->_15][k]._08 != 0) {
+                        lbl_1_bss_67B8[k] = &lbl_1_bss_3258[task->_15][i];
+                        lbl_1_bss_67B8[k]->_00 = 0.0f;
                     } else {
-                        lbl_1_bss_67B8[j] = NULL;
+                        lbl_1_bss_67B8[k] = NULL;
                     }
                 }
                 fn_1_D300(&lbl_8036E548._0C04[lbl_1_bss_5F73]);
@@ -5464,16 +5411,9 @@ void fn_1_DE1C(void) {
 }
 
 // .text:0x0000D9B8 size:0x464
-// Registers only: the target keeps lbl_1_bss_5F73 in r29 and elem in r12, and
-// indexes the slot's state with lbzx
 void fn_1_D9B8(void) {
     UnkTaskState0610* task;
     UnkList0610* list;
-    Unk0060Elem* elem;
-    UnkAnimRef0610* anim;
-    Unk6940* state;
-    Unk8036E548Actor* actor;
-    u8 anim45;
     f32 start;
     s16 limit;
     s32 id;
@@ -5497,19 +5437,9 @@ void fn_1_D9B8(void) {
                 task->_15 = 0;
             }
         } while ((id = lbl_1_bss_3218[task->_15]._0) < 0);
-        state = &lbl_1_bss_6940[lbl_1_bss_5F73];
-        actor = &lbl_8036E548._0C04[lbl_1_bss_5F73];
         lbl_1_bss_6940[lbl_1_bss_5F73]._44 = id;
-        state->_45 = lbl_1_bss_3218[task->_15]._2;
-        anim = actor->_010[state->_44];
-        elem = &lbl_8036E548._0060->_34[lbl_1_bss_5F73];
-        anim45 = state->_45;
-        elem->_04 = anim;
-        elem->_0E = anim45;
-        elem->_5C = 0.0f;
-        elem->_58 = 1;
-        elem->_5A = elem->_59 = anim != NULL;
-        elem->_60 = 0.0f;
+        lbl_1_bss_6940[lbl_1_bss_5F73]._45 = lbl_1_bss_3218[task->_15]._2;
+        setElemAnim(&lbl_8036E548._0060->_34[lbl_1_bss_5F73], lbl_8036E548._0C04[lbl_1_bss_5F73]._010[lbl_1_bss_6940[lbl_1_bss_5F73]._44], lbl_1_bss_6940[lbl_1_bss_5F73]._45);
         start = lbl_1_bss_67B8[0]->_00;
         i = 5;
         while (i--) {
@@ -5551,13 +5481,13 @@ void fn_1_D8A0(void) {
 
 // .text:0x0000D7A4 size:0xFC
 void fn_1_D7A4(s32 arg0) {
+    UnkAnimRef0610* ref;
     UnkSlotSet0610* set = &lbl_1_data_F4D4._4[arg0];
     s32 i = 8;
     while (i--) {
         if (set->_10[i]._0 != 0) {
             s16 id;
             s16 frame;
-            UnkAnimRef0610* ref;
             lbl_1_bss_3218[i]._0 = id = set->_10[i]._2;
             ref = lbl_8036E548._0C04[lbl_1_bss_5F73]._010[id];
             lbl_1_bss_3218[i]._2 = frame = set->_10[i]._4;
@@ -5683,7 +5613,9 @@ void fn_1_D4BC(void) {
 }
 
 // .text:0x0000D300 size:0x1BC
-// Only the epilogue differs: the target restores r0 before r28-r31
+// Only the epilogue differs: the target restores r0 before r28-r31. The permuter
+// matched it with a no-op `& 0xFFFFFFFFFFFFFFFFu` on the _C4 line's index (same
+// body); store orders do not
 void fn_1_D300(Unk8036E548Actor* arg0) {
     s32 first;
     s32 second;
@@ -5756,8 +5688,9 @@ void fn_1_D13C(void) {
 }
 
 // .text:0x0000CDC8 size:0x374
-// _0060->_34[idx]._00 loads as add+lwz 52 where the target forms idx*144+52 and
-// uses lwzx (fn_1_D13C gets it right); the setup block is scheduled differently
+// _0060->_34[idx]._00 loads as add+lwz 52 where the target uses addi+lwzx, as in
+// fn_1_ECF8 (*(UnkList0610**)&...->_34[idx] gives it: 89.46%); the setup block
+// is scheduled differently
 void fn_1_CDC8(void) {
     UnkList0610** lists[2];
     UnkTimer0610* timers[2];

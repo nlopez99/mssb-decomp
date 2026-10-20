@@ -141,7 +141,7 @@ extern struct {
     /* 0x2C50 */ Unk3090Model* _2C50[9];
 } lbl_8036E548;
 
-extern struct {
+extern struct Unk3090Fielder {
     /* 0x000 */ Vec _000;
     /* 0x00C */ f32 _00C;
     /* 0x010 */ u8 _010[0x48 - 0x10];
@@ -1114,12 +1114,18 @@ int fn_3_10698C(void** list) {
     return count;
 }
 
-// 99.57%: the target tests the id with `extsh.` once (cmpwi here) and swaps r4/r5/r6 in the
-// fielder branch's angle lookup; with an s16 id (99.34%) the runner branch's registers differ.
+static inline void getAnimPosition(s32 id, Vec* pos) {
+    memset(pos, 0, sizeof(Vec));
+    if (!getAnimRelatedCoordinates(id, lbl_3_common_bss_DE94._0000->_0938, (VecXYZ*)pos)) {
+        memset(pos, 0, sizeof(Vec));
+        getAnimRelatedCoordinates(id, 4, (VecXYZ*)pos);
+    }
+}
+
 // .text:0x00106270 size:0x71C mapped:0x80745304
 void fn_3_106270(Vec* out) {
     g_Stats_s* stats = &g_Stats;
-    int id = lbl_3_common_bss_DE94._0000->_0946;
+    s16 id = lbl_3_common_bss_DE94._0000->_0946;
     Vec pos;
     InMemRunnerType* runner;
 
@@ -1135,11 +1141,7 @@ void fn_3_106270(Vec* out) {
                     lbl_3_common_bss_DE94._0000->_0938 = lbl_3_data_3B4C[g_Fielders[id]._17A];
                     lbl_3_common_bss_DE94._0000->_0950 = 0;
                 }
-                memset(&pos, 0, sizeof(Vec));
-                if (!getAnimRelatedCoordinates(id, lbl_3_common_bss_DE94._0000->_0938, (VecXYZ*)&pos)) {
-                    memset(&pos, 0, sizeof(Vec));
-                    getAnimRelatedCoordinates(id, 4, (VecXYZ*)&pos);
-                }
+                getAnimPosition(id, &pos);
                 if (lbl_3_common_bss_DE94._0000->_09B7 == 0) {
                     if (lbl_3_common_bss_DE94._0000->_0938 != lbl_3_common_bss_DE94._0000->_093C ||
                         lbl_3_common_bss_DE94._0000->_0948 != lbl_3_common_bss_DE94._0000->_0946 ||
@@ -1161,8 +1163,8 @@ void fn_3_106270(Vec* out) {
                 }
                 if (stats->replayInd != 0 && stats->_3C == 7) {
                     out->y = -1.0f * out->y + g_Fielders[id]._00C + lbl_3_data_1DB00[lbl_3_common_bss_DE94._0000->_094C].y;
-                    out->x += lbl_3_data_1DB00[lbl_3_common_bss_DE94._0000->_094C].x;
-                    out->z += lbl_3_data_1DB00[lbl_3_common_bss_DE94._0000->_094C].z;
+                    out->x = out->x + lbl_3_data_1DB00[lbl_3_common_bss_DE94._0000->_094C].x;
+                    out->z = out->z + lbl_3_data_1DB00[lbl_3_common_bss_DE94._0000->_094C].z;
                 } else {
                     out->y = -1.0f * pos.y + g_Fielders[id]._00C + lbl_3_data_1DB00[lbl_3_common_bss_DE94._0000->_094C].y;
                     out->x = pos.x + lbl_3_data_1DB00[lbl_3_common_bss_DE94._0000->_094C].x;
@@ -1182,11 +1184,7 @@ void fn_3_106270(Vec* out) {
                     lbl_3_common_bss_DE94._0000->_0938 = lbl_3_data_3B4C[runner->charID];
                     lbl_3_common_bss_DE94._0000->_0950 = 0;
                 }
-                memset(&pos, 0, sizeof(Vec));
-                if (!getAnimRelatedCoordinates(id, lbl_3_common_bss_DE94._0000->_0938, (VecXYZ*)&pos)) {
-                    memset(&pos, 0, sizeof(Vec));
-                    getAnimRelatedCoordinates(id, 4, (VecXYZ*)&pos);
-                }
+                getAnimPosition(id, &pos);
                 pos.x -= runner->position.x;
                 pos.y -= runner->position.y;
                 pos.z -= runner->position.z;
@@ -1278,12 +1276,12 @@ void fn_3_106014(f32 x, f32 y, f32 z) {
     }
 }
 
-// 98.12%: registers only in the vertex writes (FIFO base r7, colour bytes r6/r5/r4 and the
-// sums x + w, y + h in r3/r0 in the target).
 // .text:0x00105E00 size:0x214 mapped:0x80744E94
-void fn_3_105E00(int x, int y, int w, int h) {
+void fn_3_105E00(s16 x, s16 y, s16 w, s16 h) {
     Mtx44 proj;
     Mtx mtx;
+    s16 right = x + w;
+    s16 bottom = y + h;
 
     C_MTXOrtho(proj, 0.0f, 448.0f, 0.0f, 640.0f, 0.0f, -100.0f);
     GXSetProjection(proj, GX_ORTHOGRAPHIC);
@@ -1308,18 +1306,15 @@ void fn_3_105E00(int x, int y, int w, int h) {
     GXBegin(GX_QUADS, GX_VTXFMT0, 4);
     GXPosition2s16(x, y);
     GXColor4u8(0, 255, 0, 200);
-    GXPosition2s16(x + w, y);
+    GXPosition2s16(right, y);
     GXColor4u8(0, 255, 0, 200);
-    GXPosition2s16(x + w, y + h);
+    GXPosition2s16(right, bottom);
     GXColor4u8(0, 255, 0, 200);
-    GXPosition2s16(x, y + h);
+    GXPosition2s16(x, bottom);
     GXColor4u8(0, 255, 0, 200);
     GXEnd();
 }
 
-// 94.52%: the second division's mulhw and its addi 400 come one slot later in the target.
-// With fn_3_105E00 taking s16 parameters (and no casts here) this matches, but fn_3_105E00
-// then sign-extends before its sums and drops to 94.70%.
 // .text:0x00105CDC size:0x124 mapped:0x80744D70
 void fn_3_105CDC(void) {
     Vec* points = lbl_3_common_bss_DE94._0000->_0098;
@@ -1336,7 +1331,7 @@ void fn_3_105CDC(void) {
             if (i == 5) {
                 i = 5;
             }
-            fn_3_105E00((s16)(x / 50 + 150), (s16)(-z / 50 + 400), 2, 2);
+            fn_3_105E00(x / 50 + 150, -z / 50 + 400, 2, 2);
         }
     }
 }
@@ -1446,8 +1441,9 @@ void fn_3_105A10(Vec* out, Vec* from, Vec* to, f32 t) {
     memcpy(out, result, sizeof(Vec));
 }
 
-// 99.75%: registers only in the key search (the walking pointer and stride are r9 and r6
-// in the target, r7 and r10 here).
+// 99.88%: registers only; the target keeps frac in r7 and the key count and next->_00 in r8
+// (swapped here). Every order and type of frac, sec and found gives this; a permuter
+// session found nothing more.
 // .text:0x001054D0 size:0x540 mapped:0x80744564
 void fn_3_1054D0(struct Unk3090Track* track, u32 time, s16 channel) {
     u16 frac = time;
@@ -1456,7 +1452,7 @@ void fn_3_1054D0(struct Unk3090Track* track, u32 time, s16 channel) {
     Unk3090Channel* ch = (Unk3090Channel*)track->_08[channel + 1];
     u8* keys = ch->_0C;
     s32 stride = lbl_3_data_20FC4[ch->_06];
-    Unk3090TrackKey* key = (Unk3090TrackKey*)(keys + (ch->_04 - 1) * stride);
+    Unk3090TrackKey* key = (Unk3090TrackKey*)(keys + (ch->_04 - 1) * lbl_3_data_20FC4[ch->_06]);
     Unk3090TrackKey* next;
 
     if (ch->_04 == 1) {
@@ -1531,9 +1527,6 @@ void fn_3_1054CC(void) {
     return;
 }
 
-// 99.78%: registers only; the key count and seconds take r5 and r4 in the target (swapped
-// here), the key search's pointers r9/r8 (r8/r7 here), and the forward vector rotates f3/f2/f0.
-// Best of every order of the six integer locals.
 // .text:0x00104B3C size:0x990 mapped:0x80743BD0
 void fn_3_104B3C(struct Unk3090Track* track, u32 time, s16 channel, u8 depth, struct Unk3090View* view) {
     Unk3090View child;
@@ -1554,7 +1547,7 @@ void fn_3_104B3C(struct Unk3090Track* track, u32 time, s16 channel, u8 depth, st
     u8* keys = ch->_0C;
     Unk3090TrackKey* key;
     Unk3090TrackKey* next;
-    u32 sec;
+    u16 sec;
     u16 frac;
     s32 stride;
     u32 i;
@@ -1564,8 +1557,8 @@ void fn_3_104B3C(struct Unk3090Track* track, u32 time, s16 channel, u8 depth, st
     if (ch->_00 >= 0 && depth != 0) {
         fn_3_104B3C(track, time, ch->_00, depth - 1, view);
     }
-    stride = lbl_3_data_20FC4[ch->_06];
     sec = time >> 16;
+    stride = lbl_3_data_20FC4[ch->_06];
     frac = time;
     key = (Unk3090TrackKey*)(keys + (ch->_04 - 1) * stride);
     if (ch->_04 != 1 && sec < key->_00) {
@@ -1709,7 +1702,7 @@ void fn_3_104B3C(struct Unk3090Track* track, u32 time, s16 channel, u8 depth, st
         rot[1][0] = axes[1].x;
         rot[1][1] = axes[1].y;
         rot[1][2] = axes[1].z;
-        if (axes[1].x == 0.0f && axes[1].z == 0.0f) {
+        if (rot[1][0] == 0.0f && rot[1][2] == 0.0f) {
             pos.y = 0.0f;
             pos.x = 0.0f;
             pos.z = 1.0f;
@@ -1960,8 +1953,8 @@ void fn_3_103C30(Vec* pos) {
     }
 }
 
-// 99.82%: registers only, in code shared with fn_3_1000D8: the fielder angle sum, the
-// ball-direction atan2 arguments and the dist/delta temporaries of cases 4 to 7.
+// 99.90%: registers only, in code shared with fn_3_1000D8: the fielder angle sum (constant
+// in f0 in the target) and dist in cases 4 to 7 (f4/f3 in the target, f6/f4 here).
 // .text:0x00101CC4 size:0x1F6C mapped:0x80740D58
 void fn_3_101CC4(void) {
     Mtx rot;
@@ -1997,12 +1990,12 @@ void fn_3_101CC4(void) {
             lbl_3_common_bss_DE94._0000->_00D0.y = 0.00001f + angles[1];
             lbl_3_common_bss_DE94._0000->_00D0.z = 0.0f;
             fn_3_103E7C(angles);
-            dx = 100.0f * cosf_kludge(angles[0]) * cosf_kludge(angles[1]);
-            dy = 100.0f * sinf_kludge(angles[1]);
-            dz = 100.0f * sinf_kludge(angles[0]) * cosf_kludge(angles[1]);
-            g_pCamera->_284C.x = g_pCamera->_2858.x + dx;
-            g_pCamera->_284C.y = g_pCamera->_2858.y + dy;
-            g_pCamera->_284C.z = g_pCamera->_2858.z + dz;
+            delta.x = 100.0f * cosf_kludge(angles[0]) * cosf_kludge(angles[1]);
+            delta.y = 100.0f * sinf_kludge(angles[1]);
+            delta.z = 100.0f * sinf_kludge(angles[0]) * cosf_kludge(angles[1]);
+            g_pCamera->_284C.x = g_pCamera->_2858.x + delta.x;
+            g_pCamera->_284C.y = g_pCamera->_2858.y + delta.y;
+            g_pCamera->_284C.z = g_pCamera->_2858.z + delta.z;
             fn_3_1040D8();
             if (g_pCamera->_284C.y < 0.1f) {
                 g_pCamera->_284C.y = 0.1f;
@@ -2061,8 +2054,9 @@ void fn_3_101CC4(void) {
                     offset.z += g_Runners[id - 9].position.z;
                     memcpy(&g_pCamera->_2840, &offset, sizeof(Vec));
                 } else if (id == 13) {
-                    PSMTXRotRad(rot, 'Y', atan2(-(g_Ball.pastCoordinates[0].x - g_Ball.AtBat_Contact_BallPos.x),
-                                                -(g_Ball.pastCoordinates[0].z - g_Ball.AtBat_Contact_BallPos.z)));
+                    dz = g_Ball.pastCoordinates[0].z - g_Ball.AtBat_Contact_BallPos.z;
+                    dx = g_Ball.pastCoordinates[0].x - g_Ball.AtBat_Contact_BallPos.x;
+                    PSMTXRotRad(rot, 'Y', atan2(-dx, -dz));
                     memcpy(&offset, &g_pCamera->_2840, sizeof(Vec));
                     offset.x = g_pCamera->_2840.x - g_Ball.AtBat_Contact_BallPos.x;
                     offset.y = g_pCamera->_2840.y - g_Ball.AtBat_Contact_BallPos.y;
@@ -2232,8 +2226,8 @@ void fn_3_101CC4(void) {
     }
 }
 
-// 99.79%: registers only: the fielder angle sum (1.5707964f + _048), the ball-direction
-// atan2 arguments and the dist/delta temporaries of cases 4 to 7.
+// 99.89%: registers only: the fielder angle sum (constant in f0 in the target) and dist in
+// cases 4 to 7 (f4/f3 in the target, f6/f4 here); a permuter session found nothing.
 // .text:0x001000D8 size:0x1BEC mapped:0x8073F16C
 void fn_3_1000D8(void) {
     Mtx rot;
@@ -2259,12 +2253,12 @@ void fn_3_1000D8(void) {
             angles[0] = fn_3_9FEA8(g_pCamera->_2870);
             angles[1] = fn_3_9FEA8(g_pCamera->_2874);
             fn_3_103E7C(angles);
-            dx = 100.0f * cosf_kludge(angles[0]) * cosf_kludge(angles[1]);
-            dy = 100.0f * sinf_kludge(angles[1]);
-            dz = 100.0f * sinf_kludge(angles[0]) * cosf_kludge(angles[1]);
-            g_pCamera->_284C.x = g_pCamera->_2858.x + dx;
-            g_pCamera->_284C.y = g_pCamera->_2858.y + dy;
-            g_pCamera->_284C.z = g_pCamera->_2858.z + dz;
+            delta.x = 100.0f * cosf_kludge(angles[0]) * cosf_kludge(angles[1]);
+            delta.y = 100.0f * sinf_kludge(angles[1]);
+            delta.z = 100.0f * sinf_kludge(angles[0]) * cosf_kludge(angles[1]);
+            g_pCamera->_284C.x = g_pCamera->_2858.x + delta.x;
+            g_pCamera->_284C.y = g_pCamera->_2858.y + delta.y;
+            g_pCamera->_284C.z = g_pCamera->_2858.z + delta.z;
             fn_3_1040D8();
             break;
         case 2:
@@ -2310,8 +2304,9 @@ void fn_3_1000D8(void) {
                     offset.z += g_Runners[id - 9].position.z;
                     memcpy(&g_pCamera->_2840, &offset, sizeof(Vec));
                 } else if (id == 13) {
-                    PSMTXRotRad(rot, 'Y', atan2(-(g_Ball.pastCoordinates[0].x - g_Ball.AtBat_Contact_BallPos.x),
-                                                -(g_Ball.pastCoordinates[0].z - g_Ball.AtBat_Contact_BallPos.z)));
+                    dz = g_Ball.pastCoordinates[0].z - g_Ball.AtBat_Contact_BallPos.z;
+                    dx = g_Ball.pastCoordinates[0].x - g_Ball.AtBat_Contact_BallPos.x;
+                    PSMTXRotRad(rot, 'Y', atan2(-dx, -dz));
                     memcpy(&offset, &g_pCamera->_2840, sizeof(Vec));
                     offset.x = g_pCamera->_2840.x - g_Ball.AtBat_Contact_BallPos.x;
                     offset.y = g_pCamera->_2840.y - g_Ball.AtBat_Contact_BallPos.y;
@@ -2496,7 +2491,33 @@ BOOL fn_3_100018(void) {
     return lbl_3_common_bss_DE94._0000->_09B6 == 1;
 }
 
-// 99.59%: registers in the captain searches (0x48, 0x49, 0x55, 0x58, 0x59) and 0x2F's modulo.
+// The captain searches compile to the target's register copies only as inlined calls.
+static inline s32 findCaptainIndex(GameControlsStruct* logic, GameInitVariables* settings) {
+    s32 i;
+    s32 found = 0;
+
+    for (i = 0; i < 9; i++) {
+        if (logic->Team_CaptainRosterLoc[settings->humanTeamNumber] == lbl_8036E548._2C50[i]->_257) {
+            found = i;
+        }
+    }
+    return found;
+}
+
+static inline s32 findCaptainKind(GameControlsStruct* logic, GameInitVariables* settings) {
+    s32 i;
+    s32 kind = 0;
+
+    for (i = 0; i < 9; i++) {
+        if (logic->Team_CaptainRosterLoc[settings->humanTeamNumber] == lbl_8036E548._2C50[i]->_257) {
+            kind = lbl_8036E548._2C50[i]->_252;
+        }
+    }
+    return kind;
+}
+
+// 99.82%: registers in the inlined captain searches (0x49, 0x55, 0x58, 0x59): the target gives
+// the walking pointer the lower register and the index the higher one.
 // .text:0x000FDB30 size:0x24E8 mapped:0x8073CBC4
 BOOL fn_3_FDB30(void) {
     Unk3090Task* task = lbl_803CC1B8;
@@ -2933,8 +2954,8 @@ BOOL fn_3_FDB30(void) {
             cam->_0000 += 1;
             continue;
         case 0x2F:
-            lbl_3_common_bss_DE94._0000->_0940 =
-                lbl_3_data_1D980[cam->_0000[1] + lbl_3_common_bss_DE94._0000->_0934 % cam->_0000[2]][cam->_0000[3]];
+            arg = lbl_3_common_bss_DE94._0000->_0934 % cam->_0000[2];
+            lbl_3_common_bss_DE94._0000->_0940 = lbl_3_data_1D980[cam->_0000[1] + arg][cam->_0000[3]];
             lbl_3_common_bss_DE94._0000->_0118 = 0;
             fn_3_FC938();
             cam->_0000 += 4;
@@ -3140,8 +3161,8 @@ BOOL fn_3_FDB30(void) {
             }
             continue;
         case 0x48:
-            if (logic->Team_CaptainRosterLoc[settings->humanTeamNumber] ==
-                lbl_8036E548._2C50[lbl_3_data_1E434[cam->_0000[1]]._14]->_257) {
+            model = lbl_8036E548._2C50[lbl_3_data_1E434[cam->_0000[1]]._14];
+            if (logic->Team_CaptainRosterLoc[settings->humanTeamNumber] == model->_257) {
                 fn_3_24ADC(cam->_0000[1], FALSE);
                 cam->_0000 += 3;
             } else {
@@ -3150,12 +3171,7 @@ BOOL fn_3_FDB30(void) {
             }
             continue;
         case 0x49:
-            found = 0;
-            for (i = 0; i < 9; i++) {
-                if (logic->Team_CaptainRosterLoc[settings->humanTeamNumber] == lbl_8036E548._2C50[i]->_257) {
-                    found = i;
-                }
-            }
+            found = findCaptainIndex(logic, settings);
             lbl_3_common_bss_DE94._0000->_09AA = 0;
             lbl_3_common_bss_DE94._0000->_09B5 = 0;
             lbl_3_common_bss_DE94._0000->_0946 = found;
@@ -3208,12 +3224,7 @@ BOOL fn_3_FDB30(void) {
             continue;
         case 0x55:
         case 0x56:
-            kind = 0;
-            for (i = 0; i < 9; i++) {
-                if (logic->Team_CaptainRosterLoc[settings->humanTeamNumber] == lbl_8036E548._2C50[i]->_257) {
-                    kind = lbl_8036E548._2C50[i]->_252;
-                }
-            }
+            kind = findCaptainKind(logic, settings);
             switch (kind) {
             case 0:
                 arg = 0;
@@ -3247,22 +3258,12 @@ BOOL fn_3_FDB30(void) {
             cam->_0000 += 1;
             continue;
         case 0x58:
-            found = 0;
-            for (i = 0; i < 9; i++) {
-                if (logic->Team_CaptainRosterLoc[settings->humanTeamNumber] == lbl_8036E548._2C50[i]->_257) {
-                    found = i;
-                }
-            }
+            found = findCaptainIndex(logic, settings);
             fn_80011358(found, level);
             cam->_0000 += 1;
             continue;
         case 0x59:
-            found = 0;
-            for (i = 0; i < 9; i++) {
-                if (logic->Team_CaptainRosterLoc[settings->humanTeamNumber] == lbl_8036E548._2C50[i]->_257) {
-                    found = i;
-                }
-            }
+            found = findCaptainIndex(logic, settings);
             fn_80011358(found, 4);
             cam->_0000 += 1;
             continue;
@@ -3333,13 +3334,12 @@ BOOL fn_3_FDB30(void) {
     }
 }
 
-// 98.91%: registers only in case 1 (task->_1E in r7 and the table bases in r5/r6 in the
-// target, r6 and r4/r5 here).
 // .text:0x000FDA1C size:0x114 mapped:0x8073CAB0
 void fn_3_FDA1C(void) {
     Unk3090Task* task = lbl_803CC1B8;
     Unk3090Model* model;
     Unk3090Queue* queue;
+    struct Unk3090Fielder* fielder;
 
     switch (task->_22) {
     case 0:
@@ -3347,7 +3347,8 @@ void fn_3_FDA1C(void) {
         break;
     case 1:
         model = lbl_8036E548._2C50[task->_1E];
-        if (g_Fielders[task->_1E]._218 == 0) {
+        fielder = &g_Fielders[task->_1E];
+        if (fielder->_218 == 0) {
             if (task->_1E < 9) {
                 task->_1E++;
                 task->_22 = 0;
@@ -3554,16 +3555,15 @@ void fn_3_FCF24(void) {
     cam->_003C = total;
 }
 
-// .text:0x000FCF20 size:0x4 mapped:0x8073BFB4
-void fn_3_FCF20(void) {
-    return;
+// fn_3_FCEB0 matches only with the camera taken through an inlined call (found by the
+// permuter as an identity function); fn_3_FCE38 does not change with it.
+static inline lbl_3_common_bss_DE94_s2* getCameraPath(void) {
+    return lbl_3_common_bss_DE94._0000;
 }
 
-// 94.64%: registers only, the same rotation as fn_3_FCE38 (camera r5, key offset r6,
-// key count r7 in the target).
-// .text:0x000FCEB0 size:0x70 mapped:0x8073BF44
+// .text:0x000FCEB0 size:0x74 mapped:0x8073BF44
 int fn_3_FCEB0(f32 time) {
-    lbl_3_common_bss_DE94_s2* cam = lbl_3_common_bss_DE94._0000;
+    lbl_3_common_bss_DE94_s2* cam = getCameraPath();
     int i = 0;
 
     if (time < 0.0) {
@@ -3578,14 +3578,9 @@ int fn_3_FCEB0(f32 time) {
     return i;
 }
 
-// .text:0x000FCEAC size:0x4 mapped:0x8073BF40
-void fn_3_FCEAC(void) {
-    return;
-}
-
-// 94.48%: registers only; the target keeps the camera in r5, the key offset in r6 and
-// the key count in r7, and this build ends with an unreachable blr the target lacks.
-// .text:0x000FCE38 size:0x74 mapped:0x8073BECC
+// 98.00%: registers only; the target keeps the camera in r5, the key offset in r6 and the
+// key count in r7. A permuter session found nothing.
+// .text:0x000FCE38 size:0x78 mapped:0x8073BECC
 int fn_3_FCE38(int i, f32 time) {
     lbl_3_common_bss_DE94_s2* cam = lbl_3_common_bss_DE94._0000;
     int count = cam->_003C;

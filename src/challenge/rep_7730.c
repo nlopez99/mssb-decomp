@@ -112,7 +112,7 @@ extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);
 extern void fn_800B2C08(void* actor, s32 arg1);
 extern void fn_800BD548(void* model, s32 count, ...);
 extern void fn_800BDA24(struct Model7730* model);
-extern void fn_80023F0C(void* src, struct Tex7730* dst, s32 srcX, s32 srcY, s32 w, s32 h, s32 dstX, s32 dstY);
+extern int fn_80023F0C(void* src, struct Tex7730* dst, s32 srcX, s32 srcY, s32 w, s32 h, s32 dstX, s32 dstY);
 extern void gOz_GXSetTexture(s32, s32, s32);
 extern void SetDisplayStateTexture(void* tex, s32, s32);
 extern void fn_800BD670(struct ModelTable7730* table, MtxPtr mtx);

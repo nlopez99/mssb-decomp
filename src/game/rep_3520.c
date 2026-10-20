@@ -25,59 +25,14 @@
 #include "musyx/musyx.h"
 #include "game/rep_3D50.h"
 
-// A spoke's end points, one per player at g_Minigame._1CE8
-typedef struct Unk3520Spoke {
-    /* 0x00 */ VecXYZ start;
-    /* 0x0C */ VecXYZ end;
-} Unk3520Spoke; // size: 0x18
-
-// The pieces along the spokes, at g_Minigame._A8
-typedef struct Unk3520Piece {
-    /* 0x00 */ Vec pos;
-    /* 0x0C */ u8 _0C[0x22 - 0xC];
-    /* 0x22 */ s16 _22;
-    /* 0x24 */ u8 _24[2];
-    /* 0x26 */ u8 _26;
-    /* 0x27 */ u8 _27;
-} Unk3520Piece; // size: 0x28
-
-// The bonus box, at g_Minigame._CB0
-typedef struct Unk3520Box {
-    /* 0x00 */ Vec pos;
-    /* 0x0C */ Vec vel;
-    /* 0x18 */ u8 _18[0x1C - 0x18];
-    /* 0x1C */ s16 _1C;
-    /* 0x1E */ u8 _1E;
-} Unk3520Box; // size: 0x20
-
 // A wall the bounce reflects off
 typedef struct Unk3520Line {
     /* 0x00 */ Vec pos;
     /* 0x0C */ Vec dir;
 } Unk3520Line;
 
-// The coin bag, at g_Minigame._B6C
-typedef struct Unk3520Bag {
-    /* 0x00 */ Vec pos;
-    /* 0x0C */ Vec vel;
-    /* 0x18 */ s32 coins[10];
-    /* 0x40 */ u8 active;
-    /* 0x41 */ u8 _41[3];
-} Unk3520Bag; // size: 0x44
-
-// This minigame's view of g_Minigame
-typedef struct Unk3520Minigame {
-    /* 0x0000 */ u8 _0000[0xA8];
-    /* 0x00A8 */ Unk3520Piece pieces[40];
-    /* 0x06E8 */ u8 _06E8[0xB6C - 0x6E8];
-    /* 0x0B6C */ Unk3520Bag bag;
-    /* 0x0BB0 */ Unk3520Obj objs[4];
-    /* 0x0CB0 */ Unk3520Box box;
-    /* 0x0CD0 */ u8 _0CD0[0x1CE8 - 0xCD0];
-    /* 0x1CE8 */ Unk3520Spoke spokes[4];
-} Unk3520Minigame;
-
-#define MG (*(Unk3520Minigame*)&g_Minigame)
+// g_Minigame as this minigame lays it out (UnknownHomes_Game.h)
+#define MG g_Minigame.starDash
 
 // Another player as a target, sorted by fn_3_134918 (distance) or fn_3_134908 (points)
 typedef struct Unk3520Target {
@@ -95,21 +50,6 @@ typedef struct Unk3520Coin {
     /* 0x10 */ u8 quadrant;
     /* 0x11 */ u8 valid;
 } Unk3520Coin; // size: 0x14
-
-// One per player, at g_Minigame._1DCC
-typedef struct Unk3520Cpu {
-    /* 0x0 */ f32 _0;
-    /* 0x4 */ s16 _4;
-    /* 0x6 */ u8 _6;
-    /* 0x7 */ s8 _7;
-} Unk3520Cpu; // size: 0x8
-
-// The CPU players' state, at g_Minigame._1DCC
-typedef struct Unk3520Ai {
-    /* 0x00 */ Unk3520Cpu cpu[4];
-    /* 0x20 */ f32 sin;
-    /* 0x24 */ f32 cos;
-} Unk3520Ai;
 
 typedef struct Unk3520Fielder {
     /* 0x000 */ Vec pos;
@@ -264,15 +204,11 @@ void fn_3_13C464(void) {
 }
 
 // .text:0x0013BCB8 size:0x7AC mapped:0x8077AD4C
-// 98.1%: the fielder loop keeps a dead copy of its walker, and the pieces loop starts
-// from a fresh g_Minigame base where the target copies r25 (MG.pieces has no member).
 void fn_3_13BCB8(void) {
-    int n;
-    Unk3520Fielder* fielder;
     s32 i;
-    int j;
+    Unk3520Fielder* fielder;
+    int n;
     u8 strength;
-    int r;
 
     if (g_GameLogic._125 == 0) {
         fn_3_59A90();
@@ -315,7 +251,7 @@ void fn_3_13BCB8(void) {
                 g_Minigame.minigameControlStruct._28[n] = i;
                 g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]] = n + 2;
                 fn_3_6E24C(i, g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]]);
-                                fielder = &g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]]];
+                fielder = &g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]]];
                 g_Minigame.starDashStunType[i] = 0;
                 fielder->_20D = i;
                 fielder->pos.x = lbl_3_data_2198C[n][0];
@@ -363,11 +299,10 @@ void fn_3_13BCB8(void) {
             memset(&g_Minigame.starDashObjs[i]._24, 0, sizeof(Vec));
             g_Minigame.starDashObjs[i]._3D = 0;
         }
-        for (j = 0; j < lbl_3_bss_B780; j++) {
-            r = random_fn_3_9EE24((lbl_3_data_21A90[g_Minigame.soloMinigameDifficulty][0][1] - lbl_3_data_21A90[g_Minigame.soloMinigameDifficulty][0][0]) * 60);
-            g_Minigame.starDashObjs[j]._38 = lbl_3_data_21A90[g_Minigame.soloMinigameDifficulty][0][0] * 60 + r;
-            g_Minigame.starDashObjs[j]._30 = 360 / lbl_3_bss_B780 * j;
-            g_Minigame.starDashObjs[j]._34 = g_Minigame.starDashObjs[j]._30 + 360 / lbl_3_data_21A88[lbl_3_bss_B781];
+        for (i = 0; i < lbl_3_bss_B780; i++) {
+            g_Minigame.starDashObjs[i]._38 = lbl_3_data_21A90[g_Minigame.soloMinigameDifficulty][0][0] * 60 + random_fn_3_9EE24((lbl_3_data_21A90[g_Minigame.soloMinigameDifficulty][0][1] - lbl_3_data_21A90[g_Minigame.soloMinigameDifficulty][0][0]) * 60);
+            g_Minigame.starDashObjs[i]._30 = 360 / lbl_3_bss_B780 * i;
+            g_Minigame.starDashObjs[i]._34 = g_Minigame.starDashObjs[i]._30 + 360 / lbl_3_data_21A88[lbl_3_bss_B781];
         }
         g_Minigame._1D78[0] = 0;
         g_Minigame._1D78[1] = 0;
@@ -791,8 +726,6 @@ void fn_3_139CA0(void) {
 }
 
 // .text:0x00139808 size:0x498 mapped:0x8077889C
-// 99.2%: the target addresses vel from the loop's walker (4480(r25)); a vel local takes
-// its own register (r21) but gives the reflections the target's schedule.
 void fn_3_139808(void) {
     int i;
     int j;
@@ -806,7 +739,6 @@ void fn_3_139808(void) {
     f32 dz;
     f32 dist;
     Unk3520Fielder* fielder;
-    Vec* vel;
 
     for (i = 0; i < 100; i++) {
         if (g_Minigame.wallBall_coinsVisibleInd[i] != 1) {
@@ -818,7 +750,6 @@ void fn_3_139808(void) {
             g_Minigame._1D6C--;
             continue;
         }
-        vel = (Vec*)&g_Minigame.wallBall_coinVelocity[i];
         seg.src.x = g_Minigame.wallBall_coinCoordinates[i].x;
         seg.src.y = -g_Minigame.wallBall_coinCoordinates[i].y;
         seg.src.z = g_Minigame.wallBall_coinCoordinates[i].z;
@@ -837,8 +768,8 @@ void fn_3_139808(void) {
         seg.dst.z = g_Minigame.wallBall_coinCoordinates[i].z;
         type = checkCollision(&seg, &col, 0, FALSE);
         if (type == 5) {
-                        col.normal.y *= -1.0f;
-            fn_3_13ADC0(vel, vel, &col.normal);
+            col.normal.y *= -1.0f;
+            fn_3_13ADC0(&MG.coinVel[i], &MG.coinVel[i], &col.normal);
             g_Minigame.wallBall_coinCoordinates[i].x = col.position.x;
             g_Minigame.wallBall_coinCoordinates[i].y = -col.position.y;
             g_Minigame.wallBall_coinCoordinates[i].z = col.position.z;
@@ -846,7 +777,7 @@ void fn_3_139808(void) {
         seg.dst.x = g_Minigame.wallBall_coinCoordinates[i].x;
         seg.dst.y = -g_Minigame.wallBall_coinCoordinates[i].y;
         seg.dst.z = g_Minigame.wallBall_coinCoordinates[i].z;
-        if (fn_3_1373E0(&seg, (Vec*)&g_Minigame.wallBall_coinVelocity[i], (VecSrcDst*)&col, lbl_3_data_219B8[15])) {
+        if (fn_3_1373E0(&seg, &MG.coinVel[i], (VecSrcDst*)&col, lbl_3_data_219B8[15])) {
             g_Minigame.wallBall_coinCoordinates[i].x = col.position.x;
             g_Minigame.wallBall_coinCoordinates[i].y = col.position.y;
             g_Minigame.wallBall_coinCoordinates[i].z = col.position.z;
@@ -856,8 +787,8 @@ void fn_3_139808(void) {
             seg.dst.z = g_Minigame.wallBall_coinCoordinates[i].z;
             type = checkCollision(&seg, &col, 0, FALSE);
             if (type == 5) {
-                                col.normal.y *= -1.0f;
-                fn_3_13ADC0(vel, vel, &col.normal);
+                col.normal.y *= -1.0f;
+                fn_3_13ADC0(&MG.coinVel[i], &MG.coinVel[i], &col.normal);
                 g_Minigame.wallBall_coinCoordinates[i].x = col.position.x;
                 g_Minigame.wallBall_coinCoordinates[i].y = -col.position.y;
                 g_Minigame.wallBall_coinCoordinates[i].z = col.position.z;
@@ -882,8 +813,8 @@ void fn_3_139808(void) {
                 continue;
             }
             reach = lbl_3_data_219B8[15] + lbl_3_data_47BC[fielder->_1C9];
-            dz = fielder->pos.z - g_Minigame.wallBall_coinCoordinates[i].z;
             dx = fielder->pos.x - g_Minigame.wallBall_coinCoordinates[i].x;
+            dz = fielder->pos.z - g_Minigame.wallBall_coinCoordinates[i].z;
             reach *= reach;
             dist = dx * dx + dz * dz;
             if (dist < reach && dist < best) {
@@ -2106,7 +2037,7 @@ void fn_3_1357A4(Vec* pos, Vec* dir) {
 // 99.0%: cpu and the aIStrength walker swap r26 and r27; fn_3_13BB30, which inlines
 // this, matches.
 void fn_3_1356F8(void) {
-    Unk3520Cpu* cpu = (Unk3520Cpu*)&g_Minigame._1DCC;
+    Unk3520Cpu* cpu = MG.ai.cpu;
     u8 strength;
     u32 i;
 
@@ -2148,7 +2079,7 @@ int fn_3_13564C(f32 x, f32 z) {
 
 // .text:0x00135600 size:0x4C mapped:0x80774694
 void fn_3_135600(f32* outX, f32* outZ, f32 x, f32 z) {
-    Unk3520Ai* ai = (Unk3520Ai*)&g_Minigame._1DCC;
+    Unk3520Ai* ai = &MG.ai;
 
     x -= lbl_3_data_21A48.x;
     z -= lbl_3_data_21A48.z;
@@ -2488,17 +2419,17 @@ BOOL fn_3_1344BC(u32 a, u32 b) {
 }
 
 // The angle around the center from player i's fielder, turned by offset
-static inline s16 Unk3520_CircleAngle(int i, int offset) {
+static inline s16 Unk3520_CircleAngle(s32 i, int offset) {
     return fn_3_9FE6C_normalizeAngle(
         radToShortAngle(atan2(-(g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.x - lbl_3_data_21A48.x),
                               g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.z - lbl_3_data_21A48.z)) + offset);
 }
 
 // .text:0x0013334C size:0x1170 mapped:0x807723E0
-// 97.8%: the g_Minigame base the walkers copy is spilled to the stack where the target
-// keeps it in r14, and the registers of the player loop follow.
+// 98.92%: &_1D7C[character] is computed once for the memset and input, where the target
+// computes it again after the memset; the coin loop's two walkers swap r6 and r7.
 void fn_3_13334C(void) {
-    Unk3520Ai* ai = (Unk3520Ai*)&g_Minigame._1DCC;
+    Unk3520Ai* ai = &MG.ai;
     Unk3520Coin* coins;
     Unk3520Coin* coin;
     Unk3520Fielder* fielder;
@@ -2507,10 +2438,12 @@ void fn_3_13334C(void) {
     int starQuadrant;
     int bagQuadrant;
     int boxQuadrant;
-    u32 target;
-    u32 quadrant;
+    int quadrant;
     f32 tx;
     f32 tz;
+    u32 target;
+    f32 px;
+    f32 pz;
     f32 x;
     f32 z;
     f32 dx;
@@ -2569,12 +2502,12 @@ void fn_3_13334C(void) {
         input = &g_Minigame._1D7C[character];
         strength = g_Minigame.minigameControlStruct.aIStrength[i];
         fielder = &g_Fielders[g_Minigame.minigameFielderIndex[i]];
-        fn_3_135600(&x, &z, fielder->pos.x, fielder->pos.z);
-        quadrant = fn_3_13564C(x, z);
+        fn_3_135600(&px, &pz, fielder->pos.x, fielder->pos.z);
+        quadrant = fn_3_13564C(px, pz);
         switch (ai->cpu[i]._6) {
         case 0:
             if (lbl_803CBBC0 != 0 && g_FieldingLogic._000[i]._08 <= lbl_3_data_21B28[strength] &&
-                (g_Minigame._1D72 == 0 || i == g_Minigame._1D6D || fn_3_135520(x, z, 5.0f) == 0)) {
+                (g_Minigame._1D72 == 0 || i == g_Minigame._1D6D || fn_3_135520(px, pz, 5.0f) == 0)) {
                 g_Minigame._1D7C[character].buttonInput = g_Minigame._1D7C[character].newButtonInput |= 0x200;
             }
             target = 4;
@@ -2587,8 +2520,8 @@ void fn_3_13334C(void) {
                 target = starQuadrant;
             }
             if (target == 4 && MG.bag.active != 0) {
-                dz = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.z - MG.bag.pos.z;
                 dx = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.x - MG.bag.pos.x;
+                dz = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.z - MG.bag.pos.z;
                 if (dx * dx + dz * dz <= lbl_3_data_21B78[strength] * lbl_3_data_21B78[strength]) {
                     j = 0;
                     do {
@@ -2604,8 +2537,8 @@ void fn_3_13334C(void) {
                 }
             }
             if (target == 4 && MG.box._1E == 1) {
-                dz = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.z - MG.box.pos.z;
                 dx = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.x - MG.box.pos.x;
+                dz = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.z - MG.box.pos.z;
                 if (dx * dx + dz * dz <= lbl_3_data_21B68[strength] * lbl_3_data_21B68[strength]) {
                     j = 0;
                     do {
@@ -2638,8 +2571,8 @@ void fn_3_13334C(void) {
                     strength);
             }
             if (g_Minigame._1D6D >= 0 && i != g_Minigame._1D6D) {
-                dz = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.z - g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame._1D6D]].pos.z;
                 dx = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.x - g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame._1D6D]].pos.x;
+                dz = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.z - g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame._1D6D]].pos.z;
                 if (dx * dx + dz * dz <= lbl_3_data_21B38[strength] * lbl_3_data_21B38[strength]) {
                     offset = fn_3_1344BC(g_Minigame._1D6D, i) ? 0 : 0x800;
                     away = radToShortAngle(atan2(dz, dx));
@@ -2651,8 +2584,8 @@ void fn_3_13334C(void) {
                 j = 0;
                 do {
                     if (g_Minigame.starDashObjs[j]._3D >= 1 && g_Minigame.starDashObjs[j]._3D <= 3) {
-                        dz = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.z - g_Minigame.starDashObjs[j]._0.z;
                         dx = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.x - g_Minigame.starDashObjs[j]._0.x;
+                        dz = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.z - g_Minigame.starDashObjs[j]._0.z;
                         if (dx * dx + dz * dz <= lbl_3_data_21B48[strength] * lbl_3_data_21B48[strength]) {
                             away = radToShortAngle(atan2(dz, dx));
                             input->controlStickAngle = fn_3_1345AC(input->controlStickAngle,
@@ -2663,8 +2596,8 @@ void fn_3_13334C(void) {
                 } while (++j < lbl_3_data_21A88[g_Minigame.soloMinigameDifficulty]);
             }
             if (MG.box._1E == 2) {
-                dz = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.z - MG.box.pos.z;
                 dx = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.x - MG.box.pos.x;
+                dz = g_Fielders[g_Minigame.minigameFielderIndex[i]].pos.z - MG.box.pos.z;
                 if (dx * dx + dz * dz <= lbl_3_data_21B58[strength] * lbl_3_data_21B58[strength]) {
                     away = radToShortAngle(atan2(dz, dx));
                     input->controlStickAngle = fn_3_1345AC(input->controlStickAngle,
@@ -2673,7 +2606,7 @@ void fn_3_13334C(void) {
                 }
             }
             if (g_Minigame._1D72 != 0 && i != g_Minigame._1D6D) {
-                if (fn_3_135520(x, z, 0.20943952f * dolsqrtf2(x * x + z * z) + ai->cpu[i]._0) == 1) {
+                if (fn_3_135520(px, pz, 0.20943952f * dolsqrtf2(px * px + pz * pz) + ai->cpu[i]._0) == 1) {
                     ai->cpu[i]._0 = RandomInt_Game(100) < lbl_3_data_21B88[strength] ? 3.0f : 1.5f;
                     input->controlStickAngle = Unk3520_CircleAngle(i, 0);
                     ai->cpu[i]._6 = 1;

@@ -784,7 +784,7 @@ void fn_3_1AEB8(void) {
 }
 
 // .text:0x0001AE44 size:0x74 mapped:0x80659ED8
-void fn_3_1AE44(u8 arg4, u16 arg5, f32 arg1, f32 arg2, f32 arg3) {
+void fn_3_1AE44(u8 arg4, s32 arg5, f32 arg1, f32 arg2, f32 arg3) {
     if (g_Stats.replayInd == 0 && g_d_GameSettings.GameModeSelected != GAME_TYPE_TOY_FIELD) {
         g_pCamera->_2828.x = arg1;
         g_pCamera->_2828.y = arg2;

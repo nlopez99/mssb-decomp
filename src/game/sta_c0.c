@@ -15,6 +15,7 @@
 #include "game/rep_4138.h"
 #include "math.h"
 #include "string.h"
+#include "static/sub.h"
 
 typedef struct {
     /* 0x00 */ void* _00;
@@ -156,7 +157,6 @@ extern void fn_80025EEC(StaC0Anim* state, s32, s32);
 extern void AnimateActorBones(void* bones);
 extern s32 fn_8005268C(void);
 extern camera_803c639c_s* fn_80052734(s32 idx);
-extern s32 fn_800247E4(s32 x, s32 y, s32 width, s32 bytes);
 
 
 extern u16 lbl_3_data_81DC[16];

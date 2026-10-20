@@ -124,7 +124,10 @@ typedef struct StaC5Draw {
     /* 0xC0 */ u8 _C0;
     /* 0xC1 */ s8 _C1;
     /* 0xC2 */ u8 _C2;
-    /* 0xC3 */ s8 _C3;
+    union {
+        /* 0xC3 */ s8 _C3;
+        /* 0xC3 */ u8 _C3u;
+    };
     /* 0xC4 */ s8 _C4;
     /* 0xC5 */ u8 _C5;
     /* 0xC6 */ u8 _C6;
@@ -241,7 +244,7 @@ extern void fn_800B0A5C_insertQueue(void (*func)(void), s32 arg);
 
 extern void fn_80033620(StaC5Emitter* emitter);
 extern void fn_80033964(StaC5Emitter* emitter);
-extern StaC5Emitter* fn_80033A24(BOOL (*update)(StaC5Emitter*), s32, s32, s32, s32, s32);
+extern StaC5Emitter* fn_80033A24(BOOL (*update)(StaC5Emitter*), u8, s32, s32, s32, u8);
 extern void fn_80033F64(f32, f32, f32);
 extern void fn_80033CC8(StaC5Particle* particle, void* arg1);
 
@@ -478,9 +481,13 @@ static inline void spawnDrawEffect(StaC5Draw* draw) {
     }
 }
 
+static inline StaC5Model* getModel(u8 idx) {
+    return &lbl_8036E548._6C->models[idx];
+}
+
 // .text:0x000F6FDC size:0x1468 mapped:0x80736070
-// 96.70%: saved registers differ in places (the declaration order moves them); the target
-// computes n1 + 2 between the counting loops and stores pitcherModel to _C3 without extsb.
+// 98.70%: the target loads (u8)n1 for the first loop before the lbl_8036E548 base and
+// strength-reduces the props loop's model address (getModel's u8 index here re-extends i).
 void fn_3_F6FDC(void** files) {
     s32 n1;
     u8 end;
@@ -488,7 +495,7 @@ void fn_3_F6FDC(void** files) {
     StaC5Prop* prop;
     StaC5Draw* draw;
     s32* indices;
-    s8 pitcherModel;
+    u8 pitcherModel;
     u32 y;
     s32 count;
     u8 fieldModel;
@@ -499,10 +506,11 @@ void fn_3_F6FDC(void** files) {
     u8 idx;
     u8 numModels;
     s32 n2;
+    s32 total;
     StaC5Ball* ball;
     StaC5Draw* entry;
-    u8 numActors;
     u8 ballModel;
+    u8 extraModel;
 
     count = 0;
     end = FALSE;
@@ -524,19 +532,19 @@ void fn_3_F6FDC(void** files) {
             break;
         }
     }
+    total = n1 + 2;
     prop2 = lbl_3_data_1B9A4;
     for (; n2 < 5; n2++) {
         if (prop2[n2].type == 6) {
             break;
         }
     }
-    numModels = n1 + 2 + n2;
-    numActors = numModels + 4;
-    lbl_8036E548._6C = ActorObjectInitTable(numActors);
-    lbl_3_common_bss_350E4._6D = numActors;
+    numModels = total + n2;
+    lbl_8036E548._6C = ActorObjectInitTable((u8)(numModels + 4));
+    lbl_3_common_bss_350E4._6D = numModels + 4;
     j = 0;
-    lbl_3_bss_B219 = 0;
-    for (i = 0; i < (u8)n1; i++, j++) {
+    lbl_3_bss_B219 = i = 0;
+    for (; i < (u8)n1; i++, j++) {
         fn_800BDC88(lbl_8036E548._6C, j, j, files[indices[1]], NULL, 0);
         fn_3_B97DC(&lbl_8036E548._6C->models[j], files[indices[1] + 2]);
     }
@@ -544,10 +552,10 @@ void fn_3_F6FDC(void** files) {
     pitcherModel = j;
     fn_800BDC88(lbl_8036E548._6C, j, j, files[indices[2]], NULL, 0);
     fn_3_B97DC(&lbl_8036E548._6C->models[j], files[indices[2] + 2]);
-    lbl_8036E548._6C->models[j]._5B = 2;
+    getModel(j)->_5B = 2;
     fn_800B4AFC(lbl_8036E548._6C->models[j]._00, lbl_8036E548._6C->models[j]._5B & 1);
     ballModel = j + 1;
-    fn_800BDC88(lbl_8036E548._6C, ballModel, ballModel, files[indices[3]], NULL, 0);
+    fn_800BDC88(lbl_8036E548._6C, (u8)(j + 1), (u8)(j + 1), files[indices[3]], NULL, 0);
     j += 2;
     fieldModel = j;
     for (i = 0; i < (u8)n2; i++, j++) {
@@ -555,18 +563,19 @@ void fn_3_F6FDC(void** files) {
         fn_3_B98E8((struct StadiumModel1D58*)&lbl_8036E548._6C->models[j]);
     }
     fn_800BDC88(lbl_8036E548._6C, j, j, files[indices[5]], NULL, 0);
-    fn_800BDC88(lbl_8036E548._6C, (u8)(j + 1), (u8)(j + 1), files[indices[6]], NULL, 0);
+    extraModel = j + 1;
+    fn_800BDC88(lbl_8036E548._6C, extraModel, extraModel, files[indices[6]], NULL, 0);
     fn_800BDC88(lbl_8036E548._6C, (u8)(j + 2), (u8)(j + 2), files[indices[7]], NULL, 0);
     lbl_3_bss_B55C = &lbl_8036E548._6C->models[(u8)(j + 2)];
     fn_800BDC88(lbl_8036E548._6C, (u8)(j + 3), (u8)(j + 3), files[indices[8]], NULL, 0);
     lbl_3_bss_B154[0] = files[indices[16]];
     lbl_3_bss_B154[1] = files[indices[17]];
-    for (i = 0; i < numActors; i++) {
+    for (i = 0; i < (u8)(numModels + 4); i++) {
         fn_800BD548(&lbl_8036E548._6C->models[i], 4, lbl_3_common_bss_350E4._20, lbl_3_common_bss_350E4._24,
                     lbl_3_common_bss_350E4._28, lbl_3_common_bss_350E4._2C);
     }
     fn_80025DDC(files[indices[14]]);
-    fn_80025C58(files[indices[14]], &lbl_8036E548._6C->models[(u8)(j + 1)]);
+    fn_80025C58(files[indices[14]], &lbl_8036E548._6C->models[extraModel]);
     lbl_3_bss_B1BC._00 = files[indices[15]];
     fn_80025FFC(files[indices[14]], &lbl_3_bss_B1BC);
     fn_80025EEC(&lbl_3_bss_B1BC, 0, 0);
@@ -593,9 +602,9 @@ void fn_3_F6FDC(void** files) {
                 break;
             }
             entry->_9D = 0;
-            draw->_74 = &lbl_8036E548._6C->models[i];
+            draw->_74 = getModel(i);
             entry->_C2 = idx;
-            entry->_C3 = pitcherModel;
+            entry->_C3u = pitcherModel;
             draw->_78 = files[indices[9]];
             draw->_7C = NULL;
             draw->_80 = fn_3_F1674;
@@ -722,7 +731,7 @@ void fn_3_F6FDC(void** files) {
 
     lbl_3_bss_B21A = count + 1;
     draw[1]._9D = 4;
-    draw[1]._74 = &lbl_8036E548._6C->models[(u8)(j + 1)];
+    draw[1]._74 = &lbl_8036E548._6C->models[extraModel];
     draw[1]._78 = NULL;
     draw[1]._7C = NULL;
     draw[1]._80 = NULL;
@@ -845,8 +854,9 @@ void fn_3_F6C60(void) {
 }
 
 // .text:0x000F6A94 size:0x1CC mapped:0x80735B28
-// 97.13%: volatile registers differ (B21D/B21E addresses and the start*4 pointer);
-// the target forms the B21E address before reading _3C[*n - 1].
+// 97.13%: volatile registers differ (B21D/B21E addresses and the start*4 pointer). The
+// target loads _40[*n - 1] before _3C[*n - 1]; swapping the sum fixes that order (95.65%,
+// fn_3_F6C60 99.54%) but forms the B21E address after the loads.
 void fn_3_F6A94(s32* n) {
     Mtx m;
     Control control;
@@ -1203,8 +1213,9 @@ void fn_3_F56CC(StaC5Ball* obj) {
 }
 
 // .text:0x000F4FBC size:0x710 mapped:0x80734050
-// 99.60%: obj takes r29 where the target has r30, which it later reuses for
-// g_d_GameSettings in the sound helper; declaration orders tried change nothing.
+// 99.60%: obj takes r29 where the target has r30, which it later reuses for g_d_GameSettings
+// in the sound helper. A second pointer copied from obj mid-case 1 and used for _C4 and _A0
+// (permuter) reaches 99.85%, so the original may have reached obj through two names.
 void fn_3_F4FBC(StaC5Ball* obj) {
     Vec dir;
     Vec unit;
@@ -1612,7 +1623,8 @@ void fn_3_F2FFC(StaC5Draw* draw, f32 x, f32 z) {
 
 // .text:0x000F2938 size:0x6C4 mapped:0x807319CC
 // 99.86%: in the inlined fn_3_F2724 the sine and cosine land in f29/f30 the other way
-// round; reordering fn_3_F2724's locals fixes one copy or the other, never both.
+// round. Its body written in place here (locals m01, m10, m00 first) fixes them at 99.94%
+// but swaps angle's f29/f30; declaration orders on both sides change nothing more.
 void fn_3_F2938(StaC5Draw* draw) {
     Vec pos;
     Vec dir;
@@ -2059,7 +2071,8 @@ static inline void turnTowardHome(StaC5Draw* draw) {
 
 // .text:0x000F082C size:0x778 mapped:0x8072F8C0
 // 99.97%: the heading angle's negation goes to f30 before the multiply, where the
-// target negates into f1 and writes only the product to f30.
+// target negates into f1 and writes only the product to f30. K * -x, a local for _AC,
+// a degToRad helper and a helper taking the angle all give the constant's FPR swapped.
 void fn_3_F082C(StaC5Draw* draw) {
     Vec next;
     StaC5Fielder* fielder;
@@ -2216,24 +2229,23 @@ void fn_3_F0184(void) {
 }
 
 // .text:0x000EFB54 size:0x630 mapped:0x8072EBE8
-// 95.88%: the frame is 0x10 larger and every local sits 12 bytes higher than in the
-// target (q2 at 0x8 up to pos at 0x74); the struct copies may need other forms.
 void fn_3_EFB54(StaC5Draw* draw) {
-    Quaternion q2;
-    Quaternion q1;
-    Quaternion q;
-    Vec axis;
-    Vec w;
-    Vec u;
-    Vec right = { 1.0f, 0.0f, 0.0f };
-    Vec off;
     Vec pos = { 0.0f, 0.0f, 0.0f };
+    Vec off;
+    Vec right = { 1.0f, 0.0f, 0.0f };
+    Vec u;
+    Vec w;
+    Vec axis;
+    Quaternion q;
+    Quaternion q1;
+    Quaternion q2;
     StaC5Player* player;
     s32 i;
     s8 side;
     f32 angle;
     f32 depth;
     f32 radius;
+    f32 yaw;
 
     player = lbl_8036E548._2C50[draw->_C1];
     if (player == NULL) {
@@ -2247,9 +2259,9 @@ void fn_3_EFB54(StaC5Draw* draw) {
                 break;
             }
         }
-        if (player == NULL) {
-            return;
-        }
+    }
+    if (player == NULL) {
+        return;
     }
     memset(&pos, 0, sizeof(Vec));
     if (!player->_25A) {
@@ -2283,51 +2295,48 @@ void fn_3_EFB54(StaC5Draw* draw) {
     off.x = -radius * (f32)cos(angle);
     off.y = -depth;
     off.z = -radius * (f32)sin(angle);
-    pos.x += off.x * 0.5f;
-    pos.y += off.y * 0.5f;
-    pos.z += off.z * 0.5f;
+    pos.x += off.x / 2.0f;
+    pos.y += off.y / 2.0f;
+    pos.z += off.z / 2.0f;
     pos.y *= -1.0f;
     off.x *= -1.0f;
     off.y *= -1.0f;
     off.z *= -1.0f;
     draw->_A0 = pos;
-    w = off;
-    u = off;
+    u = w = off;
     w.z = 0.0f;
     u.y = 0.0f;
-    w.x = sqrt(pow(off.z, 2.0) + pow(off.x, 2.0));
+    w.x = sqrt(pow(off.x, 2.0) + pow(off.z, 2.0));
     if (0.0f != radius) {
         PSVECNormalize(&u, &u);
     }
     PSVECNormalize(&w, &w);
-    draw->_AC = 57.29578f * -(f32)acos(PSVECDotProduct(&u, &right));
+    yaw = acos(PSVECDotProduct(&u, &right));
+    draw->_AC = 57.29578f * -yaw;
     if (u.z < 0.0f) {
         draw->_AC = 360.0f - draw->_AC;
     }
-    axis.x = 0.0f;
+    axis.x = axis.z = 0.0f;
     axis.y = 1.0f;
-    axis.z = 0.0f;
     C_QUATRotAxisRad(&q1, &axis, 0.017453292f * draw->_AC);
     draw->_B0 = 57.29578f * (f32)acos(PSVECDotProduct(&w, &right));
     if (w.y < 0.0f) {
         draw->_B0 = 360.0f - draw->_B0;
     }
-    axis.x = 0.0f;
-    axis.y = 0.0f;
+    axis.x = axis.y = 0.0f;
     axis.z = 1.0f;
     C_QUATRotAxisRad(&q2, &axis, 0.017453292f * draw->_B0);
     PSQUATMultiply(&q1, &q2, &q);
     PSQUATNormalize(&q, &q);
-    if (PSQUATDotProduct(&q, &q) == 0.0f) {
-        axis.x = 0.0f;
+    if (!PSQUATDotProduct(&q, &q)) {
+        axis.x = axis.z = 0.0f;
         axis.y = 1.0f;
-        axis.z = 0.0f;
         C_QUATRotAxisRad(&q, &axis, 0.0f);
     }
-    if (player->_25D == 1) {
-        draw->_90_7 = 1;
-    } else {
+    if (player->_25D != 1) {
         draw->_90_7 = 0;
+    } else {
+        draw->_90_7 = 1;
     }
     CTRLSetTranslation(&draw->control, draw->_A0.x, -draw->_A0.y, draw->_A0.z);
     CTRLSetQuat(&draw->control, q.x, q.y, q.z, q.w);
@@ -2402,8 +2411,8 @@ BOOL fn_3_EF7B4(Vec pos, u8 block) {
 }
 
 // .text:0x000EF55C size:0x258 mapped:0x8072E5F0
-// 99.50%: the sidesA walking pointer and sign are in r27/r28 where the target has
-// r28/r27; statement and declaration orders tried change nothing else.
+// 99.79%: in the first loop the sidesA walking pointer and sign are in r28/r27 where the
+// target has r27/r28; declaration orders and for-clause orders tried change nothing else.
 u8 fn_3_EF55C(Vec pos, u8 block) {
     Vec to;
     Vec edge;
@@ -2418,7 +2427,7 @@ u8 fn_3_EF55C(Vec pos, u8 block) {
         return 1;
     }
     corners = lbl_3_data_1B824[block];
-    for (i = 0, sign = -1; i < 2; i++, sign += 2) {
+    for (sign = -1, i = 0; i < 2; i++, sign += 2) {
         to.x = pos.x - corners[sidesA[i][0]][0];
         to.z = pos.z - corners[sidesA[i][0]][1];
         edge.x = corners[sidesA[i][1]][0] - corners[sidesA[i][0]][0];
@@ -2432,7 +2441,7 @@ u8 fn_3_EF55C(Vec pos, u8 block) {
             return 1;
         }
     }
-    for (i = 0, sign = -1; i < 2; i++, sign += 2) {
+    for (i = 0, sign = -1; i < 2; sign += 2, i++) {
         to.x = pos.x - corners[sidesB[i][0]][0];
         to.z = pos.z - corners[sidesB[i][0]][1];
         edge.x = corners[sidesB[i][1]][0] - corners[sidesB[i][0]][0];
@@ -2712,8 +2721,6 @@ void fn_3_EE96C(Vec* pos) {
 }
 
 // .text:0x000EE67C size:0x2F0 mapped:0x8072D710
-// 97.37%: the target's switch also tests an empty case 1 (cmpwi 3, then cmpwi 1), which
-// MWCC drops here, and keeps the shift counter in r3 where this has r7.
 void fn_3_EE67C(StaC5Shape* shape, MtxPtr view) {
     Mtx mv;
     GXVtxDescList desc[27];
@@ -2731,8 +2738,10 @@ void fn_3_EE67C(StaC5Shape* shape, MtxPtr view) {
     GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, shape->_00->format >> 4, shape->_00->format & 0xF);
     GXSetNumTexGens(1);
     entry = shape->_10->entries;
-    for (i = 0; i < shape->_10->count; i++, entry++) {
+    for (i = 0; i < shape->_10->count; entry++, i++) {
         switch (entry->type) {
+        case 1:
+            break;
         case 2:
             GXClearVtxDesc();
             n = 0;
@@ -2741,7 +2750,7 @@ void fn_3_EE67C(StaC5Shape* shape, MtxPtr view) {
                 desc[0].mType = entry->flags & 3;
                 n = 1;
             }
-            for (shift = 2, attr = GX_VA_POS; attr <= GX_VA_TEX7; attr++, shift += 2) {
+            for (attr = GX_VA_POS, shift = 2; attr <= GX_VA_TEX7; attr++, shift += 2) {
                 type = (entry->flags >> shift) & 3;
                 if (type != 0) {
                     desc[n].mAttr = attr;
@@ -2749,7 +2758,7 @@ void fn_3_EE67C(StaC5Shape* shape, MtxPtr view) {
                     n++;
                 }
             }
-            type = (entry->flags >> shift) & 3;
+            type = (entry->flags >> 26) & 3;
             if (type != 0) {
                 desc[n].mAttr = attr;
                 desc[n].mType = type;
@@ -2761,6 +2770,8 @@ void fn_3_EE67C(StaC5Shape* shape, MtxPtr view) {
         case 3:
             GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_REG, GX_SRC_REG, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
             fn_3_EE100(shape, view);
+            break;
+        case 4:
             break;
         }
         if (entry->list != NULL) {

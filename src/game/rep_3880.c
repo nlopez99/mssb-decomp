@@ -288,7 +288,7 @@ extern void fn_800B27DC(Mtx44 proj, GXProjectionType type);
 extern void fn_800B2160(s32 mode);
 extern void fn_800B1468(Vec* corners, u32 color, TexInfo3880* tex);
 extern void fn_80030D88(Vec* pos, Vec* dir, UnkBurst3880* burst, s32 n);
-extern void fn_8002F5F4(Vec* pos, Vec* dir, UnkSpark3880* spark, s16 id);
+extern void fn_8002F5F4(Vec* pos, Vec* dir, UnkSpark3880* spark);
 extern void fn_80030470(Vec* pos, Vec* dir, Vec* back, UnkBurst3880* burst, s32 n);
 extern s32 fn_8005268C(void);
 extern camera_803c639c_s* fn_80052734(s32 index);
@@ -302,7 +302,7 @@ extern void fn_80033F64(f32 width, f32 height, f32 angle);
 extern void fn_8003403C(f32 width, f32 height);
 extern Emitter3880* fn_800339F0(Emitter3880* start, u8 id);
 extern Emitter3880* fn_800337CC(Emitter3880* emitter, s32 count, s32 exact);
-extern Emitter3880* fn_80033A24(BOOL (*update)(Emitter3880*), s32, s32, s32, s32, s32);
+extern Emitter3880* fn_80033A24(BOOL (*update)(Emitter3880*), u8, s32, s32, s32, u8);
 
 // rep_3310.h declares these as void(void) placeholders
 
@@ -407,7 +407,7 @@ BOOL fn_3_15767C(Emitter3880* emitter) {
                         ids = lbl_3_data_267E4[piranha->kind];
                         lbl_3_data_266B0[0]._04 = ids[0];
                         lbl_3_data_266B0[1]._04 = ids[1];
-                        fn_8002F5F4(&pos, &dir, &lbl_3_data_267A0, ids[0]);
+                        fn_8002F5F4(&pos, &dir, &lbl_3_data_267A0);
                         if (lbl_80366158._28 == 0) {
                             fn_80030D88(&pos, &dir, &lbl_3_data_266B0[1], 41);
                             fn_80030D88(&pos, &dir, &lbl_3_data_266B0[2], 41);

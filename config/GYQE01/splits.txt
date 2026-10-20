@@ -14,6 +14,56 @@ Sections:
 	.sdata2     type:rodata align:4
 	.sbss2      type:bss align:32
 
+static/sub.c:
+	extab       start:0x80005B50 end:0x80005BA0
+	extabindex  start:0x80007458 end:0x800074D0
+	.text       start:0x80023CF4 end:0x80024C04
+	.rodata     start:0x800E6720 end:0x800E6768
+	.data       start:0x800F76E0 end:0x800F7720
+	.sbss       start:0x803CBC60 end:0x803CBC68
+	.sdata2     start:0x803CC580 end:0x803CC5A8
+
+static/anim.c:
+	extab       start:0x80005BA0 end:0x80005BC0
+	extabindex  start:0x800074D0 end:0x80007500
+	.text       start:0x80024D2C end:0x80026130
+	.sdata2     start:0x803CC5A8 end:0x803CC5D8
+
+static/lookat.c:
+	extab       start:0x80005BC0 end:0x80005BC8
+	extabindex  start:0x80007500 end:0x8000750C
+	.text       start:0x80026134 end:0x800263FC
+	.rodata     start:0x800E6768 end:0x800E6778
+	.sdata2     start:0x803CC5D8 end:0x803CC5F0
+
+static/particle.c:
+	extab       start:0x80005BC8 end:0x80005D98
+	extabindex  start:0x8000750C end:0x800077C4
+	.text       start:0x800263FC end:0x80034BCC
+	.rodata     start:0x800E6778 end:0x800E68A8
+	.bss        start:0x8017EC00 end:0x801F8640
+	.sdata2     start:0x803CC5F0 end:0x803CC6E8
+
+static/spani_default.c:
+	extab       start:0x80005D98 end:0x80005E40
+	extabindex  start:0x800077C4 end:0x800078C0
+	.text       start:0x80034BCC end:0x80036C88
+	.rodata     start:0x800E68A8 end:0x800E6910
+	.data       start:0x800F78E0 end:0x800F79A0
+	.bss        start:0x801F8640 end:0x8023DD80
+	.sdata      start:0x803CB810 end:0x803CB818
+	.sbss       start:0x803CBC90 end:0x803CBCA0
+	.sdata2     start:0x803CC6E8 end:0x803CC720
+
+static/physics.c:
+	extab       start:0x80005E48 end:0x80005EE8
+	extabindex  start:0x800078CC end:0x800079BC
+	.text       start:0x80037054 end:0x80039AA8
+	.data       start:0x800F79A0 end:0x800F7A40
+	.sdata      start:0x803CB818 end:0x803CB828
+	.sbss       start:0x803CBCA0 end:0x803CBCA8
+	.sdata2     start:0x803CC720 end:0x803CC7A0
+
 Dolphin/base/PPCArch.c:
 	.text       start:0x8006D024 end:0x8006D138
 

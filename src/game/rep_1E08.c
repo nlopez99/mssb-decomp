@@ -27,6 +27,7 @@
 #include "game/rep_1D58.h"
 #include "game/rep_EA0.h"
 #include "game/rep_140.h"
+#include "static/sub.h"
 
 typedef struct {
     /* 0x00 */ void (*_00)(void);
@@ -1940,8 +1941,8 @@ extern void fn_800B0A14_removeQueue(void);
 extern void fn_80034CEC(UnkTask1E08* task);
 extern void fn_80034E20(UnkTask1E08* task, void* desc);
 extern void fn_8003A688(void* arg0, f32 x, f32 y);
-extern BOOL fn_80033928(s32 arg0);
-extern void* fn_80033A24(BOOL (*update)(void*), s32, s32, s32, s32, s32);
+extern BOOL fn_80033928(u8 id);
+extern void* fn_80033A24(BOOL (*update)(void*), u8, s32, s32, s32, u8);
 extern void fn_800BD670(UnkActor1E08* actor, MtxPtr mtx);
 extern void fn_800BD8C4(UnkActor1E08* actor, s32 arg1);
 extern void fn_800BD548(void* model, s32 count, ...);
@@ -1968,8 +1969,6 @@ extern void fn_80025FFC(void* anim, UnkAnimEntry1E08* entry, void* file);
 extern void fn_80025EEC(UnkAnimEntry1E08* entry, s32, s32);
 extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_800ACFB0(void* data);
-extern void fn_800246D4(int (*compare)(const void*, const void*), void* src, void* dst, int size, int count);
-extern void fn_800245EC(camera_803c639c_s* camera, Mtx view, Vec* points, f32* out, s32 count, s32 arg5);
 extern void fn_80033B58(void* texture, s32 index, s32, s32);
 extern u16 lbl_800F7860[4][2];
 extern void fn_80028628(Vec* pos, Vec* eye, UnkFxParams1E08* params, u16* shape, u32* color, UnkFxShape1E08* arg5, BOOL flag);

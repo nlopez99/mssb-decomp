@@ -3,6 +3,7 @@
 #include "header_rep_data.h"
 
 #include "static/UnknownHomes_Static.h"
+#include "static/sub.h"
 
 typedef struct {
     /* 0x0 */ s8 index;
@@ -73,8 +74,6 @@ extern f32 lbl_3_data_4BC4[10];
 extern f32 runnerVelocityLookup[22];
 extern s16 lbl_3_data_4C54[12];
 extern u8 lbl_3_data_775C;
-
-extern int LERPToNewRange_Float(int value, int inMin, int inMax, int outMin, int outMax);
 
 // .text:0x0006EF1C size:0x5CC mapped:0x806ADFB0
 void fn_3_6EF1C(void) {

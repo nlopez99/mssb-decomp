@@ -16,6 +16,8 @@
 #include "Dolphin/rand.h"
 #include "musyx/musyx.h"
 #include "game/rep_3D50.h"
+#include "static/particle.h"
+#include "static/sub.h"
 
 // g_Minigame as this minigame lays it out (UnknownHomes_Game.h)
 #define MG g_Minigame.piranhaPanic
@@ -83,7 +85,6 @@ extern struct {
 
 extern void fn_800B993C(void);
 extern void fn_800B9948(void* callback);
-extern void pitchingMachinePitching(u8 id);
 extern void changeScene(u8, s16);
 extern u8 lbl_800EFBA4[0x10];
 extern s16 lbl_3_data_7F10[54];
@@ -121,7 +122,6 @@ extern struct {
     /* 0x00 */ u8 _00[0x40];
     /* 0x40 */ s16 _40;
 } lbl_3_common_bss_37400;
-extern int LERPToNewRange_Float(int value, int inMin, int inMax, int outMin, int outMax);
 extern f32 lbl_3_data_47BC[5];
 extern s8 lbl_3_data_21EC0[4];
 extern s8 lbl_3_data_21E20[3];
@@ -179,8 +179,6 @@ void fn_3_1471C0(void) {
 }
 
 // .text:0x00146A90 size:0x730 mapped:0x80785B24
-// 94.10%: the fielder setup stores and the 100-coin loop use other registers and bases,
-// as in rep_3520's fn_3_13BCB8.
 void fn_3_146A90(void) {
     Unk37A8Fielder* fielder;
     s32 i;
@@ -190,9 +188,9 @@ void fn_3_146A90(void) {
 
     if (g_GameLogic._125 == 0) {
         fn_3_59A90();
+        g_GameLogic.secondaryGameMode = 7;
         g_Minigame._17C0 = 0;
         g_Minigame.turnOverStatus = 0;
-        g_GameLogic.secondaryGameMode = 7;
         g_Minigame._1A37 = 0;
         for (i = 0; i < 4; i++) {
             g_Minigame.miniGameCurrentPoints[i] = 0;
@@ -227,32 +225,31 @@ void fn_3_146A90(void) {
         }
         fn_3_591AC();
         fn_3_58870();
-        n = 0;
-        for (i = 0; i < 4; i++) {
+        for (i = 0, n = 0; i < 4; i++) {
             if (g_Minigame.minigameControlStruct.characterIndex[i] >= 0) {
                 g_Minigame.minigameControlStruct._28[n] = i;
                 g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]] = n + 2;
                 fn_3_6E24C(i, g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]]);
+                fielder = &g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]]];
+                fielder->_20D = i;
+                fielder->pos.x = lbl_3_data_21B94[n].x;
+                fielder->pos.y = lbl_3_data_21B94[n].y;
+                fielder->pos.z = lbl_3_data_21B94[n].z;
+                fielder->_00C = lbl_3_data_21D2C[1];
+                fielder->_1D2 = 0;
+                fielder->_050 = 0.0f;
+                fielder->_048 = 1.5707964f;
                 MG._1C7E[i][0] = -1;
                 MG._1C7E[i][1] = -1;
                 MG._1C7E[i][2] = -1;
-                fielder = &g_Fielders[g_Minigame.minigameFielderIndex[g_Minigame.minigameControlStruct._28[n]]];
                 g_Minigame._1C8A[i] = 0;
-                fielder->_20D = i;
-                fielder->pos.x = lbl_3_data_21B94[n].x;
                 MG._1B34[i] = -1;
                 g_Minigame._1C92[i] = -1;
-                fielder->pos.y = lbl_3_data_21B94[n].y;
                 MG._1C9A[i] = 0;
-                fielder->pos.z = lbl_3_data_21B94[n].z;
                 MG._1B50[i] = 0;
-                fielder->_00C = lbl_3_data_21D2C[1];
                 MG._1B80[i] = 0;
-                fielder->_1D2 = 0;
                 g_Minigame._1CA5[i] = 0;
-                fielder->_050 = 0.0f;
                 g_Minigame._1CAD[i] = i;
-                fielder->_048 = 1.5707964f;
                 g_Minigame._1CB1[i] = 0;
                 for (j = 0; j < 10; j++) {
                     MG._1B58[i][j] = 0;
@@ -340,7 +337,8 @@ void fn_3_146928(void) {
 
 // .text:0x00146408 size:0x520 mapped:0x8078549C
 // 98.08%: the target keeps the coin loop's &g_Minigame in r26 through the inlined piranha loop
-// (mr r28,r26) for the points loop; this reloads it (see registers.md, "Unsolved").
+// (mr r28,r26) for the points loop; this reloads it (see registers.md, "Unsolved"). Counter
+// types in fn_3_142CA8 and fn_3_143714 and a permuter session did not change it.
 void fn_3_146408(void) {
     if (fn_3_108854() != 0) {
         return;
@@ -512,21 +510,19 @@ void fn_3_145AD0(int player) {
 }
 
 // .text:0x001453BC size:0x714 mapped:0x80784450
-// 91.08%: registers and scheduling; coin sits in r25 where this has r27, and the
-// thrower's block loads the fielder index before its stores.
+// 99.92%: the distance test's coordinate z pointer and the target row offset swap r7 and r8,
+// and the target loads the row's x before z; the x-first order of the terms is worse.
 void fn_3_1453BC(int coin) {
-    Unk37A8Entry* entry;
-    Unk37A8Fielder* fielder;
-    VecXYZ pos;
-    Vec dir;
-    f32 dx;
-    f32 dz;
-    f32 dist;
-    s16 points;
-    s16 left;
     int team;
-    s8 player;
+    Unk37A8Entry* entry;
+    s8 points;
     int target;
+    Unk37A8Fielder* fielder;
+    Vec dir;
+    VecXYZ pos;
+    f32 dist;
+    s16 left;
+    s8 player;
     int i;
 
     team = MG._1BB6[coin];
@@ -546,12 +542,11 @@ void fn_3_1453BC(int coin) {
             fn_3_90064(0x309);
             fn_3_154238(coin);
             if (g_Minigame._1CA5[player] == 0 && MG._1C9A[player] == 0) {
+                fielder = &g_Fielders[g_Minigame.minigameFielderIndex[player]];
                 MG._1C9A[player] = 1;
                 MG._1B3C[player] = lbl_3_data_21E68[14];
                 MG._1B50[player] = 0;
-                fielder = &g_Fielders[g_Minigame.minigameFielderIndex[player]];
-                dir.x = 0.0f;
-                dir.y = 0.0f;
+                dir.x = dir.y = 0.0f;
                 dir.z = -1.0f;
                 PSVECNormalize(&dir, &dir);
                 fielder->_038 = dir.x;
@@ -583,18 +578,13 @@ void fn_3_1453BC(int coin) {
     }
     target = MG._1BE8[coin];
     if (target >= 0) {
-        dx = g_Minigame.wallBall_coinCoordinates[coin].x - lbl_3_data_21BC4[target][1].x;
-        dz = g_Minigame.wallBall_coinCoordinates[coin].z - lbl_3_data_21BC4[target][1].z;
-        dist = dolsqrtf2(dx * dx + dz * dz);
+        dist = dolsqrtf2(SQ(g_Minigame.wallBall_coinCoordinates[coin].z - lbl_3_data_21BC4[target][1].z) +
+                         SQ(g_Minigame.wallBall_coinCoordinates[coin].x - lbl_3_data_21BC4[target][1].x));
         entry = &MG._0000[target];
         if (entry->_2A == 2 && dist < lbl_3_data_21E24[1]) {
             if (MG._1B84[coin] == entry->_2C || entry->_2C == 4 || MG._1B84[coin] == 5) {
-                if (MG._1B84[coin] == 5) {
-                    points = lbl_3_data_21E68[24];
-                } else {
-                    points = 1;
-                }
-                pos = g_Minigame.wallBall_coinCoordinates[coin];
+                points = MG._1B84[coin] == 5 ? lbl_3_data_21E68[24] : 1;
+                memcpy(&pos, &g_Minigame.wallBall_coinCoordinates[coin], sizeof(pos));
                 pos.y *= -1.0f;
                 if (MG._1B84[coin] == 5) {
                     fn_3_147CFC((Vec*)&pos);
@@ -607,14 +597,14 @@ void fn_3_1453BC(int coin) {
                 } else {
                     fn_3_90064(0x2DC);
                 }
-                left = entry->_2D - (s8)points;
+                left = entry->_2D - points;
                 if (left <= 0) {
                     entry->_2D = 0;
                 } else {
-                    entry->_2D = left;
+                    entry->_2D -= points;
                 }
                 MG._1B50[team]++;
-                MG._1B58[team][g_Minigame._1B80[team]] = (s8)points * lbl_3_data_21E18[entry->_2B][1];
+                MG._1B58[team][g_Minigame._1B80[team]] = points * lbl_3_data_21E18[entry->_2B][1];
                 g_Minigame._1B80[team]++;
                 entry->_2F[0] = -1;
                 entry->_2F[1] = -1;
@@ -668,8 +658,6 @@ void fn_3_1453BC(int coin) {
 }
 
 // .text:0x00144CB8 size:0x704 mapped:0x80783D4C
-// 97.76%: registers and scheduling only; the list sort's pointers and counters and the
-// sign/1.5 block after rand() use other volatile registers.
 void fn_3_144CB8(void) {
     Unk37A8Fielder* fielder;
     InputStruct* input;
@@ -677,6 +665,7 @@ void fn_3_144CB8(void) {
     int k;
     s8 tmp;
     s8 roll;
+    s8 sign;
     int i;
     int j;
     int coin;
@@ -765,12 +754,12 @@ void fn_3_144CB8(void) {
                         j++;
                     }
                 }
-                for (i = 0; i < 2; i++) {
-                    for (j = i + 1; j < 3; j++) {
-                        if (g_Minigame.miniGameCurrentPoints[list[i]] < g_Minigame.miniGameCurrentPoints[list[j]]) {
-                            tmp = list[i];
-                            list[i] = list[j];
-                            list[j] = tmp;
+                for (k = 0; k < 2; k++) {
+                    for (i = k + 1; i < 3; i++) {
+                        if (g_Minigame.miniGameCurrentPoints[list[k]] < g_Minigame.miniGameCurrentPoints[list[i]]) {
+                            tmp = list[k];
+                            list[k] = list[i];
+                            list[i] = tmp;
                         }
                     }
                 }
@@ -782,10 +771,11 @@ void fn_3_144CB8(void) {
                         break;
                     }
                 }
-                fielder->_10C = lbl_3_data_21B94[roll].x + 1.5 * (s8)(__abs(roll - player) / (roll - player));
+                sign = __abs(roll - player) / (roll - player);
+                MG._1BE8[coin] = -1 - roll;
+                fielder->_10C = lbl_3_data_21B94[roll].x + 1.5 * sign;
                 fielder->_110 = 0.0f;
                 fielder->_114 = lbl_3_data_21B94[roll].z;
-                MG._1BE8[coin] = -1 - roll;
             }
             g_Minigame._1C8E[player] = MG._1C7E[player][0];
             MG._193A[coin] = 3;
@@ -1122,7 +1112,8 @@ void fn_3_1439EC(s32 idx) {
 }
 
 // .text:0x00143770 size:0x27C mapped:0x80782804
-// 98.54%: the target forms the list pointers before its first open[] store.
+// 98.54%: the target forms the list pointers before its first open[] store. Not fixed by the
+// order or form (loop, chained) of the setup stores, declaration orders, or a permuter session.
 s32 fn_3_143770(UnkMgEntry3310* entry) {
     s32 open[4];
     s32 free[4];
@@ -1380,12 +1371,12 @@ void fn_3_142C18(void) {
 }
 
 // .text:0x001428F0 size:0x328 mapped:0x80781984
-// 98.19%: the target reads cpu->_0 and cpu->_3 off g_Minigame + player * 4 before forming
-// cpu, and allocates kind, count and found in other saved registers.
+// 98.42%: the target reads _0 and _3 off g_Minigame + player * 4 and only then turns that
+// register into cpu (addi in place); every valid placement of cpu tried keeps a separate base.
 u8 fn_3_1428F0(s8 player, u8 force) {
     Unk37A8Cpu* cpu;
-    u8 strength;
     s8 port;
+    u8 strength;
     s8 ready;
     s8 coin;
     s8 target;
@@ -1623,9 +1614,13 @@ void fn_3_14225C(void) {
     fn_800B9948(fn_3_141C8C);
 }
 
+// An RGBA8 texel's byte offset from its index; the parameter must be s32 (int allocates the
+// caller's loop counters differently)
+static inline s32 TexelByteOffset(s32 texel) {
+    return texel * 4;
+}
+
 // .text:0x00142088 size:0x1D4 mapped:0x8078111C
-// 96.28%: registers only; the loop counters and the inlined fn_3_142030's temporaries
-// sit in other volatile registers.
 void fn_3_142088(void) {
     u32 y;
     u32 x;
@@ -1633,7 +1628,7 @@ void fn_3_142088(void) {
 
     for (y = 0; y < 4; y++) {
         for (x = 0; x < 4; x++) {
-            offset = fn_3_142030(x, y, 4) * 4;
+            offset = TexelByteOffset(fn_3_142030(x, y, 4));
             if (offset < 32) {
                 lbl_3_bss_B800[offset + 0] = lbl_3_bss_B800[offset + 2] = 255;
                 lbl_3_bss_B800[offset + 1] = lbl_3_bss_B800[offset + 3] = 150;
@@ -1645,8 +1640,8 @@ void fn_3_142088(void) {
     }
     GXInitTexObj(&lbl_3_bss_B7C4, lbl_3_bss_B800, 4, 4, GX_TF_RGBA8, GX_REPEAT, GX_REPEAT, GX_FALSE);
     GXInitTexObjLOD(&lbl_3_bss_B7C4, GX_LINEAR, GX_LINEAR, 0.0f, 0.0f, 0.0f, GX_FALSE, GX_FALSE, GX_ANISO_1);
-    lbl_3_bss_B7E4 = 0;
     lbl_3_data_266A4 = -1;
+    lbl_3_bss_B7E4 = 0;
     lbl_3_bss_B7C1 = 0;
 }
 

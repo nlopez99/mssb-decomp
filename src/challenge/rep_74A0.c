@@ -202,7 +202,7 @@ extern void fn_800BD190(void* geo, void* tex);
 extern void fn_800BDC88(ModelTable74A0* table, u16 first, u16 last, void* layout, void* anim, void* skn);
 extern void fn_800BD548(Model74A0* model, s32 count, ...);
 extern void fn_800B2C08(Node74A0* node, s32 arg1);
-extern Emitter74A0* fn_80033A24(BOOL (*update)(Emitter74A0*), s32, s32, s32, s32, s32);
+extern Emitter74A0* fn_80033A24(BOOL (*update)(Emitter74A0*), u8, s32, s32, s32, u8);
 extern u8 lbl_803CBBC0;
 extern void SetFog(GXFogType type, f32 startZ, f32 endZ, f32 nearZ, f32 farZ, GXColor color);
 extern void minigamesSetSomePointers(void);

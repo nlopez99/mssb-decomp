@@ -1,0 +1,85 @@
+#ifndef __STATIC_PARTICLE_H_
+#define __STATIC_PARTICLE_H_
+
+#include "mssbTypes.h"
+#include "Dolphin/mtx.h"
+#include "Dolphin/gx.h"
+
+struct Emitter;
+struct Particle;
+struct ZSortEntry;
+struct TexFile;
+struct EffectParams;
+struct SparkParticle;
+struct GlowParticle;
+struct FlareParams;
+struct SparkParams;
+struct SmokeParams;
+struct PuffParams;
+struct StreakParams;
+
+BOOL fn_800263FC(void* e);
+void fn_80026998(struct SmokeParams* params);
+BOOL fn_80026E58(void* e);
+void fn_80027300(struct Emitter* e, Vec* pos, Vec* dir, struct EffectParams* params, f32 scale);
+void fn_80027674(Vec* pos, Vec* dir, struct EffectParams* params, f32 scale, u8 id);
+void fn_80027918(u8 id, f32 v);
+void fn_8002852C(void);
+BOOL fn_80028F48(void* e);
+void fn_8002955C(Vec* pos, Vec* dir, struct PuffParams* params);
+void fn_800297F0(struct Emitter* e, Vec* pos, Vec* dir, struct PuffParams* params);
+BOOL fn_80029CC8(void* e);
+void fn_8002BC84(struct Emitter* e, Vec* pos, Vec* dir, struct EffectParams* params);
+void fn_8002A1CC(Vec* pos, struct StreakParams* params);
+u8 fn_8002A85C(struct Emitter* e, struct GlowParticle* p);
+u8 fn_8002AC68(struct Emitter* e, struct SparkParticle* p);
+BOOL fn_8002B014(struct Emitter* e);
+void fn_8002B400(struct Emitter* e, struct SparkParams* params, Vec* pos);
+void fn_8002B7F8(Vec* pos, struct SparkParams* params, u8 glow);
+void fn_8002C2D0(Vec* pos, Vec* dir, struct EffectParams* params);
+void fn_8002CDD0(Vec* pos);
+BOOL fn_8002D82C(void* e);
+void fn_8002DC68(Vec* pos);
+BOOL fn_8002F1AC(Vec* pos, s32 key);
+BOOL fn_8002ECA0(void* e);
+void fn_8002F258(Vec* pos, s32 id, struct FlareParams* params);
+void fn_8002F5F4(Vec* pos, Vec* dir, struct EffectParams* params);
+BOOL fn_8002F9FC(void* e);
+void fn_8002FDB8(struct Emitter* e, Vec* pos, Vec* dir, Vec* back, struct EffectParams* params);
+void fn_80030470(Vec* pos, Vec* dir, Vec* back, struct EffectParams* params, s32 id);
+void fn_80030720(struct Emitter* e, Vec* pos, Vec* dir, struct EffectParams* params);
+void fn_80030D88(Vec* pos, Vec* dir, struct EffectParams* params, s32 id);
+BOOL fn_8002E3DC(void* e);
+BOOL fn_8002E828(void* e);
+BOOL fn_80031034(void* e);
+void fn_800317C4(struct Emitter* e, Vec* pos, struct EffectParams* params);
+void fn_80031CA4(Vec* pos, struct EffectParams* params);
+struct Particle* fn_80031F34(struct Particle* list, s32 n);
+s32 fn_80032038(struct ZSortEntry* a, struct ZSortEntry* b);
+void fn_80032064(Vec* pos, struct StreakParams* dir);
+void fn_80032284(Vec* pos);
+void fn_800324EC(u16 joint, s32 player, s32 other, struct StreakParams* dir);
+BOOL fn_800328E0(void* e);
+void fn_800330CC(s32 n, u32 arg1, Vec* start, Vec* end, f32 arg4, s32 arg5, s32 arg6, f32 arg7);
+void fn_800332B8(Vec* dirIn, Vec* out, f32 yawMin, f32 yawMax, f32 pitchMin, f32 pitchMax);
+f32 fn_800335BC(s32 angle);
+f32 fn_800335EC(s32 angle);
+void fn_80033620(struct Emitter* e);
+void fn_80033794(struct Particle* list);
+struct Emitter* fn_800337CC(struct Emitter* e, s32 n, BOOL all);
+void pitchingMachinePitching(u8 id);
+BOOL fn_80033928(u8 id);
+void fn_80033964(struct Emitter* e);
+struct Emitter* fn_800339F0(struct Emitter* e, u8 id);
+struct Emitter* fn_80033A24(BOOL (*update)(void*), u8 priority, s32 kind, s32 n, BOOL all, u8 id);
+void fn_80033B58(struct TexFile* file, s32 index, GXTexWrapMode wrapS, GXTexWrapMode wrapT);
+void fn_80033CC8(struct Particle* p, struct TexFile* file);
+void fn_80033F64(f32 w, f32 h, f32 angle);
+void fn_8003403C(f32 w, f32 h);
+void fn_800340F4(Mtx m);
+void fn_80034120(Mtx m);
+void fn_8003414C(Mtx m);
+void minigamesSetSomePointers(void);
+void minigamesSetSomePointers2(void);
+
+#endif // !__STATIC_PARTICLE_H_
