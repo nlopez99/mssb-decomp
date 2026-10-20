@@ -133,6 +133,7 @@ void fn_80039AC0(void) {
     f32 rnd;
 
     if (lbl_803C5090.flags & 8) {
+        // the target reads the colour as one unaligned word from 0x1A
         color = (*(u32*)&lbl_803C5090._1A & ~0xFF) | lbl_803C5090.alpha;
     } else {
         color = 0xFFFFFF00;
@@ -209,14 +210,12 @@ void fn_80039AC0(void) {
         f32 x1;
         f32 y0;
         f32 y1;
-        u16 tmax;
 
         w = (640.0f * lbl_803C5090.scale) / 1280.0f;
         h = (448.0f * lbl_803C5090.scale) / 1280.0f;
         x0 = -w / 2.0f;
         x1 = w / 2.0f;
         y0 = -h / 2.0f;
-        tmax = (lbl_803C5090._14 << 10) / 448;
         z = -lbl_803C5090.scale;
         y1 = y0 + (f32)lbl_803C5090._14 * lbl_803C5090.scale / 1280.0f;
         quad[0].x = x0;
@@ -230,13 +229,13 @@ void fn_80039AC0(void) {
         quad[1].z = z;
         quad[1].color = color;
         quad[1].s = 0;
-        quad[1].t = tmax;
+        quad[1].t = (lbl_803C5090._14 << 10) / 448;
         quad[2].x = x1;
         quad[2].y = y1;
         quad[2].z = z;
         quad[2].color = color;
         quad[2].s = 0x400;
-        quad[2].t = tmax;
+        quad[2].t = (lbl_803C5090._14 << 10) / 448;
         quad[3].x = x1;
         quad[3].y = y0;
         quad[3].z = z;
