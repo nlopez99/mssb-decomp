@@ -15,6 +15,10 @@ struct ModelSub2C;
 
 struct _VecXYZ;
 
+struct ModelSlot* fn_800111D8(struct ModelActor* actor);
+struct ModelActor* fn_800111FC(struct ModelActor* actor, BOOL alt);
+void fn_80011358(int idx, int part);
+void fn_80011468(void);
 struct ModelActor* fn_80011570(void);
 void fn_80011578(void);
 void fn_800115C8(s8 idx);
@@ -83,7 +87,7 @@ BOOL fn_8001B728(int idx, int joint, Vec* out);
 BOOL getAnimRelatedCoordinates(int idx, int joint, struct _VecXYZ* out);
 void QueueCharacterAnimation(s32 idx, int anim, int a, int b, int c, int d, int e);
 void AnimateCharacter(s32 idx, int anim, int a, u8 mode, int b, int c, int d, int e);
-void fn_8001BA44(void);
+void fn_8001BA44(int idx, int anim, int a, int b, int c, int d, int e);
 void fn_8001BE50(void);
 void fn_8001C234(void);
 void fn_8001C528(void);

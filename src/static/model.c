@@ -87,7 +87,8 @@ typedef struct ModelNode {
     /* 0x0080 */ u16 joint;
     /* 0x0082 */ u8 _0082[0x98 - 0x82];
     /* 0x0098 */ u8 flags;
-    /* 0x0099 */ u8 _0099[0xEC - 0x99];
+    /* 0x0099 */ u8 _99;
+    /* 0x009A */ u8 _009A[0xEC - 0x9A];
     /* 0x00EC */ MtxPtr mtx;
     /* 0x00F0 */ u8 _00F0[0x100 - 0xF0];
     /* 0x0100 */ struct ModelNode* next;
@@ -218,7 +219,7 @@ typedef struct ModelActor {
     /* 0x0262 */ s8 _262;
     /* 0x0263 */ s8 _263;
     /* 0x0264 */ s8 _264;
-    /* 0x0265 */ u8 _0265[0x266 - 0x265];
+    /* 0x0265 */ s8 _265;
     /* 0x0266 */ s8 _266;
     /* 0x0267 */ s8 _267;
     /* 0x0268 */ u8 _268;
@@ -378,6 +379,11 @@ void LITInitAttn(LITObj* light, f32 a0, f32 a1, f32 a2, f32 k0, f32 k1, f32 k2);
 void LITInitPos(LITObj* light, f32 x, f32 y, f32 z);
 void LITInitColor(LITObj* light, GXColor color);
 void fn_800BD2DC(void);
+void fn_8004B6EC(ModelActor* actor, ModelSlot* slot);
+void fn_8004B7F4(ModelActor* actor);
+void fn_8004BAEC(ModelActor* actor, ModelSlot* slot);
+void fn_8005240C(ModelActor* actor, ModelSlot* slot);
+void fn_800B2BA8(ModelNode* node, u16 joint, ModelNode* src, u16 bone);
 ModelTable* ActorObjectInitTable(s32 count);
 void fn_800BDC88(ModelTable* table, u16 slot, u16 id, void* layout, s32 arg4, s32 arg5);
 void convertTextureHeader(void* tex);
@@ -1365,7 +1371,7 @@ void fn_8001BE50(void) {
 }
 
 // .text:0x8001BA44 size:0x40C
-void fn_8001BA44(void) {
+void fn_8001BA44(int idx, int anim, int a, int b, int c, int d, int e) {
 }
 
 // .text:0x8001B990 size:0xB4
@@ -2368,4 +2374,131 @@ void fn_80011578(void) {
 // .text:0x80011570 size:0x8
 ModelActor* fn_80011570(void) {
     return lbl_803CBC18;
+}
+
+// .text:0x80011468 size:0x108
+void fn_80011468(void) {
+    ModelActor* actor;
+    ModelSlot* slot;
+    int i;
+
+    for (i = 0; i < 13; i++) {
+        actor = lbl_8036E548.actors[i];
+        if (actor != NULL) {
+            slot = &lbl_8036E548._0060->slots[actor->_255];
+            switch (actor->_252) {
+            case 19:
+                fn_8004B6EC(actor, slot);
+                break;
+            case 40:
+            case 41:
+                fn_8004B7F4(actor);
+                break;
+            case 38:
+                slot->node->_99 = 1;
+            case 18:
+                fn_8004BAEC(actor, slot);
+                break;
+            case 14:
+            case 37:
+                fn_8005240C(actor, slot);
+                break;
+            case 6:
+            case 10:
+            case 12:
+            case 24:
+            case 25:
+            case 26:
+            case 42:
+                slot->node->_99 = 1;
+                break;
+            case 20:
+            case 43:
+                if (actor->_62 == 0x40) {
+                    slot->node->_99 = 0;
+                } else {
+                    slot->node->_99 = 1;
+                }
+                break;
+            }
+        }
+    }
+}
+
+// .text:0x80011358 size:0x110
+void fn_80011358(int idx, int part) {
+    ModelActor* actor;
+    ModelSlot* slot;
+    ModelNode* src;
+    u16 joint;
+    u16 n;
+    int k;
+
+    if (idx < 0 || idx >= 13) {
+        return;
+    }
+    actor = lbl_8036E548.actors[idx];
+    if (actor == NULL || lbl_8036E548._0060 == NULL || lbl_8036E548._0064 == NULL) {
+        return;
+    }
+    joint = actor->joints[36];
+    if (joint == 0xFFFF) {
+        return;
+    }
+    if (part < 0 || part >= 5) {
+        part = 4;
+    }
+    slot = &lbl_8036E548._0060->slots[actor->_255];
+    if (part == 4) {
+        fn_800B2BA8(slot->node, joint, NULL, 0);
+        return;
+    }
+    src = lbl_8036E548._0064->slots[part + 21].node;
+    for (k = 0, n = src->numBones; k < n; k++) {
+        if (src->bones[k]->dispObj != NULL) {
+            fn_800B2BA8(slot->node, joint, src, k);
+            return;
+        }
+    }
+}
+
+// .text:0x800111FC size:0x15C
+// 66.30%: waits on fn_8001BA44, whose empty stub is inlined here; the target calls it
+// with bl. The rest follows the target line by line.
+ModelActor* fn_800111FC(ModelActor* actor, BOOL alt) {
+    ModelActor* target;
+    int slot;
+
+    if (g_d_GameSettings.GameModeSelected != 6) {
+        return actor;
+    }
+    slot = actor->_255 % 4;
+    lbl_8036E548.actorData[slot + 4]._25D = 0;
+    lbl_8036E548.actorData[slot]._25D = 0;
+    target = &lbl_8036E548.actorData[slot + (alt ? 4 : 0)];
+    lbl_8036E548.actors[slot] = target;
+    if (target->_255 != actor->_255) {
+        fn_8001BA44(slot, actor->_62, actor->_25F, actor->_262, 0, actor->_265, actor->_269);
+        target->_64 = actor->_64;
+        target->_6C = actor->_6C;
+        target->_25E = actor->_25E;
+        target->_260 = actor->_260;
+        target->_263 = actor->_263;
+        target->_266 = actor->_266;
+        target->_26A = actor->_26A;
+        target->_26D = actor->_26D;
+        target->_66 = actor->_66;
+        target->_6E = actor->_6E;
+        target->_261 = actor->_261;
+        target->_264 = actor->_264;
+        target->_267 = actor->_267;
+        target->_26B = actor->_26B;
+        target->_26E = actor->_26E;
+    }
+    return target;
+}
+
+// .text:0x800111D8 size:0x24
+ModelSlot* fn_800111D8(ModelActor* actor) {
+    return &lbl_8036E548._0060->slots[actor->_255];
 }
