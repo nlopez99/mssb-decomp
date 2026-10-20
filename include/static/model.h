@@ -5,6 +5,7 @@
 #include "Dolphin/mtx.h"
 
 struct ModelActor;
+struct ModelTable;
 struct ModelNode;
 struct LightDesc;
 struct ModelHandle;
@@ -99,7 +100,7 @@ void fn_8001D110(s32 idx, f32 x, f32 y, f32 z);
 void fn_8001D148(s32 idx, f32 x, f32 y, f32 z);
 void fn_8001D180(void);
 void fn_8001D2D4(void);
-void fn_8001DB74(void);
+void fn_8001DB74(struct ModelTable* table);
 void fn_8001DD58(struct ModelNode* node, int lod, MtxPtr camera, u8 numLights, ...);
 void fn_8001DEA4(void);
 void fn_8001E0D8(void);

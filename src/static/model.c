@@ -4,6 +4,7 @@
 #include "C3/control.h"
 #include "C3/geoPalette.h"
 #include "C3/anim.h"
+#include "C3/actor.h"
 #include "Dolphin/gx.h"
 #include "static/static_80021188.h"
 #include "static/static_8003A2EC.h"
@@ -32,6 +33,11 @@ typedef struct _VecXYZ {
 } VecXYZ;
 
 // STRUCTS BEGIN
+typedef struct ModelCamera {
+    /* 0x0000 */ u8 _0000[0x40 - 0x0];
+    /* 0x0040 */ Mtx view;
+} ModelCamera; // size: 0x70
+
 typedef struct JointPair {
     /* 0x0000 */ u16 a;
     /* 0x0002 */ u16 b;
@@ -182,7 +188,7 @@ typedef struct ModelActor {
     /* 0x0255 */ s8 _255;
     /* 0x0256 */ u8 _0256[0x25C - 0x256];
     /* 0x025C */ s8 _25C;
-    /* 0x025D */ s8 _25D;
+    /* 0x025D */ u8 _25D;
     /* 0x025E */ s8 _25E;
     /* 0x025F */ s8 _25F;
     /* 0x0260 */ s8 _260;
@@ -211,7 +217,17 @@ typedef struct ModelActor {
 
 typedef struct ModelSlot {
     /* 0x0000 */ ModelNode* node;
-    /* 0x0004 */ u8 _0004[0x64 - 0x4];
+    /* 0x0004 */ ANIMBank* anim;
+    /* 0x0008 */ u8 _0008[0xE - 0x8];
+    /* 0x000E */ u16 seqNum;
+    /* 0x0010 */ u8 _0010[0x54 - 0x10];
+    /* 0x0054 */ f32 speed;
+    /* 0x0058 */ u8 _58;
+    /* 0x0059 */ u8 _59;
+    /* 0x005A */ u8 _5A;
+    /* 0x005B */ u8 _5B;
+    /* 0x005C */ f32 time;
+    /* 0x0060 */ f32 _60;
     /* 0x0064 */ u16 _64;
     /* 0x0066 */ u16 _66;
     /* 0x0068 */ u16* _68;
@@ -303,6 +319,14 @@ void LITInitAttn(LITObj* light, f32 a0, f32 a1, f32 a2, f32 k0, f32 k1, f32 k2);
 void LITInitPos(LITObj* light, f32 x, f32 y, f32 z);
 void LITInitColor(LITObj* light, GXColor color);
 void fn_800BD2DC(void);
+void fn_800B4CA0(ModelNode* node, f32 time);
+void fn_800B4C04(ModelNode* node, f32 speed);
+void fn_800B4AFC(ModelNode* node, u8 arg1);
+void Set_FUN_800b2b6c(ModelNode* node, u16* arg1);
+void fn_800BDA24(ModelSlot* slot);
+s32 fn_800527BC(void);
+ModelCamera* fn_80052734(s32 idx);
+u8 fn_800B3C04(s32 idx, ModelNode* node, Mtx m);
 void fn_800BD2CC(s32 id, GXColor color);
 void fn_800BD548(ModelSlot* slot, s32 count, ...);
 void fn_800B2C10(ModelNode* node, u16 joint, Vec* out);
@@ -610,7 +634,58 @@ void fn_8001DD58(ModelNode* node, int lod, MtxPtr camera, u8 numLights, ...) {
 }
 
 // .text:0x8001DB74 size:0x1E4
-void fn_8001DB74(void) {
+void fn_8001DB74(ModelTable* table) {
+    Mtx m;
+    ModelSlot* slot;
+    u16 i;
+    int shift;
+    MtxPtr view;
+    u16 j;
+    ModelActor* actor;
+    ModelNode* node;
+    u8 mask;
+
+    for (i = 0; i < table->count; i++) {
+        actor = lbl_8036E548.actors[i];
+        if (actor != NULL && actor->_25D != 0) {
+            slot = &lbl_8036E548._0060->slots[actor->_255];
+            if (slot->node != NULL) {
+                if (slot->_58) {
+                    ACTSetAnimation((Actor*)slot->node, slot->anim, NULL, slot->seqNum, 0.0f, slot->_60);
+                }
+                if (slot->_59) {
+                    fn_800B4CA0(slot->node, slot->time);
+                }
+                if (slot->_5A) {
+                    fn_800B4C04(slot->node, slot->speed);
+                }
+                if (slot->_5B & 2) {
+                    fn_800B4AFC(slot->node, slot->_5B & 1);
+                }
+                Set_FUN_800b2b6c(slot->node, slot->_68);
+                if (slot->_6C) {
+                    fn_800BDA24(slot);
+                }
+                for (j = 0; j < fn_800527BC(); j++) {
+                    view = fn_80052734(j)->view;
+                    shift = j * 3;
+                    mask = ~(3 << shift);
+                    if (lbl_8036E548._307A == 5) {
+                        slot->node->flags = 1;
+                    } else {
+                        PSMTXTrans(m, actor->pos.x, actor->pos.y, actor->pos.z);
+                        PSMTXConcat(view, m, m);
+                        node = slot->node;
+                        node->flags = (node->flags & mask) | (fn_800B3C04(j, node, m) << shift);
+                    }
+                }
+                slot->_58 = 0;
+                slot->_59 = 0;
+                slot->_5A = 0;
+                slot->_5B &= 1;
+            }
+        }
+    }
 }
 
 // .text:0x8001D2D4 size:0x8A0
@@ -642,6 +717,33 @@ void fn_8001D074(void) {
 
 // .text:0x8001CE74 size:0x200
 void fn_8001CE74(void) {
+    LightPos* light = lbl_80367318;
+    int id;
+    int i;
+
+    lbl_8036E548._3085 = 4;
+    if (g_d_GameSettings.GameModeSelected == 7) {
+        id = g_d_GameSettings.StadiumID + 7;
+    } else {
+        id = g_d_GameSettings.StadiumID;
+    }
+    fn_8001CA40(id);
+    fn_800BD2DC();
+    if (lbl_800F7478[g_d_GameSettings._54].ambient.a != 0) {
+        fn_800BD2CC(1, lbl_800F7478[g_d_GameSettings._54].ambient);
+    }
+    for (i = 0; i < 4; i++) {
+        LITAlloc(&lbl_8036E548.lights[i]);
+        LITInitAttn(lbl_8036E548.lights[i], 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+        LITInitPos(lbl_8036E548.lights[i], light->pos.x, light->pos.y, light->pos.z);
+        LITInitColor(lbl_8036E548.lights[i], light->color);
+        light++;
+    }
+    if (lbl_8036E548._006C != NULL) {
+        for (i = 0; i < lbl_8036E548._006C->count; i++) {
+            fn_800BD548(&lbl_8036E548._006C->slots[i], 4, lbl_8036E548.lights[0], lbl_8036E548.lights[1], lbl_8036E548.lights[2], lbl_8036E548.lights[3]);
+        }
+    }
 }
 
 // .text:0x8001CCC8 size:0x1AC
