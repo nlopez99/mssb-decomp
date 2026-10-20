@@ -250,6 +250,10 @@ extern StadiumLights lbl_800F7478[14];
 extern u8 lbl_80367318[];
 extern s32 lbl_803CBC70;
 extern s32 lbl_803CBD0C;
+extern s32 fn_8005268C(void);
+extern MtxPtr fn_80052734(s32 index);
+extern u16 lbl_800F7840[16];
+extern void SetFogNone(void);
 extern u16 lbl_800F7860[7][2];
 extern struct {
     /* 0x0000 */ u8 _0000[0x2C50];
@@ -337,6 +341,68 @@ void minigamesSetSomePointers2(void)
     lbl_803CBC80 = lbl_801F8040;
     initCosTable();
     lbl_803CBC7C = 0;
+}
+
+// .text:0x8003452C size:0x39C
+void minigamesGXStuff(void)
+{
+    GXTexObj texObj;
+    Emitter* e;
+    Emitter* dead;
+    BOOL finished;
+
+    if (lbl_803CBC78 != 0) {
+        lbl_803CBC78 = 0;
+        e = lbl_803CBC84.next;
+        while (e != NULL) {
+            dead = e;
+            e = e->next;
+            fn_80033964(dead);
+        }
+        lbl_803CBC84.next = NULL;
+        return;
+    }
+    if (lbl_803CBC84.next == NULL) {
+        return;
+    }
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetNumChans(1);
+    GXSetNumTexGens(1);
+    GXSetNumTevStages(1);
+    GXSetTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2X4, GX_TG_TEX0, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
+    GXSetCullMode(GX_CULL_NONE);
+    GXInitTexObj(&texObj, lbl_800F7840, 4, 4, GX_TF_RGB565, GX_CLAMP, GX_CLAMP, GX_FALSE);
+    GXInitTexObjLOD(&texObj, GX_LINEAR, GX_LINEAR, 0.0f, 0.0f, 0.0f, GX_FALSE, GX_FALSE, GX_ANISO_1);
+    GXLoadTexObj(&texObj, GX_TEXMAP0);
+    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_RASC, GX_CC_TEXC, GX_CC_ZERO);
+    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_RASA, GX_CA_TEXA, GX_CA_ZERO);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    GXSetProjection(fn_80052734(fn_8005268C()), GX_PERSPECTIVE);
+    GXLoadPosMtxImm(lbl_8017FFE0, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    SetFogNone();
+    e = lbl_803CBC84.next;
+    while (e != NULL) {
+        if (e->update != NULL) {
+            finished = e->update(e);
+            if (finished) {
+                dead = e;
+            }
+        }
+        e = e->next;
+        if (finished) {
+            fn_80033964(dead);
+        }
+    }
 }
 
 // .text:0x80034220 size:0x30C
