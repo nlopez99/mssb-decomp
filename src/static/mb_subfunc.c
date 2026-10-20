@@ -61,6 +61,34 @@ typedef struct MbTeams {
     /* 0x38 */ u8 _38[0x5C - 0x38];
 } MbTeams; // size: 0x5C
 
+typedef struct MbStatGroup {
+    /* 0x0 */ s32 a;
+    /* 0x4 */ s16 b;
+    /* 0x6 */ s16 c;
+} MbStatGroup; // size: 0x8
+
+typedef struct MbStatSlot {
+    /* 0x00 */ u8 _00[0x14];
+    /* 0x14 */ u8 _14;
+    /* 0x15 */ u8 _15;
+} MbStatSlot; // size: 0x16
+
+typedef struct MbStats {
+    /* 0x000 */ MbStatGroup head[5];
+    /* 0x028 */ MbStatGroup rows[6][5];
+    /* 0x118 */ MbStatGroup tail[5];
+    /* 0x140 */ MbStatSlot slots[32];
+    /* 0x400 */ u8 _400[0x454 - 0x400];
+} MbStats; // size: 0x454
+
+extern MbStats lbl_803616CC;
+extern s32 lbl_800E88C4[6][5][3];
+extern s32 lbl_800E8A2C[5][3];
+extern s32 lbl_800E8A68[5][3];
+extern u8 lbl_800E869C[32];
+
+extern void fn_8006C398(MbStatSlot* slot);
+
 extern MbState lbl_8034E9A0;
 extern MbTeams lbl_803C6724;
 extern u8 lbl_80108DB8[];
@@ -664,6 +692,30 @@ s8 translateStarPitchHitIndex(u8 index) {
 
 // .text:0x80064534 size:0x220
 void fn_80064534(void) {
+    s32 i;
+    s32 j;
+
+    for (i = 0; i < 6; i++) {
+        for (j = 0; j < 5; j++) {
+            lbl_803616CC.rows[i][j].a = lbl_800E88C4[i][j][0];
+            lbl_803616CC.rows[i][j].b = lbl_800E88C4[i][j][1];
+            lbl_803616CC.rows[i][j].c = lbl_800E88C4[i][j][2];
+        }
+    }
+    for (j = 0; j < 5; j++) {
+        lbl_803616CC.head[j].a = lbl_800E8A2C[j][0];
+        lbl_803616CC.head[j].b = lbl_800E8A2C[j][1];
+        lbl_803616CC.head[j].c = lbl_800E8A2C[j][2];
+    }
+    for (j = 0; j < 5; j++) {
+        lbl_803616CC.tail[j].a = lbl_800E8A68[j][0];
+        lbl_803616CC.tail[j].b = lbl_800E8A68[j][1];
+        lbl_803616CC.tail[j].c = lbl_800E8A68[j][2];
+    }
+    for (i = 0; i < 32; i++) {
+        fn_8006C398(&lbl_803616CC.slots[i]);
+        lbl_803616CC.slots[i]._14 = lbl_800E869C[i];
+    }
 }
 
 // .text:0x80064430 size:0x104
