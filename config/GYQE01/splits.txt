@@ -55,6 +55,15 @@ static/spani_default.c:
 	.sbss       start:0x803CBC90 end:0x803CBCA0
 	.sdata2     start:0x803CC6E8 end:0x803CC720
 
+static/physics.c:
+	extab       start:0x80005E48 end:0x80005EE8
+	extabindex  start:0x800078CC end:0x800079BC
+	.text       start:0x80037054 end:0x80039AA8
+	.data       start:0x800F79A0 end:0x800F7A40
+	.sdata      start:0x803CB818 end:0x803CB828
+	.sbss       start:0x803CBCA0 end:0x803CBCA8
+	.sdata2     start:0x803CC720 end:0x803CC7A0
+
 Dolphin/base/PPCArch.c:
 	.text       start:0x8006D024 end:0x8006D138
 
