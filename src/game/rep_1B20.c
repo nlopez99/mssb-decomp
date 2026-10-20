@@ -8,6 +8,7 @@
 #include "game/rep_1C18.h"
 #include "game/m_sound.h"
 #include "game/rep_F80.h"
+#include "static/static_8001FE00.h"
 
 typedef struct AramEntry1B20 {
     /* 0x0 */ u32 _0[4];
@@ -60,7 +61,6 @@ extern struct {
     /* 0x307E */ u8 _307E;
 } lbl_8036E548;
 
-extern void changeScene(u8, s16);
 extern void minigamesSetSomePointers(void);
 extern u8 lbl_800EFBA4[0x10];
 extern int fn_80035838(AramEntry1B20* entry, int count);

@@ -26,6 +26,7 @@
 #include "game/rep_12D0.h"
 #include "game/rep_1330.h"
 #include "static/sub.h"
+#include "static/static_8001FE00.h"
 
 extern struct {
     /* 0x00 */ s32 _00;
@@ -124,7 +125,6 @@ s16 lbl_3_data_8080[4] = {1, 100, 60, 0};
 
 BOOL fn_8001C920(int charID);
 void fn_3_1DD48(void);
-extern void changeScene(u8, s16);
 int fn_3_6D564(int team, int rosterID, int arg);
 
 static s32 lbl_3_bss_172C[7];

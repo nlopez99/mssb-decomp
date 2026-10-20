@@ -2,6 +2,7 @@
 #include "header_rep_data.h"
 #include "Dolphin/vec.h"
 #include "static/UnknownHomes_Static.h"
+#include "static/static_800638CC.h"
 
 typedef struct {
     /* 0x00 */ s32 _00;
@@ -33,7 +34,6 @@ extern void fn_8002955C(Vec* pos, s32 arg1, Unk3C80Burst* burst);
 extern void fn_80030D88(Vec* pos, Vec* vel, Unk3C80Trail* trail, s32 arg3);
 extern void fn_80031CA4(Vec* pos, Unk3C80Glow* glow);
 extern s32 fn_8004AD54(u8 stadium, s32 type);
-extern void fn_80064344(Vec* pos, Vec* vel);
 
 static Unk3C80Glow lbl_3_data_27D58 = {
     0, { 4, 10, 70000, 30000, 78000, 30, 10, 109000, 101000, 0, 30, 12800000, 0, 0, 0 }, 0, { 0xFFFFFF00, 0, 75000 },

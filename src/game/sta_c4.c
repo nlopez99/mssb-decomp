@@ -18,6 +18,7 @@
 #include "math.h"
 #include "string.h"
 #include "static/sub.h"
+#include "static/static_80021188.h"
 
 typedef struct StaC4Particle {
     /* 0x00 */ struct StaC4Particle* next;
@@ -301,7 +302,6 @@ extern u8 lbl_3_data_11138[0x10][3];
 extern u8 lbl_3_data_8404[6][15][2];
 extern u8 lbl_3_data_84B8[30][2];
 
-extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_8003A144(void);
 extern void fn_80035750(void* arg0, void* arg1, s32 arg2);
 extern void fn_80034E20(StaC4Task* task, void* desc);
@@ -313,7 +313,6 @@ extern void fn_80025DDC(void* anim);
 extern void fn_80025FFC(void* anim, StaC4Anim* state);
 extern void fn_80025EEC(StaC4Anim* state, s32, s32);
 extern StaC4Tex* fn_80039AB4(void);
-extern void fn_800ACFB0(void* data);
 extern void fn_800A7D4C(s32, void*);
 extern void fn_80033620(StaC4Emitter* emitter);
 extern void fn_8003403C(f32, f32);

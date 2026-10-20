@@ -16,6 +16,7 @@
 #include "math.h"
 #include "string.h"
 #include "static/sub.h"
+#include "static/static_80021188.h"
 
 typedef struct {
     /* 0x00 */ void* _00;
@@ -145,7 +146,6 @@ StaC0Prop lbl_3_data_17B98[11] = {
 };
 u8 lbl_3_data_17CF8[9] = { 1, 2, 4, 4, 4, 4, 2, 8, 9 };
 
-extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern StaC0Actor* ActorObjectInitTable(u16 count);
 extern void fn_800BDC88(StaC0Actor* actors, u16 first, u16 last, void* model, void* anim, s32 arg5);
 extern void fn_800BD548(void* model, s32 count, ...);

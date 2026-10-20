@@ -22,6 +22,7 @@
 #include "game/rep_D18.h"
 #include "game/rep_3090.h"
 #include "game/rep_3DA8.h"
+#include "static/static_8001FE00.h"
 
 typedef struct {
     /* 0x00 */ Vec _00;
@@ -210,7 +211,6 @@ typedef struct {
 extern UnkA00CharEntry lbl_800E8558[54];
 extern s16 lbl_3_data_7F7C[][4];
 
-void changeScene(u8, s16);
 void fn_8001D074(s32, BOOL);
 void fn_800B0A14_removeQueue(void);
 UnkA00Task* fn_800B0A5C_insertQueue(void (*)(void), s32);

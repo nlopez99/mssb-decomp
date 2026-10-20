@@ -3,6 +3,7 @@
 #include "game/UnknownHomes_Game.h"
 #include "game/rep_3310.h"
 #include "string.h"
+#include "static/static_80021188.h"
 
 typedef struct {
     /* 0x00 */ void* _00;
@@ -56,7 +57,6 @@ extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);
 extern void convertTextureHeader(void* tex);
 extern void fn_800BD190(void* geo, void* tex);
 extern UnkActor3E00* ActorObjectInitTable(u16 count);
-extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_80025C58(void* anim, void*);
 extern void fn_80025DDC(void* anim);
 extern void fn_80025FFC(void* anim, UnkAnimState3E00* state);

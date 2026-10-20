@@ -7,6 +7,9 @@
 #include "musyx/musyx.h"
 #include "menus/rep_0010.h"
 #include "menus/rep_0CA0.h"
+#include "static/static_8001FE00.h"
+#include "static/spani_default.h"
+#include "static/static_8004C9FC.h"
 
 extern struct {
     /* 0x0000 */ u8 _0000[0x46F8];
@@ -119,9 +122,6 @@ extern s32 fn_2_14F8(s32 min, s32 max);
 extern void fn_2_11A0(s32 arg0);
 extern void fn_2_85108(void);
 extern void* fn_800B0A5C_insertQueue(void (*)(void), s32);
-extern void changeScene(u8, s16);
-extern void fn_80035CA4(s32 id);
-extern s32 fn_8004CA6C(u16 buttons);
 extern void fn_8004CC2C(void);
 extern void fn_8004D0F0(void);
 extern void fn_80062A74(void);

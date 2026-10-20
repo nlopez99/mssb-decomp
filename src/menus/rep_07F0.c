@@ -8,6 +8,8 @@
 #include "menus/rep_08E8.h"
 #include "menus/rep_0788.h"
 #include "menus/rep_0A58.h"
+#include "static/objinit.h"
+#include "static/static_8001FE00.h"
 
 typedef struct {
     /* 0x00 */ u8 _00[0x10];
@@ -92,7 +94,6 @@ extern struct {
 extern u32 lbl_803CB850[4];
 extern void* lbl_803CC1B8;
 
-extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_800B0A14_removeQueue(void);
 extern void fn_80009018(void* arg0);
 extern void fn_800AD070(void);
@@ -108,7 +109,6 @@ extern s32 fn_800ADB04(void* arg0, void* arg1, s32 arg2, s32 arg3);
 extern void fn_800ADBFC(void);
 extern void fn_800ADC40(void* arg0, u32 arg1);
 extern void* fn_800B0A5C_insertQueue(void (*callback)(void), s32 priority);
-extern void changeScene(u8, s16);
 extern u8 fn_80068514(s32 arg0, s32 arg1);
 extern u8 fn_8006862C(s32 arg0, s32 arg1);
 extern void fn_8006877C(s32 arg0);

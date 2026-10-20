@@ -7,6 +7,7 @@
 #include "Dolphin/mtx.h"
 #include "string.h"
 #include "Dolphin/rand.h"
+#include "static/static_80021188.h"
 
 typedef struct Task74A0Parent {
     /* 0x00 */ u8 _00[0x10];
@@ -183,9 +184,7 @@ extern struct {
 } lbl_80366158;
 
 extern void fn_800AD038(void* arg0);
-extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_800246D4(s32 (*compare)(Sort74A0*, Sort74A0*), Sort74A0* src, Sort74A0* dst, s32 size, s32 count);
-extern void fn_800ACFB0(void* ptr);
 extern void fn_800B2C88(Node74A0* node, u16 index, Mtx out);
 extern void fn_800B806C(s32 arg0, f32 top, f32 bottom, f32 left, f32 right, f32 nearZ, f32 farZ, f32 arg7);
 extern void makeLookAtMatrix(Mtx m, const Vec* camPos, const Vec* camUp, const Vec* target);

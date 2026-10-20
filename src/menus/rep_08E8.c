@@ -13,6 +13,8 @@
 #include "menus/rep_09B8.h"
 #include "menus/rep_0B08.h"
 #include "menus/rep_1028.h"
+#include "static/objinit.h"
+#include "static/static_80021188.h"
 
 typedef struct MenuTask08E8 {
     /* 0x00 */ u8 _00[0xC];
@@ -469,7 +471,6 @@ extern void fn_80034E20(void* task, u32* layout);
 extern void fn_80035B50(s32);
 extern s32 fn_80035838(AramEntry08E8* entry, s32 count);
 extern void fn_800AD054(s32 arg0, s32 arg1);
-extern void fn_800ACFB0(void* data);
 extern void fn_800A7D4C(s32, void*);
 extern void fn_800BD670(void* model, MtxPtr mtx);
 extern void fn_80031CA4(Vec* pos, u32* glow);
@@ -484,7 +485,6 @@ extern BOOL fn_8006CDC0(s32 index);
 extern void starMissionRelated2(void);
 extern void fn_8003BF54(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
-extern void* _OSAllocFromHeap(u32 align, u32 size);
 
 // rep_09B8 (an empty function there)
 
@@ -492,9 +492,7 @@ extern void fn_80052968(void);
 extern void* lbl_803CC1B8;
 extern s32 fn_80016710(s32, s32);
 extern void fn_800B0A14_removeQueue(void);
-extern void fn_80023B04(s32);
 extern void fn_80014204(s32);
-extern void* fn_80023AA4(void);
 extern MenuActorRef08E8* fn_800111D8(MenuFielder08E8* fielder);
 extern camera_803c639c_s* fn_80052734(s32);
 extern s32 fn_800527BC(void);

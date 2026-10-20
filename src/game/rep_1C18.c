@@ -6,6 +6,7 @@
 #include "game/rep_1BC8.h"
 #include "game/rep_D18.h"
 #include "game/rep_31A0.h"
+#include "static/static_8001FE00.h"
 
 extern struct {
     /* 0x000 */ u8 _000[0x1D2];
@@ -57,7 +58,6 @@ extern struct {
     /* 0x0000 */ CharacterStats _0000[1];
 } lbl_8034E9A0;
 
-extern void changeScene(u8, s16);
 extern BOOL fn_8001594C(int team);
 extern void fn_8004CC18(void);
 extern u8 fn_8004FD64(int);

@@ -11,6 +11,7 @@
 #include "game/rep_A00.h"
 #include "game/rep_1E08.h"
 #include "game/rep_12D0.h"
+#include "static/static_8001FE00.h"
 
 // Same layout as rep_A00.c's cue table entries, which read lbl_3_data_1E434 and lbl_3_data_1F090
 typedef struct {
@@ -223,7 +224,6 @@ extern s32 lbl_3_data_3B34[];
 extern void fn_80011358(int, u8);
 extern void fn_8001CA40(int arg);
 extern void fn_80052798(s32);
-extern void changeScene(u8, s16);
 extern void* fn_800B0A5C_insertQueue(void (*)(void), s32);
 
 extern void** fn_800111D8(Unk3090Model* model);

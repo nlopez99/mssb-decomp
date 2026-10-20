@@ -6,6 +6,8 @@
 #include "Dolphin/os.h"
 #include "string.h"
 #include "menus/rep_0C50.h"
+#include "static/static_8001FE00.h"
+#include "static/mb_subfunc.h"
 
 extern struct {
     /* 0x00 */ u8 _00;
@@ -314,7 +316,6 @@ static inline void copyChar0438(CharEntry0438* dst, CharEntry0438* src) {
 extern void fn_800AD038(s32 arg0);
 extern void fn_800628D4(s32 charID);
 extern void fn_8004EEF4(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-extern void fn_800678CC(s32 arg0);
 extern void fn_8004D990(s32 arg0, s32 arg1, s32 arg2);
 extern void fn_8004D460(s32 arg0, s32 arg1);
 extern void fn_8004E5B4(s32 arg0, s32 arg1, s32 arg2);
@@ -323,7 +324,6 @@ extern void* fn_800B0A5C_insertQueue(void (*callback)(void), s32 priority);
 extern void fn_2_82E58(void);
 extern void fn_2_19F2C(void);
 extern void fn_2_11A0(s32 arg0);
-extern void changeScene(u8, s16);
 extern void fn_80062A74(void);
 extern void fn_80021410(void);
 extern void fn_80035CA4(int arg);

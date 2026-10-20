@@ -8,6 +8,7 @@
 #include "game/rep_1CB8.h"
 #include "game/rep_D0.h"
 #include "game/rep_A00.h"
+#include "static/static_8004AC00.h"
 
 typedef struct UnkE08Fielder {
     /* 0x000 */ VecXYZ _000;
@@ -284,7 +285,6 @@ void fn_8001B4D8(int actor);
 s16 fn_8001B35C(int actor, int which);
 void** fn_800111D8(UnkE08Actor* actor);
 f32 fn_800B4A44(void* model, u16 anim);
-void fn_8004AE18(s32 fielder);
 void fn_8001C528(void);
 int fn_3_6D564(int team, int rosterID, int arg);
 extern s16 lbl_3_data_5EDC[22];

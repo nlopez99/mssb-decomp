@@ -1,5 +1,6 @@
 #include "menus/rep_11C0.h"
 #include "header_rep_data.h"
+#include "static/static_8001FE00.h"
 
 typedef struct MenuTask11C0 {
     /* 0x00 */ void (*fn)(void);
@@ -70,7 +71,6 @@ extern void fn_800363D8(MenuTask11C0* task, s32, s32, s32, s32);
 extern s32 fn_80042DA8(MenuTask11C0* task, s32, s32);
 extern void fn_80062674(s32);
 extern void fn_800626EC(s32);
-extern void changeScene(u8, s16);
 
 static inline BOOL fn_2_isState(u8 state) {
     return lbl_803C66B0._4F == state ? TRUE : FALSE;

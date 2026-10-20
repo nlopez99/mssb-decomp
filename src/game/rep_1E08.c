@@ -28,6 +28,7 @@
 #include "game/rep_EA0.h"
 #include "game/rep_140.h"
 #include "static/sub.h"
+#include "static/static_8004AC00.h"
 
 typedef struct {
     /* 0x00 */ void (*_00)(void);
@@ -1972,7 +1973,6 @@ extern void fn_800ACFB0(void* data);
 extern void fn_80033B58(void* texture, s32 index, s32, s32);
 extern u16 lbl_800F7860[4][2];
 extern void fn_80028628(Vec* pos, Vec* eye, UnkFxParams1E08* params, u16* shape, u32* color, UnkFxShape1E08* arg5, BOOL flag);
-extern void fn_8004B1B8(s32 v);
 extern void fn_80035750(void* arg0, void* arg1, s32 arg2);
 extern UnkSkeleton1E08** fn_800111D8(UnkPlayer1E08* player);
 extern s32 fn_8005268C(void);

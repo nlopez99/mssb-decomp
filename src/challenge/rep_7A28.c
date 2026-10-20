@@ -8,6 +8,7 @@
 #include "Dolphin/gx.h"
 #include "Dolphin/pad.h"
 #include "string.h"
+#include "static/objinit.h"
 
 // A particle effect editor: a debug camera, an emitter position and a menu per effect
 
@@ -106,7 +107,6 @@ extern struct {
     /* 0x08 */ void* _08;
 } lbl_80366158;
 
-extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void* ARAMTransfer(void* entry, int arg1, int arg2, u32 aram);
 extern void convertTextureHeader(void* tex);
 extern void fn_800AD038(void* arg0);
