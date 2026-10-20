@@ -84,7 +84,8 @@ extern struct {
     /* 0x0CF48 */ s8 _CF48[2];
     /* 0x0CF4A */ u8 _CF4A[0xCF52 - 0xCF4A];
     /* 0x0CF52 */ u8 _CF52[2];
-    /* 0x0CF54 */ u8 _CF54[0xCF5B - 0xCF54];
+    /* 0x0CF54 */ u8 _CF54[2];
+    /* 0x0CF56 */ u8 _CF56[0xCF5B - 0xCF56];
     /* 0x0CF5B */ u8 _CF5B[2];
     /* 0x0CF5D */ u8 _CF5D[0xCF63 - 0xCF5D];
     /* 0x0CF63 */ u8 _CF63[2];
@@ -96,9 +97,7 @@ extern struct {
     /* 0x0CF75 */ s8 _CF75;
     /* 0x0CF76 */ s8 _CF76;
     /* 0x0CF77 */ u8 _CF77[0xCF7A - 0xCF77];
-    /* 0x0CF7A */ u8 _CF7A;
-    /* 0x0CF7B */ u8 _CF7B;
-    /* 0x0CF7C */ u8 _CF7C;
+    /* 0x0CF7A */ u8 texts[3];
     /* 0x0CF7D */ u8 _CF7D;
     /* 0x0CF7E */ u8 _CF7E;
     /* 0x0CF7F */ u8 _CF7F;
@@ -106,7 +105,8 @@ extern struct {
     /* 0x0CF89 */ s8 _CF89[9];
     /* 0x0CF92 */ u8 _CF92;
     /* 0x0CF93 */ u8 _CF93;
-    /* 0x0CF94 */ u8 _CF94[0xCF96 - 0xCF94];
+    /* 0x0CF94 */ u8 _CF94;
+    /* 0x0CF95 */ s8 _CF95;
     /* 0x0CF96 */ s8 _CF96;
     /* 0x0CF97 */ s8 _CF97;
     /* 0x0CF98 */ s8 _CF98;
@@ -414,7 +414,91 @@ void fn_8005F734(SpaniTask* task, s32 team) {
 }
 
 // .text:0x8005F068 size:0x6CC
-void fn_8005F068(void) {
+void fn_8005F068(SpaniTask* task, s32 team) {
+    s32 i;
+    s8 cur;
+    s8 slot;
+    s8 prev;
+    s8 prevSlot;
+
+    if (isLockState(lbl_803C66B0.rows[9].port[team], 0)) {
+        cur = lbl_803297E0._CF46[team] - 1;
+        slot = lbl_80354720[team][cur]._2;
+        if (lbl_803297E0._CF3E[team] != 0xFF) {
+            prev = lbl_803297E0._CF3E[team];
+            prevSlot = lbl_80354720[team][prev]._2;
+        }
+        switch (lbl_803297E0._CF52[team]) {
+        case 0:
+            if (lbl_803297E0._CF54[team] == 1) {
+                getTeamObj(task, team, 0x14)->_5C = 20 << 16;
+                getTeamObj(task, team, 0x14)->_68 = 4;
+                getTeamObj(task, team, 0x1A)->_68 = 1;
+                getTeamObj(task, team, 0xE2)->_68 = 4;
+                getTeamObj(task, team, 0xE4)->_68 = 4;
+                for (i = 0; i < 9; i++) {
+                    lbl_80371C30[task->_14 + 0x64 + i + team * 9].obj->_54 &= ~2;
+                    lbl_80371C30[task->_14 + 0x1C + i + team * 9].obj->_5C = 0;
+                    lbl_80371C30[task->_14 + 0x1C + i + team * 9].obj->_68 = 0;
+                    lbl_80371C30[task->_14 + 0x40 + i + team * 9].obj->_5C = 0;
+                    lbl_80371C30[task->_14 + 0x40 + i + team * 9].obj->_68 = 0;
+                }
+                if (cur >= 0 && cur < 9) {
+                    lbl_80371C30[task->_14 + 0x1C + cur + team * 9].obj->_5C = 0;
+                    lbl_80371C30[task->_14 + 0x1C + cur + team * 9].obj->_68 = 1;
+                    lbl_80371C30[task->_14 + 0x52 + cur + team * 9].obj->_5C = 0;
+                    lbl_80371C30[task->_14 + 0x52 + cur + team * 9].obj->_68 = 1;
+                    lbl_80371C30[task->_14 + 0x64 + cur + team * 9].obj->_54 |= 2;
+                    lbl_80371C30[task->_14 + 0x64 + cur + team * 9].obj->_64 = 0x2A;
+                    lbl_80371C30[task->_14 + 0x64 + cur + team * 9].obj->_68 = 1;
+                    fn_8005C830(task, team, cur);
+                    lbl_80371C30[task->_14 + 0x40 + cur + team * 9].obj->_5C = 0;
+                    lbl_80371C30[task->_14 + 0x40 + cur + team * 9].obj->_68 = 1;
+                    if (lbl_803297E0._CF3E[team] != 0xFF) {
+                        lbl_80371C30[task->_14 + 0x1C + prev + team * 9].obj->_5C = 10 << 16;
+                        lbl_80371C30[task->_14 + 0x1C + prev + team * 9].obj->_68 = 0;
+                        lbl_80371C30[task->_14 + 0x40 + prev + team * 9].obj->_5C = 0;
+                        lbl_80371C30[task->_14 + 0x40 + prev + team * 9].obj->_68 = 1;
+                    }
+                }
+            }
+            break;
+        case 1:
+            if (lbl_803297E0._CF54[team] != 1) {
+                for (i = 0; i < 9; i++) {
+                    lbl_80371C30[task->_14 + 0x10A + i + team * 9].obj->_5C = 0;
+                    lbl_80371C30[task->_14 + 0x10A + i + team * 9].obj->_68 = 0;
+                    lbl_80371C30[task->_14 + 0xF8 + i + team * 9].obj->_5C = 0;
+                    lbl_80371C30[task->_14 + 0xF8 + i + team * 9].obj->_68 = 0;
+                    lbl_80371C30[task->_14 + 0xE6 + i + team * 9].obj->_54 &= ~2;
+                    lbl_80371C30[task->_14 + 0x12E + i + team * 9].obj->_54 &= ~2;
+                }
+                getTeamObj(task, team, 0x14)->_5C = 10 << 16;
+                getTeamObj(task, team, 0x14)->_68 = 1;
+                getTeamObj(task, team, 0x1A)->_68 = 4;
+                getTeamObj(task, team, 0xE2)->_68 = 1;
+                getTeamObj(task, team, 0xE4)->_68 = 1;
+                getTeamObj(task, team, 0xE2)->_54 |= 2;
+                getTeamObj(task, team, 0xE4)->_54 |= 2;
+                if (cur >= 0 && cur < 9) {
+                    lbl_80371C30[task->_14 + 0x10A + slot + team * 9].obj->_68 = 1;
+                    lbl_80371C30[task->_14 + 0xF8 + slot + team * 9].obj->_68 = 1;
+                    lbl_80371C30[task->_14 + 0xE6 + slot + team * 9].obj->_54 |= 2;
+                    lbl_80371C30[task->_14 + 0x12E + slot + team * 9].obj->_54 |= 2;
+                    lbl_80371C30[task->_14 + 0x12E + slot + team * 9].obj->_64 = 0x2A;
+                    lbl_80371C30[task->_14 + 0x12E + slot + team * 9].obj->_68 = 1;
+                    fn_8005C830(task, team, cur);
+                    if (lbl_803297E0._CF3E[team] != 0xFF) {
+                        lbl_80371C30[task->_14 + 0x10A + prevSlot + team * 9].obj->_68 = 1;
+                        lbl_80371C30[task->_14 + 0xF8 + prevSlot + team * 9].obj->_68 = 1;
+                    }
+                }
+            }
+            break;
+        }
+        fn_800626EC(team);
+        lbl_803C66B0.rows[9].port[team] = 1;
+    }
 }
 
 // .text:0x8005EC88 size:0x3E0
@@ -938,7 +1022,7 @@ void fn_800596D4(SpaniTask* task) {
         } else {
             text = 0x1C6;
         }
-        fn_8000FE08(lbl_803297E0._CF7C, 0, text);
+        fn_8000FE08(lbl_803297E0.texts[2], 0, text);
         lbl_803297E0._CF73 = 1;
     }
     if (lbl_803297E0._CF73 != 0) {
@@ -1358,6 +1442,8 @@ void fn_80058050(void) {
 }
 
 // .text:0x80057CAC size:0x3A4
+// 98.88%: registers only; the case-2 loops' counters and the lbl_803297E0
+// pointer get other numbers (the switch on flag gave the copies of 0).
 void fn_80057CAC(void) {
     SpaniTask* task = lbl_803CC1B8;
     u8 flag;
@@ -1432,7 +1518,101 @@ void starMenu(void) {
 }
 
 // .text:0x800576F0 size:0x518
+// 99.83%: registers only in case 2's text loop; the target keeps i in r29 and
+// the lbl_803297E0 pointer in r28, the base the other way round.
 void challengeCheckStarsMenuLoading(void) {
+    SpaniTask* task = lbl_803CC1B8;
+    s32 i;
+
+    switch (lbl_803297E0._CF92) {
+    case 1:
+        if (lbl_803297E0._CF93 == 0) {
+            getSpaniObj(task, 1)->_68 = 1;
+            getSpaniObj(task, 0x1E)->_68 = 1;
+            getSpaniObj(task, 3)->_68 = 1;
+            challengeDrawStarsOnMissionMenu();
+            drawStarProgressionMenu(task);
+            if (challengeStarRelatedInd(lbl_803297E0._CF9C, lbl_803297E0._CF98)) {
+                getSpaniObj(task, 0x23)->_54 |= 2;
+                getSpaniObj(task, 0x23)->_5C = 0;
+                getSpaniObj(task, 0x23)->_68 = 1;
+                getSpaniObj(task, 0x45)->_5C = 1 << 16;
+            }
+            lbl_803297E0._CF93 = 1;
+        }
+        if (lbl_803297E0._CF93 != 0 && isAnimDone(task, 1, 10) == TRUE) {
+            lbl_803297E0._CF93 = 0;
+            lbl_803297E0._CF92 = 0;
+        }
+        break;
+    case 2:
+        if (lbl_803297E0._CF93 == 0) {
+            getSpaniObj(task, 1)->_68 = 4;
+            getSpaniObj(task, 0x1E)->_68 = 4;
+            lbl_803297E0._CF93 = 1;
+        }
+        if (lbl_803297E0._CF93 != 0) {
+            i = isAnimDone(task, 1, 0);
+            i += isAnimDone(task, 0x1E, 0);
+            if (i == 2) {
+                lbl_803297E0._CF94 = 1;
+                lbl_803297E0._CF93 = 0;
+                lbl_803297E0._CF92 = 0;
+                for (i = 0; i < 3; i++) {
+                    fn_8000FEE8(lbl_803297E0.texts[i]);
+                }
+                fn_8000F8F4((struct TextModelSet*)task);
+            }
+        }
+        break;
+    case 3:
+        if (lbl_803297E0._CF93 == 0) {
+            lbl_80371C30[task->_14 + 3 + lbl_803297E0._CF96].obj->_5C = 0;
+            lbl_80371C30[task->_14 + 3 + lbl_803297E0._CF96].obj->_68 = 1;
+            lbl_80371C30[task->_14 + 3 + lbl_803297E0._CF95].obj->_5C = 10 << 16;
+            lbl_80371C30[task->_14 + 3 + lbl_803297E0._CF95].obj->_68 = 4;
+            drawStarProgressionMenu(task);
+            if (challengeStarRelatedInd(lbl_803297E0._CF9C, lbl_803297E0._CF98)) {
+                getSpaniObj(task, 0x23)->_54 |= 2;
+                getSpaniObj(task, 0x23)->_5C = 0;
+                getSpaniObj(task, 0x23)->_68 = 1;
+                getSpaniObj(task, 0x45)->_5C = 1 << 16;
+            } else {
+                getSpaniObj(task, 0x23)->_54 &= ~2;
+                getSpaniObj(task, 0x45)->_5C = 0;
+            }
+            lbl_803297E0._CF93 = 1;
+        }
+        if (lbl_803297E0._CF93 != 0) {
+            lbl_803297E0._CF93 = 0;
+            lbl_803297E0._CF92 = 0;
+        }
+        break;
+    case 4:
+        someChallengeStarFunction2(task);
+        break;
+    case 6:
+        someChallengeStarFunction(task);
+        break;
+    case 5:
+        if (lbl_803297E0._CF93 == 0) {
+            getSpaniObj(task, 1)->_68 = 1;
+            getSpaniObj(task, 0)->_68 = 1;
+            getSpaniObj(task, 0x45)->_54 |= 2;
+            getSpaniObj(task, 0x45)->_68 = 1;
+            lbl_803297E0._CF93 = 1;
+        }
+        if (lbl_803297E0._CF93 != 0 && isAnimDone(task, 1, 20) == TRUE) {
+            lbl_803297E0._CF93 = 0;
+            lbl_803297E0._CF92 = 0;
+        }
+        break;
+    }
+    if (lbl_803297E0._CF94 != 0) {
+        lbl_803297E0._CF94 = 0;
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+    }
 }
 
 // .text:0x800572C0 size:0x430
@@ -1476,7 +1656,7 @@ void someChallengeStarFunction2(SpaniTask* task) {
         } else {
             text = 0x1C6;
         }
-        fn_8000FE08(lbl_803297E0._CF7C, 0, text);
+        fn_8000FE08(lbl_803297E0.texts[2], 0, text);
         lbl_803297E0._CF93 = 1;
     }
     if (lbl_803297E0._CF93 != 0) {
@@ -1521,7 +1701,7 @@ void someChallengeStarFunction(SpaniTask* task) {
         } else {
             text = 0x1C6;
         }
-        fn_8000FE08(lbl_803297E0._CF7C, 0, text);
+        fn_8000FE08(lbl_803297E0.texts[2], 0, text);
         lbl_803297E0._CF93 = 1;
     }
     if (lbl_803297E0._CF93 && isAnimDone(task, 1, 10) == TRUE) {
@@ -1577,14 +1757,14 @@ void drawStarProgressionMenu(SpaniTask* task) {
         text = 0x1C6;
     }
     if (lbl_803297E0._CF92 == 1) {
-        lbl_803297E0._CF7A = fn_8000F988((struct TextModelSet*)task, 0x4F, 0, 0, charId + 8, 0);
-        lbl_803297E0._CF7B = fn_8000F988((struct TextModelSet*)task, 0x50, 1, 0, lbl_8010B3E8[lbl_800E8558[charId].set] + challengeRelated(lbl_803297E0._CF9C), 0);
-        lbl_803297E0._CF7C = fn_8000F988((struct TextModelSet*)task, 0x51, 0, 0, text, 0);
-        lbl_80366B18[lbl_803297E0._CF7C]._2F = 1;
+        lbl_803297E0.texts[0] = fn_8000F988((struct TextModelSet*)task, 0x4F, 0, 0, charId + 8, 0);
+        lbl_803297E0.texts[1] = fn_8000F988((struct TextModelSet*)task, 0x50, 1, 0, lbl_8010B3E8[lbl_800E8558[charId].set] + challengeRelated(lbl_803297E0._CF9C), 0);
+        lbl_803297E0.texts[2] = fn_8000F988((struct TextModelSet*)task, 0x51, 0, 0, text, 0);
+        lbl_80366B18[lbl_803297E0.texts[2]]._2F = 1;
     } else {
-        fn_8000FE08(lbl_803297E0._CF7A, 0, charId + 8);
-        fn_8000FE08(lbl_803297E0._CF7B, 0, lbl_8010B3E8[lbl_800E8558[charId].set] + challengeRelated(lbl_803297E0._CF9C));
-        fn_8000FE08(lbl_803297E0._CF7C, 0, text);
+        fn_8000FE08(lbl_803297E0.texts[0], 0, charId + 8);
+        fn_8000FE08(lbl_803297E0.texts[1], 0, lbl_8010B3E8[lbl_800E8558[charId].set] + challengeRelated(lbl_803297E0._CF9C));
+        fn_8000FE08(lbl_803297E0.texts[2], 0, text);
     }
     for (i = 0; i < lbl_803297E0._CF9A; i++) {
         if (challengeStarRelatedInd(lbl_803297E0._CF9C, i)) {
