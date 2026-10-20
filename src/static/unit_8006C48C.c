@@ -12,7 +12,12 @@ typedef struct MissionChar {
     /* 0x04 */ s8 _04;
     /* 0x05 */ s8 _05;
     /* 0x06 */ s8 _06;
-    /* 0x07 */ u8 _07[0x31 - 0x7];
+    /* 0x07 */ u8 _07;
+    /* 0x08 */ struct {
+        /* 0x0 */ s8 _0;
+        /* 0x1 */ s8 flag; // negative once the star is earned
+    } stars[10];
+    /* 0x1C */ u8 _1C[0x31 - 0x1C];
     /* 0x31 */ s8 status;
     /* 0x32 */ u8 _32[0x34 - 0x32];
 } MissionChar; // size: 0x34
@@ -55,6 +60,7 @@ typedef struct SoundSlot {
 extern MissionTracker starMissionCompletionTracker;
 extern MissionInfo lbl_800E8558[];
 extern s16 lbl_8010B444[][11];
+extern f32 lbl_8010B4B4[][11];
 extern f32 lbl_8010B590[][7];
 extern BigMenuState lbl_803297E0;
 extern SoundSlot lbl_80366B18[];
@@ -104,11 +110,42 @@ void fn_8006CEBC(void) {
 }
 
 // .text:0x8006CDC0 size:0xFC
-void fn_8006CDC0(void) {
+s32 fn_8006CDC0(s32 index) {
+    MissionTracker* tr = &starMissionCompletionTracker;
+    MissionChar* ch;
+    s32 count;
+    s32 i;
+
+    if (lbl_800E8558[index]._3 == 0) {
+        return 0;
+    }
+    count = 0;
+    ch = &tr->chars[index];
+    for (i = 0; i < 10; i++) {
+        if (ch->stars[i].flag < 0) {
+            count++;
+        }
+    }
+    return count;
 }
 
 // .text:0x8006CCA4 size:0x11C
-void determineIfMissionDescriptionIsShown(void) {
+s16 determineIfMissionDescriptionIsShown(s32 index) {
+    MissionChar* ch = &starMissionCompletionTracker.chars[index];
+    s32 count;
+    s32 i;
+
+    if (lbl_800E8558[index]._3 == 0) {
+        count = 0;
+    } else {
+        count = 0;
+        for (i = 0; i < 10; i++) {
+            if (ch->stars[i].flag < 0) {
+                count++;
+            }
+        }
+    }
+    return lbl_8010B444[ch->_05][count];
 }
 
 // .text:0x8006CBE4 size:0xC0
@@ -132,7 +169,22 @@ s16 challengeRelated(s32 index) {
 }
 
 // .text:0x8006CAC8 size:0x11C
-void starMissionMenu(void) {
+f32 starMissionMenu(s32 index) {
+    MissionChar* ch = &starMissionCompletionTracker.chars[index];
+    s32 count;
+    s32 i;
+
+    if (lbl_800E8558[index]._3 == 0) {
+        count = 0;
+    } else {
+        count = 0;
+        for (i = 0; i < 10; i++) {
+            if (ch->stars[i].flag < 0) {
+                count++;
+            }
+        }
+    }
+    return lbl_8010B4B4[ch->_05][count];
 }
 
 // .text:0x8006CA9C size:0x2C
