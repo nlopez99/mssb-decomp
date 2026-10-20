@@ -1554,11 +1554,8 @@ s32 fn_3_142570(s8 player) {
 }
 
 // .text:0x00142284 size:0x2EC mapped:0x80781318
-// 99.21%: registers only; g_Minigame, eta and cpu sit in r29, r28 and r30 where the
-// target has r30, r29 and r28.
 void fn_3_142284(void) {
     Unk37A8Cpu* cpus = MG._1DCC;
-    Unk37A8Cpu* cpu;
     s32 eta[4];
     s8 port;
     u8 strength;
@@ -1566,7 +1563,6 @@ void fn_3_142284(void) {
 
     i = 0;
     do {
-        cpu = &cpus[i];
         port = g_Minigame.minigameControlStruct.characterIndex[i];
         if (port >= 0 && port < 4) {
             eta[i] = fn_3_142570(i);
@@ -1575,68 +1571,68 @@ void fn_3_142284(void) {
             }
             memset(&g_Minigame._1D7C[port], 0, sizeof(InputStruct));
             strength = g_Minigame.minigameControlStruct.aIStrength[i];
-            switch (cpu->_2) {
+            switch (cpus[i]._2) {
             case 0:
                 if (eta[i] >= 0) {
                     switch (RandomIndexFromWeights(lbl_3_data_21E9C[strength], 4)) {
                     case 0:
                         if (eta[i] > LERPToNewRange_Float(MG._1B50[i], 0, lbl_3_data_21E68[19], lbl_3_data_21E68[2], lbl_3_data_21E68[3]) + 3) {
                             if (fn_3_1428F0(i, FALSE)) {
-                                cpu->_2 = 1;
+                                cpus[i]._2 = 1;
                             }
                         } else {
                             g_Minigame._1D7C[port].newButtonInput |= 4;
                             g_Minigame._1D7C[port].buttonInput |= 4;
-                            cpu->_2 = 2;
+                            cpus[i]._2 = 2;
                         }
                         break;
                     case 1:
                         if (eta[i] > lbl_3_data_21E68[2] + 3) {
                             if (fn_3_1428F0(i, FALSE)) {
-                                cpu->_2 = 1;
+                                cpus[i]._2 = 1;
                             }
                         } else {
                             g_Minigame._1D7C[port].newButtonInput |= 4;
                             g_Minigame._1D7C[port].buttonInput |= 4;
-                            cpu->_2 = 2;
+                            cpus[i]._2 = 2;
                         }
                         break;
                     case 2:
                         g_Minigame._1D7C[port].newButtonInput |= 4;
                         g_Minigame._1D7C[port].buttonInput |= 4;
-                        cpu->_2 = 2;
+                        cpus[i]._2 = 2;
                         break;
                     case 3:
                         if (fn_3_1428F0(i, TRUE)) {
-                            cpu->_2 = 1;
+                            cpus[i]._2 = 1;
                         }
                         break;
                     }
                 } else if (fn_3_1428F0(i, FALSE)) {
-                    cpu->_2 = 1;
+                    cpus[i]._2 = 1;
                 }
                 break;
             case 1:
                 if (g_Minigame._1C92[i] < 0) {
-                    cpu->_2 = 0;
+                    cpus[i]._2 = 0;
                 }
                 break;
             case 2:
                 g_Minigame._1D7C[port].buttonInput |= 4;
                 if (g_Minigame._1CA5[i] != 1) {
-                    cpu->_2 = 3;
+                    cpus[i]._2 = 3;
                 }
                 break;
             case 3:
                 if (eta[i] >= 0) {
                     g_Minigame._1D7C[port].buttonInput |= 4;
                 } else {
-                    cpu->_2 = 4;
+                    cpus[i]._2 = 4;
                 }
                 break;
             case 4:
                 if (g_Minigame._1CA5[i] != 3) {
-                    cpu->_2 = 0;
+                    cpus[i]._2 = 0;
                 }
                 break;
             }
