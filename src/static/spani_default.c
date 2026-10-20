@@ -4,6 +4,13 @@
 #include "static/UnknownHomes_Static.h"
 #include "string.h"
 
+typedef struct SpaniColor {
+    /* 0x0 */ u8 r;
+    /* 0x1 */ u8 g;
+    /* 0x2 */ u8 b;
+    /* 0x3 */ u8 a;
+} SpaniColor;
+
 typedef struct SpaniObj {
     /* 0x00 */ struct SpaniObj* parent;
     /* 0x04 */ struct SpaniObj* next;
@@ -12,16 +19,19 @@ typedef struct SpaniObj {
     /* 0x3C */ u8 _3C[0x48 - 0x3C];
     /* 0x48 */ Vec _48;
     /* 0x54 */ u32 _54;
-    /* 0x58 */ u8 color[4];
+    /* 0x58 */ SpaniColor color;
     /* 0x5C */ u32 _5C;
-    /* 0x60 */ u8 _60[0x64 - 0x60];
+    /* 0x60 */ s32 _60;
     /* 0x64 */ u16 _64;
-    /* 0x66 */ u8 _66;
+    /* 0x66 */ u8 _66; // index into lbl_803C4BE0
     /* 0x67 */ u8 _67;
     /* 0x68 */ u8 _68;
-    /* 0x69 */ u8 _69[0x72 - 0x69];
+    /* 0x69 */ u8 _69[0x6C - 0x69];
+    /* 0x6C */ f32 _6C;
+    /* 0x70 */ u8 _70;
+    /* 0x71 */ u8 _71;
     /* 0x72 */ s16 _72;
-    /* 0x74 */ u8 _74[4];
+    /* 0x74 */ SpaniColor _74;
     /* 0x78 */ Mtx _78;
     /* 0xA8 */ u8 _A8;
     /* 0xA9 */ u8 _A9[0xAC - 0xA9];
@@ -50,10 +60,18 @@ typedef struct SabEntry {
 typedef struct SpaniDesc {
     /* 0x00 */ u16 _00;
     /* 0x02 */ u16 _02;
-    /* 0x04 */ s32 _04[3];
-    /* 0x10 */ u8 _10[2];
+    /* 0x04 */ f32 x;
+    /* 0x08 */ f32 y;
+    /* 0x0C */ SpaniColor color;
+    /* 0x10 */ u8 _10;
+    /* 0x11 */ u8 _11;
     /* 0x12 */ s16 _12; // index of the parent in the list, 0xFF for none
-    /* 0x14 */ s32 _14[3];
+    /* 0x14 */ u8 _14; // id in lbl_8023D6C0
+    /* 0x15 */ u8 _15[0x18 - 0x15];
+    /* 0x18 */ f32 _18;
+    /* 0x1C */ u8 _1C;
+    /* 0x1D */ u8 _1D;
+    /* 0x1E */ s16 _1E;
 } SpaniDesc; // size: 0x20
 
 // Passed to the callback fn_80034BCC
@@ -111,7 +129,6 @@ extern void fn_8000B9C8(SabFile* sab);
 extern void fn_800ACFB0(void* data);
 extern void fn_80011140(void);
 
-extern SpaniObj* fn_80034F50(SpaniDesc* desc);
 
 extern SpaniSlot lbl_80371C30[];
 extern SpaniObj lbl_8039C3E0[0x360];
@@ -148,27 +165,62 @@ void fn_800369DC(f32 zoom) {
 // .text:0x80036824 size:0x1B8 mapped:0x80036824
 u16 fn_80036824(s32 id, s32 anim, u16 frame) {
     s32 i = fn_80035DD4(id);
+    s32 k;
+    SabPart** pp;
     SabAnim* a;
     SabPart* p;
-    s32 k;
     s32 m;
+    SabInfo* info;
 
     if (i == -1) {
         OSPanic("spani_default.c", 298, "It is a number not registered. \n");
     }
-    a = lbl_803C4BE0[i]._38->table->anims[anim];
-    k = a->count - 1;
+    a = (SabAnim*)((u32*)lbl_803C4BE0[i]._38->table)[anim + 2];
+    k = a->count;
+    pp = &a->parts[--k];
     do {
-        p = a->parts[k];
+        p = *pp--;
         m = p->count;
+        info = &p->info[m];
         do {
             m--;
+            info--;
             if (m == frame) {
-                return p->info[m]._06;
+                return info->_06;
             }
         } while (m != 0);
     } while (--k != 0);
     return 0;
+}
+
+// .text:0x8003664C size:0x1D8 mapped:0x8003664C
+void fn_8003664C(s32 id, s32 index, s16 value, u32 sel) {
+    s32 i = fn_80035DD4(id);
+    u32 k;
+    SabPart** pp;
+    SabAnim* a;
+    SabPart* p;
+    s32 m;
+    SabInfo* info;
+
+    if (i == -1) {
+        OSPanic("spani_default.c", 350, "It is a number not registered. \n");
+    }
+    a = (SabAnim*)((u32*)lbl_803C4BE0[i]._38->table)[lbl_8039C3E0[index]._64 + 2];
+    k = a->count;
+    pp = &a->parts[--k];
+    do {
+        p = *pp--;
+        m = p->count;
+        info = &p->info[m];
+        do {
+            m--;
+            info--;
+            if (info->_04 != 0 && k == sel) {
+                info->_06 = value;
+            }
+        } while (m != 0);
+    } while (--k != 0);
 }
 
 // .text:0x8003656C size:0xE0 mapped:0x8003656C
@@ -177,8 +229,8 @@ void fn_8003656C(SpaniTask* task, s32 id, s32 part, u16 kind, s32 value) {
     s32 v;
     SpaniObj* obj = lbl_80371C30[task->_14 + id].obj;
     u16 anim = obj->_64;
-    SabEntry* e = &lbl_803C4BE0[obj->_66];
-    SabFile* sab = e->_38;
+    u8 n = obj->_66;
+    SabFile* sab = lbl_803C4BE0[n]._38;
     SabPart* p;
 
     if (fn_8000CEF0(sab, kind, 0, value, &info) != 0) {
@@ -186,8 +238,8 @@ void fn_8003656C(SpaniTask* task, s32 id, s32 part, u16 kind, s32 value) {
     } else {
         v = 0;
     }
-    p = e->_38->table->anims[anim]->parts[part];
-    fn_8000CC4C(sab, p, &v, (u32)&p->info[0]._1C - (u32)&p->info[0], 4);
+    p = (SabPart*)((u32*)((u32*)lbl_803C4BE0[n]._38->table)[anim + 2])[part + 2];
+    fn_8000CC4C(sab, p, &v, (u32)&((SabInfo*)((u8*)p + 4))->_1C - (u32)((u8*)p + 4), 4);
 }
 
 // .text:0x8003649C size:0xD0 mapped:0x8003649C
@@ -196,16 +248,16 @@ void fn_8003649C(SpaniTask* task, s32 id, s32 part, u16 kind, s32 value) {
     u16 v;
     SpaniObj* obj = lbl_80371C30[task->_14 + id].obj;
     u16 anim = obj->_64;
-    SabEntry* e = &lbl_803C4BE0[obj->_66];
+    u8 n = obj->_66;
     SabPart* p;
 
-    if (fn_8000CEF0(e->_38, kind, 0, value, &info) != 0) {
+    if (fn_8000CEF0(lbl_803C4BE0[n]._38, kind, 0, value, &info) != 0) {
         v = info._06;
     } else {
         v = 0;
     }
-    p = e->_38->table->anims[anim]->parts[part];
-    fn_8000CC4C(e->_38, p, &v, (u32)&p->info[0]._06 - (u32)&p->info[0], 2);
+    p = (SabPart*)((u32*)((u32*)lbl_803C4BE0[n]._38->table)[anim + 2])[part + 2];
+    fn_8000CC4C(lbl_803C4BE0[n]._38, p, &v, (u32)&((SabInfo*)((u8*)p + 4))->_06 - (u32)((u8*)p + 4), 2);
 }
 
 // .text:0x800363D8 size:0xC4 mapped:0x800363D8
@@ -260,6 +312,52 @@ void fn_80036134(SpaniTask* task, s32 id, s32 arg2, s32 id2) {
     fn_8000CEF0(lbl_803C4BE0[obj->_66]._38, obj->_64, arg2, obj->_5C >> 16, &info);
     lbl_80371C30[task->_14 + id2].obj->_48.x = info.x;
     lbl_80371C30[task->_14 + id2].obj->_48.y = info.y;
+}
+
+// .text:0x80035F20 size:0x214 mapped:0x80035F20
+SabInfo* fn_80035F20(s32 id, s32 index, u16 frame, s16 sel) {
+    s32 i = fn_80035DD4(id);
+    u32 k;
+    SabPart** pp;
+    SabAnim* a;
+    SabPart* p;
+    s32 m;
+    SabInfo* info;
+
+    if (i == -1) {
+        OSPanic("spani_default.c", 796, "It is a number not registered. \n");
+    }
+    a = (SabAnim*)((u32*)lbl_803C4BE0[i]._38->table)[lbl_8039C3E0[index]._64 + 2];
+    k = a->count;
+    pp = &a->parts[--k];
+    if (sel == -1) {
+        p = *pp;
+        m = p->count;
+        info = &p->info[m];
+        do {
+            m--;
+            info--;
+        } while (m != 0);
+        return &info[frame];
+    }
+    do {
+        p = *pp--;
+        m = p->count;
+        info = &p->info[m];
+        do {
+            if (k == sel) {
+                goto found;
+            }
+            m--;
+            info--;
+        } while (m != 0);
+    } while (--k != 0);
+found:
+    while (m != 0) {
+        m--;
+        info--;
+    }
+    return info;
 }
 
 // .text:0x80035EEC size:0x34 mapped:0x80035EEC
@@ -370,6 +468,56 @@ void fn_800356B8(void) {
     lbl_803C5F74[0] = 0;
 }
 
+// .text:0x80034F50 size:0x218 mapped:0x80034F50
+SpaniObj* fn_80034F50(SpaniDesc* desc) {
+    s32 i;
+    s32 j;
+    SpaniObj* o;
+
+    for (i = 0; i < 0x360; i++) {
+        if (lbl_8039C3E0[i]._54 == 0) {
+            for (j = 0; j < 0x360; j++) {
+                if (desc->_14 == lbl_8023D6C0[j]) {
+                    break;
+                }
+            }
+            o = &lbl_8039C3E0[i];
+            o->_54 = 1;
+            if (desc->_00 == 1) {
+                o->_54 |= 4;
+            }
+            o->color = desc->color;
+            o->_74 = desc->color;
+            o->_64 = desc->_02;
+            o->_67 = desc->_11;
+            o->_66 = j;
+            o->_48.x = desc->x;
+            o->_48.y = desc->y;
+            o->_48.z = 0.0f;
+            o->_6C = desc->_18;
+            o->_70 = desc->_1C;
+            o->next = NULL;
+            o->child = NULL;
+            o->_72 = desc->_1E;
+            o->_71 = desc->_1D;
+            if (desc->_10 == 2) {
+                o->_68 = 0;
+            } else if (desc->_10 == 3) {
+                o->_68 = 1;
+            } else {
+                o->_68 = desc->_10;
+                o->_54 |= 2;
+            }
+            o->_5C = 0;
+            o->_60 = 0x10000;
+            o->_A8 = 0;
+            PSMTXIdentity(o->mtx);
+            return o;
+        }
+    }
+    return NULL;
+}
+
 // .text:0x80034E20 size:0x130 mapped:0x80034E20
 void fn_80034E20(SpaniTask* task, SpaniDesc* desc) {
     s32 n = 0;
@@ -436,10 +584,10 @@ s32 fn_80034BCC(SpaniHook* hook) {
     for (o = lbl_803CBC9C->child; o != NULL; o = o->next) {
         if (o->parent->_64 == hook->ids[0] && o->_72 == hook->ids[1]) {
             PSMTXCopy(hook->mtx, o->_78);
-            o->_74[0] = hook->color[0] * o->color[0] / 255;
-            o->_74[1] = hook->color[1] * o->color[1] / 255;
-            o->_74[2] = hook->color[2] * o->color[2] / 255;
-            o->_74[3] = hook->color[3] * o->color[3] / 255;
+            o->_74.r = hook->color[0] * o->color.r / 255;
+            o->_74.g = hook->color[1] * o->color.g / 255;
+            o->_74.b = hook->color[2] * o->color.b / 255;
+            o->_74.a = hook->color[3] * o->color.a / 255;
             o->_A8 = 1;
         }
     }
