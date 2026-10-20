@@ -47,6 +47,7 @@ void fn_80032284(Vec* pos);
 void fn_800324EC(u16 joint, s32 player, s32 other, Vec* dir);
 BOOL fn_800328E0(void* e);
 void fn_800330CC(s32 n, u32 arg1, Vec* start, Vec* end, f32 arg4, s32 arg5, s32 arg6, f32 arg7);
+void fn_800332B8(Vec* dirIn, Vec* out, f32 yawMin, f32 yawMax, f32 pitchMin, f32 pitchMax);
 f32 fn_800335BC(s32 angle);
 f32 fn_800335EC(s32 angle);
 void fn_80033620(struct Emitter* e);

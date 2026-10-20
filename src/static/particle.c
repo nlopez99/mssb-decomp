@@ -6,6 +6,7 @@
 #include "static/UnknownHomes_Static.h"
 #include "string.h"
 #include "math.h"
+#include "Dolphin/rand.h"
 
 typedef struct Particle {
     /* 0x00 */ struct Particle* next;
@@ -585,11 +586,60 @@ f32 fn_800335EC(s32 angle)
 // .text:0x800335BC size:0x30
 f32 fn_800335BC(s32 angle)
 {
-    s32 i = __abs(angle) & 0x7FF;
+    s32 i;
+    if (angle < 0) {
+        angle = -angle;
+    }
+    i = angle & 0x7FF;
     if (i >= 0x401) {
         i = 0x800 - i;
     }
     return lbl_8017ED68[i];
+}
+
+// .text:0x800332B8 size:0x304
+// 97.41%: registers in the inlined table lookups differ (the target negates pitch in place),
+// and one fcmpu against 0.0f has its operands swapped.
+void fn_800332B8(Vec* dirIn, Vec* out, f32 yawMin, f32 yawMax, f32 pitchMin, f32 pitchMax)
+{
+    Mtx m;
+    Vec axis;
+    Vec up = { 1.0f, 0.0f, 0.0f };
+    Vec dir;
+    Quaternion q;
+    s32 base;
+    s32 yaw;
+    s32 pitch;
+    f32 angle;
+
+    if (dirIn != NULL) {
+        memcpy(&dir, dirIn, sizeof(Vec));
+        dirIn = &dir;
+    }
+    base = 2048.0f * (yawMin / 360.0f) + 0.5f;
+    if (yawMax != yawMin) {
+        yaw = base + rand() % (s32)(2048.0f * ((yawMax - yawMin) / 360.0f) + 0.5f);
+    } else {
+        yaw = base;
+    }
+    out->x = fn_800335BC(yaw);
+    out->y = fn_800335EC(yaw);
+    pitch = 2048.0f * (pitchMin / 360.0f) + 0.5f;
+    if (pitchMax != pitchMin) {
+        pitch += rand() % (s32)(2048.0f * ((pitchMax - pitchMin) / 360.0f) + 0.5f);
+    }
+    out->z = out->x * fn_800335EC(pitch);
+    out->x *= fn_800335BC(pitch);
+    if (dirIn != NULL && PSVECMag(dirIn) != 0.0f) {
+        angle = acos(PSVECDotProduct(&up, dirIn));
+        PSVECCrossProduct(&up, dirIn, &axis);
+        if (PSVECMag(&axis) != 0.0f) {
+            C_QUATRotAxisRad(&q, &axis, angle);
+            PSMTXQuat(m, &q);
+            PSMTXMultVec(m, out, out);
+        }
+        PSVECScale(out, PSVECMag(dirIn), out);
+    }
 }
 
 // .text:0x800330CC size:0x1EC
