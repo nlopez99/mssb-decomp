@@ -214,25 +214,50 @@ def main() -> int:
     for unit, fn in appeared:
         print(f"  new      {fn} ({unit})")
 
-    # Strict matches, only in units whose objects changed
+    # Strict matches, only in units whose objects changed, keyed by function so
+    # a function moved into a unit the base lacks is still compared
     old_units, new_units = load_units(base_dir), load_units(root_dir)
-    lost, gained, checked = [], [], 0
-    for name in sorted(set(before) & set(after)):
+
+    def changed(name: str) -> bool:
         o, n = old_units.get(name), new_units.get(name)
-        if not o or not n or "base_path" not in n:
+        if not o or not n:
+            return True
+        return not all(file_hash(os.path.join(base_dir, o[key])) == file_hash(os.path.join(root_dir, n[key]))
+                       for key in ("target_path", "base_path") if key in o and key in n)
+
+    def shared_names(units: Dict[str, Any]) -> set:
+        seen, shared = set(), set()
+        for unit in units.values():
+            for f in unit.get("functions", []):
+                (shared if f["name"] in seen else seen).add(f["name"])
+        return shared
+
+    shared = shared_names(before) | shared_names(after)
+
+    def key(unit: str, fn: str) -> str:
+        return f"{unit}:{fn}" if fn in shared else fn
+
+    was: Dict[str, Tuple[str, str]] = {}
+    now: Dict[str, Tuple[str, str]] = {}
+    checked = 0
+    for name in sorted(set(before) | set(after)):
+        if not changed(name):
             continue
-        same = all(file_hash(os.path.join(base_dir, o[key])) == file_hash(os.path.join(root_dir, n[key]))
-                   for key in ("target_path", "base_path") if key in o and key in n)
-        if same:
-            continue
-        checked += 1
-        was = strict_statuses(base_dir, o, before[name]) if "base_path" in o else {}
-        now = strict_statuses(root_dir, n, after[name])
-        for fn, status in now.items():
-            if was.get(fn) == "match" and status != "match":
-                lost.append((name, fn, status))
-            elif status == "match" and was.get(fn) != "match":
-                gained.append((name, fn, was.get(fn, "missing")))
+        o, n = old_units.get(name), new_units.get(name)
+        if name in before and o and "base_path" in o:
+            for fn, status in strict_statuses(base_dir, o, before[name]).items():
+                was[key(name, fn)] = (name, status)
+        if name in after and n and "base_path" in n:
+            checked += 1
+            for fn, status in strict_statuses(root_dir, n, after[name]).items():
+                now[key(name, fn)] = (name, status)
+    # A function absent from the new report altogether was merged away by a
+    # symbols change; the scores section lists it as gone
+    present = {key(u, f["name"]) for u, unit in after.items() for f in unit.get("functions", [])}
+    lost = [(was[k][0], k, now.get(k, (None, "missing"))[1]) for k in sorted(was)
+            if was[k][1] == "match" and k in present and now.get(k, (None, ""))[1] != "match"]
+    gained = [(now[k][0], k, was.get(k, (None, "missing"))[1]) for k in sorted(now)
+              if now[k][1] == "match" and was.get(k, (None, ""))[1] != "match"]
     print(f"strict matches: {len(gained)} gained, {len(lost)} lost ({checked} changed units checked)")
     for unit, fn, status in lost:
         print(f"  LOST     {fn} ({unit}): now {status}")
