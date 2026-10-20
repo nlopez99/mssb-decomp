@@ -1111,7 +1111,8 @@ void fn_3_1439EC(s32 idx) {
 }
 
 // .text:0x00143770 size:0x27C mapped:0x80782804
-// 98.54%: the target forms the list pointers before its first open[] store.
+// 98.54%: the target forms the list pointers before its first open[] store. Not fixed by the
+// order or form (loop, chained) of the setup stores, declaration orders, or a permuter session.
 s32 fn_3_143770(UnkMgEntry3310* entry) {
     s32 open[4];
     s32 free[4];
@@ -1612,9 +1613,13 @@ void fn_3_14225C(void) {
     fn_800B9948(fn_3_141C8C);
 }
 
+// An RGBA8 texel's byte offset from its index; the parameter must be s32 (int allocates the
+// caller's loop counters differently)
+static inline s32 TexelByteOffset(s32 texel) {
+    return texel * 4;
+}
+
 // .text:0x00142088 size:0x1D4 mapped:0x8078111C
-// 96.28%: registers only; the loop counters and the inlined fn_3_142030's temporaries
-// sit in other volatile registers.
 void fn_3_142088(void) {
     u32 y;
     u32 x;
@@ -1622,7 +1627,7 @@ void fn_3_142088(void) {
 
     for (y = 0; y < 4; y++) {
         for (x = 0; x < 4; x++) {
-            offset = fn_3_142030(x, y, 4) * 4;
+            offset = TexelByteOffset(fn_3_142030(x, y, 4));
             if (offset < 32) {
                 lbl_3_bss_B800[offset + 0] = lbl_3_bss_B800[offset + 2] = 255;
                 lbl_3_bss_B800[offset + 1] = lbl_3_bss_B800[offset + 3] = 150;
