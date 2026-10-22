@@ -96,7 +96,8 @@ extern struct {
     /* 0x0CF74 */ u8 _CF74;
     /* 0x0CF75 */ s8 _CF75;
     /* 0x0CF76 */ s8 _CF76;
-    /* 0x0CF77 */ u8 _CF77[0xCF7A - 0xCF77];
+    /* 0x0CF77 */ u8 _CF77;
+    /* 0x0CF78 */ s16 _CF78;
     /* 0x0CF7A */ u8 texts[3];
     /* 0x0CF7D */ u8 _CF7D;
     /* 0x0CF7E */ u8 _CF7E;
@@ -187,6 +188,8 @@ typedef struct TextModel {
 extern TextModel lbl_80366B18[];
 extern SpaniSlot lbl_80371C30[];
 extern SpaniTask* lbl_803CC1B8;
+extern struct SpaniDesc lbl_801000A8[];
+extern struct SpaniDesc lbl_801041C8[];
 extern struct SpaniDesc lbl_80107688[];
 extern struct SpaniDesc lbl_80108048[];
 
@@ -262,6 +265,135 @@ void SetMenuNumber(void) {
 
 // .text:0x80061B9C size:0x7D0
 void fn_80061B9C(void) {
+    SpaniTask* task = lbl_803CC1B8;
+    s32 slot;
+    s8 team;
+    s32 i;
+    u8 flag;
+    u8 left;
+    BOOL cpu;
+    s32 port;
+
+    lbl_803297E0._CF40[5] = 0;
+    team = lbl_803297E0._CF3B;
+    if (g_d_GameSettings._06 != 2) {
+        fn_80034E20(task, lbl_801000A8);
+        getSpaniObj(task, 0x10)->_5C = lbl_8034E9A0.ports[0] << 16;
+        if (g_d_GameSettings._10 == 0) {
+            getSpaniObj(task, 0x11)->_5C = ((s8)(lbl_8034E9A0.ports[0] == 0) + 4) << 16;
+        } else {
+            if (g_d_GameSettings._10 == 0) {
+                port = 5;
+                if (lbl_8034E9A0.ports[1] != -1) {
+                    port = lbl_8034E9A0.ports[1] + 4;
+                }
+            } else {
+                port = lbl_8034E9A0.ports[1];
+            }
+            getSpaniObj(task, 0x11)->_5C = port << 16;
+        }
+        if (g_d_GameSettings.GameModeSelected != 5) {
+            for (i = 0; i < 9; i++) {
+                lbl_80371C30[task->_14 + 0x164 + i].obj->_54 &= ~2;
+            }
+            getSpaniObj(task, 0x1D2)->_54 &= ~2;
+            fn_8005C2B0(task);
+            fn_8005BF40(task);
+        } else {
+            getSpaniObj(task, 0x1D2)->_54 &= ~2;
+            fn_8005BB5C(task);
+            for (i = 0; i < 9; i++) {
+                slot = lbl_80354720[0][i]._2;
+                fn_800363D8(task, slot + 0x10A, 1, 0x83, inMemRoster[0][i].stats.CharID);
+                getTeamObj(task, i, 0xE6)->_54 &= ~2;
+                if (g_d_GameSettings.GameModeSelected == 5) {
+                    flag = starMissionCompletionTracker._43D6[inMemRoster[0][i].stats.CharID];
+                } else {
+                    flag = lbl_8034E9A0._489B[0][i];
+                }
+                if (flag != 0) {
+                    getTeamObj(task, slot, 0x140)->_68 = 1;
+                    getTeamObj(task, slot, 0x152)->_54 |= 2;
+                    getTeamObj(task, slot, 0x152)->_5C = 0;
+                    getTeamObj(task, slot, 0x152)->_68 = 1;
+                } else {
+                    getTeamObj(task, slot, 0x152)->_54 &= ~2;
+                }
+                getTeamObj(task, i, 0x12E)->_54 &= ~2;
+                getTeamObj(task, i, 0xF8)->_64 = lbl_8034E9A0.ports[0] + 30;
+            }
+        }
+        if (g_d_GameSettings.GameModeSelected == 5) {
+            getSpaniObj(task, 0x17)->_54 &= ~2;
+        }
+    } else {
+        fn_80034E20(task, lbl_801041C8);
+        if (g_d_GameSettings.home_AwaySetting) {
+            if (g_d_GameSettings.GameModeSelected == 5 && (s32)starMissionCompletionTracker._441F[0] == 19) {
+                if (team != 0) {
+                    left = TRUE;
+                } else {
+                    left = FALSE;
+                }
+            } else if (g_d_GameSettings.GameModeSelected == 5 && (s32)starMissionCompletionTracker._441F[0] == 19) {
+                if (team != 0) {
+                    left = TRUE;
+                } else {
+                    left = TRUE;
+                }
+            } else if (team == 0) {
+                left = TRUE;
+            } else {
+                left = FALSE;
+            }
+        } else if (team != 0) {
+            left = TRUE;
+        } else {
+            left = FALSE;
+        }
+        if (left) {
+            getSpaniObj(task, 6)->_54 &= ~2;
+            getSpaniObj(task, 9)->_54 &= ~2;
+            getSpaniObj(task, 7)->_5C = (lbl_8034E9A0._470D[team] % 4) << 16;
+            getSpaniObj(task, 10)->_5C = (lbl_8034E9A0._470D[team] % 4) << 16;
+        } else {
+            getSpaniObj(task, 7)->_54 &= ~2;
+            getSpaniObj(task, 10)->_54 &= ~2;
+            getSpaniObj(task, 6)->_5C = (lbl_8034E9A0._470D[team] % 4) << 16;
+            getSpaniObj(task, 9)->_5C = (lbl_8034E9A0._470D[team] % 4) << 16;
+        }
+        cpu = FALSE;
+        if (g_d_GameSettings._10 == 0 && team != 0) {
+            cpu = TRUE;
+        }
+        if (cpu) {
+            if (lbl_8034E9A0.ports[team] == -1) {
+                port = (team != 0) + 4;
+            } else {
+                port = lbl_8034E9A0.ports[team] + 4;
+            }
+        } else {
+            port = lbl_8034E9A0.ports[team];
+        }
+        getSpaniObj(task, 12)->_5C = port << 16;
+        getSpaniObj(task, 2)->_5C = 20 << 16;
+        getSpaniObj(task, 2)->_68 = 0;
+        getSpaniObj(task, 4)->_5C = 20 << 16;
+        getSpaniObj(task, 5)->_5C = 24 << 16;
+        getSpaniObj(task, 4)->_68 = 0;
+        getSpaniObj(task, 5)->_68 = 0;
+        getSpaniObj(task, 8)->_5C = 10 << 16;
+        getSpaniObj(task, 8)->_68 = 0;
+        if (lbl_803297E0._CFA2[team] == 1) {
+            getSpaniObj(task, 0x50)->_64 = 40;
+            getSpaniObj(task, 1)->_64 = 71;
+            getSpaniObj(task, 1)->_5C = 20 << 16;
+            getSpaniObj(task, 1)->_68 = 0;
+        }
+        fn_8005B298(task);
+        fn_8005AF68(task);
+    }
+    lbl_803CC1B8->func = fn_80060184;
 }
 
 // .text:0x80060184 size:0x1A18
@@ -963,57 +1095,123 @@ void fn_8005A350(void) {
 }
 
 // .text:0x80059B38 size:0x818
-void starMissionRelated1(void) {
+void starMissionRelated1(SpaniTask* task) {
+    s32 i;
+    u8 set;
+    u8 level;
+    s32 variant;
+    s32 shown;
+    s32 count;
+    s32 text;
+
+    if (lbl_803297E0._CF73 == 0) {
+        lbl_803297E0._CF9C = lbl_800E8558[lbl_803297E0._CF78]._0[1];
+        variant = starMissionCompletionTracker.characters[lbl_803297E0._CF9C].variantClassification;
+        set = lbl_800E8558[lbl_803297E0._CF78].set;
+        level = lbl_8034E9A0.chars[lbl_803297E0._CF78 / 9][lbl_803297E0._CF78 % 9]._31;
+        switch (variant) {
+        case 0:
+            variant = 3;
+            count = 10;
+            break;
+        case 1:
+            variant = 2;
+            count = 8;
+            break;
+        case 2:
+            variant = 1;
+            count = 6;
+            break;
+        case 3:
+            variant = 0;
+            count = 4;
+            break;
+        }
+        getSpaniObj(task, g_d_GameSettings._06 == 2 ? 0x16E : 0x1D7)->_54 |= 2;
+        getSpaniObj(task, g_d_GameSettings._06 == 2 ? 0x16E : 0x1D7)->_68 = 1;
+        getSpaniObj(task, g_d_GameSettings._06 == 2 ? 0x16A : 0x1D3)->_54 |= 2;
+        getSpaniObj(task, g_d_GameSettings._06 == 2 ? 0x16A : 0x1D3)->_68 = 1;
+        getSpaniObj(task, g_d_GameSettings._06 == 2 ? 0x16B : 0x1D4)->_54 |= 2;
+        getSpaniObj(task, g_d_GameSettings._06 == 2 ? 0x16B : 0x1D4)->_5C = variant << 16;
+        getSpaniObj(task, g_d_GameSettings._06 == 2 ? 0x16C : 0x1D5)->_54 |= 2;
+        getSpaniObj(task, g_d_GameSettings._06 == 2 ? 0x16C : 0x1D5)->_68 = 1;
+        getSpaniObj(task, g_d_GameSettings._06 == 2 ? 0x16D : 0x1D6)->_68 = 1;
+        getSpaniObj(task, g_d_GameSettings._06 == 2 ? 0x171 : 0x1DA)->_5C = level << 16;
+        getSpaniObj(task, g_d_GameSettings._06 == 2 ? 0x172 : 0x1DB)->_5C = lbl_803297E0._CF78 << 16;
+        lbl_803297E0.texts[0] = fn_8000F988((struct TextModelSet*)task, g_d_GameSettings._06 == 2 ? 0x19B : 0x205, 0, 0, lbl_803297E0._CF9C + 8, 0);
+        lbl_803297E0.texts[1] = fn_8000F988((struct TextModelSet*)task, g_d_GameSettings._06 == 2 ? 0x19C : 0x206, 1, 0, lbl_8010B3E8[set] + determineIfMissionDescriptionIsShown(lbl_803297E0._CF9C), 0);
+        shown = determineIfMissionDescriptionIsShown(lbl_803297E0._CF9C);
+        getSpaniObj(task, 0x1DC)->_5C = (4 - shown) << 16;
+        if (*(s8*)&starMissionCompletionTracker.characters[lbl_803297E0._CF9C].inGameMissionTracker[lbl_803297E0._CF75].shownOnPauseMenu != 0) {
+            text = lbl_8010A768[set][lbl_803297E0._CF75]._0;
+        } else if (lbl_8010A768[set][lbl_803297E0._CF75]._6 <= starMissionCompletionTracker._4415) {
+            text = 0x1C5;
+        } else {
+            text = 0x1C6;
+        }
+        lbl_803297E0.texts[2] = fn_8000F988((struct TextModelSet*)task, g_d_GameSettings._06 == 2 ? 0x19D : 0x207, 0, 0, text, 0);
+        lbl_80366B18[lbl_803297E0.texts[2]]._2F = 1;
+        for (i = 0; i < count; i++) {
+            if (challengeStarRelatedInd(lbl_803297E0._CF9C, i)) {
+                getTeamObj(task, i, 0x1F1)->_54 |= 2;
+                getTeamObj(task, i, 0x1F1)->_68 = 1;
+            } else {
+                getTeamObj(task, i, 0x1F1)->_54 &= ~2;
+            }
+            getTeamObj(task, i, 0x1FB)->_54 &= ~2;
+            getTeamObj(task, i, 0x1E7)->_54 &= ~2;
+            getTeamObj(task, i, g_d_GameSettings._06 == 2 ? 0x173 : 0x1DD)->_5C = 0;
+        }
+        if (challengeStarRelatedInd(lbl_803297E0._CF9C, lbl_803297E0._CF75)) {
+            getSpaniObj(task, 0x1D9)->_54 |= 2;
+            getSpaniObj(task, 0x1D9)->_68 = 1;
+            lbl_80371C30[task->_14 + 0x1E7 + lbl_803297E0._CF75].obj->_54 |= 2;
+            lbl_80371C30[task->_14 + 0x1E7 + lbl_803297E0._CF75].obj->_68 = 1;
+            getTeamObj(task, lbl_803297E0._CF75, g_d_GameSettings._06 == 2 ? 0x173 : 0x1DD)->_5C = 0x10000;
+        } else {
+            getSpaniObj(task, 0x1D9)->_54 &= ~2;
+            lbl_80371C30[task->_14 + 0x1E7 + lbl_803297E0._CF75].obj->_54 &= ~2;
+            getTeamObj(task, lbl_803297E0._CF75, g_d_GameSettings._06 == 2 ? 0x173 : 0x1DD)->_5C = 0;
+        }
+        lbl_80371C30[task->_14 + 0x1FB + lbl_803297E0._CF75].obj->_54 |= 2;
+        lbl_80371C30[task->_14 + 0x1FB + lbl_803297E0._CF75].obj->_68 = 1;
+        lbl_803297E0._CF73 = 1;
+    }
+    if (lbl_803297E0._CF73 != 0) {
+        lbl_803297E0._CF74 = 0;
+        lbl_803297E0._CF73 = 0;
+    }
 }
 
 // .text:0x800596D4 size:0x464
-// 82.48%: first draft; the 0x10000 constant and the slot base (0x1DD or
-// 0x173) are scheduled differently, and registers differ throughout.
 void fn_800596D4(SpaniTask* task) {
-    s32 base;
     u8 set;
-    s16 text;
+    s32 text;
 
     if (lbl_803297E0._CF73 == 0) {
         if (challengeStarRelatedInd(lbl_803297E0._CF9C, lbl_803297E0._CF75)) {
-            base = 0x1DD;
             getSpaniObj(task, 0x1D9)->_54 |= 2;
             getSpaniObj(task, 0x1D9)->_5C = 0;
             getSpaniObj(task, 0x1D9)->_68 = 1;
-            getSpaniObj(task, lbl_803297E0._CF75 + 0x1E7)->_54 |= 2;
-            getSpaniObj(task, lbl_803297E0._CF75 + 0x1E7)->_5C = 0;
-            getSpaniObj(task, lbl_803297E0._CF75 + 0x1E7)->_68 = 1;
-            if (g_d_GameSettings._06 == 2) {
-                base = 0x173;
-            }
-            getSpaniObj(task, base + lbl_803297E0._CF75)->_5C = 0x10000;
+            lbl_80371C30[task->_14 + 0x1E7 + lbl_803297E0._CF75].obj->_54 |= 2;
+            lbl_80371C30[task->_14 + 0x1E7 + lbl_803297E0._CF75].obj->_5C = 0;
+            lbl_80371C30[task->_14 + 0x1E7 + lbl_803297E0._CF75].obj->_68 = 1;
+            getTeamObj(task, lbl_803297E0._CF75, g_d_GameSettings._06 == 2 ? 0x173 : 0x1DD)->_5C = 0x10000;
         } else {
-            base = 0x1DD;
             getSpaniObj(task, 0x1D9)->_54 &= ~2;
-            getSpaniObj(task, lbl_803297E0._CF75 + 0x1E7)->_54 &= ~2;
-            if (g_d_GameSettings._06 == 2) {
-                base = 0x173;
-            }
-            getSpaniObj(task, base + lbl_803297E0._CF75)->_5C = 0;
+            lbl_80371C30[task->_14 + 0x1E7 + lbl_803297E0._CF75].obj->_54 &= ~2;
+            getTeamObj(task, lbl_803297E0._CF75, g_d_GameSettings._06 == 2 ? 0x173 : 0x1DD)->_5C = 0;
         }
-        getSpaniObj(task, lbl_803297E0._CF75 + 0x1FB)->_54 |= 2;
-        getSpaniObj(task, lbl_803297E0._CF75 + 0x1FB)->_68 = 1;
+        lbl_80371C30[task->_14 + 0x1FB + lbl_803297E0._CF75].obj->_54 |= 2;
+        lbl_80371C30[task->_14 + 0x1FB + lbl_803297E0._CF75].obj->_68 = 1;
         if (challengeStarRelatedInd(lbl_803297E0._CF9C, lbl_803297E0._CF76)) {
-            base = 0x1DD;
-            getSpaniObj(task, lbl_803297E0._CF76 + 0x1E7)->_54 &= ~2;
-            if (g_d_GameSettings._06 == 2) {
-                base = 0x173;
-            }
-            getSpaniObj(task, base + lbl_803297E0._CF76)->_5C = 0;
+            lbl_80371C30[task->_14 + 0x1E7 + lbl_803297E0._CF76].obj->_54 &= ~2;
+            getTeamObj(task, lbl_803297E0._CF76, g_d_GameSettings._06 == 2 ? 0x173 : 0x1DD)->_5C = 0;
         } else {
-            base = 0x1DD;
-            if (g_d_GameSettings._06 == 2) {
-                base = 0x173;
-            }
-            getSpaniObj(task, base + lbl_803297E0._CF76)->_5C = 0;
+            getTeamObj(task, lbl_803297E0._CF76, g_d_GameSettings._06 == 2 ? 0x173 : 0x1DD)->_5C = 0;
         }
-        getSpaniObj(task, lbl_803297E0._CF76 + 0x1FB)->_54 &= ~2;
-        getSpaniObj(task, lbl_803297E0._CF76 + 0x1FB)->_68 = 1;
+        lbl_80371C30[task->_14 + 0x1FB + lbl_803297E0._CF76].obj->_54 &= ~2;
+        lbl_80371C30[task->_14 + 0x1FB + lbl_803297E0._CF76].obj->_68 = 1;
         set = lbl_800E8558[lbl_803297E0._CF9C].set;
         if (*(s8*)&starMissionCompletionTracker.characters[lbl_803297E0._CF9C].inGameMissionTracker[lbl_803297E0._CF75].shownOnPauseMenu != 0) {
             text = lbl_8010A768[set][lbl_803297E0._CF75]._0;
