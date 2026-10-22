@@ -572,6 +572,8 @@ void fn_80051D00(void) {
 }
 
 // .text:0x8005138C size:0x974
+// 99.87%: registers only, in the entry block: the target puts lbl_803C6028 in r4,
+// the zero in r5, task->_1C in r6 and task->_14 * 8 in r7 (here r5, r6, r7, r4).
 void fn_8005138C(void) {
     CrowdTask* task;
     CrowdObj* obj;
@@ -1247,6 +1249,8 @@ void fn_8004F964(void) {
 }
 
 // .text:0x8004F10C size:0x858
+// 99.86%: registers only, in the entry block: the target puts task->_1C in r3,
+// the slot base + 16 and then frame in r4 (here r4, r3 and r9).
 void fn_8004F10C(void) {
     CrowdTask* task;
     CrowdObj* obj;
