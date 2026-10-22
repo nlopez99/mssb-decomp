@@ -37,6 +37,7 @@ BOOL fn_8002B014(struct Emitter* e);
 void fn_8002B400(struct Emitter* e, struct SparkParams* params, Vec* pos);
 void fn_8002B7F8(Vec* pos, struct SparkParams* params, u8 glow);
 void fn_8002C2D0(Vec* pos, Vec* dir, struct EffectParams* params);
+BOOL fn_8002C56C(void* e);
 void fn_8002CDD0(Vec* pos);
 BOOL fn_8002D82C(void* e);
 void fn_8002DC68(Vec* pos);

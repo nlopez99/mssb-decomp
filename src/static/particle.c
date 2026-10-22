@@ -205,6 +205,29 @@ typedef struct ArcParticle {
     /* 0x48 */ u16 fade;
 } ArcParticle;
 
+// What fn_8002CE4C's callers pass
+typedef struct ArcParams {
+    /* 0x00 */ s32 file;
+    /* 0x04 */ s32 tex;
+    /* 0x08 */ s32 count;
+    /* 0x0C */ s32 delay;
+    /* 0x10 */ s32 frames;
+    /* 0x14 */ s32 rise[2];
+    /* 0x1C */ s32 split[2];
+    /* 0x24 */ s32 hold[2];
+    /* 0x2C */ s32 fade[2];
+    /* 0x34 */ s32 size[2];
+    /* 0x3C */ s32 yaw[2];
+    /* 0x44 */ s32 pitch[2];
+    /* 0x4C */ s32 vel[2];
+    /* 0x54 */ s32 angle[2];
+    /* 0x5C */ s32 spin[2];
+    /* 0x64 */ s32 velScale[2];
+    /* 0x6C */ s32 velScaleEnd[2];
+    /* 0x74 */ s32 posScale[2];
+    /* 0x7C */ s32 dist[2];
+} ArcParams; // size: 0x84
+
 // What fn_8002DCE4's callers pass
 typedef struct DriftParams {
     /* 0x00 */ s32 file;
@@ -2280,6 +2303,131 @@ BOOL fn_8002D82C(void* arg)
     } while (p != NULL);
     GXLoadPosMtxImm(lbl_8017FFE0, GX_PNMTX0);
     return alive == 0;
+}
+
+// .text:0x8002CE4C size:0x9E0
+// 99.87%: registers only, in the w/h lookups: the target keeps size in f2 and the second
+// index in r4 (f1 and r0 here); the lookup and size forms of fn_8002DCE4 change nothing.
+void fn_8002CE4C(Vec* start, Vec* end, ArcParams* params)
+{
+    f32 splitMin;
+    f32 splitRange;
+    f32 yawMin;
+    f32 yawMax;
+    f32 pitchMin;
+    f32 pitchMax;
+    f32 velMin;
+    f32 velRange;
+    f32 angleMin;
+    f32 angleRange;
+    f32 sizeMin;
+    f32 sizeRange;
+    f32 spinMin;
+    f32 spinRange;
+    f32 vsMin;
+    f32 vsRange;
+    f32 veMin;
+    f32 veRange;
+    f32 psMin;
+    f32 psRange;
+    f32 distMin;
+    f32 distRange;
+    s32 rise;
+    s32 riseRange;
+    s32 holdMin;
+    s32 holdRange;
+    s32 fadeMin;
+    s32 fadeRange;
+    s32 d;
+    s32 a;
+    s32 i;
+    f32 size;
+    f32 w;
+    f32 h;
+    Vec dir;
+    Emitter* e;
+    ArcParticle* p;
+    s32 sign = 1;
+
+    e = fn_80033A24(fn_8002C56C, 0x80, 0, params->count, TRUE, 10);
+    if (e != NULL) {
+        rise = params->frames * (params->rise[0] / 100000.0f);
+        riseRange = params->frames * (params->rise[1] / 100000.0f) - rise;
+        splitMin = params->split[0] / 100000.0f;
+        splitRange = (params->split[1] - params->split[0]) / 100000.0f;
+        holdMin = params->hold[0];
+        holdRange = params->hold[1] - holdMin;
+        fadeMin = params->fade[0];
+        fadeRange = params->fade[1] - fadeMin;
+        yawMin = params->yaw[0] / 100000.0f;
+        yawMax = params->yaw[1] / 100000.0f;
+        pitchMin = params->pitch[0] / 100000.0f;
+        pitchMax = params->pitch[1] / 100000.0f;
+        angleMin = params->angle[0] / 100000.0f;
+        angleRange = (params->angle[1] - params->angle[0]) / 100000.0f;
+        velMin = params->vel[0] / 100000.0f;
+        velRange = (params->vel[1] - params->vel[0]) / 100000.0f;
+        vsMin = params->velScale[0] / 100000.0f;
+        vsRange = (params->velScale[1] - params->velScale[0]) / 100000.0f;
+        veMin = params->velScaleEnd[0] / 100000.0f;
+        veRange = (params->velScaleEnd[1] - params->velScaleEnd[0]) / 100000.0f;
+        sizeMin = params->size[0] / 100000.0f;
+        sizeRange = (params->size[1] - params->size[0]) / 100000.0f;
+        spinMin = params->spin[0] / 100000.0f;
+        spinRange = (params->spin[1] - params->spin[0]) / 100000.0f;
+        psMin = params->posScale[0] / 100000.0f;
+        psRange = (params->posScale[1] - params->posScale[0]) / 100000.0f;
+        distMin = params->dist[0] / 100000.0f;
+        distRange = (params->dist[1] - params->dist[0]) / 100000.0f;
+        e->_10 = params->file;
+        e->_3C = params->tex;
+        e->_40 = params->frames;
+        e->_18.x = start->x;
+        e->_18.y = start->y;
+        e->_18.z = start->z;
+        e->_24.x = end->x;
+        e->_24.y = end->y;
+        e->_24.z = end->z;
+        PSVECSubtract(end, start, &e->_30);
+        p = (ArcParticle*)e->particles;
+        do {
+            p->delay = params->delay * rand() / 32767;
+            d = rise + riseRange * rand() / 32767;
+            p->t[0] = p->dur[0] = d * (splitMin + splitRange * rand() / 32767.0f);
+            p->t[1] = p->dur[1] = d - p->dur[0];
+            p->t[2] = p->dur[2] = holdMin + holdRange * rand() / 32767;
+            p->vel.x = velMin + velRange * rand() / 32767.0f;
+            p->vel.y = 0.0f;
+            p->vel.z = 0.0f;
+            fn_800332B8(&p->vel, &p->vel, yawMin, yawMax, pitchMin, pitchMax);
+            p->vel.x *= sign;
+            sign *= -1;
+            PSVECNormalize(&p->vel, &dir);
+            PSVECScale(&dir, distMin + distRange * rand() / 32767.0f, &p->pos);
+            p->velScale = vsMin + vsRange * rand() / 32767.0f;
+            p->velScaleEnd = veMin + veRange * rand() / 32767.0f - p->velScale;
+            p->posScale = psMin + psRange * rand() / 32767.0f;
+            p->spin = spinMin + spinRange * rand() / 32767.0f;
+            a = 0.5f + 2048.0f * (angleMin + angleRange * rand() / 32767.0f) / 360.0f;
+            size = 1.4142135f * ((sizeMin + sizeRange * rand() / 32767.0f) / 2.0f);
+            i = a;
+            if (i < 0) {
+                i = -i;
+            }
+            i &= 0x7FF;
+            if (i >= 0x401) {
+                i = 0x800 - i;
+            }
+            w = size * lbl_8017ED68[i];
+            h = size * fn_800335EC(a);
+            p->w = w;
+            p->h = h;
+            p->rgba = 0xFFFFFFFF;
+            p->texCoords = (rand() & 1) ? 0x123 : 0x321;
+            p->fade = fadeMin + fadeRange * rand() / 32767;
+            p = (ArcParticle*)p->next;
+        } while (p != NULL);
+    }
 }
 
 // .text:0x8002CDD0 size:0x7C
