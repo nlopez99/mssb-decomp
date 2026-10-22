@@ -73,12 +73,12 @@ struct DODisplayObj {
     /* 0x48 */ DOUserTevModeFunc userTevMode;
     /* 0x4C */ GXTexObj *envTexObj;
     /* 0x50 */ GXTexObj *projTexObj;
-    /* 0x54 */ u8 _54[4];
-    /* 0x58 */ u8 _58[4];
-    /* 0x5C */ u8 _5C[4];
-    /* 0x60 */ u8 _60[4];
-    /* 0x64 */ u8 _64[4];
-    /* 0x68 */ u8 _68[4];
+    /* 0x54 */ f32 xMin;
+    /* 0x58 */ f32 xMax;
+    /* 0x5C */ f32 yMin;
+    /* 0x60 */ f32 yMax;
+    /* 0x64 */ f32 zMin;
+    /* 0x68 */ f32 zMax;
 }; // size: 0x6C
 
 typedef struct {
@@ -116,7 +116,8 @@ struct sHdr *GEOGetPalette(DODisplayDataPtr *pal, char *name);
 void GEOReleasePalette(DODisplayDataPtr *pal);
 u32 GEOGetUserDataSize(DODisplayDataPtr pal);
 char *GEOGetUserData(DODisplayDataPtr pal);
-void DOGet(struct DODisplayObj **dispObj, DODisplayDataPtr pal, u16 id, char *name);
+// This game's DOGet takes no name: fn_800B4084 leaves r6 unset.
+void DOGet(struct DODisplayObj **dispObj, DODisplayDataPtr pal, u16 id);
 
 // normalTable.c
 extern u8 normalTableQuantizeInfo;

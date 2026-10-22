@@ -1119,16 +1119,16 @@ void InitDisplayObjWithLayout(struct DODisplayObj* dispObj, DOLayout* layout) {
     dispObj->envTexObj = NULL;
     dispObj->projTexObj = NULL;
     dispObj->pad8 = layout->pad8;
-    memcpy(dispObj->_58, layout->_20, 4);
-    memcpy(dispObj->_54, layout->_1C, 4);
-    memcpy(dispObj->_60, layout->_28, 4);
-    memcpy(dispObj->_5C, layout->_24, 4);
-    memcpy(dispObj->_68, layout->_30, 4);
-    memcpy(dispObj->_64, layout->_2C, 4);
+    memcpy(&dispObj->xMax, layout->_20, 4);
+    memcpy(&dispObj->xMin, layout->_1C, 4);
+    memcpy(&dispObj->yMax, layout->_28, 4);
+    memcpy(&dispObj->yMin, layout->_24, 4);
+    memcpy(&dispObj->zMax, layout->_30, 4);
+    memcpy(&dispObj->zMin, layout->_2C, 4);
 }
 
 // .text:0x800BCAB8 size:0x8C
-void DOGet(struct DODisplayObj **dispObj, DODisplayDataPtr pal, u16 id, char *name) {
+void DOGet(struct DODisplayObj **dispObj, DODisplayDataPtr pal, u16 id) {
     DOLayout* layout;
 
     if (id >= pal->numDescriptors) {
@@ -1303,12 +1303,12 @@ void* fn_800BCEF8(DOLayout* layout, struct DODisplayObj* dispObj) {
     dispObj->userTevMode = DODefaultUserTevMode;
     dispObj->envTexObj = NULL;
     dispObj->projTexObj = NULL;
-    memcpy(dispObj->_58, layout->_20, 4);
-    memcpy(dispObj->_54, layout->_1C, 4);
-    memcpy(dispObj->_60, layout->_28, 4);
-    memcpy(dispObj->_5C, layout->_24, 4);
-    memcpy(dispObj->_68, layout->_30, 4);
-    memcpy(dispObj->_64, layout->_2C, 4);
+    memcpy(&dispObj->xMax, layout->_20, 4);
+    memcpy(&dispObj->xMin, layout->_1C, 4);
+    memcpy(&dispObj->yMax, layout->_28, 4);
+    memcpy(&dispObj->yMin, layout->_24, 4);
+    memcpy(&dispObj->zMax, layout->_30, 4);
+    memcpy(&dispObj->zMin, layout->_2C, 4);
     return skin;
 }
 

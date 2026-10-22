@@ -1076,6 +1076,85 @@ Unknown/File_0x800a64e0.c:
 	.text       start:0x800A64E0 end:0x800A6870
 	.bss        start:0x803C6990 end:0x803C6CF8
 
+static/dvdsys.c:
+	extab       start:0x80006608 end:0x80006688
+	extabindex  start:0x8000846C end:0x8000852C
+	.text       start:0x800A6870 end:0x800A7AD8
+	.rodata     start:0x800E7730 end:0x800E77C8
+	.data       start:0x8010F420 end:0x8010F460
+
+static/static_800A7AD8.c:
+	extab       start:0x80006688 end:0x80006690
+	extabindex  start:0x8000852C end:0x80008538
+	.text       start:0x800A7AD8 end:0x800A7BAC
+	.data       start:0x8010F460 end:0x80110080
+	.sdata2     start:0x803CCEC8 end:0x803CCED0
+
+static/graphic.c:
+	extab       start:0x80006690 end:0x800066C8
+	extabindex  start:0x80008538 end:0x8000858C
+	.text       start:0x800A7BAC end:0x800A8518
+	.rodata     start:0x800E77C8 end:0x800E7800
+	.sdata      start:0x803CBAD0 end:0x803CBAD8
+	.sdata2     start:0x803CCED0 end:0x803CCEE0
+
+static/static_800A8518.c:
+	extab       start:0x800066C8 end:0x80006750
+	extabindex  start:0x8000858C end:0x80008658
+	.text       start:0x800A8518 end:0x800A94C4
+	.sbss       start:0x803CC128 end:0x803CC158
+
+static/static_800A94C4.c:
+	extab       start:0x80006750 end:0x80006768
+	extabindex  start:0x80008658 end:0x8000867C
+	.text       start:0x800A94C4 end:0x800A9864
+	.data       start:0x80110080 end:0x80110090
+
+static/mcard.c:
+	extab       start:0x80006768 end:0x80006808
+	extabindex  start:0x8000867C end:0x8000876C
+	.text       start:0x800A9864 end:0x800ACF14
+	.rodata     start:0x800E7800 end:0x800E7B50
+	.data       start:0x80110090 end:0x801101B0
+	.sbss       start:0x803CC158 end:0x803CC170
+	.sdata2     start:0x803CCEE0 end:0x803CCEE8
+
+static/static_800ACF14.c:
+	.text       start:0x800ACF14 end:0x800AD070
+
+C3/actor/act.c:
+	extab       start:0x80006990 end:0x80006A28
+	extabindex  start:0x800089B8 end:0x80008A9C
+	.text       start:0x800B2AC8 end:0x800B4A44
+	.rodata     start:0x800E7D28 end:0x800E7D58
+	.data       start:0x80111640 end:0x80111670
+	.sdata2     start:0x803CCF58 end:0x803CCF78
+
+C3/actor/actorAnim.c:
+	extab       start:0x80006A28 end:0x80006A40
+	extabindex  start:0x80008A9C end:0x80008AC0
+	.text       start:0x800B4A44 end:0x800B4E9C
+	.sdata2     start:0x803CCF78 end:0x803CCF80
+
+C3/anim/animBank.c:
+	extab       start:0x80006A40 end:0x80006A50
+	extabindex  start:0x80008AC0 end:0x80008AD8
+	.text       start:0x800B4E9C end:0x800B516C
+
+C3/anim/animPipe.c:
+	extab       start:0x80006A50 end:0x80006A88
+	extabindex  start:0x80008AD8 end:0x80008B2C
+	.text       start:0x800B516C end:0x800B79D0
+	.rodata     start:0x800E7D58 end:0x800E7E78
+	.sdata      start:0x803CBB48 end:0x803CBB58
+	.sdata2     start:0x803CCF80 end:0x803CCFB8
+
+C3/actor/boneAnim.c:
+	extab       start:0x80006A88 end:0x80006A90
+	extabindex  start:0x80008B2C end:0x80008B38
+	.text       start:0x800B79D0 end:0x800B7D3C
+	.sdata2     start:0x803CCFB8 end:0x803CCFC0
+
 C3/control/control.c:
 	extab       start:0x80006A90 end:0x80006AE0
 	extabindex  start:0x80008B38 end:0x80008BB0

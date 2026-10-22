@@ -82,7 +82,6 @@ void DOVARenderSkin(struct DODisplayObj *dispObj, MtxPtr camera, MtxPtr mtxArray
 void fn_800BC824(struct DODisplayObj* dispObj, GXTexObj* texObj);
 void DOSetWorldMatrix(struct DODisplayObj *dispObj, MtxPtr m);
 void InitDisplayObjWithLayout(struct DODisplayObj* dispObj, DOLayout* layout);
-void DOGet(struct DODisplayObj **dispObj, DODisplayDataPtr pal, u16 id, char *name);
 void* LoadGeoPalette(DODisplayDataPtr pal);
 void convertGeometryAndSknHeader(DODisplayDataPtr pal, void* skn);
 void fn_800BCDBC(DODisplayDataPtr pal);

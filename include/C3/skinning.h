@@ -19,21 +19,29 @@ typedef struct {
     /* 0x08 */ u8 * weights;
 } sAccBuffers;
 
+// This game's bone is 0x140 bytes (static/objinit.c's ObjBone): three 0x44-byte Controls.
 typedef struct sBone {
-    /* 0x00 */ u16 boneID;
-    /* 0x02 */ u8 inheritanceFlag;
-    /* 0x03 */ u8 drawingPriority;
-    /* 0x04 */ DSBranch branch;
-    /* 0x14 */ struct DODisplayObj * dispObj;
-    /* 0x18 */ Control orientationCtrl;
-    /* 0x4C */ Control animationCtrl;
-    /* 0x80 */ struct ANIMPipe * animPipe;
-    /* 0x84 */ MtxPtr forwardMtx;
-    /* 0x88 */ MtxPtr skinMtx;
-    /* 0x8C */ MtxPtr skinInvTransposeMtx;
-    /* 0x90 */ MtxPtr orientationInvMtx;
-    /* 0x94 */ DSLink drawPriorityLink;
-} sBone;
+    /* 0x000 */ u16 boneID;
+    /* 0x002 */ u8 inheritanceFlag;
+    /* 0x003 */ u8 drawingPriority;
+    /* 0x004 */ DSBranch branch;
+    /* 0x014 */ struct DODisplayObj * dispObj;
+    /* 0x018 */ struct DODisplayObj * _18;
+    /* 0x01C */ Control orientationCtrl;
+    /* 0x060 */ Control animationCtrl;
+    /* 0x0A4 */ Control _A4;
+    /* 0x0E8 */ struct ANIMPipe * animPipe;
+    /* 0x0EC */ MtxPtr forwardMtx;
+    /* 0x0F0 */ MtxPtr skinMtx;
+    /* 0x0F4 */ MtxPtr skinInvTransposeMtx;
+    /* 0x0F8 */ MtxPtr orientationInvMtx;
+    /* 0x0FC */ DSLink drawPriorityLink;
+    /* 0x104 */ u8 _104[0x134 - 0x104];
+    /* 0x134 */ u16 _134;
+    /* 0x136 */ u8 _136;
+    /* 0x137 */ u8 _137;
+    /* 0x138 */ u8 _138[0x140 - 0x138];
+} sBone; // size: 0x140
 
 typedef struct {
     /* 0x00 */ Mtx34 m;
@@ -100,7 +108,7 @@ void GQRSetup7(u32 loadScale, u32 loadType, u32 storeScale, u32 storeType);
 extern sAccBuffers SKAccBuffers[2];
 extern void * SKBuffers[4];
 
-void SKNIt(sBone **bones, sHdr *hdr);
+void SKNIt(sBone **bones, sHdr *hdr, char *positionArray);
 void SKNInit(void);
 void SKNBzero32B(void * base, u32 size);
 void SKNLCBzero(void * base, u32 size);
