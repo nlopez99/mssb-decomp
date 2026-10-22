@@ -58,12 +58,16 @@ typedef struct SprtLayer {
 } SprtLayer; // size: 0xC
 
 extern GDCurrentDL* lbl_803CC0F0;
+extern u32 lbl_802FE8B8[24];
+extern SprtProj lbl_802FE918[];
 extern SprtState lbl_802FEBF8[];
 extern SprtState lbl_802FF978[];
-extern SprtProj lbl_802FE918[];
+extern GDCurrentDL lbl_803006F8[2][24];
 extern SprtVtx lbl_803C8A24[];
 
 extern void fn_800A1BB0(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+extern void fn_800A1A70(GDCurrentDL* dl, void* start, u32 length);
+extern void fn_800A7D4C(s32 slot, void* node);
 extern void fn_800A1E3C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern void fn_800A1F40(s32 map, s32 wrapS, s32 wrapT, s32 minFilter, s32 magFilter, f32 minLod, f32 maxLod, f32 lodBias,
                         u8 biasClamp, u8 edgeLod, s32 aniso);
@@ -111,6 +115,18 @@ s32 lbl_803CC1CC;
 s32 lbl_803CC1C8;
 s32 lbl_803CC1C4;
 GDCurrentDL* lbl_803CC1C0;
+
+static inline void SetProjection(SprtProj* proj, Mtx44 m, s32 type) {
+    s32 col = (type == GX_ORTHOGRAPHIC) + 2;
+
+    proj->type = type;
+    proj->p[0] = m[0][0];
+    proj->p[1] = m[0][col];
+    proj->p[2] = m[1][1];
+    proj->p[3] = m[1][col];
+    proj->p[4] = m[2][2];
+    proj->p[5] = m[2][3];
+}
 
 static inline void ReserveSprite(s32 size) {
     size -= lbl_803CC1C0->end - lbl_803CC1C0->pDisplayListData;
@@ -238,21 +254,64 @@ static inline s32 UpdateZMode(void) {
 }
 
 // .text:0x800B2854 size:0x274
-void fn_800B2854(void) {
+void fn_800B2854(u8* buf, s32 size, Mtx44 proj, s32 projType, s32 count, u32* handles, u32* sizes) {
+    s32 half;
+    u8* front;
+    u8* back;
+    GDCurrentDL* dl;
+    s32 i;
+    u32 n;
+    SprtProj* p;
+    s32 col;
+
+    lbl_803CBB30 = count;
+    lbl_803CC1E0 = size / 2;
+    memcpy(lbl_802FE8B8, handles, count * sizeof(u32));
+    half = size / 2;
+    front = buf;
+    back = buf + half;
+    dl = lbl_803006F8[0];
+    half = half / count;
+    for (i = 0; i < count; i++) {
+        if (sizes != NULL) {
+            n = sizes[i];
+        } else {
+            n = half;
+        }
+        fn_800A1A70(dl, front, n);
+        fn_800A1A70(dl + 24, back, n);
+        SetProjection(&lbl_803CBB40[i], proj, projType);
+        front += n;
+        back += n;
+        dl++;
+    }
+    lbl_803CC1D4 = lbl_803CBB30;
+    lbl_803CBB34 = &lbl_802FEBF8[lbl_803CBB30];
+    lbl_803CBB38 = lbl_803CBB34 + 24;
+    lbl_803CC1E4 = lbl_803006F8[lbl_803CC1C4];
+    lbl_803CC1C0 = &lbl_803CC1E4[lbl_803CBB30];
+    lbl_803CBB40 = &lbl_802FE918[lbl_803CBB30];
+    lbl_803CC1C0->end = lbl_803CC1E4[0].begin + lbl_803CC1E0;
+    while (lbl_803CC1D4 != 0) {
+        lbl_803CC1D4--;
+        lbl_803CC1C0--;
+        lbl_803CBB34--;
+        lbl_803CBB38--;
+        lbl_803CBB40--;
+        memset(lbl_803CBB34, 0, sizeof(SprtState));
+        PSMTXIdentity(lbl_803CBB34->view);
+        memcpy(&lbl_803CBB34->proj, lbl_803CBB40, sizeof(SprtProj));
+        lbl_803CBB34->_8A = 1;
+        lbl_803CBB34->_80 = -1;
+        memcpy(lbl_803CBB38, lbl_803CBB34, sizeof(SprtState));
+    }
+    lbl_803CC1D8[1] = NULL;
+    lbl_803CC1D8[0] = NULL;
 }
 
 // .text:0x800B27DC size:0x78
 void fn_800B27DC(Mtx44 m, GXProjectionType type) {
-    SprtProj* proj = &lbl_803CBB34->proj;
-    s32 col = (type == GX_ORTHOGRAPHIC) + 2;
-
-    proj->type = type;
-    proj->p[0] = m[0][0];
-    proj->p[1] = m[0][col];
-    proj->p[2] = m[1][1];
-    proj->p[3] = m[1][col];
-    proj->p[4] = m[2][2];
-    proj->p[5] = m[2][3];
+    SetProjection(&lbl_803CBB34->proj, m, type);
 }
 
 // .text:0x800B27A4 size:0x38
@@ -271,6 +330,62 @@ void fn_800B27A4(s32 shift) {
 
 // .text:0x800B251C size:0x288
 void fn_800B251C(void) {
+    u32* handle;
+    s32 i;
+    u32 len;
+    SprtLayer* layer;
+
+    if (lbl_803CC1C0 != NULL) {
+        handle = lbl_802FE8B8;
+        lbl_803CC1C0 = lbl_803CC1E4;
+        for (i = 0; i < lbl_803CBB30; i++) {
+            len = lbl_803CC1C0->pDisplayListData - lbl_803CC1C0->begin;
+            if (len != 0) {
+                while (len & 31) {
+                    len++;
+                    *lbl_803CC1C0->pDisplayListData = 0;
+                    lbl_803CC1C0->pDisplayListData++;
+                }
+                DCStoreRangeNoSync(lbl_803CC1C0->begin, len);
+                layer = &lbl_80111340[lbl_803CC1C4][i];
+                layer->dl = lbl_803CC1C0;
+                layer->draw = fn_800B2240;
+                fn_800A7D4C(*handle, layer);
+            }
+            handle++;
+            lbl_803CC1C0++;
+        }
+        lbl_803CC1D4 = lbl_803CBB30;
+        lbl_803CC1C4 ^= 1;
+        lbl_803CC1E4 = lbl_803006F8[lbl_803CC1C4];
+        lbl_803CBB34 = &lbl_802FEBF8[lbl_803CBB30];
+        lbl_803CBB38 = lbl_803CBB34 + 24;
+        lbl_803CBB40 = &lbl_802FE918[lbl_803CBB30];
+        lbl_803CC1C0 = &lbl_803CC1E4[lbl_803CBB30];
+        lbl_803CC1C0->end = lbl_803CC1E4[0].begin + lbl_803CC1E0;
+        while (lbl_803CC1D4 != 0) {
+            lbl_803CC1D4--;
+            lbl_803CC1C0--;
+            lbl_803CBB34--;
+            lbl_803CBB38--;
+            lbl_803CBB40--;
+            memset(lbl_803CBB34, 0, sizeof(SprtState));
+            PSMTXIdentity(lbl_803CBB34->view);
+            memcpy(&lbl_803CBB34->proj, lbl_803CBB40, sizeof(SprtProj));
+            lbl_803CBB34->_8A = 1;
+            lbl_803CBB34->_80 = -1;
+            memcpy(lbl_803CBB38, lbl_803CBB34, sizeof(SprtState));
+            if (lbl_803CC1D8[lbl_803CC1C4] != NULL) {
+                lbl_803CC1C0->length = lbl_803CC1D8[lbl_803CC1C4][lbl_803CC1D4];
+                lbl_803CC1C0->begin = lbl_803CC1C0->end - lbl_803CC1C0->length;
+                if (lbl_803CC1D4 != 0) {
+                    lbl_803CC1C0[-1].end = lbl_803CC1C0->begin;
+                }
+            }
+            lbl_803CC1C0->pDisplayListData = lbl_803CC1C0->begin;
+        }
+        lbl_803CC1D8[lbl_803CC1C4] = NULL;
+    }
 }
 
 // .text:0x800B24D4 size:0x48

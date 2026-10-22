@@ -31,6 +31,6 @@ void fn_800B24D4(s32 index);
 void fn_800B251C(void);
 void fn_800B27A4(s32 shift);
 void fn_800B27DC(Mtx44 m, GXProjectionType type);
-void fn_800B2854(void);
+void fn_800B2854(u8* buf, s32 size, Mtx44 proj, s32 projType, s32 count, u32* handles, u32* sizes);
 
 #endif // !__STATIC_SPRT_H_
