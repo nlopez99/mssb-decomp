@@ -1104,6 +1104,12 @@ static/static_800A8518.c:
 	.text       start:0x800A8518 end:0x800A94C4
 	.sbss       start:0x803CC128 end:0x803CC158
 
+static/static_800A94C4.c:
+	extab       start:0x80006750 end:0x80006768
+	extabindex  start:0x80008658 end:0x8000867C
+	.text       start:0x800A94C4 end:0x800A9864
+	.data       start:0x80110080 end:0x80110090
+
 C3/control/control.c:
 	extab       start:0x80006A90 end:0x80006AE0
 	extabindex  start:0x80008B38 end:0x80008BB0

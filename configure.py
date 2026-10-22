@@ -670,6 +670,7 @@ config.libs = [
             Object(NonMatching, "static/static_800A7AD8.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/graphic.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/static_800A8518.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(NonMatching, "static/static_800A94C4.c", extra_cflags=["-cpp_exceptions on"]),
         ],
     },
     {
