@@ -10,7 +10,6 @@ struct ModelTable;
 struct ModelNode;
 struct LightDesc;
 struct ModelHandle;
-struct ModelLink;
 struct ModelSub2C;
 
 struct _VecXYZ;
@@ -52,10 +51,10 @@ BOOL fn_80016B60(struct ModelActor* actor);
 BOOL fn_80016F7C(void);
 BOOL fn_80017098(int team, int player, int arg2, int slot, int arg4, int arg5);
 BOOL fn_80017340(int idx);
-s32 fn_8001758C(u8* arg0, s32 idx, u8 arg2, u8 arg3, u8 arg4, s8 arg5, u8 arg6, u8 arg7);
+s32 fn_8001758C(u8* state, s32 idx, u8 kind, u8 team, u8 player, u8 arg5, u8 arg6, u8 arg7);
 void fn_800177B4(void);
-void fn_80017814(void);
-void fn_80017D28(void);
+void fn_80017814(struct ModelActor* actor, s32 idx, s32 kind, void (*callback)(struct ModelSlot*));
+void fn_80017D28(struct ModelActor* src);
 void fn_80017DBC(void);
 void fn_80018024(void);
 void fn_80018270(void);
@@ -119,6 +118,6 @@ void challengeMapMaybe(void);
 void fn_8001F5E8(void);
 void fn_8001F8A4(void);
 void fn_8001FC4C(struct ModelActor* actor);
-void fn_8001FDD4(struct ModelLink* arg0);
+void fn_8001FDD4(struct ModelSlot* slot);
 
 #endif // !__STATIC_MODEL_H_

@@ -73,7 +73,8 @@ typedef struct ModelEntry28 {
 } ModelEntry28; // size: 0x28
 
 typedef struct ModelNode {
-    /* 0x0000 */ u8 _0000[0x6 - 0x0];
+    /* 0x0000 */ u16 id;
+    /* 0x0002 */ u8 _0002[0x6 - 0x2];
     /* 0x0006 */ u16 numBones;
     /* 0x0008 */ u8 _0008[0x14 - 0x8];
     /* 0x0014 */ struct DODisplayObj* dispObj;
@@ -93,7 +94,10 @@ typedef struct ModelNode {
     /* 0x00EC */ MtxPtr mtx;
     /* 0x00F0 */ u8 _00F0[0x100 - 0xF0];
     /* 0x0100 */ struct ModelNode* next;
-} ModelNode; // size: 0x104
+    /* 0x0104 */ u8 _0104[0x136 - 0x104];
+    /* 0x0136 */ u8 _136;
+    /* 0x0137 */ u8 _0137[0x138 - 0x137];
+} ModelNode; // size: 0x138
 
 typedef struct LightSet {
     /* 0x0000 */ LightDesc lights[4];
@@ -140,7 +144,7 @@ typedef struct ModelLoadReq {
     /* 0x0016 */ u8 _16;
     /* 0x0017 */ u8 _0017[0x19 - 0x17];
     /* 0x0019 */ u8 _19;
-    /* 0x001A */ u8 _1A;
+    /* 0x001A */ s8 _1A;
     /* 0x001B */ u8 _1B;
     /* 0x001C */ u8 _1C;
     /* 0x001D */ u8 _1D;
@@ -227,16 +231,18 @@ typedef struct ModelActor {
     /* 0x0269 */ s8 _269;
     /* 0x026A */ s8 _26A;
     /* 0x026B */ s8 _26B;
-    /* 0x026C */ u8 _026C[0x26D - 0x26C];
+    /* 0x026C */ s8 _26C;
     /* 0x026D */ s8 _26D;
     /* 0x026E */ s8 _26E;
     /* 0x026F */ s8 _26F;
-    /* 0x0270 */ u8 _0270[0x273 - 0x270];
+    /* 0x0270 */ s8 _270;
+    /* 0x0271 */ s8 _271;
+    /* 0x0272 */ s8 _272;
     /* 0x0273 */ s8 _273;
     /* 0x0274 */ s8 _274;
     /* 0x0275 */ u8 _0275[0x277 - 0x275];
     /* 0x0277 */ u8 _277;
-    /* 0x0278 */ s8 _278;
+    /* 0x0278 */ u8 _278;
     /* 0x0279 */ u8 _0279[0x27C - 0x279];
 } ModelActor; // size: 0x27C
 
@@ -318,7 +324,7 @@ typedef struct ModelWork {
             /* 0x2D28 */ u8 _2D28[0x2D38 - 0x2D28];
             /* 0x2D38 */ void* _2D38;
             /* 0x2D3C */ void* _2D3C;
-            /* 0x2D40 */ u8 _2D40[0x2D44 - 0x2D40];
+            /* 0x2D40 */ u32 _2D40;
             /* 0x2D44 */ s16 _2D44;
             /* 0x2D46 */ u8 _2D46;
             /* 0x2D47 */ u8 _2D47[0x2D48 - 0x2D47];
@@ -328,7 +334,7 @@ typedef struct ModelWork {
             /* 0x2D52 */ u8 _2D52;
             /* 0x2D53 */ u8 _2D53[0x2D54 - 0x2D53];
             /* 0x2D54 */ void* _2D54;
-            /* 0x2D58 */ u8 _2D58[0x2D5C - 0x2D58];
+            /* 0x2D58 */ u32 _2D58;
             /* 0x2D5C */ s16 _2D5C;
             /* 0x2D5E */ u8 _2D5E;
             /* 0x2D5F */ u8 _2D5F[0x2D64 - 0x2D5F];
@@ -459,6 +465,18 @@ void fn_800BD2CC(s32 id, GXColor color);
 void fn_800BD548(ModelSlot* slot, s32 count, ...);
 void fn_800B2C10(ModelNode* node, u16 joint, Vec* out);
 void fn_800B2C44(ModelNode* node, u16 joint, Vec* out);
+void fn_8002399C(ModelSlot* slot, s32 id, u16 idx, void* layout, void* anim, void* skn);
+void fn_800B2B74(ModelNode* node, u16 joint);
+void fn_800B2B54(ModelNode* node, u16 joint, s32 arg2);
+void fn_800B2C08(ModelNode* node, u16 joint);
+s32 fn_800638B4(ModelActor* actor, ModelSlot* slot);
+s32 fn_80063010(ModelActor* actor, ModelSlot* slot);
+s32 fn_8004B7B4(ModelActor* actor, ModelSlot* slot);
+s32 fn_800637BC(ModelActor* actor, ModelSlot* slot);
+s32 fn_8004BD6C(ModelActor* actor, ModelSlot* slot);
+s32 fn_800637D4(ModelActor* actor, ModelSlot* slot);
+void* fn_80052634(ModelActor* actor, ModelSlot* slot);
+s32 fn_80062ED4(ModelActor* actor, ModelSlot* slot);
 
 extern AramEntry lbl_800F1D78[];
 extern u8 lbl_800F71D8[];
@@ -568,30 +586,16 @@ static inline Vec setSlotJoints(u16 slot, u16 a, u16 b) {
 }
 
 // .text:0x8001FDD4 size:0x2C
-void fn_8001FDD4(ModelLink* arg0) {
-    if (arg0->_70 != NULL) {
-        fn_800B9AA8(arg0->_70);
-    }
-}
-
-static inline void mirrorJointPairs(ModelActor* actor, JointPair* list) {
-    u16 b;
-    u16 a;
-    JointPair* pairs;
-
-    for (pairs = list; pairs->a != 0xFFFF; pairs++) {
-        a = actor->joints[pairs->a];
-        b = actor->joints[pairs->b];
-        if (a != 0xFFFF && b != 0xFFFF) {
-            actor->_72[a] = b;
-            actor->_72[b] = a;
-        }
+void fn_8001FDD4(ModelSlot* slot) {
+    if (slot->lights[0] != NULL) {
+        fn_800B9AA8(slot->lights[0]);
     }
 }
 
 // .text:0x8001FC4C size:0x188
 void fn_8001FC4C(ModelActor* actor) {
     JointPair* list;
+    JointPair* pairs;
     s32 i;
     u16 a;
     u16 b;
@@ -631,7 +635,17 @@ void fn_8001FC4C(ModelActor* actor) {
         break;
     }
     if (list != NULL) {
-        mirrorJointPairs(actor, list);
+        u16 a;
+        u16 b;
+
+        for (pairs = list; pairs->a != 0xFFFF; pairs++) {
+            a = actor->joints[pairs->a];
+            b = actor->joints[pairs->b];
+            if (a != 0xFFFF && b != 0xFFFF) {
+                actor->_72[a] = b;
+                actor->_72[b] = a;
+            }
+        }
     }
 }
 
@@ -1879,11 +1893,199 @@ void fn_80017DBC(void) {
 }
 
 // .text:0x80017D28 size:0x94
-void fn_80017D28(void) {
+void fn_80017D28(ModelActor* src) {
+    s32 idx = src->_255 + 4;
+    ModelActor* actor;
+
+    actor = &lbl_8036E548.actorData[idx];
+    actor->_252 = src->_252;
+    actor->_254 = src->_254;
+    actor->_255 = idx;
+    actor->_25C = 1;
+    actor->_25D = 0;
+    actor->_30 = src->_30;
+    actor->_25A = src->_25A;
+    actor->_25B = src->_25B;
+    actor->_08 = src->_0C;
+    fn_80017814(actor, idx, 0, fn_8001FDD4);
 }
 
 // .text:0x80017814 size:0x514
-void fn_80017814(void) {
+void fn_80017814(ModelActor* actor, s32 idx, s32 kind, void (*callback)(ModelSlot*)) {
+    u32* base = (u32*)actor->_08;
+    ModelSlot* slot = &lbl_8036E548._0060->slots[idx];
+    void* layout;
+    void* geo;
+    void* skn;
+    void* tex;
+    void* anim;
+    u16 count;
+    s32 id;
+    u16 bone;
+    int i;
+
+    for (i = 0; i < 5; i++) {
+        if (((u32*)actor->_08)[i] == 0) {
+            break;
+        }
+        ((u32*)actor->_08)[i] = (u32)base + base[i];
+    }
+    tex = ((void**)actor->_08)[0];
+    convertTextureHeader(tex);
+    layout = ((void**)actor->_08)[1];
+    if (layout != NULL) {
+        geo = ((void**)actor->_08)[2];
+        skn = ((void**)actor->_08)[3];
+        LoadActorLayout(layout);
+        convertGeometryAndSknHeader(geo, skn);
+        haveActLayoutPointToGeoHeader(layout, geo);
+        fn_800BD190(geo, tex);
+    } else {
+        return;
+    }
+    if (kind < 9) {
+        anim = actor->anims[2];
+    } else {
+        anim = actor->anims[1];
+    }
+    fn_8002399C(slot, actor->_255, idx, layout, anim, skn);
+    if (((void**)actor->_08)[4] != NULL) {
+        fn_80025DDC(((void**)actor->_08)[4]);
+        fn_80025C58(((void**)actor->_08)[4], (struct Model*)slot);
+    }
+    count = slot->node->numBones;
+    memset(actor->joints, 0xFF, sizeof(actor->joints));
+    for (i = 0; i < count; i++) {
+        bone = slot->node->bones[i]->id;
+        if (bone != 0xFFFF) {
+            actor->joints[bone] = i;
+        }
+    }
+    id = actor->joints[19];
+    fn_800B2B74(slot->node, id);
+    id = actor->joints[25];
+    fn_800B2B74(slot->node, id);
+    id = actor->joints[36];
+    fn_800B2B74(slot->node, id);
+    actor->models[0] = slot->node;
+    id = actor->joints[3];
+    if (id != 0xFFFF) {
+        fn_800B2B54(actor->models[0], id, 0xD);
+    }
+    fn_800BD548(slot, 4, lbl_8036E548.lights[0], lbl_8036E548.lights[1], lbl_8036E548.lights[2], lbl_8036E548.lights[3]);
+    CTRLSetTranslation(&slot->ctrl, 0.0f, 0.0f, 0.0f);
+    CTRLSetRotation(&slot->ctrl, 0.0f, 0.0f, 0.0f);
+    slot->speed = 0.5f;
+    slot->_5A = 1;
+    id = actor->joints[3];
+    if (id != 0xFFFF) {
+        fn_800B2BA8(slot->node, id, NULL, 0);
+        slot->node->bones[(u16)id]->_136 = 1;
+    }
+    id = actor->joints[2];
+    if (id != 0xFFFF) {
+        fn_800B2BA8(slot->node, id, NULL, 0);
+        slot->node->bones[(u16)id]->_136 = 1;
+    }
+    id = actor->joints[1];
+    if (id != 0xFFFF) {
+        fn_800B2BA8(slot->node, id, NULL, 0);
+        slot->node->bones[(u16)id]->_136 = 1;
+    }
+    id = actor->joints[36];
+    if (id != 0xFFFF) {
+        fn_800B2BA8(slot->node, id, NULL, 0);
+    }
+    id = actor->joints[46];
+    if (id != 0xFFFF) {
+        fn_800B2BA8(slot->node, id, NULL, 0);
+        slot->node->bones[(u16)id]->_136 = 1;
+    }
+    fn_800B2C08(slot->node, actor->joints[4]);
+    fn_8001FC4C(actor);
+    slot->callback = callback;
+    actor->_60 = -1;
+    actor->_62 = -1;
+    actor->_64 = -1;
+    actor->_66 = -1;
+    actor->_68 = -1;
+    actor->_6A = -1;
+    actor->_6C = -1;
+    actor->_6E = -1;
+    actor->_25D = 0;
+    actor->_25E = 0;
+    actor->_25F = 0;
+    actor->_260 = 0;
+    actor->_261 = 0;
+    actor->_262 = 0;
+    actor->_263 = 0;
+    actor->_264 = 0;
+    actor->_265 = 0;
+    actor->_266 = 0;
+    actor->_267 = 0;
+    actor->_268 = 0;
+    actor->_269 = 0;
+    actor->_26A = 0;
+    actor->_26B = 0;
+    actor->_26C = 0;
+    actor->_26D = 0;
+    actor->_26E = 0;
+    actor->_270 = 0;
+    actor->_271 = 0;
+    actor->_272 = 0;
+    actor->_273 = 0;
+    actor->_277 = 0xFF;
+    switch (actor->_252) {
+    case 2:
+        fn_800638B4(actor, slot);
+        break;
+    case 33:
+    case 34:
+    case 35:
+    case 36:
+        fn_80063010(actor, slot);
+        break;
+    case 19:
+        fn_8004B7B4(actor, slot);
+        break;
+    case 12:
+    case 21:
+    case 22:
+    case 23:
+    case 42:
+        slot->node->_99 = 1;
+        break;
+    case 24:
+    case 25:
+    case 26:
+        slot->node->_99 = 1;
+        break;
+    case 20:
+    case 43:
+        fn_800637BC(actor, slot);
+        break;
+    case 38:
+        slot->node->_99 = 1;
+        fn_8004BD6C(actor, slot);
+        break;
+    case 41:
+        fn_800637D4(actor, slot);
+    case 18:
+    case 40:
+        fn_8004BD6C(actor, slot);
+        break;
+    case 14:
+    case 37:
+        fn_80052634(actor, slot);
+        break;
+    case 16:
+    case 44:
+    case 45:
+    case 46:
+    case 47:
+        fn_80062ED4(actor, slot);
+        break;
+    }
 }
 
 // .text:0x800177B4 size:0x60
@@ -1897,7 +2099,51 @@ void fn_800177B4(void) {
 }
 
 // .text:0x8001758C size:0x228
-s32 fn_8001758C(u8* arg0, s32 idx, u8 arg2, u8 arg3, u8 arg4, s8 arg5, u8 arg6, u8 arg7) {
+s32 fn_8001758C(u8* state, s32 idx, u8 kind, u8 team, u8 player, u8 arg5, u8 arg6, u8 arg7) {
+    ModelActor* actor = &lbl_8036E548.actorData[idx];
+    s32 entry;
+    RosterEntry* roster;
+
+    switch (*state) {
+    case 0:
+        if ((s32)lbl_803C6CF8._715 == 1) {
+            actor->_25C = 1;
+            actor->_256 = team;
+            actor->_257 = player;
+            actor->_254 = arg6;
+            actor->_252 = kind;
+            actor->_258 = arg5;
+            actor->_259 = arg7;
+            entry = actor->_252 * 19;
+            roster = &inMemRoster[team][player];
+            actor->_25A = roster->_26;
+            actor->_25B = roster->_27;
+            actor->_278 = (u8)(arg6 == 9);
+            if (arg7 == 0) {
+                entry++;
+            }
+            if (actor->_278 && arg7 == 1 && lbl_8036E548._2D5C == kind) {
+                memcpy(actor->_08, lbl_8036E548._2D54, lbl_8036E548._2D58);
+                goto load;
+            }
+            if (arg6 >= 10 && arg6 <= 12 && arg7 == 0 && lbl_8036E548._2D44 == kind) {
+                memcpy(actor->_08, lbl_8036E548._2D3C, lbl_8036E548._2D40);
+                goto load;
+            }
+            if (arg7 == 0 || fn_8002204C(actor->_252, actor->_08) == NULL) {
+                ARAMTransfer(&lbl_803CB790[entry], actor->_08, 0, 0);
+            }
+            *state = 1;
+        }
+        break;
+    case 1:
+        if (lbl_803716B8._1E8 == 0 && (s32)lbl_803C6CF8._715 == 1) {
+        load:
+            fn_80017814(actor, actor->_255, arg6, fn_8001FDD4);
+            return 1;
+        }
+        break;
+    }
     return 0;
 }
 
