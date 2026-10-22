@@ -56,6 +56,7 @@ void fn_800A84C4(u32 retraceCount) {
 void initRenderMode(GXRenderModeObj* rmode, u32 fifoSize, s32 overscan) {
     void* arenaLo;
     void* arenaHi;
+    u32 xfbSize;
     u8* heapLo;
 
     lbl_803C7420.retraceInterval = 0;
@@ -89,9 +90,9 @@ void initRenderMode(GXRenderModeObj* rmode, u32 fifoSize, s32 overscan) {
     }
     arenaLo = OSGetArenaLo();
     arenaHi = OSGetArenaHi();
+    xfbSize = ((u16)(lbl_803C7420.rmode->fbWidth + 15) & ~15) * lbl_803C7420.rmode->xfbHeight * 2;
     lbl_803C7420.xfb = (void*)(((u32)arenaLo + 0x1F) & ~0x1F);
-    heapLo = (u8*)((((u32)lbl_803C7420.xfb +
-                     ((u16)(lbl_803C7420.rmode->fbWidth + 15) & ~15) * lbl_803C7420.rmode->xfbHeight * 2) + 0x1F) & ~0x1F);
+    heapLo = (u8*)(((u32)lbl_803C7420.xfb + xfbSize + 0x1F) & ~0x1F);
     lbl_803C7420.fifoBase = heapLo;
     lbl_803C7420.fifo = GXInit(heapLo, fifoSize);
     heapLo += fifoSize;
