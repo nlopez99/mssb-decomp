@@ -1076,6 +1076,12 @@ Unknown/File_0x800a64e0.c:
 	.text       start:0x800A64E0 end:0x800A6870
 	.bss        start:0x803C6990 end:0x803C6CF8
 
+static/static_800B0724.c:
+	extab       start:0x800068E8 end:0x800068F0
+	extabindex  start:0x800088BC end:0x800088C8
+	.text       start:0x800B0724 end:0x800B07FC
+	.sdata2     start:0x803CCF08 end:0x803CCF18
+
 static/sound.c:
 	extab       start:0x800068F0 end:0x80006910
 	extabindex  start:0x800088C8 end:0x800088F8
