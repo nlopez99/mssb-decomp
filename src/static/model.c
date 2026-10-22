@@ -3820,7 +3820,8 @@ BOOL fn_80016F7C(void) {
                     dst->anims[i] = src->anims[i];
                 }
             }
-            if (++lbl_8036E548._2D88 >= 4) {
+            lbl_8036E548._2D88++;
+            if (lbl_8036E548._2D88 >= 4) {
                 return TRUE;
             }
         } else {
