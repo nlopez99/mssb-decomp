@@ -8,7 +8,7 @@ struct MoviePlayer;
 
 void fn_800AD070(void);
 u32 fn_800AD490(struct MoviePlayer* player);
-void fn_800AD500(void);
+void fn_800AD500(struct MoviePlayer* player, u8* buf);
 u32 fn_800AD6BC(struct MoviePlayer* player);
 s32 fn_800AD780(struct MoviePlayer* player);
 void fn_800AD830(struct MoviePlayer* player);

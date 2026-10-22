@@ -1,6 +1,12 @@
 #include "static/movie.h"
+#include "Dolphin/gx.h"
 #include "Dolphin/os.h"
 #include "string.h"
+
+typedef struct MovieFrame {
+    /* 0x0 */ u8* buf;
+    /* 0x4 */ u8 _4[0x8];
+} MovieFrame; // size: 0xC
 
 typedef struct MoviePlayer {
     /* 0x000 */ u8 _000[0x28];
@@ -13,11 +19,25 @@ typedef struct MoviePlayer {
     /* 0x0A6 */ u16 height;
     /* 0x0A8 */ u8 _0A8;
     /* 0x0A9 */ u8 _0A9;
-    /* 0x0AA */ u8 _0AA[0xF0 - 0xAA];
+    /* 0x0AA */ u8 _0AA[0xD0 - 0xAA];
+    /* 0x0D0 */ u8* _0D0;
+    /* 0x0D4 */ u8* _0D4;
+    /* 0x0D8 */ u8 _0D8[0xE8 - 0xD8];
+    /* 0x0E8 */ u8* _0E8;
+    /* 0x0EC */ u8* _0EC;
     /* 0x0F0 */ struct MovieHeader* header;
-    /* 0x0F4 */ u8 _0F4[6][0xC];
-    /* 0x13C */ u8* _13C[6];
-    /* 0x154 */ u8 _154[0x198 - 0x154];
+    /* 0x0F4 */ MovieFrame frames[6];
+    /* 0x13C */ MovieFrame* _13C[6];
+    /* 0x154 */ u8* _154;
+    /* 0x158 */ u8* _158;
+    /* 0x15C */ u8* _15C;
+    /* 0x160 */ u8* _160;
+    /* 0x164 */ u8* _164;
+    /* 0x168 */ u8* _168;
+    /* 0x16C */ u8* _16C;
+    /* 0x170 */ u8* _170;
+    /* 0x174 */ s32 _174;
+    /* 0x178 */ u8 _178[0x198 - 0x178];
     /* 0x198 */ OSTime pausedTime;
     /* 0x1A0 */ OSTime startTime;
     /* 0x1A8 */ u8 _1A8[0x1B8 - 0x1A8];
@@ -67,6 +87,9 @@ extern OSMessageQueue lbl_802FB870;
 
 extern u16 lbl_803CBAE4;
 extern u32 fn_800E4B1C(void* arg);
+extern void fn_800E4B90(void* arg, u8* buf, u32 blocks, u16 blockSize);
+extern GXTexObj lbl_803C78A4;
+extern GXTexFmt lbl_803CBAD8[2];
 
 #define ALIGN32(x) (((x) + 31) & ~31)
 
@@ -237,7 +260,7 @@ s32 fn_800ADB04(MovieHeader* header, MoviePlayer* player, u8 arg2, u8 stream) {
         }
     }
     for (i = 0; i < 6; i++) {
-        lbl_803CC170->_13C[i] = lbl_803CC170->_0F4[i];
+        lbl_803CC170->_13C[i] = &lbl_803CC170->frames[i];
     }
     lbl_803CC170->_1B8 = arg2;
     if (lbl_803CC17E == 0) {
@@ -332,7 +355,45 @@ u32 fn_800AD6BC(MoviePlayer* player) {
 }
 
 // .text:0x800AD500 size:0x1BC
-void fn_800AD500(void) {
+void fn_800AD500(MoviePlayer* player, u8* buf) {
+    u32 blocks;
+    u32 pixels;
+    u32 texSize;
+    u16 width;
+    u16 height;
+    u8 a;
+    u8 b;
+    u32 blockSize;
+    u32 sample;
+    u32 frameSize;
+    s32 i;
+
+    width = player->width;
+    height = player->height;
+    a = player->_0A8;
+    b = player->_0A9;
+    blocks = lbl_803CBAE4 * ((ALIGN32(player->_030) + lbl_803CBAE4 - 1) / lbl_803CBAE4);
+    pixels = width * height;
+    blockSize = blocks * 0x1C;
+    texSize = pixels << (player->_1B8 + 1);
+
+    fn_800E4B90(player->_0A0, buf, blocks, lbl_803CBAE4);
+    player->_16C = buf + ALIGN32(fn_800E4B1C(player->_0A0));
+    player->_170 = player->_16C + ALIGN32(texSize);
+    memset(player->_16C, 0, ALIGN32(texSize) * 2);
+    GXInitTexObj(&lbl_803C78A4, player->_16C, width, height, lbl_803CBAD8[player->_1B8], GX_CLAMP, GX_CLAMP, GX_FALSE);
+    player->_174 = 0;
+    player->_164 = player->_170 + ALIGN32(texSize);
+    player->_168 = player->_164 + ALIGN32(player->_028);
+    memset(player->_168, 0, blockSize);
+    sample = a * b;
+    player->_0D0 = player->_0E8 = player->_154 = player->_168 + ALIGN32(player->_030);
+    player->_158 = player->_160 = player->_154;
+    player->_0D4 = player->_0EC = player->_15C = player->frames[0].buf = player->_154 + blockSize;
+    frameSize = ALIGN32(pixels * (sample + 2) / sample);
+    for (i = 1; i < 6; i++) {
+        player->frames[i].buf = player->frames[i - 1].buf + frameSize;
+    }
 }
 
 // .text:0x800AD490 size:0x70
