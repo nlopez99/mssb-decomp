@@ -387,12 +387,15 @@ s32 fn_800ACC6C(s32 type, s32 a, s32 b) {
 }
 
 // .text:0x800AC508 size:0x764
+// The target pools "/opening.bnr" and the palette-version string ahead of fn_800ABF44's, so four
+// string offsets differ; the masked iconSpeed and the CARDStat base also swap r23/r24.
 void fn_800AC508(char* fileName, void* banner, s32 bannerSize, void* icon, u32 iconSize, s32 iconSpeed, s32 iconAnim, char* comment, char* comment2, s32 blocks) {
     TEXDescriptorPtr desc;
     u8* opening = NULL;
     u8* dst;
     TEXPalettePtr pal;
-    u8 i;
+    s32 shift;
+    s32 i;
     s16 hasClut;
     char* comments;
 
@@ -454,16 +457,16 @@ void fn_800AC508(char* fileName, void* banner, s32 bannerSize, void* icon, u32 i
         pal = _OSAllocFromHeap(0x20, iconSize);
         memcpy(pal, icon, iconSize);
         BindPalette(pal);
-        for (i = 0; i < pal->numDescriptors && i < 8; i++) {
+        for (i = 0, shift = 0; i < pal->numDescriptors && i < 8; i++, shift += 2) {
             desc = TEXGet(pal, i);
             switch (desc->textureHeader->format) {
             case GX_TF_RGB5A3:
-                CARDSetIconFormat(&lbl_802EF330, i, CARD_STAT_ICON_RGB5A3);
+                lbl_802EF330.iconFormat = (lbl_802EF330.iconFormat & ~(CARD_STAT_ICON_MASK << shift)) | (CARD_STAT_ICON_RGB5A3 << shift);
                 memcpy(dst, desc->textureHeader->data, 0x800);
                 dst += 0x800;
                 break;
             case GX_TF_C8:
-                CARDSetIconFormat(&lbl_802EF330, i, CARD_STAT_ICON_C8);
+                lbl_802EF330.iconFormat = (lbl_802EF330.iconFormat & ~(CARD_STAT_ICON_MASK << shift)) | (CARD_STAT_ICON_C8 << shift);
                 memcpy(dst, desc->textureHeader->data, 0x400);
                 hasClut = 1;
                 dst += 0x400;
@@ -472,7 +475,7 @@ void fn_800AC508(char* fileName, void* banner, s32 bannerSize, void* icon, u32 i
                 OSPanic("mcard.c", 849, "Unsupported icon texture formant.\n");
                 break;
             }
-            CARDSetIconSpeed(&lbl_802EF330, i, iconSpeed & 3);
+            lbl_802EF330.iconSpeed = (lbl_802EF330.iconSpeed & ~(CARD_STAT_SPEED_MASK << shift)) | ((iconSpeed & CARD_STAT_SPEED_MASK) << shift);
         }
         for (; i < 8; i++) {
             CARDSetIconFormat(&lbl_802EF330, i, CARD_STAT_ICON_NONE);
