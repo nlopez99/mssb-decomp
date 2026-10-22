@@ -844,6 +844,70 @@ static inline void orderStep3E_1(SpaniTask* task, s32 port) {
     }
 }
 
+static inline void helperW(SpaniTask* task, s32 team) {
+    s32 done;
+
+    if (lbl_803297E0._CF61[lbl_803297E0._CF3B] != 0) {
+        switch (lbl_803297E0._CF67[team]) {
+        case 0:
+            fn_80058644(task);
+            break;
+        case 1:
+            fn_80058394(task);
+            break;
+        }
+    } else {
+        if (lbl_803297E0._CF67[team] == 0) {
+            if ((getSpaniObj(task, 0x118)->_5C >> 16) > 5) {
+                getSpaniObj(task, 0x118)->_5C = 5 << 16;
+            }
+            getSpaniObj(task, 0x118)->_68 = 4;
+            getSpaniObj(task, 0x119)->_68 = 4;
+            getSpaniObj(task, 0x121)->_68 = 4;
+            done = isAnimDone(task, 0x118, 0);
+            done += isAnimDone(task, 0x119, 0);
+            done += isAnimDone(task, 0x121, 0);
+            if (done == 3) {
+                lbl_803297E0._CF65[team] = 0;
+            }
+        } else {
+            if ((getSpaniObj(task, 0x118)->_5C >> 16) > 5) {
+                getSpaniObj(task, 0x118)->_5C = 5 << 16;
+            }
+            getSpaniObj(task, 0x118)->_68 = 4;
+            getSpaniObj(task, 0x12F)->_68 = 4;
+            if (isAnimDone(task, 0x12F, 0) == 1) {
+                lbl_803297E0._CF65[lbl_803297E0._CF3B] = 0;
+            }
+        }
+        lbl_803297E0._CF63[lbl_803297E0._CF3B] = 0;
+    }
+}
+
+static inline void helperX(SpaniTask* task) {
+    s32 done;
+    s32 i;
+
+    if (lbl_803297E0._CF73 != 0) {
+        done = isAnimDone(task, g_d_GameSettings._06 == 2 ? 0x16E : 0x1D7, 0);
+        done += isAnimDone(task, g_d_GameSettings._06 == 2 ? 0x16A : 0x1D3, 0);
+        done += isAnimDone(task, g_d_GameSettings._06 == 2 ? 0x16C : 0x1D5, 0);
+        if (done == 3) {
+        getSpaniObj(task, g_d_GameSettings._06 == 2 ? 0x16A : 0x1D3)->_54 &= ~2;
+        getSpaniObj(task, g_d_GameSettings._06 == 2 ? 0x16B : 0x1D4)->_54 &= ~2;
+        getSpaniObj(task, g_d_GameSettings._06 == 2 ? 0x16C : 0x1D5)->_54 &= ~2;
+        getSpaniObj(task, g_d_GameSettings._06 == 2 ? 0x16E : 0x1D7)->_54 &= ~2;
+        for (i = 0; i < 3; i++) {
+            fn_8000FEE8(lbl_803297E0.texts[i]);
+        }
+        fn_8000F8F4((struct TextModelSet*)task);
+        lbl_803297E0._CF71[1] = 0;
+        lbl_803297E0._CF74 = 0;
+        lbl_803297E0._CF73 = 0;
+        }
+    }
+}
+
 // .text:0x80060184 size:0x1A18
 void fn_80060184(void) {
     SpaniTask* task = lbl_803CC1B8;
@@ -1920,6 +1984,17 @@ void fn_8005AF68(SpaniTask* task) {
     }
 }
 
+static inline s32 nextHand(StatTable* stats) {
+    s32 hand = stats->BattingStance + stats->FieldingArm * 2;
+    hand++;
+    if (hand == 4) {
+        hand = 0;
+    }
+    stats->BattingStance = hand % 2;
+    stats->FieldingArm = hand / 2;
+    return hand;
+}
+
 static inline u16 getPadTrig(s32 pad, s32 team) {
     if (g_d_GameSettings._06 != 2) {
         return lbl_8034E9A0._472C[pad]._2;
@@ -1930,9 +2005,6 @@ static inline u16 getPadTrig(s32 pad, s32 team) {
 // .text:0x8005A350 size:0xC18
 void fn_8005A350(SpaniTask* task, s32 team) {
     s32 pad = team;
-    StatTable* stats;
-    u8* stance;
-    u8* arm;
     s32 cur;
     s32 hand;
     s8 slot;
@@ -1954,16 +2026,7 @@ void fn_8005A350(SpaniTask* task, s32 team) {
         if (lbl_803297E0._CF52[team] == 0 && g_d_GameSettings._06 != 2) {
             if (lbl_803297E0._CF46[team] != 0) {
                 cur = lbl_803297E0._CF46[team] - 1;
-                stats = &inMemRoster[team][cur].stats;
-                stance = &stats->BattingStance;
-                arm = &stats->FieldingArm;
-                hand = *stance + *arm * 2;
-                hand++;
-                if (hand == 4) {
-                    hand = 0;
-                }
-                *stance = hand % 2;
-                *arm = hand / 2;
+                hand = nextHand(&inMemRoster[team][cur].stats);
                 getGridObj(task, cur, team * 9, 0xAC)->_5C = hand << 16;
                 sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
             }
@@ -2043,41 +2106,7 @@ void fn_8005A350(SpaniTask* task, s32 team) {
                 lbl_803297E0._CF63[team] = 0;
             }
         } else {
-            if (lbl_803297E0._CF61[lbl_803297E0._CF3B] != 0) {
-                switch (lbl_803297E0._CF67[team]) {
-                case 0:
-                    fn_80058644(task);
-                    break;
-                case 1:
-                    fn_80058394(task);
-                    break;
-                }
-            } else {
-                if (lbl_803297E0._CF67[team] == 0) {
-                    if ((getSpaniObj(task, 0x118)->_5C >> 16) > 5) {
-                        getSpaniObj(task, 0x118)->_5C = 5 << 16;
-                    }
-                    getSpaniObj(task, 0x118)->_68 = 4;
-                    getSpaniObj(task, 0x119)->_68 = 4;
-                    getSpaniObj(task, 0x121)->_68 = 4;
-                    done = isAnimDone(task, 0x118, 0);
-                    done += isAnimDone(task, 0x119, 0);
-                    done += isAnimDone(task, 0x121, 0);
-                    if (done == 3) {
-                        lbl_803297E0._CF65[team] = 0;
-                    }
-                } else {
-                    if ((getSpaniObj(task, 0x118)->_5C >> 16) > 5) {
-                        getSpaniObj(task, 0x118)->_5C = 5 << 16;
-                    }
-                    getSpaniObj(task, 0x118)->_68 = 4;
-                    getSpaniObj(task, 0x12F)->_68 = 4;
-                    if (isAnimDone(task, 0x12F, 0) == 1) {
-                        lbl_803297E0._CF65[lbl_803297E0._CF3B] = 0;
-                    }
-                }
-                lbl_803297E0._CF63[lbl_803297E0._CF3B] = 0;
-            }
+            helperW(task, team);
         }
     }
     if (lbl_803297E0._CF71[0] != 0) {
@@ -2096,24 +2125,7 @@ void fn_8005A350(SpaniTask* task, s32 team) {
                     getSpaniObj(task, g_d_GameSettings._06 == 2 ? 0x16C : 0x1D5)->_68 = 4;
                     lbl_803297E0._CF73 = 1;
                 }
-                if (lbl_803297E0._CF73 != 0) {
-                    done = isAnimDone(task, g_d_GameSettings._06 == 2 ? 0x16E : 0x1D7, 0);
-                    done += isAnimDone(task, g_d_GameSettings._06 == 2 ? 0x16A : 0x1D3, 0);
-                    done += isAnimDone(task, g_d_GameSettings._06 == 2 ? 0x16C : 0x1D5, 0);
-                    if (done == 3) {
-                    getSpaniObj(task, g_d_GameSettings._06 == 2 ? 0x16A : 0x1D3)->_54 &= ~2;
-                    getSpaniObj(task, g_d_GameSettings._06 == 2 ? 0x16B : 0x1D4)->_54 &= ~2;
-                    getSpaniObj(task, g_d_GameSettings._06 == 2 ? 0x16C : 0x1D5)->_54 &= ~2;
-                    getSpaniObj(task, g_d_GameSettings._06 == 2 ? 0x16E : 0x1D7)->_54 &= ~2;
-                    for (i = 0; i < 3; i++) {
-                        fn_8000FEE8(lbl_803297E0.texts[i]);
-                    }
-                    fn_8000F8F4((struct TextModelSet*)task);
-                    lbl_803297E0._CF71[1] = 0;
-                    lbl_803297E0._CF74 = 0;
-                    lbl_803297E0._CF73 = 0;
-                    }
-                }
+                helperX(task);
                 break;
             }
         } else {
