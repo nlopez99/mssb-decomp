@@ -1110,6 +1110,15 @@ static/static_800A94C4.c:
 	.text       start:0x800A94C4 end:0x800A9864
 	.data       start:0x80110080 end:0x80110090
 
+static/mcard.c:
+	extab       start:0x80006768 end:0x80006808
+	extabindex  start:0x8000867C end:0x8000876C
+	.text       start:0x800A9864 end:0x800ACF14
+	.rodata     start:0x800E7800 end:0x800E7B50
+	.data       start:0x80110090 end:0x801101B0
+	.sbss       start:0x803CC158 end:0x803CC170
+	.sdata2     start:0x803CCEE0 end:0x803CCEE8
+
 C3/control/control.c:
 	extab       start:0x80006A90 end:0x80006AE0
 	extabindex  start:0x80008B38 end:0x80008BB0
