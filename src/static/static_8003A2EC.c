@@ -2207,7 +2207,7 @@ static inline s32 CompSize(u8 type) {
 
 // 76.49%: the target unrolls the vertex descriptor loop six times (ctr 2 plus one more);
 // no loop form tried here gets MWCC to unroll it
-void fn_8003A8A0(Model* model, MtxPtr view) {
+void fn_8003A8A0(Model* model, MtxPtr view, s32 arg2) {
     Mtx mtx;
     GXVtxDescList list[27];
     s32 i;

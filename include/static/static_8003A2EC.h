@@ -16,7 +16,7 @@ void fn_8003A688(s32 i, f32 width, f32 height);
 void fn_8003A6B0(s32 i, struct TextureDesc* tex, f32 width, f32 height);
 void fn_8003A848(u8 r, u8 g, u8 b);
 void fn_8003A85C(u8 enabled);
-void fn_8003A8A0(struct Model* model, MtxPtr view);
+void fn_8003A8A0(struct Model* model, MtxPtr view, s32 arg2);
 void fn_8003AC90(void);
 void fn_8003AD84(struct TextureEntry* entry);
 u8 fn_8003AE54(void);
