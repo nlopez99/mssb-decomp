@@ -71,6 +71,14 @@ static inline f32 getFrameT(struct ANIMPipe *animPipe, KeyFrame *currentFrame, K
     return dt / (animPipe->currentTrack->animTime - currentFrame->time);
 }
 
+static inline f32 BezierF(f32 p0, f32 c0, f32 c1, f32 p1, f32 t) {
+    f32 tt = t * t;
+    f32 ttt = t * tt;
+    f32 s = 1.0f - t;
+
+    return s * (3.0f * tt * (c1 + p1) + s * (s * p0 + 3.0f * t * (c0 + p0))) + ttt * p1;
+}
+
 static inline int getCompSize(u8 type) {
     switch (type) {
     case GX_U8:
@@ -253,9 +261,8 @@ void DoQuatAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFrame
 }
 
 // .text:0x800B6E0C size:0x3B4
-// Differs: the Bezier case's three components are scheduled together where the target
-// stores each before computing the next (DoTranslation/DoScale too), dt is compared with
-// 0.0f in the other operand order, plus registers.
+// Differs: dt is compared with 0.0f in the other operand order, and registers in the
+// linear and Bezier cases.
 void DoEulerAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFrame *nextFrame) {
     f32 cur[3];
     f32 next[3];
@@ -316,11 +323,8 @@ void DoEulerAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFram
     case 2:
         GetData(type, currentFrame->interpolation + interpOffset + stride, curTangent, 3, scale);
         GetData(type, nextFrame->interpolation + interpOffset, nextTangent, 3, scale);
-        tt = t * t;
-        ttt = t * tt;
-        s = 1.0f - t;
         for (i = 0; i < 3; i++) {
-            out[i] = s * (3.0f * tt * (nextTangent[i] + next[i]) + s * (s * cur[i] + 3.0f * t * (curTangent[i] + cur[i]))) + ttt * next[i];
+            out[i] = BezierF(cur[i], curTangent[i], nextTangent[i], next[i], t);
         }
         break;
     case 3:
@@ -334,12 +338,12 @@ void DoEulerAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFram
 }
 
 // .text:0x800B63DC size:0xA30
-// Differs: registers and scheduling in the interpolation cases (see DoEulerAnimation);
-// its three identity quaternions are the .rodata at the start of the unit's range.
+// Differs: registers and the Hermite case's scheduling; its three identity quaternions
+// are the .rodata at the start of the unit's range.
 void DoScaleAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFrame *nextFrame, u8 flag) {
     f32 cur[3];
     f32 next[3];
-    Vec out;
+    f32 out[3];
     f32 curTangent[3];
     f32 nextTangent[3];
     Quaternion curQ = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -378,9 +382,9 @@ void DoScaleAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFram
     t = getFrameT(animPipe, currentFrame, nextFrame);
     switch ((animPipe->currentTrack->interpolationType >> 2) & 3) {
     case 0:
-        out.x = cur[0];
-        out.y = cur[1];
-        out.z = cur[2];
+        out[0] = cur[0];
+        out[1] = cur[1];
+        out[2] = cur[2];
         if (animPipe->currentTrack->animType & 0x20) {
             outQ.x = curQ.x;
             outQ.y = curQ.y;
@@ -390,9 +394,9 @@ void DoScaleAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFram
         break;
     case 1:
         s = 1.0f - t;
-        out.x = t * next[0] + s * cur[0];
-        out.y = t * next[1] + s * cur[1];
-        out.z = t * next[2] + s * cur[2];
+        out[0] = t * next[0] + s * cur[0];
+        out[1] = t * next[1] + s * cur[1];
+        out[2] = t * next[2] + s * cur[2];
         if (animPipe->currentTrack->animType & 0x20) {
             QuatSlerp(&curQ, &nextQ, &outQ, t);
         }
@@ -400,11 +404,8 @@ void DoScaleAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFram
     case 2:
         GetData(type, currentFrame->interpolation + stride, curTangent, 3, scale);
         GetData(type, nextFrame->interpolation, nextTangent, 3, scale);
-        tt = t * t;
-        ttt = t * tt;
-        s = 1.0f - t;
         for (i = 0; i < 3; i++) {
-            ((f32 *)&out)[i] = s * (3.0f * tt * (nextTangent[i] + next[i]) + s * (s * cur[i] + 3.0f * t * (curTangent[i] + cur[i]))) + ttt * next[i];
+            out[i] = BezierF(cur[i], curTangent[i], nextTangent[i], next[i], t);
         }
         if (animPipe->currentTrack->animType & 0x20) {
             QuatSlerp(&curQ, &nextQ, &outQ, t);
@@ -444,7 +445,7 @@ void DoScaleAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFram
         h10 = ttt + (t - 2.0f * tt);
         h11 = -tt + ttt;
         for (i = 0; i < 3; i++) {
-            ((f32 *)&out)[i] = h11 * nextTangent[i] + (h10 * curTangent[i] + (h00 * cur[i] + h01 * next[i]));
+            out[i] = h11 * nextTangent[i] + (h10 * curTangent[i] + (h00 * cur[i] + h01 * next[i]));
         }
         if (animPipe->currentTrack->animType & 0x20) {
             QuatSlerp(&curQ, &nextQ, &outQ, t);
@@ -454,17 +455,17 @@ void DoScaleAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFram
         OSPanic("animPipe.c", 424, "Unknown pInterpolation pSetting!(\226\242\222m\202\314\225\342\212\324\203^\203C\203v\202\252\216w\222\350\202\263\202\352\202\304\202\242\202\334\202\267)");
         break;
     }
-    CTRLSetScale(animPipe->control, out.x, out.y, out.z);
+    CTRLSetScale(animPipe->control, out[0], out[1], out[2]);
     CTRL_SetQuatUnk(animPipe->control, outQ.x, outQ.y, outQ.z, outQ.w);
 }
 
 // .text:0x800B5DA8 size:0x634
 // Differs: the target extracts the interpolation modes with srawi/clrlwi (a signed
-// shift) where this has rlwinm, the Bezier/Hermite stores as in DoEulerAnimation, registers.
+// shift) where this has rlwinm; the Hermite case's scheduling; registers.
 void DoTranslationAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFrame *nextFrame) {
     f32 cur[3];
     f32 next[3];
-    Vec out;
+    f32 out[3];
     f32 curTangent[3];
     f32 nextTangent[3];
     f32 curEase;
@@ -539,24 +540,21 @@ void DoTranslationAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, K
     }
     switch (animPipe->currentTrack->interpolationType & 3) {
     case 0:
-        out.x = cur[0];
-        out.y = cur[1];
-        out.z = cur[2];
+        out[0] = cur[0];
+        out[1] = cur[1];
+        out[2] = cur[2];
         break;
     case 1:
         s = 1.0f - t;
-        out.x = t * next[0] + s * cur[0];
-        out.y = t * next[1] + s * cur[1];
-        out.z = t * next[2] + s * cur[2];
+        out[0] = t * next[0] + s * cur[0];
+        out[1] = t * next[1] + s * cur[1];
+        out[2] = t * next[2] + s * cur[2];
         break;
     case 2:
         GetData(type, currentFrame->interpolation + offset + stride, curTangent, 3, scale);
         GetData(type, nextFrame->interpolation + offset, nextTangent, 3, scale);
-        tt = t * t;
-        ttt = t * tt;
-        s = 1.0f - t;
         for (i = 0; i < 3; i++) {
-            ((f32 *)&out)[i] = s * (3.0f * tt * (nextTangent[i] + next[i]) + s * (s * cur[i] + 3.0f * t * (curTangent[i] + cur[i]))) + ttt * next[i];
+            out[i] = BezierF(cur[i], curTangent[i], nextTangent[i], next[i], t);
         }
         break;
     case 3:
@@ -594,14 +592,14 @@ void DoTranslationAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, K
         h10 = ttt + (t - 2.0f * tt);
         h11 = -tt + ttt;
         for (i = 0; i < 3; i++) {
-            ((f32 *)&out)[i] = h11 * nextTangent[i] + (h10 * curTangent[i] + (h00 * cur[i] + h01 * next[i]));
+            out[i] = h11 * nextTangent[i] + (h10 * curTangent[i] + (h00 * cur[i] + h01 * next[i]));
         }
         break;
     default:
         OSPanic("animPipe.c", 546, "Unknown pInterpolation pSetting!(\226\242\222m\202\314\225\342\212\324\203^\203C\203v\202\252\216w\222\350\202\263\202\352\202\304\202\242\202\334\202\267)");
         break;
     }
-    CTRLSetTranslation(animPipe->control, out.x, out.y, out.z);
+    CTRLSetTranslation(animPipe->control, out[0], out[1], out[2]);
 }
 
 // .text:0x800B560C size:0x79C
