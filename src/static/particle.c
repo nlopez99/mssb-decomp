@@ -484,6 +484,8 @@ extern s32 lbl_803CBC70;
 extern s32 lbl_803CB800;
 extern f32 lbl_803CB804;
 extern f32 lbl_803CB80C;
+extern s32 lbl_803CB7F8;
+extern f32 lbl_803CB7FC;
 extern s32 lbl_803CBD0C;
 extern s32 fn_8005268C(void);
 extern MtxPtr fn_80052734(s32 index);
@@ -1067,6 +1069,148 @@ void fn_800330CC(s32 n, u32 arg1, Vec* start, Vec* end, f32 arg4, s32 arg5, s32 
         e->_40 = arg1;
         e->_44 = arg7;
     }
+}
+
+static inline void stepDrift(DriftParticle* p)
+{
+    s32 i;
+    s32 c;
+
+    for (i = 0; i < 3; i++) {
+        c = p->color[i] + p->dcolor[i];
+        if (c < 0) {
+            c = 0;
+        } else if (c > 255) {
+            c = 255;
+        }
+        p->color[i] = c;
+        p->accel[i] = p->force[i] / p->mass;
+        p->vel[i] += p->accel[i];
+        p->pos[i] += p->vel[i];
+    }
+    c = p->color[i] + p->dcolor[i];
+    if (c < 0) {
+        c = 0;
+    } else if (c > 255) {
+        c = 255;
+    }
+    p->color[i] = c;
+}
+
+// .text:0x800328E0 size:0x7EC
+// 99.82%: registers only, in the respawn's two lookups of a: the target puts the first index
+// in r0 and the second in r6 (r4 and r0 here); call and written-out forms change nothing.
+BOOL fn_800328E0(void* arg)
+{
+    ArcEmitter* e = arg;
+    s32 r;
+    DriftParticle* p = (DriftParticle*)((Emitter*)e)->particles;
+    s32 alive = 0;
+    s32 a;
+    s32 i;
+    Quaternion q;
+    Vec up = { 0.0f, 1.0f, 0.0f };
+    Vec dir;
+    Vec axis;
+    Vec v;
+    Mtx m;
+    f32 s;
+    f32 angle;
+    f32 c2;
+    f32 c1;
+    f32 speed;
+    f32 k;
+
+    fn_8003403C(p->w, p->h);
+    memcpy(&dir, &e->end, sizeof(Vec));
+    angle = acos(PSVECDotProduct(&up, &dir));
+    PSVECCrossProduct(&up, &dir, &axis);
+    angle *= 0.5f;
+    s = sin(angle);
+    q.w = cos(angle);
+    q.x = axis.x * s;
+    q.y = axis.y * s;
+    q.z = axis.z * s;
+    PSMTXQuat(m, &q);
+    do {
+        if (p->delay > 0) {
+            p->delay -= (lbl_80366158._28 == 0);
+        } else if (p->remaining != 0) {
+            if (lbl_80366158._28 == 0) {
+                p->force[2] = 0.0f;
+                p->force[0] = 0.0f;
+                p->force[1] = 0.16344418f * p->mass;
+                p->force[0] += 0.001f * (-p->vel[0] * p->mass);
+                p->force[1] += 0.001f * (-p->vel[1] * p->mass);
+                p->force[2] += 0.001f * (-p->vel[2] * p->mass);
+                stepDrift(p);
+                if (p->vel[1] > 0.0f && p->pos[1] >= e->_3C) {
+                    p->vel[1] *= e->_38;
+                    p->remaining--;
+                }
+                if (fabs(p->pos[0]) > 300.0 || fabs(p->pos[2]) > 300.0) {
+                    p->remaining = 0;
+                }
+            }
+            fn_80033CC8((Particle*)p, (TexFile*)e->_10);
+        } else if (e->_34 != 0) {
+            k = lbl_803CB7FC;
+            a = 512.0f * (1.0f - k) + 512.0f * k * rand() / 32767.0f;
+            i = a;
+            if (i < 0) {
+                i = -i;
+            }
+            i &= 0x7FF;
+            if (i >= 0x401) {
+                i = 0x800 - i;
+            }
+            c1 = lbl_8017ED68[i];
+            i = __abs(a + 0x600) & 0x7FF;
+            if (i >= 0x401) {
+                i = 0x800 - i;
+            }
+            c2 = lbl_8017ED68[i];
+            r = rand();
+            speed = e->_30 / 60.0f * ((rand() & 0xF) + 90) / 100.0f;
+            speed /= 0.001f;
+            p->mass = 0.001f;
+            p->pos[0] = e->start.x;
+            p->pos[1] = e->start.y;
+            p->pos[2] = e->start.z;
+            i = r;
+            if (i < 0) {
+                i = -i;
+            }
+            i &= 0x7FF;
+            if (i >= 0x401) {
+                i = 0x800 - i;
+            }
+            v.x = speed * c1 * lbl_8017ED68[i];
+            v.y = -speed * c2;
+            v.z = speed * c1 * fn_800335EC(r);
+            v.y += 0.16344418f;
+            PSMTXMultVec(m, &v, &v);
+            p->vel[0] = v.x;
+            p->vel[1] = v.y;
+            p->vel[2] = v.z;
+            p->w = e->_44;
+            p->h = e->_44;
+            p->rgba = e->_40;
+            p->drgba = 0;
+            p->remaining = 2;
+            p->delay = r & lbl_803CB7F8;
+            p->tex = 0xFF;
+        } else {
+            goto next;
+        }
+        alive++;
+    next:
+        p = (DriftParticle*)p->next;
+    } while (p != NULL);
+    if (e->_34 > 0) {
+        e->_34--;
+    }
+    return alive == 0;
 }
 
 // .text:0x800324EC size:0x3F4
@@ -2043,32 +2187,6 @@ void fn_8002DC68(Vec* pos)
         memcpy(&e->_24, &e->_18, sizeof(Vec));
         memcpy(&e->_18, pos, sizeof(Vec));
     }
-}
-
-static inline void stepDrift(DriftParticle* p)
-{
-    s32 i;
-    s32 c;
-
-    for (i = 0; i < 3; i++) {
-        c = p->color[i] + p->dcolor[i];
-        if (c < 0) {
-            c = 0;
-        } else if (c > 255) {
-            c = 255;
-        }
-        p->color[i] = c;
-        p->accel[i] = p->force[i] / p->mass;
-        p->vel[i] += p->accel[i];
-        p->pos[i] += p->vel[i];
-    }
-    c = p->color[i] + p->dcolor[i];
-    if (c < 0) {
-        c = 0;
-    } else if (c > 255) {
-        c = 255;
-    }
-    p->color[i] = c;
 }
 
 // .text:0x8002D82C size:0x43C
