@@ -666,6 +666,7 @@ config.libs = [
             Object(NonMatching, "static/static_80069A68.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/static_8006C100.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/static_8006C48C.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(NonMatching, "static/movie.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/static_800B0724.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/sound.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/static_800B0A14.c", extra_cflags=["-cpp_exceptions on"]),

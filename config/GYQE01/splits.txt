@@ -1076,6 +1076,16 @@ Unknown/File_0x800a64e0.c:
 	.text       start:0x800A64E0 end:0x800A6870
 	.bss        start:0x803C6990 end:0x803C6CF8
 
+static/movie.c:
+	extab       start:0x80006808 end:0x800068E8
+	extabindex  start:0x8000876C end:0x800088BC
+	.text       start:0x800AD070 end:0x800B0724
+	.rodata     start:0x800E7B50 end:0x800E7CB0
+	.data       start:0x801101C0 end:0x801112F0
+	.sdata      start:0x803CBAD8 end:0x803CBB10
+	.sbss       start:0x803CC170 end:0x803CC1B0
+	.sdata2     start:0x803CCEE8 end:0x803CCF08
+
 static/static_800B0724.c:
 	extab       start:0x800068E8 end:0x800068F0
 	extabindex  start:0x800088BC end:0x800088C8
