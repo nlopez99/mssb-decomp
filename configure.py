@@ -768,6 +768,12 @@ config.libs = [
                       "-fp_contract off", 
                       "-use_lmw_stmw off"]
     ),
+    DolphinLib(
+        "hvqm4",
+        [
+            Object(NonMatching, "HVQM4/hvqm4dec.c", extra_cflags=["-inline noauto"]),
+        ],
+    ),
     Rel(
         "game",
         [
