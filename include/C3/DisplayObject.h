@@ -5,6 +5,13 @@
 
 typedef void (*DOEnvCallback)(GXTevStageID stage, s32 arg1, s32 arg2, GXTexCoordID coord, GXTexMapID map);
 
+struct DOUserTevData {
+    /* 0x00 */ u8 _00[0x20];
+    /* 0x20 */ f32 _20;
+    /* 0x24 */ f32 _24;
+};
+typedef struct DOUserTevData DOUserTevData;
+
 // The layout in this game's geometry palettes: the SDK's DODisplayLayout with more fields after it.
 typedef struct DOLayout {
     /* 0x00 */ PositionData *positionData;
@@ -31,11 +38,11 @@ void fn_800B996C(DOEnvCallback arg0);
 void SetFogNone(void);
 void SetFog(GXFogType type, f32 startz, f32 endz, f32 nearz, f32 farz, GXColor color);
 void SetFogNoneAgain(void);
-void fn_800B9A9C(s32 arg0, f32 arg1);
-void fn_800B9AA8(void* light);
+void fn_800B9A9C(u32 arg0, f32 arg1);
+void fn_800B9AA8(Light* light);
 s32 fn_800B9AB0(u32 mode, struct DODisplayObj* dispObj, u8* setting, GXTevStageID* stage, GXTexCoordID* coord, GXTexMapID* map, GXChannelID* chan, MtxPtr camera);
-void fn_800B9EA8(void);
-void fn_800BA44C(u32 stage, struct DODisplayObj* dispObj, void* data, u8* arg3, u8* arg4);
+s32 fn_800B9EA8(u32 mode, struct DODisplayObj* dispObj, u8* setting, GXTevStageID* stage, GXTexCoordID* coord, GXTexMapID* map, GXChannelID* chan, MtxPtr camera);
+void DODefaultUserTevMode(s32 mode, struct DODisplayObj* dispObj, DOUserTevData* data, u8* numTexGens, u8* numStages);
 void Custom_SetState(void);
 void SetState(void);
 void GetColorFromQuant(void* color, u32 quantizeInfo, u8* r, u8* g, u8* b, u8* a);

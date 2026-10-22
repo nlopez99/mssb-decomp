@@ -57,7 +57,7 @@ typedef struct {
 
 // This game's display object is 0x6C bytes: worldMatrix sits at 0x18 (DOSetWorldMatrix),
 // and InitDisplayObjWithLayout copies six more words from the layout after the shader.
-typedef void (*DOUserTevModeFunc)(u32 stage, struct DODisplayObj *dispObj, void *data, u8 *arg3, u8 *arg4);
+typedef void (*DOUserTevModeFunc)(s32 mode, struct DODisplayObj *dispObj, struct DOUserTevData *data, u8 *numTexGens, u8 *numStages);
 
 struct DODisplayObj {
     /* 0x00 */ PositionData *positionData;

@@ -1,6 +1,7 @@
 #include "C3/DisplayObject.h"
 extern void OSReport(const char* msg, ...);
 #include "string.h"
+#include "stl/math.h"
 
 extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_800ACFB0(void* data);
@@ -23,7 +24,7 @@ u8 lbl_803CBB60 = 0x40;
 // .sbss, declared from the highest address down
 GXColor lbl_803CC224;
 u8 lbl_803CC220;
-s32 lbl_803CC21C;
+u32 lbl_803CC21C;
 f32 lbl_803CC218;
 u8 lbl_803CC210[8];
 s32 lbl_803CC20C;
@@ -33,7 +34,7 @@ s32 lbl_803CC200;
 f32 lbl_803CC1FC;
 f32 lbl_803CC1F8;
 DOEnvCallback lbl_803CC1F4;
-void* lbl_803CC1F0;
+Light* lbl_803CC1F0;
 
 // .text:0x800B993C size:0xC
 void fn_800B993C(void) {
@@ -91,13 +92,13 @@ void SetFogNoneAgain(void) {
 }
 
 // .text:0x800B9A9C size:0xC
-void fn_800B9A9C(s32 arg0, f32 arg1) {
+void fn_800B9A9C(u32 arg0, f32 arg1) {
     lbl_803CC21C = arg0;
     lbl_803CC218 = arg1;
 }
 
 // .text:0x800B9AA8 size:0x8
-void fn_800B9AA8(void* light) {
+void fn_800B9AA8(Light* light) {
     lbl_803CC1F0 = light;
 }
 
@@ -184,10 +185,200 @@ s32 fn_800B9AB0(u32 mode, struct DODisplayObj* dispObj, u8* setting, GXTevStageI
 }
 
 // .text:0x800B9EA8 size:0x5A4
-void fn_800B9EA8(void) {}
+s32 fn_800B9EA8(u32 mode, struct DODisplayObj* dispObj, u8* setting, GXTevStageID* stage, GXTexCoordID* coord, GXTexMapID* map, GXChannelID* chan, MtxPtr camera) {
+    Mtx spF4;
+    Mtx spC4;
+    Mtx sp94;
+    Mtx sp64;
+    Mtx sp34;
+    Vec dir;
+    Vec axis;
+    Vec up = { 0.0f, 0.0f, 1.0f };
+    GXTexGenSrc src = GX_TG_NRM;
+    GXColor kcolor;
+    GXTevColorArg colorArg;
+    GXTevAlphaArg alphaArg;
+    GXTevColorArg konst;
+    GXTexMapID map2;
+    f32 dot;
+    f32 reflect;
+    f32 scale;
+
+    if (lbl_803CBB58 == 0) {
+        return -1;
+    }
+    if (dispObj == NULL || dispObj->lightingData == NULL || lbl_803CC1F0 == NULL || setting == NULL) {
+        return -1;
+    }
+    PSMTXIdentity(sp64);
+    PSMTXIdentity(sp34);
+    PSMTXConcat(camera, dispObj->worldMatrix, spF4);
+    PSMTXInverse(spF4, spC4);
+    PSMTXTranspose(spC4, spF4);
+    PSMTXMultVecSR(camera, &lbl_803CC1F0->direction, &dir);
+    dot = PSVECDotProduct(&dir, &up);
+    if (dot == -1.0f) {
+        PSMTXScale(sp64, 0.0f, 0.0f, 0.0f);
+        PSMTXScale(sp34, 0.0f, 0.0f, 0.0f);
+    } else {
+        dir.x = -dir.x;
+        dir.y = -dir.y;
+        dir.z = -dir.z;
+        if (PSVECMag(&dir) == 0.0f) {
+            return -1;
+        }
+        PSVECNormalize(&dir, &dir);
+        if (dot == 1.0f) {
+            PSMTXIdentity(spC4);
+        } else {
+            PSVECCrossProduct(&dir, &up, &axis);
+            if (PSVECMag(&axis) == 0.0f) {
+                PSMTXIdentity(spC4);
+            } else {
+                PSMTXRotAxisRad(spC4, &axis, acos(PSVECDotProduct(&up, &dir)));
+            }
+        }
+        PSMTXConcat(spC4, spF4, sp64);
+        if (lbl_803CC21C != 0) {
+            reflect = lbl_803CC218;
+        } else {
+            reflect = (setting[1] & 0x7F) / 100.0f;
+        }
+        scale = 0.5f * (0.5f - reflect) + 0.75f;
+        PSMTXScale(spC4, scale, -scale, 0.0f);
+        PSMTXTrans(sp94, 0.5f, 0.5f, 1.0f);
+        PSMTXConcat(sp94, spC4, sp34);
+    }
+    if (mode == 5) {
+        colorArg = GX_CC_RASC;
+        *chan = GX_COLOR0A0;
+        alphaArg = GX_CA_RASA;
+    } else {
+        colorArg = GX_CC_CPREV;
+        *chan = GX_COLOR_NULL;
+        alphaArg = GX_CA_APREV;
+    }
+    if (dispObj->pad8 != 0) {
+        kcolor.r = kcolor.g = kcolor.b = kcolor.a = dispObj->pad8;
+        konst = GX_CC_KONST;
+        GXSetTevKColor(GX_KCOLOR0, kcolor);
+        GXSetTevKColorSel(*stage, GX_TEV_KCSEL_K0);
+    } else {
+        konst = GX_CC_APREV;
+    }
+    if (dispObj->lightingData->compCount == 2) {
+        src = GX_TG_BINRM;
+    }
+    GXLoadTexMtxImm(sp64, GX_TEXMTX0 + *map * 3, GX_MTX3x4);
+    GXLoadTexMtxImm(sp34, GX_PTTEXMTX0 + *map * 3, GX_MTX3x4);
+    if (*(u16*)(setting + 2) == 0) {
+        GXSetTexCoordGen2(*coord, GX_TG_MTX3X4, src, GX_TEXMTX0 + *map * 3, GX_TRUE, GX_PTTEXMTX0 + *map * 3);
+        GXSetTevOrder(*stage, *coord, *map, *chan);
+        GXSetTevColorIn(*stage, GX_CC_ZERO, GX_CC_TEXC, konst, colorArg);
+        GXSetTevColorOp(*stage, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+        GXSetTevAlphaIn(*stage, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, alphaArg);
+        GXSetTevAlphaOp(*stage, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+        (*stage)++;
+        (*coord)++;
+        (*map)++;
+    } else {
+        map2 = *map + 1;
+        GXSetTexCoordGen2(*coord, GX_TG_MTX2X4, map2 + GX_TG_TEX0, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
+        GXSetTevOrder(*stage, *coord, map2, GX_COLOR0A0);
+        GXSetTevColorIn(*stage, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_TEXC);
+        GXSetTevColorOp(*stage, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVREG0);
+        GXSetTevAlphaIn(*stage, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_TEXA);
+        GXSetTevAlphaOp(*stage, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVREG0);
+        (*stage)++;
+        (*coord)++;
+        GXSetTexCoordGen2(*coord, GX_TG_MTX3X4, src, GX_TEXMTX0 + *map * 3, GX_TRUE, GX_PTTEXMTX0 + *map * 3);
+        GXSetTevOrder(*stage, *coord, *map, GX_COLOR_NULL);
+        GXSetTevColorIn(*stage, colorArg, GX_CC_TEXC, GX_CC_C0, GX_CC_ZERO);
+        GXSetTevColorOp(*stage, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+        GXSetTevAlphaIn(*stage, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, alphaArg);
+        GXSetTevAlphaOp(*stage, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+        (*stage)++;
+        (*coord)++;
+        *map += 2;
+    }
+    return 0;
+}
 
 // .text:0x800BA44C size:0x3FC
-void fn_800BA44C(u32 stage, struct DODisplayObj* dispObj, void* data, u8* arg3, u8* arg4) {}
+void DODefaultUserTevMode(s32 mode, struct DODisplayObj* dispObj, DOUserTevData* data, u8* numTexGens, u8* numStages) {
+    Mtx m;
+    GXTevStageID stage;
+    GXTexCoordID coord;
+    GXTexMapID map;
+    GXTevColorArg colorArg;
+    GXTevAlphaArg alphaArg;
+    GXChannelID chan;
+    f32 x;
+    f32 y;
+    f32 len;
+    f32 offset;
+
+    if (dispObj->overrideTevMode) {
+        OSReport("Error: DODefaultUserTevMode: Cannot override tev mode AND use default user tev mode function.\n");
+        return;
+    }
+    stage = *numStages;
+    coord = *numStages;
+    map = *numStages;
+    if (stage == GX_TEVSTAGE0) {
+        colorArg = GX_CC_RASC;
+        alphaArg = GX_CA_RASA;
+        chan = GX_COLOR0A0;
+    } else {
+        colorArg = GX_CC_CPREV;
+        alphaArg = GX_CA_APREV;
+        chan = GX_COLOR_NULL;
+    }
+    switch (mode) {
+    case 9:
+        GXSetTevOrder(stage, coord, map, chan);
+        GXSetTevColorIn(stage, GX_CC_TEXC, GX_CC_ZERO, GX_CC_ZERO, colorArg);
+        GXSetTevAlphaIn(stage, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, alphaArg);
+        GXSetTevColorOp(stage, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+        GXSetTevAlphaOp(stage, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+        break;
+    case 10:
+        GXSetTevOrder(stage, coord, map, chan);
+        GXSetTevColorIn(stage, GX_CC_TEXC, GX_CC_ZERO, GX_CC_ZERO, colorArg);
+        GXSetTevAlphaIn(stage, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, alphaArg);
+        GXSetTevColorOp(stage, GX_TEV_SUB, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+        GXSetTevAlphaOp(stage, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+        break;
+    case 11:
+        x = data->_20;
+        y = data->_24;
+        if (x == 0.0f && y == 0.0f) {
+            GXSetTexCoordGen2(coord, GX_TG_MTX2X4, *numStages + GX_TG_TEX0, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
+        } else {
+            len = dolsqrtf2(x * x + y * y);
+            offset = 0.159154f * (f32)asin(y / len);
+            if (x < 0.0f) {
+                offset = 0.5f - offset;
+            }
+            PSMTXIdentity(m);
+            m[0][0] = 2.0f;
+            m[0][3] = -offset;
+            GXLoadTexMtxImm(m, GX_TEXMTX0 + *numStages * 3, GX_MTX3x4);
+            GXSetTexCoordGen2(coord, GX_TG_MTX3X4, *numStages + GX_TG_TEX0, GX_TEXMTX0 + *numStages * 3, GX_FALSE, GX_PTIDENTITY);
+        }
+        GXSetTevOrder(stage, coord, map, chan);
+        GXSetTevColorIn(stage, GX_CC_ZERO, GX_CC_TEXC, GX_CC_APREV, colorArg);
+        GXSetTevColorOp(stage, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+        GXSetTevAlphaIn(stage, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_KONST);
+        GXSetTevAlphaOp(stage, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+        break;
+    default:
+        OSReport("Warning: DODefaultUserTevMode: Unknown user tev mode %d\n", mode);
+        return;
+    }
+    (*numTexGens)++;
+    (*numStages)++;
+}
 
 // .text:0x800BA848 size:0x12E4
 void Custom_SetState(void) {}
@@ -484,7 +675,7 @@ void* fn_800BCEF8(DOLayout* layout, struct DODisplayObj* dispObj) {
     dispObj->pad8 = layout->pad8;
     dispObj->visibility = 1;
     dispObj->overrideTevMode = 0;
-    dispObj->userTevMode = fn_800BA44C;
+    dispObj->userTevMode = DODefaultUserTevMode;
     dispObj->shaderFunc = NULL;
     dispObj->shaderData = NULL;
     memcpy(dispObj->_58, layout->_20, 4);
