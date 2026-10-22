@@ -686,24 +686,24 @@ void fn_800B117C(u8 value) {
 
 // .text:0x800B0D68 size:0x414
 s32 AllocateSprite(s32 index, s32 size) {
+    u8* flushEnd;
     s32 need;
+    u8* src;
+    s32 amount;
     s32 lo;
     s32 hi;
+    u8* flushStart;
     s32 last;
     s32 avail;
-    s32 amount;
     s32 moved;
     s32 i;
-    u8* src;
     u8* dst;
-    u8* flushStart;
-    u8* flushEnd;
 
     if (size <= 0) {
         return 0;
     }
     if (size < lbl_803CBB3C) {
-        need = lbl_803CBB3C * ((lbl_803CBB3C + size - 1) / lbl_803CBB3C);
+        need = lbl_803CBB3C * ((lbl_803CBB3C - 1 + size) / lbl_803CBB3C);
     } else {
         need = (size + 31) / 32 * 32;
     }
@@ -724,8 +724,8 @@ s32 AllocateSprite(s32 index, s32 size) {
             i = lo;
             do {
                 i++;
-                lbl_803CC1E4[i].begin -= amount;
                 moved += lbl_803CC1E4[i].length;
+                lbl_803CC1E4[i].begin -= amount;
                 lbl_803CC1E4[i].end -= amount;
                 lbl_803CC1E4[i].pDisplayListData -= amount;
             } while (i < index);
@@ -752,8 +752,8 @@ s32 AllocateSprite(s32 index, s32 size) {
             src = lbl_803CC1E4[index + 1].begin;
             moved = 0;
             for (i = index + 1; i <= hi; i++) {
-                lbl_803CC1E4[i].begin += amount;
                 moved += lbl_803CC1E4[i].length;
+                lbl_803CC1E4[i].begin += amount;
                 lbl_803CC1E4[i].end += amount;
                 lbl_803CC1E4[i].pDisplayListData += amount;
             }
