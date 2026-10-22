@@ -477,15 +477,15 @@ void fn_800B2160(u8 value) {
 }
 
 // .text:0x800B1EBC size:0x2A4
-s32 fn_800B1EBC(SprtTex* tex, s32 id, u16 width, u16 height) {
-    s32 map = id + 1;
-    s32 dirty;
-    s32 n;
-    u32 tmem;
-    u8 wrapS;
-    u8 wrapT;
-    u16 bits;
+s32 fn_800B1EBC(SprtTex* tex, s32 id, u32 width, u32 height) {
     u16 v;
+    s32 map = id + 1;
+    u32 tmem;
+    s32 dirty;
+    u32 n;
+    s32 wrapS;
+    s32 wrapT;
+    u16 bits;
 
     lbl_803CBB34->_68[id] = lbl_803CBB34->_84;
     dirty = 0;
@@ -543,7 +543,7 @@ s32 fn_800B1EBC(SprtTex* tex, s32 id, u16 width, u16 height) {
 
 
 // .text:0x800B1500 size:0x9BC
-void DrawSprite(s32 prim, SprtVtx* verts, s32 count, SprtTex* tex, u16 width, u16 height) {
+void DrawSprite(s32 prim, SprtVtx* verts, s32 count, SprtTex* tex, u32 width, u32 height) {
     s32 dirty;
     s32 changed;
     u8* cmd;
@@ -583,7 +583,8 @@ void DrawSprite(s32 prim, SprtVtx* verts, s32 count, SprtTex* tex, u16 width, u1
     if (lbl_803CBB34->_80 >= 0 && dirty == 0) {
         hdr = lbl_803CC1C0->begin + lbl_803CBB34->_80;
         n = *(u16*)(hdr + 1);
-        if (hdr[0] == GX_QUADS && prim == GX_QUADS && lbl_803CC1C0->pDisplayListData == hdr + n * sizeof(SprtVtx) + 3 &&
+        size = n * sizeof(SprtVtx) + 3;
+        if (hdr[0] == GX_QUADS && prim == GX_QUADS && lbl_803CC1C0->pDisplayListData == hdr + size &&
             n < 0xFFFF - count) {
             size = count * sizeof(SprtVtx);
             ReserveSprite(size);
@@ -640,7 +641,7 @@ void DrawSprite_TexObj(SprtVtx* verts, SprtTex* tex) {
 }
 
 // .text:0x800B1314 size:0x3C
-void fn_800B1314(SprtVtx* verts, SprtTex* tex, u16 width, u16 height) {
+void fn_800B1314(SprtVtx* verts, SprtTex* tex, u32 width, u32 height) {
     DrawSprite(GX_QUADS, verts, 4, tex, width, height);
 }
 
@@ -657,8 +658,8 @@ void DrawNullSprite(SprtVtx* verts, s32 count) {
 // .text:0x800B1188 size:0x11C
 void fn_800B1188(void) {
     SprtProj proj;
-    u32 zmode;
     u8 c;
+    u32 zmode;
     s16 one;
 
     memcpy(&proj, &lbl_803CBB38->proj, sizeof(SprtProj));
