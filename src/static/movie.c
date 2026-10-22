@@ -3,7 +3,17 @@
 #include "string.h"
 
 typedef struct MoviePlayer {
-    /* 0x000 */ u8 _000[0xF0];
+    /* 0x000 */ u8 _000[0x28];
+    /* 0x028 */ u32 _028;
+    /* 0x02C */ u8 _02C[0x30 - 0x2C];
+    /* 0x030 */ u32 _030;
+    /* 0x034 */ u8 _034[0xA0 - 0x34];
+    /* 0x0A0 */ u8 _0A0[4];
+    /* 0x0A4 */ u16 width;
+    /* 0x0A6 */ u16 height;
+    /* 0x0A8 */ u8 _0A8;
+    /* 0x0A9 */ u8 _0A9;
+    /* 0x0AA */ u8 _0AA[0xF0 - 0xAA];
     /* 0x0F0 */ struct MovieHeader* header;
     /* 0x0F4 */ u8 _0F4[6][0xC];
     /* 0x13C */ u8* _13C[6];
@@ -54,6 +64,11 @@ extern struct {
 extern MovieRing lbl_803C79D4;
 extern MovieBuffer lbl_803C7A00;
 extern OSMessageQueue lbl_802FB870;
+
+extern u16 lbl_803CBAE4;
+extern u32 fn_800E4B1C(void* arg);
+
+#define ALIGN32(x) (((x) + 31) & ~31)
 
 extern u8 lbl_803CC17C;
 extern u8 lbl_803CC17D;
@@ -294,7 +309,26 @@ s32 fn_800AD780(MoviePlayer* player) {
 }
 
 // .text:0x800AD6BC size:0xC4
-void fn_800AD6BC(void) {
+// 83.88%: scheduling and registers of the size terms differ; locals, orders and += chains tried.
+u32 fn_800AD6BC(MoviePlayer* player) {
+    u32 audio;
+    u32 sample;
+    u32 pixels;
+    u32 blocks;
+    u32 size;
+
+    sample = player->_0A8 * player->_0A9;
+    pixels = player->width * player->height;
+    audio = ALIGN32(player->_030);
+    blocks = lbl_803CBAE4 * ((audio + lbl_803CBAE4 - 1) / lbl_803CBAE4);
+
+    size = ALIGN32(player->_028);
+    size += ALIGN32(pixels << (player->_1B8 + 1)) * 2;
+    size += audio;
+    size += blocks * 0x1C;
+    size += ALIGN32(pixels * (sample + 2) / sample) * 6;
+    size += ALIGN32(fn_800E4B1C(player->_0A0));
+    return size;
 }
 
 // .text:0x800AD500 size:0x1BC
