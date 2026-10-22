@@ -1,6 +1,7 @@
 #include "static/model.h"
 #include "static/UnknownHomes_Static.h"
 #include "string.h"
+#include "math.h"
 #include "Dolphin/os.h"
 #include "C3/control.h"
 #include "C3/geoPalette.h"
@@ -84,6 +85,12 @@ typedef struct ModelEntry28 {
     /* 0x0027 */ u8 _0027[0x28 - 0x27];
 } ModelEntry28; // size: 0x28
 
+typedef struct BoneTrackRef {
+    /* 0x00 */ u8 _00[0xC - 0x0];
+    /* 0x0C */ void* _0C;
+    /* 0x10 */ void* _10;
+} BoneTrackRef; // size: 0x14
+
 typedef struct ModelNode {
     /* 0x0000 */ u16 id;
     /* 0x0002 */ u8 _0002[0x6 - 0x2];
@@ -106,7 +113,8 @@ typedef struct ModelNode {
     /* 0x0090 */ u8 _0090[0x98 - 0x90];
     /* 0x0098 */ u8 flags;
     /* 0x0099 */ u8 _99;
-    /* 0x009A */ u8 _009A[0xEC - 0x9A];
+    /* 0x009A */ u8 _009A[0xE8 - 0x9A];
+    /* 0x00E8 */ struct BoneTrackRef* _E8;
     /* 0x00EC */ MtxPtr mtx;
     /* 0x00F0 */ u8 _00F0[0x100 - 0xF0];
     /* 0x0100 */ struct ModelNode* next;
@@ -158,7 +166,8 @@ typedef struct ModelLoadReq {
     /* 0x0014 */ u8 _14;
     /* 0x0015 */ u8 _15;
     /* 0x0016 */ u8 _16;
-    /* 0x0017 */ u8 _0017[0x19 - 0x17];
+    /* 0x0017 */ u8 _17;
+    /* 0x0018 */ u8 _0018[0x19 - 0x18];
     /* 0x0019 */ u8 _19;
     /* 0x001A */ s8 _1A;
     /* 0x001B */ u8 _1B;
@@ -367,7 +376,7 @@ typedef struct ModelWork {
             /* 0x2D46 */ u8 _2D46;
             /* 0x2D47 */ u8 _2D47[0x2D48 - 0x2D47];
             /* 0x2D48 */ void* _2D48;
-            /* 0x2D4C */ u8 _2D4C[0x2D50 - 0x2D4C];
+            /* 0x2D4C */ u32 _2D4C;
             /* 0x2D50 */ s16 _2D50;
             /* 0x2D52 */ u8 _2D52;
             /* 0x2D53 */ u8 _2D53[0x2D54 - 0x2D53];
@@ -386,7 +395,8 @@ typedef struct ModelWork {
             /* 0x2D7A */ u8 _2D7A;
             /* 0x2D7B */ u8 _2D7B;
             /* 0x2D7C */ u8 _2D7C;
-            /* 0x2D7D */ u8 _2D7D[0x2D7F - 0x2D7D];
+            /* 0x2D7D */ u8 _2D7D;
+            /* 0x2D7E */ u8 _2D7E;
             /* 0x2D7F */ s8 _2D7F[9];
             /* 0x2D88 */ s8 _2D88;
             /* 0x2D89 */ s8 _2D89[4];
@@ -407,7 +417,7 @@ typedef struct ModelWork {
     /* 0x307A */ u8 _307A;
     /* 0x307B */ u8 _307B;
     /* 0x307C */ u8 _307C;
-    /* 0x307D */ u8 _307D[0x307E - 0x307D];
+    /* 0x307D */ u8 _307D;
     /* 0x307E */ u8 _307E;
     /* 0x307F */ u8 _307F[0x3082 - 0x307F];
     /* 0x3082 */ s8 _3082;
@@ -521,6 +531,7 @@ f32 fn_800B4C40(ModelNode* node, ModelTable* table);
 void fn_8004B208(ModelActor* actor, s16 anim, s32 arg2, f32 frames);
 s32 fn_8004AD54(u8 stadium, u8 arg1);
 void DrawShadows(u8 on);
+void fn_800BF048(void (*cb)(void));
 u8 GetDrawShadows(void);
 void fn_800BEC00(BOOL alt);
 void fn_800BD1E8(s32 arg0);
@@ -1702,7 +1713,70 @@ fail:
 }
 
 // .text:0x8001C67C size:0x2A4
-int fn_8001C67C_animation(int, int) {
+int fn_8001C67C_animation(int charId, int idx) {
+    ModelTable* table;
+    ModelNode* node;
+    BoneTrackRef* ref;
+    int i;
+    int n;
+
+    if (lbl_803CBC3C[2] == 0) {
+        if ((s32)lbl_803C6CF8._715 != 1) {
+            return FALSE;
+        }
+        table = lbl_8036E548._0064;
+        node = table->slots[4].node;
+        ref = node->bones[0]->_E8;
+        if (ref != NULL && ref->_0C != NULL) {
+            for (i = 0; i < node->numBones; i++) {
+                ACTSetBoneTrack((sBone*)node->bones[i], NULL, node->_8C < 1.0f, 0.0f);
+            }
+            table->slots[4]._58 = 0;
+            table->slots[4]._59 = 0;
+            table->slots[4]._5A = 0;
+            table->slots[4]._60 = 0.0f;
+        }
+        lbl_803CBC3C[2] = 1;
+    }
+    if (lbl_803CBC3C[2] == 1) {
+        if (g_d_GameSettings.minigamesEnabled) {
+            if (g_d_GameSettings.GameModeSelected == 7) {
+                n = charId * 19 + 9;
+            } else {
+                n = charId * 19 + 2;
+            }
+            ARAMTransfer(&lbl_803CB790[n], lbl_8036E548.rows[0]._0C, 0, 0);
+        } else {
+            if (charId == lbl_8036E548._2D50) {
+                memcpy(lbl_8036E548.bufs[0], lbl_8036E548._2D48, lbl_8036E548._2D4C);
+                goto load;
+            }
+            if (g_d_GameSettings.GameModeSelected == 2) {
+                n = charId * 19 + 10;
+            } else {
+                n = charId * 19 + 2;
+            }
+            ARAMTransfer(&lbl_803CB790[n], lbl_8036E548.bufs[0], 0, 0);
+        }
+        lbl_803CBC3C[2] = 2;
+    } else if (lbl_803CBC3C[2] == 2 && (s32)lbl_803C6CF8._715 == 1) {
+        if (g_d_GameSettings.minigamesEnabled) {
+            ANIMGet(lbl_8036E548.rows[0]._0C);
+            if (lbl_8036E548.actors[idx]->anims[0] == NULL) {
+                lbl_8036E548.actors[idx]->anims[0] = lbl_8036E548.rows[0]._0C;
+            }
+        } else {
+        load:
+            ANIMGet(lbl_8036E548.bufs[0]);
+            if (lbl_8036E548.actors[idx]->anims[0] == NULL) {
+                lbl_8036E548.actors[idx]->anims[0] = lbl_8036E548.bufs[0];
+            }
+        }
+        lbl_8036E548._2D68 = charId;
+        return TRUE;
+    }
+    lbl_803CBC3C[0] = 0;
+    return FALSE;
 }
 
 // .text:0x8001C588 size:0xF4
@@ -2384,6 +2458,61 @@ void fn_80019A60(void) {
 
 // .text:0x800196D8 size:0x388
 void fn_800196D8(void) {
+    ModelLoadReq* req = lbl_803CC1B8;
+    ModelLoadReq* task;
+    Vec light;
+    Vec dir;
+    f32 len;
+    void** base;
+    s32 i;
+
+    switch (req->_14) {
+    case 0:
+        task = fn_800B0A5C_insertQueue(fn_800188C0, 0);
+        task->_14 = 0;
+        task->_16 = 0;
+        task->_17 = 0xFF;
+        lbl_8036E548._307B = 1;
+        req->_14++;
+        break;
+    case 1:
+        if (lbl_8036E548._307B == 0) {
+            req->_14++;
+        }
+        break;
+    case 2:
+        dir.x = -lbl_80367318[0].pos.x;
+        dir.y = -lbl_80367318[0].pos.y;
+        dir.z = -lbl_80367318[0].pos.z;
+        len = dolsqrtf2(dir.x * dir.x + dir.y * dir.y + dir.z * dir.z);
+        lbl_8036E548._3087 = 1;
+        dir.x /= len;
+        dir.y /= len;
+        dir.z /= len;
+        fn_8003A540(0);
+        lbl_8036E548._3086 = 1;
+        DrawShadows(1);
+        light = dir;
+        fn_800BEBCC(0, &light);
+        fn_800BF048(fn_8001AAF0);
+        fn_800BF058(fn_8001AB10);
+        base = lbl_8036E548.files;
+        for (i = 0; i < 80; i++) {
+            lbl_8036E548.files[i] = (u8*)base + (u32)base[i];
+        }
+        lbl_8036E548._307C = 0;
+        lbl_8036E548._307D = 0;
+        lbl_8036E548._3082 = 0;
+        fn_8001F8A4();
+        req->_14++;
+        break;
+    default:
+        challengeMapMaybe();
+        lbl_8036E548._2D7D = 1;
+        lbl_8036E548._307C = 1;
+        fn_800B0A14_removeQueue();
+        break;
+    }
 }
 
 // .text:0x80018DEC size:0x8EC
