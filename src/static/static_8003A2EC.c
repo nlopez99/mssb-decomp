@@ -963,8 +963,7 @@ void fn_80040C14(void) {
 }
 
 // .text:0x8004053C size:0x6D8
-// 98.71%: the target truncates the two message ternaries to u8 (clrlwi) and loads the
-// name before the slot in case 5's call
+// 99.05%: case 5 schedules the file name's addi after the slot's address and the channel load
 void fn_8004053C(void) {
     u8 msg = 0;
     MenuTask* task = lbl_803CC1B8;
@@ -1303,6 +1302,8 @@ static inline u8 IsSaveValid(void) {
 }
 
 // .text:0x8003F2B8 size:0x1284
+// 99.69%: registers only; case 13's a15 takes r30 for r25, and IsSaveValid's save and block
+// pointers take r11 and r7 for r10 and r11 (declaration orders and loop forms tried)
 void fn_8003F2B8(void) {
     MenuTask* task = lbl_803CC1B8;
     MenuTask* child;
@@ -2197,10 +2198,8 @@ static inline void StoreSave(u8 mask, u8 slot) {
 }
 
 static inline void ClearBlock(u8 slot) {
-    u8* data = lbl_80354768.blocks[slot];
-
-    memset(data, 0, sizeof(lbl_80354768.blocks[slot]));
-    memcpy(lbl_802D4B00.blocks[slot].data, data, sizeof(lbl_802D4B00.blocks[slot].data));
+    memset(lbl_80354768.blocks[slot], 0, sizeof(lbl_80354768.blocks[slot]));
+    memcpy(lbl_802D4B00.blocks[slot].data, lbl_80354768.blocks[slot], sizeof(lbl_802D4B00.blocks[slot].data));
     lbl_80354768._CF5E[slot] = 0;
     lbl_802D4B00.header._46[slot] = 0;
     lbl_802D4B00.blocks[slot].size = sizeof(SaveBlock);
@@ -2243,6 +2242,8 @@ static inline void RetryOrQuit(MenuTask* task) {
 }
 
 // .text:0x8003C00C size:0x28CC
+// 99.63%: registers only; case 8's and case 21's copies of the task fields sit two registers low,
+// and case 16 keeps PackSave's save pointer in r29 for r26 (StoreSave then reuses neither)
 void fn_8003C00C(void) {
     MenuTask* task = lbl_803CC1B8;
     CardRequest req;
@@ -3829,7 +3830,8 @@ void fn_8003A688(s32 i, f32 width, f32 height) {
 }
 
 // .text:0x8003A550 size:0x138
-// 98.53%: registers only; tex and the decal's offset and pointer take r27, r28 and r25 for r25, r27, r28
+// 98.97%: registers only; tex and ndir take r26 and r25 for r25 and r26, and the new head
+// takes r0 for r4
 void fn_8003A550(s32 tex, Vec* pos, Vec* dir, u8 arg3) {
     Vec* ndir;
     u16 head = lbl_802D3D80.head;
@@ -3840,7 +3842,7 @@ void fn_8003A550(s32 tex, Vec* pos, Vec* dir, u8 arg3) {
         decal = &lbl_802D3D80.decals[head];
         decal->tex = tex;
         ndir = &decal->dir;
-        decal->pos = *pos;
+        lbl_802D3D80.decals[head].pos = *pos;
         PSVECNormalize(dir, ndir);
         PSVECScale(ndir, lbl_802D3D80.halfSize[tex][0], &decal->side);
         x = -lbl_802D3D80.decals[head].side.z;
@@ -3850,8 +3852,9 @@ void fn_8003A550(s32 tex, Vec* pos, Vec* dir, u8 arg3) {
         lbl_802D3D80.decals[head].dir.y = lbl_803CB82C;
         lbl_802D3D80.decals[head].alpha = 0xFF;
         lbl_802D3D80.decals[head]._26 = arg3;
-        lbl_802D3D80.head = (head + 1) % 64;
-        lbl_802D3D80.tail = (lbl_802D3D80.tail + (lbl_802D3D80.head == lbl_802D3D80.tail)) % 64;
+        head = (head + 1) % 64;
+        lbl_802D3D80.head = head;
+        lbl_802D3D80.tail = (lbl_802D3D80.tail + (head == lbl_802D3D80.tail)) % 64;
     }
 }
 
