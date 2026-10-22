@@ -11,7 +11,7 @@ typedef struct McardTask {
     /* 0x14 */ s32 state;
     /* 0x18 */ u8 chan;
     /* 0x19 */ u8 async;
-    /* 0x1A */ s16 fileNo;
+    /* 0x1A */ u16 fileNo;
     /* 0x1C */ char* fileName;
     /* 0x20 */ u8 _20[0xC];
     /* 0x2C */ s32 buf;
@@ -181,6 +181,35 @@ static inline s32 ReadSerial(u8 chan) {
     result = CARDGetSerialNo(chan, &serial);
     lbl_803C7838.slots[chan].serial = serial;
     return result;
+}
+
+static inline s32 FindFile(u8 chan, char* fileName) {
+    char name[0x21];
+    CARDFileInfo info;
+    s32 result;
+    s32 found;
+
+    strncpy(name, fileName, 0x20);
+    name[0x20] = 0;
+    if (strlen(name) >= 0x20) {
+        OSPanic("mcard.c", 510, "MemoryCard FileName Error!!");
+    }
+    result = CARDOpen(chan, fileName, &info);
+    switch (result) {
+    case CARD_RESULT_READY:
+        lbl_803C7838.error = 8;
+        found = 0;
+        CARDClose(&info);
+        break;
+    case CARD_RESULT_NOFILE:
+        found = 1;
+        break;
+    default:
+        fn_800ACD64(result);
+        found = 2;
+        break;
+    }
+    return found;
 }
 
 // .text:0x800ACD64 size:0x1B0
@@ -404,6 +433,119 @@ void fn_800AA930(struct McardRequest* req, u64 serial) {
 
 // .text:0x800AA44C size:0x4E4
 void fn_800AA44C(void) {
+    McardTask* task = lbl_803CC1B8;
+    u8 chan;
+
+    switch (task->state) {
+    case 0:
+        chan = task->chan;
+        fn_800ACD64(CARDUnmount(chan));
+        switch (CheckSlot(chan)) {
+        case 0:
+            break;
+        case 1:
+            task->state = 1;
+            break;
+        case 2:
+            task->state = 8;
+            break;
+        }
+        break;
+    case 1:
+        if (Mount(task->chan, task->async) == 0) {
+            task->state = 2;
+        }
+        break;
+    case 2:
+        fn_800ACD64(CARDGetResultCode(task->chan));
+        switch (lbl_803C7838.error) {
+        case 0xF:
+            break;
+        case 1:
+        case 2:
+        case 0x11:
+            task->state = 3;
+            break;
+        default:
+            task->state = 8;
+            break;
+        }
+        break;
+    case 3:
+        if (Check(task->chan, task->async) == 0) {
+            task->state = 4;
+        }
+        break;
+    case 4:
+        fn_800ACD64(CARDGetResultCode(task->chan));
+        switch (lbl_803C7838.error) {
+        case 0xF:
+            break;
+        case 0x11:
+            task->state = 5;
+            break;
+        case 0x10:
+        default:
+            task->state = 8;
+            break;
+        }
+        break;
+    case 5:
+        if (lbl_803C7838.error == 0x11) {
+            if (ReadSerial(task->chan) != CARD_RESULT_BUSY) {
+                if (lbl_803C7838.slots[task->chan].serial != 0) {
+                    if (lbl_802EF2C0[task->chan] == 0) {
+                        task->state = 6;
+                    } else if (lbl_803C7838.slots[task->chan].serial == lbl_802EF2C0[task->chan]) {
+                        task->state = 6;
+                    } else {
+                        lbl_803C7838.error = 0x10;
+                        task->state = 8;
+                    }
+                } else {
+                    task->state = 8;
+                }
+            }
+        } else {
+            task->state = 8;
+        }
+        break;
+    case 6:
+        switch (FindFile(task->chan, task->fileName)) {
+        case 0:
+            task->fileNo = 1;
+            task->state = 7;
+            break;
+        case 1:
+            task->state = 7;
+            break;
+        case 2:
+            task->state = 8;
+            break;
+        }
+        break;
+    case 7:
+        fn_800ACD64(CARDUnmount(task->chan));
+        switch (lbl_803C7838.error) {
+        case 0xF:
+            break;
+        case 0x11:
+            if (task->fileNo == 1) {
+                lbl_803C7838.error = 8;
+            }
+            task->state = 8;
+            break;
+        case 0x10:
+        default:
+            task->state = 8;
+            break;
+        }
+        break;
+    case 8:
+        task->parent->result = 1;
+        fn_800B0A14_removeQueue();
+        break;
+    }
 }
 
 // .text:0x800AA34C size:0x100
