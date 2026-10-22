@@ -73,6 +73,32 @@ static inline f32 getFrameT(struct ANIMPipe *animPipe, KeyFrame *currentFrame, K
     return dt / (animPipe->currentTrack->animTime - currentFrame->time);
 }
 
+static inline f32 EaseT(f32 t, f32 a, f32 b) {
+    f32 sum = a + b;
+    f32 k;
+    f32 speed;
+
+    if (t == 0.0f || t == 1.0f || sum == 0.0f) {
+        return t;
+    }
+    if (sum > 1.0f) {
+        k = 1.0f / sum;
+        a *= k;
+        b *= k;
+        speed = 0.5f - k;
+    } else {
+        speed = 0.5f - 1.0f / sum;
+    }
+    if (t < a) {
+        return t * (t * (speed / a));
+    }
+    if (t < 1.0f - b) {
+        return speed * (2.0f * t - a);
+    }
+    k = 1.0f - t;
+    return 1.0f - k * (k * (speed / b));
+}
+
 static inline f32 BezierF(f32 p0, f32 c0, f32 c1, f32 p1, f32 t) {
     f32 tt = t * t;
     f32 ttt = t * tt;
@@ -176,22 +202,16 @@ void ANIMTick(struct ANIMPipe *animPipe, u8 flag) {
 }
 
 // .text:0x800B71C0 size:0x558
-// Differs: the target compares dt against 0.0f in the other operand order and keeps a
-// second copy of t (f29) for Squad.
+// Differs: the target compares dt against 0.0f in the other operand order; registers in
+// the inlined slerp (omega and t * omega swapped, as in Squad's third).
 void DoQuatAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFrame *nextFrame) {
     u8 type;
     int stride;
     u32 offset;
     u32 mode;
     f32 t;
-    f32 dt;
     f32 easeIn;
     f32 easeOut;
-    f32 sum;
-    f32 a;
-    f32 b;
-    f32 k;
-    f32 speed;
     Quaternion out;
     Quaternion cur;
     Quaternion next;
@@ -224,26 +244,7 @@ void DoQuatAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFrame
     case 5:
         GetData(lbl_803CBB51, nextFrame->interpolation + offset + 0x10, &easeIn, 1, lbl_803CBB4C);
         GetData(lbl_803CBB51, currentFrame->interpolation + offset + 0x12, &easeOut, 1, lbl_803CBB4C);
-        a = easeOut;
-        b = easeIn;
-        sum = a + b;
-        if (t != 0.0f && t != 1.0f && sum != 0.0f) {
-            if (sum > 1.0f) {
-                k = 1.0f / sum;
-                a *= k;
-                b *= k;
-                speed = 0.5f - k;
-            } else {
-                speed = 0.5f - 1.0f / sum;
-            }
-            if (t < a) {
-                t = t * (t * (speed / a));
-            } else if (t < 1.0f - b) {
-                t = speed * (2.0f * t - a);
-            } else {
-                t = 1.0f - (1.0f - t) * ((1.0f - t) * (speed / b));
-            }
-        }
+        t = EaseT(t, easeOut, easeIn);
     case 4:
         GetData(lbl_803CBB50, currentFrame->interpolation + offset + 8, (f32 *)&curTangent, 4, lbl_803CBB48);
         GetData(lbl_803CBB50, nextFrame->interpolation + offset, (f32 *)&nextTangent, 4, lbl_803CBB48);
@@ -279,7 +280,6 @@ void DoEulerAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFram
     u32 interpOffset;
     f32 scale;
     f32 t;
-    f32 dt;
     f32 tt;
     f32 ttt;
     f32 s;
@@ -360,11 +360,6 @@ void DoScaleAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFram
     f32 tt;
     f32 ttt;
     f32 s;
-    f32 sum;
-    f32 k;
-    f32 speed;
-    f32 a;
-    f32 b;
     f32 h00;
     f32 h01;
     f32 h10;
@@ -419,26 +414,7 @@ void DoScaleAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFram
         GetData(lbl_803CBB51, p + stride + 2, &curEase, 1, lbl_803CBB4C);
         GetData(type, nextFrame->interpolation, nextTangent, 3, scale);
         GetData(lbl_803CBB51, nextFrame->interpolation + stride * 2, &nextEase, 1, lbl_803CBB4C);
-        a = curEase;
-        b = nextEase;
-        sum = a + b;
-        if (t != 0.0f && t != 1.0f && sum != 0.0f) {
-            if (sum > 1.0f) {
-                k = 1.0f / sum;
-                a *= k;
-                b *= k;
-                speed = 0.5f - k;
-            } else {
-                speed = 0.5f - 1.0f / sum;
-            }
-            if (t < a) {
-                t = t * (t * (speed / a));
-            } else if (t < 1.0f - b) {
-                t = speed * (2.0f * t - a);
-            } else {
-                t = 1.0f - (1.0f - t) * ((1.0f - t) * (speed / b));
-            }
-        }
+        t = EaseT(t, curEase, nextEase);
         tt = t * t;
         ttt = tt * t;
         h00 = 2.0f * ttt - 3.0f * tt;
@@ -481,11 +457,6 @@ void DoTranslationAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, K
     f32 tt;
     f32 ttt;
     f32 s;
-    f32 sum;
-    f32 k;
-    f32 speed;
-    f32 a;
-    f32 b;
     f32 h00;
     f32 h01;
     f32 h10;
@@ -566,26 +537,7 @@ void DoTranslationAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, K
         p = nextFrame->interpolation + offset;
         GetData(type, p, nextTangent, 3, scale);
         GetData(lbl_803CBB51, p + stride * 2, &nextEase, 1, lbl_803CBB4C);
-        a = curEase;
-        b = nextEase;
-        sum = a + b;
-        if (t != 0.0f && t != 1.0f && sum != 0.0f) {
-            if (sum > 1.0f) {
-                k = 1.0f / sum;
-                a *= k;
-                b *= k;
-                speed = 0.5f - k;
-            } else {
-                speed = 0.5f - 1.0f / sum;
-            }
-            if (t < a) {
-                t = t * (t * (speed / a));
-            } else if (t < 1.0f - b) {
-                t = speed * (2.0f * t - a);
-            } else {
-                t = 1.0f - (1.0f - t) * ((1.0f - t) * (speed / b));
-            }
-        }
+        t = EaseT(t, curEase, nextEase);
         tt = t * t;
         ttt = tt * t;
         h00 = 2.0f * ttt - 3.0f * tt;
