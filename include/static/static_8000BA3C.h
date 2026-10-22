@@ -136,12 +136,16 @@ typedef struct SpriteKey {
     /* 0x04 */ u8 type;
     /* 0x05 */ u8 blend;
     /* 0x06 */ u16 index;
-    /* 0x08 */ u8 _08_b7 : 3;
+    /* 0x08 */ u8 _08_b7 : 2;
+    /* 0x08 */ u8 _08_b5 : 1;
     /* 0x08 */ u8 _08_b4 : 1;
     /* 0x08 */ u8 _08_b3 : 1;
     /* 0x08 */ u8 _08_b2 : 1;
-    /* 0x08 */ u8 _08_b1 : 2;
-    /* 0x09 */ u8 _09[0xC - 0x9];
+    /* 0x08 */ u8 _08_b1 : 1;
+    /* 0x08 */ u8 _08_b0 : 1;
+    /* 0x09 */ u8 _09_b7 : 1;
+    /* 0x09 */ u8 _09_b0 : 7;
+    /* 0x0A */ u8 _0A[0xC - 0xA];
     /* 0x0C */ s16 scaleX;
     /* 0x0E */ s16 scaleY;
     /* 0x10 */ s16 _10;
@@ -187,11 +191,11 @@ typedef struct SpriteVerts {
 } SpriteVerts;
 
 s32 fn_8000BA3C(u32* time, AnimFile* file, s32 idx, Mtx mtx, s32 flags, u32 color, u16** outKey, SpriteNest* nest);
-void fn_8000C194(void);
+s32 fn_8000C194(u32* time, AnimFile* file, s32 idx, Mtx mtx, s32 flags, u32 color, u16** outKey, TexFile* tex);
 void fn_8000CC4C(AnimFile* file, AnimFrame* f, u8* src, u32 offset, u32 size);
 u32 fn_8000CEF0(AnimFile* file, s32 idx, u32 frame, s32 skip, u32* dst);
 s32 fn_8000D164(u32* time, AnimFile* file, s32 idx, Mtx mtx, s32 flags, u32 color, u16** outKey, TexFile* tex);
-void fn_8000D838(void);
+s32 fn_8000D838(u32* time, AnimFile* file, s32 idx, Mtx mtx, s32 flags, u32 color, u16** outKey, TexFile* tex);
 void fn_8000D8A4(SpriteShape* shape, Mtx mtx, ShapeStyle* style);
 void fn_8000DC9C(SpriteShape* shape, Mtx mtx, ShapeStyle* style);
 void fn_8000E030(SpriteShape* shape, Mtx mtx, ShapeStyle* style);
