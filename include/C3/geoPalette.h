@@ -115,7 +115,8 @@ struct sHdr *GEOGetPalette(DODisplayDataPtr *pal, char *name);
 void GEOReleasePalette(DODisplayDataPtr *pal);
 u32 GEOGetUserDataSize(DODisplayDataPtr pal);
 char *GEOGetUserData(DODisplayDataPtr pal);
-void DOGet(struct DODisplayObj **dispObj, DODisplayDataPtr pal, u16 id, char *name);
+// This game's DOGet takes no name: fn_800B4084 leaves r6 unset.
+void DOGet(struct DODisplayObj **dispObj, DODisplayDataPtr pal, u16 id);
 
 // normalTable.c
 extern u8 normalTableQuantizeInfo;

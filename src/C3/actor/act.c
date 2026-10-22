@@ -1,5 +1,8 @@
+#include "Dolphin/os.h"
 #include "C3/act.h"
 #include "static/static_80021188.h"
+
+#define ALIGN32(x) (((x) + 0x1F) & ~0x1F)
 
 typedef struct UnkBF068 {
     /* 0x00 */ u8 _00[8];
@@ -60,6 +63,7 @@ void fn_800B49E4(ActorLayout *layout) {
 }
 
 // .text:0x800B4910 size:0xD4
+// Differs: the target copies the first bone's address from r0 into r4 (one extra mr).
 void LoadActorLayout(ActorLayout *layout) {
     ActorBone *bone;
     u32 i;
@@ -171,7 +175,112 @@ void fn_800B4724(Actor *actor, sHdr *skHeader) {
 }
 
 // .text:0x800B43A0 size:0x384
-void fn_800B43A0(void) {}
+// Differs: registers only, in the allocation size's sum (totalBones loaded into r0, not r4).
+Actor *fn_800B43A0(ActorLayout *layout) {
+    Actor *actor;
+    u32 boneArraySize;
+    u32 forwardSize;
+    u32 skinSize;
+    u32 orientSize;
+    u32 invTransposeSize;
+    u32 vertSize;
+    u16 boneCount;
+    u32 size;
+    sBone *bones;
+    Actor header;
+    Mtx m;
+    u16 compSize;
+    s32 diff;
+
+    skinSize = 0;
+    orientSize = 0;
+    invTransposeSize = 0;
+    vertSize = 0;
+    boneCount = 0;
+    boneArraySize = ALIGN32(layout->totalBones * sizeof(sBone *));
+    forwardSize = ALIGN32(layout->totalBones * sizeof(Mtx));
+    if (layout->skinFileID != 0xFFFF) {
+        DOGet(&header.skinObject, (DODisplayDataPtr)layout->geoPaletteName, layout->skinFileID);
+        size = ALIGN32(layout->totalBones * sizeof(Mtx));
+        skinSize = size;
+        orientSize = size;
+        if (header.skinObject->lightingData != NULL) {
+            invTransposeSize = size;
+        }
+        switch ((u8)(header.skinObject->positionData->quantizeInfo >> 4)) {
+        case 0:
+        case 1:
+            compSize = 1;
+            break;
+        case 2:
+        case 3:
+            compSize = 2;
+            break;
+        case 4:
+            compSize = 4;
+            break;
+        default:
+            compSize = 0;
+            break;
+        }
+        vertSize = ALIGN32(header.skinObject->positionData->numPositions * (header.skinObject->positionData->compCount * compSize));
+    }
+    actor = _OSAllocFromHeap(0x20, sizeof(Actor) + boneArraySize + forwardSize + skinSize + orientSize + vertSize + invTransposeSize + ALIGN32(layout->totalBones * sizeof(sBone)));
+    actor->boneArray = (sBone **)(actor + 1);
+    actor->forwardMtxArray = (MtxPtr)((u8 *)actor->boneArray + boneArraySize);
+    actor->skinObject = header.skinObject;
+    actor->skHeader = NULL;
+    PSMTXIdentity(m);
+    actor->actorID = layout->actorID;
+    actor->layout = layout;
+    actor->totalBones = layout->totalBones;
+    DSInitTree(&actor->hierarchy, (Ptr)(sBone *)NULL, &((sBone *)NULL)->branch);
+    DSInitList(&actor->drawPriorityList, (Ptr)(sBone *)NULL, &((sBone *)NULL)->drawPriorityLink);
+    actor->pal = NULL;
+    if (layout->geoPaletteName != NULL) {
+        actor->pal = (DODisplayDataPtr)layout->geoPaletteName;
+    }
+    if (layout->skinFileID != 0xFFFF) {
+        DOSetWorldMatrix(actor->skinObject, m);
+        actor->skinMtxArray = (MtxPtr)((u8 *)actor->forwardMtxArray + forwardSize);
+        actor->orientationInvMtxArray = (MtxPtr)((u8 *)actor->skinMtxArray + skinSize);
+        diff = actor->skinObject->lightingData->normalArray - actor->skinObject->positionData->positionArray;
+        actor->skinObject->positionData->positionArray = (char *)actor->orientationInvMtxArray + orientSize;
+        actor->skinObject->lightingData->normalArray = actor->skinObject->positionData->positionArray + diff;
+        if (actor->skinObject->lightingData != NULL) {
+            actor->skinInvTransposeMtxArray = (MtxPtr)(actor->skinObject->positionData->positionArray + vertSize);
+        } else {
+            actor->skinInvTransposeMtxArray = NULL;
+        }
+    } else {
+        actor->skinObject = NULL;
+        actor->skinMtxArray = NULL;
+        actor->orientationInvMtxArray = NULL;
+        actor->skinInvTransposeMtxArray = NULL;
+    }
+    bones = (sBone *)((u8 *)actor->forwardMtxArray + forwardSize + skinSize + orientSize + vertSize + invTransposeSize);
+    actor->worldControl.type = 0;
+    if (layout->hierarchy.Root != NULL) {
+        fn_800B4084(NULL, (ActorBone *)layout->hierarchy.Root, actor, &boneCount, bones);
+    }
+    if (boneCount != actor->totalBones) {
+        OSPanic("act.c", 496, "Incorrect number of bones in actor");
+    }
+    if (actor->skinObject != NULL) {
+        f_BuildBoneSkinOrientationMatrix((sBone *)actor->hierarchy.Root, m);
+    }
+    ACTSort(actor);
+    actor->_80 = 0;
+    actor->_82 = 0;
+    actor->_84 = 0;
+    actor->_88 = 0;
+    actor->_8C = 1.0f;
+    actor->_90 = 0.0f;
+    actor->_99 = 0;
+    actor->_98 = 0;
+    actor->_94 = 0;
+    return actor;
+}
 
 // .text:0x800B4278 size:0x128
 void fn_800B4278(Actor *actor) {
@@ -194,10 +303,64 @@ void fn_800B4278(Actor *actor) {
 }
 
 // .text:0x800B4084 size:0x1F4
-void fn_800B4084(void) {}
+void fn_800B4084(sBone *parent, ActorBone *layoutBone, Actor *actor, u16 *index, sBone *boneMem) {
+    sBone *bone;
+
+    while (layoutBone != NULL) {
+        bone = &boneMem[*index];
+        bone->branch.Children = NULL;
+        DSInsertBranchBelow(&actor->hierarchy, (Ptr)parent, (Ptr)bone);
+        actor->boneArray[*index] = bone;
+        bone->boneID = layoutBone->boneID;
+        bone->inheritanceFlag = layoutBone->inheritanceFlag;
+        bone->drawingPriority = layoutBone->drawingPriority;
+        bone->orientationCtrl.type = 0;
+        if (layoutBone->orientationCtrl != NULL) {
+            bone->orientationCtrl = *layoutBone->orientationCtrl;
+        }
+        bone->dispObj = NULL;
+        if (layoutBone->geoFileID != 0xFFFF) {
+            DOGet(&bone->dispObj, actor->pal, layoutBone->geoFileID);
+        }
+        bone->_18 = bone->dispObj;
+        bone->animPipe = NULL;
+        bone->animationCtrl.type = 0;
+        bone->_A4.type = 0;
+        bone->_134 = 1;
+        bone->_136 = 0;
+        bone->_137 = 0;
+        bone->forwardMtx = actor->forwardMtxArray + *index * 3;
+        PSMTXIdentity(bone->forwardMtx);
+        if (actor->skinObject != NULL) {
+            bone->skinMtx = actor->skinMtxArray + *index * 3;
+            PSMTXIdentity(bone->skinMtx);
+            bone->orientationInvMtx = actor->orientationInvMtxArray + *index * 3;
+            PSMTXIdentity(bone->orientationInvMtx);
+            if (actor->skinObject->lightingData != NULL) {
+                bone->skinInvTransposeMtx = actor->skinInvTransposeMtxArray + *index * 3;
+                PSMTXIdentity(bone->skinInvTransposeMtx);
+            } else {
+                bone->skinInvTransposeMtx = NULL;
+            }
+        } else {
+            bone->skinMtx = NULL;
+            bone->orientationInvMtx = NULL;
+            bone->skinInvTransposeMtx = NULL;
+        }
+        (*index)++;
+        if (layoutBone->branch.Children != NULL) {
+            fn_800B4084(bone, (ActorBone *)layoutBone->branch.Children, actor, index, boneMem);
+        }
+        layoutBone = (ActorBone *)layoutBone->branch.Next;
+    }
+}
 
 // .text:0x800B4048 size:0x3C
-void fn_800B4048(void) {}
+BOOL fn_800B4048(Actor **actor, ActorLayout *layout, u16 actorID) {
+    layout->actorID = actorID;
+    *actor = fn_800B43A0(layout);
+    return TRUE;
+}
 
 // .text:0x800B3F20 size:0x128
 void fn_800B3F20(void) {}
@@ -234,7 +397,23 @@ void fn_800B3A78(Actor *actor, MtxPtr camera, u8 numLights, ...) {
 }
 
 // .text:0x800B37A4 size:0x2D4
-void f_BuildBoneSkinOrientationMatrix(void) {}
+void f_BuildBoneSkinOrientationMatrix(sBone *bone, MtxPtr parent) {
+    Mtx m;
+    Mtx world;
+
+    for (; bone != NULL; bone = (sBone *)bone->branch.Next) {
+        if (bone->inheritanceFlag == 1) {
+            CTRLBuildMatrix(&bone->orientationCtrl, m);
+            PSMTXConcat(parent, m, world);
+            PSMTXInverse(world, bone->orientationInvMtx);
+        } else {
+            CTRLBuildInverseMatrix(&bone->orientationCtrl, bone->orientationInvMtx);
+        }
+        if (bone->branch.Children != NULL) {
+            f_BuildBoneSkinOrientationMatrix((sBone *)bone->branch.Children, world);
+        }
+    }
+}
 
 // .text:0x800B34B4 size:0x2F0
 void fn_800B34B4(void) {}
