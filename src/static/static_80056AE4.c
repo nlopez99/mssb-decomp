@@ -2865,11 +2865,11 @@ void challengeCheckStarsMenuLoading(void) {
 }
 
 // .text:0x800572C0 size:0x430
-// 98.06%: the target adds task->_14 and the mission index in the other
-// register order.
+// 99.46%: registers only around the CF97 + 0x45 slot and the mission tracker
+// lookup (the tracker base and the mission offset added the other way round).
 void someChallengeStarFunction2(SpaniTask* task) {
     u8 set;
-    s16 text;
+    u16 text;
 
     if (lbl_803297E0._CF93 == 0) {
         set = lbl_800E8558[lbl_803297E0._CF9C].set;
@@ -2877,25 +2877,25 @@ void someChallengeStarFunction2(SpaniTask* task) {
             getSpaniObj(task, 0x23)->_54 |= 2;
             getSpaniObj(task, 0x23)->_5C = 0;
             getSpaniObj(task, 0x23)->_68 = 1;
-            getSpaniObj(task, lbl_803297E0._CF98 + 0x31)->_54 |= 2;
-            getSpaniObj(task, lbl_803297E0._CF98 + 0x31)->_5C = 0;
-            getSpaniObj(task, lbl_803297E0._CF98 + 0x31)->_68 = 1;
-            getSpaniObj(task, lbl_803297E0._CF98 + 0x45)->_5C = 0x10000;
+            lbl_80371C30[task->_14 + 0x31 + lbl_803297E0._CF98].obj->_54 |= 2;
+            lbl_80371C30[task->_14 + 0x31 + lbl_803297E0._CF98].obj->_5C = 0;
+            lbl_80371C30[task->_14 + 0x31 + lbl_803297E0._CF98].obj->_68 = 1;
+            lbl_80371C30[task->_14 + 0x45 + lbl_803297E0._CF98].obj->_5C = 0x10000;
         } else {
             getSpaniObj(task, 0x23)->_54 &= ~2;
-            getSpaniObj(task, lbl_803297E0._CF98 + 0x31)->_54 &= ~2;
-            getSpaniObj(task, lbl_803297E0._CF98 + 0x45)->_5C = 0;
+            lbl_80371C30[task->_14 + 0x31 + lbl_803297E0._CF98].obj->_54 &= ~2;
+            lbl_80371C30[task->_14 + 0x45 + lbl_803297E0._CF98].obj->_5C = 0;
         }
-        getSpaniObj(task, lbl_803297E0._CF98 + 0x45)->_54 |= 2;
-        getSpaniObj(task, lbl_803297E0._CF98 + 0x45)->_68 = 1;
+        lbl_80371C30[task->_14 + 0x45 + lbl_803297E0._CF98].obj->_54 |= 2;
+        lbl_80371C30[task->_14 + 0x45 + lbl_803297E0._CF98].obj->_68 = 1;
         if (challengeStarRelatedInd(lbl_803297E0._CF9C, lbl_803297E0._CF97)) {
-            getSpaniObj(task, lbl_803297E0._CF97 + 0x31)->_54 &= ~2;
-            getSpaniObj(task, lbl_803297E0._CF97 + 0x27)->_5C = 0;
+            lbl_80371C30[task->_14 + 0x31 + lbl_803297E0._CF97].obj->_54 &= ~2;
+            lbl_80371C30[task->_14 + 0x27 + lbl_803297E0._CF97].obj->_5C = 0;
         } else {
-            getSpaniObj(task, lbl_803297E0._CF97 + 0x27)->_5C = 0;
+            lbl_80371C30[task->_14 + 0x27 + lbl_803297E0._CF97].obj->_5C = 0;
         }
-        getSpaniObj(task, lbl_803297E0._CF97 + 0x45)->_54 &= ~2;
-        getSpaniObj(task, lbl_803297E0._CF97 + 0x45)->_68 = 1;
+        lbl_80371C30[task->_14 + 0x45 + lbl_803297E0._CF97].obj->_54 &= ~2;
+        lbl_80371C30[task->_14 + 0x45 + lbl_803297E0._CF97].obj->_68 = 1;
         if (*(s8*)&starMissionCompletionTracker.characters[lbl_803297E0._CF9C].inGameMissionTracker[lbl_803297E0._CF98].shownOnPauseMenu != 0) {
             text = lbl_8010A768[set][lbl_803297E0._CF98]._0;
         } else if (challengeStarRelatedInd(lbl_803297E0._CF9C, lbl_803297E0._CF98)) {
@@ -2915,8 +2915,8 @@ void someChallengeStarFunction2(SpaniTask* task) {
 }
 
 // .text:0x80056F70 size:0x350
-// 99.62%: registers only where the mission index meets task->_14 and in the
-// mission tracker lookup.
+// 99.81%: registers only in the mission tracker lookup (the tracker base and
+// the mission offset added the other way round).
 void someChallengeStarFunction(SpaniTask* task) {
     s16 set;
     s32 i;
@@ -2936,10 +2936,10 @@ void someChallengeStarFunction(SpaniTask* task) {
             getSpaniObj(task, 0x23)->_54 |= 2;
             getSpaniObj(task, 0x23)->_5C = 0;
             getSpaniObj(task, 0x23)->_68 = 1;
-            getSpaniObj(task, lbl_803297E0._CF98 + 0x31)->_54 |= 2;
-            getSpaniObj(task, lbl_803297E0._CF98 + 0x31)->_5C = 0;
-            getSpaniObj(task, lbl_803297E0._CF98 + 0x31)->_68 = 1;
-            getSpaniObj(task, lbl_803297E0._CF98 + 0x45)->_5C = 0x10000;
+            lbl_80371C30[task->_14 + 0x31 + lbl_803297E0._CF98].obj->_54 |= 2;
+            lbl_80371C30[task->_14 + 0x31 + lbl_803297E0._CF98].obj->_5C = 0;
+            lbl_80371C30[task->_14 + 0x31 + lbl_803297E0._CF98].obj->_68 = 1;
+            lbl_80371C30[task->_14 + 0x45 + lbl_803297E0._CF98].obj->_5C = 0x10000;
         }
         if (*(s8*)&starMissionCompletionTracker.characters[lbl_803297E0._CF9C].inGameMissionTracker[lbl_803297E0._CF98].shownOnPauseMenu != 0) {
             text = lbl_8010A768[set][lbl_803297E0._CF98]._0;
