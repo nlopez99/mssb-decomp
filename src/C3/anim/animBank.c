@@ -56,19 +56,22 @@ struct ANIMAnimTrack *ANIMGetTrackFromSequence(ANIMSequences *animSeq, u16 animT
     return NULL;
 }
 
+static inline int getStartFrame(struct ANIMAnimTrack *animTrack, f32 time, int start) {
+    if (animTrack->keyFrames[start].time <= time) {
+        return start;
+    }
+    return 0;
+}
+
 // .text:0x800B4E9C size:0x100
-// Differs: the target picks the start index in r7 without the copy through r0, then
-// allocates two loop registers differently.
+// Differs: registers only (numFrames - 1 and the index copy swapped between r8 and r9).
 void ANIMGetKeyFrameFromTrack(struct ANIMAnimTrack *animTrack, f32 time, KeyFrame **currentFrame, KeyFrame **nextFrame, u16 *hint) {
     u16 numFrames;
     KeyFrame *frame;
     u16 i;
     u16 count;
-    int start;
 
-    start = *hint;
-    start = (animTrack->keyFrames[start].time <= time) ? start : 0;
-    i = start;
+    i = getStartFrame(animTrack, time, *hint);
     numFrames = animTrack->totalFrames;
     count = numFrames;
     while (count--) {
