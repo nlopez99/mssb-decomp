@@ -52,10 +52,10 @@ typedef struct Actor {
     /* 0x80 */ u16 _80;
     /* 0x82 */ u16 _82;
     /* 0x84 */ u16 _84;
-    /* 0x88 */ u32 _88;
+    /* 0x88 */ u16 *_88;
     /* 0x8C */ f32 _8C;
     /* 0x90 */ f32 _90;
-    /* 0x94 */ u32 _94;
+    /* 0x94 */ BOOL (*_94)(sBone *bone, sBone *other, MtxPtr m, f32 weight);
     /* 0x98 */ u8 _98;
     /* 0x99 */ u8 _99;
     /* 0x9A */ u8 _9A[0xA0 - 0x9A];

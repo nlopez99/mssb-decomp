@@ -15,12 +15,18 @@ struct ANIMAnimTrack {
     /* 0x0F */ u8 replaceHierarchyCtrl;
 };
 
+// This game's ANIMPipe (static/objinit.c's ObjBoneAnim): fn_800B4A44 reads the
+// current track at 0x0C and a flag at 0x17.
 struct ANIMPipe {
     /* 0x00 */ f32 time;
     /* 0x04 */ f32 speed;
-    /* 0x08 */ struct ANIMAnimTrack * currentTrack;
-    /* 0x0C */ struct Control * control;
-    /* 0x10 */ u8 replaceHierarchyCtrl;
+    /* 0x08 */ f32 _08;
+    /* 0x0C */ struct ANIMAnimTrack * currentTrack;
+    /* 0x10 */ struct Control * control;
+    /* 0x14 */ u16 _14;
+    /* 0x16 */ u8 replaceHierarchyCtrl;
+    /* 0x17 */ u8 _17;
+    /* 0x18 */ u8 _18;
 };
 
 typedef struct ANIMSequences {
