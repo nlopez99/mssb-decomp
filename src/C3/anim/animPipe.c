@@ -23,6 +23,7 @@ static inline f32 acosF(f32 x) {
 static inline void QuatSlerp(Quaternion *p, Quaternion *q, Quaternion *r, f32 t) {
     f32 cosom;
     f32 omega;
+    f32 tomega;
     f32 sinom;
     f32 sclp;
     f32 sclq;
@@ -31,9 +32,10 @@ static inline void QuatSlerp(Quaternion *p, Quaternion *q, Quaternion *r, f32 t)
     if ((1.0f + cosom) > 0.000001f) {
         if ((1.0f - cosom) > 0.000001f) {
             omega = acosF(cosom);
+            tomega = t * omega;
             sinom = 1.0f / sinF(omega);
-            sclp = sinom * sinF(omega - t * omega);
-            sclq = sinom * sinF(t * omega);
+            sclp = sinom * sinF(omega - tomega);
+            sclq = sinom * sinF(tomega);
         } else {
             sclp = 1.0f - t;
             sclq = t;
@@ -636,8 +638,8 @@ void GetData(u8 type, void *src, f32 *dst, u8 count, f32 scale) {
 }
 
 // .text:0x800B516C size:0x4A0
-// Differs: the target keeps one more value in a saved float register (f20-f31 against
-// f21-f31), shifting the allocation of the three inlined slerps.
+// Differs: registers only, in the third slerp (omega and t * omega in f20/f22 where this
+// has f21/f20).
 void Squad(Quaternion *p, Quaternion *a, Quaternion *b, Quaternion *q, Quaternion *d, f32 t) {
     Quaternion pq;
     Quaternion ab;
