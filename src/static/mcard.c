@@ -281,8 +281,17 @@ static inline s32 SetAttributes(s32 chan, s32 fileNo, u8 attr, s32 async) {
     return 0;
 }
 
-static BOOL ReadOpening(u8* buf);
-static void BindPalette(TEXPalettePtr pal);
+static inline u16 CalcCrc(s32 len, u8* data) {
+    u16 crc = 0xFFFF;
+
+    while (--len >= 0) {
+        crc = (crc << 8) ^ lbl_800E7800[(u8)(crc >> 8) ^ *data++];
+    }
+    return ~crc;
+}
+
+static inline BOOL ReadOpening(u8* buf);
+static inline void BindPalette(TEXPalettePtr pal);
 
 // .text:0x800ACD64 size:0x1B0
 void fn_800ACD64(s32 result) {
@@ -499,8 +508,7 @@ void fn_800AC508(char* fileName, void* banner, s32 bannerSize, void* icon, u32 i
 }
 
 // .text:0x800ABF44 size:0x5C4
-// The inlined fn_800ABB14 copy swaps its data pointer and length registers (as in fn_800ABBD0),
-// and the SizeOver string's pool offset waits on fn_800AC508's strings.
+// Only the SizeOver string's pool offset differs (see fn_800AC508).
 void fn_800ABF44(void) {
     McardWriteTask* wr;
     CARDStat* stat = &lbl_802EF330;
@@ -519,7 +527,7 @@ void fn_800ABF44(void) {
         buf = wr->buf;
         memcpy(buf, lbl_802EF2F0, 0x40);
         if (!(lbl_803CC160 & 1)) {
-            *(u16*)(buf + 0x40) = fn_800ABB14((u8*)wr->buf + 0x44, wr->size - 0x44);
+            *(u16*)(buf + 0x40) = CalcCrc(wr->size - 0x44, (u8*)wr->buf + 0x44);
         }
         memcpy(lbl_803CC164, wr->buf, wr->size);
         if (stat->commentAddr + wr->size > stat->length) {
@@ -733,7 +741,6 @@ static inline void BindPalette(TEXPalettePtr pal) {
 }
 
 // .text:0x800ABBD0 size:0x374
-// Only the inlined fn_800ABB14 copy differs: its data pointer and length swap registers (r7/r8).
 void fn_800ABBD0(void) {
     CARDStat* stat = &lbl_802EF330;
     McardTask* task = lbl_803CC1B8;
@@ -821,7 +828,7 @@ void fn_800ABBD0(void) {
     case 3:
         if (!(lbl_803CC160 & 1)) {
             buf = io->buf;
-            if (*(u16*)(buf + 0x40) != fn_800ABB14(buf + 0x44, io->size - 0x44)) {
+            if (*(u16*)(buf + 0x40) != CalcCrc(io->size - 0x44, buf + 0x44)) {
                 lbl_803C7838.error = 0xB;
                 task->parent->result = 2;
                 fn_800B0A14_removeQueue();
@@ -851,12 +858,7 @@ void fn_800ABB60(void) {
 
 // .text:0x800ABB14 size:0x4C
 u16 fn_800ABB14(u8* data, s32 len) {
-    u16 crc = 0xFFFF;
-
-    while (--len >= 0) {
-        crc = (crc << 8) ^ lbl_800E7800[(u8)(crc >> 8) ^ *data++];
-    }
-    return ~crc;
+    return CalcCrc(len, data);
 }
 
 // .text:0x800AB534 size:0x5E0
