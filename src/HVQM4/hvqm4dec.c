@@ -251,20 +251,75 @@ void fn_800E156C(u8* dst, s32 stride, u8 value, u8 top, u8 bottom, u8 left, u8 r
 }
 
 // .text:0x800E1708 size:0x4AC
-void fn_800E1708(void) {
-}
-
-// .text:0x800E1BB4 size:0x4EC
-void fn_800E1BB4(void) {
-}
-
-// .text:0x800E20A0 size:0x270
-s32 fn_800E20A0(VideoState* state, s32* result, u8 count, u8* nest, u32 nest_stride, s32 plane_idx) {
+s32 fn_800E1708(VideoState* state, u8* basis, s32* bits, u8* nest, u32 nest_stride, s32 plane_idx) {
     return 0;
 }
 
+// .text:0x800E1BB4 size:0x4EC
+s32 fn_800E1BB4(VideoState* state, u8* basis, s32* bits, u8* nest, u32 nest_stride, s32 plane_idx) {
+    return 0;
+}
+
+// .text:0x800E20A0 size:0x270
+// the target puts bits at sp+0x34 above basis (sp+0x24); this build puts it at sp+0x20
+s32 fn_800E20A0(VideoState* state, s32* result, u8 count, u8* nest, u32 nest_stride, s32 plane_idx) {
+    u8 basis[16];
+    s32 bits = 0;
+
+    result[0] = result[1] = result[2] = result[3] = result[4] = result[5] = result[6] = result[7] = result[8] =
+        result[9] = result[10] = result[11] = result[12] = result[13] = result[14] = result[15] = 0;
+    while (count--) {
+        s32 factor = fn_800E1708(state, basis, &bits, nest, nest_stride, plane_idx);
+        result[0] += factor * basis[0];
+        result[1] += factor * basis[1];
+        result[2] += factor * basis[2];
+        result[3] += factor * basis[3];
+        result[4] += factor * basis[4];
+        result[5] += factor * basis[5];
+        result[6] += factor * basis[6];
+        result[7] += factor * basis[7];
+        result[8] += factor * basis[8];
+        result[9] += factor * basis[9];
+        result[10] += factor * basis[10];
+        result[11] += factor * basis[11];
+        result[12] += factor * basis[12];
+        result[13] += factor * basis[13];
+        result[14] += factor * basis[14];
+        result[15] += factor * basis[15];
+    }
+    return (result[0] + result[1] + result[2] + result[3] + result[4] + result[5] + result[6] + result[7] + result[8] +
+            result[9] + result[10] + result[11] + result[12] + result[13] + result[14] + result[15]) >> 4;
+}
+
 // .text:0x800E2310 size:0x270
-void fn_800E2310(void) {
+// the target puts bits at sp+0x34 above basis (sp+0x24); this build puts it at sp+0x20
+s32 fn_800E2310(VideoState* state, s32* result, u8 count, u8* nest, u32 nest_stride, s32 plane_idx) {
+    u8 basis[16];
+    s32 bits = 0;
+
+    result[0] = result[1] = result[2] = result[3] = result[4] = result[5] = result[6] = result[7] = result[8] =
+        result[9] = result[10] = result[11] = result[12] = result[13] = result[14] = result[15] = 0;
+    while (count--) {
+        s32 factor = fn_800E1BB4(state, basis, &bits, nest, nest_stride, plane_idx);
+        result[0] += factor * basis[0];
+        result[1] += factor * basis[1];
+        result[2] += factor * basis[2];
+        result[3] += factor * basis[3];
+        result[4] += factor * basis[4];
+        result[5] += factor * basis[5];
+        result[6] += factor * basis[6];
+        result[7] += factor * basis[7];
+        result[8] += factor * basis[8];
+        result[9] += factor * basis[9];
+        result[10] += factor * basis[10];
+        result[11] += factor * basis[11];
+        result[12] += factor * basis[12];
+        result[13] += factor * basis[13];
+        result[14] += factor * basis[14];
+        result[15] += factor * basis[15];
+    }
+    return (result[0] + result[1] + result[2] + result[3] + result[4] + result[5] + result[6] + result[7] + result[8] +
+            result[9] + result[10] + result[11] + result[12] + result[13] + result[14] + result[15]) >> 4;
 }
 
 // .text:0x800E2580 size:0x318
