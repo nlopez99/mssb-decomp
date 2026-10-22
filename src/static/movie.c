@@ -3,9 +3,11 @@
 #include "string.h"
 
 typedef struct MoviePlayer {
-    /* 0x000 */ u8 _000[0x1A0];
+    /* 0x000 */ u8 _000[0x198];
+    /* 0x198 */ OSTime pausedTime;
     /* 0x1A0 */ OSTime startTime;
-    /* 0x1A8 */ u8 _1A8[0x1BA - 0x1A8];
+    /* 0x1A8 */ u8 _1A8[0x1B9 - 0x1A8];
+    /* 0x1B9 */ u8 _1B9;
     /* 0x1BA */ u8 flags;
 } MoviePlayer;
 
@@ -46,6 +48,7 @@ extern u8 lbl_803CC17C;
 extern u8 lbl_803CC17D;
 extern u8 lbl_803CC17F;
 extern s32 lbl_803CC19C;
+extern void* lbl_803CC170;
 
 extern void fn_800A63C8(void);
 
@@ -198,7 +201,19 @@ void fn_800AD9F4(void) {
 }
 
 // .text:0x800AD95C size:0x98
-void fn_800AD95C(void) {
+void fn_800AD95C(MoviePlayer* player, u8 arg) {
+    u8 flags;
+
+    if (player != NULL) {
+        flags = player->flags;
+        if (flags == 0 || flags == 4) {
+            player->_1B9 = arg;
+            OSSendMessage(&lbl_802FB870, (OSMessage)1, OS_MESSAGE_NOBLOCK);
+        } else if (flags & 2) {
+            player->flags = 1;
+            player->pausedTime += OSGetTime() - player->startTime;
+        }
+    }
 }
 
 // .text:0x800AD914 size:0x48
@@ -214,7 +229,16 @@ void fn_800AD830(void) {
 }
 
 // .text:0x800AD780 size:0xB0
-void fn_800AD780(void) {
+s32 fn_800AD780(MoviePlayer* player) {
+    u32 status = fn_800AD490(player);
+
+    if (status == 0) {
+        return 1;
+    }
+    if (status == 4 && lbl_803CC170 == NULL) {
+        return 1;
+    }
+    return 0;
 }
 
 // .text:0x800AD6BC size:0xC4
@@ -226,7 +250,6 @@ void fn_800AD500(void) {
 }
 
 // .text:0x800AD490 size:0x70
-// 87.14%: the base hoists the final clrlwi above the flags & 2 test (beqlr).
 u32 fn_800AD490(MoviePlayer* player) {
     u8 flags;
     s8 error;
@@ -249,9 +272,11 @@ u32 fn_800AD490(MoviePlayer* player) {
     }
     if (flags & 2) {
         return flags & 0x12;
-    } else {
-        return flags & 1;
     }
+    if (flags & 1) {
+        return 1;
+    }
+    return 0;
 }
 
 // .text:0x800AD070 size:0x420
