@@ -1,0 +1,62 @@
+#ifndef _C3_STATIC_800BDE8C_H_
+#define _C3_STATIC_800BDE8C_H_
+
+#include "C3/charPipeline.h"
+#include "C3/static_800BD478.h"
+
+typedef struct ShadowEntry {
+    /* 0x00 */ u8 _00[0x34];
+    /* 0x34 */ Vec pos;
+    /* 0x40 */ Mtx view;
+    /* 0x70 */ u8 _70[0xB0 - 0x70];
+    /* 0xB0 */ Mtx mtx;
+} ShadowEntry; // size: 0xE0
+
+typedef void (*ShadowCallback)(ActorSlot* slot, MtxPtr view);
+
+typedef struct ShadowRange {
+    /* 0x00 */ f32 min;
+    /* 0x04 */ f32 max;
+} ShadowRange;
+
+typedef struct ShadowState {
+    /* 0x00 */ u8 enabled;
+    /* 0x01 */ u8 _01[0x8 - 0x1];
+    /* 0x08 */ GXTexObj* texObj;
+    /* 0x0C */ GXTlutObj* tlut;
+    /* 0x10 */ u8 _10[0x14 - 0x10];
+    /* 0x14 */ ShadowEntry* entries;
+    /* 0x18 */ void* _18;
+    /* 0x1C */ ShadowCallback _1C;
+    /* 0x20 */ void* _20;
+    /* 0x24 */ u16 _24;
+    /* 0x26 */ u8 _26[2];
+    /* 0x28 */ ShadowRange range[3];
+    /* 0x40 */ Vec center;
+    /* 0x4C */ u8 _4C;
+    /* 0x4D */ s8 _4D;
+} ShadowState; // size: 0x50
+
+void fn_800BDE8C(u32 arg0);
+void fn_800BDEA0(void);
+void fn_800BDF70(ActorSlot* slot);
+void fn_800BDFE0(void);
+void fn_800BE09C(void);
+void fn_800BE158(void);
+void fn_800BE498(void);
+void fn_800BEA04(void);
+void fn_800BEB3C(void);
+MtxPtr fn_800BEB80(u8 index);
+u8 fn_800BEBA0(void);
+u8 GetDrawShadows(void);
+void DrawShadows(u8 enable);
+void fn_800BEBCC(u8 index, Vec pos);
+void fn_800BEC00(s32 arg0);
+void fn_800BEC30(void);
+void fn_800BF008(void);
+void fn_800BF038(void* arg0);
+void fn_800BF048(void* arg0);
+void fn_800BF058(ShadowCallback arg0);
+ShadowState* fn_800BF068(void);
+
+#endif // _C3_STATIC_800BDE8C_H_
