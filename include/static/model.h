@@ -88,7 +88,7 @@ void QueueCharacterAnimation(s32 idx, int anim, int a, int b, int c, int d, int 
 void AnimateCharacter(s32 idx, int anim, int a, u8 mode, int b, int c, int d, int e);
 void fn_8001BA44(int idx, int anim, u8 loop, u8 noRoot, s16 frame, u8 mirror, u8 blend);
 void fn_8001BE50(int idx, int anim, u8 loop, u8 noRoot, s16 frame, u8 mirror, u8 blend);
-void fn_8001C234(void);
+void fn_8001C234(u32* done);
 void fn_8001C528(void);
 BOOL fn_8001C588(int id);
 int fn_8001C67C_animation(int, int);
