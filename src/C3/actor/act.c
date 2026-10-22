@@ -25,6 +25,8 @@ typedef struct ActorDraw {
 
 extern UnkBF068 *fn_800BF068(void);
 extern BOOL fn_800B7D3C(s32 arg, Vec *corners, Mtx mtx);
+extern void fn_800BEA04(Vec pos);
+extern s32 lbl_803CC1E8;
 extern void fn_800B84AC(Control *control, Control *r3, Control *r4, f32 weight);
 extern void CTRLBuildMatrix_FlipY(Control *control, Mtx m);
 extern void CTRLBuildMatrix_FlipX(Control *control, Mtx m);
@@ -407,7 +409,111 @@ void fn_800B3F20(Actor *actor) {
 }
 
 // .text:0x800B3C04 size:0x31C
-void fn_800B3C04(void) {}
+u8 fn_800B3C04(s32 arg, Actor *actor, Mtx camera) {
+    sBone *bone = (sBone *)actor->drawPriorityList.Head;
+    u8 result = 0;
+    struct DODisplayObj *obj;
+    Vec center = { 0.0f, 0.0f, 0.0f };
+    Mtx m;
+    Vec corners[8];
+
+    if (actor->skinObject != NULL) {
+        PSMTXCopy(actor->forwardMtxArray + actor->_84 * 3, m);
+        PSMTXMultVec(m, &center, &center);
+        PSMTXConcat(camera, m, m);
+        obj = actor->skinObject;
+        corners[0].x = 1.2f * obj->xMax;
+        corners[0].y = obj->yMax - center.y;
+        corners[0].z = 1.2f * obj->zMin;
+        corners[1].x = 1.2f * obj->xMin;
+        corners[1].y = obj->yMax - center.y;
+        corners[1].z = 1.2f * obj->zMin;
+        corners[2].x = 1.2f * obj->xMin;
+        corners[2].y = obj->yMax - center.y;
+        corners[2].z = 1.2f * obj->zMax;
+        corners[3].x = 1.2f * obj->xMax;
+        corners[3].y = obj->yMax - center.y;
+        corners[3].z = 1.2f * obj->zMax;
+        corners[4].x = 1.2f * obj->xMax;
+        corners[4].y = obj->yMin - center.y;
+        corners[4].z = 1.2f * obj->zMin;
+        corners[5].x = 1.2f * obj->xMin;
+        corners[5].y = obj->yMin - center.y;
+        corners[5].z = 1.2f * obj->zMin;
+        corners[6].x = 1.2f * obj->xMin;
+        corners[6].y = obj->yMin - center.y;
+        corners[6].z = 1.2f * obj->zMax;
+        corners[7].x = 1.2f * obj->xMax;
+        corners[7].y = obj->yMin - center.y;
+        corners[7].z = 1.2f * obj->zMax;
+        if (fn_800B7D3C(arg, corners, m) != 0) {
+            if (actor->_98 & 0x24) {
+                fn_800BEA04(center);
+            }
+            return 3;
+        }
+        corners[0].x = -2.0f;
+        corners[0].z = 2.0f;
+        corners[1].x = 2.0f;
+        corners[1].z = 2.0f;
+        corners[2].x = 2.0f;
+        corners[2].z = -2.0f;
+        corners[3].x = -2.0f;
+        corners[3].z = -2.0f;
+        corners[4].x = -2.0f;
+        corners[4].z = 2.0f;
+        corners[5].x = 2.0f;
+        corners[5].z = 2.0f;
+        corners[6].x = 2.0f;
+        corners[6].z = -2.0f;
+        corners[7].x = -2.0f;
+        corners[7].z = -2.0f;
+        if (fn_800B7D3C(arg, corners, m) != 0) {
+            result = 2;
+        }
+    }
+    for (; bone != NULL; bone = (sBone *)bone->drawPriorityLink.Next) {
+        obj = bone->dispObj;
+        if (obj != NULL) {
+            corners[0].x = obj->xMax;
+            corners[0].y = obj->yMax;
+            corners[0].z = obj->zMin;
+            corners[1].x = obj->xMin;
+            corners[1].y = obj->yMax;
+            corners[1].z = obj->zMin;
+            corners[2].x = obj->xMin;
+            corners[2].y = obj->yMax;
+            corners[2].z = obj->zMax;
+            corners[3].x = obj->xMax;
+            corners[3].y = obj->yMax;
+            corners[3].z = obj->zMax;
+            corners[4].x = obj->xMax;
+            corners[4].y = obj->yMin;
+            corners[4].z = obj->zMin;
+            corners[5].x = obj->xMin;
+            corners[5].y = obj->yMin;
+            corners[5].z = obj->zMin;
+            corners[6].x = obj->xMin;
+            corners[6].y = obj->yMin;
+            corners[6].z = obj->zMax;
+            corners[7].x = obj->xMax;
+            corners[7].y = obj->yMin;
+            corners[7].z = obj->zMax;
+            PSMTXConcat(camera, obj->worldMatrix, m);
+            if (fn_800B7D3C(arg, corners, m) != 0) {
+                if (actor->_98 & 0x24) {
+                    PSMTXMultVec(obj->worldMatrix, &center, &center);
+                    fn_800BEA04(center);
+                }
+                return 3;
+            }
+        }
+    }
+    if (result != 0 && (actor->_98 & 4)) {
+        fn_800BEA04(center);
+    }
+    return result;
+}
 
 // .text:0x800B3A78 size:0x18C
 void fn_800B3A78(Actor *actor, MtxPtr camera, u8 numLights, ...) {
@@ -528,10 +634,178 @@ void fn_800B34B4(Actor *actor, sBone *bone, MtxPtr parentMtx) {
 }
 
 // .text:0x800B313C size:0x378
-void fn_800B313C(void) {}
+void fn_800B313C(Actor *actor) {
+    f32 weight;
+    sBone *bone;
+    u16 i;
+    sBone *other;
+    sBone *parent;
+    Control ctrl;
+    Mtx world;
+    Mtx m;
+    Mtx orient;
+    Mtx rot;
+
+    lbl_803CC1E8 = actor->_99;
+    CTRLBuildMatrix(&actor->worldControl, world);
+    if (actor->_88 != NULL) {
+        PSMTXConcat(world, lbl_80111640, world);
+    }
+    for (i = 0; i < actor->totalBones; i++) {
+        bone = actor->boneArray[i];
+        weight = getBoneWeight(bone->_134, actor->_8C);
+        if (bone->_134 & 0x20) {
+            if (bone->_134 & 4) {
+                bone->_A4.controlParams.srt.t.x = bone->animationCtrl.controlParams.srt.t.x;
+            }
+            if (bone->_134 & 8) {
+                bone->_A4.controlParams.srt.t.y = bone->animationCtrl.controlParams.srt.t.y;
+            }
+            if (bone->_134 & 0x10) {
+                bone->_A4.controlParams.srt.t.z = bone->animationCtrl.controlParams.srt.t.z;
+            }
+        }
+        if (bone->animationCtrl.type != 0) {
+            if (actor->_88 == NULL) {
+                fn_800B84AC(&bone->animationCtrl, &bone->_A4, &bone->animationCtrl, weight);
+                CTRLBuildMatrix(&bone->animationCtrl, m);
+            } else if (actor->_94 == NULL || !actor->_94(bone, actor->boneArray[actor->_88[i]], m, weight)) {
+                other = actor->boneArray[actor->_88[i]];
+                fn_800B84AC(&other->animationCtrl, &other->_A4, &other->animationCtrl, weight);
+                if (bone->branch.Parent != NULL) {
+                    CTRLBuildMatrix_FlipY(&other->animationCtrl, m);
+                } else {
+                    CTRLBuildMatrix_FlipX(&other->animationCtrl, m);
+                }
+                switch (bone->_137) {
+                case 1:
+                    PSMTXRotRad(rot, 'X', 3.1415927f);
+                    PSMTXConcat(m, rot, m);
+                    break;
+                case 2:
+                    PSMTXRotRad(rot, 'Y', 3.1415927f);
+                    PSMTXConcat(m, rot, m);
+                    break;
+                case 3:
+                    PSMTXRotRad(rot, 'Z', 3.1415927f);
+                    PSMTXConcat(m, rot, m);
+                    break;
+                }
+            }
+            if (bone->animPipe->replaceHierarchyCtrl == 0) {
+                CTRLBuildMatrix(&bone->orientationCtrl, orient);
+                PSMTXConcat(orient, m, m);
+            }
+        } else {
+            fn_800B84AC(&ctrl, &bone->_A4, &bone->orientationCtrl, weight);
+            CTRLBuildMatrix(&ctrl, m);
+        }
+        parent = (sBone *)bone->branch.Parent;
+        if (bone->inheritanceFlag == 1 && parent != NULL) {
+            PSMTXConcat(parent->forwardMtx, m, bone->forwardMtx);
+        } else {
+            PSMTXConcat(world, m, bone->forwardMtx);
+        }
+        if (bone->dispObj != NULL) {
+            DOSetWorldMatrix(bone->dispObj, bone->forwardMtx);
+        }
+        if (actor->skinObject != NULL) {
+            PSMTXConcat(bone->forwardMtx, bone->orientationInvMtx, bone->skinMtx);
+            if (actor->skinObject->lightingData != NULL) {
+                PSMTXInverse(bone->skinMtx, m);
+                PSMTXTranspose(m, bone->skinInvTransposeMtx);
+            }
+        }
+    }
+}
 
 // .text:0x800B2DD0 size:0x36C
-void fn_800B2DD0(void) {}
+// Differs: prologue scheduling only, as in fn_800B34B4. parentMtx is read uninitialized,
+// as in the target.
+void fn_800B2DD0(Actor *actor, sBone *bone) {
+    f32 weight;
+    u16 i;
+    sBone *other;
+    sBone *child;
+    sBone *parent;
+    Control ctrl;
+    Mtx parentMtx;
+    Mtx m;
+    Mtx orient;
+    Mtx rot;
+
+    weight = getBoneWeight(bone->_134, actor->_8C);
+    if (bone->_134 & 0x20) {
+        if (bone->_134 & 4) {
+            bone->_A4.controlParams.srt.t.x = bone->animationCtrl.controlParams.srt.t.x;
+        }
+        if (bone->_134 & 8) {
+            bone->_A4.controlParams.srt.t.y = bone->animationCtrl.controlParams.srt.t.y;
+        }
+        if (bone->_134 & 0x10) {
+            bone->_A4.controlParams.srt.t.z = bone->animationCtrl.controlParams.srt.t.z;
+        }
+    }
+    if (bone->animationCtrl.type != 0) {
+        if (actor->_88 == NULL) {
+            fn_800B84AC(&bone->animationCtrl, &bone->_A4, &bone->animationCtrl, weight);
+            CTRLBuildMatrix(&bone->animationCtrl, m);
+        } else if (actor->_94 == NULL || !actor->_94(bone, actor->boneArray[actor->_88[0]], m, weight)) {
+            for (i = 0; i < actor->totalBones; i++) {
+                if (bone->boneID == actor->boneArray[i]->boneID) {
+                    other = actor->boneArray[actor->_88[i]];
+                    break;
+                }
+            }
+            fn_800B84AC(&other->animationCtrl, &other->_A4, &other->animationCtrl, weight);
+            if (bone->branch.Parent != NULL) {
+                CTRLBuildMatrix_FlipY(&other->animationCtrl, m);
+            } else {
+                CTRLBuildMatrix_FlipX(&other->animationCtrl, m);
+            }
+            switch (bone->_137) {
+            case 1:
+                PSMTXRotRad(rot, 'X', 3.1415927f);
+                PSMTXConcat(m, rot, m);
+                break;
+            case 2:
+                PSMTXRotRad(rot, 'Y', 3.1415927f);
+                PSMTXConcat(m, rot, m);
+                break;
+            case 3:
+                PSMTXRotRad(rot, 'Z', 3.1415927f);
+                PSMTXConcat(m, rot, m);
+                break;
+            }
+        }
+        if (bone->animPipe->replaceHierarchyCtrl == 0) {
+            CTRLBuildMatrix(&bone->orientationCtrl, orient);
+            PSMTXConcat(orient, m, m);
+        }
+    } else {
+        fn_800B84AC(&ctrl, &bone->_A4, &bone->orientationCtrl, weight);
+        CTRLBuildMatrix(&ctrl, m);
+    }
+    parent = (sBone *)bone->branch.Parent;
+    if (bone->inheritanceFlag == 1 && parent != NULL) {
+        PSMTXConcat(parent->forwardMtx, m, bone->forwardMtx);
+    } else {
+        PSMTXConcat(parentMtx, m, bone->forwardMtx);
+    }
+    if (bone->dispObj != NULL) {
+        DOSetWorldMatrix(bone->dispObj, bone->forwardMtx);
+    }
+    if (actor->skinObject != NULL) {
+        PSMTXConcat(bone->forwardMtx, bone->orientationInvMtx, bone->skinMtx);
+        if (actor->skinObject->lightingData != NULL) {
+            PSMTXInverse(bone->skinMtx, m);
+            PSMTXTranspose(m, bone->skinInvTransposeMtx);
+        }
+    }
+    for (child = (sBone *)bone->branch.Children; child != NULL; child = (sBone *)child->branch.Next) {
+        fn_800B2DD0(actor, child);
+    }
+}
 
 // .text:0x800B2D5C size:0x74
 void fn_800B2D5C(Actor *actor) {
