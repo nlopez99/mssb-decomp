@@ -686,6 +686,7 @@ config.libs = [
         "objects": [
             Object(NonMatching, "C3/control/control.c", extra_cflags=["-inline deferred"]),
             Object(NonMatching, "C3/geoPalette/DisplayObject.c"),
+            Object(NonMatching, "C3/light/light.c"),
         ],
     },
     MusyxLib(

@@ -1095,6 +1095,12 @@ C3/geoPalette/DisplayObject.c:
 	.sbss       start:0x803CC1F0 end:0x803CC228
 	.sdata2     start:0x803CCFF8 end:0x803CD058
 
+C3/light/light.c:
+	extab       start:0x80006B80 end:0x80006B98
+	extabindex  start:0x80008CA0 end:0x80008CC4
+	.text       start:0x800BD300 end:0x800BD478
+	.sdata2     start:0x803CD058 end:0x803CD060
+
 Musyx/seq.c:
 	.text       start:0x800C0A8C end:0x800C4AB4
 	.data       start:0x801123A8 end:0x801123F8
