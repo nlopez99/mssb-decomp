@@ -5,12 +5,43 @@
 
 typedef void (*DOEnvCallback)(GXTevStageID stage, s32 arg1, s32 arg2, GXTexCoordID coord, GXTexMapID map);
 
-struct DOUserTevData {
-    /* 0x00 */ u8 _00[0x20];
-    /* 0x20 */ f32 _20;
-    /* 0x24 */ f32 _24;
-};
-typedef struct DOUserTevData DOUserTevData;
+// An entry of this game's texture palettes
+typedef struct DOTexHeader {
+    /* 0x00 */ void* image;
+    /* 0x04 */ void* tlut;
+    /* 0x08 */ u16 height;
+    /* 0x0A */ u16 width;
+    /* 0x0C */ u8 _0C[2];
+    /* 0x0E */ u8 minFilter;
+    /* 0x0F */ u8 magFilter;
+    /* 0x10 */ f32 lodBias;
+    /* 0x14 */ u8 _14;
+    /* 0x15 */ u8 minLOD;
+    /* 0x16 */ u8 maxLOD;
+    /* 0x17 */ u8 format;
+    /* 0x18 */ u16 tlutEntries;
+    /* 0x1A */ u8 tlutFormat;
+    /* 0x1B */ u8 _1B;
+    /* 0x1C */ u16 index;
+    /* 0x1E */ u8 _1E[2];
+} DOTexHeader; // size: 0x20
+
+typedef struct DOTexPalette {
+    /* 0x00 */ u32 _00;
+    /* 0x04 */ DOTexHeader entries[1];
+} DOTexPalette;
+
+typedef struct DOState {
+    /* 0x00 */ u8 _00;
+    /* 0x01 */ u8 _01;
+    /* 0x02 */ u16 flags;
+    /* 0x04 */ u32 tevModes;
+    /* 0x08 */ u8 _08[4];
+    /* 0x0C */ u32 scale;
+} DOState;
+
+typedef void (*DOTevCallback)(struct DODisplayObj* dispObj, GXTevStageID* stage, GXTexCoordID* coord, GXTexMapID* map, u8* numStages, u8* numTexGens, MtxPtr camera);
+typedef void (*DOShadowCallback)(MtxPtr m, GXTevStageID* stage, GXTexCoordID* coord, GXTexMapID* map, u8* numStages, u8* numTexGens);
 
 // The layout in this game's geometry palettes: the SDK's DODisplayLayout with more fields after it.
 typedef struct DOLayout {
@@ -32,7 +63,7 @@ typedef struct DOLayout {
 } DOLayout; // size: 0x34
 
 void fn_800B993C(void);
-void fn_800B9948(s32 arg0);
+void fn_800B9948(DOTevCallback arg0);
 void fn_800B9950(u32 flags, f32 arg1, f32 arg2);
 void fn_800B996C(DOEnvCallback arg0);
 void SetFogNone(void);
@@ -40,15 +71,15 @@ void SetFog(GXFogType type, f32 startz, f32 endz, f32 nearz, f32 farz, GXColor c
 void SetFogNoneAgain(void);
 void fn_800B9A9C(u32 arg0, f32 arg1);
 void fn_800B9AA8(Light* light);
-s32 fn_800B9AB0(u32 mode, struct DODisplayObj* dispObj, u8* setting, GXTevStageID* stage, GXTexCoordID* coord, GXTexMapID* map, GXChannelID* chan, MtxPtr camera);
-s32 fn_800B9EA8(u32 mode, struct DODisplayObj* dispObj, u8* setting, GXTevStageID* stage, GXTexCoordID* coord, GXTexMapID* map, GXChannelID* chan, MtxPtr camera);
-void DODefaultUserTevMode(s32 mode, struct DODisplayObj* dispObj, DOUserTevData* data, u8* numTexGens, u8* numStages);
-void Custom_SetState(void);
-void SetState(void);
+s32 fn_800B9AB0(u32 mode, struct DODisplayObj* dispObj, DOState* state, GXTevStageID* stage, GXTexCoordID* coord, GXTexMapID* map, GXChannelID* chan, MtxPtr camera);
+s32 fn_800B9EA8(u32 mode, struct DODisplayObj* dispObj, DOState* state, GXTevStageID* stage, GXTexCoordID* coord, GXTexMapID* map, GXChannelID* chan, MtxPtr camera);
+void DODefaultUserTevMode(s32 mode, struct DODisplayObj* dispObj, MtxPtr camera, u8* numTexGens, u8* numStages);
+void Custom_SetState(struct DODisplayObj* dispObj, DOState* state, MtxPtr camera);
+void SetState(DisplayStateList* state, struct DODisplayObj* dispObj, MtxPtr camera);
 void GetColorFromQuant(void* color, u32 quantizeInfo, u8* r, u8* g, u8* b, u8* a);
 void DOVARender(struct DODisplayObj *dispObj, MtxPtr camera, u8 numLights, va_list *list);
 void DOVARenderSkin(struct DODisplayObj *dispObj, MtxPtr camera, MtxPtr mtxArray, MtxPtr invTransposeMtxArray, u8 numLights, va_list *list);
-void fn_800BC824(struct DODisplayObj* dispObj, void* arg1);
+void fn_800BC824(struct DODisplayObj* dispObj, GXTexObj* texObj);
 void DOSetWorldMatrix(struct DODisplayObj *dispObj, MtxPtr m);
 void InitDisplayObjWithLayout(struct DODisplayObj* dispObj, DOLayout* layout);
 void DOGet(struct DODisplayObj **dispObj, DODisplayDataPtr pal, u16 id, char *name);
@@ -58,7 +89,7 @@ void fn_800BCDBC(DODisplayDataPtr pal);
 void fn_800BCE38(DODisplayDataPtr pal);
 void* fn_800BCEF8(DOLayout* layout, struct DODisplayObj* dispObj);
 void fn_800BD190(DODisplayDataPtr pal, TEXPalettePtr tex);
-void fn_800BD1E8(s32 arg0);
+void fn_800BD1E8(DOShadowCallback arg0);
 void __MTGQR5(register u32 val);
 void __MTGQR6(register u32 val);
 void __MTGQR7(register u32 val);

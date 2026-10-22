@@ -57,7 +57,7 @@ typedef struct {
 
 // This game's display object is 0x6C bytes: worldMatrix sits at 0x18 (DOSetWorldMatrix),
 // and InitDisplayObjWithLayout copies six more words from the layout after the shader.
-typedef void (*DOUserTevModeFunc)(s32 mode, struct DODisplayObj *dispObj, struct DOUserTevData *data, u8 *numTexGens, u8 *numStages);
+typedef void (*DOUserTevModeFunc)(s32 mode, struct DODisplayObj *dispObj, MtxPtr camera, u8 *numTexGens, u8 *numStages);
 
 struct DODisplayObj {
     /* 0x00 */ PositionData *positionData;
@@ -71,8 +71,8 @@ struct DODisplayObj {
     /* 0x17 */ u8 overrideTevMode;
     /* 0x18 */ Mtx worldMatrix;
     /* 0x48 */ DOUserTevModeFunc userTevMode;
-    /* 0x4C */ unkCB shaderFunc;
-    /* 0x50 */ void *shaderData;
+    /* 0x4C */ GXTexObj *envTexObj;
+    /* 0x50 */ GXTexObj *projTexObj;
     /* 0x54 */ u8 _54[4];
     /* 0x58 */ u8 _58[4];
     /* 0x5C */ u8 _5C[4];
