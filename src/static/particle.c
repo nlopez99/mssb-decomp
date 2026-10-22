@@ -1230,8 +1230,8 @@ static inline void stepDrift(DriftParticle* p)
 }
 
 // .text:0x800328E0 size:0x7EC
-// 99.82%: registers only, in the respawn's two lookups of a: the target puts the first index
-// in r0 and the second in r6 (r4 and r0 here); call and written-out forms change nothing.
+// 99.85%: registers only, in the respawn's second lookup of a: the target computes a + 0x600
+// and its absolute value in r6 (r3 here); __abs, abs and hand-written forms change nothing.
 BOOL fn_800328E0(void* arg)
 {
     ArcEmitter* e = arg;
@@ -1297,7 +1297,8 @@ BOOL fn_800328E0(void* arg)
                 i = 0x800 - i;
             }
             c1 = lbl_8017ED68[i];
-            i = __abs(a + 0x600) & 0x7FF;
+            i = __abs(a + 0x600);
+            i &= 0x7FF;
             if (i >= 0x401) {
                 i = 0x800 - i;
             }
@@ -3328,9 +3329,9 @@ void fn_8002955C(Vec* pos, Vec* dir, PuffParams* params)
 }
 
 // .text:0x80028F48 size:0x614
-// 99.81%: registers only: the target gives the two table lookups other scratch registers
-// (r0, r6), the residue fn_800332B8's yaw lookups show too. Helper forms (__abs, param reuse,
-// nested calls) and which lookup is written out did not change it.
+// 99.83%: registers only: the target gives the two table lookups other scratch registers
+// (r0, r6), the residue fn_800332B8's and fn_800328E0's lookups show too. Writing the second
+// as `i = __abs(ang + 0x600); i &= 0x7FF;` gained a little; no form tried reaches r0/r6.
 BOOL fn_80028F48(void* arg)
 {
     Emitter* e = arg;
@@ -3430,7 +3431,12 @@ BOOL fn_80028F48(void* arg)
                 i = 0x800 - i;
             }
             c = s * lbl_8017ED68[i];
-            s *= fn_800335EC(ang);
+            i = __abs(ang + 0x600);
+            i &= 0x7FF;
+            if (i >= 0x401) {
+                i = 0x800 - i;
+            }
+            s *= lbl_8017ED68[i];
             GXBegin(GX_QUADS, GX_VTXFMT0, 4);
             GXPosition3f32(v.x + c, v.y + s, v.z);
             GXColor1u32(p->_34);
