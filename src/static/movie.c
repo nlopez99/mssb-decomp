@@ -2,6 +2,7 @@
 #include "Dolphin/ar.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/os.h"
+#include "Dolphin/mtx.h"
 #include "static/dvdsys.h"
 #include "static/static_800ACF14.h"
 #include "string.h"
@@ -43,7 +44,11 @@ typedef struct MoviePlayer {
     /* 0x178 */ u8 _178[0x198 - 0x178];
     /* 0x198 */ OSTime pausedTime;
     /* 0x1A0 */ OSTime startTime;
-    /* 0x1A8 */ u8 _1A8[0x1B8 - 0x1A8];
+    /* 0x1A8 */ u8 _1A8[0x1B0 - 0x1A8];
+    /* 0x1B0 */ u16 dispWidth;
+    /* 0x1B2 */ u16 dispHeight;
+    /* 0x1B4 */ s16 dispY;
+    /* 0x1B6 */ s16 dispX;
     /* 0x1B8 */ u8 _1B8;
     /* 0x1B9 */ u8 _1B9;
     /* 0x1BA */ u8 flags;
@@ -120,6 +125,13 @@ extern u32 lbl_803CC1AC;
 extern OSThread lbl_802FB220;
 
 extern void fn_800A63C8(void);
+extern Mtx44 lbl_802FB1E0;
+extern s16* lbl_803CBB00[2];
+extern u8 lbl_801112C0[0x20];
+extern f32 lbl_803CC184;
+extern u8 lbl_803CC194;
+
+const GXColor lbl_803CCEE8 = { 255, 255, 255, 255 };
 extern struct {
     /* 0x00 */ u8 _00[0x5C];
     /* 0x5C */ OSThreadQueue retraceQueue;
@@ -508,6 +520,45 @@ void YUV2RGB(void) {
 
 // .text:0x800ADD70 size:0x1F0
 void fn_800ADD70(void) {
+    f32 proj[7];
+    Mtx mtx;
+    MoviePlayer* player;
+    s16* verts;
+
+    player = lbl_803CC170;
+    if (player != NULL) {
+        GXGetProjectionv(proj);
+        GXSetProjection(lbl_802FB1E0, GX_ORTHOGRAPHIC);
+        GXInvalidateTexAll();
+        GXLoadTexObj(&lbl_803C78A4, GX_TEXMAP0);
+        GXInvalidateVtxCache();
+        GXClearVtxDesc();
+        GXSetVtxDesc(GX_VA_POS, GX_INDEX8);
+        GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+        GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_S16, 0);
+        GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U8, 0);
+        lbl_803CC194 ^= 1;
+        verts = lbl_803CBB00[lbl_803CC194];
+        verts[0] = verts[9] = player->dispX;
+        verts[1] = verts[4] = player->dispY;
+        verts[3] = verts[6] = player->dispX + player->dispWidth - 1;
+        verts[7] = verts[10] = player->dispY + player->dispHeight - 1;
+        verts[2] = verts[5] = verts[8] = verts[11] = lbl_803CC184;
+        DCFlushRange(verts, 0x18);
+        GXSetArray(GX_VA_POS, verts, 6);
+        GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_REG, GX_SRC_REG, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+        GXSetNumChans(1);
+        GXSetNumTexGens(1);
+        GXSetNumTevStages(1);
+        GXSetChanMatColor(GX_COLOR0A0, lbl_803CCEE8);
+        GXSetTevOp(GX_TEVSTAGE0, GX_REPLACE);
+        GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+        PSMTXIdentity(mtx);
+        GXLoadPosMtxImm(mtx, GX_PNMTX0);
+        GXSetCurrentMtx(GX_PNMTX0);
+        GXCallDisplayList(lbl_801112C0, 0x20);
+        GXSetProjectionv(proj);
+    }
 }
 
 // .text:0x800ADC40 size:0x130
