@@ -468,7 +468,120 @@ void fn_800E2B8C(Plane* plane, MCPlane* mc, s32 a, s32 b, s32 c) {
 }
 
 // .text:0x800E2C18 size:0x6D0
+// registers only: in the two cases that read one source row the target still puts
+// the destination row in r9, as if b (r8) were live there
 void fn_800E2C18(u8* dst, s32 dst_stride, u8* src, s32 src_stride, s32 hpel_x, s32 hpel_y) {
+    u8* a;
+    u8* b;
+    u8* d;
+
+    if (hpel_x == 0 && hpel_y == 0) {
+        a = src + src_stride;
+        d = dst + dst_stride;
+        dst[0] = src[0];
+        dst[1] = src[1];
+        dst[2] = src[2];
+        dst[3] = src[3];
+        d[0] = a[0];
+        d[1] = a[1];
+        d[2] = a[2];
+        d[3] = a[3];
+        a += src_stride;
+        d += dst_stride;
+        d[0] = a[0];
+        d[1] = a[1];
+        d[2] = a[2];
+        d[3] = a[3];
+        a += src_stride;
+        d += dst_stride;
+        d[0] = a[0];
+        d[1] = a[1];
+        d[2] = a[2];
+        d[3] = a[3];
+        return;
+    }
+    if (hpel_x != 0 && hpel_y == 0) {
+        a = src + src_stride;
+        d = dst + dst_stride;
+        dst[0] = (src[0] + src[1] + 1) >> 1;
+        dst[1] = (src[1] + src[2] + 1) >> 1;
+        dst[2] = (src[2] + src[3] + 1) >> 1;
+        dst[3] = (src[3] + src[4] + 1) >> 1;
+        d[0] = (a[0] + a[1] + 1) >> 1;
+        d[1] = (a[1] + a[2] + 1) >> 1;
+        d[2] = (a[2] + a[3] + 1) >> 1;
+        d[3] = (a[3] + a[4] + 1) >> 1;
+        a += src_stride;
+        d += dst_stride;
+        d[0] = (a[0] + a[1] + 1) >> 1;
+        d[1] = (a[1] + a[2] + 1) >> 1;
+        d[2] = (a[2] + a[3] + 1) >> 1;
+        d[3] = (a[3] + a[4] + 1) >> 1;
+        a += src_stride;
+        d += dst_stride;
+        d[0] = (a[0] + a[1] + 1) >> 1;
+        d[1] = (a[1] + a[2] + 1) >> 1;
+        d[2] = (a[2] + a[3] + 1) >> 1;
+        d[3] = (a[3] + a[4] + 1) >> 1;
+        return;
+    }
+    if (hpel_x == 0 && hpel_y != 0) {
+        b = src + src_stride;
+        d = dst + dst_stride;
+        dst[0] = (src[0] + b[0] + 1) >> 1;
+        dst[1] = (src[1] + b[1] + 1) >> 1;
+        dst[2] = (src[2] + b[2] + 1) >> 1;
+        dst[3] = (src[3] + b[3] + 1) >> 1;
+        a = b;
+        b += src_stride;
+        d[0] = (a[0] + b[0] + 1) >> 1;
+        d[1] = (a[1] + b[1] + 1) >> 1;
+        d[2] = (a[2] + b[2] + 1) >> 1;
+        d[3] = (a[3] + b[3] + 1) >> 1;
+        a += src_stride;
+        b += src_stride;
+        d += dst_stride;
+        d[0] = (a[0] + b[0] + 1) >> 1;
+        d[1] = (a[1] + b[1] + 1) >> 1;
+        d[2] = (a[2] + b[2] + 1) >> 1;
+        d[3] = (a[3] + b[3] + 1) >> 1;
+        a += src_stride;
+        b += src_stride;
+        d += dst_stride;
+        d[0] = (a[0] + b[0] + 1) >> 1;
+        d[1] = (a[1] + b[1] + 1) >> 1;
+        d[2] = (a[2] + b[2] + 1) >> 1;
+        d[3] = (a[3] + b[3] + 1) >> 1;
+        return;
+    }
+    if (hpel_x != 0 && hpel_y != 0) {
+        b = src + src_stride;
+        d = dst + dst_stride;
+        dst[0] = (src[0] + src[1] + b[0] + b[1] + 2) >> 2;
+        dst[1] = (src[1] + src[2] + b[1] + b[2] + 2) >> 2;
+        dst[2] = (src[2] + src[3] + b[2] + b[3] + 2) >> 2;
+        dst[3] = (src[3] + src[4] + b[3] + b[4] + 2) >> 2;
+        a = b;
+        b += src_stride;
+        d[0] = (a[0] + a[1] + b[0] + b[1] + 2) >> 2;
+        d[1] = (a[1] + a[2] + b[1] + b[2] + 2) >> 2;
+        d[2] = (a[2] + a[3] + b[2] + b[3] + 2) >> 2;
+        d[3] = (a[3] + a[4] + b[3] + b[4] + 2) >> 2;
+        a += src_stride;
+        b += src_stride;
+        d += dst_stride;
+        d[0] = (a[0] + a[1] + b[0] + b[1] + 2) >> 2;
+        d[1] = (a[1] + a[2] + b[1] + b[2] + 2) >> 2;
+        d[2] = (a[2] + a[3] + b[2] + b[3] + 2) >> 2;
+        d[3] = (a[3] + a[4] + b[3] + b[4] + 2) >> 2;
+        a += src_stride;
+        b += src_stride;
+        d += dst_stride;
+        d[0] = (a[0] + a[1] + b[0] + b[1] + 2) >> 2;
+        d[1] = (a[1] + a[2] + b[1] + b[2] + 2) >> 2;
+        d[2] = (a[2] + a[3] + b[2] + b[3] + 2) >> 2;
+        d[3] = (a[3] + a[4] + b[3] + b[4] + 2) >> 2;
+    }
 }
 
 // .text:0x800E32E8 size:0xC4
