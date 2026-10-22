@@ -30,6 +30,8 @@ void fn_800AD01C(void* hi) {
 }
 
 // .text:0x800ACFD0 size:0x4C
+// Registers only: the target computes the rounded size and align + 7 into r7/r4 first and keeps
+// the heap base in r6; the permuter got closest with -align assigned inside the expression.
 void* _OSAllocFromHeap(s32 align, u32 size) {
     u8* lo = lbl_803C7898.lo;
     u8* hi = lbl_803C7898.hi;
@@ -51,6 +53,7 @@ void fn_800ACFB0(void* ptr) {
 }
 
 // .text:0x800ACF78 size:0x38
+// Registers only: the block start and the offset inside it swap r5/r6.
 void fn_800ACF78(void* ptr, u32 size) {
     u8* start = ((u8**)ptr)[-2];
 
@@ -62,6 +65,7 @@ void fn_800ACF78(void* ptr, u32 size) {
 }
 
 // .text:0x800ACF34 size:0x44
+// Registers only: the target keeps the heap base in r5 and lo in r4.
 void* fn_800ACF34(s32 align, u32 size) {
     u8* lo = lbl_803C7898.lo;
     u8* hi = lbl_803C7898.hi;
