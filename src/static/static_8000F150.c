@@ -1577,6 +1577,17 @@ static inline s32 getTextHeight(TextBox* box) {
     return total;
 }
 
+static inline s32 glyphIndex(u16 c) {
+    return (u16)(c % 2116) - (*lbl_80366B18._7F4 & 0x7FFF) - 1;
+}
+
+static inline void drawGlyph(TextBox* box, s32 x, s32 y, u16 u, u16 v, u16 w, u32 color, s32 font) {
+    if (box->_0C != 0) {
+        fn_800100A4(x + box->_14, y + box->_16, u, v, w, box->_0C, font, box->_00);
+    }
+    fn_800100A4(x, y, u, v, w, color, font, box->_00);
+}
+
 // .text:0x800111B4 size:0x24
 void fn_800111B4(RelocTable* table) {
     s32 n = table->count;
@@ -1807,10 +1818,7 @@ void DrawText(s32 i) {
                     idx = (lbl_80366B18._7EC[10] & 0x7FFF) % 2116;
                     u = (u16)(idx % 46) * wide;
                     v = (idx / 46) * lineH;
-                    if (box->_0C != 0) {
-                        fn_800100A4(x + box->_14, y + box->_16, u, v, w, box->_0C, font, box->_00);
-                    }
-                    fn_800100A4(x, y, u, v, w, color, font, box->_00);
+                    drawGlyph(box, x, y, u, v, w, color, font);
                     x += w;
                     x += box->_2D;
                 }
@@ -1831,10 +1839,7 @@ void DrawText(s32 i) {
                     idx = (lbl_80366B18._7EC[*p] & 0x7FFF) % 2116;
                     u = (u16)(idx % 46) * wide;
                     v = (idx / 46) * lineH;
-                    if (box->_0C != 0) {
-                        fn_800100A4(x + box->_14, y + box->_16, u, v, w, box->_0C, font, box->_00);
-                    }
-                    fn_800100A4(x, y, u, v, w, color, font, box->_00);
+                    drawGlyph(box, x, y, u, v, w, color, font);
                     x += w;
                     count++;
                     x += box->_2D;
@@ -1918,11 +1923,11 @@ void DrawText(s32 i) {
                     c = lbl_80366218[c];
                     c &= 0x7FFF;
                 }
+                idx = c % 2116;
                 count++;
-                n = (u16)(c % 2116) - (*lbl_80366B18._7F4 & 0x7FFF) - 1;
+                n = glyphIndex(c);
                 w = lbl_800E90F4[n][font];
                 dy = lbl_800E95B4[n][font];
-                idx = c % 2116;
                 u = (u16)(idx % 46) * wide;
                 v = (idx / 46) * lineH;
             } else {
@@ -1933,10 +1938,7 @@ void DrawText(s32 i) {
                 v = (c / 92) * lineH;
                 u = narrow * ((u16)n % 2 + ((u16)n / 2) * 2);
             }
-            if (box->_0C != 0) {
-                fn_800100A4(x + box->_14, y + (box->_16 + dy), u, v, w, box->_0C, font, box->_00);
-            }
-            fn_800100A4(x, y + dy, u, v, w, color, font, box->_00);
+            drawGlyph(box, x, y + dy, u, v, w, color, font);
             x += w;
             x += box->_2D;
         }
@@ -2270,7 +2272,7 @@ s32 fn_8000FA9C(s32 i) {
                     c = lbl_80366218[c];
                     c &= 0x7FFF;
                 }
-                n = (u16)(c % 2116) - (*lbl_80366B18._7F4 & 0x7FFF) - 1;
+                n = glyphIndex(c);
                 c = lbl_800E90F4[n][box->_2C];
             } else {
                 c = lbl_800E8F60[c][box->_2C];
