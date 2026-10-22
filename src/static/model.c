@@ -2967,7 +2967,109 @@ void fn_800188C0(void) {
 }
 
 // .text:0x80018270 size:0x650
-void fn_80018270(void) {
+// 97.94%: the roster and all-characters scans start their counters as copies of the
+// maximum's zero (mr r9,r31; mr r5,r31), and mode 2 stores _2D64 before actorData[9]._08.
+void fn_80018270(int mode) {
+    u32 maxB = 0;
+    u32 maxA = 0;
+    u32 size;
+    u32 sizeA;
+    u32 sizeB;
+    u32 total;
+    u8* p;
+    s32 i;
+    int t;
+    int k;
+    u32 entry;
+
+    if (mode == 2) {
+        p = _OSAllocFromHeap(32, 0x13E80);
+        lbl_8036E548._2C8C = p;
+        lbl_8036E548.actorData[0]._08 = p;
+        for (i = 1; i < 9; i++) {
+            lbl_8036E548.actorData[i]._08 = _OSAllocFromHeap(32, 0x12C40);
+        }
+        for (k = 0; k < 54; k++) {
+            size = lbl_803CB790[k * 19].size & 0x0FFFFFFF;
+            if (maxA < size) {
+                maxA = size;
+            }
+        }
+        sizeA = (maxA + 31) & ~31;
+        total = sizeA * 4 + 0x13E80;
+        p = _OSAllocFromHeap(32, total);
+        lbl_8036E548.actorData[9]._08 = p;
+        for (k = 10; k < 13; k++) {
+            p += sizeA;
+            lbl_8036E548.actorData[k]._08 = p;
+        }
+        lbl_8036E548._2D64 = total;
+        p += sizeA;
+        lbl_8036E548._2D3C = p;
+        lbl_8036E548._2D40 = 0x13E80;
+        lbl_8036E548._2D44 = -1;
+        lbl_8036E548._2D46 = 0;
+    } else {
+        if (mode == 0) {
+            for (t = 0; t < 2; t++) {
+                for (k = 0; k < 9; k++) {
+                    size = lbl_803CB790[inMemRoster[t][k]._24 * 19].size & 0x0FFFFFFF;
+                    if (maxA < size) {
+                        maxA = size;
+                    }
+                }
+            }
+            for (t = 0; t < 2; t++) {
+                for (k = 0; k < 9; k++) {
+                    entry = inMemRoster[t][k]._24 * 19 + 1;
+                    size = lbl_803CB790[entry].size & 0x0FFFFFFF;
+                    if (maxB < size) {
+                        maxB = size;
+                    }
+                }
+            }
+        } else {
+            for (k = 0; k < 54; k++) {
+                size = lbl_803CB790[k * 19].size & 0x0FFFFFFF;
+                if (maxA < size) {
+                    maxA = size;
+                }
+            }
+            for (k = 0; k < 54; k++) {
+                entry = k * 19 + 1;
+                size = lbl_803CB790[entry].size & 0x0FFFFFFF;
+                if (maxB < size) {
+                    maxB = size;
+                }
+            }
+        }
+        sizeA = (maxA + 31) & ~31;
+        sizeB = (maxB + 31) & ~31;
+        total = sizeB * 9 + sizeA * 4 + (sizeA + sizeB);
+        p = _OSAllocFromHeap(32, total);
+        lbl_8036E548._2C8C = p;
+        lbl_8036E548._2D64 = total;
+        for (i = 0; i < 9; i++) {
+            lbl_8036E548.actorData[i]._08 = p;
+            p += sizeB;
+        }
+        for (k = 9; k < 13; k++) {
+            lbl_8036E548.actorData[k]._08 = p;
+            p += sizeA;
+        }
+        lbl_8036E548._2D54 = p;
+        lbl_8036E548._2D58 = sizeA;
+        lbl_8036E548._2D5C = -1;
+        lbl_8036E548._2D5E = 0;
+        lbl_8036E548._2D3C = p + sizeA;
+        lbl_8036E548._2D40 = sizeB;
+        lbl_8036E548._2D44 = -1;
+        lbl_8036E548._2D46 = 0;
+    }
+    for (i = 0; i < 13; i++) {
+        lbl_8036E548.actorData[i]._2C = NULL;
+        lbl_8036E548.actorData[i]._30 = NULL;
+    }
 }
 
 // .text:0x80018024 size:0x24C

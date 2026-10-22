@@ -57,7 +57,7 @@ void fn_80017814(struct ModelActor* actor, s32 idx, s32 kind, void (*callback)(s
 void fn_80017D28(struct ModelActor* src);
 void fn_80017DBC(struct ModelActor* actor, s32 idx);
 void fn_80018024(void);
-void fn_80018270(void);
+void fn_80018270(int mode);
 void fn_800188C0(void);
 void fn_800189B8(void);
 void fn_800189E4(void);
