@@ -1,7 +1,44 @@
 #include "Dolphin/os.h"
 #include "C3/charPipeline.h"
+#include "stl/math.h"
 
 void GetData(u8 type, void *src, f32 *dst, u8 count, f32 scale);
+
+static inline void QuatSlerp(Quaternion *p, Quaternion *q, Quaternion *r, f32 t) {
+    f32 cosom;
+    f32 omega;
+    f32 sinom;
+    f32 sclp;
+    f32 sclq;
+
+    cosom = p->x * q->x + p->y * q->y + p->z * q->z + p->w * q->w;
+    if ((1.0f + cosom) > 0.000001f) {
+        if ((1.0f - cosom) > 0.000001f) {
+            omega = acos(cosom);
+            sinom = 1.0f / sin(omega);
+            sclp = sinom * sin(omega - t * omega);
+            sclq = sinom * sin(t * omega);
+        } else {
+            sclp = 1.0f - t;
+            sclq = t;
+        }
+        r->x = sclp * p->x + sclq * q->x;
+        r->y = sclp * p->y + sclq * q->y;
+        r->z = sclp * p->z + sclq * q->z;
+        r->w = sclp * p->w + sclq * q->w;
+    } else {
+        r->x = -q->y;
+        r->y = q->x;
+        r->z = -q->w;
+        r->w = q->z;
+        sclp = sin(1.5707964f - 1.5707964f * t);
+        sclq = sin(1.5707964f * t);
+        r->x = sclp * p->x + sclq * r->x;
+        r->y = sclp * p->y + sclq * r->y;
+        r->z = sclp * p->z + sclq * r->z;
+        r->w = sclp * p->w + sclq * r->w;
+    }
+}
 
 static inline f32 getFrameT(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFrame *nextFrame) {
     f32 dt = animPipe->time - currentFrame->time;
@@ -234,4 +271,13 @@ void GetData(u8 type, void *src, f32 *dst, u8 count, f32 scale) {
 }
 
 // .text:0x800B516C size:0x4A0
-void Squad(void) {}
+void Squad(Quaternion *p, Quaternion *a, Quaternion *b, Quaternion *q, Quaternion *d, f32 t) {
+    Quaternion pq;
+    Quaternion ab;
+    f32 t2;
+
+    t2 = 2.0f * (1.0f - t) * t;
+    QuatSlerp(p, q, &pq, t);
+    QuatSlerp(a, b, &ab, t);
+    QuatSlerp(&pq, &ab, d, t2);
+}
