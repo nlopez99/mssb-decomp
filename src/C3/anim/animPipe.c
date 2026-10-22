@@ -335,7 +335,146 @@ void DoEulerAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFram
 void DoScaleAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFrame *nextFrame, u8 flag) {}
 
 // .text:0x800B5DA8 size:0x634
-void DoTranslationAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFrame *nextFrame) {}
+// Differs: the target extracts the interpolation modes with srawi/clrlwi (a signed
+// shift) where this has rlwinm, plus register allocation; string offsets as in DoQuatAnimation.
+void DoTranslationAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFrame *nextFrame) {
+    f32 cur[3];
+    f32 next[3];
+    Vec out;
+    f32 curTangent[3];
+    f32 nextTangent[3];
+    f32 curEase;
+    f32 nextEase;
+    u8 type;
+    int stride;
+    u32 offset;
+    u32 mode;
+    f32 scale;
+    f32 t;
+    f32 tt;
+    f32 ttt;
+    f32 s;
+    f32 sum;
+    f32 speed;
+    f32 a;
+    f32 b;
+    f32 h00;
+    f32 h01;
+    f32 h10;
+    f32 h11;
+    char *p;
+    int i;
+
+    type = animPipe->currentTrack->quantizeInfo >> 4;
+    scale = 1.0f / (1 << (animPipe->currentTrack->quantizeInfo & 0xF));
+    stride = getCompSize(type) * 3;
+    offset = 0;
+    if (animPipe->currentTrack->animType & 2) {
+        offset = getCompSize(type) * 3;
+        if (animPipe->currentTrack->animType & 0x20) {
+            offset += getCompSize(type) * 4;
+        }
+    }
+    if (animPipe->currentTrack->animType & 4) {
+        offset += stride;
+    }
+    if (animPipe->currentTrack->animType & 8) {
+        offset += 8;
+    }
+    GetData(type, currentFrame->setting + offset, cur, 3, scale);
+    GetData(type, nextFrame->setting + offset, next, 3, scale);
+    t = getFrameT(animPipe, currentFrame, nextFrame);
+    offset = 0;
+    if (animPipe->currentTrack->animType & 2) {
+        mode = (animPipe->currentTrack->interpolationType >> 2) & 3;
+        if (mode == 2) {
+            offset = stride * 2;
+        }
+        if (mode == 3) {
+            offset = stride * 2 + 4;
+        }
+    }
+    if (animPipe->currentTrack->animType & 8) {
+        mode = (animPipe->currentTrack->interpolationType >> 4) & 7;
+        if (mode == 4) {
+            offset += 0x10;
+        }
+        if (mode == 5) {
+            offset += 0x14;
+        }
+    } else if (animPipe->currentTrack->animType & 4) {
+        mode = (animPipe->currentTrack->interpolationType >> 4) & 7;
+        if (mode == 2) {
+            offset += stride * 2;
+        }
+        if (mode == 3) {
+            offset += stride * 2;
+            offset += 4;
+        }
+    }
+    switch (animPipe->currentTrack->interpolationType & 3) {
+    case 0:
+        out.x = cur[0];
+        out.y = cur[1];
+        out.z = cur[2];
+        break;
+    case 1:
+        s = 1.0f - t;
+        out.x = t * next[0] + s * cur[0];
+        out.y = t * next[1] + s * cur[1];
+        out.z = t * next[2] + s * cur[2];
+        break;
+    case 2:
+        GetData(type, currentFrame->interpolation + offset + stride, curTangent, 3, scale);
+        GetData(type, nextFrame->interpolation + offset, nextTangent, 3, scale);
+        tt = t * t;
+        ttt = t * tt;
+        s = 1.0f - t;
+        for (i = 0; i < 3; i++) {
+            ((f32 *)&out)[i] = s * (3.0f * tt * (nextTangent[i] + next[i]) + s * (s * cur[i] + 3.0f * t * (curTangent[i] + cur[i]))) + ttt * next[i];
+        }
+        break;
+    case 3:
+        p = currentFrame->interpolation + offset + stride;
+        GetData(type, p, curTangent, 3, scale);
+        GetData(lbl_803CBB51, p + stride + 2, &curEase, 1, lbl_803CBB4C);
+        p = nextFrame->interpolation + offset;
+        GetData(type, p, nextTangent, 3, scale);
+        GetData(lbl_803CBB51, p + stride * 2, &nextEase, 1, lbl_803CBB4C);
+        a = curEase;
+        b = nextEase;
+        sum = a + b;
+        if (t != 0.0f && t != 1.0f && sum != 0.0f) {
+            if (sum > 1.0f) {
+                speed = 0.5f - 1.0f / sum;
+            } else {
+                speed = 0.5f - 1.0f / sum;
+            }
+            if (t < a) {
+                t = t * (t * (speed / a));
+            } else if (t < 1.0f - b) {
+                t = speed * (2.0f * t - a);
+            } else {
+                t = 1.0f - (1.0f - t) * ((1.0f - t) * (speed / b));
+            }
+        }
+        tt = t * t;
+        ttt = tt * t;
+        h00 = 2.0f * ttt - 3.0f * tt;
+        h01 = -h00;
+        h00 = 1.0f + h00;
+        h10 = ttt + (t - 2.0f * tt);
+        h11 = -tt + ttt;
+        for (i = 0; i < 3; i++) {
+            ((f32 *)&out)[i] = h11 * nextTangent[i] + (h10 * curTangent[i] + (h00 * cur[i] + h01 * next[i]));
+        }
+        break;
+    default:
+        OSPanic("animPipe.c", 546, "Unknown pInterpolation pSetting!(\226\242\222m\202\314\225\342\212\324\203^\203C\203v\202\252\216w\222\350\202\263\202\352\202\304\202\242\202\334\202\267)");
+        break;
+    }
+    CTRLSetTranslation(animPipe->control, out.x, out.y, out.z);
+}
 
 // .text:0x800B560C size:0x79C
 void GetData(u8 type, void *src, f32 *dst, u8 count, f32 scale) {
