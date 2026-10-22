@@ -171,7 +171,10 @@ typedef struct DriftParticle {
         /* 0x40 */ u32 rgba;
         /* 0x40 */ u8 color[4];
     };
-    /* 0x44 */ s8 dcolor[4];
+    union {
+        /* 0x44 */ s8 dcolor[4];
+        /* 0x44 */ u32 drgba;
+    };
     /* 0x48 */ s16 delay;
     /* 0x4A */ s16 remaining;
     /* 0x4C */ u8 _4C;
@@ -179,6 +182,23 @@ typedef struct DriftParticle {
     /* 0x4E */ u8 _4E;
     /* 0x4F */ u8 texCoords;
 } DriftParticle;
+
+// What fn_8002DCE4's callers pass
+typedef struct DriftParams {
+    /* 0x00 */ s32 file;
+    /* 0x04 */ s32 tex;
+    /* 0x08 */ s32 count;
+    /* 0x0C */ s32 life;
+    /* 0x10 */ s32 size[2];
+    /* 0x18 */ s32 speed;
+    /* 0x1C */ s32 delay;
+    /* 0x20 */ s32 lifeVar;
+    /* 0x24 */ s32 yaw[2];
+    /* 0x2C */ s32 pitch[2];
+    /* 0x34 */ s32 fadeAge;
+    /* 0x38 */ s32 _38[2];
+    /* 0x40 */ s32 angle[2];
+} DriftParams; // size: 0x48
 
 // The particles fn_800317C4 starts
 typedef struct SwirlParticle {
@@ -194,7 +214,10 @@ typedef struct SwirlParticle {
     /* 0x34 */ f32 _34;
     /* 0x38 */ f32 _38;
     /* 0x3C */ f32 _3C;
-    /* 0x40 */ s32 rgba;
+    union {
+        /* 0x40 */ s32 rgba;
+        /* 0x40 */ u8 color[4];
+    };
     /* 0x44 */ u8 _44;
     /* 0x45 */ u8 _45[0x48 - 0x45];
     /* 0x48 */ s16 delay;
@@ -1295,6 +1318,137 @@ void fn_800317C4(Emitter* e, Vec* pos, EffectParams* params)
     }
 }
 
+// .text:0x80031034 size:0x790
+// 99.65%: registers only, in the inlined fn_80031F34. With that helper returning `list`
+// (reassigned to the sorted head) this reaches 99.93%, leaving only n in r27 for the target's r22.
+BOOL fn_80031034(void* arg)
+{
+    Emitter* e = arg;
+    s32 alive = 0;
+    s32 blend;
+    Particle* prev;
+    SwirlParticle* dead;
+    SwirlParticle* tail;
+    SwirlParticle* p;
+    s32 alpha;
+    s32 i;
+    f32 r;
+    f32 ofs;
+    Vec a;
+    Vec b;
+
+    GXLoadPosMtxImm(lbl_8017FFE0, GX_PNMTX0);
+    GXSetZMode(GX_TRUE, GX_LEQUAL, e->state);
+    blend = -1;
+    p = (SwirlParticle*)fn_80031F34(e->particles, e->count);
+    e->particles = (Particle*)p;
+    prev = (Particle*)&e->particles;
+    tail = NULL;
+    dead = NULL;
+    do {
+        if (blend != p->_4F) {
+            blend = p->_4F;
+            if (p->_4F != 0) {
+                GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_ONE, GX_LO_CLEAR);
+            } else {
+                GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+            }
+        }
+        if (p->_44 == 0) {
+            if (p->_38 * p->_38 > p->_3C * p->_3C) {
+                r = p->_1C * p->_38 / 2.0f;
+            } else {
+                r = p->_1C * p->_3C / 2.0f;
+            }
+            ofs = r;
+            if (r > 0.0f) {
+                ofs = -r;
+            }
+            ofs *= p->_34;
+            lbl_80180010[0].x = -p->_1C * p->_38 / 2.0f;
+            lbl_80180010[0].y = ofs - p->_1C * p->_3C / 2.0f;
+            lbl_80180010[0].z = 0.0f;
+            lbl_80180010[1].x = -p->_1C * p->_3C / 2.0f;
+            lbl_80180010[1].y = p->_1C * p->_38 / 2.0f + ofs;
+            lbl_80180010[1].z = 0.0f;
+            lbl_80180010[2].x = p->_1C * p->_38 / 2.0f;
+            lbl_80180010[2].y = p->_1C * p->_3C / 2.0f + ofs;
+            lbl_80180010[2].z = 0.0f;
+            lbl_80180010[3].x = p->_1C * p->_3C / 2.0f;
+            lbl_80180010[3].y = ofs - p->_1C * p->_38 / 2.0f;
+            lbl_80180010[3].z = 0.0f;
+        } else {
+            a.x = p->_38 / 2.0f;
+            a.y = p->_3C / 2.0f;
+            a.z = 0.0f;
+            b.x = p->_3C / 2.0f;
+            b.y = -p->_38 / 2.0f;
+            b.z = 0.0f;
+            PSVECAdd(&a, &b, &b);
+            PSVECNormalize(&b, &b);
+            PSVECScale(&b, p->_34, &b);
+            lbl_80180010[0].x = b.x - p->_1C * p->_38 / 2.0f;
+            lbl_80180010[0].y = b.y - p->_1C * p->_3C / 2.0f;
+            lbl_80180010[0].z = 0.0f;
+            lbl_80180010[1].x = b.x - p->_1C * p->_3C / 2.0f;
+            lbl_80180010[1].y = p->_1C * p->_38 / 2.0f + b.y;
+            lbl_80180010[1].z = 0.0f;
+            lbl_80180010[2].x = p->_1C * p->_38 / 2.0f + b.x;
+            lbl_80180010[2].y = p->_1C * p->_3C / 2.0f + b.y;
+            lbl_80180010[2].z = 0.0f;
+            lbl_80180010[3].x = p->_1C * p->_3C / 2.0f + b.x;
+            lbl_80180010[3].y = b.y - p->_1C * p->_38 / 2.0f;
+            lbl_80180010[3].z = 0.0f;
+        }
+        if (p->_2C <= p->remaining) {
+            if (lbl_80366158._28 == 0) {
+                p->_1C *= p->_20;
+            }
+            alpha = p->_30 * (p->delay - p->remaining) / (p->delay - p->_2C);
+        } else {
+            if (lbl_80366158._28 == 0) {
+                p->_1C *= p->_24;
+            }
+            alpha = p->_30 * p->remaining / p->_2C;
+        }
+        for (i = 0; i < 4; i++) {
+            PSMTXMultVec(lbl_8017FF78, &lbl_80180010[i], &lbl_80180010[i]);
+        }
+        fn_80033CC8((Particle*)p, (TexFile*)e->_10);
+        if (alpha < 0) {
+            p->remaining = 0;
+        } else if (lbl_80366158._28 == 0) {
+            p->pos.x += p->vel.x;
+            p->pos.y += p->vel.y;
+            p->pos.z += p->vel.z;
+            p->vel.x *= p->_28;
+            p->vel.y *= p->_28;
+            p->vel.z *= p->_28;
+            p->color[3] = alpha;
+            p->remaining--;
+        }
+        if (p->remaining == 0) {
+            prev->next = p->next;
+            if (tail != NULL) {
+                tail->next = (Particle*)p;
+            } else {
+                dead = p;
+            }
+            tail = p;
+            p->next = NULL;
+            e->count--;
+        } else {
+            prev = (Particle*)p;
+            alive++;
+        }
+        p = (SwirlParticle*)prev->next;
+    } while (p != NULL);
+    if (dead != NULL) {
+        fn_80033794((Particle*)dead);
+    }
+    return alive == 0;
+}
+
 // .text:0x80030D88 size:0x2AC
 // 98.80%: the target copies params to r7 before dir to r5 at entry; this copies them
 // the other way round. The rest matches.
@@ -1796,6 +1950,89 @@ BOOL fn_8002E3DC(void* arg)
         p = p->next;
     } while (p != NULL);
     return alive == 0;
+}
+
+// .text:0x8002DCE4 size:0x6F8
+void fn_8002DCE4(Vec* start, Vec* end, DriftParams* params)
+{
+    f32 speed;
+    f32 sizeMin;
+    f32 sizeRange;
+    f32 yawMin;
+    f32 yawMax;
+    f32 pitchMin;
+    f32 pitchMax;
+    f32 angleBase;
+    f32 angleRange;
+    Vec d;
+    Emitter* e;
+    DriftParticle* p;
+    s32 a;
+    f32 size;
+    f32 w;
+    f32 h;
+    s32 i;
+    s32 sign = 1;
+
+    yawMin = params->yaw[0] / 100000.0f;
+    yawMax = params->yaw[1] / 100000.0f;
+    pitchMin = params->pitch[0] / 100000.0f;
+    pitchMax = params->pitch[1] / 100000.0f;
+    sizeMin = params->size[0] / 100000.0f;
+    sizeRange = params->size[1] / 100000.0f - sizeMin;
+    angleBase = 45.0f + params->angle[0] / 100000.0f;
+    angleRange = (params->angle[1] - params->angle[0]) / 100000.0f;
+    PSVECSubtract(end, start, &d);
+    speed = params->speed / 100000.0f;
+    e = fn_80033A24(fn_8002D82C, 0x80, 0, params->count, TRUE, 9);
+    if (e != NULL) {
+        e->_10 = params->file;
+        e->fadeAge = params->fadeAge;
+        memcpy(&e->_18, end, sizeof(Vec));
+        memcpy(&e->_24, end, sizeof(Vec));
+        p = (DriftParticle*)e->particles;
+        do {
+            p->delay = rand() % params->delay;
+            p->remaining = params->life - p->delay - rand() % params->lifeVar;
+            p->pos[0] = start->x;
+            p->pos[1] = start->y;
+            p->pos[2] = start->z;
+            p->vel[0] = d.x / (f32)(p->remaining - 1);
+            p->vel[1] = d.y / (f32)(p->remaining - 1);
+            p->vel[2] = d.z / (f32)(p->remaining - 1);
+            fn_800332B8(NULL, (Vec*)p->force, yawMin, yawMax, pitchMin, pitchMax);
+            PSVECScale((Vec*)p->force, speed * (0.5f * (rand() % 256) + 0.75f), (Vec*)p->force);
+            p->force[0] *= sign;
+            sign = -sign;
+            PSVECScale((Vec*)p->force, 0.5f * -p->remaining, (Vec*)p->accel);
+            PSVECAdd((Vec*)p->vel, (Vec*)p->accel, (Vec*)p->vel);
+            p->mass = 1.0f;
+            if (angleRange) {
+                a = 2048.0f * (angleBase + angleRange * rand() / 32767.0f) / 360.0f + 0.5f;
+                size = 1.4142135f * ((sizeMin + sizeRange * rand() / 32767.0f) / 2.0f);
+                i = a;
+                if (i < 0) {
+                    i = -i;
+                }
+                i &= 0x7FF;
+                if (i >= 0x401) {
+                    i = 0x800 - i;
+                }
+                w = size * lbl_8017ED68[i];
+                h = size * fn_800335EC(a);
+                p->w = w;
+                p->h = h;
+                p->texCoords = (rand() & 1) ? 0x1B : 0xE4;
+            } else {
+                p->h = p->w = (sizeMin + sizeRange * rand() / 32767.0f) / 2.0f;
+                p->texCoords = 0xB1;
+            }
+            p->rgba = 0xFFFFFFFF;
+            p->drgba = 0;
+            p->tex = params->tex;
+            p = (DriftParticle*)p->next;
+        } while (p != NULL);
+    }
 }
 
 // .text:0x8002DC68 size:0x7C
