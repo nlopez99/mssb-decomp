@@ -3,6 +3,10 @@
 // In .bss that splits.txt cannot give this unit yet (see the report)
 extern ShadowState lbl_803009F8;
 
+f32 lbl_803CBB68 = 20.0f;
+
+int __abs(int n);
+
 // .text:0x800BDE8C size:0x14
 void fn_800BDE8C(u32 arg0) {
     lbl_803009F8._4C = (arg0 & 7) << 5;
@@ -51,7 +55,64 @@ void fn_800BDFE0(ActorGroup* group) {
 void fn_800BE09C(void) {}
 
 // .text:0x800BE158 size:0x340
-void fn_800BE158(void) {}
+// 99.86%: registers only in the near-camera branch: the target loads 0.0f into f1 and -1.0f
+// into f0 there; declaration orders and three statement orders were tried.
+void fn_800BE158(ShadowEntry* shadow, ShadowEntry* camera) {
+    Vec v;
+    f32 extent;
+    f32 t;
+    f32 dist;
+    f32 back;
+    f32 sx;
+    f32 sz;
+    f32 size;
+
+    t = camera->eye.y / (camera->eye.y - camera->target.y);
+    PSVECSubtract(&camera->target, &camera->eye, &v);
+    PSVECScale(&v, t, &v);
+    dist = PSVECMag(&v);
+    PSVECAdd(&camera->eye, &v, &v);
+    back = 100.0f;
+    if (lbl_803009F8._24 != 0) {
+        sx = __abs((s32)(lbl_803009F8.range[0].max - lbl_803009F8.range[0].min));
+        sz = __abs((s32)(lbl_803009F8.range[2].max - lbl_803009F8.range[2].min));
+        extent = (sx >= sz ? sx : sz) / 1.4f;
+        if (extent < 15.0f) {
+            extent = 15.0f;
+        }
+        shadow->target.x = (lbl_803009F8.range[0].min + lbl_803009F8.range[0].max) / 2.0f;
+        shadow->target.y = 0.0f;
+        shadow->target.z = (lbl_803009F8.range[2].min + lbl_803009F8.range[2].max) / 2.0f;
+    } else {
+        extent = 10.0f;
+        shadow->target.x = 0.0f;
+        shadow->target.y = 0.0f;
+        shadow->target.z = 0.0f;
+    }
+    if (extent < lbl_803CBB68 || dist > 23.0f) {
+        C_MTXOrtho(shadow->proj, -extent, extent, extent, -extent, shadow->near, shadow->far);
+        GXSetProjection(shadow->proj, GX_ORTHOGRAPHIC);
+        C_MTXLightOrtho(shadow->mtx, extent, -extent, extent, -extent, 0.5f, 0.5f, 0.5f, 0.5f);
+    } else {
+        back = 2.5f * (camera->eye.y - 2.0f);
+        if (back > -20.0f) {
+            back = -20.0f;
+        }
+        size = 12.0f;
+        shadow->target.x = v.x;
+        shadow->target.y = 0.0f;
+        back *= -1.0f;
+        shadow->target.z = v.z;
+        C_MTXOrtho(shadow->proj, -size, size, size, -size, shadow->near, shadow->far);
+        GXSetProjection(shadow->proj, GX_ORTHOGRAPHIC);
+        C_MTXLightOrtho(shadow->mtx, size, -size, size, -size, 0.5f, 0.5f, 0.5f, 0.5f);
+    }
+    PSVECScale(&shadow->pos, back, &v);
+    PSVECAdd(&shadow->target, &v, &shadow->eye);
+    shadow->up.y = lbl_803009F8._4D;
+    C_MTXLookAt(shadow->view, &shadow->eye, &shadow->up, &shadow->target);
+    PSMTXConcat(shadow->mtx, shadow->view, shadow->mtx);
+}
 
 // .text:0x800BE498 size:0x56C
 void fn_800BE498(void) {}

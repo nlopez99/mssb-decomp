@@ -5,10 +5,15 @@
 #include "C3/static_800BD478.h"
 
 typedef struct ShadowEntry {
-    /* 0x00 */ u8 _00[0x34];
+    /* 0x00 */ Vec eye;
+    /* 0x0C */ Vec up;
+    /* 0x18 */ Vec target;
+    /* 0x24 */ u8 _24[0x2C - 0x24];
+    /* 0x2C */ f32 near;
+    /* 0x30 */ f32 far;
     /* 0x34 */ Vec pos;
     /* 0x40 */ Mtx view;
-    /* 0x70 */ u8 _70[0xB0 - 0x70];
+    /* 0x70 */ Mtx44 proj;
     /* 0xB0 */ Mtx mtx;
 } ShadowEntry; // size: 0xE0
 
@@ -43,7 +48,7 @@ void fn_800BDEA0(void);
 void fn_800BDF70(ActorSlot* slot);
 void fn_800BDFE0(ActorGroup* group);
 void fn_800BE09C(void);
-void fn_800BE158(void);
+void fn_800BE158(struct ShadowEntry* shadow, struct ShadowEntry* camera);
 void fn_800BE498(void);
 void fn_800BEA04(Vec pos);
 void fn_800BEB3C(void);
