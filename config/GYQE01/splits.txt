@@ -1094,6 +1094,20 @@ C3/anim/animBank.c:
 	extabindex  start:0x80008AC0 end:0x80008AD8
 	.text       start:0x800B4E9C end:0x800B516C
 
+C3/anim/animPipe.c:
+	extab       start:0x80006A50 end:0x80006A88
+	extabindex  start:0x80008AD8 end:0x80008B2C
+	.text       start:0x800B516C end:0x800B79D0
+	.rodata     start:0x800E7D58 end:0x800E7E78
+	.sdata      start:0x803CBB48 end:0x803CBB58
+	.sdata2     start:0x803CCF80 end:0x803CCFB8
+
+C3/actor/boneAnim.c:
+	extab       start:0x80006A88 end:0x80006A90
+	extabindex  start:0x80008B2C end:0x80008B38
+	.text       start:0x800B79D0 end:0x800B7D3C
+	.sdata2     start:0x803CCFB8 end:0x803CCFC0
+
 C3/control/control.c:
 	extab       start:0x80006A90 end:0x80006AE0
 	extabindex  start:0x80008B38 end:0x80008BB0
