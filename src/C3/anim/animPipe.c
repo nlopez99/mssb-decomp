@@ -276,8 +276,8 @@ void DoEulerAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFram
     f32 s;
     int i;
 
-    type = animPipe->currentTrack->quantizeInfo >> 4;
     scale = 1.0f / (1 << (animPipe->currentTrack->quantizeInfo & 0xF));
+    type = animPipe->currentTrack->quantizeInfo >> 4;
     size = getCompSize(type);
     stride = size * 3;
     settingOffset = 0;
@@ -366,8 +366,8 @@ void DoScaleAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFram
     char *p;
     int i;
 
-    type = animPipe->currentTrack->quantizeInfo >> 4;
     scale = 1.0f / (1 << (animPipe->currentTrack->quantizeInfo & 0xF));
+    type = animPipe->currentTrack->quantizeInfo >> 4;
     stride = getCompSize(type) * 3;
     GetData(type, currentFrame->setting, cur, 3, scale);
     GetData(type, nextFrame->setting, next, 3, scale);
@@ -490,8 +490,8 @@ void DoTranslationAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, K
     char *p;
     int i;
 
-    type = animPipe->currentTrack->quantizeInfo >> 4;
     scale = 1.0f / (1 << (animPipe->currentTrack->quantizeInfo & 0xF));
+    type = animPipe->currentTrack->quantizeInfo >> 4;
     stride = getCompSize(type) * 3;
     offset = 0;
     if (animPipe->currentTrack->animType & 2) {
