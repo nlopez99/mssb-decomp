@@ -1701,8 +1701,6 @@ void DrawText(s32 i) {
     u16 v;
     u16 w;
     s32 dy;
-    s32 lines;
-    s32 h;
     s32 total;
     s32 limit;
 
@@ -1842,7 +1840,7 @@ void DrawText(s32 i) {
                     m /= 10;
                 }
                 w = wide;
-                for (n = j, p = &digits[j]; n >= 0; n--, p--) {
+                for (n = j, p = &digits[j]; n >= 0; p--, n--) {
                     idx = (lbl_80366B18._7EC[*p] & 0x7FFF) % 2116;
                     u = (u16)(idx % 46) * wide;
                     v = (idx / 46) * lineH;
