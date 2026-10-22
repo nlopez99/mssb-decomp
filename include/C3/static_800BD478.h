@@ -10,27 +10,20 @@ typedef struct ActorLayoutBones {
 
 // This game's actor: the SDK's with more fields after it
 typedef struct ActorEx {
-    /* 0x00 */ u8 _00[0x99];
+    /* 0x00 */ u8 _00[0x1C];
+    /* 0x1C */ Control worldControl;
+    /* 0x60 */ u8 _60[0x98 - 0x60];
+    /* 0x98 */ u8 _98;
     /* 0x99 */ u8 _99;
 } ActorEx;
-
-typedef struct ActorAnimState {
-    /* 0x00 */ Actor* actor;
-    /* 0x04 */ u8 _04[0x10 - 0x4];
-    /* 0x10 */ Control control;
-    /* 0x54 */ u8 _54[0x64 - 0x54];
-    /* 0x64 */ u16 _64;
-    /* 0x66 */ u16 _66;
-} ActorAnimState;
 
 typedef struct ActorSlot {
     /* 0x00 */ ActorEx* actor;
     /* 0x04 */ u32 _04;
-    /* 0x08 */ s32 _08;
+    /* 0x08 */ void (*_08)(void);
     /* 0x0C */ s16 _0C;
     /* 0x0E */ u16 _0E;
-    /* 0x10 */ u8 _10;
-    /* 0x11 */ u8 _11[0x54 - 0x11];
+    /* 0x10 */ Control control;
     /* 0x54 */ f32 _54;
     /* 0x58 */ u8 _58;
     /* 0x59 */ u8 _59;
@@ -54,11 +47,11 @@ typedef struct ActorGroup {
 } ActorGroup;
 
 void fn_800BD478(Actor** actor, ActorLayoutBones* layout);
-void fn_800BD548(void);
+void fn_800BD548(ActorSlot* slot, u8 count, ...);
 void fn_800BD670(void);
-void fn_800BD8C4(void);
-void fn_800BDA24(ActorAnimState* state);
-void fn_800BDA94(void);
+void fn_800BD8C4(ActorGroup* group, s32 arg1);
+void fn_800BDA24(ActorSlot* slot);
+void fn_800BDA94(ActorSlot* slot, s32 arg1);
 void fn_800BDC88(ActorGroup* group, u16 index, s16 arg2, s32 arg3, u32 arg4, s32 arg5);
 ActorGroup* ActorObjectInitTable(u16 count);
 
