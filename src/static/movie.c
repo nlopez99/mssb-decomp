@@ -2,6 +2,8 @@
 #include "Dolphin/ar.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/os.h"
+#include "static/dvdsys.h"
+#include "static/static_800ACF14.h"
 #include "string.h"
 
 typedef struct MovieFrame {
@@ -68,7 +70,8 @@ typedef struct MovieRing {
 } MovieRing;
 
 typedef struct MovieBuffer {
-    /* 0x00 */ u8 _00[0x8];
+    /* 0x00 */ u8* _00;
+    /* 0x04 */ u32 _04;
     /* 0x08 */ void* _08;
     /* 0x0C */ u32 end;
     /* 0x10 */ u32 pos;
@@ -79,7 +82,13 @@ typedef struct MovieBuffer {
 } MovieBuffer;
 
 extern struct {
-    /* 0x000 */ u8 _000[0x722];
+    /* 0x000 */ u8 _000[0x700];
+    /* 0x700 */ u8* bufEnd;
+    /* 0x704 */ u8* writePtr;
+    /* 0x708 */ u8* readPtr;
+    /* 0x70C */ s32 streamSize;
+    /* 0x710 */ u32 streamDone;
+    /* 0x714 */ u8 _714[0x722 - 0x714];
     /* 0x722 */ s8 error;
 } lbl_803C6CF8;
 extern MovieRing lbl_803C79D4;
@@ -107,12 +116,44 @@ extern u8 lbl_803CC181;
 extern s32 lbl_803CC1A4;
 extern u32 lbl_803CC1AC;
 extern OSThread lbl_802FB220;
-extern void fn_800ACFB0(void* data);
 
 extern void fn_800A63C8(void);
+extern struct {
+    /* 0x000 */ u32 free;
+    /* 0x004 */ u8 _004[0x210 - 0x4];
+} data_803C6780;
+extern s32 fn_800A6418(u32 size);
+extern void ARQSetChunkSize(u32 size);
+extern void ARQFlushQueue(void);
 
 // .text:0x800B05E4 size:0x140
-void fn_800B05E4(void) {
+void fn_800B05E4(s32 aramSize, u32 size) {
+    MovieRing* ring = &lbl_803C79D4;
+    MovieBuffer* buf = &lbl_803C7A00;
+
+    lbl_803CC1A8 = 0;
+    memset(ring, 0, sizeof(MovieRing));
+    if (aramSize == -1) {
+        ring->size = lbl_803CC1AC < data_803C6780.free ? lbl_803CC1AC : data_803C6780.free;
+    } else {
+        ring->size = lbl_803CC1AC < aramSize ? lbl_803CC1AC : aramSize;
+    }
+    ring->size = ALIGN32(ring->size);
+    ring->readPos = ring->writePos = ring->start = fn_800A6418(ring->size);
+    ring->end = ring->start + ring->size;
+    ARQSetChunkSize(0x1000);
+    ARQFlushQueue();
+    size = ALIGN32(size);
+    buf->_04 = lbl_803C6CF8.streamSize;
+    buf->_00 = lbl_803C6CF8.bufEnd - lbl_803C6CF8.streamSize;
+    buf->_04 = lbl_803C6CF8.streamSize;
+    buf->_08 = _OSAllocFromHeap(32, size);
+    buf->end = (u32)buf->_08 + size;
+    buf->write = (u32)buf->_08;
+    buf->pos = (u32)buf->_08;
+    buf->size = size;
+    buf->free = 0;
+    buf->used = 0;
 }
 
 // .text:0x800B0580 size:0x64
@@ -231,7 +272,42 @@ void fn_800B0230(u8* dest, u32 size) {
 }
 
 // .text:0x800B0134 size:0xFC
-void fn_800B0134(void) {
+s32 fn_800B0134(u32 size) {
+    BOOL enabled;
+    u32 first;
+    u32 second;
+    u8* src;
+    u8* wrap;
+
+    while (lbl_803C6CF8.streamDone < size) {
+    }
+    enabled = OSDisableInterrupts();
+    if (lbl_803C6CF8.readPtr + size < lbl_803C7A00._00 + lbl_803C7A00._04) {
+        src = lbl_803C6CF8.readPtr;
+        first = size;
+        wrap = NULL;
+        second = 0;
+    } else {
+        first = (lbl_803C7A00._00 + lbl_803C7A00._04) - lbl_803C6CF8.readPtr;
+        src = lbl_803C6CF8.readPtr;
+        wrap = lbl_803C7A00._00;
+        second = size - first;
+    }
+    OSRestoreInterrupts(enabled);
+    if (size >= first) {
+        fn_800B03F4(src, size);
+    } else {
+        fn_800B03F4(src, first);
+        while (lbl_803C79D4._29 != 0) {
+        }
+        fn_800B03F4(wrap, second);
+    }
+    while (lbl_803C79D4._29 != 0) {
+    }
+    if (size != 0) {
+        fn_800A6D10(size);
+    }
+    return 1;
 }
 
 // .text:0x800B0008 size:0x12C
@@ -297,6 +373,17 @@ void fn_800AFD4C(void) {
 
 // .text:0x800AFC10 size:0x13C
 void fn_800AFC10(void) {
+    MovieBuffer* buf = &lbl_803C7A00;
+    MovieRing* ring = &lbl_803C79D4;
+
+    ring->writePos = ring->start;
+    ring->readPos = ring->start;
+    ring->_20 = 0;
+    buf->write = (u32)buf->_08;
+    buf->pos = (u32)buf->_08;
+    buf->free = 0;
+    buf->used = 0;
+    fn_800B0008(buf->size);
 }
 
 // .text:0x800AFBF0 size:0x20

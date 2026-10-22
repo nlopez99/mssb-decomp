@@ -36,11 +36,11 @@ void fn_800AFD4C(void);
 u8 fn_800AFFB0(void);
 void fn_800AFFC0(u32 n);
 s32 fn_800B0008(u32 size);
-void fn_800B0134(void);
+s32 fn_800B0134(u32 size);
 void fn_800B0230(u8* dest, u32 size);
 void fn_800B0390(u32 request);
 void fn_800B03F4(u8* src, u32 size);
 void fn_800B0580(u32 request);
-void fn_800B05E4(void);
+void fn_800B05E4(s32 aramSize, u32 size);
 
 #endif // !__STATIC_MOVIE_H_
