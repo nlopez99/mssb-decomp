@@ -890,6 +890,8 @@ void challengeMapMaybe(void) {
 }
 
 // .text:0x8001F228 size:0x298
+// 98.16%: the target keeps the li/cmpwi/bge guard before the last loop (the 2D6A bytes);
+// an s32 counter brings the guard back but moves the work base out of r5 (95.44%).
 void fn_8001F228(void) {
     s32 i;
     int j;
@@ -1269,6 +1271,8 @@ void fn_8001DB74(ModelTable* table) {
 }
 
 // .text:0x8001D2D4 size:0x8A0
+// 98.10%: the slot-clearing loop sets its zero with li r4/li r6/mr r3 (here li r6/mr r4)
+// and the target sets sub1 with mr r26,r27 from sub0's NULL; the rest is renumbering.
 void fn_8001D2D4(void) {
     u32 done;
     Mtx m;
@@ -1498,8 +1502,8 @@ void fn_8001D2D4(void) {
 }
 
 // .text:0x8001D180 size:0x154
-// 95.35%: the target keeps a second copy of actor (mr r9,r6) for the loop body; this build
-// uses one register, so the loop registers differ.
+// 96.65%: the target keeps a second copy of actor (mr r9,r6) for the loop body; this build
+// uses one register, so the loop registers differ (getActorJoint and re-read forms are worse).
 void fn_8001D180(int idx, int part, BOOL restore) {
     ModelActor* actor = lbl_8036E548.actors[idx];
     ModelPose* pose;
@@ -1713,6 +1717,8 @@ fail:
 }
 
 // .text:0x8001C67C size:0x2A4
+// 98.52%: the slot table and the bone offset swap r27/r28 in the bone-track loop, and the
+// 0.0f argument is loaded one instruction earlier.
 int fn_8001C67C_animation(int charId, int idx) {
     ModelTable* table;
     ModelNode* node;
@@ -1825,6 +1831,8 @@ void fn_8001C528(void) {
 }
 
 // .text:0x8001C234 size:0x2F4
+// 97.72%: registers only: done, the work base, the loop pointer, lbl_80366158, i and
+// actor are allocated r25-r30 in another order (declaration orders and if/continue tried).
 void fn_8001C234(u32* done) {
     ModelActor* actor;
     f32 frames;
@@ -1897,6 +1905,8 @@ void fn_8001C234(u32* done) {
 }
 
 // .text:0x8001BE50 size:0x3E4
+// 99.56%: the slot pointer and the &actors[idx] temporary swap r28/r30 throughout;
+// declaration orders and the inlined helpers' forms change nothing.
 void fn_8001BE50(int idx, int anim, u8 loop, u8 noRoot, s16 frame, u8 mirror, u8 blend) {
     ModelActor* actor = lbl_8036E548.actors[idx];
     ModelSlot* slot;
@@ -1975,6 +1985,8 @@ void fn_8001BE50(int idx, int anim, u8 loop, u8 noRoot, s16 frame, u8 mirror, u8
 }
 
 // .text:0x8001BA44 size:0x40C
+// 98.74%: the target copies the actor into r28 right after loading it (mr r28,r10) and
+// keeps the &actors[idx] temporary in r29; the rest is that renumbering.
 void fn_8001BA44(int idx, int anim, u8 loop, u8 noRoot, s16 frame, u8 mirror, u8 blend) {
     ModelActor* actor = lbl_8036E548.actors[idx];
     ModelSlot* slot;
@@ -2279,6 +2291,9 @@ void fn_8001B2D0(void) {
 }
 
 // .text:0x8001B224 size:0xAC
+// 92.74%: the target loads actor->_62 second among the call's arguments and keeps the
+// actor in r8; here _62 is loaded last and the actor is in r7. Casts, locals and a
+// permuter session found nothing plausible.
 void fn_8001B224(void) {
     int i;
     ModelActor* actor;
@@ -2457,6 +2472,8 @@ void fn_80019A60(void) {
 }
 
 // .text:0x800196D8 size:0x388
+// 99.51%: the file-relocation loop starts its counter and its byte offset in one register
+// (li r5,0) where this build uses two (li r0,0; li r5,0).
 void fn_800196D8(void) {
     ModelLoadReq* req = lbl_803CC1B8;
     ModelLoadReq* task;
@@ -2520,6 +2537,8 @@ void fn_80018DEC(void) {
 }
 
 // .text:0x80018B74 size:0x278
+// 96.01%: registers only: the five running maxima, the entry pointer and the game mode
+// sit in other volatile registers, which carries into the rounding and the buffer loop.
 void fn_80018B74(void) {
     u32 sizeE = 0;
     u32 sizeB = 0;
@@ -2838,6 +2857,9 @@ void fn_80017D28(ModelActor* src) {
 }
 
 // .text:0x80017814 size:0x514
+// 99.94%: only the layout pointer differs: the target loads it into r3 and copies it to r26
+// after the NULL test; here it lives in r26 from the load (if/else, assignment-in-test and
+// re-read forms tried).
 void fn_80017814(ModelActor* actor, s32 idx, s32 kind, void (*callback)(ModelSlot*)) {
     u32* base = (u32*)actor->_08;
     ModelSlot* slot = &lbl_8036E548._0060->slots[idx];
@@ -4212,6 +4234,9 @@ static inline void stashPart(ModelSub2C* tmp, ModelSub2C* src) {
 }
 
 // .text:0x80011CA8 size:0xA44
+// 99.67%: registers in the two inlined restorePartDispObj copies (actor and the models
+// pointer swap r8/r9, the bone count and pointer r6/r7), the symptom fn_8001D180 shares;
+// the target's two .sbss2 symbols lbl_803CD308/30C are one 6-byte initializer here.
 BOOL fn_80011CA8(ModelActor* actor, int set, int seq) {
     ModelSub2C tmp[6];
     u8 used[6] = { 0, 0, 0, 0, 0, 0 };
@@ -4583,8 +4608,9 @@ void fn_80011358(int idx, int part) {
 }
 
 // .text:0x800111FC size:0x15C
-// 66.30%: waits on fn_8001BA44, whose empty stub is inlined here; the target calls it
-// with bl. The rest follows the target line by line.
+// 89.54%: (alt ? 4 : 0) is computed with srawi/and where the target uses rlwinm, the
+// target loads actor->_62 first among the call's arguments (as in fn_8001B224), and it
+// copies the selected actor into r31 after storing it.
 ModelActor* fn_800111FC(ModelActor* actor, BOOL alt) {
     ModelActor* target;
     int slot;
