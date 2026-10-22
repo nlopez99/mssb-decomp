@@ -87,7 +87,9 @@ typedef struct ModelNode {
     /* 0x0078 */ u8 _0078[0x7C - 0x78];
     /* 0x007C */ void* _7C;
     /* 0x0080 */ u16 joint;
-    /* 0x0082 */ u8 _0082[0x98 - 0x82];
+    /* 0x0082 */ u8 _0082[0x8C - 0x82];
+    /* 0x008C */ f32 _8C;
+    /* 0x0090 */ u8 _0090[0x98 - 0x90];
     /* 0x0098 */ u8 flags;
     /* 0x0099 */ u8 _99;
     /* 0x009A */ u8 _009A[0xEC - 0x9A];
@@ -153,9 +155,11 @@ typedef struct ModelLoadReq {
 
 typedef struct AnimState {
     /* 0x0000 */ void* hdr;
-    /* 0x0004 */ u8 _0004[0x2C - 0x4];
+    /* 0x0004 */ void* clips;
+    /* 0x0008 */ void* sets;
+    /* 0x000C */ u8 sub[0x2C - 0xC];
     /* 0x002C */ void* file;
-    /* 0x0030 */ u8 _0030[0x58 - 0x30];
+    /* 0x0030 */ u8 setPtrs[0x58 - 0x30];
     /* 0x0058 */ s8 current;
     /* 0x0059 */ u8 _59;
     /* 0x005A */ u8 _005A[0x5C - 0x5A];
@@ -231,7 +235,7 @@ typedef struct ModelActor {
     /* 0x0269 */ s8 _269;
     /* 0x026A */ s8 _26A;
     /* 0x026B */ s8 _26B;
-    /* 0x026C */ s8 _26C;
+    /* 0x026C */ u8 _26C;
     /* 0x026D */ s8 _26D;
     /* 0x026E */ s8 _26E;
     /* 0x026F */ s8 _26F;
@@ -469,6 +473,7 @@ void fn_8002399C(ModelSlot* slot, s32 id, u16 idx, void* layout, void* anim, voi
 void fn_800B2B74(ModelNode* node, u16 joint);
 void fn_800B2B54(ModelNode* node, u16 joint, s32 arg2);
 void fn_800B2C08(ModelNode* node, u16 joint);
+void fn_800B2B4C(ModelNode* node, f32 weight);
 s32 fn_800638B4(ModelActor* actor, ModelSlot* slot);
 s32 fn_80063010(ModelActor* actor, ModelSlot* slot);
 s32 fn_8004B7B4(ModelActor* actor, ModelSlot* slot);
@@ -1167,7 +1172,7 @@ void fn_8001D180(int idx, int part, BOOL restore) {
     ModelNode* bone;
     ModelNode* src;
     int joint;
-    u16 n;
+    int n;
     int k;
 
     if (actor != NULL) {
@@ -1425,11 +1430,173 @@ void fn_8001C234(void) {
 }
 
 // .text:0x8001BE50 size:0x3E4
-void fn_8001BE50(void) {
+void fn_8001BE50(int idx, int anim, u8 loop, u8 noRoot, s16 frame, u8 mirror, u8 blend) {
+    ModelActor* actor = lbl_8036E548.actors[idx];
+    ModelSlot* slot;
+    int set;
+    ANIMBank* bank;
+    f32 speed = 0.0f;
+    int seq;
+    if (actor == NULL) {
+        return;
+    }
+    slot = &lbl_8036E548._0060->slots[actor->_255];
+    if (blend != 0) {
+        speed = 1.0f / blend;
+    }
+    if (actor->_26C == 0) {
+        fn_800B2B54(actor->models[0], getActorJoint(actor, 4), 0xD);
+    } else {
+        fn_800B2B54(actor->models[0], getActorJoint(actor, 4), 1);
+        fn_800B2B54(slot->node, lbl_8036E548.actors[idx] != NULL ? lbl_8036E548.actors[idx]->joints[4] : 0xFFFF, 1);
+        fn_800B2B4C(slot->node, 0.125f);
+        slot->node->_8C = 0.0f;
+    }
+    if (anim >= 0) {
+        if (anim < 45) {
+            seq = anim;
+            set = 2;
+        } else if (anim < 61) {
+            seq = anim - 45;
+            set = 1;
+        } else if (anim < 63) {
+            seq = anim - 61;
+            set = 4;
+        } else if (anim < 75) {
+            seq = anim - 63;
+            set = 3;
+        } else if (anim < 105) {
+            seq = anim - 75;
+            set = 0;
+        } else {
+            set = 5;
+            seq = anim - 105;
+        }
+    }
+    bank = actor->anims[set];
+    if (bank != NULL) {
+        if (seq >= bank->numSequences) {
+            return;
+        }
+        if (seq < 0) {
+            return;
+        }
+        slot->anim = bank;
+        slot->seqNum = seq;
+        slot->time = 0.0f;
+        slot->_58 = 1;
+        slot->_5A = slot->_59 = bank != NULL;
+        slot->_60 = speed;
+    }
+    if (actor->_2C != NULL) {
+        fn_80025EEC(&actor->_2C->state, set, seq);
+    }
+    if (actor->_30 != NULL && actor->_30->_CC != 0) {
+        fn_80025EEC(&actor->_30->parts[1].state, set, seq);
+        fn_80025EEC(&actor->_30->parts[0].state, set, seq);
+    }
+    if (loop) {
+        slot->_5B = 3;
+    } else {
+        slot->_5B = 2;
+    }
+    slot->time = frame * actor->_4C;
+    slot->_59 = 1;
+    fn_8001B5EC(idx, noRoot);
+    fn_8001B308(idx, mirror);
+    actor->_268 = noRoot;
 }
 
 // .text:0x8001BA44 size:0x40C
-void fn_8001BA44(int idx, int anim, int a, int b, int c, int d, int e) {
+void fn_8001BA44(int idx, int anim, u8 loop, u8 noRoot, s16 frame, u8 mirror, u8 blend) {
+    ModelActor* actor = lbl_8036E548.actors[idx];
+    ModelSlot* slot;
+    int set;
+    ANIMBank* bank;
+    f32 speed = 0.0f;
+    int seq;
+    BOOL found;
+    if (actor == NULL) {
+        return;
+    }
+    slot = &lbl_8036E548._0060->slots[actor->_255];
+    if (blend != 0) {
+        speed = 1.0f / blend;
+    }
+    if (actor->_26C == 0) {
+        fn_800B2B54(actor->models[0], getActorJoint(actor, 4), 0xD);
+    } else {
+        fn_800B2B54(actor->models[0], getActorJoint(actor, 4), 1);
+        fn_800B2B54(slot->node, lbl_8036E548.actors[idx] != NULL ? lbl_8036E548.actors[idx]->joints[4] : 0xFFFF, 1);
+        fn_800B2B4C(slot->node, 0.125f);
+        slot->node->_8C = 0.0f;
+    }
+    if (anim < 0) {
+        found = FALSE;
+    } else {
+        if (anim < 45) {
+            seq = anim;
+            set = 2;
+        } else if (anim < 61) {
+            seq = anim - 45;
+            set = 1;
+        } else if (anim < 63) {
+            seq = anim - 61;
+            set = 4;
+        } else if (anim < 75) {
+            seq = anim - 63;
+            set = 3;
+        } else if (anim < 105) {
+            seq = anim - 75;
+            set = 0;
+        } else {
+            set = 5;
+            seq = anim - 105;
+        }
+        found = TRUE;
+    }
+    if (found) {
+        bank = actor->anims[set];
+        if (bank != NULL) {
+            if (seq >= bank->numSequences) {
+                return;
+            }
+            if (seq < 0) {
+                return;
+            }
+            slot->anim = bank;
+            slot->seqNum = seq;
+            slot->time = 0.0f;
+            slot->_58 = 1;
+            slot->_59 = slot->_5A = bank != NULL;
+            slot->_60 = speed;
+        }
+    } else {
+        slot->anim = NULL;
+        slot->seqNum = 0;
+        slot->time = 0.0f;
+        slot->_58 = 1;
+        slot->_59 = 0;
+        slot->_5A = 0;
+        slot->_60 = 0.0f;
+        return;
+    }
+    if (actor->_2C != NULL) {
+        fn_80025EEC(&actor->_2C->state, set, seq);
+    }
+    if (actor->_30 != NULL) {
+        fn_80011CA8(actor, set, seq);
+    }
+    if (loop) {
+        slot->_5B = 3;
+    } else {
+        slot->_5B = 2;
+    }
+    slot->time = frame * actor->_4C;
+    slot->_59 = 1;
+    fn_8001B5EC(idx, noRoot);
+    fn_8001B308(idx, mirror);
+    actor->_268 = noRoot;
 }
 
 // .text:0x8001B990 size:0xB4
@@ -1625,7 +1792,7 @@ int fn_8001B35C(int idx, int side) {
 }
 
 // .text:0x8001B308 size:0x54
-void fn_8001B308(s32 idx, BOOL on) {
+void fn_8001B308(int idx, BOOL on) {
     ModelActor* actor = lbl_8036E548.actors[idx];
     ModelSlot* slot;
 
@@ -1646,6 +1813,16 @@ void fn_8001B2D0(void) {
 
 // .text:0x8001B224 size:0xAC
 void fn_8001B224(void) {
+    int i;
+    ModelActor* actor;
+
+    memcpy(lbl_8036E548.actorData, lbl_8036C4FC, sizeof(lbl_8036E548.actorData));
+    for (i = 0; i < 13; i++) {
+        actor = lbl_8036E548.actors[i];
+        if (actor != NULL && (actor->_25D != 0 || i <= 8)) {
+            fn_8001BE50(i, actor->_62, actor->_25F, actor->_262, actor->_6A + 1, actor->_265, 0);
+        }
+    }
 }
 
 // .text:0x8001B214 size:0x10
@@ -3268,8 +3445,82 @@ void fn_800126EC(ModelSub2C* sub, void* tex, u8* idx) {
     fn_80025FFC(sub->files[idx[2]], &sub->state);
 }
 
+static inline void copyPart(ModelSub2C* dst, ModelSub2C* src) {
+    dst->files = src->files;
+    dst->_60 = src->_60;
+    dst->state.hdr = src->state.hdr;
+    dst->state.clips = src->state.clips;
+    dst->state.sets = src->state.sets;
+    dst->state.file = src->state.file;
+    dst->state.current = src->state.current;
+    memcpy(dst->state.sub, src->state.sub, sizeof(dst->state.sub));
+    memcpy(dst->state.setPtrs, src->state.setPtrs, sizeof(dst->state.setPtrs));
+}
+
+static inline void stashPart(ModelSub2C* tmp, ModelSub2C* src) {
+    copyPart(&tmp[src->_60 % 6], src);
+}
+
 // .text:0x80011CA8 size:0xA44
-void fn_80011CA8(void) {
+BOOL fn_80011CA8(ModelActor* actor, int set, int seq) {
+    ModelSub2C tmp[6];
+    u8 used[6] = { 0, 0, 0, 0, 0, 0 };
+    int idx = actor->_254;
+    int a;
+    int b;
+    int k;
+    int n;
+
+    stashPart(tmp, &lbl_8036E548.poses[idx * 3].parts[0]);
+    stashPart(tmp, &lbl_8036E548.poses[idx * 3].parts[1]);
+    stashPart(tmp, &lbl_8036E548.poses[idx * 3 + 1].parts[0]);
+    stashPart(tmp, &lbl_8036E548.poses[idx * 3 + 1].parts[1]);
+    stashPart(tmp, &lbl_8036E548.poses[idx * 3 + 2].parts[0]);
+    stashPart(tmp, &lbl_8036E548.poses[idx * 3 + 2].parts[1]);
+    if ((u32)(set - 2) > 2) {
+        if (actor->_25B) {
+            a = 2;
+            b = 3;
+        } else {
+            a = 4;
+            b = 5;
+        }
+    } else if (actor->_25A) {
+        a = 4;
+        b = 1;
+    } else {
+        a = 0;
+        b = 3;
+    }
+    copyPart(&actor->_30->parts[0], &tmp[a]);
+    copyPart(&actor->_30->parts[1], &tmp[b]);
+    used[a] = 1;
+    used[b] = 1;
+    n = 0;
+    for (k = 0; k < 6; k++) {
+        if (!used[k]) {
+            switch (n) {
+            case 0:
+                copyPart(&lbl_8036E548.poses[idx * 3 + 1].parts[0], &tmp[k]);
+                break;
+            case 1:
+                copyPart(&lbl_8036E548.poses[idx * 3 + 1].parts[1], &tmp[k]);
+                break;
+            case 2:
+                copyPart(&lbl_8036E548.poses[idx * 3 + 2].parts[0], &tmp[k]);
+                break;
+            case 3:
+                copyPart(&lbl_8036E548.poses[idx * 3 + 2].parts[1], &tmp[k]);
+                break;
+            }
+            n++;
+        }
+    }
+    restorePartDispObj(actor->_254, 0);
+    restorePartDispObj(actor->_254, 1);
+    fn_80025EEC(&actor->_30->parts[0].state, set, seq);
+    fn_80025EEC(&actor->_30->parts[1].state, set, seq);
+    return TRUE;
 }
 
 // .text:0x80011BE4 size:0xC4
