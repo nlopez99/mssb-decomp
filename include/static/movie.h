@@ -35,7 +35,7 @@ void fn_800AFC10(void);
 void fn_800AFD4C(void);
 u8 fn_800AFFB0(void);
 void fn_800AFFC0(u32 n);
-void fn_800B0008(void);
+s32 fn_800B0008(u32 size);
 void fn_800B0134(void);
 void fn_800B0230(u8* dest, u32 size);
 void fn_800B0390(u32 request);

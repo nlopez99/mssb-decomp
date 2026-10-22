@@ -61,7 +61,7 @@ typedef struct MovieRing {
     /* 0x14 */ u32 _14;
     /* 0x18 */ u32 _18;
     /* 0x1C */ u32 _1C;
-    /* 0x20 */ u32 _20;
+    /* 0x20 */ volatile u32 _20;
     /* 0x24 */ u32 _24;
     /* 0x28 */ u8 _28;
     /* 0x29 */ volatile u8 _29;
@@ -72,7 +72,7 @@ typedef struct MovieBuffer {
     /* 0x08 */ void* _08;
     /* 0x0C */ u32 end;
     /* 0x10 */ u32 pos;
-    /* 0x14 */ u8 _14[0x18 - 0x14];
+    /* 0x14 */ u32 write;
     /* 0x18 */ u32 size;
     /* 0x1C */ u32 free;
     /* 0x20 */ u32 used;
@@ -103,7 +103,7 @@ extern MoviePlayer* lbl_803CC170;
 extern u8 lbl_803CC17E;
 extern u8 lbl_803CC181;
 extern s32 lbl_803CC1A4;
-extern s32 lbl_803CC1AC;
+extern u32 lbl_803CC1AC;
 extern OSThread lbl_802FB220;
 extern void fn_800ACFB0(void* data);
 
@@ -132,7 +132,7 @@ void fn_800B03F4(void) {
 }
 
 // .text:0x800B0390 size:0x64
-// 67.40%: the target reloads ring->_24 after each store to lbl_803C79D4 (two bases).
+// 77.12%: the target reloads ring->_24 after each store to lbl_803C79D4 (two bases).
 void fn_800B0390(u32 request) {
     MovieRing* ring = &lbl_803C79D4;
 
@@ -152,7 +152,6 @@ void fn_800B0230(u8* dest, u32 size) {
     u32 first;
     u32 second;
     u32 end;
-    u8* dest2;
 
     if (size != 0) {
         end = ring->readPos + size;
@@ -180,12 +179,11 @@ void fn_800B0230(u8* dest, u32 size) {
         if (second != 0) {
             while (ring->_29 != 0) {
             }
-            dest2 = dest + first;
             ring->_29 = 2;
-            DCInvalidateRange(dest2, second);
-            ARQPostRequest(&lbl_803C78C4[1], 0, ARQ_TYPE_ARAM_TO_MRAM, ARQ_PRIORITY_HIGH, ring->start, (u32)dest2, second,
-                           fn_800B0390);
-            DCInvalidateRange(dest2, second);
+            DCInvalidateRange(dest + first, second);
+            ARQPostRequest(&lbl_803C78C4[1], 0, ARQ_TYPE_ARAM_TO_MRAM, ARQ_PRIORITY_HIGH, ring->start, (u32)(dest + first),
+                           second, fn_800B0390);
+            DCInvalidateRange(dest + first, second);
         }
     }
 }
@@ -195,7 +193,43 @@ void fn_800B0134(void) {
 }
 
 // .text:0x800B0008 size:0x12C
-void fn_800B0008(void) {
+s32 fn_800B0008(u32 size) {
+    MovieBuffer* buf = &lbl_803C7A00;
+    u32 aligned = ALIGN32(size);
+    u32 first;
+    u32 second;
+    u8* wrap;
+
+    if (buf->free >= buf->size) {
+        return 1;
+    }
+    if (buf->write + aligned > buf->end) {
+        first = buf->end - buf->write;
+        wrap = buf->_08;
+        second = aligned - first;
+    } else {
+        first = aligned;
+        wrap = NULL;
+        second = 0;
+    }
+    fn_800B0230((u8*)buf->write, first);
+    while (lbl_803C79D4._29 != 0) {
+    }
+    if (second != 0) {
+        fn_800B0230(wrap, second);
+        while (lbl_803C79D4._29 != 0) {
+        }
+    }
+    if (buf->write + aligned < buf->end) {
+        buf->write += first;
+    } else {
+        buf->write = (u32)buf->_08 + second;
+    }
+    buf->free += aligned;
+    if (lbl_803C79D4._20 > lbl_803CC1AC) {
+        memset((void*)(buf->write - (lbl_803C79D4._20 - lbl_803CC1AC)), 0, lbl_803C79D4._20 - lbl_803CC1AC);
+    }
+    return 1;
 }
 
 // .text:0x800AFFC0 size:0x48
