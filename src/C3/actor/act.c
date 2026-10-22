@@ -1,4 +1,5 @@
 #include "C3/act.h"
+#include "static/static_80021188.h"
 
 typedef struct UnkBF068 {
     /* 0x00 */ u8 _00[8];
@@ -11,9 +12,38 @@ typedef struct ActorLayoutFile {
     /* 0x20 */ ActorBone bones[1];
 } ActorLayoutFile;
 
+// What fn_800B472C draws: a layout placed by two matrices.
+typedef struct ActorDraw {
+    /* 0x00 */ u8 _00[0x8];
+    /* 0x08 */ Mtx world;
+    /* 0x38 */ Mtx camera;
+    /* 0x68 */ ActorLayout *layout;
+} ActorDraw;
+
 extern UnkBF068 *fn_800BF068(void);
+extern BOOL fn_800B7D3C(s32 arg, Vec *corners, Mtx mtx);
 extern void fn_800BF2A8(sBone **bones, sHdr *hdr, char *positionArray);
 extern void fn_800BC824(DODisplayLayout *layout, void *data);
+extern void fn_800B4CDC(Actor *actor);
+
+static inline void freeDisplayObj(struct DODisplayObj *dispObj) {
+    if (dispObj->displayData) {
+        fn_800ACFB0(dispObj->displayData);
+    }
+    if (dispObj->lightingData) {
+        fn_800ACFB0(dispObj->lightingData);
+    }
+    if (dispObj->textureData) {
+        fn_800ACFB0(dispObj->textureData);
+    }
+    if (dispObj->colorData) {
+        fn_800ACFB0(dispObj->colorData);
+    }
+    if (dispObj->positionData) {
+        fn_800ACFB0(dispObj->positionData);
+    }
+    fn_800ACFB0(dispObj);
+}
 
 
 // .text:0x800B49E4 size:0x60
@@ -70,7 +100,70 @@ void haveActLayoutPointToGeoHeader(ActorLayout *layout, char *geoPalette) {
 }
 
 // .text:0x800B472C size:0x1DC
-void fn_800B472C(void) {}
+void fn_800B472C(struct ActorDraw *draw) {
+    MtxPtr world = draw->world;
+    MtxPtr camera = draw->camera;
+    int i;
+    ActorLayout *layout;
+    struct DODisplayObj *obj;
+    DODisplayDataPtr pal;
+    Vec corners[8];
+    Mtx mtx;
+
+    layout = draw->layout;
+    pal = (DODisplayDataPtr)layout->geoPaletteName;
+    for (i = 0; i < layout->totalBones; i++) {
+        if (((ActorLayoutFile *)layout)->bones[i].geoFileID != 0xFFFF) {
+            obj = (struct DODisplayObj *)pal->descriptorArray[((ActorLayoutFile *)layout)->bones[i].geoFileID].layout;
+            CTRLBuildMatrix(((ActorLayoutFile *)layout)->bones[i].orientationCtrl, obj->worldMatrix);
+            PSMTXConcat(world, obj->worldMatrix, obj->worldMatrix);
+            PSMTXConcat(camera, obj->worldMatrix, mtx);
+            corners[0].x = obj->xMax;
+            corners[0].y = obj->yMax;
+            corners[0].z = obj->zMin;
+            corners[1].x = obj->xMin;
+            corners[1].y = obj->yMax;
+            corners[1].z = obj->zMin;
+            corners[2].x = obj->xMin;
+            corners[2].y = obj->yMax;
+            corners[2].z = obj->zMax;
+            corners[3].x = obj->xMax;
+            corners[3].y = obj->yMax;
+            corners[3].z = obj->zMax;
+            corners[4].x = obj->xMax;
+            corners[4].y = obj->yMin;
+            corners[4].z = obj->zMin;
+            corners[5].x = obj->xMin;
+            corners[5].y = obj->yMin;
+            corners[5].z = obj->zMin;
+            corners[6].x = obj->xMin;
+            corners[6].y = obj->yMin;
+            corners[6].z = obj->zMax;
+            corners[7].x = obj->xMax;
+            corners[7].y = obj->yMin;
+            corners[7].z = obj->zMax;
+            if (fn_800B7D3C(0, corners, mtx) != 0) {
+                if (((ActorLayoutFile *)layout)->bones[i].pad16 & 1) {
+                    GXSetZMode(GX_TRUE, GX_ALWAYS, GX_TRUE);
+                } else {
+                    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
+                }
+                switch (((ActorLayoutFile *)layout)->bones[i].pad16 & 6) {
+                case 2:
+                    GXSetBlendMode(GX_BM_BLEND, GX_BL_ONE, GX_BL_ONE, GX_LO_CLEAR);
+                    break;
+                case 4:
+                    GXSetBlendMode(GX_BM_BLEND, GX_BL_DSTCOL, GX_BL_ZERO, GX_LO_CLEAR);
+                    break;
+                default:
+                    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+                    break;
+                }
+                DOVARender(obj, camera, 0, NULL);
+            }
+        }
+    }
+}
 
 // .text:0x800B4724 size:0x8
 void fn_800B4724(Actor *actor, sHdr *skHeader) {
@@ -81,7 +174,24 @@ void fn_800B4724(Actor *actor, sHdr *skHeader) {
 void fn_800B43A0(void) {}
 
 // .text:0x800B4278 size:0x128
-void fn_800B4278(void) {}
+void fn_800B4278(Actor *actor) {
+    struct DODisplayObj *dispObj;
+    int i;
+    struct DODisplayObj *skin;
+
+    skin = actor->skinObject;
+    fn_800B4CDC(actor);
+    for (i = actor->totalBones - 1; i >= 0; i--) {
+        dispObj = actor->boneArray[i]->dispObj;
+        if (dispObj != NULL) {
+            freeDisplayObj(dispObj);
+        }
+    }
+    fn_800ACFB0(actor);
+    if (skin != NULL) {
+        freeDisplayObj(actor->skinObject);
+    }
+}
 
 // .text:0x800B4084 size:0x1F4
 void fn_800B4084(void) {}
@@ -96,7 +206,32 @@ void fn_800B3F20(void) {}
 void fn_800B3C04(void) {}
 
 // .text:0x800B3A78 size:0x18C
-void fn_800B3A78(void) {}
+void fn_800B3A78(Actor *actor, MtxPtr camera, u8 numLights, ...) {
+    va_list list;
+    sBone *bone;
+
+    if (actor->_98 & 9) {
+        if (actor->skinObject != NULL) {
+            fn_800B2D5C(actor);
+            GXInvalidateVtxCache();
+            va_start(list, numLights);
+            if (actor->skHeader != NULL) {
+                DOVARender(actor->skinObject, camera, numLights, &list);
+            } else {
+                DOVARenderSkin(actor->skinObject, camera, actor->skinMtxArray, actor->skinInvTransposeMtxArray, numLights, &list);
+            }
+            va_end(list);
+        }
+        for (bone = (sBone *)actor->drawPriorityList.Head; bone != NULL; bone = (sBone *)bone->drawPriorityLink.Next) {
+            if (bone->dispObj != NULL) {
+                DOSetWorldMatrix(bone->dispObj, bone->forwardMtx);
+            }
+            va_start(list, numLights);
+            DOVARender(bone->dispObj, camera, numLights, &list);
+            va_end(list);
+        }
+    }
+}
 
 // .text:0x800B37A4 size:0x2D4
 void f_BuildBoneSkinOrientationMatrix(void) {}
