@@ -32,7 +32,7 @@ void fn_800AF5FC(void);
 void fn_800AF9B4(void);
 void fn_800AFBF0(void);
 void fn_800AFC10(void);
-void fn_800AFD4C(void);
+s32 fn_800AFD4C(void);
 u8 fn_800AFFB0(void);
 void fn_800AFFC0(u32 n);
 s32 fn_800B0008(u32 size);

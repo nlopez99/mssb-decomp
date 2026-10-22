@@ -61,10 +61,10 @@ typedef struct MovieRing {
     /* 0x0C */ u32 writePos;
     /* 0x10 */ u32 size;
     /* 0x14 */ u32 _14;
-    /* 0x18 */ u32 _18;
-    /* 0x1C */ u32 _1C;
+    /* 0x18 */ volatile u32 _18;
+    /* 0x1C */ volatile u32 _1C;
     /* 0x20 */ volatile u32 _20;
-    /* 0x24 */ u32 _24;
+    /* 0x24 */ volatile u32 _24;
     /* 0x28 */ u8 _28;
     /* 0x29 */ volatile u8 _29;
 } MovieRing;
@@ -88,7 +88,9 @@ extern struct {
     /* 0x708 */ u8* readPtr;
     /* 0x70C */ s32 streamSize;
     /* 0x710 */ u32 streamDone;
-    /* 0x714 */ u8 _714[0x722 - 0x714];
+    /* 0x714 */ u8 _714;
+    /* 0x715 */ volatile s8 _715;
+    /* 0x716 */ u8 _716[0x722 - 0x716];
     /* 0x722 */ s8 error;
 } lbl_803C6CF8;
 extern MovieRing lbl_803C79D4;
@@ -157,7 +159,6 @@ void fn_800B05E4(s32 aramSize, u32 size) {
 }
 
 // .text:0x800B0580 size:0x64
-// 57.12%: same shape as fn_800B0390.
 void fn_800B0580(u32 request) {
     MovieRing* ring = &lbl_803C79D4;
 
@@ -215,7 +216,6 @@ void fn_800B03F4(u8* src, u32 size) {
 }
 
 // .text:0x800B0390 size:0x64
-// 77.12%: the target reloads ring->_24 after each store to lbl_803C79D4 (two bases).
 void fn_800B0390(u32 request) {
     MovieRing* ring = &lbl_803C79D4;
 
@@ -368,7 +368,31 @@ u8 fn_800AFFB0(void) {
 }
 
 // .text:0x800AFD4C size:0x264
-void fn_800AFD4C(void) {
+// 99.41%: registers of the inlined fn_800B0134 copy differ (first, second, src, wrap).
+s32 fn_800AFD4C(void) {
+    MovieRing* ring = &lbl_803C79D4;
+    u32 size;
+
+    if (ring->_28 != 0) {
+        return 1;
+    }
+    if (ring->size > ring->_1C + 0x4000) {
+        size = 0x4000;
+    } else {
+        size = ring->size - ring->_1C;
+    }
+    fn_800B0134(size);
+    if (lbl_803C79D4._1C >= ring->size) {
+        fn_800B0008(lbl_803C7A00.size);
+        // A discarded read of the volatile counter; the target loads it here.
+        lbl_803C79D4._1C;
+        fn_800A6C80();
+        while (lbl_803C6CF8._715 != 1) {
+        }
+        ring->_28 = 1;
+        return 1;
+    }
+    return 1;
 }
 
 // .text:0x800AFC10 size:0x13C
