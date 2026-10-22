@@ -7,6 +7,24 @@ f32 lbl_803CBB68 = 20.0f;
 
 int __abs(int n);
 
+#define ALIGN32(x) (((u32)(x) + 0x1F) & ~0x1F)
+
+extern struct {
+    /* 0x00 */ u32 _00;
+    /* 0x04 */ u32 _04;
+    /* 0x08 */ u32 _08;
+} lbl_803C7898;
+
+extern struct {
+    /* 0x00 */ u8 _00[0x50];
+    /* 0x50 */ u32 _50;
+    /* 0x54 */ u32 _54;
+    /* 0x58 */ u32 _58;
+} lbl_803C7420;
+
+extern void fn_800AD054(u32 arg0, u32 arg1);
+extern void OSSetArenaLo(void* addr);
+
 // .text:0x800BDE8C size:0x14
 void fn_800BDE8C(u32 arg0) {
     lbl_803009F8._4C = (arg0 & 7) << 5;
@@ -174,7 +192,71 @@ void fn_800BEC00(s32 arg0) {
 }
 
 // .text:0x800BEC30 size:0x3D8
-void fn_800BEC30(void) {}
+// 93.95%: first draft; registers and the scheduling of the arena pointer arithmetic differ.
+void fn_800BEC30(u8 count) {
+    Vec dirs[4] = {
+        { 1.3f, 1.0f, 1.3f },
+        { 1.3f, 1.0f, -1.3f },
+        { -1.3f, 1.0f, 1.3f },
+        { -1.3f, 1.0f, -1.3f },
+    };
+    u32 cur;
+    u32 hi;
+    u32 size;
+    u32 end;
+    s32 i;
+    u32 v;
+
+    cur = ALIGN32(lbl_803C7898._04);
+    hi = lbl_803C7898._08;
+    lbl_803009F8.copyBuf = (void**)cur;
+    cur = ALIGN32(cur + count * sizeof(void*));
+    size = GXGetTexBufferSize(640, 480, GX_TF_I4, GX_FALSE, 0);
+    lbl_803009F8.copyBuf[0] = (void*)ALIGN32(cur);
+    cur = ALIGN32((u32)lbl_803009F8.copyBuf[0] + size);
+    lbl_803009F8.texObj = (GXTexObj*)ALIGN32(cur);
+    cur = ALIGN32((u32)lbl_803009F8.texObj + count * sizeof(GXTexObj));
+    lbl_803009F8.tlut = (GXTlutObj*)ALIGN32(cur);
+    cur = ALIGN32((u32)lbl_803009F8.tlut + sizeof(GXTlutObj));
+    lbl_803009F8.tlutData = (u16*)ALIGN32(cur);
+    v = 0x11110;
+    do {
+        v -= 0x1111;
+        lbl_803009F8.tlutData[v & 0xF] = v;
+    } while (v != 0);
+    cur = ALIGN32((u32)lbl_803009F8.tlutData + 16 * sizeof(u16));
+    lbl_803009F8.entries = (ShadowEntry*)ALIGN32(cur);
+    end = ALIGN32((u32)lbl_803009F8.entries + count * sizeof(ShadowEntry));
+    fn_800AD054(end, hi);
+    lbl_803C7420._50 = end;
+    lbl_803C7420._54 = hi;
+    lbl_803C7420._58 = ALIGN32(hi - end);
+    OSSetArenaLo((void*)hi);
+    for (i = 0; i < count; i++) {
+        GXInitTexObjCI(&lbl_803009F8.texObj[i], lbl_803009F8.copyBuf[i], 640, 480, GX_TF_C4, GX_CLAMP, GX_CLAMP, GX_FALSE, GX_TLUT15);
+        GXInitTlutObj(lbl_803009F8.tlut, lbl_803009F8.tlutData, GX_TL_IA8, 16);
+        GXInitTexObjLOD(&lbl_803009F8.texObj[i], GX_LINEAR, GX_LINEAR, 0.0f, 0.0f, 0.0f, GX_FALSE, GX_FALSE, GX_ANISO_1);
+        lbl_803009F8.entries[i]._28 = 0.175f;
+        lbl_803009F8.entries[i]._24 = 0.25f;
+        lbl_803009F8.entries[i].near = 1.0f;
+        lbl_803009F8.entries[i].far = 512.0f;
+        lbl_803009F8.entries[i].eye.x = 100.0f;
+        lbl_803009F8.entries[i].eye.y = 100.0f;
+        lbl_803009F8.entries[i].eye.z = 100.0f;
+        lbl_803009F8.entries[i].up.x = 0.0f;
+        lbl_803009F8.entries[i].up.y = 1.0f;
+        lbl_803009F8.entries[i].up.z = 0.0f;
+        lbl_803009F8.entries[i].target.x = 0.0f;
+        lbl_803009F8.entries[i].target.y = 0.0f;
+        lbl_803009F8.entries[i].target.z = 50.0f;
+        lbl_803009F8.entries[i].pos = dirs[i];
+    }
+    lbl_803009F8.count = count;
+    lbl_803009F8.enabled = 0;
+    lbl_803009F8._18 = NULL;
+    lbl_803009F8._1C = NULL;
+    lbl_803009F8._4D = 1;
+}
 
 // .text:0x800BF008 size:0x30
 void fn_800BF008(void) {

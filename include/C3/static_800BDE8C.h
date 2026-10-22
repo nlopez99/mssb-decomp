@@ -8,7 +8,8 @@ typedef struct ShadowEntry {
     /* 0x00 */ Vec eye;
     /* 0x0C */ Vec up;
     /* 0x18 */ Vec target;
-    /* 0x24 */ u8 _24[0x2C - 0x24];
+    /* 0x24 */ f32 _24;
+    /* 0x28 */ f32 _28;
     /* 0x2C */ f32 near;
     /* 0x30 */ f32 far;
     /* 0x34 */ Vec pos;
@@ -26,11 +27,12 @@ typedef struct ShadowRange {
 
 typedef struct ShadowState {
     /* 0x00 */ u8 enabled;
-    /* 0x01 */ u8 _01[0x4 - 0x1];
+    /* 0x01 */ u8 count;
+    /* 0x02 */ u8 _02[0x4 - 0x2];
     /* 0x04 */ void** copyBuf;
     /* 0x08 */ GXTexObj* texObj;
     /* 0x0C */ GXTlutObj* tlut;
-    /* 0x10 */ u8 _10[0x14 - 0x10];
+    /* 0x10 */ u16* tlutData;
     /* 0x14 */ ShadowEntry* entries;
     /* 0x18 */ void* _18;
     /* 0x1C */ ShadowCallback _1C;
@@ -58,7 +60,7 @@ u8 GetDrawShadows(void);
 void DrawShadows(u8 enable);
 void fn_800BEBCC(u8 index, Vec pos);
 void fn_800BEC00(s32 arg0);
-void fn_800BEC30(void);
+void fn_800BEC30(u8 count);
 void fn_800BF008(void);
 void fn_800BF038(void (*arg0)(MtxPtr view, s32 arg1));
 void fn_800BF048(void* arg0);
