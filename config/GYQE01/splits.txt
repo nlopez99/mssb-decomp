@@ -1089,6 +1089,11 @@ C3/actor/actorAnim.c:
 	.text       start:0x800B4A44 end:0x800B4E9C
 	.sdata2     start:0x803CCF78 end:0x803CCF80
 
+C3/anim/animBank.c:
+	extab       start:0x80006A40 end:0x80006A50
+	extabindex  start:0x80008AC0 end:0x80008AD8
+	.text       start:0x800B4E9C end:0x800B516C
+
 C3/control/control.c:
 	extab       start:0x80006A90 end:0x80006AE0
 	extabindex  start:0x80008B38 end:0x80008BB0

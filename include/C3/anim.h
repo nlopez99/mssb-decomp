@@ -53,7 +53,7 @@ void ANIMGet(ANIMBank *animBank);
 void ANIMRelease(ANIMBank **animBank);
 ANIMSequences *ANIMGetSequence(ANIMBank *animBank, char *sequenceName, u16 seqNum);
 struct ANIMAnimTrack *ANIMGetTrackFromSequence(ANIMSequences *animSeq, u16 animTrackID);
-void ANIMGetKeyFrameFromTrack(struct ANIMAnimTrack * animTrack, f32 time, KeyFrame **currentFrame, KeyFrame **nextFrame);
+void ANIMGetKeyFrameFromTrack(struct ANIMAnimTrack *animTrack, f32 time, KeyFrame **currentFrame, KeyFrame **nextFrame, u16 *hint);
 u32 ANIMGetUserDataSize(ANIMBank *animBank);
 char *ANIMGetUserData(ANIMBank *animBank);
 

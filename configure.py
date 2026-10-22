@@ -686,6 +686,7 @@ config.libs = [
         "objects": [
             Object(NonMatching, "C3/actor/act.c", extra_cflags=["-inline deferred"]),
             Object(NonMatching, "C3/actor/actorAnim.c", extra_cflags=["-inline deferred"]),
+            Object(NonMatching, "C3/anim/animBank.c", extra_cflags=["-inline deferred"]),
             Object(NonMatching, "C3/control/control.c", extra_cflags=["-inline deferred"]),
         ],
     },
