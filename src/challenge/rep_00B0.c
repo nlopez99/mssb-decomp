@@ -41,12 +41,8 @@ typedef struct Draw00B0 {
     /* 0x4 */ void (*_4)(void);
 } Draw00B0; // size: 0x8
 
-extern void fn_800A1A70(GDCurrentDL* obj, void* start, u32 len);
-extern void fn_800A1A88(void);
-extern void fn_800A1B80(void);
 extern void makeLookAtMatrix(Mtx m, const Vec* camPos, const Vec* camUp, const Vec* target);
 
-extern GDCurrentDL* lbl_803CC0F0;
 extern u8 lbl_803CBBC0;
 
 extern struct {
@@ -88,13 +84,13 @@ Draw00B0 lbl_1_data_298[2] = {
 Vec lbl_1_bss_60[8];
 
 static inline void GDOverflowCheck00B0(u32 size) {
-    if (lbl_803CC0F0->pDisplayListData + size > lbl_803CC0F0->end) {
-        fn_800A1B80();
+    if (__GDCurrentDL->pDisplayListData + size > __GDCurrentDL->end) {
+        GDOverflowed();
     }
 }
 
 static inline void GDWrite00B0(u32 data) {
-    *lbl_803CC0F0->pDisplayListData++ = data;
+    *__GDCurrentDL->pDisplayListData++ = data;
 }
 
 static inline void GDWrite_u8(u8 data) {
@@ -486,8 +482,8 @@ void fn_1_19AC(void) {
     GXSetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
     GXLoadPosMtxImm(lbl_1_common_bss_472B4._000, GX_PNMTX0);
     list = lbl_1_common_bss_472B4._224 + 1;
-    fn_800A1A70(&lbl_1_common_bss_472B4._20C, lbl_1_common_bss_472B4._21C, 0x80000);
-    lbl_803CC0F0 = &lbl_1_common_bss_472B4._20C;
+    GDInitGDLObj(&lbl_1_common_bss_472B4._20C, lbl_1_common_bss_472B4._21C, 0x80000);
+    __GDCurrentDL = &lbl_1_common_bss_472B4._20C;
     if (lbl_1_common_bss_472B4._22E < 0) {
         for (i = 0; i < lbl_1_common_bss_472B4._228; i++) {
             fn_1_25BC(*list++);
@@ -504,7 +500,7 @@ void fn_1_19AC(void) {
         PSVECAdd(&line[0], &line[1], &line[1]);
         fn_1_4290(line);
     }
-    fn_800A1A88();
+    GDPadCurr32();
     size = lbl_1_common_bss_472B4._20C.pDisplayListData - lbl_1_common_bss_472B4._20C.begin;
     DCFlushRangeNoSync(lbl_1_common_bss_472B4._21C, size);
     lbl_1_common_bss_472B4._220 = size;

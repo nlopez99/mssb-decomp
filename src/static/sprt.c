@@ -57,7 +57,6 @@ typedef struct SprtLayer {
     /* 0x08 */ GDCurrentDL* dl;
 } SprtLayer; // size: 0xC
 
-extern GDCurrentDL* lbl_803CC0F0;
 extern u32 lbl_802FE8B8[24];
 extern SprtProj lbl_802FE918[];
 extern SprtState lbl_802FEBF8[];
@@ -65,17 +64,7 @@ extern SprtState lbl_802FF978[];
 extern GDCurrentDL lbl_803006F8[2][24];
 extern SprtVtx lbl_803C8A24[];
 
-extern void fn_800A1BB0(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-extern void fn_800A1A70(GDCurrentDL* dl, void* start, u32 length);
 extern void fn_800A7D4C(s32 slot, void* node);
-extern void fn_800A1E3C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-extern void fn_800A1F40(s32 map, s32 wrapS, s32 wrapT, s32 minFilter, s32 magFilter, f32 minLod, f32 maxLod, f32 lodBias,
-                        u8 biasClamp, u8 edgeLod, s32 aniso);
-extern void fn_800A2194(s32 map, u16 width, u16 height, s32 format);
-extern void fn_800A2294(s32 map, void* image);
-extern void fn_800A237C(s32 map, u32 tmem, s32 format);
-extern void fn_800A246C(s32 coord, u16 sScale, u8 sBias, u8 sWrap, u16 tScale, u8 tBias, u8 tWrap);
-extern void fn_800A26FC(void* tlut, u32 tmem);
 
 SprtLayer lbl_80111340[2][24] = {
     { { 0, fn_800B2240, NULL } },
@@ -183,19 +172,19 @@ static inline s32 UpdateBlendMode(void) {
     if (lbl_803CBB38->_8A != lbl_803CBB34->_8A) {
         lbl_803CBB38->_8A = lbl_803CBB34->_8A;
         ReserveSprite(10);
-        lbl_803CC0F0 = lbl_803CC1C0;
+        __GDCurrentDL = lbl_803CC1C0;
         switch (lbl_803CBB34->_8A) {
         case 0:
-            fn_800A1BB0(GX_BM_NONE, GX_BL_ZERO, GX_BL_ZERO, GX_LO_CLEAR);
+            GDSetBlendMode(GX_BM_NONE, GX_BL_ZERO, GX_BL_ZERO, GX_LO_CLEAR);
             break;
         case 1:
-            fn_800A1BB0(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+            GDSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
             break;
         case 2:
-            fn_800A1BB0(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_DSTALPHA, GX_LO_CLEAR);
+            GDSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_DSTALPHA, GX_LO_CLEAR);
             break;
         case 3:
-            fn_800A1BB0(GX_BM_SUBTRACT, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+            GDSetBlendMode(GX_BM_SUBTRACT, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
             break;
         }
         return 1;
@@ -222,9 +211,9 @@ static inline s32 UpdateAlphaCompare(void) {
             lbl_803CC1C0->pDisplayListData += 5;
         }
         ReserveSprite(5);
-        lbl_803CC0F0 = lbl_803CC1C0;
-        fn_800A1E3C(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
-        lbl_803CC0F0 = NULL;
+        __GDCurrentDL = lbl_803CC1C0;
+        GDSetAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
+        __GDCurrentDL = NULL;
     } else {
         if (lbl_803CBB38->zmode != lbl_803CBB34->zmode) {
             lbl_803CBB38->zmode = lbl_803CBB34->zmode;
@@ -234,9 +223,9 @@ static inline s32 UpdateAlphaCompare(void) {
             lbl_803CC1C0->pDisplayListData += 5;
         }
         ReserveSprite(5);
-        lbl_803CC0F0 = lbl_803CC1C0;
-        fn_800A1E3C(GX_GREATER, 0, GX_AOP_AND, GX_ALWAYS, 0);
-        lbl_803CC0F0 = NULL;
+        __GDCurrentDL = lbl_803CC1C0;
+        GDSetAlphaCompare(GX_GREATER, 0, GX_AOP_AND, GX_ALWAYS, 0);
+        __GDCurrentDL = NULL;
     }
     return 1;
 }
@@ -280,8 +269,8 @@ void fn_800B2854(u8* buf, s32 size, Mtx44 proj, s32 projType, s32 count, u32* ha
         } else {
             n = half;
         }
-        fn_800A1A70(dl, front, n);
-        fn_800A1A70(dl + 24, back, n);
+        GDInitGDLObj(dl, front, n);
+        GDInitGDLObj(dl + 24, back, n);
         SetProjection(&lbl_803CBB40[i], proj, projType);
         front += n;
         back += n;
@@ -505,8 +494,8 @@ s32 fn_800B1EBC(SprtTex* tex, s32 id, u32 width, u32 height) {
                 n *= 2;
             }
             tmem = (id << 13) + 0xC0000;
-            fn_800A26FC(tex->tlut, tmem);
-            fn_800A237C(map, tmem, tex->tlutFormat);
+            GDLoadTlut(tex->tlut, tmem, n);
+            GDSetTexTlut(map, tmem, tex->tlutFormat);
         }
         wrapS = tex->wrapS;
         if (wrapS != GX_CLAMP) {
@@ -532,16 +521,16 @@ s32 fn_800B1EBC(SprtTex* tex, s32 id, u32 width, u32 height) {
                 wrapT = GX_CLAMP;
             }
         }
-        fn_800A1F40(map, wrapS, wrapT, tex->minFilter, tex->magFilter, tex->minLod, tex->maxLod, tex->lodBias, 0, 0, 0);
-        fn_800A2194(map, tex->width, tex->height, tex->format);
-        fn_800A2294(map, tex->image);
+        GDSetTexLookupMode(map, wrapS, wrapT, tex->minFilter, tex->magFilter, tex->minLod, tex->maxLod, tex->lodBias, 0, 0, 0);
+        GDSetTexImgAttr(map, tex->width, tex->height, tex->format);
+        GDSetTexImgPtr(map, tex->image);
         dirty = 1;
     }
     if (lbl_803CBB34->width != width || lbl_803CBB34->height != height) {
         lbl_803CBB34->width = width;
         lbl_803CBB34->height = height;
         ReserveSprite(15);
-        fn_800A246C(id, width, 0, 0, height, 0, 0);
+        GDSetTexCoordScale2(id, width, 0, 0, height, 0, 0);
         dirty = 1;
     }
     return dirty;
@@ -561,9 +550,9 @@ void DrawSprite(s32 prim, SprtVtx* verts, s32 count, SprtTex* tex, u32 width, u3
 
     dirty = 0;
     if (tex != NULL) {
-        lbl_803CC0F0 = lbl_803CC1C0;
+        __GDCurrentDL = lbl_803CC1C0;
         dirty = fn_800B1EBC(tex, 0, width, height);
-        lbl_803CC0F0 = NULL;
+        __GDCurrentDL = NULL;
     }
     dirty |= UpdateProjection();
     dirty |= UpdateViewMtx();

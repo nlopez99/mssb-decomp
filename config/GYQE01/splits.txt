@@ -1041,6 +1041,22 @@ Dolphin/OdemuExi2/DebuggerDriver.c:
 	.sdata      start:0x803CBA90 end:0x803CBA98
 	.sbss       start:0x803CC0D8 end:0x803CC0F0
 
+Dolphin/gd/GDBase.c:
+	.text       start:0x800A1A70 end:0x800A1BB0
+	.sbss       start:0x803CC0F0 end:0x803CC0F8
+
+Dolphin/gd/GDPixel.c:
+	.text       start:0x800A1BB0 end:0x800A1E3C
+
+Dolphin/gd/GDTev.c:
+	.text       start:0x800A1E3C end:0x800A1F40
+
+Dolphin/gd/GDTexture.c:
+	.text       start:0x800A1F40 end:0x800A2B5C
+	.data       start:0x8010F158 end:0x8010F160
+	.sdata      start:0x803CBA98 end:0x803CBAC0
+	.sdata2     start:0x803CCEC0 end:0x803CCEC8
+
 Dolphin/exi/EXIBios.c:
 	.text       start:0x800A2B5C end:0x800A4538
 	.data       start:0x8010F160 end:0x8010F270

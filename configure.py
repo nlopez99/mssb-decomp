@@ -602,6 +602,15 @@ config.libs = [
         ]
     ),
     DolphinLib(
+        "gd",
+        [
+            Object(NonMatching, "Dolphin/gd/GDBase.c"),
+            Object(NonMatching, "Dolphin/gd/GDPixel.c"),
+            Object(NonMatching, "Dolphin/gd/GDTev.c"),
+            Object(NonMatching, "Dolphin/gd/GDTexture.c"),
+        ]
+    ),
+    DolphinLib(
         "exi",
         [
             Object(Matching, "Dolphin/exi/EXIBios.c"),

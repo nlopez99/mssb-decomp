@@ -1,61 +1,34 @@
-#include "types.h"
-#include "Dolphin/os.h"
 #include "Dolphin/gd.h"
+#include "Dolphin/os.h"
 
-GDCurrentDL* __GDCurrentDL    = (GDCurrentDL*)NULL;
-GDOverflowCallback overflowcb = (GDOverflowCallback)NULL;
+GDCurrentDL* __GDCurrentDL = NULL;
+GDOverflowCallback overflowcb = NULL;
 
-/**
- * @note Address: 0x800E1B04
- * @note Size: 0x18
- */
-void GDInitGDLObj(GDCurrentDL* GDL_Obj, u8* start, s32 len)
+// .text:0x800A1A70 size:0x18
+void GDInitGDLObj(GDCurrentDL* dl, void* start, u32 length)
 {
-	GDL_Obj->begin            = start;
-	GDL_Obj->pDisplayListData = start;
-	GDL_Obj->end              = start + len;
-	GDL_Obj->length           = len;
+	dl->begin = start;
+	dl->pDisplayListData = start;
+	dl->end = (u8*)start + length;
+	dl->length = length;
 }
 
-/**
- * @note Address: 0x800E1B1C
- * @note Size: 0x2C
- */
-void GDFlushCurrToMem() { DCFlushRange(__GDCurrentDL->begin, __GDCurrentDL->length); }
-
-/**
- * @note Address: 0x800E1B48
- * @note Size: 0xF8
- */
-void GDPadCurr32()
+// .text:0x800A1A88 size:0xF8
+void GDPadCurr32(void)
 {
-	u32 i = ((u32)__GDCurrentDL->pDisplayListData & 31);
-	if (i) {
-		for (i; i < 32; i++) {
+	u32 n = (u32)__GDCurrentDL->pDisplayListData & 31;
+
+	if (n) {
+		for (; n < 32; n++) {
 			__GDWrite(0);
 		}
 	}
 }
 
-/**
- * @note Address: 0x800E1C40
- * @note Size: 0x30
- */
+// .text:0x800A1B80 size:0x30
 void GDOverflowed(void)
 {
 	if (overflowcb) {
 		(*overflowcb)();
 	}
 }
-
-/**
- * @note Address: N/A
- * @note Size: 0x8
- */
-void GDSetOverflowCallback(GDOverflowCallback cb) { overflowcb = cb; }
-
-/**
- * @note Address: N/A
- * @note Size: 0x8
- */
-GDOverflowCallback GDGetOverflowCallback(void) { return overflowcb; }
