@@ -18,6 +18,7 @@
 #include "static/static_8005268C.h"
 #include "static/static_80062578.h"
 #include "static/graphic.h"
+#include "static/static_8006C48C.h"
 
 typedef struct MenuTask08E8 {
     /* 0x00 */ u8 _00[0xC];
@@ -482,9 +483,6 @@ extern void LITInitAttn(LITObj* light, f32 a0, f32 a1, f32 a2, f32 k0, f32 k1, f
 extern void LITInitPos(LITObj* light, f32 x, f32 y, f32 z);
 extern void LITInitColor(LITObj* light, GXColor color);
 extern void LITInitDir(LITObj* light, f32 nx, f32 ny, f32 nz);
-extern BOOL fn_8006C79C(s32 index);
-extern BOOL fn_8006CDC0(s32 index);
-extern void starMissionRelated2(void);
 extern void fn_8003BF54(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 
@@ -504,8 +502,6 @@ extern void Set_FUN_800b2b6c(MenuActor08E8* actor, void* arg1);
 extern void fn_800BDA24(MenuActorRef08E8* ref);
 extern u8 fn_800B3C04(s32 arg0, MenuActor08E8* actor, Mtx mtx);
 extern int fn_80024DB0(MenuAnimState08E8* anim);
-extern s32 fn_8006C5CC(void);
-extern s32 fn_8006C6C4(void);
 extern void fn_80024FA4(MenuActorRef08E8* model, u32 animId, MenuAnimState08E8* anim, s32 arg3);
 
 // rep_10C0

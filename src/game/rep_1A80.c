@@ -13,6 +13,7 @@
 #include "game/game_batter.h"
 #include "game/rep_CC8.h"
 #include "game/rep_720.h"
+#include "static/static_8001FE00.h"
 
 typedef struct AramEntry1A80 {
     /* 0x0 */ u32 _0[4];
@@ -107,8 +108,6 @@ extern struct {
 
 extern u8 lbl_3_data_6104[8];
 
-extern void changeScene(u8, s16);
-extern void fn_800203E0(int, s8);
 extern void fn_8004CC18(void);
 extern int fn_3_6BD6C(void);
 extern void fn_80035B50(int arg);
