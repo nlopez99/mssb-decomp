@@ -59,10 +59,11 @@ static inline void QuatSlerp(Quaternion *p, Quaternion *q, Quaternion *r, f32 t)
 }
 
 static inline f32 getFrameT(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFrame *nextFrame) {
+    f32 t = 0.0f;
     f32 dt = animPipe->time - currentFrame->time;
 
-    if (dt == 0.0f) {
-        return 0.0f;
+    if (dt == t) {
+        return t;
     }
     if (nextFrame->time > currentFrame->time) {
         return dt / (nextFrame->time - currentFrame->time);
@@ -202,8 +203,8 @@ void ANIMTick(struct ANIMPipe *animPipe, u8 flag) {
 }
 
 // .text:0x800B71C0 size:0x558
-// Differs: the target compares dt against 0.0f in the other operand order; registers in
-// the inlined slerp (omega and t * omega swapped, as in Squad's third).
+// Differs: registers only, in the inlined slerp (omega and t * omega swapped, as in
+// Squad's third slerp).
 void DoQuatAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFrame *nextFrame) {
     u8 type;
     int stride;
@@ -264,8 +265,7 @@ void DoQuatAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFrame
 }
 
 // .text:0x800B6E0C size:0x3B4
-// Differs: dt is compared with 0.0f in the other operand order, and registers in the
-// linear and Bezier cases.
+// Differs: registers in the linear and Bezier cases.
 void DoEulerAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFrame *nextFrame) {
     f32 cur[3];
     f32 next[3];
