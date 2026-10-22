@@ -2560,9 +2560,9 @@ void challengeMapRelated(void) {
 }
 
 // .text:0x8001A3FC size:0x2B4
-// 63.68%: first draft. The target guards the size scan and allocation with a test of a
-// counter (cmpwi r4,0; beq), so they sit in a loop of their own; the actor loop's stores
-// are scheduled differently. Not yet tuned.
+// 65.66%: first draft. The target keeps the buffer count (1) in r4 and tests it
+// (cmpwi r4,0) without holding it across the allocation; the actor loop's stores are
+// scheduled differently. Not yet tuned.
 void fn_8001A3FC(int mode) {
     u32 max;
     u32 size;
@@ -2570,6 +2570,7 @@ void fn_8001A3FC(int mode) {
     void** p;
     int i;
     s32 j;
+    s32 count = 1;
 
     fn_80018270(mode);
     lbl_803CBC34[0] = 0;
@@ -2577,24 +2578,28 @@ void fn_8001A3FC(int mode) {
     lbl_803CBC34[2] = 0;
     lbl_803CBC34[3] = 0;
     lbl_803CBC34[4] = 1;
-    for (j = 1; j < 13; j++) {
+    for (j = count; j < 13; j++) {
         lbl_80118220[j]._61 = -2;
     }
-    max = 0;
-    for (i = 0; i < 54; i++) {
-        idx = lbl_800EEB18[i];
-        if (idx >= 0) {
-            size = lbl_803CB794[idx].size & 0x0FFFFFFF;
-            if (max < size) {
-                max = size;
+    if (count != 0) {
+        max = 0;
+        for (i = 0; i < 54; i++) {
+            idx = lbl_800EEB18[i];
+            if (idx >= 0) {
+                size = lbl_803CB794[idx].size & 0x0FFFFFFF;
+                if (max < size) {
+                    max = size;
+                }
             }
         }
+        size = (max + 31) & ~31;
+        p = _OSAllocFromHeap(32, size * count);
+        lbl_803CBC30 = p;
+        for (j = 0; j < count; j++) {
+            lbl_80118220[j].files = (void**)((u8*)p + size * j);
+            lbl_80118220[j]._60 = lbl_80118220[j]._61 = -1;
+        }
     }
-    size = (max + 31) & ~31;
-    p = _OSAllocFromHeap(32, size);
-    lbl_80118220[0].files = p;
-    lbl_803CBC30 = p;
-    lbl_80118220[0]._60 = lbl_80118220[0]._61 = -1;
     fn_800145F8(mode);
     lbl_8036E548._013C = fn_80023AA4();
     fn_80018DEC(mode);
