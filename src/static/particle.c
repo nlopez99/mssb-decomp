@@ -228,6 +228,88 @@ typedef struct ArcParams {
     /* 0x7C */ s32 dist[2];
 } ArcParams; // size: 0x84
 
+// What fn_80028628's callers pass
+typedef struct RibbonParams {
+    /* 0x00 */ s32 file;
+    /* 0x04 */ s32 _04;
+    /* 0x08 */ s32 _08;
+    /* 0x0C */ s32 _0C;
+    /* 0x10 */ s32 _10;
+    /* 0x14 */ s32 _14;
+    /* 0x18 */ s32 _18;
+    /* 0x1C */ s32 _1C;
+    /* 0x20 */ s32 _20;
+    /* 0x24 */ s32 len;
+    /* 0x28 */ s32 _28;
+    /* 0x2C */ s32 _2C;
+    /* 0x30 */ s32 _30;
+    /* 0x34 */ s32 _34;
+    /* 0x38 */ s32 _38;
+    /* 0x3C */ s32 _3C;
+    /* 0x40 */ s32 _40;
+    /* 0x44 */ s32 _44;
+} RibbonParams; // size: 0x48
+
+typedef struct RibbonPoint {
+    /* 0x0 */ u16 color;
+    /* 0x2 */ u16 x;
+    /* 0x4 */ u16 y;
+    /* 0x6 */ u16 z;
+} RibbonPoint;
+
+typedef struct RibbonShape {
+    /* 0x0 */ u16 is3D : 1;
+    /* 0x0 */ u16 count : 15;
+    /* 0x2 */ u16 w;
+    /* 0x4 */ u16 h;
+    /* 0x6 */ u16 d;
+    /* 0x8 */ RibbonPoint pts[1];
+} RibbonShape;
+
+typedef struct RibbonEmitter {
+    /* 0x00 */ u8 _00[0x10];
+    /* 0x10 */ s32 file;
+    /* 0x14 */ u8 _14[0x18 - 0x14];
+    /* 0x18 */ f32 _18[12];
+    /* 0x48 */ void* _48;
+    /* 0x4C */ u8 _4C;
+    /* 0x4D */ u8 _4D;
+    /* 0x4E */ u8 _4E;
+    /* 0x4F */ u8 _4F;
+    /* 0x50 */ s32 _50;
+    /* 0x54 */ u8 _54;
+    /* 0x55 */ u8 _55;
+    /* 0x56 */ u8 _56;
+} RibbonEmitter;
+
+typedef struct RibbonLink {
+    /* 0x00 */ struct RibbonLink* next;
+    /* 0x04 */ struct RibbonLink* prev;
+    /* 0x08 */ Vec pts[7];
+} RibbonLink;
+
+typedef struct RibbonParticle {
+    /* 0x00 */ RibbonLink* next;
+    /* 0x04 */ RibbonLink* tail;
+    /* 0x08 */ Vec pts[4];
+    /* 0x38 */ f32 grav;
+    union {
+        /* 0x3C */ u32 rgba;
+        /* 0x3C */ u8 color[4];
+    };
+    /* 0x40 */ Vec vel;
+    /* 0x4C */ f32 drag;
+    /* 0x50 */ s16 _50;
+    /* 0x52 */ s16 _52;
+    /* 0x54 */ s16 _54;
+    /* 0x56 */ u8 _56;
+    /* 0x57 */ u8 links;
+    /* 0x58 */ u8 head;
+    /* 0x59 */ u8 linkHead;
+    /* 0x5A */ u8 len;
+    /* 0x5B */ u8 filled;
+} RibbonParticle;
+
 // What fn_8002DCE4's callers pass
 typedef struct DriftParams {
     /* 0x00 */ s32 file;
@@ -522,10 +604,10 @@ extern struct {
     /* 0x1D */ u8 _1D;
 } lbl_803C5090;
 
+extern LightFlashTask* lbl_803CBC70;
 extern LightFlashTask* lbl_803CC1B8;
 extern StadiumLights lbl_800F7478[14];
 extern u8 lbl_80367318[];
-extern s32 lbl_803CBC70;
 extern s32 lbl_803CB800;
 extern f32 lbl_803CB804;
 extern f32 lbl_803CB80C;
@@ -547,6 +629,8 @@ extern FlareParams lbl_800F787C;
 extern f32 lbl_800F78C0[4][2];
 extern void fn_80023B90(LightData* data, void* light);
 extern void fn_800B0A14_removeQueue(void);
+extern void* fn_800B0A5C_insertQueue(void (*callback)(void), u16 priority);
+extern void fn_8003A540(s32 value);
 extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_800ACFB0(void* data);
 extern void fn_800C07BC(void* base, void* work, s32 count, s32 size, s32 (*compare)(ZSortEntry*, ZSortEntry*));
@@ -3380,6 +3464,186 @@ BOOL fn_80028F48(void* arg)
     }
     GXLoadPosMtxImm(lbl_8017FFE0, GX_PNMTX0);
     return e->count == 0;
+}
+
+// .text:0x80028628 size:0x920
+void fn_80028628(Vec* start, Vec* end, RibbonParams* params, RibbonShape* shape, u32* colors, void* arg5, BOOL flash)
+{
+    Mtx m;
+    Vec up = { 0.0f, 0.0f, 1.0f };
+    Vec flat;
+    Vec axis;
+    Vec dir;
+    Vec pos;
+    Quaternion q;
+    f32 speed;
+    f32 grav;
+    f32 drag;
+    f32 k;
+    s32 n;
+    s32 c;
+    s32 j;
+    RibbonEmitter* e;
+    RibbonParticle* p;
+    RibbonLink* l;
+    RibbonPoint* rec;
+    LightFlashTask* task;
+
+    n = (params->len + 2) / 7 + 1;
+    if (n < 1) {
+        n = 1;
+    }
+    e = (RibbonEmitter*)fn_80033A24(fn_80027968, 0x12, 0, shape->count * n, TRUE, 4);
+    if (e == NULL) {
+        return;
+    }
+    PSVECSubtract(end, start, &dir);
+    speed = params->_08 / 100000.0f;
+    grav = params->_14 / 100000.0f;
+    drag = params->_18 / 100000.0f;
+    PSVECNormalize(&dir, &dir);
+    memcpy(&flat, &dir, sizeof(Vec));
+    flat.y = 0.0f;
+    if (PSVECMag(&flat)) {
+        PSVECNormalize(&flat, &flat);
+        PSVECCrossProduct(&up, &flat, &axis);
+        if (!PSVECMag(&axis) || axis.y > 0.0f) {
+            axis.x = 0.0f;
+            axis.y = 1.0f;
+            axis.z = 0.0f;
+        } else {
+            axis.x = 0.0f;
+            axis.y = -1.0f;
+            axis.z = 0.0f;
+        }
+        C_QUATRotAxisRad(&q, &axis, acos(PSVECDotProduct(&up, &flat)));
+        PSMTXQuat(m, &q);
+    } else {
+        PSMTXRotRad(m, 'x', 1.5707964f);
+    }
+    p = (RibbonParticle*)((Emitter*)e)->particles;
+    rec = shape->pts;
+    axis.x = 0.0f;
+    axis.y = -1.0f;
+    k = params->_0C / 100000.0f / (params->_10 / 100000.0f);
+    axis.z = 0.0f;
+    if (flash) {
+        if (lbl_803CBC70 != NULL) {
+            task = lbl_803CBC70;
+        } else {
+            task = fn_800B0A5C_insertQueue(fn_8002852C, 5);
+            lbl_803CBC70 = task;
+            *(s16*)&task->light._00[0] = 200;
+            *(s16*)&task->light._00[2] = 2152;
+            *(s16*)&task->light._00[4] = 1426;
+            ((u8*)task)[0x25] = 1;
+        }
+        if (colors != NULL) {
+            *(u32*)&task->r = colors[rec->color];
+        } else {
+            c = rec->color;
+            *(u32*)&task->r = (c & 0xF) | ((c << 4) & 0xF0) | ((c << 4) & 0xF00) | ((c << 8) & 0xF000) | ((c << 8) & 0xF0000) | ((c << 12) & 0xF00000) | ((c << 12) & 0xF000000) | ((c << 16) & 0xF0000000);
+        }
+        c = task->r + params->_44;
+        if (c > 255) {
+            c = 255;
+        }
+        task->r = c;
+        c = task->g + params->_44;
+        if (c > 255) {
+            c = 255;
+        }
+        task->g = c;
+        c = task->b + params->_44;
+        if (c > 255) {
+            c = 255;
+        }
+        task->b = c;
+        task->_21 = params->_3C;
+        task->timer = task->duration = params->_40;
+        task->_22 = 1;
+        fn_8003A540(1);
+    }
+    e->_54 = params->_28;
+    e->file = params->file;
+    e->_48 = arg5;
+    e->_4C = e->_4D = params->_30;
+    e->_4E = params->_2C;
+    e->_4F = 0;
+    e->_55 = params->_34;
+    e->_56 = params->_38;
+    while (p != NULL) {
+        flat.x = (rec->x - (f32)(shape->w / 2)) / shape->w;
+        flat.y = (rec->y - (f32)(shape->h / 2)) / shape->h;
+        if (shape->is3D) {
+            flat.z = (rec->z - (f32)(shape->d / 2)) / shape->d;
+        } else {
+            flat.z = 0.0f;
+        }
+        PSMTXMultVec(m, &flat, &flat);
+        p->vel.x = -flat.x * k;
+        p->vel.y = -flat.y * k;
+        p->vel.z = -flat.z * k;
+        pos.x = start->x;
+        pos.y = start->y;
+        pos.z = start->z;
+        p->grav = -grav;
+        p->drag = drag;
+        p->_52 = 100.0f * speed;
+        if (colors != NULL) {
+            p->rgba = colors[rec->color];
+        } else {
+            c = rec->color;
+            p->rgba = (c & 0xF) | ((c << 4) & 0xF0) | ((c << 4) & 0xF00) | ((c << 8) & 0xF000) | ((c << 8) & 0xF0000) | ((c << 12) & 0xF00000) | ((c << 12) & 0xF000000) | ((c << 16) & 0xF0000000);
+        }
+        p->color[3] = params->_1C;
+        p->_56 = params->_20;
+        p->_50 = (params->_1C + params->_20 - 1) / params->_20;
+        j = params->len;
+        memset(p->pts, 0, sizeof(p->pts));
+        p->len = j;
+        p->head = 0;
+        l = (RibbonLink*)p;
+        p->filled = 0;
+        p->links = (j + 2) / 7;
+        p->linkHead = 0;
+        for (j = p->links; j-- != 0;) {
+            l->next->prev = l;
+            l = l->next;
+            memset(l->pts, 0, sizeof(l->pts));
+        }
+        p->tail = l;
+        p->head = (p->head + 1) % 4;
+        if (p->links != 0) {
+            l = p->tail;
+            p->linkHead = (p->linkHead + 1) % 7;
+            while (l->prev != (RibbonLink*)p) {
+                memcpy(&l->pts[p->linkHead], &l->prev->pts[p->linkHead], sizeof(Vec));
+                l = l->prev;
+            }
+            memcpy(&l->pts[p->linkHead], &p->pts[p->head], sizeof(Vec));
+        }
+        memcpy(&p->pts[p->head], &pos, sizeof(Vec));
+        if (p->filled < p->len) {
+            p->filled++;
+        }
+        rec++;
+        p->_54 = params->_04;
+        p = (RibbonParticle*)p->tail->next;
+    }
+    e->_50 = 2;
+    e->_18[0] = -92.5f;
+    e->_18[1] = -36.0f;
+    e->_18[2] = 53.0f;
+    e->_18[3] = -47.5f;
+    e->_18[4] = 0.0f;
+    e->_18[5] = 118.0f;
+    e->_18[6] = 29.0f;
+    e->_18[7] = -36.0f;
+    e->_18[8] = 66.0f;
+    e->_18[9] = 83.0f;
+    e->_18[10] = 0.0f;
+    e->_18[11] = 122.0f;
 }
 
 // .text:0x8002852C size:0xFC

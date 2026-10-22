@@ -24,6 +24,7 @@ BOOL fn_80026E58(void* e);
 void fn_80027300(struct Emitter* e, Vec* pos, Vec* dir, struct EffectParams* params, f32 scale);
 void fn_80027674(Vec* pos, Vec* dir, struct EffectParams* params, f32 scale, u8 id);
 void fn_80027918(u8 id, f32 v);
+BOOL fn_80027968(void* e);
 void fn_8002852C(void);
 BOOL fn_80028F48(void* e);
 void fn_8002955C(Vec* pos, Vec* dir, struct PuffParams* params);
