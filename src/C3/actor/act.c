@@ -200,7 +200,6 @@ void fn_800B4724(Actor *actor, sHdr *skHeader) {
 }
 
 // .text:0x800B43A0 size:0x384
-// Differs: registers only, in the allocation size's sum (totalBones loaded into r0, not r4).
 Actor *fn_800B43A0(ActorLayout *layout) {
     Actor *actor;
     u32 boneArraySize;
@@ -250,7 +249,8 @@ Actor *fn_800B43A0(ActorLayout *layout) {
         }
         vertSize = ALIGN32(header.skinObject->positionData->numPositions * (header.skinObject->positionData->compCount * compSize));
     }
-    actor = _OSAllocFromHeap(0x20, sizeof(Actor) + boneArraySize + forwardSize + skinSize + orientSize + vertSize + invTransposeSize + ALIGN32(layout->totalBones * sizeof(sBone)));
+    size = ALIGN32(layout->totalBones * sizeof(sBone));
+    actor = _OSAllocFromHeap(0x20, (sizeof(Actor)) + boneArraySize + forwardSize + skinSize + orientSize + vertSize + invTransposeSize + size);
     actor->boneArray = (sBone **)(actor + 1);
     actor->forwardMtxArray = (MtxPtr)((u8 *)actor->boneArray + boneArraySize);
     actor->skinObject = header.skinObject;
