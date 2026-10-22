@@ -1,4 +1,5 @@
 #include "static/movie.h"
+#include "Dolphin/ar.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/os.h"
 #include "string.h"
@@ -52,7 +53,7 @@ typedef struct MovieHeader {
 } MovieHeader;
 
 typedef struct MovieRing {
-    /* 0x00 */ u8 _00[0x4];
+    /* 0x00 */ u32 start;
     /* 0x04 */ u32 end;
     /* 0x08 */ u32 readPos;
     /* 0x0C */ u32 writePos;
@@ -63,7 +64,7 @@ typedef struct MovieRing {
     /* 0x20 */ u32 _20;
     /* 0x24 */ u32 _24;
     /* 0x28 */ u8 _28;
-    /* 0x29 */ u8 _29;
+    /* 0x29 */ volatile u8 _29;
 } MovieRing;
 
 typedef struct MovieBuffer {
@@ -89,6 +90,7 @@ extern u16 lbl_803CBAE4;
 extern u32 fn_800E4B1C(void* arg);
 extern void fn_800E4B90(void* arg, u8* buf, u32 blocks, u16 blockSize);
 extern GXTexObj lbl_803C78A4;
+extern ARQRequest lbl_803C78C4[2];
 extern GXTexFmt lbl_803CBAD8[2];
 
 #define ALIGN32(x) (((x) + 31) & ~31)
@@ -131,7 +133,7 @@ void fn_800B03F4(void) {
 
 // .text:0x800B0390 size:0x64
 // 67.40%: the target reloads ring->_24 after each store to lbl_803C79D4 (two bases).
-void fn_800B0390(void) {
+void fn_800B0390(u32 request) {
     MovieRing* ring = &lbl_803C79D4;
 
     ring->readPos += ring->_24;
@@ -144,7 +146,48 @@ void fn_800B0390(void) {
 }
 
 // .text:0x800B0230 size:0x160
-void fn_800B0230(void) {
+// 87.39%: the target keeps dest + first in a fifth saved register (r27); the base recomputes it.
+void fn_800B0230(u8* dest, u32 size) {
+    MovieRing* ring = &lbl_803C79D4;
+    u32 first;
+    u32 second;
+    u32 end;
+    u8* dest2;
+
+    if (size != 0) {
+        end = ring->readPos + size;
+        if (end > ring->end) {
+            first = ring->end - ring->readPos;
+            second = size - first;
+        } else {
+            first = size;
+            second = 0;
+        }
+        if (second != 0) {
+            end = ring->start + second;
+        }
+        if ((ring->writePos > ring->readPos && end > ring->writePos) ||
+            (ring->writePos < ring->readPos && end > ring->writePos && second != 0)) {
+            ring->_29 = 3;
+            return;
+        }
+        ring->_24 = size;
+        ring->_29 = 2;
+        DCInvalidateRange(dest, first);
+        ARQPostRequest(&lbl_803C78C4[0], 0, ARQ_TYPE_ARAM_TO_MRAM, ARQ_PRIORITY_HIGH, ring->readPos, (u32)dest, first,
+                       fn_800B0390);
+        DCInvalidateRange(dest, first);
+        if (second != 0) {
+            while (ring->_29 != 0) {
+            }
+            dest2 = dest + first;
+            ring->_29 = 2;
+            DCInvalidateRange(dest2, second);
+            ARQPostRequest(&lbl_803C78C4[1], 0, ARQ_TYPE_ARAM_TO_MRAM, ARQ_PRIORITY_HIGH, ring->start, (u32)dest2, second,
+                           fn_800B0390);
+            DCInvalidateRange(dest2, second);
+        }
+    }
 }
 
 // .text:0x800B0134 size:0xFC
