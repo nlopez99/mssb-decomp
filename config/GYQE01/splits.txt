@@ -1084,6 +1084,17 @@ C3/control/control.c:
 	.bss        start:0x803CB1FC end:0x803CB49C
 	.sdata2     start:0x803CCFD8 end:0x803CCFF8
 
+C3/geoPalette/DisplayObject.c:
+	extab       start:0x80006AE0 end:0x80006B80
+	extabindex  start:0x80008BB0 end:0x80008CA0
+	.text       start:0x800B993C end:0x800BD300
+	.rodata     start:0x800E7E78 end:0x800E7FC8
+	.data       start:0x80111700 end:0x80111750
+	.bss        start:0x803CB49C end:0x803CB6FC
+	.sdata      start:0x803CBB58 end:0x803CBB68
+	.sbss       start:0x803CC1F0 end:0x803CC228
+	.sdata2     start:0x803CCFF8 end:0x803CD058
+
 Musyx/seq.c:
 	.text       start:0x800C0A8C end:0x800C4AB4
 	.data       start:0x801123A8 end:0x801123F8

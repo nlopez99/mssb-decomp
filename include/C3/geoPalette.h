@@ -55,6 +55,8 @@ typedef struct {
     /* 0x16 */ u16 pad16;
 } DODisplayLayout;
 
+// This game's display object is 0x6C bytes: worldMatrix sits at 0x18 (DOSetWorldMatrix),
+// and InitDisplayObjWithLayout copies six more words from the layout after the shader.
 struct DODisplayObj {
     /* 0x00 */ PositionData *positionData;
     /* 0x04 */ ColorData *colorData;
@@ -63,12 +65,18 @@ struct DODisplayObj {
     /* 0x10 */ DisplayData *displayData;
     /* 0x14 */ u8 numTextureChannels;
     /* 0x15 */ u8 pad8;
-    /* 0x16 */ u16 pad16;
-    /* 0x18 */ int visibility;
-    /* 0x1C */ Mtx worldMatrix;
+    /* 0x16 */ u8 visibility;
+    /* 0x18 */ Mtx worldMatrix;
+    /* 0x48 */ u8 _48[4];
     /* 0x4C */ unkCB shaderFunc;
     /* 0x50 */ void *shaderData;
-};
+    /* 0x54 */ u8 _54[4];
+    /* 0x58 */ u8 _58[4];
+    /* 0x5C */ u8 _5C[4];
+    /* 0x60 */ u8 _60[4];
+    /* 0x64 */ u8 _64[4];
+    /* 0x68 */ u8 _68[4];
+}; // size: 0x6C
 
 typedef struct {
     /* 0x00 */ DODisplayLayout *layout;
