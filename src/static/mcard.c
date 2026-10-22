@@ -364,6 +364,7 @@ void fn_800ACCD4(void) {
 }
 
 // .text:0x800ACC6C size:0x68
+// Only the operand order of the final add differs (add r5,r5,r3 against r5,r3,r5).
 s32 fn_800ACC6C(s32 type, s32 a, s32 b) {
     s32 blocks;
 
@@ -378,9 +379,10 @@ s32 fn_800ACC6C(s32 type, s32 a, s32 b) {
         type = 0xE00;
         break;
     }
-    type += a + b;
-    blocks = type / 0x2000;
-    if (type % 0x2000 != 0) {
+    b = a + b;
+    b += type;
+    blocks = b / 0x2000;
+    if (b % 0x2000 != 0) {
         blocks++;
     }
     return blocks;
@@ -836,15 +838,14 @@ void fn_800ABBD0(void) {
 
 // .text:0x800ABB60 size:0x70
 void fn_800ABB60(void) {
-    McardSlot* slot = lbl_803C7838.slots;
     s32 chan;
 
     if (lbl_803C7838.op == 7) {
         fn_800B0A14_removeQueue();
         return;
     }
-    for (chan = 0; chan < 2; chan++, slot++) {
-        slot->probe = CARDProbeEx(chan, &slot->memSize, &slot->sectorSize);
+    for (chan = 0; chan < 2; chan++) {
+        lbl_803C7838.slots[chan].probe = CARDProbeEx(chan, &lbl_803C7838.slots[chan].memSize, &lbl_803C7838.slots[chan].sectorSize);
     }
 }
 
