@@ -2965,13 +2965,16 @@ BOOL fn_8002B014(Emitter* e)
 }
 
 // .text:0x8002AC68 size:0x3AC
-// 99.49%: the target keeps the texture file in r30 and the texture index in r29 through the
-// inlined fn_80033B58; this swaps them. Locals for either did not move it.
 u8 fn_8002AC68(Emitter* e, SparkParticle* p)
 {
     Vec quad[4];
-    s32 i;
     s32 alpha;
+    TexFile* file = (TexFile*)e->_10;
+    TextureDesc* tex;
+    s32 index = p->tex;
+    s32 i;
+    GXTexObj texObj;
+    GXTlutObj tlutObj;
 
     quad[0].x = -p->w / 2;
     quad[0].z = p->h / 2;
@@ -2982,7 +2985,21 @@ u8 fn_8002AC68(Emitter* e, SparkParticle* p)
     quad[3].x = -p->w / 2;
     quad[3].z = -p->h / 2;
     quad[0].y = quad[1].y = quad[2].y = quad[3].y = 0.0f;
-    fn_80033B58((TexFile*)e->_10, p->tex, GX_CLAMP, GX_CLAMP);
+    if (file == NULL) {
+        GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    } else {
+        GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP1, GX_COLOR0A0);
+        tex = &file->tex[file->tex[index]._1C];
+        if (tex->tlut != NULL) {
+            GXInitTexObjCI(&texObj, tex->image, tex->width, tex->height, tex->format, GX_CLAMP, GX_CLAMP, GX_FALSE, GX_TLUT0);
+            GXInitTlutObj(&tlutObj, tex->tlut, tex->tlutFormat, tex->tlutCount);
+            GXLoadTlut(&tlutObj, GX_TLUT0);
+        } else {
+            GXInitTexObj(&texObj, tex->image, tex->width, tex->height, tex->format, GX_CLAMP, GX_CLAMP, GX_FALSE);
+        }
+        GXInitTexObjLOD(&texObj, GX_LINEAR, GX_LINEAR, tex->minLOD, tex->maxLOD, tex->lodBias, GX_FALSE, GX_FALSE, GX_ANISO_1);
+        GXLoadTexObj(&texObj, GX_TEXMAP1);
+    }
     GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
     GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_DSTALPHA, GX_LO_CLEAR);
     GXBegin(GX_QUADS, GX_VTXFMT0, 4);
