@@ -19,8 +19,8 @@ struct ANIMAnimTrack {
 // current track at 0x0C and a flag at 0x17.
 struct ANIMPipe {
     /* 0x00 */ f32 time;
-    /* 0x04 */ f32 speed;
-    /* 0x08 */ f32 _08;
+    /* 0x04 */ f32 _04;
+    /* 0x08 */ f32 speed;
     /* 0x0C */ struct ANIMAnimTrack * currentTrack;
     /* 0x10 */ struct Control * control;
     /* 0x14 */ u16 _14;
@@ -52,7 +52,7 @@ typedef struct ANIMBank {
 void ANIMGet(ANIMBank *animBank);
 void ANIMRelease(ANIMBank **animBank);
 ANIMSequences *ANIMGetSequence(ANIMBank *animBank, char *sequenceName, u16 seqNum);
-struct ANIMAnimTrack *ANIMGetTrackFromSeq(ANIMSequences *animSeq, u16 animTrackID);
+struct ANIMAnimTrack *ANIMGetTrackFromSequence(ANIMSequences *animSeq, u16 animTrackID);
 void ANIMGetKeyFrameFromTrack(struct ANIMAnimTrack * animTrack, f32 time, KeyFrame **currentFrame, KeyFrame **nextFrame);
 u32 ANIMGetUserDataSize(ANIMBank *animBank);
 char *ANIMGetUserData(ANIMBank *animBank);
@@ -61,6 +61,6 @@ char *ANIMGetUserData(ANIMBank *animBank);
 void ANIMBind(struct ANIMPipe *animPipe, Control *control, struct ANIMAnimTrack *animTrack, f32 time);
 void ANIMSetTime(struct ANIMPipe * animPipe, f32 time);
 void ANIMSetSpeed(struct ANIMPipe * animPipe, f32 speed);
-void ANIMTick(struct ANIMPipe * animPipe);
+void ANIMTick(struct ANIMPipe *animPipe, u8 flag);
 
 #endif // _DOLPHIN_CP_ANIM_H_

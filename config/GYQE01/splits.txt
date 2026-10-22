@@ -1083,6 +1083,12 @@ C3/actor/act.c:
 	.data       start:0x80111640 end:0x80111670
 	.sdata2     start:0x803CCF58 end:0x803CCF78
 
+C3/actor/actorAnim.c:
+	extab       start:0x80006A28 end:0x80006A40
+	extabindex  start:0x80008A9C end:0x80008AC0
+	.text       start:0x800B4A44 end:0x800B4E9C
+	.sdata2     start:0x803CCF78 end:0x803CCF80
+
 C3/control/control.c:
 	extab       start:0x80006A90 end:0x80006AE0
 	extabindex  start:0x80008B38 end:0x80008BB0
