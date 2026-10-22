@@ -1875,8 +1875,6 @@ s32 fn_8004D93C(s32 mode) {
 }
 
 // .text:0x8004D57C size:0x3C0
-// 92.59%: MWCC turns the forward wrap of _18[0] (rep & 2) into a branchless
-// select with one store; the target branches and stores in each arm.
 s16 fn_8004D57C(s32 player, s32 trig, u16 rep) {
     s32 taken[36];
     s32 count;
@@ -1908,22 +1906,26 @@ s16 fn_8004D57C(s32 player, s32 trig, u16 rep) {
     } else if ((trig & 0x20) && lbl_803C6028._7F[0] == -1) {
         lbl_803C6028._7F[0] = 30;
     } else if (rep & 2) {
+        CrowdState* cs = &lbl_803C6028;
+
         do {
-            if (lbl_803C6028._18[0] == count - 1) {
-                lbl_803C6028._18[0] = 0;
+            if (cs->_18[0] == count - 1) {
+                cs->_18[0] = 0;
             } else {
-                lbl_803C6028._18[0] = lbl_803C6028._18[0] + 1;
+                cs->_18[0]++;
             }
-        } while (taken[lbl_803C6028._18[0]] >= 0);
+        } while (taken[cs->_18[0]] >= 0);
         sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
     } else if (rep & 1) {
+        CrowdState* cs = &lbl_803C6028;
+
         do {
-            if (lbl_803C6028._18[0] == 0) {
-                lbl_803C6028._18[0] = count - 1;
+            if (cs->_18[0] == 0) {
+                cs->_18[0] = count - 1;
             } else {
-                lbl_803C6028._18[0]--;
+                cs->_18[0]--;
             }
-        } while (taken[lbl_803C6028._18[0]] >= 0);
+        } while (taken[cs->_18[0]] >= 0);
         sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
     }
     lbl_803C6028._20[0] = lbl_800FE930[lbl_803C6028._8C][lbl_803C6028._18[0]];
