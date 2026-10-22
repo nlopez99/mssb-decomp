@@ -131,10 +131,11 @@ typedef union SpriteColor {
 } SpriteColor;
 
 typedef struct SpriteKey {
-    /* 0x00 */ u8 _00[0x4];
+    /* 0x00 */ u16 hdr;
+    /* 0x02 */ u16 frame;
     /* 0x04 */ u8 type;
     /* 0x05 */ u8 blend;
-    /* 0x06 */ u8 _06[0x2];
+    /* 0x06 */ u16 index;
     /* 0x08 */ u8 _08_b7 : 3;
     /* 0x08 */ u8 _08_b4 : 1;
     /* 0x08 */ u8 _08_b3 : 1;
@@ -165,7 +166,12 @@ typedef struct SpriteKey {
     /* 0x2C */ s16 rot[3];
     /* 0x32 */ u8 _32[0x40 - 0x32];
     /* 0x40 */ s16 offsets[8];
-} SpriteKey;
+} SpriteKey; // size: 0x50
+
+typedef struct SpriteNest {
+    /* 0x0 */ s16 index;
+    /* 0x2 */ s16 layer;
+} SpriteNest;
 
 typedef struct SpritePalette {
     /* 0x0 */ u32 count;
@@ -180,7 +186,7 @@ typedef struct SpriteVerts {
     /* 0x36 */ u8 _36;
 } SpriteVerts;
 
-void fn_8000BA3C(void);
+s32 fn_8000BA3C(u32* time, AnimFile* file, s32 idx, Mtx mtx, s32 flags, u32 color, u16** outKey, SpriteNest* nest);
 void fn_8000C194(void);
 void fn_8000CC4C(AnimFile* file, AnimFrame* f, u8* src, u32 offset, u32 size);
 u32 fn_8000CEF0(AnimFile* file, s32 idx, u32 frame, s32 skip, u32* dst);
