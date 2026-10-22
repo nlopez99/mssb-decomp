@@ -17,6 +17,6 @@ void fn_800C02C8(Mtx34 m0, Mtx34 m1, u8* wtBase, s16* srcBase, s16* dstBase, u32
 void SKNAccVecs16Norms16Iu161(Mtx34 m, u16 count, s16* srcBase, s16* dstBase, u16* indices, u8* weights);
 void SKNAccVecs16Norms16Iu162(Mtx34 m, u16 count, s16* srcBase, s16* dstBase, u16* indices, u8* weights);
 void convertTextureHeader(void* tex);
-void fn_800C07BC(void* base, void* tmp, s32 count, s32 size, s32 (*compare)(const void* a, const void* b));
+void fn_800C07BC(void* base, void* tmp, u32 count, u32 size, s32 (*compare)(const void* a, const void* b));
 
 #endif // _C3_STATIC_800BF074_H_

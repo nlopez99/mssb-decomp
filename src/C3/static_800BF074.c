@@ -1,8 +1,6 @@
 #include "C3/static_800BF074.h"
+#include "string.h"
 
-// .bss that splits.txt cannot give this unit yet (see the report)
-extern sAccBuffers lbl_803CB6FC[2];
-extern void* lbl_803CB724[4];
 
 typedef struct TexHeaderEntry {
     /* 0x00 */ u16 id;
@@ -111,10 +109,151 @@ void SKNInit(void) {
 }
 
 // .text:0x800BF2A8 size:0x5F4
-void fn_800BF2A8(sBone** bones, sHdr* hdr, char* positionArray) {}
+// 92.36%: the SKNIt draft with s16 vertices. Same differences as SKNIt.
+void fn_800BF2A8(sBone** bones, sHdr* hdr, char* positionArray) {
+    u32 i;
+    u16 size[2];
+    SK1List* sk1;
+    SK2List* sk2;
+    SKAccList* skAcc;
+
+    GQRSetup6(hdr->posNrmShift, 7, hdr->posNrmShift, 7);
+    if (hdr->numSk1List) {
+        sk1 = hdr->sk1ListArray;
+        size[0] = SKNLCTouchData(0, sk1->vertSrc, sk1->vertSrcOffset + sk1->count * 0xC);
+        for (i = 0; i < hdr->numSk1List - 1; i++) {
+            size[(i + 1) & 1] = SKNLCTouchData(((i + 1) & 1) * 2, hdr->sk1ListArray[i + 1].vertSrc, hdr->sk1ListArray[i + 1].vertSrcOffset + hdr->sk1ListArray[i + 1].count * 0xC);
+            sk1 = &hdr->sk1ListArray[i];
+            PSMTXReorder(bones[sk1->boneIndex]->skinMtx, (f32(*)[3])sk1->m);
+            LCQueueWait(1);
+            fn_800BFF9C(sk1->m, (s16*)(sk1->vertSrcOffset + (u32)lbl_803CB724[(i & 1) * 2]), (s16*)(sk1->vertSrcOffset + (u32)lbl_803CB724[(i & 1) * 2]), sk1->count);
+            LCStoreData((void*)((u32)sk1->vertDst + (u32)positionArray), lbl_803CB724[(i & 1) * 2], size[i & 1]);
+        }
+        sk1 = &hdr->sk1ListArray[i];
+        PSMTXReorder(bones[sk1->boneIndex]->skinMtx, (f32(*)[3])sk1->m);
+        fn_800BFF9C(sk1->m, (s16*)(sk1->vertSrcOffset + (u32)lbl_803CB724[(i & 1) * 2]), (s16*)(sk1->vertSrcOffset + (u32)lbl_803CB724[(i & 1) * 2]), sk1->count);
+        LCStoreData((void*)((u32)sk1->vertDst + (u32)positionArray), lbl_803CB724[(i & 1) * 2], size[i & 1]);
+    }
+    if (hdr->numSk2List) {
+        sk2 = hdr->sk2ListArray;
+        size[0] = SKNLC2TouchData(0, sk2->vertSrc, sk2->vertSrcOffset + sk2->count * 0xC);
+        sk2 = hdr->sk2ListArray;
+        SKNLC2TouchData(1, sk2->weights, sk2->count * 2);
+        for (i = 0; i < hdr->numSk2List - 1; i++) {
+            sk2 = &hdr->sk2ListArray[i];
+            size[(i + 1) & 1] = SKNLC2TouchData(((i + 1) & 1) * 2, hdr->sk2ListArray[i + 1].vertSrc, hdr->sk2ListArray[i + 1].vertSrcOffset + hdr->sk2ListArray[i + 1].count * 0xC);
+            SKNLC2TouchData(((i + 1) & 1) * 2 + 1, hdr->sk2ListArray[i + 1].weights, hdr->sk2ListArray[i + 1].count * 2);
+            PSMTXReorder(bones[sk2->bone0Index]->skinMtx, (f32(*)[3])sk2->m0);
+            PSMTXReorder(bones[sk2->bone1Index]->skinMtx, (f32(*)[3])sk2->m1);
+            LCQueueWait(2);
+            SKNLC2Vecs16Norms16(sk2->m0, sk2->m1, (i & 1) * 2, (s16*)(positionArray + (u32)sk2->vertDst), sk2->count, sk2->vertSrcOffset, size[i & 1]);
+        }
+        sk2 = &hdr->sk2ListArray[i];
+        PSMTXReorder(bones[sk2->bone0Index]->skinMtx, (f32(*)[3])sk2->m0);
+        PSMTXReorder(bones[sk2->bone1Index]->skinMtx, (f32(*)[3])sk2->m1);
+        LCQueueWait(0);
+        SKNLC2Vecs16Norms16(sk2->m0, sk2->m1, (i & 1) * 2, (s16*)(positionArray + (u32)sk2->vertDst), sk2->count, sk2->vertSrcOffset, size[i & 1]);
+    }
+    if (hdr->numSkAccList) {
+        if (hdr->skBzeroSize) {
+            SKNBzero32B((char*)((u32)hdr->skBzeroBase + (u32)positionArray), (hdr->skBzeroSize + 0x1F) & 0x07FFFFFF);
+        }
+        skAcc = hdr->skAccListArray;
+        SKNLCAccTouchData(0, skAcc->vertSrc, skAcc->vertIndices, skAcc->weights, skAcc->count);
+        LCQueueWait(0);
+        for (i = 0; i < hdr->numSkAccList - 1; i++) {
+            SKNLCAccTouchData((i + 1) & 1, hdr->skAccListArray[i + 1].vertSrc, hdr->skAccListArray[i + 1].vertIndices, hdr->skAccListArray[i + 1].weights, hdr->skAccListArray[i + 1].count);
+            skAcc = &hdr->skAccListArray[i];
+            PSMTXReorder(bones[skAcc->boneIndex]->skinMtx, (f32(*)[3])skAcc->m);
+            SKNAccVecs16Norms16Iu162(skAcc->m, skAcc->count, lbl_803CB6FC[i & 1].src, (s16*)((u32)skAcc->vertDst + (u32)positionArray), lbl_803CB6FC[i & 1].indices, lbl_803CB6FC[i & 1].weights);
+        }
+        skAcc = &hdr->skAccListArray[i];
+        PSMTXReorder(bones[skAcc->boneIndex]->skinMtx, (f32(*)[3])skAcc->m);
+        SKNAccVecs16Norms16Iu162(skAcc->m, skAcc->count, lbl_803CB6FC[i & 1].src, (s16*)((u32)skAcc->vertDst + (u32)positionArray), lbl_803CB6FC[i & 1].indices, lbl_803CB6FC[i & 1].weights);
+        DCStoreRange((char*)((u32)hdr->skBzeroBase + (u32)positionArray), (hdr->skBzeroSize + 0x1F) & 0x07FFFFFF);
+        if (hdr->flushCount) {
+            SKNFlushByIndex2(hdr->flushIndices, hdr->flushCount, (char*)((u32)hdr->skAccListArray->vertDst + (u32)positionArray));
+        }
+    }
+}
+
+// SKNLCAccTouchData for 0x18-byte vertices
+static inline void SKNLCAccTouchDataF32(u8 buffer, s16* src, u16* indices, u8* weights, u32 count) {
+    LCLoadBlocks(lbl_803CB6FC[buffer].src, src, ((count * 0x18) + 0x1F) >> 5);
+    LCLoadBlocks(lbl_803CB6FC[buffer].indices, indices, ((count * 2) + 0x1F) >> 5);
+    LCLoadBlocks(lbl_803CB6FC[buffer].weights, weights, (count + 0x1F) >> 5);
+}
 
 // .text:0x800BF89C size:0x5F4
-void SKNIt(sBone** bones, sHdr* hdr, char* positionArray) {}
+// 92.36%: the target computes each vertDst + positionArray and count just before their calls and
+// loads lbl_803CB724[buffer] again after SKN2Vecs16Norms16NoTouch (the inlines precompute them);
+// the next sk2 touch computes ((i + 1) & 1) * 2 once and its size as offset + (count * 0x18 + 0x1F).
+void SKNIt(sBone** bones, sHdr* hdr, char* positionArray) {
+    u32 i;
+    u16 size[2];
+    SK1List* sk1;
+    SK2List* sk2;
+    SKAccList* skAcc;
+
+    GQRSetup7(hdr->posNrmShift, 0, hdr->posNrmShift, 0);
+    if (hdr->numSk1List) {
+        sk1 = hdr->sk1ListArray;
+        size[0] = SKNLCTouchData(0, sk1->vertSrc, sk1->vertSrcOffset + sk1->count * 0x18);
+        for (i = 0; i < hdr->numSk1List - 1; i++) {
+            size[(i + 1) & 1] = SKNLCTouchData(((i + 1) & 1) * 2, hdr->sk1ListArray[i + 1].vertSrc, hdr->sk1ListArray[i + 1].vertSrcOffset + hdr->sk1ListArray[i + 1].count * 0x18);
+            sk1 = &hdr->sk1ListArray[i];
+            PSMTXReorder(bones[sk1->boneIndex]->skinMtx, (f32(*)[3])sk1->m);
+            LCQueueWait(1);
+            SKN1Vecs16Norms16(sk1->m, (s16*)(sk1->vertSrcOffset + (u32)lbl_803CB724[(i & 1) * 2]), (s16*)(sk1->vertSrcOffset + (u32)lbl_803CB724[(i & 1) * 2]), sk1->count);
+            LCStoreData((void*)((u32)sk1->vertDst + (u32)positionArray), lbl_803CB724[(i & 1) * 2], size[i & 1]);
+        }
+        sk1 = &hdr->sk1ListArray[i];
+        PSMTXReorder(bones[sk1->boneIndex]->skinMtx, (f32(*)[3])sk1->m);
+        SKN1Vecs16Norms16(sk1->m, (s16*)(sk1->vertSrcOffset + (u32)lbl_803CB724[(i & 1) * 2]), (s16*)(sk1->vertSrcOffset + (u32)lbl_803CB724[(i & 1) * 2]), sk1->count);
+        LCStoreData((void*)((u32)sk1->vertDst + (u32)positionArray), lbl_803CB724[(i & 1) * 2], size[i & 1]);
+    }
+    if (hdr->numSk2List) {
+        sk2 = hdr->sk2ListArray;
+        size[0] = SKNLC2TouchData(0, sk2->vertSrc, sk2->vertSrcOffset + sk2->count * 0x18);
+        sk2 = hdr->sk2ListArray;
+        SKNLC2TouchData(1, sk2->weights, sk2->count * 2);
+        for (i = 0; i < hdr->numSk2List - 1; i++) {
+            sk2 = &hdr->sk2ListArray[i];
+            size[(i + 1) & 1] = SKNLC2TouchData(((i + 1) & 1) * 2, hdr->sk2ListArray[i + 1].vertSrc, hdr->sk2ListArray[i + 1].vertSrcOffset + hdr->sk2ListArray[i + 1].count * 0x18);
+            SKNLC2TouchData(((i + 1) & 1) * 2 + 1, hdr->sk2ListArray[i + 1].weights, hdr->sk2ListArray[i + 1].count * 2);
+            PSMTXReorder(bones[sk2->bone0Index]->skinMtx, (f32(*)[3])sk2->m0);
+            PSMTXReorder(bones[sk2->bone1Index]->skinMtx, (f32(*)[3])sk2->m1);
+            LCQueueWait(2);
+            SKNLC2Vecs16Norms16(sk2->m0, sk2->m1, (i & 1) * 2, (s16*)(positionArray + (u32)sk2->vertDst), sk2->count, sk2->vertSrcOffset, size[i & 1]);
+        }
+        sk2 = &hdr->sk2ListArray[i];
+        PSMTXReorder(bones[sk2->bone0Index]->skinMtx, (f32(*)[3])sk2->m0);
+        PSMTXReorder(bones[sk2->bone1Index]->skinMtx, (f32(*)[3])sk2->m1);
+        LCQueueWait(0);
+        SKNLC2Vecs16Norms16(sk2->m0, sk2->m1, (i & 1) * 2, (s16*)(positionArray + (u32)sk2->vertDst), sk2->count, sk2->vertSrcOffset, size[i & 1]);
+    }
+    if (hdr->numSkAccList) {
+        if (hdr->skBzeroSize) {
+            SKNBzero32B((char*)((u32)hdr->skBzeroBase + (u32)positionArray), (hdr->skBzeroSize + 0x1F) & 0x07FFFFFF);
+        }
+        skAcc = hdr->skAccListArray;
+        SKNLCAccTouchDataF32(0, skAcc->vertSrc, skAcc->vertIndices, skAcc->weights, skAcc->count);
+        LCQueueWait(0);
+        for (i = 0; i < hdr->numSkAccList - 1; i++) {
+            SKNLCAccTouchDataF32((i + 1) & 1, hdr->skAccListArray[i + 1].vertSrc, hdr->skAccListArray[i + 1].vertIndices, hdr->skAccListArray[i + 1].weights, hdr->skAccListArray[i + 1].count);
+            skAcc = &hdr->skAccListArray[i];
+            PSMTXReorder(bones[skAcc->boneIndex]->skinMtx, (f32(*)[3])skAcc->m);
+            SKNAccVecs16Norms16Iu161(skAcc->m, skAcc->count, lbl_803CB6FC[i & 1].src, (s16*)((u32)skAcc->vertDst + (u32)positionArray), lbl_803CB6FC[i & 1].indices, lbl_803CB6FC[i & 1].weights);
+        }
+        skAcc = &hdr->skAccListArray[i];
+        PSMTXReorder(bones[skAcc->boneIndex]->skinMtx, (f32(*)[3])skAcc->m);
+        SKNAccVecs16Norms16Iu161(skAcc->m, skAcc->count, lbl_803CB6FC[i & 1].src, (s16*)((u32)skAcc->vertDst + (u32)positionArray), lbl_803CB6FC[i & 1].indices, lbl_803CB6FC[i & 1].weights);
+        DCStoreRange((char*)((u32)hdr->skBzeroBase + (u32)positionArray), (hdr->skBzeroSize + 0x1F) & 0x07FFFFFF);
+        if (hdr->flushCount) {
+            SKNFlushByIndex1(hdr->flushIndices, hdr->flushCount, (char*)((u32)hdr->skAccListArray->vertDst + (u32)positionArray));
+        }
+    }
+}
 
 // .text:0x800BFE90 size:0x10C
 asm void SKN1Vecs16Norms16(register Mtx34 m, register s16* srcBase, register s16* dstBase, register u32 count) {
@@ -737,4 +876,39 @@ void convertTextureHeader(void* tex) {
 }
 
 // .text:0x800C07BC size:0x2D0
-void fn_800C07BC(void* base, void* tmp, s32 count, s32 size, s32 (*compare)(const void* a, const void* b)) {}
+// 89.50%: registers only; the target gives the outer level's halfSize, base2, tmp2 and half r31-r28
+// and the parameters r27-r23. 200 declaration orders and a permuter session were tried.
+void fn_800C07BC(void* base, void* tmp, u32 count, u32 size, s32 (*compare)(const void* a, const void* b)) {
+    u32 i;
+    u32 j;
+    void* src;
+    u32 k;
+    u32 half;
+    u32 halfSize;
+    void* base2;
+    void* tmp2;
+
+    if (count > 1) {
+        half = count >> 1;
+        halfSize = half * size;
+        base2 = (u8*)base + halfSize;
+        tmp2 = (u8*)tmp + halfSize;
+        fn_800C07BC(base, tmp, half, size, compare);
+        fn_800C07BC(base2, tmp2, count - half, size, compare);
+        memcpy(tmp, base, halfSize);
+        i = 0;
+        j = half;
+        k = 0;
+        while (i < half && j < count) {
+            if (compare((u8*)tmp + i * size, (u8*)base + j * size) <= 0) {
+                src = (u8*)tmp + i++ * size;
+            } else {
+                src = (u8*)base + j++ * size;
+            }
+            memcpy((u8*)base + k++ * size, src, size);
+        }
+        if (i < half) {
+            memcpy((u8*)base + k * size, (u8*)tmp + i * size, size * (half - i));
+        }
+    }
+}

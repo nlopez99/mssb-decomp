@@ -105,8 +105,9 @@ void GQRSetup6(u32 loadScale, u32 loadType, u32 storeScale, u32 storeType);
 void GQRSetup7(u32 loadScale, u32 loadType, u32 storeScale, u32 storeType);
 
 // SKNControl.c
-extern sAccBuffers SKAccBuffers[2];
-extern void * SKBuffers[4];
+// SKAccBuffers and SKBuffers: .bss that splits.txt cannot give C3/static_800BF074.c yet
+extern sAccBuffers lbl_803CB6FC[2];
+extern void * lbl_803CB724[4];
 
 void SKNIt(sBone **bones, sHdr *hdr, char *positionArray);
 void SKNInit(void);
@@ -128,32 +129,29 @@ extern void SKN2Vecs16Norms16NoTouch(Mtx34 m0, Mtx34 m1, u8 * wtBase, s16 * srcB
 extern void SKNAccVecs16Norms16Iu16(Mtx34 m, u16 count, s16 * srcBase, s16 * dstBase, u16 * indices, u8 * weights);
 
 static inline void SKNLCAccTouchData(u8 buffer, s16 *src, u16 *indices, u8 *weights, u32 count) {
-    u32 size = ((count * 3 * 2 * 2) + 0x1F) >> 5;
-
-    LCLoadBlocks(SKAccBuffers[buffer].src, src, size);
-    size = ((count * 2) + 0x1F) >> 5;
-    LCLoadBlocks(SKAccBuffers[buffer].indices, indices, size);
-    LCLoadBlocks(SKAccBuffers[buffer].weights, weights, (count + 31) >> 5);
+    LCLoadBlocks(lbl_803CB6FC[buffer].src, src, ((count * 3 * 2 * 2) + 0x1F) >> 5);
+    LCLoadBlocks(lbl_803CB6FC[buffer].indices, indices, ((count * 2) + 0x1F) >> 5);
+    LCLoadBlocks(lbl_803CB6FC[buffer].weights, weights, (count + 0x1F) >> 5);
 }
 
 static inline void SKNLC2Vecs16Norms16(Mtx34 m0, Mtx34 m1, u8 buffer, s16 *destination, u32 count, u8 offset, u32 size) {
-    SKN2Vecs16Norms16NoTouch(m0, m1, SKBuffers[buffer+1], (void*)((u32)SKBuffers[buffer] + offset), (void*)((u32)SKBuffers[buffer] + offset), count);
-    LCStoreBlocks(destination, SKBuffers[buffer], size);
+    SKN2Vecs16Norms16NoTouch(m0, m1, lbl_803CB724[buffer + 1], (void*)((u32)lbl_803CB724[buffer] + offset), (void*)((u32)lbl_803CB724[buffer] + offset), count);
+    LCStoreBlocks(destination, lbl_803CB724[buffer], size);
 }
 
 static inline u32 SKNLC2TouchData(u8 buffer, void *data, u32 size) {
     size = (size + 0x1F >> 5);
-    LCLoadBlocks(SKBuffers[buffer], data, size);
+    LCLoadBlocks(lbl_803CB724[buffer], data, size);
     return size;
 }
 
 static inline void SKNLC1Vecs16Norms16(Mtx34 m, s16 *destination, u32 count, u8 buffer, u8 offset, u32 size) {
-    SKN1Vecs16Norms16(m, (void*)((u32)SKBuffers[buffer] + offset), (void*)((u32)SKBuffers[buffer] + offset), count);
-    LCStoreData(destination, SKBuffers[buffer], size);
+    SKN1Vecs16Norms16(m, (void*)((u32)lbl_803CB724[buffer] + offset), (void*)((u32)lbl_803CB724[buffer] + offset), count);
+    LCStoreData(destination, lbl_803CB724[buffer], size);
 }
 
 static inline u32 SKNLCTouchData(u8 buffer, void *data, u32 size) {
-    LCLoadData(SKBuffers[buffer], data, size);
+    LCLoadData(lbl_803CB724[buffer], data, size);
     return size;
 }
 
