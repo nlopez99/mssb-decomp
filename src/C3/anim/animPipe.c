@@ -347,8 +347,8 @@ void DoScaleAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFram
     Quaternion outQ = { 0.0f, 0.0f, 0.0f, 1.0f };
     f32 curEase;
     f32 nextEase;
-    u8 type;
     int stride;
+    u8 type;
     f32 scale;
     f32 t;
     f32 tt;
@@ -382,7 +382,10 @@ void DoScaleAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFram
         out.y = cur[1];
         out.z = cur[2];
         if (animPipe->currentTrack->animType & 0x20) {
-            outQ = curQ;
+            outQ.x = curQ.x;
+            outQ.y = curQ.y;
+            outQ.z = curQ.z;
+            outQ.w = curQ.w;
         }
         break;
     case 1:
