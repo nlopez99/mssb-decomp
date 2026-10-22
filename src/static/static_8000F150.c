@@ -4,6 +4,7 @@
 #include "static/sub.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/mtx.h"
+#include "static/graphic.h"
 
 typedef struct TextBox {
     /* 0x00 */ void* _00;
@@ -136,7 +137,6 @@ extern GXColor lbl_803CB780[1];
 extern GXColor lbl_803CB784;
 extern u32 lbl_803CB788;
 extern void GXSetTexCoordScaleManually(GXTexCoordID coord, GXBool enable, u16 ss, u16 ts);
-extern void fn_800A7D4C(s32, void*);
 extern u16 lbl_80366218[0x480];
 extern TextModelEntry lbl_80371C30[];
 extern TexFile* lbl_803CBBE8;

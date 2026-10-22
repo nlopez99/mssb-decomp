@@ -183,7 +183,7 @@ void fn_800A7D7C(u32* list, s32 count) {
 }
 
 // .text:0x800A7D4C size:0x30
-void fn_800A7D4C(s32 index, u32* entry) {
+void fn_800A7D4C(s32 index, void* entry) {
     ((DrawLink*)entry)->next = ((DrawLink*)lbl_803C7420.drawList)[index].next;
     lbl_803C7420.drawList[index] = (u32)entry | 1;
 }

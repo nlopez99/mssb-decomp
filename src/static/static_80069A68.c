@@ -7,6 +7,7 @@
 #include "static/sub.h"
 #include "Dolphin/vi.h"
 #include "musyx/musyx.h"
+#include "static/graphic.h"
 
 typedef struct TexBank {
     /* 0x00 */ u32 _00;
@@ -150,7 +151,6 @@ extern s32 fn_800ADAFC(void);
 extern s32 fn_800ADB04(void* arg0, void* arg1, s32 arg2, s32 arg3);
 extern void fn_800ADBFC(void);
 extern void fn_800ADC40(void* arg0, u32 arg1);
-extern void fn_800A7D4C(s32 layer, FadeParams* params);
 extern BOOL fn_80021518(s32 group, void* data);
 extern void fn_8002149C(s32 arg0);
 extern void fn_800214D0(void);
