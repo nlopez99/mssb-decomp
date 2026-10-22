@@ -2,6 +2,9 @@
 #include "Dolphin/os.h"
 #include "Dolphin/card.h"
 #include "string.h"
+#include "Dolphin/dvd.h"
+#include "Dolphin/gx.h"
+#include "charPipeline/texPalette.h"
 
 typedef struct McardTask {
     /* 0x00 */ u8 _00[0xC];
@@ -77,7 +80,8 @@ typedef struct McardState {
     /* 0x50 */ s32 lastResult;
     /* 0x54 */ u8 error;
     /* 0x55 */ u8 op;
-    /* 0x56 */ u8 _56[2];
+    /* 0x56 */ u8 bannerSet;
+    /* 0x57 */ u8 iconCount;
     /* 0x58 */ s32 xferred;
     /* 0x5C */ u8 percent;
     /* 0x5D */ u8 _5D[3];
@@ -109,6 +113,7 @@ extern s32 CARDGetXferredBytes(s32 chan);
 extern s32 CARDSetAttributesAsync(s32 chan, s32 fileNo, u8 attr, CARDCallback callback);
 extern s32 CARDSetAttributes(s32 chan, s32 fileNo, u8 attr);
 extern void fn_800ACFB0(void* ptr);
+extern void* _OSAllocFromHeap(s32 heap, u32 size);
 extern McardTask* lbl_803CC1B8;
 extern McardState lbl_803C7838;
 extern u64 lbl_802EF2C0[2];
@@ -276,6 +281,9 @@ static inline s32 SetAttributes(s32 chan, s32 fileNo, u8 attr, s32 async) {
     return 0;
 }
 
+static BOOL ReadOpening(u8* buf);
+static void BindPalette(TEXPalettePtr pal);
+
 // .text:0x800ACD64 size:0x1B0
 void fn_800ACD64(s32 result) {
     lbl_803C7838.lastResult = result;
@@ -379,7 +387,110 @@ s32 fn_800ACC6C(s32 type, s32 a, s32 b) {
 }
 
 // .text:0x800AC508 size:0x764
-void fn_800AC508(void) {
+void fn_800AC508(char* fileName, void* banner, s32 bannerSize, void* icon, u32 iconSize, s32 iconSpeed, s32 iconAnim, char* comment, char* comment2, s32 blocks) {
+    TEXDescriptorPtr desc;
+    u8* opening = NULL;
+    u8* dst;
+    TEXPalettePtr pal;
+    u8 i;
+    s16 hasClut;
+    char* comments;
+
+    memset(&lbl_802EF330, 0, 0x6C);
+    lbl_802EF330.length = blocks << 13;
+    lbl_803CC16C = _OSAllocFromHeap(0x20, lbl_802EF330.length);
+    memset(lbl_803CC16C, 0, lbl_802EF330.length);
+    strncpy(lbl_802EF330.fileName, fileName, 0x20);
+    if ((banner == NULL && bannerSize == 0) || comment == NULL) {
+        opening = _OSAllocFromHeap(0x20, 0x1960);
+        if (!ReadOpening(opening)) {
+            OSPanic("mcard.c", 756, "\"opening.bnr\" is not found in the root directory.\n");
+        }
+    }
+    comments = (char*)lbl_802EF2F0;
+    memset(comments, 0, 4);
+    if (comment == NULL) {
+        strncpy(comments, (char*)(opening + 0x1820), 0x1F);
+    } else {
+        strncpy(comments, comment, 0x1F);
+    }
+    memset(comments + 0x20, 0, 4);
+    strncpy(comments + 0x20, comment2, 0x1F);
+    lbl_802EF330.iconAddr = 0;
+    dst = lbl_803CC16C;
+    if (banner == NULL) {
+        if (bannerSize == 0) {
+            lbl_802EF330.bannerFormat = CARD_STAT_BANNER_RGB5A3;
+            memcpy(dst, opening + 0x20, 0x1800);
+            dst += 0x1800;
+            lbl_803C7838.bannerSet = 1;
+        }
+    } else {
+        pal = _OSAllocFromHeap(0x20, bannerSize);
+        memcpy(pal, banner, bannerSize);
+        BindPalette(pal);
+        desc = TEXGet(pal, 0);
+        switch (desc->textureHeader->format) {
+        case GX_TF_RGB5A3:
+            lbl_802EF330.bannerFormat = CARD_STAT_BANNER_RGB5A3;
+            memcpy(dst, desc->textureHeader->data, 0x1800);
+            dst += 0x1800;
+            break;
+        case GX_TF_C8:
+            lbl_802EF330.bannerFormat = CARD_STAT_BANNER_C8;
+            memcpy(dst, desc->textureHeader->data, 0xC00);
+            memcpy(dst + 0xC00, desc->CLUTHeader->data, 0x200);
+            dst += 0xE00;
+            break;
+        default:
+            OSPanic("mcard.c", 814, "Unsupported banner texture format.\n");
+            break;
+        }
+        fn_800ACFB0(pal);
+        lbl_803C7838.bannerSet = 1;
+    }
+    if (icon != NULL) {
+        hasClut = 0;
+        pal = _OSAllocFromHeap(0x20, iconSize);
+        memcpy(pal, icon, iconSize);
+        BindPalette(pal);
+        for (i = 0; i < pal->numDescriptors && i < 8; i++) {
+            desc = TEXGet(pal, i);
+            switch (desc->textureHeader->format) {
+            case GX_TF_RGB5A3:
+                CARDSetIconFormat(&lbl_802EF330, i, CARD_STAT_ICON_RGB5A3);
+                memcpy(dst, desc->textureHeader->data, 0x800);
+                dst += 0x800;
+                break;
+            case GX_TF_C8:
+                CARDSetIconFormat(&lbl_802EF330, i, CARD_STAT_ICON_C8);
+                memcpy(dst, desc->textureHeader->data, 0x400);
+                hasClut = 1;
+                dst += 0x400;
+                break;
+            default:
+                OSPanic("mcard.c", 849, "Unsupported icon texture formant.\n");
+                break;
+            }
+            CARDSetIconSpeed(&lbl_802EF330, i, iconSpeed & 3);
+        }
+        for (; i < 8; i++) {
+            CARDSetIconFormat(&lbl_802EF330, i, CARD_STAT_ICON_NONE);
+            CARDSetIconSpeed(&lbl_802EF330, i, CARD_STAT_SPEED_END);
+        }
+        lbl_803C7838.iconCount = i;
+        if (hasClut == 1) {
+            memcpy(dst, desc->CLUTHeader->data, 0x200);
+            dst += 0x200;
+        }
+        lbl_802EF330.bannerFormat |= iconAnim & CARD_STAT_ANIM_MASK;
+        fn_800ACFB0(pal);
+    }
+    if (opening != NULL) {
+        fn_800ACFB0(opening);
+    }
+    lbl_803CC164 = dst;
+    lbl_802EF330.commentAddr = dst - (u8*)lbl_803CC16C;
 }
 
 // .text:0x800ABF44 size:0x5C4
@@ -570,6 +681,49 @@ void fn_800ABF44(void) {
         lbl_803CC1B8->parent->result = 2;
         fn_800B0A14_removeQueue();
         break;
+    }
+}
+
+static inline BOOL ReadOpening(u8* buf) {
+    DVDFileInfo info;
+
+    if (!DVDOpen("/opening.bnr", &info)) {
+        return FALSE;
+    }
+    if (OSRoundUp32B(info.length) < 0x1960) {
+        return FALSE;
+    }
+    if (!DVDReadPrio(&info, buf, 0x1960, 0, 2)) {
+        return FALSE;
+    }
+    if (*(u32*)buf != 'BNR1') {
+        return FALSE;
+    }
+    return TRUE;
+}
+
+static inline void BindPalette(TEXPalettePtr pal) {
+    u16 i;
+
+    if (pal->versionNumber != 2142000) {
+        OSPanic("mcard.c", 1327, "invalid version number for texture palette");
+    }
+    pal->descriptorArray = (TEXDescriptorPtr)((u32)pal->descriptorArray + (u32)pal);
+    for (i = 0; i < pal->numDescriptors; i++) {
+        if (pal->descriptorArray[i].textureHeader) {
+            pal->descriptorArray[i].textureHeader = (TEXHeaderPtr)((u32)pal->descriptorArray[i].textureHeader + (u32)pal);
+            if (!pal->descriptorArray[i].textureHeader->unpacked) {
+                pal->descriptorArray[i].textureHeader->data = (Ptr)((u32)pal->descriptorArray[i].textureHeader->data + (u32)pal);
+                pal->descriptorArray[i].textureHeader->unpacked = 1;
+            }
+        }
+        if (pal->descriptorArray[i].CLUTHeader) {
+            pal->descriptorArray[i].CLUTHeader = (CLUTHeaderPtr)((u32)pal->descriptorArray[i].CLUTHeader + (u32)pal);
+            if (!pal->descriptorArray[i].CLUTHeader->unpacked) {
+                pal->descriptorArray[i].CLUTHeader->data = (Ptr)((u32)pal->descriptorArray[i].CLUTHeader->data + (u32)pal);
+                pal->descriptorArray[i].CLUTHeader->unpacked = 1;
+            }
+        }
     }
 }
 

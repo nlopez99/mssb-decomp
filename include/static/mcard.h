@@ -22,7 +22,7 @@ u16 fn_800ABB14(u8* data, s32 len);
 void fn_800ABB60(void);
 void fn_800ABBD0(void);
 void fn_800ABF44(void);
-void fn_800AC508(void);
+void fn_800AC508(char* fileName, void* banner, s32 bannerSize, void* icon, u32 iconSize, s32 iconSpeed, s32 iconAnim, char* comment, char* comment2, s32 blocks);
 s32 fn_800ACC6C(s32 type, s32 a, s32 b);
 void fn_800ACCD4(void);
 void fn_800ACCE8(void);
