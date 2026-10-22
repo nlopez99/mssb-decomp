@@ -17,7 +17,7 @@ typedef struct FogSettings {
 
 FogSettings lbl_80111700 = { 0 };
 
-s32 lbl_803CBB58 = 1;
+u32 lbl_803CBB58 = 1;
 u8 lbl_803CBB60 = 0x40;
 
 // .sbss, declared from the highest address down
@@ -25,14 +25,14 @@ GXColor lbl_803CC224;
 u8 lbl_803CC220;
 s32 lbl_803CC21C;
 f32 lbl_803CC218;
-s32 lbl_803CC210[2];
+u8 lbl_803CC210[8];
 s32 lbl_803CC20C;
 MtxPtr lbl_803CC208;
 MtxPtr lbl_803CC204;
 s32 lbl_803CC200;
 f32 lbl_803CC1FC;
 f32 lbl_803CC1F8;
-s32 lbl_803CC1F4;
+DOEnvCallback lbl_803CC1F4;
 void* lbl_803CC1F0;
 
 // .text:0x800B993C size:0xC
@@ -56,7 +56,7 @@ void fn_800B9950(u32 flags, f32 arg1, f32 arg2) {
 }
 
 // .text:0x800B996C size:0x8
-void fn_800B996C(s32 arg0) {
+void fn_800B996C(DOEnvCallback arg0) {
     lbl_803CC1F4 = arg0;
 }
 
@@ -102,13 +102,92 @@ void fn_800B9AA8(void* light) {
 }
 
 // .text:0x800B9AB0 size:0x3F8
-void fn_800B9AB0(void) {}
+s32 fn_800B9AB0(u32 mode, struct DODisplayObj* dispObj, u8* setting, GXTevStageID* stage, GXTexCoordID* coord, GXTexMapID* map, GXChannelID* chan, MtxPtr camera) {
+    Mtx sp100;
+    Mtx spD0;
+    Mtx spA0;
+    Mtx sp70;
+    Mtx sp40;
+    Mtx sp10;
+    GXTexGenSrc src = GX_TG_NRM;
+    GXColor kcolor;
+    GXTevColorArg colorArg;
+    GXTevAlphaArg alphaArg;
+    GXTevColorArg konst;
+    f32 scale = 0.5f;
+
+    if (lbl_803CBB58 == 0) {
+        return -1;
+    }
+    if (dispObj == NULL || dispObj->lightingData == NULL || setting == NULL) {
+        return -1;
+    }
+    PSMTXIdentity(sp70);
+    PSMTXIdentity(sp40);
+    PSMTXConcat(camera, dispObj->worldMatrix, sp100);
+    PSMTXInverse(sp100, spD0);
+    PSMTXTranspose(spD0, sp70);
+    PSMTXScale(spD0, -scale, scale, 0.0f);
+    PSMTXTrans(spA0, 0.5f, 0.5f, 1.0f);
+    PSMTXConcat(spA0, spD0, sp10);
+    PSMTXScale(spD0, -scale, scale, 0.0f);
+    PSMTXTrans(spA0, 0.5f + lbl_803CC1F8, 0.5f + lbl_803CC1FC, 1.0f);
+    PSMTXConcat(spA0, spD0, sp40);
+    if (mode == 5) {
+        colorArg = GX_CC_RASC;
+        *chan = GX_COLOR0A0;
+        alphaArg = GX_CA_RASA;
+    } else {
+        colorArg = GX_CC_CPREV;
+        *chan = GX_COLOR_NULL;
+        alphaArg = GX_CA_APREV;
+    }
+    if (setting[1] != 0) {
+        kcolor.r = kcolor.g = kcolor.b = kcolor.a = setting[1];
+        konst = GX_CC_KONST;
+        GXSetTevKColor(GX_KCOLOR0, kcolor);
+        GXSetTevKColorSel(*stage, GX_TEV_KCSEL_K0);
+    } else {
+        konst = GX_CC_APREV;
+    }
+    if (dispObj->lightingData->compCount == 2) {
+        src = GX_TG_BINRM;
+    }
+    GXLoadTexMtxImm(sp70, GX_TEXMTX0 + *map * 3, GX_MTX3x4);
+    GXLoadTexMtxImm(sp40, GX_PTTEXMTX0 + *map * 3, GX_MTX3x4);
+    GXSetTexCoordGen2(*coord, GX_TG_MTX3X4, src, GX_TEXMTX0 + *map * 3, GX_TRUE, GX_PTTEXMTX0 + *map * 3);
+    GXSetTevOrder(*stage, *coord, *map, *chan);
+    if (lbl_803CC210[*map] == 1) {
+        GXSetTevColorIn(*stage, GX_CC_ZERO, GX_CC_TEXC, konst, colorArg);
+        GXSetTevColorOp(*stage, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    } else if (lbl_803CC210[*map] == 0) {
+        GXSetTevColorIn(*stage, colorArg, GX_CC_TEXC, konst, GX_CC_ZERO);
+        GXSetTevColorOp(*stage, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    } else {
+        GXSetTevColorIn(*stage, GX_CC_ZERO, GX_CC_TEXC, konst, colorArg);
+        GXSetTevColorOp(*stage, GX_TEV_SUB, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    }
+    GXSetTevAlphaIn(*stage, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, alphaArg);
+    GXSetTevAlphaOp(*stage, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    if (lbl_803CC1F4 != NULL) {
+        (*coord)++;
+        GXLoadTexMtxImm(sp70, GX_TEXMTX0 + (*map + 1) * 3, GX_MTX3x4);
+        GXLoadTexMtxImm(sp10, GX_PTTEXMTX0 + (*map + 1) * 3, GX_MTX3x4);
+        GXSetTexCoordGen2(*coord, GX_TG_MTX3X4, src, GX_TEXMTX0 + (*map + 1) * 3, GX_TRUE, GX_PTTEXMTX0 + (*map + 1) * 3);
+        (*map)++;
+        lbl_803CC1F4(*stage, 0, 1, *coord, *map);
+    }
+    (*stage)++;
+    (*coord)++;
+    (*map)++;
+    return 0;
+}
 
 // .text:0x800B9EA8 size:0x5A4
 void fn_800B9EA8(void) {}
 
 // .text:0x800BA44C size:0x3FC
-void fn_800BA44C(void) {}
+void fn_800BA44C(u32 stage, struct DODisplayObj* dispObj, void* data, u8* arg3, u8* arg4) {}
 
 // .text:0x800BA848 size:0x12E4
 void Custom_SetState(void) {}
@@ -125,13 +204,6 @@ void GetColorFromQuant(void* color, u32 quantizeInfo, u8* r, u8* g, u8* b, u8* a
         *b = (*(u16*)color << 3) & 0xF8;
         *a = 0xFF;
         break;
-    case GX_RGB8:
-    case GX_RGBX8:
-        *r = *(u32*)color >> 24;
-        *g = *(u32*)color >> 16;
-        *b = *(u32*)color >> 8;
-        *a = 0xFF;
-        break;
     case GX_RGBA4:
         *r = (*(u16*)color >> 12) & 0xF;
         *g = (*(u16*)color >> 8) & 0xF;
@@ -142,17 +214,24 @@ void GetColorFromQuant(void* color, u32 quantizeInfo, u8* r, u8* g, u8* b, u8* a
         *b |= *b << 4;
         *a |= *a << 4;
         break;
-    case GX_RGBA6:
-        *r = (*(u16*)color >> 16) & 0xFC;
-        *g = (*(u16*)color >> 10) & 0xFC;
-        *b = (*(u16*)color >> 4) & 0xFC;
-        *a = (*(u16*)color << 2) & 0xFC;
-        break;
     case GX_RGBA8:
         *r = *(u32*)color >> 24;
         *g = *(u32*)color >> 16;
         *b = *(u32*)color >> 8;
         *a = *(u32*)color;
+        break;
+    case GX_RGB8:
+    case GX_RGBX8:
+        *r = *(u32*)color >> 24;
+        *g = *(u32*)color >> 16;
+        *b = *(u32*)color >> 8;
+        *a = 0xFF;
+        break;
+    case GX_RGBA6:
+        *r = (*(u16*)color & 0xFC0000) >> 16;
+        *g = (*(u16*)color & 0x3F000) >> 10;
+        *b = (*(u16*)color & 0xFC0) >> 4;
+        *a = (*(u16*)color & 0x3F) << 2;
         break;
     }
 }
@@ -354,7 +433,68 @@ void fn_800BCE38(DODisplayDataPtr pal) {
 }
 
 // .text:0x800BCEF8 size:0x298
-void fn_800BCEF8(DOLayout* layout, struct DODisplayObj* dispObj) {}
+void* fn_800BCEF8(DOLayout* layout, struct DODisplayObj* dispObj) {
+    void* skin = NULL;
+    s32 i;
+
+    if (layout->positionData != NULL) {
+        dispObj->positionData = (PositionData*)((u32)layout + (u32)layout->positionData);
+        dispObj->positionData->positionArray = (char*)((u32)layout + (u32)dispObj->positionData->positionArray);
+        if (dispObj->positionData->compCount == 6) {
+            skin = dispObj->positionData->positionArray;
+        }
+    } else {
+        dispObj->positionData = NULL;
+    }
+    if (layout->colorData != NULL) {
+        dispObj->colorData = (ColorData*)((u32)layout + (u32)layout->colorData);
+        dispObj->colorData->colorArray = (char*)((u32)layout + (u32)dispObj->colorData->colorArray);
+    } else {
+        dispObj->colorData = NULL;
+    }
+    if (layout->textureData != NULL && layout->numTextureChannels != 0) {
+        dispObj->textureData = _OSAllocFromHeap(0x20, layout->numTextureChannels * sizeof(TextureData));
+        dispObj->numTextureChannels = layout->numTextureChannels;
+        for (i = 0; i < layout->numTextureChannels; i++) {
+            dispObj->textureData[i] = *(TextureData*)((u32)layout + (u32)&layout->textureData[i]);
+            dispObj->textureData[i].textureCoordArray = (char*)((u32)layout + (u32)dispObj->textureData[i].textureCoordArray);
+        }
+    } else {
+        dispObj->textureData = NULL;
+        dispObj->numTextureChannels = 0;
+    }
+    if (layout->lightingData != NULL) {
+        dispObj->lightingData = (LightingData*)((u32)layout + (u32)layout->lightingData);
+        dispObj->lightingData->normalArray = (char*)((u32)layout + (u32)dispObj->lightingData->normalArray);
+    } else {
+        dispObj->lightingData = NULL;
+    }
+    if (layout->displayData != NULL) {
+        dispObj->displayData = (DisplayData*)((u32)layout + (u32)layout->displayData);
+        dispObj->displayData->primitiveBank = (char*)((u32)layout + (u32)dispObj->displayData->primitiveBank);
+        dispObj->displayData->displayStateList = (DisplayStateList*)((u32)layout + (u32)dispObj->displayData->displayStateList);
+        for (i = 0; i < dispObj->displayData->numStateEntries; i++) {
+            if (dispObj->displayData->displayStateList[i].primitiveList != NULL) {
+                dispObj->displayData->displayStateList[i].primitiveList = (char*)((u32)layout + (u32)dispObj->displayData->displayStateList[i].primitiveList);
+            }
+        }
+    } else {
+        dispObj->displayData = NULL;
+    }
+    dispObj->pad8 = layout->pad8;
+    dispObj->visibility = 1;
+    dispObj->overrideTevMode = 0;
+    dispObj->userTevMode = fn_800BA44C;
+    dispObj->shaderFunc = NULL;
+    dispObj->shaderData = NULL;
+    memcpy(dispObj->_58, layout->_20, 4);
+    memcpy(dispObj->_54, layout->_1C, 4);
+    memcpy(dispObj->_60, layout->_28, 4);
+    memcpy(dispObj->_5C, layout->_24, 4);
+    memcpy(dispObj->_68, layout->_30, 4);
+    memcpy(dispObj->_64, layout->_2C, 4);
+    return skin;
+}
 
 // .text:0x800BD190 size:0x58
 void fn_800BD190(DODisplayDataPtr pal, TEXPalettePtr tex) {

@@ -3,6 +3,8 @@
 
 #include "C3/charPipeline.h"
 
+typedef void (*DOEnvCallback)(GXTevStageID stage, s32 arg1, s32 arg2, GXTexCoordID coord, GXTexMapID map);
+
 // The layout in this game's geometry palettes: the SDK's DODisplayLayout with more fields after it.
 typedef struct DOLayout {
     /* 0x00 */ PositionData *positionData;
@@ -25,15 +27,15 @@ typedef struct DOLayout {
 void fn_800B993C(void);
 void fn_800B9948(s32 arg0);
 void fn_800B9950(u32 flags, f32 arg1, f32 arg2);
-void fn_800B996C(s32 arg0);
+void fn_800B996C(DOEnvCallback arg0);
 void SetFogNone(void);
 void SetFog(GXFogType type, f32 startz, f32 endz, f32 nearz, f32 farz, GXColor color);
 void SetFogNoneAgain(void);
 void fn_800B9A9C(s32 arg0, f32 arg1);
 void fn_800B9AA8(void* light);
-void fn_800B9AB0(void);
+s32 fn_800B9AB0(u32 mode, struct DODisplayObj* dispObj, u8* setting, GXTevStageID* stage, GXTexCoordID* coord, GXTexMapID* map, GXChannelID* chan, MtxPtr camera);
 void fn_800B9EA8(void);
-void fn_800BA44C(void);
+void fn_800BA44C(u32 stage, struct DODisplayObj* dispObj, void* data, u8* arg3, u8* arg4);
 void Custom_SetState(void);
 void SetState(void);
 void GetColorFromQuant(void* color, u32 quantizeInfo, u8* r, u8* g, u8* b, u8* a);
@@ -47,7 +49,7 @@ void* LoadGeoPalette(DODisplayDataPtr pal);
 void convertGeometryAndSknHeader(DODisplayDataPtr pal, void* skn);
 void fn_800BCDBC(DODisplayDataPtr pal);
 void fn_800BCE38(DODisplayDataPtr pal);
-void fn_800BCEF8(DOLayout* layout, struct DODisplayObj* dispObj);
+void* fn_800BCEF8(DOLayout* layout, struct DODisplayObj* dispObj);
 void fn_800BD190(DODisplayDataPtr pal, TEXPalettePtr tex);
 void fn_800BD1E8(s32 arg0);
 void __MTGQR5(register u32 val);
