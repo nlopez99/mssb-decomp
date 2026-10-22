@@ -684,6 +684,7 @@ config.libs = [
         "cflags": cflags_base + ["-O4,p", "-sym on", "-cpp_exceptions on"],
         "host": False,
         "objects": [
+            Object(NonMatching, "C3/actor/act.c", extra_cflags=["-inline deferred"]),
             Object(NonMatching, "C3/control/control.c", extra_cflags=["-inline deferred"]),
         ],
     },

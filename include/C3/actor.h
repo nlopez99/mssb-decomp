@@ -32,7 +32,9 @@ typedef struct {
     /* 0x1A */ u16 pad16;
 } ActorBone;
 
-typedef struct {
+// This game's Actor is 0xA0 bytes (static/objinit.c's ObjActor): its worldControl is a
+// 0x44-byte Control, and fields follow skHeader.
+typedef struct Actor {
     /* 0x00 */ ActorLayout *layout;
     /* 0x04 */ u16 actorID;
     /* 0x06 */ u16 totalBones;
@@ -41,13 +43,23 @@ typedef struct {
     /* 0x14 */ struct DODisplayObj *skinObject;
     /* 0x18 */ sBone **boneArray;
     /* 0x1C */ Control worldControl;
-    /* 0x50 */ MtxPtr forwardMtxArray;
-    /* 0x54 */ MtxPtr skinMtxArray;
-    /* 0x58 */ MtxPtr skinInvTransposeMtxArray;
-    /* 0x5C */ MtxPtr orientationInvMtxArray;
-    /* 0x60 */ DSList drawPriorityList;
-    /* 0x6C */ sHdr * skHeader;
-} Actor;
+    /* 0x60 */ MtxPtr forwardMtxArray;
+    /* 0x64 */ MtxPtr skinMtxArray;
+    /* 0x68 */ MtxPtr skinInvTransposeMtxArray;
+    /* 0x6C */ MtxPtr orientationInvMtxArray;
+    /* 0x70 */ DSList drawPriorityList;
+    /* 0x7C */ sHdr * skHeader;
+    /* 0x80 */ u16 _80;
+    /* 0x82 */ u16 _82;
+    /* 0x84 */ u16 _84;
+    /* 0x88 */ u32 _88;
+    /* 0x8C */ f32 _8C;
+    /* 0x90 */ f32 _90;
+    /* 0x94 */ u32 _94;
+    /* 0x98 */ u8 _98;
+    /* 0x99 */ u8 _99;
+    /* 0x9A */ u8 _9A[0xA0 - 0x9A];
+} Actor; // size: 0xA0
 
 // actor.c
 void ACTGet(Actor **actor, char *name);
