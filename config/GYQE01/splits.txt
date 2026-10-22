@@ -1254,6 +1254,11 @@ C3/static_800BDE8C.c:
 	.sdata      start:0x803CBB68 end:0x803CBB70
 	.sdata2     start:0x803CD068 end:0x803CD0E0
 
+C3/static_800BF074.c:
+	extab       start:0x80006C20 end:0x80006C48
+	extabindex  start:0x80008D90 end:0x80008DCC
+	.text       start:0x800BF074 end:0x800C0A8C
+
 Musyx/seq.c:
 	.text       start:0x800C0A8C end:0x800C4AB4
 	.data       start:0x801123A8 end:0x801123F8

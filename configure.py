@@ -715,6 +715,7 @@ config.libs = [
             Object(NonMatching, "C3/light/light.c"),
             Object(NonMatching, "C3/static_800BD478.c"),
             Object(NonMatching, "C3/static_800BDE8C.c"),
+            Object(NonMatching, "C3/static_800BF074.c"),
         ],
     },
     MusyxLib(
