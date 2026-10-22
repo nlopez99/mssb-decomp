@@ -4019,7 +4019,7 @@ BOOL fn_80016344(int charId, int idx, u8 flag, int player) {
     return FALSE;
 }
 
-static inline u8 loadFaceAnimAt(ModelActor* actor, u8 charId, int idx, int n) {
+static inline u8 loadFaceAnimAt(ModelActor* actor, u8 charId, int idx, s32 n) {
     s16 id;
     ModelSub2C* sub;
 
