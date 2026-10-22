@@ -257,7 +257,6 @@ void fn_800B0390(u32 request) {
 }
 
 // .text:0x800B0230 size:0x160
-// 87.39%: the target keeps dest + first in a fifth saved register (r27); the base recomputes it.
 void fn_800B0230(u8* dest, u32 size) {
     MovieRing* ring = &lbl_803C79D4;
     u32 first;
@@ -292,7 +291,7 @@ void fn_800B0230(u8* dest, u32 size) {
             }
             ring->_29 = 2;
             DCInvalidateRange(dest + first, second);
-            ARQPostRequest(&lbl_803C78C4[1], 0, ARQ_TYPE_ARAM_TO_MRAM, ARQ_PRIORITY_HIGH, ring->start, (u32)(dest + first),
+            ARQPostRequest(&lbl_803C78C4[1], 0, ARQ_TYPE_ARAM_TO_MRAM, ARQ_PRIORITY_HIGH, ring->start, (u32)dest + first,
                            second, fn_800B0390);
             DCInvalidateRange(dest + first, second);
         }
