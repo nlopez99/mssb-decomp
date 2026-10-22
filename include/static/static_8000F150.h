@@ -9,7 +9,7 @@ typedef struct TextModelSet {
     /* 0x16 */ u16 count;
 } TextModelSet;
 
-void fn_8000F150(void);
+void fn_8000F150(void* arg);
 void fn_8000F3E8(s32 arg0);
 void somethingSetTexturePointer(void);
 void fn_8000F4B8(s32 a, s32 b, s32 c, s32 d);
