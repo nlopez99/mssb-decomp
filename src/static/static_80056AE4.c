@@ -414,8 +414,551 @@ void fn_80061B9C(void) {
     lbl_803CC1B8->func = fn_80060184;
 }
 
+static inline void orderStep38(SpaniTask* task, s32 port) {
+    s32 done;
+    s32 count;
+
+    if (g_d_GameSettings._06 != 2) {
+        fn_8005FCA0(task, port);
+        fn_8005F9D0(task, port);
+    } else {
+        if (isLockState(lbl_803C66B0.rows[9].port[port], 0)) {
+            getSpaniObj(task, 0)->_5C = 0;
+            getSpaniObj(task, 0)->_68 = 1;
+            if (lbl_803297E0._CFA2[port] != 1) {
+                getSpaniObj(task, 1)->_5C = 0;
+                getSpaniObj(task, 1)->_68 = 1;
+            }
+            getSpaniObj(task, 3)->_68 = 1;
+            getSpaniObj(task, 0xE)->_5C = 0;
+            getSpaniObj(task, 0xE)->_68 = 1;
+            fn_800626EC(port);
+            lbl_803C66B0.rows[9].port[port] = 1;
+        }
+        if (lbl_803C66B0.rows[9].port[port] == 1) {
+            count = 1;
+            done = isAnimDone(task, 0, 20);
+            if (lbl_803297E0._CFA2[port] != 1) {
+                count = 2;
+                done += isAnimDone(task, 1, 20);
+            }
+            if (done == count) {
+                fn_80062674(port);
+                lbl_803C66B0.rows[9].port[port] = 2;
+            }
+        }
+    }
+}
+
+static inline void orderStep3A(SpaniTask* task, s32 port) {
+    s32 done;
+    s32 count;
+
+    if (isLockState(lbl_803C66B0.rows[9].port[port], 0)) {
+        if (g_d_GameSettings.GameModeSelected != 5) {
+            if (g_d_GameSettings._10 == 0 && port != 0) {
+                getSpaniObj(task, port)->_5C = 30 << 16;
+                getSpaniObj(task, port)->_68 = 1;
+            } else {
+                getSpaniObj(task, port)->_5C = 20 << 16;
+                getSpaniObj(task, port)->_68 = 4;
+            }
+        } else {
+            getSpaniObj(task, port)->_5C = 20 << 16;
+            getSpaniObj(task, port)->_68 = 4;
+        }
+        fn_800626EC(port);
+        lbl_803C66B0.rows[9].port[port] = 1;
+    }
+    if (lbl_803C66B0.rows[9].port[port] == 1) {
+        if (g_d_GameSettings.GameModeSelected != 5) {
+            if (g_d_GameSettings._10 == 0 && port != 0) {
+                count = 1;
+                done = isAnimDone(task, port, 50);
+            } else {
+                count = 1;
+                done = isAnimDone(task, port, 0);
+            }
+        } else {
+            count = 1;
+            done = isAnimDone(task, port, 0);
+        }
+        if (done == count) {
+            fn_80062674(port);
+            lbl_803C66B0.rows[9].port[port] = 2;
+        }
+    }
+}
+
+static inline void orderStep3C(SpaniTask* task, s32 port) {
+    s32 done;
+    s32 count;
+
+    if (g_d_GameSettings._06 != 2) {
+        fn_8005F068(task, port);
+        if (isLockState(lbl_803C66B0.rows[9].port[port], 1)) {
+            done = 0;
+            count = 0;
+            switch (lbl_803297E0._CF52[port]) {
+            case 0:
+                if (lbl_803297E0._CF54[port] == 1) {
+                    count = 1;
+                    done = isAnimDone(task, port + 0x14, 10);
+                }
+                break;
+            case 1:
+                if (lbl_803297E0._CF54[port] != 1) {
+                    count = 1;
+                    done = isAnimDone(task, port + 0x14, 20);
+                }
+                break;
+            }
+            if (done == count) {
+                fn_80062674(port);
+                lbl_803C66B0.rows[9].port[port] = 2;
+            }
+        }
+    }
+}
+
+static inline void orderStep3D(SpaniTask* task, s32 port) {
+    if (g_d_GameSettings._06 != 2) {
+        fn_8005EC88(task, port);
+        if (isLockState(lbl_803C66B0.rows[9].port[port], 1)) {
+            fn_80062674(port);
+            lbl_803C66B0.rows[9].port[port] = 2;
+        }
+    } else {
+        fn_8005B760(task, port);
+        if (isLockState(lbl_803C66B0.rows[9].port[port], 1)) {
+            fn_80062674(port);
+            lbl_803C66B0.rows[9].port[port] = 2;
+        }
+    }
+}
+
+static inline void orderStep3B(SpaniTask* task, s32 port) {
+    fn_8005E9D8(task, port);
+}
+
+static inline void orderStep3F(SpaniTask* task, s32 port) {
+    s32 done;
+
+    if (g_d_GameSettings._06 != 2) {
+        if (isLockState(lbl_803C66B0.rows[9].port[port], 0)) {
+            getSpaniObj(task, 0)->_5C = 20 << 16;
+            getSpaniObj(task, 0)->_68 = 1;
+            getSpaniObj(task, 1)->_5C = 30 << 16;
+            getSpaniObj(task, 1)->_68 = 4;
+            getSpaniObj(task, 0x18)->_5C = 10 << 16;
+            getSpaniObj(task, 0x18)->_68 = 4;
+            getSpaniObj(task, 0x19)->_5C = 0;
+            getSpaniObj(task, 0x19)->_68 = 1;
+            getSpaniObj(task, 0x12)->_5C = 10 << 16;
+            getSpaniObj(task, 0x12)->_68 = 1;
+            getSpaniObj(task, 0x13)->_5C = 20 << 16;
+            getSpaniObj(task, 0x13)->_68 = 4;
+            fn_800626EC(port);
+            lbl_803C66B0.rows[9].port[port] = 1;
+        }
+        if (lbl_803C66B0.rows[9].port[port] == 1) {
+            done = isAnimDone(task, 0, 30);
+            done += isAnimDone(task, 1, 20);
+            done += isAnimDone(task, 0x12, 20);
+            done += isAnimDone(task, 0x13, 10);
+            if (done == 4) {
+                fn_80062674(port);
+                lbl_803C66B0.rows[9].port[port] = 2;
+            }
+        }
+    }
+}
+
+static inline void orderStep40(SpaniTask* task, s32 port) {
+    s32 done;
+
+    if (g_d_GameSettings._06 != 2) {
+        if (isLockState(lbl_803C66B0.rows[9].port[port], 0)) {
+            getSpaniObj(task, 0)->_5C = 30 << 16;
+            getSpaniObj(task, 0)->_68 = 4;
+            getSpaniObj(task, 1)->_5C = 20 << 16;
+            getSpaniObj(task, 1)->_68 = 1;
+            getSpaniObj(task, 0x18)->_5C = 0;
+            getSpaniObj(task, 0x18)->_68 = 1;
+            getSpaniObj(task, 0x19)->_5C = 10 << 16;
+            getSpaniObj(task, 0x19)->_68 = 4;
+            getSpaniObj(task, 0x12)->_5C = 20 << 16;
+            getSpaniObj(task, 0x12)->_68 = 4;
+            getSpaniObj(task, 0x13)->_5C = 10 << 16;
+            getSpaniObj(task, 0x13)->_68 = 1;
+            fn_800626EC(port);
+            lbl_803C66B0.rows[9].port[port] = 1;
+        }
+        if (lbl_803C66B0.rows[9].port[port] == 1) {
+            done = isAnimDone(task, 0, 20);
+            done += isAnimDone(task, 1, 30);
+            done += isAnimDone(task, 0x12, 10);
+            done += isAnimDone(task, 0x13, 20);
+            if (done == 4) {
+                fn_80062674(port);
+                lbl_803C66B0.rows[9].port[port] = 2;
+            }
+        }
+    }
+}
+
+static inline void orderStep41(SpaniTask* task, s32 port) {
+    s32 done;
+
+    if (isLockState(lbl_803C66B0.rows[9].port[port], 0)) {
+        getSpaniObj(task, port)->_5C = 20 << 16;
+        getSpaniObj(task, port)->_68 = 1;
+        getTeamObj(task, port, 0x18)->_5C = 10 << 16;
+        getTeamObj(task, port, 0x18)->_68 = 4;
+        getTeamObj(task, port, 0x12)->_5C = 10 << 16;
+        getTeamObj(task, port, 0x12)->_68 = 1;
+        fn_800626EC(port);
+        lbl_803C66B0.rows[9].port[port] = 1;
+    }
+    if (lbl_803C66B0.rows[9].port[port] == 1) {
+        done = isAnimAt(task, port, 30);
+        done += isAnimAt(task, port + 0x12, 20);
+        if (done == 2) {
+            lbl_803297E0._CF4A[port + 6] = 0;
+            fn_80062674(port);
+            lbl_803C66B0.rows[9].port[port] = 2;
+        }
+    }
+}
+
+static inline void orderStep42(SpaniTask* task, s32 port) {
+    s32 done;
+
+    if (isLockState(lbl_803C66B0.rows[9].port[port], 0)) {
+        getSpaniObj(task, port)->_5C = 30 << 16;
+        getSpaniObj(task, port)->_68 = 4;
+        getTeamObj(task, port, 0x18)->_5C = 0;
+        getTeamObj(task, port, 0x18)->_68 = 1;
+        getTeamObj(task, port, 0x12)->_5C = 20 << 16;
+        getTeamObj(task, port, 0x12)->_68 = 4;
+        fn_800626EC(port);
+        lbl_803C66B0.rows[9].port[port] = 1;
+    }
+    if (lbl_803C66B0.rows[9].port[port] == 1) {
+        done = isAnimDone(task, port, 20);
+        done += isAnimDone(task, port + 0x12, 10);
+        if (done == 2) {
+            fn_80062674(port);
+            lbl_803C66B0.rows[9].port[port] = 2;
+        }
+    }
+}
+
+static inline void orderStep43(SpaniTask* task, s32 port) {
+    s32 done;
+    s32 count;
+
+    fn_8005C5C4(task, port);
+    if (isLockState(lbl_803C66B0.rows[9].port[port], 1)) {
+        done = 0;
+        count = 0;
+        if (g_d_GameSettings._06 != 2) {
+            if (g_d_GameSettings.GameModeSelected == 5) {
+                done = isAnimDone(task, 0, 0);
+                count = 2;
+                done += isAnimDone(task, 1, 0);
+            } else if (g_d_GameSettings._10 == 0) {
+                if (port != 0) {
+                    count = 1;
+                    done = isAnimDone(task, port, 0);
+                } else {
+                    count = 1;
+                    done = isAnimDone(task, port, 50);
+                }
+            } else if ((getSpaniObj(task, port)->_5C >> 16) >= 30) {
+                count = 1;
+                done = isAnimDone(task, port, 50);
+            } else {
+                count = 1;
+                done = isAnimDone(task, port, 0);
+            }
+        }
+        if (done == count) {
+            fn_80062674(port);
+            lbl_803C66B0.rows[9].port[port] = 2;
+        }
+    }
+}
+
+static inline void orderStep44(SpaniTask* task, s32 port) {
+    s8 last;
+    s8 cur;
+    s8 curSlot;
+    s8 lastSlot;
+
+    if (isLockState(lbl_803C66B0.rows[9].port[port], 0)) {
+        last = lbl_803297E0._CF3E[port];
+        cur = lbl_803297E0._CF46[port] - 1;
+        if (lbl_803297E0._CF52[port] == 0) {
+            if (last != -1 && last != cur) {
+                getGridObj(task, last, port * 9, 0x1C)->_5C = 10 << 16;
+                getGridObj(task, last, port * 9, 0x1C)->_68 = 4;
+                getGridObj(task, last, port * 9, 0x40)->_5C = 10 << 16;
+                getGridObj(task, last, port * 9, 0x40)->_68 = 4;
+            }
+        } else {
+            curSlot = lbl_80354720[port][cur]._2;
+            lastSlot = lbl_80354720[port][last]._2;
+            if (g_d_GameSettings._06 != 2) {
+                if (last != -1 && lastSlot != curSlot) {
+                    getGridObj(task, lastSlot, port * 9, 0x10A)->_68 = 4;
+                    getGridObj(task, lastSlot, port * 9, 0xF8)->_68 = 4;
+                }
+            } else if (last != -1 && lastSlot != curSlot) {
+                getTeamObj(task, lastSlot, 0x23)->_68 = 4;
+                getTeamObj(task, lastSlot, 0x1A)->_68 = 4;
+            }
+        }
+        lbl_803297E0._CF3E[port] = -1;
+        fn_800626EC(port);
+        lbl_803C66B0.rows[9].port[port] = 1;
+    }
+    if (lbl_803C66B0.rows[9].port[port] == 1) {
+        fn_80062674(port);
+        lbl_803C66B0.rows[9].port[port] = 2;
+    }
+}
+
+static inline void orderStep45(SpaniTask* task, s32 port) {
+    s32 j;
+    s32 k;
+    s8 flags;
+    u8 played;
+
+    played = FALSE;
+    if (lbl_803C66B0.rows[9].port[0] == 0) {
+        for (j = 0; j < 9; j++) {
+            flags = starMissionCompletionTracker.characters[inMemRoster[1][j].stats.CharID].scoutFlagsAchieved;
+            for (k = 0; k < flags; k++) {
+                played = TRUE;
+                getGridObj(task, k, j * 5, 0x16D)->_68 = 1;
+            }
+        }
+        if (played) {
+            if (g_d_GameSettings._06 == 2) {
+                sndFXStartEx(0x1B1, 0x7F, 0x3F, 0);
+            } else {
+                sndFXStartEx(0x1E6, 0x7F, 0x3F, 0);
+            }
+        }
+        fn_800626EC(0);
+        lbl_803C66B0.rows[9].port[0] = 1;
+    }
+    if (lbl_803C66B0.rows[9].port[0] == 1) {
+        fn_80062674(0);
+        lbl_803C66B0.rows[9].port[0] = 2;
+    }
+}
+
+static inline void orderStep46(SpaniTask* task, s32 port) {
+    getSpaniObj(task, 0x1D2)->_54 |= 2;
+    getSpaniObj(task, 0x1D2)->_68 = 1;
+    lbl_803C66B0.step[0] = 0;
+}
+
+static inline void orderStep3E_0(SpaniTask* task, s32 port) {
+    s8 prev;
+    s8 slot;
+    s32 j;
+
+    if (isLockState(lbl_803C66B0.rows[9].port[port], 0)) {
+        if (lbl_803297E0._CF46[port] == 0) {
+            prev = lbl_803297E0._CF48[port] - 1;
+            slot = lbl_80354720[port][prev]._2;
+            switch (lbl_803297E0._CF52[port]) {
+            case 0:
+                getGridObj(task, prev, port * 9, 0x40)->_68 = 4;
+                getGridObj(task, prev, port * 9, 0x1C)->_5C = 10 << 16;
+                getGridObj(task, prev, port * 9, 0x1C)->_68 = 4;
+                for (j = 0; j < 9; j++) {
+                    lbl_80371C30[task->_14 + 0x64 + j + port * 9].obj->_54 &= ~2;
+                }
+                break;
+            case 1:
+                getGridObj(task, slot, port * 9, 0x10A)->_68 = 4;
+                getGridObj(task, slot, port * 9, 0xF8)->_68 = 4;
+                getGridObj(task, slot, port * 9, 0xE6)->_54 &= ~2;
+                for (j = 0; j < 9; j++) {
+                    lbl_80371C30[task->_14 + 0x12E + j + port * 9].obj->_54 &= ~2;
+                }
+                break;
+            }
+        }
+        getTeamObj(task, port, 0x18)->_5C = 0;
+        getTeamObj(task, port, 0x18)->_68 = 1;
+        fn_800626EC(port);
+        lbl_803C66B0.rows[9].port[port] = 1;
+    }
+    if (lbl_803C66B0.rows[9].port[port] == 1) {
+        fn_80062674(port);
+        lbl_803C66B0.rows[9].port[port] = 2;
+    }
+}
+
+static inline void orderStep3E_1(SpaniTask* task, s32 port) {
+    s8 prev;
+    s8 slot;
+    s32 j;
+
+    if (isLockState(lbl_803C66B0.rows[9].port[port], 0)) {
+        switch (lbl_803297E0._CF52[port]) {
+        case 0:
+            prev = lbl_803297E0._CF48[port] - 1;
+            getTeamObj(task, prev, 0x63)->_68 = 4;
+            getTeamObj(task, prev, 0x51)->_5C = 10 << 16;
+            getTeamObj(task, prev, 0x51)->_68 = 4;
+            for (j = 0; j < 9; j++) {
+                lbl_80371C30[task->_14 + 0x75 + j].obj->_54 &= ~2;
+                lbl_80371C30[task->_14 + 0x35 + j].obj->_54 &= ~2;
+            }
+            break;
+        case 1:
+            slot = lbl_80354720[port][lbl_803297E0._CF48[port] - 1]._2;
+            getTeamObj(task, slot, 0x23)->_68 = 4;
+            getTeamObj(task, slot, 0x1A)->_68 = 4;
+            getTeamObj(task, slot, 0x11)->_54 &= ~2;
+            for (j = 0; j < 9; j++) {
+                lbl_80371C30[task->_14 + 0x35 + j].obj->_54 &= ~2;
+                lbl_80371C30[task->_14 + 0x75 + j].obj->_54 &= ~2;
+            }
+            break;
+        }
+        getSpaniObj(task, 0xE)->_5C = 0;
+        getSpaniObj(task, 0xE)->_68 = 1;
+        fn_800626EC(port);
+        lbl_803C66B0.rows[9].port[port] = 1;
+    }
+    if (lbl_803C66B0.rows[9].port[port] == 1) {
+        fn_80062674(port);
+        lbl_803C66B0.rows[9].port[port] = 2;
+    }
+}
+
 // .text:0x80060184 size:0x1A18
 void fn_80060184(void) {
+    SpaniTask* task = lbl_803CC1B8;
+    s32 i;
+    s32 j;
+    s32 k;
+    u8 port;
+    s32 done;
+    s32 count;
+    s8 prev;
+    s8 slot;
+    s8 last;
+    s8 cur;
+    s8 curSlot;
+    s8 lastSlot;
+    s8 flags;
+    u8 played;
+
+    for (i = 0; i < 2; i++) {
+        port = lbl_803C66B0.active[i + 4];
+        switch (lbl_803C66B0.step[i]) {
+        case 0x38:
+            orderStep38(task, port);
+            break;
+        case 0x39:
+            if (g_d_GameSettings._06 != 2) {
+                fn_8005F734(task, port);
+                if (isLockState(lbl_803C66B0.rows[9].port[port], 1)) {
+                    count = 1;
+                    done = isAnimDone(task, port + 0x14, 10);
+                    if (g_d_GameSettings._10 == 0 && port == 0) {
+                        count++;
+                        done += isAnimDone(task, port, 30);
+                        count++;
+                        done += isAnimDone(task, port + 0x12, 20);
+                    } else {
+                        count++;
+                        done += isAnimDone(task, port, 20);
+                        count++;
+                        done += isAnimDone(task, port + 0x12, 10);
+                    }
+                    count++;
+                    done += isAnimDone(task, port + 4, 20);
+                    count++;
+                    done += isAnimDone(task, port + 10, 10);
+                    if (done == count) {
+                        if (g_d_GameSettings._10 == 0) {
+                            lbl_803297E0._CF5B[port] = 1;
+                            if (lbl_803297E0._CF5B[0] != 0 && lbl_803297E0._CF5B[1] != 0) {
+                                lbl_803297E0._CF5B[1] = 0;
+                                lbl_803297E0._CF5B[0] = 0;
+                                fn_80062674(0);
+                                fn_80062674(1);
+                                lbl_803C66B0.rows[9].port[0] = 2;
+                                lbl_803C66B0.rows[9].port[1] = 2;
+                            }
+                        } else {
+                            fn_80062674(port);
+                            lbl_803C66B0.rows[9].port[port] = 2;
+                        }
+                    }
+                }
+            }
+            break;
+        case 0x3A:
+            orderStep3A(task, port);
+            break;
+        case 0x3C:
+            orderStep3C(task, port);
+            break;
+        case 0x3D:
+            orderStep3D(task, port);
+            break;
+        case 0x3E:
+            if (g_d_GameSettings._06 != 2) {
+                orderStep3E_0(task, port);
+            } else {
+                orderStep3E_1(task, port);
+            }
+            break;
+        case 0x3B:
+            orderStep3B(task, port);
+            break;
+        case 0x3F:
+            orderStep3F(task, port);
+            break;
+        case 0x40:
+            orderStep40(task, port);
+            break;
+        case 0x41:
+            orderStep41(task, port);
+            break;
+        case 0x42:
+            orderStep42(task, port);
+            break;
+        case 0x43:
+            orderStep43(task, port);
+            break;
+        case 0x44:
+            orderStep44(task, port);
+            break;
+        case 0x45:
+            orderStep45(task, port);
+            break;
+        case 0x46:
+            orderStep46(task, port);
+            break;
+        }
+        fn_8005A350(task, port);
+    }
+    if (lbl_803297E0._CF40[5] != 0) {
+        lbl_803297E0._CF40[5] = 0;
+        fn_80034CEC(task);
+        fn_800B0A14_removeQueue();
+    }
 }
 
 // .text:0x8005FCA0 size:0x4E4
