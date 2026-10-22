@@ -25,6 +25,7 @@
 #include "game/rep_1330.h"
 #include "game/rep_2940.h"
 #include "static/mb_subfunc.h"
+#include "static/model.h"
 
 typedef struct AramEntryD18 {
     /* 0x0 */ u32 _0[4];
@@ -135,10 +136,8 @@ extern void* lbl_3_common_bss_1323C;
 extern u8 lbl_3_common_bss_134C4[];
 
 extern void fn_800111B4(void* arg);
-extern void fn_8001A25C(void* arg);
 extern void* ARAMTransfer(AramEntryD18* entry, int arg1, int arg2, u32 aram);
 extern void changeScene(u8, s16);
-extern void fn_80019A60(void* arg);
 extern void fn_8001A3FC(int arg);
 extern void fn_8001CE74(void);
 extern void fn_800216F8(u8 group, int (*callback)(void));

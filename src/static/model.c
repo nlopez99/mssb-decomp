@@ -2619,7 +2619,7 @@ void fn_8001A3FC(int mode) {
 }
 
 // .text:0x8001A25C size:0x1A0
-void fn_8001A25C(void) {
+void fn_8001A25C(void* arg) {
     LightPos* lights = lbl_80367318;
     ModelTask* task;
     int i;
@@ -2771,7 +2771,7 @@ void fn_80019C00(void) {
 }
 
 // .text:0x80019A60 size:0x1A0
-void fn_80019A60(void) {
+void fn_80019A60(void* arg) {
     LightPos* lights = lbl_80367318;
     ModelTask* task;
     int i;
