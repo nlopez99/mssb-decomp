@@ -11,6 +11,12 @@
 #include "static/static_8006C48C.h"
 #include "string.h"
 
+typedef struct PadHold {
+    /* 0x0 */ u16 _0;
+    /* 0x2 */ u16 _2;
+    /* 0x4 */ u16 _4;
+} PadHold; // size: 0x6
+
 typedef struct SpaniColor {
     /* 0x0 */ u8 r;
     /* 0x1 */ u8 g;
@@ -75,7 +81,8 @@ extern struct {
 } lbl_8034E978;
 
 extern struct {
-    /* 0x00000 */ u8 _00000[0xCF3B];
+    /* 0x00000 */ PadHold _00[2];
+    /* 0x0000C */ u8 _0000C[0xCF3B - 0xC];
     /* 0x0CF3B */ u8 _CF3B;
     /* 0x0CF3C */ u8 _CF3C[2];
     /* 0x0CF3E */ u8 _CF3E[2];
@@ -85,13 +92,18 @@ extern struct {
     /* 0x0CF4A */ u8 _CF4A[0xCF52 - 0xCF4A];
     /* 0x0CF52 */ u8 _CF52[2];
     /* 0x0CF54 */ u8 _CF54[2];
-    /* 0x0CF56 */ u8 _CF56[0xCF5B - 0xCF56];
+    /* 0x0CF56 */ u8 _CF56[2];
+    /* 0x0CF58 */ u8 _CF58[2];
+    /* 0x0CF5A */ u8 _CF5A;
     /* 0x0CF5B */ u8 _CF5B[2];
-    /* 0x0CF5D */ u8 _CF5D[0xCF63 - 0xCF5D];
+    /* 0x0CF5D */ u8 _CF5D[0xCF61 - 0xCF5D];
+    /* 0x0CF61 */ u8 _CF61[2];
     /* 0x0CF63 */ u8 _CF63[2];
-    /* 0x0CF65 */ u8 _CF65[0xCF70 - 0xCF65];
+    /* 0x0CF65 */ u8 _CF65[2];
+    /* 0x0CF67 */ u8 _CF67[2];
+    /* 0x0CF69 */ u8 _CF69[0xCF70 - 0xCF69];
     /* 0x0CF70 */ u8 _CF70;
-    /* 0x0CF71 */ u8 _CF71[0xCF73 - 0xCF71];
+    /* 0x0CF71 */ u8 _CF71[2];
     /* 0x0CF73 */ u8 _CF73;
     /* 0x0CF74 */ u8 _CF74;
     /* 0x0CF75 */ s8 _CF75;
@@ -141,7 +153,9 @@ extern struct {
     /* 0x46F8 */ s8 ports[2];
     /* 0x46FA */ u8 _46FA[0x470D - 0x46FA];
     /* 0x470D */ u8 _470D[2];
-    /* 0x470F */ u8 _470F[0x47F9 - 0x470F];
+    /* 0x470F */ u8 _470F[0x472C - 0x470F];
+    /* 0x472C */ PadHold _472C[2];
+    /* 0x4738 */ u8 _4738[0x47F9 - 0x4738];
     /* 0x47F9 */ s8 _47F9[2][9][9];
     /* 0x489B */ u8 _489B[2][9];
 } lbl_8034E9A0;
@@ -188,6 +202,10 @@ typedef struct TextModel {
 extern TextModel lbl_80366B18[];
 extern SpaniSlot lbl_80371C30[];
 extern SpaniTask* lbl_803CC1B8;
+extern u8 lbl_800EFBA4[16];
+extern void transferStatsToInMemRoster(u8 team);
+extern void sndFXRelated(u16 id);
+extern s32 fn_80042598(u8 team, s32 charId);
 extern struct SpaniDesc lbl_801000A8[];
 extern struct SpaniDesc lbl_801041C8[];
 extern struct SpaniDesc lbl_80107688[];
@@ -718,10 +736,279 @@ void fn_8005E9D8(SpaniTask* task, s32 team) {
 
 // .text:0x8005DE14 size:0xBC4
 void fn_8005DE14(SpaniTask* task, s32 team) {
+    s32 i;
+    s8 prev;
+    s8 cur;
+    s8 last;
+    s8 slot;
+    s8 prevSlot;
+    s8 lastSlot;
+
+    if (isLockState(lbl_803C66B0.rows[9].port[team], 0)) {
+        cur = lbl_803297E0._CF46[team] - 1;
+        last = lbl_803297E0._CF3E[team];
+        prev = lbl_803297E0._CF48[team] - 1;
+        if (lbl_803297E0._CF52[team] == 0) {
+            if (g_d_GameSettings._06 != 2) {
+                for (i = 0; i < 9; i++) {
+                    lbl_80371C30[task->_14 + 0x64 + i + team * 9].obj->_54 &= ~2;
+                }
+                getGridObj(task, cur, team * 9, 0x40)->_5C = 0;
+                getGridObj(task, cur, team * 9, 0x40)->_68 = 1;
+                getGridObj(task, cur, team * 9, 0x1C)->_5C = 0;
+                getGridObj(task, cur, team * 9, 0x1C)->_68 = 1;
+                getGridObj(task, cur, team * 9, 0x52)->_5C = 0;
+                getGridObj(task, cur, team * 9, 0x52)->_68 = 1;
+                getGridObj(task, cur, team * 9, 0x64)->_54 |= 2;
+                getGridObj(task, cur, team * 9, 0x64)->_64 = 0x2A;
+                getGridObj(task, cur, team * 9, 0x64)->_68 = 1;
+                fn_8005C830(task, team, cur);
+                getGridObj(task, prev, team * 9, 0x40)->_5C = 0;
+                getGridObj(task, prev, team * 9, 0x40)->_68 = 4;
+                getGridObj(task, prev, team * 9, 0x1C)->_5C = 10 << 16;
+                getGridObj(task, prev, team * 9, 0x1C)->_68 = 4;
+                if (last != -1) {
+                    getGridObj(task, last, team * 9, 0x1C)->_5C = 10 << 16;
+                    getGridObj(task, last, team * 9, 0x1C)->_68 = 0;
+                    getGridObj(task, last, team * 9, 0x40)->_68 = 1;
+                }
+            } else {
+                slot = lbl_80354720[team][cur]._2;
+                for (i = 0; i < 9; i++) {
+                    lbl_80371C30[task->_14 + 0x75 + i].obj->_54 &= ~2;
+                    lbl_80371C30[task->_14 + 0x35 + i].obj->_54 &= ~2;
+                }
+                getTeamObj(task, cur, 0x63)->_5C = 0;
+                getTeamObj(task, cur, 0x63)->_68 = 1;
+                getTeamObj(task, cur, 0x51)->_5C = 0;
+                getTeamObj(task, cur, 0x51)->_68 = 1;
+                getTeamObj(task, cur, 0x6C)->_5C = 0;
+                getTeamObj(task, cur, 0x75)->_54 |= 2;
+                getTeamObj(task, cur, 0x75)->_64 = 0x2A;
+                getTeamObj(task, cur, 0x6C)->_68 = 1;
+                getTeamObj(task, cur, 0x75)->_68 = 1;
+                fn_8005C830(task, team, cur);
+                getTeamObj(task, prev, 0x63)->_5C = 0;
+                getTeamObj(task, prev, 0x63)->_68 = 4;
+                getTeamObj(task, prev, 0x51)->_5C = 10 << 16;
+                getTeamObj(task, prev, 0x51)->_68 = 4;
+                getTeamObj(task, slot, 0x35)->_54 |= 2;
+                getTeamObj(task, slot, 0x35)->_64 = 0x2A;
+                getTeamObj(task, slot, 0x35)->_68 = 1;
+                if (last != -1) {
+                    getTeamObj(task, last, 0x51)->_5C = 10 << 16;
+                    getTeamObj(task, last, 0x51)->_68 = 0;
+                    getTeamObj(task, last, 0x63)->_68 = 1;
+                }
+            }
+        } else {
+            slot = lbl_80354720[team][cur]._2;
+            prevSlot = lbl_80354720[team][prev]._2;
+            lastSlot = lbl_80354720[team][last]._2;
+            if (g_d_GameSettings._06 != 2) {
+                getGridObj(task, slot, team * 9, 0x10A)->_68 = 1;
+                getGridObj(task, slot, team * 9, 0xF8)->_68 = 1;
+                getGridObj(task, slot, team * 9, 0xE6)->_54 |= 2;
+                getGridObj(task, prevSlot, team * 9, 0x10A)->_68 = 4;
+                getGridObj(task, prevSlot, team * 9, 0xF8)->_68 = 4;
+                getGridObj(task, prevSlot, team * 9, 0xE6)->_54 &= ~2;
+                for (i = 0; i < 9; i++) {
+                    lbl_80371C30[task->_14 + 0x12E + i + team * 9].obj->_54 &= ~2;
+                }
+                getGridObj(task, slot, team * 9, 0x12E)->_54 |= 2;
+                getGridObj(task, slot, team * 9, 0x12E)->_64 = 0x2A;
+                getGridObj(task, slot, team * 9, 0x12E)->_68 = 1;
+                fn_8005C830(task, team, cur);
+                if (last != -1) {
+                    getGridObj(task, lastSlot, team * 9, 0x10A)->_68 = 1;
+                    getGridObj(task, lastSlot, team * 9, 0xF8)->_68 = 1;
+                }
+            } else {
+                getTeamObj(task, slot, 0x23)->_68 = 1;
+                getTeamObj(task, slot, 0x1A)->_68 = 1;
+                getTeamObj(task, slot, 0x11)->_54 |= 2;
+                getTeamObj(task, prevSlot, 0x23)->_68 = 4;
+                getTeamObj(task, prevSlot, 0x1A)->_68 = 4;
+                getTeamObj(task, prevSlot, 0x11)->_54 &= ~2;
+                for (i = 0; i < 9; i++) {
+                    lbl_80371C30[task->_14 + 0x35 + i].obj->_54 &= ~2;
+                    lbl_80371C30[task->_14 + 0x75 + i].obj->_54 &= ~2;
+                }
+                getTeamObj(task, cur, 0x6C)->_54 |= 2;
+                getTeamObj(task, cur, 0x6C)->_5C = 0;
+                getTeamObj(task, cur, 0x6C)->_68 = 1;
+                getTeamObj(task, cur, 0x75)->_54 |= 2;
+                getTeamObj(task, cur, 0x75)->_64 = 0x2A;
+                getTeamObj(task, cur, 0x75)->_68 = 1;
+                getTeamObj(task, slot, 0x35)->_54 |= 2;
+                getTeamObj(task, slot, 0x35)->_64 = 0x2A;
+                getTeamObj(task, slot, 0x35)->_68 = 1;
+                if (last != -1) {
+                    getTeamObj(task, lastSlot, 0x23)->_68 = 1;
+                    getTeamObj(task, lastSlot, 0x1A)->_68 = 1;
+                }
+                fn_8005C830(task, team, cur);
+            }
+        }
+        fn_800626EC(team);
+        lbl_803C66B0.rows[9].port[team] = 1;
+    }
 }
 
 // .text:0x8005CCE4 size:0x1130
 void fn_8005CCE4(SpaniTask* task, s32 team) {
+    u8 last;
+    s32 cur;
+    s8 curSlot;
+    s8 lastSlot;
+    s8 slot;
+    s32 i;
+    u8 flag;
+
+    if (isLockState(lbl_803C66B0.rows[9].port[team], 0)) {
+        last = lbl_803297E0._CF3E[team];
+        cur = lbl_803297E0._CF46[team] - 1;
+        curSlot = lbl_80354720[team][cur]._2;
+        lastSlot = lbl_80354720[team][last]._2;
+        if (lbl_803297E0._CF52[team] == 0) {
+            if (cur != last) {
+                getGridObj(task, last, team * 9, 0x1C)->_5C = 10 << 16;
+                getGridObj(task, last, team * 9, 0x1C)->_68 = 4;
+            }
+            getGridObj(task, last, team * 9, 0x40)->_68 = 4;
+            fn_800363D8(task, cur + team * 9 + 0x40, 1, 0x83, inMemRoster[team][cur].stats.CharID);
+            fn_800363D8(task, last + team * 9 + 0x40, 1, 0x83, inMemRoster[team][last].stats.CharID);
+            getGridObj(task, cur, team * 9, 0xD0)->_5C = inMemRoster[team][cur].stats.CharacterClass << 16;
+            getGridObj(task, last, team * 9, 0xD0)->_5C = inMemRoster[team][last].stats.CharacterClass << 16;
+            getGridObj(task, cur, team * 9, 0xAC)->_5C = (inMemRoster[team][cur].stats.BattingStance + inMemRoster[team][cur].stats.FieldingArm * 2) << 16;
+            getGridObj(task, last, team * 9, 0xAC)->_5C = (inMemRoster[team][last].stats.BattingStance + inMemRoster[team][last].stats.FieldingArm * 2) << 16;
+            for (i = 0; i < 9; i++) {
+                if (g_d_GameSettings.GameModeSelected == 5) {
+                    flag = starMissionCompletionTracker._43D6[inMemRoster[team][i].stats.CharID];
+                } else {
+                    flag = lbl_8034E9A0._489B[team][i];
+                }
+                if (flag != 0) {
+                    getTeamObj(task, i, g_d_GameSettings._06 != 2 ? team * 9 + 0x76 : 0x7E)->_54 |= 2;
+                    getTeamObj(task, i, g_d_GameSettings._06 != 2 ? team * 9 + 0x76 : 0x7E)->_68 = 1;
+                    getTeamObj(task, i, g_d_GameSettings._06 != 2 ? team * 9 + 0x88 : 0x87)->_54 |= 2;
+                    getTeamObj(task, i, g_d_GameSettings._06 != 2 ? team * 9 + 0x88 : 0x87)->_5C = 15 << 16;
+                    getTeamObj(task, i, g_d_GameSettings._06 != 2 ? team * 9 + 0x88 : 0x87)->_68 = 1;
+                } else if (lbl_80361B20._00[0][inMemRoster[team][i].stats.CharID] != 0 && g_d_GameSettings.GameModeSelected != 5) {
+                    getTeamObj(task, i, g_d_GameSettings._06 != 2 ? team * 9 + 0x76 : 0x7E)->_54 |= 2;
+                    getTeamObj(task, i, g_d_GameSettings._06 != 2 ? team * 9 + 0x76 : 0x7E)->_68 = 1;
+                    getTeamObj(task, i, g_d_GameSettings._06 != 2 ? team * 9 + 0x88 : 0x87)->_54 |= 2;
+                    getTeamObj(task, i, g_d_GameSettings._06 != 2 ? team * 9 + 0x88 : 0x87)->_5C = 0;
+                    getTeamObj(task, i, g_d_GameSettings._06 != 2 ? team * 9 + 0x88 : 0x87)->_68 = 0;
+                } else {
+                    getTeamObj(task, i, g_d_GameSettings._06 != 2 ? team * 9 + 0x76 : 0x7E)->_54 &= ~2;
+                    getTeamObj(task, i, g_d_GameSettings._06 != 2 ? team * 9 + 0x88 : 0x87)->_54 &= ~2;
+                }
+                if (g_d_GameSettings._06 != 2) {
+                    getGridObj(task, i, team * 9, 0x64)->_54 &= ~2;
+                } else {
+                    getTeamObj(task, i, 0x75)->_54 &= ~2;
+                }
+            }
+            getGridObj(task, cur, team * 9, 0x64)->_54 |= 2;
+            getGridObj(task, cur, team * 9, 0x64)->_64 = 0x2A;
+            getGridObj(task, cur, team * 9, 0x64)->_68 = 1;
+            fn_8005C830(task, team, cur);
+        } else {
+            if (g_d_GameSettings._06 != 2) {
+                fn_800363D8(task, lastSlot + team * 9 + 0x10A, 1, 0x83, inMemRoster[team][last].stats.CharID);
+                fn_800363D8(task, curSlot + team * 9 + 0x10A, 1, 0x83, inMemRoster[team][cur].stats.CharID);
+                getGridObj(task, curSlot, team * 9, 0x10A)->_68 = 4;
+                getGridObj(task, curSlot, team * 9, 0xF8)->_68 = 4;
+                getGridObj(task, lastSlot, team * 9, 0x10A)->_68 = 1;
+                getGridObj(task, lastSlot, team * 9, 0xF8)->_68 = 1;
+                for (i = 0; i < 9; i++) {
+                    slot = lbl_80354720[team][i]._2;
+                    if (g_d_GameSettings.GameModeSelected == 5) {
+                        flag = starMissionCompletionTracker._43D6[inMemRoster[team][i].stats.CharID];
+                    } else {
+                        flag = lbl_8034E9A0._489B[team][i];
+                    }
+                    if (flag != 0) {
+                        getTeamObj(task, slot, g_d_GameSettings._06 != 2 ? team * 9 + 0x140 : 0x3E)->_54 |= 2;
+                        getTeamObj(task, slot, g_d_GameSettings._06 != 2 ? team * 9 + 0x140 : 0x3E)->_68 = 1;
+                        getTeamObj(task, slot, g_d_GameSettings._06 != 2 ? team * 9 + 0x152 : 0x47)->_54 |= 2;
+                        getTeamObj(task, slot, g_d_GameSettings._06 != 2 ? team * 9 + 0x152 : 0x47)->_5C = 15 << 16;
+                        getTeamObj(task, slot, g_d_GameSettings._06 != 2 ? team * 9 + 0x152 : 0x47)->_68 = 1;
+                    } else if (lbl_80361B20._00[0][inMemRoster[team][i].stats.CharID] != 0 && g_d_GameSettings.GameModeSelected != 5) {
+                        getTeamObj(task, slot, g_d_GameSettings._06 != 2 ? team * 9 + 0x140 : 0x3E)->_54 |= 2;
+                        getTeamObj(task, slot, g_d_GameSettings._06 != 2 ? team * 9 + 0x140 : 0x3E)->_68 = 1;
+                        getTeamObj(task, slot, g_d_GameSettings._06 != 2 ? team * 9 + 0x152 : 0x47)->_54 |= 2;
+                        getTeamObj(task, slot, g_d_GameSettings._06 != 2 ? team * 9 + 0x152 : 0x47)->_5C = 0;
+                        getTeamObj(task, slot, g_d_GameSettings._06 != 2 ? team * 9 + 0x152 : 0x47)->_68 = 0;
+                    } else {
+                        getTeamObj(task, slot, g_d_GameSettings._06 != 2 ? team * 9 + 0x140 : 0x3E)->_54 &= ~2;
+                        getTeamObj(task, slot, g_d_GameSettings._06 != 2 ? team * 9 + 0x152 : 0x47)->_54 &= ~2;
+                    }
+                    getGridObj(task, i, team * 9, 0x12E)->_54 &= ~2;
+                }
+                getGridObj(task, lastSlot, team * 9, 0x12E)->_54 |= 2;
+                getGridObj(task, lastSlot, team * 9, 0x12E)->_64 = 0x2A;
+                getGridObj(task, lastSlot, team * 9, 0x12E)->_68 = 1;
+            } else {
+                fn_800363D8(task, lastSlot + 0x23, 1, 0x83, inMemRoster[team][last].stats.CharID);
+                fn_800363D8(task, curSlot + 0x23, 1, 0x83, inMemRoster[team][cur].stats.CharID);
+                getTeamObj(task, curSlot, 0x23)->_68 = 4;
+                getTeamObj(task, curSlot, 0x1A)->_68 = 4;
+                getTeamObj(task, lastSlot, 0x23)->_68 = 1;
+                getTeamObj(task, lastSlot, 0x1A)->_68 = 1;
+                for (i = 0; i < 9; i++) {
+                    slot = lbl_80354720[team][i]._2;
+                    if (g_d_GameSettings.GameModeSelected == 5) {
+                        flag = starMissionCompletionTracker._43D6[inMemRoster[team][i].stats.CharID];
+                    } else {
+                        flag = lbl_8034E9A0._489B[team][i];
+                    }
+                    if (flag != 0 && (team != 1 || g_d_GameSettings.GameModeSelected != 5)) {
+                        getTeamObj(task, slot, 0x3E)->_54 |= 2;
+                        getTeamObj(task, slot, 0x3E)->_68 = 1;
+                        getTeamObj(task, slot, 0x47)->_54 |= 2;
+                        getTeamObj(task, slot, 0x47)->_5C = 15 << 16;
+                        getTeamObj(task, slot, 0x47)->_68 = 1;
+                        getTeamObj(task, i, 0x7E)->_54 |= 2;
+                        getTeamObj(task, i, 0x7E)->_68 = 1;
+                        getTeamObj(task, i, 0x87)->_54 |= 2;
+                        getTeamObj(task, i, 0x87)->_5C = 15 << 16;
+                        getTeamObj(task, i, 0x87)->_68 = 1;
+                    } else if (lbl_80361B20._00[0][inMemRoster[team][i].stats.CharID] != 0 && g_d_GameSettings.GameModeSelected != 5) {
+                        getTeamObj(task, slot, 0x3E)->_54 |= 2;
+                        getTeamObj(task, slot, 0x3E)->_68 = 1;
+                        getTeamObj(task, slot, 0x47)->_54 |= 2;
+                        getTeamObj(task, slot, 0x47)->_5C = 0;
+                        getTeamObj(task, slot, 0x47)->_68 = 0;
+                        getTeamObj(task, i, 0x7E)->_54 |= 2;
+                        getTeamObj(task, i, 0x7E)->_68 = 1;
+                        getTeamObj(task, i, 0x87)->_54 |= 2;
+                        getTeamObj(task, i, 0x87)->_5C = 0;
+                        getTeamObj(task, i, 0x87)->_68 = 0;
+                    } else {
+                        getTeamObj(task, slot, 0x3E)->_54 &= ~2;
+                        getTeamObj(task, slot, 0x47)->_54 &= ~2;
+                        getTeamObj(task, i, g_d_GameSettings._06 != 2 ? team * 9 + 0x76 : 0x7E)->_54 &= ~2;
+                        getTeamObj(task, i, g_d_GameSettings._06 != 2 ? team * 9 + 0x88 : 0x87)->_54 &= ~2;
+                    }
+                    getTeamObj(task, i, 0x35)->_54 &= ~2;
+                    getTeamObj(task, i, 0x75)->_54 &= ~2;
+                }
+                getTeamObj(task, last, 0x75)->_54 |= 2;
+                getTeamObj(task, last, 0x75)->_64 = 0x2A;
+                getTeamObj(task, last, 0x75)->_68 = 1;
+                getTeamObj(task, lastSlot, 0x35)->_54 |= 2;
+                getTeamObj(task, lastSlot, 0x35)->_64 = 0x2A;
+                getTeamObj(task, lastSlot, 0x35)->_68 = 1;
+            }
+            fn_8005C830(task, team, last);
+            lbl_803297E0._CF46[team] = fn_80042598(team, lbl_80354720[team][last]._2);
+        }
+        lbl_803297E0._CF3E[team] = -1;
+        lbl_803C66B0.step[team] = 0;
+        lbl_803C66B0.rows[9].port[team] = 2;
+    }
 }
 
 // .text:0x8005C830 size:0x4B4
@@ -1090,8 +1377,211 @@ void fn_8005AF68(SpaniTask* task) {
     }
 }
 
+static inline u16 getPadTrig(s32 pad, s32 team) {
+    if (g_d_GameSettings._06 != 2) {
+        return lbl_8034E9A0._472C[pad]._2;
+    }
+    return lbl_803297E0._00[team]._2;
+}
+
 // .text:0x8005A350 size:0xC18
-void fn_8005A350(void) {
+void fn_8005A350(SpaniTask* task, s32 team) {
+    s32 pad = team;
+    StatTable* stats;
+    u8* stance;
+    u8* arm;
+    s32 cur;
+    s32 hand;
+    s8 slot;
+    s32 done;
+    s32 i;
+
+    if (g_d_GameSettings._10 == 0) {
+        if (team != 0) {
+            return;
+        }
+        if (lbl_803297E0._CF40[3] != 0) {
+            team = 1;
+        } else {
+            team = 0;
+        }
+    }
+    switch (getPadTrig(pad, team)) {
+    case 0x400:
+        if (lbl_803297E0._CF52[team] == 0 && g_d_GameSettings._06 != 2) {
+            if (lbl_803297E0._CF46[team] != 0) {
+                cur = lbl_803297E0._CF46[team] - 1;
+                stats = &inMemRoster[team][cur].stats;
+                stance = &stats->BattingStance;
+                arm = &stats->FieldingArm;
+                hand = *stance + *arm * 2;
+                hand++;
+                if (hand == 4) {
+                    hand = 0;
+                }
+                *stance = hand % 2;
+                *arm = hand / 2;
+                getGridObj(task, cur, team * 9, 0xAC)->_5C = hand << 16;
+                sndFXStartEx(0x1B7, lbl_800EFBA4[0], 0x3F, 0);
+            }
+            lbl_803297E0._CF58[team] = 0;
+        }
+        break;
+    }
+    if (lbl_803297E0._CF9E[team] != 0) {
+        if (g_d_GameSettings._06 != 2) {
+            if (lbl_803297E0._CF46[team] != 0) {
+                transferStatsToInMemRoster(team);
+                sndFXRelated(0x40);
+            } else {
+                sndFXStartEx(0x1BA, lbl_800EFBA4[3], 0x3F, 0);
+            }
+            if (lbl_803297E0._CF46[team] != 0 && g_d_GameSettings.GameModeSelected != 5) {
+                cur = lbl_803297E0._CF46[team] - 1;
+                slot = lbl_80354720[team][cur]._2;
+                if (lbl_8034E9A0._489B[team][cur] != 0) {
+                    getGridObj(task, cur, team * 9, 0x76)->_54 |= 2;
+                    getGridObj(task, cur, team * 9, 0x76)->_68 = 1;
+                    getGridObj(task, cur, team * 9, 0x88)->_54 |= 2;
+                    getGridObj(task, cur, team * 9, 0x88)->_5C = 0;
+                    getGridObj(task, cur, team * 9, 0x88)->_68 = 1;
+                    getGridObj(task, slot, team * 9, 0x140)->_54 |= 2;
+                    getGridObj(task, slot, team * 9, 0x140)->_68 = 1;
+                    getGridObj(task, slot, team * 9, 0x152)->_54 |= 2;
+                    getGridObj(task, slot, team * 9, 0x152)->_5C = 0;
+                    getGridObj(task, slot, team * 9, 0x152)->_68 = 1;
+                } else {
+                    getGridObj(task, cur, team * 9, 0x88)->_54 |= 2;
+                    getGridObj(task, cur, team * 9, 0x88)->_5C = 0;
+                    getGridObj(task, cur, team * 9, 0x88)->_68 = 0;
+                    getGridObj(task, slot, team * 9, 0x152)->_54 |= 2;
+                    getGridObj(task, slot, team * 9, 0x152)->_5C = 0;
+                    getGridObj(task, slot, team * 9, 0x152)->_68 = 0;
+                }
+            }
+        }
+        lbl_803297E0._CF9E[team] = 0;
+    }
+    if (lbl_803297E0._CF65[team] != 0) {
+        if (g_d_GameSettings._06 != 2) {
+            if (lbl_803297E0._CF61[team] != 0) {
+                switch (lbl_803297E0._CF67[team]) {
+                case 0:
+                    fn_80058E0C(task, team);
+                    break;
+                case 1:
+                    fn_80058B20(task, team);
+                    break;
+                }
+            } else {
+                if (lbl_803297E0._CF67[team] == 0) {
+                    if ((getTeamObj(task, team, 0x19A)->_5C >> 16) > 5) {
+                        getTeamObj(task, team, 0x19A)->_5C = 5 << 16;
+                    }
+                    getTeamObj(task, team, 0x19A)->_68 = 4;
+                    getTeamObj(task, team, 0x19C)->_68 = 4;
+                    getTeamObj(task, team, 0x1AC)->_68 = 4;
+                    done = isAnimDone(task, team + 0x19A, 0);
+                    done += isAnimDone(task, team + 0x19C, 0);
+                    done += isAnimDone(task, team + 0x1AC, 0);
+                    if (done == 3) {
+                        lbl_803297E0._CF65[team] = 0;
+                    }
+                } else {
+                    if ((getTeamObj(task, team, 0x19A)->_5C >> 16) > 5) {
+                        getTeamObj(task, team, 0x19A)->_5C = 5 << 16;
+                    }
+                    getTeamObj(task, team, 0x19A)->_68 = 4;
+                    getTeamObj(task, team, 0x1C8)->_68 = 4;
+                    if (isAnimDone(task, team + 0x1C8, 0) == 1) {
+                        lbl_803297E0._CF65[team] = 0;
+                    }
+                }
+                lbl_803297E0._CF63[team] = 0;
+            }
+        } else {
+            if (lbl_803297E0._CF61[lbl_803297E0._CF3B] != 0) {
+                switch (lbl_803297E0._CF67[team]) {
+                case 0:
+                    fn_80058644(task);
+                    break;
+                case 1:
+                    fn_80058394(task);
+                    break;
+                }
+            } else {
+                if (lbl_803297E0._CF67[team] == 0) {
+                    if ((getSpaniObj(task, 0x118)->_5C >> 16) > 5) {
+                        getSpaniObj(task, 0x118)->_5C = 5 << 16;
+                    }
+                    getSpaniObj(task, 0x118)->_68 = 4;
+                    getSpaniObj(task, 0x119)->_68 = 4;
+                    getSpaniObj(task, 0x121)->_68 = 4;
+                    done = isAnimDone(task, 0x118, 0);
+                    done += isAnimDone(task, 0x119, 0);
+                    done += isAnimDone(task, 0x121, 0);
+                    if (done == 3) {
+                        lbl_803297E0._CF65[team] = 0;
+                    }
+                } else {
+                    if ((getSpaniObj(task, 0x118)->_5C >> 16) > 5) {
+                        getSpaniObj(task, 0x118)->_5C = 5 << 16;
+                    }
+                    getSpaniObj(task, 0x118)->_68 = 4;
+                    getSpaniObj(task, 0x12F)->_68 = 4;
+                    if (isAnimDone(task, 0x12F, 0) == 1) {
+                        lbl_803297E0._CF65[lbl_803297E0._CF3B] = 0;
+                    }
+                }
+                lbl_803297E0._CF63[lbl_803297E0._CF3B] = 0;
+            }
+        }
+    }
+    if (lbl_803297E0._CF71[0] != 0) {
+        if (lbl_803297E0._CF71[1] != 0) {
+            switch (lbl_803297E0._CF74) {
+            case 1:
+                starMissionRelated1(task);
+                break;
+            case 2:
+                fn_800596D4(task);
+                break;
+            case 3:
+                if (lbl_803297E0._CF73 == 0) {
+                    getSpaniObj(task, g_d_GameSettings._06 == 2 ? 0x16E : 0x1D7)->_68 = 4;
+                    getSpaniObj(task, g_d_GameSettings._06 == 2 ? 0x16A : 0x1D3)->_68 = 4;
+                    getSpaniObj(task, g_d_GameSettings._06 == 2 ? 0x16C : 0x1D5)->_68 = 4;
+                    lbl_803297E0._CF73 = 1;
+                }
+                if (lbl_803297E0._CF73 != 0) {
+                    done = isAnimDone(task, g_d_GameSettings._06 == 2 ? 0x16E : 0x1D7, 0);
+                    done += isAnimDone(task, g_d_GameSettings._06 == 2 ? 0x16A : 0x1D3, 0);
+                    done += isAnimDone(task, g_d_GameSettings._06 == 2 ? 0x16C : 0x1D5, 0);
+                    if (done == 3) {
+                    getSpaniObj(task, g_d_GameSettings._06 == 2 ? 0x16A : 0x1D3)->_54 &= ~2;
+                    getSpaniObj(task, g_d_GameSettings._06 == 2 ? 0x16B : 0x1D4)->_54 &= ~2;
+                    getSpaniObj(task, g_d_GameSettings._06 == 2 ? 0x16C : 0x1D5)->_54 &= ~2;
+                    getSpaniObj(task, g_d_GameSettings._06 == 2 ? 0x16E : 0x1D7)->_54 &= ~2;
+                    for (i = 0; i < 3; i++) {
+                        fn_8000FEE8(lbl_803297E0.texts[i]);
+                    }
+                    fn_8000F8F4((struct TextModelSet*)task);
+                    lbl_803297E0._CF71[1] = 0;
+                    lbl_803297E0._CF74 = 0;
+                    lbl_803297E0._CF73 = 0;
+                    }
+                }
+                break;
+            }
+        } else {
+            done = isAnimDone(task, g_d_GameSettings._06 == 2 ? 0x16A : 0x1D3, 0);
+            done += isAnimDone(task, g_d_GameSettings._06 == 2 ? 0x16C : 0x1D5, 0);
+            if (done == 2) {
+                lbl_803297E0._CF73 = 0;
+                lbl_803297E0._CF71[0] = 0;
+            }
+        }
+    }
 }
 
 // .text:0x80059B38 size:0x818
