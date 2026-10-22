@@ -57,7 +57,7 @@ typedef struct Emitter {
         /* 0x30 */ Vec _30;
         /* 0x30 */ s32 fadeAge;
     };
-    /* 0x3C */ u8 _3C[0x4];
+    /* 0x3C */ s32 _3C;
     /* 0x40 */ u16 _40;
     /* 0x42 */ u8 _42[0x1E];
 } Emitter; // size: 0x60
@@ -182,6 +182,28 @@ typedef struct DriftParticle {
     /* 0x4E */ u8 _4E;
     /* 0x4F */ u8 texCoords;
 } DriftParticle;
+
+// The particles fn_8002C56C moves along an arc in three phases
+typedef struct ArcParticle {
+    /* 0x00 */ Particle* next;
+    /* 0x04 */ Vec pos;
+    /* 0x10 */ Vec vel;
+    /* 0x1C */ f32 w;
+    /* 0x20 */ f32 h;
+    /* 0x24 */ f32 velScale;
+    /* 0x28 */ f32 velScaleEnd;
+    /* 0x2C */ f32 posScale;
+    union {
+        /* 0x30 */ u32 rgba;
+        /* 0x30 */ u8 color[4];
+    };
+    /* 0x34 */ f32 spin;
+    /* 0x38 */ u16 texCoords;
+    /* 0x3A */ u16 delay;
+    /* 0x3C */ u16 t[3];
+    /* 0x42 */ u16 dur[3];
+    /* 0x48 */ u16 fade;
+} ArcParticle;
 
 // What fn_8002DCE4's callers pass
 typedef struct DriftParams {
@@ -485,6 +507,7 @@ extern s32 lbl_803CB800;
 extern f32 lbl_803CB804;
 extern f32 lbl_803CB80C;
 extern s32 lbl_803CB7F8;
+extern s32 lbl_803CB808;
 extern f32 lbl_803CB7FC;
 extern s32 lbl_803CBD0C;
 extern s32 fn_8005268C(void);
@@ -2269,6 +2292,134 @@ void fn_8002CDD0(Vec* pos)
         e->_24.z = pos->z;
         PSVECSubtract(&e->_24, &e->_18, &e->_30);
     }
+}
+
+static inline f32 arcEase(u16 t, u16 dur)
+{
+    f32 x = (f32)t / (f32)dur;
+    f32 frac = x - (s32)x;
+    f32 whole = x - frac;
+    s32 n;
+    s32 i;
+
+    if (frac > 1.0f) {
+        frac -= (s32)frac;
+    }
+    n = lbl_803CB808;
+    while (n != 0) {
+        n--;
+        i = __abs((s32)(1024.0f * frac)) & 0x7FF;
+        if (i >= 0x401) {
+            i = 0x800 - i;
+        }
+        frac = (1.0f - lbl_8017ED68[i]) / 2;
+    }
+    return whole + frac;
+}
+
+// .text:0x8002C56C size:0x864
+// 99.98%: the target loads dur[1] before dur[2] for the sum (r8, r9); sum orders, statement
+// orders and counter types change nothing.
+BOOL fn_8002C56C(void* arg)
+{
+    Emitter* e = arg;
+    ArcParticle* p = (ArcParticle*)e->particles;
+    s32 alive = 0;
+    f32 (*uv)[2] = lbl_800F78C0;
+    TexFile* file = (TexFile*)e->_10;
+    s32 index = e->_3C;
+    TextureDesc* tex;
+    Vec v;
+    Vec b;
+    Vec a;
+    GXTexObj texObj;
+    Mtx m;
+    GXTlutObj tlutObj;
+    Mtx rot;
+    u32 elapsed;
+    u32 total;
+    u16 deg;
+    f32 s;
+    if (file == NULL) {
+        GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    } else {
+        GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP1, GX_COLOR0A0);
+        tex = &file->tex[file->tex[index]._1C];
+        if (tex->tlut != NULL) {
+            GXInitTexObjCI(&texObj, tex->image, tex->width, tex->height, tex->format, GX_CLAMP, GX_CLAMP, GX_FALSE, GX_TLUT0);
+            GXInitTlutObj(&tlutObj, tex->tlut, tex->tlutFormat, tex->tlutCount);
+            GXLoadTlut(&tlutObj, GX_TLUT0);
+        } else {
+            GXInitTexObj(&texObj, tex->image, tex->width, tex->height, tex->format, GX_CLAMP, GX_CLAMP, GX_FALSE);
+        }
+        GXInitTexObjLOD(&texObj, GX_LINEAR, GX_LINEAR, tex->minLOD, tex->maxLOD, tex->lodBias, GX_FALSE, GX_FALSE, GX_ANISO_1);
+        GXLoadTexObj(&texObj, GX_TEXMAP1);
+    }
+    PSMTXIdentity(m);
+    GXLoadPosMtxImm(m, GX_PNMTX0);
+    GXSetCullMode(GX_CULL_NONE);
+    GXSetZMode(GX_TRUE, GX_ALWAYS, GX_FALSE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_ONE, GX_LO_CLEAR);
+    if (lbl_80366158._28 == 0 && e->_40 != 0) {
+        e->_40--;
+    }
+    do {
+        if (p->t[2] != 0) {
+            alive++;
+            total = p->dur[0] + p->dur[1] + p->dur[2];
+            elapsed = total - (p->t[0] + p->t[1] + p->t[2]);
+            if (p->delay != 0) {
+                p->delay -= (lbl_80366158._28 == 0);
+            } else {
+                if (p->t[0] != 0) {
+                    s = 1.0f - arcEase(p->t[0], p->dur[0]);
+                    PSVECAdd(&e->_30, &p->pos, &a);
+                    PSVECScale(&a, p->posScale * s, &v);
+                    PSVECScale(&p->vel, p->velScale * s, &b);
+                    p->t[0] -= (lbl_80366158._28 == 0);
+                } else if (p->t[1] != 0) {
+                    s = arcEase(p->t[1], p->dur[1]);
+                    PSVECAdd(&e->_30, &p->pos, &a);
+                    PSVECScale(&a, 1.0 - s + p->posScale * s, &v);
+                    PSVECScale(&p->vel, p->velScale * s, &b);
+                    p->t[1] -= (lbl_80366158._28 == 0);
+                } else {
+                    s = arcEase(p->t[2], p->dur[2]);
+                    PSVECAdd(&e->_30, &p->pos, &a);
+                    memcpy(&v, &a, sizeof(Vec));
+                    PSVECScale(&p->vel, p->velScaleEnd * (1.0f - s), &b);
+                    p->t[2] -= (lbl_80366158._28 == 0);
+                }
+                if ((u16)(total - elapsed) < p->fade) {
+                    p->color[3] = (u16)(total - elapsed) * 255 / p->fade;
+                }
+                deg = p->spin * elapsed;
+                if (deg != 0) {
+                    PSMTXRotAxisRad(rot, &a, 0.017453292f * deg);
+                    PSMTXMultVec(rot, &b, &b);
+                }
+                PSVECAdd(&e->_18, &v, &v);
+                PSVECAdd(&v, &b, &v);
+                PSMTXMultVec(lbl_8017FFE0, &v, &v);
+                GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+                GXPosition3f32(v.x - p->w, v.y - p->h, v.z);
+                GXColor1u32(p->rgba);
+                GXTexCoord2f32(uv[p->texCoords & 0xF][0], uv[p->texCoords & 0xF][1]);
+                GXPosition3f32(v.x + p->h, v.y - p->w, v.z);
+                GXColor1u32(p->rgba);
+                GXTexCoord2f32(uv[(p->texCoords >> 4) & 0xF][0], uv[(p->texCoords >> 4) & 0xF][1]);
+                GXPosition3f32(v.x + p->w, v.y + p->h, v.z);
+                GXColor1u32(p->rgba);
+                GXTexCoord2f32(uv[(p->texCoords >> 8) & 0xF][0], uv[(p->texCoords >> 8) & 0xF][1]);
+                GXPosition3f32(v.x - p->h, v.y + p->w, v.z);
+                GXColor1u32(p->rgba);
+                GXTexCoord2f32(uv[(p->texCoords >> 12) & 0xF][0], uv[(p->texCoords >> 12) & 0xF][1]);
+            }
+        }
+        p = (ArcParticle*)p->next;
+    } while (p != NULL);
+    GXLoadPosMtxImm(lbl_8017FFE0, GX_PNMTX0);
+    return alive == 0;
 }
 
 // .text:0x8002C2D0 size:0x29C
