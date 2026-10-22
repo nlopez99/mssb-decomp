@@ -109,10 +109,15 @@ def download(url, response, output) -> None:
                 os.chmod(os.path.join(root, name), 0o755)
         output.touch(mode=0o755)  # Update dir modtime
     else:
-        with open(output, "wb") as f:
+        # Write a new file and rename it over the old one: worktrees share
+        # build/tools, and macOS kills processes run from a binary rewritten
+        # in place.
+        tmp = output.with_name(output.name + ".tmp")
+        with open(tmp, "wb") as f:
             shutil.copyfileobj(response, f)
-        st = os.stat(output)
-        os.chmod(output, st.st_mode | stat.S_IEXEC)
+        st = os.stat(tmp)
+        os.chmod(tmp, st.st_mode | stat.S_IEXEC)
+        os.replace(tmp, output)
 
 
 def main() -> None:
