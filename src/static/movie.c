@@ -121,6 +121,16 @@ extern OSThread lbl_802FB220;
 
 extern void fn_800A63C8(void);
 extern struct {
+    /* 0x00 */ u8 _00[0x5C];
+    /* 0x5C */ OSThreadQueue retraceQueue;
+} lbl_803C7420;
+extern u32* lbl_803CBAE8[2];
+extern u32* lbl_803CBAF0[2];
+extern u32* lbl_803CBAF8[2];
+extern u8* lbl_803CC174;
+extern u32 lbl_803CC178;
+extern u32 lbl_803CC1A0;
+extern struct {
     /* 0x000 */ u32 free;
     /* 0x004 */ u8 _004[0x210 - 0x4];
 } data_803C6780;
@@ -363,7 +373,7 @@ void fn_800AFFC0(u32 n) {
 }
 
 // .text:0x800AFFB0 size:0x10
-u8 fn_800AFFB0(void) {
+BOOL fn_800AFFB0(void) {
     return lbl_803C79D4._28;
 }
 
@@ -416,7 +426,10 @@ void fn_800AFBF0(void) {
 }
 
 // .text:0x800AF9B4 size:0x23C
-void fn_800AF9B4(void) {
+// Its body matches only in a file without fn_800AFBF0 to fn_800B05E4, which this file
+// inlines into it while the target calls them with bl: the unit is two objects.
+s32 fn_800AF9B4(u8* dest, u32 size) {
+    return 0;
 }
 
 // .text:0x800AF5FC size:0x3B8
