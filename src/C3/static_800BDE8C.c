@@ -9,7 +9,21 @@ void fn_800BDE8C(u32 arg0) {
 }
 
 // .text:0x800BDEA0 size:0xD0
-void fn_800BDEA0(void) {}
+void fn_800BDEA0(void) {
+    if (lbl_803009F8.enabled) {
+        if (lbl_803009F8._20 != NULL) {
+            lbl_803009F8._20(lbl_803009F8.entries->view, 0);
+        }
+        GXSetTexCopySrc(0, 0, 640, 448);
+        GXSetTexCopyDst(640, 480, GX_CTF_R4, GX_FALSE);
+        GXCopyTex(*lbl_803009F8.copyBuf, GX_TRUE);
+        GXPixModeSync();
+        lbl_803009F8._24 = 0;
+        lbl_803009F8.range[0].min = lbl_803009F8.range[1].min = lbl_803009F8.range[2].min = 100000000.0f;
+        lbl_803009F8.range[0].max = lbl_803009F8.range[1].max = lbl_803009F8.range[2].max = -100000000.0f;
+        lbl_803009F8.center.x = lbl_803009F8.center.y = lbl_803009F8.center.z = 0.0f;
+    }
+}
 
 // .text:0x800BDF70 size:0x70
 void fn_800BDF70(ActorSlot* slot) {
@@ -19,7 +33,19 @@ void fn_800BDF70(ActorSlot* slot) {
 }
 
 // .text:0x800BDFE0 size:0xBC
-void fn_800BDFE0(void) {}
+// 95.00%: registers only; the target gives group r29 and i r28 (and saves r28 later). int,
+// a slot pointer and a group copy were tried.
+void fn_800BDFE0(ActorGroup* group) {
+    s32 i;
+
+    if (lbl_803009F8.enabled && lbl_803009F8._1C != NULL) {
+        for (i = 0; i < group->count; i++) {
+            if (group->slots[i]._6C && (group->slots[i].actor->_98 & 0x24) && (group->slots[i].actor->_98 & 0x12)) {
+                lbl_803009F8._1C(&group->slots[i], lbl_803009F8.entries->view);
+            }
+        }
+    }
+}
 
 // .text:0x800BE09C size:0xBC
 void fn_800BE09C(void) {}
@@ -31,7 +57,16 @@ void fn_800BE158(void) {}
 void fn_800BE498(void) {}
 
 // .text:0x800BEA04 size:0x138
-void fn_800BEA04(void) {}
+void fn_800BEA04(Vec pos) {
+    lbl_803009F8.range[0].min = lbl_803009F8.range[0].min <= pos.x ? lbl_803009F8.range[0].min : pos.x;
+    lbl_803009F8.range[0].max = lbl_803009F8.range[0].max >= pos.x ? lbl_803009F8.range[0].max : pos.x;
+    lbl_803009F8.range[1].min = lbl_803009F8.range[1].min <= pos.y ? lbl_803009F8.range[1].min : pos.y;
+    lbl_803009F8.range[1].max = lbl_803009F8.range[1].max >= pos.y ? lbl_803009F8.range[1].max : pos.y;
+    lbl_803009F8.range[2].min = lbl_803009F8.range[2].min <= pos.z ? lbl_803009F8.range[2].min : pos.z;
+    lbl_803009F8.range[2].max = lbl_803009F8.range[2].max >= pos.z ? lbl_803009F8.range[2].max : pos.z;
+    PSVECAdd(&lbl_803009F8.center, &pos, &lbl_803009F8.center);
+    lbl_803009F8._24++;
+}
 
 // .text:0x800BEB3C size:0x44
 void fn_800BEB3C(void) {
@@ -86,7 +121,7 @@ void fn_800BF008(void) {
 }
 
 // .text:0x800BF038 size:0x10
-void fn_800BF038(void* arg0) {
+void fn_800BF038(void (*arg0)(MtxPtr view, s32 arg1)) {
     lbl_803009F8._20 = arg0;
 }
 

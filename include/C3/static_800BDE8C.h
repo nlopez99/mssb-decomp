@@ -21,14 +21,15 @@ typedef struct ShadowRange {
 
 typedef struct ShadowState {
     /* 0x00 */ u8 enabled;
-    /* 0x01 */ u8 _01[0x8 - 0x1];
+    /* 0x01 */ u8 _01[0x4 - 0x1];
+    /* 0x04 */ void** copyBuf;
     /* 0x08 */ GXTexObj* texObj;
     /* 0x0C */ GXTlutObj* tlut;
     /* 0x10 */ u8 _10[0x14 - 0x10];
     /* 0x14 */ ShadowEntry* entries;
     /* 0x18 */ void* _18;
     /* 0x1C */ ShadowCallback _1C;
-    /* 0x20 */ void* _20;
+    /* 0x20 */ void (*_20)(MtxPtr view, s32 arg1);
     /* 0x24 */ u16 _24;
     /* 0x26 */ u8 _26[2];
     /* 0x28 */ ShadowRange range[3];
@@ -40,11 +41,11 @@ typedef struct ShadowState {
 void fn_800BDE8C(u32 arg0);
 void fn_800BDEA0(void);
 void fn_800BDF70(ActorSlot* slot);
-void fn_800BDFE0(void);
+void fn_800BDFE0(ActorGroup* group);
 void fn_800BE09C(void);
 void fn_800BE158(void);
 void fn_800BE498(void);
-void fn_800BEA04(void);
+void fn_800BEA04(Vec pos);
 void fn_800BEB3C(void);
 MtxPtr fn_800BEB80(u8 index);
 u8 fn_800BEBA0(void);
@@ -54,7 +55,7 @@ void fn_800BEBCC(u8 index, Vec pos);
 void fn_800BEC00(s32 arg0);
 void fn_800BEC30(void);
 void fn_800BF008(void);
-void fn_800BF038(void* arg0);
+void fn_800BF038(void (*arg0)(MtxPtr view, s32 arg1));
 void fn_800BF048(void* arg0);
 void fn_800BF058(ShadowCallback arg0);
 ShadowState* fn_800BF068(void);
