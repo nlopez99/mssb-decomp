@@ -19,6 +19,43 @@ extern void fn_800B3A78(ActorEx* actor, s32 arg1, s32 count, ...);
 extern void fn_800B4048(ActorSlot* slot, s32 arg1, s32 index);
 extern void fn_800B4724(ActorEx* actor, s32 arg1);
 
+static inline void DrawSlot(ActorSlot* slot, s32 arg1) {
+    ActorEx* actor = slot->actor;
+
+    if (slot->_08 != NULL) {
+        slot->_08(slot);
+    }
+    switch (slot->_6D) {
+    case 0:
+        fn_800B3A78(actor, arg1, 0);
+        break;
+    case 1:
+        fn_800B3A78(actor, arg1, 1, slot->_70[0]);
+        break;
+    case 2:
+        fn_800B3A78(actor, arg1, 2, slot->_70[0], slot->_70[1]);
+        break;
+    case 3:
+        fn_800B3A78(actor, arg1, 3, slot->_70[0], slot->_70[1], slot->_70[2]);
+        break;
+    case 4:
+        fn_800B3A78(actor, arg1, 4, slot->_70[0], slot->_70[1], slot->_70[2], slot->_70[3]);
+        break;
+    case 5:
+        fn_800B3A78(actor, arg1, 5, slot->_70[0], slot->_70[1], slot->_70[2], slot->_70[3], slot->_70[4]);
+        break;
+    case 6:
+        fn_800B3A78(actor, arg1, 6, slot->_70[0], slot->_70[1], slot->_70[2], slot->_70[3], slot->_70[4], slot->_70[5]);
+        break;
+    case 7:
+        fn_800B3A78(actor, arg1, 7, slot->_70[0], slot->_70[1], slot->_70[2], slot->_70[3], slot->_70[4], slot->_70[5], slot->_70[6]);
+        break;
+    case 8:
+        fn_800B3A78(actor, arg1, 8, slot->_70[0], slot->_70[1], slot->_70[2], slot->_70[3], slot->_70[4], slot->_70[5], slot->_70[6], slot->_70[7]);
+        break;
+    }
+}
+
 static inline void ApplySlotControl(ActorSlot* slot) {
     ActorEx* actor = slot->actor;
 
@@ -93,7 +130,22 @@ void fn_800BD548(ActorSlot* slot, u8 count, ...) {
 }
 
 // .text:0x800BD670 size:0x254
-void fn_800BD670(void) {}
+// 98.49%: registers only; the target swaps i and slot (r31/r30). Declaration orders, a
+// block-scope slot and s32/int counters were tried.
+void fn_800BD670(ActorGroup* group, s32 arg1) {
+    ActorSlot* slot;
+    u16 i;
+
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
+    GXSetCullMode(GX_CULL_BACK);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+    for (i = 0; i < group->count; i++) {
+        slot = &group->slots[i];
+        if (group->slots[i].actor != NULL && group->slots[i]._6C) {
+            DrawSlot(slot, arg1);
+        }
+    }
+}
 
 // .text:0x800BD8C4 size:0x160
 // 95.45%: registers only; the target keeps each slot's base in r31 and group in r28. A slot
@@ -144,7 +196,7 @@ void fn_800BDA94(ActorSlot* slot, s32 arg1) {
     ActorEx* actor = slot->actor;
 
     if (slot->_08 != NULL) {
-        slot->_08();
+        slot->_08(slot);
     }
     switch (slot->_6D) {
     case 0:

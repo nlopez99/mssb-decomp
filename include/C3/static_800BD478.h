@@ -20,7 +20,7 @@ typedef struct ActorEx {
 typedef struct ActorSlot {
     /* 0x00 */ ActorEx* actor;
     /* 0x04 */ u32 _04;
-    /* 0x08 */ void (*_08)(void);
+    /* 0x08 */ void (*_08)(struct ActorSlot* slot);
     /* 0x0C */ s16 _0C;
     /* 0x0E */ u16 _0E;
     /* 0x10 */ Control control;
@@ -48,7 +48,7 @@ typedef struct ActorGroup {
 
 void fn_800BD478(Actor** actor, ActorLayoutBones* layout);
 void fn_800BD548(ActorSlot* slot, u8 count, ...);
-void fn_800BD670(void);
+void fn_800BD670(ActorGroup* group, s32 arg1);
 void fn_800BD8C4(ActorGroup* group, s32 arg1);
 void fn_800BDA24(ActorSlot* slot);
 void fn_800BDA94(ActorSlot* slot, s32 arg1);
