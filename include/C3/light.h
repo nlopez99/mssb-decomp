@@ -18,8 +18,16 @@ typedef struct Light {
     /* 0x64 */ Vec worldDirection;
     /* 0x70 */ GXColor color;
     /* 0x74 */ Control control;
-    /* 0xA8 */ MtxPtr parent;
-    /* 0xAC */ struct ANIMPipe *animPipe;
-} Light;
+    /* 0xB8 */ MtxPtr parent;
+    /* 0xBC */ struct ANIMPipe *animPipe;
+} Light; // size: 0xC0
+
+// light.c
+void LITXForm(Light *light, Mtx view);
+void LITInitColor(Light *light, GXColor color);
+void LITInitDir(Light *light, f32 nx, f32 ny, f32 nz);
+void LITInitPos(Light *light, f32 x, f32 y, f32 z);
+void LITInitAttn(Light *light, f32 a0, f32 a1, f32 a2, f32 k0, f32 k1, f32 k2);
+void LITAlloc(Light **light);
 
 #endif // _DOLPHIN_CP_LIGHT_H_
