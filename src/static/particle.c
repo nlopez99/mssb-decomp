@@ -3868,13 +3868,11 @@ BOOL fn_80027968(void* arg)
 }
 
 // .text:0x80027918 size:0x50
-// 99.75%: the target stores through the register the inlined fn_800339F0 returns in (r3);
-// this stores through its copy (r4). Loop forms and fn_800339F0 variants did not move it.
 void fn_80027918(u8 id, f32 v)
 {
-    Emitter* e = NULL;
-    while ((e = fn_800339F0(e, id)) != NULL) {
-        e->_18.y = v;
+    RibbonEmitter* e = NULL;
+    while ((e = (RibbonEmitter*)fn_800339F0((Emitter*)e, id)) != NULL) {
+        e->_18[1] = v;
     }
 }
 
