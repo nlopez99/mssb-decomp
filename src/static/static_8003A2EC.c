@@ -155,10 +155,8 @@ typedef struct SaveData {
     /* 0xCF5E */ u8 _CF5E[3];
 } SaveData;
 
-typedef struct MenuSlot {
-    /* 0x0 */ s32 _0;
-    /* 0x4 */ s32 _4;
-} MenuSlot; // size: 0x8
+// The time of the save file each memory card holds
+typedef s64 MenuSlot;
 
 extern u8 GetDrawShadows(void);
 extern void fn_800BD1E8(void (*callback)(MtxPtr, GXTevStageID*, GXTexCoordID*, GXTexMapID*, u8*, u8*));
@@ -630,8 +628,7 @@ typedef struct CardRequest {
 } CardRequest;
 
 typedef struct CardChannel {
-    /* 0x00 */ s32 _00;
-    /* 0x04 */ s32 _04;
+    /* 0x00 */ s64 time;
     /* 0x08 */ s32 result;
     /* 0x0C */ u8 _0C[0x28 - 0x0C];
 } CardChannel; // size: 0x28
@@ -644,20 +641,20 @@ extern struct {
 
 extern void fn_8000FE54(MenuTask* task);
 extern void fn_800ACCE8(void);
-extern void fn_800AB474(u8 chan, u8 arg1, s16 size, const char* name, s32 arg4, s32 arg5, s32 arg6);
+extern void fn_800AB474(u8 chan, u8 arg1, s16 size, const char* name, s64 time, s32 arg6);
 extern void fn_800AC508(const char* name, void* icon, s32 iconSize, void* banner, s32 bannerSize, s32 arg5, s32 arg6,
                         void* comment, void* comment2, s32 size);
-extern void fn_800AAEE4(CardRequest* req, MenuSlot* slot, s32 arg2, s32 arg3);
-extern void fn_800AA34C(u8 chan, u8 arg1, const char* name, MenuSlot* slot, s32 arg4, s32 arg5, u8 arg6);
+extern void fn_800AAEE4(CardRequest* req, MenuSlot* slot, s64 time);
+extern void fn_800AA34C(u8 chan, u8 arg1, const char* name, MenuSlot* slot, s64 time, u8 arg6);
 extern void fn_800ACCD4(void);
 extern s32 fn_8004A34C(void* window, u8 arg1, u8 msg, u8 arg3, u8 arg4);
-extern void fn_800A9E34(u8 chan, u8 arg1, s32 arg2, s32 arg3);
-extern void fn_800AA930(CardRequest* req, MenuSlot* slot, s32 arg2, s32 arg3);
+extern void fn_800A9E34(u8 chan, u8 arg1, s64 time);
+extern void fn_800AA930(CardRequest* req, MenuSlot* slot, s64 time);
 extern void fn_800B0A14_removeQueue(void);
 extern s32 fn_800A6418(u32 size);
 extern void fn_800A63C8(void);
 extern s32 fn_8004A328(void* card);
-extern void fn_800A9864(u8 chan, u8 arg1, s32 arg2, s32 arg3);
+extern void fn_800A9864(u8 chan, u8 arg1, s64 time);
 extern s32 lbl_803CBC48;
 extern s32 lbl_803CBC4C;
 extern s32 lbl_803CBC50;
@@ -920,7 +917,7 @@ void fn_80040C14(void) {
         req.mask = SaveBlockMask(task->_1B, task->_20);
         req._18 = 1;
         slot = &lbl_802D4AE0[task->_17];
-        fn_800AA930(&req, slot, slot->_0, slot->_4);
+        fn_800AA930(&req, slot, *slot);
         task->_14++;
         return;
     case 1:
@@ -1026,7 +1023,7 @@ void fn_8004053C(void) {
     case 5:
         task->_1D = 0;
         slot = &lbl_802D4AE0[task->_17];
-        fn_800AA34C(task->_17, task->_18, lbl_800E6910, slot, slot->_0, slot->_4, task->_1A == 0);
+        fn_800AA34C(task->_17, task->_18, lbl_800E6910, slot, *slot, task->_1A == 0);
         task->_14++;
         return;
     case 6:
@@ -1235,15 +1232,13 @@ static inline void KeepSlot(u8 chan) {
     CardChannel* card = &lbl_803C7838.chan[chan];
     MenuSlot* slot = &lbl_802D4AE0[chan];
 
-    slot->_4 = card->_04;
-    slot->_0 = card->_00;
+    *slot = card->time;
 }
 
 static inline void ClearSlot(u8 chan) {
     MenuSlot* slot = &lbl_802D4AE0[chan];
 
-    slot->_4 = 0;
-    slot->_0 = 0;
+    *slot = 0;
 }
 
 static inline void PackSave(void) {
@@ -1453,7 +1448,7 @@ void fn_8003F2B8(void) {
     case 7:
         if (fn_8004157C() == 0) {
             slot = &lbl_802D4AE0[task->_17];
-            fn_800AB474(task->_17, task->_18, lbl_803CBC48, lbl_800E6910, slot->_0, slot->_4, lbl_803CBC48);
+            fn_800AB474(task->_17, task->_18, lbl_803CBC48, lbl_800E6910, *slot, lbl_803CBC48);
             task->_14++;
             return;
         }
@@ -1724,7 +1719,7 @@ void fn_8003F2B8(void) {
             return;
         }
         slot = &lbl_802D4AE0[task->_17];
-        fn_800A9864(task->_17, task->_18, slot->_0, slot->_4);
+        fn_800A9864(task->_17, task->_18, *slot);
         task->_14 = 25;
         return;
     case 25:
@@ -1770,8 +1765,7 @@ void fn_8003F2B8(void) {
             child->_1D = 0;
             child->_20 = 3;
             child->_21 = 5;
-            lbl_802D4AE0[0]._4 = 0;
-            lbl_802D4AE0[0]._0 = 0;
+            lbl_802D4AE0[0] = 0;
             child->_1F = 2;
             lbl_803CC1B8->_10 = 0;
             task->_14 = 29;
@@ -1868,14 +1862,11 @@ void fn_8003F23C(void) {
     task->_1D = 0;
     task->_21 = 0;
     lbl_803CC1B8->_10 = 0;
-    lbl_802D4AE0[1]._4 = 0;
-    lbl_802D4AE0[1]._0 = 0;
-    lbl_802D4AE0[0]._4 = 0;
-    lbl_802D4AE0[0]._0 = 0;
+    lbl_802D4AE0[1] = 0;
+    lbl_802D4AE0[0] = 0;
 }
 
 // .text:0x8003E8D8 size:0x964
-// 99.12%: registers only, in the slot copies and clears (as in fn_8003AECC)
 void fn_8003E8D8(void) {
     MenuTask* task = lbl_803CC1B8;
     MenuTask* child;
@@ -1916,8 +1907,7 @@ void fn_8003E8D8(void) {
         case 1:
         case 2:
             slot = &lbl_802D4AE0[task->_17];
-            slot->_4 = 0;
-            slot->_0 = 0;
+            *slot = 0;
             task->_14 = 4;
             return;
         case 3:
@@ -1955,16 +1945,14 @@ void fn_8003E8D8(void) {
             case 1:
                 chan = &lbl_803C7838.chan[task->_17];
                 slot = &lbl_802D4AE0[task->_17];
-                slot->_4 = chan->_04;
-                slot->_0 = chan->_00;
+                *slot = chan->time;
                 fn_8004A34C(&lbl_803C50E8, task->_15, 30, 0, 0);
                 task->_14 = 12;
                 return;
             case 6:
                 chan = &lbl_803C7838.chan[task->_17];
                 slot = &lbl_802D4AE0[task->_17];
-                slot->_4 = chan->_04;
-                slot->_0 = chan->_00;
+                *slot = chan->time;
                 task->_14 = 8;
                 return;
             case 10:
@@ -1972,16 +1960,14 @@ void fn_8003E8D8(void) {
                 task->_14 = 12;
                 task->_1C = 12;
                 slot = &lbl_802D4AE0[task->_17];
-                slot->_4 = 0;
-                slot->_0 = 0;
+                *slot = 0;
                 return;
             case 7:
                 task->_14 = 18;
                 task->_1C = 12;
                 chan = &lbl_803C7838.chan[task->_17];
                 slot = &lbl_802D4AE0[task->_17];
-                slot->_4 = chan->_04;
-                slot->_0 = chan->_00;
+                *slot = chan->time;
                 return;
             case 8:
                 task->_14 = 18;
@@ -1989,8 +1975,7 @@ void fn_8003E8D8(void) {
                 return;
             case 9:
                 slot = &lbl_802D4AE0[task->_17];
-                slot->_4 = 0;
-                slot->_0 = 0;
+                *slot = 0;
                 task->_14 = 6;
                 return;
             }
@@ -2001,8 +1986,7 @@ void fn_8003E8D8(void) {
         task->_1D = 0;
         task->_1E = 0;
         slot = &lbl_802D4AE0[task->_17];
-        slot->_4 = 0;
-        slot->_0 = 0;
+        *slot = 0;
         task->_14++;
         return;
     case 7:
@@ -2061,23 +2045,20 @@ void fn_8003E8D8(void) {
             task->_1D = 1;
             task->_14 = 12;
             slot = &lbl_802D4AE0[task->_17];
-            slot->_4 = 0;
-            slot->_0 = 0;
+            *slot = 0;
             return;
         case 8:
             fn_8004A34C(&lbl_803C50E8, task->_15, 19, 0, 0);
             chan = &lbl_803C7838.chan[task->_17];
             slot = &lbl_802D4AE0[task->_17];
-            slot->_4 = chan->_04;
-            slot->_0 = chan->_00;
+            *slot = chan->time;
             task->_14 = 12;
             return;
         case 2:
             fn_8004A34C(&lbl_803C50E8, task->_15, 33, 0, 0);
             task->_14 = 12;
             slot = &lbl_802D4AE0[task->_17];
-            slot->_4 = 0;
-            slot->_0 = 0;
+            *slot = 0;
             return;
         case 4:
             fn_8004A34C(&lbl_803C50E8, task->_15, 37, 0, 0);
@@ -2090,8 +2071,7 @@ void fn_8003E8D8(void) {
             lbl_803C50E8._46 = 1;
             task->_14 = 6;
             slot = &lbl_802D4AE0[task->_17];
-            slot->_4 = 0;
-            slot->_0 = 0;
+            *slot = 0;
             return;
         }
         switch (lbl_803C50E8._45) {
@@ -2114,8 +2094,7 @@ void fn_8003E8D8(void) {
                 case 2:
                     task->_14 = 1;
                     slot = &lbl_802D4AE0[task->_17];
-                    slot->_4 = 0;
-                    slot->_0 = 0;
+                    *slot = 0;
                     return;
                 }
             } else {
@@ -2499,7 +2478,7 @@ void fn_8003C00C(void) {
         break;
     case 10:
         slot = &lbl_802D4AE0[task->_17];
-        fn_800AB474(task->_17, task->_18, lbl_803CBC48, lbl_800E6910, slot->_0, slot->_4, lbl_803CBC48);
+        fn_800AB474(task->_17, task->_18, lbl_803CBC48, lbl_800E6910, *slot, lbl_803CBC48);
         task->_14++;
         return;
     case 11:
@@ -2952,7 +2931,7 @@ void fn_8003C00C(void) {
             req.mask = SaveBlockMask(task->_1B, task->_20);
             req._18 = 1;
             slot = &lbl_802D4AE0[task->_17];
-            fn_800AAEE4(&req, slot, slot->_0, slot->_4);
+            fn_800AAEE4(&req, slot, *slot);
             task->_14++;
             return;
         }
@@ -3118,8 +3097,7 @@ void fn_8003BF54(u8 arg0, u8 arg1, u8 slot, u8 arg3, u8 arg4, u8 arg5, u8 arg6, 
     task->_1D = 0;
     task->_20 = arg7;
     task->_21 = arg8;
-    entry->_4 = 0;
-    entry->_0 = 0;
+    *entry = 0;
     task->_1F = 2;
     lbl_803CC1B8->_10 = 0;
 }
@@ -3155,7 +3133,7 @@ void fn_8003BB90(void) {
                 return;
             }
             slot = &lbl_802D4AE0[task->_17];
-            fn_800A9E34(task->_17, task->_18, slot->_0, slot->_4);
+            fn_800A9E34(task->_17, task->_18, *slot);
             task->_14 = 2;
             return;
         }
@@ -3255,7 +3233,6 @@ void fn_8003BB90(void) {
 }
 
 // .text:0x8003B5B0 size:0x5E0
-// 99.77%: the target reads the slot's first word through the slot pointer (lwz 0(r5)), not lwzx
 void fn_8003B5B0(void) {
     MenuTask* task = lbl_803CC1B8;
     CardRequest req;
@@ -3278,8 +3255,7 @@ void fn_8003B5B0(void) {
         task->_1D = 0;
         task->_14 = 1;
     case 1:
-        fn_800AB474(task->_17, task->_18, lbl_803CBC48, lbl_800E6910, lbl_802D4AE0[task->_17]._0,
-                    lbl_802D4AE0[task->_17]._4, lbl_803CBC48);
+        fn_800AB474(task->_17, task->_18, lbl_803CBC48, lbl_800E6910, lbl_802D4AE0[task->_17], lbl_803CBC48);
         task->_14++;
         return;
     case 2:
@@ -3359,7 +3335,7 @@ void fn_8003B5B0(void) {
             req.mask = SaveBlockMask(task->_1B, task->_20);
             req._18 = 1;
             slot = &lbl_802D4AE0[task->_17];
-            fn_800AAEE4(&req, slot, slot->_0, slot->_4);
+            fn_800AAEE4(&req, slot, *slot);
             task->_14++;
             return;
         }
@@ -3440,7 +3416,6 @@ void fn_8003B5B0(void) {
 }
 
 // .text:0x8003AECC size:0x6E4
-// 99.33%: registers only, in the three copies of a card channel's two words into its slot
 void fn_8003AECC(void) {
     MenuTask* task = lbl_803CC1B8;
     MenuTask* child;
@@ -3496,37 +3471,32 @@ void fn_8003AECC(void) {
             case 1:
                 chan = &lbl_803C7838.chan[task->_17];
                 slot = &lbl_802D4AE0[task->_17];
-                slot->_4 = chan->_04;
-                slot->_0 = chan->_00;
+                *slot = chan->time;
                 fn_8004A34C(&lbl_803C50E8, task->_15, 30, 0, 0);
                 task->_14 = 8;
                 return;
             case 6:
                 chan = &lbl_803C7838.chan[task->_17];
                 slot = &lbl_802D4AE0[task->_17];
-                slot->_4 = chan->_04;
-                slot->_0 = chan->_00;
+                *slot = chan->time;
                 task->_14 = 5;
                 return;
             case 10:
                 task->_14 = 13;
                 task->_1C = 12;
                 slot = &lbl_802D4AE0[task->_17];
-                slot->_4 = 0;
-                slot->_0 = 0;
+                *slot = 0;
                 return;
             case 7:
                 task->_14 = 13;
                 task->_1C = 12;
                 chan = &lbl_803C7838.chan[task->_17];
                 slot = &lbl_802D4AE0[task->_17];
-                slot->_4 = chan->_04;
-                slot->_0 = chan->_00;
+                *slot = chan->time;
                 return;
             case 9:
                 slot = &lbl_802D4AE0[task->_17];
-                slot->_4 = 0;
-                slot->_0 = 0;
+                *slot = 0;
                 task->_14 = 3;
                 return;
             }
@@ -3538,8 +3508,7 @@ void fn_8003AECC(void) {
         task->_1D = 0;
         task->_1E = 0;
         slot = &lbl_802D4AE0[task->_17];
-        slot->_4 = 0;
-        slot->_0 = 0;
+        *slot = 0;
         task->_14++;
         return;
     case 4:
@@ -3594,8 +3563,7 @@ void fn_8003AECC(void) {
             task->_1D = 1;
             task->_14 = 8;
             slot = &lbl_802D4AE0[task->_17];
-            slot->_4 = 0;
-            slot->_0 = 0;
+            *slot = 0;
             return;
         case 2:
         case 8:
@@ -3603,8 +3571,7 @@ void fn_8003AECC(void) {
             fn_800415A0(70);
             task->_14 = 8;
             slot = &lbl_802D4AE0[task->_17];
-            slot->_4 = 0;
-            slot->_0 = 0;
+            *slot = 0;
             return;
         case 4:
             fn_8004A34C(&lbl_803C50E8, task->_15, 37, 0, 0);
@@ -3626,8 +3593,7 @@ void fn_8003AECC(void) {
                 if (lbl_803CC1B8->_10 != 0) {
                     task->_14 = 1;
                     slot = &lbl_802D4AE0[task->_17];
-                    slot->_4 = 0;
-                    slot->_0 = 0;
+                    *slot = 0;
                     return;
                 }
             } else if (lbl_803CC1B8->_10 != 0) {
