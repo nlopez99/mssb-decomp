@@ -4,7 +4,7 @@ typedef struct HuffTree {
     /* 0x000 */ s32 _00;
     /* 0x004 */ s32 root;
     /* 0x008 */ s16 array[2][0x200];
-} HuffTree;
+} HuffTree; // size: 0x808
 
 typedef struct BitBuffer {
     /* 0x00 */ u8* ptr;
@@ -35,7 +35,7 @@ typedef struct StackState {
 } StackState;
 
 typedef struct Plane {
-    /* 0x00 */ s32 _00;
+    /* 0x00 */ BlockData* _00;
     /* 0x04 */ BlockData* _04;
     /* 0x08 */ u16 _08;
     /* 0x0A */ u16 _0A;
@@ -72,14 +72,20 @@ typedef struct MCPlane {
 
 typedef struct VideoState {
     /* 0x0000 */ Plane planes[3];
-    /* 0x00A8 */ u8 _00A8[0x30D8 - 0xA8];
+    /* 0x00A8 */ HuffTree trees[6];
     /* 0x30D8 */ BitBufferWithTree dc_values[3];
     /* 0x3114 */ BitBufferWithTree dc_rle[3];
-    /* 0x3150 */ u8 _3150[0x31DC - 0x3150];
+    /* 0x3150 */ BitBufferWithTree bufTree0[3];
+    /* 0x318C */ BitBufferWithTree basis_num[2];
+    /* 0x31B4 */ BitBufferWithTree basis_num_run[2];
     /* 0x31DC */ BitBuffer fixvl[3];
-    /* 0x320C */ u8 _320C[0x325C - 0x320C];
+    /* 0x320C */ BitBufferWithTree mv_h;
+    /* 0x3220 */ BitBufferWithTree mv_v;
+    /* 0x3234 */ BitBufferWithTree mcb_proc;
+    /* 0x3248 */ BitBufferWithTree mcb_type;
     /* 0x325C */ u16 nest_stride;
-    /* 0x325E */ u8 _325E[3];
+    /* 0x325E */ u16 nest_height;
+    /* 0x3260 */ u8 is_landscape;
     /* 0x3261 */ u8 nest_data[0x3CC6 - 0x3261];
     /* 0x3CC6 */ s16 dc_max;
     /* 0x3CC8 */ s16 dc_min;
@@ -442,7 +448,46 @@ void fn_800E3E3C(void) {
 }
 
 // .text:0x800E40E4 size:0x158
-void fn_800E40E4(void) {
+// registers only: the target gives the parameters and plane the lowest registers
+void fn_800E40E4(VideoState* state, MCPlane* mc) {
+    s32 i;
+    BlockData* blocks;
+    u16 stride;
+    u16 hsafe;
+    u16* boffs;
+    s32* poffs;
+    u8 n;
+    s32 j;
+    Plane* plane = state->planes;
+
+    for (i = 0; i < 3; i++) {
+        blocks = mc->_08;
+        boffs = plane->blk_offs;
+        stride = plane->_28;
+        poffs = plane->pix_offs;
+        hsafe = plane->_0C;
+        n = plane->_34;
+
+        for (j = 0; j < n; j++) {
+            u16 off = *boffs++;
+            u8* dst = mc->_14 + *poffs++;
+            BlockData* b = &blocks[off];
+            u8 type = b->type & 0xF;
+            u8 value = b->value;
+
+            if (type == 0) {
+                u8 top = (blocks[off - hsafe].type & 0x77) ? value : blocks[off - hsafe].value;
+                u8 left = (b[-1].type & 0x77) ? value : b[-1].value;
+                u8 right = (b[1].type & 0x77) ? value : b[1].value;
+                u8 bottom = (blocks[off + hsafe].type & 0x77) ? value : blocks[off + hsafe].value;
+                fn_800E156C(dst, stride, value, top, bottom, left, right);
+            } else {
+                fn_800E2580(state, dst, stride, value, type, i);
+            }
+        }
+        mc++;
+        plane++;
+    }
 }
 
 // .text:0x800E423C size:0x498
@@ -476,7 +521,65 @@ u32 fn_800E4B1C(VideoInfo* info) {
 }
 
 // .text:0x800E4B90 size:0x464
-void fn_800E4B90(void) {
+void fn_800E4B90(VideoInfo* info, VideoState* state) {
+    BlockData* buf;
+    Plane* plane;
+    s32 i;
+
+    info->state = state;
+    fn_800E07E8(info, 0, 1, 1);
+    fn_800E07E8(info, 1, info->h_samp, info->v_samp);
+    fn_800E07E8(info, 2, info->h_samp, info->v_samp);
+    if ((state->is_landscape = info->width >= info->height)) {
+        state->nest_stride = 0x46;
+        state->nest_height = 0x26;
+    } else {
+        state->nest_stride = 0x26;
+        state->nest_height = 0x46;
+    }
+    state->basis_num[0].tree = state->basis_num[1].tree = &state->trees[3];
+    state->basis_num_run[0].tree = state->basis_num_run[1].tree = &state->trees[1];
+    state->dc_values[0].tree = state->dc_values[1].tree = state->dc_values[2].tree = &state->trees[0];
+    state->dc_rle[0].tree = state->dc_rle[1].tree = state->dc_rle[2].tree = &state->trees[1];
+    state->bufTree0[0].tree = state->bufTree0[1].tree = state->bufTree0[2].tree = &state->trees[2];
+    state->mv_h.tree = state->mv_v.tree = &state->trees[4];
+    state->mcb_proc.tree = state->mcb_type.tree = &state->trees[5];
+
+    buf = (BlockData*)(state + 1);
+    plane = state->planes;
+    for (i = 0; i < 3; i++) {
+        BlockData* p;
+        s32 j;
+
+        plane->_00 = buf;
+        plane->_04 = buf + plane->_0C + 1;
+        buf += plane->_0C * plane->_0E;
+        p = plane->_00;
+        for (j = plane->_0C; j > 0; j--) {
+            p->value = 0x7F;
+            p->type = 0xFF;
+            p++;
+        }
+        p = buf;
+        for (j = plane->_0C; j > 0; j--) {
+            p--;
+            p->value = 0x7F;
+            p->type = 0xFF;
+        }
+        p = plane->_00 + plane->_0C;
+        for (j = plane->_0E - 2; j > 0; j--) {
+            p->value = 0x7F;
+            p->type = 0xFF;
+            p += plane->_0C;
+        }
+        p = plane->_00 + plane->_0C * 2 - 1;
+        for (j = plane->_0E - 2; j > 0; j--) {
+            p->value = 0x7F;
+            p->type = 0xFF;
+            p += plane->_0C;
+        }
+        plane++;
+    }
 }
 
 // .text:0x800E4FF4 size:0x928
