@@ -55,7 +55,7 @@ s32 fn_8001758C(u8* state, s32 idx, u8 kind, u8 team, u8 player, u8 arg5, u8 arg
 void fn_800177B4(void);
 void fn_80017814(struct ModelActor* actor, s32 idx, s32 kind, void (*callback)(struct ModelSlot*));
 void fn_80017D28(struct ModelActor* src);
-void fn_80017DBC(void);
+void fn_80017DBC(struct ModelActor* actor, s32 idx);
 void fn_80018024(void);
 void fn_80018270(void);
 void fn_800188C0(void);
@@ -72,7 +72,7 @@ void fn_8001A3FC(void);
 void challengeMapRelated(void);
 void fn_8001AAA4(void);
 void fn_8001AAF0(void);
-void fn_8001AB10(void);
+void fn_8001AB10(void* model, MtxPtr view);
 void fn_8001AF98(void);
 void fn_8001B200(void);
 void fn_8001B214(void (*callback)(void));
