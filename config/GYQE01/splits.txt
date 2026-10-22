@@ -1076,6 +1076,16 @@ Unknown/File_0x800a64e0.c:
 	.text       start:0x800A64E0 end:0x800A6870
 	.bss        start:0x803C6990 end:0x803C6CF8
 
+static/sprt.c:
+	extab       start:0x80006918 end:0x80006990
+	extabindex  start:0x80008904 end:0x800089B8
+	.text       start:0x800B0D28 end:0x800B2AC8
+	.rodata     start:0x800E7D10 end:0x800E7D28
+	.data       start:0x80111340 end:0x80111640
+	.sdata      start:0x803CBB18 end:0x803CBB48
+	.sbss       start:0x803CC1C0 end:0x803CC1E8
+	.sdata2     start:0x803CCF30 end:0x803CCF58
+
 C3/control/control.c:
 	extab       start:0x80006A90 end:0x80006AE0
 	extabindex  start:0x80008B38 end:0x80008BB0
