@@ -377,8 +377,45 @@ BOOL fn_800AFFB0(void) {
     return lbl_803C79D4._28;
 }
 
+// fn_800B0134 with the stream pointer read once; fn_800AFD4C inlines this form.
+static inline s32 streamToAram(u32 size) {
+    BOOL enabled;
+    u32 first;
+    u32 second;
+    u8* src;
+    u8* wrap;
+
+    while (lbl_803C6CF8.streamDone < size) {
+    }
+    enabled = OSDisableInterrupts();
+    src = lbl_803C6CF8.readPtr;
+    if (src + size < lbl_803C7A00._00 + lbl_803C7A00._04) {
+        first = size;
+        wrap = NULL;
+        second = 0;
+    } else {
+        first = (lbl_803C7A00._00 + lbl_803C7A00._04) - src;
+        wrap = lbl_803C7A00._00;
+        second = size - first;
+    }
+    OSRestoreInterrupts(enabled);
+    if (size >= first) {
+        fn_800B03F4(src, size);
+    } else {
+        fn_800B03F4(src, first);
+        while (lbl_803C79D4._29 != 0) {
+        }
+        fn_800B03F4(wrap, second);
+    }
+    while (lbl_803C79D4._29 != 0) {
+    }
+    if (size != 0) {
+        fn_800A6D10(size);
+    }
+    return 1;
+}
+
 // .text:0x800AFD4C size:0x264
-// 99.41%: registers of the inlined fn_800B0134 copy differ (first, second, src, wrap).
 s32 fn_800AFD4C(void) {
     MovieRing* ring = &lbl_803C79D4;
     u32 size;
@@ -391,7 +428,7 @@ s32 fn_800AFD4C(void) {
     } else {
         size = ring->size - ring->_1C;
     }
-    fn_800B0134(size);
+    streamToAram(size);
     if (lbl_803C79D4._1C >= ring->size) {
         fn_800B0008(lbl_803C7A00.size);
         // A discarded read of the volatile counter; the target loads it here.
