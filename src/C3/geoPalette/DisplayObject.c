@@ -7,6 +7,7 @@ extern void* _OSAllocFromHeap(u32 align, u32 size);
 extern void fn_800ACFB0(void* data);
 extern void SKNLoadFile(void* skn, void* hdr);
 extern MtxPtr fn_800BEB80(u8 index);
+extern f32 lbl_80111750[][3];
 extern u8 fn_800BEBA0(void);
 extern void fn_800BF008(void);
 extern struct { u8 _00[0x4C]; u8 _4C; }* fn_800BF068(void);
@@ -44,6 +45,21 @@ f32 lbl_803CC1F8;
 DOEnvCallback lbl_803CC1F4;
 Light* lbl_803CC1F0;
 
+static inline u32 GetQuantizeSize(u8 quantizeInfo) {
+    switch ((u8)(quantizeInfo >> 4)) {
+    case GX_U8:
+    case GX_S8:
+        return 1;
+    case GX_U16:
+    case GX_S16:
+        return 2;
+    case GX_F32:
+        return 4;
+    default:
+        return 0;
+    }
+}
+
 // .text:0x800B993C size:0xC
 void fn_800B993C(void) {
     lbl_803CC200 = NULL;
@@ -78,6 +94,8 @@ void SetFogNone(void) {
 }
 
 // .text:0x800B99C4 size:0x6C
+// 69.63%: the target copies the float args to f7/f6/f5/f0, rounds them with frsp for GXSetFog
+// and stores the unrounded copies; f32 and f64 parameters and a pointer local all fold the frsp.
 void SetFog(GXFogType type, f32 startz, f32 endz, f32 nearz, f32 farz, GXColor color) {
     lbl_80111700.type = type;
     lbl_80111700.startz = startz;
@@ -389,6 +407,8 @@ void DODefaultUserTevMode(s32 mode, struct DODisplayObj* dispObj, MtxPtr camera,
 }
 
 // .text:0x800BA848 size:0x12E4
+// 99.86%: numChans and bumpState take each other's registers (r26/r24) and case 8 swaps two
+// temporaries; every order of the six counter declarations was tried.
 void Custom_SetState(struct DODisplayObj* dispObj, DOState* state, MtxPtr camera) {
     Mtx sp128;
     Mtx spF8;
@@ -750,6 +770,8 @@ void Custom_SetState(struct DODisplayObj* dispObj, DOState* state, MtxPtr camera
 }
 
 // .text:0x800BBB2C size:0x430
+// 96.91%: registers only; the target gives map the camera's r28, and the VCD head's first
+// attr store reuses n's zero register.
 void SetState(DisplayStateList* state, struct DODisplayObj* dispObj, MtxPtr camera) {
     Mtx m;
     GXVtxDescList vcd[GX_VA_MAX_ATTR + 1];
@@ -902,7 +924,136 @@ void GetColorFromQuant(void* color, u32 quantizeInfo, u8* r, u8* g, u8* b, u8* a
 }
 
 // .text:0x800BC0C4 size:0x724
-void DOVARender(struct DODisplayObj *dispObj, MtxPtr camera, u8 numLights, va_list *list) {}
+// 99.08%: the target tests visibility with bne/b, the GXColor temporaries sit 4 bytes apart
+// on the stack, and the parameters land in r30/r31/r25/r26.
+void DOVARender(struct DODisplayObj *dispObj, MtxPtr camera, u8 numLights, va_list *list) {
+    Mtx mv;
+    Mtx tmp;
+    GXColor color;
+    GXColorSrc matSrc = GX_SRC_VTX;
+    DisplayStateList* stateList;
+    Light* light;
+    u32 i;
+    u32 lightMask;
+    u32 lightId;
+    f32 ambient;
+    f32 diffuse;
+    u32 stride;
+    u8 compCount;
+
+    if (dispObj != NULL) {
+        if (!dispObj->visibility) {
+            return;
+        }
+        if (lbl_803CC204 == NULL) {
+            PSMTXConcat(camera, dispObj->worldMatrix, mv);
+            GXLoadPosMtxImm(mv, GX_PNMTX0);
+            GXSetCurrentMtx(GX_PNMTX0);
+        }
+        GXSetArray(GX_VA_POS, dispObj->positionData->positionArray, (u8)(dispObj->positionData->compCount * GetQuantizeSize(dispObj->positionData->quantizeInfo)));
+        GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, dispObj->positionData->quantizeInfo >> 4, dispObj->positionData->quantizeInfo & 0xF);
+        if (dispObj->colorData != NULL) {
+            if (dispObj->colorData->numColors == 1) {
+                matSrc = GX_SRC_REG;
+                GetColorFromQuant(dispObj->colorData->colorArray, dispObj->colorData->quantizeInfo, &color.r, &color.g, &color.b, &color.a);
+                GXSetChanMatColor(GX_COLOR0A0, color);
+            } else {
+                switch ((u8)(dispObj->colorData->quantizeInfo >> 4)) {
+                case GX_RGB565:
+                case GX_RGBA4:
+                    stride = 2;
+                    break;
+                case GX_RGB8:
+                case GX_RGBA6:
+                    stride = 3;
+                    break;
+                case GX_RGBX8:
+                case GX_RGBA8:
+                    stride = 4;
+                    break;
+                default:
+                    stride = 0;
+                    break;
+                }
+                GXSetArray(GX_VA_CLR0, dispObj->colorData->colorArray, stride);
+                GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, dispObj->colorData->compCount != 3, dispObj->colorData->quantizeInfo >> 4, 0);
+            }
+            GXSetNumChans(1);
+        } else {
+            color.r = 0xFF;
+            color.g = 0xFF;
+            color.b = 0xFF;
+            color.a = 0xFF;
+            GXSetChanMatColor(GX_COLOR0A0, color);
+            GXSetNumChans(1);
+            matSrc = GX_SRC_REG;
+        }
+        if (dispObj->textureData != NULL) {
+            for (i = 0; i < dispObj->numTextureChannels; i++) {
+                GXSetArray(GX_VA_TEX0 + i, dispObj->textureData[i].textureCoordArray, (u8)(dispObj->textureData[i].compCount * GetQuantizeSize(dispObj->textureData[i].quantizeInfo)));
+                GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0 + i, GX_TEX_ST, dispObj->textureData[i].quantizeInfo >> 4, dispObj->textureData[i].quantizeInfo & 0xF);
+                GXSetTexCoordGen2(i, GX_TG_MTX2X4, GX_TG_TEX0 + i, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
+            }
+        }
+        if (dispObj->lightingData != NULL) {
+            if (dispObj->lightingData->normalArray != NULL) {
+                compCount = dispObj->lightingData->compCount;
+                if (compCount == 3 || compCount == 6) {
+                    GXSetArray(GX_VA_NRM, dispObj->lightingData->normalArray, (u8)(compCount * GetQuantizeSize(dispObj->lightingData->quantizeInfo)));
+                    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_NRM, GX_NRM_XYZ, dispObj->lightingData->quantizeInfo >> 4, dispObj->lightingData->quantizeInfo & 0xF);
+                } else if (compCount == 2) {
+                    GXSetArray(GX_VA_NBT, dispObj->lightingData->normalArray, (u8)(GetQuantizeSize(dispObj->lightingData->quantizeInfo) * 3));
+                    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_NBT, GX_NRM_NBT3, dispObj->lightingData->quantizeInfo >> 4, dispObj->lightingData->quantizeInfo & 0xF);
+                } else {
+                    OSReport("DOVARender: Invalid component count for normals %d\n", compCount);
+                }
+            } else {
+                GXSetArray(GX_VA_NRM, lbl_80111750, (u8)(GetQuantizeSize(lbl_803CBB60) * 3));
+                GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_NRM, GX_NRM_XYZ, lbl_803CBB60 >> 4, lbl_803CBB60 & 0xF);
+            }
+            if (lbl_803CC204 == NULL) {
+                PSMTXInverse(mv, tmp);
+                PSMTXTranspose(tmp, mv);
+                GXLoadNrmMtxImm(mv, GX_PNMTX0);
+            }
+        }
+        if (dispObj->lightingData != NULL && dispObj->colorData != NULL && numLights != 0) {
+            GXColor amb;
+
+            lightMask = 0;
+            ambient = 0.01f * dispObj->lightingData->ambientPercentage;
+            if (fn_800BD2B0(&amb) == 0) {
+                amb.a = 0xFF;
+                amb.r = amb.g = amb.b = 255.0f * ambient;
+            }
+            GXSetChanAmbColor(GX_COLOR0A0, amb);
+            diffuse = 1.0f - ambient;
+            for (i = 0; i < numLights; i++) {
+                light = va_arg(*list, Light*);
+                amb.r = light->color.r * diffuse;
+                amb.g = light->color.g * diffuse;
+                amb.b = light->color.b * diffuse;
+                GXInitLightColor(&light->lt_obj, amb);
+                GXInitLightPos(&light->lt_obj, light->worldPosition.x, light->worldPosition.y, light->worldPosition.z);
+                GXInitLightDir(&light->lt_obj, light->worldDirection.x, light->worldDirection.y, light->worldDirection.z);
+                lightId = 1 << i;
+                GXLoadLightObjImm(&light->lt_obj, lightId);
+                lightMask |= lightId;
+            }
+            GXSetChanCtrl(GX_COLOR0A0, GX_TRUE, GX_SRC_REG, matSrc, lightMask, GX_DF_CLAMP, GX_AF_SPOT);
+        } else {
+            GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_REG, matSrc, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+        }
+        stateList = dispObj->displayData->displayStateList;
+        for (i = 0; i < dispObj->displayData->numStateEntries; i++) {
+            SetState(stateList, dispObj, camera);
+            if (stateList->primitiveList != NULL) {
+                GXCallDisplayList(stateList->primitiveList, stateList->listSize);
+            }
+            stateList++;
+        }
+    }
+}
 
 // .text:0x800BC7E8 size:0x3C
 void DOVARenderSkin(struct DODisplayObj *dispObj, MtxPtr camera, MtxPtr mtxArray, MtxPtr invTransposeMtxArray, u8 numLights, va_list *list) {
@@ -1083,6 +1234,8 @@ void fn_800BCDBC(DODisplayDataPtr pal) {
 }
 
 // .text:0x800BCE38 size:0xC0
+// 84.65%: registers only (the target keeps pal in r31, i in r28); counter types, addition
+// orders and declaration orders were tried.
 void fn_800BCE38(DODisplayDataPtr pal) {
     struct DODisplayObj* objs;
     u32 i;
