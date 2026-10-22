@@ -54,6 +54,7 @@ void fn_800B05E4(void) {
 }
 
 // .text:0x800B0580 size:0x64
+// 57.12%: same shape as fn_800B0390.
 void fn_800B0580(void) {
     MovieRing* ring = &lbl_803C79D4;
 
@@ -71,6 +72,7 @@ void fn_800B03F4(void) {
 }
 
 // .text:0x800B0390 size:0x64
+// 67.40%: the target reloads ring->_24 after each store to lbl_803C79D4 (two bases).
 void fn_800B0390(void) {
     MovieRing* ring = &lbl_803C79D4;
 
@@ -224,6 +226,7 @@ void fn_800AD500(void) {
 }
 
 // .text:0x800AD490 size:0x70
+// 87.14%: the base hoists the final clrlwi above the flags & 2 test (beqlr).
 u32 fn_800AD490(MoviePlayer* player) {
     u8 flags;
     s8 error;

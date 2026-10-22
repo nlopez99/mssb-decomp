@@ -254,6 +254,8 @@ static inline s32 UpdateZMode(void) {
 }
 
 // .text:0x800B2854 size:0x274
+// 44.75%: pooled .bss as in fn_800B251C (49.48% with statics); the projection setup is
+// hoisted out of the loop here but not in the target.
 void fn_800B2854(u8* buf, s32 size, Mtx44 proj, s32 projType, s32 count, u32* handles, u32* sizes) {
     s32 half;
     u8* front;
@@ -329,6 +331,9 @@ void fn_800B27A4(s32 shift) {
 }
 
 // .text:0x800B251C size:0x288
+// 85.85%: the target reaches lbl_802FE918, lbl_802FEBF8 and lbl_803006F8 from the pool base
+// lbl_802FE8B8, so they are statics of this unit's .bss, which a link-order cycle keeps out of
+// splits.txt; with them static this scores 99.06%, registers only.
 void fn_800B251C(void) {
     u32* handle;
     s32 i;
@@ -477,6 +482,7 @@ void fn_800B2160(u8 value) {
 }
 
 // .text:0x800B1EBC size:0x2A4
+// 99.62%: id gets r28 where the target has r30; declaration orders and the permuter found nothing.
 s32 fn_800B1EBC(SprtTex* tex, s32 id, u32 width, u32 height) {
     u16 v;
     u32 map = id + 1;
@@ -543,6 +549,8 @@ s32 fn_800B1EBC(SprtTex* tex, s32 id, u32 width, u32 height) {
 
 
 // .text:0x800B1500 size:0x9BC
+// 94.62%: the target keeps a dead vertex test (verts[0].color, the x/y of verts 0-2, verts[3].x)
+// after dirty |= changed; every plausible empty form compiles away (docs/matching-notes/structure.md).
 void DrawSprite(s32 prim, SprtVtx* verts, s32 count, SprtTex* tex, u32 width, u32 height) {
     s32 dirty;
     s32 changed;
@@ -685,6 +693,8 @@ void fn_800B117C(u8 value) {
 }
 
 // .text:0x800B0D68 size:0x414
+// 97.13%: saved registers rotated (index r25, need r26 in the target); declaration orders
+// and the permuter found nothing better.
 s32 AllocateSprite(s32 index, s32 size) {
     u8* flushEnd;
     s32 need;

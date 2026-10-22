@@ -26,6 +26,7 @@ SoundConfig lbl_801112F0 = { 64, 48, 16, 1, 0, 0x800000 };
 SoundHeap* lbl_803CBB10 = &lbl_802FE8A0;
 
 // .text:0x800B099C size:0x78
+// 99.17%: total and the aligned size swap r4/r6 against the target's r6/r7.
 void* SndAlloc(u32 size) {
     u8* cur;
     u8* p;

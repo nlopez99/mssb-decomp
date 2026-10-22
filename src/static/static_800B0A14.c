@@ -89,6 +89,7 @@ void resetAllDrawingStructs(void) {
 }
 
 // .text:0x800B0B2C size:0xBC
+// 97.23%: the inlined resetAllDrawingStructs takes other registers than its standalone copy.
 void resetAllDrawingStructs_tonop(void) {
     s32 i;
     QueueTask* task;
@@ -103,6 +104,8 @@ void resetAllDrawingStructs_tonop(void) {
 }
 
 // .text:0x800B0A5C size:0xD0
+// 85.29%: the target stores the cursor twice per search step and reloads it each iteration;
+// the base keeps it in a register across the loop.
 QueueTask* fn_800B0A5C_insertQueue(void (*func)(void*), u16 priority) {
     QueueTask* next;
     QueueTask* prev;
@@ -136,6 +139,8 @@ QueueTask* fn_800B0A5C_insertQueue(void (*func)(void*), u16 priority) {
 }
 
 // .text:0x800B0A14 size:0x48
+// 99.33%: the target loads prev before next for the first unlink; every statement form tried
+// loads next first.
 void fn_800B0A14_removeQueue(void) {
     if (lbl_803CC1B2 != 0) {
         QueueTask* prev = lbl_803CC1B8->prev;
