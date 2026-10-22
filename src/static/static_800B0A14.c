@@ -23,7 +23,7 @@ QueueTask* lbl_803CC1B8;
 
 // .text:0x800B0CB8 size:0x70
 void RunDrawScripts_with_stack_variables(void) {
-    s32 rootArgs[8];
+    s32 rootArgs[7];
     s32 frameArgs[5];
     QueueTask* task;
 

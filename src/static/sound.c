@@ -69,7 +69,7 @@ void fn_800B0934(void* addr) {
 }
 
 // .text:0x800B0834 size:0x100
-void initSound(SoundConfig* config, u8* aiStack, u8* heap, u32 heapSize) {
+void initSound(SoundConfig* config, u8* aiStack, u8* heap, u32 heapSize, u8 arg4, u8 arg5, void* arg6) {
     SND_HOOKS hooks = { SndAlloc, SndFree };
     u8* end;
 
