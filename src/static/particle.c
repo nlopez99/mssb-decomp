@@ -1347,8 +1347,6 @@ BOOL fn_800328E0(void* arg)
 }
 
 // .text:0x800324EC size:0x3F4
-// 99.57%: the target tests the first player's pointer with bne over a b to the end; this
-// branches with beq. Only branch targets differ after it.
 void fn_800324EC(u16 joint, s32 player, s32 other, StreakParams* dir)
 {
     Vec pos;
@@ -1359,44 +1357,42 @@ void fn_800324EC(u16 joint, s32 player, s32 other, StreakParams* dir)
     Particle* p;
     u32 i;
 
-    if (player >= 0 && player < 13) {
-        if (lbl_8036E548._2C50[player] == NULL) {
-            return;
-        }
-        getAnimRelatedCoordinates(player, joint, &pos);
-        if (other >= 0 && other < 13 && lbl_8036E548._2C50[other] != NULL) {
-            getAnimRelatedCoordinates(other, joint, &v);
-            PSVECSubtract(&v, &pos, &v);
-            PSVECScale(&v, 0.5f, &v);
-            PSVECAdd(&pos, &v, &pos);
-        }
-        v.x = lbl_8017FFE0[0][3];
-        v.y = lbl_8017FFE0[1][3];
-        v.z = lbl_8017FFE0[2][3];
-        colors[0] = (lbl_800F787C.r << 24) | (lbl_800F787C.g << 16) | (lbl_800F787C.b << 8) | 0xFF;
-        for (i = 1; i < 32; i++) {
-            colors[i] = colors[0];
-        }
-        params = &lbl_800F787C;
-        params->_00 = lbl_803CBD0C;
-        e = fn_80033A24(fn_8002E828, 0x80, 0, 1, TRUE, 6);
-        if (e != NULL) {
-            e->_10 = params->_00;
-            p = e->particles;
-            p->pos.x = pos.x;
-            p->pos.y = pos.y;
-            p->pos.z = pos.z;
-            p->_40 = -0x100;
-            p->_18 = params->_10;
-            p->_1C = p->_4A = params->_14;
-            p->_20 = params->_14 / 2;
-            p->_38 = p->_3C = p->_10 = params->_08 / 100000.0f;
-            p->_14 = params->_0C / 100000.0f;
-            p->_4D = params->_04;
-        }
-        if (dir != NULL) {
-            fn_8002A1CC(&pos, dir);
-        }
+    if (player < 0 || player >= 13 || lbl_8036E548._2C50[player] == NULL) {
+        return;
+    }
+    getAnimRelatedCoordinates(player, joint, &pos);
+    if (other >= 0 && other < 13 && lbl_8036E548._2C50[other] != NULL) {
+        getAnimRelatedCoordinates(other, joint, &v);
+        PSVECSubtract(&v, &pos, &v);
+        PSVECScale(&v, 0.5f, &v);
+        PSVECAdd(&pos, &v, &pos);
+    }
+    v.x = lbl_8017FFE0[0][3];
+    v.y = lbl_8017FFE0[1][3];
+    v.z = lbl_8017FFE0[2][3];
+    colors[0] = (lbl_800F787C.r << 24) | (lbl_800F787C.g << 16) | (lbl_800F787C.b << 8) | 0xFF;
+    for (i = 1; i < 32; i++) {
+        colors[i] = colors[0];
+    }
+    params = &lbl_800F787C;
+    params->_00 = lbl_803CBD0C;
+    e = fn_80033A24(fn_8002E828, 0x80, 0, 1, TRUE, 6);
+    if (e != NULL) {
+        e->_10 = params->_00;
+        p = e->particles;
+        p->pos.x = pos.x;
+        p->pos.y = pos.y;
+        p->pos.z = pos.z;
+        p->_40 = -0x100;
+        p->_18 = params->_10;
+        p->_1C = p->_4A = params->_14;
+        p->_20 = params->_14 / 2;
+        p->_38 = p->_3C = p->_10 = params->_08 / 100000.0f;
+        p->_14 = params->_0C / 100000.0f;
+        p->_4D = params->_04;
+    }
+    if (dir != NULL) {
+        fn_8002A1CC(&pos, dir);
     }
 }
 
