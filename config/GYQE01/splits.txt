@@ -46,6 +46,7 @@ static/static_8000F150.c:
 	extab       start:0x800056D8 end:0x80005730
 	extabindex  start:0x80006DA4 end:0x80006E28
 	.text       start:0x8000F150 end:0x800111D8
+	.data       start:0x800E8F60 end:0x800EE800
 	.sdata2     start:0x803CC490 end:0x803CC4B8
 
 static/model.c:
@@ -1074,6 +1075,52 @@ Unknown/File_0x800a64e0.c:
 	extabindex  start:0x80008430 end:0x8000846C
 	.text       start:0x800A64E0 end:0x800A6870
 	.bss        start:0x803C6990 end:0x803C6CF8
+
+static/dvdsys.c:
+	extab       start:0x80006608 end:0x80006688
+	extabindex  start:0x8000846C end:0x8000852C
+	.text       start:0x800A6870 end:0x800A7AD8
+	.rodata     start:0x800E7730 end:0x800E77C8
+	.data       start:0x8010F420 end:0x8010F460
+
+static/static_800A7AD8.c:
+	extab       start:0x80006688 end:0x80006690
+	extabindex  start:0x8000852C end:0x80008538
+	.text       start:0x800A7AD8 end:0x800A7BAC
+	.data       start:0x8010F460 end:0x80110080
+	.sdata2     start:0x803CCEC8 end:0x803CCED0
+
+static/graphic.c:
+	extab       start:0x80006690 end:0x800066C8
+	extabindex  start:0x80008538 end:0x8000858C
+	.text       start:0x800A7BAC end:0x800A8518
+	.rodata     start:0x800E77C8 end:0x800E7800
+	.sdata      start:0x803CBAD0 end:0x803CBAD8
+	.sdata2     start:0x803CCED0 end:0x803CCEE0
+
+static/static_800A8518.c:
+	extab       start:0x800066C8 end:0x80006750
+	extabindex  start:0x8000858C end:0x80008658
+	.text       start:0x800A8518 end:0x800A94C4
+	.sbss       start:0x803CC128 end:0x803CC158
+
+static/static_800A94C4.c:
+	extab       start:0x80006750 end:0x80006768
+	extabindex  start:0x80008658 end:0x8000867C
+	.text       start:0x800A94C4 end:0x800A9864
+	.data       start:0x80110080 end:0x80110090
+
+static/mcard.c:
+	extab       start:0x80006768 end:0x80006808
+	extabindex  start:0x8000867C end:0x8000876C
+	.text       start:0x800A9864 end:0x800ACF14
+	.rodata     start:0x800E7800 end:0x800E7B50
+	.data       start:0x80110090 end:0x801101B0
+	.sbss       start:0x803CC158 end:0x803CC170
+	.sdata2     start:0x803CCEE0 end:0x803CCEE8
+
+static/static_800ACF14.c:
+	.text       start:0x800ACF14 end:0x800AD070
 
 C3/actor/act.c:
 	extab       start:0x80006990 end:0x80006A28
