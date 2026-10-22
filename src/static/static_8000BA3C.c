@@ -1109,11 +1109,11 @@ s32 fn_8000C194(u32* time, AnimFile* file, s32 idx, Mtx mtx, s32 flags, u32 colo
     u32* recs[2];
     u32 t;
     u16* subKey;
-    s32 ret;
     AnimTrack* track;
     AnimKeyList* keys_;
     AnimKey* key;
     AnimFrame** lp;
+    s32 ret;
     AnimFrame* layer;
     SpriteKey* cur;
     SpriteKey* next;
