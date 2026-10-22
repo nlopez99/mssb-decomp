@@ -40,9 +40,11 @@ typedef struct Plane {
     /* 0x08 */ u16 _08;
     /* 0x0A */ u16 _0A;
     /* 0x0C */ u16 _0C;
-    /* 0x0E */ u8 _0E[0x28 - 0x0E];
+    /* 0x0E */ u16 _0E;
+    /* 0x10 */ u16 blk_offs[4];
+    /* 0x18 */ s32 pix_offs[4];
     /* 0x28 */ u16 _28;
-    /* 0x2A */ u8 _2A[2];
+    /* 0x2A */ u16 _2A;
     /* 0x2C */ s32 _2C;
     /* 0x30 */ u8 _30;
     /* 0x31 */ u8 _31;
@@ -58,8 +60,8 @@ typedef struct MCPlane {
     /* 0x08 */ BlockData* _08;
     /* 0x0C */ BlockData* _0C;
     /* 0x10 */ s32 _10;
-    /* 0x14 */ s32 _14;
-    /* 0x18 */ s32 _18;
+    /* 0x14 */ u8* _14;
+    /* 0x18 */ u8* _18;
     /* 0x1C */ s32 _1C;
     /* 0x20 */ s32 _20;
     /* 0x24 */ u16 _24;
@@ -70,14 +72,17 @@ typedef struct MCPlane {
 
 typedef struct VideoState {
     /* 0x0000 */ Plane planes[3];
-    /* 0x00A8 */ u8 _00A8[0x31DC - 0xA8];
+    /* 0x00A8 */ u8 _00A8[0x30D8 - 0xA8];
+    /* 0x30D8 */ BitBufferWithTree dc_values[3];
+    /* 0x3114 */ BitBufferWithTree dc_rle[3];
+    /* 0x3150 */ u8 _3150[0x31DC - 0x3150];
     /* 0x31DC */ BitBuffer fixvl[3];
     /* 0x320C */ u8 _320C[0x325C - 0x320C];
     /* 0x325C */ u16 nest_stride;
     /* 0x325E */ u8 _325E[3];
     /* 0x3261 */ u8 nest_data[0x3CC6 - 0x3261];
-    /* 0x3CC6 */ s16 _3CC6;
-    /* 0x3CC8 */ s16 _3CC8;
+    /* 0x3CC6 */ s16 dc_max;
+    /* 0x3CC8 */ s16 dc_min;
     /* 0x3CCA */ u8 _3CCA;
     /* 0x3CCB */ u8 _3CCB[0x3CD0 - 0x3CCB];
 } VideoState; // size: 0x3CD0
@@ -93,7 +98,27 @@ void fn_800E0488(void* a, void* b) {
 }
 
 // .text:0x800E07E8 size:0x11C
-void fn_800E07E8(void) {
+void fn_800E07E8(VideoInfo* info, s32 plane_idx, u8 h_samp, u8 v_samp) {
+    Plane* plane = &info->state->planes[plane_idx];
+
+    plane->_30 = (h_samp == 2) ? 1 : 0;
+    plane->_28 = info->width >> plane->_30;
+    plane->_31 = (v_samp == 2) ? 1 : 0;
+    plane->_2A = info->height >> plane->_31;
+    plane->_2C = plane->_28 * plane->_2A;
+    plane->_32 = 2 >> plane->_30;
+    plane->_33 = 2 >> plane->_31;
+    plane->_34 = plane->_32 * plane->_33;
+    plane->_08 = info->width / (h_samp * 4);
+    plane->_0A = info->height / (v_samp * 4);
+    plane->_0C = plane->_08 + 2;
+    plane->_0E = plane->_0A + 2;
+    plane->blk_offs[0] = 0;
+    plane->blk_offs[3] = 1;
+    plane->blk_offs[2] = (plane->blk_offs[1] = plane->_0C) + 1;
+    plane->pix_offs[0] = 0;
+    plane->pix_offs[3] = 4;
+    plane->pix_offs[2] = (plane->pix_offs[1] = plane->_28 * 4) + 4;
 }
 
 // .text:0x800E0904 size:0x3C4
@@ -128,7 +153,53 @@ void fn_800E0D60(void) {
 }
 
 // .text:0x800E10B4 size:0x114
-void fn_800E10B4(void) {
+// register allocation differs: the target keeps state + i * 0x14 from a mulli and the
+// width copy in r24
+void fn_800E10B4(VideoState* state) {
+    s32 i;
+
+    for (i = 0; i < 3; i++) {
+        Plane* plane = &state->planes[i];
+        BitBufferWithTree* dcval = &state->dc_values[i];
+        BitBufferWithTree* dcrun = &state->dc_rle[i];
+        s32 width = plane->_08;
+        BlockData* curr = plane->_04;
+        s32 y = plane->_0A;
+        s32 stride = plane->_0C;
+        s32 rle = 0;
+
+        for (; y > 0; y--) {
+            BlockData* prev = curr - stride;
+            u8 value = prev->value;
+            s32 x;
+
+            for (x = width; x > 0; x--) {
+                s16 delta;
+                if (rle == 0) {
+                    s16 max = state->dc_max;
+                    s32 sum = 0;
+                    s16 min = state->dc_min;
+                    s16 v;
+                    do {
+                        v = fn_800E0CC8(dcval);
+                        sum += v;
+                    } while (min >= v || v >= max);
+                    delta = sum;
+                    if (delta == 0) {
+                        rle = fn_800E0CC8(dcrun);
+                    }
+                } else {
+                    delta = 0;
+                    rle--;
+                }
+                value += delta;
+                curr->value = value;
+                value = (value + 1 + (++prev)->value) >> 1;
+                curr++;
+            }
+            curr += 2;
+        }
+    }
 }
 
 // .text:0x800E11C8 size:0x3A4
@@ -336,11 +407,26 @@ void fn_800E2B8C(Plane* plane, MCPlane* mc, s32 a, s32 b, s32 c) {
 }
 
 // .text:0x800E2C18 size:0x6D0
-void fn_800E2C18(void) {
+void fn_800E2C18(u8* dst, s32 dst_stride, u8* src, s32 src_stride, s32 hpel_x, s32 hpel_y) {
 }
 
 // .text:0x800E32E8 size:0xC4
-void fn_800E32E8(void) {
+// registers only: the target keeps plane and mc in r30/r31 and n in r24
+void fn_800E32E8(Plane* plane, MCPlane* mc, s32 x, s32 y) {
+    s32 i;
+
+    for (i = 0; i < 3; i++) {
+        s32* offs = plane->pix_offs;
+        s32 j = 0;
+        u8* src = &mc->_18[(y >> (plane->_31 + 1)) * plane->_28 + (x >> (plane->_30 + 1))];
+        u8 n = plane->_34;
+        for (; j < n; j++) {
+            s32 off = *offs++;
+            fn_800E2C18(mc->_14 + off, plane->_28, src + off, plane->_28, x & 1, y & 1);
+        }
+        mc++;
+        plane++;
+    }
 }
 
 // .text:0x800E33AC size:0x4B4
