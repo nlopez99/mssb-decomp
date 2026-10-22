@@ -1022,8 +1022,8 @@ void fn_8004053C(void) {
         return;
     case 5:
         task->_1D = 0;
-        slot = &lbl_802D4AE0[task->_17];
-        fn_800AA34C(task->_17, task->_18, lbl_800E6910, slot, *slot, task->_1A == 0);
+        fn_800AA34C(task->_17, task->_18, lbl_800E6910, &lbl_802D4AE0[task->_17], lbl_802D4AE0[task->_17],
+                    task->_1A ? FALSE : TRUE);
         task->_14++;
         return;
     case 6:
@@ -1309,10 +1309,10 @@ void fn_8003F2B8(void) {
     MenuTask* parent;
     MenuSlot* slot;
     u8 a15;
-    u8 a16;
-    u8 a17;
-    u8 a1A;
     u8 a1B;
+    u8 a1A;
+    u8 a17;
+    u8 a16;
 
     switch (CardResultCode(lbl_803C7838.chan[task->_17].result)) {
     case 4:
@@ -1447,8 +1447,7 @@ void fn_8003F2B8(void) {
         break;
     case 7:
         if (fn_8004157C() == 0) {
-            slot = &lbl_802D4AE0[task->_17];
-            fn_800AB474(task->_17, task->_18, lbl_803CBC48, lbl_800E6910, *slot, lbl_803CBC48);
+            fn_800AB474(task->_17, task->_18, lbl_803CBC48, lbl_800E6910, lbl_802D4AE0[task->_17], lbl_803CBC48);
             task->_14++;
             return;
         }
@@ -2477,8 +2476,7 @@ void fn_8003C00C(void) {
         }
         break;
     case 10:
-        slot = &lbl_802D4AE0[task->_17];
-        fn_800AB474(task->_17, task->_18, lbl_803CBC48, lbl_800E6910, *slot, lbl_803CBC48);
+        fn_800AB474(task->_17, task->_18, lbl_803CBC48, lbl_800E6910, lbl_802D4AE0[task->_17], lbl_803CBC48);
         task->_14++;
         return;
     case 11:
