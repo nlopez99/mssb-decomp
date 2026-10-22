@@ -37,7 +37,7 @@ void* SndAlloc(u32 size) {
     cur = lbl_803CBB10->cur;
     p = (u8*)(((u32)cur + 8 + 31) & ~31);
     total = (p - cur) + size;
-    next = size + p;
+    next = cur + total;
     remain = lbl_803CBB10->end - next;
     if (remain < 0) {
         OSReport("sNp_SndAlloc:: no enough space:%d\n", remain);
