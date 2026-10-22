@@ -9,6 +9,7 @@
 #include "static/sub.h"
 #include "static/static_8000F150.h"
 #include "static/static_8006C48C.h"
+#include "static/orderchange.h"
 #include "string.h"
 
 typedef struct PadHold {
@@ -177,8 +178,6 @@ typedef struct CaptainInfo {
 extern CaptainInfo lbl_800E8558[];
 extern MissionText lbl_8010A768[][10];
 
-extern s32 fn_80042D68(void* task, s32 index, s32 value);
-extern s32 fn_80042DA8(void* task, s32 index, s32 value);
 extern void fn_8000FE08(s32 id, s32 arg1, s32 arg2);
 
 typedef struct OrderSlot {
@@ -203,9 +202,6 @@ extern TextModel lbl_80366B18[];
 extern SpaniSlot lbl_80371C30[];
 extern SpaniTask* lbl_803CC1B8;
 extern u8 lbl_800EFBA4[16];
-extern void transferStatsToInMemRoster(u8 team);
-extern void sndFXRelated(u16 id);
-extern s32 fn_80042598(u8 team, s32 charId);
 extern struct SpaniDesc lbl_801000A8[];
 extern struct SpaniDesc lbl_801041C8[];
 extern struct SpaniDesc lbl_80107688[];
