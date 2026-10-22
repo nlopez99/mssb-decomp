@@ -974,12 +974,12 @@ u32 fn_8000CEF0(AnimFile* file, s32 idx, u32 frame, s32 skip, u32* dst) {
     return TRUE;
 }
 
-// Differs: saved-register numbers throughout, and src + (size + 4) is computed as
-// (size + src) + 4; inlining that sum into its memcpy fixed the order but not the registers.
+// Differs: saved-register numbers only (p and end swapped, and case 3's pointers);
+// declaration orders tried.
 // .text:0x8000CC4C size:0x2A4
 void fn_8000CC4C(AnimFile* file, AnimFrame* f, u8* src, u32 offset, u32 size) {
     u32* p = (u32*)(f + 1);
-    u8* srcEnd = src + (size + 4);
+    u8* srcEnd = src + 4 + size;
     u32 end = offset + size;
     s32 i;
     u32 lim;
@@ -1067,7 +1067,7 @@ void fn_8000CC4C(AnimFile* file, AnimFrame* f, u8* src, u32 offset, u32 size) {
             break;
         }
         next = p;
-        words = f->size >> 2;
+        words = (u32)f->size >> 2;
         stride = file->_05;
         switch (((u16*)p)[0] & 0x7FFF) {
         case 0:
