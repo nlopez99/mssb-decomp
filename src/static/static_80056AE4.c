@@ -1305,8 +1305,6 @@ void fn_8005EC88(SpaniTask* task, s32 team) {
 }
 
 // .text:0x8005E9D8 size:0x2B0
-// 98.49%: registers only around the order slot and team * 9 in the
-// lock-0 branch.
 void fn_8005E9D8(SpaniTask* task, s32 team) {
     u8 cur;
     s8 slot;
@@ -1320,7 +1318,7 @@ void fn_8005E9D8(SpaniTask* task, s32 team) {
     } else if (lbl_803297E0._CF3C[team] != 0) {
         if (isLockState(lbl_803C66B0.rows[9].port[team], 0)) {
             cur = lbl_803297E0._CF3E[team];
-            slot = lbl_80354720[team][cur]._2;
+            slot = lbl_80354720[team][lbl_803297E0._CF3E[team]]._2;
             if (lbl_803297E0._CF52[team] == 0) {
                 lbl_80371C30[task->_14 + 0x1C + cur + team * 9].obj->_5C = 0xA0000;
                 lbl_80371C30[task->_14 + 0x1C + cur + team * 9].obj->_68 = 0;
