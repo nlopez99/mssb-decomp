@@ -250,14 +250,12 @@ void capApplicationFunction(void) {
 }
 
 // .text:0x800415A8 size:0xAD4
-// 99.94%: registers only, in the last pass (the target keeps i in r29 and j in r28);
-// declaration orders and other loop counters change nothing
 void fn_800415A8(void) {
     u8 start = 0;
     s32 i;
     s32 k;
     s32 m;
-    s16 j;
+    s16 j = 0;
     s16 id;
     u8 found;
     u8 count = 0;
