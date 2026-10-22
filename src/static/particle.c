@@ -230,7 +230,7 @@ typedef struct ArcParams {
 
 // What fn_80028628's callers pass
 typedef struct RibbonParams {
-    /* 0x00 */ s32 file;
+    /* 0x00 */ void* file;
     /* 0x04 */ s32 _04;
     /* 0x08 */ s32 _08;
     /* 0x0C */ s32 _0C;
@@ -268,7 +268,7 @@ typedef struct RibbonShape {
 
 typedef struct RibbonEmitter {
     /* 0x00 */ u8 _00[0x10];
-    /* 0x10 */ s32 file;
+    /* 0x10 */ TexFile* file;
     /* 0x14 */ u8 _14[0x18 - 0x14];
     /* 0x18 */ f32 _18[12];
     /* 0x48 */ void* _48;
@@ -301,7 +301,7 @@ typedef struct RibbonParticle {
     /* 0x4C */ f32 drag;
     /* 0x50 */ s16 _50;
     /* 0x52 */ s16 _52;
-    /* 0x54 */ s16 _54;
+    /* 0x54 */ u16 _54;
     /* 0x56 */ u8 _56;
     /* 0x57 */ u8 links;
     /* 0x58 */ u8 head;
@@ -644,7 +644,9 @@ static Mtx lbl_8017FFA8;
 static Mtx lbl_8017FF78;
 static u8 lbl_8017FD6C[0x20C];
 static f32 lbl_8017ED68[0x401];
-static u8 lbl_8017EC00[0x168];
+static Vec lbl_8017EC90[18];
+static u32 lbl_8017EC48[18];
+static f32 lbl_8017EC00[18];
 
 static inline void initParticles(void)
 {
@@ -3466,6 +3468,26 @@ BOOL fn_80028F48(void* arg)
     return e->count == 0;
 }
 
+static inline void pushRibbon(RibbonParticle* p, Vec* pos)
+{
+    RibbonLink* l;
+
+    p->head = (p->head + 1) % 4;
+    if (p->links != 0) {
+        l = p->tail;
+        p->linkHead = (p->linkHead + 1) % 7;
+        while (l->prev != (RibbonLink*)p) {
+            memcpy(&l->pts[p->linkHead], &l->prev->pts[p->linkHead], sizeof(Vec));
+            l = l->prev;
+        }
+        memcpy(&l->pts[p->linkHead], &p->pts[p->head], sizeof(Vec));
+    }
+    memcpy(&p->pts[p->head], pos, sizeof(Vec));
+    if (p->filled < p->len) {
+        p->filled++;
+    }
+}
+
 // .text:0x80028628 size:0x920
 void fn_80028628(Vec* start, Vec* end, RibbonParams* params, RibbonShape* shape, u32* colors, void* arg5, BOOL flash)
 {
@@ -3613,20 +3635,7 @@ void fn_80028628(Vec* start, Vec* end, RibbonParams* params, RibbonShape* shape,
             memset(l->pts, 0, sizeof(l->pts));
         }
         p->tail = l;
-        p->head = (p->head + 1) % 4;
-        if (p->links != 0) {
-            l = p->tail;
-            p->linkHead = (p->linkHead + 1) % 7;
-            while (l->prev != (RibbonLink*)p) {
-                memcpy(&l->pts[p->linkHead], &l->prev->pts[p->linkHead], sizeof(Vec));
-                l = l->prev;
-            }
-            memcpy(&l->pts[p->linkHead], &p->pts[p->head], sizeof(Vec));
-        }
-        memcpy(&p->pts[p->head], &pos, sizeof(Vec));
-        if (p->filled < p->len) {
-            p->filled++;
-        }
+        pushRibbon(p, &pos);
         rec++;
         p->_54 = params->_04;
         p = (RibbonParticle*)p->tail->next;
@@ -3670,6 +3679,192 @@ void fn_8002852C(void)
     lbl_803C5090._1B = task->g;
     lbl_803C5090._1C = task->b;
     lbl_803C5090._17 = task->_21 * task->timer / task->duration;
+}
+
+// .text:0x80027968 size:0xBC4
+// 99.58%: registers only: the target keeps spawn in r30 and alive in r21, which shifts the
+// identity matrix copy; declaration orders found so far reach r30 for neither.
+BOOL fn_80027968(void* arg)
+{
+    RibbonEmitter* e = arg;
+    Mtx m = { { 1.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 0.0f } };
+    s32 n;
+    Vec pos;
+    RibbonParticle* p;
+    Vec v;
+    s32 alive;
+    BOOL spawn;
+    RibbonLink* l;
+    Vec* pt;
+    s32 c;
+    u32* col;
+    s32 i;
+    f32* wid;
+    BOOL vertical;
+    s32 k;
+    f32 w;
+    Emitter* em;
+    f32 half;
+    union {
+        u32 rgba;
+        u8 c[4];
+    } color;
+
+    alive = 0;
+    i = 0;
+    spawn = FALSE;
+    p = (RibbonParticle*)((Emitter*)e)->particles;
+    if (e->_48 != NULL) {
+        if (e->_4D-- == 0) {
+            spawn = TRUE;
+            e->_4D = e->_4C;
+            e->_4F = (e->_4F + 1) % e->_4E;
+        }
+    }
+    GXSetCullMode(GX_CULL_NONE);
+    GXLoadPosMtxImm(m, GX_PNMTX0);
+    GXSetCurrentMtx(GX_PNMTX0);
+    GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_ONE, GX_LO_CLEAR);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP1, GX_COLOR0A0);
+    if (e->file != NULL) {
+        fn_80033B58(e->file, p->_54, GX_CLAMP, GX_CLAMP);
+    }
+    do {
+        if (p->_50 > 0) {
+            if (lbl_80366158._28 == 0) {
+                PSVECScale(&p->vel, p->grav, &pos);
+                PSVECAdd(&p->vel, &pos, &p->vel);
+                p->vel.y += p->drag;
+            }
+            PSMTXMultVec(lbl_8017FFE0, &p->vel, &v);
+            v.x -= lbl_8017FFE0[0][3];
+            v.y -= lbl_8017FFE0[1][3];
+            v.z -= lbl_8017FFE0[2][3];
+            vertical = fabs(v.x) < fabs(v.y);
+            pt = lbl_8017EC90;
+            col = lbl_8017EC48;
+            wid = lbl_8017EC00;
+            color.rgba = p->rgba;
+            n = p->filled;
+            w = p->_52 / 100.0f * 0.5f * e->_54 / 100.0f;
+            while (n-- != 0) {
+                if (n < p->filled && n >= 0) {
+                    if (n < 4) {
+                        memcpy(&pos, &p->pts[(p->head - n + 4) % 4], sizeof(Vec));
+                    } else {
+                        k = n - 4;
+                        l = p->next;
+                        while (k >= 7) {
+                            l = l->next;
+                            k -= 7;
+                        }
+                        memcpy(&pos, &l->pts[(p->linkHead - k + 7) % 7], sizeof(Vec));
+                    }
+                }
+                PSMTXMultVec(lbl_8017FFE0, &pos, pt);
+                pt++;
+                color.c[3] = p->color[3] * (p->filled - 1 - n) / p->filled;
+                *col++ = color.rgba;
+                *wid++ = w * (p->filled - 1 - n) / p->filled;
+            }
+            PSVECAdd(&pos, &p->vel, &pos);
+            PSMTXMultVec(lbl_8017FFE0, &pos, &v);
+            pt = lbl_8017EC90;
+            col = lbl_8017EC48;
+            wid = lbl_8017EC00;
+            GXBegin(GX_TRIANGLESTRIP, GX_VTXFMT0, (p->filled + 1) * 2);
+            if (vertical) {
+                for (k = 0; k < p->filled; k++) {
+                    GXPosition3f32(pt->x - *wid, pt->y, pt->z);
+                    GXColor1u32(*col);
+                    GXTexCoord2f32(0.0f, 0.5f);
+                    GXPosition3f32(pt->x + *wid, pt->y, pt->z);
+                    GXColor1u32(*col);
+                    GXTexCoord2f32(1.0f, 0.5f);
+                    pt++;
+                    wid++;
+                    col++;
+                }
+                GXPosition3f32(v.x - w, v.y, v.z);
+                GXColor1u32(p->rgba);
+                GXTexCoord2f32(0.0f, 0.5f);
+                GXPosition3f32(v.x + w, v.y, v.z);
+                GXColor1u32(p->rgba);
+                GXTexCoord2f32(1.0f, 0.5f);
+            } else {
+                for (k = 0; k < p->filled; k++) {
+                    GXPosition3f32(pt->x, pt->y - *wid, pt->z);
+                    GXColor1u32(*col);
+                    GXTexCoord2f32(0.0f, 0.5f);
+                    GXPosition3f32(pt->x, pt->y + *wid, pt->z);
+                    GXColor1u32(*col);
+                    GXTexCoord2f32(1.0f, 0.5f);
+                    pt++;
+                    wid++;
+                    col++;
+                }
+                GXPosition3f32(v.x, v.y - w, v.z);
+                GXColor1u32(p->rgba);
+                GXTexCoord2f32(0.0f, 0.5f);
+                GXPosition3f32(v.x, v.y + w, v.z);
+                GXColor1u32(p->rgba);
+                GXTexCoord2f32(1.0f, 0.5f);
+            }
+            half = p->_52 / 100.0f * 0.5f;
+            GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+            GXPosition3f32(v.x - half, v.y - half, v.z);
+            GXColor1u32(p->rgba);
+            GXTexCoord2f32(0.0f, 0.0f);
+            GXPosition3f32(v.x - half, v.y + half, v.z);
+            GXColor1u32(p->rgba);
+            GXTexCoord2f32(0.0f, 1.0f);
+            GXPosition3f32(v.x + half, v.y + half, v.z);
+            GXColor1u32(p->rgba);
+            GXTexCoord2f32(1.0f, 1.0f);
+            GXPosition3f32(v.x + half, v.y - half, v.z);
+            GXColor1u32(p->rgba);
+            GXTexCoord2f32(1.0f, 0.0f);
+            if (spawn && e->_4F == i % e->_4E && lbl_80366158._28 == 0) {
+                PSVECScale(&p->vel, -1.0f, &v);
+                color.c[3] = 0;
+                color.c[0] = e->_55 + e->_56 * p->color[0] / 255;
+                color.c[1] = e->_55 + e->_56 * p->color[1] / 255;
+                color.c[2] = e->_55 + e->_56 * p->color[2] / 255;
+                ((EffectParams*)e->_48)->_40 = color.rgba;
+                fn_80030D88(&pos, &v, e->_48, 5);
+                em = fn_800339F0(NULL, 5);
+                if (em != NULL) {
+                    em->state = 0;
+                }
+            }
+            if (lbl_80366158._28 == 0) {
+                for (k = 0; k < e->_50; k++) {
+                    if (pos.x >= e->_18[k * 6 + 0] && pos.y >= e->_18[k * 6 + 1] && pos.z >= e->_18[k * 6 + 2] &&
+                        pos.x <= e->_18[k * 6 + 3] && pos.y <= e->_18[k * 6 + 4] && pos.z <= e->_18[k * 6 + 5]) {
+                        break;
+                    }
+                }
+                if (k < e->_50) {
+                    p->_50 = 0;
+                } else {
+                    pushRibbon(p, &pos);
+                    c = p->color[3] - p->_56;
+                    if (c < 0) {
+                        c = 0;
+                    }
+                    p->color[3] = c;
+                    p->_50--;
+                }
+            }
+            alive++;
+        }
+        i++;
+        p = (RibbonParticle*)p->tail->next;
+    } while (p != NULL);
+    GXLoadPosMtxImm(lbl_8017FFE0, GX_PNMTX0);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    return alive == 0;
 }
 
 // .text:0x80027918 size:0x50
