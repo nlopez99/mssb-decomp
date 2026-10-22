@@ -3,6 +3,21 @@
 #include "stl/math.h"
 
 void GetData(u8 type, void *src, f32 *dst, u8 count, f32 scale);
+void Squad(Quaternion *p, Quaternion *a, Quaternion *b, Quaternion *q, Quaternion *d, f32 t);
+
+// Quaternion keys are s16 fractions of 1/16384, ease values likewise.
+f32 lbl_803CBB48 = 1.0f / 16384.0f;
+f32 lbl_803CBB4C = 1.0f / 16384.0f;
+u8 lbl_803CBB50 = GX_S16;
+u8 lbl_803CBB51 = GX_S16;
+
+static inline f32 sinF(f32 x) {
+    return sin(x);
+}
+
+static inline f32 acosF(f32 x) {
+    return acos(x);
+}
 
 static inline void QuatSlerp(Quaternion *p, Quaternion *q, Quaternion *r, f32 t) {
     f32 cosom;
@@ -14,10 +29,10 @@ static inline void QuatSlerp(Quaternion *p, Quaternion *q, Quaternion *r, f32 t)
     cosom = p->x * q->x + p->y * q->y + p->z * q->z + p->w * q->w;
     if ((1.0f + cosom) > 0.000001f) {
         if ((1.0f - cosom) > 0.000001f) {
-            omega = acos(cosom);
-            sinom = 1.0f / sin(omega);
-            sclp = sinom * sin(omega - t * omega);
-            sclq = sinom * sin(t * omega);
+            omega = acosF(cosom);
+            sinom = 1.0f / sinF(omega);
+            sclp = sinom * sinF(omega - t * omega);
+            sclq = sinom * sinF(t * omega);
         } else {
             sclp = 1.0f - t;
             sclq = t;
@@ -31,8 +46,8 @@ static inline void QuatSlerp(Quaternion *p, Quaternion *q, Quaternion *r, f32 t)
         r->y = q->x;
         r->z = -q->w;
         r->w = q->z;
-        sclp = sin(1.5707964f - 1.5707964f * t);
-        sclq = sin(1.5707964f * t);
+        sclp = sinF(1.5707964f - 1.5707964f * t);
+        sclq = sinF(1.5707964f * t);
         r->x = sclp * p->x + sclq * r->x;
         r->y = sclp * p->y + sclq * r->y;
         r->z = sclp * p->z + sclq * r->z;
@@ -88,6 +103,7 @@ void ANIMBind(struct ANIMPipe *animPipe, Control *control, struct ANIMAnimTrack 
 }
 
 // .text:0x800B7718 size:0x288
+// Waits on DoScaleAnimation and DoTranslationAnimation, still stubs that get inlined.
 void ANIMTick(struct ANIMPipe *animPipe, u8 flag) {
     KeyFrame *currentFrame;
     KeyFrame *nextFrame;
@@ -148,7 +164,91 @@ void ANIMTick(struct ANIMPipe *animPipe, u8 flag) {
 }
 
 // .text:0x800B71C0 size:0x558
-void DoQuatAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFrame *nextFrame) {}
+// Differs: the target compares dt against 0.0f in the other operand order and keeps a
+// second copy of t (f29) for Squad; its string offsets wait on the .rodata before them.
+void DoQuatAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFrame *nextFrame) {
+    u8 type;
+    int stride;
+    u32 offset;
+    u32 mode;
+    f32 t;
+    f32 dt;
+    f32 easeIn;
+    f32 easeOut;
+    f32 sum;
+    f32 a;
+    f32 b;
+    f32 k;
+    f32 speed;
+    Quaternion out;
+    Quaternion cur;
+    Quaternion next;
+    Quaternion curTangent;
+    Quaternion nextTangent;
+
+    type = animPipe->currentTrack->quantizeInfo >> 4;
+    stride = getCompSize(type) * 3;
+    offset = 0;
+    if (animPipe->currentTrack->animType & 2) {
+        offset = getCompSize(type) * 3;
+        if (animPipe->currentTrack->animType & 0x20) {
+            offset += getCompSize(type) * 4;
+        }
+    }
+    GetData(lbl_803CBB50, currentFrame->setting + offset, (f32 *)&cur, 4, lbl_803CBB48);
+    GetData(lbl_803CBB50, nextFrame->setting + offset, (f32 *)&next, 4, lbl_803CBB48);
+    t = getFrameT(animPipe, currentFrame, nextFrame);
+    offset = 0;
+    if (animPipe->currentTrack->animType & 2) {
+        mode = (animPipe->currentTrack->interpolationType >> 2) & 3;
+        if (mode == 2) {
+            offset = stride * 2;
+        }
+        if (mode == 3) {
+            offset = stride * 2 + 4;
+        }
+    }
+    switch ((animPipe->currentTrack->interpolationType >> 4) & 7) {
+    case 5:
+        GetData(lbl_803CBB51, nextFrame->interpolation + offset + 0x10, &easeIn, 1, lbl_803CBB4C);
+        GetData(lbl_803CBB51, currentFrame->interpolation + offset + 0x12, &easeOut, 1, lbl_803CBB4C);
+        a = easeOut;
+        b = easeIn;
+        sum = a + b;
+        if (t != 0.0f && t != 1.0f && sum != 0.0f) {
+            if (sum > 1.0f) {
+                k = 1.0f / sum;
+                a *= k;
+                b *= k;
+                speed = 0.5f - k;
+            } else {
+                speed = 0.5f - 1.0f / sum;
+            }
+            if (t < a) {
+                t = t * (t * (speed / a));
+            } else if (t < 1.0f - b) {
+                t = speed * (2.0f * t - a);
+            } else {
+                t = 1.0f - (1.0f - t) * ((1.0f - t) * (speed / b));
+            }
+        }
+    case 4:
+        GetData(lbl_803CBB50, currentFrame->interpolation + offset + 8, (f32 *)&curTangent, 4, lbl_803CBB48);
+        GetData(lbl_803CBB50, nextFrame->interpolation + offset, (f32 *)&nextTangent, 4, lbl_803CBB48);
+        Squad(&cur, &curTangent, &nextTangent, &next, &out, t);
+        break;
+    case 6:
+        QuatSlerp(&cur, &next, &out, t);
+        break;
+    case 0:
+        out = cur;
+        break;
+    default:
+        OSPanic("animPipe.c", 225, "Unknown pInterpolation pSetting!");
+        break;
+    }
+    CTRLSetQuat(animPipe->control, out.x, out.y, out.z, out.w);
+}
 
 // .text:0x800B6E0C size:0x3B4
 // Differs: the Hermite case's three components are scheduled together where the target
@@ -271,6 +371,8 @@ void GetData(u8 type, void *src, f32 *dst, u8 count, f32 scale) {
 }
 
 // .text:0x800B516C size:0x4A0
+// Differs: the target keeps one more value in a saved float register (f20-f31 against
+// f21-f31), shifting the allocation of the three inlined slerps.
 void Squad(Quaternion *p, Quaternion *a, Quaternion *b, Quaternion *q, Quaternion *d, f32 t) {
     Quaternion pq;
     Quaternion ab;
