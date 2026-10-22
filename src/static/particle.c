@@ -205,67 +205,6 @@ typedef struct ArcParticle {
     /* 0x48 */ u16 fade;
 } ArcParticle;
 
-// What fn_8002CE4C's callers pass
-typedef struct ArcParams {
-    /* 0x00 */ s32 file;
-    /* 0x04 */ s32 tex;
-    /* 0x08 */ s32 count;
-    /* 0x0C */ s32 delay;
-    /* 0x10 */ s32 frames;
-    /* 0x14 */ s32 rise[2];
-    /* 0x1C */ s32 split[2];
-    /* 0x24 */ s32 hold[2];
-    /* 0x2C */ s32 fade[2];
-    /* 0x34 */ s32 size[2];
-    /* 0x3C */ s32 yaw[2];
-    /* 0x44 */ s32 pitch[2];
-    /* 0x4C */ s32 vel[2];
-    /* 0x54 */ s32 angle[2];
-    /* 0x5C */ s32 spin[2];
-    /* 0x64 */ s32 velScale[2];
-    /* 0x6C */ s32 velScaleEnd[2];
-    /* 0x74 */ s32 posScale[2];
-    /* 0x7C */ s32 dist[2];
-} ArcParams; // size: 0x84
-
-// What fn_80028628's callers pass
-typedef struct RibbonParams {
-    /* 0x00 */ void* file;
-    /* 0x04 */ s32 _04;
-    /* 0x08 */ s32 _08;
-    /* 0x0C */ s32 _0C;
-    /* 0x10 */ s32 _10;
-    /* 0x14 */ s32 _14;
-    /* 0x18 */ s32 _18;
-    /* 0x1C */ s32 _1C;
-    /* 0x20 */ s32 _20;
-    /* 0x24 */ s32 len;
-    /* 0x28 */ s32 _28;
-    /* 0x2C */ s32 _2C;
-    /* 0x30 */ s32 _30;
-    /* 0x34 */ s32 _34;
-    /* 0x38 */ s32 _38;
-    /* 0x3C */ s32 _3C;
-    /* 0x40 */ s32 _40;
-    /* 0x44 */ s32 _44;
-} RibbonParams; // size: 0x48
-
-typedef struct RibbonPoint {
-    /* 0x0 */ u16 color;
-    /* 0x2 */ u16 x;
-    /* 0x4 */ u16 y;
-    /* 0x6 */ u16 z;
-} RibbonPoint;
-
-typedef struct RibbonShape {
-    /* 0x0 */ u16 is3D : 1;
-    /* 0x0 */ u16 count : 15;
-    /* 0x2 */ u16 w;
-    /* 0x4 */ u16 h;
-    /* 0x6 */ u16 d;
-    /* 0x8 */ RibbonPoint pts[1];
-} RibbonShape;
-
 typedef struct RibbonEmitter {
     /* 0x00 */ u8 _00[0x10];
     /* 0x10 */ TexFile* file;
@@ -309,23 +248,6 @@ typedef struct RibbonParticle {
     /* 0x5A */ u8 len;
     /* 0x5B */ u8 filled;
 } RibbonParticle;
-
-// What fn_8002DCE4's callers pass
-typedef struct DriftParams {
-    /* 0x00 */ s32 file;
-    /* 0x04 */ s32 tex;
-    /* 0x08 */ s32 count;
-    /* 0x0C */ s32 life;
-    /* 0x10 */ s32 size[2];
-    /* 0x18 */ s32 speed;
-    /* 0x1C */ s32 delay;
-    /* 0x20 */ s32 lifeVar;
-    /* 0x24 */ s32 yaw[2];
-    /* 0x2C */ s32 pitch[2];
-    /* 0x34 */ s32 fadeAge;
-    /* 0x38 */ s32 _38[2];
-    /* 0x40 */ s32 angle[2];
-} DriftParams; // size: 0x48
 
 // The particles fn_800317C4 starts
 typedef struct SwirlParticle {
