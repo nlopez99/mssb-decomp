@@ -1588,6 +1588,10 @@ static inline void drawGlyph(TextBox* box, s32 x, s32 y, u16 u, u16 v, u16 w, u3
     fn_800100A4(x, y, u, v, w, color, font, box->_00);
 }
 
+static inline TextAnim* getModelAnim(TextModel* model) {
+    return &lbl_803C4BE0[model->_66];
+}
+
 // .text:0x800111B4 size:0x24
 void fn_800111B4(RelocTable* table) {
     s32 n = table->count;
@@ -1665,6 +1669,9 @@ void DrawTextOnCondition(s32 group) {
     }
 }
 
+// Differs: register numbers throughout (box in r26, color in r22 in the target) and the stack slots
+// of the spilled narrow/nested/speed/sub/str; the target loads sub and str twice per fetch and
+// reads the substring table as add + lwz 4. Declaration orders and fetch forms did not fix it.
 // .text:0x80010498 size:0xA94
 void DrawText(s32 i) {
     s32 digits[5];
@@ -1854,8 +1861,13 @@ void DrawText(s32 i) {
             case 37:
             case 38:
                 n = code - 15;
+                if (n >= 10) {
+                    n = box->_20[n - 10] + 62;
+                } else {
+                    n = box->_20[n] + 8;
+                }
+                sub = (u16*)lbl_80366B18.fonts[0]->entries[n];
                 nested = TRUE;
-                sub = (u16*)lbl_80366B18.fonts[0]->entries[n >= 10 ? box->_20[n - 10] + 62 : box->_20[n] + 8];
                 break;
             case 45:
             case 46:
@@ -2162,6 +2174,8 @@ void fn_8000FD54(s32 i, s16 a, s16 b, s16 c, s16 d) {
     box->_20[3] = d;
 }
 
+// Differs: registers only; the target keeps c and the digit value in r25 and saves r25-r31
+// (frame 0x30). Declaration orders, c/code types and decode forms did not fix it.
 // .text:0x8000FA9C size:0x2B8
 s32 fn_8000FA9C(s32 i) {
     s32* strings;
@@ -2242,8 +2256,8 @@ s32 fn_8000FA9C(s32 i) {
                 } else {
                     n = box->_20[n] + 8;
                 }
-                nested = TRUE;
                 sub = (u16*)strings[n];
+                nested = TRUE;
                 break;
             case 45:
             case 46:
@@ -2334,8 +2348,8 @@ void fn_8000F8F4(TextModelSet* set) {
     }
 }
 
-// Differs: the target keeps &anim->file (lwzu) in r31 and frame in r30, and computes each
-// box address with the operands of the add swapped; declaration orders reached 99.16%.
+// Differs: each array address (box, anim) takes its base in r3 and offset in r0 in the target,
+// the other way round in the base, so &anim->file is not a lwzu; index helpers did not fix it.
 // .text:0x8000F534 size:0x3C0
 void fn_8000F534(TextModel* model, BOOL active) {
     AnimValues cur;
@@ -2366,7 +2380,7 @@ void fn_8000F534(TextModel* model, BOOL active) {
     }
     lbl_80366B18.boxes[slot->box].state = 2;
     frame = model->_64;
-    anim = &lbl_803C4BE0[model->_66];
+    anim = getModelAnim(model);
     fn_8000CEF0(anim->file, frame, 0, slot->_06, (u32*)&cur);
     x = cur.x;
     y = cur.y;
