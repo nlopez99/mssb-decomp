@@ -17,7 +17,8 @@ typedef struct McardTask {
     } _1A;
     /* 0x1C */ char* fileName;
     /* 0x20 */ u8 status;
-    /* 0x21 */ u8 _21[0xB];
+    /* 0x21 */ u8 _21[7];
+    /* 0x28 */ s32 state2;
     /* 0x2C */ s32 buf;
     /* 0x30 */ u32 size;
     /* 0x34 */ char* name;
@@ -49,6 +50,8 @@ typedef struct McardState {
     /* 0x56 */ u8 _56[0x60 - 0x56];
 } McardState;
 
+typedef u32 (*McardCallback)(s32 buf, u32 size, s32 arg);
+
 typedef struct McardRequest {
     /* 0x00 */ char* name;
     /* 0x04 */ s32 buf;
@@ -57,7 +60,7 @@ typedef struct McardRequest {
     /* 0x0D */ u8 async;
     /* 0x0E */ u8 retries;
     /* 0x0F */ u8 _0F;
-    /* 0x10 */ s32 _10;
+    /* 0x10 */ McardCallback callback;
     /* 0x14 */ s32 _14;
     /* 0x18 */ s32 _18;
 } McardRequest;
@@ -79,7 +82,7 @@ s32 lbl_803CC16C;
 s32 lbl_803CC168;
 s32 lbl_803CC164;
 s32 lbl_803CC160;
-s32 lbl_803CC15C;
+McardCallback lbl_803CC15C;
 s32 lbl_803CC158;
 
 extern CARDMemoryCard lbl_802EF3A0;
@@ -550,7 +553,7 @@ void fn_800AAEE4(struct McardRequest* req, u64 serial) {
     }
     task->_3A = retries;
     lbl_802EF2C0[task->_38] = serial;
-    lbl_803CC15C = req->_10;
+    lbl_803CC15C = req->callback;
     lbl_803CC158 = req->_14;
     lbl_803CC160 = req->_18;
     lbl_803CC1B8->result = 0;
@@ -558,6 +561,129 @@ void fn_800AAEE4(struct McardRequest* req, u64 serial) {
 
 // .text:0x800AAA70 size:0x474
 void fn_800AAA70(void) {
+    McardTask* task = lbl_803CC1B8;
+    u8 chan;
+    u32 result;
+    McardTask* sub;
+
+    switch (task->state2) {
+    case 0:
+        chan = task->_3C;
+        fn_800ACD64(CARDUnmount(chan));
+        switch (CheckSlot(chan)) {
+        case 0:
+            break;
+        case 1:
+            task->state2 = 1;
+            break;
+        case 2:
+            task->state2 = 9;
+            break;
+        }
+        break;
+    case 1:
+        if (Mount(task->_3C, task->_3D) == 0) {
+            task->state2 = 2;
+        }
+        break;
+    case 2:
+        fn_800ACD64(CARDGetResultCode(task->_3C));
+        switch (lbl_803C7838.error) {
+        case 0xF:
+            break;
+        case 1:
+        case 2:
+        case 0x11:
+            task->state2 = 3;
+            break;
+        default:
+            task->state2 = 9;
+            break;
+        }
+        break;
+    case 3:
+        if (Check(task->_3C, task->_3D) == 0) {
+            task->state2 = 4;
+        }
+        break;
+    case 4:
+        fn_800ACD64(CARDGetResultCode(task->_3C));
+        switch (lbl_803C7838.error) {
+        case 0xF:
+            break;
+        case 0x11:
+            task->state2 = 5;
+            break;
+        case 0x10:
+        default:
+            task->state2 = 9;
+            break;
+        }
+        break;
+    case 5:
+        if (lbl_803C7838.error == 0x11) {
+            if (ReadSerial(task->_3C) != CARD_RESULT_BUSY) {
+                if (lbl_803C7838.slots[task->_3C].serial != 0) {
+                    if (lbl_803C7838.slots[task->_3C].serial == lbl_802EF2C0[task->_3C]) {
+                        task->state2 = 6;
+                    } else {
+                        lbl_803C7838.error = 0x10;
+                        task->state2 = 9;
+                    }
+                } else {
+                    lbl_803C7838.error = 0x10;
+                    task->state2 = 9;
+                }
+            }
+        } else {
+            task->state2 = 9;
+        }
+        break;
+    case 6:
+        sub = fn_800B0A5C_insertQueue(fn_800ABBD0, 0xFF);
+        memset(&sub->state, 0, 0x2C);
+        task->state2 = 7;
+        lbl_803CC1B8->result = 0;
+        break;
+    case 7:
+        switch (task->result) {
+        case 0:
+            break;
+        case 1:
+            if (lbl_803CC15C != NULL) {
+                result = lbl_803CC15C(task->buf, task->size, lbl_803CC158);
+                if (result != 0x11) {
+                    lbl_803C7838.error = result;
+                    goto fail;
+                }
+            }
+            task->state2 = 8;
+            break;
+        case 2:
+        fail:
+            task->state2 = 9;
+            break;
+        }
+        break;
+    case 8:
+        fn_800ACD64(CARDUnmount(task->_3C));
+        switch (lbl_803C7838.error) {
+        case 0xF:
+            break;
+        case 0x11:
+            task->state2 = 9;
+            break;
+        case 0x10:
+        default:
+            task->state2 = 9;
+            break;
+        }
+        break;
+    case 9:
+        task->parent->result = 1;
+        fn_800B0A14_removeQueue();
+        break;
+    }
 }
 
 // .text:0x800AA930 size:0x140
@@ -581,7 +707,7 @@ void fn_800AA930(struct McardRequest* req, u64 serial) {
     task->name = lbl_802EF2D0;
     memcpy(task->name, req->name, 0x20);
     lbl_802EF2C0[req->chan] = serial;
-    lbl_803CC15C = req->_10;
+    lbl_803CC15C = req->callback;
     lbl_803CC158 = req->_14;
     lbl_803CC160 = req->_18;
     lbl_803CC1B8->result = 0;
