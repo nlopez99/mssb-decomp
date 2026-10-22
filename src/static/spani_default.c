@@ -3,6 +3,7 @@
 #include "Dolphin/mtx.h"
 #include "static/UnknownHomes_Static.h"
 #include "string.h"
+#include "static/dvdsys.h"
 
 typedef struct SpaniColor {
     /* 0x0 */ u8 r;
@@ -164,7 +165,6 @@ extern void fn_800B21A8(u8 arg0);
 extern void fn_800B24D4(u8 arg0);
 extern void fn_800B27DC(Mtx44 m, s32 arg1);
 extern void DrawTextOnCondition(u8 arg0);
-extern void* ARAMTransfer(void* entry, int arg1, int arg2, u32 aram);
 
 Mtx lbl_800F78E0[4] = {
     { { 1.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 0.0f } },

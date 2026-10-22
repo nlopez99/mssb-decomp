@@ -14,6 +14,8 @@
 #include "game/rep_1D58.h"
 #include "game/rep_1E08.h"
 #include "static/spani_default.h"
+#include "static/static_8005268C.h"
+#include "static/graphic.h"
 
 typedef struct {
     /* 0x00 */ DODisplayLayout base;
@@ -149,11 +151,7 @@ extern int fn_80023F0C(void* src, StadiumTex* dst, s32 srcX, s32 srcY, s32 w, s3
 extern void fn_8003A2C0(void);
 extern void fn_8003AD84(void* tex);
 extern void fn_8003AE5C(u8 arg);
-extern void fn_80052694(s32 idx);
-extern camera_803c639c_s* fn_80052734(s32 idx);
-extern s32 fn_800527BC(void);
 extern void* ARAMTransfer(StadiumAramEntry* entry, int arg1, int arg2, u32 aram);
-extern void fn_800A7D4C(s32, void*);
 extern void fn_800ACFB0(void* data);
 extern void fn_800B2AC8(void* layout);
 extern void fn_800B49E4(void* layout);

@@ -1,4 +1,5 @@
 #include "static/static_8000BA3C.h"
+#include "static/static_8000A0AC.h"
 #include "static/UnknownHomes_Static.h"
 #include "Dolphin/mtx.h"
 #include "math.h"
@@ -20,16 +21,37 @@ typedef struct SpriteVertex {
     /* 0x12 */ s16 v;
 } SpriteVertex; // size: 0x14
 
+typedef struct ShapeParams {
+    /* 0x00 */ Mtx mtx;
+    /* 0x30 */ u8 _30[0x40 - 0x30];
+    /* 0x40 */ f32 radius;
+    /* 0x44 */ f32 _44;
+    /* 0x48 */ u32 color0;
+    /* 0x4C */ u32 color1;
+    /* 0x50 */ s16 _50;
+    /* 0x52 */ s16 _52;
+    /* 0x54 */ u8 _54;
+    /* 0x55 */ u8 _55;
+} ShapeParams;
+
 typedef struct SpriteBuffer {
-    /* 0x00 */ SpriteVertex v[4];
-    /* 0x50 */ u8 _50[0x70 - 0x50];
+    union {
+        /* 0x00 */ SpriteVertex v[4];
+        /* 0x00 */ ShapeParams shape;
+    };
+    /* 0x58 */ u8 _58[0x64 - 0x58];
+    /* 0x64 */ MtxPtr mtx;
+    /* 0x68 */ u32 color;
+    /* 0x6C */ SpriteNest* nest;
     /* 0x70 */ struct TexFile* tex;
     /* 0x74 */ u8 _74[0x78 - 0x74];
     /* 0x78 */ struct SpriteDesc* sprite;
     /* 0x7C */ u16 flag;
     /* 0x7E */ u8 _7E;
-    /* 0x7F */ u8 _7F[0x88 - 0x7F];
-    /* 0x88 */ void* _88;
+    /* 0x7F */ u8 _7F;
+    /* 0x80 */ u8 _80[0x84 - 0x80];
+    /* 0x84 */ u32 (*callback)(struct SpriteBuffer* buf);
+    /* 0x88 */ void (*_88)(struct SpriteBuffer* buf);
     /* 0x8C */ u8 _8C[0x90 - 0x8C];
 } SpriteBuffer; // size: 0x90
 
@@ -37,6 +59,39 @@ extern SpriteBuffer lbl_80366188;
 extern struct TexImage* lbl_803CBBD8;
 
 extern void fn_800B12DC(SpriteVertex* verts, s32 count);
+typedef struct AnimKey {
+    /* 0x0 */ u16 frame;
+    /* 0x2 */ u16 mode;
+    /* 0x4 */ u16 start;
+    /* 0x6 */ u8 _06[0xC - 0x6];
+} AnimKey; // size: 0xC
+
+typedef struct AnimKeyList {
+    /* 0x0 */ u16 count;
+    /* 0x2 */ u16 _02;
+    /* 0x4 */ AnimKey keys[1];
+} AnimKeyList;
+
+typedef struct AnimRecord {
+    /* 0x0 */ u16 link : 1;
+    /* 0x0 */ u16 type : 15;
+    /* 0x2 */ u16 frame;
+    /* 0x4 */ u16 count;
+    /* 0x6 */ u16 offset;
+} AnimRecord;
+
+typedef struct SpriteLayer {
+    /* 0x0 */ u16 count;
+    /* 0x2 */ u16 _02;
+    /* 0x4 */ SpriteDesc entries[1];
+} SpriteLayer;
+
+extern void fn_800B2160(s32 mode);
+extern void fn_800B1188(void);
+extern void fn_800B117C(s32 on);
+extern void fn_800B1388(SpriteBuffer* buf);
+extern void DrawSprite_TexObj(SpriteBuffer* buf, struct TexImage* img);
+extern void fn_800B13C0(Vec* verts, u32* colors, s32 count);
 extern void DrawNullSprite(SpriteVertex* verts, u32 count);
 
 static inline void setVertexPos(SpriteVertex* v, f32* p) {
@@ -248,8 +303,73 @@ void fn_8000E764(f32 angle, f32* out) {
     out[1] = cos(angle);
 }
 
+static inline void MultVecRound(Mtx m, Vec* src, Vec* dst) {
+    s32 x = m[0][0] * src->x + m[0][1] * src->y + m[0][3] * src->z;
+    s32 y = m[1][0] * src->x + m[1][1] * src->y + m[1][3] * src->z;
+    s32 z = m[2][0] * src->x + m[2][1] * src->y + m[2][3] * src->z;
+
+    dst->x = x;
+    dst->y = y;
+    dst->z = z;
+}
+
+// Differs: FPR numbers in the first two points (the target loads the matrix row by row, the
+// build in another order) and the angle and counter registers swapped; declaration orders tried.
 // .text:0x8000E2D4 size:0x490
-void fn_8000E2D4(void) {
+void fn_8000E2D4(SpriteShape* shape, Mtx mtx, ShapeStyle* style) {
+    Vec verts[257];
+    u32 colors[257];
+    Vec center;
+    Vec pt;
+    Vec* v;
+    s32 i;
+    s32 n;
+    s32 step;
+    s16 angle;
+    f32 s;
+    f32 a;
+
+    if (shape->_25_b7 && style->_36 == 0) {
+        return;
+    }
+    v = verts;
+    for (i = 257; i != 0; i--) {
+        v->x = 0.0f;
+        v->y = 0.0f;
+        v->z = 0.0f;
+        v++;
+    }
+    colors[0] = style->_20;
+    angle = 0;
+    center.x = 128 - shape->_14;
+    center.y = 128 - shape->_16;
+    pt.x = 128.0f + center.x;
+    pt.y = 128.0f + center.y;
+    MultVecRound(mtx, &center, &verts[0]);
+    colors[1] = style->_24;
+    step = 0x10000 / style->_34;
+    MultVecRound(mtx, &pt, &verts[1]);
+    n = style->_34;
+    if (n != style->_36) {
+        n = style->_36 + 1;
+    }
+    i = n;
+    do {
+        angle -= step;
+        a = 0.0000958738f * angle;
+        s = sin(a);
+        pt.x = 128.0f * (f32)cos(a) + center.x;
+        pt.y = 128.0f * s + center.y;
+        MultVecRound(mtx, &pt, &verts[i]);
+        colors[i] = style->_24;
+    } while (--i != 0);
+    if (style->_34 == style->_36) {
+        verts[style->_36 + 1].x = verts[1].x;
+        verts[style->_36 + 1].y = verts[1].y;
+        verts[style->_36 + 1].z = verts[1].z;
+        colors[style->_36 + 1] = style->_24;
+    }
+    fn_800B13C0(verts, colors, style->_36 + 2);
 }
 
 // .text:0x8000E030 size:0x2A4
@@ -554,15 +674,220 @@ void fn_8000D8A4(SpriteShape* shape, Mtx mtx, ShapeStyle* style) {
 }
 
 // .text:0x8000D838 size:0x6C
-void fn_8000D838(void) {
+s32 fn_8000D838(u32* time, AnimFile* file, s32 idx, Mtx mtx, s32 flags, u32 color, u16** outKey, TexFile* tex) {
+    SpriteNest nest[30];
+
+    if (file->_06 == 0) {
+        return fn_8000D164(time, file, idx, mtx, flags, color, outKey, tex);
+    }
+    if (((AnimTrack**)file->tracks)[idx + 2]->count & 0x80000000) {
+        nest[0].index = -1;
+        nest[0].layer = 0;
+        return fn_8000BA3C(time, file, idx, mtx, flags, color, outKey, &nest[1]);
+    }
+    return fn_8000C194(time, file, idx, mtx, flags, color, outKey, tex);
 }
 
+// Differs: the schedule of the colour loop and the saved registers that follow from it
+// (statement and declaration orders tried in random batches), and the prologue's load order.
 // .text:0x8000D164 size:0x6D4
-void fn_8000D164(void) {
+s32 fn_8000D164(u32* time, AnimFile* file, s32 idx, Mtx mtx, s32 flags, u32 color, u16** outKey, TexFile* tex) {
+    SpriteVerts verts;
+    Mtx m;
+    InterpPoint pt;
+    u32 dstA[4];
+    u32 dstB[4];
+    u32 dstG[4];
+    u32 dstR[4];
+    u32 srcA[4];
+    u32 srcB[4];
+    u32 srcG[4];
+    u32 srcR[4];
+    u32 t;
+    u16* subKey;
+    s32 i;
+    s32 k;
+    AnimKey* key;
+    u32 start;
+    u32 span;
+    f32 f;
+    s32 j;
+    SpriteLayer** lp;
+    SpriteDesc* e;
+    u32 now;
+    SpriteDesc* next;
+    u32 c;
+    SpriteLayer* layer;
+    AnimKeyList* keys;
+    u32 dt;
+    s32 n;
+    u16 frame;
+    SpritePalette* arg;
+    s32 ret;
+    AnimTrack* track;
+    track = ((AnimTrack**)file->tracks)[idx + 2];
+    keys = (AnimKeyList*)track->frames[0];
+    arg = file->_0C;
+    now = *time;
+    ret = 0;
+    n = track->count;
+    *outKey = NULL;
+    key = &keys->keys[keys->count];
+    for (i = keys->count; i != 0; i--) {
+        key--;
+        if (now >= key->frame << 16) {
+            *outKey = &key->start;
+            ret = key->mode + 1;
+            if (key->mode == 0) {
+                now %= key->frame << 16;
+            } else if (key->mode == 2) {
+                start = **outKey << 16;
+                now = start + (now - start) % ((key->frame << 16) - start);
+            }
+            *time = now;
+            break;
+        }
+    }
+    n--;
+    lbl_80366188._7F = 0;
+    lp = (SpriteLayer**)&track->frames[n];
+    do {
+        layer = *lp--;
+        j = layer->count;
+        k = j;
+        e = &layer->entries[j];
+        next = e - 1;
+        while (k-- != 0) {
+            e--;
+            j--;
+            frame = e->frame;
+            if (now < frame << 16) {
+                next = e;
+                continue;
+            }
+            if (e->_b5) {
+                SpriteDesc* p = e;
+                for (; k != 0; k--) {
+                    p--;
+                    if (!((k != 1) & p->_b5)) {
+                        frame = p->frame;
+                    }
+                }
+            }
+            if (next->type == 0) {
+                next = e;
+            }
+            if (e->type != 0) {
+                dt = now - (e->frame << 16);
+                f = 1.0f;
+                span = (next->frame - e->frame) << 16;
+                if (dt < span) {
+                    f = (f32)dt / (f32)span;
+                }
+                if (e->_b3) {
+                    if (e[-1]._b3 && j != 0) {
+                        if (e[1]._b3) {
+                            interpolatePointsBezier_Vec2s(&pt, (BezierVec2s*)(e - 1), (BezierVec2s*)e, (BezierVec2s*)(e + 1), (BezierVec2s*)(e + 2), 1, f);
+                        } else {
+                            interpolatePointsBezier_Vec2s(&pt, (BezierVec2s*)(e - 1), (BezierVec2s*)(e - 1), (BezierVec2s*)e, (BezierVec2s*)(e + 1), 2, f);
+                        }
+                    } else if (j == 0) {
+                        interpolatePointsBezier_Vec2s(&pt, (BezierVec2s*)e, (BezierVec2s*)(e + 1), (BezierVec2s*)(e + 1), (BezierVec2s*)(e + 2), 0, f);
+                    } else {
+                        interpolatePointsBezier_Vec2s(&pt, (BezierVec2s*)e, (BezierVec2s*)(e + 1), (BezierVec2s*)(e + 2), (BezierVec2s*)(e + 2), 0, f);
+                    }
+                }
+                flags |= fn_8000AF1C(m, &verts, e, next, arg, &pt, f);
+                PSMTXConcat(mtx, m, m);
+                for (i = 0; i < 4; i++) {
+                    c = verts.colors[i];
+                    dstR[i] = color >> 24;
+                    dstG[i] = (color >> 16) & 0xFF;
+                    srcR[i] = c >> 24;
+                    dstB[i] = (color >> 8) & 0xFF;
+                    srcB[i] = (c >> 8) & 0xFF;
+                    srcG[i] = (c >> 16) & 0xFF;
+                    dstA[i] = color & 0xFF;
+                    srcA[i] = c & 0xFF;
+                    dstR[i] = dstR[i] * srcR[i] / 255;
+                    dstG[i] = dstG[i] * srcG[i] / 255;
+                    dstB[i] = dstB[i] * srcB[i] / 255;
+                    dstA[i] = dstA[i] * srcA[i] / 255;
+                    verts.colors[i] = (dstR[i] << 24) | (dstG[i] << 16) | (dstB[i] << 8) | dstA[i];
+                }
+                switch (e->_00_b7) {
+                case 0:
+                    fn_800B2160(1);
+                    break;
+                case 1:
+                    fn_800B2160(2);
+                    break;
+                case 2:
+                    fn_800B2160(3);
+                    break;
+                }
+                switch (e->type) {
+                case 1:
+                case 2:
+                    fn_8000E7BC(e, m, &verts, flags);
+                    t = TRUE;
+                    if (lbl_80366188.callback != NULL && e->_b2) {
+                        t = lbl_80366188.callback(&lbl_80366188);
+                    }
+                    if (t) {
+                        fn_800B1388(&lbl_80366188);
+                    }
+                    break;
+                case 3:
+                    t = TRUE;
+                    if (lbl_80366188.callback != NULL && e->_b2) {
+                        lbl_80366188.sprite = e;
+                        lbl_80366188.tex = NULL;
+                        lbl_80366188.flag = 1;
+                        lbl_80366188._7E = 1;
+                        memcpy(lbl_80366188.shape.mtx, m, sizeof(Mtx));
+                        lbl_80366188.shape.color0 = verts.colors[0];
+                        lbl_80366188.shape.color1 = verts.colors[1];
+                        lbl_80366188.shape._50 = e->_14;
+                        lbl_80366188.shape._52 = e->_16;
+                        lbl_80366188.shape.radius = 128.0f;
+                        lbl_80366188.shape._44 = verts._30;
+                        lbl_80366188.shape._54 = verts._34;
+                        lbl_80366188.shape._55 = verts._36;
+                        t = lbl_80366188.callback(&lbl_80366188);
+                    }
+                    if (t) {
+                        if (verts._30 == 0.0f) {
+                            fn_8000E2D4((SpriteShape*)e, m, (ShapeStyle*)&verts);
+                        } else {
+                            fn_8000DC9C((SpriteShape*)e, m, (ShapeStyle*)&verts);
+                        }
+                    }
+                    break;
+                case 4:
+                    fn_8000EC0C(e, tex, m, &verts, flags);
+                    t = TRUE;
+                    if (lbl_80366188.callback != NULL && e->_b2) {
+                        t = lbl_80366188.callback(&lbl_80366188);
+                    }
+                    if (t) {
+                        DrawSprite_TexObj(&lbl_80366188, lbl_803CBBD8);
+                    }
+                    break;
+                case 5:
+                    t = now - (frame << 16);
+                    fn_8000D164(&t, file, e->index, m, flags, verts.colors[0], &subKey, tex);
+                    break;
+                }
+            }
+            break;
+        }
+    } while (--n != 0);
+    return ret;
 }
 
-// Differs: four fewer saved registers in the target (stw r28-r31, not stmw r27) and the
-// case 2/3 copy loops, whose pointers the target steps down from the end.
+// Differs: four saved registers in the target (stw r28-r31, not stmw r27): case 3 computes its
+// source pointer into p's register there, into a fifth one here.
 // .text:0x8000CEF0 size:0x274
 u32 fn_8000CEF0(AnimFile* file, s32 idx, u32 frame, s32 skip, u32* dst) {
     AnimTrack* track = ((AnimTrack**)file->tracks)[idx + 2];
@@ -571,7 +896,7 @@ u32 fn_8000CEF0(AnimFile* file, s32 idx, u32 frame, s32 skip, u32* dst) {
     u32* next;
     s32 n;
     u32* body;
-    u16 count;
+    s32 count;
     u32* vals;
     u16* ids;
     u16* ent;
@@ -625,12 +950,10 @@ u32 fn_8000CEF0(AnimFile* file, s32 idx, u32 frame, s32 skip, u32* dst) {
         memcpy(body, (u8*)f + 8, f->size - 4);
         memcpy(dst, p, 4);
         count = ((u16*)p)[2];
-        vals = p + ((u16*)p)[3];
-        ids = (u16*)p + count;
+        vals = p + ((u16*)p)[3] - count;
+        ids = (u16*)p;
         while (count-- != 0) {
-            vals--;
-            ids--;
-            body[ids[4]] = *vals;
+            body[ids[count + 4]] = vals[count];
         }
         break;
     case 3:
@@ -651,12 +974,12 @@ u32 fn_8000CEF0(AnimFile* file, s32 idx, u32 frame, s32 skip, u32* dst) {
     return TRUE;
 }
 
-// Differs: saved-register numbers throughout, and src + (size + 4) is computed as
-// (size + src) + 4; inlining that sum into its memcpy fixed the order but not the registers.
+// Differs: saved-register numbers only (p and end swapped, and case 3's pointers);
+// declaration orders tried.
 // .text:0x8000CC4C size:0x2A4
 void fn_8000CC4C(AnimFile* file, AnimFrame* f, u8* src, u32 offset, u32 size) {
     u32* p = (u32*)(f + 1);
-    u8* srcEnd = src + (size + 4);
+    u8* srcEnd = src + 4 + size;
     u32 end = offset + size;
     s32 i;
     u32 lim;
@@ -744,7 +1067,7 @@ void fn_8000CC4C(AnimFile* file, AnimFrame* f, u8* src, u32 offset, u32 size) {
             break;
         }
         next = p;
-        words = f->size >> 2;
+        words = (u32)f->size >> 2;
         stride = file->_05;
         switch (((u16*)p)[0] & 0x7FFF) {
         case 0:
@@ -764,10 +1087,548 @@ void fn_8000CC4C(AnimFile* file, AnimFrame* f, u8* src, u32 offset, u32 size) {
     }
 }
 
+// Differs: like fn_8000BA3C, from which it was written: the colour loop's schedule and the
+// saved registers, plus the prologue's order of spills.
 // .text:0x8000C194 size:0xAB8
-void fn_8000C194(void) {
+s32 fn_8000C194(u32* time, AnimFile* file, s32 idx, Mtx mtx, s32 flags, u32 color, u16** outKey, TexFile* tex) {
+    SpriteKey keys[2];
+    SpriteVerts verts;
+    Mtx m;
+    f32 quad[16];
+    InterpPoint pt;
+    u32 dstA[4];
+    u32 dstB[4];
+    u32 dstG[4];
+    u32 dstR[4];
+    u32 srcA[4];
+    u32 srcB[4];
+    u32 srcG[4];
+    u32 srcR[4];
+    u32* recs[2];
+    u32 t;
+    u16* subKey;
+    AnimTrack* track;
+    AnimKeyList* keys_;
+    AnimKey* key;
+    AnimFrame** lp;
+    s32 ret;
+    AnimFrame* layer;
+    SpriteKey* cur;
+    SpriteKey* next;
+    u32* p;
+    u32* dst;
+    u32* body;
+    u32* vals;
+    u16* ids;
+    u16* ent;
+    u8* src;
+    u32 now;
+    u32 start;
+    u32 dt;
+    u32 span;
+    u32 words;
+    u32 stride;
+    s32 i;
+    s32 k;
+    s32 count;
+    u16 frame;
+    f32 f;
+    u32 c;
+
+    now = *time;
+    track = ((AnimTrack**)file->tracks)[idx + 2];
+    ret = 0;
+    keys_ = (AnimKeyList*)track->frames[0];
+    idx = track->count & 0x7FFFFFFF;
+    *outKey = NULL;
+    key = &keys_->keys[keys_->count];
+    for (i = keys_->count; i != 0; i--) {
+        key--;
+        if (now >= key->frame << 16) {
+            *outKey = &key->start;
+            ret = key->mode + 1;
+            if (key->mode == 0) {
+                now %= key->frame << 16;
+            } else if (key->mode == 2) {
+                start = **outKey << 16;
+                now = start + (now - start) % ((key->frame << 16) - start);
+            }
+            *time = now;
+            break;
+        }
+    }
+    idx--;
+    lp = &track->frames[idx];
+    lbl_80366188._7F = 0;
+    do {
+        layer = *lp--;
+        p = recs[1] = (u32*)(layer + 1);
+        k = layer->count;
+        while (k-- != 0) {
+            recs[0] = p;
+            frame = ((u16*)p)[1];
+            if (now < ((u16*)p)[1] << 16) {
+                recs[1] = p;
+                words = (u32)layer->size >> 2;
+                stride = file->_05;
+                switch (((u16*)p)[0] & 0x7FFF) {
+                case 0:
+                    p += words;
+                    break;
+                case 1:
+                    p += stride;
+                    break;
+                case 2:
+                    p += ((u16*)p)[3];
+                    break;
+                case 3:
+                    p += ((u16*)p)[3];
+                    break;
+                }
+                continue;
+            }
+            if (((AnimRecord*)p)->link) {
+                for (; k != 0; k--) {
+                    words = (u32)layer->size >> 2;
+                    stride = file->_05;
+                    switch (((u16*)p)[0] & 0x7FFF) {
+                    case 0:
+                        p += words;
+                        break;
+                    case 1:
+                        p += stride;
+                        break;
+                    case 2:
+                        p += ((u16*)p)[3];
+                        break;
+                    case 3:
+                        p += ((u16*)p)[3];
+                        break;
+                    }
+                    if (!((k != 1) & ((AnimRecord*)p)->link)) {
+                        frame = ((u16*)p)[1];
+                    }
+                }
+            }
+            for (i = 0; i < 2; i++) {
+                dst = (u32*)&keys[i];
+                switch (((u16*)recs[i])[0] & 0x7FFF) {
+                case 0:
+                    memset(dst, 0, file->_05 * 4);
+                    memcpy(dst, layer + 1, layer->size);
+                    break;
+                case 1:
+                    memcpy(dst, recs[i], file->_05 * 4);
+                    break;
+                case 2:
+                    memset(dst, 0, file->_05 * 4);
+                    body = dst + 1;
+                    memcpy(body, (u8*)layer + 8, layer->size - 4);
+                    memcpy(dst, recs[i], 4);
+                    count = ((u16*)recs[i])[2];
+                    vals = recs[i] + ((u16*)recs[i])[3] - count;
+                    ids = (u16*)recs[i];
+                    while (count-- != 0) {
+                        body[ids[count + 4]] = vals[count];
+                    }
+                    break;
+                case 3:
+                    memset(dst, 0, file->_05 * 4);
+                    body = dst + 1;
+                    memcpy(body, (u8*)layer + 8, layer->size - 4);
+                    memcpy(dst, recs[i], 4);
+                    count = ((u16*)recs[i])[2];
+                    ent = (u16*)(recs[i] + 2);
+                    src = (u8*)recs[i] + count * 4 + 8;
+                    while (count-- != 0) {
+                        memcpy((u8*)body + ent[0], src, ent[1]);
+                        src += ent[1];
+                        ent += 2;
+                    }
+                    break;
+                }
+            }
+            cur = &keys[0];
+            if (keys[1].type == 0) {
+                next = cur;
+            } else {
+                next = &keys[1];
+            }
+            if (keys[0].type != 0) {
+                dt = now - (keys[0].frame << 16);
+                f = 1.0f;
+                span = (next->frame - keys[0].frame) << 16;
+                if (dt < span) {
+                    f = (f32)dt / (f32)span;
+                }
+                if (keys[0]._08_b4) {
+                    fn_8000A0AC(&pt, (BezierKey*)cur, (BezierKey*)next, f);
+                }
+                flags |= fn_8000A3EC(m, &verts, cur, next, &pt, f, next->z);
+                PSMTXConcat(mtx, m, m);
+                if (cur->_09_b7) {
+                    fn_800B1188();
+                }
+                fn_800B117C(cur->_08_b0);
+                if (cur->_08_b0) {
+                    Mtx tmp = { 0 };
+
+                    f = -m[2][3] / 1280.0f;
+                    tmp[0][0] = tmp[1][1] = tmp[2][2] = f;
+                    tmp[2][3] = m[2][3];
+                    PSMTXInverse(tmp, tmp);
+                    PSMTXConcat(tmp, m, m);
+                    tmp[0][0] = tmp[1][1] = tmp[2][2] = 1.0f / 1280.0f;
+                    tmp[2][3] = -1.0f;
+                    PSMTXConcat(tmp, m, m);
+                }
+                for (i = 0; i < 4; i++) {
+                    c = verts.colors[i];
+                    dstR[i] = color >> 24;
+                    dstG[i] = (color >> 16) & 0xFF;
+                    srcR[i] = c >> 24;
+                    dstB[i] = (color >> 8) & 0xFF;
+                    srcB[i] = (c >> 8) & 0xFF;
+                    srcG[i] = (c >> 16) & 0xFF;
+                    dstA[i] = color & 0xFF;
+                    srcA[i] = c & 0xFF;
+                    dstR[i] = dstR[i] * srcR[i] / 255;
+                    dstG[i] = dstG[i] * srcG[i] / 255;
+                    dstB[i] = dstB[i] * srcB[i] / 255;
+                    dstA[i] = dstA[i] * srcA[i] / 255;
+                    verts.colors[i] = (dstR[i] << 24) | (dstG[i] << 16) | (dstB[i] << 8) | dstA[i];
+                }
+                if (keys[0].type != 3) {
+                    switch (keys[0].blend) {
+                    case 0:
+                        fn_800B2160(1);
+                        if (keys[0].type != 3 && cur->_09_b7) {
+                            fn_800B1188();
+                        }
+                        break;
+                    case 1:
+                        fn_800B2160(2);
+                        break;
+                    case 2:
+                        fn_800B2160(3);
+                        break;
+                    }
+                }
+                switch (keys[0].type) {
+                case 1:
+                    quad[0] = 0.0f;
+                    quad[1] = 0.0f;
+                    quad[6] = 256.0f;
+                    quad[7] = 256.0f;
+                    quad[2] = 256.0f;
+                    quad[3] = 0.0f;
+                    quad[4] = 0.0f;
+                    quad[5] = 256.0f;
+                    AddVec2iToQuad(quad, m, verts.offsets);
+                    lbl_80366188._7E = 0;
+                    lbl_80366188.v[0].x = quad[0];
+                    lbl_80366188.v[0].y = quad[1];
+                    lbl_80366188.v[0].z = quad[2];
+                    lbl_80366188.v[1].x = quad[4];
+                    lbl_80366188.v[1].y = quad[5];
+                    lbl_80366188.v[1].z = quad[6];
+                    lbl_80366188.v[2].x = quad[12];
+                    lbl_80366188.v[2].y = quad[13];
+                    lbl_80366188.v[2].z = quad[14];
+                    lbl_80366188.v[3].x = quad[8];
+                    lbl_80366188.v[3].y = quad[9];
+                    lbl_80366188.v[3].z = quad[10];
+                    lbl_80366188.flag = flags | cur->_08_b5;
+                    lbl_80366188.v[0].color = verts.colors[0];
+                    lbl_80366188.v[1].color = verts.colors[3];
+                    lbl_80366188.v[2].color = verts.colors[2];
+                    lbl_80366188.v[3].color = verts.colors[1];
+                    t = TRUE;
+                    if (cur->_08_b3 && lbl_80366188.callback != NULL) {
+                        t = lbl_80366188.callback(&lbl_80366188);
+                    }
+                    if (t) {
+                        fn_800B1388(&lbl_80366188);
+                    }
+                    break;
+                case 2:
+                    t = TRUE;
+                    if (cur->_08_b3 && lbl_80366188.callback != NULL) {
+                        lbl_80366188.tex = NULL;
+                        lbl_80366188.flag = 1;
+                        lbl_80366188._7E = 1;
+                        memcpy(lbl_80366188.shape.mtx, m, sizeof(Mtx));
+                        lbl_80366188.shape.color0 = verts.colors[0];
+                        lbl_80366188.shape.color1 = verts.colors[1];
+                        lbl_80366188.shape._50 = cur->_10;
+                        lbl_80366188.shape._52 = cur->_12;
+                        lbl_80366188.shape.radius = 128.0f;
+                        lbl_80366188.shape._44 = verts._30;
+                        lbl_80366188.shape._54 = verts._34;
+                        lbl_80366188.shape._55 = verts._36;
+                        t = lbl_80366188.callback(&lbl_80366188);
+                    }
+                    if (t) {
+                        if (verts._30 == 0.0f) {
+                            fn_8000E030((SpriteShape*)cur, m, (ShapeStyle*)&verts);
+                        } else {
+                            fn_8000D8A4((SpriteShape*)cur, m, (ShapeStyle*)&verts);
+                        }
+                    }
+                    break;
+                case 3:
+                    t = now - (frame << 16);
+                    fn_8000C194(&t, file, cur->index, m, flags, verts.colors[0], &subKey, tex);
+                    break;
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                    SetSpriteRect((SpriteRect*)cur, tex, m, &verts, flags);
+                    t = TRUE;
+                    if (cur->_08_b3 && lbl_80366188.callback != NULL) {
+                        t = lbl_80366188.callback(&lbl_80366188);
+                    }
+                    if (t) {
+                        DrawSprite_TexObj(&lbl_80366188, lbl_803CBBD8);
+                    }
+                    break;
+                }
+            }
+            fn_800B117C(0);
+            break;
+        }
+    } while (--idx != 0);
+    return ret;
 }
 
+// Differs: the schedule of the colour loop and the saved registers that follow from it, and
+// case 3's source pointer, which the build computes from the entry pointer (rec + 8).
 // .text:0x8000BA3C size:0x758
-void fn_8000BA3C(void) {
+s32 fn_8000BA3C(u32* time, AnimFile* file, s32 idx, Mtx mtx, s32 flags, u32 color, u16** outKey, SpriteNest* nest) {
+    SpriteKey keys[2];
+    SpriteVerts verts;
+    Mtx m;
+    InterpPoint pt;
+    u32 dstA[4];
+    u32 dstB[4];
+    u32 dstG[4];
+    u32 dstR[4];
+    u32 srcA[4];
+    u32 srcB[4];
+    u32 srcG[4];
+    u32 srcR[4];
+    u32* recs[2];
+    u32 t;
+    u16* subKey;
+    s32 ret;
+    AnimTrack* track;
+    AnimKeyList* keys_;
+    AnimKey* key;
+    AnimFrame** lp;
+    AnimFrame* layer;
+    SpriteKey* cur;
+    SpriteKey* next;
+    u32* p;
+    u32* dst;
+    u32* body;
+    u32* vals;
+    u16* ids;
+    u16* ent;
+    u8* src;
+    u32 now;
+    u32 start;
+    u32 dt;
+    u32 span;
+    u32 words;
+    u32 stride;
+    s32 i;
+    s32 k;
+    s32 count;
+    u16 frame;
+    f32 f;
+    u32 c;
+
+    if (nest != NULL) {
+        nest->index = idx;
+    }
+    now = *time;
+    track = ((AnimTrack**)file->tracks)[idx + 2];
+    ret = 0;
+    keys_ = (AnimKeyList*)track->frames[0];
+    idx = track->count & 0x7FFFFFFF;
+    *outKey = NULL;
+    key = &keys_->keys[keys_->count];
+    for (i = keys_->count; i != 0; i--) {
+        key--;
+        if (now >= key->frame << 16) {
+            *outKey = &key->start;
+            ret = key->mode + 1;
+            if (key->mode == 0) {
+                now %= key->frame << 16;
+            } else if (key->mode == 2) {
+                start = **outKey << 16;
+                now = start + (now - start) % ((key->frame << 16) - start);
+            }
+            *time = now;
+            break;
+        }
+    }
+    idx--;
+    lp = &track->frames[idx];
+    lbl_80366188._7F = 0;
+    if (nest != NULL) {
+        nest->layer = 0;
+    }
+    do {
+        layer = *lp--;
+        p = recs[1] = (u32*)(layer + 1);
+        k = layer->count;
+        while (k-- != 0) {
+            recs[0] = p;
+            frame = ((u16*)p)[1];
+            if (now < ((u16*)p)[1] << 16) {
+                recs[1] = p;
+                words = (u32)layer->size >> 2;
+                stride = file->_05;
+                switch (((u16*)p)[0] & 0x7FFF) {
+                case 0:
+                    p += words;
+                    break;
+                case 1:
+                    p += stride;
+                    break;
+                case 2:
+                    p += ((u16*)p)[3];
+                    break;
+                case 3:
+                    p += ((u16*)p)[3];
+                    break;
+                }
+                continue;
+            }
+            if (((AnimRecord*)p)->link) {
+                for (; k != 0; k--) {
+                    words = (u32)layer->size >> 2;
+                    stride = file->_05;
+                    switch (((u16*)p)[0] & 0x7FFF) {
+                    case 0:
+                        p += words;
+                        break;
+                    case 1:
+                        p += stride;
+                        break;
+                    case 2:
+                        p += ((u16*)p)[3];
+                        break;
+                    case 3:
+                        p += ((u16*)p)[3];
+                        break;
+                    }
+                    if (!((k != 1) & ((AnimRecord*)p)->link)) {
+                        frame = ((u16*)p)[1];
+                    }
+                }
+            }
+            for (i = 0; i < 2; i++) {
+                dst = (u32*)&keys[i];
+                switch (((u16*)recs[i])[0] & 0x7FFF) {
+                case 0:
+                    memset(dst, 0, file->_05 * 4);
+                    memcpy(dst, layer + 1, layer->size);
+                    break;
+                case 1:
+                    memcpy(dst, recs[i], file->_05 * 4);
+                    break;
+                case 2:
+                    memset(dst, 0, file->_05 * 4);
+                    body = dst + 1;
+                    memcpy(body, (u8*)layer + 8, layer->size - 4);
+                    memcpy(dst, recs[i], 4);
+                    count = ((u16*)recs[i])[2];
+                    vals = recs[i] + ((u16*)recs[i])[3] - count;
+                    ids = (u16*)recs[i];
+                    while (count-- != 0) {
+                        body[ids[count + 4]] = vals[count];
+                    }
+                    break;
+                case 3:
+                    memset(dst, 0, file->_05 * 4);
+                    body = dst + 1;
+                    memcpy(body, (u8*)layer + 8, layer->size - 4);
+                    memcpy(dst, recs[i], 4);
+                    count = ((u16*)recs[i])[2];
+                    ent = (u16*)(recs[i] + 2);
+                    src = (u8*)recs[i] + count * 4 + 8;
+                    while (count-- != 0) {
+                        memcpy((u8*)body + ent[0], src, ent[1]);
+                        src += ent[1];
+                        ent += 2;
+                    }
+                    break;
+                }
+            }
+            cur = &keys[0];
+            if (keys[1].type == 0) {
+                next = cur;
+            } else {
+                next = &keys[1];
+            }
+            if (keys[0].type != 0) {
+                dt = now - (keys[0].frame << 16);
+                f = 1.0f;
+                span = (next->frame - keys[0].frame) << 16;
+                if (dt < span) {
+                    f = (f32)dt / (f32)span;
+                }
+                if (keys[0]._08_b4) {
+                    fn_8000A0AC(&pt, (BezierKey*)cur, (BezierKey*)next, f);
+                }
+                flags |= fn_8000A3EC(m, &verts, cur, next, &pt, f, next->z);
+                PSMTXConcat(mtx, m, m);
+                for (i = 0; i < 4; i++) {
+                    c = verts.colors[i];
+                    dstR[i] = color >> 24;
+                    dstG[i] = (color >> 16) & 0xFF;
+                    srcR[i] = c >> 24;
+                    dstB[i] = (color >> 8) & 0xFF;
+                    srcB[i] = (c >> 8) & 0xFF;
+                    srcG[i] = (c >> 16) & 0xFF;
+                    dstA[i] = color & 0xFF;
+                    srcA[i] = c & 0xFF;
+                    dstR[i] = dstR[i] * srcR[i] / 255;
+                    dstG[i] = dstG[i] * srcG[i] / 255;
+                    dstB[i] = dstB[i] * srcB[i] / 255;
+                    dstA[i] = dstA[i] * srcA[i] / 255;
+                    verts.colors[i] = (dstR[i] << 24) | (dstG[i] << 16) | (dstB[i] << 8) | dstA[i];
+                }
+                switch (keys[0].type) {
+                case 2:
+                    break;
+                case 1:
+                case 3:
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                    if (nest != NULL && lbl_80366188._88 != NULL) {
+                        lbl_80366188.nest = nest;
+                        lbl_80366188.mtx = m;
+                        lbl_80366188.color = verts.colors[0];
+                        lbl_80366188._88(&lbl_80366188);
+                    }
+                    if (keys[0].type == 3) {
+                        t = now - (frame << 16);
+                        fn_8000BA3C(&t, file, keys[0].index, m, flags, verts.colors[0], &subKey, nest + 1);
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        if (nest != NULL) {
+            nest->layer++;
+        }
+    } while (--idx != 0);
+    return ret;
 }

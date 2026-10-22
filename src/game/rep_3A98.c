@@ -8,6 +8,7 @@
 #include "game/rep_540.h"
 #include "game/rep_AC8.h"
 #include "game/rep_1BC8.h"
+#include "static/model.h"
 
 // .data of rep_1B20
 extern s16 lbl_3_data_FC1C[2];
@@ -28,9 +29,6 @@ extern struct {
     /* 0x9C */ u8 _9C;
 } lbl_3_common_bss_32724;
 
-extern void fn_80011BE4(int arg);
-extern BOOL fn_8001594C(int team);
-extern BOOL fn_80014D4C(s16 charID);
 
 // .text outside every unit
 extern void fn_3_6B870(void);

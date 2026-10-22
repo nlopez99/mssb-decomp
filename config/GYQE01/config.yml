@@ -8,6 +8,19 @@ splits: config/GYQE01/splits.txt
 block_relocations:
 # Image data in static_8003A2EC's lbl_800F7B40 that looks like a pointer
 - source: 0x800F940C
+# Font tables in static_8000F150's .data whose first word looks like a pointer
+- source: 0x800ECF40
+- source: 0x800ED2A0
+- source: 0x800ED4E0
+- source: 0x800ED940
+- source: 0x800EDE40
+- source: 0x800EDF60
+- source: 0x800EE020
+- source: 0x800EE100
+- source: 0x800EE220
+- source: 0x800EE340
+- source: 0x800EE420
+- source: 0x800EE500
 
 modules:
 - object: orig/GYQE01/files/game.rel

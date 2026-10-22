@@ -11,6 +11,7 @@
 #include "stdlib.h"
 #include "string.h"
 #include "menus/rep_08E8.h"
+#include "static/static_80062578.h"
 
 typedef void (*Obj0B08Fn)(struct Obj0B08* obj);
 
@@ -194,7 +195,6 @@ extern struct {
 } *lbl_2_bss_1A824C;
 
 extern void fn_800BD2CC(s32 arg0, GXColor color);
-extern s32 fn_80062890(s32 id);
 extern void fn_800B0A14_removeQueue(void);
 
 // Points to starMissionCompletionTracker

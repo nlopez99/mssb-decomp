@@ -15,6 +15,9 @@
 #include "Dolphin/gx.h"
 #include "string.h"
 #include "static/static_80021188.h"
+#include "static/model.h"
+#include "static/static_8005268C.h"
+#include "static/static_80062BE4.h"
 
 typedef struct {
     /* 0x00 */ u8 _00[0x20];
@@ -185,8 +188,6 @@ extern struct {
 } lbl_3_common_bss_32724;
 
 extern f32 fn_800B4A94(UnkModelSet3310* model);
-extern void fn_8001D0D0(s32 id, f32 scale);
-extern void fn_8001D110(s32 id, f32 x, f32 y, f32 z);
 extern void fn_800BDC88(UnkActorTable3310* actors, u16 first, u16 last, void* model, void* anim, s32 arg5);
 extern void fn_800BD548(UnkActor3310* actor, s32 count, ...);
 
@@ -214,14 +215,11 @@ extern void* lbl_803CC1B8;
 extern void fn_80034CEC(UnkTask3310* task);
 extern void fn_80034E20(UnkTask3310* task, void* desc);
 extern void fn_800B0A14_removeQueue(void);
-extern void fn_80062C24(Vec* pos);
 extern UnkActorTable3310* ActorObjectInitTable(u16 count);
 extern void fn_80025C58(void* anim, UnkActor3310* actor);
-extern void fn_80011B64(s32 i);
 extern void fn_800B4CDC(UnkModelSet3310* model);
 extern void fn_800B4278(UnkModelSet3310* model);
 extern void fn_800B993C(void);
-extern s32 fn_8005268C(void);
 extern void fn_80033B58(void* texture, s32 index, s32, s32);
 extern int fn_80024DB0(UnkAnimState3310* state);
 extern void fn_80024FA4(UnkActor3310* actor, void* anim, UnkAnimState3310* state, s32 arg3);

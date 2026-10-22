@@ -11,6 +11,7 @@
 #include "Dolphin/rand.h"
 #include "static/UnknownHomes_Static.h"
 #include "string.h"
+#include "static/static_8005268C.h"
 
 typedef struct {
     /* 0x00 */ u8 _00[0xEC];
@@ -290,8 +291,6 @@ extern void fn_800B1468(Vec* corners, u32 color, TexInfo3880* tex);
 extern void fn_80030D88(Vec* pos, Vec* dir, UnkBurst3880* burst, s32 n);
 extern void fn_8002F5F4(Vec* pos, Vec* dir, UnkSpark3880* spark);
 extern void fn_80030470(Vec* pos, Vec* dir, Vec* back, UnkBurst3880* burst, s32 n);
-extern s32 fn_8005268C(void);
-extern camera_803c639c_s* fn_80052734(s32 index);
 extern Particle3880* fn_80031F34(Particle3880* particles, s32 count);
 extern void fn_80033794(void* particles);
 extern void fn_80033B58(void* texture, s32 index, s32, s32);

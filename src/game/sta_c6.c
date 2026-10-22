@@ -13,6 +13,7 @@
 #include "musyx/musyx.h"
 #include "string.h"
 #include "static/static_80021188.h"
+#include "static/static_8005268C.h"
 
 typedef struct {
     /* 0x00 */ void* _00;
@@ -294,8 +295,6 @@ extern f32 fn_800B4C40(StaC6Actor* actor);
 extern void fn_800B4CA0(StaC6Actor* actor, f32 frame);
 extern u8 fn_800B3C04(s32 arg0, StaC6Actor* actor, Mtx camera);
 extern void AnimateActorBones(StaC6Actor* actor);
-extern s32 fn_8005268C(void);
-extern camera_803c639c_s* fn_80052734(s32 idx);
 
 // MWCC lays out .bss statics in reverse order of declaration
 static u8 lbl_3_bss_AEB8[0x28];

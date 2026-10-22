@@ -2,6 +2,7 @@
 #include "header_rep_data.h"
 #include "game/UnknownHomes_Game.h"
 #include "static/UnknownHomes_Static.h"
+#include "static/model.h"
 
 typedef struct {
     /* 0x000 */ u8 _000[0xC];
@@ -36,10 +37,8 @@ extern UnkCC8Task* lbl_803CC1B8;
 
 extern u8 lbl_800F1D78[][16];
 
-extern void fn_80017D28(s32);
 extern BOOL fn_80022B68(void);
-extern void fn_80022CB4(void*, s32, s32, s32, void (*)(s32, s32, s32), void*);
-extern void fn_8001AAA4(void);
+extern void fn_80022CB4(void*, s32, s32, s32, void (*)(void*, void*, void*), void*);
 extern void fn_3_6AEC0(void);
 
 // .text:0x00059BCC size:0x60 mapped:0x80698C60
@@ -80,8 +79,8 @@ BOOL fn_3_59AE4(void) {
 }
 
 // .text:0x00059AC0 size:0x24 mapped:0x80698B54
-void fn_3_59AC0(s32 arg0, s32 arg1, s32 arg2) {
-    fn_80017D28(arg2);
+void fn_3_59AC0(void* file, void* dst, void* user) {
+    fn_80017D28(user);
 }
 
 // .text:0x00059A90 size:0x30 mapped:0x80698B24

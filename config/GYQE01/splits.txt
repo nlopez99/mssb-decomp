@@ -46,6 +46,7 @@ static/static_8000F150.c:
 	extab       start:0x800056D8 end:0x80005730
 	extabindex  start:0x80006DA4 end:0x80006E28
 	.text       start:0x8000F150 end:0x800111D8
+	.data       start:0x800E8F60 end:0x800EE800
 	.sdata2     start:0x803CC490 end:0x803CC4B8
 
 static/model.c:
@@ -1040,6 +1041,22 @@ Dolphin/OdemuExi2/DebuggerDriver.c:
 	.sdata      start:0x803CBA90 end:0x803CBA98
 	.sbss       start:0x803CC0D8 end:0x803CC0F0
 
+Dolphin/gd/GDBase.c:
+	.text       start:0x800A1A70 end:0x800A1BB0
+	.sbss       start:0x803CC0F0 end:0x803CC0F8
+
+Dolphin/gd/GDPixel.c:
+	.text       start:0x800A1BB0 end:0x800A1E3C
+
+Dolphin/gd/GDTev.c:
+	.text       start:0x800A1E3C end:0x800A1F40
+
+Dolphin/gd/GDTexture.c:
+	.text       start:0x800A1F40 end:0x800A2B5C
+	.data       start:0x8010F158 end:0x8010F160
+	.sdata      start:0x803CBA98 end:0x803CBAC0
+	.sdata2     start:0x803CCEC0 end:0x803CCEC8
+
 Dolphin/exi/EXIBios.c:
 	.text       start:0x800A2B5C end:0x800A4538
 	.data       start:0x8010F160 end:0x8010F270
@@ -1075,6 +1092,127 @@ Unknown/File_0x800a64e0.c:
 	.text       start:0x800A64E0 end:0x800A6870
 	.bss        start:0x803C6990 end:0x803C6CF8
 
+static/dvdsys.c:
+	extab       start:0x80006608 end:0x80006688
+	extabindex  start:0x8000846C end:0x8000852C
+	.text       start:0x800A6870 end:0x800A7AD8
+	.rodata     start:0x800E7730 end:0x800E77C8
+	.data       start:0x8010F420 end:0x8010F460
+
+static/static_800A7AD8.c:
+	extab       start:0x80006688 end:0x80006690
+	extabindex  start:0x8000852C end:0x80008538
+	.text       start:0x800A7AD8 end:0x800A7BAC
+	.data       start:0x8010F460 end:0x80110080
+	.sdata2     start:0x803CCEC8 end:0x803CCED0
+
+static/graphic.c:
+	extab       start:0x80006690 end:0x800066C8
+	extabindex  start:0x80008538 end:0x8000858C
+	.text       start:0x800A7BAC end:0x800A8518
+	.rodata     start:0x800E77C8 end:0x800E7800
+	.sdata      start:0x803CBAD0 end:0x803CBAD8
+	.sdata2     start:0x803CCED0 end:0x803CCEE0
+
+static/static_800A8518.c:
+	extab       start:0x800066C8 end:0x80006750
+	extabindex  start:0x8000858C end:0x80008658
+	.text       start:0x800A8518 end:0x800A94C4
+	.sbss       start:0x803CC128 end:0x803CC158
+
+static/static_800A94C4.c:
+	extab       start:0x80006750 end:0x80006768
+	extabindex  start:0x80008658 end:0x8000867C
+	.text       start:0x800A94C4 end:0x800A9864
+	.data       start:0x80110080 end:0x80110090
+
+static/mcard.c:
+	extab       start:0x80006768 end:0x80006808
+	extabindex  start:0x8000867C end:0x8000876C
+	.text       start:0x800A9864 end:0x800ACF14
+	.rodata     start:0x800E7800 end:0x800E7B50
+	.data       start:0x80110090 end:0x801101B0
+	.sbss       start:0x803CC158 end:0x803CC170
+	.sdata2     start:0x803CCEE0 end:0x803CCEE8
+
+static/static_800ACF14.c:
+	.text       start:0x800ACF14 end:0x800AD070
+
+static/movie.c:
+	extab       start:0x80006808 end:0x800068E8
+	extabindex  start:0x8000876C end:0x800088BC
+	.text       start:0x800AD070 end:0x800B0724
+	.rodata     start:0x800E7B50 end:0x800E7CB0
+	.data       start:0x801101C0 end:0x801112F0
+	.sdata      start:0x803CBAD8 end:0x803CBB10
+	.sbss       start:0x803CC170 end:0x803CC1B0
+	.sdata2     start:0x803CCEE8 end:0x803CCF08
+
+static/static_800B0724.c:
+	extab       start:0x800068E8 end:0x800068F0
+	extabindex  start:0x800088BC end:0x800088C8
+	.text       start:0x800B0724 end:0x800B07FC
+	.sdata2     start:0x803CCF08 end:0x803CCF18
+
+static/sound.c:
+	extab       start:0x800068F0 end:0x80006910
+	extabindex  start:0x800088C8 end:0x800088F8
+	.text       start:0x800B07FC end:0x800B0A14
+	.rodata     start:0x800E7CB0 end:0x800E7D10
+	.data       start:0x801112F0 end:0x80111300
+	.sdata      start:0x803CBB10 end:0x803CBB18
+	.sdata2     start:0x803CCF18 end:0x803CCF30
+
+static/static_800B0A14.c:
+	extab       start:0x80006910 end:0x80006918
+	extabindex  start:0x800088F8 end:0x80008904
+	.text       start:0x800B0A14 end:0x800B0D28
+	.data       start:0x80111300 end:0x80111340
+	.sbss       start:0x803CC1B0 end:0x803CC1C0
+
+static/sprt.c:
+	extab       start:0x80006918 end:0x80006990
+	extabindex  start:0x80008904 end:0x800089B8
+	.text       start:0x800B0D28 end:0x800B2AC8
+	.rodata     start:0x800E7D10 end:0x800E7D28
+	.data       start:0x80111340 end:0x80111640
+	.sdata      start:0x803CBB18 end:0x803CBB48
+	.sbss       start:0x803CC1C0 end:0x803CC1E8
+	.sdata2     start:0x803CCF30 end:0x803CCF58
+
+C3/actor/act.c:
+	extab       start:0x80006990 end:0x80006A28
+	extabindex  start:0x800089B8 end:0x80008A9C
+	.text       start:0x800B2AC8 end:0x800B4A44
+	.rodata     start:0x800E7D28 end:0x800E7D58
+	.data       start:0x80111640 end:0x80111670
+	.sdata2     start:0x803CCF58 end:0x803CCF78
+
+C3/actor/actorAnim.c:
+	extab       start:0x80006A28 end:0x80006A40
+	extabindex  start:0x80008A9C end:0x80008AC0
+	.text       start:0x800B4A44 end:0x800B4E9C
+	.sdata2     start:0x803CCF78 end:0x803CCF80
+
+C3/anim/animBank.c:
+	extab       start:0x80006A40 end:0x80006A50
+	extabindex  start:0x80008AC0 end:0x80008AD8
+	.text       start:0x800B4E9C end:0x800B516C
+
+C3/anim/animPipe.c:
+	extab       start:0x80006A50 end:0x80006A88
+	extabindex  start:0x80008AD8 end:0x80008B2C
+	.text       start:0x800B516C end:0x800B79D0
+	.rodata     start:0x800E7D58 end:0x800E7E78
+	.sdata      start:0x803CBB48 end:0x803CBB58
+	.sdata2     start:0x803CCF80 end:0x803CCFB8
+
+C3/actor/boneAnim.c:
+	extab       start:0x80006A88 end:0x80006A90
+	extabindex  start:0x80008B2C end:0x80008B38
+	.text       start:0x800B79D0 end:0x800B7D3C
+	.sdata2     start:0x803CCFB8 end:0x803CCFC0
+
 C3/control/control.c:
 	extab       start:0x80006A90 end:0x80006AE0
 	extabindex  start:0x80008B38 end:0x80008BB0
@@ -1082,6 +1220,44 @@ C3/control/control.c:
 	.data       start:0x801116A0 end:0x80111700
 	.bss        start:0x803CB1FC end:0x803CB49C
 	.sdata2     start:0x803CCFD8 end:0x803CCFF8
+
+C3/geoPalette/DisplayObject.c:
+	extab       start:0x80006AE0 end:0x80006B80
+	extabindex  start:0x80008BB0 end:0x80008CA0
+	.text       start:0x800B993C end:0x800BD300
+	.rodata     start:0x800E7E78 end:0x800E7FC8
+	.data       start:0x80111700 end:0x80111750
+	.bss        start:0x803CB49C end:0x803CB6FC
+	.sdata      start:0x803CBB58 end:0x803CBB68
+	.sbss       start:0x803CC1F0 end:0x803CC228
+	.sdata2     start:0x803CCFF8 end:0x803CD058
+
+C3/light/light.c:
+	extab       start:0x80006B80 end:0x80006B98
+	extabindex  start:0x80008CA0 end:0x80008CC4
+	.text       start:0x800BD300 end:0x800BD478
+	.sdata2     start:0x803CD058 end:0x803CD060
+
+C3/static_800BD478.c:
+	extab       start:0x80006B98 end:0x80006BD8
+	extabindex  start:0x80008CC4 end:0x80008D24
+	.text       start:0x800BD478 end:0x800BDE8C
+	.rodata     start:0x800E7FC8 end:0x800E8030
+	.data       start:0x80112338 end:0x801123A8
+	.sdata2     start:0x803CD060 end:0x803CD068
+
+C3/static_800BDE8C.c:
+	extab       start:0x80006BD8 end:0x80006C20
+	extabindex  start:0x80008D24 end:0x80008D90
+	.text       start:0x800BDE8C end:0x800BF074
+	.rodata     start:0x800E8030 end:0x800E8060
+	.sdata      start:0x803CBB68 end:0x803CBB70
+	.sdata2     start:0x803CD068 end:0x803CD0E0
+
+C3/static_800BF074.c:
+	extab       start:0x80006C20 end:0x80006C48
+	extabindex  start:0x80008D90 end:0x80008DCC
+	.text       start:0x800BF074 end:0x800C0A8C
 
 Musyx/seq.c:
 	.text       start:0x800C0A8C end:0x800C4AB4
@@ -1185,6 +1361,12 @@ Musyx/chorus_fx.c:
 	.text       start:0x800DF594 end:0x800DFDD4
 	.data       start:0x801177E0 end:0x80117FE0
 	.sdata2     start:0x803CD2E0 end:0x803CD2E8
+
+HVQM4/hvqm4dec.c:
+	.text       start:0x800DFDD4 end:0x800E6330
+	.rodata     start:0x800E82D8 end:0x800E82F0
+	.data       start:0x80117FE0 end:0x80118184
+	.sbss       start:0x803CC3F8 end:0x803CC400
 
 Dolphin/Runtime/__mem.c:
 	.init       start:0x8000540C end:0x80005544

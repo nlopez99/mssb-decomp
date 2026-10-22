@@ -9,6 +9,8 @@
 #include "string.h"
 #include "menus/rep_08E8.h"
 #include "static/static_80021188.h"
+#include "static/model.h"
+#include "static/graphic.h"
 
 typedef struct LITObj {
     /* 0x00 */ u8 _00[0xC0];
@@ -126,7 +128,6 @@ extern u8 lbl_803CBBC0;
 extern u8 lbl_2_bss_33FBF0[];
 
 extern void fn_2_190DC(ModelTable0DE0* table, Mtx view);
-extern void fn_800A7D4C(s32 arg0, void* arg1);
 extern void fn_800B806C(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7);
 extern void LITXForm(LITObj* light, Mtx view);
 extern void LITAlloc(LITObj** light);
@@ -140,7 +141,6 @@ extern void convertGeometryAndSknHeader(void* geo, void* skn);
 extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);
 extern void convertTextureHeader(void* tex);
 extern void fn_800BD190(void* geo, void* tex);
-extern void fn_80011640(Mtx src, Mtx dst);
 extern void makeLookAtMatrix(Mtx m, const Vec* camPos, const Vec* camUp, const Vec* target);
 extern void fn_800BDC88(ModelTable0DE0* table, u16 first, u16 last, void* model, void* anim, s32 arg5);
 extern void fn_800BD548(Model0DE0* model, s32 count, ...);

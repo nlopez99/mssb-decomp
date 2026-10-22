@@ -8,6 +8,7 @@
 #include "game/rep_140.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/rand.h"
+#include "static/static_8005268C.h"
 
 typedef struct {
     /* 0x00 */ VecXYZ _00;
@@ -54,7 +55,6 @@ typedef struct {
 static u8 lbl_3_bss_48[0x50];
 static u32 lbl_3_bss_44;
 static u8 lbl_3_bss_40[4];
-extern s32 fn_800527BC(void);
 
 extern struct {
     /* 0x0 */ u8 _0[0x5];

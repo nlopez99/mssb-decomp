@@ -2,6 +2,7 @@
 #include "Dolphin/gx.h"
 #include "Dolphin/os.h"
 #include "static/UnknownHomes_Static.h"
+#include "static/graphic.h"
 
 typedef struct SpriteVtx {
     /* 0x00 */ f32 x;
@@ -23,7 +24,6 @@ extern void fn_800B216C(s32 arg0, s32 arg1, s32 arg2);
 extern void fn_800B24D4(s32 id);
 extern void DrawSprite_TexObj(SpriteVtx* vtx, TextureDesc* tex);
 extern int rand(void);
-extern void fn_800A7D4C(s32 kind, void* entry);
 extern void fn_800B0A14_removeQueue(void);
 extern void* fn_800B0A5C_insertQueue(void (*callback)(void), s32 priority);
 

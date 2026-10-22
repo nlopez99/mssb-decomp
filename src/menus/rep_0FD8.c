@@ -5,11 +5,11 @@
 #include "Dolphin/os.h"
 #include "static/static_8001FE00.h"
 #include "static/static_80021188.h"
+#include "static/static_80062578.h"
 
 extern void fn_2_11A0(s32 arg0);
 extern void fn_8004A0FC(void);
 extern void fn_8003F23C(void);
-extern void fn_80062764(void* task);
 
 typedef struct Unk0FD8 {
     /* 0x00 */ u8 _00[0x3B];

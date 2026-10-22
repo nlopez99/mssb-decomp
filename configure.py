@@ -602,6 +602,15 @@ config.libs = [
         ]
     ),
     DolphinLib(
+        "gd",
+        [
+            Object(Matching, "Dolphin/gd/GDBase.c"),
+            Object(Matching, "Dolphin/gd/GDPixel.c"),
+            Object(Matching, "Dolphin/gd/GDTev.c"),
+            Object(Matching, "Dolphin/gd/GDTexture.c"),
+        ]
+    ),
+    DolphinLib(
         "exi",
         [
             Object(Matching, "Dolphin/exi/EXIBios.c"),
@@ -643,7 +652,7 @@ config.libs = [
             Object(NonMatching, "static/physics.c", extra_cflags=["-cpp_exceptions on"]),
             Object(Matching, "static/uitexture.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/static_8003A2EC.c", extra_cflags=["-cpp_exceptions on"]),
-            Object(NonMatching, "static/static_8004157C.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(Matching, "static/static_8004157C.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/orderchange.c", extra_cflags=["-cpp_exceptions on"]),
             Object(Matching, "static/static_80048C14.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/static_80048EB8.c", extra_cflags=["-cpp_exceptions on"]),
@@ -666,6 +675,18 @@ config.libs = [
             Object(NonMatching, "static/static_80069A68.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/static_8006C100.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/static_8006C48C.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(NonMatching, "static/dvdsys.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(NonMatching, "static/static_800A7AD8.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(NonMatching, "static/graphic.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(Matching, "static/static_800A8518.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(Matching, "static/static_800A94C4.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(NonMatching, "static/mcard.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(NonMatching, "static/static_800ACF14.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(NonMatching, "static/movie.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(Matching, "static/static_800B0724.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(NonMatching, "static/sound.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(NonMatching, "static/static_800B0A14.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(NonMatching, "static/sprt.c", extra_cflags=["-cpp_exceptions on"]),
         ],
     },
     {
@@ -684,7 +705,17 @@ config.libs = [
         "cflags": cflags_base + ["-O4,p", "-sym on", "-cpp_exceptions on"],
         "host": False,
         "objects": [
+            Object(NonMatching, "C3/actor/act.c", extra_cflags=["-inline deferred"]),
+            Object(NonMatching, "C3/actor/actorAnim.c", extra_cflags=["-inline deferred"]),
+            Object(NonMatching, "C3/anim/animBank.c", extra_cflags=["-inline deferred"]),
+            Object(NonMatching, "C3/anim/animPipe.c", extra_cflags=["-inline deferred"]),
+            Object(Matching, "C3/actor/boneAnim.c", extra_cflags=["-inline deferred"]),
             Object(NonMatching, "C3/control/control.c", extra_cflags=["-inline deferred"]),
+            Object(NonMatching, "C3/geoPalette/DisplayObject.c"),
+            Object(Matching, "C3/light/light.c"),
+            Object(NonMatching, "C3/static_800BD478.c"),
+            Object(NonMatching, "C3/static_800BDE8C.c"),
+            Object(NonMatching, "C3/static_800BF074.c"),
         ],
     },
     MusyxLib(
@@ -737,6 +768,12 @@ config.libs = [
         extra_cflags=["-str reuse,pool,readonly",
                       "-fp_contract off", 
                       "-use_lmw_stmw off"]
+    ),
+    DebuggerLib(
+        "hvqm4",
+        [
+            Object(NonMatching, "HVQM4/hvqm4dec.c", extra_cflags=["-inline noauto"]),
+        ],
     ),
     Rel(
         "game",

@@ -8,17 +8,14 @@
 #include "C3/control.h"
 #include "challenge/rep_00B0.h"
 #include "static/objinit.h"
+#include "static/model.h"
+#include "static/graphic.h"
+#include "static/static_80048C14.h"
 
-extern void fn_80048C1C(void);
-extern void fn_80048C28(void);
-extern void fn_80048D4C(void);
 extern void LITXForm(void* light, Mtx view);
 extern void SetFog(GXFogType type, f32 startZ, f32 endZ, f32 nearZ, f32 farZ, GXColor color);
 extern void SetFogNoneAgain(void);
 extern void fn_800B806C(s32 arg0, f32 top, f32 bottom, f32 left, f32 right, f32 nearZ, f32 farZ, f32 arg7);
-extern void fn_80048C14(s32 arg0);
-extern void fn_80048E00(s32 arg0, s32 arg1);
-extern s32 fn_80048EA8(s32 arg0);
 extern void fn_800B49E4(void* layout);
 extern void fn_800BCE38(void* geo);
 extern void fn_800BD190(void* geo, void* tex);
@@ -26,7 +23,6 @@ extern void convertTextureHeader(void* tex);
 extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);
 extern void fn_800AD038(void* arg0);
 extern void fn_800B472C(void* arg0);
-extern void fn_800A7D4C(s32 arg0, void* arg1);
 extern void* ARAMTransfer(void* entry, s32 arg1, s32 arg2, u32 aram);
 extern void fn_800B9AA8(void* light);
 extern void LITAlloc(void** light);
@@ -35,7 +31,6 @@ extern void LITInitColor(void* light, GXColor color);
 extern void LITInitDir(void* light, f32 nx, f32 ny, f32 nz);
 extern void LITInitPos(void* light, f32 x, f32 y, f32 z);
 extern void makeLookAtMatrix(Mtx m, const Vec* camPos, const Vec* camUp, const Vec* target);
-extern void fn_80011640(Mtx src, Mtx dst);
 extern void fn_800B9950(s32 arg0, f32 arg1, f32 arg2);
 extern s32 fn_800B7D3C(s32 arg0, Vec* corners, Mtx mtx);
 extern void DOVARender(struct DObj0138* obj, MtxPtr camera, u8 numLights, va_list* list);

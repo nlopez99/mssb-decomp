@@ -16,12 +16,12 @@ void fn_8003A688(s32 i, f32 width, f32 height);
 void fn_8003A6B0(s32 i, struct TextureDesc* tex, f32 width, f32 height);
 void fn_8003A848(u8 r, u8 g, u8 b);
 void fn_8003A85C(u8 enabled);
-void fn_8003A8A0(struct Model* model, MtxPtr view);
+void fn_8003A8A0(struct Model* model, MtxPtr view, s32 arg2);
 void fn_8003AC90(void);
 void fn_8003AD84(struct TextureEntry* entry);
 u8 fn_8003AE54(void);
 void fn_8003AE5C(u8 value);
-void fn_8003AE64(void);
+void fn_8003AE64(u32 request);
 u8 fn_8003AE70(s32 kind);
 void fn_8003AECC(void);
 void fn_8003B5B0(void);
@@ -36,7 +36,7 @@ void fn_80040C14(void);
 s32 fn_80040FE0(struct SaveFile* save);
 s32 fn_80041074(struct SaveFile* save, s32 arg1, s32 mask);
 void fn_80041150(u8 mask, u8 slot);
-s32 fn_80041348(void);
+u8 fn_80041348(void);
 void fn_8004153C(void);
 
 #endif // !__STATIC_STATIC_8003A2EC_H_
