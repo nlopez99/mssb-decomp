@@ -91,6 +91,8 @@ extern u32 fn_800E4B1C(void* arg);
 extern void fn_800E4B90(void* arg, u8* buf, u32 blocks, u16 blockSize);
 extern GXTexObj lbl_803C78A4;
 extern ARQRequest lbl_803C78C4[2];
+extern ARQRequest lbl_803C7994[2];
+extern u8 lbl_803CC1A8;
 extern GXTexFmt lbl_803CBAD8[2];
 
 #define ALIGN32(x) (((x) + 31) & ~31)
@@ -115,7 +117,7 @@ void fn_800B05E4(void) {
 
 // .text:0x800B0580 size:0x64
 // 57.12%: same shape as fn_800B0390.
-void fn_800B0580(void) {
+void fn_800B0580(u32 request) {
     MovieRing* ring = &lbl_803C79D4;
 
     ring->writePos += ring->_18;
@@ -128,7 +130,47 @@ void fn_800B0580(void) {
 }
 
 // .text:0x800B03F4 size:0x18C
-void fn_800B03F4(void) {
+void fn_800B03F4(u8* src, u32 size) {
+    MovieRing* ring = &lbl_803C79D4;
+    u32 first;
+    u32 second;
+    u32 end;
+
+    if (ring->writePos + size > ring->end) {
+        first = ring->end - ring->writePos;
+        second = size - first;
+    } else {
+        first = size;
+        second = 0;
+    }
+    if (second != 0) {
+        end = ring->start + second;
+    } else {
+        end = ring->writePos + size;
+    }
+    if ((ring->writePos > ring->readPos && end > ring->readPos && second != 0) ||
+        (ring->writePos < ring->readPos && end > ring->readPos)) {
+        ring->_29 = 3;
+        return;
+    }
+    if (lbl_803C79D4._14 > lbl_803C79D4.size) {
+        while (TRUE) {
+        }
+    }
+    ring->_18 = size;
+    lbl_803CC1A8++;
+    ring->_29 = 1;
+    DCFlushRangeNoSync(src, first);
+    ARQPostRequest(&lbl_803C7994[0], 0, ARQ_TYPE_MRAM_TO_ARAM, ARQ_PRIORITY_HIGH, (u32)src, ring->writePos, first,
+                   fn_800B0580);
+    if (second != 0) {
+        while (ring->_29 != 0) {
+        }
+        ring->_29 = 1;
+        DCFlushRangeNoSync(src + first, second);
+        ARQPostRequest(&lbl_803C7994[1], 0, ARQ_TYPE_MRAM_TO_ARAM, ARQ_PRIORITY_HIGH, (u32)src + first, ring->start,
+                       second, fn_800B0580);
+    }
 }
 
 // .text:0x800B0390 size:0x64

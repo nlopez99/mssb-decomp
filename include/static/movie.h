@@ -39,8 +39,8 @@ s32 fn_800B0008(u32 size);
 void fn_800B0134(void);
 void fn_800B0230(u8* dest, u32 size);
 void fn_800B0390(u32 request);
-void fn_800B03F4(void);
-void fn_800B0580(void);
+void fn_800B03F4(u8* src, u32 size);
+void fn_800B0580(u32 request);
 void fn_800B05E4(void);
 
 #endif // !__STATIC_MOVIE_H_
