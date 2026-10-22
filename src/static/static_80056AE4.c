@@ -1353,8 +1353,8 @@ void fn_8005DE14(SpaniTask* task, s32 team) {
 
     if (isLockState(lbl_803C66B0.rows[9].port[team], 0)) {
         cur = lbl_803297E0._CF46[team] - 1;
-        last = lbl_803297E0._CF3E[team];
         prev = lbl_803297E0._CF48[team] - 1;
+        last = lbl_803297E0._CF3E[team];
         if (lbl_803297E0._CF52[team] == 0) {
             if (g_d_GameSettings._06 != 2) {
                 for (i = 0; i < 9; i++) {
