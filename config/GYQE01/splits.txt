@@ -1076,6 +1076,20 @@ Unknown/File_0x800a64e0.c:
 	.text       start:0x800A64E0 end:0x800A6870
 	.bss        start:0x803C6990 end:0x803C6CF8
 
+static/dvdsys.c:
+	extab       start:0x80006608 end:0x80006688
+	extabindex  start:0x8000846C end:0x8000852C
+	.text       start:0x800A6870 end:0x800A7AD8
+	.rodata     start:0x800E7730 end:0x800E77C8
+	.data       start:0x8010F420 end:0x8010F460
+
+static/static_800A7AD8.c:
+	extab       start:0x80006688 end:0x80006690
+	extabindex  start:0x8000852C end:0x80008538
+	.text       start:0x800A7AD8 end:0x800A7BAC
+	.data       start:0x8010F460 end:0x80110080
+	.sdata2     start:0x803CCEC8 end:0x803CCED0
+
 C3/control/control.c:
 	extab       start:0x80006A90 end:0x80006AE0
 	extabindex  start:0x80008B38 end:0x80008BB0
