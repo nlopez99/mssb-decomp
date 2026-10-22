@@ -11,9 +11,13 @@ typedef struct McardTask {
     /* 0x14 */ s32 state;
     /* 0x18 */ u8 chan;
     /* 0x19 */ u8 async;
-    /* 0x1A */ u16 fileNo;
+    /* 0x1A */ union {
+        u16 flag;
+        s16 blocks;
+    } _1A;
     /* 0x1C */ char* fileName;
-    /* 0x20 */ u8 _20[0xC];
+    /* 0x20 */ u8 status;
+    /* 0x21 */ u8 _21[0xB];
     /* 0x2C */ s32 buf;
     /* 0x30 */ u32 size;
     /* 0x34 */ char* name;
@@ -30,7 +34,11 @@ typedef struct McardSlot {
     /* 0x08 */ s32 probe;
     /* 0x0C */ s32 memSize;
     /* 0x10 */ s32 sectorSize;
-    /* 0x14 */ u8 _14[0x28 - 0x14];
+    /* 0x14 */ s32 freeBlocks;
+    /* 0x18 */ s32 bytesFree;
+    /* 0x1C */ s32 filesFree;
+    /* 0x20 */ s32 totalBlocks;
+    /* 0x24 */ u8 _24[0x28 - 0x24];
 } McardSlot;
 
 typedef struct McardState {
@@ -352,6 +360,154 @@ u16 fn_800ABB14(u8* data, s32 len) {
 
 // .text:0x800AB534 size:0x5E0
 void fn_800AB534(void) {
+    McardTask* task = lbl_803CC1B8;
+    u8 chan;
+    s32 result;
+    McardSlot* slot;
+
+    switch (task->state) {
+    case 0:
+        chan = task->chan;
+        fn_800ACD64(CARDUnmount(chan));
+        switch (CheckSlot(chan)) {
+        case 0:
+            break;
+        case 1:
+            task->state = 1;
+            break;
+        case 2:
+            task->state = 9;
+            break;
+        }
+        break;
+    case 1:
+        if (Mount(task->chan, task->async) == 0) {
+            task->state = 2;
+        }
+        break;
+    case 2:
+        fn_800ACD64(CARDGetResultCode(task->chan));
+        switch (lbl_803C7838.error) {
+        case 0xF:
+            break;
+        case 1:
+        case 2:
+        case 0x11:
+            task->state = 3;
+            break;
+        default:
+            task->state = 9;
+            break;
+        }
+        break;
+    case 3:
+        if (Check(task->chan, task->async) == 0) {
+            task->state = 4;
+        }
+        break;
+    case 4:
+        fn_800ACD64(CARDGetResultCode(task->chan));
+        switch (lbl_803C7838.error) {
+        case 0xF:
+            break;
+        case 0x11:
+            task->state = 5;
+            break;
+        case 0x10:
+        default:
+            task->state = 9;
+            break;
+        }
+        break;
+    case 5:
+        if (lbl_803C7838.error == 0x11) {
+            if (ReadSerial(task->chan) != CARD_RESULT_BUSY) {
+                if (lbl_803C7838.slots[task->chan].serial != 0) {
+                    if (lbl_803C7838.slots[task->chan].serial == lbl_802EF2C0[task->chan]) {
+                        task->state = 6;
+                    } else {
+                        lbl_803C7838.error = 0x10;
+                        task->state = 9;
+                    }
+                } else {
+                    lbl_803C7838.error = 0x10;
+                    task->state = 9;
+                }
+            }
+        } else {
+            task->state = 9;
+        }
+        break;
+    case 6:
+        switch (FindFile(task->chan, task->fileName)) {
+        case 0:
+            task->status = 0;
+            task->state = 8;
+            break;
+        case 1:
+            task->state = 7;
+            break;
+        case 2:
+            task->state = 9;
+            break;
+        }
+        break;
+    case 7:
+        chan = task->chan;
+        result = CARDFreeBlocks(chan, &lbl_803C7838.slots[chan].bytesFree, &lbl_803C7838.slots[chan].filesFree);
+        if (result >= 0) {
+            lbl_803C7838.slots[chan].freeBlocks = lbl_803C7838.slots[chan].bytesFree / lbl_803C7838.slots[chan].sectorSize;
+            lbl_803C7838.slots[chan].totalBlocks =
+                ((lbl_803C7838.slots[chan].memSize << 20) / 8) / lbl_803C7838.slots[chan].sectorSize - 5;
+        }
+        fn_800ACD64(result);
+        switch (lbl_803C7838.error) {
+        case 0xF:
+            break;
+        case 0x11:
+            slot = &lbl_803C7838.slots[task->chan];
+            if (slot->filesFree == 0) {
+                task->status = 1;
+            } else if (task->_1A.blocks > slot->freeBlocks) {
+                task->status = 2;
+            } else {
+                task->status = 0;
+            }
+            task->state = 8;
+            break;
+        case 0x10:
+        default:
+            task->state = 9;
+            break;
+        }
+        break;
+    case 8:
+        fn_800ACD64(CARDUnmount(task->chan));
+        switch (lbl_803C7838.error) {
+        case 0xF:
+            break;
+        case 0x11:
+            switch (task->status) {
+            case 1:
+                lbl_803C7838.error = 5;
+                break;
+            case 2:
+                lbl_803C7838.error = 6;
+                break;
+            }
+            task->state = 9;
+            break;
+        case 0x10:
+        default:
+            task->state = 9;
+            break;
+        }
+        break;
+    case 9:
+        task->parent->result = 1;
+        fn_800B0A14_removeQueue();
+        break;
+    }
 }
 
 // .text:0x800AB474 size:0xC0
@@ -363,7 +519,7 @@ void fn_800AB474(u8 chan, u8 async, s16 fileNo, char* fileName, u64 serial) {
     memset(&task->state, 0, 0x2C);
     task->chan = chan;
     task->async = async;
-    task->fileNo = fileNo;
+    task->_1A.blocks = fileNo;
     task->fileName = lbl_802EF2D0;
     memcpy(task->fileName, fileName, 0x20);
     lbl_802EF2C0[chan] = serial;
@@ -513,7 +669,7 @@ void fn_800AA44C(void) {
     case 6:
         switch (FindFile(task->chan, task->fileName)) {
         case 0:
-            task->fileNo = 1;
+            task->_1A.flag = 1;
             task->state = 7;
             break;
         case 1:
@@ -530,7 +686,7 @@ void fn_800AA44C(void) {
         case 0xF:
             break;
         case 0x11:
-            if (task->fileNo == 1) {
+            if (task->_1A.flag == 1) {
                 lbl_803C7838.error = 8;
             }
             task->state = 8;
