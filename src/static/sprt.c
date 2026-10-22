@@ -479,7 +479,7 @@ void fn_800B2160(u8 value) {
 // .text:0x800B1EBC size:0x2A4
 s32 fn_800B1EBC(SprtTex* tex, s32 id, u32 width, u32 height) {
     u16 v;
-    s32 map = id + 1;
+    u32 map = id + 1;
     u32 tmem;
     s32 dirty;
     u32 n;
@@ -715,10 +715,7 @@ s32 AllocateSprite(s32 index, s32 size) {
     do {
         lo -= lo > 0;
         avail = lbl_803CC1E4[lo].length - ((lbl_803CC1E4[lo].pDisplayListData - lbl_803CC1E4[lo].begin + 31) & ~31);
-        if (need <= avail) {
-            avail = need;
-        }
-        amount = (lo != index) * avail;
+        amount = (lo != index) * (need <= avail ? need : avail);
         if (amount != 0) {
             lbl_803CC1E4[lo].length -= amount;
             lbl_803CC1E4[lo].end -= amount;
@@ -748,10 +745,7 @@ s32 AllocateSprite(s32 index, s32 size) {
         }
         hi += hi < last;
         avail = lbl_803CC1E4[hi].length - ((lbl_803CC1E4[hi].pDisplayListData - lbl_803CC1E4[hi].begin + 31) & ~31);
-        if (need <= avail) {
-            avail = need;
-        }
-        amount = (hi != index) * avail;
+        amount = (hi != index) * (need <= avail ? need : avail);
         if (amount != 0) {
             lbl_803CC1E4[hi].length -= amount;
             lbl_803CC1E4[hi].end -= amount;
