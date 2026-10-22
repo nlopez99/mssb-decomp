@@ -2744,10 +2744,19 @@ void fn_8002BC84(Emitter* e, Vec* pos, Vec* dir, EffectParams* params)
     } while (p != NULL);
 }
 
+// The emitter fn_8002B7F8 builds its sparks in before attaching them
+typedef struct GlowEmitter {
+    /* 0x00 */ u8 _00[0xC];
+    /* 0x0C */ Particle* particles;
+    /* 0x10 */ s32 _10;
+    /* 0x14 */ u16 _14_hi : 4;
+    /* 0x14 */ u16 count : 12;
+    /* 0x16 */ u8 _16[2];
+    /* 0x18 */ Particle* list;
+    /* 0x1C */ u16 glowCount;
+} GlowEmitter;
+
 // .text:0x8002B7F8 size:0x48C
-// 99.60%: registers only; the target leaves the first fn_800337CC result in r4 and copies it
-// to r30 after the glow test, where this build allocates it to r30 directly. Inline helpers for
-// the block, the glow attach or the call, early returns and Emitter-typed buffers kept it.
 void fn_8002B7F8(Vec* pos, SparkParams* params, u8 glow)
 {
     u8 tmp[sizeof(Emitter)];
@@ -2759,23 +2768,24 @@ void fn_8002B7F8(Vec* pos, SparkParams* params, u8 glow)
     }
     e = fn_800339F0(NULL, 14);
     if (e != NULL) {
-        Emitter* added = fn_800337CC((Emitter*)tmp, params->sparkCount, TRUE);
-        if (added != NULL) {
+        Emitter* res = fn_800337CC((Emitter*)tmp, params->sparkCount, TRUE);
+        if (res != NULL) {
+            GlowEmitter* added = (GlowEmitter*)res;
             Particle* p;
             if (glow && params->glowCount != 0) {
                 Emitter* g = fn_800337CC((Emitter*)tmp2, params->glowCount, TRUE);
                 if (g == NULL) {
-                    added->glow.list = NULL;
-                    added->glow.count = 0;
+                    added->list = NULL;
+                    added->glowCount = 0;
                 } else {
-                    added->glow.list = g->particles;
-                    added->glow.count = g->count;
+                    added->list = g->particles;
+                    added->glowCount = g->count;
                 }
             } else {
-                added->glow.list = NULL;
-                added->glow.count = 0;
+                added->list = NULL;
+                added->glowCount = 0;
             }
-            fn_8002B400(added, params, pos);
+            fn_8002B400((Emitter*)added, params, pos);
             p = e->particles;
             while (p->next != NULL) {
                 p = p->next;
@@ -2787,11 +2797,11 @@ void fn_8002B7F8(Vec* pos, SparkParams* params, u8 glow)
                 while (p->next != NULL) {
                     p = p->next;
                 }
-                p->next = added->glow.list;
+                p->next = added->list;
             } else {
-                e->glow.list = added->glow.list;
+                e->glow.list = added->list;
             }
-            e->glow.count += added->glow.count;
+            e->glow.count += added->glowCount;
         }
     } else {
         e = fn_80033A24((BOOL (*)(void*))fn_8002B014, 0x80, 0, params->sparkCount, TRUE, 14);
