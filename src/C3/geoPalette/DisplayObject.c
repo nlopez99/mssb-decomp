@@ -1234,19 +1234,17 @@ void fn_800BCDBC(DODisplayDataPtr pal) {
 }
 
 // .text:0x800BCE38 size:0xC0
-// 84.65%: registers only (the target keeps pal in r31, i in r28); counter types, addition
-// orders and declaration orders were tried.
 void fn_800BCE38(DODisplayDataPtr pal) {
     struct DODisplayObj* objs;
     u32 i;
 
-    pal->userData = (void*)((u32)pal->userData + (u32)pal);
-    pal->descriptorArray = (DODescriptorPtr)((u32)pal->descriptorArray + (u32)pal);
+    pal->userData = (void*)((u32)pal + (u32)pal->userData);
+    pal->descriptorArray = (DODescriptorPtr)((u32)pal + (u32)pal->descriptorArray);
     objs = _OSAllocFromHeap(0x20, pal->numDescriptors * sizeof(struct DODisplayObj));
     for (i = 0; i < pal->numDescriptors; i++) {
-        fn_800BCEF8((DOLayout*)((u32)pal->descriptorArray[i].layout + (u32)pal), objs);
-        pal->descriptorArray[i].layout = (DODisplayLayout*)objs++;
-        pal->descriptorArray[i].name = (char*)((u32)pal->descriptorArray[i].name + (u32)pal);
+        fn_800BCEF8((DOLayout*)((u32)pal + (u32)pal->descriptorArray[i].layout), &objs[i]);
+        pal->descriptorArray[i].layout = (DODisplayLayout*)&objs[i];
+        pal->descriptorArray[i].name = (char*)((u32)pal + (u32)pal->descriptorArray[i].name);
     }
 }
 
