@@ -8,6 +8,8 @@
 #include "C3/control.h"
 #include "challenge/rep_00B0.h"
 #include "static/objinit.h"
+#include "static/model.h"
+#include "static/graphic.h"
 
 extern void fn_80048C1C(void);
 extern void fn_80048C28(void);
@@ -26,7 +28,6 @@ extern void convertTextureHeader(void* tex);
 extern void haveActLayoutPointToGeoHeader(void* layout, void* geo);
 extern void fn_800AD038(void* arg0);
 extern void fn_800B472C(void* arg0);
-extern void fn_800A7D4C(s32 arg0, void* arg1);
 extern void* ARAMTransfer(void* entry, s32 arg1, s32 arg2, u32 aram);
 extern void fn_800B9AA8(void* light);
 extern void LITAlloc(void** light);
@@ -35,7 +36,6 @@ extern void LITInitColor(void* light, GXColor color);
 extern void LITInitDir(void* light, f32 nx, f32 ny, f32 nz);
 extern void LITInitPos(void* light, f32 x, f32 y, f32 z);
 extern void makeLookAtMatrix(Mtx m, const Vec* camPos, const Vec* camUp, const Vec* target);
-extern void fn_80011640(Mtx src, Mtx dst);
 extern void fn_800B9950(s32 arg0, f32 arg1, f32 arg2);
 extern s32 fn_800B7D3C(s32 arg0, Vec* corners, Mtx mtx);
 extern void DOVARender(struct DObj0138* obj, MtxPtr camera, u8 numLights, va_list* list);

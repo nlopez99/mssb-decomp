@@ -7,6 +7,7 @@
 #include "Dolphin/mtx.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/pad.h"
+#include "static/static_800ACF14.h"
 
 // A rigid-body simulation viewer: a bat swung by the settings in its menus
 
@@ -109,7 +110,6 @@ extern struct {
     /* 0x08 */ void* _08;
 } lbl_80366158;
 
-extern void fn_800AD038(void* arg0);
 extern void fn_800A97D0(s32 arg0, s32 arg1);
 extern void fn_800B0A14_removeQueue(void);
 extern void fn_800B806C(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7);

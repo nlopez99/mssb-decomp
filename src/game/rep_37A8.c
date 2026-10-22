@@ -19,6 +19,7 @@
 #include "static/particle.h"
 #include "static/sub.h"
 #include "static/static_8001FE00.h"
+#include "static/static_80062BE4.h"
 
 // g_Minigame as this minigame lays it out (UnknownHomes_Game.h)
 #define MG g_Minigame.piranhaPanic
@@ -116,7 +117,6 @@ extern void minigamesSetSomePointers2(void);
 extern void fn_3_59A90(void);
 extern void fn_3_591AC(void);
 extern void fn_3_58870(void);
-extern void fn_80062BE4(Vec* pos);
 extern u8 lbl_3_data_21E18[2][2];
 extern struct {
     /* 0x00 */ u8 _00[0x40];

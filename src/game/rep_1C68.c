@@ -17,6 +17,7 @@
 #include "game/rep_1B70.h"
 #include "game/rep_868.h"
 #include "static/static_8001FE00.h"
+#include "static/model.h"
 
 extern void fn_3_1DD48(void);
 extern int fn_3_6BA64(void);
@@ -24,7 +25,6 @@ extern u8 lbl_3_data_FAF4[4][4];
 extern u8 lbl_3_data_FC08[4][4];
 extern void* lbl_3_data_FC20[4];
 extern void* lbl_3_data_10010[4];
-extern BOOL fn_8001594C(int team);
 extern u8 lbl_803CBC3C[];
 
 extern struct {

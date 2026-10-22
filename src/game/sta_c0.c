@@ -17,6 +17,7 @@
 #include "string.h"
 #include "static/sub.h"
 #include "static/static_80021188.h"
+#include "static/static_8005268C.h"
 
 typedef struct {
     /* 0x00 */ void* _00;
@@ -155,8 +156,6 @@ extern void fn_80025FFC(void* anim, StaC0Anim* state);
 extern void fn_80025EEC(StaC0Anim* state, s32, s32);
 
 extern void AnimateActorBones(void* bones);
-extern s32 fn_8005268C(void);
-extern camera_803c639c_s* fn_80052734(s32 idx);
 
 
 extern u16 lbl_3_data_81DC[16];

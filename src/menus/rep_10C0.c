@@ -9,6 +9,7 @@
 #include "Dolphin/pad.h"
 #include "Dolphin/vec.h"
 #include "string.h"
+#include "static/model.h"
 
 // The menus' camera
 typedef struct Camera10C0 {
@@ -70,7 +71,6 @@ extern Camera10C0 lbl_2_bss_1A81D4;
 extern CameraPreset10C0 lbl_2_data_38E0[20];
 extern CameraBlend10C0 lbl_2_data_3BB0[3];
 
-extern void fn_80011640(Mtx src, Mtx dst);
 extern void fn_800B806C(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7);
 extern void makeLookAtMatrix(Mtx m, const Vec* camPos, const Vec* camUp, const Vec* target);
 

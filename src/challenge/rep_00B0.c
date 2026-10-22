@@ -6,6 +6,7 @@
 #include "Dolphin/mtx.h"
 #include "Dolphin/os.h"
 #include "string.h"
+#include "static/graphic.h"
 
 // An axis-aligned box: its low corner, then its high corner
 typedef struct Box00B0 {
@@ -40,7 +41,6 @@ typedef struct Draw00B0 {
     /* 0x4 */ void (*_4)(void);
 } Draw00B0; // size: 0x8
 
-extern void fn_800A7D4C(s32 arg0, void* arg1);
 extern void fn_800A1A70(GDCurrentDL* obj, void* start, u32 len);
 extern void fn_800A1A88(void);
 extern void fn_800A1B80(void);
