@@ -30,6 +30,21 @@ typedef struct McardTask {
     /* 0x3D */ u8 _3D;
 } McardTask;
 
+typedef struct McardIoTask {
+    /* 0x00 */ u8 _00[0xC];
+    /* 0x0C */ McardTask* parent;
+    /* 0x10 */ s16 result;
+    /* 0x12 */ u8 _12[2];
+    /* 0x14 */ CARDFileInfo fileInfo;
+    /* 0x28 */ s32 state;
+    /* 0x2C */ void* buf;
+    /* 0x30 */ u32 size;
+    /* 0x34 */ char* name;
+    /* 0x38 */ s32 fileNo;
+    /* 0x3C */ u8 chan;
+    /* 0x3D */ u8 async;
+} McardIoTask;
+
 typedef struct McardSlot {
     /* 0x00 */ u64 serial;
     /* 0x08 */ s32 probe;
@@ -47,7 +62,10 @@ typedef struct McardState {
     /* 0x50 */ s32 lastResult;
     /* 0x54 */ u8 error;
     /* 0x55 */ u8 op;
-    /* 0x56 */ u8 _56[0x60 - 0x56];
+    /* 0x56 */ u8 _56[2];
+    /* 0x58 */ s32 xferred;
+    /* 0x5C */ u8 percent;
+    /* 0x5D */ u8 _5D[3];
 } McardState;
 
 typedef u32 (*McardCallback)(s32 buf, u32 size, s32 arg);
@@ -72,12 +90,13 @@ extern s32 CARDFastDelete(s32 chan, char* fileName);
 extern s32 CARDGetResultCode(s32 chan);
 extern s32 CARDCheckAsync(s32 chan, CARDCallback callback);
 extern s32 CARDFormatAsync(s32 chan, CARDCallback callback);
+extern s32 CARDGetXferredBytes(s32 chan);
 extern void fn_800ACFB0(void* ptr);
 extern McardTask* lbl_803CC1B8;
 extern McardState lbl_803C7838;
 extern u64 lbl_802EF2C0[2];
 extern char lbl_802EF2D0[0x20];
-extern char lbl_802EF330[0x70];
+extern CARDStat lbl_802EF330;
 
 void* lbl_803CC16C;
 s32 lbl_803CC168;
@@ -335,7 +354,107 @@ void fn_800ABF44(void) {
 }
 
 // .text:0x800ABBD0 size:0x374
+// Only the inlined fn_800ABB14 copy differs: its data pointer and length swap registers (r7/r8).
 void fn_800ABBD0(void) {
+    CARDStat* stat = &lbl_802EF330;
+    McardTask* task = lbl_803CC1B8;
+    McardIoTask* io = (McardIoTask*)task->parent;
+    s32 result;
+    s32 size;
+    u8* buf;
+
+    switch (task->state) {
+    case 0:
+        result = CARDOpen(io->chan, io->name, &io->fileInfo);
+        if (result == CARD_RESULT_READY) {
+            io->fileNo = io->fileInfo.fileNo;
+        } else {
+            fn_800ACD64(result);
+            lbl_803CC1B8->parent->result = 2;
+            fn_800B0A14_removeQueue();
+            break;
+        }
+        result = CARDGetStatus(io->chan, io->fileNo, stat);
+        if (result == CARD_RESULT_READY) {
+            if (stat->iconAddr == 0xFFFFFFFF || stat->commentAddr == 0xFFFFFFFF) {
+                fn_800ACD64(CARD_RESULT_CANCELED);
+                lbl_803C7838.error = 0xB;
+                lbl_803CC1B8->parent->result = 2;
+                fn_800B0A14_removeQueue();
+                break;
+            }
+        } else {
+            fn_800ACD64(result);
+            lbl_803CC1B8->parent->result = 2;
+            fn_800B0A14_removeQueue();
+            break;
+        }
+        task->state += 1;
+        break;
+    case 1:
+        lbl_803CC168 = CARDGetXferredBytes(io->chan);
+        if (io->async == 1) {
+            result = CARDReadAsync(&io->fileInfo, io->buf, io->size, stat->offsetData, NULL);
+            if (result < 0) {
+                fn_800ACD64(result);
+                CARDClose(&io->fileInfo);
+                lbl_803CC1B8->parent->result = 2;
+                fn_800B0A14_removeQueue();
+            } else {
+                task->state += 1;
+            }
+        } else {
+            result = CARDRead(&io->fileInfo, io->buf, io->size, stat->offsetData);
+            CARDClose(&io->fileInfo);
+            if (result < 0) {
+                fn_800ACD64(result);
+                lbl_803CC1B8->parent->result = 2;
+                fn_800B0A14_removeQueue();
+            } else {
+                task->state += 2;
+            }
+        }
+        break;
+    case 2:
+        size = io->size;
+        result = CARDGetXferredBytes(io->chan) - lbl_803CC168;
+        lbl_803C7838.xferred = result;
+        lbl_803C7838.percent = (result * 100) / size;
+        if (lbl_803C7838.percent > 100) {
+            lbl_803C7838.percent = 100;
+        }
+        fn_800ACD64(CARDGetResultCode(io->chan));
+        switch (lbl_803C7838.error) {
+        case 0xF:
+            break;
+        case 0x11:
+            CARDClose(&io->fileInfo);
+            task->state += 1;
+            break;
+        case 0x10:
+        default:
+            CARDClose(&io->fileInfo);
+            lbl_803CC1B8->parent->result = 2;
+            fn_800B0A14_removeQueue();
+            break;
+        }
+        break;
+    case 3:
+        if (!(lbl_803CC160 & 1)) {
+            buf = io->buf;
+            if (*(u16*)(buf + 0x40) != fn_800ABB14(buf + 0x44, io->size - 0x44)) {
+                lbl_803C7838.error = 0xB;
+                task->parent->result = 2;
+                fn_800B0A14_removeQueue();
+                break;
+            }
+        }
+        task->state += 1;
+    case 4:
+        lbl_803CC1B8->parent->result = 1;
+        fn_800B0A14_removeQueue();
+        break;
+    }
 }
 
 // .text:0x800ABB60 size:0x70
@@ -1110,7 +1229,7 @@ void fn_800A9E34(u8 chan, u8 async, u64 serial) {
 
 // .text:0x800A9CF8 size:0x13C
 void fn_800A9CF8(void) {
-    char* name = lbl_802EF330;
+    char* name = lbl_802EF330.fileName;
     McardTask* task = lbl_803CC1B8;
     McardTask* parent = task->parent;
     s32 result;
