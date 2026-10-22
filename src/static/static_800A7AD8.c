@@ -233,4 +233,3 @@ void fn_800A7AD8(void) {
     GXInitTexObjCI(&lbl_802ECFC0.texObj, lbl_8010F460, 0x80, 0x80, GX_TF_C4, GX_CLAMP, GX_CLAMP, GX_FALSE, 0);
     GXInitTexObjLOD(&lbl_802ECFC0.texObj, GX_NEAR, GX_NEAR, 0.0f, 0.0f, 0.0f, GX_FALSE, GX_FALSE, GX_ANISO_1);
 }
-
