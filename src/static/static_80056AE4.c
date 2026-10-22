@@ -282,6 +282,8 @@ void SetMenuNumber(void) {
 }
 
 // .text:0x80061B9C size:0x7D0
+// 99.78%: registers only; the target gives the order slot and team the same
+// register (r23) and the mode-5 loop's counter r27 above its row pointers.
 void fn_80061B9C(void) {
     SpaniTask* task = lbl_803CC1B8;
     s32 slot;
@@ -942,6 +944,8 @@ static inline void orderStep39(SpaniTask* task, s32 port) {
 }
 
 // .text:0x80060184 size:0x1A18
+// 99.25%: registers only; the done counters take other saved registers, and
+// case 0x39 (not a helper: too large to inline whole) lacks the port copy.
 void fn_80060184(void) {
     SpaniTask* task = lbl_803CC1B8;
     s32 i;
@@ -1301,7 +1305,8 @@ void fn_8005EC88(SpaniTask* task, s32 team) {
 }
 
 // .text:0x8005E9D8 size:0x2B0
-// Drafted while fn_8005DE14 and fn_8005CCE4 are still stubs (inlined here).
+// 98.49%: registers only around the order slot and team * 9 in the
+// lock-0 branch.
 void fn_8005E9D8(SpaniTask* task, s32 team) {
     u8 cur;
     s8 slot;
@@ -1462,6 +1467,8 @@ void fn_8005DE14(SpaniTask* task, s32 team) {
 }
 
 // .text:0x8005CCE4 size:0x1130
+// 99.79%: registers only in the CF52 == 0 loop; the target masks the cur
+// roster's FieldingArm * 2 to 0x1FE (rlwinm) and keeps the stance in r16.
 void fn_8005CCE4(SpaniTask* task, s32 team) {
     u8 last;
     s32 cur;
@@ -1618,7 +1625,7 @@ void fn_8005CCE4(SpaniTask* task, s32 team) {
 }
 
 // .text:0x8005C830 size:0x4B4
-// 98.29%: registers only; the target keeps charID in r27 and the counters
+// 99.49%: registers only; the target keeps charID in r27 and the counters
 // one register higher.
 void fn_8005C830(SpaniTask* task, s32 team, s32 row) {
     s32 i;
@@ -2000,6 +2007,8 @@ static inline u16 getPadTrig(s32 pad, s32 team) {
 }
 
 // .text:0x8005A350 size:0xC18
+// 99.88%: registers only; nextHand's sum lands in r10 (r6 here), and the
+// two isAnimDone sums of the CF71 block put their first result in r27.
 void fn_8005A350(SpaniTask* task, s32 team) {
     s32 pad = team;
     s32 cur;
