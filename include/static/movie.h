@@ -3,6 +3,7 @@
 
 #include "mssbTypes.h"
 
+struct MovieHeader;
 struct MoviePlayer;
 
 void fn_800AD070(void);
@@ -10,12 +11,12 @@ u32 fn_800AD490(struct MoviePlayer* player);
 void fn_800AD500(void);
 void fn_800AD6BC(void);
 s32 fn_800AD780(struct MoviePlayer* player);
-void fn_800AD830(void);
+void fn_800AD830(struct MoviePlayer* player);
 void fn_800AD914(struct MoviePlayer* player);
 void fn_800AD95C(struct MoviePlayer* player, u8 arg);
-void fn_800AD9F4(void);
-u8 fn_800ADAFC(void);
-void fn_800ADB04(void);
+void fn_800AD9F4(struct MoviePlayer* player);
+s32 fn_800ADAFC(void);
+s32 fn_800ADB04(struct MovieHeader* header, struct MoviePlayer* player, u8 arg2, u8 stream);
 void fn_800ADBFC(void);
 void fn_800ADC40(void);
 void fn_800ADD70(void);

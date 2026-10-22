@@ -3,13 +3,23 @@
 #include "string.h"
 
 typedef struct MoviePlayer {
-    /* 0x000 */ u8 _000[0x198];
+    /* 0x000 */ u8 _000[0xF0];
+    /* 0x0F0 */ struct MovieHeader* header;
+    /* 0x0F4 */ u8 _0F4[6][0xC];
+    /* 0x13C */ u8* _13C[6];
+    /* 0x154 */ u8 _154[0x198 - 0x154];
     /* 0x198 */ OSTime pausedTime;
     /* 0x1A0 */ OSTime startTime;
-    /* 0x1A8 */ u8 _1A8[0x1B9 - 0x1A8];
+    /* 0x1A8 */ u8 _1A8[0x1B8 - 0x1A8];
+    /* 0x1B8 */ u8 _1B8;
     /* 0x1B9 */ u8 _1B9;
     /* 0x1BA */ u8 flags;
 } MoviePlayer;
+
+typedef struct MovieHeader {
+    /* 0x00 */ u8 _00[0xC];
+    /* 0x0C */ s32 _0C;
+} MovieHeader;
 
 typedef struct MovieRing {
     /* 0x00 */ u8 _00[0x4];
@@ -27,7 +37,8 @@ typedef struct MovieRing {
 } MovieRing;
 
 typedef struct MovieBuffer {
-    /* 0x00 */ u8 _00[0xC];
+    /* 0x00 */ u8 _00[0x8];
+    /* 0x08 */ void* _08;
     /* 0x0C */ u32 end;
     /* 0x10 */ u32 pos;
     /* 0x14 */ u8 _14[0x18 - 0x14];
@@ -48,7 +59,13 @@ extern u8 lbl_803CC17C;
 extern u8 lbl_803CC17D;
 extern u8 lbl_803CC17F;
 extern s32 lbl_803CC19C;
-extern void* lbl_803CC170;
+extern MoviePlayer* lbl_803CC170;
+extern u8 lbl_803CC17E;
+extern u8 lbl_803CC181;
+extern s32 lbl_803CC1A4;
+extern s32 lbl_803CC1AC;
+extern OSThread lbl_802FB220;
+extern void fn_800ACFB0(void* data);
 
 extern void fn_800A63C8(void);
 
@@ -188,16 +205,48 @@ void fn_800ADBFC(void) {
 }
 
 // .text:0x800ADB04 size:0xF8
-void fn_800ADB04(void) {
+s32 fn_800ADB04(MovieHeader* header, MoviePlayer* player, u8 arg2, u8 stream) {
+    s32 i;
+
+    if (fn_800ADAFC()) {
+        return 0;
+    }
+    lbl_803CC181 = stream;
+    lbl_803CC170 = player;
+    player->header = header;
+    lbl_803CC1A4 = header->_0C;
+    if (lbl_803CC181 != 0) {
+        lbl_803CC1AC = lbl_803CC1A4;
+        if (lbl_803C7A00._08 != NULL) {
+            fn_800ACFB0(lbl_803C7A00._08);
+        }
+    }
+    for (i = 0; i < 6; i++) {
+        lbl_803CC170->_13C[i] = lbl_803CC170->_0F4[i];
+    }
+    lbl_803CC170->_1B8 = arg2;
+    if (lbl_803CC17E == 0) {
+        OSResumeThread(&lbl_802FB220);
+    }
+    OSSendMessage(&lbl_802FB870, (OSMessage)0, OS_MESSAGE_NOBLOCK);
+    return 1;
 }
 
 // .text:0x800ADAFC size:0x8
-u8 fn_800ADAFC(void) {
+s32 fn_800ADAFC(void) {
     return lbl_803CC17D;
 }
 
 // .text:0x800AD9F4 size:0x108
-void fn_800AD9F4(void) {
+void fn_800AD9F4(MoviePlayer* player) {
+    if (player != NULL) {
+        if (player->flags & 3) {
+            if (!fn_800AD780(player)) {
+                OSSendMessage(&lbl_802FB870, (OSMessage)2, OS_MESSAGE_NOBLOCK);
+            }
+        }
+        OSSendMessage(&lbl_802FB870, (OSMessage)3, OS_MESSAGE_NOBLOCK);
+    }
 }
 
 // .text:0x800AD95C size:0x98
@@ -225,7 +274,10 @@ void fn_800AD914(MoviePlayer* player) {
 }
 
 // .text:0x800AD830 size:0xE4
-void fn_800AD830(void) {
+void fn_800AD830(MoviePlayer* player) {
+    if (!fn_800AD780(player)) {
+        OSSendMessage(&lbl_802FB870, (OSMessage)2, OS_MESSAGE_NOBLOCK);
+    }
 }
 
 // .text:0x800AD780 size:0xB0
