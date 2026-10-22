@@ -672,6 +672,7 @@ config.libs = [
             Object(NonMatching, "static/static_800A8518.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/static_800A94C4.c", extra_cflags=["-cpp_exceptions on"]),
             Object(NonMatching, "static/mcard.c", extra_cflags=["-cpp_exceptions on"]),
+            Object(NonMatching, "static/static_800ACF14.c", extra_cflags=["-cpp_exceptions on"]),
         ],
     },
     {

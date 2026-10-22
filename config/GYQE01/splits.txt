@@ -1119,6 +1119,9 @@ static/mcard.c:
 	.sbss       start:0x803CC158 end:0x803CC170
 	.sdata2     start:0x803CCEE0 end:0x803CCEE8
 
+static/static_800ACF14.c:
+	.text       start:0x800ACF14 end:0x800AD070
+
 C3/control/control.c:
 	extab       start:0x80006A90 end:0x80006AE0
 	extabindex  start:0x80008B38 end:0x80008BB0
