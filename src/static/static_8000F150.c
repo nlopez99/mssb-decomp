@@ -1659,8 +1659,8 @@ void DrawText(s32 i) {
     s32 digits[5];
     TextBox* box = &lbl_80366B18.boxes[i];
     s32 wide = 22;
-    s32 lineH = 22;
     s32 narrow = 11;
+    s32 lineH = 22;
     s32 count = 0;
     s32 font = 0;
     BOOL visible = TRUE;
@@ -1676,16 +1676,17 @@ void DrawText(s32 i) {
     u32 code;
     s32 n;
     s32 j;
+    s32 m;
     s32* p;
     u16 idx;
     u16 u;
     u16 v;
     u16 w;
-    u8 dy;
+    s32 dy;
     s32 lines;
     s32 h;
     s32 total;
-    u8 limit;
+    s32 limit;
 
     if (box->_28 >= 3 &&
         (((lbl_803C77B8[0]._02 & 0x1100) && (lbl_80366B18.mask & 1)) ||
@@ -1710,9 +1711,9 @@ void DrawText(s32 i) {
     x = x0;
     y = box->_12;
     if (box->_2F == 1) {
-        x = x0 = x0 - fn_8000FA9C(i) / 2 + narrow;
+        x0 = x = x0 - fn_8000FA9C(i) / 2 + narrow;
     } else if (box->_2F == 2) {
-        x = x0 = wide + (x0 - fn_8000FA9C(i));
+        x0 = x = wide + (x0 - fn_8000FA9C(i));
     }
     if (box->_30 == 1) {
         total = getTextHeight(box);
@@ -1730,9 +1731,11 @@ void DrawText(s32 i) {
         }
         visible = TRUE;
         if (nested) {
-            c = *sub++;
+            c = *sub;
+            sub++;
         } else {
-            c = *str++;
+            c = *str;
+            str++;
         }
         if (c & 0x4000) {
             code = c & 0x3FFF;
@@ -1802,8 +1805,8 @@ void DrawText(s32 i) {
                     n = -n;
                     w = wide;
                     idx = (lbl_80366B18._7EC[10] & 0x7FFF) % 2116;
-                    v = (idx / 46) * lineH;
                     u = (u16)(idx % 46) * wide;
+                    v = (idx / 46) * lineH;
                     if (box->_0C != 0) {
                         fn_800100A4(x + box->_14, y + box->_16, u, v, w, box->_0C, font, box->_00);
                     }
@@ -1813,20 +1816,21 @@ void DrawText(s32 i) {
                 }
                 p = digits;
                 j = 0;
+                m = n;
                 while (TRUE) {
-                    *p = n % 10;
-                    if (n < 10) {
+                    *p = m % 10;
+                    if (m < 10) {
                         break;
                     }
                     p++;
                     j++;
-                    n /= 10;
+                    m /= 10;
                 }
                 w = wide;
-                for (p = &digits[j]; j >= 0; j--, p--) {
+                for (n = j, p = &digits[j]; n >= 0; n--, p--) {
                     idx = (lbl_80366B18._7EC[*p] & 0x7FFF) % 2116;
-                    v = (idx / 46) * lineH;
                     u = (u16)(idx % 46) * wide;
+                    v = (idx / 46) * lineH;
                     if (box->_0C != 0) {
                         fn_800100A4(x + box->_14, y + box->_16, u, v, w, box->_0C, font, box->_00);
                     }
@@ -1845,13 +1849,8 @@ void DrawText(s32 i) {
             case 37:
             case 38:
                 n = code - 15;
-                if (n >= 10) {
-                    n = box->_20[n - 10] + 62;
-                } else {
-                    n = box->_20[n] + 8;
-                }
                 nested = TRUE;
-                sub = (u16*)lbl_80366B18.fonts[0]->entries[n];
+                sub = (u16*)lbl_80366B18.fonts[0]->entries[n >= 10 ? box->_20[n - 10] + 62 : box->_20[n] + 8];
                 break;
             case 45:
             case 46:
@@ -1916,15 +1915,16 @@ void DrawText(s32 i) {
                 if (c & 0x8000) {
                     c &= 0x7FFF;
                 } else {
-                    c = lbl_80366218[c] & 0x7FFF;
+                    c = lbl_80366218[c];
+                    c &= 0x7FFF;
                 }
                 count++;
                 n = (u16)(c % 2116) - (*lbl_80366B18._7F4 & 0x7FFF) - 1;
                 w = lbl_800E90F4[n][font];
                 dy = lbl_800E95B4[n][font];
                 idx = c % 2116;
-                v = (idx / 46) * lineH;
                 u = (u16)(idx % 46) * wide;
+                v = (idx / 46) * lineH;
             } else {
                 dy = lbl_800E9420[c][font];
                 w = lbl_800E8F60[c][font];
@@ -1999,8 +1999,8 @@ void fn_800100A4(s32 x, s32 y, u16 s, u16 t, u16 w, u32 color, s32 font, MtxPtr 
     v[1].y = zero;
     v[2].x = zero;
     v[2].y = zero + h;
-    v[3].x = zero + w;
-    v[3].y = zero + h;
+    v[3].x = v[1].x;
+    v[3].y = v[2].y;
     v[3].z = zero;
     v[2].z = zero;
     v[1].z = zero;
@@ -2162,17 +2162,17 @@ void fn_8000FD54(s32 i, s16 a, s16 b, s16 c, s16 d) {
 
 // .text:0x8000FA9C size:0x2B8
 s32 fn_8000FA9C(s32 i) {
+    s32* strings;
     TextBox* box = &lbl_80366B18.boxes[i];
+    u16* str;
+    u16* sub;
+    u16 c;
     s32 wide = 22;
     s32 narrow = 11;
     s32 max = 0;
     s32 x = 0;
     BOOL nested = FALSE;
     BOOL alt = FALSE;
-    s32* strings;
-    u16* str;
-    u16* sub;
-    u16 c;
     s32 code;
     s32 n;
 
@@ -2267,7 +2267,8 @@ s32 fn_8000FA9C(s32 i) {
                 if (c & 0x8000) {
                     c &= 0x7FFF;
                 } else {
-                    c = lbl_80366218[c] & 0x7FFF;
+                    c = lbl_80366218[c];
+                    c &= 0x7FFF;
                 }
                 n = (u16)(c % 2116) - (*lbl_80366B18._7F4 & 0x7FFF) - 1;
                 c = lbl_800E90F4[n][box->_2C];
