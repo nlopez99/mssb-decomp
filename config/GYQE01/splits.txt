@@ -1098,6 +1098,12 @@ static/graphic.c:
 	.sdata      start:0x803CBAD0 end:0x803CBAD8
 	.sdata2     start:0x803CCED0 end:0x803CCEE0
 
+static/static_800A8518.c:
+	extab       start:0x800066C8 end:0x80006750
+	extabindex  start:0x8000858C end:0x80008658
+	.text       start:0x800A8518 end:0x800A94C4
+	.sbss       start:0x803CC128 end:0x803CC158
+
 C3/control/control.c:
 	extab       start:0x80006A90 end:0x80006AE0
 	extabindex  start:0x80008B38 end:0x80008BB0
