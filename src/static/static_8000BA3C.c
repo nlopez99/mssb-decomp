@@ -886,8 +886,8 @@ s32 fn_8000D164(u32* time, AnimFile* file, s32 idx, Mtx mtx, s32 flags, u32 colo
     return ret;
 }
 
-// Differs: four fewer saved registers in the target (stw r28-r31, not stmw r27) and the
-// case 2/3 copy loops, whose pointers the target steps down from the end.
+// Differs: four saved registers in the target (stw r28-r31, not stmw r27): case 3 computes its
+// source pointer into p's register there, into a fifth one here.
 // .text:0x8000CEF0 size:0x274
 u32 fn_8000CEF0(AnimFile* file, s32 idx, u32 frame, s32 skip, u32* dst) {
     AnimTrack* track = ((AnimTrack**)file->tracks)[idx + 2];
@@ -896,7 +896,7 @@ u32 fn_8000CEF0(AnimFile* file, s32 idx, u32 frame, s32 skip, u32* dst) {
     u32* next;
     s32 n;
     u32* body;
-    u16 count;
+    s32 count;
     u32* vals;
     u16* ids;
     u16* ent;
@@ -950,12 +950,10 @@ u32 fn_8000CEF0(AnimFile* file, s32 idx, u32 frame, s32 skip, u32* dst) {
         memcpy(body, (u8*)f + 8, f->size - 4);
         memcpy(dst, p, 4);
         count = ((u16*)p)[2];
-        vals = p + ((u16*)p)[3];
-        ids = (u16*)p + count;
+        vals = p + ((u16*)p)[3] - count;
+        ids = (u16*)p;
         while (count-- != 0) {
-            vals--;
-            ids--;
-            body[ids[4]] = *vals;
+            body[ids[count + 4]] = vals[count];
         }
         break;
     case 3:
