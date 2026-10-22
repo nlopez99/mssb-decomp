@@ -68,10 +68,32 @@ typedef struct DecalColor {
     /* 0x2 */ u8 b;
 } DecalColor; // size: 0x3
 
+typedef struct StarEntry {
+    /* 0x0 */ s16 id;
+    /* 0x2 */ u8 _2[4];
+} StarEntry; // size: 0x6
+
+typedef struct StarSave {
+    /* 0x0000 */ u8 _0000[0x1606];
+    /* 0x1606 */ s8 _1606;
+    /* 0x1607 */ u8 _1607[0x40B8 - 0x1607];
+    /* 0x40B8 */ StarEntry entries[9];
+    /* 0x40EE */ u8 _40EE[0x43BC - 0x40EE];
+    /* 0x43BC */ s16 _43BC;
+    /* 0x43BE */ u8 _43BE[0x4415 - 0x43BE];
+    /* 0x4415 */ u8 _4415;
+    /* 0x4416 */ u8 _4416[0x441B - 0x4416];
+    /* 0x441B */ u8 _441B;
+    /* 0x441C */ u8 _441C;
+} StarSave;
+
 typedef struct SaveBlock {
     /* 0x0 */ u16 sum;
     /* 0x2 */ u16 size;
-    /* 0x4 */ u8 data[0x4508];
+    union {
+        /* 0x4 */ u8 data[0x4508];
+        /* 0x4 */ struct StarSave star;
+    };
 } SaveBlock; // size: 0x450C
 
 // The task fn_8003C00C runs
@@ -151,9 +173,13 @@ typedef struct TextureEntry {
 } TextureEntry;
 
 extern struct {
-    /* 0x00 */ u8 _00[0x3F];
+    /* 0x00 */ u8 _00;
+    /* 0x01 */ u8 _01[0x09 - 0x01];
+    /* 0x09 */ u8 _09;
+    /* 0x0A */ u8 _0A[0x3F - 0x0A];
     /* 0x3F */ u8 _3F;
-    /* 0x40 */ u8 _40[0x45 - 0x40];
+    /* 0x40 */ u8 _40[0x44 - 0x40];
+    /* 0x44 */ u8 _44;
     /* 0x45 */ u8 _45;
     /* 0x46 */ u8 _46;
     /* 0x47 */ u8 _47;
@@ -621,10 +647,12 @@ extern void fn_800AC508(const char* name, void* icon, s32 iconSize, void* banner
 extern void fn_800AAEE4(CardRequest* req, MenuSlot* slot, s32 arg2, s32 arg3);
 extern void fn_800AA34C(u8 chan, u8 arg1, const char* name, MenuSlot* slot, s32 arg4, s32 arg5, u8 arg6);
 extern void fn_800ACCD4(void);
-extern s32 fn_8004A34C(void* window, u8 arg1, s32 msg, u8 arg3, u8 arg4);
+extern s32 fn_8004A34C(void* window, u8 arg1, u8 msg, u8 arg3, u8 arg4);
 extern void fn_800A9E34(u8 chan, u8 arg1, s32 arg2, s32 arg3);
 extern void fn_800AA930(CardRequest* req, MenuSlot* slot, s32 arg2, s32 arg3);
 extern void fn_800B0A14_removeQueue(void);
+extern s32 fn_8004A328(void* card);
+extern void fn_800A9864(u8 chan, u8 arg1, s32 arg2, s32 arg3);
 extern s32 lbl_803CBC48;
 extern s32 lbl_803CBC4C;
 extern s32 lbl_803CBC50;
@@ -642,29 +670,15 @@ extern struct {
     /* 0x21 */ u8 _21;
 } lbl_80366158;
 extern struct {
-    /* 0x000 */ u8 _000[0x398];
+    /* 0x000 */ u8 _000[0x397];
+    /* 0x397 */ u8 _397;
     /* 0x398 */ u8 _398;
 } lbl_800EF808;
-typedef struct StarEntry {
-    /* 0x0 */ s16 id;
-    /* 0x2 */ u8 _2[4];
-} StarEntry; // size: 0x6
+
 
 extern union {
     u8 raw[0x4508];
-    struct {
-        /* 0x0000 */ u8 _0000[0x1606];
-        /* 0x1606 */ s8 _1606;
-        /* 0x1607 */ u8 _1607[0x40B8 - 0x1607];
-        /* 0x40B8 */ StarEntry entries[9];
-        /* 0x40EE */ u8 _40EE[0x43BC - 0x40EE];
-        /* 0x43BC */ s16 _43BC;
-        /* 0x43BE */ u8 _43BE[0x4415 - 0x43BE];
-        /* 0x4415 */ u8 _4415;
-        /* 0x4416 */ u8 _4416[0x441B - 0x4416];
-        /* 0x441B */ u8 _441B;
-        /* 0x441C */ u8 _441C;
-    } s;
+    StarSave s;
 } starMissionCompletionTracker;
 extern void fn_8002128C(u8 arg0);
 
@@ -950,7 +964,7 @@ void fn_80040C14(void) {
 // 98.71%: the target truncates the two message ternaries to u8 (clrlwi) and loads the
 // name before the slot in case 5's call
 void fn_8004053C(void) {
-    s32 msg = 0;
+    u8 msg = 0;
     MenuTask* task = lbl_803CC1B8;
     MenuTask* child;
     MenuTask* parent;
@@ -1006,8 +1020,8 @@ void fn_8004053C(void) {
         return;
     case 5:
         task->_1D = 0;
-        fn_800AA34C(task->_17, task->_18, lbl_800E6910, &lbl_802D4AE0[task->_17], lbl_802D4AE0[task->_17]._0,
-                    lbl_802D4AE0[task->_17]._4, task->_1A == 0);
+        slot = &lbl_802D4AE0[task->_17];
+        fn_800AA34C(task->_17, task->_18, lbl_800E6910, slot, slot->_0, slot->_4, task->_1A == 0);
         task->_14++;
         return;
     case 6:
@@ -1212,8 +1226,628 @@ void fn_8004053C(void) {
     }
 }
 
+static inline void KeepSlot(u8 chan) {
+    CardChannel* card = &lbl_803C7838.chan[chan];
+    MenuSlot* slot = &lbl_802D4AE0[chan];
+
+    slot->_4 = card->_04;
+    slot->_0 = card->_00;
+}
+
+static inline void ClearSlot(u8 chan) {
+    MenuSlot* slot = &lbl_802D4AE0[chan];
+
+    slot->_4 = 0;
+    slot->_0 = 0;
+}
+
+static inline void PackSave(void) {
+    SaveFile* const save = &lbl_802D4B00;
+    s32 i;
+
+    memset(save, 0, (sizeof(SaveFile)) - sizeof(save->_D51C));
+    memset(lbl_802D4B00._D51C, 0xEE, sizeof(lbl_802D4B00._D51C));
+    save->header._4C = lbl_800EF808._397;
+    save->header._4D = lbl_800EF808._398;
+    save->header._4E = lbl_80366158._1F;
+    memcpy(save->header._4F, lbl_80361B20, sizeof(save->header._4F));
+    memcpy(save->header._148, lbl_803616CC, sizeof(save->header._148));
+    save->header._59C = g_d_GameSettings._12;
+    memcpy(save->header._59D, &g_d_GameSettings._13_arr[1], sizeof(save->header._59D));
+    memcpy(save->header._5A3, g_d_GameSettings._1A, sizeof(save->header._5A3));
+    save->header._5AC = g_d_GameSettings._00;
+    lbl_802D4B00.headerSize = 4 + sizeof(SaveHeader);
+    i = 2;
+    do {
+        lbl_802D4B00.blocks[i].size = sizeof(SaveBlock);
+    } while (i-- != 0);
+}
+
+static inline u8 IsKnownFlag(u8 flag) {
+    BOOL known = FALSE;
+
+    if (flag == 0 || flag == 1) {
+        known = TRUE;
+    }
+    return known != FALSE;
+}
+
+static inline u8 IsSaveValid(void) {
+    SaveFile* save = &lbl_802D4B00;
+    SaveBlock* block = save->blocks;
+    s32 b;
+    s32 i;
+    s32 j;
+
+    for (b = 0; b < 3; block++, b++) {
+        if ((IsKnownFlag(lbl_802D4B00.header._46[b]) & 1) == 0) {
+            return 0;
+        }
+        if ((block->star._1606 != 0 && block->star._441B == 0) || block->star._441B != 0) {
+            for (i = 0; i < 9; i++) {
+                for (j = 0; j < 9; j++) {
+                    if (block->star.entries[i].id == block->star.entries[j].id && i != j) {
+                        return 0;
+                    }
+                }
+            }
+            if (block->star._4415 >= 4) {
+                return 0;
+            }
+            if (block->star._43BC < 0 || block->star._43BC > 1000) {
+                return 0;
+            }
+        }
+    }
+    return 1;
+}
+
 // .text:0x8003F2B8 size:0x1284
-void fn_8003F2B8(void) {}
+void fn_8003F2B8(void) {
+    MenuTask* task = lbl_803CC1B8;
+    MenuTask* child;
+    MenuTask* parent;
+    MenuSlot* slot;
+    u8 a15;
+    u8 a16;
+    u8 a17;
+    u8 a1A;
+    u8 a1B;
+
+    switch (CardResultCode(lbl_803C7838.chan[task->_17].result)) {
+    case 4:
+    case 17:
+        task->_1E = 1;
+        break;
+    case 0:
+        task->_1D = 1;
+        break;
+    }
+    switch (task->_14) {
+    case 0:
+        if (lbl_803C50E8._47) {
+            task->_14 = 34;
+            task->_1C = 11;
+            return;
+        }
+        if (lbl_803C50E8._00) {
+            task->_14 = 34;
+            task->_1C = 1;
+            return;
+        }
+        fn_800ACCE8();
+        lbl_80366158._20 = 1;
+        task->_14 = 1;
+        return;
+    case 1: {
+        u8 a1B;
+        u8 a1A;
+        u8 a17;
+        u8 a16;
+        u8 a15;
+        u8 a21;
+
+        task->_1D = 0;
+        a21 = task->_21;
+        a1B = task->_1B;
+        a1A = task->_1A;
+        a17 = task->_17;
+        a16 = task->_16;
+        a15 = task->_15;
+        child = fn_800B0A5C_insertQueue(fn_8004053C, 0x8000);
+        child->_14 = 0;
+        child->_15 = a15;
+        child->_16 = a16;
+        child->_17 = a17;
+        child->_18 = 1;
+        child->_1A = a1A;
+        child->_1B = a1B;
+        child->_1D = 0;
+        child->_21 = a21;
+        lbl_803CC1B8->_10 = 0;
+        task->_14++;
+        return;
+    }
+    case 2:
+        if (lbl_803CC1B8->_10 != 0) {
+            task->_1D = 0;
+            switch (lbl_803CC1B8->_10) {
+            case 1:
+                KeepSlot(task->_17);
+                task->_14 = 11;
+                return;
+            case 6:
+                KeepSlot(task->_17);
+                task->_14 = 16;
+                return;
+            case 10:
+                task->_14 = 3;
+                return;
+            case 7:
+                ClearSlot(task->_17);
+                task->_14 = 1;
+                return;
+            case 13:
+                KeepSlot(task->_17);
+                task->_14 = 11;
+                return;
+            case 8:
+                ClearSlot(task->_17);
+                task->_14 = 1;
+                return;
+            case 9:
+                lbl_803C50E8._44 = 1;
+                task->_14 = 5;
+                return;
+            }
+        }
+        break;
+    case 3:
+        ClearSlot(task->_17);
+        task->_1C = 10;
+        task->_14++;
+        fn_8004A34C(&lbl_803C50E8, task->_15, 2, 0, 0);
+        return;
+    case 4:
+        switch (lbl_803C50E8._45) {
+        case 1:
+        case 2:
+            lbl_803C50E8._47 = 1;
+            task->_14 = 33;
+            task->_1C = 11;
+            return;
+        case 3:
+        case 4:
+            task->_14 = 1;
+            return;
+        }
+        break;
+    case 5:
+        if (lbl_803C50E8._44) {
+            ClearSlot(task->_17);
+            fn_8004A34C(&lbl_803C50E8, task->_15, 1, 0, 0);
+            task->_1D = 0;
+            task->_1E = 0;
+            task->_14++;
+            return;
+        }
+        break;
+    case 6:
+        switch (lbl_803C50E8._45) {
+        case 1:
+        case 2:
+            task->_14 = 1;
+            ClearSlot(task->_17);
+            return;
+        case 3:
+        case 4:
+            task->_14 = 3;
+            return;
+        }
+        break;
+    case 7:
+        if (fn_8004157C() == 0) {
+            slot = &lbl_802D4AE0[task->_17];
+            fn_800AB474(task->_17, task->_18, lbl_803CBC48, lbl_800E6910, slot->_0, slot->_4, lbl_803CBC48);
+            task->_14++;
+            return;
+        }
+        break;
+    case 8:
+        if (lbl_803CC1B8->_10 != 0) {
+            switch (lbl_803C7838.status) {
+            case 0:
+            case 8:
+            case 16:
+                task->_14 = 5;
+                return;
+            case 5:
+                fn_8004A34C(&lbl_803C50E8, task->_15, 15, 0, 0);
+                task->_14 = 9;
+                return;
+            case 6:
+                fn_8004A34C(&lbl_803C50E8, task->_15, 14, 0, 0);
+                task->_14 = 9;
+                return;
+            case 17:
+                task->_14 = 13;
+                return;
+            default:
+                task->_14 = 1;
+                ClearSlot(task->_17);
+                return;
+            }
+        }
+        break;
+    case 9:
+        if (task->_1D) {
+            lbl_803C50E8._46 = 1;
+            task->_14 = 5;
+            return;
+        }
+        switch (lbl_803C50E8._45) {
+        case 1:
+        case 2:
+            lbl_80366158._21 = 1;
+            task->_14 = 10;
+            return;
+        case 3:
+        case 4:
+            task->_14 = 3;
+            return;
+        }
+        break;
+    case 11:
+        if (task->_1D) {
+            task->_14 = 5;
+            return;
+        }
+        task->_14++;
+        fn_8004A34C(&lbl_803C50E8, task->_15, 11, 0, 0);
+        return;
+    case 12:
+        if (task->_1D) {
+            lbl_803C50E8._09 = 1;
+            if (lbl_803CC1B8->_10 != 0) {
+                lbl_803C50E8._46 = 1;
+                lbl_803C50E8._09 = 0;
+                task->_14 = 5;
+                return;
+            }
+        } else if (task->_1E) {
+            switch (lbl_803C50E8._45) {
+            case 1:
+            case 2:
+                fn_8004A34C(&lbl_803C50E8, task->_15, 0, 0, 0);
+                task->_14 = 7;
+                fn_800415A0(50);
+                return;
+            case 3:
+            case 4:
+                task->_14 = 3;
+                return;
+            }
+        } else {
+            lbl_803C50E8._46 = 1;
+            task->_14 = 5;
+            return;
+        }
+        break;
+    case 13:
+        if (fn_8004157C() == 0) {
+            lbl_80366158._20 = 0;
+            PackSave();
+            a1B = task->_1B;
+            a1A = task->_1A;
+            a17 = task->_17;
+            a16 = task->_16;
+            a15 = task->_15;
+            child = fn_800B0A5C_insertQueue(fn_8003B5B0, 0x8000);
+            child->_14 = 0;
+            child->_15 = a15;
+            child->_16 = a16;
+            child->_17 = a17;
+            child->_18 = 1;
+            child->_1A = a1A;
+            child->_1B = a1B;
+            child->_1D = 0;
+            lbl_803CC1B8->_10 = 0;
+            task->_14++;
+            return;
+        }
+        break;
+    case 14:
+        if (lbl_803CC1B8->_10 != 0) {
+            task->_1D = 0;
+            switch (lbl_803CC1B8->_10) {
+            case 1:
+                task->_14 = 33;
+                task->_1C = 1;
+                break;
+            case 8:
+                task->_14 = 3;
+                break;
+            case 5:
+                fn_8004A34C(&lbl_803C50E8, task->_15, 69, 0, 0);
+                task->_14 = 15;
+                break;
+            case 2:
+            case 3:
+                fn_8004A34C(&lbl_803C50E8, task->_15, 68, 0, 0);
+                task->_14 = 15;
+                break;
+            case 9:
+                task->_14 = 5;
+                break;
+            }
+            lbl_80366158._20 = 1;
+            return;
+        }
+        break;
+    case 15:
+        if (task->_1D) {
+            lbl_803C50E8._46 = 1;
+            task->_14 = 5;
+            return;
+        }
+        switch (lbl_803C50E8._45) {
+        case 1:
+        case 2:
+            task->_14 = 1;
+            return;
+        case 3:
+        case 4:
+            task->_14 = 3;
+            return;
+        }
+        break;
+    case 16:
+        if (task->_1D) {
+            task->_14 = 5;
+            return;
+        }
+        fn_8004A34C(&lbl_803C50E8, task->_15, task->_1A == 0 ? 16 : 34, 0, 0);
+        fn_800415A0(180);
+        task->_14++;
+        return;
+    case 17:
+        if (fn_8004157C() == 0) {
+            child = fn_800B0A5C_insertQueue(fn_80040C14, 0x8000);
+            child->_14 = 0;
+            child->_15 = task->_15;
+            child->_16 = task->_16;
+            child->_17 = task->_17;
+            child->_18 = task->_18;
+            child->_1A = task->_1A;
+            child->_1D = 0;
+            child->_20 = task->_20;
+            child->_1B = task->_1B;
+            lbl_803CC1B8->_10 = 0;
+            task->_14++;
+            return;
+        }
+        break;
+    case 18:
+        switch (lbl_803CC1B8->_10) {
+        case 1:
+            if (IsSaveValid() == 0) {
+                task->_14 = 20;
+            } else {
+                fn_80041150(task->_1B, 3);
+                task->_14 = 33;
+                task->_1C = 1;
+            }
+            break;
+        case 2:
+        case 4:
+            task->_14 = 20;
+            break;
+        case 5:
+            fn_8004A34C(&lbl_803C50E8, task->_15, 17, 0, 0);
+            task->_14 = 32;
+            break;
+        case 9:
+            ClearSlot(task->_17);
+        case 8:
+            fn_8004A34C(&lbl_803C50E8, task->_15, 17, 0, 0);
+            task->_14 = 32;
+            break;
+        }
+        task->_1E = 0;
+        return;
+    case 19:
+        if (task->_1D) {
+            if (lbl_803CC1B8->_10 != 0) {
+                task->_14 = 1;
+                ClearSlot(task->_17);
+                return;
+            }
+        } else if (lbl_803CC1B8->_10 != 0) {
+            task->_14 = 1;
+            ClearSlot(task->_17);
+            return;
+        }
+        break;
+    case 20:
+        fn_8004A34C(&lbl_803C50E8, task->_15, 39, 0, 0);
+        task->_14 = 21;
+    case 21:
+        if (task->_1D) {
+            lbl_803C50E8._46 = 1;
+            task->_14 = 5;
+            return;
+        }
+        switch (lbl_803C50E8._45) {
+        case 1:
+        case 2:
+            task->_14 = 22;
+            return;
+        case 3:
+        case 4:
+            task->_14 = 3;
+            return;
+        }
+        break;
+    case 22:
+        if (lbl_803C50E8._44) {
+            if (task->_1D) {
+                task->_14 = 5;
+                return;
+            }
+            fn_8004A34C(&lbl_803C50E8, task->_15, 40, 0, 0);
+            task->_14 = 23;
+            return;
+        }
+        break;
+    case 23:
+        if (task->_1D) {
+            lbl_803C50E8._46 = 1;
+            task->_14 = 5;
+            return;
+        }
+        switch (lbl_803C50E8._45) {
+        case 1:
+        case 2:
+            task->_14 = 24;
+            fn_800415A0(50);
+            return;
+        }
+        break;
+    case 24:
+        if (task->_1D) {
+            task->_14 = 5;
+            return;
+        }
+        slot = &lbl_802D4AE0[task->_17];
+        fn_800A9864(task->_17, task->_18, slot->_0, slot->_4);
+        task->_14 = 25;
+        return;
+    case 25:
+        if (lbl_803CC1B8->_10 != 0 && lbl_803C50E8._44) {
+            task->_14 = 13;
+            return;
+        }
+        break;
+    case 26:
+        fn_8004A34C(&lbl_803C50E8, task->_15, 57, 0, 0);
+        task->_14 = 27;
+        return;
+    case 27:
+        if (task->_1D) {
+            lbl_803C50E8._46 = 1;
+            task->_14 = 5;
+            return;
+        }
+        switch (lbl_803C50E8._45) {
+        case 1:
+        case 2:
+            fn_8004A34C(&lbl_803C50E8, task->_15, 58, 0, 0);
+            fn_800415A0(100);
+            task->_14 = 28;
+            return;
+        case 3:
+        case 4:
+            task->_14 = 3;
+            return;
+        }
+        break;
+    case 28:
+        if (fn_8004157C() == 0) {
+            child = fn_800B0A5C_insertQueue(fn_8003C00C, 0x8000);
+            child->_14 = 0;
+            child->_15 = 0;
+            child->_16 = 0;
+            child->_17 = 0;
+            child->_18 = 0;
+            child->_19 = 1;
+            child->_1A = 1;
+            child->_1B = 7;
+            child->_1D = 0;
+            child->_20 = 3;
+            child->_21 = 5;
+            lbl_802D4AE0[0]._4 = 0;
+            lbl_802D4AE0[0]._0 = 0;
+            child->_1F = 2;
+            lbl_803CC1B8->_10 = 0;
+            task->_14 = 29;
+            return;
+        }
+        break;
+    case 29:
+        if (lbl_803CC1B8->_10 != 0) {
+            switch (lbl_803CC1B8->_10) {
+            case 1:
+                fn_8004A34C(&lbl_803C50E8, task->_15, 59, 0, 0);
+                task->_14 = 30;
+                return;
+            default:
+                fn_8004A34C(&lbl_803C50E8, task->_15, 60, 0, 0);
+                task->_14 = 31;
+                return;
+            }
+        }
+        break;
+    case 30:
+        if (task->_1D) {
+            lbl_803C50E8._46 = 1;
+            task->_14 = 5;
+            return;
+        }
+        switch (lbl_803C50E8._45) {
+        case 1:
+        case 2:
+            task->_1C = 1;
+            task->_14 = 34;
+            return;
+        }
+        break;
+    case 31:
+        if (task->_1D) {
+            lbl_803C50E8._46 = 1;
+            task->_14 = 5;
+            return;
+        }
+        switch (lbl_803C50E8._45) {
+        case 1:
+        case 2:
+            task->_14 = 3;
+            return;
+        }
+        break;
+    case 32:
+        if (task->_1D) {
+            lbl_803C50E8._46 = 1;
+            task->_14 = 5;
+            return;
+        }
+        switch (lbl_803C50E8._45) {
+        case 1:
+        case 2:
+            task->_14 = 1;
+            return;
+        case 3:
+        case 4:
+            task->_14 = 3;
+            return;
+        }
+        break;
+    case 33:
+        fn_8004A328(&lbl_803C50E8);
+        fn_800ACCD4();
+        task->_14++;
+        return;
+    case 34:
+        if (lbl_803C50E8._49) {
+            lbl_803C50E8._48 = 1;
+            fn_8004A34C(&lbl_803C50E8, task->_15, 77, 0, 0);
+        }
+        parent = lbl_803CC1B8->parent;
+        parent->_10 = task->_1C;
+        fn_8000FE54(parent);
+        fn_800B0A14_removeQueue();
+        break;
+    }
+}
 
 // .text:0x8003F23C size:0x7C
 void fn_8003F23C(void) {
