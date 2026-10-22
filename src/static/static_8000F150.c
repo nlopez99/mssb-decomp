@@ -9,7 +9,7 @@ typedef struct TextBox {
     /* 0x00 */ void* _00;
     /* 0x04 */ s32 _04;
     /* 0x08 */ s32 _08;
-    /* 0x0C */ s32 _0C;
+    /* 0x0C */ u32 _0C;
     /* 0x10 */ u16 _10;
     /* 0x12 */ u16 _12;
     /* 0x14 */ s16 _14;
@@ -20,8 +20,8 @@ typedef struct TextBox {
     /* 0x2A */ u8 state;
     /* 0x2B */ u8 group;
     /* 0x2C */ u8 _2C;
-    /* 0x2D */ u8 _2D;
-    /* 0x2E */ u8 _2E;
+    /* 0x2D */ s8 _2D;
+    /* 0x2E */ s8 _2E;
     /* 0x2F */ u8 _2F;
     /* 0x30 */ u8 _30;
     /* 0x31 */ u8 _31;
@@ -41,10 +41,10 @@ typedef struct TextSlot {
 
 typedef struct FontInfo {
     /* 0x00 */ s32 _00;
-    /* 0x04 */ s32 _04;
+    /* 0x04 */ u16* _04;
     /* 0x08 */ s32 _08;
     /* 0x0C */ u8 _0C[0x14 - 0xC];
-    /* 0x14 */ s32 _14;
+    /* 0x14 */ u16* _14;
     /* 0x18 */ s32 _18;
     /* 0x1C */ u16* _1C;
 } FontInfo;
@@ -69,9 +69,9 @@ typedef struct TextState {
     /* 0x7B4 */ FontInfo* info;
     /* 0x7B8 */ void* _7B8[4];
     /* 0x7C8 */ void* _7C8[9];
-    /* 0x7EC */ s32 _7EC;
+    /* 0x7EC */ u16* _7EC;
     /* 0x7F0 */ s32 _7F0;
-    /* 0x7F4 */ s32 _7F4;
+    /* 0x7F4 */ u16* _7F4;
     /* 0x7F8 */ s32 _7F8;
     /* 0x7FC */ u8 _7FC;
     /* 0x7FD */ u8 _7FD;
@@ -102,6 +102,15 @@ typedef struct RelocTable {
     /* 0x4 */ u32 offsets[1];
 } RelocTable;
 
+typedef struct SpriteVtx {
+    /* 0x00 */ f32 x;
+    /* 0x04 */ f32 y;
+    /* 0x08 */ f32 z;
+    /* 0x0C */ u32 color;
+    /* 0x10 */ u16 s;
+    /* 0x12 */ u16 t;
+} SpriteVtx; // size: 0x14
+
 typedef struct TextOverlay {
     /* 0x0 */ u32 _00;
     /* 0x4 */ void (*callback)(void* arg);
@@ -117,6 +126,12 @@ typedef struct TextDisplayList {
 extern TextState lbl_80366B18;
 extern u8 lbl_803CB760[8];
 extern u8 lbl_803CBBC0;
+extern s32 fn_80062890(s32 id);
+extern f32 lbl_803CBBDC;
+extern f32 lbl_803CBBE0;
+extern void fn_800B2160(s32 mode);
+extern void fn_800B1314(SpriteVtx* vtx, void* img, s32 ss, s32 ts);
+extern void DrawSprite_TexObj(SpriteVtx* vtx, void* tex);
 extern GXColor lbl_803CB780[1];
 extern GXColor lbl_803CB784;
 extern u32 lbl_803CB788;
@@ -1529,6 +1544,39 @@ static inline TextureDesc* getTexImage(TexFile* file, int i) {
     return (TextureDesc*)((u8*)file + file->entries[i]._00 * 32 + 4);
 }
 
+static inline s32 getTextHeight(TextBox* box) {
+    s32 lines = 1;
+    u16* str = (u16*)box->_04;
+    s32 h = 22;
+    s32 total;
+    u16 c;
+    u32 code;
+
+    if (box->_2C == 2) {
+        h = 18;
+    } else if (box->_2C == 1) {
+        h = 18;
+    }
+    while (TRUE) {
+        c = *str++;
+        if (!(c & 0x4000)) {
+            continue;
+        }
+        code = c & 0x3FFF;
+        if (code == 0) {
+            break;
+        }
+        if (code == 1) {
+            lines++;
+        }
+    }
+    total = lines * h;
+    if (lines > 1) {
+        total += box->_2E * (lines - 1);
+    }
+    return total;
+}
+
 // .text:0x800111B4 size:0x24
 void fn_800111B4(RelocTable* table) {
     s32 n = table->count;
@@ -1608,10 +1656,406 @@ void DrawTextOnCondition(s32 group) {
 
 // .text:0x80010498 size:0xA94
 void DrawText(s32 i) {
+    s32 digits[5];
+    TextBox* box = &lbl_80366B18.boxes[i];
+    s32 wide = 22;
+    s32 lineH = 22;
+    s32 narrow = 11;
+    s32 count = 0;
+    s32 font = 0;
+    BOOL visible = TRUE;
+    u16* str = (u16*)box->_04;
+    u32 color = box->_08;
+    BOOL nested = FALSE;
+    s32 speed = -1;
+    u16* sub;
+    s32 x0;
+    s32 x;
+    s32 y;
+    u16 c;
+    u32 code;
+    s32 n;
+    s32 j;
+    s32* p;
+    u16 idx;
+    u16 u;
+    u16 v;
+    u16 w;
+    u8 dy;
+    s32 lines;
+    s32 h;
+    s32 total;
+    u8 limit;
+
+    if (box->_28 >= 3 &&
+        (((lbl_803C77B8[0]._02 & 0x1100) && (lbl_80366B18.mask & 1)) ||
+         ((lbl_803C77B8[1]._02 & 0x1100) && (lbl_80366B18.mask & 2)) ||
+         ((lbl_803C77B8[2]._02 & 0x1100) && (lbl_80366B18.mask & 4)) ||
+         ((lbl_803C77B8[3]._02 & 0x1100) && (lbl_80366B18.mask & 8)))) {
+        box->_34 = 1;
+        box->_28 = 10000;
+    }
+    if (box->_2C == 2) {
+        font = 2;
+        narrow = 9;
+        wide = 18;
+        lineH = 18;
+    } else if (box->_2C != 0) {
+        font = 1;
+        narrow = 9;
+        wide = 18;
+        lineH = 18;
+    }
+    x0 = box->_10;
+    x = x0;
+    y = box->_12;
+    if (box->_2F == 1) {
+        x = x0 = x0 - fn_8000FA9C(i) / 2 + narrow;
+    } else if (box->_2F == 2) {
+        x = x0 = wide + (x0 - fn_8000FA9C(i));
+    }
+    if (box->_30 == 1) {
+        total = getTextHeight(box);
+        y = lineH / 2 + (y - total / 2);
+    } else if (box->_30 == 2) {
+        total = getTextHeight(box);
+        y = y + total - lineH;
+    }
+    while (TRUE) {
+        if (box->_28 >= 0 && box->_34 == 0) {
+            if (count > box->_28) {
+                break;
+            }
+            speed = -1;
+        }
+        visible = TRUE;
+        if (nested) {
+            c = *sub++;
+        } else {
+            c = *str++;
+        }
+        if (c & 0x4000) {
+            code = c & 0x3FFF;
+            if (code == 0) {
+                if (nested) {
+                    nested = FALSE;
+                    continue;
+                }
+                visible = FALSE;
+                box->_34 = 1;
+                break;
+            }
+            if (code >= 75 && code <= 114) {
+                if (box->_35 == 0) {
+                    if (g_d_GameSettings.GameModeSelected == GAME_TYPE_CHALLENGE) {
+                        fn_80062890(code - 57);
+                    }
+                    box->_35 = 1;
+                }
+                visible = FALSE;
+                continue;
+            }
+            switch (code) {
+            case 2:
+                visible = FALSE;
+                count++;
+                x += narrow;
+                x += box->_2D;
+                break;
+            case 3:
+                x += wide;
+                visible = FALSE;
+                count++;
+                x += box->_2D;
+                break;
+            case 1:
+                y += lineH;
+                x = x0;
+                visible = FALSE;
+                count++;
+                y += box->_2E;
+                break;
+            case 5:
+            case 6:
+            case 7:
+            case 8:
+            case 9:
+            case 10:
+            case 11:
+            case 12:
+            case 13:
+            case 14:
+                n = code - 5;
+                if (n == 0) {
+                    color = box->_08;
+                } else {
+                    color = (color & 0xFF) | lbl_800E98E0[n];
+                }
+                visible = FALSE;
+                break;
+            case 15:
+            case 16:
+            case 17:
+            case 18:
+                n = box->_18[code - 15];
+                if (n < 0) {
+                    n = -n;
+                    w = wide;
+                    idx = (lbl_80366B18._7EC[10] & 0x7FFF) % 2116;
+                    v = (idx / 46) * lineH;
+                    u = (u16)(idx % 46) * wide;
+                    if (box->_0C != 0) {
+                        fn_800100A4(x + box->_14, y + box->_16, u, v, w, box->_0C, font, box->_00);
+                    }
+                    fn_800100A4(x, y, u, v, w, color, font, box->_00);
+                    x += w;
+                    x += box->_2D;
+                }
+                p = digits;
+                j = 0;
+                while (TRUE) {
+                    *p = n % 10;
+                    if (n < 10) {
+                        break;
+                    }
+                    p++;
+                    j++;
+                    n /= 10;
+                }
+                w = wide;
+                for (p = &digits[j]; j >= 0; j--, p--) {
+                    idx = (lbl_80366B18._7EC[*p] & 0x7FFF) % 2116;
+                    v = (idx / 46) * lineH;
+                    u = (u16)(idx % 46) * wide;
+                    if (box->_0C != 0) {
+                        fn_800100A4(x + box->_14, y + box->_16, u, v, w, box->_0C, font, box->_00);
+                    }
+                    fn_800100A4(x, y, u, v, w, color, font, box->_00);
+                    x += w;
+                    count++;
+                    x += box->_2D;
+                }
+                break;
+            case 25:
+            case 26:
+            case 27:
+            case 28:
+            case 35:
+            case 36:
+            case 37:
+            case 38:
+                n = code - 15;
+                if (n >= 10) {
+                    n = box->_20[n - 10] + 62;
+                } else {
+                    n = box->_20[n] + 8;
+                }
+                nested = TRUE;
+                sub = (u16*)lbl_80366B18.fonts[0]->entries[n];
+                break;
+            case 45:
+            case 46:
+            case 47:
+            case 48:
+            case 49:
+            case 50:
+            case 51:
+            case 52:
+            case 53:
+                fn_800100A4(x, y - 1, 0, 0, 0, color | 0xFFFFFF00, code - 35, box->_00);
+                x += 28;
+                count++;
+                x += box->_2D;
+                break;
+            case 55:
+                narrow = 11;
+                wide = 22;
+                lineH = 22;
+                font = 3;
+                visible = FALSE;
+                break;
+            case 56:
+                if (box->_2C == 2) {
+                    narrow = 9;
+                    wide = 18;
+                    lineH = 18;
+                } else if (box->_2C != 0) {
+                    narrow = 9;
+                    wide = 18;
+                    lineH = 18;
+                } else {
+                    narrow = 11;
+                    wide = 22;
+                    lineH = 22;
+                }
+                font = box->_2C;
+                visible = FALSE;
+                break;
+            case 57:
+                box->_36 = 1;
+                break;
+            case 58:
+                box->_36 = 0;
+                break;
+            case 66:
+            case 67:
+            case 68:
+            case 69:
+            case 70:
+            case 71:
+            case 72:
+            case 73:
+            case 74:
+                visible = FALSE;
+                count++;
+                speed = (code - 65) * 10;
+                break;
+            }
+        } else {
+            if (box->_36 == 0) {
+                if (c & 0x8000) {
+                    c &= 0x7FFF;
+                } else {
+                    c = lbl_80366218[c] & 0x7FFF;
+                }
+                count++;
+                n = (u16)(c % 2116) - (*lbl_80366B18._7F4 & 0x7FFF) - 1;
+                w = lbl_800E90F4[n][font];
+                dy = lbl_800E95B4[n][font];
+                idx = c % 2116;
+                v = (idx / 46) * lineH;
+                u = (u16)(idx % 46) * wide;
+            } else {
+                dy = lbl_800E9420[c][font];
+                w = lbl_800E8F60[c][font];
+                count++;
+                n = c % 92;
+                v = (c / 92) * lineH;
+                u = narrow * ((u16)n % 2 + ((u16)n / 2) * 2);
+            }
+            if (box->_0C != 0) {
+                fn_800100A4(x + box->_14, y + (box->_16 + dy), u, v, w, box->_0C, font, box->_00);
+            }
+            fn_800100A4(x, y + dy, u, v, w, color, font, box->_00);
+            x += w;
+            x += box->_2D;
+        }
+    }
+    if (box->_28 >= 0 && box->_28 < 10000) {
+        limit = box->_31;
+        if (speed >= 0) {
+            limit = speed;
+        }
+        if (box->_34 != 0) {
+            box->_28 = 10000;
+            box->_35 = 1;
+        } else if (box->_32 > limit) {
+            box->_32 = 0;
+            if (box->_28 < 32766) {
+                box->_28++;
+            } else {
+                box->_28 = 32767;
+            }
+            if (visible && g_d_GameSettings.GameModeSelected == GAME_TYPE_CHALLENGE && box->_28 > 2) {
+                fn_80062890(2);
+            }
+        } else {
+            box->_32++;
+        }
+    }
 }
 
 // .text:0x800100A4 size:0x3F4
-void fn_800100A4(void) {
+void fn_800100A4(s32 x, s32 y, u16 s, u16 t, u16 w, u32 color, s32 font, MtxPtr mtx) {
+    Mtx trans;
+    Mtx m;
+    Quaternion v[4];
+    SpriteVtx quad[4];
+    f32 scale;
+    s32 h = 22;
+    f32 zero;
+
+    fn_800B2160(1);
+    if (font >= 10) {
+        h = 20;
+        w = 28;
+    } else if (font == 3) {
+        h = 22;
+    } else if (font == 2) {
+        h = 18;
+    } else if (font == 1) {
+        h = 18;
+    }
+    if (mtx != NULL) {
+        PSMTXTrans(trans, x, y, 0.0f);
+        PSMTXConcat(mtx, trans, m);
+    } else {
+        PSMTXTrans(trans, x - 320, y - 224, 0.0f);
+    }
+    zero = 0.0f;
+    v[0].x = zero;
+    v[0].y = zero;
+    v[1].x = zero + w;
+    v[1].y = zero;
+    v[2].x = zero;
+    v[2].y = zero + h;
+    v[3].x = zero + w;
+    v[3].y = zero + h;
+    v[3].z = zero;
+    v[2].z = zero;
+    v[1].z = zero;
+    v[0].z = zero;
+    if (mtx == NULL) {
+        scale = lbl_803CBBE0 / lbl_803CBBDC;
+        PSMTXScale(m, scale, scale, 1.0f);
+        PSMTXConcat(m, trans, m);
+    }
+    PSMTXMultVec(m, (Vec*)&v[0], (Vec*)&v[0]);
+    PSMTXMultVec(m, (Vec*)&v[1], (Vec*)&v[1]);
+    PSMTXMultVec(m, (Vec*)&v[2], (Vec*)&v[2]);
+    PSMTXMultVec(m, (Vec*)&v[3], (Vec*)&v[3]);
+    quad[0].x = v[0].x;
+    quad[0].y = v[0].y;
+    quad[1].x = v[2].x;
+    quad[1].y = v[2].y;
+    quad[2].x = v[3].x;
+    quad[2].y = v[3].y;
+    quad[3].x = v[1].x;
+    quad[3].y = v[1].y;
+    if (mtx != NULL) {
+        quad[0].z = v[0].z;
+        quad[1].z = v[2].z;
+        quad[2].z = v[3].z;
+        quad[3].z = v[1].z;
+    } else {
+        quad[0].z = quad[1].z = quad[2].z = quad[3].z = -lbl_803CBBE0;
+    }
+    quad[0].color = quad[1].color = quad[2].color = quad[3].color = color;
+    if (font < 10) {
+        s *= lbl_80366B18._7FC;
+        t *= lbl_80366B18._7FD;
+        w *= lbl_80366B18._7FC;
+        h *= lbl_80366B18._7FD;
+    }
+    quad[0].s = quad[1].s = s;
+    quad[2].s = quad[3].s = s + w;
+    quad[0].t = quad[3].t = t;
+    quad[1].t = quad[2].t = t + h;
+    if (font >= 10) {
+        quad[0].s = quad[1].s = 0;
+        quad[2].s = quad[3].s = 1024;
+        quad[0].t = quad[3].t = 0;
+        quad[1].t = quad[2].t = 1024;
+        DrawSprite_TexObj(quad, lbl_80366B18._7C8[font - 10]);
+    } else if (font == 3) {
+        fn_800B1314(quad, lbl_80366B18._7B8[3], 1024, 1024);
+    } else if (font == 2) {
+        fn_800B1314(quad, lbl_80366B18._7B8[2], 1024, 1024);
+    } else if (font == 1) {
+        fn_800B1314(quad, lbl_80366B18._7B8[1], 1024, 1024);
+    } else {
+        fn_800B1314(quad, lbl_80366B18._7B8[0], 1024, 1024);
+    }
 }
 
 // .text:0x8000FF04 size:0x1A0
@@ -1717,7 +2161,128 @@ void fn_8000FD54(s32 i, s16 a, s16 b, s16 c, s16 d) {
 }
 
 // .text:0x8000FA9C size:0x2B8
-void fn_8000FA9C(void) {
+s32 fn_8000FA9C(s32 i) {
+    TextBox* box = &lbl_80366B18.boxes[i];
+    s32 wide = 22;
+    s32 narrow = 11;
+    s32 max = 0;
+    s32 x = 0;
+    BOOL nested = FALSE;
+    BOOL alt = FALSE;
+    s32* strings;
+    u16* str;
+    u16* sub;
+    u16 c;
+    s32 code;
+    s32 n;
+
+    str = (u16*)box->_04;
+    if (box->_2C == 2) {
+        wide = 18;
+        narrow = 9;
+    } else if (box->_2C == 1) {
+        wide = 18;
+        narrow = 9;
+    }
+    strings = lbl_80366B18.fonts[0]->entries;
+    while (TRUE) {
+        if (nested) {
+            c = *sub++;
+        } else {
+            c = *str++;
+        }
+        if (c & 0x4000) {
+            code = c & 0x3FFF;
+            switch (code) {
+            case 0:
+                if (nested) {
+                    nested = FALSE;
+                    continue;
+                }
+                goto end;
+            case 2:
+                x += narrow;
+                break;
+            case 3:
+                x += wide;
+                break;
+            case 1:
+                x = 0;
+                break;
+            case 15:
+            case 16:
+            case 17:
+            case 18:
+                n = box->_18[code - 15];
+                if (n < 0) {
+                    n = -n;
+                    x += wide;
+                }
+                while (TRUE) {
+                    if (n < 10) {
+                        break;
+                    }
+                    x += wide;
+                    n /= 10;
+                }
+                break;
+            case 25:
+            case 26:
+            case 27:
+            case 28:
+            case 35:
+            case 36:
+            case 37:
+            case 38:
+                n = code - 15;
+                if (n >= 10) {
+                    n = box->_20[n - 10] + 62;
+                } else {
+                    n = box->_20[n] + 8;
+                }
+                nested = TRUE;
+                sub = (u16*)strings[n];
+                break;
+            case 45:
+            case 46:
+            case 47:
+            case 48:
+            case 49:
+            case 50:
+            case 51:
+            case 52:
+            case 53:
+                x += 28;
+                x += box->_2D;
+                break;
+            case 57:
+                alt = TRUE;
+                break;
+            case 58:
+                alt = FALSE;
+                break;
+            }
+        } else {
+            if (!alt) {
+                if (c & 0x8000) {
+                    c &= 0x7FFF;
+                } else {
+                    c = lbl_80366218[c] & 0x7FFF;
+                }
+                n = (u16)(c % 2116) - (*lbl_80366B18._7F4 & 0x7FFF) - 1;
+                c = lbl_800E90F4[n][box->_2C];
+            } else {
+                c = lbl_800E8F60[c][box->_2C];
+            }
+            x += c;
+            x += box->_2D;
+        }
+        if (x > max) {
+            max = x;
+        }
+    }
+end:
+    return max;
 }
 
 // .text:0x8000F988 size:0x114
