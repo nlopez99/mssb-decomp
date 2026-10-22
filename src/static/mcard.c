@@ -60,6 +60,7 @@ extern s32 CARDDeleteAsync(s32 chan, char* fileName, CARDCallback callback);
 extern s32 CARDFastDelete(s32 chan, char* fileName);
 extern s32 CARDGetResultCode(s32 chan);
 extern s32 CARDCheckAsync(s32 chan, CARDCallback callback);
+extern s32 CARDFormatAsync(s32 chan, CARDCallback callback);
 extern McardTask* lbl_803CC1B8;
 extern McardState lbl_803C7838;
 extern u64 lbl_802EF2C0[2];
@@ -156,6 +157,30 @@ static inline s32 Check(s32 chan, s32 async) {
     }
     fn_800ACD64(result);
     return 0;
+}
+
+static inline s32 Format(s32 chan, s32 async) {
+    s32 result;
+
+    if (async == 1) {
+        result = CARDFormatAsync(chan, NULL);
+        if (result == CARD_RESULT_BUSY) {
+            return 1;
+        }
+    } else {
+        result = CARDFormat(chan);
+    }
+    fn_800ACD64(result);
+    return 0;
+}
+
+static inline s32 ReadSerial(u8 chan) {
+    u64 serial = 0;
+    s32 result;
+
+    result = CARDGetSerialNo(chan, &serial);
+    lbl_803C7838.slots[chan].serial = serial;
+    return result;
 }
 
 // .text:0x800ACD64 size:0x1B0
@@ -406,6 +431,119 @@ void fn_800AA34C(u8 chan, u8 async, char* fileName, u64 serial, u8 checkSerial) 
 
 // .text:0x800A9ECC size:0x480
 void fn_800A9ECC(void) {
+    McardTask* task = lbl_803CC1B8;
+    u8 chan;
+
+    switch (task->state) {
+    case 0:
+        chan = task->chan;
+        fn_800ACD64(CARDUnmount(chan));
+        switch (CheckSlot(chan)) {
+        case 0:
+            break;
+        case 1:
+            task->state = 1;
+            break;
+        case 2:
+            task->state = 9;
+            break;
+        }
+        break;
+    case 1:
+        if (Mount(task->chan, task->async) == 0) {
+            task->state = 2;
+        }
+        break;
+    case 2:
+        fn_800ACD64(CARDGetResultCode(task->chan));
+        switch (lbl_803C7838.error) {
+        case 0xF:
+            break;
+        case 1:
+        case 2:
+        case 0x11:
+            task->state = 3;
+            break;
+        default:
+            task->state = 9;
+            break;
+        }
+        break;
+    case 3:
+        if (Check(task->chan, task->async) == 0) {
+            task->state = 4;
+        }
+        break;
+    case 4:
+        fn_800ACD64(CARDGetResultCode(task->chan));
+        switch (lbl_803C7838.error) {
+        case 0xF:
+            break;
+        default:
+            task->state = 5;
+            break;
+        }
+        break;
+    case 5:
+        if (lbl_803C7838.error == 0x11) {
+            if (ReadSerial(task->chan) != CARD_RESULT_BUSY) {
+                if (lbl_803C7838.slots[task->chan].serial == lbl_802EF2C0[task->chan]) {
+                    task->state = 6;
+                } else {
+                    lbl_803C7838.error = 0x10;
+                    task->state = 9;
+                }
+            }
+        } else {
+            task->state = 6;
+        }
+        break;
+    case 6:
+        if (Format(task->chan, task->async) == 0) {
+            task->state = 7;
+        }
+        break;
+    case 7:
+        fn_800ACD64(CARDGetResultCode(task->chan));
+        switch (lbl_803C7838.error) {
+        case 0xF:
+            break;
+        case 0x11:
+            ReadSerial(task->chan);
+            task->state = 8;
+            break;
+        case 3:
+            lbl_803C7838.error = 0xD;
+            task->state = 9;
+            break;
+        default:
+            lbl_803C7838.error = 0xC;
+            task->state = 9;
+            break;
+        }
+        break;
+    case 8:
+        fn_800ACD64(CARDUnmount(task->chan));
+        switch (lbl_803C7838.error) {
+        case 0xF:
+            break;
+        case 0x11:
+            task->state = 0xA;
+            break;
+        case 0x10:
+        default:
+            task->state = 9;
+            break;
+        }
+        break;
+    case 9:
+        task->state = 0xA;
+        break;
+    case 0xA:
+        task->parent->result = 1;
+        fn_800B0A14_removeQueue();
+        break;
+    }
 }
 
 // .text:0x800A9E34 size:0x98
@@ -478,8 +616,6 @@ void fn_800A98FC(void) {
     McardTask* task = lbl_803CC1B8;
     McardTask* sub;
     u8 chan;
-    u64 serial;
-    s32 result;
 
     switch (task->state) {
     case 0:
@@ -533,11 +669,7 @@ void fn_800A98FC(void) {
         break;
     case 5:
         if (lbl_803C7838.error == 0x11) {
-            chan = task->chan;
-            serial = 0;
-            result = CARDGetSerialNo(chan, &serial);
-            lbl_803C7838.slots[chan].serial = serial;
-            if (result != CARD_RESULT_BUSY) {
+            if (ReadSerial(task->chan) != CARD_RESULT_BUSY) {
                 if (lbl_803C7838.slots[task->chan].serial == lbl_802EF2C0[task->chan]) {
                     task->state = 6;
                 } else {
