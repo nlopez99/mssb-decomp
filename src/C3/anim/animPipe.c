@@ -167,7 +167,7 @@ void ANIMTick(struct ANIMPipe *animPipe, u8 flag) {
 
 // .text:0x800B71C0 size:0x558
 // Differs: the target compares dt against 0.0f in the other operand order and keeps a
-// second copy of t (f29) for Squad; its string offsets wait on the .rodata before them.
+// second copy of t (f29) for Squad.
 void DoQuatAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFrame *nextFrame) {
     u8 type;
     int stride;
@@ -253,9 +253,9 @@ void DoQuatAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFrame
 }
 
 // .text:0x800B6E0C size:0x3B4
-// Differs: the Hermite case's three components are scheduled together where the target
-// stores each before computing the next, plus registers; its string offsets wait on the
-// 0x30 bytes of .rodata the target has before "animPipe.c".
+// Differs: the Bezier case's three components are scheduled together where the target
+// stores each before computing the next (DoTranslation/DoScale too), dt is compared with
+// 0.0f in the other operand order, plus registers.
 void DoEulerAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFrame *nextFrame) {
     f32 cur[3];
     f32 next[3];
@@ -334,8 +334,8 @@ void DoEulerAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFram
 }
 
 // .text:0x800B63DC size:0xA30
-// Differs: registers and scheduling in the interpolation cases; the three identity
-// quaternions are the .rodata the target opens with.
+// Differs: registers and scheduling in the interpolation cases (see DoEulerAnimation);
+// its three identity quaternions are the .rodata at the start of the unit's range.
 void DoScaleAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFrame *nextFrame, u8 flag) {
     f32 cur[3];
     f32 next[3];
@@ -460,7 +460,7 @@ void DoScaleAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFram
 
 // .text:0x800B5DA8 size:0x634
 // Differs: the target extracts the interpolation modes with srawi/clrlwi (a signed
-// shift) where this has rlwinm, plus register allocation; string offsets as in DoQuatAnimation.
+// shift) where this has rlwinm, the Bezier/Hermite stores as in DoEulerAnimation, registers.
 void DoTranslationAnimation(struct ANIMPipe *animPipe, KeyFrame *currentFrame, KeyFrame *nextFrame) {
     f32 cur[3];
     f32 next[3];
