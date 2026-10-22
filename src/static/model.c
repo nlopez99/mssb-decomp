@@ -162,12 +162,14 @@ typedef struct ModelTask {
 } ModelTask; // size: 0x18
 
 typedef struct ModelLoadReq {
-    /* 0x0000 */ u8 _0000[0x14 - 0x0];
+    /* 0x0000 */ u8 _0000[0xC - 0x0];
+    /* 0x000C */ ModelTaskSub* _0C;
+    /* 0x0010 */ u8 _0010[0x14 - 0x10];
     /* 0x0014 */ u8 _14;
     /* 0x0015 */ u8 _15;
     /* 0x0016 */ u8 _16;
     /* 0x0017 */ u8 _17;
-    /* 0x0018 */ u8 _0018[0x19 - 0x18];
+    /* 0x0018 */ u8 _18;
     /* 0x0019 */ u8 _19;
     /* 0x001A */ s8 _1A;
     /* 0x001B */ u8 _1B;
@@ -420,7 +422,7 @@ typedef struct ModelWork {
     /* 0x307D */ u8 _307D;
     /* 0x307E */ u8 _307E;
     /* 0x307F */ u8 _307F[0x3082 - 0x307F];
-    /* 0x3082 */ s8 _3082;
+    /* 0x3082 */ u8 _3082;
     /* 0x3083 */ u8 _3083[0x3085 - 0x3083];
     /* 0x3085 */ u8 _3085;
     /* 0x3086 */ u8 _3086;
@@ -2401,8 +2403,87 @@ void fn_8001AAA4(void) {
     lbl_803CBBF0 = 0;
 }
 
+static inline void relocateWorkFiles(void) {
+    void** base = lbl_8036E548.files;
+    s32 i;
+
+    for (i = 0; i < 80; i++) {
+        lbl_8036E548.files[i] = (u8*)base + (u32)base[i];
+    }
+}
+
 // .text:0x8001A6B0 size:0x3F4
 void challengeMapRelated(void) {
+    ModelLoadReq* req = lbl_803CC1B8;
+    ModelLoadReq* task;
+    Vec light;
+    Vec dir;
+    f32 len;
+
+    if (lbl_8036E548._3082 != 0) {
+        return;
+    }
+    switch (req->_14) {
+    case 0:
+        lbl_8036E548._2D77 = 0;
+        lbl_8036E548._2D7B = 0;
+        lbl_8036E548._2D7C = 0;
+        lbl_8036E548._2D7A = 0;
+        req->_16 = 0;
+        req->_18 = 0;
+        req->_14 = 1;
+        break;
+    case 1:
+        if (fn_8001594C(g_d_GameSettings.home_AwaySetting ^ 1)) {
+            req->_14 = 2;
+        }
+        break;
+    case 2:
+        task = fn_800B0A5C_insertQueue(fn_800188C0, 0);
+        task->_14 = 0;
+        task->_16 = 0;
+        task->_17 = 0xFF;
+        lbl_8036E548._307B = 1;
+        req->_14++;
+        break;
+    case 3:
+        if (lbl_8036E548._307B == 0) {
+            req->_14 = 6;
+        }
+        break;
+    case 6:
+        dir.x = -lbl_80367318[0].pos.x;
+        dir.y = -lbl_80367318[0].pos.y;
+        dir.z = -lbl_80367318[0].pos.z;
+        len = dolsqrtf2(dir.x * dir.x + dir.y * dir.y + dir.z * dir.z);
+        lbl_8036E548._3087 = 1;
+        dir.x /= len;
+        dir.y /= len;
+        dir.z /= len;
+        fn_8003A540(0);
+        lbl_8036E548._3086 = 1;
+        DrawShadows(1);
+        light = dir;
+        fn_800BEBCC(0, &light);
+        fn_800BF048(fn_8001AAF0);
+        fn_800BF058(fn_8001AB10);
+        relocateWorkFiles();
+        lbl_8036E548._3082 = 0;
+        lbl_8036E548._307C = 0;
+        lbl_8036E548._307D = 0;
+        fn_8001F8A4();
+        req->_14++;
+        break;
+    case 7:
+        challengeMapMaybe();
+        req->_14++;
+        break;
+    case 8:
+        lbl_8036E548._307C = 1;
+        req->_0C->_10 = 1;
+        fn_800B0A14_removeQueue();
+        break;
+    }
 }
 
 // .text:0x8001A3FC size:0x2B4
@@ -2472,16 +2553,12 @@ void fn_80019A60(void) {
 }
 
 // .text:0x800196D8 size:0x388
-// 99.51%: the file-relocation loop starts its counter and its byte offset in one register
-// (li r5,0) where this build uses two (li r0,0; li r5,0).
 void fn_800196D8(void) {
     ModelLoadReq* req = lbl_803CC1B8;
     ModelLoadReq* task;
     Vec light;
     Vec dir;
     f32 len;
-    void** base;
-    s32 i;
 
     switch (req->_14) {
     case 0:
@@ -2513,10 +2590,7 @@ void fn_800196D8(void) {
         fn_800BEBCC(0, &light);
         fn_800BF048(fn_8001AAF0);
         fn_800BF058(fn_8001AB10);
-        base = lbl_8036E548.files;
-        for (i = 0; i < 80; i++) {
-            lbl_8036E548.files[i] = (u8*)base + (u32)base[i];
-        }
+        relocateWorkFiles();
         lbl_8036E548._307C = 0;
         lbl_8036E548._307D = 0;
         lbl_8036E548._3082 = 0;
@@ -3906,7 +3980,59 @@ void fn_80014990(s32 idx, void* file, void* hdr) {
 }
 
 // .text:0x800145F8 size:0x398
-void fn_800145F8(void) {
+void fn_800145F8(BOOL all) {
+    u32 size;
+    s16 idx;
+    u32 t;
+    u32 max = 0;
+    int p;
+    int k;
+    u32 i;
+
+    if (!all) {
+        for (t = 0; t < 2; t++) {
+            for (p = 0; p < 9; p++) {
+                idx = lbl_800EEAAC[inMemRoster[t][p]._24];
+                if (idx >= 0) {
+                    for (k = 0; k < 6; k++) {
+                        size = lbl_803CB7A8[idx + k].size & 0x0FFFFFFF;
+                        if (max < size) {
+                            max = size;
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        for (i = 0; i < 54; i++) {
+            idx = lbl_800EEAAC[i];
+            if (idx >= 0) {
+                for (k = 0; k < 6; k++) {
+                    size = lbl_803CB7A8[idx + k].size & 0x0FFFFFFF;
+                    if (max < size) {
+                        max = size;
+                    }
+                }
+            }
+        }
+    }
+    size = (max + 31) & ~31;
+    lbl_803CBC24 = _OSAllocFromHeap(32, size * 26);
+    for (i = 0; i < 13; i++) {
+        lbl_8036E548.poses[i].parts[0].files = (void**)((u8*)lbl_803CBC24 + size * (i * 2));
+        lbl_8036E548.poses[i].parts[1].files = (void**)((u8*)lbl_803CBC24 + size * (i * 2 + 1));
+    }
+    for (i = 0; i < 13; i++) {
+        lbl_8036E548.poses[i]._CF = -1;
+        lbl_8036E548.poses[i]._D1 = -1;
+        lbl_8036E548.poses[i]._D0 = -1;
+        lbl_8036E548.poses[i]._CD = 0xFF;
+        lbl_8036E548.poses[i]._CE = 0xFF;
+        lbl_8036E548.poses[i].tex = NULL;
+        lbl_8036E548.poses[i]._CC = 0;
+        lbl_8036E548.poses[i].parts[0]._60 = i * 2;
+        lbl_8036E548.poses[i].parts[1]._60 = i * 2 + 1;
+    }
 }
 
 // .text:0x80014204 size:0x3F4
