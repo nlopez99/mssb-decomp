@@ -1,4 +1,5 @@
 #include "static/movie.h"
+#include "Dolphin/ai.h"
 #include "Dolphin/ar.h"
 #include "Dolphin/gx.h"
 #include "Dolphin/os.h"
@@ -44,7 +45,7 @@ typedef struct MoviePlayer {
     /* 0x178 */ u8 _178[0x198 - 0x178];
     /* 0x198 */ OSTime pausedTime;
     /* 0x1A0 */ OSTime startTime;
-    /* 0x1A8 */ u8 _1A8[0x1B0 - 0x1A8];
+    /* 0x1A8 */ u64 _1A8;
     /* 0x1B0 */ u16 dispWidth;
     /* 0x1B2 */ u16 dispHeight;
     /* 0x1B4 */ s16 dispY;
@@ -130,6 +131,11 @@ extern s16* lbl_803CBB00[2];
 extern u8 lbl_801112C0[0x20];
 extern f32 lbl_803CC184;
 extern u8 lbl_803CC194;
+extern u8 lbl_802F93E0[2][0xF00];
+extern u16 lbl_801101C0[0x80];
+extern u8 lbl_803CBAE0;
+extern s32 lbl_803CC188;
+extern void (*lbl_803CC18C)(void);
 
 const GXColor lbl_803CCEE8 = { 255, 255, 255, 255 };
 extern struct {
@@ -506,8 +512,65 @@ void MovStreamThread(void) {
 void fn_800AE8B8(void) {
 }
 
+static inline void mixAudio(s16* out) {
+    u8 volume = lbl_803CBAE0;
+    u8 flags;
+    MoviePlayer* player = lbl_803CC170;
+    u32 size = lbl_803CBAE4;
+    s16 sample;
+    u32 i;
+    u8* src;
+    s16* dst;
+    u32 offset;
+
+    if (player != NULL && ((flags = player->flags) & 1) && !(flags & 8) && (player->_1B9 & 1)) {
+        src = player->_158;
+        if (src >= player->_160 || (src + size <= player->_160 && !(flags & 2))) {
+            dst = out;
+            offset = 0;
+            for (i = 0; i < size / 2; i++) {
+                if (src + offset > player->_15C) {
+                    src = player->_154 - offset;
+                }
+                sample = *(s16*)(src + offset);
+                offset += 2;
+                *dst += (s16)((sample & 0x8000) + (((sample * lbl_801101C0[volume & 0x7F]) >> 15) & 0x7FFF));
+                dst++;
+            }
+            player->_158 += size;
+            player->_1A8 += size;
+            player->pausedTime = OSGetTime();
+            if (player->_158 >= player->_15C) {
+                player->_158 = player->_154 + (player->_158 - player->_15C);
+            }
+        }
+    }
+}
+
 // .text:0x800AE5B8 size:0x300
 void fn_800AE5B8(void) {
+    s16* buf;
+    s16* dma;
+    BOOL enabled;
+
+    lbl_803CC18C();
+    lbl_803CC188 ^= 1;
+    buf = (s16*)lbl_802F93E0[lbl_803CC188];
+    dma = OSPhysicalToCached(AIGetDMAStartAddr());
+    if (dma != NULL) {
+        enabled = OSEnableInterrupts();
+        DCInvalidateRange(dma, lbl_803CBAE4);
+        mixAudio(dma);
+        DCFlushRange(dma, lbl_803CBAE4);
+        OSRestoreInterrupts(enabled);
+    } else {
+        AIInitDMA((u32)buf, lbl_803CBAE4);
+        enabled = OSEnableInterrupts();
+        memset(buf, 0, lbl_803CBAE4);
+        mixAudio(buf);
+        DCFlushRange(buf, lbl_803CBAE4);
+        OSRestoreInterrupts(enabled);
+    }
 }
 
 // .text:0x800AE298 size:0x320
