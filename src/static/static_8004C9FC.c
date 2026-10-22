@@ -2050,8 +2050,6 @@ void fn_8004D0F0(void) {
 }
 
 // .text:0x8004CCC0 size:0x430
-// 99.91%: registers only: in state 0 the target keeps the u16 id in r6 and its
-// 0x38-byte scaled offset in r7; here they are swapped.
 void fn_8004CCC0(void) {
     CrowdTask* task = lbl_803CC1B8;
     CrowdObj* obj;
@@ -2062,8 +2060,7 @@ void fn_8004CCC0(void) {
     if (lbl_803C5F74._03 == 0) {
         lbl_803C5F74._03 = 1;
         if (lbl_803C5F74._1A >= 0) {
-            id = fn_8000F988(task, 8, lbl_800FEAAC[lbl_803C5F74._01][2], lbl_803C5F74._1A, lbl_803C5F74._18, 0);
-            lbl_803C5F74._16 = id;
+            id = lbl_803C5F74._16 = fn_8000F988(task, 8, lbl_800FEAAC[lbl_803C5F74._01][2], lbl_803C5F74._1A, lbl_803C5F74._18, 0);
             lbl_80366B18[id]._2F = 1;
             lbl_80366B18[id]._30 = 1;
             if (lbl_803C5F74._1B != 0) {
