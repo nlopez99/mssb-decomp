@@ -13,7 +13,9 @@ typedef struct VideoInfo {
     /* 0x9 */ u8 v_samp;
 } VideoInfo;
 
+struct BitBuffer;
 struct BitBufferWithTree;
+struct HuffTree;
 struct StackState;
 struct VideoState;
 struct Plane;
@@ -22,7 +24,7 @@ struct MCPlane;
 void fn_800DFDD4(void);
 void fn_800E0488(void* a, void* b);
 void fn_800E07E8(struct VideoInfo* info, s32 plane_idx, u8 h_samp, u8 v_samp);
-void fn_800E0904(void);
+s16 fn_800E0904(struct HuffTree* tree, struct BitBuffer* buf);
 s16 fn_800E0CC8(struct BitBufferWithTree* bt);
 void fn_800E0D60(void);
 void fn_800E10B4(struct VideoState* state);

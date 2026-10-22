@@ -95,6 +95,20 @@ typedef struct VideoState {
 
 extern u8 lbl_80328DA0[0x200];
 
+s32 lbl_803CC3FC;
+s32 lbl_803CC3F8;
+
+static inline u8 getBit(BitBuffer* buf) {
+    u8 bit;
+    if (buf->bit == 0) {
+        buf->value = *buf->ptr++;
+        buf->bit = 0x80;
+    }
+    bit = buf->value & buf->bit;
+    buf->bit >>= 1;
+    return bit;
+}
+
 // .text:0x800DFDD4 size:0x6B4
 void fn_800DFDD4(void) {
 }
@@ -128,7 +142,31 @@ void fn_800E07E8(VideoInfo* info, s32 plane_idx, u8 h_samp, u8 v_samp) {
 }
 
 // .text:0x800E0904 size:0x3C4
-void fn_800E0904(void) {
+// the target's frame is 8 bytes larger (0x30): one more stack slot, likely from the
+// inlined getBit
+s16 fn_800E0904(HuffTree* tree, BitBuffer* buf) {
+    if (getBit(buf)) {
+        s32 idx = tree->_00++;
+        tree->array[0][idx] = fn_800E0904(tree, buf);
+        tree->array[1][idx] = fn_800E0904(tree, buf);
+        return idx;
+    } else {
+        s16 value = getBit(buf) ? 128 : 0;
+        s16 v;
+        value |= getBit(buf) ? 64 : 0;
+        value |= getBit(buf) ? 32 : 0;
+        value |= getBit(buf) ? 16 : 0;
+        value |= getBit(buf) ? 8 : 0;
+        value |= getBit(buf) ? 4 : 0;
+        value |= getBit(buf) ? 2 : 0;
+        value |= getBit(buf) ? 1 : 0;
+        v = value;
+        if (lbl_803CC3F8 && value > 0x7F) {
+            v -= 0x100;
+        }
+        tree->array[0][value] = v << lbl_803CC3FC;
+        return value;
+    }
 }
 
 // .text:0x800E0CC8 size:0x98
