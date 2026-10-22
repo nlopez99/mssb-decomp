@@ -290,7 +290,7 @@ typedef struct ModelSlot {
     /* 0x0000 */ ModelNode* node;
     /* 0x0004 */ ANIMBank* anim;
     /* 0x0008 */ void (*callback)(struct ModelSlot*);
-    /* 0x000C */ u8 _000C[0xE - 0xC];
+    /* 0x000C */ u16 actorIdx;
     /* 0x000E */ u16 seqNum;
     /* 0x0010 */ Control ctrl;
     /* 0x0054 */ f32 speed;
@@ -534,6 +534,9 @@ void fn_8004B208(ModelActor* actor, s16 anim, s32 arg2, f32 frames);
 s32 fn_8004AD54(u8 stadium, u8 arg1);
 void DrawShadows(u8 on);
 void fn_800BF048(void (*cb)(void));
+void fn_80023B04(s32 count);
+ModelTable* fn_80023AA4(void);
+extern void** lbl_803CBC30;
 u8 GetDrawShadows(void);
 void fn_800BEC00(BOOL alt);
 void fn_800BD1E8(s32 arg0);
@@ -556,11 +559,11 @@ void* fn_80052634(ModelActor* actor, ModelSlot* slot);
 s32 fn_80062ED4(ModelActor* actor, ModelSlot* slot);
 
 extern AramEntry lbl_800F1D78[];
-extern u8 lbl_800F71D8[];
+extern AramEntry lbl_800F71D8[];
 extern AramEntry lbl_800F5D98[];
 
 AramEntry* lbl_803CB790 = lbl_800F1D78;
-u8* lbl_803CB794 = lbl_800F71D8;
+AramEntry* lbl_803CB794 = lbl_800F71D8;
 JointPair lbl_803CB798[2] = { { 0x4A, 0x4B }, { 0xFFFF, 0 } };
 JointPair lbl_803CB7A0[2] = { { 0x2F, 0x34 }, { 0xFFFF, 0 } };
 AramEntry* lbl_803CB7A8 = lbl_800F5D98;
@@ -2384,7 +2387,77 @@ void fn_8001AF98(void) {
 
 
 // .text:0x8001AB10 size:0x488
+// 94.91%: the target forms the actor address before testing the game mode, and leaves the
+// _277 == 0 case with bne/b to the epilogue where this build has one beq.
 void fn_8001AB10(void* model, MtxPtr view) {
+    ModelSlot* slot = model;
+    ModelActor* actor = &lbl_8036E548.actorData[slot->actorIdx];
+    BOOL alt = g_d_GameSettings.GameModeSelected == 6;
+    Mtx mv;
+    Mtx trans;
+    GXColor color;
+    ModelNode* node;
+    f32 y;
+    f32 t;
+    u8 c;
+
+    if (actor->_25D == 3) {
+        y = actor->pos.y;
+        if (y < 0.0f) {
+            y = -y;
+        }
+        t = (lbl_803CB7BC - y) / lbl_803CB7BC;
+        if (t > 1.0f) {
+            t = 1.0f;
+        } else if (t < 0.0f) {
+            t = 0.0f;
+        }
+        c = fn_8003AE54();
+        color.a = 0xFF;
+        color.r = color.g = color.b = t * c;
+    } else if (actor->_25D == 1) {
+        if (actor->_277 != 0) {
+            color.r = color.g = color.b = fn_8003AE54();
+            color.a = actor->_277;
+        } else {
+            return;
+        }
+    } else {
+        return;
+    }
+    GXSetChanMatColor(GX_COLOR0A0, color);
+    if (alt) {
+        PSMTXTrans(trans, actor->pos.x, actor->pos.y, actor->pos.z);
+    } else {
+        PSMTXTrans(trans, actor->pos.x, actor->pos.y, actor->pos.z);
+    }
+    if (!alt) {
+        PSMTXConcat(view, trans, mv);
+        for (node = slot->node->child; node != NULL; node = node->next) {
+            if (node->dispObj != NULL) {
+                DOSetWorldMatrix(node->dispObj, node->mtx);
+                fn_8003A8A0((struct Model*)node->dispObj, mv, 1);
+            }
+        }
+        node = slot->node;
+        if (node->dispObj != NULL) {
+            if (node->_7C != NULL) {
+                fn_8003A8A0((struct Model*)node->dispObj, mv, 0);
+            } else {
+                DOVARenderSkin(node->dispObj, view, node->skinMtx, node->skinInvMtx, 0, NULL);
+            }
+        }
+        c = fn_8003AE54();
+        color.r = color.g = color.b = c;
+        color.a = 0xFF;
+        GXSetChanMatColor(GX_COLOR0A0, color);
+        return;
+    }
+    color.r = color.g = color.b = lbl_803CB7C1;
+    color.a = lbl_803CB7C0;
+    fn_800BD2CC(1, color);
+    PSMTXConcat(view, trans, mv);
+    fn_8001DEA4(slot, 0, mv);
 }
 
 // .text:0x8001AAF0 size:0x20
@@ -2520,7 +2593,126 @@ void fn_8001A25C(void) {
 }
 
 // .text:0x80019C00 size:0x65C
+// 98.64%: the size scan starts its maximum as a copy of the counter's zero (mr r8,r6) and
+// loads lbl_803CB794 later; the rest is register numbering in that scan.
 void fn_80019C00(void) {
+    ModelLoadReq* req = lbl_803CC1B8;
+    ModelLoadReq* task;
+    Vec light;
+    Vec dir;
+    f32 len;
+    u32 max;
+    u32 size;
+    int idx;
+    void** p;
+    int i;
+    s32 j;
+
+    switch (req->_14) {
+    case 0:
+        fn_80018024();
+        fn_80023B04(((g_d_GameSettings.GameModeSelected == 6) + 1) * 4);
+        for (i = 4; i < 13; i++) {
+            lbl_80118220[i]._61 = -1;
+        }
+        for (max = j = 0; j < 54; j++) {
+            idx = lbl_800EEB18[j];
+            if (idx >= 0) {
+                size = lbl_803CB794[idx].size & 0x0FFFFFFF;
+                if (max < size) {
+                    max = size;
+                }
+            }
+        }
+        size = (max + 31) & ~31;
+        p = _OSAllocFromHeap(32, size * 4);
+        lbl_803CBC30 = p;
+        for (j = 0; j < 4; j++) {
+            lbl_80118220[j].files = (void**)((u8*)p + size * j);
+            lbl_80118220[j]._61 = -1;
+            lbl_80118220[j]._60 = -1;
+        }
+        fn_80014204(4);
+        lbl_8036E548._013C = fn_80023AA4();
+        for (j = 0; j < 4; j++) {
+            lbl_8036E548.actorData[j]._255 = j;
+            lbl_8036E548.actors[j] = NULL;
+            lbl_8036E548._2D6A[j] = -1;
+            lbl_8036E548.actorData[j]._257 = -1;
+        }
+        for (j = 0; j < 9; j++) {
+            lbl_8036E548._2D7F[j] = -1;
+        }
+        for (j = 0; j < 4; j++) {
+            lbl_8036E548._2D89[j] = -1;
+        }
+        lbl_8036E548._2D77 = 0;
+        lbl_8036E548._2D7B = 0;
+        lbl_8036E548._2D7C = 0;
+        req->_14++;
+        break;
+    case 1:
+        task = fn_800B0A5C_insertQueue(fn_800188C0, 0);
+        task->_14 = 0;
+        task->_16 = 0;
+        task->_17 = 0xFF;
+        lbl_8036E548._307B = 1;
+        req->_14++;
+        break;
+    case 2:
+        if (lbl_8036E548._307B == 0) {
+            if (g_d_GameSettings.GameModeSelected == 6) {
+                req->_14++;
+            } else {
+                req->_14 = 5;
+            }
+        }
+        break;
+    case 3:
+        lbl_8036E548.rows[8].buf = ARAMTransfer(lbl_800EE930, NULL, 0, 0);
+        req->_14++;
+        break;
+    case 4:
+        if ((s32)lbl_803C6CF8._715 == 1) {
+            req->_14++;
+        }
+        break;
+    case 5:
+        dir.x = -lbl_80367318[0].pos.x;
+        dir.y = -lbl_80367318[0].pos.y;
+        dir.z = -lbl_80367318[0].pos.z;
+        len = dolsqrtf2(dir.x * dir.x + dir.y * dir.y + dir.z * dir.z);
+        lbl_8036E548._3087 = 1;
+        dir.x /= len;
+        dir.y /= len;
+        dir.z /= len;
+        fn_8003A540(0);
+        lbl_8036E548._3086 = 1;
+        DrawShadows(1);
+        light = dir;
+        fn_800BEBCC(0, &light);
+        fn_800BF048(fn_8001AAF0);
+        fn_800BF058(fn_8001AB10);
+        relocateWorkFiles();
+        lbl_8036E548._307C = 0;
+        lbl_8036E548._307D = 0;
+        lbl_8036E548._3082 = 0;
+        fn_8001F8A4();
+        req->_14++;
+        break;
+    case 6:
+        challengeMapMaybe();
+        if (g_d_GameSettings.GameModeSelected == 6) {
+            fn_8001F5E8();
+        }
+        req->_14++;
+        break;
+    default:
+        lbl_8036E548._2D7D = 1;
+        lbl_8036E548._307C = 1;
+        fn_800B0A14_removeQueue();
+        break;
+    }
 }
 
 // .text:0x80019A60 size:0x1A0
