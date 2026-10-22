@@ -79,10 +79,10 @@ void fn_800A97D0(s8 shift, s8 threshold) {
 
 // .text:0x800A9520 size:0x2B0
 void fn_800A9520(void) {
-    PADStatus status[4];
-    PADStatus* st;
-    PadState* pad;
     u32 i;
+    PadState* pad;
+    PADStatus* st;
+    PADStatus status[4];
     u16 prev;
     u32 dirs;
 
@@ -90,7 +90,7 @@ void fn_800A9520(void) {
     PADClamp(status);
     st = status;
     pad = lbl_803C77B8;
-    for (i = 0; i < 4; i++, st++, pad++) {
+    for (i = 0; i < 4; i++, pad++, st++) {
         pad->err = st->err;
         if (pad->err == PAD_ERR_NO_CONTROLLER) {
             PADReset(PAD_CHAN0_BIT >> i);
@@ -111,13 +111,19 @@ void fn_800A9520(void) {
         }
         pad->analog = *(PadAnalog*)&st->triggerLeft;
         pad->sticks = *(PadSticks*)&st->stickX;
-        dirs = ((pad->sticks.stickY > lbl_80110080.hi) << 19) | ((pad->sticks.stickY < lbl_80110080.lo) << 18) |
-               ((pad->sticks.stickX < lbl_80110080.lo) << 16) | ((pad->sticks.stickX > lbl_80110080.hi) << 17) |
-               ((pad->sticks.substickY < lbl_80110080.lo) << 2) | ((pad->sticks.substickY > lbl_80110080.hi) << 3) |
-               (pad->sticks.substickX < lbl_80110080.lo) | ((pad->sticks.substickX > lbl_80110080.hi) << 1);
+        dirs = 0;
+        dirs |= (pad->sticks.stickY < lbl_80110080.lo) << 18;
+        dirs |= (pad->sticks.stickY > lbl_80110080.hi) << 19;
+        dirs |= (pad->sticks.stickX < lbl_80110080.lo) << 16;
+        dirs |= (pad->sticks.stickX > lbl_80110080.hi) << 17;
+        dirs |= (pad->sticks.substickY < lbl_80110080.lo) << 2;
+        dirs |= (pad->sticks.substickY > lbl_80110080.hi) << 3;
+        dirs |= (pad->sticks.substickX < lbl_80110080.lo);
+        dirs |= (pad->sticks.substickX > lbl_80110080.hi) << 1;
         pad->dirs = dirs;
         prev = pad->prev;
-        pad->held = st->button | (dirs >> lbl_80110080.dirShift);
+        dirs >>= lbl_80110080.dirShift;
+        pad->held = st->button | dirs;
         pad->prev = pad->held;
         pad->pressed = pad->held & ~prev;
         pad->repeat = pad->pressed;

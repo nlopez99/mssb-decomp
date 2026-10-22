@@ -3,6 +3,8 @@
 
 #include "mssbTypes.h"
 
+struct McardRequest;
+
 void fn_800A9864(u8 chan, u8 async, u64 serial);
 void fn_800A98FC(void);
 void fn_800A9CF8(void);
@@ -10,9 +12,9 @@ void fn_800A9E34(u8 chan, u8 async, u64 serial);
 void fn_800A9ECC(void);
 void fn_800AA34C(u8 chan, u8 async, char* fileName, u64 serial, u8 checkSerial);
 void fn_800AA44C(void);
-void fn_800AA930(void);
+void fn_800AA930(struct McardRequest* req, u64 serial);
 void fn_800AAA70(void);
-void fn_800AAEE4(void);
+void fn_800AAEE4(struct McardRequest* req, u64 serial);
 void fn_800AAFEC(void);
 void fn_800AB474(u8 chan, u8 async, s16 fileNo, char* fileName, u64 serial);
 void fn_800AB534(void);

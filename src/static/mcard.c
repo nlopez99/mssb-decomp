@@ -41,12 +41,37 @@ typedef struct McardState {
     /* 0x56 */ u8 _56[0x60 - 0x56];
 } McardState;
 
+typedef struct McardRequest {
+    /* 0x00 */ char* name;
+    /* 0x04 */ s32 buf;
+    /* 0x08 */ s32 size;
+    /* 0x0C */ u8 chan;
+    /* 0x0D */ u8 async;
+    /* 0x0E */ u8 retries;
+    /* 0x0F */ u8 _0F;
+    /* 0x10 */ s32 _10;
+    /* 0x14 */ s32 _14;
+    /* 0x18 */ s32 _18;
+} McardRequest;
+
 extern void* fn_800B0A5C_insertQueue(void (*callback)(void), s32 priority);
 extern void fn_800B0A14_removeQueue(void);
+extern s32 CARDDeleteAsync(s32 chan, char* fileName, CARDCallback callback);
+extern s32 CARDFastDelete(s32 chan, char* fileName);
+extern s32 CARDGetResultCode(s32 chan);
+extern s32 CARDCheckAsync(s32 chan, CARDCallback callback);
 extern McardTask* lbl_803CC1B8;
 extern McardState lbl_803C7838;
 extern u64 lbl_802EF2C0[2];
 extern char lbl_802EF2D0[0x20];
+extern char lbl_802EF330[0x70];
+
+s32 lbl_803CC16C;
+s32 lbl_803CC168;
+s32 lbl_803CC164;
+s32 lbl_803CC160;
+s32 lbl_803CC15C;
+s32 lbl_803CC158;
 
 const u16 lbl_800E7800[256] = {
     0x0000, 0x1021, 0x2042, 0x3063, 0x4084, 0x50A5, 0x60C6, 0x70E7,
@@ -246,7 +271,29 @@ void fn_800AAFEC(void) {
 }
 
 // .text:0x800AAEE4 size:0x108
-void fn_800AAEE4(void) {
+void fn_800AAEE4(struct McardRequest* req, u64 serial) {
+    McardTask* task;
+    u8 retries;
+
+    if (req->size % 0x200 != 0) {
+        OSPanic("mcard.c", 2082, "MemoryCard SaveSize Error!!");
+    }
+    lbl_803C7838.op = 1;
+    task = fn_800B0A5C_insertQueue(fn_800AAFEC, 0xFF);
+    task->_38 = req->chan;
+    task->_39 = req->async;
+    task->buf = req->buf;
+    task->size = req->size;
+    retries = req->retries;
+    if (retries == 0) {
+        retries = 4;
+    }
+    task->_3A = retries;
+    lbl_802EF2C0[task->_38] = serial;
+    lbl_803CC15C = req->_10;
+    lbl_803CC158 = req->_14;
+    lbl_803CC160 = req->_18;
+    lbl_803CC1B8->result = 0;
 }
 
 // .text:0x800AAA70 size:0x474
@@ -254,7 +301,30 @@ void fn_800AAA70(void) {
 }
 
 // .text:0x800AA930 size:0x140
-void fn_800AA930(void) {
+void fn_800AA930(struct McardRequest* req, u64 serial) {
+    char name[0x21];
+    McardTask* task;
+
+    if (req->size % 0x200 != 0) {
+        OSPanic("mcard.c", 2416, "MemoryCard LoadSize Error!!");
+    }
+    strncpy(name, req->name, 0x20);
+    name[0x20] = 0;
+    if (strlen(name) >= 0x20) {
+        OSPanic("mcard.c", 2425, "MemoryCard FileName Error!!");
+    }
+    task = fn_800B0A5C_insertQueue(fn_800AAA70, 0xFF);
+    task->_3C = req->chan;
+    task->_3D = req->async;
+    task->buf = req->buf;
+    task->size = req->size;
+    task->name = lbl_802EF2D0;
+    memcpy(task->name, req->name, 0x20);
+    lbl_802EF2C0[req->chan] = serial;
+    lbl_803CC15C = req->_10;
+    lbl_803CC158 = req->_14;
+    lbl_803CC160 = req->_18;
+    lbl_803CC1B8->result = 0;
 }
 
 // .text:0x800AA44C size:0x4E4
@@ -303,6 +373,54 @@ void fn_800A9E34(u8 chan, u8 async, u64 serial) {
 
 // .text:0x800A9CF8 size:0x13C
 void fn_800A9CF8(void) {
+    char* name = lbl_802EF330;
+    McardTask* task = lbl_803CC1B8;
+    McardTask* parent = task->parent;
+    s32 result;
+
+    switch (task->state) {
+    case 0:
+        if (parent->async == 1) {
+            result = CARDDeleteAsync(parent->chan, name, NULL);
+            if (result < 0) {
+                fn_800ACD64(result);
+                task->state = 3;
+            } else {
+                task->state += 1;
+            }
+        } else {
+            result = CARDFastDelete(parent->chan, name);
+            if (result < 0) {
+                fn_800ACD64(result);
+                task->state = 3;
+            } else {
+                task->state += 2;
+            }
+        }
+        break;
+    case 1:
+        fn_800ACD64(CARDGetResultCode(parent->chan));
+        switch (lbl_803CC1B8->result) {
+        case 0xF:
+            break;
+        case 0x11:
+            task->state += 1;
+            break;
+        default:
+        case 0x10:
+            task->state = 3;
+            break;
+        }
+        break;
+    case 2:
+        parent->result = 1;
+        fn_800B0A14_removeQueue();
+        break;
+    case 3:
+        parent->result = 2;
+        fn_800B0A14_removeQueue();
+        break;
+    }
 }
 
 // .text:0x800A98FC size:0x3FC
